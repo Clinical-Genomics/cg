@@ -7,6 +7,7 @@ from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import (
     PostProcessingError,
     PostProcessingRunDataGeneratorError,
+    PostProcessingRunFileManagerError,
     PostProcessingStoreDataError,
     PostProcessingStoreFileError,
 )
@@ -64,3 +65,14 @@ class PacBioPostProcessingService(PostProcessingService):
         """Check if a run has been post-processed."""
         processing_complete_file = Path(self.sequencing_dir, run_name, POST_PROCESSING_COMPLETED)
         return processing_complete_file.exists()
+
+    def can_post_processing_start(self, run_name: str) -> bool:
+        LOG.info(f"Checking if Pacbio post-processing can start for run: {run_name}")
+        try:
+            run_data: PacBioRunData = self.run_data_generator.get_run_data(
+                run_name=run_name, sequencing_dir=self.sequencing_dir
+            )
+            self.run_validator.validate_run_files(run_data)
+        except PostProcessingRunFileManagerError:
+            return False
+        return True

@@ -83,6 +83,14 @@ def pacbio_order_to_submit(cgweb_orders_dir) -> dict:
 
 
 @pytest.fixture(scope="session")
+def raredisease_order_to_submit(cgweb_orders_dir: Path) -> dict:
+    """Load an example Raredisease order."""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "raredisease.json")
+    )
+
+
+@pytest.fixture(scope="session")
 def rml_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example RML order."""
     return ReadFile.get_content_from_file(
@@ -119,6 +127,14 @@ def tomte_order_to_submit(cgweb_orders_dir: Path) -> dict:
     """Load an example Tomte order."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "tomte.json")
+    )
+
+
+@pytest.fixture(scope="session")
+def nallo_order_to_submit(cgweb_orders_dir: Path) -> dict:
+    """Load an example Nallo order."""
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(cgweb_orders_dir, "nallo.json")
     )
 
 

@@ -3,9 +3,10 @@ import logging
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Iterator, Type
 
 from dateutil.parser import parse
+from pydantic import TypeAdapter
 from pydantic.v1 import ValidationError
 
 from cg.constants import Workflow
@@ -43,6 +44,7 @@ from cg.models.nf_analysis import (
     WorkflowDeliverables,
     WorkflowParameters,
 )
+from cg.models.qc_metrics import QCMetrics
 from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.utils import Process
 
@@ -128,7 +130,9 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get workflow version from config."""
         return self.revision
 
-    def get_built_workflow_parameters(self, case_id: str) -> WorkflowParameters:
+    def get_built_workflow_parameters(
+        self, case_id: str, dry_run: bool = False
+    ) -> WorkflowParameters:
         """Return workflow parameters."""
         raise NotImplementedError
 
@@ -346,13 +350,19 @@ class NfAnalysisAPI(AnalysisAPI):
         """Create parameters file for a case."""
         LOG.debug("Getting parameters information built on-the-fly")
         built_workflow_parameters: dict | None = self.get_built_workflow_parameters(
-            case_id=case_id
+            case_id=case_id, dry_run=dry_run
         ).model_dump()
         LOG.debug("Adding parameters from the pipeline config file if it exist")
 
-        workflow_parameters: dict = built_workflow_parameters | (
+        yaml_params: dict = (
             read_yaml(self.params) if hasattr(self, "params") and self.params else {}
         )
+
+        # Check for duplicate keys
+        duplicate_keys = set(built_workflow_parameters.keys()) & set(yaml_params.keys())
+        if duplicate_keys:
+            raise ValueError(f"Duplicate parameter keys found: {duplicate_keys}")
+        workflow_parameters: dict = built_workflow_parameters | (yaml_params)
         replaced_workflow_parameters: dict = self.replace_values_in_params_file(
             workflow_parameters=workflow_parameters
         )
@@ -926,7 +936,9 @@ class NfAnalysisAPI(AnalysisAPI):
             dry_run=dry_run,
         )
 
-    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
+    def parse_analysis(
+        self, qc_metrics_raw: list[MetricsBase], qc_metrics_model: Type[QCMetrics], **kwargs
+    ) -> NextflowAnalysis:
         """Parse Nextflow output analysis files and return an analysis model."""
         sample_metrics: dict[str, dict] = {}
         for metric in qc_metrics_raw:
@@ -934,7 +946,8 @@ class NfAnalysisAPI(AnalysisAPI):
                 sample_metrics[metric.id].update({metric.name.lower(): metric.value})
             except KeyError:
                 sample_metrics[metric.id] = {metric.name.lower(): metric.value}
-        return NextflowAnalysis(sample_metrics=sample_metrics)
+        pydantic_parser = TypeAdapter(dict[str, qc_metrics_model])
+        return NextflowAnalysis(sample_metrics=pydantic_parser.validate_python(sample_metrics))
 
     def get_latest_metadata(self, case_id: str) -> NextflowAnalysis:
         """Return analysis output of a Nextflow case."""

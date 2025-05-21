@@ -1,9 +1,13 @@
 from cg.constants.sample_sources import SourceType
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum
 from cg.services.orders.validation.constants import MAXIMUM_VOLUME, MINIMUM_VOLUME
 from cg.services.orders.validation.models.sample import Sample
-from cg.services.orders.validation.models.sample_aliases import SampleWithSkipRC
+from cg.services.orders.validation.models.sample_aliases import (
+    SampleWithCaptureKit,
+    SampleWithSkipRC,
+)
 from cg.store.models import Application
 from cg.store.store import Store
 
@@ -81,3 +85,23 @@ def is_sample_concentration_within_interval(
     concentration: float, interval: tuple[float, float]
 ) -> bool:
     return interval[0] <= concentration <= interval[1]
+
+
+def does_sample_need_capture_kit(sample: SampleWithCaptureKit, store: Store) -> bool:
+    application: Application | None = store.get_application_by_tag(sample.application)
+    return (
+        application
+        and application.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
+    )
+
+
+def is_sample_missing_capture_kit(sample: SampleWithCaptureKit, store: Store) -> bool:
+    """Returns whether a TGS sample has an application and is missing a capture kit."""
+    return does_sample_need_capture_kit(sample=sample, store=store) and not sample.capture_kit
+
+
+def is_invalid_capture_kit(sample: SampleWithCaptureKit, store: Store) -> bool:
+    if not sample.capture_kit:
+        return False
+    valid_beds: list[str] = [bed.name for bed in store.get_active_beds()]
+    return sample.capture_kit not in valid_beds

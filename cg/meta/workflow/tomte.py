@@ -7,8 +7,15 @@ from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion, Strandedness
 from cg.constants.nf_analysis import TOMTE_METRIC_CONDITIONS
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
-from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetEntry, TomteSampleSheetHeaders
+from cg.models.deliverables.metric_deliverables import MetricsBase
+from cg.models.tomte.tomte import (
+    TomteParameters,
+    TomteQCMetrics,
+    TomteSampleSheetEntry,
+    TomteSampleSheetHeaders,
+)
 from cg.resources import TOMTE_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample
 
@@ -70,7 +77,7 @@ class TomteAnalysisAPI(NfAnalysisAPI):
         )
         return sample_sheet_entry.reformat_sample_content
 
-    def get_built_workflow_parameters(self, case_id: str) -> TomteParameters:
+    def get_built_workflow_parameters(self, case_id: str, dry_run: bool = False) -> TomteParameters:
         """Return parameters."""
         return TomteParameters(
             input=self.get_sample_sheet_path(case_id=case_id),
@@ -85,3 +92,10 @@ class TomteAnalysisAPI(NfAnalysisAPI):
 
     def get_workflow_metrics(self, metric_id: str) -> dict:
         return TOMTE_METRIC_CONDITIONS
+
+    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
+        """Parse Nextflow output analysis files and return an analysis model."""
+        qc_metrics_model = TomteQCMetrics
+        return super().parse_analysis(
+            qc_metrics_raw=qc_metrics_raw, qc_metrics_model=qc_metrics_model, **kwargs
+        )

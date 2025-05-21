@@ -10,6 +10,7 @@ import rich_click as click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
@@ -20,7 +21,7 @@ from cg.constants.constants import (
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
-from cg.constants.priority import SlurmQos, TrailblazerPriority
+from cg.constants.priority import TrailblazerPriority
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisStatus, AnalysisType
@@ -57,6 +58,10 @@ class AnalysisAPI(MetaAPI):
     def __init__(self, workflow: Workflow, config: CGConfig):
         super().__init__(config=config)
         self.workflow = workflow
+        if self.workflow == Workflow.NALLO:
+            self.scout_api: ScoutAPI = self.scout_api_38
+        else:
+            self.scout_api: ScoutAPI = self.scout_api_37
         self._process = None
 
     @property
@@ -137,7 +142,7 @@ class AnalysisAPI(MetaAPI):
     def get_trailblazer_priority(self, case_id: str) -> int:
         """Get the priority for the case in Trailblazer."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        priority: int = case.priority
+        priority: Priority = case.priority
         return MAP_TO_TRAILBLAZER_PRIORITY[priority]
 
     def get_workflow_manager(self) -> str:
@@ -576,8 +581,8 @@ class AnalysisAPI(MetaAPI):
         """Add a cleaned at date for all analyses related to a case."""
         analyses: list = self.status_db.get_case_by_internal_id(internal_id=case_id).analyses
         LOG.info(f"Adding a cleaned at date for case {case_id}")
-        for analysis_obj in analyses:
-            analysis_obj.cleaned_at = analysis_obj.cleaned_at or datetime.now()
+        for analysis in analyses:
+            analysis.cleaned_at = analysis.cleaned_at or datetime.now()
             self.status_db.session.commit()
 
     def clean_run_dir(

@@ -22,5 +22,3 @@ class Sbatch(BaseModel):
 
 class SbatchDragen(Sbatch):
     partition: str = HastaSlurmPartitions.DRAGEN
-    nodes: int = 1
-    cpus_per_task: int = 48

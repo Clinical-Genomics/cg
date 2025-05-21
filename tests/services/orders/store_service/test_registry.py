@@ -20,7 +20,7 @@ from cg.services.orders.storing.service_registry import StoringServiceRegistry
         (OrderType.RML, "store_pool_order_service"),
         (OrderType.RNAFUSION, "store_generic_order_service"),
         (OrderType.SARS_COV_2, "store_microbial_order_service"),
-        (OrderType.TAXPROFILER, "store_metagenome_order_service"),
+        (OrderType.TAXPROFILER, "store_taxprofiler_order_service"),
         (OrderType.TOMTE, "store_generic_order_service"),
     ],
     ids=[
