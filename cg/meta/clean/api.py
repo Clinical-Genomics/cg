@@ -22,14 +22,16 @@ class CleanAPI:
     def get_bundle_files(self, before: datetime, workflow: Workflow) -> Iterator[list[File]]:
         """Get any bundle files for a specific version."""
 
-        analysis: Analysis
+        completed_analyses_for_workflow: list[Analysis] = (
+            self.status_db.get_completed_analyses_for_workflow_started_at_before(
+                workflow=workflow, started_at_before=before
+            )
+        )
         LOG.debug(
-            f"number of {workflow} analyses before: {before} : {len(self.status_db.get_completed_analyses_for_workflow_started_at_before(workflow=workflow, started_at_before=before))}"
+            f"number of {workflow} analyses before: {before} : {len(completed_analyses_for_workflow)}"
         )
 
-        for analysis in self.status_db.get_completed_analyses_for_workflow_started_at_before(
-            workflow=workflow, started_at_before=before
-        ):
+        for analysis in completed_analyses_for_workflow:
             bundle_name = analysis.case.internal_id
 
             hk_bundle_version: Version | None = self.housekeeper_api.version(
