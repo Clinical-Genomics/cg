@@ -1,4 +1,4 @@
-""" Trailblazer API for cg."""
+"""Trailblazer API for cg."""
 
 import datetime
 import logging
@@ -14,13 +14,8 @@ from cg.constants import Workflow
 from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
 from cg.constants.priority import TrailblazerPriority
 from cg.constants.tb import AnalysisStatus
-from cg.exc import (
-    AnalysisNotCompletedError,
-    TrailblazerAnalysisNotFound,
-    TrailblazerAPIHTTPError,
-)
+from cg.exc import AnalysisNotCompletedError, TrailblazerAnalysisNotFound, TrailblazerAPIHTTPError
 from cg.io.controller import APIRequest, ReadStream
-
 
 LOG = logging.getLogger(__name__)
 
@@ -50,9 +45,11 @@ class TrailblazerAPI:
 
     @property
     def auth_header(self) -> dict:
-        credentials = service_account.IDTokenCredentials.from_service_account_file(
-            filename=self.service_account_auth_file,
-            target_audience="trailblazer",
+        credentials: IDTokenCredentials = (
+            service_account.IDTokenCredentials.from_service_account_file(
+                filename=self.service_account_auth_file,
+                target_audience="trailblazer",
+            )
         )
         credentials.refresh(Request())
         return {"Authorization": f"Bearer {credentials.token}"}

@@ -774,13 +774,11 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     def on_analysis_started(self, case_id: str, tower_workflow_id: str | None = None):
-        trailblazer_analysis_id: int | None = None
-        if trailblazer_analysis := self._add_pending_trailblazer_analysis(
+        trailblazer_analysis: TrailblazerAnalysis = self._add_pending_trailblazer_analysis(
             case_id=case_id, tower_workflow_id=tower_workflow_id
-        ):
-            trailblazer_analysis_id = trailblazer_analysis.id
+        )
 
-        self._create_analysis_statusdb(case_id=case_id, trailblazer_id=trailblazer_analysis_id)
+        self._create_analysis_statusdb(case_id=case_id, trailblazer_id=trailblazer_analysis.id)
         self.set_statusdb_action(case_id=case_id, action="running")
 
     def get_data_analysis_type(self, case_id: str) -> str | None:
