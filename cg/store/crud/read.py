@@ -342,7 +342,7 @@ class ReadHandler(BaseHandler):
 
     def get_latest_ticket_from_case(self, case_id: str) -> str:
         """Returns the ticket from the most recent sample in a case."""
-        return self.get_case_by_internal_id(internal_id=case_id).latest_ticket
+        return str(self.get_case_by_internal_id(internal_id=case_id).latest_order.ticket_id)
 
     def _is_case_found(self, case: Case, case_id: str) -> None:
         """Raise error if case is false."""

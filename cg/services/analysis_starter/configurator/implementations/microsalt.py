@@ -31,6 +31,7 @@ class MicrosaltConfigurator(Configurator):
         self.store = store
 
     def configure(self, case_id: str) -> MicrosaltCaseConfig:
+        LOG.info(f"Configuring case {case_id}")
         self.fastq_handler.link_fastq_files(case_id)
         self.config_file_creator.create(case_id)
         return self.get_config(case_id)

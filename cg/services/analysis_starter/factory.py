@@ -51,6 +51,9 @@ from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
 )
 from cg.services.analysis_starter.submitters.submitter import Submitter
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
+from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
+from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
+from cg.services.analysis_starter.tracker.tracker import Tracker
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -76,8 +79,13 @@ class AnalysisStarterFactory:
         configurator: Configurator = self._get_configurator(workflow)
         input_fetcher: InputFetcher = self._get_input_fetcher(workflow)
         submitter: Submitter = self._get_submitter(workflow)
+        tracker: Tracker = self._get_tracker(workflow)
         return AnalysisStarter(
-            configurator=configurator, input_fetcher=input_fetcher, submitter=submitter
+            configurator=configurator,
+            input_fetcher=input_fetcher,
+            store=self.store,
+            submitter=submitter,
+            tracker=tracker,
         )
 
     def _get_configurator(self, workflow: Workflow) -> Configurator:
@@ -198,3 +206,17 @@ class AnalysisStarterFactory:
             client=client,
             compute_environment_ids=self.cg_config.seqera_platform.compute_environments,
         )
+
+    def _get_tracker(self, workflow: Workflow) -> Tracker:
+        if workflow in NEXTFLOW_WORKFLOWS:
+            return NextflowTracker(
+                store=self.store,
+                trailblazer_api=self.cg_config.trailblazer_api,
+                workflow_config=getattr(self.cg_config, workflow),
+            )
+        if workflow == Workflow.MICROSALT:
+            return MicrosaltTracker(
+                store=self.store,
+                trailblazer_api=self.cg_config.trailblazer_api,
+                workflow_config=self.cg_config.microsalt,
+            )
