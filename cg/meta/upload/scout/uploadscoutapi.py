@@ -432,7 +432,6 @@ class UploadScoutAPI:
 
                 if dry_run:
                     continue
-
                 self.scout_api.upload_rna_genome_build(
                     case_id=dna_case_id,
                     customer_case_name=customer_case.name,
@@ -445,10 +444,12 @@ class UploadScoutAPI:
         LOG.info("Upload RNA fraser and outrider file finished!")
 
     def load_rna_variant_outlier_to_scout(
-        self, dry_run: bool, rna_dna_collections: list[RNADNACollection]
+        self, dry_run: bool, case_id: str, rna_dna_collections: list[RNADNACollection]
     ) -> None:
         """Upload RNA genome built for a RNA/DNA case to Scout."""
         for rna_dna_collection in rna_dna_collections:
+            rna_fraser: File | None = self.get_rna_omics_fraser(case_id=case_id)
+            rna_outrider: File | None = self.get_rna_omics_outrider(case_id=case_id)
             dna_sample_name: str = rna_dna_collection.dna_sample_name
             for dna_case_id in rna_dna_collection.dna_case_ids:
                 LOG.info(
@@ -458,10 +459,10 @@ class UploadScoutAPI:
 
                 if dry_run:
                     continue
-
-                self.scout_api.load_variant_outlier(
-                    case_id=dna_case_id,
-                )
+                if rna_fraser or rna_outrider:
+                    self.scout_api.load_variant_outlier(
+                        case_id=dna_case_id,
+                    )
 
         for upload_statement in self.get_variant_load_summary(rna_dna_collections):
             LOG.info(upload_statement)
@@ -604,7 +605,7 @@ class UploadScoutAPI:
             rna_dna_collections=rna_dna_collections,
         )
         self.load_rna_variant_outlier_to_scout(
-            dry_run=dry_run, rna_dna_collections=rna_dna_collections
+            dry_run=dry_run, case_id=case_id, rna_dna_collections=rna_dna_collections
         )
 
     def get_config_builder(self, analysis: Analysis) -> ScoutConfigBuilder:
