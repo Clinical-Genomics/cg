@@ -609,8 +609,8 @@ class UploadScoutAPI:
             )
 
     def _has_rna_outlier_variants(self, case_id: str) -> bool:
-        rna_fraser: File | None = self.get_rna_omics_fraser(case_id=case_id)
-        rna_outrider: File | None = self.get_rna_omics_outrider(case_id=case_id)
+        rna_fraser: File | None = self.get_rna_omics_fraser(case_id)
+        rna_outrider: File | None = self.get_rna_omics_outrider(case_id)
         return bool(rna_fraser or rna_outrider)
 
     def get_config_builder(self, analysis: Analysis) -> ScoutConfigBuilder:
