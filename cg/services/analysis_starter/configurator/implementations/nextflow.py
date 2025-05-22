@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import overload
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -22,16 +21,9 @@ from cg.store.store import Store
 
 
 class NextflowStartParameters(StartParameters):
-    work_dir: str
-    from_start: bool
-    profile: str
-    config: str
-    params_file: str
-    revision: str
-    compute_env: str
-    nf_tower_id: str | None = None
+    dry_run: bool
+    revision: str | None = None
     stub_run: bool = False
-    dry_run: bool = False
 
 
 class NextflowConfigurator(Configurator):
@@ -59,18 +51,15 @@ class NextflowConfigurator(Configurator):
         self.sample_sheet_creator = sample_sheet_creator
         self.params_file_creator = params_file_creator
 
-    def configure(
-            self,
-            parameters: NextflowStartParameters) -> NextflowCaseConfig:
+    def configure(self, case_id: str, **flags) -> NextflowCaseConfig:
         """Configure a Nextflow case so that it is ready for analysis. This entails
         1. Creating a case directory.
         2. Creating a sample sheet.
         3. Creating a parameters file.
         4. Creating a configuration file.
         5. Creating any pipeline specific files."""
-        case_id: str = parameters.case_id
-        case_path: Path = self._get_case_path(case_id=case_id)
-        self._create_case_directory(case_id=case_id)
+        case_path: Path = self._get_case_path(case_id)
+        self._create_case_directory(case_id)
         self.sample_sheet_creator.create(case_id=case_id, case_path=case_path)
         sample_sheet_path: Path = self.sample_sheet_creator.get_file_path(
             case_id=case_id, case_path=case_path
@@ -80,14 +69,15 @@ class NextflowConfigurator(Configurator):
         )
         self.config_file_creator.create(case_id=case_id, case_path=case_path)
         self.pipeline_extension.configure(case_id=case_id, case_path=case_path)
-        return self.get_config(case_id)
+        return self.get_config(case_id=case_id, **flags)
 
-    def get_config(self, case_id: str) -> NextflowCaseConfig:
+    def get_config(self, case_id: str, **flags) -> NextflowCaseConfig:
         """
         Gets the configuration properties for the provided case.
         Raises:
             CaseNotConfiguredError if the params file or config file does not exist.
         """
+        overridden_parameters = NextflowStartParameters(case_id=case_id, **flags)
         case_path: Path = self._get_case_path(case_id=case_id)
         params_file_path: Path = self.params_file_creator.get_file_path(
             case_id=case_id, case_path=case_path
@@ -107,7 +97,8 @@ class NextflowConfigurator(Configurator):
             params_file=params_file_path.as_posix(),
             pipeline_repository=self.pipeline_repository,
             pre_run_script=self.pre_run_script,
-            revision=self.pipeline_revision,
+            revision=overridden_parameters.revision or self.pipeline_revision,
+            stub_run=overridden_parameters.stub_run or False,
             work_dir=self._get_work_dir(case_id).as_posix(),
             workflow=self.store.get_case_workflow(case_id),
         )

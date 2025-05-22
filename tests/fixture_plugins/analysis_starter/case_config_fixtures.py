@@ -43,5 +43,6 @@ def raredisease_case_config(
         pipeline_repository=raredisease_repository,
         pre_run_script="",
         revision=raredisease_revision,
+        stub_run=False,
         work_dir=raredisease_work_dir_path.as_posix(),
     )
