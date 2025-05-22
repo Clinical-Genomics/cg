@@ -11,10 +11,7 @@ from cg.meta.meta import MetaAPI
 from cg.meta.transfer.utils import are_all_fastq_valid
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
-from cg.services.deliver_files.rsync.sbatch import (
-    ERROR_RSYNC_FUNCTION,
-    RSYNC_CONTENTS_COMMAND,
-)
+from cg.services.deliver_files.rsync.sbatch import ERROR_RSYNC_FUNCTION, RSYNC_CONTENTS_COMMAND
 from cg.store.models import Case, Customer, Sample
 from cg.utils.files import get_files_matching_pattern
 
@@ -181,7 +178,7 @@ class ExternalDataAPI(MetaAPI):
             LOG.info("No cases to start")
             return
         for case in cases:
-            self.status_db.set_case_action(
+            self.status_db.update_case_action(
                 case_internal_id=case.internal_id, action=CaseActions.ANALYZE
             )
             LOG.info(f"Case {case.internal_id} has been set to '{CaseActions.ANALYZE}'")

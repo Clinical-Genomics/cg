@@ -53,6 +53,7 @@ def clean_context(
         case=case_to_clean,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
+        completed_at=timestamp_yesterday,
         cleaned_at=None,
         workflow=Workflow.BALSAMIC,
     )
@@ -78,6 +79,7 @@ def clean_context(
         case=case_to_not_clean,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
+        completed_at=timestamp_yesterday,
         cleaned_at=None,
         workflow=Workflow.BALSAMIC,
     )
@@ -149,6 +151,7 @@ def clean_context_microsalt(
         case=case_to_clean,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
+        completed_at=timestamp_yesterday,
         cleaned_at=None,
         workflow=Workflow.MICROSALT,
     )
@@ -176,6 +179,7 @@ def clean_context_microsalt(
         case=case_to_clean_dry_run,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
+        completed_at=timestamp_yesterday,
         cleaned_at=None,
         workflow=Workflow.MICROSALT,
     )

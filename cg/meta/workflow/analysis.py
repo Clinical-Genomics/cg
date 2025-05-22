@@ -11,6 +11,7 @@ from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
@@ -255,29 +256,57 @@ class AnalysisAPI(MetaAPI):
             f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
         )
 
-    def upload_bundle_statusdb(
-        self, case_id: str, comment: str | None = None, dry_run: bool = False, force: bool = False
-    ) -> None:
+    def _create_analysis_statusdb(self, case_id: str, trailblazer_id: int | None) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
-        case_obj: Case = self.status_db.get_case_by_internal_id(case_id)
-        analysis_start: datetime.date = self.get_bundle_created_date(case_id)
+        case_obj: Case | None = self.status_db.get_case_by_internal_id(case_id)
+        is_primary: bool = (len(case_obj.analyses) == 0) if case_obj else False
+
+        analysis_start: datetime = datetime.now()
         workflow_version: str = self.get_workflow_version(case_id)
         new_analysis: Analysis = self.status_db.add_analysis(
             workflow=self.workflow,
             version=workflow_version,
-            completed_at=datetime.now() if not force else None,
-            primary=(len(case_obj.analyses) == 0),
+            completed_at=None,
+            primary=is_primary,
             started_at=analysis_start,
-            comment=comment,
+            trailblazer_id=trailblazer_id,
         )
-        new_analysis.case = case_obj
+        if case_obj:
+            new_analysis.case = case_obj
+        self.status_db.add_item_to_store(new_analysis)
+        self.status_db.commit_to_store()
+        LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
+
+    def update_analysis_statusdb(
+        self,
+        case_id: str,
+        comment: str | None = None,
+        dry_run: bool = False,
+        force: bool = False,
+    ) -> None:
+        LOG.info(f"Marking analysis as completed in StatusDB for {case_id}")
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        analysis: Analysis | None = case.analyses[0] if case.analyses else None
+        if not analysis:
+            raise CgError(f"No analysis found for case {case_id}")
         if dry_run:
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
-        self.status_db.session.add(new_analysis)
-        self.status_db.session.commit()
-        LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
+        if not force:
+            self._update_analysis_as_completed(analysis_id=analysis.id)
+        self._update_analysis_comment(analysis_id=analysis.id, comment=comment)
+
+    def _update_analysis_as_completed(self, analysis_id: int) -> None:
+        """Update the created_at date of the latest analysis of a case."""
+        analysis_completed: datetime = datetime.now()
+        self.status_db.update_analysis_completed_at(
+            analysis_id=analysis_id, completed_at=analysis_completed
+        )
+
+    def _update_analysis_comment(self, analysis_id: int, comment: str | None) -> None:
+        """Update the comment of the latest analysis of a case."""
+        self.status_db.update_analysis_comment(analysis_id=analysis_id, comment=comment)
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         raise NotImplementedError
@@ -285,11 +314,11 @@ class AnalysisAPI(MetaAPI):
     def get_analysis_finish_path(self, case_id: str) -> Path:
         raise NotImplementedError
 
-    def add_pending_trailblazer_analysis(
+    def _add_pending_trailblazer_analysis(
         self,
         case_id: str,
         tower_workflow_id: str | None = None,
-    ) -> None:
+    ) -> TrailblazerAnalysis:
         self.check_analysis_ongoing(case_id)
         analysis_type: str = self.get_analysis_type(
             self.status_db.get_case_by_internal_id(case_id).links[0].sample
@@ -303,7 +332,7 @@ class AnalysisAPI(MetaAPI):
         workflow: Workflow = self.workflow
         workflow_manager: str = self.get_workflow_manager()
         is_case_for_development: bool = self._is_case_for_development(case_id)
-        self.trailblazer_api.add_pending_analysis(
+        tb_analysis: TrailblazerAnalysis = self.trailblazer_api.add_pending_analysis(
             analysis_type=analysis_type,
             case_id=case_id,
             config_path=config_path,
@@ -317,6 +346,8 @@ class AnalysisAPI(MetaAPI):
             tower_workflow_id=tower_workflow_id,
             is_hidden=is_case_for_development,
         )
+        LOG.info(f"Submitted case {case_id} to Trailblazer")
+        return tb_analysis
 
     def _is_case_for_development(self, case_id: str) -> bool:
         case: Case = self.status_db.get_case_by_internal_id(case_id)
@@ -360,10 +391,8 @@ class AnalysisAPI(MetaAPI):
             LOG.info(f"Dry-run: Action {action} would be set for case {case_id}")
             return
         if action in [None, *CaseActions.actions()]:
-            case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-            case.action = action
-            self.status_db.session.commit()
-            LOG.info("Action %s set for case %s", action, case_id)
+            self.status_db.update_case_action(action=action, case_internal_id=case_id)
+            LOG.info(f"Action '{action}' set for case {case_id}")
             return
         LOG.warning(
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
@@ -743,6 +772,14 @@ class AnalysisAPI(MetaAPI):
 
     def run_analysis(self, *args, **kwargs):
         raise NotImplementedError
+
+    def on_analysis_started(self, case_id: str, tower_workflow_id: str | None = None):
+        trailblazer_analysis: TrailblazerAnalysis = self._add_pending_trailblazer_analysis(
+            case_id=case_id, tower_workflow_id=tower_workflow_id
+        )
+
+        self._create_analysis_statusdb(case_id=case_id, trailblazer_id=trailblazer_analysis.id)
+        self.set_statusdb_action(case_id=case_id, action="running")
 
     def get_data_analysis_type(self, case_id: str) -> str | None:
         """

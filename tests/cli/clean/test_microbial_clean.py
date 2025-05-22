@@ -31,6 +31,7 @@ def test_dry_run(
         base_store,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
+        completed_at=timestamp_yesterday,
         cleaned_at=None,
         workflow=Workflow.MICROSALT,
     )
