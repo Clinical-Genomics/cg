@@ -21,7 +21,6 @@ from cg.store.store import Store
 
 
 class NextflowStartParameters(StartParameters):
-    dry_run: bool
     revision: str | None = None
     stub_run: bool = False
 
@@ -89,7 +88,7 @@ class NextflowConfigurator(Configurator):
             raise CaseNotConfiguredError(
                 f"Please ensure that both the parameters file {params_file_path.as_posix()} and the configuration file {config_file_path.as_posix()} exists."
             )
-        return NextflowCaseConfig(
+        config = NextflowCaseConfig(
             case_id=case_id,
             case_priority=self.store.get_case_priority(case_id),
             config_profiles=self.config_profiles,
@@ -97,11 +96,12 @@ class NextflowConfigurator(Configurator):
             params_file=params_file_path.as_posix(),
             pipeline_repository=self.pipeline_repository,
             pre_run_script=self.pre_run_script,
-            revision=overridden_parameters.revision or self.pipeline_revision,
-            stub_run=overridden_parameters.stub_run or False,
+            revision=self.pipeline_revision,
+            stub_run=False,
             work_dir=self._get_work_dir(case_id).as_posix(),
             workflow=self.store.get_case_workflow(case_id),
         )
+        return config.model_copy(update=overridden_parameters.model_dump())
 
     def _get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""

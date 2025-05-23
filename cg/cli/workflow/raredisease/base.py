@@ -50,14 +50,12 @@ raredisease.add_command(store_housekeeper)
 
 @raredisease.command("start")
 @ARGUMENT_CASE_ID
-@DRY_RUN
 @OPTION_REVISION
 @OPTION_STUB
 @click.pass_obj
 def start(
     context: CGConfig,
     case_id: str,
-    dry_run: bool,
     revision: str,
     stub_run: bool,
 ) -> None:
@@ -67,9 +65,7 @@ def start(
         context
     ).get_analysis_starter_for_workflow(Workflow.RAREDISEASE)
     try:
-        analysis_starter.start(
-            case_id=case_id, dry_run=dry_run, revision=revision, stub_run=stub_run
-        )
+        analysis_starter.start(case_id=case_id, revision=revision, stub_run=stub_run)
     except Exception as error:
         LOG.error(f"Unexpected error occurred: {error}")
         raise click.Abort from error
