@@ -38,10 +38,45 @@ def test_create_raredisease_config(
         mock_managed_variants_scout_api.export_managed_variants.return_value = []
 
         # WHEN creating a case config
-        case_config: NextflowCaseConfig = raredisease_configurator.configure(raredisease_case_id)
+        case_config: NextflowCaseConfig = raredisease_configurator.configure(
+            case_id=raredisease_case_id
+        )
 
     # THEN the expected case config is returned
     assert case_config == raredisease_case_config
+
+
+def test_create_raredisease_config_with_flag(
+    raredisease_configurator: NextflowConfigurator,
+    raredisease_case_config: NextflowCaseConfig,
+    raredisease_case_id: str,
+    raredisease_params_file_path: str,
+    raredisease_work_dir_path: str,
+):
+    """Test creating the case config for all pipelines."""
+    # GIVEN a configurator and a case id
+    gene_panel_creator: GenePanelFileCreator = (
+        raredisease_configurator.pipeline_extension.gene_panel_file_creator
+    )
+    managed_variants_creator: ManagedVariantsFileCreator = (
+        raredisease_configurator.pipeline_extension.managed_variants_file_creator
+    )
+
+    # GIVEN that scout returns panels and variants
+    with (
+        mock.patch.object(gene_panel_creator, "scout_api") as mock_gene_panel_scout_api,
+        mock.patch.object(managed_variants_creator, "scout_api") as mock_managed_variants_scout_api,
+    ):
+        mock_gene_panel_scout_api.export_panels.return_value = []
+        mock_managed_variants_scout_api.export_managed_variants.return_value = []
+
+        # WHEN creating a case config specifying additional options
+        case_config: NextflowCaseConfig = raredisease_configurator.configure(
+            case_id=raredisease_case_id, revision="0.0.0"
+        )
+
+    # THEN the expected case config is returned
+    assert case_config == raredisease_case_config.model_copy(update={"revision": "0.0.0"})
 
 
 @pytest.mark.parametrize(
