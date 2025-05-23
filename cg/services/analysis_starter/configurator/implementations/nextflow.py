@@ -76,7 +76,6 @@ class NextflowConfigurator(Configurator):
         Raises:
             CaseNotConfiguredError if the params file or config file does not exist.
         """
-        overridden_parameters = NextflowStartParameters(case_id=case_id, **flags)
         case_path: Path = self._get_case_path(case_id=case_id)
         params_file_path: Path = self.params_file_creator.get_file_path(
             case_id=case_id, case_path=case_path
@@ -101,6 +100,7 @@ class NextflowConfigurator(Configurator):
             work_dir=self._get_work_dir(case_id).as_posix(),
             workflow=self.store.get_case_workflow(case_id),
         )
+        overridden_parameters = NextflowStartParameters(case_id=case_id, **flags)
         return config.model_copy(update=overridden_parameters.model_dump())
 
     def _get_case_path(self, case_id: str) -> Path:

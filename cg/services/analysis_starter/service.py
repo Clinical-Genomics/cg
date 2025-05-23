@@ -34,8 +34,7 @@ class AnalysisStarter:
         parameters = self.configurator.configure(case_id=case_id, **flags)
         self.store.set_case_action(case_internal_id=case_id, action=CaseActions.RUNNING)
         try:
-            submit_parameters = self.submitter.get
-            tower_workflow_id: str | None = self.submitter.submit(case_config)
+            tower_workflow_id: str | None = self.submitter.submit(parameters)
             self.tracker.track(case_id=case_id, tower_workflow_id=tower_workflow_id)
         except CalledProcessError as exception:
             LOG.error(exception)
