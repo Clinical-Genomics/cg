@@ -59,6 +59,7 @@ class NfTowerHandler(NfBaseHandler):
                     "params_file",
                     "config",
                     "compute_env",
+                    "revision",
                     "stub_run",
                 )
             },
