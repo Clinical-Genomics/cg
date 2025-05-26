@@ -1,11 +1,11 @@
 - format: cram
   id: SAMPLEID
-  path: PATHTOCASE/alignment/SAMPLEID_sorted_md.cram
+  path: PATHTOCASE/alignment/SAMPLEID_sort_md.cram
   step: alignment
   tag: alignment_markduplicates
 - format: cram
   id: SAMPLEID
-  path: PATHTOCASE/alignment/SAMPLEID_sorted_md.cram.crai
+  path: PATHTOCASE/alignment/SAMPLEID_sort_md.cram.crai
   step: alignment
   tag: alignment_markduplicates_index
 - format: bam
