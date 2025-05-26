@@ -99,7 +99,12 @@ def link(context: CGConfig, case_id: str, dry_run: bool):
 @FORCE
 @click.pass_obj
 def store(context: CGConfig, case_id: str, comment: str | None, dry_run: bool, force: bool):
-    """Store finished analysis files in Housekeeper."""
+    """Store finished analysis files in Housekeeper and StatusDB.
+    If the force flag is added, the command will:
+      - Store bundles in Housekeeper even if the files are incomplete (skip Hermes validation)
+      - Overwrite existing completed_at date in StatusDB if the Analysis is already stored
+      - Require that a comment is provided explaining the reason for the force-storing
+    """
     validate_force_store_option(force=force, comment=comment)
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     housekeeper_api: HousekeeperAPI = context.housekeeper_api

@@ -26,7 +26,14 @@ from cg.constants.priority import TrailblazerPriority
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisStatus, AnalysisType
-from cg.exc import AnalysisNotReadyError, BundleAlreadyAddedError, CgDataError, CgError
+from cg.exc import (
+    AnalysisAlreadyStoredError,
+    AnalysisDoesNotExtistError,
+    AnalysisNotReadyError,
+    BundleAlreadyAddedError,
+    CgDataError,
+    CgError,
+)
 from cg.io.controller import WriteFile
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.meta import MetaAPI
@@ -289,12 +296,15 @@ class AnalysisAPI(MetaAPI):
         case: Case = self.status_db.get_case_by_internal_id(case_id)
         analysis: Analysis | None = case.analyses[0] if case.analyses else None
         if not analysis:
-            raise CgError(f"No analysis found for case {case_id}")
+            raise AnalysisDoesNotExtistError(f"No analysis found for case {case_id}")
         if dry_run:
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
-        if not force:
-            self._update_analysis_as_completed(analysis_id=analysis.id)
+        if not force and analysis.completed_at:
+            raise AnalysisAlreadyStoredError(
+                f"Analysis for case {case_id} already set as completed at {analysis.completed_at}"
+            )
+        self._update_analysis_as_completed(analysis_id=analysis.id)
         self._update_analysis_comment(analysis_id=analysis.id, comment=comment)
 
     def _update_analysis_as_completed(self, analysis_id: int) -> None:

@@ -12,6 +12,12 @@ class CgError(Exception):
         super().__init__(message)
 
 
+class AnalysisDoesNotExtistError(CgError):
+    """
+    Exception raised when an analysis does not exist.
+    """
+
+
 class AnalysisUploadError(CgError):
     """
     Error related to trying to upload analysis data.
@@ -33,6 +39,12 @@ class AnalysisNotReadyError(CgError):
 class AnalysisNotCompletedError(CgError):
     """
     Exception raised when an analysis has not completed.
+    """
+
+
+class AnalysisAlreadyStoredError(CgError):
+    """
+    Exception raised when trying to store an analysis already stored in StatusDB.
     """
 
 
