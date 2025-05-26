@@ -18,7 +18,7 @@ class SeqeraPlatformSubmitter(Submitter):
         self.client: SeqeraPlatformClient = client
         self.compute_environment_ids: dict[str, str] = compute_environment_ids
 
-    def submit(self, case_config) -> str:
+    def submit(self, case_config: NextflowCaseConfig) -> str:
         """Starts a case and returns the workflow id for the job."""
         run_request: WorkflowLaunchRequest = self._create_launch_request(case_config)
         return self.client.run_case(run_request)
@@ -39,6 +39,7 @@ class SeqeraPlatformSubmitter(Submitter):
             preRunScript=case_config.pre_run_script,
             revision=case_config.revision,
             runName=case_config.case_id,
+            stubRun=case_config.stub_run,
             workDir=case_config.work_dir,
         )
         return WorkflowLaunchRequest(launch=launch_request)
