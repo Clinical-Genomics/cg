@@ -137,7 +137,6 @@ def test_store_housekeeper_case_with_malformed_deliverables_file(
     assert "Could not store bundle in Housekeeper and StatusDB" in caplog.text
 
 
-@pytest.mark.usefixtures("housekeeper_api", "workflow_version")
 @pytest.mark.parametrize(
     "workflow",
     NEXTFLOW_WORKFLOWS + [Workflow.NALLO],

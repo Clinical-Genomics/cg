@@ -124,7 +124,6 @@ def test_store_fail(
     assert result_fail.exit_code != EXIT_SUCCESS
 
 
-@pytest.mark.usefixtures("deliverables_template_content")
 @pytest.mark.parametrize(
     "workflow",
     NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
@@ -183,7 +182,6 @@ def test_store_available_success(
     )
 
 
-@pytest.mark.usefixtures("deliverables_template_content")
 @pytest.mark.parametrize(
     "workflow",
     NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
