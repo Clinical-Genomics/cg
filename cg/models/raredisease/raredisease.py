@@ -1,4 +1,5 @@
 from enum import StrEnum
+from pathlib import Path
 
 from cg.constants.constants import SexOptions
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
@@ -69,3 +70,4 @@ class RarediseaseParameters(WorkflowParameters):
     save_mapped_as_cram: bool
     vcfanno_extra_resources: str
     vep_filters_scout_fmt: str
+    sample_id_map: Path
