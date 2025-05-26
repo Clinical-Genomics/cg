@@ -3,7 +3,7 @@
 import datetime as dt
 import logging
 from datetime import datetime
-from typing import Callable, Iterator, Literal
+from typing import Callable, Iterator
 
 from sqlalchemy.orm import Query, Session
 

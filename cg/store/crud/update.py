@@ -1,7 +1,6 @@
 """Handler to update data objects"""
 
 from datetime import datetime
-from typing import Literal
 
 from sqlalchemy.orm import Session
 
