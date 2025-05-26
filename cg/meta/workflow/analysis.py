@@ -28,7 +28,7 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.exc import (
     AnalysisAlreadyStoredError,
-    AnalysisDoesNotExtistError,
+    AnalysisDoesNotExistError,
     AnalysisNotReadyError,
     BundleAlreadyAddedError,
     CgDataError,
@@ -296,7 +296,7 @@ class AnalysisAPI(MetaAPI):
         case: Case = self.status_db.get_case_by_internal_id(case_id)
         analysis: Analysis | None = case.analyses[0] if case.analyses else None
         if not analysis:
-            raise AnalysisDoesNotExtistError(f"No analysis found for case {case_id}")
+            raise AnalysisDoesNotExistError(f"No analysis found for case {case_id}")
         if dry_run:
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return

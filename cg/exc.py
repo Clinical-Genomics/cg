@@ -12,7 +12,7 @@ class CgError(Exception):
         super().__init__(message)
 
 
-class AnalysisDoesNotExtistError(CgError):
+class AnalysisDoesNotExistError(CgError):
     """
     Exception raised when an analysis does not exist.
     """

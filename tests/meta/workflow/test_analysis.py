@@ -14,7 +14,7 @@ from cg.constants import GenePanelMasterList, Priority, SequencingRunDataAvailab
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import CaseActions, ControlOptions, Workflow
 from cg.constants.priority import SlurmQos, TrailblazerPriority
-from cg.exc import AnalysisAlreadyStoredError, AnalysisDoesNotExtistError, AnalysisNotReadyError
+from cg.exc import AnalysisAlreadyStoredError, AnalysisDoesNotExistError, AnalysisNotReadyError
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -838,7 +838,7 @@ def test_update_analysis_statusdb_no_analysis_fails(
     case_mock.analyses = []
 
     # WHEN update_analysis_statusdb is called
-    with pytest.raises(AnalysisDoesNotExtistError):
+    with pytest.raises(AnalysisDoesNotExistError):
         # THEN it raises an AnalysisDoesNotExistError
         analysis_api.update_analysis_statusdb(case_id=case_mock.internal_id)
 
