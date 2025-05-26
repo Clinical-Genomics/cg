@@ -131,8 +131,9 @@ def test_add_pending_analysis_fails(valid_trailblazer_config: dict, mocker):
     tower_workflow_id = "some_workflow_id"
     ticket = "some_ticket"
 
-    # WHEN add_pending_analysis is called, an exception is raised
+    # WHEN add_pending_analysis is called
     with pytest.raises(TrailblazerAPIHTTPError):
+        # THEN a TrailblazerAPIHTTPError is raised
         trailblazer_api.add_pending_analysis(
             case_id=case_id,
             workflow=Workflow.BALSAMIC,
