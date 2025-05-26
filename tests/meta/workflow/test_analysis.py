@@ -3,11 +3,10 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import ANY, Mock, PropertyMock, create_autospec
+from unittest.mock import ANY, Mock, create_autospec
 
 import mock
 import pytest
-from pytest import LogCaptureFixture
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
