@@ -183,7 +183,6 @@ def test_cli_store_available_case_is_running(
 
     # THEN analysis data is stored in Housekeeper and StatusDB
     assert "stored in Housekeeper" in caplog.text
-    # assert "stored in StatusDB" in caplog.text
 
     # THEN log informs about eligible case
     assert mip_case_id in caplog.text

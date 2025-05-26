@@ -9,7 +9,6 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.models import InputBundle
 from cg.cli.workflow.fluffy.base import store, store_available
 from cg.constants import EXIT_SUCCESS
-from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
 
@@ -35,9 +34,6 @@ def test_cli_store_dry_no_case(
     # THEN logging informs about the case_id not existing
     assert fluffy_case_id_non_existing in caplog.text
     assert "could not be found" in caplog.text
-
-
-import pytest
 
 
 def test_cli_store(
@@ -170,7 +166,6 @@ def test_cli_store_available_case_is_running(
 
     # THEN analysis data is stored in Housekeeper and StatusDB
     assert "stored in Housekeeper" in caplog.text
-    # assert "stored in StatusDB" in caplog.text
 
     # THEN log informs about eligible case
     assert fluffy_case_id_existing in caplog.text

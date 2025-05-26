@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from unittest.mock import ANY
 
+import pytest
 from click.testing import CliRunner
 
 from cg.apps.hermes.hermes_api import HermesApi
@@ -51,9 +52,6 @@ def test_start(
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
     assert case_id in caplog.text
-
-
-import pytest
 
 
 @pytest.mark.usefixtures("mock_config", "mock_deliverable")
