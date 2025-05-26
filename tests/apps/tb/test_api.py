@@ -113,10 +113,7 @@ def test_add_pending_analysis_succeeds(
 def test_add_pending_analysis_fails(valid_trailblazer_config: dict, mocker):
     # GIVEN there are valid credentials for calling Trailblazer
     # GIVEN an error response from Trailblazer
-    error_response: Response = create_autospec(Response)
-    error_response.status_code = 500
-    error_response.ok = False  # type: ignore
-
+    error_response: Response = create_autospec(Response, ok=False, status_code=500)
     mocker.patch.object(APIRequest, "api_request_from_content", return_value=error_response)
 
     # GIVEN a correctly configured TrailblazerAPI object
