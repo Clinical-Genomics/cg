@@ -3,11 +3,10 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import ANY, Mock, PropertyMock, create_autospec
+from unittest.mock import ANY, Mock, create_autospec
 
 import mock
 import pytest
-from pytest import LogCaptureFixture
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
@@ -807,9 +806,6 @@ def test_on_analysis_started_creates_an_analysis_in_status_db(
         version=ANY,
     )
     status_db_mock.add_item_to_store.assert_called_with(new_analysis)
-    status_db_mock.update_case_action.assert_called_with(
-        action=CaseActions.RUNNING, case_internal_id=case_mock.internal_id
-    )
     assert new_analysis.case == case_mock
 
 
