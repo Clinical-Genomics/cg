@@ -865,9 +865,10 @@ def test_update_analysis_statusdb_succeeds(
     """Test that update_analysis_statusdb succeeds if the analysis is not completed."""
     # GIVEN an analysis api and a case with an analysis in StatusDB
     analysis_api = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
-    case_mock.analyses = [create_autospec(Analysis)]
-    case_mock.analyses[0].id = 123456
-    case_mock.analyses[0].completed_at = None
+    analysis: Analysis = create_autospec(Analysis)
+    analysis.id = 123456
+    analysis.completed_at = None
+    case_mock.analyses = [analysis]
 
     # WHEN update_analysis_statusdb is called
     analysis_api.update_analysis_statusdb(case_id=case_mock.internal_id, force=False)
