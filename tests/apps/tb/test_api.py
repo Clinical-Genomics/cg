@@ -12,24 +12,27 @@ from cg.io.controller import APIRequest
 
 
 def test_add_pending_analysis_succeeds(mocker):
+    # GIVEN there are valid credentials for calling Trailblazer
     credentials = create_autospec(service_account.IDTokenCredentials)
     credentials.token = "some_token"
     mocker.patch.object(
         service_account.IDTokenCredentials, "from_service_account_file", return_value=credentials
     )
 
+    # GIVEN a succesful response from Trailblazer
     id_created_by_trailblazer = 56
-    successful_response = create_autospec(Response)
+    successful_response: Response = create_autospec(Response)
     successful_response.status_code = 200
     successful_response.text = (
         '{"id":'
         + str(id_created_by_trailblazer)
         + ',"logged_at":"2025-05-21","started_at":"2025-05-21",'
         '"completed_at":"","out_dir":"/out/dir","config_path":"/config/path"}'
-    )
+    )  # type: ignore
 
     mocker.patch.object(APIRequest, "api_request_from_content", return_value=successful_response)
 
+    # GIVEN a correct Trailblazer config
     fake_trailblazer_host = "http://localhost/fake_trailblazer"
 
     trailblazer_api = TrailblazerAPI(
@@ -42,6 +45,7 @@ def test_add_pending_analysis_succeeds(mocker):
         }
     )
 
+    # GIVEN all neccessary values are provided
     case_id = "some_case_id"
     config_path = "/config/path"
     out_dir = "/out/dir"
@@ -50,6 +54,7 @@ def test_add_pending_analysis_succeeds(mocker):
     tower_workflow_id = "some_workflow_id"
     ticket = "some_ticket"
 
+    # WHEN add_pending_analysis is called
     trailblazer_analysis: TrailblazerAnalysis = trailblazer_api.add_pending_analysis(
         case_id=case_id,
         workflow=Workflow.BALSAMIC,
@@ -63,6 +68,7 @@ def test_add_pending_analysis_succeeds(mocker):
         tower_workflow_id=tower_workflow_id,
     )
 
+    # THEN a request with the correct parameters have been made to the Trailblazer API
     APIRequest.api_request_from_content.assert_called_with(
         api_method=APIMethods.POST,
         headers={"Authorization": f"Bearer {credentials.token}"},
@@ -83,4 +89,5 @@ def test_add_pending_analysis_succeeds(mocker):
         url=f"{fake_trailblazer_host}/add-pending-analysis",
     )
 
+    # THEN the TrailblzerAnalysis object that was return includes the newly created id
     assert trailblazer_analysis.id == id_created_by_trailblazer
