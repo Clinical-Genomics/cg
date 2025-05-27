@@ -129,9 +129,13 @@ class AnalysisAPI(MetaAPI):
         get_cases_to_analyze method, and it has passed the pre-analysis quality check.
         """
         cases_to_analyse: list[Case] = self.get_cases_to_analyze()
-        cases_passing_quality_check: list[Case] = [
-            case for case in cases_to_analyse if SequencingQCService.case_pass_sequencing_qc(case)
-        ]
+
+        cases_passing_quality_check: list[Case] = []
+        for case in cases_to_analyse:
+            if SequencingQCService.case_pass_sequencing_qc(case):
+                cases_passing_quality_check.append(case)
+                LOG.debug(f"Setting case {case.internal_id} to analyse.")
+
         return cases_passing_quality_check
 
     def get_slurm_qos_for_case(self, case_id: str) -> str:

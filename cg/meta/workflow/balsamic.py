@@ -99,9 +99,14 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         cases_ready_for_analysis: list[Case] = [
             case for case in cases_to_analyse if self.is_case_ready_for_analysis(case)
         ]
-        return cases_ready_for_analysis[
+
+        selected_cases: list[Case] = cases_ready_for_analysis[
             : MAX_CASES_TO_START_IN_50_MINUTES if limit is None else limit
         ]
+        for case in selected_cases:
+            LOG.debug(f"Setting case {case.internal_id} to analyse.")
+
+        return selected_cases
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic deliverables file for the case_id should be located.
