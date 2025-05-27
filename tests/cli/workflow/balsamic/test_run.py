@@ -162,15 +162,15 @@ def test_priority_clinical(cli_runner: CliRunner, balsamic_context: CGConfig, ca
 
 
 def test_calls_on_analysis_started(cli_runner: CliRunner, balsamic_context: CGConfig):
-    # GIVEN
+    # GIVEN an instance of the BalsamicAnalysisAPI has been setup
     analysis_api: BalsamicAnalysisAPI = create_autospec(
         BalsamicAnalysisAPI, status_db=PropertyMock(return_value=create_autospec(Store))
     )
     balsamic_context.meta_apis["analysis_api"] = analysis_api
     case_id = "some_balsamic_case_id"
 
-    # WHEN
+    # WHEN successfully invoking the run command
     cli_runner.invoke(run, [case_id], obj=balsamic_context)
 
-    # THEN
+    # THEN the on_analysis_started function has been called
     analysis_api.on_analysis_started.assert_called_with(case_id)
