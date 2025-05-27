@@ -65,15 +65,15 @@ def test_cli_run(
 
 
 def test_calls_on_analysis_started(cli_runner: CliRunner, fluffy_context: CGConfig):
-    # GIVEN
+    # GIVEN an instance of the FluffyAnalysisAPI has been setup
     analysis_api: FluffyAnalysisAPI = create_autospec(
         FluffyAnalysisAPI, status_db=PropertyMock(return_value=create_autospec(Store))
     )
     fluffy_context.meta_apis["analysis_api"] = analysis_api
     case_id = "some_case_id"
 
-    # WHEN
+    # WHEN successfully invoking the run command
     cli_runner.invoke(run, [case_id], obj=fluffy_context)
 
-    # THEN
+    # THEN the on_analysis_started function has been called
     analysis_api.on_analysis_started.assert_called_with(case_id)
