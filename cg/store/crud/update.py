@@ -10,6 +10,7 @@ from cg.constants.sequencing import Sequencers
 from cg.services.illumina.post_processing.utils import get_q30_threshold
 from cg.store.base import BaseHandler
 from cg.store.models import (
+    Analysis,
     Case,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
@@ -60,8 +61,8 @@ class UpdateHandler(BaseHandler):
         case.aggregated_sequencing_qc = status
         self.session.commit()
 
-    def update_case_action(self, action: CaseActions, case_internal_id: str) -> None:
-        """Sets the action of provided cases to None or the given action."""
+    def update_case_action(self, action: CaseActions | None, case_internal_id: str) -> None:
+        """Sets the action of the provided case the given action (can be None)."""
         case: Case = self.get_case_by_internal_id(internal_id=case_internal_id)
         case.action = action
         self.commit_to_store()
@@ -100,20 +101,19 @@ class UpdateHandler(BaseHandler):
         self.session.commit()
 
     def update_analysis_completed_at(self, analysis_id: int, completed_at: datetime | None) -> None:
-        """Update the completed at field of an analysis."""
-        analysis = self.get_analysis_by_entry_id(analysis_id)
+        analysis: Analysis = self.get_analysis_by_entry_id(analysis_id)
         analysis.completed_at = completed_at
         self.session.commit()
 
     def update_analysis_comment(self, analysis_id: int, comment: str | None) -> None:
         """Update the comment field of an analysis appending the new comment over any existing."""
-        analysis = self.get_analysis_by_entry_id(analysis_id)
+        analysis: Analysis = self.get_analysis_by_entry_id(analysis_id)
         analysis.comment = f"{analysis.comment}\n{comment}" if analysis.comment else comment
         self.session.commit()
 
     def update_analysis_uploaded_at(self, analysis_id: int, uploaded_at: datetime | None) -> None:
         """Update the uploaded at field of an analysis."""
-        analysis = self.get_analysis_by_entry_id(analysis_id)
+        analysis: Analysis = self.get_analysis_by_entry_id(analysis_id)
         analysis.uploaded_at = uploaded_at
         self.session.commit()
 
@@ -121,6 +121,6 @@ class UpdateHandler(BaseHandler):
         self, analysis_id: int, upload_started_at: datetime | None
     ) -> None:
         """Update the upload started at field of an analysis."""
-        analysis = self.get_analysis_by_entry_id(analysis_id)
+        analysis: Analysis = self.get_analysis_by_entry_id(analysis_id)
         analysis.upload_started_at = upload_started_at
         self.session.commit()

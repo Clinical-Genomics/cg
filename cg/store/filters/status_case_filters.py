@@ -107,7 +107,7 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
                 Case.action.is_(None),
                 Analysis.created_at.is_(None),
             ),
-            # Cases that receive new data from sequencing
+            # Existing cases that receive new data from sequencing
             and_(
                 Case.action.is_(None),
                 Analysis.created_at < Sample.last_sequenced_at,

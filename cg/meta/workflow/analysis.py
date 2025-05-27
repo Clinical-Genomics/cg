@@ -266,8 +266,8 @@ class AnalysisAPI(MetaAPI):
     def _create_analysis_statusdb(self, case_id: str, trailblazer_id: int | None) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
-        case_obj: Case | None = self.status_db.get_case_by_internal_id(case_id)
-        is_primary: bool = (len(case_obj.analyses) == 0) if case_obj else False
+        case: Case | None = self.status_db.get_case_by_internal_id(case_id)
+        is_primary: bool = (len(case.analyses) == 0) if case else False
 
         analysis_start: datetime = datetime.now()
         workflow_version: str = self.get_workflow_version(case_id)
@@ -279,8 +279,8 @@ class AnalysisAPI(MetaAPI):
             started_at=analysis_start,
             trailblazer_id=trailblazer_id,
         )
-        if case_obj:
-            new_analysis.case = case_obj
+        if case:
+            new_analysis.case = case
         self.status_db.add_item_to_store(new_analysis)
         self.status_db.commit_to_store()
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
@@ -297,13 +297,13 @@ class AnalysisAPI(MetaAPI):
         analysis: Analysis | None = case.analyses[0] if case.analyses else None
         if not analysis:
             raise AnalysisDoesNotExistError(f"No analysis found for case {case_id}")
-        if dry_run:
-            LOG.info("Dry-run: StatusDB changes will not be commited")
-            return
         if not force and analysis.completed_at:
             raise AnalysisAlreadyStoredError(
                 f"Analysis for case {case_id} already set as completed at {analysis.completed_at}"
             )
+        if dry_run:
+            LOG.info("Dry-run: StatusDB changes will not be commited")
+            return
         self._update_analysis_as_completed(analysis_id=analysis.id)
         self._update_analysis_comment(analysis_id=analysis.id, comment=comment)
 
