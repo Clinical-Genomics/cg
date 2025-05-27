@@ -13,5 +13,5 @@ def test_creating_an_analysis_model_with_a_trailblazer_id(store: Store):
     )
 
     # THEN a new analysis is returned with the trailblazer id set
-    assert type(analysis) == Analysis
+    assert isinstance(analysis, Analysis)
     assert analysis.trailblazer_id == trailblazer_id
