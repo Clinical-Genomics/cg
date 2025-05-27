@@ -66,8 +66,9 @@ def test_cli_run(
 
 def test_calls_on_analysis_started(cli_runner: CliRunner, fluffy_context: CGConfig):
     # GIVEN
-    analysis_api: FluffyAnalysisAPI = create_autospec(FluffyAnalysisAPI)
-    analysis_api.status_db = PropertyMock(return_value=create_autospec(Store))  # type: ignore
+    analysis_api: FluffyAnalysisAPI = create_autospec(
+        FluffyAnalysisAPI, status_db=PropertyMock(return_value=create_autospec(Store))
+    )
     fluffy_context.meta_apis["analysis_api"] = analysis_api
     case_id = "some_case_id"
 

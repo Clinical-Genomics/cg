@@ -42,8 +42,9 @@ def test_dry_arguments(cli_runner: CliRunner, base_context: CGConfig, ticket_id,
 
 def test_calls_on_analysis_started(cli_runner: CliRunner, base_context: CGConfig):
     # GIVEN
-    analysis_api: MicrosaltAnalysisAPI = create_autospec(MicrosaltAnalysisAPI)
-    analysis_api.status_db = PropertyMock(return_value=create_autospec(Store))  # type: ignore
+    analysis_api: MicrosaltAnalysisAPI = create_autospec(
+        MicrosaltAnalysisAPI, status_db=PropertyMock(return_value=create_autospec(Store))
+    )
 
     case_id = "some_case_id"
     analysis_api.resolve_case_sample_id = lambda sample, ticket, unique_id: (case_id, None)

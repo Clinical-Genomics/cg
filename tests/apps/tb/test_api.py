@@ -47,14 +47,16 @@ def test_add_pending_analysis_succeeds(
     # GIVEN a succesful response from Trailblazer
     id_created_by_trailblazer = 56
 
-    successful_response: Response = create_autospec(Response)
-    successful_response.status_code = 200
-    successful_response.text = (
-        '{"id":'
-        + str(id_created_by_trailblazer)
-        + ',"logged_at":"2025-05-21","started_at":"2025-05-21",'
-        '"completed_at":"","out_dir":"/out/dir","config_path":"/config/path"}'
-    )  # type: ignore
+    successful_response: Response = create_autospec(
+        Response,
+        status_code=200,
+        text=(
+            '{"id":'
+            + str(id_created_by_trailblazer)
+            + ',"logged_at":"2025-05-21","started_at":"2025-05-21",'
+            '"completed_at":"","out_dir":"/out/dir","config_path":"/config/path"}'
+        ),
+    )
 
     mocker.patch.object(APIRequest, "api_request_from_content", return_value=successful_response)
 

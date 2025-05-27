@@ -163,8 +163,9 @@ def test_priority_clinical(cli_runner: CliRunner, balsamic_context: CGConfig, ca
 
 def test_calls_on_analysis_started(cli_runner: CliRunner, balsamic_context: CGConfig):
     # GIVEN
-    analysis_api: BalsamicAnalysisAPI = create_autospec(BalsamicAnalysisAPI)
-    analysis_api.status_db = PropertyMock(return_value=create_autospec(Store))  # type: ignore
+    analysis_api: BalsamicAnalysisAPI = create_autospec(
+        BalsamicAnalysisAPI, status_db=PropertyMock(return_value=create_autospec(Store))
+    )
     balsamic_context.meta_apis["analysis_api"] = analysis_api
     case_id = "some_balsamic_case_id"
 

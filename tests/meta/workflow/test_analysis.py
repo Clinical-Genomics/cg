@@ -784,8 +784,9 @@ def test_on_analysis_started_creates_an_analysis_in_status_db(
     # GIVEN an analysis api can successfully create a trailblazer analysis
     analysis_api: AnalysisAPI = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
 
-    new_trailblazer_analysis: TrailblazerAnalysis = create_autospec(TrailblazerAnalysis)
-    new_trailblazer_analysis.id = 123456789  # type: ignore
+    new_trailblazer_analysis: TrailblazerAnalysis = create_autospec(
+        TrailblazerAnalysis, id=123456789
+    )
     trailblazer_api_mock.add_pending_analysis = Mock(return_value=new_trailblazer_analysis)
 
     new_analysis: Analysis = create_autospec(Analysis)
