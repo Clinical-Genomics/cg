@@ -41,20 +41,21 @@ def test_dry_arguments(cli_runner: CliRunner, base_context: CGConfig, ticket_id,
 
 
 def test_calls_on_analysis_started(cli_runner: CliRunner, base_context: CGConfig):
-    # GIVEN
+    # GIVEN an instance of the MicrosaltAnalysisAPI has been setup
     analysis_api: MicrosaltAnalysisAPI = create_autospec(
-        MicrosaltAnalysisAPI, status_db=PropertyMock(return_value=create_autospec(Store))
+        MicrosaltAnalysisAPI,
+        status_db=PropertyMock(
+            return_value=create_autospec(Store),
+        ),
     )
-
-    case_id = "some_case_id"
-    analysis_api.resolve_case_sample_id = lambda sample, ticket, unique_id: (case_id, None)
-    analysis_api.get_config_path.return_value = Path("/config/path")
-    analysis_api.get_case_fastq_path.return_value = Path("/a/fastq/path")
-
     base_context.meta_apis["analysis_api"] = analysis_api
 
-    # WHEN
+    # GIVEN a case can be retrieved from the analysis api
+    case_id = "some_case_id"
+    analysis_api.resolve_case_sample_id = lambda sample, ticket, unique_id: (case_id, None)
+
+    # WHEN successfully invoking the run command
     cli_runner.invoke(run, [case_id], obj=base_context)
 
-    # THEN
+    # THEN the on_analysis_started function has been called with the found case_id
     analysis_api.on_analysis_started.assert_called_with(case_id)
