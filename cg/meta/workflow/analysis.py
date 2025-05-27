@@ -788,7 +788,7 @@ class AnalysisAPI(MetaAPI):
         )
 
         self._create_analysis_statusdb(case_id=case_id, trailblazer_id=trailblazer_analysis.id)
-        self.set_statusdb_action(case_id=case_id, action="running")
+        self.set_statusdb_action(case_id=case_id, action=CaseActions.RUNNING)
 
     def get_data_analysis_type(self, case_id: str) -> str | None:
         """
