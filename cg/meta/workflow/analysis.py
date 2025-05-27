@@ -131,7 +131,7 @@ class AnalysisAPI(MetaAPI):
             case_is_set_to_analyze or case_has_not_been_analyzed or case_latest_analysis_failed
         )
 
-    def get_cases_ready_for_analysis(self):
+    def get_cases_ready_for_analysis(self) -> list[Case]:
         """
         Return cases that are ready for analysis. The case is ready if it passes the logic in the
         get_cases_to_analyze method, and it has passed the pre-analysis quality check.
