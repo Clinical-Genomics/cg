@@ -140,7 +140,7 @@ def test_valid_case(
 
     # Make sure nothing is currently stored in Housekeeper
 
-    # Make sure  analysis not alredy stored in ClinicalDB
+    # Make sure  analysis not alredy stored in StatusDB
     assert not balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
     mocker.patch.object(AnalysisAPI, "update_analysis_statusdb")
