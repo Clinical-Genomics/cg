@@ -161,8 +161,8 @@ def test_store_housekeeper_valid_case(
     # GIVEN that case is not already stored in StatusDB
     assert not store.get_case_by_internal_id(internal_id=case_id).analyses
 
-    # mock update_analysis_statusdb so we can assert is was called
-    mocker.patch.object(AnalysisAPI, "update_analysis_statusdb")
+    # mock update_analysis_as_completed_statusdb so we can assert is was called
+    mocker.patch.object(AnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -177,7 +177,7 @@ def test_store_housekeeper_valid_case(
     assert context.meta_apis["analysis_api"].housekeeper_api.bundle(case_id)
 
     # THEN the analysis should be updated in StatusDB
-    AnalysisAPI.update_analysis_statusdb.assert_called_with(
+    AnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
         case_id=case_id, comment=ANY, dry_run=False, force=False
     )
 
@@ -210,8 +210,8 @@ def test_valid_case_already_added(
     # GIVEN that case is not already stored in StatusDB
     assert not context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
-    # mock update_analysis_statusdb so we can assert is was called
-    mocker.patch.object(AnalysisAPI, "update_analysis_statusdb")
+    # mock update_analysis_as_completed_statusdb so we can assert is was called
+    mocker.patch.object(AnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -235,7 +235,7 @@ def test_valid_case_already_added(
     assert "Bundle already added" in caplog.text
 
     # THEN the analysis should be updated in StatusDB
-    AnalysisAPI.update_analysis_statusdb.assert_called_with(
+    AnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
         case_id=case_id, comment=ANY, dry_run=False, force=False
     )
 
@@ -265,8 +265,8 @@ def test_dry_run(
     context.housekeeper_api_ = real_housekeeper_api
     context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
-    # mock update_analysis_statusdb so we can assert is was called correctly
-    mocker.patch.object(AnalysisAPI, "update_analysis_statusdb")
+    # mock update_analysis_as_completed_statusdb so we can assert is was called correctly
+    mocker.patch.object(AnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -288,7 +288,7 @@ def test_dry_run(
     assert "Dry-run: Housekeeper changes will not be commited" in caplog.text
     assert not context.housekeeper_api.bundle(case_id)
 
-    # THEN update_analysis_statusdb should be called with dry_run=TRUE
-    AnalysisAPI.update_analysis_statusdb.assert_called_with(
+    # THEN update_analysis_as_completed_statusdb should be called with dry_run=TRUE
+    AnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
         case_id=case_id, comment=ANY, dry_run=True, force=False
     )

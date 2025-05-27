@@ -63,7 +63,7 @@ def test_cli_store(
     FluffyAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
 
     # Mock the method that updates the analysis in status db
-    mocker.patch.object(FluffyAnalysisAPI, "update_analysis_statusdb")
+    mocker.patch.object(FluffyAnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # GIVEN Hermes parses deliverables and generates a valid response
     mocker.patch.object(HermesApi, "create_housekeeper_bundle")
@@ -79,7 +79,7 @@ def test_cli_store(
     assert "stored in Housekeeper" in caplog.text
 
     # THEN the analysis should be updated in status db
-    FluffyAnalysisAPI.update_analysis_statusdb.assert_called_with(
+    FluffyAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
         case_id=fluffy_case_id_existing,
         comment=ANY,
         dry_run=False,
@@ -152,7 +152,7 @@ def test_cli_store_available_case_is_running(
     FluffyAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
 
     # Mock the method that updates the analysis in status db
-    mocker.patch.object(FluffyAnalysisAPI, "update_analysis_statusdb")
+    mocker.patch.object(FluffyAnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # GIVEN Hermes parses deliverables and generates a valid response
     mocker.patch.object(HermesApi, "create_housekeeper_bundle")
@@ -171,7 +171,7 @@ def test_cli_store_available_case_is_running(
     assert fluffy_case_id_existing in caplog.text
 
     # THEN the analysis should be updated in status db
-    FluffyAnalysisAPI.update_analysis_statusdb.assert_called_with(
+    FluffyAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
         case_id=fluffy_case_id_existing,
         comment=ANY,
         dry_run=False,

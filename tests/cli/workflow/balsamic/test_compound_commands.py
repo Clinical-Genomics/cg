@@ -70,7 +70,7 @@ def test_store(
     case_id = "balsamic_case_wgs_single"
 
     # Set up a mock in the AnalysisAPI so that we can confirm it was called
-    mocker.patch.object(AnalysisAPI, "update_analysis_statusdb")
+    mocker.patch.object(AnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # Set Housekeeper to an empty real Housekeeper store
     balsamic_context.housekeeper_api_ = real_housekeeper_api
@@ -95,7 +95,7 @@ def test_store(
     assert balsamic_context.housekeeper_api.bundle(case_id)
 
     # THEN the analysis was updated in status DB
-    AnalysisAPI.update_analysis_statusdb.assert_called_with(
+    AnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
         case_id=case_id, comment=ANY, dry_run=False, force=False
     )
 
@@ -199,7 +199,7 @@ def test_store_available(
     case_id_fail = "balsamic_case_wgs_paired"
 
     # Set up a mock in the AnalysisAPI so that we can confirm it was called
-    mocker.patch.object(AnalysisAPI, "update_analysis_statusdb")
+    mocker.patch.object(AnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # Ensure the config is mocked for fail case to run compound command
     Path.mkdir(
@@ -244,7 +244,7 @@ def test_store_available(
     assert case_id_success in caplog.text
 
     # THEN the analysis of the successful case was updated in status DB
-    AnalysisAPI.update_analysis_statusdb.assert_called_once_with(
+    AnalysisAPI.update_analysis_as_completed_statusdb.assert_called_once_with(
         case_id=case_id_success, comment=ANY, dry_run=False, force=False
     )
 

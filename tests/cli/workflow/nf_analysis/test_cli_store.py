@@ -58,8 +58,8 @@ def test_store_success(
     # GIVEN that the analysis is not already stored in status_db
     assert not context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
-    # mock update_analysis_statusdb so we can assert is was called
-    mocker.patch.object(NfAnalysisAPI, "update_analysis_statusdb")
+    # mock update_analysis_as_completed_statusdb so we can assert is was called
+    mocker.patch.object(NfAnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -78,7 +78,7 @@ def test_store_success(
     assert context.housekeeper_api.bundle(case_id)
 
     # THEN the analysis should be updated in StatusDB
-    NfAnalysisAPI.update_analysis_statusdb.assert_called_with(
+    NfAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
         case_id=case_id, comment=ANY, dry_run=False, force=False
     )
 
@@ -149,8 +149,8 @@ def test_store_available_success(
     request.getfixturevalue(f"{workflow}_mock_deliverable_dir")
     request.getfixturevalue(f"{workflow}_mock_analysis_finish")
 
-    # mock update_analysis_statusdb so we can assert is was called
-    mocker.patch.object(NfAnalysisAPI, "update_analysis_statusdb")
+    # mock update_analysis_as_completed_statusdb so we can assert is was called
+    mocker.patch.object(NfAnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # GIVEN that the Housekeeper store is empty
     context.housekeeper_api_ = real_housekeeper_api
@@ -177,7 +177,7 @@ def test_store_available_success(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN the analysis should be updated in StatusDB
-    NfAnalysisAPI.update_analysis_statusdb.assert_called_with(
+    NfAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
         case_id=case_id, comment=ANY, dry_run=False, force=False
     )
 
@@ -214,8 +214,8 @@ def test_store_available_fail(
     context.housekeeper_api_ = real_housekeeper_api
     context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
-    # mock update_analysis_statusdb so we can assert is was called
-    mocker.patch.object(NfAnalysisAPI, "update_analysis_statusdb")
+    # mock update_analysis_as_completed_statusdb so we can assert is was called
+    mocker.patch.object(NfAnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -246,6 +246,6 @@ def test_store_available_fail(
     assert context.housekeeper_api.bundle(case_id)
 
     # THEN only the analysis of the successful casae should be updated in StatusDB
-    NfAnalysisAPI.update_analysis_statusdb.assert_called_once_with(
+    NfAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_once_with(
         case_id=case_id, comment=ANY, dry_run=False, force=False
     )

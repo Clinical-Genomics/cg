@@ -156,6 +156,7 @@ def run(
         return
 
     try:
+        analysis_api.set_statusdb_action(case_id=case_id, action="running")
         analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
         analysis_api.on_analysis_started(case_id)
     except Exception as error:

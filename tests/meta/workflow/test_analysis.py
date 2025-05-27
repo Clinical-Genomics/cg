@@ -827,40 +827,42 @@ def test_on_analysis_started_sets_the_case_action_to_running(
     )
 
 
-def test_update_analysis_statusdb_no_analysis_fails(
+def test_update_analysis_as_completed_statusdb_no_analysis_fails(
     analysis_config: CGConfig, case_mock: Case, status_db_mock: Store
 ):
-    """Test that update_analysis_statusdb fails if no analysis is found in the status db."""
+    """Test that update_analysis_as_completed_statusdb fails if no analysis is found in the status db."""
     # GIVEN an analysis api and a case with no analyses in StatusDB
     analysis_api = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
     case_mock.analyses = []
 
-    # WHEN update_analysis_statusdb is called
+    # WHEN update_analysis_as_completed_statusdb is called
     with pytest.raises(AnalysisDoesNotExistError):
         # THEN it raises an AnalysisDoesNotExistError
-        analysis_api.update_analysis_statusdb(case_id=case_mock.internal_id)
+        analysis_api.update_analysis_as_completed_statusdb(case_id=case_mock.internal_id)
 
 
-def test_update_analysis_statusdb_analysis_already_completed(
+def test_update_analysis_as_completed_statusdb_analysis_already_completed(
     analysis_config: CGConfig, case_mock: Case, status_db_mock: Store
 ):
-    """Test that update_analysis_statusdb fails if the analysis is already completed."""
+    """Test that update_analysis_as_completed_statusdb fails if the analysis is already completed."""
     # GIVEN an analysis api and a case with an analysis in StatusDB
     analysis_api = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
     case_mock.analyses = [create_autospec(Analysis)]
     case_mock.analyses[0].completed_at = datetime.now()
 
-    # WHEN update_analysis_statusdb is called
+    # WHEN update_analysis_as_completed_statusdb is called
     with pytest.raises(AnalysisAlreadyStoredError):
         # THEN it raises an AnalysisAlreadyStoredError
-        analysis_api.update_analysis_statusdb(case_id=case_mock.internal_id, force=False)
+        analysis_api.update_analysis_as_completed_statusdb(
+            case_id=case_mock.internal_id, force=False
+        )
 
 
 @pytest.mark.freeze_time
-def test_update_analysis_statusdb_succeeds(
+def test_update_analysis_as_completed_statusdb_succeeds(
     analysis_config: CGConfig, case_mock: Case, status_db_mock: Store
 ):
-    """Test that update_analysis_statusdb succeeds if the analysis is not completed."""
+    """Test that update_analysis_as_completed_statusdb succeeds if the analysis is not completed."""
     # GIVEN an analysis api and a case with an analysis in StatusDB
     analysis_api = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
     analysis: Analysis = create_autospec(Analysis)
@@ -868,8 +870,8 @@ def test_update_analysis_statusdb_succeeds(
     analysis.completed_at = None
     case_mock.analyses = [analysis]
 
-    # WHEN update_analysis_statusdb is called
-    analysis_api.update_analysis_statusdb(case_id=case_mock.internal_id, force=False)
+    # WHEN update_analysis_as_completed_statusdb is called
+    analysis_api.update_analysis_as_completed_statusdb(case_id=case_mock.internal_id, force=False)
 
     # THEN it updates the analysis completed_at date in StatusDB
     status_db_mock.update_analysis_completed_at.assert_called_with(

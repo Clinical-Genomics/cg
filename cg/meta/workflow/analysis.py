@@ -285,13 +285,21 @@ class AnalysisAPI(MetaAPI):
         self.status_db.commit_to_store()
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
 
-    def update_analysis_statusdb(
+    def update_analysis_as_completed_statusdb(
         self,
         case_id: str,
         comment: str | None = None,
         dry_run: bool = False,
         force: bool = False,
     ) -> None:
+        """Mark the analysis of a case as completed in StatusDB.
+        This implies:
+            - Setting the completed_at date
+            - Adding a comment if provided
+        Raises:
+            AnalysisDoesNotExistError: If no analysis is found for the case.
+            AnalysisAlreadyStoredError: If the analysis is already marked as completed.
+        """
         LOG.info(f"Marking analysis as completed in StatusDB for {case_id}")
         case: Case = self.status_db.get_case_by_internal_id(case_id)
         analysis: Analysis | None = case.analyses[0] if case.analyses else None
@@ -304,19 +312,10 @@ class AnalysisAPI(MetaAPI):
         if dry_run:
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
-        self._update_analysis_as_completed(analysis_id=analysis.id)
-        self._update_analysis_comment(analysis_id=analysis.id, comment=comment)
-
-    def _update_analysis_as_completed(self, analysis_id: int) -> None:
-        """Update the created_at date of the latest analysis of a case."""
-        analysis_completed: datetime = datetime.now()
         self.status_db.update_analysis_completed_at(
-            analysis_id=analysis_id, completed_at=analysis_completed
+            analysis_id=analysis.id, completed_at=datetime.now()
         )
-
-    def _update_analysis_comment(self, analysis_id: int, comment: str | None) -> None:
-        """Update the comment of the latest analysis of a case."""
-        self.status_db.update_analysis_comment(analysis_id=analysis_id, comment=comment)
+        self.status_db.update_analysis_comment(analysis_id=analysis.id, comment=comment)
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         raise NotImplementedError

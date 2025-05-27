@@ -62,8 +62,8 @@ def test_cli_store(
     mocker.patch.object(MipDNAAnalysisAPI, "get_date_from_file_path")
     MipDNAAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
 
-    # mock the update_analysis_statusdb method so we can assert it was called
-    mocker.patch.object(MipDNAAnalysisAPI, "update_analysis_statusdb")
+    # mock the update_analysis_as_completed_statusdb method so we can assert it was called
+    mocker.patch.object(MipDNAAnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # GIVEN Hermes parses deliverables and generates a valid response
     mocker.patch.object(HermesApi, "create_housekeeper_bundle")
@@ -83,7 +83,7 @@ def test_cli_store(
     assert "stored in Housekeeper" in caplog.text
 
     # THEN the analysis was updated in statusdb
-    MipDNAAnalysisAPI.update_analysis_statusdb.assert_called_with(
+    MipDNAAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
         case_id=mip_case_id, comment=ANY, dry_run=False, force=False
     )
 
@@ -158,8 +158,8 @@ def test_cli_store_available_case_is_running(
     mocker.patch.object(MipDNAAnalysisAPI, "get_date_from_file_path")
     MipDNAAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
 
-    # mock the update_analysis_statusdb method so we can assert it was called
-    mocker.patch.object(MipDNAAnalysisAPI, "update_analysis_statusdb")
+    # mock the update_analysis_as_completed_statusdb method so we can assert it was called
+    mocker.patch.object(MipDNAAnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # GIVEN Hermes parses deliverables and generates a valid response
     mocker.patch.object(HermesApi, "create_housekeeper_bundle")
@@ -188,7 +188,7 @@ def test_cli_store_available_case_is_running(
     assert mip_case_id in caplog.text
 
     # THEN the analysis was updated in statusdb
-    MipDNAAnalysisAPI.update_analysis_statusdb.assert_called_with(
+    MipDNAAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
         case_id=mip_case_id, comment=ANY, dry_run=False, force=False
     )
 

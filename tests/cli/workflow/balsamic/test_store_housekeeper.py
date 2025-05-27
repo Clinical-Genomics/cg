@@ -143,7 +143,7 @@ def test_valid_case(
     # Make sure  analysis not alredy stored in StatusDB
     assert not balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
-    mocker.patch.object(AnalysisAPI, "update_analysis_statusdb")
+    mocker.patch.object(AnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -157,7 +157,7 @@ def test_valid_case(
     assert "Analysis successfully stored in Housekeeper" in caplog.text
     assert balsamic_context.meta_apis["analysis_api"].housekeeper_api.bundle(case_id)
 
-    AnalysisAPI.update_analysis_statusdb.assert_called_with(
+    AnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
         case_id=case_id, comment=ANY, dry_run=False, force=False
     )
 

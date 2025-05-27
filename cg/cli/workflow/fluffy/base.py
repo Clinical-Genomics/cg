@@ -81,7 +81,7 @@ def run(
         analysis_api.on_analysis_started(case_id)
         LOG.info(f"Submitted case {case_id} to Trailblazer!")
     except Exception as error:
-        LOG.error(f"Database error, unable to update analysis for case {case_id}: {error}")
+        LOG.error(f"Error trying to update analysis for case {case_id}: {error}")
 
 
 @fluffy.command()
