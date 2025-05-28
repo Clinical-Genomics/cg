@@ -106,7 +106,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         ]
 
         for case in selected_cases:
-            LOG.debug(f"Setting case {case.internal_id} to analyse.")
+            LOG.debug(f"Going to start analysis for case {case.internal_id}.")
 
         return selected_cases
 

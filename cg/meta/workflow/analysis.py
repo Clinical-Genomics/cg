@@ -142,7 +142,7 @@ class AnalysisAPI(MetaAPI):
         for case in cases_to_analyse:
             if SequencingQCService.case_pass_sequencing_qc(case):
                 cases_passing_quality_check.append(case)
-                LOG.debug(f"Setting case {case.internal_id} to analyse.")
+                LOG.debug(f"Going to start analysis for case {case.internal_id}.")
 
         return cases_passing_quality_check
 

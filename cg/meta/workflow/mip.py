@@ -261,7 +261,7 @@ class MipAnalysisAPI(AnalysisAPI):
             : MAX_CASES_TO_START_IN_50_MINUTES if limit is None else limit
         ]
         for case in selected_cases:
-            LOG.debug(f"Selected case {case.internal_id} to analyse.")
+            LOG.debug(f"Going to start analysis for case {case.internal_id}.")
 
         return selected_cases
 
