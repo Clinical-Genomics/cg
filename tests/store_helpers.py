@@ -341,6 +341,7 @@ class StoreHelpers:
         store: Store,
         case: Case = None,
         started_at: datetime = None,
+        created_at: datetime = None,
         completed_at: datetime = None,
         uploaded_at: datetime = None,
         upload_started: datetime = None,
@@ -366,6 +367,8 @@ class StoreHelpers:
             analysis.completed_at = completed_at
         if uploaded_at:
             analysis.uploaded_at = uploaded_at
+        if created_at:
+            analysis.created_at = created_at
         if delivery_reported_at:
             analysis.delivery_report_created_at = delivery_reported_at
         if cleaned_at:

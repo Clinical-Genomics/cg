@@ -412,6 +412,64 @@ def test_one_of_one_sequenced_samples(
     assert test_case in cases
 
 
+def test_microsalt_top_up_analyses(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
+):
+    """Tests the functionality that a micrSALT case should be analysed again if a sample has newer data."""
+    # GIVEN a microSALT case
+    microsalt_case: Case = helpers.add_case(base_store, data_analysis=Workflow.MICROSALT)
+
+    # Given it has two samples, one sequenced yesterday and one today
+    sample_1: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_yesterday)
+    sample_2: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_now)
+    helpers.relate_samples(base_store=base_store, case=microsalt_case, samples=[sample_1, sample_2])
+
+    # Given that the case was analysed yesterday
+    helpers.add_analysis(
+        store=base_store,
+        case=microsalt_case,
+        created_at=timestamp_yesterday,
+        started_at=timestamp_yesterday,
+        completed_at=timestamp_yesterday,
+        workflow=Workflow.MICROSALT,
+    )
+
+    # When getting cases to analyze
+    cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.MICROSALT)
+
+    # Then the case should be returned
+    assert microsalt_case in cases
+
+
+def test_top_up_analyses(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
+):
+    """Tests the functionality that a non-microSALT cases should not start with new data if they have already been analysed."""
+    # GIVEN a non-microSALT case
+    case: Case = helpers.add_case(base_store, data_analysis=Workflow.BALSAMIC)
+
+    # Given it has two samples, one sequenced yesterday and one today
+    sample_1: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_yesterday)
+    sample_2: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_now)
+    helpers.relate_samples(base_store=base_store, case=case, samples=[sample_1, sample_2])
+
+    # Given that the case was analysed yesterday
+    helpers.add_analysis(
+        store=base_store,
+        case=case,
+        created_at=timestamp_yesterday,
+        started_at=timestamp_yesterday,
+        completed_at=timestamp_yesterday,
+        workflow=Workflow.BALSAMIC,
+    )
+
+    # When getting cases to analyze
+    cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.BALSAMIC)
+
+    # Then the case should not be returned
+    assert case not in cases
+
+
 def test_get_analyses_for_workflow_before(
     store_with_analyses_for_cases_not_uploaded_fluffy: Store,
     timestamp_now: datetime,
