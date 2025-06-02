@@ -487,7 +487,6 @@ class InvoiceView(BaseView):
 class AnalysisView(BaseView):
     """Admin view for Model.Analysis"""
 
-    column_list = ("trailblazer_id",)
     column_default_sort = ("created_at", True)
     column_editable_list = ["is_primary", "comment"]
     column_filters = ["workflow", "workflow_version", "is_primary"]
