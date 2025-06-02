@@ -189,7 +189,7 @@ class MutantAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
         else:
-            LOG.debug("Running MUTANT")
+            LOG.debug("Mocking MUTANT!!")
             self.process.run_command(
                 [
                     "--help",
