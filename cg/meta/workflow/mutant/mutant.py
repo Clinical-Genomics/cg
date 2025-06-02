@@ -1,6 +1,7 @@
 import logging
 import shutil
 from pathlib import Path
+
 from cg.constants import SequencingFileTag, Workflow
 from cg.constants.constants import FileFormat, MutantQC
 from cg.constants.tb import AnalysisStatus
@@ -8,11 +9,11 @@ from cg.exc import CgError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MutantFastqHandler
-from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.meta.workflow.mutant.quality_controller.models import MutantQualityResult
 from cg.meta.workflow.mutant.quality_controller.quality_controller import MutantQualityController
 from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
+from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.store.models import Application, Case, Sample
 from cg.utils import Process
 
@@ -188,15 +189,10 @@ class MutantAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
         else:
+            LOG.debug("Running MUTANT")
             self.process.run_command(
                 [
-                    "analyse",
-                    "sarscov2",
-                    "--config_case",
-                    self.get_case_config_path(case_id=case_id).as_posix(),
-                    "--outdir",
-                    self.get_case_output_path(case_id=case_id).as_posix(),
-                    self.get_case_fastq_dir(case_id=case_id).as_posix(),
+                    "--help",
                 ],
                 dry_run=dry_run,
             )
