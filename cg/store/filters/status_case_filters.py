@@ -99,15 +99,15 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
     """
     return cases.filter(
         or_(
-            # Overriding state: Analyse no matter what. Set for external and decompressed data
+            # Overriding state: Analyse no matter what
             Case.action == CaseActions.ANALYZE,
-            # Data just demultiplexed (new data or data retrieved from PDC)
+            # Case has not been analysed before
             and_(
                 Application.is_external.isnot(True),
                 Case.action.is_(None),
                 Analysis.created_at.is_(None),
             ),
-            # Existing cases that receive new data from sequencing
+            # Case contains new data that has not been analysed. (Only relevant for microSALT)
             and_(
                 Case.action.is_(None),
                 Analysis.created_at < Sample.last_sequenced_at,
