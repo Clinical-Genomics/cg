@@ -709,7 +709,7 @@ def test_get_trailblazer_priority(
 @pytest.fixture
 def patch_abstract_methods(mocker):
     mocker.patch.object(AnalysisAPI, "get_job_ids_path", return_value=Path("/job/ids/path"))
-    mocker.patch.object(AnalysisAPI, "get_workflow_version", return_value="0.0.0.0")
+    mocker.patch.object(AnalysisAPI, "get_workflow_version", return_value="0.0.0")
 
 
 @pytest.fixture
