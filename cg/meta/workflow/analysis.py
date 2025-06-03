@@ -31,6 +31,7 @@ from cg.exc import (
     AnalysisDoesNotExistError,
     AnalysisNotReadyError,
     BundleAlreadyAddedError,
+    CaseNotFoundError,
     CgDataError,
     CgError,
 )
@@ -151,7 +152,7 @@ class AnalysisAPI(MetaAPI):
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         return case.slurm_priority
 
-    def get_trailblazer_priority(self, case_id: str) -> int:
+    def get_trailblazer_priority(self, case_id: str) -> TrailblazerPriority:
         """Get the priority for the case in Trailblazer."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         priority: Priority = case.priority
@@ -267,14 +268,12 @@ class AnalysisAPI(MetaAPI):
             f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
         )
 
-    def _create_analysis_statusdb(self, case_id: str, trailblazer_id: int | None) -> None:
+    def _create_analysis_statusdb(self, case: Case, trailblazer_id: int | None) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
-        LOG.info(f"Storing analysis in StatusDB for {case_id}")
-        case: Case | None = self.status_db.get_case_by_internal_id(case_id)
-        is_primary: bool = (len(case.analyses) == 0) if case else False
-
+        LOG.info(f"Storing analysis in StatusDB for {case.internal_id}")
+        is_primary: bool = len(case.analyses) == 0
         analysis_start: datetime = datetime.now()
-        workflow_version: str = self.get_workflow_version(case_id)
+        workflow_version: str = self.get_workflow_version(case.internal_id)
         new_analysis: Analysis = self.status_db.add_analysis(
             workflow=self.workflow,
             version=workflow_version,
@@ -283,11 +282,10 @@ class AnalysisAPI(MetaAPI):
             started_at=analysis_start,
             trailblazer_id=trailblazer_id,
         )
-        if case:
-            new_analysis.case = case
+        new_analysis.case = case
         self.status_db.add_item_to_store(new_analysis)
         self.status_db.commit_to_store()
-        LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
+        LOG.info(f"Analysis successfully stored in StatusDB: {case.internal_id} : {analysis_start}")
 
     def update_analysis_as_completed_statusdb(
         self,
@@ -329,25 +327,25 @@ class AnalysisAPI(MetaAPI):
 
     def _add_pending_trailblazer_analysis(
         self,
-        case_id: str,
+        case: Case,
         tower_workflow_id: str | None = None,
     ) -> TrailblazerAnalysis:
-        self.check_analysis_ongoing(case_id)
-        analysis_type: str = self.get_analysis_type(
-            self.status_db.get_case_by_internal_id(case_id).links[0].sample
-        )
-        config_path: str = self.get_job_ids_path(case_id).as_posix()
+        self.check_analysis_ongoing(case.internal_id)
+
+        analysis_type: str = self.get_analysis_type(case.links[0].sample)
+        config_path: str = self.get_job_ids_path(case.internal_id).as_posix()
         email: str = environ_email()
-        order_id: int = self._get_order_id_from_case_id(case_id)
-        out_dir: str = self.get_job_ids_path(case_id).parent.as_posix()
-        priority: TrailblazerPriority = self.get_trailblazer_priority(case_id)
-        ticket: str = self.status_db.get_latest_ticket_from_case(case_id)
+        order_id: int = self._get_order_id_from_case_id(case.internal_id)
+        out_dir: str = self.get_job_ids_path(case.internal_id).parent.as_posix()
+        priority: TrailblazerPriority = self.get_trailblazer_priority(case.internal_id)
+        ticket: str = self.status_db.get_latest_ticket_from_case(case.internal_id)
         workflow: Workflow = self.workflow
         workflow_manager: str = self.get_workflow_manager()
-        is_case_for_development: bool = self._is_case_for_development(case_id)
+        is_case_for_development: bool = self._is_case_for_development(case.internal_id)
+
         tb_analysis: TrailblazerAnalysis = self.trailblazer_api.add_pending_analysis(
             analysis_type=analysis_type,
-            case_id=case_id,
+            case_id=case.internal_id,
             config_path=config_path,
             email=email,
             order_id=order_id,
@@ -359,7 +357,8 @@ class AnalysisAPI(MetaAPI):
             tower_workflow_id=tower_workflow_id,
             is_hidden=is_case_for_development,
         )
-        LOG.info(f"Submitted case {case_id} to Trailblazer")
+
+        LOG.info(f"Submitted case {case.internal_id} to Trailblazer")
         return tb_analysis
 
     def _is_case_for_development(self, case_id: str) -> bool:
@@ -787,11 +786,16 @@ class AnalysisAPI(MetaAPI):
         raise NotImplementedError
 
     def on_analysis_started(self, case_id: str, tower_workflow_id: str | None = None):
+        if (case := self.status_db.get_case_by_internal_id(case_id)) is None:
+            raise CaseNotFoundError(
+                f"Failed to create analysis in Trailblazer and StatusDB, case {case_id} not found in StatusDB"
+            )
+
         trailblazer_analysis: TrailblazerAnalysis = self._add_pending_trailblazer_analysis(
-            case_id=case_id, tower_workflow_id=tower_workflow_id
+            case=case, tower_workflow_id=tower_workflow_id
         )
 
-        self._create_analysis_statusdb(case_id=case_id, trailblazer_id=trailblazer_analysis.id)
+        self._create_analysis_statusdb(case=case, trailblazer_id=trailblazer_analysis.id)
         self.set_statusdb_action(case_id=case_id, action=CaseActions.RUNNING)
 
     def get_data_analysis_type(self, case_id: str) -> str | None:

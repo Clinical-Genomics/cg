@@ -14,7 +14,13 @@ from cg.constants import GenePanelMasterList, Priority, SequencingRunDataAvailab
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import CaseActions, ControlOptions, Workflow
 from cg.constants.priority import SlurmQos, TrailblazerPriority
-from cg.exc import AnalysisAlreadyStoredError, AnalysisDoesNotExistError, AnalysisNotReadyError
+from cg.exc import (
+    AnalysisAlreadyStoredError,
+    AnalysisDoesNotExistError,
+    AnalysisNotReadyError,
+    CaseNotFoundError,
+    CgError,
+)
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -808,6 +814,21 @@ def test_on_analysis_started_creates_an_analysis_in_status_db(
     )
     status_db_mock.add_item_to_store.assert_called_with(new_analysis)
     assert new_analysis.case == case_mock
+
+
+@pytest.mark.usefixtures("patch_abstract_methods")
+def test_on_analysis_started_throws_when_case_was_not_found(
+    analysis_config: CGConfig, case_mock: Case, status_db_mock: Store
+):
+    # GIVEN the case can't be found in StatusDB
+    status_db_mock.get_case_by_internal_id = Mock(return_value=None)
+    # GIVEN an analysis api
+    analysis_api: AnalysisAPI = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
+
+    # WHEN on_analysis_started is called
+    with pytest.raises(CaseNotFoundError):
+        # THEN it raises a CaseNotFoundError
+        analysis_api.on_analysis_started(case_id=case_mock.internal_id)
 
 
 @pytest.mark.usefixtures("patch_abstract_methods")
