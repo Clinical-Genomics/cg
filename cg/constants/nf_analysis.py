@@ -20,6 +20,10 @@ NALLO_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "predicted_sex_sex_check": {"norm": "eq", "threshold": None},
 }
 
+NALLO_PARENT_PEDDY_METRIC_CONDITION: dict[str, dict[str, Any]] = {
+    "parent_error_ped_check": {"norm": "eq", "threshold": "False"},
+}
+
 RAREDISEASE_PREDICTED_SEX_METRIC = "predicted_sex_sex_check"
 
 RAREDISEASE_METRIC_CONDITIONS_WES: dict[str, dict[str, Any]] = {
