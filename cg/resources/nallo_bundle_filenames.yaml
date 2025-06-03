@@ -84,6 +84,21 @@
   step: somalier
   tag: relate_samples
 - format: meta
+  id: CASEID
+  path: PATHTOCASE/qc/peddy/CASEID/CASEID.peddy.ped
+  step: peddy
+  tag: peddy
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/qc/peddy/CASEID/CASEID.sex_check.csv
+  step: peddy
+  tag: sex_check
+- format: meta
+  id: CASEID
+  path: PATHTOCASE/qc/peddy/CASEID/CASEID.ped_check.csv
+  step: peddy
+  tag: ped_check
+- format: meta
   id: SAMPLEID
   path: PATHTOCASE/qc/deepvariant_vcfstatsreport/SAMPLEID/SAMPLEID.visual_report.html
   step: deepvariant
@@ -115,22 +130,22 @@
   tag: vcf_index
 - format: vcf
   id: SAMPLEID
-  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_sorted.vcf.gz
+  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_trgt.vcf.gz
   step: sorted_repeats
   tag: vcf_str
 - format: vcf
   id: SAMPLEID
-  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_sorted.vcf.gz.tbi
+  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_trgt.vcf.gz.tbi
   step: sorted_repeats
   tag: vcf_str_index
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_spanning_sorted.bam
+  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_spanning_trgt.bam
   step: spanning_repeats
   tag: bam
 - format: bam
   id: SAMPLEID
-  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_spanning_sorted.bam.bai
+  path: PATHTOCASE/repeats/sample/SAMPLEID/SAMPLEID_spanning_trgt.bam.bai
   step: spanning_repeats
   tag: bam_index
 - format: vcf
@@ -165,16 +180,6 @@
   tag: vcf_snv_clinical_index
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_filtered.vcf.gz
-  step: snv_annotated_filtered
-  tag: vcf_snv_clinical
-- format: vcf
-  id: CASEID
-  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_filtered.vcf.gz.tbi
-  step: snv_annotated_filtered
-  tag: vcf_snv_clinical_index
-- format: vcf
-  id: CASEID
   path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked.vcf.gz
   step: sv_annotated_ranked
   tag: vcf_sv_research
@@ -193,6 +198,36 @@
   path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked_filtered.vcf.gz.tbi
   step: sv_annotated_ranked_filtered
   tag: vcf_sv_clinical_index
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_hificnv_cnvs_merged.vcf.gz
+  step: svs_per_caller
+  tag: vcf_hificnv
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_hificnv_cnvs_merged.vcf.gz.tbi
+  step: svs_per_caller
+  tag: vcf_hificnv_index
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_severus_svs_merged.vcf.gz
+  step: svs_per_caller
+  tag: vcf_severus
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_severus_svs_merged.vcf.gz.tbi
+  step: svs_per_caller
+  tag: vcf_severus_index
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_sniffles_svs_merged.vcf.gz
+  step: svs_per_caller
+  tag: vcf_sniffles
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_sniffles_svs_merged.vcf.gz.tbi
+  step: svs_per_caller
+  tag: vcf_sniffles_index
 - format: meta
   id: SAMPLEID
   path: PATHTOCASE/visualization_tracks/SAMPLEID/SAMPLEID_hificnv.copynum.bedgraph

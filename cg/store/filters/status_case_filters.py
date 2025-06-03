@@ -6,12 +6,7 @@ from sqlalchemy import and_, not_, or_
 from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
-from cg.constants.constants import (
-    CaseActions,
-    DataDelivery,
-    SequencingQCStatus,
-    Workflow,
-)
+from cg.constants.constants import CaseActions, DataDelivery, SequencingQCStatus, Workflow
 from cg.constants.observations import (
     LOQUSDB_CANCER_SEQUENCING_METHODS,
     LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
@@ -104,16 +99,21 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
     """
     return cases.filter(
         or_(
+            # Overriding state: Analyse no matter what
             Case.action == CaseActions.ANALYZE,
+            # Case has not been analysed before
             and_(
                 Application.is_external.isnot(True),
                 Case.action.is_(None),
                 Analysis.created_at.is_(None),
             ),
+            # Case contains new data that has not been analysed. (Only relevant for microSALT)
             and_(
                 Case.action.is_(None),
                 Analysis.created_at < Sample.last_sequenced_at,
             ),
+            # Cases manually set to top-up by production that get the new data
+            and_(Case.action == CaseActions.TOP_UP, Analysis.created_at < Sample.last_sequenced_at),
         )
     )
 

@@ -108,6 +108,11 @@ class BalsamicAnalysisTag:
     QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
 
 
+class NalloAnalysisTag:
+    HAPLOTAGS: str = "haplotags"
+    PARAPHASE: str = "paraphase"
+
+
 class HkAnalysisMetricsTag:
     QC_METRICS: set[str] = {"qc-metrics", "deliverable"}
 

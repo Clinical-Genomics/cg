@@ -227,9 +227,7 @@ def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
     helpers.add_analysis(store=sample_store)
 
     # WHEN fetching all analyses that are ready for upload
-    records: list[Analysis] = [
-        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload()
-    ]
+    records: list[Analysis] = [analysis for analysis in sample_store.get_analyses_to_upload()]
 
     # THEN no analysis object should be returned since they did not have a completed_at entry
     assert len(records) == 0
@@ -242,7 +240,7 @@ def test_analyses_to_upload_when_no_workflow(helpers, sample_store, timestamp):
 
     # WHEN fetching all analysis that are ready for upload without specifying workflow
     records: list[Analysis] = [
-        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=None)
+        analysis for analysis in sample_store.get_analyses_to_upload(workflow=None)
     ]
 
     # THEN one analysis object should be returned
@@ -256,7 +254,7 @@ def test_analyses_to_upload_when_analysis_has_workflow(helpers, sample_store, ti
 
     # WHEN fetching all analyses that are ready for upload and analysed with MIP
     records: list[Analysis] = [
-        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=None)
+        analysis for analysis in sample_store.get_analyses_to_upload(workflow=None)
     ]
 
     # THEN one analysis object should be returned
@@ -271,12 +269,12 @@ def test_analyses_to_upload_when_filtering_with_workflow(helpers, sample_store, 
 
     # WHEN fetching all workflows that are analysed with MIP
     records: list[Analysis] = [
-        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=workflow)
+        analysis for analysis in sample_store.get_analyses_to_upload(workflow=workflow)
     ]
 
-    for analysis_obj in records:
+    for analysis in records:
         # THEN the workflow should be MIP in the analysis object
-        assert analysis_obj.workflow == workflow
+        assert analysis.workflow == workflow
 
 
 def test_analyses_to_upload_with_workflow_and_no_complete_at(helpers, sample_store, timestamp):
@@ -287,7 +285,7 @@ def test_analyses_to_upload_with_workflow_and_no_complete_at(helpers, sample_sto
 
     # WHEN fetching all analyses that are ready for upload and analysed by MIP
     records: list[Analysis] = [
-        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(workflow=pipeline)
+        analysis for analysis in sample_store.get_analyses_to_upload(workflow=pipeline)
     ]
 
     # THEN no analysis object should be returned since they were not completed
@@ -301,8 +299,7 @@ def test_analyses_to_upload_when_filtering_with_missing_workflow(helpers, sample
 
     # WHEN fetching all analyses that was analysed with MIP
     records: list[Analysis] = [
-        analysis_obj
-        for analysis_obj in sample_store.get_analyses_to_upload(workflow=Workflow.RAW_DATA)
+        analysis for analysis in sample_store.get_analyses_to_upload(workflow=Workflow.RAW_DATA)
     ]
 
     # THEN no analysis object should be returned, since there were no MIP analyses
@@ -317,7 +314,7 @@ def test_set_case_action(analysis_store: Store, case_id):
     assert action is None
 
     # When setting the case to "analyze"
-    analysis_store.set_case_action(case_internal_id=case_id, action="analyze")
+    analysis_store.update_case_action(case_internal_id=case_id, action="analyze")
     new_action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
 
     # Then the action should be set to analyze
@@ -523,11 +520,13 @@ def test_get_analysis_by_case_entry_id_and_started_at(
 ):
     """Test returning an analysis using a date."""
     # GIVEN a case with an analysis with a start date in the database
-    analysis = helpers.add_analysis(store=sample_store, started_at=timestamp_now)
+    analysis = helpers.add_analysis(
+        store=sample_store, started_at=timestamp_now, completed_at=timestamp_now
+    )
     assert analysis.started_at
 
     # WHEN getting analysis via case_id and start date
-    db_analysis = sample_store.get_analysis_by_case_entry_id_and_started_at(
+    db_analysis = sample_store.get_completed_analysis_by_case_entry_id_and_started_at(
         case_entry_id=analysis.case.id, started_at_date=analysis.started_at
     )
 

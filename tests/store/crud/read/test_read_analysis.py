@@ -412,53 +412,6 @@ def test_one_of_one_sequenced_samples(
     assert test_case in cases
 
 
-def test_get_analyses_for_case_and_workflow_before(
-    store_with_analyses_for_cases_not_uploaded_fluffy: Store,
-    timestamp_now: datetime,
-    workflow: Workflow = Workflow.FLUFFY,
-    case_id: str = "yellowhog",
-):
-    """Test to get all analyses before a given date."""
-
-    # GIVEN a database with a number of analyses
-
-    # WHEN getting all analyses before a given date
-    analyses: list[Analysis] = (
-        store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_case_and_workflow_started_at_before(
-            workflow=workflow, started_at_before=timestamp_now, case_internal_id=case_id
-        )
-    )
-
-    # THEN assert that the analyses before the given date are returned
-    for analysis in analyses:
-        assert analysis.started_at < timestamp_now
-        assert analysis.case.internal_id == case_id
-        assert analysis.workflow == workflow
-
-
-def test_get_analyses_for_case_before(
-    store_with_analyses_for_cases_not_uploaded_fluffy: Store,
-    timestamp_now: datetime,
-    case_id: str = "yellowhog",
-):
-    """Test to get all analyses before a given date."""
-
-    # GIVEN a database with a number of analyses
-
-    # WHEN getting all analyses before a given date
-    analyses: list[Analysis] = (
-        store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_case_started_at_before(
-            case_internal_id=case_id,
-            started_at_before=timestamp_now,
-        )
-    )
-
-    # THEN assert that the analyses before the given date are returned
-    for analysis in analyses:
-        assert analysis.started_at < timestamp_now
-        assert analysis.case.internal_id == case_id
-
-
 def test_get_analyses_for_workflow_before(
     store_with_analyses_for_cases_not_uploaded_fluffy: Store,
     timestamp_now: datetime,
@@ -470,7 +423,7 @@ def test_get_analyses_for_workflow_before(
 
     # WHEN getting all analyses before a given date
     analyses: list[Analysis] = (
-        store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_workflow_started_at_before(
+        store_with_analyses_for_cases_not_uploaded_fluffy.get_completed_analyses_for_workflow_started_at_before(
             workflow=workflow, started_at_before=timestamp_now
         )
     )
@@ -479,26 +432,6 @@ def test_get_analyses_for_workflow_before(
     for analysis in analyses:
         assert analysis.started_at < timestamp_now
         assert analysis.workflow == workflow
-
-
-def test_get_analyses_before(
-    store_with_analyses_for_cases_not_uploaded_fluffy: Store,
-    timestamp_now: datetime,
-):
-    """Test to get all analyses for a workflow before a given date."""
-
-    # GIVEN a database with a number of analyses
-
-    # WHEN getting all analyses before a given date
-    analyses: list[Analysis] = (
-        store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_started_at_before(
-            started_at_before=timestamp_now
-        )
-    )
-
-    # THEN assert that the analyses before the given date are returned
-    for analysis in analyses:
-        assert analysis.started_at < timestamp_now
 
 
 def test_get_analysis_by_entry_id(

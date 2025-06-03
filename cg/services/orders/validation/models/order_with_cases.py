@@ -4,6 +4,7 @@ from typing_extensions import Annotated
 from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.discriminators import has_internal_id
 from cg.services.orders.validation.models.existing_case import ExistingCase
+from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.sample import Sample
 
@@ -40,4 +41,12 @@ class OrderWithCases(Order):
             (case_index, sample_index, sample)
             for case_index, case in self.enumerated_new_cases
             for sample_index, sample in case.enumerated_new_samples
+        ]
+
+    @property
+    def enumerated_existing_samples(self) -> list[tuple[int, int, ExistingSample]]:
+        return [
+            (case_index, sample_index, sample)
+            for case_index, case in self.enumerated_new_cases
+            for sample_index, sample in case.enumerated_existing_samples
         ]

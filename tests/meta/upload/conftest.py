@@ -14,7 +14,6 @@ from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
-
 from tests.store_helpers import StoreHelpers
 
 
@@ -44,7 +43,7 @@ def upload_genotypes_hk_bundle(
 
 
 @pytest.fixture
-def analysis_obj(
+def analysis(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers: StoreHelpers
 ) -> Analysis:
     """Return an analysis object with a trio."""

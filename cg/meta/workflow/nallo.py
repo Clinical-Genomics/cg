@@ -2,24 +2,25 @@
 
 import logging
 from pathlib import Path
+from typing import Any
 
 from click import File
 
 from cg.clients.chanjo2.models import (
     CoverageMetrics,
     CoveragePostRequest,
-    CoverageSample,
     CoveragePostResponse,
+    CoverageSample,
 )
 from cg.constants import Workflow
-from cg.constants.constants import GenomeVersion, FileFormat
+from cg.constants.constants import FileFormat, GenomeVersion
 from cg.constants.nf_analysis import (
-    NALLO_METRIC_CONDITIONS,
-    NALLO_COVERAGE_THRESHOLD,
-    NALLO_COVERAGE_INTERVAL_TYPE,
     NALLO_COVERAGE_FILE_TAGS,
+    NALLO_COVERAGE_INTERVAL_TYPE,
+    NALLO_COVERAGE_THRESHOLD,
+    NALLO_METRIC_CONDITIONS,
 )
-from cg.constants.scout import ScoutExportFileName, NALLO_CASE_TAGS
+from cg.constants.scout import NALLO_CASE_TAGS, ScoutExportFileName
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.io.controller import WriteFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -28,12 +29,12 @@ from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.nallo.nallo import (
     NalloParameters,
+    NalloQCMetrics,
     NalloSampleSheetEntry,
     NalloSampleSheetHeaders,
-    NalloQCMetrics,
 )
 from cg.resources import NALLO_BUNDLE_FILENAMES_PATH
-from cg.store.models import CaseSample
+from cg.store.models import CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -109,7 +110,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
             raise ValueError(f"{sex} is not a valid sex")
         return code
 
-    def get_built_workflow_parameters(self, case_id: str) -> NalloParameters:
+    def get_built_workflow_parameters(self, case_id: str, dry_run: bool = False) -> NalloParameters:
         """Return parameters."""
         outdir = self.get_case_path(case_id=case_id)
 
@@ -158,8 +159,15 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         """Return Nallo bundle filenames path."""
         return NALLO_BUNDLE_FILENAMES_PATH
 
-    def get_workflow_metrics(self, metric_id: str) -> dict:
-        return NALLO_METRIC_CONDITIONS
+    def get_workflow_metrics(self, sample_id: str) -> dict:
+        sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
+        metric_conditions: dict[str, dict[str, Any]] = NALLO_METRIC_CONDITIONS
+        self.set_order_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
+        return metric_conditions
+
+    @staticmethod
+    def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
+        metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
 
     def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
         """Return the Nallo d4 coverage file path."""

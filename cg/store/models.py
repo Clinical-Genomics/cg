@@ -296,6 +296,7 @@ class Analysis(Base):
     comment: Mapped[Text | None]
     case_id: Mapped[int] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
     case: Mapped["Case"] = orm.relationship(back_populates="analyses")
+    trailblazer_id: Mapped[int | None]
 
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
@@ -601,9 +602,7 @@ class Case(Base, PriorityMixin):
         if links:
             data["links"] = [link_obj.to_dict(samples=True) for link_obj in self.links]
         if analyses:
-            data["analyses"] = [
-                analysis_obj.to_dict(family=False) for analysis_obj in self.analyses
-            ]
+            data["analyses"] = [analysis.to_dict(family=False) for analysis in self.analyses]
         return data
 
 
@@ -848,6 +847,10 @@ class Sample(Base, PriorityMixin):
     @property
     def is_negative_control(self) -> bool:
         return self.control == ControlOptions.NEGATIVE
+
+    @property
+    def is_external(self) -> bool:
+        return self.application_version.application.is_external
 
     @property
     def flow_cells(self) -> list[Flowcell]:
