@@ -99,8 +99,7 @@ ignore = ["E501"]
 
 [tool.vulture]
 min_confidence = 60
-exclude = ["admin.py"]
 ignore_decorators = ["@click.*","*route*","@field_validator*","@model_validator*"]
-ignore_names= ["on_model_change"]
+ignore_names= ["on_model_change","*View(BaseView)"]
 paths = ["cg"]
 sort_by_size = true
