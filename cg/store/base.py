@@ -26,7 +26,6 @@ ModelBase = Base
 
 
 class BaseHandler:
-    """All queries in one base class."""
 
     def __init__(self):
         self.session = get_session()
