@@ -105,9 +105,6 @@ LOG = logging.getLogger(__name__)
 class ReadHandler(BaseHandler):
     """Class for reading items in the database."""
 
-    def __init__(self, session: Session):
-        super().__init__(session=session)
-
     def get_case_by_entry_id(self, entry_id: str) -> Case:
         """Return a case by entry id."""
         cases_query: Query = self._get_query(table=Case)

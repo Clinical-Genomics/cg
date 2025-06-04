@@ -2,8 +2,6 @@
 
 from datetime import datetime
 
-from sqlalchemy.orm import Session
-
 from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import CaseActions, SequencingQCStatus
 from cg.constants.sequencing import Sequencers
@@ -21,10 +19,6 @@ from cg.store.models import (
 
 class UpdateMixin(ReadHandler):
     """Contains methods to update database objects."""
-
-    def __init__(self, session: Session):
-        super().__init__(session=session)
-        self.session = session
 
     def update_sample_comment(self, sample_id: int, comment: str) -> None:
         """Update comment on sample with the provided comment."""

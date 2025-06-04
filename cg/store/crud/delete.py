@@ -1,17 +1,11 @@
 """Handler to delete data objects"""
 
-from sqlalchemy.orm import Session
-
 from cg.store.crud.read import ReadHandler
 from cg.store.models import Case, OrderTypeApplication, Sample
 
 
 class DeleteMixin(ReadHandler):
     """Contains methods to delete business data model instances."""
-
-    def __init__(self, session: Session):
-        super().__init__(session=session)
-        self.session = session
 
     def delete_cases_without_samples(self, case_internal_ids: list[str]) -> None:
         """Delete any cases specified in case_ids without samples."""

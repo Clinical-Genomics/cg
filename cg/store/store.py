@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 
 from cg.store.crud.create import CreateMixin
 from cg.store.crud.delete import DeleteMixin
-from cg.store.crud.read import ReadHandler
 from cg.store.crud.update import UpdateMixin
 from cg.store.database import get_session
 
@@ -18,6 +17,4 @@ class Store(
 ):
     def __init__(self):
         self.session: Session = get_session()
-        DeleteMixin(self.session)
-        ReadHandler(self.session)
-        UpdateMixin(self.session)
+        super().__init__(session=self.session)
