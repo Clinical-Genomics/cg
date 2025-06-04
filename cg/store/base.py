@@ -1,4 +1,4 @@
-"""All models aggregated in a base class."""
+"""Base class with basic database operations."""
 
 from typing import Type
 
