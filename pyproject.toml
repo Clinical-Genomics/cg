@@ -98,6 +98,6 @@ exclude = ["alembic"]
 ignore = ["E501"]
 
 [tool.vulture]
-min_confidence = 80
+min_confidence = 60
 paths = ["cg"]
 sort_by_size = true
