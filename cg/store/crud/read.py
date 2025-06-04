@@ -5,7 +5,7 @@ import logging
 from datetime import datetime
 from typing import Callable, Iterator
 
-from sqlalchemy.orm import Query, Session
+from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import (

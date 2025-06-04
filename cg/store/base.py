@@ -1,14 +1,17 @@
 """All models aggregated in a base class."""
 
-from dataclasses import dataclass
 from typing import Type
 
 from sqlalchemy import and_, func
-from sqlalchemy.orm import Query, Session
+from sqlalchemy.orm import Query
 
-from cg.store.models import Analysis, Application, ApplicationLimitations, ApplicationVersion
-from cg.store.models import Base as ModelBase
+from cg.store.database import get_session
 from cg.store.models import (
+    Analysis,
+    Application,
+    ApplicationLimitations,
+    ApplicationVersion,
+    Base,
     Case,
     CaseSample,
     Customer,
@@ -19,13 +22,14 @@ from cg.store.models import (
     Sample,
 )
 
+ModelBase = Base
 
-@dataclass
+
 class BaseHandler:
     """All queries in one base class."""
 
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(self):
+        self.session = get_session()
 
     def _get_query(self, table: Type[ModelBase]) -> Query:
         """Return a query for the given table."""
