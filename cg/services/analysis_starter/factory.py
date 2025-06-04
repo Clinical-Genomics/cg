@@ -67,12 +67,12 @@ class AnalysisStarterFactory:
         self.store: Store = cg_config.status_db
 
     def get_analysis_starter_for_case(self, case_id: str) -> AnalysisStarter:
-        LOG.info(f"Getting analysis starter for {case_id}")
+        LOG.debug(f"Getting analysis starter for {case_id}")
         workflow: Workflow = self.store.get_case_workflow(case_id)
         return self.get_analysis_starter_for_workflow(workflow)
 
     def get_analysis_starter_for_workflow(self, workflow: Workflow):
-        LOG.info(f"Getting a {workflow} analysis starter")
+        LOG.debug(f"Getting a {workflow} analysis starter")
         configurator: Configurator = self._get_configurator(workflow)
         input_fetcher: InputFetcher = self._get_input_fetcher(workflow)
         submitter: Submitter = self._get_submitter(workflow)
