@@ -99,6 +99,7 @@ ignore = ["E501"]
 
 [tool.vulture]
 min_confidence = 60
+exclude = ["admin.py"]
 ignore_decorators = ["@click.*"]
 paths = ["cg"]
 sort_by_size = true
