@@ -1,4 +1,4 @@
-"""Handler to update data objects"""
+"""Handler to update data objects."""
 
 from datetime import datetime
 

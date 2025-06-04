@@ -1,4 +1,4 @@
-"""Handler to delete data objects"""
+"""Handler to delete data objects."""
 
 from cg.store.crud.read import ReadHandler
 from cg.store.models import Case, OrderTypeApplication, Sample

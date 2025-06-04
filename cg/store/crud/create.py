@@ -1,4 +1,4 @@
-"""Handler to create data objects"""
+"""Handler to create data objects."""
 
 import logging
 from datetime import datetime
