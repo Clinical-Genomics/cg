@@ -426,7 +426,7 @@ class CreateMixin(ReadHandler):
                 type=flow_cell_dto.type,
                 model=flow_cell_dto.model,
             )
-            self.session.add(new_flow_cell)
+            self.add_item_to_store(new_flow_cell)
             LOG.debug(f"Flow cell added to status db: {new_flow_cell.internal_id}.")
             return new_flow_cell
         raise EntryAlreadyExistsError(f"Flow cell already exists: {flow_cell_dto.internal_id}")
@@ -458,7 +458,7 @@ class CreateMixin(ReadHandler):
             demultiplexing_started_at=sequencing_run_dto.demultiplexing_started_at,
             demultiplexing_completed_at=sequencing_run_dto.demultiplexing_completed_at,
         )
-        self.session.add(new_sequencing_run)
+        self.add_item_to_store(new_sequencing_run)
         LOG.debug(f"Sequencing run added to status db: {new_sequencing_run.device.internal_id}.")
         return new_sequencing_run
 
@@ -471,7 +471,7 @@ class CreateMixin(ReadHandler):
         """
         sample: Sample = self.get_sample_by_internal_id(metrics_dto.sample_id)
         if not sample:
-            self.session.rollback()
+            self.rollback()
             raise EntryNotFoundError(f"Sample not found: {metrics_dto.sample_id}")
         new_metric = IlluminaSampleSequencingMetrics(
             sample=sample,
@@ -485,7 +485,7 @@ class CreateMixin(ReadHandler):
             yield_q30=metrics_dto.yield_q30,
             created_at=metrics_dto.created_at,
         )
-        self.session.add(new_metric)
+        self.add_item_to_store(new_metric)
         return new_metric
 
     def create_pac_bio_smrt_cell(self, run_device_dto: PacBioSMRTCellDTO) -> PacbioSMRTCell:
@@ -495,7 +495,7 @@ class CreateMixin(ReadHandler):
         new_smrt_cell = PacbioSMRTCell(
             type=run_device_dto.type, internal_id=run_device_dto.internal_id
         )
-        self.session.add(new_smrt_cell)
+        self.add_item_to_store(new_smrt_cell)
         return new_smrt_cell
 
     def create_pac_bio_sequencing_run(
@@ -540,7 +540,7 @@ class CreateMixin(ReadHandler):
             unbarcoded_hifi_mean_read_length=sequencing_run_dto.unbarcoded_hifi_mean_read_length,
             device=smrt_cell,
         )
-        self.session.add(new_sequencing_run)
+        self.add_item_to_store(new_sequencing_run)
         return new_sequencing_run
 
     def create_pac_bio_sample_sequencing_run(
@@ -552,7 +552,7 @@ class CreateMixin(ReadHandler):
         LOG.debug(f"Creating Pacbio sample sequencing metric for sample {sample_id}")
         sample: Sample = self.get_sample_by_internal_id(sample_id)
         if not sample:
-            self.session.rollback()
+            self.rollback()
             raise EntryNotFoundError(f"Sample not found: {sample_id}")
         new_sample_sequencing_run = PacbioSampleSequencingMetrics(
             sample=sample,
@@ -563,5 +563,5 @@ class CreateMixin(ReadHandler):
             instrument_run=sequencing_run,
             polymerase_mean_read_length=sample_run_metrics_dto.polymerase_mean_read_length,
         )
-        self.session.add(new_sample_sequencing_run)
+        self.add_item_to_store(new_sample_sequencing_run)
         return new_sample_sequencing_run
