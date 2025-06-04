@@ -6,13 +6,7 @@ from typing import Type
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Query, Session
 
-from cg.store.models import (
-    Analysis,
-    Application,
-    ApplicationLimitations,
-    ApplicationVersion,
-    Order,
-)
+from cg.store.models import Analysis, Application, ApplicationLimitations, ApplicationVersion
 from cg.store.models import Base as ModelBase
 from cg.store.models import (
     Case,
@@ -21,6 +15,7 @@ from cg.store.models import (
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
+    Order,
     Sample,
 )
 
@@ -142,3 +137,23 @@ class BaseHandler:
             .join(IlluminaSequencingRun)
             .join(IlluminaFlowCell)
         )
+
+    def commit_to_store(self):
+        """Commit pending changes to the store."""
+        self.session.commit()
+
+    def add_item_to_store(self, item: ModelBase):
+        """Add an item to the store."""
+        self.session.add(item)
+
+    def add_multiple_items_to_store(self, items: list[ModelBase]):
+        """Add multiple items to the store."""
+        self.session.add_all(items)
+
+    def no_autoflush_context(self):
+        """Return a context manager that disables autoflush for the session."""
+        return self.session.no_autoflush
+
+    def rollback(self):
+        """Rollback any pending change to the store."""
+        self.session.rollback()

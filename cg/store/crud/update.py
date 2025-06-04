@@ -8,7 +8,7 @@ from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import CaseActions, SequencingQCStatus
 from cg.constants.sequencing import Sequencers
 from cg.services.illumina.post_processing.utils import get_q30_threshold
-from cg.store.base import BaseHandler
+from cg.store.crud.read import ReadHandler
 from cg.store.models import (
     Analysis,
     Case,
@@ -19,7 +19,7 @@ from cg.store.models import (
 )
 
 
-class UpdateHandler(BaseHandler):
+class UpdateMixin(ReadHandler):
     """Contains methods to update database objects."""
 
     def __init__(self, session: Session):

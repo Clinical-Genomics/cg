@@ -2,11 +2,11 @@
 
 from sqlalchemy.orm import Session
 
-from cg.store.base import BaseHandler
+from cg.store.crud.read import ReadHandler
 from cg.store.models import Case, OrderTypeApplication, Sample
 
 
-class DeleteDataHandler(BaseHandler):
+class DeleteMixin(ReadHandler):
     """Contains methods to delete business data model instances."""
 
     def __init__(self, session: Session):

@@ -18,7 +18,7 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSequencingRunDTO,
     PacBioSMRTCellDTO,
 )
-from cg.store.base import BaseHandler
+from cg.store.crud.read import ReadHandler
 from cg.store.database import get_session
 from cg.store.exc import EntryAlreadyExistsError, EntryNotFoundError
 from cg.store.models import (
@@ -52,7 +52,7 @@ from cg.store.models import (
 LOG = logging.getLogger(__name__)
 
 
-class CreateHandler(BaseHandler):
+class CreateMixin(ReadHandler):
     """Methods related to adding new data to the store."""
 
     def generate_readable_sample_id(self) -> str:
