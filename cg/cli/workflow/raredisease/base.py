@@ -7,24 +7,21 @@ import rich_click as click
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS, echo_lines
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
-    OPTION_REVISION,
-    OPTION_STUB,
     config_case,
     metrics_deliver,
     report_deliver,
     run,
+    start,
     start_available,
     store,
     store_available,
     store_housekeeper,
 )
 from cg.constants.cli_options import DRY_RUN
-from cg.constants.constants import MetaApis, Workflow
+from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.factory import AnalysisStarterFactory
-from cg.services.analysis_starter.service import AnalysisStarter
 
 LOG = logging.getLogger(__name__)
 
@@ -42,33 +39,11 @@ raredisease.add_command(resolve_compression)
 raredisease.add_command(config_case)
 raredisease.add_command(report_deliver)
 raredisease.add_command(run)
+raredisease.add_command(start)
 raredisease.add_command(start_available)
 raredisease.add_command(store)
 raredisease.add_command(store_available)
 raredisease.add_command(store_housekeeper)
-
-
-@raredisease.command("start")
-@ARGUMENT_CASE_ID
-@OPTION_REVISION
-@OPTION_STUB
-@click.pass_obj
-def start(
-    context: CGConfig,
-    case_id: str,
-    revision: str,
-    stub_run: bool,
-) -> None:
-    """Start workflow for a case."""
-    LOG.info(f"Starting analysis for {case_id}")
-    analysis_starter: AnalysisStarter = AnalysisStarterFactory(
-        context
-    ).get_analysis_starter_for_workflow(Workflow.RAREDISEASE)
-    try:
-        analysis_starter.start(case_id=case_id, revision=revision, stub_run=stub_run)
-    except Exception as error:
-        LOG.error(f"Unexpected error occurred: {error}")
-        raise click.Abort from error
 
 
 @raredisease.command("panel")

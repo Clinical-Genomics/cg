@@ -14,9 +14,7 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 
-@pytest.mark.parametrize(
-    "workflow", [Workflow.TOMTE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.NALLO]
-)
+@pytest.mark.parametrize("workflow", NEXTFLOW_WORKFLOWS + [Workflow.NALLO])
 def test_start(
     cli_runner: CliRunner,
     workflow: Workflow,
