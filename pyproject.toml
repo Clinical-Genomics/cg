@@ -96,3 +96,10 @@ line-length = 100
 target-version = "py311"
 exclude = ["alembic"]
 ignore = ["E501"]
+
+[tool.vulture]
+make_whitelist = true
+min_confidence = 80
+paths = ["cg"]
+sort_by_size = true
+verbose = true
