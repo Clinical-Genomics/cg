@@ -6,6 +6,17 @@ from cg.constants.symbols import EMPTY_STRING
 from cg.models.demultiplex.run_parameters import RunParameters
 
 
+class IndexOverrideCycles:
+    """Class with the possible values that index cycles can take."""
+
+    FULL_10_INDEX: str = "I10;"
+    FULL_8_INDEX: str = "I8;"
+    IGNORED_10_INDEX: str = "N10;"
+    IGNORED_8_INDEX: str = "N8;"
+    INDEX_8_IGNORED_2: str = "I8N2;"
+    INDEX_8_IGNORED_2_REVERSED: str = "N2I8;"
+
+
 @pytest.mark.parametrize(
     "lims_sample",
     [
@@ -69,6 +80,74 @@ def test_separate_indexes_single_run(
     # THEN the index should be separated
     assert bcl_convert_flow_cell_sample.index == index1_8_nt_sequence_from_lims
     assert bcl_convert_flow_cell_sample.index2 == EMPTY_STRING
+
+
+@pytest.mark.parametrize(
+    "lims_index, index1_cycles, expected_parsed_cycles",
+    [
+        ("CGATAGCAGG", 10, IndexOverrideCycles.FULL_10_INDEX),
+        ("CCATTCGANNNNNNNNN-GTTGTCCG", 8, IndexOverrideCycles.FULL_8_INDEX),
+        ("GTTCCAAT", 8, IndexOverrideCycles.FULL_8_INDEX),
+        ("GTTCCAAT", 10, IndexOverrideCycles.INDEX_8_IGNORED_2),
+    ],
+    ids=[
+        "10-nt index and cycles",
+        "extended index with 8-nt cycles",
+        "8-nt index and cycles",
+        "8-ny index, 10-ny cycles",
+    ],
+)
+def test_get_index1_override_cycles(
+    lims_index: str, index1_cycles: int, expected_parsed_cycles: str
+):
+    """Test that the returned index 1 cycles is the expected for different index configurations."""
+    # GIVEN a FlowCellSampleBCLConvert with an index
+    sample = IlluminaSampleIndexSetting(lane=1, index=lims_index, sample_id="ACC123")
+
+    # WHEN getting the index1 override cycles
+    index1_cycles: str = sample._get_index1_override_cycles(len_index1_cycles=index1_cycles)
+
+    # THEN the index1 override cycles value is the expected one
+    assert index1_cycles == expected_parsed_cycles
+
+
+@pytest.mark.parametrize(
+    "lims_index, index2_cycles, reverse_cycle, expected_parsed_cycles",
+    [
+        ("CGATAGCAGG-AATGCTACGA", 10, None, IndexOverrideCycles.FULL_10_INDEX),
+        ("GTTCCAAT-AATTCTGC", 8, None, IndexOverrideCycles.FULL_8_INDEX),
+        ("CGATAGCAGG", 10, None, IndexOverrideCycles.IGNORED_10_INDEX),
+        ("GTTCCAAT", 8, None, IndexOverrideCycles.IGNORED_8_INDEX),
+        ("GTTCCAAT-AATTCTGC", 10, True, IndexOverrideCycles.INDEX_8_IGNORED_2_REVERSED),
+        ("GTTCCAAT-AATTCTGC", 10, False, IndexOverrideCycles.INDEX_8_IGNORED_2),
+        ("GTTCCAAT-AATTCTGC", 0, None, EMPTY_STRING),
+    ],
+    ids=[
+        "10-nt index and cycles",
+        "8-nt index and cycles",
+        "No index, 10-nt cycles",
+        "No index, 8-nt cycles",
+        "8-nt index, 10-nt cycles reversed",
+        "8-nt index, 10-nt cycles not reversed",
+        "No cycles",
+    ],
+)
+def test_get_index2_override_cycles(
+    lims_index: str, index2_cycles: int, reverse_cycle: bool, expected_parsed_cycles: str
+):
+    """Test that the returned index 2 cycles is the expected for different index configurations."""
+    # GIVEN a FlowCellSampleBCLConvert with separated indexes
+    sample = IlluminaSampleIndexSetting(lane=1, index=lims_index, sample_id="ACC123")
+    is_run_single_index: bool = not bool(index2_cycles)
+    sample.separate_indexes(is_run_single_index=is_run_single_index)
+
+    # WHEN getting the index2 override cycles
+    index2_cycles: str = sample._get_index2_override_cycles(
+        len_index2_cycles=index2_cycles, reverse_cycle=reverse_cycle
+    )
+
+    # THEN the index2 override cycles value is the expected one
+    assert index2_cycles == expected_parsed_cycles
 
 
 @pytest.mark.parametrize(
