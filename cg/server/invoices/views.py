@@ -144,7 +144,7 @@ def new(record_type):
             records=db.get_samples_to_invoice_query()
         )
     elif record_type == "Pool":
-        records: list[Pool | Sample] = db.get_samples_to_invoice_for_customer(customer=customer)
+        records: list[Pool | Sample] = db.get_pools_to_invoice_for_customer(customer=customer)
         customers_to_invoice: list[Customer] = db.get_customers_to_invoice(
             records=db.get_pools_to_invoice_query()
         )
