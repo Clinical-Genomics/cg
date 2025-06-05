@@ -64,7 +64,7 @@ class ObservationsAPI:
     ):
         """Return input files from a case to upload to Loqusdb."""
         analysis: Analysis = case.analyses[0]
-        analysis_date: datetime = analysis.started_at or analysis.completed_at
+        analysis_date: datetime = analysis.completed_at
         hk_version: Version = self.housekeeper_api.version(analysis.case.internal_id, analysis_date)
         return self.get_observations_files_from_hk(hk_version=hk_version, case_id=case.internal_id)
 
