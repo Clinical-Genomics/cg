@@ -101,5 +101,5 @@ ignore = ["E501"]
 min_confidence = 60
 ignore_decorators = ["@click.*","*route*","@field_validator*","@model_validator*","@app.*","@validator*","@action*","@field_serializer"]
 ignore_names= ["on_model_change","*View(BaseView)"]
-paths = ["cg"]
+paths = ["cg","vulture_whitelist.py"]
 sort_by_size = true
