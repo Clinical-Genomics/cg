@@ -39,31 +39,9 @@ def get_file_with_pattern_from_list(files: list[Path], pattern: str) -> Path | N
     raise FileNotFoundError(f"No {pattern} file found in given file list")
 
 
-def get_files_in_directory_with_pattern(directory: Path, pattern: str) -> list[Path]:
-    """Get files with a pattern in a directory and subdirectories.
-    Raises:
-        FileNotFoundError: If no files with the pattern can be found.
-    """
-    files_with_pattern: list[Path] = []
-    if not directory.is_dir() or not directory.exists():
-        raise FileNotFoundError(f"Directory {directory} does not exist")
-    for directory_path, _, dir_files in os.walk(directory):
-        files_with_pattern.extend(
-            Path(directory_path, file) for file in dir_files if pattern in file
-        )
-    if not files_with_pattern:
-        raise FileNotFoundError(f"No files with pattern {pattern} found in {directory}")
-    return files_with_pattern
-
-
 def get_files_matching_pattern(directory: Path, pattern: str) -> list[Path]:
     """Search for all files in a directory that match a pattern."""
     return list(directory.glob(pattern))
-
-
-def get_all_files_in_dir(base_path: Path) -> set[Path]:
-    """Get a set of all files relative to the given base path."""
-    return {file.relative_to(base_path) for file in base_path.rglob("*") if file.is_file()}
 
 
 def rename_file(file_path: Path, renamed_file_path: Path) -> None:

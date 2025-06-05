@@ -92,9 +92,6 @@ class TrailblazerAPI:
         if latest_analysis:
             return latest_analysis.status
 
-    def has_latest_analysis_started(self, case_id: str) -> bool:
-        return self.get_latest_analysis_status(case_id=case_id) in self.__STARTED_STATUSES
-
     def is_latest_analysis_ongoing(self, case_id: str) -> bool:
         return self.get_latest_analysis_status(case_id=case_id) in self.__ONGOING_STATUSES
 

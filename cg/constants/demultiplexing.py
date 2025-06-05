@@ -157,17 +157,6 @@ class SampleSheetBCLConvertSections:
             ]
 
 
-class IndexOverrideCycles(StrEnum):
-    """Class with the possible values that index cycles can take."""
-
-    FULL_10_INDEX: str = "I10;"
-    FULL_8_INDEX: str = "I8;"
-    IGNORED_10_INDEX: str = "N10;"
-    IGNORED_8_INDEX: str = "N8;"
-    INDEX_8_IGNORED_2: str = "I8N2;"
-    INDEX_8_IGNORED_2_REVERSED: str = "N2I8;"
-
-
 CUSTOM_INDEX_TAIL = "NNNNNNNNN"
 FASTQ_FILE_SUFFIXES: list[str] = [".fastq", ".gz"]
 UNDETERMINED: str = "Undetermined"

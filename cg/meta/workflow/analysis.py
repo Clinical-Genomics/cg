@@ -174,11 +174,6 @@ class AnalysisAPI(MetaAPI):
         """Path to file containing slurm/tower job ids for the case."""
         raise NotImplementedError
 
-    def get_sample_name_from_lims_id(self, lims_id: str) -> str:
-        """Retrieve sample name provided by customer for specific sample"""
-        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=lims_id)
-        return sample.name
-
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         """
         Links fastq files from Housekeeper to case working directory
@@ -426,15 +421,6 @@ class AnalysisAPI(MetaAPI):
             case
             for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
-        ]
-
-    def get_cases_to_qc(self) -> list[Case]:
-        """Return cases where analysis finished successfully,
-        and is ready for QC metrics checks."""
-        return [
-            case
-            for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
-            if self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
 
     def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
@@ -724,9 +710,6 @@ class AnalysisAPI(MetaAPI):
             ) and not all(file.archive.retrieved_at for file in files):
                 return False
         return True
-
-    def get_archive_location_for_case(self, case_id: str) -> str:
-        return self.status_db.get_case_by_internal_id(case_id).customer.data_archive_location
 
     @staticmethod
     def _write_managed_variants(out_dir: Path, content: list[str]) -> None:
