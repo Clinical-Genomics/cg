@@ -160,8 +160,8 @@ MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
     mitodel_file={"mitodel"},
     tiddit_coverage_wig={"tiddit-coverage", "bigwig"},
     rhocall_wig={"rhocall-viz"},
-    upd_regions_bed={"upd", "regions"},
-    upd_sites_bed={"upd", "sites"},
+    upd_regions_bed={"upd", "regions", "bigbed"},
+    upd_sites_bed={"upd", "sites", "bigbed"},
 )
 
 BALSAMIC_SAMPLE_TAGS = dict(
