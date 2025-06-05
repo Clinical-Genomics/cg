@@ -579,6 +579,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--cache-version": cache_version,
                 "--cadd-annotations": self.cadd_path,
                 "--artefact-snv-observations": arguments.get("artefact_somatic_snv"),
+                "--artefact-sv-observations": arguments.get("artefact_somatic_sv"),
                 "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
                 "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
                 "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),

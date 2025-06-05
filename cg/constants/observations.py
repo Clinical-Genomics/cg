@@ -71,6 +71,7 @@ class ObservationsFileWildcards(StrEnum):
     """File patterns regarding dump Loqusdb files."""
 
     ARTEFACT_SNV: str = "artefact_somatic_snv"
+    ARTEFACT_SV: str = "artefact_somatic_sv"
     CLINICAL_SNV: str = "clinical_snv"
     CLINICAL_SV: str = "clinical_sv"
     CANCER_GERMLINE_SNV: str = "cancer_germline_snv"
