@@ -1,4 +1,3 @@
-import re
 from datetime import datetime
 from enum import Enum
 from typing import Annotated
@@ -128,16 +127,6 @@ class PriorityMixin:
     def priority_int(self, priority_int: int) -> None:
         self.priority: Priority = Priority(priority_int)
 
-    @property
-    def high_priority(self):
-        """Has high priority?"""
-        return self.priority_int > 1
-
-    @property
-    def low_priority(self):
-        """Has low priority?"""
-        return self.priority_int < 1
-
 
 class Application(Base):
     __tablename__ = "application"
@@ -200,10 +189,6 @@ class Application(Base):
 
     def __str__(self) -> str:
         return self.tag
-
-    @property
-    def reduced_price(self):
-        return self.tag.startswith("WGT") or self.tag.startswith("EXT")
 
     @property
     def expected_reads(self):
@@ -529,10 +514,6 @@ class Case(Base, PriorityMixin):
                 sequenced_dates.append(link.sample.last_sequenced_at)
         return max(sequenced_dates, default=None)
 
-    @property
-    def are_all_samples_sequenced(self) -> bool:
-        return all([link.sample.last_sequenced_at for link in self.links])
-
     def are_all_samples_control(self) -> bool:
         """Return True if all case samples are controls."""
         return all(
@@ -569,29 +550,11 @@ class Case(Base, PriorityMixin):
         return [link.sample for link in self.links if link.sample.loqusdb_id]
 
     @property
-    def is_uploaded(self) -> bool:
-        """Returns True if the latest connected analysis has been uploaded."""
-        return self.analyses and self.analyses[0].uploaded_at
-
-    @property
     def slurm_priority(self) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
         if self.are_all_samples_control():
             return SlurmQos.EXPRESS
         return Priority.priority_to_slurm_qos().get(self.priority)
-
-    def get_delivery_arguments(self) -> set[str]:
-        """Translates the case data_delivery field to workflow specific arguments."""
-        delivery_arguments: set[str] = set()
-        requested_deliveries: list[str] = re.split("[-_]", self.data_delivery)
-        delivery_per_workflow_map: dict[str, str] = {
-            DataDelivery.FASTQ: Workflow.RAW_DATA,
-            DataDelivery.ANALYSIS_FILES: self.data_analysis,
-        }
-        for data_delivery, workflow in delivery_per_workflow_map.items():
-            if data_delivery in requested_deliveries:
-                delivery_arguments.add(workflow)
-        return delivery_arguments
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
         """Represent as dictionary."""
@@ -658,42 +621,6 @@ class CaseSample(Base):
     def get_paternal_sample_id(self) -> str:
         """Return parental id."""
         return self.father.internal_id if self.father else EMPTY_STRING
-
-
-class Flowcell(Base):
-    __tablename__ = "flowcell"
-    id: Mapped[PrimaryKeyInt]
-    name: Mapped[UniqueStr]
-    sequencer_type: Mapped[str | None] = mapped_column(
-        types.Enum("hiseqga", "hiseqx", "novaseq", "novaseqx")
-    )
-    sequencer_name: Mapped[Str32 | None]
-    sequenced_at: Mapped[datetime | None]
-    status: Mapped[str | None] = mapped_column(
-        types.Enum(*(status.value for status in SequencingRunDataAvailability)), default="ondisk"
-    )
-    archived_at: Mapped[datetime | None]
-    has_backup: Mapped[bool] = mapped_column(default=False)
-    updated_at: Mapped[datetime | None] = mapped_column(onupdate=datetime.now)
-    sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
-        back_populates="flowcell",
-        cascade="all, delete, delete-orphan",
-    )
-
-    @property
-    def samples(self) -> list["Sample"]:
-        """Return samples sequenced on the flow cell."""
-        return list({metric.sample for metric in self.sequencing_metrics})
-
-    def __str__(self):
-        return self.name
-
-    def to_dict(self, samples: bool = False):
-        """Represent as dictionary"""
-        data = to_dict(model_instance=Flowcell)
-        if samples:
-            data["samples"] = [sample.to_dict() for sample in self.samples]
-        return data
 
 
 class Organism(Base):
@@ -813,9 +740,6 @@ class Sample(Base, PriorityMixin):
     father_links: Mapped[list[CaseSample]] = orm.relationship(
         foreign_keys=[CaseSample.father_id], back_populates="father"
     )
-    sequencing_metrics: Mapped[list["SampleLaneSequencingMetrics"]] = orm.relationship(
-        back_populates="sample"
-    )
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="samples")
 
     _sample_run_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(
@@ -851,11 +775,6 @@ class Sample(Base, PriorityMixin):
     @property
     def is_external(self) -> bool:
         return self.application_version.application.is_external
-
-    @property
-    def flow_cells(self) -> list[Flowcell]:
-        """Return the flow cells a sample has been sequenced on."""
-        return list({metric.flowcell for metric in self.sequencing_metrics})
 
     @property
     def phenotype_groups(self) -> list[str]:
@@ -962,38 +881,6 @@ class User(Base):
 
     def __str__(self) -> str:
         return self.name
-
-
-class SampleLaneSequencingMetrics(Base):
-    """Model for storing sequencing metrics per lane and sample."""
-
-    __tablename__ = "sample_lane_sequencing_metrics"
-
-    id: Mapped[PrimaryKeyInt]
-    flow_cell_name: Mapped[Str32] = mapped_column(ForeignKey("flowcell.name"))
-    flow_cell_lane_number: Mapped[int | None]
-
-    sample_internal_id: Mapped[Str32] = mapped_column(ForeignKey("sample.internal_id"))
-    sample_total_reads_in_lane: Mapped[BigInt | None]
-    sample_base_percentage_passing_q30: Mapped[Num_6_2 | None]
-    sample_base_mean_quality_score: Mapped[Num_6_2 | None]
-
-    created_at: Mapped[datetime | None]
-
-    flowcell: Mapped[Flowcell] = orm.relationship(back_populates="sequencing_metrics")
-    sample: Mapped[Sample] = orm.relationship(back_populates="sequencing_metrics")
-
-    __table_args__ = (
-        UniqueConstraint(
-            "flow_cell_name",
-            "sample_internal_id",
-            "flow_cell_lane_number",
-            name="uix_flowcell_sample_lane",
-        ),
-    )
-
-    def to_dict(self):
-        return to_dict(model_instance=self)
 
 
 class Order(Base):

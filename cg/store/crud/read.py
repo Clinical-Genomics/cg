@@ -115,18 +115,6 @@ class ReadHandler(BaseHandler):
             cases=cases_query, filter_functions=[CaseFilter.BY_ENTRY_ID], entry_id=entry_id
         ).first()
 
-    def has_active_cases_for_sample(self, internal_id: str) -> bool:
-        """Check if there are any active cases for a sample."""
-        sample = self.get_sample_by_internal_id(internal_id=internal_id)
-        active_actions = ["analyze", "running"]
-
-        for family_sample in sample.links:
-            case: Case = self.get_case_by_entry_id(entry_id=family_sample.case_id)
-            if case.action in active_actions:
-                return True
-
-        return False
-
     def get_application_by_case(self, case_id: str) -> Application:
         """Return the application of a case."""
 
@@ -549,19 +537,6 @@ class ReadHandler(BaseHandler):
             filter_functions=[SampleFilter.BY_INVOICE_ID],
         ).all()
         return pools + samples
-
-    def get_case_sample_link(self, case_internal_id: str, sample_internal_id: str) -> CaseSample:
-        """Return a case-sample link between a family and a sample."""
-        filter_functions: list[CaseSampleFilter] = [
-            CaseSampleFilter.SAMPLES_IN_CASE_BY_INTERNAL_ID,
-            CaseSampleFilter.CASES_WITH_SAMPLE_BY_INTERNAL_ID,
-        ]
-        return apply_case_sample_filter(
-            filter_functions=filter_functions,
-            case_samples=self._get_join_case_sample_query(),
-            case_internal_id=case_internal_id,
-            sample_internal_id=sample_internal_id,
-        ).first()
 
     def new_invoice_id(self) -> int:
         """Fetch invoices."""
