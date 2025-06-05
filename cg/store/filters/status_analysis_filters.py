@@ -80,6 +80,13 @@ def filter_analyses_by_started_at(analyses: Query, started_at_date: datetime, **
     return analyses.filter(Analysis.started_at == started_at_date)
 
 
+def filter_analyses_by_completed_at(
+    analyses: Query, completed_at_date: datetime, **kwargs
+) -> Query:
+    """Return a query of analyses completed at a certain date."""
+    return analyses.filter(Analysis.completed_at == completed_at_date)
+
+
 def filter_analyses_not_cleaned(analyses: Query, **kwargs) -> Query:
     """Return a query of analyses that have not been cleaned."""
     return analyses.filter(Analysis.cleaned_at.is_(None))
@@ -133,6 +140,7 @@ class AnalysisFilter(Enum):
     IS_NOT_CLEANED: Callable = filter_analyses_not_cleaned
     STARTED_AT_BEFORE: Callable = filter_analyses_started_before
     BY_STARTED_AT: Callable = filter_analyses_by_started_at
+    BY_COMPLETED_AT: Callable = filter_analyses_by_completed_at
     CASE_ACTION_IS_NONE: Callable = filter_analysis_case_action_is_none
     ORDER_BY_UPLOADED_AT: Callable = order_analyses_by_uploaded_at_asc
     ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at_asc

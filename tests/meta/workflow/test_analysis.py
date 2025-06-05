@@ -891,8 +891,15 @@ def test_update_analysis_as_completed_statusdb_succeeds(
     analysis.completed_at = None
     case_mock.analyses = [analysis]
 
-    # WHEN update_analysis_as_completed_statusdb is called
-    analysis_api.update_analysis_as_completed_statusdb(case_id=case_mock.internal_id, force=False)
+    # GIVEN that the bundle deliverables file has been created
+    with mock.patch(
+        "cg.meta.workflow.analysis.AnalysisAPI.get_bundle_created_date",
+        return_value=datetime.now(),
+    ):
+        # WHEN update_analysis_as_completed_statusdb is called
+        analysis_api.update_analysis_as_completed_statusdb(
+            case_id=case_mock.internal_id, force=False
+        )
 
     # THEN it updates the analysis completed_at date in StatusDB
     status_db_mock.update_analysis_completed_at.assert_called_with(
