@@ -1,36 +1,34 @@
-"""All models aggregated in a base class."""
+"""Base class with basic database operations."""
 
-from dataclasses import dataclass
 from typing import Type
 
 from sqlalchemy import and_, func
-from sqlalchemy.orm import Query, Session
+from sqlalchemy.orm import Query
 
+from cg.store.database import get_session
 from cg.store.models import (
     Analysis,
     Application,
     ApplicationLimitations,
     ApplicationVersion,
-    Order,
-)
-from cg.store.models import Base as ModelBase
-from cg.store.models import (
+    Base,
     Case,
     CaseSample,
     Customer,
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
+    Order,
     Sample,
 )
 
+ModelBase = Base
 
-@dataclass
+
 class BaseHandler:
-    """All queries in one base class."""
 
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(self):
+        self.session = get_session()
 
     def _get_query(self, table: Type[ModelBase]) -> Query:
         """Return a query for the given table."""
@@ -142,3 +140,27 @@ class BaseHandler:
             .join(IlluminaSequencingRun)
             .join(IlluminaFlowCell)
         )
+
+    def commit_to_store(self):
+        """Commit pending changes to the store."""
+        self.session.commit()
+
+    def add_item_to_store(self, item: ModelBase):
+        """Add an item to the store in the current transaction."""
+        self.session.add(item)
+
+    def add_multiple_items_to_store(self, items: list[ModelBase]):
+        """Add multiple items to the store in the current transaction."""
+        self.session.add_all(items)
+
+    def delete_item_from_store(self, item: ModelBase):
+        """Delete an item from the store in the current transaction."""
+        self.session.delete(item)
+
+    def no_autoflush_context(self):
+        """Return a context manager that disables autoflush for the session."""
+        return self.session.no_autoflush
+
+    def rollback(self):
+        """Rollback any pending change to the store."""
+        self.session.rollback()

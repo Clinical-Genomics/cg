@@ -211,12 +211,12 @@ def add_sample(
         priority=priority,
         original_ticket=original_ticket,
     )
-    new_record.application_version: ApplicationVersion = (
-        status_db.get_current_application_version_by_tag(tag=application_tag)
+    new_record.application_version = status_db.get_current_application_version_by_tag(
+        tag=application_tag
     )
-    new_record.customer: Customer = customer
-    status_db.session.add(new_record)
-    status_db.session.commit()
+    new_record.customer = customer
+    status_db.add_item_to_store(new_record)
+    status_db.commit_to_store()
     LOG.info(f"{new_record.internal_id}: new sample added")
 
 
