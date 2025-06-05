@@ -100,7 +100,7 @@ class NextflowConfigurator(Configurator):
             work_dir=self._get_work_dir(case_id).as_posix(),
             workflow=self.store.get_case_workflow(case_id),
         )
-        overridden_parameters = NextflowStartParameters(case_id=case_id, **flags)
+        overridden_parameters = NextflowStartParameters.model_validate(flags)
         return config.model_copy(update=overridden_parameters.model_dump(exclude_none=True))
 
     def _get_case_path(self, case_id: str) -> Path:

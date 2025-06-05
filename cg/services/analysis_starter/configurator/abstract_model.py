@@ -4,11 +4,11 @@ from cg.constants import Workflow
 
 
 class StartParameters(BaseModel):
-    case_id: str
+    pass
 
 
 class RunParameters(BaseModel):
-    case_id: str
+    pass
 
 
 class CaseConfig(BaseModel):
