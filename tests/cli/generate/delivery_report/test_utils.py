@@ -6,10 +6,10 @@ import click.exceptions
 import pytest
 
 from cg.cli.generate.delivery_report.utils import (
-    get_report_case,
+    get_report_analysis_completed_at,
     get_report_api,
     get_report_api_workflow,
-    get_report_analysis_started_at,
+    get_report_case,
 )
 from cg.constants import Workflow
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
@@ -84,10 +84,10 @@ def test_get_report_api_workflow(raredisease_delivery_report_click_context: clic
     assert isinstance(report_api, RarediseaseDeliveryReportAPI)
 
 
-def test_get_report_analysis_started_at(
+def test_get_report_analysis_completed_at(
     raredisease_delivery_report_click_context: click.Context, raredisease_case_id: str
 ):
-    """Tests retrieval of analysis started at field"""
+    """Tests retrieval of analysis completed at field"""
 
     # GIVEN a case and a report api
     case: Case = get_report_case(
@@ -97,11 +97,11 @@ def test_get_report_analysis_started_at(
         context=raredisease_delivery_report_click_context, case=case
     )
 
-    # WHEN resolving the analysis started at field
-    started_at = get_report_analysis_started_at(
-        case=case, report_api=report_api, analysis_started_at=None
+    # WHEN resolving the analysis completed at field
+    completed_at = get_report_analysis_completed_at(
+        case=case, report_api=report_api, analysis_completed_at=None
     )
 
     # THEN check if the verified value has been correctly extracted and formatted
-    assert started_at
-    assert isinstance(started_at, datetime)
+    assert completed_at
+    assert isinstance(completed_at, datetime)
