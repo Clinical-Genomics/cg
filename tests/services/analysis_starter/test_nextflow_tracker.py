@@ -44,7 +44,16 @@ def test_nextflow_tracker(nextflow_tracker: NextflowTracker, raredisease_case_id
 
     # WHEN wanting to track the started microSALT analysis
     with mock.patch.object(
-        TrailblazerAPI, "query_trailblazer", return_value=None
+        TrailblazerAPI,
+        "query_trailblazer",
+        return_value={
+            "id": 123456,
+            "logged_at": "",
+            "started_at": "",
+            "completed_at": "",
+            "out_dir": "",
+            "config_path": "",
+        },
     ) as request_submitter:
         nextflow_tracker.track(case_id=raredisease_case_id, tower_workflow_id="1")
 

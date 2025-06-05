@@ -1,16 +1,18 @@
 import logging
 from abc import ABC, abstractmethod
+from datetime import datetime
 from pathlib import Path
 
 from cg.apps.environ import environ_email
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.constants import CustomerId
+from cg.apps.tb.models import TrailblazerAnalysis
+from cg.constants.constants import CustomerId, Workflow
 from cg.constants.priority import TrailblazerPriority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisType
 from cg.exc import CgError
 from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
-from cg.store.models import Case, Sample
+from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -34,6 +36,12 @@ class Tracker(ABC):
         case_id: str,
         tower_workflow_id: str | None = None,
     ) -> None:
+        tb_analysis: TrailblazerAnalysis = self._track_in_trailblazer(case_id, tower_workflow_id)
+        self._create_analysis_statusdb(case_id=case_id, trailblazer_id=tb_analysis.id)
+
+    def _track_in_trailblazer(
+        self, case_id: str, tower_workflow_id: int | None
+    ) -> TrailblazerAnalysis:
         analysis_type: str = self._get_analysis_type(case_id)
         config_path: Path = self._get_job_ids_path(case_id)
         email: str = environ_email()
@@ -42,7 +50,7 @@ class Tracker(ABC):
         priority: TrailblazerPriority = self._get_trailblazer_priority(case_id)
         ticket: str = self.store.get_latest_ticket_from_case(case_id)
         is_case_for_development: bool = self._is_case_for_development(case_id)
-        self.trailblazer_api.add_pending_analysis(
+        return self.trailblazer_api.add_pending_analysis(
             analysis_type=analysis_type,
             case_id=case_id,
             config_path=config_path.as_posix(),
@@ -56,6 +64,37 @@ class Tracker(ABC):
             tower_workflow_id=tower_workflow_id,
             is_hidden=is_case_for_development,
         )
+
+    def _create_analysis_statusdb(self, case_id: str, trailblazer_id: int | None) -> None:
+        """Storing an analysis bundle in StatusDB for a provided case."""
+        LOG.info(f"Storing analysis in StatusDB for {case_id}")
+        case: Case = self.store.get_case_by_internal_id(case_id)
+        is_primary: bool = len(case.analyses) == 0
+        analysis_start: datetime = datetime.now()
+        workflow_version: str = self.get_workflow_version(case)
+        new_analysis: Analysis = self.store.add_analysis(
+            workflow=Workflow(case.data_analysis),
+            version=workflow_version,
+            completed_at=None,
+            primary=is_primary,
+            started_at=analysis_start,
+            trailblazer_id=trailblazer_id,
+        )
+        new_analysis.case = case
+        self.store.add_item_to_store(new_analysis)
+        self.store.commit_to_store()
+        LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
+
+    def get_workflow_version(self, case: Case) -> str:
+        """
+        Calls the workflow to get the workflow version number. If fails, returns a placeholder value instead.
+        """
+        try:
+            self.process.run_command(["--version"])
+            return list(self.process.stdout_lines())[0].split()[-1]
+        except (Exception, CalledProcessError):
+            LOG.warning(f"Could not retrieve {self.workflow} workflow version!")
+            return "0.0.0"
 
     def _get_analysis_type(self, case_id: str) -> str:
         """

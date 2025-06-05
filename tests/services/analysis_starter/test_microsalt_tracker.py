@@ -29,7 +29,16 @@ def test_microsalt_tracker_successful(microsalt_tracker: MicrosaltTracker, micro
 
     # WHEN wanting to track the started microSALT analysis
     with mock.patch.object(
-        TrailblazerAPI, "query_trailblazer", return_value=None
+        TrailblazerAPI,
+        "query_trailblazer",
+        return_value={
+            "id": 123456,
+            "logged_at": "",
+            "started_at": "",
+            "completed_at": "",
+            "out_dir": "",
+            "config_path": "",
+        },
     ) as request_submitter:
         microsalt_tracker.track(case_id=case_id)
 

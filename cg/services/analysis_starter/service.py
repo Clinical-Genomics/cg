@@ -31,18 +31,22 @@ class AnalysisStarter:
         """Fetches raw data, generates configuration files and runs the specified case."""
         self.tracker.ensure_analysis_not_ongoing(case_id)
         self.input_fetcher.ensure_files_are_ready(case_id)
-        parameters = self.configurator.configure(case_id=case_id, **flags)
-        self.store.set_case_action(case_internal_id=case_id, action=CaseActions.RUNNING)
+        parameters: CaseConfig = self.configurator.configure(case_id=case_id, **flags)
+        self.store.update_case_action(case_internal_id=case_id, action=CaseActions.RUNNING)
         try:
             tower_workflow_id: str | None = self.submitter.submit(parameters)
             self.tracker.track(case_id=case_id, tower_workflow_id=tower_workflow_id)
         except CalledProcessError as exception:
             LOG.error(exception)
-            self.store.set_case_action(case_internal_id=case_id, action=None)
+            self.store.update_case_action(case_internal_id=case_id, action=None)
 
-    def run(self, case_id: str):
+    def run(self, case_id: str, **flags):
         """Run a case using an assumed existing configuration."""
         self.tracker.ensure_analysis_not_ongoing(case_id)
-        case_config: CaseConfig = self.configurator.get_config(case_id)
-        tower_workflow_id: str | None = self.submitter.submit(case_config)
-        self.tracker.track(case_id=case_id, tower_workflow_id=tower_workflow_id)
+        parameters: CaseConfig = self.configurator.get_config(case_id=case_id, **flags)
+        try:
+            tower_workflow_id: str | None = self.submitter.submit(parameters)
+            self.tracker.track(case_id=case_id, tower_workflow_id=tower_workflow_id)
+        except CalledProcessError as exception:
+            LOG.error(exception)
+            self.store.update_case_action(case_internal_id=case_id, action=None)
