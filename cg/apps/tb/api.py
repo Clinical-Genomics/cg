@@ -23,14 +23,6 @@ LOG = logging.getLogger(__name__)
 class TrailblazerAPI:
     """Interface to Trailblazer for `cg`."""
 
-    __STARTED_STATUSES = [
-        AnalysisStatus.COMPLETED,
-        AnalysisStatus.FAILED,
-        AnalysisStatus.PENDING,
-        AnalysisStatus.RUNNING,
-        AnalysisStatus.ERROR,
-        AnalysisStatus.QC,
-    ]
     __ONGOING_STATUSES = [
         AnalysisStatus.PENDING,
         AnalysisStatus.RUNNING,
