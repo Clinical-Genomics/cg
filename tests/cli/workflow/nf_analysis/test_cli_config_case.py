@@ -120,7 +120,9 @@ def test_config_case_default_parameters(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     sample_sheet_path: Path = request.getfixturevalue(f"{workflow}_sample_sheet_path")
     params_file_path: Path = request.getfixturevalue(f"{workflow}_params_file_path")
-    nexflow_config_file_path: Path = request.getfixturevalue(f"{workflow}_nexflow_config_file_path")
+    nexflow_config_file_path: Path = request.getfixturevalue(
+        f"{workflow}_nextflow_config_file_path"
+    )
     sample_sheet_content_expected: str = request.getfixturevalue(f"{workflow}_sample_sheet_content")
 
     # Mocking external Scout call
@@ -201,7 +203,9 @@ def test_config_case_dry_run(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     sample_sheet_path: Path = request.getfixturevalue(f"{workflow}_sample_sheet_path")
     params_file_path: Path = request.getfixturevalue(f"{workflow}_params_file_path")
-    nexflow_config_file_path: Path = request.getfixturevalue(f"{workflow}_nexflow_config_file_path")
+    nexflow_config_file_path: Path = request.getfixturevalue(
+        f"{workflow}_nextflow_config_file_path"
+    )
 
     # GIVEN a valid case
 
