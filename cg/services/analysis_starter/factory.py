@@ -66,16 +66,13 @@ class AnalysisStarterFactory:
         self.lims_api: LimsAPI = cg_config.lims_api
         self.store: Store = cg_config.status_db
 
-    def scout_api(self, workflow: Workflow) -> ScoutAPI:
-        return (
-            self.cg_config.scout_api_38
-            if workflow == Workflow.NALLO
-            else self.cg_config.scout_api_37
-        )
-
-    def get_analysis_starter(self, case_id: str) -> AnalysisStarter:
+    def get_analysis_starter_for_case(self, case_id: str) -> AnalysisStarter:
+        LOG.debug(f"Getting analysis starter for {case_id}")
         workflow: Workflow = self.store.get_case_workflow(case_id)
-        LOG.info(f"Getting a {workflow} analysis starter for case {case_id}")
+        return self.get_analysis_starter_for_workflow(workflow)
+
+    def get_analysis_starter_for_workflow(self, workflow: Workflow):
+        LOG.debug(f"Getting a {workflow} analysis starter")
         configurator: Configurator = self._get_configurator(workflow)
         input_fetcher: InputFetcher = self._get_input_fetcher(workflow)
         submitter: Submitter = self._get_submitter(workflow)
@@ -169,10 +166,17 @@ class AnalysisStarterFactory:
             )
 
     def _get_gene_panel_file_creator(self, workflow: Workflow) -> GenePanelFileCreator:
-        return GenePanelFileCreator(scout_api=self.scout_api(workflow), store=self.store)
+        return GenePanelFileCreator(scout_api=self._get_scout_api(workflow), store=self.store)
 
     def _get_managed_variants_file_creator(self, workflow: Workflow) -> ManagedVariantsFileCreator:
-        return ManagedVariantsFileCreator(scout_api=self.scout_api(workflow), store=self.store)
+        return ManagedVariantsFileCreator(scout_api=self._get_scout_api(workflow), store=self.store)
+
+    def _get_scout_api(self, workflow: Workflow) -> ScoutAPI:
+        return (
+            self.cg_config.scout_api_38
+            if workflow == Workflow.NALLO
+            else self.cg_config.scout_api_37
+        )
 
     def _get_input_fetcher(self, workflow: Workflow) -> InputFetcher:
         if workflow in FASTQ_WORKFLOWS:

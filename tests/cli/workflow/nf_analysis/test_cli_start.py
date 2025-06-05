@@ -9,15 +9,12 @@ from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
-from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 
-@pytest.mark.parametrize(
-    "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
-)
+@pytest.mark.parametrize("workflow", NEXTFLOW_WORKFLOWS + [Workflow.NALLO])
 def test_start(
     cli_runner: CliRunner,
     workflow: Workflow,

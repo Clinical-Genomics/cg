@@ -27,14 +27,14 @@ class AnalysisStarter:
         self.submitter = submitter
         self.tracker = tracker
 
-    def start(self, case_id: str):
+    def start(self, case_id: str, **flags):
         """Fetches raw data, generates configuration files and runs the specified case."""
         self.tracker.ensure_analysis_not_ongoing(case_id)
         self.input_fetcher.ensure_files_are_ready(case_id)
-        case_config: CaseConfig = self.configurator.configure(case_id)
+        parameters = self.configurator.configure(case_id=case_id, **flags)
         self.store.set_case_action(case_internal_id=case_id, action=CaseActions.RUNNING)
         try:
-            tower_workflow_id: str | None = self.submitter.submit(case_config)
+            tower_workflow_id: str | None = self.submitter.submit(parameters)
             self.tracker.track(case_id=case_id, tower_workflow_id=tower_workflow_id)
         except CalledProcessError as exception:
             LOG.error(exception)

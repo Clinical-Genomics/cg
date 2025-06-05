@@ -142,7 +142,7 @@ def search(query):
 def start(context: CGConfig, case_id: str):
     """Start the analysis for the given case."""
     starter_factory = AnalysisStarterFactory(context)
-    analysis_starter: AnalysisStarter = starter_factory.get_analysis_starter(case_id)
+    analysis_starter: AnalysisStarter = starter_factory.get_analysis_starter_for_case(case_id)
     analysis_starter.start(case_id)
 
 
@@ -152,7 +152,7 @@ def start(context: CGConfig, case_id: str):
 def run(context: CGConfig, case_id: str):
     """Start the analysis for the given case."""
     starter_factory = AnalysisStarterFactory(context)
-    analysis_starter: AnalysisStarter = starter_factory.get_analysis_starter(case_id)
+    analysis_starter: AnalysisStarter = starter_factory.get_analysis_starter_for_case(case_id)
     analysis_starter.run(case_id)
 
 
