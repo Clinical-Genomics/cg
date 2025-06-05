@@ -25,7 +25,7 @@ def test_start(
     mocker,
 ):
     """Test to ensure all parts of start command will run successfully given ideal conditions."""
-    caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.INFO)
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
     # GIVEN a case id

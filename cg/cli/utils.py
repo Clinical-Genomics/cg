@@ -4,6 +4,7 @@ import shutil
 import rich_click as click
 
 from cg.constants import Workflow
+from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
@@ -27,6 +28,7 @@ CLICK_CONTEXT_SETTINGS: dict[str, int] = {
 
 
 TOWER_WORKFLOW_TO_ANALYSIS_API_MAP: dict = {
+    Workflow.NALLO: NalloAnalysisAPI,
     Workflow.RAREDISEASE: RarediseaseAnalysisAPI,
     Workflow.RNAFUSION: RnafusionAnalysisAPI,
     Workflow.TAXPROFILER: TaxprofilerAnalysisAPI,

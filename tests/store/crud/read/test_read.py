@@ -314,7 +314,7 @@ def test_set_case_action(analysis_store: Store, case_id):
     assert action is None
 
     # When setting the case to "analyze"
-    analysis_store.set_case_action(case_internal_id=case_id, action="analyze")
+    analysis_store.update_case_action(case_internal_id=case_id, action="analyze")
     new_action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
 
     # Then the action should be set to analyze
@@ -520,11 +520,13 @@ def test_get_analysis_by_case_entry_id_and_started_at(
 ):
     """Test returning an analysis using a date."""
     # GIVEN a case with an analysis with a start date in the database
-    analysis = helpers.add_analysis(store=sample_store, started_at=timestamp_now)
+    analysis = helpers.add_analysis(
+        store=sample_store, started_at=timestamp_now, completed_at=timestamp_now
+    )
     assert analysis.started_at
 
     # WHEN getting analysis via case_id and start date
-    db_analysis = sample_store.get_analysis_by_case_entry_id_and_started_at(
+    db_analysis = sample_store.get_completed_analysis_by_case_entry_id_and_started_at(
         case_entry_id=analysis.case.id, started_at_date=analysis.started_at
     )
 

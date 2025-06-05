@@ -3,7 +3,7 @@
 import datetime as dt
 import logging
 from datetime import datetime
-from typing import Callable, Iterator, Literal
+from typing import Callable, Iterator
 
 from sqlalchemy.orm import Query, Session
 
@@ -160,9 +160,12 @@ class ReadHandler(BaseHandler):
             workflow=workflow,
         ).first()
 
-    def get_latest_analysis_to_upload_for_workflow(self, workflow: str = None) -> list[Analysis]:
+    def get_latest_analysis_to_upload_for_workflow(
+        self, workflow: Workflow | None = None
+    ) -> list[Analysis]:
         """Return latest not uploaded analysis for each case given a workflow."""
-        filter_functions: list[AnalysisFilter] = [
+        filter_functions: list[Callable] = [
+            AnalysisFilter.COMPLETED,
             AnalysisFilter.WITH_WORKFLOW,
             AnalysisFilter.IS_NOT_UPLOADED,
         ]
@@ -172,11 +175,12 @@ class ReadHandler(BaseHandler):
             workflow=workflow,
         ).all()
 
-    def get_analysis_by_case_entry_id_and_started_at(
+    def get_completed_analysis_by_case_entry_id_and_started_at(
         self, case_entry_id: int, started_at_date: dt.datetime
-    ) -> Analysis:
+    ) -> Analysis | None:
         """Fetch an analysis."""
-        filter_functions: list[AnalysisFilter] = [
+        filter_functions: list[Callable] = [
+            AnalysisFilter.COMPLETED,
             AnalysisFilter.BY_CASE_ENTRY_ID,
             AnalysisFilter.BY_STARTED_AT,
         ]
@@ -188,7 +192,7 @@ class ReadHandler(BaseHandler):
             started_at_date=started_at_date,
         ).first()
 
-    def get_analysis_by_entry_id(self, entry_id: int) -> Analysis:
+    def get_analysis_by_entry_id(self, entry_id: int) -> Analysis | None:
         """Return an analysis."""
         return apply_analysis_filter(
             filter_functions=[AnalysisFilter.BY_ENTRY_ID],
@@ -1120,14 +1124,6 @@ class ReadHandler(BaseHandler):
         ]
         return cases_to_analyze[:limit]
 
-    def set_case_action(
-        self, action: Literal[CaseActions.actions()], case_internal_id: str
-    ) -> None:
-        """Sets the action of provided cases to None or the given action."""
-        case: Case = self.get_case_by_internal_id(internal_id=case_internal_id)
-        case.action = action
-        self.session.commit()
-
     def get_cases_to_compress(self, date_threshold: datetime) -> list[Case]:
         """Return all cases that are ready to be compressed by SPRING."""
         case_filter_functions: list[CaseFilter] = [
@@ -1180,9 +1176,9 @@ class ReadHandler(BaseHandler):
             internal_id=internal_id,
         ).all()
 
-    def get_analyses_to_upload(self, workflow: Workflow = None) -> list[Analysis]:
+    def get_analyses_to_upload(self, workflow: Workflow | None = None) -> list[Analysis]:
         """Return analyses that have not been uploaded."""
-        analysis_filter_functions: list[AnalysisFilter] = [
+        analysis_filter_functions: list[Callable] = [
             AnalysisFilter.WITH_WORKFLOW,
             AnalysisFilter.COMPLETED,
             AnalysisFilter.IS_NOT_UPLOADED,
@@ -1196,10 +1192,11 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_analyses_to_clean(
-        self, before: datetime = datetime.now(), workflow: Workflow = None
+        self, before: datetime = datetime.now(), workflow: Workflow | None = None
     ) -> list[Analysis]:
         """Return analyses that haven't been cleaned."""
-        filter_functions: list[AnalysisFilter] = [
+        filter_functions: list[Callable] = [
+            AnalysisFilter.COMPLETED,
             AnalysisFilter.IS_UPLOADED,
             AnalysisFilter.IS_NOT_CLEANED,
             AnalysisFilter.STARTED_AT_BEFORE,
@@ -1214,11 +1211,12 @@ class ReadHandler(BaseHandler):
             started_at_date=before,
         ).all()
 
-    def get_analyses_for_workflow_started_at_before(
+    def get_completed_analyses_for_workflow_started_at_before(
         self, workflow: Workflow, started_at_before: datetime
     ) -> list[Analysis]:
         """Return all analyses for a workflow started before a certain date."""
-        filter_functions: list[AnalysisFilter] = [
+        filter_functions: list[Callable] = [
+            AnalysisFilter.COMPLETED,
             AnalysisFilter.WITH_WORKFLOW,
             AnalysisFilter.STARTED_AT_BEFORE,
         ]
@@ -1265,7 +1263,8 @@ class ReadHandler(BaseHandler):
             samples=self._get_join_analysis_sample_family_query(),
             filter_functions=[SampleFilter.IS_NOT_DELIVERED],
         )
-        filter_functions: list[AnalysisFilter] = [
+        filter_functions: list[Callable] = [
+            AnalysisFilter.COMPLETED,
             AnalysisFilter.IS_NOT_UPLOADED,
             AnalysisFilter.WITH_WORKFLOW,
             AnalysisFilter.ORDER_BY_UPLOADED_AT,
@@ -1280,7 +1279,8 @@ class ReadHandler(BaseHandler):
             cases=self._get_join_analysis_case_query(),
             filter_functions=[CaseFilter.REPORT_SUPPORTED],
         )
-        analysis_filter_functions: list[AnalysisFilter] = [
+        analysis_filter_functions: list[Callable] = [
+            AnalysisFilter.COMPLETED,
             AnalysisFilter.REPORT_BY_WORKFLOW,
             AnalysisFilter.WITHOUT_DELIVERY_REPORT,
             AnalysisFilter.VALID_IN_PRODUCTION,
@@ -1296,7 +1296,8 @@ class ReadHandler(BaseHandler):
             cases=self._get_join_analysis_case_query(),
             filter_functions=[CaseFilter.WITH_SCOUT_DELIVERY],
         )
-        analysis_filter_functions: list[AnalysisFilter] = [
+        analysis_filter_functions: list[Callable] = [
+            AnalysisFilter.COMPLETED,
             AnalysisFilter.REPORT_BY_WORKFLOW,
             AnalysisFilter.WITH_DELIVERY_REPORT,
             AnalysisFilter.IS_NOT_UPLOADED,

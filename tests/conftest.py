@@ -1923,7 +1923,7 @@ def hk_uri() -> str:
     return "sqlite:///"
 
 
-@pytest.fixture(name="context_config")
+@pytest.fixture
 def context_config(
     cg_uri: str,
     hk_uri: str,

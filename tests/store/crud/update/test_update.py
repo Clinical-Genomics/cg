@@ -190,3 +190,43 @@ def test_update_analysis_upload_started_at(
 
     # THEN the upload_started_at field is updated
     assert analysis.upload_started_at == timestamp_yesterday
+
+
+@pytest.mark.freeze_time
+def test_update_analysis_completed_at(store: Store, helpers: StoreHelpers):
+    """Test updating the completed at date for an analysis works properly."""
+    # GIVEN a store with an analysis that has not been completed
+    analysis: Analysis = helpers.add_analysis(store=store, completed_at=None)
+
+    # WHEN updating the completed at date for an analysis
+    store.update_analysis_completed_at(analysis_id=analysis.id, completed_at=datetime.now())
+
+    # THEN the completed at date for the analysis is updated
+    updated_analysis: Analysis = store.get_analysis_by_entry_id(analysis.id)
+    assert updated_analysis.completed_at == datetime.now()
+
+
+@pytest.mark.parametrize(
+    "old_comment, expected_comment",
+    [
+        (None, "This is a new comment."),
+        ("This is an old comment.", "This is an old comment.\nThis is a new comment."),
+    ],
+    ids=["no_existing_comment", "existing_comment"],
+)
+def test_update_analysis_comment(
+    store: Store,
+    helpers: StoreHelpers,
+    old_comment: str | None,
+    expected_comment: str,
+):
+    # GIVEN an analysis in store with a comment that may or may not exist
+    analysis: Analysis = helpers.add_analysis(store=store)
+    analysis.comment = old_comment
+
+    # WHEN updating the comment for an analysis
+    new_comment: str = "This is a new comment."
+    store.update_analysis_comment(analysis_id=analysis.id, comment=new_comment)
+
+    # THEN the comment for the analysis is updated
+    assert analysis.comment == expected_comment

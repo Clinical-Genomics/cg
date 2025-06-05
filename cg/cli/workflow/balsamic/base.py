@@ -116,11 +116,7 @@ def run(
         )
         if dry_run:
             return
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-        analysis_api.set_statusdb_action(case_id=case_id, action="running")
-    except CgError as error:
-        LOG.error(f"Could not run analysis: {error}")
-        raise click.Abort()
+        analysis_api.on_analysis_started(case_id)
     except Exception as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort()
@@ -169,7 +165,7 @@ def store_housekeeper(
         analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
         analysis_api.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
-        analysis_api.upload_bundle_statusdb(
+        analysis_api.update_analysis_as_completed_statusdb(
             case_id=case_id, comment=comment, dry_run=dry_run, force=force
         )
         analysis_api.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
