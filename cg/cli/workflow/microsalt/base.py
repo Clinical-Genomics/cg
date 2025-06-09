@@ -154,17 +154,13 @@ def run(
     if sample_id or dry_run:
         analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
         return
-    try:
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-    except Exception as error:
-        LOG.warning(
-            f"Trailblazer warning: Could not track analysis progress for case {case_id}! {error.__class__.__name__}"
-        )
+
     try:
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
         analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
-    except:
-        LOG.error("Failed to run analysis!")
+        analysis_api.on_analysis_started(case_id)
+    except Exception as error:
+        LOG.error(f"Failed to run analysis for case {case_id}: {error}")
         analysis_api.set_statusdb_action(case_id=case_id, action=None)
         raise
 

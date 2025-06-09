@@ -314,7 +314,7 @@ def test_set_case_action(analysis_store: Store, case_id):
     assert action is None
 
     # When setting the case to "analyze"
-    analysis_store.set_case_action(case_internal_id=case_id, action="analyze")
+    analysis_store.update_case_action(case_internal_id=case_id, action="analyze")
     new_action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
 
     # Then the action should be set to analyze
@@ -515,17 +515,19 @@ def test_get_user_when_email_is_none_returns_none(store_with_users: Store):
     assert filtered_user is None
 
 
-def test_get_analysis_by_case_entry_id_and_started_at(
+def test_get_analysis_by_case_entry_id_and_completed_at(
     sample_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test returning an analysis using a date."""
-    # GIVEN a case with an analysis with a start date in the database
-    analysis = helpers.add_analysis(store=sample_store, started_at=timestamp_now)
-    assert analysis.started_at
+    # GIVEN a case with an analysis with a completed date in the database
+    analysis = helpers.add_analysis(
+        store=sample_store, started_at=timestamp_now, completed_at=timestamp_now
+    )
+    assert analysis.completed_at
 
-    # WHEN getting analysis via case_id and start date
-    db_analysis = sample_store.get_analysis_by_case_entry_id_and_started_at(
-        case_entry_id=analysis.case.id, started_at_date=analysis.started_at
+    # WHEN getting analysis via case_id and completed date
+    db_analysis = sample_store.get_analysis_by_case_entry_id_and_completed_at(
+        case_entry_id=analysis.case.id, completed_at_date=analysis.completed_at
     )
 
     # THEN the analysis should have been retrieved
