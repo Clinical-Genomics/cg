@@ -15,7 +15,14 @@ from cg.constants.constants import (
     SampleType,
 )
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
-from cg.exc import CaseNotFoundError, CgDataError, CgError, OrderNotFoundError, SampleNotFoundError
+from cg.exc import (
+    AnalysisDoesNotExistError,
+    CaseNotFoundError,
+    CgDataError,
+    CgError,
+    OrderNotFoundError,
+    SampleNotFoundError,
+)
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import SexEnum
 from cg.server.dto.samples.requests import CollaboratorSamplesRequest
@@ -186,6 +193,19 @@ class ReadHandler(BaseHandler):
             case_entry_id=case_entry_id,
             completed_at_date=completed_at_date,
         ).first()
+
+    def get_latest_started_analysis_for_case(self, case_id: str) -> Analysis:
+        """Return the latest started analysis for a case.
+        Raises:
+            AnalysisDoesNotExistError if no analysis is found.
+        """
+        case: Case = self.get_case_by_internal_id(case_id)
+        analyses: list[Analysis] = case.analyses
+        if not analyses:
+            raise AnalysisDoesNotExistError(f"No analysis found for case {case_id}")
+        analyses.sort(key=lambda x: x.started_at, reverse=True)
+        analysis: Analysis | None = analyses[0]
+        return analysis
 
     def get_analysis_by_entry_id(self, entry_id: int) -> Analysis | None:
         """Return an analysis."""
