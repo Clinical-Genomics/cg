@@ -199,7 +199,7 @@ class ReadHandler(BaseHandler):
         Raises:
             AnalysisDoesNotExistError if no analysis is found.
         """
-        case: Case = self.get_case_by_internal_id(case_id)
+        case: Case | None = self.get_case_by_internal_id(case_id)
         analyses: list[Analysis] = case.analyses
         if not analyses:
             raise AnalysisDoesNotExistError(f"No analysis found for case {case_id}")
