@@ -166,7 +166,7 @@ WORKFLOW_PROTECTED_TAGS = {
         ["microsalt-version"],
         ["qc-report", "visualization"],
         ["typing-report", "visualization"],
-        ["typing-report", "qc-metrics"]
+        ["typing-report", "qc-metrics"],
     ],
     Workflow.MIP_DNA: [
         ["vcf-snv-clinical"],
