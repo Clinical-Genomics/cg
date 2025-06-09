@@ -12,6 +12,8 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisType
 from cg.exc import CgError
 from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
+from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
+from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
 
@@ -21,23 +23,31 @@ LOG = logging.getLogger(__name__)
 class Tracker(ABC):
     """Ensures tracking of started analyses. This mainly means exporting analyses to Trailblazer."""
 
-    def __init__(self, store: Store, trailblazer_api: TrailblazerAPI, workflow_config):
+    def __init__(
+        self,
+        store: Store,
+        subprocess_submitter: SubprocessSubmitter,
+        trailblazer_api: TrailblazerAPI,
+        workflow_config,
+    ):
         self.store = store
+        self.subprocess_submitter = subprocess_submitter
         self.trailblazer_api = trailblazer_api
         self.workflow_config = workflow_config
 
     def ensure_analysis_not_ongoing(self, case_id: str) -> None:
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id):
-            LOG.warning(f"{case_id} : analysis is still ongoing - skipping")
             raise CgError(f"Analysis still ongoing in Trailblazer for case {case_id}")
 
     def track(
         self,
-        case_id: str,
+        case_config: CaseConfig,
         tower_workflow_id: str | None = None,
     ) -> None:
-        tb_analysis: TrailblazerAnalysis = self._track_in_trailblazer(case_id, tower_workflow_id)
-        self._create_analysis_statusdb(case_id=case_id, trailblazer_id=tb_analysis.id)
+        tb_analysis: TrailblazerAnalysis = self._track_in_trailblazer(
+            case_id=case_config.case_id, tower_workflow_id=tower_workflow_id
+        )
+        self._create_analysis_statusdb(case_config=case_config, trailblazer_id=tb_analysis.id)
 
     def _track_in_trailblazer(
         self, case_id: str, tower_workflow_id: int | None
@@ -65,13 +75,16 @@ class Tracker(ABC):
             is_hidden=is_case_for_development,
         )
 
-    def _create_analysis_statusdb(self, case_id: str, trailblazer_id: int | None) -> None:
+    def _create_analysis_statusdb(
+        self, case_config: CaseConfig, trailblazer_id: int | None
+    ) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
+        case_id: str = case_config.case_id
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
         case: Case = self.store.get_case_by_internal_id(case_id)
         is_primary: bool = len(case.analyses) == 0
         analysis_start: datetime = datetime.now()
-        workflow_version: str = self.get_workflow_version(case)
+        workflow_version: str = self.subprocess_submitter.get_workflow_version(case_config)
         new_analysis: Analysis = self.store.add_analysis(
             workflow=Workflow(case.data_analysis),
             version=workflow_version,
@@ -84,17 +97,6 @@ class Tracker(ABC):
         self.store.add_item_to_store(new_analysis)
         self.store.commit_to_store()
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
-
-    def get_workflow_version(self, case: Case) -> str:
-        """
-        Calls the workflow to get the workflow version number. If fails, returns a placeholder value instead.
-        """
-        try:
-            self.process.run_command(["--version"])
-            return list(self.process.stdout_lines())[0].split()[-1]
-        except (Exception, CalledProcessError):
-            LOG.warning(f"Could not retrieve {self.workflow} workflow version!")
-            return "0.0.0"
 
     def _get_analysis_type(self, case_id: str) -> str:
         """

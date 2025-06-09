@@ -215,12 +215,14 @@ class AnalysisStarterFactory:
         if workflow in NEXTFLOW_WORKFLOWS:
             return NextflowTracker(
                 store=self.store,
+                subprocess_submitter=SubprocessSubmitter(),
                 trailblazer_api=self.cg_config.trailblazer_api,
                 workflow_config=getattr(self.cg_config, workflow),
             )
         if workflow == Workflow.MICROSALT:
             return MicrosaltTracker(
                 store=self.store,
+                subprocess_submitter=SubprocessSubmitter(),
                 trailblazer_api=self.cg_config.trailblazer_api,
                 workflow_config=self.cg_config.microsalt,
             )
