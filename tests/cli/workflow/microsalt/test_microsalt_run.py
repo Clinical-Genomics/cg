@@ -1,9 +1,9 @@
 """This file groups all tests related to microsalt start creation"""
 
 from pathlib import Path
-from unittest import mock
 
 from click.testing import CliRunner
+from pytest_mock import mocker
 
 from cg.cli.workflow.microsalt.base import run
 from cg.constants import Workflow
@@ -33,18 +33,16 @@ def test_run_raises_error_if_not_configured(cli_runner: CliRunner, base_context:
     case_id = "some_case_id"
 
     # GIVEN that the case has a workflow and no ongoing analysis
-    with (
-        mock.patch.object(Store, "get_case_workflow", return_value=Workflow.MICROSALT),
-        mock.patch.object(Tracker, "ensure_analysis_not_ongoing", return_value=None),
-    ):
+    mocker.patch.object(Store, "get_case_workflow", return_value=Workflow.MICROSALT)
+    mocker.patch.object(Tracker, "ensure_analysis_not_ongoing", return_value=None)
 
-        # GIVEN that the config file does not exist
+    # GIVEN that the config file does not exist
 
-        # WHEN running the case
-        result = cli_runner.invoke(run, [case_id], obj=base_context)
+    # WHEN running the case
+    result = cli_runner.invoke(run, [case_id], obj=base_context)
 
-        # THEN an error should be raised
-        assert isinstance(result.exception, CaseNotConfiguredError)
+    # THEN an error should be raised
+    assert isinstance(result.exception, CaseNotConfiguredError)
 
 
 def test_run_tracks_case(cli_runner: CliRunner, base_context: CGConfig):
@@ -54,16 +52,14 @@ def test_run_tracks_case(cli_runner: CliRunner, base_context: CGConfig):
     # GIVEN that the case has a workflow and no ongoing analysis _and_ is configured
 
     # GIVEN that the case is submitted successfully
-    with (
-        mock.patch.object(Store, "get_case_workflow", return_value=Workflow.MICROSALT),
-        mock.patch.object(Tracker, "ensure_analysis_not_ongoing", return_value=None),
-        mock.patch.object(Path, "exists", return_value=True),
-        mock.patch.object(SubprocessSubmitter, "submit", return_value=None),
-        mock.patch.object(Tracker, "track") as track_mock,
-    ):
+    mocker.patch.object(Store, "get_case_workflow", return_value=Workflow.MICROSALT)
+    mocker.patch.object(Tracker, "ensure_analysis_not_ongoing", return_value=None)
+    mocker.patch.object(Path, "exists", return_value=True)
+    mocker.patch.object(SubprocessSubmitter, "submit", return_value=None)
+    track_mock = mocker.patch.object(Tracker, "track")
 
-        # WHEN running the case
-        cli_runner.invoke(run, [case_id], obj=base_context)
+    # WHEN running the case
+    cli_runner.invoke(run, [case_id], obj=base_context)
 
-        # THEN the progress should be tracked
-        track_mock.assert_called_once_with()
+    # THEN the progress should be tracked
+    track_mock.assert_called_once_with()
