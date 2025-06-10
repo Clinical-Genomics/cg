@@ -9,6 +9,7 @@ from cg.constants.constants import Workflow, WorkflowManager
 from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
 from cg.store.models import Case
@@ -26,8 +27,16 @@ def microsalt_tracker(cg_context: CGConfig, microsalt_store: Store):
 
 
 def test_microsalt_tracker_successful(microsalt_tracker: MicrosaltTracker, microsalt_store: Store):
-    # GIVEN a microSALT case
-    case_id: str = "microparakeet"
+    # GIVEN a microSALT case config
+    case_config = MicrosaltCaseConfig(
+        case_id="microparakeet",
+        binary="binary",
+        conda_binary="conda/binary",
+        config_file="config/file",
+        environment="stage",
+        fastq_directory="fastq/dir",
+    )
+    case_id: str = case_config.case_id
 
     # WHEN wanting to track the started microSALT analysis
     with mock.patch.object(
@@ -42,7 +51,7 @@ def test_microsalt_tracker_successful(microsalt_tracker: MicrosaltTracker, micro
             "config_path": "",
         },
     ) as request_submitter:
-        microsalt_tracker.track(case_id=case_id)
+        microsalt_tracker.track(case_config)
 
     # THEN the appropriate POST should have been sent
     case: Case = microsalt_store.get_case_by_internal_id(case_id)
