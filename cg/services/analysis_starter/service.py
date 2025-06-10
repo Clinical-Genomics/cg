@@ -35,10 +35,10 @@ class AnalysisStarter:
         self.store.update_case_action(case_internal_id=case_id, action=CaseActions.RUNNING)
         try:
             tower_workflow_id: str | None = self.submitter.submit(parameters)
-            self.tracker.track(case_id=case_id, tower_workflow_id=tower_workflow_id)
+            self.tracker.track(case_config=parameters, tower_workflow_id=tower_workflow_id)
         except CalledProcessError as exception:
-            LOG.error(exception)
             self.store.update_case_action(case_internal_id=case_id, action=None)
+            raise exception
 
     def run(self, case_id: str, **flags):
         """Run a case using an assumed existing configuration."""
@@ -46,7 +46,7 @@ class AnalysisStarter:
         parameters: CaseConfig = self.configurator.get_config(case_id=case_id, **flags)
         try:
             tower_workflow_id: str | None = self.submitter.submit(parameters)
-            self.tracker.track(case_id=case_id, tower_workflow_id=tower_workflow_id)
+            self.tracker.track(case_config=parameters, tower_workflow_id=tower_workflow_id)
         except CalledProcessError as exception:
-            LOG.error(exception)
             self.store.update_case_action(case_internal_id=case_id, action=None)
+            raise exception
