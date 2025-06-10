@@ -9,6 +9,7 @@ from cg.constants.constants import Workflow, WorkflowManager
 from cg.constants.tb import AnalysisType
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import StatusEnum
+from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
 from cg.store.models import Case, CaseSample, Customer, Order
 from cg.store.store import Store
@@ -33,6 +34,7 @@ def nextflow_tracker(cg_context: CGConfig, helpers: StoreHelpers, raredisease_ca
     store.commit_to_store()
     return NextflowTracker(
         store=cg_context.status_db,
+        subprocess_submitter=SubprocessSubmitter(),
         trailblazer_api=cg_context.trailblazer_api,
         workflow_config=cg_context.raredisease,
     )

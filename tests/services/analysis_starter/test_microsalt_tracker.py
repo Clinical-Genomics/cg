@@ -9,6 +9,7 @@ from cg.constants.constants import Workflow, WorkflowManager
 from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
 from cg.store.models import Case
 from cg.store.store import Store
@@ -18,6 +19,7 @@ from cg.store.store import Store
 def microsalt_tracker(cg_context: CGConfig, microsalt_store: Store):
     return MicrosaltTracker(
         store=microsalt_store,
+        subprocess_submitter=SubprocessSubmitter(),
         trailblazer_api=cg_context.trailblazer_api,
         workflow_config=cg_context.microsalt,
     )

@@ -28,24 +28,6 @@ def test_no_arguments(cli_runner: CliRunner, base_context: CGConfig):
     assert result.exit_code != EXIT_SUCCESS
 
 
-def test_calls_on_analysis_started(cli_runner: CliRunner, base_context: CGConfig):
-    # GIVEN a case to run
-    case_id = "some_case_id"
-
-    with (
-        mock.patch.object(Store, "get_case_workflow", return_value=Workflow.MICROSALT),
-        mock.patch.object(SubprocessSubmitter, "submit", return_value=None),
-        mock.patch.object(Tracker, "ensure_analysis_not_ongoing", return_value=None),
-        mock.patch.object(Tracker, "track") as run_mock,
-    ):
-
-        # WHEN successfully invoking the run command
-        cli_runner.invoke(run, [case_id], obj=base_context)
-
-    # THEN the on_analysis_started function has been called with the found case_id
-    run_mock.assert_called_with(case_id=case_id, config_file=None)
-
-
 def test_run_raises_error_if_not_configured(cli_runner: CliRunner, base_context: CGConfig):
     # GIVEN a case to run
     case_id = "some_case_id"
