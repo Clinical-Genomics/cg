@@ -2,11 +2,13 @@
 
 from datetime import datetime
 
+import pytest
 from sqlalchemy.orm import Query
 
 from cg.constants import Workflow
 from cg.constants.constants import CaseActions
 from cg.constants.subject import PhenotypeStatus
+from cg.exc import AnalysisDoesNotExistError
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -512,3 +514,34 @@ def test_get_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_older_
 
     # THEN cases should not contain the test case
     assert test_case not in cases_to_analyze
+
+
+def test_get_latest_started_analysis_for_case(base_store: Store, helpers: StoreHelpers):
+    """Test returning the latest started analysis for a case."""
+    # GIVEN a store with multiple analyses for a case
+    test_case: Case = helpers.add_case(store=base_store, name="test_case")
+    test_analysis_1: Analysis = helpers.add_analysis(
+        store=base_store, case=test_case, started_at=datetime(2023, 1, 1, 0, 0, 0)
+    )
+    test_analysis_2: Analysis = helpers.add_analysis(
+        store=base_store, case=test_case, started_at=datetime(2023, 1, 2, 0, 0, 0)
+    )
+
+    # WHEN fetching the latest started analysis for a case
+    latest_analysis: Analysis = base_store.get_latest_started_analysis_for_case(
+        case_id=test_case.internal_id
+    )
+
+    # THEN the latest started analysis should be returned
+    assert latest_analysis == test_analysis_2
+
+
+def test_get_latest_started_analysis_for_case_no_analyses(base_store: Store, helpers: StoreHelpers):
+    """Test that returning the latest analysis for a case without analyses fails."""
+    # GIVEN a store with no analyses for a case
+    test_case: Case = helpers.add_case(store=base_store, name="test_case")
+
+    # WHEN fetching the latest started analysis for a case
+    with pytest.raises(AnalysisDoesNotExistError):
+        # THEN an AnalysisDoesNotExistError should be raised
+        base_store.get_latest_started_analysis_for_case(case_id=test_case.internal_id)
