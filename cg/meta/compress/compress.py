@@ -1,5 +1,5 @@
 """
-    API for compressing files. Functionality to compress FASTQ, decompress SPRING and clean files
+API for compressing files. Functionality to compress FASTQ, decompress SPRING and clean files
 """
 
 import logging
@@ -145,6 +145,32 @@ class CompressAPI:
             self.crunchy_api.spring_to_fastq(compression_obj=compression, sample_id=sample_id)
             update_metadata_date(spring_metadata_path=compression.spring_metadata_path)
         return True
+
+    def clean_selected_fastq_files(self, samples: list[Sample], dry_run: bool = False) -> None:
+        """Clean FASTQ files for selected cases.
+
+        This means removing compressed FASTQ files and update housekeeper to point to the new SPRING
+        file and its metadata file.
+        """
+        for sample in samples:
+            sample_id: str = sample.internal_id
+            if self.is_sample_linked_to_newer_case(sample_id=sample_id):
+                LOG.info(
+                    f"Skipping sample {sample_id} as it is linked to a case not eligible for cleaning"
+                )
+                continue
+            archive_location: str = sample.archive_location
+            try:
+                was_cleaned: bool = self.clean_fastq(
+                    sample_id=sample_id, archive_location=archive_location
+                )
+                if not was_cleaned:
+                    LOG.debug(
+                        f"Skipping sample {sample_id} because the bundle version or FASTQ files were not present"
+                    )
+                    continue
+            except Exception as error:
+                LOG.error(f"Could not clean sample {sample_id}: {error}")
 
     def clean_fastq(self, sample_id: str, archive_location: str) -> bool:
         """Check that FASTQ compression is completed for a case and clean.
