@@ -59,11 +59,11 @@ def test_run_tracks_case(cli_runner: CliRunner, base_context: CGConfig):
         mock.patch.object(Tracker, "ensure_analysis_not_ongoing", return_value=None),
         mock.patch.object(Path, "exists", return_value=True),
         mock.patch.object(SubprocessSubmitter, "submit", return_value=None),
-        mock.patch.object(Tracker, "track") as run_mock,
+        mock.patch.object(Tracker, "track") as track_mock,
     ):
 
         # WHEN running the case
         cli_runner.invoke(run, [case_id], obj=base_context)
 
         # THEN the progress should be tracked
-        run_mock.assert_called_once()
+        track_mock.assert_called_once_with()

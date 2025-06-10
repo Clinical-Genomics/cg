@@ -6,7 +6,7 @@ from pathlib import Path
 from cg.apps.environ import environ_email
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.constants.constants import CustomerId, Workflow
+from cg.constants.constants import CaseActions, CustomerId, Workflow
 from cg.constants.priority import TrailblazerPriority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisType
@@ -28,16 +28,12 @@ class Tracker(ABC):
         store: Store,
         subprocess_submitter: SubprocessSubmitter,
         trailblazer_api: TrailblazerAPI,
-        workflow_config,
+        workflow_root: str,
     ):
         self.store = store
         self.subprocess_submitter = subprocess_submitter
         self.trailblazer_api = trailblazer_api
-        self.workflow_config = workflow_config
-
-    def ensure_analysis_not_ongoing(self, case_id: str) -> None:
-        if self.trailblazer_api.is_latest_analysis_ongoing(case_id):
-            raise CgError(f"Analysis still ongoing in Trailblazer for case {case_id}")
+        self.workflow_root = workflow_root
 
     def track(
         self,
@@ -48,6 +44,16 @@ class Tracker(ABC):
             case_id=case_config.case_id, tower_workflow_id=tower_workflow_id
         )
         self._create_analysis_statusdb(case_config=case_config, trailblazer_id=tb_analysis.id)
+
+    def ensure_analysis_not_ongoing(self, case_id: str) -> None:
+        if self.trailblazer_api.is_latest_analysis_ongoing(case_id):
+            raise CgError(f"Analysis still ongoing in Trailblazer for case {case_id}")
+
+    def set_case_as_running(self, case_id: str) -> None:
+        self.store.update_case_action(case_internal_id=case_id, action=CaseActions.RUNNING)
+
+    def set_case_as_not_running(self, case_id: str) -> None:
+        self.store.update_case_action(case_internal_id=case_id, action=None)
 
     def _track_in_trailblazer(
         self, case_id: str, tower_workflow_id: int | None
@@ -128,5 +134,5 @@ class Tracker(ABC):
         pass
 
     @abstractmethod
-    def _get_job_ids_path(self, case_id):
+    def _get_job_ids_path(self, case_id: str):
         pass
