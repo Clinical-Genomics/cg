@@ -11,7 +11,7 @@ from cg.constants.constants import CustomerId
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.sample_sources import SourceType
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import LoqusdbUploadCaseError, AnalysisNotCompletedError
+from cg.exc import AnalysisNotCompletedError, LoqusdbUploadCaseError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import (
