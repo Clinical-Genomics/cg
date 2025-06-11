@@ -2,11 +2,13 @@
 
 from datetime import datetime
 
+import pytest
 from sqlalchemy.orm import Query
 
 from cg.constants import Workflow
 from cg.constants.constants import CaseActions
 from cg.constants.subject import PhenotypeStatus
+from cg.exc import AnalysisDoesNotExistError, AnalysisNotCompletedError
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -423,7 +425,7 @@ def test_get_analyses_for_workflow_before(
 
     # WHEN getting all analyses before a given date
     analyses: list[Analysis] = (
-        store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_workflow_started_at_before(
+        store_with_analyses_for_cases_not_uploaded_fluffy.get_completed_analyses_for_workflow_started_at_before(
             workflow=workflow, started_at_before=timestamp_now
         )
     )
@@ -512,3 +514,79 @@ def test_get_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_older_
 
     # THEN cases should not contain the test case
     assert test_case not in cases_to_analyze
+
+
+def test_get_latest_started_analysis_for_case(base_store: Store, helpers: StoreHelpers):
+    """Test returning the latest started analysis for a case."""
+    # GIVEN a store with multiple analyses for a case
+    test_case: Case = helpers.add_case(store=base_store, name="test_case")
+    helpers.add_analysis(store=base_store, case=test_case, started_at=datetime(2023, 1, 1, 0, 0, 0))
+    expected_analysis: Analysis = helpers.add_analysis(
+        store=base_store, case=test_case, started_at=datetime(2023, 1, 2, 0, 0, 0)
+    )
+
+    # WHEN fetching the latest started analysis for a case
+    latest_analysis: Analysis = base_store.get_latest_started_analysis_for_case(
+        case_id=test_case.internal_id
+    )
+
+    # THEN the latest started analysis should be returned
+    assert latest_analysis == expected_analysis
+
+
+def test_get_latest_started_analysis_for_case_no_analyses(base_store: Store, helpers: StoreHelpers):
+    """Test that returning the latest analysis for a case without analyses fails."""
+    # GIVEN a store with no analyses for a case
+    test_case: Case = helpers.add_case(store=base_store, name="test_case")
+
+    # WHEN fetching the latest started analysis for a case
+    with pytest.raises(AnalysisDoesNotExistError):
+        # THEN an AnalysisDoesNotExistError should be raised
+        base_store.get_latest_started_analysis_for_case(case_id=test_case.internal_id)
+
+
+def test_get_latest_completed_analysis_for_case(base_store: Store, helpers: StoreHelpers):
+    """Test returning the latest completed analysis for a case."""
+    # GIVEN a store with multiple analyses for a case
+    test_case: Case = helpers.add_case(store=base_store, name="test_case")
+    helpers.add_analysis(
+        store=base_store, case=test_case, completed_at=datetime(2023, 1, 1, 0, 0, 0)
+    )
+    expected_analysis: Analysis = helpers.add_analysis(
+        store=base_store, case=test_case, completed_at=datetime(2023, 1, 2, 0, 0, 0)
+    )
+
+    # WHEN fetching the latest completed analysis for a case
+    latest_analysis: Analysis = base_store.get_latest_completed_analysis_for_case(
+        case_id=test_case.internal_id
+    )
+
+    # THEN the latest completed analysis should be returned
+    assert latest_analysis == expected_analysis
+
+
+def test_get_latest_completed_analysis_for_case_no_analyses(
+    base_store: Store, helpers: StoreHelpers
+):
+    """Test that returning the latest analysis for a case without analyses fails."""
+    # GIVEN a store with no analyses for a case
+    test_case: Case = helpers.add_case(store=base_store, name="test_case")
+
+    # WHEN fetching the latest completed analysis for a case
+    with pytest.raises(AnalysisDoesNotExistError):
+        # THEN an AnalysisDoesNotExistError should be raised
+        base_store.get_latest_completed_analysis_for_case(case_id=test_case.internal_id)
+
+
+def test_get_latest_completed_analysis_for_case_no_completed_analysis(
+    base_store: Store, helpers: StoreHelpers
+):
+    """Test that returning the latest analysis for a case without completed analyses fails."""
+    # GIVEN a store with no completed analyses for a case
+    test_case: Case = helpers.add_case(store=base_store, name="test_case")
+    helpers.add_analysis(store=base_store, case=test_case, completed_at=None)
+
+    # WHEN fetching the latest completed analysis for a case
+    with pytest.raises(AnalysisNotCompletedError):
+        # THEN an AnalysisDoesNotExistError should be raised
+        base_store.get_latest_completed_analysis_for_case(case_id=test_case.internal_id)

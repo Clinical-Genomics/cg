@@ -1,7 +1,11 @@
 from pathlib import Path
+from unittest.mock import create_autospec
+
+import requests
+from requests import Response
 
 from cg.constants.constants import FileFormat
-from cg.io.controller import ReadFile, ReadStream, WriteFile, WriteStream
+from cg.io.controller import APIRequest, ReadFile, ReadStream, WriteFile, WriteStream
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 
@@ -291,3 +295,22 @@ def test_write_csv_stream_from_content(csv_stream: str):
 
     # THEN assert all data is kept and in csv format
     assert csv_stream + "\n" == csv_content
+
+
+def test_api_request_from_content(mocker):
+    # GIVEN an api that returns a succesful response
+    mock_response: Response = create_autospec(Response)
+    mocker.patch.object(requests, "post", return_value=mock_response)
+    url = "http://localhost"
+
+    headers: dict[str, str] = {"some": "header"}
+    json: dict[str, str] = {"json": "content"}
+
+    # WHEN sending a request to the api
+    response: Response = APIRequest.api_request_from_content(
+        "POST", url=url, headers=headers, json=json, verify=True
+    )
+
+    # THEN the api was correctly called and the response is returned
+    requests.post.assert_called_with(url=url, headers=headers, json=json, verify=True)
+    assert response == mock_response

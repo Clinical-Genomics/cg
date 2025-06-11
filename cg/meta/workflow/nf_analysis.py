@@ -567,7 +567,8 @@ class NfAnalysisAPI(AnalysisAPI):
                 use_nextflow=use_nextflow,
                 dry_run=dry_run,
             )
-            self.set_statusdb_action(case_id=case_id, action=CaseActions.RUNNING, dry_run=dry_run)
+            if not dry_run:
+                self.on_analysis_started(case_id=case_id, tower_workflow_id=tower_workflow_id)
         except FileNotFoundError as error:
             LOG.error(f"Could not resume analysis: {error}")
             raise FileNotFoundError
@@ -577,12 +578,6 @@ class NfAnalysisAPI(AnalysisAPI):
         except CgError as error:
             LOG.error(f"Could not run analysis: {error}")
             raise CgError
-
-        if not dry_run:
-            self.add_pending_trailblazer_analysis(
-                case_id=case_id,
-                tower_workflow_id=tower_workflow_id,
-            )
 
     def run_analysis(
         self,
@@ -864,7 +859,7 @@ class NfAnalysisAPI(AnalysisAPI):
             self.trailblazer_api.verify_latest_analysis_is_completed(case_id=case_id, force=force)
             self.verify_deliverables_file_exists(case_id)
             self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
-            self.upload_bundle_statusdb(
+            self.update_analysis_as_completed_statusdb(
                 case_id=case_id, comment=comment, dry_run=dry_run, force=force
             )
             self.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)

@@ -87,7 +87,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     LOG.info("Create load config")
     try:
         scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(
-            analysis=case.analyses[0]
+            analysis=status_db.get_latest_completed_analysis_for_case(case.internal_id),
         )
     except SyntaxError as error:
         LOG.warning(repr(error))

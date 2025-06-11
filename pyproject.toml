@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "cg"
-version = "70.0.8"
+version = "71.0.6"
 description = "Clinical Genomics command center"
 readme = {file = "README.md", content-type = "text/markdown"}
 homepage = "https://github.com/Clinical-Genomics/cg"
@@ -68,6 +68,7 @@ mock = ["mock"]
 pre-commit = ["pre-commit"]
 pytest-cov = ["pytest-cov"]
 pytest-mock = ["pytest-mock"]
+pytest-freezegun = ["pytest-freezegun"]
 pytest = ["pytest"]
 ruff = ["ruff"]
 pytest-xdist = ["pytest-xdist"]
