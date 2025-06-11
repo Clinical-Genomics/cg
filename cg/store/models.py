@@ -479,7 +479,7 @@ class Case(Base, PriorityMixin):
     tickets: Mapped[VarChar128 | None]
 
     analyses: Mapped[list[Analysis]] = orm.relationship(
-        back_populates="case", order_by="-Analysis.completed_at"
+        back_populates="case", order_by="-Analysis.created_at"
     )
     links: Mapped[list["CaseSample"]] = orm.relationship(back_populates="case")
     orders: Mapped[list["Order"]] = orm.relationship(secondary=order_case, back_populates="cases")
@@ -517,7 +517,12 @@ class Case(Base, PriorityMixin):
 
     @property
     def latest_analyzed(self) -> datetime | None:
-        return self.analyses[0].completed_at if self.analyses else None
+        if not self.analyses:
+            return None
+        sorted_analyses: list[Analysis] = sorted(
+            self.analyses, key=lambda analysis: analysis.completed_at, reverse=True
+        )
+        return sorted_analyses[0].completed_at
 
     @property
     def latest_sequenced(self) -> datetime | None:

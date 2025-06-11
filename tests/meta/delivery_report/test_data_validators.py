@@ -31,7 +31,7 @@ def test_get_empty_report_data(
 
     # GIVEN a delivery report data model
     report_data: ReportModel = raredisease_delivery_report_api.get_report_data(
-        case_id=raredisease_case_id, analysis_date=case.analyses[0].completed_at
+        case_id=raredisease_case_id, analysis_date=case.latest_analyzed
     )
 
     # GIVEN empty fields
@@ -74,7 +74,7 @@ def test_get_missing_report_data(
 
     # GIVEN a report data model
     report_data: ReportModel = raredisease_delivery_report_api.get_report_data(
-        raredisease_case_id, case.analyses[0].completed_at
+        raredisease_case_id, case.latest_analyzed
     )
 
     # GIVEN a dictionary of report empty fields and a list of required MIP DNA report fields
