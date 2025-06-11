@@ -11,7 +11,7 @@ from cg.constants.constants import CustomerId
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.sample_sources import SourceType
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import LoqusdbUploadCaseError
+from cg.exc import LoqusdbUploadCaseError, AnalysisNotCompletedError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import (
@@ -19,7 +19,7 @@ from cg.models.observations.input_files import (
     MipDNAObservationsInputFiles,
     RarediseaseObservationsInputFiles,
 )
-from cg.store.models import Analysis, Case
+from cg.store.models import Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -62,7 +62,11 @@ class ObservationsAPI:
         | RarediseaseObservationsInputFiles
     ):
         """Return input files from a case to upload to Loqusdb."""
-        hk_version: Version = self.housekeeper_api.version(case.internal_id, case.latest_analyzed)
+        if not case.latest_analyzed:
+            raise AnalysisNotCompletedError(f"Case {case.internal_id} has no completed analyses")
+        hk_version: Version = self.housekeeper_api.version(
+            bundle=case.internal_id, date=case.latest_analyzed
+        )
         return self.get_observations_files_from_hk(hk_version=hk_version, case_id=case.internal_id)
 
     def get_loqusdb_api(self, loqusdb_instance: LoqusdbInstance) -> LoqusdbAPI:
