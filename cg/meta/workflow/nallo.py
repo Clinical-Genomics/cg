@@ -19,7 +19,9 @@ from cg.constants.nf_analysis import (
     NALLO_COVERAGE_FILE_TAGS,
     NALLO_COVERAGE_INTERVAL_TYPE,
     NALLO_COVERAGE_THRESHOLD,
-    NALLO_METRIC_CONDITIONS, NALLO_PARENT_PEDDY_METRIC_CONDITION,
+    NALLO_GENERAL_METRIC_CONDITIONS,
+    NALLO_PARENT_PEDDY_METRIC_CONDITION,
+    NALLO_RAW_METRIC_CONDITIONS,
 )
 from cg.constants.scout import NALLO_CASE_TAGS, ScoutExportFileName
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
@@ -164,7 +166,8 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         """Return Nallo workflow metric conditions for a sample."""
         sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
         if "-" not in sample_id:
-            metric_conditions: dict[str, dict[str, Any]] = NALLO_METRIC_CONDITIONS
+            metric_conditions: dict[str, dict[str, Any]] = NALLO_GENERAL_METRIC_CONDITIONS
+            metric_conditions.update(NALLO_RAW_METRIC_CONDITIONS)
             self.set_order_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
         else:
             metric_conditions = NALLO_PARENT_PEDDY_METRIC_CONDITION.copy()
