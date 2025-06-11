@@ -1,7 +1,6 @@
 import logging
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
 from cg.constants import Workflow
 from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.meta.archive.archive import SpringArchiveAPI
@@ -32,7 +31,6 @@ class AnalysisStarterFactory:
         self.cg_config = cg_config
         self.configurator_factory = ConfiguratorFactory(cg_config)
         self.housekeeper_api: HousekeeperAPI = cg_config.housekeeper_api
-        self.lims_api: LimsAPI = cg_config.lims_api
         self.store: Store = cg_config.status_db
 
     def get_analysis_starter_for_case(self, case_id: str) -> AnalysisStarter:
