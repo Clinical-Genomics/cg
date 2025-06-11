@@ -221,26 +221,21 @@ def test_clean_selected_fastq_files(
 
     # GIVEN a sample linked to two cases one being not eligible for cleaning
     sample: Sample = helpers.add_sample(store=base_store, internal_id="sample1")
-    # case1: Case = helpers.ensure_case(store=base_store, case_id="case1", case_name="case1")
     case1: Case = helpers.add_case_with_sample(
         base_store=base_store, case_id="case1", sample_id="sample1"
     )
     case1.created_at = datetime(2023, 1, 1, 12, 0, 0)
-    # case2: Case = helpers.ensure_case(store=base_store, case_id="case2", case_name="case2")
     case2: Case = helpers.add_case_with_sample(
         base_store=base_store, case_id="case2", sample_id="sample1"
     )
     case2.created_at = datetime.now()
-
-    helpers.add_case_with_sample
-
     sample.cases = [case1, case2]
 
-    # WHEN calling clean_fastq with a days_back threshold
+    # WHEN calling clean_selected_fastq_files with a days_back threshold
     with mock.patch.object(CompressAPI, "clean_fastq") as clean_fastq_mock:
         populated_compress_fastq_api.clean_selected_fastq_files(
             samples=[sample],
             days_back=60,
         )
-        # THEN assert that the clean_fastq mock was not called
+        # THEN assert that the clean_fastq_mock was not called
         clean_fastq_mock.assert_not_called()
