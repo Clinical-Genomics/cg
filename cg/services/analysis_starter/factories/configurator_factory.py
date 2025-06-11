@@ -1,4 +1,3 @@
-import logging
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -6,8 +5,6 @@ from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
 from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
-from cg.meta.archive.archive import SpringArchiveAPI
-from cg.meta.compress import CompressAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
@@ -41,67 +38,23 @@ from cg.services.analysis_starter.configurator.implementations.microsalt import 
     MicrosaltConfigurator,
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
-from cg.services.analysis_starter.constants import FASTQ_WORKFLOWS
-from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
-from cg.services.analysis_starter.input_fetcher.input_fetcher import InputFetcher
-from cg.services.analysis_starter.service import AnalysisStarter
-from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
-from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
-    SeqeraPlatformSubmitter,
-)
-from cg.services.analysis_starter.submitters.submitter import Submitter
-from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
-from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
-from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
-from cg.services.analysis_starter.tracker.tracker import Tracker
 from cg.store.store import Store
 
-LOG = logging.getLogger(__name__)
 
+class ConfiguratorFactory:
 
-class AnalysisStarterFactory:
     def __init__(self, cg_config: CGConfig):
         self.cg_config = cg_config
         self.housekeeper_api: HousekeeperAPI = cg_config.housekeeper_api
         self.lims_api: LimsAPI = cg_config.lims_api
         self.store: Store = cg_config.status_db
 
-    def get_analysis_starter_for_case(self, case_id: str) -> AnalysisStarter:
-        LOG.debug(f"Getting analysis starter for {case_id}")
-        workflow: Workflow = self.store.get_case_workflow(case_id)
-        return self.get_analysis_starter_for_workflow(workflow)
-
-    def get_analysis_starter_for_workflow(self, workflow: Workflow):
-        LOG.debug(f"Getting a {workflow} analysis starter")
-        configurator: Configurator = self._get_configurator(workflow)
-        input_fetcher: InputFetcher = self._get_input_fetcher(workflow)
-        submitter: Submitter = self._get_submitter(workflow)
-        tracker: Tracker = self._get_tracker(workflow)
-        return AnalysisStarter(
-            configurator=configurator,
-            input_fetcher=input_fetcher,
-            submitter=submitter,
-            tracker=tracker,
-        )
-
-    def _get_configurator(self, workflow: Workflow) -> Configurator:
+    def get_configurator(self, workflow: Workflow) -> Configurator:
         if workflow in NEXTFLOW_WORKFLOWS:
             return self._get_nextflow_configurator(workflow)
         elif workflow == Workflow.MICROSALT:
             return self._get_microsalt_configurator()
-
-    def _get_microsalt_configurator(self):
-        return MicrosaltConfigurator(
-            config_file_creator=self._get_microsalt_config_file_creator(),
-            fastq_handler=MicrosaltFastqHandler(
-                housekeeper_api=self.housekeeper_api,
-                root_dir=Path(self.cg_config.microsalt.root),
-                status_db=self.store,
-            ),
-            lims_api=self.lims_api,
-            microsalt_config=self.cg_config.microsalt,
-            store=self.store,
-        )
+        raise NotImplementedError
 
     def _get_nextflow_configurator(self, workflow: Workflow) -> NextflowConfigurator:
         config_file_creator = self._get_nextflow_config_file_creator(workflow)
@@ -128,19 +81,15 @@ class AnalysisStarterFactory:
             workflow_config_path=pipeline_config.config,
         )
 
-    def _get_microsalt_config_file_creator(self) -> MicrosaltConfigFileCreator:
-        return MicrosaltConfigFileCreator(
-            lims_api=self.lims_api,
-            queries_path=self.cg_config.microsalt.queries_path,
-            store=self.store,
-        )
-
     def _get_params_file_creator(self, workflow: Workflow) -> ParamsFileCreator:
         if workflow == Workflow.RAREDISEASE:
             pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
             return RarediseaseParamsFileCreator(
                 lims=self.lims_api, store=self.store, params=pipeline_config.params
             )
+
+    def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
+        return getattr(self.cg_config, workflow)
 
     def _get_sample_sheet_creator(self, workflow: Workflow) -> NextflowSampleSheetCreator:
         if workflow == Workflow.RAREDISEASE:
@@ -149,9 +98,6 @@ class AnalysisStarterFactory:
                 lims=self.cg_config.lims_api,
                 store=self.store,
             )
-
-    def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
-        return getattr(self.cg_config, workflow)
 
     def _get_pipeline_extension(self, workflow: Workflow) -> PipelineExtension:
         if workflow == Workflow.RAREDISEASE:
@@ -177,51 +123,22 @@ class AnalysisStarterFactory:
             else self.cg_config.scout_api_37
         )
 
-    def _get_input_fetcher(self, workflow: Workflow) -> InputFetcher:
-        if workflow in FASTQ_WORKFLOWS:
-            spring_archive_api = SpringArchiveAPI(
-                status_db=self.store,
+    def _get_microsalt_configurator(self) -> MicrosaltConfigurator:
+        return MicrosaltConfigurator(
+            config_file_creator=self._get_microsalt_config_file_creator(),
+            fastq_handler=MicrosaltFastqHandler(
                 housekeeper_api=self.housekeeper_api,
-                data_flow_config=self.cg_config.data_flow,
-            )
-            compress_api = CompressAPI(
-                hk_api=self.housekeeper_api,
-                crunchy_api=self.cg_config.crunchy_api,
-                demux_root=self.cg_config.run_instruments.illumina.demultiplexed_runs_dir,
-            )
-            return FastqFetcher(
-                compress_api=compress_api,
-                housekeeper_api=self.housekeeper_api,
-                spring_archive_api=spring_archive_api,
+                root_dir=Path(self.cg_config.microsalt.root),
                 status_db=self.store,
-            )
-        return InputFetcher()
-
-    def _get_submitter(self, workflow: Workflow) -> Submitter:
-        if workflow in NEXTFLOW_WORKFLOWS:
-            return self._get_seqera_platform_submitter()
-        else:
-            return SubprocessSubmitter()
-
-    def _get_seqera_platform_submitter(self) -> SeqeraPlatformSubmitter:
-        client = SeqeraPlatformClient(config=self.cg_config.seqera_platform)
-        return SeqeraPlatformSubmitter(
-            client=client,
-            compute_environment_ids=self.cg_config.seqera_platform.compute_environments,
+            ),
+            lims_api=self.lims_api,
+            microsalt_config=self.cg_config.microsalt,
+            store=self.store,
         )
 
-    def _get_tracker(self, workflow: Workflow) -> Tracker:
-        if workflow in NEXTFLOW_WORKFLOWS:
-            return NextflowTracker(
-                store=self.store,
-                subprocess_submitter=SubprocessSubmitter(),
-                trailblazer_api=self.cg_config.trailblazer_api,
-                workflow_root=getattr(self.cg_config, workflow).root,
-            )
-        if workflow == Workflow.MICROSALT:
-            return MicrosaltTracker(
-                store=self.store,
-                subprocess_submitter=SubprocessSubmitter(),
-                trailblazer_api=self.cg_config.trailblazer_api,
-                workflow_root=self.cg_config.microsalt.root,
-            )
+    def _get_microsalt_config_file_creator(self) -> MicrosaltConfigFileCreator:
+        return MicrosaltConfigFileCreator(
+            lims_api=self.lims_api,
+            queries_path=self.cg_config.microsalt.queries_path,
+            store=self.store,
+        )

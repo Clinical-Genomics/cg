@@ -32,7 +32,7 @@ from cg.constants.cli_options import FORCE
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.factory import AnalysisStarterFactory
+from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.service import AnalysisStarter
 from cg.store.database import (
     create_all_tables,
