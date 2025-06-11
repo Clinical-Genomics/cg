@@ -3,7 +3,6 @@
 import datetime as dt
 
 import pytest
-from store_helpers import StoreHelpers
 
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
@@ -15,6 +14,7 @@ from tests.cli.workflow.mip.conftest import (
     mip_dna_context,
     mip_rna_context,
 )
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.mark.freeze_time
