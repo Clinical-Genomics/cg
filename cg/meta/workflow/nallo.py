@@ -168,12 +168,13 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         if "-" not in sample_id:
             metric_conditions: dict[str, dict[str, Any]] = NALLO_GENERAL_METRIC_CONDITIONS
             metric_conditions.update(NALLO_RAW_METRIC_CONDITIONS)
-            self.set_order_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
+            self.set_peddy_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
+            self.set_somalier_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
         else:
             metric_conditions = NALLO_PARENT_PEDDY_METRIC_CONDITION.copy()
         return metric_conditions
 
-    def _get_sample_pair_patterns(self, case_id: str) -> list[str]:
+    def _get_nallo_sample_pair_patterns(self, case_id: str) -> list[str]:
         """Return sample-pair patterns for searching in MultiQC."""
         sample_ids: list[str] = list(self.status_db.get_sample_ids_by_case_id(case_id=case_id))
         pairwise_patterns: list[str] = [
@@ -181,7 +182,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         ]
         return pairwise_patterns
 
-    def get_parent_error_ped_check_metric(
+    def get_nallo_parent_error_ped_check_metric(
         self, pair_sample_ids: str, multiqc_raw_data: dict[dict]
     ) -> MetricsBase | None:
         """Return the parsed metrics for pedigree error given a concatenated pair of sample ids."""
@@ -192,6 +193,17 @@ class NalloAnalysisAPI(NfAnalysisAPI):
                 metric_name=metric_name,
                 metric_value=sample_pair_metrics[metric_name],
                 metric_id=pair_sample_ids,
+            )
+
+    def get_nallo_raw_metric(self, sample_id: str, multiqc_raw_data: dict) -> MetricsBase | None:
+        metric_name = "sex"
+        raw_metrics_section: dict[str, dict] = multiqc_raw_data.get("multiqc_somalier", {})
+        sample_metrics = raw_metrics_section.get(sample_id)
+        if sample_metrics and metric_name in sample_metrics:
+            return self.get_multiqc_metric(
+                metric_name=metric_name,
+                metric_value=sample_metrics[metric_name],
+                metric_id=sample_id,
             )
 
     def get_nallo_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
@@ -208,8 +220,14 @@ class NalloAnalysisAPI(NfAnalysisAPI):
                 )
             )
             metrics.extend(metrics_for_pattern)
-        for sample_pair in self._get_sample_pair_patterns(case_id):
-            if parent_error_metric := self.get_parent_error_ped_check_metric(
+        for sample_id in self.status_db.get_sample_ids_by_case_id(case_id):
+            if raw_metric := self.get_nallo_raw_metric(
+                sample_id=sample_id,
+                multiqc_raw_data=multiqc_json.report_saved_raw_data,
+            ):
+                metrics.append(raw_metric)
+        for sample_pair in self._get_nallo_sample_pair_patterns(case_id):
+            if parent_error_metric := self.get_nallo_parent_error_ped_check_metric(
                 pair_sample_ids=sample_pair, multiqc_raw_data=multiqc_json.report_saved_raw_data
             ):
                 metrics.append(parent_error_metric)
@@ -217,8 +235,19 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         return metrics
 
     @staticmethod
-    def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
+    def set_peddy_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
+
+    @staticmethod
+    def set_somalier_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
+        if "sex" in metric_conditions:
+            metric_conditions["sex"]["threshold"] = float(
+                {
+                    "male": PlinkSex.MALE,
+                    "female": PlinkSex.FEMALE,
+                    "unknown": PlinkSex.UNKNOWN,
+                }[sample.sex]
+            )
 
     def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
         """Return the Nallo d4 coverage file path."""
