@@ -262,6 +262,8 @@ class DeliveryRsyncService:
     ) -> int:
         """Instantiates a slurm api and sbatches the given commands. Default parameters can be
         overridden."""
+
+        l = log_dir or self.log_dir.as_posix()
         sbatch_parameters: Sbatch = Sbatch(
             job_name="_".join([job_prefix, "rsync"]),
             account=account or self.account,

@@ -4,11 +4,11 @@ from enum import IntEnum, StrEnum
 
 
 class SlurmQos(StrEnum):
-    MAINTENANCE: str = "maintenance"
-    LOW: str = "low"
-    NORMAL: str = "normal"
-    HIGH: str = "high"
-    EXPRESS: str = "express"
+    MAINTENANCE = "maintenance"
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+    EXPRESS = "express"
 
 
 class TrailblazerPriority(StrEnum):
