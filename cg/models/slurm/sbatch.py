@@ -18,6 +18,7 @@ class Sbatch(BaseModel):
     exclude: str | None = ""
     number_tasks: int | None = None
     memory: int | None = None
+    dependency: str | None = None
 
 
 class SbatchDragen(Sbatch):

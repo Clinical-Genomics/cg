@@ -48,7 +48,7 @@ class DeliveryRsyncService:
         self.workflow: str = Workflow.RSYNC
 
     @property
-    def slurm_quality_of_service(self) -> str:
+    def slurm_quality_of_service(self) -> SlurmQos:
         """Return the slurm quality of service depending on the slurm account."""
         return SlurmQos.HIGH if self.account == SlurmAccount.PRODUCTION else SlurmQos.LOW
 
@@ -101,36 +101,6 @@ class DeliveryRsyncService:
         ctime: dt.datetime = dt.datetime.fromtimestamp(process.stat().st_ctime)
 
         return before > ctime
-
-    def concatenate_rsync_commands(
-        self,
-        folder_list: set[Path],
-        source_and_destination_paths: dict[str, Path],
-        ticket: str,
-        case: Case,
-    ) -> str:
-        """Concatenates the rsync commands for each folder to be transferred."""
-        command: str = ""
-        for folder in folder_list:
-            source_path = Path(source_and_destination_paths["delivery_source_path"], folder.name)
-            destination_path: Path = Path(
-                source_and_destination_paths["rsync_destination_path"], ticket
-            )
-
-            command += RSYNC_COMMAND.format(
-                source_path=source_path, destination_path=destination_path
-            )
-        if case.data_analysis == Workflow.MUTANT:
-            covid_report_path: str = self.format_covid_report_path(case=case, ticket=ticket)
-            covid_destination_path: str = self.format_covid_destination_path(
-                self.covid_destination_path, customer_internal_id=case.customer.internal_id
-            )
-            command += COVID_REPORT_RSYNC.format(
-                covid_report_path=covid_report_path,
-                covid_destination_path=covid_destination_path,
-                log_dir=self.log_dir,
-            )
-        return command
 
     def set_log_dir(self, folder_prefix: str) -> None:
         if folder_prefix not in str(self.log_dir.as_posix()):
@@ -189,39 +159,38 @@ class DeliveryRsyncService:
             )
         return covid_report_options[0]
 
-    def create_log_dir(self, dry_run: bool) -> None:
-        """Create log dir."""
-        log_dir: Path = self.log_dir
-        LOG.info(f"Creating folder: {log_dir}")
-        if log_dir.exists():
-            LOG.warning(f"Could not create {log_dir}, this folder already exist")
-        elif dry_run:
-            LOG.info(f"Would have created path {log_dir}, but this is a dry run")
-        else:
-            log_dir.mkdir(parents=True, exist_ok=True)
-
     def run_rsync_for_case(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
         """Submit Rsync commands for a single case for delivery to the delivery server."""
-        ticket: str = case.latest_ticket
+        ticket: str | None = case.latest_ticket
+        if not ticket:
+            raise CgError(f"Could not find ticket for case {case.internal_id}")
+
         source_and_destination_paths: dict[str, Path] = self.get_source_and_destination_paths(
             ticket=ticket, customer_internal_id=case.customer.internal_id
         )
+
         self.set_log_dir(folder_prefix=case.internal_id)
-        self.create_log_dir(dry_run=dry_run)
-        command: str = self.concatenate_rsync_commands(
-            folder_list=folders_to_deliver,
-            source_and_destination_paths=source_and_destination_paths,
+        self._create_log_dir(dry_run=dry_run)
+
+        folder_creation_job_id: int = self._create_remote_ticket_inbox(
+            dry_run=dry_run,
             ticket=ticket,
-            case=case,
+            source_and_destination_paths=source_and_destination_paths,
         )
-        return self.sbatch_rsync_commands(
-            commands=command, job_prefix=case.internal_id, dry_run=dry_run
+
+        return self._deliver_folder_contents(
+            case=case,
+            dry_run=dry_run,
+            folder_creation_job_id=folder_creation_job_id,
+            folders_to_deliver=folders_to_deliver,
+            ticket=ticket,
+            source_and_destination_paths=source_and_destination_paths,
         )
 
     def run_rsync_for_ticket(self, ticket: str, dry_run: bool) -> int:
         """Runs rsync of a whole ticket folder to the delivery server."""
         self.set_log_dir(folder_prefix=ticket)
-        self.create_log_dir(dry_run=dry_run)
+        self._create_log_dir(dry_run=dry_run)
         cases: list[Case] = self.get_all_cases_from_ticket(ticket=ticket)
         if not cases:
             LOG.warning(f"Could not find any cases for ticket {ticket}")
@@ -246,15 +215,18 @@ class DeliveryRsyncService:
                 source_path=source_and_destination_paths["delivery_source_path"],
                 destination_path=source_and_destination_paths["rsync_destination_path"],
             )
-        return self.sbatch_rsync_commands(commands=commands, job_prefix=ticket, dry_run=dry_run)
+        return self._submit_sbatch_rsync_commands(
+            commands=commands, job_prefix=ticket, dry_run=dry_run
+        )
 
-    def sbatch_rsync_commands(
+    def _submit_sbatch_rsync_commands(
         self,
         commands: str,
         job_prefix: str,
-        account: str = None,
-        email: str = None,
-        log_dir: str = None,
+        dependency: str | None = None,
+        account: str | None = None,
+        email: str | None = None,
+        log_dir: str | None = None,
         hours: int = 24,
         number_tasks: int = 1,
         memory: int = 1,
@@ -263,8 +235,9 @@ class DeliveryRsyncService:
         """Instantiates a slurm api and sbatches the given commands. Default parameters can be
         overridden."""
 
+        job_name: str = f"{job_prefix}_rsync"
         sbatch_parameters: Sbatch = Sbatch(
-            job_name="_".join([job_prefix, "rsync"]),
+            job_name=job_name,
             account=account or self.account,
             number_tasks=number_tasks,
             memory=memory,
@@ -275,12 +248,95 @@ class DeliveryRsyncService:
             commands=commands,
             error=ERROR_RSYNC_FUNCTION.format(),
             exclude="--exclude=gpu-compute-0-[0-1],cg-dragen",
+            dependency=dependency,
         )
         slurm_api = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)
         sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
-        sbatch_path = self.log_dir / "_".join([job_prefix, "rsync.sh"])
+        sbatch_path: Path = self.log_dir / f"{job_name}.sh"
         sbatch_number: int = slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
         return sbatch_number
+
+    def _create_remote_ticket_inbox(self, dry_run, ticket, source_and_destination_paths) -> int:
+        job_name: str = f"{ticket}_create_inbox"
+        sbatch_parameters: Sbatch = Sbatch(
+            job_name=job_name,
+            account=self.account,
+            log_dir=self.log_dir.as_posix(),
+            email=self.mail_user,
+            hours=24,
+            commands="",
+        )
+        slurm_api = SlurmAPI()
+        slurm_api.set_dry_run(dry_run=dry_run)
+        sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
+        sbatch_path: Path = self.log_dir / f"{job_name}.sh"
+        sbatch_number: int = slurm_api.submit_sbatch(
+            sbatch_content=sbatch_content, sbatch_path=sbatch_path
+        )
+        return sbatch_number
+
+    def _concatenate_rsync_commands(
+        self,
+        folder_list: set[Path],
+        source_and_destination_paths: dict[str, Path],
+        ticket: str,
+        case: Case,
+    ) -> str:
+        """Concatenates the rsync commands for each folder to be transferred."""
+        command: str = ""
+        for folder in folder_list:
+            source_path = Path(source_and_destination_paths["delivery_source_path"], folder.name)
+            destination_path: Path = Path(
+                source_and_destination_paths["rsync_destination_path"], ticket
+            )
+
+            command += RSYNC_COMMAND.format(
+                source_path=source_path, destination_path=destination_path
+            )
+        if case.data_analysis == Workflow.MUTANT:
+            covid_report_path: str = self.format_covid_report_path(case=case, ticket=ticket)
+            covid_destination_path: str = self.format_covid_destination_path(
+                self.covid_destination_path, customer_internal_id=case.customer.internal_id
+            )
+            command += COVID_REPORT_RSYNC.format(
+                covid_report_path=covid_report_path,
+                covid_destination_path=covid_destination_path,
+                log_dir=self.log_dir,
+            )
+        return command
+
+    def _create_log_dir(self, dry_run: bool) -> None:
+        """Create log dir."""
+        log_dir: Path = self.log_dir
+        LOG.info(f"Creating folder: {log_dir}")
+        if log_dir.exists():
+            LOG.warning(f"Could not create {log_dir}, this folder already exist")
+        elif dry_run:
+            LOG.info(f"Would have created path {log_dir}, but this is a dry run")
+        else:
+            log_dir.mkdir(parents=True, exist_ok=True)
+
+    def _deliver_folder_contents(
+        self,
+        case,
+        folder_creation_job_id,
+        dry_run,
+        folders_to_deliver,
+        ticket,
+        source_and_destination_paths,
+    ):
+        command: str = self._concatenate_rsync_commands(
+            folder_list=folders_to_deliver,
+            source_and_destination_paths=source_and_destination_paths,
+            ticket=ticket,
+            case=case,
+        )
+        return self._submit_sbatch_rsync_commands(
+            commands=command,
+            job_prefix=case.internal_id,
+            dry_run=dry_run,
+            dependency=f"afterok:{folder_creation_job_id}",
+        )

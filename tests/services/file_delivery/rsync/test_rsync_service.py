@@ -3,10 +3,11 @@
 import logging
 import shutil
 from pathlib import Path, PosixPath
+from typing import Generator
 from unittest.mock import ANY, create_autospec
 
 import pytest
-from mock import MagicMock
+from mock import MagicMock, PropertyMock
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import Workflow
@@ -72,15 +73,23 @@ def created_sbatch_information() -> str:
 
 
 @pytest.fixture
-def created_sbatch_number() -> int:
-    return 42
+def first_job_number() -> int:
+    return 1
 
 
 @pytest.fixture
-def slurm_api_mock(created_sbatch_information: str, created_sbatch_number: int, mocker) -> SlurmAPI:
+def second_job_number() -> int:
+    return 2
+
+
+@pytest.fixture
+def slurm_api_mock(
+    created_sbatch_information: str, first_job_number: int, second_job_number: int, mocker
+) -> SlurmAPI:
     slurm_api_mock: SlurmAPI = create_autospec(SlurmAPI)
     slurm_api_mock.generate_sbatch_content.return_value = created_sbatch_information
-    slurm_api_mock.submit_sbatch.return_value = created_sbatch_number
+
+    slurm_api_mock.submit_sbatch.side_effect = [first_job_number, second_job_number]
 
     mocker.patch("cg.services.deliver_files.rsync.service.SlurmAPI", return_value=slurm_api_mock)
     return slurm_api_mock
@@ -161,7 +170,7 @@ def test_make_log_dir(delivery_rsync_service: DeliveryRsyncService, ticket_id: s
 
     # WHEN the log directory is created
     delivery_rsync_service.set_log_dir(folder_prefix=ticket_id)
-    delivery_rsync_service.create_log_dir(dry_run=True)
+    delivery_rsync_service._create_log_dir(dry_run=True)
 
     # THEN the path is not created since it is a dry run
     assert "Would have created path" in caplog.text
@@ -176,7 +185,7 @@ def test_run_rsync_on_slurm_for_ticket(
     status_db_mock: Store,
     slurm_api_mock: SlurmAPI,
     created_sbatch_information,
-    created_sbatch_number,
+    first_job_number,
     rsync_account: str,
     rsync_mail_user: str,
     rsync_base_path: str,
@@ -193,7 +202,7 @@ def test_run_rsync_on_slurm_for_ticket(
     status_db_mock.get_cases_by_ticket_id.return_value = [case]
 
     slurm_api_mock.generate_sbatch_content.return_value = created_sbatch_information
-    slurm_api_mock.submit_sbatch.return_value = created_sbatch_number
+    slurm_api_mock.submit_sbatch.return_value = first_job_number
 
     # WHEN rsync is run for a ticket
     returned_sbatch_number: int = rsync_service.run_rsync_for_ticket(ticket=ticket, dry_run=True)
@@ -225,7 +234,7 @@ def test_run_rsync_on_slurm_for_ticket(
         sbatch_path=Path(f"{rsync_base_path}/{ticket}_250611_10_05_01_000000/{ticket}_rsync.sh"),
     )
 
-    assert returned_sbatch_number == created_sbatch_number
+    assert returned_sbatch_number == first_job_number
 
 
 def test_run_rsync_on_slurm_no_cases(
@@ -262,7 +271,7 @@ def test_concatenate_rsync_commands(
         "rsync_destination_path": Path(project_dir, customer_id),
     }
     # WHEN then commands are generated
-    command: str = delivery_rsync_service.concatenate_rsync_commands(
+    command: str = delivery_rsync_service._concatenate_rsync_commands(
         folder_list=folders_to_deliver,
         source_and_destination_paths=source_and_destination_paths,
         ticket=ticket_id,
@@ -319,7 +328,7 @@ def test_concatenate_rsync_commands_mutant(
     mocker.patch.object(
         DeliveryRsyncService, "format_covid_destination_path", return_value=covid_destination_path
     )
-    command: str = delivery_rsync_service.concatenate_rsync_commands(
+    command: str = delivery_rsync_service._concatenate_rsync_commands(
         folder_list=folders_to_deliver,
         source_and_destination_paths=source_and_destination_paths,
         ticket=ticket_id,
@@ -336,18 +345,17 @@ def test_slurm_rsync_single_case(
     case_mock: Case,
     customer_mock: Customer,
     created_sbatch_information: str,
-    created_sbatch_number: int,
+    first_job_number: int,
+    second_job_number: int,
     rsync_base_path: str,
     rsync_delivery_path: str,
     rsync_destination_path: str,
     rsync_service: DeliveryRsyncService,
     ticket: str,
-    caplog: pytest.LogCaptureFixture,
     folders_to_deliver: set[Path],
     slurm_api_mock: SlurmAPI,
 ):
     """Test for running rsync on a single case using SLURM."""
-    caplog.set_level(logging.INFO)
 
     # WHEN the destination path is created
     sbatch_number: int = rsync_service.run_rsync_for_case(
@@ -356,7 +364,7 @@ def test_slurm_rsync_single_case(
         folders_to_deliver=folders_to_deliver,
     )
 
-    expected_commands = [
+    expected_commands: list[str] = [
         (
             f"rsync -rvL {rsync_delivery_path}/{customer_mock.internal_id}/inbox/{ticket}/{type} "
             f"{rsync_destination_path}/{customer_mock.internal_id}/inbox/{ticket}"
@@ -366,6 +374,8 @@ def test_slurm_rsync_single_case(
 
     _args, kwargs = slurm_api_mock.generate_sbatch_content.call_args
     sbatch_parameters: Sbatch = kwargs["sbatch_parameters"]
+
+    assert sbatch_parameters.dependency == f"afterok:{first_job_number}"
 
     for command in expected_commands:
         assert command in sbatch_parameters.commands
@@ -378,7 +388,17 @@ def test_slurm_rsync_single_case(
     )
 
     # THEN check that an integer was returned as sbatch number and the delivery should be complete
-    assert sbatch_number == created_sbatch_number
+    assert sbatch_number == second_job_number
+
+
+def test_slurm_rsync_single_case_no_ticket(
+    folders_to_deliver: set[Path], rsync_service: DeliveryRsyncService
+):
+    case_with_no_ticket: Case = create_autospec(Case, latest_ticket=None)
+    with pytest.raises(CgError):
+        rsync_service.run_rsync_for_case(
+            case=case_with_no_ticket, dry_run=True, folders_to_deliver=folders_to_deliver
+        )
 
 
 def test_slurm_rsync_single_case_missing_file(
