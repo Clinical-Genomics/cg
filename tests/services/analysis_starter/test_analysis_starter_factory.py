@@ -6,7 +6,7 @@ from cg.services.analysis_starter.configurator.implementations.microsalt import 
     MicrosaltConfigurator,
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
-from cg.services.analysis_starter.factory import AnalysisStarterFactory
+from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.service import AnalysisStarter
 from cg.services.analysis_starter.submitters.seqera_platform.submitter import (

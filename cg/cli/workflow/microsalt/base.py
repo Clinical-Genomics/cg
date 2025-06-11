@@ -16,7 +16,7 @@ from cg.io.controller import WriteFile, WriteStream
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.factory import AnalysisStarterFactory
+from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
