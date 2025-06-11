@@ -1,8 +1,10 @@
 """Tests for cleaning FASTQ files."""
 
+from datetime import datetime
 import logging
 from pathlib import Path
 from typing import Generator
+from unittest import mock
 
 from _pytest.logging import LogCaptureFixture
 from housekeeper.store.models import File, Version
@@ -11,7 +13,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.meta.compress import files
+from cg.meta.compress.compress import CompressAPI
 from cg.models import CompressionData
+from cg.store.models import Case, Sample
 from tests.cli.compress.conftest import MockCompressAPI
 from tests.meta.compress.conftest import MockCompressionData
 from tests.store_helpers import StoreHelpers
@@ -205,3 +209,38 @@ def test_cli_clean_fastqs_pending_compression_metadata(
     # THEN assert that the FASTQ files are NOT removed
     assert fastq_first.exists()
     assert fastq_second.exists()
+
+
+def test_clean_selected_fastq_files(
+    populated_compress_fastq_api: MockCompressAPI,
+    sample: str,
+    helpers: StoreHelpers,
+    base_store: StoreHelpers,
+):
+    """Test to clean selected FASTQ files."""
+
+    # GIVEN a sample linked to two cases one being not eligible for cleaning
+    sample: Sample = helpers.add_sample(store=base_store, internal_id="sample1")
+    # case1: Case = helpers.ensure_case(store=base_store, case_id="case1", case_name="case1")
+    case1: Case = helpers.add_case_with_sample(
+        base_store=base_store, case_id="case1", sample_id="sample1"
+    )
+    case1.created_at = datetime(2023, 1, 1, 12, 0, 0)
+    # case2: Case = helpers.ensure_case(store=base_store, case_id="case2", case_name="case2")
+    case2: Case = helpers.add_case_with_sample(
+        base_store=base_store, case_id="case2", sample_id="sample1"
+    )
+    case2.created_at = datetime.now()
+
+    helpers.add_case_with_sample
+
+    sample.cases = [case1, case2]
+
+    # WHEN calling clean_fastq with a days_back threshold
+    with mock.patch.object(CompressAPI, "clean_fastq") as clean_fastq_mock:
+        populated_compress_fastq_api.clean_selected_fastq_files(
+            samples=[sample],
+            days_back=60,
+        )
+        # THEN assert that the clean_fastq mock was not called
+        clean_fastq_mock.assert_not_called()

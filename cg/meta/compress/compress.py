@@ -165,8 +165,8 @@ class CompressAPI:
         """Clean FASTQ files for samples linked to eligible case."""
         for sample in samples:
             sample_id: str = sample.internal_id
-            if sample.links > 1:
-                if self.is_sample_linked_to_newer_case(sample=sample, days_back=days_back):
+            if len(sample.links) > 1:
+                if self._is_sample_linked_to_newer_case(sample=sample, days_back=days_back):
                     continue
             archive_location: str = sample.archive_location
             try:
