@@ -5,7 +5,7 @@ from pathlib import Path
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
-from cg.cli.workflow.microsalt.base import run
+from cg.cli.workflow.microsalt.base import dev_run, run
 from cg.constants import Workflow
 from cg.exc import CaseNotConfiguredError
 from cg.models.cg_config import CGConfig
@@ -42,7 +42,7 @@ def test_run_raises_error_if_not_configured(
     # GIVEN that the config file does not exist
 
     # WHEN running the case
-    result = cli_runner.invoke(run, [case_id], obj=base_context)
+    result = cli_runner.invoke(dev_run, [case_id], obj=base_context)
 
     # THEN an error should be raised
     assert isinstance(result.exception, CaseNotConfiguredError)
@@ -56,13 +56,14 @@ def test_run_tracks_case(cli_runner: CliRunner, base_context: CGConfig, mocker: 
 
     # GIVEN that the case is submitted successfully
     mocker.patch.object(Store, "get_case_workflow", return_value=Workflow.MICROSALT)
+    mocker.patch.object(Store, "update_case_action")
     mocker.patch.object(Tracker, "ensure_analysis_not_ongoing", return_value=None)
     mocker.patch.object(Path, "exists", return_value=True)
     mocker.patch.object(SubprocessSubmitter, "submit", return_value=None)
     track_mock = mocker.patch.object(Tracker, "track")
 
     # WHEN running the case
-    cli_runner.invoke(run, [case_id], obj=base_context)
+    cli_runner.invoke(dev_run, [case_id], obj=base_context)
 
     # THEN the progress should be tracked
     microsalt_config = base_context.microsalt
@@ -76,4 +77,4 @@ def test_run_tracks_case(cli_runner: CliRunner, base_context: CGConfig, mocker: 
         environment=microsalt_config.conda_env,
         fastq_directory=expected_fastq_dir.as_posix(),
     )
-    track_mock.assert_called_once_with(case_config=expected_case_config, trailblazer_id=None)
+    track_mock.assert_called_once_with(case_config=expected_case_config, tower_workflow_id=None)
