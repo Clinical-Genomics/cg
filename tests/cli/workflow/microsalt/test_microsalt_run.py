@@ -3,12 +3,13 @@
 from pathlib import Path
 
 from click.testing import CliRunner
-from pytest_mock import mocker
+from pytest_mock import MockerFixture
 
 from cg.cli.workflow.microsalt.base import run
 from cg.constants import Workflow
 from cg.exc import CaseNotConfiguredError
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.tracker import Tracker
 from cg.store.store import Store
@@ -28,7 +29,9 @@ def test_no_arguments(cli_runner: CliRunner, base_context: CGConfig):
     assert result.exit_code != EXIT_SUCCESS
 
 
-def test_run_raises_error_if_not_configured(cli_runner: CliRunner, base_context: CGConfig):
+def test_run_raises_error_if_not_configured(
+    cli_runner: CliRunner, base_context: CGConfig, mocker: MockerFixture
+):
     # GIVEN a case to run
     case_id = "some_case_id"
 
@@ -45,7 +48,7 @@ def test_run_raises_error_if_not_configured(cli_runner: CliRunner, base_context:
     assert isinstance(result.exception, CaseNotConfiguredError)
 
 
-def test_run_tracks_case(cli_runner: CliRunner, base_context: CGConfig):
+def test_run_tracks_case(cli_runner: CliRunner, base_context: CGConfig, mocker: MockerFixture):
     # GIVEN a case to run
     case_id = "some_case_id"
 
@@ -62,4 +65,15 @@ def test_run_tracks_case(cli_runner: CliRunner, base_context: CGConfig):
     cli_runner.invoke(run, [case_id], obj=base_context)
 
     # THEN the progress should be tracked
-    track_mock.assert_called_once_with()
+    microsalt_config = base_context.microsalt
+    expected_config_file = Path(microsalt_config.queries_path, case_id).with_suffix(".json")
+    expected_fastq_dir = Path(microsalt_config.root, "fastq", case_id)
+    expected_case_config = MicrosaltCaseConfig(
+        binary=microsalt_config.binary_path,
+        case_id=case_id,
+        conda_binary=microsalt_config.conda_binary,
+        config_file=expected_config_file.as_posix(),
+        environment=microsalt_config.conda_env,
+        fastq_directory=expected_fastq_dir.as_posix(),
+    )
+    track_mock.assert_called_once_with(case_config=expected_case_config, trailblazer_id=None)

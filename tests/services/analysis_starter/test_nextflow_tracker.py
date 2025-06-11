@@ -37,7 +37,7 @@ def nextflow_tracker(cg_context: CGConfig, helpers: StoreHelpers, raredisease_ca
         store=cg_context.status_db,
         subprocess_submitter=SubprocessSubmitter(),
         trailblazer_api=cg_context.trailblazer_api,
-        workflow_config=cg_context.raredisease,
+        workflow_root=cg_context.raredisease.root,
     )
 
 

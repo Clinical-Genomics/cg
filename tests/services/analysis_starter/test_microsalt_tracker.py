@@ -22,7 +22,7 @@ def microsalt_tracker(cg_context: CGConfig, microsalt_store: Store):
         store=microsalt_store,
         subprocess_submitter=SubprocessSubmitter(),
         trailblazer_api=cg_context.trailblazer_api,
-        workflow_config=cg_context.microsalt,
+        workflow_root=cg_context.microsalt.root,
     )
 
 
