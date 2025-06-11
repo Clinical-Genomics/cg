@@ -91,9 +91,11 @@ def clean_fastq(context: CGConfig, case_id: str | None, days_back: int, dry_run:
         LOG.info("Did not find any FASTQ files to clean. Closing")
         return
 
-    else:
-        sample_ids: Iterable[str] = store.get_sample_ids_by_case_id(case_id=case_id.internal_id)
-        compress_api.clean_selected_fastq_files(samples=sample_ids, dry_run=dry_run)
+    for case in cases:
+        samples: list[Sample] = store.get_samples_by_case_id(case_id=case.internal_id)
+        compress_api.clean_selected_fastq_files(
+            samples=samples, days_back=days_back, dry_run=dry_run
+        )
 
 
 @click.command("fix-spring")

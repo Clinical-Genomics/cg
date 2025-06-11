@@ -2,6 +2,7 @@
 API for compressing files. Functionality to compress FASTQ, decompress SPRING and clean files
 """
 
+from datetime import datetime, timedelta
 import logging
 import re
 from pathlib import Path
@@ -15,7 +16,7 @@ from cg.constants import SequencingFileTag
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
 from cg.models import CompressionData
-from cg.store.models import Sample
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -146,19 +147,26 @@ class CompressAPI:
             update_metadata_date(spring_metadata_path=compression.spring_metadata_path)
         return True
 
-    def clean_selected_fastq_files(self, samples: list[Sample], dry_run: bool = False) -> None:
-        """Clean FASTQ files for selected cases.
+    def is_sample_linked_to_newer_case(self, sample: Sample, days_back: int) -> bool:
+        """Check if a sample is linked to a case that is not eligible for cleaning."""
+        for link in sample.links:
+            case: Case = link.case
+            creation_date: datetime = case.created_at
+            date_threshold: datetime = datetime.now() - timedelta(days=days_back)
+            if creation_date > date_threshold:
+                LOG.info(
+                    f"Skipping sample {sample.internal_id}, linked to case {case.internal_id} created on {creation_date}, not eligible for cleaning"
+                )
+                return True
+            return False
 
-        This means removing compressed FASTQ files and update housekeeper to point to the new SPRING
-        file and its metadata file.
-        """
+    def clean_selected_fastq_files(self, samples: list[Sample], days_back: int) -> None:
+        """Clean FASTQ files for samples linked to eligible case."""
         for sample in samples:
             sample_id: str = sample.internal_id
-            if self.is_sample_linked_to_newer_case(sample_id=sample_id):
-                LOG.info(
-                    f"Skipping sample {sample_id} as it is linked to a case not eligible for cleaning"
-                )
-                continue
+            if sample.links > 1:
+                if self.is_sample_linked_to_newer_case(sample=sample, days_back=days_back):
+                    continue
             archive_location: str = sample.archive_location
             try:
                 was_cleaned: bool = self.clean_fastq(
