@@ -1,7 +1,6 @@
 """Observations API."""
 
 import logging
-from datetime import datetime
 from pathlib import Path
 
 from housekeeper.store.models import Version
@@ -63,9 +62,7 @@ class ObservationsAPI:
         | RarediseaseObservationsInputFiles
     ):
         """Return input files from a case to upload to Loqusdb."""
-        analysis: Analysis = case.analyses[0]
-        analysis_date: datetime = analysis.completed_at
-        hk_version: Version = self.housekeeper_api.version(analysis.case.internal_id, analysis_date)
+        hk_version: Version = self.housekeeper_api.version(case.internal_id, case.latest_analyzed)
         return self.get_observations_files_from_hk(hk_version=hk_version, case_id=case.internal_id)
 
     def get_loqusdb_api(self, loqusdb_instance: LoqusdbInstance) -> LoqusdbAPI:

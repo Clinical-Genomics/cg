@@ -2,6 +2,9 @@
 
 import datetime as dt
 
+import pytest
+from store_helpers import StoreHelpers
+
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Case
@@ -14,20 +17,27 @@ from tests.cli.workflow.mip.conftest import (
 )
 
 
-def test_mip_dna_update_uploaded_at(mip_dna_context: CGConfig, mip_dna_case: Case):
+@pytest.mark.freeze_time
+def test_mip_dna_update_uploaded_at(
+    mip_dna_context: CGConfig, mip_dna_case: Case, helpers: StoreHelpers
+):
     """Test setting uploaded at for a finished analysis."""
     # GIVEN an analysis that should be uploaded
     upload_api: UploadAPI = UploadAPI(
         config=mip_dna_context, analysis_api=mip_dna_context.meta_apis["analysis_api"]
     )
-    dna_mip_analysis: Analysis = mip_dna_case.analyses[0]
-    assert dna_mip_analysis.uploaded_at is None
+    dna_mip_analysis: Analysis = helpers.add_analysis(
+        store=mip_dna_context.status_db,
+        case=mip_dna_case,
+        completed_at=dt.datetime.now(),
+        uploaded_at=None,
+    )
 
     # WHEN setting the uploaded at
     upload_api.update_uploaded_at(analysis=dna_mip_analysis)
 
     # THEN the uploaded at should be set to a date
-    assert isinstance(dna_mip_analysis.uploaded_at, dt.datetime)
+    assert dna_mip_analysis.uploaded_at == dt.datetime.now()
 
 
 def test_mip_rna_update_uploaded_at(mip_rna_context: CGConfig, mip_rna_analysis: Analysis):
