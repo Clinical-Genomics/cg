@@ -19,6 +19,96 @@ from cg.store.models import Case, Customer
 from cg.store.store import Store
 
 
+@pytest.fixture
+def rsync_delivery_path() -> str:
+    return "/a/delivery/path"
+
+
+@pytest.fixture
+def rsync_account() -> str:
+    return "rsync_account"
+
+
+@pytest.fixture
+def rsync_base_path() -> str:
+    return "/rsync/base/path"
+
+
+@pytest.fixture
+def rsync_destination_path() -> str:
+    return "/destination/path"
+
+
+@pytest.fixture
+def rsync_mail_user() -> str:
+    return "some_user@scilifelab.se"
+
+
+@pytest.fixture
+def ticket() -> str:
+    return "123456"
+
+
+@pytest.fixture
+def status_db_mock() -> Store:
+    return create_autospec(Store)
+
+
+@pytest.fixture
+def customer_mock() -> Customer:
+    return create_autospec(Customer, internal_id="test_customer_1")
+
+
+@pytest.fixture
+def case_mock(customer_mock: Customer, ticket: str) -> Case:
+    return create_autospec(
+        Case, customer=customer_mock, internal_id="some_internal_id", latest_ticket=ticket
+    )
+
+
+@pytest.fixture
+def created_sbatch_information() -> str:
+    return "a_string_with_sbatch_information"
+
+
+@pytest.fixture
+def created_sbatch_number() -> int:
+    return 42
+
+
+@pytest.fixture
+def slurm_api_mock(created_sbatch_information: str, created_sbatch_number: int, mocker) -> SlurmAPI:
+    slurm_api_mock: SlurmAPI = create_autospec(SlurmAPI)
+    slurm_api_mock.generate_sbatch_content.return_value = created_sbatch_information
+    slurm_api_mock.submit_sbatch.return_value = created_sbatch_number
+
+    mocker.patch("cg.services.deliver_files.rsync.service.SlurmAPI", return_value=slurm_api_mock)
+    return slurm_api_mock
+
+
+@pytest.fixture
+def rsync_service(
+    rsync_delivery_path: str,
+    rsync_account: str,
+    rsync_base_path: str,
+    rsync_destination_path: str,
+    rsync_mail_user: str,
+    status_db_mock: Store,
+) -> DeliveryRsyncService:
+    return DeliveryRsyncService(
+        delivery_path=rsync_delivery_path,
+        rsync_config=RsyncDeliveryConfig(
+            account=rsync_account,
+            base_path=rsync_base_path,
+            covid_destination_path="/covid/destination/path",
+            covid_report_path="/covid/report/path",
+            destination_path=rsync_destination_path,
+            mail_user=rsync_mail_user,
+        ),
+        status_db=status_db_mock,
+    )
+
+
 def test_get_source_and_destination_paths(
     mutant_case: Case, delivery_rsync_service: DeliveryRsyncService, ticket_id: str, mocker
 ):
@@ -80,75 +170,19 @@ def test_make_log_dir(delivery_rsync_service: DeliveryRsyncService, ticket_id: s
     assert str(delivery_rsync_service.log_dir).startswith(f"/another/path/{ticket_id}")
 
 
-@pytest.fixture
-def rsync_delivery_path() -> str:
-    return "/a/delivery/path"
-
-
-@pytest.fixture
-def rsync_account() -> str:
-    return "rsync_account"
-
-
-@pytest.fixture
-def rsync_base_path() -> str:
-    return "/rsync/base/path"
-
-
-@pytest.fixture
-def rsync_destination_path() -> str:
-    return "/destination/path"
-
-
-@pytest.fixture
-def rsync_mail_user() -> str:
-    return "some_user@scilifelab.se"
-
-
-@pytest.fixture
-def ticket() -> str:
-    return "123456"
-
-
-@pytest.fixture
-def status_db_mock() -> Store:
-    return create_autospec(Store)
-
-
-@pytest.fixture
-def rsync_service(
-    rsync_delivery_path: str,
-    rsync_account: str,
-    rsync_base_path: str,
-    rsync_destination_path: str,
-    rsync_mail_user: str,
-    status_db_mock: Store,
-) -> DeliveryRsyncService:
-    return DeliveryRsyncService(
-        delivery_path=rsync_delivery_path,
-        rsync_config=RsyncDeliveryConfig(
-            account=rsync_account,
-            base_path=rsync_base_path,
-            covid_destination_path="/covid/destination/path",
-            covid_report_path="/covid/report/path",
-            destination_path=rsync_destination_path,
-            mail_user=rsync_mail_user,
-        ),
-        status_db=status_db_mock,
-    )
-
-
 @pytest.mark.freeze_time("2025-06-11 10:05:01")
-def test_run_rsync_on_slurm(
+def test_run_rsync_on_slurm_for_ticket(
     rsync_service: DeliveryRsyncService,
     status_db_mock: Store,
+    slurm_api_mock: SlurmAPI,
+    created_sbatch_information,
+    created_sbatch_number,
     rsync_account: str,
     rsync_mail_user: str,
     rsync_base_path: str,
     rsync_delivery_path: str,
     rsync_destination_path: str,
     ticket: str,
-    mocker,
 ):
     # GIVEN a valid microsalt case
     customer_mock: Customer = create_autospec(Customer, internal_id="test_customer_1")
@@ -158,13 +192,8 @@ def test_run_rsync_on_slurm(
 
     status_db_mock.get_cases_by_ticket_id.return_value = [case]
 
-    slurm_api_mock: SlurmAPI = create_autospec(SlurmAPI)
-    created_sbatch_information = "a_string_with_sbatch_information"
-    created_sbatch_number: int = 42
     slurm_api_mock.generate_sbatch_content.return_value = created_sbatch_information
     slurm_api_mock.submit_sbatch.return_value = created_sbatch_number
-
-    mocker.patch("cg.services.deliver_files.rsync.service.SlurmAPI", return_value=slurm_api_mock)
 
     # WHEN rsync is run for a ticket
     returned_sbatch_number: int = rsync_service.run_rsync_for_ticket(ticket=ticket, dry_run=True)
@@ -302,39 +331,54 @@ def test_concatenate_rsync_commands_mutant(
     assert covid_destination_path.as_posix() in command
 
 
+@pytest.mark.freeze_time("2025-06-11 10:05:01")
 def test_slurm_rsync_single_case(
-    all_samples_in_inbox: Path,
-    case: Case,
-    destination_path: Path,
-    delivery_rsync_service: DeliveryRsyncService,
-    caplog,
-    mocker,
-    ticket_id: str,
+    case_mock: Case,
+    customer_mock: Customer,
+    created_sbatch_information: str,
+    created_sbatch_number: int,
+    rsync_base_path: str,
+    rsync_delivery_path: str,
+    rsync_destination_path: str,
+    rsync_service: DeliveryRsyncService,
+    ticket: str,
+    caplog: pytest.LogCaptureFixture,
     folders_to_deliver: set[Path],
+    slurm_api_mock: SlurmAPI,
 ):
     """Test for running rsync on a single case using SLURM."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN paths needed to run rsync
-    mocker.patch.object(DeliveryRsyncService, "get_source_and_destination_paths")
-    DeliveryRsyncService.get_source_and_destination_paths.return_value = {
-        "delivery_source_path": all_samples_in_inbox,
-        "rsync_destination_path": destination_path,
-    }
-
-    mocker.patch.object(Store, "get_latest_ticket_from_case")
-    Store.get_latest_ticket_from_case.return_value = ticket_id
-
     # WHEN the destination path is created
-    sbatch_number: int
-    sbatch_number: int = delivery_rsync_service.run_rsync_for_case(
-        case=case,
+    sbatch_number: int = rsync_service.run_rsync_for_case(
+        case=case_mock,
         dry_run=True,
         folders_to_deliver=folders_to_deliver,
     )
 
+    expected_commands = [
+        (
+            f"rsync -rvL {rsync_delivery_path}/{customer_mock.internal_id}/inbox/{ticket}/{type} "
+            f"{rsync_destination_path}/{customer_mock.internal_id}/inbox/{ticket}"
+        )
+        for type in ["case", "father", "mother", "child"]
+    ]
+
+    _args, kwargs = slurm_api_mock.generate_sbatch_content.call_args
+    sbatch_parameters: Sbatch = kwargs["sbatch_parameters"]
+
+    for command in expected_commands:
+        assert command in sbatch_parameters.commands
+
+    slurm_api_mock.submit_sbatch.assert_called_with(
+        sbatch_content=created_sbatch_information,
+        sbatch_path=Path(
+            f"{rsync_base_path}/{case_mock.internal_id}_250611_10_05_01_000000/{case_mock.internal_id}_rsync.sh"
+        ),
+    )
+
     # THEN check that an integer was returned as sbatch number and the delivery should be complete
-    assert isinstance(sbatch_number, int)
+    assert sbatch_number == created_sbatch_number
 
 
 def test_slurm_rsync_single_case_missing_file(

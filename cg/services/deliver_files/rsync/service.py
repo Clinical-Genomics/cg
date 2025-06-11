@@ -4,7 +4,7 @@ import datetime as dt
 import glob
 import logging
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, cast
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
@@ -263,7 +263,6 @@ class DeliveryRsyncService:
         """Instantiates a slurm api and sbatches the given commands. Default parameters can be
         overridden."""
 
-        l = log_dir or self.log_dir.as_posix()
         sbatch_parameters: Sbatch = Sbatch(
             job_name="_".join([job_prefix, "rsync"]),
             account=account or self.account,
