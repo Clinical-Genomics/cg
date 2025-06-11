@@ -10,6 +10,4 @@ class NextflowTracker(Tracker):
 
     def _get_job_ids_path(self, case_id: str) -> Path:
         """Return the path to a Trailblazer config file containing Tower IDs."""
-        return Path(self.workflow_config.root, case_id, "tower_ids").with_suffix(
-            FileExtensions.YAML
-        )
+        return Path(self.workflow_root, case_id, "tower_ids").with_suffix(FileExtensions.YAML)

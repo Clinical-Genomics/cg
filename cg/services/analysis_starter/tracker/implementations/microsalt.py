@@ -14,7 +14,7 @@ class MicrosaltTracker(Tracker):
     def _get_job_ids_path(self, case_id: str) -> Path:
         project_id: str = self._get_lims_project_id(case_id)
         job_ids_path = Path(
-            self.workflow_config.root,
+            self.workflow_root,
             "results",
             "reports",
             "trailblazer",
@@ -29,10 +29,12 @@ class MicrosaltTracker(Tracker):
         sample_id: str = case.links[0].sample.internal_id
         return self._extract_project_id(sample_id)
 
-    def _extract_project_id(self, sample_id: str) -> str:
+    @staticmethod
+    def _extract_project_id(sample_id: str) -> str:
         return sample_id.rsplit("A", maxsplit=1)[0]
 
-    def _ensure_old_job_ids_are_removed(self, job_ids_path: Path) -> None:
+    @staticmethod
+    def _ensure_old_job_ids_are_removed(job_ids_path: Path) -> None:
         is_yaml_file: bool = job_ids_path.suffix == FileExtensions.YAML
         if job_ids_path.exists() and is_yaml_file:
             job_ids_path.unlink()

@@ -9,6 +9,8 @@ from cg.constants.constants import Workflow, WorkflowManager
 from cg.constants.tb import AnalysisType
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import StatusEnum
+from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
+from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
 from cg.store.models import Case, CaseSample, Customer, Order
 from cg.store.store import Store
@@ -33,20 +35,43 @@ def nextflow_tracker(cg_context: CGConfig, helpers: StoreHelpers, raredisease_ca
     store.commit_to_store()
     return NextflowTracker(
         store=cg_context.status_db,
+        subprocess_submitter=SubprocessSubmitter(),
         trailblazer_api=cg_context.trailblazer_api,
-        workflow_config=cg_context.raredisease,
+        workflow_root=cg_context.raredisease.root,
     )
 
 
 def test_nextflow_tracker(nextflow_tracker: NextflowTracker, raredisease_case_id: str):
     # GIVEN a raredisease case
     case: Case = nextflow_tracker.store.get_case_by_internal_id(raredisease_case_id)
+    case_config = NextflowCaseConfig(
+        case_id=raredisease_case_id,
+        workflow=Workflow.RAREDISEASE,
+        case_priority=case.slurm_priority,
+        config_profiles=[],
+        nextflow_config_file="config/file",
+        params_file="params/file",
+        pipeline_repository="github/raredisease",
+        pre_run_script="pre_run_script",
+        revision="1.0.0",
+        stub_run=False,
+        work_dir="work/dir",
+    )
 
     # WHEN wanting to track the started microSALT analysis
     with mock.patch.object(
-        TrailblazerAPI, "query_trailblazer", return_value=None
+        TrailblazerAPI,
+        "query_trailblazer",
+        return_value={
+            "id": 123456,
+            "logged_at": "",
+            "started_at": "",
+            "completed_at": "",
+            "out_dir": "",
+            "config_path": "",
+        },
     ) as request_submitter:
-        nextflow_tracker.track(case_id=raredisease_case_id, tower_workflow_id="1")
+        nextflow_tracker.track(case_config=case_config, tower_workflow_id="1")
 
     # THEN the appropriate POST should have been sent
     config_path: Path = nextflow_tracker._get_job_ids_path(raredisease_case_id)

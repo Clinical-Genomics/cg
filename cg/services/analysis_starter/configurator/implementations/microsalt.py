@@ -30,14 +30,16 @@ class MicrosaltConfigurator(Configurator):
         self.config = microsalt_config
         self.store = store
 
-    def configure(self, case_id: str) -> MicrosaltCaseConfig:
+    def configure(self, case_id: str, **flags) -> MicrosaltCaseConfig:
         LOG.info(f"Configuring case {case_id}")
         self.fastq_handler.link_fastq_files(case_id)
         self.config_file_creator.create(case_id)
-        return self.get_config(case_id)
+        return self.get_config(case_id=case_id, **flags)
 
-    def get_config(self, case_id: str) -> MicrosaltCaseConfig:
-        config_file_path: Path = self.config_file_creator.get_config_path(case_id)
+    def get_config(self, case_id: str, **flags) -> MicrosaltCaseConfig:
+        config_file_path: Path = flags.get(
+            "config_path", self.config_file_creator.get_config_path(case_id)
+        )
         if not config_file_path.exists():
             raise CaseNotConfiguredError(
                 f"Please ensure that the config file {config_file_path.as_posix} exists."

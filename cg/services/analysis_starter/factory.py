@@ -80,7 +80,6 @@ class AnalysisStarterFactory:
         return AnalysisStarter(
             configurator=configurator,
             input_fetcher=input_fetcher,
-            store=self.store,
             submitter=submitter,
             tracker=tracker,
         )
@@ -215,12 +214,14 @@ class AnalysisStarterFactory:
         if workflow in NEXTFLOW_WORKFLOWS:
             return NextflowTracker(
                 store=self.store,
+                subprocess_submitter=SubprocessSubmitter(),
                 trailblazer_api=self.cg_config.trailblazer_api,
-                workflow_config=getattr(self.cg_config, workflow),
+                workflow_root=getattr(self.cg_config, workflow).root,
             )
         if workflow == Workflow.MICROSALT:
             return MicrosaltTracker(
                 store=self.store,
+                subprocess_submitter=SubprocessSubmitter(),
                 trailblazer_api=self.cg_config.trailblazer_api,
-                workflow_config=self.cg_config.microsalt,
+                workflow_root=self.cg_config.microsalt.root,
             )

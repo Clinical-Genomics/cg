@@ -2,7 +2,6 @@ import logging
 
 import rich_click as click
 
-
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.microsalt.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
