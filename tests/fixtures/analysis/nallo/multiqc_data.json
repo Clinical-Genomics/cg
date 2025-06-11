@@ -31,5 +31,52 @@
                 "predicted_sex_sex_check": "female"
             }
         }
-    ]
+    ],
+        "report_saved_raw_data": {
+            "multiqc_somalier": {
+                "ACC17046A2": {
+                    "family_id": "nallo",
+                    "paternal_id": 0.0,
+                    "maternal_id": 0.0,
+                    "sex": 2.0,
+                    "phenotype": 2.0,
+                    "original_pedigree_sex": "female",
+                    "gt_depth_mean": 20.4,
+                    "gt_depth_sd": 6.5,
+                    "depth_mean": 20.3,
+                    "depth_sd": 6.6,
+                    "ab_mean": 0.52,
+                    "ab_std": 0.42,
+                    "n_hom_ref": 4727.0,
+                    "n_het": 6126.0,
+                    "n_hom_alt": 5668.0,
+                    "n_unknown": 863.0,
+                    "p_middling_ab": 0.007,
+                    "X_depth_mean": 12.24,
+                    "X_n": 325.0,
+                    "X_hom_ref": 148.0,
+                    "X_het": 0.0,
+                    "X_hom_alt": 177.0,
+                    "Y_depth_mean": 12.73,
+                    "Y_n": 15.0
+                }
+            },
+            "multiqc_peddy": {
+                "ADM1-ADM2": {
+                    "rel_ped_check": 0.4917,
+                    "hets_a_ped_check": 3624.0,
+                    "hets_b_ped_check": 3704.0,
+                    "shared_hets_ped_check": 1808.0,
+                    "ibs0_ped_check": 13.0,
+                    "ibs2_ped_check": 4164.0,
+                    "n_ped_check": 7886.0,
+                    "pedigree_parents_ped_check": "True",
+                    "pedigree_relatedness_ped_check": 0.5,
+                    "predicted_parents_ped_check": "True",
+                    "parent_error_ped_check": "False",
+                    "sample_duplication_error_ped_check": "False",
+                    "rel_difference_ped_check": 0.008278
+            }
+        }
+    }
 }
