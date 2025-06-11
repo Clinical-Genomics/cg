@@ -164,8 +164,8 @@ class DeliveryReportAPI:
 
     def update_delivery_report_date(self, case: Case, analysis_date: datetime) -> None:
         """Updates the date when a delivery report was created."""
-        analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_started_at(
-            case_entry_id=case.id, started_at_date=analysis_date
+        analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_completed_at(
+            case_entry_id=case.id, completed_at_date=analysis_date
         )
         analysis.delivery_report_created_at = datetime.now()
         self.status_db.session.commit()
@@ -173,8 +173,8 @@ class DeliveryReportAPI:
     def get_report_data(self, case_id: str, analysis_date: datetime) -> ReportModel:
         """Fetches all the data needed to generate a delivery report."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_started_at(
-            case_entry_id=case.id, started_at_date=analysis_date
+        analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_completed_at(
+            case_entry_id=case.id, completed_at_date=analysis_date
         )
         analysis_metadata: AnalysisModel = self.analysis_api.get_latest_metadata(case.internal_id)
         case_model: CaseModel = self.get_case_data(case, analysis, analysis_metadata)

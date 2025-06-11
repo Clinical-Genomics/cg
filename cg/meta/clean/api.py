@@ -22,25 +22,27 @@ class CleanAPI:
     def get_bundle_files(self, before: datetime, workflow: Workflow) -> Iterator[list[File]]:
         """Get any bundle files for a specific version."""
 
-        analysis: Analysis
+        completed_analyses_for_workflow: list[Analysis] = (
+            self.status_db.get_completed_analyses_for_workflow_started_at_before(
+                workflow=workflow, started_at_before=before
+            )
+        )
         LOG.debug(
-            f"number of {workflow} analyses before: {before} : {len(self.status_db.get_analyses_for_workflow_started_at_before(workflow=workflow, started_at_before=before))}"
+            f"number of {workflow} analyses before: {before} : {len(completed_analyses_for_workflow)}"
         )
 
-        for analysis in self.status_db.get_analyses_for_workflow_started_at_before(
-            workflow=workflow, started_at_before=before
-        ):
+        for analysis in completed_analyses_for_workflow:
             bundle_name = analysis.case.internal_id
 
             hk_bundle_version: Version | None = self.housekeeper_api.version(
-                bundle=bundle_name, date=analysis.started_at
+                bundle=bundle_name, date=analysis.completed_at
             )
             if not hk_bundle_version:
                 LOG.warning(
                     f"Version not found for "
                     f"bundle:{bundle_name}; "
                     f"workflow: {workflow}; "
-                    f"date {analysis.started_at}"
+                    f"date {analysis.completed_at}"
                 )
                 continue
 
@@ -48,7 +50,7 @@ class CleanAPI:
                 f"Version found for "
                 f"bundle:{bundle_name}; "
                 f"workflow: {workflow}; "
-                f"date {analysis.started_at}"
+                f"date {analysis.completed_at}"
             )
             yield self.housekeeper_api.get_files(
                 bundle=bundle_name, version=hk_bundle_version.id

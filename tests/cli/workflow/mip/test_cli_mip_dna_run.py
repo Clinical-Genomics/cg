@@ -62,6 +62,7 @@ def test_mip_run(
     mip_dna_context,
     trailblazer_api,
     mip_dna_config_path,
+    case_qc_sample_info_path,
 ):
     """Test print the MIP run"""
 
@@ -72,8 +73,11 @@ def test_mip_run(
     mocker.patch.object(MipDNAAnalysisAPI, "run_analysis")
     MipDNAAnalysisAPI.run_analysis.return_value = 0
 
-    mocker.patch.object(MipDNAAnalysisAPI, "add_pending_trailblazer_analysis")
-    MipDNAAnalysisAPI.add_pending_trailblazer_analysis.return_value = True
+    mocker.patch.object(MipDNAAnalysisAPI, "on_analysis_started")
+
+    # GIVEN that the case has a QC sample info file
+    mocker.patch.object(MipDNAAnalysisAPI, "get_sample_info_path")
+    MipDNAAnalysisAPI.get_sample_info_path.return_value = case_qc_sample_info_path
 
     # GIVEN a cli function
     # WHEN we run a case

@@ -15,7 +15,7 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(scope="function")
-def fluffy_case_id_existing(selected_novaseq_6000_post_1_5_kits_case_ids):
+def fluffy_case_id_existing(selected_novaseq_6000_post_1_5_kits_case_ids: list[str]) -> str:
     return selected_novaseq_6000_post_1_5_kits_case_ids[0]
 
 

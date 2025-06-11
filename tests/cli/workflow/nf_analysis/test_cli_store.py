@@ -1,4 +1,5 @@
 import logging
+from unittest.mock import ANY
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -48,7 +49,7 @@ def test_store_success(
     )
 
     # GIVEN that the Housekeeper store is empty
-    context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
+    context.housekeeper_api_ = real_housekeeper_api
     context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # GIVEN that the bundle is not present in Housekeeper
@@ -56,6 +57,9 @@ def test_store_success(
 
     # GIVEN that the analysis is not already stored in status_db
     assert not context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
+
+    # mock update_analysis_as_completed_statusdb so we can assert is was called
+    mocker.patch.object(NfAnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -71,9 +75,12 @@ def test_store_success(
     # THEN bundle should be successfully added to Housekeeper and StatusDB
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
-    assert "Analysis successfully stored in StatusDB" in caplog.text
-    assert context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
     assert context.housekeeper_api.bundle(case_id)
+
+    # THEN the analysis should be updated in StatusDB
+    NfAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
+        case_id=case_id, comment=ANY, dry_run=False, force=False
+    )
 
 
 @pytest.mark.parametrize(
@@ -125,7 +132,6 @@ def test_store_available_success(
     cli_runner: CliRunner,
     workflow: Workflow,
     real_housekeeper_api: HousekeeperAPI,
-    deliverables_template_content: list[dict],
     request: FixtureRequest,
     caplog: LogCaptureFixture,
     mocker,
@@ -143,8 +149,11 @@ def test_store_available_success(
     request.getfixturevalue(f"{workflow}_mock_deliverable_dir")
     request.getfixturevalue(f"{workflow}_mock_analysis_finish")
 
+    # mock update_analysis_as_completed_statusdb so we can assert is was called
+    mocker.patch.object(NfAnalysisAPI, "update_analysis_as_completed_statusdb")
+
     # GIVEN that the Housekeeper store is empty
-    context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
+    context.housekeeper_api_ = real_housekeeper_api
     context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # GIVEN that HermesAPI returns a deliverables output
@@ -161,17 +170,16 @@ def test_store_available_success(
     # THEN all expected cases are picked up for storing
     assert f"Storing deliverables for {case_id}" in caplog.text
 
-    # THEN case has an associated analysis
-    assert len(context.status_db.get_case_by_internal_id(case_id).analyses) == 1
-
     # THEN bundle can be found in Housekeeper
     assert context.housekeeper_api.bundle(case_id)
 
-    # THEN StatusDB action is set to None
-    assert context.status_db.get_case_by_internal_id(case_id).action is None
-
     # THEN command exits successfully
     assert result.exit_code == EXIT_SUCCESS
+
+    # THEN the analysis should be updated in StatusDB
+    NfAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
+        case_id=case_id, comment=ANY, dry_run=False, force=False
+    )
 
 
 @pytest.mark.parametrize(
@@ -182,9 +190,7 @@ def test_store_available_fail(
     cli_runner: CliRunner,
     workflow: Workflow,
     real_housekeeper_api: HousekeeperAPI,
-    deliverables_template_content: list[dict],
     case_id_not_enough_reads: str,
-    sample_id: str,
     request: FixtureRequest,
     caplog: LogCaptureFixture,
     mocker,
@@ -205,8 +211,11 @@ def test_store_available_fail(
     failed_case_id: str = case_id_not_enough_reads
 
     # GIVEN that the Housekeeper store is empty
-    context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
+    context.housekeeper_api_ = real_housekeeper_api
     context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
+
+    # mock update_analysis_as_completed_statusdb so we can assert is was called
+    mocker.patch.object(NfAnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -230,20 +239,13 @@ def test_store_available_fail(
     # THEN one case failed to store
     assert f"Error storing {failed_case_id}" in caplog.text
 
-    # THEN case failing store does not have an associated analysis
-    assert not context.status_db.get_case_by_internal_id(failed_case_id).analyses
-
-    # THEN case with successful store has an associated analysis
-    assert len(context.status_db.get_case_by_internal_id(case_id).analyses) == 1
-
     # THEN case failing store does not have an associated Housekeeper bundle
     assert not context.housekeeper_api.bundle(failed_case_id)
 
     # THEN bundle can be found in Housekeeper for successful case
     assert context.housekeeper_api.bundle(case_id)
 
-    # THEN StatusDB action remains as running for case failing store
-    assert context.status_db.get_case_by_internal_id(failed_case_id).action == CaseActions.RUNNING
-
-    # THEN StatusDB action is set to None for successful case
-    assert not context.status_db.get_case_by_internal_id(case_id).action
+    # THEN only the analysis of the successful casae should be updated in StatusDB
+    NfAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_once_with(
+        case_id=case_id, comment=ANY, dry_run=False, force=False
+    )

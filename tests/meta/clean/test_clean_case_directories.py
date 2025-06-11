@@ -20,7 +20,10 @@ def test_clean_rnafusion_case_directories(
 
     # GIVEN a file which was modified days_since_modification ago
     analysis_to_clean: Analysis = rnafusion_context.status_db.add_analysis(
-        workflow=Workflow.RNAFUSION, started_at=parse("2024-06-06"), uploaded=parse("2024-06-06")
+        workflow=Workflow.RNAFUSION,
+        started_at=parse("2024-06-06"),
+        uploaded=parse("2024-06-06"),
+        completed_at=parse("2024-06-06"),
     )
     analysis_to_clean.case = rnafusion_context.status_db.get_cases()[0]
     rnafusion_context.status_db.session.add(analysis_to_clean)
@@ -51,7 +54,10 @@ def test_clean_taxprofiler_case_directories(
 
     # GIVEN a file which was modified days_since_modification ago
     analysis_to_clean: Analysis = taxprofiler_context.status_db.add_analysis(
-        workflow=Workflow.TAXPROFILER, started_at=parse("2024-06-06"), uploaded=parse("2024-06-06")
+        workflow=Workflow.TAXPROFILER,
+        started_at=parse("2024-06-06"),
+        uploaded=parse("2024-06-06"),
+        completed_at=parse("2024-06-06"),
     )
     analysis_to_clean.case = taxprofiler_context.status_db.get_cases()[0]
     taxprofiler_context.status_db.session.add(analysis_to_clean)
