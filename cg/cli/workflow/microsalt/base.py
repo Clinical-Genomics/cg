@@ -193,7 +193,7 @@ def start(
     "config_case_path",
     required=False,
     type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
-    help="optionally change the config-case",
+    help="optionally change the config file path",
 )
 @click.pass_obj
 def dev_run(
@@ -201,7 +201,8 @@ def dev_run(
     config_case_path: click.Path,
     case_id: str,
 ) -> None:
-    """Start the microSALT workflow for the provided case. Uses new code."""
+    """Runs the microSALT workflow for the provided case. Uses new code. Does not generate
+    config files."""
 
     analysis_starter = AnalysisStarterFactory(context).get_analysis_starter_for_case(case_id)
     analysis_starter.run(case_id=case_id, config_file=config_case_path)
@@ -211,7 +212,8 @@ def dev_run(
 @ARGUMENT_CASE_ID
 @click.pass_context
 def dev_start(context: click.Context, case_id: str) -> None:
-    """Start whole microSALT workflow by providing case, ticket or sample id"""
+    """Generates config file, links fastq files and Starts the microSALT analysis
+    for the provided case."""
     LOG.info(f"Starting Microsalt workflow for {case_id}")
     analysis_starter = AnalysisStarterFactory(context.obj).get_analysis_starter_for_case(case_id)
     analysis_starter.start(case_id)
