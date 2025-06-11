@@ -147,7 +147,7 @@ class CompressAPI:
             update_metadata_date(spring_metadata_path=compression.spring_metadata_path)
         return True
 
-    def is_sample_linked_to_newer_case(self, sample: Sample, days_back: int) -> bool:
+    def _is_sample_linked_to_newer_case(self, sample: Sample, days_back: int) -> bool:
         """Check if a sample is linked to a case that is not eligible for cleaning."""
         for link in sample.links:
             case: Case = link.case
@@ -155,10 +155,11 @@ class CompressAPI:
             date_threshold: datetime = datetime.now() - timedelta(days=days_back)
             if creation_date > date_threshold:
                 LOG.info(
-                    f"Skipping sample {sample.internal_id}, linked to case {case.internal_id} created on {creation_date}, not eligible for cleaning"
+                    f"Skipping sample {sample.internal_id}, linked to case {case.internal_id}"
+                    f" created on {creation_date}, not eligible for cleaning"
                 )
                 return True
-            return False
+        return False
 
     def clean_selected_fastq_files(self, samples: list[Sample], days_back: int) -> None:
         """Clean FASTQ files for samples linked to eligible case."""
