@@ -13,18 +13,18 @@ from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.delivery_report.metadata import SampleMetadataModel
 from cg.models.delivery_report.report import (
-    ReportModel,
-    CustomerModel,
     CaseModel,
+    CustomerModel,
     DataAnalysisModel,
+    ReportModel,
 )
 from cg.models.delivery_report.sample import (
-    SampleModel,
     ApplicationModel,
     MethodsModel,
+    SampleModel,
     TimestampModel,
 )
-from cg.store.models import Case, Analysis, Sample
+from cg.store.models import Analysis, Case, Sample
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
@@ -42,7 +42,7 @@ def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
 
     # WHEN generating the delivery report HTML
     delivery_report_html: str = delivery_report_api.get_delivery_report_html(
-        case_id=case_id, analysis_date=case.analyses[0].started_at, force=False
+        case_id=case_id, analysis_date=case.analyses[0].completed_at, force=False
     )
 
     # THEN it should generate a valid HTML string
@@ -51,7 +51,7 @@ def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
-def write_delivery_report_file(request: FixtureRequest, workflow: Workflow, tmp_path: Path):
+def test_write_delivery_report_file(request: FixtureRequest, workflow: Workflow, tmp_path: Path):
     """Test writing of the delivery report for different workflows."""
 
     # GIVEN a delivery report API
@@ -63,10 +63,11 @@ def write_delivery_report_file(request: FixtureRequest, workflow: Workflow, tmp_
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
+    # WHEN writing the delivery report file
     delivery_report_file: Path = delivery_report_api.write_delivery_report_file(
         case_id=case.internal_id,
         directory=tmp_path,
-        analysis_date=case.analyses[0].started_at,
+        analysis_date=case.analyses[0].completed_at,
         force=False,
     )
 
@@ -89,7 +90,7 @@ def test_render_delivery_report(request: FixtureRequest, workflow: Workflow):
 
     # GIVEN some report data
     report_data: ReportModel = delivery_report_api.get_report_data(
-        case_id=case_id, analysis_date=case.analyses[0].started_at
+        case_id=case_id, analysis_date=case.analyses[0].completed_at
     )
 
     # WHEN rendering the report
@@ -115,7 +116,7 @@ def test_get_report_data(request: FixtureRequest, workflow: Workflow):
 
     # WHEN extracting the report data
     report_data: ReportModel = delivery_report_api.get_report_data(
-        case_id=case_id, analysis_date=case.analyses[0].started_at
+        case_id=case_id, analysis_date=case.analyses[0].completed_at
     )
 
     # THEN the report model should have been populated and the data validated
@@ -138,7 +139,7 @@ def test_validate_report_data(request: FixtureRequest, workflow: Workflow):
 
     # GIVEN a report data model
     report_data: ReportModel = delivery_report_api.get_report_data(
-        case_id=case_id, analysis_date=case.analyses[0].started_at
+        case_id=case_id, analysis_date=case.analyses[0].completed_at
     )
 
     # WHEN validating the delivery report data
@@ -168,7 +169,7 @@ def test_validate_report_data_empty_optional_fields(
 
     # GIVEN a delivery report data model
     report_data: ReportModel = delivery_report_api.get_report_data(
-        case_id, case.analyses[0].started_at
+        case_id, case.analyses[0].completed_at
     )
 
     # GIVEN empty optional delivery report fields
@@ -208,7 +209,7 @@ def test_validate_report_data_empty_required_fields(
 
     # GIVEN a delivery report data model
     report_data: ReportModel = delivery_report_api.get_report_data(
-        case_id, case.analyses[0].started_at
+        case_id, case.analyses[0].completed_at
     )
 
     # GIVEN empty required delivery report fields
@@ -246,7 +247,7 @@ def test_validate_report_data_empty_required_fields_force(
 
     # GIVEN a delivery report data model
     report_data: ReportModel = delivery_report_api.get_report_data(
-        case_id, case.analyses[0].started_at
+        case_id, case.analyses[0].completed_at
     )
 
     # GIVEN empty required delivery report fields
@@ -279,7 +280,7 @@ def test_validate_report_data_external_sample(request: FixtureRequest, workflow:
 
     # GIVEN a delivery report data model
     report_data: ReportModel = delivery_report_api.get_report_data(
-        case_id, case.analyses[0].started_at
+        case_id, case.analyses[0].completed_at
     )
 
     # GIVEN a case with an external sample
