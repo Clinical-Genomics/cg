@@ -25,7 +25,7 @@ NALLO_PARENT_PEDDY_METRIC_CONDITION: dict[str, dict[str, Any]] = {
 }
 
 NALLO_RAW_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
-    "sex": {"norm": "lt", "threshold": None},
+    "sex": {"norm": "eq", "threshold": None},
 }
 
 RAREDISEASE_PREDICTED_SEX_METRIC = "predicted_sex_sex_check"
