@@ -92,7 +92,7 @@ def clean_fastq(context: CGConfig, case_id: str | None, days_back: int, dry_run:
         return
     is_successful: bool = True
     for case in cases:
-        samples: list[Sample] = store.get_samples_by_case_id(case_id=case.internal_id)
+        samples: list[Sample] = case.samples
         if not compress_api.clean_fastq_files_for_samples(samples=samples, days_back=days_back):
             is_successful: bool = False
     if not is_successful:
