@@ -231,7 +231,7 @@ def dev_config_case(context: CGConfig, case_id: str) -> None:
     configurator = cast(
         MicrosaltConfigurator, ConfiguratorFactory(context).get_configurator(Workflow.MICROSALT)
     )
-    configurator.configure(case_id)
+    configurator.configure(case_id=case_id)
 
 
 @microsalt.command("start-available")

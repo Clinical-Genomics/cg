@@ -5,10 +5,14 @@ import logging
 from pathlib import Path
 
 from click.testing import CliRunner
+from pytest_mock import MockerFixture
 
 from cg.apps.lims import LimsAPI
-from cg.cli.workflow.microsalt.base import config_case
+from cg.cli.workflow.microsalt.base import config_case, dev_config_case
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.configurator.implementations.microsalt import (
+    MicrosaltConfigurator,
+)
 
 EXIT_SUCCESS = 0
 
@@ -217,3 +221,15 @@ def test_vre_comment(
 
     # THEN the organism should now be ....
     assert "ABCD123" in result.output
+
+
+def test_dev_case_config(cli_runner: CliRunner, base_context: CGConfig, mocker: MockerFixture):
+
+    # GIVEN a microSALT configurator
+    config_mock = mocker.patch.object(MicrosaltConfigurator, "configure")
+
+    # WHEN running the dev-config-case CLI command
+    cli_runner.invoke(dev_config_case, ["some_case_id"], obj=base_context)
+
+    # THEN the configurator should have been called with the specified case id
+    config_mock.assert_called_once_with(case_id="some_case_id")
