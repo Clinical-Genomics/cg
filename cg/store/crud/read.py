@@ -1128,16 +1128,12 @@ class ReadHandler(BaseHandler):
             CaseFilter.FOR_ANALYSIS,
         ]
         cases = apply_case_filter(
-            cases=self.get_cases_with_analyzes(),
+            cases=self._get_outer_join_cases_with_latest_analyses_query(),
             filter_functions=case_filter_functions,
             workflow=workflow,
         )
-
-        sorted_cases: list[Case] = list(cases.order_by(Case.ordered_at))
-        cases_to_analyze: list[Case] = [
-            case for case in sorted_cases if self._is_case_to_be_analyzed(case)
-        ]
-        return cases_to_analyze[:limit]
+        sorted_and_truncated: Query = cases.order_by(Case.ordered_at).limit(limit)
+        return sorted_and_truncated.all()
 
     def get_cases_to_compress(self, date_threshold: datetime) -> list[Case]:
         """Return all cases that are ready to be compressed by SPRING."""

@@ -92,10 +92,12 @@ def filter_cases_by_priority(cases: Query, priority: str, **kwargs) -> Query:
 
 
 def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
-    """Filter cases in need of analysis by:
-    1. Action set to analyze or
-    2. Internally created cases with no action set and no prior analysis or
-    3. Cases with no action, but new sequence data
+    """Filter cases that should be analyzed:
+    1. All cases with action set to ANALYZE should be analyzed, regardless of other conditions.
+    2. A case that has not been analyzed before
+    3. A microSALT case with at least one sample has new data that has not been analyzed
+    4. A case that has been set to TOP_UP by production and has new data
+    Scenarios 2, 3, and 4 all require that the case has passed Sequencing QC.
     """
     return cases.filter(
         or_(
@@ -106,15 +108,21 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
                 Application.is_external.isnot(True),
                 Case.action.is_(None),
                 Analysis.created_at.is_(None),
+                Case.aggregated_sequencing_qc == SequencingQCStatus.PASSED,
             ),
             # Case contains new data that has not been analysed. (Only relevant for microSALT)
             and_(
                 Case.action.is_(None),
                 Analysis.created_at < Sample.last_sequenced_at,
                 Case.data_analysis == Workflow.MICROSALT,
+                Case.aggregated_sequencing_qc == SequencingQCStatus.PASSED,
             ),
             # Cases manually set to top-up by production that get the new data
-            and_(Case.action == CaseActions.TOP_UP, Analysis.created_at < Sample.last_sequenced_at),
+            and_(
+                Case.action == CaseActions.TOP_UP,
+                Analysis.created_at < Sample.last_sequenced_at,
+                Case.aggregated_sequencing_qc == SequencingQCStatus.PASSED,
+            ),
         )
     )
 
