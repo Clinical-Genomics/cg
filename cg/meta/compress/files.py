@@ -12,7 +12,7 @@ from cg.constants.compression import (
     FASTQ_FIRST_READ_SUFFIX,
     FASTQ_SECOND_READ_SUFFIX,
 )
-from cg.models import CompressionData
+from cg.models.compression_data import CompressionData
 
 LOG = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ def get_hk_files_dict(tags: list[str], version_obj: Version) -> dict[Path, File]
         file_tags: set[str] = {tag.name for tag in version_file.tags}
         if not file_tags.intersection(tags):
             continue
-        LOG.info(f"Found file {version_file.path}")
+        LOG.debug(f"Found file {version_file.path}")
         path_obj: Path = Path(version_file.full_path)
         hk_file[path_obj] = version_file
     return hk_file

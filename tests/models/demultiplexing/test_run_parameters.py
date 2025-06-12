@@ -314,6 +314,7 @@ def test_get_index_settings(
         ("hiseq_2500_dual_index_run_parameters", None),
         ("novaseq_6000_run_parameters_pre_1_5_kits", "S4"),
         ("novaseq_6000_run_parameters_post_1_5_kits", "S1"),
+        ("novaseq_x_run_parameters_node_name", "10B"),
         ("novaseq_x_run_parameters", "10B"),
     ],
 )

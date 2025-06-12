@@ -1,7 +1,6 @@
 """Observations API."""
 
 import logging
-from datetime import datetime
 from pathlib import Path
 
 from housekeeper.store.models import Version
@@ -11,15 +10,16 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CustomerId
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.sample_sources import SourceType
-from cg.constants.sequencing import SequencingMethod
-from cg.exc import LoqusdbUploadCaseError
+from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.exc import AnalysisNotCompletedError, LoqusdbUploadCaseError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
     MipDNAObservationsInputFiles,
+    RarediseaseObservationsInputFiles,
 )
-from cg.store.models import Analysis, Case
+from cg.store.models import Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -56,11 +56,17 @@ class ObservationsAPI:
 
     def get_observations_input_files(
         self, case: Case
-    ) -> MipDNAObservationsInputFiles | BalsamicObservationsInputFiles:
-        """Fetch input files from a case to upload to Loqusdb."""
-        analysis: Analysis = case.analyses[0]
-        analysis_date: datetime = analysis.started_at or analysis.completed_at
-        hk_version: Version = self.housekeeper_api.version(analysis.case.internal_id, analysis_date)
+    ) -> (
+        BalsamicObservationsInputFiles
+        | MipDNAObservationsInputFiles
+        | RarediseaseObservationsInputFiles
+    ):
+        """Return input files from a case to upload to Loqusdb."""
+        if not case.latest_analyzed:
+            raise AnalysisNotCompletedError(f"Case {case.internal_id} has no completed analyses")
+        hk_version: Version = self.housekeeper_api.version(
+            bundle=case.internal_id, date=case.latest_analyzed
+        )
         return self.get_observations_files_from_hk(hk_version=hk_version, case_id=case.internal_id)
 
     def get_loqusdb_api(self, loqusdb_instance: LoqusdbInstance) -> LoqusdbAPI:
@@ -118,7 +124,7 @@ class ObservationsAPI:
 
     def is_sequencing_method_eligible_for_observations_upload(self, case_id: str) -> bool:
         """Return whether a sequencing method is valid for observations upload."""
-        sequencing_method: SequencingMethod | None = self.analysis_api.get_data_analysis_type(
+        sequencing_method: SeqLibraryPrepCategory | None = self.analysis_api.get_data_analysis_type(
             case_id
         )
         if sequencing_method not in self.loqusdb_sequencing_methods:

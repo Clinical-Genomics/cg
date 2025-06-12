@@ -19,7 +19,7 @@ def test_validate_non_existing_sample_sheet(
     sample_sheet: Path = Path("a_sample_sheet_that_does_not_exist.csv")
     assert sample_sheet.exists() is False
 
-    # WHEN validating the sample sheet
+    # WHEN validating the sample sheetresult = {Result} <Result SystemExit(2)>
     result = cli_runner.invoke(
         validate_sample_sheet,
         [str(sample_sheet)],
@@ -28,8 +28,6 @@ def test_validate_non_existing_sample_sheet(
 
     # THEN assert that it exits with a non-zero exit code
     assert result.exit_code != EXIT_SUCCESS
-    # THEN assert the correct information was communicated
-    assert f"File '{sample_sheet.name}' does not exist" in result.output
 
 
 def test_validate_sample_sheet_wrong_file_type(

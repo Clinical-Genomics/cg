@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -24,18 +24,10 @@ jobs:
         with:
           virtualenvs-create: false
 
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        id: cache
-        with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ env.pythonLocation }}-${{ hashFiles('**/poetry.lock') }}
-
       - name: Install Dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction --all-extras
 
-      - name: Test with pytest & Coveralls
+      - name: Test with Pytest & Coveralls
         run: |
           pytest -n logical --cov=cg/
           coveralls

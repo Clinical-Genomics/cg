@@ -3,7 +3,7 @@
 import logging
 import traceback
 
-import click
+import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN, FORCE
@@ -40,7 +40,7 @@ def nipt_upload_case(context: click.Context, case_id: str | None, dry_run: bool,
 
     nipt_upload_api: NiptUploadAPI = NiptUploadAPI(context.obj)
     nipt_upload_api.set_dry_run(dry_run=dry_run)
-    if force or nipt_upload_api.flowcell_passed_qc_value(
+    if force or nipt_upload_api.sequencing_run_passed_qc_value(
         case_id=case_id, q30_threshold=Q30_THRESHOLD
     ):
         nipt_upload_api.update_analysis_upload_started_date(case_id)
@@ -50,10 +50,7 @@ def nipt_upload_case(context: click.Context, case_id: str | None, dry_run: bool,
         LOG.info(f"{case_id}: analysis uploaded!")
     else:
         LOG.error(f"Uploading case failed: {case_id}")
-        LOG.error(
-            f"Flowcell did not pass one of the following QC parameters:\n"
-            f"target_reads={nipt_upload_api.target_reads(case_id=case_id)}, Q30_threshold={Q30_THRESHOLD}"
-        )
+        LOG.error("Sequencing run did not pass QC. Please check the QC values in the database.")
         raise AnalysisUploadError("Upload failed")
 
 
@@ -77,7 +74,7 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
     for analysis in analyses:
         internal_id = analysis.case.internal_id
 
-        if nipt_upload_api.flowcell_passed_qc_value(
+        if nipt_upload_api.sequencing_run_passed_qc_value(
             case_id=internal_id, q30_threshold=Q30_THRESHOLD
         ):
             LOG.info(f"Uploading case: {internal_id}")

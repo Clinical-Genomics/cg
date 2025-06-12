@@ -2,19 +2,26 @@ import logging
 import re
 from typing import Iterable
 
-import click
+import rich_click as click
 from tabulate import tabulate
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, Customer, Flowcell, Sample
+from cg.store.models import Case, Customer, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 ANALYSIS_HEADERS = ["Analysis Date", "Workflow", "Version"]
 FAMILY_HEADERS = ["Case", "Name", "Customer", "Priority", "Panels", "Action"]
-FLOW_CELL_HEADERS = ["Flowcell", "Type", "Sequencer", "Date", "Archived?", "Status"]
+SEQUENCING_RUN_HEADERS = [
+    "Flow Cell",
+    "Type",
+    "Sequencer",
+    "Sequencing started",
+    "Sequencing finished",
+    "Archived?",
+    "Data availability",
+]
 LINK_HEADERS = ["Sample", "Mother", "Father"]
 SAMPLE_HEADERS = ["Sample", "Name", "Customer", "Application", "State", "Priority", "External?"]
 
@@ -32,7 +39,7 @@ def get(context: click.Context, identifier: str | None):
             context.invoke(get_case, case_ids=[identifier])
         elif re.match(r"^[HC][A-Z0-9]{8}$", identifier):
             # try flowcell information
-            context.invoke(get_flow_cell, flow_cell_id=identifier)
+            context.invoke(get_sequencing_run, flow_cell_id=identifier)
         else:
             LOG.error(f"{identifier}: can't predict identifier")
             raise click.Abort
@@ -66,9 +73,11 @@ def get_sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample
             case_ids: list[str] = [link_obj.case.internal_id for link_obj in existing_sample.links]
             context.invoke(get_case, case_ids=case_ids, samples=False)
         if not hide_flow_cell:
-            for sample_flow_cell in existing_sample.flow_cells:
-                LOG.debug(f"Get info on flow cell: {sample_flow_cell.name}")
-                context.invoke(get_flow_cell, flow_cell_id=sample_flow_cell.name, samples=False)
+            for sample_flow_cell in existing_sample.run_devices:
+                LOG.debug(f"Get info on flow cell: {sample_flow_cell.internal_id}")
+                context.invoke(
+                    get_sequencing_run, flow_cell_id=sample_flow_cell.internal_id, samples=False
+                )
 
 
 @get.command("analysis")
@@ -172,31 +181,38 @@ def get_case(
             context.invoke(get_analysis, case_id=status_db_case.internal_id)
 
 
-@get.command("flow-cell")
+@get.command("sequencing-run")
 @click.option("--samples/--no-samples", default=True, help="Display related samples")
 @click.argument("flow-cell-id")
 @click.pass_context
-def get_flow_cell(context: click.Context, samples: bool, flow_cell_id: str):
-    """Get information about a flow cell and the samples on it."""
+def get_sequencing_run(context: click.Context, samples: bool, flow_cell_id: str):
+    """Get information about a sequencing run and its samples, if any."""
     status_db: Store = context.obj.status_db
-    existing_flow_cell: Flowcell = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
-    if not existing_flow_cell:
-        LOG.error(f"{flow_cell_id}: flow cell not found")
+    sequencing_run: IlluminaSequencingRun = (
+        status_db.get_illumina_sequencing_run_by_device_internal_id(device_internal_id=flow_cell_id)
+    )
+    if not sequencing_run:
+        LOG.error(f"Sequencing run with {flow_cell_id} not found")
         raise click.Abort
     row: list[str] = [
-        existing_flow_cell.name,
-        existing_flow_cell.sequencer_type,
-        existing_flow_cell.sequencer_name,
-        existing_flow_cell.sequenced_at.date(),
-        existing_flow_cell.archived_at.date() if existing_flow_cell.archived_at else "No",
-        existing_flow_cell.status,
+        sequencing_run.device.internal_id,
+        sequencing_run.sequencer_type,
+        sequencing_run.sequencer_name,
+        (
+            sequencing_run.sequencing_started_at.date()
+            if sequencing_run.sequencing_started_at
+            else "Not available"
+        ),
+        sequencing_run.sequencing_completed_at.date(),
+        sequencing_run.archived_at.date() if sequencing_run.archived_at else "No",
+        sequencing_run.data_availability,
     ]
-    click.echo(tabulate([row], headers=FLOW_CELL_HEADERS, tablefmt="psql"))
+    click.echo(tabulate([row], headers=SEQUENCING_RUN_HEADERS, tablefmt="psql"))
     if samples:
         sample_ids: list[str] = [
-            sample_obj.internal_id for sample_obj in existing_flow_cell.samples
+            metric.sample.internal_id for metric in sequencing_run.sample_metrics
         ]
         if sample_ids:
             context.invoke(get_sample, sample_ids=sample_ids, cases=False)
         else:
-            LOG.warning("No samples found on flow cell")
+            LOG.warning("No samples found on sequencing run")

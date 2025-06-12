@@ -1,7 +1,9 @@
-from enum import StrEnum
+from enum import StrEnum, auto
 
 from cg.constants import FileExtensions
-from cg.constants.housekeeper_tags import AlignmentFileTag
+from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
+
+HGNC_ID = "hgnc_id"
 
 
 class GenomeBuild(StrEnum):
@@ -12,6 +14,7 @@ class GenomeBuild(StrEnum):
 class ScoutExportFileName(StrEnum):
     MANAGED_VARIANTS: str = f"managed_variants{FileExtensions.VCF}"
     PANELS: str = f"gene_panels{FileExtensions.BED}"
+    PANELS_TSV: str = f"gene_panels{FileExtensions.TSV}"
 
 
 class UploadTrack(StrEnum):
@@ -21,6 +24,7 @@ class UploadTrack(StrEnum):
 
 class ScoutCustomCaseReportTags(StrEnum):
     DELIVERY: str = "delivery_report"
+    RNA_DELIVERY: str = "rna_delivery_report"
     CNV: str = "cnv_report"
     COV_QC: str = "coverage_qc_report"
     MULTIQC: str = "multiqc"
@@ -29,7 +33,49 @@ class ScoutCustomCaseReportTags(StrEnum):
     GENE_FUSION_RESEARCH: str = "gene_fusion_research"
 
 
-MIP_CASE_TAGS = dict(
+class ScoutUploadKey(StrEnum):
+    SMN_TSV = auto()
+    SNV_VCF = auto()
+    SV_VCF = auto()
+    VCF_STR = auto()
+    VCF_FUSION = auto()
+    VCF_SNV = auto()
+    VCF_SV = auto()
+
+
+RAREDISEASE_CASE_TAGS = dict(
+    delivery_report={"delivery-report"},
+    multiqc={"multiqc-html"},
+    peddy_check={"ped-check", "peddy"},
+    peddy_ped={"ped", "peddy"},
+    peddy_sex={"sex-check", "peddy"},
+    smn_tsv={"smn-calling"},
+    vcf_mei={"mobile-elements", "clinical", "vcf"},
+    vcf_mei_research={"mobile-elements", "research", "vcf"},
+    vcf_snv_research={"vcf-snv-research"},
+    vcf_snv={"vcf-snv-clinical"},
+    vcf_snv_research_mt={"vcf-sv-research", "mitochondria"},
+    vcf_snv_mt={"vcf-sv-clinical", "mitochondria"},
+    str_catalog={"expansionhunter", "variant-catalog"},
+    vcf_sv_research={"vcf-sv-research"},
+    vcf_sv={"vcf-sv-clinical"},
+    vcf_str={"vcf-str"},
+)
+
+NALLO_CASE_TAGS = dict(
+    delivery_report={"delivery-report"},
+    multiqc={"multiqc-html"},
+    peddy_check={"ped-check", "peddy"},
+    peddy_ped={"ped", "peddy"},
+    peddy_sex={"sex-check", "peddy"},
+    vcf_snv_research={"vcf-snv-research"},
+    vcf_snv={"vcf-snv-clinical"},
+    vcf_sv_research={"vcf-sv-research"},
+    vcf_sv={"vcf-sv-clinical"},
+    vcf_str={"vcf-str"},
+)
+
+MIP_CASE_TAGS: dict[str, set[str]] = dict(
     delivery_report={"delivery-report"},
     multiqc_report={"multiqc-html"},
     peddy_check={"ped-check", "peddy"},
@@ -74,7 +120,32 @@ RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
     vcf_fusion={"vcf-fusion"},
 )
 
-MIP_SAMPLE_TAGS = dict(
+RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
+    alignment_file={AlignmentFileTag.CRAM},
+    d4_file={"d4"},
+    vcf2cytosure={"vcf2cytosure"},
+    mt_bam={"bam-mt"},
+    eklipse_path={"eklipse-png"},
+    chromograph_autozyg={"chromograph", "autozyg"},
+    chromograph_coverage={"chromograph", "tcov"},
+    chromograph_regions={"chromograph", "regions"},
+    chromograph_sites={"chromograph", "sites"},
+    reviewer_alignment={"expansionhunter", "bam"},
+    reviewer_alignment_index={"expansionhunter", "bam-index"},
+    reviewer_vcf={"expansionhunter", "vcf-str"},
+    mitodel_file={"mitodel"},
+)
+
+NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
+    alignment_path={AlignmentFileTag.BAM, "haplotags"},
+    assembly_alignment_path={AlignmentFileTag.BAM, "assembly"},
+    d4_file={"coverage", "d4"},
+    hificnv_coverage={"hificnv", "bigwig"},
+    paraphase_alignment_path={AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE},
+    minor_allele_frequency_wig={"hificnv", "bigwig", "maf"},
+)
+
+MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
     bam_file={"bam"},
     alignment_file={"cram"},
     vcf2cytosure={"vcf2cytosure"},
@@ -104,3 +175,9 @@ BALSAMIC_UMI_SAMPLE_TAGS = dict(
 RNAFUSION_SAMPLE_TAGS = dict(
     alignment_file={AlignmentFileTag.CRAM},
 )
+
+RANK_MODEL_THRESHOLD = 5
+
+NALLO_RANK_MODEL_THRESHOLD = 8
+NALLO_RANK_MODEL_VERSION_SNV = "1.0"
+NALLO_RANK_MODEL_VERSION_SV = "1.0"

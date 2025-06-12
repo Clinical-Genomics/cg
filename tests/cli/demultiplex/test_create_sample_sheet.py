@@ -5,8 +5,8 @@ from _pytest.fixtures import FixtureRequest
 from click.testing import CliRunner, Result
 from pydantic import BaseModel
 
-from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.process import EXIT_SUCCESS
 from cg.io.txt import read_txt
@@ -20,7 +20,7 @@ def test_create_sample_sheet_no_run_parameters_fails(
     cli_runner: CliRunner,
     tmp_flow_cell_without_run_parameters_path: Path,
     sample_sheet_context_broken_flow_cells: CGConfig,
-    hiseq_2500_custom_index_bcl_convert_lims_samples: list[FlowCellSample],
+    hiseq_2500_custom_index_bcl_convert_lims_samples: list[IlluminaSampleIndexSetting],
     caplog,
     mocker,
 ):
@@ -92,7 +92,7 @@ def test_create_v2_sample_sheet(
 ):
     """Test that creating a v2 sample sheet works."""
     # GIVEN a sample sheet context with a sample sheet api
-    sample_sheet_api: SampleSheetAPI = sample_sheet_context.sample_sheet_api
+    sample_sheet_api: IlluminaSampleSheetService = sample_sheet_context.sample_sheet_api
 
     # GIVEN a sequencing run directory with some run parameters
     flow_cell_directory: Path = request.getfixturevalue(scenario.sequencing_run_directory)

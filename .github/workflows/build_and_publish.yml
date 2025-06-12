@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out git repository
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -27,6 +27,7 @@ jobs:
         env:
           PYPI_USERNAME: __token__
           PYPI_PASSWORD: ${{ secrets.pypi_password }}
+          POETRY_REQUESTS_TIMEOUT: 60
         run: |
           poetry publish --no-interaction --build \
             --username $PYPI_USERNAME \

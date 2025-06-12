@@ -1,7 +1,7 @@
 import logging
 
-from cg.constants.constants import PrepCategory
 from cg.constants.priority import Priority
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
@@ -67,6 +67,16 @@ def ready_made_library_case_pass_sequencing_qc(case: Case) -> bool:
     return enough_reads
 
 
+def all_samples_in_case_have_reads(case: Case) -> bool:
+    """
+    Check if all samples have reads.
+    """
+    passed_quality_check: bool = all(sample.has_reads for sample in case.samples)
+    if not passed_quality_check:
+        LOG.warning("Not all samples in case have reads.")
+    return passed_quality_check
+
+
 def any_sample_in_case_has_reads(case: Case) -> bool:
     """
     Check if any sample has reads.
@@ -104,7 +114,7 @@ def get_express_reads_threshold_for_sample(sample: Sample) -> int:
 
 
 def is_sample_ready_made_library(sample: Sample) -> bool:
-    return sample.prep_category == PrepCategory.READY_MADE_LIBRARY
+    return sample.prep_category == SeqLibraryPrepCategory.READY_MADE_LIBRARY
 
 
 def is_case_ready_made_library(case: Case) -> bool:

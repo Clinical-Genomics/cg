@@ -32,14 +32,15 @@ CAPTUREKIT_OPTIONS = (
 
 
 class JobType(StrEnum):
-    UPLOAD: str = "upload"
-    ANALYSIS: str = "analysis"
+    UPLOAD = "upload"
+    ANALYSIS = "analysis"
 
 
 class CaseActions(StrEnum):
-    ANALYZE: str = "analyze"
-    HOLD: str = "hold"
-    RUNNING: str = "running"
+    ANALYZE = "analyze"
+    HOLD = "hold"
+    RUNNING = "running"
+    TOP_UP = "top-up"
 
     @classmethod
     def actions(cls) -> list[str]:
@@ -74,7 +75,7 @@ class CustomerId(StrEnum):
     CUST999: str = "cust999"
 
 
-class FlowCellStatus(StrEnum):
+class SequencingRunDataAvailability(StrEnum):
     ON_DISK: str = "ondisk"
     REMOVED: str = "removed"
     REQUESTED: str = "requested"
@@ -86,30 +87,12 @@ class FlowCellStatus(StrEnum):
         return list(map(lambda status: status.value, cls))
 
 
-class AnalysisType(StrEnum):
-    TARGETED_GENOME_SEQUENCING: str = "tgs"
-    WHOLE_EXOME_SEQUENCING: str = "wes"
-    WHOLE_GENOME_SEQUENCING: str = "wgs"
-    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
-    OTHER: str = "other"
-
-
 class CancerAnalysisType(StrEnum):
     TUMOR_NORMAL = auto()
     TUMOR_NORMAL_PANEL = auto()
     TUMOR_NORMAL_WGS = auto()
     TUMOR_PANEL = auto()
     TUMOR_WGS = auto()
-
-
-class PrepCategory(StrEnum):
-    COVID: str = "cov"
-    MICROBIAL: str = "mic"
-    READY_MADE_LIBRARY: str = "rml"
-    TARGETED_GENOME_SEQUENCING: str = "tgs"
-    WHOLE_EXOME_SEQUENCING: str = "wes"
-    WHOLE_GENOME_SEQUENCING: str = "wgs"
-    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
 
 
 class SexOptions(StrEnum):
@@ -130,24 +113,31 @@ class StatusOptions(StrEnum):
 
 
 class Workflow(StrEnum):
-    BALSAMIC: str = "balsamic"
-    BALSAMIC_PON: str = "balsamic-pon"
-    BALSAMIC_QC: str = "balsamic-qc"
-    BALSAMIC_UMI: str = "balsamic-umi"
-    DEMULTIPLEX: str = "demultiplex"
-    FASTQ: str = "fastq"
-    FLUFFY: str = "fluffy"
-    JASEN: str = "jasen"
-    MICROSALT: str = "microsalt"
-    MIP_DNA: str = "mip-dna"
-    MIP_RNA: str = "mip-rna"
-    MUTANT: str = "mutant"
-    RAREDISEASE: str = "raredisease"
-    RNAFUSION: str = "rnafusion"
-    RSYNC: str = "rsync"
-    SPRING: str = "spring"
-    TAXPROFILER: str = "taxprofiler"
-    TOMTE: str = "tomte"
+    BALSAMIC = "balsamic"
+    BALSAMIC_PON = "balsamic-pon"
+    BALSAMIC_UMI = "balsamic-umi"
+    DEMULTIPLEX = "demultiplex"
+    FLUFFY = "fluffy"
+    JASEN = "jasen"
+    MICROSALT = "microsalt"
+    MIP_DNA = "mip-dna"
+    MIP_RNA = "mip-rna"
+    MUTANT = "mutant"
+    NALLO = "nallo"
+    RAREDISEASE = "raredisease"
+    RAW_DATA = "raw-data"
+    RNAFUSION = "rnafusion"
+    RSYNC = "rsync"
+    SPRING = "spring"
+    TAXPROFILER = "taxprofiler"
+    TOMTE = "tomte"
+
+
+DNA_WORKFLOWS_WITH_SCOUT_UPLOAD: list[Workflow] = [
+    Workflow.MIP_DNA,
+    Workflow.BALSAMIC,
+    Workflow.BALSAMIC_UMI,
+]
 
 
 class FileFormat(StrEnum):
@@ -162,10 +152,12 @@ class FileFormat(StrEnum):
 
 
 class GenomeVersion(StrEnum):
-    hg19: str = "hg19"
-    hg38: str = "hg38"
-    canfam3: str = "canfam3"
+    GRCh37: str = "GRCh37"
+    GRCh38: str = "GRCh38"
     T2T_CHM13: str = "T2T-CHM13v2.0"
+    CANFAM3 = auto()
+    HG19: str = "hg19"
+    HG38: str = "hg38"
 
 
 class SampleType(StrEnum):
@@ -174,18 +166,22 @@ class SampleType(StrEnum):
 
 
 class DataDelivery(StrEnum):
-    ANALYSIS_FILES: str = "analysis"
-    ANALYSIS_SCOUT: str = "analysis-scout"
-    FASTQ: str = "fastq"
-    FASTQ_SCOUT: str = "fastq-scout"
-    FASTQ_QC: str = "fastq_qc"
-    FASTQ_ANALYSIS: str = "fastq-analysis"
-    FASTQ_QC_ANALYSIS: str = "fastq_qc-analysis"
-    FASTQ_ANALYSIS_SCOUT: str = "fastq-analysis-scout"
-    NIPT_VIEWER: str = "nipt-viewer"
-    NO_DELIVERY: str = "no-delivery"
-    SCOUT: str = "scout"
-    STATINA: str = "statina"
+    ANALYSIS_FILES = "analysis"
+    ANALYSIS_SCOUT = "analysis-scout"
+    BAM = "bam"
+    FASTQ = "fastq"
+    FASTQ_SCOUT = "fastq-scout"
+    FASTQ_QC = "fastq_qc"
+    FASTQ_ANALYSIS = "fastq-analysis"
+    FASTQ_QC_ANALYSIS = "fastq_qc-analysis"
+    FASTQ_ANALYSIS_SCOUT = "fastq-analysis-scout"
+    NIPT_VIEWER = "nipt-viewer"
+    NO_DELIVERY = "no-delivery"
+    RAW_DATA_ANALYSIS = "raw_data-analysis"
+    RAW_DATA_ANALYSIS_SCOUT = "raw_data-analysis-scout"
+    RAW_DATA_SCOUT = "raw_data-scout"
+    SCOUT = "scout"
+    STATINA = "statina"
 
 
 class HastaSlurmPartitions(StrEnum):
@@ -193,6 +189,8 @@ class HastaSlurmPartitions(StrEnum):
 
 
 class FileExtensions(StrEnum):
+    BAM: str = ".bam"
+    BCF: str = ".bcf"
     BED: str = ".bed"
     COMPLETE: str = ".complete"
     CONFIG: str = ".config"
@@ -218,7 +216,10 @@ class FileExtensions(StrEnum):
     TAR: str = ".tar"
     TMP: str = ".tmp"
     TSV: str = ".tsv"
+    TXT: str = ".txt"
     VCF: str = ".vcf"
+    VCF_GZ: str = ".vcf.gz"
+    XLSX: str = ".xlsx"
     XML: str = ".xml"
     YAML: str = ".yaml"
 
@@ -248,6 +249,13 @@ class MicrosaltAppTags(StrEnum):
     MWXNXTR003: str = "MWXNXTR003"
     VWGNXTR001: str = "VWGNXTR001"
     PREP_CATEGORY: str = "mic"
+
+
+class MutantQC:
+    EXTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD: int = 100000
+    INTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD: int = 2000
+    FRACTION_OF_SAMPLES_WITH_FAILED_QC_THRESHOLD: float = 0.2
+    QUALITY_REPORT_FILE_NAME: str = f"QC_report{FileExtensions.JSON}"
 
 
 DRY_RUN_MESSAGE = "Dry run: process call will not be executed!"
@@ -294,3 +302,13 @@ class SequencingQCStatus(Enum):
     FAILED = auto()
     PASSED = auto()
     PENDING = auto()
+
+
+class SampleStatus(StrEnum):
+    INCOMING = "incoming"
+    LABPREP = "labprep"
+    SEQUENCING = "sequencing"
+
+    @classmethod
+    def statuses(cls) -> list[str]:
+        return [cls.INCOMING, cls.LABPREP, cls.SEQUENCING]

@@ -5,16 +5,18 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
-from cg.constants import Workflow
+from cg.constants import SequencingFileTag, Workflow
+from cg.constants.constants import CaseActions
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Sample
+from cg.store.models import Case, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(scope="function")
-def fluffy_case_id_existing():
-    return "norwegiangiraffe"
+def fluffy_case_id_existing(selected_novaseq_6000_post_1_5_kits_case_ids: list[str]) -> str:
+    return selected_novaseq_6000_post_1_5_kits_case_ids[0]
 
 
 @pytest.fixture(scope="function")
@@ -23,8 +25,8 @@ def fluffy_case_id_non_existing():
 
 
 @pytest.fixture(scope="function")
-def fluffy_sample_lims_id():
-    return "ACC1234A1"
+def fluffy_sample_lims_id(selected_novaseq_6000_post_1_5_kits_sample_ids):
+    return selected_novaseq_6000_post_1_5_kits_sample_ids[0]
 
 
 @pytest.fixture(scope="function")
@@ -104,7 +106,11 @@ def fluffy_hermes_deliverables_response_data(
 
 
 @pytest.fixture(scope="function")
-def fluffy_fastq_hk_bundle_data(fluffy_fastq_file_path, fluffy_sample_lims_id) -> dict:
+def fluffy_fastq_hk_bundle_data(
+    fluffy_fastq_file_path: Path,
+    fluffy_sample_lims_id: str,
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
+) -> dict:
     return {
         "name": fluffy_sample_lims_id,
         "created": dt.datetime.now(),
@@ -112,7 +118,7 @@ def fluffy_fastq_hk_bundle_data(fluffy_fastq_file_path, fluffy_sample_lims_id) -
         "files": [
             {
                 "path": fluffy_fastq_file_path.as_posix(),
-                "tags": ["fastq", "flowcell"],
+                "tags": [SequencingFileTag.FASTQ, novaseq_6000_post_1_5_kits_flow_cell_id],
                 "archive": False,
             }
         ],
@@ -120,19 +126,38 @@ def fluffy_fastq_hk_bundle_data(fluffy_fastq_file_path, fluffy_sample_lims_id) -
 
 
 @pytest.fixture(scope="function")
-def fluffy_samplesheet_bundle_data(novaseq_6000_post_1_5_kits_correct_sample_sheet_path) -> dict:
+def fluffy_samplesheet_bundle_data(
+    novaseq_6000_post_1_5_kits_correct_sample_sheet_path: Path,
+    novaseq_6000_post_1_5_kits_flow_cell_id: str,
+) -> dict:
     return {
-        "name": "flowcell",
+        "name": novaseq_6000_post_1_5_kits_flow_cell_id,
         "created": dt.datetime.now(),
         "version": "1.0",
         "files": [
             {
                 "path": str(novaseq_6000_post_1_5_kits_correct_sample_sheet_path),
-                "tags": ["flowcell", "samplesheet"],
+                "tags": [novaseq_6000_post_1_5_kits_flow_cell_id, "samplesheet"],
                 "archive": False,
             }
         ],
     }
+
+
+@pytest.fixture(scope="function")
+def fluffy_store(
+    store_with_illumina_sequencing_data: Store,
+    fluffy_case_id_existing: str,
+    fluffy_sample_lims_id: str,
+) -> Store:
+    case: Case = store_with_illumina_sequencing_data.get_case_by_internal_id(
+        internal_id=fluffy_case_id_existing
+    )
+    case.data_analysis = Workflow.FLUFFY
+    case.links[0].sample.last_sequenced_at = dt.datetime.now()
+    case.links[0].sample.reads = 50
+    case.action = CaseActions.ANALYZE
+    return store_with_illumina_sequencing_data
 
 
 @pytest.fixture(scope="function")
@@ -140,36 +165,18 @@ def fluffy_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
-    fluffy_samplesheet_bundle_data,
-    fluffy_fastq_hk_bundle_data,
-    fluffy_case_id_existing,
-    fluffy_sample_lims_id,
+    fluffy_samplesheet_bundle_data: dict,
+    fluffy_fastq_hk_bundle_data: dict,
+    fluffy_case_id_existing: str,
+    fluffy_sample_lims_id: str,
+    fluffy_store: Store,
 ) -> CGConfig:
     cg_context.housekeeper_api_ = real_housekeeper_api
+    cg_context.status_db_ = fluffy_store
     fluffy_analysis_api = FluffyAnalysisAPI(config=cg_context)
     helpers.ensure_hk_version(
         fluffy_analysis_api.housekeeper_api, bundle_data=fluffy_samplesheet_bundle_data
     )
     helpers.ensure_hk_version(fluffy_analysis_api.housekeeper_api, fluffy_fastq_hk_bundle_data)
-    example_fluffy_case = helpers.add_case(
-        fluffy_analysis_api.status_db,
-        internal_id=fluffy_case_id_existing,
-        name=fluffy_case_id_existing,
-        data_analysis=Workflow.FLUFFY,
-    )
-    example_fluffy_sample = helpers.add_sample(
-        fluffy_analysis_api.status_db,
-        application_type="tgs",
-        is_tumour=False,
-        internal_id=fluffy_sample_lims_id,
-        reads=100,
-        last_sequenced_at=dt.datetime.now(),
-    )
-    helpers.add_flow_cell(
-        fluffy_analysis_api.status_db, flow_cell_name="flowcell", samples=[example_fluffy_sample]
-    )
-    helpers.add_relationship(
-        fluffy_analysis_api.status_db, case=example_fluffy_case, sample=example_fluffy_sample
-    )
     cg_context.meta_apis["analysis_api"] = fluffy_analysis_api
     return cg_context

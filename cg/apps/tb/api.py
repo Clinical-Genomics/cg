@@ -1,24 +1,20 @@
-""" Trailblazer API for cg."""
+"""Trailblazer API for cg."""
 
-import datetime
 import logging
+from datetime import datetime
 from typing import Any
 
-from google.auth import jwt
-from google.auth.crypt import RSASigner
+from google.auth.transport.requests import Request
+from google.oauth2.service_account import IDTokenCredentials
 
 from cg.apps.tb.dto.create_job_request import CreateJobRequest
 from cg.apps.tb.dto.summary_response import AnalysisSummary, SummariesResponse
 from cg.apps.tb.models import AnalysesResponse, TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import TrailblazerPriority
 from cg.constants.tb import AnalysisStatus
-from cg.exc import (
-    AnalysisNotCompletedError,
-    TrailblazerAnalysisNotFound,
-    TrailblazerAPIHTTPError,
-)
+from cg.exc import AnalysisNotCompletedError, TrailblazerAnalysisNotFound, TrailblazerAPIHTTPError
 from cg.io.controller import APIRequest, ReadStream
 
 LOG = logging.getLogger(__name__)
@@ -49,10 +45,12 @@ class TrailblazerAPI:
 
     @property
     def auth_header(self) -> dict:
-        signer = RSASigner.from_service_account_file(self.service_account_auth_file)
-        payload = {"email": self.service_account}
-        jwt_token = jwt.encode(signer=signer, payload=payload).decode("ascii")
-        return {"Authorization": f"Bearer {jwt_token}"}
+        credentials: IDTokenCredentials = IDTokenCredentials.from_service_account_file(
+            filename=self.service_account_auth_file,
+            target_audience="trailblazer",
+        )
+        credentials.refresh(Request())
+        return {"Authorization": f"Bearer {credentials.token}"}
 
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST
@@ -112,12 +110,14 @@ class TrailblazerAPI:
         analysis_type: str,
         config_path: str,
         out_dir: str,
-        slurm_quality_of_service: SlurmQos,
-        email: str = None,
+        priority: TrailblazerPriority,
+        workflow: Workflow,
+        email: str | None = None,
         order_id: int | None = None,
-        workflow: Workflow = None,
-        ticket: str = None,
+        ticket: str | None = None,
         workflow_manager: str = WorkflowManager.Slurm,
+        tower_workflow_id: str | None = None,
+        is_hidden: bool = False,
     ) -> TrailblazerAnalysis:
         request_body = {
             "case_id": case_id,
@@ -126,16 +126,16 @@ class TrailblazerAPI:
             "config_path": config_path,
             "order_id": order_id,
             "out_dir": out_dir,
-            "priority": slurm_quality_of_service,
+            "priority": priority,
             "workflow": workflow.upper(),
             "ticket": ticket,
             "workflow_manager": workflow_manager,
+            "tower_workflow_id": tower_workflow_id,
+            "is_hidden": is_hidden,
         }
         LOG.debug(f"Submitting job to Trailblazer: {request_body}")
-        if response := self.query_trailblazer(
-            command="add-pending-analysis", request_body=request_body
-        ):
-            return TrailblazerAnalysis.model_validate(response)
+        response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
+        return TrailblazerAnalysis.model_validate(response)
 
     def set_analysis_uploaded(self, case_id: str, uploaded_at: datetime) -> None:
         """Set a uploaded at date for a trailblazer analysis."""
@@ -147,7 +147,7 @@ class TrailblazerAPI:
             command="set-analysis-uploaded", request_body=request_body, method=APIMethods.PUT
         )
 
-    def set_analysis_status(self, case_id: str, status: str) -> datetime:
+    def set_analysis_status(self, case_id: str, status: str) -> None:
         """Set an analysis to a given status."""
         request_body = {"case_id": case_id, "status": status}
 

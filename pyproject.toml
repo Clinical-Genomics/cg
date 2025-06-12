@@ -2,12 +2,11 @@
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry]
+[project]
 name = "cg"
-version = "61.1.4"
+version = "71.0.6"
 description = "Clinical Genomics command center"
-authors = ["Clinical Genomics <support@clinicalgenomics.se>"]
-readme = "README.md"
+readme = {file = "README.md", content-type = "text/markdown"}
 homepage = "https://github.com/Clinical-Genomics/cg"
 repository = "https://github.com/Clinical-Genomics/cg"
 classifiers = [
@@ -20,70 +19,63 @@ include = [
   "cg/**/*",
   "tests/**/*"
 ]
+requires-python = ">=3.9,<3.13"
+dependencies = [
+"alembic",
+"SQLAlchemy",
+"PyMySQL",
+"click",
+"blinker",
+"CacheControl",
+"Flask-Admin",
+"Flask-CORS",
+"Flask-Dance",
+"Flask",
+"Flask-WTF",
+"WTForms == 3.0.0",
+"google-auth",
+"gunicorn",
+"requests",
+"werkzeug",
+"cachetools",
+"cryptography",
+"coloredlogs",
+"Jinja2",
+"lxml",
+"marshmallow",
+"MarkupSafe",
+"openpyxl",
+"packaging",
+"pandas",
+"paramiko",
+"petname",
+"psutil",
+"pydantic == 2.7.4",
+"python-dateutil",
+"PyYAML",
+"tabulate",
+"typing_extensions",
+"urllib3",
+"genologics",
+"housekeeper>=4.11.3",
+"pydantic-settings>=2.3.3",
+"email-validator>=2.2.0",
+"rich-click>=1.8.4",
+  ]
+[project.optional-dependencies]
+coveralls = ["coveralls"]
+mock = ["mock"]
+pre-commit = ["pre-commit"]
+pytest-cov = ["pytest-cov"]
+pytest-mock = ["pytest-mock"]
+pytest-freezegun = ["pytest-freezegun"]
+pytest = ["pytest"]
+ruff = ["ruff"]
+pytest-xdist = ["pytest-xdist"]
 
-[tool.poetry.dependencies]
-python = ">=3.9,<3.13"
-
-# Database
-alembic = "*"
-SQLAlchemy = "*"
-PyMySQL = "*"
-
-# CLI
-click = "*"
-
-# Server
-blinker = "*"
-CacheControl = "*"
-Flask-Admin = "*"
-Flask-CORS = "*"
-Flask-Dance = "*"
-Flask = "*"
-Flask-WTF = "*"
-WTForms = "*"
-google-auth = "*"
-gunicorn = "*"
-requests = "*"
-sendmail-container = "*"
-werkzeug = "*"
-
-# Utils
-cachetools = "*"
-cryptography = "*"
-coloredlogs = "*"
-Jinja2 = ">=3.1.3"
-lxml = "*"
-marshmallow = "*"
-MarkupSafe = "*"
-openpyxl = "*"
-packaging = "*"
-pandas = "*"
-paramiko = "*"
-petname = "*"
-psutil = "*"
-pydantic = "*"
-python-dateutil = "*"
-PyYAML = "*"
-tabulate = "*"
-typing_extensions = "*"
-urllib3 = "*"
-
-# Apps
-genologics = "*"
-housekeeper = ">=4.11.3"
 
 
-[tool.poetry.dev-dependencies]
-coveralls = "*"
-mock = "*"
-pre-commit = "*"
-pytest-cov = "*"
-pytest-mock = "*"
-pytest = "*"
-ruff = "*"
-pytest-xdist = "*"
-
-[tool.poetry.scripts]
+[project.scripts]
 cg = "cg.cli.base:base"
 
 
@@ -94,6 +86,10 @@ line-length = 100
 
 [tool.isort]
 profile = "black"
+include_trailing_comma = "true"
+line_length=100
+multi_line_output=3
+ensure_newline_before_comments = "true"
 
 [tool.ruff]
 line-length = 100

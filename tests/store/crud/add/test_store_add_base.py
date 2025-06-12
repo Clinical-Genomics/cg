@@ -3,7 +3,8 @@ from datetime import datetime as dt
 import pytest
 
 from cg.constants.subject import Sex
-from cg.services.illumina_services.illumina_metrics_service.models import IlluminaFlowCellDTO
+from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
+from cg.store.exc import EntryNotFoundError, EntryAlreadyExistsError
 from cg.store.models import (
     ApplicationVersion,
     Collaboration,
@@ -127,7 +128,8 @@ def test_add_illumina_flow_cell(
     store: Store,
 ):
     # GIVEN an Illumina flow cell not in store
-    assert not store.get_illumina_flow_cell_by_internal_id(illumina_flow_cell_internal_id)
+    with pytest.raises(EntryNotFoundError):
+        store.get_illumina_flow_cell_by_internal_id(illumina_flow_cell_internal_id)
 
     # WHEN adding the flow cell to the store
     store.add_illumina_flow_cell(illumina_flow_cell_dto)
@@ -147,6 +149,7 @@ def test_add_illumina_flow_cell_already_exists(
     assert store.get_illumina_flow_cell_by_internal_id(illumina_flow_cell_internal_id)
 
     # WHEN adding the flow cell to the store
-    # THEN a ValueError should be raised
-    with pytest.raises(ValueError):
+
+    # THEN a EntryAlreadyExistsError should be raised
+    with pytest.raises(EntryAlreadyExistsError):
         store.add_illumina_flow_cell(illumina_flow_cell_dto)

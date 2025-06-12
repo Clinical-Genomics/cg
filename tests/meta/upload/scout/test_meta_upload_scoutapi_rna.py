@@ -9,13 +9,13 @@ from housekeeper.store.models import File
 
 import cg.store as Store
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Workflow
+from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
 from cg.constants.scout import ScoutCustomCaseReportTags
-from cg.constants.sequencing import SequencingMethod
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import RNADNACollection, UploadScoutAPI
 from cg.store.models import Case, Sample
-from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.mocks.hk_mock import MockFile, MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
 
 
@@ -45,8 +45,8 @@ def ensure_two_dna_tumour_matches(
     )
     another_sample_id = helpers.add_sample(
         store=rna_store,
-        application_tag=SequencingMethod.WGS,
-        application_type=SequencingMethod.WGS,
+        application_tag=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=True,
         name=another_sample_id,
         subject_id=subject_id,
@@ -70,7 +70,7 @@ def ensure_extra_rna_case_match(
     subject_id: str = get_subject_id_from_case(store=rna_store, case_id=rna_case_id)
     another_rna_sample_id = helpers.add_sample(
         store=rna_store,
-        application_type=SequencingMethod.WTS,
+        application_type=SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         is_tumour=False,
         internal_id=another_rna_sample_id,
         subject_id=subject_id,
@@ -559,8 +559,8 @@ def test_create_rna_dna_collections(
 
     # WHEN running the method to create a list of RNADNACollections
     # with the relationships between RNA/DNA samples and DNA cases
-    rna_dna_collections: list[RNADNACollection] = upload_scout_api.create_rna_dna_collections(
-        rna_case
+    rna_dna_collections: list[RNADNACollection] = (
+        upload_scout_api.status_db.get_related_dna_cases_with_samples(rna_case)
     )
 
     # THEN the output should be a list of RNADNACollections
@@ -585,7 +585,7 @@ def test_add_rna_sample(
 
     # WHEN running the method to create a list of RNADNACollections
     # with the relationships between RNA/DNA samples and DNA cases
-    rna_dna_collections: list[RNADNACollection] = upload_scout_api.create_rna_dna_collections(
+    rna_dna_collections: list[RNADNACollection] = rna_store.get_related_dna_cases_with_samples(
         rna_case
     )
 
@@ -593,7 +593,7 @@ def test_add_rna_sample(
     assert rna_sample_list
     for sample in rna_sample_list:
         assert sample.internal_id in [
-            rna_dna_collection.rna_sample_internal_id for rna_dna_collection in rna_dna_collections
+            rna_dna_collection.rna_sample_id for rna_dna_collection in rna_dna_collections
         ]
 
 
@@ -609,13 +609,15 @@ def test_link_rna_sample_to_dna_sample(
     rna_sample: Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
 
     # WHEN creating an RNADNACollection for an RNA sample
-    rna_dna_collection: RNADNACollection = upload_scout_api.create_rna_dna_collection(rna_sample)
+    rna_dna_collection: list[RNADNACollection] = rna_store.get_related_dna_cases_with_samples(
+        rna_sample.links[0].case
+    )
 
     # THEN the RNADNACollection should contain the RNA sample
-    assert rna_sample_son_id == rna_dna_collection.rna_sample_internal_id
+    assert rna_sample_son_id == rna_dna_collection[0].rna_sample_id
 
     # THEN the RNADNACollection should have its dna_sample_id set to the related dna_sample_id
-    assert dna_sample_son_id == rna_dna_collection.dna_sample_name
+    assert dna_sample_son_id == rna_dna_collection[0].dna_sample_name
 
 
 def test_add_dna_cases_to_dna_sample(
@@ -632,10 +634,12 @@ def test_add_dna_cases_to_dna_sample(
     dna_case: Case = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
 
     # WHEN adding creating the RNADNACollection
-    rna_dna_collection: RNADNACollection = upload_scout_api.create_rna_dna_collection(rna_sample)
+    rna_dna_collection: list[RNADNACollection] = rna_store.get_related_dna_cases_with_samples(
+        rna_sample.links[0].case
+    )
 
     # THEN the DNA cases should contain the DNA_case name associated with the DNA sample
-    assert dna_case.internal_id in rna_dna_collection.dna_case_ids
+    assert dna_case.internal_id in rna_dna_collection[0].dna_case_ids
 
 
 def test_map_dna_cases_to_dna_sample_incorrect_workflow(
@@ -654,7 +658,7 @@ def test_map_dna_cases_to_dna_sample_incorrect_workflow(
     rna_sample: Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
 
     # GIVEN that the DNA case has a different workflow than the expected workflow
-    dna_case.data_analysis = Workflow.FASTQ
+    dna_case.data_analysis = Workflow.RAW_DATA
 
     # WHEN mapping the DNA case name to the DNA sample name in the related DNA cases
     related_dna_cases: list[str] = upload_scout_api._dna_cases_related_to_dna_sample(
@@ -702,11 +706,11 @@ def test_get_multiqc_html_report(
 ):
     """Test that the multiqc html report is returned."""
 
-    # GIVEN a DNA case with a multiqc-htlml report
+    # GIVEN a DNA case with a multiqc-html report
     case: Case = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
-    multiqc_file: File = mip_dna_analysis_hk_api.files(
-        bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
-    )[0]
+    multiqc_file: MockFile = mip_dna_analysis_hk_api.get_file_from_latest_version(
+        bundle_name=dna_case_id, tags={HK_MULTIQC_HTML_TAG, case}
+    )
 
     # WHEN getting the multiqc html report
     report_type, multiqc_report = upload_mip_analysis_scout_api.get_multiqc_html_report(
@@ -728,7 +732,7 @@ def test_upload_report_to_scout(
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN a DNA case with a multiqc-htlml report
+    # GIVEN a DNA case with a multiqc-html report
     multiqc_file: File = mip_dna_analysis_hk_api.files(
         bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
     )[0]
@@ -748,7 +752,7 @@ def test_upload_report_to_scout(
     )
 
 
-def test_upload_rna_report_to_successful_dna_case_in_scout(
+def test_upload_rna_multiqc_report_to_successful_dna_case_in_scout(
     caplog,
     rna_case_id: str,
     rna_store: Store,
@@ -776,8 +780,8 @@ def test_upload_rna_report_to_successful_dna_case_in_scout(
     )
 
     # WHEN finding the related DNA case
-    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
-        case_id=rna_case_id
+    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_related_uploaded_dna_cases(
+        rna_case_id
     )
 
     # THEN the api should know that it should find related DNA cases
@@ -787,6 +791,143 @@ def test_upload_rna_report_to_successful_dna_case_in_scout(
     for case_id in dna_case_ids:
         assert (
             f"Uploading {ScoutCustomCaseReportTags.MULTIQC} report to Scout for case {case_id}"
+            in caplog.text
+        )
+
+
+def test_upload_tomte_rna_multiqc_report_to_successful_dna_case_in_scout(
+    caplog,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_mip_analysis_scout_api: UploadScoutAPI,
+    tomte_analysis_hk_api: MockHousekeeperAPI,
+):
+    """Test that the report is uploaded to Scout."""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an RNA case, and a store with an rna connected to it
+    upload_mip_analysis_scout_api.status_db: Store = rna_store
+
+    # GIVEN an RNA case with a multiqc-htlml report
+    multiqc_file: File = tomte_analysis_hk_api.files(
+        bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
+    )[0]
+
+    # WHEN uploading a report to a completed DNA case in Scout
+    upload_mip_analysis_scout_api.upload_rna_report_to_dna_case_in_scout(
+        dry_run=False,
+        rna_case_id=rna_case_id,
+        report_type=ScoutCustomCaseReportTags.MULTIQC,
+        report_file=multiqc_file,
+    )
+
+    # WHEN finding the related DNA case
+    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_related_uploaded_dna_cases(
+        rna_case_id
+    )
+
+    # THEN the api should know that it should find related DNA cases
+    assert f"Finding DNA cases related to RNA case {rna_case_id}" in caplog.text
+
+    # THEN the report should be uploaded to Scout
+    for case_id in dna_case_ids:
+        assert (
+            f"Uploading {ScoutCustomCaseReportTags.MULTIQC} report to Scout for case {case_id}"
+            in caplog.text
+        )
+
+
+def test_upload_rna_delivery_report_to_successful_dna_case_in_scout(
+    caplog,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_mip_analysis_scout_api: UploadScoutAPI,
+    mip_rna_analysis_hk_api: MockHousekeeperAPI,
+):
+    """Test that the report is uploaded to Scout."""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an RNA case, and an store with an rna connected to it
+    upload_mip_analysis_scout_api.status_db: Store = rna_store
+
+    # GIVEN an RNA case with a multiqc-htlml report
+    rna_delivery_report: File = mip_rna_analysis_hk_api.files(
+        bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.RNA_DELIVERY]
+    )[0]
+
+    # WHEN uploading a report to a completed DNA case in Scout
+    upload_mip_analysis_scout_api.upload_rna_report_to_dna_case_in_scout(
+        dry_run=False,
+        rna_case_id=rna_case_id,
+        report_type=ScoutCustomCaseReportTags.RNA_DELIVERY,
+        report_file=rna_delivery_report,
+    )
+
+    # WHEN finding the related DNA case
+    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_related_uploaded_dna_cases(
+        rna_case_id
+    )
+
+    # THEN the api should know that it should find related DNA cases
+    assert f"Finding DNA cases related to RNA case {rna_case_id}" in caplog.text
+
+    # THEN the report should be uploaded to Scout
+    for case_id in dna_case_ids:
+        assert (
+            f"Uploading {ScoutCustomCaseReportTags.RNA_DELIVERY} report to Scout for case {case_id}"
+            in caplog.text
+        )
+
+
+def test_upload_tomte_rna_delivery_report_to_successful_dna_case_in_scout(
+    caplog,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_tomte_analysis_scout_api: UploadScoutAPI,
+    tomte_analysis_hk_api: MockHousekeeperAPI,
+):
+    """Test that the report is uploaded to Scout."""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an RNA case, and an store with an rna connected to it
+    upload_tomte_analysis_scout_api.status_db: Store = rna_store
+
+    # GIVEN an RNA case with a rna delivery report
+    rna_delivery_report: File = tomte_analysis_hk_api.files(
+        bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.RNA_DELIVERY]
+    )[0]
+
+    # WHEN uploading a report to a completed DNA case in Scout
+    upload_tomte_analysis_scout_api.upload_rna_report_to_dna_case_in_scout(
+        dry_run=False,
+        rna_case_id=rna_case_id,
+        report_type=ScoutCustomCaseReportTags.RNA_DELIVERY,
+        report_file=rna_delivery_report,
+    )
+
+    # WHEN finding the related DNA case
+    dna_case_ids: Set[str] = upload_tomte_analysis_scout_api.get_related_uploaded_dna_cases(
+        rna_case_id
+    )
+    # THEN the dna case id should have been mentioned in the logging (and used in the upload)
+
+    # Assert that each string in 'expected_strings' is in 'caplog.text'
+    for dna_case_id in dna_case_ids:
+        assert (
+            dna_case_id in caplog.text
+        ), f"Expected '{dna_case_id}' to be in log output, but it wasn't."
+
+    # THEN the api should know that it should find related DNA cases
+    assert f"Finding DNA cases related to RNA case {rna_case_id}" in caplog.text
+
+    # assert f"Running upload of report to DNA case {dna_case_ids[0]}" in caplog.text
+    # THEN the report should be uploaded to Scout
+    for case_id in dna_case_ids:
+        assert (
+            f"Uploading {ScoutCustomCaseReportTags.RNA_DELIVERY} report to Scout for case {case_id}"
             in caplog.text
         )
 
@@ -811,8 +952,8 @@ def test_upload_rna_report_to_not_yet_uploaded_dna_case_in_scout(
     )[0]
 
     # WHEN finding the related DNA case with no successful upload
-    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
-        case_id=rna_case_id
+    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_related_uploaded_dna_cases(
+        rna_case_id
     )
     dna_case: Case = rna_store.get_case_by_internal_id(internal_id=list(dna_case_ids)[0])
     dna_case.analyses[0].uploaded_at = None

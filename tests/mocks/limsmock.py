@@ -5,6 +5,9 @@ from typing_extensions import Literal
 
 from cg.apps.lims import LimsAPI
 
+from cg.constants.lims import LimsArtifactTypes, LimsProcess
+from cg.exc import LimsDataError
+
 
 class LimsProject(BaseModel):
     id: str = "1"
@@ -16,6 +19,17 @@ class MockReagentType:
     def __init__(self, label: str, sequence: str):
         self.label: str = label
         self.sequence: str = sequence
+
+
+class LimsUDF(BaseModel):
+    control: str | None = None
+    customer: str = None
+
+    def get(self, argument: str) -> str:
+        if argument == "Control":
+            return self.control
+        if argument == "customer":
+            return self.customer
 
 
 class LimsSample(BaseModel):
@@ -35,10 +49,17 @@ class LimsSample(BaseModel):
     received: str = None
     source: str = None
     priority: str = None
+    udfs: LimsUDF = LimsUDF()
+
+
+class LimsArtifactObject(BaseModel):
+    parent_process: LimsProcess = LimsProcess.COVID_POOLING_STEP
+    type: LimsArtifactTypes = LimsArtifactTypes.ANALYTE
+    samples: list[LimsSample] = []
 
 
 class MockLimsAPI(LimsAPI):
-    """Mock LIMS API to get target bed from LIMS."""
+    """Mock LIMS API for testing."""
 
     def __init__(self, config: dict = None, samples: list[dict] = None):
         if samples is None:
@@ -56,6 +77,7 @@ class MockLimsAPI(LimsAPI):
         self._sequencing_method = "CG002 - Cluster Generation (HiSeq X)"
         self._delivery_method = "CG002 - Delivery"
         self._source = "cell-free DNA"
+        self.artifacts: dict[str, list[LimsArtifactObject]] = {}
 
     def set_prep_method(self, method: str = "1337:00 Test prep method"):
         """Mock function"""
@@ -75,6 +97,50 @@ class MockLimsAPI(LimsAPI):
         if internal_id not in self.sample_vars:
             self.add_sample(internal_id)
         self.sample_vars[internal_id]["capture_kit"] = capture_kit
+
+    def add_artifact_for_sample(
+        self,
+        sample_id: str,
+        samples: list[LimsSample] = None,
+    ):
+        if sample_id in self.artifacts:
+            self.artifacts[sample_id].append(LimsArtifactObject(samples=samples))
+        else:
+            self.artifacts[sample_id] = [LimsArtifactObject(samples=samples)]
+
+    def get_latest_artifact_for_sample(
+        self, process_type: LimsProcess, artifact_type: LimsArtifactTypes, sample_internal_id: str
+    ) -> LimsArtifactObject:
+        return self.artifacts[sample_internal_id][0]
+
+    def get_internal_negative_control_id_from_sample_in_pool(
+        self, sample_internal_id: str, pooling_step: LimsProcess
+    ) -> str:
+        """Retrieve from lims the sample_id for the internal negative control sample present in the same pool as the given sample."""
+        artifact: LimsArtifactObject = self.get_latest_artifact_for_sample(
+            process_type=pooling_step,
+            artifact_type=LimsArtifactTypes.ANALYTE,
+            sample_internal_id=sample_internal_id,
+        )
+        samples = artifact.samples
+
+        negative_controls: list = self._get_negative_controls_from_list(samples=samples)
+
+        if len(negative_controls) > 1:
+            sample_ids = [sample.id for sample in negative_controls]
+            raise LimsDataError(
+                f"Several internal negative control samples found: {' '.join(sample_ids)}"
+            )
+        return negative_controls[0].id
+
+    @staticmethod
+    def _get_negative_controls_from_list(samples: list[LimsSample]) -> list[LimsSample]:
+        """Filter and return a list of internal negative controls from a given sample list."""
+        negative_controls = []
+        for sample in samples:
+            if sample.udfs.control == "negative" and sample.udfs.customer == "cust000":
+                negative_controls.append(sample)
+        return negative_controls
 
     def capture_kit(self, lims_id: str):
         if lims_id in self.sample_vars:

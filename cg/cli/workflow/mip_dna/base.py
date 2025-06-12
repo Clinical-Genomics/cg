@@ -2,11 +2,11 @@
 
 import logging
 
-import click
+import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import (
-    ensure_flow_cells_on_disk,
+    ensure_illumina_runs_on_disk,
     link,
     resolve_compression,
     store,
@@ -43,7 +43,7 @@ def mip_dna(
 
 for sub_cmd in [
     config_case,
-    ensure_flow_cells_on_disk,
+    ensure_illumina_runs_on_disk,
     link,
     managed_variants,
     panel,

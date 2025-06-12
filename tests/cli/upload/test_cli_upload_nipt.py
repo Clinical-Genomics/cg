@@ -31,10 +31,10 @@ def test_nipt_statina_upload_case(
     # GIVEN a specified NIPT case that has its analysis stored but is not yet uploaded
     caplog.set_level(logging.DEBUG)
 
-    analysis_obj: Analysis = helpers.add_analysis(store=upload_context.status_db)
-    case_id = analysis_obj.case.internal_id
-    assert not analysis_obj.upload_started_at
-    assert not analysis_obj.uploaded_at
+    analysis: Analysis = helpers.add_analysis(store=upload_context.status_db)
+    case_id = analysis.case.internal_id
+    assert not analysis.upload_started_at
+    assert not analysis.uploaded_at
 
     # WHEN uploading of a specified NIPT case
     mocker.patch.object(NiptUploadAPI, "get_statina_files", return_value=MockStatinaUploadFiles())
@@ -42,7 +42,7 @@ def test_nipt_statina_upload_case(
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=True)
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value", return_value=True)
     mocker.patch.object(TrailblazerAPI, "set_analysis_uploaded")
     result = cli_runner.invoke(
         cli=nipt_upload_case, args=[case_id], obj=upload_context, catch_exceptions=False
@@ -54,10 +54,10 @@ def test_nipt_statina_upload_case(
     assert NIPT_FTP_SUCCESS in caplog.text
 
     # THEN set analysis.upload_started_at in the database
-    assert analysis_obj.upload_started_at
+    assert analysis.upload_started_at
 
     # THEN set analysis.uploaded_at in the database
-    assert analysis_obj.uploaded_at
+    assert analysis.uploaded_at
 
     # THEN exit without errors
     assert result.exit_code == 0
@@ -71,10 +71,10 @@ def test_nipt_statina_upload_case_dry_run(
     # GIVEN a specified NIPT case that has its analysis stored but is not yet uploaded
     caplog.set_level(logging.DEBUG)
 
-    analysis_obj: Analysis = helpers.add_analysis(store=upload_context.status_db)
-    case_id = analysis_obj.case.internal_id
-    assert not analysis_obj.upload_started_at
-    assert not analysis_obj.uploaded_at
+    analysis: Analysis = helpers.add_analysis(store=upload_context.status_db)
+    case_id = analysis.case.internal_id
+    assert not analysis.upload_started_at
+    assert not analysis.uploaded_at
 
     # WHEN uploading a specified NIPT case with dry-run flag set
     mocker.patch.object(NiptUploadAPI, "get_statina_files", return_value=MockStatinaUploadFiles())
@@ -82,7 +82,7 @@ def test_nipt_statina_upload_case_dry_run(
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=True)
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value", return_value=True)
     result = cli_runner.invoke(
         cli=nipt_upload_case, args=[case_id, "--dry-run"], obj=upload_context
     )
@@ -93,10 +93,10 @@ def test_nipt_statina_upload_case_dry_run(
     assert NIPT_FTP_SUCCESS in caplog.text
 
     # THEN analysis.upload_started_at should not be set in the database
-    assert analysis_obj.upload_started_at is None
+    assert analysis.upload_started_at is None
 
     # THEN analysis.uploaded_at should not be set in the database
-    assert analysis_obj.uploaded_at is None
+    assert analysis.uploaded_at is None
 
     # THEN exit without errors
     assert result.exit_code == 0
@@ -110,13 +110,13 @@ def test_nipt_statina_upload_auto(
     # GIVEN a case ready for upload
     caplog.set_level(logging.DEBUG)
 
-    analysis_obj: Analysis = helpers.add_analysis(
+    analysis: Analysis = helpers.add_analysis(
         store=upload_context.status_db,
         completed_at=datetime.datetime.now(),
         workflow=Workflow.FLUFFY,
     )
-    assert analysis_obj.completed_at
-    assert not analysis_obj.uploaded_at
+    assert analysis.completed_at
+    assert not analysis.uploaded_at
 
     # WHEN uploading all NIPT cases
     mocker.patch.object(NiptUploadAPI, "get_statina_files", return_value=MockStatinaUploadFiles())
@@ -124,7 +124,7 @@ def test_nipt_statina_upload_auto(
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=True)
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value", return_value=True)
     mocker.patch.object(TrailblazerAPI, "set_analysis_uploaded")
 
     result = cli_runner.invoke(cli=nipt_upload_all, args=[], obj=upload_context)
@@ -135,10 +135,10 @@ def test_nipt_statina_upload_auto(
     assert NIPT_FTP_SUCCESS in caplog.text
 
     # THEN set analysis.upload_started_at in the database
-    assert analysis_obj.upload_started_at
+    assert analysis.upload_started_at
 
     # THEN set analysis.uploaded_at in the database
-    assert analysis_obj.uploaded_at
+    assert analysis.uploaded_at
 
     # THEN exit without errors
     assert result.exit_code == 0
@@ -170,13 +170,13 @@ def test_nipt_statina_upload_auto_analysis_without_case(
     # GIVEN no analyses for upload
     caplog.set_level(logging.DEBUG)
 
-    analysis_obj: Analysis = helpers.add_analysis(
+    analysis: Analysis = helpers.add_analysis(
         store=upload_context.status_db,
         completed_at=datetime.datetime.now(),
         workflow=Workflow.FLUFFY,
     )
-    analysis_obj.case = None
-    mocker.patch.object(NiptUploadAPI, "get_all_upload_analyses", return_value=[analysis_obj])
+    analysis.case = None
+    mocker.patch.object(NiptUploadAPI, "get_all_upload_analyses", return_value=[analysis])
     # WHEN uploading all NIPT cases
     result = cli_runner.invoke(cli=nipt_upload_all, args=[], obj=upload_context)
 
@@ -192,13 +192,13 @@ def test_nipt_statina_upload_auto_dry_run(
     # GIVEN a case ready for upload
     caplog.set_level(logging.DEBUG)
 
-    analysis_obj: Analysis = helpers.add_analysis(
+    analysis: Analysis = helpers.add_analysis(
         store=upload_context.status_db,
         completed_at=datetime.datetime.now(),
         workflow=Workflow.FLUFFY,
     )
-    assert analysis_obj.completed_at
-    assert not analysis_obj.uploaded_at
+    assert analysis.completed_at
+    assert not analysis.uploaded_at
 
     # WHEN uploading all NIPT cases
     mocker.patch.object(NiptUploadAPI, "get_statina_files", return_value=MockStatinaUploadFiles())
@@ -206,7 +206,7 @@ def test_nipt_statina_upload_auto_dry_run(
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=True)
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value", return_value=True)
     result = cli_runner.invoke(cli=nipt_upload_all, args=["--dry-run"], obj=upload_context)
 
     # THEN both the nipt ftp and statina upload should start
@@ -215,10 +215,10 @@ def test_nipt_statina_upload_auto_dry_run(
     assert NIPT_FTP_SUCCESS in caplog.text
 
     # THEN analysis.upload_started_at should not be set in the database
-    assert analysis_obj.upload_started_at is None
+    assert analysis.upload_started_at is None
 
     # THEN analysis.uploaded_at should not be set in the database
-    assert analysis_obj.uploaded_at is None
+    assert analysis.uploaded_at is None
 
     # THEN exit without errors
     assert result.exit_code == 0
@@ -232,8 +232,8 @@ def test_nipt_statina_upload_force_failed_case(
     # GIVEN a completed NIPT case, not yet uploaded
     caplog.set_level(logging.DEBUG)
 
-    analysis_obj: Analysis = helpers.add_analysis(store=upload_context.status_db)
-    case_id = analysis_obj.case.internal_id
+    analysis: Analysis = helpers.add_analysis(store=upload_context.status_db)
+    case_id = analysis.case.internal_id
 
     # WHEN uploading of a specified NIPT case AND the qc fails but it forced to upload
     mocker.patch.object(NiptUploadAPI, "get_statina_files", return_value=MockStatinaUploadFiles())
@@ -241,7 +241,7 @@ def test_nipt_statina_upload_force_failed_case(
     mocker.patch.object(NiptUploadAPI, "get_housekeeper_results_file")
     mocker.patch.object(NiptUploadAPI, "get_results_file_path")
     mocker.patch.object(NiptUploadAPI, "upload_to_ftp_server")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=False)
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value", return_value=False)
     mocker.patch.object(TrailblazerAPI, "set_analysis_uploaded")
     result = cli_runner.invoke(
         cli=nipt_upload_case, args=[case_id, "--force"], obj=upload_context, catch_exceptions=False

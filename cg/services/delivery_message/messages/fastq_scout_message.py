@@ -1,6 +1,6 @@
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
 from cg.services.delivery_message.messages.utils import (
-    get_fastq_delivery_path,
+    get_caesar_delivery_path,
     get_scout_link,
 )
 from cg.store.models import Case
@@ -8,7 +8,7 @@ from cg.store.models import Case
 
 def get_case_message(case: Case) -> str:
     scout_link: str = get_scout_link(case)
-    delivery_path: str = get_fastq_delivery_path(case)
+    delivery_path: str = get_caesar_delivery_path(case)
     return (
         f"Hello,\n\n"
         f"The analysis has been uploaded to Scout for the following case:\n\n"
@@ -21,7 +21,7 @@ def get_case_message(case: Case) -> str:
 def get_cases_message(cases: list[Case]) -> str:
     scout_links: list[str] = [get_scout_link(case) for case in cases]
     scout_links_row_separated: str = "\n".join(scout_links)
-    delivery_path: str = get_fastq_delivery_path(cases[0])
+    delivery_path: str = get_caesar_delivery_path(cases[0])
     return (
         f"Hello,\n\n "
         f"The analyses have been uploaded to Scout for the following cases:\n\n"

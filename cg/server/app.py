@@ -6,6 +6,21 @@ from flask_dance.consumer import oauth_authorized
 from flask_dance.contrib.google import google, make_google_blueprint
 from sqlalchemy.orm import scoped_session
 
+from cg.server import admin, ext, invoices
+from cg.server.app_config import app_config
+from cg.server.endpoints.analyses import ANALYSES_BLUEPRINT
+from cg.server.endpoints.applications import APPLICATIONS_BLUEPRINT
+from cg.server.endpoints.cases import CASES_BLUEPRINT
+from cg.server.endpoints.index_sequences import INDEX_SEQUENCES_BLUEPRINT
+from cg.server.endpoints.orders import ORDERS_BLUEPRINT
+from cg.server.endpoints.pools import POOLS_BLUEPRINT
+from cg.server.endpoints.samples import SAMPLES_BLUEPRINT
+from cg.server.endpoints.sequencing_metrics.illumina_sequencing_metrics import FLOW_CELLS_BLUEPRINT
+from cg.server.endpoints.sequencing_metrics.pacbio_sequencing_metrics import (
+    PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT,
+)
+from cg.server.endpoints.sequencing_run.pacbio_sequencing_run import PACBIO_SEQUENCING_RUN_BLUEPRINT
+from cg.server.endpoints.users import USERS_BLUEPRINT
 from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
     Analysis,
@@ -18,18 +33,18 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Flowcell,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
     Invoice,
     Order,
     Organism,
+    PacbioSampleSequencingMetrics,
+    PacbioSequencingRun,
     Panel,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
     User,
 )
-
-from . import admin, api, ext, invoices
 
 
 def create_app():
@@ -44,7 +59,8 @@ def create_app():
 
 
 def _load_config(app: Flask):
-    app.config.from_object(__name__.replace("app", "config"))
+    app.config.update(app_config.model_dump())
+    app.secret_key = app_config.cg_secret_key
 
 
 def _configure_extensions(app: Flask):
@@ -57,8 +73,6 @@ def _configure_extensions(app: Flask):
     ext.db.init_app(app)
     ext.lims.init_app(app)
     ext.analysis_client.init_app(app)
-    if app.config["OSTICKET_API_KEY"]:
-        ext.osticket.init_app(app)
     ext.admin.init_app(app, index_view=AdminIndexView(endpoint="admin"))
     app.json_provider_class = ext.CustomJSONEncoder
 
@@ -68,12 +82,9 @@ def _initialize_logging(app):
 
 
 def _register_blueprints(app: Flask):
-    if not app.config["CG_ENABLE_ADMIN"]:
-        return
-
     oauth_bp = make_google_blueprint(
-        client_id=app.config["GOOGLE_OAUTH_CLIENT_ID"],
-        client_secret=app.config["GOOGLE_OAUTH_CLIENT_SECRET"],
+        client_id=app_config.google_oauth_client_id,
+        client_secret=app_config.google_oauth_client_secret,
         scope=["openid", "https://www.googleapis.com/auth/userinfo.email"],
     )
 
@@ -85,12 +96,29 @@ def _register_blueprints(app: Flask):
         user_data = resp.json()
         session["user_email"] = user_data["email"]
 
-    app.register_blueprint(api.BLUEPRINT)
     app.register_blueprint(invoices.BLUEPRINT, url_prefix="/invoices")
     app.register_blueprint(oauth_bp, url_prefix="/login")
+    app.register_blueprint(APPLICATIONS_BLUEPRINT)
+    app.register_blueprint(CASES_BLUEPRINT)
+    app.register_blueprint(ORDERS_BLUEPRINT)
+    app.register_blueprint(SAMPLES_BLUEPRINT)
+    app.register_blueprint(POOLS_BLUEPRINT)
+    app.register_blueprint(FLOW_CELLS_BLUEPRINT)
+    app.register_blueprint(ANALYSES_BLUEPRINT)
+    app.register_blueprint(USERS_BLUEPRINT)
+    app.register_blueprint(PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT)
+    app.register_blueprint(PACBIO_SEQUENCING_RUN_BLUEPRINT)
+    app.register_blueprint(INDEX_SEQUENCES_BLUEPRINT)
     _register_admin_views()
 
-    ext.csrf.exempt(api.BLUEPRINT)  # Protected with Auth header already
+    ext.csrf.exempt(SAMPLES_BLUEPRINT)
+    ext.csrf.exempt(CASES_BLUEPRINT)
+    ext.csrf.exempt(APPLICATIONS_BLUEPRINT)
+    ext.csrf.exempt(ORDERS_BLUEPRINT)
+    ext.csrf.exempt(POOLS_BLUEPRINT)
+    ext.csrf.exempt(FLOW_CELLS_BLUEPRINT)
+    ext.csrf.exempt(ANALYSES_BLUEPRINT)
+    ext.csrf.exempt(USERS_BLUEPRINT)
 
     @app.route("/")
     def index():
@@ -116,18 +144,24 @@ def _register_admin_views():
     ext.admin.add_view(admin.OrderView(Order, ext.db.session))
     ext.admin.add_view(admin.PanelView(Panel, ext.db.session))
     ext.admin.add_view(admin.UserView(User, ext.db.session))
-    ext.admin.add_view(
-        admin.SampleLaneSequencingMetricsView(SampleLaneSequencingMetrics, ext.db.session)
-    )
 
     # Business data views
     ext.admin.add_view(admin.CaseView(Case, ext.db.session))
     ext.admin.add_view(admin.CaseSampleView(CaseSample, ext.db.session))
     ext.admin.add_view(admin.SampleView(Sample, ext.db.session))
     ext.admin.add_view(admin.PoolView(Pool, ext.db.session))
-    ext.admin.add_view(admin.FlowcellView(Flowcell, ext.db.session))
     ext.admin.add_view(admin.AnalysisView(Analysis, ext.db.session))
     ext.admin.add_view(admin.InvoiceView(Invoice, ext.db.session))
+    ext.admin.add_view(
+        admin.IlluminaFlowCellView(IlluminaSequencingRun, ext.db.session, name="Illumina Flow Cell")
+    )
+    ext.admin.add_view(
+        admin.IlluminaSampleSequencingMetricsView(IlluminaSampleSequencingMetrics, ext.db.session)
+    )
+    ext.admin.add_view(admin.PacbioSmrtCellView(PacbioSequencingRun, ext.db.session))
+    ext.admin.add_view(
+        admin.PacbioSampleRunMetricsView(PacbioSampleSequencingMetrics, ext.db.session)
+    )
 
 
 def _register_teardowns(app: Flask):

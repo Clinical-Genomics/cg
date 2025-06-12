@@ -7,11 +7,7 @@ from pathlib import Path
 
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
-from housekeeper.store.database import (
-    create_all_tables,
-    drop_all_tables,
-    initialize_database,
-)
+from housekeeper.store.database import create_all_tables, drop_all_tables, initialize_database
 from housekeeper.store.models import Archive, Bundle, File, Tag, Version
 from housekeeper.store.store import Store
 from sqlalchemy.orm import Query
@@ -27,16 +23,12 @@ LOG = logging.getLogger(__name__)
 
 
 class HousekeeperAPI:
-    """API to decouple cg code from Housekeeper"""
+    """API to decouple cg code from Housekeeper."""
 
     def __init__(self, config: dict) -> None:
         initialize_database(config["housekeeper"]["database"])
         self._store = Store(config["housekeeper"]["root"])
         self.root_dir: str = config["housekeeper"]["root"]
-
-    def __getattr__(self, name):
-        LOG.warning(f"Called undefined {name} on {self.__class__.__name__}, please wrap")
-        return getattr(self._store, name)
 
     def new_bundle(self, name: str, created_at: datetime = None) -> Bundle:
         """Create a new file bundle."""
@@ -193,6 +185,21 @@ class HousekeeperAPI:
         files: Query = self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
         return files.order_by(File.id.desc()).first()
 
+    def get_file_by_exact_tags(
+        self, bundle: str, tags: list, version: int | None = None
+    ) -> File | None:
+        """Return a file that matches exact tags and optionally filtered by bundle and version."""
+        if not tags:
+            LOG.debug("No tags provided, skipping")
+            return None
+        files: list[File] = self.files(bundle=bundle, version=version, tags=tags).all()
+        for file in files:
+            file_tags = {tag.name for tag in file.tags}
+            LOG.debug(f"Using tags {file_tags}")
+            if file_tags == set(tags):
+                LOG.debug(f"Found file {file}")
+                return file
+
     def check_bundle_files(
         self,
         bundle_name: str,
@@ -277,7 +284,7 @@ class HousekeeperAPI:
         """Get the latest version of a Housekeeper bundle."""
         last_version: Version = self.last_version(bundle_name)
         if not last_version:
-            LOG.warning(f"No bundle found for {bundle_name} in Housekeeper")
+            LOG.debug(f"No bundle found for {bundle_name} in Housekeeper")
             return None
         LOG.debug(f"Found Housekeeper version object for {bundle_name}: {repr(last_version)}")
         return last_version
@@ -570,19 +577,19 @@ class HousekeeperAPI:
         else:
             LOG.debug(f"Bundle with name {bundle_name} already exists")
 
-    def store_fastq_path_in_housekeeper(
+    def create_bundle_and_add_file_with_tags(
         self,
-        sample_internal_id: str,
-        sample_fastq_path: Path,
-        flow_cell_id: str,
+        bundle_name: str,
+        file_path: Path,
+        tags: list[str],
     ) -> None:
-        """Add the fastq file path with tags to a bundle and version in Housekeeper."""
-        self.add_bundle_and_version_if_non_existent(sample_internal_id)
-        self.add_tags_if_non_existent([sample_internal_id])
+        """Add a file path with tags to a bundle and version in Housekeeper."""
+        self.add_bundle_and_version_if_non_existent(bundle_name)
+        self.add_tags_if_non_existent([bundle_name])
         self.add_file_to_bundle_if_non_existent(
-            file_path=sample_fastq_path,
-            bundle_name=sample_internal_id,
-            tag_names=[SequencingFileTag.FASTQ, flow_cell_id, sample_internal_id],
+            file_path=file_path,
+            bundle_name=bundle_name,
+            tag_names=tags,
         )
 
     def get_archive_entries(

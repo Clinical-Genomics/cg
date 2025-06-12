@@ -3,10 +3,9 @@
 import datetime as dt
 import logging
 
-import click
+import rich_click as click
 
-from cg.cli.generate.report.base import generate_delivery_report
-from cg.cli.upload.clinical_delivery import upload_clinical_delivery
+from cg.cli.generate.delivery_report.base import generate_delivery_report
 from cg.cli.upload.scout import upload_to_scout
 from cg.constants import (
     REPORT_SUPPORTED_DATA_DELIVERY,
@@ -31,7 +30,7 @@ class NfAnalysisUploadAPI(UploadAPI):
 
     def upload(self, ctx: click.Context, case: Case, restart: bool) -> None:
         """Upload NF analysis data and files."""
-        analysis: Analysis = case.analyses[0]
+        analysis: Analysis = self.status_db.get_latest_completed_analysis_for_case(case.internal_id)
         self.update_upload_started_at(analysis=analysis)
 
         # Delivery report generation
@@ -42,7 +41,7 @@ class NfAnalysisUploadAPI(UploadAPI):
             ctx.invoke(generate_delivery_report, case_id=case.internal_id)
 
         # Clinical delivery
-        ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
+        self.upload_files_to_customer_inbox(case)
 
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:

@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Query
 
 from cg.store.filters.status_pool_filters import (
-    filter_pools_by_customer_id,
+    filter_pools_by_customer_ids,
     filter_pools_by_invoice_id,
     filter_pools_by_name_enquiry,
     filter_pools_by_order_enquiry,
@@ -263,7 +263,7 @@ def test_filter_pools_by_customer_id(
     # GIVEN a store with two pools of with the same customer
 
     # WHEN getting pools with customer id
-    pools: Query = filter_pools_by_customer_id(
+    pools: Query = filter_pools_by_customer_ids(
         pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool),
         customer_ids=[1],
     )

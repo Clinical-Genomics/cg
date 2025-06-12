@@ -9,7 +9,7 @@ class Order(BaseModel):
     ticket_id: int
     order_date: str
     id: int
-    is_delivered: bool
+    is_open: bool
     workflow: Workflow
     summary: OrderSummary | None = None
 

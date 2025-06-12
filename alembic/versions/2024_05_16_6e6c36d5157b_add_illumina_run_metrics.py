@@ -48,5 +48,4 @@ def upgrade():
 
 
 def downgrade():
-
     op.drop_table("illumina_run_metrics")

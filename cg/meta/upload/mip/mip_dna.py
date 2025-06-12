@@ -3,10 +3,9 @@
 import datetime as dt
 import logging
 
-import click
+import rich_click as click
 
-from cg.cli.generate.report.base import generate_delivery_report
-from cg.cli.upload.clinical_delivery import upload_clinical_delivery
+from cg.cli.generate.delivery_report.base import generate_delivery_report
 from cg.cli.upload.coverage import upload_coverage
 from cg.cli.upload.genotype import upload_genotypes
 from cg.cli.upload.gens import upload_to_gens
@@ -31,7 +30,7 @@ class MipDNAUploadAPI(UploadAPI):
 
     def upload(self, ctx: click.Context, case: Case, restart: bool) -> None:
         """Uploads MIP-DNA analysis data and files."""
-        analysis: Analysis = case.analyses[0]
+        analysis: Analysis = self.status_db.get_latest_completed_analysis_for_case(case.internal_id)
         self.update_upload_started_at(analysis=analysis)
 
         # Main upload
@@ -45,8 +44,7 @@ class MipDNAUploadAPI(UploadAPI):
         if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
             ctx.invoke(generate_delivery_report, case_id=case.internal_id)
 
-        # Clinical delivery upload
-        ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
+        self.upload_files_to_customer_inbox(case)
 
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:

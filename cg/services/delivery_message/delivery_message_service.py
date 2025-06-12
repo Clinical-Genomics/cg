@@ -1,9 +1,7 @@
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.exc import OrderNotDeliverableError
-from cg.server.dto.delivery_message.delivery_message_request import (
-    DeliveryMessageRequest,
-)
+from cg.server.dto.delivery_message.delivery_message_request import DeliveryMessageRequest
 from cg.server.dto.delivery_message.delivery_message_response import (
     DeliveryMessageOrderResponse,
     DeliveryMessageResponse,
@@ -54,5 +52,5 @@ class DeliveryMessageService:
     def _get_delivery_message(self, case_ids: set[str]) -> str:
         cases: list[Case] = self.store.get_cases_by_internal_ids(case_ids)
         validate_cases(cases=cases, case_ids=case_ids)
-        message: str = get_message(cases)
+        message: str = get_message(cases=cases, store=self.store)
         return message

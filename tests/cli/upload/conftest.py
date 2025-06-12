@@ -12,30 +12,20 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import DELIVERY_REPORT_FILE_NAME
-from cg.constants.constants import FileFormat, Workflow
-from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.constants.housekeeper_tags import (
-    HK_DELIVERY_REPORT_TAG,
-    GensAnalysisTag,
-    HkMipAnalysisTag,
-)
+from cg.constants.constants import FileFormat
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, GensAnalysisTag, HkMipAnalysisTag
 from cg.io.controller import ReadFile
-from cg.meta.deliver import DeliverAPI
-from cg.meta.rsync import RsyncAPI
+from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
-    FastqConcatenationService,
-)
 from cg.store.models import Analysis
 from cg.store.store import Store
 from tests.meta.upload.scout.conftest import mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
-from tests.mocks.report import MockMipDNAReportAPI
 from tests.store_helpers import StoreHelpers
 
 LOG = logging.getLogger(__name__)
@@ -62,10 +52,8 @@ def upload_genotypes_hk_bundle(
 
 
 @pytest.fixture
-def analysis_obj(
-    analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers
-) -> Analysis:
-    """Return a analysis object with a trio"""
+def analysis(analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers) -> Analysis:
+    """Return an analysis object with a trio"""
     return analysis_store_trio.get_case_by_internal_id(internal_id=case_id).analyses[0]
 
 
@@ -73,12 +61,12 @@ def analysis_obj(
 def upload_genotypes_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     upload_genotypes_hk_bundle: dict,
-    analysis_obj: Analysis,
+    analysis: Analysis,
     helpers,
 ) -> HousekeeperAPI:
     """Add and include files from upload genotypes hk bundle"""
     helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle)
-    hk_version = real_housekeeper_api.last_version(analysis_obj.case.internal_id)
+    hk_version = real_housekeeper_api.last_version(analysis.case.internal_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
 
@@ -157,13 +145,13 @@ def upload_report_hk_bundle(case_id: str, delivery_report_html: Path, timestamp)
 def upload_report_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     upload_report_hk_bundle: dict,
-    analysis_obj: Analysis,
+    analysis: Analysis,
     helpers,
 ) -> HousekeeperAPI:
     """Add and include files from upload reports hk bundle"""
 
     helpers.ensure_hk_bundle(real_housekeeper_api, upload_report_hk_bundle)
-    hk_version = real_housekeeper_api.last_version(analysis_obj.case.internal_id)
+    hk_version = real_housekeeper_api.last_version(analysis.case.internal_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
 
@@ -180,7 +168,7 @@ def base_context(
     cg_context.status_db_ = analysis_store
     cg_context.housekeeper_api_ = housekeeper_api
     cg_context.trailblazer_api_ = trailblazer_api
-    cg_context.scout_api_ = MockScoutApi()
+    cg_context.scout_api_37_ = MockScoutApi()
     cg_context.meta_apis["scout_upload_api"] = upload_scout_api
     cg_context.mip_rd_dna.root = tempdir
 
@@ -197,23 +185,12 @@ def fastq_context(
     cg_context: CGConfig,
 ) -> CGConfig:
     """Fastq context to use in cli"""
-
-    base_context.meta_apis["delivery_api"] = DeliverAPI(
-        store=base_context.status_db,
-        hk_api=base_context.housekeeper_api,
-        case_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.FASTQ]["case_tags"],
-        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[Workflow.FASTQ]["sample_tags"],
-        delivery_type="fastq",
-        project_base_path=Path(base_context.delivery_path),
-        fastq_file_service=FastqConcatenationService(),
-    )
-    base_context.meta_apis["rsync_api"] = RsyncAPI(cg_context)
     base_context.trailblazer_api_ = trailblazer_api
     return base_context
 
 
 @pytest.fixture(scope="function")
-def upload_scout_api(housekeeper_api: MockHousekeeperAPI, mip_load_config: ScoutLoadConfig):
+def upload_scout_api(housekeeper_api: MockHousekeeperAPI):
     """Return a upload scout api"""
     api = MockScoutUploadApi()
     api.housekeeper = housekeeper_api
@@ -258,7 +235,7 @@ class MockScoutUploadApi(UploadScoutAPI):
     def _request_analysis(self, analysis_store_single_case):
         self.analysis = analysis_store_single_case
 
-    def generate_config(self, analysis, **kwargs):
+    def generate_config(self, analysis=analysis, **kwargs):
         """Mock the generate config"""
         if self.missing_mandatory_field:
             self.config.vcf_snv = None
@@ -302,13 +279,15 @@ class MockLims:
 
 
 @pytest.fixture
-def upload_context(cg_context: CGConfig) -> CGConfig:
-    analysis_api = MipDNAAnalysisAPI(config=cg_context)
+def upload_context(
+    cg_context: CGConfig, raredisease_delivery_report_api: RarediseaseDeliveryReportAPI
+) -> CGConfig:
+    analysis_api = RarediseaseAnalysisAPI(config=cg_context)
     cg_context.meta_apis["analysis_api"] = analysis_api
-    cg_context.meta_apis["report_api"] = MockMipDNAReportAPI(cg_context, analysis_api)
+    cg_context.meta_apis["report_api"] = raredisease_delivery_report_api
     cg_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
         hk_api=cg_context.housekeeper_api,
-        scout_api=cg_context.scout_api,
+        scout_api=cg_context.scout_api_37,
         madeline_api=cg_context.madeline_api,
         analysis_api=analysis_api,
         lims_api=cg_context.lims_api,

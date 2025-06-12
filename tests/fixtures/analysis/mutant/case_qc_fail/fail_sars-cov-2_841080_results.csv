@@ -1,0 +1,3 @@
+Sample,Selection,Region Code,Ticket,%N_bases,%10X_coverage,QC_pass,Lineage,Pangolin_data_version,VOC,Mutations
+sample_qc_fail,Allmän övervakning,01,841080,39.56,60.38,FALSE,BA.3,SCORPIO_v0.1.12,No,S373P;S375F;D614G;N969K
+external_negative_control_qc_pass,Information saknas,01,841080,99.90,0.10,FALSE,Unassigned,PUSHER-v1.23.1,No,-

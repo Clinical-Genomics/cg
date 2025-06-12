@@ -2,14 +2,20 @@
 
 import logging
 from datetime import datetime, timedelta
+from pathlib import Path
 
-import click
+import rich_click as click
 
 from cg.exc import AnalysisAlreadyUploadedError, AnalysisUploadError
 from cg.meta.meta import MetaAPI
+from cg.meta.upload.error_handling import handle_delivery_type_errors
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
+    DeliverFilesService,
+)
+from cg.services.deliver_files.factory import DeliveryServiceFactory
 from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
@@ -23,7 +29,7 @@ class UploadAPI(MetaAPI):
         self.analysis_api: AnalysisAPI = analysis_api
         self.scout_upload_api: UploadScoutAPI = UploadScoutAPI(
             hk_api=config.housekeeper_api,
-            scout_api=config.scout_api,
+            scout_api=analysis_api.scout_api,
             madeline_api=config.madeline_api,
             analysis_api=self.analysis_api,
             lims_api=config.lims_api,
@@ -64,22 +70,29 @@ class UploadAPI(MetaAPI):
             raise AnalysisUploadError
 
         if not restart:
-            analysis_obj: Analysis = case_obj.analyses[0]
+            analysis: Analysis = case_obj.analyses[0]
 
-            if analysis_obj.uploaded_at:
-                LOG.error(
-                    f"The analysis has been already uploaded: {analysis_obj.uploaded_at.date()}"
-                )
+            if analysis.uploaded_at:
+                LOG.error(f"The analysis has been already uploaded: {analysis.uploaded_at.date()}")
                 raise AnalysisAlreadyUploadedError
-            elif analysis_obj.upload_started_at:
-                if datetime.now() - analysis_obj.upload_started_at > timedelta(hours=24):
+            elif analysis.upload_started_at:
+                if datetime.now() - analysis.upload_started_at > timedelta(hours=24):
                     LOG.error(
-                        f"This upload has already started at {analysis_obj.upload_started_at}, but something went wrong. "
+                        f"This upload has already started at {analysis.upload_started_at}, but something went wrong. "
                         f"Restart it with the --restart flag."
                     )
                     raise AnalysisUploadError
 
-                LOG.warning(
-                    f"The upload has already started: {analysis_obj.upload_started_at.time()}"
-                )
+                LOG.warning(f"The upload has already started: {analysis.upload_started_at.time()}")
                 raise AnalysisAlreadyUploadedError
+
+    @handle_delivery_type_errors
+    def upload_files_to_customer_inbox(self, case: Case) -> None:
+        """Uploads the analysis files to the customer inbox."""
+        factory_service: DeliveryServiceFactory = self.config.delivery_service_factory
+        delivery_service: DeliverFilesService = factory_service.build_delivery_service(
+            case=case, delivery_type=case.data_delivery
+        )
+        delivery_service.deliver_files_for_case(
+            case=case, delivery_base_path=Path(self.config.delivery_path)
+        )

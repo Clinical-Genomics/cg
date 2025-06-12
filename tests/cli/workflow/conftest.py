@@ -6,7 +6,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from cg.constants import DataDelivery, FileExtensions, FlowCellStatus, Workflow
+from cg.constants import DataDelivery, FileExtensions, SequencingRunDataAvailability, Workflow
 from cg.models.cg_config import CGConfig
 from cg.store.crud.read import ReadHandler
 from cg.store.models import Case
@@ -53,7 +53,7 @@ def analysis_store(base_store: Store, workflow_case_id: str, helpers: StoreHelpe
 
 
 @pytest.fixture
-def fastq_context(
+def raw_data_fastq_context(
     base_context,
     cg_context: CGConfig,
     fastq_case,
@@ -76,7 +76,7 @@ def fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket_id: str) 
         "name": family_name,
         "panels": None,
         "internal_id": case_id,
-        "data_analysis": Workflow.FASTQ,
+        "data_analysis": Workflow.RAW_DATA,
         "data_delivery": DataDelivery.FASTQ,
         "completed_at": None,
         "action": None,
@@ -228,13 +228,12 @@ def tb_api():
 
 
 @pytest.fixture
-def mock_analysis_flow_cell(mocker) -> None:
-    """Mocks the get_flow_cells_by_case method to return a list containing a flow cell whose status is
-    on disk."""
-    flow_cell = Mock()
-    flow_cell.status = FlowCellStatus.ON_DISK
-    mocker.patch.object(ReadHandler, "get_flow_cells_by_case")
-    ReadHandler.get_flow_cells_by_case.return_value = [flow_cell]
+def mock_analysis_illumina_run(mocker) -> None:
+    """Mocks the get_flow_cells_by_case method to return a list containing an "ondisk" flow cell."""
+    sequencing_run = Mock()
+    sequencing_run.data_availability = SequencingRunDataAvailability.ON_DISK
+    mocker.patch.object(ReadHandler, "get_illumina_sequencing_runs_by_case")
+    ReadHandler.get_illumina_sequencing_runs_by_case.return_value = [sequencing_run]
 
 
 @pytest.fixture(scope="session")

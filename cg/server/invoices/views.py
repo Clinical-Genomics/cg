@@ -154,7 +154,7 @@ def new(record_type):
         count=count,
         records=records,
         record_type=record_type,
-        total_price_threshold=current_app.config["TOTAL_PRICE_THRESHOLD"],
+        total_price_threshold=current_app.config["invoice_max_price"],
         args={"customer": customer_id},
     )
 
@@ -197,7 +197,7 @@ def invoice_template(invoice_id):
     workbook = render_xlsx(invoice_dict)
 
     temp_dir = tempfile.gettempdir()
-    filename = "Invoice_{}_{}.xlsx".format(invoice_obj.id, cost_center)
+    filename = f"Invoice_{invoice_obj.id}_{cost_center}.xlsx"
     excel_path = os.path.join(temp_dir, filename)
     workbook.save(excel_path)
 

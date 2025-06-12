@@ -1,6 +1,6 @@
 import logging
 
-import click
+import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS, is_case_name_allowed
 from cg.constants import DataDelivery, Priority, Workflow
@@ -211,12 +211,12 @@ def add_sample(
         priority=priority,
         original_ticket=original_ticket,
     )
-    new_record.application_version: ApplicationVersion = (
-        status_db.get_current_application_version_by_tag(tag=application_tag)
+    new_record.application_version = status_db.get_current_application_version_by_tag(
+        tag=application_tag
     )
-    new_record.customer: Customer = customer
-    status_db.session.add(new_record)
-    status_db.session.commit()
+    new_record.customer = customer
+    status_db.add_item_to_store(new_record)
+    status_db.commit_to_store()
     LOG.info(f"{new_record.internal_id}: new sample added")
 
 
@@ -292,7 +292,6 @@ def add_case(
         order = Order(
             customer_id=customer.id,
             ticket_id=int(ticket),
-            workflow=data_analysis,
         )
     new_case.orders.append(order)
 
@@ -337,10 +336,18 @@ def link_sample_to_case(
             LOG.error(f"{mother_id}: mother not found")
             raise click.Abort
 
+        if mother.sex != Sex.FEMALE:
+            LOG.error(f"{mother_id}: mother is not {Sex.FEMALE}")
+            raise click.Abort
+
     if father_id:
         father: Sample = status_db.get_sample_by_internal_id(internal_id=father_id)
         if father is None:
             LOG.error(f"{father_id}: father not found")
+            raise click.Abort
+
+        if father.sex != Sex.MALE:
+            LOG.error(f"{father_id}: father is not {Sex.MALE}")
             raise click.Abort
 
     new_record: CaseSample = status_db.relate_sample(

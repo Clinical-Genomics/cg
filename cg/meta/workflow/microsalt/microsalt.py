@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import click
+import rich_click as click
 
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, Workflow
 from cg.constants.constants import FileExtensions
@@ -53,7 +53,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
         return self._process
 
-    def clean_run_dir(self, case_id: str, yes: bool, case_path: list[Path] | Path) -> int:
+    def clean_run_dir(
+        self, case_id: str, skip_confirmation: bool, case_path: list[Path] | Path
+    ) -> int:
         """Remove workflow run directories for a MicroSALT case."""
 
         if not case_path:
@@ -65,7 +67,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         if isinstance(case_path, Path):
             case_path: list[Path] = [case_path]
         for analysis_path in case_path:
-            if yes or click.confirm(
+            if skip_confirmation or click.confirm(
                 f"Are you sure you want to remove all files in {analysis_path}?"
             ):
                 if analysis_path.is_symlink():

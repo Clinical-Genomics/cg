@@ -10,11 +10,7 @@ from cg.cli.archive import archive_spring_files, delete_file, update_job_statuse
 from cg.constants import EXIT_SUCCESS, SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
 from cg.io.controller import APIRequest
-from cg.meta.archive.ddn.constants import (
-    FAILED_JOB_STATUSES,
-    ONGOING_JOB_STATUSES,
-    JobStatus,
-)
+from cg.meta.archive.ddn.constants import FAILED_JOB_STATUSES, ONGOING_JOB_STATUSES, JobStatus
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import ArchivalResponse, AuthToken, GetJobStatusResponse
 from cg.models.cg_config import CGConfig
@@ -61,16 +57,20 @@ def test_archive_spring_files_success(
     spring_file: File = all_non_archived_spring_files[0]
 
     # WHEN running 'cg archive archive-spring-files'
-    with mock.patch.object(
-        AuthToken,
-        "model_validate",
-        return_value=test_auth_token,
-    ), mock.patch.object(
-        APIRequest,
-        "api_request_from_content",
-        return_value=ok_miria_response,
-    ), mock.patch.object(
-        DDNDataFlowClient, "_archive_file", return_value=ArchivalResponse(jobId=archival_job_id)
+    with (
+        mock.patch.object(
+            AuthToken,
+            "model_validate",
+            return_value=test_auth_token,
+        ),
+        mock.patch.object(
+            APIRequest,
+            "api_request_from_content",
+            return_value=ok_miria_response,
+        ),
+        mock.patch.object(
+            DDNDataFlowClient, "_archive_file", return_value=ArchivalResponse(jobId=archival_job_id)
+        ),
     ):
         result = cli_runner.invoke(
             archive_spring_files,
@@ -105,18 +105,22 @@ def test_get_archival_job_status(
     assert not archive_context.housekeeper_api.get_archive_entries()[0].archived_at
 
     # WHEN invoking update_job_statuses
-    with mock.patch.object(
-        AuthToken,
-        "model_validate",
-        return_value=test_auth_token,
-    ), mock.patch.object(
-        APIRequest,
-        "api_request_from_content",
-        return_value=ok_miria_response,
-    ), mock.patch.object(
-        DDNDataFlowClient,
-        "_get_job_status",
-        return_value=GetJobStatusResponse(id=archival_job_id, status=job_status),
+    with (
+        mock.patch.object(
+            AuthToken,
+            "model_validate",
+            return_value=test_auth_token,
+        ),
+        mock.patch.object(
+            APIRequest,
+            "api_request_from_content",
+            return_value=ok_miria_response,
+        ),
+        mock.patch.object(
+            DDNDataFlowClient,
+            "_get_job_status",
+            return_value=GetJobStatusResponse(id=archival_job_id, status=job_status),
+        ),
     ):
         result = cli_runner.invoke(
             update_job_statuses,
@@ -162,18 +166,22 @@ def test_get_retrieval_job_status(
     retrieving_archive.retrieval_task_id = retrieval_job_id
 
     # WHEN invoking update_job_statuses
-    with mock.patch.object(
-        AuthToken,
-        "model_validate",
-        return_value=test_auth_token,
-    ), mock.patch.object(
-        APIRequest,
-        "api_request_from_content",
-        return_value=ok_miria_response,
-    ), mock.patch.object(
-        DDNDataFlowClient,
-        "_get_job_status",
-        return_value=GetJobStatusResponse(id=retrieval_job_id, status=job_status),
+    with (
+        mock.patch.object(
+            AuthToken,
+            "model_validate",
+            return_value=test_auth_token,
+        ),
+        mock.patch.object(
+            APIRequest,
+            "api_request_from_content",
+            return_value=ok_miria_response,
+        ),
+        mock.patch.object(
+            DDNDataFlowClient,
+            "_get_job_status",
+            return_value=GetJobStatusResponse(id=retrieval_job_id, status=job_status),
+        ),
     ):
         result = cli_runner.invoke(
             update_job_statuses,
@@ -220,16 +228,18 @@ def test_delete_file_raises_http_error(
     )
 
     # GIVEN that the request returns a failed response
-    with mock.patch.object(
-        DDNDataFlowClient,
-        "_get_auth_token",
-        return_value=test_auth_token,
-    ), mock.patch.object(
-        APIRequest,
-        "api_request_from_content",
-        return_value=failed_delete_file_response,
-    ), pytest.raises(
-        HTTPError
+    with (
+        mock.patch.object(
+            DDNDataFlowClient,
+            "_get_auth_token",
+            return_value=test_auth_token,
+        ),
+        mock.patch.object(
+            APIRequest,
+            "api_request_from_content",
+            return_value=failed_delete_file_response,
+        ),
+        pytest.raises(HTTPError),
     ):
         # WHEN trying to delete the file via Miria and in Housekeeper
 
@@ -265,14 +275,17 @@ def test_delete_file_success(
     )
 
     # GIVEN that the delete request returns a successful response
-    with mock.patch.object(
-        DDNDataFlowClient,
-        "_get_auth_token",
-        return_value=test_auth_token,
-    ), mock.patch.object(
-        APIRequest,
-        "api_request_from_content",
-        return_value=ok_delete_file_response,
+    with (
+        mock.patch.object(
+            DDNDataFlowClient,
+            "_get_auth_token",
+            return_value=test_auth_token,
+        ),
+        mock.patch.object(
+            APIRequest,
+            "api_request_from_content",
+            return_value=ok_delete_file_response,
+        ),
     ):
         # WHEN trying to delete the file via Miria and in Housekeeper
 

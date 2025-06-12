@@ -12,8 +12,10 @@ from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileFormat, MetaApis
+from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
 
@@ -22,7 +24,7 @@ LOG = logging.getLogger(__name__)
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_config_case_without_options(
     cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest
@@ -42,7 +44,7 @@ def test_config_case_without_options(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_config_with_missing_case(
     cli_runner: CliRunner,
@@ -72,7 +74,7 @@ def test_config_with_missing_case(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.RAREDISEASE, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_config_case_without_samples(
     cli_runner: CliRunner,
@@ -102,13 +104,14 @@ def test_config_case_without_samples(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS,
 )
 def test_config_case_default_parameters(
     cli_runner: CliRunner,
     workflow: Workflow,
     caplog: LogCaptureFixture,
     request: FixtureRequest,
+    scout_export_manged_variants_output: str,
     mocker,
 ):
     """Test that command generates config files."""
@@ -125,6 +128,13 @@ def test_config_case_default_parameters(
 
     # GIVEN that the sample source in LIMS is set
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
+
+    # GIVEN a mocked scout export of the managed variants for RAREDISEASE
+    mocker.patch.object(
+        RarediseaseAnalysisAPI,
+        "get_managed_variants",
+        return_value=scout_export_manged_variants_output,
+    )
 
     # GIVEN a valid case
 
@@ -175,13 +185,14 @@ def test_config_case_default_parameters(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE],
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_config_case_dry_run(
     cli_runner: CliRunner,
     workflow: Workflow,
     caplog: LogCaptureFixture,
     request: FixtureRequest,
+    scout_export_manged_variants_output: str,
     mocker,
 ):
     """Test dry-run."""
@@ -197,6 +208,13 @@ def test_config_case_dry_run(
     # GIVEN that the sample source in LIMS is set
     mocker.patch.object(LimsAPI, "get_source", return_value="blood")
 
+    # GIVEN a mocked scout export of the managed variants
+    mocker.patch.object(
+        RarediseaseAnalysisAPI,
+        "get_managed_variants",
+        return_value=scout_export_manged_variants_output,
+    )
+
     # WHEN invoking the command with dry-run specified
     result = cli_runner.invoke(
         workflow_cli, [workflow, "config-case", case_id, "--dry-run"], obj=context
@@ -204,7 +222,6 @@ def test_config_case_dry_run(
 
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
-
     # THEN sample sheet and parameters information should be collected
     assert "Getting sample sheet information" in caplog.text
     assert "Getting parameters information" in caplog.text
@@ -220,6 +237,6 @@ def test_config_case_dry_run(
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     if analysis_api.is_gene_panel_required:
         assert "Creating gene panel file" in caplog.text
-        assert "bin/scout --config scout-stage.yaml export panel" in caplog.text
+        assert f"{analysis_api.scout_api.scout_base_command} export panel" in caplog.text
         gene_panel_path: Path = request.getfixturevalue(f"{workflow}_gene_panel_path")
         assert not gene_panel_path.is_file()

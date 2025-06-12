@@ -11,6 +11,7 @@ from housekeeper.store.models import File
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import SARS_COV_REGEX, FileFormat
+from cg.constants.housekeeper_tags import FohmTag
 from cg.exc import HousekeeperFileMissingError
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.cg_config import CGConfig
@@ -45,13 +46,15 @@ class GisaidAPI:
         self.process = Process(binary=self.gisaid_binary)
 
     def get_completion_file_from_hk(self, case_id: str) -> File:
-        """Find completon file in Housekeeper and return it"""
+        """Return completion file.
+        Raises:
+            HousekeeperFileMissingError."""
 
         completion_file: File | None = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=case_id, tags=["komplettering"]
+            bundle_name=case_id, tags={FohmTag.COMPLEMENTARY}
         )
         if not completion_file:
-            msg = f"completion file missing for bundle {case_id}"
+            msg = f"Completion file missing for bundle {case_id}"
             raise HousekeeperFileMissingError(message=msg)
         return completion_file
 

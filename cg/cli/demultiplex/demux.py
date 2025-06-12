@@ -2,27 +2,25 @@ import logging
 from glob import glob
 from pathlib import Path
 
-import click
+import rich_click as click
 from pydantic import ValidationError
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.api import SampleSheetAPI
+from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     hardlink_flow_cell_analysis_data,
     is_ready_for_post_processing,
     mark_as_demultiplexed,
     mark_flow_cell_as_queued_for_post_processing,
+    is_manifest_file_required,
+    create_manifest_file,
+    is_syncing_complete,
+    is_flow_cell_sync_confirmed,
 )
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.exc import FlowCellError, SampleSheetError
-from cg.meta.demultiplex.utils import (
-    create_manifest_file,
-    is_flow_cell_sync_confirmed,
-    is_manifest_file_required,
-    is_syncing_complete,
-)
+from cg.exc import CgError, FlowCellError, SampleSheetContentError
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
@@ -36,7 +34,7 @@ LOG = logging.getLogger(__name__)
 def demultiplex_all(context: CGConfig, sequencing_runs_directory: click.Path, dry_run: bool):
     """Demultiplex all sequencing runs that are ready under the sequencing runs directory."""
     LOG.info("Running cg demultiplex all ...")
-    sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
+    sample_sheet_api: IlluminaSampleSheetService = context.sample_sheet_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
     if sequencing_runs_directory:
@@ -60,9 +58,10 @@ def demultiplex_all(context: CGConfig, sequencing_runs_directory: click.Path, dr
 
         try:
             sample_sheet_api.validate_sample_sheet(sequencing_run.sample_sheet_path)
-        except (SampleSheetError, ValidationError):
+        except (CgError, ValidationError):
             LOG.warning(
-                f"Malformed sample sheet. Run cg demultiplex samplesheet validate {sequencing_run.sample_sheet_path}"
+                "Malformed sample sheet. Run "
+                f"cg demultiplex samplesheet validate {sequencing_run.sample_sheet_path}"
             )
             continue
 
@@ -91,7 +90,7 @@ def demultiplex_sequencing_run(
     """
 
     LOG.info(f"Starting demultiplexing of sequencing run {sequencing_run_name}")
-    sample_sheet_api: SampleSheetAPI = context.sample_sheet_api
+    sample_sheet_api: IlluminaSampleSheetService = context.sample_sheet_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     sequencing_run_dir: Path = Path(
         context.demultiplex_api.sequencing_runs_dir, sequencing_run_name
@@ -111,19 +110,24 @@ def demultiplex_sequencing_run(
 
     try:
         sample_sheet_api.validate_sample_sheet(sequencing_run.sample_sheet_path)
-    except (SampleSheetError, ValidationError) as error:
+    except SampleSheetContentError:
+        LOG.warning("Starting demultiplexing a with a manually modified sample sheet")
+    except (CgError, ValidationError) as error:
         LOG.warning(
-            f"Malformed sample sheet. Run cg demultiplex samplesheet validate {sequencing_run.sample_sheet_path}"
+            "Malformed sample sheet. "
+            f"Run cg demultiplex samplesheet validate {sequencing_run.sample_sheet_path}"
         )
         raise click.Abort from error
 
-    if not dry_run:
-        demultiplex_api.prepare_output_directory(sequencing_run)
-        slurm_job_id: int = demultiplex_api.start_demultiplexing(sequencing_run=sequencing_run)
-        tb_api: TrailblazerAPI = context.trailblazer_api
-        demultiplex_api.add_to_trailblazer(
-            tb_api=tb_api, slurm_job_id=slurm_job_id, sequencing_run=sequencing_run
-        )
+    if dry_run:
+        LOG.info(f"Would have started demultiplexing {sequencing_run_name}")
+        return
+    demultiplex_api.prepare_output_directory(sequencing_run)
+    slurm_job_id: int = demultiplex_api.start_demultiplexing(sequencing_run=sequencing_run)
+    tb_api: TrailblazerAPI = context.trailblazer_api
+    demultiplex_api.add_to_trailblazer(
+        tb_api=tb_api, slurm_job_id=slurm_job_id, sequencing_run=sequencing_run
+    )
 
 
 @click.command(name="copy-completed-sequencing-runs")

@@ -45,6 +45,7 @@ def test_gens_api_load(
         parameters=[
             "load",
             "sample",
+            "--force",
             "--sample-id",
             sample_id,
             "--genome-build",

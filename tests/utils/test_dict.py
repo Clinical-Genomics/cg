@@ -2,7 +2,42 @@
 
 from pathlib import Path
 
-from cg.utils.dict import get_full_path_dictionary, get_list_from_dictionary
+from cg.utils.dict import (
+    get_full_path_dictionary,
+    get_list_from_dictionary,
+    remove_duplicate_dicts,
+)
+
+
+def test_remove_duplicate_dicts():
+    # GIVEN a list of dicts
+    dicts = [{"a": 1, "b": 2}, {"c": 1, "d": 4}, {"a": 1, "b": 2}, {"c": 1, "d": 4}]
+
+    # WHEN removing duplicate dicts
+    content: list[dict] = remove_duplicate_dicts(dicts)
+
+    # THEN a list of dicts is returned
+    assert isinstance(content[0], dict)
+
+    # THEN duplicates are removed
+    assert len(content) == 2
+    assert len(content[0]) == 2
+    assert len(content[1]) == 2
+
+
+def test_remove_duplicate_dicts_when_no_duplicates():
+    # GIVEN a list of dicts
+    dicts = [{"a": 1, "b": 2}, {"c": 1, "d": 4}, {"f": 1, "b": 2}, {"c": 1, "d": 1}]
+
+    # WHEN removing duplicate dicts
+    content: list[dict] = remove_duplicate_dicts(dicts)
+
+    # THEN a list of dicts is returned
+    assert isinstance(content[0], dict)
+
+    # THEN all dicts remain
+    assert len(content) == 4
+    assert len(content[3]) == 2
 
 
 def test_get_list_from_dictionary():

@@ -13,9 +13,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow
 from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
-from cg.meta.upload.nipt.models import FlowCellQ30AndReads, StatinaUploadFiles
+from cg.meta.upload.nipt.models import SequencingRunQ30AndReads, StatinaUploadFiles
 from cg.models.cg_config import CGConfig
-from cg.store.models import Analysis, Case, Flowcell
+from cg.store.models import Analysis, IlluminaSequencingRun
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -48,32 +48,31 @@ class NiptUploadAPI:
         LOG.info("Set dry run to %s", dry_run)
         self.dry_run = dry_run
 
-    def flowcell_passed_qc_value(self, case_id: str, q30_threshold: float) -> bool:
+    def sequencing_run_passed_qc_value(self, case_id: str, q30_threshold: float) -> bool:
         """
         Check the average Q30 and the total number of reads for each sample
-        in the latest flow cell related to a case.
+        in the latest sequencing run related to a case.
         """
-        flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
-        flow_cell_summary: FlowCellQ30AndReads = FlowCellQ30AndReads(
-            average_q30_across_samples=self.status_db.get_average_percentage_passing_q30_for_flow_cell(
-                flow_cell_name=flow_cell.name
-            ),
-            total_reads_on_flow_cell=self.status_db.get_number_of_reads_for_flow_cell(
-                flow_cell_name=flow_cell.name
-            ),
+        sequencing_run: IlluminaSequencingRun = (
+            self.status_db.get_latest_illumina_sequencing_run_for_nipt_case(case_id)
         )
-        if not flow_cell_summary.passes_q30_threshold(
+        sequencing_run_summary: SequencingRunQ30AndReads = SequencingRunQ30AndReads(
+            average_q30_across_samples=sequencing_run.percent_q30,
+            total_reads_on_flow_cell=sequencing_run.total_reads,
+        )
+        threshold: int = self.status_db.get_ready_made_library_expected_reads(case_id=case_id)
+        if not sequencing_run_summary.passes_q30_threshold(
             threshold=q30_threshold
-        ) or not flow_cell_summary.passes_read_threshold(
-            threshold=self.status_db.get_ready_made_library_expected_reads(case_id=case_id)
-        ):
+        ) or not sequencing_run_summary.passes_read_threshold(threshold=threshold):
             LOG.warning(
-                f"Flow cell {flow_cell.name} did not pass QC for case {case_id} with Q30: "
-                f"{flow_cell_summary.average_q30_across_samples} and reads: {flow_cell_summary.total_reads_on_flow_cell}."
+                f"Sequencing run {sequencing_run.device.internal_id} did not pass QC for case {case_id} with Q30: "
+                f"{sequencing_run_summary.average_q30_across_samples} and reads: {sequencing_run_summary.total_reads_on_flow_cell}."
                 f"Skipping upload."
             )
             return False
-        LOG.debug(f"Flow cell {flow_cell.name} passed QC for case {case_id}.")
+        LOG.debug(
+            f"Sequencing run for {sequencing_run.device.internal_id} passed QC for case {case_id}."
+        )
         return True
 
     def get_housekeeper_results_file(self, case_id: str, tags: list | None = None) -> str:
@@ -131,29 +130,25 @@ class NiptUploadAPI:
     def update_analysis_uploaded_at_date(self, case_id: str) -> Analysis:
         """Updates analysis_uploaded_at for the uploaded analysis"""
 
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        analysis_obj: Analysis = case_obj.analyses[0]
-
+        analysis: Analysis = self.status_db.get_latest_started_analysis_for_case(case_id)
         if not self.dry_run:
-            analysis_obj.uploaded_at = dt.datetime.now()
+            analysis.uploaded_at = dt.datetime.now()
             self.status_db.session.commit()
             self.trailblazer_api.set_analysis_uploaded(
-                case_id=case_id, uploaded_at=analysis_obj.uploaded_at
+                case_id=case_id, uploaded_at=analysis.uploaded_at
             )
 
-        return analysis_obj
+        return analysis
 
     def update_analysis_upload_started_date(self, case_id: str) -> Analysis:
         """Updates analysis_upload_started_at for the uploaded analysis"""
 
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        analysis_obj: Analysis = case_obj.analyses[0]
-
+        analysis: Analysis = self.status_db.get_latest_started_analysis_for_case(case_id)
         if not self.dry_run:
-            analysis_obj.upload_started_at = dt.datetime.now()
+            analysis.upload_started_at = dt.datetime.now()
             self.status_db.session.commit()
 
-        return analysis_obj
+        return analysis
 
     def get_statina_files(self, case_id: str) -> StatinaUploadFiles:
         """Get statina files from housekeeper."""

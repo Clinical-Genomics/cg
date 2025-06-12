@@ -4,19 +4,23 @@ from cg.constants.constants import Workflow
 
 
 class OrderType(StrEnum):
-    BALSAMIC: str = Workflow.BALSAMIC
-    BALSAMIC_QC: str = Workflow.BALSAMIC_QC
-    BALSAMIC_UMI: str = Workflow.BALSAMIC_UMI
-    FASTQ: str = Workflow.FASTQ
-    FLUFFY: str = Workflow.FLUFFY
-    METAGENOME: str = "metagenome"
-    MICROSALT: str = Workflow.MICROSALT
-    MIP_DNA: str = Workflow.MIP_DNA
-    MIP_RNA: str = Workflow.MIP_RNA
-    RML: str = "rml"
-    RNAFUSION: str = Workflow.RNAFUSION
-    SARS_COV_2: str = "sars-cov-2"
-    TOMTE: str = Workflow.TOMTE
+    BALSAMIC = Workflow.BALSAMIC
+    BALSAMIC_UMI = Workflow.BALSAMIC_UMI
+    FASTQ = "fastq"
+    FLUFFY = Workflow.FLUFFY
+    METAGENOME = "metagenome"
+    MICROBIAL_FASTQ = "microbial-fastq"
+    MICROSALT = Workflow.MICROSALT
+    MIP_DNA = Workflow.MIP_DNA
+    MIP_RNA = Workflow.MIP_RNA
+    NALLO = Workflow.NALLO
+    PACBIO_LONG_READ = "pacbio-long-read"
+    RML = "rml"
+    RAREDISEASE = Workflow.RAREDISEASE
+    RNAFUSION = Workflow.RNAFUSION
+    SARS_COV_2 = "sars-cov-2"
+    TAXPROFILER = Workflow.TAXPROFILER
+    TOMTE = Workflow.TOMTE
 
 
 class ExcelSampleAliases(StrEnum):

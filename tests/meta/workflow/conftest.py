@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from cg.constants import SequencingFileTag
 from cg.constants.constants import CaseActions, MicrosaltAppTags, MicrosaltQC, Workflow
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
@@ -79,17 +80,17 @@ def spring_fastq_mix(compression_object: CompressionData) -> dict:
             {
                 "path": str(compression_object.spring_path),
                 "archive": False,
-                "tags": ["spring"],
+                "tags": [SequencingFileTag.SPRING],
             },
             {
                 "path": str(compression_object.fastq_first),
                 "archive": False,
-                "tags": ["fastq"],
+                "tags": [SequencingFileTag.FASTQ],
             },
             {
                 "path": str(compression_object.fastq_second),
                 "archive": False,
-                "tags": ["fastq"],
+                "tags": [SequencingFileTag.FASTQ],
             },
         ],
     }
@@ -285,12 +286,12 @@ def rnafusion_metrics() -> dict[str, float]:
 
 @pytest.fixture(name="mip_analysis_api")
 def fixture_mip_analysis_api(
-    cg_context: CGConfig, mip_hk_store, analysis_store
+    cg_context: CGConfig, mip_hk_store, store_with_illumina_sequencing_data
 ) -> MipDNAAnalysisAPI:
     """Return a MIP analysis API."""
     analysis_api = MipDNAAnalysisAPI(cg_context)
     analysis_api.housekeeper_api = mip_hk_store
-    analysis_api.status_db = analysis_store
+    analysis_api.status_db = store_with_illumina_sequencing_data
     return analysis_api
 
 

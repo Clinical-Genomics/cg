@@ -23,10 +23,13 @@ os.environ["LIMS_USERNAME"] = "dummy_value"
 os.environ["LIMS_PASSWORD"] = "dummy_value"
 os.environ["GOOGLE_OAUTH_CLIENT_ID"] = "dummy_value"
 os.environ["GOOGLE_OAUTH_CLIENT_SECRET"] = "dummy_value"
-os.environ["CG_ENABLE_ADMIN"] = "1"
 os.environ["TRAILBLAZER_SERVICE_ACCOUNT"] = "dummy_value"
 os.environ["TRAILBLAZER_SERVICE_ACCOUNT_AUTH_FILE"] = "dummy_value"
 os.environ["TRAILBLAZER_HOST"] = "dummy_value"
+os.environ["CG_SECRET_KEY"] = "dummy_value"
+os.environ["GUNICORN_BIND"] = "0.0.0.0:8000"
+os.environ["SUPPORT_SYSTEM_EMAIL"] = "dummy_value"
+os.environ["EMAIL_URI"] = "dummy_value"
 
 
 @pytest.fixture
@@ -48,7 +51,6 @@ def order(
         customer_id=customer.id,
         ticket_id=1,
         order_date=datetime.now(),
-        workflow=Workflow.MIP_DNA,
     )
     order.cases.append(server_case)
     order.cases.append(server_case_in_same_order)
@@ -57,21 +59,26 @@ def order(
 
 @pytest.fixture
 def order_another(helpers: StoreHelpers, customer_another: Customer) -> Order:
+    case: Case = helpers.add_case(name="another_case", store=store, data_analysis=Workflow.MIP_DNA)
     order: Order = helpers.add_order(
         store=store, customer_id=customer_another.id, ticket_id=2, order_date=datetime.now()
     )
+    order.cases.append(case)
     return order
 
 
 @pytest.fixture
 def order_balsamic(helpers: StoreHelpers, customer_another: Customer) -> Order:
+    case: Case = helpers.add_case(
+        name="balsamic_case", store=store, data_analysis=Workflow.BALSAMIC
+    )
     order: Order = helpers.add_order(
         store=store,
         customer_id=customer_another.id,
         ticket_id=3,
         order_date=datetime.now(),
-        workflow=Workflow.BALSAMIC,
     )
+    order.cases.append(case)
     return order
 
 

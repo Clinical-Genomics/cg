@@ -1,4 +1,3 @@
-import datetime
 from pathlib import Path
 
 import pytest
@@ -49,6 +48,44 @@ def test_rta_exists(novaseq_6000_pre_1_5_kits_flow_cell: IlluminaRunDirectoryDat
 
     # THEN assert that the file exists
     assert rta_file.exists()
+
+
+def test_copy_complete_exists(novaseq_6000_pre_1_5_kits_flow_cell: IlluminaRunDirectoryData):
+    """Test return of CopyComplete file."""
+    # GIVEN the path to a finished flow cell
+    # GIVEN a flow cell object
+
+    # WHEN fetching the path to the RTA file
+    copy_complete: Path = novaseq_6000_pre_1_5_kits_flow_cell.copy_complete_path
+
+    # THEN assert that the file exists
+    assert copy_complete.exists()
+
+
+def test_get_sequencing_runs_dir(novaseq_x_flow_cell: IlluminaRunDirectoryData):
+    """Test getting the path to the sequencing runs directory."""
+    # GIVEN an Illumina run directory data
+
+    # WHEN getting the path to the sequencing runs directory
+    runs_dir: Path = novaseq_x_flow_cell.get_sequencing_runs_dir()
+
+    # THEN it should be the expected one
+    assert DemultiplexingDirsAndFiles.SEQUENCING_RUNS_DIRECTORY_NAME in runs_dir.as_posix()
+
+
+def test_get_demultiplexed_runs_dir(novaseq_x_flow_cell: IlluminaRunDirectoryData):
+    """Test getting the path to the demultiplexed runs directory."""
+    # GIVEN an Illumina run directory data
+    assert (
+        DemultiplexingDirsAndFiles.SEQUENCING_RUNS_DIRECTORY_NAME
+        in novaseq_x_flow_cell.path.as_posix()
+    )
+
+    # WHEN getting the path to the demultiplexed runs directory
+    demux_dir: Path = novaseq_x_flow_cell.get_demultiplexed_runs_dir()
+
+    # THEN it should be the expected one
+    assert DemultiplexingDirsAndFiles.DEMULTIPLEXED_RUNS_DIRECTORY_NAME in demux_dir.as_posix()
 
 
 @pytest.mark.parametrize(
@@ -178,29 +215,3 @@ def test_has_demultiplexing_started_on_sequencer_false(
 
     # THEN the response should be False
     assert not has_demux_started
-
-
-def test_sequencing_dates_novaseqx_flow_cell(novaseq_x_flow_cell_dir: Path):
-    # GIVEN a flow cell directory data for a novaseq x flow cell
-    flow_cell = IlluminaRunDirectoryData(novaseq_x_flow_cell_dir)
-
-    # WHEN fetching the sequencing start and end dates
-    start_date: datetime = flow_cell.sequencing_started_at
-    end_date: datetime = flow_cell.sequencing_completed_at
-
-    # THEN the dates should be set
-    assert isinstance(start_date, datetime.datetime)
-    assert isinstance(end_date, datetime.datetime)
-
-
-def test_sequencing_dates_novaseq_6000_flow_cell(novaseq_6000_post_1_5_kits_flow_cell_path: Path):
-    # GIVEN a flow cell directory data for a novaseq 6000 flow cell
-    flow_cell = IlluminaRunDirectoryData(novaseq_6000_post_1_5_kits_flow_cell_path)
-
-    # WHEN fetching the sequencing start and end dates
-    start_date: datetime = flow_cell.sequencing_started_at
-    end_date: datetime = flow_cell.sequencing_completed_at
-
-    # THEN none of the dates should be set
-    assert not start_date
-    assert not end_date

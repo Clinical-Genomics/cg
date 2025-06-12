@@ -20,9 +20,9 @@ LOG = logging.getLogger(__name__)
 class ScoutAPI:
     """Interface to Scout."""
 
-    def __init__(self, config, slurm_upload_service: SlurmUploadService):
-        binary_path = config["scout"]["binary_path"]
-        config_path = config["scout"]["config_path"]
+    def __init__(self, scout_config, slurm_upload_service: SlurmUploadService):
+        binary_path = scout_config.binary_path
+        config_path = scout_config.config_path
         self.process = Process(binary=binary_path, config=config_path)
         self.slurm_upload_service = slurm_upload_service
         self.scout_base_command = f"{binary_path} --config {config_path}"
@@ -157,7 +157,7 @@ class ScoutAPI:
             get_cases_command.append("--finished")
 
         if reruns:
-            LOG.info("Fetching cases that are reruns")
+            LOG.debug("Fetching cases that are reruns")
             get_cases_command.append("--reruns")
 
         if days_ago:
@@ -175,7 +175,7 @@ class ScoutAPI:
         for case_export in ReadStream.get_content_from_stream(
             file_format=FileFormat.JSON, stream=self.process.stdout
         ):
-            LOG.info(f"Validating case {case_export.get('_id')}")
+            LOG.debug(f"Validating case {case_export.get('_id')}")
             cases.append(ScoutExportCase.model_validate(case_export))
         return cases
 
@@ -277,6 +277,101 @@ class ScoutAPI:
             raise ScoutUploadError(
                 "Something went wrong when uploading rna coverage bigwig file"
             ) from error
+
+    def upload_omics_sample_id(
+        self, dna_case_id: str, customer_sample_id: str, rna_sample_internal_id: str
+    ) -> None:
+        """Load a omics sample id into a case in the database."""
+
+        upload_command: list[str] = [
+            "update",
+            "individual",
+            "--case-id",
+            dna_case_id,
+            "--ind",
+            customer_sample_id,
+            "omics_sample_id",
+            rna_sample_internal_id,
+        ]
+        try:
+            LOG.info("Uploading omics_sample_id")
+            self.process.run_command(upload_command)
+        except CalledProcessError as error:
+            raise ScoutUploadError("Something went wrong when uploading omics_sample_id") from error
+
+    def upload_rna_fraser_outrider(
+        self,
+        case_id: str,
+        fraser_file_path: str | None,
+        outrider_file_path: str | None,
+        customer_case_name: str,
+        cust_id: str,
+    ) -> None:
+        """Load a rna fraser file into a case in the database."""
+        upload_command: list[str] = [
+            "update",
+            "case",
+            "-n",
+            customer_case_name,
+            "-i",
+            cust_id,
+        ]
+        if fraser_file_path:
+            upload_command.extend(["--fraser", fraser_file_path])
+            LOG.info(f"Uploading rna fraser file {fraser_file_path} to case {case_id}")
+
+        if outrider_file_path:
+            upload_command.extend(["--outrider", outrider_file_path])
+            LOG.info(f"Uploading outrider file {outrider_file_path} to case {case_id}")
+        try:
+            self.process.run_command(upload_command)
+        except CalledProcessError as error:
+            raise ScoutUploadError("Something went wrong when uploading rna fraser file") from error
+
+    def upload_rna_genome_build(
+        self, case_id: str, customer_case_name: str, cust_id: str, rna_genome_build: str
+    ) -> None:
+        """Load a rna fraser file into a case in the database."""
+
+        upload_command: list[str] = [
+            "update",
+            "case",
+            "-n",
+            customer_case_name,
+            "-i",
+            cust_id,
+            "--rna-genome-build",
+            rna_genome_build,
+        ]
+        try:
+            LOG.info(f"Updating rna genome build {rna_genome_build} to case {case_id}")
+            self.process.run_command(upload_command)
+        except CalledProcessError as error:
+            raise ScoutUploadError("Something went wrong when updating rna genome build") from error
+
+    def upload_rna_delivery_report(self, case_id: str, report_path: str) -> None:
+        """Load a RNA report into a case in the database."""
+
+        self.upload_report(
+            case_id=case_id,
+            report_path=report_path,
+            report_type=ScoutCustomCaseReportTags.RNA_DELIVERY,
+        )
+
+    def load_variant_outlier(self, case_id: str) -> None:
+        """Load a rna fraser file into a case in the database."""
+
+        upload_command: list[str] = [
+            "load",
+            "variants",
+            "--outlier",
+            case_id,
+        ]
+        try:
+            LOG.info(f"Loading variants outlier for case {case_id}")
+            self.process.run_command(upload_command)
+        except CalledProcessError as error:
+            raise ScoutUploadError("Something went wrong when loading variants outlier") from error
 
     def upload_rna_alignment_file(
         self, case_id: str, customer_sample_id: str, file_path: str

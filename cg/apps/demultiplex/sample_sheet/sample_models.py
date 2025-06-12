@@ -12,14 +12,13 @@ from cg.apps.demultiplex.sample_sheet.index import (
 from cg.apps.demultiplex.sample_sheet.validators import SampleId
 from cg.constants.demultiplexing import CUSTOM_INDEX_TAIL, SampleSheetBCLConvertSections
 from cg.constants.symbols import EMPTY_STRING
-from cg.exc import SampleSheetError
 from cg.models.demultiplex.run_parameters import RunParameters
 
 LOG = logging.getLogger(__name__)
 
 
-class FlowCellSample(BaseModel):
-    """Class that represents a flow cell sample."""
+class IlluminaSampleIndexSetting(BaseModel):
+    """Class that represents index settings for a sample on an Illumina run."""
 
     lane: int = Field(..., alias=SampleSheetBCLConvertSections.Data.LANE)
     sample_id: SampleId = Field(..., alias=SampleSheetBCLConvertSections.Data.SAMPLE_INTERNAL_ID)
@@ -81,7 +80,9 @@ class FlowCellSample(BaseModel):
         )
         self.override_cycles = read1_cycles + index1_cycles + index2_cycles + read2_cycles
 
-    def _update_barcode_mismatches_1(self, samples_to_compare: list["FlowCellSample"]) -> None:
+    def _update_barcode_mismatches_1(
+        self, samples_to_compare: list["IlluminaSampleIndexSetting"]
+    ) -> None:
         """Assign zero to barcode_mismatches_1 if the hamming distance between self.index
         and the index1 of any sample in the lane is below the minimum threshold."""
         for sample in samples_to_compare:
@@ -97,7 +98,7 @@ class FlowCellSample(BaseModel):
 
     def _update_barcode_mismatches_2(
         self,
-        samples_to_compare: list["FlowCellSample"],
+        samples_to_compare: list["IlluminaSampleIndexSetting"],
         is_reverse_complement: bool,
     ) -> None:
         """Assign zero to barcode_mismatches_2 if the hamming distance between self.index2
@@ -131,13 +132,11 @@ class FlowCellSample(BaseModel):
 
     def update_barcode_mismatches(
         self,
-        samples_to_compare: list["FlowCellSample"],
+        samples_to_compare: list["IlluminaSampleIndexSetting"],
         is_run_single_index: bool,
         is_reverse_complement: bool,
     ) -> None:
         """Update barcode mismatch attributes comparing to the rest of the samples in the lane."""
-        if not samples_to_compare:
-            raise SampleSheetError("No samples to compare with to update barcode mismatch values")
         self._update_barcode_mismatches_1(samples_to_compare=samples_to_compare)
         if is_run_single_index:
             LOG.debug("Run is single-indexed, skipping barcode mismatch update for index 2")

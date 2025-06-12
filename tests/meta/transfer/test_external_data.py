@@ -174,7 +174,7 @@ def test_get_fastq_paths_to_add(
     ExternalDataAPI._get_destination_path.return_value = fastq_dir
 
     # GIVEN a sample id
-    sample_id: str = "fastq"
+    sample_id: str = "EXT01"
 
     # WHEN getting the fastq paths to add
     fastq_paths: list[Path] = external_data_api._get_fastq_paths_to_add(sample_id=sample_id)
@@ -254,8 +254,8 @@ def test_add_transfer_to_housekeeper(
         sample.internal_id for sample in samples[:-1]
     ]
 
-    mocker.patch.object(Store, "set_case_action")
-    Store.set_case_action.return_value = None
+    mocker.patch.object(Store, "update_case_action")
+    Store.update_case_action.return_value = None
 
     # THEN none of the samples should exist in housekeeper
     assert all(

@@ -1,7 +1,7 @@
 import logging
 from typing import Callable, Type
 
-import click
+import rich_click as click
 from housekeeper.store.models import Archive, File
 from pydantic import BaseModel, ConfigDict
 
@@ -83,36 +83,6 @@ class SpringArchiveAPI:
             archive_task_id=job_id,
         )
 
-    def retrieve_spring_files_for_case(self, case_id: str) -> None:
-        """Submits jobs to retrieve any archived files belonging to the given case, and updates the Archive entries
-        with the retrieval job id."""
-        case: Case = self.status_db.get_case_by_internal_id(case_id)
-        files_to_retrieve: list[File] = self.get_files_to_retrieve(case)
-        if not files_to_retrieve:
-            raise MissingFilesError(f"No files to retrieve for case {case_id}")
-        self.retrieve_files_from_archive_location(
-            files_and_samples=self.add_samples_to_files(files=files_to_retrieve),
-            archive_location=case.customer.data_archive_location,
-        )
-
-    def get_files_to_retrieve(self, case: Case) -> list[File]:
-        return [
-            file
-            for file in self.get_archived_spring_files_for_case(case)
-            if file.archive.retrieval_task_id is None
-        ]
-
-    def get_archived_spring_files_for_case(self, case: Case) -> list[File]:
-        """Returns a list of archived Spring files, i.e. they have entries in the Archive table
-        in Housekeeper."""
-        archived_files: list[File] = []
-        for link in case.links:
-            archived_files += self.housekeeper_api.get_archived_files_for_bundle(
-                bundle_name=link.sample.internal_id,
-                tags=[SequencingFileTag.SPRING],
-            )
-        return archived_files
-
     def retrieve_files_from_archive_location(
         self, files_and_samples: list[FileAndSample], archive_location: str
     ) -> None:
@@ -125,15 +95,11 @@ class SpringArchiveAPI:
             files=[file_and_sample.file for file_and_sample in files_and_samples],
         )
 
-    def get_archived_files_from_samples(self, samples: list[Sample]) -> list[File]:
+    def get_archived_files_from_sample(self, sample: Sample) -> list[File]:
         """Gets archived spring files from the bundles corresponding to the given list of samples."""
-        files: list[File] = []
-        for sample in samples:
-            files.extend(
-                self.housekeeper_api.get_archived_files_for_bundle(
-                    bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING]
-                )
-            )
+        files: list[File] = self.housekeeper_api.get_archived_files_for_bundle(
+            bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING]
+        )
         return files
 
     def set_archive_retrieval_task_ids(self, retrieval_task_id: int, files: list[File]) -> None:
@@ -344,9 +310,27 @@ class SpringArchiveAPI:
                 LOG.info(error)
                 continue
 
+    def retrieve_spring_files_for_case(self, case_id: str) -> None:
+        """Submits jobs to retrieve any archived files belonging to the given case, and updates the Archive entries
+        with the retrieval job id."""
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        for sample in case.samples:
+            try:
+                self._retrieve_spring_files_for_sample(sample)
+            except MissingFilesError as error:
+                LOG.warning(str(error))
+                continue
+
     def retrieve_spring_files_for_sample(self, sample_id: str) -> None:
         sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
-        files_to_retrieve: list[File] = self.get_archived_files_from_samples([sample])
+        self._retrieve_spring_files_for_sample(sample)
+
+    def _retrieve_spring_files_for_sample(self, sample: Sample) -> None:
+        files_to_retrieve: list[File] = self.get_archived_files_from_sample(sample)
+        if not files_to_retrieve:
+            raise MissingFilesError(
+                f"No archived Spring files found for sample {sample.internal_id}."
+            )
         files_and_samples: list[FileAndSample] = self.add_samples_to_files(files_to_retrieve)
         self.retrieve_files_from_archive_location(
             files_and_samples=files_and_samples, archive_location=sample.archive_location

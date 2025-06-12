@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 from pydantic.v1 import ValidationError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -18,8 +18,9 @@ from cg.cli.workflow.balsamic.options import (
     OPTION_QOS,
 )
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
+from cg.cli.workflow.utils import validate_force_store_option
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.cli_options import DRY_RUN, FORCE
+from cg.constants.cli_options import COMMENT, DRY_RUN, FORCE, LIMIT
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -115,11 +116,7 @@ def run(
         )
         if dry_run:
             return
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-        analysis_api.set_statusdb_action(case_id=case_id, action="running")
-    except CgError as error:
-        LOG.error(f"Could not run analysis: {error}")
-        raise click.Abort()
+        analysis_api.on_analysis_started(case_id)
     except Exception as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort()
@@ -135,7 +132,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool, force: bool):
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     try:
         analysis_api.status_db.verify_case_exists(case_id)
-        analysis_api.verify_case_config_file_exists(case_id=case_id)
+        analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.trailblazer_api.verify_latest_analysis_is_completed(
             case_id=case_id, force=force
         )
@@ -150,9 +147,13 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool, force: bool):
 
 @balsamic.command("store-housekeeper")
 @ARGUMENT_CASE_ID
+@COMMENT
+@DRY_RUN
 @FORCE
 @click.pass_obj
-def store_housekeeper(context: CGConfig, case_id: str, force: bool):
+def store_housekeeper(
+    context: CGConfig, case_id: str, comment: str | None, dry_run: bool, force: bool
+):
     """Store a finished analysis in Housekeeper and StatusDB."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
@@ -161,11 +162,13 @@ def store_housekeeper(context: CGConfig, case_id: str, force: bool):
 
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.verify_case_config_file_exists(case_id=case_id)
+        analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
-        analysis_api.upload_bundle_housekeeper(case_id=case_id, force=force)
-        analysis_api.upload_bundle_statusdb(case_id=case_id)
-        analysis_api.set_statusdb_action(case_id=case_id, action=None)
+        analysis_api.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
+        analysis_api.update_analysis_as_completed_statusdb(
+            case_id=case_id, comment=comment, dry_run=dry_run, force=force
+        )
+        analysis_api.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
     except ValidationError as error:
         LOG.warning("Deliverables file is malformed")
         raise error
@@ -231,14 +234,15 @@ def start(
 
 @balsamic.command("start-available")
 @DRY_RUN
+@LIMIT
 @click.pass_context
-def start_available(context: click.Context, dry_run: bool = False):
+def start_available(context: click.Context, dry_run: bool = False, limit: int | None = None):
     """Start full workflow for all cases ready for analysis"""
 
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case in analysis_api.get_cases_ready_for_analysis():
+    for case in analysis_api.get_cases_ready_for_analysis(limit=limit):
         try:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
@@ -255,14 +259,16 @@ def start_available(context: click.Context, dry_run: bool = False):
 
 @balsamic.command("store")
 @ARGUMENT_CASE_ID
+@COMMENT
 @DRY_RUN
 @FORCE
 @click.pass_context
-def store(context: click.Context, case_id: str, dry_run: bool, force: bool):
+def store(context: click.Context, case_id: str, comment: str | None, dry_run: bool, force: bool):
     """Generate Housekeeper report for CASE ID and store in Housekeeper"""
     LOG.info(f"Storing analysis for {case_id}")
+    validate_force_store_option(force=force, comment=comment)
     context.invoke(report_deliver, case_id=case_id, dry_run=dry_run, force=force)
-    context.invoke(store_housekeeper, case_id=case_id, force=force)
+    context.invoke(store_housekeeper, case_id=case_id, comment=comment, force=force)
 
 
 @balsamic.command("store-available")

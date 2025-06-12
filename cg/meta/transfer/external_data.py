@@ -8,10 +8,10 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import HK_FASTQ_TAGS, FileExtensions
 from cg.constants.constants import CaseActions
 from cg.meta.meta import MetaAPI
-from cg.meta.rsync.sbatch import ERROR_RSYNC_FUNCTION, RSYNC_CONTENTS_COMMAND
 from cg.meta.transfer.utils import are_all_fastq_valid
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
+from cg.services.deliver_files.rsync.sbatch import ERROR_RSYNC_FUNCTION, RSYNC_CONTENTS_COMMAND
 from cg.store.models import Case, Customer, Sample
 from cg.utils.files import get_files_matching_pattern
 
@@ -141,7 +141,9 @@ class ExternalDataAPI(MetaAPI):
         LOG.debug(f"Checking fastq files in {sample_folder}")
         file_paths: list[Path] = [
             sample_folder.joinpath(path)
-            for path in get_files_matching_pattern(directory=sample_folder, pattern="*.fastq.gz")
+            for path in get_files_matching_pattern(
+                directory=sample_folder, pattern=f"*{FileExtensions.FASTQ_GZ}"
+            )
         ]
         LOG.debug(f"Found {len(file_paths)} fastq files for sample {sample_id}")
         hk_version: Version = self.housekeeper_api.get_or_create_version(bundle_name=sample_id)
@@ -176,7 +178,7 @@ class ExternalDataAPI(MetaAPI):
             LOG.info("No cases to start")
             return
         for case in cases:
-            self.status_db.set_case_action(
+            self.status_db.update_case_action(
                 case_internal_id=case.internal_id, action=CaseActions.ANALYZE
             )
             LOG.info(f"Case {case.internal_id} has been set to '{CaseActions.ANALYZE}'")

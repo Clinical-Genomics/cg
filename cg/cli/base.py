@@ -4,7 +4,7 @@ import logging
 import sys
 from pathlib import Path
 
-import click
+import rich_click as click
 import coloredlogs
 from sqlalchemy.orm import scoped_session
 
@@ -20,12 +20,13 @@ from cg.cli.demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
 from cg.cli.downsample import downsample
 from cg.cli.generate.base import generate as generate_cmd
 from cg.cli.get import get
+from cg.cli.post_process.post_process import post_process_group as post_processing
+from cg.cli.sequencing_qc.sequencing_qc import sequencing_qc
 from cg.cli.set.base import set_cmd
 from cg.cli.store.base import store as store_cmd
 from cg.cli.transfer import transfer_group
 from cg.cli.upload.base import upload
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.cli.validate import validate
 from cg.cli.workflow.base import workflow as workflow_cmd
 from cg.constants.cli_options import FORCE
 from cg.constants.constants import FileFormat
@@ -101,6 +102,38 @@ def init(context: CGConfig, reset: bool, force: bool):
     LOG.info(f"Success! New tables: {', '.join(get_tables())}")
 
 
+def find_commands(group, query: str) -> list[str]:
+    """Recursively find commands in a group that match the query.
+    Args:
+        query the command or pattern you want to look for. Does not support fuzzy searches.
+    """
+    commands: list[str] = []
+    for cmd_name, cmd in group.commands.items():
+        if query.lower() in cmd_name.lower():
+            commands.append(cmd_name)
+        if isinstance(cmd, click.Group):
+            sub_commands = find_commands(cmd, query)
+            commands.extend(f"{cmd_name} {sub_cmd}" for sub_cmd in sub_commands)
+    return commands
+
+
+@base.command()
+@click.argument(
+    "query",
+    required=False,
+    default="",
+)
+def search(query):
+    """Search for available commands."""
+    commands: list[str] = find_commands(base, query)
+    if commands:
+        click.echo("Matching commands:")
+        for cmd in commands:
+            click.echo(f"  {cmd}")
+    else:
+        click.echo("No matching commands found.")
+
+
 base.add_command(add_cmd)
 base.add_command(archive)
 base.add_command(backup)
@@ -118,4 +151,5 @@ base.add_command(deliver_cmd)
 base.add_command(demultiplex_cmd)
 base.add_command(generate_cmd)
 base.add_command(downsample)
-base.add_command(validate)
+base.add_command(post_processing)
+base.add_command(sequencing_qc)

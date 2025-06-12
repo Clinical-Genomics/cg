@@ -7,13 +7,14 @@ from pathlib import Path
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Workflow
-from cg.constants.constants import CaseActions, FileFormat, PrepCategory
+from cg.constants import SequencingFileTag, Workflow
+from cg.constants.constants import CaseActions, FileFormat
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.io.controller import WriteFile
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store.models import Sample
 from cg.store.store import Store
-from cg.store.models import ApplicationVersion, Sample
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
@@ -195,7 +196,8 @@ def balsamic_housekeeper(housekeeper_api, helpers, balsamic_mock_fastq_files: li
             "created": dt.datetime.now(),
             "version": "1.0",
             "files": [
-                {"path": f, "tags": ["fastq"], "archive": False} for f in balsamic_mock_fastq_files
+                {"path": f, "tags": [SequencingFileTag.FASTQ], "archive": False}
+                for f in balsamic_mock_fastq_files
             ],
         }
         helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
@@ -308,7 +310,7 @@ def balsamic_context(
     helpers.ensure_application_version(
         store=status_db,
         application_tag="TGSA",
-        prep_category=PrepCategory.TARGETED_GENOME_SEQUENCING,
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         target_reads=10,
     )
 
@@ -316,7 +318,7 @@ def balsamic_context(
     helpers.ensure_application_version(
         store=status_db,
         application_tag="WESA",
-        prep_category=PrepCategory.WHOLE_EXOME_SEQUENCING,
+        prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
         target_reads=10,
     )
 
@@ -324,7 +326,7 @@ def balsamic_context(
     helpers.ensure_application_version(
         store=status_db,
         application_tag="WGSA",
-        prep_category=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         target_reads=10,
     )
 
@@ -336,7 +338,7 @@ def balsamic_context(
         target_reads=10,
     )
 
-    # Create textbook case for WGS PAIRED with enough reads
+    # Create textbook case for WHOLE_GENOME_SEQUENCING PAIRED with enough reads
     case_wgs_paired_enough_reads = helpers.add_case(
         store=status_db,
         internal_id="balsamic_case_wgs_paired_enough_reads",
@@ -346,7 +348,7 @@ def balsamic_context(
     )
     sample_case_wgs_paired_tumor_enough_reads = helpers.add_sample(
         status_db,
-        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=True,
         internal_id="sample_case_wgs_paired_tumor_enough_reads",
         reads=10,
@@ -354,7 +356,7 @@ def balsamic_context(
     )
     sample_case_wgs_paired_normal_enough_reads = helpers.add_sample(
         status_db,
-        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=False,
         internal_id="sample_case_wgs_paired_normal_enough_reads",
         reads=10,
@@ -371,7 +373,7 @@ def balsamic_context(
         sample=sample_case_wgs_paired_normal_enough_reads,
     )
 
-    # Create textbook case for WGS PAIRED
+    # Create textbook case for WHOLE_GENOME_SEQUENCING PAIRED
     case_wgs_paired = helpers.add_case(
         store=status_db,
         internal_id="balsamic_case_wgs_paired",
@@ -381,7 +383,7 @@ def balsamic_context(
     )
     sample_case_wgs_paired_tumor = helpers.add_sample(
         status_db,
-        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=True,
         internal_id="sample_case_wgs_paired_tumor",
         reads=10,
@@ -389,7 +391,7 @@ def balsamic_context(
     )
     sample_case_wgs_paired_normal = helpers.add_sample(
         status_db,
-        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=False,
         internal_id="sample_case_wgs_paired_normal",
         reads=10,
@@ -398,7 +400,7 @@ def balsamic_context(
     helpers.add_relationship(status_db, case=case_wgs_paired, sample=sample_case_wgs_paired_tumor)
     helpers.add_relationship(status_db, case=case_wgs_paired, sample=sample_case_wgs_paired_normal)
 
-    # Create textbook case for TGS PAIRED without enough reads
+    # Create textbook case for TARGETED_GENOME_SEQUENCING PAIRED without enough reads
     case_tgs_paired = helpers.add_case(
         status_db,
         internal_id="balsamic_case_tgs_paired",
@@ -408,7 +410,7 @@ def balsamic_context(
     sample_case_tgs_paired_tumor = helpers.add_sample(
         status_db,
         application_tag="TGSA",
-        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=True,
         internal_id="sample_case_tgs_paired_tumor",
         reads=10,
@@ -417,7 +419,7 @@ def balsamic_context(
     sample_case_tgs_paired_normal = helpers.add_sample(
         status_db,
         application_tag="TGSA",
-        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=False,
         internal_id="sample_case_tgs_paired_normal",
         reads=0,
@@ -426,7 +428,7 @@ def balsamic_context(
     helpers.add_relationship(status_db, case=case_tgs_paired, sample=sample_case_tgs_paired_tumor)
     helpers.add_relationship(status_db, case=case_tgs_paired, sample=sample_case_tgs_paired_normal)
 
-    # Create textbook case for WGS TUMOR ONLY
+    # Create textbook case for WHOLE_GENOME_SEQUENCING TUMOR ONLY
     case_wgs_single = helpers.add_case(
         status_db,
         internal_id="balsamic_case_wgs_single",
@@ -435,7 +437,7 @@ def balsamic_context(
     )
     sample_case_wgs_single_tumor = helpers.add_sample(
         status_db,
-        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=True,
         internal_id="sample_case_wgs_single_tumor",
         reads=100,
@@ -443,7 +445,7 @@ def balsamic_context(
     )
     helpers.add_relationship(status_db, case=case_wgs_single, sample=sample_case_wgs_single_tumor)
 
-    # Create textbook case for TGS TUMOR ONLY
+    # Create textbook case for TARGETED_GENOME_SEQUENCING TUMOR ONLY
     case_tgs_single = helpers.add_case(
         status_db,
         internal_id="balsamic_case_tgs_single",
@@ -453,14 +455,14 @@ def balsamic_context(
     sample_case_tgs_single_tumor = helpers.add_sample(
         status_db,
         application_tag="TGSA",
-        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=True,
         internal_id="sample_case_tgs_single_tumor",
         last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(status_db, case=case_tgs_single, sample=sample_case_tgs_single_tumor)
 
-    # Create ERROR case for TGS NORMAL ONLY
+    # Create ERROR case for TARGETED_GENOME_SEQUENCING NORMAL ONLY
     case_tgs_single_error = helpers.add_case(
         status_db,
         internal_id="balsamic_case_tgs_single_error",
@@ -470,7 +472,7 @@ def balsamic_context(
     sample_case_tgs_single_normal_error = helpers.add_sample(
         status_db,
         application_tag="TGSA",
-        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=False,
         internal_id="sample_case_tgs_single_normal_error",
         reads=0,
@@ -482,7 +484,7 @@ def balsamic_context(
         sample=sample_case_tgs_single_normal_error,
     )
 
-    # Create ERROR case for TGS TWO TUMOR ONE NORMAL
+    # Create ERROR case for TARGETED_GENOME_SEQUENCING TWO TUMOR ONE NORMAL
     case_tgs_paired_error = helpers.add_case(
         status_db,
         internal_id="balsamic_case_tgs_paired_error",
@@ -492,7 +494,7 @@ def balsamic_context(
     sample_case_tgs_paired_tumor_error = helpers.add_sample(
         status_db,
         application_tag="TGSA",
-        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=True,
         reads=0,
         internal_id="sample_case_tgs_paired_tumor_error",
@@ -501,7 +503,7 @@ def balsamic_context(
     sample_case_tgs_paired_tumor2_error = helpers.add_sample(
         status_db,
         application_tag="TGSA",
-        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=True,
         reads=0,
         internal_id="sample_case_tgs_paired_tumor2_error",
@@ -510,7 +512,7 @@ def balsamic_context(
     sample_case_tgs_paired_normal_error = helpers.add_sample(
         status_db,
         application_tag="TGSA",
-        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=False,
         reads=0,
         internal_id="sample_case_tgs_paired_normal_error",
@@ -541,7 +543,7 @@ def balsamic_context(
     )
     mixed_sample_case_wgs_paired_tumor_error = helpers.add_sample(
         status_db,
-        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=True,
         reads=0,
         internal_id="mixed_sample_case_wgs_paired_tumor_error",
@@ -550,7 +552,7 @@ def balsamic_context(
     mixed_sample_case_tgs_paired_normal_error = helpers.add_sample(
         status_db,
         application_tag="TGSA",
-        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=False,
         reads=0,
         internal_id="mixed_sample_case_tgs_paired_normal_error",
@@ -576,7 +578,7 @@ def balsamic_context(
     )
     mixed_sample_case_wgs_mic_paired_tumor_error = helpers.add_sample(
         status_db,
-        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=True,
         internal_id="mixed_sample_case_wgs_mic_paired_tumor_error",
         reads=0,
@@ -612,7 +614,7 @@ def balsamic_context(
     mixed_sample_case_mixed_bed_paired_tumor_error = helpers.add_sample(
         status_db,
         application_tag="TGSA",
-        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=True,
         internal_id="mixed_sample_case_mixed_bed_paired_tumor_error",
         last_sequenced_at=dt.datetime.now(),
@@ -620,7 +622,7 @@ def balsamic_context(
     mixed_sample_case_mixed_bed_paired_normal_error = helpers.add_sample(
         status_db,
         application_tag="TGSA",
-        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         is_tumour=False,
         internal_id="mixed_sample_case_mixed_bed_paired_normal_error",
         reads=0,
@@ -637,7 +639,7 @@ def balsamic_context(
         sample=mixed_sample_case_mixed_bed_paired_normal_error,
     )
 
-    # Create ERROR case for WGS TUMOR ONLY MIP CLI_OPTION_ANALYSIS ONLY
+    # Create ERROR case for WHOLE_GENOME_SEQUENCING TUMOR ONLY MIP CLI_OPTION_ANALYSIS ONLY
     mip_case_wgs_single = helpers.add_case(
         status_db,
         internal_id="mip_case_wgs_single",
@@ -646,7 +648,7 @@ def balsamic_context(
     )
     mip_sample_case_wgs_single_tumor = helpers.add_sample(
         status_db,
-        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=True,
         internal_id="mip_sample_case_wgs_single_tumor",
         last_sequenced_at=dt.datetime.now(),
@@ -657,7 +659,7 @@ def balsamic_context(
         sample=mip_sample_case_wgs_single_tumor,
     )
 
-    # Create ERROR case for WGS ONE TUMOR TWO NORMAL
+    # Create ERROR case for WHOLE_GENOME_SEQUENCING ONE TUMOR TWO NORMAL
     case_wgs_paired_two_normal_error = helpers.add_case(
         status_db,
         internal_id="balsamic_case_wgs_paired_two_normal_error",
@@ -667,7 +669,7 @@ def balsamic_context(
     sample_case_wgs_paired_two_normal_tumor_error = helpers.add_sample(
         status_db,
         application_tag="WGSA",
-        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=True,
         internal_id="sample_case_wgs_paired_two_normal_tumor_error",
         reads=0,
@@ -676,7 +678,7 @@ def balsamic_context(
     sample_case_wgs_paired_two_normal_normal1_error = helpers.add_sample(
         status_db,
         application_tag="WGSA",
-        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=False,
         internal_id="sample_case_wgs_paired_two_normal_normal1_error",
         reads=0,
@@ -685,7 +687,7 @@ def balsamic_context(
     sample_case_wgs_paired_two_normal_normal2_error = helpers.add_sample(
         status_db,
         application_tag="WGSA",
-        application_type=PrepCategory.WHOLE_GENOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         is_tumour=False,
         internal_id="sample_case_wgs_paired_two_normal_normal2_error",
         reads=0,
@@ -707,7 +709,7 @@ def balsamic_context(
         sample=sample_case_wgs_paired_two_normal_normal2_error,
     )
 
-    # Create WES case with 1 tumor sample
+    # Create WHOLE_EXOME_SEQUENCING case with 1 tumor sample
     case_wes_tumor = helpers.add_case(
         status_db,
         internal_id="balsamic_case_wes_tumor",
@@ -717,14 +719,14 @@ def balsamic_context(
     sample_case_wes_tumor = helpers.add_sample(
         status_db,
         application_tag="WESA",
-        application_type=PrepCategory.WHOLE_EXOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
         is_tumour=True,
         internal_id="sample_case_wes_tumor",
         last_sequenced_at=dt.datetime.now(),
     )
     helpers.add_relationship(status_db, case=case_wes_tumor, sample=sample_case_wes_tumor)
 
-    # Create ERROR case for WES when no panel is found
+    # Create ERROR case for WHOLE_EXOME_SEQUENCING when no panel is found
     case_wes_panel_error = helpers.add_case(
         status_db,
         internal_id="balsamic_case_wes_panel_error",
@@ -734,7 +736,7 @@ def balsamic_context(
     sample_case_wes_panel_error = helpers.add_sample(
         status_db,
         application_tag="WESA",
-        application_type=PrepCategory.WHOLE_EXOME_SEQUENCING,
+        application_type=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
         is_tumour=True,
         internal_id="sample_case_wes_panel_error",
         reads=0,
@@ -893,3 +895,8 @@ def mock_analysis_finish(balsamic_dir: Path, balsamic_case_id: str) -> None:
     """Create analysis_finish file for testing"""
     Path.mkdir(Path(balsamic_dir, balsamic_case_id, "analysis"), parents=True, exist_ok=True)
     Path(balsamic_dir, balsamic_case_id, "analysis", "analysis_finish").touch(exist_ok=True)
+
+
+@pytest.fixture
+def balsamic_analysis_api(balsamic_context: CGConfig) -> BalsamicAnalysisAPI:
+    return BalsamicAnalysisAPI(config=balsamic_context)

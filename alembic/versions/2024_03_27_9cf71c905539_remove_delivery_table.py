@@ -18,12 +18,10 @@ depends_on = None
 
 
 def upgrade():
-
     op.drop_table(table_name="delivery")
 
 
 def downgrade():
-
     op.create_table(
         "delivery",
         sa.Column("id", sa.Integer, nullable=False, primary_key=True),

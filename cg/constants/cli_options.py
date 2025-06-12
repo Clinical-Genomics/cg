@@ -1,4 +1,4 @@
-import click
+import rich_click as click
 
 DRY_RUN = click.option(
     "--dry-run",
@@ -9,6 +9,7 @@ DRY_RUN = click.option(
 
 SKIP_CONFIRMATION = click.option(
     "-y",
+    "--skip-confirmation",
     "--yes",
     is_flag=True,
     default=False,
@@ -20,4 +21,17 @@ FORCE = click.option(
     "--force",
     is_flag=True,
     help="Override any warnings or confirmation prompts",
+)
+
+COMMENT = click.option(
+    "--comment",
+    type=str,
+    required=False,
+    help="A comment providing an explanation for the forced action",
+)
+
+LIMIT = click.option(
+    "--limit",
+    type=int,
+    help="Maximum number of cases to start",
 )

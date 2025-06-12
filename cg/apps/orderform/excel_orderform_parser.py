@@ -12,8 +12,8 @@ from cg.apps.orderform.utils import are_all_samples_metagenome
 from cg.constants import DataDelivery
 from cg.constants.orderforms import Orderform
 from cg.exc import OrderFormError
+from cg.models.orders.constants import OrderType
 from cg.models.orders.excel_sample import ExcelSample
-from cg.models.orders.order import OrderType
 
 LOG = logging.getLogger(__name__)
 
@@ -22,13 +22,16 @@ class ExcelOrderformParser(OrderformParser):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     NO_ANALYSIS: str = "no-analysis"
     NO_VALUE: str = "no_value"
-    SHEET_NAMES: list[str] = ["Orderform", "orderform", "order form"]
+    SHEET_NAMES: list[str] = ["Orderform", "orderform", "order form", "Order Form"]
     VALID_ORDERFORMS: list[str] = [
         f"{Orderform.MIP_DNA}:{Orderform.get_current_orderform_version(Orderform.MIP_DNA)}",  # Orderform MIP-DNA, Balsamic, sequencing only, MIP-RNA
-        f"{Orderform.MICROSALT}:{Orderform.get_current_orderform_version(Orderform.MICROSALT)}",  # Microbial WGS
+        f"{Orderform.MICROSALT}:{Orderform.get_current_orderform_version(Orderform.MICROSALT)}",  # Microbial WHOLE_GENOME_SEQUENCING
+        f"{Orderform.NALLO}:{Orderform.get_current_orderform_version(Orderform.NALLO)}",  # Nallo
         f"{Orderform.RML}:{Orderform.get_current_orderform_version(Orderform.RML)}",  # Orderform Ready made libraries (RML)
         f"{Orderform.METAGENOME}:{Orderform.get_current_orderform_version(Orderform.METAGENOME)}",  # Microbial meta genomes
         f"{Orderform.SARS_COV_2}:{Orderform.get_current_orderform_version(Orderform.SARS_COV_2)}",  # Orderform SARS-CoV-2
+        f"{Orderform.MICROBIAL_FASTQ}:{Orderform.get_current_orderform_version(Orderform.MICROBIAL_FASTQ)}",  # Microbial FASTQ
+        f"{Orderform.PACBIO_LONG_READ}:{Orderform.get_current_orderform_version(Orderform.PACBIO_LONG_READ)}",
     ]
     samples: list[ExcelSample] = []
 
@@ -143,6 +146,9 @@ class ExcelOrderformParser(OrderformParser):
         document_number_to_project_type = {
             Orderform.MICROSALT: OrderType.MICROSALT,
             Orderform.SARS_COV_2: OrderType.SARS_COV_2,
+            Orderform.MICROBIAL_FASTQ: OrderType.MICROBIAL_FASTQ,
+            Orderform.NALLO: OrderType.NALLO,
+            Orderform.PACBIO_LONG_READ: OrderType.PACBIO_LONG_READ,
         }
         for document_number, value in document_number_to_project_type.items():
             if document_number in document_title:
@@ -171,20 +177,10 @@ class ExcelOrderformParser(OrderformParser):
         return data_analyses.pop().lower().replace(" ", "-")
 
     def get_data_delivery(self) -> str:
-        """Determine the order_data delivery type"""
-
-        data_delivery: str = self.parse_data_delivery()
-
-        try:
-            return DataDelivery(data_delivery)
-        except ValueError as error:
-            raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}") from error
-
-    def parse_data_delivery(self) -> str:
+        "Get the data delivery type."
         data_deliveries: set[str] = {
             sample.data_delivery or self.NO_VALUE for sample in self.samples
         }
-
         if len(data_deliveries) > 1:
             raise OrderFormError(f"mixed 'Data Delivery' types: {', '.join(data_deliveries)}")
 
@@ -199,7 +195,7 @@ class ExcelOrderformParser(OrderformParser):
         return customers.pop()
 
     def parse_orderform(self, excel_path: str) -> None:
-        """Parse out information from an order form"""
+        """Parse out information from an order form."""
 
         LOG.info(f"Open excel workbook from file {excel_path}")
         workbook: Workbook = openpyxl.load_workbook(
@@ -229,5 +225,26 @@ class ExcelOrderformParser(OrderformParser):
 
     @staticmethod
     def _transform_data_delivery(data_delivery: str) -> str:
-        """Transforms the data-delivery parsed in the excel file, to the ones used in cg"""
-        return data_delivery.lower().replace(" + ", "-").replace(" ", "_")
+        """Transforms the data-delivery parsed in the excel file, to the ones used in cg."""
+        try:
+            orderform_to_internal: dict = {
+                "analysis": DataDelivery.ANALYSIS_FILES,
+                "analysis + scout": DataDelivery.ANALYSIS_SCOUT,
+                "bam": DataDelivery.BAM,
+                "fastq": DataDelivery.FASTQ,
+                "fastq + analysis": DataDelivery.FASTQ_ANALYSIS,
+                "fastq + analysis + scout": DataDelivery.FASTQ_ANALYSIS_SCOUT,
+                "fastq + Scout": DataDelivery.FASTQ_SCOUT,
+                "fastq qc": DataDelivery.FASTQ_QC,
+                "fastq qc + analysis": DataDelivery.FASTQ_QC_ANALYSIS,
+                "no delivery": DataDelivery.NO_DELIVERY,
+                "scout": DataDelivery.SCOUT,
+                "statina": DataDelivery.STATINA,
+                "fastq-analysis": DataDelivery.FASTQ_ANALYSIS,  # Sars Cov10 orderform does not have the same options as others
+                "raw_data + analysis": DataDelivery.RAW_DATA_ANALYSIS,
+                "raw_data + scout": DataDelivery.RAW_DATA_SCOUT,
+                "raw_data + analysis + scout": DataDelivery.RAW_DATA_ANALYSIS_SCOUT,
+            }
+            return orderform_to_internal[data_delivery]
+        except KeyError as error:
+            raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}") from error

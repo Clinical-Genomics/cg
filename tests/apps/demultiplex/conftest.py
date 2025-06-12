@@ -1,24 +1,36 @@
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.override_cycles_validator import OverrideCyclesValidator
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 
 
 @pytest.fixture
-def bcl_convert_samples_similar_index1() -> list[FlowCellSample]:
+def bcl_convert_samples_similar_index1() -> list[IlluminaSampleIndexSetting]:
     """Return a list of three FlowCellSampleBCLConvert with updated indexes."""
-    sample_1 = FlowCellSample(lane=1, sample_id="ACC123", index="CAGAAGAT", index2="GCGCAAGC")
-    sample_2 = FlowCellSample(lane=1, sample_id="ACC456", index="CAGAAGAG", index2="CAATGTAT")
-    sample_3 = FlowCellSample(lane=2, sample_id="ACC789", index="AAGCGATA", index2="AACCGCAA")
+    sample_1 = IlluminaSampleIndexSetting(
+        lane=1, sample_id="ACC123", index="CAGAAGAT", index2="GCGCAAGC"
+    )
+    sample_2 = IlluminaSampleIndexSetting(
+        lane=1, sample_id="ACC456", index="CAGAAGAG", index2="CAATGTAT"
+    )
+    sample_3 = IlluminaSampleIndexSetting(
+        lane=2, sample_id="ACC789", index="AAGCGATA", index2="AACCGCAA"
+    )
     return [sample_1, sample_2, sample_3]
 
 
 @pytest.fixture
-def bcl_convert_samples_similar_index2() -> list[FlowCellSample]:
+def bcl_convert_samples_similar_index2() -> list[IlluminaSampleIndexSetting]:
     """Return a list of three FlowCellSampleBCLConvert with updated indexes."""
-    sample_1 = FlowCellSample(lane=1, sample_id="ACC123", index="GCGCAAGC", index2="CAATGTAC")
-    sample_2 = FlowCellSample(lane=1, sample_id="ACC456", index="CAATGTAT", index2="CAATGTAT")
-    sample_3 = FlowCellSample(lane=2, sample_id="ACC789", index="AAGCGATA", index2="AACCGCAA")
+    sample_1 = IlluminaSampleIndexSetting(
+        lane=1, sample_id="ACC123", index="GCGCAAGC", index2="CAATGTAC"
+    )
+    sample_2 = IlluminaSampleIndexSetting(
+        lane=1, sample_id="ACC456", index="CAATGTAT", index2="CAATGTAT"
+    )
+    sample_3 = IlluminaSampleIndexSetting(
+        lane=2, sample_id="ACC789", index="AAGCGATA", index2="AACCGCAA"
+    )
     return [sample_1, sample_2, sample_3]
 
 
@@ -26,9 +38,9 @@ def bcl_convert_samples_similar_index2() -> list[FlowCellSample]:
 
 
 @pytest.fixture
-def novaseq6000_flow_cell_sample_1() -> FlowCellSample:
+def novaseq6000_flow_cell_sample_1() -> IlluminaSampleIndexSetting:
     """Return a NovaSeq sample."""
-    return FlowCellSample(
+    return IlluminaSampleIndexSetting(
         lane=1,
         sample_id="ACC7628A68",
         index="ATTCCACACT",
@@ -37,9 +49,9 @@ def novaseq6000_flow_cell_sample_1() -> FlowCellSample:
 
 
 @pytest.fixture
-def novaseq6000_flow_cell_sample_2() -> FlowCellSample:
+def novaseq6000_flow_cell_sample_2() -> IlluminaSampleIndexSetting:
     """Return a NovaSeq sample."""
-    return FlowCellSample(
+    return IlluminaSampleIndexSetting(
         lane=2,
         sample_id="ACC7628A1",
         index="ATTCCACACT",
@@ -48,9 +60,9 @@ def novaseq6000_flow_cell_sample_2() -> FlowCellSample:
 
 
 @pytest.fixture
-def novaseq6000_flow_cell_sample_no_dual_index() -> FlowCellSample:
+def novaseq6000_flow_cell_sample_no_dual_index() -> IlluminaSampleIndexSetting:
     """Return a NovaSeq sample without dual indexes."""
-    return FlowCellSample(
+    return IlluminaSampleIndexSetting(
         lane=2,
         sample_id="ACC7628A1",
         index="ATTCCACACT",
@@ -90,9 +102,9 @@ def raw_index_sequence(
 
 
 @pytest.fixture
-def bcl_convert_flow_cell_sample(raw_index_sequence: str) -> FlowCellSample:
+def bcl_convert_flow_cell_sample(raw_index_sequence: str) -> IlluminaSampleIndexSetting:
     """Return a BCL Convert sample."""
-    return FlowCellSample(lane=1, index=raw_index_sequence, sample_id="ACC123")
+    return IlluminaSampleIndexSetting(lane=1, index=raw_index_sequence, sample_id="ACC123")
 
 
 @pytest.fixture

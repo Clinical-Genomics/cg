@@ -8,13 +8,14 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.clients.chanjo2.client import Chanjo2APIClient
 from cg.meta.backup.backup import SpringBackupAPI
-from cg.meta.backup.pdc import PdcAPI
 from cg.meta.compress import CompressAPI
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.store import Store
 
 
@@ -22,9 +23,11 @@ class MetaAPI:
     """MetaAPI class initializing all App APIs used within CG in non-conflicting manner"""
 
     def __init__(self, config: CGConfig):
-        self.config = config
         self.chanjo_api: ChanjoAPI = config.chanjo_api
+        self.chanjo2_api: Chanjo2APIClient = config.chanjo2_api
+        self.config = config
         self.crunchy_api: CrunchyAPI = config.crunchy_api
+        self.delivery_api: DeliveryAPI = config.delivery_api
         self.genotype_api: GenotypeAPI = config.genotype_api
         self.hermes_api: HermesApi = config.hermes_api
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
@@ -42,11 +45,11 @@ class MetaAPI:
                         binary_path=config.dict()["encryption"]["binary_path"]
                     ),
                     hk_api=config.housekeeper_api,
-                    pdc_api=PdcAPI(config.dict()["pdc"]["binary_path"]),
+                    pdc_service=PdcService(config.dict()["pdc"]["binary_path"]),
                 ),
             ),
         )
+        self.scout_api_37: ScoutAPI = config.scout_api_37
+        self.scout_api_38: ScoutAPI = config.scout_api_38
         self.status_db: Store = config.status_db
-        self.scout_api: ScoutAPI = config.scout_api
         self.trailblazer_api: TrailblazerAPI = config.trailblazer_api
-        self.delivery_api: DeliveryAPI = config.delivery_api

@@ -2,6 +2,7 @@
 
 import shutil
 from pathlib import Path
+from typing import List
 
 import pytest
 
@@ -98,10 +99,10 @@ def tmp_illumina_sequencing_runs_directory(
 
 
 @pytest.fixture
-def tmp_demultiplexed_runs_flow_cell_directory(tmp_path: Path) -> Path:
+def tmp_illumina_demultiplexed_runs_directory(tmp_path: Path) -> Path:
     """Return the path to a demultiplexed flow cell run directory."""
     demultiplexed_runs = Path(tmp_path, "demultiplexed-runs")
-    demultiplexed_runs.mkdir()
+    demultiplexed_runs.mkdir(exist_ok=True)
     return demultiplexed_runs
 
 
@@ -124,7 +125,7 @@ def tmp_illumina_flow_cells_demux_all_directory(
     """
     Return the path to a temporary flow cells directory with flow cells ready for demultiplexing.
     Generates a copy of the original flow cells directory.
-    This fixture is used for testing of the cg demutliplex all cmd.
+    This fixture is used for testing of the cg demultiplex all cmd.
     """
     original_dir = illumina_demux_all_directory
     tmp_dir = Path(tmp_path, "sequencing_runs_demux_all")
@@ -307,6 +308,18 @@ def tmp_demultiplexed_flow_cell_no_fastq_files(
     )
 
 
+@pytest.fixture
+def tmp_demultiplexed_novaseq_6000_post_1_5_kits_path(
+    tmp_illumina_demultiplexed_flow_cells_directory: Path,
+    novaseq_6000_post_1_5_kits_flow_cell_full_name: str,
+) -> Path:
+    """Return the path to a demultiplexed flow cell directory without fastq files."""
+    return Path(
+        tmp_illumina_demultiplexed_flow_cells_directory,
+        novaseq_6000_post_1_5_kits_flow_cell_full_name,
+    )
+
+
 # Fixtures for test demultiplex flow cell
 @pytest.fixture
 def tmp_empty_demultiplexed_runs_directory(
@@ -484,6 +497,14 @@ def novaseq_x_run_parameters_path(novaseq_x_flow_cell_dir: Path) -> Path:
     return Path(novaseq_x_flow_cell_dir, DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE)
 
 
+@pytest.fixture
+def novaseq_x_run_parameters_name_node_path(run_parameters_dir: Path) -> Path:
+    return Path(
+        run_parameters_dir,
+        "RunParameters_novaseq_x_flow_cell_name_node.xml",
+    )
+
+
 @pytest.fixture(scope="module")
 def run_parameters_missing_versions_path(
     run_parameters_dir: Path,
@@ -545,6 +566,42 @@ def novaseq_x_correct_sample_sheet(novaseq_x_flow_cell_dir: Path) -> Path:
 
 
 @pytest.fixture
+def seven_canonical_flow_cell_sample_sheets(
+    hiseq_x_single_index_sample_sheet_path: Path,
+    hiseq_x_dual_index_sample_sheet_path: Path,
+    hiseq_2500_dual_index_sample_sheet_path: Path,
+    hiseq_2500_custom_index_sample_sheet_path: Path,
+    novaseq_6000_pre_1_5_kits_correct_sample_sheet_path: Path,
+    novaseq_6000_post_1_5_kits_correct_sample_sheet_path: Path,
+    novaseq_x_correct_sample_sheet: Path,
+) -> list[Path]:
+    """Return a dictionary with seven canonical flow cell sample sheets."""
+    return [
+        hiseq_x_single_index_sample_sheet_path,
+        hiseq_x_dual_index_sample_sheet_path,
+        hiseq_2500_dual_index_sample_sheet_path,
+        hiseq_2500_custom_index_sample_sheet_path,
+        novaseq_6000_pre_1_5_kits_correct_sample_sheet_path,
+        novaseq_6000_post_1_5_kits_correct_sample_sheet_path,
+        novaseq_x_correct_sample_sheet,
+    ]
+
+
+@pytest.fixture
+def canonical_flow_cell_ids_and_sample_sheet_paths(
+    seven_canonical_flow_cell_ids: list[str],
+    seven_canonical_flow_cell_sample_sheets: list[Path],
+) -> dict[str, Path]:
+    """Return a dictionary with canonical flow cell ids as keys and sample sheet paths as values."""
+    sample_sheet_paths: dict[str, Path] = {}
+    for flow_cell_id, sample_sheet_path in zip(
+        seven_canonical_flow_cell_ids, seven_canonical_flow_cell_sample_sheets
+    ):
+        sample_sheet_paths[flow_cell_id] = sample_sheet_path
+    return sample_sheet_paths
+
+
+@pytest.fixture
 def novaseq_6000_sample_sheet_with_reversed_cycles(sample_sheet_dir: Path) -> Path:
     """Return the path to a NovaSeq6000 sample sheet with reversed index2 cycles."""
     return Path(sample_sheet_dir, "novaseq_6000_sample_sheet_with_reversed_cycles.csv")
@@ -593,3 +650,147 @@ def spring_meta_data_file(spring_dir: Path) -> Path:
 def spring_file_father(spring_dir: Path) -> Path:
     """Return the path to a second existing spring file."""
     return Path(spring_dir, "dummy_run_002.spring")
+
+
+# temporary fastq paths for canonical illumina runs
+def make_tmp_fastq_paths(tmp_path, run_id, sample_ids: List[str]) -> dict[str, Path]:
+    fastq_paths: dict[str, Path] = {}
+    tmp_path_parent: Path = Path(tmp_path, run_id)
+    tmp_path_parent.mkdir(exist_ok=True)
+    for sample_id in sample_ids:
+        fastq_path = Path(tmp_path_parent, f"{sample_id}_S1_L001_R1_001.fastq.gz")
+        fastq_path.touch()
+        fastq_paths[sample_id] = fastq_path
+    return fastq_paths
+
+
+@pytest.fixture
+def tmp_hiseq_x_single_index_fastq_path(
+    tmp_illumina_demultiplexed_runs_directory: Path,
+    hiseq_x_single_index_flow_cell_name: str,
+    selected_hiseq_x_single_index_sample_ids: list[str],
+) -> dict[str, Path]:
+    """Return the paths to a temporary single-index HiSeqX FASTQ file."""
+    return make_tmp_fastq_paths(
+        tmp_illumina_demultiplexed_runs_directory,
+        hiseq_x_single_index_flow_cell_name,
+        selected_hiseq_x_single_index_sample_ids,
+    )
+
+
+@pytest.fixture
+def tmp_hiseq_x_dual_index_fastq_path(
+    tmp_illumina_demultiplexed_runs_directory: Path,
+    hiseq_x_dual_index_flow_cell_name: str,
+    selected_hiseq_x_dual_index_sample_ids: list[str],
+) -> dict[str, Path]:
+    """Return the path to a temporary dual-index HiSeqX FASTQ file."""
+    return make_tmp_fastq_paths(
+        tmp_illumina_demultiplexed_runs_directory,
+        hiseq_x_dual_index_flow_cell_name,
+        selected_hiseq_x_dual_index_sample_ids,
+    )
+
+
+@pytest.fixture
+def tmp_hiseq_2500_dual_index_fastq_path(
+    tmp_illumina_demultiplexed_runs_directory: Path,
+    hiseq_2500_dual_index_flow_cell_name: str,
+    selected_hiseq_2500_dual_index_sample_ids: list[str],
+) -> dict[str, Path]:
+    """Return the path to a temporary dual-index HiSeq2500 FASTQ file."""
+    return make_tmp_fastq_paths(
+        tmp_illumina_demultiplexed_runs_directory,
+        hiseq_2500_dual_index_flow_cell_name,
+        selected_hiseq_2500_dual_index_sample_ids,
+    )
+
+
+@pytest.fixture
+def tmp_hiseq_2500_custom_index_fastq_path(
+    tmp_illumina_demultiplexed_runs_directory: Path,
+    hiseq_2500_custom_index_flow_cell_name: str,
+    selected_hiseq_2500_custom_index_sample_ids: list[str],
+) -> dict[str, Path]:
+    """Return the path to a temporary custom-index HiSeq2500 FASTQ file."""
+    return make_tmp_fastq_paths(
+        tmp_illumina_demultiplexed_runs_directory,
+        hiseq_2500_custom_index_flow_cell_name,
+        selected_hiseq_2500_custom_index_sample_ids,
+    )
+
+
+@pytest.fixture
+def tmp_novaseq_6000_pre_1_5_kits_fastq_path(
+    tmp_illumina_demultiplexed_runs_directory: Path,
+    novaseq_6000_pre_1_5_kits_flow_cell_full_name: str,
+    selected_novaseq_6000_pre_1_5_kits_sample_ids: list[str],
+) -> dict[str, Path]:
+    """Return the path to a temporary NovaSeq6000 pre 1.5 kits FASTQ file."""
+    return make_tmp_fastq_paths(
+        tmp_illumina_demultiplexed_runs_directory,
+        novaseq_6000_pre_1_5_kits_flow_cell_full_name,
+        selected_novaseq_6000_pre_1_5_kits_sample_ids,
+    )
+
+
+@pytest.fixture
+def tmp_novaseq_6000_post_1_5_kits_fastq_path(
+    tmp_illumina_demultiplexed_runs_directory: Path,
+    novaseq_6000_post_1_5_kits_flow_cell_full_name: str,
+    selected_novaseq_6000_post_1_5_kits_sample_ids: list[str],
+) -> dict[str, Path]:
+    """Return the path to a temporary NovaSeq6000 post 1.5 kits FASTQ file."""
+    return make_tmp_fastq_paths(
+        tmp_illumina_demultiplexed_runs_directory,
+        novaseq_6000_post_1_5_kits_flow_cell_full_name,
+        selected_novaseq_6000_post_1_5_kits_sample_ids,
+    )
+
+
+@pytest.fixture
+def tmp_novaseq_x_fastq_path(
+    tmp_illumina_demultiplexed_runs_directory: Path,
+    novaseq_x_flow_cell_full_name: str,
+    selected_novaseq_x_sample_ids: list[str],
+) -> dict[str, Path]:
+    """Return the path to a temporary NovaSeqX FASTQ file."""
+    return make_tmp_fastq_paths(
+        tmp_illumina_demultiplexed_runs_directory,
+        novaseq_x_flow_cell_full_name,
+        selected_novaseq_x_sample_ids,
+    )
+
+
+@pytest.fixture
+def tmp_fastq_files_for_canonical_illumina_demultiplexed_runs(
+    tmp_hiseq_x_single_index_fastq_path: dict[str, Path],
+    tmp_hiseq_x_dual_index_fastq_path: dict[str, Path],
+    tmp_hiseq_2500_dual_index_fastq_path: dict[str, Path],
+    tmp_hiseq_2500_custom_index_fastq_path: dict[str, Path],
+    tmp_novaseq_6000_pre_1_5_kits_fastq_path: dict[str, Path],
+    tmp_novaseq_6000_post_1_5_kits_fastq_path: dict[str, Path],
+    tmp_novaseq_x_fastq_path: dict[str, Path],
+) -> list[dict[str, Path]]:
+    return [
+        tmp_hiseq_x_single_index_fastq_path,
+        tmp_hiseq_x_dual_index_fastq_path,
+        tmp_hiseq_2500_dual_index_fastq_path,
+        tmp_hiseq_2500_custom_index_fastq_path,
+        tmp_novaseq_6000_pre_1_5_kits_fastq_path,
+        tmp_novaseq_6000_post_1_5_kits_fastq_path,
+        tmp_novaseq_x_fastq_path,
+    ]
+
+
+@pytest.fixture
+def tmp_fastq_files_for_all_canonical_illumina_demultiplexed_runs(
+    seven_canonical_flow_cell_ids: list[str],
+    tmp_fastq_files_for_canonical_illumina_demultiplexed_runs: list[dict[str, Path]],
+) -> dict[str, dict[str, Path]]:
+    return {
+        flow_cell_id: fastq_paths
+        for flow_cell_id, fastq_paths in zip(
+            seven_canonical_flow_cell_ids, tmp_fastq_files_for_canonical_illumina_demultiplexed_runs
+        )
+    }

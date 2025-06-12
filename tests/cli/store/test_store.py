@@ -4,8 +4,8 @@ from click.testing import CliRunner
 
 from cg.cli.store.store import (
     store_case,
-    store_demultiplexed_flow_cell,
-    store_flow_cell,
+    store_demultiplexed_illumina_run,
+    store_illumina_run,
     store_sample,
     store_ticket,
 )
@@ -130,25 +130,25 @@ def test_store_flow_cell(
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with a sample
     sample: Sample = populated_compress_context.status_db.get_sample_by_internal_id(sample_id)
+    assert sample
 
     # GIVEN samples objects on a flow cell
-    mocker.patch.object(Store, "get_samples_from_flow_cell")
-    Store.get_samples_from_flow_cell.return_value = [sample]
+    with (
+        mocker.patch.object(Store, "get_samples_by_illumina_flow_cell", return_value=[sample]),
+        mocker.patch.object(CompressAPI, "add_decompressed_fastq", return_value=True),
+    ):
+        # WHEN running the store flow cell command
+        res = cli_runner.invoke(
+            store_illumina_run,
+            [novaseq_6000_pre_1_5_kits_flow_cell_id],
+            obj=populated_compress_context,
+        )
 
-    # GIVEN that decompression is not finished
-    mocker.patch.object(CompressAPI, "add_decompressed_fastq")
-    CompressAPI.add_decompressed_fastq.return_value = True
+        # THEN assert that the command exits successfully
+        assert res.exit_code == EXIT_SUCCESS
 
-    # WHEN running the store flow cell command
-    res = cli_runner.invoke(
-        store_flow_cell, [novaseq_6000_pre_1_5_kits_flow_cell_id], obj=populated_compress_context
-    )
-
-    # THEN assert that the command exits successfully
-    assert res.exit_code == EXIT_SUCCESS
-
-    # THEN assert that we log that we stored FASTQ files
-    assert f"Stored fastq files for {sample_id}" in caplog.text
+        # THEN assert that we log that we stored FASTQ files
+        assert f"Stored fastq files for {sample_id}" in caplog.text
 
 
 def test_store_ticket(
@@ -177,7 +177,7 @@ def test_store_ticket(
     assert f"Stored fastq files for {sample_id}" in caplog.text
 
 
-def test_store_store_demultiplexed_flow_cell(
+def test_store_demultiplexed_flow_cell(
     caplog,
     cli_runner: CliRunner,
     novaseq_6000_pre_1_5_kits_flow_cell_id: str,
@@ -192,15 +192,15 @@ def test_store_store_demultiplexed_flow_cell(
     sample: Sample = real_populated_compress_context.status_db.get_sample_by_internal_id(sample_id)
 
     # GIVEN samples objects on a flow cell
-    mocker.patch.object(Store, "get_samples_from_flow_cell")
-    Store.get_samples_from_flow_cell.return_value = [sample]
+    mocker.patch.object(Store, "get_samples_by_illumina_flow_cell")
+    Store.get_samples_by_illumina_flow_cell.return_value = [sample]
 
     # GIVEN an updated metadata file
     mocker.patch("cg.cli.store.store.update_metadata_paths", return_value=None)
 
     # WHEN running the store demultiplexed flow cell command
     res = cli_runner.invoke(
-        store_demultiplexed_flow_cell,
+        store_demultiplexed_illumina_run,
         [novaseq_6000_pre_1_5_kits_flow_cell_id],
         obj=real_populated_compress_context,
     )

@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Iterable
 
-import click
+import rich_click as click
 from housekeeper.store.models import File
 
 from cg.apps.crunchy.files import update_metadata_paths
@@ -69,15 +69,14 @@ def store_case(context: click.Context, case_id: str, dry_run: bool) -> None:
     LOG.info(f"Stored fastq files for {stored_individuals} samples")
 
 
-@click.command("flow-cell")
+@click.command("illumina-run")
 @click.argument("flow-cell-id", type=str)
 @DRY_RUN
 @click.pass_context
-def store_flow_cell(context: click.Context, flow_cell_id: str, dry_run: bool) -> None:
-    """Include links to decompressed FASTQ files belonging to this flow cell in Housekeeper."""
-
+def store_illumina_run(context: click.Context, flow_cell_id: str, dry_run: bool) -> None:
+    """Include links to decompressed FASTQ files belonging to this Illumina run to Housekeeper."""
     status_db: Store = context.obj.status_db
-    samples: list[Sample] = status_db.get_samples_from_flow_cell(flow_cell_id=flow_cell_id)
+    samples: list[Sample] = status_db.get_samples_by_illumina_flow_cell(flow_cell_id)
     stored_individuals: int = invoke_store_samples(
         context=context, dry_run=dry_run, sample_ids=[sample.internal_id for sample in samples]
     )
@@ -98,17 +97,21 @@ def store_ticket(context: click.Context, ticket: str, dry_run: bool) -> None:
     LOG.info(f"Stored fastq files for {stored_individuals} samples")
 
 
-@click.command("demultiplexed-flow-cell")
+@click.command("demultiplexed-run")
 @click.argument("flow-cell-id", type=str)
 @DRY_RUN
 @click.pass_obj
-def store_demultiplexed_flow_cell(context: click.Context, flow_cell_id: str, dry_run: bool) -> None:
-    """Include all files in a flow cell bundle and its corresponding sequencing files. Updates SPRING metadata file"""
+def store_demultiplexed_illumina_run(
+    context: click.Context, flow_cell_id: str, dry_run: bool
+) -> None:
+    """
+    Include all flow cell bundle and sequencing files to Housekeeper. Updates SPRING metadata file.
+    """
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     status_db: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run)
 
-    samples: list[Sample] = status_db.get_samples_from_flow_cell(flow_cell_id=flow_cell_id)
+    samples: list[Sample] = status_db.get_samples_by_illumina_flow_cell(flow_cell_id)
     bundle_names: list[str] = (
         [sample.internal_id for sample in samples if sample.internal_id] + [flow_cell_id]
         if samples

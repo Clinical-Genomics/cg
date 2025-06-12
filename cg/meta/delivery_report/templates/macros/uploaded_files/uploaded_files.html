@@ -1,0 +1,120 @@
+{% from "/macros/uploaded_files/balsamic_uploaded_files.html" import balsamic_scout_files %}
+{% from "/macros/uploaded_files/mip_dna_uploaded_files.html" import mip_dna_scout_files %}
+{% from "/macros/uploaded_files/nallo_uploaded_files.html" import nallo_scout_files %}
+{% from "/macros/uploaded_files/raredisease_uploaded_files.html" import raredisease_scout_files %}
+{% from "/macros/uploaded_files/rnafusion_uploaded_files.html" import rnafusion_scout_files %}
+
+{% macro uploaded_files(case, customer) %}
+{% set data_delivery = case.data_analysis.data_delivery %}
+  {% if "fastq" in data_delivery or "analysis" in data_delivery or "scout" in data_delivery %}
+    <div class="container mb-5">
+      <h3 class="mb-4">Uppladdade filer</h3>
+      <div class="alert alert-info" role="alert">
+        Ytterligare information om de specifika levererade filerna finns på:
+        <a href="https://clinical.scilifelab.se/data-delivery" class="alert-link">
+          https://clinical.scilifelab.se/data-delivery</a>.
+      </div>
+      <!-- Scout files -->
+      {{ scout_files(case=case, customer_id=customer.id, scout_access=customer.scout_access) }}
+      <!-- Caesar files -->
+      {{ caesar_files(case=case, customer_id=customer.id) }}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro scout_files(case, customer_id, scout_access) %}
+{% set workflow = case.data_analysis.workflow %}
+  {% if scout_access and "scout" in case.data_analysis.data_delivery %}
+    <h4 class="mt-4 mb-3">Scout</h4>
+    <div class="alert alert-info" role="alert">
+      Varianter finns uppladdade i Scout:
+      {% if "nallo" in workflow %}
+        <a href="https://scout38.sys.scilifelab.se/{{ customer_id }}/{{ case.name }}" class="alert-link">
+          https://scout38.sys.scilifelab.se/{{ customer_id }}/{{ case.name }}</a>.
+      {% else %}
+        <a href="https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}" class="alert-link">
+          https://scout.scilifelab.se/{{ customer_id }}/{{ case.name }}</a>.
+      {% endif %}
+    </div>
+    {% if "balsamic" in workflow %}
+      <!-- BALSAMIC Scout files -->
+      {{ balsamic_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
+    {% elif workflow == "mip-dna" %}
+      <!-- MIP-DNA Scout files -->
+      {{ mip_dna_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
+    {% elif workflow == "nallo" %}
+      <!-- Nallo Scout files -->
+      {{ nallo_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
+    {% elif workflow == "raredisease" %}
+      <!-- Raredisease Scout files -->
+      {{ raredisease_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
+    {% elif workflow == "rnafusion" %}
+      <!-- Rnafusion Scout files -->
+      {{ rnafusion_scout_files(scout_files=case.data_analysis.scout_files, case_id=case.id, case_name=case.name) }}
+    {% endif %}
+  {% endif %}
+{% endmacro %}
+
+{% macro caesar_files(case, customer_id) %}
+{% set data_delivery = case.data_analysis.data_delivery %}
+  {% if "fastq" in data_delivery or "analysis" in data_delivery %}
+    <h4 class="mt-4 mb-3">Leveransinkorg (Caesar)</h4>
+    <div class="alert alert-info" role="alert">
+      Filer som ska laddas upp till din inkorg:
+      <a class="alert-link">/home/{{ customer_id }}/inbox/{{ case.samples[0].ticket }}</a>.
+    </div>
+    <!-- Analysis files -->
+    {{ analysis_files(case=case) }}
+    <!-- Fastq files -->
+    {{ fastq_files(case=case) }}
+  {% endif %}
+{% endmacro %}
+
+{% macro analysis_files(case) %}
+  {% if "analysis" in case.data_analysis.data_delivery %}
+    <table class="table w-auto align-middle" aria-describedby="uploaded-analysis-files-table">
+      <thead class="table-secondary">
+        <tr>
+          <th scope="col" colspan="2">Analysfiler</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ delivered_files(row_title=case.name, files=case.data_analysis.delivered_files) }}
+        {% for sample in case.samples %}
+          {{ delivered_files(row_title=sample.name, files=sample.delivered_files) }}
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endmacro %}
+
+{% macro fastq_files(case) %}
+  {% if "fastq" in case.data_analysis.data_delivery %}
+    <table class="table w-auto align-middle" aria-describedby="uploaded-fastq-files-table">
+      <thead class="table-secondary">
+        <tr>
+          <th scope="col" colspan="2">Fastq-filer</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sample in case.samples %}
+          <!-- Delivered files -->
+          {{ delivered_files(row_title=sample.name, files=sample.delivered_fastq_files) }}
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endmacro %}
+
+{% macro delivered_files(row_title, files) %}
+  {% if files != "N/A" %}
+    <tr>
+      <th scope="row" rowspan="{{ files | length + 1}}">{{ row_title }}</th>
+    </tr>
+    {% for file in files %}
+      <tr>
+        <td>{{ file }}</td>
+      </tr>
+    {% endfor %}
+  {% endif %}
+{% endmacro %}

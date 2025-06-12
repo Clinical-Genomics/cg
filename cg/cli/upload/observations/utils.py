@@ -9,6 +9,7 @@ from cg.constants.observations import LOQUSDB_SUPPORTED_WORKFLOWS
 from cg.exc import CaseNotFoundError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.meta.observations.raredisease_observations_api import RarediseaseObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from cg.store.store import Store
@@ -37,11 +38,12 @@ def get_observations_verified_case(context: CGConfig, case_id: str | None, uploa
 
 def get_observations_api(
     context: CGConfig, case_id: str | None, upload: bool
-) -> MipDNAObservationsAPI | BalsamicObservationsAPI:
+) -> BalsamicObservationsAPI | MipDNAObservationsAPI | RarediseaseObservationsAPI:
     """Return an observations API given a specific case object."""
     case: Case = get_observations_verified_case(context=context, case_id=case_id, upload=upload)
     observations_apis = {
-        Workflow.MIP_DNA: MipDNAObservationsAPI(context),
         Workflow.BALSAMIC: BalsamicObservationsAPI(context),
+        Workflow.MIP_DNA: MipDNAObservationsAPI(context),
+        Workflow.RAREDISEASE: RarediseaseObservationsAPI(context),
     }
     return observations_apis[case.data_analysis]

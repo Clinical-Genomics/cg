@@ -3,9 +3,8 @@
 import logging
 from subprocess import CalledProcessError
 
-import click
+import rich_click as click
 
-from cg.cli.upload.clinical_delivery import upload_clinical_delivery
 from cg.cli.upload.scout import upload_rna_to_scout
 from cg.constants import DataDelivery
 from cg.meta.upload.upload_api import UploadAPI
@@ -25,11 +24,10 @@ class MipRNAUploadAPI(UploadAPI):
 
     def upload(self, ctx: click.Context, case: Case, restart: bool) -> None:
         """Uploads MIP-RNA analysis data and files."""
-        analysis: Analysis = case.analyses[0]
+        analysis: Analysis = self.status_db.get_latest_completed_analysis_for_case(case.internal_id)
         self.update_upload_started_at(analysis=analysis)
 
-        # Clinical delivery upload
-        ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
+        self.upload_files_to_customer_inbox(case=case)
 
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:

@@ -21,8 +21,8 @@ from tests.cli.workflow.balsamic.conftest import (
 
 
 def test_genotype_check_wgs_normal(balsamic_context: CGConfig):
-    """Test a cancer case with WGS and normal sample that is Genotype compatible."""
-    # GIVEN a balsamic case with WGS tag and a normal sample
+    """Test a cancer case with WHOLE_GENOME_SEQUENCING and normal sample that is Genotype compatible."""
+    # GIVEN a balsamic case with WHOLE_GENOME_SEQUENCING tag and a normal sample
     internal_id = "balsamic_case_wgs_paired_enough_reads"
     case: Case = balsamic_context.status_db.get_case_by_internal_id(internal_id=internal_id)
 
@@ -34,8 +34,8 @@ def test_genotype_check_wgs_normal(balsamic_context: CGConfig):
 
 
 def test_genotype_check_non_wgs_normal(balsamic_context: CGConfig):
-    """Test a cancer case with no WGS sample that is not Genotype compatible."""
-    # GIVEN a balsamic case with a normal sample, but no WGS tag
+    """Test a cancer case with no WHOLE_GENOME_SEQUENCING sample that is not Genotype compatible."""
+    # GIVEN a balsamic case with a normal sample, but no WHOLE_GENOME_SEQUENCING tag
     internal_id = "balsamic_case_tgs_paired"
     case: Case = balsamic_context.status_db.get_case_by_internal_id(internal_id=internal_id)
 

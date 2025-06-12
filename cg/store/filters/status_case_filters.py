@@ -6,7 +6,7 @@ from sqlalchemy import and_, not_, or_
 from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
-from cg.constants.constants import CaseActions, DataDelivery, Workflow
+from cg.constants.constants import CaseActions, DataDelivery, SequencingQCStatus, Workflow
 from cg.constants.observations import (
     LOQUSDB_CANCER_SEQUENCING_METHODS,
     LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
@@ -76,6 +76,11 @@ def filter_cases_by_name_search(cases: Query, name_search: str, **kwargs) -> Que
     return cases.filter(Case.name.contains(name_search))
 
 
+def filter_cases_by_workflows(cases: Query, workflows: list[Workflow], **kwargs) -> Query:
+    """Filter cases by data analysis types."""
+    return cases.filter(Case.data_analysis.in_(workflows))
+
+
 def filter_cases_by_workflow_search(cases: Query, workflow_search: str, **kwargs) -> Query:
     """Filter cases with a workflow search pattern."""
     return cases.filter(Case.data_analysis.contains(workflow_search))
@@ -86,11 +91,6 @@ def filter_cases_by_priority(cases: Query, priority: str, **kwargs) -> Query:
     return cases.filter(Case.priority == priority)
 
 
-def filter_cases_by_ticket_id(cases: Query, ticket_id: str, **kwargs) -> Query:
-    """Filter cases with matching ticket id."""
-    return cases.filter(Case.tickets.contains(ticket_id))
-
-
 def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
     """Filter cases in need of analysis by:
     1. Action set to analyze or
@@ -99,16 +99,21 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
     """
     return cases.filter(
         or_(
+            # Overriding state: Analyse no matter what
             Case.action == CaseActions.ANALYZE,
+            # Case has not been analysed before
             and_(
                 Application.is_external.isnot(True),
                 Case.action.is_(None),
                 Analysis.created_at.is_(None),
             ),
+            # Case contains new data that has not been analysed. (Only relevant for microSALT)
             and_(
                 Case.action.is_(None),
                 Analysis.created_at < Sample.last_sequenced_at,
             ),
+            # Cases manually set to top-up by production that get the new data
+            and_(Case.action == CaseActions.TOP_UP, Analysis.created_at < Sample.last_sequenced_at),
         )
     )
 
@@ -205,6 +210,16 @@ def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
     return cases.order_by(Case.created_at.desc())
 
 
+def filter_cases_pending_or_failed_sequencing_qc(cases: Query, **kwargs) -> Query:
+    """Filter cases with pending or failed sequencing QC."""
+    return cases.filter(
+        or_(
+            Case.aggregated_sequencing_qc == SequencingQCStatus.PENDING,
+            Case.aggregated_sequencing_qc == SequencingQCStatus.FAILED,
+        )
+    )
+
+
 def apply_case_filter(
     cases: Query,
     filter_functions: list[Callable],
@@ -222,6 +237,7 @@ def apply_case_filter(
     order_date: datetime | None = None,
     workflow: Workflow | None = None,
     workflow_search: str | None = None,
+    workflows: list[Workflow] | None = None,
     priority: str | None = None,
     ticket_id: str | None = None,
     order_id: int | None = None,
@@ -244,6 +260,7 @@ def apply_case_filter(
             order_date=order_date,
             workflow=workflow,
             workflow_search=workflow_search,
+            workflows=workflows,
             priority=priority,
             ticket_id=ticket_id,
             order_id=order_id,
@@ -264,9 +281,9 @@ class CaseFilter(Enum):
     BY_INTERNAL_ID_SEARCH: Callable = filter_cases_by_internal_id_search
     BY_NAME: Callable = filter_cases_by_name
     BY_NAME_SEARCH: Callable = filter_cases_by_name_search
+    BY_WORKFLOWS: Callable = filter_cases_by_workflows
     BY_WORKFLOW_SEARCH: Callable = filter_cases_by_workflow_search
     BY_PRIORITY: Callable = filter_cases_by_priority
-    BY_TICKET: Callable = filter_cases_by_ticket_id
     FOR_ANALYSIS: Callable = filter_cases_for_analysis
     HAS_INACTIVE_ANALYSIS: Callable = filter_inactive_analysis_cases
     HAS_SEQUENCE: Callable = filter_cases_has_sequence
@@ -283,3 +300,4 @@ class CaseFilter(Enum):
     WITH_WORKFLOW: Callable = filter_cases_with_workflow
     WITH_SCOUT_DELIVERY: Callable = filter_cases_with_scout_data_delivery
     ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at
+    PENDING_OR_FAILED_SEQUENCING_QC: Callable = filter_cases_pending_or_failed_sequencing_qc

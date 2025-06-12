@@ -1,0 +1,65 @@
+{% macro sample_prep(case) %}
+{% set workflow = case.data_analysis.workflow %}
+  <div class="container mb-5">
+    <h3 class="mb-4">Provberedning</h3>
+    <table class="table w-auto text-center align-middle" aria-describedby="sample-prep-table">
+      <thead class="table-secondary">
+        <tr>
+          <th scope="col">Prov</th>
+          <th scope="col">Ankom</th>
+          <th scope="col">Beredd</th>
+          <th scope="col">Sekvenserad</th>
+          <th scope="col">Biblioteksberedning</th>
+          <!-- Bait set column -->
+          <th scope="col">
+            {{ bait_set(workflow=workflow, analysis_type=case.data_analysis.type) }}
+          </th>
+          <th scope="col">Sekvensering</th>
+          <th scope="col">Mottagningskvalitetskontroll</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sample in case.samples %}
+        <tr>
+          <th scope="row">{{ sample.name }} ({{ sample.id }})</th>
+          <td>{{ sample.timestamps.received_at }}</td>
+          <td>{{ sample.timestamps.prepared_at }}</td>
+          <td>{{ sample.timestamps.reads_updated_at }}</td>
+          <td>{{ sample.methods.library_prep }}</td>
+          <!-- Bait set value -->
+          <td>
+            {{ bait_set_value(workflow=workflow, analysis_type=case.data_analysis.type, sample=sample) }}
+          </td>
+          <td>{{ sample.methods.sequencing }}</td>
+          <td>{{ sample.metadata.initial_qc }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="alert alert-primary" role="alert">
+      Laboratoriet har inte haft ansvar för provtagningsstadiet och extraktion, resultaten gäller
+      för provet såsom det har mottagits.
+    </div>
+  </div>
+{% endmacro %}
+
+{% macro bait_set(workflow, analysis_type) %}
+  {% if
+    ("balsamic" in workflow and "panelsekvensering" in analysis_type) or
+    (workflow in ("mip-dna", "raredisease") and analysis_type == "wes")
+  %}
+    Bait Set
+  {% endif %}
+{% endmacro %}
+
+{% macro bait_set_value(workflow, analysis_type, sample) %}
+  {% if
+    ("balsamic" in workflow and "panelsekvensering" in analysis_type) or
+    (workflow in ("mip-dna", "raredisease") and analysis_type == "wes")
+  %}
+    {{ sample.metadata.bait_set }}
+    {% if "balsamic" in workflow and sample.metadata.bait_set != "N/A" %}
+      (v{{sample.metadata.bait_set_version }})
+    {% endif %}
+  {% endif %}
+{% endmacro %}

@@ -2,22 +2,21 @@
 
 import logging
 
-import click
+import rich_click as click
 
 from cg.apps.crunchy.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.meta.compress.compress import CompressAPI
-from cg.models.cg_config import CGConfig
-
-from .store import (
+from cg.cli.store.store import (
     store_case,
-    store_demultiplexed_flow_cell,
-    store_flow_cell,
+    store_demultiplexed_illumina_run,
+    store_illumina_run,
     store_qc_metrics,
     store_sample,
     store_ticket,
 )
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
+from cg.meta.compress.compress import CompressAPI
+from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
@@ -40,8 +39,8 @@ def store(context: CGConfig):
 
 for sub_cmd in [
     store_case,
-    store_demultiplexed_flow_cell,
-    store_flow_cell,
+    store_demultiplexed_illumina_run,
+    store_illumina_run,
     store_sample,
     store_ticket,
     store_qc_metrics,

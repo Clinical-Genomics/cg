@@ -20,4 +20,4 @@ class OrdersRequest(BaseModel):
     sort_order: SortOrder | None = Field(alias="sortOrder", default=SortOrder.DESC)
     search: str | None = None
     workflow: str | None = None
-    delivered: bool | None = None
+    is_open: bool | None = None

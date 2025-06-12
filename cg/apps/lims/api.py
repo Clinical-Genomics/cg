@@ -9,8 +9,15 @@ from genologics.entities import Artifact, Process, Researcher, Sample
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
-from cg.constants import Priority
-from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod, LimsArtifactTypes
+from cg.constants.constants import ControlOptions, CustomerId
+from cg.constants.lims import (
+    MASTER_STEPS_UDFS,
+    PROP2UDF,
+    DocumentationMethod,
+    LimsArtifactTypes,
+    LimsProcess,
+)
+from cg.constants.priority import Priority
 from cg.exc import LimsDataError
 
 from .order import OrderHandler
@@ -478,3 +485,81 @@ class LimsAPI(Lims, OrderHandler):
         )
         input_amount: float | None = self._get_last_used_input_amount(input_amounts=input_amounts)
         return input_amount
+
+    def get_latest_artifact_for_sample(
+        self,
+        process_type: LimsProcess,
+        sample_internal_id: str,
+        artifact_type: LimsArtifactTypes | None = LimsArtifactTypes.ANALYTE,
+    ) -> Artifact:
+        """Return latest artifact for a given sample, process and artifact type."""
+
+        artifacts: list[Artifact] = self.get_artifacts(
+            process_type=process_type,
+            type=artifact_type,
+            samplelimsid=sample_internal_id,
+        )
+
+        if not artifacts:
+            raise LimsDataError(
+                f"No artifacts were found for process {process_type}, type {artifact_type} and sample {sample_internal_id}."
+            )
+
+        latest_artifact: Artifact = self._get_latest_artifact_from_list(artifact_list=artifacts)
+        return latest_artifact
+
+    def _get_latest_artifact_from_list(self, artifact_list: list[Artifact]) -> Artifact:
+        """Returning the latest artifact in a list of artifacts."""
+        artifacts = []
+        for artifact in artifact_list:
+            date = artifact.parent_process.date_run or datetime.today().strftime("%Y-%m-%d")
+            artifacts.append((date, artifact.id, artifact))
+
+        artifacts.sort()
+        date, id, latest_artifact = artifacts[-1]
+        return latest_artifact
+
+    def get_internal_negative_control_id_from_sample_in_pool(
+        self, sample_internal_id: str, pooling_step: LimsProcess
+    ) -> str:
+        """Retrieve from LIMS the sample ID for the internal negative control sample present in the same pool as the given sample."""
+        artifact: Artifact = self.get_latest_artifact_for_sample(
+            process_type=pooling_step,
+            sample_internal_id=sample_internal_id,
+        )
+        negative_controls: list[Sample] = self._get_negative_controls_from_list(
+            samples=artifact.samples
+        )
+
+        if not negative_controls:
+            raise LimsDataError(
+                f"No internal negative controls found in the pool of sample {sample_internal_id}."
+            )
+
+        if len(negative_controls) > 1:
+            sample_ids = [sample.id for sample in negative_controls]
+            raise LimsDataError(
+                f"Multiple internal negative control samples found: {' '.join(sample_ids)}"
+            )
+
+        return negative_controls[0].id
+
+    @staticmethod
+    def _get_negative_controls_from_list(samples: list[Sample]) -> list[Sample]:
+        """Filter and return a list of internal negative controls from a given sample list."""
+        negative_controls = []
+        for sample in samples:
+            if (
+                sample.udf.get("Control") == ControlOptions.NEGATIVE
+                and sample.udf.get("customer") == CustomerId.CG_INTERNAL_CUSTOMER
+            ):
+                negative_controls.append(sample)
+        return negative_controls
+
+    def get_sample_region_and_lab_code(self, sample_id: str) -> str:
+        """Return the region code and lab code for a sample formatted as a prefix string."""
+        region_code: str = self.get_sample_attribute(lims_id=sample_id, key="region_code").split(
+            " "
+        )[0]
+        lab_code: str = self.get_sample_attribute(lims_id=sample_id, key="lab_code").split(" ")[0]
+        return f"{region_code}_{lab_code}_"

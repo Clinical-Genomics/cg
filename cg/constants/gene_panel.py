@@ -18,6 +18,7 @@ class GenePanelMasterList(StrEnum):
     CARDIOLOGY: str = "Cardiology"
     CILM: str = "CILM"
     CH: str = "CH"
+    CHILDHYPOTONIA: str = "CHILDHYPOTONIA"
     CTD: str = "CTD"
     DIAB: str = "DIAB"
     ENDO: str = "ENDO"
@@ -47,6 +48,10 @@ class GenePanelMasterList(StrEnum):
     STROKE: str = "STROKE"
     AID: str = "AID"
     INHERITED_CANCER: str = "Inherited cancer"
+    VEO_IBD: str = "VEO-IBD"
+    KIDNEY: str = "Kidney"
+    CAKUT: str = "CAKUT"
+    NCRNA: str = "ncRNA"
 
     @classmethod
     def get_panel_names(cls, panels=None) -> list[str]:
@@ -63,6 +68,18 @@ class GenePanelMasterList(StrEnum):
             CustomerId.CUST004,
             CustomerId.CUST042,
         }
+
+    @staticmethod
+    def is_customer_collaborator_and_panels_in_gene_panels_master_list(
+        customer_id: str, gene_panels: set[str]
+    ) -> bool:
+        return customer_id in GenePanelMasterList.collaborators() and gene_panels.issubset(
+            GenePanelMasterList.get_panel_names()
+        )
+
+    @staticmethod
+    def get_non_specific_gene_panels() -> set[str]:
+        return {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
 
 
 class GenePanelCombo:

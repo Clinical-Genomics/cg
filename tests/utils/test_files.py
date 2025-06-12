@@ -1,16 +1,27 @@
-from datetime import datetime
 from pathlib import Path
 
 import pytest
 
+from cg.constants import FileExtensions
 from cg.utils.files import (
     get_directories_in_path,
-    get_source_creation_time_stamp,
     get_file_in_directory,
+    get_file_with_pattern_from_list,
+    get_files_in_directory_with_pattern,
+    get_files_matching_pattern,
+    get_project_root_dir,
+    get_source_creation_time_stamp,
     remove_directory_and_contents,
     rename_file,
-    get_files_in_directory_with_pattern,
 )
+
+
+def test_get_project_root_dir():
+    # WHEN getting the project root dir
+    root_dir: Path = get_project_root_dir()
+
+    # THEN return the dir path
+    assert root_dir.name == "cg"
 
 
 def test_get_file_in_directory(nested_directory_with_file: Path, some_file: str):
@@ -22,6 +33,30 @@ def test_get_file_in_directory(nested_directory_with_file: Path, some_file: str)
 
     # THEN assert that the file is returned
     assert file_path.exists()
+
+
+def test_get_file_with_pattern_from_list():
+    """Test that a file is extracted from a list by pattern."""
+    # GIVEN a list of files and a pattern found in one of the files
+    files = [Path("file1.txt"), Path("file2.txt"), Path("file3.txt")]
+
+    # WHEN getting a file by the pattern
+    file = get_file_with_pattern_from_list(files, "file2")
+
+    # THEN assert that the file is returned
+    assert file == Path("file2.txt")
+
+
+def test_get_file_with_pattern_from_list_no_file():
+    """Test that a file is extracted from a list by pattern."""
+    # GIVEN a list of files and a pattern not found in any of the files
+    files = [Path("file1.txt"), Path("file2.txt"), Path("file3.txt")]
+
+    # WHEN getting a file by the pattern
+
+    # THEN a FileNotFoundError should be raised
+    with pytest.raises(FileNotFoundError):
+        get_file_with_pattern_from_list(files, "file4")
 
 
 def test_get_files_in_directory_by_pattern(nested_directory_with_file: Path, some_file: str):
@@ -37,6 +72,31 @@ def test_get_files_in_directory_by_pattern(nested_directory_with_file: Path, som
     for file_path in file_paths:
         assert file_path.exists()
         assert some_file in file_path.as_posix()
+
+
+def test_get_files_matching_pattern(nested_directory_with_file: Path, some_file: str):
+    # GIVEN a directory with a subdirectory containing a .txt file
+    directory_with_file = Path(nested_directory_with_file, "sub_directory")
+
+    # WHEN getting the file from the directory
+    files = get_files_matching_pattern(
+        directory=directory_with_file, pattern=f"*{FileExtensions.TXT}"
+    )
+
+    # THEN assert that the file is returned
+    assert len(files) == 1
+
+
+def test_get_files_matching_pattern_no_files(nested_directory_with_file: Path, some_file: str):
+    # GIVEN a directory with a subdirectory containing a .txt file
+
+    # WHEN getting the file from the directory
+    files = get_files_matching_pattern(
+        directory=nested_directory_with_file, pattern=f"*{FileExtensions.JSON}"
+    )
+
+    # THEN assert that the file is returned
+    assert len(files) == 0
 
 
 def test_rename_file(tmp_path: Path):

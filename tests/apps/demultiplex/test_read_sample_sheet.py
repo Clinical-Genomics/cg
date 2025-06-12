@@ -7,13 +7,13 @@ from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
     get_samples_by_lane,
     validate_samples_are_unique,
 )
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
-from cg.exc import SampleSheetError
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
+from cg.exc import SampleSheetContentError, SampleSheetFormatError
 
 
 def test_validate_samples_are_unique(
-    novaseq6000_flow_cell_sample_1: FlowCellSample,
-    novaseq6000_flow_cell_sample_2: FlowCellSample,
+    novaseq6000_flow_cell_sample_1: IlluminaSampleIndexSetting,
+    novaseq6000_flow_cell_sample_2: IlluminaSampleIndexSetting,
 ):
     """Test that validating two different samples finishes successfully."""
     # GIVEN two different NovaSeq samples
@@ -28,14 +28,14 @@ def test_validate_samples_are_unique(
 
 
 def test_validate_samples_are_unique_when_not_unique(
-    novaseq6000_flow_cell_sample_1: FlowCellSample, caplog
+    novaseq6000_flow_cell_sample_1: IlluminaSampleIndexSetting, caplog
 ):
     """Test that validating two identical samples fails."""
     # GIVEN two identical NovaSeq samples
     caplog.set_level(logging.INFO)
 
     # WHEN validating the samples
-    with pytest.raises(SampleSheetError):
+    with pytest.raises(SampleSheetContentError):
         validate_samples_are_unique(
             samples=[novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_1]
         )
@@ -48,14 +48,14 @@ def test_validate_samples_are_unique_when_not_unique(
 
 
 def test_get_samples_by_lane(
-    novaseq6000_flow_cell_sample_1: FlowCellSample,
-    novaseq6000_flow_cell_sample_2: FlowCellSample,
+    novaseq6000_flow_cell_sample_1: IlluminaSampleIndexSetting,
+    novaseq6000_flow_cell_sample_2: IlluminaSampleIndexSetting,
 ):
     """Test that grouping two samples with different lanes returns two groups."""
     # GIVEN two samples on two different lanes
 
     # WHEN getting the samples per lane
-    samples_per_lane: dict[int, list[FlowCellSample]] = get_samples_by_lane(
+    samples_per_lane: dict[int, list[IlluminaSampleIndexSetting]] = get_samples_by_lane(
         samples=[novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_2]
     )
 
@@ -90,7 +90,7 @@ def test_get_raw_samples_no_header(sample_sheet_samples_no_column_names: list[li
     caplog.set_level(logging.INFO)
 
     # WHEN trying to get the samples from the sample sheet
-    with pytest.raises(SampleSheetError):
+    with pytest.raises(SampleSheetFormatError):
         get_raw_samples_from_content(sample_sheet_content=sample_sheet_samples_no_column_names)
 
     # THEN an exception is raised because of the missing header
@@ -103,7 +103,7 @@ def test_get_raw_samples_no_samples(sample_sheet_bcl_convert_data_header: list[l
     caplog.set_level(logging.INFO)
 
     # WHEN trying to get the samples from the sample sheet
-    with pytest.raises(SampleSheetError):
+    with pytest.raises(SampleSheetFormatError):
         get_raw_samples_from_content(sample_sheet_content=sample_sheet_bcl_convert_data_header)
 
     # THEN an exception is raised because of the missing samples

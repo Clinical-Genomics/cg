@@ -1,13 +1,14 @@
 import logging
 
 from cg.constants import DEFAULT_CAPTURE_KIT, Workflow
-from cg.constants.constants import AnalysisType
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.pedigree import Pedigree
+from cg.constants.scout import MIP_CASE_TAGS
+from cg.constants.tb import AnalysisType
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
-from cg.store.models import CaseSample, Case
+from cg.store.models import Case, CaseSample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -53,7 +54,7 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
     ) -> dict[str, str | int | None]:
         """Return config sample data."""
         sample_data: dict[str, str | int] = self.get_sample_data(link_obj=link_obj)
-        if sample_data["analysis_type"] == AnalysisType.WHOLE_GENOME_SEQUENCING:
+        if sample_data["analysis_type"] == AnalysisType.WGS:
             sample_data["capture_kit"]: str = panel_bed or DEFAULT_CAPTURE_KIT
         else:
             sample_data["capture_kit"]: str | None = panel_bed or self.get_target_bed_from_lims(
@@ -89,8 +90,10 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
             link.sample.application_version.application.analysis_type for link in case.links
         }
         if len(analysis_types) > 1:
-            LOG.warning(
-                f"Multiple analysis types found. Defaulting to {AnalysisType.WHOLE_GENOME_SEQUENCING}."
-            )
-            return AnalysisType.WHOLE_GENOME_SEQUENCING
+            LOG.warning(f"Multiple analysis types found. Defaulting to {AnalysisType.WGS}.")
+            return AnalysisType.WGS
         return analysis_types.pop() if analysis_types else None
+
+    def get_scout_upload_case_tags(self) -> dict:
+        """Return MIP DNA Scout upload case tags."""
+        return MIP_CASE_TAGS

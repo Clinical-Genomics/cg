@@ -1,0 +1,16 @@
+{% from "/macros/data_analysis/qc_metrics/qc_metrics.html" import qc_metrics %}
+
+{% macro mip_dna_qc_metrics(samples) %}
+  {% set 
+    metrics = [
+      {"name": "Kön",                   "key": "sex",                  "description": "Kön beräknat genom bioinformatisk analys."},
+      {"name": "Läspar [M]",            "key": "million_read_pairs",   "description": "Antal sekvenseringsläsningar i miljoner läspar."},
+      {"name": "Mappade sekvenser [%]", "key": "mapped_reads",         "description": "Procent sekvenser som matchar en eller flera positioner i referensgenomet."},
+      {"name": "Medelsekvensdjup",      "key": "mean_target_coverage", "description": "Medelvärdet av täckningsgraden i baser över genpanelen/genpanelerna angivna under dataanalys."},
+      {"name": "Täckningsgrad 10x [%]", "key": "pct_10x",              "description": "Andel baser som är sekvenserade med ett djup över en specificerad gräns (10x) över genpanelen/genpanelerna angivna under dataanalys. Det beräknas efter borttagning av duplikata läsningar."},
+      {"name": "Duplikat [%]",          "key": "duplicates",           "description": "Sekvenseringsläsningar som är duplikat (kopior) och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserat bibliotek eller djup sekvensering."},
+    ]
+  %}
+  <!-- Quality control metrics -->
+  {{ qc_metrics(samples=samples, metrics=metrics) }}
+{% endmacro %}

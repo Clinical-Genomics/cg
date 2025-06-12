@@ -2,15 +2,15 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from pydantic.v1 import ValidationError
+from pydantic import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import FileExtensions, GenePanelMasterList, Workflow
+from cg.constants import FileExtensions, Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
-from cg.meta.workflow.analysis import AnalysisAPI, add_gene_panel_combo
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.mip.mip_analysis import MipAnalysis
@@ -249,13 +249,21 @@ class MipAnalysisAPI(AnalysisAPI):
                 return True
         return False
 
-    def get_cases_ready_for_analysis(self) -> list[Case]:
+    def get_cases_ready_for_analysis(self, limit: int | None = None) -> list[Case]:
         """Return cases to analyze."""
-        cases_to_analyse: list[Case] = self.get_cases_to_analyse()
+        cases_to_analyse: list[Case] = self.get_cases_to_analyze()
+
         cases_ready_for_analysis: list[Case] = [
             case for case in cases_to_analyse if self.is_case_ready_for_analysis(case)
         ]
-        return cases_ready_for_analysis[:MAX_CASES_TO_START_IN_50_MINUTES]
+
+        selected_cases: list[Case] = cases_ready_for_analysis[
+            : MAX_CASES_TO_START_IN_50_MINUTES if limit is None else limit
+        ]
+        for case in selected_cases:
+            LOG.debug(f"Going to start analysis for case {case.internal_id}.")
+
+        return selected_cases
 
     @staticmethod
     def _append_value_for_non_flags(parameters: list, value) -> None:

@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 from sqlalchemy.orm import Query
 
 from cg.cli.upload.observations.utils import get_observations_api
@@ -12,6 +12,7 @@ from cg.constants.constants import Workflow
 from cg.exc import CaseNotFoundError, LoqusdbError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.meta.observations.raredisease_observations_api import RarediseaseObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
@@ -23,16 +24,16 @@ LOG = logging.getLogger(__name__)
 @SKIP_CONFIRMATION
 @DRY_RUN
 @click.pass_obj
-def delete_observations(context: CGConfig, case_id: str, dry_run: bool, yes: bool):
+def delete_observations(context: CGConfig, case_id: str, dry_run: bool, skip_confirmation: bool):
     """Delete a case from Loqusdb and reset the Loqusdb IDs in StatusDB."""
-    observations_api: MipDNAObservationsAPI | BalsamicObservationsAPI = get_observations_api(
-        context=context, case_id=case_id, upload=False
-    )
+    observations_api: (
+        BalsamicObservationsAPI | MipDNAObservationsAPI | RarediseaseObservationsAPI
+    ) = get_observations_api(context=context, case_id=case_id, upload=False)
     if dry_run:
         LOG.info(f"Dry run. This would delete all variants in Loqusdb for case: {case_id}")
         return
     LOG.info(f"This will delete all variants in Loqusdb for case: {case_id}")
-    if yes or click.confirm("Do you want to continue?", abort=True):
+    if skip_confirmation or click.confirm("Do you want to continue?", abort=True):
         observations_api.delete_case(case_id)
 
 
@@ -42,7 +43,7 @@ def delete_observations(context: CGConfig, case_id: str, dry_run: bool, yes: boo
 @DRY_RUN
 @click.pass_context
 def delete_available_observations(
-    context: click.Context, workflow: Workflow | None, dry_run: bool, yes: bool
+    context: click.Context, workflow: Workflow | None, dry_run: bool, skip_confirmation: bool
 ):
     """Delete available observation from Loqusdb."""
     status_db: Store = context.obj.status_db
@@ -51,12 +52,15 @@ def delete_available_observations(
         f"This would delete observations for the following cases: "
         f"{[case.internal_id for case in uploaded_observations]}"
     )
-    if yes or click.confirm("Do you want to continue?", abort=True):
+    if skip_confirmation or click.confirm("Do you want to continue?", abort=True):
         for case in uploaded_observations:
             try:
                 LOG.info(f"Will delete observations for {case.internal_id}")
                 context.invoke(
-                    delete_observations, case_id=case.internal_id, dry_run=dry_run, yes=yes
+                    delete_observations,
+                    case_id=case.internal_id,
+                    dry_run=dry_run,
+                    skip_confirmation=skip_confirmation,
                 )
             except (CaseNotFoundError, LoqusdbError) as error:
                 LOG.error(f"Error deleting observations for {case.internal_id}: {error}")

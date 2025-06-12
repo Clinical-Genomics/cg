@@ -1,6 +1,6 @@
 import logging
 
-import click
+import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN, FORCE
@@ -34,7 +34,7 @@ def batch(configs: CGConfig, case_id: str, dry_run: bool, force: bool):
     statina_files: StatinaUploadFiles = nipt_upload_api.get_statina_files(case_id=case_id)
     if dry_run:
         LOG.info(f"Found file paths for statina upload: {statina_files.json(exclude_none=True)}")
-    elif force or nipt_upload_api.flowcell_passed_qc_value(
+    elif force or nipt_upload_api.sequencing_run_passed_qc_value(
         case_id=case_id, q30_threshold=Q30_THRESHOLD
     ):
         nipt_upload_api.upload_to_statina_database(statina_files=statina_files)

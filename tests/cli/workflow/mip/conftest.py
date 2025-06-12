@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -148,6 +149,7 @@ def mip_dna_context(
                 application_type="wgs",
                 customer_id="cust000",
                 sex=Sex.UNKNOWN,
+                last_sequenced_at=datetime.now(),
             )
             helpers.add_relationship(store=_store, sample=sample, case=case_obj, status="affected")
     cg_context.meta_apis["analysis_api"] = mip_analysis_api
@@ -157,15 +159,15 @@ def mip_dna_context(
 def setup_mocks(
     mocker,
     can_at_least_one_sample_be_decompressed: bool = False,
-    case_to_analyze: Case = None,
+    get_case_to_analyze: Case = None,
     decompress_spring: bool = False,
     has_latest_analysis_started: bool = False,
     is_spring_decompression_needed: bool = False,
     is_spring_decompression_running: bool = False,
 ) -> None:
     """Helper function to set up the necessary mocks for the decompression logics."""
-    mocker.patch.object(ReadHandler, "cases_to_analyse")
-    ReadHandler.cases_to_analyse.return_value = [case_to_analyze]
+    mocker.patch.object(ReadHandler, "get_cases_to_analyze")
+    ReadHandler.get_cases_to_analyze.return_value = [get_case_to_analyze]
 
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
     PrepareFastqAPI.is_spring_decompression_needed.return_value = is_spring_decompression_needed
@@ -196,5 +198,10 @@ def setup_mocks(
         return_value=["a str"],
     )
 
-    mocker.patch.object(ReadHandler, "are_all_flow_cells_on_disk")
-    ReadHandler.are_all_flow_cells_on_disk.return_value = True
+    mocker.patch.object(ReadHandler, "are_all_illumina_runs_on_disk")
+    ReadHandler.are_all_illumina_runs_on_disk.return_value = True
+
+
+@pytest.fixture(scope="function")
+def mip_dna_analysis_api(mip_dna_context: CGConfig) -> MipDNAAnalysisAPI:
+    return MipDNAAnalysisAPI(config=mip_dna_context)

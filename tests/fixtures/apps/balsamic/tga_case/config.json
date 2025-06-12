@@ -1,0 +1,226 @@
+{
+  "QC": {
+    "adapter": "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+    "min_seq_length": "25"
+  },
+  "vcf": {
+    "manta": {
+      "mutation": "somatic",
+      "mutation_type": "SV",
+      "analysis_type": ["paired", "single"],
+      "sequencing_type": ["targeted", "wgs"],
+      "workflow_solution": ["BALSAMIC"]
+    },
+    "cnvkit": {
+      "mutation": "somatic",
+      "mutation_type": "CNV",
+      "analysis_type": ["paired", "single"],
+      "sequencing_type": ["targeted"],
+      "workflow_solution": ["BALSAMIC"]
+    },
+    "vardict": {
+      "mutation": "somatic",
+      "mutation_type": "SNV",
+      "analysis_type": ["paired", "single"],
+      "sequencing_type": ["targeted"],
+      "workflow_solution": ["BALSAMIC"]
+    },
+    "tnscope": {
+      "mutation": "somatic",
+      "mutation_type": "SNV",
+      "analysis_type": ["paired", "single"],
+      "sequencing_type": ["wgs"],
+      "workflow_solution": ["Sentieon"]
+    },
+    "dnascope": {
+      "mutation": "germline",
+      "mutation_type": "SNV",
+      "analysis_type": ["paired", "single"],
+      "sequencing_type": ["targeted", "wgs"],
+      "workflow_solution": ["Sentieon"]
+    },
+    "tnhaplotyper": {
+      "mutation": "somatic",
+      "mutation_type": "SNV",
+      "analysis_type": ["paired", "single"],
+      "sequencing_type": ["targeted", "wgs"],
+      "workflow_solution": ["Sentieon"]
+    },
+    "manta_germline": {
+      "mutation": "germline",
+      "mutation_type": "SV",
+      "analysis_type": ["paired", "single"],
+      "sequencing_type": ["targeted", "wgs"],
+      "workflow_solution": ["BALSAMIC"]
+    },
+    "haplotypecaller": {
+      "mutation": "germline",
+      "mutation_type": "SNV",
+      "analysis_type": ["paired", "single"],
+      "sequencing_type": ["targeted"],
+      "workflow_solution": ["BALSAMIC"]
+    },
+    "TNscope_umi": {
+      "mutation": "somatic",
+      "mutation_type": "SNV",
+      "analysis_type": ["single", "paired"],
+      "sequencing_type": ["targeted"],
+      "workflow_solution": ["Sentieon_umi"]
+    },
+    "delly": {
+      "mutation": "somatic",
+      "mutation_type": "SV",
+      "analysis_type": ["paired", "single"],
+      "sequencing_type": ["wgs", "targeted"],
+      "workflow_solution": ["BALSAMIC"]
+    },
+    "ascat": {
+      "mutation": "somatic",
+      "mutation_type": "CNV",
+      "analysis_type": ["paired"],
+      "sequencing_type": ["wgs"],
+      "workflow_solution": ["BALSAMIC"]
+    }
+  },
+  "analysis": {
+    "case_id": "mock_case",
+    "analysis_type": "paired",
+    "analysis_workflow": "balsamic",
+    "sequencing_type": "targeted",
+    "analysis_dir": "/mock/path/cases",
+    "fastq_path": "/mock/path/cases/mock_case/analysis/fastq/",
+    "script": "/mock/path/cases/mock_case/scripts/",
+    "log": "/mock/path/cases/mock_case/logs/",
+    "result": "/mock/path/cases/mock_case/analysis",
+    "benchmark": "/mock/path/cases/mock_case/benchmarks/",
+    "dag": "/mock/path/cases/mock_case/mock_case_BALSAMIC_8.2.5_graph.pdf",
+    "BALSAMIC_version": "8.2.5",
+    "config_creation_date": "2021-12-28 13:12"
+  },
+  "samples": [
+    {
+      "type": "normal",
+      "name": "ACC0000A0",
+      "fastq_info": {
+        "H3CVVDRXY_ACC0000A0_S68_L001": {
+          "fwd": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A0_S68_L001_R1_001.fastq.gz",
+          "rev": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A0_S68_L001_R2_001.fastq.gz"
+        },
+        "H3CVVDRXY_ACC0000A0_S68_L002": {
+          "fwd": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A0_S68_L002_R1_001.fastq.gz",
+          "rev": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A0_S68_L002_R2_001.fastq.gz"
+        }
+      }
+    },
+    {
+      "type": "tumor",
+      "name": "ACC0000A1",
+      "fastq_info": {
+        "H3CVVDRXY_ACC0000A1_S68_L001": {
+          "fwd": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A1_S68_L001_R1_001.fastq.gz",
+          "rev": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A1_S68_L001_R2_001.fastq.gz"
+        },
+        "H3CVVDRXY_ACC0000A1_S68_L002": {
+          "fwd": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A1_S68_L002_R1_001.fastq.gz",
+          "rev": "/mock/path/cases/mock_case/analysis/fastq//H3CVVDRXY_ACC0000A1_S68_L002_R2_001.fastq.gz"
+        }
+      }
+    }
+  ],
+  "reference": {
+    "reference_genome": "/mock/path/balsamic_cache/8.2.5/hg19/genome/human_g1k_v37.fasta",
+    "dbsnp": "/mock/path/balsamic_cache/8.2.5/hg19/variants/dbsnp_grch37_b138.vcf.gz",
+    "1kg_snps_all": "/mock/path/balsamic_cache/8.2.5/hg19/variants/1k_genome_wgs_p1_v3_all_sites.vcf.gz",
+    "1kg_snps_high": "/mock/path/balsamic_cache/8.2.5/hg19/variants/1kg_phase1_snps_high_confidence_b37.vcf.gz",
+    "1kg_known_indel": "/mock/path/balsamic_cache/8.2.5/hg19/variants/1kg_known_indels_b37.vcf.gz",
+    "mills_1kg": "/mock/path/balsamic_cache/8.2.5/hg19/variants/mills_1kg_index.vcf.gz",
+    "gnomad_variant": "/mock/path/balsamic_cache/8.2.5/hg19/variants/gnomad.genomes.r2.1.1.sites.vcf.bgz",
+    "cosmic": "/mock/path/balsamic_cache/8.2.5/hg19/variants/cosmic_coding_muts_v94.vcf.gz",
+    "exon_bed": "/mock/path/balsamic_cache/8.2.5/hg19/genome/refGene.flat.bed",
+    "refflat": "/mock/path/balsamic_cache/8.2.5/hg19/genome/refGene.flat",
+    "refGene": "/mock/path/balsamic_cache/8.2.5/hg19/genome/refGene.txt",
+    "wgs_calling_interval": "/mock/path/balsamic_cache/8.2.5/hg19/genome/wgs_calling_regions.v1",
+    "genome_chrom_size": "/mock/path/balsamic_cache/8.2.5/hg19/genome/hg19.chrom.sizes",
+    "vep": "/mock/path/balsamic_cache/8.2.5/hg19/vep",
+    "rankscore": "/mock/path/balsamic_cache/8.2.5/hg19/genome/cancer_rank_model_-v0.1-.ini",
+    "access_regions": "/mock/path/balsamic_cache/8.2.5/hg19/genome/access_5kb_hg19.txt",
+    "delly_exclusion": "/mock/path/balsamic_cache/8.2.5/hg19/genome/delly_exclusion.tsv",
+    "delly_exclusion_converted": "/mock/path/balsamic_cache/8.2.5/hg19/genome/delly_exclusion_converted.tsv",
+    "ascat_gccorrection": "/mock/path/balsamic_cache/8.2.5/hg19/genome/GRCh37_SnpGcCorrections.tsv",
+    "ascat_chryloci": "/mock/path/balsamic_cache/8.2.5/hg19/genome/GRCh37_Y.loci",
+    "clinvar": "/mock/path/balsamic_cache/8.2.5/hg19/variants/clinvar.vcf.gz",
+    "reference_access_date": "/mock/path/cases/2021-12-20 23:32:13"
+  },
+  "singularity": {
+    "image": "/mock/path/balsamic_cache/8.2.5/containers"
+  },
+  "bioinfo_tools": {
+    "bedtools": "align_qc",
+    "bwa": "align_qc",
+    "fastqc": "align_qc",
+    "samtools": "align_qc",
+    "picard": "align_qc",
+    "multiqc": "align_qc",
+    "fastp": "align_qc",
+    "csvkit": "align_qc",
+    "ensembl-vep": "annotate",
+    "genmod": "annotate",
+    "vcfanno": "annotate",
+    "sambamba": "coverage_qc",
+    "mosdepth": "coverage_qc",
+    "bcftools": "varcall_py36",
+    "tabix": "varcall_py36",
+    "gatk": "varcall_py36",
+    "vardict": "varcall_py36",
+    "strelka": "varcall_py27",
+    "manta": "varcall_py27",
+    "cnvkit": "varcall_cnvkit",
+    "delly": "delly",
+    "ascatNgs": "ascatNgs",
+    "sentieon": "sentieon"
+  },
+  "bioinfo_tools_version": {
+    "manta": ["1.6.0"],
+    "bcftools": ["1.9", "1.11"],
+    "tabix": ["0.2.6"],
+    "samtools": ["1.9", "1.12", "1.11"],
+    "sentieon": ["202010.02"],
+    "delly": ["0.8.7"],
+    "sambamba": ["0.6.6"],
+    "mosdepth": ["0.2.9"],
+    "ascatNgs": ["4.5.0"],
+    "gatk": ["3.8"],
+    "vardict": ["2019.06.04=pl526_0"],
+    "bedtools": ["2.30.0"],
+    "bwa": ["0.7.15"],
+    "fastqc": ["0.11.9"],
+    "picard": ["2.25.0"],
+    "multiqc": ["1.11"],
+    "fastp": ["0.20.1"],
+    "csvkit": ["1.0.4"],
+    "ensembl-vep": ["100.2"],
+    "vcfanno": ["0.3.2"]
+  },
+  "panel": {
+    "capture_kit": "/mock/path/reference/target_capture_bed/production/balsamic/gicfdna_3.1_hg19_design.bed",
+    "chrom": [
+      "19",
+      "2",
+      "8",
+      "18",
+      "14",
+      "12",
+      "1",
+      "7",
+      "20",
+      "3",
+      "4",
+      "9",
+      "5",
+      "10",
+      "16",
+      "17"
+    ],
+    "pon_cnn": "/mock/path/pon/gmsmyeloid_5.3_hg19_design_CNVkit_PON_reference_v1.cnn"
+  }
+}

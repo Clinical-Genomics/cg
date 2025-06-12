@@ -4,8 +4,11 @@ import shutil
 from pathlib import Path
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.io.csv import read_csv, write_csv
 
 LOG = logging.getLogger(__name__)
+
+NANOPORE_SEQUENCING_SUMMARY_PATTERN: str = r"final_summary_*.txt"
 
 
 def is_demultiplexing_copied(analysis_directory: Path) -> bool:
@@ -114,3 +117,103 @@ def is_ready_for_post_processing(flow_cell_dir: Path, demultiplexed_runs_dir: Pa
         flow_cell_is_ready = False
 
     return flow_cell_is_ready
+
+
+def get_existing_manifest_file(source_directory: Path) -> Path | None:
+    """Returns the first existing manifest file in the source directory."""
+    manifest_file_paths = [
+        Path(source_directory, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST),
+        Path(source_directory, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST),
+    ]
+    for file_path in manifest_file_paths:
+        if file_path.exists():
+            return file_path
+
+
+def are_all_files_synced(files_at_source: list[Path], target_directory: Path) -> bool:
+    """Checks if all relevant files in the source are present in the target directory."""
+    for file in files_at_source:
+        target_file_path = Path(target_directory, file)
+        if is_file_relevant_for_demultiplexing(file) and not target_file_path.exists():
+            LOG.info(f"File: {file}, has not been transferred from source to {target_directory}")
+            return False
+    return True
+
+
+def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
+    """Returns whether all relevant files for demultiplexing have been synced from the source to the target."""
+    existing_manifest_file: Path | None = get_existing_manifest_file(source_directory)
+
+    if not existing_manifest_file:
+        LOG.debug(f"{source_directory} does not contain a manifest file. Skipping.")
+        return False
+
+    files_at_source: list[Path] = parse_manifest_file(existing_manifest_file)
+    return are_all_files_synced(files_at_source=files_at_source, target_directory=target_directory)
+
+
+def is_manifest_file_required(flow_cell_dir: Path) -> bool:
+    """Returns whether a flow cell directory needs a manifest file."""
+    illumina_manifest_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST)
+    custom_manifest_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)
+    copy_complete_file = Path(flow_cell_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE)
+    sequencing_finished: bool = copy_complete_file.exists() or is_nanopore_sequencing_complete(
+        flow_cell_dir
+    )
+    return (
+        not any((illumina_manifest_file.exists(), custom_manifest_file.exists()))
+        and sequencing_finished
+    )
+
+
+def create_manifest_file(flow_cell_dir_name: Path) -> Path:
+    """Creates a tab separated file containing the paths of all files in the given
+    directory and any subdirectories."""
+    files_in_directory: list[list[str]] = []
+    for subdir, _, files in os.walk(flow_cell_dir_name):
+        subdir = Path(subdir).relative_to(flow_cell_dir_name)
+        files_in_directory.extend([Path(subdir, file).as_posix()] for file in files)
+    LOG.info(
+        f"Writing manifest file to {Path(flow_cell_dir_name, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)}"
+    )
+    output_path = Path(flow_cell_dir_name, DemultiplexingDirsAndFiles.CG_FILE_MANIFEST)
+    write_csv(
+        content=files_in_directory,
+        file_path=output_path,
+        delimiter="\t",
+    )
+    return output_path
+
+
+def is_flow_cell_sync_confirmed(target_flow_cell_dir: Path) -> bool:
+    return Path(target_flow_cell_dir, DemultiplexingDirsAndFiles.COPY_COMPLETE).exists()
+
+
+def get_nanopore_summary_file(flow_cell_directory: Path) -> bool | None:
+    """Returns the summary file for a Nanopore run if found."""
+    try:
+        file = Path(next(flow_cell_directory.glob(NANOPORE_SEQUENCING_SUMMARY_PATTERN)))
+    except StopIteration:
+        file = None
+    return file
+
+
+def is_nanopore_sequencing_complete(flow_cell_directory: Path) -> bool:
+    """Returns whether the sequencing is complete for a Nanopore run."""
+    return bool(get_nanopore_summary_file(flow_cell_directory))
+
+
+def parse_manifest_file(manifest_file: Path) -> list[Path]:
+    """Returns a list with the first entry of each row of the given TSV file."""
+    LOG.debug(f"Parsing manifest file: {manifest_file}")
+    files: list[list[str]] = read_csv(file_path=manifest_file, delimiter="\t")
+    return [Path(file[0]) for file in files]
+
+
+def is_file_relevant_for_demultiplexing(file: Path) -> bool:
+    """Returns whether a file is relevant for demultiplexing."""
+    relevant_directories = [DemultiplexingDirsAndFiles.INTER_OP, DemultiplexingDirsAndFiles.DATA]
+    for relevant_directory in relevant_directories:
+        if relevant_directory in file.parts:
+            return True
+    return False

@@ -5,26 +5,25 @@ import getpass
 import logging
 from typing import Iterable
 
-import click
+import rich_click as click
 
 from cg.cli.set.case import set_case
 from cg.cli.set.cases import set_cases
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.constants import FlowCellStatus
+from cg.constants import SequencingRunDataAvailability
+from cg.constants.cli_options import SKIP_CONFIRMATION
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
-from cg.store.models import ApplicationVersion, Customer, Flowcell, Sample
+from cg.store.exc import EntryNotFoundError
+from cg.store.models import ApplicationVersion, Customer, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 
 CONFIRM = "Continue?"
 HELP_KEY_VALUE = "Give a property on sample and the value to set it to, e.g. -kv name Prov52"
 HELP_SKIP_LIMS = "Skip setting value in LIMS"
-HELP_YES = "Answer yes on all confirmations"
 OPTION_LONG_KEY_VALUE = "--key-value"
 OPTION_LONG_SKIP_LIMS = "--skip-lims"
-OPTION_LONG_YES = "--yes"
 OPTION_SHORT_KEY_VALUE = "-kv"
-OPTION_SHORT_YES = "-y"
 NOT_CHANGEABLE_SAMPLE_ATTRIBUTES = [
     "application_version_id",
     "customer_id",
@@ -69,7 +68,7 @@ def set_cmd():
     help="Give a property on sample and the value to set it to, e.g. -kv name Prov52",
 )
 @click.option("--skip-lims", is_flag=True, help="Skip setting value in LIMS")
-@click.option("-y", "--yes", is_flag=True, help="Answer yes on all confirmations")
+@SKIP_CONFIRMATION
 @click.argument("case_id", required=False)
 @click.pass_context
 def samples(
@@ -77,7 +76,7 @@ def samples(
     identifiers: click.Tuple([str, str]),
     kwargs: click.Tuple([str, str]),
     skip_lims: bool,
-    yes: bool,
+    skip_confirmation: bool,
     case_id: str,
 ):
     """Set values on many samples at the same time."""
@@ -93,12 +92,16 @@ def samples(
     for sample_obj in sample_objs:
         LOG.info(f"{sample_obj}")
 
-    if not (yes or click.confirm(CONFIRM)):
+    if not (skip_confirmation or click.confirm(CONFIRM)):
         raise click.Abort
 
     for sample_obj in sample_objs:
         context.invoke(
-            sample, sample_id=sample_obj.internal_id, kwargs=kwargs, yes=yes, skip_lims=skip_lims
+            sample,
+            sample_id=sample_obj.internal_id,
+            kwargs=kwargs,
+            skip_confirmation=skip_confirmation,
+            skip_lims=skip_lims,
         )
 
 
@@ -183,14 +186,14 @@ def list_keys(
     help=HELP_KEY_VALUE,
 )
 @click.option(OPTION_LONG_SKIP_LIMS, is_flag=True, help=HELP_SKIP_LIMS)
-@click.option(OPTION_SHORT_YES, OPTION_LONG_YES, is_flag=True, help=HELP_YES)
+@SKIP_CONFIRMATION
 @click.pass_obj
 def sample(
     context: CGConfig,
     sample_id: str | None,
     kwargs: click.Tuple([str, str]),
     skip_lims: bool,
-    yes: bool,
+    skip_confirmation: bool,
 ):
     """Set key values on a sample.
 
@@ -242,7 +245,7 @@ def sample(
 
         LOG.info(f"Would change from {new_key}={old_value} to {new_key}={new_value} on {sample}")
 
-        if not (yes or click.confirm(CONFIRM)):
+        if not (skip_confirmation or click.confirm(CONFIRM)):
             continue
 
         if key == "comment":
@@ -259,7 +262,7 @@ def sample(
             new_value = sample.priority_human if key == "priority" else value
             LOG.info(f"Would set {new_key} to {new_value} for {sample.internal_id} in LIMS")
 
-            if not (yes or click.confirm(CONFIRM)):
+            if not (skip_confirmation or click.confirm(CONFIRM)):
                 raise click.Abort
 
             try:
@@ -284,23 +287,35 @@ def _update_comment(comment, obj):
             obj.comment = f"{timestamp}-{getpass.getuser()}: {comment}" + "\n" + obj.comment
 
 
-@set_cmd.command()
-@click.option("-s", "--status", type=click.Choice(FlowCellStatus.statuses()))
-@click.argument("flow_cell_name")
+@set_cmd.command("sequencing-run")
+@click.option(
+    "-d", "--data-availability", type=click.Choice(SequencingRunDataAvailability.statuses())
+)
+@click.argument("flow_cell_id")
 @click.pass_obj
-def flowcell(context: CGConfig, flow_cell_name: str, status: str | None):
-    """Update information about a flow cell."""
+def set_sequencing_run(context: CGConfig, flow_cell_id: str, data_availability: str):
+    """Update data availability information for a sequencing run."""
     status_db: Store = context.status_db
-    flowcell_obj: Flowcell = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
-
-    if flowcell_obj is None:
-        LOG.warning(f"flow cell not found: {flow_cell_name}")
+    try:
+        sequencing_run: IlluminaSequencingRun = (
+            status_db.get_illumina_sequencing_run_by_device_internal_id(flow_cell_id)
+        )
+    except EntryNotFoundError:
+        LOG.error(f"Sequencing run with {flow_cell_id} not found")
         raise click.Abort
-    prev_status: str = flowcell_obj.status
-    flowcell_obj.status = status
+
+    if not data_availability:
+        LOG.error(
+            f"Please provide a data availability status. Choose from: {SequencingRunDataAvailability.statuses()}"
+        )
+        raise click.Abort
+    prev_status: str = sequencing_run.data_availability
+    sequencing_run.data_availability = data_availability
 
     status_db.session.commit()
-    LOG.info(f"{flow_cell_name} set: {prev_status} -> {status}")
+    LOG.info(
+        f"Changed data availability from {prev_status} to {data_availability} for {flow_cell_id}"
+    )
 
 
 set_cmd.add_command(set_case)

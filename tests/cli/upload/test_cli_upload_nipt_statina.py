@@ -24,7 +24,7 @@ def test_nipt_statina_upload_case(upload_context: CGConfig, cli_runner: CliRunne
     # WHEN adding a result file of a specified NIPT case
     mocker.patch.object(NiptUploadAPI, "get_statina_files", return_value=MockStatinaUploadFiles())
     mocker.patch.object(NiptUploadAPI, "upload_to_statina_database")
-    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=True)
+    mocker.patch.object(NiptUploadAPI, "sequencing_run_passed_qc_value", return_value=True)
     result = cli_runner.invoke(batch, [case_id], obj=upload_context)
 
     # THEN the nipt upload should start and exit without errors

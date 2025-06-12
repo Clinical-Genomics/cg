@@ -1,4 +1,4 @@
-import click
+import rich_click as click
 
 from cg.constants.constants import GenomeVersion
 from cg.constants.priority import SlurmQos
@@ -13,8 +13,8 @@ OPTION_GENDER = click.option(
 OPTION_GENOME_VERSION = click.option(
     "--genome-version",
     show_default=True,
-    default=GenomeVersion.hg19,
-    type=click.Choice([GenomeVersion.hg19, GenomeVersion.hg38, GenomeVersion.canfam3]),
+    default=GenomeVersion.HG19,
+    type=click.Choice([GenomeVersion.HG19, GenomeVersion.HG38, GenomeVersion.CANFAM3]),
     help="Type and build version of the reference genome. Set this option to override the default.",
 )
 OPTION_PANEL_BED = click.option(
@@ -40,7 +40,7 @@ OPTION_OBSERVATIONS = click.option(
     type=click.Path(exists=True),
     multiple=True,
     required=False,
-    help="VCF paths of clinical and/or cancer SNVs and SVs observations (WGS analysis only). Set this option to "
+    help="VCF paths of clinical and/or cancer SNVs and SVs observations (WHOLE_GENOME_SEQUENCING analysis only). Set this option to "
     "override the latest Loqusdb dump files.",
 )
 

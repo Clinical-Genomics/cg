@@ -16,11 +16,11 @@ def test_no_options(cli_runner: CliRunner, base_context: CGConfig):
     # THEN command should have returned all pipelines that is supported
     assert result.exit_code == EXIT_SUCCESS
     assert "balsamic" in result.output
-    assert "balsamic-qc" in result.output
     assert "balsamic-umi" in result.output
     assert "microsalt" in result.output
     assert "mip-dna" in result.output
     assert "mip-rna" in result.output
+    assert "nallo" in result.output
     assert "raredisease" in result.output
     assert "rnafusion" in result.output
     assert "taxprofiler" in result.output

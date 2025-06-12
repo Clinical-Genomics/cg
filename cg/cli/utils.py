@@ -1,8 +1,14 @@
 import re
-
-import click
-
 import shutil
+
+import rich_click as click
+
+from cg.constants import Workflow
+from cg.meta.workflow.nallo import NalloAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
+from cg.meta.workflow.tomte import TomteAnalysisAPI
 
 
 def echo_lines(lines: list[str]) -> None:
@@ -18,4 +24,13 @@ def is_case_name_allowed(name: str) -> bool:
 
 CLICK_CONTEXT_SETTINGS: dict[str, int] = {
     "max_content_width": shutil.get_terminal_size().columns - 10
+}
+
+
+TOWER_WORKFLOW_TO_ANALYSIS_API_MAP: dict = {
+    Workflow.NALLO: NalloAnalysisAPI,
+    Workflow.RAREDISEASE: RarediseaseAnalysisAPI,
+    Workflow.RNAFUSION: RnafusionAnalysisAPI,
+    Workflow.TAXPROFILER: TaxprofilerAnalysisAPI,
+    Workflow.TOMTE: TomteAnalysisAPI,
 }

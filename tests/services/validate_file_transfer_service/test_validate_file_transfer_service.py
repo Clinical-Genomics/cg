@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import pytest
+
 from cg.constants.constants import FileFormat
 from cg.services.validate_file_transfer_service.validate_file_transfer_service import (
     ValidateFileTransferService,
@@ -16,7 +18,7 @@ def test_get_manifest_content(
     # GIVEN a manifest file
 
     # WHEN getting the content of the manifest file
-    manifest_content: any = validate_file_transfer_service.get_manifest_file_content(
+    manifest_content: any = validate_file_transfer_service._get_manifest_file_content(
         manifest_file=manifest_file, manifest_file_format=FileFormat.TXT
     )
 
@@ -31,12 +33,12 @@ def test_get_file_names_from_content(
 ):
     """Test the get file names from content method."""
     # GIVEN a manifest file content
-    manifest_content: dict = validate_file_transfer_service.get_manifest_file_content(
+    manifest_content: dict = validate_file_transfer_service._get_manifest_file_content(
         manifest_file=manifest_file, manifest_file_format=FileFormat.TXT
     )
 
     # WHEN getting the file names from the content
-    file_names: list[str] = validate_file_transfer_service.extract_file_names_from_manifest(
+    file_names: list[str] = validate_file_transfer_service._extract_file_names_from_manifest(
         manifest_content
     )
 
@@ -56,7 +58,7 @@ def test_is_file_in_directory(
     # GIVEN a source directory and a list of file names
     for file_name in expected_file_names_in_manifest:
         # WHEN checking if the file is in the directory
-        is_file_in_directory: bool = validate_file_transfer_service.is_file_in_directory_tree(
+        is_file_in_directory: bool = validate_file_transfer_service._is_file_in_directory_tree(
             file_name=file_name, source_dir=transfer_source_dir
         )
 
@@ -73,14 +75,13 @@ def test_validate_by_manifest_file(
     # GIVEN a manifest file and a source directory
 
     # WHEN validating the files in the manifest file
-    is_valid: bool = validate_file_transfer_service.is_transfer_completed(
+    validate_file_transfer_service.validate_file_transfer(
         manifest_file=manifest_file,
         source_dir=transfer_source_dir,
         manifest_file_format=FileFormat.TXT,
     )
 
-    # THEN assert that the files in the manifest are in the directory
-    assert is_valid
+    # THEN the validation passed
 
 
 def test_validate_by_manifest_file_fail(
@@ -92,14 +93,14 @@ def test_validate_by_manifest_file_fail(
     # GIVEN a manifest file and a source directory
 
     # WHEN validating the files in the manifest file
-    is_valid: bool = validate_file_transfer_service.is_transfer_completed(
-        manifest_file=manifest_file_fail,
-        source_dir=transfer_source_dir,
-        manifest_file_format=FileFormat.TXT,
-    )
 
-    # THEN assert that the files in the manifest are not in the directory
-    assert not is_valid
+    # THEN the validation raises an error
+    with pytest.raises(FileNotFoundError):
+        validate_file_transfer_service.validate_file_transfer(
+            manifest_file=manifest_file_fail,
+            source_dir=transfer_source_dir,
+            manifest_file_format=FileFormat.TXT,
+        )
 
 
 def test_get_manifest_file_paths(
@@ -110,7 +111,7 @@ def test_get_manifest_file_paths(
     validate_file_transfer_service = ValidateFileTransferService()
 
     # WHEN getting the using a pattern
-    manifest_file_paths: list[Path] = validate_file_transfer_service.get_manifest_file_paths(
+    manifest_file_paths: list[Path] = validate_file_transfer_service._get_manifest_file_paths(
         source_dir=transfer_source_dir, pattern="file"
     )
 

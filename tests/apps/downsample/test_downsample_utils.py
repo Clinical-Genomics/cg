@@ -2,6 +2,7 @@ from pathlib import Path
 
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.downsample.utils import store_downsampled_sample_bundle
+from cg.constants import SequencingFileTag
 from cg.models.downsample.downsample_data import DownsampleData
 
 
@@ -33,5 +34,5 @@ def test_add_fastq_files_to_housekeeper(
     )
 
     assert downsample_api.housekeeper_api.get_files(
-        downsample_data.downsampled_sample.internal_id, tags=["fastq"]
+        downsample_data.downsampled_sample.internal_id, tags=[SequencingFileTag.FASTQ]
     )

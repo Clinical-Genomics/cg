@@ -8,13 +8,13 @@ from cg.utils.files import get_all_files_in_dir
 
 def test_flow_cell_is_ready_for_post_processing(
     novaseqx_flow_cell_dir_with_analysis_data: Path,
-    tmp_demultiplexed_runs_flow_cell_directory: Path,
+    tmp_illumina_demultiplexed_runs_directory: Path,
 ):
     # GIVEN a flow cell which is ready for post processing
 
     # WHEN checking if the flow cell is ready for post processing
     is_flow_cell_ready: bool = is_ready_for_post_processing(
-        novaseqx_flow_cell_dir_with_analysis_data, tmp_demultiplexed_runs_flow_cell_directory
+        novaseqx_flow_cell_dir_with_analysis_data, tmp_illumina_demultiplexed_runs_directory
     )
 
     # THEN the flow cell is ready for post processing
@@ -22,13 +22,13 @@ def test_flow_cell_is_ready_for_post_processing(
 
 
 def test_flow_cell_is_not_ready_for_post_processing_without_analysis(
-    novaseqx_flow_cell_analysis_incomplete: Path, tmp_demultiplexed_runs_flow_cell_directory: Path
+    novaseqx_flow_cell_analysis_incomplete: Path, tmp_illumina_demultiplexed_runs_directory: Path
 ):
     # GIVEN a flow cell for which analysis is not completed
 
     # WHEN checking if the flow cell is ready for post processing
     is_flow_cell_ready: bool = is_ready_for_post_processing(
-        novaseqx_flow_cell_analysis_incomplete, tmp_demultiplexed_runs_flow_cell_directory
+        novaseqx_flow_cell_analysis_incomplete, tmp_illumina_demultiplexed_runs_directory
     )
 
     # THEN the flow cell is not ready for post processing
@@ -37,13 +37,13 @@ def test_flow_cell_is_not_ready_for_post_processing_without_analysis(
 
 def test_flow_cell_is_not_ready_for_post_processing_when_not_demultiplexed(
     demultiplex_not_complete_novaseqx_flow_cell: Path,
-    tmp_demultiplexed_runs_flow_cell_directory: Path,
+    tmp_illumina_demultiplexed_runs_directory: Path,
 ):
     # GIVEN a flow cell for which demultiplexing is not completed
 
     # WHEN checking if the flow cell is ready for post processing
     is_flow_cell_ready: bool = is_ready_for_post_processing(
-        demultiplex_not_complete_novaseqx_flow_cell, tmp_demultiplexed_runs_flow_cell_directory
+        demultiplex_not_complete_novaseqx_flow_cell, tmp_illumina_demultiplexed_runs_directory
     )
 
     # THEN the flow cell is not ready for post processing
@@ -51,13 +51,13 @@ def test_flow_cell_is_not_ready_for_post_processing_when_not_demultiplexed(
 
 
 def test_flow_cell_is_not_ready_when_already_post_processed(
-    post_processed_novaseqx_flow_cell: Path, tmp_demultiplexed_runs_flow_cell_directory: Path
+    post_processed_novaseqx_flow_cell: Path, tmp_illumina_demultiplexed_runs_directory: Path
 ):
     # GIVEN a flow cell for which post processing is done
 
     # WHEN checking if the flow cell is ready for post processing
     is_flow_cell_ready: bool = is_ready_for_post_processing(
-        post_processed_novaseqx_flow_cell, tmp_demultiplexed_runs_flow_cell_directory
+        post_processed_novaseqx_flow_cell, tmp_illumina_demultiplexed_runs_directory
     )
 
     # THEN the flow cell is not ready for post processing as the the flow cell has already been post processed
@@ -66,16 +66,16 @@ def test_flow_cell_is_not_ready_when_already_post_processed(
 
 def test_previously_copied_flow_cell_is_not_ready(
     novaseqx_flow_cell_dir_with_analysis_data: Path,
-    tmp_demultiplexed_runs_flow_cell_directory: Path,
+    tmp_illumina_demultiplexed_runs_directory: Path,
 ):
     # GIVEN a flow cell which already exists in demultiplexed runs
     Path(
-        tmp_demultiplexed_runs_flow_cell_directory, novaseqx_flow_cell_dir_with_analysis_data.name
+        tmp_illumina_demultiplexed_runs_directory, novaseqx_flow_cell_dir_with_analysis_data.name
     ).mkdir()
 
     # WHEN checking if the flow cell is ready for post processing
     is_flow_cell_ready: bool = is_ready_for_post_processing(
-        novaseqx_flow_cell_dir_with_analysis_data, tmp_demultiplexed_runs_flow_cell_directory
+        novaseqx_flow_cell_dir_with_analysis_data, tmp_illumina_demultiplexed_runs_directory
     )
 
     # THEN the flow cell is not ready for post processing
@@ -101,17 +101,17 @@ def test_get_latest_analysis_version_path(
 
 
 def test_copy_novaseqx_flow_cell(
-    tmp_demultiplexed_runs_flow_cell_directory: Path,
+    tmp_illumina_demultiplexed_runs_directory: Path,
     novaseqx_flow_cell_dir_with_analysis_data: Path,
     novaseq_x_flow_cell_full_name: str,
 ):
     # GIVEN a demultiplexed runs directory for a NovaseqX flow cell
     demultiplexed_runs_novaseqx_dir: Path = Path(
-        tmp_demultiplexed_runs_flow_cell_directory, novaseq_x_flow_cell_full_name
+        tmp_illumina_demultiplexed_runs_directory, novaseq_x_flow_cell_full_name
     )
     # WHEN copying the flow cell analysis data to demultiplexed runs NovaseqX directory
     hardlink_flow_cell_analysis_data(
-        novaseqx_flow_cell_dir_with_analysis_data, tmp_demultiplexed_runs_flow_cell_directory
+        novaseqx_flow_cell_dir_with_analysis_data, tmp_illumina_demultiplexed_runs_directory
     )
 
     # THEN the data contains everything from the analysis folder

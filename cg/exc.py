@@ -12,6 +12,12 @@ class CgError(Exception):
         super().__init__(message)
 
 
+class AnalysisDoesNotExistError(CgError):
+    """
+    Exception raised when an analysis does not exist.
+    """
+
+
 class AnalysisUploadError(CgError):
     """
     Error related to trying to upload analysis data.
@@ -33,6 +39,12 @@ class AnalysisNotReadyError(CgError):
 class AnalysisNotCompletedError(CgError):
     """
     Exception raised when an analysis has not completed.
+    """
+
+
+class AnalysisAlreadyStoredError(CgError):
+    """
+    Exception raised when trying to store an analysis already stored in StatusDB.
     """
 
 
@@ -60,15 +72,21 @@ class CgDataError(CgError):
     """
 
 
+class SampleNotFoundError(CgDataError):
+    """
+    Exception raised when a sample is not found.
+    """
+
+
 class ChecksumFailedError(CgError):
     """
     Exception raised when the checksums of two files are not equal.
     """
 
 
-class CleanFlowCellFailedError(CgError):
+class IlluminaCleanRunError(CgError):
     """
-    Exception raised when the cleaning of a flow cell failed.
+    Exception raised when the cleaning of an Illumina run failed.
     """
 
 
@@ -98,15 +116,19 @@ class FlowCellError(CgError):
     """Raised when there is a problem with a flow cell."""
 
 
-class FlowCellsNeededError(CgError):
+class AuthorisationError(CgError):
+    """Raised when a forbidden transaction is attempted by an external user."""
+
+
+class IlluminaRunsNeededError(CgError):
     """Raised when fetching flow cells still needed to start analysis."""
 
 
-class FlowCellEncryptionError(CgError):
+class IlluminaRunEncryptionError(CgError):
     """Raised when there is a problem with encrypting a flow cell."""
 
 
-class FlowCellAlreadyBackedUpError(CgError):
+class IlluminaRunAlreadyBackedUpError(CgError):
     """Raised when a flow cell is already backed-up."""
 
 
@@ -168,6 +190,12 @@ class OrderError(CgError):
     """
 
 
+class OrderSubmissionError(CgError):
+    """
+    Exception related to order submission.
+    """
+
+
 class OrderFormError(CgError):
     """
     Exception related to the order form.
@@ -188,8 +216,16 @@ class RunParametersError(CgError):
     """Raised when something is wrong with the run parameters file."""
 
 
-class SampleSheetError(CgError):
+class NfSampleSheetError(CgError):
     """Raised when something is wrong with the sample sheet."""
+
+
+class SampleSheetContentError(CgError):
+    """Raised when something is wrong with the sample sheet content."""
+
+
+class SampleSheetFormatError(CgError):
+    """Raised when something is wrong with the sample sheet format."""
 
 
 class ScoutUploadError(CgError):
@@ -268,6 +304,10 @@ class MissingMetrics(CgError):
     """Exception raised when mandatory metrics are missing."""
 
 
+class MissingSequencingMetricsError(CgError):
+    """Exception raised when sequencing metrics are missing."""
+
+
 class ArchiveJobFailedError(CgError):
     """Exception raised when an archival or retrieval job has failed."""
 
@@ -278,10 +318,6 @@ class XMLError(CgError):
 
 class OrderNotFoundError(CgError):
     """Exception raised when an order is not found."""
-
-
-class OrderExistsError(CgError):
-    """Exception raised when cases and samples are added to a pre-existing order."""
 
 
 class OrderMismatchError(CgError):
@@ -298,3 +334,15 @@ class DeliveryMessageNotSupportedError(CgError):
 
 class OverrideCyclesError(CgError):
     """Exception raised when the override cycles are not correct."""
+
+
+class Chanjo2APIClientError(CgError):
+    """Exception related to the Chanjo2 API client."""
+
+
+class Chanjo2RequestError(Chanjo2APIClientError):
+    """Exception raised when a request to the Chanjo2 API client fails."""
+
+
+class Chanjo2ResponseError(Chanjo2APIClientError):
+    """Exception raised when the response from Chanjo2 API client fails validation."""

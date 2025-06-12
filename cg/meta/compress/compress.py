@@ -14,7 +14,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
-from cg.models import CompressionData
+from cg.models.compression_data import CompressionData
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ class CompressAPI:
 
     def compress_fastq(self, sample_id: str) -> bool:
         """Compress the FASTQ files for an individual."""
-        LOG.info(f"Check if FASTQ compression is possible for {sample_id}")
+        LOG.debug(f"Check if FASTQ compression is possible for {sample_id}")
         version: Version = self.hk_api.get_latest_bundle_version(bundle_name=sample_id)
         if not version:
             return False
@@ -92,7 +92,7 @@ class CompressAPI:
         if self._is_spring_archived(compression):
             LOG.debug(f"Found archived Spring file for {sample_id} - compression not possible")
             return False
-        return self.crunchy_api.is_fastq_compression_possible(compression_obj=compression)
+        return compression.is_fastq_compression_possible
 
     def _is_spring_archived(self, compression_data: CompressionData) -> bool:
         spring_file: File | None = self.hk_api.get_file_insensitive_path(
@@ -119,11 +119,9 @@ class CompressAPI:
 
         compressions: list[CompressionData] = files.get_spring_paths(version_obj=version)
         for compression in compressions:
-            if not self.crunchy_api.is_spring_decompression_possible(compression_obj=compression):
+            if not compression.is_spring_decompression_possible:
                 LOG.info(f"SPRING to FASTQ decompression not possible for {sample_id}")
-                if self.crunchy_api.is_compression_pending(
-                    compression
-                ) or self.crunchy_api.is_spring_decompression_done(compression):
+                if compression.is_compression_pending or compression.is_spring_decompression_done:
                     LOG.info(
                         f"Spring file {compression.spring_path.as_posix()} is already being decompressed."
                     )
@@ -152,7 +150,7 @@ class CompressAPI:
         This means removing compressed FASTQ files and update housekeeper to point to the new SPRING
         file and its metadata file.
         """
-        LOG.info(f"Clean FASTQ files for {sample_id}")
+        LOG.debug(f"Clean FASTQ files for {sample_id}")
         version: Version = self.hk_api.get_latest_bundle_version(bundle_name=sample_id)
         if not version:
             return False
@@ -166,19 +164,23 @@ class CompressAPI:
         all_cleaned: bool = True
         for run_name in sample_fastq:
             compression: CompressionData = sample_fastq[run_name]["compression_data"]
+            fastq_first: File = sample_fastq[run_name]["hk_first"]
+            fastq_second: File = sample_fastq[run_name]["hk_second"]
 
-            if not self.crunchy_api.is_fastq_compression_done(compression=compression):
-                LOG.info(f"FASTQ compression not done for sample {sample_id}, run {run_name}")
+            if not self._can_fastqs_be_removed(compression):
+                LOG.info(
+                    f"FASTQ compression not done for sample {sample_id}, run {run_name}, and spring files are not archived."
+                )
                 all_cleaned = False
                 continue
 
-            LOG.info(f"FASTQ compression done for sample {sample_id}, run {run_name}!")
+            LOG.info(f"FASTQs are ready to be removed for sample {sample_id}, run {run_name}!")
 
             self.update_fastq_hk(
                 sample_id=sample_id,
                 compression_obj=compression,
-                hk_fastq_first=sample_fastq[run_name]["hk_first"],
-                hk_fastq_second=sample_fastq[run_name]["hk_second"],
+                hk_fastq_first=fastq_first,
+                hk_fastq_second=fastq_second,
                 archive_location=archive_location,
             )
 
@@ -193,6 +195,16 @@ class CompressAPI:
             )
         return all_cleaned
 
+    def _can_fastqs_be_removed(self, compression_data: CompressionData) -> bool:
+        is_fastq_compression_done: bool = compression_data.is_fastq_compression_done
+        spring_file: File | None = self.hk_api.get_file_insensitive_path(
+            compression_data.spring_path
+        )
+        is_spring_archived: bool = (
+            spring_file and spring_file.archive and spring_file.archive.archived_at
+        )
+        return is_fastq_compression_done or is_spring_archived
+
     def add_decompressed_fastq(self, sample: Sample) -> bool:
         """Adds unpacked FASTQ files to Housekeeper."""
         LOG.info(f"Adds FASTQ to Housekeeper for {sample.internal_id}")
@@ -204,7 +216,7 @@ class CompressAPI:
         if not spring_paths:
             LOG.warning(f"Could not find any spring paths for {sample.internal_id}")
         for compression in spring_paths:
-            if not self.crunchy_api.is_spring_decompression_done(compression):
+            if not compression.is_spring_decompression_done:
                 LOG.info(f"SPRING to FASTQ decompression not finished {sample.internal_id}")
                 return False
 

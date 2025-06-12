@@ -45,7 +45,7 @@ class SequencingFileTag(StrEnum):
     SPRING_METADATA: str = "spring-metadata"
 
 
-HK_MULTIQC_HTML_TAG = ["multiqc-html"]
+HK_MULTIQC_HTML_TAG = "multiqc-html"
 
 HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]
 
@@ -57,6 +57,7 @@ class HermesFileTag(StrEnum):
 
     CLINICAL_DELIVERY: str = "clinical-delivery"
     LONG_TERM_STORAGE: str = "long-term-storage"
+    SCOUT: str = "scout"
 
 
 class AnalysisTag(StrEnum):
@@ -64,6 +65,11 @@ class AnalysisTag(StrEnum):
 
     ARRIBA: str = "arriba"
     ARRIBA_VISUALIZATION: str = "arriba-visualisation"
+    BED: str = "bed"
+    BIGWIG: str = "bigwig"
+    CLINICAL: str = "clinical"
+    COVERAGE: str = "coverage"
+    FRASER: str = "fraser"
     FUSION: str = "fusion"
     FUSIONCATCHER: str = "fusioncatcher"
     FUSIONCATCHER_SUMMARY: str = "fusioncatcher-summary"
@@ -71,11 +77,20 @@ class AnalysisTag(StrEnum):
     FUSIONINSPECTOR_HTML: str = "fusioninspector-html"
     FUSIONREPORT: str = "fusionreport"
     GENE_COUNTS: str = "gene-counts"
+    JUNCTION: str = "junction"
     MULTIQC_HTML: str = "multiqc-html"
+    OUTRIDER: str = "outrider"
+    REPEATS: str = "repeats"
     RESEARCH: str = "research"
     RNA: str = "rna"
+    SMN_CALLING: str = "smn-calling"
     STARFUSION: str = "star-fusion"
     VCF_FUSION: str = "vcf-fusion"
+    VCF_SNV: str = "vcf-snv"
+    VCF_SNV_CLINICAL: str = "vcf-snv-clinical"
+    VCF_STR: str = "vcf-str"
+    VCF_SV_CLINICAL: str = "vcf-sv-clinical"
+    VCF_SV: str = "vcf-sv"
 
 
 class HkMipAnalysisTag:
@@ -84,14 +99,31 @@ class HkMipAnalysisTag:
     SAMPLE_INFO: list[str] = ["sample-info"]
 
 
+class NFAnalysisTags:
+    MANIFEST: str = "manifest"
+
+
 class BalsamicAnalysisTag:
     CONFIG: list[str] = ["balsamic-config"]
     QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
 
 
+class NalloAnalysisTag:
+    HAPLOTAGS: str = "haplotags"
+    PARAPHASE: str = "paraphase"
+
+
+class HkAnalysisMetricsTag:
+    QC_METRICS: set[str] = {"qc-metrics", "deliverable"}
+
+
 class GensAnalysisTag:
     COVERAGE: list[str] = ["gens", "coverage", "bed"]
     FRACSNP: list[str] = ["gens", "fracsnp", "bed"]
+
+
+class GenotypeAnalysisTag:
+    GENOTYPE: str = "genotype"
 
 
 class BalsamicProtectedTags:
@@ -123,19 +155,18 @@ class BalsamicProtectedTags:
 
 WORKFLOW_PROTECTED_TAGS = {
     Workflow.BALSAMIC: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
-    Workflow.BALSAMIC_QC: BalsamicProtectedTags.QC,
     Workflow.BALSAMIC_PON: [],
     Workflow.BALSAMIC_UMI: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
-    Workflow.FASTQ: [],
     Workflow.FLUFFY: ["NIPT_csv", "MultiQC"],
     Workflow.MICROSALT: [
-        ["microsalt-log"],
+        ["assembly"],
         ["config"],
+        ["microsalt-log"],
+        ["microsalt-config"],
+        ["microsalt-version"],
         ["qc-report", "visualization"],
         ["typing-report", "visualization"],
         ["typing-report", "qc-metrics"],
-        ["microsalt-config"],
-        ["assembly"],
     ],
     Workflow.MIP_DNA: [
         ["vcf-snv-clinical"],
@@ -202,18 +233,23 @@ WORKFLOW_PROTECTED_TAGS = {
         ["gisaid-log"],
         ["gisaid-csv"],
     ],
+    Workflow.RAREDISEASE: [
+        [HermesFileTag.LONG_TERM_STORAGE],
+    ],
+    Workflow.RAW_DATA: [],
     Workflow.RNAFUSION: [
-        [AnalysisTag.FUSION, AnalysisTag.ARRIBA],
-        [AnalysisTag.FUSION, AnalysisTag.STARFUSION],
-        [AnalysisTag.FUSION, AnalysisTag.FUSIONCATCHER],
-        [AnalysisTag.FUSIONINSPECTOR],
-        [AnalysisTag.FUSIONREPORT, AnalysisTag.RESEARCH],
-        [AnalysisTag.FUSIONINSPECTOR_HTML, AnalysisTag.RESEARCH],
-        [AnalysisTag.ARRIBA_VISUALIZATION, AnalysisTag.RESEARCH],
-        [AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA],
-        [HK_DELIVERY_REPORT_TAG],
-        [AnalysisTag.VCF_FUSION],
-        [AnalysisTag.GENE_COUNTS],
+        [HermesFileTag.LONG_TERM_STORAGE],
+        [AnalysisTag.FUSION, AnalysisTag.ARRIBA],  # legacy
+        [AnalysisTag.FUSION, AnalysisTag.STARFUSION],  # legacy
+        [AnalysisTag.FUSION, AnalysisTag.FUSIONCATCHER],  # legacy
+        [AnalysisTag.FUSIONINSPECTOR],  # legacy
+        [AnalysisTag.FUSIONREPORT, AnalysisTag.RESEARCH],  # legacy
+        [AnalysisTag.FUSIONINSPECTOR_HTML, AnalysisTag.RESEARCH],  # legacy
+        [AnalysisTag.ARRIBA_VISUALIZATION, AnalysisTag.RESEARCH],  # legacy
+        [AnalysisTag.MULTIQC_HTML, AnalysisTag.RNA],  # legacy
+        [HK_DELIVERY_REPORT_TAG],  # legacy
+        [AnalysisTag.VCF_FUSION],  # legacy
+        [AnalysisTag.GENE_COUNTS],  # legacy
     ],
     Workflow.TAXPROFILER: [
         [HermesFileTag.LONG_TERM_STORAGE],
@@ -241,3 +277,8 @@ class JanusTags:
         "star",
         "general-stats",
     ]
+
+
+class FohmTag(StrEnum):
+    COMPLEMENTARY = "komplettering"
+    PANGOLIN_TYPING = "pangolin-typing-fohm"

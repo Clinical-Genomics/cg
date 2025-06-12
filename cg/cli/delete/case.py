@@ -3,7 +3,7 @@
 import datetime
 import logging
 
-import click
+import rich_click as click
 
 from cg.cli.get import get_case as print_case
 from cg.constants.cli_options import DRY_RUN, SKIP_CONFIRMATION
@@ -18,7 +18,7 @@ LOG = logging.getLogger(__name__)
 @DRY_RUN
 @SKIP_CONFIRMATION
 @click.pass_context
-def delete_case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
+def delete_case(context: click.Context, case_id: str, dry_run: bool, skip_confirmation: bool):
     """Delete case with links and samples.
 
     The command will stop if the case has any analyses made on it.
@@ -40,13 +40,15 @@ def delete_case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
     context.invoke(print_case, case_ids=[case_id])
 
     if case.links and not (
-        yes or click.confirm(f"Case {case_id} has links: {case.links}, continue?")
+        skip_confirmation or click.confirm(f"Case {case_id} has links: {case.links}, continue?")
     ):
         raise click.Abort
 
-    _delete_links_and_samples(case_obj=case, dry_run=dry_run, status_db=status_db, yes=yes)
+    _delete_links_and_samples(
+        case_obj=case, dry_run=dry_run, status_db=status_db, skip_confirmation=skip_confirmation
+    )
 
-    if not (yes or click.confirm(f"Do you want to DELETE case: {case}?")):
+    if not (skip_confirmation or click.confirm(f"Do you want to DELETE case: {case}?")):
         raise click.Abort
 
     if dry_run:
@@ -58,11 +60,13 @@ def delete_case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
     status_db.session.commit()
 
 
-def _delete_links_and_samples(case_obj: Case, dry_run: bool, status_db: Store, yes: bool):
+def _delete_links_and_samples(
+    case_obj: Case, dry_run: bool, status_db: Store, skip_confirmation: bool
+):
     """Delete all links from a case to samples"""
     samples_to_delete: list[Sample] = []
     for case_link in case_obj.links:
-        if not (yes or click.confirm(f"Do you want to DELETE link: {case_link}?")):
+        if not (skip_confirmation or click.confirm(f"Do you want to DELETE link: {case_link}?")):
             raise click.Abort
 
         samples_to_delete.append(case_link.sample)
@@ -75,10 +79,12 @@ def _delete_links_and_samples(case_obj: Case, dry_run: bool, status_db: Store, y
             status_db.session.commit()
 
     for sample in samples_to_delete:
-        _delete_sample(dry_run=dry_run, sample=sample, status_db=status_db, yes=yes)
+        _delete_sample(
+            dry_run=dry_run, sample=sample, status_db=status_db, skip_confirmation=skip_confirmation
+        )
 
 
-def _delete_sample(dry_run: bool, sample: Sample, status_db: Store, yes: bool):
+def _delete_sample(dry_run: bool, sample: Sample, status_db: Store, skip_confirmation: bool):
     if _has_sample_been_lab_processed(sample):
         _log_sample_process_information(sample)
         return
@@ -89,7 +95,7 @@ def _delete_sample(dry_run: bool, sample: Sample, status_db: Store, yes: bool):
         return
 
     if not (
-        yes
+        skip_confirmation
         or click.confirm(
             f"Sample {sample.internal_id} is not linked to anything, "
             f"do you want to DELETE sample:"

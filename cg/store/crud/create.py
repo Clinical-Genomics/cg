@@ -1,3 +1,5 @@
+"""Handler to create data objects."""
+
 import logging
 from datetime import datetime
 
@@ -5,16 +7,22 @@ import petname
 from sqlalchemy import Insert
 from sqlalchemy.orm import Session
 
-from cg.constants import DataDelivery, FlowCellStatus, Priority, Workflow
+from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
-from cg.models.orders.order import OrderIn
-from cg.services.illumina_services.illumina_metrics_service.models import (
+from cg.models.orders.constants import OrderType
+from cg.services.illumina.data_transfer.models import (
     IlluminaFlowCellDTO,
     IlluminaSampleSequencingMetricsDTO,
     IlluminaSequencingRunDTO,
 )
-from cg.store.base import BaseHandler
+from cg.services.run_devices.pacbio.data_transfer_service.dto import (
+    PacBioSampleSequencingMetricsDTO,
+    PacBioSequencingRunDTO,
+    PacBioSMRTCellDTO,
+)
+from cg.store.crud.read import ReadHandler
 from cg.store.database import get_session
+from cg.store.exc import EntryAlreadyExistsError, EntryNotFoundError
 from cg.store.models import (
     Analysis,
     Application,
@@ -26,17 +34,19 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
-    Flowcell,
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
     Invoice,
     Order,
+    OrderTypeApplication,
     Organism,
+    PacbioSampleSequencingMetrics,
+    PacbioSequencingRun,
+    PacbioSMRTCell,
     Panel,
     Pool,
     Sample,
-    SampleLaneSequencingMetrics,
     User,
     order_case,
 )
@@ -44,7 +54,7 @@ from cg.store.models import (
 LOG = logging.getLogger(__name__)
 
 
-class CreateHandler(BaseHandler):
+class CreateMixin(ReadHandler):
     """Methods related to adding new data to the store."""
 
     def generate_readable_sample_id(self) -> str:
@@ -121,6 +131,15 @@ class CreateHandler(BaseHandler):
             **kwargs,
         )
 
+    def link_order_types_to_application(
+        self, application: Application, order_types: list[OrderType]
+    ) -> list[OrderTypeApplication]:
+        new_orders: list = []
+        for order_type in order_types:
+            new_record = OrderTypeApplication(application=application, order_type=order_type)
+            new_orders.append(new_record)
+        return new_orders
+
     def add_application_version(
         self,
         application: Application,
@@ -191,6 +210,7 @@ class CreateHandler(BaseHandler):
         received: datetime = None,
         original_ticket: str = None,
         tumour: bool = False,
+        subject_id: str = None,
         **kwargs,
     ) -> Sample:
         """Build a new Sample record."""
@@ -212,6 +232,7 @@ class CreateHandler(BaseHandler):
             priority=priority,
             received_at=received,
             sex=sex,
+            subject_id=subject_id,
             **kwargs,
         )
 
@@ -226,11 +247,13 @@ class CreateHandler(BaseHandler):
         priority: Priority | None = Priority.standard,
         synopsis: str | None = None,
         customer_id: int | None = None,
+        comment: str | None = None,
     ) -> Case:
         """Build a new Case record."""
 
         internal_id: str = self.generate_readable_case_id()
         return Case(
+            comment=comment,
             cohorts=cohorts,
             data_analysis=str(data_analysis),
             data_delivery=str(data_delivery),
@@ -260,33 +283,15 @@ class CreateHandler(BaseHandler):
         new_record.father = father
         return new_record
 
-    def add_flow_cell(
-        self,
-        flow_cell_name: str,
-        sequencer_name: str,
-        sequencer_type: str,
-        date: datetime,
-        flow_cell_status: str | None = FlowCellStatus.ON_DISK,
-        has_backup: bool | None = False,
-    ) -> Flowcell:
-        """Build a new Flowcell record."""
-        return Flowcell(
-            name=flow_cell_name,
-            sequencer_name=sequencer_name,
-            sequencer_type=sequencer_type,
-            sequenced_at=date,
-            status=flow_cell_status,
-            has_backup=has_backup,
-        )
-
     def add_analysis(
         self,
         workflow: Workflow,
-        version: str = None,
-        completed_at: datetime = None,
+        version: str | None = None,
+        completed_at: datetime | None = None,
         primary: bool = False,
-        uploaded: datetime = None,
-        started_at: datetime = None,
+        uploaded: datetime | None = None,
+        started_at: datetime | None = None,
+        comment: str | None = None,
         **kwargs,
     ) -> Analysis:
         """Build a new Analysis record."""
@@ -297,6 +302,7 @@ class CreateHandler(BaseHandler):
             is_primary=primary,
             uploaded_at=uploaded,
             started_at=started_at,
+            comment=comment,
             **kwargs,
         )
 
@@ -395,27 +401,14 @@ class CreateHandler(BaseHandler):
             **kwargs,
         )
 
-    def add_sample_lane_sequencing_metrics(
-        self, flow_cell_name: str, sample_internal_id: str, **kwargs
-    ) -> SampleLaneSequencingMetrics:
-        """Add a new SampleLaneSequencingMetrics record."""
-        return SampleLaneSequencingMetrics(
-            flow_cell_name=flow_cell_name,
-            sample_internal_id=sample_internal_id,
+    def add_order(self, customer: Customer, ticket_id: int, **kwargs) -> Order:
+        """Build a new Order record."""
+        order = Order(
+            customer=customer,
+            order_date=datetime.now(),
+            ticket_id=ticket_id,
             **kwargs,
         )
-
-    def add_order(self, order_data: OrderIn):
-        customer: Customer = self.get_customer_by_internal_id(order_data.customer)
-        workflow: str = order_data.samples[0].data_analysis
-        order = Order(
-            customer_id=customer.id,
-            ticket_id=order_data.ticket,
-            workflow=workflow,
-        )
-        session: Session = get_session()
-        session.add(order)
-        session.commit()
         return order
 
     @staticmethod
@@ -427,16 +420,18 @@ class CreateHandler(BaseHandler):
 
     def add_illumina_flow_cell(self, flow_cell_dto: IlluminaFlowCellDTO) -> IlluminaFlowCell:
         """Add a new Illumina flow cell to the status database as a pending transaction."""
-        if self.get_illumina_flow_cell_by_internal_id(flow_cell_dto.internal_id):
-            raise ValueError(f"Flow cell with {flow_cell_dto.internal_id} already exists.")
-        new_flow_cell = IlluminaFlowCell(
-            internal_id=flow_cell_dto.internal_id,
-            type=flow_cell_dto.type,
-            model=flow_cell_dto.model,
-        )
-        self.session.add(new_flow_cell)
-        LOG.debug(f"Flow cell added to status db: {new_flow_cell.id}.")
-        return new_flow_cell
+        try:
+            self.get_illumina_flow_cell_by_internal_id(flow_cell_dto.internal_id)
+        except EntryNotFoundError:
+            new_flow_cell = IlluminaFlowCell(
+                internal_id=flow_cell_dto.internal_id,
+                type=flow_cell_dto.type,
+                model=flow_cell_dto.model,
+            )
+            self.add_item_to_store(new_flow_cell)
+            LOG.debug(f"Flow cell added to status db: {new_flow_cell.internal_id}.")
+            return new_flow_cell
+        raise EntryAlreadyExistsError(f"Flow cell already exists: {flow_cell_dto.internal_id}")
 
     def add_illumina_sequencing_run(
         self, sequencing_run_dto: IlluminaSequencingRunDTO, flow_cell: IlluminaFlowCell
@@ -465,8 +460,8 @@ class CreateHandler(BaseHandler):
             demultiplexing_started_at=sequencing_run_dto.demultiplexing_started_at,
             demultiplexing_completed_at=sequencing_run_dto.demultiplexing_completed_at,
         )
-        self.session.add(new_sequencing_run)
-        LOG.debug(f"Sequencing run added to status db: {new_sequencing_run.id}.")
+        self.add_item_to_store(new_sequencing_run)
+        LOG.debug(f"Sequencing run added to status db: {new_sequencing_run.device.internal_id}.")
         return new_sequencing_run
 
     def add_illumina_sample_metrics_entry(
@@ -477,6 +472,9 @@ class CreateHandler(BaseHandler):
         transaction.
         """
         sample: Sample = self.get_sample_by_internal_id(metrics_dto.sample_id)
+        if not sample:
+            self.rollback()
+            raise EntryNotFoundError(f"Sample not found: {metrics_dto.sample_id}")
         new_metric = IlluminaSampleSequencingMetrics(
             sample=sample,
             instrument_run=sequencing_run,
@@ -489,5 +487,83 @@ class CreateHandler(BaseHandler):
             yield_q30=metrics_dto.yield_q30,
             created_at=metrics_dto.created_at,
         )
-        self.session.add(new_metric)
+        self.add_item_to_store(new_metric)
         return new_metric
+
+    def create_pac_bio_smrt_cell(self, run_device_dto: PacBioSMRTCellDTO) -> PacbioSMRTCell:
+        LOG.debug(f"Creating Pacbio SMRT cell for {run_device_dto.internal_id}")
+        if self.get_pac_bio_smrt_cell_by_internal_id(run_device_dto.internal_id):
+            raise ValueError(f"SMRT cell with {run_device_dto.internal_id} already exists.")
+        new_smrt_cell = PacbioSMRTCell(
+            type=run_device_dto.type, internal_id=run_device_dto.internal_id
+        )
+        self.add_item_to_store(new_smrt_cell)
+        return new_smrt_cell
+
+    def create_pac_bio_sequencing_run(
+        self, sequencing_run_dto: PacBioSequencingRunDTO, smrt_cell: PacbioSMRTCell
+    ) -> PacbioSequencingRun:
+        LOG.debug(f"Creating Pacbio sequencing run for SMRT cell {smrt_cell.internal_id}")
+        new_sequencing_run = PacbioSequencingRun(
+            type=sequencing_run_dto.type,
+            well=sequencing_run_dto.well,
+            plate=sequencing_run_dto.plate,
+            run_name=sequencing_run_dto.run_name,
+            movie_name=sequencing_run_dto.movie_name,
+            started_at=sequencing_run_dto.started_at,
+            completed_at=sequencing_run_dto.completed_at,
+            hifi_reads=sequencing_run_dto.hifi_reads,
+            hifi_yield=sequencing_run_dto.hifi_yield,
+            hifi_mean_read_length=sequencing_run_dto.hifi_mean_read_length,
+            hifi_median_read_quality=sequencing_run_dto.hifi_median_read_quality,
+            percent_reads_passing_q30=sequencing_run_dto.percent_reads_passing_q30,
+            productive_zmws=sequencing_run_dto.productive_zmws,
+            p0_percent=sequencing_run_dto.p0_percent,
+            p1_percent=sequencing_run_dto.p1_percent,
+            p2_percent=sequencing_run_dto.p2_percent,
+            polymerase_mean_read_length=sequencing_run_dto.polymerase_mean_read_length,
+            polymerase_read_length_n50=sequencing_run_dto.polymerase_read_length_n50,
+            polymerase_mean_longest_subread=sequencing_run_dto.polymerase_mean_longest_subread,
+            polymerase_longest_subread_n50=sequencing_run_dto.polymerase_longest_subread_n50,
+            control_reads=sequencing_run_dto.control_reads,
+            control_mean_read_length=sequencing_run_dto.control_mean_read_length,
+            control_mean_read_concordance=sequencing_run_dto.control_mean_read_concordance,
+            control_mode_read_concordance=sequencing_run_dto.control_mode_read_concordance,
+            failed_reads=sequencing_run_dto.failed_reads,
+            failed_yield=sequencing_run_dto.failed_yield,
+            failed_mean_read_length=sequencing_run_dto.failed_mean_read_length,
+            barcoded_hifi_reads=sequencing_run_dto.barcoded_hifi_reads,
+            barcoded_hifi_reads_percentage=sequencing_run_dto.barcoded_hifi_reads_percentage,
+            barcoded_hifi_yield=sequencing_run_dto.barcoded_hifi_yield,
+            barcoded_hifi_yield_percentage=sequencing_run_dto.barcoded_hifi_yield_percentage,
+            barcoded_hifi_mean_read_length=sequencing_run_dto.barcoded_hifi_mean_read_length,
+            unbarcoded_hifi_reads=sequencing_run_dto.unbarcoded_hifi_reads,
+            unbarcoded_hifi_yield=sequencing_run_dto.unbarcoded_hifi_yield,
+            unbarcoded_hifi_mean_read_length=sequencing_run_dto.unbarcoded_hifi_mean_read_length,
+            device=smrt_cell,
+        )
+        self.add_item_to_store(new_sequencing_run)
+        return new_sequencing_run
+
+    def create_pac_bio_sample_sequencing_run(
+        self,
+        sample_run_metrics_dto: PacBioSampleSequencingMetricsDTO,
+        sequencing_run: PacbioSequencingRun,
+    ) -> PacbioSampleSequencingMetrics:
+        sample_id: str = sample_run_metrics_dto.sample_internal_id
+        LOG.debug(f"Creating Pacbio sample sequencing metric for sample {sample_id}")
+        sample: Sample = self.get_sample_by_internal_id(sample_id)
+        if not sample:
+            self.rollback()
+            raise EntryNotFoundError(f"Sample not found: {sample_id}")
+        new_sample_sequencing_run = PacbioSampleSequencingMetrics(
+            sample=sample,
+            hifi_reads=sample_run_metrics_dto.hifi_reads,
+            hifi_yield=sample_run_metrics_dto.hifi_yield,
+            hifi_mean_read_length=sample_run_metrics_dto.hifi_mean_read_length,
+            hifi_median_read_quality=sample_run_metrics_dto.hifi_median_read_quality,
+            instrument_run=sequencing_run,
+            polymerase_mean_read_length=sample_run_metrics_dto.polymerase_mean_read_length,
+        )
+        self.add_item_to_store(new_sample_sequencing_run)
+        return new_sample_sequencing_run

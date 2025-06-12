@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 
 from cg.apps.environ import environ_email
 from cg.cli.utils import echo_lines
@@ -19,7 +19,7 @@ from cg.cli.workflow.mip.options import (
     START_WITH_PROGRAM,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.cli_options import DRY_RUN
+from cg.constants.cli_options import DRY_RUN, LIMIT
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -139,11 +139,10 @@ def run(
         return
 
     try:
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-        analysis_api.set_statusdb_action(case_id=case_id, action="running")
+        analysis_api.on_analysis_started(case_id=case_id)
         LOG.info(f"{analysis_api.workflow} run started!")
-    except CgError as error:
-        LOG.error(error)
+    except Exception as error:
+        LOG.error(f"Database error, unable to update analysis for case {case_id}: {error}")
         raise click.Abort
 
 
@@ -199,14 +198,15 @@ def start(
 
 @click.command("start-available")
 @DRY_RUN
+@LIMIT
 @click.pass_context
-def start_available(context: click.Context, dry_run: bool = False):
+def start_available(context: click.Context, dry_run: bool = False, limit: int | None = None):
     """Start full analysis workflow for all cases ready for analysis."""
 
     analysis_api: MipAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case in analysis_api.get_cases_ready_for_analysis():
+    for case in analysis_api.get_cases_ready_for_analysis(limit=limit):
         try:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:

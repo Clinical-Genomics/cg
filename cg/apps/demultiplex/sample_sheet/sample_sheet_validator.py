@@ -7,15 +7,15 @@ from pydantic import ValidationError
 
 from cg.apps.demultiplex.sample_sheet.override_cycles_validator import OverrideCyclesValidator
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_flow_cell_samples_from_content,
+    get_samples_from_content,
     get_raw_samples_from_content,
     validate_samples_unique_per_lane,
 )
-from cg.apps.demultiplex.sample_sheet.sample_models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import NAME_TO_INDEX_SETTINGS, SampleSheetBCLConvertSections
-from cg.exc import OverrideCyclesError, SampleSheetError
+from cg.exc import OverrideCyclesError, SampleSheetContentError, SampleSheetFormatError
 from cg.io.controller import ReadFile
 
 LOG = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ class SampleSheetValidator:
             - BCLConvert Settings
             - BCLConvert Data
         Raises:
-            SampleSheetError if the sample sheet does not have all the sections.
+            SampleSheetFormatError if the sample sheet does not have all the sections.
         """
         LOG.debug("Validating that the sample sheet has all the necessary sections")
         has_header: bool = [SampleSheetBCLConvertSections.Header.HEADER] in self.content
@@ -55,12 +55,14 @@ class SampleSheetValidator:
         if not all([has_header, has_cycles, has_settings, has_data]):
             message: str = "Sample sheet does not have all the necessary sections"
             LOG.error(message)
-            raise SampleSheetError(message)
+            raise SampleSheetFormatError(message)
 
     def _get_index_settings_name(self) -> str:
         """
         Find the entry in the sample sheet holding the index settings name, which has the form:
         `IndexSettings,<index_setting_name>`, and extract its value.
+        Raises:
+            SampleSheetFormatError if the index settings are not found in the sample sheet.
         """
 
         for row in self.content:
@@ -69,7 +71,7 @@ class SampleSheetValidator:
                 return row[1]
         message: str = "No index settings found in sample sheet"
         LOG.error(message)
-        raise SampleSheetError(message)
+        raise SampleSheetFormatError(message)
 
     def _set_is_index2_reverse_complement(self) -> None:
         """Return whether the index2 override cycles value is reverse-complemented."""
@@ -84,7 +86,7 @@ class SampleSheetValidator:
         Return the cycle from the sample sheet given the cycle name. Set nullable to True to
         return None if the cycle is not found.
         Raises:
-            SampleSheetError if the cycle is not found and nullable is False.
+            SampleSheetFormatError if the cycle is not found and nullable is False.
         """
         for row in self.content:
             if cycle_name in row:
@@ -92,7 +94,7 @@ class SampleSheetValidator:
         if not nullable:
             message: str = f"No {cycle_name} found in sample sheet"
             LOG.error(message)
-            raise SampleSheetError(message)
+            raise SampleSheetFormatError(message)
 
     def _set_cycles(self):
         """Set values to the run cycle attributes."""
@@ -113,12 +115,12 @@ class SampleSheetValidator:
         """
         LOG.debug("Validating samples")
         try:
-            validated_samples: list[FlowCellSample] = get_flow_cell_samples_from_content(
+            validated_samples: list[IlluminaSampleIndexSetting] = get_samples_from_content(
                 sample_sheet_content=self.content
             )
         except ValidationError as error:
             LOG.error("Sample sheet failed validation: samples are not in the correct format")
-            raise SampleSheetError from error
+            raise SampleSheetContentError from error
         validate_samples_unique_per_lane(validated_samples)
 
     def _validate_override_cycles(self) -> None:
@@ -139,7 +141,7 @@ class SampleSheetValidator:
             try:
                 validator.validate_sample(sample)
             except OverrideCyclesError as error:
-                raise SampleSheetError from error
+                raise SampleSheetContentError from error
 
     def validate_sample_sheet_from_content(self, content: list[list[str]]) -> None:
         """
@@ -150,7 +152,8 @@ class SampleSheetValidator:
         - The samples have the correct attributes
         - The override cycles are valid
         Raises:
-            SampleSheetError: If the sample sheet is not valid.
+            SampleSheetError: If the sample sheet content is wrong.
+            SampleSheetFormatError: If the sample sheet format is wrong.
         """
         self.set_sample_sheet_content(content)
         LOG.debug("Validating sample sheet")
@@ -178,5 +181,5 @@ class SampleSheetValidator:
             SampleSheetError: If the sample sheet is not valid.
         """
         self.validate_sample_sheet_from_file(file_path)
-        samples: list[FlowCellSample] = get_flow_cell_samples_from_content(self.content)
+        samples: list[IlluminaSampleIndexSetting] = get_samples_from_content(self.content)
         return SampleSheet(samples=samples)

@@ -6,7 +6,7 @@ from cg.cli.workflow.fluffy.base import create_samplesheet
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Flowcell, Sample
+from cg.store.models import IlluminaSequencingRun, Sample
 
 
 def test_create_samplesheet_dry(
@@ -110,10 +110,12 @@ def test_create_fluffy_samplesheet_from_bcl_convert_sample_sheet(
     # GIVEN a case_id that does exist in database
 
     # GIVEN the flow cell for the case was sequenced on a novaseqx machine
-    flow_cell: Flowcell = fluffy_context.status_db.get_latest_flow_cell_on_case(
-        fluffy_case_id_existing
+    sequencing_run: IlluminaSequencingRun = (
+        fluffy_context.status_db.get_latest_illumina_sequencing_run_for_nipt_case(
+            fluffy_case_id_existing
+        )
     )
-    flow_cell.sequencer_type = "novaseqx"
+    sequencing_run.sequencer_type = "novaseqx"
 
     # GIVEN Concentrations are set in LIMS on sample level
     mocker.patch.object(FluffyAnalysisAPI, "get_concentrations_from_lims")

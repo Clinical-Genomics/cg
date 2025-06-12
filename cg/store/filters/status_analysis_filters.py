@@ -75,9 +75,11 @@ def filter_analyses_started_before(analyses: Query, started_at_date: datetime, *
     return analyses.filter(Analysis.started_at < started_at_date)
 
 
-def filter_analyses_by_started_at(analyses: Query, started_at_date: datetime, **kwargs) -> Query:
-    """Return a query of analyses started at a certain date."""
-    return analyses.filter(Analysis.started_at == started_at_date)
+def filter_analyses_by_completed_at(
+    analyses: Query, completed_at_date: datetime, **kwargs
+) -> Query:
+    """Return a query of analyses completed at a certain date."""
+    return analyses.filter(Analysis.completed_at == completed_at_date)
 
 
 def filter_analyses_not_cleaned(analyses: Query, **kwargs) -> Query:
@@ -90,13 +92,19 @@ def filter_analysis_case_action_is_none(analyses: Query, **kwargs) -> Query:
     return analyses.join(Case).filter(Case.action.is_(None))
 
 
+def filter_analysis_by_entry_id(analyses: Query, entry_id: int, **kwargs) -> Query:
+    """Return a query of analyses filtered by entry id."""
+    return analyses.filter(Analysis.id == entry_id)
+
+
 def apply_analysis_filter(
     filter_functions: list[Callable],
     analyses: Query,
-    workflow: Workflow = None,
     case_entry_id: int = None,
     completed_at_date: datetime = None,
+    entry_id: int = None,
     started_at_date: datetime = None,
+    workflow: Workflow = None,
 ) -> Query:
     """Apply filtering functions to the analyses queries and return filtered results."""
 
@@ -106,6 +114,7 @@ def apply_analysis_filter(
             workflow=workflow,
             case_entry_id=case_entry_id,
             completed_at_date=completed_at_date,
+            entry_id=entry_id,
             started_at_date=started_at_date,
         )
     return analyses
@@ -125,7 +134,8 @@ class AnalysisFilter(Enum):
     BY_CASE_ENTRY_ID: Callable = filter_analyses_by_case_entry_id
     IS_NOT_CLEANED: Callable = filter_analyses_not_cleaned
     STARTED_AT_BEFORE: Callable = filter_analyses_started_before
-    BY_STARTED_AT: Callable = filter_analyses_by_started_at
+    BY_COMPLETED_AT: Callable = filter_analyses_by_completed_at
     CASE_ACTION_IS_NONE: Callable = filter_analysis_case_action_is_none
     ORDER_BY_UPLOADED_AT: Callable = order_analyses_by_uploaded_at_asc
     ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at_asc
+    BY_ENTRY_ID: Callable = filter_analysis_by_entry_id

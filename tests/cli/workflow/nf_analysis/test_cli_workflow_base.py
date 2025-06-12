@@ -5,17 +5,12 @@ from click.testing import CliRunner
 
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
+from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 
 
 @pytest.mark.parametrize(
     "workflow",
-    [
-        Workflow.JASEN,
-        Workflow.RAREDISEASE,
-        Workflow.RNAFUSION,
-        Workflow.TAXPROFILER,
-        Workflow.TOMTE,
-    ],
+    NEXTFLOW_WORKFLOWS + [Workflow.JASEN] + [Workflow.NALLO],
 )
 def test_workflow_no_args(cli_runner: CliRunner, workflow: Workflow, request):
     """Test to see that workflow is added and prints help when no subcommand is specified."""

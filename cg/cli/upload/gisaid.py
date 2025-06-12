@@ -2,7 +2,7 @@
 
 import logging
 
-import click
+import rich_click as click
 
 from cg.meta.upload.gisaid import GisaidAPI
 from cg.models.cg_config import CGConfig

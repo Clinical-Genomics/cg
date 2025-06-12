@@ -1,20 +1,18 @@
 from enum import StrEnum
+from pathlib import Path
 
-from pydantic import BaseModel
-
+from cg.constants.constants import SexOptions
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
+from cg.models.qc_metrics import QCMetrics
 
 
-class RarediseaseQCMetrics(BaseModel):
-    """Raredisease QC metrics"""
+class RarediseaseQCMetrics(QCMetrics):
+    """Raredisease QC metrics."""
 
-    percentage_mapped_reads: float | None
-    pct_target_bases_10x: float | None
-    median_target_coverage: float | None
-    pct_pf_reads_aligned: float | None
-    pct_pf_reads_improper_pairs: float | None
-    pct_adapter: float | None
-    fraction_duplicates: float | None
+    mapped_reads: int
+    percent_duplicates: float
+    predicted_sex_sex_check: SexOptions
+    total_reads: int
 
 
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
@@ -67,5 +65,9 @@ class RarediseaseSampleSheetHeaders(StrEnum):
 class RarediseaseParameters(WorkflowParameters):
     """Model for Raredisease parameters."""
 
-    target_bed: str
+    target_bed_file: str
     analysis_type: str
+    save_mapped_as_cram: bool
+    vcfanno_extra_resources: str
+    vep_filters_scout_fmt: str
+    sample_id_map: Path
