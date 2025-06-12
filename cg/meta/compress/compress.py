@@ -148,7 +148,7 @@ class CompressAPI:
         return True
 
     def _is_sample_linked_to_newer_case(self, sample: Sample, days_back: int) -> bool:
-        """Check if a sample is linked to a case that is not eligible for cleaning."""
+        """Check if a sample is linked to a case not old enough to be cleaned."""
         for link in sample.links:
             case: Case = link.case
             creation_date: datetime = case.created_at
@@ -157,14 +157,16 @@ class CompressAPI:
                 return True
         return False
 
-    def clean_fastq_files_new_case(self, samples: list[Sample], days_back: int) -> bool:
+    def clean_fastq_files_for_samples(self, samples: list[Sample], days_back: int) -> bool:
         """Clean FASTQ files for samples linked to eligible case."""
         is_successful: bool = True
         for sample in samples:
             sample_id: str = sample.internal_id
             if len(sample.links) > 1:
                 if self._is_sample_linked_to_newer_case(sample=sample, days_back=days_back):
-                    LOG.info(f"Skipping sample {sample.internal_id}, not eligible for cleaning")
+                    LOG.info(
+                        f"Skipping sample {sample.internal_id}, as it belongs to a case not eligible for cleaning"
+                    )
                     continue
             archive_location: str = sample.archive_location
             try:

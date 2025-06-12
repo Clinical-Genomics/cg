@@ -16,6 +16,7 @@ from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
 from cg.models import CompressionData
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 from tests.cli.compress.conftest import MockCompressAPI
 from tests.meta.compress.conftest import MockCompressionData
 from tests.store_helpers import StoreHelpers
@@ -211,28 +212,28 @@ def test_cli_clean_fastqs_pending_compression_metadata(
     assert fastq_second.exists()
 
 
-def test_clean_fastq_files_new_case(
+def test_clean_fastq_files_for_samples(
     populated_compress_fastq_api: MockCompressAPI,
     helpers: StoreHelpers,
-    base_store: StoreHelpers,
+    base_store: Store,
 ):
     """Test to clean selected FASTQ files."""
 
     # GIVEN a sample linked to two cases one being not eligible for cleaning
     sample: Sample = helpers.add_sample(store=base_store, internal_id="sample1")
-    case1: Case = helpers.add_case_with_sample(
+    old_case: Case = helpers.add_case_with_sample(
         base_store=base_store, case_id="case1", sample_id="sample1"
     )
-    case1.created_at = datetime(2023, 1, 1, 12, 0, 0)
-    case2: Case = helpers.add_case_with_sample(
+    old_case.created_at = datetime(2023, 1, 1, 12, 0, 0)
+    new_case: Case = helpers.add_case_with_sample(
         base_store=base_store, case_id="case2", sample_id="sample1"
     )
-    case2.created_at = datetime.now()
-    sample.cases = [case1, case2]
+    new_case.created_at = datetime.now()
+    sample.cases = [old_case, new_case]
 
-    # WHEN calling clean_fastq_files_new_case with a days_back threshold
+    # WHEN calling clean_fastq_files_for_samples with a days_back threshold
     with mock.patch.object(CompressAPI, "clean_fastq") as clean_fastq_mock:
-        populated_compress_fastq_api.clean_fastq_files_new_case(
+        populated_compress_fastq_api.clean_fastq_files_for_samples(
             samples=[sample],
             days_back=60,
         )
@@ -240,10 +241,10 @@ def test_clean_fastq_files_new_case(
         clean_fastq_mock.assert_not_called()
 
 
-def test_clean_fastq_files_new_case_failure(
+def test_clean_fastq_files_for_samples_failure(
     populated_compress_fastq_api: MockCompressAPI,
     helpers: StoreHelpers,
-    base_store: StoreHelpers,
+    base_store: Store,
 ):
     """Test to clean selected FASTQ files with a failure."""
     # GIVEN a case with a sample
@@ -251,15 +252,13 @@ def test_clean_fastq_files_new_case_failure(
         base_store=base_store, case_id="case1", sample_id="sample1"
     )
     sample: Sample = case.samples[0]
-    # WHEN calling clean_fastq_files_new_case with and an exception is raised in clean_fastq
+    # GIVEN that an exception is raised when calling clean_fastq
     with mock.patch.object(CompressAPI, "clean_fastq") as clean_fastq_mock:
         clean_fastq_mock.side_effect = Exception()
-        populated_compress_fastq_api.clean_fastq_files_new_case(
+        # WHEN calling clean_fastq_files_for_samples
+        result: bool = populated_compress_fastq_api.clean_fastq_files_for_samples(
             samples=[sample],
             days_back=60,
         )
-        # THEN assert that clean_fastq_files_new_case returns False
-        assert not populated_compress_fastq_api.clean_fastq_files_new_case(
-            samples=[sample],
-            days_back=60,
-        )
+        # THEN assert that clean_fastq_files_for_samples returns False
+        assert not result
