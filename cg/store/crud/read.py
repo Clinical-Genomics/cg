@@ -3,9 +3,9 @@
 import datetime as dt
 import logging
 from datetime import datetime
-from typing import Callable, Iterator, Literal
+from typing import Callable, Iterator
 
-from sqlalchemy.orm import Query, Session
+from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import (
@@ -15,7 +15,15 @@ from cg.constants.constants import (
     SampleType,
 )
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
-from cg.exc import CaseNotFoundError, CgDataError, CgError, OrderNotFoundError, SampleNotFoundError
+from cg.exc import (
+    AnalysisDoesNotExistError,
+    AnalysisNotCompletedError,
+    CaseNotFoundError,
+    CgDataError,
+    CgError,
+    OrderNotFoundError,
+    SampleNotFoundError,
+)
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import SexEnum
 from cg.server.dto.samples.requests import CollaboratorSamplesRequest
@@ -86,6 +94,7 @@ from cg.store.models import (
     InstrumentRun,
     Invoice,
     Order,
+    OrderTypeApplication,
     Organism,
     PacbioSampleSequencingMetrics,
     PacbioSequencingRun,
@@ -103,9 +112,6 @@ LOG = logging.getLogger(__name__)
 
 class ReadHandler(BaseHandler):
     """Class for reading items in the database."""
-
-    def __init__(self, session: Session):
-        super().__init__(session=session)
 
     def get_case_by_entry_id(self, entry_id: str) -> Case:
         """Return a case by entry id."""
@@ -158,9 +164,12 @@ class ReadHandler(BaseHandler):
             workflow=workflow,
         ).first()
 
-    def get_latest_analysis_to_upload_for_workflow(self, workflow: str = None) -> list[Analysis]:
+    def get_latest_analysis_to_upload_for_workflow(
+        self, workflow: Workflow | None = None
+    ) -> list[Analysis]:
         """Return latest not uploaded analysis for each case given a workflow."""
-        filter_functions: list[AnalysisFilter] = [
+        filter_functions: list[Callable] = [
+            AnalysisFilter.COMPLETED,
             AnalysisFilter.WITH_WORKFLOW,
             AnalysisFilter.IS_NOT_UPLOADED,
         ]
@@ -170,23 +179,52 @@ class ReadHandler(BaseHandler):
             workflow=workflow,
         ).all()
 
-    def get_analysis_by_case_entry_id_and_started_at(
-        self, case_entry_id: int, started_at_date: dt.datetime
-    ) -> Analysis:
+    def get_analysis_by_case_entry_id_and_completed_at(
+        self, case_entry_id: int, completed_at_date: dt.datetime
+    ) -> Analysis | None:
         """Fetch an analysis."""
-        filter_functions: list[AnalysisFilter] = [
+        filter_functions: list[Callable] = [
             AnalysisFilter.BY_CASE_ENTRY_ID,
-            AnalysisFilter.BY_STARTED_AT,
+            AnalysisFilter.BY_COMPLETED_AT,
         ]
 
         return apply_analysis_filter(
             filter_functions=filter_functions,
             analyses=self._get_query(Analysis),
             case_entry_id=case_entry_id,
-            started_at_date=started_at_date,
+            completed_at_date=completed_at_date,
         ).first()
 
-    def get_analysis_by_entry_id(self, entry_id: int) -> Analysis:
+    def get_latest_started_analysis_for_case(self, case_id: str) -> Analysis:
+        """Return the latest started analysis for a case.
+        Raises:
+            AnalysisDoesNotExistError if no analysis is found.
+        """
+        case: Case | None = self.get_case_by_internal_id(case_id)
+        analyses: list[Analysis] = case.analyses
+        if not analyses:
+            raise AnalysisDoesNotExistError(f"No analysis found for case {case_id}")
+        analyses.sort(key=lambda x: x.started_at, reverse=True)
+        analysis: Analysis = analyses[0]
+        return analysis
+
+    def get_latest_completed_analysis_for_case(self, case_id: str) -> Analysis:
+        """Return the latest completed analysis for a case.
+        Raises:
+            AnalysisDoesNotExistError if no analysis is found.
+        """
+        case: Case | None = self.get_case_by_internal_id(case_id)
+        if not case.analyses:
+            raise AnalysisDoesNotExistError(f"No analysis found for case {case_id}")
+        completed_analyses: list[Analysis] = [
+            analysis for analysis in case.analyses if analysis.completed_at
+        ]
+        if not completed_analyses:
+            raise AnalysisNotCompletedError(f"No completed analysis found for case {case_id}")
+        completed_analyses.sort(key=lambda x: x.completed_at, reverse=True)
+        return completed_analyses[0]
+
+    def get_analysis_by_entry_id(self, entry_id: int) -> Analysis | None:
         """Return an analysis."""
         return apply_analysis_filter(
             filter_functions=[AnalysisFilter.BY_ENTRY_ID],
@@ -675,15 +713,22 @@ class ReadHandler(BaseHandler):
             SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH,
             SampleFilter.ORDER_BY_CREATED_AT_DESC,
             SampleFilter.IS_NOT_CANCELLED,
-            SampleFilter.LIMIT,
         ]
-        return apply_sample_filter(
-            samples=self._get_query(table=Sample),
+        query = (
+            self._get_query(table=Sample)
+            .join(Sample.application_version)
+            .join(ApplicationVersion.application)
+            .join(Application.order_type_applications)
+        )
+        samples: Query = apply_sample_filter(
+            samples=query,
             customer_entry_ids=collaborator_ids,
             search_pattern=request.enquiry,
             filter_functions=filters,
-            limit=request.limit,
-        ).all()
+        )
+        if request.order_type:
+            samples = samples.filter(OrderTypeApplication.order_type == request.order_type)
+        return samples.limit(request.limit).all()
 
     def _get_samples_by_customer_and_subject_id_query(
         self, customer_internal_id: str, subject_id: str
@@ -816,7 +861,7 @@ class ReadHandler(BaseHandler):
         """Check if a sample exists in StatusDB."""
         return bool(self.get_sample_by_internal_id(sample_id))
 
-    def get_application_by_tag(self, tag: str) -> Application:
+    def get_application_by_tag(self, tag: str) -> Application | None:
         """Return an application by tag."""
         return apply_application_filter(
             applications=self._get_query(table=Application),
@@ -1111,14 +1156,6 @@ class ReadHandler(BaseHandler):
         ]
         return cases_to_analyze[:limit]
 
-    def set_case_action(
-        self, action: Literal[CaseActions.actions()], case_internal_id: str
-    ) -> None:
-        """Sets the action of provided cases to None or the given action."""
-        case: Case = self.get_case_by_internal_id(internal_id=case_internal_id)
-        case.action = action
-        self.session.commit()
-
     def get_cases_to_compress(self, date_threshold: datetime) -> list[Case]:
         """Return all cases that are ready to be compressed by SPRING."""
         case_filter_functions: list[CaseFilter] = [
@@ -1171,9 +1208,9 @@ class ReadHandler(BaseHandler):
             internal_id=internal_id,
         ).all()
 
-    def get_analyses_to_upload(self, workflow: Workflow = None) -> list[Analysis]:
+    def get_analyses_to_upload(self, workflow: Workflow | None = None) -> list[Analysis]:
         """Return analyses that have not been uploaded."""
-        analysis_filter_functions: list[AnalysisFilter] = [
+        analysis_filter_functions: list[Callable] = [
             AnalysisFilter.WITH_WORKFLOW,
             AnalysisFilter.COMPLETED,
             AnalysisFilter.IS_NOT_UPLOADED,
@@ -1187,10 +1224,11 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_analyses_to_clean(
-        self, before: datetime = datetime.now(), workflow: Workflow = None
+        self, before: datetime = datetime.now(), workflow: Workflow | None = None
     ) -> list[Analysis]:
         """Return analyses that haven't been cleaned."""
-        filter_functions: list[AnalysisFilter] = [
+        filter_functions: list[Callable] = [
+            AnalysisFilter.COMPLETED,
             AnalysisFilter.IS_UPLOADED,
             AnalysisFilter.IS_NOT_CLEANED,
             AnalysisFilter.STARTED_AT_BEFORE,
@@ -1205,52 +1243,12 @@ class ReadHandler(BaseHandler):
             started_at_date=before,
         ).all()
 
-    def get_analyses_for_case_and_workflow_started_at_before(
-        self,
-        workflow: Workflow,
-        started_at_before: datetime,
-        case_internal_id: str,
-    ) -> list[Analysis]:
-        """Return all analyses older than certain date."""
-        case = self.get_case_by_internal_id(internal_id=case_internal_id)
-        case_entry_id: int = case.id if case else None
-        filter_functions: list[AnalysisFilter] = [
-            AnalysisFilter.BY_CASE_ENTRY_ID,
-            AnalysisFilter.WITH_WORKFLOW,
-            AnalysisFilter.STARTED_AT_BEFORE,
-        ]
-        return apply_analysis_filter(
-            filter_functions=filter_functions,
-            analyses=self._get_query(table=Analysis),
-            workflow=workflow,
-            case_entry_id=case_entry_id,
-            started_at_date=started_at_before,
-        ).all()
-
-    def get_analyses_for_case_started_at_before(
-        self,
-        case_internal_id: str,
-        started_at_before: datetime,
-    ) -> list[Analysis]:
-        """Return all analyses for a case older than certain date."""
-        case = self.get_case_by_internal_id(internal_id=case_internal_id)
-        case_entry_id: int = case.id if case else None
-        filter_functions: list[AnalysisFilter] = [
-            AnalysisFilter.BY_CASE_ENTRY_ID,
-            AnalysisFilter.STARTED_AT_BEFORE,
-        ]
-        return apply_analysis_filter(
-            filter_functions=filter_functions,
-            analyses=self._get_query(table=Analysis),
-            case_entry_id=case_entry_id,
-            started_at_date=started_at_before,
-        ).all()
-
-    def get_analyses_for_workflow_started_at_before(
+    def get_completed_analyses_for_workflow_started_at_before(
         self, workflow: Workflow, started_at_before: datetime
     ) -> list[Analysis]:
         """Return all analyses for a workflow started before a certain date."""
-        filter_functions: list[AnalysisFilter] = [
+        filter_functions: list[Callable] = [
+            AnalysisFilter.COMPLETED,
             AnalysisFilter.WITH_WORKFLOW,
             AnalysisFilter.STARTED_AT_BEFORE,
         ]
@@ -1258,14 +1256,6 @@ class ReadHandler(BaseHandler):
             filter_functions=filter_functions,
             analyses=self._get_query(table=Analysis),
             workflow=workflow,
-            started_at_date=started_at_before,
-        ).all()
-
-    def get_analyses_started_at_before(self, started_at_before: datetime) -> list[Analysis]:
-        """Return all analyses for a workflow started before a certain date."""
-        return apply_analysis_filter(
-            filter_functions=[AnalysisFilter.STARTED_AT_BEFORE],
-            analyses=self._get_query(table=Analysis),
             started_at_date=started_at_before,
         ).all()
 
@@ -1305,7 +1295,8 @@ class ReadHandler(BaseHandler):
             samples=self._get_join_analysis_sample_family_query(),
             filter_functions=[SampleFilter.IS_NOT_DELIVERED],
         )
-        filter_functions: list[AnalysisFilter] = [
+        filter_functions: list[Callable] = [
+            AnalysisFilter.COMPLETED,
             AnalysisFilter.IS_NOT_UPLOADED,
             AnalysisFilter.WITH_WORKFLOW,
             AnalysisFilter.ORDER_BY_UPLOADED_AT,
@@ -1320,7 +1311,8 @@ class ReadHandler(BaseHandler):
             cases=self._get_join_analysis_case_query(),
             filter_functions=[CaseFilter.REPORT_SUPPORTED],
         )
-        analysis_filter_functions: list[AnalysisFilter] = [
+        analysis_filter_functions: list[Callable] = [
+            AnalysisFilter.COMPLETED,
             AnalysisFilter.REPORT_BY_WORKFLOW,
             AnalysisFilter.WITHOUT_DELIVERY_REPORT,
             AnalysisFilter.VALID_IN_PRODUCTION,
@@ -1336,7 +1328,8 @@ class ReadHandler(BaseHandler):
             cases=self._get_join_analysis_case_query(),
             filter_functions=[CaseFilter.WITH_SCOUT_DELIVERY],
         )
-        analysis_filter_functions: list[AnalysisFilter] = [
+        analysis_filter_functions: list[Callable] = [
+            AnalysisFilter.COMPLETED,
             AnalysisFilter.REPORT_BY_WORKFLOW,
             AnalysisFilter.WITH_DELIVERY_REPORT,
             AnalysisFilter.IS_NOT_UPLOADED,
@@ -1711,7 +1704,10 @@ class ReadHandler(BaseHandler):
             uploaded_dna_cases: list[Case] = self._get_related_uploaded_cases_for_rna_sample(
                 rna_sample=rna_sample, collaborators=collaborators
             )
-            related_dna_cases.extend(uploaded_dna_cases)
+            # Only add unique DNA cases to the list since we are going from RNA samples to DNA cases in the loop above
+            for case in uploaded_dna_cases:
+                if case not in related_dna_cases:
+                    related_dna_cases.append(case)
         if not related_dna_cases:
             raise CgDataError(
                 f"No matching uploaded DNA cases for case {rna_case.internal_id} ({rna_case.name})."
@@ -1779,6 +1775,10 @@ class ReadHandler(BaseHandler):
         collaborator_ids: list[int] = [collaborator.id for collaborator in collaborators]
         rna_dna_collections: list[RNADNACollection] = []
         for sample in rna_case.samples:
+            if not sample.subject_id:
+                raise CgDataError(
+                    f"Failed to link RNA sample {sample.internal_id} to DNA samples - subject_id field is empty."
+                )
             related_dna_samples: Query = self._get_related_samples_query(
                 sample=sample, prep_categories=DNA_PREP_CATEGORIES, collaborators=collaborators
             )
@@ -1796,7 +1796,7 @@ class ReadHandler(BaseHandler):
         return rna_dna_collections
 
     def get_pacbio_sample_sequencing_metrics(
-        self, sample_id: str | None, smrt_cell_id: str | None
+        self, sample_id: str | None, smrt_cell_ids: list[str] | None
     ) -> list[PacbioSampleSequencingMetrics]:
         """
         Fetches data from PacbioSampleSequencingMetrics filtered on sample_internal_id and/or smrt_cell_id.
@@ -1809,8 +1809,8 @@ class ReadHandler(BaseHandler):
         )
         if sample_id:
             sequencing_metrics = sequencing_metrics.filter(Sample.internal_id == sample_id)
-        if smrt_cell_id:
-            sequencing_metrics = sequencing_metrics.filter(RunDevice.internal_id == smrt_cell_id)
+        if smrt_cell_ids:
+            sequencing_metrics = sequencing_metrics.filter(RunDevice.internal_id.in_(smrt_cell_ids))
         return sequencing_metrics.all()
 
     def get_pacbio_sequencing_runs_by_run_name(self, run_name: str) -> list[PacbioSequencingRun]:
@@ -1824,3 +1824,11 @@ class ReadHandler(BaseHandler):
         if runs.count() == 0:
             raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()
+
+    def is_sample_name_used(self, sample: Sample, customer_entry_id: int) -> bool:
+        """Check if a sample name is already used by the customer"""
+        if self.get_sample_by_customer_and_name(
+            customer_entry_id=[customer_entry_id], sample_name=sample.name
+        ):
+            return True
+        return False

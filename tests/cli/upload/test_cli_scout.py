@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 import mock
 import pytest
@@ -12,6 +13,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
+from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -24,6 +26,7 @@ WORKFLOWS_TO_TEST: list = [
     Workflow.BALSAMIC,
     Workflow.MIP_DNA,
     Workflow.MIP_RNA,
+    Workflow.NALLO,
     Workflow.RNAFUSION,
 ]
 
@@ -31,6 +34,7 @@ ANALYSIS_API: list = [
     (Workflow.BALSAMIC, BalsamicAnalysisAPI),
     (Workflow.MIP_DNA, MipDNAAnalysisAPI),
     (Workflow.MIP_RNA, MipRNAAnalysisAPI),
+    (Workflow.NALLO, NalloAnalysisAPI),
     (Workflow.RNAFUSION, RnafusionAnalysisAPI),
     (Workflow.TOMTE, TomteAnalysisAPI),
 ]
@@ -77,9 +81,9 @@ def test_create_scout_load_config(
     caplog.set_level(logging.DEBUG)
     status_db: Store = cg_context.status_db
 
-    # GIVEN a case with a balsamic analysis
+    # GIVEN a case with a completed analysis
     case: Case = helpers.ensure_case(store=status_db, data_analysis=workflow, case_id=case_id)
-    helpers.add_analysis(store=status_db, case=case, workflow=workflow)
+    helpers.add_analysis(store=status_db, case=case, workflow=workflow, completed_at=datetime.now())
 
     with mock.patch.object(UploadScoutAPI, "generate_config", return_value=MockScoutLoadConfig()):
         # WHEN creating the scout load config

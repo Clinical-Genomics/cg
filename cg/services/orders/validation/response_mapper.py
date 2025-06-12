@@ -48,8 +48,8 @@ def map_sample_errors(order: dict, errors: list[SampleError]) -> None:
 def add_error(entity: dict, field: str, message: str) -> None:
     if not entity.get(field):
         set_field(entity=entity, field=field, value=None)
-    if field == "sample_errors":
-        # Special handling for sample errors since the 'value' corresponds to whether it is set
+    if field in {"sample_errors", "warnings"}:
+        # Special handling since the 'value' corresponds to whether it is set
         entity[field]["value"] = True
     entity[field]["errors"].append(message)
 
@@ -97,6 +97,7 @@ def wrap_sample_fields(samples: list[dict]) -> None:
     for sample in samples:
         for field, value in sample.items():
             set_field(entity=sample, field=field, value=value)
+        set_field(entity=sample, field="warnings", value=False)
 
 
 def set_field(entity: dict, field: str, value: Any) -> None:

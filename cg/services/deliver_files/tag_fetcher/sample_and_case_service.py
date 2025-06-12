@@ -1,11 +1,7 @@
 from cg.constants import Workflow
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.services.deliver_files.tag_fetcher.error_handling import (
-    handle_tag_errors,
-)
-from cg.services.deliver_files.tag_fetcher.abstract import (
-    FetchDeliveryFileTagsService,
-)
+from cg.services.deliver_files.tag_fetcher.abstract import FetchDeliveryFileTagsService
+from cg.services.deliver_files.tag_fetcher.error_handling import handle_tag_errors
 from cg.services.deliver_files.tag_fetcher.models import DeliveryFileTags
 
 
@@ -24,7 +20,7 @@ class SampleAndCaseDeliveryTagsFetcher(FetchDeliveryFileTagsService):
         )
 
     @staticmethod
-    def _validate_workflow(workflow: Workflow):
+    def _validate_workflow(workflow: Workflow) -> Workflow:
         """Validate the workflow."""
         if workflow not in PIPELINE_ANALYSIS_TAG_MAP:
             raise ValueError(f"Workflow {workflow} is not supported.")

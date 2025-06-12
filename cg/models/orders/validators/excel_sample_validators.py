@@ -8,6 +8,8 @@ def parse_panels(panels: str) -> list[str] | None:
     separator = ";" if ";" in panels else None
     if ":" in panels:
         separator = ":"
+    if not separator:
+        return [panels]
     return panels.split(separator)
 
 
@@ -78,3 +80,8 @@ def convert_to_priority(priority: str | None) -> str | None:
 
 def convert_to_date(date: str | None) -> str | None:
     return date[:10] if date else None
+
+
+def empty_string_to_none(value) -> bool | None:
+    """Convert empty strings to None."""
+    return None if value == "" else value

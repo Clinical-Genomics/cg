@@ -57,6 +57,7 @@ class HermesFileTag(StrEnum):
 
     CLINICAL_DELIVERY: str = "clinical-delivery"
     LONG_TERM_STORAGE: str = "long-term-storage"
+    SCOUT: str = "scout"
 
 
 class AnalysisTag(StrEnum):
@@ -79,10 +80,17 @@ class AnalysisTag(StrEnum):
     JUNCTION: str = "junction"
     MULTIQC_HTML: str = "multiqc-html"
     OUTRIDER: str = "outrider"
+    REPEATS: str = "repeats"
     RESEARCH: str = "research"
     RNA: str = "rna"
+    SMN_CALLING: str = "smn-calling"
     STARFUSION: str = "star-fusion"
     VCF_FUSION: str = "vcf-fusion"
+    VCF_SNV: str = "vcf-snv"
+    VCF_SNV_CLINICAL: str = "vcf-snv-clinical"
+    VCF_STR: str = "vcf-str"
+    VCF_SV_CLINICAL: str = "vcf-sv-clinical"
+    VCF_SV: str = "vcf-sv"
 
 
 class HkMipAnalysisTag:
@@ -98,6 +106,11 @@ class NFAnalysisTags:
 class BalsamicAnalysisTag:
     CONFIG: list[str] = ["balsamic-config"]
     QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
+
+
+class NalloAnalysisTag:
+    HAPLOTAGS: str = "haplotags"
+    PARAPHASE: str = "paraphase"
 
 
 class HkAnalysisMetricsTag:
@@ -146,13 +159,14 @@ WORKFLOW_PROTECTED_TAGS = {
     Workflow.BALSAMIC_UMI: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
     Workflow.FLUFFY: ["NIPT_csv", "MultiQC"],
     Workflow.MICROSALT: [
-        ["microsalt-log"],
+        ["assembly"],
         ["config"],
+        ["microsalt-log"],
+        ["microsalt-config"],
+        ["microsalt-version"],
         ["qc-report", "visualization"],
         ["typing-report", "visualization"],
         ["typing-report", "qc-metrics"],
-        ["microsalt-config"],
-        ["assembly"],
     ],
     Workflow.MIP_DNA: [
         ["vcf-snv-clinical"],

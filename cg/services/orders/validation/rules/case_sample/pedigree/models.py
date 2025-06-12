@@ -1,7 +1,7 @@
 from cg.services.orders.validation.models.case_aliases import CaseContainingRelatives
 from cg.services.orders.validation.models.existing_sample import ExistingSample
-from cg.services.orders.validation.workflows.mip_dna.models.sample import MIPDNASample
-from cg.services.orders.validation.workflows.tomte.models.sample import TomteSample
+from cg.services.orders.validation.order_types.mip_dna.models.sample import MIPDNASample
+from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
 from cg.store.store import Store
 
 SampleWithParents = TomteSample | MIPDNASample | ExistingSample

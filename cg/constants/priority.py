@@ -12,10 +12,10 @@ class SlurmQos(StrEnum):
 
 
 class TrailblazerPriority(StrEnum):
-    LOW: str = "low"
-    NORMAL: str = "normal"
-    HIGH: str = "high"
-    EXPRESS: str = "express"
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+    EXPRESS = "express"
 
 
 class PriorityTerms(StrEnum):
@@ -27,11 +27,11 @@ class PriorityTerms(StrEnum):
 
 
 class Priority(IntEnum):
-    research: int = 0
-    standard: int = 1
-    priority: int = 2
-    express: int = 3
-    clinical_trials: int = 4
+    research = 0
+    standard = 1
+    clinical_trials = 2
+    priority = 3
+    express = 4
 
     @classmethod
     def priority_to_slurm_qos(cls) -> dict[int, str]:

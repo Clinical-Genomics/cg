@@ -127,3 +127,13 @@ class IndexNumberOutOfRangeError(SampleError):
         maximum: int = len(INDEX_SEQUENCES[index])
         message: str = f"Index number must be a number between 1 and {maximum}"
         super(SampleError, self).__init__(sample_index=sample_index, field=field, message=message)
+
+
+class CaptureKitMissingError(SampleError):
+    field: str = "capture_kit"
+    message: str = "Bait set is required for TGS analyses"
+
+
+class CaptureKitInvalidError(SampleError):
+    field: str = "capture_kit"
+    message: str = "Bait set must be valid"

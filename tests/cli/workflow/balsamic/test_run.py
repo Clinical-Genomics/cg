@@ -2,13 +2,16 @@
 
 import logging
 from pathlib import Path
+from unittest.mock import PropertyMock, create_autospec
 
 from click.testing import CliRunner
 
 from cg.cli.workflow.balsamic.base import run
 from cg.constants import EXIT_SUCCESS
 from cg.constants.priority import SlurmQos
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store.store import Store
 
 
 def test_without_options(cli_runner: CliRunner, balsamic_context: CGConfig):
@@ -156,3 +159,18 @@ def test_priority_clinical(cli_runner: CliRunner, balsamic_context: CGConfig, ca
     # THEN dry run should include the the priority value
     assert "--qos" in caplog.text
     assert priority_value in caplog.text
+
+
+def test_calls_on_analysis_started(cli_runner: CliRunner, balsamic_context: CGConfig):
+    # GIVEN an instance of the BalsamicAnalysisAPI has been setup
+    analysis_api: BalsamicAnalysisAPI = create_autospec(
+        BalsamicAnalysisAPI, status_db=PropertyMock(return_value=create_autospec(Store))
+    )
+    balsamic_context.meta_apis["analysis_api"] = analysis_api
+    case_id = "some_balsamic_case_id"
+
+    # WHEN successfully invoking the run command
+    cli_runner.invoke(run, [case_id], obj=balsamic_context)
+
+    # THEN the on_analysis_started function has been called
+    analysis_api.on_analysis_started.assert_called_with(case_id)

@@ -17,6 +17,7 @@ from cg.meta.compress.compress import CompressAPI
 from cg.models.compression_data import CompressionData
 from cg.store.models import Case, Sample
 from cg.store.store import Store
+
 from tests.cli.compress.conftest import MockCompressAPI
 from tests.meta.compress.conftest import MockCompressionData
 from tests.store_helpers import StoreHelpers

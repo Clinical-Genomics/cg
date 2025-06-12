@@ -49,8 +49,8 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
-from cg.models import CompressionData
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
+from cg.models.compression_data import CompressionData
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.nallo.nallo import NalloSampleSheetHeaders
 from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
@@ -103,6 +103,10 @@ pytest_plugins = [
     "tests.fixture_plugins.delivery_fixtures.delivery_files_models_fixtures",
     "tests.fixture_plugins.delivery_fixtures.delivery_services_fixtures",
     "tests.fixture_plugins.delivery_fixtures.delivery_formatted_files_fixtures",
+    "tests.fixture_plugins.delivery_message_fixtures.case_id_fixtures",
+    "tests.fixture_plugins.delivery_message_fixtures.message_fixtures",
+    "tests.fixture_plugins.delivery_message_fixtures.service_fixtures",
+    "tests.fixture_plugins.delivery_message_fixtures.store_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.flow_cell_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.housekeeper_fixtures",
     "tests.fixture_plugins.demultiplex_fixtures.metrics_fixtures",
@@ -1246,7 +1250,7 @@ def hermes_api(hermes_process: ProcessMock) -> HermesApi:
 # Scout fixtures
 
 
-@pytest.fixture(name="scout_api")
+@pytest.fixture
 def scout_api() -> MockScoutAPI:
     """Setup Scout API."""
     return MockScoutAPI()
@@ -1903,7 +1907,7 @@ def hk_uri() -> str:
     return "sqlite:///"
 
 
-@pytest.fixture(name="context_config")
+@pytest.fixture
 def context_config(
     cg_uri: str,
     hk_uri: str,
@@ -2216,6 +2220,10 @@ def context_config(
         "scout": {
             "binary_path": "bin/scout",
             "config_path": "scout-stage.yaml",
+        },
+        "scout_38": {
+            "binary_path": "bin/scout_38",
+            "config_path": "scout_38-stage.yaml",
         },
         "statina": {
             "api_url": "api_url",
@@ -2909,6 +2917,14 @@ def raredisease_sample_sheet_path(raredisease_dir, raredisease_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
+def raredisease_sample_id_map(raredisease_dir: str, raredisease_case_id: str) -> Path:
+    """Return sample id map path."""
+    return Path(
+        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_customer_internal_mapping"
+    ).with_suffix(FileExtensions.CSV)
+
+
+@pytest.fixture(scope="function")
 def raredisease_params_file_path(raredisease_dir, raredisease_case_id) -> Path:
     """Path to parameters file."""
     return Path(
@@ -2962,16 +2978,17 @@ def raredisease_parameters_default(
     raredisease_dir: Path,
     raredisease_case_id: str,
     raredisease_sample_sheet_path: Path,
-    bed_version_file_name,
+    bed_version_file_name: str,
+    raredisease_sample_id_map: Path,
 ) -> RarediseaseParameters:
     """Return Tomte parameters."""
     return RarediseaseParameters(
         input=raredisease_sample_sheet_path,
         outdir=Path(raredisease_dir, raredisease_case_id),
         target_bed_file=bed_version_file_name,
-        skip_germlinecnvcaller=False,
         analysis_type=AnalysisType.WES,
         save_mapped_as_cram=True,
+        sample_id_map=raredisease_sample_id_map,
         vcfanno_extra_resources=str(
             Path(raredisease_dir, raredisease_case_id + ScoutExportFileName.MANAGED_VARIANTS)
         ),
@@ -3950,7 +3967,6 @@ def tomte_context(
         internal_id=sample_id,
         reads=total_sequenced_reads_pass,
         last_sequenced_at=datetime.now(),
-        reference_genome=GenomeVersion.HG38,
     )
 
     helpers.add_relationship(
