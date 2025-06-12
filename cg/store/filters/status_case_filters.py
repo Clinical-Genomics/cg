@@ -111,6 +111,7 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
             and_(
                 Case.action.is_(None),
                 Analysis.created_at < Sample.last_sequenced_at,
+                Case.data_analysis == Workflow.MICROSALT,
             ),
             # Cases manually set to top-up by production that get the new data
             and_(Case.action == CaseActions.TOP_UP, Analysis.created_at < Sample.last_sequenced_at),
