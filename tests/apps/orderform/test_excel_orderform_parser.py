@@ -1,7 +1,11 @@
 from pathlib import Path
 
+import openpyxl
+import pytest
+from openpyxl import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
+
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
-from cg.constants.constants import DataDelivery
 from cg.models.orders.constants import OrderType
 from cg.models.orders.excel_sample import ExcelSample
 from cg.models.orders.orderform_schema import Orderform
@@ -17,132 +21,36 @@ def is_excel(file_path: Path) -> bool:
     return Path(file_path).suffix == ".xlsx"
 
 
-def test_parse_mip_rna_orderform(mip_rna_orderform: str):
-    """Test to parse an mip rna orderform in excel format"""
-    # GIVEN a orderform in excel format
-    assert is_excel(Path(mip_rna_orderform))
-    # GIVEN a orderform API
+def get_nr_samples_excel(orderform_path: str) -> int:
+    """Parse a excel orderform file and return the number of sample rows."""
     orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
+    workbook: Workbook = openpyxl.load_workbook(
+        filename=orderform_path, read_only=True, data_only=True
+    )
+    sheet_name: str = orderform_parser.get_sheet_name(workbook.sheetnames)
+    orderform_sheet: Worksheet = workbook[sheet_name]
+    nr_samples = 0
+    current_row = "unknown"
+    for row in orderform_sheet.rows:
+        if row[0].value == "</SAMPLE ENTRIES>":
+            # End of samples
+            break
+        elif row[0].value == "<SAMPLE ENTRIES>":
+            # Samples start here
+            current_row = "samples"
+            continue
+        if current_row == "samples":
+            values = []
+            for cell in row:
+                value = str(cell.value)
+                if value == "None":
+                    value = ""
+                values.append(value)
 
-    # WHEN parsing the orderform
-    orderform_parser.parse_orderform(excel_path=mip_rna_orderform)
-
-    # THEN assert that the project type is correct
-    assert orderform_parser.project_type == OrderType.MIP_RNA
-
-
-def test_parse_rnafusion_orderform(rnafusion_orderform: str):
-    """Test to parse an rnafusion orderform in excel format"""
-    # GIVEN a orderform in excel format
-    assert is_excel(Path(rnafusion_orderform))
-    # GIVEN a orderform API
-    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
-
-    # WHEN parsing the orderform
-    orderform_parser.parse_orderform(excel_path=rnafusion_orderform)
-
-    # THEN assert that the project type is correct
-    assert orderform_parser.project_type == OrderType.RNAFUSION
-
-
-def test_parse_balsamic_orderform(balsamic_orderform: str):
-    """Test to parse a balsamic orderform in Excel format"""
-    # GIVEN a orderform in excel format
-    assert is_excel(Path(balsamic_orderform))
-    # GIVEN a orderform API
-    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
-
-    # WHEN parsing the orderform
-    orderform_parser.parse_orderform(excel_path=balsamic_orderform)
-
-    # THEN assert that the project type is correct
-    assert orderform_parser.project_type == OrderType.BALSAMIC
-
-
-def test_parse_balsamic_umi_orderform(balsamic_umi_orderform: str):
-    """Test to parse a balsamic orderform in excel format"""
-    # GIVEN a orderform in excel format
-    assert is_excel(Path(balsamic_umi_orderform))
-    # GIVEN a orderform API
-    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
-
-    # WHEN parsing the orderform
-    orderform_parser.parse_orderform(excel_path=balsamic_umi_orderform)
-
-    # THEN assert that the project type is correct
-    assert orderform_parser.project_type == OrderType.BALSAMIC_UMI
-
-
-def test_parse_microbial_orderform(microsalt_orderform: str):
-    """Test to parse a microbial orderform in excel format"""
-    # GIVEN a order form in excel format
-    assert is_excel(Path(microsalt_orderform))
-    # GIVEN a orderform API
-    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
-
-    # WHEN parsing the orderform
-    orderform_parser.parse_orderform(excel_path=microsalt_orderform)
-
-    # THEN assert that the project type is correct
-    assert orderform_parser.project_type == OrderType.MICROSALT
-
-
-def test_parse_pacbio_sequencing_orderform(pacbio_revio_sequencing_orderform: str):
-    """Test to parse a pacbio orderform in excel format"""
-    # GIVEN a order form in excel format
-    assert is_excel(Path(pacbio_revio_sequencing_orderform))
-    # GIVEN a orderform API
-    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
-
-    # WHEN parsing the orderform
-    orderform_parser.parse_orderform(excel_path=pacbio_revio_sequencing_orderform)
-
-    # THEN assert that the project type is correct
-    assert orderform_parser.project_type == OrderType.PACBIO_LONG_READ
-
-
-def test_parse_nallo_sequencing_orderform(nallo_order_form: str):
-    """Test to parse a Nallo order form in Excel format"""
-    # GIVEN a Nallo order form in Excel format
-    assert is_excel(Path(nallo_order_form))
-
-    # GIVEN a orderform API
-    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
-
-    # WHEN parsing the orderform
-    orderform_parser.parse_orderform(excel_path=nallo_order_form)
-
-    # THEN assert that the project type is correct
-    assert orderform_parser.project_type == OrderType.NALLO
-
-
-def test_parse_sarscov2_orderform(sarscov2_orderform: str):
-    """Test to parse a sarscov2 orderform in excel format"""
-
-    # GIVEN a order form in excel format
-    assert is_excel(Path(sarscov2_orderform))
-    # GIVEN a orderform API
-    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
-
-    # WHEN parsing the orderform
-    orderform_parser.parse_orderform(excel_path=sarscov2_orderform)
-
-    # THEN assert that the project type is correct
-    assert orderform_parser.project_type == OrderType.SARS_COV_2
-
-
-def test_parse_metagenome_orderform(metagenome_orderform: str):
-    """Test to parse an metagenome orderform in excel format"""
-    # GIVEN a order form in excel format
-    assert is_excel(Path(metagenome_orderform))
-    # GIVEN a orderform API
-    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
-
-    # WHEN parsing the orderform
-    orderform_parser.parse_orderform(excel_path=metagenome_orderform)
-
-    # THEN assert that the project type is correct
-    assert orderform_parser.project_type == OrderType.METAGENOME
+            # skip empty rows
+            if values[0]:
+                nr_samples += 1
+    return nr_samples
 
 
 def test_generate_mip_orderform_with_cases(mip_order_parser: ExcelOrderformParser):
@@ -160,99 +68,6 @@ def test_generate_mip_orderform_with_cases(mip_order_parser: ExcelOrderformParse
     assert case_obj.name == "mipdnacase1"
     assert case_obj.priority == "standard"
     assert set(case_obj.panels) == set(["Actionable"])
-
-
-def test_parse_mip_orderform(mip_orderform: str, nr_samples_mip_orderform: int):
-    """Test to parse a mip orderform in xlsx format"""
-    # GIVEN a orderform in excel format
-    assert is_excel(Path(mip_orderform))
-    # GIVEN a orderform API
-    order_form_parser = ExcelOrderformParser()
-    # GIVEN the correct orderform name
-    order_name: str = Path(mip_orderform).stem
-
-    # WHEN parsing the mip orderform
-    order_form_parser.parse_orderform(excel_path=mip_orderform)
-
-    # THEN assert that the correct name was set
-    assert order_form_parser.order_name == order_name
-
-    # THEN assert the number of samples parsed are correct
-    assert len(order_form_parser.samples) == nr_samples_mip_orderform
-
-    # THEN assert that the project type is correct
-    assert order_form_parser.project_type == OrderType.MIP_DNA
-
-
-def test_parse_mip_orderform_no_delivery(
-    mip_orderform_no_delivery: str, nr_samples_mip_orderform: int
-):
-    """Test to parse a mip orderform in xlsx format"""
-    # GIVEN a orderform in excel format
-    assert is_excel(Path(mip_orderform_no_delivery))
-    # GIVEN a orderform API
-    order_form_parser = ExcelOrderformParser()
-    # GIVEN the correct orderform name
-    order_name: str = Path(mip_orderform_no_delivery).stem
-
-    # WHEN parsing the mip orderform
-    order_form_parser.parse_orderform(excel_path=mip_orderform_no_delivery)
-
-    # THEN assert that the correct name was set
-    assert order_form_parser.order_name == order_name
-
-    # THEN assert the number of samples parsed are correct
-    assert len(order_form_parser.samples) == nr_samples_mip_orderform
-    assert order_form_parser.samples[0].panels == ["Inherited cancer"]
-    assert order_form_parser.samples[1].panels == ["AID", "Inherited cancer"]
-    assert order_form_parser.delivery_type == DataDelivery.NO_DELIVERY
-
-    # THEN assert that the project type is correct
-    assert order_form_parser.project_type == OrderType.MIP_DNA
-
-
-def test_parse_rml_orderform(rml_orderform: str, nr_samples_rml_orderform: int):
-    """Test to parse an excel orderform in xlsx format"""
-    # GIVEN a orderform in excel format
-    assert is_excel(Path(rml_orderform))
-    # GIVEN a orderform API
-    order_form_parser = ExcelOrderformParser()
-    # GIVEN the correct orderform name
-    order_name: str = Path(rml_orderform).stem
-
-    # WHEN parsing the RML orderform
-    order_form_parser.parse_orderform(excel_path=rml_orderform)
-
-    # THEN assert that the correct name was set
-    assert order_form_parser.order_name == order_name
-
-    # THEN assert that the number of samples was correct
-    assert len(order_form_parser.samples) == nr_samples_rml_orderform
-
-
-def test_parse_fastq_orderform(fastq_orderform: str, nr_samples_fastq_orderform: int):
-    """Test to parse an fastq orderform in xlsx format"""
-    # GIVEN a orderform in excel format
-    assert is_excel(Path(fastq_orderform))
-    # GIVEN a orderform API
-    order_form_parser = ExcelOrderformParser()
-    # GIVEN the correct orderform name
-    order_name: str = Path(fastq_orderform).stem
-
-    # WHEN parsing the fastq orderform
-    order_form_parser.parse_orderform(excel_path=fastq_orderform)
-
-    # THEN assert that the correct name was set
-    assert order_form_parser.order_name == order_name
-
-    # THEN assert that the correct number if samples where parsed
-    assert len(order_form_parser.samples) == nr_samples_fastq_orderform
-
-    # THEN it should determine the project type
-    assert order_form_parser.project_type == OrderType.FASTQ
-
-    # THEN it should determine the correct customer should have been parsed
-    assert order_form_parser.customer_id == "cust000"
 
 
 def test_fastq_samples_is_correct(fastq_order_parser: ExcelOrderformParser):
@@ -294,47 +109,71 @@ def test_get_data_delivery(microsalt_order_parser):
     assert data_delivery
 
 
-def test_parse_microbial_sequencing_orderform(microbial_sequencing_orderform: str):
-    """Test the parsing of a microbial sequencing orderform."""
-    # GIVEN a microbial sequencing orderform in excel format
+@pytest.mark.parametrize(
+    "orderform_fixture, ordertype",
+    [
+        ("balsamic_orderform", OrderType.BALSAMIC),
+        ("balsamic_umi_orderform", OrderType.BALSAMIC_UMI),
+        ("fastq_orderform", OrderType.FASTQ),
+        ("metagenome_orderform", OrderType.METAGENOME),
+        ("microsalt_orderform", OrderType.MICROSALT),
+        ("mip_orderform", OrderType.MIP_DNA),
+        ("mip_rna_orderform", OrderType.MIP_RNA),
+        ("nallo_order_form", OrderType.NALLO),
+        ("raredisease_orderform", OrderType.RAREDISEASE),
+        ("rml_orderform", "fluffy"),
+        ("rnafusion_orderform", OrderType.RNAFUSION),
+        ("sarscov2_orderform", OrderType.SARS_COV_2),
+        ("pacbio_revio_sequencing_orderform", OrderType.PACBIO_LONG_READ),
+        ("microbial_sequencing_orderform", OrderType.MICROBIAL_FASTQ),
+        ("taxprofiler_orderform", OrderType.TAXPROFILER),
+        ("tomte_orderform", OrderType.TOMTE),
+    ],
+    ids=[
+        "balsamic",
+        "balsamic_umi",
+        "fastq",
+        "metagenome",
+        "microsalt",
+        "mip_dna",
+        "mip_rna",
+        "nallo",
+        "raredisease",
+        "rml",
+        "rnafusion",
+        "sarscov2",
+        "pacbio_long_read",
+        "microbial_fastq",
+        "taxprofiler",
+        "tomte",
+    ],
+)
+def test_parse_orderform(
+    orderform_fixture: str, ordertype: OrderType, request: pytest.FixtureRequest
+):
+    """Test to parse an order form in excel format"""
+    # GIVEN a orderform in excel format
+    orderform: str = request.getfixturevalue(orderform_fixture)
+    assert is_excel(Path(orderform))
+
+    # GIVEN the correct orderform name
+    order_name: str = Path(orderform).stem
+
+    # GIVEN a orderform API
+    order_form_parser: ExcelOrderformParser = ExcelOrderformParser()
 
     # WHEN parsing the orderform
-    order_form_parser = ExcelOrderformParser()
-    order_form_parser.parse_orderform(excel_path=microbial_sequencing_orderform)
+    order_form_parser.parse_orderform(excel_path=orderform)
 
     # THEN assert that the project type is correct
-    assert order_form_parser.project_type == OrderType.MICROBIAL_FASTQ
+    assert order_form_parser.project_type == ordertype
+
     # THEN assert that samples are parsed
     assert order_form_parser.samples
+    assert len(order_form_parser.samples) == get_nr_samples_excel(orderform)
 
+    # THEN assert that the correct name was set
+    assert order_form_parser.order_name == order_name
 
-def test_parse_taxprofiler_orderform(taxprofiler_orderform: str):
-    """Test to parse a Taxprofiler orderform in excel format"""
-
-    # GIVEN an order form in Excel format
-    assert is_excel(Path(taxprofiler_orderform))
-
-    # GIVEN an ExcelOrderformParser
-    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
-
-    # WHEN parsing the orderform
-    orderform_parser.parse_orderform(excel_path=taxprofiler_orderform)
-
-    # THEN assert that the project type is correct
-    assert orderform_parser.project_type == OrderType.TAXPROFILER
-
-
-def test_parse_tomte_orderform(tomte_orderform: str):
-    """Test to parse a Tomte orderform in excel format"""
-
-    # GIVEN an order form in Excel format
-    assert is_excel(Path(tomte_orderform))
-
-    # GIVEN an ExcelOrderformParser
-    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
-
-    # WHEN parsing the orderform
-    orderform_parser.parse_orderform(excel_path=tomte_orderform)
-
-    # THEN assert that the project type is correct
-    assert orderform_parser.project_type == OrderType.TOMTE
+    # THEN it should determine the correct customer should have been parsed
+    assert order_form_parser.customer_id == "cust000"
