@@ -90,10 +90,13 @@ def clean_fastq(context: CGConfig, case_id: str | None, days_back: int, dry_run:
     if not cases:
         LOG.info("Did not find any FASTQ files to clean. Closing")
         return
-
+    is_successful: bool = True
     for case in cases:
         samples: list[Sample] = store.get_samples_by_case_id(case_id=case.internal_id)
-        compress_api.clean_fastq_files_new_case(samples=samples, days_back=days_back)
+        if not compress_api.clean_fastq_files_new_case(samples=samples, days_back=days_back):
+            is_successful: bool = False
+    if not is_successful:
+        click.Abort("Failed to clean FASTQ files. Aborting")
 
 
 @click.command("fix-spring")

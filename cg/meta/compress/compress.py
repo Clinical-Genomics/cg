@@ -157,8 +157,9 @@ class CompressAPI:
                 return True
         return False
 
-    def clean_fastq_files_new_case(self, samples: list[Sample], days_back: int) -> None:
+    def clean_fastq_files_new_case(self, samples: list[Sample], days_back: int) -> bool:
         """Clean FASTQ files for samples linked to eligible case."""
+        is_successful: bool = True
         for sample in samples:
             sample_id: str = sample.internal_id
             if len(sample.links) > 1:
@@ -176,7 +177,9 @@ class CompressAPI:
                     )
                     continue
             except Exception as error:
+                is_successful = False
                 LOG.error(f"Could not clean sample {sample_id}: {error}")
+        return is_successful
 
     def clean_fastq(self, sample_id: str, archive_location: str) -> bool:
         """Check that FASTQ compression is completed for a case and clean.
