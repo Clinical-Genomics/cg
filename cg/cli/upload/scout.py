@@ -8,7 +8,7 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.cli.upload.utils import suggest_cases_to_upload
+from cg.cli.upload.utils import get_scout_api, suggest_cases_to_upload
 from cg.constants import Workflow
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.constants import FileFormat
@@ -20,6 +20,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
+from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
@@ -72,20 +73,22 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     status_db: Store = context.status_db
 
     LOG.info("Fetching family object")
-    case_obj: Case = status_db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
 
-    if not case_obj.analyses:
+    if not case.analyses:
         LOG.warning(f"Could not find analyses for {case_id}")
         raise click.Abort
 
-    context.meta_apis["upload_api"]: UploadAPI = get_upload_api(cg_config=context, case=case_obj)
+    context.meta_apis["upload_api"]: UploadAPI = get_upload_api(cg_config=context, case=case)
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
 
     LOG.info("----------------- CREATE CONFIG -----------------------")
     LOG.info("Create load config")
     try:
-        scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
+        scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(
+            analysis=status_db.get_latest_completed_analysis_for_case(case.internal_id),
+        )
     except SyntaxError as error:
         LOG.warning(repr(error))
         raise click.Abort from error
@@ -142,7 +145,7 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
     LOG.info("----------------- UPLOAD -----------------------")
 
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    scout_api: ScoutAPI = context.scout_api
+    scout_api: ScoutAPI = get_scout_api(cg_config=context, case_id=case_id)
 
     tag_name: str = UploadScoutAPI.get_load_config_tag()
     version: Version = housekeeper_api.last_version(bundle=case_id)
@@ -316,6 +319,7 @@ def get_upload_api(case: Case, cg_config: CGConfig) -> UploadAPI:
         Workflow.BALSAMIC_UMI: BalsamicUmiAnalysisAPI,
         Workflow.MIP_RNA: MipRNAAnalysisAPI,
         Workflow.MIP_DNA: MipDNAAnalysisAPI,
+        Workflow.NALLO: NalloAnalysisAPI,
         Workflow.RAREDISEASE: RarediseaseAnalysisAPI,
         Workflow.RNAFUSION: RnafusionAnalysisAPI,
         Workflow.TOMTE: TomteAnalysisAPI,

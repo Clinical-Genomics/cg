@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
+from cg.constants.constants import DataDelivery
 from cg.models.orders.constants import OrderType
 from cg.models.orders.excel_sample import ExcelSample
 from cg.models.orders.orderform_schema import Orderform
@@ -100,6 +101,21 @@ def test_parse_pacbio_sequencing_orderform(pacbio_revio_sequencing_orderform: st
     assert orderform_parser.project_type == OrderType.PACBIO_LONG_READ
 
 
+def test_parse_nallo_sequencing_orderform(nallo_order_form: str):
+    """Test to parse a Nallo order form in Excel format"""
+    # GIVEN a Nallo order form in Excel format
+    assert is_excel(Path(nallo_order_form))
+
+    # GIVEN a orderform API
+    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
+
+    # WHEN parsing the orderform
+    orderform_parser.parse_orderform(excel_path=nallo_order_form)
+
+    # THEN assert that the project type is correct
+    assert orderform_parser.project_type == OrderType.NALLO
+
+
 def test_parse_sarscov2_orderform(sarscov2_orderform: str):
     """Test to parse a sarscov2 orderform in excel format"""
 
@@ -168,6 +184,33 @@ def test_parse_mip_orderform(mip_orderform: str, nr_samples_mip_orderform: int):
     assert order_form_parser.project_type == OrderType.MIP_DNA
 
 
+def test_parse_mip_orderform_no_delivery(
+    mip_orderform_no_delivery: str, nr_samples_mip_orderform: int
+):
+    """Test to parse a mip orderform in xlsx format"""
+    # GIVEN a orderform in excel format
+    assert is_excel(Path(mip_orderform_no_delivery))
+    # GIVEN a orderform API
+    order_form_parser = ExcelOrderformParser()
+    # GIVEN the correct orderform name
+    order_name: str = Path(mip_orderform_no_delivery).stem
+
+    # WHEN parsing the mip orderform
+    order_form_parser.parse_orderform(excel_path=mip_orderform_no_delivery)
+
+    # THEN assert that the correct name was set
+    assert order_form_parser.order_name == order_name
+
+    # THEN assert the number of samples parsed are correct
+    assert len(order_form_parser.samples) == nr_samples_mip_orderform
+    assert order_form_parser.samples[0].panels == ["Inherited cancer"]
+    assert order_form_parser.samples[1].panels == ["AID", "Inherited cancer"]
+    assert order_form_parser.delivery_type == DataDelivery.NO_DELIVERY
+
+    # THEN assert that the project type is correct
+    assert order_form_parser.project_type == OrderType.MIP_DNA
+
+
 def test_parse_rml_orderform(rml_orderform: str, nr_samples_rml_orderform: int):
     """Test to parse an excel orderform in xlsx format"""
     # GIVEN a orderform in excel format
@@ -228,7 +271,7 @@ def test_fastq_samples_is_correct(fastq_order_parser: ExcelOrderformParser):
     assert tumour_sample and normal_sample
 
 
-def test_generate_parsed_rml_orderform(rml_order_parser: ExcelOrderformParser, caplog):
+def test_generate_parsed_rml_orderform(rml_order_parser: ExcelOrderformParser):
     """Test to generate a order from a parsed rml excel file"""
     # GIVEN a order form parser that have parsed an excel file
 
@@ -279,3 +322,19 @@ def test_parse_taxprofiler_orderform(taxprofiler_orderform: str):
 
     # THEN assert that the project type is correct
     assert orderform_parser.project_type == OrderType.TAXPROFILER
+
+
+def test_parse_tomte_orderform(tomte_orderform: str):
+    """Test to parse a Tomte orderform in excel format"""
+
+    # GIVEN an order form in Excel format
+    assert is_excel(Path(tomte_orderform))
+
+    # GIVEN an ExcelOrderformParser
+    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
+
+    # WHEN parsing the orderform
+    orderform_parser.parse_orderform(excel_path=tomte_orderform)
+
+    # THEN assert that the project type is correct
+    assert orderform_parser.project_type == OrderType.TOMTE

@@ -7,6 +7,7 @@ import rich_click as click
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.cli.upload.utils import get_scout_api
 from cg.constants.cli_options import DRY_RUN
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.models.cg_config import CGConfig
@@ -28,7 +29,7 @@ def process_solved(
 
     LOG.info("----------------- PROCESS-SOLVED ----------------")
 
-    scout_api: ScoutAPI = context.scout_api
+    scout_api: ScoutAPI = get_scout_api(cg_config=context, case_id=case_id)
     mutacc_auto_api: MutaccAutoAPI = context.mutacc_auto_api
     mutacc_upload_api = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 

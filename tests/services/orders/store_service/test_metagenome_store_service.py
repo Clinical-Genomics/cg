@@ -9,9 +9,9 @@ import pytest
 from cg.services.orders.storing.implementations.metagenome_order_service import (
     StoreMetagenomeOrderService,
 )
-from cg.services.orders.validation.workflows.metagenome.models.order import MetagenomeOrder
-from cg.services.orders.validation.workflows.taxprofiler.models.order import TaxprofilerOrder
-from cg.store.models import Sample
+from cg.services.orders.validation.order_types.metagenome.models.order import MetagenomeOrder
+from cg.services.orders.validation.order_types.taxprofiler.models.order import TaxprofilerOrder
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
@@ -44,6 +44,10 @@ def test_store_metagenome_order_data_in_status_db(
     # THEN the samples should have the correct application tag
     for sample in db_samples:
         assert sample.application_version.application.tag in ["METWPFR030", "METPCFR030"]
+
+    # THEN there should be a case for each sample
+    db_cases: list[Case] = store_to_submit_and_validate_orders._get_query(table=Case).all()
+    assert len(db_samples) == len(db_cases)
 
     # THEN the order should be stored
     assert store_to_submit_and_validate_orders.get_order_by_ticket_id(ticket_id_as_int)

@@ -235,11 +235,28 @@ def mip_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture(scope="session")
+def mip_orderform_no_delivery(orderforms: Path) -> str:
+    """Orderform fixture for MIP samples with delivery set to No delivery."""
+    return Path(
+        orderforms,
+        f"{Orderform.MIP_DNA}.{Orderform.get_current_orderform_version(Orderform.MIP_DNA)}.mip_no_delivery.xlsx",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
 def mip_rna_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP RNA samples."""
     return Path(
         orderforms,
         f"{Orderform.MIP_RNA}.{Orderform.get_current_orderform_version(Orderform.MIP_RNA)}.mip_rna.xlsx",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def nallo_order_form(orderforms: Path) -> str:
+    return Path(
+        orderforms,
+        f"{Orderform.NALLO}.{Orderform.get_current_orderform_version(Orderform.NALLO)}.xlsx",
     ).as_posix()
 
 
@@ -258,6 +275,15 @@ def taxprofiler_orderform(orderforms: Path) -> str:
     return Path(
         orderforms,
         f"{Orderform.TAXPROFILER}.{Orderform.get_current_orderform_version(Orderform.TAXPROFILER)}.taxprofiler.xlsx",
+    ).as_posix()
+
+
+@pytest.fixture
+def tomte_orderform(orderforms: Path) -> str:
+    """Orderform fixture for sarscov2 samples."""
+    return Path(
+        orderforms,
+        f"{Orderform.TOMTE}.{Orderform.get_current_orderform_version(Orderform.TOMTE)}.tomte.xlsx",
     ).as_posix()
 
 

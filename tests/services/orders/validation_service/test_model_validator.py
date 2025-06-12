@@ -2,10 +2,10 @@ import pytest
 
 from cg.services.orders.validation.model_validator.model_validator import ModelValidator
 from cg.services.orders.validation.models.order import Order
-from cg.services.orders.validation.workflows.fluffy.models.order import FluffyOrder
-from cg.services.orders.validation.workflows.mutant.models.order import MutantOrder
-from cg.services.orders.validation.workflows.rml.models.order import RMLOrder
-from cg.services.orders.validation.workflows.tomte.models.order import TomteOrder
+from cg.services.orders.validation.order_types.fluffy.models.order import FluffyOrder
+from cg.services.orders.validation.order_types.mutant.models.order import MutantOrder
+from cg.services.orders.validation.order_types.rml.models.order import RMLOrder
+from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 
 
 @pytest.mark.parametrize(

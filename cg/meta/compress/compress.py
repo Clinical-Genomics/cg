@@ -18,6 +18,7 @@ from cg.meta.compress import files
 from cg.models.compression_data import CompressionData
 from cg.store.models import Case, Sample
 
+
 LOG = logging.getLogger(__name__)
 
 
@@ -93,7 +94,7 @@ class CompressAPI:
         if self._is_spring_archived(compression):
             LOG.debug(f"Found archived Spring file for {sample_id} - compression not possible")
             return False
-        return self.crunchy_api.is_fastq_compression_possible(compression_obj=compression)
+        return compression.is_fastq_compression_possible
 
     def _is_spring_archived(self, compression_data: CompressionData) -> bool:
         spring_file: File | None = self.hk_api.get_file_insensitive_path(
@@ -120,11 +121,9 @@ class CompressAPI:
 
         compressions: list[CompressionData] = files.get_spring_paths(version_obj=version)
         for compression in compressions:
-            if not self.crunchy_api.is_spring_decompression_possible(compression_obj=compression):
+            if not compression.is_spring_decompression_possible:
                 LOG.info(f"SPRING to FASTQ decompression not possible for {sample_id}")
-                if self.crunchy_api.is_compression_pending(
-                    compression
-                ) or self.crunchy_api.is_spring_decompression_done(compression):
+                if compression.is_compression_pending or compression.is_spring_decompression_done:
                     LOG.info(
                         f"Spring file {compression.spring_path.as_posix()} is already being decompressed."
                     )
@@ -235,9 +234,7 @@ class CompressAPI:
         return all_cleaned
 
     def _can_fastqs_be_removed(self, compression_data: CompressionData) -> bool:
-        is_fastq_compression_done: bool = self.crunchy_api.is_fastq_compression_done(
-            compression_data
-        )
+        is_fastq_compression_done: bool = compression_data.is_fastq_compression_done
         spring_file: File | None = self.hk_api.get_file_insensitive_path(
             compression_data.spring_path
         )
@@ -257,7 +254,7 @@ class CompressAPI:
         if not spring_paths:
             LOG.warning(f"Could not find any spring paths for {sample.internal_id}")
         for compression in spring_paths:
-            if not self.crunchy_api.is_spring_decompression_done(compression):
+            if not compression.is_spring_decompression_done:
                 LOG.info(f"SPRING to FASTQ decompression not finished {sample.internal_id}")
                 return False
 

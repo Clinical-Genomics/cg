@@ -9,9 +9,14 @@ from cg.constants.nf_analysis import RNAFUSION_METRIC_CONDITIONS
 from cg.constants.scout import RNAFUSION_CASE_TAGS
 from cg.exc import MissingMetrics
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
-from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
+from cg.models.rnafusion.rnafusion import (
+    RnafusionParameters,
+    RnafusionQCMetrics,
+    RnafusionSampleSheetEntry,
+)
 from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
 from cg.store.models import CaseSample
 
@@ -78,7 +83,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         return sample_sheet_entry.reformat_sample_content()
 
     def get_built_workflow_parameters(
-        self, case_id: str, genomes_base: Path | None = None
+        self, case_id: str, dry_run: bool = False
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
         return RnafusionParameters(
@@ -106,3 +111,10 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def get_scout_upload_case_tags(self) -> dict:
         """Return Rnafusion Scout upload case tags."""
         return RNAFUSION_CASE_TAGS
+
+    def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
+        """Parse Nextflow output analysis files and return an analysis model."""
+        qc_metrics_model = RnafusionQCMetrics
+        return super().parse_analysis(
+            qc_metrics_raw=qc_metrics_raw, qc_metrics_model=qc_metrics_model, **kwargs
+        )

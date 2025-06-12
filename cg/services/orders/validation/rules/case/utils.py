@@ -2,11 +2,12 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
-from cg.services.orders.validation.workflows.balsamic.models.case import BalsamicCase
-from cg.services.orders.validation.workflows.balsamic.models.sample import BalsamicSample
-from cg.services.orders.validation.workflows.balsamic_umi.models.case import BalsamicUmiCase
-from cg.services.orders.validation.workflows.balsamic_umi.models.sample import BalsamicUmiSample
-from cg.store.models import Case as DbCase, Application
+from cg.services.orders.validation.order_types.balsamic.models.case import BalsamicCase
+from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
+from cg.services.orders.validation.order_types.balsamic_umi.models.case import BalsamicUmiCase
+from cg.services.orders.validation.order_types.balsamic_umi.models.sample import BalsamicUmiSample
+from cg.store.models import Application
+from cg.store.models import Case as DbCase
 from cg.store.models import Customer, Sample
 from cg.store.store import Store
 
@@ -68,3 +69,21 @@ def is_sample_in_case(case: Case, sample_name: str, store: Store) -> bool:
     elif case.get_existing_sample_from_db(sample_name=sample_name, store=store):
         return True
     return False
+
+
+def get_case_prep_categories(case: Case, store: Store) -> set[str]:
+    """
+    Return a set with all prep categories of the samples in the case
+    if the sample and its application exist, and has a prep category.
+    """
+    prep_categories: set[str] = set()
+    for _, sample in case.enumerated_new_samples:
+        application: Application | None = store.get_application_by_tag(sample.application)
+        if application and application.prep_category:
+            prep_categories.add(application.prep_category)
+
+    for _, sample in case.enumerated_existing_samples:
+        db_sample: Sample | None = store.get_sample_by_internal_id(sample.internal_id)
+        if db_sample and db_sample.prep_category:
+            prep_categories.add(db_sample.prep_category)
+    return prep_categories

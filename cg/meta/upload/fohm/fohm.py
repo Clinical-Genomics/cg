@@ -4,7 +4,9 @@ import logging
 import os
 import re
 from pathlib import Path
+
 import paramiko
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.constants import FileExtensions
@@ -16,9 +18,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.email import EmailInfo
 from cg.models.fohm.reports import FohmComplementaryReport, FohmPangolinReport
 from cg.services.deliver_files.constants import DeliveryDestination, DeliveryStructure
-from cg.services.deliver_files.factory import (
-    DeliveryServiceFactory,
-)
+from cg.services.deliver_files.factory import DeliveryServiceFactory
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 from cg.utils.dict import remove_duplicate_dicts
@@ -324,17 +324,19 @@ class FOHMUploadAPI:
         """Update timestamp for cases which started being processed as batch."""
         if self._dry_run:
             return
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        case.analyses[0].upload_started_at = dt.datetime.now()
-        self.status_db.session.commit()
+        analysis_id: int = self.status_db.get_latest_completed_analysis_for_case(case_id).id
+        self.status_db.update_analysis_upload_started_at(
+            analysis_id=analysis_id, upload_started_at=dt.datetime.now()
+        )
 
     def update_uploaded_at(self, case_id: str) -> None:
         """Update timestamp for a case which uploaded successfully."""
         if self._dry_run:
             return
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        case.analyses[0].uploaded_at = dt.datetime.now()
-        self.status_db.session.commit()
+        analysis_id: int = self.status_db.get_latest_completed_analysis_for_case(case_id).id
+        self.status_db.update_analysis_uploaded_at(
+            analysis_id=analysis_id, uploaded_at=dt.datetime.now()
+        )
 
     def parse_and_write_complementary_report(self) -> list[FohmComplementaryReport]:
         """Parse and write a complementary report."""

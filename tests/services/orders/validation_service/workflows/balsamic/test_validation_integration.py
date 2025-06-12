@@ -1,7 +1,7 @@
 from cg.models.orders.constants import OrderType
 from cg.services.orders.validation.order_type_maps import RuleSet
+from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.service import OrderValidationService
-from cg.services.orders.validation.workflows.balsamic.models.order import BalsamicOrder
 
 
 def test_valid_order(

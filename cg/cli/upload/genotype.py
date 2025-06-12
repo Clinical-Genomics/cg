@@ -8,7 +8,7 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case
+from cg.store.models import Analysis
 from cg.store.store import Store
 
 from .utils import suggest_cases_to_upload
@@ -36,9 +36,9 @@ def upload_genotypes(context: CGConfig, re_upload: bool, family_id: str | None):
     if not family_id:
         suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
-    case: Case = status_db.get_case_by_internal_id(internal_id=family_id)
+    analysis: Analysis = status_db.get_latest_completed_analysis_for_case(family_id)
     upload_genotypes_api = UploadGenotypesAPI(hk_api=housekeeper_api, gt_api=genotype_api)
-    results: dict = upload_genotypes_api.get_genotype_data(case.analyses[0])
+    results: dict = upload_genotypes_api.get_genotype_data(analysis)
 
     if not results:
         LOG.warning("Could not find any results to upload")

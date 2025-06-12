@@ -5,12 +5,16 @@ from cg.services.orders.validation.errors.case_errors import (
     CaseNameNotAvailableError,
     CaseOutsideOfCollaborationError,
     ExistingCaseWithoutAffectedSampleError,
+    MultiplePrepCategoriesError,
     MultipleSamplesInCaseError,
     NewCaseWithoutAffectedSampleError,
     RepeatedCaseNameError,
 )
 from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
+from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
+from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
+from cg.services.orders.validation.order_types.rna_fusion.models.sample import RNAFusionSample
 from cg.services.orders.validation.rules.case.rules import (
     validate_case_internal_ids_exist,
     validate_case_names_available,
@@ -19,11 +23,9 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_existing_cases_belong_to_collaboration,
     validate_existing_cases_have_an_affected_sample,
     validate_one_sample_per_case,
+    validate_samples_in_case_have_same_prep_category,
 )
-from cg.services.orders.validation.workflows.mip_dna.models.order import MIPDNAOrder
-from cg.services.orders.validation.workflows.rna_fusion.models.order import RNAFusionOrder
-from cg.services.orders.validation.workflows.rna_fusion.models.sample import RNAFusionSample
-from cg.store.models import Case
+from cg.store.models import Application, Case
 from cg.store.store import Store
 
 
@@ -90,7 +92,7 @@ def test_multiple_samples_in_case(rnafusion_order: RNAFusionOrder):
     # GIVEN an RNAFusion order with multiple samples in the same case
     rnafusion_sample = RNAFusionSample(
         container=ContainerEnum.tube,
-        container_name="container_name",
+        container_name="container-name",
         application="DummyAppTag",
         name="ExtraSample",
         require_qc_ok=False,
@@ -190,3 +192,30 @@ def test_existing_case_without_affected_samples(
 
     # THEN the error should concern the first case
     assert errors[0].case_index == mip_dna_order.cases.index(existing_case)
+
+
+def test_case_samples_multiple_prep_categories(
+    mip_dna_order: MIPDNAOrder,
+    store_to_submit_and_validate_orders: Store,
+):
+    # GIVEN a store with two applications from different prep categories
+    store = store_to_submit_and_validate_orders
+    wes_application: Application = store.get_application_by_tag("EXOKTTR040")
+    wes_application.prep_category = "wes"
+    wgs_application: Application = store.get_application_by_tag("WGSPCFC030")
+
+    # GIVEN an order with a case containing samples with different prep categories
+    mip_dna_order.cases[0].samples[0].application = wes_application.tag
+    mip_dna_order.cases[0].samples[1].application = wgs_application.tag
+
+    # WHEN validating that the case does not contain samples with different prep categories
+    errors: list[MultiplePrepCategoriesError] = validate_samples_in_case_have_same_prep_category(
+        order=mip_dna_order, store=store_to_submit_and_validate_orders
+    )
+
+    # THEN the expected error should be returned
+    error = errors[0]
+    assert isinstance(error, MultiplePrepCategoriesError)
+
+    # THEN the error should concern the first case
+    assert error.case_index == 0
