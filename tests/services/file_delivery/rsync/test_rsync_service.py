@@ -36,8 +36,18 @@ def rsync_base_path() -> str:
 
 
 @pytest.fixture
-def rsync_destination_path() -> str:
-    return "/destination/path"
+def rsync_destination_host() -> str:
+    return "example.scilifelab.se"
+
+
+@pytest.fixture
+def inbox_path() -> str:
+    return "/mnt/deliver"
+
+
+@pytest.fixture
+def rsync_destination_path(rsync_destination_host: str, inbox_path: str) -> str:
+    return f"{rsync_destination_host}:{inbox_path}"
 
 
 @pytest.fixture
@@ -321,7 +331,7 @@ def test_concatenate_rsync_commands_mutant(
     }
     report_path = Path(project_dir, customer_id, ticket_id, "a_report_file")
     covid_destination_path = Path(project_dir, "destination")
-    delivery_rsync_service.covid_destination_path = covid_destination_path
+    delivery_rsync_service.covid_destination_path = covid_destination_path.as_posix()
 
     # WHEN then commands are generated
     mocker.patch.object(DeliveryRsyncService, "format_covid_report_path", return_value=report_path)
@@ -345,6 +355,8 @@ def test_slurm_rsync_single_case(
     case_mock: Case,
     customer_mock: Customer,
     created_sbatch_information: str,
+    rsync_destination_host: str,
+    inbox_path: str,
     first_job_number: int,
     second_job_number: int,
     rsync_base_path: str,
@@ -372,13 +384,25 @@ def test_slurm_rsync_single_case(
         for type in ["case", "father", "mother", "child"]
     ]
 
-    _args, kwargs = slurm_api_mock.generate_sbatch_content.call_args
-    sbatch_parameters: Sbatch = kwargs["sbatch_parameters"]
+    _args, first_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[0]
+    _args, second_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[1]
 
-    assert sbatch_parameters.dependency == f"afterok:{first_job_number}"
+    sbatch_first_job: Sbatch = first_call_kwargs["sbatch_parameters"]
+    sbatch_second_job: Sbatch = second_call_kwargs["sbatch_parameters"]
+
+    assert sbatch_first_job.job_name == f"{ticket}_create_inbox"
+    assert (
+        sbatch_first_job.commands
+        == f"""
+ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer_mock.internal_id}/inbox/{ticket}"
+"""
+    )
+
+    assert sbatch_second_job.job_name == f"{case_mock.internal_id}_rsync"
+    assert sbatch_second_job.dependency == f"afterok:{first_job_number}"
 
     for command in expected_commands:
-        assert command in sbatch_parameters.commands
+        assert command in sbatch_second_job.commands
 
     slurm_api_mock.submit_sbatch.assert_called_with(
         sbatch_content=created_sbatch_information,
@@ -404,7 +428,7 @@ def test_slurm_rsync_single_case_no_ticket(
 def test_slurm_rsync_single_case_missing_file(
     all_samples_in_inbox: Path,
     case: Case,
-    destination_path: Path,
+    rsync_destination_path: Path,
     delivery_rsync_service: DeliveryRsyncService,
     caplog,
     mocker,
@@ -421,7 +445,7 @@ def test_slurm_rsync_single_case_missing_file(
     mocker.patch.object(DeliveryRsyncService, "get_source_and_destination_paths")
     DeliveryRsyncService.get_source_and_destination_paths.return_value = {
         "delivery_source_path": all_samples_in_inbox,
-        "rsync_destination_path": destination_path,
+        "rsync_destination_path": Path(rsync_destination_path),
     }
 
     mocker.patch.object(Store, "get_latest_ticket_from_case")

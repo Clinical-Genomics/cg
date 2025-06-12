@@ -20,6 +20,7 @@ from cg.services.deliver_files.rsync.models import RsyncDeliveryConfig
 from cg.services.deliver_files.rsync.sbatch import (
     COVID_REPORT_RSYNC,
     COVID_RSYNC,
+    CREATE_INBOX_COMMAND,
     ERROR_RSYNC_FUNCTION,
     RSYNC_COMMAND,
 )
@@ -259,15 +260,22 @@ class DeliveryRsyncService:
         )
         return sbatch_number
 
-    def _create_remote_ticket_inbox(self, dry_run, ticket, source_and_destination_paths) -> int:
+    def _create_remote_ticket_inbox(
+        self, dry_run: bool, ticket: str, source_and_destination_paths: dict[str, Path]
+    ) -> int:
+        host, inbox_path = (
+            source_and_destination_paths["rsync_destination_path"].as_posix().split(":")
+        )
+        inbox_path: str = f"{inbox_path}/{ticket}"
         job_name: str = f"{ticket}_create_inbox"
+
         sbatch_parameters: Sbatch = Sbatch(
             job_name=job_name,
             account=self.account,
             log_dir=self.log_dir.as_posix(),
             email=self.mail_user,
             hours=24,
-            commands="",
+            commands=CREATE_INBOX_COMMAND.format(host=host, inbox_path=inbox_path),
         )
         slurm_api = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)
