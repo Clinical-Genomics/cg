@@ -154,19 +154,16 @@ class CompressAPI:
             creation_date: datetime = case.created_at
             date_threshold: datetime = datetime.now() - timedelta(days=days_back)
             if creation_date > date_threshold:
-                LOG.info(
-                    f"Skipping sample {sample.internal_id}, linked to case {case.internal_id}"
-                    f" created on {creation_date}, not eligible for cleaning"
-                )
                 return True
         return False
 
-    def clean_selected_fastq_files(self, samples: list[Sample], days_back: int) -> None:
+    def clean_fastq_files_new_case(self, samples: list[Sample], days_back: int) -> None:
         """Clean FASTQ files for samples linked to eligible case."""
         for sample in samples:
             sample_id: str = sample.internal_id
             if len(sample.links) > 1:
                 if self._is_sample_linked_to_newer_case(sample=sample, days_back=days_back):
+                    LOG.info(f"Skipping sample {sample.internal_id}, not eligible for cleaning")
                     continue
             archive_location: str = sample.archive_location
             try:

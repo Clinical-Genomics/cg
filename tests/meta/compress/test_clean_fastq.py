@@ -211,9 +211,8 @@ def test_cli_clean_fastqs_pending_compression_metadata(
     assert fastq_second.exists()
 
 
-def test_clean_selected_fastq_files(
+def test_clean_fastq_files_new_case(
     populated_compress_fastq_api: MockCompressAPI,
-    sample: str,
     helpers: StoreHelpers,
     base_store: StoreHelpers,
 ):
@@ -231,9 +230,9 @@ def test_clean_selected_fastq_files(
     case2.created_at = datetime.now()
     sample.cases = [case1, case2]
 
-    # WHEN calling clean_selected_fastq_files with a days_back threshold
+    # WHEN calling clean_fastq_files_new_case with a days_back threshold
     with mock.patch.object(CompressAPI, "clean_fastq") as clean_fastq_mock:
-        populated_compress_fastq_api.clean_selected_fastq_files(
+        populated_compress_fastq_api.clean_fastq_files_new_case(
             samples=[sample],
             days_back=60,
         )

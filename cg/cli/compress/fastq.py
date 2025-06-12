@@ -93,9 +93,7 @@ def clean_fastq(context: CGConfig, case_id: str | None, days_back: int, dry_run:
 
     for case in cases:
         samples: list[Sample] = store.get_samples_by_case_id(case_id=case.internal_id)
-        compress_api.clean_selected_fastq_files(
-            samples=samples, days_back=days_back, dry_run=dry_run
-        )
+        compress_api.clean_fastq_files_new_case(samples=samples, days_back=days_back)
 
 
 @click.command("fix-spring")
