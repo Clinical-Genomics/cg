@@ -238,3 +238,28 @@ def test_clean_fastq_files_new_case(
         )
         # THEN assert that the clean_fastq_mock was not called
         clean_fastq_mock.assert_not_called()
+
+
+def test_clean_fastq_files_new_case_failure(
+    populated_compress_fastq_api: MockCompressAPI,
+    helpers: StoreHelpers,
+    base_store: StoreHelpers,
+):
+    """Test to clean selected FASTQ files with a failure."""
+    # GIVEN a case with a sample
+    case: Case = helpers.add_case_with_sample(
+        base_store=base_store, case_id="case1", sample_id="sample1"
+    )
+    sample: Sample = case.samples[0]
+    # WHEN calling clean_fastq_files_new_case with and an exception is raised in clean_fastq
+    with mock.patch.object(CompressAPI, "clean_fastq") as clean_fastq_mock:
+        clean_fastq_mock.side_effect = Exception()
+        populated_compress_fastq_api.clean_fastq_files_new_case(
+            samples=[sample],
+            days_back=60,
+        )
+        # THEN assert that clean_fastq_files_new_case returns False
+        assert not populated_compress_fastq_api.clean_fastq_files_new_case(
+            samples=[sample],
+            days_back=60,
+        )
