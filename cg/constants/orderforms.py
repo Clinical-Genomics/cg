@@ -17,6 +17,7 @@ class Orderform(StrEnum):
     MIP_DNA = "1508"
     MIP_RNA = "1508"
     NALLO = "long_read_nallo_analysis"
+    RAREDISEASE = "1508"
     RNAFUSION = "1508"
     RML = "1604"
     SARS_COV_2 = "2184"
