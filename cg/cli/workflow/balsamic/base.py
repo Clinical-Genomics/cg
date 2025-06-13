@@ -242,7 +242,7 @@ def start_available(context: click.Context, dry_run: bool = False, limit: int | 
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case in analysis_api.get_cases_ready_for_analysis(limit=limit):
+    for case in analysis_api.get_cases_to_analyze(limit=limit):
         try:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:

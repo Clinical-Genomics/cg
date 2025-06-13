@@ -8,11 +8,10 @@ from pydantic import ValidationError
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.utils import validate_force_store_option
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
-from cg.constants.cli_options import DRY_RUN, FORCE, COMMENT
+from cg.constants.cli_options import COMMENT, DRY_RUN, FORCE
 from cg.constants.constants import MetaApis
 from cg.exc import AnalysisNotReadyError, CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 
@@ -216,7 +215,7 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
     """Start workflow for all cases ready for analysis."""
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
     exit_code: int = EXIT_SUCCESS
-    for case in analysis_api.get_cases_ready_for_analysis():
+    for case in analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
