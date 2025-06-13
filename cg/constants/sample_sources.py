@@ -21,6 +21,7 @@ ANALYSIS_SOURCES = (
     "cell line",
     "cytology (FFPE)",
     "cytology (not fixed/fresh)",
+    "cytology (fixed)",
     "fibroblast",
     "muscle",
     "nail",

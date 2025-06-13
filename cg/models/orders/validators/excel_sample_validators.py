@@ -23,6 +23,7 @@ def validate_data_analysis(data_analysis):
         "MicroSALT",  # OF 1603 (implicit)
         "MIP DNA",  # OF 1508
         "MIP RNA",  # OF 1508
+        "raredisease",  # OF 1508
         "RNAfusion",  # OF 1508
         "Mutant",  # OF 2184
         "Taxprofiler",  # OF 1508
