@@ -175,15 +175,15 @@ class MipConfigBuilder(ScoutConfigBuilder):
             sample_id=sample_id,
             hk_version=hk_version,
         )
-        config_sample.tiddit_coverage_wig = self.get_file_from_hk(
-            hk_tags=self.sample_tags.tiddit_coverage_wig, hk_version=hk_version
+        config_sample.tiddit_coverage_wig = self.get_sample_file(
+            hk_tags=self.sample_tags.tiddit_coverage_wig, hk_version=hk_version, sample_id=sample_id
         )
-        config_sample.rhocall_wig = self.get_file_from_hk(
-            hk_tags=self.sample_tags.rhocall_wig, hk_version=hk_version
+        config_sample.rhocall_wig = self.get_sample_file(
+            hk_tags=self.sample_tags.rhocall_wig, hk_version=hk_version, sample_id=sample_id
         )
-        config_sample.upd_regions_bed = self.get_file_from_hk(
-            hk_tags=self.sample_tags.upd_regions_bed, hk_version=hk_version
+        config_sample.upd_regions_bed = self.get_sample_file(
+            hk_tags=self.sample_tags.upd_regions_bed, hk_version=hk_version, sample_id=sample_id
         )
-        config_sample.upd_sites_bed = self.get_file_from_hk(
-            hk_tags=self.sample_tags.upd_sites_bed, hk_version=hk_version
+        config_sample.upd_sites_bed = self.get_sample_file(
+            hk_tags=self.sample_tags.upd_sites_bed, hk_version=hk_version, sample_id=sample_id
         )
