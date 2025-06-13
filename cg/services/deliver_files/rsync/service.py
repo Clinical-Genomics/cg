@@ -292,6 +292,9 @@ class DeliveryRsyncService:
             exclude="--exclude=gpu-compute-0-[0-1],cg-dragen",
             dependency=dependency,
         )
+        return self._generate_and_submit_sbatch(dry_run, job_name, sbatch_parameters)
+
+    def _generate_and_submit_sbatch(self, dry_run, job_name, sbatch_parameters):
         slurm_api = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)
         sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
@@ -318,14 +321,9 @@ class DeliveryRsyncService:
             hours=24,
             commands=CREATE_INBOX_COMMAND.format(host=host, inbox_path=inbox_path),
         )
-        slurm_api = SlurmAPI()
-        slurm_api.set_dry_run(dry_run=dry_run)
-        sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
-        sbatch_path: Path = self.log_dir / f"{job_name}.sh"
-        sbatch_number: int = slurm_api.submit_sbatch(
-            sbatch_content=sbatch_content, sbatch_path=sbatch_path
+        return self._generate_and_submit_sbatch(
+            dry_run=dry_run, job_name=job_name, sbatch_parameters=sbatch_parameters
         )
-        return sbatch_number
 
     def _deliver_folder_contents(
         self,
