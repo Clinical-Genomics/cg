@@ -1,5 +1,9 @@
 """Sbatch templates for the rsync function"""
 
+CREATE_INBOX_COMMAND = """
+ssh {host} "mkdir -p {inbox_path}"
+"""
+
 RSYNC_COMMAND = """
 rsync -rvL {source_path} {destination_path}
 """
