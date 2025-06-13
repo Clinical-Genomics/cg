@@ -139,7 +139,7 @@ def test_get_data_delivery(microsalt_order_parser):
         "mip_rna",
         "nallo",
         "raredisease",
-        "rml",
+        "fluffy",
         "rnafusion",
         "sarscov2",
         "pacbio_long_read",
