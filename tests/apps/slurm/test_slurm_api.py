@@ -29,6 +29,32 @@ def test_generate_sbatch_header(sbatch_parameters: Sbatch):
     assert f"#SBATCH --mail-user={sbatch_parameters.email}" in sbatch_header
 
 
+def test_generate_sbatch_header_with_optional_headers(sbatch_parameters: Sbatch):
+    # GIVEN a Sbatch object with empty exclude and dependency
+    sbatch_parameters.exclude = "--exclude=stuff"
+    sbatch_parameters.dependency = "--dependency=afterok:42"
+
+    # WHEN building a sbatch header
+    sbatch_header: str = SlurmAPI.generate_sbatch_header(sbatch_parameters)
+
+    # THEN both headers should be included
+    assert "#SBATCH --exclude=stuff\n" in sbatch_header
+    assert "#SBATCH --dependency=afterok:42" in sbatch_header
+
+
+def test_generate_sbatch_header_without_optional_headers(sbatch_parameters: Sbatch):
+    # GIVEN a Sbatch object with empty exclude and dependency
+    sbatch_parameters.exclude = None
+    sbatch_parameters.dependency = None
+
+    # WHEN building a sbatch header
+    sbatch_header: str = SlurmAPI.generate_sbatch_header(sbatch_parameters)
+
+    # THEN no empty headers should be included
+    assert "#SBATCH None" not in sbatch_header
+    assert "#SBATCH\n" not in sbatch_header
+
+
 def test_generate_sbatch_body_no_error_function(sbatch_parameters: Sbatch):
     # GIVEN a Sbatch object with some parameters
 
@@ -66,30 +92,12 @@ def test_submit_sbatch_script_dry_run(sbatch_content: str):
     assert isinstance(job_number, int)
 
 
-def test_submit_sbatch_script(sbatch_content: str, slurm_api: SlurmAPI, sbatch_path: Path):
+def test_submit_sbatch_script(
+    sbatch_content: str, slurm_api: SlurmAPI, sbatch_path: Path, sbatch_job_number: int
+):
     # GIVEN a slurm api
     # GIVEN some sbatch content
     # GIVEN the path to a sbatch file
-
-    # WHEN submitting the job
-    job_number: int = slurm_api.submit_sbatch(
-        sbatch_content=sbatch_content, sbatch_path=sbatch_path
-    )
-
-    # THEN assert that a job number is returned
-    assert isinstance(job_number, int)
-
-
-def test_submit_sbatch_script_with_dependency(
-    slurm_api: SlurmAPI, sbatch_path: Path, sbatch_parameters: Sbatch, sbatch_job_number
-):
-    # GIVEN a slurm api
-
-    # GIVEN the parameter dependency is set
-    sbatch_parameters.dependency = "--dependency=afterok:42"
-
-    # GIVEN sbatch content is genereated with these parameters
-    sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters)
 
     open_mock = mock_open()
     with patch("builtins.open", open_mock):
@@ -98,12 +106,12 @@ def test_submit_sbatch_script_with_dependency(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
 
-        # THEN a file is written including a dependency header
+        # THEN a file is written with SBATCH headers
         write_args, _ = open_mock().write.call_args
-        assert "\n#SBATCH --dependency=afterok:42\n" in write_args[0]
+        assert "\n#SBATCH --job-name=test\n" in write_args[0]
 
-        # THEN a job is started and the job number is returned
-        assert job_number == sbatch_job_number
+    # THEN a job is started and the job number is returned
+    assert job_number == sbatch_job_number
 
 
 def test_submit_sbatch_script_std_error_output(

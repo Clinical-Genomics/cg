@@ -224,7 +224,7 @@ class DeliveryRsyncService:
         self,
         commands: str,
         job_prefix: str,
-        dependency: str = "",
+        dependency: str | None = None,
         account: str | None = None,
         email: str | None = None,
         log_dir: str | None = None,
