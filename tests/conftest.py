@@ -278,7 +278,7 @@ def empty_list() -> list:
     return []
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def sbatch_process(sbatch_job_number: int) -> ProcessMock:
     """Return a mocked process object."""
     slurm_process = ProcessMock(binary="sbatch")

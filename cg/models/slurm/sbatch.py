@@ -15,10 +15,10 @@ class Sbatch(BaseModel):
     quality_of_service: SlurmQos = SlurmQos.LOW
     commands: str
     error: str | None = None
-    exclude: str | None = ""
+    exclude: str = ""
     number_tasks: int | None = None
     memory: int | None = None
-    dependency: str | None = None
+    dependency: str = ""
 
 
 class SbatchDragen(Sbatch):

@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from unittest.mock import mock_open, patch
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.models.slurm.sbatch import Sbatch
@@ -77,6 +78,32 @@ def test_submit_sbatch_script(sbatch_content: str, slurm_api: SlurmAPI, sbatch_p
 
     # THEN assert that a job number is returned
     assert isinstance(job_number, int)
+
+
+def test_submit_sbatch_script_with_dependency(
+    slurm_api: SlurmAPI, sbatch_path: Path, sbatch_parameters: Sbatch, sbatch_job_number
+):
+    # GIVEN a slurm api
+
+    # GIVEN the parameter dependency is set
+    sbatch_parameters.dependency = "--dependency=afterok:42"
+
+    # GIVEN sbatch content is genereated with these parameters
+    sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters)
+
+    open_mock = mock_open()
+    with patch("builtins.open", open_mock):
+        # WHEN submitting the job
+        job_number: int = slurm_api.submit_sbatch(
+            sbatch_content=sbatch_content, sbatch_path=sbatch_path
+        )
+
+        # THEN a file is written including a dependency header
+        write_args, _ = open_mock().write.call_args
+        assert "\n#SBATCH --dependency=afterok:42\n" in write_args[0]
+
+        # THEN a job is started and the job number is returned
+        assert job_number == sbatch_job_number
 
 
 def test_submit_sbatch_script_std_error_output(

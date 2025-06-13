@@ -10,6 +10,7 @@ SBATCH_HEADER_TEMPLATE = """#! /bin/bash {use_login_shell}
 #SBATCH --time={hours}:{minutes}:00
 #SBATCH --qos={quality_of_service}
 #SBATCH {exclude}
+#SBATCH {dependency}
 
 set -eu -o pipefail
 

@@ -2,12 +2,10 @@
 
 import logging
 import shutil
-from pathlib import Path, PosixPath
-from typing import Generator
+from pathlib import Path
 from unittest.mock import ANY, create_autospec
 
 import pytest
-from mock import MagicMock, PropertyMock
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import Workflow
@@ -384,8 +382,8 @@ def test_slurm_rsync_single_case(
         for type in ["case", "father", "mother", "child"]
     ]
 
-    _args, first_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[0]
-    _args, second_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[1]
+    _, first_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[0]
+    _, second_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[1]
 
     sbatch_first_job: Sbatch = first_call_kwargs["sbatch_parameters"]
     sbatch_second_job: Sbatch = second_call_kwargs["sbatch_parameters"]
