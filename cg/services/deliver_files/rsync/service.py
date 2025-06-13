@@ -144,17 +144,6 @@ class DeliveryRsyncService:
     def get_all_cases_from_ticket(self, ticket: str) -> list[Case]:
         return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
 
-    def create_log_dir(self, dry_run: bool) -> None:
-        """Create log dir."""
-        log_dir: Path = self.log_dir
-        LOG.info(f"Creating folder: {log_dir}")
-        if log_dir.exists():
-            LOG.warning(f"Could not create {log_dir}, this folder already exist")
-        elif dry_run:
-            LOG.info(f"Would have created path {log_dir}, but this is a dry run")
-        else:
-            log_dir.mkdir(parents=True, exist_ok=True)
-
     def get_source_and_destination_paths(
         self, ticket: str, customer_internal_id: str
     ) -> dict[str, Path]:
@@ -200,6 +189,17 @@ class DeliveryRsyncService:
                 f" {self.covid_report_path % (case.internal_id, ticket)}!"
             )
         return covid_report_options[0]
+
+    def create_log_dir(self, dry_run: bool) -> None:
+        """Create log dir."""
+        log_dir: Path = self.log_dir
+        LOG.info(f"Creating folder: {log_dir}")
+        if log_dir.exists():
+            LOG.warning(f"Could not create {log_dir}, this folder already exist")
+        elif dry_run:
+            LOG.info(f"Would have created path {log_dir}, but this is a dry run")
+        else:
+            log_dir.mkdir(parents=True, exist_ok=True)
 
     def run_rsync_for_case(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
         """Submit Rsync commands for a single case for delivery to the delivery server."""
