@@ -121,7 +121,7 @@ def test_get_data_delivery(microsalt_order_parser):
         ("mip_rna_orderform", OrderType.MIP_RNA),
         ("nallo_order_form", OrderType.NALLO),
         ("raredisease_orderform", OrderType.RAREDISEASE),
-        ("rml_orderform", "fluffy"),
+        ("rml_orderform", OrderType.FLUFFY),
         ("rnafusion_orderform", OrderType.RNAFUSION),
         ("sarscov2_orderform", OrderType.SARS_COV_2),
         ("pacbio_revio_sequencing_orderform", OrderType.PACBIO_LONG_READ),
