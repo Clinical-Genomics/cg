@@ -279,7 +279,7 @@ def test_concatenate_rsync_commands(
         "rsync_destination_path": Path(project_dir, customer_id),
     }
     # WHEN then commands are generated
-    command: str = delivery_rsync_service._concatenate_rsync_commands(
+    command: str = delivery_rsync_service.concatenate_rsync_commands(
         folder_list=folders_to_deliver,
         source_and_destination_paths=source_and_destination_paths,
         ticket=ticket_id,
@@ -336,7 +336,7 @@ def test_concatenate_rsync_commands_mutant(
     mocker.patch.object(
         DeliveryRsyncService, "format_covid_destination_path", return_value=covid_destination_path
     )
-    command: str = delivery_rsync_service._concatenate_rsync_commands(
+    command: str = delivery_rsync_service.concatenate_rsync_commands(
         folder_list=folders_to_deliver,
         source_and_destination_paths=source_and_destination_paths,
         ticket=ticket_id,

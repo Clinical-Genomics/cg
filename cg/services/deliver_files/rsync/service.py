@@ -103,6 +103,36 @@ class DeliveryRsyncService:
 
         return before > ctime
 
+    def concatenate_rsync_commands(
+        self,
+        folder_list: set[Path],
+        source_and_destination_paths: dict[str, Path],
+        ticket: str,
+        case: Case,
+    ) -> str:
+        """Concatenates the rsync commands for each folder to be transferred."""
+        command: str = ""
+        for folder in folder_list:
+            source_path = Path(source_and_destination_paths["delivery_source_path"], folder.name)
+            destination_path: Path = Path(
+                source_and_destination_paths["rsync_destination_path"], ticket
+            )
+
+            command += RSYNC_COMMAND.format(
+                source_path=source_path, destination_path=destination_path
+            )
+        if case.data_analysis == Workflow.MUTANT:
+            covid_report_path: str = self.format_covid_report_path(case=case, ticket=ticket)
+            covid_destination_path: str = self.format_covid_destination_path(
+                self.covid_destination_path, customer_internal_id=case.customer.internal_id
+            )
+            command += COVID_REPORT_RSYNC.format(
+                covid_report_path=covid_report_path,
+                covid_destination_path=covid_destination_path,
+                log_dir=self.log_dir,
+            )
+        return command
+
     def set_log_dir(self, folder_prefix: str) -> None:
         if folder_prefix not in str(self.log_dir.as_posix()):
             timestamp = dt.datetime.now()
@@ -110,6 +140,17 @@ class DeliveryRsyncService:
             folder_name = Path("_".join([folder_prefix, timestamp_str]))
             LOG.info(f"Setting log dir to: {self.base_path / folder_name}")
             self.log_dir: Path = self.base_path / folder_name
+
+    def _create_log_dir(self, dry_run: bool) -> None:
+        """Create log dir."""
+        log_dir: Path = self.log_dir
+        LOG.info(f"Creating folder: {log_dir}")
+        if log_dir.exists():
+            LOG.warning(f"Could not create {log_dir}, this folder already exist")
+        elif dry_run:
+            LOG.info(f"Would have created path {log_dir}, but this is a dry run")
+        else:
+            log_dir.mkdir(parents=True, exist_ok=True)
 
     def get_all_cases_from_ticket(self, ticket: str) -> list[Case]:
         return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
@@ -216,11 +257,11 @@ class DeliveryRsyncService:
                 source_path=source_and_destination_paths["delivery_source_path"],
                 destination_path=source_and_destination_paths["rsync_destination_path"],
             )
-        return self._submit_sbatch_rsync_commands(
+        return self.submit_sbatch_rsync_commands(
             commands=commands, job_prefix=ticket, dry_run=dry_run
         )
 
-    def _submit_sbatch_rsync_commands(
+    def submit_sbatch_rsync_commands(
         self,
         commands: str,
         job_prefix: str,
@@ -286,47 +327,6 @@ class DeliveryRsyncService:
         )
         return sbatch_number
 
-    def _concatenate_rsync_commands(
-        self,
-        folder_list: set[Path],
-        source_and_destination_paths: dict[str, Path],
-        ticket: str,
-        case: Case,
-    ) -> str:
-        """Concatenates the rsync commands for each folder to be transferred."""
-        command: str = ""
-        for folder in folder_list:
-            source_path = Path(source_and_destination_paths["delivery_source_path"], folder.name)
-            destination_path: Path = Path(
-                source_and_destination_paths["rsync_destination_path"], ticket
-            )
-
-            command += RSYNC_COMMAND.format(
-                source_path=source_path, destination_path=destination_path
-            )
-        if case.data_analysis == Workflow.MUTANT:
-            covid_report_path: str = self.format_covid_report_path(case=case, ticket=ticket)
-            covid_destination_path: str = self.format_covid_destination_path(
-                self.covid_destination_path, customer_internal_id=case.customer.internal_id
-            )
-            command += COVID_REPORT_RSYNC.format(
-                covid_report_path=covid_report_path,
-                covid_destination_path=covid_destination_path,
-                log_dir=self.log_dir,
-            )
-        return command
-
-    def _create_log_dir(self, dry_run: bool) -> None:
-        """Create log dir."""
-        log_dir: Path = self.log_dir
-        LOG.info(f"Creating folder: {log_dir}")
-        if log_dir.exists():
-            LOG.warning(f"Could not create {log_dir}, this folder already exist")
-        elif dry_run:
-            LOG.info(f"Would have created path {log_dir}, but this is a dry run")
-        else:
-            log_dir.mkdir(parents=True, exist_ok=True)
-
     def _deliver_folder_contents(
         self,
         case,
@@ -336,13 +336,13 @@ class DeliveryRsyncService:
         ticket,
         source_and_destination_paths,
     ):
-        command: str = self._concatenate_rsync_commands(
+        command: str = self.concatenate_rsync_commands(
             folder_list=folders_to_deliver,
             source_and_destination_paths=source_and_destination_paths,
             ticket=ticket,
             case=case,
         )
-        return self._submit_sbatch_rsync_commands(
+        return self.submit_sbatch_rsync_commands(
             commands=command,
             job_prefix=case.internal_id,
             dry_run=dry_run,
