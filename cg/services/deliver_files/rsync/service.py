@@ -141,6 +141,9 @@ class DeliveryRsyncService:
             LOG.info(f"Setting log dir to: {self.base_path / folder_name}")
             self.log_dir: Path = self.base_path / folder_name
 
+    def get_all_cases_from_ticket(self, ticket: str) -> list[Case]:
+        return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
+
     def create_log_dir(self, dry_run: bool) -> None:
         """Create log dir."""
         log_dir: Path = self.log_dir
@@ -151,9 +154,6 @@ class DeliveryRsyncService:
             LOG.info(f"Would have created path {log_dir}, but this is a dry run")
         else:
             log_dir.mkdir(parents=True, exist_ok=True)
-
-    def get_all_cases_from_ticket(self, ticket: str) -> list[Case]:
-        return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
 
     def get_source_and_destination_paths(
         self, ticket: str, customer_internal_id: str
