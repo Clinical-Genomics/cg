@@ -18,6 +18,7 @@ from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
+    AnalysisNotCompletedError,
     CaseNotFoundError,
     CgDataError,
     CgError,
@@ -205,8 +206,24 @@ class ReadHandler(BaseHandler):
         if not analyses:
             raise AnalysisDoesNotExistError(f"No analysis found for case {case_id}")
         analyses.sort(key=lambda x: x.started_at, reverse=True)
-        analysis: Analysis | None = analyses[0]
+        analysis: Analysis = analyses[0]
         return analysis
+
+    def get_latest_completed_analysis_for_case(self, case_id: str) -> Analysis:
+        """Return the latest completed analysis for a case.
+        Raises:
+            AnalysisDoesNotExistError if no analysis is found.
+        """
+        case: Case | None = self.get_case_by_internal_id(case_id)
+        if not case.analyses:
+            raise AnalysisDoesNotExistError(f"No analysis found for case {case_id}")
+        completed_analyses: list[Analysis] = [
+            analysis for analysis in case.analyses if analysis.completed_at
+        ]
+        if not completed_analyses:
+            raise AnalysisNotCompletedError(f"No completed analysis found for case {case_id}")
+        completed_analyses.sort(key=lambda x: x.completed_at, reverse=True)
+        return completed_analyses[0]
 
     def get_analysis_by_entry_id(self, entry_id: int) -> Analysis | None:
         """Return an analysis."""

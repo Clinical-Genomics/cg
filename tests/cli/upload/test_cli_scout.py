@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 import mock
 import pytest
@@ -80,9 +81,9 @@ def test_create_scout_load_config(
     caplog.set_level(logging.DEBUG)
     status_db: Store = cg_context.status_db
 
-    # GIVEN a case with a balsamic analysis
+    # GIVEN a case with a completed analysis
     case: Case = helpers.ensure_case(store=status_db, data_analysis=workflow, case_id=case_id)
-    helpers.add_analysis(store=status_db, case=case, workflow=workflow)
+    helpers.add_analysis(store=status_db, case=case, workflow=workflow, completed_at=datetime.now())
 
     with mock.patch.object(UploadScoutAPI, "generate_config", return_value=MockScoutLoadConfig()):
         # WHEN creating the scout load config

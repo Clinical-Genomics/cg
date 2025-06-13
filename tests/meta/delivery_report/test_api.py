@@ -42,7 +42,7 @@ def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
 
     # WHEN generating the delivery report HTML
     delivery_report_html: str = delivery_report_api.get_delivery_report_html(
-        case_id=case_id, analysis_date=case.analyses[0].completed_at, force=False
+        case_id=case_id, analysis_date=case.latest_analyzed, force=False
     )
 
     # THEN it should generate a valid HTML string
@@ -67,7 +67,7 @@ def test_write_delivery_report_file(request: FixtureRequest, workflow: Workflow,
     delivery_report_file: Path = delivery_report_api.write_delivery_report_file(
         case_id=case.internal_id,
         directory=tmp_path,
-        analysis_date=case.analyses[0].completed_at,
+        analysis_date=case.latest_analyzed,
         force=False,
     )
 
@@ -90,7 +90,7 @@ def test_render_delivery_report(request: FixtureRequest, workflow: Workflow):
 
     # GIVEN some report data
     report_data: ReportModel = delivery_report_api.get_report_data(
-        case_id=case_id, analysis_date=case.analyses[0].completed_at
+        case_id=case_id, analysis_date=case.latest_analyzed
     )
 
     # WHEN rendering the report
@@ -116,7 +116,7 @@ def test_get_report_data(request: FixtureRequest, workflow: Workflow):
 
     # WHEN extracting the report data
     report_data: ReportModel = delivery_report_api.get_report_data(
-        case_id=case_id, analysis_date=case.analyses[0].completed_at
+        case_id=case_id, analysis_date=case.latest_analyzed
     )
 
     # THEN the report model should have been populated and the data validated
@@ -139,7 +139,7 @@ def test_validate_report_data(request: FixtureRequest, workflow: Workflow):
 
     # GIVEN a report data model
     report_data: ReportModel = delivery_report_api.get_report_data(
-        case_id=case_id, analysis_date=case.analyses[0].completed_at
+        case_id=case_id, analysis_date=case.latest_analyzed
     )
 
     # WHEN validating the delivery report data
@@ -168,9 +168,7 @@ def test_validate_report_data_empty_optional_fields(
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
     # GIVEN a delivery report data model
-    report_data: ReportModel = delivery_report_api.get_report_data(
-        case_id, case.analyses[0].completed_at
-    )
+    report_data: ReportModel = delivery_report_api.get_report_data(case_id, case.latest_analyzed)
 
     # GIVEN empty optional delivery report fields
     report_data.version = None
@@ -208,9 +206,7 @@ def test_validate_report_data_empty_required_fields(
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
     # GIVEN a delivery report data model
-    report_data: ReportModel = delivery_report_api.get_report_data(
-        case_id, case.analyses[0].completed_at
-    )
+    report_data: ReportModel = delivery_report_api.get_report_data(case_id, case.latest_analyzed)
 
     # GIVEN empty required delivery report fields
     report_data.accredited = None
@@ -246,9 +242,7 @@ def test_validate_report_data_empty_required_fields_force(
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
     # GIVEN a delivery report data model
-    report_data: ReportModel = delivery_report_api.get_report_data(
-        case_id, case.analyses[0].completed_at
-    )
+    report_data: ReportModel = delivery_report_api.get_report_data(case_id, case.latest_analyzed)
 
     # GIVEN empty required delivery report fields
     report_data.accredited = None
@@ -279,9 +273,7 @@ def test_validate_report_data_external_sample(request: FixtureRequest, workflow:
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
     # GIVEN a delivery report data model
-    report_data: ReportModel = delivery_report_api.get_report_data(
-        case_id, case.analyses[0].completed_at
-    )
+    report_data: ReportModel = delivery_report_api.get_report_data(case_id, case.latest_analyzed)
 
     # GIVEN a case with an external sample
     report_data.case.samples[0].timestamps.received_at = None
@@ -328,12 +320,11 @@ def test_get_report_version(request: FixtureRequest, workflow: Workflow):
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case
+    # GIVEN a case with an analysis
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
-    case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
-
-    # GIVEN an analysis object
-    analysis: Analysis = case.analyses[0]
+    analysis: Analysis = (
+        delivery_report_api.analysis_api.status_db.get_latest_completed_analysis_for_case(case_id)
+    )
 
     # WHEN retrieving the delivery report version
     delivery_report_version: int = delivery_report_api.get_report_version(analysis)
@@ -351,16 +342,19 @@ def test_get_case_data(request: FixtureRequest, workflow: Workflow):
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case
+    # GIVEN a case with an analysis
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
+    analysis: Analysis = (
+        delivery_report_api.analysis_api.status_db.get_latest_completed_analysis_for_case(case_id)
+    )
 
     # GIVEN workflow specific analysis metadata
     analysis_metadata: AnalysisModel = delivery_report_api.analysis_api.get_latest_metadata(case_id)
 
     # WHEN retrieving case data
     case_data: CaseModel = delivery_report_api.get_case_data(
-        case=case, analysis=case.analyses[0], analysis_metadata=analysis_metadata
+        case=case, analysis=analysis, analysis_metadata=analysis_metadata
     )
 
     # THEN the case delivery report model should have been populated
@@ -505,10 +499,13 @@ def test_get_case_analysis_data(request: FixtureRequest, workflow: Workflow):
     # GIVEN a case
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     case: Case = delivery_report_api.analysis_api.status_db.get_case_by_internal_id(case_id)
+    analysis: Analysis = (
+        delivery_report_api.analysis_api.status_db.get_latest_completed_analysis_for_case(case_id)
+    )
 
     # WHEN retrieving a case analysis
     case_analysis_data: DataAnalysisModel = delivery_report_api.get_case_analysis_data(
-        case, case.analyses[0]
+        case=case, analysis=analysis
     )
 
     # THEN the case analysis data model has been populated
