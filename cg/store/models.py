@@ -517,10 +517,13 @@ class Case(Base, PriorityMixin):
 
     @property
     def latest_analyzed(self) -> datetime | None:
-        if not self.analyses:
+        valid_analyses: list[Analysis] | None = [
+            a for a in self.analyses if a.completed_at is not None
+        ]
+        if not valid_analyses:
             return None
         sorted_analyses: list[Analysis] = sorted(
-            self.analyses, key=lambda analysis: analysis.completed_at, reverse=True
+            valid_analyses, key=lambda analysis: analysis.completed_at, reverse=True
         )
         return sorted_analyses[0].completed_at
 
