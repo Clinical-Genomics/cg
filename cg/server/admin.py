@@ -79,10 +79,20 @@ def view_application_version_link(unused1, unused2, model, unused3):
 
     del unused1, unused2, unused3
 
-    url: str = url_for(
-        "applicationversion.index_view", search=model.application_version.application.tag
+    url: str = url_for("applicationversion.index_view", search=model.tag)
+    return Markup(f"<a href='{url}'>{model.tag}</a>")
+
+
+def view_application_link_via_application_version(unused1, unused2, model, unused3):
+    """column formatter to open this view"""
+    del unused1, unused2, unused3
+    return Markup(
+        "<a href='%s'>%s</a>"
+        % (
+            url_for("application.index_view", search=model.application_version.application.tag),
+            model.application_version,
+        )
     )
-    return Markup(f"<a href='{url}'>{model.application_version}</a>")
 
 
 def view_pacbio_sample_sequencing_metrics_link(unused1, unused2, model, unused3):
@@ -222,6 +232,7 @@ class ApplicationView(BaseView):
         "category",
     ]
     column_formatters = {
+        "tag": view_application_version_link,
         "order_types": view_order_types,
         "sample_concentration_minimum": view_sample_concentration_minimum,
         "sample_concentration_maximum": view_sample_concentration_maximum,
@@ -653,7 +664,7 @@ class PoolView(BaseView):
     column_editable_list = ["ticket"]
     column_filters = ["customer.internal_id", "application_version.application"]
     column_formatters = {
-        "application_version": view_application_version_link,
+        "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
         "invoice": InvoiceView.view_invoice_link,
     }
@@ -684,7 +695,7 @@ class SampleView(BaseView):
         "capture_kit",
     ]
     column_formatters = {
-        "application_version": view_application_version_link,
+        "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
         "is_external": is_external_application,
         "internal_id": view_case_sample_link,
