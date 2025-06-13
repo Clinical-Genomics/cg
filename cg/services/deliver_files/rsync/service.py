@@ -346,5 +346,5 @@ class DeliveryRsyncService:
             commands=command,
             job_prefix=case.internal_id,
             dry_run=dry_run,
-            dependency=f"afterok:{folder_creation_job_id}",
+            dependency=f"--dependency=afterok:{folder_creation_job_id}",
         )

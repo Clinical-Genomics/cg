@@ -397,7 +397,7 @@ ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer_mock.internal_id}/
     )
 
     assert sbatch_second_job.job_name == f"{case_mock.internal_id}_rsync"
-    assert sbatch_second_job.dependency == f"afterok:{first_job_number}"
+    assert sbatch_second_job.dependency == f"--dependency=afterok:{first_job_number}"
 
     for command in expected_commands:
         assert command in sbatch_second_job.commands
