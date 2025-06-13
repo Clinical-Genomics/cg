@@ -178,7 +178,7 @@ def test_make_log_dir(delivery_rsync_service: DeliveryRsyncService, ticket_id: s
 
     # WHEN the log directory is created
     delivery_rsync_service.set_log_dir(folder_prefix=ticket_id)
-    delivery_rsync_service._create_log_dir(dry_run=True)
+    delivery_rsync_service.create_log_dir(dry_run=True)
 
     # THEN the path is not created since it is a dry run
     assert "Would have created path" in caplog.text

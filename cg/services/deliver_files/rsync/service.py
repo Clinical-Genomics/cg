@@ -141,7 +141,7 @@ class DeliveryRsyncService:
             LOG.info(f"Setting log dir to: {self.base_path / folder_name}")
             self.log_dir: Path = self.base_path / folder_name
 
-    def _create_log_dir(self, dry_run: bool) -> None:
+    def create_log_dir(self, dry_run: bool) -> None:
         """Create log dir."""
         log_dir: Path = self.log_dir
         LOG.info(f"Creating folder: {log_dir}")
@@ -212,7 +212,7 @@ class DeliveryRsyncService:
         )
 
         self.set_log_dir(folder_prefix=case.internal_id)
-        self._create_log_dir(dry_run=dry_run)
+        self.create_log_dir(dry_run=dry_run)
 
         folder_creation_job_id: int = self._create_remote_ticket_inbox(
             dry_run=dry_run,
@@ -232,7 +232,7 @@ class DeliveryRsyncService:
     def run_rsync_for_ticket(self, ticket: str, dry_run: bool) -> int:
         """Runs rsync of a whole ticket folder to the delivery server."""
         self.set_log_dir(folder_prefix=ticket)
-        self._create_log_dir(dry_run=dry_run)
+        self.create_log_dir(dry_run=dry_run)
         cases: list[Case] = self.get_all_cases_from_ticket(ticket=ticket)
         if not cases:
             LOG.warning(f"Could not find any cases for ticket {ticket}")
