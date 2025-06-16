@@ -1,4 +1,4 @@
-from pydantic import field_validator, BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Any
 import operator
 
@@ -8,6 +8,7 @@ from cg.models.qc_metrics import QCMetrics
 
 class BalsamicMetricValue(BaseModel):
     """BALSAMIC Metric attributes"""
+
     value: Any
     condition: MetricCondition | None = None
 
@@ -33,6 +34,7 @@ class BalsamicMetricValue(BaseModel):
             return True
         qc_function = getattr(operator, self.condition.norm)
         return qc_function(self.value, self.condition.threshold)
+
 
 class BalsamicWGSQCMetrics(BalsamicQCMetrics):
     """BALSAMIC WHOLE_GENOME_SEQUENCING QC metrics"""
@@ -65,6 +67,7 @@ class BalsamicQCMetrics(QCMetrics):
 
 class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
     """BALSAMIC targeted QC metrics"""
+
     mean_target_coverage: BalsamicMetricValue | None = None
     median_target_coverage: BalsamicMetricValue | None = None
     pct_target_bases_50x: BalsamicMetricValue | None = None

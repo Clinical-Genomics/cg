@@ -90,7 +90,9 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
         fold_80: fold 80 base penalty; source: workflow
     """
 
-    mean_insert_size: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
+    mean_insert_size: Annotated[
+        BalsamicMetricValue | None, BeforeValidator(get_number_as_string)
+    ] = None
     fold_80: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
 
 
@@ -108,7 +110,9 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     bait_set_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     gc_dropout: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
-    median_target_coverage: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
+    median_target_coverage: Annotated[
+        BalsamicMetricValue | None, BeforeValidator(get_number_as_string)
+    ] = None
     pct_250x: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
     pct_500x: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
 
@@ -123,10 +127,14 @@ class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
         pct_reads_improper_pairs: fraction of reads that are not properly aligned in pairs
     """
 
-    median_coverage: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
+    median_coverage: Annotated[
+        BalsamicMetricValue | None, BeforeValidator(get_number_as_string)
+    ] = None
     pct_15x: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
     pct_60x: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
-    pct_reads_improper_pairs: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
+    pct_reads_improper_pairs: Annotated[
+        BalsamicMetricValue | None, BeforeValidator(get_number_as_string)
+    ] = None
 
 
 class SequencingSampleMetadataModel(SampleMetadataModel):

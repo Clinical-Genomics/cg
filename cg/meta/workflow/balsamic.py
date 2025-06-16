@@ -353,11 +353,20 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             sample_metric = BalsamicMetricsBase(**value)
             try:
                 qc_metrics[sample_metric.id].update(
-                    {sample_metric.name.lower(): {"value": sample_metric.value, "condition": sample_metric.condition}}
+                    {
+                        sample_metric.name.lower(): {
+                            "value": sample_metric.value,
+                            "condition": sample_metric.condition,
+                        }
+                    }
                 )
             except KeyError:
                 qc_metrics[sample_metric.id] = {
-                    sample_metric.name.lower(): {"value": sample_metric.value, "condition": sample_metric.condition}}
+                    sample_metric.name.lower(): {
+                        "value": sample_metric.value,
+                        "condition": sample_metric.condition,
+                    }
+                }
 
         # return qc_metrics
         return BalsamicAnalysis(
