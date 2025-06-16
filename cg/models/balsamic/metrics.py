@@ -6,6 +6,16 @@ from cg.models.deliverables.metric_deliverables import MetricCondition, MetricsB
 from cg.models.qc_metrics import QCMetrics
 
 
+class BalsamicMetricsBase(MetricsBase):
+    """BALSAMIC base metric attributes
+
+    Attributes:
+        condition: balsamic metric validation condition
+    """
+
+    condition: MetricCondition | None = None
+
+
 class BalsamicMetricValue(BaseModel):
     """BALSAMIC Metric attributes"""
 
@@ -35,6 +45,12 @@ class BalsamicMetricValue(BaseModel):
         qc_function = getattr(operator, self.condition.norm)
         return qc_function(self.value, self.condition.threshold)
 
+class BalsamicQCMetrics(QCMetrics):
+    """BALSAMIC common QC metrics"""
+
+    fold_80_base_penalty: BalsamicMetricValue | None = None
+    mean_insert_size: BalsamicMetricValue | None = None
+    percent_duplication: BalsamicMetricValue | None = None
 
 class BalsamicWGSQCMetrics(BalsamicQCMetrics):
     """BALSAMIC WHOLE_GENOME_SEQUENCING QC metrics"""
@@ -46,23 +62,6 @@ class BalsamicWGSQCMetrics(BalsamicQCMetrics):
     pct_100x: BalsamicMetricValue | None = None
     pct_pf_reads_improper_pairs: BalsamicMetricValue | None = None
 
-
-class BalsamicMetricsBase(MetricsBase):
-    """BALSAMIC base metric attributes
-
-    Attributes:
-        condition: balsamic metric validation condition
-    """
-
-    condition: MetricCondition | None = None
-
-
-class BalsamicQCMetrics(QCMetrics):
-    """BALSAMIC common QC metrics"""
-
-    fold_80_base_penalty: BalsamicMetricValue | None = None
-    mean_insert_size: BalsamicMetricValue | None = None
-    percent_duplication: BalsamicMetricValue | None = None
 
 
 class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
@@ -79,12 +78,3 @@ class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
     gc_dropout: BalsamicMetricValue | None = None
 
 
-class BalsamicWGSQCMetrics(BalsamicQCMetrics):
-    """BALSAMIC WHOLE_GENOME_SEQUENCING QC metrics"""
-
-    median_coverage: BalsamicMetricValue | None = None
-    pct_15x: BalsamicMetricValue | None = None
-    pct_30x: BalsamicMetricValue | None = None
-    pct_60x: BalsamicMetricValue | None = None
-    pct_100x: BalsamicMetricValue | None = None
-    pct_pf_reads_improper_pairs: BalsamicMetricValue | None = None
