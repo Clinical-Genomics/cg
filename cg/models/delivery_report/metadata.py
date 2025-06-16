@@ -9,6 +9,7 @@ from cg.models.delivery_report.validators import (
     get_report_string,
     get_sex_as_string,
 )
+from cg.models.balsamic.metrics import BalsamicMetricValue
 
 
 class SampleMetadataModel(BaseModel):
