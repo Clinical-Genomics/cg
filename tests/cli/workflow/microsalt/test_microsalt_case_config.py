@@ -4,7 +4,7 @@
 import logging
 from pathlib import Path
 
-from click.testing import CliRunner
+from click.testing import CliRunner, Result
 from pytest_mock import MockerFixture
 
 from cg.apps.lims import LimsAPI
@@ -229,7 +229,10 @@ def test_dev_case_config(cli_runner: CliRunner, base_context: CGConfig, mocker: 
     config_mock = mocker.patch.object(MicrosaltConfigurator, "configure")
 
     # WHEN running the dev-config-case CLI command
-    cli_runner.invoke(dev_config_case, ["some_case_id"], obj=base_context)
+    result: Result = cli_runner.invoke(dev_config_case, ["some_case_id"], obj=base_context)
 
     # THEN the configurator should have been called with the specified case id
     config_mock.assert_called_once_with(case_id="some_case_id")
+
+    # THEN the command should have executed without fail
+    assert result.exit_code == EXIT_SUCCESS
