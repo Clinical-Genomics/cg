@@ -9,7 +9,6 @@ from cg.models.delivery_report.validators import (
     get_report_string,
     get_sex_as_string,
 )
-from cg.models.balsamic.metrics import BalsamicMetricValue
 
 
 class SampleMetadataModel(BaseModel):
@@ -107,6 +106,7 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
         pct_250x: percent of targeted bases that are covered to 250X coverage or more; source: workflow
         pct_500x: percent of targeted bases that are covered to 500X coverage or more; source: workflow
     """
+    from cg.models.balsamic.metrics import BalsamicMetricValue
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     bait_set_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
@@ -127,6 +127,7 @@ class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
         pct_60x: fraction of bases that attained at least 15X sequence coverage; source: workflow
         pct_reads_improper_pairs: fraction of reads that are not properly aligned in pairs
     """
+    from cg.models.balsamic.metrics import BalsamicMetricValue
 
     median_coverage: Annotated[
         BalsamicMetricValue | None, BeforeValidator(get_number_as_string)
