@@ -8,6 +8,7 @@ from click.testing import CliRunner
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
+from cg.constants.constants import SequencingQCStatus
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -159,9 +160,7 @@ def test_start_available_with_limit(
     case: Case = balsamic_context.status_db.get_case_by_internal_id(
         internal_id="balsamic_case_tgs_single"
     )
-    for sample in case.samples:
-        sample.reads = sample.expected_reads_for_sample
-    balsamic_context.status_db.commit_to_store()
+    case.aggregated_sequencing_qc = SequencingQCStatus.PASSED
 
     # GIVEN that there are now 2 cases that are ready for analysis
     assert len(balsamic_analysis_api.get_cases_to_analyze()) == 2
