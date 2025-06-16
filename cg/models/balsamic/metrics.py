@@ -1,4 +1,5 @@
-from pydantic import field_validator
+from pydantic import field_validator, BaseModel
+from typing import Any
 import operator
 
 from cg.models.deliverables.metric_deliverables import MetricCondition, MetricsBase
@@ -24,7 +25,7 @@ class BalsamicMetricValue(BaseModel):
     def meets_condition(self) -> bool:
         """Check if the metric value meets its condition.
 
-        Returns:
+        Returns:<
             bool: True if the value meets the condition, False otherwise.
             If no condition is set, returns True.
         """
