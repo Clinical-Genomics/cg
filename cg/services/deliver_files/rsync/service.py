@@ -267,43 +267,18 @@ class DeliveryRsyncService:
         commands: str,
         job_prefix: str,
         dependency: str | None = None,
-        account: str | None = None,
-        email: str | None = None,
-        log_dir: str | None = None,
-        hours: int = 24,
-        number_tasks: int = 1,
-        memory: int = 1,
         dry_run: bool = False,
     ) -> int:
-        """Instantiates a slurm api and sbatches the given commands. Default parameters can be
-        overridden."""
+        """Instantiates a slurm api and sbatches the given commands."""
 
-        job_name: str = f"{job_prefix}_rsync"
-        sbatch_parameters: Sbatch = Sbatch(
-            job_name=job_name,
-            account=account or self.account,
-            number_tasks=number_tasks,
-            memory=memory,
-            log_dir=log_dir or self.log_dir.as_posix(),
-            email=email or self.mail_user,
-            hours=hours,
-            quality_of_service=self.slurm_quality_of_service,
+        return self._generate_and_submit_sbatch(
             commands=commands,
-            error=ERROR_RSYNC_FUNCTION,
-            exclude="--exclude=gpu-compute-0-[0-1],cg-dragen",
             dependency=dependency,
+            dry_run=dry_run,
+            error_command=ERROR_RSYNC_FUNCTION,
+            exclude="--exclude=gpu-compute-0-[0-1],cg-dragen",
+            job_name=f"{job_prefix}_rsync",
         )
-        return self._generate_and_submit_sbatch(dry_run, job_name, sbatch_parameters)
-
-    def _generate_and_submit_sbatch(self, dry_run, job_name, sbatch_parameters):
-        slurm_api = SlurmAPI()
-        slurm_api.set_dry_run(dry_run=dry_run)
-        sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
-        sbatch_path: Path = self.log_dir / f"{job_name}.sh"
-        sbatch_number: int = slurm_api.submit_sbatch(
-            sbatch_content=sbatch_content, sbatch_path=sbatch_path
-        )
-        return sbatch_number
 
     def _create_remote_ticket_inbox(
         self, dry_run: bool, ticket: str, source_and_destination_paths: dict[str, Path]
@@ -314,29 +289,21 @@ class DeliveryRsyncService:
         inbox_path: str = f"{inbox_path}/{ticket}"
         job_name: str = f"{ticket}_create_inbox"
 
-        sbatch_parameters: Sbatch = Sbatch(
-            account=self.account,
-            commands=CREATE_INBOX_COMMAND.format(host=host, inbox_path=inbox_path),
-            email=self.mail_user,
-            error=ERROR_CREATE_INBOX_FUNCTION,
-            hours=24,
-            job_name=job_name,
-            log_dir=self.log_dir.as_posix(),
-            number_tasks=1,
-            memory=1,
-        )
+        commands: str = CREATE_INBOX_COMMAND.format(host=host, inbox_path=inbox_path)
+        error_command = ERROR_CREATE_INBOX_FUNCTION
+
         return self._generate_and_submit_sbatch(
-            dry_run=dry_run, job_name=job_name, sbatch_parameters=sbatch_parameters
+            commands=commands, error_command=error_command, job_name=job_name, dry_run=dry_run
         )
 
     def _deliver_folder_contents(
         self,
-        case,
-        folder_creation_job_id,
-        dry_run,
-        folders_to_deliver,
-        ticket,
-        source_and_destination_paths,
+        case: Case,
+        folder_creation_job_id: str,
+        folders_to_deliver: set[Path],
+        ticket: str,
+        source_and_destination_paths: dict[str, Path],
+        dry_run: bool = False,
     ):
         command: str = self.concatenate_rsync_commands(
             folder_list=folders_to_deliver,
@@ -350,3 +317,35 @@ class DeliveryRsyncService:
             dry_run=dry_run,
             dependency=f"--dependency=afterok:{folder_creation_job_id}",
         )
+
+    def _generate_and_submit_sbatch(
+        self,
+        job_name: str,
+        commands: str,
+        error_command: str,
+        dry_run=False,
+        dependency=None,
+        exclude=None,
+    ):
+        sbatch_parameters: Sbatch = Sbatch(
+            account=self.account,
+            commands=commands,
+            dependency=dependency,
+            email=self.mail_user,
+            error=error_command,
+            exclude=exclude,
+            hours=24,
+            job_name=job_name,
+            log_dir=self.log_dir.as_posix(),
+            memory=1,
+            number_tasks=1,
+        )
+
+        slurm_api = SlurmAPI()
+        slurm_api.set_dry_run(dry_run=dry_run)
+        sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
+        sbatch_path: Path = self.log_dir / f"{job_name}.sh"
+        sbatch_number: int = slurm_api.submit_sbatch(
+            sbatch_content=sbatch_content, sbatch_path=sbatch_path
+        )
+        return sbatch_number
