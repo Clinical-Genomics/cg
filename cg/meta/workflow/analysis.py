@@ -25,7 +25,7 @@ from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
 from cg.constants.priority import TrailblazerPriority
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.constants.tb import AnalysisStatus, AnalysisType
+from cg.constants.tb import AnalysisType
 from cg.exc import (
     AnalysisAlreadyStoredError,
     AnalysisNotReadyError,
@@ -42,7 +42,6 @@ from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.services.sequencing_qc_service import SequencingQCService
 from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
@@ -115,21 +114,6 @@ class AnalysisAPI(MetaAPI):
         if not self.get_case_path(case_id=case_id).exists():
             LOG.info(f"No working directory for {case_id} exists")
             raise FileNotFoundError(f"No working directory for {case_id} exists")
-
-    def is_case_ready_for_analysis(self, case: Case) -> bool:
-        """Check if case is ready for analysis. If case passes sequencing QC and is set to analyze,
-        or has not been analyzed yet, or the latest analysis failed, the case is ready for analysis.
-        """
-        case_passed_sequencing_qc: bool = SequencingQCService.case_pass_sequencing_qc(case)
-        case_is_set_to_analyze: bool = case.action == CaseActions.ANALYZE
-        case_has_not_been_analyzed: bool = not case.latest_analyzed
-        case_latest_analysis_failed: bool = (
-            self.trailblazer_api.get_latest_analysis_status(case_id=case.internal_id)
-            == AnalysisStatus.FAILED
-        )
-        return case_passed_sequencing_qc and (
-            case_is_set_to_analyze or case_has_not_been_analyzed or case_latest_analysis_failed
-        )
 
     def get_slurm_qos_for_case(self, case_id: str) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
