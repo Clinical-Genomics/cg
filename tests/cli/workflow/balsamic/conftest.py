@@ -8,7 +8,7 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, FileFormat
+from cg.constants.constants import CaseActions, FileFormat, SequencingQCStatus
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.io.controller import WriteFile
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -468,6 +468,7 @@ def balsamic_context(
         internal_id="balsamic_case_tgs_single_error",
         name="balsamic_case_tgs_single_error",
         data_analysis=Workflow.BALSAMIC,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
     sample_case_tgs_single_normal_error = helpers.add_sample(
         status_db,
@@ -490,6 +491,7 @@ def balsamic_context(
         internal_id="balsamic_case_tgs_paired_error",
         name="balsamic_case_tgs_paired_error",
         data_analysis=Workflow.BALSAMIC,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
     sample_case_tgs_paired_tumor_error = helpers.add_sample(
         status_db,
@@ -540,6 +542,7 @@ def balsamic_context(
         internal_id="balsamic_case_mixed_paired_error",
         name="balsamic_case_mixed_paired_error",
         data_analysis=Workflow.BALSAMIC,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
     mixed_sample_case_wgs_paired_tumor_error = helpers.add_sample(
         status_db,
