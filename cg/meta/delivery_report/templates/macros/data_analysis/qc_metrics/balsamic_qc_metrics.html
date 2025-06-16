@@ -36,4 +36,43 @@
   {% endif %}
   <!-- Quality control metrics -->
   {{ qc_metrics(samples=samples, metrics=metrics) }}
+
+  {% set failed_metrics = [] %}
+  {% for sample in samples %}
+    {% for metric in metrics %}
+      {% if sample.metadata[metric.key] and sample.metadata[metric.key].condition and not sample.metadata[metric.key].meets_condition() %}
+        {% set _ = failed_metrics.append({
+          'sample': sample.name,
+          'metric': metric.name,
+          'value': sample.metadata[metric.key].value,
+          'threshold': sample.metadata[metric.key].condition.threshold,
+          'condition': sample.metadata[metric.key].condition.norm
+        }) %}
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+
+  {% if failed_metrics %}
+    <h4 class="mt-4 mb-3">Kvalitetsmått som inte uppfyller kraven</h4>
+    <table class="table w-auto text-center align-middle" aria-describedby="failed-qc-metrics-table">
+      <thead class="table-secondary">
+        <tr>
+          <th scope="col">Prov</th>
+          <th scope="col">Mått</th>
+          <th scope="col">Värde</th>
+          <th scope="col">Krav</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for failed in failed_metrics %}
+        <tr>
+          <td>{{ failed.sample }}</td>
+          <td>{{ failed.metric }}</td>
+          <td>{{ failed.value }}</td>
+          <td>{{ failed.condition }} {{ failed.threshold }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
 {% endmacro %}

@@ -38,11 +38,16 @@ def get_boolean_as_string(value: bool | None) -> str:
 def get_number_as_string(value: Any) -> str:
     """
     Return string representation of a number. If None is provided, then it returns N/A.
+    For BalsamicMetricValue objects, returns the string representation of the value.
 
     Raises:
         ValueError: If the input value cannot be converted to a float.
     """
     try:
+        if hasattr(value, 'value'):
+            # Handle BalsamicMetricValue objects
+            result: str = str(round(float(value.value), PRECISION))
+            return result
         result: str = str(round(float(value), PRECISION))
         return result
     except TypeError:

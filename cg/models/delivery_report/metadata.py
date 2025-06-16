@@ -90,8 +90,8 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
         fold_80: fold 80 base penalty; source: workflow
     """
 
-    mean_insert_size: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    fold_80: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    mean_insert_size: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
+    fold_80: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
 
 
 class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
@@ -107,10 +107,10 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     bait_set_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    gc_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    median_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    pct_250x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    pct_500x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    gc_dropout: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
+    median_target_coverage: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
+    pct_250x: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
+    pct_500x: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
 
 
 class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
@@ -123,10 +123,10 @@ class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
         pct_reads_improper_pairs: fraction of reads that are not properly aligned in pairs
     """
 
-    median_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    pct_15x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    pct_60x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    pct_reads_improper_pairs: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    median_coverage: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
+    pct_15x: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
+    pct_60x: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
+    pct_reads_improper_pairs: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
 
 
 class SequencingSampleMetadataModel(SampleMetadataModel):

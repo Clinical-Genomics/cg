@@ -1,4 +1,5 @@
 from pydantic import field_validator
+import operator
 
 from cg.models.deliverables.metric_deliverables import MetricCondition, MetricsBase
 from cg.models.qc_metrics import QCMetrics
@@ -19,6 +20,18 @@ class BalsamicMetricValue(BaseModel):
             if not (0 <= v <= 100):
                 raise ValueError(f"Percentage for {info.field_name} must be between 0 and 100.")
         return v
+
+    def meets_condition(self) -> bool:
+        """Check if the metric value meets its condition.
+
+        Returns:
+            bool: True if the value meets the condition, False otherwise.
+            If no condition is set, returns True.
+        """
+        if not self.condition:
+            return True
+        qc_function = getattr(operator, self.condition.norm)
+        return qc_function(self.value, self.condition.threshold)
 
 class BalsamicWGSQCMetrics(BalsamicQCMetrics):
     """BALSAMIC WHOLE_GENOME_SEQUENCING QC metrics"""
