@@ -357,9 +357,11 @@ def test_slurm_rsync_single_case(
     inbox_path: str,
     first_job_number: int,
     second_job_number: int,
+    rsync_account: str,
     rsync_base_path: str,
     rsync_delivery_path: str,
     rsync_destination_path: str,
+    rsync_mail_user: str,
     rsync_service: DeliveryRsyncService,
     ticket: str,
     folders_to_deliver: set[Path],
@@ -374,7 +376,33 @@ def test_slurm_rsync_single_case(
         folders_to_deliver=folders_to_deliver,
     )
 
-    expected_commands: list[str] = [
+    _, first_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[0]
+    _, second_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[1]
+
+    sbatch_first_job: Sbatch = first_call_kwargs["sbatch_parameters"]
+    sbatch_second_job: Sbatch = second_call_kwargs["sbatch_parameters"]
+
+    expected_create_inbox_command = f"""
+ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer_mock.internal_id}/inbox/{ticket}"
+"""
+
+    assert sbatch_first_job == Sbatch(
+        job_name=f"{ticket}_create_inbox",
+        number_tasks=1,
+        memory=1,
+        account=rsync_account,
+        log_dir=f"{rsync_base_path}/{case_mock.internal_id}_250611_10_05_01_000000",
+        email=rsync_mail_user,
+        hours=24,
+        quality_of_service=SlurmQos.LOW,
+        commands=expected_create_inbox_command,
+        error='\necho "Create inbox failed"\n',
+    )
+
+    assert sbatch_second_job.job_name == f"{case_mock.internal_id}_rsync"
+    assert sbatch_second_job.dependency == f"--dependency=afterok:{first_job_number}"
+
+    expected_rsync_commands: list[str] = [
         (
             f"rsync -rvL {rsync_delivery_path}/{customer_mock.internal_id}/inbox/{ticket}/{type} "
             f"{rsync_destination_path}/{customer_mock.internal_id}/inbox/{ticket}"
@@ -382,24 +410,7 @@ def test_slurm_rsync_single_case(
         for type in ["case", "father", "mother", "child"]
     ]
 
-    _, first_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[0]
-    _, second_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[1]
-
-    sbatch_first_job: Sbatch = first_call_kwargs["sbatch_parameters"]
-    sbatch_second_job: Sbatch = second_call_kwargs["sbatch_parameters"]
-
-    assert sbatch_first_job.job_name == f"{ticket}_create_inbox"
-    assert (
-        sbatch_first_job.commands
-        == f"""
-ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer_mock.internal_id}/inbox/{ticket}"
-"""
-    )
-
-    assert sbatch_second_job.job_name == f"{case_mock.internal_id}_rsync"
-    assert sbatch_second_job.dependency == f"--dependency=afterok:{first_job_number}"
-
-    for command in expected_commands:
+    for command in expected_rsync_commands:
         assert command in sbatch_second_job.commands
 
     slurm_api_mock.submit_sbatch.assert_called_with(

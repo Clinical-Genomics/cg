@@ -21,6 +21,7 @@ from cg.services.deliver_files.rsync.sbatch import (
     COVID_REPORT_RSYNC,
     COVID_RSYNC,
     CREATE_INBOX_COMMAND,
+    ERROR_CREATE_INBOX_FUNCTION,
     ERROR_RSYNC_FUNCTION,
     RSYNC_COMMAND,
 )
@@ -288,7 +289,7 @@ class DeliveryRsyncService:
             hours=hours,
             quality_of_service=self.slurm_quality_of_service,
             commands=commands,
-            error=ERROR_RSYNC_FUNCTION.format(),
+            error=ERROR_RSYNC_FUNCTION,
             exclude="--exclude=gpu-compute-0-[0-1],cg-dragen",
             dependency=dependency,
         )
@@ -314,12 +315,15 @@ class DeliveryRsyncService:
         job_name: str = f"{ticket}_create_inbox"
 
         sbatch_parameters: Sbatch = Sbatch(
-            job_name=job_name,
             account=self.account,
-            log_dir=self.log_dir.as_posix(),
-            email=self.mail_user,
-            hours=24,
             commands=CREATE_INBOX_COMMAND.format(host=host, inbox_path=inbox_path),
+            email=self.mail_user,
+            error=ERROR_CREATE_INBOX_FUNCTION,
+            hours=24,
+            job_name=job_name,
+            log_dir=self.log_dir.as_posix(),
+            number_tasks=1,
+            memory=1,
         )
         return self._generate_and_submit_sbatch(
             dry_run=dry_run, job_name=job_name, sbatch_parameters=sbatch_parameters

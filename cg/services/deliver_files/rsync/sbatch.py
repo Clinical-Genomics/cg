@@ -21,6 +21,10 @@ COVID_REPORT_RSYNC = """
 rsync -rvL --chmod=777 {covid_report_path} {covid_destination_path}
 """
 
+ERROR_CREATE_INBOX_FUNCTION = """
+echo "Create inbox failed"
+"""
+
 ERROR_RSYNC_FUNCTION = """
 echo "Rsync failed"
 """
