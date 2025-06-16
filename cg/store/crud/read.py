@@ -8,12 +8,7 @@ from typing import Callable, Iterator
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import (
-    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
-    CaseActions,
-    CustomerId,
-    SampleType,
-)
+from cg.constants.constants import DNA_WORKFLOWS_WITH_SCOUT_UPLOAD, CustomerId, SampleType
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
@@ -1104,19 +1099,6 @@ class ReadHandler(BaseHandler):
     def get_cases_with_samples(self) -> Query:
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
-
-    def _is_case_set_to_analyse_or_not_analyzed(self, case: Case) -> bool:
-        return case.action == CaseActions.ANALYZE or not case.latest_analyzed
-
-    def _is_latest_analysis_done_on_all_sequences(self, case: Case) -> bool:
-        return case.latest_analyzed < case.latest_sequenced
-
-    def _is_case_to_be_analyzed(self, case: Case) -> bool:
-        if not case.latest_sequenced:
-            return False
-        if self._is_case_set_to_analyse_or_not_analyzed(case):
-            return True
-        return bool(self._is_latest_analysis_done_on_all_sequences(case))
 
     def get_cases_to_analyze(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed.
