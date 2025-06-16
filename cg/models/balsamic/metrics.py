@@ -4,10 +4,31 @@ from cg.models.deliverables.metric_deliverables import MetricCondition, MetricsB
 from cg.models.qc_metrics import QCMetrics
 
 
-def percent_value_validation(cls, value: float) -> float:
-    """Converts a raw float value to percent"""
+class BalsamicMetricValue(BaseModel):
+    """BALSAMIC Metric attributes"""
+    value: Any
+    condition: MetricCondition | None = None
 
-    return value * 100
+    @field_validator("value", mode="before")
+    @classmethod
+    def convert_and_validate_percentage(cls, v, info):
+        if "pct_" in info.field_name and v is not None:
+            if v <= 1:
+                # Assume this is a proportion and convert to percent
+                v *= 100
+            if not (0 <= v <= 100):
+                raise ValueError(f"Percentage for {info.field_name} must be between 0 and 100.")
+        return v
+
+class BalsamicWGSQCMetrics(BalsamicQCMetrics):
+    """BALSAMIC WHOLE_GENOME_SEQUENCING QC metrics"""
+
+    median_coverage: BalsamicMetricValue | None = None
+    pct_15x: BalsamicMetricValue | None = None
+    pct_30x: BalsamicMetricValue | None = None
+    pct_60x: BalsamicMetricValue | None = None
+    pct_100x: BalsamicMetricValue | None = None
+    pct_pf_reads_improper_pairs: BalsamicMetricValue | None = None
 
 
 class BalsamicMetricsBase(MetricsBase):
@@ -23,50 +44,30 @@ class BalsamicMetricsBase(MetricsBase):
 class BalsamicQCMetrics(QCMetrics):
     """BALSAMIC common QC metrics"""
 
-    fold_80_base_penalty: float | None = None
-    mean_insert_size: float | None = None
-    percent_duplication: float | None = None
-
-    _percent_duplication: float = field_validator("percent_duplication")(percent_value_validation)
+    fold_80_base_penalty: BalsamicMetricValue | None = None
+    mean_insert_size: BalsamicMetricValue | None = None
+    percent_duplication: BalsamicMetricValue | None = None
 
 
 class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
     """BALSAMIC targeted QC metrics"""
-
-    mean_target_coverage: float | None = None
-    median_target_coverage: float | None = None
-    pct_target_bases_50x: float | None = None
-    pct_target_bases_100x: float | None = None
-    pct_target_bases_250x: float | None = None
-    pct_target_bases_500x: float | None = None
-    pct_target_bases_1000x: float | None = None
-    pct_off_bait: float | None = None
-    gc_dropout: float | None = None
-
-    _pct_values: float = field_validator(
-        "pct_target_bases_50x",
-        "pct_target_bases_100x",
-        "pct_target_bases_250x",
-        "pct_target_bases_500x",
-        "pct_target_bases_1000x",
-        "pct_off_bait",
-    )(percent_value_validation)
+    mean_target_coverage: BalsamicMetricValue | None = None
+    median_target_coverage: BalsamicMetricValue | None = None
+    pct_target_bases_50x: BalsamicMetricValue | None = None
+    pct_target_bases_100x: BalsamicMetricValue | None = None
+    pct_target_bases_250x: BalsamicMetricValue | None = None
+    pct_target_bases_500x: BalsamicMetricValue | None = None
+    pct_target_bases_1000x: BalsamicMetricValue | None = None
+    pct_off_bait: BalsamicMetricValue | None = None
+    gc_dropout: BalsamicMetricValue | None = None
 
 
 class BalsamicWGSQCMetrics(BalsamicQCMetrics):
     """BALSAMIC WHOLE_GENOME_SEQUENCING QC metrics"""
 
-    median_coverage: float | None = None
-    pct_15x: float | None = None
-    pct_30x: float | None = None
-    pct_60x: float | None = None
-    pct_100x: float | None = None
-    pct_pf_reads_improper_pairs: float | None = None
-
-    _pct_values: float = field_validator(
-        "pct_15x",
-        "pct_30x",
-        "pct_60x",
-        "pct_100x",
-        "pct_pf_reads_improper_pairs",
-    )(percent_value_validation)
+    median_coverage: BalsamicMetricValue | None = None
+    pct_15x: BalsamicMetricValue | None = None
+    pct_30x: BalsamicMetricValue | None = None
+    pct_60x: BalsamicMetricValue | None = None
+    pct_100x: BalsamicMetricValue | None = None
+    pct_pf_reads_improper_pairs: BalsamicMetricValue | None = None

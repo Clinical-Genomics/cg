@@ -343,7 +343,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve the latest metadata for {case_id}")
             raise CgError
 
-    def parse_analysis(self, config_raw: dict, qc_metrics_raw: dict, **kwargs) -> BalsamicAnalysis:
+    def parse_analysis(config_raw: dict, qc_metrics_raw: dict, **kwargs):
         """Returns a formatted BalsamicAnalysis object"""
 
         sequencing_type = config_raw["analysis"]["sequencing_type"]
@@ -353,14 +353,16 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             sample_metric = BalsamicMetricsBase(**value)
             try:
                 qc_metrics[sample_metric.id].update(
-                    {sample_metric.name.lower(): sample_metric.value}
+                    {sample_metric.name.lower(): {"value": sample_metric.value, "condition": sample_metric.condition}}
                 )
             except KeyError:
-                qc_metrics[sample_metric.id] = {sample_metric.name.lower(): sample_metric.value}
+                qc_metrics[sample_metric.id] = {
+                    sample_metric.name.lower(): {"value": sample_metric.value, "condition": sample_metric.condition}}
 
+        # return qc_metrics
         return BalsamicAnalysis(
             balsamic_config=config_raw,
-            sample_metrics=self.cast_metrics_type(sequencing_type, qc_metrics),
+            sample_metrics=cast_metrics_type(sequencing_type, qc_metrics),
         )
 
     @staticmethod
