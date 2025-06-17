@@ -89,6 +89,7 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
         mean_insert_size: mean insert size of the distribution; source: workflow
         fold_80: fold 80 base penalty; source: workflow
     """
+    from cg.models.balsamic.metrics import BalsamicMetricValue
 
     mean_insert_size: Annotated[
         BalsamicMetricValue | None, BeforeValidator(get_number_as_string)
