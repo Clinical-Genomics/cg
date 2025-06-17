@@ -23,7 +23,7 @@ from cg.exc import CgError
 from cg.io.controller import WriteFile
 from cg.models.slurm.sbatch import Sbatch
 from cg.services.deliver_files.rsync.models import RsyncDeliveryConfig
-from cg.services.deliver_files.rsync.sbatch import (
+from cg.services.deliver_files.rsync.sbatch_commands import (
     COVID_REPORT_RSYNC,
     COVID_RSYNC,
     CREATE_INBOX_COMMAND,
