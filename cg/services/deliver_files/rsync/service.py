@@ -12,6 +12,12 @@ from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.priority import SlurmAccount, SlurmQos, TrailblazerPriority
+from cg.constants.slurm import (
+    SLURM_UPLOAD_EXCLUDED_COMPUTE_NODES,
+    SLURM_UPLOAD_MAX_HOURS,
+    SLURM_UPLOAD_MEMORY,
+    SLURM_UPLOAD_TASKS,
+)
 from cg.constants.tb import AnalysisType
 from cg.exc import CgError
 from cg.io.controller import WriteFile
@@ -276,7 +282,7 @@ class DeliveryRsyncService:
             dependency=dependency,
             dry_run=dry_run,
             error_command=ERROR_RSYNC_FUNCTION,
-            exclude="--exclude=gpu-compute-0-[0-1],cg-dragen",
+            exclude=SLURM_UPLOAD_EXCLUDED_COMPUTE_NODES,
             job_name=f"{job_prefix}_rsync",
         )
 
@@ -334,11 +340,11 @@ class DeliveryRsyncService:
             email=self.mail_user,
             error=error_command,
             exclude=exclude,
-            hours=24,
+            hours=SLURM_UPLOAD_MAX_HOURS,
             job_name=job_name,
             log_dir=self.log_dir.as_posix(),
-            memory=1,
-            number_tasks=1,
+            memory=SLURM_UPLOAD_MEMORY,
+            number_tasks=SLURM_UPLOAD_TASKS,
             quality_of_service=self.slurm_quality_of_service,
         )
 
