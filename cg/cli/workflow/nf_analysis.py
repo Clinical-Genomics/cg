@@ -8,11 +8,10 @@ from pydantic import ValidationError
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.utils import validate_force_store_option
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
-from cg.constants.cli_options import DRY_RUN, FORCE, COMMENT
+from cg.constants.cli_options import COMMENT, DRY_RUN, FORCE
 from cg.constants.constants import MetaApis
 from cg.exc import AnalysisNotReadyError, CgError, HousekeeperStoreError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 
@@ -322,11 +321,13 @@ def store_available(context: click.Context, dry_run: bool) -> None:
     """
 
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
-
+    exit_code: int = EXIT_SUCCESS
     for case in analysis_api.get_cases_to_store():
         LOG.info(f"Storing deliverables for {case.internal_id}")
         try:
             analysis_api.store(case_id=case.internal_id, dry_run=dry_run)
         except Exception as error:
             LOG.error(f"Error storing {case.internal_id}: {repr(error)}")
-            raise click.Abort
+            exit_code = EXIT_FAIL
+    if exit_code:
+        raise click.Abort()
