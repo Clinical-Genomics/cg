@@ -378,7 +378,7 @@ def test_slurm_rsync_single_case(
         folders_to_deliver=folders_to_deliver,
     )
 
-    # THEN two jobs are created with the correct commands and paramaters
+    # THEN two jobs are created with the correct commands and parameters
     _, first_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[0]
     _, second_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[1]
 
