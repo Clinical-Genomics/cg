@@ -256,7 +256,7 @@ def test_run_rsync_on_slurm_no_cases(
     """Test for running rsync using SLURM when there are no cases on the ticket."""
 
     # GIVEN ticket without any cases
-    status_db_mock.get_cases_by_ticket_id.return_value = None
+    status_db_mock.get_cases_by_ticket_id.return_value = []
 
     # WHEN the job is submitted
     with pytest.raises(CgError):
