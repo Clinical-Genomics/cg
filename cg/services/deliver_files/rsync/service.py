@@ -310,7 +310,8 @@ class DeliveryRsyncService:
         ticket: str,
         source_and_destination_paths: dict[str, Path],
         dry_run: bool = False,
-    ):
+    ) -> int:
+    """Submit the job that rsyncs case data to the delivery server and return the job id."""
         command: str = self.concatenate_rsync_commands(
             folder_list=folders_to_deliver,
             source_and_destination_paths=source_and_destination_paths,
