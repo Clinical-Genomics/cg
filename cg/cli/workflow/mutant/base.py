@@ -118,7 +118,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
         try:
             analysis_api.run_qc_on_case(case=case, dry_run=dry_run)
         except Exception:
-            exit_code = EXIT_FAIL
+            was_successful = False
 
     cases_to_store: list[Case] = analysis_api.get_cases_to_store()
     LOG.info(f"Found {len(cases_to_store)} cases to store!")
