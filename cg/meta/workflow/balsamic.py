@@ -371,7 +371,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         # return qc_metrics
         return BalsamicAnalysis(
             balsamic_config=config_raw,
-            sample_metrics=cast_metrics_type(sequencing_type, qc_metrics),
+            sample_metrics=self.cast_metrics_type(sequencing_type, qc_metrics),
         )
 
     @staticmethod
