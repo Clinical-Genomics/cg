@@ -339,6 +339,7 @@ class DeliveryRsyncService:
             log_dir=self.log_dir.as_posix(),
             memory=1,
             number_tasks=1,
+            quality_of_service=self.slurm_quality_of_service,
         )
 
         slurm_api = SlurmAPI()

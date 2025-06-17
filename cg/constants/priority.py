@@ -45,6 +45,6 @@ class Priority(IntEnum):
 
 
 class SlurmAccount(StrEnum):
-    PRODUCTION: str = "production"
-    DEVELOPMENT: str = "development"
-    STAGE: str = "stage"
+    PRODUCTION = "production"
+    DEVELOPMENT = "development"
+    STAGE = "stage"

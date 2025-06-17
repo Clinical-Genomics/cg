@@ -25,7 +25,7 @@ def rsync_delivery_path() -> str:
 
 @pytest.fixture
 def rsync_account() -> str:
-    return "rsync_account"
+    return SlurmAccount.DEVELOPMENT
 
 
 @pytest.fixture
@@ -205,7 +205,8 @@ def test_run_rsync_on_slurm_for_ticket(
     customer_mock: Customer = create_autospec(Customer, internal_id="test_customer_1")
     case: Case = create_autospec(Case, customer=customer_mock)
 
-    # GIVEN a DeliveryRsyncService
+    # GIVEN a DeliveryRsyncService with the slurm production account
+    rsync_service.account = SlurmAccount.PRODUCTION
 
     status_db_mock.get_cases_by_ticket_id.return_value = [case]
 
@@ -221,7 +222,7 @@ def test_run_rsync_on_slurm_for_ticket(
 
     slurm_api_mock.generate_sbatch_content.assert_called_with(
         sbatch_parameters=Sbatch(
-            account=rsync_account,
+            account=SlurmAccount.PRODUCTION,
             commands=expected_command,
             email=rsync_mail_user,
             error='\necho "Rsync failed"\n',
@@ -232,7 +233,7 @@ def test_run_rsync_on_slurm_for_ticket(
             memory=1,
             minutes="00",
             number_tasks=1,
-            quality_of_service=SlurmQos.LOW,
+            quality_of_service=SlurmQos.HIGH,
             use_login_shell="",
         )
     )
