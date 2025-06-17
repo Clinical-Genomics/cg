@@ -190,7 +190,6 @@ def start(
 
 
 @microsalt.command("dev-run")
-@ARGUMENT_CASE_ID
 @click.option(
     "-c",
     "--config-case",
@@ -199,6 +198,7 @@ def start(
     type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
     help="optionally change the config file path",
 )
+@ARGUMENT_CASE_ID
 @click.pass_obj
 def dev_run(
     context: CGConfig,
@@ -223,7 +223,7 @@ def dev_start(context: click.Context, case_id: str) -> None:
     analysis_starter.start(case_id)
 
 
-@microsalt.command("dev-config-case")
+@microsalt.command()
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def dev_config_case(context: CGConfig, case_id: str) -> None:
