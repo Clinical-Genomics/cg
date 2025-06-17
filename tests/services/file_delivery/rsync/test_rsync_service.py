@@ -3,6 +3,7 @@
 import logging
 import shutil
 from pathlib import Path
+from typing import cast
 from unittest.mock import ANY, call, create_autospec
 
 import pytest
@@ -54,7 +55,7 @@ def rsync_mail_user() -> str:
 
 
 @pytest.fixture
-def ticket() -> str:
+def rsync_ticket() -> str:
     return "123456"
 
 
@@ -69,9 +70,9 @@ def customer_mock() -> Customer:
 
 
 @pytest.fixture
-def case_mock(customer_mock: Customer, ticket: str) -> Case:
+def case_mock(customer_mock: Customer, rsync_ticket: str) -> Case:
     return create_autospec(
-        Case, customer=customer_mock, internal_id="some_internal_id", latest_ticket=ticket
+        Case, customer=customer_mock, internal_id="some_internal_id", latest_ticket=rsync_ticket
     )
 
 
@@ -189,7 +190,6 @@ def test_make_log_dir(delivery_rsync_service: DeliveryRsyncService, ticket_id: s
 
 @pytest.mark.freeze_time("2025-06-11 10:05:01")
 def test_run_rsync_on_slurm_for_ticket(
-    customer_mock: Customer,
     case_mock: Case,
     rsync_service: DeliveryRsyncService,
     status_db_mock: Store,
@@ -200,9 +200,11 @@ def test_run_rsync_on_slurm_for_ticket(
     rsync_base_path: str,
     rsync_delivery_path: str,
     rsync_destination_path: str,
-    ticket: str,
 ):
-    # GIVEN a valid case related to a customer
+    # GIVEN a valid case related to a customer and a ticket
+    customer: Customer = case_mock.customer
+    ticket: str = cast(str, case_mock.latest_ticket)
+
     # GIVEN the case is associated with the given ticket
     status_db_mock.get_cases_by_ticket_id.return_value = [case_mock]
 
@@ -214,8 +216,8 @@ def test_run_rsync_on_slurm_for_ticket(
 
     # THEN the correct sbatch content is generated
     expected_command: str = (
-        f"\nrsync -rvL {rsync_delivery_path}/{customer_mock.internal_id}/inbox/{ticket} "
-        f"{rsync_destination_path}/{customer_mock.internal_id}/inbox\n"
+        f"\nrsync -rvL {rsync_delivery_path}/{customer.internal_id}/inbox/{ticket} "
+        f"{rsync_destination_path}/{customer.internal_id}/inbox\n"
     )
 
     slurm_api_mock.generate_sbatch_content.assert_called_with(
@@ -249,7 +251,7 @@ def test_run_rsync_on_slurm_for_ticket(
 def test_run_rsync_on_slurm_no_cases(
     rsync_service: DeliveryRsyncService,
     status_db_mock,
-    ticket: str,
+    rsync_ticket: str,
 ):
     """Test for running rsync using SLURM when there are no cases on the ticket."""
 
@@ -259,7 +261,7 @@ def test_run_rsync_on_slurm_no_cases(
     # WHEN the job is submitted
     with pytest.raises(CgError):
         # THEN an error is raised
-        rsync_service.run_rsync_for_ticket(ticket=ticket, dry_run=True)
+        rsync_service.run_rsync_for_ticket(ticket=rsync_ticket, dry_run=True)
 
 
 def test_concatenate_rsync_commands(
@@ -352,24 +354,23 @@ def test_concatenate_rsync_commands_mutant(
 @pytest.mark.freeze_time("2025-06-11 10:05:01")
 def test_slurm_rsync_single_case(
     case_mock: Case,
-    customer_mock: Customer,
     created_sbatch_information: str,
     rsync_destination_host: str,
     inbox_path: str,
     first_job_number: int,
     second_job_number: int,
-    rsync_account: str,
     rsync_base_path: str,
     rsync_delivery_path: str,
     rsync_destination_path: str,
     rsync_mail_user: str,
     rsync_service: DeliveryRsyncService,
-    ticket: str,
     folders_to_deliver: set[Path],
     slurm_api_mock: SlurmAPI,
 ):
     """Test for running rsync on a single case using SLURM."""
     # GIVEN a valid case, related to a customer and ticket exists
+    customer: Customer = case_mock.customer
+    ticket: str = cast(str, case_mock.latest_ticket)
 
     # WHEN run_rsync_for_case is run
     sbatch_number: int = rsync_service.run_rsync_for_case(
@@ -386,14 +387,14 @@ def test_slurm_rsync_single_case(
     sbatch_second_job: Sbatch = second_call_kwargs["sbatch_parameters"]
 
     expected_create_inbox_command = f"""
-ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer_mock.internal_id}/inbox/{ticket}"
+ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer.internal_id}/inbox/{ticket}"
 """
 
     assert sbatch_first_job == Sbatch(
         job_name=f"{ticket}_create_inbox",
         number_tasks=1,
         memory=1,
-        account=rsync_account,
+        account=rsync_service.account,
         log_dir=f"{rsync_base_path}/{case_mock.internal_id}_250611_10_05_01_000000",
         email=rsync_mail_user,
         hours=24,
@@ -407,8 +408,8 @@ ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer_mock.internal_id}/
 
     expected_rsync_commands: list[str] = [
         (
-            f"rsync -rvL {rsync_delivery_path}/{customer_mock.internal_id}/inbox/{ticket}/{type} "
-            f"{rsync_destination_path}/{customer_mock.internal_id}/inbox/{ticket}"
+            f"rsync -rvL {rsync_delivery_path}/{customer.internal_id}/inbox/{ticket}/{type} "
+            f"{rsync_destination_path}/{customer.internal_id}/inbox/{ticket}"
         )
         for type in ["case", "father", "mother", "child"]
     ]
