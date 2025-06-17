@@ -342,7 +342,7 @@ class DeliveryRsyncService:
         slurm_api = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)
         sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
-        sbatch_path: Path = self.log_dir / f"{job_name}.sh"
+        sbatch_path = Path(self.log_dir, f"{job_name}.sh")
         sbatch_number: int = slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
