@@ -1,5 +1,6 @@
 from pydantic import BaseModel, BeforeValidator, field_validator
 from typing_extensions import Annotated
+from typing import TYPE_CHECKING
 
 from cg.constants import NA_FIELD, RIN_MAX_THRESHOLD, RIN_MIN_THRESHOLD
 from cg.models.delivery_report.validators import (
@@ -9,6 +10,9 @@ from cg.models.delivery_report.validators import (
     get_report_string,
     get_sex_as_string,
 )
+
+if TYPE_CHECKING:
+    from cg.models.balsamic.metrics import BalsamicMetricValue
 
 
 class SampleMetadataModel(BaseModel):
@@ -89,12 +93,11 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
         mean_insert_size: mean insert size of the distribution; source: workflow
         fold_80: fold 80 base penalty; source: workflow
     """
-    from cg.models.balsamic.metrics import BalsamicMetricValue
 
     mean_insert_size: Annotated[
-        BalsamicMetricValue | None, BeforeValidator(get_number_as_string)
+        "BalsamicMetricValue | None", BeforeValidator(get_number_as_string)
     ] = None
-    fold_80: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
+    fold_80: Annotated["BalsamicMetricValue | None", BeforeValidator(get_number_as_string)] = None
 
 
 class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
@@ -107,16 +110,15 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
         pct_250x: percent of targeted bases that are covered to 250X coverage or more; source: workflow
         pct_500x: percent of targeted bases that are covered to 500X coverage or more; source: workflow
     """
-    from cg.models.balsamic.metrics import BalsamicMetricValue
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     bait_set_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    gc_dropout: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
+    gc_dropout: Annotated["BalsamicMetricValue | None", BeforeValidator(get_number_as_string)] = None
     median_target_coverage: Annotated[
-        BalsamicMetricValue | None, BeforeValidator(get_number_as_string)
+        "BalsamicMetricValue | None", BeforeValidator(get_number_as_string)
     ] = None
-    pct_250x: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
-    pct_500x: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
+    pct_250x: Annotated["BalsamicMetricValue | None", BeforeValidator(get_number_as_string)] = None
+    pct_500x: Annotated["BalsamicMetricValue | None", BeforeValidator(get_number_as_string)] = None
 
 
 class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
@@ -128,15 +130,14 @@ class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
         pct_60x: fraction of bases that attained at least 15X sequence coverage; source: workflow
         pct_reads_improper_pairs: fraction of reads that are not properly aligned in pairs
     """
-    from cg.models.balsamic.metrics import BalsamicMetricValue
 
     median_coverage: Annotated[
-        BalsamicMetricValue | None, BeforeValidator(get_number_as_string)
+        "BalsamicMetricValue | None", BeforeValidator(get_number_as_string)
     ] = None
-    pct_15x: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
-    pct_60x: Annotated[BalsamicMetricValue | None, BeforeValidator(get_number_as_string)] = None
+    pct_15x: Annotated["BalsamicMetricValue | None", BeforeValidator(get_number_as_string)] = None
+    pct_60x: Annotated["BalsamicMetricValue | None", BeforeValidator(get_number_as_string)] = None
     pct_reads_improper_pairs: Annotated[
-        BalsamicMetricValue | None, BeforeValidator(get_number_as_string)
+        "BalsamicMetricValue | None", BeforeValidator(get_number_as_string)
     ] = None
 
 
