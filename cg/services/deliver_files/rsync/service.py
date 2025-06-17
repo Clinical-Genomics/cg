@@ -264,26 +264,13 @@ class DeliveryRsyncService:
                 source_path=source_and_destination_paths["delivery_source_path"],
                 destination_path=source_and_destination_paths["rsync_destination_path"],
             )
-        return self.submit_sbatch_rsync_commands(
-            commands=commands, job_prefix=ticket, dry_run=dry_run
-        )
-
-    def submit_sbatch_rsync_commands(
-        self,
-        commands: str,
-        job_prefix: str,
-        dependency: str | None = None,
-        dry_run: bool = False,
-    ) -> int:
-        """Instantiates a slurm api and sbatches the given commands."""
 
         return self._generate_and_submit_sbatch(
             commands=commands,
-            dependency=dependency,
             dry_run=dry_run,
             error_command=ERROR_RSYNC_FUNCTION,
             exclude=SLURM_UPLOAD_EXCLUDED_COMPUTE_NODES,
-            job_name=f"{job_prefix}_rsync",
+            job_name=f"{ticket}_rsync",
         )
 
     def _create_remote_ticket_inbox(
@@ -318,10 +305,13 @@ class DeliveryRsyncService:
             ticket=ticket,
             case=case,
         )
-        return self.submit_sbatch_rsync_commands(
+
+        return self._generate_and_submit_sbatch(
             commands=command,
-            job_prefix=case.internal_id,
             dry_run=dry_run,
+            error_command=ERROR_RSYNC_FUNCTION,
+            exclude=SLURM_UPLOAD_EXCLUDED_COMPUTE_NODES,
+            job_name=f"{case.internal_id}_rsync",
             dependency=f"--dependency=afterok:{folder_creation_job_id}",
         )
 
