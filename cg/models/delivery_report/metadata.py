@@ -99,6 +99,22 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
     mean_insert_size: Annotated[Any, BeforeValidator(get_number_as_string)] = None
     fold_80: Annotated[Any, BeforeValidator(get_number_as_string)] = None
 
+    def get_metric_value(self, metric: Any) -> str:
+        """Get the string representation of a metric value."""
+        if metric is None:
+            return NA_FIELD
+        if hasattr(metric, "value"):
+            return get_number_as_string(metric)
+        return get_number_as_string(metric)
+
+    def get_metric_condition(self, metric: Any) -> bool:
+        """Check if a metric meets its condition."""
+        if metric is None:
+            return False
+        if hasattr(metric, "meets_condition"):
+            return metric.meets_condition()
+        return True
+
 
 class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
     """Metrics and trending data model associated to a specific BALSAMIC sample.

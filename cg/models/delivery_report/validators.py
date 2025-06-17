@@ -44,8 +44,12 @@ def get_number_as_string(value: Any) -> str:
         ValueError: If the input value cannot be converted to a float.
     """
     try:
+        if value is None:
+            return NA_FIELD
         if hasattr(value, "value"):
             # Handle BalsamicMetricValue objects
+            if value.value is None:
+                return NA_FIELD
             result: str = str(round(float(value.value), PRECISION))
             return result
         result: str = str(round(float(value), PRECISION))
