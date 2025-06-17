@@ -3,7 +3,7 @@
 import logging
 import shutil
 from pathlib import Path
-from unittest.mock import ANY, create_autospec
+from unittest.mock import ANY, call, create_autospec
 
 import pytest
 
@@ -189,6 +189,8 @@ def test_make_log_dir(delivery_rsync_service: DeliveryRsyncService, ticket_id: s
 
 @pytest.mark.freeze_time("2025-06-11 10:05:01")
 def test_run_rsync_on_slurm_for_ticket(
+    customer_mock: Customer,
+    case_mock: Case,
     rsync_service: DeliveryRsyncService,
     status_db_mock: Store,
     slurm_api_mock: SlurmAPI,
@@ -200,20 +202,17 @@ def test_run_rsync_on_slurm_for_ticket(
     rsync_destination_path: str,
     ticket: str,
 ):
-    # GIVEN a valid microsalt case
-    customer_mock: Customer = create_autospec(Customer, internal_id="test_customer_1")
-    case: Case = create_autospec(Case, customer=customer_mock)
+    # GIVEN a valid case related to a customer
+    # GIVEN the case is associated with the given ticket
+    status_db_mock.get_cases_by_ticket_id.return_value = [case_mock]
 
     # GIVEN a DeliveryRsyncService with the slurm production account
     rsync_service.account = SlurmAccount.PRODUCTION
 
-    status_db_mock.get_cases_by_ticket_id.return_value = [case]
-
-    slurm_api_mock.generate_sbatch_content.return_value = created_sbatch_information
-    slurm_api_mock.submit_sbatch.return_value = first_job_number
-
     # WHEN rsync is run for a ticket
     returned_sbatch_number: int = rsync_service.run_rsync_for_ticket(ticket=ticket, dry_run=True)
+
+    # THEN the correct sbatch content is generated
     expected_command: str = (
         f"\nrsync -rvL {rsync_delivery_path}/{customer_mock.internal_id}/inbox/{ticket} "
         f"{rsync_destination_path}/{customer_mock.internal_id}/inbox\n"
@@ -237,11 +236,13 @@ def test_run_rsync_on_slurm_for_ticket(
         )
     )
 
+    # THEN the correct sbatch is submitted
     slurm_api_mock.submit_sbatch.assert_called_with(
         sbatch_content=created_sbatch_information,
         sbatch_path=Path(f"{rsync_base_path}/{ticket}_250611_10_05_01_000000/{ticket}_rsync.sh"),
     )
 
+    # THEN the created job number is returned
     assert returned_sbatch_number == first_job_number
 
 
@@ -368,14 +369,16 @@ def test_slurm_rsync_single_case(
     slurm_api_mock: SlurmAPI,
 ):
     """Test for running rsync on a single case using SLURM."""
+    # GIVEN a valid case, related to a customer and ticket exists
 
-    # WHEN the destination path is created
+    # WHEN run_rsync_for_case is run
     sbatch_number: int = rsync_service.run_rsync_for_case(
         case=case_mock,
         dry_run=True,
         folders_to_deliver=folders_to_deliver,
     )
 
+    # THEN two jobs are created with the correct commands and paramaters
     _, first_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[0]
     _, second_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[1]
 
@@ -413,14 +416,24 @@ ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer_mock.internal_id}/
     for command in expected_rsync_commands:
         assert command in sbatch_second_job.commands
 
-    slurm_api_mock.submit_sbatch.assert_called_with(
+    # THEN both job are correctly submitted
+    first_call, second_call = slurm_api_mock.submit_sbatch.mock_calls
+
+    assert first_call == call(
+        sbatch_content=created_sbatch_information,
+        sbatch_path=Path(
+            f"{rsync_base_path}/{case_mock.internal_id}_250611_10_05_01_000000/{ticket}_create_inbox.sh"
+        ),
+    )
+
+    assert second_call == call(
         sbatch_content=created_sbatch_information,
         sbatch_path=Path(
             f"{rsync_base_path}/{case_mock.internal_id}_250611_10_05_01_000000/{case_mock.internal_id}_rsync.sh"
         ),
     )
 
-    # THEN check that an integer was returned as sbatch number and the delivery should be complete
+    # THEN the created job number of the file transfer job is returned
     assert sbatch_number == second_job_number
 
 
