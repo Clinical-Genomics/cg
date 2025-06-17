@@ -442,6 +442,12 @@ class CaseView(BaseView):
         "customer.internal_id",
         "tickets",
     ]
+    form_ajax_refs = {
+        "orders": {
+            "fields": ["id", "ticket_id"],
+            "page_size": 20,
+        }
+    }
     form_excluded_columns = [
         "analyses",
         "_cohorts",
@@ -556,7 +562,12 @@ class AnalysisView(BaseView):
         "case.internal_id",
         "case.name",
     ]
-    form_extra_fields = {"workflow": SelectEnumField(enum_class=Workflow)}
+    form_ajax_refs = {
+        "case": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        }
+    }
 
 
 class IlluminaFlowCellView(BaseView):
@@ -644,6 +655,12 @@ class OrderView(BaseView):
     column_display_pk = True
     create_modal = True
     edit_modal = True
+    form_ajax_refs = {
+        "cases": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        }
+    }
 
 
 class PanelView(BaseView):
