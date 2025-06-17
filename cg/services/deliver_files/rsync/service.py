@@ -330,10 +330,10 @@ class DeliveryRsyncService:
         job_name: str,
         commands: str,
         error_command: str,
-        dry_run=False,
-        dependency=None,
-        exclude=None,
-    ):
+        dry_run: bool = False,
+        dependency: str | None = None,
+        exclude: str | None = None,
+    ) -> int:
         sbatch_parameters: Sbatch = Sbatch(
             account=self.account,
             commands=commands,
