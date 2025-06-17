@@ -299,7 +299,7 @@ class DeliveryRsyncService:
     def _deliver_folder_contents(
         self,
         case: Case,
-        folder_creation_job_id: str,
+        folder_creation_job_id: int,
         folders_to_deliver: set[Path],
         ticket: str,
         source_and_destination_paths: dict[str, Path],

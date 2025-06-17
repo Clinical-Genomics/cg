@@ -194,7 +194,6 @@ def test_run_rsync_on_slurm_for_ticket(
     slurm_api_mock: SlurmAPI,
     created_sbatch_information,
     first_job_number,
-    rsync_account: str,
     rsync_mail_user: str,
     rsync_base_path: str,
     rsync_delivery_path: str,
