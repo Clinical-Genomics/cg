@@ -209,7 +209,7 @@ class DeliveryRsyncService:
             log_dir.mkdir(parents=True, exist_ok=True)
 
     def run_rsync_for_case(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
-        """Submit Rsync commands for a single case for delivery to the delivery server."""
+        """Submit Rsync commands for delivering a case to the delivery server and return the job id."""
         ticket: str | None = case.latest_ticket
         if not ticket:
             raise CgError(f"Could not find ticket for case {case.internal_id}")
