@@ -1007,6 +1007,9 @@ class Order(Base):
 
     __tablename__ = "order"
 
+    def __str__(self) -> str:
+        return f"{self.id} (ticket {self.ticket_id})"
+
     id: Mapped[PrimaryKeyInt]
     cases: Mapped[list[Case]] = orm.relationship(secondary=order_case, back_populates="orders")
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"))
