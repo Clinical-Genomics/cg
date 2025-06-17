@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import rich_click as click
 
@@ -10,12 +10,16 @@ from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.cli_options import DRY_RUN
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, Workflow
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.io.controller import WriteFile, WriteStream
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.configurator.implementations.microsalt import (
+    MicrosaltConfigurator,
+)
+from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.store.models import Sample
 
@@ -186,7 +190,6 @@ def start(
 
 
 @microsalt.command("dev-run")
-@ARGUMENT_CASE_ID
 @click.option(
     "-c",
     "--config-case",
@@ -195,6 +198,7 @@ def start(
     type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
     help="optionally change the config file path",
 )
+@ARGUMENT_CASE_ID
 @click.pass_obj
 def dev_run(
     context: CGConfig,
@@ -217,6 +221,17 @@ def dev_start(context: click.Context, case_id: str) -> None:
     LOG.info(f"Starting Microsalt workflow for {case_id}")
     analysis_starter = AnalysisStarterFactory(context.obj).get_analysis_starter_for_case(case_id)
     analysis_starter.start(case_id)
+
+
+@microsalt.command()
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_config_case(context: CGConfig, case_id: str) -> None:
+    """Create a config file for a microSALT case."""
+    configurator = cast(
+        MicrosaltConfigurator, ConfiguratorFactory(context).get_configurator(Workflow.MICROSALT)
+    )
+    configurator.configure(case_id=case_id)
 
 
 @microsalt.command("start-available")
