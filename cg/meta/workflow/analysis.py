@@ -312,7 +312,7 @@ class AnalysisAPI(MetaAPI):
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
         self.status_db.update_analysis_completed_at(
-            analysis_id=analysis.id, completed_at=self.get_bundle_created_date(case_id)
+            analysis_id=analysis.id, completed_at=datetime.now()
         )
         self.status_db.update_analysis_comment(analysis_id=analysis.id, comment=comment)
 
