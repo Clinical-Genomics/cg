@@ -303,10 +303,7 @@ class AnalysisAPI(MetaAPI):
             AnalysisAlreadyStoredError: If the analysis is already marked as completed.
         """
         LOG.info(f"Marking analysis as completed in StatusDB for {case_id}")
-        case: Case = self.status_db.get_case_by_internal_id(case_id)
-        analysis: Analysis | None = case.analyses[0] if case.analyses else None
-        if not analysis:
-            raise AnalysisDoesNotExistError(f"No analysis found for case {case_id}")
+        analysis: Analysis = self.status_db.get_latest_started_analysis_for_case(case_id)
         if not force and analysis.completed_at:
             raise AnalysisAlreadyStoredError(
                 f"Analysis for case {case_id} already set as completed at {analysis.completed_at}"
@@ -315,7 +312,7 @@ class AnalysisAPI(MetaAPI):
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
         self.status_db.update_analysis_completed_at(
-            analysis_id=analysis.id, completed_at=datetime.now()
+            analysis_id=analysis.id, completed_at=self.get_bundle_created_date(case_id)
         )
         self.status_db.update_analysis_comment(analysis_id=analysis.id, comment=comment)
 

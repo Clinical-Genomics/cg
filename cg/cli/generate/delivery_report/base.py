@@ -10,11 +10,11 @@ from housekeeper.store.models import Version
 
 from cg.cli.generate.delivery_report.options import (
     ARGUMENT_CASE_ID,
-    OPTION_STARTED_AT,
+    OPTION_COMPLETED_AT,
     OPTION_WORKFLOW,
 )
 from cg.cli.generate.delivery_report.utils import (
-    get_report_analysis_started_at,
+    get_report_analysis_completed_at,
     get_report_api,
     get_report_api_workflow,
     get_report_case,
@@ -32,20 +32,22 @@ LOG = logging.getLogger(__name__)
 @ARGUMENT_CASE_ID
 @FORCE
 @DRY_RUN
-@OPTION_STARTED_AT
+@OPTION_COMPLETED_AT
 @click.pass_context
 def generate_delivery_report(
     context: click.Context,
     case_id: str,
     force: bool,
     dry_run: bool,
-    analysis_started_at: str = None,
+    analysis_completed_at: str = None,
 ) -> None:
     """Creates a delivery report for the provided case."""
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
     case: Case = get_report_case(context, case_id)
     report_api: DeliveryReportAPI = get_report_api(context, case)
-    analysis_date: datetime = get_report_analysis_started_at(case, report_api, analysis_started_at)
+    analysis_date: datetime = get_report_analysis_completed_at(
+        case=case, report_api=report_api, analysis_completed_at=analysis_completed_at
+    )
 
     # Dry run: prints the HTML report to console
     if dry_run:
