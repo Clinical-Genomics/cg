@@ -4,7 +4,7 @@ import datetime as dt
 import glob
 import logging
 from pathlib import Path
-from typing import Iterable, cast
+from typing import Iterable
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI

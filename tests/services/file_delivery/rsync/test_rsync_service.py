@@ -333,8 +333,12 @@ ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer.internal_id}/inbox
 def test_slurm_rsync_single_case_no_ticket(
     folders_to_deliver: set[Path], rsync_service: DeliveryRsyncService
 ):
+    # GIVEN the rsync service and a case with no related ticket
     case_with_no_ticket: Case = create_autospec(Case, latest_ticket=None)
+
+    # WHEN run_rsync_for_case is called with the case
     with pytest.raises(CgError):
+        # THEN an exception is thrown
         rsync_service.run_rsync_for_case(
             case=case_with_no_ticket, dry_run=True, folders_to_deliver=folders_to_deliver
         )
