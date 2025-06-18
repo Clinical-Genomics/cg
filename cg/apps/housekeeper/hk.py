@@ -253,12 +253,17 @@ class HousekeeperAPI:
         """Create a new bundle version."""
         return self._store.new_version(created_at, expires_at)
 
+    # TODO: Remove this function
     def version(self, bundle: str, date: datetime) -> Version:
         """Fetch a version."""
         LOG.debug(f"Return version: {date}, from {bundle}")
         return self._store.get_version_by_date_and_bundle_name(
             bundle_name=bundle, version_date=date
         )
+
+    def get_version_by_id(self, version_id: int) -> Version:
+        """Fetch a version by its ID."""
+        return self._store.get_version_by_id(version_id=version_id)
 
     def last_version(self, bundle: str) -> Version:
         """Gets the latest version of a bundle."""

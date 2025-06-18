@@ -19,7 +19,7 @@ from cg.models.observations.input_files import (
     MipDNAObservationsInputFiles,
     RarediseaseObservationsInputFiles,
 )
-from cg.store.models import Case
+from cg.store.models import Analysis, Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -62,10 +62,11 @@ class ObservationsAPI:
         | RarediseaseObservationsInputFiles
     ):
         """Return input files from a case to upload to Loqusdb."""
-        if not case.latest_analyzed:
+        analysis: Analysis | None = case.latest_analysis
+        if not analysis or not analysis.housekeeper_version_id:
             raise AnalysisNotCompletedError(f"Case {case.internal_id} has no completed analyses")
-        hk_version: Version = self.housekeeper_api.version(
-            bundle=case.internal_id, date=case.latest_analyzed
+        hk_version: Version = self.housekeeper_api.get_version_by_id(
+            analysis.housekeeper_version_id
         )
         return self.get_observations_files_from_hk(hk_version=hk_version, case_id=case.internal_id)
 

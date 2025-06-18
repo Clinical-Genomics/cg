@@ -1,12 +1,9 @@
 """Tests CLI utils for generating delivery reports."""
 
-from datetime import datetime
-
 import click.exceptions
 import pytest
 
 from cg.cli.generate.delivery_report.utils import (
-    get_report_analysis_completed_at,
     get_report_api,
     get_report_api_workflow,
     get_report_case,
@@ -82,26 +79,3 @@ def test_get_report_api_workflow(raredisease_delivery_report_click_context: clic
     # THEN the extracted API should match the expected type
     assert report_api
     assert isinstance(report_api, RarediseaseDeliveryReportAPI)
-
-
-def test_get_report_analysis_completed_at(
-    raredisease_delivery_report_click_context: click.Context, raredisease_case_id: str
-):
-    """Tests retrieval of analysis completed at field"""
-
-    # GIVEN a case and a report api
-    case: Case = get_report_case(
-        context=raredisease_delivery_report_click_context, case_id=raredisease_case_id
-    )
-    report_api: DeliveryReportAPI = get_report_api(
-        context=raredisease_delivery_report_click_context, case=case
-    )
-
-    # WHEN resolving the analysis completed at field
-    completed_at = get_report_analysis_completed_at(
-        case=case, report_api=report_api, analysis_completed_at=None
-    )
-
-    # THEN check if the verified value has been correctly extracted and formatted
-    assert completed_at
-    assert isinstance(completed_at, datetime)

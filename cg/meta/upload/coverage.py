@@ -4,6 +4,7 @@ import logging
 
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.exc import AnalysisNotCompletedError
 from cg.store.models import Analysis
 from cg.store.store import Store
 
@@ -20,12 +21,17 @@ class UploadCoverageApi:
 
     def data(self, analysis: Analysis) -> dict:
         """Get data for uploading coverage."""
-        family_id = analysis.case.internal_id
-        data = {"family": family_id, "family_name": analysis.case.name, "samples": []}
+        case_id = analysis.case.internal_id
+        if not analysis.housekeeper_version_id:
+            message: str = f"Analysis for case {case_id} has no Housekeeper version ID"
+            LOG.error(message)
+            raise AnalysisNotCompletedError(message)
+
+        data = {"family": case_id, "family_name": analysis.case.name, "samples": []}
         for link_obj in analysis.case.links:
-            hk_version = self.hk_api.version(family_id, analysis.completed_at)
             hk_coverage = self.hk_api.files(
-                version=hk_version.id, tags=[link_obj.sample.internal_id, "coverage"]
+                version=analysis.housekeeper_version_id,
+                tags=[link_obj.sample.internal_id, "coverage"],
             ).first()
             data["samples"].append(
                 {

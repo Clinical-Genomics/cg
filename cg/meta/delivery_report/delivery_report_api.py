@@ -55,11 +55,9 @@ class DeliveryReportAPI:
         self.scout_api: ScoutAPI = self.analysis_api.scout_api
         self.status_db: Store = self.analysis_api.status_db
 
-    def get_delivery_report_html(self, case_id: str, analysis_date: datetime, force: bool) -> str:
+    def get_delivery_report_html(self, case_id: str, analysis: Analysis, force: bool) -> str:
         """Generates the HTML content of a delivery report."""
-        report_data: ReportModel = self.get_report_data(
-            case_id=case_id, analysis_date=analysis_date
-        )
+        report_data: ReportModel = self.get_report_data(case_id=case_id, analysis=analysis)
         report_data: ReportModel = self.validate_report_data(
             case_id=case_id, report_data=report_data, force=force
         )
@@ -67,12 +65,12 @@ class DeliveryReportAPI:
         return rendered_report
 
     def write_delivery_report_file(
-        self, case_id: str, directory: Path, analysis_date: datetime, force: bool
+        self, case_id: str, directory: Path, analysis: Analysis, force: bool
     ) -> Path:
         """Write a file containing the delivery report content."""
         directory.mkdir(parents=True, exist_ok=True)
         delivery_report: str = self.get_delivery_report_html(
-            case_id=case_id, analysis_date=analysis_date, force=force
+            case_id=case_id, analysis=analysis, force=force
         )
         report_file_path = Path(directory, DELIVERY_REPORT_FILE_NAME)
         with open(report_file_path, "w") as delivery_report_stream:
@@ -162,20 +160,14 @@ class DeliveryReportAPI:
         ]
         return [analysis.case for analysis in analyses]
 
-    def update_delivery_report_date(self, case: Case, analysis_date: datetime) -> None:
+    def update_delivery_report_date(self, analysis: Analysis) -> None:
         """Updates the date when a delivery report was created."""
-        analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_completed_at(
-            case_entry_id=case.id, completed_at_date=analysis_date
-        )
         analysis.delivery_report_created_at = datetime.now()
         self.status_db.session.commit()
 
-    def get_report_data(self, case_id: str, analysis_date: datetime) -> ReportModel:
+    def get_report_data(self, case_id: str, analysis: Analysis) -> ReportModel:
         """Fetches all the data needed to generate a delivery report."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_completed_at(
-            case_entry_id=case.id, completed_at_date=analysis_date
-        )
         analysis_metadata: AnalysisModel = self.analysis_api.get_latest_metadata(case.internal_id)
         case_model: CaseModel = self.get_case_data(case, analysis, analysis_metadata)
         return ReportModel(
