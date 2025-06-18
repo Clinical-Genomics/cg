@@ -61,13 +61,17 @@ def test_configure_missing_organism(
         # THEN the missing organism should raise a CgDataError
 
 
-def test_get_config_path_success(
+def test_get_case_config_multiple_samples(
     microsalt_configurator: MicrosaltConfigurator, microsalt_case: Case, microsalt_sample: Sample
 ):
     # GIVEN a microSALT case
     # GIVEN that the config file exists
-    with mock.patch.object(Path, "exists", return_value=True):
-        # WHEN getting the config object
+    # GIVEN that the case contains multiple samples
+    with (
+        mock.patch.object(Path, "exists", return_value=True),
+        mock.patch.object(Case, "samples", return_value=[microsalt_sample, microsalt_sample]),
+    ):
+        # WHEN getting the case config
         config = microsalt_configurator.get_config(microsalt_case.internal_id)
 
         # THEN the returned configuration should be correct
@@ -78,6 +82,42 @@ def test_get_config_path_success(
             == Path(
                 microsalt_configurator.config_file_creator.queries_path,
                 microsalt_case.internal_id + FileExtensions.JSON,
+            ).as_posix()
+        )
+        # THEN the case fastq path should be used
+        assert (
+            config.fastq_directory
+            == microsalt_configurator.fastq_handler.get_case_fastq_path(
+                microsalt_case.internal_id
+            ).as_posix()
+        )
+
+
+def test_get_case_config_single_sample(
+    microsalt_configurator: MicrosaltConfigurator, microsalt_case: Case, microsalt_sample: Sample
+):
+    # GIVEN a microSALT case
+    # GIVEN that the config file exists
+    # GIVEN that the case contains only a single sample
+    with mock.patch.object(Path, "exists", return_value=True):
+        # WHEN getting the case config
+        config = microsalt_configurator.get_config(microsalt_case.internal_id)
+
+        # THEN the returned configuration should be correct
+        assert config.case_id == microsalt_case.internal_id
+        assert config.workflow == Workflow.MICROSALT
+        assert (
+            config.config_file
+            == Path(
+                microsalt_configurator.config_file_creator.queries_path,
+                microsalt_case.internal_id + FileExtensions.JSON,
+            ).as_posix()
+        )
+        # THEN the case fastq path should be used
+        assert (
+            config.fastq_directory
+            == microsalt_configurator.fastq_handler.get_sample_fastq_destination_dir(
+                case=microsalt_case, sample=microsalt_sample
             ).as_posix()
         )
 

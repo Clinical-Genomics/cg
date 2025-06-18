@@ -10,6 +10,7 @@ from cg.services.analysis_starter.configurator.file_creators.microsalt_config im
     MicrosaltConfigFileCreator,
 )
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
+from cg.store.models import Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -44,7 +45,7 @@ class MicrosaltConfigurator(Configurator):
             raise CaseNotConfiguredError(
                 f"Please ensure that the config file {config_file_path.as_posix} exists."
             )
-        fastq_directory: Path = self.fastq_handler.get_case_fastq_path(case_id)
+        fastq_directory: Path = self._get_fastq_directory(case_id)
         return MicrosaltCaseConfig(
             binary=self.config.binary_path,
             case_id=case_id,
@@ -53,3 +54,17 @@ class MicrosaltConfigurator(Configurator):
             environment=self.config.conda_env,
             fastq_directory=fastq_directory.as_posix(),
         )
+
+    def _get_fastq_directory(self, case_id: str) -> Path:
+        """This gets the directory in which the pipeline will look for Fastq files.
+        Due to a bug in the pipeline, single sample cases needs a different path."""
+        case: Case = self.store.get_case_by_internal_id(case_id)
+        if len(case.samples) == 1:
+            LOG.debug(
+                f"Case {case_id} contains only a single sample, so nested fastq directory for"
+                f"{case.samples[0].internal_id} is used."
+            )
+            return self.fastq_handler.get_sample_fastq_destination_dir(
+                case=case, sample=case.samples[0]
+            )
+        return self.fastq_handler.get_case_fastq_path(case_id)
