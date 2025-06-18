@@ -51,9 +51,16 @@ OPTION_CACHE_VERSION = click.option(
     help="Cache version to be used for init or analysis. Use 'develop' or 'X.X.X'.",
 )
 
-OPTION_CLUSTER_CONFIG = click.option(
-    "--cluster-config",
+OPTION_WORKFLOW_PROFILE = click.option(
+    "--workflow-profile",
     type=click.Path(exists=True),
     required=False,
-    help="Cluster resources configuration JSON file path used for analysis.",
+    help="Path to directory containing config.yaml with workflow rule resources.",
+)
+
+OPTION_RUN_INTERACTIVELY = click.option(
+    "--run-interactively",
+    type=bool,
+    required=False,
+    help="If given snakemake will run interactively on the current node and submit jobs sequentially.",
 )
