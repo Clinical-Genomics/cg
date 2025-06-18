@@ -1106,6 +1106,7 @@ class ReadHandler(BaseHandler):
         2. Use the latest analysis for case to determine if the case is to be analyzed"""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.HAS_SEQUENCE,
+            CaseFilter.PASSING_SEQUENCING_QC,
             CaseFilter.WITH_WORKFLOW,
             CaseFilter.FOR_ANALYSIS,
         ]

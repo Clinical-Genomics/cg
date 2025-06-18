@@ -97,7 +97,7 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
     2. A case that has not been analyzed before
     3. A microSALT case with at least one sample has new data that has not been analyzed
     4. A case that has been set to TOP_UP by production and has new data
-    Scenarios 2, 3, and 4 all require that the case has passed Sequencing QC.
+    All scenarios require that the case has passed Sequencing QC.
     """
     return cases.filter(
         or_(
@@ -108,20 +108,17 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
                 Application.is_external.isnot(True),
                 Case.action.is_(None),
                 Analysis.created_at.is_(None),
-                Case.aggregated_sequencing_qc == SequencingQCStatus.PASSED,
             ),
             # Case contains new data that has not been analysed. (Only relevant for microSALT)
             and_(
                 Case.action.is_(None),
                 Analysis.created_at < Sample.last_sequenced_at,
                 Case.data_analysis == Workflow.MICROSALT,
-                Case.aggregated_sequencing_qc == SequencingQCStatus.PASSED,
             ),
             # Cases manually set to top-up by production that get the new data
             and_(
                 Case.action == CaseActions.TOP_UP,
                 Analysis.created_at < Sample.last_sequenced_at,
-                Case.aggregated_sequencing_qc == SequencingQCStatus.PASSED,
             ),
         )
     )
@@ -229,6 +226,11 @@ def filter_cases_pending_or_failed_sequencing_qc(cases: Query, **kwargs) -> Quer
     )
 
 
+def filter_cases_passing_sequencing_qc(cases: Query, **kwargs) -> Query:
+    """Filter cases with passing sequencing QC."""
+    return cases.filter(Case.aggregated_sequencing_qc == SequencingQCStatus.PASSED)
+
+
 def apply_case_filter(
     cases: Query,
     filter_functions: list[Callable],
@@ -310,3 +312,4 @@ class CaseFilter(Enum):
     WITH_SCOUT_DELIVERY: Callable = filter_cases_with_scout_data_delivery
     ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at
     PENDING_OR_FAILED_SEQUENCING_QC: Callable = filter_cases_pending_or_failed_sequencing_qc
+    PASSING_SEQUENCING_QC: Callable = filter_cases_passing_sequencing_qc
