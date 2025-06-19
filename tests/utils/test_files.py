@@ -7,7 +7,6 @@ from cg.utils.files import (
     get_directories_in_path,
     get_file_in_directory,
     get_file_with_pattern_from_list,
-    get_files_in_directory_with_pattern,
     get_files_matching_pattern,
     get_project_root_dir,
     get_source_creation_time_stamp,
@@ -57,21 +56,6 @@ def test_get_file_with_pattern_from_list_no_file():
     # THEN a FileNotFoundError should be raised
     with pytest.raises(FileNotFoundError):
         get_file_with_pattern_from_list(files, "file4")
-
-
-def test_get_files_in_directory_by_pattern(nested_directory_with_file: Path, some_file: str):
-    """Test function to get files with a pattern in a directory and subdirectories."""
-    # GIVEN a directory with subdirectories with a file
-
-    # WHEN getting the file
-    file_paths: list[Path] = get_files_in_directory_with_pattern(
-        directory=nested_directory_with_file, pattern=some_file
-    )
-
-    # THEN assert that the file is returned
-    for file_path in file_paths:
-        assert file_path.exists()
-        assert some_file in file_path.as_posix()
 
 
 def test_get_files_matching_pattern(nested_directory_with_file: Path, some_file: str):

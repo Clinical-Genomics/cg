@@ -116,11 +116,6 @@ class DemultiplexingAPI:
         """Create the path to the stderr logfile."""
         return Path(sequencing_run.path, f"{DemultiplexingAPI.get_run_name(sequencing_run)}.stderr")
 
-    @staticmethod
-    def get_stdout_logfile(sequencing_run: IlluminaRunDirectoryData) -> Path:
-        """Create the path to the stdout logfile."""
-        return Path(sequencing_run.path, f"{DemultiplexingAPI.get_run_name(sequencing_run)}.stdout")
-
     def demultiplexed_run_dir_path(self, sequencing_run: IlluminaRunDirectoryData) -> Path:
         """Create the path to where the demultiplexed result should be produced."""
         return Path(self.demultiplexed_runs_dir, sequencing_run.path.name)

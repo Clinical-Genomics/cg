@@ -31,23 +31,6 @@ class OverrideCyclesValidator:
         self.run_index2_cycles: int | None = run_index2_cycles
         self.is_reverse_complement: bool | None = is_reverse_complement
 
-    def set_run_cycles(
-        self,
-        read1_cycles: int | None = None,
-        read2_cycles: int | None = None,
-        index1_cycles: int | None = None,
-        index2_cycles: int | None = None,
-    ) -> None:
-        """Set the run cycles."""
-        self.run_read1_cycles = read1_cycles
-        self.run_read2_cycles = read2_cycles
-        self.run_index1_cycles = index1_cycles
-        self.run_index2_cycles = index2_cycles
-
-    def set_reverse_complement(self, is_reverse_complement: bool) -> None:
-        """Set the reverse complement."""
-        self.is_reverse_complement = is_reverse_complement
-
     def set_attributes_from_sample(self, sample: dict[str, str]) -> None:
         """Set the sample, override cycles and sample id."""
         self.sample = sample
