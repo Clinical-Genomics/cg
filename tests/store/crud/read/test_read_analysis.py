@@ -417,7 +417,7 @@ def test_one_of_one_sequenced_samples(
 def test_microsalt_re_analysis(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
 ):
-    """Tests the functionality that a micrSALT case should be analysed again if a sample has newer data."""
+    """Tests the functionality that a microSALT case should be analysed again if a sample has newer data."""
     # GIVEN a microSALT case
     microsalt_case: Case = helpers.add_case(store=base_store, data_analysis=Workflow.MICROSALT)
 

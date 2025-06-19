@@ -640,7 +640,7 @@ def test_filter_cases_for_analysis_top_up(
     base_store.session.add(test_analysis)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_query_for_analysis_start()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN getting cases to analyze
     cases: Query = filter_cases_for_analysis(cases=cases)
@@ -694,7 +694,7 @@ def test_filter_cases_for_analysis_top_up_multiple_analyses(
     )
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_query_for_analysis_start()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN getting cases to analyze
     cases: Query = filter_cases_for_analysis(cases=cases)

@@ -45,7 +45,7 @@ class BaseHandler:
             .join(Application)
         )
 
-    def _get_query_for_analysis_start(self) -> Query:
+    def _get_case_query_for_analysis_start(self) -> Query:
         """Return a query for all cases and joins them with their latest analysis, if present."""
         latest_analysis_subquery: Subquery = (
             self.session.query(
