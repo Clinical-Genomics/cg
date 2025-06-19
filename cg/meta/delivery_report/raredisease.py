@@ -46,7 +46,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
             bait_set=self.lims_api.capture_kit(sample.internal_id),
             duplicates=sample_metrics.percent_duplicates,
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
-            mapped_reads=sample_metrics.mapped_reads / sample_metrics.total_reads,
+            mapped_reads=round((sample_metrics.mapped_reads / sample_metrics.total_reads) * 100, 2),
             mean_target_coverage=coverage_metrics.mean_coverage if coverage_metrics else None,
             million_read_pairs=get_million_read_pairs(sample.reads),
             pct_10x=coverage_metrics.coverage_completeness_percent if coverage_metrics else None,
