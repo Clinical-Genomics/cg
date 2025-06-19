@@ -23,7 +23,6 @@ from cg.store.models import Analysis, Case
 LOG = logging.getLogger(__name__)
 
 
-# TODO: remove anaöysis_completed_at as parameter
 @click.command("delivery-report")
 @ARGUMENT_CASE_ID
 @FORCE
