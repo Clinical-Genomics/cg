@@ -414,19 +414,19 @@ def test_one_of_one_sequenced_samples(
     assert test_case in cases
 
 
-def test_microsalt_top_up_analyses(
+def test_microsalt_re_analysis(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
 ):
     """Tests the functionality that a micrSALT case should be analysed again if a sample has newer data."""
     # GIVEN a microSALT case
-    microsalt_case: Case = helpers.add_case(base_store, data_analysis=Workflow.MICROSALT)
+    microsalt_case: Case = helpers.add_case(store=base_store, data_analysis=Workflow.MICROSALT)
 
-    # Given it has two samples, one sequenced yesterday and one today
+    # GIVEN it has two samples, one sequenced yesterday and one now
     sample_1: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_yesterday)
     sample_2: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_now)
     helpers.relate_samples(base_store=base_store, case=microsalt_case, samples=[sample_1, sample_2])
 
-    # Given that the case was analysed yesterday
+    # GIVEN that the case was analysed yesterday
     helpers.add_analysis(
         store=base_store,
         case=microsalt_case,
@@ -436,26 +436,26 @@ def test_microsalt_top_up_analyses(
         workflow=Workflow.MICROSALT,
     )
 
-    # When getting cases to analyze
+    # WHEN getting cases to analyze
     cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.MICROSALT)
 
-    # Then the case should be returned
+    # THEN the case should be returned
     assert microsalt_case in cases
 
 
-def test_top_up_analyses(
+def test_multiple_starts_non_microsalt_analysis(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
 ):
-    """Tests the functionality that a non-microSALT cases should not start with new data if they have already been analysed."""
+    """Tests that a non-microSALT case should not start with new data if they have already been analysed."""
     # GIVEN a non-microSALT case
-    case: Case = helpers.add_case(base_store, data_analysis=Workflow.BALSAMIC)
+    case: Case = helpers.add_case(store=base_store, data_analysis=Workflow.BALSAMIC)
 
-    # Given it has two samples, one sequenced yesterday and one today
+    # GIVEN it has two samples, one sequenced yesterday and one now
     sample_1: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_yesterday)
     sample_2: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_now)
     helpers.relate_samples(base_store=base_store, case=case, samples=[sample_1, sample_2])
 
-    # Given that the case was analysed yesterday
+    # GIVEN that the case was analysed yesterday
     helpers.add_analysis(
         store=base_store,
         case=case,
@@ -465,10 +465,10 @@ def test_top_up_analyses(
         workflow=Workflow.BALSAMIC,
     )
 
-    # When getting cases to analyze
+    # WHEN getting cases to analyze
     cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.BALSAMIC)
 
-    # Then the case should not be returned
+    # THEN the case should not be returned
     assert case not in cases
 
 
@@ -578,9 +578,7 @@ def test_get_latest_started_analysis_for_case(base_store: Store, helpers: StoreH
     """Test returning the latest started analysis for a case."""
     # GIVEN a store with multiple analyses for a case
     test_case: Case = helpers.add_case(store=base_store, name="test_case")
-    test_analysis_1: Analysis = helpers.add_analysis(
-        store=base_store, case=test_case, started_at=datetime(2023, 1, 1, 0, 0, 0)
-    )
+    helpers.add_analysis(store=base_store, case=test_case, started_at=datetime(2023, 1, 1, 0, 0, 0))
     test_analysis_2: Analysis = helpers.add_analysis(
         store=base_store, case=test_case, started_at=datetime(2023, 1, 2, 0, 0, 0)
     )

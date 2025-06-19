@@ -45,8 +45,8 @@ class BaseHandler:
             .join(Application)
         )
 
-    def _get_outer_join_cases_with_latest_analyses_query(self) -> Query:
-        """Return a query for all cases in the database with an analysis."""
+    def _get_query_for_analysis_start(self) -> Query:
+        """Return a query for all cases and joins them with their latest analysis, if present."""
         latest_analysis_subquery: Subquery = (
             self.session.query(
                 Analysis.case_id, func.max(Analysis.created_at).label("latest_created_at")

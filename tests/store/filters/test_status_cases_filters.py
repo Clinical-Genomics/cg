@@ -640,7 +640,7 @@ def test_filter_cases_for_analysis_top_up(
     base_store.session.add(test_analysis)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_latest_analyses_query()
+    cases: Query = base_store._get_query_for_analysis_start()
 
     # WHEN getting cases to analyze
     cases: Query = filter_cases_for_analysis(cases=cases)
@@ -659,8 +659,7 @@ def test_filter_cases_for_analysis_top_up_multiple_analyses(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
 ):
     """
-    Test that a case is returned when there is a case with an action set to top-up and has new
-    sequencing data and also multiple analyses.
+    Test that only the latest analysis is considered for the top-up case.
     """
     # GIVEN a sampled sequenced twelve hours ago
     test_sample: Sample = helpers.add_sample(
@@ -685,6 +684,7 @@ def test_filter_cases_for_analysis_top_up_multiple_analyses(
         case=test_case,
     )
     test_analysis.created_at = timestamp_yesterday
+
     # GIVEN an analysis for the case completed now
     helpers.add_analysis(
         store=base_store,
@@ -694,16 +694,13 @@ def test_filter_cases_for_analysis_top_up_multiple_analyses(
     )
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_latest_analyses_query()
+    cases: Query = base_store._get_query_for_analysis_start()
 
     # WHEN getting cases to analyze
     cases: Query = filter_cases_for_analysis(cases=cases)
 
-    # THEN assert that cases is a query
-    assert isinstance(cases, Query)
-
     # THEN assert that query is empty
-    assert not cases.all()
+    assert len(cases.all()) == 0
 
 
 def test_filter_cases_for_analysis_top_up_when_no_new_sequence_data(

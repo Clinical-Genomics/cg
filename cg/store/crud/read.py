@@ -1111,7 +1111,7 @@ class ReadHandler(BaseHandler):
             CaseFilter.FOR_ANALYSIS,
         ]
         cases = apply_case_filter(
-            cases=self._get_outer_join_cases_with_latest_analyses_query(),
+            cases=self._get_query_for_analysis_start(),
             filter_functions=case_filter_functions,
             workflow=workflow,
         )

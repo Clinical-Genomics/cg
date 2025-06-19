@@ -97,7 +97,6 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
     2. A case that has not been analyzed before
     3. A microSALT case with at least one sample has new data that has not been analyzed
     4. A case that has been set to TOP_UP by production and has new data
-    All scenarios require that the case has passed Sequencing QC.
     """
     return cases.filter(
         or_(
@@ -151,7 +150,7 @@ def filter_cases_with_loqusdb_supported_workflow(
         if workflow
         else cases.filter(Case.data_analysis.in_(LOQUSDB_SUPPORTED_WORKFLOWS))
     )
-    return records.filter(Customer.loqus_upload == True)
+    return records.filter(Customer.loqus_upload)
 
 
 def filter_cases_with_loqusdb_supported_sequencing_method(
