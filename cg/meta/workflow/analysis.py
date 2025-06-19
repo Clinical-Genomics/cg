@@ -260,13 +260,13 @@ class AnalysisAPI(MetaAPI):
                 "The following files would be stored:\n%s",
                 "\n".join([f["path"] for f in bundle_data["files"]]),
             )
-            return bundle_result
-        self.housekeeper_api.include(bundle_version)
-        self.housekeeper_api.add_commit(bundle_object)
-        self.housekeeper_api.add_commit(bundle_version)
-        LOG.info(
-            f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
-        )
+        else:
+            self.housekeeper_api.include(bundle_version)
+            self.housekeeper_api.add_commit(bundle_object)
+            self.housekeeper_api.add_commit(bundle_version)
+            LOG.info(
+                f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
+            )
         return bundle_result
 
     def _create_analysis_statusdb(self, case: Case, trailblazer_id: int | None) -> None:
