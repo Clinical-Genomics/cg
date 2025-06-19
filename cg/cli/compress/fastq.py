@@ -84,24 +84,19 @@ def clean_fastq(context: CGConfig, case_id: str | None, days_back: int, dry_run:
     store: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run)
 
-    cases: list[Case] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
+    cases: list[Case] | None = get_cases_to_process(
+        case_id=case_id, days_back=days_back, store=store
+    )
     if not cases:
+        LOG.info("Did not find any FASTQ files to clean. Closing")
         return
-
-    cleaned_inds = 0
+    is_successful: bool = True
     for case in cases:
-        sample_ids: Iterable[str] = store.get_sample_ids_by_case_id(case_id=case.internal_id)
-        for sample_id in sample_ids:
-            archive_location: str = store.get_sample_by_internal_id(sample_id).archive_location
-            was_cleaned: bool = compress_api.clean_fastq(
-                sample_id=sample_id, archive_location=archive_location
-            )
-            if not was_cleaned:
-                LOG.debug(f"Skipping individual {sample_id}")
-                continue
-            cleaned_inds += 1
-
-    LOG.info(f"Cleaned fastqs in {cleaned_inds} individuals")
+        samples: list[Sample] = case.samples
+        if not compress_api.clean_fastq_files_for_samples(samples=samples, days_back=days_back):
+            is_successful: bool = False
+    if not is_successful:
+        click.Abort("Failed to clean FASTQ files. Aborting")
 
 
 @click.command("fix-spring")
