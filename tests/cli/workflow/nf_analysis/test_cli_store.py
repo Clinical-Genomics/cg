@@ -247,5 +247,5 @@ def test_store_available_fail(
 
     # THEN only the analysis of the successful casae should be updated in StatusDB
     NfAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_once_with(
-        case_id=case_id, comment=ANY, dry_run=False, force=False
+        case_id=case_id, hk_version_id=ANY, comment=ANY, dry_run=False, force=False
     )
