@@ -8,7 +8,7 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, FileFormat
+from cg.constants.constants import CaseActions, FileFormat, SequencingQCStatus
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.io.controller import WriteFile
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -406,6 +406,7 @@ def balsamic_context(
         internal_id="balsamic_case_tgs_paired",
         name="balsamic_case_tgs_paired",
         data_analysis=Workflow.BALSAMIC,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
     sample_case_tgs_paired_tumor = helpers.add_sample(
         status_db,
@@ -451,6 +452,7 @@ def balsamic_context(
         internal_id="balsamic_case_tgs_single",
         name="balsamic_case_tgs_single",
         data_analysis=Workflow.BALSAMIC,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
     sample_case_tgs_single_tumor = helpers.add_sample(
         status_db,
@@ -468,6 +470,7 @@ def balsamic_context(
         internal_id="balsamic_case_tgs_single_error",
         name="balsamic_case_tgs_single_error",
         data_analysis=Workflow.BALSAMIC,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
     sample_case_tgs_single_normal_error = helpers.add_sample(
         status_db,
@@ -490,6 +493,7 @@ def balsamic_context(
         internal_id="balsamic_case_tgs_paired_error",
         name="balsamic_case_tgs_paired_error",
         data_analysis=Workflow.BALSAMIC,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
     sample_case_tgs_paired_tumor_error = helpers.add_sample(
         status_db,
@@ -540,6 +544,7 @@ def balsamic_context(
         internal_id="balsamic_case_mixed_paired_error",
         name="balsamic_case_mixed_paired_error",
         data_analysis=Workflow.BALSAMIC,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
     mixed_sample_case_wgs_paired_tumor_error = helpers.add_sample(
         status_db,
@@ -575,6 +580,7 @@ def balsamic_context(
         internal_id="balsamic_case_mixed_wgs_mic_paired_error",
         name="balsamic_case_mixed_wgs_mic_paired_error",
         data_analysis=Workflow.BALSAMIC,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
     mixed_sample_case_wgs_mic_paired_tumor_error = helpers.add_sample(
         status_db,
@@ -610,6 +616,7 @@ def balsamic_context(
         internal_id="balsamic_case_mixed_bed_paired_error",
         name="balsamic_case_mixed_bed_paired_error",
         data_analysis=Workflow.BALSAMIC,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
     mixed_sample_case_mixed_bed_paired_tumor_error = helpers.add_sample(
         status_db,
@@ -665,6 +672,7 @@ def balsamic_context(
         internal_id="balsamic_case_wgs_paired_two_normal_error",
         name="balsamic_case_wgs_paired_two_normal_error",
         data_analysis=Workflow.BALSAMIC,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
     sample_case_wgs_paired_two_normal_tumor_error = helpers.add_sample(
         status_db,
@@ -715,6 +723,7 @@ def balsamic_context(
         internal_id="balsamic_case_wes_tumor",
         name="balsamic_case_wes_tumor",
         data_analysis=Workflow.BALSAMIC,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
     sample_case_wes_tumor = helpers.add_sample(
         status_db,
@@ -732,6 +741,7 @@ def balsamic_context(
         internal_id="balsamic_case_wes_panel_error",
         name="balsamic_case_wes_panel_error",
         data_analysis=Workflow.BALSAMIC,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
     sample_case_wes_panel_error = helpers.add_sample(
         status_db,

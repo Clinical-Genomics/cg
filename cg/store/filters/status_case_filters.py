@@ -92,10 +92,11 @@ def filter_cases_by_priority(cases: Query, priority: str, **kwargs) -> Query:
 
 
 def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
-    """Filter cases in need of analysis by:
-    1. Action set to analyze or
-    2. Internally created cases with no action set and no prior analysis or
-    3. Cases with no action, but new sequence data
+    """Filter cases that should be analyzed:
+    1. All cases with action set to ANALYZE should be analyzed, regardless of other conditions.
+    2. A case that has not been analyzed before
+    3. A microSALT case with at least one sample has new data that has not been analyzed
+    4. A case that has been set to TOP_UP by production and has new data
     """
     return cases.filter(
         or_(
@@ -111,9 +112,13 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
             and_(
                 Case.action.is_(None),
                 Analysis.created_at < Sample.last_sequenced_at,
+                Case.data_analysis == Workflow.MICROSALT,
             ),
             # Cases manually set to top-up by production that get the new data
-            and_(Case.action == CaseActions.TOP_UP, Analysis.created_at < Sample.last_sequenced_at),
+            and_(
+                Case.action == CaseActions.TOP_UP,
+                Analysis.created_at < Sample.last_sequenced_at,
+            ),
         )
     )
 
@@ -145,7 +150,7 @@ def filter_cases_with_loqusdb_supported_workflow(
         if workflow
         else cases.filter(Case.data_analysis.in_(LOQUSDB_SUPPORTED_WORKFLOWS))
     )
-    return records.filter(Customer.loqus_upload == True)
+    return records.filter(Customer.loqus_upload)
 
 
 def filter_cases_with_loqusdb_supported_sequencing_method(
@@ -218,6 +223,11 @@ def filter_cases_pending_or_failed_sequencing_qc(cases: Query, **kwargs) -> Quer
             Case.aggregated_sequencing_qc == SequencingQCStatus.FAILED,
         )
     )
+
+
+def filter_cases_passing_sequencing_qc(cases: Query, **kwargs) -> Query:
+    """Filter cases with passing sequencing QC."""
+    return cases.filter(Case.aggregated_sequencing_qc == SequencingQCStatus.PASSED)
 
 
 def apply_case_filter(
@@ -301,3 +311,4 @@ class CaseFilter(Enum):
     WITH_SCOUT_DELIVERY: Callable = filter_cases_with_scout_data_delivery
     ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at
     PENDING_OR_FAILED_SEQUENCING_QC: Callable = filter_cases_pending_or_failed_sequencing_qc
+    PASSING_SEQUENCING_QC: Callable = filter_cases_passing_sequencing_qc
