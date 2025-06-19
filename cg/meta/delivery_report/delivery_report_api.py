@@ -169,7 +169,9 @@ class DeliveryReportAPI:
         """Fetches all the data needed to generate a delivery report."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_metadata: AnalysisModel = self.analysis_api.get_latest_metadata(case.internal_id)
-        case_model: CaseModel = self.get_case_data(case, analysis, analysis_metadata)
+        case_model: CaseModel = self.get_case_data(
+            case=case, analysis=analysis, analysis_metadata=analysis_metadata
+        )
         return ReportModel(
             customer=self.get_customer_data(case=case),
             version=self.get_report_version(analysis=analysis),
