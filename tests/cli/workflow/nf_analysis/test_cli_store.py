@@ -79,7 +79,7 @@ def test_store_success(
 
     # THEN the analysis should be updated in StatusDB
     NfAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
-        case_id=case_id, comment=ANY, dry_run=False, force=False
+        case_id=case_id, hk_version_id=ANY, comment=ANY, dry_run=False, force=False
     )
 
 
@@ -178,7 +178,7 @@ def test_store_available_success(
 
     # THEN the analysis should be updated in StatusDB
     NfAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
-        case_id=case_id, comment=ANY, dry_run=False, force=False
+        case_id=case_id, hk_version_id=ANY, comment=ANY, dry_run=False, force=False
     )
 
 

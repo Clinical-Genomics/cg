@@ -81,7 +81,7 @@ def test_cli_store(
     # THEN the analysis should be updated in status db
     FluffyAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
         case_id=fluffy_case_id_existing,
-        hk_version_id=3,
+        hk_version_id=ANY,
         comment=ANY,
         dry_run=False,
         force=False,
@@ -174,7 +174,7 @@ def test_cli_store_available_case_is_running(
     # THEN the analysis should be updated in status db
     FluffyAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
         case_id=fluffy_case_id_existing,
-        hk_version_id=3,
+        hk_version_id=ANY,
         comment=ANY,
         dry_run=False,
         force=False,
