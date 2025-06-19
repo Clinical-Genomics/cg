@@ -8,11 +8,7 @@ from pathlib import Path
 import rich_click as click
 from housekeeper.store.models import Version
 
-from cg.cli.generate.delivery_report.options import (
-    ARGUMENT_CASE_ID,
-    OPTION_COMPLETED_AT,
-    OPTION_WORKFLOW,
-)
+from cg.cli.generate.delivery_report.options import ARGUMENT_CASE_ID, OPTION_WORKFLOW
 from cg.cli.generate.delivery_report.utils import (
     get_report_api,
     get_report_api_workflow,
@@ -32,14 +28,12 @@ LOG = logging.getLogger(__name__)
 @ARGUMENT_CASE_ID
 @FORCE
 @DRY_RUN
-@OPTION_COMPLETED_AT
 @click.pass_context
 def generate_delivery_report(
     context: click.Context,
     case_id: str,
     force: bool,
     dry_run: bool,
-    analysis_completed_at: str = None,
 ) -> None:
     """Creates a delivery report for the latest analysis of the provided case."""
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
