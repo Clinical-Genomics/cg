@@ -8,7 +8,6 @@ from unittest.mock import ANY, Mock, create_autospec
 import mock
 import pytest
 from housekeeper.store.models import Version
-from pytest_mock import mocker
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
@@ -16,13 +15,7 @@ from cg.constants import GenePanelMasterList, Priority, SequencingRunDataAvailab
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import CaseActions, ControlOptions, Workflow
 from cg.constants.priority import SlurmQos, TrailblazerPriority
-from cg.exc import (
-    AnalysisAlreadyStoredError,
-    AnalysisDoesNotExistError,
-    AnalysisNotReadyError,
-    CaseNotFoundError,
-    CgError,
-)
+from cg.exc import AnalysisAlreadyStoredError, AnalysisNotReadyError, CaseNotFoundError
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI

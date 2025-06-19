@@ -2,6 +2,8 @@
 
 import logging
 
+from housekeeper.store.models import File
+
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import AnalysisNotCompletedError
@@ -29,7 +31,7 @@ class UploadCoverageApi:
 
         data = {"family": case_id, "family_name": analysis.case.name, "samples": []}
         for link_obj in analysis.case.links:
-            hk_coverage = self.hk_api.files(
+            hk_coverage: File = self.hk_api.files(
                 version=analysis.housekeeper_version_id,
                 tags=[link_obj.sample.internal_id, "coverage"],
             ).first()
