@@ -158,7 +158,7 @@ def test_valid_case(
     assert balsamic_context.meta_apis["analysis_api"].housekeeper_api.bundle(case_id)
 
     AnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
-        case_id=case_id, comment=ANY, dry_run=False, force=False
+        case_id=case_id, hk_version_id=ANY, comment=ANY, dry_run=False, force=False
     )
 
 

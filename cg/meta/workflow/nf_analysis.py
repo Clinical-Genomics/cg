@@ -858,9 +858,15 @@ class NfAnalysisAPI(AnalysisAPI):
             self.status_db.verify_case_exists(case_id)
             self.trailblazer_api.verify_latest_analysis_is_completed(case_id=case_id, force=force)
             self.verify_deliverables_file_exists(case_id)
-            self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
+            _, version = self.create_housekeeper_bundle(
+                case_id=case_id, dry_run=dry_run, force=force
+            )
             self.update_analysis_as_completed_statusdb(
-                case_id=case_id, comment=comment, dry_run=dry_run, force=force
+                case_id=case_id,
+                hk_version_id=version.id,
+                comment=comment,
+                dry_run=dry_run,
+                force=force,
             )
             self.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
         except ValidationError as error:

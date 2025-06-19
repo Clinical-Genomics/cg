@@ -106,23 +106,3 @@ def get_report_api_workflow(context: click.Context, workflow: Workflow) -> Deliv
         Workflow.TOMTE: TomteDeliveryReportAPI(analysis_api=TomteAnalysisAPI(config=context.obj)),
     }
     return dispatch_report_api.get(workflow)
-
-
-def get_report_analysis_completed_at(
-    case: Case, report_api: DeliveryReportAPI, analysis_completed_at: str | None
-) -> datetime:
-    """Resolves and returns a valid analysis completed date."""
-    if not analysis_completed_at:
-        analysis_completed_at: datetime = (
-            report_api.status_db.get_case_by_internal_id(internal_id=case.internal_id)
-            .analyses[0]
-            .completed_at
-        )
-    # If there is no analysis for the provided date
-    if not report_api.status_db.get_analysis_by_case_entry_id_and_completed_at(
-        case_entry_id=case.id, completed_at_date=analysis_completed_at
-    ):
-        LOG.error(f"There is no analysis completed at {analysis_completed_at}")
-        raise click.Abort
-    LOG.info(f"Using analysis completed at: {analysis_completed_at}")
-    return analysis_completed_at

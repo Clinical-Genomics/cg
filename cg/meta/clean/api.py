@@ -33,11 +33,7 @@ class CleanAPI:
 
         for analysis in completed_analyses_for_workflow:
             bundle_name = analysis.case.internal_id
-
-            hk_bundle_version: Version | None = self.housekeeper_api.version(
-                bundle=bundle_name, date=analysis.completed_at
-            )
-            if not hk_bundle_version:
+            if not analysis.housekeeper_version_id:
                 LOG.warning(
                     f"Version not found for "
                     f"bundle:{bundle_name}; "
@@ -53,7 +49,7 @@ class CleanAPI:
                 f"date {analysis.completed_at}"
             )
             yield self.housekeeper_api.get_files(
-                bundle=bundle_name, version=hk_bundle_version.id
+                bundle=bundle_name, version=analysis.housekeeper_version_id
             ).all()
 
     @staticmethod

@@ -8,13 +8,8 @@ from pathlib import Path
 import rich_click as click
 from housekeeper.store.models import Version
 
-from cg.cli.generate.delivery_report.options import (
-    ARGUMENT_CASE_ID,
-    OPTION_COMPLETED_AT,
-    OPTION_WORKFLOW,
-)
+from cg.cli.generate.delivery_report.options import ARGUMENT_CASE_ID, OPTION_WORKFLOW
 from cg.cli.generate.delivery_report.utils import (
-    get_report_analysis_completed_at,
     get_report_api,
     get_report_api_workflow,
     get_report_case,
@@ -23,7 +18,7 @@ from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.exc import CgError
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
-from cg.store.models import Case
+from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
 
@@ -32,32 +27,33 @@ LOG = logging.getLogger(__name__)
 @ARGUMENT_CASE_ID
 @FORCE
 @DRY_RUN
-@OPTION_COMPLETED_AT
 @click.pass_context
 def generate_delivery_report(
     context: click.Context,
     case_id: str,
     force: bool,
     dry_run: bool,
-    analysis_completed_at: str = None,
 ) -> None:
-    """Creates a delivery report for the provided case."""
+    """Creates a delivery report for the latest analysis of the provided case."""
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
     case: Case = get_report_case(context, case_id)
     report_api: DeliveryReportAPI = get_report_api(context, case)
-    analysis_date: datetime = get_report_analysis_completed_at(
-        case=case, report_api=report_api, analysis_completed_at=analysis_completed_at
-    )
+    analysis: Analysis | None = case.latest_analysis
+    if not analysis or not analysis.housekeeper_version_id:
+        LOG.error(
+            f"Analysis for case {case_id} is not completed or does not have a Housekeeper version. "
+        )
+        raise click.Abort()
 
     # Dry run: prints the HTML report to console
     if dry_run:
         delivery_report_html: str = report_api.get_delivery_report_html(
-            case_id=case_id, analysis_date=analysis_date, force=force
+            case_id=case_id, analysis=analysis, force=force
         )
         click.echo(delivery_report_html)
         return
 
-    version: Version = report_api.housekeeper_api.version(bundle=case_id, date=analysis_date)
+    version: Version = report_api.housekeeper_api.get_version_by_id(analysis.housekeeper_version_id)
     delivery_report: str | None = report_api.get_delivery_report_from_hk(
         case_id=case_id, version=version
     )
@@ -70,7 +66,7 @@ def generate_delivery_report(
     created_delivery_report: Path = report_api.write_delivery_report_file(
         case_id=case_id,
         directory=Path(report_api.analysis_api.root, case_id),
-        analysis_date=analysis_date,
+        analysis=analysis,
         force=force,
     )
     report_api.add_delivery_report_to_hk(
@@ -82,7 +78,7 @@ def generate_delivery_report(
             fg="green",
         )
     )
-    report_api.update_delivery_report_date(case=case, analysis_date=analysis_date)
+    report_api.update_delivery_report_date(analysis=analysis)
 
 
 @click.command("available-delivery-reports")

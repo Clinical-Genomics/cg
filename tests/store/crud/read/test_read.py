@@ -515,25 +515,6 @@ def test_get_user_when_email_is_none_returns_none(store_with_users: Store):
     assert filtered_user is None
 
 
-def test_get_analysis_by_case_entry_id_and_completed_at(
-    sample_store: Store, helpers: StoreHelpers, timestamp_now: datetime
-):
-    """Test returning an analysis using a date."""
-    # GIVEN a case with an analysis with a completed date in the database
-    analysis = helpers.add_analysis(
-        store=sample_store, started_at=timestamp_now, completed_at=timestamp_now
-    )
-    assert analysis.completed_at
-
-    # WHEN getting analysis via case_id and completed date
-    db_analysis = sample_store.get_analysis_by_case_entry_id_and_completed_at(
-        case_entry_id=analysis.case.id, completed_at_date=analysis.completed_at
-    )
-
-    # THEN the analysis should have been retrieved
-    assert db_analysis == analysis
-
-
 def test_get_illumina_sequencing_runs_by_case(
     store_with_illumina_sequencing_data: Store,
     selected_novaseq_x_case_ids: str,

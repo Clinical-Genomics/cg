@@ -33,38 +33,6 @@ def test_new_version(housekeeper_api: HousekeeperAPI, timestamp: datetime.dateti
     assert version_obj.bundle_id is None
 
 
-def test_get_version_non_existing(housekeeper_api: HousekeeperAPI, timestamp: datetime.datetime):
-    """Test to get a version when there are no existing version."""
-    # GIVEN a empty housekeeper_api
-
-    # WHEN fetching a version
-    version_obj = housekeeper_api.version(bundle=None, date=timestamp)
-
-    # THEN assert that the function returns None
-    assert version_obj is None
-
-
-def test_get_version_existing(
-    housekeeper_api: HousekeeperAPI,
-    timestamp_yesterday: datetime.datetime,
-    hk_bundle_data: dict[str, Any],
-):
-    """Test to get a version when there is a bundle and a version."""
-    # GIVEN a populated housekeeper_api
-    bundle_obj, version_obj = housekeeper_api.add_bundle(hk_bundle_data)
-    housekeeper_api.add_commit(bundle_obj)
-    housekeeper_api.add_commit(version_obj)
-
-    # WHEN fetching a version
-    fetched_version = housekeeper_api.version(bundle=bundle_obj.name, date=timestamp_yesterday)
-
-    # THEN assert that the function returns True
-    assert fetched_version
-
-    # THEN assert version has a bundle_id attribute
-    assert fetched_version.bundle_id == bundle_obj.id
-
-
 def test_add_version_existing_bundle(
     populated_housekeeper_api: HousekeeperAPI,
     later_timestamp: datetime.datetime,

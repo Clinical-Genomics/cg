@@ -178,7 +178,7 @@ def test_store_housekeeper_valid_case(
 
     # THEN the analysis should be updated in StatusDB
     AnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
-        case_id=case_id, comment=ANY, dry_run=False, force=False
+        case_id=case_id, hk_version_id=ANY, comment=ANY, dry_run=False, force=False
     )
 
 
@@ -236,7 +236,7 @@ def test_valid_case_already_added(
 
     # THEN the analysis should be updated in StatusDB
     AnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
-        case_id=case_id, comment=ANY, dry_run=False, force=False
+        case_id=case_id, hk_version_id=ANY, comment=ANY, dry_run=False, force=False
     )
 
 
@@ -290,5 +290,5 @@ def test_dry_run(
 
     # THEN update_analysis_as_completed_statusdb should be called with dry_run=TRUE
     AnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
-        case_id=case_id, comment=ANY, dry_run=True, force=False
+        case_id=case_id, hk_version_id=ANY, comment=ANY, dry_run=True, force=False
     )

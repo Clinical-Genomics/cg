@@ -7,7 +7,7 @@ from unittest.mock import ANY, Mock, create_autospec
 
 import mock
 import pytest
-from pytest_mock import mocker
+from housekeeper.store.models import Version
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
@@ -15,13 +15,7 @@ from cg.constants import GenePanelMasterList, Priority, SequencingRunDataAvailab
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import CaseActions, ControlOptions, Workflow
 from cg.constants.priority import SlurmQos, TrailblazerPriority
-from cg.exc import (
-    AnalysisAlreadyStoredError,
-    AnalysisDoesNotExistError,
-    AnalysisNotReadyError,
-    CaseNotFoundError,
-    CgError,
-)
+from cg.exc import AnalysisAlreadyStoredError, AnalysisNotReadyError, CaseNotFoundError
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -858,6 +852,7 @@ def test_update_analysis_as_completed_statusdb_analysis_already_completed(
     """Test that update_analysis_as_completed_statusdb fails if the analysis is already completed."""
     # GIVEN an analysis api and a case with an analysis in StatusDB
     analysis_api = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
+
     case_mock.analyses = [create_autospec(Analysis)]
     case_mock.analyses[0].completed_at = datetime.now()
 
@@ -865,7 +860,7 @@ def test_update_analysis_as_completed_statusdb_analysis_already_completed(
     with pytest.raises(AnalysisAlreadyStoredError):
         # THEN it raises an AnalysisAlreadyStoredError
         analysis_api.update_analysis_as_completed_statusdb(
-            case_id=case_mock.internal_id, force=False
+            case_id=case_mock.internal_id, hk_version_id=1234, force=False
         )
 
 
@@ -881,18 +876,31 @@ def test_update_analysis_as_completed_statusdb_succeeds(
     analysis: Analysis = create_autospec(Analysis)
     analysis.id = 123456
     analysis.completed_at = None
+    analysis.housekeeper_version_id = None
+    hk_version: Version = create_autospec(Version)
+    hk_version.id = 1234
     status_db_mock.get_latest_started_analysis_for_case.return_value = analysis
 
     # GIVEN that the bundle has a completed_at date of now
-    with mock.patch("os.path.getctime", return_value=datetime.now().timestamp()):
+    with (
+        mock.patch("os.path.getctime", return_value=datetime.now().timestamp()),
+        mock.patch.object(
+            AnalysisAPI, "create_housekeeper_bundle", return_value=(None, hk_version)
+        ),
+    ):
         # WHEN update_analysis_as_completed_statusdb is called
         analysis_api.update_analysis_as_completed_statusdb(
-            case_id=case_mock.internal_id, force=False
+            case_id=case_mock.internal_id, hk_version_id=1234, force=False
         )
 
     # THEN it updates the analysis completed_at date in StatusDB
     status_db_mock.update_analysis_completed_at.assert_called_with(
-        analysis_id=123456, completed_at=datetime.now().replace(microsecond=0)
+        analysis_id=123456, completed_at=datetime.now()
+    )
+
+    # THEN it updates the analysis housekeeper version id
+    status_db_mock.update_analysis_housekeeper_version_id.assert_called_with(
+        analysis_id=123456, version_id=1234
     )
 
     # THEN it updates the analysis comment
