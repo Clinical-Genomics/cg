@@ -27,6 +27,7 @@ from cg.store.models import Analysis, Case
 LOG = logging.getLogger(__name__)
 
 
+# TODO: remove anaöysis_completed_at as parameter
 @click.command("delivery-report")
 @ARGUMENT_CASE_ID
 @FORCE
@@ -40,7 +41,7 @@ def generate_delivery_report(
     dry_run: bool,
     analysis_completed_at: str = None,
 ) -> None:
-    """Creates a delivery report for the provided case."""
+    """Creates a delivery report for the latest analysis of the provided case."""
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
     case: Case = get_report_case(context, case_id)
     report_api: DeliveryReportAPI = get_report_api(context, case)

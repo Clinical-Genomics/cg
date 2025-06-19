@@ -318,8 +318,14 @@ class MockHousekeeperAPI:
         self._bundles.append(bundle_obj)
         return bundle_obj
 
+    # TODO: Remove this method
+
     def version(self, *args, **kwargs):
         """Fetch a version"""
+        return self._version_obj
+
+    def get_version_by_id(self, *args, **kwargs):
+        """Fetch a version by id"""
         return self._version_obj
 
     def get_or_create_version(self, bundle_name: str):
