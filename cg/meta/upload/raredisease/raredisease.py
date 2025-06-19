@@ -28,7 +28,7 @@ class RarediseaseUploadAPI(UploadAPI):
 
     def upload(self, ctx: click.Context, case: Case, restart: bool) -> None:
         """Uploads RAREDISEASE analysis data and files."""
-        analysis: Analysis = case.analyses[0]
+        analysis: Analysis = self.status_db.get_latest_completed_analysis_for_case(case.internal_id)
         self.update_upload_started_at(analysis=analysis)
 
         # Delivery report generation
