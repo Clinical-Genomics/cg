@@ -30,7 +30,7 @@ def test_microsalt_analysis_starter_start_available_error_handling(
         cg_context
     ).get_analysis_starter_for_workflow(Workflow.MICROSALT)
 
-    # GIVEN that an error is raised
+    # GIVEN that the start exits with a given behaviour
     mocker.patch.object(Store, "get_cases_to_analyze", return_value=[create_autospec(Case)])
     mocker.patch.object(AnalysisStarter, "start", return_value=None, side_effect=error)
 
