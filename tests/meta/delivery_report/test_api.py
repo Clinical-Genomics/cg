@@ -37,18 +37,20 @@ def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case id
-    case_id: str = request.getfixturevalue(f"{workflow}_case_id")
+    # GIVEN a case
+    case: Case = create_autospec(Case)
+    case.internal_id = request.getfixturevalue(f"{workflow}_case_id")
 
-    # GIVEN an analysis
+    # GIVEN an analysis linked to the case
     analysis: Analysis = create_autospec(Analysis)
     analysis.comment = "comment"
     analysis.workflow = workflow
     analysis.workflow_version = "1.0.0"
+    analysis.case = case
 
     # WHEN generating the delivery report HTML
     delivery_report_html: str = delivery_report_api.get_delivery_report_html(
-        case_id=case_id, analysis=analysis, force=False
+        analysis=analysis, force=False
     )
 
     # THEN it should generate a valid HTML string
@@ -65,18 +67,19 @@ def test_write_delivery_report_file(request: FixtureRequest, workflow: Workflow,
         f"{workflow}_delivery_report_api"
     )
 
-    # GIVEN a case id
-    case_id: str = request.getfixturevalue(f"{workflow}_case_id")
+    # GIVEN a case
+    case: Case = create_autospec(Case)
+    case.internal_id = request.getfixturevalue(f"{workflow}_case_id")
 
-    # GIVEN an analysis
+    # GIVEN an analysis linked to the case
     analysis: Analysis = create_autospec(Analysis)
     analysis.comment = "comment"
     analysis.workflow = workflow
     analysis.workflow_version = "1.0.0"
+    analysis.case = case
 
     # WHEN writing the delivery report file
     delivery_report_file: Path = delivery_report_api.write_delivery_report_file(
-        case_id=case_id,
         directory=tmp_path,
         analysis=analysis,
         force=False,

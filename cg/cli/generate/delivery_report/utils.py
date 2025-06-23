@@ -1,7 +1,6 @@
 """Delivery report helpers."""
 
 import logging
-from datetime import datetime
 
 import rich_click as click
 
@@ -23,7 +22,7 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
-from cg.store.models import Case
+from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
 
@@ -70,6 +69,17 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
         )
         raise click.Abort
     return case
+
+
+def get_analysis_for_delivery_report(case: Case) -> Analysis:
+    """Returns the analysis object for the delivery report generation."""
+    analysis: Analysis | None = case.latest_analysis
+    if not analysis or not analysis.housekeeper_version_id:
+        LOG.error(
+            f"Analysis for case {case.internal_id} is not completed or does not have a Housekeeper version. "
+        )
+        raise click.Abort()
+    return analysis
 
 
 def get_report_api(context: click.Context, case: Case) -> DeliveryReportAPI:

@@ -10,6 +10,7 @@ from housekeeper.store.models import Version
 
 from cg.cli.generate.delivery_report.options import ARGUMENT_CASE_ID, OPTION_WORKFLOW
 from cg.cli.generate.delivery_report.utils import (
+    get_analysis_for_delivery_report,
     get_report_api,
     get_report_api_workflow,
     get_report_case,
@@ -36,19 +37,14 @@ def generate_delivery_report(
 ) -> None:
     """Creates a delivery report for the latest analysis of the provided case."""
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
-    case: Case = get_report_case(context, case_id)
-    report_api: DeliveryReportAPI = get_report_api(context, case)
-    analysis: Analysis | None = case.latest_analysis
-    if not analysis or not analysis.housekeeper_version_id:
-        LOG.error(
-            f"Analysis for case {case_id} is not completed or does not have a Housekeeper version. "
-        )
-        raise click.Abort()
+    case: Case = get_report_case(context=context, case_id=case_id)
+    report_api: DeliveryReportAPI = get_report_api(context=context, case=case)
+    analysis: Analysis = get_analysis_for_delivery_report(case)
 
     # Dry run: prints the HTML report to console
     if dry_run:
         delivery_report_html: str = report_api.get_delivery_report_html(
-            case_id=case_id, analysis=analysis, force=force
+            analysis=analysis, force=force
         )
         click.echo(delivery_report_html)
         return
@@ -64,7 +60,6 @@ def generate_delivery_report(
         return
 
     created_delivery_report: Path = report_api.write_delivery_report_file(
-        case_id=case_id,
         directory=Path(report_api.analysis_api.root, case_id),
         analysis=analysis,
         force=force,
