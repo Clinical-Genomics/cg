@@ -1,9 +1,13 @@
 """Tests CLI utils for generating delivery reports."""
 
+from datetime import datetime
+from unittest.mock import create_autospec
+
 import click.exceptions
 import pytest
 
 from cg.cli.generate.delivery_report.utils import (
+    get_analysis_for_delivery_report,
     get_report_api,
     get_report_api_workflow,
     get_report_case,
@@ -11,7 +15,7 @@ from cg.cli.generate.delivery_report.utils import (
 from cg.constants import Workflow
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
-from cg.store.models import Case
+from cg.store.models import Analysis, Case
 
 
 def test_get_report_case(
@@ -79,3 +83,44 @@ def test_get_report_api_workflow(raredisease_delivery_report_click_context: clic
     # THEN the extracted API should match the expected type
     assert report_api
     assert isinstance(report_api, RarediseaseDeliveryReportAPI)
+
+
+def test_get_analysis_for_delivery_report(
+    raredisease_delivery_report_click_context: click.Context, raredisease_case_id: str
+):
+    """Tests retrieval of analysis completed at field"""
+
+    # GIVEN a case
+    case: Case = get_report_case(
+        context=raredisease_delivery_report_click_context, case_id=raredisease_case_id
+    )
+
+    # GIVEN a completed analysis linked to the case
+    analysis: Analysis = create_autospec(Analysis)
+    analysis.completed_at = datetime.now()
+    analysis.housekeeper_version_id = 1234
+    analysis.case = case
+
+    # WHEN getting the analysis for delivery report
+    analysis: Analysis = get_analysis_for_delivery_report(case)
+
+    # THEN an analysis is returned
+    assert isinstance(analysis, Analysis)
+
+
+def test_get_analysis_for_delivery_report_no_completed_analysis(
+    raredisease_delivery_report_click_context: click.Context, raredisease_case_id: str
+):
+    """Tests error raise when no completed analysis is found for the case."""
+
+    # GIVEN a case with no completed analysis
+    case: Case = get_report_case(
+        context=raredisease_delivery_report_click_context, case_id=raredisease_case_id
+    )
+    case.analyses[0].completed_at = None
+
+    # WHEN getting the analysis for delivery report
+
+    # THEN an exception should be raised
+    with pytest.raises(click.exceptions.Abort):
+        get_analysis_for_delivery_report(case)

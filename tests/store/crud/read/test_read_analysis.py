@@ -452,20 +452,23 @@ def test_get_analysis_by_entry_id(
     assert analysis.id == 1
 
 
-def test_get_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_older_than_last_sequenced_and_one_is(
+def test_get_cases_for_analysis_filters_out_analysis_older_than_last_sequenced_sample(
     base_store: Store,
     helpers: StoreHelpers,
     timestamp_now: datetime,
     timestamp_yesterday: datetime,
     old_timestamp: datetime,
 ):
-    """Test that a case is not returned if case action is None and when there are miltiple analyses where one analysis is older than a sample is last sequenced."""
+    """
+    Test that a case is not returned if case action is None and when there are multiple analyses
+    where one analysis is older than a sample is last sequenced.
+    """
 
     # GIVEN a case to be analyzed
     test_case_to_be_analyzed: Case = helpers.add_case(store=base_store, name="a_case_to_analyze")
 
     # GIVEN a case to be not returned
-    test_case: Case = helpers.add_case(store=base_store, name="a_case_to_be_filtered")
+    test_case: Case = helpers.add_case(store=base_store, name="a_case_to_be_filtered_out")
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(
@@ -480,8 +483,9 @@ def test_get_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_older_
         completed_at=timestamp_now,
         workflow=Workflow.MIP_DNA,
     )
+    test_analysis.housekeeper_version_id = 1234
 
-    # GIVEN a completed analysis older than the sample last sequenced
+    # GIVEN an old completed analysis older than the sample last sequenced
     test_analysis_2: Analysis = helpers.add_analysis(
         store=base_store,
         case=test_case,
@@ -489,10 +493,10 @@ def test_get_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_older_
         completed_at=timestamp_yesterday,
         workflow=Workflow.MIP_DNA,
     )
-    # GIVEN an old analysis
     test_analysis_2.created_at = old_timestamp
+    test_analysis_2.housekeeper_version_id = 1235
 
-    # Given an action set to None
+    # GIVEN an action set to None
     test_analysis.case.action = None
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
@@ -509,7 +513,7 @@ def test_get_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_older_
     # WHEN getting cases to analyze
     cases_to_analyze: list[Case] = base_store.get_cases_to_analyze()
 
-    # Then assert that test_case_to_analyze is returned
+    # THEN assert that test_case_to_analyze is returned
     assert test_case_to_be_analyzed in cases_to_analyze
 
     # THEN cases should not contain the test case

@@ -73,7 +73,7 @@ def generate_delivery_report(
             fg="green",
         )
     )
-    report_api.update_delivery_report_date(analysis=analysis)
+    report_api.update_delivery_report_date(analysis)
 
 
 @click.command("available-delivery-reports")

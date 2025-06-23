@@ -24,11 +24,6 @@ class UploadCoverageApi:
     def data(self, analysis: Analysis) -> dict:
         """Get data for uploading coverage."""
         case_id = analysis.case.internal_id
-        if not analysis.housekeeper_version_id:
-            message: str = f"Analysis for case {case_id} has no Housekeeper version ID"
-            LOG.error(message)
-            raise AnalysisNotCompletedError(message)
-
         data = {"family": case_id, "family_name": analysis.case.name, "samples": []}
         for link_obj in analysis.case.links:
             hk_coverage: File = self.hk_api.files(

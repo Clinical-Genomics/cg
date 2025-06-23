@@ -254,7 +254,7 @@ class HousekeeperAPI:
         return self._store.new_version(created_at, expires_at)
 
     def get_version_by_id(self, version_id: int) -> Version:
-        """Fetch a version by its ID."""
+        """Return a version given its database ID."""
         return self._store.get_version_by_id(version_id=version_id)
 
     def last_version(self, bundle: str) -> Version:
