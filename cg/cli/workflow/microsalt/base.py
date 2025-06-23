@@ -234,6 +234,20 @@ def dev_config_case(context: CGConfig, case_id: str) -> None:
     configurator.configure(case_id=case_id)
 
 
+@microsalt.command()
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_start_available(context: CGConfig) -> None:
+    """Starts all available microSALT cases."""
+    LOG.info("Starting Microsalt workflow.")
+    analysis_starter = AnalysisStarterFactory(context).get_analysis_starter_for_workflow(
+        Workflow.MICROSALT
+    )
+    succeeded: bool = analysis_starter.start_available()
+    if not succeeded:
+        raise click.Abort
+
+
 @microsalt.command("start-available")
 @DRY_RUN
 @click.pass_context

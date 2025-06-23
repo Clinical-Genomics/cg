@@ -47,8 +47,10 @@ class AnalysisStarterFactory:
         return AnalysisStarter(
             configurator=configurator,
             input_fetcher=input_fetcher,
+            store=self.store,
             submitter=submitter,
             tracker=tracker,
+            workflow=workflow,
         )
 
     def _get_input_fetcher(self, workflow: Workflow) -> InputFetcher:
