@@ -793,6 +793,24 @@ class CaseSampleView(BaseView):
     column_searchable_list = ["case.internal_id", "case.name", "sample.internal_id"]
     create_modal = True
     edit_modal = True
+    form_ajax_refs = {
+        "case": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        },
+        "sample": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        },
+        "mother": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        },
+        "father": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        },
+    }
 
 
 class UserView(BaseView):
