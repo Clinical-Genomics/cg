@@ -48,6 +48,12 @@ class AnalysisAlreadyStoredError(CgError):
     """
 
 
+class AnalysisRunningError(CgError):
+    """
+    Exception raised when trying to start a case which is running in Trailblazer.
+    """
+
+
 class BalsamicStartError(CgError):
     """
     Exception raised when Balsamic fails to start.
