@@ -22,7 +22,9 @@ def upgrade():
         table_name="analysis",
         column=sa.Column("housekeeper_version_id", sa.Integer(), nullable=True),
     )
+    op.create_index("ix_hk_version_id", "analysis", ["housekeeper_version_id"])
 
 
 def downgrade():
+    op.drop_index("ix_hk_version_id", table_name="analysis")
     op.drop_column(table_name="analysis", column_name="housekeeper_version_id")
