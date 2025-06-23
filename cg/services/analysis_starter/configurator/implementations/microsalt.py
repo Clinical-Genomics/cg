@@ -56,13 +56,15 @@ class MicrosaltConfigurator(Configurator):
         )
 
     def _get_fastq_directory(self, case_id: str) -> Path:
-        """This gets the directory in which the pipeline will look for Fastq files.
-        Due to a bug in the pipeline, single sample cases needs a different path."""
+        """
+        Returns the directory in which the pipeline will look for Fastq files
+        depending on whether the case has one or multiple samples.
+        """
         case: Case = self.store.get_case_by_internal_id(case_id)
         if len(case.samples) == 1:
             LOG.debug(
-                f"Case {case_id} contains only a single sample, so nested fastq directory for"
-                f"{case.samples[0].internal_id} is used."
+                f"Case {case_id} contains only a single sample, so the nested fastq directory for"
+                f"{case.samples[0].internal_id} will be used."
             )
             return self.fastq_handler.get_sample_fastq_destination_dir(
                 case=case, sample=case.samples[0]

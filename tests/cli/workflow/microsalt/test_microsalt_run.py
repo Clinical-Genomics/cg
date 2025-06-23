@@ -98,9 +98,7 @@ def test_run_tracks_case(cli_runner: CliRunner, base_context: CGConfig, mocker: 
     mocker.patch.object(Store, "update_case_action")
     mock_case = create_autospec(Case)
     mock_case.data_analysis = Workflow.MICROSALT
-    mock_sample = create_autospec(Sample)
-    mock_sample_two = create_autospec(Sample)
-    mock_case.samples = [mock_sample, mock_sample_two]
+    mock_case.samples = [create_autospec(Sample), create_autospec(Sample)]
     mocker.patch.object(Store, "get_case_by_internal_id", return_value=mock_case)
     mocker.patch.object(Tracker, "ensure_analysis_not_ongoing", return_value=None)
     mocker.patch.object(Path, "exists", return_value=True)
