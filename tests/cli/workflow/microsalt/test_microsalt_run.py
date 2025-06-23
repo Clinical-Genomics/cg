@@ -15,6 +15,7 @@ from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.tracker import Tracker
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 EXIT_SUCCESS = 0
@@ -95,6 +96,10 @@ def test_run_tracks_case(cli_runner: CliRunner, base_context: CGConfig, mocker: 
     # GIVEN that the case is submitted successfully
     mocker.patch.object(Store, "get_case_workflow", return_value=Workflow.MICROSALT)
     mocker.patch.object(Store, "update_case_action")
+    mock_case = create_autospec(Case)
+    mock_case.data_analysis = Workflow.MICROSALT
+    mock_case.samples = [create_autospec(Sample), create_autospec(Sample)]
+    mocker.patch.object(Store, "get_case_by_internal_id", return_value=mock_case)
     mocker.patch.object(Tracker, "ensure_analysis_not_ongoing", return_value=None)
     mocker.patch.object(Path, "exists", return_value=True)
     mocker.patch.object(SubprocessSubmitter, "submit", return_value=None)
