@@ -30,7 +30,14 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
+from cg.constants.constants import (
+    CaseActions,
+    CustomerId,
+    FileFormat,
+    GenomeVersion,
+    SequencingQCStatus,
+    Strandedness,
+)
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AlignmentFileTag
 from cg.constants.priority import SlurmQos
@@ -2652,6 +2659,7 @@ def nallo_context(
         internal_id=case_id_not_enough_reads,
         name=case_id_not_enough_reads,
         data_analysis=Workflow.NALLO,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
 
     sample_not_enough_reads: Sample = helpers.add_sample(
@@ -3062,6 +3070,7 @@ def raredisease_context(
         internal_id=case_id_not_enough_reads,
         name=case_id_not_enough_reads,
         data_analysis=Workflow.RAREDISEASE,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
 
     sample_not_enough_reads: Sample = helpers.add_sample(
@@ -3554,6 +3563,7 @@ def rnafusion_context(
         internal_id=case_id_not_enough_reads,
         name=case_id_not_enough_reads,
         data_analysis=Workflow.RNAFUSION,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
 
     sample_not_enough_reads: Sample = helpers.add_sample(
@@ -3968,6 +3978,7 @@ def tomte_context(
         internal_id=case_id_not_enough_reads,
         name=case_id_not_enough_reads,
         data_analysis=Workflow.TOMTE,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
 
     sample_not_enough_reads: Sample = helpers.add_sample(
@@ -4203,6 +4214,7 @@ def taxprofiler_context(
         internal_id=case_id_not_enough_reads,
         name=case_id_not_enough_reads,
         data_analysis=Workflow.TAXPROFILER,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
 
     sample_not_enough_reads: Sample = helpers.add_sample(
