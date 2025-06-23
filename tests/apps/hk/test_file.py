@@ -343,7 +343,8 @@ def test_check_bundle_files(
     fastq_file: Path,
     bed_file: Path,
 ):
-    """Test that when adding an existing and a new file to a bundle, only the new is returned."""
+    """Test that only files which are not already in a bundle are returned by check_bundle_files."""
+
     # GIVEN a Housekeeper version with a file
     version: Version = populated_housekeeper_api.get_version_by_id(1)
 
