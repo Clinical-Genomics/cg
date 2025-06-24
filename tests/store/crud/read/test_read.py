@@ -236,7 +236,7 @@ def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
 def test_analyses_to_upload_when_no_workflow(helpers, sample_store, timestamp):
     """Test analyses to upload with no workflow specified."""
     # GIVEN a store with one analysis
-    helpers.add_analysis(store=sample_store, completed_at=timestamp)
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, housekeeper_version_id=1234)
 
     # WHEN fetching all analysis that are ready for upload without specifying workflow
     records: list[Analysis] = [
@@ -250,7 +250,12 @@ def test_analyses_to_upload_when_no_workflow(helpers, sample_store, timestamp):
 def test_analyses_to_upload_when_analysis_has_workflow(helpers, sample_store, timestamp):
     """Test analyses to upload to when existing workflow."""
     # GIVEN a store with an analysis that has been run with MIP
-    helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=Workflow.MIP_DNA)
+    helpers.add_analysis(
+        store=sample_store,
+        completed_at=timestamp,
+        workflow=Workflow.MIP_DNA,
+        housekeeper_version_id=1234,
+    )
 
     # WHEN fetching all analyses that are ready for upload and analysed with MIP
     records: list[Analysis] = [

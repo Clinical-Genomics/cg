@@ -83,8 +83,8 @@ def raredisease_delivery_report_store_context(
         completed_at=datetime.now(),
         workflow=Workflow.RAREDISEASE,
         data_delivery=DataDelivery.ANALYSIS_SCOUT,
+        housekeeper_version_id=1234,
     )
-    analysis.housekeeper_version_id = 1234
     base_store.add_item_to_store(analysis)
     base_store.commit_to_store()
     return base_store
@@ -124,8 +124,8 @@ def rnafusion_delivery_report_store_context(
         completed_at=datetime.now(),
         workflow=Workflow.RNAFUSION,
         data_delivery=DataDelivery.ANALYSIS_SCOUT,
+        housekeeper_version_id=1234,
     )
-    analysis.housekeeper_version_id = 1234
     base_store.add_item_to_store(analysis)
     base_store.commit_to_store()
     return base_store

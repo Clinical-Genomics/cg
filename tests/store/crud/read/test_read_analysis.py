@@ -540,8 +540,8 @@ def test_get_cases_for_analysis_filters_out_analysis_older_than_last_sequenced_s
         started_at=timestamp_yesterday,
         completed_at=timestamp_now,
         workflow=Workflow.MIP_DNA,
+        housekeeper_version_id=1234,
     )
-    test_analysis.housekeeper_version_id = 1234
 
     # GIVEN an old completed analysis older than the sample last sequenced
     test_analysis_2: Analysis = helpers.add_analysis(

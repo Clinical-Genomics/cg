@@ -24,6 +24,7 @@ def test_clean_rnafusion_case_directories(
         started_at=parse("2024-06-06"),
         uploaded=parse("2024-06-06"),
         completed_at=parse("2024-06-06"),
+        housekeeper_version_id=1234,
     )
     analysis_to_clean.case = rnafusion_context.status_db.get_cases()[0]
     rnafusion_context.status_db.session.add(analysis_to_clean)
@@ -58,6 +59,7 @@ def test_clean_taxprofiler_case_directories(
         started_at=parse("2024-06-06"),
         uploaded=parse("2024-06-06"),
         completed_at=parse("2024-06-06"),
+        housekeeper_version_id=1234,
     )
     analysis_to_clean.case = taxprofiler_context.status_db.get_cases()[0]
     taxprofiler_context.status_db.session.add(analysis_to_clean)

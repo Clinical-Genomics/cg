@@ -76,9 +76,12 @@ def test_clean_hk_case_files_single_analysis(
     workflow: Workflow = Workflow.MIP_DNA
 
     analysis: Analysis = helpers.add_analysis(
-        store=store, started_at=date_days_ago, completed_at=date_days_ago, workflow=workflow
+        store=store,
+        started_at=date_days_ago,
+        completed_at=date_days_ago,
+        workflow=workflow,
+        housekeeper_version_id=1234,
     )
-    analysis.housekeeper_version_id = 1234
     bundle_name: str = analysis.case.internal_id
 
     # GIVEN a housekeeper api with some files
@@ -116,9 +119,12 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     workflow: Workflow = Workflow.MIP_DNA
 
     analysis: Analysis = helpers.add_analysis(
-        store=store, started_at=date_days_ago, completed_at=date_days_ago, workflow=workflow
+        store=store,
+        started_at=date_days_ago,
+        completed_at=date_days_ago,
+        workflow=workflow,
+        housekeeper_version_id=1234,
     )
-    analysis.housekeeper_version_id = 1234
     bundle_name: str = analysis.case.internal_id
 
     # GIVEN a housekeeper api with some file with protected tags

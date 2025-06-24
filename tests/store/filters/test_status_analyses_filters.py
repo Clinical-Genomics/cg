@@ -79,16 +79,34 @@ def test_filter_completed_analyses(
     """Test filtering of completed analyses."""
 
     # GIVEN a mock analysis
-    analysis: Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
+    analysis: Analysis = helpers.add_analysis(
+        store=base_store, completed_at=timestamp_now, housekeeper_version_id=1234
+    )
 
     # WHEN retrieving the completed analyses
     analyses: Query = filter_completed_analyses(analyses=base_store._get_query(table=Analysis))
 
-    # ASSERT that analyses is a query
+    # THEN analyses is a query
     assert isinstance(analyses, Query)
 
     # THEN the completed analysis should be obtained
     assert analysis in analyses
+
+
+def test_filter_completed_analyses_no_hk_version_id(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+):
+    """Test that an analysis without a housekeeper version id is not considered complete."""
+
+    # GIVEN a mock analysis without a housekeeper version id
+    analysis: Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
+    assert analysis.housekeeper_version_id is None
+
+    # WHEN retrieving the completed analyses
+    analyses: Query = filter_completed_analyses(analyses=base_store._get_query(table=Analysis))
+
+    # THEN the completed analysis should be obtained
+    assert analysis not in analyses
 
 
 def test_filter_filter_uploaded_analyses(
