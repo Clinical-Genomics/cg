@@ -32,7 +32,7 @@ class AnalysisStarter:
         self.workflow = workflow
 
     def start_available(self, limit: int | None = None) -> bool:
-        """Starts available cases. Returns True if all cases started without an error."""
+        """Starts available cases. Returns True if all ready cases started without an error."""
         succeeded = True
         cases: list[Case] = self.store.get_cases_to_analyze(workflow=self.workflow, limit=limit)
         for case in cases:
