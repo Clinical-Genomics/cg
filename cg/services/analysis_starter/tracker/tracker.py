@@ -10,7 +10,7 @@ from cg.constants.constants import CaseActions, CustomerId, Workflow
 from cg.constants.priority import TrailblazerPriority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisType
-from cg.exc import CgError
+from cg.exc import AnalysisRunningError
 from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
@@ -47,7 +47,7 @@ class Tracker(ABC):
 
     def ensure_analysis_not_ongoing(self, case_id: str) -> None:
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id):
-            raise CgError(f"Analysis still ongoing in Trailblazer for case {case_id}")
+            raise AnalysisRunningError(f"Analysis still ongoing in Trailblazer for case {case_id}")
 
     def set_case_as_running(self, case_id: str) -> None:
         self.store.update_case_action(case_internal_id=case_id, action=CaseActions.RUNNING)

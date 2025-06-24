@@ -7,7 +7,7 @@ from cg.apps.environ import environ_email
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import Workflow, WorkflowManager
 from cg.constants.tb import AnalysisStatus, AnalysisType
-from cg.exc import CgError
+from cg.exc import AnalysisRunningError
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
@@ -85,6 +85,6 @@ def test_microsalt_tracker_ongoing_analysis(microsalt_tracker: MicrosaltTracker)
         mock.patch.object(
             TrailblazerAPI, "get_latest_analysis_status", return_value=AnalysisStatus.RUNNING
         ),
-        pytest.raises(CgError),
+        pytest.raises(AnalysisRunningError),
     ):
         microsalt_tracker.ensure_analysis_not_ongoing("case_id")
