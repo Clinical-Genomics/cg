@@ -8,12 +8,7 @@ from typing import Callable, Iterator
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import (
-    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
-    CaseActions,
-    CustomerId,
-    SampleType,
-)
+from cg.constants.constants import DNA_WORKFLOWS_WITH_SCOUT_UPLOAD, CustomerId, SampleType
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
@@ -1106,39 +1101,23 @@ class ReadHandler(BaseHandler):
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
 
-    def _is_case_set_to_analyse_or_not_analyzed(self, case: Case) -> bool:
-        return case.action == CaseActions.ANALYZE or not case.latest_analyzed
-
-    def _is_latest_analysis_done_on_all_sequences(self, case: Case) -> bool:
-        return case.latest_analyzed < case.latest_sequenced
-
-    def _is_case_to_be_analyzed(self, case: Case) -> bool:
-        if not case.latest_sequenced:
-            return False
-        if self._is_case_set_to_analyse_or_not_analyzed(case):
-            return True
-        return bool(self._is_latest_analysis_done_on_all_sequences(case))
-
     def get_cases_to_analyze(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed.
         1. Get cases to be analyzed using BE query
         2. Use the latest analysis for case to determine if the case is to be analyzed"""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.HAS_SEQUENCE,
+            CaseFilter.PASSING_SEQUENCING_QC,
             CaseFilter.WITH_WORKFLOW,
             CaseFilter.FOR_ANALYSIS,
         ]
         cases = apply_case_filter(
-            cases=self.get_cases_with_analyzes(),
+            cases=self._get_case_query_for_analysis_start(),
             filter_functions=case_filter_functions,
             workflow=workflow,
         )
-
-        sorted_cases: list[Case] = list(cases.order_by(Case.ordered_at))
-        cases_to_analyze: list[Case] = [
-            case for case in sorted_cases if self._is_case_to_be_analyzed(case)
-        ]
-        return cases_to_analyze[:limit]
+        sorted_and_truncated: Query = cases.order_by(Case.ordered_at).limit(limit)
+        return sorted_and_truncated.all()
 
     def get_cases_to_compress(self, date_threshold: datetime) -> list[Case]:
         """Return all cases that are ready to be compressed by SPRING."""
