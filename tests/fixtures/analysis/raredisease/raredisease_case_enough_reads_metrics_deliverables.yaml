@@ -1291,7 +1291,7 @@ metrics:
   input: multiqc_data.json
   name: Contamination Status
   step: multiqc
-  value: 'NO'
+  value: 'YES'
 - condition: null
   header: null
   id: ADM1
