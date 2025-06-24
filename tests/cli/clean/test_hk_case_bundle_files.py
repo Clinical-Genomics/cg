@@ -94,7 +94,7 @@ def test_clean_hk_case_files_single_analysis(
     # THEN it should be successful
     assert result.exit_code == 0
     # THEN it should report some files to clean
-    assert "Version found for" in caplog.text
+    assert "Version with id" in caplog.text
     assert "has the tags" in caplog.text
     assert "has no protected tags" in caplog.text
     assert "found on disk" in caplog.text
@@ -139,6 +139,6 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     # THEN it should be successful
     assert result.exit_code == 0
     # THEN it should report some files to clean
-    assert "Version found for" in caplog.text
+    assert "Version with id" in caplog.text
     assert "has the tags" in caplog.text
     assert "has the protected tag(s)" in caplog.text

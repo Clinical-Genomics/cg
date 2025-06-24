@@ -30,5 +30,5 @@ def upload_coverage(context: CGConfig, family_id):
         hk_api=context.housekeeper_api,
         chanjo_api=context.chanjo_api,
     )
-    coverage_data = upload_coverage_api.data(case.latest_analysis)
+    coverage_data = upload_coverage_api.data(case.latest_completed_analysis)
     upload_coverage_api.upload(coverage_data)

@@ -73,11 +73,9 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
 
 def get_analysis_for_delivery_report(case: Case) -> Analysis:
     """Returns the analysis object for the delivery report generation."""
-    analysis: Analysis | None = case.latest_analysis
+    analysis: Analysis | None = case.latest_completed_analysis
     if not analysis:
-        LOG.error(
-            f"Analysis for case {case.internal_id} is not completed or does not have a Housekeeper version. "
-        )
+        LOG.error(f"There is no completed analysis for case {case.internal_id}. ")
         raise click.Abort()
     return analysis
 

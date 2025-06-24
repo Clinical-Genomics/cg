@@ -62,8 +62,8 @@ class ObservationsAPI:
         | RarediseaseObservationsInputFiles
     ):
         """Return input files from a case to upload to Loqusdb."""
-        analysis: Analysis | None = case.latest_analysis
-        if not analysis or not analysis.housekeeper_version_id:
+        analysis: Analysis | None = case.latest_completed_analysis
+        if not analysis:
             raise AnalysisNotCompletedError(f"Case {case.internal_id} has no completed analyses")
         hk_version: Version = self.housekeeper_api.get_version_by_id(
             analysis.housekeeper_version_id
