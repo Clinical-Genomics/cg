@@ -297,6 +297,7 @@ class Analysis(Base):
     case_id: Mapped[int] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
     case: Mapped["Case"] = orm.relationship(back_populates="analyses")
     trailblazer_id: Mapped[int | None]
+    housekeeper_version_id: Mapped[int | None]
 
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
