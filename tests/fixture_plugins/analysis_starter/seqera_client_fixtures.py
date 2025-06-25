@@ -3,7 +3,6 @@ from http import HTTPStatus
 import pytest
 from requests import Response
 
-from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.priority import SlurmQos
 from cg.io.controller import WriteStream
@@ -27,7 +26,6 @@ def seqera_platform_config() -> SeqeraPlatformConfig:
             SlurmQos.HIGH: "high-id",
             SlurmQos.EXPRESS: "express-id",
         },
-        workflow_ids={Workflow.RAREDISEASE: 1},
         workspace_id=1,
     )
 

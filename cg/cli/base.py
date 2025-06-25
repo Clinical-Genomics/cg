@@ -32,8 +32,6 @@ from cg.constants.cli_options import FORCE
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
-from cg.services.analysis_starter.service import AnalysisStarter
 from cg.store.database import (
     create_all_tables,
     drop_all_tables,
@@ -134,26 +132,6 @@ def search(query):
             click.echo(f"  {cmd}")
     else:
         click.echo("No matching commands found.")
-
-
-@base.command("start")
-@click.pass_obj
-@click.argument("case_id")
-def start(context: CGConfig, case_id: str):
-    """Start the analysis for the given case."""
-    starter_factory = AnalysisStarterFactory(context)
-    analysis_starter: AnalysisStarter = starter_factory.get_analysis_starter_for_case(case_id)
-    analysis_starter.start(case_id)
-
-
-@base.command("run")
-@click.pass_obj
-@click.argument("case_id")
-def run(context: CGConfig, case_id: str):
-    """Start the analysis for the given case."""
-    starter_factory = AnalysisStarterFactory(context)
-    analysis_starter: AnalysisStarter = starter_factory.get_analysis_starter_for_case(case_id)
-    analysis_starter.run(case_id)
 
 
 base.add_command(add_cmd)

@@ -22,7 +22,6 @@ from cg.apps.tb import TrailblazerAPI
 from cg.clients.arnold.api import ArnoldAPIClient
 from cg.clients.chanjo2.client import Chanjo2APIClient
 from cg.clients.janus.api import JanusAPIClient
-from cg.constants import Workflow
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.delivery.delivery import DeliveryAPI
@@ -354,7 +353,6 @@ class SeqeraPlatformConfig(BaseModel):
     base_url: str
     bearer_token: str
     compute_environments: dict[SlurmQos, str]
-    workflow_ids: dict[Workflow, int]
     workspace_id: int
 
 

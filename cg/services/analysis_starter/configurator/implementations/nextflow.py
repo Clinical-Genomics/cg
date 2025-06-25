@@ -4,7 +4,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.exc import CaseNotConfiguredError
 from cg.models.cg_config import CommonAppConfig
-from cg.services.analysis_starter.configurator.abstract_model import StartParameters
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
@@ -18,11 +17,6 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.store.store import Store
-
-
-class NextflowStartParameters(StartParameters):
-    revision: str | None = None
-    stub_run: bool = False
 
 
 class NextflowConfigurator(Configurator):
@@ -100,8 +94,7 @@ class NextflowConfigurator(Configurator):
             work_dir=self._get_work_dir(case_id).as_posix(),
             workflow=self.store.get_case_workflow(case_id),
         )
-        overridden_parameters = NextflowStartParameters.model_validate(flags)
-        return config.model_copy(update=overridden_parameters.model_dump(exclude_none=True))
+        return config.model_copy(update=flags)
 
     def _get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""

@@ -2,7 +2,6 @@ import logging
 
 import requests
 
-from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
 from cg.models.cg_config import SeqeraPlatformConfig
 from cg.services.analysis_starter.submitters.seqera_platform.dtos import WorkflowLaunchRequest
@@ -16,7 +15,6 @@ class SeqeraPlatformClient:
         self.bearer_token: str = config.bearer_token
         self.auth_headers: dict = {"Authorization": f"Bearer {self.bearer_token}"}
         self.compute_environment_ids: dict[SlurmQos, str] = config.compute_environments
-        self.workflow_ids: dict[Workflow, int] = config.workflow_ids
         self.workspace_id: int = config.workspace_id
 
     def run_case(self, request: WorkflowLaunchRequest) -> str:
