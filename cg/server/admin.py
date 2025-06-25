@@ -239,7 +239,7 @@ class ApplicationView(BaseView):
         "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
         "sample_concentration_maximum_cfdna": view_sample_concentration_maximum_cfdna,
     }
-    column_filters = ["prep_category", "is_accredited"]
+    column_filters = ["prep_category", "is_accredited", "is_archived"]
     column_searchable_list = ["tag", "prep_category"]
     form_excluded_columns = ["category", "versions", "order_type_applications"]
     form_extra_fields = {
