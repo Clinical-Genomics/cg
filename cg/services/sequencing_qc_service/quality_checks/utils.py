@@ -152,7 +152,7 @@ def is_sample_express_priority(sample: Sample) -> bool:
 
 def priority_based_check(case: Case) -> bool:
     """
-    Uses the priority of the case which rule to apply for the sequencing QC check.
+    Uses the priority of the case to  decide which rule to apply for the sequencing QC check.
     NOTE: this is and should only be used for microSALT cases.
     """
     if case.priority == Priority.research:

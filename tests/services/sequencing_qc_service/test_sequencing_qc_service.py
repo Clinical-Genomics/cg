@@ -9,22 +9,24 @@ def test_case_pass_sequencing_qc_microsalt_prio(base_store: Store, helpers: Stor
     """Test that a microSALT priority case with passes sequencing QC when only one sample has data."""
     # GIVEN a microSALT priority case with two samples
     case: Case = helpers.add_case(
-        base_store,
+        store=base_store,
         data_analysis="microsalt",
         priority="priority",
         aggregated_sequencing_qc=SequencingQCStatus.PENDING,
     )
 
     # GIVEN one sample has data and one does not
-    sequenced_sample: Sample = helpers.add_sample(base_store, reads=50000000)
-    non_sequenced_sample: Sample = helpers.add_sample(base_store, reads=0)
-    helpers.relate_samples(base_store, case, samples=[sequenced_sample, non_sequenced_sample])
+    sequenced_sample: Sample = helpers.add_sample(store=base_store, reads=50000000)
+    non_sequenced_sample: Sample = helpers.add_sample(store=base_store, reads=0)
+    helpers.relate_samples(
+        base_store=base_store, case=case, samples=[sequenced_sample, non_sequenced_sample]
+    )
 
     # WHEN running the sequencing QC
-    service = SequencingQCService(store=base_store)
+    service = SequencingQCService(base_store)
     passes_qc: bool = service.case_pass_sequencing_qc(case)
 
-    # THEN the case should pass QC
+    # THEN the case should pass
     assert passes_qc
 
 
@@ -32,20 +34,22 @@ def test_case_pass_sequencing_qc_microsalt_research(base_store: Store, helpers: 
     """Test that a microSALT research case does not pass sequencing QC when only one sample has data."""
     # GIVEN a microSALT research case with two samples
     case: Case = helpers.add_case(
-        base_store,
+        store=base_store,
         data_analysis="microsalt",
         priority="research",
         aggregated_sequencing_qc=SequencingQCStatus.PENDING,
     )
 
     # GIVEN one sample has data and one does not
-    sequenced_sample: Sample = helpers.add_sample(base_store, reads=50000000)
-    non_sequenced_sample: Sample = helpers.add_sample(base_store, reads=0)
-    helpers.relate_samples(base_store, case, samples=[sequenced_sample, non_sequenced_sample])
+    sequenced_sample: Sample = helpers.add_sample(store=base_store, reads=50000000)
+    non_sequenced_sample: Sample = helpers.add_sample(store=base_store, reads=0)
+    helpers.relate_samples(
+        base_store=base_store, case=case, samples=[sequenced_sample, non_sequenced_sample]
+    )
 
     # WHEN running the sequencing QC
-    service = SequencingQCService(store=base_store)
+    service = SequencingQCService(base_store)
     passes_qc: bool = service.case_pass_sequencing_qc(case)
 
-    # THEN the case should not pass QC
+    # THEN the case should not pass
     assert not passes_qc
