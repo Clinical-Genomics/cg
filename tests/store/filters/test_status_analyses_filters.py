@@ -5,12 +5,13 @@ from sqlalchemy.orm import Query
 from cg.constants.constants import Workflow
 from cg.store.filters.status_analysis_filters import (
     filter_analyses_by_case_entry_id,
-    filter_analyses_by_started_at,
+    filter_analyses_by_completed_at,
     filter_analyses_not_cleaned,
     filter_analyses_started_before,
     filter_analyses_with_delivery_report,
     filter_analyses_with_workflow,
     filter_analyses_without_delivery_report,
+    filter_analysis_by_entry_id,
     filter_completed_analyses,
     filter_not_uploaded_analyses,
     filter_report_analyses_by_workflow,
@@ -18,7 +19,6 @@ from cg.store.filters.status_analysis_filters import (
     filter_valid_analyses_in_production,
     order_analyses_by_completed_at_asc,
     order_analyses_by_uploaded_at_asc,
-    filter_analysis_by_entry_id,
 )
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
@@ -301,30 +301,30 @@ def test_filter_analysis_not_cleaned(
     assert analysis_cleaned not in analyses
 
 
-def test_filter_analyses_by_started_at(
+def test_filter_analyses_by_completed_at(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
 ):
-    """Test filtering of analyses by started at."""
+    """Test filtering of analyses by completed at."""
 
     # GIVEN a set of mock analyses
-    analysis_started_now: Analysis = helpers.add_analysis(
-        store=base_store, started_at=timestamp_now
+    analysis_completed_now: Analysis = helpers.add_analysis(
+        store=base_store, completed_at=timestamp_now
     )
-    analysis_started_old: Analysis = helpers.add_analysis(
-        store=base_store, case=analysis_started_now.case, started_at=timestamp_yesterday
+    analysis_completed_old: Analysis = helpers.add_analysis(
+        store=base_store, case=analysis_completed_now.case, completed_at=timestamp_yesterday
     )
 
-    # WHEN filtering the analyses by started_at
-    analyses: Query = filter_analyses_by_started_at(
-        analyses=base_store._get_query(table=Analysis), started_at_date=timestamp_yesterday
+    # WHEN filtering the analyses by completed_at
+    analyses: Query = filter_analyses_by_completed_at(
+        analyses=base_store._get_query(table=Analysis), completed_at_date=timestamp_yesterday
     )
 
     # ASSERT that analyses is a query
     assert isinstance(analyses, Query)
 
-    # THEN only the analysis that have been started after the given date should be retrieved
-    assert analysis_started_now not in analyses
-    assert analysis_started_old in analyses
+    # THEN only the analysis that have been completed after the given date should be retrieved
+    assert analysis_completed_now not in analyses
+    assert analysis_completed_old in analyses
 
 
 def test_filter_by_analysis_entry_id(base_store: Store, helpers: StoreHelpers):

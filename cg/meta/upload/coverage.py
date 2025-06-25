@@ -23,8 +23,7 @@ class UploadCoverageApi:
         family_id = analysis.case.internal_id
         data = {"family": family_id, "family_name": analysis.case.name, "samples": []}
         for link_obj in analysis.case.links:
-            analysis_date = analysis.started_at or analysis.completed_at
-            hk_version = self.hk_api.version(family_id, analysis_date)
+            hk_version = self.hk_api.version(family_id, analysis.completed_at)
             hk_coverage = self.hk_api.files(
                 version=hk_version.id, tags=[link_obj.sample.internal_id, "coverage"]
             ).first()

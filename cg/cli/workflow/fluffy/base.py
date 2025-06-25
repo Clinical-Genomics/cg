@@ -76,14 +76,12 @@ def run(
     )
     if dry_run:
         return
-    # Submit analysis for tracking in Trailblazer
+
     try:
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
+        analysis_api.on_analysis_started(case_id)
         LOG.info(f"Submitted case {case_id} to Trailblazer!")
     except Exception as error:
-        LOG.warning(f"Unable to submit job file to Trailblazer, raised error: {error}")
-
-    analysis_api.set_statusdb_action(case_id=case_id, action="running")
+        LOG.error(f"Error trying to update analysis for case {case_id}: {error}")
 
 
 @fluffy.command()
@@ -130,7 +128,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     analysis_api: FluffyAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case in analysis_api.get_cases_ready_for_analysis():
+    for case in analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:

@@ -1,11 +1,15 @@
 import logging
 from pathlib import Path
+from unittest.mock import ANY
 
+import pytest
 from click.testing import CliRunner
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
+from cg.constants.constants import SequencingQCStatus
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
@@ -51,12 +55,11 @@ def test_start(
     assert case_id in caplog.text
 
 
+@pytest.mark.usefixtures("mock_config", "mock_deliverable")
 def test_store(
     cli_runner: CliRunner,
     balsamic_context: CGConfig,
     real_housekeeper_api,
-    mock_config,
-    mock_deliverable,
     caplog,
     hermes_deliverables,
     mocker,
@@ -67,6 +70,9 @@ def test_store(
     # GIVEN case-id for which we created a config file, deliverables file, and analysis_finish file
     case_id = "balsamic_case_wgs_single"
 
+    # Set up a mock in the AnalysisAPI so that we can confirm it was called
+    mocker.patch.object(AnalysisAPI, "update_analysis_as_completed_statusdb")
+
     # Set Housekeeper to an empty real Housekeeper store
     balsamic_context.housekeeper_api_ = real_housekeeper_api
     balsamic_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
@@ -74,7 +80,7 @@ def test_store(
     # Make sure the bundle was not present in the store
     assert not balsamic_context.housekeeper_api.bundle(case_id)
 
-    # Make sure analysis not already stored in ClinicalDB
+    # Make sure analysis not already stored in StatusDB
     assert not balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
     # GIVEN a HermesAPI returning a deliverables output
@@ -87,9 +93,12 @@ def test_store(
     # THEN bundle should be successfully added to HK and STATUS
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
-    assert "Analysis successfully stored in StatusDB" in caplog.text
-    assert balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
     assert balsamic_context.housekeeper_api.bundle(case_id)
+
+    # THEN the analysis was updated in status DB
+    AnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
+        case_id=case_id, comment=ANY, dry_run=False, force=False
+    )
 
 
 def test_start_available(
@@ -151,12 +160,10 @@ def test_start_available_with_limit(
     case: Case = balsamic_context.status_db.get_case_by_internal_id(
         internal_id="balsamic_case_tgs_single"
     )
-    for sample in case.samples:
-        sample.reads = sample.expected_reads_for_sample
-    balsamic_context.status_db.commit_to_store()
+    case.aggregated_sequencing_qc = SequencingQCStatus.PASSED
 
     # GIVEN that there are now 2 cases that are ready for analysis
-    assert len(balsamic_analysis_api.get_cases_ready_for_analysis()) == 2
+    assert len(balsamic_analysis_api.get_cases_to_analyze()) == 2
 
     # GIVEN that decompression is not needed
     mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression", return_value=None)
@@ -171,16 +178,14 @@ def test_start_available_with_limit(
     assert caplog.text.count("Starting analysis for") == 1
 
 
+@pytest.mark.usefixtures("mock_config", "mock_deliverable", "mock_analysis_illumina_run")
 def test_store_available(
     cli_runner: CliRunner,
     balsamic_context: CGConfig,
     real_housekeeper_api,
-    mock_config,
-    mock_deliverable,
     caplog,
     mocker,
     hermes_deliverables,
-    mock_analysis_illumina_run,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
     Test that sore-available picks up eligible cases and does not pick up ineligible ones"""
@@ -191,6 +196,9 @@ def test_store_available(
 
     # GIVEN CASE ID where analysis finish is not mocked
     case_id_fail = "balsamic_case_wgs_paired"
+
+    # Set up a mock in the AnalysisAPI so that we can confirm it was called
+    mocker.patch.object(AnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # Ensure the config is mocked for fail case to run compound command
     Path.mkdir(
@@ -234,8 +242,10 @@ def test_store_available(
     # THEN case id with analysis_finish gets picked up
     assert case_id_success in caplog.text
 
-    # THEN case has analyses
-    assert balsamic_context.status_db.get_case_by_internal_id(case_id_success).analyses
+    # THEN the analysis of the successful case was updated in status DB
+    AnalysisAPI.update_analysis_as_completed_statusdb.assert_called_once_with(
+        case_id=case_id_success, comment=ANY, dry_run=False, force=False
+    )
 
     # THEN bundle can be found in Housekeeper
     assert balsamic_context.housekeeper_api.bundle(case_id_success)

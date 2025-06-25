@@ -139,11 +139,10 @@ def run(
         return
 
     try:
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-        analysis_api.set_statusdb_action(case_id=case_id, action="running")
+        analysis_api.on_analysis_started(case_id=case_id)
         LOG.info(f"{analysis_api.workflow} run started!")
-    except CgError as error:
-        LOG.error(error)
+    except Exception as error:
+        LOG.error(f"Database error, unable to update analysis for case {case_id}: {error}")
         raise click.Abort
 
 
@@ -207,7 +206,7 @@ def start_available(context: click.Context, dry_run: bool = False, limit: int | 
     analysis_api: MipAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case in analysis_api.get_cases_ready_for_analysis(limit=limit):
+    for case in analysis_api.get_cases_to_analyze(limit=limit):
         try:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:

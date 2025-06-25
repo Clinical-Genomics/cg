@@ -41,6 +41,7 @@ from cg.models.delivery_report.validators import (
 )
 from cg.models.orders.constants import OrderType
 from cg.store.models import Analysis, Case, Sample
+from cg.store.store import Store
 
 
 def test_get_report_string():
@@ -259,15 +260,14 @@ def test_check_supported_workflow_mismatch_between_ordered_and_started(
 ):
     """Test validation error if a customer requested workflow does not match the data analysis."""
 
-    # GIVEN a delivery report API
+    # GIVEN a delivery report API with a store
+    store: Store = raredisease_delivery_report_api.analysis_api.status_db
 
     # GIVEN a case object that has been ordered with Raredisease workflow
-    case: Case = raredisease_delivery_report_api.analysis_api.status_db.get_case_by_internal_id(
-        raredisease_case_id
-    )
+    case: Case = store.get_case_by_internal_id(raredisease_case_id)
 
     # GIVEN an analysis that has been started with the Rnafusion workflow
-    analysis: Analysis = case.analyses[0]
+    analysis: Analysis = store.get_latest_completed_analysis_for_case(raredisease_case_id)
     analysis.workflow = Workflow.RNAFUSION
 
     # WHEN retrieving case analysis data
@@ -288,16 +288,15 @@ def test_check_supported_workflow_not_delivery_report_supported(
 ):
     """Test validation error if a customer requested workflow does not match the data analysis."""
 
-    # GIVEN a delivery report API
+    # GIVEN a delivery report API with a store
+    store: Store = raredisease_delivery_report_api.analysis_api.status_db
 
     # GIVEN a FLUFFY case object
-    case: Case = raredisease_delivery_report_api.analysis_api.status_db.get_case_by_internal_id(
-        raredisease_case_id
-    )
+    case: Case = store.get_case_by_internal_id(raredisease_case_id)
     case.data_analysis = Workflow.FLUFFY
 
     # GIVEN an analysis that has been started with the FLUFFY workflow
-    analysis: Analysis = case.analyses[0]
+    analysis: Analysis = store.get_latest_completed_analysis_for_case(raredisease_case_id)
     analysis.workflow = Workflow.FLUFFY
 
     # WHEN retrieving case analysis data

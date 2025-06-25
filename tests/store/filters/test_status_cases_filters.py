@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Query
 
@@ -397,14 +397,14 @@ def test_filter_cases_for_analysis_multiple_analyses_and_one_analysis_is_older_t
     """Test that a case is returned if case action is None and when there are miltiple analyses where one analysis is older than a sample is last sequenced."""
 
     # GIVEN a case
-    test_case: Case = helpers.add_case(base_store)
+    test_case: Case = helpers.add_case(base_store, data_analysis=Workflow.MICROSALT)
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_now)
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=test_case, completed_at=timestamp_now, workflow=Workflow.MIP_DNA
+        store=base_store, case=test_case, completed_at=timestamp_now, workflow=Workflow.MICROSALT
     )
 
     # GIVEN a completed analysis older than the sample last sequenced
@@ -413,7 +413,7 @@ def test_filter_cases_for_analysis_multiple_analyses_and_one_analysis_is_older_t
         case=test_case,
         started_at=timestamp_yesterday,
         completed_at=timestamp_yesterday,
-        workflow=Workflow.MIP_DNA,
+        workflow=Workflow.MICROSALT,
     )
     # GIVEN an old analysis
     test_analysis_2.created_at = timestamp_yesterday
@@ -450,7 +450,7 @@ def test_filter_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_old
     """Test that a case is returned if case action is None and when there are miltiple analyses where one analysis is older than a sample is last sequenced."""
 
     # GIVEN a case
-    test_case: Case = helpers.add_case(base_store)
+    test_case: Case = helpers.add_case(base_store, data_analysis=Workflow.MICROSALT)
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(
@@ -463,7 +463,7 @@ def test_filter_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_old
         case=test_case,
         started_at=timestamp_yesterday,
         completed_at=timestamp_now,
-        workflow=Workflow.MIP_DNA,
+        workflow=Workflow.MICROSALT,
     )
 
     # GIVEN a completed analysis older than the sample last sequenced
@@ -472,7 +472,7 @@ def test_filter_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_old
         case=test_case,
         started_at=timestamp_yesterday,
         completed_at=timestamp_yesterday,
-        workflow=Workflow.MIP_DNA,
+        workflow=Workflow.MICROSALT,
     )
     # GIVEN an old analysis
     test_analysis_2.created_at = old_timestamp
@@ -545,7 +545,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
     )
 
     # GIVEN a completed analysis
-    test_analysis: Analysis = helpers.add_analysis(store=base_store, workflow=Workflow.MIP_DNA)
+    test_analysis: Analysis = helpers.add_analysis(store=base_store, workflow=Workflow.MICROSALT)
 
     # Given an action set to None
     test_analysis.case.action = None
@@ -604,6 +604,148 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
     assert isinstance(cases, Query)
 
     # THEN no cases should be returned
+    assert not cases.all()
+
+
+def test_filter_cases_for_analysis_top_up(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
+):
+    """
+    Test that a case is returned when there is a case with an action set to top-up and has new
+    sequencing data.
+    """
+    # GIVEN a sampled sequenced just now
+    test_sample: Sample = helpers.add_sample(
+        store=base_store, is_external=False, last_sequenced_at=timestamp_now
+    )
+
+    # GIVEN a case with action set to "top-up"
+    test_case: Case = helpers.add_case(
+        store=base_store, name="test_case", action=CaseActions.TOP_UP
+    )
+
+    # GIVEN that the sample and the case are related
+    link = base_store.relate_sample(
+        case=test_case, sample=test_sample, status=PhenotypeStatus.AFFECTED
+    )
+
+    # GIVEN an analysis for the case completed yesterday
+    test_analysis: Analysis = helpers.add_analysis(
+        store=base_store,
+        workflow=Workflow.MIP_DNA,
+        case=test_case,
+    )
+    test_analysis.created_at = timestamp_yesterday
+    base_store.session.add(link)
+    base_store.session.add(test_analysis)
+
+    # GIVEN a cases Query
+    cases: Query = base_store._get_case_query_for_analysis_start()
+
+    # WHEN getting cases to analyze
+    cases: Query = filter_cases_for_analysis(cases=cases)
+
+    # THEN assert that cases is a query
+    assert isinstance(cases, Query)
+
+    # THEN assert that query is not empty
+    assert isinstance(cases.first(), Case)
+
+    # THEN cases should contain the test case
+    assert cases.first() == test_case
+
+
+def test_filter_cases_for_analysis_top_up_multiple_analyses(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
+):
+    """
+    Test that only the latest analysis is considered for the top-up case.
+    """
+    # GIVEN a sampled sequenced twelve hours ago
+    test_sample: Sample = helpers.add_sample(
+        store=base_store,
+        is_external=False,
+        last_sequenced_at=timestamp_now - timedelta(hours=12),
+    )
+
+    # GIVEN a case with action set to "top-up"
+    test_case: Case = helpers.add_case(
+        store=base_store, name="test_case", action=CaseActions.TOP_UP
+    )
+
+    # GIVEN that the sample and the case are related
+    helpers.relate_samples(base_store=base_store, case=test_case, samples=[test_sample])
+
+    # GIVEN an analysis for the case completed yesterday
+    test_analysis: Analysis = helpers.add_analysis(
+        store=base_store,
+        created_at=timestamp_yesterday,
+        workflow=Workflow.MIP_DNA,
+        case=test_case,
+    )
+    test_analysis.created_at = timestamp_yesterday
+
+    # GIVEN an analysis for the case completed now
+    helpers.add_analysis(
+        store=base_store,
+        created_at=timestamp_now,
+        workflow=Workflow.MIP_DNA,
+        case=test_case,
+    )
+
+    # GIVEN a cases Query
+    cases: Query = base_store._get_case_query_for_analysis_start()
+
+    # WHEN getting cases to analyze
+    cases: Query = filter_cases_for_analysis(cases=cases)
+
+    # THEN assert that query is empty
+    assert len(cases.all()) == 0
+
+
+def test_filter_cases_for_analysis_top_up_when_no_new_sequence_data(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
+):
+    """
+    Test that a case is not returned when there is a case with an action set to top-up and has no new
+    sequencing data.
+    """
+    # GIVEN a sampled sequenced yesterday
+    test_sample: Sample = helpers.add_sample(
+        store=base_store, is_external=False, last_sequenced_at=timestamp_yesterday
+    )
+
+    # GIVEN a case with action set to "top-up"
+    test_case: Case = helpers.add_case(
+        store=base_store, name="test_case", action=CaseActions.TOP_UP
+    )
+
+    # GIVEN that the sample and the case are related
+    link = base_store.relate_sample(
+        case=test_case, sample=test_sample, status=PhenotypeStatus.AFFECTED
+    )
+
+    # GIVEN an analysis for the case completed now
+    test_analysis: Analysis = helpers.add_analysis(
+        store=base_store,
+        workflow=Workflow.MIP_DNA,
+        case=test_case,
+    )
+    test_analysis.created_at = timestamp_now
+
+    base_store.session.add(link)
+    base_store.session.add(test_analysis)
+
+    # GIVEN a cases Query
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+
+    # WHEN getting cases to analyze
+    cases: Query = filter_cases_for_analysis(cases=cases)
+
+    # THEN assert that cases is a query
+    assert isinstance(cases, Query)
+
+    # THEN assert that query is empty
     assert not cases.all()
 
 

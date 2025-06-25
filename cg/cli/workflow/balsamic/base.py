@@ -116,11 +116,7 @@ def run(
         )
         if dry_run:
             return
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-        analysis_api.set_statusdb_action(case_id=case_id, action="running")
-    except CgError as error:
-        LOG.error(f"Could not run analysis: {error}")
-        raise click.Abort()
+        analysis_api.on_analysis_started(case_id)
     except Exception as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort()
@@ -169,7 +165,7 @@ def store_housekeeper(
         analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
         analysis_api.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
-        analysis_api.upload_bundle_statusdb(
+        analysis_api.update_analysis_as_completed_statusdb(
             case_id=case_id, comment=comment, dry_run=dry_run, force=force
         )
         analysis_api.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
@@ -246,7 +242,7 @@ def start_available(context: click.Context, dry_run: bool = False, limit: int | 
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case in analysis_api.get_cases_ready_for_analysis(limit=limit):
+    for case in analysis_api.get_cases_to_analyze(limit=limit):
         try:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
@@ -283,13 +279,13 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
-    exit_code: int = EXIT_SUCCESS
+    was_successful: bool = True
     for case_obj in analysis_api.get_cases_to_store():
         LOG.info(f"Storing deliverables for {case_obj.internal_id}")
         try:
             context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
         except Exception as exception_object:
             LOG.error(f"Error storing {case_obj.internal_id}: {exception_object}")
-            exit_code = EXIT_FAIL
-    if exit_code:
-        raise click.Abort
+            was_successful = False
+    if not was_successful:
+        raise click.Abort()
