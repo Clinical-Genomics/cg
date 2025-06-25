@@ -34,6 +34,7 @@ class LoqusdbAPI:
         hard_threshold: float | None = None,
         soft_threshold: float | None = None,
         snv_gq_only: bool | None = False,
+        loqusdb_options: list[str] | None = None,
     ) -> dict[str, int]:
         """Add observations to Loqusdb from VCF files."""
         load_params = {
@@ -47,7 +48,9 @@ class LoqusdbAPI:
             "--hard-threshold": str(hard_threshold) if hard_threshold else None,
             "--soft-threshold": str(soft_threshold) if soft_threshold else None,
         }
-        load_call_params: list[str] = ["load"] + get_list_from_dictionary(load_params)
+        load_call_params: list[str] = (
+            (loqusdb_options or []) + ["load"] + get_list_from_dictionary(load_params)
+        )
         load_call_params.append("--qual-gq") if qual_gq else None
         load_call_params.append("--snv-gq-only") if snv_gq_only else None
         self.process.run_command(parameters=load_call_params)
