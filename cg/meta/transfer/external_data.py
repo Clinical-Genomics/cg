@@ -11,7 +11,10 @@ from cg.meta.meta import MetaAPI
 from cg.meta.transfer.utils import are_all_fastq_valid
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
-from cg.services.deliver_files.rsync.sbatch import ERROR_RSYNC_FUNCTION, RSYNC_CONTENTS_COMMAND
+from cg.services.deliver_files.rsync.sbatch_commands import (
+    ERROR_RSYNC_FUNCTION,
+    RSYNC_CONTENTS_COMMAND,
+)
 from cg.store.models import Case, Customer, Sample
 from cg.utils.files import get_files_matching_pattern
 
