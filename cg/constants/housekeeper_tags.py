@@ -153,13 +153,14 @@ WORKFLOW_PROTECTED_TAGS = {
     Workflow.BALSAMIC_UMI: BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
     Workflow.FLUFFY: ["NIPT_csv", "MultiQC"],
     Workflow.MICROSALT: [
-        ["microsalt-log"],
+        ["assembly"],
         ["config"],
+        ["microsalt-log"],
+        ["microsalt-config"],
+        ["microsalt-version"],
         ["qc-report", "visualization"],
         ["typing-report", "visualization"],
         ["typing-report", "qc-metrics"],
-        ["microsalt-config"],
-        ["assembly"],
     ],
     Workflow.MIP_DNA: [
         ["vcf-snv-clinical"],

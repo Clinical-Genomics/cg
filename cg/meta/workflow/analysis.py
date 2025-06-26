@@ -25,10 +25,9 @@ from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
 from cg.constants.priority import TrailblazerPriority
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.constants.tb import AnalysisStatus, AnalysisType
+from cg.constants.tb import AnalysisType
 from cg.exc import (
     AnalysisAlreadyStoredError,
-    AnalysisDoesNotExistError,
     AnalysisNotReadyError,
     BundleAlreadyAddedError,
     CaseNotFoundError,
@@ -43,7 +42,6 @@ from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.services.sequencing_qc_service import SequencingQCService
 from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
@@ -116,36 +114,6 @@ class AnalysisAPI(MetaAPI):
         if not self.get_case_path(case_id=case_id).exists():
             LOG.info(f"No working directory for {case_id} exists")
             raise FileNotFoundError(f"No working directory for {case_id} exists")
-
-    def is_case_ready_for_analysis(self, case: Case) -> bool:
-        """Check if case is ready for analysis. If case passes sequencing QC and is set to analyze,
-        or has not been analyzed yet, or the latest analysis failed, the case is ready for analysis.
-        """
-        case_passed_sequencing_qc: bool = SequencingQCService.case_pass_sequencing_qc(case)
-        case_is_set_to_analyze: bool = case.action == CaseActions.ANALYZE
-        case_has_not_been_analyzed: bool = not case.latest_analyzed
-        case_latest_analysis_failed: bool = (
-            self.trailblazer_api.get_latest_analysis_status(case_id=case.internal_id)
-            == AnalysisStatus.FAILED
-        )
-        return case_passed_sequencing_qc and (
-            case_is_set_to_analyze or case_has_not_been_analyzed or case_latest_analysis_failed
-        )
-
-    def get_cases_ready_for_analysis(self) -> list[Case]:
-        """
-        Return cases that are ready for analysis. The case is ready if it passes the logic in the
-        get_cases_to_analyze method, and it has passed the pre-analysis quality check.
-        """
-        cases_to_analyse: list[Case] = self.get_cases_to_analyze()
-
-        cases_passing_quality_check: list[Case] = []
-        for case in cases_to_analyse:
-            if SequencingQCService.case_pass_sequencing_qc(case):
-                cases_passing_quality_check.append(case)
-                LOG.debug(f"Going to start analysis for case {case.internal_id}.")
-
-        return cases_passing_quality_check
 
     def get_slurm_qos_for_case(self, case_id: str) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
@@ -298,10 +266,7 @@ class AnalysisAPI(MetaAPI):
             AnalysisAlreadyStoredError: If the analysis is already marked as completed.
         """
         LOG.info(f"Marking analysis as completed in StatusDB for {case_id}")
-        case: Case = self.status_db.get_case_by_internal_id(case_id)
-        analysis: Analysis | None = case.analyses[0] if case.analyses else None
-        if not analysis:
-            raise AnalysisDoesNotExistError(f"No analysis found for case {case_id}")
+        analysis: Analysis = self.status_db.get_latest_started_analysis_for_case(case_id)
         if not force and analysis.completed_at:
             raise AnalysisAlreadyStoredError(
                 f"Analysis for case {case_id} already set as completed at {analysis.completed_at}"
@@ -310,7 +275,7 @@ class AnalysisAPI(MetaAPI):
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
         self.status_db.update_analysis_completed_at(
-            analysis_id=analysis.id, completed_at=datetime.now()
+            analysis_id=analysis.id, completed_at=self.get_bundle_created_date(case_id)
         )
         self.status_db.update_analysis_comment(analysis_id=analysis.id, comment=comment)
 
@@ -411,8 +376,8 @@ class AnalysisAPI(MetaAPI):
         )
         return analyses_to_clean
 
-    def get_cases_to_analyze(self) -> list[Case]:
-        return self.status_db.get_cases_to_analyze(workflow=self.workflow)
+    def get_cases_to_analyze(self, limit: int = None) -> list[Case]:
+        return self.status_db.get_cases_to_analyze(limit=limit, workflow=self.workflow)
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,

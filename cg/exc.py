@@ -48,6 +48,12 @@ class AnalysisAlreadyStoredError(CgError):
     """
 
 
+class AnalysisRunningError(CgError):
+    """
+    Exception raised when trying to start a case which is running in Trailblazer.
+    """
+
+
 class BalsamicStartError(CgError):
     """
     Exception raised when Balsamic fails to start.
@@ -92,6 +98,10 @@ class IlluminaCleanRunError(CgError):
 
 class DsmcAlreadyRunningError(CgError):
     """Raised when there is already a DCms process running on the system."""
+
+
+class DecompressionCouldNotStartError(CgError):
+    """Raised when decompression could not be started."""
 
 
 class DeliveryReportError(CgError):
@@ -312,3 +322,7 @@ class Chanjo2RequestError(Chanjo2APIClientError):
 
 class Chanjo2ResponseError(Chanjo2APIClientError):
     """Exception raised when the response from Chanjo2 API client fails validation."""
+
+
+class CaseNotConfiguredError(CgError):
+    """Exception raised when a case is being run without a configuration."""

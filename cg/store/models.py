@@ -268,7 +268,7 @@ class Analysis(Base):
     workflow: Mapped[str | None] = mapped_column(
         types.Enum(*(workflow.value for workflow in Workflow))
     )
-    workflow_version: Mapped[Str32 | None]
+    workflow_version: Mapped[Str64 | None]
     started_at: Mapped[datetime | None]
     completed_at: Mapped[datetime | None]
     delivery_report_created_at: Mapped[datetime | None]
@@ -282,6 +282,7 @@ class Analysis(Base):
     case_id: Mapped[int] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
     case: Mapped["Case"] = orm.relationship(back_populates="analyses")
     trailblazer_id: Mapped[int | None]
+    housekeeper_version_id: Mapped[int | None]
 
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
@@ -440,7 +441,7 @@ class Case(Base, PriorityMixin):
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped["Customer"] = orm.relationship(foreign_keys=[customer_id])
-    data_analysis: Mapped[str | None] = mapped_column(
+    data_analysis: Mapped[str] = mapped_column(
         types.Enum(*(workflow.value for workflow in Workflow))
     )
     data_delivery: Mapped[str | None] = mapped_column(
@@ -464,7 +465,7 @@ class Case(Base, PriorityMixin):
     tickets: Mapped[VarChar128 | None]
 
     analyses: Mapped[list[Analysis]] = orm.relationship(
-        back_populates="case", order_by="-Analysis.completed_at"
+        back_populates="case", order_by="-Analysis.created_at"
     )
     links: Mapped[list["CaseSample"]] = orm.relationship(back_populates="case")
     orders: Mapped[list["Order"]] = orm.relationship(secondary=order_case, back_populates="cases")
@@ -502,17 +503,13 @@ class Case(Base, PriorityMixin):
 
     @property
     def latest_analyzed(self) -> datetime | None:
-        return self.analyses[0].completed_at if self.analyses else None
-
-    @property
-    def latest_sequenced(self) -> datetime | None:
-        sequenced_dates = []
-        for link in self.links:
-            if link.sample.application_version.application.is_external:
-                sequenced_dates.append(link.sample.ordered_at)
-            elif link.sample.last_sequenced_at:
-                sequenced_dates.append(link.sample.last_sequenced_at)
-        return max(sequenced_dates, default=None)
+        valid_analyses: list[Analysis] = [a for a in self.analyses if a.completed_at is not None]
+        if not valid_analyses:
+            return None
+        sorted_analyses: list[Analysis] = sorted(
+            valid_analyses, key=lambda analysis: analysis.completed_at, reverse=True
+        )
+        return sorted_analyses[0].completed_at
 
     def are_all_samples_control(self) -> bool:
         """Return True if all case samples are controls."""
@@ -887,6 +884,9 @@ class Order(Base):
     """Model for storing orders."""
 
     __tablename__ = "order"
+
+    def __str__(self) -> str:
+        return f"{self.id} (ticket {self.ticket_id})"
 
     id: Mapped[PrimaryKeyInt]
     cases: Mapped[list[Case]] = orm.relationship(secondary=order_case, back_populates="orders")

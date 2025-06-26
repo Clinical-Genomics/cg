@@ -34,8 +34,6 @@ CLI_OPTIONS = {
 }
 LOG = logging.getLogger(__name__)
 
-MAX_CASES_TO_START_IN_50_MINUTES = 33
-
 
 class MipAnalysisAPI(AnalysisAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and
@@ -248,22 +246,6 @@ class MipAnalysisAPI(AnalysisAPI):
                 )
                 return True
         return False
-
-    def get_cases_ready_for_analysis(self, limit: int | None = None) -> list[Case]:
-        """Return cases to analyze."""
-        cases_to_analyse: list[Case] = self.get_cases_to_analyze()
-
-        cases_ready_for_analysis: list[Case] = [
-            case for case in cases_to_analyse if self.is_case_ready_for_analysis(case)
-        ]
-
-        selected_cases: list[Case] = cases_ready_for_analysis[
-            : MAX_CASES_TO_START_IN_50_MINUTES if limit is None else limit
-        ]
-        for case in selected_cases:
-            LOG.debug(f"Going to start analysis for case {case.internal_id}.")
-
-        return selected_cases
 
     @staticmethod
     def _append_value_for_non_flags(parameters: list, value) -> None:

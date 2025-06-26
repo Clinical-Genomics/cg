@@ -86,7 +86,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case in analysis_api.get_cases_ready_for_analysis():
+    for case in analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
@@ -109,7 +109,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
     analysis_api: MutantAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
-    exit_code: int = EXIT_SUCCESS
+    was_successful: bool = True
 
     cases_ready_for_qc: list[Case] = analysis_api.get_cases_to_perform_qc_on()
     LOG.info(f"Found {len(cases_ready_for_qc)} cases to perform QC on!")
@@ -118,7 +118,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
         try:
             analysis_api.run_qc_on_case(case=case, dry_run=dry_run)
         except Exception:
-            exit_code = EXIT_FAIL
+            was_successful = False
 
     cases_to_store: list[Case] = analysis_api.get_cases_to_store()
     LOG.info(f"Found {len(cases_to_store)} cases to store!")
@@ -128,10 +128,10 @@ def store_available(context: click.Context, dry_run: bool) -> None:
             context.invoke(store, case_id=case.internal_id, dry_run=dry_run)
         except Exception as exception_object:
             LOG.error(f"Error storingc {case.internal_id}: {exception_object}")
-            exit_code = EXIT_FAIL
+            was_successful = False
 
-    if exit_code:
-        raise click.Abort
+    if not was_successful:
+        raise click.Abort()
 
 
 @mutant.command("run-qc")
