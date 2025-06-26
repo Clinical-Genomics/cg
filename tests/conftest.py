@@ -2095,6 +2095,7 @@ def context_config(
             "username": "user",
         },
         "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb.yaml"},
+        "loqusdb-lwp": {"binary_path": "loqusdb-rd-lwp", "config_path": "loqusdb-rd-lwp.yaml"},
         "loqusdb-wes": {"binary_path": "loqusdb-wes", "config_path": "loqusdb-wes.yaml"},
         "loqusdb-somatic": {
             "binary_path": "loqusdb-somatic",

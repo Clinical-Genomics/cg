@@ -446,6 +446,7 @@ class CGConfig(BaseModel):
     lims_api_: LimsAPI = None
     loqusdb: CommonAppConfig = Field(None, alias=LoqusdbInstance.WGS.value)
     loqusdb_api_: LoqusdbAPI = None
+    loqusdb_rd_lwp: CommonAppConfig = Field(None, alias=LoqusdbInstance.LWP.value)
     loqusdb_somatic: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC.value)
     loqusdb_tumor: CommonAppConfig = Field(None, alias=LoqusdbInstance.TUMOR.value)
     loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
