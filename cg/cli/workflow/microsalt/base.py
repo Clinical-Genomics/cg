@@ -192,8 +192,8 @@ def start(
 @microsalt.command("dev-run")
 @click.option(
     "-c",
-    "--config-case",
-    "config_case_path",
+    "--config",
+    "config_file_path",
     required=False,
     type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
     help="optionally change the config file path",
@@ -202,14 +202,14 @@ def start(
 @click.pass_obj
 def dev_run(
     context: CGConfig,
-    config_case_path: click.Path,
+    config_file_path: click.Path,
     case_id: str,
 ) -> None:
     """Runs the microSALT workflow for the provided case. Uses new code. Does not generate
     config files."""
 
     analysis_starter = AnalysisStarterFactory(context).get_analysis_starter_for_case(case_id)
-    analysis_starter.run(case_id=case_id, config_file=config_case_path)
+    analysis_starter.run(case_id=case_id, config_file=config_file_path)
 
 
 @microsalt.command("dev-start")
