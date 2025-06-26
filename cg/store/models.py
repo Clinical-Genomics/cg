@@ -296,6 +296,8 @@ class Analysis(Base):
     comment: Mapped[Text | None]
     case_id: Mapped[int] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
     case: Mapped["Case"] = orm.relationship(back_populates="analyses")
+    trailblazer_id: Mapped[int | None]
+    housekeeper_version_id: Mapped[int | None]
 
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
@@ -478,7 +480,7 @@ class Case(Base, PriorityMixin):
     tickets: Mapped[VarChar128 | None]
 
     analyses: Mapped[list[Analysis]] = orm.relationship(
-        back_populates="case", order_by="-Analysis.completed_at"
+        back_populates="case", order_by="-Analysis.created_at"
     )
     links: Mapped[list["CaseSample"]] = orm.relationship(back_populates="case")
     orders: Mapped[list["Order"]] = orm.relationship(secondary=order_case, back_populates="cases")
@@ -516,7 +518,13 @@ class Case(Base, PriorityMixin):
 
     @property
     def latest_analyzed(self) -> datetime | None:
-        return self.analyses[0].completed_at if self.analyses else None
+        valid_analyses: list[Analysis] = [a for a in self.analyses if a.completed_at is not None]
+        if not valid_analyses:
+            return None
+        sorted_analyses: list[Analysis] = sorted(
+            valid_analyses, key=lambda analysis: analysis.completed_at, reverse=True
+        )
+        return sorted_analyses[0].completed_at
 
     @property
     def latest_sequenced(self) -> datetime | None:
@@ -531,6 +539,13 @@ class Case(Base, PriorityMixin):
     @property
     def are_all_samples_sequenced(self) -> bool:
         return all([link.sample.last_sequenced_at for link in self.links])
+
+    def are_all_samples_control(self) -> bool:
+        """Return True if all case samples are controls."""
+        return all(
+            sample.control in [ControlOptions.NEGATIVE, ControlOptions.POSITIVE]
+            for sample in self.samples
+        )
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -566,10 +581,11 @@ class Case(Base, PriorityMixin):
         return self.analyses and self.analyses[0].uploaded_at
 
     @property
-    def slurm_priority(self) -> SlurmQos:
-        case_priority: str = self.priority
-        slurm_priority: str = Priority.priority_to_slurm_qos().get(case_priority)
-        return SlurmQos(slurm_priority)
+    def slurm_priority(self) -> str:
+        """Get Quality of service (SLURM QOS) for the case."""
+        if self.are_all_samples_control():
+            return SlurmQos.EXPRESS
+        return Priority.priority_to_slurm_qos().get(self.priority)
 
     def get_delivery_arguments(self) -> set[str]:
         """Translates the case data_delivery field to workflow specific arguments."""
@@ -593,9 +609,7 @@ class Case(Base, PriorityMixin):
         if links:
             data["links"] = [link_obj.to_dict(samples=True) for link_obj in self.links]
         if analyses:
-            data["analyses"] = [
-                analysis_obj.to_dict(family=False) for analysis_obj in self.analyses
-            ]
+            data["analyses"] = [analysis.to_dict(family=False) for analysis in self.analyses]
         return data
 
 
@@ -842,6 +856,10 @@ class Sample(Base, PriorityMixin):
         return self.control == ControlOptions.NEGATIVE
 
     @property
+    def is_external(self) -> bool:
+        return self.application_version.application.is_external
+
+    @property
     def flow_cells(self) -> list[Flowcell]:
         """Return the flow cells a sample has been sequenced on."""
         return list({metric.flowcell for metric in self.sequencing_metrics})
@@ -989,6 +1007,9 @@ class Order(Base):
     """Model for storing orders."""
 
     __tablename__ = "order"
+
+    def __str__(self) -> str:
+        return f"{self.id} (ticket {self.ticket_id})"
 
     id: Mapped[PrimaryKeyInt]
     cases: Mapped[list[Case]] = orm.relationship(secondary=order_case, back_populates="orders")

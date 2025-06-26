@@ -36,12 +36,6 @@ def view_priority(unused1, unused2, model, unused3):
     return Markup("%s" % model.priority.name) if model else ""
 
 
-def view_flow_cell_internal_id(unused1, unused2, model, unused3):
-    """column formatter for priority"""
-    del unused1, unused2, unused3
-    return Markup("%s" % model.device.internal_id)
-
-
 def view_flow_cell_model(unused1, unused2, model, unused3):
     """column formatter for priority"""
     del unused1, unused2, unused3
@@ -53,11 +47,6 @@ def view_smrt_cell_model(unused1, unused2, model, unused3):
     return Markup("%s" % model.device.model)
 
 
-def view_smrt_cell_internal_id(unused1, unused2, model, unused3):
-    del unused1, unused2, unused3
-    return Markup("%s" % model.device.internal_id)
-
-
 def view_case_sample_link(unused1, unused2, model, unused3):
     """column formatter to open the case-sample view"""
 
@@ -65,7 +54,60 @@ def view_case_sample_link(unused1, unused2, model, unused3):
 
     return Markup(
         "<a href='%s'>%s</a>"
-        % (url_for("casesample.index_view", search=model.internal_id), model.internal_id)
+        % (url_for("casesample.index_view", search=f"={model.internal_id}"), model.internal_id)
+    )
+
+
+def view_illumina_sample_sequencing_metrics_link(unused1, unused2, model, unused3):
+    """column formatter to open the case-sample view"""
+
+    del unused1, unused2, unused3
+
+    return Markup(
+        "<a href='%s'>%s</a>"
+        % (
+            url_for(
+                "illuminasamplesequencingmetrics.index_view", search=f"={model.device.internal_id}"
+            ),
+            model.device.internal_id,
+        )
+    )
+
+
+def view_application_version_link(unused1, unused2, model, unused3):
+    """column formatter to open the case-sample view"""
+
+    del unused1, unused2, unused3
+
+    url: str = url_for("applicationversion.index_view", search=model.tag)
+    return Markup(f"<a href='{url}'>{model.tag}</a>")
+
+
+def view_application_link_via_application_version(unused1, unused2, model, unused3):
+    """column formatter to open this view"""
+    del unused1, unused2, unused3
+    return Markup(
+        "<a href='%s'>%s</a>"
+        % (
+            url_for("application.index_view", search=model.application_version.application.tag),
+            model.application_version,
+        )
+    )
+
+
+def view_pacbio_sample_sequencing_metrics_link(unused1, unused2, model, unused3):
+    """column formatter to open the case-sample view"""
+
+    del unused1, unused2, unused3
+
+    return Markup(
+        "<a href='%s'>%s</a>"
+        % (
+            url_for(
+                "pacbiosamplesequencingmetrics.index_view", search=f"={model.device.internal_id}"
+            ),
+            model.device.internal_id,
+        )
     )
 
 
@@ -125,6 +167,36 @@ def view_sample_concentration_maximum_cfdna(unused1, unused2, model, unused3):
     )
 
 
+def view_user_link(unused1, unused2, model, property_name):
+    """Column formatter used for linking to the User table."""
+    del unused1, unused2
+    contact_name: str = getattr(model, property_name)
+    return (
+        Markup(
+            "<a href='%s'>%s</a>"
+            % (url_for("user.index_view", search=f"{contact_name}"), contact_name)
+        )
+        if contact_name
+        else ""
+    )
+
+
+def view_customer_link(unused1, unused2, model, unused3):
+    """column formatter to open this view"""
+    del unused1, unused2, unused3
+    markup = ""
+    if model.customer:
+        markup += Markup(
+            " <a href='%s'>%s</a>"
+            % (
+                url_for("customer.index_view", search=f"={model.customer.internal_id}"),
+                model.customer,
+            )
+        )
+
+    return markup
+
+
 class ApplicationView(BaseView):
     """Admin view for Model.Application"""
 
@@ -160,13 +232,14 @@ class ApplicationView(BaseView):
         "category",
     ]
     column_formatters = {
+        "tag": view_application_version_link,
         "order_types": view_order_types,
         "sample_concentration_minimum": view_sample_concentration_minimum,
         "sample_concentration_maximum": view_sample_concentration_maximum,
         "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
         "sample_concentration_maximum_cfdna": view_sample_concentration_maximum_cfdna,
     }
-    column_filters = ["prep_category", "is_accredited"]
+    column_filters = ["prep_category", "is_accredited", "is_archived"]
     column_searchable_list = ["tag", "prep_category"]
     form_excluded_columns = ["category", "versions", "order_type_applications"]
     form_extra_fields = {
@@ -233,7 +306,7 @@ class ApplicationVersionView(BaseView):
         "comment",
     )
     column_exclude_list = ["created_at", "updated_at"]
-    column_filters = ["version", "application.tag"]
+    column_filters = ["application.is_archived", "application.tag", "version"]
     column_formatters = {"application": ApplicationView.view_application_link}
     column_searchable_list = ["application.tag"]
     edit_modal = True
@@ -305,10 +378,7 @@ class CustomerView(BaseView):
     column_editable_list = [
         "collaborations",
         "comment",
-        "delivery_contact",
-        "lab_contact",
         "loqus_upload",
-        "primary_contact",
         "priority",
         "return_samples",
         "scout_access",
@@ -328,6 +398,11 @@ class CustomerView(BaseView):
         "scout_access",
     ]
     column_filters = ["priority", "scout_access", "data_archive_location"]
+    column_formatters = {
+        "delivery_contact": view_user_link,
+        "lab_contact": view_user_link,
+        "primary_contact": view_user_link,
+    }
     column_searchable_list = ["internal_id", "name"]
     form_excluded_columns = ["families", "samples", "pools", "orders", "invoices"]
 
@@ -357,6 +432,7 @@ class CaseView(BaseView):
         "tickets",
     ]
     column_formatters = {
+        "customer": view_customer_link,
         "internal_id": view_case_sample_link,
         "priority": view_priority,
     }
@@ -366,6 +442,12 @@ class CaseView(BaseView):
         "customer.internal_id",
         "tickets",
     ]
+    form_ajax_refs = {
+        "orders": {
+            "fields": ["id", "ticket_id"],
+            "page_size": 20,
+        }
+    }
     form_excluded_columns = [
         "analyses",
         "_cohorts",
@@ -385,7 +467,7 @@ class CaseView(BaseView):
         if model.case:
             markup += Markup(
                 " <a href='%s'>%s</a>"
-                % (url_for("case.index_view", search=model.case.internal_id), model.case)
+                % (url_for("case.index_view", search=f"={model.case.internal_id}"), model.case)
             )
 
         return markup
@@ -445,6 +527,7 @@ class InvoiceView(BaseView):
         "discount",
         "price",
     )
+    column_formatters = {"customer": view_customer_link}
     column_searchable_list = ["customer.internal_id", "customer.name", "id"]
 
     @staticmethod
@@ -479,7 +562,12 @@ class AnalysisView(BaseView):
         "case.internal_id",
         "case.name",
     ]
-    form_extra_fields = {"workflow": SelectEnumField(enum_class=Workflow)}
+    form_ajax_refs = {
+        "case": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        }
+    }
 
 
 class IlluminaFlowCellView(BaseView):
@@ -508,7 +596,10 @@ class IlluminaFlowCellView(BaseView):
         "demultiplexing_completed_at",
         "archived_at",
     )
-    column_formatters = {"internal_id": view_flow_cell_internal_id, "model": view_flow_cell_model}
+    column_formatters = {
+        "internal_id": view_illumina_sample_sequencing_metrics_link,
+        "model": view_flow_cell_model,
+    }
     column_default_sort = ("sequencing_completed_at", True)
     column_filters = ["sequencer_type", "sequencer_name", "data_availability"]
     column_editable_list = ["data_availability"]
@@ -559,10 +650,17 @@ class OrderView(BaseView):
 
     column_default_sort = ("order_date", True)
     column_editable_list = ["is_open"]
+    column_formatters = {"customer": view_customer_link}
     column_searchable_list = ["id", "ticket_id"]
     column_display_pk = True
     create_modal = True
     edit_modal = True
+    form_ajax_refs = {
+        "cases": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        }
+    }
 
 
 class PanelView(BaseView):
@@ -570,6 +668,7 @@ class PanelView(BaseView):
 
     column_editable_list = ["current_version", "name"]
     column_filters = ["customer.internal_id"]
+    column_formatters = {"customer": view_customer_link}
     column_searchable_list = ["customer.internal_id", "name", "abbrev"]
     create_modal = True
     edit_modal = True
@@ -581,7 +680,11 @@ class PoolView(BaseView):
     column_default_sort = ("created_at", True)
     column_editable_list = ["ticket"]
     column_filters = ["customer.internal_id", "application_version.application"]
-    column_formatters = {"invoice": InvoiceView.view_invoice_link}
+    column_formatters = {
+        "application_version": view_application_link_via_application_version,
+        "customer": view_customer_link,
+        "invoice": InvoiceView.view_invoice_link,
+    }
     column_searchable_list = ["name", "order", "ticket", "customer.internal_id"]
 
 
@@ -609,6 +712,8 @@ class SampleView(BaseView):
         "capture_kit",
     ]
     column_formatters = {
+        "application_version": view_application_link_via_application_version,
+        "customer": view_customer_link,
         "is_external": is_external_application,
         "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
@@ -641,7 +746,10 @@ class SampleView(BaseView):
         return (
             Markup(
                 "<a href='%s'>%s</a>"
-                % (url_for("sample.index_view", search=model.sample.internal_id), model.sample)
+                % (
+                    url_for("sample.index_view", search=f"={model.sample.internal_id}"),
+                    model.sample,
+                )
             )
             if model.sample
             else ""
@@ -685,6 +793,24 @@ class CaseSampleView(BaseView):
     column_searchable_list = ["case.internal_id", "case.name", "sample.internal_id"]
     create_modal = True
     edit_modal = True
+    form_ajax_refs = {
+        "case": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        },
+        "sample": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        },
+        "mother": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        },
+        "father": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        },
+    }
 
 
 class UserView(BaseView):
@@ -744,7 +870,10 @@ class PacbioSmrtCellView(BaseView):
         "barcoded_hifi_yield_percentage",
         "barcoded_hifi_mean_read_length",
     )
-    column_formatters = {"internal_id": view_smrt_cell_internal_id, "model": view_smrt_cell_model}
+    column_formatters = {
+        "internal_id": view_pacbio_sample_sequencing_metrics_link,
+        "model": view_smrt_cell_model,
+    }
     column_default_sort = ("completed_at", True)
     column_searchable_list = ["device.internal_id", "run_name", "movie_name"]
     column_sortable_list = [

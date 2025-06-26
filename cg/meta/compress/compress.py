@@ -12,10 +12,11 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
+from cg.exc import DecompressionCouldNotStartError
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
-from cg.models import CompressionData
-from cg.store.models import Sample
+from cg.models.compression_data import CaseCompressionData, CompressionData, SampleCompressionData
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -92,7 +93,7 @@ class CompressAPI:
         if self._is_spring_archived(compression):
             LOG.debug(f"Found archived Spring file for {sample_id} - compression not possible")
             return False
-        return self.crunchy_api.is_fastq_compression_possible(compression_obj=compression)
+        return compression.is_fastq_compression_possible
 
     def _is_spring_archived(self, compression_data: CompressionData) -> bool:
         spring_file: File | None = self.hk_api.get_file_insensitive_path(
@@ -101,6 +102,15 @@ class CompressAPI:
         if (not spring_file) or (not spring_file.archive):
             return False
         return bool(spring_file.archive.archived_at)
+
+    def decompress_case(self, case: Case) -> None:
+        """Decompresses all Spring files tied to the case.
+        Raises:
+            DecompressionFailedToStartError if no sample could start decompressing."""
+        if not any(self.decompress_spring(sample.internal_id) for sample in case.samples):
+            raise DecompressionCouldNotStartError(
+                f"No sample could be decompressed for {case.internal_id}"
+            )
 
     def decompress_spring(self, sample_id: str) -> bool:
         """Decompress SPRING archive for a sample.
@@ -119,11 +129,9 @@ class CompressAPI:
 
         compressions: list[CompressionData] = files.get_spring_paths(version_obj=version)
         for compression in compressions:
-            if not self.crunchy_api.is_spring_decompression_possible(compression_obj=compression):
+            if not compression.is_spring_decompression_possible:
                 LOG.info(f"SPRING to FASTQ decompression not possible for {sample_id}")
-                if self.crunchy_api.is_compression_pending(
-                    compression
-                ) or self.crunchy_api.is_spring_decompression_done(compression):
+                if compression.is_compression_pending or compression.is_spring_decompression_done:
                     LOG.info(
                         f"Spring file {compression.spring_path.as_posix()} is already being decompressed."
                     )
@@ -198,9 +206,7 @@ class CompressAPI:
         return all_cleaned
 
     def _can_fastqs_be_removed(self, compression_data: CompressionData) -> bool:
-        is_fastq_compression_done: bool = self.crunchy_api.is_fastq_compression_done(
-            compression_data
-        )
+        is_fastq_compression_done: bool = compression_data.is_fastq_compression_done
         spring_file: File | None = self.hk_api.get_file_insensitive_path(
             compression_data.spring_path
         )
@@ -220,7 +226,7 @@ class CompressAPI:
         if not spring_paths:
             LOG.warning(f"Could not find any spring paths for {sample.internal_id}")
         for compression in spring_paths:
-            if not self.crunchy_api.is_spring_decompression_done(compression):
+            if not compression.is_spring_decompression_done:
                 LOG.info(f"SPRING to FASTQ decompression not finished {sample.internal_id}")
                 return False
 
@@ -353,3 +359,21 @@ class CompressAPI:
             if fastq_file.exists():
                 fastq_file.unlink()
                 LOG.debug(f"FASTQ file {fastq_file} removed")
+
+    def get_case_compression_data(self, case: Case) -> CaseCompressionData:
+        """Return an object containing compression data for a case."""
+        sample_compressions: list[SampleCompressionData] = []
+        for sample in case.samples:
+            sample_compression_data: SampleCompressionData = self.get_sample_compression_data(
+                sample.internal_id
+            )
+            sample_compressions.append(sample_compression_data)
+        return CaseCompressionData(
+            case_id=case.internal_id, sample_compression_data=sample_compressions
+        )
+
+    def get_sample_compression_data(self, sample_id: str) -> SampleCompressionData:
+        compression_objects: list[CompressionData] = []
+        version: Version = self.hk_api.get_latest_bundle_version(sample_id)
+        compression_objects.extend(files.get_spring_paths(version))
+        return SampleCompressionData(sample_id=sample_id, compression_objects=compression_objects)

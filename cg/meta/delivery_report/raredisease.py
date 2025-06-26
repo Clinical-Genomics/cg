@@ -1,6 +1,7 @@
 """Raredisease Delivery Report API."""
 
 from cg.clients.chanjo2.models import CoverageMetrics
+from cg.constants.housekeeper_tags import HermesFileTag, AnalysisTag
 from cg.constants.report import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,
@@ -45,7 +46,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
             bait_set=self.lims_api.capture_kit(sample.internal_id),
             duplicates=sample_metrics.percent_duplicates,
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
-            mapped_reads=sample_metrics.mapped_reads / sample_metrics.total_reads,
+            mapped_reads=round((sample_metrics.mapped_reads / sample_metrics.total_reads) * 100, 2),
             mean_target_coverage=coverage_metrics.mean_coverage if coverage_metrics else None,
             million_read_pairs=get_million_read_pairs(sample.reads),
             pct_10x=coverage_metrics.coverage_completeness_percent if coverage_metrics else None,
@@ -64,18 +65,46 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
     def get_scout_variants_files(self, case_id: str) -> ScoutVariantsFiles:
         """Return Raredisease files that will be uploaded to Scout."""
         return ScoutVariantsFiles(
-            snv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.SNV_VCF
-            ),
-            sv_vcf=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.SV_VCF
-            ),
-            vcf_str=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.VCF_STR
-            ),
-            smn_tsv=self.get_scout_uploaded_file_from_hk(
-                case_id=case_id, scout_key=ScoutUploadKey.SMN_TSV
-            ),
+            snv_vcf=self.housekeeper_api.get_file_by_exact_tags(
+                bundle=case_id,
+                tags=[
+                    AnalysisTag.VCF_SNV_CLINICAL,
+                    case_id,
+                    HermesFileTag.CLINICAL_DELIVERY,
+                    HermesFileTag.LONG_TERM_STORAGE,
+                    HermesFileTag.SCOUT,
+                ],
+            ).full_path,
+            sv_vcf=self.housekeeper_api.get_file_by_exact_tags(
+                bundle=case_id,
+                tags=[
+                    AnalysisTag.VCF_SV_CLINICAL,
+                    case_id,
+                    HermesFileTag.CLINICAL_DELIVERY,
+                    HermesFileTag.LONG_TERM_STORAGE,
+                    HermesFileTag.SCOUT,
+                ],
+            ).full_path,
+            vcf_str=self.housekeeper_api.get_file_by_exact_tags(
+                bundle=case_id,
+                tags=[
+                    AnalysisTag.VCF_STR,
+                    case_id,
+                    HermesFileTag.CLINICAL_DELIVERY,
+                    HermesFileTag.LONG_TERM_STORAGE,
+                    HermesFileTag.SCOUT,
+                ],
+            ).full_path,
+            smn_tsv=self.housekeeper_api.get_file_by_exact_tags(
+                bundle=case_id,
+                tags=[
+                    AnalysisTag.SMN_CALLING,
+                    case_id,
+                    HermesFileTag.CLINICAL_DELIVERY,
+                    HermesFileTag.LONG_TERM_STORAGE,
+                    HermesFileTag.SCOUT,
+                ],
+            ).full_path,
         )
 
     @staticmethod

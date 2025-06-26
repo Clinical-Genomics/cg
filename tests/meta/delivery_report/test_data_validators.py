@@ -5,8 +5,8 @@ import math
 from cg.constants import NA_FIELD
 from cg.meta.delivery_report.data_validators import (
     get_empty_report_data,
-    get_missing_report_data,
     get_million_read_pairs,
+    get_missing_report_data,
 )
 from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
 from cg.models.delivery_report.report import ReportModel
@@ -31,7 +31,7 @@ def test_get_empty_report_data(
 
     # GIVEN a delivery report data model
     report_data: ReportModel = raredisease_delivery_report_api.get_report_data(
-        case_id=raredisease_case_id, analysis_date=case.analyses[0].started_at
+        case_id=raredisease_case_id, analysis_date=case.latest_analyzed
     )
 
     # GIVEN empty fields
@@ -74,7 +74,7 @@ def test_get_missing_report_data(
 
     # GIVEN a report data model
     report_data: ReportModel = raredisease_delivery_report_api.get_report_data(
-        raredisease_case_id, case.analyses[0].started_at
+        raredisease_case_id, case.latest_analyzed
     )
 
     # GIVEN a dictionary of report empty fields and a list of required MIP DNA report fields

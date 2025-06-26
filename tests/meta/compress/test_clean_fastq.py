@@ -11,7 +11,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.meta.compress import files
-from cg.models import CompressionData
+from cg.models.compression_data import CompressionData
 from tests.cli.compress.conftest import MockCompressAPI
 from tests.meta.compress.conftest import MockCompressionData
 from tests.store_helpers import StoreHelpers

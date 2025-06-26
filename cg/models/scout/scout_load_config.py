@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict
+from pydantic import AfterValidator, BaseModel, ConfigDict
 from typing_extensions import Annotated, Literal
 
 from cg.constants.scout import UploadTrack
@@ -53,7 +53,7 @@ class ScoutIndividual(BaseModel):
             "wgs",
             "wts",
         ],
-        BeforeValidator(field_not_none),
+        AfterValidator(field_not_none),
     ] = None
     capture_kit: str | None = None
     confirmed_parent: bool | None = None
@@ -61,9 +61,9 @@ class ScoutIndividual(BaseModel):
     father: str | None = None
     mother: str | None = None
     phenotype: str | None = None
-    sample_id: Annotated[str, BeforeValidator(field_not_none)] = None
+    sample_id: Annotated[str | None, AfterValidator(field_not_none)] = None
     sample_name: str | None = None
-    sex: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    sex: Annotated[str | None, AfterValidator(field_not_none)] = None
     subject_id: str | None = None
     tissue_type: str | None = None
     model_config = ConfigDict(validate_assignment=True)
@@ -80,6 +80,14 @@ class ScoutMipIndividual(ScoutIndividual):
     upd_sites_bed: str | None = None
     vcf2cytosure: str | None = None
     mitodel_file: str | None = None
+
+
+class ScoutNalloIndividual(ScoutIndividual):
+    d4_file: str | None = None
+    paraphase_alignment_path: str | None = None
+    tiddit_coverage_wig: str | None = None
+    minor_allele_frequency_wig: str | None = None
+    assembly_alignment_path: str | None = None
 
 
 class ScoutRarediseaseIndividual(ScoutIndividual):
@@ -105,9 +113,10 @@ class ScoutCancerIndividual(ScoutIndividual):
 
 
 class ScoutLoadConfig(BaseModel):
-    owner: Annotated[str, BeforeValidator(field_not_none)] = None
-    family: Annotated[str, BeforeValidator(field_not_none)] = None
+    owner: Annotated[str | None, AfterValidator(field_not_none)] = None
+    family: Annotated[str | None, AfterValidator(field_not_none)] = None
     family_name: str | None = None
+    status: str | None = None
     synopsis: str | None = None
     phenotype_terms: list[str] | None = None
     phenotype_groups: list[str] | None = None
@@ -133,7 +142,7 @@ class ScoutLoadConfig(BaseModel):
 
 class BalsamicLoadConfig(ScoutLoadConfig):
     madeline: str | None = None
-    vcf_cancer: Annotated[str, BeforeValidator(field_not_none)] = None
+    vcf_cancer: Annotated[str | None, AfterValidator(field_not_none)] = None
     vcf_cancer_sv: str | None = None
     vcf_cancer_research: str | None = None
     vcf_cancer_sv_research: str | None = None
@@ -156,11 +165,26 @@ class MipLoadConfig(ScoutLoadConfig):
     variant_catalog: str | None = None
     vcf_mei: str | None = None
     vcf_mei_research: str | None = None
-    vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None
-    vcf_snv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    vcf_snv: Annotated[str | None, AfterValidator(field_not_none)] = None
+    vcf_snv_research: Annotated[str | None, AfterValidator(field_not_none)] = None
     vcf_str: str | None = None
-    vcf_sv: Annotated[str | None, BeforeValidator(field_not_none)] = None
-    vcf_sv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    vcf_sv: Annotated[str | None, AfterValidator(field_not_none)] = None
+    vcf_sv_research: Annotated[str | None, AfterValidator(field_not_none)] = None
+
+
+class NalloLoadConfig(ScoutLoadConfig):
+    madeline: str | None = None
+    peddy_check: str | None = None
+    peddy_ped: str | None = None
+    peddy_sex: str | None = None
+    samples: list[ScoutNalloIndividual] = []
+    somalier_samples: str | None = None
+    somalier_pairs: str | None = None
+    vcf_snv: Annotated[str | None, AfterValidator(field_not_none)] = None
+    vcf_snv_research: Annotated[str | None, AfterValidator(field_not_none)] = None
+    vcf_sv: Annotated[str | None, AfterValidator(field_not_none)] = None
+    vcf_sv_research: Annotated[str | None, AfterValidator(field_not_none)] = None
+    vcf_str: str | None = None
 
 
 class RarediseaseLoadConfig(ScoutLoadConfig):
@@ -174,12 +198,12 @@ class RarediseaseLoadConfig(ScoutLoadConfig):
     str_catalog: str | None = None
     vcf_mei: str | None = None
     vcf_mei_research: str | None = None
-    vcf_snv: Annotated[str, BeforeValidator(field_not_none)] = None
-    vcf_snv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    vcf_snv: Annotated[str | None, AfterValidator(field_not_none)] = None
+    vcf_snv_research: Annotated[str | None, AfterValidator(field_not_none)] = None
     vcf_snv_mt: str | None = None
     vcf_snv_research_mt: str | None = None
-    vcf_sv: Annotated[str | None, BeforeValidator(field_not_none)] = None
-    vcf_sv_research: Annotated[str | None, BeforeValidator(field_not_none)] = None
+    vcf_sv: Annotated[str | None, AfterValidator(field_not_none)] = None
+    vcf_sv_research: Annotated[str | None, AfterValidator(field_not_none)] = None
     vcf_str: str | None = None
 
 

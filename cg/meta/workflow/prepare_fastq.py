@@ -5,13 +5,12 @@ from pathlib import Path
 
 from housekeeper.store.models import File, Version
 
-from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.constants import PIPELINES_USING_PARTIAL_ANALYSES
 from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
-from cg.models import CompressionData
+from cg.models.compression_data import CompressionData
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -23,7 +22,6 @@ class PrepareFastqAPI:
         self.store: Store = store
         self.hk_api: HousekeeperAPI = compress_api.hk_api
         self.compress_api: CompressAPI = compress_api
-        self.crunchy_api: CrunchyAPI = compress_api.crunchy_api
 
     def get_compression_objects(self, case_id: str) -> list[CompressionData]:
         """Return a list of compression objects"""
@@ -35,9 +33,7 @@ class PrepareFastqAPI:
             if self._should_skip_sample(case=case, sample=sample):
                 LOG.warning(f"Skipping sample {sample_id} - it has no reads.")
                 continue
-            version_obj: Version = self.compress_api.hk_api.get_latest_bundle_version(
-                bundle_name=sample_id
-            )
+            version_obj: Version = self.hk_api.get_latest_bundle_version(sample_id)
             compression_objects.extend(files.get_spring_paths(version_obj))
         return compression_objects
 
@@ -54,8 +50,7 @@ class PrepareFastqAPI:
         LOG.debug(f"Checking if decompression is needed for {sample_id}.")
         compression_objects = self.get_sample_compression_objects(sample_id=sample_id)
         return any(
-            not self.crunchy_api.is_compression_pending(compression_object)
-            and not compression_object.pair_exists()
+            not compression_object.is_compression_pending and not compression_object.pair_exists()
             for compression_object in compression_objects
         )
 
@@ -65,16 +60,13 @@ class PrepareFastqAPI:
         For some workflows, we want to start a partial analysis disregarding the samples with no reads.
         This method returns true if we should skip the sample.
         """
-        if case.data_analysis in PIPELINES_USING_PARTIAL_ANALYSES and not sample.has_reads:
-            return True
-        return False
+        return case.data_analysis in PIPELINES_USING_PARTIAL_ANALYSES and not sample.has_reads
 
     def is_spring_decompression_needed(self, case_id: str) -> bool:
         """Check if spring decompression needs to be started"""
         compression_objects = self.get_compression_objects(case_id=case_id)
         return any(
-            not self.crunchy_api.is_compression_pending(compression_object)
-            and not compression_object.pair_exists()
+            not compression_object.is_compression_pending and not compression_object.pair_exists()
             for compression_object in compression_objects
         )
 
@@ -82,15 +74,14 @@ class PrepareFastqAPI:
         """Check if case is being decompressed"""
         compression_objects = self.get_compression_objects(case_id=case_id)
         return any(
-            self.crunchy_api.is_compression_pending(compression_object)
-            for compression_object in compression_objects
+            compression_object.is_compression_pending for compression_object in compression_objects
         )
 
     def can_at_least_one_sample_be_decompressed(self, case_id: str) -> bool:
         """Returns True if at least one sample can be decompressed, otherwise False"""
         compression_objects: list[CompressionData] = self.get_compression_objects(case_id=case_id)
         return any(
-            self.crunchy_api.is_spring_decompression_possible(compression_object)
+            compression_object.is_spring_decompression_possible
             for compression_object in compression_objects
         )
 
@@ -117,7 +108,7 @@ class PrepareFastqAPI:
             )
 
     def add_decompressed_spring_object(
-        self, compression: CompressionData, fastq_files: dict[Path, File], sample: Case
+        self, compression: CompressionData, fastq_files: dict[Path, File], sample: Sample
     ) -> None:
         """Adds decompressed FASTQ files to Housekeeper related to a single spring file."""
         result = True

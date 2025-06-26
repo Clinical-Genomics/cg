@@ -9,15 +9,12 @@ from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
-from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 
-@pytest.mark.parametrize(
-    "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
-)
+@pytest.mark.parametrize("workflow", NEXTFLOW_WORKFLOWS + [Workflow.NALLO])
 def test_start(
     cli_runner: CliRunner,
     workflow: Workflow,
@@ -28,7 +25,7 @@ def test_start(
     mocker,
 ):
     """Test to ensure all parts of start command will run successfully given ideal conditions."""
-    caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.INFO)
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
 
     # GIVEN a case id
@@ -60,7 +57,7 @@ def test_start(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
 )
 def test_start_available(
     cli_runner: CliRunner,

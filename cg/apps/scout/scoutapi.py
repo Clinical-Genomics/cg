@@ -20,9 +20,9 @@ LOG = logging.getLogger(__name__)
 class ScoutAPI:
     """Interface to Scout."""
 
-    def __init__(self, config, slurm_upload_service: SlurmUploadService):
-        binary_path = config["scout"]["binary_path"]
-        config_path = config["scout"]["config_path"]
+    def __init__(self, scout_config, slurm_upload_service: SlurmUploadService):
+        binary_path = scout_config.binary_path
+        config_path = scout_config.config_path
         self.process = Process(binary=binary_path, config=config_path)
         self.slurm_upload_service = slurm_upload_service
         self.scout_base_command = f"{binary_path} --config {config_path}"
@@ -302,13 +302,12 @@ class ScoutAPI:
     def upload_rna_fraser_outrider(
         self,
         case_id: str,
-        fraser_file_path: str,
-        outrider_file_path: str,
+        fraser_file_path: str | None,
+        outrider_file_path: str | None,
         customer_case_name: str,
         cust_id: str,
     ) -> None:
         """Load a rna fraser file into a case in the database."""
-
         upload_command: list[str] = [
             "update",
             "case",
@@ -316,15 +315,15 @@ class ScoutAPI:
             customer_case_name,
             "-i",
             cust_id,
-            "--fraser",
-            fraser_file_path,
-            "--outrider",
-            outrider_file_path,
         ]
+        if fraser_file_path:
+            upload_command.extend(["--fraser", fraser_file_path])
+            LOG.info(f"Uploading rna fraser file {fraser_file_path} to case {case_id}")
+
+        if outrider_file_path:
+            upload_command.extend(["--outrider", outrider_file_path])
+            LOG.info(f"Uploading outrider file {outrider_file_path} to case {case_id}")
         try:
-            LOG.info(
-                f"Uploading rna fraser file {fraser_file_path} and outrider file {outrider_file_path} to case {case_id} with command {upload_command}"
-            )
             self.process.run_command(upload_command)
         except CalledProcessError as error:
             raise ScoutUploadError("Something went wrong when uploading rna fraser file") from error

@@ -1,7 +1,7 @@
 from cg.models.orders.constants import OrderType
 from cg.services.orders.validation.order_type_maps import RuleSet
+from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.services.orders.validation.service import OrderValidationService
-from cg.services.orders.validation.workflows.tomte.models.order import TomteOrder
 
 
 def test_valid_order(

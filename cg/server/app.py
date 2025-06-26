@@ -11,6 +11,7 @@ from cg.server.app_config import app_config
 from cg.server.endpoints.analyses import ANALYSES_BLUEPRINT
 from cg.server.endpoints.applications import APPLICATIONS_BLUEPRINT
 from cg.server.endpoints.cases import CASES_BLUEPRINT
+from cg.server.endpoints.index_sequences import INDEX_SEQUENCES_BLUEPRINT
 from cg.server.endpoints.orders import ORDERS_BLUEPRINT
 from cg.server.endpoints.pools import POOLS_BLUEPRINT
 from cg.server.endpoints.samples import SAMPLES_BLUEPRINT
@@ -58,8 +59,8 @@ def create_app():
 
 
 def _load_config(app: Flask):
-    app.config.update(app_config.dict())
-    app.secret_key = app.config["cg_secret_key"]
+    app.config.update(app_config.model_dump())
+    app.secret_key = app_config.cg_secret_key
 
 
 def _configure_extensions(app: Flask):
@@ -82,8 +83,8 @@ def _initialize_logging(app):
 
 def _register_blueprints(app: Flask):
     oauth_bp = make_google_blueprint(
-        client_id=app.config["google_oauth_client_id"],
-        client_secret=app.config["google_oauth_client_secret"],
+        client_id=app_config.google_oauth_client_id,
+        client_secret=app_config.google_oauth_client_secret,
         scope=["openid", "https://www.googleapis.com/auth/userinfo.email"],
     )
 
@@ -107,6 +108,7 @@ def _register_blueprints(app: Flask):
     app.register_blueprint(USERS_BLUEPRINT)
     app.register_blueprint(PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT)
     app.register_blueprint(PACBIO_SEQUENCING_RUN_BLUEPRINT)
+    app.register_blueprint(INDEX_SEQUENCES_BLUEPRINT)
     _register_admin_views()
 
     ext.csrf.exempt(SAMPLES_BLUEPRINT)

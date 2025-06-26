@@ -12,6 +12,12 @@ class CgError(Exception):
         super().__init__(message)
 
 
+class AnalysisDoesNotExistError(CgError):
+    """
+    Exception raised when an analysis does not exist.
+    """
+
+
 class AnalysisUploadError(CgError):
     """
     Error related to trying to upload analysis data.
@@ -33,6 +39,18 @@ class AnalysisNotReadyError(CgError):
 class AnalysisNotCompletedError(CgError):
     """
     Exception raised when an analysis has not completed.
+    """
+
+
+class AnalysisAlreadyStoredError(CgError):
+    """
+    Exception raised when trying to store an analysis already stored in StatusDB.
+    """
+
+
+class AnalysisRunningError(CgError):
+    """
+    Exception raised when trying to start a case which is running in Trailblazer.
     """
 
 
@@ -84,6 +102,10 @@ class DsmcAlreadyRunningError(CgError):
 
 class DecompressionNeededError(CgError):
     """Raised when decompression still needed to start analysis."""
+
+
+class DecompressionCouldNotStartError(CgError):
+    """Raised when decompression could not be started."""
 
 
 class DeliveryReportError(CgError):
@@ -334,3 +356,7 @@ class Chanjo2RequestError(Chanjo2APIClientError):
 
 class Chanjo2ResponseError(Chanjo2APIClientError):
     """Exception raised when the response from Chanjo2 API client fails validation."""
+
+
+class CaseNotConfiguredError(CgError):
+    """Exception raised when a case is being run without a configuration."""

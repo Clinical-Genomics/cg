@@ -28,9 +28,7 @@ metrics:
   name: total_sequences
   step: multiqc
   value: 300008747.0
-- condition:
-    norm: lt
-    threshold: 20.0
+- condition: null
   header: null
   id: ADM1
   input: multiqc_data.json
@@ -321,9 +319,7 @@ metrics:
   name: PCT_EXC_DUPE
   step: multiqc
   value: 0.047463
-- condition:
-    norm: lt
-    threshold: 0.0005
+- condition: null
   header: null
   id: ADM1
   input: multiqc_data.json
@@ -1257,9 +1253,7 @@ metrics:
   name: pct_surviving
   step: multiqc
   value: 96.91697445688075
-- condition:
-    norm: lt
-    threshold: 151000000.0
+- condition: null
   header: null
   id: ADM1
   input: multiqc_data.json
@@ -1281,14 +1275,21 @@ metrics:
   step: multiqc
   value: 1.265529162641732
 - condition:
-    norm: eq
-    threshold: 'NO'
+    norm: lt
+    threshold: 0.20
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: PERCENT_DUPLICATION
+  step: multiqc
+  value: 0.0438
+- condition: null
   header: null
   id: ADM1
   input: multiqc_data.json
   name: Contamination Status
   step: multiqc
-  value: 'NO'
+  value: 'YES'
 - condition: null
   header: null
   id: ADM1
@@ -1324,9 +1325,7 @@ metrics:
   name: total_sequences
   step: multiqc
   value: 300008747.0
-- condition:
-    norm: lt
-    threshold: 20.0
+- condition: null
   header: null
   id: ADM2
   input: multiqc_data.json
@@ -1617,9 +1616,7 @@ metrics:
   name: PCT_EXC_DUPE
   step: multiqc
   value: 0.047463
-- condition:
-    norm: lt
-    threshold: 0.0005
+- condition: null
   header: null
   id: ADM2
   input: multiqc_data.json
@@ -2553,9 +2550,7 @@ metrics:
   name: pct_surviving
   step: multiqc
   value: 96.91697445688075
-- condition:
-    norm: lt
-    threshold: 151000000.0
+- condition: null
   header: null
   id: ADM2
   input: multiqc_data.json
@@ -2577,8 +2572,15 @@ metrics:
   step: multiqc
   value: 1.265529162641732
 - condition:
-    norm: eq
-    threshold: 'NO'
+    norm: lt
+    threshold: 0.20
+  header: null
+  id: ADM2
+  input: multiqc_data.json
+  name: PERCENT_DUPLICATION
+  step: multiqc
+  value: 0.0438
+- condition: null
   header: null
   id: ADM2
   input: multiqc_data.json

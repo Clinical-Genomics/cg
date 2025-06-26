@@ -7,9 +7,9 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     SampleIsOwnMotherError,
 )
 from cg.services.orders.validation.models.existing_sample import ExistingSample
+from cg.services.orders.validation.order_types.mip_dna.models.sample import MIPDNASample
+from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
 from cg.services.orders.validation.rules.case_sample.pedigree.models import FamilyTree, Node
-from cg.services.orders.validation.workflows.mip_dna.models.sample import MIPDNASample
-from cg.services.orders.validation.workflows.tomte.models.sample import TomteSample
 
 
 def validate_tree(pedigree: FamilyTree) -> list[PedigreeError]:

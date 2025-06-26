@@ -6,8 +6,8 @@ from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.service import StoreOrderService
-from cg.services.orders.validation.workflows.pacbio_long_read.models.order import PacbioOrder
-from cg.services.orders.validation.workflows.pacbio_long_read.models.sample import PacbioSample
+from cg.services.orders.validation.order_types.pacbio_long_read.models.order import PacbioOrder
+from cg.services.orders.validation.order_types.pacbio_long_read.models.sample import PacbioSample
 from cg.store.models import ApplicationVersion, Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 
@@ -112,5 +112,4 @@ class StorePacBioOrderService(StoreOrderService):
             original_ticket=ticket_id,
             priority=sample.priority,
             tumour=sample.tumour,
-            subject_id=sample.subject_id,
         )

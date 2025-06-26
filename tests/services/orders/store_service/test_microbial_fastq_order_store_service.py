@@ -2,7 +2,9 @@ from cg.constants import DataDelivery
 from cg.services.orders.storing.implementations.microbial_fastq_order_service import (
     StoreMicrobialFastqOrderService,
 )
-from cg.services.orders.validation.workflows.microbial_fastq.models.order import MicrobialFastqOrder
+from cg.services.orders.validation.order_types.microbial_fastq.models.order import (
+    MicrobialFastqOrder,
+)
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 

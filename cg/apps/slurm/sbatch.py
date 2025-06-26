@@ -9,7 +9,7 @@ SBATCH_HEADER_TEMPLATE = """#! /bin/bash {use_login_shell}
 #SBATCH --mail-user={email}
 #SBATCH --time={hours}:{minutes}:00
 #SBATCH --qos={quality_of_service}
-#SBATCH {exclude}
+{optional_headers}
 
 set -eu -o pipefail
 
@@ -23,10 +23,10 @@ log "Running on: $(hostname)"
 
 DRAGEN_SBATCH_HEADER_TEMPLATE = """#! /bin/bash
 #SBATCH --job-name={job_name}
-#SBATCH --partition=dragen
+#SBATCH --partition={partition}
 #SBATCH --account={account}
-#SBATCH --cpus-per-task=24
-#SBATCH --nodes=1
+#SBATCH --exclusive
+#SBATCH --mem=0 # Allocates all memory on the node
 #SBATCH --error={log_dir}/{job_name}.stderr
 #SBATCH --output={log_dir}/{job_name}.stdout
 #SBATCH --mail-type=FAIL

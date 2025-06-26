@@ -32,14 +32,15 @@ CAPTUREKIT_OPTIONS = (
 
 
 class JobType(StrEnum):
-    UPLOAD: str = "upload"
-    ANALYSIS: str = "analysis"
+    UPLOAD = "upload"
+    ANALYSIS = "analysis"
 
 
 class CaseActions(StrEnum):
-    ANALYZE: str = "analyze"
-    HOLD: str = "hold"
-    RUNNING: str = "running"
+    ANALYZE = "analyze"
+    HOLD = "hold"
+    RUNNING = "running"
+    TOP_UP = "top-up"
 
     @classmethod
     def actions(cls) -> list[str]:
@@ -112,24 +113,24 @@ class StatusOptions(StrEnum):
 
 
 class Workflow(StrEnum):
-    BALSAMIC: str = "balsamic"
-    BALSAMIC_PON: str = "balsamic-pon"
-    BALSAMIC_UMI: str = "balsamic-umi"
-    DEMULTIPLEX: str = "demultiplex"
-    FLUFFY: str = "fluffy"
-    JASEN: str = "jasen"
-    MICROSALT: str = "microsalt"
-    MIP_DNA: str = "mip-dna"
-    MIP_RNA: str = "mip-rna"
-    MUTANT: str = "mutant"
-    NALLO: str = "nallo"
-    RAREDISEASE: str = "raredisease"
-    RAW_DATA: str = "raw-data"
-    RNAFUSION: str = "rnafusion"
-    RSYNC: str = "rsync"
-    SPRING: str = "spring"
-    TAXPROFILER: str = "taxprofiler"
-    TOMTE: str = "tomte"
+    BALSAMIC = "balsamic"
+    BALSAMIC_PON = "balsamic-pon"
+    BALSAMIC_UMI = "balsamic-umi"
+    DEMULTIPLEX = "demultiplex"
+    FLUFFY = "fluffy"
+    JASEN = "jasen"
+    MICROSALT = "microsalt"
+    MIP_DNA = "mip-dna"
+    MIP_RNA = "mip-rna"
+    MUTANT = "mutant"
+    NALLO = "nallo"
+    RAREDISEASE = "raredisease"
+    RAW_DATA = "raw-data"
+    RNAFUSION = "rnafusion"
+    RSYNC = "rsync"
+    SPRING = "spring"
+    TAXPROFILER = "taxprofiler"
+    TOMTE = "tomte"
 
 
 DNA_WORKFLOWS_WITH_SCOUT_UPLOAD: list[Workflow] = [
@@ -165,19 +166,22 @@ class SampleType(StrEnum):
 
 
 class DataDelivery(StrEnum):
-    ANALYSIS_FILES: str = "analysis"
-    ANALYSIS_SCOUT: str = "analysis-scout"
-    BAM: str = "bam"
-    FASTQ: str = "fastq"
-    FASTQ_SCOUT: str = "fastq-scout"
-    FASTQ_QC: str = "fastq_qc"
-    FASTQ_ANALYSIS: str = "fastq-analysis"
-    FASTQ_QC_ANALYSIS: str = "fastq_qc-analysis"
-    FASTQ_ANALYSIS_SCOUT: str = "fastq-analysis-scout"
-    NIPT_VIEWER: str = "nipt-viewer"
-    NO_DELIVERY: str = "no-delivery"
-    SCOUT: str = "scout"
-    STATINA: str = "statina"
+    ANALYSIS_FILES = "analysis"
+    ANALYSIS_SCOUT = "analysis-scout"
+    BAM = "bam"
+    FASTQ = "fastq"
+    FASTQ_SCOUT = "fastq-scout"
+    FASTQ_QC = "fastq_qc"
+    FASTQ_ANALYSIS = "fastq-analysis"
+    FASTQ_QC_ANALYSIS = "fastq_qc-analysis"
+    FASTQ_ANALYSIS_SCOUT = "fastq-analysis-scout"
+    NIPT_VIEWER = "nipt-viewer"
+    NO_DELIVERY = "no-delivery"
+    RAW_DATA_ANALYSIS = "raw_data-analysis"
+    RAW_DATA_ANALYSIS_SCOUT = "raw_data-analysis-scout"
+    RAW_DATA_SCOUT = "raw_data-scout"
+    SCOUT = "scout"
+    STATINA = "statina"
 
 
 class HastaSlurmPartitions(StrEnum):
@@ -262,8 +266,8 @@ class MetaApis:
 
 
 class WorkflowManager(StrEnum):
-    Slurm: str = "slurm"
-    Tower: str = "nf_tower"
+    Slurm = "slurm"
+    Tower = "nf_tower"
 
 
 class Strandedness(StrEnum):

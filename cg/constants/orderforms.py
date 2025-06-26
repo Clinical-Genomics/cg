@@ -8,31 +8,35 @@ SOURCE_TYPES = set().union(METAGENOME_SOURCES, ANALYSIS_SOURCES)
 
 
 class Orderform(StrEnum):
-    BALSAMIC: str = "1508"
-    BALSAMIC_UMI: str = "1508"
-    FASTQ: str = "1508"
-    METAGENOME: str = "1508"
-    FLUFFY: str = "1604"
-    MICROSALT: str = "1603"
-    MIP_DNA: str = "1508"
-    MIP_RNA: str = "1508"
-    RNAFUSION: str = "1508"
-    RML: str = "1604"
-    SARS_COV_2: str = "2184"
-    MICROBIAL_FASTQ: str = "microbial_sequencing"
-    PACBIO_LONG_READ: str = "pacbio_revio_sequencing"
-    TAXPROFILER: str = "1508"
+    BALSAMIC = "1508"
+    BALSAMIC_UMI = "1508"
+    FASTQ = "1508"
+    METAGENOME = "1508"
+    FLUFFY = "1604"
+    MICROSALT = "1603"
+    MIP_DNA = "1508"
+    MIP_RNA = "1508"
+    NALLO = "long_read_nallo_analysis"
+    RAREDISEASE = "1508"
+    RNAFUSION = "1508"
+    RML = "1604"
+    SARS_COV_2 = "2184"
+    MICROBIAL_FASTQ = "microbial_sequencing"
+    PACBIO_LONG_READ = "pacbio_revio_sequencing"
+    TAXPROFILER = "1508"
+    TOMTE = "1508"
 
     @staticmethod
     def get_current_orderform_version(order_form: str) -> str:
         """Returns the current version of the given order form."""
         current_order_form_versions = {
-            Orderform.MIP_DNA: "33",
-            Orderform.RML: "19",
+            Orderform.MIP_DNA: "35",
+            Orderform.RML: "20",
             Orderform.MICROSALT: "11",
+            Orderform.NALLO: "1",
             Orderform.SARS_COV_2: "10",
-            Orderform.MICROBIAL_FASTQ: "1",
-            Orderform.PACBIO_LONG_READ: "1",
+            Orderform.MICROBIAL_FASTQ: "2",
+            Orderform.PACBIO_LONG_READ: "2",
         }
         return current_order_form_versions[order_form]
 

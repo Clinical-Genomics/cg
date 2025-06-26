@@ -4,6 +4,8 @@ from cg.services.orders.validation.errors.sample_errors import (
     ApplicationNotCompatibleError,
     ApplicationNotValidError,
     BufferInvalidError,
+    CaptureKitInvalidError,
+    CaptureKitMissingError,
     ConcentrationInvalidIfSkipRCError,
     ConcentrationRequiredError,
     ContainerNameMissingError,
@@ -14,8 +16,8 @@ from cg.services.orders.validation.errors.sample_errors import (
     OccupiedWellError,
     PoolApplicationError,
     PoolPriorityError,
+    SampleError,
     SampleNameNotAvailableControlError,
-    SampleNameNotAvailableError,
     SampleNameRepeatedError,
     VolumeRequiredError,
     WellFormatError,
@@ -28,6 +30,8 @@ from cg.services.orders.validation.models.order_aliases import (
     OrderWithIndexedSamples,
 )
 from cg.services.orders.validation.models.sample_aliases import IndexedSample
+from cg.services.orders.validation.order_types.fastq.models.order import FastqOrder
+from cg.services.orders.validation.order_types.microsalt.models.order import OrderWithSamples
 from cg.services.orders.validation.rules.sample.utils import (
     PlateSamplesValidator,
     get_indices_for_repeated_sample_names,
@@ -46,11 +50,11 @@ from cg.services.orders.validation.rules.sample.utils import (
 )
 from cg.services.orders.validation.rules.utils import (
     is_application_compatible,
+    is_invalid_capture_kit,
+    is_sample_missing_capture_kit,
     is_volume_invalid,
     is_volume_missing,
 )
-from cg.services.orders.validation.workflows.fastq.models.order import FastqOrder
-from cg.services.orders.validation.workflows.microsalt.models.order import OrderWithSamples
 from cg.store.store import Store
 
 
@@ -118,6 +122,30 @@ def validate_buffer_skip_rc_condition(order: FastqOrder, **kwargs) -> list[Buffe
     return errors
 
 
+def validate_capture_kit_compatible(
+    order: FastqOrder, store: Store, **kwargs
+) -> list[CaptureKitInvalidError]:
+    """Validates that the capture kit is in our Bed table, and active."""
+    errors: list[CaptureKitInvalidError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if is_invalid_capture_kit(sample=sample, store=store):
+            error = CaptureKitInvalidError(sample_index=sample_index)
+            errors.append(error)
+    return errors
+
+
+def validate_capture_kit_required(
+    order: FastqOrder, store: Store, **kwargs
+) -> list[CaptureKitMissingError]:
+    """Validates that capture kit is required for TGS samples"""
+    errors: list[CaptureKitMissingError] = []
+    for sample_index, sample in order.enumerated_samples:
+        if is_sample_missing_capture_kit(sample=sample, store=store):
+            error = CaptureKitMissingError(sample_index=sample_index)
+            errors.append(error)
+    return errors
+
+
 def validate_concentration_interval_if_skip_rc(
     order: FastqOrder, store: Store, **kwargs
 ) -> list[ConcentrationInvalidIfSkipRCError]:
@@ -128,6 +156,19 @@ def validate_concentration_interval_if_skip_rc(
     errors: list[ConcentrationInvalidIfSkipRCError] = []
     if order.skip_reception_control:
         errors.extend(validate_concentration_interval(order=order, store=store))
+    return errors
+
+
+def validate_concentration_required_if_skip_rc(
+    order: FastqOrder, **kwargs
+) -> list[ConcentrationRequiredError]:
+    """
+    Validate that all samples have a concentration if the order skips reception control.
+    Only applicable to order types that have targeted sequencing applications (TGS).
+    """
+    errors: list[ConcentrationRequiredError] = []
+    if order.skip_reception_control:
+        errors.extend(validate_concentration_required(order))
     return errors
 
 
@@ -143,19 +184,6 @@ def validate_container_name_required(
         if is_container_name_missing(sample=sample):
             error = ContainerNameMissingError(sample_index=sample_index)
             errors.append(error)
-    return errors
-
-
-def validate_concentration_required_if_skip_rc(
-    order: FastqOrder, **kwargs
-) -> list[ConcentrationRequiredError]:
-    """
-    Validate that all samples have a concentration if the order skips reception control.
-    Only applicable to order types that have targeted sequencing applications (TGS).
-    """
-    errors: list[ConcentrationRequiredError] = []
-    if order.skip_reception_control:
-        errors.extend(validate_concentration_required(order))
     return errors
 
 
@@ -178,6 +206,19 @@ def validate_index_number_required(
         if is_index_number_missing(sample):
             error = IndexNumberMissingError(sample_index=sample_index)
             errors.append(error)
+    return errors
+
+
+def validate_non_control_sample_names_available(
+    order: OrderWithControlSamples, store: Store, **kwargs
+) -> list[SampleNameNotAvailableControlError]:
+    """
+    Validate that non-control sample names do not exists in the database under the same customer.
+    Applicable to all orders with control samples.
+    """
+    errors: list[SampleNameNotAvailableControlError] = get_sample_name_not_available_errors(
+        order=order, store=store, has_order_control=True
+    )
     return errors
 
 
@@ -217,26 +258,13 @@ def validate_pools_contain_one_priority(
 
 def validate_sample_names_available(
     order: OrderWithSamples, store: Store, **kwargs
-) -> list[SampleNameNotAvailableError]:
+) -> list[SampleError]:
     """
     Validate that the sample names do not exists in the database under the same customer.
     Applicable to all orders without control samples.
     """
-    errors: list[SampleNameNotAvailableError] = get_sample_name_not_available_errors(
+    errors: list[SampleError] = get_sample_name_not_available_errors(
         order=order, store=store, has_order_control=False
-    )
-    return errors
-
-
-def validate_non_control_sample_names_available(
-    order: OrderWithControlSamples, store: Store, **kwargs
-) -> list[SampleNameNotAvailableControlError]:
-    """
-    Validate that non-control sample names do not exists in the database under the same customer.
-    Applicable to all orders with control samples.
-    """
-    errors: list[SampleNameNotAvailableControlError] = get_sample_name_not_available_errors(
-        order=order, store=store, has_order_control=True
     )
     return errors
 

@@ -120,7 +120,9 @@ def test_config_case_default_parameters(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     sample_sheet_path: Path = request.getfixturevalue(f"{workflow}_sample_sheet_path")
     params_file_path: Path = request.getfixturevalue(f"{workflow}_params_file_path")
-    nexflow_config_file_path: Path = request.getfixturevalue(f"{workflow}_nexflow_config_file_path")
+    nexflow_config_file_path: Path = request.getfixturevalue(
+        f"{workflow}_nextflow_config_file_path"
+    )
     sample_sheet_content_expected: str = request.getfixturevalue(f"{workflow}_sample_sheet_content")
 
     # Mocking external Scout call
@@ -201,7 +203,9 @@ def test_config_case_dry_run(
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
     sample_sheet_path: Path = request.getfixturevalue(f"{workflow}_sample_sheet_path")
     params_file_path: Path = request.getfixturevalue(f"{workflow}_params_file_path")
-    nexflow_config_file_path: Path = request.getfixturevalue(f"{workflow}_nexflow_config_file_path")
+    nexflow_config_file_path: Path = request.getfixturevalue(
+        f"{workflow}_nextflow_config_file_path"
+    )
 
     # GIVEN a valid case
 
@@ -237,6 +241,6 @@ def test_config_case_dry_run(
     analysis_api: NfAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     if analysis_api.is_gene_panel_required:
         assert "Creating gene panel file" in caplog.text
-        assert "bin/scout --config scout-stage.yaml export panel" in caplog.text
+        assert f"{analysis_api.scout_api.scout_base_command} export panel" in caplog.text
         gene_panel_path: Path = request.getfixturevalue(f"{workflow}_gene_panel_path")
         assert not gene_panel_path.is_file()

@@ -1,7 +1,7 @@
 from enum import StrEnum, auto
 
 from cg.constants import FileExtensions
-from cg.constants.housekeeper_tags import AlignmentFileTag
+from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
 
 HGNC_ID = "hgnc_id"
 
@@ -39,6 +39,8 @@ class ScoutUploadKey(StrEnum):
     SV_VCF = auto()
     VCF_STR = auto()
     VCF_FUSION = auto()
+    VCF_SNV = auto()
+    VCF_SV = auto()
 
 
 RAREDISEASE_CASE_TAGS = dict(
@@ -55,6 +57,19 @@ RAREDISEASE_CASE_TAGS = dict(
     vcf_snv_research_mt={"vcf-sv-research", "mitochondria"},
     vcf_snv_mt={"vcf-sv-clinical", "mitochondria"},
     str_catalog={"expansionhunter", "variant-catalog"},
+    vcf_sv_research={"vcf-sv-research"},
+    vcf_sv={"vcf-sv-clinical"},
+    vcf_str={"vcf-str"},
+)
+
+NALLO_CASE_TAGS = dict(
+    delivery_report={"delivery-report"},
+    multiqc={"multiqc-html"},
+    peddy_check={"ped-check", "peddy"},
+    peddy_ped={"ped", "peddy"},
+    peddy_sex={"sex-check", "peddy"},
+    vcf_snv_research={"vcf-snv-research"},
+    vcf_snv={"vcf-snv-clinical"},
     vcf_sv_research={"vcf-sv-research"},
     vcf_sv={"vcf-sv-clinical"},
     vcf_str={"vcf-str"},
@@ -121,6 +136,15 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
     mitodel_file={"mitodel"},
 )
 
+NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
+    alignment_path={AlignmentFileTag.BAM, "haplotags"},
+    assembly_alignment_path={AlignmentFileTag.BAM, "assembly"},
+    d4_file={"coverage", "d4"},
+    hificnv_coverage={"hificnv", "bigwig"},
+    paraphase_alignment_path={AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE},
+    minor_allele_frequency_wig={"hificnv", "bigwig", "maf"},
+)
+
 MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
     bam_file={"bam"},
     alignment_file={"cram"},
@@ -153,3 +177,7 @@ RNAFUSION_SAMPLE_TAGS = dict(
 )
 
 RANK_MODEL_THRESHOLD = 5
+
+NALLO_RANK_MODEL_THRESHOLD = 8
+NALLO_RANK_MODEL_VERSION_SNV = "1.0"
+NALLO_RANK_MODEL_VERSION_SV = "1.0"
