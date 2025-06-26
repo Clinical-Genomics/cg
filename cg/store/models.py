@@ -302,11 +302,6 @@ class Analysis(Base):
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
 
-    @property
-    def is_completed(self) -> bool:
-        """Returns True if the analysis has been completed."""
-        return self.completed_at is not None and self.housekeeper_version_id is not None
-
     def to_dict(self, family: bool = True):
         """Represent as dictionary"""
         data = to_dict(model_instance=self)
@@ -524,7 +519,7 @@ class Case(Base, PriorityMixin):
     @property
     def latest_completed_analysis(self) -> Analysis | None:
         """Returns the latest completed analysis for this case."""
-        valid_analyses: list[Analysis] = [a for a in self.analyses if a.is_completed]
+        valid_analyses: list[Analysis] = [a for a in self.analyses if a.completed_at is not None]
         if not valid_analyses:
             return None
         sorted_analyses: list[Analysis] = sorted(

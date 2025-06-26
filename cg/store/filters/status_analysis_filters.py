@@ -22,9 +22,7 @@ def filter_analyses_with_workflow(analyses: Query, workflow: Workflow = None, **
 
 def filter_completed_analyses(analyses: Query, **kwargs) -> Query:
     """Return analyses that have been completed."""
-    return analyses.filter(
-        and_(Analysis.completed_at.isnot(None), Analysis.housekeeper_version_id.isnot(None))
-    )
+    return analyses.filter(Analysis.completed_at.isnot(None))
 
 
 def filter_uploaded_analyses(analyses: Query, **kwargs) -> Query:
