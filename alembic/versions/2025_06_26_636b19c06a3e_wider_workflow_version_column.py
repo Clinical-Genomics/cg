@@ -9,6 +9,7 @@ Create Date: 2025-06-26 10:19:41.528568
 from enum import StrEnum
 
 import sqlalchemy as sa
+from sqlalchemy import func
 
 from alembic import op
 
@@ -78,7 +79,7 @@ def downgrade():
         existing_type=sa.types.Enum(*(workflow.value for workflow in Workflow)),
     )
 
-    for case in session.query(Case).filter(len(Case.data_analysis) > 32).all():
+    for case in session.query(Case).filter(func.length(Case.data_analysis) > 32).all():
         # Replace with placeholder value
         case.data_analysis = "0.0.0"
 
