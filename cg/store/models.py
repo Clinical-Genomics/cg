@@ -283,7 +283,7 @@ class Analysis(Base):
     workflow: Mapped[str | None] = mapped_column(
         types.Enum(*(workflow.value for workflow in Workflow))
     )
-    workflow_version: Mapped[Str32 | None]
+    workflow_version: Mapped[Str64 | None]
     started_at: Mapped[datetime | None]
     completed_at: Mapped[datetime | None]
     delivery_report_created_at: Mapped[datetime | None]
@@ -456,7 +456,7 @@ class Case(Base, PriorityMixin):
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped["Customer"] = orm.relationship(foreign_keys=[customer_id])
-    data_analysis: Mapped[str | None] = mapped_column(
+    data_analysis: Mapped[str] = mapped_column(
         types.Enum(*(workflow.value for workflow in Workflow))
     )
     data_delivery: Mapped[str | None] = mapped_column(
