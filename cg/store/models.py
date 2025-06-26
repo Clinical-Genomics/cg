@@ -517,14 +517,21 @@ class Case(Base, PriorityMixin):
         return sorted_orders[0]
 
     @property
-    def latest_analyzed(self) -> datetime | None:
+    def latest_completed_analysis(self) -> Analysis | None:
+        """Returns the latest completed analysis for this case."""
         valid_analyses: list[Analysis] = [a for a in self.analyses if a.completed_at is not None]
         if not valid_analyses:
             return None
         sorted_analyses: list[Analysis] = sorted(
             valid_analyses, key=lambda analysis: analysis.completed_at, reverse=True
         )
-        return sorted_analyses[0].completed_at
+        return sorted_analyses[0]
+
+    @property
+    def latest_analyzed(self) -> datetime | None:
+        return (
+            self.latest_completed_analysis.completed_at if self.latest_completed_analysis else None
+        )
 
     @property
     def latest_sequenced(self) -> datetime | None:

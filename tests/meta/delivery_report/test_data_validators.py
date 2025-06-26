@@ -1,6 +1,7 @@
 """Tests delivery report data validation helpers."""
 
 import math
+from unittest.mock import create_autospec
 
 from cg.constants import NA_FIELD
 from cg.meta.delivery_report.data_validators import (
@@ -10,7 +11,7 @@ from cg.meta.delivery_report.data_validators import (
 )
 from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
 from cg.models.delivery_report.report import ReportModel
-from cg.store.models import Case
+from cg.store.models import Analysis, Case
 
 
 def test_get_empty_report_data(
@@ -22,16 +23,17 @@ def test_get_empty_report_data(
 
     # GIVEN a delivery report API
 
-    # GIVEN a case object
-    case: Case = raredisease_delivery_report_api.analysis_api.status_db.get_case_by_internal_id(
-        raredisease_case_id
-    )
+    # GIVEN an analysis
+    analysis: Analysis = create_autospec(Analysis)
+    analysis.comment = "comment"
+    analysis.workflow = "raredisease"
+    analysis.workflow_version = "1.0.0"
 
     # GIVEN a sample ID
 
     # GIVEN a delivery report data model
     report_data: ReportModel = raredisease_delivery_report_api.get_report_data(
-        case_id=raredisease_case_id, analysis_date=case.latest_analyzed
+        case_id=raredisease_case_id, analysis=analysis
     )
 
     # GIVEN empty fields
@@ -65,16 +67,17 @@ def test_get_missing_report_data(
 
     # GIVEN a delivery report API
 
-    # GIVEN a case object
-    case: Case = raredisease_delivery_report_api.analysis_api.status_db.get_case_by_internal_id(
-        raredisease_case_id
-    )
+    # GIVEN an analysis
+    analysis: Analysis = create_autospec(Analysis)
+    analysis.comment = "comment"
+    analysis.workflow = "raredisease"
+    analysis.workflow_version = "1.0.0"
 
     # GIVEN a sample ID
 
     # GIVEN a report data model
     report_data: ReportModel = raredisease_delivery_report_api.get_report_data(
-        raredisease_case_id, case.latest_analyzed
+        case_id=raredisease_case_id, analysis=analysis
     )
 
     # GIVEN a dictionary of report empty fields and a list of required MIP DNA report fields
