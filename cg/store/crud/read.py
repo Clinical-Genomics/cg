@@ -8,7 +8,13 @@ from typing import Callable, Iterator
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import DNA_WORKFLOWS_WITH_SCOUT_UPLOAD, CustomerId, SampleType
+from cg.constants.constants import (
+    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+    CaseActions,
+    CustomerId,
+    SampleType,
+)
+from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
@@ -373,7 +379,7 @@ class ReadHandler(BaseHandler):
 
     def get_latest_ticket_from_case(self, case_id: str) -> str:
         """Returns the ticket from the most recent sample in a case."""
-        return self.get_case_by_internal_id(internal_id=case_id).latest_ticket
+        return str(self.get_case_by_internal_id(internal_id=case_id).latest_order.ticket_id)
 
     def _is_case_found(self, case: Case, case_id: str) -> None:
         """Raise error if case is false."""
@@ -1803,6 +1809,16 @@ class ReadHandler(BaseHandler):
         if runs.count() == 0:
             raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()
+
+    def get_case_priority(self, case_id: str) -> SlurmQos:
+        """Get case priority."""
+        case: Case = self.get_case_by_internal_id(case_id)
+        return SlurmQos(case.slurm_priority)
+
+    def get_case_workflow(self, case_id: str) -> Workflow:
+        """Get case workflow."""
+        case: Case = self.get_case_by_internal_id(case_id)
+        return Workflow(case.data_analysis)
 
     def is_sample_name_used(self, sample: Sample, customer_entry_id: int) -> bool:
         """Check if a sample name is already used by the customer"""
