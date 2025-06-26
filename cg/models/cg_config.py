@@ -242,7 +242,9 @@ class RarediseaseConfig(CommonAppConfig):
     resources: str
     launch_directory: str
     workflow_bin_path: str
+    pre_run_script: str = ""
     profile: str
+    repository: str
     revision: str
     root: str
     slurm: SlurmConfig
@@ -303,7 +305,7 @@ class TaxprofilerConfig(CommonAppConfig):
 
 class MicrosaltConfig(BaseModel):
     binary_path: str
-    conda_binary: str | None = None
+    conda_binary: str
     conda_env: str
     queries_path: str
     root: str
@@ -345,6 +347,13 @@ class FOHMConfig(BaseModel):
 class ExternalConfig(BaseModel):
     hasta: str
     caesar: str
+
+
+class SeqeraPlatformConfig(BaseModel):
+    base_url: str
+    bearer_token: str
+    compute_environments: dict[SlurmQos, str]
+    workspace_id: int
 
 
 class DataFlowConfig(BaseModel):
@@ -437,6 +446,7 @@ class CGConfig(BaseModel):
     lims_api_: LimsAPI = None
     loqusdb: CommonAppConfig = Field(None, alias=LoqusdbInstance.WGS.value)
     loqusdb_api_: LoqusdbAPI = None
+    loqusdb_rd_lwp: CommonAppConfig = Field(None, alias=LoqusdbInstance.LWP.value)
     loqusdb_somatic: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC.value)
     loqusdb_tumor: CommonAppConfig = Field(None, alias=LoqusdbInstance.TUMOR.value)
     loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
@@ -449,6 +459,7 @@ class CGConfig(BaseModel):
     pigz: CommonAppConfig | None = None
     run_names_services_: RunNamesServices | None = None
     sample_sheet_api_: IlluminaSampleSheetService | None = None
+    seqera_platform: SeqeraPlatformConfig | None = None
     scout: CommonAppConfig = None
     scout_38: CommonAppConfig = None
     scout_api_37_: ScoutAPI = None
