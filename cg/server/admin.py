@@ -306,7 +306,7 @@ class ApplicationVersionView(BaseView):
         "comment",
     )
     column_exclude_list = ["created_at", "updated_at"]
-    column_filters = ["application.tag", "version"]
+    column_filters = ["application.is_archived", "application.tag", "version"]
     column_formatters = {"application": ApplicationView.view_application_link}
     column_searchable_list = ["application.tag"]
     edit_modal = True

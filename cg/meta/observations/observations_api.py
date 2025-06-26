@@ -18,6 +18,7 @@ from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
     MipDNAObservationsInputFiles,
     RarediseaseObservationsInputFiles,
+    NalloObservationsInputFiles,
 )
 from cg.store.models import Case
 from cg.store.store import Store
@@ -33,6 +34,7 @@ class ObservationsAPI:
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.analysis_api: AnalysisAPI = analysis_api
         self.loqusdb_config: CommonAppConfig = config.loqusdb
+        self.loqusdb_rd_lwp_config: CommonAppConfig = config.loqusdb_rd_lwp
         self.loqusdb_wes_config: CommonAppConfig = config.loqusdb_wes
         self.loqusdb_somatic_config: CommonAppConfig = config.loqusdb_somatic
         self.loqusdb_tumor_config: CommonAppConfig = config.loqusdb_tumor
@@ -59,6 +61,7 @@ class ObservationsAPI:
     ) -> (
         BalsamicObservationsInputFiles
         | MipDNAObservationsInputFiles
+        | NalloObservationsInputFiles
         | RarediseaseObservationsInputFiles
     ):
         """Return input files from a case to upload to Loqusdb."""
@@ -72,6 +75,10 @@ class ObservationsAPI:
     def get_loqusdb_api(self, loqusdb_instance: LoqusdbInstance) -> LoqusdbAPI:
         """Returns a Loqusdb API for the given Loqusdb instance."""
         loqusdb_apis = {
+            LoqusdbInstance.LWP: LoqusdbAPI(
+                binary_path=self.loqusdb_rd_lwp_config.binary_path,
+                config_path=self.loqusdb_rd_lwp_config.config_path,
+            ),
             LoqusdbInstance.WGS: LoqusdbAPI(
                 binary_path=self.loqusdb_config.binary_path,
                 config_path=self.loqusdb_config.config_path,
