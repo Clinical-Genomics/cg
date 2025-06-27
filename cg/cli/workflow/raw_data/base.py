@@ -44,13 +44,20 @@ def store_raw_data_analysis(context: click.Context, case_id: str, dry_run: bool 
 def store_available_raw_data_analysis(context: click.Context, dry_run: bool = False):
     """Creates an analysis object in status-db for all raw data cases to be delivered."""
     status_db: Store = context.obj.status_db
+    was_successful: bool = True
     for case in status_db.get_cases_to_analyze(workflow=Workflow.RAW_DATA):
         LOG.info(f"Creating an analysis for case {case.internal_id}")
         if SequencingQCService.case_pass_sequencing_qc(case):
             if dry_run:
                 return
-            raw_data_service = RawDataAnalysisService(
-                store=context.obj.status_db,
-                trailblazer_api=context.obj.trailblazer_api,
-            )
-            raw_data_service.store_analysis(case.internal_id)
+            try:
+                raw_data_service = RawDataAnalysisService(
+                    store=context.obj.status_db,
+                    trailblazer_api=context.obj.trailblazer_api,
+                )
+                raw_data_service.store_analysis(case.internal_id)
+            except Exception as error:
+                LOG.error(f"Failed to store analysis for case {case.internal_id}: {error}")
+                was_successful = False
+    if not was_successful:
+        raise click.Abort()

@@ -24,11 +24,11 @@ def upload_coverage(context: CGConfig, family_id):
         suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
 
-    case_obj: Case = status_db.get_case_by_internal_id(internal_id=family_id)
+    case: Case = status_db.get_case_by_internal_id(internal_id=family_id)
     upload_coverage_api = UploadCoverageApi(
         status_api=status_db,
         hk_api=context.housekeeper_api,
         chanjo_api=context.chanjo_api,
     )
-    coverage_data = upload_coverage_api.data(case_obj.analyses[0])
+    coverage_data = upload_coverage_api.data(case.latest_completed_analysis)
     upload_coverage_api.upload(coverage_data)

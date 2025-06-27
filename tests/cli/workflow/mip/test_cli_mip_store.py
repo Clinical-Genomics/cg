@@ -84,7 +84,7 @@ def test_cli_store(
 
     # THEN the analysis was updated in statusdb
     MipDNAAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
-        case_id=mip_case_id, comment=ANY, dry_run=False, force=False
+        case_id=mip_case_id, hk_version_id=ANY, comment=ANY, dry_run=False, force=False
     )
 
 
@@ -189,7 +189,7 @@ def test_cli_store_available_case_is_running(
 
     # THEN the analysis was updated in statusdb
     MipDNAAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
-        case_id=mip_case_id, comment=ANY, dry_run=False, force=False
+        case_id=mip_case_id, hk_version_id=ANY, comment=ANY, dry_run=False, force=False
     )
 
 
