@@ -110,7 +110,7 @@ def test_get_cases_with_extended_models(
     base_store.session.add(link)
 
     # WHEN getting cases to analyze
-    cases: list[Query] = list(base_store._get_outer_join_cases_with_analyses_query())
+    cases: list[Query] = list(base_store._get_case_query_for_analysis_start())
 
     case: Case = cases[0]
 
@@ -127,7 +127,7 @@ def test_get_cases_with_extended_models_when_no_case(base_store: Store):
     # GIVEN an empty database
 
     # WHEN getting cases to analyze
-    cases: list[Query] = list(base_store._get_outer_join_cases_with_analyses_query())
+    cases: list[Query] = list(base_store._get_case_query_for_analysis_start())
 
     # THEN no cases should be returned
     assert not cases

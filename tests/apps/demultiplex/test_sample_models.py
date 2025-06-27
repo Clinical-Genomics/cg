@@ -2,9 +2,19 @@ import pytest
 
 from cg.apps.demultiplex.sample_sheet.index import get_reverse_complement_dna_seq
 from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
-from cg.constants.demultiplexing import IndexOverrideCycles
 from cg.constants.symbols import EMPTY_STRING
 from cg.models.demultiplex.run_parameters import RunParameters
+
+
+class IndexOverrideCycles:
+    """Class with the possible values that index cycles can take."""
+
+    FULL_10_INDEX: str = "I10;"
+    FULL_8_INDEX: str = "I8;"
+    IGNORED_10_INDEX: str = "N10;"
+    IGNORED_8_INDEX: str = "N8;"
+    INDEX_8_IGNORED_2: str = "I8N2;"
+    INDEX_8_IGNORED_2_REVERSED: str = "N2I8;"
 
 
 @pytest.mark.parametrize(
