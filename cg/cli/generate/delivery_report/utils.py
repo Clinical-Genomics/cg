@@ -1,7 +1,6 @@
 """Delivery report helpers."""
 
 import logging
-from datetime import datetime
 
 import rich_click as click
 
@@ -23,7 +22,7 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
-from cg.store.models import Case
+from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
 
@@ -72,6 +71,15 @@ def get_report_case(context: click.Context, case_id: str) -> Case:
     return case
 
 
+def get_analysis_for_delivery_report(case: Case) -> Analysis:
+    """Returns the analysis object for the delivery report generation."""
+    analysis: Analysis | None = case.latest_completed_analysis
+    if not analysis:
+        LOG.error(f"There is no completed analysis for case {case.internal_id}. ")
+        raise click.Abort()
+    return analysis
+
+
 def get_report_api(context: click.Context, case: Case) -> DeliveryReportAPI:
     """Returns a report API to be used for the delivery report generation."""
     if context.obj.meta_apis.get("report_api"):
@@ -106,23 +114,3 @@ def get_report_api_workflow(context: click.Context, workflow: Workflow) -> Deliv
         Workflow.TOMTE: TomteDeliveryReportAPI(analysis_api=TomteAnalysisAPI(config=context.obj)),
     }
     return dispatch_report_api.get(workflow)
-
-
-def get_report_analysis_completed_at(
-    case: Case, report_api: DeliveryReportAPI, analysis_completed_at: str | None
-) -> datetime:
-    """Resolves and returns a valid analysis completed date."""
-    if not analysis_completed_at:
-        analysis_completed_at: datetime = (
-            report_api.status_db.get_case_by_internal_id(internal_id=case.internal_id)
-            .analyses[0]
-            .completed_at
-        )
-    # If there is no analysis for the provided date
-    if not report_api.status_db.get_analysis_by_case_entry_id_and_completed_at(
-        case_entry_id=case.id, completed_at_date=analysis_completed_at
-    ):
-        LOG.error(f"There is no analysis completed at {analysis_completed_at}")
-        raise click.Abort
-    LOG.info(f"Using analysis completed at: {analysis_completed_at}")
-    return analysis_completed_at

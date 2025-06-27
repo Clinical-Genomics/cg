@@ -50,7 +50,8 @@ def test_with_yes(
 
     analysis_to_clean = analysis_api.status_db.get_case_by_internal_id(
         balsamic_case_clean
-    ).analyses[0]
+    ).latest_completed_analysis
+    assert analysis_to_clean
     case_path = analysis_api.get_case_path(balsamic_case_clean)
     Path(case_path).mkdir(exist_ok=True, parents=True)
 
@@ -88,7 +89,9 @@ def test_dry_run(
         workflow=Workflow.BALSAMIC,
     )
 
-    analysis_to_clean = base_store.get_case_by_internal_id(balsamic_case_clean).analyses[0]
+    analysis_to_clean = base_store.get_case_by_internal_id(
+        balsamic_case_clean
+    ).latest_completed_analysis
     case_path = clean_context.meta_apis["analysis_api"].get_case_path(balsamic_case_clean)
     Path(case_path).mkdir(exist_ok=True, parents=True)
 

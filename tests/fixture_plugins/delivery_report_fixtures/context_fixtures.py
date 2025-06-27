@@ -3,8 +3,8 @@
 from datetime import datetime
 from pathlib import Path
 
-import rich_click as click
 import pytest
+import rich_click as click
 from pytest_mock import MockFixture
 
 from cg.apps.lims import LimsAPI
@@ -20,7 +20,7 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.delivery_report.report import ScoutVariantsFiles
-from cg.store.models import Case, Sample
+from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
 from tests.conftest import raredisease_case_id
 from tests.store_helpers import StoreHelpers
@@ -76,14 +76,17 @@ def raredisease_delivery_report_store_context(
         reference_genome="hg19",
     )
     helpers.add_relationship(store=base_store, case=case, sample=sample)
-    helpers.add_analysis(
+    analysis: Analysis = helpers.add_analysis(
         store=base_store,
         case=case,
         started_at=datetime.now(),
         completed_at=datetime.now(),
         workflow=Workflow.RAREDISEASE,
         data_delivery=DataDelivery.ANALYSIS_SCOUT,
+        housekeeper_version_id=1234,
     )
+    base_store.add_item_to_store(analysis)
+    base_store.commit_to_store()
     return base_store
 
 
@@ -114,14 +117,17 @@ def rnafusion_delivery_report_store_context(
         original_ticket=ticket_id,
     )
     helpers.add_relationship(store=base_store, case=case, sample=sample)
-    helpers.add_analysis(
+    analysis: Analysis = helpers.add_analysis(
         store=base_store,
         case=case,
         started_at=datetime.now(),
         completed_at=datetime.now(),
         workflow=Workflow.RNAFUSION,
         data_delivery=DataDelivery.ANALYSIS_SCOUT,
+        housekeeper_version_id=1234,
     )
+    base_store.add_item_to_store(analysis)
+    base_store.commit_to_store()
     return base_store
 
 
