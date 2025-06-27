@@ -204,10 +204,10 @@ class AnalysisAPI(MetaAPI):
         application_type: str = self.get_case_application_type(case_id)
         return application_type == AnalysisType.WES
 
-    def upload_bundle_housekeeper(
+    def create_housekeeper_bundle(
         self, case_id: str, dry_run: bool = False, force: bool = False
-    ) -> None:
-        """Storing bundle data in Housekeeper for a case."""
+    ) -> tuple[Bundle, Version]:
+        """Create and return bundle data in Housekeeper for a case."""
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
         bundle_data: dict = self.get_hermes_transformed_deliverables(case_id=case_id, force=force)
         bundle_result: tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
@@ -223,13 +223,14 @@ class AnalysisAPI(MetaAPI):
                 "The following files would be stored:\n%s",
                 "\n".join([f["path"] for f in bundle_data["files"]]),
             )
-            return
-        self.housekeeper_api.include(bundle_version)
-        self.housekeeper_api.add_commit(bundle_object)
-        self.housekeeper_api.add_commit(bundle_version)
-        LOG.info(
-            f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
-        )
+        else:
+            self.housekeeper_api.include(bundle_version)
+            self.housekeeper_api.add_commit(bundle_object)
+            self.housekeeper_api.add_commit(bundle_version)
+            LOG.info(
+                f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
+            )
+        return bundle_result
 
     def _create_analysis_statusdb(self, case: Case, trailblazer_id: int | None) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
@@ -253,6 +254,7 @@ class AnalysisAPI(MetaAPI):
     def update_analysis_as_completed_statusdb(
         self,
         case_id: str,
+        hk_version_id: int,
         comment: str | None = None,
         dry_run: bool = False,
         force: bool = False,
@@ -275,7 +277,10 @@ class AnalysisAPI(MetaAPI):
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
         self.status_db.update_analysis_completed_at(
-            analysis_id=analysis.id, completed_at=self.get_bundle_created_date(case_id)
+            analysis_id=analysis.id, completed_at=datetime.now()
+        )
+        self.status_db.update_analysis_housekeeper_version_id(
+            analysis_id=analysis.id, version_id=hk_version_id
         )
         self.status_db.update_analysis_comment(analysis_id=analysis.id, comment=comment)
 

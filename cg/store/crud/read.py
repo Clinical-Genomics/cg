@@ -163,22 +163,6 @@ class ReadHandler(BaseHandler):
             workflow=workflow,
         ).all()
 
-    def get_analysis_by_case_entry_id_and_completed_at(
-        self, case_entry_id: int, completed_at_date: dt.datetime
-    ) -> Analysis | None:
-        """Fetch an analysis."""
-        filter_functions: list[Callable] = [
-            AnalysisFilter.BY_CASE_ENTRY_ID,
-            AnalysisFilter.BY_COMPLETED_AT,
-        ]
-
-        return apply_analysis_filter(
-            filter_functions=filter_functions,
-            analyses=self._get_query(Analysis),
-            case_entry_id=case_entry_id,
-            completed_at_date=completed_at_date,
-        ).first()
-
     def get_latest_started_analysis_for_case(self, case_id: str) -> Analysis:
         """Return the latest started analysis for a case.
         Raises:

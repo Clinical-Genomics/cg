@@ -353,6 +353,7 @@ class StoreHelpers:
         data_delivery: DataDelivery = DataDelivery.FASTQ_QC,
         uploading: bool = False,
         config_path: str = None,
+        housekeeper_version_id: int | None = None,
     ) -> Analysis:
         """Utility function to add an analysis for tests."""
 
@@ -380,6 +381,8 @@ class StoreHelpers:
             analysis.config_path = config_path
         if workflow:
             analysis.workflow = str(workflow)
+        if housekeeper_version_id:
+            analysis.housekeeper_version_id = housekeeper_version_id
 
         analysis.limitations = "A limitation"
         analysis.case = case
