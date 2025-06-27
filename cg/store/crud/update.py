@@ -99,6 +99,12 @@ class UpdateMixin(ReadHandler):
         analysis.completed_at = completed_at
         self.commit_to_store()
 
+    def update_analysis_housekeeper_version_id(self, analysis_id: int, version_id: int) -> None:
+        """Update the Housekeeper version ID of an analysis."""
+        analysis: Analysis = self.get_analysis_by_entry_id(analysis_id)
+        analysis.housekeeper_version_id = version_id
+        self.commit_to_store()
+
     def update_analysis_comment(self, analysis_id: int, comment: str | None) -> None:
         """Update the comment field of an analysis appending the new comment over any existing."""
         analysis: Analysis = self.get_analysis_by_entry_id(analysis_id)
@@ -117,4 +123,12 @@ class UpdateMixin(ReadHandler):
         """Update the upload started at field of an analysis."""
         analysis: Analysis = self.get_analysis_by_entry_id(analysis_id)
         analysis.upload_started_at = upload_started_at
+        self.commit_to_store()
+
+    def update_analysis_delivery_report_date(
+        self, analysis_id: int, delivery_report_date: datetime | None
+    ) -> None:
+        """Update the delivery report created_at field of an analysis."""
+        analysis: Analysis = self.get_analysis_by_entry_id(analysis_id)
+        analysis.delivery_report_created_at = delivery_report_date
         self.commit_to_store()
