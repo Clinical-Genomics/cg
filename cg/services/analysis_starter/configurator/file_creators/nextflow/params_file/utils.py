@@ -30,3 +30,12 @@ def _replace_params_placeholders(value: str | int, workflow_parameters: dict) ->
                     f"{{{{{placeholder}}}}}", str(workflow_parameters[placeholder])
                 )
     return value
+
+
+def replace_rework(workflow_parameters: dict) -> dict:
+    replaced_workflow_parameters = copy.deepcopy(workflow_parameters)
+    for key, correct_value in replaced_workflow_parameters.items():
+        for replaceable_value in replaced_workflow_parameters.values():
+            if f"{{{{{key}}}}}" in replaceable_value:
+                replaceable_value.replace(f"{{{{{key}}}}}", correct_value)
+    return replaced_workflow_parameters

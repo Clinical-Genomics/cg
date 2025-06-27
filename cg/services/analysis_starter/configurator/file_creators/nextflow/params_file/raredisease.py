@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
-from cg.constants import DEFAULT_CAPTURE_KIT, FileExtensions
+from cg.constants import DEFAULT_CAPTURE_KIT
 from cg.constants.scout import ScoutExportFileName
 from cg.constants.tb import AnalysisType
 from cg.exc import CgDataError
@@ -25,11 +25,6 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         self.store = store
         self.lims = lims
         self.params = params
-
-    @staticmethod
-    def get_file_path(case_id: str, case_path: Path) -> Path:
-        """Return the path to the params file."""
-        return Path(case_path, f"{case_id}_params_file").with_suffix(FileExtensions.YAML)
 
     def create(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> None:
         """Create the params file for a case."""
