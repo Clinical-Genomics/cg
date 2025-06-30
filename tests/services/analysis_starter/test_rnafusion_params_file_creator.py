@@ -26,7 +26,10 @@ def test_rnafusion_params_file_creator_success(
     )
 
     # THEN the file should have been created correctly
-    expected_params = {"someparam": "something"} | {"input": sample_sheet_path, "outdir": case_path}
+    expected_params: dict = {"someparam": "something"} | {
+        "input": sample_sheet_path,
+        "outdir": case_path,
+    }
     write_mock.assert_called_once_with(
         file_path=rnafusion_params_file_creator.get_file_path(case_path=case_path, case_id=case_id),
         content=expected_params,
