@@ -38,7 +38,7 @@ class AnalysisStarterFactory:
         workflow: Workflow = self.store.get_case_workflow(case_id)
         return self.get_analysis_starter_for_workflow(workflow)
 
-    def get_analysis_starter_for_workflow(self, workflow: Workflow):
+    def get_analysis_starter_for_workflow(self, workflow: Workflow) -> AnalysisStarter:
         LOG.debug(f"Getting a {workflow} analysis starter")
         configurator: Configurator = self.configurator_factory.get_configurator(workflow)
         input_fetcher: InputFetcher = self._get_input_fetcher(workflow)

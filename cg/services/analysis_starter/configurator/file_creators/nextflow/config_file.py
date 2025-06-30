@@ -20,7 +20,7 @@ class NextflowConfigFileCreator:
     @staticmethod
     def get_file_path(case_id: str, case_path: Path) -> Path:
         """Return the path to the Nextflow config file."""
-        return Path(case_path, f"{case_id}_nextflow_config").with_suffix(FileExtensions.CONFIG)
+        return Path(case_path, f"{case_id}_nextflow_config").with_suffix(FileExtensions.JSON)
 
     def create(self, case_id: str, case_path: Path) -> None:
         """Create the Nextflow config file for a case."""
