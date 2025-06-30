@@ -1,5 +1,10 @@
 import copy
+import logging
 import re
+
+from cg.exc import CgDataError
+
+LOG = logging.getLogger(__name__)
 
 
 def replace_values_in_params_file(workflow_parameters: dict) -> dict:
@@ -30,3 +35,28 @@ def _replace_params_placeholders(value: str | int, workflow_parameters: dict) ->
                     f"{{{{{placeholder}}}}}", str(workflow_parameters[placeholder])
                 )
     return value
+
+
+def validate_no_repeated_parameters(case_parameters: dict, workflow_parameters: dict) -> None:
+    """
+    Validate that no parameter is defined twice with different values in  the case and workflow
+    parameter dictionaries.
+    Raises:
+        CgDataError: if one or more parameters are defined with different values in the
+        case and workflow parameters.
+    """
+    error: bool = False
+    repeated_parameters = set(case_parameters.keys()) & set(workflow_parameters.keys())
+    for param in repeated_parameters:
+        if case_parameters[param] != workflow_parameters[param]:
+            LOG.error(
+                f"Parameter '{param}' is defined with different values in the case and "
+                f"workflow parameters.\n Case parameter value: {case_parameters[param]} \n"
+                f"Workflow parameter value: {workflow_parameters[param]}"
+            )
+            error = True
+    if error:
+        raise CgDataError(
+            "One or more parameters are defined with different values "
+            "in the case and workflow parameters."
+        )

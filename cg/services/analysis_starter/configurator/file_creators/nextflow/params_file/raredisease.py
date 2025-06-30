@@ -14,6 +14,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.utils import (
     replace_values_in_params_file,
+    validate_no_repeated_parameters,
 )
 from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
@@ -45,6 +46,9 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
         ).model_dump()
         workflow_parameters: any = read_yaml(Path(self.params))
+        validate_no_repeated_parameters(
+            case_parameters=case_workflow_parameters, workflow_parameters=workflow_parameters
+        )
         parameters: dict = case_workflow_parameters | workflow_parameters
         curated_parameters: dict = replace_values_in_params_file(parameters)
         return curated_parameters
