@@ -1,8 +1,10 @@
 """Tests for cleaning FASTQ files."""
 
+from datetime import datetime
 import logging
 from pathlib import Path
 from typing import Generator
+from unittest import mock
 
 from _pytest.logging import LogCaptureFixture
 from housekeeper.store.models import File, Version
@@ -11,7 +13,11 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.meta.compress import files
+from cg.meta.compress.compress import CompressAPI
 from cg.models.compression_data import CompressionData
+from cg.store.models import Case, Sample
+from cg.store.store import Store
+
 from tests.cli.compress.conftest import MockCompressAPI
 from tests.meta.compress.conftest import MockCompressionData
 from tests.store_helpers import StoreHelpers
@@ -205,3 +211,92 @@ def test_cli_clean_fastqs_pending_compression_metadata(
     # THEN assert that the FASTQ files are NOT removed
     assert fastq_first.exists()
     assert fastq_second.exists()
+
+
+def test_clean_fastq_files_for_samples(
+    populated_compress_fastq_api: MockCompressAPI,
+    helpers: StoreHelpers,
+    base_store: Store,
+):
+    """Test to clean selected FASTQ files."""
+
+    # GIVEN a sample linked to two cases one being not eligible for cleaning
+    sample: Sample = helpers.add_sample(store=base_store, internal_id="sample1")
+    old_case: Case = helpers.add_case_with_sample(
+        base_store=base_store, case_id="case1", sample_id="sample1"
+    )
+    old_case.created_at = datetime(2023, 1, 1, 12, 0, 0)
+    new_case: Case = helpers.add_case_with_sample(
+        base_store=base_store, case_id="case2", sample_id="sample1"
+    )
+    new_case.created_at = datetime.now()
+    sample.cases = [old_case, new_case]
+
+    # WHEN calling clean_fastq_files_for_samples with a days_back threshold
+    with mock.patch.object(CompressAPI, "clean_fastq") as clean_fastq_mock:
+        populated_compress_fastq_api.clean_fastq_files_for_samples(
+            samples=[sample],
+            days_back=60,
+        )
+        # THEN assert that the clean_fastq_mock was not called
+        clean_fastq_mock.assert_not_called()
+
+
+def test_clean_fastq_files_for_samples_failure(
+    populated_compress_fastq_api: MockCompressAPI,
+    helpers: StoreHelpers,
+    base_store: Store,
+):
+    """Test to clean selected FASTQ files with a failure."""
+    # GIVEN a case with a sample
+    case: Case = helpers.add_case_with_sample(
+        base_store=base_store, case_id="case1", sample_id="sample1"
+    )
+    sample: Sample = case.samples[0]
+    # GIVEN that an exception is raised when calling clean_fastq
+    with mock.patch.object(CompressAPI, "clean_fastq") as clean_fastq_mock:
+        clean_fastq_mock.side_effect = Exception()
+        # WHEN calling clean_fastq_files_for_samples
+        result: bool = populated_compress_fastq_api.clean_fastq_files_for_samples(
+            samples=[sample],
+            days_back=60,
+        )
+        # THEN assert that clean_fastq_files_for_samples returns False
+        assert not result
+
+
+def test_clean_fastq_files_for_samples_continues_after_failure(
+    populated_compress_fastq_api: MockCompressAPI,
+    helpers: StoreHelpers,
+    base_store: Store,
+):
+    """Test that clean_fastq_files_for_samples continues after failure."""
+    # GIVEN a case with two samples
+    case: Case = helpers.add_case_with_sample(
+        base_store=base_store, case_id="case1", sample_id="sample1"
+    )
+    sample1: Sample = case.samples[0]
+    sample2: Sample = helpers.add_sample(store=base_store, internal_id="sample2")
+    sample2.cases = [case]
+
+    # GIVEN that an exception is raised when calling clean_fastq for sample1 but not for sample2
+    with mock.patch.object(CompressAPI, "clean_fastq") as clean_fastq_mock:
+        clean_fastq_mock.side_effect = [Exception(), None]
+        # WHEN calling clean_fastq_files_for_samples
+        result: bool = populated_compress_fastq_api.clean_fastq_files_for_samples(
+            samples=[sample1, sample2],
+            days_back=60,
+        )
+        # THEN assert that clean_fastq failed for sample1
+        clean_fastq_mock.assert_any_call(
+            sample_id=sample1.internal_id,
+            archive_location=PDC_ARCHIVE_LOCATION,
+        )
+        # THEN assert that clean_fastq succeeded for sample2
+        clean_fastq_mock.assert_any_call(
+            sample_id=sample2.internal_id,
+            archive_location=PDC_ARCHIVE_LOCATION,
+        )
+
+        # THEN assert that clean_fastq_files_for_samples returns False
+        assert not result
