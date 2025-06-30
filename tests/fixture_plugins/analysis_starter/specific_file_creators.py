@@ -7,6 +7,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.gene_panel
 from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
     ManagedVariantsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_mapping import (
+    SampleMappingFileCreator,
+)
 
 
 @pytest.fixture
@@ -27,3 +30,11 @@ def raredisease_managed_variants_creator(
         store=raredisease_context.status_db,
         scout_api=raredisease_context.scout_api_37,
     )
+
+
+@pytest.fixture
+def raredisease_sample_mapping_file_creator(
+    raredisease_context: CGConfig,
+) -> SampleMappingFileCreator:
+    """Fixture for the raredisease sample mapping file creator."""
+    return SampleMappingFileCreator(store=raredisease_context.status_db)

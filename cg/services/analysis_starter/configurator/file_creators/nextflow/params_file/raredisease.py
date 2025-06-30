@@ -6,6 +6,7 @@ from cg.constants.scout import ScoutExportFileName
 from cg.constants.symbols import EMPTY_STRING
 from cg.exc import CgDataError
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
+from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
@@ -22,10 +23,11 @@ from cg.store.store import Store
 
 class RarediseaseParamsFileCreator(ParamsFileCreator):
 
-    def __init__(self, store: Store, lims: LimsAPI, params: str):
+    def __init__(self, store: Store, lims: LimsAPI, params: str, extension: RarediseaseExtension):
         self.store = store
         self.lims = lims
         self.params = params
+        self.extension = extension
 
     @staticmethod
     def get_file_path(case_id: str, case_path: Path) -> Path:
@@ -59,6 +61,9 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         """Return case-specific parameters for the analysis."""
         analysis_type: str = self._get_data_analysis_type(case_id)
         target_bed_file: str = self._get_target_bed_from_lims(case_id)
+        sample_mapping_path: Path = self.extension.sample_mapping_file_creator.get_file_path(
+            case_id=case_id, case_path=case_path
+        )
         return RarediseaseParameters(
             input=sample_sheet_path,
             outdir=case_path,
@@ -67,6 +72,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             save_mapped_as_cram=True,
             vcfanno_extra_resources=f"{case_path}/{ScoutExportFileName.MANAGED_VARIANTS}",
             vep_filters_scout_fmt=f"{case_path}/{ScoutExportFileName.PANELS}",
+            sample_id_map=sample_mapping_path,
         )
 
     def _get_data_analysis_type(self, case_id: str) -> str:
