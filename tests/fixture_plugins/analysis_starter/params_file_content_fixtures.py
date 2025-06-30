@@ -16,7 +16,6 @@ def expected_raredisease_params_file_content(
         "target_bed_file": "twistexomecomprehensive_10.2_hg19_design.bed",
         "analysis_type": "wgs",
         "save_mapped_as_cram": True,
-        "skip_germlinecnvcaller": True,
         "vcfanno_extra_resources": raredisease_managed_variants_path.as_posix(),
         "vep_filters_scout_fmt": raredisease_gene_panel_path.as_posix(),
         "someparam": "something",

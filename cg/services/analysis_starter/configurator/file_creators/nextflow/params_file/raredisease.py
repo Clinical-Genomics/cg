@@ -9,11 +9,11 @@ from cg.io.yaml import read_yaml, write_yaml_nextflow_style
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.models import (
+    RarediseaseParameters,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.utils import (
     replace_values_in_params_file,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.models import (
-    RarediseaseParameters,
 )
 from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
@@ -55,14 +55,12 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         """Return case-specific parameters for the analysis."""
         analysis_type: str = self._get_data_analysis_type(case_id)
         target_bed_file: str = self._get_target_bed(case_id=case_id, analysis_type=analysis_type)
-        skip_germlinecnvcaller: bool = self._get_germlinecnvcaller_flag(analysis_type=analysis_type)
         return RarediseaseParameters(
             input=sample_sheet_path,
             outdir=case_path,
             analysis_type=analysis_type,
             target_bed_file=target_bed_file,
             save_mapped_as_cram=True,
-            skip_germlinecnvcaller=skip_germlinecnvcaller,
             vcfanno_extra_resources=f"{case_path}/{ScoutExportFileName.MANAGED_VARIANTS}",
             vep_filters_scout_fmt=f"{case_path}/{ScoutExportFileName.PANELS}",
         )
@@ -107,8 +105,3 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         if not bed_version:
             raise CgDataError(f"Bed-version {target_bed_shortname} does not exist")
         return bed_version.filename
-
-    @staticmethod
-    def _get_germlinecnvcaller_flag(analysis_type: str) -> bool:
-        """Return True if the germlinecnvcaller should be skipped."""
-        return analysis_type == AnalysisType.WGS
