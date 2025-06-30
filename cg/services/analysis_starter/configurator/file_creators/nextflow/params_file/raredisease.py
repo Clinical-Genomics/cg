@@ -1,9 +1,9 @@
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
-from cg.constants import DEFAULT_CAPTURE_KIT, FileExtensions
+from cg.constants import FileExtensions
 from cg.constants.scout import ScoutExportFileName
-from cg.constants.tb import AnalysisType
+from cg.constants.symbols import EMPTY_STRING
 from cg.exc import CgDataError
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
@@ -58,7 +58,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
     ) -> RarediseaseParameters:
         """Return case-specific parameters for the analysis."""
         analysis_type: str = self._get_data_analysis_type(case_id)
-        target_bed_file: str = self._get_target_bed(case_id=case_id, analysis_type=analysis_type)
+        target_bed_file: str = self._get_target_bed_from_lims(case_id)
         return RarediseaseParameters(
             input=sample_sheet_path,
             outdir=case_path,
@@ -77,22 +77,9 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         sample: Sample = self.store.get_samples_by_case_id(case_id=case_id)[0]
         return sample.application_version.application.analysis_type
 
-    def _get_target_bed(self, case_id: str, analysis_type: str) -> str:
+    def _get_target_bed_from_lims(self, case_id: str) -> str:
         """
-        Return the target bed file from LIMS or use default capture kit for WHOLE_GENOME_SEQUENCING.
-        Raises:
-            ValueError if not capture kit can be assigned to the case.
-        """
-        target_bed_file: str = self._get_target_bed_from_lims(case_id=case_id)
-        if not target_bed_file:
-            if analysis_type == AnalysisType.WGS:
-                return DEFAULT_CAPTURE_KIT
-            raise ValueError("No capture kit was found in LIMS")
-        return target_bed_file
-
-    def _get_target_bed_from_lims(self, case_id: str) -> str | None:
-        """
-        Get target bed filename from LIMS.
+        Get target bed filename from LIMS. Return an empty string if no target bed is found in LIMS.
         Raises:
             CgDataError: if the bed target capture version is not found in StatusDB.
         """
@@ -102,7 +89,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             sample: Sample = self.store.get_sample_by_internal_id(internal_id=sample.from_sample)
         target_bed_shortname: str | None = self.lims.capture_kit(lims_id=sample.internal_id)
         if not target_bed_shortname:
-            return None
+            return EMPTY_STRING
         bed_version: BedVersion | None = self.store.get_bed_version_by_short_name(
             bed_version_short_name=target_bed_shortname
         )

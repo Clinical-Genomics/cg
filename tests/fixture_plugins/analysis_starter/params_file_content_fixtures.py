@@ -13,7 +13,7 @@ def expected_raredisease_params_file_content(
     return {
         "input": raredisease_sample_sheet_path,
         "outdir": raredisease_case_path,
-        "target_bed_file": "twistexomecomprehensive_10.2_hg19_design.bed",
+        "target_bed_file": "",
         "analysis_type": "wgs",
         "save_mapped_as_cram": True,
         "vcfanno_extra_resources": raredisease_managed_variants_path.as_posix(),
