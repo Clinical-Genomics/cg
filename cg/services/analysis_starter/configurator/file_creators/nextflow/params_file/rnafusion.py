@@ -12,8 +12,8 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 
 class RNAFusionParamsFileCreator(ParamsFileCreator):
 
-    def __init__(self, params: Path):
-        self.params = params
+    def __init__(self, params: str):
+        self.params = Path(params)
 
     def create(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> any:
         file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
