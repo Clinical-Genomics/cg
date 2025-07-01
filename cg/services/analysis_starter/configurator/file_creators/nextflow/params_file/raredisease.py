@@ -105,8 +105,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         )
         content: list[list[str]] = [["customer_id", "internal_id"]]
         case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
-        for link in case.links:
-            sample = link.sample
+        for sample in case.samples:
             content.append([sample.name, sample.internal_id])
         write_csv(file_path=file_path, content=content)
         return file_path
