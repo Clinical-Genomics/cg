@@ -58,9 +58,9 @@ class ConfiguratorFactory:
 
     def _get_nextflow_configurator(self, workflow: Workflow) -> NextflowConfigurator:
         config_file_creator = self._get_nextflow_config_file_creator(workflow)
-        extension: PipelineExtension = self._get_pipeline_extension(workflow)
         params_file_creator: ParamsFileCreator = self._get_params_file_creator(workflow)
         sample_sheet_creator: NextflowSampleSheetCreator = self._get_sample_sheet_creator(workflow)
+        extension: PipelineExtension = self._get_pipeline_extension(workflow)
         return NextflowConfigurator(
             config_file_creator=config_file_creator,
             housekeeper_api=self.housekeeper_api,
@@ -82,16 +82,11 @@ class ConfiguratorFactory:
             workflow_config_path=pipeline_config.config,
         )
 
-    def _get_params_file_creator(
-        self,
-        workflow: Workflow,
-    ) -> ParamsFileCreator:
+    def _get_params_file_creator(self, workflow: Workflow) -> ParamsFileCreator:
         if workflow == Workflow.RAREDISEASE:
             pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
             return RarediseaseParamsFileCreator(
-                lims=self.lims_api,
-                store=self.store,
-                params=pipeline_config.params,
+                lims=self.lims_api, store=self.store, params=pipeline_config.params
             )
 
     def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
