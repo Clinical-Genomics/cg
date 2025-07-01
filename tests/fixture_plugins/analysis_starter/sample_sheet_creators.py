@@ -4,6 +4,9 @@ from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+    RNAFusionSampleSheetCreator,
+)
 
 
 @pytest.fixture
@@ -14,4 +17,14 @@ def raredisease_sample_sheet_creator(
         store=raredisease_context.status_db,
         housekeeper_api=raredisease_context.housekeeper_api,
         lims=raredisease_context.lims_api,
+    )
+
+
+@pytest.fixture
+def rnafusion_sample_sheet_creator(
+    rnafusion_context: CGConfig,
+) -> RNAFusionSampleSheetCreator:
+    return RNAFusionSampleSheetCreator(
+        store=rnafusion_context.status_db,
+        housekeeper_api=rnafusion_context.housekeeper_api,
     )
