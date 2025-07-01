@@ -18,7 +18,7 @@ from cg.store.store import Store
 class RarediseaseSampleSheetCreator(NextflowSampleSheetCreator):
 
     def __init__(self, housekeeper_api: HousekeeperAPI, lims: LimsAPI, store: Store):
-        self.housekeeper_api = housekeeper_api
+        super().__init__(housekeeper_api)
         self.lims = lims
         self.store = store
 
