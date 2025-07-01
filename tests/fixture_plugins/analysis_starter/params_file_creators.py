@@ -1,7 +1,6 @@
 import pytest
 
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
@@ -10,11 +9,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 @pytest.fixture
 def raredisease_params_file_creator(
     raredisease_context: CGConfig,
-    raredisease_extension: RarediseaseExtension,
 ) -> RarediseaseParamsFileCreator:
     return RarediseaseParamsFileCreator(
         store=raredisease_context.status_db,
         lims=raredisease_context.lims_api,
         params=raredisease_context.raredisease.params,
-        extension=raredisease_extension,
     )

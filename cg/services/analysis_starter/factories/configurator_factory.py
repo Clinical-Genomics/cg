@@ -28,9 +28,6 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_mapping import (
-    SampleMappingFileCreator,
-)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.abstract import (
     NextflowSampleSheetCreator,
 )
@@ -62,9 +59,7 @@ class ConfiguratorFactory:
     def _get_nextflow_configurator(self, workflow: Workflow) -> NextflowConfigurator:
         config_file_creator = self._get_nextflow_config_file_creator(workflow)
         extension: PipelineExtension = self._get_pipeline_extension(workflow)
-        params_file_creator: ParamsFileCreator = self._get_params_file_creator(
-            workflow=workflow, extension=extension
-        )
+        params_file_creator: ParamsFileCreator = self._get_params_file_creator(workflow)
         sample_sheet_creator: NextflowSampleSheetCreator = self._get_sample_sheet_creator(workflow)
         return NextflowConfigurator(
             config_file_creator=config_file_creator,
@@ -88,7 +83,8 @@ class ConfiguratorFactory:
         )
 
     def _get_params_file_creator(
-        self, workflow: Workflow, extension: PipelineExtension
+        self,
+        workflow: Workflow,
     ) -> ParamsFileCreator:
         if workflow == Workflow.RAREDISEASE:
             pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
@@ -96,7 +92,6 @@ class ConfiguratorFactory:
                 lims=self.lims_api,
                 store=self.store,
                 params=pipeline_config.params,
-                extension=extension,
             )
 
     def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
@@ -116,13 +111,9 @@ class ConfiguratorFactory:
             managed_variants_creator: ManagedVariantsFileCreator = (
                 self._get_managed_variants_file_creator(workflow)
             )
-            sample_mapping_creator: SampleMappingFileCreator = (
-                self._get_sample_mapping_file_creator()
-            )
             return RarediseaseExtension(
                 gene_panel_file_creator=gene_panel_creator,
                 managed_variants_file_creator=managed_variants_creator,
-                sample_mapping_file_creator=sample_mapping_creator,
             )
 
     def _get_gene_panel_file_creator(self, workflow: Workflow) -> GenePanelFileCreator:
@@ -130,9 +121,6 @@ class ConfiguratorFactory:
 
     def _get_managed_variants_file_creator(self, workflow: Workflow) -> ManagedVariantsFileCreator:
         return ManagedVariantsFileCreator(scout_api=self._get_scout_api(workflow), store=self.store)
-
-    def _get_sample_mapping_file_creator(self) -> SampleMappingFileCreator:
-        return SampleMappingFileCreator(store=self.store)
 
     def _get_scout_api(self, workflow: Workflow) -> ScoutAPI:
         return (
