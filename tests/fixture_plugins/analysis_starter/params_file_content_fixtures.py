@@ -18,5 +18,7 @@ def expected_raredisease_params_file_content(
         "save_mapped_as_cram": True,
         "vcfanno_extra_resources": raredisease_managed_variants_path.as_posix(),
         "vep_filters_scout_fmt": raredisease_gene_panel_path.as_posix(),
-        "someparam": "something",
+        "sample_id_map": Path(
+            raredisease_case_path, "raredisease_case_enough_reads_customer_internal_mapping.csv"
+        ),
     }

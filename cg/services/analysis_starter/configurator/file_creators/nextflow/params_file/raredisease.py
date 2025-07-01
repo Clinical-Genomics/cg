@@ -5,6 +5,7 @@ from cg.constants import FileExtensions
 from cg.constants.scout import ScoutExportFileName
 from cg.constants.symbols import EMPTY_STRING
 from cg.exc import CgDataError
+from cg.io.csv import write_csv
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
@@ -59,6 +60,9 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         """Return case-specific parameters for the analysis."""
         analysis_type: str = self._get_data_analysis_type(case_id)
         target_bed_file: str = self._get_target_bed_from_lims(case_id)
+        sample_mapping_file: Path = self._create_sample_mapping_file(
+            case_id=case_id, case_path=case_path
+        )
         return RarediseaseParameters(
             input=sample_sheet_path,
             outdir=case_path,
@@ -67,6 +71,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             save_mapped_as_cram=True,
             vcfanno_extra_resources=f"{case_path}/{ScoutExportFileName.MANAGED_VARIANTS}",
             vep_filters_scout_fmt=f"{case_path}/{ScoutExportFileName.PANELS}",
+            sample_id_map=sample_mapping_file,
         )
 
     def _get_data_analysis_type(self, case_id: str) -> str:
@@ -96,3 +101,16 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         if not bed_version:
             raise CgDataError(f"Bed-version {target_bed_shortname} does not exist")
         return bed_version.filename
+
+    def _create_sample_mapping_file(self, case_id: str, case_path: Path) -> Path:
+        """Create a sample mapping file for the case and returns its path."""
+        file_path = Path(case_path, f"{case_id}_customer_internal_mapping").with_suffix(
+            FileExtensions.CSV
+        )
+        content: list[list[str]] = [["customer_id", "internal_id"]]
+        case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
+        for link in case.links:
+            sample = link.sample
+            content.append([sample.name, sample.internal_id])
+        write_csv(file_path=file_path, content=content)
+        return file_path
