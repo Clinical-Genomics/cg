@@ -28,21 +28,20 @@ def raredisease_params_file_creator(
 
 
 @pytest.fixture
-def rnafusion_params_file_creator(rnafusion_context: CGConfig) -> RNAFusionParamsFileCreator:
-    return RNAFusionParamsFileCreator(rnafusion_context.rnafusion.params)
+def rnafusion_params_file_creator(
+    nf_analysis_pipeline_params_path: Path,
+) -> RNAFusionParamsFileCreator:
+    return RNAFusionParamsFileCreator(nf_analysis_pipeline_params_path.as_posix())
 
 
 @pytest.fixture
 def raredisease_params_file_creator2(
     mock_store_for_raredisease_params_file_creator: Store,
     nf_analysis_pipeline_params_path: Path,
-    mocker: MockFixture,
 ) -> RarediseaseParamsFileCreator:
     """Fixture to provide a RarediseaseParamsFileCreator with a mock store."""
     lims = create_autospec(LimsAPI)
     lims.capture_kit.return_value = "capture_kit"
-    mocker.patch.object(raredisease, "read_yaml", return_value={"someparam": "something"})
-    mocker.patch.object(raredisease, "write_csv", return_value=None)
     return RarediseaseParamsFileCreator(
         store=mock_store_for_raredisease_params_file_creator,
         lims=lims,

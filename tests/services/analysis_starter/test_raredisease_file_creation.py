@@ -23,28 +23,36 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 
 
-def test_raredisease_params_file_creator(
+@pytest.fixture
+def param_file_mocking(nextflow_params_file_content: dict, mocker: MockerFixture):
+    """Mock the read_yaml and write_yaml_nextflow_style methods."""
+    mocker.patch.object(raredisease, "read_yaml", return_value=nextflow_params_file_content)
+    mocker.patch.object(raredisease, "write_csv", return_value=None)
+
+
+@pytest.mark.usefixtures("param_file_mocking")
+def test_nextflow_params_file_creator(
     raredisease_params_file_creator2: RarediseaseParamsFileCreator,
     expected_raredisease_params_file_content: dict,
-    raredisease_case_path2: Path,
-    raredisease_sample_sheet_path2: Path,
+    nextflow_case_path: Path,
+    nextflow_sample_sheet_path: Path,
+    nextflow_case_id: str,
     mocker: MockerFixture,
 ):
     """Test that the Raredisease params file creator is initialized correctly."""
     # GIVEN a case id, case path and sample sheet path
-    case_id = "raredisease_case_id"
 
     # WHEN creating the params file
     write_mock = mocker.patch.object(raredisease, "write_yaml_nextflow_style", return_value=None)
     raredisease_params_file_creator2.create(
-        case_id=case_id,
-        case_path=raredisease_case_path2,
-        sample_sheet_path=raredisease_sample_sheet_path2,
+        case_id=nextflow_case_id,
+        case_path=nextflow_case_path,
+        sample_sheet_path=nextflow_sample_sheet_path,
     )
 
     # THEN the file should have been written with the expected content
     file_path: Path = raredisease_params_file_creator2.get_file_path(
-        case_id=case_id, case_path=raredisease_case_path2
+        case_id=nextflow_case_id, case_path=nextflow_case_path
     )
     write_mock.assert_called_once_with(
         file_path=file_path, content=expected_raredisease_params_file_content
