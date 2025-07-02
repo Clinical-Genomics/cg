@@ -34,7 +34,7 @@ def test_raredisease_params_file_creator(
     # GIVEN a case id, case path and sample sheet path
     case_id = "raredisease_case_id"
 
-    # WHEN initializing the Raredisease params file creator
+    # WHEN creating the params file
     write_mock = mocker.patch.object(raredisease, "write_yaml_nextflow_style", return_value=None)
     raredisease_params_file_creator2.create(
         case_id=case_id,
