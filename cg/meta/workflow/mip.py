@@ -34,8 +34,6 @@ CLI_OPTIONS = {
 }
 LOG = logging.getLogger(__name__)
 
-MAX_CASES_TO_START_IN_50_MINUTES = 33
-
 
 class MipAnalysisAPI(AnalysisAPI):
     """The workflow is accessed through Trailblazer but cg provides additional conventions and

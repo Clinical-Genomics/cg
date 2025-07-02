@@ -7,7 +7,6 @@ from typing import List
 import pytest
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.constants.nanopore_files import NanoporeDirsAndFiles
 
 CORRECT_SAMPLE_SHEET: str = "CorrectSampleSheet.csv"
 
@@ -37,12 +36,6 @@ def illumina_demultiplexed_runs_directory(demultiplex_fixtures: Path) -> Path:
 def illumina_demux_all_directory(demultiplex_fixtures: Path) -> Path:
     """Return the path to the sequenced flow cells fixture directory."""
     return Path(demultiplex_fixtures, "sequencing_runs_demux_all")
-
-
-@pytest.fixture(scope="session")
-def nanopore_flow_cells_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the sequenced flow cells fixture directory."""
-    return Path(demultiplex_fixtures, NanoporeDirsAndFiles.DATA_DIRECTORY)
 
 
 @pytest.fixture(scope="session")
