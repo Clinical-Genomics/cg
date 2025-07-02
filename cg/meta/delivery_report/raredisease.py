@@ -1,7 +1,7 @@
 """Raredisease Delivery Report API."""
 
 from cg.clients.chanjo2.models import CoverageMetrics
-from cg.constants.housekeeper_tags import HermesFileTag, AnalysisTag
+from cg.constants.housekeeper_tags import AnalysisTag, HermesFileTag
 from cg.constants.report import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,
@@ -14,7 +14,6 @@ from cg.constants.report import (
     REQUIRED_SAMPLE_RAREDISEASE_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
 )
-from cg.constants.scout import ScoutUploadKey
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.meta.delivery_report.data_validators import get_million_read_pairs
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
@@ -85,16 +84,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
                     HermesFileTag.SCOUT,
                 ],
             ).full_path,
-            vcf_str=self.housekeeper_api.get_file_by_exact_tags(
-                bundle=case_id,
-                tags=[
-                    AnalysisTag.VCF_STR,
-                    case_id,
-                    HermesFileTag.CLINICAL_DELIVERY,
-                    HermesFileTag.LONG_TERM_STORAGE,
-                    HermesFileTag.SCOUT,
-                ],
-            ).full_path,
+            vcf_str=self._get_vcf_str_file(case_id),
             smn_tsv=self.housekeeper_api.get_file_by_exact_tags(
                 bundle=case_id,
                 tags=[
@@ -105,6 +95,27 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
                     HermesFileTag.SCOUT,
                 ],
             ).full_path,
+        )
+
+    def _get_vcf_str_file(self, case_id: str) -> str:
+        """Gets the VCF STR file. If the case is not WGS, returns None, since the file
+        will not have been generated."""
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        analysis_type: str = case.samples[0].application_version.application.analysis_type
+        should_have_vcf_str: bool = analysis_type == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+        return (
+            self.housekeeper_api.get_file_by_exact_tags(
+                bundle=case_id,
+                tags=[
+                    AnalysisTag.VCF_STR,
+                    case_id,
+                    HermesFileTag.CLINICAL_DELIVERY,
+                    HermesFileTag.LONG_TERM_STORAGE,
+                    HermesFileTag.SCOUT,
+                ],
+            ).full_path
+            if should_have_vcf_str
+            else None
         )
 
     @staticmethod
