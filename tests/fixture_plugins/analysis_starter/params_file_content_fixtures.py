@@ -5,20 +5,21 @@ import pytest
 
 @pytest.fixture
 def expected_raredisease_params_file_content(
-    raredisease_case_path: Path,
-    raredisease_sample_sheet_path: Path,
-    raredisease_gene_panel_path: Path,
+    raredisease_case_path2: Path,
+    raredisease_sample_sheet_path2: Path,
+    raredisease_gene_panel_path2: Path,
     raredisease_managed_variants_path: Path,
 ) -> dict:
     return {
-        "input": raredisease_sample_sheet_path,
-        "outdir": raredisease_case_path,
-        "target_bed_file": "",
+        "someparam": "something",
+        "input": raredisease_sample_sheet_path2,
+        "outdir": raredisease_case_path2,
+        "target_bed_file": "bed_version_file.bed",
         "analysis_type": "wgs",
         "save_mapped_as_cram": True,
         "vcfanno_extra_resources": raredisease_managed_variants_path.as_posix(),
-        "vep_filters_scout_fmt": raredisease_gene_panel_path.as_posix(),
+        "vep_filters_scout_fmt": raredisease_gene_panel_path2.as_posix(),
         "sample_id_map": Path(
-            raredisease_case_path, "raredisease_case_enough_reads_customer_internal_mapping.csv"
+            raredisease_case_path2, "raredisease_case_id_customer_internal_mapping.csv"
         ),
     }

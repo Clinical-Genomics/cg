@@ -85,7 +85,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             CgDataError: if the bed target capture version is not found in StatusDB.
         """
         case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
-        sample: Sample = case.links[0].sample
+        sample: Sample = case.samples[0]
         if sample.from_sample:
             sample: Sample = self.store.get_sample_by_internal_id(internal_id=sample.from_sample)
         target_bed_shortname: str | None = self.lims.capture_kit(lims_id=sample.internal_id)

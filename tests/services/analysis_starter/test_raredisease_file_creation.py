@@ -2,6 +2,7 @@ from pathlib import Path
 from unittest import mock
 
 import pytest
+from pytest_mock import MockerFixture
 
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
@@ -13,12 +14,41 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.gene_panel
 from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
     ManagedVariantsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import raredisease
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.abstract import (
     NextflowSampleSheetCreator,
 )
+
+
+def test_raredisease_params_file_creator(
+    raredisease_params_file_creator2: RarediseaseParamsFileCreator,
+    expected_raredisease_params_file_content: dict,
+    raredisease_case_path2: Path,
+    raredisease_sample_sheet_path2: Path,
+    mocker: MockerFixture,
+):
+    """Test that the Raredisease params file creator is initialized correctly."""
+    # GIVEN a case id, case path and sample sheet path
+    case_id = "raredisease_case_id"
+
+    # WHEN initializing the Raredisease params file creator
+    write_mock = mocker.patch.object(raredisease, "write_yaml_nextflow_style", return_value=None)
+    raredisease_params_file_creator2.create(
+        case_id=case_id,
+        case_path=raredisease_case_path2,
+        sample_sheet_path=raredisease_sample_sheet_path2,
+    )
+
+    # THEN
+    path = raredisease_params_file_creator2.get_file_path(
+        case_id=case_id, case_path=raredisease_case_path2
+    )
+    write_mock.assert_called_once_with(
+        file_path=path, content=expected_raredisease_params_file_content
+    )
 
 
 @pytest.mark.parametrize(
@@ -49,42 +79,6 @@ def test_nextflow_config_file_content(
     # THEN the content of the file is the expected
     expected_content: str = request.getfixturevalue(expected_content_fixture)
     assert content.rstrip() == expected_content.rstrip()
-
-
-@pytest.mark.parametrize(
-    "file_creator_fixture, case_id_fixture, case_path_fixture, expected_content_fixture",
-    [
-        (
-            "raredisease_params_file_creator",
-            "raredisease_case_id",
-            "raredisease_case_path",
-            "expected_raredisease_params_file_content",
-        )
-    ],
-    ids=["raredisease"],
-)
-def test_params_file_content(
-    file_creator_fixture: str,
-    case_id_fixture: str,
-    case_path_fixture: str,
-    expected_content_fixture: str,
-    raredisease_sample_sheet_path: Path,
-    request: pytest.FixtureRequest,
-):
-    """Test that the params file content is created correctly for all pipelines."""
-    # GIVEN a params file content creator and a case id
-    content_creator: RarediseaseParamsFileCreator = request.getfixturevalue(file_creator_fixture)
-    case_id: str = request.getfixturevalue(case_id_fixture)
-    case_path: Path = request.getfixturevalue(case_path_fixture)
-
-    # WHEN creating a params file
-    content: dict = content_creator._get_content(
-        case_id=case_id, case_path=case_path, sample_sheet_path=raredisease_sample_sheet_path
-    )
-
-    # THEN the content of the file is the expected
-    expected_content: str = request.getfixturevalue(expected_content_fixture)
-    assert content == expected_content
 
 
 @pytest.mark.parametrize(
