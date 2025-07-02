@@ -6,7 +6,7 @@ from pathlib import Path
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, SequencingFileTag
 from cg.io.gzip import read_gzip_first_line
-from cg.meta.workflow.fastq import _is_undetermined_in_path
+from cg.meta.workflow.fastq import is_undetermined_in_path
 from cg.models.fastq import FastqFileMeta, GetFastqFileMeta
 from cg.store.models import Sample
 
@@ -51,7 +51,7 @@ class NextflowSampleSheetCreator(ABC):
         header_line: str = read_gzip_first_line(file_path=fastq_path)
         fastq_file_meta: FastqFileMeta = self._parse_fastq_header(header_line)
         fastq_file_meta.path = fastq_path
-        fastq_file_meta.undetermined = _is_undetermined_in_path(fastq_path)
+        fastq_file_meta.undetermined = is_undetermined_in_path(fastq_path)
         matches = re.findall(r"-l[1-9]t([1-9]{2})_", str(fastq_path))
         if len(matches) > 0:
             fastq_file_meta.flow_cell_id = f"{fastq_file_meta.flow_cell_id}-{matches[0]}"
