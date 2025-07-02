@@ -36,7 +36,7 @@ def rnafusion_params_file_creator(
     nextflow_params_file_content: dict,
     mocker: MockerFixture,
 ) -> RNAFusionParamsFileCreator:
-    mocker.patch.object(raredisease, "read_yaml", return_value=nextflow_params_file_content)
+    mocker.patch.object(rnafusion, "read_yaml", return_value=nextflow_params_file_content)
     return RNAFusionParamsFileCreator(nf_analysis_pipeline_params_path.as_posix())
 
 
