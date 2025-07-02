@@ -42,7 +42,7 @@ def test_raredisease_params_file_creator(
         sample_sheet_path=raredisease_sample_sheet_path2,
     )
 
-    # THEN
+    # THEN the file should have been written with the expected content
     path = raredisease_params_file_creator2.get_file_path(
         case_id=case_id, case_path=raredisease_case_path2
     )
