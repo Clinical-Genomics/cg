@@ -17,6 +17,11 @@ def raredisease_case_path(raredisease_dir: Path, raredisease_case_id: str) -> Pa
 
 
 @pytest.fixture
+def raredisease_case_path2(raredisease_dir: Path, raredisease_case_id: str) -> Path:
+    return Path("case", "path")
+
+
+@pytest.fixture
 def raredisease_work_dir_path(raredisease_case_path: Path, raredisease_case_id: Path) -> Path:
     return Path(raredisease_case_path, "work")
 
@@ -27,11 +32,15 @@ def raredisease_gene_panel_path(raredisease_case_path: Path) -> Path:
     return Path(raredisease_case_path, "gene_panels").with_suffix(FileExtensions.BED)
 
 
+@pytest.fixture(scope="function")
+def raredisease_gene_panel_path2(raredisease_case_path2: Path) -> Path:
+    """Path to gene panel file."""
+    return Path(raredisease_case_path2, "gene_panels").with_suffix(FileExtensions.BED)
+
+
 @pytest.fixture
-def raredisease_managed_variants_path(
-    raredisease_case_path: Path, raredisease_case_id: str
-) -> Path:
-    return Path(raredisease_case_path, "managed_variants").with_suffix(FileExtensions.VCF)
+def raredisease_managed_variants_path(raredisease_case_path2: Path) -> Path:
+    return Path(raredisease_case_path2, "managed_variants").with_suffix(FileExtensions.VCF)
 
 
 @pytest.fixture
@@ -65,3 +74,9 @@ def raredisease_sample_sheet_path(raredisease_case_path, raredisease_case_id) ->
     return Path(raredisease_case_path, f"{raredisease_case_id}_samplesheet").with_suffix(
         FileExtensions.CSV
     )
+
+
+@pytest.fixture(scope="function")
+def raredisease_sample_sheet_path2() -> Path:
+    """Path to sample sheet."""
+    return Path("samplesheet", "path")
