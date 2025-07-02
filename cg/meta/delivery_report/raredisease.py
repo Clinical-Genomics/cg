@@ -1,7 +1,6 @@
 """Raredisease Delivery Report API."""
 
 from cg.clients.chanjo2.models import CoverageMetrics
-from cg.constants.housekeeper_tags import AnalysisTag, HermesFileTag
 from cg.constants.report import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,
@@ -81,27 +80,6 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
             sv_vcf=sv_vcf,
             vcf_str=vcf_str,
             smn_tsv=smn_tsv,
-        )
-
-    def _get_vcf_str_file(self, case_id: str) -> str:
-        """Gets the VCF STR file. If the case is not WGS, returns None, since the file
-        will not have been generated."""
-        case: Case = self.status_db.get_case_by_internal_id(case_id)
-        analysis_type: str = case.samples[0].application_version.application.analysis_type
-        should_have_vcf_str: bool = analysis_type == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
-        return (
-            self.housekeeper_api.get_file_by_exact_tags(
-                bundle=case_id,
-                tags=[
-                    AnalysisTag.VCF_STR,
-                    case_id,
-                    HermesFileTag.CLINICAL_DELIVERY,
-                    HermesFileTag.LONG_TERM_STORAGE,
-                    HermesFileTag.SCOUT,
-                ],
-            ).full_path
-            if should_have_vcf_str
-            else None
         )
 
     @staticmethod
