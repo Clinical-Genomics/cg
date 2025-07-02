@@ -22,9 +22,9 @@ def raredisease_sample_sheet_creator(
 
 @pytest.fixture
 def rnafusion_sample_sheet_creator(
-    rnafusion_context: CGConfig,
+    cg_context: CGConfig,
 ) -> RNAFusionSampleSheetCreator:
     return RNAFusionSampleSheetCreator(
-        store=rnafusion_context.status_db,
-        housekeeper_api=rnafusion_context.housekeeper_api,
+        store=cg_context.status_db,
+        housekeeper_api=cg_context.housekeeper_api,
     )
