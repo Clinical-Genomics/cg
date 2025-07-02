@@ -15,7 +15,13 @@
       <tr>
         <th scope="row">{{ metric.name }}</th>
         {% for sample in samples %}
-          <td>{{ sample.metadata[metric.key] }}</td>
+          <td>
+            {% if sample.metadata[metric.key] and sample.metadata[metric.key].value is not none %}
+              {{ sample.metadata[metric.key].value }}
+            {% else %}
+              N/A
+            {% endif %}
+          </td>
         {% endfor %}
         <td class="text-start">{{ metric.description }}</td>
       </tr>
