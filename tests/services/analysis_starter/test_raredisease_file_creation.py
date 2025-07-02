@@ -43,11 +43,11 @@ def test_raredisease_params_file_creator(
     )
 
     # THEN the file should have been written with the expected content
-    path = raredisease_params_file_creator2.get_file_path(
+    file_path: Path = raredisease_params_file_creator2.get_file_path(
         case_id=case_id, case_path=raredisease_case_path2
     )
     write_mock.assert_called_once_with(
-        file_path=path, content=expected_raredisease_params_file_content
+        file_path=file_path, content=expected_raredisease_params_file_content
     )
 
 
