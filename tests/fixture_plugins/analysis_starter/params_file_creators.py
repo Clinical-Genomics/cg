@@ -30,8 +30,9 @@ def raredisease_params_file_creator(
 @pytest.fixture
 def rnafusion_params_file_creator(rnafusion_context: CGConfig) -> RNAFusionParamsFileCreator:
     return RNAFusionParamsFileCreator(rnafusion_context.rnafusion.params)
-  
-  
+
+
+@pytest.fixture
 def raredisease_params_file_creator2(
     mock_store_for_raredisease_params_file_creator: Store,
     nf_analysis_pipeline_params_path: Path,
