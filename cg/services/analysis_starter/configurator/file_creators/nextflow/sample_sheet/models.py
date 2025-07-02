@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
+from cg.models.nf_analysis import NextflowSampleSheetEntry
 
 
 class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
@@ -50,14 +50,3 @@ class RarediseaseSampleSheetHeaders(StrEnum):
     @classmethod
     def list(cls) -> list[str]:
         return list(map(lambda header: header.value, cls))
-
-
-class RarediseaseParameters(WorkflowParameters):
-    """Model for Raredisease parameters."""
-
-    target_bed_file: str
-    analysis_type: str
-    save_mapped_as_cram: bool
-    skip_germlinecnvcaller: bool
-    vcfanno_extra_resources: str
-    vep_filters_scout_fmt: str
