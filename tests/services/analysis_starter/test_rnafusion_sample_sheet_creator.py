@@ -3,9 +3,11 @@ from unittest.mock import create_autospec
 
 from pytest_mock import MockerFixture
 
-from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
 from cg.constants import Workflow
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import rnafusion
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
+    abstract,
+    rnafusion,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
     RNAFusionSampleSheetCreator,
 )
@@ -29,6 +31,15 @@ def test_rnafusion_sample_sheet_creator(
     mock_sample.internal_id = "rna_sample"
     mock_case.samples = [mock_sample]
     mocker.patch.object(Store, "get_case_by_internal_id", return_value=mock_case)
+    mocker.patch.object(
+        abstract,
+        "read_gzip_first_line",
+        side_effect=[
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
+            "@ST-E00201:173:HCLCGALXX:1:2106:22516:34834/2",
+        ],
+    )
+    mocker.patch.object(Path, "is_file", return_value=True)
     rnafusion_sample_sheet_creator.create(case_id=rnafusion_case_id, case_path=case_path)
 
     write_mock.assert_called_with(
