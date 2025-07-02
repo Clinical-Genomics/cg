@@ -45,8 +45,11 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         case_workflow_parameters: dict = self._get_case_parameters(
             case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
         ).model_dump()
-        workflow_parameters: any = read_yaml(Path(self.params))
-        parameters: dict = workflow_parameters | case_workflow_parameters
+        workflow_parameters: dict = read_yaml(Path(self.params))
+        duplicate_keys = set(case_workflow_parameters.keys()) & set(workflow_parameters.keys())
+        if duplicate_keys:
+            raise CgDataError(f"Duplicate parameter keys found: {duplicate_keys}")
+        parameters: dict = case_workflow_parameters | workflow_parameters
         curated_parameters: dict = replace_values_in_params_file(parameters)
         return curated_parameters
 

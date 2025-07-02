@@ -11,7 +11,6 @@ def expected_raredisease_params_file_content(
     raredisease_managed_variants_path: Path,
 ) -> dict:
     return {
-        "someparam": "something",
         "input": raredisease_sample_sheet_path2,
         "outdir": raredisease_case_path2,
         "target_bed_file": "bed_version_file.bed",
@@ -22,4 +21,5 @@ def expected_raredisease_params_file_content(
         "sample_id_map": Path(
             raredisease_case_path2, "raredisease_case_id_customer_internal_mapping.csv"
         ),
+        "someparam": "something",
     }
