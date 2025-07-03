@@ -27,6 +27,26 @@ def raredisease_sample_sheet_creator(
 
 
 @pytest.fixture
+def raredisease_sample_sheet_creator2(
+    fastq_path_1: Path,
+    fastq_path_2: Path,
+    raredisease_context: CGConfig,
+    mock_store_for_raredisease_params_file_creator: Store,
+) -> RarediseaseSampleSheetCreator:
+    fastq_file1 = create_autospec(File)
+    fastq_file1.full_path = fastq_path_1.as_posix()
+    fastq_file2 = create_autospec(File)
+    fastq_file2.full_path = fastq_path_2.as_posix()
+    housekeeper_mock = create_autospec(HousekeeperAPI)
+    housekeeper_mock.files.return_value = [fastq_file1, fastq_file2]
+    return RarediseaseSampleSheetCreator(
+        store=mock_store_for_raredisease_params_file_creator,
+        housekeeper_api=housekeeper_mock,
+        lims=raredisease_context.lims_api,
+    )
+
+
+@pytest.fixture
 def rnafusion_sample_sheet_creator(
     fastq_path_1: Path, fastq_path_2: Path, mock_store_for_rnafusion_sample_sheet_creator: Store
 ) -> RNAFusionSampleSheetCreator:

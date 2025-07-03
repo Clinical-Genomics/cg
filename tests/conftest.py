@@ -3314,23 +3314,6 @@ def rnafusion_workflow() -> str:
 
 
 @pytest.fixture(scope="function")
-def rnafusion_sample_sheet_content_list(
-    fastq_path_1: Path,
-    fastq_path_2: Path,
-    strandedness: str,
-) -> list[list[str]]:
-    """Return the expected sample sheet content  for rnafusion."""
-    headers: list[str] = RnafusionSampleSheetEntry.headers()
-    row: list[str] = [
-        "rna_sample",
-        fastq_path_1,
-        fastq_path_2,
-        strandedness.value,
-    ]
-    return [headers, row]
-
-
-@pytest.fixture(scope="function")
 def rnafusion_sample_sheet_content(
     rnafusion_case_id: str,
     sample_id: str,
