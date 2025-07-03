@@ -56,7 +56,7 @@ def microsalt_store(base_store: Store, helpers: StoreHelpers) -> Store:
 
 
 @pytest.fixture
-def mock_store_for_raredisease_params_file_creator(
+def mock_store_for_raredisease_file_creators(
     nextflow_case_id: str, nextflow_sample_id: str
 ) -> Store:
     """Fixture to provide a mock store for the params file creator."""

@@ -20,7 +20,7 @@ class NextflowSampleSheetCreator(ABC):
 
     @staticmethod
     def get_file_path(case_id: str, case_path: Path) -> Path:
-        """Return the path to the params file."""
+        """Return the path to the sample sheet."""
         return Path(case_path, f"{case_id}_sample_sheet").with_suffix(FileExtensions.CSV)
 
     @abstractmethod

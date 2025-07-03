@@ -19,7 +19,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
     ParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
-    abstract,
+    creator,
     raredisease,
     rnafusion,
 )
@@ -144,7 +144,7 @@ def test_nextflow_sample_sheet_creators(
 
     # GIVEN a pair of Fastq files that have a header
     mocker.patch.object(
-        abstract,
+        creator,
         "read_gzip_first_line",
         side_effect=[
             "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",

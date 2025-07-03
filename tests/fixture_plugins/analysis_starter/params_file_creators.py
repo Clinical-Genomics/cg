@@ -42,7 +42,7 @@ def rnafusion_params_file_creator(
 
 @pytest.fixture
 def raredisease_params_file_creator2(
-    mock_store_for_raredisease_params_file_creator: Store,
+    mock_store_for_raredisease_file_creators: Store,
     nextflow_params_file_content: dict,
     nf_analysis_pipeline_params_path: Path,
     mocker: MockerFixture,
@@ -53,7 +53,7 @@ def raredisease_params_file_creator2(
     mocker.patch.object(raredisease, "read_yaml", return_value=nextflow_params_file_content)
     mocker.patch.object(raredisease, "write_csv", return_value=None)
     return RarediseaseParamsFileCreator(
-        store=mock_store_for_raredisease_params_file_creator,
+        store=mock_store_for_raredisease_file_creators,
         lims=lims,
         params=nf_analysis_pipeline_params_path.as_posix(),
     )

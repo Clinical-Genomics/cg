@@ -4,7 +4,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.io.csv import write_csv
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.abstract import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.models import (
