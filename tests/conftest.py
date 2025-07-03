@@ -3319,7 +3319,7 @@ def rnafusion_sample_sheet_content_list(
     headers: list[str] = RnafusionSampleSheetEntry.headers()
     row: list[str] = [
         "rna_sample",
-        Path("/path/fastq_1.fastq.gz"),
+        Path("/path/fastq_1.fastq.z"),
         Path("/path/fastq_2.fastq.gz"),
         strandedness.value,
     ]
