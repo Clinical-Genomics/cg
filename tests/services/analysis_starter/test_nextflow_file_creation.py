@@ -44,34 +44,19 @@ def test_nextflow_params_file_creator(
     write_yaml_mock.assert_called_once_with(file_path=file_path, content=expected_content)
 
 
-@pytest.mark.parametrize(
-    "file_creator_fixture, case_id_fixture, expected_content_fixture",
-    [
-        (
-            "raredisease_config_file_creator",
-            "raredisease_case_id",
-            "expected_raredisease_config_content",
-        )
-    ],
-    ids=["raredisease"],
-)
 def test_nextflow_config_file_content(
-    file_creator_fixture: str,
-    case_id_fixture: str,
-    expected_content_fixture: str,
-    request: pytest.FixtureRequest,
+    nextflow_config_file_creator: NextflowConfigFileCreator,
+    nextflow_case_id: str,
+    expected_nextflow_config_content: str,
 ):
     """Test that a Nextflow config file content is created correctly for all pipelines."""
     # GIVEN a Nextflow config content creator and a case id
-    file_creator: NextflowConfigFileCreator = request.getfixturevalue(file_creator_fixture)
-    case_id: str = request.getfixturevalue(case_id_fixture)
 
     # WHEN creating a Nextflow config file
-    content: str = file_creator._get_content(case_id)
+    content: str = nextflow_config_file_creator._get_content(nextflow_case_id)
 
     # THEN the content of the file is the expected
-    expected_content: str = request.getfixturevalue(expected_content_fixture)
-    assert content.rstrip() == expected_content.rstrip()
+    assert content.rstrip() == expected_nextflow_config_content.rstrip()
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])

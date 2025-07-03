@@ -3,7 +3,7 @@ from unittest.mock import create_autospec
 import pytest
 
 from cg.constants.constants import DataDelivery, Workflow
-from cg.constants.priority import Priority
+from cg.constants.priority import Priority, SlurmQos
 from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.store.models import (
     Application,
@@ -74,6 +74,7 @@ def mock_store_for_raredisease_file_creators(
     link.get_paternal_sample_id = ""
     case.links = [link]
     case.data_analysis = Workflow.RAREDISEASE
+    case.slurm_priority = SlurmQos.NORMAL
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id.return_value = case
     store.get_samples_by_case_id.return_value = [sample]

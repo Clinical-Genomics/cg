@@ -29,7 +29,7 @@ def nextflow_cluster_options() -> str:
 
 
 @pytest.fixture
-def expected_raredisease_config_content(
+def expected_nextflow_config_content(
     nextflow_cluster_options: str,
     nextflow_config_base_content: str,
 ) -> str:
