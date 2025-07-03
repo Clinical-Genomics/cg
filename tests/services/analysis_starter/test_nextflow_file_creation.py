@@ -16,6 +16,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_va
     ManagedVariantsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import creator
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
+    NextflowSampleSheetCreator,
+)
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
@@ -163,3 +166,12 @@ def test_managed_variants_content(
 
     # THEN the content of the file is the expected
     assert content == expected_content_fixture
+
+
+def test_parse_fastq_header_raises_error():
+    # GIVEN a faulty FASTQ Header
+
+    with pytest.raises(TypeError):
+        # WHEN parsing the header
+        # THEN the correct error is raised
+        NextflowSampleSheetCreator._parse_fastq_header(line="Not a Fastq header")
