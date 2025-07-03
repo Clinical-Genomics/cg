@@ -17,8 +17,15 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_va
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
+    abstract,
+    rnafusion,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.abstract import (
     NextflowSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+    RNAFusionSampleSheetCreator,
 )
 
 
@@ -128,6 +135,33 @@ def test_nextflow_sample_sheet_content(
     # THEN the content of the file is the expected
     expected_content: str = request.getfixturevalue(expected_content_fixture)
     assert content == expected_content
+
+
+def test_rnafusion_sample_sheet_creator(
+    nextflow_case_id: str,
+    nextflow_case_path: Path,
+    rnafusion_sample_sheet_content_list: list[list[str]],
+    rnafusion_sample_sheet_creator: RNAFusionSampleSheetCreator,
+    mocker: MockerFixture,
+):
+
+    write_mock = mocker.patch.object(rnafusion, "write_csv")
+    mocker.patch.object(
+        abstract,
+        "read_gzip_first_line",
+        side_effect=[
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/2",
+        ],
+    )
+    mocker.patch.object(Path, "is_file", return_value=True)
+    rnafusion_sample_sheet_creator.create(case_id=nextflow_case_id, case_path=nextflow_case_path)
+    write_mock.assert_called_with(
+        content=rnafusion_sample_sheet_content_list,
+        file_path=rnafusion_sample_sheet_creator.get_file_path(
+            case_path=nextflow_case_path, case_id=nextflow_case_id
+        ),
+    )
 
 
 @pytest.mark.parametrize(

@@ -3,7 +3,6 @@ from unittest.mock import create_autospec
 
 import pytest
 from housekeeper.store.models import File
-from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.models.cg_config import CGConfig
@@ -29,15 +28,15 @@ def raredisease_sample_sheet_creator(
 
 @pytest.fixture
 def rnafusion_sample_sheet_creator(
-    base_store: Store, fastq_path_1: Path, fastq_path_2: Path, mocker: MockerFixture
+    fastq_path_1: Path, fastq_path_2: Path, mock_store_for_rnafusion_sample_sheet_creator: Store
 ) -> RNAFusionSampleSheetCreator:
-    housekeeper_mock = create_autospec(HousekeeperAPI)
     fastq_file1 = create_autospec(File)
     fastq_file1.full_path = fastq_path_1.as_posix()
     fastq_file2 = create_autospec(File)
     fastq_file2.full_path = fastq_path_2.as_posix()
-    mocker.patch.object(housekeeper_mock, "files", return_value=[fastq_file1, fastq_file2])
+    housekeeper_mock = create_autospec(HousekeeperAPI)
+    housekeeper_mock.files.return_value = [fastq_file1, fastq_file2]
     return RNAFusionSampleSheetCreator(
-        store=base_store,
+        store=mock_store_for_rnafusion_sample_sheet_creator,
         housekeeper_api=housekeeper_mock,
     )

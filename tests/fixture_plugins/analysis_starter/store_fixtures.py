@@ -64,3 +64,19 @@ def mock_store_for_raredisease_params_file_creator() -> Store:
     bed_version.filename = "bed_version_file.bed"
     store.get_bed_version_by_short_name.return_value = bed_version
     return store
+
+
+@pytest.fixture
+def mock_store_for_rnafusion_sample_sheet_creator() -> Store:
+    """Fixture mocking the necessary parts of StatusDB for the RNAFusion sample sheet creator."""
+
+    mock_sample = create_autospec(Sample)
+    mock_sample.internal_id = "rna_sample"
+
+    mock_case = create_autospec(Case)
+    mock_case.data_analysis = Workflow.RNAFUSION
+    mock_case.samples = [mock_sample]
+
+    mock_store = create_autospec(Store)
+    mock_store.get_case_by_internal_id.return_value = mock_case
+    return mock_store
