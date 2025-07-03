@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-from services.analysis_starter.conftest import nextflow_case_path
 
 from cg.constants import FileExtensions
 
@@ -76,3 +75,14 @@ def raredisease_sample_sheet_path(raredisease_case_path, raredisease_case_id) ->
 def nextflow_params_file_content() -> dict:
     """Return a dictionary with some parameters for the Nextflow params file."""
     return {"someparam": "something"}
+
+
+@pytest.fixture
+def nextflow_case_path() -> Path:
+    return Path("case", "path")
+
+
+@pytest.fixture
+def nextflow_sample_sheet_path() -> Path:
+    """Path to sample sheet."""
+    return Path("samplesheet", "path")
