@@ -5,6 +5,7 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, SequencingFileTag
+from cg.io.csv import write_csv
 from cg.io.gzip import read_gzip_first_line
 from cg.meta.workflow.fastq import is_undetermined_in_path
 from cg.models.fastq import FastqFileMeta, GetFastqFileMeta
@@ -23,8 +24,13 @@ class NextflowSampleSheetCreator(ABC):
         """Return the path to the sample sheet."""
         return Path(case_path, f"{case_id}_sample_sheet").with_suffix(FileExtensions.CSV)
 
-    @abstractmethod
     def create(self, case_id: str, case_path: Path) -> None:
+        file_path = self.get_file_path(case_id=case_id, case_path=case_path)
+        content: list[list[str]] = self._get_content(case_id)
+        write_csv(file_path=file_path, content=content)
+
+    @abstractmethod
+    def _get_content(self, case_id: str) -> list[list[str]]:
         pass
 
     def _get_paired_read_paths(self, sample: Sample) -> tuple[list[str], list[str]]:

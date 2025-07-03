@@ -15,68 +15,33 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.gene_panel
 from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
     ManagedVariantsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
-    ParamsFileCreator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
-    creator,
-    raredisease,
-    rnafusion,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
-    RarediseaseSampleSheetCreator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
-    RNAFusionSampleSheetCreator,
-)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import creator
 
 
-@pytest.mark.parametrize(
-    "file_creator_fixture, expected_content_fixture, mock_writer",
-    [
-        (
-            "raredisease_params_file_creator2",
-            "expected_raredisease_params_file_content",
-            "write_raredisease_mock",
-        ),
-        (
-            "rnafusion_params_file_creator",
-            "expected_rnafusion_params_file_content",
-            "write_rnafusion_mock",
-        ),
-    ],
-    ids=["raredisease", "rnafusion"],
-)
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_nextflow_params_file_creator(
-    file_creator_fixture: str,
-    expected_content_fixture: str,
-    mock_writer: str,
+    workflow: Workflow,
+    params_file_scenario: dict,
     nextflow_case_path: Path,
     nextflow_sample_sheet_path: Path,
     nextflow_case_id: str,
-    mocker: MockerFixture,
-    request: pytest.FixtureRequest,
 ):
     """Test that the Raredisease params file creator is initialized correctly."""
-    # GIVEN a case id, case path and sample sheet path
-
-    # GIVEN a ParamsFileCreator
-    params_file_creator: ParamsFileCreator = request.getfixturevalue(file_creator_fixture)
+    # GIVEN a params file creator, an expected output and a mocked file writer
+    file_creator, expected_content, write_yaml_mock = params_file_scenario[workflow]
 
     # WHEN creating the params file
-    write_mock: mocker.MagicMock = request.getfixturevalue(mock_writer)
-    params_file_creator.create(
+    file_creator.create(
         case_id=nextflow_case_id,
         case_path=nextflow_case_path,
         sample_sheet_path=nextflow_sample_sheet_path,
     )
 
     # THEN the file should have been written with the expected content
-    file_path: Path = params_file_creator.get_file_path(
+    file_path: Path = file_creator.get_file_path(
         case_id=nextflow_case_id, case_path=nextflow_case_path
     )
-    expected_params_file_content: dict = request.getfixturevalue(expected_content_fixture)
-    write_mock.assert_called_once_with(file_path=file_path, content=expected_params_file_content)
+    write_yaml_mock.assert_called_once_with(file_path=file_path, content=expected_content)
 
 
 @pytest.mark.parametrize(
@@ -109,38 +74,17 @@ def test_nextflow_config_file_content(
     assert content.rstrip() == expected_content.rstrip()
 
 
-@pytest.fixture
-def sample_sheet_scenario(
-    mocker: MockerFixture,
-    raredisease_sample_sheet_creator2: RarediseaseSampleSheetCreator,
-    raredisease_sample_sheet_expected_content: list[list[str]],
-    rnafusion_sample_sheet_creator: RNAFusionSampleSheetCreator,
-    rnafusion_sample_sheet_content_list: list[list[str]],
-) -> dict:
-    return {
-        Workflow.RAREDISEASE: (
-            raredisease_sample_sheet_creator2,
-            raredisease_sample_sheet_expected_content,
-            mocker.patch.object(raredisease, "write_csv"),
-        ),
-        Workflow.RNAFUSION: (
-            rnafusion_sample_sheet_creator,
-            rnafusion_sample_sheet_content_list,
-            mocker.patch.object(rnafusion, "write_csv"),
-        ),
-    }
-
-
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_nextflow_sample_sheet_creators(
-    mocker: MockerFixture,
+    workflow: Workflow,
+    sample_sheet_scenario: dict,
     nextflow_case_id: str,
     nextflow_case_path: Path,
-    sample_sheet_scenario: dict,
-    workflow: Workflow,
+    mocker: MockerFixture,
 ):
     # GIVEN a sample sheet creator, an expected output and a mocked file writer
-    sample_sheet_creator, expected_content, write_mock = sample_sheet_scenario[workflow]
+    sample_sheet_creator, expected_content = sample_sheet_scenario[workflow]
+    write_mock: mocker.MagicMock = mocker.patch.object(creator, "write_csv")
 
     # GIVEN a pair of Fastq files that have a header
     mocker.patch.object(
