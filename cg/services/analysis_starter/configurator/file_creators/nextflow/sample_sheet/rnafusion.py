@@ -16,11 +16,6 @@ class RNAFusionSampleSheetCreator(NextflowSampleSheetCreator):
         super().__init__(housekeeper_api)
         self.store = store
 
-    def create(self, case_id: str, case_path: Path) -> None:
-        file_path = self.get_file_path(case_id=case_id, case_path=case_path)
-        content: list[list[str]] = self._get_content(case_id)
-        write_csv(file_path=file_path, content=content)
-
     def _get_content(self, case_id: str) -> list[list[str]]:
         content = [RnafusionSampleSheetEntry.headers()]
         case: Case = self.store.get_case_by_internal_id(case_id)

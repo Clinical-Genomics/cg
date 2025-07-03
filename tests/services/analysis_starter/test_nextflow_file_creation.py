@@ -42,11 +42,11 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 
 @pytest.fixture
 def params_file_scenario(
-    mocker: MockerFixture,
     raredisease_params_file_creator2: RarediseaseParamsFileCreator,
     expected_raredisease_params_file_content: dict,
     rnafusion_params_file_creator: RNAFusionParamsFileCreator,
     expected_rnafusion_params_file_content: dict,
+    mocker: MockerFixture,
 ) -> dict:
     return {
         Workflow.RAREDISEASE: (
@@ -120,7 +120,6 @@ def test_nextflow_config_file_content(
 
 @pytest.fixture
 def sample_sheet_scenario(
-    mocker: MockerFixture,
     raredisease_sample_sheet_creator2: RarediseaseSampleSheetCreator,
     raredisease_sample_sheet_expected_content: list[list[str]],
     rnafusion_sample_sheet_creator: RNAFusionSampleSheetCreator,
@@ -130,26 +129,24 @@ def sample_sheet_scenario(
         Workflow.RAREDISEASE: (
             raredisease_sample_sheet_creator2,
             raredisease_sample_sheet_expected_content,
-            mocker.patch.object(raredisease, "write_csv"),
         ),
         Workflow.RNAFUSION: (
             rnafusion_sample_sheet_creator,
             rnafusion_sample_sheet_content_list,
-            mocker.patch.object(rnafusion, "write_csv"),
         ),
     }
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_nextflow_sample_sheet_creators(
-    mocker: MockerFixture,
+    workflow: Workflow,
+    sample_sheet_scenario: dict,
     nextflow_case_id: str,
     nextflow_case_path: Path,
-    sample_sheet_scenario: dict,
-    workflow: Workflow,
+    mocker: MockerFixture,
 ):
     # GIVEN a sample sheet creator, an expected output and a mocked file writer
-    sample_sheet_creator, expected_content, write_mock = sample_sheet_scenario[workflow]
+    sample_sheet_creator, expected_content = sample_sheet_scenario[workflow]
 
     # GIVEN a pair of Fastq files that have a header
     mocker.patch.object(
@@ -164,6 +161,7 @@ def test_nextflow_sample_sheet_creators(
     mocker.patch.object(Path, "is_file", return_value=True)
 
     # WHEN creating the sample sheet
+    write_mock: mocker.MagicMock = mocker.patch.object(creator, "write_csv")
     sample_sheet_creator.create(case_id=nextflow_case_id, case_path=nextflow_case_path)
 
     # THEN the sample sheet should have been written to the correct path with the correct content
