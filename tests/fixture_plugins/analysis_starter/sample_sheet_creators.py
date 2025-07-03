@@ -13,6 +13,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
     RNAFusionSampleSheetCreator,
 )
+from cg.store.store import Store
 
 
 @pytest.fixture
@@ -28,7 +29,7 @@ def raredisease_sample_sheet_creator(
 
 @pytest.fixture
 def rnafusion_sample_sheet_creator(
-    cg_context, fastq_path_1: Path, fastq_path_2: Path, mocker: MockerFixture
+    base_store: Store, fastq_path_1: Path, fastq_path_2: Path, mocker: MockerFixture
 ) -> RNAFusionSampleSheetCreator:
     housekeeper_mock = create_autospec(HousekeeperAPI)
     fastq_file1 = create_autospec(File)
@@ -37,6 +38,6 @@ def rnafusion_sample_sheet_creator(
     fastq_file2.full_path = fastq_path_2.as_posix()
     mocker.patch.object(housekeeper_mock, "files", return_value=[fastq_file1, fastq_file2])
     return RNAFusionSampleSheetCreator(
-        store=cg_context.status_db,
+        store=base_store,
         housekeeper_api=housekeeper_mock,
     )
