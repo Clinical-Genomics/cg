@@ -278,7 +278,9 @@ class RnafusionConfig(CommonAppConfig):
     config: str
     resources: str
     launch_directory: str
+    pre_run_script: str = ""
     profile: str
+    repository: str
     revision: str
     root: str
     slurm: SlurmConfig

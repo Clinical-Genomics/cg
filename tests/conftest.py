@@ -2212,8 +2212,10 @@ def context_config(
             "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_bin_path": Path("workflow", "path").as_posix(),
+            "pre_run_script": "",
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
+            "repository": "https://some_url",
             "revision": "2.2.0",
             "root": str(rnafusion_dir),
             "slurm": {

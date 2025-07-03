@@ -53,3 +53,25 @@ def test_analysis_starter_factory_raredisease(
         assert isinstance(analysis_starter.configurator, NextflowConfigurator)
         assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
         assert isinstance(analysis_starter.submitter, SeqeraPlatformSubmitter)
+
+
+def test_analysis_starter_factory_rnafusion(
+    cg_context: CGConfig, seqera_platform_config: SeqeraPlatformConfig
+):
+    # GIVEN an AnalysisStarterFactory
+    analysis_starter_factory = AnalysisStarterFactory(cg_context)
+
+    # GIVEN that the CGConfig has the seqera platform config set
+    cg_context.seqera_platform = seqera_platform_config
+
+    # GIVEN a Raredisease case
+    with mock.patch.object(Store, "get_case_workflow", return_value=Workflow.RNAFUSION):
+        # WHEN fetching the AnalysisStarter
+        analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case(
+            "case_id"
+        )
+
+        # THEN the Factory should have it configured correctly
+        assert isinstance(analysis_starter.configurator, NextflowConfigurator)
+        assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
+        assert isinstance(analysis_starter.submitter, SeqeraPlatformSubmitter)
