@@ -96,7 +96,6 @@ class ConfiguratorFactory:
         if workflow == Workflow.RAREDISEASE:
             return RarediseaseSampleSheetCreator(
                 housekeeper_api=self.cg_config.housekeeper_api,
-                lims=self.cg_config.lims_api,
                 store=self.store,
             )
 

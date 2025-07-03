@@ -1,9 +1,5 @@
-from pathlib import Path
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
-from cg.io.csv import write_csv
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowSampleSheetCreator,
 )
@@ -17,9 +13,8 @@ from cg.store.store import Store
 
 class RarediseaseSampleSheetCreator(NextflowSampleSheetCreator):
 
-    def __init__(self, housekeeper_api: HousekeeperAPI, lims: LimsAPI, store: Store):
+    def __init__(self, housekeeper_api: HousekeeperAPI, store: Store):
         super().__init__(housekeeper_api)
-        self.lims = lims
         self.store = store
 
     def _get_content(self, case_id: str) -> list[list[str]]:

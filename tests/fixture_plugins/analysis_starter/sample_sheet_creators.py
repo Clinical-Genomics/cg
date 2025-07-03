@@ -22,7 +22,6 @@ def raredisease_sample_sheet_creator(
     return RarediseaseSampleSheetCreator(
         store=raredisease_context.status_db,
         housekeeper_api=raredisease_context.housekeeper_api,
-        lims=raredisease_context.lims_api,
     )
 
 
@@ -42,7 +41,6 @@ def raredisease_sample_sheet_creator2(
     return RarediseaseSampleSheetCreator(
         store=mock_store_for_raredisease_file_creators,
         housekeeper_api=housekeeper_mock,
-        lims=raredisease_context.lims_api,
     )
 
 
