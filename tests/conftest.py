@@ -106,6 +106,7 @@ pytest_plugins = [
     "tests.fixture_plugins.analysis_starter.extension_fixtures",
     "tests.fixture_plugins.analysis_starter.fastq_handlers",
     "tests.fixture_plugins.analysis_starter.name_fixtures",
+    "tests.fixture_plugins.analysis_starter.nextflow_mock_yaml_writers",
     "tests.fixture_plugins.analysis_starter.path_fixtures",
     "tests.fixture_plugins.analysis_starter.sample_sheet_creators",
     "tests.fixture_plugins.analysis_starter.sample_sheet_content_fixtures",

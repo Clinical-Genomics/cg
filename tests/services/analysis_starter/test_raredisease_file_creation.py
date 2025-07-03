@@ -14,28 +14,12 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.gene_panel
 from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
     ManagedVariantsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
-    raredisease,
-    rnafusion,
-)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.abstract import (
     NextflowSampleSheetCreator,
 )
-
-
-@pytest.fixture
-def write_raredisease_mock(mocker: MockerFixture) -> mock.MagicMock:
-    """Mock the write_yaml_nextflow_style function."""
-    return mocker.patch.object(raredisease, "write_yaml_nextflow_style", return_value=None)
-
-
-@pytest.fixture
-def write_rnafusion_mock(mocker: MockerFixture) -> mock.MagicMock:
-    """Mock the write_yaml_nextflow_style function for RNAFusion."""
-    return mocker.patch.object(rnafusion, "write_yaml_nextflow_style", return_value=None)
 
 
 @pytest.mark.parametrize(
