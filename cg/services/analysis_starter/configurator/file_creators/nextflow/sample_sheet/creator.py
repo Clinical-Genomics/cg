@@ -1,6 +1,6 @@
 import logging
 import re
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
