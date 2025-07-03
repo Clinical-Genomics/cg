@@ -15,51 +15,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.gene_panel
 from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
     ManagedVariantsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
-    raredisease as raredisease_params,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
-    rnafusion as rnafusion_params,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
-    RarediseaseParamsFileCreator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
-    RNAFusionParamsFileCreator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
-    creator,
-    raredisease,
-    rnafusion,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
-    RarediseaseSampleSheetCreator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
-    RNAFusionSampleSheetCreator,
-)
-
-
-@pytest.fixture
-def params_file_scenario(
-    raredisease_params_file_creator2: RarediseaseParamsFileCreator,
-    expected_raredisease_params_file_content: dict,
-    rnafusion_params_file_creator: RNAFusionParamsFileCreator,
-    expected_rnafusion_params_file_content: dict,
-    mocker: MockerFixture,
-) -> dict:
-    return {
-        Workflow.RAREDISEASE: (
-            raredisease_params_file_creator2,
-            expected_raredisease_params_file_content,
-            mocker.patch.object(raredisease_params, "write_yaml_nextflow_style", return_value=None),
-        ),
-        Workflow.RNAFUSION: (
-            rnafusion_params_file_creator,
-            expected_rnafusion_params_file_content,
-            mocker.patch.object(rnafusion_params, "write_yaml_nextflow_style", return_value=None),
-        ),
-    }
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import creator
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
@@ -116,25 +72,6 @@ def test_nextflow_config_file_content(
     # THEN the content of the file is the expected
     expected_content: str = request.getfixturevalue(expected_content_fixture)
     assert content.rstrip() == expected_content.rstrip()
-
-
-@pytest.fixture
-def sample_sheet_scenario(
-    raredisease_sample_sheet_creator2: RarediseaseSampleSheetCreator,
-    raredisease_sample_sheet_expected_content: list[list[str]],
-    rnafusion_sample_sheet_creator: RNAFusionSampleSheetCreator,
-    rnafusion_sample_sheet_content_list: list[list[str]],
-) -> dict:
-    return {
-        Workflow.RAREDISEASE: (
-            raredisease_sample_sheet_creator2,
-            raredisease_sample_sheet_expected_content,
-        ),
-        Workflow.RNAFUSION: (
-            rnafusion_sample_sheet_creator,
-            rnafusion_sample_sheet_content_list,
-        ),
-    }
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
