@@ -104,8 +104,7 @@ class ConfiguratorFactory:
     def _get_sample_sheet_creator(self, workflow: Workflow) -> NextflowSampleSheetCreator:
         if workflow == Workflow.RAREDISEASE:
             return RarediseaseSampleSheetCreator(
-                housekeeper_api=self.housekeeper_api,
-                lims=self.lims_api,
+                housekeeper_api=self.cg_config.housekeeper_api,
                 store=self.store,
             )
         elif workflow == Workflow.RNAFUSION:
