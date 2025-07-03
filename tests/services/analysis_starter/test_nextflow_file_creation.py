@@ -5,6 +5,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.constants import Workflow
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )
@@ -17,8 +18,16 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_va
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.abstract import (
-    NextflowSampleSheetCreator,
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
+    creator,
+    raredisease,
+    rnafusion,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
+    RarediseaseSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+    RNAFusionSampleSheetCreator,
 )
 
 
@@ -100,34 +109,61 @@ def test_nextflow_config_file_content(
     assert content.rstrip() == expected_content.rstrip()
 
 
-@pytest.mark.parametrize(
-    "file_creator_fixture, case_id_fixture, expected_content_fixture",
-    [
-        (
-            "raredisease_sample_sheet_creator",
-            "raredisease_case_id",
-            "raredisease_sample_sheet_expected_content",
-        )
-    ],
-    ids=["raredisease"],
-)
-def test_nextflow_sample_sheet_content(
-    file_creator_fixture: str,
-    case_id_fixture: str,
-    expected_content_fixture: str,
-    request: pytest.FixtureRequest,
+@pytest.fixture
+def sample_sheet_scenario(
+    mocker: MockerFixture,
+    raredisease_sample_sheet_creator2: RarediseaseSampleSheetCreator,
+    raredisease_sample_sheet_expected_content: list[list[str]],
+    rnafusion_sample_sheet_creator: RNAFusionSampleSheetCreator,
+    rnafusion_sample_sheet_content_list: list[list[str]],
+) -> dict:
+    return {
+        Workflow.RAREDISEASE: (
+            raredisease_sample_sheet_creator2,
+            raredisease_sample_sheet_expected_content,
+            mocker.patch.object(raredisease, "write_csv"),
+        ),
+        Workflow.RNAFUSION: (
+            rnafusion_sample_sheet_creator,
+            rnafusion_sample_sheet_content_list,
+            mocker.patch.object(rnafusion, "write_csv"),
+        ),
+    }
+
+
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
+def test_nextflow_sample_sheet_creators(
+    mocker: MockerFixture,
+    nextflow_case_id: str,
+    nextflow_case_path: Path,
+    sample_sheet_scenario: dict,
+    workflow: Workflow,
 ):
-    """Test that the sample sheet content is created correctly."""
-    # GIVEN a sample sheet content creator, a case id and a case path
-    file_creator: NextflowSampleSheetCreator = request.getfixturevalue(file_creator_fixture)
-    case_id: str = request.getfixturevalue(case_id_fixture)
+    # GIVEN a sample sheet creator, an expected output and a mocked file writer
+    sample_sheet_creator, expected_content, write_mock = sample_sheet_scenario[workflow]
 
-    # WHEN creating a sample sheet
-    content: list[list[str]] = file_creator._get_content(case_id=case_id)
+    # GIVEN a pair of Fastq files that have a header
+    mocker.patch.object(
+        creator,
+        "read_gzip_first_line",
+        side_effect=[
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/2",
+        ],
+    )
+    # GIVEN that the files exist
+    mocker.patch.object(Path, "is_file", return_value=True)
 
-    # THEN the content of the file is the expected
-    expected_content: str = request.getfixturevalue(expected_content_fixture)
-    assert content == expected_content
+    # WHEN creating the sample sheet
+    sample_sheet_creator.create(case_id=nextflow_case_id, case_path=nextflow_case_path)
+
+    # THEN the sample sheet should have been written to the correct path with the correct content
+    write_mock.assert_called_with(
+        content=expected_content,
+        file_path=sample_sheet_creator.get_file_path(
+            case_path=nextflow_case_path, case_id=nextflow_case_id
+        ),
+    )
 
 
 @pytest.mark.parametrize(
