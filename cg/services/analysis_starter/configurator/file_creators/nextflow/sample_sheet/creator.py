@@ -1,6 +1,6 @@
 import logging
 import re
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -14,7 +14,7 @@ from cg.store.models import Sample
 LOG = logging.getLogger(__name__)
 
 
-class NextflowSampleSheetCreator:
+class NextflowSampleSheetCreator(ABC):
 
     def __init__(self, housekeeper_api: HousekeeperAPI):
         self.housekeeper_api = housekeeper_api

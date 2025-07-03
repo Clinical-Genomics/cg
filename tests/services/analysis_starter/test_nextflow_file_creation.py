@@ -84,6 +84,7 @@ def test_nextflow_sample_sheet_creators(
 ):
     # GIVEN a sample sheet creator, an expected output and a mocked file writer
     sample_sheet_creator, expected_content = sample_sheet_scenario[workflow]
+    write_mock: mocker.MagicMock = mocker.patch.object(creator, "write_csv")
 
     # GIVEN a pair of Fastq files that have a header
     mocker.patch.object(
@@ -98,7 +99,6 @@ def test_nextflow_sample_sheet_creators(
     mocker.patch.object(Path, "is_file", return_value=True)
 
     # WHEN creating the sample sheet
-    write_mock: mocker.MagicMock = mocker.patch.object(creator, "write_csv")
     sample_sheet_creator.create(case_id=nextflow_case_id, case_path=nextflow_case_path)
 
     # THEN the sample sheet should have been written to the correct path with the correct content
