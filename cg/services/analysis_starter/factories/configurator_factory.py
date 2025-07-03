@@ -28,11 +28,17 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
+    RNAFusionParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+    RNAFusionSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
@@ -88,6 +94,9 @@ class ConfiguratorFactory:
             return RarediseaseParamsFileCreator(
                 lims=self.lims_api, store=self.store, params=pipeline_config.params
             )
+        elif workflow == Workflow.RNAFUSION:
+            pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
+            return RNAFusionParamsFileCreator(pipeline_config.params)
 
     def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
         return getattr(self.cg_config, workflow)
@@ -97,6 +106,10 @@ class ConfiguratorFactory:
             return RarediseaseSampleSheetCreator(
                 housekeeper_api=self.cg_config.housekeeper_api,
                 store=self.store,
+            )
+        elif workflow == Workflow.RNAFUSION:
+            return RNAFusionSampleSheetCreator(
+                housekeeper_api=self.housekeeper_api, store=self.store
             )
 
     def _get_pipeline_extension(self, workflow: Workflow) -> PipelineExtension:
@@ -109,6 +122,7 @@ class ConfiguratorFactory:
                 gene_panel_file_creator=gene_panel_creator,
                 managed_variants_file_creator=managed_variants_creator,
             )
+        return PipelineExtension()
 
     def _get_gene_panel_file_creator(self, workflow: Workflow) -> GenePanelFileCreator:
         return GenePanelFileCreator(scout_api=self._get_scout_api(workflow), store=self.store)
