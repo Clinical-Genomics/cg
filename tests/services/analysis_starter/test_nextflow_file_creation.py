@@ -15,8 +15,17 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.gene_panel
 from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
     ManagedVariantsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
-    ParamsFileCreator,
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
+    raredisease as raredisease_params,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
+    rnafusion as rnafusion_params,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
+    RarediseaseParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
+    RNAFusionParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
     abstract,
@@ -31,52 +40,52 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 
 
-@pytest.mark.parametrize(
-    "file_creator_fixture, expected_content_fixture, mock_writer",
-    [
-        (
-            "raredisease_params_file_creator2",
-            "expected_raredisease_params_file_content",
-            "write_raredisease_mock",
+@pytest.fixture
+def params_file_scenario(
+    mocker: MockerFixture,
+    raredisease_params_file_creator2: RarediseaseParamsFileCreator,
+    expected_raredisease_params_file_content: dict,
+    rnafusion_params_file_creator: RNAFusionParamsFileCreator,
+    expected_rnafusion_params_file_content: dict,
+) -> dict:
+    return {
+        Workflow.RAREDISEASE: (
+            raredisease_params_file_creator2,
+            expected_raredisease_params_file_content,
+            mocker.patch.object(raredisease_params, "write_yaml_nextflow_style", return_value=None),
         ),
-        (
-            "rnafusion_params_file_creator",
-            "expected_rnafusion_params_file_content",
-            "write_rnafusion_mock",
+        Workflow.RNAFUSION: (
+            rnafusion_params_file_creator,
+            expected_rnafusion_params_file_content,
+            mocker.patch.object(rnafusion_params, "write_yaml_nextflow_style", return_value=None),
         ),
-    ],
-    ids=["raredisease", "rnafusion"],
-)
+    }
+
+
+@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_nextflow_params_file_creator(
-    file_creator_fixture: str,
-    expected_content_fixture: str,
-    mock_writer: str,
+    workflow: Workflow,
+    params_file_scenario: dict,
     nextflow_case_path: Path,
     nextflow_sample_sheet_path: Path,
     nextflow_case_id: str,
-    mocker: MockerFixture,
-    request: pytest.FixtureRequest,
 ):
     """Test that the Raredisease params file creator is initialized correctly."""
-    # GIVEN a case id, case path and sample sheet path
-
-    # GIVEN a ParamsFileCreator
-    params_file_creator: ParamsFileCreator = request.getfixturevalue(file_creator_fixture)
+    # GIVEN a params file creator, an expected output and a mocked file writer
+    file_creator, expected_content, write_yaml_mock = params_file_scenario[workflow]
 
     # WHEN creating the params file
-    write_mock: mocker.MagicMock = request.getfixturevalue(mock_writer)
-    params_file_creator.create(
+    file_creator.create(
         case_id=nextflow_case_id,
         case_path=nextflow_case_path,
         sample_sheet_path=nextflow_sample_sheet_path,
     )
 
     # THEN the file should have been written with the expected content
-    file_path: Path = params_file_creator.get_file_path(
+    file_path: Path = file_creator.get_file_path(
         case_id=nextflow_case_id, case_path=nextflow_case_path
     )
-    expected_params_file_content: dict = request.getfixturevalue(expected_content_fixture)
-    write_mock.assert_called_once_with(file_path=file_path, content=expected_params_file_content)
+    write_yaml_mock.assert_called_once_with(file_path=file_path, content=expected_content)
 
 
 @pytest.mark.parametrize(
