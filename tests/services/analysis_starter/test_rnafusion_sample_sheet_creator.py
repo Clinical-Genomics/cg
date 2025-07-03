@@ -36,7 +36,7 @@ def test_rnafusion_sample_sheet_creator(
         "read_gzip_first_line",
         side_effect=[
             "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
-            "@ST-E00201:173:HCLCGALXX:1:2106:22516:34834/2",
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/2",
         ],
     )
     mocker.patch.object(Path, "is_file", return_value=True)
