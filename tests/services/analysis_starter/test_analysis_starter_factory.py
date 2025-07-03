@@ -1,5 +1,3 @@
-from unittest import mock
-
 from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
@@ -18,21 +16,22 @@ from cg.services.analysis_starter.submitters.subprocess.submitter import Subproc
 from cg.store.store import Store
 
 
-def test_analysis_starter_factory_microsalt(cg_context: CGConfig):
+def test_analysis_starter_factory_microsalt(cg_context: CGConfig, mocker: MockerFixture):
     # GIVEN an AnalysisStarterFactory
     analysis_starter_factory = AnalysisStarterFactory(cg_context)
 
     # GIVEN a microSALT case
-    with mock.patch.object(Store, "get_case_workflow", return_value=Workflow.MICROSALT):
-        # WHEN fetching the AnalysisStarter
-        analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case(
-            "case_id"
-        )
+    mocker.patch.object(Store, "get_case_workflow", return_value=Workflow.MICROSALT)
 
-        # THEN the Factory should have it configured correctly
-        assert isinstance(analysis_starter.configurator, MicrosaltConfigurator)
-        assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
-        assert isinstance(analysis_starter.submitter, SubprocessSubmitter)
+    # WHEN fetching the AnalysisStarter
+    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case(
+        "case_id"
+    )
+
+    # THEN the Factory should have it configured correctly
+    assert isinstance(analysis_starter.configurator, MicrosaltConfigurator)
+    assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
+    assert isinstance(analysis_starter.submitter, SubprocessSubmitter)
 
 
 def test_analysis_starter_factory_raredisease(
