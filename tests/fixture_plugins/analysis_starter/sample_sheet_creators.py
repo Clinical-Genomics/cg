@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import create_autospec
 
 import pytest
@@ -27,13 +28,13 @@ def raredisease_sample_sheet_creator(
 
 @pytest.fixture
 def rnafusion_sample_sheet_creator(
-    cg_context, mocker: MockerFixture
+    cg_context, fastq_path_1: Path, fastq_path_2: Path, mocker: MockerFixture
 ) -> RNAFusionSampleSheetCreator:
     housekeeper_mock = create_autospec(HousekeeperAPI)
     fastq_file1 = create_autospec(File)
-    fastq_file1.full_path = "/path/fastq_1.fastq.gz"
+    fastq_file1.full_path = fastq_path_1.as_posix()
     fastq_file2 = create_autospec(File)
-    fastq_file2.full_path = "/path/fastq_2.fastq.gz"
+    fastq_file2.full_path = fastq_path_2.as_posix()
     mocker.patch.object(housekeeper_mock, "files", return_value=[fastq_file1, fastq_file2])
     return RNAFusionSampleSheetCreator(
         store=cg_context.status_db,

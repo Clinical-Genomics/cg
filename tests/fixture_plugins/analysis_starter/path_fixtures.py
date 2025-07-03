@@ -80,3 +80,13 @@ def raredisease_sample_sheet_path(raredisease_case_path, raredisease_case_id) ->
 def raredisease_sample_sheet_path2() -> Path:
     """Path to sample sheet."""
     return Path("samplesheet", "path")
+
+
+@pytest.fixture
+def fastq_path_1() -> Path:
+    return Path("path", "fastq_1.fastq.gz")
+
+
+@pytest.fixture
+def fastq_path_2() -> Path:
+    return Path("path", "fastq_2.fastq.gz")
