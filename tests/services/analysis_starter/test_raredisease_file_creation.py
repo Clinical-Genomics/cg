@@ -14,41 +14,60 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.gene_panel
 from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
     ManagedVariantsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import raredisease
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
-    RarediseaseParamsFileCreator,
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
+    ParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.abstract import (
     NextflowSampleSheetCreator,
 )
 
 
-def test_raredisease_params_file_creator(
-    raredisease_params_file_creator2: RarediseaseParamsFileCreator,
-    expected_raredisease_params_file_content: dict,
-    raredisease_case_path2: Path,
-    raredisease_sample_sheet_path2: Path,
+@pytest.mark.parametrize(
+    "file_creator_fixture, expected_content_fixture, mock_writer",
+    [
+        (
+            "raredisease_params_file_creator2",
+            "expected_raredisease_params_file_content",
+            "write_raredisease_mock",
+        ),
+        (
+            "rnafusion_params_file_creator",
+            "expected_rnafusion_params_file_content",
+            "write_rnafusion_mock",
+        ),
+    ],
+    ids=["raredisease", "rnafusion"],
+)
+def test_nextflow_params_file_creator(
+    file_creator_fixture: str,
+    expected_content_fixture: str,
+    mock_writer: str,
+    nextflow_case_path: Path,
+    nextflow_sample_sheet_path: Path,
+    nextflow_case_id: str,
     mocker: MockerFixture,
+    request: pytest.FixtureRequest,
 ):
     """Test that the Raredisease params file creator is initialized correctly."""
     # GIVEN a case id, case path and sample sheet path
-    case_id = "raredisease_case_id"
+
+    # GIVEN a ParamsFileCreator
+    params_file_creator: ParamsFileCreator = request.getfixturevalue(file_creator_fixture)
 
     # WHEN creating the params file
-    write_mock = mocker.patch.object(raredisease, "write_yaml_nextflow_style", return_value=None)
-    raredisease_params_file_creator2.create(
-        case_id=case_id,
-        case_path=raredisease_case_path2,
-        sample_sheet_path=raredisease_sample_sheet_path2,
+    write_mock: mocker.MagicMock = request.getfixturevalue(mock_writer)
+    params_file_creator.create(
+        case_id=nextflow_case_id,
+        case_path=nextflow_case_path,
+        sample_sheet_path=nextflow_sample_sheet_path,
     )
 
     # THEN the file should have been written with the expected content
-    file_path: Path = raredisease_params_file_creator2.get_file_path(
-        case_id=case_id, case_path=raredisease_case_path2
+    file_path: Path = params_file_creator.get_file_path(
+        case_id=nextflow_case_id, case_path=nextflow_case_path
     )
-    write_mock.assert_called_once_with(
-        file_path=file_path, content=expected_raredisease_params_file_content
-    )
+    expected_params_file_content: dict = request.getfixturevalue(expected_content_fixture)
+    write_mock.assert_called_once_with(file_path=file_path, content=expected_params_file_content)
 
 
 @pytest.mark.parametrize(
