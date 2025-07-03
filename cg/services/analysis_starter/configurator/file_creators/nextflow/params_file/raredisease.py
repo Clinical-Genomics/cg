@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
-from cg.constants import DEFAULT_CAPTURE_KIT
 from cg.constants import FileExtensions
 from cg.constants.scout import ScoutExportFileName
 from cg.constants.symbols import EMPTY_STRING
@@ -26,7 +25,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
     def __init__(self, store: Store, lims: LimsAPI, params: str):
         self.store = store
         self.lims = lims
-        self.params = params
+        self.params = Path(params)
 
     def create(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> None:
         """Create the params file for a case."""
@@ -41,7 +40,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         case_workflow_parameters: dict = self._get_case_parameters(
             case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
         ).model_dump()
-        workflow_parameters: dict = read_yaml(Path(self.params))
+        workflow_parameters: dict = read_yaml(self.params)
         duplicate_keys = set(case_workflow_parameters.keys()) & set(workflow_parameters.keys())
         if duplicate_keys:
             raise CgDataError(f"Duplicate parameter keys found: {duplicate_keys}")
