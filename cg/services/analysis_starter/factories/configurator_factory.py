@@ -69,8 +69,6 @@ class ConfiguratorFactory:
         extension: PipelineExtension = self._get_pipeline_extension(workflow)
         return NextflowConfigurator(
             config_file_creator=config_file_creator,
-            housekeeper_api=self.housekeeper_api,
-            lims=self.lims_api,
             params_file_creator=params_file_creator,
             pipeline_config=self._get_pipeline_config(workflow),
             sample_sheet_creator=sample_sheet_creator,

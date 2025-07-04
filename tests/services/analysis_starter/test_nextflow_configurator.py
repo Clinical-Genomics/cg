@@ -2,6 +2,7 @@ from pathlib import Path
 
 import mock
 import pytest
+from pytest_mock import MockerFixture
 
 from cg.services.analysis_starter.configurator.file_creators.nextflow.gene_panel import (
     GenePanelFileCreator,
@@ -107,3 +108,45 @@ def test_create_nextflow_config_file_exists(
     assert configurator.config_file_creator.get_file_path(
         case_id=case_id, case_path=case_path
     ).exists()
+
+
+def test_create_rnafusion_configurator(
+    nextflow_case_id: str,
+    nextflow_root: str,
+    rnafusion_configurator: NextflowConfigurator,
+    mocker: MockerFixture,
+    rnafusion_case_config: NextflowCaseConfig,
+):
+
+    # GIVEN that IO operations are mocked
+    mocker.patch.object(Path, "exists", return_value=True)
+
+    # GIVEN that the case path is mocked
+    rnafusion_configurator.root_dir = nextflow_root
+
+    # WHEN getting the case config
+    case_config = rnafusion_configurator.get_config(case_id=nextflow_case_id)
+
+    # THEN we should get back a case config
+    assert case_config == rnafusion_case_config
+
+
+def test_create_rnafusion_configurator_flags(
+    nextflow_case_id: str,
+    nextflow_root: str,
+    rnafusion_configurator: NextflowConfigurator,
+    mocker: MockerFixture,
+    rnafusion_case_config: NextflowCaseConfig,
+):
+
+    # GIVEN that IO operations are mocked
+    mocker.patch.object(Path, "exists", return_value=True)
+
+    # GIVEN that the case path is mocked
+    rnafusion_configurator.root_dir = nextflow_root
+
+    # WHEN getting the case config
+    case_config = rnafusion_configurator.get_config(case_id=nextflow_case_id, revision="overridden")
+
+    # THEN we should get back a case config with updated value
+    assert case_config.revision == "overridden"

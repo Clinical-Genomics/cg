@@ -13,8 +13,14 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.config_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
+    RNAFusionParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+    RNAFusionSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
@@ -51,10 +57,26 @@ def raredisease_configurator(
     return NextflowConfigurator(
         store=raredisease_context.status_db,
         pipeline_config=raredisease_context.raredisease,
-        housekeeper_api=raredisease_context.housekeeper_api,
-        lims=raredisease_context.lims_api,
         config_file_creator=nextflow_config_file_creator,
         sample_sheet_creator=raredisease_sample_sheet_creator,
         params_file_creator=raredisease_params_file_creator,
         pipeline_extension=raredisease_extension,
+    )
+
+
+@pytest.fixture
+def rnafusion_configurator(
+    rnafusion_sample_sheet_creator: RNAFusionSampleSheetCreator,
+    rnafusion_params_file_creator: RNAFusionParamsFileCreator,
+    mock_store_for_rnafusion_sample_sheet_creator: Store,
+    nextflow_config_file_creator: NextflowConfigFileCreator,
+    rnafusion_context: CGConfig,
+) -> NextflowConfigurator:
+    return NextflowConfigurator(
+        store=mock_store_for_rnafusion_sample_sheet_creator,
+        config_file_creator=nextflow_config_file_creator,
+        params_file_creator=rnafusion_params_file_creator,
+        pipeline_config=rnafusion_context.rnafusion,
+        sample_sheet_creator=rnafusion_sample_sheet_creator,
+        pipeline_extension=PipelineExtension(),
     )
