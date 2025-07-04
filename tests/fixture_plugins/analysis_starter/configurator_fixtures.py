@@ -1,5 +1,6 @@
 import pytest
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
@@ -13,8 +14,14 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.config_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
+    RNAFusionParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+    RNAFusionSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
@@ -57,4 +64,26 @@ def raredisease_configurator(
         sample_sheet_creator=raredisease_sample_sheet_creator,
         params_file_creator=raredisease_params_file_creator,
         pipeline_extension=raredisease_extension,
+    )
+
+
+@pytest.fixture
+def rnafusion_configurator(
+    rnafusion_sample_sheet_creator: RNAFusionSampleSheetCreator,
+    rnafusion_params_file_creator: RNAFusionParamsFileCreator,
+    mock_store_for_rnafusion_sample_sheet_creator: Store,
+    housekeeper_api: HousekeeperAPI,
+    lims_api: LimsAPI,
+    nextflow_config_file_creator: NextflowConfigFileCreator,
+    rnafusion_context: CGConfig,
+):
+    return NextflowConfigurator(
+        store=mock_store_for_rnafusion_sample_sheet_creator,
+        config_file_creator=nextflow_config_file_creator,
+        housekeeper_api=housekeeper_api,
+        lims=lims_api,
+        params_file_creator=rnafusion_params_file_creator,
+        pipeline_config=rnafusion_context.rnafusion,
+        sample_sheet_creator=rnafusion_sample_sheet_creator,
+        pipeline_extension=PipelineExtension(),
     )

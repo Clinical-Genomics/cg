@@ -2,13 +2,17 @@ from pathlib import Path
 
 import mock
 import pytest
+from pytest_mock import MockerFixture
 
+from cg.services.analysis_starter.configurator.file_creators.nextflow import config_file
 from cg.services.analysis_starter.configurator.file_creators.nextflow.gene_panel import (
     GenePanelFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
     ManagedVariantsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import rnafusion
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import creator
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 
@@ -107,3 +111,33 @@ def test_create_nextflow_config_file_exists(
     assert configurator.config_file_creator.get_file_path(
         case_id=case_id, case_path=case_path
     ).exists()
+
+
+def test_create_rnafusion_configurator(
+    nextflow_case_id: str, rnafusion_configurator: NextflowConfigurator, mocker: MockerFixture
+):
+
+    # GIVEN that IO operations are mocked
+    mocker.patch.object(Path, "mkdir")
+    mocker.patch.object(Path, "is_file", return_value=True)
+    mocker.patch.object(Path, "exists", return_value=True)
+    mocker.patch.object(
+        creator,
+        "read_gzip_first_line",
+        side_effect=[
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/2",
+        ],
+    )
+
+    config_file_mock = mocker.patch.object(config_file, "write_txt")
+    params_file_mock = mocker.patch.object(rnafusion, "write_yaml_nextflow_style")
+    sample_sheet_mock = mocker.patch.object(creator, "write_csv")
+
+    # WHEN configuring a case
+    rnafusion_configurator.configure(case_id=nextflow_case_id)
+
+    # THEN the config file, the params file and the sample sheet should have been written
+    config_file_mock.assert_called_once()
+    params_file_mock.assert_called_once()
+    sample_sheet_mock.assert_called_once()
