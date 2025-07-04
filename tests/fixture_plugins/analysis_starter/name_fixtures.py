@@ -8,6 +8,11 @@ def nextflow_case_id() -> str:
 
 
 @pytest.fixture
+def nextflow_root() -> str:
+    return "/root"
+
+
+@pytest.fixture
 def nextflow_sample_id() -> str:
     """Fixture for a Nextflow sample id."""
     return "sample_id"

@@ -76,7 +76,7 @@ def rnafusion_configurator(
     lims_api: LimsAPI,
     nextflow_config_file_creator: NextflowConfigFileCreator,
     rnafusion_context: CGConfig,
-):
+) -> NextflowConfigurator:
     return NextflowConfigurator(
         store=mock_store_for_rnafusion_sample_sheet_creator,
         config_file_creator=nextflow_config_file_creator,
