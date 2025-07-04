@@ -37,6 +37,8 @@ class NextflowConfigurator(Configurator):
         self.config_profiles = [pipeline_config.profile]
         self.pre_run_script = pipeline_config.pre_run_script
         self.store: Store = store
+        self.housekeeper_api: HousekeeperAPI = housekeeper_api
+        self.lims: LimsAPI = lims
         self.config_file_creator = config_file_creator
         self.pipeline_extension = pipeline_extension
         self.sample_sheet_creator = sample_sheet_creator

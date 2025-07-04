@@ -7,6 +7,8 @@ import rich_click as click
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
+    OPTION_REVISION,
+    OPTION_STUB,
     config_case,
     metrics_deliver,
     report_deliver,
@@ -49,22 +51,29 @@ rnafusion.add_command(store_available)
 
 @rnafusion.command()
 @ARGUMENT_CASE_ID
+@OPTION_REVISION
+@OPTION_STUB
 @click.pass_obj
 def dev_run(case_id: str, config: CGConfig):
     factory = AnalysisStarterFactory(config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
-        Workflow.RNAFUSION)
+        Workflow.RNAFUSION
+    )
     analysis_starter.run(case_id=case_id)
 
 
 @rnafusion.command()
 @ARGUMENT_CASE_ID
+@OPTION_REVISION
+@OPTION_STUB
 @click.pass_obj
 def dev_start(case_id: str, config: CGConfig):
     factory = AnalysisStarterFactory(config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
-        Workflow.RNAFUSION)
+        Workflow.RNAFUSION
+    )
     analysis_starter.start(case_id=case_id)
+
 
 @rnafusion.command()
 @click.pass_obj
