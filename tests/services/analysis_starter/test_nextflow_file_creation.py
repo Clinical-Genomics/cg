@@ -6,6 +6,7 @@ from pytest_mock import MockerFixture
 
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
+from cg.services.analysis_starter.configurator.file_creators.nextflow import config_file
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )
@@ -47,34 +48,27 @@ def test_nextflow_params_file_creator(
     write_yaml_mock.assert_called_once_with(file_path=file_path, content=expected_content)
 
 
-@pytest.mark.parametrize(
-    "file_creator_fixture, case_id_fixture, expected_content_fixture",
-    [
-        (
-            "raredisease_config_file_creator",
-            "raredisease_case_id",
-            "expected_raredisease_config_content",
-        )
-    ],
-    ids=["raredisease"],
-)
 def test_nextflow_config_file_content(
-    file_creator_fixture: str,
-    case_id_fixture: str,
-    expected_content_fixture: str,
-    request: pytest.FixtureRequest,
+    nextflow_config_file_creator: NextflowConfigFileCreator,
+    nextflow_case_id: str,
+    nextflow_case_path: Path,
+    expected_nextflow_config_content: str,
+    mocker: MockerFixture,
 ):
     """Test that a Nextflow config file content is created correctly for all pipelines."""
     # GIVEN a Nextflow config content creator and a case id
-    file_creator: NextflowConfigFileCreator = request.getfixturevalue(file_creator_fixture)
-    case_id: str = request.getfixturevalue(case_id_fixture)
+
+    # GIVEN a writer mock
+    write_mock: mocker.MagicMock = mocker.patch.object(config_file, "write_txt", return_value=None)
 
     # WHEN creating a Nextflow config file
-    content: str = file_creator._get_content(case_id)
+    nextflow_config_file_creator.create(case_id=nextflow_case_id, case_path=nextflow_case_path)
 
     # THEN the content of the file is the expected
-    expected_content: str = request.getfixturevalue(expected_content_fixture)
-    assert content.rstrip() == expected_content.rstrip()
+    file_path = Path(nextflow_case_path, f"{nextflow_case_id}_nextflow_config.json")
+    write_mock.assert_called_once_with(
+        file_path=file_path, content=expected_nextflow_config_content
+    )
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])

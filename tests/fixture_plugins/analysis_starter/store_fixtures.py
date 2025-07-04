@@ -3,7 +3,7 @@ from unittest.mock import create_autospec
 import pytest
 
 from cg.constants.constants import DataDelivery, Workflow
-from cg.constants.priority import Priority
+from cg.constants.priority import Priority, SlurmQos
 from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.store.models import (
     Application,
@@ -53,6 +53,18 @@ def microsalt_store(base_store: Store, helpers: StoreHelpers) -> Store:
     base_store.commit_to_store()
 
     return base_store
+
+
+@pytest.fixture
+def mock_store_for_nextflow_config_file_creation(
+    nextflow_case_id: str,
+) -> Store:
+    """Fixture to provide a mock store for the Nextflow config file creator."""
+    case: Case = create_autospec(Case)
+    case.slurm_priority = SlurmQos.NORMAL
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id.return_value = case
+    return store
 
 
 @pytest.fixture
