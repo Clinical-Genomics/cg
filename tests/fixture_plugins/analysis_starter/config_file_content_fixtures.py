@@ -33,4 +33,4 @@ def expected_nextflow_config_content(
     nextflow_cluster_options: str,
     nextflow_config_base_content: str,
 ) -> str:
-    return nextflow_cluster_options + nextflow_config_base_content
+    return nextflow_cluster_options + nextflow_config_base_content + NEW_LINE
