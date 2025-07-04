@@ -5,7 +5,7 @@ import logging
 import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.cli.workflow.commands import resolve_compression
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
     config_case,
     metrics_deliver,
@@ -17,9 +17,12 @@ from cg.cli.workflow.nf_analysis import (
     store_available,
     store_housekeeper,
 )
-from cg.constants.constants import MetaApis
+from cg.constants.constants import MetaApis, Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
+from cg.services.analysis_starter.service import AnalysisStarter
 
 LOG = logging.getLogger(__name__)
 
@@ -42,3 +45,35 @@ rnafusion.add_command(report_deliver)
 rnafusion.add_command(store_housekeeper)
 rnafusion.add_command(store)
 rnafusion.add_command(store_available)
+
+
+@rnafusion.command()
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_run(case_id: str, config: CGConfig):
+    factory = AnalysisStarterFactory(config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
+        Workflow.RNAFUSION)
+    analysis_starter.run(case_id=case_id)
+
+
+@rnafusion.command()
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_start(case_id: str, config: CGConfig):
+    factory = AnalysisStarterFactory(config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
+        Workflow.RNAFUSION)
+    analysis_starter.start(case_id=case_id)
+
+@rnafusion.command()
+@click.pass_obj
+def dev_start_available(context: CGConfig) -> None:
+    """Starts all available RNAFusion cases."""
+    LOG.info("Starting RNAFusion workflow.")
+    analysis_starter = AnalysisStarterFactory(context).get_analysis_starter_for_workflow(
+        Workflow.RNAFUSION
+    )
+    succeeded: bool = analysis_starter.start_available()
+    if not succeeded:
+        raise click.Abort
