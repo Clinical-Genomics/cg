@@ -54,12 +54,12 @@ rnafusion.add_command(store_available)
 @OPTION_REVISION
 @OPTION_STUB
 @click.pass_obj
-def dev_run(case_id: str, config: CGConfig, stub_run: bool = False):
+def dev_run(case_id: str, config: CGConfig, stub_run: bool = False, revision: str | None = None):
     factory = AnalysisStarterFactory(config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RNAFUSION
     )
-    analysis_starter.run(case_id=case_id, stub_run=stub_run)
+    analysis_starter.run(case_id=case_id, stub_run=stub_run, revision=revision)
 
 
 @rnafusion.command()
@@ -67,12 +67,12 @@ def dev_run(case_id: str, config: CGConfig, stub_run: bool = False):
 @OPTION_REVISION
 @OPTION_STUB
 @click.pass_obj
-def dev_start(case_id: str, config: CGConfig, stub_run: bool = False):
+def dev_start(config: CGConfig, case_id: str, stub_run: bool = False, revision: str | None = None):
     factory = AnalysisStarterFactory(config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RNAFUSION
     )
-    analysis_starter.start(case_id=case_id, stub_run=stub_run)
+    analysis_starter.start(case_id=case_id, stub_run=stub_run, revision=revision)
 
 
 @rnafusion.command()
