@@ -56,6 +56,18 @@ def microsalt_store(base_store: Store, helpers: StoreHelpers) -> Store:
 
 
 @pytest.fixture
+def mock_store_for_nextflow_config_file_creation(
+    nextflow_case_id: str,
+) -> Store:
+    """Fixture to provide a mock store for the Nextflow config file creator."""
+    case: Case = create_autospec(Case)
+    case.slurm_priority = SlurmQos.NORMAL
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id.return_value = case
+    return store
+
+
+@pytest.fixture
 def mock_store_for_raredisease_file_creators(
     nextflow_case_id: str, nextflow_sample_id: str
 ) -> Store:
@@ -74,7 +86,6 @@ def mock_store_for_raredisease_file_creators(
     link.get_paternal_sample_id = ""
     case.links = [link]
     case.data_analysis = Workflow.RAREDISEASE
-    case.slurm_priority = SlurmQos.NORMAL
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id.return_value = case
     store.get_samples_by_case_id.return_value = [sample]
