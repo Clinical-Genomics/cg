@@ -110,3 +110,13 @@ def mock_store_for_rnafusion_sample_sheet_creator(nextflow_sample_id: str) -> St
     mock_store = create_autospec(Store)
     mock_store.get_case_by_internal_id.return_value = mock_case
     return mock_store
+
+
+@pytest.fixture
+def mock_store_for_gene_panel_file_creator() -> Store:
+    """Fixture to provide a mock store for the gene panel file creator."""
+    case: Case = create_autospec(Case)
+    case.customer.internal_id = "cust000"
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id.return_value = case
+    return store
