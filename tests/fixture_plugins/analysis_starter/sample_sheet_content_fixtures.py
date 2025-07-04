@@ -2,63 +2,49 @@ from pathlib import Path
 
 import pytest
 
+from cg.models.rnafusion.rnafusion import RnafusionSampleSheetEntry
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.models import (
     RarediseaseSampleSheetHeaders,
 )
 
 
-def get_raredisease_sample_sheet_entry(
-    sample_id: str, lane: int, fastq1: Path, fastq2: Path, case_id: str
-) -> list[str]:
-    return [
-        sample_id,
-        lane,
-        fastq1,
-        fastq2,
-        2,
-        0,
-        "",
-        "",
-        case_id,
-    ]
-
-
 @pytest.fixture(scope="function")
 def raredisease_sample_sheet_expected_content(
-    sample_id: str,
+    nextflow_sample_id: str,
     father_sample_id: str,
-    raredisease_case_id: str,
-    fastq_forward_read_path: Path,
-    fastq_reverse_read_path: Path,
+    nextflow_case_id: str,
+    fastq_path_1: Path,
+    fastq_path_2: Path,
 ) -> list[list[str]]:
     """Return the expected sample sheet content  for raredisease."""
     headers: list[str] = RarediseaseSampleSheetHeaders.list()
-    entry_1: list[str] = get_raredisease_sample_sheet_entry(
-        sample_id=sample_id,
-        lane=1,
-        fastq1=fastq_forward_read_path,
-        fastq2=fastq_reverse_read_path,
-        case_id=raredisease_case_id,
-    )
-    entry_2: list[str] = get_raredisease_sample_sheet_entry(
-        sample_id=sample_id,
-        lane=2,
-        fastq1=fastq_forward_read_path,
-        fastq2=fastq_reverse_read_path,
-        case_id=raredisease_case_id,
-    )
-    entry_3: list[str] = get_raredisease_sample_sheet_entry(
-        sample_id=father_sample_id,
-        lane=1,
-        fastq1=fastq_forward_read_path,
-        fastq2=fastq_reverse_read_path,
-        case_id=raredisease_case_id,
-    )
-    entry_4: list[str] = get_raredisease_sample_sheet_entry(
-        sample_id=father_sample_id,
-        lane=2,
-        fastq1=fastq_forward_read_path,
-        fastq2=fastq_reverse_read_path,
-        case_id=raredisease_case_id,
-    )
-    return [headers, entry_1, entry_2, entry_3, entry_4]
+    entry_1: list[str] = [
+        nextflow_sample_id,
+        1,
+        fastq_path_1,
+        fastq_path_2,
+        1,
+        2,
+        "",
+        "",
+        nextflow_case_id,
+    ]
+    return [headers, entry_1]
+
+
+@pytest.fixture(scope="function")
+def rnafusion_sample_sheet_content_list(
+    fastq_path_1: Path,
+    fastq_path_2: Path,
+    nextflow_sample_id: str,
+    strandedness: str,
+) -> list[list[str]]:
+    """Return the expected sample sheet content  for rnafusion."""
+    headers: list[str] = RnafusionSampleSheetEntry.headers()
+    row: list[str] = [
+        nextflow_sample_id,
+        fastq_path_1,
+        fastq_path_2,
+        strandedness.value,
+    ]
+    return [headers, row]
