@@ -32,7 +32,6 @@ class GenePanelFileCreator:
         return self.scout_api.export_panels(build=genome_build, panels=all_panels)
 
     def _get_aggregated_panels(self, customer_id: str, default_panels: set[str]) -> list[str]:
-        # TODO: Create unit test for this method with different scenarios
         """Check if the customer is collaborator for gene panel master list
         and if all default panels are included in the gene panel master list.
         If not, add gene panel combo and broad non-specific gene panels.
@@ -48,7 +47,6 @@ class GenePanelFileCreator:
     @staticmethod
     def _add_gene_panels_in_combo(gene_panels: set[str]) -> set[str]:
         """Add gene panels belonging to the same combo of the given gene panels."""
-        # TODO: Create parametrised unit test for this method with each possible combo
         additional_panels = set()
         for panel in gene_panels:
             if panel in GenePanelCombo.COMBO_1:
