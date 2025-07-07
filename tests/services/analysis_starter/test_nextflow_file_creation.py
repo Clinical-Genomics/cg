@@ -6,7 +6,7 @@ from pytest_mock import MockerFixture
 
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
-from cg.constants.gene_panel import GenePanelGenomeBuild, GenePanelMasterList
+from cg.constants.gene_panel import GenePanelMasterList
 from cg.services.analysis_starter.configurator.file_creators.nextflow import config_file
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
@@ -149,7 +149,7 @@ def test_gene_panel_file_content(
         (False, [GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN]),
     ],
     ids=[
-        "customer collaborator and panels in master list",
+        "customer is collaborator and panels in master list",
         "customer not collaborator or panels not in master list",
     ],
 )
@@ -159,10 +159,10 @@ def test_get_agregated_gene_panels(
     expected_panels: list[str],
     mocker: MockerFixture,
 ):
-    """Test that the aggregated gene panels are returned correctly."""
-    # GIVEN a gene panel file creator and a set of panels
+    """Test that gene panels are aggregated correctly."""
+    # GIVEN a gene panel file creator
 
-    # GIVEN a mock for the GenePanel class
+    # GIVEN a mock for the GenePanel Master List method
     mocker.patch.object(
         GenePanelMasterList,
         "is_customer_collaborator_and_panels_in_gene_panels_master_list",
@@ -200,7 +200,7 @@ def test_add_gene_panels_in_combo(
     panels: set[str],
     expected_panels: set[str],
 ):
-    """Test that the gene panels in combo are added correctly."""
+    """Test that the combo gene panels are added correctly to a panel set."""
     # GIVEN a set of gene panels
 
     # WHEN adding the gene panels in combo

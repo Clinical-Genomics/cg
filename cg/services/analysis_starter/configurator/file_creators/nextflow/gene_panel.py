@@ -46,7 +46,7 @@ class GenePanelFileCreator:
 
     @staticmethod
     def _add_gene_panels_in_combo(gene_panels: set[str]) -> set[str]:
-        """Add gene panels belonging to the same combo of the given gene panels."""
+        """Add gene panels belonging to the same combo of the given gene panels to the panel set."""
         additional_panels = set()
         for panel in gene_panels:
             if panel in GenePanelCombo.COMBO_1:
