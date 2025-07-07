@@ -25,7 +25,7 @@ class MicrosaltTracker(Tracker):
         return job_ids_path
 
     def _get_file_name_start(self, case_id: str) -> str:
-        """Returns the LIMS project ID if the case contains multiple samples, else the sample id."""
+        """Returns the LIMS project id if the case contains multiple samples, else the sample id."""
         case: Case = self.store.get_case_by_internal_id(case_id)
         sample_id: str = case.samples[0].internal_id
         if len(case.samples) == 1:
