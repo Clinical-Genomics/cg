@@ -84,7 +84,7 @@ class NextflowConfigurator(Configurator):
             work_dir=self._get_work_dir(case_id).as_posix(),
             workflow=self.store.get_case_workflow(case_id),
         )
-        config = self._set_flags(config=config, **flags)
+        config: NextflowCaseConfig = self._set_flags(config=config, **flags)
         self._ensure_valid_config(config)
         return config
 

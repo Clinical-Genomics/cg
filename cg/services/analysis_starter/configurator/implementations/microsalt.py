@@ -50,7 +50,7 @@ class MicrosaltConfigurator(Configurator):
             environment=self.config.conda_env,
             fastq_directory=fastq_directory.as_posix(),
         )
-        config = self._set_flags(config=config, **flags)
+        config: MicrosaltCaseConfig = self._set_flags(config=config, **flags)
         self._ensure_valid_config(config)
         return config
 
