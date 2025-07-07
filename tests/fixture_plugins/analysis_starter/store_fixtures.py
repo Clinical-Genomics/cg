@@ -88,6 +88,8 @@ def mock_store_for_raredisease_file_creators(
     case.data_analysis = Workflow.RAREDISEASE
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id.return_value = case
+    store.get_case_priority.return_value = SlurmQos.NORMAL
+    store.get_case_workflow.return_value = Workflow.RAREDISEASE
     store.get_samples_by_case_id.return_value = [sample]
     store.get_sample_by_internal_id.return_value = sample
     bed_version = create_autospec(BedVersion)

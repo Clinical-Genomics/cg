@@ -19,12 +19,12 @@ def nextflow_sample_id() -> str:
 
 
 @pytest.fixture
-def raredisease_repository() -> str:
+def nextflow_repository() -> str:
     return "https://some_url"
 
 
 @pytest.fixture
-def raredisease_revision() -> str:
+def nextflow_pipeline_revision() -> str:
     return "2.2.0"
 
 

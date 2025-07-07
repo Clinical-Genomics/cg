@@ -5,7 +5,6 @@ import pytest
 from pytest_mock import MockerFixture
 
 from cg.apps.lims import LimsAPI
-from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
     raredisease,
     rnafusion,
@@ -21,27 +20,6 @@ from cg.store.store import Store
 
 @pytest.fixture
 def raredisease_params_file_creator(
-    raredisease_context: CGConfig,
-) -> RarediseaseParamsFileCreator:
-    return RarediseaseParamsFileCreator(
-        store=raredisease_context.status_db,
-        lims=raredisease_context.lims_api,
-        params=raredisease_context.raredisease.params,
-    )
-
-
-@pytest.fixture
-def rnafusion_params_file_creator(
-    nf_analysis_pipeline_params_path: Path,
-    nextflow_params_file_content: dict,
-    mocker: MockerFixture,
-) -> RNAFusionParamsFileCreator:
-    mocker.patch.object(rnafusion, "read_yaml", return_value=nextflow_params_file_content)
-    return RNAFusionParamsFileCreator(nf_analysis_pipeline_params_path.as_posix())
-
-
-@pytest.fixture
-def raredisease_params_file_creator2(
     mock_store_for_raredisease_file_creators: Store,
     nextflow_params_file_content: dict,
     nf_analysis_pipeline_params_path: Path,
@@ -57,3 +35,13 @@ def raredisease_params_file_creator2(
         lims=lims,
         params=nf_analysis_pipeline_params_path.as_posix(),
     )
+
+
+@pytest.fixture
+def rnafusion_params_file_creator(
+    nf_analysis_pipeline_params_path: Path,
+    nextflow_params_file_content: dict,
+    mocker: MockerFixture,
+) -> RNAFusionParamsFileCreator:
+    mocker.patch.object(rnafusion, "read_yaml", return_value=nextflow_params_file_content)
+    return RNAFusionParamsFileCreator(nf_analysis_pipeline_params_path.as_posix())

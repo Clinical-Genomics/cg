@@ -5,7 +5,6 @@ import pytest
 from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
 )
@@ -17,16 +16,6 @@ from cg.store.store import Store
 
 @pytest.fixture
 def raredisease_sample_sheet_creator(
-    raredisease_context: CGConfig,
-) -> RarediseaseSampleSheetCreator:
-    return RarediseaseSampleSheetCreator(
-        store=raredisease_context.status_db,
-        housekeeper_api=raredisease_context.housekeeper_api,
-    )
-
-
-@pytest.fixture
-def raredisease_sample_sheet_creator2(
     fastq_path_1: Path,
     fastq_path_2: Path,
     mock_store_for_raredisease_file_creators: Store,

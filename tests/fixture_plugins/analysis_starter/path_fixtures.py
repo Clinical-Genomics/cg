@@ -16,6 +16,7 @@ def raredisease_case_path(raredisease_dir: Path, raredisease_case_id: str) -> Pa
     return Path(raredisease_dir, raredisease_case_id)
 
 
+# TODO: Can remove after refactoring
 @pytest.fixture
 def raredisease_work_dir_path(raredisease_case_path: Path, raredisease_case_id: Path) -> Path:
     return Path(raredisease_case_path, "work")
@@ -66,8 +67,8 @@ def raredisease_sample_sheet_path(raredisease_case_path, raredisease_case_id) ->
 
 
 @pytest.fixture
-def nextflow_case_path() -> Path:
-    return Path("case", "path")
+def nextflow_case_path(nextflow_root: str, nextflow_case_id) -> Path:
+    return Path(nextflow_root, nextflow_case_id)
 
 
 @pytest.fixture
