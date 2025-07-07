@@ -109,4 +109,6 @@ def mock_store_for_rnafusion_sample_sheet_creator(nextflow_sample_id: str) -> St
 
     mock_store = create_autospec(Store)
     mock_store.get_case_by_internal_id.return_value = mock_case
+    mock_store.get_case_workflow.return_value = Workflow.RNAFUSION
+    mock_store.get_case_priority.return_value = SlurmQos.NORMAL
     return mock_store

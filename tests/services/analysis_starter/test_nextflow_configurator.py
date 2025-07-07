@@ -2,6 +2,7 @@ from pathlib import Path
 
 import mock
 import pytest
+from pytest_mock import MockerFixture
 
 from cg.services.analysis_starter.configurator.file_creators.nextflow.gene_panel import (
     GenePanelFileCreator,
@@ -79,6 +80,39 @@ def test_create_raredisease_config_with_flag(
     assert case_config == raredisease_case_config.model_copy(update={"revision": "0.0.0"})
 
 
+def test_create_raredisease_config_with_none_flag(
+    raredisease_configurator: NextflowConfigurator,
+    raredisease_case_config: NextflowCaseConfig,
+    raredisease_case_id: str,
+    raredisease_params_file_path: str,
+    raredisease_work_dir_path: str,
+):
+    """Test creating the case config with a flag set to None."""
+    # GIVEN a configurator and a case id
+    gene_panel_creator: GenePanelFileCreator = (
+        raredisease_configurator.pipeline_extension.gene_panel_file_creator
+    )
+    managed_variants_creator: ManagedVariantsFileCreator = (
+        raredisease_configurator.pipeline_extension.managed_variants_file_creator
+    )
+
+    # GIVEN that scout returns panels and variants
+    with (
+        mock.patch.object(gene_panel_creator, "scout_api") as mock_gene_panel_scout_api,
+        mock.patch.object(managed_variants_creator, "scout_api") as mock_managed_variants_scout_api,
+    ):
+        mock_gene_panel_scout_api.export_panels.return_value = []
+        mock_managed_variants_scout_api.export_managed_variants.return_value = []
+
+        # WHEN creating a case config specifying revision being None
+        case_config: NextflowCaseConfig = raredisease_configurator.configure(
+            case_id=raredisease_case_id, revision=None
+        )
+
+    # THEN the expected case config is returned without revision being changed
+    assert case_config == raredisease_case_config
+
+
 @pytest.mark.parametrize(
     "configurator_fixture, case_id_fixture, case_path_fixture",
     [("raredisease_configurator", "raredisease_case_id", "raredisease_case_path")],
@@ -107,3 +141,45 @@ def test_create_nextflow_config_file_exists(
     assert configurator.config_file_creator.get_file_path(
         case_id=case_id, case_path=case_path
     ).exists()
+
+
+def test_create_rnafusion_configurator(
+    nextflow_case_id: str,
+    nextflow_root: str,
+    rnafusion_configurator: NextflowConfigurator,
+    mocker: MockerFixture,
+    rnafusion_case_config: NextflowCaseConfig,
+):
+
+    # GIVEN that IO operations are mocked
+    mocker.patch.object(Path, "exists", return_value=True)
+
+    # GIVEN that the case path is mocked
+    rnafusion_configurator.root_dir = nextflow_root
+
+    # WHEN getting the case config
+    case_config = rnafusion_configurator.get_config(case_id=nextflow_case_id)
+
+    # THEN we should get back a case config
+    assert case_config == rnafusion_case_config
+
+
+def test_create_rnafusion_configurator_flags(
+    nextflow_case_id: str,
+    nextflow_root: str,
+    rnafusion_configurator: NextflowConfigurator,
+    mocker: MockerFixture,
+    rnafusion_case_config: NextflowCaseConfig,
+):
+
+    # GIVEN that IO operations are mocked
+    mocker.patch.object(Path, "exists", return_value=True)
+
+    # GIVEN that the case path is mocked
+    rnafusion_configurator.root_dir = nextflow_root
+
+    # WHEN getting the case config
+    case_config = rnafusion_configurator.get_config(case_id=nextflow_case_id, revision="overridden")
+
+    # THEN we should get back a case config with updated value
+    assert case_config.revision == "overridden"
