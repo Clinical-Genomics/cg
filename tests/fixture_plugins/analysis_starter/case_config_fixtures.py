@@ -46,3 +46,24 @@ def raredisease_case_config(
         stub_run=False,
         work_dir=raredisease_work_dir_path.as_posix(),
     )
+
+
+@pytest.fixture
+def rnafusion_case_config(nextflow_root: str, nextflow_case_id: str) -> NextflowCaseConfig:
+    return NextflowCaseConfig(
+        case_id=nextflow_case_id,
+        workflow=Workflow.RNAFUSION,
+        case_priority=SlurmQos.NORMAL,
+        config_profiles=["myprofile"],
+        nextflow_config_file=Path(
+            nextflow_root, nextflow_case_id, f"{nextflow_case_id}_nextflow_config.json"
+        ).as_posix(),
+        params_file=Path(
+            nextflow_root, nextflow_case_id, f"{nextflow_case_id}_params_file.yaml"
+        ).as_posix(),
+        pipeline_repository="https://some_url",
+        pre_run_script="",
+        revision="2.2.0",
+        stub_run=False,
+        work_dir=Path(nextflow_root, nextflow_case_id, "work").as_posix(),
+    )
