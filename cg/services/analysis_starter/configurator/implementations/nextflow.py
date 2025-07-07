@@ -71,10 +71,6 @@ class NextflowConfigurator(Configurator):
         config_file_path: Path = self.config_file_creator.get_file_path(
             case_id=case_id, case_path=case_path
         )
-        if not params_file_path.exists() or not config_file_path.exists():
-            raise CaseNotConfiguredError(
-                f"Please ensure that both the parameters file {params_file_path.as_posix()} and the configuration file {config_file_path.as_posix()} exists."
-            )
         config = NextflowCaseConfig(
             case_id=case_id,
             case_priority=self.store.get_case_priority(case_id),
@@ -88,7 +84,9 @@ class NextflowConfigurator(Configurator):
             work_dir=self._get_work_dir(case_id).as_posix(),
             workflow=self.store.get_case_workflow(case_id),
         )
-        return config.model_copy(update=flags)
+        config = self._set_flags(config=config, **flags)
+        self._ensure_valid_config(config)
+        return config
 
     def _get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
@@ -101,3 +99,12 @@ class NextflowConfigurator(Configurator):
 
     def _get_work_dir(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "work")
+
+    @staticmethod
+    def _ensure_valid_config(config: NextflowCaseConfig) -> None:
+        params_file_path = Path(config.params_file)
+        config_file_path = Path(config.nextflow_config_file)
+        if not params_file_path.exists() or not config_file_path.exists():
+            raise CaseNotConfiguredError(
+                f"Please ensure that both the parameters file {params_file_path.as_posix()} and the configuration file {config_file_path.as_posix()} exists."
+            )
