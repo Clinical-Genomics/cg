@@ -11,6 +11,17 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_va
 
 @pytest.fixture
 def raredisease_extension(
+    raredisease_gene_panel_creator: GenePanelFileCreator,
+    raredisease_managed_variants_creator: ManagedVariantsFileCreator,
+) -> RarediseaseExtension:
+    return RarediseaseExtension(
+        gene_panel_file_creator=raredisease_gene_panel_creator,
+        managed_variants_file_creator=raredisease_managed_variants_creator,
+    )
+
+
+@pytest.fixture
+def raredisease_extension2(
     nextflow_gene_panel_creator: GenePanelFileCreator,
     raredisease_managed_variants_creator: ManagedVariantsFileCreator,
 ) -> RarediseaseExtension:
