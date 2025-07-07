@@ -16,3 +16,24 @@ def nextflow_root() -> str:
 def nextflow_sample_id() -> str:
     """Fixture for a Nextflow sample id."""
     return "sample_id"
+
+
+@pytest.fixture
+def raredisease_repository() -> str:
+    return "https://some_url"
+
+
+@pytest.fixture
+def raredisease_revision() -> str:
+    return "2.2.0"
+
+
+@pytest.fixture
+def raredisease_config_profiles() -> list[str]:
+    return ["myprofile"]
+
+
+@pytest.fixture
+def nextflow_params_file_content() -> dict:
+    """Return a dictionary with some parameters for the Nextflow params file."""
+    return {"someparam": "something"}

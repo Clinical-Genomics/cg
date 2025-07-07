@@ -29,7 +29,6 @@ def raredisease_sample_sheet_creator(
 def raredisease_sample_sheet_creator2(
     fastq_path_1: Path,
     fastq_path_2: Path,
-    raredisease_context: CGConfig,
     mock_store_for_raredisease_file_creators: Store,
 ) -> RarediseaseSampleSheetCreator:
     fastq_file1 = create_autospec(File)

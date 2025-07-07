@@ -51,8 +51,6 @@ def test_create_raredisease_config_with_flag(
     raredisease_configurator: NextflowConfigurator,
     raredisease_case_config: NextflowCaseConfig,
     raredisease_case_id: str,
-    raredisease_params_file_path: str,
-    raredisease_work_dir_path: str,
 ):
     """Test creating the case config for all pipelines."""
     # GIVEN a configurator and a case id

@@ -2967,6 +2967,12 @@ def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> 
 
 
 @pytest.fixture(scope="function")
+def raredisease_gene_panel_path(raredisease_case_path: Path) -> Path:
+    """Path to gene panel file."""
+    return Path(raredisease_case_path, "gene_panels").with_suffix(FileExtensions.BED)
+
+
+@pytest.fixture(scope="function")
 def raredisease_sample_id_map(raredisease_dir: str, raredisease_case_id: str) -> Path:
     """Return sample id map path."""
     return Path(
