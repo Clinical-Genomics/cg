@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import create_autospec
 
 import mock
 import pytest
@@ -12,7 +13,7 @@ from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
@@ -73,6 +74,47 @@ def test_microsalt_tracker_successful(microsalt_tracker: MicrosaltTracker, micro
     request_submitter.assert_called_with(
         command="add-pending-analysis", request_body=expected_request_body
     )
+
+
+def test_get_job_ids_path_multiple_samples(microsalt_tracker: MicrosaltTracker):
+
+    # GIVEN a microSALT case containing two samples
+    microsalt_case = create_autospec(Case)
+    internal_id = "case_id"
+    microsalt_case.internal_id = internal_id
+    sample_1 = create_autospec(Sample)
+    sample_2 = create_autospec(Sample)
+    sample_1.internal_id = "ACC123A1"
+    microsalt_case.samples = [sample_1, sample_2]
+    store = create_autospec(Store)
+    store.get_case_by_internal_id.return_value = microsalt_case
+    microsalt_tracker.store = store
+
+    # WHEN getting the job_ids_path
+    job_id_path = microsalt_tracker._get_job_ids_path(internal_id)
+
+    # THEN the file name should use the LIMS project ID
+    assert job_id_path.name == "ACC123_slurm_ids.yaml"
+
+
+def test_get_job_ids_path_single_sample(microsalt_tracker: MicrosaltTracker):
+
+    # GIVEN a microSALT case containing two samples
+    microsalt_case = create_autospec(Case)
+    internal_id = "case_id"
+    microsalt_case.internal_id = internal_id
+    sample = create_autospec(Sample)
+    sample.internal_id = "ACC123A1"
+    microsalt_case.samples = [sample]
+    store = create_autospec(Store)
+    store.get_case_by_internal_id.return_value = microsalt_case
+    microsalt_tracker.store = store
+
+    # WHEN getting the job_ids_path
+    job_id_path = microsalt_tracker._get_job_ids_path(internal_id)
+
+    # THEN the file name should use the LIMS project ID
+    assert job_id_path.name == "ACC123A1_slurm_ids.yaml"
 
 
 def test_microsalt_tracker_ongoing_analysis(microsalt_tracker: MicrosaltTracker):
