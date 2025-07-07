@@ -91,7 +91,7 @@ def test_get_job_ids_path_multiple_samples(microsalt_tracker: MicrosaltTracker):
     microsalt_tracker.store = store
 
     # WHEN getting the job_ids_path
-    job_id_path = microsalt_tracker._get_job_ids_path(internal_id)
+    job_id_path: Path = microsalt_tracker._get_job_ids_path(internal_id)
 
     # THEN the file name should use the LIMS project ID
     assert job_id_path.name == "ACC123_slurm_ids.yaml"
@@ -111,9 +111,9 @@ def test_get_job_ids_path_single_sample(microsalt_tracker: MicrosaltTracker):
     microsalt_tracker.store = store
 
     # WHEN getting the job_ids_path
-    job_id_path = microsalt_tracker._get_job_ids_path(internal_id)
+    job_id_path: Path = microsalt_tracker._get_job_ids_path(internal_id)
 
-    # THEN the file name should use the LIMS project ID
+    # THEN the file name should use the sample ID
     assert job_id_path.name == "ACC123A1_slurm_ids.yaml"
 
 
