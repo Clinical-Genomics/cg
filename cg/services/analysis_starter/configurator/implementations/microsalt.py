@@ -41,12 +41,8 @@ class MicrosaltConfigurator(Configurator):
         config_file_path: Path = flags.get(
             "config_path", self.config_file_creator.get_config_path(case_id)
         )
-        if not config_file_path.exists():
-            raise CaseNotConfiguredError(
-                f"Please ensure that the config file {config_file_path.as_posix} exists."
-            )
         fastq_directory: Path = self._get_fastq_directory(case_id)
-        return MicrosaltCaseConfig(
+        config = MicrosaltCaseConfig(
             binary=self.config.binary_path,
             case_id=case_id,
             conda_binary=self.config.conda_binary,
@@ -54,6 +50,9 @@ class MicrosaltConfigurator(Configurator):
             environment=self.config.conda_env,
             fastq_directory=fastq_directory.as_posix(),
         )
+        config: MicrosaltCaseConfig = self._set_flags(config=config, **flags)
+        self._ensure_valid_config(config)
+        return config
 
     def _get_fastq_directory(self, case_id: str) -> Path:
         """
@@ -70,3 +69,11 @@ class MicrosaltConfigurator(Configurator):
                 case=case, sample=case.samples[0]
             )
         return self.fastq_handler.get_case_fastq_path(case_id)
+
+    @staticmethod
+    def _ensure_valid_config(config: MicrosaltCaseConfig) -> None:
+        config_file_path = Path(config.config_file)
+        if not config_file_path.exists():
+            raise CaseNotConfiguredError(
+                f"Please ensure that the config file {config_file_path.as_posix} exists."
+            )

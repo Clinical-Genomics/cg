@@ -77,7 +77,10 @@ def test_run_raises_error_if_not_configured(
     # GIVEN that the case has a workflow and no ongoing analysis
     mocker.patch.object(Store, "get_case_workflow", return_value=Workflow.MICROSALT)
     mocker.patch.object(Tracker, "ensure_analysis_not_ongoing", return_value=None)
-
+    mock_case = create_autospec(Case)
+    sample = create_autospec(Sample)
+    mock_case.samples = [sample]
+    mocker.patch.object(Store, "get_case_by_internal_id", return_value=mock_case)
     # GIVEN that the config file does not exist
 
     # WHEN running the case
