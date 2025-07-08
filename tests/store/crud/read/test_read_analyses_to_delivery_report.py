@@ -20,6 +20,7 @@ def test_missing(analysis_store: Store, helpers: StoreHelpers, timestamp_now):
         uploaded_at=timestamp_now,
         workflow=workflow,
         data_delivery=DataDelivery.SCOUT,
+        housekeeper_version_id=1234,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     link: CaseSample = analysis_store.relate_sample(
@@ -87,6 +88,7 @@ def test_analyses_to_upload_delivery_reports(
         delivery_reported_at=timestamp_now,
         workflow=workflow,
         data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
+        housekeeper_version_id=1234,
     )
 
     # WHEN calling the analyses_to_upload_delivery_reports

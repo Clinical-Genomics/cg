@@ -235,7 +235,6 @@ def dev_config_case(context: CGConfig, case_id: str) -> None:
 
 
 @microsalt.command()
-@ARGUMENT_CASE_ID
 @click.pass_obj
 def dev_start_available(context: CGConfig) -> None:
     """Starts all available microSALT cases."""

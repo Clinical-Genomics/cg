@@ -60,6 +60,7 @@ class ConfiguratorFactory:
         config_file_creator = self._get_nextflow_config_file_creator(workflow)
         params_file_creator: ParamsFileCreator = self._get_params_file_creator(workflow)
         sample_sheet_creator: NextflowSampleSheetCreator = self._get_sample_sheet_creator(workflow)
+        extension: PipelineExtension = self._get_pipeline_extension(workflow)
         return NextflowConfigurator(
             config_file_creator=config_file_creator,
             housekeeper_api=self.housekeeper_api,
@@ -68,7 +69,7 @@ class ConfiguratorFactory:
             pipeline_config=self._get_pipeline_config(workflow),
             sample_sheet_creator=sample_sheet_creator,
             store=self.store,
-            pipeline_extension=self._get_pipeline_extension(workflow),
+            pipeline_extension=extension,
         )
 
     def _get_nextflow_config_file_creator(self, workflow: Workflow) -> NextflowConfigFileCreator:

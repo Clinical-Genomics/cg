@@ -114,6 +114,7 @@ def test_nipt_statina_upload_auto(
         store=upload_context.status_db,
         completed_at=datetime.datetime.now(),
         workflow=Workflow.FLUFFY,
+        housekeeper_version_id=1234,
     )
     assert analysis.completed_at
     assert not analysis.uploaded_at
@@ -196,6 +197,7 @@ def test_nipt_statina_upload_auto_dry_run(
         store=upload_context.status_db,
         completed_at=datetime.datetime.now(),
         workflow=Workflow.FLUFFY,
+        housekeeper_version_id=1234,
     )
     assert analysis.completed_at
     assert not analysis.uploaded_at

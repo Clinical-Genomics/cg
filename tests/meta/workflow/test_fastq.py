@@ -88,7 +88,7 @@ def test_parse_fastq_header_when_no_match(fastq_header: str, expected_error):
 def test_parse_file_data(fastq_path: Path, expected_fastq_meta: dict, mocker):
     # GIVEN a FASTQ file
 
-    with mocker.patch("cg.meta.workflow.fastq._is_undetermined_in_path", return_value=None):
+    with mocker.patch("cg.meta.workflow.fastq.is_undetermined_in_path", return_value=None):
         # WHEN parsing header
         header_meta = FastqHandler.parse_file_data(fastq_path=fastq_path)
 

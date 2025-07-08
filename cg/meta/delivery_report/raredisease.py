@@ -1,7 +1,6 @@
 """Raredisease Delivery Report API."""
 
 from cg.clients.chanjo2.models import CoverageMetrics
-from cg.constants.housekeeper_tags import HermesFileTag, AnalysisTag
 from cg.constants.report import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,
@@ -64,47 +63,23 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
 
     def get_scout_variants_files(self, case_id: str) -> ScoutVariantsFiles:
         """Return Raredisease files that will be uploaded to Scout."""
+        snv_vcf: str | None = self.get_scout_uploaded_file_from_hk(
+            case_id=case_id, scout_key=ScoutUploadKey.VCF_SNV
+        )
+        sv_vcf: str | None = self.get_scout_uploaded_file_from_hk(
+            case_id=case_id, scout_key=ScoutUploadKey.VCF_SV
+        )
+        vcf_str: str | None = self.get_scout_uploaded_file_from_hk(
+            case_id=case_id, scout_key=ScoutUploadKey.VCF_STR
+        )
+        smn_tsv: str | None = self.get_scout_uploaded_file_from_hk(
+            case_id=case_id, scout_key=ScoutUploadKey.SMN_TSV
+        )
         return ScoutVariantsFiles(
-            snv_vcf=self.housekeeper_api.get_file_by_exact_tags(
-                bundle=case_id,
-                tags=[
-                    AnalysisTag.VCF_SNV_CLINICAL,
-                    case_id,
-                    HermesFileTag.CLINICAL_DELIVERY,
-                    HermesFileTag.LONG_TERM_STORAGE,
-                    HermesFileTag.SCOUT,
-                ],
-            ).full_path,
-            sv_vcf=self.housekeeper_api.get_file_by_exact_tags(
-                bundle=case_id,
-                tags=[
-                    AnalysisTag.VCF_SV_CLINICAL,
-                    case_id,
-                    HermesFileTag.CLINICAL_DELIVERY,
-                    HermesFileTag.LONG_TERM_STORAGE,
-                    HermesFileTag.SCOUT,
-                ],
-            ).full_path,
-            vcf_str=self.housekeeper_api.get_file_by_exact_tags(
-                bundle=case_id,
-                tags=[
-                    AnalysisTag.VCF_STR,
-                    case_id,
-                    HermesFileTag.CLINICAL_DELIVERY,
-                    HermesFileTag.LONG_TERM_STORAGE,
-                    HermesFileTag.SCOUT,
-                ],
-            ).full_path,
-            smn_tsv=self.housekeeper_api.get_file_by_exact_tags(
-                bundle=case_id,
-                tags=[
-                    AnalysisTag.SMN_CALLING,
-                    case_id,
-                    HermesFileTag.CLINICAL_DELIVERY,
-                    HermesFileTag.LONG_TERM_STORAGE,
-                    HermesFileTag.SCOUT,
-                ],
-            ).full_path,
+            snv_vcf=snv_vcf,
+            sv_vcf=sv_vcf,
+            vcf_str=vcf_str,
+            smn_tsv=smn_tsv,
         )
 
     @staticmethod
