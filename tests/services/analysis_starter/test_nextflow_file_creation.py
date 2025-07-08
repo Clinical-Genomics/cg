@@ -6,7 +6,7 @@ from pytest_mock import MockerFixture
 
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
-from cg.constants.gene_panel import GenePanelMasterList
+from cg.constants.gene_panel import GenePanelGenomeBuild, GenePanelMasterList
 from cg.services.analysis_starter.configurator.file_creators.nextflow import config_file
 from cg.services.analysis_starter.configurator.file_creators.nextflow import (
     gene_panel as gene_panel_creator,
@@ -114,30 +114,30 @@ def test_nextflow_sample_sheet_creators(
 
 
 def test_gene_panel_file_content(
-    raredisease_gene_panel_creator: GenePanelFileCreator,
-    raredisease_case_id: str,
-    raredisease_case_path: Path,
-    raredisease_gene_panel_file_content: list[str],
+    nextflow_gene_panel_creator: GenePanelFileCreator,
+    nextflow_case_id: str,
+    nextflow_case_path: Path,
+    nextflow_gene_panel_file_content,
     mocker: MockerFixture,
 ):
     """Test that the gene panel file content is created correctly."""
     # GIVEN a gene panel file content creator, a case id and a case path
 
-    # GIVEN a mock of Scout export panels
-    mocker.patch.object(ScoutAPI, "export_panels", return_value=raredisease_gene_panel_file_content)
+    # GIVEN that the case has a genome build
+    mocker.patch.object(
+        gene_panel_creator, "get_genome_build", return_value=GenePanelGenomeBuild.hg19
+    )
 
     # GIVEN a mock writer
     write_mock: mocker.MagicMock = mocker.patch.object(gene_panel_creator, "write_txt")
 
     # WHEN creating a gene panel file
-    raredisease_gene_panel_creator.create(
-        case_id=raredisease_case_id, case_path=raredisease_case_path
-    )
+    nextflow_gene_panel_creator.create(case_id=nextflow_case_id, case_path=nextflow_case_path)
 
     # THEN the gene panel file would have been written with the expected content
     write_mock.assert_called_once_with(
-        content=raredisease_gene_panel_file_content,
-        file_path=raredisease_gene_panel_creator.get_file_path(raredisease_case_path),
+        content=nextflow_gene_panel_file_content,
+        file_path=nextflow_gene_panel_creator.get_file_path(nextflow_case_path),
     )
 
 

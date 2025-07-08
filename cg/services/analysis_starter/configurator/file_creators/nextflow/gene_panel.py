@@ -25,7 +25,7 @@ class GenePanelFileCreator:
 
     def _get_content(self, case_id: str) -> list[str]:
         case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
-        genome_build: GenePanelGenomeBuild = get_genome_build(workflow=Workflow(case.data_analysis))
+        genome_build: GenePanelGenomeBuild = get_genome_build(workflow=case.data_analysis)
         all_panels: list[str] = self._get_aggregated_panels(
             customer_id=case.customer.internal_id, default_panels=set(case.panels)
         )

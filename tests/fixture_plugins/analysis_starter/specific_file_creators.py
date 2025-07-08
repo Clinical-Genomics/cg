@@ -15,20 +15,16 @@ from cg.store.store import Store
 
 
 @pytest.fixture
-def raredisease_gene_panel_creator(raredisease_context: CGConfig) -> GenePanelFileCreator:
-    return GenePanelFileCreator(
-        store=raredisease_context.status_db,
-        scout_api=raredisease_context.scout_api_37,
-    )
-
-
-@pytest.fixture
-def nextflow_gene_panel_creator() -> GenePanelFileCreator:
+def nextflow_gene_panel_creator(
+    nextflow_gene_panel_file_content,
+) -> GenePanelFileCreator:
     mock_store: Store = create_autospec(Store)
     mock_store.get_case_by_internal_id.return_value = create_autospec(Case)
+    mock_scout: ScoutAPI = create_autospec(ScoutAPI)
+    mock_scout.export_panels.return_value = nextflow_gene_panel_file_content
     return GenePanelFileCreator(
         store=mock_store,
-        scout_api=create_autospec(ScoutAPI),
+        scout_api=mock_scout,
     )
 
 
