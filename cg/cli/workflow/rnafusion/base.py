@@ -1,6 +1,7 @@
 """CLI support to create config and/or start RNAFUSION."""
 
 import logging
+from typing import cast
 
 import rich_click as click
 
@@ -57,7 +58,7 @@ rnafusion.add_command(store_available)
 def dev_config_case(config: CGConfig, case_id: str):
     """Configure an RNAFusion case so that it is ready to be run."""
     factory = ConfiguratorFactory(config)
-    configurator: NextflowConfigurator = factory.get_configurator(Workflow.RNAFUSION)
+    configurator = cast(NextflowConfigurator, factory.get_configurator(Workflow.RNAFUSION))
     configurator.configure(case_id=case_id)
 
 

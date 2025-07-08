@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import TypeVar
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -47,8 +46,6 @@ from cg.services.analysis_starter.configurator.implementations.microsalt import 
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.store.store import Store
 
-ImplementedConfigurator = TypeVar("ImplementedConfigurator", bound=Configurator)
-
 
 class ConfiguratorFactory:
 
@@ -58,7 +55,7 @@ class ConfiguratorFactory:
         self.lims_api: LimsAPI = cg_config.lims_api
         self.store: Store = cg_config.status_db
 
-    def get_configurator(self, workflow: Workflow) -> ImplementedConfigurator:
+    def get_configurator(self, workflow: Workflow) -> Configurator:
         if workflow in NEXTFLOW_WORKFLOWS:
             return self._get_nextflow_configurator(workflow)
         elif workflow == Workflow.MICROSALT:
