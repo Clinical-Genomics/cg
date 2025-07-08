@@ -30,7 +30,14 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.constants import FileExtensions, SequencingFileTag, Workflow
-from cg.constants.constants import CaseActions, CustomerId, FileFormat, GenomeVersion, Strandedness
+from cg.constants.constants import (
+    CaseActions,
+    CustomerId,
+    FileFormat,
+    GenomeVersion,
+    SequencingQCStatus,
+    Strandedness,
+)
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AlignmentFileTag
 from cg.constants.priority import SlurmQos
@@ -92,6 +99,22 @@ multiqc_json_file = "multiqc_data.json"
 software_version_file = "software_versions.yml"
 deliverables_yaml = "_deliverables.yaml"
 pytest_plugins = [
+    "tests.fixture_plugins.analysis_starter.case_config_fixtures",
+    "tests.fixture_plugins.analysis_starter.config_file_creators",
+    "tests.fixture_plugins.analysis_starter.configurator_fixtures",
+    "tests.fixture_plugins.analysis_starter.config_file_content_fixtures",
+    "tests.fixture_plugins.analysis_starter.extension_fixtures",
+    "tests.fixture_plugins.analysis_starter.fastq_handlers",
+    "tests.fixture_plugins.analysis_starter.path_fixtures",
+    "tests.fixture_plugins.analysis_starter.sample_sheet_creators",
+    "tests.fixture_plugins.analysis_starter.sample_sheet_content_fixtures",
+    "tests.fixture_plugins.analysis_starter.seqera_client_fixtures",
+    "tests.fixture_plugins.analysis_starter.seqera_submitter_fixtures",
+    "tests.fixture_plugins.analysis_starter.specific_file_creators",
+    "tests.fixture_plugins.analysis_starter.specific_file_content_fixtures",
+    "tests.fixture_plugins.analysis_starter.store_fixtures",
+    "tests.fixture_plugins.analysis_starter.params_file_creators",
+    "tests.fixture_plugins.analysis_starter.params_file_content_fixtures",
     "tests.fixture_plugins.backup_fixtures.backup_fixtures",
     "tests.fixture_plugins.chanjo2_fixtures.api_fixtures",
     "tests.fixture_plugins.chanjo2_fixtures.models_fixtures",
@@ -278,7 +301,7 @@ def empty_list() -> list:
     return []
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def sbatch_process(sbatch_job_number: int) -> ProcessMock:
     """Return a mocked process object."""
     slurm_process = ProcessMock(binary="sbatch")
@@ -1907,7 +1930,7 @@ def hk_uri() -> str:
     return "sqlite:///"
 
 
-@pytest.fixture(name="context_config")
+@pytest.fixture
 def context_config(
     cg_uri: str,
     hk_uri: str,
@@ -2072,6 +2095,7 @@ def context_config(
             "username": "user",
         },
         "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb.yaml"},
+        "loqusdb-lwp": {"binary_path": "loqusdb-rd-lwp", "config_path": "loqusdb-rd-lwp.yaml"},
         "loqusdb-wes": {"binary_path": "loqusdb-wes", "config_path": "loqusdb-wes.yaml"},
         "loqusdb-somatic": {
             "binary_path": "loqusdb-somatic",
@@ -2146,6 +2170,7 @@ def context_config(
             "workflow_bin_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
+            "repository": "https://some_url",
             "revision": "2.2.0",
             "root": str(raredisease_dir),
             "slurm": {
@@ -2244,7 +2269,7 @@ def context_config(
     }
 
 
-@pytest.fixture(name="cg_context")
+@pytest.fixture
 def cg_context(
     context_config: dict, base_store: Store, housekeeper_api: MockHousekeeperAPI
 ) -> CGConfig:
@@ -2635,6 +2660,7 @@ def nallo_context(
         internal_id=case_id_not_enough_reads,
         name=case_id_not_enough_reads,
         data_analysis=Workflow.NALLO,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
 
     sample_not_enough_reads: Sample = helpers.add_sample(
@@ -2823,7 +2849,7 @@ def nallo_multiqc_json_metrics(nallo_analysis_dir) -> dict:
 
 
 @pytest.fixture(scope="function")
-def nallo_nexflow_config_file_path(nallo_dir, nallo_case_id) -> Path:
+def nallo_nextflow_config_file_path(nallo_dir, nallo_case_id) -> Path:
     """Path to config file."""
     return Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_nextflow_config").with_suffix(
         FileExtensions.JSON
@@ -2909,36 +2935,6 @@ def raredisease_sample_sheet_content(
 
 
 @pytest.fixture(scope="function")
-def raredisease_sample_sheet_path(raredisease_dir, raredisease_case_id) -> Path:
-    """Path to sample sheet."""
-    return Path(
-        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet"
-    ).with_suffix(FileExtensions.CSV)
-
-
-@pytest.fixture(scope="function")
-def raredisease_params_file_path(raredisease_dir, raredisease_case_id) -> Path:
-    """Path to parameters file."""
-    return Path(
-        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_params_file"
-    ).with_suffix(FileExtensions.YAML)
-
-
-@pytest.fixture(scope="function")
-def raredisease_gene_panel_path(raredisease_dir, raredisease_case_id) -> Path:
-    """Path to gene panel file."""
-    return Path(raredisease_dir, raredisease_case_id, "gene_panels").with_suffix(FileExtensions.BED)
-
-
-@pytest.fixture(scope="function")
-def raredisease_nexflow_config_file_path(raredisease_dir, raredisease_case_id) -> Path:
-    """Path to config file."""
-    return Path(
-        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_nextflow_config"
-    ).with_suffix(FileExtensions.JSON)
-
-
-@pytest.fixture(scope="function")
 def raredisease_deliverable_data(
     raredisease_dir: Path, raredisease_case_id: str, sample_id: str
 ) -> dict:
@@ -2966,11 +2962,20 @@ def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> 
 
 
 @pytest.fixture(scope="function")
+def raredisease_sample_id_map(raredisease_dir: str, raredisease_case_id: str) -> Path:
+    """Return sample id map path."""
+    return Path(
+        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_customer_internal_mapping"
+    ).with_suffix(FileExtensions.CSV)
+
+
+@pytest.fixture(scope="function")
 def raredisease_parameters_default(
     raredisease_dir: Path,
     raredisease_case_id: str,
     raredisease_sample_sheet_path: Path,
-    bed_version_file_name,
+    bed_version_file_name: str,
+    raredisease_sample_id_map: Path,
 ) -> RarediseaseParameters:
     """Return Tomte parameters."""
     return RarediseaseParameters(
@@ -2979,6 +2984,7 @@ def raredisease_parameters_default(
         target_bed_file=bed_version_file_name,
         analysis_type=AnalysisType.WES,
         save_mapped_as_cram=True,
+        sample_id_map=raredisease_sample_id_map,
         vcfanno_extra_resources=str(
             Path(raredisease_dir, raredisease_case_id + ScoutExportFileName.MANAGED_VARIANTS)
         ),
@@ -3010,6 +3016,7 @@ def raredisease_context(
     """context to use in cli"""
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
     cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.lims_api_ = MockLimsAPI()
     cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
     status_db: Store = cg_context.status_db
 
@@ -3064,6 +3071,7 @@ def raredisease_context(
         internal_id=case_id_not_enough_reads,
         name=case_id_not_enough_reads,
         data_analysis=Workflow.RAREDISEASE,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
 
     sample_not_enough_reads: Sample = helpers.add_sample(
@@ -3074,7 +3082,6 @@ def raredisease_context(
         application_tag=wgs_application_tag,
         reference_genome=GenomeVersion.HG19,
     )
-
     helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_not_enough_reads)
 
     # GIVEN a genome build
@@ -3379,7 +3386,7 @@ def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def rnafusion_nexflow_config_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
+def rnafusion_nextflow_config_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
     """Path to config file."""
     return Path(
         rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_nextflow_config"
@@ -3558,6 +3565,7 @@ def rnafusion_context(
         internal_id=case_id_not_enough_reads,
         name=case_id_not_enough_reads,
         data_analysis=Workflow.RNAFUSION,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
 
     sample_not_enough_reads: Sample = helpers.add_sample(
@@ -3692,7 +3700,7 @@ def tomte_params_file_path(tomte_dir, tomte_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def tomte_nexflow_config_file_path(tomte_dir, tomte_case_id) -> Path:
+def tomte_nextflow_config_file_path(tomte_dir, tomte_case_id) -> Path:
     """Path to config file."""
     return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_nextflow_config").with_suffix(
         FileExtensions.JSON
@@ -3972,6 +3980,7 @@ def tomte_context(
         internal_id=case_id_not_enough_reads,
         name=case_id_not_enough_reads,
         data_analysis=Workflow.TOMTE,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
 
     sample_not_enough_reads: Sample = helpers.add_sample(
@@ -4027,7 +4036,7 @@ def taxprofiler_sample_sheet_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_nexflow_config_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
+def taxprofiler_nextflow_config_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
     """Path to config file."""
     return Path(
         taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_nextflow_config"
@@ -4207,6 +4216,7 @@ def taxprofiler_context(
         internal_id=case_id_not_enough_reads,
         name=case_id_not_enough_reads,
         data_analysis=Workflow.TAXPROFILER,
+        aggregated_sequencing_qc=SequencingQCStatus.FAILED,
     )
 
     sample_not_enough_reads: Sample = helpers.add_sample(

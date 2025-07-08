@@ -2,48 +2,13 @@
 
 from pathlib import Path
 
-import openpyxl
 import pytest
-from openpyxl.workbook import Workbook
-from openpyxl.worksheet.worksheet import Worksheet
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.constants.constants import FileFormat
 from cg.constants.orderforms import Orderform
 from cg.io.controller import ReadFile
 from cg.models.orders.constants import OrderType
-
-
-def get_nr_samples_excel(orderform_path: str) -> int:
-    """Parse a excel orderform file and return the number of sample rows."""
-    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
-    workbook: Workbook = openpyxl.load_workbook(
-        filename=orderform_path, read_only=True, data_only=True
-    )
-    sheet_name: str = orderform_parser.get_sheet_name(workbook.sheetnames)
-    orderform_sheet: Worksheet = workbook[sheet_name]
-    nr_samples = 0
-    current_row = "unknown"
-    for row in orderform_sheet.rows:
-        if row[0].value == "</SAMPLE ENTRIES>":
-            # End of samples
-            break
-        elif row[0].value == "<SAMPLE ENTRIES>":
-            # Samples start here
-            current_row = "samples"
-            continue
-        if current_row == "samples":
-            values = []
-            for cell in row:
-                value = str(cell.value)
-                if value == "None":
-                    value = ""
-                values.append(value)
-
-            # skip empty rows
-            if values[0]:
-                nr_samples += 1
-    return nr_samples
 
 
 @pytest.fixture
@@ -89,24 +54,6 @@ def microsalt_order_parser(microsalt_orderform: str) -> ExcelOrderformParser:
 
 
 @pytest.fixture
-def nr_samples_mip_orderform(mip_orderform: str) -> int:
-    """Return the number of samples in the mip orderform."""
-    return get_nr_samples_excel(mip_orderform)
-
-
-@pytest.fixture
-def nr_samples_rml_orderform(rml_orderform: str) -> int:
-    """Return the number of samples in the RML orderform."""
-    return get_nr_samples_excel(rml_orderform)
-
-
-@pytest.fixture
-def nr_samples_fastq_orderform(fastq_orderform: str) -> int:
-    """Return the number of samples in the RML orderform."""
-    return get_nr_samples_excel(fastq_orderform)
-
-
-@pytest.fixture
 def mip_rna_orderform_sample() -> dict:
     """Return a raw parsed mip RNA sample in excel format."""
     return {
@@ -141,52 +88,7 @@ def mip_rna_orderform_sample() -> dict:
     }
 
 
-# Orderform fixtures
-
-
-@pytest.fixture(scope="session")
-def microsalt_orderform(orderforms: Path) -> str:
-    """Orderform fixture for microbial samples."""
-    return Path(
-        orderforms,
-        f"{Orderform.MICROSALT}.{Orderform.get_current_orderform_version(Orderform.MICROSALT)}.microbial.xlsx",
-    ).as_posix()
-
-
-@pytest.fixture(scope="session")
-def microbial_sequencing_orderform(orderforms: Path) -> str:
-    """Orderform fixture for microbial samples."""
-    return Path(
-        orderforms,
-        f"{Orderform.MICROBIAL_FASTQ}.{Orderform.get_current_orderform_version(Orderform.MICROBIAL_FASTQ)}.xlsx",
-    ).as_posix()
-
-
-@pytest.fixture(scope="session")
-def pacbio_revio_sequencing_orderform(orderforms: Path) -> str:
-    """Orderform fixture for pacbio samples."""
-    return Path(
-        orderforms,
-        f"{Orderform.PACBIO_LONG_READ}_{Orderform.get_current_orderform_version(Orderform.PACBIO_LONG_READ)}.xlsx",
-    ).as_posix()
-
-
-@pytest.fixture
-def sarscov2_orderform(orderforms: Path) -> str:
-    """Orderform fixture for sarscov2 samples."""
-    return Path(
-        orderforms,
-        f"{Orderform.SARS_COV_2}.{Orderform.get_current_orderform_version(Orderform.SARS_COV_2)}.sarscov2.xlsx",
-    ).as_posix()
-
-
-@pytest.fixture(scope="session")
-def rml_orderform(orderforms: Path) -> str:
-    """Orderform fixture for RML samples."""
-    return Path(
-        orderforms,
-        f"{Orderform.RML}.{Orderform.get_current_orderform_version(Orderform.RML)}.rml.xlsx",
-    ).as_posix()
+# Excel order form fixtures
 
 
 @pytest.fixture(scope="session")
@@ -226,20 +128,29 @@ def metagenome_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture(scope="session")
+def microbial_sequencing_orderform(orderforms: Path) -> str:
+    """Orderform fixture for microbial samples."""
+    return Path(
+        orderforms,
+        f"{Orderform.MICROBIAL_FASTQ}.{Orderform.get_current_orderform_version(Orderform.MICROBIAL_FASTQ)}.xlsx",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def microsalt_orderform(orderforms: Path) -> str:
+    """Orderform fixture for microbial samples."""
+    return Path(
+        orderforms,
+        f"{Orderform.MICROSALT}.{Orderform.get_current_orderform_version(Orderform.MICROSALT)}.microbial.xlsx",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
 def mip_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP samples."""
     return Path(
         orderforms,
         f"{Orderform.MIP_DNA}.{Orderform.get_current_orderform_version(Orderform.MIP_DNA)}.mip.xlsx",
-    ).as_posix()
-
-
-@pytest.fixture(scope="session")
-def mip_orderform_no_delivery(orderforms: Path) -> str:
-    """Orderform fixture for MIP samples with delivery set to No delivery."""
-    return Path(
-        orderforms,
-        f"{Orderform.MIP_DNA}.{Orderform.get_current_orderform_version(Orderform.MIP_DNA)}.mip_no_delivery.xlsx",
     ).as_posix()
 
 
@@ -253,11 +164,54 @@ def mip_rna_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture(scope="session")
+def nallo_order_form(orderforms: Path) -> str:
+    return Path(
+        orderforms,
+        f"{Orderform.NALLO}.{Orderform.get_current_orderform_version(Orderform.NALLO)}.xlsx",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def pacbio_revio_sequencing_orderform(orderforms: Path) -> str:
+    """Orderform fixture for pacbio samples."""
+    return Path(
+        orderforms,
+        f"{Orderform.PACBIO_LONG_READ}_{Orderform.get_current_orderform_version(Orderform.PACBIO_LONG_READ)}.xlsx",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def raredisease_orderform(orderforms: Path) -> str:
+    return Path(
+        orderforms,
+        f"{Orderform.RAREDISEASE}.{Orderform.get_current_orderform_version(Orderform.RAREDISEASE)}.raredisease.xlsx",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
+def rml_orderform(orderforms: Path) -> str:
+    """Orderform fixture for RML samples."""
+    return Path(
+        orderforms,
+        f"{Orderform.RML}.{Orderform.get_current_orderform_version(Orderform.RML)}.rml.xlsx",
+    ).as_posix()
+
+
+@pytest.fixture(scope="session")
 def rnafusion_orderform(orderforms: Path) -> str:
     """Orderform fixture for MIP RNA samples."""
     return Path(
         orderforms,
         f"{Orderform.RNAFUSION}.{Orderform.get_current_orderform_version(Orderform.RNAFUSION)}.rnafusion.xlsx",
+    ).as_posix()
+
+
+@pytest.fixture
+def sarscov2_orderform(orderforms: Path) -> str:
+    """Orderform fixture for sarscov2 samples."""
+    return Path(
+        orderforms,
+        f"{Orderform.SARS_COV_2}.{Orderform.get_current_orderform_version(Orderform.SARS_COV_2)}.sarscov2.xlsx",
     ).as_posix()
 
 
@@ -277,6 +231,9 @@ def tomte_orderform(orderforms: Path) -> str:
         orderforms,
         f"{Orderform.TOMTE}.{Orderform.get_current_orderform_version(Orderform.TOMTE)}.tomte.xlsx",
     ).as_posix()
+
+
+# JSON order form fixtures
 
 
 @pytest.fixture(scope="session")

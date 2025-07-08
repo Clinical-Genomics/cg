@@ -1,22 +1,65 @@
 """This script tests the cli methods to create prerequisites and start a mip-dna analysis"""
 
 import logging
+from unittest import mock
+
+from click.testing import CliRunner
 
 from cg.cli.workflow.mip_dna.base import start_available
 from cg.constants import EXIT_SUCCESS, Workflow
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.models.cg_config import CGConfig
 
 
-def test_dry(cli_runner, mip_dna_context):
-    """Test mip dna start with --dry option"""
+def test_dry(cli_runner, mip_dna_context, caplog):
+    """Test mip-dna start-available with --dry option"""
+    # GIVEN that the log messages are captured
+    caplog.set_level(logging.INFO)
 
-    # GIVEN a mip_dna_context
+    # GIVEN a mip_dna_context with 3 cases that are ready for analysis
+    analysis_api = MipDNAAnalysisAPI(config=mip_dna_context)
+    assert len(analysis_api.get_cases_to_analyze()) == 3
 
-    # WHEN using dry running
-    result = cli_runner.invoke(start_available, ["--dry-run"], obj=mip_dna_context)
+    # GIVEN that the cases do not need decompression
+    with mock.patch.object(MipDNAAnalysisAPI, "resolve_decompression", return_value=None):
+
+        # WHEN using dry running
+        result = cli_runner.invoke(start_available, ["--dry-run"], obj=mip_dna_context)
 
     # THEN command should have accepted the option happily
     assert result.exit_code == EXIT_SUCCESS
+
+    # THEN that the 3 cases are picked up to start
+    assert caplog.text.count("Starting full MIP analysis workflow for case") == 3
+
+
+def test_start_available_with_limit(
+    cli_runner: CliRunner,
+    caplog,
+    mip_dna_context: CGConfig,
+    mip_dna_analysis_api: MipDNAAnalysisAPI,
+):
+    """Test that the mip-dna start-available command picks up only the given max number of cases."""
+    # GIVEN that the log messages are captured
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a mip_dna_context with 3 cases that are ready for analysis
+    assert len(mip_dna_analysis_api.get_cases_to_analyze()) == 3
+
+    # GIVEN that the cases do not need decompression
+    with mock.patch.object(MipDNAAnalysisAPI, "resolve_decompression", return_value=None):
+
+        # WHEN running start-available command with limit=1
+        result = cli_runner.invoke(
+            start_available, ["--dry-run", "--limit", 1], obj=mip_dna_context
+        )
+
+    # THEN command succeeds
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN only 1 case is picked up to start
+    assert caplog.text.count("Starting full MIP analysis workflow for case") == 1
 
 
 def test_dna_case_included(cli_runner, caplog, dna_case, mip_dna_context, mocker):

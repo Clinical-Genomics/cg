@@ -1,22 +1,29 @@
 """Test for analysis"""
 
 import logging
+from datetime import datetime
+from pathlib import Path
+from unittest.mock import ANY, Mock, create_autospec
 
 import mock
 import pytest
+from housekeeper.store.models import Version
 
+from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import GenePanelMasterList, Priority, SequencingRunDataAvailability
 from cg.constants.archiving import ArchiveLocations
-from cg.constants.constants import ControlOptions
+from cg.constants.constants import CaseActions, ControlOptions, Workflow
 from cg.constants.priority import SlurmQos, TrailblazerPriority
-from cg.exc import AnalysisNotReadyError
+from cg.exc import AnalysisAlreadyStoredError, AnalysisNotReadyError, CaseNotFoundError
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.store.models import Case, IlluminaSequencingRun, Sample
+from cg.store.models import Analysis, Case, CaseSample, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -688,3 +695,213 @@ def test_get_trailblazer_priority(
 
     # THEN the expected trailblazer priority should be returned
     assert trailblazer_priority is expected_trailblazer_priority
+
+
+#  Below are new tests using mocks instead of a test database,
+#  in the future the old tests in this module could be adjusted to also use these fixtures
+
+
+@pytest.fixture(autouse=True)
+def patch_abstract_methods(mocker):
+    mocker.patch.object(AnalysisAPI, "get_job_ids_path", return_value=Path("/job/ids/path"))
+    mocker.patch.object(AnalysisAPI, "get_workflow_version", return_value="0.0.0")
+    mocker.patch.object(
+        AnalysisAPI, "get_deliverables_file_path", return_value=Path("/deliverables/file/path")
+    )
+
+
+@pytest.fixture
+def case_mock() -> Case:
+    case_sample: CaseSample = create_autospec(CaseSample)
+    case_sample.sample = create_autospec(Sample)
+
+    case: Case = create_autospec(Case)
+    case.internal_id = "some_case_id"
+    case.links = [case_sample]
+    case.priority = Priority.standard
+    return case
+
+
+@pytest.fixture
+def status_db_mock(case_mock: Case) -> Store:
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id = lambda internal_id: case_mock
+    return store
+
+
+@pytest.fixture
+def trailblazer_api_mock() -> TrailblazerAPI:
+    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
+    trailblazer_api.is_latest_analysis_ongoing = lambda case_id: False
+    return trailblazer_api
+
+
+@pytest.fixture()
+def analysis_config(
+    context_config: dict, status_db_mock: Store, trailblazer_api_mock: TrailblazerAPI
+) -> CGConfig:
+    cg_config = CGConfig(**context_config)
+    cg_config.status_db_ = status_db_mock
+    cg_config.trailblazer_api_ = trailblazer_api_mock
+    return cg_config
+
+
+@pytest.mark.usefixtures("patch_abstract_methods")
+def test_on_analysis_started_adds_a_pending_analysis_to_trailblazer(
+    analysis_config: CGConfig,
+    case_mock: Case,
+    trailblazer_api_mock: TrailblazerAPI,
+):
+    # GIVEN an analysis api with a reference to the trailblazer api
+    analysis_api: AnalysisAPI = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
+    analysis_api.trailblazer_api = trailblazer_api_mock
+    tower_id = "some_tower_id"
+
+    # WHEN on_analysis is called
+    analysis_api.on_analysis_started(case_id=case_mock.internal_id, tower_workflow_id=tower_id)
+
+    # THEN a pending analysis is added to trailblazer with the correct case_id
+    trailblazer_api_mock.add_pending_analysis.assert_called_with(
+        case_id=case_mock.internal_id,
+        tower_workflow_id=tower_id,
+        analysis_type=ANY,
+        config_path=ANY,
+        email=ANY,
+        is_hidden=False,
+        order_id=ANY,
+        out_dir=ANY,
+        priority=ANY,
+        ticket=ANY,
+        workflow=Workflow.BALSAMIC,
+        workflow_manager=ANY,
+    )
+
+
+@pytest.mark.freeze_time
+@pytest.mark.usefixtures("patch_abstract_methods")
+def test_on_analysis_started_creates_an_analysis_in_status_db(
+    analysis_config: CGConfig,
+    case_mock: Case,
+    status_db_mock: Store,
+    trailblazer_api_mock: TrailblazerAPI,
+):
+    # GIVEN an analysis api can successfully create a trailblazer analysis
+    analysis_api: AnalysisAPI = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
+
+    new_trailblazer_analysis: TrailblazerAnalysis = create_autospec(
+        TrailblazerAnalysis, id=123456789
+    )
+    trailblazer_api_mock.add_pending_analysis = Mock(return_value=new_trailblazer_analysis)
+
+    new_analysis: Analysis = create_autospec(Analysis)
+    status_db_mock.add_analysis = Mock(return_value=new_analysis)
+
+    # WHEN on_analysis_started is called
+    analysis_api.on_analysis_started(case_mock.internal_id)
+
+    # THEN it creates an Analysis row in status db connected with:
+    #   - the trailblazer analysis id
+    #   - the given case
+    status_db_mock.add_analysis.assert_called_with(
+        workflow=Workflow.BALSAMIC,
+        trailblazer_id=new_trailblazer_analysis.id,
+        completed_at=None,
+        primary=True,
+        started_at=datetime.now(),
+        version=ANY,
+    )
+    status_db_mock.add_item_to_store.assert_called_with(new_analysis)
+    assert new_analysis.case == case_mock
+
+
+@pytest.mark.usefixtures("patch_abstract_methods")
+def test_on_analysis_started_throws_when_case_was_not_found(
+    analysis_config: CGConfig, case_mock: Case, status_db_mock: Store
+):
+    # GIVEN the case can't be found in StatusDB
+    status_db_mock.get_case_by_internal_id = Mock(return_value=None)
+    # GIVEN an analysis api
+    analysis_api: AnalysisAPI = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
+
+    # WHEN on_analysis_started is called
+    with pytest.raises(CaseNotFoundError):
+        # THEN it raises a CaseNotFoundError
+        analysis_api.on_analysis_started(case_id=case_mock.internal_id)
+
+
+@pytest.mark.usefixtures("patch_abstract_methods")
+def test_on_analysis_started_sets_the_case_action_to_running(
+    analysis_config: CGConfig, case_mock: Case, status_db_mock: Store
+):
+    # GIVEN an analysis api and a case with action = None
+    analysis_api = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
+    case_mock.action = None
+
+    # WHEN on_analysis_started is called
+    analysis_api.on_analysis_started(case_mock.internal_id)
+
+    # THEN the case action is set to RUNNING
+    status_db_mock.update_case_action.assert_called_with(
+        action=CaseActions.RUNNING, case_internal_id=case_mock.internal_id
+    )
+
+
+def test_update_analysis_as_completed_statusdb_analysis_already_completed(
+    analysis_config: CGConfig, case_mock: Case, status_db_mock: Store
+):
+    """Test that update_analysis_as_completed_statusdb fails if the analysis is already completed."""
+    # GIVEN an analysis api and a case with an analysis in StatusDB
+    analysis_api = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
+
+    case_mock.analyses = [create_autospec(Analysis)]
+    case_mock.analyses[0].completed_at = datetime.now()
+
+    # WHEN update_analysis_as_completed_statusdb is called
+    with pytest.raises(AnalysisAlreadyStoredError):
+        # THEN it raises an AnalysisAlreadyStoredError
+        analysis_api.update_analysis_as_completed_statusdb(
+            case_id=case_mock.internal_id, hk_version_id=1234, force=False
+        )
+
+
+@pytest.mark.freeze_time
+def test_update_analysis_as_completed_statusdb_succeeds(
+    analysis_config: CGConfig,
+    case_mock: Case,
+    status_db_mock: Store,
+):
+    """Test that update_analysis_as_completed_statusdb succeeds if the analysis is not completed."""
+    # GIVEN an analysis api and a case with an analysis in StatusDB
+    analysis_api = AnalysisAPI(workflow=Workflow.BALSAMIC, config=analysis_config)
+    analysis: Analysis = create_autospec(Analysis)
+    analysis.id = 123456
+    analysis.completed_at = None
+    analysis.housekeeper_version_id = None
+    hk_version: Version = create_autospec(Version)
+    hk_version.id = 1234
+    status_db_mock.get_latest_started_analysis_for_case.return_value = analysis
+
+    # GIVEN that the bundle has a completed_at date of now
+    with (
+        mock.patch("os.path.getctime", return_value=datetime.now().timestamp()),
+        mock.patch.object(
+            AnalysisAPI, "create_housekeeper_bundle", return_value=(None, hk_version)
+        ),
+    ):
+        # WHEN update_analysis_as_completed_statusdb is called
+        analysis_api.update_analysis_as_completed_statusdb(
+            case_id=case_mock.internal_id, hk_version_id=1234, force=False
+        )
+
+    # THEN it updates the analysis completed_at date in StatusDB
+    status_db_mock.update_analysis_completed_at.assert_called_with(
+        analysis_id=123456, completed_at=datetime.now()
+    )
+
+    # THEN it updates the analysis housekeeper version id
+    status_db_mock.update_analysis_housekeeper_version_id.assert_called_with(
+        analysis_id=123456, version_id=1234
+    )
+
+    # THEN it updates the analysis comment
+    status_db_mock.update_analysis_comment.assert_called_with(analysis_id=123456, comment=ANY)

@@ -15,8 +15,3 @@ OPTION_WORKFLOW = click.option(
     type=click.Choice(REPORT_SUPPORTED_WORKFLOW),
     help="Limit delivery report generation to a specific workflow",
 )
-
-OPTION_STARTED_AT = click.option(
-    "--analysis-started-at",
-    help="Retrieve analysis started at a specific date (i.e. '2020-05-28  12:00:46')",
-)

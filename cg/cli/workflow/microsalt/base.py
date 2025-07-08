@@ -2,20 +2,25 @@
 
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.cli.workflow.commands import resolve_compression, store, store_available
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.cli_options import DRY_RUN
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, Workflow
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.io.controller import WriteFile, WriteStream
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.configurator.implementations.microsalt import (
+    MicrosaltConfigurator,
+)
+from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
+from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -154,17 +159,13 @@ def run(
     if sample_id or dry_run:
         analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
         return
-    try:
-        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-    except Exception as error:
-        LOG.warning(
-            f"Trailblazer warning: Could not track analysis progress for case {case_id}! {error.__class__.__name__}"
-        )
+
     try:
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
         analysis_api.process.run_command(parameters=analyse_command, dry_run=dry_run)
-    except:
-        LOG.error("Failed to run analysis!")
+        analysis_api.on_analysis_started(case_id)
+    except Exception as error:
+        LOG.error(f"Failed to run analysis for case {case_id}: {error}")
         analysis_api.set_statusdb_action(case_id=case_id, action=None)
         raise
 
@@ -188,6 +189,64 @@ def start(
     context.invoke(run, ticket=ticket, sample=sample, unique_id=unique_id, dry_run=dry_run)
 
 
+@microsalt.command("dev-run")
+@click.option(
+    "-c",
+    "--config",
+    "config_file_path",
+    required=False,
+    type=click.Path(exists=True, file_okay=True, dir_okay=False, resolve_path=True),
+    help="optionally change the config file path",
+)
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_run(
+    context: CGConfig,
+    config_file_path: click.Path,
+    case_id: str,
+) -> None:
+    """Runs the microSALT workflow for the provided case. Uses new code. Does not generate
+    config files."""
+
+    analysis_starter = AnalysisStarterFactory(context).get_analysis_starter_for_case(case_id)
+    analysis_starter.run(case_id=case_id, config_file=config_file_path)
+
+
+@microsalt.command("dev-start")
+@ARGUMENT_CASE_ID
+@click.pass_context
+def dev_start(context: click.Context, case_id: str) -> None:
+    """Generates config file, links fastq files and Starts the microSALT analysis
+    for the provided case."""
+    LOG.info(f"Starting Microsalt workflow for {case_id}")
+    analysis_starter = AnalysisStarterFactory(context.obj).get_analysis_starter_for_case(case_id)
+    analysis_starter.start(case_id)
+
+
+@microsalt.command()
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_config_case(context: CGConfig, case_id: str) -> None:
+    """Create a config file for a microSALT case."""
+    configurator = cast(
+        MicrosaltConfigurator, ConfiguratorFactory(context).get_configurator(Workflow.MICROSALT)
+    )
+    configurator.configure(case_id=case_id)
+
+
+@microsalt.command()
+@click.pass_obj
+def dev_start_available(context: CGConfig) -> None:
+    """Starts all available microSALT cases."""
+    LOG.info("Starting Microsalt workflow.")
+    analysis_starter = AnalysisStarterFactory(context).get_analysis_starter_for_workflow(
+        Workflow.MICROSALT
+    )
+    succeeded: bool = analysis_starter.start_available()
+    if not succeeded:
+        raise click.Abort
+
+
 @microsalt.command("start-available")
 @DRY_RUN
 @click.pass_context
@@ -197,7 +256,7 @@ def start_available(context: click.Context, dry_run: bool = False):
     analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case in analysis_api.get_cases_ready_for_analysis():
+    for case in analysis_api.get_cases_to_analyze():
         try:
             context.invoke(start, unique_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:

@@ -83,7 +83,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         return sample_sheet_entry.reformat_sample_content()
 
     def get_built_workflow_parameters(
-        self, case_id: str, genomes_base: Path | None = None
+        self, case_id: str, dry_run: bool = False
     ) -> RnafusionParameters:
         """Get Rnafusion parameters."""
         unique_sample: Sample = self.get_validated_case(case_id=case_id).samples[0]

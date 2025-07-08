@@ -1,6 +1,13 @@
+from datetime import datetime
+from pathlib import Path
+from unittest.mock import ANY
+
+import pytest
 from click.testing import CliRunner
+from pytest import LogCaptureFixture
 
 from cg.apps.hermes.hermes_api import HermesApi
+from cg.apps.housekeeper.models import InputBundle
 from cg.cli.workflow.mip_dna.base import store, store_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -31,12 +38,12 @@ def test_cli_store_dry_no_case(
 def test_cli_store(
     cli_runner: CliRunner,
     mip_case_id: str,
-    mip_deliverables_file,
-    mip_hermes_dna_deliverables_response_data,
+    mip_deliverables_file: Path,
+    mip_hermes_dna_deliverables_response_data: InputBundle,
     mip_dna_context: CGConfig,
-    timestamp_yesterday,
-    case_qc_sample_info_path,
-    caplog,
+    timestamp_yesterday: datetime,
+    case_qc_sample_info_path: Path,
+    caplog: LogCaptureFixture,
     mocker,
 ):
     caplog.set_level("INFO")
@@ -55,6 +62,9 @@ def test_cli_store(
     mocker.patch.object(MipDNAAnalysisAPI, "get_date_from_file_path")
     MipDNAAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
 
+    # mock the update_analysis_as_completed_statusdb method so we can assert it was called
+    mocker.patch.object(MipDNAAnalysisAPI, "update_analysis_as_completed_statusdb")
+
     # GIVEN Hermes parses deliverables and generates a valid response
     mocker.patch.object(HermesApi, "create_housekeeper_bundle")
     HermesApi.create_housekeeper_bundle.return_value = mip_hermes_dna_deliverables_response_data
@@ -71,10 +81,11 @@ def test_cli_store(
 
     # THEN log informs that analysis was stored in Housekeeper and StatusDB
     assert "stored in Housekeeper" in caplog.text
-    assert "stored in StatusDB" in caplog.text
 
-    # THEN action of case in StatusDB is set to None
-    assert not mip_analysis_api.status_db.get_case_by_internal_id(internal_id=mip_case_id).action
+    # THEN the analysis was updated in statusdb
+    MipDNAAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
+        case_id=mip_case_id, hk_version_id=ANY, comment=ANY, dry_run=False, force=False
+    )
 
 
 def test_cli_store_bundle_already_added(
@@ -120,16 +131,16 @@ def test_cli_store_bundle_already_added(
     assert "Error storing deliverables" in caplog.text
 
 
+@pytest.mark.usefixtures("mip_case_dirs")
 def test_cli_store_available_case_is_running(
     cli_runner: CliRunner,
-    mip_case_id,
-    mip_case_dirs,
-    mip_deliverables_file,
-    mip_hermes_dna_deliverables_response_data,
+    mip_case_id: str,
+    mip_deliverables_file: Path,
+    mip_hermes_dna_deliverables_response_data: InputBundle,
     mip_dna_context: CGConfig,
-    timestamp_yesterday,
-    case_qc_sample_info_path,
-    caplog,
+    timestamp_yesterday: datetime,
+    case_qc_sample_info_path: Path,
+    caplog: LogCaptureFixture,
     mocker,
 ):
     caplog.set_level("INFO")
@@ -146,6 +157,9 @@ def test_cli_store_available_case_is_running(
     # GIVEN the same timestamp is attained when storing analysis in different databases
     mocker.patch.object(MipDNAAnalysisAPI, "get_date_from_file_path")
     MipDNAAnalysisAPI.get_date_from_file_path.return_value = timestamp_yesterday
+
+    # mock the update_analysis_as_completed_statusdb method so we can assert it was called
+    mocker.patch.object(MipDNAAnalysisAPI, "update_analysis_as_completed_statusdb")
 
     # GIVEN Hermes parses deliverables and generates a valid response
     mocker.patch.object(HermesApi, "create_housekeeper_bundle")
@@ -169,18 +183,19 @@ def test_cli_store_available_case_is_running(
 
     # THEN analysis data is stored in Housekeeper and StatusDB
     assert "stored in Housekeeper" in caplog.text
-    assert "stored in StatusDB" in caplog.text
 
     # THEN log informs about eligible case
     assert mip_case_id in caplog.text
 
-    # THEN case action is set to None after storing
-    assert not mip_analysis_api.status_db.get_case_by_internal_id(internal_id=mip_case_id).action
+    # THEN the analysis was updated in statusdb
+    MipDNAAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
+        case_id=mip_case_id, hk_version_id=ANY, comment=ANY, dry_run=False, force=False
+    )
 
 
 def test_cli_store_available_case_not_running(
     cli_runner: CliRunner,
-    mip_case_id,
+    mip_case_id: str,
     mip_deliverables_file,
     mip_hermes_dna_deliverables_response_data,
     mip_dna_context: CGConfig,

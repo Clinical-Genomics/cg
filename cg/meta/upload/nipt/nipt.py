@@ -15,7 +15,7 @@ from cg.constants import Workflow
 from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
 from cg.meta.upload.nipt.models import SequencingRunQ30AndReads, StatinaUploadFiles
 from cg.models.cg_config import CGConfig
-from cg.store.models import Analysis, Case, IlluminaSequencingRun
+from cg.store.models import Analysis, IlluminaSequencingRun
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -130,9 +130,7 @@ class NiptUploadAPI:
     def update_analysis_uploaded_at_date(self, case_id: str) -> Analysis:
         """Updates analysis_uploaded_at for the uploaded analysis"""
 
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        analysis: Analysis = case_obj.analyses[0]
-
+        analysis: Analysis = self.status_db.get_latest_started_analysis_for_case(case_id)
         if not self.dry_run:
             analysis.uploaded_at = dt.datetime.now()
             self.status_db.session.commit()
@@ -145,9 +143,7 @@ class NiptUploadAPI:
     def update_analysis_upload_started_date(self, case_id: str) -> Analysis:
         """Updates analysis_upload_started_at for the uploaded analysis"""
 
-        case_obj: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        analysis: Analysis = case_obj.analyses[0]
-
+        analysis: Analysis = self.status_db.get_latest_started_analysis_for_case(case_id)
         if not self.dry_run:
             analysis.upload_started_at = dt.datetime.now()
             self.status_db.session.commit()

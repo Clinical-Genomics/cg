@@ -236,7 +236,7 @@ def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
 def test_analyses_to_upload_when_no_workflow(helpers, sample_store, timestamp):
     """Test analyses to upload with no workflow specified."""
     # GIVEN a store with one analysis
-    helpers.add_analysis(store=sample_store, completed_at=timestamp)
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, housekeeper_version_id=1234)
 
     # WHEN fetching all analysis that are ready for upload without specifying workflow
     records: list[Analysis] = [
@@ -250,7 +250,12 @@ def test_analyses_to_upload_when_no_workflow(helpers, sample_store, timestamp):
 def test_analyses_to_upload_when_analysis_has_workflow(helpers, sample_store, timestamp):
     """Test analyses to upload to when existing workflow."""
     # GIVEN a store with an analysis that has been run with MIP
-    helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=Workflow.MIP_DNA)
+    helpers.add_analysis(
+        store=sample_store,
+        completed_at=timestamp,
+        workflow=Workflow.MIP_DNA,
+        housekeeper_version_id=1234,
+    )
 
     # WHEN fetching all analyses that are ready for upload and analysed with MIP
     records: list[Analysis] = [
@@ -314,7 +319,7 @@ def test_set_case_action(analysis_store: Store, case_id):
     assert action is None
 
     # When setting the case to "analyze"
-    analysis_store.set_case_action(case_internal_id=case_id, action="analyze")
+    analysis_store.update_case_action(case_internal_id=case_id, action="analyze")
     new_action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
 
     # Then the action should be set to analyze
@@ -513,23 +518,6 @@ def test_get_user_when_email_is_none_returns_none(store_with_users: Store):
 
     # THEN no user should be returned
     assert filtered_user is None
-
-
-def test_get_analysis_by_case_entry_id_and_started_at(
-    sample_store: Store, helpers: StoreHelpers, timestamp_now: datetime
-):
-    """Test returning an analysis using a date."""
-    # GIVEN a case with an analysis with a start date in the database
-    analysis = helpers.add_analysis(store=sample_store, started_at=timestamp_now)
-    assert analysis.started_at
-
-    # WHEN getting analysis via case_id and start date
-    db_analysis = sample_store.get_analysis_by_case_entry_id_and_started_at(
-        case_entry_id=analysis.case.id, started_at_date=analysis.started_at
-    )
-
-    # THEN the analysis should have been retrieved
-    assert db_analysis == analysis
 
 
 def test_get_illumina_sequencing_runs_by_case(

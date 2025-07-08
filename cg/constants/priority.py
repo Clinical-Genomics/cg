@@ -4,18 +4,18 @@ from enum import IntEnum, StrEnum
 
 
 class SlurmQos(StrEnum):
-    MAINTENANCE: str = "maintenance"
-    LOW: str = "low"
-    NORMAL: str = "normal"
-    HIGH: str = "high"
-    EXPRESS: str = "express"
+    MAINTENANCE = "maintenance"
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+    EXPRESS = "express"
 
 
 class TrailblazerPriority(StrEnum):
-    LOW: str = "low"
-    NORMAL: str = "normal"
-    HIGH: str = "high"
-    EXPRESS: str = "express"
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+    EXPRESS = "express"
 
 
 class PriorityTerms(StrEnum):
@@ -45,6 +45,6 @@ class Priority(IntEnum):
 
 
 class SlurmAccount(StrEnum):
-    PRODUCTION: str = "production"
-    DEVELOPMENT: str = "development"
-    STAGE: str = "stage"
+    PRODUCTION = "production"
+    DEVELOPMENT = "development"
+    STAGE = "stage"

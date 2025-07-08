@@ -130,7 +130,9 @@ class NfAnalysisAPI(AnalysisAPI):
         """Get workflow version from config."""
         return self.revision
 
-    def get_built_workflow_parameters(self, case_id: str) -> WorkflowParameters:
+    def get_built_workflow_parameters(
+        self, case_id: str, dry_run: bool = False
+    ) -> WorkflowParameters:
         """Return workflow parameters."""
         raise NotImplementedError
 
@@ -348,7 +350,7 @@ class NfAnalysisAPI(AnalysisAPI):
         """Create parameters file for a case."""
         LOG.debug("Getting parameters information built on-the-fly")
         built_workflow_parameters: dict | None = self.get_built_workflow_parameters(
-            case_id=case_id
+            case_id=case_id, dry_run=dry_run
         ).model_dump()
         LOG.debug("Adding parameters from the pipeline config file if it exist")
 
@@ -565,7 +567,8 @@ class NfAnalysisAPI(AnalysisAPI):
                 use_nextflow=use_nextflow,
                 dry_run=dry_run,
             )
-            self.set_statusdb_action(case_id=case_id, action=CaseActions.RUNNING, dry_run=dry_run)
+            if not dry_run:
+                self.on_analysis_started(case_id=case_id, tower_workflow_id=tower_workflow_id)
         except FileNotFoundError as error:
             LOG.error(f"Could not resume analysis: {error}")
             raise FileNotFoundError
@@ -575,12 +578,6 @@ class NfAnalysisAPI(AnalysisAPI):
         except CgError as error:
             LOG.error(f"Could not run analysis: {error}")
             raise CgError
-
-        if not dry_run:
-            self.add_pending_trailblazer_analysis(
-                case_id=case_id,
-                tower_workflow_id=tower_workflow_id,
-            )
 
     def run_analysis(
         self,
@@ -861,9 +858,15 @@ class NfAnalysisAPI(AnalysisAPI):
             self.status_db.verify_case_exists(case_id)
             self.trailblazer_api.verify_latest_analysis_is_completed(case_id=case_id, force=force)
             self.verify_deliverables_file_exists(case_id)
-            self.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
-            self.upload_bundle_statusdb(
-                case_id=case_id, comment=comment, dry_run=dry_run, force=force
+            _, version = self.create_housekeeper_bundle(
+                case_id=case_id, dry_run=dry_run, force=force
+            )
+            self.update_analysis_as_completed_statusdb(
+                case_id=case_id,
+                hk_version_id=version.id,
+                comment=comment,
+                dry_run=dry_run,
+                force=force,
             )
             self.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
         except ValidationError as error:
