@@ -1,25 +1,16 @@
 from pathlib import Path
-from unittest import mock
 
 import pytest
 from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
-from cg.services.analysis_starter.configurator.file_creators.nextflow.gene_panel import (
-    GenePanelFileCreator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
-    ManagedVariantsFileCreator,
-)
-from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
-from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 
 
 @pytest.mark.parametrize(
     "workflow",
     [Workflow.RAREDISEASE, Workflow.RNAFUSION],
 )
-def test_create_nextflow_configurator(
+def test_get_case_config(
     workflow: Workflow,
     nextflow_case_id: str,
     nextflow_root: str,
@@ -45,7 +36,7 @@ def test_create_nextflow_configurator(
     "workflow",
     [Workflow.RAREDISEASE, Workflow.RNAFUSION],
 )
-def test_create_nextflow_configurator_flags(
+def test_get_case_config_flags(
     workflow: Workflow,
     nextflow_case_id: str,
     nextflow_root: str,
@@ -71,7 +62,7 @@ def test_create_nextflow_configurator_flags(
     "workflow",
     [Workflow.RAREDISEASE, Workflow.RNAFUSION],
 )
-def test_create_nextflow_configurator_none_flags(
+def test_get_case_config_none_flags(
     workflow: Workflow,
     nextflow_case_id: str,
     nextflow_root: str,
