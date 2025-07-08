@@ -2,7 +2,7 @@ import pytest
 
 from cg.apps.lims import LimsAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, RarediseaseConfig, RnafusionConfig
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.file_creators.microsalt_config import (
     MicrosaltConfigFileCreator,
@@ -48,18 +48,19 @@ def microsalt_configurator(
 
 @pytest.fixture
 def raredisease_configurator(
-    raredisease_context: CGConfig,
-    nextflow_config_file_creator: NextflowConfigFileCreator,
     raredisease_sample_sheet_creator: RarediseaseSampleSheetCreator,
     raredisease_params_file_creator: RarediseaseParamsFileCreator,
+    mock_store_for_raredisease_file_creators: Store,
+    nextflow_config_file_creator: NextflowConfigFileCreator,
     raredisease_extension: PipelineExtension,
+    raredisease_config_object: RarediseaseConfig,
 ) -> NextflowConfigurator:
     return NextflowConfigurator(
-        store=raredisease_context.status_db,
-        pipeline_config=raredisease_context.raredisease,
+        store=mock_store_for_raredisease_file_creators,
         config_file_creator=nextflow_config_file_creator,
-        sample_sheet_creator=raredisease_sample_sheet_creator,
         params_file_creator=raredisease_params_file_creator,
+        pipeline_config=raredisease_config_object,
+        sample_sheet_creator=raredisease_sample_sheet_creator,
         pipeline_extension=raredisease_extension,
     )
 
@@ -70,13 +71,13 @@ def rnafusion_configurator(
     rnafusion_params_file_creator: RNAFusionParamsFileCreator,
     mock_store_for_rnafusion_sample_sheet_creator: Store,
     nextflow_config_file_creator: NextflowConfigFileCreator,
-    rnafusion_context: CGConfig,
+    rnafusion_config_object: RnafusionConfig,
 ) -> NextflowConfigurator:
     return NextflowConfigurator(
         store=mock_store_for_rnafusion_sample_sheet_creator,
         config_file_creator=nextflow_config_file_creator,
         params_file_creator=rnafusion_params_file_creator,
-        pipeline_config=rnafusion_context.rnafusion,
+        pipeline_config=rnafusion_config_object,
         sample_sheet_creator=rnafusion_sample_sheet_creator,
         pipeline_extension=PipelineExtension(),
     )

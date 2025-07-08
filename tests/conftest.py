@@ -117,6 +117,7 @@ pytest_plugins = [
     "tests.fixture_plugins.analysis_starter.store_fixtures",
     "tests.fixture_plugins.analysis_starter.params_file_creators",
     "tests.fixture_plugins.analysis_starter.params_file_content_fixtures",
+    "tests.fixture_plugins.analysis_starter.pipeline_config_fixtures",
     "tests.fixture_plugins.analysis_starter.testing_scenarios",
     "tests.fixture_plugins.backup_fixtures.backup_fixtures",
     "tests.fixture_plugins.chanjo2_fixtures.api_fixtures",
@@ -2964,6 +2965,12 @@ def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> 
     return Path(
         raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_deliverables"
     ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture
+def raredisease_gene_panel_path(raredisease_case_path: Path) -> Path:
+    """Path to gene panel file."""
+    return Path(raredisease_case_path, "gene_panels").with_suffix(FileExtensions.BED)
 
 
 @pytest.fixture(scope="function")

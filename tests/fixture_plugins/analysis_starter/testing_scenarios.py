@@ -18,11 +18,13 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
     RNAFusionSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
+from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 
 
 @pytest.fixture
 def params_file_scenario(
-    raredisease_params_file_creator2: RarediseaseParamsFileCreator,
+    raredisease_params_file_creator: RarediseaseParamsFileCreator,
     expected_raredisease_params_file_content: dict,
     rnafusion_params_file_creator: RNAFusionParamsFileCreator,
     expected_rnafusion_params_file_content: dict,
@@ -30,7 +32,7 @@ def params_file_scenario(
 ) -> dict:
     return {
         Workflow.RAREDISEASE: (
-            raredisease_params_file_creator2,
+            raredisease_params_file_creator,
             expected_raredisease_params_file_content,
             mocker.patch.object(raredisease, "write_yaml_nextflow_style", return_value=None),
         ),
@@ -44,18 +46,37 @@ def params_file_scenario(
 
 @pytest.fixture
 def sample_sheet_scenario(
-    raredisease_sample_sheet_creator2: RarediseaseSampleSheetCreator,
+    raredisease_sample_sheet_creator: RarediseaseSampleSheetCreator,
     raredisease_sample_sheet_expected_content: list[list[str]],
     rnafusion_sample_sheet_creator: RNAFusionSampleSheetCreator,
     rnafusion_sample_sheet_content_list: list[list[str]],
 ) -> dict:
     return {
         Workflow.RAREDISEASE: (
-            raredisease_sample_sheet_creator2,
+            raredisease_sample_sheet_creator,
             raredisease_sample_sheet_expected_content,
         ),
         Workflow.RNAFUSION: (
             rnafusion_sample_sheet_creator,
             rnafusion_sample_sheet_content_list,
+        ),
+    }
+
+
+@pytest.fixture
+def configurator_scenario(
+    raredisease_configurator: NextflowConfigurator,
+    raredisease_case_config2: NextflowCaseConfig,
+    rnafusion_configurator: NextflowConfigurator,
+    rnafusion_case_config: NextflowCaseConfig,
+) -> dict:
+    return {
+        Workflow.RAREDISEASE: (
+            raredisease_configurator,
+            raredisease_case_config2,
+        ),
+        Workflow.RNAFUSION: (
+            rnafusion_configurator,
+            rnafusion_case_config,
         ),
     }

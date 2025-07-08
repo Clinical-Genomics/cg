@@ -22,12 +22,6 @@ def raredisease_work_dir_path(raredisease_case_path: Path, raredisease_case_id: 
 
 
 @pytest.fixture(scope="function")
-def raredisease_gene_panel_path(raredisease_case_path: Path) -> Path:
-    """Path to gene panel file."""
-    return Path(raredisease_case_path, "gene_panels").with_suffix(FileExtensions.BED)
-
-
-@pytest.fixture(scope="function")
 def raredisease_gene_panel_path2(nextflow_case_path: Path) -> Path:
     """Path to gene panel file."""
     return Path(nextflow_case_path, "gene_panels").with_suffix(FileExtensions.BED)
@@ -72,14 +66,8 @@ def raredisease_sample_sheet_path(raredisease_case_path, raredisease_case_id) ->
 
 
 @pytest.fixture
-def nextflow_params_file_content() -> dict:
-    """Return a dictionary with some parameters for the Nextflow params file."""
-    return {"someparam": "something"}
-
-
-@pytest.fixture
-def nextflow_case_path() -> Path:
-    return Path("case", "path")
+def nextflow_case_path(nextflow_root: str, nextflow_case_id) -> Path:
+    return Path(nextflow_root, nextflow_case_id)
 
 
 @pytest.fixture
