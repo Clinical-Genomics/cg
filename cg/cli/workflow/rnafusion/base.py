@@ -55,7 +55,7 @@ rnafusion.add_command(store_available)
 @rnafusion.command()
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_config_case(case_id: str, config: CGConfig):
+def dev_config_case(config: CGConfig, case_id: str):
     factory = ConfiguratorFactory(config)
     configurator: NextflowConfigurator = cast(
         NextflowConfigurator, factory.get_configurator(Workflow.RNAFUSION)
@@ -68,7 +68,7 @@ def dev_config_case(case_id: str, config: CGConfig):
 @OPTION_REVISION
 @OPTION_STUB
 @click.pass_obj
-def dev_run(case_id: str, config: CGConfig, stub_run: bool = False, revision: str | None = None):
+def dev_run(config: CGConfig, case_id: str, stub_run: bool = False, revision: str | None = None):
     factory = AnalysisStarterFactory(config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RNAFUSION
