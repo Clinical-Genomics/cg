@@ -56,6 +56,7 @@ rnafusion.add_command(store_available)
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def dev_config_case(config: CGConfig, case_id: str):
+    """Configure an RNAFusion case so that it is ready to be run."""
     factory = ConfiguratorFactory(config)
     configurator: NextflowConfigurator = cast(
         NextflowConfigurator, factory.get_configurator(Workflow.RNAFUSION)
@@ -69,6 +70,7 @@ def dev_config_case(config: CGConfig, case_id: str):
 @OPTION_STUB
 @click.pass_obj
 def dev_run(config: CGConfig, case_id: str, stub_run: bool = False, revision: str | None = None):
+    """Run a preconfigured RNAFusion case."""
     factory = AnalysisStarterFactory(config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RNAFUSION
@@ -82,6 +84,7 @@ def dev_run(config: CGConfig, case_id: str, stub_run: bool = False, revision: st
 @OPTION_STUB
 @click.pass_obj
 def dev_start(config: CGConfig, case_id: str, stub_run: bool = False, revision: str | None = None):
+    """Start an RNAFusion case. Configures the case if needed."""
     factory = AnalysisStarterFactory(config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RNAFUSION
