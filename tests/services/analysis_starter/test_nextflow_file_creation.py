@@ -146,7 +146,7 @@ def test_gene_panel_file_content(
     "mock_value, expected_panels",
     [
         (True, GenePanelMasterList.get_panel_names()),
-        (False, [GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN]),
+        (False, list({GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN})),
     ],
     ids=[
         "customer is collaborator and panels in master list",

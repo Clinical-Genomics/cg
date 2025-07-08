@@ -1,11 +1,6 @@
 from pathlib import Path
 
 import pytest
-from fixture_plugins.analysis_starter.name_fixtures import (
-    nextflow_pipeline_revision,
-    nextflow_repository,
-    raredisease_config_profiles,
-)
 
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
