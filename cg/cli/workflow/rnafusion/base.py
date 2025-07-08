@@ -1,6 +1,7 @@
 """CLI support to create config and/or start RNAFUSION."""
 
 import logging
+from typing import cast
 
 import rich_click as click
 
@@ -23,7 +24,7 @@ from cg.constants.constants import MetaApis, Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.configurator.configurator import Configurator
+from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.service import AnalysisStarter
@@ -56,7 +57,9 @@ rnafusion.add_command(store_available)
 @click.pass_obj
 def dev_config_case(case_id: str, config: CGConfig):
     factory = ConfiguratorFactory(config)
-    configurator: Configurator = factory.get_configurator(Workflow.RNAFUSION)
+    configurator: NextflowConfigurator = cast(
+        NextflowConfigurator, factory.get_configurator(Workflow.RNAFUSION)
+    )
     configurator.configure(case_id=case_id)
 
 
