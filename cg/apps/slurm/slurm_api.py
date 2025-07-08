@@ -2,13 +2,13 @@
 
 import logging
 from pathlib import Path
+from typing import Any
 
 from cg.apps.slurm.sbatch import (
     DRAGEN_SBATCH_HEADER_TEMPLATE,
     SBATCH_BODY_TEMPLATE,
     SBATCH_HEADER_TEMPLATE,
 )
-from cg.constants.slurm import Slurm
 from cg.models.slurm.sbatch import Sbatch, SbatchDragen
 from cg.utils import Process
 
@@ -46,7 +46,12 @@ class SlurmAPI:
 
     @staticmethod
     def generate_sbatch_header(sbatch_parameters: Sbatch) -> str:
-        return SBATCH_HEADER_TEMPLATE.format(**sbatch_parameters.model_dump())
+        header_params: dict[str, Any] = sbatch_parameters.model_dump()
+        optional_headers: str = _generate_optional_headers(
+            [sbatch_parameters.exclude, sbatch_parameters.dependency]
+        )
+
+        return SBATCH_HEADER_TEMPLATE.format(**header_params, optional_headers=optional_headers)
 
     @staticmethod
     def generate_dragen_sbatch_header(sbatch_parameters: Sbatch) -> str:
@@ -93,3 +98,10 @@ class SlurmAPI:
             sbatch_content=sbatch_content, sbatch_path=sbatch_path, dry_run=self.dry_run
         )
         return self.submit_sbatch_job(sbatch_path=sbatch_path)
+
+
+def _generate_optional_headers(optional_headers: list[str | None]) -> str:
+    header_str: str = ""
+    for header in optional_headers:
+        header_str += f"#SBATCH {header}\n" if header else ""
+    return header_str
