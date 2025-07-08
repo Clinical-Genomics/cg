@@ -18,10 +18,14 @@ def get_nextflow_config_dict(
     nextflow_pipeline_revision: str,
     email_address: str,
 ) -> callable:
-    """Return a dictionary with all the raredisease configuration."""
+    """
+    Return a config dictionary factory for Nextflow pipelines. The returned factory can be called
+    by adding the workflow as parameter to obtain the config dictionary.
+    Example usage:
+        config: dict = get_nextflow_config_dict(workflow="raredisease")
+    """
 
     def _make_dict(workflow: str) -> dict:
-        """Create a configuration dictionary for the given workflow and conda environment."""
         return {
             "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
@@ -50,13 +54,11 @@ def get_nextflow_config_dict(
 
 @pytest.fixture
 def raredisease_config_object(get_nextflow_config_dict: callable) -> RarediseaseConfig:
-    """Fixture to provide a mock RarediseaseConfig object."""
-    config_dict = get_nextflow_config_dict(workflow="raredisease")
-    return RarediseaseConfig(**config_dict)
+    config: dict = get_nextflow_config_dict(workflow="raredisease")
+    return RarediseaseConfig(**config)
 
 
 @pytest.fixture
 def rnafusion_config_object(get_nextflow_config_dict: callable) -> RnafusionConfig:
-    """Fixture to provide a mock RnafusionConfig object."""
-    config_dict = get_nextflow_config_dict(workflow="rnafusion")
-    return RnafusionConfig(**config_dict)
+    config: dict = get_nextflow_config_dict(workflow="rnafusion")
+    return RnafusionConfig(**config)
