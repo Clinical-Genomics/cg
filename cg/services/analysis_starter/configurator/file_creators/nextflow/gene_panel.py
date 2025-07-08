@@ -46,7 +46,13 @@ class GenePanelFileCreator:
 
     @staticmethod
     def _add_gene_panels_in_combo(gene_panels: set[str]) -> set[str]:
-        """Add gene panels belonging to the same combo of the given gene panels to the panel set."""
+        """
+        Return an expanded list of gene panels with all gene panels that belong to the same combo.
+
+        Some panels require the presence of other panels. These panels are said to belong to the
+        same combo. This method expands the given panel set, adding all necessary panels
+        (panels in the same combo) for each panel in the given set.
+        """
         additional_panels = set()
         for panel in gene_panels:
             if panel in GenePanelCombo.COMBO_1:
