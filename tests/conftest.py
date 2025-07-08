@@ -2967,7 +2967,7 @@ def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> 
     ).with_suffix(FileExtensions.YAML)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def raredisease_gene_panel_path(raredisease_case_path: Path) -> Path:
     """Path to gene panel file."""
     return Path(raredisease_case_path, "gene_panels").with_suffix(FileExtensions.BED)
