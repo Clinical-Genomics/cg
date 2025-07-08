@@ -8,12 +8,7 @@ from typing import Callable, Iterator
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import (
-    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
-    CaseActions,
-    CustomerId,
-    SampleType,
-)
+from cg.constants.constants import DNA_WORKFLOWS_WITH_SCOUT_UPLOAD, CustomerId, SampleType
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
@@ -1642,6 +1637,7 @@ class ReadHandler(BaseHandler):
                 SampleFilter.BY_SUBJECT_ID,
                 SampleFilter.BY_TUMOUR,
                 SampleFilter.BY_CUSTOMER_ENTRY_IDS,
+                SampleFilter.IS_NOT_CANCELLED,
             ],
         )
         if samples.count() != 1:
