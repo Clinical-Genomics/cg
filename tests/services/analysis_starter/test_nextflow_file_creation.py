@@ -8,6 +8,9 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.services.analysis_starter.configurator.file_creators.nextflow import config_file
+from cg.services.analysis_starter.configurator.file_creators.nextflow import (
+    gene_panel as gene_panel_creator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )
@@ -17,7 +20,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.gene_panel
 from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
     ManagedVariantsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import creator
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
+    creator as samplesheet_creator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowSampleSheetCreator,
 )
@@ -82,11 +87,11 @@ def test_nextflow_sample_sheet_creators(
 ):
     # GIVEN a sample sheet creator, an expected output and a mocked file writer
     sample_sheet_creator, expected_content = sample_sheet_scenario[workflow]
-    write_mock: mocker.MagicMock = mocker.patch.object(creator, "write_csv")
+    write_mock: mocker.MagicMock = mocker.patch.object(samplesheet_creator, "write_csv")
 
     # GIVEN a pair of Fastq files that have a header
     mocker.patch.object(
-        creator,
+        samplesheet_creator,
         "read_gzip_first_line",
         side_effect=[
             "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
@@ -108,38 +113,32 @@ def test_nextflow_sample_sheet_creators(
     )
 
 
-@pytest.mark.parametrize(
-    "file_creator_fixture, case_id_fixture, expected_content_fixture",
-    [
-        (
-            "raredisease_gene_panel_creator",
-            "raredisease_case_id",
-            "raredisease_gene_panel_file_content",
-        )
-    ],
-    ids=["raredisease"],
-)
 def test_gene_panel_file_content(
-    file_creator_fixture: str,
-    case_id_fixture: str,
-    expected_content_fixture: str,
-    request: pytest.FixtureRequest,
+    raredisease_gene_panel_creator: GenePanelFileCreator,
+    raredisease_case_id: str,
+    raredisease_case_path: Path,
+    raredisease_gene_panel_file_content: list[str],
+    mocker: MockerFixture,
 ):
     """Test that the gene panel file content is created correctly."""
-    # GIVEN a gene panel file content creator and a case path
-    file_creator: GenePanelFileCreator = request.getfixturevalue(file_creator_fixture)
-    case_id: str = request.getfixturevalue(case_id_fixture)
+    # GIVEN a gene panel file content creator, a case id and a case path
 
-    # GIVEN a mock of Scout gene panels
-    expected_content: list[str] = request.getfixturevalue(expected_content_fixture)
+    # GIVEN a mock of Scout export panels
+    mocker.patch.object(ScoutAPI, "export_panels", return_value=raredisease_gene_panel_file_content)
+
+    # GIVEN a mock writer
+    write_mock: mocker.MagicMock = mocker.patch.object(gene_panel_creator, "write_txt")
 
     # WHEN creating a gene panel file
-    with mock.patch.object(ScoutAPI, "export_panels", return_value=expected_content):
-        content: list[str] = file_creator._get_content(case_id)
+    raredisease_gene_panel_creator.create(
+        case_id=raredisease_case_id, case_path=raredisease_case_path
+    )
 
-    # THEN the content of the file is the expected
-
-    assert content == expected_content
+    # THEN the gene panel file would have been written with the expected content
+    write_mock.assert_called_once_with(
+        content=raredisease_gene_panel_file_content,
+        file_path=raredisease_gene_panel_creator.get_file_path(raredisease_case_path),
+    )
 
 
 @pytest.mark.parametrize(
