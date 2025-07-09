@@ -1,8 +1,5 @@
-from pathlib import Path
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import Strandedness
-from cg.io.csv import write_csv
 from cg.models.rnafusion.rnafusion import RnafusionSampleSheetEntry
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowSampleSheetCreator,
