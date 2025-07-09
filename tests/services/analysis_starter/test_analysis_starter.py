@@ -61,7 +61,8 @@ def test_rnafusion_start(
     analysis_starter: AnalysisStarter = AnalysisStarterFactory(
         cg_context
     ).get_analysis_starter_for_workflow(Workflow.RNAFUSION)
-    # GIVEN a store containing a case
+
+    # GIVEN a store that all our components use
     mock_store = create_autospec(Store)
     analysis_starter.store = mock_store
     analysis_starter.input_fetcher.status_db = mock_store
@@ -71,15 +72,13 @@ def test_rnafusion_start(
     configurator.config_file_creator.store = mock_store
     analysis_starter.tracker.store = mock_store
 
+    # GIVEN a case with appropriate parameters set
     mock_case = create_autospec(Case)
     mock_sample = create_autospec(Sample)
     mock_store.get_case_by_internal_id.return_value = mock_case
     mock_case.samples = [mock_sample]
     mock_case.priority = Priority.standard
     mock_case.data_analysis = Workflow.RNAFUSION
-
-    # GIVEN that no analysis is running for the case
-    mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing", return_value=False)
 
     # GIVEN that the case is not downsampled nor external
     mock_store.is_case_down_sampled.return_value = False
@@ -88,6 +87,9 @@ def test_rnafusion_start(
     # GIVEN that the case has a priority and a workflow
     mock_store.get_case_priority.return_value = SlurmQos.NORMAL
     mock_store.get_case_workflow.return_value = Workflow.RNAFUSION
+
+    # GIVEN that no analysis is running for the case
+    mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing", return_value=False)
 
     # GIVEN that the flow cells are on disk
     mock_store.are_all_illumina_runs_on_disk.return_value = True
