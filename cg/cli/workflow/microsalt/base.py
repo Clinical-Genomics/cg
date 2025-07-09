@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import cast
 
 import rich_click as click
 
@@ -11,7 +12,9 @@ from cg.constants.constants import Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.configurator.configurator import Configurator
+from cg.services.analysis_starter.configurator.implementations.microsalt import (
+    MicrosaltConfigurator,
+)
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.service import AnalysisStarter
@@ -73,7 +76,7 @@ def start(context: CGConfig, case_id: str) -> None:
 def config_case(context: CGConfig, case_id: str) -> None:
     """Create a config file for a microSALT case."""
     factory = ConfiguratorFactory(context)
-    configurator: Configurator = factory.get_configurator(Workflow.MICROSALT)
+    configurator = cast(MicrosaltConfigurator, factory.get_configurator(Workflow.MICROSALT))
     configurator.configure(case_id=case_id)
 
 
