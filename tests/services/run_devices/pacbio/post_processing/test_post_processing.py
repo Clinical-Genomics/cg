@@ -80,7 +80,7 @@ def test_can_post_processing_start_true(
     """Tests that the post-processing is deemed ready to start when SMRT cells are ready."""
     # GIVEN a parent folder with two SMRT-cells
 
-    # Given both of them are ready for post-processing
+    # GIVEN both of them are ready for post-processing
     pac_bio_post_processing_service.run_validator.validate_run_files = Mock(
         side_effect=[None, None]
     )
@@ -100,7 +100,7 @@ def test_can_post_processing_start_false(
     """Tests that the post-processing is not deemed ready to start when at least one SMRT cell is not are ready."""
     # GIVEN a parent folder with two SMRT-cells
 
-    # Given one of them is not ready for post-processing
+    # GIVEN one of them is not ready for post-processing
     pac_bio_post_processing_service.run_validator.validate_run_files = Mock(
         side_effect=[None, PostProcessingRunFileManagerError]
     )

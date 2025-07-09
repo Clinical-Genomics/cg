@@ -76,7 +76,7 @@ class PacBioPostProcessingService(PostProcessingService):
         return all_smrt_cells_are_ready
 
     def is_smrt_cell_ready_for_post_processing(self, run_name: str) -> bool:
-        LOG.info(f"Checking if a Pacbio SMRT-cell {run_name} is ready for postprocessing")
+        LOG.info(f"Checking if Pacbio SMRT-cell {run_name} is ready for postprocessing")
         try:
             run_data: PacBioRunData = self.run_data_generator.get_run_data(
                 run_name=run_name, sequencing_dir=self.sequencing_dir
