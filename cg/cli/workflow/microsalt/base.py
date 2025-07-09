@@ -7,7 +7,7 @@ from typing import cast
 import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression, store, store_available
 from cg.constants.constants import Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
@@ -32,6 +32,8 @@ def microsalt(context: click.Context) -> None:
     context.obj.meta_apis["analysis_api"] = MicrosaltAnalysisAPI(config=context.obj)
 
 
+microsalt.add_command(store)
+microsalt.add_command(store_available)
 microsalt.add_command(resolve_compression)
 
 
