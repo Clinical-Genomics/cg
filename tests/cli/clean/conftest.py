@@ -56,6 +56,7 @@ def clean_context(
         completed_at=timestamp_yesterday,
         cleaned_at=None,
         workflow=Workflow.BALSAMIC,
+        housekeeper_version_id=1234,
     )
     Path(analysis_api.get_case_path(balsamic_case_clean)).mkdir(exist_ok=True, parents=True)
 
@@ -82,6 +83,7 @@ def clean_context(
         completed_at=timestamp_yesterday,
         cleaned_at=None,
         workflow=Workflow.BALSAMIC,
+        housekeeper_version_id=1235,
     )
     Path(analysis_api.get_case_path(balsamic_case_not_clean)).mkdir(exist_ok=True, parents=True)
     cg_context.meta_apis["analysis_api"] = analysis_api
@@ -154,6 +156,7 @@ def clean_context_microsalt(
         completed_at=timestamp_yesterday,
         cleaned_at=None,
         workflow=Workflow.MICROSALT,
+        housekeeper_version_id=1234,
     )
     case_path_list = analysis_api.get_case_path(microsalt_case_clean)
     for path in case_path_list:
@@ -182,6 +185,7 @@ def clean_context_microsalt(
         completed_at=timestamp_yesterday,
         cleaned_at=None,
         workflow=Workflow.MICROSALT,
+        housekeeper_version_id=1235,
     )
 
     case_path_list = analysis_api.get_case_path(microsalt_case_clean_dry)

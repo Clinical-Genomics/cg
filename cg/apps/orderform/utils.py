@@ -7,6 +7,7 @@ ORDER_TYPES_WITH_CASES = [
     OrderType.MIP_DNA,
     OrderType.MIP_RNA,
     OrderType.NALLO,
+    OrderType.RAREDISEASE,
     OrderType.RNAFUSION,
     OrderType.TOMTE,
 ]

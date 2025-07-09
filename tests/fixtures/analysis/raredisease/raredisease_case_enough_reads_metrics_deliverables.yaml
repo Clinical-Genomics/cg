@@ -1283,15 +1283,13 @@ metrics:
   name: PERCENT_DUPLICATION
   step: multiqc
   value: 0.0438
-- condition:
-    norm: eq
-    threshold: 'NO'
+- condition: null
   header: null
   id: ADM1
   input: multiqc_data.json
   name: Contamination Status
   step: multiqc
-  value: 'NO'
+  value: 'YES'
 - condition: null
   header: null
   id: ADM1
@@ -2582,9 +2580,7 @@ metrics:
   name: PERCENT_DUPLICATION
   step: multiqc
   value: 0.0438
-- condition:
-    norm: eq
-    threshold: 'NO'
+- condition: null
   header: null
   id: ADM2
   input: multiqc_data.json

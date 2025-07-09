@@ -4,13 +4,12 @@ from sqlalchemy.orm import Query
 
 from cg.constants.constants import Workflow
 from cg.store.filters.status_analysis_filters import (
-    filter_analyses_by_case_entry_id,
-    filter_analyses_by_started_at,
     filter_analyses_not_cleaned,
     filter_analyses_started_before,
     filter_analyses_with_delivery_report,
     filter_analyses_with_workflow,
     filter_analyses_without_delivery_report,
+    filter_analysis_by_entry_id,
     filter_completed_analyses,
     filter_not_uploaded_analyses,
     filter_report_analyses_by_workflow,
@@ -18,7 +17,6 @@ from cg.store.filters.status_analysis_filters import (
     filter_valid_analyses_in_production,
     order_analyses_by_completed_at_asc,
     order_analyses_by_uploaded_at_asc,
-    filter_analysis_by_entry_id,
 )
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
@@ -81,12 +79,14 @@ def test_filter_completed_analyses(
     """Test filtering of completed analyses."""
 
     # GIVEN a mock analysis
-    analysis: Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
+    analysis: Analysis = helpers.add_analysis(
+        store=base_store, completed_at=timestamp_now, housekeeper_version_id=1234
+    )
 
     # WHEN retrieving the completed analyses
     analyses: Query = filter_completed_analyses(analyses=base_store._get_query(table=Analysis))
 
-    # ASSERT that analyses is a query
+    # THEN analyses is a query
     assert isinstance(analyses, Query)
 
     # THEN the completed analysis should be obtained
@@ -232,27 +232,6 @@ def test_order_analyses_by_uploaded_at_asc(
         assert analyses.all()[index].uploaded_at <= analyses.all()[index + 1].uploaded_at
 
 
-def test_filter_analysis_by_case(base_store: Store, helpers: StoreHelpers, case: Case):
-    """Test filtering of analyses by case."""
-
-    # GIVEN a set of mock analyses
-    analysis: Analysis = helpers.add_analysis(store=base_store)
-    analysis_other_case: Analysis = helpers.add_analysis(store=base_store, case=case)
-
-    # WHEN filtering the analyses by case
-    analyses: Query = filter_analyses_by_case_entry_id(
-        analyses=base_store._get_query(table=Analysis), case_entry_id=case.id
-    )
-
-    # ASSERT that analyses is a query
-    assert isinstance(analyses, Query)
-
-    # THEN only the analysis belonging to the case should be retrieved
-    assert analysis not in analyses
-    assert analysis_other_case in analyses
-    assert analysis_other_case.case == case
-
-
 def test_filter_analysis_started_before(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
@@ -299,32 +278,6 @@ def test_filter_analysis_not_cleaned(
     # THEN only the analysis that have not been cleaned should be retrieved
     assert analysis in analyses
     assert analysis_cleaned not in analyses
-
-
-def test_filter_analyses_by_started_at(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
-):
-    """Test filtering of analyses by started at."""
-
-    # GIVEN a set of mock analyses
-    analysis_started_now: Analysis = helpers.add_analysis(
-        store=base_store, started_at=timestamp_now
-    )
-    analysis_started_old: Analysis = helpers.add_analysis(
-        store=base_store, case=analysis_started_now.case, started_at=timestamp_yesterday
-    )
-
-    # WHEN filtering the analyses by started_at
-    analyses: Query = filter_analyses_by_started_at(
-        analyses=base_store._get_query(table=Analysis), started_at_date=timestamp_yesterday
-    )
-
-    # ASSERT that analyses is a query
-    assert isinstance(analyses, Query)
-
-    # THEN only the analysis that have been started after the given date should be retrieved
-    assert analysis_started_now not in analyses
-    assert analysis_started_old in analyses
 
 
 def test_filter_by_analysis_entry_id(base_store: Store, helpers: StoreHelpers):

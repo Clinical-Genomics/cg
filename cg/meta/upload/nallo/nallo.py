@@ -6,6 +6,7 @@ import logging
 import rich_click as click
 
 from cg.cli.generate.delivery_report.base import generate_delivery_report
+from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.scout import upload_to_scout
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
 from cg.meta.upload.upload_api import UploadAPI
@@ -25,7 +26,7 @@ class NalloUploadAPI(UploadAPI):
 
     def upload(self, ctx: click.Context, case: Case, restart: bool) -> None:
         """Uploads NALLO analysis data and files."""
-        analysis: Analysis = case.analyses[0]
+        analysis: Analysis = self.status_db.get_latest_completed_analysis_for_case(case.internal_id)
         self.update_upload_started_at(analysis=analysis)
         # Delivery report generation
         if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
@@ -37,6 +38,9 @@ class NalloUploadAPI(UploadAPI):
         LOG.info(
             f"Upload of case {case.internal_id} was successful. Uploaded at {dt.datetime.now()} in StatusDB"
         )
+
+        # Upload to loqusdb
+        ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
 
         # Clinical delivery upload
         self.upload_files_to_customer_inbox(case)

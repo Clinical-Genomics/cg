@@ -12,14 +12,22 @@ from cg.constants import Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.priority import SlurmAccount, SlurmQos, TrailblazerPriority
+from cg.constants.slurm import (
+    SLURM_UPLOAD_EXCLUDED_COMPUTE_NODES,
+    SLURM_UPLOAD_MAX_HOURS,
+    SLURM_UPLOAD_MEMORY,
+    SLURM_UPLOAD_TASKS,
+)
 from cg.constants.tb import AnalysisType
 from cg.exc import CgError
 from cg.io.controller import WriteFile
 from cg.models.slurm.sbatch import Sbatch
 from cg.services.deliver_files.rsync.models import RsyncDeliveryConfig
-from cg.services.deliver_files.rsync.sbatch import (
+from cg.services.deliver_files.rsync.sbatch_commands import (
     COVID_REPORT_RSYNC,
     COVID_RSYNC,
+    CREATE_INBOX_COMMAND,
+    ERROR_CREATE_INBOX_FUNCTION,
     ERROR_RSYNC_FUNCTION,
     RSYNC_COMMAND,
 )
@@ -48,7 +56,7 @@ class DeliveryRsyncService:
         self.workflow: str = Workflow.RSYNC
 
     @property
-    def slurm_quality_of_service(self) -> str:
+    def slurm_quality_of_service(self) -> SlurmQos:
         """Return the slurm quality of service depending on the slurm account."""
         return SlurmQos.HIGH if self.account == SlurmAccount.PRODUCTION else SlurmQos.LOW
 
@@ -201,21 +209,31 @@ class DeliveryRsyncService:
             log_dir.mkdir(parents=True, exist_ok=True)
 
     def run_rsync_for_case(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
-        """Submit Rsync commands for a single case for delivery to the delivery server."""
-        ticket: str = case.latest_ticket
+        """Submit Rsync commands for delivering a case to the delivery server and return the job id."""
+        ticket: str | None = case.latest_ticket
+        if not ticket:
+            raise CgError(f"Could not find ticket for case {case.internal_id}")
+
         source_and_destination_paths: dict[str, Path] = self.get_source_and_destination_paths(
             ticket=ticket, customer_internal_id=case.customer.internal_id
         )
+
         self.set_log_dir(folder_prefix=case.internal_id)
         self.create_log_dir(dry_run=dry_run)
-        command: str = self.concatenate_rsync_commands(
-            folder_list=folders_to_deliver,
-            source_and_destination_paths=source_and_destination_paths,
+
+        folder_creation_job_id: int = self._create_remote_ticket_inbox(
+            dry_run=dry_run,
             ticket=ticket,
-            case=case,
+            source_and_destination_paths=source_and_destination_paths,
         )
-        return self.sbatch_rsync_commands(
-            commands=command, job_prefix=case.internal_id, dry_run=dry_run
+
+        return self._deliver_folder_contents(
+            case=case,
+            dry_run=dry_run,
+            folder_creation_job_id=folder_creation_job_id,
+            folders_to_deliver=folders_to_deliver,
+            ticket=ticket,
+            source_and_destination_paths=source_and_destination_paths,
         )
 
     def run_rsync_for_ticket(self, ticket: str, dry_run: bool) -> int:
@@ -246,39 +264,85 @@ class DeliveryRsyncService:
                 source_path=source_and_destination_paths["delivery_source_path"],
                 destination_path=source_and_destination_paths["rsync_destination_path"],
             )
-        return self.sbatch_rsync_commands(commands=commands, job_prefix=ticket, dry_run=dry_run)
 
-    def sbatch_rsync_commands(
+        return self._generate_and_submit_sbatch(
+            commands=commands,
+            dry_run=dry_run,
+            error_command=ERROR_RSYNC_FUNCTION,
+            exclude=SLURM_UPLOAD_EXCLUDED_COMPUTE_NODES,
+            job_name=f"{ticket}_rsync",
+        )
+
+    def _create_remote_ticket_inbox(
+        self, dry_run: bool, ticket: str, source_and_destination_paths: dict[str, Path]
+    ) -> int:
+        host, inbox_path = (
+            source_and_destination_paths["rsync_destination_path"].as_posix().split(":")
+        )
+        inbox_path: str = f"{inbox_path}/{ticket}"
+        job_name: str = f"{ticket}_create_inbox"
+
+        commands: str = CREATE_INBOX_COMMAND.format(host=host, inbox_path=inbox_path)
+        error_command = ERROR_CREATE_INBOX_FUNCTION
+
+        return self._generate_and_submit_sbatch(
+            commands=commands, error_command=error_command, job_name=job_name, dry_run=dry_run
+        )
+
+    def _deliver_folder_contents(
         self,
-        commands: str,
-        job_prefix: str,
-        account: str = None,
-        email: str = None,
-        log_dir: str = None,
-        hours: int = 24,
-        number_tasks: int = 1,
-        memory: int = 1,
+        case: Case,
+        folder_creation_job_id: int,
+        folders_to_deliver: set[Path],
+        ticket: str,
+        source_and_destination_paths: dict[str, Path],
         dry_run: bool = False,
     ) -> int:
-        """Instantiates a slurm api and sbatches the given commands. Default parameters can be
-        overridden."""
-        sbatch_parameters: Sbatch = Sbatch(
-            job_name="_".join([job_prefix, "rsync"]),
-            account=account or self.account,
-            number_tasks=number_tasks,
-            memory=memory,
-            log_dir=log_dir or self.log_dir.as_posix(),
-            email=email or self.mail_user,
-            hours=hours,
-            quality_of_service=self.slurm_quality_of_service,
-            commands=commands,
-            error=ERROR_RSYNC_FUNCTION.format(),
-            exclude="--exclude=gpu-compute-0-[0-1],cg-dragen",
+        """Submit the job that rsyncs case data to the delivery server and return the job id."""
+        command: str = self.concatenate_rsync_commands(
+            folder_list=folders_to_deliver,
+            source_and_destination_paths=source_and_destination_paths,
+            ticket=ticket,
+            case=case,
         )
+
+        return self._generate_and_submit_sbatch(
+            commands=command,
+            dry_run=dry_run,
+            error_command=ERROR_RSYNC_FUNCTION,
+            exclude=SLURM_UPLOAD_EXCLUDED_COMPUTE_NODES,
+            job_name=f"{case.internal_id}_rsync",
+            dependency=f"--dependency=afterok:{folder_creation_job_id}",
+        )
+
+    def _generate_and_submit_sbatch(
+        self,
+        job_name: str,
+        commands: str,
+        error_command: str,
+        dry_run: bool = False,
+        dependency: str | None = None,
+        exclude: str | None = None,
+    ) -> int:
+        sbatch_parameters: Sbatch = Sbatch(
+            account=self.account,
+            commands=commands,
+            dependency=dependency,
+            email=self.mail_user,
+            error=error_command,
+            exclude=exclude,
+            hours=SLURM_UPLOAD_MAX_HOURS,
+            job_name=job_name,
+            log_dir=self.log_dir.as_posix(),
+            memory=SLURM_UPLOAD_MEMORY,
+            number_tasks=SLURM_UPLOAD_TASKS,
+            quality_of_service=self.slurm_quality_of_service,
+        )
+
         slurm_api = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)
         sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
-        sbatch_path = self.log_dir / "_".join([job_prefix, "rsync.sh"])
+        sbatch_path = Path(self.log_dir, f"{job_name}.sh")
         sbatch_number: int = slurm_api.submit_sbatch(
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )

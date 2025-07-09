@@ -46,7 +46,7 @@ from cg.meta.upload.raredisease.raredisease import RarediseaseUploadAPI
 from cg.meta.upload.tomte.tomte import TomteUploadAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case
+from cg.store.models import Analysis, Case
 from cg.store.store import Store
 from cg.utils.click.EnumChoice import EnumChoice
 
@@ -121,10 +121,13 @@ def upload_all_completed_analyses(context: click.Context, workflow: Workflow = N
 
     exit_code = 0
     for analysis in status_db.get_analyses_to_upload(workflow=workflow):
-        if analysis.case.analyses[0].uploaded_at is not None:
+        latest_case_analysis: Analysis = status_db.get_latest_completed_analysis_for_case(
+            analysis.case.internal_id
+        )
+        if latest_case_analysis.uploaded_at is not None:
             LOG.warning(
                 f"Skipping upload for case {analysis.case.internal_id}. "
-                f"Case has been already uploaded at {analysis.case.analyses[0].uploaded_at}."
+                f"Case has been already uploaded at {latest_case_analysis.uploaded_at}."
             )
             continue
 
