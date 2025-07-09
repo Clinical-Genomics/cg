@@ -83,5 +83,6 @@ class PacBioPostProcessingService(PostProcessingService):
             )
             self.run_validator.validate_run_files(run_data)
         except PostProcessingRunFileManagerError:
+            LOG.debug(f"Run {run_name} is not ready for post-processing. Missing required files.")
             return False
         return True
