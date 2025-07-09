@@ -103,7 +103,7 @@ def test_rnafusion_start(
     # GIVEN that all fastq files are ready for analysis
     mocker.patch.object(FastqFetcher, "_are_fastq_files_ready_for_analysis", return_value=True)
 
-    # GIVEN that the sample sheet content is created correctly
+    # GIVEN that the sample sheet content is created
     mocker.patch.object(RNAFusionSampleSheetCreator, "_get_sample_content", return_value=[[""]])
 
     # GIVEN that the files are written correctly
