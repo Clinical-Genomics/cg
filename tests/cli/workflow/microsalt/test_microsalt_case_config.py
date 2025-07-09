@@ -11,7 +11,7 @@ from cg.services.analysis_starter.configurator.implementations.microsalt import 
 )
 
 
-def test_dev_case_config(cli_runner: CliRunner, cg_context: CGConfig, mocker: MockerFixture):
+def test_case_config(cli_runner: CliRunner, cg_context: CGConfig, mocker: MockerFixture):
 
     # GIVEN a microSALT configurator
     config_mock = mocker.patch.object(MicrosaltConfigurator, "configure")

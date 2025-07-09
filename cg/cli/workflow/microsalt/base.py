@@ -35,6 +35,16 @@ def microsalt(context: click.Context) -> None:
 microsalt.add_command(resolve_compression)
 
 
+@microsalt.command("config-case")
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def config_case(cg_config: CGConfig, case_id: str) -> None:
+    """Create a config file for a microSALT case."""
+    factory = ConfiguratorFactory(cg_config)
+    configurator = cast(MicrosaltConfigurator, factory.get_configurator(Workflow.MICROSALT))
+    configurator.configure(case_id=case_id)
+
+
 @microsalt.command("run")
 @click.option(
     "-c",
@@ -47,12 +57,12 @@ microsalt.add_command(resolve_compression)
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def run(
-    context: CGConfig,
+    cg_config: CGConfig,
     config_file_path: click.Path,
     case_id: str,
 ) -> None:
     """Runs the microSALT workflow for the provided case. Does not generate config files."""
-    factory = AnalysisStarterFactory(context)
+    factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_case(case_id)
     analysis_starter.run(case_id=case_id, config_file=config_file_path)
 
@@ -60,32 +70,22 @@ def run(
 @microsalt.command("start")
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def start(context: CGConfig, case_id: str) -> None:
+def start(cg_config: CGConfig, case_id: str) -> None:
     """
     Generates config file, links fastq files and runs the microSALT analysis for the provided case.
     """
     LOG.info(f"Starting Microsalt workflow for {case_id}")
-    factory = AnalysisStarterFactory(context)
+    factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_case(case_id)
     analysis_starter.start(case_id)
 
 
-@microsalt.command("config-case")
-@ARGUMENT_CASE_ID
-@click.pass_obj
-def config_case(context: CGConfig, case_id: str) -> None:
-    """Create a config file for a microSALT case."""
-    factory = ConfiguratorFactory(context)
-    configurator = cast(MicrosaltConfigurator, factory.get_configurator(Workflow.MICROSALT))
-    configurator.configure(case_id=case_id)
-
-
 @microsalt.command("start-available")
 @click.pass_obj
-def start_available(context: CGConfig) -> None:
+def start_available(cg_config: CGConfig) -> None:
     """Starts all available microSALT cases."""
     LOG.info("Starting Microsalt workflow.")
-    factory = AnalysisStarterFactory(context)
+    factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.MICROSALT
     )
