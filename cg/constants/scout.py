@@ -158,6 +158,10 @@ MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
     reviewer_alignment_index={"expansionhunter", "bam-index"},
     reviewer_vcf={"expansionhunter", "vcf-str"},
     mitodel_file={"mitodel"},
+    tiddit_coverage_wig={"tiddit-coverage", "bigwig"},
+    rhocall_wig={"rhocall-viz"},
+    upd_regions_bed={"upd", "regions", "bigbed"},
+    upd_sites_bed={"upd", "sites", "bigbed"},
 )
 
 BALSAMIC_SAMPLE_TAGS = dict(

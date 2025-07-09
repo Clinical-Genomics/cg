@@ -1,7 +1,8 @@
 """
-    API for compressing files. Functionality to compress FASTQ, decompress SPRING and clean files
+API for compressing files. Functionality to compress FASTQ, decompress SPRING and clean files
 """
 
+from datetime import datetime, timedelta
 import logging
 import re
 from pathlib import Path
@@ -153,6 +154,42 @@ class CompressAPI:
             self.crunchy_api.spring_to_fastq(compression_obj=compression, sample_id=sample_id)
             update_metadata_date(spring_metadata_path=compression.spring_metadata_path)
         return True
+
+    def _is_sample_linked_to_newer_case(self, sample: Sample, days_back: int) -> bool:
+        """Check if a sample is linked to a case not old enough to be cleaned."""
+        for link in sample.links:
+            case: Case = link.case
+            creation_date: datetime = case.created_at
+            date_threshold: datetime = datetime.now() - timedelta(days=days_back)
+            if creation_date > date_threshold:
+                return True
+        return False
+
+    def clean_fastq_files_for_samples(self, samples: list[Sample], days_back: int) -> bool:
+        """Clean FASTQ files for samples linked to eligible case."""
+        is_successful: bool = True
+        for sample in samples:
+            sample_id: str = sample.internal_id
+            if len(sample.links) > 1:
+                if self._is_sample_linked_to_newer_case(sample=sample, days_back=days_back):
+                    LOG.info(
+                        f"Skipping sample {sample.internal_id}, as it belongs to a case not eligible for cleaning"
+                    )
+                    continue
+            archive_location: str = sample.archive_location
+            try:
+                was_cleaned: bool = self.clean_fastq(
+                    sample_id=sample_id, archive_location=archive_location
+                )
+                if not was_cleaned:
+                    LOG.debug(
+                        f"Skipping sample {sample_id} because the bundle version or FASTQ files were not present"
+                    )
+                    continue
+            except Exception as error:
+                is_successful = False
+                LOG.error(f"Could not clean sample {sample_id}: {error}")
+        return is_successful
 
     def clean_fastq(self, sample_id: str, archive_location: str) -> bool:
         """Check that FASTQ compression is completed for a case and clean.
