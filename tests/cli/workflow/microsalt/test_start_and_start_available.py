@@ -45,6 +45,10 @@ def test_start_available(
     exit_status: int,
     mocker: MockerFixture,
 ):
+    """
+    Test that the microSALT start_available command succeeds when the starter succeeds and
+    aborts otherwise.
+    """
     # GIVEN a valid context
 
     # GIVEN a mocked AnalysisStarter and a store that returns a workflow
