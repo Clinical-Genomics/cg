@@ -86,7 +86,7 @@ def start(cg_config: CGConfig, case_id: str) -> None:
 @click.pass_obj
 def start_available(cg_config: CGConfig) -> None:
     """Starts all available microSALT cases."""
-    LOG.info("Starting Microsalt workflow.")
+    LOG.info("Starting Microsalt workflow for all available cases.")
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.MICROSALT
