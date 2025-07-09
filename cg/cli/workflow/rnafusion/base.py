@@ -67,7 +67,7 @@ def dev_config_case(config: CGConfig, case_id: str):
 @OPTION_REVISION
 @OPTION_STUB
 @click.pass_obj
-def dev_run(config: CGConfig, case_id: str, stub_run: bool = False, revision: str | None = None):
+def dev_run(config: CGConfig, case_id: str, stub_run: bool, revision: str | None = None):
     """Run a preconfigured RNAFusion case."""
     factory = AnalysisStarterFactory(config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(

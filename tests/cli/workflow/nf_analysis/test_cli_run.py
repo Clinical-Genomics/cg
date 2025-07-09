@@ -6,11 +6,14 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
+from pytest_mock import MockerFixture
 
 from cg.cli.workflow.base import workflow as workflow_cli
+from cg.cli.workflow.rnafusion.base import dev_run
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.service import AnalysisStarter
 
 
 @pytest.mark.parametrize(
@@ -286,3 +289,37 @@ def test_resume_using_nextflow_dry_run(
 
     # THEN command should include resume flag
     assert "-resume" in caplog.text
+
+
+def test_run_calls_service(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    mocker: MockerFixture,
+):
+    # GIVEN a case id
+    case_id: str = "case_id"
+
+    # WHEN running the dev run command without flags
+    service_call = mocker.patch.object(AnalysisStarter, "run")
+    cli_runner.invoke(dev_run, [case_id], obj=rnafusion_context)
+
+    # THEN the analysis starter should have been called with the expected input
+    service_call.assert_called_once_with(case_id=case_id, revision=None, stub_run=False)
+
+
+def test_run_calls_service_with_flag(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    mocker: MockerFixture,
+):
+    # GIVEN a case id
+    case_id: str = "case_id"
+
+    # GIVEN that the dev run command is run with flags
+    service_call = mocker.patch.object(AnalysisStarter, "run")
+    cli_runner.invoke(
+        dev_run, [case_id, "--revision", "1.0.0", "--stub-run"], obj=rnafusion_context
+    )
+
+    # THEN the analysis started should have been called with the flags set
+    service_call.assert_called_once_with(case_id=case_id, revision="1.0.0", stub_run=True)
