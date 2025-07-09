@@ -60,5 +60,5 @@ def test_start_available(
     # THEN the starter command should have been called
     starter_mock.start_available.assert_called_once()
 
-    # THEN the command should have executed without fail
+    # THEN the command should have executed as expected
     assert result.exit_code == exit_status
