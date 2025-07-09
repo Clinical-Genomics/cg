@@ -4,6 +4,7 @@ from unittest.mock import create_autospec
 import pytest
 import requests
 from pytest_mock import MockerFixture
+from requests import Response
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
@@ -16,7 +17,6 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
     RNAFusionSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.service import AnalysisStarter
@@ -54,23 +54,18 @@ def test_microsalt_analysis_starter_start_available_error_handling(
 
 
 def test_rnafusion_start(
-    cg_context,
-    http_workflow_launch_response,
+    cg_context: CGConfig,
+    http_workflow_launch_response: Response,
     mocker: MockerFixture,
 ):
-    analysis_starter: AnalysisStarter = AnalysisStarterFactory(
-        cg_context
-    ).get_analysis_starter_for_workflow(Workflow.RNAFUSION)
-
-    # GIVEN a store that all our components use
+    analysis_starter_factory = AnalysisStarterFactory(cg_context)
+    # GIVEN a store that all our components use a mocked store
     mock_store = create_autospec(Store)
-    analysis_starter.store = mock_store
-    analysis_starter.input_fetcher.status_db = mock_store
-    configurator: NextflowConfigurator = analysis_starter.configurator
-    configurator.store = mock_store
-    configurator.sample_sheet_creator.store = mock_store
-    configurator.config_file_creator.store = mock_store
-    analysis_starter.tracker.store = mock_store
+    analysis_starter_factory.store = mock_store
+    analysis_starter_factory.configurator_factory.store = mock_store
+    analysis_starter = analysis_starter_factory.get_analysis_starter_for_workflow(
+        Workflow.RNAFUSION
+    )
 
     # GIVEN a case with appropriate parameters set
     mock_case = create_autospec(Case)
