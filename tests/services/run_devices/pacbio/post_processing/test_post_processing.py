@@ -102,7 +102,12 @@ def test_can_post_processing_start_false(
 
     # GIVEN one of them is not ready for post-processing
     pac_bio_post_processing_service.run_validator.validate_run_files = Mock(
-        side_effect=[None, PostProcessingRunFileManagerError]
+        side_effect=[
+            None,
+            PostProcessingRunFileManagerError(
+                f"No Manifest file found in {pacbio_barcoded_sequencing_run_name}"
+            ),
+        ]
     )
 
     # WHEN checking if post-processing can start
