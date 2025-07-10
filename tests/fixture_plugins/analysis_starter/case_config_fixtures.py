@@ -9,32 +9,6 @@ from cg.services.analysis_starter.configurator.models.nextflow import NextflowCa
 
 @pytest.fixture
 def raredisease_case_config(
-    raredisease_case_id: str,
-    raredisease_config_profiles: list[str],
-    raredisease_nextflow_config_file_path: Path,
-    raredisease_params_file_path: Path,
-    nextflow_repository: str,
-    nextflow_pipeline_revision: str,
-    raredisease_work_dir_path: Path,
-) -> NextflowCaseConfig:
-
-    return NextflowCaseConfig(
-        case_id=raredisease_case_id,
-        config_profiles=raredisease_config_profiles,
-        workflow=Workflow.RAREDISEASE,
-        case_priority=SlurmQos.NORMAL,
-        nextflow_config_file=raredisease_nextflow_config_file_path.as_posix(),
-        params_file=raredisease_params_file_path.as_posix(),
-        pipeline_repository=nextflow_repository,
-        pre_run_script="",
-        revision=nextflow_pipeline_revision,
-        stub_run=False,
-        work_dir=raredisease_work_dir_path.as_posix(),
-    )
-
-
-@pytest.fixture
-def raredisease_case_config2(
     nextflow_case_id: str,
     nextflow_case_path: Path,
     raredisease_config_profiles: list[str],
