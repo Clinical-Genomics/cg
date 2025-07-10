@@ -75,21 +75,24 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
             analysis_metadata.balsamic_config.panel.capture_kit
         )
         bed: Bed = self.status_db.get_bed_by_entry_id(bed_version.bed_id) if bed_version else None
-        return BalsamicTargetedSampleMetadataModel(
+        
+        metadata = BalsamicTargetedSampleMetadataModel(
             bait_set=bed.name if bed else None,
             bait_set_version=analysis_metadata.balsamic_config.panel.capture_kit_version,
-            duplicates=sample_metrics.percent_duplication if sample_metrics else None,
-            fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
-            gc_dropout=sample_metrics.gc_dropout if sample_metrics else None,
             initial_qc=passed_initial_qc,
-            mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
-            median_target_coverage=(
-                sample_metrics.median_target_coverage if sample_metrics else None
-            ),
             million_read_pairs=million_read_pairs,
-            pct_250x=sample_metrics.pct_target_bases_250x if sample_metrics else None,
-            pct_500x=sample_metrics.pct_target_bases_500x if sample_metrics else None,
         )
+        
+        if sample_metrics:
+            metadata.duplicates = metadata.get_metric_value(sample_metrics.percent_duplication)
+            metadata.fold_80 = metadata.get_metric_value(sample_metrics.fold_80_base_penalty)
+            metadata.gc_dropout = metadata.get_metric_value(sample_metrics.gc_dropout)
+            metadata.mean_insert_size = metadata.get_metric_value(sample_metrics.mean_insert_size)
+            metadata.median_target_coverage = metadata.get_metric_value(sample_metrics.median_target_coverage)
+            metadata.pct_250x = metadata.get_metric_value(sample_metrics.pct_target_bases_250x)
+            metadata.pct_500x = metadata.get_metric_value(sample_metrics.pct_target_bases_500x)
+        
+        return metadata
 
     @staticmethod
     def get_wgs_metadata(
@@ -98,19 +101,21 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
         sample_metrics: BalsamicWGSQCMetrics,
     ) -> BalsamicWGSSampleMetadataModel:
         """Return report metadata for Balsamic WHOLE_GENOME_SEQUENCING analysis."""
-        return BalsamicWGSSampleMetadataModel(
-            duplicates=sample_metrics.percent_duplication if sample_metrics else None,
-            fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
+        metadata = BalsamicWGSSampleMetadataModel(
             initial_qc=passed_initial_qc,
-            mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
-            median_coverage=sample_metrics.median_coverage if sample_metrics else None,
             million_read_pairs=million_read_pairs,
-            pct_15x=sample_metrics.pct_15x if sample_metrics else None,
-            pct_60x=sample_metrics.pct_60x if sample_metrics else None,
-            pct_reads_improper_pairs=(
-                sample_metrics.pct_pf_reads_improper_pairs if sample_metrics else None
-            ),
         )
+        
+        if sample_metrics:
+            metadata.duplicates = metadata.get_metric_value(sample_metrics.percent_duplication)
+            metadata.fold_80 = metadata.get_metric_value(sample_metrics.fold_80_base_penalty)
+            metadata.mean_insert_size = metadata.get_metric_value(sample_metrics.mean_insert_size)
+            metadata.median_coverage = metadata.get_metric_value(sample_metrics.median_coverage)
+            metadata.pct_15x = metadata.get_metric_value(sample_metrics.pct_15x)
+            metadata.pct_60x = metadata.get_metric_value(sample_metrics.pct_60x)
+            metadata.pct_reads_improper_pairs = metadata.get_metric_value(sample_metrics.pct_pf_reads_improper_pairs)
+        
+        return metadata
 
     def is_report_accredited(
         self, samples: list[SampleModel], analysis_metadata: BalsamicAnalysis
