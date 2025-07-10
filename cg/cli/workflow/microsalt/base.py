@@ -63,7 +63,7 @@ def run(
     config_file_path: click.Path,
     case_id: str,
 ) -> None:
-    """Runs the microSALT workflow for the provided case. Does not generate config files."""
+    """Run a preconfigured microSALT case."""
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_case(case_id)
     analysis_starter.run(case_id=case_id, config_file=config_file_path)
@@ -86,7 +86,7 @@ def start(cg_config: CGConfig, case_id: str) -> None:
 @click.pass_obj
 def start_available(cg_config: CGConfig) -> None:
     """Starts all available microSALT cases."""
-    LOG.info("Starting Microsalt workflow for all available cases.")
+    LOG.info("Starting microSALT workflow for all available cases.")
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.MICROSALT
