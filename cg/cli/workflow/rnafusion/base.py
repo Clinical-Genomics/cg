@@ -55,9 +55,9 @@ rnafusion.add_command(store_available)
 @rnafusion.command()
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_config_case(config: CGConfig, case_id: str):
+def dev_config_case(cg_config: CGConfig, case_id: str):
     """Configure an RNAFusion case so that it is ready to be run."""
-    factory = ConfiguratorFactory(config)
+    factory = ConfiguratorFactory(cg_config)
     configurator = cast(NextflowConfigurator, factory.get_configurator(Workflow.RNAFUSION))
     configurator.configure(case_id=case_id)
 
@@ -67,9 +67,9 @@ def dev_config_case(config: CGConfig, case_id: str):
 @OPTION_REVISION
 @OPTION_STUB
 @click.pass_obj
-def dev_run(config: CGConfig, case_id: str, stub_run: bool, revision: str | None = None):
+def dev_run(cg_config: CGConfig, case_id: str, stub_run: bool, revision: str | None = None):
     """Run a preconfigured RNAFusion case."""
-    factory = AnalysisStarterFactory(config)
+    factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RNAFUSION
     )
@@ -81,9 +81,11 @@ def dev_run(config: CGConfig, case_id: str, stub_run: bool, revision: str | None
 @OPTION_REVISION
 @OPTION_STUB
 @click.pass_obj
-def dev_start(config: CGConfig, case_id: str, stub_run: bool = False, revision: str | None = None):
+def dev_start(
+    cg_config: CGConfig, case_id: str, stub_run: bool = False, revision: str | None = None
+):
     """Start an RNAFusion case. Configures the case if needed."""
-    factory = AnalysisStarterFactory(config)
+    factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RNAFUSION
     )
@@ -92,10 +94,10 @@ def dev_start(config: CGConfig, case_id: str, stub_run: bool = False, revision: 
 
 @rnafusion.command()
 @click.pass_obj
-def dev_start_available(context: CGConfig) -> None:
+def dev_start_available(cg_config: CGConfig) -> None:
     """Starts all available RNAFusion cases."""
     LOG.info("Starting RNAFusion workflow.")
-    analysis_starter = AnalysisStarterFactory(context).get_analysis_starter_for_workflow(
+    analysis_starter = AnalysisStarterFactory(cg_config).get_analysis_starter_for_workflow(
         Workflow.RNAFUSION
     )
     succeeded: bool = analysis_starter.start_available()
