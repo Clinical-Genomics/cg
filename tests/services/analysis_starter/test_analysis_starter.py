@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import cast
 from unittest.mock import create_autospec
 
 import pytest
@@ -13,10 +14,17 @@ from cg.constants import Workflow
 from cg.constants.priority import Priority, SlurmQos
 from cg.exc import AnalysisNotReadyError, AnalysisRunningError
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
+    NextflowConfigFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
+    RNAFusionParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import creator
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
     RNAFusionSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.service import AnalysisStarter
@@ -58,7 +66,12 @@ def test_rnafusion_start(
     http_workflow_launch_response: Response,
     mocker: MockerFixture,
 ):
+    # GIVEN a case_id
+    case_id: str = "case_id"
+
+    # GIVEN an analysis starter factory
     analysis_starter_factory = AnalysisStarterFactory(cg_context)
+
     # GIVEN a store that all our components use a mocked store
     mock_store = create_autospec(Store)
     analysis_starter_factory.store = mock_store
@@ -101,9 +114,6 @@ def test_rnafusion_start(
     # GIVEN that the sample sheet content is created
     mocker.patch.object(RNAFusionSampleSheetCreator, "_get_sample_content", return_value=[[""]])
 
-    # GIVEN that the files are written correctly
-    mocker.patch.object(creator, "write_csv")
-
     # GIVEN that the fastq files exist
     mocker.patch.object(Path, "is_file", return_value=True)
 
@@ -132,7 +142,17 @@ def test_rnafusion_start(
     )
 
     # WHEN starting a case
-    analysis_starter.start("case_id")
+    analysis_starter.start(case_id)
+
+    # THEN all the necessary files should have been written
+    configurator: NextflowConfigurator = cast(NextflowConfigurator, analysis_starter.configurator)
+    config_file_creator: NextflowConfigFileCreator = configurator.config_file_creator
+    sample_sheet_creator = cast(RNAFusionSampleSheetCreator, configurator.sample_sheet_creator)
+    params_file_creator = cast(RNAFusionParamsFileCreator, configurator.params_file_creator)
+    case_path = configurator._get_case_path(case_id)
+    assert config_file_creator.get_file_path(case_id=case_id, case_path=case_path).exists()
+    assert sample_sheet_creator.get_file_path(case_id=case_id, case_path=case_path).exists()
+    assert params_file_creator.get_file_path(case_id=case_id, case_path=case_path).exists()
 
     # THEN our mocks should have been called
     submit_mock.assert_called_once()
