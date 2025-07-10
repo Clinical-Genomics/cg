@@ -105,6 +105,8 @@ pytest_plugins = [
     "tests.fixture_plugins.analysis_starter.config_file_content_fixtures",
     "tests.fixture_plugins.analysis_starter.extension_fixtures",
     "tests.fixture_plugins.analysis_starter.fastq_handlers",
+    "tests.fixture_plugins.analysis_starter.name_fixtures",
+    "tests.fixture_plugins.analysis_starter.nextflow_mock_yaml_writers",
     "tests.fixture_plugins.analysis_starter.path_fixtures",
     "tests.fixture_plugins.analysis_starter.sample_sheet_creators",
     "tests.fixture_plugins.analysis_starter.sample_sheet_content_fixtures",
@@ -115,6 +117,8 @@ pytest_plugins = [
     "tests.fixture_plugins.analysis_starter.store_fixtures",
     "tests.fixture_plugins.analysis_starter.params_file_creators",
     "tests.fixture_plugins.analysis_starter.params_file_content_fixtures",
+    "tests.fixture_plugins.analysis_starter.pipeline_config_fixtures",
+    "tests.fixture_plugins.analysis_starter.testing_scenarios",
     "tests.fixture_plugins.backup_fixtures.backup_fixtures",
     "tests.fixture_plugins.chanjo2_fixtures.api_fixtures",
     "tests.fixture_plugins.chanjo2_fixtures.models_fixtures",
@@ -2210,8 +2214,10 @@ def context_config(
             "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_bin_path": Path("workflow", "path").as_posix(),
+            "pre_run_script": "",
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
+            "repository": "https://some_url",
             "revision": "2.2.0",
             "root": str(rnafusion_dir),
             "slurm": {
@@ -2249,6 +2255,12 @@ def context_config(
         "scout_38": {
             "binary_path": "bin/scout_38",
             "config_path": "scout_38-stage.yaml",
+        },
+        "seqera_platform": {
+            "base_url": "url",
+            "bearer_token": "bearer",
+            "compute_environments": {"normal": "normal"},
+            "workspace_id": 123,
         },
         "statina": {
             "api_url": "api_url",
@@ -2959,6 +2971,12 @@ def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> 
     return Path(
         raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_deliverables"
     ).with_suffix(FileExtensions.YAML)
+
+
+@pytest.fixture
+def raredisease_gene_panel_path(raredisease_case_path: Path) -> Path:
+    """Path to gene panel file."""
+    return Path(raredisease_case_path, "gene_panels").with_suffix(FileExtensions.BED)
 
 
 @pytest.fixture(scope="function")

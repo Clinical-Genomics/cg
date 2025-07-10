@@ -13,7 +13,6 @@ from cg.constants.tb import AnalysisType
 from cg.exc import AnalysisRunningError
 from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
-from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
 
@@ -26,12 +25,10 @@ class Tracker(ABC):
     def __init__(
         self,
         store: Store,
-        subprocess_submitter: SubprocessSubmitter,
         trailblazer_api: TrailblazerAPI,
         workflow_root: str,
     ):
         self.store = store
-        self.subprocess_submitter = subprocess_submitter
         self.trailblazer_api = trailblazer_api
         self.workflow_root = workflow_root
 
@@ -90,7 +87,7 @@ class Tracker(ABC):
         case: Case = self.store.get_case_by_internal_id(case_id)
         is_primary: bool = len(case.analyses) == 0
         analysis_start: datetime = datetime.now()
-        workflow_version: str = self.subprocess_submitter.get_workflow_version(case_config)
+        workflow_version: str = self._get_workflow_version(case_config)
         new_analysis: Analysis = self.store.add_analysis(
             workflow=Workflow(case.data_analysis),
             version=workflow_version,
@@ -135,4 +132,8 @@ class Tracker(ABC):
 
     @abstractmethod
     def _get_job_ids_path(self, case_id: str):
+        pass
+
+    @abstractmethod
+    def _get_workflow_version(self, case_config: CaseConfig) -> str:
         pass

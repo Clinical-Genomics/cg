@@ -1,12 +1,25 @@
 from pathlib import Path
 
+from cg.apps.tb import TrailblazerAPI
 from cg.constants import FileExtensions
 from cg.constants.constants import WorkflowManager
+from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
+from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.tracker import Tracker
 from cg.store.models import Case
+from cg.store.store import Store
 
 
 class MicrosaltTracker(Tracker):
+    def __init__(
+        self,
+        store: Store,
+        subprocess_submitter: SubprocessSubmitter,
+        trailblazer_api: TrailblazerAPI,
+        workflow_root: str,
+    ):
+        super().__init__(store=store, trailblazer_api=trailblazer_api, workflow_root=workflow_root)
+        self.subprocess_submitter = subprocess_submitter
 
     def _workflow_manager(self) -> WorkflowManager:
         return WorkflowManager.Slurm
@@ -41,3 +54,6 @@ class MicrosaltTracker(Tracker):
         is_yaml_file: bool = job_ids_path.suffix == FileExtensions.YAML
         if job_ids_path.exists() and is_yaml_file:
             job_ids_path.unlink()
+
+    def _get_workflow_version(self, case_config: MicrosaltCaseConfig) -> str:
+        return self.subprocess_submitter.get_workflow_version(case_config)

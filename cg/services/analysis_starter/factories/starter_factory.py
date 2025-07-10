@@ -90,7 +90,6 @@ class AnalysisStarterFactory:
         if workflow in NEXTFLOW_WORKFLOWS:
             return NextflowTracker(
                 store=self.store,
-                subprocess_submitter=SubprocessSubmitter(),
                 trailblazer_api=self.cg_config.trailblazer_api,
                 workflow_root=getattr(self.cg_config, workflow).root,
             )

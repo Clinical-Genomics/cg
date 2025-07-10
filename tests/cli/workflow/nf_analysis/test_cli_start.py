@@ -4,14 +4,17 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
+from pytest_mock import MockerFixture
 
 from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
+from cg.cli.workflow.rnafusion.base import dev_start, dev_start_available
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.service import AnalysisStarter
 
 
 @pytest.mark.parametrize("workflow", NEXTFLOW_WORKFLOWS + [Workflow.NALLO])
@@ -107,3 +110,52 @@ def test_start_available(
 
     # THEN the case without enough reads should not start
     assert case_id_not_enough_reads not in caplog.text
+
+
+def test_start_rnafusion_calls_service(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    mocker: MockerFixture,
+):
+    # GIVEN a case id
+    case_id: str = "case_id"
+
+    # WHEN running the dev run command without flags
+    service_call = mocker.patch.object(AnalysisStarter, "start")
+    cli_runner.invoke(dev_start, [case_id], obj=rnafusion_context)
+
+    # THEN the analysis starter should have been called with the expected input
+    service_call.assert_called_once_with(case_id=case_id, revision=None, stub_run=False)
+
+
+def test_start_rnafusion_calls_service_with_flag(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    mocker: MockerFixture,
+):
+    # GIVEN a case id
+    case_id: str = "case_id"
+
+    # GIVEN that the dev run command is run with flags
+    service_call = mocker.patch.object(AnalysisStarter, "start")
+    cli_runner.invoke(
+        dev_start, [case_id, "--revision", "1.0.0", "--stub-run"], obj=rnafusion_context
+    )
+
+    # THEN the analysis started should have been called with the flags set
+    service_call.assert_called_once_with(case_id=case_id, revision="1.0.0", stub_run=True)
+
+
+def test_start_rnafusion_available_calls_service(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    mocker: MockerFixture,
+):
+    # GIVEN a sufficient context
+
+    # WHEN running the dev run command without flags
+    service_call = mocker.patch.object(AnalysisStarter, "start_available")
+    cli_runner.invoke(dev_start_available, obj=rnafusion_context)
+
+    # THEN the analysis starter should have been called with the expected input
+    service_call.assert_called_once_with()

@@ -17,30 +17,19 @@ def raredisease_case_path(raredisease_dir: Path, raredisease_case_id: str) -> Pa
 
 
 @pytest.fixture
-def raredisease_case_path2(raredisease_dir: Path, raredisease_case_id: str) -> Path:
-    return Path("case", "path")
-
-
-@pytest.fixture
 def raredisease_work_dir_path(raredisease_case_path: Path, raredisease_case_id: Path) -> Path:
     return Path(raredisease_case_path, "work")
 
 
 @pytest.fixture(scope="function")
-def raredisease_gene_panel_path(raredisease_case_path: Path) -> Path:
+def raredisease_gene_panel_path2(nextflow_case_path: Path) -> Path:
     """Path to gene panel file."""
-    return Path(raredisease_case_path, "gene_panels").with_suffix(FileExtensions.BED)
-
-
-@pytest.fixture(scope="function")
-def raredisease_gene_panel_path2(raredisease_case_path2: Path) -> Path:
-    """Path to gene panel file."""
-    return Path(raredisease_case_path2, "gene_panels").with_suffix(FileExtensions.BED)
+    return Path(nextflow_case_path, "gene_panels").with_suffix(FileExtensions.BED)
 
 
 @pytest.fixture
-def raredisease_managed_variants_path(raredisease_case_path2: Path) -> Path:
-    return Path(raredisease_case_path2, "managed_variants").with_suffix(FileExtensions.VCF)
+def raredisease_managed_variants_path(nextflow_case_path: Path) -> Path:
+    return Path(nextflow_case_path, "managed_variants").with_suffix(FileExtensions.VCF)
 
 
 @pytest.fixture
@@ -76,7 +65,22 @@ def raredisease_sample_sheet_path(raredisease_case_path, raredisease_case_id) ->
     )
 
 
-@pytest.fixture(scope="function")
-def raredisease_sample_sheet_path2() -> Path:
+@pytest.fixture
+def nextflow_case_path(nextflow_root: str, nextflow_case_id) -> Path:
+    return Path(nextflow_root, nextflow_case_id)
+
+
+@pytest.fixture
+def nextflow_sample_sheet_path() -> Path:
     """Path to sample sheet."""
     return Path("samplesheet", "path")
+
+
+@pytest.fixture
+def fastq_path_1() -> Path:
+    return Path("path", "fastq_1.fastq.gz")
+
+
+@pytest.fixture
+def fastq_path_2() -> Path:
+    return Path("path", "fastq_2.fastq.gz")
