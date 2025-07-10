@@ -2256,6 +2256,12 @@ def context_config(
             "binary_path": "bin/scout_38",
             "config_path": "scout_38-stage.yaml",
         },
+        "seqera_platform": {
+            "base_url": "url",
+            "bearer_token": "bearer",
+            "compute_environments": {"normal": "normal"},
+            "workspace_id": 123,
+        },
         "statina": {
             "api_url": "api_url",
             "auth_path": "auth_path",
