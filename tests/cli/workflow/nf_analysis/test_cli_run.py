@@ -291,7 +291,7 @@ def test_resume_using_nextflow_dry_run(
     assert "-resume" in caplog.text
 
 
-def test_run_calls_service(
+def test_run_rnafusion_calls_service(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     mocker: MockerFixture,
@@ -307,7 +307,7 @@ def test_run_calls_service(
     service_call.assert_called_once_with(case_id=case_id, revision=None, stub_run=False)
 
 
-def test_run_calls_service_with_flag(
+def test_run_rnafusion_calls_service_with_flag(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     mocker: MockerFixture,

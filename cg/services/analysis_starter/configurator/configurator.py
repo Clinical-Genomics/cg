@@ -8,12 +8,12 @@ SpecificCaseConfig = TypeVar("SpecificCaseConfig", bound=CaseConfig)
 
 class Configurator(ABC):
     @abstractmethod
-    def configure(self, case_id: str, **flags) -> SpecificCaseConfig:
+    def configure(self, case_id: str, **flags) -> CaseConfig:
         """Abstract method to configure a case."""
         pass
 
     @abstractmethod
-    def get_config(self, case_id: str, **flags) -> SpecificCaseConfig:
+    def get_config(self, case_id: str, **flags) -> CaseConfig:
         """Abstract method to get the (pre-existing) config for a case."""
         pass
 
@@ -24,5 +24,5 @@ class Configurator(ABC):
 
     @staticmethod
     @abstractmethod
-    def _ensure_valid_config(config: SpecificCaseConfig) -> None:
+    def _ensure_valid_config(config: CaseConfig) -> None:
         pass

@@ -2,6 +2,18 @@ from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
 from cg.models.cg_config import CGConfig, SeqeraPlatformConfig
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
+    RarediseaseParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
+    RNAFusionParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
+    RarediseaseSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+    RNAFusionSampleSheetCreator,
+)
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
@@ -53,6 +65,12 @@ def test_analysis_starter_factory_raredisease(
 
     # THEN the Factory should have it configured correctly
     assert isinstance(analysis_starter.configurator, NextflowConfigurator)
+    assert isinstance(
+        analysis_starter.configurator.sample_sheet_creator, RarediseaseSampleSheetCreator
+    )
+    assert isinstance(
+        analysis_starter.configurator.params_file_creator, RarediseaseParamsFileCreator
+    )
     assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
     assert isinstance(analysis_starter.submitter, SeqeraPlatformSubmitter)
 
@@ -76,5 +94,9 @@ def test_analysis_starter_factory_rnafusion(
 
     # THEN the Factory should have it configured correctly
     assert isinstance(analysis_starter.configurator, NextflowConfigurator)
+    assert isinstance(
+        analysis_starter.configurator.sample_sheet_creator, RNAFusionSampleSheetCreator
+    )
+    assert isinstance(analysis_starter.configurator.params_file_creator, RNAFusionParamsFileCreator)
     assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
     assert isinstance(analysis_starter.submitter, SeqeraPlatformSubmitter)

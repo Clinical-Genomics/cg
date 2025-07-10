@@ -117,7 +117,7 @@ def mock_store_for_rnafusion_sample_sheet_creator(nextflow_sample_id: str) -> St
 
 
 @pytest.fixture
-def mock_store_for_gene_panel_file_creator() -> Store:
+def mock_store_for_nextflow_gene_panel_file_creator() -> Store:
     """Fixture to provide a mock store for the gene panel file creator."""
     case: Case = create_autospec(Case)
     case.customer.internal_id = "cust000"

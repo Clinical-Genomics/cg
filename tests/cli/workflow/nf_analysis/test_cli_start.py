@@ -112,7 +112,7 @@ def test_start_available(
     assert case_id_not_enough_reads not in caplog.text
 
 
-def test_start_calls_service(
+def test_start_rnafusion_calls_service(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     mocker: MockerFixture,
@@ -128,7 +128,7 @@ def test_start_calls_service(
     service_call.assert_called_once_with(case_id=case_id, revision=None, stub_run=False)
 
 
-def test_start_calls_service_with_flag(
+def test_start_rnafusion_calls_service_with_flag(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     mocker: MockerFixture,
@@ -146,7 +146,7 @@ def test_start_calls_service_with_flag(
     service_call.assert_called_once_with(case_id=case_id, revision="1.0.0", stub_run=True)
 
 
-def test_start_available_calls_service(
+def test_start_rnafusion_available_calls_service(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     mocker: MockerFixture,
