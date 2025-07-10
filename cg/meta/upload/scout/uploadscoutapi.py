@@ -13,7 +13,6 @@ from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AlignmentFileTag, AnalysisTag
 from cg.constants.scout import GenomeBuild, ScoutCustomCaseReportTags
-from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
@@ -26,7 +25,7 @@ from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store.api.data_classes import RNADNACollection
-from cg.store.models import Analysis, Case, Customer, Sample
+from cg.store.models import Analysis, Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -647,58 +646,6 @@ class UploadScoutAPI:
         }
 
         return config_builders[analysis.workflow]
-
-    def _dna_cases_related_to_dna_sample(
-        self, dna_sample: Sample, collaborators: set[Customer]
-    ) -> list[str]:
-        """Maps a list of uploaded DNA cases linked to DNA sample."""
-        potential_cases_related_to_dna_sample: list[Case] = [link.case for link in dna_sample.links]
-        return self.filter_cases_related_to_dna_sample(
-            list_of_dna_cases=potential_cases_related_to_dna_sample, collaborators=collaborators
-        )
-
-    @staticmethod
-    def filter_cases_related_to_dna_sample(
-        list_of_dna_cases: list[Case], collaborators: set[Customer]
-    ) -> list[str]:
-        """Filters the given list of DNA samples and returns a subset of uploaded cases ordered by customers in the
-        specified list of collaborators and within the correct workflow."""
-        filtered_dna_cases: list[str] = []
-        for case in list_of_dna_cases:
-            if (
-                case.data_analysis
-                in [
-                    Workflow.BALSAMIC,
-                    Workflow.BALSAMIC_UMI,
-                    Workflow.MIP_DNA,
-                    Workflow.RAREDISEASE,
-                ]
-                and case.customer in collaborators
-            ):
-                if not case.is_uploaded:
-                    LOG.warning(
-                        f"Cannot upload RNA report to DNA case {case.internal_id}. DNA case is not uploaded."
-                    )
-                filtered_dna_cases.append(case.internal_id)
-        return filtered_dna_cases
-
-    @staticmethod
-    def _get_application_prep_category(
-        subject_id_samples: list[Sample],
-    ) -> list[Sample | None]:
-        """Filter a models Sample list, returning DNA samples selected on their preparation category."""
-        subject_id_dna_samples: list[Sample | None] = [
-            sample
-            for sample in subject_id_samples
-            if sample.prep_category
-            in [
-                SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value,
-                SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING.value,
-                SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value,
-            ]
-        ]
-
-        return subject_id_dna_samples
 
     def get_related_uploaded_dna_cases(self, rna_case_id: str) -> set[str]:
         """Returns all uploaded DNA cases related to the specified RNA case."""
