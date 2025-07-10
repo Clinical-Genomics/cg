@@ -14,5 +14,5 @@ class RarediseaseParameters(WorkflowParameters):
     sample_id_map: Path
 
 
-class RnafusionParameters(WorkflowParameters):
-    """Rnafusion parameters."""
+class RNAFusionParameters(WorkflowParameters):
+    """RNAFUSION parameters."""

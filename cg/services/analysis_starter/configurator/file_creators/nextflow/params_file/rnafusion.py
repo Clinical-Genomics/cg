@@ -5,7 +5,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
     ParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.models import (
-    RnafusionParameters,
+    RNAFusionParameters,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.utils import (
     replace_values_in_params_file,
@@ -23,7 +23,7 @@ class RNAFusionParamsFileCreator(ParamsFileCreator):
         write_yaml_nextflow_style(file_path=file_path, content=content)
 
     def _get_content(self, case_path: Path, sample_sheet_path: Path) -> dict:
-        case_parameters = RnafusionParameters(
+        case_parameters = RNAFusionParameters(
             input=sample_sheet_path,
             outdir=case_path,
         )
