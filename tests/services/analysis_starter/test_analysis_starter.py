@@ -157,6 +157,6 @@ def test_rnafusion_start(
     assert sample_sheet_creator.get_file_path(case_id=case_id, case_path=case_path).exists()
     assert params_file_creator.get_file_path(case_id=case_id, case_path=case_path).exists()
 
-    # THEN our mocks should have been called
+    # THEN the case should have been submitted and tracked
     submit_mock.assert_called_once()
     track_mock.assert_called_once()
