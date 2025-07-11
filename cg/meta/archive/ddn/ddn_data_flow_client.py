@@ -9,13 +9,8 @@ from housekeeper.store.models import File
 from pydantic import BaseModel
 from requests import Response
 
-from cg.constants.constants import APIMethods
-from cg.exc import (
-    ArchiveJobFailedError,
-    DdnDataflowAuthenticationError,
-    DdnDataflowDeleteFileError,
-)
-from cg.io.controller import APIRequest
+from cg.exc import ArchiveJobFailedError, DdnDataflowAuthenticationError, DdnDataflowDeleteFileError
+from cg.io.api import get, post
 from cg.meta.archive.ddn.constants import (
     DELETE_FILE_SUCCESSFUL_MESSAGE,
     DESTINATION_ATTRIBUTE,
@@ -71,8 +66,7 @@ class DDNDataFlowClient(ArchiveHandler):
 
     def _get_auth_token(self) -> AuthToken:
         """Retrieves auth and refresh token from the REST-API."""
-        response: Response = APIRequest.api_request_from_content(
-            api_method=APIMethods.POST,
+        response: Response = post(
             url=urljoin(base=self.url, url=DataflowEndpoints.GET_AUTH_TOKEN),
             headers=self.headers,
             json=AuthPayload(
@@ -93,8 +87,7 @@ class DDNDataFlowClient(ArchiveHandler):
         self.token_expiration: datetime = datetime.fromtimestamp(auth_token.expire)
 
     def _get_refreshed_auth_token(self) -> AuthToken:
-        response: Response = APIRequest.api_request_from_content(
-            api_method=APIMethods.POST,
+        response: Response = post(
             url=urljoin(base=self.url, url=DataflowEndpoints.REFRESH_AUTH_TOKEN),
             headers=self.headers,
             json=RefreshPayload(refresh=self.refresh_token).model_dump(),
@@ -240,9 +233,7 @@ class DDNDataFlowClient(ArchiveHandler):
     ) -> Response:
         """Posts a request with the provided body and headers to the given endpoint."""
         LOG.info(get_request_log(body=body.model_dump(by_alias=True)))
-
-        response: Response = APIRequest.api_request_from_content(
-            api_method=APIMethods.POST,
+        response: Response = post(
             url=urljoin(self.url, endpoint),
             headers=headers,
             json=body.model_dump(by_alias=True),
@@ -254,10 +245,8 @@ class DDNDataFlowClient(ArchiveHandler):
     def _get_job_status(self, headers: dict, job_id: int) -> GetJobStatusResponse:
         """Gets the job status for the provided job_id."""
         LOG.info(f"Sending GET request for job {job_id}")
-
         url: str = urljoin(self.url, DataflowEndpoints.GET_JOB_STATUS + str(job_id))
-        response: Response = APIRequest.api_request_from_content(
-            api_method=APIMethods.GET,
+        response: Response = get(
             url=url,
             headers=headers,
             json={},
