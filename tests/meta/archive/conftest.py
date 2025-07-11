@@ -139,7 +139,7 @@ def ddn_dataflow_client(ddn_dataflow_config: DataFlowConfig) -> DDNDataFlowClien
         },
     ).encode()
     with mock.patch(
-        "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content",
+        "cg.meta.archive.ddn.ddn_data_flow_client.post",
         return_value=mock_ddn_auth_success_response,
     ):
         return DDNDataFlowClient(ddn_dataflow_config)
