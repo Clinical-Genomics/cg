@@ -97,9 +97,9 @@ def dev_start(
 @click.pass_obj
 def dev_start_available(cg_config: CGConfig) -> None:
     """Starts all available raredisease cases."""
-    LOG.info("Starting RNAFusion workflow for all available cases.")
+    LOG.info("Starting raredisease workflow for all available cases.")
     analysis_starter = AnalysisStarterFactory(cg_config).get_analysis_starter_for_workflow(
-        Workflow.RNAFUSION
+        Workflow.RAREDISEASE
     )
     succeeded: bool = analysis_starter.start_available()
     if not succeeded:
