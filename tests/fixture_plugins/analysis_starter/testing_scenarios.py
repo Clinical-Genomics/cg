@@ -66,14 +66,14 @@ def sample_sheet_scenario(
 @pytest.fixture
 def configurator_scenario(
     raredisease_configurator: NextflowConfigurator,
-    raredisease_case_config2: NextflowCaseConfig,
+    raredisease_case_config: NextflowCaseConfig,
     rnafusion_configurator: NextflowConfigurator,
     rnafusion_case_config: NextflowCaseConfig,
 ) -> dict:
     return {
         Workflow.RAREDISEASE: (
             raredisease_configurator,
-            raredisease_case_config2,
+            raredisease_case_config,
         ),
         Workflow.RNAFUSION: (
             rnafusion_configurator,
