@@ -48,7 +48,7 @@ def expected_rnafusion_params_file_content(
 
 
 @pytest.fixture
-def expected_raredisease_params_content() -> dict:
+def expected_raredisease_workflow_params_content() -> dict:
     """Return a dictionary with some parameters for the Raredisease params file."""
     return {
         "input": "/path/to/samplesheet/case_samplesheet.csv",

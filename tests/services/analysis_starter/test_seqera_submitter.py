@@ -11,14 +11,16 @@ from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
 def test_create_launch_request(
     seqera_platform_submitter: SeqeraPlatformSubmitter,
     raredisease_case_config: NextflowCaseConfig,
-    expected_raredisease_params_content: dict,
+    expected_raredisease_workflow_params_content: dict,
     expected_workflow_launch_request: WorkflowLaunchRequest,
     mocker: MockerFixture,
 ):
     # GIVEN a Seqera platform submitter and a case config
 
     # GIVEN that the read_yaml method returns the expected parameters content
-    mocker.patch.object(submitter, "read_yaml", return_value=expected_raredisease_params_content)
+    mocker.patch.object(
+        submitter, "read_yaml", return_value=expected_raredisease_workflow_params_content
+    )
 
     # WHEN creating a workflow launch request
     workflow_launch_request: WorkflowLaunchRequest = (
