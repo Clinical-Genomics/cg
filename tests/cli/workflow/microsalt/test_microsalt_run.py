@@ -24,7 +24,6 @@ def test_run_raises_error_if_not_configured(
     case_id = "some_case_id"
 
     # GIVEN that the case has a workflow and no ongoing analysis
-    mocker.patch.object(Store, "get_case_workflow", return_value=Workflow.MICROSALT)
     mocker.patch.object(Tracker, "ensure_analysis_not_ongoing", return_value=None)
     mock_case = create_autospec(Case)
     sample = create_autospec(Sample)
@@ -47,7 +46,6 @@ def test_run_tracks_case(cli_runner: CliRunner, cg_context: CGConfig, mocker: Mo
     # GIVEN that the case has a workflow and no ongoing analysis _and_ is configured
 
     # GIVEN that the case is submitted successfully
-    mocker.patch.object(Store, "get_case_workflow", return_value=Workflow.MICROSALT)
     mocker.patch.object(Store, "update_case_action")
     mock_case = create_autospec(Case)
     mock_case.data_analysis = Workflow.MICROSALT

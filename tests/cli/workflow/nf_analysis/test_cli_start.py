@@ -137,7 +137,7 @@ def test_start_nextflow_calls_service(
     case_id: str = "case_id"
 
     # GIVEN a mocked AnalysisStarter that simulates the start method
-    service_call = mocker.patch.object(AnalysisStarter, "start")
+    service_call: MagicMock = mocker.patch.object(AnalysisStarter, "start")
 
     # WHEN running the start command
     result: Result = cli_runner.invoke(

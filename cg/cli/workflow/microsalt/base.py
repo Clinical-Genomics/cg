@@ -65,7 +65,9 @@ def run(
 ) -> None:
     """Run a preconfigured microSALT case."""
     factory = AnalysisStarterFactory(cg_config)
-    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_case(case_id)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
+        Workflow.MICROSALT
+    )
     analysis_starter.run(case_id=case_id, config_file=config_file_path)
 
 
@@ -78,7 +80,9 @@ def start(cg_config: CGConfig, case_id: str) -> None:
     """
     LOG.info(f"Starting microSALT workflow for {case_id}")
     factory = AnalysisStarterFactory(cg_config)
-    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_case(case_id)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
+        Workflow.MICROSALT
+    )
     analysis_starter.start(case_id)
 
 

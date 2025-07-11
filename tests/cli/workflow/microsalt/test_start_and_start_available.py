@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, create_autospec
+from unittest.mock import MagicMock
 
 import pytest
 from click.testing import CliRunner, Result
@@ -7,7 +7,6 @@ from pytest_mock import MockerFixture
 from cg.cli.workflow.microsalt.base import start, start_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.service import AnalysisStarter
 
 
@@ -15,17 +14,14 @@ def test_start(cli_runner: CliRunner, cg_context: CGConfig, mocker: MockerFixtur
     # GIVEN a valid context and a case id
     case_id: str = "case_id"
 
-    # GIVEN a mocked AnalysisStarter
-    starter_mock: AnalysisStarter = create_autospec(AnalysisStarter)
-    mocker.patch.object(
-        AnalysisStarterFactory, "get_analysis_starter_for_case", return_value=starter_mock
-    )
+    # GIVEN a mocked AnalysisStarter that simulates the start method
+    service_call: MagicMock = mocker.patch.object(AnalysisStarter, "start")
 
     # WHEN running the start command
     result: Result = cli_runner.invoke(start, [case_id], obj=cg_context)
 
     # THEN the starter command should have been called with the specified case id
-    starter_mock.start.assert_called_once_with(case_id)
+    service_call.assert_called_once_with(case_id)
 
     # THEN the command should have executed without fail
     assert result.exit_code == EXIT_SUCCESS
