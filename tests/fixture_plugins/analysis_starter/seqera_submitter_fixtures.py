@@ -25,9 +25,9 @@ def seqera_platform_submitter(
 
 @pytest.fixture
 def expected_workflow_launch_request(
-    raredisease_case_config: NextflowCaseConfig, expected_raredisease_params_file_content: dict
+    raredisease_case_config: NextflowCaseConfig, expected_raredisease_params_content: dict
 ) -> WorkflowLaunchRequest:
-    parameters_as_string = write_yaml_stream(expected_raredisease_params_file_content)
+    parameters_as_string = write_yaml_stream(expected_raredisease_params_content)
     launch = LaunchRequest(
         computeEnvId="normal-id",
         configProfiles=raredisease_case_config.config_profiles,
