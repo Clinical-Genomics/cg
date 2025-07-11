@@ -263,14 +263,15 @@ def test_nextflow_case_config(
     cg_context: CGConfig,
     mocker: MockerFixture,
 ):
-    # GIVEN a Nextflow configurator
+    # GIVEN a case id and a Nextflow configurator
+    case_id: str = "some_case_id"
     config_mock = mocker.patch.object(NextflowConfigurator, "configure")
 
     # WHEN running the dev-config-case CLI command
-    result: Result = cli_runner.invoke(case_config_command, ["some_case_id"], obj=cg_context)
+    result: Result = cli_runner.invoke(case_config_command, [case_id], obj=cg_context)
 
     # THEN the configurator should have been called with the specified case id
-    config_mock.assert_called_once_with(case_id="some_case_id")
+    config_mock.assert_called_once_with(case_id=case_id)
 
     # THEN the command should have executed without fail
     assert result.exit_code == EXIT_SUCCESS
