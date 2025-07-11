@@ -27,12 +27,12 @@ def seqera_platform_submitter(
 def expected_workflow_launch_request(
     raredisease_case_config: NextflowCaseConfig, expected_raredisease_params_content: dict
 ) -> WorkflowLaunchRequest:
-    parameters_as_string = write_yaml_stream(expected_raredisease_params_content)
+    parameter_stream: str = write_yaml_stream(expected_raredisease_params_content)
     launch = LaunchRequest(
         computeEnvId="normal-id",
         configProfiles=raredisease_case_config.config_profiles,
         configText=f"includeConfig '{raredisease_case_config.nextflow_config_file}'",
-        paramsText=parameters_as_string,
+        paramsText=parameter_stream,
         pipeline=raredisease_case_config.pipeline_repository,
         preRunScript=raredisease_case_config.pre_run_script,
         pullLatest=False,
