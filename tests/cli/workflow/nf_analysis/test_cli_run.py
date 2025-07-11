@@ -295,7 +295,7 @@ def test_resume_using_nextflow_dry_run(
 @pytest.mark.parametrize(
     "run_command", [raredisease_dev_run, rnafusion_dev_run], ids=["raredisease", "RNAFUSION"]
 )
-def test_run_nextflow_calls_service_with_flag(
+def test_run_nextflow_calls_service(
     run_command: callable,
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
