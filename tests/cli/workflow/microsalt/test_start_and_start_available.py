@@ -46,8 +46,7 @@ def test_start_available(
     mocker: MockerFixture,
 ):
     """
-    Test that the microSALT start_available command succeeds when the starter succeeds and
-    aborts otherwise.
+    Test that the start_available command succeeds when the starter succeeds and aborts otherwise.
     """
     # GIVEN a valid context
 
