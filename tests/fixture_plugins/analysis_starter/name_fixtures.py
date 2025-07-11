@@ -34,7 +34,7 @@ def raredisease_config_profiles() -> list[str]:
 
 
 @pytest.fixture
-def nextflow_params_file_content() -> dict:
+def nextflow_workflow_params_content() -> dict:
     """Return a dictionary with some parameters for the Nextflow params file."""
     return {"someparam": "something"}
 

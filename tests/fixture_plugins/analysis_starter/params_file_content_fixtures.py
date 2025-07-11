@@ -10,7 +10,7 @@ def expected_raredisease_params_file_content(
     raredisease_gene_panel_path2: Path,
     raredisease_managed_variants_path: Path,
     nextflow_case_id: str,
-    nextflow_params_file_content: dict,
+    nextflow_workflow_params_content: dict,
 ) -> dict:
     case_parameters = {
         "input": nextflow_sample_sheet_path,
@@ -24,16 +24,18 @@ def expected_raredisease_params_file_content(
             nextflow_case_path, f"{nextflow_case_id}_customer_internal_mapping.csv"
         ),
     }
-    return case_parameters | nextflow_params_file_content
+    return case_parameters | nextflow_workflow_params_content
 
 
 @pytest.fixture
 def expected_rnafusion_params_file_content(
-    nextflow_case_path: Path, nextflow_sample_sheet_path: Path, nextflow_params_file_content: dict
+    nextflow_case_path: Path,
+    nextflow_sample_sheet_path: Path,
+    nextflow_workflow_params_content: dict,
 ) -> dict:
     """Return a dictionary with some parameters for the RNAfusion params file."""
     case_parameters = {
         "input": nextflow_sample_sheet_path,
         "outdir": nextflow_case_path,
     }
-    return case_parameters | nextflow_params_file_content
+    return case_parameters | nextflow_workflow_params_content
