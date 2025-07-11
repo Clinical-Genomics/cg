@@ -12,7 +12,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.priority import Priority, SlurmQos
-from cg.exc import AnalysisNotReadyError, AnalysisRunningError
+from cg.exc import AnalysisNotReadyError
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
@@ -36,22 +36,33 @@ from cg.store.store import Store
 
 
 @pytest.mark.parametrize(
+    "workflow",
+    [
+        Workflow.MICROSALT,
+        Workflow.RNAFUSION,
+        Workflow.RAREDISEASE,
+    ],
+)
+@pytest.mark.parametrize(
     "error, expected_exit",
     [
         (None, True),
         (AnalysisNotReadyError, True),
-        (AnalysisRunningError, False),
         (Exception, False),
     ],
-    ids=["Success", "Fastqs missing", "Analysis ongoing", "General error"],
+    ids=["Success", "Fastqs missing", "General error"],
 )
-def test_microsalt_analysis_starter_start_available_error_handling(
-    cg_context: CGConfig, mocker: MockerFixture, error: type[Exception], expected_exit: bool
+def test_analysis_starter_start_available_error_handling(
+    workflow: Workflow,
+    cg_context: CGConfig,
+    mocker: MockerFixture,
+    error: type[Exception],
+    expected_exit: bool,
 ):
     # GIVEN an AnalysisStarter
     analysis_starter: AnalysisStarter = AnalysisStarterFactory(
         cg_context
-    ).get_analysis_starter_for_workflow(Workflow.MICROSALT)
+    ).get_analysis_starter_for_workflow(workflow)
 
     # GIVEN that the start exits with a given behaviour
     mocker.patch.object(Store, "get_cases_to_analyze", return_value=[create_autospec(Case)])

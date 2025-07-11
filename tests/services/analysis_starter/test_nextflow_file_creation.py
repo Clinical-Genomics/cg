@@ -145,7 +145,7 @@ def test_gene_panel_file_content(
     "mock_value, expected_panels",
     [
         (True, GenePanelMasterList.get_panel_names()),
-        (False, list({GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN})),
+        (False, [GenePanelMasterList.PANELAPP_GREEN, GenePanelMasterList.OMIM_AUTO]),
     ],
     ids=[
         "customer is collaborator and panels in master list",
@@ -174,7 +174,7 @@ def test_get_agregated_gene_panels(
     )
 
     # THEN the aggregated panels are what is expected
-    assert aggregated_panels == expected_panels
+    assert set(aggregated_panels) == set(expected_panels)
 
 
 @pytest.mark.parametrize(

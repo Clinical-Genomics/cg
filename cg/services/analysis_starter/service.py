@@ -2,7 +2,7 @@ import logging
 from subprocess import CalledProcessError
 
 from cg.constants import Workflow
-from cg.exc import AnalysisNotReadyError, AnalysisRunningError
+from cg.exc import AnalysisNotReadyError
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.input_fetcher.input_fetcher import InputFetcher
@@ -40,11 +40,8 @@ class AnalysisStarter:
                 self.start(case.internal_id)
             except AnalysisNotReadyError as error:
                 LOG.error(error)
-            except AnalysisRunningError as error:
-                LOG.error(error)
-                succeeded = False
             except Exception as error:
-                LOG.error(f"Unspecified error occurred: {error}")
+                LOG.error(error)
                 succeeded = False
         return succeeded
 
