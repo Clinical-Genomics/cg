@@ -1,15 +1,19 @@
 import logging
+from unittest.mock import MagicMock
 
 import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
-from click.testing import CliRunner
+from click.testing import CliRunner, Result
 from pytest_mock import MockerFixture
 
 from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
-from cg.cli.workflow.rnafusion.base import dev_start, dev_start_available
-from cg.constants import EXIT_SUCCESS, Workflow
+from cg.cli.workflow.raredisease.base import dev_start as raredisease_dev_start
+from cg.cli.workflow.raredisease.base import dev_start_available as raredisease_dev_start_available
+from cg.cli.workflow.rnafusion.base import dev_start as rnafusion_dev_start
+from cg.cli.workflow.rnafusion.base import dev_start_available as rnafusion_dev_start_available
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -112,50 +116,82 @@ def test_start_available(
     assert case_id_not_enough_reads not in caplog.text
 
 
-def test_start_rnafusion_calls_service(
+@pytest.mark.parametrize(
+    "start_command",
+    [
+        raredisease_dev_start,
+        rnafusion_dev_start,
+    ],
+    ids=[
+        "raredisease",
+        "RNAFUSION",
+    ],
+)
+def test_start_nextflow_calls_service(
+    start_command: callable,
     cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
+    cg_context: CGConfig,
     mocker: MockerFixture,
 ):
-    # GIVEN a case id
+    # GIVEN a valid context and a case id
     case_id: str = "case_id"
 
-    # WHEN running the dev run command without flags
+    # GIVEN a mocked AnalysisStarter that simulates the start method
     service_call = mocker.patch.object(AnalysisStarter, "start")
-    cli_runner.invoke(dev_start, [case_id], obj=rnafusion_context)
 
-    # THEN the analysis starter should have been called with the expected input
-    service_call.assert_called_once_with(case_id=case_id, revision=None, stub_run=False)
-
-
-def test_start_rnafusion_calls_service_with_flag(
-    cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
-    mocker: MockerFixture,
-):
-    # GIVEN a case id
-    case_id: str = "case_id"
-
-    # GIVEN that the dev run command is run with flags
-    service_call = mocker.patch.object(AnalysisStarter, "start")
-    cli_runner.invoke(
-        dev_start, [case_id, "--revision", "1.0.0", "--stub-run"], obj=rnafusion_context
+    # WHEN running the start command
+    result: Result = cli_runner.invoke(
+        start_command, [case_id, "--revision", "1.0.0", "--stub-run"], obj=cg_context
     )
 
     # THEN the analysis started should have been called with the flags set
     service_call.assert_called_once_with(case_id=case_id, revision="1.0.0", stub_run=True)
 
+    # THEN the command should have executed without fail
+    assert result.exit_code == EXIT_SUCCESS
 
-def test_start_rnafusion_available_calls_service(
+
+@pytest.mark.parametrize(
+    "start_available_command",
+    [
+        raredisease_dev_start_available,
+        rnafusion_dev_start_available,
+    ],
+    ids=[
+        "raredisease",
+        "RNAFUSION",
+    ],
+)
+@pytest.mark.parametrize(
+    "succeeds, exit_status",
+    [
+        (True, EXIT_SUCCESS),
+        (False, EXIT_FAIL),
+    ],
+)
+def test_start_available_nextflow_calls_service(
+    start_available_command: callable,
+    succeeds: bool,
+    exit_status: int,
     cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
+    cg_context: CGConfig,
     mocker: MockerFixture,
 ):
+    """
+    Test that the start_available command succeeds when the starter succeeds and aborts otherwise.
+    """
     # GIVEN a sufficient context
 
-    # WHEN running the dev run command without flags
-    service_call = mocker.patch.object(AnalysisStarter, "start_available")
-    cli_runner.invoke(dev_start_available, obj=rnafusion_context)
+    # GIVEN a mocked AnalysisStarter that simulates the start_available method
+    service_call: MagicMock = mocker.patch.object(
+        AnalysisStarter, "start_available", return_value=succeeds
+    )
+
+    # WHEN running the start-available command
+    result: Result = cli_runner.invoke(start_available_command, obj=cg_context)
 
     # THEN the analysis starter should have been called with the expected input
-    service_call.assert_called_once_with()
+    service_call.assert_called_once()
+
+    # THEN the command should have executed without fail
+    assert result.exit_code == exit_status

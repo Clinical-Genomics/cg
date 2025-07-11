@@ -1,4 +1,4 @@
-from unittest.mock import create_autospec
+from unittest.mock import MagicMock, create_autospec
 
 import pytest
 from click.testing import CliRunner, Result
@@ -50,18 +50,16 @@ def test_start_available(
     """
     # GIVEN a valid context
 
-    # GIVEN a mocked AnalysisStarter and a store that returns a workflow
-    starter_mock: AnalysisStarter = create_autospec(AnalysisStarter)
-    starter_mock.start_available.return_value = succeeds
-    mocker.patch.object(
-        AnalysisStarterFactory, "get_analysis_starter_for_workflow", return_value=starter_mock
+    # GIVEN a mocked AnalysisStarter that simulates the start_available method
+    service_call: MagicMock = mocker.patch.object(
+        AnalysisStarter, "start_available", return_value=succeeds
     )
 
     # WHEN running the start_available command
     result: Result = cli_runner.invoke(start_available, obj=cg_context)
 
     # THEN the starter command should have been called
-    starter_mock.start_available.assert_called_once()
+    service_call.assert_called_once()
 
     # THEN the command should have executed as expected
     assert result.exit_code == exit_status

@@ -6,10 +6,13 @@ from pathlib import Path
 import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
-from click.testing import CliRunner
+from click.testing import CliRunner, Result
+from pytest_mock import MockerFixture
 
 from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
+from cg.cli.workflow.raredisease.base import dev_config_case as raredisease_config_case
+from cg.cli.workflow.rnafusion.base import dev_config_case as rnafusion_config_case
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileFormat, MetaApis
 from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
@@ -17,6 +20,7 @@ from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -244,3 +248,29 @@ def test_config_case_dry_run(
         assert f"{analysis_api.scout_api.scout_base_command} export panel" in caplog.text
         gene_panel_path: Path = request.getfixturevalue(f"{workflow}_gene_panel_path")
         assert not gene_panel_path.is_file()
+
+
+@pytest.mark.parametrize(
+    "case_config_command",
+    [
+        raredisease_config_case,
+        rnafusion_config_case,
+    ],
+)
+def test_nextflow_case_config(
+    case_config_command: callable,
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    mocker: MockerFixture,
+):
+    # GIVEN a Nextflow configurator
+    config_mock = mocker.patch.object(NextflowConfigurator, "configure")
+
+    # WHEN running the dev-config-case CLI command
+    result: Result = cli_runner.invoke(case_config_command, ["some_case_id"], obj=cg_context)
+
+    # THEN the configurator should have been called with the specified case id
+    config_mock.assert_called_once_with(case_id="some_case_id")
+
+    # THEN the command should have executed without fail
+    assert result.exit_code == EXIT_SUCCESS

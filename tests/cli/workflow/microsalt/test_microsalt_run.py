@@ -30,6 +30,7 @@ def test_run_raises_error_if_not_configured(
     sample = create_autospec(Sample)
     mock_case.samples = [sample]
     mocker.patch.object(Store, "get_case_by_internal_id", return_value=mock_case)
+
     # GIVEN that the config file does not exist
 
     # WHEN running the case

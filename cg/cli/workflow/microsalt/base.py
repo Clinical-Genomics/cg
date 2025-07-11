@@ -1,4 +1,4 @@
-"""CLI support to start microsalt"""
+"""CLI support to start microSALT."""
 
 import logging
 from pathlib import Path
@@ -76,7 +76,7 @@ def start(cg_config: CGConfig, case_id: str) -> None:
     """
     Generates config file, links fastq files and runs the microSALT analysis for the provided case.
     """
-    LOG.info(f"Starting Microsalt workflow for {case_id}")
+    LOG.info(f"Starting microSALT workflow for {case_id}")
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_case(case_id)
     analysis_starter.start(case_id)
@@ -100,7 +100,7 @@ def start_available(cg_config: CGConfig) -> None:
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_context
 def qc_microsalt(context: click.Context, unique_id: str) -> None:
-    """Perform QC on a microsalt case."""
+    """Perform QC on a microSALT case."""
     analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
     metrics_file_path: Path = analysis_api.get_metrics_file_path(unique_id)
     try:

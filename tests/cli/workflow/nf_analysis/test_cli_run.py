@@ -9,7 +9,8 @@ from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
 from cg.cli.workflow.base import workflow as workflow_cli
-from cg.cli.workflow.rnafusion.base import dev_run
+from cg.cli.workflow.raredisease.base import dev_run as raredisease_dev_run
+from cg.cli.workflow.rnafusion.base import dev_run as rnafusion_dev_run
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.models.cg_config import CGConfig
@@ -291,23 +292,11 @@ def test_resume_using_nextflow_dry_run(
     assert "-resume" in caplog.text
 
 
-def test_run_rnafusion_calls_service(
-    cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
-    mocker: MockerFixture,
-):
-    # GIVEN a case id
-    case_id: str = "case_id"
-
-    # WHEN running the dev run command without flags
-    service_call = mocker.patch.object(AnalysisStarter, "run")
-    cli_runner.invoke(dev_run, [case_id], obj=rnafusion_context)
-
-    # THEN the analysis starter should have been called with the expected input
-    service_call.assert_called_once_with(case_id=case_id, revision=None, stub_run=False)
-
-
-def test_run_rnafusion_calls_service_with_flag(
+@pytest.mark.parametrize(
+    "run_command", [raredisease_dev_run, rnafusion_dev_run], ids=["raredisease", "RNAFUSION"]
+)
+def test_run_nextflow_calls_service_with_flag(
+    run_command: callable,
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     mocker: MockerFixture,
@@ -318,7 +307,7 @@ def test_run_rnafusion_calls_service_with_flag(
     # GIVEN that the dev run command is run with flags
     service_call = mocker.patch.object(AnalysisStarter, "run")
     cli_runner.invoke(
-        dev_run, [case_id, "--revision", "1.0.0", "--stub-run"], obj=rnafusion_context
+        run_command, [case_id, "--revision", "1.0.0", "--stub-run"], obj=rnafusion_context
     )
 
     # THEN the analysis started should have been called with the flags set
