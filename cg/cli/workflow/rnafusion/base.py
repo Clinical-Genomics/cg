@@ -12,7 +12,6 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_STUB,
     metrics_deliver,
     report_deliver,
-    run,
     start,
     start_available,
     store,
@@ -40,7 +39,6 @@ def rnafusion(context: click.Context) -> None:
 
 
 rnafusion.add_command(resolve_compression)
-rnafusion.add_command(run)
 rnafusion.add_command(start)
 rnafusion.add_command(start_available)
 rnafusion.add_command(metrics_deliver)
@@ -65,7 +63,7 @@ def config_case(cg_config: CGConfig, case_id: str):
 @OPTION_REVISION
 @OPTION_STUB
 @click.pass_obj
-def dev_run(cg_config: CGConfig, case_id: str, stub_run: bool, revision: str | None = None):
+def run(cg_config: CGConfig, case_id: str, stub_run: bool, revision: str | None = None):
     """Run a preconfigured RNAFUSION case."""
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(

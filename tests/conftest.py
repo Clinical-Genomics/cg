@@ -3608,15 +3608,6 @@ def rnafusion_mock_analysis_finish(
     )
 
 
-@pytest.fixture(scope="function")
-def rnafusion_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
-    """Create samplesheet.csv file for testing"""
-    Path.mkdir(Path(rnafusion_dir, rnafusion_case_id), parents=True, exist_ok=True)
-    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").with_suffix(
-        FileExtensions.CSV
-    ).touch(exist_ok=True)
-
-
 # Tomte fixtures
 @pytest.fixture(scope="session")
 def tomte_case_id() -> str:
