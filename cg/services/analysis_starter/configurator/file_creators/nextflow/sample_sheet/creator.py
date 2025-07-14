@@ -10,14 +10,16 @@ from cg.io.gzip import read_gzip_first_line
 from cg.meta.workflow.fastq import is_undetermined_in_path
 from cg.models.fastq import FastqFileMeta, GetFastqFileMeta
 from cg.store.models import Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
 
 class NextflowSampleSheetCreator(ABC):
 
-    def __init__(self, housekeeper_api: HousekeeperAPI):
+    def __init__(self, housekeeper_api: HousekeeperAPI, store: Store):
         self.housekeeper_api = housekeeper_api
+        self.store = store
 
     @staticmethod
     def get_file_path(case_id: str, case_path: Path) -> Path:

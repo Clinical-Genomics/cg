@@ -1,17 +1,12 @@
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import Strandedness
 from cg.models.rnafusion.rnafusion import RnafusionSampleSheetEntry
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowSampleSheetCreator,
 )
 from cg.store.models import Case, Sample
-from cg.store.store import Store
 
 
 class RNAFusionSampleSheetCreator(NextflowSampleSheetCreator):
-    def __init__(self, housekeeper_api: HousekeeperAPI, store: Store):
-        super().__init__(housekeeper_api)
-        self.store = store
 
     def _get_content(self, case_id: str) -> list[list[str]]:
         content = [RnafusionSampleSheetEntry.headers()]
