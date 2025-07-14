@@ -31,9 +31,3 @@ def nextflow_pipeline_revision() -> str:
 @pytest.fixture
 def raredisease_config_profiles() -> list[str]:
     return ["myprofile"]
-
-
-@pytest.fixture
-def nextflow_params_file_content() -> dict:
-    """Return a dictionary with some parameters for the Nextflow params file."""
-    return {"someparam": "something"}
