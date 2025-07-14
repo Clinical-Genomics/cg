@@ -12,8 +12,6 @@ from cg.cli.workflow.nf_analysis import (
     OPTION_STUB,
     metrics_deliver,
     report_deliver,
-    start,
-    start_available,
     store,
     store_available,
     store_housekeeper,
@@ -39,8 +37,6 @@ def rnafusion(context: click.Context) -> None:
 
 
 rnafusion.add_command(resolve_compression)
-rnafusion.add_command(start)
-rnafusion.add_command(start_available)
 rnafusion.add_command(metrics_deliver)
 rnafusion.add_command(report_deliver)
 rnafusion.add_command(store_housekeeper)
@@ -77,9 +73,7 @@ def run(cg_config: CGConfig, case_id: str, stub_run: bool, revision: str | None 
 @OPTION_REVISION
 @OPTION_STUB
 @click.pass_obj
-def dev_start(
-    cg_config: CGConfig, case_id: str, stub_run: bool = False, revision: str | None = None
-):
+def start(cg_config: CGConfig, case_id: str, stub_run: bool = False, revision: str | None = None):
     """Start an RNAFUSION case. Configures the case if needed."""
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
@@ -90,7 +84,7 @@ def dev_start(
 
 @rnafusion.command()
 @click.pass_obj
-def dev_start_available(cg_config: CGConfig) -> None:
+def start_available(cg_config: CGConfig) -> None:
     """Starts all available RNAFUSION cases."""
     LOG.info("Starting RNAFUSION workflow for all available cases.")
     analysis_starter = AnalysisStarterFactory(cg_config).get_analysis_starter_for_workflow(

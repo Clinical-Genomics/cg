@@ -9,8 +9,8 @@ from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
 from cg.cli.workflow.base import workflow as workflow_cli
-from cg.cli.workflow.raredisease.base import dev_run as raredisease_dev_run
-from cg.cli.workflow.rnafusion.base import run as rnafusion_dev_run
+from cg.cli.workflow.raredisease.base import dev_run as raredisease_run
+from cg.cli.workflow.rnafusion.base import run as rnafusion_run
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.service import AnalysisStarter
@@ -289,7 +289,7 @@ def test_resume_using_nextflow_dry_run(
 
 
 @pytest.mark.parametrize(
-    "run_command", [raredisease_dev_run, rnafusion_dev_run], ids=["raredisease", "RNAFUSION"]
+    "run_command", [raredisease_run, rnafusion_run], ids=["raredisease", "RNAFUSION"]
 )
 def test_run_nextflow_calls_service(
     run_command: callable,
