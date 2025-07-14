@@ -10,7 +10,6 @@ from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
     OPTION_REVISION,
     OPTION_STUB,
-    config_case,
     metrics_deliver,
     report_deliver,
     run,
@@ -41,7 +40,6 @@ def rnafusion(context: click.Context) -> None:
 
 
 rnafusion.add_command(resolve_compression)
-rnafusion.add_command(config_case)
 rnafusion.add_command(run)
 rnafusion.add_command(start)
 rnafusion.add_command(start_available)
@@ -55,7 +53,7 @@ rnafusion.add_command(store_available)
 @rnafusion.command()
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_config_case(cg_config: CGConfig, case_id: str):
+def config_case(cg_config: CGConfig, case_id: str):
     """Configure an RNAFUSION case so that it is ready to be run."""
     factory = ConfiguratorFactory(cg_config)
     configurator = cast(NextflowConfigurator, factory.get_configurator(Workflow.RNAFUSION))
