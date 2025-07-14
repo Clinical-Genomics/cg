@@ -11,7 +11,7 @@ from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.cli.workflow.raredisease.base import dev_start as raredisease_start
 from cg.cli.workflow.raredisease.base import dev_start_available as raredisease_start_available
-from cg.cli.workflow.rnafusion.base import start as rnafusion_dev_start
+from cg.cli.workflow.rnafusion.base import start as rnafusion_start
 from cg.cli.workflow.rnafusion.base import start_available as rnafusion_start_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -122,7 +122,7 @@ def test_start_available(
     "start_command",
     [
         raredisease_start,
-        rnafusion_dev_start,
+        rnafusion_start,
     ],
     ids=[
         "raredisease",
