@@ -5,6 +5,7 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, SequencingFileTag
+from cg.exc import NfSampleSheetError
 from cg.io.csv import write_csv
 from cg.io.gzip import read_gzip_first_line
 from cg.meta.workflow.fastq import is_undetermined_in_path
@@ -34,6 +35,29 @@ class NextflowSampleSheetCreator(ABC):
     @abstractmethod
     def _get_content(self, case_id: str) -> list[list[str]]:
         pass
+
+    def _get_validated_and_existing_fastq_paths(self, sample: Sample) -> list[tuple[str, str]]:
+        """
+        Returns a list of tuples with corresponding fastq files for a sample.
+        The files are guaranteed to exist and to be in pairs.
+        """
+        fastq_forward_read_paths, fastq_reverse_read_paths = self._get_paired_read_paths(sample)
+        if len(fastq_forward_read_paths) != len(fastq_reverse_read_paths):
+            raise NfSampleSheetError("Fastq file length for forward and reverse do not match")
+
+        missing_paths = []
+        path_pairs: list[tuple[str, str]] = zip(fastq_forward_read_paths, fastq_reverse_read_paths)
+        for forward_file, reverse_file in path_pairs:
+            if not Path(forward_file).is_file():
+                missing_paths.append(forward_file)
+            if not Path(reverse_file).is_file():
+                missing_paths.append(reverse_file)
+
+        if missing_paths:
+            error_message: str = "\n".join(missing_paths)
+            raise NfSampleSheetError(f"The following files do not exist:\n{error_message}")
+
+        return path_pairs
 
     def _get_paired_read_paths(self, sample: Sample) -> tuple[list[str], list[str]]:
         """Returns a tuple of paired fastq file paths for the forward and reverse read."""
