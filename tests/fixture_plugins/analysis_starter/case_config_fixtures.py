@@ -28,7 +28,6 @@ def raredisease_case_config(
         pipeline_repository=nextflow_repository,
         pre_run_script="",
         revision=nextflow_pipeline_revision,
-        stub_run=False,
         work_dir=Path(nextflow_case_path, "work").as_posix(),
     )
 
@@ -49,6 +48,5 @@ def rnafusion_case_config(nextflow_root: str, nextflow_case_id: str) -> Nextflow
         pipeline_repository="https://some_url",
         pre_run_script="",
         revision="2.2.0",
-        stub_run=False,
         work_dir=Path(nextflow_root, nextflow_case_id, "work").as_posix(),
     )
