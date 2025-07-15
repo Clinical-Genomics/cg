@@ -38,14 +38,17 @@ class NextflowSampleSheetCreator(ABC):
 
     def _get_validated_and_existing_fastq_paths(self, sample: Sample) -> list[tuple[str, str]]:
         """
-        Returns a list of tuples with corresponding fastq files for a sample.
+        Returns a list of tuples with forward and reverse pairs of fastq files for a sample.
         The files are guaranteed to exist and to be in pairs.
+        Raises:
+            NfSampleSheetError: If the fastq files do not exist or if
+            the number of forward and reverse files do not match.
         """
         fastq_forward_read_paths, fastq_reverse_read_paths = self._get_paired_read_paths(sample)
         if len(fastq_forward_read_paths) != len(fastq_reverse_read_paths):
             raise NfSampleSheetError("Fastq file length for forward and reverse do not match")
 
-        missing_paths = []
+        missing_paths: list[str] = []
         path_pairs: list[tuple[str, str]] = zip(fastq_forward_read_paths, fastq_reverse_read_paths)
         for forward_file, reverse_file in path_pairs:
             if not Path(forward_file).is_file():
