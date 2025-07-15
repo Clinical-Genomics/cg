@@ -8,6 +8,7 @@ import rich_click as click
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
+    config_case,
     OPTION_REVISION,
     OPTION_STUB,
     metrics_deliver,
@@ -56,30 +57,26 @@ def config_case(cg_config: CGConfig, case_id: str):
 
 @rnafusion.command()
 @ARGUMENT_CASE_ID
-@OPTION_REVISION
-@OPTION_STUB
 @click.pass_obj
-def run(cg_config: CGConfig, case_id: str, stub_run: bool, revision: str | None = None):
+def run(cg_config: CGConfig, case_id: str):
     """Run a preconfigured RNAFUSION case."""
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RNAFUSION
     )
-    analysis_starter.run(case_id=case_id, stub_run=stub_run, revision=revision)
+    analysis_starter.run(case_id=case_id)
 
 
 @rnafusion.command()
 @ARGUMENT_CASE_ID
-@OPTION_REVISION
-@OPTION_STUB
 @click.pass_obj
-def start(cg_config: CGConfig, case_id: str, stub_run: bool = False, revision: str | None = None):
+def start(cg_config: CGConfig, case_id: str):
     """Start an RNAFUSION case. Configures the case if needed."""
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RNAFUSION
     )
-    analysis_starter.start(case_id=case_id, stub_run=stub_run, revision=revision)
+    analysis_starter.start(case_id=case_id)
 
 
 @rnafusion.command()

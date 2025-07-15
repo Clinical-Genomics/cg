@@ -302,7 +302,7 @@ def test_run_nextflow_calls_service(
 
     # GIVEN that the dev run command is run with flags
     service_call = mocker.patch.object(AnalysisStarter, "run")
-    cli_runner.invoke(run_command, [case_id, "--revision", "1.0.0", "--stub-run"], obj=cg_context)
+    cli_runner.invoke(run_command, [case_id], obj=cg_context)
 
     # THEN the analysis started should have been called with the flags set
-    service_call.assert_called_once_with(case_id=case_id, revision="1.0.0", stub_run=True)
+    service_call.assert_called_once_with(case_id=case_id)

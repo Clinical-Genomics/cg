@@ -80,7 +80,6 @@ class NextflowConfigurator(Configurator):
             pipeline_repository=self.pipeline_repository,
             pre_run_script=self.pre_run_script,
             revision=self.pipeline_revision,
-            stub_run=False,
             work_dir=self._get_work_dir(case_id).as_posix(),
             workflow=self.store.get_case_workflow(case_id),
         )
@@ -106,5 +105,6 @@ class NextflowConfigurator(Configurator):
         config_file_path = Path(config.nextflow_config_file)
         if not params_file_path.exists() or not config_file_path.exists():
             raise CaseNotConfiguredError(
-                f"Please ensure that both the parameters file {params_file_path.as_posix()} and the configuration file {config_file_path.as_posix()} exists."
+                f"Please ensure that both the parameters file {params_file_path.as_posix()} "
+                f"and the configuration file {config_file_path.as_posix()} exists."
             )

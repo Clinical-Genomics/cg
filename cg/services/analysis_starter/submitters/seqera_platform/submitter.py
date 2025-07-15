@@ -34,7 +34,6 @@ class SeqeraPlatformSubmitter(Submitter):
             preRunScript=case_config.pre_run_script,
             revision=case_config.revision,
             runName=case_config.case_id,
-            stubRun=case_config.stub_run,
             workDir=case_config.work_dir,
         )
         return WorkflowLaunchRequest(launch=launch_request)
