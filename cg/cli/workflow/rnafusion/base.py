@@ -9,11 +9,10 @@ from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
     config_case,
+    OPTION_REVISION,
+    OPTION_STUB,
     metrics_deliver,
     report_deliver,
-    run,
-    start,
-    start_available,
     store,
     store_available,
     store_housekeeper,
@@ -39,10 +38,6 @@ def rnafusion(context: click.Context) -> None:
 
 
 rnafusion.add_command(resolve_compression)
-rnafusion.add_command(config_case)
-rnafusion.add_command(run)
-rnafusion.add_command(start)
-rnafusion.add_command(start_available)
 rnafusion.add_command(metrics_deliver)
 rnafusion.add_command(report_deliver)
 rnafusion.add_command(store_housekeeper)
@@ -53,7 +48,7 @@ rnafusion.add_command(store_available)
 @rnafusion.command()
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_config_case(cg_config: CGConfig, case_id: str):
+def config_case(cg_config: CGConfig, case_id: str):
     """Configure an RNAFUSION case so that it is ready to be run."""
     factory = ConfiguratorFactory(cg_config)
     configurator = cast(NextflowConfigurator, factory.get_configurator(Workflow.RNAFUSION))
@@ -63,7 +58,7 @@ def dev_config_case(cg_config: CGConfig, case_id: str):
 @rnafusion.command()
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_run(cg_config: CGConfig, case_id: str):
+def run(cg_config: CGConfig, case_id: str):
     """Run a preconfigured RNAFUSION case."""
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
@@ -75,7 +70,7 @@ def dev_run(cg_config: CGConfig, case_id: str):
 @rnafusion.command()
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_start(cg_config: CGConfig, case_id: str):
+def start(cg_config: CGConfig, case_id: str):
     """Start an RNAFUSION case. Configures the case if needed."""
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
@@ -86,7 +81,7 @@ def dev_start(cg_config: CGConfig, case_id: str):
 
 @rnafusion.command()
 @click.pass_obj
-def dev_start_available(cg_config: CGConfig) -> None:
+def start_available(cg_config: CGConfig) -> None:
     """Starts all available RNAFUSION cases."""
     LOG.info("Starting RNAFUSION workflow for all available cases.")
     analysis_starter = AnalysisStarterFactory(cg_config).get_analysis_starter_for_workflow(
