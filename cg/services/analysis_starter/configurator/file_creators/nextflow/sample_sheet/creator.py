@@ -2,6 +2,7 @@ import logging
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Iterator
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, SequencingFileTag
@@ -35,7 +36,7 @@ class NextflowSampleSheetCreator(ABC):
     def _get_content(self, case_id: str) -> list[list[str]]:
         pass
 
-    def _get_paired_read_paths(self, sample: Sample) -> list[tuple[str, str]]:
+    def _get_paired_read_paths(self, sample: Sample) -> Iterator[tuple[str, str]]:
         """Returns a list of tuples of paired fastq file paths for the forward and reverse read."""
         sample_metadata: list[FastqFileMeta] = self._get_fastq_metadata_for_sample(sample)
         fastq_forward_read_paths: list[str] = self._extract_read_files(
