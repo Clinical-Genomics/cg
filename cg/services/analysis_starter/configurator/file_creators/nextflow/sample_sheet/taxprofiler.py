@@ -3,7 +3,7 @@ from cg.constants.symbols import EMPTY_STRING
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowSampleSheetCreator,
 )
-from cg.store.models import Case, CaseSample
+from cg.store.models import Case, Sample
 
 HEADERS: list[str] = [
     "sample",
@@ -22,22 +22,18 @@ class TaxprofilerSampleSheetCreator(NextflowSampleSheetCreator):
         This contains information for all samples linked to the case."""
         case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
         sample_sheet_content: list[list[str]] = [HEADERS]
-        for link in case.links:
-            sample_sheet_content.extend(self._get_sample_sheet_content_per_sample(case_sample=link))
+        for sample in case.samples:
+            sample_sheet_content.extend(self._get_sample_sheet_content_per_sample(sample))
         return sample_sheet_content
 
-    def _get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
+    def _get_sample_sheet_content_per_sample(self, sample: Sample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
         content: list[list[str]] = []
-        sample_name: str = case_sample.sample.name
-        fastq_file_pairs: list[tuple[str, str]] = self._get_validated_and_existing_fastq_paths(
-            sample=case_sample.sample
-        )
-
-        for run_accession, (forward_file, reverse_file) in enumerate(fastq_file_pairs, 1):
+        paired_fastq_files: list[tuple[str, str]] = self._get_paired_read_paths(sample)
+        for incremental_id, (forward_file, reverse_file) in enumerate(paired_fastq_files, start=1):
             entry: list[str] = [
-                sample_name,
-                run_accession,
+                sample.name,
+                incremental_id,
                 SequencingPlatform.ILLUMINA,
                 forward_file,
                 reverse_file,

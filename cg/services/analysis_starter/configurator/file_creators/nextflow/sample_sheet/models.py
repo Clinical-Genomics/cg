@@ -1,5 +1,3 @@
-from enum import StrEnum
-
 from cg.models.nf_analysis import NextflowSampleSheetEntry
 
 
@@ -34,19 +32,3 @@ class RarediseaseSampleSheetEntry(NextflowSampleSheetEntry):
                 zip(self.fastq_forward_read_paths, self.fastq_reverse_read_paths)
             )
         ]
-
-
-class RarediseaseSampleSheetHeaders(StrEnum):
-    sample: str = "sample"
-    lane: str = "lane"
-    fastq_1: str = "fastq_1"
-    fastq_2: str = "fastq_2"
-    sex: str = "sex"
-    phenotype: str = "phenotype"
-    paternal_id: str = "paternal_id"
-    maternal_id: str = "maternal_id"
-    case_id: str = "case_id"
-
-    @classmethod
-    def list(cls) -> list[str]:
-        return list(map(lambda header: header.value, cls))
