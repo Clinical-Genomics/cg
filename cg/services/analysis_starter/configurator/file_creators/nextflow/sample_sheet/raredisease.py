@@ -1,3 +1,5 @@
+from typing import Iterator
+
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowSampleSheetCreator,
@@ -31,7 +33,9 @@ class RarediseaseSampleSheetCreator(NextflowSampleSheetCreator):
     def _get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
         content: list[list[str]] = []
-        paired_fastq_paths: list[tuple[str, str]] = self._get_paired_read_paths(case_sample.sample)
+        paired_fastq_paths: Iterator[tuple[str, str]] = self._get_paired_read_paths(
+            case_sample.sample
+        )
         for incremental_id, (fastq_forward_read_path, fastq_reverse_read_path) in enumerate(
             paired_fastq_paths, start=1
         ):
