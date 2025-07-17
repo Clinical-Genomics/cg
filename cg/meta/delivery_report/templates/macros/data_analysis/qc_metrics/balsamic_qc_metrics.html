@@ -35,5 +35,55 @@
     %}
   {% endif %}
   <!-- Quality control metrics -->
-  {{ qc_metrics(samples=samples, metrics=metrics) }}
+  <h4 class="mt-4 mb-3">Kvalitetsmått</h4>
+  <table class="table w-auto text-center align-middle" aria-describedby="qc-metrics-table">
+    <thead class="table-secondary">
+      <tr>
+        <th scope="col">Kvalitetsmått</th>
+        {% for sample in samples %}
+          <th scope="col">{{ sample.name }} ({{ sample.id }})</th>
+        {% endfor %}
+        <th scope="col">Krav</th>
+        <th scope="col">Status</th>
+        <th scope="col">Förklaringar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for metric in metrics %}
+      <tr>
+        <th scope="row">{{ metric.name }}</th>
+        {% for sample in samples %}
+          <td>
+            {% if sample.metadata[metric.key] and sample.metadata[metric.key].value is not none %}
+              {{ sample.metadata[metric.key].value }}
+            {% else %}
+              N/A
+            {% endif %}
+          </td>
+        {% endfor %}
+        <td>
+          {% if samples[0].metadata[metric.key] and samples[0].metadata[metric.key].condition %}
+            {{ samples[0].metadata[metric.key].condition.norm }} {{ samples[0].metadata[metric.key].condition.threshold }}
+          {% else %}
+            -
+          {% endif %}
+        </td>
+        <td>
+          {% set all_passed = true %}
+          {% for sample in samples %}
+            {% if sample.metadata[metric.key] and sample.metadata[metric.key].condition and not sample.metadata[metric.key].meets_condition() %}
+              {% set all_passed = false %}
+            {% endif %}
+          {% endfor %}
+          {% if all_passed %}
+            <span class="text-success">✓</span>
+          {% else %}
+            <span class="text-danger">✗</span>
+          {% endif %}
+        </td>
+        <td class="text-start">{{ metric.description }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% endmacro %}

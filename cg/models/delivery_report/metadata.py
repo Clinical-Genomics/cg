@@ -1,5 +1,6 @@
-from pydantic import BaseModel, BeforeValidator, field_validator
+from pydantic import BaseModel, BeforeValidator, field_validator, ConfigDict
 from typing_extensions import Annotated
+from typing import TYPE_CHECKING, Any
 
 from cg.constants import NA_FIELD, RIN_MAX_THRESHOLD, RIN_MIN_THRESHOLD
 from cg.models.delivery_report.validators import (
@@ -9,6 +10,9 @@ from cg.models.delivery_report.validators import (
     get_report_string,
     get_sex_as_string,
 )
+
+if TYPE_CHECKING:
+    from cg.models.balsamic.metrics import BalsamicMetricValue
 
 
 class SampleMetadataModel(BaseModel):
@@ -20,6 +24,7 @@ class SampleMetadataModel(BaseModel):
         million_read_pairs: number of million read pairs obtained; source: StatusDB/sample/reads (/2*10^6)
         initial_qc: initial QC protocol flag; source: LIMS
     """
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     duplicates: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     million_read_pairs: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
@@ -89,9 +94,26 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
         mean_insert_size: mean insert size of the distribution; source: workflow
         fold_80: fold 80 base penalty; source: workflow
     """
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    mean_insert_size: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    fold_80: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    mean_insert_size: Annotated[Any, BeforeValidator(get_number_as_string)] = None
+    fold_80: Annotated[Any, BeforeValidator(get_number_as_string)] = None
+
+    def get_metric_value(self, metric: Any) -> str:
+        """Get the string representation of a metric value."""
+        if metric is None:
+            return NA_FIELD
+        if hasattr(metric, "value"):
+            return get_number_as_string(metric)
+        return get_number_as_string(metric)
+
+    def get_metric_condition(self, metric: Any) -> bool:
+        """Check if a metric meets its condition."""
+        if metric is None:
+            return False
+        if hasattr(metric, "meets_condition"):
+            return metric.meets_condition()
+        return True
 
 
 class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
@@ -104,13 +126,14 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
         pct_250x: percent of targeted bases that are covered to 250X coverage or more; source: workflow
         pct_500x: percent of targeted bases that are covered to 500X coverage or more; source: workflow
     """
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     bait_set_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    gc_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    median_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    pct_250x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    pct_500x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    gc_dropout: Annotated[Any, BeforeValidator(get_number_as_string)] = None
+    median_target_coverage: Annotated[Any, BeforeValidator(get_number_as_string)] = None
+    pct_250x: Annotated[Any, BeforeValidator(get_number_as_string)] = None
+    pct_500x: Annotated[Any, BeforeValidator(get_number_as_string)] = None
 
 
 class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
@@ -122,11 +145,12 @@ class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
         pct_60x: fraction of bases that attained at least 15X sequence coverage; source: workflow
         pct_reads_improper_pairs: fraction of reads that are not properly aligned in pairs
     """
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    median_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    pct_15x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    pct_60x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    pct_reads_improper_pairs: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    median_coverage: Annotated[Any, BeforeValidator(get_number_as_string)] = None
+    pct_15x: Annotated[Any, BeforeValidator(get_number_as_string)] = None
+    pct_60x: Annotated[Any, BeforeValidator(get_number_as_string)] = None
+    pct_reads_improper_pairs: Annotated[Any, BeforeValidator(get_number_as_string)] = None
 
 
 class SequencingSampleMetadataModel(SampleMetadataModel):
