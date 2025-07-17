@@ -77,7 +77,9 @@ def test_nextflow_config_file_content(
     )
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
+@pytest.mark.parametrize(
+    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]
+)
 def test_nextflow_sample_sheet_creators(
     workflow: Workflow,
     sample_sheet_scenario: dict,

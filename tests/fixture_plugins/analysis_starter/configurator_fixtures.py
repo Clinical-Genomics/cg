@@ -69,12 +69,12 @@ def raredisease_configurator(
 def rnafusion_configurator(
     rnafusion_sample_sheet_creator: RNAFusionSampleSheetCreator,
     rnafusion_params_file_creator: RNAFusionParamsFileCreator,
-    mock_store_for_rnafusion_sample_sheet_creator: Store,
+    mock_store_for_rnafusion_file_creators: Store,
     nextflow_config_file_creator: NextflowConfigFileCreator,
     rnafusion_config_object: RnafusionConfig,
 ) -> NextflowConfigurator:
     return NextflowConfigurator(
-        store=mock_store_for_rnafusion_sample_sheet_creator,
+        store=mock_store_for_rnafusion_file_creators,
         config_file_creator=nextflow_config_file_creator,
         params_file_creator=rnafusion_params_file_creator,
         pipeline_config=rnafusion_config_object,

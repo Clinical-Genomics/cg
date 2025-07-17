@@ -18,6 +18,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
     RNAFusionSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
+    TaxprofilerSampleSheetCreator,
+)
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 
@@ -49,7 +52,9 @@ def sample_sheet_scenario(
     raredisease_sample_sheet_creator: RarediseaseSampleSheetCreator,
     raredisease_sample_sheet_expected_content: list[list[str]],
     rnafusion_sample_sheet_creator: RNAFusionSampleSheetCreator,
-    rnafusion_sample_sheet_content_list: list[list[str]],
+    rnafusion_sample_sheet_expected_content: list[list[str]],
+    taxprofiler_sample_sheet_creator: TaxprofilerSampleSheetCreator,
+    taxprofiler_sample_sheet_expected_content: list[list[str]],
 ) -> dict:
     return {
         Workflow.RAREDISEASE: (
@@ -58,7 +63,11 @@ def sample_sheet_scenario(
         ),
         Workflow.RNAFUSION: (
             rnafusion_sample_sheet_creator,
-            rnafusion_sample_sheet_content_list,
+            rnafusion_sample_sheet_expected_content,
+        ),
+        Workflow.TAXPROFILER: (
+            taxprofiler_sample_sheet_creator,
+            taxprofiler_sample_sheet_expected_content,
         ),
     }
 
