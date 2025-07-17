@@ -28,7 +28,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
+@pytest.mark.parametrize(
+    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]
+)
 def test_nextflow_params_file_creator(
     workflow: Workflow,
     params_file_scenario: dict,
