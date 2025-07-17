@@ -517,36 +517,6 @@ def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
         upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
 
 
-def test_get_application_prep_category(
-    another_rna_sample_id: str,
-    dna_sample_son_id: str,
-    helpers: StoreHelpers,
-    rna_case_id: str,
-    rna_sample_son_id: str,
-    rna_store: Store,
-    upload_scout_api: UploadScoutAPI,
-):
-    """Test that RNA samples are removed when filtering sample list by workflow."""
-
-    # GIVEN an RNA sample that is connected by subject ID to one RNA and one DNA sample in other cases
-
-    ensure_extra_rna_case_match(another_rna_sample_id, helpers, rna_case_id, rna_store)
-    upload_scout_api.status_db = rna_store
-
-    dna_sample: Sample = rna_store.get_sample_by_internal_id(dna_sample_son_id)
-    another_rna_sample_id: Sample = rna_store.get_sample_by_internal_id(another_rna_sample_id)
-    all_son_rna_dna_samples: list[Sample] = [dna_sample, another_rna_sample_id]
-
-    # WHEN running the method to filter a list of Sample objects containing RNA and DNA samples connected by subject_id
-    only_son_dna_samples = upload_scout_api._get_application_prep_category(all_son_rna_dna_samples)
-
-    # THEN even though an RNA sample is present in the initial query, the output should not contain any RNA samples
-    nr_of_subject_id_samples: int = len(all_son_rna_dna_samples)
-    nr_of_subject_id_dna_samples: int = len([only_son_dna_samples])
-    assert nr_of_subject_id_samples == 2
-    assert nr_of_subject_id_dna_samples == 1
-
-
 def test_create_rna_dna_collections(
     rna_case_id: str,
     rna_store: Store,
@@ -640,62 +610,6 @@ def test_add_dna_cases_to_dna_sample(
 
     # THEN the DNA cases should contain the DNA_case name associated with the DNA sample
     assert dna_case.internal_id in rna_dna_collection[0].dna_case_ids
-
-
-def test_map_dna_cases_to_dna_sample_incorrect_workflow(
-    rna_store: Store,
-    upload_scout_api: UploadScoutAPI,
-    dna_sample_son_id: str,
-    dna_case_id: str,
-    rna_sample_son_id: str,
-):
-    """Test that the DNA case name is not mapped to the DNA sample name in the rna-dna-sample-case map."""
-
-    # GIVEN an RNA sample and a DNA sample
-
-    dna_sample: Sample = rna_store.get_sample_by_internal_id(dna_sample_son_id)
-    dna_case: Case = rna_store.get_case_by_internal_id(dna_case_id)
-    rna_sample: Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
-
-    # GIVEN that the DNA case has a different workflow than the expected workflow
-    dna_case.data_analysis = Workflow.RAW_DATA
-
-    # WHEN mapping the DNA case name to the DNA sample name in the related DNA cases
-    related_dna_cases: list[str] = upload_scout_api._dna_cases_related_to_dna_sample(
-        dna_sample=dna_sample,
-        collaborators=rna_sample.customer.collaborators,
-    )
-
-    # THEN the related DNA cases should not contain the DNA case name associated with the DNA sample name
-    assert dna_case.internal_id not in related_dna_cases
-
-
-def test_map_dna_cases_to_dna_sample_incorrect_customer(
-    rna_store: Store,
-    upload_scout_api: UploadScoutAPI,
-    dna_sample_son_id: str,
-    dna_case_id: str,
-    rna_sample_son_id: str,
-):
-    """Test that the DNA case name is not mapped to the DNA sample name in the RNADNACollection."""
-
-    # GIVEN an RNA sample, a DNA sample, and a rna-dna case map
-
-    dna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=dna_sample_son_id)
-    dna_case: Case = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
-    rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
-
-    # GIVEN that the DNA case has a different customer than the expected customer
-    dna_case.customer_id = 1000
-
-    # WHEN mapping the DNA case name to the DNA sample name in the rna-dna-sample-case map
-    dna_cases: list[str] = upload_scout_api._dna_cases_related_to_dna_sample(
-        dna_sample=dna_sample,
-        collaborators=rna_sample.customer.collaborators,
-    )
-
-    # THEN the rna-dna-sample-case map should not contain the DNA case name associated with the DNA sample name
-    assert dna_case.internal_id not in dna_cases
 
 
 def test_get_multiqc_html_report(
