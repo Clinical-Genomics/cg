@@ -37,7 +37,7 @@ class NextflowSampleSheetCreator(ABC):
         pass
 
     def _get_paired_read_paths(self, sample: Sample) -> Iterator[tuple[str, str]]:
-        """Returns a list of tuples of paired fastq file paths for the forward and reverse read."""
+        """Return an iterator of tuples with paired fastq paths for the forward and reverse read."""
         sample_metadata: list[FastqFileMeta] = self._get_fastq_metadata_for_sample(sample)
         fastq_forward_read_paths: list[str] = self._extract_read_files(
             metadata=sample_metadata, forward_read=True
