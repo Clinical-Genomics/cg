@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
@@ -19,6 +20,8 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
 
+LOG = logging.getLogger(__name__)
+
 
 class RarediseaseParamsFileCreator(ParamsFileCreator):
 
@@ -29,6 +32,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
 
     def create(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> None:
         """Create the params file for a case."""
+        LOG.debug(f"Creating params file for case {case_id}")
         file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
         content: dict = self._get_content(
             case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path

@@ -28,6 +28,7 @@ class NextflowSampleSheetCreator(ABC):
         return Path(case_path, f"{case_id}_sample_sheet").with_suffix(FileExtensions.CSV)
 
     def create(self, case_id: str, case_path: Path) -> None:
+        LOG.debug(f"Creating sample sheet for case {case_id}")
         file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
         content: list[list[str]] = self._get_content(case_id)
         write_csv(file_path=file_path, content=content)
@@ -37,7 +38,7 @@ class NextflowSampleSheetCreator(ABC):
         pass
 
     def _get_paired_read_paths(self, sample: Sample) -> Iterator[tuple[str, str]]:
-        """Returns a list of tuples of paired fastq file paths for the forward and reverse read."""
+        """Return an iterator of tuples with paired fastq paths for the forward and reverse read."""
         sample_metadata: list[FastqFileMeta] = self._get_fastq_metadata_for_sample(sample)
         fastq_forward_read_paths: list[str] = self._extract_read_files(
             metadata=sample_metadata, forward_read=True

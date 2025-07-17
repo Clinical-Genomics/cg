@@ -40,7 +40,6 @@ def expected_workflow_launch_request(
         revision=raredisease_case_config.revision,
         runName=raredisease_case_config.case_id,
         sessionId=None,
-        stubRun=False,
         workDir=raredisease_case_config.work_dir,
     )
     return WorkflowLaunchRequest(launch=launch)
