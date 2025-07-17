@@ -4041,12 +4041,8 @@ def taxprofiler_parameters_default(
 ) -> TaxprofilerParameters:
     """Return Taxprofiler parameters."""
     return TaxprofilerParameters(
-        cluster_options="--qos=normal",
         input=taxprofiler_sample_sheet_path,
         outdir=Path(taxprofiler_dir, taxprofiler_case_id),
-        databases=Path(existing_directory),
-        hostremoval_reference=Path(existing_directory),
-        priority="development",
     )
 
 
