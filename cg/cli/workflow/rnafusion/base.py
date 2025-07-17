@@ -69,6 +69,7 @@ def run(cg_config: CGConfig, case_id: str):
 @click.pass_obj
 def start(cg_config: CGConfig, case_id: str):
     """Start an RNAFUSION case. Configures the case if needed."""
+    LOG.info(f"Starting RNAFUSION workflow for case {case_id}.")
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RNAFUSION
@@ -81,7 +82,8 @@ def start(cg_config: CGConfig, case_id: str):
 def start_available(cg_config: CGConfig):
     """Starts all available RNAFUSION cases."""
     LOG.info("Starting RNAFUSION workflow for all available cases.")
-    analysis_starter = AnalysisStarterFactory(cg_config).get_analysis_starter_for_workflow(
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RNAFUSION
     )
     succeeded: bool = analysis_starter.start_available()
