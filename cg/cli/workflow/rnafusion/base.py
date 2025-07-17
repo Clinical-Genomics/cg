@@ -8,9 +8,6 @@ import rich_click as click
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
-    config_case,
-    OPTION_REVISION,
-    OPTION_STUB,
     metrics_deliver,
     report_deliver,
     store,
@@ -81,7 +78,7 @@ def start(cg_config: CGConfig, case_id: str):
 
 @rnafusion.command()
 @click.pass_obj
-def start_available(cg_config: CGConfig) -> None:
+def start_available(cg_config: CGConfig):
     """Starts all available RNAFUSION cases."""
     LOG.info("Starting RNAFUSION workflow for all available cases.")
     analysis_starter = AnalysisStarterFactory(cg_config).get_analysis_starter_for_workflow(
