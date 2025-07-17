@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
@@ -11,6 +12,8 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
     replace_values_in_params_file,
 )
 
+LOG = logging.getLogger(__name__)
+
 
 class RNAFusionParamsFileCreator(ParamsFileCreator):
 
@@ -18,6 +21,7 @@ class RNAFusionParamsFileCreator(ParamsFileCreator):
         self.params = Path(params)
 
     def create(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> any:
+        LOG.debug(f"Creating params file for case {case_id}")
         file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
         content: dict = self._get_content(case_path=case_path, sample_sheet_path=sample_sheet_path)
         write_yaml_nextflow_style(file_path=file_path, content=content)
