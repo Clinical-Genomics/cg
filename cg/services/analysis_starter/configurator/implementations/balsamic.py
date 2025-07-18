@@ -1,0 +1,306 @@
+import logging
+import re
+import subprocess
+from pathlib import Path
+
+from cg.apps.lims import LimsAPI
+from cg.constants import SexOptions
+from cg.constants.constants import GenomeVersion
+from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.exc import (
+    BalsamicInconsistentSexError,
+    BalsamicMissingTumorError,
+    BedFileNotFound,
+    CaseNotConfiguredError,
+)
+from cg.models.cg_config import BalsamicConfig
+from cg.services.analysis_starter.configurator.configurator import Configurator
+from cg.services.analysis_starter.configurator.models.balsamic import (
+    BalsamicCaseConfig,
+    BalsamicConfigInput,
+)
+from cg.store.models import Case
+from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
+
+
+class VariantType:
+    SNV = "snv"
+    SV = "sv"
+
+
+class ObservationsFilePatterns:
+    """File patterns regarding dump Loqusdb files."""
+
+    ARTEFACT_SNV = "artefact_somatic_snv"
+    CLINICAL_SNV = "clinical_snv"
+    CLINICAL_SV = "clinical_sv"
+    CANCER_GERMLINE_SNV = "cancer_germline_snv"
+    CANCER_GERMLINE_SV = "cancer_germline_sv"
+    CANCER_SOMATIC_SNV = "cancer_somatic_snv"
+    CANCER_SOMATIC_SV = "cancer_somatic_sv"
+
+
+BALSAMIC_CONFIG_CLI_COMMAND = (
+    "{conda_binary} run {binary} balsamic config case"
+    " --analysis-dir {analysis_dir}"
+    " --analysis-workflow {analysis_workflow}"
+    " --balsamic-cache {balsamic_cache}"
+    " --cadd-annotations {cadd_annotations}"
+    " --artefact-snv-observations {artefact_snv_observations}"
+    " --cancer-germline-snv-observations {cancer_germline_snv_observations}"
+    " --cancer-germline-sv-observations {cancer_germline_sv_observations}"
+    " --cancer-somatic-sv-observations {cancer_somatic_sv_observations}"
+    " --case-id {case_id}"
+    " --clinical-snv-observations {clinical_snv_observations}"
+    " --clinical-sv-observations {clinical_sv_observations}"
+    " --fastq-path {fastq_path}"
+    " --gender {gender}"
+    " --genome-interval {genome_interval}"
+    " --genome-version {genome_version}"
+    " --gens-coverage-pon {gens_coverage_pon}"
+    " --gnomad-min-af5 {gnomad_min_af5}"
+    " --normal-sample-name {normal_sample_name}"
+    " --panel-bed {panel_bed}"
+    " --pon-cnn {pon_cnn}"
+    " --exome {exome}"
+    " --sentieon-install-dir {sentieon_install_dir}"
+    " --sentieon-license {sentieon_license}"
+    " --soft-filter-normal {soft_filter_normal}"
+    " --swegen-snv {swegen_snv}"
+    " --swegen-sv {swegen_sv}"
+    " --tumor-sample-name {tumor_sample_name}"
+)
+
+
+class BalsamicConfigurator(Configurator):
+    def __init__(
+        self,
+        config: BalsamicConfig,
+        lims_api: LimsAPI,
+        store: Store,
+    ):
+        self.store: Store = store
+        self.lims_api: LimsAPI = lims_api
+        self.conda_binary: str = config.conda_binary
+        self.balsamic_binary: str = config.binary_path
+        self.root_dir: str = config.root
+        self.bed_directory: str = config.bed_directory
+        self.cache_dir: str = config.balsamic_cache
+        self.cadd_path: str = config.cadd_path
+        self.default_cluster_config: str = config.cluster_config
+        self.genome_interval_path: str = config.genome_interval_path
+        self.gens_coverage_female_path: str = config.gens_coverage_female_path
+        self.gens_coverage_male_path: str = config.gens_coverage_male_path
+        self.gnomad_af5_path: str = config.gnomad_af5_path
+        self.sentieon_licence_path: str = config.sentieon_licence_path
+        self.sentieon_licence_server: str = config.sentieon_licence_server
+        self.loqusdb_artefact_snv: str = config.loqusdb_artefact_snv
+        self.loqusdb_cancer_germline_snv: str = config.loqusdb_cancer_germline_snv
+        self.loqusdb_cancer_germline_sv: str = config.loqusdb_cancer_germline_sv
+        self.loqusdb_cancer_somatic_snv: str = config.loqusdb_cancer_somatic_snv
+        self.loqusdb_cancer_somatic_sv: str = config.loqusdb_cancer_somatic_sv
+        self.loqusdb_clinical_snv: str = config.loqusdb_clinical_snv
+        self.loqusdb_clinical_sv: str = config.loqusdb_clinical_sv
+        self.ponn_directory: Path = Path(config.balsamic.ponn_directory)
+        self.slurm_account: str = config.slurm.account
+        self.slurm_mail_user: str = config.slurm.mail_user
+        self.swen_snv: str = config.swegen_snv
+        self.swen_sv: str = config.swegen_sv
+
+    def configure(self, case_id: str, **flags) -> BalsamicCaseConfig:
+        config_cli_input: BalsamicConfigInput = self._build_cli_input(case_id)
+        self.create_config_file(config_cli_input)
+        return self.get_config(case_id=case_id, **flags)
+
+    def get_config(self, case_id: str, **flags) -> BalsamicCaseConfig:
+        balsamic_config: BalsamicCaseConfig = BalsamicCaseConfig(
+            account=self.slurm_account,
+            binary=self.balsamic_binary,
+            conda_binary=self.conda_binary,
+            cluster_config=self.default_cluster_config,
+            environment=self.balsamic_binary,
+            mail_user=self.slurm_mail_user,
+            qos=self.store.get_case_by_internal_id(case_id).slurm_priority,
+            sample_config=self._get_sample_config_path(case_id),
+        )
+        balsamic_config: BalsamicCaseConfig = self._set_flags(config=balsamic_config, **flags)
+        self._ensure_valid_config(balsamic_config)
+        return balsamic_config
+
+    def _build_cli_input(self, case_id) -> BalsamicConfigInput:
+        case: Case = self.store.get_case_by_internal_id(case_id)
+        if self._all_samples_are_wgs(case):
+            return self._build_wgs_config(case)
+        else:
+            return self._build_targeted_config(case)
+
+    def _build_wgs_config(self, case: Case) -> BalsamicConfigInput:
+        patient_sex: SexOptions = self._get_patient_sex(case)
+        return BalsamicConfigInput(
+            analysis_dir=self.root_dir,
+            analysis_workflow=case.data_analysis,
+            artefact_snv_observations=self.loqusdb_artefact_snv,
+            balsamic_binary=self.balsamic_binary,
+            balsamic_cache=self.cache_dir,
+            cadd_annotations=self.cadd_path,
+            cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
+            cancer_germline_sv_observations=self.loqusdb_cancer_germline_sv,
+            cancer_somatic_snv_observations=self.loqusdb_cancer_somatic_snv,
+            cancer_somatic_sv_observations=self.loqusdb_cancer_somatic_sv,
+            case_id=case.internal_id,
+            clinical_snv_observations=self.loqusdb_clinical_snv,
+            clinical_sv_observations=self.loqusdb_clinical_sv,
+            conda_binary=self.conda_binary,
+            fastq_path=Path(self.root_dir, case.internal_id, "fastq"),
+            gender=patient_sex,
+            genome_interval=self.genome_interval_path,
+            genome_version=GenomeVersion.HG19,
+            gens_coverage_pon=(
+                self.gens_coverage_female_path
+                if patient_sex == SexOptions.FEMALE
+                else self.gens_coverage_male_path
+            ),
+            gnomad_min_af5=self.gnomad_af5_path,
+            normal_sample_name=self._get_normal_sample_id(case),
+            sentieon_install_dir=self.sentieon_licence_path,
+            sentieon_license=self.sentieon_licence_server,
+            swegen_snv=self.swen_snv,
+            swegen_sv=self.swen_sv,
+            tumor_sample_name=self._get_tumor_sample_id(case),
+        )
+
+    def _build_targeted_config(self, case, **flags) -> BalsamicConfigInput:
+        bed_file: Path = self._resolve_bed_file(case, **flags)
+        patient_sex: SexOptions = self._get_patient_sex(case)
+        return BalsamicConfigInput(
+            analysis_dir=self.root_dir,
+            analysis_workflow=case.data_analysis,
+            artefact_snv_observations=self.loqusdb_artefact_snv,
+            balsamic_binary=self.balsamic_binary,
+            balsamic_cache=self.cache_dir,
+            cadd_annotations=self.cadd_path,
+            cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
+            cancer_germline_sv_observations=self.loqusdb_cancer_germline_sv,
+            cancer_somatic_snv_observations=self.loqusdb_cancer_somatic_snv,
+            cancer_somatic_sv_observations=self.loqusdb_cancer_somatic_sv,
+            case_id=case.internal_id,
+            clinical_snv_observations=self.loqusdb_clinical_snv,
+            clinical_sv_observations=self.loqusdb_clinical_sv,
+            conda_binary=self.conda_binary,
+            fastq_path=Path(self.root_dir, case.internal_id, "fastq"),
+            gender=patient_sex,
+            genome_version=GenomeVersion.HG19,
+            gnomad_min_af5=self.gnomad_af5_path,
+            normal_sample_name=self._get_normal_sample_id(case),
+            panel_bed=bed_file,
+            pon_cnn=self._get_pon(bed_file),
+            exome=self._all_samples_are_exome(case),
+            sentieon_install_dir=self.sentieon_licence_path,
+            sentieon_license=self.sentieon_licence_server,
+            soft_filter_normal=bool(self._get_normal_sample_id(case)),
+            swegen_snv=self.swen_snv,
+            swegen_sv=self.swen_sv,
+            tumor_sample_name=self._get_tumor_sample_id(case),
+        )
+
+    @staticmethod
+    def create_config_file(config_cli_input: BalsamicConfigInput) -> None:
+        formatted_command = BALSAMIC_CONFIG_CLI_COMMAND.format(**config_cli_input.model_dump())
+        LOG.debug(f"Running: {formatted_command}")
+        subprocess.run(
+            args=formatted_command,
+            shell=True,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+    @staticmethod
+    def _all_samples_are_wgs(case: Case) -> bool:
+        """Check if all samples in the case are WGS."""
+        return all(
+            sample.application_version.application.prep_category
+            == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+            for sample in case.samples
+        )
+
+    @staticmethod
+    def _get_patient_sex(case):
+        sample_sex: set[SexOptions] = {sample.sex for sample in case.samples}
+        if len(sample_sex) == 1:
+            return sample_sex.pop()
+        else:
+            raise BalsamicInconsistentSexError(
+                f"Case {case.internal_id} contains samples of differing sex"
+            )
+
+    @staticmethod
+    def _get_normal_sample_id(case) -> str | None:
+        for sample in case.samples:
+            if not sample.is_tumour:
+                return sample.internal_id
+
+    @staticmethod
+    def _get_tumor_sample_id(case) -> str:
+        for sample in case.samples:
+            if sample.is_tumour:
+                return sample.internal_id
+        raise BalsamicMissingTumorError(f"Case {case.internal_id} does not contain a tumor sample")
+
+    def _resolve_bed_file(self, case, **flags) -> Path:
+        bed_name = flags.get("panel_bed") or self._get_bed_name_from_lims(case)
+        if db_bed := self.store.get_bed_version_by_short_name(bed_name):
+            return Path(self.bed_directory, db_bed.filename)
+        raise BedFileNotFound(f"No Bed file found for the provided name {bed_name}.")
+
+    def _get_bed_name_from_lims(self, case: Case) -> str:
+        """Get the bed name from LIMS. Assumes that all samples in the case have the same panel."""
+        first_sample = case.samples[0]
+        if lims_bed := self.lims_api.capture_kit(lims_id=first_sample.internal_id):
+            return lims_bed
+        else:
+            raise BedFileNotFound(
+                f"No bed file found in LIMS for sample {first_sample.internal_id} in for case {case.internal_id}."
+            )
+
+    def _get_pon(self, bed_file: Path) -> Path:
+        """Finds the corresponding PON file for the given bed file.
+        These are versioned and named like: <bed_file_name>_hg19_design_CNVkit_PON_reference_v<version>.cnn
+        This method returns the latest version of the PON file matching the bed name.
+        """
+        identifier = bed_file.stem
+        pattern = re.compile(rf"{re.escape(identifier)}.*_v(\d+)\.cnn$")
+        candidates = []
+
+        for file in self.ponn_directory.glob("*.cnn"):
+            if match := pattern.search(file.name):
+                version = int(match[1])
+                candidates.append((version, file))
+
+        if not candidates:
+            raise FileNotFoundError(
+                f"No matching CNN files found for identifier '{identifier}' in {self.ponn_directory}"
+            )
+
+        return max(candidates, key=lambda x: x[0])[1]
+
+    @staticmethod
+    def _all_samples_are_exome(case: Case) -> bool:
+        """Check if all samples in the case are exome."""
+        return all(
+            sample.application_version.application.prep_category
+            == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
+            for sample in case.samples
+        )
+
+    def _get_sample_config_path(self, case_id: str) -> Path:
+        return Path(self.root_dir, case_id, f"{case_id}.json")
+
+    @staticmethod
+    def _ensure_valid_config(config: BalsamicCaseConfig) -> None:
+        if not config.sample_config.exists():
+            raise CaseNotConfiguredError(
+                f"Please ensure that the config file {config.sample_config.exists()} exists."
+            )
