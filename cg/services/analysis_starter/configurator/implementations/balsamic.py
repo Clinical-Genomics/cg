@@ -1,4 +1,6 @@
+import logging
 import re
+import subprocess
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
@@ -10,8 +12,11 @@ from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicConfigInput
+from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.store.models import Case
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 class VariantType:
@@ -31,10 +36,51 @@ class ObservationsFilePatterns:
     CANCER_SOMATIC_SV = "cancer_somatic_sv"
 
 
+BALSAMIC_CONFIG_CLI_COMMAND = (
+    "{conda_binary} run {binary} balsamic config case"
+    " --analysis-dir {analysis_dir}"
+    " --analysis-workflow {analysis_workflow}"
+    " --balsamic-cache {balsamic_cache}"
+    " --cadd-annotations {cadd_annotations}"
+    " --artefact-snv-observations {artefact_snv_observations}"
+    " --cancer-germline-snv-observations {cancer_germline_snv_observations}"
+    " --cancer-germline-sv-observations {cancer_germline_sv_observations}"
+    " --cancer-somatic-sv-observations {cancer_somatic_sv_observations}"
+    " --case-id {case_id}"
+    " --clinical-snv-observations {clinical_snv_observations}"
+    " --clinical-sv-observations {clinical_sv_observations}"
+    " --fastq-path {fastq_path}"
+    " --gender {gender}"
+    " --genome-interval {genome_interval}"
+    " --genome-version {genome_version}"
+    " --gens-coverage-pon {gens_coverage_pon}"
+    " --gnomad-min-af5 {gnomad_min_af5}"
+    " --normal-sample-name {normal_sample_name}"
+    " --panel-bed {panel_bed}"
+    " --pon-cnn {pon_cnn}"
+    " --exome {exome}"
+    " --sentieon-install-dir {sentieon_install_dir}"
+    " --sentieon-license {sentieon_license}"
+    " --soft-filter-normal {soft_filter_normal}"
+    " --swegen-snv {swegen_snv}"
+    " --swegen-sv {swegen_sv}"
+    " --tumor-sample-name {tumor_sample_name}"
+)
+
+
 class BalsamicConfigurator(Configurator):
-    def __init__(self, config: BalsamicConfig, lims_api: LimsAPI, store: Store):
+    def __init__(
+        self,
+        config: BalsamicConfig,
+        lims_api: LimsAPI,
+        store: Store,
+        submitter: SubprocessSubmitter,
+    ):
         self.store: Store = store
+        self.submitter: SubprocessSubmitter = submitter
         self.lims_api: LimsAPI = lims_api
+        self.conda_binary: str = config.conda_binary
+        self.balsamic_binary: str = config.binary_path
         self.root_dir: str = config.root
         self.bed_directory: str = config.balsamic.bed_directory
         self.cache_dir: str = config.balsamic_cache
@@ -80,6 +126,7 @@ class BalsamicConfigurator(Configurator):
             analysis_dir=self.root_dir,
             analysis_workflow=case.data_analysis,
             artefact_snv_observations=self.loqusdb_artefact_snv,
+            balsamic_binary=self.balsamic_binary,
             balsamic_cache=self.cache_dir,
             cadd_annotations=self.cadd_path,
             cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
@@ -89,6 +136,7 @@ class BalsamicConfigurator(Configurator):
             case_id=case.internal_id,
             clinical_snv_observations=self.loqusdb_clinical_snv,
             clinical_sv_observations=self.loqusdb_clinical_sv,
+            conda_binary=self.conda_binary,
             fastq_path=Path(self.root_dir, case.internal_id, "fastq"),
             gender=patient_sex,
             genome_interval=self.genome_interval_path,
@@ -114,6 +162,7 @@ class BalsamicConfigurator(Configurator):
             analysis_dir=self.root_dir,
             analysis_workflow=case.data_analysis,
             artefact_snv_observations=self.loqusdb_artefact_snv,
+            balsamic_binary=self.balsamic_binary,
             balsamic_cache=self.cache_dir,
             cadd_annotations=self.cadd_path,
             cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
@@ -123,6 +172,7 @@ class BalsamicConfigurator(Configurator):
             case_id=case.internal_id,
             clinical_snv_observations=self.loqusdb_clinical_snv,
             clinical_sv_observations=self.loqusdb_clinical_sv,
+            conda_binary=self.conda_binary,
             fastq_path=Path(self.root_dir, case.internal_id, "fastq"),
             gender=patient_sex,
             genome_version=GenomeVersion.HG19,
@@ -139,8 +189,17 @@ class BalsamicConfigurator(Configurator):
             tumor_sample_name=self._get_tumor_sample_id(case),
         )
 
-    def create_config_file(self, config_cli_input: BalsamicConfigInput) -> Path:
-        pass
+    @staticmethod
+    def create_config_file(config_cli_input: BalsamicConfigInput) -> None:
+        formatted_command = BALSAMIC_CONFIG_CLI_COMMAND.format(**config_cli_input.model_dump())
+        LOG.debug(f"Running: {formatted_command}")
+        subprocess.run(
+            args=formatted_command,
+            shell=True,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
 
     @staticmethod
     def _all_samples_are_wgs(case: Case) -> bool:

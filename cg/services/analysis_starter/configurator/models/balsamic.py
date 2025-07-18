@@ -2,6 +2,8 @@ from pydantic import BaseModel
 
 
 class BalsamicConfigInput(BaseModel):
+    conda_binary: str
+    balsamic_binary: str
     analysis_dir: str
     analysis_workflow: str
     artefact_snv_observations: str
