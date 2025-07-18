@@ -12,3 +12,7 @@ class RarediseaseParameters(WorkflowParameters):
     vcfanno_extra_resources: str
     vep_filters_scout_fmt: str
     sample_id_map: Path
+
+
+class RNAFusionParameters(WorkflowParameters):
+    """RNAFUSION parameters."""

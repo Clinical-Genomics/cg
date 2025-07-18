@@ -2,7 +2,7 @@ import logging
 from subprocess import CalledProcessError
 
 from cg.constants import Workflow
-from cg.exc import AnalysisNotReadyError, AnalysisRunningError
+from cg.exc import AnalysisNotReadyError
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.input_fetcher.input_fetcher import InputFetcher
@@ -35,21 +35,20 @@ class AnalysisStarter:
         """Starts available cases. Returns True if all ready cases started without an error."""
         succeeded = True
         cases: list[Case] = self.store.get_cases_to_analyze(workflow=self.workflow, limit=limit)
+        LOG.info(f"Found {len(cases)} {self.workflow} cases to start")
         for case in cases:
             try:
                 self.start(case.internal_id)
             except AnalysisNotReadyError as error:
                 LOG.error(error)
-            except AnalysisRunningError as error:
-                LOG.error(error)
-                succeeded = False
             except Exception as error:
-                LOG.error(f"Unspecified error occurred: {error}")
+                LOG.error(error)
                 succeeded = False
         return succeeded
 
     def start(self, case_id: str, **flags) -> None:
         """Fetches raw data, generates configuration files and runs the specified case."""
+        LOG.debug(f"Starting case {case_id}")
         self.tracker.ensure_analysis_not_ongoing(case_id)
         self.input_fetcher.ensure_files_are_ready(case_id)
         parameters: CaseConfig = self.configurator.configure(case_id=case_id, **flags)

@@ -1,7 +1,19 @@
-from unittest import mock
+from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
 from cg.models.cg_config import CGConfig, SeqeraPlatformConfig
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
+    RarediseaseParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
+    RNAFusionParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
+    RarediseaseSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+    RNAFusionSampleSheetCreator,
+)
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
@@ -16,25 +28,26 @@ from cg.services.analysis_starter.submitters.subprocess.submitter import Subproc
 from cg.store.store import Store
 
 
-def test_analysis_starter_factory_microsalt(cg_context: CGConfig):
+def test_analysis_starter_factory_microsalt(cg_context: CGConfig, mocker: MockerFixture):
     # GIVEN an AnalysisStarterFactory
     analysis_starter_factory = AnalysisStarterFactory(cg_context)
 
     # GIVEN a microSALT case
-    with mock.patch.object(Store, "get_case_workflow", return_value=Workflow.MICROSALT):
-        # WHEN fetching the AnalysisStarter
-        analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case(
-            "case_id"
-        )
+    mocker.patch.object(Store, "get_case_workflow", return_value=Workflow.MICROSALT)
 
-        # THEN the Factory should have it configured correctly
-        assert isinstance(analysis_starter.configurator, MicrosaltConfigurator)
-        assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
-        assert isinstance(analysis_starter.submitter, SubprocessSubmitter)
+    # WHEN fetching the AnalysisStarter
+    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case(
+        "case_id"
+    )
+
+    # THEN the Factory should have it configured correctly
+    assert isinstance(analysis_starter.configurator, MicrosaltConfigurator)
+    assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
+    assert isinstance(analysis_starter.submitter, SubprocessSubmitter)
 
 
 def test_analysis_starter_factory_raredisease(
-    cg_context: CGConfig, seqera_platform_config: SeqeraPlatformConfig
+    cg_context: CGConfig, seqera_platform_config: SeqeraPlatformConfig, mocker: MockerFixture
 ):
     # GIVEN an AnalysisStarterFactory
     analysis_starter_factory = AnalysisStarterFactory(cg_context)
@@ -43,13 +56,47 @@ def test_analysis_starter_factory_raredisease(
     cg_context.seqera_platform = seqera_platform_config
 
     # GIVEN a Raredisease case
-    with mock.patch.object(Store, "get_case_workflow", return_value=Workflow.RAREDISEASE):
-        # WHEN fetching the AnalysisStarter
-        analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case(
-            "case_id"
-        )
+    mocker.patch.object(Store, "get_case_workflow", return_value=Workflow.RAREDISEASE)
 
-        # THEN the Factory should have it configured correctly
-        assert isinstance(analysis_starter.configurator, NextflowConfigurator)
-        assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
-        assert isinstance(analysis_starter.submitter, SeqeraPlatformSubmitter)
+    # WHEN fetching the AnalysisStarter
+    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case(
+        "case_id"
+    )
+
+    # THEN the Factory should have it configured correctly
+    assert isinstance(analysis_starter.configurator, NextflowConfigurator)
+    assert isinstance(
+        analysis_starter.configurator.sample_sheet_creator, RarediseaseSampleSheetCreator
+    )
+    assert isinstance(
+        analysis_starter.configurator.params_file_creator, RarediseaseParamsFileCreator
+    )
+    assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
+    assert isinstance(analysis_starter.submitter, SeqeraPlatformSubmitter)
+
+
+def test_analysis_starter_factory_rnafusion(
+    cg_context: CGConfig, seqera_platform_config: SeqeraPlatformConfig, mocker: MockerFixture
+):
+    # GIVEN an AnalysisStarterFactory
+    analysis_starter_factory = AnalysisStarterFactory(cg_context)
+
+    # GIVEN that the CGConfig has the seqera platform config set
+    cg_context.seqera_platform = seqera_platform_config
+
+    # GIVEN an RNAFusion case
+    mocker.patch.object(Store, "get_case_workflow", return_value=Workflow.RNAFUSION)
+
+    # WHEN fetching the AnalysisStarter
+    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case(
+        "case_id"
+    )
+
+    # THEN the Factory should have it configured correctly
+    assert isinstance(analysis_starter.configurator, NextflowConfigurator)
+    assert isinstance(
+        analysis_starter.configurator.sample_sheet_creator, RNAFusionSampleSheetCreator
+    )
+    assert isinstance(analysis_starter.configurator.params_file_creator, RNAFusionParamsFileCreator)
+    assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
+    assert isinstance(analysis_starter.submitter, SeqeraPlatformSubmitter)

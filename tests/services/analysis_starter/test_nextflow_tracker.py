@@ -10,7 +10,6 @@ from cg.constants.tb import AnalysisType
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
-from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
 from cg.store.models import Case, CaseSample, Customer, Order
 from cg.store.store import Store
@@ -35,7 +34,6 @@ def nextflow_tracker(cg_context: CGConfig, helpers: StoreHelpers, raredisease_ca
     store.commit_to_store()
     return NextflowTracker(
         store=cg_context.status_db,
-        subprocess_submitter=SubprocessSubmitter(),
         trailblazer_api=cg_context.trailblazer_api,
         workflow_root=cg_context.raredisease.root,
     )
@@ -54,7 +52,6 @@ def test_nextflow_tracker(nextflow_tracker: NextflowTracker, raredisease_case_id
         pipeline_repository="github/raredisease",
         pre_run_script="pre_run_script",
         revision="1.0.0",
-        stub_run=False,
         work_dir="work/dir",
     )
 

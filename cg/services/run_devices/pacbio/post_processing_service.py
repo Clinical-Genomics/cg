@@ -68,11 +68,21 @@ class PacBioPostProcessingService(PostProcessingService):
 
     def can_post_processing_start(self, run_name: str) -> bool:
         LOG.info(f"Checking if Pacbio post-processing can start for run: {run_name}")
+        parent_directory: Path = Path(self.sequencing_dir, run_name).parent
+        all_smrt_cells_are_ready: bool = all(
+            self.is_smrt_cell_ready_for_post_processing(f"{parent_directory.name}/{smrt_cell.name}")
+            for smrt_cell in parent_directory.iterdir()
+        )
+        return all_smrt_cells_are_ready
+
+    def is_smrt_cell_ready_for_post_processing(self, run_name: str) -> bool:
+        LOG.info(f"Checking if Pacbio SMRT-cell {run_name} is ready for postprocessing")
         try:
             run_data: PacBioRunData = self.run_data_generator.get_run_data(
                 run_name=run_name, sequencing_dir=self.sequencing_dir
             )
             self.run_validator.validate_run_files(run_data)
-        except PostProcessingRunFileManagerError:
+        except PostProcessingRunFileManagerError as error:
+            LOG.debug(f"Run {run_name} is not ready for post-processing. {error.args[0]}.")
             return False
         return True

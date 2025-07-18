@@ -273,9 +273,9 @@ class WorkflowManager(StrEnum):
 class Strandedness(StrEnum):
     """Strandedness types."""
 
-    FORWARD: str = "forward"
-    REVERSE: str = "reverse"
-    UNSTRANDED: str = "unstranded"
+    FORWARD = "forward"
+    REVERSE = "reverse"
+    UNSTRANDED = "unstranded"
 
 
 class ReadDirection(IntEnum):
