@@ -189,12 +189,19 @@ class BalsamicConfig(CommonAppConfig):
     gens_coverage_female_path: str
     gens_coverage_male_path: str
     gnomad_af5_path: str
-    loqusdb_path: str
+    loqusdb_artefact_snv: str
+    loqusdb_cancer_germline_snv: str
+    loqusdb_cancer_germline_sv: str
+    loqusdb_cancer_somatic_snv: str
+    loqusdb_cancer_somatic_sv: str
+    loqusdb_clinical_snv: str
+    loqusdb_clinical_sv: str
     pon_path: str
     root: str
     sentieon_licence_path: str
     slurm: SlurmConfig
-    swegen_path: str
+    swegen_snv: str
+    swegen_sv: str
 
 
 class MutantConfig(BaseModel):
