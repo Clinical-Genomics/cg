@@ -7,12 +7,18 @@ from cg.apps.lims import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.constants import GenomeVersion
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import BalsamicInconsistentSexError, BalsamicMissingTumorError, BedFileNotFound
+from cg.exc import (
+    BalsamicInconsistentSexError,
+    BalsamicMissingTumorError,
+    BedFileNotFound,
+    CaseNotConfiguredError,
+)
 from cg.models.cg_config import BalsamicConfig
-from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
-from cg.services.analysis_starter.configurator.models.balsamic import BalsamicConfigInput
-from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
+from cg.services.analysis_starter.configurator.models.balsamic import (
+    BalsamicCaseConfig,
+    BalsamicConfigInput,
+)
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -74,22 +80,21 @@ class BalsamicConfigurator(Configurator):
         config: BalsamicConfig,
         lims_api: LimsAPI,
         store: Store,
-        submitter: SubprocessSubmitter,
     ):
         self.store: Store = store
-        self.submitter: SubprocessSubmitter = submitter
         self.lims_api: LimsAPI = lims_api
         self.conda_binary: str = config.conda_binary
         self.balsamic_binary: str = config.binary_path
         self.root_dir: str = config.root
-        self.bed_directory: str = config.balsamic.bed_directory
+        self.bed_directory: str = config.bed_directory
         self.cache_dir: str = config.balsamic_cache
-        self.cadd_path: str = config.balsamic.cadd_path
-        self.genome_interval_path: str = config.balsamic.genome_interval_path
-        self.gens_coverage_female_path: str = config.balsamic.gens_coverage_female_path
-        self.gens_coverage_male_path: str = config.balsamic.gens_coverage_male_path
-        self.gnomad_af5_path: str = config.balsamic.gnomad_af5_path
-        self.sentieon_licence_path: str = config.balsamic.sentieon_licence_path
+        self.cadd_path: str = config.cadd_path
+        self.default_cluster_config: str = config.cluster_config
+        self.genome_interval_path: str = config.genome_interval_path
+        self.gens_coverage_female_path: str = config.gens_coverage_female_path
+        self.gens_coverage_male_path: str = config.gens_coverage_male_path
+        self.gnomad_af5_path: str = config.gnomad_af5_path
+        self.sentieon_licence_path: str = config.sentieon_licence_path
         self.sentieon_licence_server: str = config.sentieon_licence_server
         self.loqusdb_artefact_snv: str = config.loqusdb_artefact_snv
         self.loqusdb_cancer_germline_snv: str = config.loqusdb_cancer_germline_snv
@@ -99,19 +104,30 @@ class BalsamicConfigurator(Configurator):
         self.loqusdb_clinical_snv: str = config.loqusdb_clinical_snv
         self.loqusdb_clinical_sv: str = config.loqusdb_clinical_sv
         self.ponn_directory: Path = Path(config.balsamic.ponn_directory)
+        self.slurm_account: str = config.slurm.account
+        self.slurm_mail_user: str = config.slurm.mail_user
         self.swen_snv: str = config.swegen_snv
         self.swen_sv: str = config.swegen_sv
 
-    def configure(self, case_id: str, **flags) -> CaseConfig:
+    def configure(self, case_id: str, **flags) -> BalsamicCaseConfig:
         config_cli_input: BalsamicConfigInput = self._build_cli_input(case_id)
         self.create_config_file(config_cli_input)
         return self.get_config(case_id=case_id, **flags)
 
-    def get_config(self, case_id: str, **flags) -> CaseConfig:
-        pass
-
-    def _ensure_valid_config(self, config: CaseConfig) -> None:
-        pass
+    def get_config(self, case_id: str, **flags) -> BalsamicCaseConfig:
+        balsamic_config: BalsamicCaseConfig = BalsamicCaseConfig(
+            account=self.slurm_account,
+            binary=self.balsamic_binary,
+            conda_binary=self.conda_binary,
+            cluster_config=self.default_cluster_config,
+            environment=self.balsamic_binary,
+            mail_user=self.slurm_mail_user,
+            qos=self.store.get_case_by_internal_id(case_id).slurm_priority,
+            sample_config=self._get_sample_config_path(case_id),
+        )
+        balsamic_config: BalsamicCaseConfig = self._set_flags(config=balsamic_config, **flags)
+        self._ensure_valid_config(balsamic_config)
+        return balsamic_config
 
     def _build_cli_input(self, case_id) -> BalsamicConfigInput:
         case: Case = self.store.get_case_by_internal_id(case_id)
@@ -278,3 +294,13 @@ class BalsamicConfigurator(Configurator):
             == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
             for sample in case.samples
         )
+
+    def _get_sample_config_path(self, case_id: str) -> Path:
+        return Path(self.root_dir, case_id, f"{case_id}.json")
+
+    @staticmethod
+    def _ensure_valid_config(config: BalsamicCaseConfig) -> None:
+        if not config.sample_config.exists():
+            raise CaseNotConfiguredError(
+                f"Please ensure that the config file {config.sample_config.exists()} exists."
+            )

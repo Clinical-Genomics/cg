@@ -1,4 +1,9 @@
+from pathlib import Path
+
 from pydantic import BaseModel
+
+from cg.constants import Workflow
+from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 
 
 class BalsamicConfigInput(BaseModel):
@@ -31,3 +36,15 @@ class BalsamicConfigInput(BaseModel):
     swegen_snv: str
     swegen_sv: str
     tumor_sample_name: str
+
+
+class BalsamicCaseConfig(CaseConfig):
+    account: str
+    binary: str
+    cluster_config: str
+    conda_binary: str
+    environment: str
+    mail_user: str
+    qos: str
+    sample_config: Path
+    workflow: Workflow = Workflow.BALSAMIC

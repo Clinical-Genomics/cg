@@ -183,6 +183,7 @@ class BalsamicConfig(CommonAppConfig):
     bed_path: str
     binary_path: str
     cadd_path: str
+    cluster_config: str
     conda_binary: str
     conda_env: str
     genome_interval_path: str
