@@ -142,6 +142,8 @@ def mock_store_for_taxprofiler_file_creators(nextflow_sample_id: str) -> Store:
 
     mock_store: Mock[Store] = create_autospec(Store)
     mock_store.get_case_by_internal_id.return_value = mock_case
+    mock_store.get_case_workflow.return_value = Workflow.TAXPROFILER
+    mock_store.get_case_priority.return_value = SlurmQos.NORMAL
     return mock_store
 
 

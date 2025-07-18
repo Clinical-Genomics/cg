@@ -29,5 +29,5 @@ def nextflow_pipeline_revision() -> str:
 
 
 @pytest.fixture
-def raredisease_config_profiles() -> list[str]:
+def nextflow_config_profiles() -> list[str]:
     return ["myprofile"]

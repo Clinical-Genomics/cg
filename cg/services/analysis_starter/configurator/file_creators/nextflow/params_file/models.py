@@ -16,3 +16,7 @@ class RarediseaseParameters(WorkflowParameters):
 
 class RNAFusionParameters(WorkflowParameters):
     """RNAFUSION parameters."""
+
+
+class TaxprofilerParameters(WorkflowParameters):
+    """Taxprofiler parameters."""

@@ -6,6 +6,9 @@ from cg.constants import FileExtensions
 
 class ParamsFileCreator(ABC):
 
+    def __init__(self, params: str):
+        self.params = Path(params)
+
     @staticmethod
     def get_file_path(case_id: str, case_path: Path) -> Path:
         """Return the path to the params file for a case."""

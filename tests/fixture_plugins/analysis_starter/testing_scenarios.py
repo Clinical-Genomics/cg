@@ -5,12 +5,16 @@ from cg.constants import Workflow
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
     raredisease,
     rnafusion,
+    taxprofiler,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
     RNAFusionParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
+    TaxprofilerParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
@@ -31,6 +35,8 @@ def params_file_scenario(
     expected_raredisease_params_file_content: dict,
     rnafusion_params_file_creator: RNAFusionParamsFileCreator,
     expected_rnafusion_params_file_content: dict,
+    taxprofiler_params_file_creator: TaxprofilerParamsFileCreator,
+    expected_taxprofiler_params_file_content: dict,
     mocker: MockerFixture,
 ) -> dict:
     return {
@@ -43,6 +49,11 @@ def params_file_scenario(
             rnafusion_params_file_creator,
             expected_rnafusion_params_file_content,
             mocker.patch.object(rnafusion, "write_yaml_nextflow_style", return_value=None),
+        ),
+        Workflow.TAXPROFILER: (
+            taxprofiler_params_file_creator,
+            expected_taxprofiler_params_file_content,
+            mocker.patch.object(taxprofiler, "write_yaml_nextflow_style", return_value=None),
         ),
     }
 
@@ -78,6 +89,8 @@ def configurator_scenario(
     raredisease_case_config: NextflowCaseConfig,
     rnafusion_configurator: NextflowConfigurator,
     rnafusion_case_config: NextflowCaseConfig,
+    taxprofiler_configurator: NextflowConfigurator,
+    taxprofiler_case_config: NextflowCaseConfig,
 ) -> dict:
     return {
         Workflow.RAREDISEASE: (
@@ -87,5 +100,9 @@ def configurator_scenario(
         Workflow.RNAFUSION: (
             rnafusion_configurator,
             rnafusion_case_config,
+        ),
+        Workflow.TAXPROFILER: (
+            taxprofiler_configurator,
+            taxprofiler_case_config,
         ),
     }
