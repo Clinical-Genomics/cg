@@ -89,6 +89,8 @@ def configurator_scenario(
     raredisease_case_config: NextflowCaseConfig,
     rnafusion_configurator: NextflowConfigurator,
     rnafusion_case_config: NextflowCaseConfig,
+    taxprofiler_configurator: NextflowConfigurator,
+    taxprofiler_case_config: NextflowCaseConfig,
 ) -> dict:
     return {
         Workflow.RAREDISEASE: (
@@ -98,5 +100,9 @@ def configurator_scenario(
         Workflow.RNAFUSION: (
             rnafusion_configurator,
             rnafusion_case_config,
+        ),
+        Workflow.TAXPROFILER: (
+            taxprofiler_configurator,
+            taxprofiler_case_config,
         ),
     }
