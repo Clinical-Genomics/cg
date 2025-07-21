@@ -39,7 +39,21 @@ def expected_rnafusion_params_file_content(
     nextflow_sample_sheet_path: Path,
     nextflow_workflow_params_content: dict,
 ) -> dict:
-    """Return a dictionary with some parameters for the RNAfusion params file."""
+    """Return a dictionary with parameters for the RNAFUSION params file."""
+    case_parameters = {
+        "input": nextflow_sample_sheet_path,
+        "outdir": nextflow_case_path,
+    }
+    return case_parameters | nextflow_workflow_params_content
+
+
+@pytest.fixture
+def expected_taxprofiler_params_file_content(
+    nextflow_case_path: Path,
+    nextflow_sample_sheet_path: Path,
+    nextflow_workflow_params_content: dict,
+) -> dict:
+    """Return a dictionary with parameters for the Taxprofiler params file."""
     case_parameters = {
         "input": nextflow_sample_sheet_path,
         "outdir": nextflow_case_path,
@@ -49,7 +63,7 @@ def expected_rnafusion_params_file_content(
 
 @pytest.fixture
 def expected_raredisease_workflow_params_content() -> dict:
-    """Return a dictionary with some parameters for the Raredisease params file."""
+    """Return a dictionary with some parameters for the raredisease params file."""
     return {
         "input": "/path/to/samplesheet/case_samplesheet.csv",
         "outdir": "/path/to/case",

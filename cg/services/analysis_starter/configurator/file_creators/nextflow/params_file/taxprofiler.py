@@ -6,7 +6,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
     ParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.models import (
-    RNAFusionParameters,
+    TaxprofilerParameters,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.utils import (
     replace_values_in_params_file,
@@ -15,7 +15,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 LOG = logging.getLogger(__name__)
 
 
-class RNAFusionParamsFileCreator(ParamsFileCreator):
+class TaxprofilerParamsFileCreator(ParamsFileCreator):
 
     def create(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> None:
         LOG.debug(f"Creating params file for case {case_id}")
@@ -25,7 +25,7 @@ class RNAFusionParamsFileCreator(ParamsFileCreator):
 
     def _get_content(self, case_path: Path, sample_sheet_path: Path) -> dict:
         """Return the merged dictionary with case-specific parameters and workflow parameters."""
-        case_parameters = RNAFusionParameters(
+        case_parameters = TaxprofilerParameters(
             input=sample_sheet_path,
             outdir=case_path,
         )
