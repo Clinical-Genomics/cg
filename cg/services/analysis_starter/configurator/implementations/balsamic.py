@@ -42,38 +42,6 @@ class ObservationsFilePatterns:
     CANCER_SOMATIC_SV = "cancer_somatic_sv"
 
 
-BALSAMIC_CONFIG_CLI_COMMAND = (
-    "{conda_binary} run {binary} balsamic config case"
-    " --analysis-dir {analysis_dir}"
-    " --analysis-workflow {analysis_workflow}"
-    " --balsamic-cache {balsamic_cache}"
-    " --cadd-annotations {cadd_annotations}"
-    " --artefact-snv-observations {artefact_snv_observations}"
-    " --cancer-germline-snv-observations {cancer_germline_snv_observations}"
-    " --cancer-germline-sv-observations {cancer_germline_sv_observations}"
-    " --cancer-somatic-sv-observations {cancer_somatic_sv_observations}"
-    " --case-id {case_id}"
-    " --clinical-snv-observations {clinical_snv_observations}"
-    " --clinical-sv-observations {clinical_sv_observations}"
-    " --fastq-path {fastq_path}"
-    " --gender {gender}"
-    " --genome-interval {genome_interval}"
-    " --genome-version {genome_version}"
-    " --gens-coverage-pon {gens_coverage_pon}"
-    " --gnomad-min-af5 {gnomad_min_af5}"
-    " --normal-sample-name {normal_sample_name}"
-    " --panel-bed {panel_bed}"
-    " --pon-cnn {pon_cnn}"
-    " --exome {exome}"
-    " --sentieon-install-dir {sentieon_install_dir}"
-    " --sentieon-license {sentieon_license}"
-    " --soft-filter-normal {soft_filter_normal}"
-    " --swegen-snv {swegen_snv}"
-    " --swegen-sv {swegen_sv}"
-    " --tumor-sample-name {tumor_sample_name}"
-)
-
-
 class BalsamicConfigurator(Configurator):
     def __init__(
         self,
@@ -106,8 +74,8 @@ class BalsamicConfigurator(Configurator):
         self.ponn_directory: Path = Path(config.balsamic.ponn_directory)
         self.slurm_account: str = config.slurm.account
         self.slurm_mail_user: str = config.slurm.mail_user
-        self.swen_snv: str = config.swegen_snv
-        self.swen_sv: str = config.swegen_sv
+        self.swegen_snv: str = config.swegen_snv
+        self.swegen_sv: str = config.swegen_sv
 
     def configure(self, case_id: str, **flags) -> BalsamicCaseConfig:
         config_cli_input: BalsamicConfigInput = self._build_cli_input(case_id)
@@ -166,8 +134,8 @@ class BalsamicConfigurator(Configurator):
             normal_sample_name=self._get_normal_sample_id(case),
             sentieon_install_dir=self.sentieon_licence_path,
             sentieon_license=self.sentieon_licence_server,
-            swegen_snv=self.swen_snv,
-            swegen_sv=self.swen_sv,
+            swegen_snv=self.swegen_snv,
+            swegen_sv=self.swegen_sv,
             tumor_sample_name=self._get_tumor_sample_id(case),
         )
 
@@ -200,17 +168,17 @@ class BalsamicConfigurator(Configurator):
             sentieon_install_dir=self.sentieon_licence_path,
             sentieon_license=self.sentieon_licence_server,
             soft_filter_normal=bool(self._get_normal_sample_id(case)),
-            swegen_snv=self.swen_snv,
-            swegen_sv=self.swen_sv,
+            swegen_snv=self.swegen_snv,
+            swegen_sv=self.swegen_sv,
             tumor_sample_name=self._get_tumor_sample_id(case),
         )
 
     @staticmethod
     def create_config_file(config_cli_input: BalsamicConfigInput) -> None:
-        formatted_command = BALSAMIC_CONFIG_CLI_COMMAND.format(**config_cli_input.model_dump())
-        LOG.debug(f"Running: {formatted_command}")
+        final_command: str = config_cli_input.dump_to_cli()
+        LOG.debug(f"Running: {final_command}")
         subprocess.run(
-            args=formatted_command,
+            args=final_command,
             shell=True,
             check=True,
             stdout=subprocess.PIPE,
