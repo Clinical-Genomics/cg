@@ -24,7 +24,7 @@ class TaxprofilerParamsFileCreator(ParamsFileCreator):
         write_yaml_nextflow_style(file_path=file_path, content=content)
 
     def _get_content(self, case_path: Path, sample_sheet_path: Path) -> dict:
-        """Return the union between case-specific parameters and workflow parameters."""
+        """Return the merged dictionary with case-specific parameters and workflow parameters."""
         case_parameters = TaxprofilerParameters(
             input=sample_sheet_path,
             outdir=case_path,

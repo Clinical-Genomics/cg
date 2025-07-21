@@ -39,7 +39,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         write_yaml_nextflow_style(file_path=file_path, content=content)
 
     def _get_content(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> dict:
-        """Return the union between case-specific parameters and workflow parameters."""
+        """Return the merged dictionary with case-specific parameters and workflow parameters."""
         case_parameters: dict = self._get_case_parameters(
             case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
         ).model_dump()
