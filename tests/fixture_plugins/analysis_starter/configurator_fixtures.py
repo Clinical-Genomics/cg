@@ -1,7 +1,7 @@
 import pytest
 
 from cg.apps.lims import LimsAPI
-from cg.meta.workflow.fastq import MicrosaltFastqHandler
+from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig, RarediseaseConfig, RnafusionConfig
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.file_creators.microsalt_config import (
@@ -87,12 +87,14 @@ def rnafusion_configurator(
 @pytest.fixture
 def balsamic_configurator(
     cg_context: CGConfig,
+    balsamic_fastq_handler: BalsamicFastqHandler,
     lims_api: LimsAPI,
     base_store: Store,
 ) -> BalsamicConfigurator:
 
     return BalsamicConfigurator(
         config=cg_context.balsamic,
+        fastq_handler=balsamic_fastq_handler,
         lims_api=lims_api,
         store=base_store,
     )
