@@ -22,6 +22,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
     RNAFusionSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
@@ -80,4 +81,18 @@ def rnafusion_configurator(
         pipeline_config=rnafusion_config_object,
         sample_sheet_creator=rnafusion_sample_sheet_creator,
         pipeline_extension=PipelineExtension(),
+    )
+
+
+@pytest.fixture
+def balsamic_configurator(
+    cg_context: CGConfig,
+    lims_api: LimsAPI,
+    base_store: Store,
+) -> BalsamicConfigurator:
+
+    return BalsamicConfigurator(
+        config=cg_context.balsamic,
+        lims_api=lims_api,
+        store=base_store,
     )

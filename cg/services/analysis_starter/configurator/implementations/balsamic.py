@@ -10,7 +10,7 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import (
     BalsamicInconsistentSexError,
     BalsamicMissingTumorError,
-    BedFileNotFound,
+    BedFileNotFoundError,
     CaseNotConfiguredError,
 )
 from cg.models.cg_config import BalsamicConfig
@@ -54,7 +54,7 @@ class BalsamicConfigurator(Configurator):
         self.conda_binary: str = config.conda_binary
         self.balsamic_binary: str = config.binary_path
         self.root_dir: str = config.root
-        self.bed_directory: str = config.bed_directory
+        self.bed_directory: str = config.bed_path
         self.cache_dir: str = config.balsamic_cache
         self.cadd_path: str = config.cadd_path
         self.default_cluster_config: str = config.cluster_config
@@ -62,6 +62,7 @@ class BalsamicConfigurator(Configurator):
         self.gens_coverage_female_path: str = config.gens_coverage_female_path
         self.gens_coverage_male_path: str = config.gens_coverage_male_path
         self.gnomad_af5_path: str = config.gnomad_af5_path
+        self.environment: str = config.conda_env
         self.sentieon_licence_path: str = config.sentieon_licence_path
         self.sentieon_licence_server: str = config.sentieon_licence_server
         self.loqusdb_artefact_snv: str = config.loqusdb_artefact_snv
@@ -71,7 +72,7 @@ class BalsamicConfigurator(Configurator):
         self.loqusdb_cancer_somatic_sv: str = config.loqusdb_cancer_somatic_sv
         self.loqusdb_clinical_snv: str = config.loqusdb_clinical_snv
         self.loqusdb_clinical_sv: str = config.loqusdb_clinical_sv
-        self.ponn_directory: Path = Path(config.balsamic.ponn_directory)
+        self.pon_directory: Path = Path(config.pon_path)
         self.slurm_account: str = config.slurm.account
         self.slurm_mail_user: str = config.slurm.mail_user
         self.swegen_snv: str = config.swegen_snv
@@ -86,9 +87,10 @@ class BalsamicConfigurator(Configurator):
         balsamic_config: BalsamicCaseConfig = BalsamicCaseConfig(
             account=self.slurm_account,
             binary=self.balsamic_binary,
+            case_id=case_id,
             conda_binary=self.conda_binary,
             cluster_config=self.default_cluster_config,
-            environment=self.balsamic_binary,
+            environment=self.environment,
             mail_user=self.slurm_mail_user,
             qos=self.store.get_case_by_internal_id(case_id).slurm_priority,
             sample_config=self._get_sample_config_path(case_id),
@@ -96,6 +98,18 @@ class BalsamicConfigurator(Configurator):
         balsamic_config: BalsamicCaseConfig = self._set_flags(config=balsamic_config, **flags)
         self._ensure_valid_config(balsamic_config)
         return balsamic_config
+
+    @staticmethod
+    def create_config_file(config_cli_input: BalsamicConfigInput) -> None:
+        final_command: str = config_cli_input.dump_to_cli()
+        LOG.debug(f"Running: {final_command}")
+        subprocess.run(
+            args=final_command,
+            shell=True,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
 
     def _build_cli_input(self, case_id) -> BalsamicConfigInput:
         case: Case = self.store.get_case_by_internal_id(case_id)
@@ -174,18 +188,6 @@ class BalsamicConfigurator(Configurator):
         )
 
     @staticmethod
-    def create_config_file(config_cli_input: BalsamicConfigInput) -> None:
-        final_command: str = config_cli_input.dump_to_cli()
-        LOG.debug(f"Running: {final_command}")
-        subprocess.run(
-            args=final_command,
-            shell=True,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-
-    @staticmethod
     def _all_samples_are_wgs(case: Case) -> bool:
         """Check if all samples in the case are WGS."""
         return all(
@@ -195,7 +197,16 @@ class BalsamicConfigurator(Configurator):
         )
 
     @staticmethod
-    def _get_patient_sex(case):
+    def _all_samples_are_exome(case: Case) -> bool:
+        """Check if all samples in the case are exome."""
+        return all(
+            sample.application_version.application.prep_category
+            == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
+            for sample in case.samples
+        )
+
+    @staticmethod
+    def _get_patient_sex(case) -> SexOptions:
         sample_sex: set[SexOptions] = {sample.sex for sample in case.samples}
         if len(sample_sex) == 1:
             return sample_sex.pop()
@@ -221,7 +232,7 @@ class BalsamicConfigurator(Configurator):
         bed_name = flags.get("panel_bed") or self._get_bed_name_from_lims(case)
         if db_bed := self.store.get_bed_version_by_short_name(bed_name):
             return Path(self.bed_directory, db_bed.filename)
-        raise BedFileNotFound(f"No Bed file found for the provided name {bed_name}.")
+        raise BedFileNotFoundError(f"No Bed file found for with provided name {bed_name}.")
 
     def _get_bed_name_from_lims(self, case: Case) -> str:
         """Get the bed name from LIMS. Assumes that all samples in the case have the same panel."""
@@ -229,7 +240,7 @@ class BalsamicConfigurator(Configurator):
         if lims_bed := self.lims_api.capture_kit(lims_id=first_sample.internal_id):
             return lims_bed
         else:
-            raise BedFileNotFound(
+            raise BedFileNotFoundError(
                 f"No bed file found in LIMS for sample {first_sample.internal_id} in for case {case.internal_id}."
             )
 
@@ -242,26 +253,17 @@ class BalsamicConfigurator(Configurator):
         pattern = re.compile(rf"{re.escape(identifier)}.*_v(\d+)\.cnn$")
         candidates = []
 
-        for file in self.ponn_directory.glob("*.cnn"):
+        for file in self.pon_directory.glob("*.cnn"):
             if match := pattern.search(file.name):
                 version = int(match[1])
                 candidates.append((version, file))
 
         if not candidates:
             raise FileNotFoundError(
-                f"No matching CNN files found for identifier '{identifier}' in {self.ponn_directory}"
+                f"No matching CNN files found for identifier '{identifier}' in {self.pon_directory}"
             )
 
         return max(candidates, key=lambda x: x[0])[1]
-
-    @staticmethod
-    def _all_samples_are_exome(case: Case) -> bool:
-        """Check if all samples in the case are exome."""
-        return all(
-            sample.application_version.application.prep_category
-            == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
-            for sample in case.samples
-        )
 
     def _get_sample_config_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, f"{case_id}.json")

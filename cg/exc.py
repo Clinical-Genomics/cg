@@ -370,5 +370,5 @@ class BalsamicMissingTumorError(CgError):
     """Exception raised when a Balsamic case is missing a tumor sample."""
 
 
-class BedFileNotFound(CgError):
+class BedFileNotFoundError(CgError):
     """Exception raised not finding a bed file for a Balsamic case."""

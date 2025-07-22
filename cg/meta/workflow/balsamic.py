@@ -64,7 +64,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.qos: SlurmQos = config.balsamic.slurm.qos
         self.root_dir: str = config.balsamic.root
         self.sentieon_licence_path: str = config.balsamic.sentieon_licence_path
-        self.sentieon_licence_server: str = config.sentieon_licence_server
+        self.sentieon_licence_server: str = config.balsamic.sentieon_licence_server
         self.swegen_path: str = config.balsamic.swegen_path
 
     @property

@@ -7,34 +7,34 @@ from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 
 
 class BalsamicConfigInput(BaseModel):
-    conda_binary: str
-    balsamic_binary: str
-    analysis_dir: str
+    conda_binary: Path
+    balsamic_binary: Path
+    analysis_dir: Path
     analysis_workflow: str
-    artefact_snv_observations: str
-    balsamic_cache: str
-    cadd_annotations: str
-    cancer_germline_snv_observations: str
-    cancer_germline_sv_observations: str
-    cancer_somatic_sv_observations: str
+    artefact_snv_observations: Path
+    balsamic_cache: Path
+    cadd_annotations: Path
+    cancer_germline_snv_observations: Path
+    cancer_germline_sv_observations: Path
+    cancer_somatic_sv_observations: Path
     case_id: str
-    clinical_snv_observations: str
-    clinical_sv_observations: str
-    fastq_path: str
+    clinical_snv_observations: Path
+    clinical_sv_observations: Path
+    fastq_path: Path
     gender: str
-    genome_interval: str
+    genome_interval: Path | None = None
     genome_version: str
-    gens_coverage_pon: str | None
-    gnomad_min_af5: str | None
-    normal_sample_name: str | None
-    panel_bed: str | None = None
-    pon_cnn: str | None = None
+    gens_coverage_pon: Path | None = None
+    gnomad_min_af5: Path | None = None
+    normal_sample_name: str | None = None
+    panel_bed: Path | None = None
+    pon_cnn: Path | None = None
     exome: bool = False
-    sentieon_install_dir: str
+    sentieon_install_dir: Path
     sentieon_license: str
     soft_filter_normal: bool = False
-    swegen_snv: str
-    swegen_sv: str
+    swegen_snv: Path
+    swegen_sv: Path
     tumor_sample_name: str
 
     def dump_to_cli(self) -> str:
@@ -71,8 +71,9 @@ class BalsamicConfigInput(BaseModel):
             "--tumor-sample-name": self.tumor_sample_name,
         }
         for flag, value in args.items():
-            if value is type(bool) and value:
-                base += f" {flag}"
+            if isinstance(value, bool):
+                if value is True:
+                    base += f" {flag}"
             elif value is not None:
                 base += f" {flag} {value}"
         return base
@@ -80,9 +81,9 @@ class BalsamicConfigInput(BaseModel):
 
 class BalsamicCaseConfig(CaseConfig):
     account: str
-    binary: str
-    cluster_config: str
-    conda_binary: str
+    binary: Path
+    cluster_config: Path
+    conda_binary: Path
     environment: str
     mail_user: str
     qos: str
