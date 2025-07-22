@@ -190,6 +190,7 @@ class BalsamicConfig(CommonAppConfig):
     gens_coverage_female_path: Path
     gens_coverage_male_path: Path
     gnomad_af5_path: Path
+    loqusdb_path: str
     loqusdb_artefact_snv: Path
     loqusdb_cancer_germline_snv: Path
     loqusdb_cancer_germline_sv: Path
@@ -202,6 +203,7 @@ class BalsamicConfig(CommonAppConfig):
     sentieon_licence_path: Path
     sentieon_licence_server: str
     slurm: SlurmConfig
+    swegen_path: str
     swegen_snv: Path
     swegen_sv: Path
 

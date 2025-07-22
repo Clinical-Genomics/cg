@@ -3,6 +3,7 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from cg.constants import Workflow
+from cg.constants.priority import SlurmQos
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 
 
@@ -40,8 +41,8 @@ class BalsamicConfigInput(BaseModel):
     def dump_to_cli(self) -> str:
         """Dump the Balsamic case config to a CLI command. None flags are excluded and boolean flags are converted to
         only add the flag."""
-        base = f"{self.conda_binary} run {self.balsamic_binary} balsamic config case"
-        args = {
+        command = f"{self.conda_binary} run {self.balsamic_binary} balsamic config case"
+        flags = {
             "--analysis-dir": self.analysis_dir,
             "--analysis-workflow": self.analysis_workflow,
             "--balsamic-cache": self.balsamic_cache,
@@ -70,13 +71,13 @@ class BalsamicConfigInput(BaseModel):
             "--swegen-sv": self.swegen_sv,
             "--tumor-sample-name": self.tumor_sample_name,
         }
-        for flag, value in args.items():
+        for flag, value in flags.items():
             if isinstance(value, bool):
                 if value is True:
-                    base += f" {flag}"
+                    command += f" {flag}"
             elif value is not None:
-                base += f" {flag} {value}"
-        return base
+                command += f" {flag} {value}"
+        return command
 
 
 class BalsamicCaseConfig(CaseConfig):
@@ -86,6 +87,6 @@ class BalsamicCaseConfig(CaseConfig):
     conda_binary: Path
     environment: str
     mail_user: str
-    qos: str
+    qos: SlurmQos
     sample_config: Path
     workflow: Workflow = Workflow.BALSAMIC

@@ -48,22 +48,22 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     ):
         super().__init__(workflow=workflow, config=config)
         self.account: str = config.balsamic.slurm.account
-        self.balsamic_cache: str = config.balsamic.balsamic_cache
-        self.bed_path: str = config.balsamic.bed_path
-        self.binary_path: str = config.balsamic.binary_path
-        self.cadd_path: str = config.balsamic.cadd_path
-        self.conda_binary: str = config.balsamic.conda_binary
+        self.balsamic_cache: str = str(config.balsamic.balsamic_cache)
+        self.bed_path: str = str(config.balsamic.bed_path)
+        self.binary_path: str = str(config.balsamic.binary_path)
+        self.cadd_path: str = str(config.balsamic.cadd_path)
+        self.conda_binary: str = str(config.balsamic.conda_binary)
         self.conda_env: str = config.balsamic.conda_env
         self.email: EmailStr = config.balsamic.slurm.mail_user
-        self.genome_interval_path: str = config.balsamic.genome_interval_path
-        self.gens_coverage_female_path: str = config.balsamic.gens_coverage_female_path
-        self.gens_coverage_male_path: str = config.balsamic.gens_coverage_male_path
-        self.gnomad_af5_path: str = config.balsamic.gnomad_af5_path
-        self.loqusdb_path: str = config.balsamic.loqusdb_path
-        self.pon_path: str = config.balsamic.pon_path
+        self.genome_interval_path: str = str(config.balsamic.genome_interval_path)
+        self.gens_coverage_female_path: str = str(config.balsamic.gens_coverage_female_path)
+        self.gens_coverage_male_path: str = str(config.balsamic.gens_coverage_male_path)
+        self.gnomad_af5_path: str = str(config.balsamic.gnomad_af5_path)
+        self.loqusdb_path: str = str(config.balsamic.loqusdb_path)
+        self.pon_path: str = str(config.balsamic.pon_path)
         self.qos: SlurmQos = config.balsamic.slurm.qos
-        self.root_dir: str = config.balsamic.root
-        self.sentieon_licence_path: str = config.balsamic.sentieon_licence_path
+        self.root_dir: str = str(config.balsamic.root)
+        self.sentieon_licence_path: str = str(config.balsamic.sentieon_licence_path)
         self.sentieon_licence_server: str = config.balsamic.sentieon_licence_server
         self.swegen_path: str = config.balsamic.swegen_path
 

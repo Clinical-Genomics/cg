@@ -25,23 +25,6 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-class VariantType:
-    SNV = "snv"
-    SV = "sv"
-
-
-class ObservationsFilePatterns:
-    """File patterns regarding dump Loqusdb files."""
-
-    ARTEFACT_SNV = "artefact_somatic_snv"
-    CLINICAL_SNV = "clinical_snv"
-    CLINICAL_SV = "clinical_sv"
-    CANCER_GERMLINE_SNV = "cancer_germline_snv"
-    CANCER_GERMLINE_SV = "cancer_germline_sv"
-    CANCER_SOMATIC_SNV = "cancer_somatic_snv"
-    CANCER_SOMATIC_SV = "cancer_somatic_sv"
-
-
 class BalsamicConfigurator(Configurator):
     def __init__(
         self,
@@ -51,32 +34,32 @@ class BalsamicConfigurator(Configurator):
     ):
         self.store: Store = store
         self.lims_api: LimsAPI = lims_api
-        self.conda_binary: str = config.conda_binary
-        self.balsamic_binary: str = config.binary_path
-        self.root_dir: str = config.root
-        self.bed_directory: str = config.bed_path
-        self.cache_dir: str = config.balsamic_cache
-        self.cadd_path: str = config.cadd_path
-        self.default_cluster_config: str = config.cluster_config
-        self.genome_interval_path: str = config.genome_interval_path
-        self.gens_coverage_female_path: str = config.gens_coverage_female_path
-        self.gens_coverage_male_path: str = config.gens_coverage_male_path
-        self.gnomad_af5_path: str = config.gnomad_af5_path
+        self.conda_binary: Path = config.conda_binary
+        self.balsamic_binary: Path = config.binary_path
+        self.root_dir: Path = config.root
+        self.bed_directory: Path = config.bed_path
+        self.cache_dir: Path = config.balsamic_cache
+        self.cadd_path: Path = config.cadd_path
+        self.default_cluster_config: Path = config.cluster_config
+        self.genome_interval_path: Path = config.genome_interval_path
+        self.gens_coverage_female_path: Path = config.gens_coverage_female_path
+        self.gens_coverage_male_path: Path = config.gens_coverage_male_path
+        self.gnomad_af5_path: Path = config.gnomad_af5_path
         self.environment: str = config.conda_env
-        self.sentieon_licence_path: str = config.sentieon_licence_path
+        self.sentieon_licence_path: Path = config.sentieon_licence_path
         self.sentieon_licence_server: str = config.sentieon_licence_server
-        self.loqusdb_artefact_snv: str = config.loqusdb_artefact_snv
-        self.loqusdb_cancer_germline_snv: str = config.loqusdb_cancer_germline_snv
-        self.loqusdb_cancer_germline_sv: str = config.loqusdb_cancer_germline_sv
-        self.loqusdb_cancer_somatic_snv: str = config.loqusdb_cancer_somatic_snv
-        self.loqusdb_cancer_somatic_sv: str = config.loqusdb_cancer_somatic_sv
-        self.loqusdb_clinical_snv: str = config.loqusdb_clinical_snv
-        self.loqusdb_clinical_sv: str = config.loqusdb_clinical_sv
+        self.loqusdb_artefact_snv: Path = config.loqusdb_artefact_snv
+        self.loqusdb_cancer_germline_snv: Path = config.loqusdb_cancer_germline_snv
+        self.loqusdb_cancer_germline_sv: Path = config.loqusdb_cancer_germline_sv
+        self.loqusdb_cancer_somatic_snv: Path = config.loqusdb_cancer_somatic_snv
+        self.loqusdb_cancer_somatic_sv: Path = config.loqusdb_cancer_somatic_sv
+        self.loqusdb_clinical_snv: Path = config.loqusdb_clinical_snv
+        self.loqusdb_clinical_sv: Path = config.loqusdb_clinical_sv
         self.pon_directory: Path = Path(config.pon_path)
         self.slurm_account: str = config.slurm.account
         self.slurm_mail_user: str = config.slurm.mail_user
-        self.swegen_snv: str = config.swegen_snv
-        self.swegen_sv: str = config.swegen_sv
+        self.swegen_snv: Path = config.swegen_snv
+        self.swegen_sv: Path = config.swegen_sv
 
     def configure(self, case_id: str, **flags) -> BalsamicCaseConfig:
         config_cli_input: BalsamicConfigInput = self._build_cli_input(case_id)
