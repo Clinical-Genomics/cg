@@ -69,10 +69,6 @@ def test_create_samplesheet_success(
     mocker.patch.object(FluffyAnalysisAPI, "get_concentrations_from_lims")
     FluffyAnalysisAPI.get_concentrations_from_lims.return_value = "20"
 
-    # GIVEN every sample in SampleSheet has been given a name in StatusDB
-    mocker.patch.object(FluffyAnalysisAPI, "get_sample_name_from_lims_id")
-    FluffyAnalysisAPI.get_sample_name_from_lims_id.return_value = "CustName"
-
     # GIVEN every sample in SampleSheet sequenced_at set in StatusDB
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_sequenced_date")
     FluffyAnalysisAPI.get_sample_sequenced_date.return_value = dt.datetime.now().date()
@@ -120,10 +116,6 @@ def test_create_fluffy_samplesheet_from_bcl_convert_sample_sheet(
     # GIVEN Concentrations are set in LIMS on sample level
     mocker.patch.object(FluffyAnalysisAPI, "get_concentrations_from_lims")
     FluffyAnalysisAPI.get_concentrations_from_lims.return_value = "20"
-
-    # GIVEN every sample in SampleSheet has been given a name in StatusDB
-    mocker.patch.object(FluffyAnalysisAPI, "get_sample_name_from_lims_id")
-    FluffyAnalysisAPI.get_sample_name_from_lims_id.return_value = "CustName"
 
     # GIVEN every sample in SampleSheet last_sequenced_at set in StatusDB
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_sequenced_date")

@@ -32,8 +32,6 @@ from cg.utils.utils import build_command_from_dict, get_string_from_list_by_patt
 
 LOG = logging.getLogger(__name__)
 
-MAX_CASES_TO_START_IN_50_MINUTES = 21
-
 
 class BalsamicAnalysisAPI(AnalysisAPI):
     """Handles communication between BALSAMIC processes and the rest of CG infrastructure."""

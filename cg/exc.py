@@ -100,10 +100,6 @@ class DsmcAlreadyRunningError(CgError):
     """Raised when there is already a DCms process running on the system."""
 
 
-class DecompressionNeededError(CgError):
-    """Raised when decompression still needed to start analysis."""
-
-
 class DecompressionCouldNotStartError(CgError):
     """Raised when decompression could not be started."""
 
@@ -176,33 +172,15 @@ class LimsDataError(CgError):
     """
 
 
-class MicrosaltError(CgError):
-    """
-    Error related to Microsalt analysis.
-    """
-
-
 class MissingAnalysisRunDirectory(CgError):
     """
     Error related to missing analysis.
     """
 
 
-class NfAnalysisError(CgError):
-    """
-    Error related to nf analysis.
-    """
-
-
 class OrderError(CgError):
     """
     Exception related to orders.
-    """
-
-
-class OrderSubmissionError(CgError):
-    """
-    Exception related to order submission.
     """
 
 
@@ -266,10 +244,6 @@ class ValidationError(CgError):
     """
 
 
-class DeleteDemuxError(CgError):
-    """Raised when there is an issue with wiping a flowcell before start."""
-
-
 class LoqusdbError(CgError):
     """Exception related to the Loqusdb app."""
 
@@ -314,10 +288,6 @@ class MissingMetrics(CgError):
     """Exception raised when mandatory metrics are missing."""
 
 
-class MissingSequencingMetricsError(CgError):
-    """Exception raised when sequencing metrics are missing."""
-
-
 class ArchiveJobFailedError(CgError):
     """Exception raised when an archival or retrieval job has failed."""
 
@@ -336,10 +306,6 @@ class OrderMismatchError(CgError):
 
 class OrderNotDeliverableError(CgError):
     """Exception raised when no analysis is ready for delivery for an order."""
-
-
-class DeliveryMessageNotSupportedError(CgError):
-    """Exception raised when trying to fetch delivery messages for unsupported workflows."""
 
 
 class OverrideCyclesError(CgError):
