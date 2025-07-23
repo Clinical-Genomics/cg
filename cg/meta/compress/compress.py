@@ -403,7 +403,7 @@ class CompressAPI:
         sample_compressions: list[SampleCompressionData] = []
         for sample in case.samples:
             if self._should_skip_sample(case=case, sample=sample):
-                LOG.warning(f"Skipping sample {sample.internal_id} - it has no reads.")
+                LOG.debug(f"Skipping sample {sample.internal_id} - it has no reads.")
                 continue
             sample_compression_data: SampleCompressionData = self.get_sample_compression_data(
                 sample.internal_id
