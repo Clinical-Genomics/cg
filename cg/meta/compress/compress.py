@@ -420,7 +420,7 @@ class CompressAPI:
         return SampleCompressionData(sample_id=sample_id, compression_objects=compression_objects)
 
     @staticmethod
-    def _should_skip_sample(case: Case, sample: Sample):
+    def _should_skip_sample(case: Case, sample: Sample) -> bool:
         """
         For some workflows, we want to start a partial analysis skipping the samples with no reads.
         This method returns true if we should skip the sample.
