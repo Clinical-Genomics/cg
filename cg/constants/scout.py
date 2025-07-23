@@ -161,12 +161,14 @@ MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
 )
 
 BALSAMIC_SAMPLE_TAGS = dict(
+    d4_file={"d4"},
     bam_file={"bam"},
     alignment_file={"cram"},
     vcf2cytosure={"vcf2cytosure"},
 )
 
 BALSAMIC_UMI_SAMPLE_TAGS = dict(
+    d4_file={"umi-d4"},
     bam_file={"umi-bam"},
     alignment_file={"umi-cram"},
 )

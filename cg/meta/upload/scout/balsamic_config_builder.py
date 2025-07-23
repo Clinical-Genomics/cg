@@ -52,6 +52,9 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
             sample_id=sample_id,
             hk_version=hk_version,
         )
+        config_sample.d4_file = self.get_sample_file(
+            hk_tags=self.sample_tags.d4_file, sample_id=sample_id, hk_version=hk_version
+        )
 
     def build_config_sample(
         self, case_sample: CaseSample, hk_version: Version

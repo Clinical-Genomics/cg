@@ -141,6 +141,7 @@ class ScoutLoadConfig(BaseModel):
 
 
 class BalsamicLoadConfig(ScoutLoadConfig):
+    d4_file: str | None = None
     madeline: str | None = None
     vcf_cancer: Annotated[str | None, AfterValidator(field_not_none)] = None
     vcf_cancer_sv: str | None = None
