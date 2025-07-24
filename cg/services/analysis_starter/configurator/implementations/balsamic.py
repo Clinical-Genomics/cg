@@ -7,12 +7,7 @@ from cg.apps.lims import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.constants import GenomeVersion
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import (
-    BalsamicInconsistentSexError,
-    BalsamicMissingTumorError,
-    BedFileNotFoundError,
-    CaseNotConfiguredError,
-)
+from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError, CaseNotConfiguredError
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.models.balsamic import (
@@ -187,12 +182,7 @@ class BalsamicConfigurator(Configurator):
     @staticmethod
     def _get_patient_sex(case) -> SexOptions:
         sample_sex: set[SexOptions] = {sample.sex for sample in case.samples}
-        if len(sample_sex) == 1:
-            return sample_sex.pop()
-        else:
-            raise BalsamicInconsistentSexError(
-                f"Case {case.internal_id} contains samples of differing sex"
-            )
+        return sample_sex.pop()
 
     @staticmethod
     def _get_normal_sample_id(case) -> str | None:

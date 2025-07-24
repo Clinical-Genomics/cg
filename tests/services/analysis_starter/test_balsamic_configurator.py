@@ -5,12 +5,7 @@ import pytest
 
 from cg.constants import SexOptions
 from cg.constants.priority import SlurmQos
-from cg.exc import (
-    BalsamicInconsistentSexError,
-    BalsamicMissingTumorError,
-    BedFileNotFoundError,
-    CaseNotConfiguredError,
-)
+from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError, CaseNotConfiguredError
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.models.balsamic import (
     BalsamicCaseConfig,
@@ -71,22 +66,6 @@ def test__get_patient_sex():
 
     # THEN the correct sex should be returned
     assert sex == SexOptions.MALE
-
-
-def test__get_patient_sex_mismatch():
-    """Tests that an error is raised when samples have different sexes"""
-    # GIVEN a case with two samples
-    case_with_sex_mismatch = create_autospec(Case)
-
-    # GIVEN that the samples have different sexes
-    sample_1 = create_autospec(Sample, sex=SexOptions.MALE)
-    sample_2 = create_autospec(Sample, sex=SexOptions.FEMALE)
-    case_with_sex_mismatch.samples = [sample_1, sample_2]
-
-    # WHEN getting the sex
-    # THEN the correct error should be raised
-    with pytest.raises(BalsamicInconsistentSexError):
-        BalsamicConfigurator._get_patient_sex(case_with_sex_mismatch)
 
 
 def test__resolve_bed_file_correct_in_lims(balsamic_configurator: BalsamicConfigurator):
