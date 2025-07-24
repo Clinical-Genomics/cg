@@ -231,7 +231,7 @@ class BalsamicConfigurator(Configurator):
             raise FileNotFoundError(
                 f"No matching CNN files found for identifier '{identifier}' in {self.pon_directory}"
             )
-        latest_version, latest_file = max(candidates, key=lambda x: x[0])
+        _, latest_file = max(candidates, key=lambda x: x[0])
 
         return latest_file
 
