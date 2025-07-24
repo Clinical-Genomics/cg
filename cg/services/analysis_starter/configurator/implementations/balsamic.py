@@ -122,11 +122,7 @@ class BalsamicConfigurator(Configurator):
             gender=patient_sex,
             genome_interval=self.genome_interval_path,
             genome_version=GenomeVersion.HG19,
-            gens_coverage_pon=(
-                self.gens_coverage_female_path
-                if patient_sex == SexOptions.FEMALE
-                else self.gens_coverage_male_path
-            ),
+            gens_coverage_pon=self._get_coverage_pon(patient_sex),
             gnomad_min_af5=self.gnomad_af5_path,
             normal_sample_name=self._get_normal_sample_id(case),
             sentieon_install_dir=self.sentieon_licence_path,
@@ -245,8 +241,9 @@ class BalsamicConfigurator(Configurator):
             raise FileNotFoundError(
                 f"No matching CNN files found for identifier '{identifier}' in {self.pon_directory}"
             )
+        latest_version, latest_file = max(candidates, key=lambda x: x[0])
 
-        return max(candidates, key=lambda x: x[0])[1]
+        return latest_file
 
     def _get_sample_config_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, f"{case_id}.json")
@@ -257,3 +254,10 @@ class BalsamicConfigurator(Configurator):
             raise CaseNotConfiguredError(
                 f"Please ensure that the config file {config.sample_config.exists()} exists."
             )
+
+    def _get_coverage_pon(self, patient_sex: SexOptions) -> Path:
+        return (
+            self.gens_coverage_female_path
+            if patient_sex == SexOptions.FEMALE
+            else self.gens_coverage_male_path
+        )
