@@ -17,8 +17,8 @@ PANEL_ONLY_FIELDS = ["soft_filter_normal", "panel_bed", "pon_cnn", "exome"]
 WGS_ONLY_FIELDS = ["genome_interval", "gens_coverage_pon"]
 
 
-def test_get_pon_file(balsamic_configurator, tmp_path):
-    # GIVEN a balsamic configurator
+def test_get_pon_file(balsamic_configurator: BalsamicConfigurator, tmp_path: Path):
+    # GIVEN a Balsamic configurator
     balsamic_configurator.pon_directory = tmp_path
     # GIVEN a bed file
     panel_name = "GMS_duck"
@@ -31,14 +31,14 @@ def test_get_pon_file(balsamic_configurator, tmp_path):
         pon_path.touch()
 
     # WHEN getting the pon path
-    pon_path = balsamic_configurator._get_pon_file(bed_file)
+    pon_path: Path = balsamic_configurator._get_pon_file(bed_file)
 
     # THEN the returned path should be the latest version
     assert pon_path == new_pon_path
 
 
 def test_get_pon_file_no_match(balsamic_configurator: BalsamicConfigurator, tmp_path: Path):
-    # GIVEN a balsamic configurator
+    # GIVEN a Balsamic configurator
     balsamic_configurator.pon_directory = tmp_path
 
     # GIVEN a bed file with no matching PON files
@@ -51,7 +51,7 @@ def test_get_pon_file_no_match(balsamic_configurator: BalsamicConfigurator, tmp_
         balsamic_configurator._get_pon_file(bed_file)
 
 
-def test__get_patient_sex():
+def test_get_patient_sex():
     """Tests that the correct sex is returned when all samples have the same sex"""
     # GIVEN a case with two samples
     case_with_male = create_autospec(Case)
@@ -68,9 +68,9 @@ def test__get_patient_sex():
     assert sex == SexOptions.MALE
 
 
-def test__resolve_bed_file_correct_in_lims(balsamic_configurator: BalsamicConfigurator):
+def test_resolve_bed_file_correct_in_lims(balsamic_configurator: BalsamicConfigurator):
     """Test that the correct bed file is resolved when it exists in LIMS."""
-    # GIVEN a balsamic configurator with a bed_directory
+    # GIVEN a Balsamic configurator with a bed_directory
     bed_directory = Path("path/to/bed/files")
     balsamic_configurator.bed_directory = bed_directory
 
@@ -94,9 +94,9 @@ def test__resolve_bed_file_correct_in_lims(balsamic_configurator: BalsamicConfig
     assert bed_file == Path(bed_directory, "GMS_duck_v5.99_extra_floating.bed")
 
 
-def test__resolve_bed_file_not_in_lims(balsamic_configurator: BalsamicConfigurator):
+def test_resolve_bed_file_not_in_lims(balsamic_configurator: BalsamicConfigurator):
     """Test that an error is raised when the panel is not set in LIMS."""
-    # GIVEN a balsamic configurator with a bed_directory
+    # GIVEN a Balsamic configurator with a bed_directory
     bed_directory = Path("path/to/bed/files")
     balsamic_configurator.bed_directory = bed_directory
 
@@ -114,9 +114,9 @@ def test__resolve_bed_file_not_in_lims(balsamic_configurator: BalsamicConfigurat
         balsamic_configurator._resolve_bed_file(case_missing_bed)
 
 
-def test__resolve_bed_file_not_in_store(balsamic_configurator: BalsamicConfigurator):
+def test_resolve_bed_file_not_in_store(balsamic_configurator: BalsamicConfigurator):
     """Test that an error is raised when the panel does not exist in the store."""
-    # GIVEN a balsamic configurator with a bed_directory
+    # GIVEN a Balsamic configurator with a bed_directory
     bed_directory = Path("path/to/bed/files")
     balsamic_configurator.bed_directory = bed_directory
 
@@ -137,9 +137,9 @@ def test__resolve_bed_file_not_in_store(balsamic_configurator: BalsamicConfigura
         balsamic_configurator._resolve_bed_file(case_missing_bed)
 
 
-def test__resolve_bed_file_override_with_flag(balsamic_configurator: BalsamicConfigurator):
+def test_resolve_bed_file_override_with_flag(balsamic_configurator: BalsamicConfigurator):
     """Test that the bed file can be overridden with a flag."""
-    # GIVEN a balsamic configurator with a bed_directory
+    # GIVEN a Balsamic configurator with a bed_directory
     bed_directory = Path("path/to/bed/files")
     balsamic_configurator.bed_directory = bed_directory
 
@@ -169,8 +169,8 @@ def test__resolve_bed_file_override_with_flag(balsamic_configurator: BalsamicCon
     balsamic_configurator.lims_api.capture_kit.assert_not_called()
 
 
-def test__get_normal_sample_id():
-    """ "Tests that a case containing a normal sample returns the correct sample id."""
+def test_get_normal_sample_id():
+    """Tests that a case containing a normal sample returns the correct sample id."""
     # GIVEN a case with a normal sample
     case_with_normal = create_autospec(Case)
     normal_sample = create_autospec(Sample, internal_id="normal_sample", is_tumour=False)
@@ -183,7 +183,7 @@ def test__get_normal_sample_id():
     assert normal_sample_id == "normal_sample"
 
 
-def test__get_normal_sample_id_no_normal_sample():
+def test_get_normal_sample_id_no_normal_sample():
     """Tests that a case without a normal returns None."""
     # GIVEN a case without a normal sample
     case_with_tumor = create_autospec(Case)
@@ -197,7 +197,7 @@ def test__get_normal_sample_id_no_normal_sample():
     assert normal_sample_id is None
 
 
-def test__get_tumor_sample_id():
+def test_get_tumor_sample_id():
     """Tests that a case containing a tumor sample returns the correct sample id."""
     # GIVEN a case with a tumor sample
     case_with_tumor = create_autospec(Case)
@@ -211,7 +211,7 @@ def test__get_tumor_sample_id():
     assert tumor_sample_id == "tumor_sample"
 
 
-def test__get_tumor_sample_id_no_tumor_sample():
+def test_get_tumor_sample_id_no_tumor_sample():
     """Tests that a case without tumor samples raises an error."""
     # GIVEN a case without a tumor sample
     case_with_normal = create_autospec(Case)
@@ -224,7 +224,7 @@ def test__get_tumor_sample_id_no_tumor_sample():
         BalsamicConfigurator._get_tumor_sample_id(case_with_normal)
 
 
-def test__build_cli_input_wgs_tumor_only(balsamic_configurator):
+def test_build_cli_input_wgs_tumor_only(balsamic_configurator: BalsamicConfigurator):
     # GIVEN a case with one WGS sample
     wgs_tumor_only_case = create_autospec(Case, data_analysis="balsamic", internal_id="case_1")
     application = create_autospec(Application, prep_category="wgs")
@@ -258,7 +258,7 @@ def test__build_cli_input_wgs_tumor_only(balsamic_configurator):
         assert getattr(cli_input, field) == BalsamicConfigInput.model_fields[field].default
 
 
-def test__build_cli_input_wgs_tumor_normal(balsamic_configurator):
+def test_build_cli_input_wgs_tumor_normal(balsamic_configurator: BalsamicConfigurator):
     # GIVEN a case with one two WGS samples (tumor and normal)
     wgs_tumor_only_case = create_autospec(Case, data_analysis="balsamic-umi", internal_id="case_1")
     application = create_autospec(Application, prep_category="wgs")
@@ -299,7 +299,9 @@ def test__build_cli_input_wgs_tumor_normal(balsamic_configurator):
         assert getattr(cli_input, field) == BalsamicConfigInput.model_fields[field].default
 
 
-def test__build_cli_input_panel_tumor_only(balsamic_configurator, bed_version_short_name):
+def test_build_cli_input_panel_tumor_only(
+    balsamic_configurator: BalsamicConfigurator, bed_version_short_name: str
+):
     # GIVEN a case with one panel sample
     panel_tumor_only_case = create_autospec(Case, data_analysis="balsamic", internal_id="case_1")
     application = create_autospec(Application, prep_category="tgs")
@@ -336,7 +338,9 @@ def test__build_cli_input_panel_tumor_only(balsamic_configurator, bed_version_sh
         assert getattr(cli_input, field) == BalsamicConfigInput.model_fields[field].default
 
 
-def test__build_cli_input_panel_exome_only(balsamic_configurator, bed_version_short_name):
+def test_build_cli_input_panel_exome_only(
+    balsamic_configurator: BalsamicConfigurator, bed_version_short_name: str
+):
     # GIVEN a case with one exome sample
     exome_tumor_only_case = create_autospec(Case, data_analysis="balsamic", internal_id="case_1")
     application = create_autospec(Application, prep_category="wes")
@@ -378,7 +382,7 @@ def test__build_cli_input_panel_exome_only(balsamic_configurator, bed_version_sh
 
 def test_get_config(balsamic_configurator: BalsamicCaseConfig, case_id: str, tmp_path: Path):
     """Tests that the get_config method returns a BalsamicCaseConfig. And that fields can be overridden with flags."""
-    # GIVEN a balsamic configurator with an existing config file
+    # GIVEN a Balsamic configurator with an existing config file
     balsamic_configurator.root_dir = tmp_path
     Path(balsamic_configurator.root_dir, case_id).mkdir()
     Path(balsamic_configurator.root_dir, case_id, f"{case_id}.json").touch()
@@ -404,7 +408,7 @@ def test_get_config_missing_config_file(
     balsamic_configurator: BalsamicCaseConfig, case_id: str, tmp_path: Path
 ):
     """Tests that the get_config method raises an error if the config file is missing."""
-    # GIVEN a balsamic configurator with a non-existing config file
+    # GIVEN a BalsamicCaseConfig with a non-existing config file
     balsamic_configurator.root_dir = tmp_path
 
     # GIVEN that the database returns a case with the provided case_id

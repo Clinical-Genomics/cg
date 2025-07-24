@@ -14,7 +14,7 @@ from cg.services.analysis_starter.configurator.models.balsamic import (
     BalsamicCaseConfig,
     BalsamicConfigInput,
 )
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -205,7 +205,7 @@ class BalsamicConfigurator(Configurator):
 
     def _get_bed_name_from_lims(self, case: Case) -> str:
         """Get the bed name from LIMS. Assumes that all samples in the case have the same panel."""
-        first_sample = case.samples[0]
+        first_sample: Sample = case.samples[0]
         if lims_bed := self.lims_api.capture_kit(lims_id=first_sample.internal_id):
             return lims_bed
         else:
