@@ -110,6 +110,7 @@ class ScoutCancerIndividual(ScoutIndividual):
     msi: str | None = None
     tumor_purity: float = 0
     vcf2cytosure: str | None = None
+    d4_file: str | None = None
 
 
 class ScoutLoadConfig(BaseModel):
