@@ -17,7 +17,7 @@ PANEL_ONLY_FIELDS = ["soft_filter_normal", "panel_bed", "pon_cnn", "exome"]
 WGS_ONLY_FIELDS = ["genome_interval", "gens_coverage_pon"]
 
 
-def test__get_pon(balsamic_configurator, tmp_path):
+def test_get_pon_file(balsamic_configurator, tmp_path):
     # GIVEN a balsamic configurator
     balsamic_configurator.pon_directory = tmp_path
     # GIVEN a bed file
@@ -31,13 +31,13 @@ def test__get_pon(balsamic_configurator, tmp_path):
         pon_path.touch()
 
     # WHEN getting the pon path
-    pon_path = balsamic_configurator._get_pon(bed_file)
+    pon_path = balsamic_configurator._get_pon_file(bed_file)
 
     # THEN the returned path should be the latest version
     assert pon_path == new_pon_path
 
 
-def test__get_pon_no_match(balsamic_configurator: BalsamicConfigurator, tmp_path: Path):
+def test_get_pon_file_no_match(balsamic_configurator: BalsamicConfigurator, tmp_path: Path):
     # GIVEN a balsamic configurator
     balsamic_configurator.pon_directory = tmp_path
 
@@ -48,7 +48,7 @@ def test__get_pon_no_match(balsamic_configurator: BalsamicConfigurator, tmp_path
     # WHEN getting the pon path
     # THEN it should raise a FileNotFoundError
     with pytest.raises(FileNotFoundError):
-        balsamic_configurator._get_pon(bed_file)
+        balsamic_configurator._get_pon_file(bed_file)
 
 
 def test__get_patient_sex():
@@ -318,7 +318,7 @@ def test__build_cli_input_panel_tumor_only(balsamic_configurator, bed_version_sh
     balsamic_configurator.lims_api.capture_kit = Mock(return_value=bed_version_short_name)
 
     # GIVEN that there exists matching pon files
-    balsamic_configurator._get_pon = Mock(return_value=Path("path/to/pon.cnn"))
+    balsamic_configurator._get_pon_file = Mock(return_value=Path("path/to/pon.cnn"))
 
     # WHEN building the CLI input
     cli_input: BalsamicConfigInput = balsamic_configurator._build_cli_input(
@@ -355,7 +355,7 @@ def test__build_cli_input_panel_exome_only(balsamic_configurator, bed_version_sh
     balsamic_configurator.lims_api.capture_kit = Mock(return_value=bed_version_short_name)
 
     # GIVEN that there exists matching pon files
-    balsamic_configurator._get_pon = Mock(return_value=Path("path/to/pon.cnn"))
+    balsamic_configurator._get_pon_file = Mock(return_value=Path("path/to/pon.cnn"))
 
     # WHEN building the CLI input
     cli_input: BalsamicConfigInput = balsamic_configurator._build_cli_input(

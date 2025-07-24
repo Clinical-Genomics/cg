@@ -50,7 +50,7 @@ class BalsamicConfigurator(Configurator):
         self.loqusdb_cancer_somatic_sv: Path = config.loqusdb_cancer_somatic_sv
         self.loqusdb_clinical_snv: Path = config.loqusdb_clinical_snv
         self.loqusdb_clinical_sv: Path = config.loqusdb_clinical_sv
-        self.pon_directory: Path = Path(config.pon_path)
+        self.pon_directory: Path = config.pon_path
         self.slurm_account: str = config.slurm.account
         self.slurm_mail_user: str = config.slurm.mail_user
         self.swegen_snv: Path = config.swegen_snv
@@ -151,7 +151,7 @@ class BalsamicConfigurator(Configurator):
             gnomad_min_af5=self.gnomad_af5_path,
             normal_sample_name=self._get_normal_sample_id(case),
             panel_bed=bed_file,
-            pon_cnn=self._get_pon(bed_file),
+            pon_cnn=self._get_pon_file(bed_file),
             exome=self._all_samples_are_exome(case),
             sentieon_install_dir=self.sentieon_licence_path,
             sentieon_license=self.sentieon_licence_server,
@@ -213,7 +213,7 @@ class BalsamicConfigurator(Configurator):
                 f"No bed file found in LIMS for sample {first_sample.internal_id} in for case {case.internal_id}."
             )
 
-    def _get_pon(self, bed_file: Path) -> Path:
+    def _get_pon_file(self, bed_file: Path) -> Path:
         """Finds the corresponding PON file for the given bed file.
         These are versioned and named like: <bed_file_name>_hg19_design_CNVkit_PON_reference_v<version>.cnn
         This method returns the latest version of the PON file matching the bed name.
