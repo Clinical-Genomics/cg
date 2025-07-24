@@ -8,6 +8,7 @@ from cg.constants import SexOptions
 from cg.constants.constants import GenomeVersion
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError, CaseNotConfiguredError
+from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.models.balsamic import (
@@ -24,6 +25,7 @@ class BalsamicConfigurator(Configurator):
     def __init__(
         self,
         config: BalsamicConfig,
+        fastq_handler: BalsamicFastqHandler,
         lims_api: LimsAPI,
         store: Store,
     ):
@@ -32,6 +34,7 @@ class BalsamicConfigurator(Configurator):
         self.conda_binary: Path = config.conda_binary
         self.balsamic_binary: Path = config.binary_path
         self.root_dir: Path = config.root
+        self.fastq_handler: BalsamicFastqHandler = fastq_handler
         self.bed_directory: Path = config.bed_path
         self.cache_dir: Path = config.balsamic_cache
         self.cadd_path: Path = config.cadd_path
@@ -57,6 +60,8 @@ class BalsamicConfigurator(Configurator):
         self.swegen_sv: Path = config.swegen_sv
 
     def configure(self, case_id: str, **flags) -> BalsamicCaseConfig:
+        LOG.info(f"Configuring case {case_id}")
+        self.fastq_handler.link_fastq_files(case_id)
         config_cli_input: BalsamicConfigInput = self._build_cli_input(case_id)
         self.create_config_file(config_cli_input)
         return self.get_config(case_id=case_id, **flags)
