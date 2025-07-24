@@ -179,22 +179,33 @@ class MutaccAutoConfig(CommonAppConfig):
 
 
 class BalsamicConfig(CommonAppConfig):
-    balsamic_cache: str
-    bed_path: str
-    binary_path: str
-    cadd_path: str
-    conda_binary: str
+    balsamic_cache: Path
+    bed_path: Path
+    binary_path: Path
+    cadd_path: Path
+    cluster_config: Path
+    conda_binary: Path
     conda_env: str
-    genome_interval_path: str
-    gens_coverage_female_path: str
-    gens_coverage_male_path: str
-    gnomad_af5_path: str
+    genome_interval_path: Path
+    gens_coverage_female_path: Path
+    gens_coverage_male_path: Path
+    gnomad_af5_path: Path
     loqusdb_path: str
-    pon_path: str
-    root: str
-    sentieon_licence_path: str
+    loqusdb_artefact_snv: Path
+    loqusdb_cancer_germline_snv: Path
+    loqusdb_cancer_germline_sv: Path
+    loqusdb_cancer_somatic_snv: Path
+    loqusdb_cancer_somatic_sv: Path
+    loqusdb_clinical_snv: Path
+    loqusdb_clinical_sv: Path
+    pon_path: Path
+    root: Path
+    sentieon_licence_path: Path
+    sentieon_licence_server: str
     slurm: SlurmConfig
     swegen_path: str
+    swegen_snv: Path
+    swegen_sv: Path
 
 
 class MutantConfig(BaseModel):
@@ -409,7 +420,6 @@ class CGConfig(BaseModel):
     max_flowcells: int | None = None
     nanopore_data_directory: str
     run_instruments: RunInstruments
-    sentieon_licence_server: str
     tower_binary_path: str
 
     # Base APIs that always should exist
