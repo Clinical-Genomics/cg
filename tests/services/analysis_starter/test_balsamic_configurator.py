@@ -225,7 +225,7 @@ def test_get_tumor_sample_id_no_tumor_sample():
 
 
 def test_build_cli_input_wgs_tumor_only(balsamic_configurator: BalsamicConfigurator):
-    # GIVEN a case with one WGS sample
+    # GIVEN a case with one tumor WGS sample
     wgs_tumor_only_case = create_autospec(Case, data_analysis="balsamic", internal_id="case_1")
     application = create_autospec(Application, prep_category="wgs")
     application_version = create_autospec(ApplicationVersion, application=application)
@@ -247,7 +247,7 @@ def test_build_cli_input_wgs_tumor_only(balsamic_configurator: BalsamicConfigura
     # THEN pydantic model should be created (and validated)
     assert isinstance(cli_input, BalsamicConfigInput)
 
-    # THEN the correct no normal sample name should be set
+    # THEN the correct normal sample name should be set
     assert cli_input.normal_sample_name is None
 
     # THEN the correct gens_coverage_pon should be chosen (Female)
@@ -259,7 +259,7 @@ def test_build_cli_input_wgs_tumor_only(balsamic_configurator: BalsamicConfigura
 
 
 def test_build_cli_input_wgs_tumor_normal(balsamic_configurator: BalsamicConfigurator):
-    # GIVEN a case with one two WGS samples (tumor and normal)
+    # GIVEN a case with two WGS samples (tumor and normal)
     wgs_tumor_only_case = create_autospec(Case, data_analysis="balsamic-umi", internal_id="case_1")
     application = create_autospec(Application, prep_category="wgs")
     application_version = create_autospec(ApplicationVersion, application=application)
@@ -302,7 +302,7 @@ def test_build_cli_input_wgs_tumor_normal(balsamic_configurator: BalsamicConfigu
 def test_build_cli_input_panel_tumor_only(
     balsamic_configurator: BalsamicConfigurator, bed_version_short_name: str
 ):
-    # GIVEN a case with one panel sample
+    # GIVEN a case with one tumor panel sample
     panel_tumor_only_case = create_autospec(Case, data_analysis="balsamic", internal_id="case_1")
     application = create_autospec(Application, prep_category="tgs")
     application_version = create_autospec(ApplicationVersion, application=application)
@@ -327,10 +327,10 @@ def test_build_cli_input_panel_tumor_only(
         case_id=panel_tumor_only_case.internal_id
     )
 
-    # THEN pydantic model should be created (and validated)
+    # THEN a BalsamicConfigInput instance should be created (and validated)
     assert isinstance(cli_input, BalsamicConfigInput)
 
-    # THEN the correct no normal sample name should be set
+    # THEN the correct normal sample name should be set
     assert cli_input.normal_sample_name is None
 
     # THEN fields not relevant for panel analyses should be set to their default values
@@ -369,7 +369,7 @@ def test_build_cli_input_panel_exome_only(
     # THEN pydantic model should be created (and validated)
     assert isinstance(cli_input, BalsamicConfigInput)
 
-    # THEN the correct no normal sample name should be set
+    # THEN the correct normal sample name should be set
     assert cli_input.normal_sample_name is None
 
     # THEN fields not relevant for panel analyses should be set to their default values
@@ -380,7 +380,7 @@ def test_build_cli_input_panel_exome_only(
     assert cli_input.exome is True
 
 
-def test_get_config(balsamic_configurator: BalsamicCaseConfig, case_id: str, tmp_path: Path):
+def test_get_config(balsamic_configurator: BalsamicConfigurator, case_id: str, tmp_path: Path):
     """Tests that the get_config method returns a BalsamicCaseConfig. And that fields can be overridden with flags."""
     # GIVEN a Balsamic configurator with an existing config file
     balsamic_configurator.root_dir = tmp_path
@@ -405,11 +405,13 @@ def test_get_config(balsamic_configurator: BalsamicCaseConfig, case_id: str, tmp
 
 
 def test_get_config_missing_config_file(
-    balsamic_configurator: BalsamicCaseConfig, case_id: str, tmp_path: Path
+    balsamic_configurator: BalsamicConfigurator, case_id: str, tmp_path: Path
 ):
     """Tests that the get_config method raises an error if the config file is missing."""
-    # GIVEN a BalsamicCaseConfig with a non-existing config file
+    # GIVEN a BalsamicConfigurator
     balsamic_configurator.root_dir = tmp_path
+
+    # GIVEN that the config file does not exist
 
     # GIVEN that the database returns a case with the provided case_id
     case_to_configure = create_autospec(Case, internal_id=case_id)
