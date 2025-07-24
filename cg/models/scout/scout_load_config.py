@@ -110,6 +110,7 @@ class ScoutCancerIndividual(ScoutIndividual):
     msi: str | None = None
     tumor_purity: float = 0
     vcf2cytosure: str | None = None
+    d4_file: str | None = None
 
 
 class ScoutLoadConfig(BaseModel):
@@ -141,6 +142,7 @@ class ScoutLoadConfig(BaseModel):
 
 
 class BalsamicLoadConfig(ScoutLoadConfig):
+    d4_file: str | None = None
     madeline: str | None = None
     vcf_cancer: Annotated[str | None, AfterValidator(field_not_none)] = None
     vcf_cancer_sv: str | None = None
