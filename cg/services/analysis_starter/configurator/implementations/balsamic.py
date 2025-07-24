@@ -218,9 +218,9 @@ class BalsamicConfigurator(Configurator):
         These are versioned and named like: <bed_file_name>_hg19_design_CNVkit_PON_reference_v<version>.cnn
         This method returns the latest version of the PON file matching the bed name.
         """
-        identifier = bed_file.stem
-        pattern = re.compile(rf"{re.escape(identifier)}.*_v(\d+)\.cnn$")
-        candidates = []
+        identifier: str = bed_file.stem
+        pattern: re.Pattern[str] = re.compile(rf"{re.escape(identifier)}.*_v(\d+)\.cnn$")
+        candidates: list = []
 
         for file in self.pon_directory.glob("*.cnn"):
             if match := pattern.search(file.name):
