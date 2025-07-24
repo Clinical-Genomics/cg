@@ -18,6 +18,7 @@ def balsamic_config_input(tmp_path: Path) -> BalsamicConfigInput:
         cadd_annotations=tmp_path / "cadd_annotations.json",
         cancer_germline_snv_observations=tmp_path / "cancer_germline_snv.json",
         cancer_germline_sv_observations=tmp_path / "cancer_germline_sv.json",
+        cancer_somatic_snv_observations=tmp_path / "cancer_somatic_snv.json",
         cancer_somatic_sv_observations=tmp_path / "cancer_somatic_sv.json",
         case_id="test_case",
         clinical_snv_observations=tmp_path / "clinical_snv.json",

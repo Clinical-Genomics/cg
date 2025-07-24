@@ -2,7 +2,8 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from cg.constants import Workflow
+from cg.constants import SexOptions, Workflow
+from cg.constants.constants import GenomeVersion
 from cg.constants.priority import SlurmQos
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 
@@ -11,20 +12,21 @@ class BalsamicConfigInput(BaseModel):
     conda_binary: Path
     balsamic_binary: Path
     analysis_dir: Path
-    analysis_workflow: str
+    analysis_workflow: Workflow
     artefact_snv_observations: Path
     balsamic_cache: Path
     cadd_annotations: Path
     cancer_germline_snv_observations: Path
     cancer_germline_sv_observations: Path
+    cancer_somatic_snv_observations: Path
     cancer_somatic_sv_observations: Path
     case_id: str
     clinical_snv_observations: Path
     clinical_sv_observations: Path
     fastq_path: Path
-    gender: str
+    gender: SexOptions
     genome_interval: Path | None = None
-    genome_version: str
+    genome_version: GenomeVersion
     gens_coverage_pon: Path | None = None
     gnomad_min_af5: Path | None = None
     normal_sample_name: str | None = None
