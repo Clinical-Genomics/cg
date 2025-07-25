@@ -94,12 +94,12 @@ class BalsamicConfigurator(Configurator):
             stderr=subprocess.PIPE,
         )
 
-    def _build_cli_input(self, case_id) -> BalsamicConfigInput:
+    def _build_cli_input(self, case_id, **flags) -> BalsamicConfigInput:
         case: Case = self.store.get_case_by_internal_id(case_id)
         if self._all_samples_are_wgs(case):
             return self._build_wgs_config(case)
         else:
-            return self._build_targeted_config(case)
+            return self._build_targeted_config(case, **flags)
 
     def _build_wgs_config(self, case: Case) -> BalsamicConfigInput:
         patient_sex: SexOptions = self._get_patient_sex(case)
