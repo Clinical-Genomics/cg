@@ -7,12 +7,7 @@ from cg.apps.lims import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.constants import GenomeVersion
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import (
-    BalsamicInconsistentSexError,
-    BalsamicMissingTumorError,
-    BedFileNotFoundError,
-    CaseNotConfiguredError,
-)
+from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError, CaseNotConfiguredError
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
@@ -20,7 +15,7 @@ from cg.services.analysis_starter.configurator.models.balsamic import (
     BalsamicCaseConfig,
     BalsamicConfigInput,
 )
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -58,7 +53,7 @@ class BalsamicConfigurator(Configurator):
         self.loqusdb_cancer_somatic_sv: Path = config.loqusdb_cancer_somatic_sv
         self.loqusdb_clinical_snv: Path = config.loqusdb_clinical_snv
         self.loqusdb_clinical_sv: Path = config.loqusdb_clinical_sv
-        self.pon_directory: Path = Path(config.pon_path)
+        self.pon_directory: Path = config.pon_path
         self.slurm_account: str = config.slurm.account
         self.slurm_mail_user: str = config.slurm.mail_user
         self.swegen_snv: Path = config.swegen_snv
@@ -127,11 +122,7 @@ class BalsamicConfigurator(Configurator):
             gender=patient_sex,
             genome_interval=self.genome_interval_path,
             genome_version=GenomeVersion.HG19,
-            gens_coverage_pon=(
-                self.gens_coverage_female_path
-                if patient_sex == SexOptions.FEMALE
-                else self.gens_coverage_male_path
-            ),
+            gens_coverage_pon=self._get_coverage_pon(patient_sex),
             gnomad_min_af5=self.gnomad_af5_path,
             normal_sample_name=self._get_normal_sample_id(case),
             sentieon_install_dir=self.sentieon_licence_path,
@@ -165,7 +156,7 @@ class BalsamicConfigurator(Configurator):
             gnomad_min_af5=self.gnomad_af5_path,
             normal_sample_name=self._get_normal_sample_id(case),
             panel_bed=bed_file,
-            pon_cnn=self._get_pon(bed_file),
+            pon_cnn=self._get_pon_file(bed_file),
             exome=self._all_samples_are_exome(case),
             sentieon_install_dir=self.sentieon_licence_path,
             sentieon_license=self.sentieon_licence_server,
@@ -196,12 +187,7 @@ class BalsamicConfigurator(Configurator):
     @staticmethod
     def _get_patient_sex(case) -> SexOptions:
         sample_sex: set[SexOptions] = {sample.sex for sample in case.samples}
-        if len(sample_sex) == 1:
-            return sample_sex.pop()
-        else:
-            raise BalsamicInconsistentSexError(
-                f"Case {case.internal_id} contains samples of differing sex"
-            )
+        return sample_sex.pop()
 
     @staticmethod
     def _get_normal_sample_id(case) -> str | None:
@@ -224,7 +210,7 @@ class BalsamicConfigurator(Configurator):
 
     def _get_bed_name_from_lims(self, case: Case) -> str:
         """Get the bed name from LIMS. Assumes that all samples in the case have the same panel."""
-        first_sample = case.samples[0]
+        first_sample: Sample = case.samples[0]
         if lims_bed := self.lims_api.capture_kit(lims_id=first_sample.internal_id):
             return lims_bed
         else:
@@ -232,14 +218,14 @@ class BalsamicConfigurator(Configurator):
                 f"No bed file found in LIMS for sample {first_sample.internal_id} in for case {case.internal_id}."
             )
 
-    def _get_pon(self, bed_file: Path) -> Path:
+    def _get_pon_file(self, bed_file: Path) -> Path:
         """Finds the corresponding PON file for the given bed file.
         These are versioned and named like: <bed_file_name>_hg19_design_CNVkit_PON_reference_v<version>.cnn
         This method returns the latest version of the PON file matching the bed name.
         """
-        identifier = bed_file.stem
-        pattern = re.compile(rf"{re.escape(identifier)}.*_v(\d+)\.cnn$")
-        candidates = []
+        identifier: str = bed_file.stem
+        pattern: re.Pattern[str] = re.compile(rf"{re.escape(identifier)}.*_v(\d+)\.cnn$")
+        candidates: list = []
 
         for file in self.pon_directory.glob("*.cnn"):
             if match := pattern.search(file.name):
@@ -250,8 +236,9 @@ class BalsamicConfigurator(Configurator):
             raise FileNotFoundError(
                 f"No matching CNN files found for identifier '{identifier}' in {self.pon_directory}"
             )
+        _, latest_file = max(candidates, key=lambda x: x[0])
 
-        return max(candidates, key=lambda x: x[0])[1]
+        return latest_file
 
     def _get_sample_config_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, f"{case_id}.json")
@@ -262,3 +249,10 @@ class BalsamicConfigurator(Configurator):
             raise CaseNotConfiguredError(
                 f"Please ensure that the config file {config.sample_config.exists()} exists."
             )
+
+    def _get_coverage_pon(self, patient_sex: SexOptions) -> Path:
+        return (
+            self.gens_coverage_female_path
+            if patient_sex == SexOptions.FEMALE
+            else self.gens_coverage_male_path
+        )

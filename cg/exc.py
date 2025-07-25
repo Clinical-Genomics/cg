@@ -362,10 +362,6 @@ class CaseNotConfiguredError(CgError):
     """Exception raised when a case is being run without a configuration."""
 
 
-class BalsamicInconsistentSexError(CgError):
-    """Exception raised when samples in a Balsamic case have different sex."""
-
-
 class BalsamicMissingTumorError(CgError):
     """Exception raised when a Balsamic case is missing a tumor sample."""
 
