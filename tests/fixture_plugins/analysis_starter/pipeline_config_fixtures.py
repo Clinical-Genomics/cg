@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.models.cg_config import RarediseaseConfig, RnafusionConfig
+from cg.models.cg_config import BalsamicConfig, RarediseaseConfig, RnafusionConfig, SlurmConfig
 
 
 @pytest.fixture
@@ -62,3 +62,39 @@ def raredisease_config_object(get_nextflow_config_dict: callable) -> Raredisease
 def rnafusion_config_object(get_nextflow_config_dict: callable) -> RnafusionConfig:
     config: dict = get_nextflow_config_dict(workflow="rnafusion")
     return RnafusionConfig(**config)
+
+
+@pytest.fixture
+def balsamic_config(tmp_path) -> BalsamicConfig:
+    return BalsamicConfig(
+        balsamic_cache=tmp_path / "balsamic_cache",
+        bed_path=tmp_path / "bed_file.bed",
+        binary_path=tmp_path / "binary",
+        cadd_path=tmp_path / "cadd",
+        cluster_config=tmp_path / "cluster.yaml",
+        conda_binary=tmp_path / "conda",
+        conda_env="balsamic_env",
+        genome_interval_path=tmp_path / "intervals.interval_list",
+        gens_coverage_female_path=tmp_path / "coverage_female.txt",
+        gens_coverage_male_path=tmp_path / "coverage_male.txt",
+        gnomad_af5_path=tmp_path / "gnomad_af5.vcf",
+        loqusdb_path="mongodb://localhost:27017/loqusdb",
+        loqusdb_artefact_snv=tmp_path / "artefact_snv.vcf",
+        loqusdb_cancer_germline_snv=tmp_path / "cancer_germline_snv.vcf",
+        loqusdb_cancer_germline_sv=tmp_path / "cancer_germline_sv.vcf",
+        loqusdb_cancer_somatic_snv=tmp_path / "cancer_somatic_snv.vcf",
+        loqusdb_cancer_somatic_sv=tmp_path / "cancer_somatic_sv.vcf",
+        loqusdb_clinical_snv=tmp_path / "clinical_snv.vcf",
+        loqusdb_clinical_sv=tmp_path / "clinical_sv.vcf",
+        pon_path=tmp_path / "pon.vcf",
+        root=tmp_path / "balsamic_root",
+        sentieon_licence_path=tmp_path / "sentieon.lic",
+        sentieon_licence_server="27001@sentieon-license",
+        slurm=SlurmConfig(
+            account="production",
+            mail_user="balsamic@test.org",
+        ),
+        swegen_path="swegen",
+        swegen_snv=tmp_path / "swegen_snv.vcf",
+        swegen_sv=tmp_path / "swegen_sv.vcf",
+    )
