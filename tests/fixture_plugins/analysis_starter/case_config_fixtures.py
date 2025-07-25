@@ -4,6 +4,7 @@ import pytest
 
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
+from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 
 
@@ -15,7 +16,6 @@ def raredisease_case_config(
     nextflow_repository: str,
     nextflow_pipeline_revision: str,
 ) -> NextflowCaseConfig:
-
     return NextflowCaseConfig(
         case_id=nextflow_case_id,
         config_profiles=raredisease_config_profiles,
@@ -51,4 +51,20 @@ def rnafusion_case_config(nextflow_root: str, nextflow_case_id: str) -> Nextflow
         revision="2.2.0",
         stub_run=False,
         work_dir=Path(nextflow_root, nextflow_case_id, "work").as_posix(),
+    )
+
+
+@pytest.fixture
+def balsamic_case_config(case_id: str, tmp_path: Path) -> BalsamicCaseConfig:
+    return BalsamicCaseConfig(
+        account="development",
+        binary=tmp_path / "bin" / "balsamic",
+        case_id=case_id,
+        cluster_config=tmp_path / "balsamic_cluster_config.json",
+        conda_binary=tmp_path / "bin" / "conda",
+        environment="T_BALSAMIC",
+        mail_user="some@email.se",
+        qos=SlurmQos.NORMAL,
+        sample_config=tmp_path / case_id / f"{case_id}.json",
+        workflow=Workflow.BALSAMIC,
     )
