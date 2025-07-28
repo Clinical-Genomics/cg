@@ -2,6 +2,7 @@ from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
 import pytest
+from pytest_mock import MockFixture
 
 from cg.apps.environ import environ_email
 from cg.apps.tb import TrailblazerAPI
@@ -31,6 +32,7 @@ def balsamic_tracker(balsamic_store: Store, tmp_path: Path) -> BalsamicTracker:
 def test_balsamic_tracker_successful(
     balsamic_case_config: BalsamicCaseConfig,
     balsamic_tracker: BalsamicTracker,
+    mocker: MockFixture,
 ):
     # GIVEN a valid Balsamic case config
 
@@ -38,9 +40,10 @@ def test_balsamic_tracker_successful(
     db_case: Case = balsamic_tracker.store.get_case_by_internal_id(balsamic_case_config.case_id)
 
     # GIVEN that a Balsamic Config file exists
-    balsamic_case_config.sample_config.parent.mkdir()
-    with open(balsamic_case_config.sample_config, "w") as file:
-        file.write('{"analysis": {"BALSAMIC_version": "1.0.12"}}')
+    mocker.patch(
+        "cg.services.analysis_starter.tracker.implementations.balsamic.read_json",
+        return_value={"analysis": {"BALSAMIC_version": "1.0.12"}},
+    )
 
     balsamic_tracker.trailblazer_api.add_pending_analysis = Mock(
         return_value=create_autospec(TrailblazerAnalysis, id=11234)
