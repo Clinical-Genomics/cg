@@ -141,7 +141,7 @@ def balsamic_store(base_store: Store, case_id: str, helpers: StoreHelpers) -> St
     application_version: ApplicationVersion = helpers.ensure_application_version(
         store=base_store, prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
     )
-    customer: Customer = base_store.get_customers()[0]
+    customer: Customer = base_store.get_customers()[1]
 
     balsamic_sample: Sample = base_store.add_sample(
         application_version=application_version,

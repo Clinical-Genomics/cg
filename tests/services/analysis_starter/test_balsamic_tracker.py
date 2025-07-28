@@ -3,12 +3,16 @@ from unittest.mock import Mock, create_autospec
 
 import pytest
 
+from cg.apps.environ import environ_email
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Workflow
+from cg.constants.constants import WorkflowManager
+from cg.constants.priority import TrailblazerPriority
+from cg.constants.tb import AnalysisType
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.services.analysis_starter.tracker.implementations.balsamic import BalsamicTracker
-from cg.store.models import Analysis
+from cg.store.models import Analysis, Case
 from cg.store.store import Store
 
 
@@ -30,6 +34,9 @@ def test_balsamic_tracker_successful(
 ):
     # GIVEN a valid Balsamic case config
 
+    # GIVEN that the case exists in the da
+    db_case: Case = balsamic_tracker.store.get_case_by_internal_id(balsamic_case_config.case_id)
+
     # GIVEN that a Balsamic Config file exists
     balsamic_case_config.sample_config.parent.mkdir()
     with open(balsamic_case_config.sample_config, "w") as file:
@@ -38,11 +45,37 @@ def test_balsamic_tracker_successful(
     balsamic_tracker.trailblazer_api.add_pending_analysis = Mock(
         return_value=create_autospec(TrailblazerAnalysis, id=11234)
     )
-    balsamic_tracker.track(case_config=balsamic_case_config)
+
+    # GIVEN the expected request body for Trailblazer
+    expected_request_body: dict = {
+        "case_id": balsamic_case_config.case_id,
+        "email": environ_email(),
+        "analysis_type": AnalysisType.TGS.value,
+        "config_path": Path(
+            balsamic_tracker.workflow_root,
+            f"{balsamic_case_config.case_id}",
+            "analysis",
+            "slurm_jobids.yaml",
+        ).as_posix(),
+        "order_id": db_case.latest_order.id,
+        "out_dir": Path(
+            balsamic_tracker.workflow_root, f"{balsamic_case_config.case_id}", "analysis"
+        ).as_posix(),
+        "priority": TrailblazerPriority.NORMAL.value,
+        "workflow": Workflow.BALSAMIC.value,
+        "ticket": str(db_case.latest_order.ticket_id),
+        "workflow_manager": WorkflowManager.Slurm.value,
+        "tower_workflow_id": None,
+        "is_hidden": True,
+    }
+
     # WHEN tracking the analysis
+    balsamic_tracker.track(case_config=balsamic_case_config)
 
     # THEN trailblazer API should be called with the correct parameters
-    balsamic_tracker.trailblazer_api.add_pending_analysis.assert_called_once()
+    balsamic_tracker.trailblazer_api.add_pending_analysis.assert_called_once_with(
+        **expected_request_body
+    )
 
     # THEN the analysis should be created in the status database
     created_analysis: Analysis = balsamic_tracker.store.get_latest_started_analysis_for_case(
