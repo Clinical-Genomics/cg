@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.models.cg_config import RarediseaseConfig, RnafusionConfig
+from cg.models.cg_config import RarediseaseConfig, RnafusionConfig, TaxprofilerConfig
 
 
 @pytest.fixture
@@ -62,3 +62,9 @@ def raredisease_config_object(get_nextflow_config_dict: callable) -> Raredisease
 def rnafusion_config_object(get_nextflow_config_dict: callable) -> RnafusionConfig:
     config: dict = get_nextflow_config_dict(workflow="rnafusion")
     return RnafusionConfig(**config)
+
+
+@pytest.fixture
+def taxprofiler_config_object(get_nextflow_config_dict: callable) -> TaxprofilerConfig:
+    config: dict = get_nextflow_config_dict(workflow="taxprofiler")
+    return TaxprofilerConfig(**config)
