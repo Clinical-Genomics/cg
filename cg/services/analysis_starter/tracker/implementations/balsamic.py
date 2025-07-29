@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from cg.constants.constants import FileFormat, WorkflowManager
-from cg.io.controller import ReadFile
+from cg.constants.constants import WorkflowManager
+from cg.io.json import read_json
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.services.analysis_starter.tracker.tracker import Tracker
 
@@ -15,7 +15,6 @@ class BalsamicTracker(Tracker):
         return Path(self.workflow_root, case_id, "analysis", "slurm_jobids.yaml")
 
     def _get_workflow_version(self, case_config: BalsamicCaseConfig) -> str:
-        config_data: dict = ReadFile.get_content_from_file(
-            file_format=FileFormat.JSON, file_path=case_config.sample_config
-        )
+        read_json(case_config.sample_config)
+        config_data: dict = read_json(case_config.sample_config)
         return config_data["analysis"]["BALSAMIC_version"]

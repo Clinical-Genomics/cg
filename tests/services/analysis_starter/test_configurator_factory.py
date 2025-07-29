@@ -3,6 +3,7 @@ import pytest
 from cg.constants import Workflow
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
+from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
@@ -13,6 +14,7 @@ from cg.services.analysis_starter.factories.configurator_factory import Configur
 @pytest.mark.parametrize(
     "workflow, configurator_type",
     [
+        (Workflow.BALSAMIC, BalsamicConfigurator),
         (Workflow.MICROSALT, MicrosaltConfigurator),
         (Workflow.RAREDISEASE, NextflowConfigurator),
         (Workflow.RNAFUSION, NextflowConfigurator),
@@ -35,7 +37,7 @@ def test_configurator_factory_success(
 
 def test_configurator_factory_failure(cg_context: CGConfig):
     # GIVEN a workflow we do not have support for
-    workflow = Workflow.BALSAMIC
+    workflow = Workflow.MIP_DNA
 
     # GIVEN a configurator factory
     configurator_factory = ConfiguratorFactory(cg_config=cg_context)
