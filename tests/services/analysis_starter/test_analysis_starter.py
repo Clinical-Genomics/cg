@@ -1,4 +1,5 @@
 from pathlib import Path
+from subprocess import CalledProcessError
 from typing import cast
 from unittest.mock import create_autospec
 
@@ -40,7 +41,6 @@ from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
-@pytest.mark.skip(reason="Will be implemented after the tests for start are done")
 @pytest.mark.parametrize(
     "workflow",
     [
@@ -51,7 +51,7 @@ from cg.store.store import Store
     ],
 )
 @pytest.mark.parametrize(
-    "module_name, function, error, expected_exit",
+    "attribute_name, function_name, error, expected_exit",
     [
         ("tracker", "ensure_analysis_not_ongoing", None, True),
         ("input_fetcher", "ensure_files_are_ready", AnalysisNotReadyError, True),
@@ -62,22 +62,31 @@ from cg.store.store import Store
 def test_analysis_starter_start_available_error_handling(
     workflow: Workflow,
     cg_context: CGConfig,
-    module_name: str,
-    function: str,
+    attribute_name: str,
+    function_name: str,
     error: type[Exception],
     expected_exit: bool,
-    mocker: MockerFixture,
 ):
-    # GIVEN an AnalysisStarter
-    analysis_starter: AnalysisStarter = AnalysisStarterFactory(
-        cg_context
-    ).get_analysis_starter_for_workflow(workflow)
+    """Test that the AnalysisStarter returns correct exit values depending on the errors raised."""
+    # GIVEN a Store with a mock case
+    mock_store = create_autospec(Store)
+    mock_case = create_autospec(Case)
+    mock_store.get_cases_to_analyze.return_value = [mock_case]
 
-    module = getattr(analysis_starter, module_name)
+    # GIVEN an analysis starter
+    analysis_starter = AnalysisStarter(
+        configurator=create_autospec(NextflowConfigurator),
+        input_fetcher=create_autospec(FastqFetcher),
+        store=mock_store,
+        submitter=create_autospec(SeqeraPlatformSubmitter),
+        tracker=create_autospec(NextflowTracker),
+        workflow=workflow,
+    )
 
-    # GIVEN that the start exits with a given behaviour
-    mocker.patch.object(Store, "get_cases_to_analyze", return_value=[create_autospec(Case)])
-    mocker.patch.object(module, function, return_value=None, side_effect=error)
+    # GIVEN that the AnalysisStarter mock raises an error as specified in the parametrisation
+    mocked_attribute = getattr(analysis_starter, attribute_name)
+    mocked_function = getattr(mocked_attribute, function_name)
+    mocked_function.side_effect = error
 
     # WHEN starting all available cases
     succeeded: bool = analysis_starter.start_available()
@@ -196,7 +205,7 @@ def test_rnafusion_start(
     ],
 )
 def test_nextflow_start(workflow: Workflow):
-    """Test that Nextflow cases can be started successfully without adding flags."""
+    """Test that Nextflow cases can be started successfully."""
     # GIVEN a Taxprofiler case_id
     case_id: str = "case_id"
 
@@ -244,3 +253,38 @@ def test_nextflow_start(workflow: Workflow):
     tracker.track.assert_called_once_with(
         case_config=mock_case_config, tower_workflow_id=mock_tower_id
     )
+
+
+@pytest.mark.parametrize(
+    "workflow",
+    [
+        Workflow.RNAFUSION,
+        Workflow.RAREDISEASE,
+        Workflow.TAXPROFILER,
+    ],
+)
+def test_nextflow_start_error_raised_in_run_and_track(workflow: Workflow):
+    """Test that an error raised in submitting the analysis job is handled correctly."""
+    # GIVEN a case_id
+    case_id: str = "case_id"
+
+    # GIVEN an analysis starter
+    analysis_starter = AnalysisStarter(
+        configurator=create_autospec(NextflowConfigurator),
+        input_fetcher=create_autospec(FastqFetcher),
+        store=create_autospec(Store),
+        submitter=create_autospec(SeqeraPlatformSubmitter),
+        tracker=create_autospec(NextflowTracker),
+        workflow=workflow,
+    )
+
+    # GIVEN that the submitter raises an error when submitting the analysis job
+    expected_error = CalledProcessError(returncode=1, cmd="submit_command")
+    analysis_starter.submitter.submit.side_effect = expected_error
+
+    # WHEN the case is started
+    with pytest.raises(CalledProcessError):
+        analysis_starter.start(case_id)
+
+    # THEN the error is propagated and the case should be set as not running
+    analysis_starter.tracker.set_case_as_not_running.assert_called_once_with(case_id)
