@@ -1,6 +1,7 @@
 """CLI support to create config and/or start TAXPROFILER."""
 
 import logging
+from typing import cast
 
 import rich_click as click
 
@@ -21,6 +22,8 @@ from cg.constants.constants import MetaApis, Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
+from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.service import AnalysisStarter
 
@@ -71,6 +74,16 @@ def dev_run(cg_config: CGConfig, case_id: str) -> None:
         Workflow.TAXPROFILER
     )
     analysis_starter.run(case_id=case_id)
+
+
+@taxprofiler.command()
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_config_case(cg_config: CGConfig, case_id: str) -> None:
+    """Configure a Taxprofiler case so that it is ready to be run."""
+    factory = ConfiguratorFactory(cg_config)
+    configurator = cast(NextflowConfigurator, factory.get_configurator(Workflow.TAXPROFILER))
+    configurator.configure(case_id=case_id)
 
 
 taxprofiler.add_command(resolve_compression)
