@@ -2,7 +2,7 @@
 
 from typing import Type
 
-from sqlalchemy import and_, func
+from sqlalchemy import Subquery, and_, func
 from sqlalchemy.orm import Query
 
 from cg.store.database import get_session
@@ -44,6 +44,35 @@ class BaseHandler:
             .join(ApplicationVersion)
             .join(Application)
         )
+
+    def _get_case_query_for_analysis_start(self) -> Query:
+        """Return a query for all cases and joins them with their latest analysis, if present."""
+        latest_analysis_subquery: Subquery = (
+            self.session.query(
+                Analysis.case_id, func.max(Analysis.created_at).label("latest_created_at")
+            )
+            .group_by(Analysis.case_id)
+            .subquery()
+        )
+
+        cases_with_only_latest_analysis: Query = (
+            self.session.query(Case)
+            .outerjoin(latest_analysis_subquery, latest_analysis_subquery.c.case_id == Case.id)
+            .outerjoin(
+                Analysis,
+                and_(
+                    Analysis.case_id == Case.id,
+                    Analysis.created_at == latest_analysis_subquery.c.latest_created_at,
+                ),
+            )
+        )
+        complete_query: Query = (
+            cases_with_only_latest_analysis.join(Case.links)
+            .join(CaseSample.sample)
+            .join(ApplicationVersion)
+            .join(Application)
+        )
+        return complete_query
 
     def _get_join_cases_with_samples_query(self) -> Query:
         """Return a join query for all cases in the database with samples."""

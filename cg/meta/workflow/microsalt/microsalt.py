@@ -17,9 +17,7 @@ from cg.meta.workflow.microsalt.quality_controller import MicroSALTQualityContro
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.meta.workflow.microsalt.utils import get_most_recent_project_directory
 from cg.models.cg_config import CGConfig
-from cg.services.sequencing_qc_service.sequencing_qc_service import (
-    SequencingQCService,
-)
+from cg.services.sequencing_qc_service.sequencing_qc_service import SequencingQCService
 from cg.store.models import Case, Sample
 from cg.utils import Process
 
@@ -91,21 +89,13 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_job_ids_path(self, case_id: str) -> Path:
         project_id: str = self.get_project_id(case_id)
-        job_ids_path = Path(
+        return Path(
             self.root_dir,
             "results",
             "reports",
             "trailblazer",
             f"{project_id}_slurm_ids{FileExtensions.YAML}",
         )
-        # Necessary due to how microsalt structures its output
-        self._ensure_old_job_ids_are_removed(job_ids_path)
-        return job_ids_path
-
-    def _ensure_old_job_ids_are_removed(self, job_ids_path: Path) -> None:
-        is_yaml_file: bool = job_ids_path.suffix == FileExtensions.YAML
-        if job_ids_path.exists() and is_yaml_file:
-            job_ids_path.unlink()
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be

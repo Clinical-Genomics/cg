@@ -164,9 +164,11 @@ def store_housekeeper(
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
-        analysis_api.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run, force=force)
+        _, version = analysis_api.create_housekeeper_bundle(
+            case_id=case_id, dry_run=dry_run, force=force
+        )
         analysis_api.update_analysis_as_completed_statusdb(
-            case_id=case_id, comment=comment, dry_run=dry_run, force=force
+            case_id=case_id, hk_version_id=version.id, comment=comment, dry_run=dry_run, force=force
         )
         analysis_api.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
     except ValidationError as error:
@@ -242,7 +244,7 @@ def start_available(context: click.Context, dry_run: bool = False, limit: int | 
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     exit_code: int = EXIT_SUCCESS
-    for case in analysis_api.get_cases_ready_for_analysis(limit=limit):
+    for case in analysis_api.get_cases_to_analyze(limit=limit):
         try:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:

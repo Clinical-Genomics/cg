@@ -76,7 +76,11 @@ def test_clean_hk_case_files_single_analysis(
     workflow: Workflow = Workflow.MIP_DNA
 
     analysis: Analysis = helpers.add_analysis(
-        store=store, started_at=date_days_ago, completed_at=date_days_ago, workflow=workflow
+        store=store,
+        started_at=date_days_ago,
+        completed_at=date_days_ago,
+        workflow=workflow,
+        housekeeper_version_id=1234,
     )
     bundle_name: str = analysis.case.internal_id
 
@@ -93,7 +97,7 @@ def test_clean_hk_case_files_single_analysis(
     # THEN it should be successful
     assert result.exit_code == 0
     # THEN it should report some files to clean
-    assert "Version found for" in caplog.text
+    assert "Version with id" in caplog.text
     assert "has the tags" in caplog.text
     assert "has no protected tags" in caplog.text
     assert "found on disk" in caplog.text
@@ -115,7 +119,11 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     workflow: Workflow = Workflow.MIP_DNA
 
     analysis: Analysis = helpers.add_analysis(
-        store=store, started_at=date_days_ago, completed_at=date_days_ago, workflow=workflow
+        store=store,
+        started_at=date_days_ago,
+        completed_at=date_days_ago,
+        workflow=workflow,
+        housekeeper_version_id=1234,
     )
     bundle_name: str = analysis.case.internal_id
 
@@ -137,6 +145,6 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     # THEN it should be successful
     assert result.exit_code == 0
     # THEN it should report some files to clean
-    assert "Version found for" in caplog.text
+    assert "Version with id" in caplog.text
     assert "has the tags" in caplog.text
     assert "has the protected tag(s)" in caplog.text

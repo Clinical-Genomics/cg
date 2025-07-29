@@ -4,8 +4,8 @@ import logging
 import sys
 from pathlib import Path
 
-import rich_click as click
 import coloredlogs
+import rich_click as click
 from sqlalchemy.orm import scoped_session
 
 import cg

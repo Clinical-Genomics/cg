@@ -230,3 +230,34 @@ def test_update_analysis_comment(
 
     # THEN the comment for the analysis is updated
     assert analysis.comment == expected_comment
+
+
+def test_update_analysis_housekeeper_version_id(store: Store, helpers: StoreHelpers):
+    """Test updating the housekeeper version ID for an analysis works properly."""
+    # GIVEN a store with an analysis that has no housekeeper version ID
+    analysis: Analysis = helpers.add_analysis(store=store)
+    assert analysis.housekeeper_version_id is None
+
+    # WHEN updating the housekeeper version ID for an analysis
+    new_version_id: int = 1234
+    store.update_analysis_housekeeper_version_id(analysis_id=analysis.id, version_id=new_version_id)
+
+    # THEN the housekeeper version ID for the analysis is updated
+    updated_analysis: Analysis = store.get_analysis_by_entry_id(analysis.id)
+    assert updated_analysis.housekeeper_version_id == new_version_id
+
+
+@pytest.mark.freeze_time
+def test_update_analysis_delivery_report_date(store: Store, helpers: StoreHelpers):
+    """Test updating the delivery report created_at for an analysis works properly."""
+    # GIVEN a store with an analysis without delivery report
+    analysis: Analysis = helpers.add_analysis(store=store, delivery_reported_at=None)
+
+    # WHEN updating the delivery report created_at for an analysis
+    store.update_analysis_delivery_report_date(
+        analysis_id=analysis.id, delivery_report_date=datetime.now()
+    )
+
+    # THEN the delivery report created_at for the analysis is updated
+    updated_analysis: Analysis = store.get_analysis_by_entry_id(analysis.id)
+    assert updated_analysis.delivery_report_created_at == datetime.now()

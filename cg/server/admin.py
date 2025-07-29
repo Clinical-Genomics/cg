@@ -239,7 +239,7 @@ class ApplicationView(BaseView):
         "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
         "sample_concentration_maximum_cfdna": view_sample_concentration_maximum_cfdna,
     }
-    column_filters = ["prep_category", "is_accredited"]
+    column_filters = ["prep_category", "is_accredited", "is_archived"]
     column_searchable_list = ["tag", "prep_category"]
     form_excluded_columns = ["category", "versions", "order_type_applications"]
     form_extra_fields = {
@@ -306,7 +306,7 @@ class ApplicationVersionView(BaseView):
         "comment",
     )
     column_exclude_list = ["created_at", "updated_at"]
-    column_filters = ["application.tag", "version"]
+    column_filters = ["application.is_archived", "application.tag", "version"]
     column_formatters = {"application": ApplicationView.view_application_link}
     column_searchable_list = ["application.tag"]
     edit_modal = True
@@ -793,6 +793,24 @@ class CaseSampleView(BaseView):
     column_searchable_list = ["case.internal_id", "case.name", "sample.internal_id"]
     create_modal = True
     edit_modal = True
+    form_ajax_refs = {
+        "case": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        },
+        "sample": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        },
+        "mother": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        },
+        "father": {
+            "fields": ["internal_id", "name"],
+            "page_size": 20,
+        },
+    }
 
 
 class UserView(BaseView):

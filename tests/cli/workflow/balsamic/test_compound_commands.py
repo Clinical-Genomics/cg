@@ -8,6 +8,7 @@ from click.testing import CliRunner
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
+from cg.constants.constants import SequencingQCStatus
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -96,7 +97,7 @@ def test_store(
 
     # THEN the analysis was updated in status DB
     AnalysisAPI.update_analysis_as_completed_statusdb.assert_called_with(
-        case_id=case_id, comment=ANY, dry_run=False, force=False
+        case_id=case_id, hk_version_id=ANY, comment=ANY, dry_run=False, force=False
     )
 
 
@@ -159,12 +160,10 @@ def test_start_available_with_limit(
     case: Case = balsamic_context.status_db.get_case_by_internal_id(
         internal_id="balsamic_case_tgs_single"
     )
-    for sample in case.samples:
-        sample.reads = sample.expected_reads_for_sample
-    balsamic_context.status_db.commit_to_store()
+    case.aggregated_sequencing_qc = SequencingQCStatus.PASSED
 
     # GIVEN that there are now 2 cases that are ready for analysis
-    assert len(balsamic_analysis_api.get_cases_ready_for_analysis()) == 2
+    assert len(balsamic_analysis_api.get_cases_to_analyze()) == 2
 
     # GIVEN that decompression is not needed
     mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression", return_value=None)
@@ -245,7 +244,7 @@ def test_store_available(
 
     # THEN the analysis of the successful case was updated in status DB
     AnalysisAPI.update_analysis_as_completed_statusdb.assert_called_once_with(
-        case_id=case_id_success, comment=ANY, dry_run=False, force=False
+        case_id=case_id_success, hk_version_id=ANY, comment=ANY, dry_run=False, force=False
     )
 
     # THEN bundle can be found in Housekeeper

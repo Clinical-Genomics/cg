@@ -27,16 +27,9 @@ def test_dry_run(
     # GIVEN a case on disk that could be deleted
     caplog.set_level(logging.INFO)
     base_store = clean_context_microsalt.status_db
-    helpers.add_analysis(
-        base_store,
-        started_at=timestamp_yesterday,
-        uploaded_at=timestamp_yesterday,
-        completed_at=timestamp_yesterday,
-        cleaned_at=None,
-        workflow=Workflow.MICROSALT,
-    )
-
-    analysis_to_clean = base_store.get_case_by_internal_id(microsalt_case_clean_dry).analyses[0]
+    analysis_to_clean = base_store.get_case_by_internal_id(
+        microsalt_case_clean_dry
+    ).latest_completed_analysis
     case_path_list = clean_context_microsalt.meta_apis["analysis_api"].get_case_path(
         microsalt_case_clean_dry
     )
@@ -58,7 +51,7 @@ def test_dry_run(
     assert microsalt_case_clean_dry in caplog.text
 
     # THEN the analysis should still be in the analyses_to_clean query since this is a dry-ryn
-    assert analysis_to_clean.cleaned_at == None
+    assert analysis_to_clean.cleaned_at is None
     assert analysis_to_clean in base_store.get_analyses_to_clean(workflow=Workflow.MICROSALT)
 
 
@@ -84,7 +77,9 @@ def test_clean_run(
         workflow=Workflow.MICROSALT,
     )
 
-    analysis_to_clean = base_store.get_case_by_internal_id(microsalt_case_clean).analyses[0]
+    analysis_to_clean = base_store.get_case_by_internal_id(
+        microsalt_case_clean
+    ).latest_completed_analysis
     case_path_list = clean_context_microsalt.meta_apis["analysis_api"].get_case_path(
         microsalt_case_clean
     )
