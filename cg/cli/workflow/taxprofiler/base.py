@@ -61,6 +61,18 @@ def dev_start_available(cg_config: CGConfig) -> None:
         raise click.Abort
 
 
+@taxprofiler.command()
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_run(cg_config: CGConfig, case_id: str) -> None:
+    """Run a preconfigured Taxprofiler case."""
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
+        Workflow.TAXPROFILER
+    )
+    analysis_starter.run(case_id=case_id)
+
+
 taxprofiler.add_command(resolve_compression)
 taxprofiler.add_command(config_case)
 taxprofiler.add_command(run)
