@@ -1,7 +1,7 @@
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import cast
-from unittest.mock import create_autospec
+from unittest.mock import ANY, create_autospec
 
 import pytest
 import requests
@@ -28,7 +28,11 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
     RNAFusionSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.implementations.microsalt import (
+    MicrosaltConfigurator,
+)
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
+from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
@@ -36,9 +40,49 @@ from cg.services.analysis_starter.service import AnalysisStarter
 from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
     SeqeraPlatformSubmitter,
 )
+from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
+from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
 from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
 from cg.store.models import Case, Sample
 from cg.store.store import Store
+
+
+@pytest.fixture
+def analysis_starter_scenario() -> dict:
+    """
+    Return a dict with mocks for configurator, case_config, submitter, tracker and submit return
+    value for testing the analysis starter for each pipeline.
+    """
+    return {
+        Workflow.MICROSALT: (
+            create_autospec(MicrosaltConfigurator),
+            create_autospec(MicrosaltCaseConfig),
+            create_autospec(SubprocessSubmitter),
+            create_autospec(MicrosaltTracker),
+            None,
+        ),
+        Workflow.RNAFUSION: (
+            create_autospec(NextflowConfigurator),
+            create_autospec(NextflowCaseConfig),
+            create_autospec(SeqeraPlatformSubmitter),
+            create_autospec(NextflowTracker),
+            "tower_id",
+        ),
+        Workflow.RAREDISEASE: (
+            create_autospec(NextflowConfigurator),
+            create_autospec(NextflowCaseConfig),
+            create_autospec(SeqeraPlatformSubmitter),
+            create_autospec(NextflowTracker),
+            "tower_id",
+        ),
+        Workflow.TAXPROFILER: (
+            create_autospec(NextflowConfigurator),
+            create_autospec(NextflowCaseConfig),
+            create_autospec(SeqeraPlatformSubmitter),
+            create_autospec(NextflowTracker),
+            "tower_id",
+        ),
+    }
 
 
 @pytest.mark.parametrize(
@@ -95,7 +139,6 @@ def test_analysis_starter_start_available_error_handling(
     assert succeeded == expected_exit
 
 
-# TODO: Use this test as inspiration for an integration test for the start mudule
 def test_rnafusion_start(
     cg_context: CGConfig,
     http_workflow_launch_response: Response,
@@ -199,23 +242,30 @@ def test_rnafusion_start(
 @pytest.mark.parametrize(
     "workflow",
     [
+        Workflow.MICROSALT,
         Workflow.RNAFUSION,
         Workflow.RAREDISEASE,
         Workflow.TAXPROFILER,
     ],
 )
-def test_nextflow_start(workflow: Workflow):
-    """Test that Nextflow cases can be started successfully."""
-    # GIVEN a Taxprofiler case_id
+def test_nextflow_start(
+    workflow: Workflow,
+    analysis_starter_scenario: dict,
+):
+    """Test that a case can be started successfully for all pipelines."""
+    # GIVEN a case_id
     case_id: str = "case_id"
 
     # GIVEN a set of flags
     flags: dict[str, str] = {"flag1": "value1", "flag2": "value2"}
 
-    # GIVEN a Taxprofiler configurator that returns a mock case config
-    configurator: NextflowConfigurator = create_autospec(NextflowConfigurator)
-    mock_case_config: NextflowCaseConfig = create_autospec(NextflowCaseConfig)
-    configurator.configure.return_value = mock_case_config
+    # GIVEN a mock configurator, case config, submitter, tracker, and tower_id
+    mock_configurator, mock_case_config, mock_submitter, mock_tracker, tower_id = (
+        analysis_starter_scenario[workflow]
+    )
+
+    # GIVEN that the configurator returns the mock case config
+    mock_configurator.configure.return_value = mock_case_config
 
     # GIVEN a FastqFetcher
     input_fetcher: FastqFetcher = create_autospec(FastqFetcher)
@@ -223,68 +273,120 @@ def test_nextflow_start(workflow: Workflow):
     # GIVEN a Store
     mock_store: Store = create_autospec(Store)
 
-    # GIVEN a SeqeraPlatformSubmitter
-    submitter: SeqeraPlatformSubmitter = create_autospec(SeqeraPlatformSubmitter)
-    mock_tower_id: str = "tower_id"
-    submitter.submit.return_value = mock_tower_id
-
-    # GIVEN a NextflowTracker
-    tracker: NextflowTracker = create_autospec(NextflowTracker)
+    # GIVEN that the submitter returns a tower_id or None when submitting the analysis
+    mock_submitter.submit.return_value = tower_id
 
     # GIVEN an analysis starter
     analysis_starter = AnalysisStarter(
-        configurator=configurator,
+        configurator=mock_configurator,
         input_fetcher=input_fetcher,
         store=mock_store,
-        submitter=submitter,
-        tracker=tracker,
+        submitter=mock_submitter,
+        tracker=mock_tracker,
         workflow=workflow,
     )
 
-    # WHEN starting the Taxprofiler case
+    # WHEN starting the case
     analysis_starter.start(case_id, **flags)
 
     # THEN the analysis should be started successfully
-    tracker.ensure_analysis_not_ongoing.assert_called_once_with(case_id)
+    mock_tracker.ensure_analysis_not_ongoing.assert_called_once_with(case_id)
     input_fetcher.ensure_files_are_ready.assert_called_once_with(case_id)
-    configurator.configure.assert_called_once_with(case_id=case_id, **flags)
-    tracker.set_case_as_running.assert_called_once_with(case_id)
-    submitter.submit.assert_called_once_with(mock_case_config)
-    tracker.track.assert_called_once_with(
-        case_config=mock_case_config, tower_workflow_id=mock_tower_id
+    mock_configurator.configure.assert_called_once_with(case_id=case_id, **flags)
+    mock_tracker.set_case_as_running.assert_called_once_with(case_id)
+    mock_submitter.submit.assert_called_once_with(mock_case_config)
+    mock_tracker.track.assert_called_once_with(
+        case_config=mock_case_config, tower_workflow_id=tower_id
     )
 
 
 @pytest.mark.parametrize(
     "workflow",
     [
+        Workflow.MICROSALT,
         Workflow.RNAFUSION,
         Workflow.RAREDISEASE,
         Workflow.TAXPROFILER,
     ],
 )
-def test_nextflow_start_error_raised_in_run_and_track(workflow: Workflow):
+def test_nextflow_start_error_raised_in_run_and_track(
+    workflow: Workflow, analysis_starter_scenario: dict
+):
     """Test that an error raised in submitting the analysis job is handled correctly."""
     # GIVEN a case_id
     case_id: str = "case_id"
 
-    # GIVEN an analysis starter
-    analysis_starter = AnalysisStarter(
-        configurator=create_autospec(NextflowConfigurator),
-        input_fetcher=create_autospec(FastqFetcher),
-        store=create_autospec(Store),
-        submitter=create_autospec(SeqeraPlatformSubmitter),
-        tracker=create_autospec(NextflowTracker),
-        workflow=workflow,
-    )
+    # GIVEN a mock configurator, submitter and tracker
+    mock_configurator, _, mock_submitter, mock_tracker, _ = analysis_starter_scenario[workflow]
 
     # GIVEN that the submitter raises an error when submitting the analysis job
     expected_error = CalledProcessError(returncode=1, cmd="submit_command")
-    analysis_starter.submitter.submit.side_effect = expected_error
+    mock_submitter.submit.side_effect = expected_error
+
+    # GIVEN an analysis starter
+    analysis_starter = AnalysisStarter(
+        configurator=mock_configurator,
+        input_fetcher=create_autospec(FastqFetcher),
+        store=create_autospec(Store),
+        submitter=mock_submitter,
+        tracker=mock_tracker,
+        workflow=workflow,
+    )
 
     # WHEN the case is started
     with pytest.raises(CalledProcessError):
         analysis_starter.start(case_id)
 
     # THEN the error is propagated and the case should be set as not running
-    analysis_starter.tracker.set_case_as_not_running.assert_called_once_with(case_id)
+    mock_tracker.set_case_as_not_running.assert_called_once_with(case_id)
+
+
+@pytest.mark.parametrize(
+    "workflow",
+    [
+        Workflow.MICROSALT,
+        Workflow.RNAFUSION,
+        Workflow.RAREDISEASE,
+        Workflow.TAXPROFILER,
+    ],
+)
+def test_run(
+    workflow: Workflow,
+    analysis_starter_scenario: dict,
+):
+    """Test that the case can be run successfully."""
+    # GIVEN a case_id
+    case_id: str = "case_id"
+
+    # GIVEN a mock configurator, submitter, tracker, and case config
+    mock_configurator, mock_case_config, mock_submitter, mock_tracker, _ = (
+        analysis_starter_scenario[workflow]
+    )
+
+    # GIVEN that the get_config method from the configurator returns the mock case config
+    mock_configurator.get_config.return_value = mock_case_config
+
+    # GIVEN an analysis starter
+    analysis_starter = AnalysisStarter(
+        configurator=mock_configurator,
+        input_fetcher=create_autospec(FastqFetcher),
+        store=create_autospec(Store),
+        submitter=mock_submitter,
+        tracker=mock_tracker,
+        workflow=workflow,
+    )
+
+    # WHEN running the case
+    analysis_starter.run(case_id)
+
+    # THEN the tracker should ensure that the analysis is not ongoing
+    mock_tracker.ensure_analysis_not_ongoing.assert_called_once_with(case_id)
+
+    # THEN the tracker should set the case as running
+    mock_tracker.set_case_as_running.assert_called_once_with(case_id)
+
+    # THEN the analysis jobs should be submitted
+    mock_submitter.submit.assert_called_once_with(mock_case_config)
+
+    # THEN the tracker should track the case
+    mock_tracker.track.assert_called_once_with(case_config=mock_case_config, tower_workflow_id=ANY)
