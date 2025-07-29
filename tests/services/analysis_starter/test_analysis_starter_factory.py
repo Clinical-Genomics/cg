@@ -11,6 +11,7 @@ from cg.services.analysis_starter.configurator.implementations.microsalt import 
     MicrosaltConfigurator,
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
+from cg.services.analysis_starter.factories import starter_factory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.service import AnalysisStarter
@@ -24,6 +25,7 @@ from cg.store.store import Store
 
 
 def test_analysis_starter_factory_microsalt(cg_context: CGConfig, mocker: MockerFixture):
+    """Test that the AnalysisStarterFactory creates a Microsalt AnalysisStarter correctly."""
     # GIVEN an AnalysisStarterFactory
     analysis_starter_factory = AnalysisStarterFactory(cg_context)
 
@@ -51,6 +53,7 @@ def test_analysis_starter_factory_nextflow_starter(
     seqera_platform_config: SeqeraPlatformConfig,
     mocker: MockerFixture,
 ):
+    """Test that the AnalysisStarterFactory creates a Nextflow AnalysisStarter correctly."""
     # GIVEN an AnalysisStarterFactory
     analysis_starter_factory = AnalysisStarterFactory(cg_context)
 
@@ -65,10 +68,7 @@ def test_analysis_starter_factory_nextflow_starter(
         SeqeraPlatformSubmitter, "__init__", return_value=None
     )
     mock_client: Mock[SeqeraPlatformClient] = create_autospec(SeqeraPlatformClient)
-    mocker.patch(
-        "cg.services.analysis_starter.factories.starter_factory.SeqeraPlatformClient",
-        return_value=mock_client,
-    )
+    mocker.patch.object(starter_factory, "SeqeraPlatformClient", return_value=mock_client)
 
     # GIVEN a NextflowTracker mocked constructor
     mock_tracker_init: MagicMock = mocker.patch.object(

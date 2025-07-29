@@ -116,14 +116,13 @@ def mock_store_for_raredisease_file_creators(
 @pytest.fixture
 def mock_store_for_rnafusion_file_creators(nextflow_sample_id: str) -> Store:
     """Fixture mocking the necessary parts of StatusDB for the RNAFusion sample sheet creator."""
-    mock_sample: Mock[Sample] = create_autospec(Sample)
+    mock_sample: Sample = create_autospec(Sample)
     mock_sample.internal_id = nextflow_sample_id
 
-    mock_case: Mock[Case] = create_autospec(Case)
+    mock_case: Case = create_autospec(Case, samples=[mock_sample])
     mock_case.data_analysis = Workflow.RNAFUSION
-    mock_case.samples = [mock_sample]
 
-    mock_store: Mock[Store] = create_autospec(Store)
+    mock_store: Store = create_autospec(Store)
     mock_store.get_case_by_internal_id.return_value = mock_case
     mock_store.get_case_workflow.return_value = Workflow.RNAFUSION
     mock_store.get_case_priority.return_value = SlurmQos.NORMAL
@@ -137,8 +136,7 @@ def mock_store_for_taxprofiler_file_creators(nextflow_sample_id: str) -> Store:
     mock_sample.internal_id = nextflow_sample_id
     mock_sample.name = nextflow_sample_id
 
-    mock_case: Mock[Case] = create_autospec(Case)
-    mock_case.samples = [mock_sample]
+    mock_case: Case = create_autospec(Case, samples=[mock_sample])
 
     mock_store: Mock[Store] = create_autospec(Store)
     mock_store.get_case_by_internal_id.return_value = mock_case

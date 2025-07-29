@@ -28,45 +28,56 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
     RNAFusionSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
+from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.service import AnalysisStarter
+from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
+    SeqeraPlatformSubmitter,
+)
+from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
+@pytest.mark.skip(reason="Will be implemented after the tests for start are done")
 @pytest.mark.parametrize(
     "workflow",
     [
         Workflow.MICROSALT,
         Workflow.RNAFUSION,
         Workflow.RAREDISEASE,
+        Workflow.TAXPROFILER,
     ],
 )
 @pytest.mark.parametrize(
-    "error, expected_exit",
+    "module_name, function, error, expected_exit",
     [
-        (None, True),
-        (AnalysisNotReadyError, True),
-        (Exception, False),
+        ("tracker", "ensure_analysis_not_ongoing", None, True),
+        ("input_fetcher", "ensure_files_are_ready", AnalysisNotReadyError, True),
+        ("tracker", "ensure_analysis_not_ongoing", Exception, False),
     ],
     ids=["Success", "Fastqs missing", "General error"],
 )
 def test_analysis_starter_start_available_error_handling(
     workflow: Workflow,
     cg_context: CGConfig,
-    mocker: MockerFixture,
+    module_name: str,
+    function: str,
     error: type[Exception],
     expected_exit: bool,
+    mocker: MockerFixture,
 ):
     # GIVEN an AnalysisStarter
     analysis_starter: AnalysisStarter = AnalysisStarterFactory(
         cg_context
     ).get_analysis_starter_for_workflow(workflow)
 
+    module = getattr(analysis_starter, module_name)
+
     # GIVEN that the start exits with a given behaviour
     mocker.patch.object(Store, "get_cases_to_analyze", return_value=[create_autospec(Case)])
-    mocker.patch.object(AnalysisStarter, "start", return_value=None, side_effect=error)
+    mocker.patch.object(module, function, return_value=None, side_effect=error)
 
     # WHEN starting all available cases
     succeeded: bool = analysis_starter.start_available()
@@ -75,6 +86,7 @@ def test_analysis_starter_start_available_error_handling(
     assert succeeded == expected_exit
 
 
+# TODO: Use this test as inspiration for an integration test for the start mudule
 def test_rnafusion_start(
     cg_context: CGConfig,
     http_workflow_launch_response: Response,
@@ -173,3 +185,62 @@ def test_rnafusion_start(
     # THEN the case should have been submitted and tracked
     submit_mock.assert_called_once()
     track_mock.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "workflow",
+    [
+        Workflow.RNAFUSION,
+        Workflow.RAREDISEASE,
+        Workflow.TAXPROFILER,
+    ],
+)
+def test_nextflow_start(workflow: Workflow):
+    """Test that Nextflow cases can be started successfully without adding flags."""
+    # GIVEN a Taxprofiler case_id
+    case_id: str = "case_id"
+
+    # GIVEN a set of flags
+    flags: dict[str, str] = {"flag1": "value1", "flag2": "value2"}
+
+    # GIVEN a Taxprofiler configurator that returns a mock case config
+    configurator: NextflowConfigurator = create_autospec(NextflowConfigurator)
+    mock_case_config: NextflowCaseConfig = create_autospec(NextflowCaseConfig)
+    configurator.configure.return_value = mock_case_config
+
+    # GIVEN a FastqFetcher
+    input_fetcher: FastqFetcher = create_autospec(FastqFetcher)
+
+    # GIVEN a Store
+    mock_store: Store = create_autospec(Store)
+
+    # GIVEN a SeqeraPlatformSubmitter
+    submitter: SeqeraPlatformSubmitter = create_autospec(SeqeraPlatformSubmitter)
+    mock_tower_id: str = "tower_id"
+    submitter.submit.return_value = mock_tower_id
+
+    # GIVEN a NextflowTracker
+    tracker: NextflowTracker = create_autospec(NextflowTracker)
+
+    # GIVEN an analysis starter
+    analysis_starter = AnalysisStarter(
+        configurator=configurator,
+        input_fetcher=input_fetcher,
+        store=mock_store,
+        submitter=submitter,
+        tracker=tracker,
+        workflow=workflow,
+    )
+
+    # WHEN starting the Taxprofiler case
+    analysis_starter.start(case_id, **flags)
+
+    # THEN the analysis should be started successfully
+    tracker.ensure_analysis_not_ongoing.assert_called_once_with(case_id)
+    input_fetcher.ensure_files_are_ready.assert_called_once_with(case_id)
+    configurator.configure.assert_called_once_with(case_id=case_id, **flags)
+    tracker.set_case_as_running.assert_called_once_with(case_id)
+    submitter.submit.assert_called_once_with(mock_case_config)
+    tracker.track.assert_called_once_with(
+        case_config=mock_case_config, tower_workflow_id=mock_tower_id
+    )
