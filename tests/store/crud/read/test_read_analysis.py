@@ -414,6 +414,64 @@ def test_one_of_one_sequenced_samples(
     assert test_case in cases
 
 
+def test_microsalt_re_analysis(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
+):
+    """Tests the functionality that a microSALT case should be analysed again if a sample has newer data."""
+    # GIVEN a microSALT case
+    microsalt_case: Case = helpers.add_case(store=base_store, data_analysis=Workflow.MICROSALT)
+
+    # GIVEN it has two samples, one sequenced yesterday and one now
+    sample_1: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_yesterday)
+    sample_2: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_now)
+    helpers.relate_samples(base_store=base_store, case=microsalt_case, samples=[sample_1, sample_2])
+
+    # GIVEN that the case was analysed yesterday
+    helpers.add_analysis(
+        store=base_store,
+        case=microsalt_case,
+        created_at=timestamp_yesterday,
+        started_at=timestamp_yesterday,
+        completed_at=timestamp_yesterday,
+        workflow=Workflow.MICROSALT,
+    )
+
+    # WHEN getting cases to analyze
+    cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.MICROSALT)
+
+    # THEN the case should be returned
+    assert microsalt_case in cases
+
+
+def test_multiple_starts_non_microsalt_analysis(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
+):
+    """Tests that a non-microSALT case should not start with new data if they have already been analysed."""
+    # GIVEN a non-microSALT case
+    case: Case = helpers.add_case(store=base_store, data_analysis=Workflow.BALSAMIC)
+
+    # GIVEN it has two samples, one sequenced yesterday and one now
+    sample_1: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_yesterday)
+    sample_2: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_now)
+    helpers.relate_samples(base_store=base_store, case=case, samples=[sample_1, sample_2])
+
+    # GIVEN that the case was analysed yesterday
+    helpers.add_analysis(
+        store=base_store,
+        case=case,
+        created_at=timestamp_yesterday,
+        started_at=timestamp_yesterday,
+        completed_at=timestamp_yesterday,
+        workflow=Workflow.BALSAMIC,
+    )
+
+    # WHEN getting cases to analyze
+    cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.BALSAMIC)
+
+    # THEN the case should not be returned
+    assert case not in cases
+
+
 def test_get_analyses_for_workflow_before(
     store_with_analyses_for_cases_not_uploaded_fluffy: Store,
     timestamp_now: datetime,
@@ -452,20 +510,23 @@ def test_get_analysis_by_entry_id(
     assert analysis.id == 1
 
 
-def test_get_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_older_than_last_sequenced_and_one_is(
+def test_get_cases_for_analysis_filters_out_analysis_older_than_last_sequenced_sample(
     base_store: Store,
     helpers: StoreHelpers,
     timestamp_now: datetime,
     timestamp_yesterday: datetime,
     old_timestamp: datetime,
 ):
-    """Test that a case is not returned if case action is None and when there are miltiple analyses where one analysis is older than a sample is last sequenced."""
+    """
+    Test that a case is not returned if case action is None and when there are multiple analyses
+    where one analysis is older than a sample is last sequenced.
+    """
 
     # GIVEN a case to be analyzed
     test_case_to_be_analyzed: Case = helpers.add_case(store=base_store, name="a_case_to_analyze")
 
     # GIVEN a case to be not returned
-    test_case: Case = helpers.add_case(store=base_store, name="a_case_to_be_filtered")
+    test_case: Case = helpers.add_case(store=base_store, name="a_case_to_be_filtered_out")
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(
@@ -479,9 +540,10 @@ def test_get_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_older_
         started_at=timestamp_yesterday,
         completed_at=timestamp_now,
         workflow=Workflow.MIP_DNA,
+        housekeeper_version_id=1234,
     )
 
-    # GIVEN a completed analysis older than the sample last sequenced
+    # GIVEN an old completed analysis older than the sample last sequenced
     test_analysis_2: Analysis = helpers.add_analysis(
         store=base_store,
         case=test_case,
@@ -489,10 +551,10 @@ def test_get_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_older_
         completed_at=timestamp_yesterday,
         workflow=Workflow.MIP_DNA,
     )
-    # GIVEN an old analysis
     test_analysis_2.created_at = old_timestamp
+    test_analysis_2.housekeeper_version_id = 1235
 
-    # Given an action set to None
+    # GIVEN an action set to None
     test_analysis.case.action = None
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
@@ -509,7 +571,7 @@ def test_get_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_older_
     # WHEN getting cases to analyze
     cases_to_analyze: list[Case] = base_store.get_cases_to_analyze()
 
-    # Then assert that test_case_to_analyze is returned
+    # THEN assert that test_case_to_analyze is returned
     assert test_case_to_be_analyzed in cases_to_analyze
 
     # THEN cases should not contain the test case

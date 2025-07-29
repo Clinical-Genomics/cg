@@ -18,6 +18,7 @@ def test_get_analyses_to_upload_for_workflow(
         upload_started=None,
         workflow=Workflow.RAW_DATA,
         completed_at=timestamp_now,
+        housekeeper_version_id=1234,
     )
     new_case = helpers.add_case(store=base_store, name="no_upload_case")
     analysis_no_upload: Analysis = helpers.add_analysis(

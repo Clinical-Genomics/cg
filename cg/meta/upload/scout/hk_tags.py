@@ -91,3 +91,7 @@ class SampleTags(BaseModel):
     reviewer_vcf: set[str] | None = None
     mitodel_file: set[str] | None = None
     paraphase_alignment_path: set[str] | None = None
+    tiddit_coverage_wig: set[str] | None = None
+    rhocall_wig: set[str] | None = None
+    upd_regions_bed: set[str] | None = None
+    upd_sites_bed: set[str] | None = None
