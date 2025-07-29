@@ -14,10 +14,10 @@ from cg.services.analysis_starter.factories.configurator_factory import Configur
 @pytest.mark.parametrize(
     "workflow, configurator_type",
     [
+        (Workflow.BALSAMIC, BalsamicConfigurator),
         (Workflow.MICROSALT, MicrosaltConfigurator),
         (Workflow.RAREDISEASE, NextflowConfigurator),
         (Workflow.RNAFUSION, NextflowConfigurator),
-        (Workflow.BALSAMIC, BalsamicConfigurator),
     ],
 )
 def test_configurator_factory_success(
