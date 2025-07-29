@@ -309,7 +309,7 @@ def dev_start(
     cluster_config: click.Path | None,
     panel_bed: str | None,
 ):
-    """Start a raredisease case. Configures the case if needed."""
+    """Start a Balsamic case. Configures the case if needed."""
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
     analysis_starter.start(case_id=case_id, cluster_config=cluster_config, panel_bed=panel_bed)
@@ -319,10 +319,9 @@ def dev_start(
 @click.pass_obj
 def dev_start_available(cg_config: CGConfig):
     """Starts all available raredisease cases."""
-    LOG.info("Starting raredisease workflow for all available cases.")
-    analysis_starter = AnalysisStarterFactory(cg_config).get_analysis_starter_for_workflow(
-        Workflow.BALSAMIC
-    )
+    LOG.info("Starting Balsamic workflow for all available cases.")
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
     succeeded: bool = analysis_starter.start_available()
     if not succeeded:
         raise click.Abort
