@@ -72,6 +72,7 @@ pytest-freezegun = ["pytest-freezegun"]
 pytest = ["pytest"]
 ruff = ["ruff"]
 pytest-xdist = ["pytest-xdist"]
+pytest-httpserver=["pytest-httpserver"]
 
 [tool.pytest.ini_options]
 markers = [

@@ -1,5 +1,5 @@
 ---
-database: "sqlite:///cg"
+database: "sqlite:///file:cg?mode=memory&cache=shared&uri=true"
 delivery_path: "tests/integration/config/delivery_path"
 madeline_exe: "tests/integration/config/madeline_exe"
 nanopore_data_directory: "tests/integration/config/nanopore_data_directory"
@@ -27,7 +27,7 @@ run_instruments:
     demultiplexed_runs_dir: "tests/integration/config/illumina_demultiplexed_runs_dir"
 
 housekeeper:
-  database: "sqlite:///housekeeper"
+  database: "sqlite:///file:housekeeper?mode=memory&cache=shared&uri=true"
   root: "tests/integration/config/housekeeper_root"
 
 chanjo:
@@ -77,7 +77,7 @@ crunchy:
     conda_env: crunchy_conda_env
 
 genotype:
-  database: "sqlite:///genotype"
+  database: "sqlite:///file:genotype?mode=memory&cache=shared&uri=true"
   binary_path: "tests/integration/config/genotype_binary_path"
   config_path: "tests/integration/config/genotype_config_path"
 
@@ -120,9 +120,9 @@ data-delivery:
   mail_user: "data-delivery-user@scilifelab.se"
 
 trailblazer:
-  database: "sqlite:///trailblazer"
+  database: "sqlite:///file:trailblazer?mode=memory&cache=shared&uri=true"
   root: tests/integration/config/trailblazer
   service_account: "trailblazer_service_account"
   google_client_id:  "trailblazer_google_client_id"
   service_account_auth_file: tests/integration/config/trailblazer/service_account_auth_file
-  host: "http://localhost/trailblazer"
+  host: "http://localhost:8888/trailblazer"
