@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, Mock, create_autospec
+from unittest.mock import MagicMock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -67,7 +67,7 @@ def test_analysis_starter_factory_nextflow_starter(
     mock_platform_submitter_init: MagicMock = mocker.patch.object(
         SeqeraPlatformSubmitter, "__init__", return_value=None
     )
-    mock_client: Mock[SeqeraPlatformClient] = create_autospec(SeqeraPlatformClient)
+    mock_client: SeqeraPlatformClient = create_autospec(SeqeraPlatformClient)
     mocker.patch.object(starter_factory, "SeqeraPlatformClient", return_value=mock_client)
 
     # GIVEN a NextflowTracker mocked constructor

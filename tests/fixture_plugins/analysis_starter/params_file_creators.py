@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import Mock, create_autospec
+from unittest.mock import create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -30,7 +30,7 @@ def raredisease_params_file_creator(
     mocker: MockerFixture,
 ) -> RarediseaseParamsFileCreator:
     """Fixture to provide a RarediseaseParamsFileCreator with a mock store."""
-    lims: Mock[LimsAPI] = create_autospec(LimsAPI)
+    lims: LimsAPI = create_autospec(LimsAPI)
     lims.capture_kit.return_value = "capture_kit"
     mocker.patch.object(raredisease, "read_yaml", return_value=nextflow_workflow_params_content)
     mocker.patch.object(raredisease, "write_csv", return_value=None)

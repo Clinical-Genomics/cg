@@ -111,10 +111,13 @@ def test_analysis_starter_start_available_error_handling(
     error: type[Exception],
     expected_exit: bool,
 ):
-    """Test that the AnalysisStarter returns correct exit values depending on the errors raised."""
+    """
+    Test that the start_available command from AnalysisStarter returns correct exit values
+    depending on the errors raised.
+    """
     # GIVEN a Store with a mock case
-    mock_store = create_autospec(Store)
-    mock_case = create_autospec(Case)
+    mock_store: Store = create_autospec(Store)
+    mock_case: Case = create_autospec(Case)
     mock_store.get_cases_to_analyze.return_value = [mock_case]
 
     # GIVEN an analysis starter
@@ -151,18 +154,17 @@ def test_rnafusion_start(
     analysis_starter_factory = AnalysisStarterFactory(cg_context)
 
     # GIVEN a store that all our components use a mocked store
-    mock_store = create_autospec(Store)
+    mock_store: Store = create_autospec(Store)
     analysis_starter_factory.store = mock_store
     analysis_starter_factory.configurator_factory.store = mock_store
-    analysis_starter = analysis_starter_factory.get_analysis_starter_for_workflow(
+    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
         Workflow.RNAFUSION
     )
 
     # GIVEN a case with appropriate parameters set
-    mock_case = create_autospec(Case)
-    mock_sample = create_autospec(Sample)
+    mock_sample: Sample = create_autospec(Sample)
+    mock_case: Case = create_autospec(Case, samples=[mock_sample])
     mock_store.get_case_by_internal_id.return_value = mock_case
-    mock_case.samples = [mock_sample]
     mock_case.priority = Priority.standard
     mock_case.data_analysis = Workflow.RNAFUSION
 
@@ -264,7 +266,7 @@ def test_nextflow_start(
         analysis_starter_scenario[workflow]
     )
 
-    # GIVEN that the configurator returns the mock case config
+    # GIVEN that the configure method from the configurator returns the mock case config
     mock_configurator.configure.return_value = mock_case_config
 
     # GIVEN a FastqFetcher
@@ -276,7 +278,7 @@ def test_nextflow_start(
     # GIVEN that the submitter returns a tower_id or None when submitting the analysis
     mock_submitter.submit.return_value = tower_id
 
-    # GIVEN an analysis starter
+    # GIVEN an analysis starter initialised with the previously mocked classes
     analysis_starter = AnalysisStarter(
         configurator=mock_configurator,
         input_fetcher=input_fetcher,
@@ -323,7 +325,7 @@ def test_nextflow_start_error_raised_in_run_and_track(
     expected_error = CalledProcessError(returncode=1, cmd="submit_command")
     mock_submitter.submit.side_effect = expected_error
 
-    # GIVEN an analysis starter
+    # GIVEN an analysis starter initialised with the previously mocked classes
     analysis_starter = AnalysisStarter(
         configurator=mock_configurator,
         input_fetcher=create_autospec(FastqFetcher),
@@ -366,7 +368,7 @@ def test_run(
     # GIVEN that the get_config method from the configurator returns the mock case config
     mock_configurator.get_config.return_value = mock_case_config
 
-    # GIVEN an analysis starter
+    # GIVEN an analysis starter initialised with the previously mocked classes
     analysis_starter = AnalysisStarter(
         configurator=mock_configurator,
         input_fetcher=create_autospec(FastqFetcher),
