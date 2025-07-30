@@ -1,5 +1,4 @@
 import logging
-from typing import Callable
 from unittest.mock import MagicMock
 
 import pytest
@@ -128,7 +127,7 @@ def test_start_available(
     ids=["raredisease", "RNAFUSION", "Taxprofiler"],
 )
 def test_start_nextflow_calls_service(
-    start_command: Callable,
+    start_command: BaseCommand,
     cli_runner: CliRunner,
     cg_context: CGConfig,
     mocker: MockerFixture,

@@ -1,7 +1,6 @@
 """This script tests the run cli command"""
 
 import logging
-from typing import Callable
 
 import pytest
 from _pytest.fixtures import FixtureRequest
