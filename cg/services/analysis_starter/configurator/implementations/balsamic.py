@@ -48,7 +48,6 @@ class BalsamicConfigurator(Configurator):
         self.sentieon_licence_server: str = config.sentieon_licence_server
         self.loqusdb_artefact_snv: Path = config.loqusdb_artefact_snv
         self.loqusdb_cancer_germline_snv: Path = config.loqusdb_cancer_germline_snv
-        self.loqusdb_cancer_germline_sv: Path = config.loqusdb_cancer_germline_sv
         self.loqusdb_cancer_somatic_snv: Path = config.loqusdb_cancer_somatic_snv
         self.loqusdb_cancer_somatic_sv: Path = config.loqusdb_cancer_somatic_sv
         self.loqusdb_clinical_snv: Path = config.loqusdb_clinical_snv
@@ -111,7 +110,6 @@ class BalsamicConfigurator(Configurator):
             balsamic_cache=self.cache_dir,
             cadd_annotations=self.cadd_path,
             cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
-            cancer_germline_sv_observations=self.loqusdb_cancer_germline_sv,
             cancer_somatic_snv_observations=self.loqusdb_cancer_somatic_snv,
             cancer_somatic_sv_observations=self.loqusdb_cancer_somatic_sv,
             case_id=case.internal_id,
@@ -143,7 +141,6 @@ class BalsamicConfigurator(Configurator):
             balsamic_cache=self.cache_dir,
             cadd_annotations=self.cadd_path,
             cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
-            cancer_germline_sv_observations=self.loqusdb_cancer_germline_sv,
             cancer_somatic_snv_observations=self.loqusdb_cancer_somatic_snv,
             cancer_somatic_sv_observations=self.loqusdb_cancer_somatic_sv,
             case_id=case.internal_id,
