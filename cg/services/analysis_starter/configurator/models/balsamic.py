@@ -43,7 +43,7 @@ class BalsamicConfigInput(BaseModel):
     def dump_to_cli(self) -> str:
         """Dump the Balsamic case config to a CLI command. None flags are excluded and boolean flags are converted to
         only add the flag."""
-        command = f"{self.conda_binary} run {self.balsamic_binary} balsamic config case"
+        command = f"{self.conda_binary} run {self.balsamic_binary} config case"
         flags = {
             "--analysis-dir": self.analysis_dir,
             "--analysis-workflow": self.analysis_workflow,
