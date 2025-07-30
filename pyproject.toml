@@ -73,7 +73,10 @@ pytest = ["pytest"]
 ruff = ["ruff"]
 pytest-xdist = ["pytest-xdist"]
 
-
+[tool.pytest.ini_options]
+markers = [
+  "integration: Integration tests"
+]
 
 [project.scripts]
 cg = "cg.cli.base:base"
