@@ -1,4 +1,5 @@
 import traceback
+from typing import Generator
 from unittest.mock import create_autospec
 
 import pytest
@@ -31,11 +32,12 @@ def httpserver_listen_address():
 
 
 @pytest.fixture
-def store() -> Store:
+def store() -> Generator[Store, None, None]:
     database.initialize_database("sqlite:///file:cg?mode=memory&cache=shared&uri=true")
     database.create_all_tables()
     store = Store()
-    return store
+    yield store
+    database.drop_all_tables()
 
 
 @pytest.mark.integration
