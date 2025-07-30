@@ -215,7 +215,7 @@ class BalsamicConfigurator(Configurator):
                 f"No bed file found in LIMS for sample {first_sample.internal_id} in for case {case.internal_id}."
             )
 
-    def _get_pon_file(self, bed_file: Path) -> Path:
+    def _get_pon_file(self, bed_file: Path) -> Path | None:
         """Finds the corresponding PON file for the given bed file.
         These are versioned and named like: <bed_file_name>_hg19_design_CNVkit_PON_reference_v<version>.cnn
         This method returns the latest version of the PON file matching the bed name.
@@ -230,9 +230,8 @@ class BalsamicConfigurator(Configurator):
                 candidates.append((version, file))
 
         if not candidates:
-            raise FileNotFoundError(
-                f"No matching CNN files found for identifier '{identifier}' in {self.pon_directory}"
-            )
+            LOG.info(f"No PON file found for bed file {bed_file.name}. Configuring without PON.")
+            return None
         _, latest_file = max(candidates, key=lambda x: x[0])
 
         return latest_file
