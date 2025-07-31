@@ -6,6 +6,7 @@ from cg.constants import Workflow
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
+from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.file_creators.microsalt_config import (
     MicrosaltConfigFileCreator,
@@ -65,7 +66,7 @@ def test_nextflow_configurator_factory_success(
 
 def test_configurator_factory_failure(cg_context: CGConfig):
     # GIVEN a workflow we do not have support for
-    workflow = Workflow.BALSAMIC
+    workflow = Workflow.MIP_DNA
 
     # GIVEN a configurator factory
     configurator_factory = ConfiguratorFactory(cg_config=cg_context)

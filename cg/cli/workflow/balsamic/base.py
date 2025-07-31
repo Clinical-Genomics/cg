@@ -1,6 +1,7 @@
 """CLI support to create config and/or start BALSAMIC."""
 
 import logging
+from typing import cast
 
 import rich_click as click
 from pydantic.v1 import ValidationError
@@ -19,12 +20,16 @@ from cg.cli.workflow.balsamic.options import (
 )
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
 from cg.cli.workflow.utils import validate_force_store_option
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.cli_options import COMMENT, DRY_RUN, FORCE, LIMIT
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
+from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
+from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
+from cg.services.analysis_starter.service import AnalysisStarter
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -291,3 +296,54 @@ def store_available(context: click.Context, dry_run: bool) -> None:
             was_successful = False
     if not was_successful:
         raise click.Abort()
+
+
+@balsamic.command("dev-start")
+@OPTION_PANEL_BED
+@OPTION_CLUSTER_CONFIG
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_start(
+    cg_config: CGConfig,
+    case_id: str,
+    cluster_config: click.Path | None,
+    panel_bed: str | None,
+):
+    """Start a Balsamic case. Configures the case if needed."""
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
+    analysis_starter.start(case_id=case_id, cluster_config=cluster_config, panel_bed=panel_bed)
+
+
+@balsamic.command("dev-start-available")
+@click.pass_obj
+def dev_start_available(cg_config: CGConfig):
+    """Starts all available raredisease cases."""
+    LOG.info("Starting Balsamic workflow for all available cases.")
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
+    succeeded: bool = analysis_starter.start_available()
+    if not succeeded:
+        raise click.Abort
+
+
+@balsamic.command()
+@OPTION_PANEL_BED
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_config_case(cg_config: CGConfig, case_id: str, panel_bed: str | None):
+    """Configure a Balsamic case so that it is ready to be run."""
+    factory = ConfiguratorFactory(cg_config)
+    configurator = cast(BalsamicConfigurator, factory.get_configurator(Workflow.BALSAMIC))
+    configurator.configure(case_id=case_id, panel_bed=panel_bed)
+
+
+@balsamic.command()
+@OPTION_CLUSTER_CONFIG
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_run(cg_config: CGConfig, case_id: str, cluster_config: click.Path | None):
+    """Run a preconfigured Balsamic case."""
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
+    analysis_starter.run(case_id=case_id, cluster_config=cluster_config)
