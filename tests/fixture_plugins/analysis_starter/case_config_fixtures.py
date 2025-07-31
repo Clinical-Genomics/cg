@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Callable
 
 import pytest
 
@@ -14,7 +15,7 @@ def get_nextflow_case_config_dict(
     nextflow_config_profiles: list[str],
     nextflow_repository: str,
     nextflow_pipeline_revision: str,
-) -> callable:
+) -> Callable:
     """
     Return a case config dictionary factory for Nextflow pipelines. The returned factory can be
     called by adding the workflow as parameter to obtain the case config dictionary.
@@ -44,15 +45,15 @@ def get_nextflow_case_config_dict(
 
 
 @pytest.fixture
-def raredisease_case_config(get_nextflow_case_config_dict: callable) -> NextflowCaseConfig:
+def raredisease_case_config(get_nextflow_case_config_dict: Callable) -> NextflowCaseConfig:
     return NextflowCaseConfig(**get_nextflow_case_config_dict(workflow=Workflow.RAREDISEASE))
 
 
 @pytest.fixture
-def rnafusion_case_config(get_nextflow_case_config_dict: callable) -> NextflowCaseConfig:
+def rnafusion_case_config(get_nextflow_case_config_dict: Callable) -> NextflowCaseConfig:
     return NextflowCaseConfig(**get_nextflow_case_config_dict(workflow=Workflow.RNAFUSION))
 
 
 @pytest.fixture
-def taxprofiler_case_config(get_nextflow_case_config_dict: callable) -> NextflowCaseConfig:
+def taxprofiler_case_config(get_nextflow_case_config_dict: Callable) -> NextflowCaseConfig:
     return NextflowCaseConfig(**get_nextflow_case_config_dict(workflow=Workflow.TAXPROFILER))

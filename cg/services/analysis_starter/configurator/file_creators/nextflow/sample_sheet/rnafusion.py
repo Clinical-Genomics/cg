@@ -1,4 +1,4 @@
-from typing import Iterator
+from collections.abc import Iterator
 
 from cg.constants.constants import Strandedness
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (

@@ -1,4 +1,4 @@
-from typing import Iterator
+from collections.abc import Iterator
 
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.symbols import EMPTY_STRING

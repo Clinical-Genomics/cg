@@ -62,7 +62,7 @@ def taxprofiler_sample_sheet_expected_content(
     fastq_path_2: Path,
 ) -> list[list[str]]:
     """Return the expected sample sheet content for Taxprofiler."""
-    row: list[str] = [
+    row: list[str | int] = [
         nextflow_sample_id,
         1,
         SequencingPlatform.ILLUMINA.value,
