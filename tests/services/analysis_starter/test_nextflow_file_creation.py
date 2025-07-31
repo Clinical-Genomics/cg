@@ -79,6 +79,24 @@ def test_nextflow_config_file_content(
     )
 
 
+def test_get_samplesheet_path(
+    rnafusion_sample_sheet_creator: NextflowSampleSheetCreator,
+    nextflow_case_id: str,
+    nextflow_case_path: Path,
+):
+    """Test that the sample sheet path is constructed correctly."""
+    # GIVEN a Nextflow sample sheet creator and a case id
+
+    # WHEN getting the sample sheet path
+    sample_sheet_path: Path = rnafusion_sample_sheet_creator.get_file_path(
+        case_id=nextflow_case_id, case_path=nextflow_case_path
+    )
+
+    # THEN the path should end with 'samplesheet.csv'
+    expected_path = Path(nextflow_case_path, f"{nextflow_case_id}_samplesheet.csv")
+    assert sample_sheet_path == expected_path
+
+
 @pytest.mark.parametrize(
     "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]
 )
