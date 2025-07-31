@@ -8,7 +8,7 @@ from cg.constants import Workflow
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 def test_get_case_config(
     workflow: Workflow,
@@ -34,7 +34,7 @@ def test_get_case_config(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 def test_get_case_config_flags(
     workflow: Workflow,
@@ -60,7 +60,7 @@ def test_get_case_config_flags(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 def test_get_case_config_none_flags(
     workflow: Workflow,

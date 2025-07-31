@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
+from click import BaseCommand
 from click.testing import CliRunner, Result
 from pytest_mock import MockerFixture
 
@@ -13,6 +14,8 @@ from cg.cli.workflow.raredisease.base import dev_start as raredisease_start
 from cg.cli.workflow.raredisease.base import dev_start_available as raredisease_start_available
 from cg.cli.workflow.rnafusion.base import start as rnafusion_start
 from cg.cli.workflow.rnafusion.base import start_available as rnafusion_start_available
+from cg.cli.workflow.taxprofiler.base import dev_start as taxprofiler_start
+from cg.cli.workflow.taxprofiler.base import dev_start_available as taxprofiler_start_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -120,17 +123,11 @@ def test_start_available(
 
 @pytest.mark.parametrize(
     "start_command",
-    [
-        raredisease_start,
-        rnafusion_start,
-    ],
-    ids=[
-        "raredisease",
-        "RNAFUSION",
-    ],
+    [raredisease_start, rnafusion_start, taxprofiler_start],
+    ids=["raredisease", "RNAFUSION", "Taxprofiler"],
 )
 def test_start_nextflow_calls_service(
-    start_command: callable,
+    start_command: BaseCommand,
     cli_runner: CliRunner,
     cg_context: CGConfig,
     mocker: MockerFixture,
@@ -153,14 +150,8 @@ def test_start_nextflow_calls_service(
 
 @pytest.mark.parametrize(
     "start_available_command",
-    [
-        raredisease_start_available,
-        rnafusion_start_available,
-    ],
-    ids=[
-        "raredisease",
-        "RNAFUSION",
-    ],
+    [raredisease_start_available, rnafusion_start_available, taxprofiler_start_available],
+    ids=["raredisease", "RNAFUSION", "Taxprofiler"],
 )
 @pytest.mark.parametrize(
     "succeeds, exit_status",
@@ -170,7 +161,7 @@ def test_start_nextflow_calls_service(
     ],
 )
 def test_start_available_nextflow_calls_service(
-    start_available_command: callable,
+    start_available_command: BaseCommand,
     succeeds: bool,
     exit_status: int,
     cli_runner: CliRunner,
