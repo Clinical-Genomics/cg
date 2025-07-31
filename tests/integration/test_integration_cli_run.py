@@ -33,6 +33,7 @@ def httpserver_listen_address():
 
 @pytest.fixture
 def store() -> Generator[Store, None, None]:
+    # TODO: use uri from config file
     database.initialize_database("sqlite:///file:cg?mode=memory&cache=shared&uri=true")
     database.create_all_tables()
     store = Store()
