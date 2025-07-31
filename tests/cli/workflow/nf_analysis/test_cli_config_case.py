@@ -6,16 +6,17 @@ from pathlib import Path
 import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
+from click import BaseCommand
 from click.testing import CliRunner, Result
 from pytest_mock import MockerFixture
 
 from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.cli.workflow.raredisease.base import dev_config_case as raredisease_config_case
-from cg.cli.workflow.rnafusion.base import dev_config_case as rnafusion_config_case
+from cg.cli.workflow.rnafusion.base import config_case as rnafusion_config_case
+from cg.cli.workflow.taxprofiler.base import dev_config_case as taxprofiler_config_case
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileFormat, MetaApis
-from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -28,7 +29,7 @@ LOG = logging.getLogger(__name__)
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_config_case_without_options(
     cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest
@@ -48,7 +49,7 @@ def test_config_case_without_options(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_config_with_missing_case(
     cli_runner: CliRunner,
@@ -78,7 +79,7 @@ def test_config_with_missing_case(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_config_case_without_samples(
     cli_runner: CliRunner,
@@ -108,7 +109,7 @@ def test_config_case_without_samples(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS,
+    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE],
 )
 def test_config_case_default_parameters(
     cli_runner: CliRunner,
@@ -191,7 +192,7 @@ def test_config_case_default_parameters(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_config_case_dry_run(
     cli_runner: CliRunner,
@@ -252,13 +253,10 @@ def test_config_case_dry_run(
 
 @pytest.mark.parametrize(
     "case_config_command",
-    [
-        raredisease_config_case,
-        rnafusion_config_case,
-    ],
+    [raredisease_config_case, rnafusion_config_case, taxprofiler_config_case],
 )
 def test_nextflow_case_config(
-    case_config_command: callable,
+    case_config_command: BaseCommand,
     cli_runner: CliRunner,
     cg_context: CGConfig,
     mocker: MockerFixture,

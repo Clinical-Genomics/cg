@@ -52,7 +52,6 @@ def test_nextflow_tracker(nextflow_tracker: NextflowTracker, raredisease_case_id
         pipeline_repository="github/raredisease",
         pre_run_script="pre_run_script",
         revision="1.0.0",
-        stub_run=False,
         work_dir="work/dir",
     )
 

@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
@@ -19,16 +20,18 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
 
+LOG = logging.getLogger(__name__)
+
 
 class RarediseaseParamsFileCreator(ParamsFileCreator):
 
     def __init__(self, store: Store, lims: LimsAPI, params: str):
+        super().__init__(params)
         self.store = store
         self.lims = lims
-        self.params = Path(params)
 
     def create(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> None:
-        """Create the params file for a case."""
+        LOG.debug(f"Creating params file for case {case_id}")
         file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
         content: dict = self._get_content(
             case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
@@ -36,15 +39,15 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         write_yaml_nextflow_style(file_path=file_path, content=content)
 
     def _get_content(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> dict:
-        """Return the content of a params file for a case."""
-        case_workflow_parameters: dict = self._get_case_parameters(
+        """Return the merged dictionary with case-specific parameters and workflow parameters."""
+        case_parameters: dict = self._get_case_parameters(
             case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
         ).model_dump()
         workflow_parameters: dict = read_yaml(self.params)
-        duplicate_keys = set(case_workflow_parameters.keys()) & set(workflow_parameters.keys())
+        duplicate_keys = set(case_parameters.keys()) & set(workflow_parameters.keys())
         if duplicate_keys:
             raise CgDataError(f"Duplicate parameter keys found: {duplicate_keys}")
-        parameters: dict = case_workflow_parameters | workflow_parameters
+        parameters: dict = case_parameters | workflow_parameters
         curated_parameters: dict = replace_values_in_params_file(parameters)
         return curated_parameters
 

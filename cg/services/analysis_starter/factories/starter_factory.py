@@ -2,7 +2,6 @@ import logging
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
@@ -75,7 +74,7 @@ class AnalysisStarterFactory:
         return InputFetcher()
 
     def _get_submitter(self, workflow: Workflow) -> Submitter:
-        if workflow in NEXTFLOW_WORKFLOWS:
+        if workflow in [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]:
             return self._get_seqera_platform_submitter()
         else:
             return SubprocessSubmitter()
@@ -88,13 +87,13 @@ class AnalysisStarterFactory:
         )
 
     def _get_tracker(self, workflow: Workflow) -> Tracker:
-        if workflow in NEXTFLOW_WORKFLOWS:
+        if workflow in [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]:
             return NextflowTracker(
                 store=self.store,
                 trailblazer_api=self.cg_config.trailblazer_api,
                 workflow_root=getattr(self.cg_config, workflow).root,
             )
-        if workflow == Workflow.MICROSALT:
+        elif workflow == Workflow.MICROSALT:
             return MicrosaltTracker(
                 store=self.store,
                 subprocess_submitter=SubprocessSubmitter(),

@@ -61,7 +61,6 @@ from cg.models.compression_data import CompressionData
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.nallo.nallo import NalloSampleSheetHeaders
 from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
-from cg.models.rnafusion.rnafusion import RnafusionParameters, RnafusionSampleSheetEntry
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
 from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
@@ -2161,7 +2160,9 @@ def context_config(
             "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_bin_path": Path("workflow", "path").as_posix(),
+            "pre_run_script": "",
             "profile": "myprofile",
+            "repository": "https://some_url",
             "references": Path("path", "to", "references").as_posix(),
             "revision": "2.2.0",
             "root": str(nallo_dir),
@@ -2203,7 +2204,9 @@ def context_config(
             "config": str(nf_analysis_pipeline_config_path),
             "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "workflow_bin_path": Path("workflow", "path").as_posix(),
+            "pre_run_script": "",
             "profile": "myprofile",
+            "repository": "https://some_url",
             "references": Path("path", "to", "references").as_posix(),
             "revision": "2.2.0",
             "root": str(tomte_dir),
@@ -2250,7 +2253,9 @@ def context_config(
             "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_bin_path": Path("workflow", "path").as_posix(),
+            "pre_run_script": "",
             "profile": "myprofile",
+            "repository": "https://some_url",
             "revision": "2.2.0",
             "slurm": {
                 "account": "development",
@@ -3334,33 +3339,6 @@ def rnafusion_case_id() -> str:
 
 
 @pytest.fixture(scope="session")
-def rnafusion_workflow() -> str:
-    """Returns rnafusion workflow."""
-    return "rnafusion"
-
-
-@pytest.fixture(scope="function")
-def rnafusion_sample_sheet_content(
-    rnafusion_case_id: str,
-    sample_id: str,
-    fastq_forward_read_path: Path,
-    fastq_reverse_read_path: Path,
-    strandedness: str,
-) -> str:
-    """Return the expected sample sheet content  for rnafusion."""
-    headers: str = ",".join(RnafusionSampleSheetEntry.headers())
-    row: str = ",".join(
-        [
-            sample_id,
-            fastq_forward_read_path.as_posix(),
-            fastq_reverse_read_path.as_posix(),
-            strandedness,
-        ]
-    )
-    return "\n".join([headers, row])
-
-
-@pytest.fixture(scope="session")
 def strandedness_not_permitted() -> str:
     """Return a not permitted strandedness."""
     return "double_stranded"
@@ -3395,30 +3373,6 @@ def rnafusion_multiqc_json_metrics_path(rnafusion_analysis_dir: Path) -> Path:
 def rnafusion_multiqc_json_metrics(rnafusion_multiqc_json_metrics_path: Path) -> list[dict]:
     """Returns the content of a mock Multiqc JSON file."""
     return read_json(file_path=rnafusion_multiqc_json_metrics_path)
-
-
-@pytest.fixture(scope="function")
-def rnafusion_sample_sheet_path(rnafusion_dir, rnafusion_case_id) -> Path:
-    """Path to sample sheet."""
-    return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet").with_suffix(
-        FileExtensions.CSV
-    )
-
-
-@pytest.fixture(scope="function")
-def rnafusion_params_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
-    """Path to parameters file."""
-    return Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_params_file").with_suffix(
-        FileExtensions.YAML
-    )
-
-
-@pytest.fixture(scope="function")
-def rnafusion_nextflow_config_file_path(rnafusion_dir, rnafusion_case_id) -> Path:
-    """Path to config file."""
-    return Path(
-        rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_nextflow_config"
-    ).with_suffix(FileExtensions.JSON)
 
 
 @pytest.fixture(scope="function")
@@ -3508,23 +3462,6 @@ def tower_id() -> int:
 def existing_directory(tmpdir_factory) -> Path:
     """Path to existing temporary directory."""
     return tmpdir_factory.mktemp("any_directory")
-
-
-@pytest.fixture(scope="function")
-def rnafusion_parameters_default(
-    rnafusion_dir: Path,
-    rnafusion_case_id: str,
-    rnafusion_sample_sheet_path: Path,
-    existing_directory: Path,
-) -> RnafusionParameters:
-    """Return Rnafusion parameters."""
-    return RnafusionParameters(
-        cluster_options="--qos=normal",
-        genomes_base=Path(existing_directory),
-        input=rnafusion_sample_sheet_path,
-        outdir=Path(rnafusion_dir, rnafusion_case_id),
-        priority="development",
-    )
 
 
 @pytest.fixture(scope="session")
@@ -3685,15 +3622,6 @@ def rnafusion_mock_analysis_finish(
             "tower_ids",
         ).with_suffix(FileExtensions.YAML),
     )
-
-
-@pytest.fixture(scope="function")
-def rnafusion_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
-    """Create samplesheet.csv file for testing"""
-    Path.mkdir(Path(rnafusion_dir, rnafusion_case_id), parents=True, exist_ok=True)
-    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").with_suffix(
-        FileExtensions.CSV
-    ).touch(exist_ok=True)
 
 
 # Tomte fixtures
@@ -4129,12 +4057,8 @@ def taxprofiler_parameters_default(
 ) -> TaxprofilerParameters:
     """Return Taxprofiler parameters."""
     return TaxprofilerParameters(
-        cluster_options="--qos=normal",
         input=taxprofiler_sample_sheet_path,
         outdir=Path(taxprofiler_dir, taxprofiler_case_id),
-        databases=Path(existing_directory),
-        hostremoval_reference=Path(existing_directory),
-        priority="development",
     )
 
 

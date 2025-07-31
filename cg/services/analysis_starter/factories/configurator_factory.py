@@ -31,6 +31,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
     RNAFusionParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
+    TaxprofilerParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowSampleSheetCreator,
 )
@@ -41,6 +44,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
     RNAFusionSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
+    TaxprofilerSampleSheetCreator,
+)
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
@@ -57,7 +63,7 @@ class ConfiguratorFactory:
         self.store: Store = cg_config.status_db
 
     def get_configurator(self, workflow: Workflow) -> Configurator:
-        if workflow in NEXTFLOW_WORKFLOWS:
+        if workflow in [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]:
             return self._get_nextflow_configurator(workflow)
         elif workflow == Workflow.MICROSALT:
             return self._get_microsalt_configurator()
@@ -98,6 +104,9 @@ class ConfiguratorFactory:
         elif workflow == Workflow.RNAFUSION:
             pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
             return RNAFusionParamsFileCreator(pipeline_config.params)
+        elif workflow == Workflow.TAXPROFILER:
+            pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
+            return TaxprofilerParamsFileCreator(pipeline_config.params)
 
     def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
         return getattr(self.cg_config, workflow)
@@ -110,6 +119,10 @@ class ConfiguratorFactory:
             )
         elif workflow == Workflow.RNAFUSION:
             return RNAFusionSampleSheetCreator(
+                housekeeper_api=self.housekeeper_api, store=self.store
+            )
+        elif workflow == Workflow.TAXPROFILER:
+            return TaxprofilerSampleSheetCreator(
                 housekeeper_api=self.housekeeper_api, store=self.store
             )
 

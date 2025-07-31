@@ -35,6 +35,7 @@ class AnalysisStarter:
         """Starts available cases. Returns True if all ready cases started without an error."""
         succeeded = True
         cases: list[Case] = self.store.get_cases_to_analyze(workflow=self.workflow, limit=limit)
+        LOG.info(f"Found {len(cases)} {self.workflow} cases to start")
         for case in cases:
             try:
                 self.start(case.internal_id)
@@ -47,6 +48,7 @@ class AnalysisStarter:
 
     def start(self, case_id: str, **flags) -> None:
         """Fetches raw data, generates configuration files and runs the specified case."""
+        LOG.debug(f"Starting case {case_id}")
         self.tracker.ensure_analysis_not_ongoing(case_id)
         self.input_fetcher.ensure_files_are_ready(case_id)
         parameters: CaseConfig = self.configurator.configure(case_id=case_id, **flags)

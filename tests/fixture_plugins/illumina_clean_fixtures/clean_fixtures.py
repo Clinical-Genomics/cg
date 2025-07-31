@@ -6,10 +6,8 @@ import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.models.cg_config import CGConfig
-from cg.services.illumina.cleaning.clean_runs_service import (
-    IlluminaCleanRunsService,
-)
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.services.illumina.cleaning.clean_runs_service import IlluminaCleanRunsService
 from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
