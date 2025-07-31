@@ -2,7 +2,13 @@ import pytest
 
 from cg.apps.lims import LimsAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler
-from cg.models.cg_config import BalsamicConfig, CGConfig, RarediseaseConfig, RnafusionConfig, TaxprofilerConfig
+from cg.models.cg_config import (
+    BalsamicConfig,
+    CGConfig,
+    RarediseaseConfig,
+    RnafusionConfig,
+    TaxprofilerConfig,
+)
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.file_creators.microsalt_config import (
     MicrosaltConfigFileCreator,
@@ -25,16 +31,15 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
     RNAFusionSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
     TaxprofilerSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.store.store import Store
-
 
 
 @pytest.fixture
@@ -104,8 +109,8 @@ def rnafusion_configurator(
         sample_sheet_creator=rnafusion_sample_sheet_creator,
         pipeline_extension=PipelineExtension(),
     )
-  
-  
+
+
 @pytest.fixture
 def taxprofiler_configurator(
     taxprofiler_sample_sheet_creator: TaxprofilerSampleSheetCreator,

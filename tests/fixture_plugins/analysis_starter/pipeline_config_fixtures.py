@@ -3,7 +3,13 @@ from pathlib import Path
 
 import pytest
 
-from cg.models.cg_config import BalsamicConfig, RarediseaseConfig, RnafusionConfig, SlurmConfig, TaxprofilerConfig
+from cg.models.cg_config import (
+    BalsamicConfig,
+    RarediseaseConfig,
+    RnafusionConfig,
+    SlurmConfig,
+    TaxprofilerConfig,
+)
 
 
 @pytest.fixture
@@ -52,7 +58,7 @@ def get_nextflow_config_dict(
 
     return _make_dict
 
- 
+
 @pytest.fixture
 def balsamic_config(tmp_path) -> BalsamicConfig:
     return BalsamicConfig(
@@ -87,7 +93,7 @@ def balsamic_config(tmp_path) -> BalsamicConfig:
         swegen_snv=tmp_path / "swegen_snv.vcf",
         swegen_sv=tmp_path / "swegen_sv.vcf",
     )
-  
+
 
 @pytest.fixture
 def raredisease_config_object(get_nextflow_config_dict: Callable) -> RarediseaseConfig:

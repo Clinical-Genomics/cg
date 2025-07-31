@@ -44,7 +44,7 @@ def get_nextflow_case_config_dict(
 
     return _make_dict
 
-  
+
 @pytest.fixture
 def balsamic_case_config(case_id: str, tmp_path: Path) -> BalsamicCaseConfig:
     return BalsamicCaseConfig(
@@ -60,7 +60,7 @@ def balsamic_case_config(case_id: str, tmp_path: Path) -> BalsamicCaseConfig:
         workflow=Workflow.BALSAMIC,
     )
 
-      
+
 @pytest.fixture
 def raredisease_case_config(get_nextflow_case_config_dict: Callable) -> NextflowCaseConfig:
     return NextflowCaseConfig(**get_nextflow_case_config_dict(workflow=Workflow.RAREDISEASE))
