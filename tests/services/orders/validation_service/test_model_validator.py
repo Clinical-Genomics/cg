@@ -6,7 +6,6 @@ from cg.services.orders.validation.order_types.fluffy.models.order import Fluffy
 from cg.services.orders.validation.order_types.mutant.models.order import MutantOrder
 from cg.services.orders.validation.order_types.rml.models.order import RMLOrder
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
-from cg.services.orders.validation.order_types.rna_fusion.models.sample import RNAFusionSample
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 
 
@@ -66,8 +65,7 @@ def test_rnafusion_order_sets_samples_as_tumour(rnafusion_order_to_submit: dict)
     assert errors.is_empty
 
     # THEN the tumour value should be set to True for all parsed samples
-    parsed_samples: list[RNAFusionSample] = [case.samples[0] for case in order.cases]
-    assert all(sample.tumour is True for sample in parsed_samples)
+    assert all(case.samples[0].tumour is True for case in order.cases)
 
 
 def test_rnafusion_with_normal_sample_fails(rnafusion_order_to_submit: dict):
@@ -102,6 +100,32 @@ def test_set_tumour_to_false_fails_rnafusion_sample(rnafusion_order_to_submit: d
     with pytest.raises(ValueError) as exc_info:
         order.cases[0].samples[0].tumour = False
     assert str(exc_info.value) == "RNAFUSION samples must always be tumour samples"
+
+
+def test_rnafusion_existing_sample_tumour_fails(rnafusion_order_with_existing_sample: dict):
+    """
+    Test that a RNAFUSION order with an existing sample specified as non-tumour fails validation.
+    """
+    # GIVEN a RNAFUSION order with an existing sample specified as non-tumour (normal sample)
+    assert rnafusion_order_with_existing_sample["cases"][0]["samples"][0]["tumour"] is False
+    assert rnafusion_order_with_existing_sample["cases"][0]["samples"][0]["internal_id"] is not None
+
+    # WHEN validating the order
+    _, errors = ModelValidator.validate(
+        order=rnafusion_order_with_existing_sample, model=RNAFusionOrder
+    )
+
+    # THEN there should be a case sample validation error
+    assert errors.case_sample_errors
+
+    # THEN the error should concern the tumour field of the first sample
+    assert errors.case_sample_errors[0].field == "tumour"
+
+    # THEN the error message should indicate that a RNAFUSION order cannot contain normal samples
+    assert (
+        errors.case_sample_errors[0].message
+        == "Value error, Can't perform RNAFUSION analysis on non-tumour samples"
+    )
 
 
 def test_order_field_error(valid_order: TomteOrder, model_validator: ModelValidator):
