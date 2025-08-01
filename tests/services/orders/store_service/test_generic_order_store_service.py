@@ -140,7 +140,7 @@ def test_store_rna_fusion_order(
     assert first_case.data_delivery == str(DataDelivery.FASTQ_ANALYSIS)
     assert new_link.sample.name == "sample1-rna-t1"
     assert new_link.sample.application_version.application.tag == "RNAPOAR025"
-    assert new_link
+    assert new_link.sample.is_tumour is True
 
 
 def test_store_tomte_order(
