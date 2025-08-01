@@ -1,9 +1,10 @@
 """
-    API for compressing files. Functionality to compress FASTQ, decompress SPRING and clean files
+API for compressing files. Functionality to compress FASTQ, decompress SPRING and clean files
 """
 
 import logging
 import re
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from housekeeper.store.models import File, Version
@@ -12,10 +13,12 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
+from cg.constants.constants import PIPELINES_USING_PARTIAL_ANALYSES
+from cg.exc import DecompressionCouldNotStartError
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
-from cg.models.compression_data import CompressionData
-from cg.store.models import Sample
+from cg.models.compression_data import CaseCompressionData, CompressionData, SampleCompressionData
+from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -102,6 +105,15 @@ class CompressAPI:
             return False
         return bool(spring_file.archive.archived_at)
 
+    def decompress_case(self, case: Case) -> None:
+        """Decompresses all Spring files tied to the case.
+        Raises:
+            DecompressionFailedToStartError if no sample could start decompressing."""
+        if not any(self.decompress_spring(sample.internal_id) for sample in case.samples):
+            raise DecompressionCouldNotStartError(
+                f"No sample could be decompressed for {case.internal_id}"
+            )
+
     def decompress_spring(self, sample_id: str) -> bool:
         """Decompress SPRING archive for a sample.
 
@@ -143,6 +155,42 @@ class CompressAPI:
             self.crunchy_api.spring_to_fastq(compression_obj=compression, sample_id=sample_id)
             update_metadata_date(spring_metadata_path=compression.spring_metadata_path)
         return True
+
+    def _is_sample_linked_to_newer_case(self, sample: Sample, days_back: int) -> bool:
+        """Check if a sample is linked to a case not old enough to be cleaned."""
+        for link in sample.links:
+            case: Case = link.case
+            creation_date: datetime = case.created_at
+            date_threshold: datetime = datetime.now() - timedelta(days=days_back)
+            if creation_date > date_threshold:
+                return True
+        return False
+
+    def clean_fastq_files_for_samples(self, samples: list[Sample], days_back: int) -> bool:
+        """Clean FASTQ files for samples linked to eligible case."""
+        is_successful: bool = True
+        for sample in samples:
+            sample_id: str = sample.internal_id
+            if len(sample.links) > 1:
+                if self._is_sample_linked_to_newer_case(sample=sample, days_back=days_back):
+                    LOG.info(
+                        f"Skipping sample {sample.internal_id}, as it belongs to a case not eligible for cleaning"
+                    )
+                    continue
+            archive_location: str = sample.archive_location
+            try:
+                was_cleaned: bool = self.clean_fastq(
+                    sample_id=sample_id, archive_location=archive_location
+                )
+                if not was_cleaned:
+                    LOG.debug(
+                        f"Skipping sample {sample_id} because the bundle version or FASTQ files were not present"
+                    )
+                    continue
+            except Exception as error:
+                is_successful = False
+                LOG.error(f"Could not clean sample {sample_id}: {error}")
+        return is_successful
 
     def clean_fastq(self, sample_id: str, archive_location: str) -> bool:
         """Check that FASTQ compression is completed for a case and clean.
@@ -349,3 +397,34 @@ class CompressAPI:
             if fastq_file.exists():
                 fastq_file.unlink()
                 LOG.debug(f"FASTQ file {fastq_file} removed")
+
+    def get_case_compression_data(self, case: Case) -> CaseCompressionData:
+        """Return an object containing compression data for a case."""
+        sample_compressions: list[SampleCompressionData] = []
+        for sample in case.samples:
+            if self._should_skip_sample(case=case, sample=sample):
+                LOG.debug(f"Skipping sample {sample.internal_id} - it has no reads.")
+                continue
+            sample_compression_data: SampleCompressionData = self.get_sample_compression_data(
+                sample.internal_id
+            )
+            sample_compressions.append(sample_compression_data)
+        return CaseCompressionData(
+            case_id=case.internal_id, sample_compression_data=sample_compressions
+        )
+
+    def get_sample_compression_data(self, sample_id: str) -> SampleCompressionData:
+        compression_objects: list[CompressionData] = []
+        version: Version = self.hk_api.get_latest_bundle_version(sample_id)
+        compression_objects.extend(files.get_spring_paths(version))
+        return SampleCompressionData(sample_id=sample_id, compression_objects=compression_objects)
+
+    @staticmethod
+    def _should_skip_sample(case: Case, sample: Sample) -> bool:
+        """
+        For some workflows, we want to start a partial analysis skipping the samples with no reads.
+        This method returns true if we should skip the sample.
+        """
+        if case.data_analysis in PIPELINES_USING_PARTIAL_ANALYSES and not sample.has_reads:
+            return True
+        return False

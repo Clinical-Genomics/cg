@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Callable
 
+from sqlalchemy import and_
 from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_WORKFLOW
@@ -65,21 +66,9 @@ def order_analyses_by_uploaded_at_asc(analyses: Query, **kwargs) -> Query:
     return analyses.order_by(Analysis.uploaded_at.asc())
 
 
-def filter_analyses_by_case_entry_id(analyses: Query, case_entry_id: int, **kwargs) -> Query:
-    """Return a query of analysis filtered by case entry id."""
-    return analyses.filter(Analysis.case_id == case_entry_id)
-
-
 def filter_analyses_started_before(analyses: Query, started_at_date: datetime, **kwargs) -> Query:
     """Return a query of analyses started before a certain date."""
     return analyses.filter(Analysis.started_at < started_at_date)
-
-
-def filter_analyses_by_completed_at(
-    analyses: Query, completed_at_date: datetime, **kwargs
-) -> Query:
-    """Return a query of analyses completed at a certain date."""
-    return analyses.filter(Analysis.completed_at == completed_at_date)
 
 
 def filter_analyses_not_cleaned(analyses: Query, **kwargs) -> Query:
@@ -131,10 +120,8 @@ class AnalysisFilter(Enum):
     WITH_DELIVERY_REPORT: Callable = filter_analyses_with_delivery_report
     WITHOUT_DELIVERY_REPORT: Callable = filter_analyses_without_delivery_report
     REPORT_BY_WORKFLOW: Callable = filter_report_analyses_by_workflow
-    BY_CASE_ENTRY_ID: Callable = filter_analyses_by_case_entry_id
     IS_NOT_CLEANED: Callable = filter_analyses_not_cleaned
     STARTED_AT_BEFORE: Callable = filter_analyses_started_before
-    BY_COMPLETED_AT: Callable = filter_analyses_by_completed_at
     CASE_ACTION_IS_NONE: Callable = filter_analysis_case_action_is_none
     ORDER_BY_UPLOADED_AT: Callable = order_analyses_by_uploaded_at_asc
     ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at_asc

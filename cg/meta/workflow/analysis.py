@@ -25,10 +25,9 @@ from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
 from cg.constants.priority import TrailblazerPriority
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.constants.tb import AnalysisStatus, AnalysisType
+from cg.constants.tb import AnalysisType
 from cg.exc import (
     AnalysisAlreadyStoredError,
-    AnalysisDoesNotExistError,
     AnalysisNotReadyError,
     BundleAlreadyAddedError,
     CaseNotFoundError,
@@ -43,7 +42,6 @@ from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.services.sequencing_qc_service import SequencingQCService
 from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
@@ -116,36 +114,6 @@ class AnalysisAPI(MetaAPI):
         if not self.get_case_path(case_id=case_id).exists():
             LOG.info(f"No working directory for {case_id} exists")
             raise FileNotFoundError(f"No working directory for {case_id} exists")
-
-    def is_case_ready_for_analysis(self, case: Case) -> bool:
-        """Check if case is ready for analysis. If case passes sequencing QC and is set to analyze,
-        or has not been analyzed yet, or the latest analysis failed, the case is ready for analysis.
-        """
-        case_passed_sequencing_qc: bool = SequencingQCService.case_pass_sequencing_qc(case)
-        case_is_set_to_analyze: bool = case.action == CaseActions.ANALYZE
-        case_has_not_been_analyzed: bool = not case.latest_analyzed
-        case_latest_analysis_failed: bool = (
-            self.trailblazer_api.get_latest_analysis_status(case_id=case.internal_id)
-            == AnalysisStatus.FAILED
-        )
-        return case_passed_sequencing_qc and (
-            case_is_set_to_analyze or case_has_not_been_analyzed or case_latest_analysis_failed
-        )
-
-    def get_cases_ready_for_analysis(self) -> list[Case]:
-        """
-        Return cases that are ready for analysis. The case is ready if it passes the logic in the
-        get_cases_to_analyze method, and it has passed the pre-analysis quality check.
-        """
-        cases_to_analyse: list[Case] = self.get_cases_to_analyze()
-
-        cases_passing_quality_check: list[Case] = []
-        for case in cases_to_analyse:
-            if SequencingQCService.case_pass_sequencing_qc(case):
-                cases_passing_quality_check.append(case)
-                LOG.debug(f"Going to start analysis for case {case.internal_id}.")
-
-        return cases_passing_quality_check
 
     def get_slurm_qos_for_case(self, case_id: str) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
@@ -241,10 +209,10 @@ class AnalysisAPI(MetaAPI):
         application_type: str = self.get_case_application_type(case_id)
         return application_type == AnalysisType.WES
 
-    def upload_bundle_housekeeper(
+    def create_housekeeper_bundle(
         self, case_id: str, dry_run: bool = False, force: bool = False
-    ) -> None:
-        """Storing bundle data in Housekeeper for a case."""
+    ) -> tuple[Bundle, Version]:
+        """Create and return bundle data in Housekeeper for a case."""
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
         bundle_data: dict = self.get_hermes_transformed_deliverables(case_id=case_id, force=force)
         bundle_result: tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
@@ -260,13 +228,14 @@ class AnalysisAPI(MetaAPI):
                 "The following files would be stored:\n%s",
                 "\n".join([f["path"] for f in bundle_data["files"]]),
             )
-            return
-        self.housekeeper_api.include(bundle_version)
-        self.housekeeper_api.add_commit(bundle_object)
-        self.housekeeper_api.add_commit(bundle_version)
-        LOG.info(
-            f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
-        )
+        else:
+            self.housekeeper_api.include(bundle_version)
+            self.housekeeper_api.add_commit(bundle_object)
+            self.housekeeper_api.add_commit(bundle_version)
+            LOG.info(
+                f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
+            )
+        return bundle_result
 
     def _create_analysis_statusdb(self, case: Case, trailblazer_id: int | None) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
@@ -290,6 +259,7 @@ class AnalysisAPI(MetaAPI):
     def update_analysis_as_completed_statusdb(
         self,
         case_id: str,
+        hk_version_id: int,
         comment: str | None = None,
         dry_run: bool = False,
         force: bool = False,
@@ -312,7 +282,10 @@ class AnalysisAPI(MetaAPI):
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
         self.status_db.update_analysis_completed_at(
-            analysis_id=analysis.id, completed_at=self.get_bundle_created_date(case_id)
+            analysis_id=analysis.id, completed_at=datetime.now()
+        )
+        self.status_db.update_analysis_housekeeper_version_id(
+            analysis_id=analysis.id, version_id=hk_version_id
         )
         self.status_db.update_analysis_comment(analysis_id=analysis.id, comment=comment)
 
@@ -413,8 +386,8 @@ class AnalysisAPI(MetaAPI):
         )
         return analyses_to_clean
 
-    def get_cases_to_analyze(self) -> list[Case]:
-        return self.status_db.get_cases_to_analyze(workflow=self.workflow)
+    def get_cases_to_analyze(self, limit: int = None) -> list[Case]:
+        return self.status_db.get_cases_to_analyze(limit=limit, workflow=self.workflow)
 
     def get_cases_to_store(self) -> list[Case]:
         """Return cases where analysis finished successfully,

@@ -8,6 +8,7 @@ import pytest
 from cg.models.cg_config import CGConfig
 from cg.services.run_devices.exc import (
     PostProcessingError,
+    PostProcessingRunFileManagerError,
     PostProcessingStoreDataError,
     PostProcessingStoreFileError,
 )
@@ -70,3 +71,49 @@ def test_pac_bio_post_processing_store_files_error(
         # THEN a PostProcessingError is raised
         with pytest.raises(PostProcessingError):
             post_processing_service.post_process(run_name=pacbio_barcoded_sequencing_run_name)
+
+
+def test_can_post_processing_start_true(
+    pac_bio_post_processing_service: PacBioPostProcessingService,
+    pacbio_barcoded_sequencing_run_name,
+):
+    """Tests that the post-processing is deemed ready to start when SMRT cells are ready."""
+    # GIVEN a parent folder with two SMRT-cells
+
+    # GIVEN both of them are ready for post-processing
+    pac_bio_post_processing_service.run_validator.validate_run_files = Mock(
+        side_effect=[None, None]
+    )
+    # WHEN checking if post-processing can start
+    can_start: bool = pac_bio_post_processing_service.can_post_processing_start(
+        pacbio_barcoded_sequencing_run_name
+    )
+
+    # THEN it should return True
+    assert can_start
+
+
+def test_can_post_processing_start_false(
+    pac_bio_post_processing_service: PacBioPostProcessingService,
+    pacbio_barcoded_sequencing_run_name,
+):
+    """Tests that the post-processing is not deemed ready to start when at least one SMRT cell is not are ready."""
+    # GIVEN a parent folder with two SMRT-cells
+
+    # GIVEN one of them is not ready for post-processing
+    pac_bio_post_processing_service.run_validator.validate_run_files = Mock(
+        side_effect=[
+            None,
+            PostProcessingRunFileManagerError(
+                f"No Manifest file found in {pacbio_barcoded_sequencing_run_name}"
+            ),
+        ]
+    )
+
+    # WHEN checking if post-processing can start
+    can_start: bool = pac_bio_post_processing_service.can_post_processing_start(
+        pacbio_barcoded_sequencing_run_name
+    )
+
+    # THEN it should return False
+    assert not can_start

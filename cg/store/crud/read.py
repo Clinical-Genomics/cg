@@ -14,6 +14,7 @@ from cg.constants.constants import (
     CustomerId,
     SampleType,
 )
+from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
@@ -178,22 +179,6 @@ class ReadHandler(BaseHandler):
             analyses=self._get_latest_analyses_for_cases_query(),
             workflow=workflow,
         ).all()
-
-    def get_analysis_by_case_entry_id_and_completed_at(
-        self, case_entry_id: int, completed_at_date: dt.datetime
-    ) -> Analysis | None:
-        """Fetch an analysis."""
-        filter_functions: list[Callable] = [
-            AnalysisFilter.BY_CASE_ENTRY_ID,
-            AnalysisFilter.BY_COMPLETED_AT,
-        ]
-
-        return apply_analysis_filter(
-            filter_functions=filter_functions,
-            analyses=self._get_query(Analysis),
-            case_entry_id=case_entry_id,
-            completed_at_date=completed_at_date,
-        ).first()
 
     def get_latest_started_analysis_for_case(self, case_id: str) -> Analysis:
         """Return the latest started analysis for a case.
@@ -378,7 +363,7 @@ class ReadHandler(BaseHandler):
 
     def get_latest_ticket_from_case(self, case_id: str) -> str:
         """Returns the ticket from the most recent sample in a case."""
-        return self.get_case_by_internal_id(internal_id=case_id).latest_ticket
+        return str(self.get_case_by_internal_id(internal_id=case_id).latest_order.ticket_id)
 
     def _is_case_found(self, case: Case, case_id: str) -> None:
         """Raise error if case is false."""
@@ -1122,39 +1107,23 @@ class ReadHandler(BaseHandler):
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
 
-    def _is_case_set_to_analyse_or_not_analyzed(self, case: Case) -> bool:
-        return case.action == CaseActions.ANALYZE or not case.latest_analyzed
-
-    def _is_latest_analysis_done_on_all_sequences(self, case: Case) -> bool:
-        return case.latest_analyzed < case.latest_sequenced
-
-    def _is_case_to_be_analyzed(self, case: Case) -> bool:
-        if not case.latest_sequenced:
-            return False
-        if self._is_case_set_to_analyse_or_not_analyzed(case):
-            return True
-        return bool(self._is_latest_analysis_done_on_all_sequences(case))
-
     def get_cases_to_analyze(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed.
         1. Get cases to be analyzed using BE query
         2. Use the latest analysis for case to determine if the case is to be analyzed"""
         case_filter_functions: list[CaseFilter] = [
             CaseFilter.HAS_SEQUENCE,
+            CaseFilter.PASSING_SEQUENCING_QC,
             CaseFilter.WITH_WORKFLOW,
             CaseFilter.FOR_ANALYSIS,
         ]
         cases = apply_case_filter(
-            cases=self.get_cases_with_analyzes(),
+            cases=self._get_case_query_for_analysis_start(),
             filter_functions=case_filter_functions,
             workflow=workflow,
         )
-
-        sorted_cases: list[Case] = list(cases.order_by(Case.ordered_at))
-        cases_to_analyze: list[Case] = [
-            case for case in sorted_cases if self._is_case_to_be_analyzed(case)
-        ]
-        return cases_to_analyze[:limit]
+        sorted_and_truncated: Query = cases.order_by(Case.ordered_at).limit(limit)
+        return sorted_and_truncated.all()
 
     def get_cases_to_compress(self, date_threshold: datetime) -> list[Case]:
         """Return all cases that are ready to be compressed by SPRING."""
@@ -1824,6 +1793,16 @@ class ReadHandler(BaseHandler):
         if runs.count() == 0:
             raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()
+
+    def get_case_priority(self, case_id: str) -> SlurmQos:
+        """Get case priority."""
+        case: Case = self.get_case_by_internal_id(case_id)
+        return SlurmQos(case.slurm_priority)
+
+    def get_case_workflow(self, case_id: str) -> Workflow:
+        """Get case workflow."""
+        case: Case = self.get_case_by_internal_id(case_id)
+        return Workflow(case.data_analysis)
 
     def is_sample_name_used(self, sample: Sample, customer_entry_id: int) -> bool:
         """Check if a sample name is already used by the customer"""

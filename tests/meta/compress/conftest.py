@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Generator
+from unittest.mock import Mock, create_autospec
 
 import pytest
 
@@ -14,6 +15,7 @@ from cg.constants import SequencingFileTag
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.compress import CompressAPI
+from cg.models.compression_data import CompressionData, SampleCompressionData
 from tests.cli.compress.conftest import MockCompressAPI
 from tests.store_helpers import StoreHelpers
 
@@ -228,3 +230,13 @@ def decompress_hk_spring_bundle(
 
     hk_spring_bundle["files"].extend([spring_file_info, spring_meta_info])
     return hk_spring_bundle
+
+
+@pytest.fixture
+def sample_compression_data() -> SampleCompressionData:
+    """Return a SampleCompressionData object for a sample."""
+    compression_data: Mock[CompressionData] = create_autospec(CompressionData)
+    return SampleCompressionData(
+        sample_id="sample_1",
+        compression_objects=[compression_data],
+    )

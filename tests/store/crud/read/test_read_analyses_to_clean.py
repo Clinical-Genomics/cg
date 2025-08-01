@@ -19,6 +19,7 @@ def test_analysis_included(
         uploaded_at=timestamp_yesterday,
         completed_at=timestamp_yesterday,
         cleaned_at=None,
+        housekeeper_version_id=1234,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: CaseSample = analysis_store.relate_sample(
@@ -67,6 +68,7 @@ def test_workflow_included(
         completed_at=timestamp_yesterday,
         cleaned_at=None,
         workflow=workflow,
+        housekeeper_version_id=1234,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: CaseSample = analysis_store.relate_sample(
@@ -122,6 +124,7 @@ def test_non_cleaned_included(
         uploaded_at=timestamp_yesterday,
         completed_at=timestamp_yesterday,
         cleaned_at=None,
+        housekeeper_version_id=1234,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: CaseSample = analysis_store.relate_sample(

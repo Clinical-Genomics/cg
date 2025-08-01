@@ -266,16 +266,16 @@ class MetaApis:
 
 
 class WorkflowManager(StrEnum):
-    Slurm: str = "slurm"
-    Tower: str = "nf_tower"
+    Slurm = "slurm"
+    Tower = "nf_tower"
 
 
 class Strandedness(StrEnum):
     """Strandedness types."""
 
-    FORWARD: str = "forward"
-    REVERSE: str = "reverse"
-    UNSTRANDED: str = "unstranded"
+    FORWARD = "forward"
+    REVERSE = "reverse"
+    UNSTRANDED = "unstranded"
 
 
 class ReadDirection(IntEnum):

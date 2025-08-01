@@ -6,13 +6,22 @@ from cg.constants.constants import CancerAnalysisType, CustomerId, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 
 LOQUSDB_ID = "_id"
-LOQUSDB_SUPPORTED_WORKFLOWS = [Workflow.BALSAMIC, Workflow.MIP_DNA, Workflow.RAREDISEASE]
+LOQUSDB_SUPPORTED_WORKFLOWS = [
+    Workflow.BALSAMIC,
+    Workflow.MIP_DNA,
+    Workflow.NALLO,
+    Workflow.RAREDISEASE,
+]
 LOQUSDB_RARE_DISEASE_CUSTOMERS = [CustomerId.CUST002, CustomerId.CUST003, CustomerId.CUST004]
 LOQUSDB_CANCER_CUSTOMERS = [
     CustomerId.CUST110,
     CustomerId.CUST127,
     CustomerId.CUST143,
     CustomerId.CUST147,
+]
+LOQUSDB_LONG_READ_CUSTOMERS = [CustomerId.CUST002, CustomerId.CUST003, CustomerId.CUST004]
+LOQUSDB_LONG_READ_SEQUENCING_METHODS = [
+    SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
 ]
 LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS = [
     SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
@@ -43,6 +52,7 @@ class BalsamicObservationsAnalysisTag(StrEnum):
 class LoqusdbInstance(StrEnum):
     """Observations instances."""
 
+    LWP: str = "loqusdb-lwp"
     WGS: str = "loqusdb"
     WES: str = "loqusdb-wes"
     SOMATIC: str = "loqusdb-somatic"
@@ -65,6 +75,24 @@ class MipDNAObservationsAnalysisTag(StrEnum):
     SV_VCF: str = "vcf-sv-research"
     PROFILE_GBCF: str = "snv-gbcf"
     FAMILY_PED: str = "pedigree"
+
+
+class NalloObservationsAnalysisTag(StrEnum):
+    """Nallo observations files analysis tags."""
+
+    SNV_VCF = "vcf-snv-research"
+    SV_VCF = "vcf-sv-research"
+    FAMILY_PED = "pedigree"
+
+
+class NalloLoadParameters(Enum):
+    """Nallo Loqusdb load command parameters."""
+
+    PROFILE_THRESHOLD = 0.95
+    GQ_THRESHOLD = 10
+    HARD_THRESHOLD = 0.95
+    SOFT_THRESHOLD = 0.90
+    SNV_GQ_ONLY = True
 
 
 class ObservationsFileWildcards(StrEnum):
