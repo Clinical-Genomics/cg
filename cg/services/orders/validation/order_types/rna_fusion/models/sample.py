@@ -6,6 +6,8 @@ from cg.services.orders.validation.constants import ElutionBuffer, TissueBlockEn
 from cg.services.orders.validation.models.sample import Sample
 from cg.services.orders.validation.utils import parse_buffer, parse_control
 
+TUMOUR_ERROR_MESSAGE: str = "RNAFUSION samples must always be tumour samples"
+
 
 class RNAFusionSample(Sample):
     age_at_sampling: float | None = None
@@ -27,15 +29,15 @@ class RNAFusionSample(Sample):
     @classmethod
     def validate_tumour_is_true(cls, v):
         if v is not True:
-            raise ValueError("RNAFUSION samples must always be tumour samples")
+            raise ValueError(TUMOUR_ERROR_MESSAGE)
         return v
 
     def __setattr__(self, name, value):
         if name == "tumour" and hasattr(self, name):
-            raise ValueError("RNAFUSION samples must always be tumour samples")
+            raise ValueError(TUMOUR_ERROR_MESSAGE)
         super().__setattr__(name, value)
 
     def model_copy(self, *args, update=None, **kwargs):
         if update and "tumour" in update and update["tumour"] is not True:
-            raise ValueError("RNAFUSION samples must always be tumour samples")
+            raise ValueError(TUMOUR_ERROR_MESSAGE)
         return super().model_copy(*args, update=update, **kwargs)

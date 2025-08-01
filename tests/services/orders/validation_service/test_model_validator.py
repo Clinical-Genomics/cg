@@ -76,7 +76,7 @@ def test_rnafusion_with_normal_sample_fails(rnafusion_order_to_submit: dict):
     rnafusion_order_to_submit["cases"][0]["samples"][0]["tumour"] = False
 
     # WHEN validating the order
-    order, errors = ModelValidator.validate(order=rnafusion_order_to_submit, model=RNAFusionOrder)
+    _, errors = ModelValidator.validate(order=rnafusion_order_to_submit, model=RNAFusionOrder)
 
     # THEN there should be a sample validation error
     assert errors.case_sample_errors
