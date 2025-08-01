@@ -54,15 +54,16 @@ def test_get_pon_file_no_files(balsamic_configurator: BalsamicConfigurator, tmp_
     bed_file = Path(balsamic_configurator.bed_directory, f"{panel_name}.bed")
 
     # WHEN getting the pon path
-    # THEN it should raise a FileNotFoundError
-    with pytest.raises(FileNotFoundError):
-        balsamic_configurator._get_pon_file(bed_file)
+    pon_file: Path | None = balsamic_configurator._get_pon_file(bed_file)
+
+    # THEN None should be returned
+    assert pon_file is None
 
 
 def test_get_pon_file_no_matching_files(
     balsamic_configurator: BalsamicConfigurator, tmp_path: Path
 ):
-    """Test that an error is raised when no matching PON files are found."""
+    """Test that None is returned when no matching PON files are found."""
     # GIVEN a Balsamic configurator
     balsamic_configurator.pon_directory = tmp_path
 
@@ -74,9 +75,10 @@ def test_get_pon_file_no_matching_files(
     (tmp_path / "some_other_file.txt").touch()
 
     # WHEN getting the pon path
-    # THEN it should raise a FileNotFoundError
-    with pytest.raises(FileNotFoundError):
-        balsamic_configurator._get_pon_file(bed_file)
+    pon_file: Path | None = balsamic_configurator._get_pon_file(bed_file)
+
+    # THEN None should be returned
+    assert pon_file is None
 
 
 def test_get_patient_sex():
