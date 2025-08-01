@@ -79,6 +79,10 @@ markers = [
   "integration: Integration tests"
 ]
 
+addopts = [
+    "-m", "not integration",
+]
+
 [project.scripts]
 cg = "cg.cli.base:base"
 
