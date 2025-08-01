@@ -101,7 +101,7 @@ def test_set_tumour_to_false_fails_rnafusion_sample(rnafusion_order_to_submit: d
     # THEN it should raise a ValueError saying that RNAFUSION samples must be tumour samples
     with pytest.raises(ValueError) as exc_info:
         order.cases[0].samples[0].tumour = False
-        assert str(exc_info.value) == "RNAFUSION samples must always be tumour samples"
+    assert str(exc_info.value) == "RNAFUSION samples must always be tumour samples"
 
 
 def test_order_field_error(valid_order: TomteOrder, model_validator: ModelValidator):
