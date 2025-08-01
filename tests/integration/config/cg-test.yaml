@@ -104,8 +104,8 @@ pdc:
   binary_path: "tests/integration/config/pdc_binary_path"
 
 scout:
-  binary_path: tests/integration/config/scout_binary_path
-  config_path: tests/integration/config/scout_config_path
+  binary_path: tests/integration/config/scout/binary
+  config_path: tests/integration/config/scout/config
 
 scout_38:
   binary_path: tests/integration/config/scout_38_binary_path

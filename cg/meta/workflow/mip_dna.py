@@ -20,7 +20,7 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
 
     @property
     def root(self) -> str:
-        return self.config.mip_rd_dna.root
+        return self.config.mip_rd_dna.root  # mip_rd_dna is none here
 
     @property
     def conda_binary(self) -> str:
