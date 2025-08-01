@@ -25,9 +25,15 @@ class RNAFusionSample(Sample):
     tissue_block_size: TissueBlockEnum | None = None
     tumour: bool = True
 
-    @field_validator("tumour")
+    @field_validator("tumour", mode="before")
     @classmethod
-    def validate_tumour_is_true(cls, v):
+    def default_and_validate_tumour(cls, v) -> bool:
+        """Ensure that the tumour field is always set to True.
+        If it is not provided, it defaults to True.
+        If it is provided and not True, raise a ValueError.
+        """
+        if v is None:
+            return True
         if v is not True:
             raise ValueError(TUMOUR_ERROR_MESSAGE)
         return v
