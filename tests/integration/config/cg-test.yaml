@@ -87,9 +87,17 @@ hermes:
   container_mount_volume: "tests/integration/config/hermes_container_mount_volume"
 
 lims:
-  host: "http://localhost/lims"
+  host: "http://localhost:8888/lims"
   username: lims_username
   password: lims_password
+
+mip-rd-dna:
+  conda_binary: "tests/integration/config/workflows/mip-dna/conda_bin"
+  conda_env: S_mip12.1
+  mip_config: "tests/integration/config/workflows/mip-dna/config/mip12.1-dna-stage.yaml"
+  workflow: "analyse rd_dna"
+  root: "tests/integration/config/workflows/mip-dna/cases"
+  script: "tests/integration/config/workflows/mip-dna/bin"
 
 mutacc-auto:
   config_path: "tests/integration/config/mutacc-auto_config_path"

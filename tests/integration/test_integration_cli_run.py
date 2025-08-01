@@ -1,6 +1,5 @@
-import traceback
 from collections.abc import Generator
-from datetime import date, datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from subprocess import CompletedProcess
 from typing import cast
@@ -17,17 +16,13 @@ from pytest_httpserver import HTTPServer
 from cg.apps.tb.api import IDTokenCredentials
 from cg.cli.base import base
 from cg.cli.workflow.microsalt.base import run
-from cg.constants.constants import DataDelivery, Workflow
+from cg.constants.constants import Workflow
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.process import EXIT_SUCCESS
-from cg.constants.subject import Sex
-from cg.exc import CaseNotConfiguredError
-from cg.services.analysis_starter.tracker.tracker import Tracker
 from cg.store import database as cg_database
-from cg.store.models import Case, Customer, IlluminaFlowCell, IlluminaSequencingRun, Order, Sample
+from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 from cg.utils import commands
-from tests.conftest import helpers
 from tests.store_helpers import StoreHelpers
 
 
@@ -77,6 +72,7 @@ def test_start_available_mip_dna(
     helpers: StoreHelpers,
     tmp_path_factory: TempPathFactory,
     mocker,
+    httpserver: HTTPServer,
 ):
     cli_runner = CliRunner()
 
@@ -124,6 +120,10 @@ def test_start_available_mip_dna(
         )
     )
 
+    httpserver.expect_request(f"/lims/api/v2/samples/{sample.internal_id}").respond_with_json(
+        {"what": "?"}
+    )
+
     # WHEN running start available
     result: Result = cli_runner.invoke(
         base,
@@ -166,49 +166,3 @@ def test_start_available_mip_dna(
     assert result.exit_code == 0
     updated_case = status_db.get_case_by_internal_id(case.internal_id)
     assert cast(Case, updated_case).action == "running"
-
-
-# @pytest.mark.integration
-# def test_run_raises_error_if_not_configured(microsalt_store: Store, httpserver: HTTPServer):
-
-#     cli_runner = CliRunner()
-
-#     # GIVEN a case to run
-#     case_id = "microparakeet"
-
-#     # GIVEN trailblazer returns an analysis for the case that is not complete
-#     # TODO: should there even be an analysis at this stage?
-#     httpserver.expect_request("/trailblazer/get-latest-analysis").respond_with_json(
-#         {
-#             "id": "12345",
-#             "logged_at": "2025-07-30",
-#             "started_at": "2025-07-30",
-#             "completed_at": "",
-#             "out_dir": "/out/dir",
-#             "config_path": "/config/path",
-#         }
-#     )
-
-#     # GIVEN that the config file for a case does not exist
-
-#     # WHEN running the case
-#     result = cli_runner.invoke(
-#         base,
-#         [
-#             "--config",
-#             "tests/integration/config/cg-test.yaml",
-#             "workflow",
-#             "microsalt",
-#             "run",
-#             case_id,
-#         ],
-#     )
-
-#     traceback.print_exception(result.exception)
-
-#     # THEN an error should be raised
-#     assert isinstance(result.exception, CaseNotConfiguredError)
-
-#     # THEN the case should not be running
-#     case: Case | None = microsalt_store.get_case_by_internal_id(case_id)
-#     assert case and case.action == None
