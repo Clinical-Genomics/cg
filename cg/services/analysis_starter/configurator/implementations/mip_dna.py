@@ -20,4 +20,5 @@ class MIPDNAConfigurator(Configurator):
         if flags.get("use_bwa_mem"):
             flags["bwa_mem"] = 1
             flags["bwa_mem2"] = 0
+            flags.pop("use_bwa_mem")
         return Configurator._set_flags(config=config, **flags)

@@ -2,6 +2,21 @@ from cg.services.analysis_starter.configurator.implementations.mip_dna import MI
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 
 
+def test_get_config():
+    """Test that the MIP DNA configurator can get a case config."""
+    # GIVEN a MIP DNA configurator
+    configurator = MIPDNAConfigurator()
+
+    # GIVEN a case ID
+    case_id = "test_case"
+
+    # WHEN getting the case config
+    case_config: MIPDNACaseConfig = configurator.get_config(case_id=case_id)
+
+    # THEN
+    assert case_config.case_id == "test_case"
+
+
 def test_get_config_bwa_mem_override():
     """Test that the MIP DNA configurator can get a case config."""
     # GIVEN a MIP DNA configurator
@@ -16,3 +31,4 @@ def test_get_config_bwa_mem_override():
     # THEN
     assert case_config.bwa_mem == 1
     assert case_config.bwa_mem2 == 0
+    assert getattr(case_config, "use_bwa_mem", None) is None
