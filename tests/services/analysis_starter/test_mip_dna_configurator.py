@@ -1,3 +1,4 @@
+from cg.constants.priority import SlurmQos
 from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 
@@ -15,6 +16,7 @@ def test_get_config():
 
     # THEN
     assert case_config.case_id == "test_case"
+    assert case_config.slurm_qos == SlurmQos.NORMAL
 
 
 def test_get_config_bwa_mem_override():

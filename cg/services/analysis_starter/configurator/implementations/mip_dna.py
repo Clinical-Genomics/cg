@@ -8,6 +8,7 @@ class MIPDNAConfigurator(Configurator):
         pass
 
     def get_config(self, case_id: str, **flags) -> MIPDNACaseConfig:
+
         config = MIPDNACaseConfig(case_id=case_id)
         return self._set_flags(config=config, **flags)
 
