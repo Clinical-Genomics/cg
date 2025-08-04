@@ -132,6 +132,25 @@ def test_start_available_mip_dna(
         )
     )
 
+    def mock_run(*args, **kwargs):
+        command = args[0]
+
+        stdout = b""
+
+        if ("export" in command) and ("panel" in command):
+            stdout += b"22\t26995242\t27014052\t2397\tCRYBB1\n22\t38452318\t38471708\t9394\tPICK1\n"
+        elif "mip-dna/conda_bin run" in command:
+            filepath = Path(
+                f"tests/integration/config/workflows/mip-dna/cases/{case.internal_id}/analysis/{case.internal_id}_qc_sample_info.yaml"
+            )
+            filepath.parent.mkdir(parents=True, exist_ok=True)
+            filepath.touch()
+        return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
+
+    subprocess_mock.run = Mock(side_effect=mock_run)
+
+    # 22\t26995242\t27014052\t2397\tCRYBB1\n22\t38452318\t38471708\t9394\tPICK1\n"
+
     mocker.patch.object(mip_base, "environ_email", return_value="testuser@scilifelab.se")
 
     httpserver.expect_request(
