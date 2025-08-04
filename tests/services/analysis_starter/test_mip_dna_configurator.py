@@ -32,19 +32,17 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     case_id = "test_case"
 
     # WHEN getting the case config
-    case_config: MIPDNACaseConfig = configurator.get_config(
-        case_id=case_id, start_with="short_bread"
-    )
+    case_config: MIPDNACaseConfig = configurator.get_config(case_id=case_id)
 
     # THEN case_id, slurm_qos and email should be set
     assert case_config.case_id == "test_case"
     assert case_config.slurm_qos == SlurmQos.NORMAL
     assert case_config.email == "test@scilifelab.se"
     assert case_config.start_after_recipe is None
-    assert case_config.start_with_recipe == "short_bread"
+    assert case_config.start_with_recipe is None
 
 
-def test_get_config_bwa_mem_override(mock_status_db: Store):
+def test_get_config_all_flags_set(mock_status_db: Store):
     """Test that the MIP DNA configurator can get a case config."""
 
     # GIVEN a MIP DNA configurator
@@ -54,9 +52,17 @@ def test_get_config_bwa_mem_override(mock_status_db: Store):
     case_id = "test_case"
 
     # WHEN getting the case config
-    case_config: MIPDNACaseConfig = configurator.get_config(case_id=case_id, use_bwa_mem=True)
+    case_config: MIPDNACaseConfig = configurator.get_config(
+        case_id=case_id,
+        start_after_recipe="banana_bread",
+        start_with_recipe="short_bread",
+        use_bwa_mem=True,
+    )
 
     # THEN we should run the analysis with bwa_mem instead of bwa_mem2
     assert case_config.bwa_mem == 1
     assert case_config.bwa_mem2 == 0
     assert getattr(case_config, "use_bwa_mem", None) is None
+
+    assert case_config.start_after_recipe == "banana_bread"
+    assert case_config.start_with_recipe == "short_bread"
