@@ -1,3 +1,4 @@
+from cg.apps.environ import environ_email
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.store.store import Store
@@ -12,7 +13,9 @@ class MIPDNAConfigurator(Configurator):
 
     def get_config(self, case_id: str, **flags) -> MIPDNACaseConfig:
         case = self.store.get_case_by_internal_id(case_id)
-        config = MIPDNACaseConfig(case_id=case_id, slurm_qos=case.slurm_priority)
+        config = MIPDNACaseConfig(
+            case_id=case_id, email=environ_email(), slurm_qos=case.slurm_priority
+        )
         return self._set_flags(config=config, **flags)
 
     @staticmethod

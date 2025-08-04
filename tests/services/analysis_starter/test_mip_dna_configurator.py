@@ -1,8 +1,10 @@
 from unittest.mock import Mock, create_autospec
 
 import pytest
+from pytest_mock import MockerFixture
 
 from cg.constants.priority import SlurmQos
+from cg.services.analysis_starter.configurator.implementations import mip_dna
 from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.store.models import Case
@@ -17,8 +19,12 @@ def mock_status_db() -> Store:
     return mock_store
 
 
-def test_get_config(mock_status_db: Store):
+def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     """Test that the MIP DNA configurator can get a case config."""
+
+    # GIVEN an email address in the environment
+    mocker.patch.object(mip_dna, "environ_email", return_value="test@scilifelab.se")
+
     # GIVEN a MIP DNA configurator
     configurator = MIPDNAConfigurator(store=mock_status_db)
 
@@ -28,15 +34,16 @@ def test_get_config(mock_status_db: Store):
     # WHEN getting the case config
     case_config: MIPDNACaseConfig = configurator.get_config(case_id=case_id)
 
-    # THEN
+    # THEN case_id, slurm_qos and email should be set
     assert case_config.case_id == "test_case"
     assert case_config.slurm_qos == SlurmQos.NORMAL
+    assert case_config.email == "test@scilifelab.se"
 
 
 def test_get_config_bwa_mem_override(mock_status_db: Store):
     """Test that the MIP DNA configurator can get a case config."""
-    # GIVEN a MIP DNA configurator
 
+    # GIVEN a MIP DNA configurator
     configurator = MIPDNAConfigurator(store=mock_status_db)
 
     # GIVEN a case ID
@@ -45,7 +52,7 @@ def test_get_config_bwa_mem_override(mock_status_db: Store):
     # WHEN getting the case config
     case_config: MIPDNACaseConfig = configurator.get_config(case_id=case_id, use_bwa_mem=True)
 
-    # THEN
+    # THEN we should run the analysis with bwa_mem instead of bwa_mem2
     assert case_config.bwa_mem == 1
     assert case_config.bwa_mem2 == 0
     assert getattr(case_config, "use_bwa_mem", None) is None
