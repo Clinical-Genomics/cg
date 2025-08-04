@@ -32,14 +32,16 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     case_id = "test_case"
 
     # WHEN getting the case config
-    case_config: MIPDNACaseConfig = configurator.get_config(case_id=case_id)
+    case_config: MIPDNACaseConfig = configurator.get_config(
+        case_id=case_id, start_with="short_bread"
+    )
 
     # THEN case_id, slurm_qos and email should be set
     assert case_config.case_id == "test_case"
     assert case_config.slurm_qos == SlurmQos.NORMAL
     assert case_config.email == "test@scilifelab.se"
-    assert case_config.start_after == "first step"
-    assert case_config.start_with == "?"
+    assert case_config.start_after_recipe is None
+    assert case_config.start_with_recipe == "short_bread"
 
 
 def test_get_config_bwa_mem_override(mock_status_db: Store):

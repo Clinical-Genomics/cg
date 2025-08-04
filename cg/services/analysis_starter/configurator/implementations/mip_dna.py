@@ -14,7 +14,9 @@ class MIPDNAConfigurator(Configurator):
     def get_config(self, case_id: str, **flags) -> MIPDNACaseConfig:
         case = self.store.get_case_by_internal_id(case_id)
         config = MIPDNACaseConfig(
-            case_id=case_id, email=environ_email(), slurm_qos=case.slurm_priority
+            case_id=case_id,
+            email=environ_email(),
+            slurm_qos=case.slurm_priority,
         )
         return self._set_flags(config=config, **flags)
 
