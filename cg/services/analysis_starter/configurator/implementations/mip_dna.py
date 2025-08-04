@@ -17,4 +17,7 @@ class MIPDNAConfigurator(Configurator):
 
     @staticmethod
     def _set_flags(config: MIPDNACaseConfig, **flags) -> MIPDNACaseConfig:
-        pass
+        if flags.get("use_bwa_mem"):
+            flags["bwa_mem"] = 1
+            flags["bwa_mem2"] = 0
+        return Configurator._set_flags(config=config, **flags)
