@@ -38,6 +38,8 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     assert case_config.case_id == "test_case"
     assert case_config.slurm_qos == SlurmQos.NORMAL
     assert case_config.email == "test@scilifelab.se"
+    assert case_config.start_after == "first step"
+    assert case_config.start_with == "?"
 
 
 def test_get_config_bwa_mem_override(mock_status_db: Store):

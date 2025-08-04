@@ -7,4 +7,5 @@ class MIPDNACaseConfig(CaseConfig):
     bwa_mem2: int | None = None
     email: str
     slurm_qos: str
+    start_after: str | None
     workflow: Workflow = Workflow.MIP_DNA
