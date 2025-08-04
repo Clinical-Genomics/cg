@@ -1,15 +1,18 @@
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
+from cg.store.store import Store
 
 
 class MIPDNAConfigurator(Configurator):
+    def __init__(self, store: Store):
+        self.store = store
 
     def configure(self, case_id: str, **flags) -> MIPDNACaseConfig:
         pass
 
     def get_config(self, case_id: str, **flags) -> MIPDNACaseConfig:
-
-        config = MIPDNACaseConfig(case_id=case_id)
+        case = self.store.get_case_by_internal_id(case_id)
+        config = MIPDNACaseConfig(case_id=case_id, slurm_qos=case.slurm_priority)
         return self._set_flags(config=config, **flags)
 
     @staticmethod
