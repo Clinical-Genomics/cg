@@ -3,9 +3,6 @@ from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 
 
 class MIPDNACaseConfig(CaseConfig):
-    binary: str
-    conda_binary: str
-    config_file: str
-    environment: str
-    fastq_directory: str
+    bwa_mem: int | None = None
+    bwa_mem2: int | None = None
     workflow: Workflow = Workflow.MIP_DNA
