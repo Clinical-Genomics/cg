@@ -228,6 +228,16 @@ class MipFastqHandler(FastqHandler):
         date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
         return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read_direction}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
+    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
+        """Return the path to the FASTQ destination directory."""
+        return Path(
+            self.root_dir,
+            case.internal_id,
+            sample.application_version.application.analysis_type,
+            sample.internal_id,
+            FileFormat.FASTQ,
+        )
+
 
 class MicrosaltFastqHandler(FastqHandler):
     @staticmethod

@@ -94,3 +94,7 @@ def test_parse_file_data(fastq_path: Path, expected_fastq_meta: dict, mocker):
 
         # THEN header meta should match the expected header information
         assert header_meta == expected_fastq_meta
+
+
+def test_mip_get_sample_fastq_destination_dir():
+    pass
