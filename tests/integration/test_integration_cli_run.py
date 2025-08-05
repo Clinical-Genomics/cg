@@ -1,3 +1,4 @@
+import shutil
 from collections.abc import Generator
 from datetime import datetime
 from pathlib import Path
@@ -82,6 +83,13 @@ def test_start_available_mip_dna(
     case: Case = helpers.add_case(
         store=status_db, data_analysis=Workflow.MIP_DNA, ticket=str(ticket_id)
     )
+
+    filepath = Path(
+        f"tests/integration/config/workflows/mip-dna/cases/{case.internal_id}/analysis/{case.internal_id}_qc_sample_info.yaml"
+    )
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2("tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml", filepath)
+
     order: Order = helpers.add_order(
         store=status_db, ticket_id=ticket_id, customer_id=case.customer_id
     )
@@ -139,17 +147,9 @@ def test_start_available_mip_dna(
 
         if ("export" in command) and ("panel" in command):
             stdout += b"22\t26995242\t27014052\t2397\tCRYBB1\n22\t38452318\t38471708\t9394\tPICK1\n"
-        elif "mip-dna/conda_bin run" in command:
-            filepath = Path(
-                f"tests/integration/config/workflows/mip-dna/cases/{case.internal_id}/analysis/{case.internal_id}_qc_sample_info.yaml"
-            )
-            filepath.parent.mkdir(parents=True, exist_ok=True)
-            filepath.touch()
         return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
 
     subprocess_mock.run = Mock(side_effect=mock_run)
-
-    # 22\t26995242\t27014052\t2397\tCRYBB1\n22\t38452318\t38471708\t9394\tPICK1\n"
 
     mocker.patch.object(mip_base, "environ_email", return_value="testuser@scilifelab.se")
 
@@ -253,5 +253,6 @@ def test_start_available_mip_dna(
     )
 
     assert result.exit_code == 0
-    updated_case = status_db.get_case_by_internal_id(case.internal_id)
-    assert cast(Case, updated_case).action == "running"
+    updated_case = cast(Case, status_db.get_case_by_internal_id(case.internal_id))
+    assert len(updated_case.analyses) == 1
+    assert updated_case.action == "running"
