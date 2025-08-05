@@ -8,12 +8,7 @@ from typing import Callable, Iterator
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import (
-    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
-    CaseActions,
-    CustomerId,
-    SampleType,
-)
+from cg.constants.constants import DNA_WORKFLOWS_WITH_SCOUT_UPLOAD, CustomerId, SampleType
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
@@ -788,6 +783,20 @@ class ReadHandler(BaseHandler):
             filter_functions=[CaseFilter.BY_INTERNAL_ID],
             internal_id=internal_id,
         ).first()
+
+    def get_case_by_internal_id_strict(self, internal_id: str) -> Case:
+        """
+        Get case by internal id.
+        Raises:
+            sqlalchemy.orm.exc.NoResultFound: If no case is found with the given internal id.
+            sqlalchemy.orm.exc.MultipleResultsFound: If multiple cases are found with the same
+            internal id. This should not happen due to database constraints.
+        """
+        return apply_case_filter(
+            cases=self._get_query(table=Case),
+            filter_functions=[CaseFilter.BY_INTERNAL_ID],
+            internal_id=internal_id,
+        ).one()
 
     def get_cases_by_internal_ids(self, internal_ids: list[str]) -> list[Case]:
         """Get cases by internal ids."""

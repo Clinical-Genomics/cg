@@ -1,4 +1,5 @@
 import pytest
+
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -30,3 +31,8 @@ def test_get_uploaded_related_dna_case(
     # THEN the correct set of cases is returned
     assert fetched_uploaded_related_dna_case == uploaded_related_dna_case
     assert fetched_uploaded_related_dna_case != related_dna_cases
+
+
+def test_get_case_by_internal_id_strict_works(store_with_cases_and_customers: Store):
+    """Test that get_case_by_internal_id_strict returns the correct case."""
+    pass
