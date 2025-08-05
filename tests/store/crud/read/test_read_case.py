@@ -1,5 +1,4 @@
 import pytest
-import sqlalchemy
 
 from cg.exc import CaseNotFoundError
 from cg.store.models import Case
@@ -49,12 +48,16 @@ def test_get_case_by_internal_id_strict_works(store_with_cases_and_customers: St
 
 
 def test_get_case_by_internal_id_strict_fails(store_with_cases_and_customers: Store):
-    """"""
+    """Test that looking for a case with a non-existent internal id raises an error."""
+
     # GIVEN a fake internal id
     internal_id: str = "fake"
 
     # WHEN fetching a case using the fake internal id
+
+    # THEN the method should raise a CaseNotFoundError
     with pytest.raises(CaseNotFoundError) as error:
         store_with_cases_and_customers.get_case_by_internal_id_strict(internal_id)
 
-    assert str(error) == "?"
+    # THEN the error message should be as expected
+    assert str(error.value) == f"Case with internal id {internal_id} was not found in the database."
