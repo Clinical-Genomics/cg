@@ -3,6 +3,7 @@ from collections.abc import Generator
 from datetime import datetime
 from pathlib import Path
 from subprocess import CompletedProcess
+from time import sleep
 from typing import cast
 from unittest.mock import ANY, Mock, create_autospec
 
@@ -18,7 +19,7 @@ from cg.apps.tb.api import IDTokenCredentials
 from cg.cli.base import base
 from cg.cli.workflow.microsalt.base import run
 from cg.cli.workflow.mip import base as mip_base
-from cg.constants.constants import Workflow
+from cg.constants.constants import CaseActions, Workflow
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.tb import AnalysisType
@@ -253,6 +254,7 @@ def test_start_available_mip_dna(
     )
 
     assert result.exit_code == 0
-    updated_case = cast(Case, status_db.get_case_by_internal_id(case.internal_id))
-    assert len(updated_case.analyses) == 1
-    assert updated_case.action == "running"
+
+    status_db.session.refresh(case)
+    assert len(case.analyses) == 1
+    assert case.action == CaseActions.RUNNING
