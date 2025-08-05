@@ -80,13 +80,24 @@ def test_start_available_mip_dna(
 ):
     cli_runner = CliRunner()
 
+    test_root_dir = tmp_path_factory.mktemp("test_start_available_mip_dna")
+    template_path = "tests/integration/config/cg-test.yaml"
+    with open(template_path) as f:
+        config_content = f.read()
+
+    config_content = config_content.format(test_root_dir=test_root_dir)
+
+    config_path = test_root_dir / "cg-config.yaml"
+    with open(config_path, "w") as f:
+        f.write(config_content)
+
     ticket_id = 12345
     case: Case = helpers.add_case(
         store=status_db, data_analysis=Workflow.MIP_DNA, ticket=str(ticket_id)
     )
 
     filepath = Path(
-        f"tests/integration/config/workflows/mip-dna/cases/{case.internal_id}/analysis/{case.internal_id}_qc_sample_info.yaml"
+        f"{test_root_dir}/mip-dna/cases/{case.internal_id}/analysis/{case.internal_id}_qc_sample_info.yaml"
     )
     filepath.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2("tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml", filepath)
@@ -169,8 +180,12 @@ def test_start_available_mip_dna(
 
     httpserver.expect_request(
         "/trailblazer/add-pending-analysis",
-        data=b'{"case_id": "%(case_id)s", "email": "linnealofdahl@scilifelab.se", "type": "wgs", "config_path": "tests/integration/config/workflows/mip-dna/cases/%(case_id)s/analysis/slurm_job_ids.yaml", "order_id": 1, "out_dir": "tests/integration/config/workflows/mip-dna/cases/%(case_id)s/analysis", "priority": "normal", "workflow": "MIP-DNA", "ticket": "%(ticket_id)s", "workflow_manager": "slurm", "tower_workflow_id": null, "is_hidden": true}'
-        % {b"case_id": case.internal_id.encode(), b"ticket_id": str(ticket_id).encode()},
+        data=b'{"case_id": "%(case_id)s", "email": "linnealofdahl@scilifelab.se", "type": "wgs", "config_path": "%(test_root_dir)s/mip-dna/cases/%(case_id)s/analysis/slurm_job_ids.yaml", "order_id": 1, "out_dir": "%(test_root_dir)s/mip-dna/cases/%(case_id)s/analysis", "priority": "normal", "workflow": "MIP-DNA", "ticket": "%(ticket_id)s", "workflow_manager": "slurm", "tower_workflow_id": null, "is_hidden": true}'
+        % {
+            b"case_id": case.internal_id.encode(),
+            b"ticket_id": str(ticket_id).encode(),
+            b"test_root_dir": str(test_root_dir).encode(),
+        },
     ).respond_with_json(
         {
             "id": "1",
@@ -187,7 +202,7 @@ def test_start_available_mip_dna(
         base,
         [
             "--config",
-            "tests/integration/config/cg-test.yaml",
+            config_path.as_posix(),
             "workflow",
             "mip-dna",
             "start-available",
@@ -195,9 +210,9 @@ def test_start_available_mip_dna(
     )
     subprocess_mock.run.assert_any_call(
         [
-            "tests/integration/config/scout/binary",
+            f"{test_root_dir}/scout/binary",
             "--config",
-            "tests/integration/config/scout/config",
+            f"{test_root_dir}/scout/config",
             "export",
             "panel",
             "--bed",
@@ -212,16 +227,6 @@ def test_start_available_mip_dna(
         stderr=ANY,
     )
 
-    # TODO check that these files are created, switch to pytest temp dir:
-    # create mode 100644 tests/integration/config/workflows/mip-dna/cases/darlingdolphin/gene_panels.bed
-    # create mode 100644 tests/integration/config/workflows/mip-dna/cases/darlingdolphin/managed_variants.vcf
-    # create mode 100644 tests/integration/config/workflows/mip-dna/cases/invitingcrappie/gene_panels.bed
-    # create mode 100644 tests/integration/config/workflows/mip-dna/cases/invitingcrappie/managed_variants.vcf
-    # create mode 100644 tests/integration/config/workflows/mip-dna/cases/moralfinch/gene_panels.bed
-    # create mode 100644 tests/integration/config/workflows/mip-dna/cases/moralfinch/managed_variants.vcf
-    # create mode 100644 tests/integration/config/workflows/mip-dna/cases/mutualoriole/gene_panels.bed
-    # create mode 100644 tests/integration/config/workflows/mip-dna/cases/mutualoriole/managed_variants.vcf
-
     # The order of the bed arguments is not deterministic, so we need to look at them as a set
     bed_args = subprocess_mock.run.call_args_list[0][0][0][6:9]
     assert set(bed_args) == {
@@ -232,9 +237,9 @@ def test_start_available_mip_dna(
 
     subprocess_mock.run.assert_any_call(
         [
-            "tests/integration/config/scout/binary",
+            f"{test_root_dir}/scout/binary",
             "--config",
-            "tests/integration/config/scout/config",
+            f"{test_root_dir}/scout/config",
             "export",
             "managed",
             "--build",
@@ -246,7 +251,7 @@ def test_start_available_mip_dna(
     )
 
     subprocess_mock.run.assert_any_call(
-        f"""tests/integration/config/workflows/mip-dna/conda_bin run --name S_mip12.1 tests/integration/config/workflows/mip-dna/bin analyse rd_dna --config tests/integration/config/workflows/mip-dna/config/mip12.1-dna-stage.yaml {case.internal_id} --slurm_quality_of_service normal --email testuser@scilifelab.se""",
+        f"""{test_root_dir}/mip-dna/conda_bin run --name S_mip12.1 {test_root_dir}/mip-dna/bin analyse rd_dna --config {test_root_dir}/mip-dna/config/mip12.1-dna-stage.yaml {case.internal_id} --slurm_quality_of_service normal --email testuser@scilifelab.se""",
         check=False,
         shell=True,
         stdout=ANY,
@@ -258,3 +263,7 @@ def test_start_available_mip_dna(
     status_db.session.refresh(case)
     assert len(case.analyses) == 1
     assert case.action == CaseActions.RUNNING
+
+    case_dir = Path(test_root_dir, "mip-dna", "cases", case.internal_id)
+    assert Path(case_dir, "gene_panels.bed").exists()
+    assert Path(case_dir, "managed_variants.vcf").exists()
