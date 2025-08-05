@@ -16,6 +16,7 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, SequencingFileTag
+from cg.constants.constants import FileFormat
 from cg.io.gzip import read_gzip_first_line
 from cg.models.fastq import FastqFileMeta, GetFastqFileMeta
 from cg.store.models import Case, Sample

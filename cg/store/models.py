@@ -845,11 +845,6 @@ class Sample(Base, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
-    def analysis_type(self) -> str:
-        """"""
-        return self.application_version.application.analysis_type
-
-    @property
     def archive_location(self) -> str:
         """Returns the data_archive_location if the customer linked to the sample."""
         return self.customer.data_archive_location
