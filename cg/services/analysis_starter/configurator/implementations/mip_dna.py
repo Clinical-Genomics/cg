@@ -1,6 +1,7 @@
 from cg.apps.environ import environ_email
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
+from cg.store.models import Case
 from cg.store.store import Store
 
 
@@ -12,7 +13,7 @@ class MIPDNAConfigurator(Configurator):
         pass
 
     def get_config(self, case_id: str, **flags) -> MIPDNACaseConfig:
-        case = self.store.get_case_by_internal_id(case_id)
+        case: Case = self.store.get_case_by_internal_id_strict(case_id)
         config = MIPDNACaseConfig(
             case_id=case_id,
             email=environ_email(),
