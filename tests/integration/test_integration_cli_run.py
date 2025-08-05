@@ -91,6 +91,7 @@ def test_start_available_mip_dna(
     mocker,
     httpserver: HTTPServer,
 ):
+    """Test a successful run of the command start-available mip-dna with one case to be analysed"""
     cli_runner = CliRunner()
 
     # GIVEN a mip root directory
