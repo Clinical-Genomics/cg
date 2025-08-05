@@ -99,10 +99,11 @@ def test_parse_file_data(fastq_path: Path, expected_fastq_meta: dict, mocker):
 
 
 def test_mip_get_sample_fastq_destination_dir():
+    """Test that getting the sample destination dir for a case and a sample
+    returns the correct path."""
     # GIVEN a MIPFastqHandler
-    fastq_handler = MipFastqHandler(
-        housekeeper_api=Mock(), root_dir=Path("root_dir"), status_db=Mock()
-    )
+    root_dir = Path("root_dir")
+    fastq_handler = MipFastqHandler(housekeeper_api=Mock(), root_dir=root_dir, status_db=Mock())
 
     # GIVEN a case and a sample
     case: Case = create_autospec(Case, internal_id="case_internal_id")
@@ -112,4 +113,6 @@ def test_mip_get_sample_fastq_destination_dir():
     dir: Path = fastq_handler.get_sample_fastq_destination_dir(case=case, sample=sample)
 
     # THEN the path is as expected
-    assert dir == Path("some", "path")
+    assert dir == Path(
+        root_dir, case.internal_id, sample.prep_category, sample.internal_id, "fastq"
+    )

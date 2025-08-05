@@ -234,7 +234,7 @@ class MipFastqHandler(FastqHandler):
         return Path(
             self.root_dir,
             case.internal_id,
-            sample.application_version.application.analysis_type,
+            sample.prep_category,
             sample.internal_id,
             FileFormat.FASTQ,
         )
