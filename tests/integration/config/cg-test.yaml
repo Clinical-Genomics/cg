@@ -1,5 +1,5 @@
 ---
-database: "sqlite:///file:cg?mode=memory&cache=shared&uri=true"
+database: "{status_db_uri}"
 delivery_path: "{test_root_dir}/delivery_path"
 madeline_exe: "{test_root_dir}/madeline_exe"
 nanopore_data_directory: "{test_root_dir}/nanopore_data_directory"
@@ -27,7 +27,7 @@ run_instruments:
     demultiplexed_runs_dir: "{test_root_dir}/illumina_demultiplexed_runs_dir"
 
 housekeeper:
-  database: "sqlite:///file:housekeeper?mode=memory&cache=shared&uri=true"
+  database: "{housekeeper_db_uri}"
   root: "{test_root_dir}/housekeeper_root"
 
 chanjo:

@@ -45,9 +45,18 @@ def httpserver_listen_address():
 
 
 @pytest.fixture
-def store() -> Generator[Store, None, None]:
-    # TODO: use uri from config file
-    cg_database.initialize_database("sqlite:///file:cg?mode=memory&cache=shared&uri=true")
+def status_db_uri() -> str:
+    return "sqlite:///file:cg?mode=memory&cache=shared&uri=true"
+
+
+@pytest.fixture
+def housekeeper_db_uri() -> str:
+    return "sqlite:///file:housekeeper?mode=memory&cache=shared&uri=true"
+
+
+@pytest.fixture
+def store(status_db_uri: str) -> Generator[Store, None, None]:
+    cg_database.initialize_database(status_db_uri)
     cg_database.create_all_tables()
     store = Store()
     yield store
@@ -60,11 +69,13 @@ def status_db(store: Store) -> Generator[Store, None, None]:
 
 
 @pytest.fixture
-def housekeeper_db() -> Generator[HousekeeperStore, None, None]:
-    # TODO: use uri from config file
-    hk_database.initialize_database("sqlite:///file:housekeeper?mode=memory&cache=shared&uri=true")
+def housekeeper_db(
+    housekeeper_db_uri: str, tmp_path_factory: TempPathFactory
+) -> Generator[HousekeeperStore, None, None]:
+    hk_database.initialize_database(housekeeper_db_uri)
     hk_database.create_all_tables()
-    store = HousekeeperStore(root="/housekeeper/root")
+    housekeeper_root: Path = tmp_path_factory.mktemp("housekeeper")
+    store = HousekeeperStore(root=housekeeper_root.as_posix())
     yield store
     hk_database.drop_all_tables()
 
@@ -72,6 +83,8 @@ def housekeeper_db() -> Generator[HousekeeperStore, None, None]:
 @pytest.mark.integration
 def test_start_available_mip_dna(
     status_db: Store,
+    status_db_uri: str,
+    housekeeper_db_uri: str,
     housekeeper_db: HousekeeperStore,
     helpers: StoreHelpers,
     tmp_path_factory: TempPathFactory,
@@ -85,9 +98,13 @@ def test_start_available_mip_dna(
     with open(template_path) as f:
         config_content = f.read()
 
-    config_content = config_content.format(test_root_dir=test_root_dir)
+    config_content = config_content.format(
+        test_root_dir=test_root_dir,
+        status_db_uri=status_db_uri,
+        housekeeper_db_uri=housekeeper_db_uri,
+    )
 
-    config_path = test_root_dir / "cg-config.yaml"
+    config_path = Path(test_root_dir, "cg-config.yaml")
     with open(config_path, "w") as f:
         f.write(config_content)
 
