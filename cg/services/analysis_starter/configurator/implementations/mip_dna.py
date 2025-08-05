@@ -1,16 +1,23 @@
+import logging
+
 from cg.apps.environ import environ_email
+from cg.meta.workflow.fastq import MipFastqHandler
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.store.models import Case
 from cg.store.store import Store
 
+LOG = logging.getLogger(__name__)
+
 
 class MIPDNAConfigurator(Configurator):
-    def __init__(self, store: Store):
+    def __init__(self, fastq_handler: MipFastqHandler, store: Store):
+        self.fastq_handler = fastq_handler
         self.store = store
 
     def configure(self, case_id: str, **flags) -> MIPDNACaseConfig:
-        pass
+        LOG.info(f"Configuring case {case_id}")
+        self.fastq_handler.link_fastq_files(case_id)
 
     def get_config(self, case_id: str, **flags) -> MIPDNACaseConfig:
         case: Case = self.store.get_case_by_internal_id_strict(case_id)

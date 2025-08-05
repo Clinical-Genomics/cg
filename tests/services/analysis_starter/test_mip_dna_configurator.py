@@ -19,6 +19,20 @@ def mock_status_db() -> Store:
     return mock_store
 
 
+def test_configure():
+    # GIVEN a case id
+    case_id = "test_case"
+
+    # GIVEN a MIP DNA configurator
+    configurator = MIPDNAConfigurator(store=Mock(), fastq_handler=Mock())
+
+    # WHEN configuring a case
+    configurator.configure(case_id)
+
+    # THEN the fastq handler should have been called with the case id
+    configurator.fastq_handler.link_fastq_files.assert_called_once_with(case_id)
+
+
 def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     """Test that the MIP DNA configurator can get a case config."""
 
