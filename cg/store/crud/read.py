@@ -5,6 +5,7 @@ import logging
 from datetime import datetime
 from typing import Callable, Iterator
 
+import sqlalchemy
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
@@ -792,11 +793,16 @@ class ReadHandler(BaseHandler):
             sqlalchemy.orm.exc.MultipleResultsFound: If multiple cases are found with the same
             internal id. This should not happen due to database constraints.
         """
-        return apply_case_filter(
-            cases=self._get_query(table=Case),
-            filter_functions=[CaseFilter.BY_INTERNAL_ID],
-            internal_id=internal_id,
-        ).one()
+        try:
+            return apply_case_filter(
+                cases=self._get_query(table=Case),
+                filter_functions=[CaseFilter.BY_INTERNAL_ID],
+                internal_id=internal_id,
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise CaseNotFoundError(
+                f"Case with internal id {internal_id} was not found in the database."
+            )
 
     def get_cases_by_internal_ids(self, internal_ids: list[str]) -> list[Case]:
         """Get cases by internal ids."""
