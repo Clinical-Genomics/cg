@@ -91,7 +91,7 @@ def test_start_available_mip_dna(
     mocker,
     httpserver: HTTPServer,
 ):
-    """Test a successful run of the command start-available mip-dna with one case to be analysed"""
+    """Test a successful run of the command start-available mip-dna with one case to be analysed that has not been analysed before"""
     cli_runner = CliRunner()
 
     # GIVEN a mip root directory
@@ -132,6 +132,8 @@ def test_start_available_mip_dna(
     delivery_report_path: Path = tmp_path_factory.mktemp("delivery_report")
 
     # GIVEN the bundle data exists in Housekeeper
+    # TODO: investigate if this a realistic bundle - most important to fix
+    # Probably the fastq files should exist as this point
     bundle_data = {
         "name": sample.internal_id,
         "created": datetime.now(),
@@ -173,6 +175,8 @@ def test_start_available_mip_dna(
     mocker.patch.object(mip_base, "environ_email", return_value="testuser@scilifelab.se")
 
     # GIVEN the trailblazer API returns an uncompleted analysis
+    # TODO: investigate, could/should this be an empty response as in "no existing analysis"
+    # Maybe a bundle has to exist because there is an analysis
     httpserver.expect_request(
         "/trailblazer/get-latest-analysis", data='{"case_id": "' + case.internal_id + '"}'
     ).respond_with_json(
@@ -187,6 +191,7 @@ def test_start_available_mip_dna(
     )
 
     # GIVEN a pending analysis can be added to the Trailblazer API
+    # TODO: fix email!
     httpserver.expect_request(
         "/trailblazer/add-pending-analysis",
         data=b'{"case_id": "%(case_id)s", "email": "linnealofdahl@scilifelab.se", "type": "wgs", "config_path": "%(test_root_dir)s/mip-dna/cases/%(case_id)s/analysis/slurm_job_ids.yaml", "order_id": 1, "out_dir": "%(test_root_dir)s/mip-dna/cases/%(case_id)s/analysis", "priority": "normal", "workflow": "MIP-DNA", "ticket": "%(ticket_id)s", "workflow_manager": "slurm", "tower_workflow_id": null, "is_hidden": true}'
@@ -219,6 +224,7 @@ def test_start_available_mip_dna(
     )
 
     # THEN a scout command is called to export panel beds
+    # TODO: maybe only use one panel to avoid extra assert
     subprocess_mock.run.assert_any_call(
         [
             f"{test_root_dir}/scout/binary",
@@ -285,6 +291,7 @@ def test_start_available_mip_dna(
     case_dir = Path(test_root_dir, "mip-dna", "cases", case.internal_id)
     assert Path(case_dir, "gene_panels.bed").exists()
     assert Path(case_dir, "managed_variants.vcf").exists()
+    # TODO: check that pedigree.yaml was created
 
 
 def create_qc_file(test_root_dir, case) -> Path:
