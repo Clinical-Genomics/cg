@@ -5,7 +5,7 @@ from cg.constants.constants import DEFAULT_CAPTURE_KIT, FileExtensions
 from cg.constants.tb import AnalysisType
 from cg.exc import CgError
 from cg.io.yaml import write_yaml
-from cg.store.models import Case, Sample
+from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
 
@@ -23,9 +23,9 @@ class MIPDNAConfigFileCreator:
         content = {"case": "", "default_gene_panels": [], "samples": []}
         case: Case = self.store.get_case_by_internal_id_strict(case_id)
         samples_data = []
-        for sample in case.samples:
+        for case_sample in case.links:
             sample_content: dict = self._get_sample_content(
-                bed_file=bed_file, case_id=case_id, sample=sample
+                bed_file=bed_file, case_id=case_id, case_sample=case_sample
             )
             samples_data.append(sample_content)
         content["case"] = case.internal_id
@@ -53,18 +53,22 @@ class MIPDNAConfigFileCreator:
     def _get_target_bed_from_lims(self, case_id):
         return "mock_bed_file"
 
-    def _get_sample_content(self, bed_file: str, case_id: str, sample: Sample) -> dict:
+    def _get_sample_content(self, bed_file: str, case_id: str, case_sample: CaseSample) -> dict:
+        sample: Sample = case_sample.sample
         bed_file: str = self._get_sample_bed_file(
             bed_file_name=bed_file, case_id=case_id, sample=sample
         )
+        mother: str = case_sample.mother.internal_id if case_sample.mother else "0"
+        father: str = case_sample.father.internal_id if case_sample.father else "0"
+
         return {
-            "analysis_type": "",
+            "analysis_type": sample.prep_category,
             "capture_kit": bed_file,
             "expected_coverage": sample.application_version.application.min_sequencing_depth,
-            "father": "",
-            "mother": "",
-            "phenotype": "",
-            "sample_display_name": "",
-            "sample_id": "",
-            "sex": "",
+            "father": father,
+            "mother": mother,
+            "phenotype": case_sample.status,
+            "sample_display_name": sample.name,
+            "sample_id": sample.internal_id,
+            "sex": sample.sex,
         }

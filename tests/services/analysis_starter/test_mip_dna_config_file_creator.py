@@ -8,7 +8,7 @@ from cg.services.analysis_starter.configurator.file_creators import mip_dna_conf
 from cg.services.analysis_starter.configurator.file_creators.mip_dna_config import (
     MIPDNAConfigFileCreator,
 )
-from cg.store.models import Case, Sample
+from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
 
@@ -37,8 +37,9 @@ def expected_content() -> dict:
 def test_create(expected_content: dict, mocker: MockerFixture):
     # GIVEN a mocked store
     sample = create_autospec(Sample)
+    case_sample: CaseSample = create_autospec(CaseSample, sample=sample)
     case_id = "case_id"
-    case: Case = create_autospec(Case, internal_id=case_id, samples=[sample])
+    case: Case = create_autospec(Case, internal_id=case_id, links=[case_sample])
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=case)
 
