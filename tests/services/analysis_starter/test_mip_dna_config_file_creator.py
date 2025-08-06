@@ -4,6 +4,8 @@ from unittest.mock import Mock, create_autospec
 import pytest
 from pytest_mock import MockerFixture
 
+from cg.constants.constants import StatusOptions
+from cg.models.orders.sample_base import SexEnum
 from cg.services.analysis_starter.configurator.file_creators import mip_dna_config
 from cg.services.analysis_starter.configurator.file_creators.mip_dna_config import (
     MIPDNAConfigFileCreator,
@@ -23,12 +25,12 @@ def expected_content() -> dict:
                 "analysis_type": "",
                 "capture_kit": "mock_bed_file",
                 "expected_coverage": "",
-                "father": "",
-                "mother": "",
-                "phenotype": "",
-                "sample_display_name": "",
-                "sample_id": "",
-                "sex": "",
+                "father": "0",
+                "mother": "mother_id",
+                "phenotype": StatusOptions.AFFECTED,
+                "sample_display_name": "sample_name",
+                "sample_id": "sample_id",
+                "sex": SexEnum.male,
             },
         ],
     }
@@ -36,8 +38,12 @@ def expected_content() -> dict:
 
 def test_create(expected_content: dict, mocker: MockerFixture):
     # GIVEN a mocked store
-    sample = create_autospec(Sample)
-    case_sample: CaseSample = create_autospec(CaseSample, sample=sample)
+    sample = create_autospec(Sample, internal_id="sample_id", sex=SexEnum.male)
+    sample.name = "sample_name"
+    mother = create_autospec(Sample, internal_id="mother_id")
+    case_sample: CaseSample = create_autospec(
+        CaseSample, father=None, mother=mother, sample=sample, status=StatusOptions.AFFECTED
+    )
     case_id = "case_id"
     case: Case = create_autospec(Case, internal_id=case_id, links=[case_sample])
     store: Store = create_autospec(Store)
