@@ -10,14 +10,15 @@ class MIPDNAConfigFileCreator:
         self.lims_api = lims_api
         self.store = store
 
-    def create(self, case_id: str) -> None:
-        bed_file = self._get_bed_file()
+    def create(self, case_id: str, bed_flag: str | None) -> None:
+        bed_file: str | None = self._get_bed_file_name(bed_flag)
         write_yaml(content="", file_path=Path(""))
 
     def _get_content(
         self,
         bed_file: str,
     ):
+        bed_file = self._get_bed_file()
         pass
 
     def _get_bed_file(self):
