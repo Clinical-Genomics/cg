@@ -14,6 +14,6 @@ def test_create(mocker: MockerFixture):
 
     mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
 
-    file_creator.create("case_id")
+    file_creator.create(case_id="case_id", bed_flag=None)
 
     mock_write.assert_called_once_with(content="expected_content", file_path=Path("expected_path"))
