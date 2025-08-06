@@ -11,4 +11,14 @@ class MIPDNAConfigFileCreator:
         self.store = store
 
     def create(self, case_id: str) -> None:
+        bed_file = self._get_bed_file()
         write_yaml(content="", file_path=Path(""))
+
+    def _get_content(
+        self,
+        bed_file: str,
+    ):
+        pass
+
+    def _get_bed_file(self):
+        return "bed_file.bed"
