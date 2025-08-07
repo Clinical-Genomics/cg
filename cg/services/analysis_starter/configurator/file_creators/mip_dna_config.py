@@ -18,7 +18,9 @@ class MIPDNAConfigFileCreator:
     def create(self, case_id: str, bed_flag: str | None) -> None:
         bed_file: str | None = self._get_bed_file_name(bed_flag)
         content: dict = self._get_content(bed_file=bed_file, case_id=case_id)
-        write_yaml(content=content, file_path=Path(""))
+        directory = Path(self.root, case_id)
+        directory.mkdir(exist_ok=True, parents=True)
+        write_yaml(content=content, file_path=Path(directory, "pedigree.yaml"))
 
     def _get_content(self, bed_file: str | None, case_id: str) -> dict:
         case: Case = self.store.get_case_by_internal_id_strict(case_id)
@@ -57,18 +59,14 @@ class MIPDNAConfigFileCreator:
             "sex": sample.sex,
         }
 
-    def _get_sample_bed_file(
-        self, bed_file_name: str | None, case: Case, sample: Sample
-    ) -> str | None:
+    def _get_sample_bed_file(self, bed_file_name: str | None, case: Case, sample: Sample) -> str:
         if bed_file_name:
             return bed_file_name
         if sample.prep_category == AnalysisType.WGS:
             return DEFAULT_CAPTURE_KIT
-        bed_file: str | None = self._get_target_bed_from_lims(case)
-        if not bed_file:
-            raise CgError("")
+        return self._get_target_bed_from_lims(case)
 
-    def _get_bed_file_name(self, bed_flag: str | None):
+    def _get_bed_file_name(self, bed_flag: str | None) -> str | None:
         if bed_flag is None:
             return None
         elif bed_flag.endswith(FileExtensions.BED):
@@ -77,13 +75,13 @@ class MIPDNAConfigFileCreator:
             return bed_version.filename
         raise CgError("Please provide a valid panel shortname or a path to panel.bed file!")
 
-    def _get_target_bed_from_lims(self, case: Case) -> str | None:
+    def _get_target_bed_from_lims(self, case: Case) -> str:
         """Get target bed filename from LIMS."""
         sample: Sample = case.samples[0]
         if sample.from_sample:
             sample: Sample = self.store.get_sample_by_internal_id(internal_id=sample.from_sample)
         bed_shortname: str | None = self.lims_api.capture_kit(lims_id=sample.internal_id)
         if not bed_shortname:
-            return None
+            raise CgError(f"No target bed file found for case {case.internal_id} in LIMS")
         bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(bed_shortname)
         return bed_version.filename

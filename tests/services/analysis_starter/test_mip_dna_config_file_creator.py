@@ -89,7 +89,8 @@ def test_create_wgs(expected_content_wgs: dict, mocker: MockerFixture):
     store.get_case_by_internal_id_strict = Mock(return_value=case)
 
     # GIVEN a MIPDNAConfigFileCreator
-    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), store=store)
+    root = "mip_root"
+    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), root=root, store=store)
 
     # GIVEN a patched writer
     mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
@@ -146,7 +147,8 @@ def test_create_wes(expected_content_wes: dict, mocker: MockerFixture):
     lims.capture_kit = Mock(return_value="capture_kit_short_name")
 
     # GIVEN a MIPDNAConfigFileCreator
-    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), store=store)
+    root = "mip_root"
+    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), root=root, store=store)
 
     # GIVEN a patched writer
     mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
@@ -155,4 +157,6 @@ def test_create_wes(expected_content_wes: dict, mocker: MockerFixture):
     file_creator.create(case_id=case_id, bed_flag=None)
 
     # THEN the writer is called with the correct content and file path
-    mock_write.assert_called_once_with(content=expected_content_wes, file_path=Path("."))
+    mock_write.assert_called_once_with(
+        content=expected_content_wes, file_path=Path(root, case_id, "pedigree.yaml")
+    )
