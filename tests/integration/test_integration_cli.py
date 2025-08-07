@@ -24,6 +24,7 @@ from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.tb import AnalysisType
+from cg.meta.workflow import analysis
 from cg.store import database as cg_database
 from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Order, Sample
 from cg.store.store import Store
@@ -168,6 +169,7 @@ def test_start_available_mip_dna(
 
     # GIVEN an email adress can be determined from the environment
     mocker.patch.object(mip_base, "environ_email", return_value="testuser@scilifelab.se")
+    mocker.patch.object(analysis, "environ_email", return_value="testuser@scilifelab.se")
 
     # GIVEN the trailblazer API returns an uncompleted analysis
     # TODO: investigate, could/should this be an empty response as in "no existing analysis"
@@ -186,10 +188,9 @@ def test_start_available_mip_dna(
     )
 
     # GIVEN a pending analysis can be added to the Trailblazer API
-    # TODO: fix email!
     httpserver.expect_request(
         "/trailblazer/add-pending-analysis",
-        data=b'{"case_id": "%(case_id)s", "email": "linnealofdahl@scilifelab.se", "type": "wgs", "config_path": "%(test_root_dir)s/mip-dna/cases/%(case_id)s/analysis/slurm_job_ids.yaml", "order_id": 1, "out_dir": "%(test_root_dir)s/mip-dna/cases/%(case_id)s/analysis", "priority": "normal", "workflow": "MIP-DNA", "ticket": "%(ticket_id)s", "workflow_manager": "slurm", "tower_workflow_id": null, "is_hidden": true}'
+        data=b'{"case_id": "%(case_id)s", "email": "testuser@scilifelab.se", "type": "wgs", "config_path": "%(test_root_dir)s/mip-dna/cases/%(case_id)s/analysis/slurm_job_ids.yaml", "order_id": 1, "out_dir": "%(test_root_dir)s/mip-dna/cases/%(case_id)s/analysis", "priority": "normal", "workflow": "MIP-DNA", "ticket": "%(ticket_id)s", "workflow_manager": "slurm", "tower_workflow_id": null, "is_hidden": true}'
         % {
             b"case_id": case.internal_id.encode(),
             b"ticket_id": str(ticket_id).encode(),
