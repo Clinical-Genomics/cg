@@ -171,21 +171,10 @@ def test_start_available_mip_dna(
     mocker.patch.object(mip_base, "environ_email", return_value="testuser@scilifelab.se")
     mocker.patch.object(analysis, "environ_email", return_value="testuser@scilifelab.se")
 
-    # GIVEN the trailblazer API returns an uncompleted analysis
-    # TODO: investigate, could/should this be an empty response as in "no existing analysis"
-    # Maybe a bundle has to exist because there is an analysis
+    # GIVEN the trailblazer API returns no ongoing analysis for the case
     httpserver.expect_request(
         "/trailblazer/get-latest-analysis", data='{"case_id": "' + case.internal_id + '"}'
-    ).respond_with_json(
-        {
-            "id": "1",
-            "logged_at": "",
-            "started_at": "",
-            "completed_at": "",
-            "out_dir": "out/dir",
-            "config_path": "config/path",
-        }
-    )
+    ).respond_with_json(None)
 
     # GIVEN a pending analysis can be added to the Trailblazer API
     httpserver.expect_request(
