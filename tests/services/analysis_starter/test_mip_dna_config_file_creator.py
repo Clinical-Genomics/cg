@@ -8,6 +8,7 @@ from cg.apps.lims import LimsAPI
 from cg.constants import GenePanelMasterList
 from cg.constants.constants import DEFAULT_CAPTURE_KIT, StatusOptions
 from cg.constants.tb import AnalysisType
+from cg.exc import LimsDataError
 from cg.models.orders.sample_base import SexEnum
 from cg.services.analysis_starter.configurator.file_creators import mip_dna_config
 from cg.services.analysis_starter.configurator.file_creators.mip_dna_config import (
@@ -143,8 +144,7 @@ def test_create_wes(expected_content_wes: dict, mocker: MockerFixture):
 
     # GIVEN a LIMS mock
     lims: LimsAPI = create_autospec(LimsAPI)
-    # TODO: Test the scenario when lims returns None
-    lims.capture_kit = Mock(return_value="capture_kit_short_name")
+    lims.get_capture_kit_strict = Mock(return_value="capture_kit_short_name")
 
     # GIVEN a MIPDNAConfigFileCreator
     root = "mip_root"
@@ -153,10 +153,42 @@ def test_create_wes(expected_content_wes: dict, mocker: MockerFixture):
     # GIVEN a patched writer
     mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
 
-    # WHEN creating the config file
+    # WHEN creating the config file when the provided bed flag is None
     file_creator.create(case_id=case_id, bed_flag=None)
 
     # THEN the writer is called with the correct content and file path
     mock_write.assert_called_once_with(
         content=expected_content_wes, file_path=Path(root, case_id, "pedigree.yaml")
     )
+
+
+def test_create_config_wes_lims_fails():
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.get_capture_kit_strict = Mock(side_effect=LimsDataError)
+
+    # GIVEN a mock store containing a case with a WES sample
+    sample = create_autospec(
+        Sample,
+        internal_id="sample_id",
+        prep_category=AnalysisType.WES,
+        from_sample=None,
+    )
+    sample.name = "sample_name"
+    case_sample: CaseSample = create_autospec(CaseSample, sample=sample)
+    case_id = "case_id"
+    case: Case = create_autospec(
+        Case,
+        internal_id=case_id,
+        links=[case_sample],
+    )
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id_strict = Mock(return_value=case)
+
+    # GIVEN a MIPDNAConfigFileCreator
+    file_creator = MIPDNAConfigFileCreator(lims_api=lims_api, root="", store=store)
+
+    # WHEN creating the config file when the provided bed flag is None
+
+    # THEN a LimsDataError should be raised
+    with pytest.raises(LimsDataError):
+        file_creator.create(case_id=case_id, bed_flag=None)
