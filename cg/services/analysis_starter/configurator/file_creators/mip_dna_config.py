@@ -16,18 +16,18 @@ class MIPDNAConfigFileCreator:
         self.store = store
 
     def create(self, case_id: str, bed_flag: str | None) -> None:
-        bed_file: str | None = self._get_bed_file_name(bed_flag)
-        content: dict = self._get_content(bed_file=bed_file, case_id=case_id)
+        provided_bed_file: str | None = self._get_bed_file_name(bed_flag) if bed_flag else None
+        content: dict = self._get_content(provided_bed_file=provided_bed_file, case_id=case_id)
         directory = Path(self.root, case_id)
         directory.mkdir(exist_ok=True, parents=True)
         write_yaml(content=content, file_path=Path(directory, "pedigree.yaml"))
 
-    def _get_content(self, bed_file: str | None, case_id: str) -> dict:
+    def _get_content(self, provided_bed_file: str | None, case_id: str) -> dict:
         case: Case = self.store.get_case_by_internal_id_strict(case_id)
         samples_data = []
         for case_sample in case.links:
             sample_content: dict = self._get_sample_content(
-                bed_file=bed_file, case_sample=case_sample
+                provided_bed_file=provided_bed_file, case_sample=case_sample
             )
             samples_data.append(sample_content)
         return {
@@ -36,10 +36,10 @@ class MIPDNAConfigFileCreator:
             "samples": samples_data,
         }
 
-    def _get_sample_content(self, bed_file: str, case_sample: CaseSample) -> dict:
+    def _get_sample_content(self, provided_bed_file: str | None, case_sample: CaseSample) -> dict:
         case: Case = case_sample.case
         sample: Sample = case_sample.sample
-        bed_file: str = bed_file or self._get_sample_bed_file(case=case, sample=sample)
+        bed_file: str = provided_bed_file or self._get_sample_bed_file(case=case, sample=sample)
         mother: str = case_sample.mother.internal_id if case_sample.mother else "0"
         father: str = case_sample.father.internal_id if case_sample.father else "0"
 
@@ -59,10 +59,8 @@ class MIPDNAConfigFileCreator:
             "sex": sample.sex,
         }
 
-    def _get_bed_file_name(self, bed_flag: str | None) -> str | None:
-        if bed_flag is None:
-            return None
-        elif bed_flag.endswith(FileExtensions.BED):
+    def _get_bed_file_name(self, bed_flag: str) -> str:
+        if bed_flag.endswith(FileExtensions.BED):
             return bed_flag
         bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(bed_flag)
         return bed_version.filename
@@ -74,7 +72,9 @@ class MIPDNAConfigFileCreator:
 
     def _get_target_bed_from_lims(self, case: Case) -> str:
         """Get target bed filename from LIMS."""
-        sample: Sample = case.samples[0]
+        sample: Sample = case.samples[
+            0
+        ]  # Should the input to the function be the sample instead of the case?
         if sample.from_sample:
             sample: Sample = self.store.get_sample_by_internal_id(internal_id=sample.from_sample)
         bed_shortname: str | None = self.lims_api.capture_kit(lims_id=sample.internal_id)
