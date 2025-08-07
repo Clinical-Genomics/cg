@@ -72,13 +72,10 @@ class MIPDNAConfigFileCreator:
 
     def _get_target_bed_from_lims(self, case: Case) -> str:
         """Get target bed filename from LIMS."""
-        sample: Sample = case.samples[
-            0
-        ]  # Should the input to the function be the sample instead of the case?
+        # Should the input to the function be the sample instead of the case?
+        sample: Sample = case.samples[0]
         if sample.from_sample:
             sample: Sample = self.store.get_sample_by_internal_id(internal_id=sample.from_sample)
-        bed_shortname: str | None = self.lims_api.capture_kit(lims_id=sample.internal_id)
-        if not bed_shortname:
-            raise CgError(f"No target bed file found for case {case.internal_id} in LIMS")
+        bed_shortname: str = self.lims_api.get_capture_kit_strict(lims_id=sample.internal_id)
         bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(bed_shortname)
         return bed_version.filename
