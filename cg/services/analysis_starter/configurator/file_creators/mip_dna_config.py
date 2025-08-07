@@ -74,7 +74,7 @@ class MIPDNAConfigFileCreator:
             return bed_version.filename
         raise CgError("Please provide a valid panel shortname or a path to panel.bed file!")
 
-    def _get_target_bed_from_lims(self, case: Case):
+    def _get_target_bed_from_lims(self, case: Case) -> str | None:
         """Get target bed filename from LIMS."""
         sample: Sample = case.samples[0]
         if sample.from_sample:
@@ -84,5 +84,3 @@ class MIPDNAConfigFileCreator:
             return None
         bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(bed_shortname)
         return bed_version.filename
-
-
