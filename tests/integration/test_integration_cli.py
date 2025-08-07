@@ -313,24 +313,3 @@ def create_config(status_db_uri, housekeeper_db_uri, test_root_dir):
     with open(config_path, "w") as f:
         f.write(config_content)
     return config_path
-
-
-def create_spring_metadata(tmp_path_factory, test_root_dir):
-    template_path = Path("tests/integration/config/spring_metadata.json")
-    return create_file_from_template(
-        template_path=template_path,
-        destination_path=tmp_path_factory.mktemp("spring_files"),
-        test_root_dir=test_root_dir,
-    )
-
-
-def create_file_from_template(template_path: Path, destination_path: Path, **template_args) -> Path:
-    with open(template_path) as f:
-        template_content: str = f.read()
-
-    template_content = template_content.format(template_args)
-
-    with open(destination_path, "w") as f:
-        f.write(template_content)
-
-    return destination_path
