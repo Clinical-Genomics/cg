@@ -80,7 +80,9 @@ def test_create_wgs(expected_content_wgs: dict, mocker: MockerFixture):
         CaseSample, father=None, mother=mother, sample=sample, status=StatusOptions.UNKNOWN
     )
     case_id = "case_id"
-    case: Case = create_autospec(Case, internal_id=case_id, links=[case_sample], panels=[GenePanelMasterList.OMIM_AUTO])
+    case: Case = create_autospec(
+        Case, internal_id=case_id, links=[case_sample], panels=[GenePanelMasterList.OMIM_AUTO]
+    )
     case_sample.case = case
 
     store: Store = create_autospec(Store)
@@ -96,7 +98,9 @@ def test_create_wgs(expected_content_wgs: dict, mocker: MockerFixture):
     file_creator.create(case_id=case_id, bed_flag=None)
 
     # THEN the writer is called with the correct content and file path
-    mock_write.assert_called_once_with(content=expected_content_wgs, file_path=Path(root, case_id, "pedigree.yaml"))
+    mock_write.assert_called_once_with(
+        content=expected_content_wgs, file_path=Path(root, case_id, "pedigree.yaml")
+    )
 
 
 # TODO: Write test for downsampled sample
@@ -122,7 +126,12 @@ def test_create_wes(expected_content_wes: dict, mocker: MockerFixture):
         CaseSample, father=None, mother=mother, sample=sample, status=StatusOptions.AFFECTED
     )
     case_id = "case_id"
-    case: Case = create_autospec(Case, internal_id=case_id, links=[case_sample], panels=[GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN])
+    case: Case = create_autospec(
+        Case,
+        internal_id=case_id,
+        links=[case_sample],
+        panels=[GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN],
+    )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=case)
     # TODO: Test the scenario when store returns None

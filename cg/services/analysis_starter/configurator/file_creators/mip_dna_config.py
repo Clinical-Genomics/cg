@@ -3,7 +3,7 @@ from pathlib import Path
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import DEFAULT_CAPTURE_KIT, FileExtensions, StatusOptions
 from cg.constants.tb import AnalysisType
-from cg.exc import CgDataError, CgError
+from cg.exc import CgError
 from cg.io.yaml import write_yaml
 from cg.store.models import BedVersion, Case, CaseSample, Sample
 from cg.store.store import Store
@@ -57,13 +57,16 @@ class MIPDNAConfigFileCreator:
             "sex": sample.sex,
         }
 
-    def _get_sample_bed_file(self, bed_file_name: str | None, case: Case, sample: Sample) -> str:
+    def _get_sample_bed_file(
+        self, bed_file_name: str | None, case: Case, sample: Sample
+    ) -> str | None:
         if bed_file_name:
             return bed_file_name
         if sample.prep_category == AnalysisType.WGS:
             return DEFAULT_CAPTURE_KIT
-        else:
-            return self._get_target_bed_from_lims(case)
+        bed_file: str | None = self._get_target_bed_from_lims(case)
+        if not bed_file:
+            raise CgError("")
 
     def _get_bed_file_name(self, bed_flag: str | None):
         if bed_flag is None:
