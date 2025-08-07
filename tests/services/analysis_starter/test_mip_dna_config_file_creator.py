@@ -28,7 +28,7 @@ def expected_content_wgs() -> dict:
                 "expected_coverage": 26,
                 "father": "0",
                 "mother": "mother_id",
-                "phenotype": StatusOptions.AFFECTED,
+                "phenotype": StatusOptions.UNAFFECTED,
                 "sample_display_name": "sample_name",
                 "sample_id": "sample_id",
                 "sex": SexEnum.male,
@@ -75,10 +75,12 @@ def test_create_wgs(expected_content_wgs: dict, mocker: MockerFixture):
     sample.name = "sample_name"
     mother = create_autospec(Sample, internal_id="mother_id")
     case_sample: CaseSample = create_autospec(
-        CaseSample, father=None, mother=mother, sample=sample, status=StatusOptions.AFFECTED
+        CaseSample, father=None, mother=mother, sample=sample, status=StatusOptions.UNKNOWN
     )
     case_id = "case_id"
     case: Case = create_autospec(Case, internal_id=case_id, links=[case_sample])
+    case_sample.case = case
+
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=case)
 

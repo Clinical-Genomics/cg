@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
-from cg.constants.constants import DEFAULT_CAPTURE_KIT, FileExtensions
+from cg.constants.constants import DEFAULT_CAPTURE_KIT, FileExtensions, StatusOptions
 from cg.constants.tb import AnalysisType
 from cg.exc import CgError
 from cg.io.yaml import write_yaml
@@ -25,7 +25,7 @@ class MIPDNAConfigFileCreator:
         samples_data = []
         for case_sample in case.links:
             sample_content: dict = self._get_sample_content(
-                bed_file=bed_file, case_id=case_id, case_sample=case_sample
+                bed_file=bed_file, case_sample=case_sample
             )
             samples_data.append(sample_content)
         content["case"] = case.internal_id
@@ -53,13 +53,18 @@ class MIPDNAConfigFileCreator:
     def _get_target_bed_from_lims(self, case_id):
         return "mock_bed_file"
 
-    def _get_sample_content(self, bed_file: str, case_id: str, case_sample: CaseSample) -> dict:
+    def _get_sample_content(self, bed_file: str, case_sample: CaseSample) -> dict:
+        case: Case = case_sample.case
         sample: Sample = case_sample.sample
         bed_file: str = self._get_sample_bed_file(
-            bed_file_name=bed_file, case_id=case_id, sample=sample
+            bed_file_name=bed_file, case_id=case.internal_id, sample=sample
         )
         mother: str = case_sample.mother.internal_id if case_sample.mother else "0"
         father: str = case_sample.father.internal_id if case_sample.father else "0"
+
+        phenotype = case_sample.status
+        if len(case.links) == 1 and case_sample.status == StatusOptions.UNKNOWN:
+            phenotype = StatusOptions.UNAFFECTED
 
         return {
             "analysis_type": sample.prep_category,
@@ -67,7 +72,7 @@ class MIPDNAConfigFileCreator:
             "expected_coverage": sample.application_version.application.min_sequencing_depth,
             "father": father,
             "mother": mother,
-            "phenotype": case_sample.status,
+            "phenotype": phenotype,
             "sample_display_name": sample.name,
             "sample_id": sample.internal_id,
             "sex": sample.sex,
