@@ -39,7 +39,7 @@ class MIPDNAConfigFileCreator:
     def _get_sample_content(self, bed_file: str, case_sample: CaseSample) -> dict:
         case: Case = case_sample.case
         sample: Sample = case_sample.sample
-        bed_file: str = self._get_sample_bed_file(bed_file_name=bed_file, case=case, sample=sample)
+        bed_file: str = bed_file or self._get_sample_bed_file(case=case, sample=sample)
         mother: str = case_sample.mother.internal_id if case_sample.mother else "0"
         father: str = case_sample.father.internal_id if case_sample.father else "0"
 
@@ -59,21 +59,18 @@ class MIPDNAConfigFileCreator:
             "sex": sample.sex,
         }
 
-    def _get_sample_bed_file(self, bed_file_name: str | None, case: Case, sample: Sample) -> str:
-        if bed_file_name:
-            return bed_file_name
-        if sample.prep_category == AnalysisType.WGS:
-            return DEFAULT_CAPTURE_KIT
-        return self._get_target_bed_from_lims(case)
-
     def _get_bed_file_name(self, bed_flag: str | None) -> str | None:
         if bed_flag is None:
             return None
         elif bed_flag.endswith(FileExtensions.BED):
             return bed_flag
-        if bed_version := self.store.get_bed_version_by_short_name(bed_flag):
-            return bed_version.filename
-        raise CgError("Please provide a valid panel shortname or a path to panel.bed file!")
+        bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(bed_flag)
+        return bed_version.filename
+
+    def _get_sample_bed_file(self, case: Case, sample: Sample) -> str:
+        if sample.prep_category == AnalysisType.WGS:
+            return DEFAULT_CAPTURE_KIT
+        return self._get_target_bed_from_lims(case)
 
     def _get_target_bed_from_lims(self, case: Case) -> str:
         """Get target bed filename from LIMS."""
