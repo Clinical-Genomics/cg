@@ -3,9 +3,9 @@ from pathlib import Path
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import DEFAULT_CAPTURE_KIT, FileExtensions, StatusOptions
 from cg.constants.tb import AnalysisType
-from cg.exc import CgError
+from cg.exc import CgDataError, CgError
 from cg.io.yaml import write_yaml
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import BedVersion, Case, CaseSample, Sample
 from cg.store.store import Store
 
 
@@ -33,13 +33,13 @@ class MIPDNAConfigFileCreator:
         content["samples"] = samples_data
         return content
 
-    def _get_sample_bed_file(self, bed_file_name: str | None, case_id: str, sample: Sample) -> str:
+    def _get_sample_bed_file(self, bed_file_name: str | None, case: Case, sample: Sample) -> str:
         if bed_file_name:
             return bed_file_name
         if sample.prep_category == AnalysisType.WGS:
             return DEFAULT_CAPTURE_KIT
         else:
-            return self._get_target_bed_from_lims(case_id)
+            return self._get_target_bed_from_lims(case)
 
     def _get_bed_file_name(self, bed_flag: str | None):
         if bed_flag is None:
@@ -50,15 +50,23 @@ class MIPDNAConfigFileCreator:
             return bed_version.filename
         raise CgError("Please provide a valid panel shortname or a path to panel.bed file!")
 
-    def _get_target_bed_from_lims(self, case_id):
-        return "mock_bed_file"
+    def _get_target_bed_from_lims(self, case: Case):
+        """Get target bed filename from LIMS."""
+        sample: Sample = case.samples[0]
+        if sample.from_sample:
+            sample: Sample = self.store.get_sample_by_internal_id(internal_id=sample.from_sample)
+        bed_shortname: str | None = self.lims_api.capture_kit(lims_id=sample.internal_id)
+        if not bed_shortname:
+            return None
+        bed_version: BedVersion = self.store.get_bed_version_by_short_name(bed_shortname)
+        if not bed_version:
+            raise CgDataError(f"Bed-version {bed_shortname} does not exist")
+        return bed_version.filename
 
     def _get_sample_content(self, bed_file: str, case_sample: CaseSample) -> dict:
         case: Case = case_sample.case
         sample: Sample = case_sample.sample
-        bed_file: str = self._get_sample_bed_file(
-            bed_file_name=bed_file, case_id=case.internal_id, sample=sample
-        )
+        bed_file: str = self._get_sample_bed_file(bed_file_name=bed_file, case=case, sample=sample)
         mother: str = case_sample.mother.internal_id if case_sample.mother else "0"
         father: str = case_sample.father.internal_id if case_sample.father else "0"
 

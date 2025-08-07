@@ -956,6 +956,19 @@ class ReadHandler(BaseHandler):
             filter_functions=[BedVersionFilter.BY_SHORT_NAME],
         ).first()
 
+    def get_bed_version_by_short_name_strict(self, bed_version_short_name: str) -> BedVersion:
+        """Return bed version with short name."""
+        try:
+            return apply_bed_version_filter(
+                bed_versions=self._get_query(table=BedVersion),
+                bed_version_short_name=bed_version_short_name,
+                filter_functions=[BedVersionFilter.BY_SHORT_NAME],
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise CaseNotFoundError(
+                f"Case with internal id {internal_id} was not found in the database."
+            )
+
     def get_bed_by_entry_id(self, bed_entry_id: int) -> Bed:
         """Get panel bed with bed entry id."""
         return apply_bed_filter(
