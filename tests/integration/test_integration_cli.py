@@ -1,10 +1,10 @@
 import shutil
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from datetime import datetime
 from pathlib import Path
 from subprocess import CompletedProcess
 from time import sleep
-from typing import cast
+from typing import Literal, cast
 from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
@@ -82,24 +82,32 @@ def housekeeper_db(
     hk_database.drop_all_tables()
 
 
+@pytest.fixture
+def scout_export_panel_stdout() -> bytes:
+    return b"22\t26995242\t27014052\t2397\tCRYBB1\n22\t38452318\t38471708\t9394\tPICK1\n"
+
+
 @pytest.mark.integration
 def test_start_available_mip_dna(
-    status_db: Store,
-    status_db_uri: str,
+    helpers: StoreHelpers,
     housekeeper_db_uri: str,
     housekeeper_db: HousekeeperStore,
-    helpers: StoreHelpers,
-    tmp_path_factory: TempPathFactory,
-    mocker,
     httpserver: HTTPServer,
+    mocker: Callable,
+    scout_export_panel_stdout: bytes,
+    status_db_uri: str,
+    status_db: Store,
+    tmp_path_factory: TempPathFactory,
 ):
-    """Test a successful run of the command start-available mip-dna with one case to be analysed that has not been analysed before"""
+    """Test a successful run of the command start-available mip-dna
+    with one case to be analysed that has not been analysed before"""
     cli_runner = CliRunner()
 
     # GIVEN a mip root directory
-    test_root_dir = tmp_path_factory.mktemp("test_start_available_mip_dna")
+    test_root_dir: Path = tmp_path_factory.mktemp("test_start_available_mip_dna")
     # GIVEN a config file with valid database uris and directories
-    config_path = create_config(status_db_uri, housekeeper_db_uri, test_root_dir)
+    config_path: Path = create_config(status_db_uri, housekeeper_db_uri, test_root_dir)
+    mip_dna_path = Path(test_root_dir, "mip-dna")
 
     # GIVEN a case with existing qc files
     ticket_id = 12345
@@ -158,11 +166,10 @@ def test_start_available_mip_dna(
 
     def mock_run(*args, **kwargs):
         command = args[0]
-
         stdout = b""
 
         if ("export" in command) and ("panel" in command):
-            stdout += b"22\t26995242\t27014052\t2397\tCRYBB1\n22\t38452318\t38471708\t9394\tPICK1\n"
+            stdout += scout_export_panel_stdout
         return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
 
     subprocess_mock.run = Mock(side_effect=mock_run)
@@ -179,11 +186,15 @@ def test_start_available_mip_dna(
     # GIVEN a pending analysis can be added to the Trailblazer API
     httpserver.expect_request(
         "/trailblazer/add-pending-analysis",
-        data=b'{"case_id": "%(case_id)s", "email": "testuser@scilifelab.se", "type": "wgs", "config_path": "%(test_root_dir)s/mip-dna/cases/%(case_id)s/analysis/slurm_job_ids.yaml", "order_id": 1, "out_dir": "%(test_root_dir)s/mip-dna/cases/%(case_id)s/analysis", "priority": "normal", "workflow": "MIP-DNA", "ticket": "%(ticket_id)s", "workflow_manager": "slurm", "tower_workflow_id": null, "is_hidden": true}'
+        data=b'{"case_id": "%(case_id)s", "email": "testuser@scilifelab.se", "type": "wgs", '
+        b'"config_path": "%(case_dir)s/analysis/slurm_job_ids.yaml",'
+        b' "order_id": 1, "out_dir": "%(case_dir)s/analysis", '
+        b'"priority": "normal", "workflow": "MIP-DNA", "ticket": "%(ticket_id)s", '
+        b'"workflow_manager": "slurm", "tower_workflow_id": null, "is_hidden": true}'
         % {
             b"case_id": case.internal_id.encode(),
             b"ticket_id": str(ticket_id).encode(),
-            b"test_root_dir": str(test_root_dir).encode(),
+            b"case_dir": str(Path(mip_dna_path, "cases", case.internal_id)).encode(),
         },
     ).respond_with_json(
         {
@@ -255,7 +266,9 @@ def test_start_available_mip_dna(
 
     # THEN a mip-dna analysis is started with the expected parameters
     subprocess_mock.run.assert_any_call(
-        f"""{test_root_dir}/mip-dna/conda_bin run --name S_mip12.1 {test_root_dir}/mip-dna/bin analyse rd_dna --config {test_root_dir}/mip-dna/config/mip12.1-dna-stage.yaml {case.internal_id} --slurm_quality_of_service normal --email testuser@scilifelab.se""",
+        f"{mip_dna_path}/conda_bin run --name S_mip12.1 "
+        f"{mip_dna_path}/bin analyse rd_dna --config {mip_dna_path}/config/mip12.1-dna-stage.yaml "
+        f"{case.internal_id} --slurm_quality_of_service normal --email testuser@scilifelab.se",
         check=False,
         shell=True,
         stdout=ANY,
