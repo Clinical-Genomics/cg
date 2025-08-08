@@ -24,13 +24,20 @@ def test_configure():
     case_id = "test_case"
 
     # GIVEN a MIP DNA configurator
-    configurator = MIPDNAConfigurator(store=Mock(), fastq_handler=Mock())
+    configurator = MIPDNAConfigurator(
+        config_file_creator=Mock(), store=Mock(), fastq_handler=Mock()
+    )
 
     # WHEN configuring a case
-    configurator.configure(case_id)
+    configurator.configure(case_id=case_id, panel_bed="bed_file.bed")
 
     # THEN the fastq handler should have been called with the case id
     configurator.fastq_handler.link_fastq_files.assert_called_once_with(case_id)
+
+    # THEN the config file creator should have been called with the case id and the provided bed flag
+    configurator.config_file_creator.create.assert_called_once_with(
+        case_id=case_id, bed_flag="bed_file.bed"
+    )
 
 
 def test_get_config(mock_status_db: Store, mocker: MockerFixture):

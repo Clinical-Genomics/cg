@@ -3,7 +3,6 @@ from pathlib import Path
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import DEFAULT_CAPTURE_KIT, FileExtensions, StatusOptions
 from cg.constants.tb import AnalysisType
-from cg.exc import CgError
 from cg.io.yaml import write_yaml
 from cg.store.models import BedVersion, Case, CaseSample, Sample
 from cg.store.store import Store
@@ -79,3 +78,7 @@ class MIPDNAConfigFileCreator:
         )
         bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(bed_shortname)
         return bed_version.filename
+
+    def _write_file(self, content: dict, file_path: Path) -> None:
+        """Write the content to a YAML file."""
+        write_yaml(content=content, file_path=file_path)
