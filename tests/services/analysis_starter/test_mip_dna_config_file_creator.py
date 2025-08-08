@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import Mock, PropertyMock, create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -68,7 +68,7 @@ def case_id() -> str:
 
 
 @pytest.fixture
-def sample() -> Sample:
+def wgs_sample() -> Sample:
     application: Application = create_autospec(Application, min_sequencing_depth=26)
     application_version: ApplicationVersion = create_autospec(
         ApplicationVersion, application=application
@@ -85,9 +85,9 @@ def sample() -> Sample:
 
 
 @pytest.fixture
-def case_sample(sample: Sample) -> CaseSample:
+def case_sample(wgs_sample: Sample) -> CaseSample:
     return create_autospec(
-        CaseSample, father=None, mother=None, sample=sample, status=StatusOptions.UNKNOWN
+        CaseSample, father=None, mother=None, sample=wgs_sample, status=StatusOptions.UNKNOWN
     )
 
 
@@ -273,11 +273,8 @@ def test_wgs_fails_bed_name_not_in_store():
         file_creator.create(case_id="case_id", bed_flag="bed_file")
 
 
-# TODO: Write test for downsampled sample
-
-
-def test_create_wes(expected_content_wes: dict, mocker: MockerFixture):
-    # GIVEN a mocked store
+@pytest.fixture
+def wes_sample() -> Sample:
     application: Application = create_autospec(Application, min_sequencing_depth=26)
     application_version: ApplicationVersion = create_autospec(
         ApplicationVersion, application=application
@@ -291,32 +288,41 @@ def test_create_wes(expected_content_wes: dict, mocker: MockerFixture):
         from_sample=None,
     )
     sample.name = "sample_name"
+    return sample
+
+
+@pytest.fixture
+def wes_mock_store(case_id: str, wes_sample: Sample) -> Store:
     mother = create_autospec(Sample, internal_id="mother_id")
     case_sample: CaseSample = create_autospec(
-        CaseSample, father=None, mother=mother, sample=sample, status=StatusOptions.AFFECTED
+        CaseSample, father=None, mother=mother, sample=wes_sample, status=StatusOptions.AFFECTED
     )
-    case_id = "case_id"
     case: Case = create_autospec(
         Case,
         internal_id=case_id,
         links=[case_sample],
         panels=[GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN],
+        samples=[wes_sample],
     )
+    case_sample.case = case
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=case)
-    # TODO: Test the scenario when store returns None
 
-    # GIVEN a BED verson in the store
     bed_version: BedVersion = create_autospec(BedVersion, filename="mock_bed_version.bed")
     store.get_bed_version_by_short_name_strict = Mock(return_value=bed_version)
+    return store
 
+
+def test_create_wes(
+    case_id: str, expected_content_wes: dict, wes_mock_store: Store, mocker: MockerFixture
+):
     # GIVEN a LIMS mock
     lims: LimsAPI = create_autospec(LimsAPI)
     lims.get_capture_kit_strict = Mock(return_value="capture_kit_short_name")
 
     # GIVEN a MIPDNAConfigFileCreator
     root = "mip_root"
-    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), root=root, store=store)
+    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), root=root, store=wes_mock_store)
 
     # GIVEN a patched writer
     mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
@@ -330,45 +336,12 @@ def test_create_wes(expected_content_wes: dict, mocker: MockerFixture):
     )
 
 
-def test_create_config_wes_with_downsampled_sample(mocker):
-    # GIVEN a mocked store
-    application: Application = create_autospec(Application, min_sequencing_depth=26)
-    application_version: ApplicationVersion = create_autospec(
-        ApplicationVersion, application=application
-    )
-
+def test_create_config_wes_with_downsampled_sample(
+    case_id: str, wes_mock_store: Store, wes_sample: Sample, mocker: MockerFixture
+):
     # GIVEN that the sample is downsampled
-    sample = create_autospec(
-        Sample,
-        internal_id="sample_id",
-        sex=SexEnum.male,
-        prep_category=AnalysisType.WES,
-        application_version=application_version,
-        from_sample="other_sample_id",  # Is it really a string??
-    )
-    sample.name = "sample_name"
-    mother = create_autospec(Sample, internal_id="mother_id")
-    case_sample: CaseSample = create_autospec(
-        CaseSample, father=None, mother=mother, sample=sample, status=StatusOptions.AFFECTED
-    )
-    case_id = "case_id"
-    case: Case = create_autospec(
-        Case,
-        internal_id=case_id,
-        links=[case_sample],
-        panels=[GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN],
-    )
-    case.samples = [sample]
-
-    store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(return_value=case)
-    store.get_sample_by_internal_id = Mock(
-        return_value=create_autospec(Sample, internal_id="other_sample_id")
-    )
-
-    # GIVEN a BED verson in the store
-    bed_version: BedVersion = create_autospec(BedVersion, filename="mock_bed_version.bed")
-    store.get_bed_version_by_short_name_strict = Mock(return_value=bed_version)
+    original_sample_id = "other_sample_id"
+    wes_sample.from_sample = original_sample_id
 
     # GIVEN a LIMS mock
     lims: LimsAPI = create_autospec(LimsAPI)
@@ -379,13 +352,13 @@ def test_create_config_wes_with_downsampled_sample(mocker):
 
     # GIVEN a MIPDNAConfigFileCreator
     root = "mip_root"
-    file_creator = MIPDNAConfigFileCreator(lims_api=lims, root=root, store=store)
+    file_creator = MIPDNAConfigFileCreator(lims_api=lims, root=root, store=wes_mock_store)
 
     # WHEN creating the config file
     file_creator.create(case_id=case_id, bed_flag=None)
 
     # THEN
-    lims.get_capture_kit_strict.assert_called_once_with("other_sample_id")
+    lims.get_capture_kit_strict.assert_called_once_with(original_sample_id)
 
 
 def test_create_config_wes_lims_fails():
