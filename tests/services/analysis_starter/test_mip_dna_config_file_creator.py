@@ -31,7 +31,7 @@ def expected_content_wgs() -> dict:
                 "expected_coverage": 26,
                 "father": "0",
                 "mother": "0",
-                "phenotype": StatusOptions.UNAFFECTED,
+                "phenotype": StatusOptions.AFFECTED,
                 "sample_display_name": "sample_name",
                 "sample_id": "sample_id",
                 "sex": SexEnum.male,
@@ -85,18 +85,18 @@ def wgs_sample() -> Sample:
 
 
 @pytest.fixture
-def case_sample(wgs_sample: Sample) -> CaseSample:
+def wgs_case_sample(wgs_sample: Sample) -> CaseSample:
     return create_autospec(
-        CaseSample, father=None, mother=None, sample=wgs_sample, status=StatusOptions.UNKNOWN
+        CaseSample, father=None, mother=None, sample=wgs_sample, status=StatusOptions.AFFECTED
     )
 
 
 @pytest.fixture
-def wgs_mock_store(case_id: str, case_sample: CaseSample) -> Store:
+def wgs_mock_store(case_id: str, wgs_case_sample: CaseSample) -> Store:
     case: Case = create_autospec(
-        Case, internal_id=case_id, links=[case_sample], panels=[GenePanelMasterList.OMIM_AUTO]
+        Case, internal_id=case_id, links=[wgs_case_sample], panels=[GenePanelMasterList.OMIM_AUTO]
     )
-    case_sample.case = case
+    wgs_case_sample.case = case
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=case)
     return store
@@ -168,6 +168,20 @@ def test_create_wgs_bed_short_name_provided(
     )
 
 
+def test_wgs_fails_bed_name_not_in_store():
+    # GIVEN a mock store
+    store: Store = create_autospec(Store)
+    store.get_bed_version_by_short_name_strict = Mock(side_effect=BedVersionNotFoundError)
+
+    # GIVEN a config file creator
+    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), root="", store=store)
+
+    # WHEN creating the config file providing a bed short name that doesn't exist in the store
+    # THEN a BedVersionNotFound error is raised
+    with pytest.raises(BedVersionNotFoundError):
+        file_creator.create(case_id="case_id", bed_flag="bed_file")
+
+
 @pytest.mark.parametrize(
     "mother, expected_mother_field",
     [(None, "0"), (create_autospec(Sample, internal_id="mother_sample"), "mother_sample")],
@@ -180,7 +194,7 @@ def test_create_wgs_bed_short_name_provided(
 )
 def test_create_wgs_father_and_mother_set(
     case_id: str,
-    case_sample: CaseSample,
+    wgs_case_sample: CaseSample,
     expected_father_field: str,
     expected_mother_field: str,
     expected_content_wgs: dict,
@@ -192,8 +206,8 @@ def test_create_wgs_father_and_mother_set(
     # GIVEN a mock store and a case id
 
     # GIVEN a mother and father is set on the case sample
-    case_sample.mother = mother
-    case_sample.father = father
+    wgs_case_sample.mother = mother
+    wgs_case_sample.father = father
 
     # GIVEN a file content that have an expected mother and father
     expected_content_wgs["samples"][0]["mother"] = expected_mother_field
@@ -216,61 +230,32 @@ def test_create_wgs_father_and_mother_set(
     )
 
 
-def test_create_wgs(expected_content_wgs: dict, mocker: MockerFixture):
-    # GIVEN a mocked store
-    application: Application = create_autospec(Application, min_sequencing_depth=26)
-    application_version: ApplicationVersion = create_autospec(
-        ApplicationVersion, application=application
-    )
-    sample = create_autospec(
-        Sample,
-        internal_id="sample_id",
-        sex=SexEnum.male,
-        prep_category=AnalysisType.WGS,
-        application_version=application_version,
-    )
-    sample.name = "sample_name"
-    mother = create_autospec(Sample, internal_id="mother_id")
-    case_sample: CaseSample = create_autospec(
-        CaseSample, father=None, mother=mother, sample=sample, status=StatusOptions.UNKNOWN
-    )
-    case_id = "case_id"
-    case: Case = create_autospec(
-        Case, internal_id=case_id, links=[case_sample], panels=[GenePanelMasterList.OMIM_AUTO]
-    )
-    case_sample.case = case
+def test_create_wgs_only_one_sample_phenotype_unknown(
+    case_id: str,
+    expected_content_wgs: dict,
+    wgs_case_sample: CaseSample,
+    wgs_mock_store: Store,
+    mocker: MockerFixture,
+):
+    # GIVEN a case with a single case sample with status unknown
+    wgs_case_sample.status = StatusOptions.UNKNOWN
 
-    store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(return_value=case)
+    # GIVEN a store
 
-    # GIVEN a MIPDNAConfigFileCreator
-    root = "mip_root"
-    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), root=root, store=store)
+    # GIVEN a config file creator
+    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), root="root", store=wgs_mock_store)
 
-    # GIVEN a patched writer
+    # GIVEN a mocked writer
     mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
 
     # WHEN creating the config file
-    file_creator.create(case_id=case_id, bed_flag=None)
+    file_creator.create(case_id=case_id, bed_flag="default.bed")
 
-    # THEN the writer is called with the correct content and file path
+    # THEN the phenotype should have been set to unaffected
+    expected_content_wgs["samples"][0]["phenotype"] = StatusOptions.UNAFFECTED
     mock_write.assert_called_once_with(
-        content=expected_content_wgs, file_path=Path(root, case_id, "pedigree.yaml")
+        content=expected_content_wgs, file_path=Path("root", case_id, "pedigree.yaml")
     )
-
-
-def test_wgs_fails_bed_name_not_in_store():
-    # GIVEN a mock store
-    store: Store = create_autospec(Store)
-    store.get_bed_version_by_short_name_strict = Mock(side_effect=BedVersionNotFoundError)
-
-    # GIVEN a config file creator
-    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), root="", store=store)
-
-    # WHEN creating the config file providing a bed short name that doesn't exist in the store
-    # THEN a BedVersionNotFound error is raised
-    with pytest.raises(BedVersionNotFoundError):
-        file_creator.create(case_id="case_id", bed_flag="bed_file")
 
 
 @pytest.fixture
@@ -313,7 +298,7 @@ def wes_mock_store(case_id: str, wes_sample: Sample) -> Store:
     return store
 
 
-def test_create_wes(
+def test_create_wes_no_bed_flag(
     case_id: str, expected_content_wes: dict, wes_mock_store: Store, mocker: MockerFixture
 ):
     # GIVEN a LIMS mock
