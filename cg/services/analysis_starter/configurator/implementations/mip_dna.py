@@ -40,6 +40,7 @@ class MIPDNAConfigurator(Configurator):
 
     @staticmethod
     def _ensure_valid_config(config: MIPDNACaseConfig) -> None:
+        # TODO: Ensure the config file exists
         pass
 
     @staticmethod

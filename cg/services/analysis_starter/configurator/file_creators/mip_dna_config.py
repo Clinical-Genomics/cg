@@ -17,9 +17,7 @@ class MIPDNAConfigFileCreator:
     def create(self, case_id: str, bed_flag: str | None) -> None:
         provided_bed_file: str | None = self._get_bed_file_name(bed_flag) if bed_flag else None
         content: dict = self._get_content(provided_bed_file=provided_bed_file, case_id=case_id)
-        directory = Path(self.root, case_id)
-        directory.mkdir(exist_ok=True, parents=True)
-        write_yaml(content=content, file_path=Path(directory, "pedigree.yaml"))
+        self._write_file(case_id=case_id, content=content)
 
     def _get_content(self, provided_bed_file: str | None, case_id: str) -> dict:
         case: Case = self.store.get_case_by_internal_id_strict(case_id)
@@ -79,6 +77,10 @@ class MIPDNAConfigFileCreator:
         bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(bed_shortname)
         return bed_version.filename
 
-    def _write_file(self, content: dict, file_path: Path) -> None:
+    def _write_file(self, case_id: str, content: dict) -> None:
         """Write the content to a YAML file."""
-        write_yaml(content=content, file_path=file_path)
+        directory = Path(self.root, case_id)
+        directory.mkdir(exist_ok=True, parents=True)
+        write_yaml(
+            content=content, file_path=Path(directory, "pedigree").with_suffix(FileExtensions.YAML)
+        )
