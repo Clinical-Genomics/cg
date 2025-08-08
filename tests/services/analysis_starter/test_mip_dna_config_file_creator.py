@@ -27,7 +27,7 @@ def expected_content_wgs() -> dict:
         "samples": [
             {
                 "analysis_type": AnalysisType.WGS,
-                "capture_kit": DEFAULT_CAPTURE_KIT,
+                "capture_kit": "",
                 "expected_coverage": 26,
                 "father": "0",
                 "mother": "mother_id",
@@ -60,6 +60,105 @@ def expected_content_wes() -> dict:
             },
         ],
     }
+
+
+@pytest.fixture
+def case_id() -> str:
+    return "case_id"
+
+
+@pytest.fixture
+def wgs_mock_store(case_id: str) -> Store:
+    application: Application = create_autospec(Application, min_sequencing_depth=26)
+    application_version: ApplicationVersion = create_autospec(
+        ApplicationVersion, application=application
+    )
+    sample = create_autospec(
+        Sample,
+        internal_id="sample_id",
+        sex=SexEnum.male,
+        prep_category=AnalysisType.WGS,
+        application_version=application_version,
+    )
+    sample.name = "sample_name"
+    mother = create_autospec(Sample, internal_id="mother_id")
+    case_sample: CaseSample = create_autospec(
+        CaseSample, father=None, mother=mother, sample=sample, status=StatusOptions.UNKNOWN
+    )
+    case: Case = create_autospec(
+        Case, internal_id=case_id, links=[case_sample], panels=[GenePanelMasterList.OMIM_AUTO]
+    )
+    case_sample.case = case
+
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id_strict = Mock(return_value=case)
+    return store
+
+
+def test_create_wgs_no_bed_flag(
+    case_id: str, expected_content_wgs: dict, wgs_mock_store: Store, mocker: MockerFixture
+):
+    # GIVEN a mock store and a case id
+
+    # GIVEN a config file creator
+    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), root="root", store=wgs_mock_store)
+
+    # GIVEN a patched writer
+    mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
+
+    # WHEN creating a config file without a bed flag
+    file_creator.create(case_id=case_id, bed_flag=None)
+
+    # THEN the config file is created with the default capture kit
+    expected_content_wgs["samples"][0]["capture_kit"] = DEFAULT_CAPTURE_KIT
+    mock_write.assert_called_once_with(
+        content=expected_content_wgs, file_path=Path("root", case_id, "pedigree.yaml")
+    )
+
+
+def test_create_wgs_bed_file_provided(
+    case_id: str, expected_content_wgs: dict, wgs_mock_store: Store, mocker: MockerFixture
+):
+    # GIVEN a mock store and a case id
+
+    # GIVEN a config file creator
+    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), root="root", store=wgs_mock_store)
+
+    # GIVEN a patched writer
+    mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
+
+    # WHEN creating a config file providing a bed file name
+    file_creator.create(case_id=case_id, bed_flag="bed_file.bed")
+
+    # THEN the config file is created with the default capture kit
+    expected_content_wgs["samples"][0]["capture_kit"] = "bed_file.bed"
+    mock_write.assert_called_once_with(
+        content=expected_content_wgs, file_path=Path("root", case_id, "pedigree.yaml")
+    )
+
+
+def test_create_wgs_bed_short_name_provided(
+    case_id: str, expected_content_wgs: dict, wgs_mock_store: Store, mocker: MockerFixture
+):
+    # GIVEN a case id and a mock store that returns a valid bed version for a short name
+    wgs_mock_store.get_bed_version_by_short_name_strict = Mock(
+        return_value=create_autospec(BedVersion, filename="existing_bed_file.bed")
+    )
+
+    # GIVEN a config file creator
+    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), root="root", store=wgs_mock_store)
+
+    # GIVEN a patched writer
+    mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
+
+    # WHEN creating a config file providing a bed file name
+    file_creator.create(case_id=case_id, bed_flag="bed_short_name")
+
+    # THEN the config file is created with the default capture kit
+    expected_content_wgs["samples"][0]["capture_kit"] = "existing_bed_file.bed"
+    mock_write.assert_called_once_with(
+        content=expected_content_wgs, file_path=Path("root", case_id, "pedigree.yaml")
+    )
 
 
 @pytest.mark.parametrize(
