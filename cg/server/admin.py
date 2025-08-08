@@ -12,6 +12,7 @@ from wtforms.form import Form
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.models.orders.constants import OrderType
+from cg.server.admin_filters import PacbioRunNameFilter
 from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
@@ -903,6 +904,10 @@ class PacbioSmrtCellView(BaseView):
 
 
 class PacbioSampleRunMetricsView(BaseView):
+    column_formatters = {
+        "smrt_cell": PacbioSmrtCellView.view_smrt_cell_link,
+        "sample": SampleView.view_sample_link,
+    }
     column_labels = {
         "instrument_run.run_name": "Run name",
         "instrument_run.plate": "Plate",
@@ -917,8 +922,4 @@ class PacbioSampleRunMetricsView(BaseView):
         "hifi_mean_read_length",
         "hifi_median_read_quality",
     ]
-    column_formatters = {
-        "smrt_cell": PacbioSmrtCellView.view_smrt_cell_link,
-        "sample": SampleView.view_sample_link,
-    }
     column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"]
