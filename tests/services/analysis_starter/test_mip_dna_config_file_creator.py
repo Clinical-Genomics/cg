@@ -30,7 +30,7 @@ def expected_content_wgs() -> dict:
                 "capture_kit": "",
                 "expected_coverage": 26,
                 "father": "0",
-                "mother": "mother_id",
+                "mother": "0",
                 "phenotype": StatusOptions.UNAFFECTED,
                 "sample_display_name": "sample_name",
                 "sample_id": "sample_id",
@@ -81,9 +81,9 @@ def wgs_mock_store(case_id: str) -> Store:
         application_version=application_version,
     )
     sample.name = "sample_name"
-    mother = create_autospec(Sample, internal_id="mother_id")
+
     case_sample: CaseSample = create_autospec(
-        CaseSample, father=None, mother=mother, sample=sample, status=StatusOptions.UNKNOWN
+        CaseSample, father=None, mother=None, sample=sample, status=StatusOptions.UNKNOWN
     )
     case: Case = create_autospec(
         Case, internal_id=case_id, links=[case_sample], panels=[GenePanelMasterList.OMIM_AUTO]
@@ -159,57 +159,6 @@ def test_create_wgs_bed_short_name_provided(
     mock_write.assert_called_once_with(
         content=expected_content_wgs, file_path=Path("root", case_id, "pedigree.yaml")
     )
-
-
-@pytest.mark.parametrize(
-    "bed_flag, expected_capture_kit",
-    [
-        (None, DEFAULT_CAPTURE_KIT),
-        ("something.bed", "something.bed"),
-        ("existing_shortname", "existing.bed"),
-    ],
-    ids=[],
-)
-def test_create_wgs_with_bed(
-    bed_flag: str | None, expected_capture_kit: str, expected_content_wgs: dict
-):
-    # GIVEN a mock store
-    application: Application = create_autospec(Application, min_sequencing_depth=26)
-    application_version: ApplicationVersion = create_autospec(
-        ApplicationVersion, application=application
-    )
-    sample = create_autospec(
-        Sample,
-        internal_id="sample_id",
-        sex=SexEnum.male,
-        prep_category=AnalysisType.WGS,
-        application_version=application_version,
-    )
-    sample.name = "sample_name"
-    mother = create_autospec(Sample, internal_id="mother_id")
-    case_sample: CaseSample = create_autospec(
-        CaseSample, father=None, mother=mother, sample=sample, status=StatusOptions.UNKNOWN
-    )
-    case_id = "case_id"
-    case: Case = create_autospec(
-        Case, internal_id=case_id, links=[case_sample], panels=[GenePanelMasterList.OMIM_AUTO]
-    )
-    case_sample.case = case
-
-    store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(return_value=case)
-
-    def replacement_get_bed_version_by_short_name_strict(self, short_name: str):
-        if short_name == "existing_shortname":
-            return "existing.bed"
-
-    store.get_bed_version_by_short_name_strict = replacement_get_bed_version_by_short_name_strict
-
-    # GIVEN a config file creator
-
-    # WHEN creating a config file
-
-    # THEN the writer is called with a content containing the correct capture kit
 
 
 def test_create_wgs(expected_content_wgs: dict, mocker: MockerFixture):
