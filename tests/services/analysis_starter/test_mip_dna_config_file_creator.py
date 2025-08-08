@@ -168,22 +168,36 @@ def test_create_wgs_bed_short_name_provided(
     )
 
 
+@pytest.mark.parametrize(
+    "mother, expected_mother_field",
+    [(None, "0"), (create_autospec(Sample, internal_id="mother_sample"), "mother_sample")],
+    ids=["no mother", "mother set"],
+)
+@pytest.mark.parametrize(
+    "father, expected_father_field",
+    [(None, "0"), (create_autospec(Sample, internal_id="father_sample"), "father_sample")],
+    ids=["no father", "father set"],
+)
 def test_create_wgs_father_and_mother_set(
     case_id: str,
     case_sample: CaseSample,
+    expected_father_field: str,
+    expected_mother_field: str,
     expected_content_wgs: dict,
+    father: Sample | None,
+    mother: Sample | None,
     wgs_mock_store: Store,
     mocker: MockerFixture,
 ):
     # GIVEN a mock store and a case id
 
     # GIVEN a mother and father is set on the case sample
-    case_sample.mother = "mother_sample"
-    case_sample.father = "father_sample"
+    case_sample.mother = mother
+    case_sample.father = father
 
     # GIVEN a file content that have an expected mother and father
-    expected_content_wgs["samples"][0]["mother"] = case_sample.mother
-    expected_content_wgs["samples"][0]["father"] = case_sample.father
+    expected_content_wgs["samples"][0]["mother"] = expected_mother_field
+    expected_content_wgs["samples"][0]["father"] = expected_father_field
 
     # GIVEN a config file creator
     config_file_creator = MIPDNAConfigFileCreator(
@@ -314,6 +328,48 @@ def test_create_wes(expected_content_wes: dict, mocker: MockerFixture):
     mock_write.assert_called_once_with(
         content=expected_content_wes, file_path=Path(root, case_id, "pedigree.yaml")
     )
+
+
+def test_create_config_wes_with_downsampled_sample():
+    # GIVEN a mocked store
+    application: Application = create_autospec(Application, min_sequencing_depth=26)
+    application_version: ApplicationVersion = create_autospec(
+        ApplicationVersion, application=application
+    )
+    sample = create_autospec(
+        Sample,
+        internal_id="sample_id",
+        sex=SexEnum.male,
+        prep_category=AnalysisType.WES,
+        application_version=application_version,
+        from_sample="other_sample_id",  # Is it really a string??
+    )
+    sample.name = "sample_name"
+    mother = create_autospec(Sample, internal_id="mother_id")
+    case_sample: CaseSample = create_autospec(
+        CaseSample, father=None, mother=mother, sample=sample, status=StatusOptions.AFFECTED
+    )
+    case_id = "case_id"
+    case: Case = create_autospec(
+        Case,
+        internal_id=case_id,
+        links=[case_sample],
+        panels=[GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN],
+    )
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id_strict = Mock(return_value=case)
+
+    # GIVEN a BED verson in the store
+    bed_version: BedVersion = create_autospec(BedVersion, filename="mock_bed_version.bed")
+    store.get_bed_version_by_short_name_strict = Mock(return_value=bed_version)
+
+    # GIVEN a LIMS mock
+    lims: LimsAPI = create_autospec(LimsAPI)
+    lims.get_capture_kit_strict = Mock(return_value="capture_kit_short_name")
+
+    # GIVEN a MIPDNAConfigFileCreator
+    root = "mip_root"
+    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), root=root, store=store)
 
 
 def test_create_config_wes_lims_fails():
