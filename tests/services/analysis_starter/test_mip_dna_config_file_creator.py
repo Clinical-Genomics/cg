@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import Mock, create_autospec
+from unittest.mock import Mock, PropertyMock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -330,12 +330,14 @@ def test_create_wes(expected_content_wes: dict, mocker: MockerFixture):
     )
 
 
-def test_create_config_wes_with_downsampled_sample():
+def test_create_config_wes_with_downsampled_sample(mocker):
     # GIVEN a mocked store
     application: Application = create_autospec(Application, min_sequencing_depth=26)
     application_version: ApplicationVersion = create_autospec(
         ApplicationVersion, application=application
     )
+
+    # GIVEN that the sample is downsampled
     sample = create_autospec(
         Sample,
         internal_id="sample_id",
@@ -356,8 +358,13 @@ def test_create_config_wes_with_downsampled_sample():
         links=[case_sample],
         panels=[GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN],
     )
+    case.samples = [sample]
+
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=case)
+    store.get_sample_by_internal_id = Mock(
+        return_value=create_autospec(Sample, internal_id="other_sample_id")
+    )
 
     # GIVEN a BED verson in the store
     bed_version: BedVersion = create_autospec(BedVersion, filename="mock_bed_version.bed")
@@ -367,9 +374,18 @@ def test_create_config_wes_with_downsampled_sample():
     lims: LimsAPI = create_autospec(LimsAPI)
     lims.get_capture_kit_strict = Mock(return_value="capture_kit_short_name")
 
+    # GIVEN a patched writer
+    mocker.patch.object(mip_dna_config, "write_yaml")
+
     # GIVEN a MIPDNAConfigFileCreator
     root = "mip_root"
-    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), root=root, store=store)
+    file_creator = MIPDNAConfigFileCreator(lims_api=lims, root=root, store=store)
+
+    # WHEN creating the config file
+    file_creator.create(case_id=case_id, bed_flag=None)
+
+    # THEN
+    lims.get_capture_kit_strict.assert_called_once_with("other_sample_id")
 
 
 def test_create_config_wes_lims_fails():
