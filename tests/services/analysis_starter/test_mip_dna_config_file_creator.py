@@ -61,6 +61,8 @@ def expected_content_wes() -> dict:
         ],
     }
 
+@pytest.mark.parametrize
+("bed_flag, expected_content", [(None), ("something.bed"), ("existing_shortname")])
 
 def test_create_wgs(expected_content_wgs: dict, mocker: MockerFixture):
     # GIVEN a mocked store
