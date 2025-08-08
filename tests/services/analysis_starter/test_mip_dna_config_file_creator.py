@@ -8,7 +8,7 @@ from cg.apps.lims import LimsAPI
 from cg.constants import GenePanelMasterList
 from cg.constants.constants import DEFAULT_CAPTURE_KIT, StatusOptions
 from cg.constants.tb import AnalysisType
-from cg.exc import LimsDataError
+from cg.exc import BedVersionNotFoundError, LimsDataError
 from cg.models.orders.sample_base import SexEnum
 from cg.services.analysis_starter.configurator.file_creators import mip_dna_config
 from cg.services.analysis_starter.configurator.file_creators.mip_dna_config import (
@@ -103,6 +103,20 @@ def test_create_wgs(expected_content_wgs: dict, mocker: MockerFixture):
     mock_write.assert_called_once_with(
         content=expected_content_wgs, file_path=Path(root, case_id, "pedigree.yaml")
     )
+
+
+def test_wgs_fails_bed_name_not_in_store():
+    # GIVEN a mock store
+    store: Store = create_autospec(Store)
+    store.get_bed_version_by_short_name_strict = Mock(side_effect=BedVersionNotFoundError)
+
+    # GIVEN a config file creator
+    file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), root="", store=store)
+
+    # WHEN creating the config file providing a bed short name that doesn't exist in the store
+    # THEN a BedVersionNotFound error is raised
+    with pytest.raises(BedVersionNotFoundError):
+        file_creator.create(case_id="case_id", bed_flag="bed_file")
 
 
 # TODO: Write test for downsampled sample
