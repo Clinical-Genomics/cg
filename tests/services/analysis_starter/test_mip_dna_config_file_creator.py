@@ -27,7 +27,7 @@ def expected_content_wgs() -> dict:
         "samples": [
             {
                 "analysis_type": AnalysisType.WGS,
-                "capture_kit": "",
+                "capture_kit": "default.bed",
                 "expected_coverage": 26,
                 "father": "0",
                 "mother": "0",
@@ -68,7 +68,7 @@ def case_id() -> str:
 
 
 @pytest.fixture
-def wgs_mock_store(case_id: str) -> Store:
+def sample() -> Sample:
     application: Application = create_autospec(Application, min_sequencing_depth=26)
     application_version: ApplicationVersion = create_autospec(
         ApplicationVersion, application=application
@@ -81,15 +81,22 @@ def wgs_mock_store(case_id: str) -> Store:
         application_version=application_version,
     )
     sample.name = "sample_name"
+    return sample
 
-    case_sample: CaseSample = create_autospec(
+
+@pytest.fixture
+def case_sample(sample: Sample) -> CaseSample:
+    return create_autospec(
         CaseSample, father=None, mother=None, sample=sample, status=StatusOptions.UNKNOWN
     )
+
+
+@pytest.fixture
+def wgs_mock_store(case_id: str, case_sample: CaseSample) -> Store:
     case: Case = create_autospec(
         Case, internal_id=case_id, links=[case_sample], panels=[GenePanelMasterList.OMIM_AUTO]
     )
     case_sample.case = case
-
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=case)
     return store
@@ -156,6 +163,40 @@ def test_create_wgs_bed_short_name_provided(
 
     # THEN the config file is created with the default capture kit
     expected_content_wgs["samples"][0]["capture_kit"] = "existing_bed_file.bed"
+    mock_write.assert_called_once_with(
+        content=expected_content_wgs, file_path=Path("root", case_id, "pedigree.yaml")
+    )
+
+
+def test_create_wgs_father_and_mother_set(
+    case_id: str,
+    case_sample: CaseSample,
+    expected_content_wgs: dict,
+    wgs_mock_store: Store,
+    mocker: MockerFixture,
+):
+    # GIVEN a mock store and a case id
+
+    # GIVEN a mother and father is set on the case sample
+    case_sample.mother = "mother_sample"
+    case_sample.father = "father_sample"
+
+    # GIVEN a file content that have an expected mother and father
+    expected_content_wgs["samples"][0]["mother"] = case_sample.mother
+    expected_content_wgs["samples"][0]["father"] = case_sample.father
+
+    # GIVEN a config file creator
+    config_file_creator = MIPDNAConfigFileCreator(
+        lims_api=Mock(), root="root", store=wgs_mock_store
+    )
+
+    # GIVEN a patched writer
+    mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
+
+    # WHEN creating a config file providing a bed file name
+    config_file_creator.create(case_id=case_id, bed_flag="default.bed")
+
+    # THEN the config file is created with mother and father set
     mock_write.assert_called_once_with(
         content=expected_content_wgs, file_path=Path("root", case_id, "pedigree.yaml")
     )
