@@ -110,9 +110,9 @@ def test_mip_get_sample_fastq_destination_dir():
     sample: Sample = create_autospec(Sample, internal_id="sample_internal_id", prep_category="wgs")
 
     # WHEN getting the FASTQ destination directory
-    dir: Path = fastq_handler.get_sample_fastq_destination_dir(case=case, sample=sample)
+    dest_dir: Path = fastq_handler.get_sample_fastq_destination_dir(case=case, sample=sample)
 
     # THEN the path is as expected
-    assert dir == Path(
+    assert dest_dir == Path(
         root_dir, case.internal_id, sample.prep_category, sample.internal_id, "fastq"
     )
