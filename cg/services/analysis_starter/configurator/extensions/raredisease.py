@@ -1,9 +1,7 @@
 from pathlib import Path
 
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
-from cg.services.analysis_starter.configurator.file_creators.nextflow.gene_panel import (
-    GenePanelFileCreator,
-)
+from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
     ManagedVariantsFileCreator,
 )
