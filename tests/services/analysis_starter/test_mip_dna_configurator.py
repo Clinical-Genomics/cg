@@ -15,7 +15,7 @@ from cg.store.store import Store
 def mock_status_db() -> Store:
     mock_store: Store = create_autospec(Store)
     mock_case: Case = create_autospec(Case, slurm_priority=SlurmQos.NORMAL)
-    mock_store.get_case_by_internal_id = Mock(return_value=mock_case)
+    mock_store.get_case_by_internal_id_strict = Mock(return_value=mock_case)
     return mock_store
 
 
@@ -47,7 +47,9 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     mocker.patch.object(mip_dna, "environ_email", return_value="test@scilifelab.se")
 
     # GIVEN a MIP DNA configurator
-    configurator = MIPDNAConfigurator(store=mock_status_db)
+    configurator = MIPDNAConfigurator(
+        config_file_creator=Mock(), fastq_handler=Mock(), store=mock_status_db
+    )
 
     # GIVEN a case ID
     case_id = "test_case"
@@ -67,7 +69,9 @@ def test_get_config_all_flags_set(mock_status_db: Store):
     """Test that the MIP DNA configurator can get a case config."""
 
     # GIVEN a MIP DNA configurator
-    configurator = MIPDNAConfigurator(store=mock_status_db)
+    configurator = MIPDNAConfigurator(
+        config_file_creator=Mock(), fastq_handler=Mock(), store=mock_status_db
+    )
 
     # GIVEN a case ID
     case_id = "test_case"
