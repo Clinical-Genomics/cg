@@ -790,7 +790,7 @@ class ReadHandler(BaseHandler):
         """
         Get case by internal id.
         Raises:
-            sqlalchemy.orm.exc.NoResultFound: If no case is found with the given internal id.
+            CaseNotFoundError: If no case is found with the given internal id.
             sqlalchemy.orm.exc.MultipleResultsFound: If multiple cases are found with the same
             internal id. This should not happen due to database constraints.
         """
