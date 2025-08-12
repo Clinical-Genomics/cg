@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
 import pytest
@@ -25,7 +26,11 @@ def test_configure():
 
     # GIVEN a MIP DNA configurator
     configurator = MIPDNAConfigurator(
-        config_file_creator=Mock(), store=Mock(), fastq_handler=Mock()
+        config_file_creator=Mock(),
+        fastq_handler=Mock(),
+        gene_panel_file_creator=Mock(),
+        root=Path("root_dir"),
+        store=Mock(),
     )
 
     # WHEN configuring a case
@@ -39,6 +44,13 @@ def test_configure():
         case_id=case_id, bed_flag="bed_file.bed"
     )
 
+    # THEN the gene panel file creator should have been called with ?
+    configurator.gene_panel_file_creator.create.assert_called_once_with(
+        case_id=case_id, case_path=Path("root_dir", case_id)
+    )
+
+    # TODO: should also return a case config?
+
 
 def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     """Test that the MIP DNA configurator can get a case config."""
@@ -48,7 +60,11 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
 
     # GIVEN a MIP DNA configurator
     configurator = MIPDNAConfigurator(
-        config_file_creator=Mock(), fastq_handler=Mock(), store=mock_status_db
+        config_file_creator=Mock(),
+        fastq_handler=Mock(),
+        gene_panel_file_creator=Mock(),
+        root=Path("root_dir"),
+        store=mock_status_db,
     )
 
     # GIVEN a case ID
@@ -70,7 +86,11 @@ def test_get_config_all_flags_set(mock_status_db: Store):
 
     # GIVEN a MIP DNA configurator
     configurator = MIPDNAConfigurator(
-        config_file_creator=Mock(), fastq_handler=Mock(), store=mock_status_db
+        config_file_creator=Mock(),
+        fastq_handler=Mock(),
+        gene_panel_file_creator=Mock(),
+        root=Path("root_dir"),
+        store=mock_status_db,
     )
 
     # GIVEN a case ID

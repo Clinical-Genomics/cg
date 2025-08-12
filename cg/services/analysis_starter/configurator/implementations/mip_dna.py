@@ -1,8 +1,10 @@
 import logging
+from pathlib import Path
 
 from cg.apps.environ import environ_email
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.services.analysis_starter.configurator.configurator import Configurator
+from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.mip_dna_config import (
     MIPDNAConfigFileCreator,
 )
@@ -18,16 +20,21 @@ class MIPDNAConfigurator(Configurator):
         self,
         config_file_creator: MIPDNAConfigFileCreator,
         fastq_handler: MipFastqHandler,
+        gene_panel_file_creator: GenePanelFileCreator,
+        root: Path,
         store: Store,
     ):
         self.config_file_creator = config_file_creator
         self.fastq_handler = fastq_handler
         self.store = store
+        self.root = root
+        self.gene_panel_file_creator = gene_panel_file_creator
 
     def configure(self, case_id: str, **flags) -> MIPDNACaseConfig:
         LOG.info(f"Configuring case {case_id}")
         self.fastq_handler.link_fastq_files(case_id)
         self.config_file_creator.create(case_id=case_id, bed_flag=flags.get("panel_bed"))
+        self.gene_panel_file_creator.create(case_id=case_id, case_path=Path(self.root, case_id))
 
     def get_config(self, case_id: str, **flags) -> MIPDNACaseConfig:
         case: Case = self.store.get_case_by_internal_id_strict(case_id)

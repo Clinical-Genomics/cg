@@ -4,7 +4,8 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
-from cg.meta.workflow.fastq import MicrosaltFastqHandler
+from cg.exc import CgError
+from cg.meta.workflow.fastq import MicrosaltFastqHandler, MipFastqHandler
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
@@ -12,6 +13,9 @@ from cg.services.analysis_starter.configurator.extensions.raredisease import Rar
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.microsalt_config import (
     MicrosaltConfigFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.mip_dna_config import (
+    MIPDNAConfigFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
@@ -46,6 +50,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
+from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.store.store import Store
 
@@ -63,6 +68,8 @@ class ConfiguratorFactory:
             return self._get_nextflow_configurator(workflow)
         elif workflow == Workflow.MICROSALT:
             return self._get_microsalt_configurator()
+        elif workflow == Workflow.MIP_DNA:
+            return self._get_mip_dna_configurator()
         raise NotImplementedError
 
     def _get_nextflow_configurator(self, workflow: Workflow) -> NextflowConfigurator:
@@ -164,3 +171,22 @@ class ConfiguratorFactory:
             queries_path=self.cg_config.microsalt.queries_path,
             store=self.store,
         )
+
+    def _get_mip_dna_configurator(self) -> MIPDNAConfigurator:
+        mip_config = self.cg_config.mip_rd_dna
+        if mip_config is None:
+            raise CgError("Missing mip config")
+
+        root: str = mip_config.root
+        return MIPDNAConfigurator(
+            config_file_creator=self._get_mip_dna_config_file_creator(root=root),
+            fastq_handler=MipFastqHandler(
+                self.housekeeper_api, root_dir=Path(root), status_db=self.store
+            ),
+            gene_panel_file_creator=self._get_gene_panel_file_creator(Workflow.MIP_DNA),
+            root=Path(root),
+            store=self.store,
+        )
+
+    def _get_mip_dna_config_file_creator(self, root: str) -> MIPDNAConfigFileCreator:
+        return MIPDNAConfigFileCreator(lims_api=self.lims_api, root=root, store=self.store)
