@@ -1,16 +1,71 @@
 from pathlib import Path
+from typing import Any, cast
+from unittest.mock import MagicMock, Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
 
+from cg.apps.scout.scoutapi import ScoutAPI
+from cg.constants.constants import Workflow
 from cg.constants.gene_panel import GenePanelGenomeBuild, GenePanelMasterList
-from cg.services.analysis_starter.configurator.file_creators import gene_panel as gene_panel_creator
+from cg.services.analysis_starter.configurator.file_creators import gene_panel
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
+from cg.store.models import Case
+from cg.store.store import Store
+
+RAREDISEASE_CASE_ID = "raredisease_case"
+
+
+@pytest.fixture
+def raredisease_case_id() -> str:
+    return "raredisease_case"
+
+
+@pytest.fixture
+def mip_dna_case_id() -> str:
+    return "mip_dna_case"
+
+
+@pytest.fixture
+def nallo_case_id() -> str:
+    return "nallo_case"
+
+
+@pytest.fixture
+def mock_scout(nextflow_gene_panel_file_content: list[str]) -> ScoutAPI | MagicMock:
+    mock_scout: ScoutAPI = create_autospec(ScoutAPI)
+    mock_scout.export_panels = Mock(return_value=nextflow_gene_panel_file_content)
+    return mock_scout
+
+
+@pytest.fixture
+def gene_panel_creator(
+    raredisease_case_id: str, mock_scout: ScoutAPI, mip_dna_case_id: str, nallo_case_id: str
+) -> GenePanelFileCreator:
+    case_dictionary: dict[str, Case] = {
+        raredisease_case_id: create_autospec(
+            Case, internal_id=raredisease_case_id, data_analysis=Workflow.RAREDISEASE
+        ),
+        mip_dna_case_id: create_autospec(
+            Case, internal_id=mip_dna_case_id, data_analysis=Workflow.MIP_DNA
+        ),
+        nallo_case_id: create_autospec(
+            Case, internal_id=nallo_case_id, data_analysis=Workflow.NALLO
+        ),
+    }
+
+    mock_store: Store = create_autospec(Store)
+    mock_store.get_case_by_internal_id = lambda internal_id: case_dictionary[internal_id]
+
+    return GenePanelFileCreator(
+        store=mock_store,
+        scout_api=mock_scout,
+    )
 
 
 def test_gene_panel_file_content(
-    nextflow_gene_panel_creator: GenePanelFileCreator,
-    nextflow_case_id: str,
+    gene_panel_creator: GenePanelFileCreator,
+    raredisease_case_id: str,
     nextflow_case_path: Path,
     nextflow_gene_panel_file_content,
     mocker: MockerFixture,
@@ -19,20 +74,18 @@ def test_gene_panel_file_content(
     # GIVEN a gene panel file content creator, a case id and a case path
 
     # GIVEN that the case has a genome build
-    mocker.patch.object(
-        gene_panel_creator, "get_genome_build", return_value=GenePanelGenomeBuild.hg19
-    )
+    mocker.patch.object(gene_panel, "get_genome_build", return_value=GenePanelGenomeBuild.hg19)
 
     # GIVEN a mock writer
-    write_mock = mocker.patch.object(gene_panel_creator, "write_txt")
+    write_mock = mocker.patch.object(gene_panel, "write_txt")
 
     # WHEN creating a gene panel file
-    nextflow_gene_panel_creator.create(case_id=nextflow_case_id, case_path=nextflow_case_path)
+    gene_panel_creator.create(case_id=raredisease_case_id, case_path=nextflow_case_path)
 
     # THEN the gene panel file would have been written with the expected content
     write_mock.assert_called_once_with(
         content=nextflow_gene_panel_file_content,
-        file_path=nextflow_gene_panel_creator.get_file_path(nextflow_case_path),
+        file_path=gene_panel_creator.get_file_path(nextflow_case_path),
     )
 
 
@@ -47,9 +100,9 @@ def test_gene_panel_file_content(
         "customer not collaborator or panels not in master list",
     ],
 )
-def test_get_agregated_gene_panels(
+def test_get_aggregated_gene_panels(
     mock_value: bool,
-    nextflow_gene_panel_creator: GenePanelFileCreator,
+    gene_panel_creator: GenePanelFileCreator,
     expected_panels: list[str],
     mocker: MockerFixture,
 ):
@@ -64,7 +117,7 @@ def test_get_agregated_gene_panels(
     )
 
     # WHEN getting the aggregated gene panels
-    aggregated_panels: list[str] = nextflow_gene_panel_creator._get_aggregated_panels(
+    aggregated_panels: list[str] = gene_panel_creator._get_aggregated_panels(
         customer_id="cust000", default_panels=set()
     )
 
@@ -90,7 +143,7 @@ def test_get_agregated_gene_panels(
     ],
 )
 def test_add_gene_panels_in_combo(
-    nextflow_gene_panel_creator: GenePanelFileCreator,
+    gene_panel_creator: GenePanelFileCreator,
     panels: set[str],
     expected_panels: set[str],
 ):
@@ -98,7 +151,40 @@ def test_add_gene_panels_in_combo(
     # GIVEN a set of gene panels
 
     # WHEN adding the gene panels in combo
-    updated_panels: set[str] = nextflow_gene_panel_creator._add_gene_panels_in_combo(panels)
+    updated_panels: set[str] = gene_panel_creator._add_gene_panels_in_combo(panels)
 
     # THEN the updated panels contain the expected panels
     assert updated_panels == expected_panels
+
+
+@pytest.mark.parametrize(
+    "case_id, expected_build",
+    [
+        ("mip_dna_case", GenePanelGenomeBuild.hg19),
+        ("raredisease_case", GenePanelGenomeBuild.hg19),
+    ],
+    ids=[
+        "MIP-DNA case",
+        "Raredisease case",
+    ],
+)
+def test_creating_file_for_workflows_using_correct_build(
+    gene_panel_creator: GenePanelFileCreator,
+    case_id: str,
+    expected_build: GenePanelGenomeBuild,
+    mock_scout: ScoutAPI | MagicMock,
+    mocker: MockerFixture,
+):
+    # GIVEN a mock writer
+    mocker.patch.object(gene_panel, "write_txt")
+
+    # WHEN creating a gene panel file
+    gene_panel_creator.create(case_id=case_id, case_path=Path("/"))
+
+    cast(Mock, mock_scout.export_panels).assert_called_once_with(
+        build=expected_build,
+        panels=[
+            GenePanelMasterList.OMIM_AUTO,
+            GenePanelMasterList.PANELAPP_GREEN,
+        ],
+    )
