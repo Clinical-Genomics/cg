@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, cast
+from typing import cast
 from unittest.mock import MagicMock, Mock, create_autospec
 
 import pytest
@@ -14,21 +14,29 @@ from cg.store.models import Case
 from cg.store.store import Store
 
 RAREDISEASE_CASE_ID = "raredisease_case"
+MIP_DNA_CASE_ID = "mip_dna_case"
+NALLO_CASE_ID = "nallo_case"
+TOMTE_CASE_ID = "tomte_case"
 
 
 @pytest.fixture
 def raredisease_case_id() -> str:
-    return "raredisease_case"
+    return RAREDISEASE_CASE_ID
 
 
 @pytest.fixture
 def mip_dna_case_id() -> str:
-    return "mip_dna_case"
+    return MIP_DNA_CASE_ID
 
 
 @pytest.fixture
 def nallo_case_id() -> str:
-    return "nallo_case"
+    return NALLO_CASE_ID
+
+
+@pytest.fixture
+def tomte_case_id() -> str:
+    return TOMTE_CASE_ID
 
 
 @pytest.fixture
@@ -40,7 +48,11 @@ def mock_scout(nextflow_gene_panel_file_content: list[str]) -> ScoutAPI | MagicM
 
 @pytest.fixture
 def gene_panel_creator(
-    raredisease_case_id: str, mock_scout: ScoutAPI, mip_dna_case_id: str, nallo_case_id: str
+    raredisease_case_id: str,
+    mock_scout: ScoutAPI,
+    mip_dna_case_id: str,
+    nallo_case_id: str,
+    tomte_case_id: str,
 ) -> GenePanelFileCreator:
     case_dictionary: dict[str, Case] = {
         raredisease_case_id: create_autospec(
@@ -51,6 +63,9 @@ def gene_panel_creator(
         ),
         nallo_case_id: create_autospec(
             Case, internal_id=nallo_case_id, data_analysis=Workflow.NALLO
+        ),
+        tomte_case_id: create_autospec(
+            Case, internal_id=tomte_case_id, data_analysis=Workflow.TOMTE
         ),
     }
 
@@ -160,12 +175,16 @@ def test_add_gene_panels_in_combo(
 @pytest.mark.parametrize(
     "case_id, expected_build",
     [
-        ("mip_dna_case", GenePanelGenomeBuild.hg19),
-        ("raredisease_case", GenePanelGenomeBuild.hg19),
+        (MIP_DNA_CASE_ID, GenePanelGenomeBuild.hg19),
+        (RAREDISEASE_CASE_ID, GenePanelGenomeBuild.hg19),
+        (NALLO_CASE_ID, GenePanelGenomeBuild.hg38),
+        (TOMTE_CASE_ID, GenePanelGenomeBuild.hg38),
     ],
     ids=[
         "MIP-DNA case",
         "Raredisease case",
+        "NALLO case",
+        "TOMTE case",
     ],
 )
 def test_creating_file_for_workflows_using_correct_build(
