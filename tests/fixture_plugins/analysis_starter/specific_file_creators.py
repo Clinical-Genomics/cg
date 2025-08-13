@@ -5,7 +5,7 @@ import pytest
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
-from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
+from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
     ManagedVariantsFileCreator,
 )
 from cg.store.models import Case
