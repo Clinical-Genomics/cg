@@ -34,6 +34,7 @@ def test_configure(mocker: MockerFixture):
         config_file_creator=Mock(),
         fastq_handler=Mock(),
         gene_panel_file_creator=Mock(),
+        managed_variants_file_creator=Mock(),
         root=Path("root_dir"),
         store=store,
     )
@@ -44,6 +45,10 @@ def test_configure(mocker: MockerFixture):
     case_config: MIPDNACaseConfig = configurator.configure(
         case_id=case_id, panel_bed="bed_file.bed"
     )
+
+    # THEN the run directory should have been created
+    mock_create_dir.assert_called_with(parents=True, exist_ok=True)
+    assert isinstance(case_config, MIPDNACaseConfig)
 
     # THEN the fastq handler should have been called with the case id
     configurator.fastq_handler.link_fastq_files.assert_called_once_with(case_id)
@@ -58,8 +63,9 @@ def test_configure(mocker: MockerFixture):
         case_id=case_id, case_path=Path("root_dir", case_id)
     )
 
-    mock_create_dir.assert_called_with(parents=True, exist_ok=True)
-    assert isinstance(case_config, MIPDNACaseConfig)
+    configurator.managed_variants_file_creator.create.assert_called_once_with(
+        case_id=case_id, case_path=Path("root_dir", case_id)
+    )
 
 
 def test_get_config(mock_status_db: Store, mocker: MockerFixture):
