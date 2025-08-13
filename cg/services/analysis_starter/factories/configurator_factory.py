@@ -184,6 +184,7 @@ class ConfiguratorFactory:
                 self.housekeeper_api, root_dir=Path(root), status_db=self.store
             ),
             gene_panel_file_creator=self._get_gene_panel_file_creator(Workflow.MIP_DNA),
+            # TODO: add managed_variants_file_creator
             root=Path(root),
             store=self.store,
         )
