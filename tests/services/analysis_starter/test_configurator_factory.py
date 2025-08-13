@@ -79,7 +79,7 @@ def test_get_mip_dna_configurator():
     # WHEN getting the configurator for the MIP-DNA workflow
     configurator: Configurator = configurator_factory.get_configurator(Workflow.MIP_DNA)
 
-    # THEN the configurator is of type MicrosaltConfigurator
+    # THEN the configurator is of type MIPDNAConfigurator
     assert isinstance(configurator, MIPDNAConfigurator)
 
     # THEN the config file creator is of type MicrosaltConfigFileCreator
