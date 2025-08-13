@@ -20,7 +20,7 @@ def mock_status_db() -> Store:
     return mock_store
 
 
-def test_configure():
+def test_configure(mocker: MockerFixture):
     # GIVEN a case id
     case_id = "test_case"
 
@@ -37,6 +37,8 @@ def test_configure():
         root=Path("root_dir"),
         store=store,
     )
+
+    mock_create_dir = mocker.patch.object(Path, "mkdir")
 
     # WHEN configuring a case
     case_config: MIPDNACaseConfig = configurator.configure(
@@ -56,6 +58,7 @@ def test_configure():
         case_id=case_id, case_path=Path("root_dir", case_id)
     )
 
+    mock_create_dir.assert_called_with(parents=True, exist_ok=True)
     assert isinstance(case_config, MIPDNACaseConfig)
 
 

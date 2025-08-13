@@ -32,6 +32,7 @@ class MIPDNAConfigurator(Configurator):
 
     def configure(self, case_id: str, **flags) -> MIPDNACaseConfig:
         LOG.info(f"Configuring case {case_id}")
+        self._create_run_directory(case_id)
         self.fastq_handler.link_fastq_files(case_id)
         self.config_file_creator.create(case_id=case_id, bed_flag=flags.get("panel_bed"))
         self.gene_panel_file_creator.create(case_id=case_id, case_path=Path(self.root, case_id))
@@ -45,6 +46,10 @@ class MIPDNAConfigurator(Configurator):
             slurm_qos=case.slurm_priority,
         )
         return self._set_flags(config=config, **flags)
+
+    def _create_run_directory(self, case_id: str) -> None:
+        path = Path(self.root, case_id)
+        path.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
     def _ensure_valid_config(config: MIPDNACaseConfig) -> None:
