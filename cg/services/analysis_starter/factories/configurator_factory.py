@@ -4,7 +4,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
-from cg.exc import CgError
 from cg.meta.workflow.fastq import MicrosaltFastqHandler, MipFastqHandler
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
@@ -173,11 +172,8 @@ class ConfiguratorFactory:
         )
 
     def _get_mip_dna_configurator(self) -> MIPDNAConfigurator:
-        mip_config = self.cg_config.mip_rd_dna
-        if mip_config is None:
-            raise CgError("Missing mip config")
+        root: str = self.cg_config.mip_rd_dna.root
 
-        root: str = mip_config.root
         return MIPDNAConfigurator(
             config_file_creator=self._get_mip_dna_config_file_creator(root=root),
             fastq_handler=MipFastqHandler(
