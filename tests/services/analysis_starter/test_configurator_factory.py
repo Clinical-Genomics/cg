@@ -87,7 +87,7 @@ def test_get_mip_dna_configurator():
 
     # THEN the fastq handler is of type MipFastqHandler
     assert isinstance(configurator.fastq_handler, MipFastqHandler)
-
+    # THEN the gene panel file creator should be an instance of GenePanelFileCreator
     assert isinstance(configurator.gene_panel_file_creator, GenePanelFileCreator)
 
 
