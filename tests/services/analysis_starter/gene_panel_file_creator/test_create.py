@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import cast
-from unittest.mock import MagicMock, Mock, create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -40,7 +40,7 @@ def tomte_case_id() -> str:
 
 
 @pytest.fixture
-def mock_scout(nextflow_gene_panel_file_content: list[str]) -> ScoutAPI | MagicMock:
+def mock_scout(nextflow_gene_panel_file_content: list[str]) -> ScoutAPI:
     mock_scout: ScoutAPI = create_autospec(ScoutAPI)
     mock_scout.export_panels = Mock(return_value=nextflow_gene_panel_file_content)
     return mock_scout
@@ -191,7 +191,7 @@ def test_creating_file_for_workflows_using_correct_build(
     gene_panel_creator: GenePanelFileCreator,
     case_id: str,
     expected_build: GenePanelGenomeBuild,
-    mock_scout: ScoutAPI | MagicMock,
+    mock_scout: ScoutAPI,
     mocker: MockerFixture,
 ):
     # GIVEN a mock writer
@@ -200,6 +200,7 @@ def test_creating_file_for_workflows_using_correct_build(
     # WHEN creating a gene panel file
     gene_panel_creator.create(case_id=case_id, case_path=Path("/"))
 
+    # THEN Scout should have been called with the expected build and panels
     cast(Mock, mock_scout.export_panels).assert_called_once_with(
         build=expected_build,
         panels=[
