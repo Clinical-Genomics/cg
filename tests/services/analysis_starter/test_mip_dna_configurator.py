@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
 import pytest
@@ -15,7 +16,7 @@ from cg.store.store import Store
 def mock_status_db() -> Store:
     mock_store: Store = create_autospec(Store)
     mock_case: Case = create_autospec(Case, slurm_priority=SlurmQos.NORMAL)
-    mock_store.get_case_by_internal_id = Mock(return_value=mock_case)
+    mock_store.get_case_by_internal_id_strict = Mock(return_value=mock_case)
     return mock_store
 
 
@@ -23,13 +24,24 @@ def test_configure():
     # GIVEN a case id
     case_id = "test_case"
 
+    store = create_autospec(Store)
+    store.get_case_by_internal_id_strict = Mock(
+        return_value=create_autospec(Case, slurm_priority=SlurmQos.NORMAL)
+    )
+
     # GIVEN a MIP DNA configurator
     configurator = MIPDNAConfigurator(
-        config_file_creator=Mock(), store=Mock(), fastq_handler=Mock()
+        config_file_creator=Mock(),
+        fastq_handler=Mock(),
+        gene_panel_file_creator=Mock(),
+        root=Path("root_dir"),
+        store=store,
     )
 
     # WHEN configuring a case
-    configurator.configure(case_id=case_id, panel_bed="bed_file.bed")
+    case_config: MIPDNACaseConfig = configurator.configure(
+        case_id=case_id, panel_bed="bed_file.bed"
+    )
 
     # THEN the fastq handler should have been called with the case id
     configurator.fastq_handler.link_fastq_files.assert_called_once_with(case_id)
@@ -39,6 +51,13 @@ def test_configure():
         case_id=case_id, bed_flag="bed_file.bed"
     )
 
+    # THEN the gene panel file creator should have been called with correct case id and path
+    configurator.gene_panel_file_creator.create.assert_called_once_with(
+        case_id=case_id, case_path=Path("root_dir", case_id)
+    )
+
+    assert isinstance(case_config, MIPDNACaseConfig)
+
 
 def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     """Test that the MIP DNA configurator can get a case config."""
@@ -47,7 +66,13 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     mocker.patch.object(mip_dna, "environ_email", return_value="test@scilifelab.se")
 
     # GIVEN a MIP DNA configurator
-    configurator = MIPDNAConfigurator(store=mock_status_db)
+    configurator = MIPDNAConfigurator(
+        config_file_creator=Mock(),
+        fastq_handler=Mock(),
+        gene_panel_file_creator=Mock(),
+        root=Path("root_dir"),
+        store=mock_status_db,
+    )
 
     # GIVEN a case ID
     case_id = "test_case"
@@ -67,7 +92,13 @@ def test_get_config_all_flags_set(mock_status_db: Store):
     """Test that the MIP DNA configurator can get a case config."""
 
     # GIVEN a MIP DNA configurator
-    configurator = MIPDNAConfigurator(store=mock_status_db)
+    configurator = MIPDNAConfigurator(
+        config_file_creator=Mock(),
+        fastq_handler=Mock(),
+        gene_panel_file_creator=Mock(),
+        root=Path("root_dir"),
+        store=mock_status_db,
+    )
 
     # GIVEN a case ID
     case_id = "test_case"
