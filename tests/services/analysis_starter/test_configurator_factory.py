@@ -85,7 +85,7 @@ def test_get_mip_dna_configurator():
     # THEN the config file creator is of type MIPDNAConfigFileCreator
     assert isinstance(configurator.config_file_creator, MIPDNAConfigFileCreator)
 
-    # THEN the fastq handler is of type MicrosaltFastqHandler
+    # THEN the fastq handler is of type MipFastqHandler
     assert isinstance(configurator.fastq_handler, MipFastqHandler)
 
     assert isinstance(configurator.gene_panel_file_creator, GenePanelFileCreator)
