@@ -904,6 +904,7 @@ class PacbioSmrtCellView(BaseView):
 
 
 class PacbioSampleRunMetricsView(BaseView):
+    column_filters = [PacbioRunNameFilter(None, "Pacbio Run Name")]
     column_formatters = {
         "smrt_cell": PacbioSmrtCellView.view_smrt_cell_link,
         "sample": SampleView.view_sample_link,
