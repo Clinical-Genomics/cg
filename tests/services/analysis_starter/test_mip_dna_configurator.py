@@ -51,7 +51,7 @@ def test_configure():
         case_id=case_id, bed_flag="bed_file.bed"
     )
 
-    # THEN the gene panel file creator should have been called with ?
+    # THEN the gene panel file creator should have been called with correct case id and path
     configurator.gene_panel_file_creator.create.assert_called_once_with(
         case_id=case_id, case_path=Path("root_dir", case_id)
     )
