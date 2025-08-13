@@ -24,17 +24,24 @@ def test_configure():
     # GIVEN a case id
     case_id = "test_case"
 
+    store = create_autospec(Store)
+    store.get_case_by_internal_id_strict = Mock(
+        return_value=create_autospec(Case, slurm_priority=SlurmQos.NORMAL)
+    )
+
     # GIVEN a MIP DNA configurator
     configurator = MIPDNAConfigurator(
         config_file_creator=Mock(),
         fastq_handler=Mock(),
         gene_panel_file_creator=Mock(),
         root=Path("root_dir"),
-        store=Mock(),
+        store=store,
     )
 
     # WHEN configuring a case
-    configurator.configure(case_id=case_id, panel_bed="bed_file.bed")
+    case_config: MIPDNACaseConfig = configurator.configure(
+        case_id=case_id, panel_bed="bed_file.bed"
+    )
 
     # THEN the fastq handler should have been called with the case id
     configurator.fastq_handler.link_fastq_files.assert_called_once_with(case_id)
@@ -49,7 +56,7 @@ def test_configure():
         case_id=case_id, case_path=Path("root_dir", case_id)
     )
 
-    # TODO: should also return a case config?
+    assert isinstance(case_config, MIPDNACaseConfig)
 
 
 def test_get_config(mock_status_db: Store, mocker: MockerFixture):

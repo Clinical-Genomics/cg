@@ -35,6 +35,7 @@ class MIPDNAConfigurator(Configurator):
         self.fastq_handler.link_fastq_files(case_id)
         self.config_file_creator.create(case_id=case_id, bed_flag=flags.get("panel_bed"))
         self.gene_panel_file_creator.create(case_id=case_id, case_path=Path(self.root, case_id))
+        return self.get_config(case_id=case_id, **flags)
 
     def get_config(self, case_id: str, **flags) -> MIPDNACaseConfig:
         case: Case = self.store.get_case_by_internal_id_strict(case_id)
