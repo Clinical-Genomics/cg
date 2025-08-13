@@ -82,7 +82,7 @@ def test_get_mip_dna_configurator():
     # THEN the configurator is of type MIPDNAConfigurator
     assert isinstance(configurator, MIPDNAConfigurator)
 
-    # THEN the config file creator is of type MicrosaltConfigFileCreator
+    # THEN the config file creator is of type MIPDNAConfigFileCreator
     assert isinstance(configurator.config_file_creator, MIPDNAConfigFileCreator)
 
     # THEN the fastq handler is of type MicrosaltFastqHandler
