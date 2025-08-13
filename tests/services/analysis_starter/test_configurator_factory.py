@@ -76,7 +76,7 @@ def test_get_mip_dna_configurator():
     # GIVEN a configurator factory
     configurator_factory = ConfiguratorFactory(cg_config=cg_config)
 
-    # WHEN getting the configurator for the microSALT workflow
+    # WHEN getting the configurator for the MIP-DNA workflow
     configurator: Configurator = configurator_factory.get_configurator(Workflow.MIP_DNA)
 
     # THEN the configurator is of type MicrosaltConfigurator
