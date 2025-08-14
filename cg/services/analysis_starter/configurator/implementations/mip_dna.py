@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from cg.apps.environ import environ_email
+from cg.exc import CaseNotConfiguredError
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
@@ -59,9 +60,17 @@ class MIPDNAConfigurator(Configurator):
         return path
 
     @staticmethod
-    def _ensure_valid_config(config: MIPDNACaseConfig) -> None:
-        # TODO: Ensure the config file exists
-        pass
+    def _ensure_valid_config(
+        config_file_path: Path, gene_panel_file_path: Path, managed_variants_file_path: Path
+    ) -> None:
+        if not (
+            config_file_path.exists()
+            and gene_panel_file_path.exists()
+            and managed_variants_file_path.exists()
+        ):
+            raise CaseNotConfiguredError(
+                "Ensure config file, gene panel and managed variants files exist."
+            )
 
     @staticmethod
     def _set_flags(config: MIPDNACaseConfig, **flags) -> MIPDNACaseConfig:
