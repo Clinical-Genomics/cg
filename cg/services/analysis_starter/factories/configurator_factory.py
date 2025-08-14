@@ -10,6 +10,9 @@ from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
+from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
+    ManagedVariantsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.microsalt_config import (
     MicrosaltConfigFileCreator,
 )
@@ -18,9 +21,6 @@ from cg.services.analysis_starter.configurator.file_creators.mip_dna_config impo
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
-    ManagedVariantsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
@@ -173,14 +173,13 @@ class ConfiguratorFactory:
 
     def _get_mip_dna_configurator(self) -> MIPDNAConfigurator:
         root: str = self.cg_config.mip_rd_dna.root
-
         return MIPDNAConfigurator(
             config_file_creator=self._get_mip_dna_config_file_creator(root=root),
             fastq_handler=MipFastqHandler(
                 self.housekeeper_api, root_dir=Path(root), status_db=self.store
             ),
             gene_panel_file_creator=self._get_gene_panel_file_creator(Workflow.MIP_DNA),
-            # TODO: add managed_variants_file_creator
+            managed_variants_file_creator=self._get_managed_variants_file_creator(Workflow.MIP_DNA),
             root=Path(root),
             store=self.store,
         )

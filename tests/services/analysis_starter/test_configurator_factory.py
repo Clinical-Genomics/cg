@@ -9,6 +9,9 @@ from cg.models.cg_config import CGConfig, MipConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
+from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
+    ManagedVariantsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.microsalt_config import (
     MicrosaltConfigFileCreator,
 )
@@ -87,8 +90,12 @@ def test_get_mip_dna_configurator():
 
     # THEN the fastq handler is of type MipFastqHandler
     assert isinstance(configurator.fastq_handler, MipFastqHandler)
+
     # THEN the gene panel file creator should be an instance of GenePanelFileCreator
     assert isinstance(configurator.gene_panel_file_creator, GenePanelFileCreator)
+
+    # THEN the managed variants file creator should be an instance of ManagedVariantsFileCreator
+    assert isinstance(configurator.managed_variants_file_creator, ManagedVariantsFileCreator)
 
 
 def test_configurator_factory_failure(cg_context: CGConfig):

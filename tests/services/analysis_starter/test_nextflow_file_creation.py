@@ -1,17 +1,12 @@
 from pathlib import Path
-from unittest import mock
 
 import pytest
 from pytest_mock import MockerFixture
 
-from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
 from cg.services.analysis_starter.configurator.file_creators.nextflow import config_file
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.managed_variants import (
-    ManagedVariantsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
     creator as samplesheet_creator,
@@ -126,27 +121,6 @@ def test_nextflow_sample_sheet_creators(
             case_path=nextflow_case_path, case_id=nextflow_case_id
         ),
     )
-
-
-def test_managed_variants_content(
-    raredisease_managed_variants_creator: ManagedVariantsFileCreator,
-    raredisease_case_id: str,
-    raredisease_managed_variants_file_content: list[str],
-):
-    """Test that the managed variants file content is created correctly."""
-    # GIVEN a Raredisease managed variants file content creator and a case path
-
-    # GIVEN a mock of Scout variants
-
-    # WHEN creating a managed variants file
-    expected_content_fixture: list[str] = raredisease_managed_variants_file_content
-    with mock.patch.object(
-        ScoutAPI, "export_managed_variants", return_value=expected_content_fixture
-    ):
-        content: list[str] = raredisease_managed_variants_creator._get_content(raredisease_case_id)
-
-    # THEN the content of the file is the expected
-    assert content == expected_content_fixture
 
 
 def test_parse_fastq_header_raises_error():
