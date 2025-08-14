@@ -39,7 +39,11 @@ def test_configure(mocker: MockerFixture):
         store=store,
     )
 
+    # GIVEN that we mock making the run directory
     mock_create_dir = mocker.patch.object(Path, "mkdir")
+
+    # GIVEN a mocked version of _ensure_valid_config
+    mock_validation = mocker.patch.object(configurator, "_ensure_valid_config")
 
     # WHEN configuring a case
     case_config: MIPDNACaseConfig = configurator.configure(
@@ -66,6 +70,8 @@ def test_configure(mocker: MockerFixture):
     configurator.managed_variants_file_creator.create.assert_called_once_with(
         case_id=case_id, case_path=Path("root_dir", case_id)
     )
+
+    mock_validation.assert_called_once_with()
 
 
 def test_get_config(mock_status_db: Store, mocker: MockerFixture):

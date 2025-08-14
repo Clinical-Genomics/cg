@@ -52,7 +52,9 @@ class MIPDNAConfigurator(Configurator):
             email=environ_email(),
             slurm_qos=case.slurm_priority,
         )
-        return self._set_flags(config=config, **flags)
+        config = self._set_flags(config=config, **flags)
+        self._ensure_valid_config(config)
+        return config
 
     def _create_run_directory(self, case_id: str) -> Path:
         path = Path(self.root, case_id)
