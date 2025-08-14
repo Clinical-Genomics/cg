@@ -79,6 +79,7 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
         config_file_creator=Mock(),
         fastq_handler=Mock(),
         gene_panel_file_creator=Mock(),
+        managed_variants_file_creator=Mock(),
         root=Path("root_dir"),
         store=mock_status_db,
     )
@@ -105,6 +106,7 @@ def test_get_config_all_flags_set(mock_status_db: Store):
         config_file_creator=Mock(),
         fastq_handler=Mock(),
         gene_panel_file_creator=Mock(),
+        managed_variants_file_creator=Mock(),
         root=Path("root_dir"),
         store=mock_status_db,
     )

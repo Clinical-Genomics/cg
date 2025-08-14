@@ -173,7 +173,6 @@ class ConfiguratorFactory:
 
     def _get_mip_dna_configurator(self) -> MIPDNAConfigurator:
         root: str = self.cg_config.mip_rd_dna.root
-
         return MIPDNAConfigurator(
             config_file_creator=self._get_mip_dna_config_file_creator(root=root),
             fastq_handler=MipFastqHandler(
