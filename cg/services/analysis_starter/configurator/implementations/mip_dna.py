@@ -1,7 +1,10 @@
 import logging
 from pathlib import Path
 
+from poetry.console.commands import self
+
 from cg.apps.environ import environ_email
+from cg.cli.workflow.mip.base import managed_variants
 from cg.exc import CaseNotConfiguredError
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.services.analysis_starter.configurator.configurator import Configurator
@@ -53,7 +56,7 @@ class MIPDNAConfigurator(Configurator):
             slurm_qos=case.slurm_priority,
         )
         config = self._set_flags(config=config, **flags)
-        self._ensure_valid_config(config)
+        self._ensure_valid_config()
         return config
 
     def _create_run_directory(self, case_id: str) -> Path:
@@ -61,10 +64,13 @@ class MIPDNAConfigurator(Configurator):
         path.mkdir(parents=True, exist_ok=True)
         return path
 
-    @staticmethod
-    def _ensure_valid_config(
-        config_file_path: Path, gene_panel_file_path: Path, managed_variants_file_path: Path
-    ) -> None:
+    def _ensure_valid_config(self, case_id: str) -> None:
+        run_directory = Path(self.root, case_id)
+        config_file_path: Path = self.config_file_creator.get_file_path(case_id)
+        gene_panel_file_path: Path = self.gene_panel_file_creator.get_file_path(run_directory)
+        managed_variants_file_path: Path = self.managed_variants_file_creator.get_file_path(
+            run_directory
+        )
         if not (
             config_file_path.exists()
             and gene_panel_file_path.exists()
