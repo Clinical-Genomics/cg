@@ -42,8 +42,7 @@ class GenePanelFileCreator:
             return GenePanelMasterList.get_panel_names()
         all_panels: set[str] = self._add_gene_panels_in_combo(gene_panels=default_panels)
         all_panels |= GenePanelMasterList.get_non_specific_gene_panels()
-        all_panels_list: list[str] = list(all_panels)
-        all_panels_list.sort()
+        all_panels_list: list[str] = sorted(all_panels)
         return all_panels_list
 
     @staticmethod

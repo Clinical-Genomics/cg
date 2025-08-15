@@ -5,6 +5,8 @@ import pytest
 from pytest_mock import MockerFixture
 
 from cg.constants.priority import SlurmQos
+from cg.exc import CaseNotConfiguredError
+from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.implementations import mip_dna
 from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
@@ -71,7 +73,7 @@ def test_configure(mocker: MockerFixture):
         case_id=case_id, case_path=Path("root_dir", case_id)
     )
 
-    mock_validation.assert_called_once_with()
+    mock_validation.assert_called_once_with(case_id)
 
 
 def test_get_config(mock_status_db: Store, mocker: MockerFixture):
@@ -135,3 +137,24 @@ def test_get_config_all_flags_set(mock_status_db: Store):
 
     assert case_config.start_after_recipe == "banana_bread"
     assert case_config.start_with_recipe == "short_bread"
+
+
+def test_get_config_validation(mock_status_db: Store):
+    # GIVEN at least one file creator that returns a path which does not exist
+    gene_panel_file_creator: GenePanelFileCreator = create_autospec(GenePanelFileCreator)
+    gene_panel_file_creator.get_file_path = Mock(return_value=Path("fake_path"))
+
+    # GIVEN a configurator
+    configurator = MIPDNAConfigurator(
+        config_file_creator=Mock(),
+        fastq_handler=Mock(),
+        gene_panel_file_creator=gene_panel_file_creator,
+        managed_variants_file_creator=Mock(),
+        root=Path("root_dir"),
+        store=mock_status_db,
+    )
+
+    # WHEN executing get_config for a case
+    # THEN an CaseNotConfiguredError should be raised
+    with pytest.raises(CaseNotConfiguredError):
+        configurator.get_config(case_id="test_case")

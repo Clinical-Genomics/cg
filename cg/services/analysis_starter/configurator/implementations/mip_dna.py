@@ -1,10 +1,7 @@
 import logging
 from pathlib import Path
 
-from poetry.console.commands import self
-
 from cg.apps.environ import environ_email
-from cg.cli.workflow.mip.base import managed_variants
 from cg.exc import CaseNotConfiguredError
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.services.analysis_starter.configurator.configurator import Configurator
@@ -56,7 +53,7 @@ class MIPDNAConfigurator(Configurator):
             slurm_qos=case.slurm_priority,
         )
         config = self._set_flags(config=config, **flags)
-        self._ensure_valid_config()
+        self._ensure_valid_config(case_id)
         return config
 
     def _create_run_directory(self, case_id: str) -> Path:
