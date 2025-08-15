@@ -44,9 +44,6 @@ def test_configure(mocker: MockerFixture):
     # GIVEN that we mock making the run directory
     mock_create_dir = mocker.patch.object(Path, "mkdir")
 
-    # GIVEN a mocked version of _ensure_valid_config
-    mock_validation = mocker.patch.object(configurator, "_ensure_valid_config")
-
     # WHEN configuring a case
     case_config: MIPDNACaseConfig = configurator.configure(
         case_id=case_id, panel_bed="bed_file.bed"
@@ -73,8 +70,6 @@ def test_configure(mocker: MockerFixture):
         case_id=case_id, case_path=Path("root_dir", case_id)
     )
 
-    mock_validation.assert_called_once_with(case_id)
-
 
 def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     """Test that the MIP DNA configurator can get a case config."""
@@ -92,6 +87,9 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
         store=mock_status_db,
     )
 
+    # GIVEN that _ensure_valid_config does not raise an error
+    mock_validation = mocker.patch.object(configurator, "_ensure_valid_config")
+
     # GIVEN a case ID
     case_id = "test_case"
 
@@ -104,6 +102,9 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     assert case_config.email == "test@scilifelab.se"
     assert case_config.start_after_recipe is None
     assert case_config.start_with_recipe is None
+
+    # THEN the output should have been validated
+    mock_validation.assert_called_once_with(case_id)
 
 
 def test_get_config_all_flags_set(mock_status_db: Store):
