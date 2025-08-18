@@ -14,8 +14,12 @@ class ManagedVariantsFileCreator:
         self.scout_api = scout_api
         self.store = store
 
+    @staticmethod
+    def get_file_path(case_path: Path) -> Path:
+        return Path(case_path, "managed_variants").with_suffix(FileExtensions.VCF)
+
     def create(self, case_id: str, case_path: Path) -> None:
-        file_path = Path(case_path, "managed_variants").with_suffix(FileExtensions.VCF)
+        file_path = self.get_file_path(case_path)
         content: list[str] = self._get_content(case_id)
         write_txt(file_path=file_path, content=content)
 

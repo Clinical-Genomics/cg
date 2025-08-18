@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from cg.apps.environ import environ_email
+from cg.exc import CaseNotConfiguredError
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
@@ -51,17 +52,35 @@ class MIPDNAConfigurator(Configurator):
             email=environ_email(),
             slurm_qos=case.slurm_priority,
         )
-        return self._set_flags(config=config, **flags)
+        config = self._set_flags(config=config, **flags)
+        self._ensure_valid_config(case_id)
+        return config
 
     def _create_run_directory(self, case_id: str) -> Path:
         path = Path(self.root, case_id)
         path.mkdir(parents=True, exist_ok=True)
         return path
 
-    @staticmethod
-    def _ensure_valid_config(config: MIPDNACaseConfig) -> None:
-        # TODO: Ensure the config file exists
-        pass
+    def _ensure_valid_config(self, case_id: str) -> None:
+        """Ensures that the case run directory has a MIP config file, a gene panel file and a
+        managed variants file.
+        Raises:
+            CaseNotConfiguredError if any of those files are not present.
+        """
+        run_directory = Path(self.root, case_id)
+        config_file_path: Path = self.config_file_creator.get_file_path(case_id)
+        gene_panel_file_path: Path = self.gene_panel_file_creator.get_file_path(run_directory)
+        managed_variants_file_path: Path = self.managed_variants_file_creator.get_file_path(
+            run_directory
+        )
+        if not (
+            config_file_path.exists()
+            and gene_panel_file_path.exists()
+            and managed_variants_file_path.exists()
+        ):
+            raise CaseNotConfiguredError(
+                "Ensure config file, gene panel and managed variants files exist."
+            )
 
     @staticmethod
     def _set_flags(config: MIPDNACaseConfig, **flags) -> MIPDNACaseConfig:

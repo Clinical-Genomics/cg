@@ -99,8 +99,7 @@ class NextflowConfigurator(Configurator):
     def _get_work_dir(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "work")
 
-    @staticmethod
-    def _ensure_valid_config(config: NextflowCaseConfig) -> None:
+    def _ensure_valid_config(self, config: NextflowCaseConfig) -> None:
         params_file_path = Path(config.params_file)
         config_file_path = Path(config.nextflow_config_file)
         if not params_file_path.exists() or not config_file_path.exists():

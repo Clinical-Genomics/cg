@@ -22,7 +22,6 @@ class Configurator(ABC):
         curated_flags: dict = {key: value for key, value in flags.items() if value is not None}
         return config.model_copy(update=curated_flags)
 
-    @staticmethod
     @abstractmethod
-    def _ensure_valid_config(config: CaseConfig) -> None:
+    def _ensure_valid_config(self, **kwargs) -> None:
         pass
