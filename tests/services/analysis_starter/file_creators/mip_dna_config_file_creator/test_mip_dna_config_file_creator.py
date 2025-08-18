@@ -136,7 +136,7 @@ def test_create_wgs_father_and_mother_set(
     mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
 
     # WHEN creating a config file providing a bed file name
-    config_file_creator.create(case_id=case_id, bed_flag="default.bed")
+    config_file_creator.create(case_id=case_id, bed_flag="default.bed", file_path=Path("file.txt"))
 
     # THEN the config file is created with mother and father set
     mock_write.assert_called_once_with(

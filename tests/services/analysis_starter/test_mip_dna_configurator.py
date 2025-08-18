@@ -4,9 +4,13 @@ from unittest.mock import Mock, create_autospec
 import pytest
 from pytest_mock import MockerFixture
 
+from cg.constants import FileExtensions
 from cg.constants.priority import SlurmQos
 from cg.exc import CaseNotConfiguredError
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
+from cg.services.analysis_starter.configurator.file_creators.mip_dna_config import (
+    MIPDNAConfigFileCreator,
+)
 from cg.services.analysis_starter.configurator.implementations import mip_dna
 from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
@@ -32,12 +36,13 @@ def test_configure(mocker: MockerFixture):
     )
 
     # GIVEN a MIP DNA configurator
+    root_dir = Path("root_dir")
     configurator = MIPDNAConfigurator(
-        config_file_creator=Mock(),
+        config_file_creator=create_autospec(MIPDNAConfigFileCreator),
         fastq_handler=Mock(),
         gene_panel_file_creator=Mock(),
         managed_variants_file_creator=Mock(),
-        root=Path("root_dir"),
+        root=root_dir,
         store=store,
     )
 
@@ -58,7 +63,7 @@ def test_configure(mocker: MockerFixture):
 
     # THEN the config file creator should have been called with the case id and the provided bed flag
     configurator.config_file_creator.create.assert_called_once_with(
-        case_id=case_id, bed_flag="bed_file.bed"
+        case_id=case_id, bed_flag="bed_file.bed", file_path=Path(root_dir, case_id, "pedigree.yaml")
     )
 
     # THEN the gene panel file creator should have been called with correct case id and path

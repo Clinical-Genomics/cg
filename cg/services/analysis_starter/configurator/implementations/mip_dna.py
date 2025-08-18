@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from cg.apps.environ import environ_email
+from cg.constants import FileExtensions
 from cg.exc import CaseNotConfiguredError
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.services.analysis_starter.configurator.configurator import Configurator
@@ -40,7 +41,12 @@ class MIPDNAConfigurator(Configurator):
         LOG.info(f"Configuring case {case_id}")
         run_directory: Path = self._create_run_directory(case_id)
         self.fastq_handler.link_fastq_files(case_id)
-        self.config_file_creator.create(case_id=case_id, bed_flag=flags.get("panel_bed"))
+        config_file_name = "pedigree.yaml"
+        self.config_file_creator.create(
+            case_id=case_id,
+            bed_flag=flags.get("panel_bed"),
+            file_path=Path(run_directory, config_file_name),
+        )
         self.gene_panel_file_creator.create(case_id=case_id, case_path=run_directory)
         self.managed_variants_file_creator.create(case_id=case_id, case_path=run_directory)
         return self.get_config(case_id=case_id, **flags)
