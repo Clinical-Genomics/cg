@@ -1,18 +1,17 @@
 import logging
 import subprocess
 
-from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
+from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.submitters.submitter import Submitter
-from cg.services.analysis_starter.submitters.subprocess.commands import (
-    WORKFLOW_LAUNCH_COMMAND_MAP,
-    WORKFLOW_VERSION_COMMAND_MAP,
-)
+from cg.services.analysis_starter.submitters.subprocess.commands import WORKFLOW_VERSION_COMMAND_MAP
 
 LOG = logging.getLogger(__name__)
 
+SubprocessCaseConfig = MicrosaltCaseConfig
+
 
 class SubprocessSubmitter(Submitter):
-    def submit(self, case_config: CaseConfig) -> None:
+    def submit(self, case_config: SubprocessCaseConfig) -> None:
         command: str = case_config.get_start_command()
         LOG.info(f"Running: {command}")
         subprocess.run(
@@ -24,9 +23,10 @@ class SubprocessSubmitter(Submitter):
         )
 
     @staticmethod
-    def get_workflow_version(case_config: CaseConfig) -> str:
+    def get_workflow_version(case_config: SubprocessCaseConfig) -> str:
         """
-        Calls the workflow to get the workflow version number. If fails, returns a placeholder value instead.
+        Calls the workflow to get the workflow version number.
+        If fails, returns a placeholder value instead.
         """
         try:
             command: str = WORKFLOW_VERSION_COMMAND_MAP[case_config.workflow]
