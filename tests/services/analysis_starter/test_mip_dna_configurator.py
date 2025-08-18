@@ -49,6 +49,9 @@ def test_configure(mocker: MockerFixture):
     # GIVEN that we mock making the run directory
     mock_create_dir = mocker.patch.object(Path, "mkdir")
 
+    # GIVEN that the relevant files exist
+    mocker.patch.object(Path, "exists", return_value=True)
+
     # WHEN configuring a case
     case_config: MIPDNACaseConfig = configurator.configure(
         case_id=case_id, panel_bed="bed_file.bed"
@@ -95,6 +98,9 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     # GIVEN a case ID
     case_id = "test_case"
 
+    # GIVEN that the relevant files exist
+    mocker.patch.object(Path, "exists", return_value=True)
+
     # WHEN getting the case config
     case_config: MIPDNACaseConfig = configurator.get_config(case_id=case_id)
 
@@ -106,7 +112,7 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     assert case_config.start_with_recipe is None
 
 
-def test_get_config_all_flags_set(mock_status_db: Store):
+def test_get_config_all_flags_set(mock_status_db: Store, mocker: MockerFixture):
     """Test that the MIP DNA configurator can get a case config."""
 
     # GIVEN a MIP DNA configurator
@@ -121,6 +127,9 @@ def test_get_config_all_flags_set(mock_status_db: Store):
 
     # GIVEN a case ID
     case_id = "test_case"
+
+    # GIVEN that the relevant files exist
+    mocker.patch.object(Path, "exists", return_value=True)
 
     # WHEN getting the case config
     case_config: MIPDNACaseConfig = configurator.get_config(

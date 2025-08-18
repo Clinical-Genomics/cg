@@ -16,6 +16,7 @@ from cg.services.analysis_starter.configurator.file_creators.mip_dna_config impo
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.store.models import Case
 from cg.store.store import Store
+from tests.conftest import case_id
 
 LOG = logging.getLogger(__name__)
 
@@ -62,13 +63,13 @@ class MIPDNAConfigurator(Configurator):
         return config
 
     def _get_config_file_path(self, case_id: str) -> Path:
-        return Path(self.root, case_id, "pedigree").with_suffix(FileExtensions.YAML)
+        return Path(self._get_run_directory(case_id), "pedigree.yaml")
 
-    def _get_run_directory(self) -> Path:
-        pass
+    def _get_run_directory(self, case_id: str) -> Path:
+        return Path(self.root, case_id)
 
     def _create_run_directory(self, case_id: str) -> Path:
-        path = Path(self.root, case_id)
+        path: Path = self._get_run_directory(case_id)
         path.mkdir(parents=True, exist_ok=True)
         return path
 
@@ -78,8 +79,8 @@ class MIPDNAConfigurator(Configurator):
         Raises:
             CaseNotConfiguredError if any of those files are not present.
         """
-        run_directory = Path(self.root, case_id)
-        config_file_path: Path = self.config_file_creator.get_file_path(case_id)
+        run_directory: Path = self._get_run_directory(case_id)
+        config_file_path: Path = self._get_config_file_path(case_id)
         gene_panel_file_path: Path = self.gene_panel_file_creator.get_file_path(run_directory)
         managed_variants_file_path: Path = self.managed_variants_file_creator.get_file_path(
             run_directory
