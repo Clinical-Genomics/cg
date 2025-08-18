@@ -220,7 +220,6 @@ def test_start_available_mip_dna(
     )
 
     # THEN a scout command is called to export panel beds
-    # TODO: maybe only use one panel to avoid extra assert
     subprocess_mock.run.assert_any_call(
         [
             f"{test_root_dir}/scout/binary",
@@ -241,6 +240,8 @@ def test_start_available_mip_dna(
     )
 
     # The order of the bed arguments is not deterministic, so we need to look at them as a set
+    # this will be fixed so that the order is always the same in the new implementation of
+    # starting MIP-DNA pipelines
     bed_args = subprocess_mock.run.call_args_list[0][0][0][6:9]
     assert set(bed_args) == {
         GenePanelMasterList.OMIM_AUTO,
@@ -289,7 +290,7 @@ def test_start_available_mip_dna(
     case_dir = Path(test_root_dir, "mip-dna", "cases", case.internal_id)
     assert Path(case_dir, "gene_panels.bed").exists()
     assert Path(case_dir, "managed_variants.vcf").exists()
-    # TODO: check that pedigree.yaml was created
+    assert Path(case_dir, "pedigree.yaml").exists()
 
 
 def create_qc_file(test_root_dir, case) -> Path:
