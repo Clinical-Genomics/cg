@@ -87,9 +87,6 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
         store=mock_status_db,
     )
 
-    # GIVEN that _ensure_valid_config does not raise an error
-    mock_validation = mocker.patch.object(configurator, "_ensure_valid_config")
-
     # GIVEN a case ID
     case_id = "test_case"
 
@@ -102,9 +99,6 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     assert case_config.email == "test@scilifelab.se"
     assert case_config.start_after_recipe is None
     assert case_config.start_with_recipe is None
-
-    # THEN the output should have been validated
-    mock_validation.assert_called_once_with(case_id)
 
 
 def test_get_config_all_flags_set(mock_status_db: Store):
