@@ -17,12 +17,12 @@ class MIPDNAConfigFileCreator:
     def get_file_path(self, case_id: str) -> Path:
         return Path(self.root, case_id, "pedigree").with_suffix(FileExtensions.YAML)
 
-    def create(self, case_id: str, bed_flag: str | None) -> None:
+    def create(self, case_id: str, bed_flag: str | None, file_path: Path) -> None:
         provided_bed_file: str | None = self._get_bed_file_name(bed_flag) if bed_flag else None
         content: dict = self._get_content(provided_bed_file=provided_bed_file, case_id=case_id)
         write_yaml(
             content=content,
-            file_path=self.get_file_path(case_id=case_id),
+            file_path=file_path,
         )
 
     def _get_content(self, provided_bed_file: str | None, case_id: str) -> dict:
