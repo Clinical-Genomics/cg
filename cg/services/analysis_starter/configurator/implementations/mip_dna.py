@@ -62,6 +62,11 @@ class MIPDNAConfigurator(Configurator):
         return path
 
     def _ensure_valid_config(self, case_id: str) -> None:
+        """Ensures that the case run directory has a MIP config file, a gene panel file and a
+        managed variants file.
+        Raises:
+            CaseNotConfiguredError if any of those files are not present.
+        """
         run_directory = Path(self.root, case_id)
         config_file_path: Path = self.config_file_creator.get_file_path(case_id)
         gene_panel_file_path: Path = self.gene_panel_file_creator.get_file_path(run_directory)
