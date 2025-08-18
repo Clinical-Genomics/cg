@@ -1,3 +1,5 @@
+from collections.abc import Iterator
+
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.symbols import EMPTY_STRING
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
@@ -29,7 +31,7 @@ class TaxprofilerSampleSheetCreator(NextflowSampleSheetCreator):
     def _get_sample_sheet_content_per_sample(self, sample: Sample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
         content: list[list[str]] = []
-        paired_fastq_files: list[tuple[str, str]] = self._get_paired_read_paths(sample)
+        paired_fastq_files: Iterator[tuple[str, str]] = self._get_paired_read_paths(sample)
         for incremental_id, (forward_file, reverse_file) in enumerate(paired_fastq_files, start=1):
             entry: list[str] = [
                 sample.name,

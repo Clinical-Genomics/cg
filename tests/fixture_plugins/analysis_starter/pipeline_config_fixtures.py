@@ -1,8 +1,9 @@
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
 
-from cg.models.cg_config import RarediseaseConfig, RnafusionConfig
+from cg.models.cg_config import RarediseaseConfig, RnafusionConfig, TaxprofilerConfig
 
 
 @pytest.fixture
@@ -53,12 +54,18 @@ def get_nextflow_config_dict(
 
 
 @pytest.fixture
-def raredisease_config_object(get_nextflow_config_dict: callable) -> RarediseaseConfig:
+def raredisease_config_object(get_nextflow_config_dict: Callable) -> RarediseaseConfig:
     config: dict = get_nextflow_config_dict(workflow="raredisease")
     return RarediseaseConfig(**config)
 
 
 @pytest.fixture
-def rnafusion_config_object(get_nextflow_config_dict: callable) -> RnafusionConfig:
+def rnafusion_config_object(get_nextflow_config_dict: Callable) -> RnafusionConfig:
     config: dict = get_nextflow_config_dict(workflow="rnafusion")
     return RnafusionConfig(**config)
+
+
+@pytest.fixture
+def taxprofiler_config_object(get_nextflow_config_dict: Callable) -> TaxprofilerConfig:
+    config: dict = get_nextflow_config_dict(workflow="taxprofiler")
+    return TaxprofilerConfig(**config)

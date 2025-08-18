@@ -8,12 +8,16 @@ from cg.apps.lims import LimsAPI
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
     raredisease,
     rnafusion,
+    taxprofiler,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
     RNAFusionParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
+    TaxprofilerParamsFileCreator,
 )
 from cg.store.store import Store
 
@@ -26,7 +30,7 @@ def raredisease_params_file_creator(
     mocker: MockerFixture,
 ) -> RarediseaseParamsFileCreator:
     """Fixture to provide a RarediseaseParamsFileCreator with a mock store."""
-    lims = create_autospec(LimsAPI)
+    lims: LimsAPI = create_autospec(LimsAPI)
     lims.capture_kit.return_value = "capture_kit"
     mocker.patch.object(raredisease, "read_yaml", return_value=nextflow_workflow_params_content)
     mocker.patch.object(raredisease, "write_csv", return_value=None)
@@ -45,3 +49,13 @@ def rnafusion_params_file_creator(
 ) -> RNAFusionParamsFileCreator:
     mocker.patch.object(rnafusion, "read_yaml", return_value=nextflow_workflow_params_content)
     return RNAFusionParamsFileCreator(nf_analysis_pipeline_params_path.as_posix())
+
+
+@pytest.fixture
+def taxprofiler_params_file_creator(
+    nf_analysis_pipeline_params_path: Path,
+    nextflow_workflow_params_content: dict,
+    mocker: MockerFixture,
+) -> TaxprofilerParamsFileCreator:
+    mocker.patch.object(taxprofiler, "read_yaml", return_value=nextflow_workflow_params_content)
+    return TaxprofilerParamsFileCreator(nf_analysis_pipeline_params_path.as_posix())
