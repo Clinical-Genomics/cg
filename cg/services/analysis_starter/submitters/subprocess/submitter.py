@@ -13,7 +13,7 @@ LOG = logging.getLogger(__name__)
 
 class SubprocessSubmitter(Submitter):
     def submit(self, case_config: CaseConfig) -> None:
-        command: str = self._get_launch_command(case_config)
+        command: str = case_config.get_start_command()
         LOG.info(f"Running: {command}")
         subprocess.run(
             args=command,
@@ -22,11 +22,6 @@ class SubprocessSubmitter(Submitter):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-
-    @staticmethod
-    def _get_launch_command(case_config: CaseConfig) -> str:
-        command: str = WORKFLOW_LAUNCH_COMMAND_MAP[case_config.workflow]
-        return command.format(**case_config.model_dump())
 
     @staticmethod
     def get_workflow_version(case_config: CaseConfig) -> str:
