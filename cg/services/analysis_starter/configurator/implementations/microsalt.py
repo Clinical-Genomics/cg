@@ -70,8 +70,7 @@ class MicrosaltConfigurator(Configurator):
             )
         return self.fastq_handler.get_case_fastq_path(case_id)
 
-    @staticmethod
-    def _ensure_valid_config(config: MicrosaltCaseConfig) -> None:
+    def _ensure_valid_config(self, config: MicrosaltCaseConfig) -> None:
         config_file_path = Path(config.config_file)
         if not config_file_path.exists():
             raise CaseNotConfiguredError(
