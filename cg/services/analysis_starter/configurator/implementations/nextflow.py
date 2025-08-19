@@ -66,11 +66,9 @@ class NextflowConfigurator(Configurator):
             CaseNotConfiguredError if the params file or config file does not exist.
         """
         case_path: Path = self._get_case_path(case_id=case_id)
-        params_file_path: Path = self.params_file_creator.get_file_path(
-            case_id=case_id, case_path=case_path
-        )
-        config_file_path: Path = self.config_file_creator.get_file_path(
-            case_id=case_id, case_path=case_path
+        params_file_path: Path = self._get_params_file_path(case_id=case_id)
+        config_file_path: Path = self._get_config_file_path(
+            case_id=case_id,
         )
         config = NextflowCaseConfig(
             case_id=case_id,
@@ -90,7 +88,15 @@ class NextflowConfigurator(Configurator):
 
     def _get_config_file_path(self, case_id: str) -> Path:
         """Return the path to the Nextflow config file."""
-        return Path(self._get_case_path(case_id), f"{case_id}_nextflow_config").with_suffix(FileExtensions.JSON)
+        return Path(self._get_case_path(case_id), f"{case_id}_nextflow_config").with_suffix(
+            FileExtensions.JSON
+        )
+
+    def _get_params_file_path(self, case_id: str) -> Path:
+        """Return the path to the params file for a case."""
+        return Path(self._get_case_path(case_id), f"{case_id}_params_file").with_suffix(
+            FileExtensions.YAML
+        )
 
     def _get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""

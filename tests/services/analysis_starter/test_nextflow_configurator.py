@@ -1,10 +1,11 @@
 from pathlib import Path
-from unittest.mock import create_autospec, Mock
+from unittest.mock import Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
+from cg.constants.priority import SlurmQos
 from cg.models.cg_config import RarediseaseConfig
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
@@ -17,6 +18,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
     NextflowSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
+from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.store.store import Store
 
 
@@ -124,6 +126,23 @@ def test_raredisease_configure(mocker: MockerFixture):
         pipeline_extension=create_autospec(PipelineExtension),
     )
 
-    mocker.patch.object(Path, "mkdir")
+    mkdir_mock = mocker.patch.object(Path, "mkdir")
 
-    configurator.configure(case_id="case_id")
+    # GIVEN that all expected files are mocked to exist
+    mocker.patch.object(Path, "exists", return_value=True)
+
+    config: NextflowCaseConfig = configurator.configure(case_id="case_id")
+
+    expected_config = NextflowCaseConfig(
+        case_id="case_id",
+        workflow=Workflow.RAREDISEASE,
+        case_priority=SlurmQos.NORMAL,
+        config_profiles=["profile_raredisease"],
+        nextflow_config_file=Path("/root", "case_id", "case_id_nextflow_config.json").as_posix(),
+        params_file=Path("/root", "case_id", "case_id_params_file.yaml").as_posix(),
+        pipeline_repository="http://repo.scilifelab.se",
+        pre_run_script="some_script.sh",
+        revision="rev123",
+        work_dir=Path("/root", "case_id", "work").as_posix(),
+    )
+    assert config == expected_config
