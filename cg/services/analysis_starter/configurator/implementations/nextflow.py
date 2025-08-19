@@ -84,7 +84,7 @@ class NextflowConfigurator(Configurator):
             workflow=self.store.get_case_workflow(case_id),
         )
         config: NextflowCaseConfig = self._set_flags(config=config, **flags)
-        self._ensure_valid_config(config)
+        self._ensure_required_config_files_exist(config)
         return config
 
     def _get_case_path(self, case_id: str) -> Path:
@@ -99,7 +99,7 @@ class NextflowConfigurator(Configurator):
     def _get_work_dir(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, "work")
 
-    def _ensure_valid_config(self, config: NextflowCaseConfig) -> None:
+    def _ensure_required_config_files_exist(self, config: NextflowCaseConfig) -> None:
         params_file_path = Path(config.params_file)
         config_file_path = Path(config.nextflow_config_file)
         if not params_file_path.exists() or not config_file_path.exists():

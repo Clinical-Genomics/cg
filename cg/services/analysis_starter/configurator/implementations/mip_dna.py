@@ -53,7 +53,7 @@ class MIPDNAConfigurator(Configurator):
             slurm_qos=case.slurm_priority,
         )
         config = self._set_flags(config=config, **flags)
-        self._ensure_valid_config(case_id)
+        self._ensure_required_config_files_exist(case_id)
         return config
 
     def _create_run_directory(self, case_id: str) -> Path:
@@ -61,7 +61,7 @@ class MIPDNAConfigurator(Configurator):
         path.mkdir(parents=True, exist_ok=True)
         return path
 
-    def _ensure_valid_config(self, case_id: str) -> None:
+    def _ensure_required_config_files_exist(self, case_id: str) -> None:
         """Ensures that the case run directory has a MIP config file, a gene panel file and a
         managed variants file.
         Raises:

@@ -51,7 +51,7 @@ class MicrosaltConfigurator(Configurator):
             fastq_directory=fastq_directory.as_posix(),
         )
         config: MicrosaltCaseConfig = self._set_flags(config=config, **flags)
-        self._ensure_valid_config(config)
+        self._ensure_required_config_files_exist(config)
         return config
 
     def _get_fastq_directory(self, case_id: str) -> Path:
@@ -70,7 +70,7 @@ class MicrosaltConfigurator(Configurator):
             )
         return self.fastq_handler.get_case_fastq_path(case_id)
 
-    def _ensure_valid_config(self, config: MicrosaltCaseConfig) -> None:
+    def _ensure_required_config_files_exist(self, config: MicrosaltCaseConfig) -> None:
         config_file_path = Path(config.config_file)
         if not config_file_path.exists():
             raise CaseNotConfiguredError(
