@@ -12,7 +12,10 @@ from cg.services.analysis_starter.configurator.file_creators.mip_dna_config impo
     MIPDNAConfigFileCreator,
 )
 from cg.services.analysis_starter.configurator.implementations import mip_dna
-from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
+from cg.services.analysis_starter.configurator.implementations.mip_dna import (
+    MIPDNA_CONFIG_FILE_NAME,
+    MIPDNAConfigurator,
+)
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.store.models import Case
 from cg.store.store import Store
@@ -66,7 +69,9 @@ def test_configure(mocker: MockerFixture):
 
     # THEN the config file creator should have been called with the case id and the provided bed flag
     configurator.config_file_creator.create.assert_called_once_with(
-        case_id=case_id, bed_flag="bed_file.bed", file_path=Path(root_dir, case_id, "pedigree.yaml")
+        case_id=case_id,
+        bed_flag="bed_file.bed",
+        file_path=Path(root_dir, case_id, MIPDNA_CONFIG_FILE_NAME),
     )
 
     # THEN the gene panel file creator should have been called with correct case id and path

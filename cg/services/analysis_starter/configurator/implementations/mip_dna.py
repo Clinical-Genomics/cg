@@ -16,9 +16,10 @@ from cg.services.analysis_starter.configurator.file_creators.mip_dna_config impo
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.store.models import Case
 from cg.store.store import Store
-from tests.conftest import case_id
 
 LOG = logging.getLogger(__name__)
+
+MIPDNA_CONFIG_FILE_NAME = "pedigree.yaml"
 
 
 class MIPDNAConfigurator(Configurator):
@@ -63,7 +64,7 @@ class MIPDNAConfigurator(Configurator):
         return config
 
     def _get_config_file_path(self, case_id: str) -> Path:
-        return Path(self._get_run_directory(case_id), "pedigree.yaml")
+        return Path(self._get_run_directory(case_id), MIPDNA_CONFIG_FILE_NAME)
 
     def _get_run_directory(self, case_id: str) -> Path:
         return Path(self.root, case_id)
