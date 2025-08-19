@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import create_autospec
+from unittest.mock import create_autospec, Mock
 
 import pytest
 from pytest_mock import MockerFixture
@@ -108,12 +108,19 @@ def test_raredisease_configure(mocker: MockerFixture):
         pre_run_script="some_script.sh",
     )
 
+    store_mock = create_autospec(
+        Store,
+    )
+
+    store_mock.get_case_workflow = Mock(return_value="raredisease")
+    store_mock.get_case_priority = Mock(return_value="normal")
+
     configurator = NextflowConfigurator(
         config_file_creator=create_autospec(NextflowConfigFileCreator),
         params_file_creator=create_autospec(ParamsFileCreator),
         pipeline_config=pipeline_config,
         sample_sheet_creator=create_autospec(NextflowSampleSheetCreator),
-        store=create_autospec(Store),
+        store=store_mock,
         pipeline_extension=create_autospec(PipelineExtension),
     )
 

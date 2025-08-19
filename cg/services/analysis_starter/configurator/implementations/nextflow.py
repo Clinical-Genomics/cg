@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from cg.constants import FileExtensions
 from cg.exc import CaseNotConfiguredError
 from cg.models.cg_config import CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
@@ -86,6 +87,10 @@ class NextflowConfigurator(Configurator):
         config: NextflowCaseConfig = self._set_flags(config=config, **flags)
         self._ensure_valid_config(config)
         return config
+
+    def _get_config_file_path(self, case_id: str) -> Path:
+        """Return the path to the Nextflow config file."""
+        return Path(self._get_case_path(case_id), f"{case_id}_nextflow_config").with_suffix(FileExtensions.JSON)
 
     def _get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
