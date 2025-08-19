@@ -20,6 +20,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.store.store import Store
+from tests.services.analysis_starter.file_creators.mip_dna_config_file_creator.conftest import (
+    case_id,
+)
 
 
 @pytest.mark.parametrize(
@@ -116,12 +119,16 @@ def test_raredisease_configure(mocker: MockerFixture):
 
     store_mock.get_case_workflow = Mock(return_value="raredisease")
     store_mock.get_case_priority = Mock(return_value="normal")
+    sample_sheet_creator = create_autospec(NextflowSampleSheetCreator)
+    case_id = "case123"
+    case_path = Path("/root", case_id)
+    params_file_creator = create_autospec(ParamsFileCreator)
 
     configurator = NextflowConfigurator(
         config_file_creator=create_autospec(NextflowConfigFileCreator),
-        params_file_creator=create_autospec(ParamsFileCreator),
+        params_file_creator=params_file_creator,
         pipeline_config=pipeline_config,
-        sample_sheet_creator=create_autospec(NextflowSampleSheetCreator),
+        sample_sheet_creator=sample_sheet_creator,
         store=store_mock,
         pipeline_extension=create_autospec(PipelineExtension),
     )
@@ -131,18 +138,23 @@ def test_raredisease_configure(mocker: MockerFixture):
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)
 
-    config: NextflowCaseConfig = configurator.configure(case_id="case_id")
+    config: NextflowCaseConfig = configurator.configure(case_id=case_id)
 
     expected_config = NextflowCaseConfig(
-        case_id="case_id",
+        case_id=case_id,
         workflow=Workflow.RAREDISEASE,
         case_priority=SlurmQos.NORMAL,
         config_profiles=["profile_raredisease"],
-        nextflow_config_file=Path("/root", "case_id", "case_id_nextflow_config.json").as_posix(),
-        params_file=Path("/root", "case_id", "case_id_params_file.yaml").as_posix(),
+        nextflow_config_file=Path("/root", case_id, f"{case_id}_nextflow_config.json").as_posix(),
+        params_file=Path("/root", case_id, f"{case_id}_params_file.yaml").as_posix(),
         pipeline_repository="http://repo.scilifelab.se",
         pre_run_script="some_script.sh",
         revision="rev123",
-        work_dir=Path("/root", "case_id", "work").as_posix(),
+        work_dir=Path("/root", case_id, "work").as_posix(),
     )
     assert config == expected_config
+    mkdir_mock.assert_called_once_with(parents=True, exist_ok=True)
+    sample_sheet_creator.create.assert_called_once_with(case_id=case_id, case_path=case_path)
+    params_file_creator.create.assert_called_once_with(
+        case_id=case_id, case_path=case_path, sample_sheet_path="?"
+    )
