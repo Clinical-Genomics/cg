@@ -82,3 +82,6 @@ def test_get_case_config_none_flags(
 
     # THEN we should get back a case config without altering the pre-run-script
     assert case_config.pre_run_script is not None
+
+def test_MIPDNA_configure():
+    pass
