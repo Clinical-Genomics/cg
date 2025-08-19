@@ -81,7 +81,6 @@ def gene_panel_creator(
 def test_gene_panel_file_content(
     gene_panel_creator: GenePanelFileCreator,
     raredisease_case_id: str,
-    nextflow_case_path: Path,
     nextflow_gene_panel_file_content,
     mocker: MockerFixture,
 ):
@@ -95,12 +94,12 @@ def test_gene_panel_file_content(
     write_mock = mocker.patch.object(gene_panel, "write_txt")
 
     # WHEN creating a gene panel file
-    gene_panel_creator.create(case_id=raredisease_case_id, case_path=nextflow_case_path)
+    gene_panel_creator.create(case_id=raredisease_case_id, file_path=Path("/nextflow.bed"))
 
     # THEN the gene panel file would have been written with the expected content
     write_mock.assert_called_once_with(
         content=nextflow_gene_panel_file_content,
-        file_path=gene_panel_creator.get_file_path(nextflow_case_path),
+        file_path=Path("/nextflow.bed"),
     )
 
 
@@ -198,7 +197,7 @@ def test_creating_file_for_workflows_using_correct_build(
     mocker.patch.object(gene_panel, "write_txt")
 
     # WHEN creating a gene panel file
-    gene_panel_creator.create(case_id=case_id, file_path=Path("/"))
+    gene_panel_creator.create(case_id=case_id, file_path=Path("/filename.bed"))
 
     # THEN Scout should have been called with the expected build and panels
     cast(Mock, mock_scout.export_panels).assert_called_once_with(

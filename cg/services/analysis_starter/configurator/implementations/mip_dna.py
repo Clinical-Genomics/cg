@@ -49,7 +49,9 @@ class MIPDNAConfigurator(Configurator):
             bed_flag=flags.get("panel_bed"),
             file_path=self._get_config_file_path(case_id=case_id),
         )
-        self.gene_panel_file_creator.create(case_id=case_id, file_path=self._get_gene_panel_file_path(case_id))
+        self.gene_panel_file_creator.create(
+            case_id=case_id, file_path=self._get_gene_panel_file_path(case_id)
+        )
         self.managed_variants_file_creator.create(case_id=case_id, case_path=run_directory)
         return self.get_config(case_id=case_id, **flags)
 
@@ -86,7 +88,7 @@ class MIPDNAConfigurator(Configurator):
         """
         run_directory: Path = self._get_run_directory(case_id)
         config_file_path: Path = self._get_config_file_path(case_id)
-        gene_panel_file_path: Path = self.gene_panel_file_creator.get_file_path(run_directory)
+        gene_panel_file_path: Path = self._get_gene_panel_file_path(case_id)
         managed_variants_file_path: Path = self.managed_variants_file_creator.get_file_path(
             run_directory
         )
