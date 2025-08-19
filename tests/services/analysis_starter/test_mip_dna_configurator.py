@@ -4,10 +4,12 @@ from unittest.mock import Mock, create_autospec
 import pytest
 from pytest_mock import MockerFixture
 
-from cg.constants import FileExtensions
 from cg.constants.priority import SlurmQos
 from cg.exc import CaseNotConfiguredError
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
+from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
+    ManagedVariantsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.mip_dna_config import (
     MIPDNAConfigFileCreator,
 )
@@ -44,7 +46,7 @@ def test_configure(mocker: MockerFixture):
         config_file_creator=create_autospec(MIPDNAConfigFileCreator),
         fastq_handler=Mock(),
         gene_panel_file_creator=create_autospec(GenePanelFileCreator),
-        managed_variants_file_creator=Mock(),
+        managed_variants_file_creator=create_autospec(ManagedVariantsFileCreator),
         root=root_dir,
         store=store,
     )
@@ -76,11 +78,13 @@ def test_configure(mocker: MockerFixture):
 
     # THEN the gene panel file creator should have been called with correct case id and path
     configurator.gene_panel_file_creator.create.assert_called_once_with(
-        case_id=case_id, file_path=Path("root_dir", case_id, "gene_panels.bed"),
+        case_id=case_id,
+        file_path=Path("root_dir", case_id, "gene_panels.bed"),
     )
 
     configurator.managed_variants_file_creator.create.assert_called_once_with(
-        case_id=case_id, case_path=Path("root_dir", case_id)
+        case_id=case_id,
+        file_path=Path("root_dir", case_id, "managed_variants.vcf"),
     )
 
 

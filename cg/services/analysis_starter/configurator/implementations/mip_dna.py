@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 
 from cg.apps.environ import environ_email
-from cg.constants import FileExtensions
 from cg.exc import CaseNotConfiguredError
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.services.analysis_starter.configurator.configurator import Configurator
@@ -21,6 +20,7 @@ LOG = logging.getLogger(__name__)
 
 MIPDNA_CONFIG_FILE_NAME = "pedigree.yaml"
 MIPDNA_GENE_PANEL_FILE_NAME = "gene_panels.bed"
+MIPDNA_MANAGED_VARIANTS_FILE_NAME = "managed_variants.vcf"
 
 
 class MIPDNAConfigurator(Configurator):
@@ -42,7 +42,7 @@ class MIPDNAConfigurator(Configurator):
 
     def configure(self, case_id: str, **flags) -> MIPDNACaseConfig:
         LOG.info(f"Configuring case {case_id}")
-        run_directory: Path = self._create_run_directory(case_id)
+        self._create_run_directory(case_id)
         self.fastq_handler.link_fastq_files(case_id)
         self.config_file_creator.create(
             case_id=case_id,
@@ -52,7 +52,9 @@ class MIPDNAConfigurator(Configurator):
         self.gene_panel_file_creator.create(
             case_id=case_id, file_path=self._get_gene_panel_file_path(case_id)
         )
-        self.managed_variants_file_creator.create(case_id=case_id, case_path=run_directory)
+        self.managed_variants_file_creator.create(
+            case_id=case_id, file_path=self._get_managed_variants_file_path(case_id)
+        )
         return self.get_config(case_id=case_id, **flags)
 
     def get_config(self, case_id: str, **flags) -> MIPDNACaseConfig:
@@ -68,6 +70,9 @@ class MIPDNAConfigurator(Configurator):
 
     def _get_gene_panel_file_path(self, case_id: str) -> Path:
         return Path(self._get_run_directory(case_id), MIPDNA_GENE_PANEL_FILE_NAME)
+
+    def _get_managed_variants_file_path(self, case_id: str) -> Path:
+        return Path(self._get_run_directory(case_id), MIPDNA_MANAGED_VARIANTS_FILE_NAME)
 
     def _get_config_file_path(self, case_id: str) -> Path:
         return Path(self._get_run_directory(case_id), MIPDNA_CONFIG_FILE_NAME)
@@ -86,12 +91,9 @@ class MIPDNAConfigurator(Configurator):
         Raises:
             CaseNotConfiguredError if any of those files are not present.
         """
-        run_directory: Path = self._get_run_directory(case_id)
         config_file_path: Path = self._get_config_file_path(case_id)
         gene_panel_file_path: Path = self._get_gene_panel_file_path(case_id)
-        managed_variants_file_path: Path = self.managed_variants_file_creator.get_file_path(
-            run_directory
-        )
+        managed_variants_file_path: Path = self._get_managed_variants_file_path(case_id)
         if not (
             config_file_path.exists()
             and gene_panel_file_path.exists()
