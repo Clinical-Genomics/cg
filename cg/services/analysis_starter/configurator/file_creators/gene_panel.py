@@ -18,7 +18,7 @@ class GenePanelFileCreator:
     def get_file_path(case_path: Path) -> Path:
         return Path(case_path, "gene_panels").with_suffix(FileExtensions.BED)
 
-    def create(self, case_id: str, case_path: Path) -> None:
+    def create(self, case_id: str, file_path: Path) -> None:
         file_path: Path = self.get_file_path(case_path)
         content: list[str] = self._get_content(case_id)
         write_txt(file_path=file_path, content=content)

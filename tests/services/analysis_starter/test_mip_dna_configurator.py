@@ -43,7 +43,7 @@ def test_configure(mocker: MockerFixture):
     configurator = MIPDNAConfigurator(
         config_file_creator=create_autospec(MIPDNAConfigFileCreator),
         fastq_handler=Mock(),
-        gene_panel_file_creator=Mock(),
+        gene_panel_file_creator=create_autospec(GenePanelFileCreator),
         managed_variants_file_creator=Mock(),
         root=root_dir,
         store=store,
@@ -76,7 +76,7 @@ def test_configure(mocker: MockerFixture):
 
     # THEN the gene panel file creator should have been called with correct case id and path
     configurator.gene_panel_file_creator.create.assert_called_once_with(
-        case_id=case_id, case_path=Path("root_dir", case_id)
+        case_id=case_id, file_path=Path("root_dir", case_id, "gene_panels.bed"),
     )
 
     configurator.managed_variants_file_creator.create.assert_called_once_with(

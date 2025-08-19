@@ -20,6 +20,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 MIPDNA_CONFIG_FILE_NAME = "pedigree.yaml"
+MIPDNA_GENE_PANEL_FILE_NAME = "gene_panels.bed"
 
 
 class MIPDNAConfigurator(Configurator):
@@ -48,7 +49,7 @@ class MIPDNAConfigurator(Configurator):
             bed_flag=flags.get("panel_bed"),
             file_path=self._get_config_file_path(case_id=case_id),
         )
-        self.gene_panel_file_creator.create(case_id=case_id, case_path=run_directory)
+        self.gene_panel_file_creator.create(case_id=case_id, file_path=self._get_gene_panel_file_path(case_id))
         self.managed_variants_file_creator.create(case_id=case_id, case_path=run_directory)
         return self.get_config(case_id=case_id, **flags)
 
@@ -62,6 +63,9 @@ class MIPDNAConfigurator(Configurator):
         config = self._set_flags(config=config, **flags)
         self._ensure_valid_config(case_id)
         return config
+
+    def _get_gene_panel_file_path(self, case_id: str) -> Path:
+        return Path(self._get_run_directory(case_id), MIPDNA_GENE_PANEL_FILE_NAME)
 
     def _get_config_file_path(self, case_id: str) -> Path:
         return Path(self._get_run_directory(case_id), MIPDNA_CONFIG_FILE_NAME)

@@ -198,7 +198,7 @@ def test_creating_file_for_workflows_using_correct_build(
     mocker.patch.object(gene_panel, "write_txt")
 
     # WHEN creating a gene panel file
-    gene_panel_creator.create(case_id=case_id, case_path=Path("/"))
+    gene_panel_creator.create(case_id=case_id, file_path=Path("/"))
 
     # THEN Scout should have been called with the expected build and panels
     cast(Mock, mock_scout.export_panels).assert_called_once_with(
