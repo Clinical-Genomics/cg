@@ -27,9 +27,8 @@ class NextflowSampleSheetCreator(ABC):
         """Return the path to the sample sheet."""
         return Path(case_path, f"{case_id}_samplesheet").with_suffix(FileExtensions.CSV)
 
-    def create(self, case_id: str, case_path: Path) -> None:
+    def create(self, case_id: str, file_path: Path) -> None:
         LOG.debug(f"Creating sample sheet for case {case_id}")
-        file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
         content: list[list[str]] = self._get_content(case_id)
         write_csv(file_path=file_path, content=content)
 

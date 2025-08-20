@@ -158,9 +158,9 @@ def test_raredisease_configure(mocker: MockerFixture):
     )
     assert config == expected_config
     mkdir_mock.assert_called_once_with(parents=True, exist_ok=True)
-    sample_sheet_creator.create.assert_called_once_with(case_id=case_id, case_path=case_path)
+    sample_sheet_creator.create.assert_called_once_with(case_id=case_id, file_path=Path(case_path,f"{case_id}_samplesheet.csv"))
     params_file_creator.create.assert_called_once_with(
-        case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path_mock
+        case_id=case_id, file_path=case_path, sample_sheet_path=sample_sheet_path_mock
     )
     config_file_creator.create.assert_called_once_with(case_id=case_id, case_path=case_path)
     pipeline_extension.configure.assert_called_once_with(case_id=case_id, case_path=case_path)
