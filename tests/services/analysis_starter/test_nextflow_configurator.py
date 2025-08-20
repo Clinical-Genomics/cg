@@ -4,6 +4,7 @@ from unittest.mock import Mock, create_autospec
 import pytest
 from pytest_mock import MockerFixture
 
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
 from cg.models.cg_config import (
@@ -28,8 +29,14 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
     TaxprofilerParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowSampleSheetCreator,
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
+    RarediseaseSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+    RNAFusionSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
+    TaxprofilerSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
@@ -115,17 +122,33 @@ def test_get_case_config_none_flags(
 
 
 @pytest.mark.parametrize(
-    "workflow, params_file_creator_class, pipeline_config_class",
+    "workflow, params_file_creator_class, pipeline_config_class, sample_sheet_creator_class",
     [
-        (Workflow.RAREDISEASE, RarediseaseParamsFileCreator, RarediseaseConfig),
-        (Workflow.RNAFUSION, RNAFusionParamsFileCreator, RnafusionConfig),
-        (Workflow.TAXPROFILER, TaxprofilerParamsFileCreator, TaxprofilerConfig),
+        (
+            Workflow.RAREDISEASE,
+            RarediseaseParamsFileCreator,
+            RarediseaseConfig,
+            RarediseaseSampleSheetCreator,
+        ),
+        (
+            Workflow.RNAFUSION,
+            RNAFusionParamsFileCreator,
+            RnafusionConfig,
+            RNAFusionSampleSheetCreator,
+        ),
+        (
+            Workflow.TAXPROFILER,
+            TaxprofilerParamsFileCreator,
+            TaxprofilerConfig,
+            TaxprofilerSampleSheetCreator,
+        ),
     ],
 )
 def test_raredisease_configure(
     workflow: Workflow,
     params_file_creator_class: type[ParamsFileCreator],
     pipeline_config_class: type[CommonAppConfig],
+    sample_sheet_creator_class: type[SampleSheetCreator],
     mocker: MockerFixture,
 ):
     pipeline_config = create_autospec(
@@ -133,14 +156,14 @@ def test_raredisease_configure(
         root="/root",
         repository="https://repo.scilifelab.se",
         revision="rev123",
-        profile="profile_raredisease",
+        profile="profile",
         pre_run_script="some_script.sh",
     )
 
     store_mock = create_autospec(Store)
     store_mock.get_case_workflow = Mock(return_value=workflow)
     store_mock.get_case_priority = Mock(return_value="normal")
-    sample_sheet_creator = create_autospec(NextflowSampleSheetCreator)
+    sample_sheet_creator = create_autospec(sample_sheet_creator_class)
     case_id = "case123"
     case_path = Path("/root", case_id)
     params_file_creator = create_autospec(params_file_creator_class)
@@ -172,9 +195,9 @@ def test_raredisease_configure(
     # THEN the returned config should be as expected
     expected_config = NextflowCaseConfig(
         case_id=case_id,
-        workflow=Workflow.RAREDISEASE,
+        workflow=workflow,
         case_priority=SlurmQos.NORMAL,
-        config_profiles=["profile_raredisease"],
+        config_profiles=["profile"],
         nextflow_config_file=Path("/root", case_id, f"{case_id}_nextflow_config.json").as_posix(),
         params_file=Path("/root", case_id, f"{case_id}_params_file.yaml").as_posix(),
         pipeline_repository="https://repo.scilifelab.se",

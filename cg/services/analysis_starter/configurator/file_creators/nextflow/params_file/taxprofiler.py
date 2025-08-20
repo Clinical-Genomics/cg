@@ -17,9 +17,8 @@ LOG = logging.getLogger(__name__)
 
 class TaxprofilerParamsFileCreator(ParamsFileCreator):
 
-    def create(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> None:
+    def create(self, case_id: str, file_path: Path, sample_sheet_path: Path) -> None:
         LOG.debug(f"Creating params file for case {case_id}")
-        file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
         content: dict = self._get_content(case_path=case_path, sample_sheet_path=sample_sheet_path)
         write_yaml_nextflow_style(file_path=file_path, content=content)
 
