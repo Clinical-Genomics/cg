@@ -20,9 +20,6 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.store.store import Store
-from tests.services.analysis_starter.file_creators.mip_dna_config_file_creator.conftest import (
-    case_id,
-)
 
 
 @pytest.mark.parametrize(
@@ -124,13 +121,20 @@ def test_raredisease_configure(mocker: MockerFixture):
     case_path = Path("/root", case_id)
     params_file_creator = create_autospec(ParamsFileCreator)
 
+    sample_sheet_path_mock = Path("/root", case_id, f"{case_id}_samplesheet.csv")
+    sample_sheet_creator.get_file_path.return_value = sample_sheet_path_mock
+
+    config_file_creator = create_autospec(NextflowConfigFileCreator)
+
+    pipeline_extension = create_autospec(PipelineExtension)
+
     configurator = NextflowConfigurator(
-        config_file_creator=create_autospec(NextflowConfigFileCreator),
+        config_file_creator=config_file_creator,
         params_file_creator=params_file_creator,
         pipeline_config=pipeline_config,
         sample_sheet_creator=sample_sheet_creator,
         store=store_mock,
-        pipeline_extension=create_autospec(PipelineExtension),
+        pipeline_extension=pipeline_extension,
     )
 
     mkdir_mock = mocker.patch.object(Path, "mkdir")
@@ -156,5 +160,7 @@ def test_raredisease_configure(mocker: MockerFixture):
     mkdir_mock.assert_called_once_with(parents=True, exist_ok=True)
     sample_sheet_creator.create.assert_called_once_with(case_id=case_id, case_path=case_path)
     params_file_creator.create.assert_called_once_with(
-        case_id=case_id, case_path=case_path, sample_sheet_path="?"
+        case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path_mock
     )
+    config_file_creator.create.assert_called_once_with(case_id=case_id, case_path=case_path)
+    pipeline_extension.configure.assert_called_once_with(case_id=case_id, case_path=case_path)
