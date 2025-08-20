@@ -2138,6 +2138,22 @@ freezegun = ">0.3"
 pytest = ">=3.0.0"
 
 [[package]]
+name = "pytest-httpserver"
+version = "1.1.3"
+description = "pytest-httpserver is a httpserver for pytest"
+optional = true
+python-versions = ">=3.9"
+groups = ["main"]
+markers = "extra == \"pytest-httpserver\""
+files = [
+    {file = "pytest_httpserver-1.1.3-py3-none-any.whl", hash = "sha256:5f84757810233e19e2bb5287f3826a71c97a3740abe3a363af9155c0f82fdbb9"},
+    {file = "pytest_httpserver-1.1.3.tar.gz", hash = "sha256:af819d6b533f84b4680b9416a5b3f67f1df3701f1da54924afd4d6e4ba5917ec"},
+]
+
+[package.dependencies]
+Werkzeug = ">=2.0.0"
+
+[[package]]
 name = "pytest-mock"
 version = "3.14.0"
 description = "Thin-wrapper around the mock package for easier use with pytest"
@@ -2714,6 +2730,7 @@ pre-commit = ["pre-commit"]
 pytest = ["pytest"]
 pytest-cov = ["pytest-cov"]
 pytest-freezegun = ["pytest-freezegun"]
+pytest-httpserver = ["pytest-httpserver"]
 pytest-mock = ["pytest-mock"]
 pytest-xdist = ["pytest-xdist"]
 ruff = ["ruff"]
@@ -2721,4 +2738,4 @@ ruff = ["ruff"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.13"
-content-hash = "8d2738dbbb755988bd2785616a203f9348611feeee40e8c7dfa951f83f813934"
+content-hash = "60362f86d9f7595e6de6ed2a11681850fe055dd235743015857e1fa806d2e939"

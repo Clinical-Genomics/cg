@@ -72,8 +72,16 @@ pytest-freezegun = ["pytest-freezegun"]
 pytest = ["pytest"]
 ruff = ["ruff"]
 pytest-xdist = ["pytest-xdist"]
+pytest-httpserver = ["pytest-httpserver"]
 
+[tool.pytest.ini_options]
+markers = [
+  "integration: Integration tests"
+]
 
+addopts = [
+    "-m", "not integration",
+]
 
 [project.scripts]
 cg = "cg.cli.base:base"
