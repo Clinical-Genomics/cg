@@ -47,13 +47,18 @@ class NextflowConfigurator(Configurator):
         4. Creating a configuration file.
         5. Creating any pipeline specific files."""
         case_path: Path = self._get_case_path(case_id)
-        sample_sheet_path = Path(case_path,f"{case_id}_samplesheet.csv")
+        sample_sheet_path = Path(case_path, f"{case_id}_samplesheet.csv")
+        params_file_path = Path(case_path, f"{case_id}_params_file.yaml")
+        config_file_path = Path(case_path, f"{case_id}_nextflow_config.json")
+
         self._create_case_directory(case_id)
         self.sample_sheet_creator.create(case_id=case_id, file_path=sample_sheet_path)
         self.params_file_creator.create(
-            case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
+            case_id=case_id,
+            file_path=params_file_path,
+            sample_sheet_path=sample_sheet_path,
         )
-        self.config_file_creator.create(case_id=case_id, case_path=case_path)
+        self.config_file_creator.create(case_id=case_id, file_path=config_file_path)
         self.pipeline_extension.configure(case_id=case_id, case_path=case_path)
         return self.get_config(case_id=case_id, **flags)
 

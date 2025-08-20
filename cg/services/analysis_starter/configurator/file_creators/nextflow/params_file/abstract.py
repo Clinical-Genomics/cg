@@ -8,5 +8,5 @@ class ParamsFileCreator(ABC):
         self.params = Path(params)
 
     @abstractmethod
-    def create(self, case_id: str, case_path: Path, sample_sheet_path: Path) -> any:
+    def create(self, case_id: str, file_path: Path, sample_sheet_path: Path) -> any:
         pass
