@@ -101,11 +101,7 @@ def test_get_case_config_none_flags(
 
 
 @pytest.mark.parametrize(
-    "workflow",
-    [
-        Workflow.RAREDISEASE,
-    ],
-    # Workflow.RNAFUSION, Workflow.TAXPROFILER], ""
+    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]
 )
 def test_raredisease_configure(workflow: Workflow, mocker: MockerFixture):
     pipeline_config = create_autospec(
@@ -146,8 +142,10 @@ def test_raredisease_configure(workflow: Workflow, mocker: MockerFixture):
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)
 
+    # WHEN we configure the case
     config: NextflowCaseConfig = configurator.configure(case_id=case_id)
 
+    # THEN the returned config should be as expected
     expected_config = NextflowCaseConfig(
         case_id=case_id,
         workflow=Workflow.RAREDISEASE,
@@ -161,7 +159,11 @@ def test_raredisease_configure(workflow: Workflow, mocker: MockerFixture):
         work_dir=Path("/root", case_id, "work").as_posix(),
     )
     assert config == expected_config
+
+    # THEN the case run directory should have been created
     mkdir_mock.assert_called_once_with(parents=True, exist_ok=True)
+
+    # THEN the file creators should have been called
     sample_sheet_creator.create.assert_called_once_with(
         case_id=case_id, file_path=Path(case_path, f"{case_id}_samplesheet.csv")
     )
@@ -173,4 +175,6 @@ def test_raredisease_configure(workflow: Workflow, mocker: MockerFixture):
     config_file_creator.create.assert_called_once_with(
         case_id=case_id, file_path=Path(case_path, f"{case_id}_nextflow_config.json")
     )
-    pipeline_extension.configure.assert_called_once_with(case_id=case_id, case_path=case_path)
+
+    # THEN the pipeline extension should have been configured
+    pipeline_extension.configure.assert_called_once_with(case_id=case_id)

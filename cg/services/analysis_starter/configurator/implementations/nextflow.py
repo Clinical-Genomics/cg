@@ -59,7 +59,7 @@ class NextflowConfigurator(Configurator):
             sample_sheet_path=sample_sheet_path,
         )
         self.config_file_creator.create(case_id=case_id, file_path=config_file_path)
-        self.pipeline_extension.configure(case_id=case_id, case_path=case_path)
+        self.pipeline_extension.configure(case_id=case_id)
         return self.get_config(case_id=case_id, **flags)
 
     def get_config(self, case_id: str, **flags) -> NextflowCaseConfig:
