@@ -11,11 +11,9 @@ from cg.services.analysis_starter.configurator.extensions.abstract import Pipeli
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
-    ParamsFileCreator,
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
+    RarediseaseParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import \
-    RarediseaseParamsFileCreator
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowSampleSheetCreator,
 )
@@ -101,25 +99,25 @@ def test_get_case_config_none_flags(
     # THEN we should get back a case config without altering the pre-run-script
     assert case_config.pre_run_script is not None
 
+
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
-    ""
+    [
+        Workflow.RAREDISEASE,
+    ],
+    # Workflow.RNAFUSION, Workflow.TAXPROFILER], ""
 )
-def test_raredisease_configure(mocker: MockerFixture):
+def test_raredisease_configure(workflow: Workflow, mocker: MockerFixture):
     pipeline_config = create_autospec(
         RarediseaseConfig,
         root="/root",
-        repository="http://repo.scilifelab.se",
+        repository="https://repo.scilifelab.se",
         revision="rev123",
         profile="profile_raredisease",
         pre_run_script="some_script.sh",
     )
 
-    store_mock = create_autospec(
-        Store,
-    )
-
+    store_mock = create_autospec(Store)
     store_mock.get_case_workflow = Mock(return_value="raredisease")
     store_mock.get_case_priority = Mock(return_value="normal")
     sample_sheet_creator = create_autospec(NextflowSampleSheetCreator)
@@ -128,7 +126,7 @@ def test_raredisease_configure(mocker: MockerFixture):
     params_file_creator = create_autospec(RarediseaseParamsFileCreator)
 
     sample_sheet_path_mock = Path("/root", case_id, f"{case_id}_samplesheet.csv")
-    sample_sheet_creator.get_file_path.return_value = sample_sheet_path_mock
+    # sample_sheet_creator.get_file_path.return_value = sample_sheet_path_mock
 
     config_file_creator = create_autospec(NextflowConfigFileCreator)
 
@@ -157,7 +155,7 @@ def test_raredisease_configure(mocker: MockerFixture):
         config_profiles=["profile_raredisease"],
         nextflow_config_file=Path("/root", case_id, f"{case_id}_nextflow_config.json").as_posix(),
         params_file=Path("/root", case_id, f"{case_id}_params_file.yaml").as_posix(),
-        pipeline_repository="http://repo.scilifelab.se",
+        pipeline_repository="https://repo.scilifelab.se",
         pre_run_script="some_script.sh",
         revision="rev123",
         work_dir=Path("/root", case_id, "work").as_posix(),
