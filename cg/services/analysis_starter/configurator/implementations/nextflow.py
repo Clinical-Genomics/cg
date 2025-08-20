@@ -51,6 +51,7 @@ class NextflowConfigurator(Configurator):
         params_file_path = Path(case_path, f"{case_id}_params_file.yaml")
         config_file_path = Path(case_path, f"{case_id}_nextflow_config.json")
 
+
         self._create_case_directory(case_id)
         self.sample_sheet_creator.create(case_id=case_id, file_path=sample_sheet_path)
         self.params_file_creator.create(

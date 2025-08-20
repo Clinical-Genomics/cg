@@ -14,6 +14,8 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.config_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import \
+    RarediseaseParamsFileCreator
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowSampleSheetCreator,
 )
@@ -99,7 +101,11 @@ def test_get_case_config_none_flags(
     # THEN we should get back a case config without altering the pre-run-script
     assert case_config.pre_run_script is not None
 
-
+@pytest.mark.parametrize(
+    "workflow",
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    ""
+)
 def test_raredisease_configure(mocker: MockerFixture):
     pipeline_config = create_autospec(
         RarediseaseConfig,
@@ -119,7 +125,7 @@ def test_raredisease_configure(mocker: MockerFixture):
     sample_sheet_creator = create_autospec(NextflowSampleSheetCreator)
     case_id = "case123"
     case_path = Path("/root", case_id)
-    params_file_creator = create_autospec(ParamsFileCreator)
+    params_file_creator = create_autospec(RarediseaseParamsFileCreator)
 
     sample_sheet_path_mock = Path("/root", case_id, f"{case_id}_samplesheet.csv")
     sample_sheet_creator.get_file_path.return_value = sample_sheet_path_mock
