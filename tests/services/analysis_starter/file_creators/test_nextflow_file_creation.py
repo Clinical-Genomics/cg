@@ -3,7 +3,9 @@ from unittest.mock import Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
+from sqlalchemy import Case
 
+from cg.apps.lims.api import LimsAPI
 from cg.constants import Workflow
 from cg.services.analysis_starter.configurator.file_creators.nextflow import config_file
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
@@ -19,7 +21,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowSampleSheetCreator,
 )
-from cg.store.models import Sample
+from cg.store.models import BedVersion, Sample
 from cg.store.store import Store
 
 
@@ -27,11 +29,20 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
     # GIVEN
     file_path = Path("some_path", "file_name.yaml")
 
+    case = create_autospec(Case, samples=[create_autospec(Sample, from_sample=None)])
+
     store_mock: Store = create_autospec(Store)
     store_mock.get_samples_by_case_id = Mock(return_value=[create_autospec(Sample)])
+    store_mock.get_case_by_internal_id = Mock(return_value=case)
+    store_mock.get_bed_version_by_short_name = Mock(
+        return_value=create_autospec(BedVersion, filename="bed_version.bed")
+    )
+
+    lims = create_autospec(LimsAPI)
+    lims.capture_kit = Mock(return_value="target_bed_shortname_123")
 
     # GIVEN a params file creator, an expected output and a mocked file writer
-    file_creator = RarediseaseParamsFileCreator(store=store_mock, lims=Mock(), params="")
+    file_creator = RarediseaseParamsFileCreator(store=store_mock, lims=lims, params="")
 
     # GIVEN case id
     case_id = "case_id"
@@ -40,6 +51,8 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
     sample_sheet_path = Path("root", "samplesheet.csv")
 
     write_yaml_mock = mocker.patch.object(raredisease, "write_yaml_nextflow_style")
+    write_csv_mock = mocker.patch.object(raredisease, "write_csv")
+
     # WHEN creating the params file
     file_creator.create(
         case_id=case_id,
@@ -49,6 +62,9 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
 
     # THEN the file should have been written with the expected content
     write_yaml_mock.assert_called_once_with(file_path=file_path, content="?")
+    write_csv_mock.assert_called_once_with(
+        file_path=Path("some_path", f"{case_id}_customer_internal_mapping.csv")
+    )
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RNAFUSION, Workflow.TAXPROFILER])
