@@ -52,7 +52,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         self, case_id: str, case_path: Path, sample_sheet_path: Path
     ) -> RarediseaseParameters:
         """Return case-specific parameters for the analysis."""
-        analysis_type: str = self._get_data_analysis_type(case_id)
+        analysis_type: str = self._get_arbitrary_prep_category_in_case(case_id)
         target_bed_file: str = self._get_target_bed_from_lims(case_id)
         sample_mapping_file: Path = self._create_sample_mapping_file(
             case_id=case_id, case_path=case_path
@@ -68,10 +68,10 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             sample_id_map=sample_mapping_file,
         )
 
-    def _get_data_analysis_type(self, case_id: str) -> str:
+    def _get_arbitrary_prep_category_in_case(self, case_id: str) -> str:
         """
-        Return case analysis type (WEG, WGS, WTS or TGS). Assumes all case samples have the same
-        analysis type.
+        Returns prep category. Assumes all case samples have the same
+        prep category.
         """
         sample: Sample = self.store.get_samples_by_case_id(case_id=case_id)[0]
         return sample.prep_category

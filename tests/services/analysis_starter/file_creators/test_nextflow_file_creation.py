@@ -27,9 +27,10 @@ from cg.store.store import Store
 
 
 def test_raredisease_params_file_creator(mocker: MockerFixture):
-    # GIVEN
+    # GIVEN a file path
     file_path = Path("some_path", "file_name.yaml")
 
+    # GIVEN a store containing a case with a linked sample. Also contains a bed version.
     super_sample = create_autospec(
         Sample,
         from_sample=None,
@@ -38,16 +39,18 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
     )
     super_sample.name = "sample_name"
     case = create_autospec(Case, samples=[super_sample])
-
     store_mock: Store = create_autospec(Store)
     store_mock.get_samples_by_case_id = Mock(return_value=[super_sample])
     store_mock.get_case_by_internal_id_strict = Mock(return_value=case)
-    store_mock.get_bed_version_by_short_name_strict = Mock(
-        return_value=create_autospec(BedVersion, filename="bed_version.bed")
+    store_mock.get_bed_version_by_short_name_strict = lambda short_name: (
+        create_autospec(BedVersion, filename="bed_version.bed")
+        if short_name == "target_bed_shortname_123"
+        else create_autospec(BedVersion)
     )
 
+    # GIVEN that Lims returns a bed shortname
     lims = create_autospec(LimsAPI)
-    lims.capture_kit = Mock(return_value="target_bed_shortname_123")
+    lims.get_capture_kit_strict = Mock(return_value="target_bed_shortname_123")
 
     # GIVEN a params file creator, an expected output and a mocked file writer
     file_creator = RarediseaseParamsFileCreator(
