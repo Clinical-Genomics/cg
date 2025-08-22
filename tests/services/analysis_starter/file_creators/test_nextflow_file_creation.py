@@ -30,16 +30,19 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
     # GIVEN
     file_path = Path("some_path", "file_name.yaml")
 
-    case = create_autospec(Case, samples=[create_autospec(Sample, from_sample=None)])
+    super_sample = create_autospec(
+        Sample,
+        from_sample=None,
+        internal_id="ACC",
+        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+    )
+    super_sample.name = "sample_name"
+    case = create_autospec(Case, samples=[super_sample])
 
     store_mock: Store = create_autospec(Store)
-    store_mock.get_samples_by_case_id = Mock(
-        return_value=[
-            create_autospec(Sample, prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING)
-        ]
-    )
-    store_mock.get_case_by_internal_id = Mock(return_value=case)
-    store_mock.get_bed_version_by_short_name = Mock(
+    store_mock.get_samples_by_case_id = Mock(return_value=[super_sample])
+    store_mock.get_case_by_internal_id_strict = Mock(return_value=case)
+    store_mock.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
@@ -84,7 +87,8 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
         },
     )
     write_csv_mock.assert_called_once_with(
-        file_path=Path("some_path", f"{case_id}_customer_internal_mapping.csv")
+        content=[["customer_id", "internal_id"], ["sample_name", "ACC"]],
+        file_path=Path("some_path", f"{case_id}_customer_internal_mapping.csv"),
     )
 
 

@@ -4,7 +4,6 @@ from pathlib import Path
 from cg.apps.lims import LimsAPI
 from cg.constants import FileExtensions
 from cg.constants.scout import ScoutExportFileName
-from cg.constants.symbols import EMPTY_STRING
 from cg.exc import CgDataError
 from cg.io.csv import write_csv
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
@@ -43,8 +42,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
         ).model_dump()
         workflow_parameters: dict = read_yaml(self.params)
-        duplicate_keys = set(case_parameters.keys()) & set(workflow_parameters.keys())
-        if duplicate_keys:
+        if duplicate_keys := set(case_parameters.keys()) & set(workflow_parameters.keys()):
             raise CgDataError(f"Duplicate parameter keys found: {duplicate_keys}")
         parameters: dict = case_parameters | workflow_parameters
         curated_parameters: dict = replace_values_in_params_file(parameters)
@@ -84,18 +82,14 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         Raises:
             CgDataError: if the bed target capture version is not found in StatusDB.
         """
-        case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.store.get_case_by_internal_id_strict(internal_id=case_id)
         sample: Sample = case.samples[0]
-        if sample.from_sample:
-            sample: Sample = self.store.get_sample_by_internal_id(internal_id=sample.from_sample)
-        target_bed_shortname: str | None = self.lims.capture_kit(lims_id=sample.internal_id)
-        if not target_bed_shortname:
-            return EMPTY_STRING
-        bed_version: BedVersion | None = self.store.get_bed_version_by_short_name(
-            bed_version_short_name=target_bed_shortname
+        target_bed_shortname: str = self.lims.get_capture_kit_strict(
+            sample.from_sample or sample.internal_id
         )
-        if not bed_version:
-            raise CgDataError(f"Bed-version {target_bed_shortname} does not exist")
+        bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(
+            target_bed_shortname
+        )
         return bed_version.filename
 
     def _create_sample_mapping_file(self, case_id: str, case_path: Path) -> Path:
@@ -104,7 +98,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             FileExtensions.CSV
         )
         content: list[list[str]] = [["customer_id", "internal_id"]]
-        case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.store.get_case_by_internal_id_strict(internal_id=case_id)
         content.extend([sample.name, sample.internal_id] for sample in case.samples)
         write_csv(file_path=file_path, content=content)
         return file_path
