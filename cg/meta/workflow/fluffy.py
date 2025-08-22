@@ -215,6 +215,16 @@ class FluffyAnalysisAPI(AnalysisAPI):
             file_format=FileFormat.CSV, file_path=sample_sheet_path
         )
         samples: list[IlluminaSampleIndexSetting] = get_samples_from_content(sample_sheet_content)
+        for sample in samples:
+            db_sample: Sample = self.status_db.get_sample_by_internal_id(sample.sample_id)
+            if not db_sample:
+                LOG.warning(f"Sample {sample.sample_id} not found in status database, skipping.")
+                continue
+            case_ids_for_sample: list[str] = [
+                link.case.internal_id if link else "" for link in db_sample.links
+            ]
+            if case_id not in case_ids_for_sample:
+                samples.remove(sample)
 
         if not dry_run:
             Path(self.root_dir, case_id).mkdir(parents=True, exist_ok=True)
