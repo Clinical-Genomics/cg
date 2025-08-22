@@ -15,16 +15,7 @@ from cg.constants import Workflow
 from cg.constants.priority import Priority, SlurmQos
 from cg.exc import AnalysisNotReadyError
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
-    NextflowConfigFileCreator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
-    ParamsFileCreator,
-)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import creator
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowSampleSheetCreator,
-)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
     RNAFusionSampleSheetCreator,
 )
@@ -228,13 +219,10 @@ def test_rnafusion_start(
 
     # THEN all the necessary files should have been written
     configurator: NextflowConfigurator = cast(NextflowConfigurator, analysis_starter.configurator)
-    config_file_creator: NextflowConfigFileCreator = configurator.config_file_creator
-    sample_sheet_creator: NextflowSampleSheetCreator = configurator.sample_sheet_creator
-    params_file_creator: ParamsFileCreator = configurator.params_file_creator
     case_path = configurator._get_case_path(case_id)
-    assert config_file_creator.get_file_path(case_id=case_id, case_path=case_path).exists()
-    assert sample_sheet_creator.get_file_path(case_id=case_id, case_path=case_path).exists()
-    assert params_file_creator.get_file_path(case_id=case_id, case_path=case_path).exists()
+    assert Path(case_path, f"{case_id}_nextflow_config.json").exists()
+    assert Path(case_path, f"{case_id}_samplesheet.csv").exists()
+    assert Path(case_path, f"{case_id}_params_file.yaml").exists()
 
     # THEN the case should have been submitted and tracked
     submit_mock.assert_called_once()

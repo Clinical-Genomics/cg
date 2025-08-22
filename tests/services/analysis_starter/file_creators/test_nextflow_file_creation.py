@@ -105,7 +105,7 @@ def test_nextflow_params_file_creator(
     nextflow_case_id: str,
 ):
     """Test that the Nextflow params file is written correctly."""
-    file_path = Path("some_path", "file_name.yaml")
+    file_path = Path("/root", "case_id", "file_name.yaml")
     # GIVEN a params file creator, an expected output and a mocked file writer
     file_creator, expected_content, write_yaml_mock = params_file_scenario[workflow]
 
@@ -134,31 +134,13 @@ def test_nextflow_config_file_content(
     write_mock: mocker.MagicMock = mocker.patch.object(config_file, "write_txt", return_value=None)
 
     # WHEN creating a Nextflow config file
-    nextflow_config_file_creator.create(case_id=nextflow_case_id, case_path=nextflow_case_path)
+    file_path = Path(nextflow_case_path, f"{nextflow_case_id}_nextflow_config.json")
+    nextflow_config_file_creator.create(case_id=nextflow_case_id, file_path=file_path)
 
     # THEN the content of the file is the expected
-    file_path = Path(nextflow_case_path, f"{nextflow_case_id}_nextflow_config.json")
     write_mock.assert_called_once_with(
         file_path=file_path, content=expected_nextflow_config_content
     )
-
-
-def test_get_samplesheet_path(
-    rnafusion_sample_sheet_creator: NextflowSampleSheetCreator,
-    nextflow_case_id: str,
-    nextflow_case_path: Path,
-):
-    """Test that the sample sheet path is constructed correctly."""
-    # GIVEN a Nextflow sample sheet creator and a case id
-
-    # WHEN getting the sample sheet path
-    sample_sheet_path: Path = rnafusion_sample_sheet_creator.get_file_path(
-        case_id=nextflow_case_id, case_path=nextflow_case_path
-    )
-
-    # THEN the path should end with 'samplesheet.csv'
-    expected_path = Path(nextflow_case_path, f"{nextflow_case_id}_samplesheet.csv")
-    assert sample_sheet_path == expected_path
 
 
 @pytest.mark.parametrize(
@@ -188,15 +170,11 @@ def test_nextflow_sample_sheet_creators(
     mocker.patch.object(Path, "is_file", return_value=True)
 
     # WHEN creating the sample sheet
-    sample_sheet_creator.create(case_id=nextflow_case_id, case_path=nextflow_case_path)
+    file_path = Path(nextflow_case_path, f"{nextflow_case_id}_samplesheet.csv")
+    sample_sheet_creator.create(case_id=nextflow_case_id, file_path=file_path)
 
     # THEN the sample sheet should have been written to the correct path with the correct content
-    write_mock.assert_called_with(
-        content=expected_content,
-        file_path=sample_sheet_creator.get_file_path(
-            case_path=nextflow_case_path, case_id=nextflow_case_id
-        ),
-    )
+    write_mock.assert_called_with(content=expected_content, file_path=file_path)
 
 
 def test_parse_fastq_header_raises_error():
