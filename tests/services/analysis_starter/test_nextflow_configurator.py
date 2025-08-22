@@ -161,18 +161,15 @@ def test_configure(
         pre_run_script="some_script.sh",
     )
 
-    # GIVEN a mocked store
+    # GIVEN a store
     store_mock = create_autospec(Store)
     store_mock.get_case_workflow = Mock(return_value=workflow)
     store_mock.get_case_priority = Mock(return_value="normal")
 
-    # GIVEN a mocked sample sheet creator
+    # GIVEN a sample sheet creator
     sample_sheet_creator = create_autospec(sample_sheet_creator_class)
-    case_id = "case123"
-    case_path = Path("/root", case_id)
-    params_file_creator = create_autospec(params_file_creator_class)
 
-    sample_sheet_path_mock = Path("/root", case_id, f"{case_id}_samplesheet.csv")
+    params_file_creator = create_autospec(params_file_creator_class)
 
     config_file_creator = create_autospec(NextflowConfigFileCreator)
 
@@ -191,6 +188,7 @@ def test_configure(
 
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)
+    case_id = "case123"
 
     # WHEN we configure the case
     config: NextflowCaseConfig = configurator.configure(case_id=case_id)
@@ -213,17 +211,21 @@ def test_configure(
     # THEN the case run directory should have been created
     mkdir_mock.assert_called_once_with(parents=True, exist_ok=True)
 
+    case_run_directory = Path("/root", case_id)
+
     # THEN the file creators should have been called
+    sample_sheet_path = Path(case_run_directory, f"{case_id}_samplesheet.csv")
     sample_sheet_creator.create.assert_called_once_with(
-        case_id=case_id, file_path=Path(case_path, f"{case_id}_samplesheet.csv")
+        case_id=case_id, file_path=sample_sheet_path
     )
+
     params_file_creator.create.assert_called_once_with(
         case_id=case_id,
-        file_path=Path(case_path, f"{case_id}_params_file.yaml"),
-        sample_sheet_path=sample_sheet_path_mock,
+        file_path=Path(case_run_directory, f"{case_id}_params_file.yaml"),
+        sample_sheet_path=sample_sheet_path,
     )
     config_file_creator.create.assert_called_once_with(
-        case_id=case_id, file_path=Path(case_path, f"{case_id}_nextflow_config.json")
+        case_id=case_id, file_path=Path(case_run_directory, f"{case_id}_nextflow_config.json")
     )
 
     # THEN the pipeline extension should have been configured
