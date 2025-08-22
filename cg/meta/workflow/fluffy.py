@@ -223,8 +223,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
             if sample.sample_id not in case_sample_ids:
                 flow_cell_samples.remove(sample)
                 LOG.debug(f"Sample {sample.sample_id} does not belong to case {case_id}, skipping")
-                continue
-
         if not dry_run:
             Path(self.root_dir, case_id).mkdir(parents=True, exist_ok=True)
             fluffy_sample_sheet: FluffySampleSheet = self.create_fluffy_sample_sheet(
