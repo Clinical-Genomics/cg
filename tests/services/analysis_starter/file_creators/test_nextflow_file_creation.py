@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 from pytest_mock import MockerFixture
@@ -8,6 +9,10 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow import con
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import raredisease
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
+    RarediseaseParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
     creator as samplesheet_creator,
 )
@@ -16,8 +21,25 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 
 
+def test_raredisease_params_file_creator(mocker: MockerFixture):
+    file_path = Path("some_path", "file_name.yaml")
+    # GIVEN a params file creator, an expected output and a mocked file writer
+    file_creator = RarediseaseParamsFileCreator(store=Mock(), lims=Mock(), params="")
+
+    write_yaml_mock = mocker.patch.object(raredisease, "write_yaml")
+    # WHEN creating the params file
+    file_creator.create(
+        case_id=nextflow_case_id,
+        file_path=file_path,
+        sample_sheet_path=nextflow_sample_sheet_path,
+    )
+
+    # THEN the file should have been written with the expected content
+    write_yaml_mock.assert_called_once_with(file_path=file_path)
+
+
 @pytest.mark.parametrize(
-    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]
+    "workflow", [Workflow.RNAFUSION, Workflow.TAXPROFILER]
 )
 def test_nextflow_params_file_creator(
     workflow: Workflow,
@@ -25,8 +47,8 @@ def test_nextflow_params_file_creator(
     nextflow_sample_sheet_path: Path,
     nextflow_case_id: str,
 ):
+    """Test that the Nextflow params file is written correctly."""
     file_path = Path("some_path", "file_name.yaml")
-    """Test that the Raredisease params file creator is initialized correctly."""
     # GIVEN a params file creator, an expected output and a mocked file writer
     file_creator, expected_content, write_yaml_mock = params_file_scenario[workflow]
 
