@@ -76,7 +76,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         analysis type.
         """
         sample: Sample = self.store.get_samples_by_case_id(case_id=case_id)[0]
-        return sample.application_version.application.analysis_type
+        return sample.prep_category
 
     def _get_target_bed_from_lims(self, case_id: str) -> str:
         """

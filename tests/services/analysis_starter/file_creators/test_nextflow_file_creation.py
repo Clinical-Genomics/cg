@@ -7,6 +7,7 @@ from sqlalchemy import Case
 
 from cg.apps.lims.api import LimsAPI
 from cg.constants import Workflow
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.analysis_starter.configurator.file_creators.nextflow import config_file
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
@@ -32,7 +33,11 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
     case = create_autospec(Case, samples=[create_autospec(Sample, from_sample=None)])
 
     store_mock: Store = create_autospec(Store)
-    store_mock.get_samples_by_case_id = Mock(return_value=[create_autospec(Sample)])
+    store_mock.get_samples_by_case_id = Mock(
+        return_value=[
+            create_autospec(Sample, prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING)
+        ]
+    )
     store_mock.get_case_by_internal_id = Mock(return_value=case)
     store_mock.get_bed_version_by_short_name = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
@@ -42,7 +47,9 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
     lims.capture_kit = Mock(return_value="target_bed_shortname_123")
 
     # GIVEN a params file creator, an expected output and a mocked file writer
-    file_creator = RarediseaseParamsFileCreator(store=store_mock, lims=lims, params="")
+    file_creator = RarediseaseParamsFileCreator(
+        store=store_mock, lims=lims, params="Path_to_file.yaml"
+    )
 
     # GIVEN case id
     case_id = "case_id"
@@ -52,6 +59,7 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
 
     write_yaml_mock = mocker.patch.object(raredisease, "write_yaml_nextflow_style")
     write_csv_mock = mocker.patch.object(raredisease, "write_csv")
+    mocker.patch.object(raredisease, "read_yaml", return_value={"Key": "Value"})
 
     # WHEN creating the params file
     file_creator.create(
@@ -61,7 +69,20 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
     )
 
     # THEN the file should have been written with the expected content
-    write_yaml_mock.assert_called_once_with(file_path=file_path, content="?")
+    write_yaml_mock.assert_called_once_with(
+        file_path=file_path,
+        content={
+            "Key": "Value",
+            "analysis_type": "wgs",
+            "input": Path("root/samplesheet.csv"),
+            "outdir": Path("some_path"),
+            "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
+            "save_mapped_as_cram": True,
+            "target_bed_file": "bed_version.bed",
+            "vcfanno_extra_resources": "some_path/managed_variants.vcf",
+            "vep_filters_scout_fmt": "some_path/gene_panels.bed",
+        },
+    )
     write_csv_mock.assert_called_once_with(
         file_path=Path("some_path", f"{case_id}_customer_internal_mapping.csv")
     )
