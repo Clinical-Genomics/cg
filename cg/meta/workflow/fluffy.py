@@ -214,23 +214,21 @@ class FluffyAnalysisAPI(AnalysisAPI):
         sample_sheet_content: list[list[str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.CSV, file_path=sample_sheet_path
         )
-        samples: list[IlluminaSampleIndexSetting] = get_samples_from_content(sample_sheet_content)
-        for sample in samples:
-            db_sample: Sample = self.status_db.get_sample_by_internal_id(sample.sample_id)
-            if not db_sample:
-                LOG.warning(f"Sample {sample.sample_id} not found in status database, skipping.")
+        flow_cell_samples: list[IlluminaSampleIndexSetting] = get_samples_from_content(
+            sample_sheet_content
+        )
+        case_db_samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
+        case_sample_ids: list[str] = [sample.internal_id for sample in case_db_samples]
+        for sample in flow_cell_samples:
+            if sample.sample_id not in case_sample_ids:
+                flow_cell_samples.remove(sample)
+                LOG.debug(f"Sample {sample.sample_id} does not belong to case {case_id}, skipping")
                 continue
-            case_ids_for_sample: list[str] = [
-                link.case.internal_id if link else "" for link in db_sample.links
-            ]
-            if case_id not in case_ids_for_sample:
-                LOG.debug(f"Sample {sample.sample_id} not linked to case {case_id}, excluding.")
-                samples.remove(sample)
 
         if not dry_run:
             Path(self.root_dir, case_id).mkdir(parents=True, exist_ok=True)
             fluffy_sample_sheet: FluffySampleSheet = self.create_fluffy_sample_sheet(
-                samples=samples,
+                samples=flow_cell_samples,
                 flow_cell_id=sequencing_run.device.internal_id,
             )
 
