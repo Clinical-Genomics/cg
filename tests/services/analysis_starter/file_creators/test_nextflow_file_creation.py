@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -19,28 +19,39 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowSampleSheetCreator,
 )
+from cg.store.models import Sample
+from cg.store.store import Store
 
 
 def test_raredisease_params_file_creator(mocker: MockerFixture):
+    # GIVEN
     file_path = Path("some_path", "file_name.yaml")
-    # GIVEN a params file creator, an expected output and a mocked file writer
-    file_creator = RarediseaseParamsFileCreator(store=Mock(), lims=Mock(), params="")
 
-    write_yaml_mock = mocker.patch.object(raredisease, "write_yaml")
+    store_mock: Store = create_autospec(Store)
+    store_mock.get_samples_by_case_id = Mock(return_value=[create_autospec(Sample)])
+
+    # GIVEN a params file creator, an expected output and a mocked file writer
+    file_creator = RarediseaseParamsFileCreator(store=store_mock, lims=Mock(), params="")
+
+    # GIVEN case id
+    case_id = "case_id"
+
+    # GIVEN sample sheet path
+    sample_sheet_path = Path("root", "samplesheet.csv")
+
+    write_yaml_mock = mocker.patch.object(raredisease, "write_yaml_nextflow_style")
     # WHEN creating the params file
     file_creator.create(
-        case_id=nextflow_case_id,
+        case_id=case_id,
         file_path=file_path,
-        sample_sheet_path=nextflow_sample_sheet_path,
+        sample_sheet_path=sample_sheet_path,
     )
 
     # THEN the file should have been written with the expected content
-    write_yaml_mock.assert_called_once_with(file_path=file_path)
+    write_yaml_mock.assert_called_once_with(file_path=file_path, content="?")
 
 
-@pytest.mark.parametrize(
-    "workflow", [Workflow.RNAFUSION, Workflow.TAXPROFILER]
-)
+@pytest.mark.parametrize("workflow", [Workflow.RNAFUSION, Workflow.TAXPROFILER])
 def test_nextflow_params_file_creator(
     workflow: Workflow,
     params_file_scenario: dict,
