@@ -166,15 +166,15 @@ def test_configure(
     store_mock.get_case_workflow = Mock(return_value=workflow)
     store_mock.get_case_priority = Mock(return_value="normal")
 
-    # GIVEN a sample sheet creator
+    # GIVEN a several file creators
     sample_sheet_creator = create_autospec(sample_sheet_creator_class)
-
     params_file_creator = create_autospec(params_file_creator_class)
-
     config_file_creator = create_autospec(NextflowConfigFileCreator)
 
+    # GIVEN a pipeline extension
     pipeline_extension = create_autospec(PipelineExtension)
 
+    # GIVEN a nextflow configurator
     configurator = NextflowConfigurator(
         config_file_creator=config_file_creator,
         params_file_creator=params_file_creator,
@@ -184,14 +184,20 @@ def test_configure(
         pipeline_extension=pipeline_extension,
     )
 
+    # GIVEN that the case run directory is correctly created
     mkdir_mock = mocker.patch.object(Path, "mkdir")
 
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)
+
+    # GIVEN a case ID
     case_id = "case123"
 
     # WHEN we configure the case
     config: NextflowCaseConfig = configurator.configure(case_id=case_id)
+
+    # GIVEN a case run directory
+    case_run_directory = Path("/root", case_id)
 
     # THEN the returned config should be as expected
     expected_config = NextflowCaseConfig(
@@ -199,26 +205,23 @@ def test_configure(
         workflow=workflow,
         case_priority=SlurmQos.NORMAL,
         config_profiles=["profile"],
-        nextflow_config_file=Path("/root", case_id, f"{case_id}_nextflow_config.json").as_posix(),
-        params_file=Path("/root", case_id, f"{case_id}_params_file.yaml").as_posix(),
+        nextflow_config_file=Path(case_run_directory, f"{case_id}_nextflow_config.json").as_posix(),
+        params_file=Path(case_run_directory, f"{case_id}_params_file.yaml").as_posix(),
         pipeline_repository="https://repo.scilifelab.se",
         pre_run_script="some_script.sh",
         revision="rev123",
-        work_dir=Path("/root", case_id, "work").as_posix(),
+        work_dir=Path(case_run_directory, "work").as_posix(),
     )
     assert config == expected_config
 
     # THEN the case run directory should have been created
     mkdir_mock.assert_called_once_with(parents=True, exist_ok=True)
 
-    case_run_directory = Path("/root", case_id)
-
     # THEN the file creators should have been called
     sample_sheet_path = Path(case_run_directory, f"{case_id}_samplesheet.csv")
     sample_sheet_creator.create.assert_called_once_with(
         case_id=case_id, file_path=sample_sheet_path
     )
-
     params_file_creator.create.assert_called_once_with(
         case_id=case_id,
         file_path=Path(case_run_directory, f"{case_id}_params_file.yaml"),

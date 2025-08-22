@@ -22,10 +22,10 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 def test_nextflow_params_file_creator(
     workflow: Workflow,
     params_file_scenario: dict,
-    nextflow_case_path: Path,
     nextflow_sample_sheet_path: Path,
     nextflow_case_id: str,
 ):
+    file_path = Path("some_path", "file_name.yaml")
     """Test that the Raredisease params file creator is initialized correctly."""
     # GIVEN a params file creator, an expected output and a mocked file writer
     file_creator, expected_content, write_yaml_mock = params_file_scenario[workflow]
@@ -33,14 +33,11 @@ def test_nextflow_params_file_creator(
     # WHEN creating the params file
     file_creator.create(
         case_id=nextflow_case_id,
-        case_path=nextflow_case_path,
+        file_path=file_path,
         sample_sheet_path=nextflow_sample_sheet_path,
     )
 
     # THEN the file should have been written with the expected content
-    file_path: Path = file_creator.get_file_path(
-        case_id=nextflow_case_id, case_path=nextflow_case_path
-    )
     write_yaml_mock.assert_called_once_with(file_path=file_path, content=expected_content)
 
 
