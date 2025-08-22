@@ -52,7 +52,7 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
     lims = create_autospec(LimsAPI)
     lims.get_capture_kit_strict = Mock(return_value="target_bed_shortname_123")
 
-    # GIVEN a params file creator, an expected output and a mocked file writer
+    # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
         store=store_mock, lims=lims, params="Path_to_file.yaml"
     )
@@ -63,6 +63,7 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
     # GIVEN sample sheet path
     sample_sheet_path = Path("root", "samplesheet.csv")
 
+    # GIVEN IO is mocked
     write_yaml_mock = mocker.patch.object(raredisease, "write_yaml_nextflow_style")
     write_csv_mock = mocker.patch.object(raredisease, "write_csv")
     mocker.patch.object(raredisease, "read_yaml", return_value={"Key": "Value"})
@@ -89,6 +90,7 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
             "vep_filters_scout_fmt": "some_path/gene_panels.bed",
         },
     )
+    # THEN auxiliary file is written and with the correct content
     write_csv_mock.assert_called_once_with(
         content=[["customer_id", "internal_id"], ["sample_name", "ACC"]],
         file_path=Path("some_path", f"{case_id}_customer_internal_mapping.csv"),
