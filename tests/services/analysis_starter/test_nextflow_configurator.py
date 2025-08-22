@@ -144,13 +144,14 @@ def test_get_case_config_none_flags(
         ),
     ],
 )
-def test_raredisease_configure(
+def test_configure(
     workflow: Workflow,
     params_file_creator_class: type[ParamsFileCreator],
     pipeline_config_class: type[CommonAppConfig],
     sample_sheet_creator_class: type[SampleSheetCreator],
     mocker: MockerFixture,
 ):
+    # GIVEN a pipeline config
     pipeline_config = create_autospec(
         pipeline_config_class,
         root="/root",
@@ -160,16 +161,18 @@ def test_raredisease_configure(
         pre_run_script="some_script.sh",
     )
 
+    # GIVEN a mocked store
     store_mock = create_autospec(Store)
     store_mock.get_case_workflow = Mock(return_value=workflow)
     store_mock.get_case_priority = Mock(return_value="normal")
+
+    # GIVEN a mocked sample sheet creator
     sample_sheet_creator = create_autospec(sample_sheet_creator_class)
     case_id = "case123"
     case_path = Path("/root", case_id)
     params_file_creator = create_autospec(params_file_creator_class)
 
     sample_sheet_path_mock = Path("/root", case_id, f"{case_id}_samplesheet.csv")
-    # sample_sheet_creator.get_file_path.return_value = sample_sheet_path_mock
 
     config_file_creator = create_autospec(NextflowConfigFileCreator)
 
