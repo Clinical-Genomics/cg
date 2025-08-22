@@ -224,6 +224,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
                 link.case.internal_id if link else "" for link in db_sample.links
             ]
             if case_id not in case_ids_for_sample:
+                LOG.debug(f"Sample {sample.sample_id} not linked to case {case_id}, excluding.")
                 samples.remove(sample)
 
         if not dry_run:
