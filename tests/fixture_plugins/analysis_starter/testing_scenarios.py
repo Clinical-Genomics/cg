@@ -3,12 +3,8 @@ from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
-    raredisease,
     rnafusion,
     taxprofiler,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
-    RarediseaseParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
     RNAFusionParamsFileCreator,
@@ -31,8 +27,6 @@ from cg.services.analysis_starter.configurator.models.nextflow import NextflowCa
 
 @pytest.fixture
 def params_file_scenario(
-    raredisease_params_file_creator: RarediseaseParamsFileCreator,
-    expected_raredisease_params_file_content: dict,
     rnafusion_params_file_creator: RNAFusionParamsFileCreator,
     expected_rnafusion_params_file_content: dict,
     taxprofiler_params_file_creator: TaxprofilerParamsFileCreator,
@@ -40,11 +34,6 @@ def params_file_scenario(
     mocker: MockerFixture,
 ) -> dict:
     return {
-        Workflow.RAREDISEASE: (
-            raredisease_params_file_creator,
-            expected_raredisease_params_file_content,
-            mocker.patch.object(raredisease, "write_yaml_nextflow_style", return_value=None),
-        ),
         Workflow.RNAFUSION: (
             rnafusion_params_file_creator,
             expected_rnafusion_params_file_content,

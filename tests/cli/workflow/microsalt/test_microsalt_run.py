@@ -8,7 +8,7 @@ from pytest_mock import MockerFixture
 
 from cg.cli.workflow.microsalt.base import run
 from cg.constants import Workflow
-from cg.exc import CaseNotConfiguredError
+from cg.exc import MissingConfigFilesError
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
@@ -36,7 +36,7 @@ def test_run_raises_error_if_not_configured(
     result = cli_runner.invoke(run, [case_id], obj=cg_context)
 
     # THEN an error should be raised
-    assert isinstance(result.exception, CaseNotConfiguredError)
+    assert isinstance(result.exception, MissingConfigFilesError)
 
 
 def test_run_tracks_case(cli_runner: CliRunner, cg_context: CGConfig, mocker: MockerFixture):

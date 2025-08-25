@@ -6,7 +6,7 @@ from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
-from cg.services.analysis_starter.constants import FASTQ_WORKFLOWS
+from cg.services.analysis_starter.constants import IMPLEMENTED_FASTQ_WORKFLOWS
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.input_fetcher.input_fetcher import InputFetcher
@@ -53,7 +53,7 @@ class AnalysisStarterFactory:
         )
 
     def _get_input_fetcher(self, workflow: Workflow) -> InputFetcher:
-        if workflow in FASTQ_WORKFLOWS:
+        if workflow in IMPLEMENTED_FASTQ_WORKFLOWS:
             spring_archive_api = SpringArchiveAPI(
                 status_db=self.store,
                 housekeeper_api=self.housekeeper_api,
