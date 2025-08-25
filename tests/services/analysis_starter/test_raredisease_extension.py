@@ -1,16 +1,30 @@
-from unittest.mock import Mock
+from pathlib import Path
+from unittest.mock import create_autospec
 
-from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
+from cg.services.analysis_starter.configurator.extensions.raredisease import (
+    GENE_PANEL_FILE_NAME,
+    MANAGED_VARIANTS_FILE_NAME,
+    RarediseaseExtension,
+)
+from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
+from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
+    ManagedVariantsFileCreator,
+)
 
 
 def test_configure_success():
     # GIVEN a raredisease pipeline extension
     raredisease_extension = RarediseaseExtension(
-        gene_panel_file_creator=Mock(), managed_variants_file_creator=Mock()
+        gene_panel_file_creator=create_autospec(GenePanelFileCreator),
+        managed_variants_file_creator=create_autospec(ManagedVariantsFileCreator),
     )
     # WHEN calling configure
-    raredisease_extension.configure(case_id="case_id")
+    raredisease_extension.configure(case_id="case_id", case_run_directory=Path("/path/to/dir"))
 
     # THEN the file creators should have been called
-    raredisease_extension.gene_panel_file_creator.configure.assert_called_once_with()
-    raredisease_extension.managed_variants_file_creator.configure.assert_called_once_with()
+    raredisease_extension.gene_panel_file_creator.create.assert_called_once_with(
+        case_id="case_id", file_path=Path("/path/to/dir/", GENE_PANEL_FILE_NAME)
+    )
+    raredisease_extension.managed_variants_file_creator.create.assert_called_once_with(
+        case_id="case_id", file_path=Path("/path/to/dir/", MANAGED_VARIANTS_FILE_NAME)
+    )
