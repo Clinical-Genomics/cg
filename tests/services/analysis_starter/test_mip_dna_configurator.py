@@ -7,8 +7,19 @@ from pytest_mock import MockerFixture
 from cg.constants.priority import SlurmQos
 from cg.exc import MissingConfigFilesError
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
+from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
+    ManagedVariantsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.mip_dna_config import (
+    MIPDNAConfigFileCreator,
+)
 from cg.services.analysis_starter.configurator.implementations import mip_dna
-from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
+from cg.services.analysis_starter.configurator.implementations.mip_dna import (
+    MIP_DNA_CONFIG_FILE_NAME,
+    MIP_DNA_GENE_PANEL_FILE_NAME,
+    MIP_DNA_MANAGED_VARIANTS_FILE_NAME,
+    MIPDNAConfigurator,
+)
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.store.models import Case
 from cg.store.store import Store
@@ -32,17 +43,21 @@ def test_configure(mocker: MockerFixture):
     )
 
     # GIVEN a MIP DNA configurator
+    root_dir = Path("root_dir")
     configurator = MIPDNAConfigurator(
-        config_file_creator=Mock(),
+        config_file_creator=create_autospec(MIPDNAConfigFileCreator),
         fastq_handler=Mock(),
-        gene_panel_file_creator=Mock(),
-        managed_variants_file_creator=Mock(),
-        root=Path("root_dir"),
+        gene_panel_file_creator=create_autospec(GenePanelFileCreator),
+        managed_variants_file_creator=create_autospec(ManagedVariantsFileCreator),
+        root=root_dir,
         store=store,
     )
 
     # GIVEN that we mock making the run directory
     mock_create_dir = mocker.patch.object(Path, "mkdir")
+
+    # GIVEN that the relevant files exist
+    mocker.patch.object(Path, "exists", return_value=True)
 
     # WHEN configuring a case
     case_config: MIPDNACaseConfig = configurator.configure(
@@ -58,16 +73,20 @@ def test_configure(mocker: MockerFixture):
 
     # THEN the config file creator should have been called with the case id and the provided bed flag
     configurator.config_file_creator.create.assert_called_once_with(
-        case_id=case_id, bed_flag="bed_file.bed"
+        case_id=case_id,
+        bed_flag="bed_file.bed",
+        file_path=Path(root_dir, case_id, MIP_DNA_CONFIG_FILE_NAME),
     )
 
     # THEN the gene panel file creator should have been called with correct case id and path
     configurator.gene_panel_file_creator.create.assert_called_once_with(
-        case_id=case_id, case_path=Path("root_dir", case_id)
+        case_id=case_id,
+        file_path=Path(root_dir, case_id, MIP_DNA_GENE_PANEL_FILE_NAME),
     )
 
     configurator.managed_variants_file_creator.create.assert_called_once_with(
-        case_id=case_id, case_path=Path("root_dir", case_id)
+        case_id=case_id,
+        file_path=Path(root_dir, case_id, MIP_DNA_MANAGED_VARIANTS_FILE_NAME),
     )
 
 
@@ -90,6 +109,9 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     # GIVEN a case ID
     case_id = "test_case"
 
+    # GIVEN that the relevant files exist
+    mocker.patch.object(Path, "exists", return_value=True)
+
     # WHEN getting the case config
     case_config: MIPDNACaseConfig = configurator.get_config(case_id=case_id)
 
@@ -101,7 +123,7 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     assert case_config.start_with_recipe is None
 
 
-def test_get_config_all_flags_set(mock_status_db: Store):
+def test_get_config_all_flags_set(mock_status_db: Store, mocker: MockerFixture):
     """Test that the MIP DNA configurator can get a case config."""
 
     # GIVEN a MIP DNA configurator
@@ -116,6 +138,9 @@ def test_get_config_all_flags_set(mock_status_db: Store):
 
     # GIVEN a case ID
     case_id = "test_case"
+
+    # GIVEN that the relevant files exist
+    mocker.patch.object(Path, "exists", return_value=True)
 
     # WHEN getting the case config
     case_config: MIPDNACaseConfig = configurator.get_config(
