@@ -4,11 +4,13 @@ from unittest import mock
 from urllib.parse import urljoin
 
 import pytest
+from pytest_mock import MockerFixture
 from requests import Response
 
-from cg.constants.constants import APIMethods, FileFormat
+from cg.constants.constants import FileFormat
 from cg.exc import DdnDataflowAuthenticationError
-from cg.io.controller import APIRequest, WriteStream
+from cg.io.controller import WriteStream
+from cg.meta.archive.ddn import ddn_data_flow_client
 from cg.meta.archive.ddn.constants import (
     DESTINATION_ATTRIBUTE,
     OSTYPE,
@@ -22,8 +24,6 @@ from cg.meta.archive.ddn.utils import get_metadata
 from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import DataFlowConfig
 from cg.store.store import Store
-
-FUNCTION_TO_MOCK = "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content"
 
 
 def test_correct_source_root(
@@ -85,13 +85,13 @@ def test_transfer_payload_model_dump(transfer_payload: TransferPayload):
     dict_representation: dict = transfer_payload.model_dump(by_alias=True)
 
     # THEN the following fields should exist
-    assert dict_representation.get("pathInfo", None)
-    assert dict_representation.get("osType", None)
-    assert isinstance(dict_representation.get("metadataList", None), list)
+    assert dict_representation.get("pathInfo")
+    assert dict_representation.get("osType")
+    assert isinstance(dict_representation.get("metadataList"), list)
 
     # THEN the pathInfo fields should contain source and destination fields
-    assert dict_representation.get("pathInfo")[0].get("source", None)
-    assert dict_representation.get("pathInfo")[0].get("destination", None)
+    assert dict_representation.get("pathInfo")[0].get("source")
+    assert dict_representation.get("pathInfo")[0].get("destination")
 
 
 def test_ddn_dataflow_client_initialization(
@@ -99,6 +99,7 @@ def test_ddn_dataflow_client_initialization(
     local_storage_repository: str,
     remote_storage_repository: str,
     ok_response: Response,
+    mocker: MockerFixture,
 ):
     """Tests the initialization of the DDNDataFlowClient object with given an ok-response."""
 
@@ -123,17 +124,20 @@ def test_ddn_dataflow_client_initialization(
     ).encode()
 
     # WHEN initializing the DDNDataFlowClient class with the valid DDNConfig object
-    with mock.patch(
-        FUNCTION_TO_MOCK,
+    mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
         return_value=ok_response,
-    ):
-        ddn_dataflow_client = DDNDataFlowClient(config=valid_config)
+    )
+    ddn_dataflow_client = DDNDataFlowClient(config=valid_config)
 
     # THEN the DDNDataFlowClient object should be created successfully
     assert isinstance(ddn_dataflow_client, DDNDataFlowClient)
 
 
-def test_set_auth_tokens(ddn_dataflow_config: DataFlowConfig, ok_response: Response):
+def test_set_auth_tokens(
+    ddn_dataflow_config: DataFlowConfig, ok_response: Response, mocker: MockerFixture
+):
     """Tests the functions setting the auth- and refresh token as well as the expiration date."""
 
     # GIVEN a valid DDNConfig object
@@ -143,11 +147,12 @@ def test_set_auth_tokens(ddn_dataflow_config: DataFlowConfig, ok_response: Respo
     )
 
     # WHEN initializing the DDNDataFlowClient class with the valid DDNConfig object
-    with mock.patch(
-        FUNCTION_TO_MOCK,
+    mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
         return_value=ok_response,
-    ):
-        ddn_dataflow_client = DDNDataFlowClient(config=ddn_dataflow_config)
+    )
+    ddn_dataflow_client = DDNDataFlowClient(config=ddn_dataflow_config)
 
     # THEN the auth and refresh tokens should be set correctly
     assert ddn_dataflow_client.auth_token == "test_auth_token"
@@ -155,7 +160,7 @@ def test_set_auth_tokens(ddn_dataflow_config: DataFlowConfig, ok_response: Respo
 
 
 def test_ddn_dataflow_client_initialization_invalid_credentials(
-    ddn_dataflow_config: DataFlowConfig, unauthorized_response: Response
+    ddn_dataflow_config: DataFlowConfig, unauthorized_response: Response, mocker: MockerFixture
 ):
     """Tests initialization of a DDNDataFlowClient when an error is returned."""
 
@@ -166,13 +171,14 @@ def test_ddn_dataflow_client_initialization_invalid_credentials(
     unauthorized_response._content = b'{"detail": "Invalid credentials"}'
 
     # WHEN initializing the DDNDataFlowClient class with the invalid credentials
-    with mock.patch(
-        "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content",
+    mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
         return_value=unauthorized_response,
-    ):
-        # THEN an exception should be raised
-        with pytest.raises(DdnDataflowAuthenticationError):
-            DDNDataFlowClient(config=ddn_dataflow_config)
+    )
+    # THEN an exception should be raised
+    with pytest.raises(DdnDataflowAuthenticationError):
+        DDNDataFlowClient(config=ddn_dataflow_config)
 
 
 def test_transfer_payload_correct_source_root(transfer_payload: TransferPayload):
@@ -239,7 +245,9 @@ def test_auth_header_new_token(ddn_dataflow_client: DDNDataFlowClient):
     assert auth_header.get("Authorization") == f"Bearer {ddn_dataflow_client.auth_token}"
 
 
-def test__refresh_auth_token(ddn_dataflow_client: DDNDataFlowClient, ok_response: Response):
+def test__refresh_auth_token(
+    ddn_dataflow_client: DDNDataFlowClient, ok_response: Response, mocker: MockerFixture
+):
     """Tests if the refresh token is correctly updated when used."""
 
     # GIVEN a DDNDataFlowClient with new token
@@ -254,11 +262,12 @@ def test__refresh_auth_token(ddn_dataflow_client: DDNDataFlowClient, ok_response
     ).encode()
 
     # WHEN refreshing the auth token
-    with mock.patch(
-        FUNCTION_TO_MOCK,
+    mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
         return_value=ok_response,
-    ):
-        ddn_dataflow_client._refresh_auth_token()
+    )
+    ddn_dataflow_client._refresh_auth_token()
 
     # THEN the api token and the expiration time should be updated
     assert ddn_dataflow_client.auth_token == new_token
@@ -272,24 +281,24 @@ def test_archive_file(
     file_and_sample: FileAndSample,
     trimmed_local_path: str,
     ok_miria_response,
+    mocker: MockerFixture,
 ):
     """Tests that the archiving function correctly formats the input and sends API request."""
 
     # GIVEN two paths that should be archived
     # WHEN running the archive method and providing two paths
-    with mock.patch.object(
-        APIRequest,
-        "api_request_from_content",
+    mock_request_submitter = mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
         return_value=ok_miria_response,
-    ) as mock_request_submitter:
-        job_id: int = ddn_dataflow_client.archive_file(file_and_sample)
+    )
+    job_id: int = ddn_dataflow_client.archive_file(file_and_sample)
 
     # THEN an integer should be returned
     assert isinstance(job_id, int)
 
     # THEN the mocked submit function should have been called exactly once with correct arguments
     mock_request_submitter.assert_called_once_with(
-        api_method=APIMethods.POST,
         url=urljoin(base=ddn_dataflow_client.url, url=DataflowEndpoints.ARCHIVE_FILES),
         headers=dict(ddn_dataflow_client.headers, **ddn_dataflow_client.auth_header),
         json={
@@ -317,24 +326,24 @@ def test_retrieve_files(
     file_and_sample: FileAndSample,
     ok_miria_response,
     retrieve_request_json,
+    mocker: MockerFixture,
 ):
     """Tests that the retrieve function correctly formats the input and sends API request."""
 
     # GIVEN a file and sample which is archived
 
     # WHEN running retrieve_files and providing a FileAndSample object
-    with mock.patch.object(
-        APIRequest, "api_request_from_content", return_value=ok_miria_response
-    ) as mock_request_submitter:
-        job_id: int = ddn_dataflow_client.retrieve_files(files_and_samples=[file_and_sample])
+    mock_request_submitter = mocker.patch.object(
+        ddn_data_flow_client, "post", return_value=ok_miria_response
+    )
+    job_id: int = ddn_dataflow_client.retrieve_files(files_and_samples=[file_and_sample])
 
-        # THEN an integer should be returned
+    # THEN an integer should be returned
     assert isinstance(job_id, int)
 
     # THEN the mocked submit function should have been called exactly once with correct arguments
-    retrieve_request_json["pathInfo"][0]["source"] += "/" + Path(file_and_sample.file.path).name
+    retrieve_request_json["pathInfo"][0]["source"] += f"/{Path(file_and_sample.file.path).name}"
     mock_request_submitter.assert_called_once_with(
-        api_method=APIMethods.POST,
         url=urljoin(base=ddn_dataflow_client.url, url=DataflowEndpoints.RETRIEVE_FILES),
         headers=dict(ddn_dataflow_client.headers, **ddn_dataflow_client.auth_header),
         json=retrieve_request_json,
