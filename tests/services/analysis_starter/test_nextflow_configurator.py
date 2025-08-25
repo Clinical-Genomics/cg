@@ -62,11 +62,15 @@ def test_get_case_config(
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)
 
+    # GIVEN a pipeline extension
+
     # WHEN getting the case config
     case_config = configurator.get_config(case_id=nextflow_case_id)
 
     # THEN we should get back a case config
     assert case_config == expected_case_config
+
+    # THEN the pipeline extension should have been called with ensure_all_required_files_exist
 
 
 @pytest.mark.parametrize(
