@@ -232,4 +232,6 @@ def test_configure(
     )
 
     # THEN the pipeline extension should have been configured
-    pipeline_extension.configure.assert_called_once_with(case_id=case_id)
+    pipeline_extension.configure.assert_called_once_with(
+        case_id=case_id, case_run_directory=case_run_directory
+    )

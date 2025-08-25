@@ -46,10 +46,10 @@ class NextflowConfigurator(Configurator):
         3. Creating a parameters file.
         4. Creating a configuration file.
         5. Creating any pipeline specific files."""
-        case_path: Path = self._get_case_path(case_id)
-        sample_sheet_path = Path(case_path, f"{case_id}_samplesheet.csv")
-        params_file_path = Path(case_path, f"{case_id}_params_file.yaml")
-        config_file_path = Path(case_path, f"{case_id}_nextflow_config.json")
+        case_run_directory: Path = self._get_case_run_directory(case_id)
+        sample_sheet_path = Path(case_run_directory, f"{case_id}_samplesheet.csv")
+        params_file_path = Path(case_run_directory, f"{case_id}_params_file.yaml")
+        config_file_path = Path(case_run_directory, f"{case_id}_nextflow_config.json")
 
         self._create_case_directory(case_id)
         self.sample_sheet_creator.create(case_id=case_id, file_path=sample_sheet_path)
@@ -59,7 +59,7 @@ class NextflowConfigurator(Configurator):
             sample_sheet_path=sample_sheet_path,
         )
         self.config_file_creator.create(case_id=case_id, file_path=config_file_path)
-        self.pipeline_extension.configure(case_id=case_id)
+        self.pipeline_extension.configure(case_id=case_id, case_run_directory=case_run_directory)
         return self.get_config(case_id=case_id, **flags)
 
     def get_config(self, case_id: str, **flags) -> NextflowCaseConfig:
@@ -68,11 +68,8 @@ class NextflowConfigurator(Configurator):
         Raises:
             CaseNotConfiguredError if the params file or config file does not exist.
         """
-        case_path: Path = self._get_case_path(case_id=case_id)
         params_file_path: Path = self._get_params_file_path(case_id=case_id)
-        config_file_path: Path = self._get_config_file_path(
-            case_id=case_id,
-        )
+        config_file_path: Path = self._get_config_file_path(case_id=case_id)
         config = NextflowCaseConfig(
             case_id=case_id,
             case_priority=self.store.get_case_priority(case_id),
@@ -91,23 +88,23 @@ class NextflowConfigurator(Configurator):
 
     def _get_config_file_path(self, case_id: str) -> Path:
         """Return the path to the Nextflow config file."""
-        return Path(self._get_case_path(case_id), f"{case_id}_nextflow_config").with_suffix(
-            FileExtensions.JSON
-        )
+        return Path(
+            self._get_case_run_directory(case_id), f"{case_id}_nextflow_config"
+        ).with_suffix(FileExtensions.JSON)
 
     def _get_params_file_path(self, case_id: str) -> Path:
         """Return the path to the params file for a case."""
-        return Path(self._get_case_path(case_id), f"{case_id}_params_file").with_suffix(
+        return Path(self._get_case_run_directory(case_id), f"{case_id}_params_file").with_suffix(
             FileExtensions.YAML
         )
 
-    def _get_case_path(self, case_id: str) -> Path:
+    def _get_case_run_directory(self, case_id: str) -> Path:
         """Path to case working directory."""
         return Path(self.root_dir, case_id)
 
     def _create_case_directory(self, case_id: str) -> None:
         """Create case working directory."""
-        case_path: Path = self._get_case_path(case_id=case_id)
+        case_path: Path = self._get_case_run_directory(case_id=case_id)
         case_path.mkdir(parents=True, exist_ok=True)
 
     def _get_work_dir(self, case_id: str) -> Path:

@@ -219,7 +219,7 @@ def test_rnafusion_start(
 
     # THEN all the necessary files should have been written
     configurator: NextflowConfigurator = cast(NextflowConfigurator, analysis_starter.configurator)
-    case_path = configurator._get_case_path(case_id)
+    case_path = configurator._get_case_run_directory(case_id)
     assert Path(case_path, f"{case_id}_nextflow_config.json").exists()
     assert Path(case_path, f"{case_id}_samplesheet.csv").exists()
     assert Path(case_path, f"{case_id}_params_file.yaml").exists()
