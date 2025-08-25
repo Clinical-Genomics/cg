@@ -119,9 +119,9 @@ class NextflowConfigurator(Configurator):
         params_file_path = Path(config.params_file)
         config_file_path = Path(config.nextflow_config_file)
         if (
-            not params_file_path.exists()
+            self.pipeline_extension.are_required_files_missing()
+            or not params_file_path.exists()
             or not config_file_path.exists()
-            or not self.pipeline_extension.do_required_files_exist()
         ):
             raise MissingConfigFilesError(
                 f"Please ensure that both the parameters file {params_file_path.as_posix()} "

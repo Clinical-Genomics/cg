@@ -74,10 +74,10 @@ def test_get_config(
     assert case_config == expected_case_config
 
     # THEN the pipeline extension should have been called with ensure_required_files_exist
-    extension.do_required_files_exist.assert_called_once()
+    extension.are_required_files_missing.assert_called_once()
 
 
-def test_get_config_missing_required_files():
+def test_get_config_missing_required_files(mocker: MockerFixture):
     # GIVEN a nextflow configurator
 
     # GIVEN a raredisease config
@@ -103,6 +103,9 @@ def test_get_config_missing_required_files():
     # GIVEN a pipeline extension
     pipeline_extension = create_autospec(RarediseaseExtension)
 
+    # GIVEN the extension indicates missing files
+    pipeline_extension.are_required_files_missing = Mock(return_value=False)
+
     # GIVEN a nextflow configurator
     configurator = NextflowConfigurator(
         config_file_creator=config_file_creator,
@@ -113,10 +116,11 @@ def test_get_config_missing_required_files():
         pipeline_extension=pipeline_extension,
     )
 
+    # GIVEN that the files created by the configurator are mocked to exist
+    mocker.patch.object(Path, "exists", return_value=True)
 
-
-    # GIVEN the extension indicates missing files
     # WHEN calling get_config
+    configurator.get_config(case_id="case123")
     # THEN an exception is raised
 
 
