@@ -28,12 +28,12 @@ def test_create_wgs_no_bed_flag(
     mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
 
     # WHEN creating a config file without a bed flag
-    file_creator.create(case_id=case_id, bed_flag=None)
+    file_creator.create(case_id=case_id, bed_flag=None, file_path=Path("pedigree.yaml"))
 
     # THEN the config file is created with the default capture kit
     expected_content_wgs["samples"][0]["capture_kit"] = DEFAULT_CAPTURE_KIT
     mock_write.assert_called_once_with(
-        content=expected_content_wgs, file_path=Path("root", case_id, "pedigree.yaml")
+        content=expected_content_wgs, file_path=Path("pedigree.yaml")
     )
 
 
@@ -49,12 +49,12 @@ def test_create_wgs_bed_file_provided(
     mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
 
     # WHEN creating a config file providing a bed file name
-    file_creator.create(case_id=case_id, bed_flag="bed_file.bed")
+    file_creator.create(case_id=case_id, bed_flag="bed_file.bed", file_path=Path("pedigree.yaml"))
 
     # THEN the config file is created with the default capture kit
     expected_content_wgs["samples"][0]["capture_kit"] = "bed_file.bed"
     mock_write.assert_called_once_with(
-        content=expected_content_wgs, file_path=Path("root", case_id, "pedigree.yaml")
+        content=expected_content_wgs, file_path=Path("pedigree.yaml")
     )
 
 
@@ -73,12 +73,12 @@ def test_create_wgs_bed_short_name_provided(
     mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
 
     # WHEN creating a config file providing a bed file name
-    file_creator.create(case_id=case_id, bed_flag="bed_short_name")
+    file_creator.create(case_id=case_id, bed_flag="bed_short_name", file_path=Path("pedigree.yaml"))
 
     # THEN the config file is created with the default capture kit
     expected_content_wgs["samples"][0]["capture_kit"] = "existing_bed_file.bed"
     mock_write.assert_called_once_with(
-        content=expected_content_wgs, file_path=Path("root", case_id, "pedigree.yaml")
+        content=expected_content_wgs, file_path=Path("pedigree.yaml")
     )
 
 
@@ -93,7 +93,7 @@ def test_wgs_fails_bed_name_not_in_store():
     # WHEN creating the config file providing a bed short name that doesn't exist in the store
     # THEN a BedVersionNotFound error is raised
     with pytest.raises(BedVersionNotFoundError):
-        file_creator.create(case_id="case_id", bed_flag="bed_file")
+        file_creator.create(case_id="case_id", bed_flag="bed_file", file_path=Path("pedigree.yaml"))
 
 
 @pytest.mark.parametrize(
@@ -136,11 +136,13 @@ def test_create_wgs_father_and_mother_set(
     mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
 
     # WHEN creating a config file providing a bed file name
-    config_file_creator.create(case_id=case_id, bed_flag="default.bed")
+    config_file_creator.create(
+        case_id=case_id, bed_flag="default.bed", file_path=Path("pedigree.yaml")
+    )
 
     # THEN the config file is created with mother and father set
     mock_write.assert_called_once_with(
-        content=expected_content_wgs, file_path=Path("root", case_id, "pedigree.yaml")
+        content=expected_content_wgs, file_path=Path("pedigree.yaml")
     )
 
 
@@ -163,12 +165,12 @@ def test_create_wgs_only_one_sample_phenotype_unknown(
     mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
 
     # WHEN creating the config file
-    file_creator.create(case_id=case_id, bed_flag="default.bed")
+    file_creator.create(case_id=case_id, bed_flag="default.bed", file_path=Path("pedigree.yaml"))
 
     # THEN the phenotype should have been set to unaffected
     expected_content_wgs["samples"][0]["phenotype"] = StatusOptions.UNAFFECTED
     mock_write.assert_called_once_with(
-        content=expected_content_wgs, file_path=Path("root", case_id, "pedigree.yaml")
+        content=expected_content_wgs, file_path=Path("pedigree.yaml")
     )
 
 
@@ -187,11 +189,11 @@ def test_create_wes_no_bed_flag(
     mock_write = mocker.patch.object(mip_dna_config, "write_yaml")
 
     # WHEN creating the config file when the provided bed flag is None
-    file_creator.create(case_id=case_id, bed_flag=None)
+    file_creator.create(case_id=case_id, bed_flag=None, file_path=Path("pedigree.yaml"))
 
     # THEN the writer is called with the correct content and file path
     mock_write.assert_called_once_with(
-        content=expected_content_wes, file_path=Path(root, case_id, "pedigree.yaml")
+        content=expected_content_wes, file_path=Path("pedigree.yaml")
     )
 
 
@@ -214,7 +216,7 @@ def test_create_config_wes_with_downsampled_sample(
     file_creator = MIPDNAConfigFileCreator(lims_api=lims, root=root, store=wes_mock_store)
 
     # WHEN creating the config file
-    file_creator.create(case_id=case_id, bed_flag=None)
+    file_creator.create(case_id=case_id, bed_flag=None, file_path=Path("pedigree.yaml"))
 
     # THEN
     lims.get_capture_kit_strict.assert_called_once_with(original_sample_id)
@@ -249,4 +251,4 @@ def test_create_config_wes_lims_fails():
 
     # THEN a LimsDataError should be raised
     with pytest.raises(LimsDataError):
-        file_creator.create(case_id=case_id, bed_flag=None)
+        file_creator.create(case_id=case_id, bed_flag=None, file_path=Path("pedigree.yaml"))

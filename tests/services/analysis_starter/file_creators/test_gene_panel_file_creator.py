@@ -81,7 +81,6 @@ def gene_panel_creator(
 def test_gene_panel_file_content(
     gene_panel_creator: GenePanelFileCreator,
     raredisease_case_id: str,
-    nextflow_case_path: Path,
     nextflow_gene_panel_file_content,
     mocker: MockerFixture,
 ):
@@ -95,12 +94,12 @@ def test_gene_panel_file_content(
     write_mock = mocker.patch.object(gene_panel, "write_txt")
 
     # WHEN creating a gene panel file
-    gene_panel_creator.create(case_id=raredisease_case_id, case_path=nextflow_case_path)
+    gene_panel_creator.create(case_id=raredisease_case_id, file_path=Path("nextflow.bed"))
 
     # THEN the gene panel file would have been written with the expected content
     write_mock.assert_called_once_with(
         content=nextflow_gene_panel_file_content,
-        file_path=gene_panel_creator.get_file_path(nextflow_case_path),
+        file_path=Path("nextflow.bed"),
     )
 
 
@@ -173,7 +172,7 @@ def test_add_gene_panels_in_combo(
 
 
 @pytest.mark.parametrize(
-    "case_id, expected_build",
+    "case_id, expected_genome_build",
     [
         (MIP_DNA_CASE_ID, GenePanelGenomeBuild.hg19),
         (RAREDISEASE_CASE_ID, GenePanelGenomeBuild.hg19),
@@ -187,10 +186,10 @@ def test_add_gene_panels_in_combo(
         "TOMTE case",
     ],
 )
-def test_creating_file_for_workflows_using_correct_build(
+def test_creating_file_for_workflows_using_correct_genome_build(
     gene_panel_creator: GenePanelFileCreator,
     case_id: str,
-    expected_build: GenePanelGenomeBuild,
+    expected_genome_build: GenePanelGenomeBuild,
     mock_scout: ScoutAPI,
     mocker: MockerFixture,
 ):
@@ -198,11 +197,11 @@ def test_creating_file_for_workflows_using_correct_build(
     mocker.patch.object(gene_panel, "write_txt")
 
     # WHEN creating a gene panel file
-    gene_panel_creator.create(case_id=case_id, case_path=Path("/"))
+    gene_panel_creator.create(case_id=case_id, file_path=Path("filename.bed"))
 
-    # THEN Scout should have been called with the expected build and panels
+    # THEN Scout should have been called with the expected genome build and panels
     cast(Mock, mock_scout.export_panels).assert_called_once_with(
-        build=expected_build,
+        build=expected_genome_build,
         panels=[
             GenePanelMasterList.OMIM_AUTO,
             GenePanelMasterList.PANELAPP_GREEN,

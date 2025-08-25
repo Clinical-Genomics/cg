@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.constants import FileExtensions, GenePanelMasterList
+from cg.constants import GenePanelMasterList
 from cg.constants.gene_panel import GenePanelCombo, GenePanelGenomeBuild
 from cg.io.txt import write_txt
 from cg.services.analysis_starter.configurator.file_creators.nextflow.utils import get_genome_build
@@ -14,12 +14,7 @@ class GenePanelFileCreator:
         self.store = store
         self.scout_api = scout_api
 
-    @staticmethod
-    def get_file_path(case_path: Path) -> Path:
-        return Path(case_path, "gene_panels").with_suffix(FileExtensions.BED)
-
-    def create(self, case_id: str, case_path: Path) -> None:
-        file_path: Path = self.get_file_path(case_path)
+    def create(self, case_id: str, file_path: Path) -> None:
         content: list[str] = self._get_content(case_id)
         write_txt(file_path=file_path, content=content)
 

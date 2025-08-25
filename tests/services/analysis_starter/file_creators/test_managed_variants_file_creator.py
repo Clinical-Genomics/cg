@@ -5,7 +5,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.constants import FileExtensions, Workflow
+from cg.constants import Workflow
 from cg.services.analysis_starter.configurator.file_creators import managed_variants
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
     ManagedVariantsFileCreator,
@@ -48,10 +48,9 @@ def test_managed_variants_content(
     mocked_write_txt = mocker.patch.object(managed_variants, "write_txt")
 
     # WHEN creating a managed variants file
-    managed_variants_creator.create(case_id="case_id", case_path=Path("case_path"))
+    managed_variants_creator.create(case_id="case_id", file_path=Path("managed_variants.vcf"))
 
     # THEN the content of the file is the expected
-    file_path = Path("case_path", "managed_variants").with_suffix(FileExtensions.VCF)
     mocked_write_txt.assert_called_once_with(
-        file_path=file_path, content=managed_variants_file_content
+        file_path=Path("managed_variants.vcf"), content=managed_variants_file_content
     )
