@@ -15,7 +15,7 @@ from cg.services.analysis_starter.configurator.file_creators.mip_dna_config impo
 )
 from cg.services.analysis_starter.configurator.implementations import mip_dna
 from cg.services.analysis_starter.configurator.implementations.mip_dna import (
-    MIPDNA_CONFIG_FILE_NAME,
+    MIP_DNA_CONFIG_FILE_NAME,
     MIPDNAConfigurator,
 )
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
@@ -73,7 +73,7 @@ def test_configure(mocker: MockerFixture):
     configurator.config_file_creator.create.assert_called_once_with(
         case_id=case_id,
         bed_flag="bed_file.bed",
-        file_path=Path(root_dir, case_id, MIPDNA_CONFIG_FILE_NAME),
+        file_path=Path(root_dir, case_id, MIP_DNA_CONFIG_FILE_NAME),
     )
 
     # THEN the gene panel file creator should have been called with correct case id and path

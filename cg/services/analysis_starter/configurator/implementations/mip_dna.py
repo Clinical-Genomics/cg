@@ -18,9 +18,9 @@ from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
-MIPDNA_CONFIG_FILE_NAME = "pedigree.yaml"
-MIPDNA_GENE_PANEL_FILE_NAME = "gene_panels.bed"
-MIPDNA_MANAGED_VARIANTS_FILE_NAME = "managed_variants.vcf"
+MIP_DNA_CONFIG_FILE_NAME = "pedigree.yaml"
+MIP_DNA_GENE_PANEL_FILE_NAME = "gene_panels.bed"
+MIP_DNA_MANAGED_VARIANTS_FILE_NAME = "managed_variants.vcf"
 
 
 class MIPDNAConfigurator(Configurator):
@@ -69,13 +69,13 @@ class MIPDNAConfigurator(Configurator):
         return config
 
     def _get_gene_panel_file_path(self, case_id: str) -> Path:
-        return Path(self._get_run_directory(case_id), MIPDNA_GENE_PANEL_FILE_NAME)
+        return Path(self._get_run_directory(case_id), MIP_DNA_GENE_PANEL_FILE_NAME)
 
     def _get_managed_variants_file_path(self, case_id: str) -> Path:
-        return Path(self._get_run_directory(case_id), MIPDNA_MANAGED_VARIANTS_FILE_NAME)
+        return Path(self._get_run_directory(case_id), MIP_DNA_MANAGED_VARIANTS_FILE_NAME)
 
     def _get_config_file_path(self, case_id: str) -> Path:
-        return Path(self._get_run_directory(case_id), MIPDNA_CONFIG_FILE_NAME)
+        return Path(self._get_run_directory(case_id), MIP_DNA_CONFIG_FILE_NAME)
 
     def _get_run_directory(self, case_id: str) -> Path:
         return Path(self.root, case_id)
