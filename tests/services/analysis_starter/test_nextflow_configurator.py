@@ -63,6 +63,8 @@ def test_get_case_config(
     mocker.patch.object(Path, "exists", return_value=True)
 
     # GIVEN a pipeline extension
+    extension: PipelineExtension = create_autospec(PipelineExtension)
+    configurator.pipeline_extension = extension
 
     # WHEN getting the case config
     case_config = configurator.get_config(case_id=nextflow_case_id)
@@ -70,7 +72,8 @@ def test_get_case_config(
     # THEN we should get back a case config
     assert case_config == expected_case_config
 
-    # THEN the pipeline extension should have been called with ensure_all_required_files_exist
+    # THEN the pipeline extension should have been called with ensure_required_files_exist
+    extension.do_required_files_exist.assert_called_once()
 
 
 @pytest.mark.parametrize(
