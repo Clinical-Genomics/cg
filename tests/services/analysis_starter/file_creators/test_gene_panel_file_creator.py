@@ -172,7 +172,7 @@ def test_add_gene_panels_in_combo(
 
 
 @pytest.mark.parametrize(
-    "case_id, expected_build",
+    "case_id, expected_genome_build",
     [
         (MIP_DNA_CASE_ID, GenePanelGenomeBuild.hg19),
         (RAREDISEASE_CASE_ID, GenePanelGenomeBuild.hg19),
@@ -186,10 +186,10 @@ def test_add_gene_panels_in_combo(
         "TOMTE case",
     ],
 )
-def test_creating_file_for_workflows_using_correct_build(
+def test_creating_file_for_workflows_using_correct_genome_build(
     gene_panel_creator: GenePanelFileCreator,
     case_id: str,
-    expected_build: GenePanelGenomeBuild,
+    expected_genome_build: GenePanelGenomeBuild,
     mock_scout: ScoutAPI,
     mocker: MockerFixture,
 ):
@@ -199,9 +199,9 @@ def test_creating_file_for_workflows_using_correct_build(
     # WHEN creating a gene panel file
     gene_panel_creator.create(case_id=case_id, file_path=Path("filename.bed"))
 
-    # THEN Scout should have been called with the expected build and panels
+    # THEN Scout should have been called with the expected genome build and panels
     cast(Mock, mock_scout.export_panels).assert_called_once_with(
-        build=expected_build,
+        build=expected_genome_build,
         panels=[
             GenePanelMasterList.OMIM_AUTO,
             GenePanelMasterList.PANELAPP_GREEN,

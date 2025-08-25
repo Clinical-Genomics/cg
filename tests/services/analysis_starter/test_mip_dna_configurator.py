@@ -16,6 +16,8 @@ from cg.services.analysis_starter.configurator.file_creators.mip_dna_config impo
 from cg.services.analysis_starter.configurator.implementations import mip_dna
 from cg.services.analysis_starter.configurator.implementations.mip_dna import (
     MIP_DNA_CONFIG_FILE_NAME,
+    MIP_DNA_GENE_PANEL_FILE_NAME,
+    MIP_DNA_MANAGED_VARIANTS_FILE_NAME,
     MIPDNAConfigurator,
 )
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
@@ -79,12 +81,12 @@ def test_configure(mocker: MockerFixture):
     # THEN the gene panel file creator should have been called with correct case id and path
     configurator.gene_panel_file_creator.create.assert_called_once_with(
         case_id=case_id,
-        file_path=Path("root_dir", case_id, "gene_panels.bed"),
+        file_path=Path(root_dir, case_id, MIP_DNA_GENE_PANEL_FILE_NAME),
     )
 
     configurator.managed_variants_file_creator.create.assert_called_once_with(
         case_id=case_id,
-        file_path=Path("root_dir", case_id, "managed_variants.vcf"),
+        file_path=Path(root_dir, case_id, MIP_DNA_MANAGED_VARIANTS_FILE_NAME),
     )
 
 

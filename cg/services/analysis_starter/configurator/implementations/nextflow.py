@@ -48,8 +48,8 @@ class NextflowConfigurator(Configurator):
         5. Creating any pipeline specific files."""
         case_run_directory: Path = self._get_case_run_directory(case_id)
         sample_sheet_path = Path(case_run_directory, f"{case_id}_samplesheet.csv")
-        params_file_path = Path(case_run_directory, f"{case_id}_params_file.yaml")
-        config_file_path = Path(case_run_directory, f"{case_id}_nextflow_config.json")
+        params_file_path: Path = self._get_params_file_path(case_id)
+        config_file_path: Path = self._get_config_file_path(case_id)
 
         self._create_case_directory(case_id)
         self.sample_sheet_creator.create(case_id=case_id, file_path=sample_sheet_path)

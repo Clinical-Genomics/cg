@@ -196,10 +196,8 @@ def test_configure(
     # WHEN we configure the case
     config: NextflowCaseConfig = configurator.configure(case_id=case_id)
 
-    # GIVEN a case run directory
-    case_run_directory = Path("/root", case_id)
-
     # THEN the returned config should be as expected
+    case_run_directory = Path("/root", case_id)
     expected_config = NextflowCaseConfig(
         case_id=case_id,
         workflow=workflow,
