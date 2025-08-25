@@ -14,6 +14,7 @@ from cg.models.cg_config import (
     TaxprofilerConfig,
 )
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
+from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )
@@ -47,7 +48,7 @@ from cg.store.store import Store
     "workflow",
     [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
-def test_get_case_config(
+def test_get_config(
     workflow: Workflow,
     nextflow_case_id: str,
     nextflow_root: str,
@@ -74,6 +75,49 @@ def test_get_case_config(
 
     # THEN the pipeline extension should have been called with ensure_required_files_exist
     extension.do_required_files_exist.assert_called_once()
+
+
+def test_get_config_missing_required_files():
+    # GIVEN a nextflow configurator
+
+    # GIVEN a raredisease config
+    pipeline_config = create_autospec(
+        RarediseaseConfig,
+        root="/root",
+        repository="https://repo.scilifelab.se",
+        revision="rev123",
+        profile="profile",
+        pre_run_script="some_script.sh",
+    )
+
+    # GIVEN a store
+    store_mock = create_autospec(Store)
+    store_mock.get_case_workflow = Mock(return_value=Workflow.RAREDISEASE)
+    store_mock.get_case_priority = Mock(return_value="normal")
+
+    # GIVEN a several file creators
+    sample_sheet_creator = create_autospec(RarediseaseSampleSheetCreator)
+    params_file_creator = create_autospec(RarediseaseParamsFileCreator)
+    config_file_creator = create_autospec(NextflowConfigFileCreator)
+
+    # GIVEN a pipeline extension
+    pipeline_extension = create_autospec(RarediseaseExtension)
+
+    # GIVEN a nextflow configurator
+    configurator = NextflowConfigurator(
+        config_file_creator=config_file_creator,
+        params_file_creator=params_file_creator,
+        pipeline_config=pipeline_config,
+        sample_sheet_creator=sample_sheet_creator,
+        store=store_mock,
+        pipeline_extension=pipeline_extension,
+    )
+
+
+
+    # GIVEN the extension indicates missing files
+    # WHEN calling get_config
+    # THEN an exception is raised
 
 
 @pytest.mark.parametrize(
