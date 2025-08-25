@@ -23,5 +23,5 @@ class Configurator(ABC):
         return config.model_copy(update=curated_flags)
 
     @abstractmethod
-    def _ensure_valid_config(self, **kwargs) -> None:
+    def _ensure_required_config_files_exist(self, **kwargs) -> None:
         pass

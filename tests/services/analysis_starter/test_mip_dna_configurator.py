@@ -5,7 +5,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from cg.constants.priority import SlurmQos
-from cg.exc import CaseNotConfiguredError
+from cg.exc import MissingConfigFilesError
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
     ManagedVariantsFileCreator,
@@ -176,5 +176,5 @@ def test_get_config_validation(mock_status_db: Store):
 
     # WHEN executing get_config for a case
     # THEN an CaseNotConfiguredError should be raised
-    with pytest.raises(CaseNotConfiguredError):
+    with pytest.raises(MissingConfigFilesError):
         configurator.get_config(case_id="test_case")

@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
-from cg.exc import CaseNotConfiguredError
+from cg.exc import MissingConfigFilesError
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import MicrosaltConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
@@ -51,7 +51,7 @@ class MicrosaltConfigurator(Configurator):
             fastq_directory=fastq_directory.as_posix(),
         )
         config: MicrosaltCaseConfig = self._set_flags(config=config, **flags)
-        self._ensure_valid_config(config)
+        self._ensure_required_config_files_exist(config)
         return config
 
     def _get_fastq_directory(self, case_id: str) -> Path:
@@ -70,9 +70,13 @@ class MicrosaltConfigurator(Configurator):
             )
         return self.fastq_handler.get_case_fastq_path(case_id)
 
-    def _ensure_valid_config(self, config: MicrosaltCaseConfig) -> None:
+    def _ensure_required_config_files_exist(self, config: MicrosaltCaseConfig) -> None:
+        """Ensures that a Microsalt config file exists for the case.
+        Raises:
+            MissingConfigFilesError if the config file does not exist.
+        """
         config_file_path = Path(config.config_file)
         if not config_file_path.exists():
-            raise CaseNotConfiguredError(
+            raise MissingConfigFilesError(
                 f"Please ensure that the config file {config_file_path.as_posix} exists."
             )
