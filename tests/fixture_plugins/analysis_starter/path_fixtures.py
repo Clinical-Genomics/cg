@@ -40,15 +40,6 @@ def raredisease_params_file_path(raredisease_case_path: Path, raredisease_case_i
 
 
 @pytest.fixture
-def raredisease_params_file_path_readable(
-    analysis_starter_fixtures: Path, raredisease_case_path: Path, raredisease_case_id: str
-) -> Path:
-    return Path(analysis_starter_fixtures, f"{raredisease_case_id}_params_file").with_suffix(
-        FileExtensions.YAML
-    )
-
-
-@pytest.fixture
 def raredisease_nextflow_config_file_path(
     raredisease_case_path: Path, raredisease_case_id: str
 ) -> Path:

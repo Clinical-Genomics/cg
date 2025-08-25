@@ -28,7 +28,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
+@pytest.mark.parametrize(
+    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]
+)
 def test_nextflow_params_file_creator(
     workflow: Workflow,
     params_file_scenario: dict,
@@ -77,7 +79,27 @@ def test_nextflow_config_file_content(
     )
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
+def test_get_samplesheet_path(
+    rnafusion_sample_sheet_creator: NextflowSampleSheetCreator,
+    nextflow_case_id: str,
+    nextflow_case_path: Path,
+):
+    """Test that the sample sheet path is constructed correctly."""
+    # GIVEN a Nextflow sample sheet creator and a case id
+
+    # WHEN getting the sample sheet path
+    sample_sheet_path: Path = rnafusion_sample_sheet_creator.get_file_path(
+        case_id=nextflow_case_id, case_path=nextflow_case_path
+    )
+
+    # THEN the path should end with 'samplesheet.csv'
+    expected_path = Path(nextflow_case_path, f"{nextflow_case_id}_samplesheet.csv")
+    assert sample_sheet_path == expected_path
+
+
+@pytest.mark.parametrize(
+    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]
+)
 def test_nextflow_sample_sheet_creators(
     workflow: Workflow,
     sample_sheet_scenario: dict,
@@ -145,7 +167,7 @@ def test_gene_panel_file_content(
     "mock_value, expected_panels",
     [
         (True, GenePanelMasterList.get_panel_names()),
-        (False, list({GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN})),
+        (False, [GenePanelMasterList.PANELAPP_GREEN, GenePanelMasterList.OMIM_AUTO]),
     ],
     ids=[
         "customer is collaborator and panels in master list",
@@ -174,7 +196,7 @@ def test_get_agregated_gene_panels(
     )
 
     # THEN the aggregated panels are what is expected
-    assert aggregated_panels == expected_panels
+    assert set(aggregated_panels) == set(expected_panels)
 
 
 @pytest.mark.parametrize(

@@ -8,7 +8,7 @@ from cg.constants import Workflow
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 def test_get_case_config(
     workflow: Workflow,
@@ -34,7 +34,7 @@ def test_get_case_config(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 def test_get_case_config_flags(
     workflow: Workflow,
@@ -52,15 +52,15 @@ def test_get_case_config_flags(
     mocker.patch.object(Path, "exists", return_value=True)
 
     # WHEN getting the case config overriding the revision
-    case_config = configurator.get_config(case_id=nextflow_case_id, revision="overridden")
+    case_config = configurator.get_config(case_id=nextflow_case_id, pre_run_script="overridden")
 
     # THEN we should get back a case config with updated value
-    assert case_config.revision == "overridden"
+    assert case_config.pre_run_script == "overridden"
 
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION],
+    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 def test_get_case_config_none_flags(
     workflow: Workflow,
@@ -77,8 +77,8 @@ def test_get_case_config_none_flags(
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)
 
-    # WHEN getting the case config and overriding revision with None
-    case_config = configurator.get_config(case_id=nextflow_case_id, revision=None)
+    # WHEN getting the case config and overriding pre-run-script with None
+    case_config = configurator.get_config(case_id=nextflow_case_id, pre_run_script=None)
 
-    # THEN we should get back a case config without altering the revision
-    assert case_config.revision is not None
+    # THEN we should get back a case config without altering the pre-run-script
+    assert case_config.pre_run_script is not None

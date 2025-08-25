@@ -5,20 +5,22 @@ import logging
 import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
+from click import BaseCommand
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
 from cg.cli.workflow.base import workflow as workflow_cli
-from cg.cli.workflow.rnafusion.base import dev_run
+from cg.cli.workflow.raredisease.base import dev_run as raredisease_run
+from cg.cli.workflow.rnafusion.base import run as rnafusion_run
+from cg.cli.workflow.taxprofiler.base import dev_run as taxprofiler_run
 from cg.constants import EXIT_SUCCESS, Workflow
-from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.service import AnalysisStarter
 
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_run_without_options(cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest):
     """Test run command for workflow without options."""
@@ -38,7 +40,7 @@ def test_run_without_options(cli_runner: CliRunner, workflow: Workflow, request:
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_run_with_missing_case(
     cli_runner: CliRunner,
@@ -67,7 +69,7 @@ def test_run_with_missing_case(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_run_case_without_samples(
     cli_runner: CliRunner,
@@ -97,7 +99,7 @@ def test_run_case_without_samples(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_run_case_without_config_files(
     cli_runner: CliRunner,
@@ -124,7 +126,7 @@ def test_run_case_without_config_files(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_run_case_from_start_dry_run(
     cli_runner: CliRunner,
@@ -158,7 +160,7 @@ def test_run_case_from_start_dry_run(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_run_case_with_revision_dry_run(
     cli_runner: CliRunner,
@@ -192,7 +194,7 @@ def test_run_case_with_revision_dry_run(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_resume_case_dry_run(
     cli_runner: CliRunner,
@@ -207,9 +209,6 @@ def test_resume_case_dry_run(
 
     # GIVEN a case id
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
-
-    # GIVEN a mocked config
-    # request.getfixturevalue(f"{workflow}_config")
 
     # WHEN invoking a command with dry-run and nf-tower-id specified
     result = cli_runner.invoke(
@@ -228,7 +227,7 @@ def test_resume_case_dry_run(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_resume_case_with_missing_tower_id(
     cli_runner: CliRunner,
@@ -256,7 +255,7 @@ def test_resume_case_with_missing_tower_id(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_resume_using_nextflow_dry_run(
     cli_runner: CliRunner,
@@ -291,25 +290,15 @@ def test_resume_using_nextflow_dry_run(
     assert "-resume" in caplog.text
 
 
-def test_run_rnafusion_calls_service(
+@pytest.mark.parametrize(
+    "run_command",
+    [raredisease_run, rnafusion_run, taxprofiler_run],
+    ids=["raredisease", "RNAFUSION", "Taxprofiler"],
+)
+def test_run_nextflow_calls_service(
+    run_command: BaseCommand,
     cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
-    mocker: MockerFixture,
-):
-    # GIVEN a case id
-    case_id: str = "case_id"
-
-    # WHEN running the dev run command without flags
-    service_call = mocker.patch.object(AnalysisStarter, "run")
-    cli_runner.invoke(dev_run, [case_id], obj=rnafusion_context)
-
-    # THEN the analysis starter should have been called with the expected input
-    service_call.assert_called_once_with(case_id=case_id, revision=None, stub_run=False)
-
-
-def test_run_rnafusion_calls_service_with_flag(
-    cli_runner: CliRunner,
-    rnafusion_context: CGConfig,
+    cg_context: CGConfig,
     mocker: MockerFixture,
 ):
     # GIVEN a case id
@@ -317,9 +306,7 @@ def test_run_rnafusion_calls_service_with_flag(
 
     # GIVEN that the dev run command is run with flags
     service_call = mocker.patch.object(AnalysisStarter, "run")
-    cli_runner.invoke(
-        dev_run, [case_id, "--revision", "1.0.0", "--stub-run"], obj=rnafusion_context
-    )
+    cli_runner.invoke(run_command, [case_id], obj=cg_context)
 
     # THEN the analysis started should have been called with the flags set
-    service_call.assert_called_once_with(case_id=case_id, revision="1.0.0", stub_run=True)
+    service_call.assert_called_once_with(case_id=case_id)

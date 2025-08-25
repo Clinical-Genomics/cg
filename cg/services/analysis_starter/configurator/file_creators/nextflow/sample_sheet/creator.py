@@ -2,6 +2,7 @@ import logging
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Iterator
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, SequencingFileTag
@@ -10,21 +11,24 @@ from cg.io.gzip import read_gzip_first_line
 from cg.meta.workflow.fastq import is_undetermined_in_path
 from cg.models.fastq import FastqFileMeta, GetFastqFileMeta
 from cg.store.models import Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
 
 class NextflowSampleSheetCreator(ABC):
 
-    def __init__(self, housekeeper_api: HousekeeperAPI):
+    def __init__(self, housekeeper_api: HousekeeperAPI, store: Store):
         self.housekeeper_api = housekeeper_api
+        self.store = store
 
     @staticmethod
     def get_file_path(case_id: str, case_path: Path) -> Path:
         """Return the path to the sample sheet."""
-        return Path(case_path, f"{case_id}_sample_sheet").with_suffix(FileExtensions.CSV)
+        return Path(case_path, f"{case_id}_samplesheet").with_suffix(FileExtensions.CSV)
 
     def create(self, case_id: str, case_path: Path) -> None:
+        LOG.debug(f"Creating sample sheet for case {case_id}")
         file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
         content: list[list[str]] = self._get_content(case_id)
         write_csv(file_path=file_path, content=content)
@@ -33,8 +37,8 @@ class NextflowSampleSheetCreator(ABC):
     def _get_content(self, case_id: str) -> list[list[str]]:
         pass
 
-    def _get_paired_read_paths(self, sample: Sample) -> tuple[list[str], list[str]]:
-        """Returns a tuple of paired fastq file paths for the forward and reverse read."""
+    def _get_paired_read_paths(self, sample: Sample) -> Iterator[tuple[str, str]]:
+        """Return an iterator of tuples with paired fastq paths for the forward and reverse read."""
         sample_metadata: list[FastqFileMeta] = self._get_fastq_metadata_for_sample(sample)
         fastq_forward_read_paths: list[str] = self._extract_read_files(
             metadata=sample_metadata, forward_read=True
@@ -42,7 +46,7 @@ class NextflowSampleSheetCreator(ABC):
         fastq_reverse_read_paths: list[str] = self._extract_read_files(
             metadata=sample_metadata, forward_read=False
         )
-        return fastq_forward_read_paths, fastq_reverse_read_paths
+        return zip(fastq_forward_read_paths, fastq_reverse_read_paths)
 
     def _get_fastq_metadata_for_sample(self, sample: Sample) -> list[FastqFileMeta]:
         """Return FASTQ metadata objects for all fastq files linked to a sample."""

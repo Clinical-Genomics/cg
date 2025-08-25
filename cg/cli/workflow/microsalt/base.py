@@ -1,4 +1,4 @@
-"""CLI support to start microsalt"""
+"""CLI support to start microSALT."""
 
 import logging
 from pathlib import Path
@@ -63,9 +63,11 @@ def run(
     config_file_path: click.Path,
     case_id: str,
 ) -> None:
-    """Runs the microSALT workflow for the provided case. Does not generate config files."""
+    """Run a preconfigured microSALT case."""
     factory = AnalysisStarterFactory(cg_config)
-    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_case(case_id)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
+        Workflow.MICROSALT
+    )
     analysis_starter.run(case_id=case_id, config_file=config_file_path)
 
 
@@ -76,9 +78,11 @@ def start(cg_config: CGConfig, case_id: str) -> None:
     """
     Generates config file, links fastq files and runs the microSALT analysis for the provided case.
     """
-    LOG.info(f"Starting Microsalt workflow for {case_id}")
+    LOG.info(f"Starting microSALT workflow for {case_id}")
     factory = AnalysisStarterFactory(cg_config)
-    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_case(case_id)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
+        Workflow.MICROSALT
+    )
     analysis_starter.start(case_id)
 
 
@@ -86,7 +90,7 @@ def start(cg_config: CGConfig, case_id: str) -> None:
 @click.pass_obj
 def start_available(cg_config: CGConfig) -> None:
     """Starts all available microSALT cases."""
-    LOG.info("Starting Microsalt workflow for all available cases.")
+    LOG.info("Starting microSALT workflow for all available cases.")
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.MICROSALT
@@ -100,7 +104,7 @@ def start_available(cg_config: CGConfig) -> None:
 @ARGUMENT_UNIQUE_IDENTIFIER
 @click.pass_context
 def qc_microsalt(context: click.Context, unique_id: str) -> None:
-    """Perform QC on a microsalt case."""
+    """Perform QC on a microSALT case."""
     analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
     metrics_file_path: Path = analysis_api.get_metrics_file_path(unique_id)
     try:
