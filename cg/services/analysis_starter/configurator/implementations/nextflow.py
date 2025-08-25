@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cg.exc import CaseNotConfiguredError
+from cg.exc import MissingConfigFilesError
 from cg.models.cg_config import CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
@@ -100,10 +100,15 @@ class NextflowConfigurator(Configurator):
         return Path(self.root_dir, case_id, "work")
 
     def _ensure_required_config_files_exist(self, config: NextflowCaseConfig) -> None:
+        """
+        Ensure that the config and the params files exists.
+        Raises:
+            MissingConfigFilesError if either the params file or the config file is missing.
+        """
         params_file_path = Path(config.params_file)
         config_file_path = Path(config.nextflow_config_file)
         if not params_file_path.exists() or not config_file_path.exists():
-            raise CaseNotConfiguredError(
+            raise MissingConfigFilesError(
                 f"Please ensure that both the parameters file {params_file_path.as_posix()} "
                 f"and the configuration file {config_file_path.as_posix()} exists."
             )

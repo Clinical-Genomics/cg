@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from cg.apps.environ import environ_email
-from cg.exc import CaseNotConfiguredError
+from cg.exc import MissingConfigFilesError
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
@@ -65,7 +65,7 @@ class MIPDNAConfigurator(Configurator):
         """Ensures that the case run directory has a MIP config file, a gene panel file and a
         managed variants file.
         Raises:
-            CaseNotConfiguredError if any of those files are not present.
+            MissingConfigFilesError if any of those files are not present.
         """
         run_directory = Path(self.root, case_id)
         config_file_path: Path = self.config_file_creator.get_file_path(case_id)
@@ -78,7 +78,7 @@ class MIPDNAConfigurator(Configurator):
             and gene_panel_file_path.exists()
             and managed_variants_file_path.exists()
         ):
-            raise CaseNotConfiguredError(
+            raise MissingConfigFilesError(
                 "Ensure config file, gene panel and managed variants files exist."
             )
 
