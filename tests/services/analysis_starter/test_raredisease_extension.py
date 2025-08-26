@@ -28,3 +28,7 @@ def test_configure_success():
     raredisease_extension.managed_variants_file_creator.create.assert_called_once_with(
         case_id="case_id", file_path=Path("/path/to/dir/", MANAGED_VARIANTS_FILE_NAME)
     )
+
+
+def test_do_required_files_exist():
+    pass
