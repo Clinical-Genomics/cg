@@ -42,16 +42,29 @@ def test_configure_success():
         (True, False, False),
         (True, True, True),
     ],
+    ids=[
+        "neither file exists",
+        "only managed variants file exists",
+        "only gene panel file exists",
+        "both files exist",
+    ],
 )
-def test_do_required_files_exist(mocker: MockerFixture):
+def test_do_required_files_exist(
+    does_gene_panel_exist: bool,
+    does_managed_variants_exist: bool,
+    expected_value: bool,
+    mocker: MockerFixture,
+):
     # GIVEN a case run directory
     case_run_directory = Path("root")
+    file_map: dict[Path, bool] = {
+        Path(case_run_directory, GENE_PANEL_FILE_NAME): does_gene_panel_exist,
+        Path(case_run_directory, MANAGED_VARIANTS_FILE_NAME): does_managed_variants_exist,
+    }
 
     # GIVEN that one required file exists and one does not
     isfile_mock = mocker.patch.object(raredisease, "isfile")
-    isfile_mock.side_effect = lambda path: (
-        True if path == Path(case_run_directory, GENE_PANEL_FILE_NAME) else False
-    )
+    isfile_mock.side_effect = lambda path: file_map.get(path, False)
 
     # GIVEN a raredisease extension
     raredisease_extension = RarediseaseExtension(
@@ -62,5 +75,5 @@ def test_do_required_files_exist(mocker: MockerFixture):
     # WHEN calling do_required_files_exist
     do_files_exist: bool = raredisease_extension.do_required_files_exist(case_run_directory)
 
-    # THEN it should return False
-    assert not do_files_exist
+    # THEN the return values should be as expected
+    assert do_files_exist == expected_value
