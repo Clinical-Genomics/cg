@@ -56,17 +56,12 @@ def housekeeper_db_uri() -> str:
 
 
 @pytest.fixture
-def store(status_db_uri: str) -> Generator[Store, None, None]:
+def status_db(status_db_uri: str) -> Generator[Store, None, None]:
     cg_database.initialize_database(status_db_uri)
     cg_database.create_all_tables()
     store = Store()
     yield store
     cg_database.drop_all_tables()
-
-
-@pytest.fixture
-def status_db(store: Store) -> Generator[Store, None, None]:
-    yield store
 
 
 @pytest.fixture
