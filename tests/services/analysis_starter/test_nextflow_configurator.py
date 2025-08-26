@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
+from cg.exc import MissingConfigFilesError
 from cg.models.cg_config import (
     CommonAppConfig,
     RarediseaseConfig,
@@ -120,8 +121,10 @@ def test_get_config_missing_required_files(mocker: MockerFixture):
     mocker.patch.object(Path, "exists", return_value=True)
 
     # WHEN calling get_config
-    configurator.get_config(case_id="case123")
+
     # THEN an exception is raised
+    with pytest.raises(MissingConfigFilesError):
+        configurator.get_config(case_id="case123")
 
 
 @pytest.mark.parametrize(
@@ -168,6 +171,11 @@ def test_get_case_config_none_flags(
 
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)
+
+    # GIVEN that all required files exist for the pipeline extension
+    mocker.patch.object(
+        configurator.pipeline_extension, "do_required_files_exist", return_value=True
+    )
 
     # WHEN getting the case config and overriding pre-run-script with None
     case_config = configurator.get_config(case_id=nextflow_case_id, pre_run_script=None)
