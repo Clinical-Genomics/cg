@@ -7,5 +7,5 @@ class PipelineExtension:
         can be used."""
         pass
 
-    def are_required_files_missing(self) -> bool:
-        return False
+    def do_required_files_exist(self, **kwargs) -> bool:
+        return True

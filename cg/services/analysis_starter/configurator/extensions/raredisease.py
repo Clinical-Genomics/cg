@@ -29,3 +29,9 @@ class RarediseaseExtension(PipelineExtension):
         self.managed_variants_file_creator.create(
             case_id=case_id, file_path=case_run_directory.joinpath(MANAGED_VARIANTS_FILE_NAME)
         )
+
+    def do_required_files_exist(self, case_run_directory: Path) -> bool:
+        return (
+            case_run_directory.joinpath(GENE_PANEL_FILE_NAME).exists()
+            and case_run_directory.joinpath(MANAGED_VARIANTS_FILE_NAME).exists()
+        )

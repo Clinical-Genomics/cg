@@ -119,7 +119,7 @@ class NextflowConfigurator(Configurator):
         params_file_path = Path(config.params_file)
         config_file_path = Path(config.nextflow_config_file)
         if (
-            self.pipeline_extension.are_required_files_missing()
+            not self.pipeline_extension.do_required_files_exist()  #
             or not params_file_path.exists()
             or not config_file_path.exists()
         ):

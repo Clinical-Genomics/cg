@@ -74,7 +74,7 @@ def test_get_config(
     assert case_config == expected_case_config
 
     # THEN the pipeline extension should have been called with ensure_required_files_exist
-    extension.are_required_files_missing.assert_called_once()
+    extension.do_required_files_exist.assert_called_once()
 
 
 def test_get_config_missing_required_files(mocker: MockerFixture):
@@ -104,7 +104,7 @@ def test_get_config_missing_required_files(mocker: MockerFixture):
     pipeline_extension = create_autospec(RarediseaseExtension)
 
     # GIVEN the extension indicates missing files
-    pipeline_extension.are_required_files_missing = Mock(return_value=False)
+    pipeline_extension.do_required_files_exist = Mock(return_value=False)
 
     # GIVEN a nextflow configurator
     configurator = NextflowConfigurator(
