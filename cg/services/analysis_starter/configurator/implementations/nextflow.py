@@ -1,7 +1,5 @@
 from pathlib import Path
 
-from cg.apps.demultiplex.sample_sheet.sample_sheet_models import SampleSheet
-from cg.constants import FileExtensions
 from cg.exc import MissingConfigFilesError
 from cg.models.cg_config import CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
@@ -118,14 +116,16 @@ class NextflowConfigurator(Configurator):
         """
         params_file_path = Path(config.params_file)
         config_file_path = Path(config.nextflow_config_file)
-        samplesheet_file_path = Path(config.samplesheet_file)
+        samplesheet_file_path: Path = self._get_sample_sheet_path(config.case_id)
         if not (
             self.pipeline_extension.do_required_files_exist()
             and params_file_path.exists()
             and config_file_path.exists()
+            and samplesheet_file_path.exists()
         ):
             raise MissingConfigFilesError(
                 f"Please ensure that the parameters file {params_file_path.as_posix()}, "
-                f"the configuration file {config_file_path.as_posix()}, the sample sheet, and "
+                f"the configuration file {config_file_path.as_posix()}, "
+                f"the sample sheet {samplesheet_file_path.as_posix()}, and "
                 f"all pipeline specific files exists."
             )
