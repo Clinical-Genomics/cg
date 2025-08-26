@@ -3,8 +3,7 @@ from collections.abc import Callable, Generator
 from datetime import datetime
 from pathlib import Path
 from subprocess import CompletedProcess
-from time import sleep
-from typing import Literal, cast
+from typing import cast
 from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
@@ -17,7 +16,6 @@ from pytest_httpserver import HTTPServer
 
 from cg.apps.tb.api import IDTokenCredentials
 from cg.cli.base import base
-from cg.cli.workflow.microsalt.base import run
 from cg.cli.workflow.mip import base as mip_base
 from cg.constants.constants import CaseActions, Workflow
 from cg.constants.gene_panel import GenePanelMasterList
