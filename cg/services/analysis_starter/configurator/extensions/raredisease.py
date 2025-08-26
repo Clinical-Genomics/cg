@@ -1,3 +1,4 @@
+from os.path import isfile
 from pathlib import Path
 
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
@@ -31,9 +32,10 @@ class RarediseaseExtension(PipelineExtension):
         )
 
     def do_required_files_exist(self, case_run_directory: Path) -> bool:
+        retval=isfile(_get_gene_panel_file_path(case_run_directory))
         return (
-            _get_gene_panel_file_path(case_run_directory).exists()
-            and _get_managed_variants(case_run_directory).exists()
+            isfile(_get_gene_panel_file_path(case_run_directory))
+            and isfile(_get_managed_variants(case_run_directory))
         )
 
 

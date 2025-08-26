@@ -1,6 +1,9 @@
 from pathlib import Path
 from unittest.mock import create_autospec
 
+from pytest_mock import MockerFixture
+
+from cg.services.analysis_starter.configurator.extensions import raredisease
 from cg.services.analysis_starter.configurator.extensions.raredisease import (
     GENE_PANEL_FILE_NAME,
     MANAGED_VARIANTS_FILE_NAME,
@@ -30,5 +33,17 @@ def test_configure_success():
     )
 
 
-def test_do_required_files_exist():
-    pass
+def test_do_required_files_exist(mocker:MockerFixture):
+
+
+    isfile_mock= mocker.patch.object(raredisease,"isfile")
+
+    isfile_mock.side_effect = lambda path: True
+
+    raredisease_extension = RarediseaseExtension(
+        gene_panel_file_creator=create_autospec(GenePanelFileCreator),
+        managed_variants_file_creator=create_autospec(ManagedVariantsFileCreator),
+    )
+
+    raredisease_extension.do_required_files_exist(Path("root/file"))
+
