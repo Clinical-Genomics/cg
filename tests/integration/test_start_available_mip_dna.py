@@ -1,5 +1,5 @@
 import shutil
-from collections.abc import Callable, Generator
+from collections.abc import Generator
 from datetime import datetime
 from pathlib import Path
 from subprocess import CompletedProcess
@@ -13,6 +13,7 @@ from housekeeper.store.models import Bundle, Version
 from housekeeper.store.store import Store as HousekeeperStore
 from pytest import TempPathFactory
 from pytest_httpserver import HTTPServer
+from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import IDTokenCredentials
 from cg.cli.base import base
@@ -40,7 +41,7 @@ def valid_google_token(mocker):
 
 
 @pytest.fixture(scope="session")
-def httpserver_listen_address():
+def httpserver_listen_address() -> tuple[str, int]:
     return ("localhost", 8888)
 
 
@@ -91,20 +92,20 @@ def test_start_available_mip_dna(
     housekeeper_db_uri: str,
     housekeeper_db: HousekeeperStore,
     httpserver: HTTPServer,
-    mocker: Callable,
+    mocker: MockerFixture,
     scout_export_panel_stdout: bytes,
     status_db_uri: str,
     status_db: Store,
     tmp_path_factory: TempPathFactory,
 ):
-    """Test a successful run of the command start-available mip-dna
-    with one case to be analysed that has not been analysed before"""
+    """Test a successful run of the command 'cg workflow mip-dna start-available'
+    with one case to be analysed that has not been analysed before."""
     cli_runner = CliRunner()
 
     # GIVEN a mip root directory
     test_root_dir: Path = tmp_path_factory.mktemp("test_start_available_mip_dna")
     # GIVEN a config file with valid database uris and directories
-    config_path: Path = create_config(status_db_uri, housekeeper_db_uri, test_root_dir)
+    config_path: Path = create_parsed_config(status_db_uri, housekeeper_db_uri, test_root_dir)
     mip_dna_path = Path(test_root_dir, "mip-dna")
 
     # GIVEN a case with existing qc files
@@ -135,7 +136,7 @@ def test_start_available_mip_dna(
         store=status_db, sample_id=sample.internal_id, sequencing_run=sequencing_run, lane=1
     )
 
-    # GIVEN a gzipped-fastq file exists
+    # GIVEN that a gzipped-fastq file exists for the sample
     fastq_base_path: Path = tmp_path_factory.mktemp("fastq_files")
     fastq_file_path: Path = Path(fastq_base_path, "file.fastq.gz")
     shutil.copy2("tests/integration/config/file.fastq.gz", fastq_file_path)
@@ -159,7 +160,7 @@ def test_start_available_mip_dna(
     housekeeper_db.session.add(version)
     housekeeper_db.session.commit()
 
-    # GIVEN the scout command returns exported panel data
+    # GIVEN that the Scout command returns exported panel data
     subprocess_mock = mocker.patch.object(commands, "subprocess")
 
     def mock_run(*args, **kwargs):
@@ -172,11 +173,11 @@ def test_start_available_mip_dna(
 
     subprocess_mock.run = Mock(side_effect=mock_run)
 
-    # GIVEN an email adress can be determined from the environment
+    # GIVEN an email address can be determined from the environment
     mocker.patch.object(mip_base, "environ_email", return_value="testuser@scilifelab.se")
     mocker.patch.object(analysis, "environ_email", return_value="testuser@scilifelab.se")
 
-    # GIVEN the trailblazer API returns no ongoing analysis for the case
+    # GIVEN the Trailblazer API returns no ongoing analysis for the case
     httpserver.expect_request(
         "/trailblazer/get-latest-analysis", data='{"case_id": "' + case.internal_id + '"}'
     ).respond_with_json(None)
@@ -263,7 +264,7 @@ def test_start_available_mip_dna(
         stderr=ANY,
     )
 
-    # THEN a mip-dna analysis is started with the expected parameters
+    # THEN a MIP-DNA analysis is started with the expected parameters
     subprocess_mock.run.assert_any_call(
         f"{mip_dna_path}/conda_bin run --name S_mip12.1 "
         f"{mip_dna_path}/bin analyse rd_dna --config {mip_dna_path}/config/mip12.1-dna-stage.yaml "
@@ -291,7 +292,7 @@ def test_start_available_mip_dna(
     assert Path(case_dir, "pedigree.yaml").exists()
 
 
-def create_qc_file(test_root_dir, case) -> Path:
+def create_qc_file(test_root_dir: Path, case: Case) -> Path:
     filepath = Path(
         f"{test_root_dir}/mip-dna/cases/{case.internal_id}/analysis/{case.internal_id}_qc_sample_info.yaml"
     )
@@ -300,7 +301,7 @@ def create_qc_file(test_root_dir, case) -> Path:
     return filepath
 
 
-def create_config(status_db_uri, housekeeper_db_uri, test_root_dir):
+def create_parsed_config(status_db_uri: str, housekeeper_db_uri: str, test_root_dir: str):
     template_path = "tests/integration/config/cg-test.yaml"
     with open(template_path) as f:
         config_content = f.read()
