@@ -121,7 +121,6 @@ def test_get_config_missing_required_files(mocker: MockerFixture):
     mocker.patch.object(Path, "exists", return_value=True)
 
     # WHEN calling get_config
-
     # THEN an exception is raised
     with pytest.raises(MissingConfigFilesError):
         configurator.get_config(case_id="case123")
