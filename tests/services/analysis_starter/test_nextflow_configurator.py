@@ -145,6 +145,9 @@ def test_get_case_config_flags(
 
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)
+    mocker.patch.object(
+        configurator.pipeline_extension, "do_required_files_exist", return_value=True
+    )
 
     # WHEN getting the case config overriding the revision
     case_config = configurator.get_config(case_id=nextflow_case_id, pre_run_script="overridden")
