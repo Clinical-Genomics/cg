@@ -1,6 +1,7 @@
 from pathlib import Path
 from unittest.mock import create_autospec
 
+import pytest
 from pytest_mock import MockerFixture
 
 from cg.services.analysis_starter.configurator.extensions import raredisease
@@ -33,17 +34,33 @@ def test_configure_success():
     )
 
 
-def test_do_required_files_exist(mocker:MockerFixture):
+@pytest.mark.parametrize(
+    "does_gene_panel_exist, does_managed_variants_exist, expected_value",
+    [
+        (False, False, False),
+        (False, True, False),
+        (True, False, False),
+        (True, True, True),
+    ],
+)
+def test_do_required_files_exist(mocker: MockerFixture):
+    # GIVEN a case run directory
+    case_run_directory = Path("root")
 
+    # GIVEN that one required file exists and one does not
+    isfile_mock = mocker.patch.object(raredisease, "isfile")
+    isfile_mock.side_effect = lambda path: (
+        True if path == Path(case_run_directory, GENE_PANEL_FILE_NAME) else False
+    )
 
-    isfile_mock= mocker.patch.object(raredisease,"isfile")
-
-    isfile_mock.side_effect = lambda path: True
-
+    # GIVEN a raredisease extension
     raredisease_extension = RarediseaseExtension(
         gene_panel_file_creator=create_autospec(GenePanelFileCreator),
         managed_variants_file_creator=create_autospec(ManagedVariantsFileCreator),
     )
 
-    raredisease_extension.do_required_files_exist(Path("root/file"))
+    # WHEN calling do_required_files_exist
+    do_files_exist: bool = raredisease_extension.do_required_files_exist(case_run_directory)
 
+    # THEN it should return False
+    assert not do_files_exist

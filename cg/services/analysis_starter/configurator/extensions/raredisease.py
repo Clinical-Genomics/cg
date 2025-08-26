@@ -32,10 +32,9 @@ class RarediseaseExtension(PipelineExtension):
         )
 
     def do_required_files_exist(self, case_run_directory: Path) -> bool:
-        retval=isfile(_get_gene_panel_file_path(case_run_directory))
-        return (
-            isfile(_get_gene_panel_file_path(case_run_directory))
-            and isfile(_get_managed_variants(case_run_directory))
+        retval = isfile(_get_gene_panel_file_path(case_run_directory))
+        return isfile(_get_gene_panel_file_path(case_run_directory)) and isfile(
+            _get_managed_variants(case_run_directory)
         )
 
 
