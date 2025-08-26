@@ -1,3 +1,4 @@
+from os.path import isfile
 from pathlib import Path
 
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
@@ -24,8 +25,21 @@ class RarediseaseExtension(PipelineExtension):
     def configure(self, case_id: str, case_run_directory: Path) -> None:
         """Perform pipeline specific actions."""
         self.gene_panel_file_creator.create(
-            case_id=case_id, file_path=case_run_directory.joinpath(GENE_PANEL_FILE_NAME)
+            case_id=case_id, file_path=_get_gene_panel_file_path(case_run_directory)
         )
         self.managed_variants_file_creator.create(
-            case_id=case_id, file_path=case_run_directory.joinpath(MANAGED_VARIANTS_FILE_NAME)
+            case_id=case_id, file_path=_get_managed_variants(case_run_directory)
         )
+
+    def do_required_files_exist(self, case_run_directory: Path) -> bool:
+        return isfile(_get_gene_panel_file_path(case_run_directory)) and isfile(
+            _get_managed_variants(case_run_directory)
+        )
+
+
+def _get_gene_panel_file_path(case_run_directory: Path) -> Path:
+    return case_run_directory.joinpath(GENE_PANEL_FILE_NAME)
+
+
+def _get_managed_variants(case_run_directory: Path):
+    return case_run_directory.joinpath(MANAGED_VARIANTS_FILE_NAME)

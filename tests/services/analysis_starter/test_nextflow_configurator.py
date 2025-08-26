@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
+from cg.exc import MissingConfigFilesError
 from cg.models.cg_config import (
     CommonAppConfig,
     RarediseaseConfig,
@@ -14,6 +15,7 @@ from cg.models.cg_config import (
     TaxprofilerConfig,
 )
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
+from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )
@@ -47,7 +49,7 @@ from cg.store.store import Store
     "workflow",
     [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
-def test_get_case_config(
+def test_get_config(
     workflow: Workflow,
     nextflow_case_id: str,
     nextflow_root: str,
@@ -62,11 +64,66 @@ def test_get_case_config(
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)
 
+    # GIVEN a pipeline extension
+    extension: PipelineExtension = create_autospec(PipelineExtension)
+    configurator.pipeline_extension = extension
+
     # WHEN getting the case config
     case_config = configurator.get_config(case_id=nextflow_case_id)
 
     # THEN we should get back a case config
     assert case_config == expected_case_config
+
+    # THEN the pipeline extension should have been called with ensure_required_files_exist
+    extension.do_required_files_exist.assert_called_once()
+
+
+def test_get_config_missing_required_files(mocker: MockerFixture):
+    # GIVEN a nextflow configurator
+
+    # GIVEN a raredisease config
+    pipeline_config = create_autospec(
+        RarediseaseConfig,
+        root="/root",
+        repository="https://repo.scilifelab.se",
+        revision="rev123",
+        profile="profile",
+        pre_run_script="some_script.sh",
+    )
+
+    # GIVEN a store
+    store_mock = create_autospec(Store)
+    store_mock.get_case_workflow = Mock(return_value=Workflow.RAREDISEASE)
+    store_mock.get_case_priority = Mock(return_value="normal")
+
+    # GIVEN a several file creators
+    sample_sheet_creator = create_autospec(RarediseaseSampleSheetCreator)
+    params_file_creator = create_autospec(RarediseaseParamsFileCreator)
+    config_file_creator = create_autospec(NextflowConfigFileCreator)
+
+    # GIVEN a pipeline extension
+    pipeline_extension = create_autospec(RarediseaseExtension)
+
+    # GIVEN the extension indicates missing files
+    pipeline_extension.do_required_files_exist = Mock(return_value=False)
+
+    # GIVEN a nextflow configurator
+    configurator = NextflowConfigurator(
+        config_file_creator=config_file_creator,
+        params_file_creator=params_file_creator,
+        pipeline_config=pipeline_config,
+        sample_sheet_creator=sample_sheet_creator,
+        store=store_mock,
+        pipeline_extension=pipeline_extension,
+    )
+
+    # GIVEN that the files created by the configurator are mocked to exist
+    mocker.patch.object(Path, "exists", return_value=True)
+
+    # WHEN calling get_config
+    # THEN an exception is raised
+    with pytest.raises(MissingConfigFilesError):
+        configurator.get_config(case_id="case123")
 
 
 @pytest.mark.parametrize(
@@ -87,6 +144,9 @@ def test_get_case_config_flags(
 
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)
+    mocker.patch.object(
+        configurator.pipeline_extension, "do_required_files_exist", return_value=True
+    )
 
     # WHEN getting the case config overriding the revision
     case_config = configurator.get_config(case_id=nextflow_case_id, pre_run_script="overridden")
@@ -113,6 +173,11 @@ def test_get_case_config_none_flags(
 
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)
+
+    # GIVEN that all required files exist for the pipeline extension
+    mocker.patch.object(
+        configurator.pipeline_extension, "do_required_files_exist", return_value=True
+    )
 
     # WHEN getting the case config and overriding pre-run-script with None
     case_config = configurator.get_config(case_id=nextflow_case_id, pre_run_script=None)

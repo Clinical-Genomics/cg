@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from cg.exc import MissingConfigFilesError
-from cg.constants import FileExtensions
 from cg.models.cg_config import CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
@@ -47,7 +46,7 @@ class NextflowConfigurator(Configurator):
         4. Creating a configuration file.
         5. Creating any pipeline specific files."""
         case_run_directory: Path = self._get_case_run_directory(case_id)
-        sample_sheet_path = Path(case_run_directory, f"{case_id}_samplesheet.csv")
+        sample_sheet_path: Path = self._get_sample_sheet_path(case_id)
         params_file_path: Path = self._get_params_file_path(case_id)
         config_file_path: Path = self._get_config_file_path(case_id)
 
@@ -88,15 +87,14 @@ class NextflowConfigurator(Configurator):
 
     def _get_config_file_path(self, case_id: str) -> Path:
         """Return the path to the Nextflow config file."""
-        return Path(
-            self._get_case_run_directory(case_id), f"{case_id}_nextflow_config"
-        ).with_suffix(FileExtensions.JSON)
+        return Path(self._get_case_run_directory(case_id), f"{case_id}_nextflow_config.json")
 
     def _get_params_file_path(self, case_id: str) -> Path:
         """Return the path to the params file for a case."""
-        return Path(self._get_case_run_directory(case_id), f"{case_id}_params_file").with_suffix(
-            FileExtensions.YAML
-        )
+        return Path(self._get_case_run_directory(case_id), f"{case_id}_params_file.yaml")
+
+    def _get_sample_sheet_path(self, case_id: str) -> Path:
+        return Path(self._get_case_run_directory(case_id), f"{case_id}_samplesheet.csv")
 
     def _get_case_run_directory(self, case_id: str) -> Path:
         """Path to case working directory."""
@@ -118,8 +116,16 @@ class NextflowConfigurator(Configurator):
         """
         params_file_path = Path(config.params_file)
         config_file_path = Path(config.nextflow_config_file)
-        if not params_file_path.exists() or not config_file_path.exists():
+        samplesheet_file_path: Path = self._get_sample_sheet_path(config.case_id)
+        if not (
+            self.pipeline_extension.do_required_files_exist()
+            and params_file_path.exists()
+            and config_file_path.exists()
+            and samplesheet_file_path.exists()
+        ):
             raise MissingConfigFilesError(
-                f"Please ensure that both the parameters file {params_file_path.as_posix()} "
-                f"and the configuration file {config_file_path.as_posix()} exists."
+                f"Please ensure that the parameters file {params_file_path.as_posix()}, "
+                f"the configuration file {config_file_path.as_posix()}, "
+                f"the sample sheet {samplesheet_file_path.as_posix()}, and "
+                f"all pipeline specific files exists."
             )
