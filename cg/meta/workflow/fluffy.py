@@ -220,6 +220,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         case_db_samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
         case_sample_ids: list[str] = [sample.internal_id for sample in case_db_samples]
         for sample in flow_cell_samples:
+            LOG.debug(f"Checking if sample {sample.sample_id} belongs to case {case_id}")
             if sample.sample_id not in case_sample_ids:
                 flow_cell_samples.remove(sample)
                 LOG.debug(f"Sample {sample.sample_id} does not belong to case {case_id}, skipping")
