@@ -18,8 +18,13 @@ class MIPDNACaseConfig(CaseConfig):
     workflow: Workflow = Workflow.MIP_DNA
 
     def get_start_command(self) -> str:
-        return (
+        start_command = (
             "{conda_binary} run --name {conda_environment} {pipeline_binary} analyse rd_dna"
             " --config {pipeline_config_path} {case_id} --slurm_quality_of_service "
             "{slurm_qos} --email {email}"
         ).format(**self.model_dump())
+
+        if self.start_after_recipe:
+            start_command += f" --start_after_recipe {self.start_after_recipe}"
+
+        return start_command
