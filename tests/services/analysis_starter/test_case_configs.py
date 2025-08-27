@@ -27,13 +27,27 @@ def test_microsalt_get_start_command():
 
 
 def test_mip_dna_get_start_command():
+    # GIVEN a case id
+    case_id = "case_id"
+
     # GIVEN a MIP-DNA case config
     mip_case_config = MIPDNACaseConfig(
-        case_id="case_id", email="email@scilifelab.se", slurm_qos="normal"
+        conda_binary="/path/to/conda",
+        conda_environment="environment",
+        case_id=case_id,
+        email="email@scilifelab.se",
+        pipeline_binary="/path/to/pipeline/binary",
+        pipeline_config_path="/path/to/pipeline/config.yaml",
+        slurm_qos="normal",
     )
     # WHEN getting the slurm command
     start_command: str = mip_case_config.get_start_command()
 
     # THEN the command is as expected
-    expected_command = "{conda_binary} run --name {environment} {binary} analyse"
+
+    expected_command = (
+        f"{conda_binary} run --name {environment} {pipeline_binary} analyse rd_dna"
+        f" --config {pipeline_config_path} {case_id} --slurm_quality_of_service "
+        f"{mip_case_config.slurm_qos} --email {mip_case_config.email}"
+    )
     assert start_command == expected_command
