@@ -12,3 +12,6 @@ class MIPDNACaseConfig(CaseConfig):
     start_after_recipe: str | None = Field(default=None, alias="start_after")
     start_with_recipe: str | None = Field(default=None, alias="start_with")
     workflow: Workflow = Workflow.MIP_DNA
+
+    def get_start_command(self) -> str:
+        return ""
