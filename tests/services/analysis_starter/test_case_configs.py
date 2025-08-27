@@ -32,5 +32,8 @@ def test_mip_dna_get_start_command():
         case_id="case_id", email="email@scilifelab.se", slurm_qos="normal"
     )
     # WHEN getting the slurm command
-    mip_case_config.get_start_command()
+    start_command: str = mip_case_config.get_start_command()
+
     # THEN the command is as expected
+    expected_command = "{conda_binary} run --name {environment} {binary} analyse"
+    assert start_command == expected_command
