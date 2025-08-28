@@ -294,3 +294,9 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         return super().parse_analysis(
             qc_metrics_raw=qc_metrics_raw, qc_metrics_model=qc_metrics_model, **kwargs
         )
+
+    def create_metrics_deliverables_content(self, case_id: str) -> dict[str, list[dict[str, Any]]]:
+        """Create the content of a Raredisease metrics deliverables file."""
+        metrics: list[MetricsBase] = self.get_nallo_multiqc_json_metrics(case_id=case_id)
+        self.ensure_mandatory_metrics_present(metrics=metrics)
+        return {"metrics": [metric.dict() for metric in metrics]}
