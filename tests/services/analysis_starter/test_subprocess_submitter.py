@@ -1,23 +1,23 @@
 import subprocess
 from unittest import mock
+from unittest.mock import create_autospec
 
+import pytest
+
+from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
+from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 
 
-def test_subprocess_submitter():
+@pytest.mark.parametrize("case_config_class", [MicrosaltCaseConfig, MIPDNACaseConfig])
+def test_subprocess_submitter(case_config_class: type[SubprocessCaseConfig]):
     # GIVEN a SubProcessSubmitter
     subprocess_submitter = SubprocessSubmitter()
 
     # WHEN submitting a case using a valid case config
-    microsalt_case_config = MicrosaltCaseConfig(
-        binary="/path/to/microsalt/binary",
-        case_id="microsalt_case",
-        conda_binary="/path/to/conda/binary",
-        config_file="/path/to/microsalt_case/config.json",
-        environment="S_microsalt",
-        fastq_directory="/path/to/microsalt_case/fastq",
-    )
+    case_config = create_autospec(case_config_class)
+    case_config.get_workflow
     with mock.patch.object(subprocess, "run") as mock_run:
         subprocess_submitter.submit(microsalt_case_config)
 
