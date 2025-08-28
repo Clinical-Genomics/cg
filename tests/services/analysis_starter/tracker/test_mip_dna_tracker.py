@@ -1,4 +1,7 @@
+from datetime import datetime
 from unittest.mock import Mock, create_autospec
+
+import pytest
 
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
@@ -9,7 +12,8 @@ from cg.store.models import Case
 from cg.store.store import Store
 
 
-def test_track():
+@pytest.mark.freeze_time("2025-08-28 12:00:00", as_kwargs="frozen_time")
+def test_track(frozen_time):
     # GIVEN a case
     case: Case = create_autospec(Case, data_analysis=Workflow.MIP_DNA, priority=Priority.standard)
 
@@ -41,6 +45,13 @@ def test_track():
     tracker.track(case_config=case_config)
 
     # THEN analysis object should have been created in StatusDB
-    mock_status_db.add_analysis.assert_called_with()
+    mock_status_db.add_analysis.assert_called_with(
+        completed_at=None,
+        primary=True,
+        started_at=frozen_time,
+        trailblazer_id=1,
+        version="THIS WORNG",
+        workflow=Workflow.MIP_DNA,
+    )
 
     # THEN analysis object should have been created in Trailblazer
