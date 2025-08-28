@@ -1,9 +1,9 @@
 import subprocess
-from unittest.mock import Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
 
+from cg.constants.priority import SlurmQos
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.services.analysis_starter.submitters.subprocess.submitter import (
@@ -12,14 +12,35 @@ from cg.services.analysis_starter.submitters.subprocess.submitter import (
 )
 
 
-@pytest.mark.parametrize("case_config_class", [MicrosaltCaseConfig, MIPDNACaseConfig])
-def test_subprocess_submitter(case_config_class: type[SubprocessCaseConfig], mocker: MockerFixture):
+@pytest.mark.parametrize(
+    "case_config",
+    [
+        MicrosaltCaseConfig(
+            case_id="case_id",
+            binary="binary",
+            conda_binary="conda_binary",
+            config_file="config_file",
+            environment="environment",
+            fastq_directory="fastq_directory",
+        ),
+        MIPDNACaseConfig(
+            case_id="case_id",
+            pipeline_binary="pipeline_binary",
+            conda_binary="conda_binary",
+            pipeline_config_path="pipeline_config_path",
+            conda_environment="conda_environment",
+            slurm_qos=SlurmQos.NORMAL,
+            use_bwa_mem=False,
+            email="my@email.se",
+        ),
+    ],
+    ids=["microSALT", "MIP-DNA"],
+)
+def test_subprocess_submitter(case_config: SubprocessCaseConfig, mocker: MockerFixture):
     # GIVEN a SubProcessSubmitter
     subprocess_submitter = SubprocessSubmitter()
 
     # GIVEN a case config with a get_start_command method
-    case_config = create_autospec(case_config_class)
-    case_config.get_start_command = Mock(return_value="start command")
 
     # WHEN submitting a case using a valid case config
     mock_run = mocker.patch.object(subprocess, "run")
