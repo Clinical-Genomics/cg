@@ -167,9 +167,7 @@ def test_get_config_all_flags_set(
     )
 
     # THEN we should run the analysis with bwa_mem instead of bwa_mem2
-    assert case_config.bwa_mem == 1
-    assert case_config.bwa_mem2 == 0
-    assert getattr(case_config, "use_bwa_mem", None) is None
+    assert case_config.use_bwa_mem
 
     assert case_config.start_after_recipe == "banana_bread"
     assert case_config.start_with_recipe == "short_bread"
