@@ -6,6 +6,7 @@ from pytest_mock import MockerFixture
 
 from cg.constants.priority import SlurmQos
 from cg.exc import MissingConfigFilesError
+from cg.models.cg_config import MipConfig
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
     ManagedVariantsFileCreator,
@@ -33,7 +34,20 @@ def mock_status_db() -> Store:
     return mock_store
 
 
-def test_configure(mocker: MockerFixture):
+@pytest.fixture
+def mock_cg_config_mip() -> MipConfig:
+    return create_autospec(
+        MipConfig,
+        root="root_dir",
+        conda_binary="conda_binary",
+        conda_env="S_mip_dna",
+        mip_config="mip_config",
+        workflow="analyse rd_dna",
+        script="script",
+    )
+
+
+def test_configure(mock_cg_config_mip: MipConfig, mocker: MockerFixture):
     # GIVEN a case id
     case_id = "test_case"
 
@@ -45,11 +59,11 @@ def test_configure(mocker: MockerFixture):
     # GIVEN a MIP DNA configurator
     root_dir = Path("root_dir")
     configurator = MIPDNAConfigurator(
+        config=mock_cg_config_mip,
         config_file_creator=create_autospec(MIPDNAConfigFileCreator),
         fastq_handler=Mock(),
         gene_panel_file_creator=create_autospec(GenePanelFileCreator),
         managed_variants_file_creator=create_autospec(ManagedVariantsFileCreator),
-        root=root_dir,
         store=store,
     )
 

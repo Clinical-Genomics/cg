@@ -1,5 +1,5 @@
 from typing import cast
-from unittest.mock import Mock, create_autospec
+from unittest.mock import create_autospec
 
 import pytest
 
@@ -73,7 +73,15 @@ def test_nextflow_configurator_factory_success(
 
 
 def test_get_mip_dna_configurator():
-    mip_config = create_autospec(MipConfig, root="mip_root")
+    mip_config = create_autospec(
+        MipConfig,
+        root="mip_root",
+        conda_binary="conda_binary",
+        conda_env="S_mip_dna",
+        mip_config="mip_config",
+        workflow="analyse rd_dna",
+        script="script",
+    )
     cg_config = create_autospec(CGConfig, mip_rd_dna=mip_config)
 
     # GIVEN a configurator factory
