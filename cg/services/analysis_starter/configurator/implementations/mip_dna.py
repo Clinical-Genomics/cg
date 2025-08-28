@@ -27,23 +27,23 @@ MIP_DNA_MANAGED_VARIANTS_FILE_NAME = "managed_variants.vcf"
 class MIPDNAConfigurator(Configurator):
     def __init__(
         self,
-        config: MipConfig,
+        config: MipConfig,  # TODO: Consider a better name for this config
         config_file_creator: MIPDNAConfigFileCreator,
         fastq_handler: MipFastqHandler,
         gene_panel_file_creator: GenePanelFileCreator,
         managed_variants_file_creator: ManagedVariantsFileCreator,
-        root: Path,
         store: Store,
     ):
         self.conda_binary = config.conda_binary
         self.conda_environment = config.conda_env
         self.pipeline_binary = f"{config.script} {config.workflow}"
+        self.pipeline_config_path = config.mip_config
+        self.root = config.root
+
         self.config_file_creator = config_file_creator
         self.fastq_handler = fastq_handler
         self.gene_panel_file_creator = gene_panel_file_creator
-
         self.managed_variants_file_creator = managed_variants_file_creator
-        self.root = root
         self.store = store
 
     def configure(self, case_id: str, **flags) -> MIPDNACaseConfig:
@@ -67,10 +67,10 @@ class MIPDNAConfigurator(Configurator):
         case: Case = self.store.get_case_by_internal_id_strict(case_id)
         config = MIPDNACaseConfig(
             case_id=case_id,
-            conda_binary=self.con,
-            conda_environment="",
-            pipeline_binary="",
-            pipeline_config_path="",
+            conda_binary=self.conda_binary,
+            conda_environment=self.conda_environment,
+            pipeline_binary=self.pipeline_binary,
+            pipeline_config_path=self.pipeline_config_path,
             email=environ_email(),
             slurm_qos=case.slurm_priority,
         )
