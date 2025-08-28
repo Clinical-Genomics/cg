@@ -104,7 +104,7 @@ def test_configure(mock_cg_config_mip: MipConfig, mocker: MockerFixture):
     )
 
 
-def test_get_config(mock_status_db: Store, mocker: MockerFixture):
+def test_get_config(mock_cg_config_mip: MipConfig, mock_status_db: Store, mocker: MockerFixture):
     """Test that the MIP DNA configurator can get a case config."""
 
     # GIVEN an email address in the environment
@@ -112,11 +112,11 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
 
     # GIVEN a MIP DNA configurator
     configurator = MIPDNAConfigurator(
+        config=mock_cg_config_mip,
         config_file_creator=Mock(),
         fastq_handler=Mock(),
         gene_panel_file_creator=Mock(),
         managed_variants_file_creator=Mock(),
-        root=Path("root_dir"),
         store=mock_status_db,
     )
 
@@ -137,16 +137,18 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     assert case_config.start_with_recipe is None
 
 
-def test_get_config_all_flags_set(mock_status_db: Store, mocker: MockerFixture):
+def test_get_config_all_flags_set(
+    mock_cg_config_mip: MipConfig, mock_status_db: Store, mocker: MockerFixture
+):
     """Test that the MIP DNA configurator can get a case config."""
 
     # GIVEN a MIP DNA configurator
     configurator = MIPDNAConfigurator(
+        config=mock_cg_config_mip,
         config_file_creator=Mock(),
         fastq_handler=Mock(),
         gene_panel_file_creator=Mock(),
         managed_variants_file_creator=Mock(),
-        root=Path("root_dir"),
         store=mock_status_db,
     )
 
@@ -173,18 +175,18 @@ def test_get_config_all_flags_set(mock_status_db: Store, mocker: MockerFixture):
     assert case_config.start_with_recipe == "short_bread"
 
 
-def test_get_config_validation(mock_status_db: Store):
+def test_get_config_validation(mock_cg_config_mip: MipConfig, mock_status_db: Store):
     # GIVEN at least one file creator that returns a path which does not exist
     gene_panel_file_creator: GenePanelFileCreator = create_autospec(GenePanelFileCreator)
     gene_panel_file_creator.get_file_path = Mock(return_value=Path("fake_path"))
 
     # GIVEN a configurator
     configurator = MIPDNAConfigurator(
+        config=mock_cg_config_mip,
         config_file_creator=Mock(),
         fastq_handler=Mock(),
         gene_panel_file_creator=gene_panel_file_creator,
         managed_variants_file_creator=Mock(),
-        root=Path("root_dir"),
         store=mock_status_db,
     )
 
