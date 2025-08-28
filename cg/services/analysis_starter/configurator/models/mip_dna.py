@@ -27,4 +27,13 @@ class MIPDNACaseConfig(CaseConfig):
         if self.start_after_recipe:
             start_command += f" --start_after_recipe {self.start_after_recipe}"
 
+        if self.start_with_recipe:
+            start_command += f" --start_with_recipe {self.start_with_recipe}"
+
+        if self.bwa_mem is not None:
+            start_command += f" --bwa_mem {self.bwa_mem}"
+
+        if self.bwa_mem2 is not None:
+            start_command += f" --bwa_mem2 {self.bwa_mem2}"
+
         return start_command

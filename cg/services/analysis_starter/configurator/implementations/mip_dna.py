@@ -4,6 +4,7 @@ from pathlib import Path
 from cg.apps.environ import environ_email
 from cg.exc import MissingConfigFilesError
 from cg.meta.workflow.fastq import MipFastqHandler
+from cg.models.cg_config import MipConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
@@ -26,6 +27,7 @@ MIP_DNA_MANAGED_VARIANTS_FILE_NAME = "managed_variants.vcf"
 class MIPDNAConfigurator(Configurator):
     def __init__(
         self,
+        config: MipConfig,
         config_file_creator: MIPDNAConfigFileCreator,
         fastq_handler: MipFastqHandler,
         gene_panel_file_creator: GenePanelFileCreator,
@@ -33,9 +35,13 @@ class MIPDNAConfigurator(Configurator):
         root: Path,
         store: Store,
     ):
+        self.conda_binary = config.conda_binary
+        self.conda_environment = config.conda_env
+        self.pipeline_binary = f"{config.script} {config.workflow}"
         self.config_file_creator = config_file_creator
         self.fastq_handler = fastq_handler
         self.gene_panel_file_creator = gene_panel_file_creator
+
         self.managed_variants_file_creator = managed_variants_file_creator
         self.root = root
         self.store = store
@@ -61,6 +67,10 @@ class MIPDNAConfigurator(Configurator):
         case: Case = self.store.get_case_by_internal_id_strict(case_id)
         config = MIPDNACaseConfig(
             case_id=case_id,
+            conda_binary=self.con,
+            conda_environment="",
+            pipeline_binary="",
+            pipeline_config_path="",
             email=environ_email(),
             slurm_qos=case.slurm_priority,
         )

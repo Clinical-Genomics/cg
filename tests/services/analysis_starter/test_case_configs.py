@@ -56,6 +56,6 @@ def test_mip_dna_get_start_command():
         f"--start_after_recipe {mip_case_config.start_after_recipe} "
         f"--start_with_recipe {mip_case_config.start_with_recipe} "
         f"--bwa_mem {mip_case_config.bwa_mem} "
-        f"--bwa_mem2 {mip_case_config.bwa_mem2} "
+        f"--bwa_mem2 {mip_case_config.bwa_mem2}"
     )
     assert start_command == expected_command
