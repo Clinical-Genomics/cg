@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from cg.io.yaml import read_yaml
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.services.analysis_starter.tracker.tracker import Tracker
 
@@ -12,5 +13,12 @@ class MIPDNATracker(Tracker):
     def _get_job_ids_path(self, case_id: str) -> Path:
         return Path(self.workflow_root, case_id, "analysis", "slurm_job_ids.yaml")
 
+    def _get_sample_info_path(self, case_id: str) -> Path:
+        """Get case analysis sample info path"""
+        return Path(self.workflow_root, case_id, "analysis", f"{case_id}_qc_sample_info.yaml")
+
     def _get_workflow_version(self, case_config: MIPDNACaseConfig) -> str:
-        pass
+        LOG.debug("Fetch workflow version")
+        sample_info_raw: dict = read_yaml(file_path=self._get_sample_info_path(case_id))
+        sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sample_info_raw)
+        return sample_info.mip_version

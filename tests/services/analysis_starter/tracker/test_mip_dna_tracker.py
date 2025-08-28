@@ -12,8 +12,8 @@ from cg.store.models import Case
 from cg.store.store import Store
 
 
-@pytest.mark.freeze_time("2025-08-28 12:00:00", as_kwargs="frozen_time")
-def test_track(frozen_time):
+@pytest.mark.freeze_time
+def test_track():
     # GIVEN a case
     case: Case = create_autospec(Case, data_analysis=Workflow.MIP_DNA, priority=Priority.standard)
 
@@ -48,7 +48,7 @@ def test_track(frozen_time):
     mock_status_db.add_analysis.assert_called_with(
         completed_at=None,
         primary=True,
-        started_at=frozen_time,
+        started_at=datetime.now(),
         trailblazer_id=1,
         version="THIS WORNG",
         workflow=Workflow.MIP_DNA,
