@@ -73,6 +73,7 @@ class MIPDNAConfigurator(Configurator):
             pipeline_config_path=self.pipeline_config_path,
             email=environ_email(),
             slurm_qos=case.slurm_priority,
+            use_bwa_mem=flags.get("use_bwa_mem", False),
         )
         config = self._set_flags(config=config, **flags)
         self._ensure_required_config_files_exist(case_id)
@@ -115,8 +116,4 @@ class MIPDNAConfigurator(Configurator):
 
     @staticmethod
     def _set_flags(config: MIPDNACaseConfig, **flags) -> MIPDNACaseConfig:
-        if flags.get("use_bwa_mem"):
-            flags["bwa_mem"] = 1
-            flags["bwa_mem2"] = 0
-            flags.pop("use_bwa_mem")
         return Configurator._set_flags(config=config, **flags)

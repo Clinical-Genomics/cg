@@ -5,8 +5,6 @@ from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 
 
 class MIPDNACaseConfig(CaseConfig):
-    bwa_mem: int | None = None
-    bwa_mem2: int | None = None
     conda_binary: str
     conda_environment: str
     email: str
@@ -31,10 +29,7 @@ class MIPDNACaseConfig(CaseConfig):
         if self.start_with_recipe:
             start_command += f" --start_with_recipe {self.start_with_recipe}"
 
-        if self.bwa_mem is not None:
-            start_command += f" --bwa_mem {self.bwa_mem}"
-
-        if self.bwa_mem2 is not None:
-            start_command += f" --bwa_mem2 {self.bwa_mem2}"
+        if self.use_bwa_mem:
+            start_command += " --bwa_mem 1 --bwa_mem2 0"
 
         return start_command
