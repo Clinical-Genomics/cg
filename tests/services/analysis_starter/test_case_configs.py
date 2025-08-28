@@ -1,3 +1,4 @@
+from cg.constants.priority import SlurmQos
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 
@@ -38,7 +39,7 @@ def test_mip_dna_get_start_command_no_flags_set():
         email="email@scilifelab.se",
         pipeline_binary="/path/to/pipeline/binary",
         pipeline_config_path="/path/to/pipeline/config.yaml",
-        slurm_qos="normal",
+        slurm_qos=SlurmQos.NORMAL,
         use_bwa_mem=False,
     )
 
@@ -66,7 +67,7 @@ def test_mip_dna_get_start_command_all_flags_set():
         email="email@scilifelab.se",
         pipeline_binary="/path/to/pipeline/binary",
         pipeline_config_path="/path/to/pipeline/config.yaml",
-        slurm_qos="normal",
+        slurm_qos=SlurmQos.NORMAL,
         start_after="retroseq_bread",
         start_with="smile_bread",
         use_bwa_mem=True,

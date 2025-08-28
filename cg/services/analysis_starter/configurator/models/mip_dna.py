@@ -1,6 +1,7 @@
 from pydantic import Field
 
 from cg.constants.constants import Workflow
+from cg.constants.priority import SlurmQos
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 
 
@@ -10,7 +11,7 @@ class MIPDNACaseConfig(CaseConfig):
     email: str
     pipeline_binary: str
     pipeline_config_path: str
-    slurm_qos: str
+    slurm_qos: SlurmQos
     start_after_recipe: str | None = Field(default=None, alias="start_after")
     start_with_recipe: str | None = Field(default=None, alias="start_with")
     workflow: Workflow = Workflow.MIP_DNA
