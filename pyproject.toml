@@ -98,8 +98,9 @@ exclude = ["alembic"]
 ignore = ["E501"]
 
 [tool.vulture]
+paths = ["cg","vulture_whitelist.txt"]
+sort_by_size = true
 min_confidence = 60
 ignore_decorators = ["@click.*","*route*","@field_validator*","@model_validator*","@app.*","@validator*","@action*","@field_serializer"]
 ignore_names= ["on_model_change","*View(BaseView)"]
-paths = ["cg","vulture_whitelist.txt"]
-sort_by_size = true
+

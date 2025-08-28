@@ -3,9 +3,9 @@
 from datetime import datetime
 from pathlib import Path
 
-from mock import MagicMock
+import pytest
+from click import Abort
 
-from cg.apps.lims.api import LimsAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.microsalt.utils import get_project_directory_date
 from cg.models.cg_config import CGConfig
@@ -45,3 +45,12 @@ def test_get_date_from_project_directory():
 
     # THEN the date should be parsed correctly
     assert run_date == datetime(2024, 2, 5, 15, 58, 22)
+
+
+def test_resolve_case_sample_id_faile(qc_microsalt_context: CGConfig):
+    microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
+
+    # WHEN resolving a case and claiming that the id is bothj a sample and a ticket
+    # THEN an error should be raised
+    with pytest.raises(Abort):
+        microsalt_api.resolve_case_sample_id(sample=True, ticket=True, unique_id=123)
