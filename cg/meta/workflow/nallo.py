@@ -198,7 +198,8 @@ class NalloAnalysisAPI(NfAnalysisAPI):
     def get_nallo_raw_metric(self, sample_id: str, multiqc_raw_data: dict) -> MetricsBase | None:
         metric_name = "sex"
         raw_metrics_section: dict[str, dict] = multiqc_raw_data.get("multiqc_somalier", {})
-        LOG.debug(
+        # debugging print statement
+        print(
             f"Looking for {sample_id} in multiqc_somalier keys: {list(multiqc_raw_data.get('multiqc_somalier', {}).keys())}"
         )
         sample_metrics = raw_metrics_section.get(sample_id)
@@ -213,6 +214,10 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         """Return a list of the Nallo metrics specified in a MultiQC json file."""
         multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
         metrics = []
+        # debugging printing samples+cases
+        sample_ids = self.status_db.get_sample_ids_by_case_id(case_id)
+        print(f"Sample IDs for case {case_id}: {sample_ids}")
+
         for search_pattern, metric_id in self.get_multiqc_search_patterns(case_id).items():
             metrics_for_pattern: list[MetricsBase] = (
                 self.get_metrics_from_multiqc_json_with_pattern(
