@@ -903,9 +903,15 @@ class PacbioSmrtCellView(BaseView):
 
 
 class PacbioSampleRunMetricsView(BaseView):
+    column_labels = {
+        "instrument_run.run_name": "Run name",
+        "instrument_run.plate": "Plate",
+    }
     column_list = [
         "smrt_cell",
         "sample",
+        "instrument_run.run_name",
+        "instrument_run.plate",
         "hifi_reads",
         "hifi_yield",
         "hifi_mean_read_length",
