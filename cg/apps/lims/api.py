@@ -402,14 +402,6 @@ class LimsAPI(Lims, OrderHandler):
             if artifact.udf.get(udf_key) is not None
         }
 
-    def get_sample_comment(self, sample_id: str) -> str | None:
-        """Return the comment of the sample."""
-        lims_sample: dict[str, Any] = self.sample(sample_id)
-        comment = None
-        if lims_sample:
-            comment: str = lims_sample.get("comment")
-        return comment
-
     def get_sample_project(self, sample_id: str) -> str | None:
         """Return the LIMS ID of the sample associated project if sample exists in LIMS."""
         lims_sample: dict[str, Any] = self.sample(sample_id)

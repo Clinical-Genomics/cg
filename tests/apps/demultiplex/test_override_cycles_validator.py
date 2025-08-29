@@ -5,6 +5,20 @@ from cg.constants.demultiplexing import FORWARD_INDEX_CYCLE_PATTERN, REVERSE_IND
 from cg.exc import OverrideCyclesError
 
 
+def set_run_cycles(
+    validator,
+    read1_cycles: int | None = None,
+    read2_cycles: int | None = None,
+    index1_cycles: int | None = None,
+    index2_cycles: int | None = None,
+) -> None:
+    """Set the run cycles."""
+    validator.run_read1_cycles = read1_cycles
+    validator.run_read2_cycles = read2_cycles
+    validator.run_index1_cycles = index1_cycles
+    validator.run_index2_cycles = index2_cycles
+
+
 @pytest.mark.parametrize(
     "pattern, index_cycle, run_cycles, expected",
     [
@@ -53,7 +67,7 @@ def test_validate_reads_cycles_correct_cycles(
 ):
     """Test that a sample with correct read cycle values passes validation."""
     # GIVEN an override cycles validator with read cycles set
-    override_cycles_validator.set_run_cycles(read1_cycles=151, read2_cycles=151)
+    set_run_cycles(validator=override_cycles_validator, read1_cycles=151, read2_cycles=151)
 
     # GIVEN a sample with correct read cycle values
     override_cycles_validator.set_attributes_from_sample(
@@ -84,7 +98,7 @@ def test_validate_reads_cycles_incorrect_cycles(
 ):
     """Test that a sample with incorrect read cycle values raises an exception."""
     # GIVEN an override cycles validator read cycles set
-    override_cycles_validator.set_run_cycles(read1_cycles=151, read2_cycles=151)
+    set_run_cycles(validator=override_cycles_validator, read1_cycles=151, read2_cycles=151)
 
     # GIVEN a sample with incorrect read cycle values
     processed_flow_cell_sample_8_index["OverrideCycles"] = wrong_override_cycles
@@ -108,7 +122,7 @@ def test_validate_index1_cycles_correct_cycles(
 ):
     """Test that a sample with correct index 1 cycle values passes validation."""
     # GIVEN an override cycles validator with index 1 cycles set
-    override_cycles_validator.set_run_cycles(index1_cycles=10)
+    set_run_cycles(validator=override_cycles_validator, index1_cycles=10)
 
     # GIVEN a sample with correct index 1 cycle values
     override_cycles_validator.set_attributes_from_sample(request.getfixturevalue(sample))
@@ -147,7 +161,7 @@ def test_validate_index1_cycles_incorrect_cycles(
 ):
     """Test that a sample with incorrect index 1 cycle values raises an exception."""
     # GIVEN an override cycles validator with index 1 cycles set
-    override_cycles_validator.set_run_cycles(index1_cycles=run_index1_cycles)
+    set_run_cycles(validator=override_cycles_validator, index1_cycles=run_index1_cycles)
 
     # GIVEN a sample with incorrect index 1 cycle values
     processed_flow_cell_sample_8_index["OverrideCycles"] = wrong_override_cycles
@@ -174,8 +188,8 @@ def test_validate_index2_cycles_correct_cycles(
 ):
     """Test that a sample with correct index 2 cycle values passes validation."""
     # GIVEN an override cycles validator with index 2 cycles and reverse complement set
-    override_cycles_validator.set_run_cycles(index2_cycles=10)
-    override_cycles_validator.set_reverse_complement(reverse_complement)
+    set_run_cycles(validator=override_cycles_validator, index2_cycles=10)
+    override_cycles_validator.is_reverse_complement = reverse_complement
 
     # GIVEN a sample with correct index 2 cycle values
     override_cycles_validator.set_attributes_from_sample(request.getfixturevalue(sample))
@@ -217,8 +231,8 @@ def test_validate_index2_cycles_incorrect_cycles(
 ):
     """Test that a sample with incorrect index 2 cycle values raises an exception."""
     # GIVEN an override cycles validator with index 2 cycles and reverse complement set
-    override_cycles_validator.set_run_cycles(index2_cycles=run_index2_cycles)
-    override_cycles_validator.set_reverse_complement(reverse_complement)
+    set_run_cycles(validator=override_cycles_validator, index2_cycles=run_index2_cycles)
+    override_cycles_validator.is_reverse_complement = reverse_complement
 
     # GIVEN a sample with incorrect index 2 cycle values
     processed_flow_cell_sample_8_index["OverrideCycles"] = wrong_override_cycles
@@ -249,10 +263,14 @@ def test_validate_sample(
     # GIVEN a sample with correct override cycles
 
     # GIVEN an override cycles validator with all parameters set
-    override_cycles_validator.set_run_cycles(
-        read1_cycles=151, read2_cycles=151, index1_cycles=10, index2_cycles=10
+    set_run_cycles(
+        validator=override_cycles_validator,
+        read1_cycles=151,
+        read2_cycles=151,
+        index1_cycles=10,
+        index2_cycles=10,
     )
-    override_cycles_validator.set_reverse_complement(reverse_complement)
+    override_cycles_validator.is_reverse_complement = reverse_complement
     override_cycles_validator.set_attributes_from_sample(request.getfixturevalue(sample))
 
     # WHEN validating the sample

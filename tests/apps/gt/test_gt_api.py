@@ -4,10 +4,7 @@
 
 import logging
 
-import pytest
-
 from cg.apps.gt import GenotypeAPI
-from cg.exc import CaseNotFoundError
 
 
 def test_instantiate(genotype_config: dict):
@@ -63,64 +60,3 @@ def test_update_analysis_sex(genotype_api: GenotypeAPI, caplog):
 
     # THEN assert that the correct message was logged
     assert f"Set predicted sex for sample {sample} to {sex} for the sequence analysis"
-
-
-def test_export_sample(genotype_api: GenotypeAPI, genotype_export_sample_output: str, caplog):
-    """Test that get_trending calls the genotype API with correct command."""
-    caplog.set_level(logging.DEBUG)
-    # GIVEN a genotype api and argument days
-    days = 20
-    # GIVEN that the process returns some output
-    genotype_api.process.stdout = genotype_export_sample_output
-
-    # WHEN running get_trending
-    genotype_api.export_sample(days=days)
-
-    # THEN assert subprocess is running the GenotypeAPI with correct command
-    call = ["config/path", "export-sample", "-d", str(days)]
-    assert " ".join(call) in caplog.text
-
-
-def test_export_sample_no_output(genotype_api: GenotypeAPI, caplog):
-    """Test to get genotype via the api"""
-
-    # GIVEN a genotype api
-    # GIVEN a process that does not return any output
-
-    # WHEN export_sample is calling the GenotypeAPI witch is returning a empty string
-
-    # THEN assert CaseNotFoundError
-    with pytest.raises(CaseNotFoundError):
-        genotype_api.export_sample(days="")
-
-
-def test_export_sample_analysis(
-    genotype_api: GenotypeAPI, genotype_export_sample_analysis_output: str, caplog
-):
-    """Test that get_trending calls the genotype API with correct command."""
-    caplog.set_level(logging.DEBUG)
-    # GIVEN a genotype api and argument days
-    days = 20
-    # GIVEN that the process returns some output
-    genotype_api.process.stdout = genotype_export_sample_analysis_output
-
-    # WHEN running get_trending
-    genotype_api.export_sample_analysis(days=days)
-
-    # THEN assert subprocess is running the GenotypeAPI with correct command
-    call = ["config/path", "export-sample-analysis", "-d", str(days)]
-    print(genotype_api)
-    assert " ".join(call) in caplog.text
-
-
-def test_export_sample_analysis_no_output(genotype_api: GenotypeAPI):
-    """Test to get case data via the api"""
-
-    # GIVEN a genotype api
-    # GIVEN a process that does not return any output
-
-    # WHEN export_sample is calling the GenotypeAPI witch is returning a empty string
-
-    # THEN assert CaseNotFoundError
-    with pytest.raises(CaseNotFoundError):
-        genotype_api.export_sample_analysis(days=20)

@@ -769,17 +769,6 @@ class SampleView(BaseView):
         flash(message)
 
 
-class DeliveryView(BaseView):
-    """Admin view for Model.Delivery"""
-
-    column_default_sort = ("id", True)
-    column_filters = ["sample.internal_id"]
-    column_formatters = {"sample": SampleView.view_sample_link}
-    column_searchable_list = ["sample.internal_id"]
-    create_modal = True
-    edit_modal = True
-
-
 class CaseSampleView(BaseView):
     """Admin view for Model.caseSample"""
 
