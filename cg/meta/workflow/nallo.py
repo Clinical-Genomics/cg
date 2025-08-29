@@ -198,12 +198,6 @@ class NalloAnalysisAPI(NfAnalysisAPI):
     def get_nallo_raw_metric(self, sample_id: str, multiqc_raw_data: dict) -> MetricsBase | None:
         metric_name = "sex"
         raw_metrics_section: dict[str, dict] = multiqc_raw_data.get("multiqc_somalier", {})
-        # debugging print statement
-        for section, data in multiqc_raw_data.items():
-            print(f"Section: {section}, keys: {list(data.keys())}")
-        print(
-            f"Looking for {sample_id} in multiqc_somalier keys: {list(multiqc_raw_data.get('multiqc_somalier', {}).keys())}"
-        )
         sample_metrics = raw_metrics_section.get(sample_id)
         if sample_metrics and metric_name in sample_metrics:
             # debug print
@@ -219,9 +213,6 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         """Return a list of the Nallo metrics specified in a MultiQC json file."""
         multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
         metrics = []
-        # debugging printing samples+cases
-        sample_ids = self.status_db.get_sample_ids_by_case_id(case_id)
-        print(f"Sample IDs for case {case_id}: {sample_ids}")
 
         for search_pattern, metric_id in self.get_multiqc_search_patterns(case_id).items():
             metrics_for_pattern: list[MetricsBase] = (
@@ -256,13 +247,11 @@ class NalloAnalysisAPI(NfAnalysisAPI):
     @staticmethod
     def set_somalier_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         if "sex" in metric_conditions:
-            metric_conditions["sex"]["threshold"] = float(
-                {
+            metric_conditions["sex"]["threshold"] = {
                     "male": PlinkSex.MALE,
                     "female": PlinkSex.FEMALE,
                     "unknown": PlinkSex.UNKNOWN,
                 }[sample.sex]
-            )
 
     def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
         """Return the Nallo d4 coverage file path."""
