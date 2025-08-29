@@ -8,6 +8,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Priority, Workflow
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
+from cg.services.analysis_starter.tracker.implementations import mip_dna as mip_dna_tracker
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
 from cg.store.models import Case
 from cg.store.store import Store
@@ -16,6 +17,7 @@ from cg.store.store import Store
 @pytest.mark.freeze_time
 def test_track(mocker: MockerFixture):
     # GIVEN a case
+    case_id = "some_case"
     case: Case = create_autospec(Case, data_analysis=Workflow.MIP_DNA, priority=Priority.standard)
 
     # GIVEN a StatusDB mock
@@ -37,10 +39,13 @@ def test_track(mocker: MockerFixture):
 
     # GIVEN MIP-DNA case config
     case_config = MIPDNACaseConfig(
-        case_id="some_case",
+        case_id=case_id,
         email="some_email",
         slurm_qos="some_qos",
     )
+
+    # GIVEN that there is a qc info file with the mip version
+    mocker.patch.object(mip_dna_tracker, "read_yaml", return_value={"mip_version": "v8.2.5"})
 
     # WHEN calling track
     tracker.track(case_config=case_config)
@@ -56,3 +61,17 @@ def test_track(mocker: MockerFixture):
     )
 
     # THEN analysis object should have been created in Trailblazer
+    mock_trailblazer_api.add_pending_analysis.assert_called_with(
+        analysis_type=analysis_type,
+        case_id=case_id,
+        config_path=config_path.as_posix(),
+        email=email,
+        order_id=order_id,
+        out_dir=out_dir,
+        priority=priority,
+        ticket=ticket,
+        workflow=self.store.get_case_workflow(case_id),
+        workflow_manager=self._workflow_manager(),
+        tower_workflow_id=tower_workflow_id,
+        is_hidden=is_case_for_development,
+    )
