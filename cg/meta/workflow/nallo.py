@@ -206,6 +206,9 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         )
         sample_metrics = raw_metrics_section.get(sample_id)
         if sample_metrics and metric_name in sample_metrics:
+            # debug print
+            value = sample_metrics[metric_name]
+            print(f"Found {metric_name} for sample {sample_id}: {value}")
             return self.get_multiqc_metric(
                 metric_name=metric_name,
                 metric_value=sample_metrics[metric_name],
@@ -236,6 +239,8 @@ class NalloAnalysisAPI(NfAnalysisAPI):
                 multiqc_raw_data=multiqc_json.report_saved_raw_data,
             ):
                 metrics.append(raw_metric)
+                # debug print
+                print(f"Appending raw metric for sample {sample_id}: {raw_metric}")
         for sample_pair in self._get_nallo_sample_pair_patterns(case_id):
             if parent_error_metric := self.get_nallo_parent_error_ped_check_metric(
                 pair_sample_ids=sample_pair, multiqc_raw_data=multiqc_json.report_saved_raw_data
