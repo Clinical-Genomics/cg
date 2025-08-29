@@ -5,20 +5,17 @@ import logging
 from datetime import datetime
 from typing import Callable, Iterator
 
+import sqlalchemy
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import (
-    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
-    CaseActions,
-    CustomerId,
-    SampleType,
-)
+from cg.constants.constants import DNA_WORKFLOWS_WITH_SCOUT_UPLOAD, CustomerId, SampleType
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
     AnalysisNotCompletedError,
+    BedVersionNotFoundError,
     CaseNotFoundError,
     CgDataError,
     CgError,
@@ -789,6 +786,25 @@ class ReadHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
+    def get_case_by_internal_id_strict(self, internal_id: str) -> Case:
+        """
+        Get case by internal id.
+        Raises:
+            CaseNotFoundError: If no case is found with the given internal id.
+            sqlalchemy.orm.exc.MultipleResultsFound: If multiple cases are found with the same
+            internal id. This should not happen due to database constraints.
+        """
+        try:
+            return apply_case_filter(
+                cases=self._get_query(table=Case),
+                filter_functions=[CaseFilter.BY_INTERNAL_ID],
+                internal_id=internal_id,
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise CaseNotFoundError(
+                f"Case with internal id {internal_id} was not found in the database."
+            )
+
     def get_cases_by_internal_ids(self, internal_ids: list[str]) -> list[Case]:
         """Get cases by internal ids."""
         return apply_case_filter(
@@ -940,6 +956,25 @@ class ReadHandler(BaseHandler):
             bed_version_short_name=bed_version_short_name,
             filter_functions=[BedVersionFilter.BY_SHORT_NAME],
         ).first()
+
+    def get_bed_version_by_short_name_strict(self, short_name: str) -> BedVersion:
+        """
+        Return bed version with short name.
+        Raises:
+            BedVersionNotFoundError: If no bed version is found with the given short name.
+            sqlalchemy.orm.exc.MultipleResultsFound: If multiple bed versions are found with the same
+            shortname.
+        """
+        try:
+            return apply_bed_version_filter(
+                bed_versions=self._get_query(table=BedVersion),
+                bed_version_short_name=short_name,
+                filter_functions=[BedVersionFilter.BY_SHORT_NAME],
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise BedVersionNotFoundError(
+                f"Bed version with short name {short_name} was not found in the database."
+            )
 
     def get_bed_by_entry_id(self, bed_entry_id: int) -> Bed:
         """Get panel bed with bed entry id."""

@@ -6,10 +6,11 @@ from pytest_mock import MockerFixture
 from cg.constants import Workflow
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress import CompressAPI
-from cg.models.cg_config import CGConfig, SeqeraPlatformConfig
+from cg.models.cg_config import CGConfig, MipConfig, SeqeraPlatformConfig
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
+from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories import starter_factory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
@@ -41,6 +42,22 @@ def test_analysis_starter_factory_microsalt(cg_context: CGConfig, mocker: Mocker
     assert isinstance(analysis_starter.configurator, MicrosaltConfigurator)
     assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
     assert isinstance(analysis_starter.submitter, SubprocessSubmitter)
+
+
+def test_analysis_starter_factory_mip_dna():
+    # GIVEN a CGConfig
+    cg_config: CGConfig = create_autospec(CGConfig, mip_rd_dna=create_autospec(MipConfig))
+
+    # GIVEN an AnalysisStarterFactory
+    analysis_starter_factory = AnalysisStarterFactory(cg_config)
+
+    # WHEN getting the analysis starter for MIP-DNA
+    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
+        Workflow.MIP_DNA
+    )
+
+    # THEN the analysis starter should have been configured correctly
+    assert isinstance(analysis_starter.configurator, MIPDNAConfigurator)
 
 
 @pytest.mark.parametrize(
