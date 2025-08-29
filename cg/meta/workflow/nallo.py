@@ -199,6 +199,8 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         metric_name = "sex"
         raw_metrics_section: dict[str, dict] = multiqc_raw_data.get("multiqc_somalier", {})
         # debugging print statement
+        for section, data in multiqc_raw_data.items():
+            print(f"Section: {section}, keys: {list(data.keys())}")
         print(
             f"Looking for {sample_id} in multiqc_somalier keys: {list(multiqc_raw_data.get('multiqc_somalier', {}).keys())}"
         )
