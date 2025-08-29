@@ -15,16 +15,22 @@ from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseC
 from cg.services.analysis_starter.tracker import tracker as parent_tracker
 from cg.services.analysis_starter.tracker.implementations import mip_dna as mip_dna_tracker
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
-from cg.store.models import Analysis, Case, Order, Sample
+from cg.store.models import Analysis, Case, Customer, Order, Sample
 from cg.store.store import Store
 
 
+@pytest.mark.parametrize(
+    "customer_id, should_be_hidden",
+    [("cust000", True), ("cust666", False)],
+    ids=["internal", "non-internal"],
+)
 @pytest.mark.freeze_time
-def test_track(mocker: MockerFixture):
+def test_track(customer_id: str, should_be_hidden: bool, mocker: MockerFixture):
     # GIVEN a case tied to an order
     case_id = "some_case"
     case: Case = create_autospec(
         Case,
+        customer=create_autospec(Customer, internal_id=customer_id),
         data_analysis=Workflow.MIP_DNA,
         priority=Priority.standard,
         latest_order=create_autospec(Order, id=2),
@@ -104,5 +110,5 @@ def test_track(mocker: MockerFixture):
         workflow=Workflow.MIP_DNA,
         workflow_manager=WorkflowManager.Slurm,
         tower_workflow_id=None,
-        is_hidden=False,
+        is_hidden=should_be_hidden,
     )
