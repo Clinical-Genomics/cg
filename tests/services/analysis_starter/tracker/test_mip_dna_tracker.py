@@ -71,7 +71,8 @@ def test_track(customer_id: str, should_be_hidden: bool, mocker: MockerFixture):
     )
 
     # GIVEN that there is a qc info file with the mip version
-    mocker.patch.object(mip_dna_tracker, "read_yaml", return_value={"mip_version": "v8.2.5"})
+    mip_version = "v8.2.5"
+    mocker.patch.object(mip_dna_tracker, "read_yaml", return_value={"mip_version": mip_version})
 
     # GIVEN an email
     email = "email@scilifelab.se"
@@ -86,7 +87,7 @@ def test_track(customer_id: str, should_be_hidden: bool, mocker: MockerFixture):
         primary=True,
         started_at=datetime.now(),
         trailblazer_id=1,
-        version="v8.2.5",
+        version=mip_version,
         workflow=Workflow.MIP_DNA,
     )
     assert analysis.case == case
