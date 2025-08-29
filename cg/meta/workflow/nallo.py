@@ -233,7 +233,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
                 )
             )
             metrics.extend(metrics_for_pattern)
-        for sample_id in self.status_db.get_sample_ids_by_case_id(case_id):
+        for sample_id in list(self.status_db.get_sample_ids_by_case_id(case_id)):
             if raw_metric := self.get_nallo_raw_metric(
                 sample_id=sample_id,
                 multiqc_raw_data=multiqc_json.report_saved_raw_data,
