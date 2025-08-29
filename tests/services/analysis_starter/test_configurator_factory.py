@@ -73,7 +73,7 @@ def test_nextflow_configurator_factory_success(
 
 
 def test_get_mip_dna_configurator():
-    mip_config = create_autospec(
+    mip_config: MipConfig = create_autospec(
         MipConfig,
         root="mip_root",
         conda_binary="conda_binary",
@@ -82,7 +82,7 @@ def test_get_mip_dna_configurator():
         workflow="analyse rd_dna",
         script="script",
     )
-    cg_config = create_autospec(CGConfig, mip_rd_dna=mip_config)
+    cg_config: CGConfig = create_autospec(CGConfig, mip_rd_dna=mip_config)
 
     # GIVEN a configurator factory
     configurator_factory = ConfiguratorFactory(cg_config=cg_config)

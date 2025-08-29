@@ -1,4 +1,5 @@
 import subprocess
+from unittest.mock import MagicMock
 
 import pytest
 from pytest_mock import MockerFixture
@@ -36,14 +37,14 @@ from cg.services.analysis_starter.submitters.subprocess.submitter import (
     ],
     ids=["microSALT", "MIP-DNA"],
 )
-def test_subprocess_submitter(case_config: SubprocessCaseConfig, mocker: MockerFixture):
+def test_subprocess_submitter_submit(case_config: SubprocessCaseConfig, mocker: MockerFixture):
     # GIVEN a SubProcessSubmitter
     subprocess_submitter = SubprocessSubmitter()
 
     # GIVEN a case config with a get_start_command method
 
     # WHEN submitting a case using a valid case config
-    mock_run = mocker.patch.object(subprocess, "run")
+    mock_run: MagicMock = mocker.patch.object(subprocess, "run")
     subprocess_submitter.submit(case_config)
 
     # THEN the analysis should have been started
