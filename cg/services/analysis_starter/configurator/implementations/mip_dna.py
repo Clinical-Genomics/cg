@@ -27,7 +27,7 @@ MIP_DNA_MANAGED_VARIANTS_FILE_NAME = "managed_variants.vcf"
 class MIPDNAConfigurator(Configurator):
     def __init__(
         self,
-        config: MipConfig,  # TODO: Consider a better name for this config
+        config: MipConfig,
         config_file_creator: MIPDNAConfigFileCreator,
         fastq_handler: MipFastqHandler,
         gene_panel_file_creator: GenePanelFileCreator,
@@ -113,7 +113,3 @@ class MIPDNAConfigurator(Configurator):
             raise MissingConfigFilesError(
                 "Ensure config file, gene panel and managed variants files exist."
             )
-
-    @staticmethod
-    def _set_flags(config: MIPDNACaseConfig, **flags) -> MIPDNACaseConfig:
-        return Configurator._set_flags(config=config, **flags)

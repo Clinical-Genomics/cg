@@ -28,6 +28,8 @@ class SubprocessSubmitter(Submitter):
         """
         Calls the workflow to get the workflow version number.
         If fails, returns a placeholder value instead.
+
+        Currently supported workflow: microSALT
         """
         try:
             command: str = WORKFLOW_VERSION_COMMAND_MAP[case_config.workflow]
