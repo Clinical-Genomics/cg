@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from cg.constants.constants import WorkflowManager
 from cg.io.yaml import read_yaml
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.services.analysis_starter.tracker.tracker import Tracker
@@ -7,8 +8,8 @@ from cg.services.analysis_starter.tracker.tracker import Tracker
 
 class MIPDNATracker(Tracker):
 
-    def _workflow_manager(self):
-        pass
+    def _workflow_manager(self) -> WorkflowManager:
+        return WorkflowManager.Slurm
 
     def _get_job_ids_path(self, case_id: str) -> Path:
         return Path(self.workflow_root, case_id, "analysis", "slurm_job_ids.yaml")

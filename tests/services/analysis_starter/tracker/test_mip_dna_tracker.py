@@ -8,19 +8,26 @@ from pytest_mock import MockerFixture
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Priority, Workflow
+from cg.constants.constants import WorkflowManager
+from cg.constants.priority import TrailblazerPriority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.services.analysis_starter.tracker.implementations import mip_dna as mip_dna_tracker
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
-from cg.store.models import Analysis, Case
+from cg.store.models import Analysis, Case, Order
 from cg.store.store import Store
 
 
 @pytest.mark.freeze_time
 def test_track(mocker: MockerFixture):
-    # GIVEN a case
+    # GIVEN a case tied to an order
     case_id = "some_case"
-    case: Case = create_autospec(Case, data_analysis=Workflow.MIP_DNA, priority=Priority.standard)
+    case: Case = create_autospec(
+        Case,
+        data_analysis=Workflow.MIP_DNA,
+        priority=Priority.standard,
+        latest_order=create_autospec(Order, id=2),
+    )
 
     # GIVEN an analysis
     analysis: Analysis = create_autospec(Analysis)
@@ -29,6 +36,8 @@ def test_track(mocker: MockerFixture):
     mock_status_db: Store = create_autospec(Store)
     mock_status_db.get_case_by_internal_id = Mock(return_value=case)
     mock_status_db.add_analysis = Mock(return_value=analysis)
+    mock_status_db.get_latest_ticket_from_case = Mock(return_value="123456")
+    mock_status_db.get_case_workflow = Mock(return_value=Workflow.MIP_DNA)
 
     # GIVEN a mock TrailblazerAPI
     mock_trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
@@ -76,18 +85,20 @@ def test_track(mocker: MockerFixture):
     mock_status_db.add_item_to_store.assert_called_with(analysis)
     mock_status_db.commit_to_store.assert_called_once()
 
+    out_dir = Path(workflow_root, case_id, "analysis")
+
     # THEN analysis object should have been created in Trailblazer
     mock_trailblazer_api.add_pending_analysis.assert_called_with(
         analysis_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         case_id=case_id,
-        config_path=Path(workflow_root, case_id, "analysis", "slurm_job_ids.yaml"),
+        config_path=Path(out_dir, "slurm_job_ids.yaml"),
         email=email,
-        order_id=order_id,
+        order_id=2,
         out_dir=out_dir,
-        priority=priority,
-        ticket=ticket,
-        workflow=self.store.get_case_workflow(case_id),
-        workflow_manager=self._workflow_manager(),
-        tower_workflow_id=tower_workflow_id,
-        is_hidden=is_case_for_development,
+        priority=TrailblazerPriority.NORMAL,
+        ticket="123456",
+        workflow=Workflow.MIP_DNA,
+        workflow_manager=WorkflowManager.Slurm,
+        tower_workflow_id=None,
+        is_hidden=False,
     )
