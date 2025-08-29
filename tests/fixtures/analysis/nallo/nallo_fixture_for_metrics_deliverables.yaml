@@ -132,6 +132,15 @@ metrics:
   value: female
 - condition:
     norm: eq
+    threshold: 2.0
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: sex
+  step: multiqc
+  value: 2.0
+- condition:
+    norm: eq
     threshold: 'False'
   header: null
   id: ADM1-ADM2

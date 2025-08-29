@@ -166,7 +166,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         """Return Nallo workflow metric conditions for a sample."""
         sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
         if "-" not in sample_id:
-            metric_conditions: dict[str, dict[str, Any]] = NALLO_GENERAL_METRIC_CONDITIONS
+            metric_conditions: dict[str, dict[str, Any]] = NALLO_GENERAL_METRIC_CONDITIONS.copy()
             metric_conditions.update(NALLO_RAW_METRIC_CONDITIONS)
             self.set_peddy_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
             self.set_somalier_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
@@ -198,6 +198,8 @@ class NalloAnalysisAPI(NfAnalysisAPI):
     def get_nallo_raw_metric(self, sample_id: str, multiqc_raw_data: dict) -> MetricsBase | None:
         metric_name = "sex"
         raw_metrics_section: dict[str, dict] = multiqc_raw_data.get("multiqc_somalier", {})
+        LOG.debug(
+            f"Looking for {sample_id} in multiqc_somalier keys: {list(multiqc_raw_data.get('multiqc_somalier', {}).keys())}")
         sample_metrics = raw_metrics_section.get(sample_id)
         if sample_metrics and metric_name in sample_metrics:
             return self.get_multiqc_metric(
@@ -296,7 +298,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         )
 
     def create_metrics_deliverables_content(self, case_id: str) -> dict[str, list[dict[str, Any]]]:
-        """Create the content of a Raredisease metrics deliverables file."""
+        """Create the content of a Nallo metrics deliverables file."""
         metrics: list[MetricsBase] = self.get_nallo_multiqc_json_metrics(case_id=case_id)
         self.ensure_mandatory_metrics_present(metrics=metrics)
         return {"metrics": [metric.dict() for metric in metrics]}
