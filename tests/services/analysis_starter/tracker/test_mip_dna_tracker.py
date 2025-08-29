@@ -7,7 +7,6 @@ from pytest_mock import MockerFixture
 
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.cli.set.base import samples
 from cg.constants import Priority, Workflow
 from cg.constants.constants import WorkflowManager
 from cg.constants.priority import TrailblazerPriority
@@ -30,9 +29,7 @@ def test_track(mocker: MockerFixture):
         priority=Priority.standard,
         latest_order=create_autospec(Order, id=2),
         samples=[
-            create_autospec(
-                Sample, id=1, prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
-            )
+            create_autospec(Sample, prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING)
         ],
     )
 
