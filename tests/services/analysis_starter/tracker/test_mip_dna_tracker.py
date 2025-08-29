@@ -7,14 +7,16 @@ from pytest_mock import MockerFixture
 
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
+from cg.cli.set.base import samples
 from cg.constants import Priority, Workflow
 from cg.constants.constants import WorkflowManager
 from cg.constants.priority import TrailblazerPriority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
+from cg.services.analysis_starter.tracker import tracker as parent_tracker
 from cg.services.analysis_starter.tracker.implementations import mip_dna as mip_dna_tracker
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
-from cg.store.models import Analysis, Case, Order
+from cg.store.models import Analysis, Case, Order, Sample
 from cg.store.store import Store
 
 
@@ -27,6 +29,11 @@ def test_track(mocker: MockerFixture):
         data_analysis=Workflow.MIP_DNA,
         priority=Priority.standard,
         latest_order=create_autospec(Order, id=2),
+        samples=[
+            create_autospec(
+                Sample, id=1, prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+            )
+        ],
     )
 
     # GIVEN an analysis
@@ -65,7 +72,7 @@ def test_track(mocker: MockerFixture):
 
     # GIVEN an email
     email = "email@scilifelab.se"
-    mocker.patch.object(mip_dna_tracker, "environ_mail", return_value=email)
+    mocker.patch.object(parent_tracker, "environ_email", return_value=email)
 
     # WHEN calling track
     tracker.track(case_config=case_config)
@@ -91,10 +98,10 @@ def test_track(mocker: MockerFixture):
     mock_trailblazer_api.add_pending_analysis.assert_called_with(
         analysis_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         case_id=case_id,
-        config_path=Path(out_dir, "slurm_job_ids.yaml"),
+        config_path=Path(out_dir, "slurm_job_ids.yaml").as_posix(),
         email=email,
         order_id=2,
-        out_dir=out_dir,
+        out_dir=out_dir.as_posix(),
         priority=TrailblazerPriority.NORMAL,
         ticket="123456",
         workflow=Workflow.MIP_DNA,

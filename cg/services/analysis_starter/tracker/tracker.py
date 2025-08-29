@@ -106,7 +106,7 @@ class Tracker(ABC):
         Return the analysis type for sample.
         Only analysis types supported by Trailblazer are valid outputs.
         """
-        sample: Sample = self.store.get_case_by_internal_id(case_id).links[0].sample
+        sample: Sample = self.store.get_case_by_internal_id(case_id).samples[0]
         prep_category: str = sample.prep_category
         if prep_category and prep_category.lower() in {
             SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
