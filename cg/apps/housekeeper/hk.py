@@ -181,21 +181,6 @@ class HousekeeperAPI:
         files: Query = self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
         return files.order_by(File.id.desc()).first()
 
-    def get_file_by_exact_tags(
-        self, bundle: str, tags: list, version: int | None = None
-    ) -> File | None:
-        """Return a file that matches exact tags and optionally filtered by bundle and version."""
-        if not tags:
-            LOG.debug("No tags provided, skipping")
-            return None
-        files: list[File] = self.files(bundle=bundle, version=version, tags=tags).all()
-        for file in files:
-            file_tags = {tag.name for tag in file.tags}
-            LOG.debug(f"Using tags {file_tags}")
-            if file_tags == set(tags):
-                LOG.debug(f"Found file {file}")
-                return file
-
     def check_bundle_files(
         self,
         bundle_name: str,

@@ -2,63 +2,72 @@ from pathlib import Path
 
 import pytest
 
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.models import (
-    RarediseaseSampleSheetHeaders,
+from cg.constants.sequencing import SequencingPlatform
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
+    HEADERS as RAREDISEASE_HEADERS,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+    HEADERS as RNAFUSION_HEADERS,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
+    HEADERS as TAXPROFILER_HEADERS,
 )
 
 
-def get_raredisease_sample_sheet_entry(
-    sample_id: str, lane: int, fastq1: Path, fastq2: Path, case_id: str
-) -> list[str]:
-    return [
-        sample_id,
-        lane,
-        fastq1,
-        fastq2,
-        2,
-        0,
-        "",
-        "",
-        case_id,
-    ]
-
-
-@pytest.fixture(scope="function")
+@pytest.fixture
 def raredisease_sample_sheet_expected_content(
-    sample_id: str,
+    nextflow_sample_id: str,
     father_sample_id: str,
-    raredisease_case_id: str,
-    fastq_forward_read_path: Path,
-    fastq_reverse_read_path: Path,
+    nextflow_case_id: str,
+    fastq_path_1: Path,
+    fastq_path_2: Path,
 ) -> list[list[str]]:
-    """Return the expected sample sheet content  for raredisease."""
-    headers: list[str] = RarediseaseSampleSheetHeaders.list()
-    entry_1: list[str] = get_raredisease_sample_sheet_entry(
-        sample_id=sample_id,
-        lane=1,
-        fastq1=fastq_forward_read_path,
-        fastq2=fastq_reverse_read_path,
-        case_id=raredisease_case_id,
-    )
-    entry_2: list[str] = get_raredisease_sample_sheet_entry(
-        sample_id=sample_id,
-        lane=2,
-        fastq1=fastq_forward_read_path,
-        fastq2=fastq_reverse_read_path,
-        case_id=raredisease_case_id,
-    )
-    entry_3: list[str] = get_raredisease_sample_sheet_entry(
-        sample_id=father_sample_id,
-        lane=1,
-        fastq1=fastq_forward_read_path,
-        fastq2=fastq_reverse_read_path,
-        case_id=raredisease_case_id,
-    )
-    entry_4: list[str] = get_raredisease_sample_sheet_entry(
-        sample_id=father_sample_id,
-        lane=2,
-        fastq1=fastq_forward_read_path,
-        fastq2=fastq_reverse_read_path,
-        case_id=raredisease_case_id,
-    )
-    return [headers, entry_1, entry_2, entry_3, entry_4]
+    """Return the expected sample sheet content for raredisease."""
+    entry_1: list[str] = [
+        nextflow_sample_id,
+        1,
+        fastq_path_1.as_posix(),
+        fastq_path_2.as_posix(),
+        "1",
+        "2",
+        "",
+        "",
+        nextflow_case_id,
+    ]
+    return [RAREDISEASE_HEADERS, entry_1]
+
+
+@pytest.fixture
+def rnafusion_sample_sheet_expected_content(
+    fastq_path_1: Path,
+    fastq_path_2: Path,
+    nextflow_sample_id: str,
+    strandedness: str,
+) -> list[list[str]]:
+    """Return the expected sample sheet content for RNAFUSION."""
+    row: list[str] = [
+        nextflow_sample_id,
+        fastq_path_1.as_posix(),
+        fastq_path_2.as_posix(),
+        strandedness.value,
+    ]
+    return [RNAFUSION_HEADERS, row]
+
+
+@pytest.fixture
+def taxprofiler_sample_sheet_expected_content(
+    nextflow_sample_id: str,
+    nextflow_case_id: str,
+    fastq_path_1: Path,
+    fastq_path_2: Path,
+) -> list[list[str]]:
+    """Return the expected sample sheet content for Taxprofiler."""
+    row: list[str | int] = [
+        nextflow_sample_id,
+        1,
+        SequencingPlatform.ILLUMINA.value,
+        fastq_path_1.as_posix(),
+        fastq_path_2.as_posix(),
+        "",
+    ]
+    return [TAXPROFILER_HEADERS, row]

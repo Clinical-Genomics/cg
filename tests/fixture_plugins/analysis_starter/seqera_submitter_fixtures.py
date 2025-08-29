@@ -1,9 +1,6 @@
-from pathlib import Path
-
 import pytest
 
-from cg.constants.constants import FileFormat
-from cg.io.controller import ReadFile, WriteStream
+from cg.io.yaml import write_yaml_stream
 from cg.models.cg_config import SeqeraPlatformConfig
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
@@ -28,19 +25,14 @@ def seqera_platform_submitter(
 
 @pytest.fixture
 def expected_workflow_launch_request(
-    raredisease_case_config: NextflowCaseConfig, raredisease_params_file_path_readable: Path
+    raredisease_case_config: NextflowCaseConfig, expected_raredisease_workflow_params_content: dict
 ) -> WorkflowLaunchRequest:
-    parameters: dict = ReadFile.get_content_from_file(
-        file_format=FileFormat.YAML, file_path=Path(raredisease_params_file_path_readable)
-    )
-    parameters_as_string = WriteStream.write_stream_from_content(
-        content=parameters, file_format=FileFormat.YAML
-    )
+    parameter_stream: str = write_yaml_stream(expected_raredisease_workflow_params_content)
     launch = LaunchRequest(
         computeEnvId="normal-id",
         configProfiles=raredisease_case_config.config_profiles,
         configText=f"includeConfig '{raredisease_case_config.nextflow_config_file}'",
-        paramsText=parameters_as_string,
+        paramsText=parameter_stream,
         pipeline=raredisease_case_config.pipeline_repository,
         preRunScript=raredisease_case_config.pre_run_script,
         pullLatest=False,
@@ -48,7 +40,6 @@ def expected_workflow_launch_request(
         revision=raredisease_case_config.revision,
         runName=raredisease_case_config.case_id,
         sessionId=None,
-        stubRun=False,
         workDir=raredisease_case_config.work_dir,
     )
     return WorkflowLaunchRequest(launch=launch)

@@ -13,7 +13,6 @@ class LaunchRequest(BaseModel):
     revision: str
     runName: str
     sessionId: str | None = None
-    stubRun: bool = False
     workDir: str
 
 

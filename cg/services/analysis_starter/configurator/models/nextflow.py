@@ -10,5 +10,4 @@ class NextflowCaseConfig(CaseConfig):
     pipeline_repository: str
     pre_run_script: str
     revision: str
-    stub_run: bool
     work_dir: str

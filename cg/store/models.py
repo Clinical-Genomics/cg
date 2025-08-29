@@ -512,12 +512,6 @@ class Case(Base, PriorityMixin):
         )
         return sorted_analyses[0]
 
-    @property
-    def latest_analyzed(self) -> datetime | None:
-        return (
-            self.latest_completed_analysis.completed_at if self.latest_completed_analysis else None
-        )
-
     def are_all_samples_control(self) -> bool:
         """Return True if all case samples are controls."""
         return all(

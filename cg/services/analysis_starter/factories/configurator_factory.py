@@ -4,7 +4,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
-from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
@@ -28,11 +27,23 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.abstract import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
+    RNAFusionParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
+    TaxprofilerParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+    RNAFusionSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
+    TaxprofilerSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
@@ -50,7 +61,7 @@ class ConfiguratorFactory:
         self.store: Store = cg_config.status_db
 
     def get_configurator(self, workflow: Workflow) -> Configurator:
-        if workflow in NEXTFLOW_WORKFLOWS:
+        if workflow in [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]:
             return self._get_nextflow_configurator(workflow)
         elif workflow == Workflow.MICROSALT:
             return self._get_microsalt_configurator()
@@ -60,15 +71,14 @@ class ConfiguratorFactory:
         config_file_creator = self._get_nextflow_config_file_creator(workflow)
         params_file_creator: ParamsFileCreator = self._get_params_file_creator(workflow)
         sample_sheet_creator: NextflowSampleSheetCreator = self._get_sample_sheet_creator(workflow)
+        extension: PipelineExtension = self._get_pipeline_extension(workflow)
         return NextflowConfigurator(
             config_file_creator=config_file_creator,
-            housekeeper_api=self.housekeeper_api,
-            lims=self.lims_api,
             params_file_creator=params_file_creator,
             pipeline_config=self._get_pipeline_config(workflow),
             sample_sheet_creator=sample_sheet_creator,
             store=self.store,
-            pipeline_extension=self._get_pipeline_extension(workflow),
+            pipeline_extension=extension,
         )
 
     def _get_nextflow_config_file_creator(self, workflow: Workflow) -> NextflowConfigFileCreator:
@@ -87,6 +97,12 @@ class ConfiguratorFactory:
             return RarediseaseParamsFileCreator(
                 lims=self.lims_api, store=self.store, params=pipeline_config.params
             )
+        elif workflow == Workflow.RNAFUSION:
+            pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
+            return RNAFusionParamsFileCreator(pipeline_config.params)
+        elif workflow == Workflow.TAXPROFILER:
+            pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
+            return TaxprofilerParamsFileCreator(pipeline_config.params)
 
     def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
         return getattr(self.cg_config, workflow)
@@ -95,8 +111,15 @@ class ConfiguratorFactory:
         if workflow == Workflow.RAREDISEASE:
             return RarediseaseSampleSheetCreator(
                 housekeeper_api=self.cg_config.housekeeper_api,
-                lims=self.cg_config.lims_api,
                 store=self.store,
+            )
+        elif workflow == Workflow.RNAFUSION:
+            return RNAFusionSampleSheetCreator(
+                housekeeper_api=self.housekeeper_api, store=self.store
+            )
+        elif workflow == Workflow.TAXPROFILER:
+            return TaxprofilerSampleSheetCreator(
+                housekeeper_api=self.housekeeper_api, store=self.store
             )
 
     def _get_pipeline_extension(self, workflow: Workflow) -> PipelineExtension:
@@ -109,6 +132,7 @@ class ConfiguratorFactory:
                 gene_panel_file_creator=gene_panel_creator,
                 managed_variants_file_creator=managed_variants_creator,
             )
+        return PipelineExtension()
 
     def _get_gene_panel_file_creator(self, workflow: Workflow) -> GenePanelFileCreator:
         return GenePanelFileCreator(scout_api=self._get_scout_api(workflow), store=self.store)

@@ -3,13 +3,13 @@ from unittest import mock
 
 import pytest
 from housekeeper.store.models import File
+from pytest_mock import MockerFixture
 from requests import HTTPError, Response
 
 from cg.constants.archiving import ArchiveLocations
-from cg.constants.constants import APIMethods
 from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.io.controller import APIRequest
 from cg.meta.archive.archive import ARCHIVE_HANDLERS, FileAndSample, SpringArchiveAPI
+from cg.meta.archive.ddn import ddn_data_flow_client
 from cg.meta.archive.ddn.constants import (
     FAILED_JOB_STATUSES,
     METADATA_LIST,
@@ -133,27 +133,26 @@ def test_archive_all_non_archived_spring_files(
     test_auth_token: AuthToken,
     sample_id: str,
     limit: int | None,
+    mocker: MockerFixture,
 ):
     """Test archiving all non-archived SPRING files for Miria customers."""
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
     # with the DDN customer having two samples, and the non-DDN having one sample.
 
     # WHEN archiving all available files
-    with (
-        mock.patch.object(
-            AuthToken,
-            "model_validate",
-            return_value=test_auth_token,
-        ),
-        mock.patch.object(
-            APIRequest,
-            "api_request_from_content",
-            return_value=ok_miria_response,
-        ) as mock_request_submitter,
-    ):
-        spring_archive_api.archive_spring_files_and_add_archives_to_housekeeper(
-            spring_file_count_limit=limit
-        )
+    mocker.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=test_auth_token,
+    )
+    mock_request_submitter = mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
+        return_value=ok_miria_response,
+    )
+    spring_archive_api.archive_spring_files_and_add_archives_to_housekeeper(
+        spring_file_count_limit=limit
+    )
 
     # THEN the DDN archiving function should have been called with the correct destination and source if limit > 0
     if limit not in [0, -1]:
@@ -161,7 +160,6 @@ def test_archive_all_non_archived_spring_files(
         metadata: list[dict] = get_metadata(sample)
         archive_request_json[METADATA_LIST] = metadata
         mock_request_submitter.assert_called_with(
-            api_method=APIMethods.POST,
             url="some/api/files/archive",
             headers=header_with_test_auth_token,
             json=archive_request_json,
@@ -201,34 +199,29 @@ def test_get_archival_status(
     archival_job_id: int,
     job_status: JobStatus,
     should_date_be_set: bool,
+    mocker: MockerFixture,
 ):
     # GIVEN a file with an ongoing archival
     file: File = spring_archive_api.housekeeper_api.files().first()
     spring_archive_api.housekeeper_api.add_archives(files=[file], archive_task_id=archival_job_id)
 
     # WHEN querying the task id and getting a "COMPLETED" response
-    with (
-        mock.patch.object(
-            AuthToken,
-            "model_validate",
-            return_value=test_auth_token,
-        ),
-        mock.patch.object(
-            APIRequest,
-            "api_request_from_content",
-            return_value=ok_miria_job_status_response,
-        ),
-        mock.patch.object(
-            DDNDataFlowClient,
-            "_get_job_status",
-            return_value=GetJobStatusResponse(id=archival_job_id, status=job_status),
-        ),
-    ):
-        spring_archive_api.update_ongoing_task(
-            task_id=archival_job_id,
-            archive_handler=ddn_dataflow_client,
-            is_archival=True,
-        )
+    mocker.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=test_auth_token,
+    )
+    mocker.patch.object(
+        DDNDataFlowClient,
+        "_get_job_status",
+        return_value=GetJobStatusResponse(id=archival_job_id, status=job_status),
+    )
+
+    spring_archive_api.update_ongoing_task(
+        task_id=archival_job_id,
+        archive_handler=ddn_dataflow_client,
+        is_archival=True,
+    )
 
     # THEN The Archive entry should have been updated
     if job_status == FAILED_JOB_STATUSES[0]:
@@ -257,6 +250,7 @@ def test_get_retrieval_status(
     test_auth_token,
     job_status,
     should_date_be_set,
+    mocker: MockerFixture,
 ):
     """Tests that the three different categories of retrieval statuses we have identified,
     i.e. failed, ongoing and successful, are handled correctly."""
@@ -269,28 +263,21 @@ def test_get_retrieval_status(
     )
 
     # WHEN querying the task id
-    with (
-        mock.patch.object(
-            AuthToken,
-            "model_validate",
-            return_value=test_auth_token,
-        ),
-        mock.patch.object(
-            APIRequest,
-            "api_request_from_content",
-            return_value=ok_miria_job_status_response,
-        ),
-        mock.patch.object(
-            DDNDataFlowClient,
-            "_get_job_status",
-            return_value=GetJobStatusResponse(id=retrieval_job_id, status=job_status),
-        ),
-    ):
-        spring_archive_api.update_ongoing_task(
-            task_id=retrieval_job_id,
-            archive_handler=ddn_dataflow_client,
-            is_archival=False,
-        )
+    mocker.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=test_auth_token,
+    )
+    mocker.patch.object(
+        DDNDataFlowClient,
+        "_get_job_status",
+        return_value=GetJobStatusResponse(id=retrieval_job_id, status=job_status),
+    )
+    spring_archive_api.update_ongoing_task(
+        task_id=retrieval_job_id,
+        archive_handler=ddn_dataflow_client,
+        is_archival=False,
+    )
 
     # THEN The Archive entry should have been updated
     if job_status == FAILED_JOB_STATUSES[0]:
@@ -310,6 +297,7 @@ def test_retrieve_case(
     test_auth_token,
     archival_job_id: int,
     sample_with_spring_file: str,
+    mocker: MockerFixture,
 ):
     """Test retrieving all archived SPRING files tied to a case for a Miria customer."""
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
@@ -327,25 +315,22 @@ def test_retrieve_case(
     sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(sample_with_spring_file)
 
     # WHEN archiving all available files
-    with (
-        mock.patch.object(
-            AuthToken,
-            "model_validate",
-            return_value=test_auth_token,
-        ),
-        mock.patch.object(
-            APIRequest,
-            "api_request_from_content",
-            return_value=ok_miria_response,
-        ) as mock_request_submitter,
-    ):
-        spring_archive_api.retrieve_spring_files_for_case(sample.links[0].case.internal_id)
+    mocker.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=test_auth_token,
+    )
+    mock_request_submitter = mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
+        return_value=ok_miria_response,
+    )
+    spring_archive_api.retrieve_spring_files_for_case(sample.links[0].case.internal_id)
 
-    retrieve_request_json["pathInfo"][0]["source"] += "/" + Path(files[0].path).name
+    retrieve_request_json["pathInfo"][0]["source"] += f"/{Path(files[0].path).name}"
 
     # THEN the DDN archiving function should have been called with the correct destination and source.
     mock_request_submitter.assert_called_with(
-        api_method=APIMethods.POST,
         url="some/api/files/retrieve",
         headers=header_with_test_auth_token,
         json=retrieve_request_json,
@@ -368,6 +353,7 @@ def test_retrieve_sample(
     test_auth_token,
     archival_job_id: int,
     sample_with_spring_file: str,
+    mocker: MockerFixture,
 ):
     """Test retrieving all archived SPRING files tied to a sample for a Miria customer."""
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
@@ -385,25 +371,22 @@ def test_retrieve_sample(
         assert file.archive
 
     # WHEN archiving all available files
-    with (
-        mock.patch.object(
-            AuthToken,
-            "model_validate",
-            return_value=test_auth_token,
-        ),
-        mock.patch.object(
-            APIRequest,
-            "api_request_from_content",
-            return_value=ok_miria_response,
-        ) as mock_request_submitter,
-    ):
-        spring_archive_api.retrieve_spring_files_for_sample(sample_with_spring_file)
+    mocker.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=test_auth_token,
+    )
+    mock_request_submitter = mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
+        return_value=ok_miria_response,
+    )
+    spring_archive_api.retrieve_spring_files_for_sample(sample_with_spring_file)
 
     retrieve_request_json["pathInfo"][0]["source"] += "/" + Path(files[0].path).name
 
     # THEN the DDN archiving function should have been called with the correct destination and source.
     mock_request_submitter.assert_called_with(
-        api_method=APIMethods.POST,
         url="some/api/files/retrieve",
         headers=header_with_test_auth_token,
         json=retrieve_request_json,
@@ -426,6 +409,7 @@ def test_retrieve_order(
     test_auth_token,
     archival_job_id: int,
     sample_with_spring_file: str,
+    mocker: MockerFixture,
 ):
     """Test retrieving all archived SPRING files tied to an order for a Miria customer."""
     # GIVEN a populated status_db database with two customers, one DDN and one non-DDN,
@@ -445,27 +429,24 @@ def test_retrieve_order(
     sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(sample_with_spring_file)
 
     # WHEN archiving all available files
-    with (
-        mock.patch.object(
-            AuthToken,
-            "model_validate",
-            return_value=test_auth_token,
-        ),
-        mock.patch.object(
-            APIRequest,
-            "api_request_from_content",
-            return_value=ok_miria_response,
-        ) as mock_request_submitter,
-    ):
-        spring_archive_api.retrieve_spring_files_for_order(
-            id_=sample.original_ticket, is_order_id=False
-        )
+    mocker.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=test_auth_token,
+    )
+    mock_request_submitter = mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
+        return_value=ok_miria_response,
+    )
+    spring_archive_api.retrieve_spring_files_for_order(
+        id_=sample.original_ticket, is_order_id=False
+    )
 
     retrieve_request_json["pathInfo"][0]["source"] += "/" + Path(files[0].path).name
 
     # THEN the DDN archiving function should have been called with the correct destination and source.
     mock_request_submitter.assert_called_with(
-        api_method=APIMethods.POST,
         url="some/api/files/retrieve",
         headers=header_with_test_auth_token,
         json=retrieve_request_json,
@@ -482,6 +463,7 @@ def test_delete_file_raises_http_error(
     failed_delete_file_response: Response,
     test_auth_token: AuthToken,
     archival_job_id: int,
+    mocker: MockerFixture,
 ):
     """Tests that an HTTP error is raised when the Miria response is unsuccessful for a delete file request,
     and that the file is not removed from Housekeeper."""
@@ -500,19 +482,17 @@ def test_delete_file_raises_http_error(
     )
 
     # GIVEN that the request returns a failed response
-    with (
-        mock.patch.object(
-            DDNDataFlowClient,
-            "_get_auth_token",
-            return_value=test_auth_token,
-        ),
-        mock.patch.object(
-            APIRequest,
-            "api_request_from_content",
-            return_value=failed_delete_file_response,
-        ),
-        pytest.raises(HTTPError),
-    ):
+    mocker.patch.object(
+        DDNDataFlowClient,
+        "_get_auth_token",
+        return_value=test_auth_token,
+    )
+    mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
+        return_value=failed_delete_file_response,
+    )
+    with pytest.raises(HTTPError):
         # WHEN trying to delete the file via Miria and in Housekeeper
 
         # THEN an HTTPError should be raised
@@ -527,6 +507,7 @@ def test_delete_file_success(
     ok_delete_file_response: Response,
     test_auth_token: AuthToken,
     archival_job_id: int,
+    mocker: MockerFixture,
 ):
     """Tests that given a successful response from Miria, the file is deleted and removed from Housekeeper."""
 
@@ -544,22 +525,20 @@ def test_delete_file_success(
     )
 
     # GIVEN that the delete request returns a successful response
-    with (
-        mock.patch.object(
-            DDNDataFlowClient,
-            "_get_auth_token",
-            return_value=test_auth_token,
-        ),
-        mock.patch.object(
-            APIRequest,
-            "api_request_from_content",
-            return_value=ok_delete_file_response,
-        ),
-    ):
-        # WHEN trying to delete the file via Miria and in Housekeeper
+    mocker.patch.object(
+        DDNDataFlowClient,
+        "_get_auth_token",
+        return_value=test_auth_token,
+    )
+    mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
+        return_value=ok_delete_file_response,
+    )
+    # WHEN trying to delete the file via Miria and in Housekeeper
 
-        # THEN no error is raised
-        spring_archive_api.delete_file(file_path=spring_file.path)
+    # THEN no error is raised
+    spring_archive_api.delete_file(file_path=spring_file.path)
 
     # THEN the file is removed from Housekeeper
     assert not spring_archive_api.housekeeper_api.get_file(spring_file_id)

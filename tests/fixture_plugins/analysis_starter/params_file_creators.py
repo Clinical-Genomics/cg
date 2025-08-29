@@ -1,17 +1,61 @@
-import pytest
+from pathlib import Path
+from unittest.mock import create_autospec
 
-from cg.models.cg_config import CGConfig
+import pytest
+from pytest_mock import MockerFixture
+
+from cg.apps.lims import LimsAPI
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
+    raredisease,
+    rnafusion,
+    taxprofiler,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
+    RNAFusionParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
+    TaxprofilerParamsFileCreator,
+)
+from cg.store.store import Store
 
 
 @pytest.fixture
 def raredisease_params_file_creator(
-    raredisease_context: CGConfig,
+    mock_store_for_raredisease_file_creators: Store,
+    nextflow_workflow_params_content: dict,
+    nf_analysis_pipeline_params_path: Path,
+    mocker: MockerFixture,
 ) -> RarediseaseParamsFileCreator:
+    """Fixture to provide a RarediseaseParamsFileCreator with a mock store."""
+    lims: LimsAPI = create_autospec(LimsAPI)
+    lims.capture_kit.return_value = "capture_kit"
+    mocker.patch.object(raredisease, "read_yaml", return_value=nextflow_workflow_params_content)
+    mocker.patch.object(raredisease, "write_csv", return_value=None)
     return RarediseaseParamsFileCreator(
-        store=raredisease_context.status_db,
-        lims=raredisease_context.lims_api,
-        params=raredisease_context.raredisease.params,
+        store=mock_store_for_raredisease_file_creators,
+        lims=lims,
+        params=nf_analysis_pipeline_params_path.as_posix(),
     )
+
+
+@pytest.fixture
+def rnafusion_params_file_creator(
+    nf_analysis_pipeline_params_path: Path,
+    nextflow_workflow_params_content: dict,
+    mocker: MockerFixture,
+) -> RNAFusionParamsFileCreator:
+    mocker.patch.object(rnafusion, "read_yaml", return_value=nextflow_workflow_params_content)
+    return RNAFusionParamsFileCreator(nf_analysis_pipeline_params_path.as_posix())
+
+
+@pytest.fixture
+def taxprofiler_params_file_creator(
+    nf_analysis_pipeline_params_path: Path,
+    nextflow_workflow_params_content: dict,
+    mocker: MockerFixture,
+) -> TaxprofilerParamsFileCreator:
+    mocker.patch.object(taxprofiler, "read_yaml", return_value=nextflow_workflow_params_content)
+    return TaxprofilerParamsFileCreator(nf_analysis_pipeline_params_path.as_posix())
