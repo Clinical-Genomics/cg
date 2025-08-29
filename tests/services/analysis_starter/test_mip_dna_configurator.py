@@ -6,6 +6,7 @@ from pytest_mock import MockerFixture
 
 from cg.constants.priority import SlurmQos
 from cg.exc import MissingConfigFilesError
+from cg.models.cg_config import MipConfig
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
     ManagedVariantsFileCreator,
@@ -33,7 +34,20 @@ def mock_status_db() -> Store:
     return mock_store
 
 
-def test_configure(mocker: MockerFixture):
+@pytest.fixture
+def mock_cg_config_mip() -> MipConfig:
+    return create_autospec(
+        MipConfig,
+        root="root_dir",
+        conda_binary="conda_binary",
+        conda_env="S_mip_dna",
+        mip_config="mip_config",
+        workflow="analyse rd_dna",
+        script="script",
+    )
+
+
+def test_configure(mock_cg_config_mip: MipConfig, mocker: MockerFixture):
     # GIVEN a case id
     case_id = "test_case"
 
@@ -45,11 +59,11 @@ def test_configure(mocker: MockerFixture):
     # GIVEN a MIP DNA configurator
     root_dir = Path("root_dir")
     configurator = MIPDNAConfigurator(
+        config=mock_cg_config_mip,
         config_file_creator=create_autospec(MIPDNAConfigFileCreator),
         fastq_handler=Mock(),
         gene_panel_file_creator=create_autospec(GenePanelFileCreator),
         managed_variants_file_creator=create_autospec(ManagedVariantsFileCreator),
-        root=root_dir,
         store=store,
     )
 
@@ -90,7 +104,7 @@ def test_configure(mocker: MockerFixture):
     )
 
 
-def test_get_config(mock_status_db: Store, mocker: MockerFixture):
+def test_get_config(mock_cg_config_mip: MipConfig, mock_status_db: Store, mocker: MockerFixture):
     """Test that the MIP DNA configurator can get a case config."""
 
     # GIVEN an email address in the environment
@@ -98,11 +112,11 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
 
     # GIVEN a MIP DNA configurator
     configurator = MIPDNAConfigurator(
+        config=mock_cg_config_mip,
         config_file_creator=Mock(),
         fastq_handler=Mock(),
         gene_panel_file_creator=Mock(),
         managed_variants_file_creator=Mock(),
-        root=Path("root_dir"),
         store=mock_status_db,
     )
 
@@ -123,16 +137,18 @@ def test_get_config(mock_status_db: Store, mocker: MockerFixture):
     assert case_config.start_with_recipe is None
 
 
-def test_get_config_all_flags_set(mock_status_db: Store, mocker: MockerFixture):
+def test_get_config_all_flags_set(
+    mock_cg_config_mip: MipConfig, mock_status_db: Store, mocker: MockerFixture
+):
     """Test that the MIP DNA configurator can get a case config."""
 
     # GIVEN a MIP DNA configurator
     configurator = MIPDNAConfigurator(
+        config=mock_cg_config_mip,
         config_file_creator=Mock(),
         fastq_handler=Mock(),
         gene_panel_file_creator=Mock(),
         managed_variants_file_creator=Mock(),
-        root=Path("root_dir"),
         store=mock_status_db,
     )
 
@@ -151,26 +167,24 @@ def test_get_config_all_flags_set(mock_status_db: Store, mocker: MockerFixture):
     )
 
     # THEN we should run the analysis with bwa_mem instead of bwa_mem2
-    assert case_config.bwa_mem == 1
-    assert case_config.bwa_mem2 == 0
-    assert getattr(case_config, "use_bwa_mem", None) is None
+    assert case_config.use_bwa_mem
 
     assert case_config.start_after_recipe == "banana_bread"
     assert case_config.start_with_recipe == "short_bread"
 
 
-def test_get_config_validation(mock_status_db: Store):
+def test_get_config_validation(mock_cg_config_mip: MipConfig, mock_status_db: Store):
     # GIVEN at least one file creator that returns a path which does not exist
     gene_panel_file_creator: GenePanelFileCreator = create_autospec(GenePanelFileCreator)
     gene_panel_file_creator.get_file_path = Mock(return_value=Path("fake_path"))
 
     # GIVEN a configurator
     configurator = MIPDNAConfigurator(
+        config=mock_cg_config_mip,
         config_file_creator=Mock(),
         fastq_handler=Mock(),
         gene_panel_file_creator=gene_panel_file_creator,
         managed_variants_file_creator=Mock(),
-        root=Path("root_dir"),
         store=mock_status_db,
     )
 

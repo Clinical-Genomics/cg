@@ -2,12 +2,13 @@ import logging
 import subprocess
 
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
+from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.services.analysis_starter.submitters.submitter import Submitter
 from cg.services.analysis_starter.submitters.subprocess.commands import WORKFLOW_VERSION_COMMAND_MAP
 
 LOG = logging.getLogger(__name__)
 
-SubprocessCaseConfig = MicrosaltCaseConfig
+SubprocessCaseConfig = MicrosaltCaseConfig | MIPDNACaseConfig
 
 
 class SubprocessSubmitter(Submitter):
@@ -27,6 +28,8 @@ class SubprocessSubmitter(Submitter):
         """
         Calls the workflow to get the workflow version number.
         If fails, returns a placeholder value instead.
+
+        Currently supported workflow: microSALT
         """
         try:
             command: str = WORKFLOW_VERSION_COMMAND_MAP[case_config.workflow]
