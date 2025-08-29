@@ -29,6 +29,7 @@
                     "source": "tissue (fresh frozen)",
                     "synopsis": "",
                     "subject_id": "subject-sample1-rna-t1",
+                    "tumour": null,
                     "volume": "120",
                     "well_position": "A:1"
                 }
@@ -60,6 +61,7 @@
                     "source": "tissue (fresh frozen)",
                     "synopsis": "",
                     "subject_id": "subject-sample1-rna-t2",
+                    "tumour": null,
                     "volume": "20",
                     "well_position": "B:1"
                 }
