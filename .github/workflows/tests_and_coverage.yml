@@ -30,6 +30,7 @@ jobs:
       - name: Test with Pytest & Coveralls
         run: |
           pytest -n logical --cov=cg/
+          pytest -m integration
           coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}

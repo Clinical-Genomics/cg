@@ -1,0 +1,136 @@
+---
+database: "{status_db_uri}"
+delivery_path: "{test_root_dir}/delivery_path"
+madeline_exe: "{test_root_dir}/madeline_exe"
+nanopore_data_directory: "{test_root_dir}/nanopore_data_directory"
+sentieon_licence_server: "localhost"
+tower_binary_path: "{test_root_dir}/tower_binary_path"
+email_base_settings:
+  sender_email: "integration-tests@scilifelab.se"
+  smtp_server: "localhost"
+
+downsample:
+  downsample_dir: "{test_root_dir}/downsample_dir"
+  downsample_script: "{test_root_dir}/downsample_script"
+  account: "development"
+
+run_instruments:
+  pacbio:
+    data_dir: "{test_root_dir}/pacbio_data_dir"
+    systemd_trigger_dir: "{test_root_dir}/pacbio_systemd_trigger_dir"
+  nanopore:
+    data_dir: "{test_root_dir}/nanopore_data_dir"
+    systemd_trigger_dir: "{test_root_dir}/nanopore_systemd_trigger_dir"
+  illumina:
+    data_dir: "{test_root_dir}/illumina_data_dir"
+    sequencing_runs_dir: "{test_root_dir}/illumina_sequencing_runs_dir"
+    demultiplexed_runs_dir: "{test_root_dir}/illumina_demultiplexed_runs_dir"
+
+housekeeper:
+  database: "{housekeeper_db_uri}"
+  root: "{test_root_dir}/housekeeper_root"
+
+chanjo:
+  binary_path: "{test_root_dir}/chanjo_binary_path"
+  config_path: "{test_root_dir}/chanjo_config_path"
+
+chanjo2:
+  host: "http://localhost/chanjo2"
+
+microsalt:
+  root: "{test_root_dir}/microsalt"
+  conda_binary: "{test_root_dir}/microsalt/conda_bin"
+  conda_env: "{test_root_dir}/microsalt/conda_env"
+  binary_path: "{test_root_dir}/microsalt/bin"
+  queries_path: "{test_root_dir}/microsalt/queries"
+
+balsamic:
+  conda_binary: "{test_root_dir}/balsamic_conda_binary"
+  binary_path: "{test_root_dir}/balsamic_binary_path"
+  balsamic_cache: "{test_root_dir}/balsamic_cache"
+  bed_path: "{test_root_dir}/balsamic_bed_path"
+  cadd_path: "{test_root_dir}/balsamic_cadd_path"
+  conda_env: "conda_env_balsamic"
+  genome_interval_path: "{test_root_dir}/balsamic_genome_interval_path"
+  gens_coverage_female_path: "{test_root_dir}/balsamic_gens_coverage_female_path"
+  gens_coverage_male_path: "{test_root_dir}/balsamic_gens_coverage_male_path"
+  gnomad_af5_path: "{test_root_dir}/balsamic_gnomad_af5_path"
+  loqusdb_path: "{test_root_dir}/balsamic_loqusdb_path"
+  pon_path: "{test_root_dir}/balsamic_pon_path"
+  root: "{test_root_dir}/balsamic_root_path"
+  sentieon_licence_path: "{test_root_dir}/balsamic_sention_licence_path"
+  slurm: 
+    account: "balsamic_slurm_account"
+    mail_user: "balsamic_mail_user@scilifelab.se"
+    qos: "low"
+  swegen_path: "{test_root_dir}/balsamic_swegen_path"
+
+crunchy:
+  conda_binary: "{test_root_dir}/crunchy_conda_binary"
+  cram_reference: "{test_root_dir}/crunchy_cram_reference"
+  slurm:
+    account: development
+    hours: 24
+    mail_user: crunchy_slurm_mail_user@scilifelab.se
+    memory: 50
+    number_tasks: 12
+    conda_env: crunchy_conda_env
+
+genotype:
+  database: "sqlite:///file:genotype?mode=memory&cache=shared&uri=true"
+  binary_path: "{test_root_dir}/genotype_binary_path"
+  config_path: "{test_root_dir}/genotype_config_path"
+
+hermes:
+  binary_path: "{test_root_dir}/hermes_binary_path"
+  container_path: "{test_root_dir}/hermes_container_path"
+  container_mount_volume: "{test_root_dir}/hermes_container_mount_volume"
+
+lims:
+  host: "http://localhost:8888/lims"
+  username: lims_username
+  password: lims_password
+
+mip-rd-dna:
+  conda_binary: "{test_root_dir}/mip-dna/conda_bin"
+  conda_env: S_mip12.1
+  mip_config: "{test_root_dir}/mip-dna/config/mip12.1-dna-stage.yaml"
+  workflow: "analyse rd_dna"
+  root: "{test_root_dir}/mip-dna/cases"
+  script: "{test_root_dir}/mip-dna/bin"
+
+mutacc-auto:
+  config_path: "{test_root_dir}/mutacc-auto_config_path"
+  binary_path: "{test_root_dir}/mutacc-auto_binary_path"
+  padding: 300
+
+encryption:
+  encryption_dir: "{test_root_dir}/encryption_encryption_dir"
+  binary_path: "{test_root_dir}/encryption_binary_path"
+
+pdc:
+  binary_path: "{test_root_dir}/pdc_binary_path"
+
+scout:
+  binary_path: {test_root_dir}/scout/binary
+  config_path: {test_root_dir}/scout/config
+
+scout_38:
+  binary_path: {test_root_dir}/scout_38_binary_path
+  config_path: {test_root_dir}/scout_38_config_path
+
+data-delivery:
+  destination_path: {test_root_dir}/data-delivery_destination_path
+  covid_destination_path: {test_root_dir}/data-delivery_covid_destination_path
+  covid_report_path: {test_root_dir}/data-delivery_covid_report_path
+  base_path: {test_root_dir}/data-delivery_base_path
+  account: "development"
+  mail_user: "data-delivery-user@scilifelab.se"
+
+trailblazer:
+  database: "sqlite:///file:trailblazer?mode=memory&cache=shared&uri=true"
+  root: {test_root_dir}/trailblazer
+  service_account: "trailblazer_service_account"
+  google_client_id:  "trailblazer_google_client_id"
+  service_account_auth_file: {test_root_dir}/trailblazer/service_account_auth_file
+  host: "http://localhost:8888/trailblazer"
