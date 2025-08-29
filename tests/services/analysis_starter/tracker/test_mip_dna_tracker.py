@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
 import pytest
@@ -7,6 +8,7 @@ from pytest_mock import MockerFixture
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Priority, Workflow
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.services.analysis_starter.tracker.implementations import mip_dna as mip_dna_tracker
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
@@ -37,8 +39,9 @@ def test_track(mocker: MockerFixture):
     )
 
     # GIVEN MIP-DNA tracker
+    workflow_root = "/some/root"
     tracker = MIPDNATracker(
-        store=mock_status_db, trailblazer_api=mock_trailblazer_api, workflow_root="/some/root"
+        store=mock_status_db, trailblazer_api=mock_trailblazer_api, workflow_root=workflow_root
     )
 
     # GIVEN MIP-DNA case config
@@ -50,6 +53,10 @@ def test_track(mocker: MockerFixture):
 
     # GIVEN that there is a qc info file with the mip version
     mocker.patch.object(mip_dna_tracker, "read_yaml", return_value={"mip_version": "v8.2.5"})
+
+    # GIVEN an email
+    email = "email@scilifelab.se"
+    mocker.patch.object(mip_dna_tracker, "environ_mail", return_value=email)
 
     # WHEN calling track
     tracker.track(case_config=case_config)
@@ -65,20 +72,22 @@ def test_track(mocker: MockerFixture):
     )
     assert analysis.case == case
 
+    # THEN the items are added to the database
     mock_status_db.add_item_to_store.assert_called_with(analysis)
+    mock_status_db.commit_to_store.assert_called_once()
 
-    # # THEN analysis object should have been created in Trailblazer
-    # mock_trailblazer_api.add_pending_analysis.assert_called_with(
-    #     analysis_type=analysis_type,
-    #     case_id=case_id,
-    #     config_path=config_path.as_posix(),
-    #     email=email,
-    #     order_id=order_id,
-    #     out_dir=out_dir,
-    #     priority=priority,
-    #     ticket=ticket,
-    #     workflow=self.store.get_case_workflow(case_id),
-    #     workflow_manager=self._workflow_manager(),
-    #     tower_workflow_id=tower_workflow_id,
-    #     is_hidden=is_case_for_development,
-    # )
+    # THEN analysis object should have been created in Trailblazer
+    mock_trailblazer_api.add_pending_analysis.assert_called_with(
+        analysis_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        case_id=case_id,
+        config_path=Path(workflow_root, case_id, "analysis", "slurm_job_ids.yaml"),
+        email=email,
+        order_id=order_id,
+        out_dir=out_dir,
+        priority=priority,
+        ticket=ticket,
+        workflow=self.store.get_case_workflow(case_id),
+        workflow_manager=self._workflow_manager(),
+        tower_workflow_id=tower_workflow_id,
+        is_hidden=is_case_for_development,
+    )
