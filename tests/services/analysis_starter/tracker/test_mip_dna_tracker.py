@@ -10,7 +10,7 @@ from cg.constants import Priority, Workflow
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.services.analysis_starter.tracker.implementations import mip_dna as mip_dna_tracker
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
-from cg.store.models import Case
+from cg.store.models import Analysis, Case
 from cg.store.store import Store
 
 
@@ -58,6 +58,18 @@ def test_track(mocker: MockerFixture):
         trailblazer_id=1,
         version="v8.2.5",
         workflow=Workflow.MIP_DNA,
+    )
+
+    mock_status_db.add_item_to_store.assert_called_with(
+        Analysis(
+            workflow=Workflow.MIP_DNA,
+            workflow_version="v8.2.5",
+            completed_at=None,
+            is_primary=True,
+            started_at=datetime.now(),
+            trailblazer_id=1,
+            case=case,
+        )
     )
 
     # THEN analysis object should have been created in Trailblazer
