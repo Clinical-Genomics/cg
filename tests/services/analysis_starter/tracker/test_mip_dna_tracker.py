@@ -2,6 +2,7 @@ from datetime import datetime
 from unittest.mock import Mock, create_autospec
 
 import pytest
+from pytest_mock import MockerFixture
 
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
@@ -13,7 +14,7 @@ from cg.store.store import Store
 
 
 @pytest.mark.freeze_time
-def test_track():
+def test_track(mocker: MockerFixture):
     # GIVEN a case
     case: Case = create_autospec(Case, data_analysis=Workflow.MIP_DNA, priority=Priority.standard)
 
@@ -50,7 +51,7 @@ def test_track():
         primary=True,
         started_at=datetime.now(),
         trailblazer_id=1,
-        version="THIS WORNG",
+        version="v8.2.5",
         workflow=Workflow.MIP_DNA,
     )
 

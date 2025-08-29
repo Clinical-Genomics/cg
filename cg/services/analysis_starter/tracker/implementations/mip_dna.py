@@ -18,7 +18,5 @@ class MIPDNATracker(Tracker):
         return Path(self.workflow_root, case_id, "analysis", f"{case_id}_qc_sample_info.yaml")
 
     def _get_workflow_version(self, case_config: MIPDNACaseConfig) -> str:
-        LOG.debug("Fetch workflow version")
-        sample_info_raw: dict = read_yaml(file_path=self._get_sample_info_path(case_id))
-        sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sample_info_raw)
-        return sample_info.mip_version
+        sample_info_raw: dict = read_yaml(file_path=self._get_sample_info_path(case_config.case_id))
+        return sample_info_raw.get("mip_version")
