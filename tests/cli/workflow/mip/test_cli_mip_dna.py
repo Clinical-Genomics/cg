@@ -40,7 +40,10 @@ def test_mip_dna_dev_run(mocker: MockerFixture):
     mock_run = mocker.patch.object(AnalysisStarter, "run")
 
     # WHEN invoking cg workflow mip-dna dev-run
-    cli_runner.invoke(dev_run, ["case_id"], obj=cg_config)
+    result = cli_runner.invoke(dev_run, ["case_id"], obj=cg_config)
+
+    # THEN the command exits successfully
+    assert result.exit_code == 0
 
     # THEN the analysis starter should have been called
     get_analysis_starter_spy.assert_called_once_with(ANY, Workflow.MIP_DNA)
