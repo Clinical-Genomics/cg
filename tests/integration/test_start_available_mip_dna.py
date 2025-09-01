@@ -97,7 +97,7 @@ def test_start_available_mip_dna(
     with one case to be analysed that has not been analysed before."""
     cli_runner = CliRunner()
 
-    # GIVEN a mip root directory
+    # GIVEN a MIP-DNA root directory
     test_root_dir: Path = tmp_path_factory.mktemp("test_start_available_mip_dna")
     # GIVEN a config file with valid database uris and directories
     config_path: Path = create_parsed_config(status_db_uri, housekeeper_db_uri, test_root_dir)
