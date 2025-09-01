@@ -34,17 +34,6 @@ class BaseHandler:
         """Return a query for the given table."""
         return self.session.query(table)
 
-    def _get_outer_join_cases_with_analyses_query(self) -> Query:
-        """Return a query for all cases in the database with an analysis."""
-        return (
-            self._get_query(table=Case)
-            .outerjoin(Analysis)
-            .join(Case.links)
-            .join(CaseSample.sample)
-            .join(ApplicationVersion)
-            .join(Application)
-        )
-
     def _get_case_query_for_analysis_start(self) -> Query:
         """Return a query for all cases and joins them with their latest analysis, if present."""
         latest_analysis_subquery: Subquery = (

@@ -123,38 +123,6 @@ def test_convert_into_transfer_data(
     assert isinstance(transferdata[0], MiriaObject)
 
 
-def test_call_corresponding_archiving_method(
-    spring_archive_api: SpringArchiveAPI, sample_id: str, ddn_dataflow_client: DDNDataFlowClient
-):
-    """Tests so that the correct archiving function is used when providing a Karolinska customer."""
-    # GIVEN a file to be transferred
-    # GIVEN a spring_archive_api with a mocked archive function
-    file_and_sample = FileAndSample(
-        file=spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first(),
-        sample=spring_archive_api.status_db.get_sample_by_internal_id(sample_id),
-    )
-
-    with (
-        mock.patch.object(
-            DDNDataFlowClient,
-            "_set_auth_tokens",
-            return_value=123,
-        ),
-        mock.patch.object(
-            DDNDataFlowClient,
-            "archive_file",
-            return_value=123,
-        ) as mock_request_submitter,
-    ):
-        # WHEN calling the corresponding archive method
-        spring_archive_api.archive_file_to_location(
-            file_and_sample=file_and_sample, archive_handler=ddn_dataflow_client
-        )
-
-    # THEN the correct archive function should have been called once
-    mock_request_submitter.assert_called_once_with(file_and_sample=file_and_sample)
-
-
 @pytest.mark.parametrize("limit", [None, -1, 0, 1])
 def test_archive_all_non_archived_spring_files(
     spring_archive_api: SpringArchiveAPI,

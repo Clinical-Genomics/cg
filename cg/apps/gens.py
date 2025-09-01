@@ -2,8 +2,6 @@
 
 import logging
 
-from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.store.models import Case
 from cg.utils import Process
 from cg.utils.dict import get_list_from_dictionary
 
@@ -46,14 +44,6 @@ class GensAPI:
         self.process.run_command(parameters=load_call_params, dry_run=self.dry_run)
         if self.process.stderr:
             LOG.warning(self.process.stderr)
-
-    @staticmethod
-    def is_suitable_for_upload(case: Case) -> bool:
-        """Check if a cancer case supports Gens upload."""
-        return all(
-            sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
-            for sample in case.samples
-        )
 
     def __str__(self):
         return f"GensAPI(dry_run: {self.dry_run})"
