@@ -136,7 +136,7 @@ metrics:
   header: null
   id: ADM1
   input: multiqc_data.json
-  name: sex
+  name: somalier_sex
   step: multiqc
   value: 2.0
 - condition:

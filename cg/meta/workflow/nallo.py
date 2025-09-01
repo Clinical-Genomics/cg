@@ -241,8 +241,8 @@ class NalloAnalysisAPI(NfAnalysisAPI):
 
     @staticmethod
     def set_somalier_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
-        if "sex" in metric_conditions:
-            metric_conditions["sex"]["threshold"] = float(
+        if "somalier_sex" in metric_conditions:
+            metric_conditions["somalier_sex"]["threshold"] = float(
                 {
                     "male": PlinkSex.MALE,
                     "female": PlinkSex.FEMALE,
