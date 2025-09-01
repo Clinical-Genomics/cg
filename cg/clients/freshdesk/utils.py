@@ -1,18 +1,12 @@
 import logging
 from functools import wraps
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 from pydantic import ValidationError
 from requests import ConnectionError, HTTPError
 from requests.exceptions import MissingSchema
 
-from cg.clients.freshdesk.exceptions import (
-    FreshdeskAPIException,
-    FreshdeskModelException,
-)
-from cg.constants.constants import FileFormat
-from cg.io.controller import WriteFile
+from cg.clients.freshdesk.exceptions import FreshdeskAPIException, FreshdeskModelException
 
 LOG = logging.getLogger(__name__)
 
@@ -69,18 +63,3 @@ def prepare_attachments(attachments: list[Path]) -> list[tuple[str, tuple[str, b
     return [
         ("attachments[]", (attachment.name, open(attachment, "rb"))) for attachment in attachments
     ]
-
-
-def create_temp_attachment_file(content: dict, file_name: Path) -> TemporaryDirectory:
-    """Create a file-based attachment."""
-    if content and file_name:
-        directory = TemporaryDirectory()
-        WriteFile.write_file_from_content(
-            content=content,
-            file_format=FileFormat.JSON,
-            file_path=Path(directory.name, "order.json"),
-        )
-        return directory
-    else:
-        LOG.error("Content or file path is None. Cannot create file attachment.")
-        raise ValueError("Both content and file path must be provided and cannot be None")

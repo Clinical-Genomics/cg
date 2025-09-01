@@ -35,11 +35,6 @@ class CompressionData:
         return self.stub.with_suffix(FileExtensions.SPRING)
 
     @property
-    def encrypted_spring_path(self) -> Path:
-        """Return the path to a SPRING file"""
-        return self.stub.with_suffix(FileExtensions.SPRING).with_suffix(FileExtensions.GPG)
-
-    @property
     def spring_metadata_path(self) -> Path:
         """Return the path to a SPRING metadata file"""
         return self.stub.with_suffix(".json")
