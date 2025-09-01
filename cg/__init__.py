@@ -1,2 +1,2 @@
 __title__ = "cg"
-__version__ = "75.0.7"
+__version__ = "75.0.8"
