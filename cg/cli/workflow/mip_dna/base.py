@@ -20,7 +20,12 @@ from cg.cli.workflow.mip.base import (
     start,
     start_available,
 )
-from cg.cli.workflow.mip.options import OPTION_BWA_MEM, START_AFTER_PROGRAM, START_WITH_PROGRAM
+from cg.cli.workflow.mip.options import (
+    OPTION_BWA_MEM,
+    OPTION_PANEL_BED,
+    START_AFTER_PROGRAM,
+    START_WITH_PROGRAM,
+)
 from cg.constants import Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -80,4 +85,30 @@ def dev_run(
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.MIP_DNA)
     analysis_starter.run(
         case_id=case_id, start_after=start_after, start_with=start_with, use_bwa_mem=use_bwa_mem
+    )
+
+
+@mip_dna.command("dev-start")
+@START_AFTER_PROGRAM
+@START_WITH_PROGRAM
+@OPTION_BWA_MEM
+@OPTION_PANEL_BED
+@click.argument("case_id", type=str)
+@click.pass_obj
+def dev_start(
+    cg_config: CGConfig,
+    case_id: str,
+    use_bwa_mem: bool,
+    panel_bed: str,
+    start_after: str | None,
+    start_with: str | None,
+):
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.MIP_DNA)
+    analysis_starter.start(
+        case_id=case_id,
+        start_after=start_after,
+        start_with=start_with,
+        panel_bed=panel_bed,
+        use_bwa_mem=use_bwa_mem,
     )

@@ -4,7 +4,7 @@ import pytest
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
-from cg.cli.workflow.mip_dna.base import dev_run
+from cg.cli.workflow.mip_dna.base import dev_run, dev_start
 from cg.constants import Workflow
 from cg.models.cg_config import CGConfig, IlluminaConfig, MipConfig, RunInstruments
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
@@ -84,14 +84,19 @@ def test_mip_dna_dev_run(
     )
 
 
-def test_mip_dna_dev_start(cg_config: CGConfig):
+def test_mip_dna_dev_start(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a cli runner
     cli_runner = CliRunner()
 
     # GIVEN a CGConfig with a MIP-DNA config
 
+    get_analysis_starter_spy = mocker.spy(
+        AnalysisStarterFactory, "get_analysis_starter_for_workflow"
+    )
+    mock_start = mocker.patch.object(AnalysisStarter, "start")
+
     # WHEN invoking cg workflow mip-dna dev-start
-    cli_runner.invoke(
+    result = cli_runner.invoke(
         dev_start,
         [
             "--start-with",
@@ -107,4 +112,7 @@ def test_mip_dna_dev_start(cg_config: CGConfig):
     )
 
     # THEN the command exits successfully
+    assert result.exit_code == 0
+
     # THEN the analysis starter should have been called
+    mock_start.assert_called_once_with(case_id="case_id")
