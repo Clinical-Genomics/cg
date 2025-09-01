@@ -2,7 +2,6 @@
 
 import logging
 
-from cg.exc import CaseNotFoundError
 from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
@@ -54,28 +53,6 @@ class GenotypeAPI:
         analysis_sex_parameters = ["add-sex", sample_id, "-a", "sequence", sex]
         LOG.debug(f"Set predicted sex for sample {sample_id} to {sex} for the sequence analysis")
         self.process.run_command(parameters=analysis_sex_parameters, dry_run=self.dry_run)
-
-    def export_sample(self, days: int = 0) -> str:
-        """Export sample info."""
-        export_sample_parameters = ["export-sample", "-d", str(days)]
-
-        self.process.run_command(parameters=export_sample_parameters, dry_run=self.dry_run)
-        output = self.process.stdout
-        # If sample not in genotype db, stdout of genotype command will be empty.
-        if not output:
-            raise CaseNotFoundError("samples not found in genotype db")
-        return output
-
-    def export_sample_analysis(self, days: int = 0) -> str:
-        """Export analysis."""
-        export_sample_analysis_parameters = ["export-sample-analysis", "-d", str(days)]
-
-        self.process.run_command(parameters=export_sample_analysis_parameters, dry_run=self.dry_run)
-        output = self.process.stdout
-        # If sample not in genotype db, stdout of genotype command will be empty.
-        if not output:
-            raise CaseNotFoundError("samples not found in genotype db")
-        return output
 
     def __str__(self):
         return f"GenotypeAPI(dry_run: {self.dry_run})"

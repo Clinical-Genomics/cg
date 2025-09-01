@@ -1,15 +1,15 @@
 import datetime
-from unittest import mock
 
 import pytest
 from click.testing import CliRunner
 from housekeeper.store.models import Archive, File
+from pytest_mock import MockerFixture
 from requests import HTTPError, Response
 
 from cg.cli.archive import archive_spring_files, delete_file, update_job_statuses
 from cg.constants import EXIT_SUCCESS, SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
-from cg.io.controller import APIRequest
+from cg.meta.archive.ddn import ddn_data_flow_client
 from cg.meta.archive.ddn.constants import FAILED_JOB_STATUSES, ONGOING_JOB_STATUSES, JobStatus
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import ArchivalResponse, AuthToken, GetJobStatusResponse
@@ -43,6 +43,7 @@ def test_archive_spring_files_success(
     archival_job_id: int,
     test_auth_token: AuthToken,
     ok_miria_response: Response,
+    mocker: MockerFixture,
 ):
     """Tests that the CLI command 'cg archive archive-spring-files' adds an archive with the correct
     job_id when an archiving job is launched via Miria."""
@@ -57,25 +58,23 @@ def test_archive_spring_files_success(
     spring_file: File = all_non_archived_spring_files[0]
 
     # WHEN running 'cg archive archive-spring-files'
-    with (
-        mock.patch.object(
-            AuthToken,
-            "model_validate",
-            return_value=test_auth_token,
-        ),
-        mock.patch.object(
-            APIRequest,
-            "api_request_from_content",
-            return_value=ok_miria_response,
-        ),
-        mock.patch.object(
-            DDNDataFlowClient, "_archive_file", return_value=ArchivalResponse(jobId=archival_job_id)
-        ),
-    ):
-        result = cli_runner.invoke(
-            archive_spring_files,
-            obj=archive_context,
-        )
+    mocker.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=test_auth_token,
+    )
+    mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
+        return_value=ok_miria_response,
+    )
+    mocker.patch.object(
+        DDNDataFlowClient, "_archive_file", return_value=ArchivalResponse(jobId=archival_job_id)
+    )
+    result = cli_runner.invoke(
+        archive_spring_files,
+        obj=archive_context,
+    )
 
     # THEN the command should have executed without fail and added an entry in the archive with the archiving task id
     # returned by Miria
@@ -93,6 +92,7 @@ def test_get_archival_job_status(
     test_auth_token: AuthToken,
     ok_miria_response: Response,
     job_status: JobStatus,
+    mocker: MockerFixture,
 ):
     """Tests that when invoking update_job_statuses in the Archive CLI module with an ongoing archival job,
     the database is updated according to whether the job has completed, failed or is still ongoing.
@@ -105,27 +105,25 @@ def test_get_archival_job_status(
     assert not archive_context.housekeeper_api.get_archive_entries()[0].archived_at
 
     # WHEN invoking update_job_statuses
-    with (
-        mock.patch.object(
-            AuthToken,
-            "model_validate",
-            return_value=test_auth_token,
-        ),
-        mock.patch.object(
-            APIRequest,
-            "api_request_from_content",
-            return_value=ok_miria_response,
-        ),
-        mock.patch.object(
-            DDNDataFlowClient,
-            "_get_job_status",
-            return_value=GetJobStatusResponse(id=archival_job_id, status=job_status),
-        ),
-    ):
-        result = cli_runner.invoke(
-            update_job_statuses,
-            obj=archive_context,
-        )
+    mocker.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=test_auth_token,
+    )
+    mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
+        return_value=ok_miria_response,
+    )
+    mocker.patch.object(
+        DDNDataFlowClient,
+        "_get_job_status",
+        return_value=GetJobStatusResponse(id=archival_job_id, status=job_status),
+    )
+    result = cli_runner.invoke(
+        update_job_statuses,
+        obj=archive_context,
+    )
 
     # THEN the command should have exited successfully and updated the archive record
     assert result.exit_code == 0
@@ -153,6 +151,7 @@ def test_get_retrieval_job_status(
     test_auth_token: AuthToken,
     ok_miria_response: Response,
     job_status: JobStatus,
+    mocker: MockerFixture,
 ):
     """Tests that when invoking update_job_statuses in the Archive CLI module with an ongoing retrieval job,
     the database is updated according to whether the job has completed, failed or is still ongoing.
@@ -166,27 +165,25 @@ def test_get_retrieval_job_status(
     retrieving_archive.retrieval_task_id = retrieval_job_id
 
     # WHEN invoking update_job_statuses
-    with (
-        mock.patch.object(
-            AuthToken,
-            "model_validate",
-            return_value=test_auth_token,
-        ),
-        mock.patch.object(
-            APIRequest,
-            "api_request_from_content",
-            return_value=ok_miria_response,
-        ),
-        mock.patch.object(
-            DDNDataFlowClient,
-            "_get_job_status",
-            return_value=GetJobStatusResponse(id=retrieval_job_id, status=job_status),
-        ),
-    ):
-        result = cli_runner.invoke(
-            update_job_statuses,
-            obj=archive_context,
-        )
+    mocker.patch.object(
+        AuthToken,
+        "model_validate",
+        return_value=test_auth_token,
+    )
+    mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
+        return_value=ok_miria_response,
+    )
+    mocker.patch.object(
+        DDNDataFlowClient,
+        "_get_job_status",
+        return_value=GetJobStatusResponse(id=retrieval_job_id, status=job_status),
+    )
+    result = cli_runner.invoke(
+        update_job_statuses,
+        obj=archive_context,
+    )
 
     # THEN the command should have exited successfully and updated the archive record
     assert result.exit_code == 0
@@ -210,6 +207,7 @@ def test_delete_file_raises_http_error(
     failed_delete_file_response: Response,
     test_auth_token: AuthToken,
     archival_job_id: int,
+    mocker: MockerFixture,
 ):
     """Tests that an HTTP error is raised when the Miria response is unsuccessful for a delete file request,
     and that the file is not removed from Housekeeper."""
@@ -228,19 +226,17 @@ def test_delete_file_raises_http_error(
     )
 
     # GIVEN that the request returns a failed response
-    with (
-        mock.patch.object(
-            DDNDataFlowClient,
-            "_get_auth_token",
-            return_value=test_auth_token,
-        ),
-        mock.patch.object(
-            APIRequest,
-            "api_request_from_content",
-            return_value=failed_delete_file_response,
-        ),
-        pytest.raises(HTTPError),
-    ):
+    mocker.patch.object(
+        DDNDataFlowClient,
+        "_get_auth_token",
+        return_value=test_auth_token,
+    )
+    mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
+        return_value=failed_delete_file_response,
+    )
+    with pytest.raises(HTTPError):
         # WHEN trying to delete the file via Miria and in Housekeeper
 
         # THEN an HTTPError should be raised
@@ -258,6 +254,7 @@ def test_delete_file_success(
     ok_delete_file_response: Response,
     test_auth_token: AuthToken,
     archival_job_id: int,
+    mocker: MockerFixture,
 ):
     """Tests that given a successful response from Miria, the file is deleted and removed from Housekeeper."""
 
@@ -275,24 +272,20 @@ def test_delete_file_success(
     )
 
     # GIVEN that the delete request returns a successful response
-    with (
-        mock.patch.object(
-            DDNDataFlowClient,
-            "_get_auth_token",
-            return_value=test_auth_token,
-        ),
-        mock.patch.object(
-            APIRequest,
-            "api_request_from_content",
-            return_value=ok_delete_file_response,
-        ),
-    ):
-        # WHEN trying to delete the file via Miria and in Housekeeper
+    mocker.patch.object(
+        DDNDataFlowClient,
+        "_get_auth_token",
+        return_value=test_auth_token,
+    )
+    mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
+        return_value=ok_delete_file_response,
+    )
+    # WHEN trying to delete the file via Miria and in Housekeeper
 
-        # THEN no error is raised
-        cli_runner.invoke(
-            delete_file, [spring_file.path], obj=archive_context, catch_exceptions=False
-        )
+    # THEN no error is raised
+    cli_runner.invoke(delete_file, [spring_file.path], obj=archive_context, catch_exceptions=False)
 
     # THEN the file is removed from Housekeeper
     assert not archive_context.housekeeper_api.get_file(spring_file_id)

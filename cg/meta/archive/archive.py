@@ -1,9 +1,8 @@
 import logging
-from typing import Callable, Type
+from typing import Type
 
 import rich_click as click
 from housekeeper.store.models import Archive, File
-from pydantic import BaseModel, ConfigDict
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
@@ -21,14 +20,6 @@ ARCHIVE_HANDLERS: dict[str, Type[ArchiveHandler]] = {
 }
 
 
-class ArchiveModels(BaseModel):
-    """Model containing the necessary file and sample information."""
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-    file_model: Callable
-    handler: ArchiveHandler
-
-
 class SpringArchiveAPI:
     """Class handling the archiving of sample SPRING files to an off-premise location for long
     term storage."""
@@ -39,12 +30,6 @@ class SpringArchiveAPI:
         self.housekeeper_api: HousekeeperAPI = housekeeper_api
         self.status_db: Store = status_db
         self.data_flow_config: DataFlowConfig = data_flow_config
-
-    @staticmethod
-    def archive_file_to_location(
-        file_and_sample: FileAndSample, archive_handler: ArchiveHandler
-    ) -> int:
-        return archive_handler.archive_file(file_and_sample=file_and_sample)
 
     def archive_spring_files_and_add_archives_to_housekeeper(
         self, spring_file_count_limit: int | None
