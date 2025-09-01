@@ -99,8 +99,12 @@ def test_start_available_mip_dna(
 
     # GIVEN a MIP-DNA root directory
     test_root_dir: Path = tmp_path_factory.mktemp("test_start_available_mip_dna")
-    # GIVEN a config file with valid database uris and directories
-    config_path: Path = create_parsed_config(status_db_uri, housekeeper_db_uri, test_root_dir)
+    # GIVEN a config file with valid database URIs and directories
+    config_path: Path = create_parsed_config(
+        status_db_uri=status_db_uri,
+        housekeeper_db_uri=housekeeper_db_uri,
+        test_root_dir=test_root_dir.as_posix(),
+    )
     mip_dna_path = Path(test_root_dir, "mip-dna")
 
     # GIVEN a case with existing qc files
