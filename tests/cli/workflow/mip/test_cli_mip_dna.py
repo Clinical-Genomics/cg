@@ -1,4 +1,4 @@
-from unittest.mock import Mock, create_autospec
+from unittest.mock import ANY, Mock, create_autospec
 
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
@@ -7,6 +7,7 @@ from cg.cli.workflow.mip_dna.base import dev_run
 from cg.constants import Workflow
 from cg.models.cg_config import CGConfig, IlluminaConfig, MipConfig, RunInstruments
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
+from cg.services.analysis_starter.service import AnalysisStarter
 
 
 def test_mip_dna_dev_run(mocker: MockerFixture):
@@ -36,9 +37,11 @@ def test_mip_dna_dev_run(mocker: MockerFixture):
     get_analysis_starter_spy = mocker.spy(
         AnalysisStarterFactory, "get_analysis_starter_for_workflow"
     )
+    mock_run = mocker.patch.object(AnalysisStarter, "run")
 
     # WHEN invoking cg workflow mip-dna dev-run
     cli_runner.invoke(dev_run, ["case_id"], obj=cg_config)
 
     # THEN the analysis starter should have been called
-    get_analysis_starter_spy.assert_called_once_with(Workflow.MIP_DNA)
+    get_analysis_starter_spy.assert_called_once_with(ANY, Workflow.MIP_DNA)
+    mock_run.assert_called_once_with("case_id")

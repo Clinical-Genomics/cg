@@ -20,9 +20,12 @@ from cg.cli.workflow.mip.base import (
     start,
     start_available,
 )
+from cg.constants import Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
+from cg.services.analysis_starter.service import AnalysisStarter
 
 LOG = logging.getLogger(__name__)
 
@@ -63,4 +66,6 @@ for sub_cmd in [
 @click.pass_obj
 def dev_run(cg_config: CGConfig, case_id: str):
     """."""
-    pass
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.MIP_DNA)
+    analysis_starter.run(case_id)
