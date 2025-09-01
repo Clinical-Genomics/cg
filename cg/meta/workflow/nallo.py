@@ -201,7 +201,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         sample_metrics = raw_metrics_section.get(sample_id)
         if sample_metrics and metric_name in sample_metrics:
             return self.get_multiqc_metric(
-                metric_name=metric_name,
+                metric_name="somalier_sex",
                 metric_value=sample_metrics[metric_name],
                 metric_id=sample_id,
             )
