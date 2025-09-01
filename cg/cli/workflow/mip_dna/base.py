@@ -22,6 +22,7 @@ from cg.cli.workflow.mip.base import (
 )
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
@@ -55,3 +56,11 @@ for sub_cmd in [
     store_available,
 ]:
     mip_dna.add_command(sub_cmd)
+
+
+@mip_dna.command("dev-run")
+@click.argument("case_id", type=str)
+@click.pass_obj
+def dev_run(cg_config: CGConfig, case_id: str):
+    """."""
+    pass

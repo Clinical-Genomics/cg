@@ -2,6 +2,7 @@ from unittest.mock import Mock, create_autospec
 
 from click.testing import CliRunner
 
+from cg.cli.workflow.mip_dna.base import dev_run
 from cg.constants import Workflow
 from cg.models.cg_config import CGConfig, IlluminaConfig, MipConfig, RunInstruments
 
