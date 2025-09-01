@@ -244,6 +244,7 @@ def test_rnafusion_start(
     "workflow",
     [
         Workflow.MICROSALT,
+        Workflow.MIP_DNA,
         Workflow.RNAFUSION,
         Workflow.RAREDISEASE,
         Workflow.TAXPROFILER,
@@ -305,6 +306,7 @@ def test_start(
     "workflow",
     [
         Workflow.MICROSALT,
+        Workflow.MIP_DNA,
         Workflow.RNAFUSION,
         Workflow.RAREDISEASE,
         Workflow.TAXPROFILER,
@@ -344,6 +346,7 @@ def test_start_error_raised_in_run_and_track(workflow: Workflow, analysis_starte
     "workflow",
     [
         Workflow.MICROSALT,
+        Workflow.MIP_DNA,
         Workflow.RNAFUSION,
         Workflow.RAREDISEASE,
         Workflow.TAXPROFILER,
