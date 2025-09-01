@@ -1,5 +1,6 @@
 from unittest.mock import ANY, Mock, create_autospec
 
+import pytest
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
@@ -11,15 +12,15 @@ from cg.services.analysis_starter.service import AnalysisStarter
 
 
 @pytest.mark.parametrize(
-    "start_after, start_with, use_bwa_mem",
+    "cli_args, start_after, start_with, use_bwa_mem",
     [
-        (None, None, False),
-        ("levain_bread", None, False),
-        (None, "levain_bread", False),
-        (None, None, True),
+        (["case_id"], None, None, False),
+        (["case_id"], "levain_bread", "dinkel_bread", True),
     ],
 )
-def test_mip_dna_dev_run(start_after, start_with, use_bwa_mem, mocker: MockerFixture):
+def test_mip_dna_dev_run(
+    cli_args: list[str], start_after, start_with, use_bwa_mem, mocker: MockerFixture
+):
     # GIVEN a CLI runner
     cli_runner = CliRunner()
 
@@ -49,7 +50,7 @@ def test_mip_dna_dev_run(start_after, start_with, use_bwa_mem, mocker: MockerFix
     mock_run = mocker.patch.object(AnalysisStarter, "run")
 
     # WHEN invoking cg workflow mip-dna dev-run
-    result = cli_runner.invoke(dev_run, ["case_id"], obj=cg_config)
+    result = cli_runner.invoke(dev_run, cli_args, obj=cg_config)
 
     # THEN the command exits successfully
     assert result.exit_code == 0
