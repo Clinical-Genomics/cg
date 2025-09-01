@@ -7,7 +7,6 @@ from _pytest.logging import LogCaptureFixture
 from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import DataDelivery
 from cg.constants.delivery import INBOX_NAME
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.models.cg_config import CGConfig
@@ -240,33 +239,6 @@ def test_get_fastq_delivery_files_by_sample_not_deliverable(
     assert f"Sample {sample_id_not_enough_reads} is not deliverable" in caplog.text
 
 
-def test_get_fastq_delivery_files(
-    delivery_context_microsalt: CGConfig,
-    case_id: str,
-    delivery_fastq_file: Path,
-    delivery_another_fastq_file: Path,
-):
-    """Test get FASTQ delivery files for all samples linked to a case."""
-
-    # GIVEN a delivery context
-    delivery_api: DeliveryAPI = delivery_context_microsalt.delivery_api
-    status_db: Store = delivery_context_microsalt.status_db
-
-    # GIVEN a case object
-    case: Case = status_db.get_case_by_internal_id(case_id)
-
-    # WHEN retrieving the FASTQ file to deliver
-    delivery_files: list[DeliveryFile] = delivery_api.get_fastq_delivery_files(case=case)
-
-    # THEN all the FASTQ sample files should be returned
-    for delivery_file in delivery_files:
-        assert isinstance(delivery_file, DeliveryFile)
-        assert delivery_file.source_path.name in [
-            delivery_fastq_file.name,
-            delivery_another_fastq_file.name,
-        ]
-
-
 def test_get_analysis_sample_delivery_files_by_sample(
     delivery_context_balsamic: CGConfig, case_id: str, sample_id: str, delivery_cram_file: Path
 ):
@@ -288,33 +260,6 @@ def test_get_analysis_sample_delivery_files_by_sample(
     # THEN the analysis cram file should be returned as a delivery file model
     assert isinstance(delivery_files[0], DeliveryFile)
     assert delivery_files[0].source_path.name == delivery_cram_file.name
-
-
-def test_get_analysis_sample_delivery_files(
-    delivery_context_balsamic: CGConfig,
-    case_id: str,
-    delivery_cram_file: Path,
-    delivery_another_cram_file: Path,
-):
-    """Test get complete list of analysis sample files."""
-
-    # GIVEN a delivery context
-    delivery_api: DeliveryAPI = delivery_context_balsamic.delivery_api
-    status_db: Store = delivery_context_balsamic.status_db
-
-    # GIVEN a case object
-    case: Case = status_db.get_case_by_internal_id(case_id)
-
-    # WHEN retrieving sample delivery files
-    delivery_files: list[DeliveryFile] = delivery_api.get_analysis_sample_delivery_files(case=case)
-
-    # THEN the analysis cram files should be returned for all case samples
-    for delivery_file in delivery_files:
-        assert isinstance(delivery_file, DeliveryFile)
-        assert delivery_file.source_path.name in [
-            delivery_cram_file.name,
-            delivery_another_cram_file.name,
-        ]
 
 
 def test_get_analysis_case_delivery_files(
@@ -343,94 +288,4 @@ def test_get_analysis_case_delivery_files(
         assert delivery_file.source_path.name not in [
             delivery_cram_file.name,
             delivery_another_cram_file.name,
-        ]
-
-
-def test_get_delivery_files_fastq_delivery(
-    delivery_context_microsalt: CGConfig,
-    case_id: str,
-    delivery_fastq_file: Path,
-    delivery_another_fastq_file: Path,
-):
-    """Test get delivery files for FASTQ data delivery."""
-
-    # GIVEN a delivery context
-    delivery_api: DeliveryAPI = delivery_context_microsalt.delivery_api
-    status_db: Store = delivery_context_microsalt.status_db
-
-    # GIVEN a case object with FASTQ data as delivery
-    case: Case = status_db.get_case_by_internal_id(case_id)
-
-    # WHEN retrieving the FASTQ delivery files
-    delivery_files: list[DeliveryFile] = delivery_api.get_delivery_files(case=case)
-
-    # THEN only the FASTQ sample files should be returned
-    for delivery_file in delivery_files:
-        assert isinstance(delivery_file, DeliveryFile)
-        assert delivery_file.source_path.name in [
-            delivery_fastq_file.name,
-            delivery_another_fastq_file.name,
-        ]
-
-
-def test_get_delivery_files_analysis_delivery(
-    delivery_context_balsamic: CGConfig,
-    case_id: str,
-    delivery_report_file: Path,
-    delivery_cram_file: Path,
-    delivery_another_cram_file: Path,
-):
-    """Test get delivery files for analysis data delivery."""
-
-    # GIVEN a delivery context
-    delivery_api: DeliveryAPI = delivery_context_balsamic.delivery_api
-    status_db: Store = delivery_context_balsamic.status_db
-
-    # GIVEN a case object with analysis files as data delivery
-    case: Case = status_db.get_case_by_internal_id(case_id)
-    case.data_delivery = DataDelivery.ANALYSIS_FILES
-
-    # WHEN retrieving the analysis delivery files
-    delivery_files: list[DeliveryFile] = delivery_api.get_delivery_files(case=case)
-
-    # THEN only the analysis case and sample files should be returned
-    for delivery_file in delivery_files:
-        assert isinstance(delivery_file, DeliveryFile)
-        assert delivery_file.source_path.name in [
-            delivery_report_file.name,
-            delivery_cram_file.name,
-            delivery_another_cram_file.name,
-        ]
-
-
-def test_get_delivery_files_fastq_analysis_delivery(
-    delivery_context_balsamic: CGConfig,
-    case_id: str,
-    delivery_report_file: Path,
-    delivery_cram_file: Path,
-    delivery_another_cram_file: Path,
-    delivery_fastq_file: Path,
-    delivery_another_fastq_file: Path,
-):
-    """Test get delivery files for FASTQ analysis data delivery."""
-
-    # GIVEN a delivery context
-    delivery_api: DeliveryAPI = delivery_context_balsamic.delivery_api
-    status_db: Store = delivery_context_balsamic.status_db
-
-    # GIVEN a case object with FASTQ analysis as data delivery
-    case: Case = status_db.get_case_by_internal_id(case_id)
-
-    # WHEN retrieving the FASTQ analysis delivery files
-    delivery_files: list[DeliveryFile] = delivery_api.get_delivery_files(case=case)
-
-    # THEN analysis case and sample files should be returned together with the fastqs
-    for delivery_file in delivery_files:
-        assert isinstance(delivery_file, DeliveryFile)
-        assert delivery_file.source_path.name in [
-            delivery_report_file.name,
-            delivery_cram_file.name,
-            delivery_another_cram_file.name,
-            delivery_fastq_file.name,
-            delivery_another_fastq_file.name,
         ]

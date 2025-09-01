@@ -2,8 +2,6 @@
 
 import logging
 
-from pydantic import BaseModel
-
 from cg.utils.utils import get_hamming_distance
 
 LOG = logging.getLogger(__name__)
@@ -14,13 +12,6 @@ MINIMUM_HAMMING_DISTANCE: int = 3
 def is_dual_index(index: str) -> bool:
     """Determines if an index in the raw sample sheet is dual index or not."""
     return "-" in index
-
-
-class Index(BaseModel):
-    """Class that represents an index."""
-
-    name: str
-    sequence: str
 
 
 def get_reverse_complement_dna_seq(dna: str) -> str:
