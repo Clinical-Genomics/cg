@@ -22,8 +22,10 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
+from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
+from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
@@ -33,6 +35,7 @@ from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
 )
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
+from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
 from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
 from cg.store.models import Case, Sample
 from cg.store.store import Store
@@ -50,6 +53,13 @@ def analysis_starter_scenario() -> dict:
             create_autospec(MicrosaltCaseConfig),
             create_autospec(SubprocessSubmitter),
             create_autospec(MicrosaltTracker),
+            None,
+        ),
+        Workflow.MIP_DNA: (
+            create_autospec(MIPDNAConfigurator),
+            create_autospec(MIPDNACaseConfig),
+            create_autospec(SubprocessSubmitter),
+            create_autospec(MIPDNATracker),
             None,
         ),
         Workflow.RNAFUSION: (
@@ -80,6 +90,7 @@ def analysis_starter_scenario() -> dict:
     "workflow",
     [
         Workflow.MICROSALT,
+        Workflow.MIP_DNA,
         Workflow.RNAFUSION,
         Workflow.RAREDISEASE,
         Workflow.TAXPROFILER,
@@ -238,7 +249,7 @@ def test_rnafusion_start(
         Workflow.TAXPROFILER,
     ],
 )
-def test_nextflow_start(
+def test_start(
     workflow: Workflow,
     analysis_starter_scenario: dict,
 ):
@@ -299,9 +310,7 @@ def test_nextflow_start(
         Workflow.TAXPROFILER,
     ],
 )
-def test_nextflow_start_error_raised_in_run_and_track(
-    workflow: Workflow, analysis_starter_scenario: dict
-):
+def test_start_error_raised_in_run_and_track(workflow: Workflow, analysis_starter_scenario: dict):
     """Test that an error raised in submitting the analysis job is handled correctly."""
     # GIVEN a case_id
     case_id: str = "case_id"

@@ -104,4 +104,5 @@ class AnalysisStarterFactory:
             return MIPDNATracker(
                 store=self.store,
                 trailblazer_api=self.cg_config.trailblazer_api,
+                workflow_root=self.cg_config.mip_rd_dna.root,
             )
