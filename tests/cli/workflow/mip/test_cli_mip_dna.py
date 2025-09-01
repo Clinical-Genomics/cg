@@ -10,7 +10,16 @@ from cg.services.analysis_starter.factories.starter_factory import AnalysisStart
 from cg.services.analysis_starter.service import AnalysisStarter
 
 
-def test_mip_dna_dev_run(mocker: MockerFixture):
+@pytest.mark.parametrize(
+    "start_after, start_with, use_bwa_mem",
+    [
+        (None, None, False),
+        ("levain_bread", None, False),
+        (None, "levain_bread", False),
+        (None, None, True),
+    ],
+)
+def test_mip_dna_dev_run(start_after, start_with, use_bwa_mem, mocker: MockerFixture):
     # GIVEN a CLI runner
     cli_runner = CliRunner()
 
@@ -47,4 +56,6 @@ def test_mip_dna_dev_run(mocker: MockerFixture):
 
     # THEN the analysis starter should have been called
     get_analysis_starter_spy.assert_called_once_with(ANY, Workflow.MIP_DNA)
-    mock_run.assert_called_once_with("case_id")
+    mock_run.assert_called_once_with(
+        case_id="case_id", start_after=None, start_with=None, use_bwa_mem=False
+    )
