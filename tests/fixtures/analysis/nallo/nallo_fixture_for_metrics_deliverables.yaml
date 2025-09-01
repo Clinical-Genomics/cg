@@ -130,3 +130,21 @@ metrics:
   name: predicted_sex_sex_check
   step: multiqc
   value: female
+- condition:
+    norm: eq
+    threshold: 2.0
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: somalier_sex
+  step: multiqc
+  value: 2.0
+- condition:
+    norm: eq
+    threshold: 'False'
+  header: null
+  id: ADM1-ADM2
+  input: multiqc_data.json
+  name: parent_error_ped_check
+  step: multiqc
+  value: 'False'

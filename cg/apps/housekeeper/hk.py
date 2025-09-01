@@ -168,10 +168,6 @@ class HousekeeperAPI:
         """Wrap method in Housekeeper Store."""
         return self._store.session.rollback()
 
-    def session_no_autoflush(self):
-        """Wrap property in Housekeeper Store."""
-        return self._store.session.no_autoflush
-
     def get_files(self, bundle: str, tags: list | None = None, version: int | None = None) -> Query:
         """Get all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version.
@@ -184,21 +180,6 @@ class HousekeeperAPI:
         """Return latest file from Housekeeper, filtered by bundle and/or tags and/or version."""
         files: Query = self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
         return files.order_by(File.id.desc()).first()
-
-    def get_file_by_exact_tags(
-        self, bundle: str, tags: list, version: int | None = None
-    ) -> File | None:
-        """Return a file that matches exact tags and optionally filtered by bundle and version."""
-        if not tags:
-            LOG.debug("No tags provided, skipping")
-            return None
-        files: list[File] = self.files(bundle=bundle, version=version, tags=tags).all()
-        for file in files:
-            file_tags = {tag.name for tag in file.tags}
-            LOG.debug(f"Using tags {file_tags}")
-            if file_tags == set(tags):
-                LOG.debug(f"Found file {file}")
-                return file
 
     def check_bundle_files(
         self,
@@ -407,26 +388,6 @@ class HousekeeperAPI:
             raise HousekeeperBundleVersionMissingError
         return self.files(version=version.id, tags=tags).all()
 
-    def is_fastq_or_spring_in_all_bundles(self, bundle_names: list[str]) -> bool:
-        """Return whether all FASTQ/SPRING files are included for the given bundles."""
-        sequencing_files_in_hk: dict[str, bool] = {}
-        if not bundle_names:
-            return False
-        for bundle_name in bundle_names:
-            sequencing_files_in_hk[bundle_name] = False
-            for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
-                sample_file_in_hk: list[bool] = []
-                hk_files: list[File] | None = self.get_files_from_latest_version(
-                    bundle_name=bundle_name, tags=[tag]
-                )
-                sample_file_in_hk += [True for hk_file in hk_files if hk_file.is_included]
-                if sample_file_in_hk:
-                    break
-            sequencing_files_in_hk[bundle_name] = (
-                all(sample_file_in_hk) if sample_file_in_hk else False
-            )
-        return all(sequencing_files_in_hk.values())
-
     def get_non_archived_files_for_bundle(
         self, bundle_name: str, tags: list | None = None
     ) -> list[File]:
@@ -454,35 +415,6 @@ class HousekeeperAPI:
             )
             self._store.session.add(archive)
         self.commit()
-
-    def is_fastq_or_spring_on_disk_in_all_bundles(self, bundle_names: list[str]) -> bool:
-        """Return whether or not all FASTQ/SPRING files are on disk for the given bundles."""
-        sequencing_files_on_disk: dict[str, bool] = {}
-        if not bundle_names:
-            return False
-        for bundle_name in bundle_names:
-            sequencing_files_on_disk[bundle_name] = False
-            for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
-                sample_file_on_disk: list[bool] = []
-                hk_files: list[File] | None = self.get_files_from_latest_version(
-                    bundle_name=bundle_name, tags=[tag]
-                )
-                sample_file_on_disk += [
-                    True for hk_file in hk_files if Path(hk_file.full_path).exists()
-                ]
-                if sample_file_on_disk:
-                    break
-            sequencing_files_on_disk[bundle_name] = (
-                all(sample_file_on_disk) if sample_file_on_disk else False
-            )
-        return all(sequencing_files_on_disk.values())
-
-    def get_non_archived_spring_path_and_bundle_name(self) -> list[tuple[str, str]]:
-        """Return a list of bundles with corresponding file paths for all non-archived SPRING
-        files."""
-        return [
-            (file.version.bundle.name, file.path) for file in self.get_non_archived_spring_files()
-        ]
 
     def set_archive_retrieved_at(self, file_id: int, retrieval_task_id: int):
         """Sets the retrieved_at value for an Archive entry. Raises a ValueError if the given retrieval task id

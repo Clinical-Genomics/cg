@@ -3,7 +3,6 @@ API for compressing files. Functionality to compress FASTQ, decompress SPRING an
 """
 
 import logging
-import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -47,17 +46,6 @@ class CompressAPI:
             self.crunchy_api.set_dry_run(dry_run)
         if self.backup_api:
             self.backup_api.dry_run = self.dry_run
-
-    def get_flow_cell_id(self, fastq_path: Path) -> str:
-        """Extract the flow cell id from a fastq path assuming flow cell id is the first word in the file name."""
-        flow_cell_id: str = ""
-        regexp = r"(\A[A-Z0-9]+)"
-        try:
-            flow_cell_id: str = re.search(regexp, fastq_path.name).group()
-        except AttributeError as error:
-            LOG.error(error)
-            LOG.info(f"Could not find flow cell id from fastq path: {fastq_path.as_posix()}")
-        return flow_cell_id
 
     def compress_fastq(self, sample_id: str) -> bool:
         """Compress the FASTQ files for an individual."""

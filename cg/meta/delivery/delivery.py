@@ -119,16 +119,6 @@ class DeliveryAPI:
         )
         return delivery_files
 
-    def get_analysis_sample_delivery_files(self, case: Case) -> list[DeliveryFile]:
-        """Return a complete list of analysis sample files to be delivered."""
-        delivery_files: list[DeliveryFile] = []
-        for sample in case.samples:
-            sample_delivery_files: list[DeliveryFile] = (
-                self.get_analysis_sample_delivery_files_by_sample(case=case, sample=sample)
-            )
-            delivery_files.extend(sample_delivery_files)
-        return delivery_files
-
     def get_analysis_case_delivery_files(self, case: Case) -> list[DeliveryFile]:
         """
         Return a complete list of analysis case files to be delivered and ignore analysis sample
@@ -143,24 +133,6 @@ class DeliveryAPI:
             files=case_files, case=case, internal_id=case.internal_id, external_id=case.name
         )
         return delivery_files
-
-    def get_delivery_files(self, case: Case, force: bool = False) -> list[DeliveryFile]:
-        """Return a complete list of files to be delivered to the customer's inbox."""
-        delivery_files: list[DeliveryFile] = []
-        if self.is_fastq_delivery(case.data_delivery):
-            fastq_files: list[DeliveryFile] = self.get_fastq_delivery_files(case=case, force=force)
-            delivery_files.extend(fastq_files)
-        if self.is_analysis_delivery(case.data_delivery):
-            analysis_case_files: list[DeliveryFile] = self.get_analysis_case_delivery_files(case)
-            analysis_sample_files: list[DeliveryFile] = self.get_analysis_sample_delivery_files(
-                case=case
-            )
-            delivery_files.extend(analysis_case_files + analysis_sample_files)
-        return delivery_files
-
-    def link_delivery_files_to_inbox(self) -> None:
-        """Link files from Housekeeper bundle to the customer's inbox."""
-        raise NotImplementedError
 
     def get_fastq_delivery_files_by_sample(
         self, case: Case, sample: Sample, force: bool = False
@@ -182,14 +154,4 @@ class DeliveryAPI:
             internal_id=sample.internal_id,
             external_id=sample.name,
         )
-        return delivery_files
-
-    def get_fastq_delivery_files(self, case: Case, force: bool = False) -> list[DeliveryFile]:
-        """Return a complete list of FASTQ sample files to be delivered."""
-        delivery_files: list[DeliveryFile] = []
-        for sample in case.samples:
-            fastq_delivery_files: list[DeliveryFile] = self.get_fastq_delivery_files_by_sample(
-                case=case, sample=sample, force=force
-            )
-            delivery_files.extend(fastq_delivery_files)
         return delivery_files
