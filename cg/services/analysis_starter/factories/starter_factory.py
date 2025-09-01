@@ -18,6 +18,7 @@ from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
 from cg.services.analysis_starter.submitters.submitter import Submitter
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
+from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
 from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
 from cg.services.analysis_starter.tracker.tracker import Tracker
 from cg.store.store import Store
@@ -98,4 +99,9 @@ class AnalysisStarterFactory:
                 subprocess_submitter=SubprocessSubmitter(),
                 trailblazer_api=self.cg_config.trailblazer_api,
                 workflow_root=self.cg_config.microsalt.root,
+            )
+        elif workflow == Workflow.MIP_DNA:
+            return MIPDNATracker(
+                store=self.store,
+                trailblazer_api=self.cg_config.trailblazer_api,
             )

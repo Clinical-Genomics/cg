@@ -6,7 +6,13 @@ from pytest_mock import MockerFixture
 from cg.constants import Workflow
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress import CompressAPI
-from cg.models.cg_config import CGConfig, MipConfig, SeqeraPlatformConfig
+from cg.models.cg_config import (
+    CGConfig,
+    IlluminaConfig,
+    MipConfig,
+    RunInstruments,
+    SeqeraPlatformConfig,
+)
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
@@ -21,6 +27,7 @@ from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
     SeqeraPlatformSubmitter,
 )
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
+from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
 from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
 from cg.store.store import Store
 
@@ -55,7 +62,15 @@ def test_analysis_starter_factory_mip_dna():
         workflow=Workflow.MIP_DNA,
         script="script",
     )
-    cg_config: CGConfig = create_autospec(CGConfig, mip_rd_dna=mip_rd_dna_config, data_flow=Mock())
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        mip_rd_dna=mip_rd_dna_config,
+        data_flow=Mock(),
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+        ),
+    )
 
     # GIVEN an AnalysisStarterFactory
     analysis_starter_factory = AnalysisStarterFactory(cg_config)
@@ -67,6 +82,9 @@ def test_analysis_starter_factory_mip_dna():
 
     # THEN the analysis starter should have been configured correctly
     assert isinstance(analysis_starter.configurator, MIPDNAConfigurator)
+    assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
+    assert isinstance(analysis_starter.submitter, SubprocessSubmitter)
+    assert isinstance(analysis_starter.tracker, MIPDNATracker)
 
 
 @pytest.mark.parametrize(
