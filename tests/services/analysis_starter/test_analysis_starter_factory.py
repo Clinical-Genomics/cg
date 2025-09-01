@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, create_autospec
+from unittest.mock import MagicMock, Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -45,8 +45,17 @@ def test_analysis_starter_factory_microsalt(cg_context: CGConfig, mocker: Mocker
 
 
 def test_analysis_starter_factory_mip_dna():
-    # GIVEN a CGConfig
-    cg_config: CGConfig = create_autospec(CGConfig, mip_rd_dna=create_autospec(MipConfig))
+    # GIVEN a CGConfig with a MIP-DNA config
+    mip_rd_dna_config: MipConfig = create_autospec(
+        MipConfig,
+        root="root",
+        conda_binary="conda/binary",
+        conda_env="conda_env",
+        mip_config="mip/config.config",
+        workflow=Workflow.MIP_DNA,
+        script="script",
+    )
+    cg_config: CGConfig = create_autospec(CGConfig, mip_rd_dna=mip_rd_dna_config, data_flow=Mock())
 
     # GIVEN an AnalysisStarterFactory
     analysis_starter_factory = AnalysisStarterFactory(cg_config)
