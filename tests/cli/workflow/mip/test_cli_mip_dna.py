@@ -11,6 +11,28 @@ from cg.services.analysis_starter.factories.starter_factory import AnalysisStart
 from cg.services.analysis_starter.service import AnalysisStarter
 
 
+@pytest.fixture
+def cg_config() -> CGConfig:
+    mip_rd_dna_config: MipConfig = create_autospec(
+        MipConfig,
+        root="root",
+        conda_binary="conda/binary",
+        conda_env="conda_env",
+        mip_config="mip/config.config",
+        workflow=Workflow.MIP_DNA,
+        script="script",
+    )
+    return create_autospec(
+        CGConfig,
+        mip_rd_dna=mip_rd_dna_config,
+        data_flow=Mock(),
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+        ),
+    )
+
+
 @pytest.mark.parametrize(
     "cli_args, start_after, start_with, use_bwa_mem",
     [
@@ -36,30 +58,13 @@ def test_mip_dna_dev_run(
     start_after: str | None,
     start_with: str | None,
     use_bwa_mem: bool,
+    cg_config: CGConfig,
     mocker: MockerFixture,
 ):
     # GIVEN a CLI runner
     cli_runner = CliRunner()
 
     # GIVEN a CG Config with a MIP-DNA config
-    mip_rd_dna_config: MipConfig = create_autospec(
-        MipConfig,
-        root="root",
-        conda_binary="conda/binary",
-        conda_env="conda_env",
-        mip_config="mip/config.config",
-        workflow=Workflow.MIP_DNA,
-        script="script",
-    )
-    cg_config: CGConfig = create_autospec(
-        CGConfig,
-        mip_rd_dna=mip_rd_dna_config,
-        data_flow=Mock(),
-        run_instruments=create_autospec(
-            RunInstruments,
-            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
-        ),
-    )
 
     get_analysis_starter_spy = mocker.spy(
         AnalysisStarterFactory, "get_analysis_starter_for_workflow"
@@ -79,8 +84,27 @@ def test_mip_dna_dev_run(
     )
 
 
-def test_mip_dna_dev_start():
+def test_mip_dna_dev_start(cg_config: CGConfig):
     # GIVEN a cli runner
+    cli_runner = CliRunner()
+
     # GIVEN a CGConfig with a MIP-DNA config
+
     # WHEN invoking cg workflow mip-dna dev-start
-    pass
+    cli_runner.invoke(
+        dev_start,
+        [
+            "--start-with",
+            "dinkel_bread",
+            "--start-after",
+            "pretzel",
+            "--use-bwa-mem",
+            "--panel-bed",
+            "some_panel",
+            "case_id",
+        ],
+        obj=cg_config,
+    )
+
+    # THEN the command exits successfully
+    # THEN the analysis starter should have been called
