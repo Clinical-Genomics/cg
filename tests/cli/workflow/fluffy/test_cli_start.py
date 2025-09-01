@@ -7,7 +7,6 @@ from cg.cli.workflow.fluffy.base import start_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.crud.read import ReadHandler
 from cg.store.models import Sample
 
 
@@ -57,10 +56,6 @@ def test_start_available(
     # GIVEN Concentrations are set in LIMS on sample level
     mocker.patch.object(FluffyAnalysisAPI, "get_concentrations_from_lims")
     FluffyAnalysisAPI.get_concentrations_from_lims.return_value = "20"
-
-    # GIVEN every sample in SampleSheet has been given a name in StatusDB
-    mocker.patch.object(FluffyAnalysisAPI, "get_sample_name_from_lims_id")
-    FluffyAnalysisAPI.get_sample_name_from_lims_id.return_value = "CustName"
 
     # GIVEN every sample in SampleSheet last_sequenced_at set in StatusDB
     mocker.patch.object(FluffyAnalysisAPI, "get_sample_sequenced_date")

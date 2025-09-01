@@ -15,9 +15,6 @@ class MockTB:
     def add_commit(self, *args, **kwargs) -> None:
         return None
 
-    def has_latest_analysis_started(self, *args, **kwargs) -> bool:
-        return False
-
     def analyses(self, *args, **kwargs) -> list:
         return self.analyses_response
 

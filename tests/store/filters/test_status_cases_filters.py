@@ -49,7 +49,7 @@ def test_filter_cases_has_sequence(
     base_store.session.add(link)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN getting cases to analyse
     cases: Query = filter_cases_has_sequence(cases=cases)
@@ -79,7 +79,7 @@ def test_filter_cases_has_sequence_when_external(base_store: Store, helpers: Sto
     base_store.session.add(link)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN getting cases to analyse
     cases: Query = filter_cases_has_sequence(cases=cases)
@@ -107,7 +107,7 @@ def test_filter_cases_has_sequence_when_not_sequenced(base_store: Store, helpers
     base_store.session.add(link)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN getting cases to analyze
     cases: Query = filter_cases_has_sequence(cases=cases)
@@ -139,7 +139,7 @@ def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
     base_store.session.add(link)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN getting cases to analyze
     cases: Query = filter_cases_has_sequence(cases=cases)
@@ -169,7 +169,7 @@ def test_filter_cases_with_workflow_when_correct_workflow(
     base_store.session.add(link)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN getting cases to analyse for another workflow
     cases: list[Query] = list(filter_cases_with_workflow(cases=cases, workflow=Workflow.BALSAMIC))
@@ -196,7 +196,7 @@ def test_filter_cases_with_workflow_when_incorrect_workflow(
     base_store.session.add(link)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_query(Case)
 
     # WHEN getting cases to analyse for another workflow
     cases: list[Query] = list(filter_cases_with_workflow(cases=cases, workflow=Workflow.MIP_DNA))
@@ -231,7 +231,7 @@ def test_filter_cases_with_loqusdb_supported_workflow(
     base_store.session.add_all([link_1, link_2])
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._join_sample_and_case()
 
     # WHEN getting cases with workflow
     cases: list[Query] = list(filter_cases_with_loqusdb_supported_workflow(cases=cases))
@@ -261,7 +261,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method(
     base_store.session.add(link)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._join_sample_and_case()
 
     # WHEN retrieving the available cases
     cases: Query = filter_cases_with_loqusdb_supported_sequencing_method(
@@ -293,7 +293,7 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method_empty(
     base_store.session.add(link)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN retrieving the valid cases
     cases: Query = filter_cases_with_loqusdb_supported_sequencing_method(
@@ -330,7 +330,7 @@ def test_filter_cases_for_analysis(
     base_store.session.add(link)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN getting cases to analyze
     cases: Query = filter_cases_for_analysis(cases=cases)
@@ -379,7 +379,7 @@ def test_filter_cases_for_analysis_that_is_running_multiple_analyses_and_one_ana
     base_store.session.add(link)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN getting cases to analyze
     cases: Query = filter_cases_for_analysis(cases=cases)
@@ -394,41 +394,35 @@ def test_filter_cases_for_analysis_that_is_running_multiple_analyses_and_one_ana
 def test_filter_cases_for_analysis_multiple_analyses_and_one_analysis_is_older_than_last_sequenced(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
 ):
-    """Test that a case is returned if case action is None and when there are miltiple analyses where one analysis is older than a sample is last sequenced."""
+    """Test that a case is returned if case action is None and when there are multiple analyses where one analysis is older than a sample is last sequenced."""
 
     # GIVEN a case
-    test_case: Case = helpers.add_case(base_store, data_analysis=Workflow.MICROSALT)
+    test_case: Case = helpers.add_case(base_store, data_analysis=Workflow.MICROSALT, action=None)
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_now)
+    helpers.relate_samples(base_store=base_store, case=test_case, samples=[test_sample])
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=test_case, completed_at=timestamp_now, workflow=Workflow.MICROSALT
+        store=base_store,
+        case=test_case,
+        created_at=timestamp_now - timedelta(hours=1),
+        workflow=Workflow.MICROSALT,
     )
 
     # GIVEN a completed analysis older than the sample last sequenced
-    test_analysis_2: Analysis = helpers.add_analysis(
+    helpers.add_analysis(
         store=base_store,
         case=test_case,
         started_at=timestamp_yesterday,
+        created_at=timestamp_yesterday,
         completed_at=timestamp_yesterday,
         workflow=Workflow.MICROSALT,
     )
-    # GIVEN an old analysis
-    test_analysis_2.created_at = timestamp_yesterday
-
-    # Given an action set to None
-    test_analysis.case.action = None
-
-    # GIVEN a database with a case with one sequenced sample for specified analysis
-    link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
-    )
-    base_store.session.add(link)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN getting cases to analyze
     cases: Query = filter_cases_for_analysis(cases=cases)
@@ -447,47 +441,35 @@ def test_filter_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_old
     timestamp_yesterday: datetime,
     old_timestamp: datetime,
 ):
-    """Test that a case is returned if case action is None and when there are miltiple analyses where one analysis is older than a sample is last sequenced."""
+    """Test that a case is not returned if case action is None and when there are multiple analyses where one analysis is newer than a sample is last sequenced."""
 
     # GIVEN a case
-    test_case: Case = helpers.add_case(base_store, data_analysis=Workflow.MICROSALT)
+    test_case: Case = helpers.add_case(base_store, data_analysis=Workflow.MICROSALT, action=None)
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(
         store=base_store, last_sequenced_at=timestamp_yesterday
     )
+    helpers.relate_samples(base_store=base_store, case=test_case, samples=[test_sample])
 
     # GIVEN a completed analysis
     test_analysis: Analysis = helpers.add_analysis(
         store=base_store,
         case=test_case,
-        started_at=timestamp_yesterday,
-        completed_at=timestamp_now,
+        created_at=timestamp_now,
         workflow=Workflow.MICROSALT,
     )
 
     # GIVEN a completed analysis older than the sample last sequenced
-    test_analysis_2: Analysis = helpers.add_analysis(
+    helpers.add_analysis(
         store=base_store,
         case=test_case,
-        started_at=timestamp_yesterday,
-        completed_at=timestamp_yesterday,
+        created_at=timestamp_yesterday - timedelta(hours=1),
         workflow=Workflow.MICROSALT,
     )
-    # GIVEN an old analysis
-    test_analysis_2.created_at = old_timestamp
-
-    # Given an action set to None
-    test_analysis.case.action = None
-
-    # GIVEN a database with a case with one sequenced sample for specified analysis
-    link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
-    )
-    base_store.session.add(link)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN getting cases to analyze
     cases: Query = filter_cases_for_analysis(cases=cases)
@@ -496,7 +478,7 @@ def test_filter_cases_for_analysis_multiple_analyses_and_one_analysis_is_not_old
     assert isinstance(cases, Query)
 
     # THEN cases should contain the test case
-    assert test_analysis.case in cases
+    assert test_analysis.case not in cases
 
 
 def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
@@ -519,7 +501,7 @@ def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
     base_store.session.add(link)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN getting cases to analyze
     cases: Query = filter_cases_for_analysis(cases=cases)
@@ -560,7 +542,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
     test_analysis.created_at = timestamp_yesterday
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN getting cases to analyze
     cases: Query = filter_cases_for_analysis(cases=cases)
@@ -595,7 +577,7 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
     base_store.session.add(link)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN getting cases to analyze
     cases: Query = filter_cases_for_analysis(cases=cases)
@@ -737,7 +719,7 @@ def test_filter_cases_for_analysis_top_up_when_no_new_sequence_data(
     base_store.session.add(test_analysis)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN getting cases to analyze
     cases: Query = filter_cases_for_analysis(cases=cases)
@@ -767,7 +749,7 @@ def test_filter_cases_with_scout_data_delivery(
     base_store.session.add(link)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_query(Case)
 
     # WHEN getting cases with Scout as the data delivery option
     cases: Query = filter_cases_with_scout_data_delivery(cases=cases)
@@ -803,7 +785,7 @@ def test_filter_report_supported_data_delivery_cases(
     base_store.session.add_all([link_1, link_2])
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
+    cases: Query = base_store._get_case_query_for_analysis_start()
 
     # WHEN retrieving the delivery report supported cases
     cases: Query = filter_report_supported_data_delivery_cases(cases=cases)
