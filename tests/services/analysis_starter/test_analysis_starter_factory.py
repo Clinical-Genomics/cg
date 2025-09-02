@@ -52,7 +52,7 @@ def test_analysis_starter_factory_microsalt(cg_context: CGConfig, mocker: Mocker
 
 
 def test_analysis_starter_factory_mip_dna():
-    # GIVEN a CGConfig with a MIP-DNA config
+    # GIVEN a CGConfig with configuration info for MIP-DNA
     mip_rd_dna_config: MipConfig = create_autospec(
         MipConfig,
         root="root",
