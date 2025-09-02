@@ -5,6 +5,7 @@ from click import BaseCommand
 from click.testing import CliRunner, Result
 from pytest_mock import MockerFixture
 
+from cg.cli.workflow.mip_dna.base import dev_start_available as mip_dna_start_available
 from cg.cli.workflow.raredisease.base import dev_start_available as raredisease_start_available
 from cg.cli.workflow.rnafusion.base import start_available as rnafusion_start_available
 from cg.cli.workflow.taxprofiler.base import dev_start_available as taxprofiler_start_available
@@ -15,8 +16,13 @@ from cg.services.analysis_starter.service import AnalysisStarter
 
 @pytest.mark.parametrize(
     "start_available_command",
-    [raredisease_start_available, rnafusion_start_available, taxprofiler_start_available],
-    ids=["raredisease", "RNAFUSION", "Taxprofiler"],
+    [
+        raredisease_start_available,
+        rnafusion_start_available,
+        taxprofiler_start_available,
+        mip_dna_start_available,
+    ],
+    ids=["raredisease", "RNAFUSION", "Taxprofiler", "MIP-DNA"],
 )
 @pytest.mark.parametrize(
     "succeeds, exit_status",
@@ -25,7 +31,7 @@ from cg.services.analysis_starter.service import AnalysisStarter
         (False, EXIT_FAIL),
     ],
 )
-def test_start_available_nextflow_calls_service(
+def test_start_available_calls_analysis_starter(
     start_available_command: BaseCommand,
     succeeds: bool,
     exit_status: int,
@@ -39,7 +45,7 @@ def test_start_available_nextflow_calls_service(
     # GIVEN a sufficient context
 
     # GIVEN a mocked AnalysisStarter that simulates the start_available method
-    service_call: MagicMock = mocker.patch.object(
+    analysis_starter_start_available: MagicMock = mocker.patch.object(
         AnalysisStarter, "start_available", return_value=succeeds
     )
 
@@ -47,7 +53,7 @@ def test_start_available_nextflow_calls_service(
     result: Result = cli_runner.invoke(start_available_command, obj=cg_context)
 
     # THEN the analysis starter should have been called with the expected input
-    service_call.assert_called_once()
+    analysis_starter_start_available.assert_called_once()
 
     # THEN the command should have executed without fail
     assert result.exit_code == exit_status

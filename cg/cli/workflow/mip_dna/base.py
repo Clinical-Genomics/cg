@@ -112,3 +112,13 @@ def dev_start(
         panel_bed=panel_bed,
         use_bwa_mem=use_bwa_mem,
     )
+
+
+@mip_dna.command("dev-start-available")
+@click.pass_obj
+def dev_start_available(cg_config: CGConfig):
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.MIP_DNA)
+    succeeded: bool = analysis_starter.start_available()
+    if not succeeded:
+        raise click.Abort
