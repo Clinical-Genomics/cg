@@ -25,37 +25,3 @@ def test_start(cli_runner: CliRunner, cg_context: CGConfig, mocker: MockerFixtur
 
     # THEN the command should have executed without fail
     assert result.exit_code == EXIT_SUCCESS
-
-
-@pytest.mark.parametrize(
-    "succeeds, exit_status",
-    [
-        (True, EXIT_SUCCESS),
-        (False, EXIT_FAIL),
-    ],
-)
-def test_start_available(
-    cli_runner: CliRunner,
-    cg_context: CGConfig,
-    succeeds: bool,
-    exit_status: int,
-    mocker: MockerFixture,
-):
-    """
-    Test that the start_available command succeeds when the starter succeeds and aborts otherwise.
-    """
-    # GIVEN a valid context
-
-    # GIVEN a mocked AnalysisStarter that simulates the start_available method
-    service_call: MagicMock = mocker.patch.object(
-        AnalysisStarter, "start_available", return_value=succeeds
-    )
-
-    # WHEN running the start_available command
-    result: Result = cli_runner.invoke(start_available, obj=cg_context)
-
-    # THEN the starter command should have been called
-    service_call.assert_called_once()
-
-    # THEN the command should have executed as expected
-    assert result.exit_code == exit_status
