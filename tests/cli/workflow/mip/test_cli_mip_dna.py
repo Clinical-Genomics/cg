@@ -64,7 +64,7 @@ def test_mip_dna_dev_run(
     # GIVEN a CLI runner
     cli_runner = CliRunner()
 
-    # GIVEN a CG Config with a MIP-DNA config
+    # GIVEN a CGConfig with configuration info for MIP-DNA
 
     get_analysis_starter_spy = mocker.spy(
         AnalysisStarterFactory, "get_analysis_starter_for_workflow"
@@ -119,7 +119,7 @@ def test_mip_dna_dev_start(
     # GIVEN a cli runner
     cli_runner = CliRunner()
 
-    # GIVEN a CGConfig with a MIP-DNA config
+    # GIVEN a CGConfig with configuration info for MIP-DNA
 
     get_analysis_starter_spy = mocker.spy(
         AnalysisStarterFactory, "get_analysis_starter_for_workflow"
@@ -145,3 +145,18 @@ def test_mip_dna_dev_start(
         use_bwa_mem=use_bwa_mem,
         start_with=start_with,
     )
+
+
+def test_mip_dna_dev_case_config(cg_config: CGConfig):
+    # GIVEN a CLIRunner
+    cli_runner = CliRunner()
+
+    # GIVEN a CGConfig with configuration info for MIP-DNA
+
+    # WHEN invoking cg workflow mip-dna dev-case-config
+    result = cli_runner.invoke(dev_case_config, ["case_id"], obj=cg_config)
+
+    # THEN the command exits successfully
+    assert result.exit_code == 0
+
+    # THEN the configurator should have been created and called

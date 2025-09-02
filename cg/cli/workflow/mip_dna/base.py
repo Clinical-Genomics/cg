@@ -122,3 +122,7 @@ def dev_start_available(cg_config: CGConfig):
     succeeded: bool = analysis_starter.start_available()
     if not succeeded:
         raise click.Abort
+
+
+def dev_case_config(cg_config: CGConfig):
+    pass
