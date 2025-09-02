@@ -3,6 +3,7 @@ from collections.abc import Generator
 from datetime import datetime
 from pathlib import Path
 from subprocess import CompletedProcess
+from types import ModuleType
 from typing import cast
 from unittest.mock import ANY, Mock, create_autospec
 
@@ -24,6 +25,10 @@ from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.tb import AnalysisType
 from cg.meta.workflow import analysis
+from cg.services.analysis_starter.configurator.implementations import (
+    mip_dna as mip_dna_configurator,
+)
+from cg.services.analysis_starter.submitters.subprocess import submitter
 from cg.store import database as cg_database
 from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Order, Sample
 from cg.store.store import Store
@@ -81,8 +86,15 @@ def scout_export_panel_stdout() -> bytes:
     return b"22\t26995242\t27014052\t2397\tCRYBB1\n22\t38452318\t38471708\t9394\tPICK1\n"
 
 
+@pytest.mark.parametrize(
+    "command, subprocess_module",
+    [("start-available", commands), ("dev-start-available", submitter)],
+    ids=["start-available", "dev-start-available"],
+)
 @pytest.mark.integration
 def test_start_available_mip_dna(
+    command: str,
+    subprocess_module: ModuleType,
     helpers: StoreHelpers,
     housekeeper_db_uri: str,
     housekeeper_db: HousekeeperStore,
@@ -175,6 +187,9 @@ def test_start_available_mip_dna(
     # GIVEN an email address can be determined from the environment
     mocker.patch.object(mip_base, "environ_email", return_value="testuser@scilifelab.se")
     mocker.patch.object(analysis, "environ_email", return_value="testuser@scilifelab.se")
+    mocker.patch.object(
+        mip_dna_configurator, "environ_email", return_value="testuser@scilifelab.se"
+    )
 
     # GIVEN the Trailblazer API returns no ongoing analysis for the case
     httpserver.expect_request(
@@ -205,6 +220,9 @@ def test_start_available_mip_dna(
         }
     )
 
+    # GIVEN the analysis can be started as a sub process
+    analysis_subprocess_mock = mocker.patch.object(subprocess_module, "subprocess")
+
     # WHEN running mip-dna start-available
     result: Result = cli_runner.invoke(
         base,
@@ -213,7 +231,7 @@ def test_start_available_mip_dna(
             config_path.as_posix(),
             "workflow",
             "mip-dna",
-            "start-available",
+            command,
         ],
     )
 
@@ -264,11 +282,15 @@ def test_start_available_mip_dna(
     )
 
     # THEN a MIP-DNA analysis is started with the expected parameters
-    subprocess_mock.run.assert_any_call(
+    command = (
         f"{mip_dna_path}/conda_bin run --name S_mip12.1 "
         f"{mip_dna_path}/bin analyse rd_dna --config {mip_dna_path}/config/mip12.1-dna-stage.yaml "
-        f"{case.internal_id} --slurm_quality_of_service normal --email testuser@scilifelab.se",
-        check=False,
+        f"{case.internal_id} --slurm_quality_of_service normal --email testuser@scilifelab.se"
+    )
+
+    analysis_subprocess_mock.run.assert_any_call(
+        command,
+        check=True,
         shell=True,
         stdout=ANY,
         stderr=ANY,
