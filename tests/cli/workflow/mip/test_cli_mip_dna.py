@@ -149,7 +149,7 @@ def test_mip_dna_dev_start(
     )
 
 
-def test_mip_dna_dev_case_config(cg_config: CGConfig, mocker: MockerFixture):
+def test_mip_dna_dev_config_case_all_flags(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a CLIRunner
     cli_runner = CliRunner()
 
@@ -158,7 +158,31 @@ def test_mip_dna_dev_case_config(cg_config: CGConfig, mocker: MockerFixture):
     get_configurator_spy = mocker.spy(ConfiguratorFactory, "get_configurator")
 
     # GIVEN a configure function that exits successfully
-    mock_configure = mocker.patch.object(MIPDNAConfigurator,"configure")
+    mock_configure = mocker.patch.object(MIPDNAConfigurator, "configure")
+
+    # WHEN invoking cg workflow mip-dna dev-case-config
+    result = cli_runner.invoke(
+        dev_config_case, ["--panel-bed", "panel.bed", "case_id"], obj=cg_config
+    )
+
+    # THEN the command exits successfully
+    assert result.exit_code == 0
+
+    # THEN the configurator should have been created and called
+    get_configurator_spy.assert_called_once_with(ANY, Workflow.MIP_DNA)
+    mock_configure.assert_called_once_with(case_id="case_id", panel_bed="panel.bed")
+
+
+def test_mip_dna_dev_config_case_no_flags(cg_config: CGConfig, mocker: MockerFixture):
+    # GIVEN a CLIRunner
+    cli_runner = CliRunner()
+
+    # GIVEN a CGConfig with configuration info for MIP-DNA
+
+    get_configurator_spy = mocker.spy(ConfiguratorFactory, "get_configurator")
+
+    # GIVEN a configure function that exits successfully
+    mock_configure = mocker.patch.object(MIPDNAConfigurator, "configure")
 
     # WHEN invoking cg workflow mip-dna dev-case-config
     result = cli_runner.invoke(dev_config_case, ["case_id"], obj=cg_config)
@@ -168,5 +192,4 @@ def test_mip_dna_dev_case_config(cg_config: CGConfig, mocker: MockerFixture):
 
     # THEN the configurator should have been created and called
     get_configurator_spy.assert_called_once_with(ANY, Workflow.MIP_DNA)
-    mock_configure.assert_called_once_with(case_id="case_id")
-
+    mock_configure.assert_called_once_with(case_id="case_id", panel_bed=None)

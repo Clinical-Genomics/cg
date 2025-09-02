@@ -7,7 +7,6 @@ import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import (
-    ARGUMENT_CASE_ID,
     ensure_illumina_runs_on_disk,
     link,
     resolve_compression,
@@ -23,6 +22,7 @@ from cg.cli.workflow.mip.base import (
     start_available,
 )
 from cg.cli.workflow.mip.options import (
+    ARGUMENT_CASE_ID,
     OPTION_BWA_MEM,
     OPTION_PANEL_BED,
     START_AFTER_PROGRAM,
@@ -129,10 +129,14 @@ def dev_start_available(cg_config: CGConfig):
 
 
 @mip_dna.command("dev-config-case")
+@OPTION_PANEL_BED
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_config_case(cg_config: CGConfig, case_id: str):
+def dev_config_case(
+    cg_config: CGConfig,
+    case_id: str,
+    panel_bed: str | None,
+):
     factory = ConfiguratorFactory(cg_config)
     configurator = cast(MIPDNAConfigurator, factory.get_configurator(Workflow.MIP_DNA))
-    configurator.configure(case_id=case_id)
-
+    configurator.configure(case_id=case_id, panel_bed=panel_bed)
