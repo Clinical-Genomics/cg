@@ -73,6 +73,7 @@ def test_nextflow_configurator_factory_success(
 
 
 def test_get_mip_dna_configurator():
+    # GIVEN a MIP-DNA config
     mip_config: MipConfig = create_autospec(
         MipConfig,
         root="mip_root",

@@ -9,7 +9,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Priority, Workflow
 from cg.constants.constants import WorkflowManager
-from cg.constants.priority import TrailblazerPriority
+from cg.constants.priority import SlurmQos, TrailblazerPriority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.services.analysis_starter.tracker import tracker as parent_tracker
@@ -66,8 +66,13 @@ def test_track(customer_id: str, should_be_hidden: bool, mocker: MockerFixture):
     # GIVEN MIP-DNA case config
     case_config = MIPDNACaseConfig(
         case_id=case_id,
+        conda_binary="conda/binary",
+        conda_environment="conda_env",
         email="some_email",
-        slurm_qos="some_qos",
+        pipeline_binary="pipeline/binary",
+        pipeline_config_path="some/path",
+        slurm_qos=SlurmQos.NORMAL,
+        use_bwa_mem=False,
     )
 
     # GIVEN that there is a qc info file with the mip version
