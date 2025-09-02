@@ -84,7 +84,13 @@ def dev_run(
     start_after: str | None,
     start_with: str | None,
 ):
-    """."""
+    """
+    Run a preconfigured MIP-DNA case.
+    Assumes that the following files are in the case run directory:
+        - pedigree.yaml
+        - gene_panels.bed
+        - managed_variants.vcf
+    """
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.MIP_DNA)
     analysis_starter.run(
@@ -107,6 +113,12 @@ def dev_start(
     start_after: str | None,
     start_with: str | None,
 ):
+    """
+    Start a MIP-DNA case. Configures the case and writes the following files:
+        - pedigree.yaml
+        - gene_panels.bed
+        - managed_variants.vcf
+    """
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.MIP_DNA)
     analysis_starter.start(
@@ -121,6 +133,8 @@ def dev_start(
 @mip_dna.command("dev-start-available")
 @click.pass_obj
 def dev_start_available(cg_config: CGConfig):
+    """Starts all available MIP-DNA cases."""
+    LOG.info("Starting MIP-DNA workflow for all available cases.")
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.MIP_DNA)
     succeeded: bool = analysis_starter.start_available()
@@ -137,6 +151,12 @@ def dev_config_case(
     case_id: str,
     panel_bed: str | None,
 ):
+    """
+    Configure a MIP-DNA case so that it is ready to be run. This creates the following files:
+        - pedigree.yaml
+        - gene_panels.bed
+        - managed_variants.vcf
+    """
     factory = ConfiguratorFactory(cg_config)
     configurator = cast(MIPDNAConfigurator, factory.get_configurator(Workflow.MIP_DNA))
     configurator.configure(case_id=case_id, panel_bed=panel_bed)
