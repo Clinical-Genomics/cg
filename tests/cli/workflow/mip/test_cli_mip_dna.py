@@ -87,7 +87,7 @@ def test_mip_dna_dev_run(
 @pytest.mark.parametrize(
     "cli_args, panel_bed, start_after, start_with, use_bwa_mem",
     [
-        (["case_id"], "", None, None, False),
+        (["case_id"], None, None, None, False),
         (
             [
                 "--panel-bed",
@@ -99,6 +99,7 @@ def test_mip_dna_dev_run(
                 "--use-bwa-mem",
                 "case_id",
             ],
+            "panel.bed",
             "levain_bread",
             "dinkel_bread",
             True,
@@ -106,7 +107,15 @@ def test_mip_dna_dev_run(
     ],
     ids=["No arguments", "All arguments"],
 )
-def test_mip_dna_dev_start(cg_config: CGConfig, mocker: MockerFixture):
+def test_mip_dna_dev_start(
+    cli_args: list[str],
+    panel_bed: str | None,
+    start_after: str | None,
+    start_with: str | None,
+    use_bwa_mem: bool,
+    cg_config: CGConfig,
+    mocker: MockerFixture,
+):
     # GIVEN a cli runner
     cli_runner = CliRunner()
 
@@ -120,16 +129,7 @@ def test_mip_dna_dev_start(cg_config: CGConfig, mocker: MockerFixture):
     # WHEN invoking cg workflow mip-dna dev-start
     result = cli_runner.invoke(
         dev_start,
-        [
-            "--start-with",
-            "dinkel_bread",
-            "--start-after",
-            "pretzel",
-            "--use-bwa-mem",
-            "--panel-bed",
-            "some_panel",
-            "case_id",
-        ],
+        cli_args,
         obj=cg_config,
     )
 
@@ -140,8 +140,8 @@ def test_mip_dna_dev_start(cg_config: CGConfig, mocker: MockerFixture):
     get_analysis_starter_spy.assert_called_once_with(ANY, Workflow.MIP_DNA)
     mock_start.assert_called_once_with(
         case_id="case_id",
-        panel_bed="some_panel",
-        start_after="pretzel",
-        use_bwa_mem=True,
-        start_with="dinkel_bread",
+        panel_bed=panel_bed,
+        start_after=start_after,
+        use_bwa_mem=use_bwa_mem,
+        start_with=start_with,
     )
