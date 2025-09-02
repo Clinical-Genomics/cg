@@ -65,7 +65,6 @@ def test_mip_dna_get_start_command_all_flags_set():
         conda_environment="environment",
         case_id=case_id,
         email="email@scilifelab.se",
-        panel_bed="panel.bed",
         pipeline_binary="/path/to/pipeline/binary",
         pipeline_config_path="/path/to/pipeline/config.yaml",
         slurm_qos=SlurmQos.NORMAL,
@@ -82,7 +81,6 @@ def test_mip_dna_get_start_command_all_flags_set():
         f"{mip_case_config.conda_binary} run --name {mip_case_config.conda_environment} {mip_case_config.pipeline_binary} analyse rd_dna"
         f" --config {mip_case_config.pipeline_config_path} {case_id} --slurm_quality_of_service "
         f"{mip_case_config.slurm_qos} --email {mip_case_config.email} "
-        f"--panel-bed {mip_case_config.panel_bed} "
         f"--start_after_recipe {mip_case_config.start_after_recipe} "
         f"--start_with_recipe {mip_case_config.start_with_recipe} "
         f"--bwa_mem 1 "

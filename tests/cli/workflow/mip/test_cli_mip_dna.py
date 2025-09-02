@@ -145,3 +145,6 @@ def test_mip_dna_dev_start(
         use_bwa_mem=use_bwa_mem,
         start_with=start_with,
     )
+
+def test_mip_dna_dev_start_available():
+    #
