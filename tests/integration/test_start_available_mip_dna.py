@@ -282,14 +282,14 @@ def test_start_available_mip_dna(
     )
 
     # THEN a MIP-DNA analysis is started with the expected parameters
-    test_command = (
+    expected_command = (
         f"{mip_dna_path}/conda_bin run --name S_mip12.1 "
         f"{mip_dna_path}/bin analyse rd_dna --config {mip_dna_path}/config/mip12.1-dna-stage.yaml "
         f"{case.internal_id} --slurm_quality_of_service normal --email testuser@scilifelab.se"
     )
 
     analysis_subprocess_mock.run.assert_any_call(
-        test_command,
+        expected_command,
         check=False,
         shell=True,
         stdout=ANY,
