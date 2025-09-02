@@ -6,6 +6,7 @@ import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import (
+    ARGUMENT_CASE_ID,
     ensure_illumina_runs_on_disk,
     link,
     resolve_compression,
@@ -30,6 +31,7 @@ from cg.constants import Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.service import AnalysisStarter
 
@@ -71,7 +73,7 @@ for sub_cmd in [
 @START_AFTER_PROGRAM
 @START_WITH_PROGRAM
 @OPTION_BWA_MEM
-@click.argument("case_id", type=str)
+@ARGUMENT_CASE_ID
 @click.pass_obj
 def dev_run(
     cg_config: CGConfig,
@@ -93,7 +95,7 @@ def dev_run(
 @START_WITH_PROGRAM
 @OPTION_BWA_MEM
 @OPTION_PANEL_BED
-@click.argument("case_id", type=str)
+@ARGUMENT_CASE_ID
 @click.pass_obj
 def dev_start(
     cg_config: CGConfig,
@@ -124,5 +126,9 @@ def dev_start_available(cg_config: CGConfig):
         raise click.Abort
 
 
-def dev_case_config(cg_config: CGConfig):
-    pass
+@mip_dna.command("dev-config-case")
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_config_case(cg_config: CGConfig, case_id: str):
+    factory = ConfiguratorFactory(cg_config)
+    configurator = factory.get_configurator(Workflow.MIP_DNA)

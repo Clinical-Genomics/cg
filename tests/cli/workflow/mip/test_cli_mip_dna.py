@@ -4,9 +4,10 @@ import pytest
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
-from cg.cli.workflow.mip_dna.base import dev_run, dev_start
+from cg.cli.workflow.mip_dna.base import dev_config_case, dev_run, dev_start
 from cg.constants import Workflow
 from cg.models.cg_config import CGConfig, IlluminaConfig, MipConfig, RunInstruments
+from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.service import AnalysisStarter
 
@@ -147,16 +148,19 @@ def test_mip_dna_dev_start(
     )
 
 
-def test_mip_dna_dev_case_config(cg_config: CGConfig):
+def test_mip_dna_dev_case_config(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a CLIRunner
     cli_runner = CliRunner()
 
     # GIVEN a CGConfig with configuration info for MIP-DNA
 
+    get_configurator_spy = mocker.spy(ConfiguratorFactory, "get_configurator")
+
     # WHEN invoking cg workflow mip-dna dev-case-config
-    result = cli_runner.invoke(dev_case_config, ["case_id"], obj=cg_config)
+    result = cli_runner.invoke(dev_config_case, ["case_id"], obj=cg_config)
 
     # THEN the command exits successfully
     assert result.exit_code == 0
 
     # THEN the configurator should have been created and called
+    get_configurator_spy.assert_called_once_with(Workflow.MIP_DNA)
