@@ -9,6 +9,7 @@ class MIPDNACaseConfig(CaseConfig):
     conda_binary: str
     conda_environment: str
     email: str
+    panel_bed: str | None = None
     pipeline_binary: str
     pipeline_config_path: str
     slurm_qos: SlurmQos
@@ -23,6 +24,9 @@ class MIPDNACaseConfig(CaseConfig):
             " --config {pipeline_config_path} {case_id} --slurm_quality_of_service "
             "{slurm_qos} --email {email}"
         ).format(**self.model_dump())
+
+        if self.panel_bed:
+            start_command += f" --panel_bed {self.panel_bed}"
 
         if self.start_after_recipe:
             start_command += f" --start_after_recipe {self.start_after_recipe}"

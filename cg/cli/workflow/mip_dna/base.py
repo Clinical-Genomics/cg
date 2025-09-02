@@ -99,7 +99,7 @@ def dev_start(
     cg_config: CGConfig,
     case_id: str,
     use_bwa_mem: bool,
-    panel_bed: str,
+    panel_bed: str | None,
     start_after: str | None,
     start_with: str | None,
 ):
