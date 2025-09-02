@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from cg.io.controller import ReadFile
-from cg.utils.files import get_file_in_directory, get_files_in_directory_with_pattern
+from cg.utils.files import get_file_in_directory
 
 LOG = logging.getLogger(__name__)
 
@@ -58,10 +58,6 @@ class ValidateFileTransferService:
                 return True
         except FileNotFoundError:
             return False
-
-    @staticmethod
-    def _get_manifest_file_paths(source_dir: Path, pattern: str) -> list[Path]:
-        return get_files_in_directory_with_pattern(directory=source_dir, pattern=pattern)
 
     def _get_files_in_manifest(self, manifest_file: Path, manifest_file_format: str) -> list[str]:
         """Get the files listed in the manifest file."""
