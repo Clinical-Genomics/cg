@@ -77,13 +77,35 @@ def test_mip_dna_dev_run(
     # THEN the command exits successfully
     assert result.exit_code == 0
 
-    # THEN the analysis starter should have been called
+    # THEN the analysis starter should have been created and called
     get_analysis_starter_spy.assert_called_once_with(ANY, Workflow.MIP_DNA)
     mock_run.assert_called_once_with(
         case_id="case_id", start_after=start_after, start_with=start_with, use_bwa_mem=use_bwa_mem
     )
 
 
+@pytest.mark.parametrize(
+    "cli_args, panel_bed, start_after, start_with, use_bwa_mem",
+    [
+        (["case_id"], "", None, None, False),
+        (
+            [
+                "--panel-bed",
+                "panel.bed",
+                "--start-with",
+                "dinkel_bread",
+                "--start-after",
+                "levain_bread",
+                "--use-bwa-mem",
+                "case_id",
+            ],
+            "levain_bread",
+            "dinkel_bread",
+            True,
+        ),
+    ],
+    ids=["No arguments", "All arguments"],
+)
 def test_mip_dna_dev_start(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a cli runner
     cli_runner = CliRunner()
@@ -114,5 +136,12 @@ def test_mip_dna_dev_start(cg_config: CGConfig, mocker: MockerFixture):
     # THEN the command exits successfully
     assert result.exit_code == 0
 
-    # THEN the analysis starter should have been called
-    mock_start.assert_called_once_with(case_id="case_id")
+    # THEN the analysis starter should have been created and called
+    get_analysis_starter_spy.assert_called_once_with(ANY, Workflow.MIP_DNA)
+    mock_start.assert_called_once_with(
+        case_id="case_id",
+        panel_bed="some_panel",
+        start_after="pretzel",
+        use_bwa_mem=True,
+        start_with="dinkel_bread",
+    )
