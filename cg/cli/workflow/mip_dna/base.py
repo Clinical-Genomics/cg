@@ -1,6 +1,7 @@
 """Commands to start MIP rare disease DNA workflow."""
 
 import logging
+from typing import cast
 
 import rich_click as click
 
@@ -31,6 +32,7 @@ from cg.constants import Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.service import AnalysisStarter
@@ -131,4 +133,6 @@ def dev_start_available(cg_config: CGConfig):
 @click.pass_obj
 def dev_config_case(cg_config: CGConfig, case_id: str):
     factory = ConfiguratorFactory(cg_config)
-    configurator = factory.get_configurator(Workflow.MIP_DNA)
+    configurator = cast(MIPDNAConfigurator, factory.get_configurator(Workflow.MIP_DNA))
+    configurator.configure(case_id=case_id)
+

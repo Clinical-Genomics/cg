@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 from cg.cli.workflow.mip_dna.base import dev_config_case, dev_run, dev_start
 from cg.constants import Workflow
 from cg.models.cg_config import CGConfig, IlluminaConfig, MipConfig, RunInstruments
+from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.service import AnalysisStarter
@@ -156,6 +157,9 @@ def test_mip_dna_dev_case_config(cg_config: CGConfig, mocker: MockerFixture):
 
     get_configurator_spy = mocker.spy(ConfiguratorFactory, "get_configurator")
 
+    # GIVEN a configure function that exits successfully
+    mock_configure = mocker.patch.object(MIPDNAConfigurator,"configure")
+
     # WHEN invoking cg workflow mip-dna dev-case-config
     result = cli_runner.invoke(dev_config_case, ["case_id"], obj=cg_config)
 
@@ -163,4 +167,6 @@ def test_mip_dna_dev_case_config(cg_config: CGConfig, mocker: MockerFixture):
     assert result.exit_code == 0
 
     # THEN the configurator should have been created and called
-    get_configurator_spy.assert_called_once_with(Workflow.MIP_DNA)
+    get_configurator_spy.assert_called_once_with(ANY, Workflow.MIP_DNA)
+    mock_configure.assert_called_once_with(case_id="case_id")
+
