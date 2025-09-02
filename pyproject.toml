@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "cg"
-version = "75.0.8"
+version = "75.1.0"
 description = "Clinical Genomics command center"
 readme = {file = "README.md", content-type = "text/markdown"}
 homepage = "https://github.com/Clinical-Genomics/cg"
@@ -72,8 +72,16 @@ pytest-freezegun = ["pytest-freezegun"]
 pytest = ["pytest"]
 ruff = ["ruff"]
 pytest-xdist = ["pytest-xdist"]
+pytest-httpserver = ["pytest-httpserver"]
 
+[tool.pytest.ini_options]
+markers = [
+  "integration: Integration tests"
+]
 
+addopts = [
+    "-m", "not integration",
+]
 
 [project.scripts]
 cg = "cg.cli.base:base"
@@ -96,3 +104,11 @@ line-length = 100
 target-version = "py311"
 exclude = ["alembic"]
 ignore = ["E501"]
+
+[tool.vulture]
+paths = ["cg","vulture_whitelist.txt"]
+sort_by_size = true
+min_confidence = 60
+ignore_decorators = ["@click.*","*route*","@field_validator*","@model_validator*","@app.*","@validator*","@action*","@field_serializer"]
+ignore_names= ["on_model_change","*View(BaseView)"]
+

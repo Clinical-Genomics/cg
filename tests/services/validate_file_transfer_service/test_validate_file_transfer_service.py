@@ -101,21 +101,3 @@ def test_validate_by_manifest_file_fail(
             source_dir=transfer_source_dir,
             manifest_file_format=FileFormat.TXT,
         )
-
-
-def test_get_manifest_file_paths(
-    expected_file_names_in_manifest: list[str], transfer_source_dir: Path
-):
-    """Test the get manifest file paths method."""
-    # GIVEN a source directory
-    validate_file_transfer_service = ValidateFileTransferService()
-
-    # WHEN getting the using a pattern
-    manifest_file_paths: list[Path] = validate_file_transfer_service._get_manifest_file_paths(
-        source_dir=transfer_source_dir, pattern="file"
-    )
-
-    # THEN assert that the manifest file paths are a list
-    assert len(manifest_file_paths) == len(expected_file_names_in_manifest)
-    for manifest_file_path in manifest_file_paths:
-        assert manifest_file_path.name in expected_file_names_in_manifest

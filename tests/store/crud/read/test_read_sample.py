@@ -131,34 +131,6 @@ def test_get_sample_by_name(store_with_samples_that_have_names: Store, name="tes
     assert samples and samples.name == name
 
 
-def test_has_active_cases_for_sample_analyze(
-    store_with_active_sample_analyze: Store,
-    sample_internal_id: str = "test_sample_internal_id",
-):
-    """Test that a sample is active."""
-    # GIVEN a store with an active case
-
-    # THEN the sample should be active
-    assert (
-        store_with_active_sample_analyze.has_active_cases_for_sample(internal_id=sample_internal_id)
-        is True
-    )
-
-
-def test_has_active_cases_for_sample_running(
-    store_with_active_sample_running: Store,
-    sample_internal_id: str = "test_sample_internal_id",
-):
-    """Test that a sample is active."""
-    # GIVEN a store with an active case
-
-    # THEN the sample should be active
-    assert (
-        store_with_active_sample_running.has_active_cases_for_sample(internal_id=sample_internal_id)
-        is True
-    )
-
-
 def test_get_samples_by_customer_and_name(
     store_with_samples_that_have_names: Store,
     name: str = "test_sample_1",
