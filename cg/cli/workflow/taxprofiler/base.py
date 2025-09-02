@@ -8,12 +8,8 @@ import rich_click as click
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
-    config_case,
     metrics_deliver,
     report_deliver,
-    run,
-    start,
-    start_available,
     store,
     store_available,
     store_housekeeper,
@@ -41,8 +37,14 @@ def taxprofiler(context: click.Context) -> None:
 @taxprofiler.command()
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_start(cg_config: CGConfig, case_id: str) -> None:
-    """Start a Taxprofiler case. Configures the case if needed."""
+def start(cg_config: CGConfig, case_id: str) -> None:
+    """Start a Taxprofiler case.
+    Configures the case and writes the following files:
+        - CASE_ID_params_file.yaml
+        - CASE_ID_nextflow_config.json
+        - CASE_ID_samplesheet.csv
+    and submits the job to the Seqera Platform.
+    """
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.TAXPROFILER
@@ -52,7 +54,7 @@ def dev_start(cg_config: CGConfig, case_id: str) -> None:
 
 @taxprofiler.command()
 @click.pass_obj
-def dev_start_available(cg_config: CGConfig) -> None:
+def start_available(cg_config: CGConfig) -> None:
     """Starts all available Taxprofiler cases."""
     LOG.info("Starting Taxprofiler workflow for all available cases.")
     factory = AnalysisStarterFactory(cg_config)
@@ -67,8 +69,13 @@ def dev_start_available(cg_config: CGConfig) -> None:
 @taxprofiler.command()
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_run(cg_config: CGConfig, case_id: str) -> None:
-    """Run a preconfigured Taxprofiler case."""
+def run(cg_config: CGConfig, case_id: str) -> None:
+    """Run a preconfigured Taxprofiler case.
+    Assumes that the following files are in the case run directory:
+        - CASE_ID_params_file.yaml
+        - CASE_ID_nextflow_config.json
+        - CASE_ID_samplesheet.csv
+    """
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.TAXPROFILER
@@ -79,18 +86,19 @@ def dev_run(cg_config: CGConfig, case_id: str) -> None:
 @taxprofiler.command()
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_config_case(cg_config: CGConfig, case_id: str) -> None:
-    """Configure a Taxprofiler case so that it is ready to be run."""
+def config_case(cg_config: CGConfig, case_id: str) -> None:
+    """Configure a Taxprofiler case so that it is ready to be run.
+    Creates the following files in the case run directory:
+        - CASE_ID_params_file.yaml
+        - CASE_ID_nextflow_config.json
+        - CASE_ID_samplesheet.csv
+    """
     factory = ConfiguratorFactory(cg_config)
     configurator = cast(NextflowConfigurator, factory.get_configurator(Workflow.TAXPROFILER))
     configurator.configure(case_id=case_id)
 
 
 taxprofiler.add_command(resolve_compression)
-taxprofiler.add_command(config_case)
-taxprofiler.add_command(run)
-taxprofiler.add_command(start)
-taxprofiler.add_command(start_available)
 taxprofiler.add_command(metrics_deliver)
 taxprofiler.add_command(report_deliver)
 taxprofiler.add_command(store_housekeeper)
