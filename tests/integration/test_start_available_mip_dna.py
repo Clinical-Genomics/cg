@@ -3,7 +3,6 @@ from collections.abc import Generator
 from datetime import datetime
 from pathlib import Path
 from subprocess import CompletedProcess
-from types import ModuleType
 from typing import cast
 from unittest.mock import ANY, Mock, create_autospec
 
@@ -87,14 +86,12 @@ def scout_export_panel_stdout() -> bytes:
 
 
 @pytest.mark.parametrize(
-    "command, subprocess_module",
-    [("start-available", commands), ("dev-start-available", submitter)],
-    ids=["start-available", "dev-start-available"],
+    "test_command",
+    ["start-available", "dev-start-available"],
 )
 @pytest.mark.integration
 def test_start_available_mip_dna(
-    command: str,
-    subprocess_module: ModuleType,
+    test_command: str,
     helpers: StoreHelpers,
     housekeeper_db_uri: str,
     housekeeper_db: HousekeeperStore,
@@ -221,7 +218,10 @@ def test_start_available_mip_dna(
     )
 
     # GIVEN the analysis can be started as a sub process
-    analysis_subprocess_mock = mocker.patch.object(subprocess_module, "subprocess")
+    if test_command == "dev-start-available":
+        analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
+    else:
+        analysis_subprocess_mock = subprocess_mock
 
     # WHEN running mip-dna start-available
     result: Result = cli_runner.invoke(
@@ -231,7 +231,7 @@ def test_start_available_mip_dna(
             config_path.as_posix(),
             "workflow",
             "mip-dna",
-            command,
+            test_command,
         ],
     )
 
@@ -282,15 +282,15 @@ def test_start_available_mip_dna(
     )
 
     # THEN a MIP-DNA analysis is started with the expected parameters
-    command = (
+    test_command = (
         f"{mip_dna_path}/conda_bin run --name S_mip12.1 "
         f"{mip_dna_path}/bin analyse rd_dna --config {mip_dna_path}/config/mip12.1-dna-stage.yaml "
         f"{case.internal_id} --slurm_quality_of_service normal --email testuser@scilifelab.se"
     )
 
     analysis_subprocess_mock.run.assert_any_call(
-        command,
-        check=True,
+        test_command,
+        check=False,
         shell=True,
         stdout=ANY,
         stderr=ANY,
