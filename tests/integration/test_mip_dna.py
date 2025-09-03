@@ -40,11 +40,6 @@ def valid_google_token(mocker):
     )
 
 
-@pytest.fixture(scope="session")
-def httpserver_listen_address() -> tuple[str, int]:
-    return ("localhost", 8888)
-
-
 @pytest.fixture
 def status_db_uri() -> str:
     return "sqlite:///file:cg?mode=memory&cache=shared&uri=true"
