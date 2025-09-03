@@ -74,7 +74,7 @@ def test_mip_dna_dev_run_all_flags(
     cli_runner = CliRunner()
 
     # GIVEN a CGConfig with configuration info for MIP-DNA
-    
+
     # GIVEN the analysis starter factory can create an analysis starter
     get_analysis_starter_spy = mocker.spy(
         AnalysisStarterFactory, "get_analysis_starter_for_workflow"
@@ -88,7 +88,6 @@ def test_mip_dna_dev_run_all_flags(
 
     # WHEN invoking cg workflow mip-dna dev-run
     result = cli_runner.invoke(dev_run, flags, obj=cg_config)
-
 
     # THEN the command exits successfully
     assert result.exit_code == 0
@@ -148,6 +147,7 @@ def test_mip_dna_dev_start_all_flags(
 
     # GIVEN a CGConfig with configuration info for MIP-DNA
 
+    # GIVEN the analysis starter factory can create an analysis starter
     get_analysis_starter_spy = mocker.spy(
         AnalysisStarterFactory, "get_analysis_starter_for_workflow"
     )
