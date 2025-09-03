@@ -49,7 +49,7 @@ def test_mip_dna_dev_run_no_flags(cg_config: CGConfig, mocker: MockerFixture):
         AnalysisStarterFactory, "get_analysis_starter_for_workflow"
     )
 
-    # GIVEN a run function that exits successfully
+    # GIVEN that the analysis starter can run the case
     mock_run = mocker.patch.object(AnalysisStarter, "run")
 
     # GIVEN no flags
@@ -82,7 +82,7 @@ def test_mip_dna_dev_run_all_flags(cg_config: CGConfig, mocker: MockerFixture):
         AnalysisStarterFactory, "get_analysis_starter_for_workflow"
     )
 
-    # GIVEN a run function that exits successfully
+    # GIVEN that the analysis starter can run the case
     mock_run = mocker.patch.object(AnalysisStarter, "run")
 
     # GIVEN all possible flags
@@ -120,7 +120,7 @@ def test_mip_dna_dev_start_no_flags(
         AnalysisStarterFactory, "get_analysis_starter_for_workflow"
     )
 
-    # GIVEN a start function that exits successfully
+    # GIVEN that the analysis starter can start the case
     mock_start = mocker.patch.object(AnalysisStarter, "start")
 
     # GIVEN no cli flags
@@ -164,7 +164,7 @@ def test_mip_dna_dev_start_all_flags(
         AnalysisStarterFactory, "get_analysis_starter_for_workflow"
     )
 
-    # GIVEN a start function that exits successfully
+    # GIVEN that the analysis starter can start the case
     mock_start = mocker.patch.object(AnalysisStarter, "start")
 
     # GIVEN all possible flags
@@ -215,7 +215,7 @@ def test_mip_dna_dev_config_case_all_flags(cg_config: CGConfig, mocker: MockerFi
     # GIVEN the configurator factory can create a configurator
     get_configurator_spy = mocker.spy(ConfiguratorFactory, "get_configurator")
 
-    # GIVEN a configure function that exits successfully
+    # GIVEN that the configurator can configure the case
     mock_configure = mocker.patch.object(MIPDNAConfigurator, "configure")
 
     # WHEN invoking cg workflow mip-dna dev-case-config
@@ -243,7 +243,7 @@ def test_mip_dna_dev_config_case_no_flags(cg_config: CGConfig, mocker: MockerFix
     # GIVEN the configurator factory can create a configurator
     get_configurator_spy = mocker.spy(ConfiguratorFactory, "get_configurator")
 
-    # GIVEN a configure function that exits successfully
+    # GIVEN that the configurator can configure the case
     mock_configure = mocker.patch.object(MIPDNAConfigurator, "configure")
 
     # WHEN invoking cg workflow mip-dna dev-case-config
