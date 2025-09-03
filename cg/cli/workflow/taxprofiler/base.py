@@ -38,11 +38,11 @@ def taxprofiler(context: click.Context) -> None:
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def start(cg_config: CGConfig, case_id: str) -> None:
-    """Start a Taxprofiler case.
-    Configures the case and writes the following files:
-        - CASE_ID_params_file.yaml
-        - CASE_ID_nextflow_config.json
-        - CASE_ID_samplesheet.csv
+    """Start a Taxprofiler case. \n
+    Configures the case and writes the following files: \n
+        - CASE_ID_params_file.yaml \n
+        - CASE_ID_nextflow_config.json \n
+        - CASE_ID_samplesheet.csv \n
     and submits the job to the Seqera Platform.
     """
     factory = AnalysisStarterFactory(cg_config)
@@ -70,10 +70,10 @@ def start_available(cg_config: CGConfig) -> None:
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def run(cg_config: CGConfig, case_id: str) -> None:
-    """Run a preconfigured Taxprofiler case.
-    Assumes that the following files are in the case run directory:
-        - CASE_ID_params_file.yaml
-        - CASE_ID_nextflow_config.json
+    """Run a preconfigured Taxprofiler case. \n
+    Assumes that the following files are in the case run directory: \n
+        - CASE_ID_params_file.yaml \n
+        - CASE_ID_nextflow_config.json \n
         - CASE_ID_samplesheet.csv
     """
     factory = AnalysisStarterFactory(cg_config)
@@ -87,10 +87,10 @@ def run(cg_config: CGConfig, case_id: str) -> None:
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def config_case(cg_config: CGConfig, case_id: str) -> None:
-    """Configure a Taxprofiler case so that it is ready to be run.
-    Creates the following files in the case run directory:
-        - CASE_ID_params_file.yaml
-        - CASE_ID_nextflow_config.json
+    """Configure a Taxprofiler case so that it is ready to be run. \n
+    Creates the following files in the case run directory:\n
+        - CASE_ID_params_file.yaml \n
+        - CASE_ID_nextflow_config.json \n
         - CASE_ID_samplesheet.csv
     """
     factory = ConfiguratorFactory(cg_config)
