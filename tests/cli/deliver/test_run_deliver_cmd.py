@@ -1,12 +1,11 @@
 """Tests for running the delivery command"""
 
 import logging
-from pathlib import Path
 
 from click.testing import CliRunner
 
-from cg.cli.deliver.base import deliver_case, deliver_ticket
-from cg.constants.process import EXIT_SUCCESS, EXIT_FAIL, EXIT_PARSE_ERROR
+from cg.cli.deliver.base import deliver_case
+from cg.constants.process import EXIT_PARSE_ERROR
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 

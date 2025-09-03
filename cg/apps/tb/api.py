@@ -23,14 +23,6 @@ LOG = logging.getLogger(__name__)
 class TrailblazerAPI:
     """Interface to Trailblazer for `cg`."""
 
-    __STARTED_STATUSES = [
-        AnalysisStatus.COMPLETED,
-        AnalysisStatus.FAILED,
-        AnalysisStatus.PENDING,
-        AnalysisStatus.RUNNING,
-        AnalysisStatus.ERROR,
-        AnalysisStatus.QC,
-    ]
     __ONGOING_STATUSES = [
         AnalysisStatus.PENDING,
         AnalysisStatus.RUNNING,
@@ -91,9 +83,6 @@ class TrailblazerAPI:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
         if latest_analysis:
             return latest_analysis.status
-
-    def has_latest_analysis_started(self, case_id: str) -> bool:
-        return self.get_latest_analysis_status(case_id=case_id) in self.__STARTED_STATUSES
 
     def is_latest_analysis_ongoing(self, case_id: str) -> bool:
         return self.get_latest_analysis_status(case_id=case_id) in self.__ONGOING_STATUSES

@@ -212,10 +212,6 @@ class MockTB:
         """Override TrailblazerAPI get_analysis_status method to avoid default behaviour"""
         return None
 
-    def has_latest_analysis_started(self, case_id: str):
-        """Override TrailblazerAPI has_analysis_started method to avoid default behaviour"""
-        return False
-
     def set_analysis_uploaded(self, case_id: str, uploaded_at: datetime):
         return None
 

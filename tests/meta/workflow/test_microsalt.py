@@ -3,9 +3,6 @@
 from datetime import datetime
 from pathlib import Path
 
-from mock import MagicMock
-
-from cg.apps.lims.api import LimsAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.microsalt.utils import get_project_directory_date
 from cg.models.cg_config import CGConfig
