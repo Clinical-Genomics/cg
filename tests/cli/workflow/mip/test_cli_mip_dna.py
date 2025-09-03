@@ -44,6 +44,7 @@ def test_mip_dna_dev_run_no_flags(
 
     # GIVEN a CGConfig with configuration info for MIP-DNA
 
+    # GIVEN the analysis starter factory can create an analysis starter
     get_analysis_starter_spy = mocker.spy(
         AnalysisStarterFactory, "get_analysis_starter_for_workflow"
     )
@@ -73,7 +74,8 @@ def test_mip_dna_dev_run_all_flags(
     cli_runner = CliRunner()
 
     # GIVEN a CGConfig with configuration info for MIP-DNA
-
+    
+    # GIVEN the analysis starter factory can create an analysis starter
     get_analysis_starter_spy = mocker.spy(
         AnalysisStarterFactory, "get_analysis_starter_for_workflow"
     )
@@ -86,6 +88,7 @@ def test_mip_dna_dev_run_all_flags(
 
     # WHEN invoking cg workflow mip-dna dev-run
     result = cli_runner.invoke(dev_run, flags, obj=cg_config)
+
 
     # THEN the command exits successfully
     assert result.exit_code == 0
@@ -106,6 +109,7 @@ def test_mip_dna_dev_start_no_flags(
 
     # GIVEN a CGConfig with configuration info for MIP-DNA
 
+    # GIVEN the analysis starter factory can create an analysis starter
     get_analysis_starter_spy = mocker.spy(
         AnalysisStarterFactory, "get_analysis_starter_for_workflow"
     )
@@ -191,6 +195,7 @@ def test_mip_dna_dev_config_case_all_flags(cg_config: CGConfig, mocker: MockerFi
 
     # GIVEN a CGConfig with configuration info for MIP-DNA
 
+    # GIVEN the configurator factory can create a configurator
     get_configurator_spy = mocker.spy(ConfiguratorFactory, "get_configurator")
 
     # GIVEN a configure function that exits successfully
@@ -215,6 +220,7 @@ def test_mip_dna_dev_config_case_no_flags(cg_config: CGConfig, mocker: MockerFix
 
     # GIVEN a CGConfig with configuration info for MIP-DNA
 
+    # GIVEN the configurator factory can create a configurator
     get_configurator_spy = mocker.spy(ConfiguratorFactory, "get_configurator")
 
     # GIVEN a configure function that exits successfully
