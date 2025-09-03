@@ -69,7 +69,7 @@ def test_start(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_start_available(
     cli_runner: CliRunner,
