@@ -2,16 +2,15 @@
 
 import logging
 from pathlib import Path
-from unittest.mock import create_autospec, Mock
+from unittest.mock import Mock, create_autospec
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
-from cg.cli.add import link_sample_to_case
 from cg.cli.workflow.balsamic.base import config_case
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import SexEnum
-from cg.store.models import Bed, BedVersion, Case, Sample, CaseSample
+from cg.store.models import Bed, BedVersion, Case, CaseSample, Sample
 from cg.store.store import Store
 
 EXIT_SUCCESS = 0
@@ -361,17 +360,19 @@ def test_get_panel_loqusdb_dump(
     case_id = "balsamic_case_tgs_single"
 
     sample: Sample = create_autospec(Sample, internal_id="sample_id", sex=SexEnum.female)
-    case: Case= create_autospec(Case, links=[create_autospec(CaseSample, sample=sample)])
+    case: Case = create_autospec(Case, links=[create_autospec(CaseSample, sample=sample)])
 
-
-    # GIVEN a store with a bed version
+    # GIVEN a sufficient store
     store: Store = create_autospec(Store)
     bed = create_autospec(Bed)
     bed.name = "GMSmyeloid"
-    bed_version = create_autospec(BedVersion, bed=bed)
+    bed_version = create_autospec(
+        BedVersion, bed=bed, short_name="BalsamicBed1", file_name="balsamic_bed_1.bed"
+    )
+    store.get_case_by_internal_id = Mock(return_value=case)
     store.get_bed_version_by_file_name_strict = Mock(return_value=bed_version)
-    balsamic_context.status_db_ = store
 
+    balsamic_context.status_db_ = store
 
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
