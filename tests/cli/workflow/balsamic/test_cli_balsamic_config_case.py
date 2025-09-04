@@ -345,3 +345,21 @@ def test_error_wes_panel(
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
     assert "requires a bed file" in caplog.text
+
+
+def test_get_panel_loqusdb_dump(
+    cli_runner: CliRunner, balsamic_context: CGConfig, caplog: LogCaptureFixture
+):
+    """Test command without --target-bed option when BED can be retrieved from LIMS."""
+    caplog.set_level(logging.INFO)
+    # GIVEN case that bed-version set in lims with same version existing in status db
+    case_id = "balsamic_case_tgs_single"
+
+    # WHEN dry running
+    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+
+    # THEN command should be generated successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN dry-print should include the bed_key and the bed_value including path
+    assert "--cancer-somatic-snv-panel-observations" in caplog.text
