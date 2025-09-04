@@ -371,8 +371,10 @@ def test_get_panel_loqusdb_dump(
     )
     store.get_case_by_internal_id = Mock(return_value=case)
     store.get_bed_version_by_file_name_strict = Mock(return_value=bed_version)
+    store.get_bed_version_by_short_name = Mock(return_value=bed_version)
 
     balsamic_context.status_db_ = store
+    balsamic_context.meta_apis["analysis_api"].status_db = store
 
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
