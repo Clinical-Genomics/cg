@@ -362,7 +362,7 @@ def test_get_panel_loqusdb_dump(
 
     sample: Sample = create_autospec(
         Sample,
-        internal_id="sample_id",
+        internal_id="sample_case_tgs_single_tumor",
         sex=SexEnum.female,
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         from_sample=None,
@@ -376,11 +376,12 @@ def test_get_panel_loqusdb_dump(
     bed = create_autospec(Bed)
     bed.name = "GMSmyeloid"
     bed_version = create_autospec(
-        BedVersion, bed=bed, short_name="BalsamicBed1", file_name="balsamic_bed_1.bed"
+        BedVersion, bed=bed, short_name="BalsamicBed1", filename="balsamic_bed_1.bed"
     )
     store.get_case_by_internal_id = Mock(return_value=case)
     store.get_bed_version_by_file_name_strict = Mock(return_value=bed_version)
     store.get_bed_version_by_short_name = Mock(return_value=bed_version)
+    store.get_samples_by_case_id = Mock(return_value=[sample])
 
     balsamic_context.status_db_ = store
     balsamic_context.meta_apis["analysis_api"].status_db = store
