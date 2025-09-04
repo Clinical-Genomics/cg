@@ -493,7 +493,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "GMSlymphoid": "loqusdb_cancer_somatic_lymphoid_snv_variants_export-202509XX-.vcf.gz",
             "Twist Exome Comprehensive": "loqusdb_cancer_somatic_exome_snv_variants_export-202509XX-.vcf.gz",
         }
-        return bed_to_loqusdb_dump.get(bed_name)
+        return f"{self.loqusdb_path}/{bed_to_loqusdb_dump.get(bed_name)}"
 
     @staticmethod
     def print_sample_params(case_id: str, sample_data: dict) -> None:

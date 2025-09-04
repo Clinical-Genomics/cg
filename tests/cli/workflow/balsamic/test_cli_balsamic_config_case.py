@@ -357,8 +357,9 @@ def test_get_panel_loqusdb_dump(
 ):
     """Test command without --target-bed option when BED can be retrieved from LIMS."""
     caplog.set_level(logging.INFO)
-    # GIVEN case that bed-version set in lims with same version existing in status db
-    case_id = "balsamic_case_tgs_single"
+
+    # GIVEN a sufficient store
+    store: Store = create_autospec(Store)
 
     sample: Sample = create_autospec(
         Sample,
@@ -368,11 +369,10 @@ def test_get_panel_loqusdb_dump(
         from_sample=None,
     )
     case_sample = create_autospec(CaseSample, sample=sample)
+    case_id = "balsamic_case_tgs_single"
     case: Case = create_autospec(Case, links=[case_sample], internal_id=case_id)
     case_sample.case = case
 
-    # GIVEN a sufficient store
-    store: Store = create_autospec(Store)
     bed = create_autospec(Bed)
     bed.name = "GMSmyeloid"
     bed_version = create_autospec(
@@ -385,6 +385,7 @@ def test_get_panel_loqusdb_dump(
 
     balsamic_context.status_db_ = store
     balsamic_context.meta_apis["analysis_api"].status_db = store
+    loqus_db_dir: str = balsamic_context.meta_apis["analysis_api"].loqusdb_path
 
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
@@ -393,4 +394,6 @@ def test_get_panel_loqusdb_dump(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN dry-print should include the bed_key and the bed_value including path
-    assert "--cancer-somatic-snv-panel-observations" in caplog.text
+    myeloid_file_name = "loqusdb_cancer_somatic_myeloid_snv_variants_export-202509XX-.vcf.gz"
+    expected_path: str = f"{loqus_db_dir}/{myeloid_file_name}"
+    assert f"--cancer-somatic-snv-panel-observations {expected_path}" in caplog.text
