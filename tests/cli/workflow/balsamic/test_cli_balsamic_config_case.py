@@ -2,12 +2,15 @@
 
 import logging
 from pathlib import Path
+from unittest.mock import create_autospec
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
 from cg.cli.workflow.balsamic.base import config_case
 from cg.models.cg_config import CGConfig
+from cg.store.models import Bed, BedVersion
+from cg.store.store import Store
 
 EXIT_SUCCESS = 0
 
@@ -354,6 +357,13 @@ def test_get_panel_loqusdb_dump(
     caplog.set_level(logging.INFO)
     # GIVEN case that bed-version set in lims with same version existing in status db
     case_id = "balsamic_case_tgs_single"
+
+    # GIVEN a store with a bed version
+    store = create_autospec(Store)
+    bed = create_autospec(Bed)
+    bed.name = "GMSmyeloid"
+    bed_version = create_autospec(BedVersion, bed=bed)
+    balsamic_context.status_db = store
 
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
