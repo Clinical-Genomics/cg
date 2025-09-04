@@ -1,6 +1,7 @@
 """Module for Nallo Analysis API."""
 
 import logging
+from itertools import permutations
 from pathlib import Path
 from typing import Any
 
@@ -18,7 +19,9 @@ from cg.constants.nf_analysis import (
     NALLO_COVERAGE_FILE_TAGS,
     NALLO_COVERAGE_INTERVAL_TYPE,
     NALLO_COVERAGE_THRESHOLD,
-    NALLO_METRIC_CONDITIONS,
+    NALLO_GENERAL_METRIC_CONDITIONS,
+    NALLO_PARENT_PEDDY_METRIC_CONDITION,
+    NALLO_RAW_METRIC_CONDITIONS,
 )
 from cg.constants.scout import NALLO_CASE_TAGS, ScoutExportFileName
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
@@ -26,7 +29,7 @@ from cg.io.controller import WriteFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import MetricsBase
+from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.nallo.nallo import (
     NalloParameters,
     NalloQCMetrics,
@@ -160,14 +163,92 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         return NALLO_BUNDLE_FILENAMES_PATH
 
     def get_workflow_metrics(self, sample_id: str) -> dict:
-        sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
-        metric_conditions: dict[str, dict[str, Any]] = NALLO_METRIC_CONDITIONS
-        self.set_order_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
+        """Return Nallo workflow metric conditions for a sample."""
+        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
+        if "-" not in sample_id:
+            metric_conditions: dict[str, dict[str, Any]] = NALLO_GENERAL_METRIC_CONDITIONS.copy()
+            metric_conditions.update(NALLO_RAW_METRIC_CONDITIONS)
+            self.set_peddy_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
+            self.set_somalier_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
+        else:
+            metric_conditions = NALLO_PARENT_PEDDY_METRIC_CONDITION.copy()
         return metric_conditions
 
+    def _get_nallo_sample_pair_patterns(self, case_id: str) -> list[str]:
+        """Return sample-pair patterns for searching in MultiQC."""
+        sample_ids: list[str] = list(self.status_db.get_sample_ids_by_case_id(case_id=case_id))
+        pairwise_patterns: list[str] = [
+            f"{sample1}-{sample2}" for sample1, sample2 in permutations(sample_ids, 2)
+        ]
+        return pairwise_patterns
+
+    def get_nallo_parent_error_ped_check_metric(
+        self, pair_sample_ids: str, multiqc_raw_data: dict[dict]
+    ) -> MetricsBase | None:
+        """Return the parsed metrics for pedigree error given a concatenated pair of sample ids."""
+        metric_name: str = "parent_error_ped_check"
+        peddy_metrics: dict[str, dict] = multiqc_raw_data["multiqc_peddy"]
+        if sample_pair_metrics := peddy_metrics.get(pair_sample_ids, None):
+            return self.get_multiqc_metric(
+                metric_name=metric_name,
+                metric_value=sample_pair_metrics[metric_name],
+                metric_id=pair_sample_ids,
+            )
+
+    def get_nallo_raw_metric(self, sample_id: str, multiqc_raw_data: dict) -> MetricsBase | None:
+        metric_name = "sex"
+        raw_metrics_section: dict[str, dict] = multiqc_raw_data.get("multiqc_somalier", {})
+        sample_metrics = raw_metrics_section.get(sample_id)
+        if sample_metrics and metric_name in sample_metrics:
+            return self.get_multiqc_metric(
+                metric_name="somalier_sex",
+                metric_value=sample_metrics[metric_name],
+                metric_id=sample_id,
+            )
+
+    def get_nallo_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
+        """Return a list of the Nallo metrics specified in a MultiQC json file."""
+        multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
+        metrics = []
+
+        for search_pattern, metric_id in self.get_multiqc_search_patterns(case_id).items():
+            metrics_for_pattern: list[MetricsBase] = (
+                self.get_metrics_from_multiqc_json_with_pattern(
+                    search_pattern=search_pattern,
+                    multiqc_json=multiqc_json,
+                    metric_id=metric_id,
+                    exact_match=self.is_multiqc_pattern_search_exact,
+                )
+            )
+            metrics.extend(metrics_for_pattern)
+        for sample_id in self.status_db.get_sample_ids_by_case_id(case_id):
+            if raw_metric := self.get_nallo_raw_metric(
+                sample_id=sample_id,
+                multiqc_raw_data=multiqc_json.report_saved_raw_data,
+            ):
+                metrics.append(raw_metric)
+        for sample_pair in self._get_nallo_sample_pair_patterns(case_id):
+            if parent_error_metric := self.get_nallo_parent_error_ped_check_metric(
+                pair_sample_ids=sample_pair, multiqc_raw_data=multiqc_json.report_saved_raw_data
+            ):
+                metrics.append(parent_error_metric)
+        metrics = self.get_deduplicated_metrics(metrics=metrics)
+        return metrics
+
     @staticmethod
-    def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
+    def set_peddy_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
+
+    @staticmethod
+    def set_somalier_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
+        if "somalier_sex" in metric_conditions:
+            metric_conditions["somalier_sex"]["threshold"] = float(
+                {
+                    "male": PlinkSex.MALE,
+                    "female": PlinkSex.FEMALE,
+                    "unknown": PlinkSex.UNKNOWN,
+                }[sample.sex]
+            )
 
     def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
         """Return the Nallo d4 coverage file path."""
@@ -214,3 +295,9 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         return super().parse_analysis(
             qc_metrics_raw=qc_metrics_raw, qc_metrics_model=qc_metrics_model, **kwargs
         )
+
+    def create_metrics_deliverables_content(self, case_id: str) -> dict[str, list[dict[str, Any]]]:
+        """Create the content of a Nallo metrics deliverables file."""
+        metrics: list[MetricsBase] = self.get_nallo_multiqc_json_metrics(case_id=case_id)
+        self.ensure_mandatory_metrics_present(metrics=metrics)
+        return {"metrics": [metric.dict() for metric in metrics]}
