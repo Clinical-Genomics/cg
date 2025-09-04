@@ -183,7 +183,7 @@ def test_workflow_profile_option(
     caplog: LogCaptureFixture,
     tmp_path: Path,
 ):
-    """Test run command with workflow-profile option"""
+    """Test run command with workflow-profile option."""
     caplog.set_level(logging.INFO)
 
     # GIVEN valid case-id
