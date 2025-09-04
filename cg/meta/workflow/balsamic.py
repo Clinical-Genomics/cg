@@ -443,13 +443,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             raise BalsamicStartError(f"{case_id} has no samples tagged for BALSAMIC analysis!")
 
         verified_panel_bed = self.get_verified_bed(panel_bed=panel_bed, sample_data=sample_data)
-        bed_name = self.status_db.get_bed_version_by_file_name(verified_panel_bed).bed.name
-        bed_to_loqusdb_dump: dict = {
-            "GMSmyeloid": "loqusdb_cancer_somatic_myeloid_snv_variants_export-202509XX-.vcf.gz",
-            "GMSlymphoid": "loqusdb_cancer_somatic_lymphoid_snv_variants_export-202509XX-.vcf.gz",
-            "Twist Exome Comprehensive": "loqusdb_cancer_somatic_exome_snv_variants_export-202509XX-.vcf.gz",
-        }
-        loqusdb_dump_file: str | None = bed_to_loqusdb_dump.get(bed_name)
+        loqusdb_panel_dump_file: str | None = self.get_panel_loqusdb_dump(verified_panel_bed)
         verified_pon = (
             self.get_verified_pon(pon_cnn=pon_cnn, panel_bed=verified_panel_bed)
             if verified_panel_bed
@@ -463,7 +457,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "case_id": case_id,
             "analysis_workflow": self.workflow,
             "genome_version": genome_version,
-            "loqusdb_dump_file": loqusdb_dump_file,
+            "loqusdb_panel_dump_file": loqusdb_panel_dump_file,
             "sex": verified_sex,
             "panel_bed": verified_panel_bed,
             "pon_cnn": verified_pon,
@@ -491,8 +485,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_panel_loqusdb_dump(self, bed_file: str | None) -> str | None:
         if not bed_file:
             return None
-
-        bed_name: str = self.status_db.get_bed_version_by_file_name_strict(bed_file).bed.name
+        bed_file_name: str = Path(bed_file).name
+        bed_name: str = self.status_db.get_bed_version_by_file_name_strict(bed_file_name).bed.name
 
         bed_to_loqusdb_dump: dict = {
             "GMSmyeloid": "loqusdb_cancer_somatic_myeloid_snv_variants_export-202509XX-.vcf.gz",
@@ -585,7 +579,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
                 "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
                 "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
-                "--cancer-somatic-snv-panel-observations": arguments.get("loqusdb_dump_file"),
+                "--cancer-somatic-snv-panel-observations": arguments.get("loqusdb_panel_dump_file"),
                 "--cancer-somatic-sv-observations": arguments.get("cancer_somatic_sv"),
                 "--case-id": arguments.get("case_id"),
                 "--clinical-snv-observations": arguments.get("clinical_snv"),
