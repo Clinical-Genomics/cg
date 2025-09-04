@@ -443,6 +443,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             raise BalsamicStartError(f"{case_id} has no samples tagged for BALSAMIC analysis!")
 
         verified_panel_bed = self.get_verified_bed(panel_bed=panel_bed, sample_data=sample_data)
+        bed_name = self.status_db.get_bed_version_by_file_name(verified_panel_bed).bed.name
         verified_pon = (
             self.get_verified_pon(pon_cnn=pon_cnn, panel_bed=verified_panel_bed)
             if verified_panel_bed
@@ -564,6 +565,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
                 "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
                 "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
+                "--cancer-somatic-snv-panel-observations": None,
                 "--cancer-somatic-sv-observations": arguments.get("cancer_somatic_sv"),
                 "--case-id": arguments.get("case_id"),
                 "--clinical-snv-observations": arguments.get("clinical_snv"),
