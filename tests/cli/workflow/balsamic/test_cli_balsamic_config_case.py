@@ -360,8 +360,16 @@ def test_get_panel_loqusdb_dump(
     # GIVEN case that bed-version set in lims with same version existing in status db
     case_id = "balsamic_case_tgs_single"
 
-    sample: Sample = create_autospec(Sample, internal_id="sample_id", sex=SexEnum.female, prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,)
-    case: Case = create_autospec(Case, links=[create_autospec(CaseSample, sample=sample)])
+    sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_id",
+        sex=SexEnum.female,
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        from_sample=None,
+    )
+    case_sample = create_autospec(CaseSample, sample=sample)
+    case: Case = create_autospec(Case, links=[case_sample], internal_id=case_id)
+    case_sample.case = case
 
     # GIVEN a sufficient store
     store: Store = create_autospec(Store)
