@@ -488,6 +488,19 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return config_case
 
+    def get_panel_loqusdb_dump(self, bed_file: str | None) -> str | None:
+        if not bed_file:
+            return None
+
+        bed_name: str = self.status_db.get_bed_version_by_file_name_strict(bed_file).bed.name
+
+        bed_to_loqusdb_dump: dict = {
+            "GMSmyeloid": "loqusdb_cancer_somatic_myeloid_snv_variants_export-202509XX-.vcf.gz",
+            "GMSlymphoid": "loqusdb_cancer_somatic_lymphoid_snv_variants_export-202509XX-.vcf.gz",
+            "Twist Exome Comprehensive": "loqusdb_cancer_somatic_exome_snv_variants_export-202509XX-.vcf.gz",
+        }
+        return bed_to_loqusdb_dump.get(bed_name)
+
     @staticmethod
     def print_sample_params(case_id: str, sample_data: dict) -> None:
         """Outputs a table of samples to be displayed in log"""
