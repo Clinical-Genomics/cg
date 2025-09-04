@@ -51,7 +51,7 @@ def test_subprocess_submitter_submit(case_config: SubprocessCaseConfig, mocker: 
     mock_run.assert_called_once_with(
         args=case_config.get_start_command(),
         shell=True,
-        check=True,
+        check=False,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
