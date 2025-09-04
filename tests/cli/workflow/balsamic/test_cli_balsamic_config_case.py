@@ -8,6 +8,7 @@ from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
 from cg.cli.workflow.balsamic.base import config_case
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import SexEnum
 from cg.store.models import Bed, BedVersion, Case, CaseSample, Sample
@@ -359,7 +360,7 @@ def test_get_panel_loqusdb_dump(
     # GIVEN case that bed-version set in lims with same version existing in status db
     case_id = "balsamic_case_tgs_single"
 
-    sample: Sample = create_autospec(Sample, internal_id="sample_id", sex=SexEnum.female)
+    sample: Sample = create_autospec(Sample, internal_id="sample_id", sex=SexEnum.female, prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,)
     case: Case = create_autospec(Case, links=[create_autospec(CaseSample, sample=sample)])
 
     # GIVEN a sufficient store
