@@ -619,7 +619,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         command = ["run", "analysis"]
         run_analysis = ["--run-analysis"] if not dry_run else []
-        benchmark = ["--benchmark"]
+        benchmark = ["--benchmark"]  # TODO: Remove this
         options = build_command_from_dict(
             {
                 "--account": self.account,
