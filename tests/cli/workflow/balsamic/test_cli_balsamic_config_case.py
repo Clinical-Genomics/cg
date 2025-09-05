@@ -410,3 +410,53 @@ def test_get_panel_loqusdb_dump(
     # THEN dry-print should include the bed_key and the bed_value including path
     expected_path: str = f"{loqus_db_dir}/{expected_loqusdb_file}"
     assert f"--cancer-somatic-snv-panel-observations {expected_path}" in caplog.text
+
+
+def test_tga__panel_loqusdb_dump(
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+    bed_name: str,
+    caplog: LogCaptureFixture,
+    expected_loqusdb_file: str,
+):
+    """Test command without --target-bed option when BED can be retrieved from LIMS."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a sufficient store
+    store: Store = create_autospec(Store)
+
+    sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_case_tgs_single_tumor",
+        sex=SexEnum.female,
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        from_sample=None,
+    )
+    case_sample = create_autospec(CaseSample, sample=sample)
+    case_id = "balsamic_case_tgs_single"
+    case: Case = create_autospec(Case, links=[case_sample], internal_id=case_id)
+    case_sample.case = case
+
+    bed = create_autospec(Bed)
+    bed.name = bed_name
+    bed_version = create_autospec(
+        BedVersion, bed=bed, short_name="BalsamicBed1", filename="balsamic_bed_1.bed"
+    )
+    store.get_case_by_internal_id = Mock(return_value=case)
+    store.get_bed_version_by_file_name_strict = Mock(return_value=bed_version)
+    store.get_bed_version_by_short_name = Mock(return_value=bed_version)
+    store.get_samples_by_case_id = Mock(return_value=[sample])
+
+    balsamic_context.status_db_ = store
+    balsamic_context.meta_apis["analysis_api"].status_db = store
+    loqus_db_dir: str = balsamic_context.meta_apis["analysis_api"].loqusdb_path
+
+    # WHEN dry running
+    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+
+    # THEN command should be generated successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN dry-print should include the bed_key and the bed_value including path
+    expected_path: str = f"{loqus_db_dir}/{expected_loqusdb_file}"
+    assert f"--cancer-somatic-snv-panel-observations {expected_path}" in caplog.text
