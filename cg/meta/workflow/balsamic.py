@@ -1,6 +1,7 @@
 """Module for Balsamic Analysis API."""
 
 import logging
+from enum import StrEnum
 from pathlib import Path
 
 from housekeeper.store.models import File, Version
@@ -31,6 +32,12 @@ from cg.utils import Process
 from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
 
 LOG = logging.getLogger(__name__)
+
+
+class SNVPanelLoqusDBDumpFiles(StrEnum):
+    GMSMYELOID = "loqusdb_cancer_somatic_myeloid_snv_variants_export-202509XX-.vcf.gz"
+    GMSLYMPHOID = "loqusdb_cancer_somatic_lymphoid_snv_variants_export-202509XX-.vcf.gz"
+    TWIST_EXOME_COMPREHENSIVE = "loqusdb_cancer_somatic_exome_snv_variants_export-202509XX-.vcf.gz"
 
 
 class BalsamicAnalysisAPI(AnalysisAPI):
