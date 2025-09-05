@@ -10,6 +10,7 @@ from click.testing import CliRunner
 
 from cg.cli.workflow.balsamic.base import config_case
 from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.meta.workflow.balsamic import BED_TO_PANEL_LOQUSDB_DUMP_FILE
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import SexEnum
 from cg.store.models import Bed, BedVersion, Case, CaseSample, Sample
@@ -356,12 +357,9 @@ def test_error_wes_panel(
 @pytest.mark.parametrize(
     "bed_name, expected_loqusdb_file",
     [
-        ("GMSmyeloid", "loqusdb_cancer_somatic_myeloid_snv_variants_export-202509XX-.vcf.gz"),
-        ("GMSlymphoid", "loqusdb_cancer_somatic_lymphoid_snv_variants_export-202509XX-.vcf.gz"),
-        (
-            "Twist Exome Comprehensive",
-            "loqusdb_cancer_somatic_exome_snv_variants_export-202509XX-.vcf.gz",
-        ),
+        ("GMSmyeloid", BED_TO_PANEL_LOQUSDB_DUMP_FILE["GMSmyeloid"]),
+        ("GMSlymphoid", BED_TO_PANEL_LOQUSDB_DUMP_FILE["GMSlymphoid"]),
+        ("Twist Exome Comprehensive", BED_TO_PANEL_LOQUSDB_DUMP_FILE["Twist Exome Comprehensive"]),
     ],
 )
 def test_get_panel_loqusdb_dump(
