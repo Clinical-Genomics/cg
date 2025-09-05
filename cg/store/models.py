@@ -572,8 +572,10 @@ class CaseSample(Base):
     __table_args__ = (UniqueConstraint("case_id", "sample_id", name="_case_sample_uc"),)
 
     id: Mapped[PrimaryKeyInt]
-    case_id: Mapped[str] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
-    sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id", ondelete="CASCADE"))
+    case_id: Mapped[str] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"), nullable=False)
+    sample_id: Mapped[int] = mapped_column(
+        ForeignKey("sample.id", ondelete="CASCADE"), nullable=False
+    )
     status: Mapped[str] = mapped_column(
         types.Enum(*(status.value for status in StatusOptions)), default=StatusOptions.UNKNOWN.value
     )
