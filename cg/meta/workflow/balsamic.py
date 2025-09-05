@@ -39,6 +39,8 @@ PANELS_WITH_LOQUSDB_DUMP_FILES_MAP: dict[str, str] = {
     "Twist Exome Comprehensive": "loqusdb_cancer_somatic_exome_snv_variants_export-202509XX-.vcf.gz",
 }
 
+LOQUSDB_WGS_DUMP_FILE = "loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz"
+
 
 class BalsamicAnalysisAPI(AnalysisAPI):
     """Handles communication between BALSAMIC processes and the rest of CG infrastructure."""
@@ -467,6 +469,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "analysis_workflow": self.workflow,
             "genome_version": genome_version,
             "loqusdb_panel_dump_file": loqusdb_panel_dump_file,
+            "artefact_sv_observation": LOQUSDB_WGS_DUMP_FILE if is_wgs_case else None,
             "sex": verified_sex,
             "panel_bed": verified_panel_bed,
             "pon_cnn": verified_pon,
