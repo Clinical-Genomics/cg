@@ -2,12 +2,19 @@
 
 import logging
 from pathlib import Path
+from unittest.mock import Mock, create_autospec
 
+import pytest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
 from cg.cli.workflow.balsamic.base import config_case
+from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.meta.workflow.balsamic import PANELS_WITH_LOQUSDB_DUMP_FILES_MAP
 from cg.models.cg_config import CGConfig
+from cg.models.orders.sample_base import SexEnum
+from cg.store.models import Bed, BedVersion, Case, CaseSample, Sample
+from cg.store.store import Store
 
 EXIT_SUCCESS = 0
 
@@ -130,6 +137,8 @@ def test_paired_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
     # THEN tumor and normal options should be included in command
     assert "--tumor" in caplog.text
     assert "--normal" in caplog.text
+    # THEN the snv panel loqusdb dump file flag is not included in the command
+    assert "--cancer-somatic-snv-panel-observations" not in caplog.text
 
 
 def test_paired_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture):
@@ -345,3 +354,110 @@ def test_error_wes_panel(
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
     assert "requires a bed file" in caplog.text
+
+
+@pytest.mark.parametrize(
+    "bed_name, expected_loqusdb_file",
+    [
+        ("GMSmyeloid", PANELS_WITH_LOQUSDB_DUMP_FILES_MAP["GMSmyeloid"]),
+        ("GMSlymphoid", PANELS_WITH_LOQUSDB_DUMP_FILES_MAP["GMSlymphoid"]),
+        (
+            "Twist Exome Comprehensive",
+            PANELS_WITH_LOQUSDB_DUMP_FILES_MAP["Twist Exome Comprehensive"],
+        ),
+    ],
+)
+def test_get_panel_loqusdb_dump(
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+    bed_name: str,
+    caplog: LogCaptureFixture,
+    expected_loqusdb_file: str,
+):
+    """Test command without --target-bed option when BED can be retrieved from LIMS."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a sufficient store
+    store: Store = create_autospec(Store)
+
+    sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_case_tgs_single_tumor",
+        sex=SexEnum.female,
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        from_sample=None,
+    )
+    case_sample = create_autospec(CaseSample, sample=sample)
+    case_id = "balsamic_case_tgs_single"
+    case: Case = create_autospec(Case, links=[case_sample], internal_id=case_id)
+    case_sample.case = case
+
+    bed = create_autospec(Bed)
+    bed.name = bed_name
+    bed_version = create_autospec(
+        BedVersion, bed=bed, short_name="BalsamicBed1", filename="balsamic_bed_1.bed"
+    )
+    store.get_case_by_internal_id = Mock(return_value=case)
+    store.get_bed_version_by_file_name_strict = Mock(return_value=bed_version)
+    store.get_bed_version_by_short_name = Mock(return_value=bed_version)
+    store.get_samples_by_case_id = Mock(return_value=[sample])
+
+    balsamic_context.status_db_ = store
+    balsamic_context.meta_apis["analysis_api"].status_db = store
+    loqus_db_dir: str = balsamic_context.meta_apis["analysis_api"].loqusdb_path
+
+    # WHEN dry running
+    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+
+    # THEN command should be generated successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN dry-print should include the bed_key and the bed_value including path
+    expected_path: str = f"{loqus_db_dir}/{expected_loqusdb_file}"
+    assert f"--cancer-somatic-snv-panel-observations {expected_path}" in caplog.text
+
+
+def test_tga_panel_with_no_loqusdb_dump(
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+    caplog: LogCaptureFixture,
+):
+    """Test command without --target-bed option when BED can be retrieved from LIMS."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a sufficient store
+    store: Store = create_autospec(Store)
+
+    sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_case_tgs_single_tumor",
+        sex=SexEnum.female,
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        from_sample=None,
+    )
+    case_sample = create_autospec(CaseSample, sample=sample)
+    case_id = "balsamic_case_tgs_single"
+    case: Case = create_autospec(Case, links=[case_sample], internal_id=case_id)
+    case_sample.case = case
+
+    bed = create_autospec(Bed)
+    bed.name = "panel_with_no_loqusdb_dump"
+    bed_version = create_autospec(
+        BedVersion, bed=bed, short_name="BalsamicBed1", filename="balsamic_bed_1.bed"
+    )
+    store.get_case_by_internal_id = Mock(return_value=case)
+    store.get_bed_version_by_file_name_strict = Mock(return_value=bed_version)
+    store.get_bed_version_by_short_name = Mock(return_value=bed_version)
+    store.get_samples_by_case_id = Mock(return_value=[sample])
+
+    balsamic_context.status_db_ = store
+    balsamic_context.meta_apis["analysis_api"].status_db = store
+
+    # WHEN dry running
+    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+
+    # THEN command should be generated successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN dry-print should include the bed_key and the bed_value including path
+    assert "--cancer-somatic-snv-panel-observations" not in caplog.text
