@@ -10,7 +10,7 @@ from click.testing import CliRunner
 
 from cg.cli.workflow.balsamic.base import config_case
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.meta.workflow.balsamic import BED_TO_PANEL_LOQUSDB_DUMP_FILE
+from cg.meta.workflow.balsamic import PANELS_WITH_LOQUSDB_DUMP_FILES_MAP
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import SexEnum
 from cg.store.models import Bed, BedVersion, Case, CaseSample, Sample
@@ -357,9 +357,12 @@ def test_error_wes_panel(
 @pytest.mark.parametrize(
     "bed_name, expected_loqusdb_file",
     [
-        ("GMSmyeloid", BED_TO_PANEL_LOQUSDB_DUMP_FILE["GMSmyeloid"]),
-        ("GMSlymphoid", BED_TO_PANEL_LOQUSDB_DUMP_FILE["GMSlymphoid"]),
-        ("Twist Exome Comprehensive", BED_TO_PANEL_LOQUSDB_DUMP_FILE["Twist Exome Comprehensive"]),
+        ("GMSmyeloid", PANELS_WITH_LOQUSDB_DUMP_FILES_MAP["GMSmyeloid"]),
+        ("GMSlymphoid", PANELS_WITH_LOQUSDB_DUMP_FILES_MAP["GMSlymphoid"]),
+        (
+            "Twist Exome Comprehensive",
+            PANELS_WITH_LOQUSDB_DUMP_FILES_MAP["Twist Exome Comprehensive"],
+        ),
     ],
 )
 def test_get_panel_loqusdb_dump(
@@ -412,12 +415,10 @@ def test_get_panel_loqusdb_dump(
     assert f"--cancer-somatic-snv-panel-observations {expected_path}" in caplog.text
 
 
-def test_tga__panel_loqusdb_dump(
+def test_tga_panel_with_no_loqusdb_dump(
     cli_runner: CliRunner,
     balsamic_context: CGConfig,
-    bed_name: str,
     caplog: LogCaptureFixture,
-    expected_loqusdb_file: str,
 ):
     """Test command without --target-bed option when BED can be retrieved from LIMS."""
     caplog.set_level(logging.INFO)
@@ -438,7 +439,7 @@ def test_tga__panel_loqusdb_dump(
     case_sample.case = case
 
     bed = create_autospec(Bed)
-    bed.name = bed_name
+    bed.name = "panel_with_no_loqusdb_dump"
     bed_version = create_autospec(
         BedVersion, bed=bed, short_name="BalsamicBed1", filename="balsamic_bed_1.bed"
     )
@@ -458,5 +459,4 @@ def test_tga__panel_loqusdb_dump(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN dry-print should include the bed_key and the bed_value including path
-    expected_path: str = f"{loqus_db_dir}/{expected_loqusdb_file}"
-    assert f"--cancer-somatic-snv-panel-observations {expected_path}" in caplog.text
+    assert "--cancer-somatic-snv-panel-observations" not in caplog.text
