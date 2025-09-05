@@ -12,7 +12,7 @@ from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
 from cg.constants.scout import BALSAMIC_CASE_TAGS
-from cg.constants.sequencing import Variants
+from cg.constants.sequencing import SeqLibraryPrepCategory, Variants
 from cg.constants.subject import Sex
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
@@ -460,6 +460,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         verified_exome_argument: bool = self.has_case_only_exome_samples(case_id=case_id)
 
+        is_wgs_case: bool = self.has_case_only_wgs_samples(case_id=case_id)
 
         config_case: dict[str, str] = {
             "case_id": case_id,
@@ -490,12 +491,14 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return config_case
 
-
     def has_case_only_wgs_samples(self, case_id: str) -> bool:
-        """Returns True if the application type for all samples in a case is WHOLE_EXOME_SEQUENCING."""
-        application_type: str = self.get_case_application_type(case_id)
-        return application_type == AnalysisType.WES
-
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        return all(
+            [
+                sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+                for sample in case.samples
+            ]
+        )
 
     def get_panel_loqusdb_dump(self, bed_file: str | None) -> str | None:
         if not bed_file:
@@ -587,7 +590,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--cache-version": cache_version,
                 "--cadd-annotations": self.cadd_path,
                 "--artefact-snv-observations": arguments.get("artefact_somatic_snv"),
-                "--artefact-sv-observation":None,
+                "--artefact-sv-observation": None,
                 "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
                 "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
                 "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
