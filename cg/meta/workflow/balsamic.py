@@ -33,7 +33,7 @@ from cg.utils.utils import build_command_from_dict, get_string_from_list_by_patt
 LOG = logging.getLogger(__name__)
 
 
-BED_TO_PANEL_LOQUSDB_DUMP_FILE: dict[str, str] = {
+_BED_TO_PANEL_LOQUSDB_DUMP_FILE: dict[str, str] = {
     "GMSmyeloid": "loqusdb_cancer_somatic_myeloid_snv_variants_export-202509XX-.vcf.gz",
     "GMSlymphoid": "loqusdb_cancer_somatic_lymphoid_snv_variants_export-202509XX-.vcf.gz",
     "Twist Exome Comprehensive": "loqusdb_cancer_somatic_exome_snv_variants_export-202509XX-.vcf.gz",
