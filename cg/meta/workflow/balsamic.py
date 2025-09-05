@@ -469,7 +469,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "analysis_workflow": self.workflow,
             "genome_version": genome_version,
             "loqusdb_panel_dump_file": loqusdb_panel_dump_file,
-            "artefact_sv_observation": LOQUSDB_WGS_DUMP_FILE if is_wgs_case else None,
+            "artefact_sv_observation": (
+                f"{self.loqusdb_path}/{LOQUSDB_WGS_DUMP_FILE}" if is_wgs_case else None
+            ),
             "sex": verified_sex,
             "panel_bed": verified_panel_bed,
             "pon_cnn": verified_pon,

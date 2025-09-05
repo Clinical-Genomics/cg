@@ -137,6 +137,11 @@ def test_paired_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
     # THEN tumor and normal options should be included in command
     assert "--tumor" in caplog.text
     assert "--normal" in caplog.text
+    # THEN the WGS flag is included in the command
+    expected_file_path = (
+        f"{balsamic_context.meta_apis['analysis_api'].loqusdb_path}/{LOQUSDB_WGS_DUMP_FILE}"
+    )
+    assert f"--artefact-sv-observation {expected_file_path}" in caplog.text
     # THEN the snv panel loqusdb dump file flag is not included in the command
     assert "--cancer-somatic-snv-panel-observations" not in caplog.text
 
@@ -202,7 +207,10 @@ def test_single_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
     assert "--normal" not in caplog.text
 
     # THEN the LoqusDB artefact somatic sv variant export file is included to the command
-    assert f"--artefact-sv-observation {LOQUSDB_WGS_DUMP_FILE}" in caplog.text
+    expected_file_path = (
+        f"{balsamic_context.meta_apis['analysis_api'].loqusdb_path}/{LOQUSDB_WGS_DUMP_FILE}"
+    )
+    assert f"--artefact-sv-observation {expected_file_path}" in caplog.text
 
 
 def test_single_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture):
@@ -392,7 +400,7 @@ def test_get_panel_loqusdb_dump(
     )
     case_sample = create_autospec(CaseSample, sample=sample)
     case_id = "balsamic_case_tgs_single"
-    case: Case = create_autospec(Case, links=[case_sample], internal_id=case_id)
+    case: Case = create_autospec(Case, links=[case_sample], samples=[sample], internal_id=case_id)
     case_sample.case = case
 
     bed = create_autospec(Bed)
@@ -443,7 +451,7 @@ def test_tga_panel_with_no_loqusdb_dump(
     )
     case_sample = create_autospec(CaseSample, sample=sample)
     case_id = "balsamic_case_tgs_single"
-    case: Case = create_autospec(Case, links=[case_sample], internal_id=case_id)
+    case: Case = create_autospec(Case, links=[case_sample], samples=[sample], internal_id=case_id)
     case_sample.case = case
 
     bed = create_autospec(Bed)
