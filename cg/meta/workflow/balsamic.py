@@ -460,6 +460,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         verified_exome_argument: bool = self.has_case_only_exome_samples(case_id=case_id)
 
+
         config_case: dict[str, str] = {
             "case_id": case_id,
             "analysis_workflow": self.workflow,
@@ -488,6 +489,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             )
 
         return config_case
+
+
+    def has_case_only_wgs_samples(self, case_id: str) -> bool:
+        """Returns True if the application type for all samples in a case is WHOLE_EXOME_SEQUENCING."""
+        application_type: str = self.get_case_application_type(case_id)
+        return application_type == AnalysisType.WES
+
 
     def get_panel_loqusdb_dump(self, bed_file: str | None) -> str | None:
         if not bed_file:
@@ -579,6 +587,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--cache-version": cache_version,
                 "--cadd-annotations": self.cadd_path,
                 "--artefact-snv-observations": arguments.get("artefact_somatic_snv"),
+                "--artefact-sv-observation":None,
                 "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
                 "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
                 "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
