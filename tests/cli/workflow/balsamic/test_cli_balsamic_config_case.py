@@ -137,6 +137,8 @@ def test_paired_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
     # THEN tumor and normal options should be included in command
     assert "--tumor" in caplog.text
     assert "--normal" in caplog.text
+    # THEN the snv panel loqusdb dump file flag is not included in the command
+    assert "--cancer-somatic-snv-panel-observations" not in caplog.text
 
 
 def test_paired_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture):

@@ -495,7 +495,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         bed_file_name: str = Path(bed_file).name
         bed_name: str = self.status_db.get_bed_version_by_file_name_strict(bed_file_name).bed.name
 
-        return f"{self.loqusdb_path}/{PANELS_WITH_LOQUSDB_DUMP_FILES_MAP.get(bed_name)}"
+        if file_name := PANELS_WITH_LOQUSDB_DUMP_FILES_MAP.get(bed_name):
+            return f"{self.loqusdb_path}/{file_name}"
 
     @staticmethod
     def print_sample_params(case_id: str, sample_data: dict) -> None:
