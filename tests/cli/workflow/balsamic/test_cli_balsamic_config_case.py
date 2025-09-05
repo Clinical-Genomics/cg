@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
+import pytest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
@@ -352,8 +353,23 @@ def test_error_wes_panel(
     assert "requires a bed file" in caplog.text
 
 
+@pytest.mark.parametrize(
+    "bed_name, expected_loqusdb_file",
+    [
+        ("GMSmyeloid", "loqusdb_cancer_somatic_myeloid_snv_variants_export-202509XX-.vcf.gz"),
+        ("GMSlymphoid", "loqusdb_cancer_somatic_lymphoid_snv_variants_export-202509XX-.vcf.gz"),
+        (
+            "Twist Exome Comprehensive",
+            "loqusdb_cancer_somatic_exome_snv_variants_export-202509XX-.vcf.gz",
+        ),
+    ],
+)
 def test_get_panel_loqusdb_dump(
-    cli_runner: CliRunner, balsamic_context: CGConfig, caplog: LogCaptureFixture
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+    bed_name: str,
+    caplog: LogCaptureFixture,
+    expected_loqusdb_file: str,
 ):
     """Test command without --target-bed option when BED can be retrieved from LIMS."""
     caplog.set_level(logging.INFO)
@@ -374,7 +390,7 @@ def test_get_panel_loqusdb_dump(
     case_sample.case = case
 
     bed = create_autospec(Bed)
-    bed.name = "GMSmyeloid"
+    bed.name = bed_name
     bed_version = create_autospec(
         BedVersion, bed=bed, short_name="BalsamicBed1", filename="balsamic_bed_1.bed"
     )
@@ -394,6 +410,5 @@ def test_get_panel_loqusdb_dump(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN dry-print should include the bed_key and the bed_value including path
-    myeloid_file_name = "loqusdb_cancer_somatic_myeloid_snv_variants_export-202509XX-.vcf.gz"
-    expected_path: str = f"{loqus_db_dir}/{myeloid_file_name}"
+    expected_path: str = f"{loqus_db_dir}/{expected_loqusdb_file}"
     assert f"--cancer-somatic-snv-panel-observations {expected_path}" in caplog.text
