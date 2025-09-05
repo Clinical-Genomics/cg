@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from housekeeper.store.models import File, Version
-from pydantic.v1 import EmailStr, ValidationError
+from pydantic.v1 import ValidationError
 
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat, GenomeVersion, SampleType
@@ -52,7 +52,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.cadd_path: str = config.balsamic.cadd_path
         self.conda_binary: str = config.balsamic.conda_binary
         self.conda_env: str = config.balsamic.conda_env
-        self.email: EmailStr = config.balsamic.slurm.mail_user
         self.genome_interval_path: str = config.balsamic.genome_interval_path
         self.gens_coverage_female_path: str = config.balsamic.gens_coverage_female_path
         self.gens_coverage_male_path: str = config.balsamic.gens_coverage_male_path
@@ -619,17 +618,15 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         command = ["run", "analysis"]
         run_analysis = ["--run-analysis"] if not dry_run else []
-        benchmark = ["--benchmark"]  # TODO: Remove this
         options = build_command_from_dict(
             {
                 "--account": self.account,
-                "--mail-user": self.email,
                 "--qos": slurm_quality_of_service or self.get_slurm_qos_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
                 "--cluster-config": cluster_config,
             }
         )
-        parameters = command + options + run_analysis + benchmark
+        parameters = command + options + run_analysis
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def report_deliver(self, case_id: str, dry_run: bool = False) -> None:
