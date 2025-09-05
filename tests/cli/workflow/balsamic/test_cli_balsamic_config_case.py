@@ -452,7 +452,6 @@ def test_tga_panel_with_no_loqusdb_dump(
 
     balsamic_context.status_db_ = store
     balsamic_context.meta_apis["analysis_api"].status_db = store
-    loqus_db_dir: str = balsamic_context.meta_apis["analysis_api"].loqusdb_path
 
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
