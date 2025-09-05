@@ -1,7 +1,6 @@
 """Module for Balsamic Analysis API."""
 
 import logging
-from enum import StrEnum
 from pathlib import Path
 
 from housekeeper.store.models import File, Version
@@ -34,10 +33,11 @@ from cg.utils.utils import build_command_from_dict, get_string_from_list_by_patt
 LOG = logging.getLogger(__name__)
 
 
-class SNVPanelLoqusDBDumpFiles(StrEnum):
-    GMSMYELOID = "loqusdb_cancer_somatic_myeloid_snv_variants_export-202509XX-.vcf.gz"
-    GMSLYMPHOID = "loqusdb_cancer_somatic_lymphoid_snv_variants_export-202509XX-.vcf.gz"
-    TWIST_EXOME_COMPREHENSIVE = "loqusdb_cancer_somatic_exome_snv_variants_export-202509XX-.vcf.gz"
+BED_TO_PANEL_LOQUSDB_DUMP_FILE: dict[str, str] = {
+    "GMSmyeloid": "loqusdb_cancer_somatic_myeloid_snv_variants_export-202509XX-.vcf.gz",
+    "GMSlymphoid": "loqusdb_cancer_somatic_lymphoid_snv_variants_export-202509XX-.vcf.gz",
+    "Twist Exome Comprehensive": "loqusdb_cancer_somatic_exome_snv_variants_export-202509XX-.vcf.gz",
+}
 
 
 class BalsamicAnalysisAPI(AnalysisAPI):
@@ -495,12 +495,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         bed_file_name: str = Path(bed_file).name
         bed_name: str = self.status_db.get_bed_version_by_file_name_strict(bed_file_name).bed.name
 
-        bed_to_loqusdb_dump: dict = {
-            "GMSmyeloid": "loqusdb_cancer_somatic_myeloid_snv_variants_export-202509XX-.vcf.gz",
-            "GMSlymphoid": "loqusdb_cancer_somatic_lymphoid_snv_variants_export-202509XX-.vcf.gz",
-            "Twist Exome Comprehensive": "loqusdb_cancer_somatic_exome_snv_variants_export-202509XX-.vcf.gz",
-        }
-        return f"{self.loqusdb_path}/{bed_to_loqusdb_dump.get(bed_name)}"
+        return f"{self.loqusdb_path}/{BED_TO_PANEL_LOQUSDB_DUMP_FILE.get(bed_name)}"
 
     @staticmethod
     def print_sample_params(case_id: str, sample_data: dict) -> None:
