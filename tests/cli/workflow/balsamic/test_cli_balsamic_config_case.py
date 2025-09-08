@@ -10,7 +10,7 @@ from click.testing import CliRunner
 
 from cg.cli.workflow.balsamic.base import config_case
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.meta.workflow.balsamic import PANELS_WITH_LOQUSDB_DUMP_FILES_MAP
+from cg.meta.workflow.balsamic import LOQUSDB_WGS_DUMP_FILE, PANELS_WITH_LOQUSDB_DUMP_FILES_MAP
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import SexEnum
 from cg.store.models import Bed, BedVersion, Case, CaseSample, Sample
@@ -137,6 +137,11 @@ def test_paired_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
     # THEN tumor and normal options should be included in command
     assert "--tumor" in caplog.text
     assert "--normal" in caplog.text
+    # THEN the LoqusDB artefact somatic sv variant export file is included in the command
+    expected_file_path = (
+        f"{balsamic_context.meta_apis['analysis_api'].loqusdb_path}/{LOQUSDB_WGS_DUMP_FILE}"
+    )
+    assert f"--artefact-sv-observation {expected_file_path}" in caplog.text
     # THEN the flag related to TGS should not be included in the command
     assert "--cancer-somatic-snv-panel-observations" not in caplog.text
 
@@ -200,6 +205,12 @@ def test_single_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
     assert "--tumor" in caplog.text
     # THEN normal option should NOT be included in command
     assert "--normal" not in caplog.text
+
+    # THEN the LoqusDB artefact somatic sv variant export file is included in the command
+    expected_file_path = (
+        f"{balsamic_context.meta_apis['analysis_api'].loqusdb_path}/{LOQUSDB_WGS_DUMP_FILE}"
+    )
+    assert f"--artefact-sv-observation {expected_file_path}" in caplog.text
 
 
 def test_single_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture):
@@ -389,7 +400,7 @@ def test_get_panel_loqusdb_dump(
     )
     case_sample = create_autospec(CaseSample, sample=sample)
     case_id = "balsamic_case_tgs_single"
-    case: Case = create_autospec(Case, links=[case_sample], internal_id=case_id)
+    case: Case = create_autospec(Case, links=[case_sample], samples=[sample], internal_id=case_id)
     case_sample.case = case
 
     bed = create_autospec(Bed)
@@ -416,6 +427,9 @@ def test_get_panel_loqusdb_dump(
     expected_path: str = f"{loqus_db_dir}/{expected_loqusdb_file}"
     assert f"--cancer-somatic-snv-panel-observations {expected_path}" in caplog.text
 
+    # THEN the flag for WGS is not included
+    assert "--artefact-sv-observation" not in caplog.text
+
 
 def test_tga_panel_with_no_loqusdb_dump(
     cli_runner: CliRunner,
@@ -437,7 +451,7 @@ def test_tga_panel_with_no_loqusdb_dump(
     )
     case_sample = create_autospec(CaseSample, sample=sample)
     case_id = "balsamic_case_tgs_single"
-    case: Case = create_autospec(Case, links=[case_sample], internal_id=case_id)
+    case: Case = create_autospec(Case, links=[case_sample], samples=[sample], internal_id=case_id)
     case_sample.case = case
 
     bed: Bed = create_autospec(Bed)
@@ -461,3 +475,6 @@ def test_tga_panel_with_no_loqusdb_dump(
 
     # THEN the flag related to TGS should not be included in the command
     assert "--cancer-somatic-snv-panel-observations" not in caplog.text
+
+    # THEN the flag for WGS is not included
+    assert "--artefact-sv-observation" not in caplog.text
