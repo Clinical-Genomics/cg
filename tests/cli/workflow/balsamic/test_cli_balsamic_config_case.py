@@ -478,3 +478,40 @@ def test_tga_panel_with_no_loqusdb_dump(
 
     # THEN the flag for WGS is not included
     assert "--artefact-sv-observation" not in caplog.text
+
+
+def test_unknown_sex_is_set_as_unknown(
+    cli_runner: CliRunner, balsamic_context: CGConfig, caplog: LogCaptureFixture
+):
+    """Test that configuring a case with a sample with unknown sex is set as unknown."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a sufficient store with a sample with set to unknown
+    store: Store = create_autospec(Store)
+
+    sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_case_tgs_single_tumor",
+        sex=SexEnum.unknown,
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        from_sample=None,
+    )
+    case_sample = create_autospec(CaseSample, sample=sample)
+    case_id = "balsamic_case_tgs_single"
+    case: Case = create_autospec(Case, links=[case_sample], samples=[sample], internal_id=case_id)
+    case_sample.case = case
+
+    store.get_case_by_internal_id = Mock(return_value=case)
+    store.get_samples_by_case_id = Mock(return_value=[sample])
+
+    balsamic_context.status_db_ = store
+    balsamic_context.meta_apis["analysis_api"].status_db = store
+
+    # WHEN dry running
+    result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+
+    # THEN command should be generated successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN the sex is set to unknown in the command
+    assert "--gender unknown" in caplog.text
