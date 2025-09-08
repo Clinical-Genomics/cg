@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from typing import Any
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -12,7 +12,7 @@ from cg.apps.coverage import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.constants import Workflow
+from cg.constants import DataDelivery, Workflow
 from cg.exc import DeliveryReportError
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.meta.delivery_report.balsamic import BalsamicDeliveryReportAPI
@@ -68,6 +68,16 @@ def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
 
 def test_get_delivery_report_html_balsamic():
 
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id = Mock(
+        return_value=create_autospec(
+            Case,
+            data_analysis=Workflow.BALSAMIC,
+            data_delivery=DataDelivery.ANALYSIS_FILES,
+            internal_id="case_id",
+            panels=["some_panel"],
+        )
+    )
     analysis_api = create_autospec(
         BalsamicAnalysisAPI,
         chanjo_api=create_autospec(ChanjoAPI),
@@ -75,7 +85,7 @@ def test_get_delivery_report_html_balsamic():
         housekeeper_api=create_autospec(HousekeeperAPI),
         lims_api=create_autospec(LimsAPI),
         scout_api=create_autospec(ScoutAPI),
-        status_db=create_autospec(Store),
+        status_db=store,
     )
 
     # GIVEN a Balsamic delivery report API
@@ -83,7 +93,7 @@ def test_get_delivery_report_html_balsamic():
 
     # WHEN we generate a delivery report
     delivery_report: str = delivery_report_api.get_delivery_report_html(
-        analysis=create_autospec(Analysis), force=False
+        analysis=create_autospec(Analysis, comment="some comment"), force=False
     )
 
     # THEN the output should be as expected
