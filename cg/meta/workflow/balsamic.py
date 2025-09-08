@@ -332,7 +332,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve the latest metadata for {case_id}")
             raise CgError
 
-    def parse_analysis(self, config_raw: dict, qc_metrics_raw: dict, **kwargs) -> BalsamicAnalysis:
+    def parse_analysis(
+        self, config_raw: dict, qc_metrics_raw: list[dict], **kwargs
+    ) -> BalsamicAnalysis:
         """Returns a formatted BalsamicAnalysis object"""
 
         sequencing_type = config_raw["analysis"]["sequencing_type"]
