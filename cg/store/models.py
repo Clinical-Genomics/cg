@@ -821,7 +821,7 @@ class Sample(Base, PriorityMixin):
         """Return the sample run metrics for the sample."""
         return self._sample_run_metrics
 
-    def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
+    def to_dict(self, links: bool = False) -> dict:
         """Represent as dictionary"""
         data = to_dict(model_instance=self)
         data["priority"] = self.priority_human
@@ -830,8 +830,6 @@ class Sample(Base, PriorityMixin):
         data["application"] = self.application_version.application.to_dict()
         if links:
             data["links"] = [link_obj.to_dict(family=True, parents=True) for link_obj in self.links]
-        if flowcells:
-            data["flowcells"] = [flow_cell.to_dict() for flow_cell in self.flow_cells]
         return data
 
 
