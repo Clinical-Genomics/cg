@@ -40,7 +40,7 @@ class SubprocessSubmitter(Submitter):
                 stderr=subprocess.PIPE,
             )
             stdout: str = result.stdout.decode("utf-8").rstrip()
-            return list(stdout)[0].split()[-1]
+            return stdout.split()[-1]
         except Exception:
             LOG.warning(f"Could not retrieve {case_config.workflow} workflow version!")
             return "0.0.0"
