@@ -20,7 +20,7 @@ def get_sample(sample_id):
         return abort(HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (sample.customer not in g.current_user.customers):
         return abort(HTTPStatus.FORBIDDEN)
-    return jsonify(**sample.to_dict(links=True, flowcells=True))
+    return jsonify(**sample.to_dict(links=True))
 
 
 @SAMPLES_BLUEPRINT.route("/samples_in_collaboration")
@@ -39,7 +39,7 @@ def parse_sample_in_collaboration(sample_id):
     )
     if sample.customer not in customer.collaborators:
         return abort(HTTPStatus.FORBIDDEN)
-    return jsonify(**sample.to_dict(links=True, flowcells=True))
+    return jsonify(**sample.to_dict(links=True))
 
 
 @SAMPLES_BLUEPRINT.route("/samples")

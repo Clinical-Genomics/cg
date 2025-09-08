@@ -142,7 +142,7 @@ def test_paired_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
         f"{balsamic_context.meta_apis['analysis_api'].loqusdb_path}/{LOQUSDB_WGS_DUMP_FILE}"
     )
     assert f"--artefact-sv-observation {expected_file_path}" in caplog.text
-    # THEN the snv panel loqusdb dump file flag is not included in the command
+    # THEN the flag related to TGS should not be included in the command
     assert "--cancer-somatic-snv-panel-observations" not in caplog.text
 
 
@@ -385,7 +385,7 @@ def test_get_panel_loqusdb_dump(
     caplog: LogCaptureFixture,
     expected_loqusdb_file: str,
 ):
-    """Test command without --target-bed option when BED can be retrieved from LIMS."""
+    """Test that the Loqusdb dump file is provided for TGS cases with known bed names."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a sufficient store
@@ -436,7 +436,7 @@ def test_tga_panel_with_no_loqusdb_dump(
     balsamic_context: CGConfig,
     caplog: LogCaptureFixture,
 ):
-    """Test command without --target-bed option when BED can be retrieved from LIMS."""
+    """Test that no Loqusdb dump file is provided for unsupported bed names."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a sufficient store
@@ -454,9 +454,9 @@ def test_tga_panel_with_no_loqusdb_dump(
     case: Case = create_autospec(Case, links=[case_sample], samples=[sample], internal_id=case_id)
     case_sample.case = case
 
-    bed = create_autospec(Bed)
+    bed: Bed = create_autospec(Bed)
     bed.name = "panel_with_no_loqusdb_dump"
-    bed_version = create_autospec(
+    bed_version: BedVersion = create_autospec(
         BedVersion, bed=bed, short_name="BalsamicBed1", filename="balsamic_bed_1.bed"
     )
     store.get_case_by_internal_id = Mock(return_value=case)
@@ -473,7 +473,7 @@ def test_tga_panel_with_no_loqusdb_dump(
     # THEN command should be generated successfully
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN dry-print should include the bed_key and the bed_value including path
+    # THEN the flag related to TGS should not be included in the command
     assert "--cancer-somatic-snv-panel-observations" not in caplog.text
 
     # THEN the flag for WGS is not included
