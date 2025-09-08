@@ -600,7 +600,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--fastq-path": self.get_sample_fastq_destination_dir(
                     self.status_db.get_case_by_internal_id(case_id)
                 ),
-                "--headjob-partition": arguments.get("head-jobs"),
+                "--headjob-partition": "head-jobs",
                 "--gender": arguments.get("sex"),
                 "--genome-interval": arguments.get("genome_interval"),
                 "--genome-version": arguments.get("genome_version"),
