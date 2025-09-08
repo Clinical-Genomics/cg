@@ -628,7 +628,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def run_analysis(
         self,
         case_id: str,
-        cluster_config: Path | None = None,
+        workflow_profile: Path | None = None,
         slurm_quality_of_service: str | None = None,
         dry_run: bool = False,
     ) -> None:
@@ -641,7 +641,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--account": self.account,
                 "--qos": slurm_quality_of_service or self.get_slurm_qos_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
-                "--cluster-config": cluster_config,
+                "--workflow-profile": workflow_profile,
             }
         )
         parameters = command + options + run_analysis
