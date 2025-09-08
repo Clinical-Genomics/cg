@@ -12,7 +12,7 @@ from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
 from cg.constants.scout import BALSAMIC_CASE_TAGS
-from cg.constants.sequencing import Variants
+from cg.constants.sequencing import SeqLibraryPrepCategory, Variants
 from cg.constants.subject import Sex
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
@@ -38,6 +38,8 @@ PANELS_WITH_LOQUSDB_DUMP_FILES_MAP: dict[str, str] = {
     "GMSlymphoid": "loqusdb_cancer_somatic_lymphoid_snv_variants_export-202509XX-.vcf.gz",
     "Twist Exome Comprehensive": "loqusdb_cancer_somatic_exome_snv_variants_export-202509XX-.vcf.gz",
 }
+
+LOQUSDB_WGS_DUMP_FILE = "loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz"
 
 
 class BalsamicAnalysisAPI(AnalysisAPI):
@@ -460,11 +462,16 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         verified_exome_argument: bool = self.has_case_only_exome_samples(case_id=case_id)
 
+        is_wgs_case: bool = self.has_case_only_wgs_samples(case_id=case_id)
+
         config_case: dict[str, str] = {
             "case_id": case_id,
             "analysis_workflow": self.workflow,
             "genome_version": genome_version,
             "loqusdb_panel_dump_file": loqusdb_panel_dump_file,
+            "loqusdb_wgs_dump_file": (
+                f"{self.loqusdb_path}/{LOQUSDB_WGS_DUMP_FILE}" if is_wgs_case else None
+            ),
             "sex": verified_sex,
             "panel_bed": verified_panel_bed,
             "pon_cnn": verified_pon,
@@ -488,6 +495,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             )
 
         return config_case
+
+    def has_case_only_wgs_samples(self, case_id: str) -> bool:
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        return all(
+            sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+            for sample in case.samples
+        )
 
     def get_panel_loqusdb_dump(self, bed_file: str | None) -> str | None:
         if not bed_file:
@@ -579,6 +593,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--cache-version": cache_version,
                 "--cadd-annotations": self.cadd_path,
                 "--artefact-snv-observations": arguments.get("artefact_somatic_snv"),
+                "--artefact-sv-observation": arguments.get("loqusdb_wgs_dump_file"),
                 "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
                 "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
                 "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
