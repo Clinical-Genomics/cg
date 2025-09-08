@@ -58,6 +58,10 @@ def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
     assert "<!DOCTYPE html>" in delivery_report_html
 
 
+def test_get_delivery_report_html_balsamic():
+    pass
+
+
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_write_delivery_report_file(request: FixtureRequest, workflow: Workflow, tmp_path: Path):
     """Test writing of the delivery report for different workflows."""
