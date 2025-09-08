@@ -10,7 +10,9 @@ from _pytest.logging import LogCaptureFixture
 
 from cg.constants import Workflow
 from cg.exc import DeliveryReportError
+from cg.meta.delivery_report.balsamic import BalsamicDeliveryReportAPI
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.analysis import AnalysisModel
 from cg.models.delivery_report.metadata import SampleMetadataModel
 from cg.models.delivery_report.report import (
@@ -59,7 +61,16 @@ def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
 
 
 def test_get_delivery_report_html_balsamic():
-    pass
+    # GIVEN a Balsamic delivery report API
+    delivery_report_api = BalsamicDeliveryReportAPI(create_autospec(BalsamicAnalysisAPI))
+
+    # WHEN we generate a delivery report
+    delivery_report_api.get_delivery_report_html(analysis=create_autospec(Analysis), force=False)
+
+    # THEN the output should be as expected
+
+
+
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
