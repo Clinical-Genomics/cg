@@ -197,6 +197,9 @@ def test_workflow_profile_option(
     Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).touch(
         exist_ok=True
     )
+    config_path = Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id))
+    Path.mkdir(config_path.parent, exist_ok=True)
+    config_path.touch(exist_ok=True)
 
     # GIVEN that the workflow-profile path exists
     workflow_profile = Path(tmp_path, "workflow_profile")

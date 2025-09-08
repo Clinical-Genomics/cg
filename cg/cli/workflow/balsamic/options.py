@@ -55,5 +55,5 @@ OPTION_WORKFLOW_PROFILE = click.option(
     "--workflow-profile",
     type=click.Path(exists=True),
     required=False,
-    help="Path to directory containing config.yaml with workflow rule resources.",
+    help="Path to directory containing config.yaml.",
 )
