@@ -137,7 +137,7 @@ def test_paired_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
     # THEN tumor and normal options should be included in command
     assert "--tumor" in caplog.text
     assert "--normal" in caplog.text
-    # THEN the WGS flag is included in the command
+    # THEN the LoqusDB artefact somatic sv variant export file is included in the command
     expected_file_path = (
         f"{balsamic_context.meta_apis['analysis_api'].loqusdb_path}/{LOQUSDB_WGS_DUMP_FILE}"
     )
@@ -206,7 +206,7 @@ def test_single_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
     # THEN normal option should NOT be included in command
     assert "--normal" not in caplog.text
 
-    # THEN the LoqusDB artefact somatic sv variant export file is included to the command
+    # THEN the LoqusDB artefact somatic sv variant export file is included in the command
     expected_file_path = (
         f"{balsamic_context.meta_apis['analysis_api'].loqusdb_path}/{LOQUSDB_WGS_DUMP_FILE}"
     )

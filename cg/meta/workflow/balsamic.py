@@ -469,7 +469,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "analysis_workflow": self.workflow,
             "genome_version": genome_version,
             "loqusdb_panel_dump_file": loqusdb_panel_dump_file,
-            "artefact_sv_observation": (
+            "loqusdb_wgs_dump_file": (
                 f"{self.loqusdb_path}/{LOQUSDB_WGS_DUMP_FILE}" if is_wgs_case else None
             ),
             "sex": verified_sex,
@@ -499,10 +499,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def has_case_only_wgs_samples(self, case_id: str) -> bool:
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
         return all(
-            [
-                sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
-                for sample in case.samples
-            ]
+            sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+            for sample in case.samples
         )
 
     def get_panel_loqusdb_dump(self, bed_file: str | None) -> str | None:
@@ -595,7 +593,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--cache-version": cache_version,
                 "--cadd-annotations": self.cadd_path,
                 "--artefact-snv-observations": arguments.get("artefact_somatic_snv"),
-                "--artefact-sv-observation": arguments.get("artefact_sv_observation"),
+                "--artefact-sv-observation": arguments.get("loqusdb_wgs_dump_file"),
                 "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
                 "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
                 "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
