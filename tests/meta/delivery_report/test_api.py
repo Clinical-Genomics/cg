@@ -8,8 +8,13 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 
+from cg.apps.coverage import ChanjoAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
 from cg.exc import DeliveryReportError
+from cg.meta.delivery.delivery import DeliveryAPI
 from cg.meta.delivery_report.balsamic import BalsamicDeliveryReportAPI
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -28,6 +33,7 @@ from cg.models.delivery_report.sample import (
     TimestampModel,
 )
 from cg.store.models import Analysis, Case, Sample
+from cg.store.store import Store
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
@@ -61,16 +67,27 @@ def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
 
 
 def test_get_delivery_report_html_balsamic():
+
+    analysis_api = create_autospec(
+        BalsamicAnalysisAPI,
+        chanjo_api=create_autospec(ChanjoAPI),
+        delivery_api=create_autospec(DeliveryAPI),
+        housekeeper_api=create_autospec(HousekeeperAPI),
+        lims_api=create_autospec(LimsAPI),
+        scout_api=create_autospec(ScoutAPI),
+        status_db=create_autospec(Store),
+    )
+
     # GIVEN a Balsamic delivery report API
-    delivery_report_api = BalsamicDeliveryReportAPI(create_autospec(BalsamicAnalysisAPI))
+    delivery_report_api = BalsamicDeliveryReportAPI(analysis_api)
 
     # WHEN we generate a delivery report
-    delivery_report_api.get_delivery_report_html(analysis=create_autospec(Analysis), force=False)
+    delivery_report: str = delivery_report_api.get_delivery_report_html(
+        analysis=create_autospec(Analysis), force=False
+    )
 
     # THEN the output should be as expected
-
-
-
+    assert delivery_report == "?"
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
