@@ -72,6 +72,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.sentieon_licence_path: str = config.balsamic.sentieon_licence_path
         self.sentieon_licence_server: str = config.sentieon_licence_server
         self.swegen_path: str = config.balsamic.swegen_path
+        self.head_job_partition: str = config.balsamic.head_job_partition
 
     @property
     def root(self) -> str:
@@ -473,6 +474,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
             "exome": verified_exome_argument,
+            "head_job_partition": self.head_job_partition,
         }
 
         config_case.update(self.get_verified_samples(case_id=case_id))
@@ -600,7 +602,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--fastq-path": self.get_sample_fastq_destination_dir(
                     self.status_db.get_case_by_internal_id(case_id)
                 ),
-                "--headjob-partition": "head-jobs",
+                "--headjob-partition": arguments.get("head_job_partition"),
                 "--gender": arguments.get("sex"),
                 "--genome-interval": arguments.get("genome_interval"),
                 "--genome-version": arguments.get("genome_version"),

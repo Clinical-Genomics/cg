@@ -205,6 +205,12 @@ def email_address() -> str:
     return "user.name@scilifelab.se"
 
 
+@pytest.fixture(scope="function")
+def head_job_partition() -> str:
+    """Return the name of the head job partition."""
+    return "head-job"
+
+
 @pytest.fixture(scope="session")
 def case_id() -> str:
     """Return a case id."""
@@ -1938,6 +1944,7 @@ def context_config(
     cg_uri: str,
     hk_uri: str,
     email_address: str,
+    head_job_partition: str,
     fluffy_dir: Path,
     housekeeper_dir: Path,
     mip_dir: Path,
@@ -2025,6 +2032,7 @@ def context_config(
             },
             "sentieon_licence_path": str(cg_dir),
             "swegen_path": str(cg_dir),
+            "head_job_partition": head_job_partition,
         },
         "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
         "chanjo2": {"host": "chanjo2_host"},
