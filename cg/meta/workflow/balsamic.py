@@ -261,10 +261,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if all(val["sex"] == sex for val in sample_data.values()) and sex in set(
             value for value in Sex
         ):
-            if sex not in [Sex.FEMALE, Sex.MALE]:
-                LOG.warning(f"The provided sex is unknown, setting {Sex.FEMALE} as the default")
-                sex = Sex.FEMALE
-
             return sex
         else:
             LOG.error(f"Unable to retrieve a valid sex from samples: {sample_data.keys()}")
