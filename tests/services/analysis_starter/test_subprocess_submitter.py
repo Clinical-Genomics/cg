@@ -54,7 +54,7 @@ def test_microsalt_get_workflow_version(mocker: MockerFixture):
     )
 
     # GIVEN that running a subprocess works
-    mocker.patch.object(
+    mock_run = mocker.patch.object(
         subprocess,
         "run",
         return_value=create_autospec(
@@ -64,6 +64,15 @@ def test_microsalt_get_workflow_version(mocker: MockerFixture):
 
     # WHEN getting the workflow version
     workflow_version = subprocess_submitter.get_workflow_version(case_config)
+
+    # THEN the subprocess should have been called with the expected call
+    mock_run.assert_called_once_with(
+        args=f"{case_config.conda_binary} run {case_config.binary} --version",
+        shell=True,
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
 
     # THEN the workflow version should have been returned
     assert workflow_version == "4.2.2"
