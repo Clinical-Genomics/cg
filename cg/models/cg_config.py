@@ -195,6 +195,7 @@ class BalsamicConfig(CommonAppConfig):
     sentieon_licence_path: str
     slurm: SlurmConfig
     swegen_path: str
+    head_job_partition: str
 
 
 class MutantConfig(BaseModel):

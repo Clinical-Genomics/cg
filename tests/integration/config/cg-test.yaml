@@ -59,11 +59,12 @@ balsamic:
   pon_path: "{test_root_dir}/balsamic_pon_path"
   root: "{test_root_dir}/balsamic_root_path"
   sentieon_licence_path: "{test_root_dir}/balsamic_sention_licence_path"
-  slurm: 
+  slurm:
     account: "balsamic_slurm_account"
     mail_user: "balsamic_mail_user@scilifelab.se"
     qos: "low"
   swegen_path: "{test_root_dir}/balsamic_swegen_path"
+  head_job_partition: "head-jobs"
 
 crunchy:
   conda_binary: "{test_root_dir}/crunchy_conda_binary"
