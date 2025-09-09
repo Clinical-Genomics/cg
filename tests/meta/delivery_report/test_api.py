@@ -20,6 +20,7 @@ from cg.meta.delivery_report.balsamic import BalsamicDeliveryReportAPI
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.analysis import AnalysisModel
+from cg.models.delivery.delivery import DeliveryFile
 from cg.models.delivery_report.metadata import SampleMetadataModel
 from cg.models.delivery_report.report import (
     CaseModel,
@@ -80,7 +81,12 @@ def test_get_delivery_report_html_balsamic():
         )
     )
     delivery_api: DeliveryAPI = create_autospec(DeliveryAPI)
-    delivery_api.is_analysis_delivery = Mock(return_value=False)
+    delivery_api.is_analysis_delivery = Mock(return_value=True)
+    delivery_api.get_analysis_case_delivery_files = Mock(
+        return_value=[
+            DeliveryFile(source_path=Path("source"), destination_path=Path("destination"))
+        ]
+    )
     analysis_api = create_autospec(
         BalsamicAnalysisAPI,
         chanjo_api=create_autospec(ChanjoAPI),
@@ -92,7 +98,7 @@ def test_get_delivery_report_html_balsamic():
     )
     analysis_api.get_genome_build = Mock(return_value="some_genome_build")
     analysis_api.get_pons = Mock(return_value=["some_pon"])
-    analysis_api.get_data_analysis_type = Mock(return_value=CancerAnalysisType.TUMOR_NORMAL)
+    analysis_api.get_data_analysis_type = Mock(return_value=CancerAnalysisType.TUMOR_PANEL)
     analysis_api.get_variant_callers = Mock(return_value=["some_variant_caller"])
 
     # GIVEN a Balsamic delivery report API
