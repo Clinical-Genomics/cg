@@ -78,15 +78,19 @@ def test_get_delivery_report_html_balsamic():
             panels=["some_panel"],
         )
     )
+    delivery_api: DeliveryAPI = create_autospec(DeliveryAPI)
+    delivery_api.is_analysis_delivery = Mock(return_value=False)
     analysis_api = create_autospec(
         BalsamicAnalysisAPI,
         chanjo_api=create_autospec(ChanjoAPI),
-        delivery_api=create_autospec(DeliveryAPI),
+        delivery_api=delivery_api,
         housekeeper_api=create_autospec(HousekeeperAPI),
         lims_api=create_autospec(LimsAPI),
         scout_api=create_autospec(ScoutAPI),
         status_db=store,
     )
+    analysis_api.get_genome_build = Mock(return_value="some_genome_build")
+    analysis_api.get_pons = Mock(return_value=["some_pon"])
 
     # GIVEN a Balsamic delivery report API
     delivery_report_api = BalsamicDeliveryReportAPI(analysis_api)
