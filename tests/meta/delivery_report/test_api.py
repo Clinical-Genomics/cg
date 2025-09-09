@@ -12,7 +12,6 @@ from cg.apps.coverage import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.cli.workflow.base import workflow
 from cg.constants import CancerAnalysisType, DataDelivery, Workflow
 from cg.exc import DeliveryReportError
 from cg.meta.delivery.delivery import DeliveryAPI
@@ -84,7 +83,9 @@ def test_get_delivery_report_html_balsamic():
     delivery_api.is_analysis_delivery = Mock(return_value=True)
     delivery_api.get_analysis_case_delivery_files = Mock(
         return_value=[
-            DeliveryFile(source_path=Path("source"), destination_path=Path("destination"))
+            create_autospec(
+                DeliveryFile, destination_path=Path("destination"), source_path=Path("source")
+            )
         ]
     )
     analysis_api = create_autospec(
