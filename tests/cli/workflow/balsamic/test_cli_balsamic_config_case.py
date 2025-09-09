@@ -486,7 +486,7 @@ def test_unknown_sex_is_set_as_unknown(
     """Test that configuring a case with a sample with unknown sex is set as unknown."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN a sufficient store with a sample with set to unknown
+    # GIVEN a store containing a case tied to a sample with unknown sex
     store: Store = create_autospec(Store)
 
     sample: Sample = create_autospec(
@@ -507,7 +507,7 @@ def test_unknown_sex_is_set_as_unknown(
     balsamic_context.status_db_ = store
     balsamic_context.meta_apis["analysis_api"].status_db = store
 
-    # WHEN dry running
+    # WHEN dry running cg workflow balsamic config-case
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
 
     # THEN command should be generated successfully
