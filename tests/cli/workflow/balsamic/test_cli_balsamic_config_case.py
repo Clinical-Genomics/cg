@@ -480,7 +480,7 @@ def test_tga_panel_with_no_loqusdb_dump(
     assert "--artefact-sv-observation" not in caplog.text
 
 
-def test_head_job_partition(
+def test_head_job_partition_flag_included_in_cli_command(
     cli_runner: CliRunner,
     balsamic_context: CGConfig,
     caplog: LogCaptureFixture,
