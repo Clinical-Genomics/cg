@@ -1,6 +1,7 @@
 {% from "/macros/data_analysis/qc_metrics/qc_metrics.html" import qc_metrics %}
 
 {% macro balsamic_qc_metrics(samples, analysis_type) %}
+  <!-- TODO: Add sex on this metrics list-->
   {% set
     metrics = [
       {"name": "Läspar [M]",                  "key": "million_read_pairs", "description": "Antal sekvenseringsläsningar i miljoner läspar."},

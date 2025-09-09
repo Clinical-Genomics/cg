@@ -14,7 +14,7 @@ SWEDAC_LOGO_PATH = Path(
     project_root_dir, "meta", "delivery_report", "templates", "static", "images", "SWEDAC_logo.png"
 )
 
-BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]
+BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]  # TODO: Change something here?
 
 RNAFUSION_REPORT_ACCREDITED_APPTAGS: list[str] = ["RNAPOAR100"]
 RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT: int = 300
@@ -209,6 +209,7 @@ REQUIRED_SAMPLE_METADATA_NALLO_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIE
 _REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
     "mean_insert_size",
     "fold_80",
+    # TODO: Add sex here
 ]
 
 REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS: list[str] = (
