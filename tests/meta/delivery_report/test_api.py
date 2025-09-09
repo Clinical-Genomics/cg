@@ -33,8 +33,9 @@ from cg.models.delivery_report.sample import (
     SampleModel,
     TimestampModel,
 )
-from cg.store.models import Analysis, Case, Sample
+from cg.store.models import Analysis, Case, Sample, CaseSample
 from cg.store.store import Store
+from tests.conftest import case_id
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
@@ -79,6 +80,7 @@ def test_get_delivery_report_html_balsamic():
             panels=["some_panel"],
         )
     )
+    store.get_case_samples_by_case_id = Mock(return_value=[CaseSample])
     delivery_api: DeliveryAPI = create_autospec(DeliveryAPI)
     delivery_api.is_analysis_delivery = Mock(return_value=True)
     delivery_api.get_analysis_case_delivery_files = Mock(
