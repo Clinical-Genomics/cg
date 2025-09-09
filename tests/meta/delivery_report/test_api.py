@@ -12,6 +12,7 @@ from cg.apps.coverage import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.cli.workflow.base import workflow
 from cg.constants import DataDelivery, Workflow
 from cg.exc import DeliveryReportError
 from cg.meta.delivery.delivery import DeliveryAPI
@@ -34,6 +35,7 @@ from cg.models.delivery_report.sample import (
 )
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
+from tests.conftest import workflow_version
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
@@ -91,13 +93,16 @@ def test_get_delivery_report_html_balsamic():
     )
     analysis_api.get_genome_build = Mock(return_value="some_genome_build")
     analysis_api.get_pons = Mock(return_value=["some_pon"])
+    analysis_api.get_data_analysis_type = Mock(return_value="tgs")
+    analysis_api.get_variant_callers = Mock(return_value=["some_variant_caller"])
+
 
     # GIVEN a Balsamic delivery report API
     delivery_report_api = BalsamicDeliveryReportAPI(analysis_api)
 
     # WHEN we generate a delivery report
     delivery_report: str = delivery_report_api.get_delivery_report_html(
-        analysis=create_autospec(Analysis, comment="some comment"), force=False
+        analysis=create_autospec(Analysis, comment="some comment", workflow=Workflow.BALSAMIC, workflow_version="18.0.0"), force=False
     )
 
     # THEN the output should be as expected
