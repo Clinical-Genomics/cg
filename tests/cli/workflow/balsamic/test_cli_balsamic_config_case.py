@@ -145,6 +145,9 @@ def test_paired_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
     # THEN the flag related to TGS should not be included in the command
     assert "--cancer-somatic-snv-panel-observations" not in caplog.text
 
+    # THEN the partition flag should be included
+    assert f"--headjob-partition {balsamic_context.balsamic.head_job_partition} " in caplog.text
+
 
 def test_paired_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture):
     """Test with case_id that requires PAIRED TARGETED_GENOME_SEQUENCING analysis."""
@@ -160,6 +163,8 @@ def test_paired_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog:
     # THEN tumor and normal options should be included in command
     assert "--tumor" in caplog.text
     assert "--normal" in caplog.text
+    # THEN the partition flag should be included
+    assert f"--headjob-partition {balsamic_context.balsamic.head_job_partition} " in caplog.text
 
 
 def test_pon_cnn(
@@ -212,6 +217,9 @@ def test_single_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
     )
     assert f"--artefact-sv-observation {expected_file_path}" in caplog.text
 
+    # THEN the partition flag should be included
+    assert f"--headjob-partition {balsamic_context.balsamic.head_job_partition} " in caplog.text
+
 
 def test_single_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture):
     """Test with case_id that requires SINGLE TARGETED_GENOME_SEQUENCING analysis."""
@@ -228,6 +236,8 @@ def test_single_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog:
     assert "--tumor" in caplog.text
     # THEN normal option should NOT be included in command
     assert "--normal" not in caplog.text
+    # THEN the partition flag should be included
+    assert f"--headjob-partition {balsamic_context.balsamic.head_job_partition} " in caplog.text
 
 
 def test_error_single_wgs_panel_arg(

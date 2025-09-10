@@ -65,6 +65,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.gens_coverage_female_path: str = config.balsamic.gens_coverage_female_path
         self.gens_coverage_male_path: str = config.balsamic.gens_coverage_male_path
         self.gnomad_af5_path: str = config.balsamic.gnomad_af5_path
+        self.head_job_partition: str = config.balsamic.head_job_partition
         self.loqusdb_path: str = config.balsamic.loqusdb_path
         self.pon_path: str = config.balsamic.pon_path
         self.qos: SlurmQos = config.balsamic.slurm.qos
@@ -473,6 +474,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
             "exome": verified_exome_argument,
+            "head_job_partition": self.head_job_partition,
         }
 
         config_case.update(self.get_verified_samples(case_id=case_id))
@@ -605,6 +607,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--genome-version": arguments.get("genome_version"),
                 "--gens-coverage-pon": arguments.get("gens_coverage_pon"),
                 "--gnomad-min-af5": arguments.get("gnomad_min_af5"),
+                "--headjob-partition": arguments.get("head_job_partition"),
                 "--normal-sample-name": arguments.get("normal_sample_name"),
                 "--panel-bed": arguments.get("panel_bed"),
                 "--pon-cnn": arguments.get("pon_cnn"),
