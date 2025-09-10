@@ -33,7 +33,8 @@ from cg.models.delivery_report.sample import (
     SampleModel,
     TimestampModel,
 )
-from cg.store.models import Analysis, Case, Sample, CaseSample
+from cg.models.orders.sample_base import SexEnum
+from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.store.store import Store
 from tests.conftest import case_id
 
@@ -80,7 +81,12 @@ def test_get_delivery_report_html_balsamic():
             panels=["some_panel"],
         )
     )
-    store.get_case_samples_by_case_id = Mock(return_value=[CaseSample])
+    sample: Sample = create_autospec(
+        Sample, sex=SexEnum.male, is_tumour=True, internal_id="sample_id"
+    )
+    store.get_case_samples_by_case_id = Mock(
+        return_value=[create_autospec(CaseSample, sample=sample)]
+    )
     delivery_api: DeliveryAPI = create_autospec(DeliveryAPI)
     delivery_api.is_analysis_delivery = Mock(return_value=True)
     delivery_api.get_analysis_case_delivery_files = Mock(
@@ -98,6 +104,7 @@ def test_get_delivery_report_html_balsamic():
         lims_api=create_autospec(LimsAPI),
         scout_api=create_autospec(ScoutAPI),
         status_db=store,
+        workflow=Workflow.BALSAMIC,
     )
     analysis_api.get_genome_build = Mock(return_value="some_genome_build")
     analysis_api.get_pons = Mock(return_value=["some_pon"])
