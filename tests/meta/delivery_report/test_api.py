@@ -19,6 +19,7 @@ from cg.meta.delivery_report.balsamic import BalsamicDeliveryReportAPI
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.analysis import AnalysisModel
+from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.delivery.delivery import DeliveryFile
 from cg.models.delivery_report.metadata import SampleMetadataModel
 from cg.models.delivery_report.report import (
@@ -69,7 +70,7 @@ def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
     assert "<!DOCTYPE html>" in delivery_report_html
 
 
-def test_get_delivery_report_html_balsamic():
+def test_get_delivery_report_html_balsamic(balsamic_tga_analysis: BalsamicAnalysis):
 
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id = Mock(
@@ -114,6 +115,7 @@ def test_get_delivery_report_html_balsamic():
     analysis_api.get_pons = Mock(return_value=["some_pon"])
     analysis_api.get_data_analysis_type = Mock(return_value=CancerAnalysisType.TUMOR_PANEL)
     analysis_api.get_variant_callers = Mock(return_value=["some_variant_caller"])
+    analysis_api.get_latest_metadata = Mock(return_value=balsamic_tga_analysis)
 
     # GIVEN a Balsamic delivery report API
     delivery_report_api = BalsamicDeliveryReportAPI(analysis_api)
