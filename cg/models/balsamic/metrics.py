@@ -1,6 +1,8 @@
-from pydantic import field_validator
+from pydantic import AfterValidator, field_validator
+from typing_extensions import Annotated
 
 from cg.models.deliverables.metric_deliverables import MetricCondition, MetricsBase
+from cg.models.delivery_report.validators import get_sex_as_string
 from cg.models.qc_metrics import QCMetrics
 
 
@@ -26,7 +28,7 @@ class BalsamicQCMetrics(QCMetrics):
     fold_80_base_penalty: float | None = None
     mean_insert_size: float | None = None
     percent_duplication: float | None = None
-    compare_predicted_to_given_sex: str
+    compare_predicted_to_given_sex: Annotated[str, AfterValidator(get_sex_as_string)]
 
     _percent_duplication: float = field_validator("percent_duplication")(percent_value_validation)
 

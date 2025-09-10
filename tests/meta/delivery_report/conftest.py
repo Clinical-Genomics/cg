@@ -29,7 +29,7 @@ def balsamic_tga_analysis():
         sample_metrics={
             "sample_id": BalsamicTargetedQCMetrics(
                 percent_duplication=0.01,
-                compare_predicted_to_given_sex="Man",
+                predicted_sex="Man",
                 mean_insert_size=1.0,
                 fold_80_base_penalty=1.0,
                 gc_dropout=1.0,
