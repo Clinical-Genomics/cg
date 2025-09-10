@@ -503,14 +503,7 @@ def test_head_job_partition_flag_included_in_cli_command(
     case: Case = create_autospec(Case, links=[case_sample], samples=[sample], internal_id=case_id)
     case_sample.case = case
 
-    bed = create_autospec(Bed)
-    bed.name = "GMSmyeloid"
-    bed_version = create_autospec(
-        BedVersion, bed=bed, short_name="BalsamicBed1", filename="balsamic_bed_1.bed"
-    )
     store.get_case_by_internal_id = Mock(return_value=case)
-    store.get_bed_version_by_file_name_strict = Mock(return_value=bed_version)
-    store.get_bed_version_by_short_name = Mock(return_value=bed_version)
     store.get_samples_by_case_id = Mock(return_value=[sample])
 
     balsamic_context.status_db_ = store
