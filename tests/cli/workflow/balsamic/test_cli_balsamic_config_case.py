@@ -163,6 +163,8 @@ def test_paired_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog:
     # THEN tumor and normal options should be included in command
     assert "--tumor" in caplog.text
     assert "--normal" in caplog.text
+    # THEN the partition flag should be included
+    assert f"--headjob-partition {balsamic_context.balsamic.head_job_partition} " in caplog.text
 
 
 def test_pon_cnn(
