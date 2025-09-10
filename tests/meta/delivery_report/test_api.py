@@ -36,7 +36,6 @@ from cg.models.delivery_report.sample import (
 from cg.models.orders.sample_base import SexEnum
 from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.store.store import Store
-from tests.conftest import case_id
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
@@ -96,12 +95,15 @@ def test_get_delivery_report_html_balsamic():
             )
         ]
     )
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.has_sample_passed_initial_qc = Mock(return_value=True)
+
     analysis_api = create_autospec(
         BalsamicAnalysisAPI,
         chanjo_api=create_autospec(ChanjoAPI),
         delivery_api=delivery_api,
         housekeeper_api=create_autospec(HousekeeperAPI),
-        lims_api=create_autospec(LimsAPI),
+        lims_api=lims_api,
         scout_api=create_autospec(ScoutAPI),
         status_db=store,
         workflow=Workflow.BALSAMIC,
