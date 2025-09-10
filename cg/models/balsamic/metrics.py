@@ -28,7 +28,7 @@ class BalsamicQCMetrics(QCMetrics):
     fold_80_base_penalty: float | None = None
     mean_insert_size: float | None = None
     percent_duplication: float | None = None
-    compare_predicted_to_given_sex: Annotated[str, AfterValidator(get_sex_as_string)]
+    compare_predicted_to_given_sex: Annotated[str | None, AfterValidator(get_sex_as_string)] = None
 
     _percent_duplication: float = field_validator("percent_duplication")(percent_value_validation)
 

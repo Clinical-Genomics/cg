@@ -173,3 +173,21 @@
   condition:
     norm: gt
     threshold: 0.8
+- header: null
+  id: ACC0000A1
+  input: sex_prediction.json
+  name: COMPARE_PREDICTED_TO_GIVEN_SEX
+  step: sex_check
+  value: male
+  condition:
+    norm: eq
+    threshold: male
+- header: null
+  id: ACC0000A2
+  input: sex_prediction.json
+  name: COMPARE_PREDICTED_TO_GIVEN_SEX
+  step: sex_check
+  value: male
+  condition:
+    norm: eq
+    threshold: male
