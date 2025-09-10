@@ -14,7 +14,7 @@ SWEDAC_LOGO_PATH = Path(
     project_root_dir, "meta", "delivery_report", "templates", "static", "images", "SWEDAC_logo.png"
 )
 
-BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]  # TODO: Change something here?
+BALSAMIC_REPORT_ACCREDITED_PANELS: list[str] = ["gmsmyeloid"]
 
 RNAFUSION_REPORT_ACCREDITED_APPTAGS: list[str] = ["RNAPOAR100"]
 RNAFUSION_REPORT_MINIMUM_INPUT_AMOUNT: int = 300
