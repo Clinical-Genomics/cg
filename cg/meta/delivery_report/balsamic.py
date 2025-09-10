@@ -89,6 +89,7 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
             million_read_pairs=million_read_pairs,
             pct_250x=sample_metrics.pct_target_bases_250x if sample_metrics else None,
             pct_500x=sample_metrics.pct_target_bases_500x if sample_metrics else None,
+            predicted_sex=sample_metrics.compare_predicted_to_given_sex if sample_metrics else None,
         )
 
     @staticmethod
