@@ -515,3 +515,43 @@ def test_unknown_sex_is_set_as_unknown(
 
     # THEN the sex is set to unknown in the command
     assert "--gender unknown" in caplog.text
+
+    def test_head_job_partition_flag_included_in_cli_command(
+        cli_runner: CliRunner,
+        balsamic_context: CGConfig,
+        caplog: LogCaptureFixture,
+    ):
+        """Test that head job partition is included in the run command"""
+        caplog.set_level(logging.INFO)
+
+        # GIVEN a sufficient store
+        store: Store = create_autospec(Store)
+
+        sample: Sample = create_autospec(
+            Sample,
+            internal_id="sample_case_tgs_single_tumor",
+            sex=SexEnum.female,
+            prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            from_sample=None,
+        )
+        case_sample = create_autospec(CaseSample, sample=sample)
+        case_id = "balsamic_case_tgs_single"
+        case: Case = create_autospec(
+            Case, links=[case_sample], samples=[sample], internal_id=case_id
+        )
+        case_sample.case = case
+
+        store.get_case_by_internal_id = Mock(return_value=case)
+        store.get_samples_by_case_id = Mock(return_value=[sample])
+
+        balsamic_context.status_db_ = store
+        balsamic_context.meta_apis["analysis_api"].status_db = store
+
+        # WHEN dry running
+        result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+
+        # THEN command should be generated successfully
+        assert result.exit_code == EXIT_SUCCESS
+
+        # THEN the partition flag should be included
+        assert f"--headjob-partition {balsamic_context.balsamic.head_job_partition} " in caplog.text
