@@ -111,6 +111,7 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
             pct_reads_improper_pairs=(
                 sample_metrics.pct_pf_reads_improper_pairs if sample_metrics else None
             ),
+            predicted_sex=sample_metrics.compare_predicted_to_given_sex if sample_metrics else None,
         )
 
     def is_report_accredited(
