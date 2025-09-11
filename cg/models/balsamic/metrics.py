@@ -27,6 +27,7 @@ class BalsamicQCMetrics(QCMetrics):
 
     fold_80_base_penalty: float | None = None
     mean_insert_size: float | None = None
+    median_target_coverage: float | None = None
     percent_duplication: float | None = None
     compare_predicted_to_given_sex: Annotated[str | None, AfterValidator(get_sex_as_string)] = None
 
@@ -37,7 +38,6 @@ class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
     """BALSAMIC targeted QC metrics"""
 
     mean_target_coverage: float | None = None
-    median_target_coverage: float | None = None
     pct_target_bases_50x: float | None = None
     pct_target_bases_100x: float | None = None
     pct_target_bases_250x: float | None = None
@@ -59,7 +59,6 @@ class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
 class BalsamicWGSQCMetrics(BalsamicQCMetrics):
     """BALSAMIC WHOLE_GENOME_SEQUENCING QC metrics"""
 
-    median_coverage: float | None = None
     pct_15x: float | None = None
     pct_30x: float | None = None
     pct_60x: float | None = None

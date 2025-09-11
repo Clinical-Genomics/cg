@@ -18,6 +18,7 @@ def test_parse_analysis_tga(cg_context, balsamic_tga_config_raw, balsamic_tga_me
     # THEN assert that it was successfully created
     assert isinstance(balsamic_analysis.balsamic_config, BalsamicConfigJSON)
     assert isinstance(balsamic_analysis.sample_metrics["ACC00000A1"], BalsamicTargetedQCMetrics)
+    # TODO add more asserts regarding the created object
 
 
 def test_parse_analysis_wgs(cg_context, balsamic_wgs_config_raw, balsamic_wgs_metrics_raw):
@@ -35,3 +36,4 @@ def test_parse_analysis_wgs(cg_context, balsamic_wgs_config_raw, balsamic_wgs_me
 
     assert isinstance(balsamic_analysis.balsamic_config, BalsamicConfigJSON)
     assert isinstance(balsamic_analysis.sample_metrics["ACC00000A1"], BalsamicWGSQCMetrics)
+    assert balsamic_analysis.sample_metrics["ACC00000A1"].median_target_coverage
