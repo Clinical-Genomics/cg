@@ -74,7 +74,7 @@ def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
 
 
 def test_get_delivery_report_html_balsamic_tga(balsamic_tga_analysis: BalsamicAnalysis):
-
+    # GIVEN a store with a BALSAMIC TGA case linked to a sample
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id = Mock(
         return_value=create_autospec(
@@ -92,6 +92,8 @@ def test_get_delivery_report_html_balsamic_tga(balsamic_tga_analysis: BalsamicAn
     store.get_case_samples_by_case_id = Mock(
         return_value=[create_autospec(CaseSample, sample=sample)]
     )
+
+    # GIVEN a Delivery API
     delivery_api: DeliveryAPI = create_autospec(DeliveryAPI)
     delivery_api.is_analysis_delivery = Mock(return_value=True)
     delivery_api.get_analysis_case_delivery_files = Mock(
@@ -101,9 +103,12 @@ def test_get_delivery_report_html_balsamic_tga(balsamic_tga_analysis: BalsamicAn
             )
         ]
     )
+
+    # GIVEN a LIMS API
     lims_api: LimsAPI = create_autospec(LimsAPI)
     lims_api.has_sample_passed_initial_qc = Mock(return_value=True)
 
+    # GIVEN a Balsamic Analysis API
     analysis_api = create_autospec(
         BalsamicAnalysisAPI,
         chanjo_api=create_autospec(ChanjoAPI),
@@ -131,7 +136,7 @@ def test_get_delivery_report_html_balsamic_tga(balsamic_tga_analysis: BalsamicAn
         force=False,
     )
 
-    # THEN the output should be as expected
+    # THEN the QC table should be present in the HTML content
     assert EXPECTED_BALSAMIC_QC_TABLE_TGA in delivery_report
 
 

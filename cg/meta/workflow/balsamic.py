@@ -316,8 +316,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_latest_metadata(self, case_id: str) -> BalsamicAnalysis:
         """Return the latest metadata of a specific BALSAMIC case."""
 
-        config_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.CONFIG)
-        metrics_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.QC_METRICS)
+        config_raw_data: dict = self.get_latest_raw_file_data(
+            case_id=case_id, tags=BalsamicAnalysisTag.CONFIG
+        )
+        metrics_raw_data: list[dict] = self.get_latest_raw_file_data(
+            case_id=case_id, tags=BalsamicAnalysisTag.QC_METRICS
+        )
 
         if config_raw_data and metrics_raw_data:
             try:

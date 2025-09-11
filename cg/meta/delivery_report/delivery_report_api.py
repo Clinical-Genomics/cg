@@ -251,14 +251,14 @@ class DeliveryReportAPI:
         for case_sample in case_samples:
             sample: Sample = case_sample.sample
             lims_sample: dict[str, Any] = self.lims_api.sample(sample.internal_id)
-            delivered_files: list[File] | None = (
+            delivered_files: list[DeliveryFile] | None = (
                 self.delivery_api.get_analysis_sample_delivery_files_by_sample(
                     case=case, sample=sample
                 )
                 if self.delivery_api.is_analysis_delivery(case.data_delivery)
                 else None
             )
-            delivered_fastq_files: list[File] | None = (
+            delivered_fastq_files: list[DeliveryFile] | None = (
                 self.delivery_api.get_fastq_delivery_files_by_sample(case=case, sample=sample)
                 if self.delivery_api.is_fastq_delivery(case.data_delivery)
                 else None
