@@ -196,6 +196,75 @@ def test_get_delivery_report_html_balsamic_wgs(balsamic_wgs_analysis: BalsamicAn
     assert EXPECTED_BALSAMIC_QC_TABLE_WGS in delivery_report
 
 
+def test_get_delivery_report_html_balsamic_wgs_no_predicted_sex(
+    balsamic_wgs_analysis_without_predicted_sex: BalsamicAnalysis, caplog: LogCaptureFixture
+):
+    caplog.set_level("INFO")
+
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id = Mock(
+        return_value=create_autospec(
+            Case,
+            data_analysis=Workflow.BALSAMIC,
+            data_delivery=DataDelivery.ANALYSIS_FILES,
+            internal_id="case_id",
+        )
+    )
+    sample: Sample = create_autospec(
+        Sample, sex=SexEnum.male, is_tumour=True, internal_id="sample_id"
+    )
+    sample.name = "sample_name"
+    store.get_case_samples_by_case_id = Mock(
+        return_value=[create_autospec(CaseSample, sample=sample)]
+    )
+    delivery_api: DeliveryAPI = create_autospec(DeliveryAPI)
+    delivery_api.is_analysis_delivery = Mock(return_value=True)
+    delivery_api.get_analysis_case_delivery_files = Mock(
+        return_value=[
+            create_autospec(
+                DeliveryFile, destination_path=Path("destination"), source_path=Path("source")
+            )
+        ]
+    )
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.has_sample_passed_initial_qc = Mock(return_value=True)
+
+    analysis_api = create_autospec(
+        BalsamicAnalysisAPI,
+        chanjo_api=create_autospec(ChanjoAPI),
+        delivery_api=delivery_api,
+        housekeeper_api=create_autospec(HousekeeperAPI),
+        lims_api=lims_api,
+        scout_api=create_autospec(ScoutAPI),
+        status_db=store,
+        workflow=Workflow.BALSAMIC,
+    )
+    analysis_api.get_genome_build = Mock(return_value="some_genome_build")
+    analysis_api.get_pons = Mock(return_value=["some_pon"])
+    analysis_api.get_data_analysis_type = Mock(return_value=CancerAnalysisType.TUMOR_NORMAL_WGS)
+    analysis_api.get_variant_callers = Mock(return_value=["some_variant_caller"])
+    analysis_api.get_latest_metadata = Mock(
+        return_value=balsamic_wgs_analysis_without_predicted_sex
+    )
+
+    # GIVEN a Balsamic delivery report API
+    delivery_report_api = BalsamicDeliveryReportAPI(analysis_api)
+
+    # WHEN we generate a delivery report
+    # THEN a DeliveryReportError should be raised
+    with pytest.raises(DeliveryReportError):
+        delivery_report_api.get_delivery_report_html(
+            analysis=create_autospec(
+                Analysis,
+                comment="some comment",
+                workflow=Workflow.BALSAMIC,
+                workflow_version="18.0.0",
+            ),
+            force=False,
+        )
+    assert "- predicted_sex" in caplog.text
+
+
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
 def test_write_delivery_report_file(request: FixtureRequest, workflow: Workflow, tmp_path: Path):
     """Test writing of the delivery report for different workflows."""
