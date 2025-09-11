@@ -1,171 +1,263 @@
 - header: null
-  id: ACC0000A1
-  input: ACC0000A1.multiple_metrics.alignment_summary_metrics
+  id: ACC00000A2
+  input: normal.ACC00000A2.alignment_summary_metrics.txt
   name: PCT_PF_READS_IMPROPER_PAIRS
   step: multiqc_picard_AlignmentSummaryMetrics
-  value: 0.014512
+  value: 0.014465
   condition:
     norm: le
     threshold: 0.05
 - header: null
-  id: ACC0000A2
-  input: ACC0000A2.multiple_metrics.alignment_summary_metrics
+  id: ACC00000A1
+  input: tumor.ACC00000A1.alignment_summary_metrics.txt
   name: PCT_PF_READS_IMPROPER_PAIRS
   step: multiqc_picard_AlignmentSummaryMetrics
-  value: 0.015803
+  value: 0.014569
   condition:
     norm: le
     threshold: 0.05
 - header: null
-  id: ACC0000A2
-  input: ACC0000A2.dedup.realign.hsmetric.txt
+  id: ACC00000A2
+  input: normal.ACC00000A2.gc_bias.txt
+  name: AT_DROPOUT
+  step: multiqc_picard_gcbias
+  value: 1.409102
+  condition:
+    norm: lt
+    threshold: 5.0
+- header: null
+  id: ACC00000A2
+  input: normal.ACC00000A2.gc_bias.txt
+  name: GC_DROPOUT
+  step: multiqc_picard_gcbias
+  value: 1.659403
+  condition:
+    norm: lt
+    threshold: 5.0
+- header: null
+  id: ACC00000A1
+  input: normal.ACC00000A2.gc_bias.txt
+  name: AT_DROPOUT
+  step: multiqc_picard_gcbias
+  value: 1.325519
+  condition:
+    norm: lt
+    threshold: 5.0
+- header: null
+  id: ACC00000A1
+  input: normal.ACC00000A2.gc_bias.txt
+  name: GC_DROPOUT
+  step: multiqc_picard_gcbias
+  value: 1.65471
+  condition:
+    norm: lt
+    threshold: 5.0
+- header: null
+  id: ACC00000A1
+  input: normal.ACC00000A2.hsmetric.txt
   name: FOLD_80_BASE_PENALTY
   step: multiqc_picard_HsMetrics
-  value: 1.198677
+  value: 1.337691
   condition: null
 - header: null
-  id: ACC0000A1
-  input: ACC0000A1.dedup.realign.hsmetric.txt
+  id: ACC00000A1
+  input: normal.ACC00000A2.hsmetric.txt
+  name: AT_DROPOUT
+  step: multiqc_picard_HsMetrics
+  value: 0.053718
+  condition:
+    norm: lt
+    threshold: 5.0
+- header: null
+  id: ACC00000A1
+  input: normal.ACC00000A2.hsmetric.txt
+  name: GC_DROPOUT
+  step: multiqc_picard_HsMetrics
+  value: 1.619223
+  condition:
+    norm: lt
+    threshold: 5.0
+- header: null
+  id: ACC00000A2
+  input: normal.ACC00000A2.hsmetric.txt
   name: FOLD_80_BASE_PENALTY
   step: multiqc_picard_HsMetrics
-  value: 1.096481
+  value: 1.22658
   condition: null
 - header: null
-  id: ACC0000A1
-  input: ACC0000A1.multiple_metrics.insert_size_metrics
+  id: ACC00000A2
+  input: normal.ACC00000A2.hsmetric.txt
+  name: AT_DROPOUT
+  step: multiqc_picard_HsMetrics
+  value: 0.148487
+  condition:
+    norm: lt
+    threshold: 5.0
+- header: null
+  id: ACC00000A2
+  input: normal.ACC00000A2.hsmetric.txt
+  name: GC_DROPOUT
+  step: multiqc_picard_HsMetrics
+  value: 1.177491
+  condition:
+    norm: lt
+    threshold: 5.0
+- header: null
+  id: ACC00000A2
+  input: normal.ACC00000A2.insert_size_metrics.txt
   name: MEAN_INSERT_SIZE
   step: multiqc_picard_insertSize
-  value: 313.246508
+  value: 347.069842
   condition: null
 - header: null
-  id: ACC0000A2
-  input: ACC0000A2.multiple_metrics.insert_size_metrics
+  id: ACC00000A1
+  input: tumor.ACC00000A1.insert_size_metrics.txt
   name: MEAN_INSERT_SIZE
   step: multiqc_picard_insertSize
-  value: 372.877626
+  value: 359.345997
   condition: null
 - header: null
-  id: ACC0000A2
-  input: normal.ACC0000A2.dedup.metrics
+  id: ACC00000A1
+  input: tumor.ACC00000A1.dedup.metrics
   name: PERCENT_DUPLICATION
   step: multiqc_picard_dups
-  value: 0.155342
+  value: 0.120049
   condition: null
 - header: null
-  id: ACC0000A1
-  input: tumor.ACC0000A1.dedup.metrics
+  id: ACC00000A2
+  input: normal.ACC00000A2.dedup.metrics
   name: PERCENT_DUPLICATION
   step: multiqc_picard_dups
-  value: 0.143543
+  value: 0.128775
   condition: null
 - header: null
-  id: ACC0000A1
-  input: ACC0000A1_picard_wgs_metrics.txt
-  name: MEDIAN_COVERAGE
-  step: multiqc_picard_wgsmetrics
-  value: 117.0
-  condition: null
+  id: ACC00000A2
+  input: normal.ACC00000A2.hsmetric.txt
+  name: MEDIAN_TARGET_COVERAGE
+  step: multiqc_picard_HsMetrics
+  value: 30.0
+  condition:
+    norm: gt
+    threshold: 26
 - header: null
-  id: ACC0000A1
-  input: ACC0000A1_picard_wgs_metrics.txt
+  id: ACC00000A2
+  input: normal.ACC00000A2_picard_wgs_metrics.txt
   name: PCT_15X
   step: multiqc_picard_wgsmetrics
-  value: 0.984724
+  value: 0.966635
   condition: null
 - header: null
-  id: ACC0000A1
-  input: ACC0000A1_picard_wgs_metrics.txt
+  id: ACC00000A2
+  input: normal.ACC00000A2_picard_wgs_metrics.txt
   name: PCT_30X
   step: multiqc_picard_wgsmetrics
-  value: 0.981091
+  value: 0.508249
   condition: null
 - header: null
-  id: ACC0000A1
-  input: ACC0000A1_picard_wgs_metrics.txt
+  id: ACC00000A2
+  input: normal.ACC00000A2_picard_wgs_metrics.txt
   name: PCT_60X
   step: multiqc_picard_wgsmetrics
-  value: 0.943016
+  value: 0.002788
+  condition: null
+- header: null
+  id: ACC00000A2
+  input: normal.ACC00000A2_picard_wgs_metrics.txt
+  name: PCT_100X
+  step: multiqc_picard_wgsmetrics
+  value: 0.001113
+  condition: null
+- header: null
+  id: ACC00000A2
+  input: normal.ACC00000A2_picard_wgs_metrics.txt
+  name: FOLD_80_BASE_PENALTY
+  step: multiqc_picard_wgsmetrics
+  value: 1.224108
+  condition: null
+- header: null
+  id: ACC00000A1
+  input: tumor.ACC00000A1.hsmetric.txt
+  name: MEDIAN_TARGET_COVERAGE
+  step: multiqc_picard_wgsmetrics
+  value: 111.0
+  condition:
+    norm: gt
+    threshold: 26
+- header: null
+  id: ACC00000A1
+  input: tumor.ACC00000A1_picard_wgs_metrics.txt
+  name: PCT_15X
+  step: multiqc_picard_wgsmetrics
+  value: 0.979451
+  condition: null
+- header: null
+  id: ACC00000A1
+  input: tumor.ACC00000A1_picard_wgs_metrics.txt
+  name: PCT_30X
+  step: multiqc_picard_wgsmetrics
+  value: 0.976069
+  condition: null
+- header: null
+  id: ACC00000A1
+  input: tumor.ACC00000A1_picard_wgs_metrics.txt
+  name: PCT_60X
+  step: multiqc_picard_wgsmetrics
+  value: 0.941892
   condition:
     norm: gt
     threshold: 0.8
 - header: null
-  id: ACC0000A1
-  input: ACC0000A1_picard_wgs_metrics.txt
+  id: ACC00000A1
+  input: tumor.ACC00000A1_picard_wgs_metrics.txt
   name: PCT_100X
   step: multiqc_picard_wgsmetrics
-  value: 0.833303
+  value: 0.646318
   condition: null
 - header: null
-  id: ACC0000A1
-  input: ACC0000A1_picard_wgs_metrics.txt
+  id: ACC00000A1
+  input: tumor.ACC00000A1_picard_wgs_metrics.txt
   name: FOLD_80_BASE_PENALTY
   step: multiqc_picard_wgsmetrics
-  value: 1.094618
+  value: 1.323066
   condition: null
 - header: null
-  id: ACC0000A2
-  input: ACC0000A2_picard_wgs_metrics.txt
-  name: MEDIAN_COVERAGE
-  step: multiqc_picard_wgsmetrics
-  value: 27.0
-  condition: null
-- header: null
-  id: ACC0000A2
-  input: ACC0000A2_picard_wgs_metrics.txt
-  name: PCT_15X
-  step: multiqc_picard_wgsmetrics
-  value: 0.9401
-  condition:
-    norm: gt
-    threshold: 0.95
-- header: null
-  id: ACC0000A2
-  input: ACC0000A2_picard_wgs_metrics.txt
-  name: PCT_30X
-  step: multiqc_picard_wgsmetrics
-  value: 0.370618
-  condition: null
-- header: null
-  id: ACC0000A2
-  input: ACC0000A2_picard_wgs_metrics.txt
-  name: PCT_60X
-  step: multiqc_picard_wgsmetrics
-  value: 0.002758
-  condition: null
-- header: null
-  id: ACC0000A2
-  input: ACC0000A2_picard_wgs_metrics.txt
-  name: PCT_100X
-  step: multiqc_picard_wgsmetrics
-  value: 0.001058
-  condition: null
-- header: null
-  id: ACC0000A2
-  input: ACC0000A2_picard_wgs_metrics.txt
-  name: FOLD_80_BASE_PENALTY
-  step: multiqc_picard_wgsmetrics
-  value: 1.232587
-  condition: null
-- header: null
-  id: wgs-case
-  input: SV.somatic.wgs-case.svdb.clinical.filtered.pass.stats
+  id: wholewhale
+  input: SV.somatic.wholewhale.svdb.clinical.filtered.pass.stats
   name: NUMBER_OF_SITES
   step: collect_custom_qc_metrics
-  value: 2998
+  value: 6219
   condition:
     norm: lt
-    threshold: 50000.0
+    threshold: 50000
 - header: null
-  id: wgs-case
-  input: SNV.somatic.wgs-case.tnscope.clinical.filtered.pass.stats
+  id: wholewhale
+  input: SNV.somatic.wholewhale.tnscope.clinical.filtered.pass.stats
   name: NUMBER_OF_SITES
   step: collect_custom_qc_metrics
-  value: 18116
+  value: 12042
   condition:
     norm: lt
-    threshold: 50000.0
+    threshold: 50000
 - header: null
-  id: wgs-case
+  id: ACC00000A1
+  input: sex_prediction.json
+  name: COMPARE_PREDICTED_TO_GIVEN_SEX
+  step: sex_check
+  value: female
+  condition:
+    norm: eq
+    threshold: female
+- header: null
+  id: ACC00000A2
+  input: sex_prediction.json
+  name: COMPARE_PREDICTED_TO_GIVEN_SEX
+  step: sex_check
+  value: female
+  condition:
+    norm: eq
+    threshold: female
+- header: null
+  id: wholewhale
   input: somalier.pairs.tsv
   name: RELATEDNESS
   step: multiqc_somalier
@@ -173,21 +265,3 @@
   condition:
     norm: gt
     threshold: 0.8
-- header: null
-  id: ACC0000A1
-  input: sex_prediction.json
-  name: COMPARE_PREDICTED_TO_GIVEN_SEX
-  step: sex_check
-  value: male
-  condition:
-    norm: eq
-    threshold: male
-- header: null
-  id: ACC0000A2
-  input: sex_prediction.json
-  name: COMPARE_PREDICTED_TO_GIVEN_SEX
-  step: sex_check
-  value: male
-  condition:
-    norm: eq
-    threshold: male

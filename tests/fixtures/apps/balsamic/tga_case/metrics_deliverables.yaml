@@ -1,124 +1,235 @@
 - header: null
-  id: ACC0000A0
-  input: concatenated_ACC0000A0_XXXXXX_R.sorted.mrkdup.hsmetric
+  id: ACC00000A1
+  input: normal.ACC00001A2.hsmetric.txt
   name: PCT_OFF_BAIT
   step: multiqc_picard_HsMetrics
-  value: 0.403752
+  value: 0.375377
   condition: null
 - header: null
-  id: ACC0000A0
-  input: concatenated_ACC0000A0_XXXXXX_R.sorted.mrkdup.hsmetric
+  id: ACC00000A1
+  input: normal.ACC00001A2.hsmetric.txt
   name: MEAN_TARGET_COVERAGE
   step: multiqc_picard_HsMetrics
-  value: 3128.940221
+  value: 1033.586714
   condition: null
 - header: null
-  id: ACC0000A0
-  input: concatenated_ACC0000A0_XXXXXX_R.sorted.mrkdup.hsmetric
+  id: ACC00000A1
+  input: normal.ACC00001A2.hsmetric.txt
   name: MEDIAN_TARGET_COVERAGE
   step: multiqc_picard_HsMetrics
-  value: 3228.0
+  value: 1094.0
   condition: null
 - header: null
-  id: ACC0000A0
-  input: concatenated_ACC0000A0_XXXXXX_R.sorted.mrkdup.hsmetric
+  id: ACC00000A1
+  input: normal.ACC00001A2.hsmetric.txt
   name: FOLD_80_BASE_PENALTY
   step: multiqc_picard_HsMetrics
-  value: 1.180287
+  value: 1.683366
+  condition: null
+- header: null
+  id: ACC00000A1
+  input: normal.ACC00001A2.hsmetric.txt
+  name: PCT_TARGET_BASES_20X
+  step: multiqc_picard_HsMetrics
+  value: 0.998813
+  condition: null
+- header: null
+  id: ACC00000A1
+  input: normal.ACC00001A2.hsmetric.txt
+  name: PCT_TARGET_BASES_50X
+  step: multiqc_picard_HsMetrics
+  value: 0.998543
+  condition: null
+- header: null
+  id: ACC00000A1
+  input: normal.ACC00001A2.hsmetric.txt
+  name: PCT_TARGET_BASES_100X
+  step: multiqc_picard_HsMetrics
+  value: 0.997694
+  condition: null
+- header: null
+  id: ACC00000A1
+  input: normal.ACC00001A2.hsmetric.txt
+  name: PCT_TARGET_BASES_250X
+  step: multiqc_picard_HsMetrics
+  value: 0.985918
   condition:
-    norm: lt
-    threshold: 1.8
+    norm: gt
+    threshold: 0.95
 - header: null
-  id: ACC0000A1
-  input: concatenated_ACC0000A1_XXXXXX_R.sorted.mrkdup.hsmetric
-  name: PCT_OFF_BAIT
+  id: ACC00000A1
+  input: normal.ACC00001A2.hsmetric.txt
+  name: PCT_TARGET_BASES_500X
   step: multiqc_picard_HsMetrics
-  value: 0.370438
+  value: 0.882644
   condition: null
 - header: null
-  id: ACC0000A1
-  input: concatenated_ACC0000A1_XXXXXX_R.sorted.mrkdup.hsmetric
-  name: MEAN_TARGET_COVERAGE
+  id: ACC00000A1
+  input: normal.ACC00001A2.hsmetric.txt
+  name: PCT_TARGET_BASES_1000X
   step: multiqc_picard_HsMetrics
-  value: 5132.727209
+  value: 0.56992
   condition: null
 - header: null
-  id: ACC0000A1
-  input: concatenated_ACC0000A1_XXXXXX_R.sorted.mrkdup.hsmetric
-  name: MEDIAN_TARGET_COVERAGE
-  step: multiqc_picard_HsMetrics
-  value: 5323.0
-  condition: null
-- header: null
-  id: ACC0000A1
-  input: concatenated_ACC0000A1_XXXXXX_R.sorted.mrkdup.hsmetric
-  name: FOLD_80_BASE_PENALTY
-  step: multiqc_picard_HsMetrics
-  value: 1.163356
-  condition:
-    norm: lt
-    threshold: 1.8
-- header: null
-  id: ACC0000A1
-  input: concatenated_ACC0000A1_XXXXXX_R.sorted.insertsizemetric
-  name: MEAN_INSERT_SIZE
-  step: multiqc_picard_insertSize
-  value: 178.192201
-  condition: null
-- header: null
-  id: ACC0000A0
-  input: concatenated_ACC0000A0_XXXXXX_R.sorted.insertsizemetric
-  name: MEAN_INSERT_SIZE
-  step: multiqc_picard_insertSize
-  value: 193.161307
-  condition: null
-- header: null
-  id: ACC0000A0
-  input: concatenated_ACC0000A0_XXXXXX_R.sorted.mrkdup.txt
-  name: PERCENT_DUPLICATION
-  step: multiqc_picard_dups
-  value: 0.930424
-  condition: null
-- header: null
-  id: ACC0000A1
-  input: concatenated_ACC0000A1_XXXXXX_R.sorted.mrkdup.txt
-  name: PERCENT_DUPLICATION
-  step: multiqc_picard_dups
-  value: 0.931044
-  condition: null
-- header: null
-  id: ACC0000A0
-  input: ACC0000A0.dedup.hsmetric.txt
+  id: ACC00000A1
+  input: normal.ACC00001A2.hsmetric.txt
   name: GC_DROPOUT
   step: multiqc_picard_HsMetrics
-  value: 1.119042
+  value: 0.243943
   condition:
     norm: lt
     threshold: 1.0
 - header: null
-  id: ACC0000A1
-  input: ACC0000A1.dedup.hsmetric.txt
+  id: ACC00001A2
+  input: normal.ACC00001A2.hsmetric.txt
+  name: PCT_OFF_BAIT
+  step: multiqc_picard_HsMetrics
+  value: 0.372064
+  condition: null
+- header: null
+  id: ACC00001A2
+  input: normal.ACC00001A2.hsmetric.txt
+  name: MEAN_TARGET_COVERAGE
+  step: multiqc_picard_HsMetrics
+  value: 903.903117
+  condition: null
+- header: null
+  id: ACC00001A2
+  input: normal.ACC00001A2.hsmetric.txt
+  name: MEDIAN_TARGET_COVERAGE
+  step: multiqc_picard_HsMetrics
+  value: 964.0
+  condition: null
+- header: null
+  id: ACC00001A2
+  input: normal.ACC00001A2.hsmetric.txt
+  name: FOLD_80_BASE_PENALTY
+  step: multiqc_picard_HsMetrics
+  value: 1.686386
+  condition: null
+- header: null
+  id: ACC00001A2
+  input: normal.ACC00001A2.hsmetric.txt
+  name: PCT_TARGET_BASES_20X
+  step: multiqc_picard_HsMetrics
+  value: 0.998822
+  condition: null
+- header: null
+  id: ACC00001A2
+  input: normal.ACC00001A2.hsmetric.txt
+  name: PCT_TARGET_BASES_50X
+  step: multiqc_picard_HsMetrics
+  value: 0.998473
+  condition: null
+- header: null
+  id: ACC00001A2
+  input: normal.ACC00001A2.hsmetric.txt
+  name: PCT_TARGET_BASES_100X
+  step: multiqc_picard_HsMetrics
+  value: 0.997257
+  condition: null
+- header: null
+  id: ACC00001A2
+  input: normal.ACC00001A2.hsmetric.txt
+  name: PCT_TARGET_BASES_250X
+  step: multiqc_picard_HsMetrics
+  value: 0.978843
+  condition:
+    norm: gt
+    threshold: 0.95
+- header: null
+  id: ACC00001A2
+  input: normal.ACC00001A2.hsmetric.txt
+  name: PCT_TARGET_BASES_500X
+  step: multiqc_picard_HsMetrics
+  value: 0.83066
+  condition: null
+- header: null
+  id: ACC00001A2
+  input: normal.ACC00001A2.hsmetric.txt
+  name: PCT_TARGET_BASES_1000X
+  step: multiqc_picard_HsMetrics
+  value: 0.461154
+  condition: null
+- header: null
+  id: ACC00001A2
+  input: normal.ACC00001A2.hsmetric.txt
   name: GC_DROPOUT
   step: multiqc_picard_HsMetrics
-  value: 1.00692
+  value: 0.444905
   condition:
     norm: lt
     threshold: 1.0
 - header: null
-  id: ACC0000A0
+  id: ACC00000A1
+  input: tumor.ACC00000A1.insert_size_metrics.txt
+  name: MEAN_INSERT_SIZE
+  step: multiqc_picard_insertSize
+  value: 168.719145
+  condition: null
+- header: null
+  id: ACC00001A2
+  input: normal.ACC00001A2.insert_size_metrics.txt
+  name: MEAN_INSERT_SIZE
+  step: multiqc_picard_insertSize
+  value: 168.515498
+  condition: null
+- header: null
+  id: ACC00000A1
+  input: tumor.ACC00000A1.dedup_conensus.metrics
+  name: PERCENT_DUPLICATION
+  step: multiqc_picard_dups
+  value: 0.641873
+  condition: null
+- header: null
+  id: ACC00001A2
+  input: normal.ACC00001A2.dedup_conensus.metrics
+  name: PERCENT_DUPLICATION
+  step: multiqc_picard_dups
+  value: 0.61773
+  condition: null
+- header: null
+  id: selectbengal
+  input: SV.somatic.selectbengal.svdb.clinical.filtered.pass.stats
+  name: NUMBER_OF_SITES
+  step: collect_custom_qc_metrics
+  value: 112
+  condition:
+    norm: lt
+    threshold: 50000
+- header: null
+  id: selectbengal
+  input: SNV.somatic.selectbengal.merged.clinical.filtered.pass.stats
+  name: NUMBER_OF_SITES
+  step: collect_custom_qc_metrics
+  value: 5249
+  condition:
+    norm: lt
+    threshold: 50000
+- header: null
+  id: ACC00000A1
   input: sex_prediction.json
   name: COMPARE_PREDICTED_TO_GIVEN_SEX
   step: sex_check
   value: male
   condition:
     norm: eq
-    threshold: male
+    threshold: female
 - header: null
-  id: ACC0000A1
+  id: ACC00001A2
   input: sex_prediction.json
   name: COMPARE_PREDICTED_TO_GIVEN_SEX
   step: sex_check
   value: male
   condition:
     norm: eq
-    threshold: male
+    threshold: female
+- header: null
+  id: selectbengal
+  input: somalier.pairs.tsv
+  name: RELATEDNESS
+  step: multiqc_somalier
+  value: 1.0
+  condition:
+    norm: gt
+    threshold: 0.8
