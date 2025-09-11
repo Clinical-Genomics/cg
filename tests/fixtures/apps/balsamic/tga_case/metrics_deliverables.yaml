@@ -189,8 +189,8 @@
   value: 0.61773
   condition: null
 - header: null
-  id: selectbengal
-  input: SV.somatic.selectbengal.svdb.clinical.filtered.pass.stats
+  id: tga-case
+  input: SV.somatic.tga-case.svdb.clinical.filtered.pass.stats
   name: NUMBER_OF_SITES
   step: collect_custom_qc_metrics
   value: 112
@@ -198,8 +198,8 @@
     norm: lt
     threshold: 50000
 - header: null
-  id: selectbengal
-  input: SNV.somatic.selectbengal.merged.clinical.filtered.pass.stats
+  id: tga-case
+  input: SNV.somatic.tga-case.merged.clinical.filtered.pass.stats
   name: NUMBER_OF_SITES
   step: collect_custom_qc_metrics
   value: 5249
@@ -225,7 +225,7 @@
     norm: eq
     threshold: female
 - header: null
-  id: selectbengal
+  id: tga-case
   input: somalier.pairs.tsv
   name: RELATEDNESS
   step: multiqc_somalier

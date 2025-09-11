@@ -221,8 +221,8 @@
   value: 1.323066
   condition: null
 - header: null
-  id: wholewhale
-  input: SV.somatic.wholewhale.svdb.clinical.filtered.pass.stats
+  id: wgs-case
+  input: SV.somatic.wgs-case.svdb.clinical.filtered.pass.stats
   name: NUMBER_OF_SITES
   step: collect_custom_qc_metrics
   value: 6219
@@ -230,8 +230,8 @@
     norm: lt
     threshold: 50000
 - header: null
-  id: wholewhale
-  input: SNV.somatic.wholewhale.tnscope.clinical.filtered.pass.stats
+  id: wgs-case
+  input: SNV.somatic.wgs-case.tnscope.clinical.filtered.pass.stats
   name: NUMBER_OF_SITES
   step: collect_custom_qc_metrics
   value: 12042
@@ -257,7 +257,7 @@
     norm: eq
     threshold: female
 - header: null
-  id: wholewhale
+  id: wgs-case
   input: somalier.pairs.tsv
   name: RELATEDNESS
   step: multiqc_somalier
