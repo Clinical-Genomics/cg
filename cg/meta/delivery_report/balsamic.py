@@ -104,7 +104,7 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
             initial_qc=passed_initial_qc,
             mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
-            median_coverage=sample_metrics.median_coverage if sample_metrics else None,
+            median_coverage=sample_metrics.median_target_coverage if sample_metrics else None,
             million_read_pairs=million_read_pairs,
             pct_15x=sample_metrics.pct_15x if sample_metrics else None,
             pct_60x=sample_metrics.pct_60x if sample_metrics else None,
