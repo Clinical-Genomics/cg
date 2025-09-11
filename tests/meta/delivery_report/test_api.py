@@ -37,7 +37,10 @@ from cg.models.delivery_report.sample import (
 from cg.models.orders.sample_base import SexEnum
 from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.store.store import Store
-from tests.meta.delivery_report.conftest import EXPECTED_BALSAMIC_QC_TABLE
+from tests.meta.delivery_report.conftest import (
+    EXPECTED_BALSAMIC_QC_TABLE_TGA,
+    EXPECTED_BALSAMIC_QC_TABLE_WGS,
+)
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
@@ -129,7 +132,7 @@ def test_get_delivery_report_html_balsamic_tga(balsamic_tga_analysis: BalsamicAn
     )
 
     # THEN the output should be as expected
-    assert EXPECTED_BALSAMIC_QC_TABLE in delivery_report
+    assert EXPECTED_BALSAMIC_QC_TABLE_TGA in delivery_report
 
 
 def test_get_delivery_report_html_balsamic_wgs(balsamic_wgs_analysis: BalsamicAnalysis):
@@ -190,7 +193,7 @@ def test_get_delivery_report_html_balsamic_wgs(balsamic_wgs_analysis: BalsamicAn
     )
 
     # THEN the output should be as expected
-    assert EXPECTED_BALSAMIC_QC_TABLE in delivery_report
+    assert EXPECTED_BALSAMIC_QC_TABLE_WGS in delivery_report
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
