@@ -480,7 +480,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
             "exome": verified_exome_argument,
-            "head_job_partition": self.head_job_partition,
         }
 
         config_case.update(self.get_verified_samples(case_id=case_id))
@@ -613,7 +612,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--genome-version": arguments.get("genome_version"),
                 "--gens-coverage-pon": arguments.get("gens_coverage_pon"),
                 "--gnomad-min-af5": arguments.get("gnomad_min_af5"),
-                "--headjob-partition": arguments.get("head_job_partition"),
                 "--normal-sample-name": arguments.get("normal_sample_name"),
                 "--panel-bed": arguments.get("panel_bed"),
                 "--pon-cnn": arguments.get("pon_cnn"),
@@ -647,6 +645,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--qos": slurm_quality_of_service or self.get_slurm_qos_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
                 "--workflow-profile": workflow_profile,
+                "--headjob-partition": self.head_job_partition,
             }
         )
         parameters = command + options + run_analysis

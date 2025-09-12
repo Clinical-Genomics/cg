@@ -107,6 +107,9 @@ def test_run_analysis(cli_runner: CliRunner, balsamic_context: CGConfig, caplog)
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
 
+    # THEN the partition flag should be included
+    assert f"--headjob-partition {balsamic_context.balsamic.head_job_partition}" in caplog.text
+
 
 def test_priority_custom(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with priority option"""
