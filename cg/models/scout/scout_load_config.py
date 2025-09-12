@@ -37,6 +37,7 @@ class Reviewer(BaseModel):
     alignment_index: str | None = None
     vcf: str | None = None
     catalog: str | None = None
+    trgt: str | None = None
 
 
 class ScoutIndividual(BaseModel):
@@ -177,6 +178,7 @@ class NalloLoadConfig(ScoutLoadConfig):
     peddy_check: str | None = None
     peddy_ped: str | None = None
     peddy_sex: str | None = None
+    reviewer: Reviewer = Reviewer(trgt=True)
     samples: list[ScoutNalloIndividual] = []
     somalier_samples: str | None = None
     somalier_pairs: str | None = None
