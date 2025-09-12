@@ -34,9 +34,9 @@ LOG = logging.getLogger(__name__)
 
 
 PANELS_WITH_LOQUSDB_DUMP_FILES_MAP: dict[str, str] = {
-    "GMSmyeloid": "loqusdb_cancer_somatic_myeloid_snv_variants_export-202509XX-.vcf.gz",
-    "GMSlymphoid": "loqusdb_cancer_somatic_lymphoid_snv_variants_export-202509XX-.vcf.gz",
-    "Twist Exome Comprehensive": "loqusdb_cancer_somatic_exome_snv_variants_export-202509XX-.vcf.gz",
+    "GMSmyeloid": "loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz",
+    "GMSlymphoid": "loqusdb_cancer_somatic_lymphoid_snv_variants_export-20250920-.vcf.gz",
+    "Twist Exome Comprehensive": "loqusdb_cancer_somatic_exome_snv_variants_export-20250920-.vcf.gz",
 }
 
 LOQUSDB_WGS_DUMP_FILE = "loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz"
