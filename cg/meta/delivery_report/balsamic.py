@@ -89,6 +89,7 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
             million_read_pairs=million_read_pairs,
             pct_250x=sample_metrics.pct_target_bases_250x if sample_metrics else None,
             pct_500x=sample_metrics.pct_target_bases_500x if sample_metrics else None,
+            predicted_sex=sample_metrics.compare_predicted_to_given_sex if sample_metrics else None,
         )
 
     @staticmethod
@@ -103,13 +104,14 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
             initial_qc=passed_initial_qc,
             mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
-            median_coverage=sample_metrics.median_coverage if sample_metrics else None,
+            median_coverage=sample_metrics.median_target_coverage if sample_metrics else None,
             million_read_pairs=million_read_pairs,
             pct_15x=sample_metrics.pct_15x if sample_metrics else None,
             pct_60x=sample_metrics.pct_60x if sample_metrics else None,
             pct_reads_improper_pairs=(
                 sample_metrics.pct_pf_reads_improper_pairs if sample_metrics else None
             ),
+            predicted_sex=sample_metrics.compare_predicted_to_given_sex if sample_metrics else None,
         )
 
     def is_report_accredited(
