@@ -1,6 +1,7 @@
 """CLI support to create config and/or start BALSAMIC."""
 
 import logging
+import traceback
 
 import rich_click as click
 from pydantic.v1 import ValidationError
@@ -82,10 +83,12 @@ def config_case(
             dry_run=dry_run,
         )
     except CgError as error:
-        LOG.error(f"Could not create config: {error}")
+        error_info = f"Error: {type(error).__name__}: {str(error)}\n{traceback.format_exc()}"
+        LOG.error(f"Could not create config: {error_info}")
         raise click.Abort()
     except Exception as error:
-        LOG.error(f"Could not create config: {error}")
+        error_info = f"Error: {type(error).__name__}: {str(error)}\n{traceback.format_exc()}"
+        LOG.error(f"Could not create config: {error_info}")
         raise click.Abort()
 
 
@@ -118,7 +121,8 @@ def run(
             return
         analysis_api.on_analysis_started(case_id)
     except Exception as error:
-        LOG.error(f"Could not run analysis: {error}")
+        error_info = f"Error: {type(error).__name__}: {str(error)}\n{traceback.format_exc()}"
+        LOG.error(f"Could not run analysis: {error_info}")
         raise click.Abort()
 
 
