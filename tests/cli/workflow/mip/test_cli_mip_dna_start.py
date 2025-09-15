@@ -2,9 +2,12 @@
 
 import logging
 from unittest import mock
+from unittest.mock import ANY
 
 from click.testing import CliRunner
+from pytest_mock import MockerFixture
 
+from cg.cli.workflow.mip.options import DEFAULT_LIMIT
 from cg.cli.workflow.mip_dna.base import start_available
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -12,7 +15,7 @@ from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 
 
-def test_dry(cli_runner, mip_dna_context, caplog):
+def test_dry(cli_runner, mip_dna_context, caplog, mocker: MockerFixture):
     """Test mip-dna start-available with --dry option"""
     # GIVEN that the log messages are captured
     caplog.set_level(logging.INFO)
@@ -22,16 +25,22 @@ def test_dry(cli_runner, mip_dna_context, caplog):
     assert len(analysis_api.get_cases_to_analyze()) == 3
 
     # GIVEN that the cases do not need decompression
-    with mock.patch.object(MipDNAAnalysisAPI, "resolve_decompression", return_value=None):
+    mocker.patch.object(MipDNAAnalysisAPI, "resolve_decompression", return_value=None)
 
-        # WHEN using dry running
-        result = cli_runner.invoke(start_available, ["--dry-run"], obj=mip_dna_context)
+    # GIVEN knowledge of what goes on in mip-dna start command
+    get_cases_to_analyze_spy = mocker.spy(MipDNAAnalysisAPI, "get_cases_to_analyze")
+
+    # WHEN using dry running
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=mip_dna_context)
 
     # THEN command should have accepted the option happily
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN that the 3 cases are picked up to start
     assert caplog.text.count("Starting full MIP analysis workflow for case") == 3
+
+    # THEN we should have provided a limit when getting cases to analyze
+    get_cases_to_analyze_spy.assert_called_once_with(ANY, limit=DEFAULT_LIMIT)
 
 
 def test_start_available_with_limit(

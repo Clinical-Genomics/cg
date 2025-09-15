@@ -2,6 +2,8 @@ import rich_click as click
 
 from cg.constants.priority import SlurmQos
 
+DEFAULT_LIMIT = 33
+
 EMAIL_OPTION = click.option("-e", "--email", help="Email to send errors to", type=str)
 QOS_OPTION = click.option(
     "-qos",
@@ -35,7 +37,7 @@ OPTION_LIMIT = click.option(
     "--limit",
     type=int,
     help="Maximum number of cases to start",
-    default=33,
+    default=DEFAULT_LIMIT,
 )
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True, type=str)

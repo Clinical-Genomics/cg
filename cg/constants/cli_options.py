@@ -29,9 +29,3 @@ COMMENT = click.option(
     required=False,
     help="A comment providing an explanation for the forced action",
 )
-
-LIMIT = click.option(
-    "--limit",
-    type=int,
-    help="Maximum number of cases to start",
-)

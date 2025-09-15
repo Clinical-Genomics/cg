@@ -11,6 +11,7 @@ from cg.cli.workflow.mip.options import (
     ARGUMENT_CASE_ID,
     EMAIL_OPTION,
     OPTION_BWA_MEM,
+    OPTION_LIMIT,
     OPTION_MIP_DRY_RUN,
     OPTION_PANEL_BED,
     OPTION_SKIP_EVALUATION,
@@ -19,7 +20,7 @@ from cg.cli.workflow.mip.options import (
     START_WITH_PROGRAM,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.cli_options import DRY_RUN, LIMIT
+from cg.constants.cli_options import DRY_RUN
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -198,7 +199,7 @@ def start(
 
 @click.command("start-available")
 @DRY_RUN
-@LIMIT
+@OPTION_LIMIT
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False, limit: int | None = None):
     """Start full analysis workflow for all cases ready for analysis."""
