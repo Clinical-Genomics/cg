@@ -178,7 +178,7 @@ class NalloLoadConfig(ScoutLoadConfig):
     peddy_check: str | None = None
     peddy_ped: str | None = None
     peddy_sex: str | None = None
-    reviewer: Reviewer = Reviewer(trgt=True)
+    reviewer: Reviewer = Reviewer(trgt="true")
     samples: list[ScoutNalloIndividual] = []
     somalier_samples: str | None = None
     somalier_pairs: str | None = None
