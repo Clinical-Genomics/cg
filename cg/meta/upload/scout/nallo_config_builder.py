@@ -113,7 +113,7 @@ class NalloConfigBuilder(ScoutConfigBuilder):
             hk_version=hk_version,
         )
         config_sample.reviewer.alignment = self.get_sample_file(
-            hk_tags=self.sample_tags.spanning,
+            hk_tags=self.sample_tags.reviewer_alignment,
             sample_id=sample_id,
             hk_version=hk_version,
         )

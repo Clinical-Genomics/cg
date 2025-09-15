@@ -68,6 +68,7 @@ NALLO_CASE_TAGS = dict(
     peddy_check={"ped-check", "peddy"},
     peddy_ped={"ped", "peddy"},
     peddy_sex={"sex-check", "peddy"},
+    str_catalog={"trgt", "variant-catalog"},
     vcf_snv_research={"vcf-snv-research"},
     vcf_snv={"vcf-snv-clinical"},
     vcf_sv_research={"vcf-sv-research"},
