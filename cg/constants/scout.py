@@ -143,9 +143,9 @@ NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
     d4_file={"coverage", "d4"},
     hificnv_coverage={"hificnv", "bigwig"},
     paraphase_alignment_path={AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE},
-    reviewer_alignment={"spanning_repeats", "bam"},
-    reviewer_alignment_index={"spanning_repeats", "bam_index"},
-    reviewer_vcf={"repeats_annotated", "vcf_str"},
+    reviewer_alignment={"repeats", "spanning", "bam"},
+    reviewer_alignment_index={"repeats", "spanning", "bam-index"},
+    reviewer_vcf={"vcf-str"},
     minor_allele_frequency_wig={"hificnv", "bigwig", "maf"},
 )
 
