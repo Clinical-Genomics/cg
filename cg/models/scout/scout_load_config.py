@@ -86,6 +86,7 @@ class ScoutMipIndividual(ScoutIndividual):
 class ScoutNalloIndividual(ScoutIndividual):
     d4_file: str | None = None
     paraphase_alignment_path: str | None = None
+    reviewer: Reviewer = Reviewer(trgt="true")
     tiddit_coverage_wig: str | None = None
     minor_allele_frequency_wig: str | None = None
     assembly_alignment_path: str | None = None
@@ -178,7 +179,6 @@ class NalloLoadConfig(ScoutLoadConfig):
     peddy_check: str | None = None
     peddy_ped: str | None = None
     peddy_sex: str | None = None
-    reviewer: Reviewer = Reviewer(trgt="true")
     samples: list[ScoutNalloIndividual] = []
     somalier_samples: str | None = None
     somalier_pairs: str | None = None

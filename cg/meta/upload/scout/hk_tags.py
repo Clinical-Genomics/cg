@@ -89,7 +89,6 @@ class SampleTags(BaseModel):
     reviewer_alignment_index: set[str] | None = None
     reviewer_catalog: set[str] | None = None
     reviewer_vcf: set[str] | None = None
-    trgt: set[str] | None = None
     mitodel_file: set[str] | None = None
     paraphase_alignment_path: set[str] | None = None
     tiddit_coverage_wig: set[str] | None = None
