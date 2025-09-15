@@ -4,6 +4,8 @@ from cg.constants.constants import GenomeVersion
 from cg.constants.priority import SlurmQos
 from cg.constants.subject import Sex
 
+BALSAMIC_DEFAULT_LIMIT = 21
+
 OPTION_GENDER = click.option(
     "--gender",
     type=click.Choice([Sex.FEMALE, Sex.MALE]),
@@ -56,4 +58,11 @@ OPTION_CLUSTER_CONFIG = click.option(
     type=click.Path(exists=True),
     required=False,
     help="Cluster resources configuration JSON file path used for analysis.",
+)
+
+OPTION_LIMIT = click.option(
+    "--limit",
+    type=int,
+    help="Maximum number of cases to start",
+    default=BALSAMIC_DEFAULT_LIMIT,
 )

@@ -8,6 +8,7 @@ from click.testing import CliRunner
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.cli.workflow.balsamic.base import balsamic, start, start_available, store, store_available
+from cg.cli.workflow.balsamic.options import BALSAMIC_DEFAULT_LIMIT
 from cg.constants.constants import SequencingQCStatus
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -129,6 +130,9 @@ def test_start_available(
     mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression", return_value=None)
     mocker.patch.object(BalsamicAnalysisAPI, "config_case", return_value=None)
 
+    # GIVEN knowledge of the analysis api input
+    get_cases_to_analyze_spy = mocker.spy(BalsamicAnalysisAPI, "get_cases_to_analyze")
+
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
 
@@ -140,6 +144,9 @@ def test_start_available(
 
     # THEN the ineligible case should NOT be run
     assert f"Starting analysis for {case_id_not_enough_reads}" not in caplog.text
+
+    # THEN the limit should be correct set
+    get_cases_to_analyze_spy.assert_called_once_with(ANY, limit=BALSAMIC_DEFAULT_LIMIT)
 
 
 def test_start_available_with_limit(

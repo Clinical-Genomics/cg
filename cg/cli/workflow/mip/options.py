@@ -31,4 +31,11 @@ OPTION_SKIP_EVALUATION = click.option(
     help="Skip mip qccollect evaluation",
 )
 
+OPTION_LIMIT = click.option(
+    "--limit",
+    type=int,
+    help="Maximum number of cases to start",
+    default=33,
+)
+
 ARGUMENT_CASE_ID = click.argument("case_id", required=True, type=str)
