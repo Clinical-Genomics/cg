@@ -201,7 +201,7 @@ def start(
 @DRY_RUN
 @OPTION_LIMIT
 @click.pass_context
-def start_available(context: click.Context, dry_run: bool = False, limit: int | None = None):
+def start_available(context: click.Context, limit: int, dry_run: bool = False):
     """Start full analysis workflow for all cases ready for analysis."""
 
     analysis_api: MipAnalysisAPI = context.obj.meta_apis["analysis_api"]
