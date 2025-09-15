@@ -130,12 +130,14 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         config_sample.reviewer.catalog = self.get_file_from_hk(
             hk_tags=self.case_tags.str_catalog, hk_version=hk_version
         )
-        if any([
-            config_sample.reviewer.alignment,
-            config_sample.reviewer.alignment_index,
-            config_sample.reviewer.vcf,
-            config_sample.reviewer.catalog,
-        ]):
+        if any(
+            [
+                config_sample.reviewer.alignment,
+                config_sample.reviewer.alignment_index,
+                config_sample.reviewer.vcf,
+                config_sample.reviewer.catalog,
+            ]
+        ):
             config_sample.reviewer.trgt = "true"
         else:
             config_sample.reviewer.trgt = None
