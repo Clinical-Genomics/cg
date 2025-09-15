@@ -182,7 +182,6 @@ class NalloLoadConfig(ScoutLoadConfig):
     samples: list[ScoutNalloIndividual] = []
     somalier_samples: str | None = None
     somalier_pairs: str | None = None
-    str_catalog: str | None = None
     vcf_snv: Annotated[str | None, AfterValidator(field_not_none)] = None
     vcf_snv_research: Annotated[str | None, AfterValidator(field_not_none)] = None
     vcf_sv: Annotated[str | None, AfterValidator(field_not_none)] = None
