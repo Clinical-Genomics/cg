@@ -19,7 +19,7 @@ include = [
   "cg/**/*",
   "tests/**/*"
 ]
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.11,<3.13"
 dependencies = [
 "alembic",
 "SQLAlchemy",
@@ -57,7 +57,7 @@ dependencies = [
 "typing_extensions",
 "urllib3",
 "genologics",
-"housekeeper>=4.11.3",
+"housekeeper == 4.13.15",
 "pydantic-settings>=2.3.3",
 "email-validator>=2.2.0",
 "rich-click>=1.8.4",

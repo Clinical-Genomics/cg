@@ -1,13 +1,16 @@
 from pathlib import Path
 from unittest import mock
+from unittest.mock import Mock, create_autospec
 
 import pytest
-from housekeeper.store.models import File
+from housekeeper.store.models import File, Version
 from pytest_mock import MockerFixture
 from requests import HTTPError, Response
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.exc import MissingFilesError
 from cg.meta.archive.archive import ARCHIVE_HANDLERS, FileAndSample, SpringArchiveAPI
 from cg.meta.archive.ddn import ddn_data_flow_client
 from cg.meta.archive.ddn.constants import (
@@ -22,6 +25,7 @@ from cg.meta.archive.ddn.utils import get_metadata
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
+from cg.store.store import Store
 
 
 def test_add_samples_to_files(spring_archive_api: SpringArchiveAPI):
@@ -340,6 +344,46 @@ def test_retrieve_case(
     # THEN the Archive entry should have a retrieval task id set
     for file in files:
         assert file.archive.retrieval_task_id
+
+
+def test_retrieve_sample_retrieval_already_ongoing(
+    ddn_dataflow_config: DataFlowConfig,
+    real_housekeeper_api: HousekeeperAPI,
+    mocker: MockerFixture,
+):
+    """Test retrieving files does not act on ongoing retrievals."""
+    # GIVEN a sample_id
+    sample_id = "sample_id"
+
+    # GIVEN a status_db containing a sample tied to a clinical customer
+    status_db: Store = create_autospec(Store)
+    status_db.get_sample_by_internal_id = Mock(
+        return_value=create_autospec(
+            Sample, internal_id=sample_id, archive_location=ArchiveLocations.KAROLINSKA_BUCKET
+        )
+    )
+
+    # GIVEN that files are already being retrieved
+    version: Version = real_housekeeper_api.get_or_create_version(bundle_name=sample_id)
+    file: File = real_housekeeper_api.add_file(
+        path="retrieving/file.txt", version_obj=version, tags=["spring", "karolinska_bucket"]
+    )
+    real_housekeeper_api.commit()
+    real_housekeeper_api.add_archives(files=[file], archive_task_id=123)
+    file.archive.retrieval_task_id = 1234
+
+    # GIVEN a spring archive api
+    spring_archive_api = SpringArchiveAPI(
+        data_flow_config=ddn_dataflow_config,
+        housekeeper_api=real_housekeeper_api,
+        status_db=status_db,
+    )
+
+    # WHEN retrieving files for the sample
+
+    # THEN a MissingFilesError is raised since no files should be retrieved
+    with pytest.raises(MissingFilesError):
+        spring_archive_api.retrieve_spring_files_for_sample(sample_id)
 
 
 def test_retrieve_sample(
