@@ -251,9 +251,7 @@ class ScoutConfigBuilder:
             hk_tags=self.sample_tags.bam_file, sample_id=sample_id, hk_version=hk_version
         )
 
-    def include_reviewer_files(
-        self, config_sample: ScoutIndividual, hk_version: Version
-    ) -> None:
+    def include_reviewer_files(self, config_sample: ScoutIndividual, hk_version: Version) -> None:
         LOG.info("Adding reviewer files to sample")
         sample_id: str = config_sample.sample_id
         config_sample.reviewer.alignment = self.get_sample_file(

@@ -166,4 +166,6 @@ class MipConfigBuilder(ScoutConfigBuilder):
         config_sample.upd_sites_bed = self.get_sample_file(
             hk_tags=self.sample_tags.upd_sites_bed, hk_version=hk_version, sample_id=sample_id
         )
-        self.include_reviewer_files(config_sample=config_sample, sample_id=sample_id, hk_version=hk_version)
+        self.include_reviewer_files(
+            config_sample=config_sample, sample_id=sample_id, hk_version=hk_version
+        )
