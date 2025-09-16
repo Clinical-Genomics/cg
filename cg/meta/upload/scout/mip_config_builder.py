@@ -167,5 +167,5 @@ class MipConfigBuilder(ScoutConfigBuilder):
             hk_tags=self.sample_tags.upd_sites_bed, hk_version=hk_version, sample_id=sample_id
         )
         self.include_reviewer_files(
-            config_sample=config_sample, sample_id=sample_id, hk_version=hk_version
+            config_sample=config_sample, hk_version=hk_version
         )

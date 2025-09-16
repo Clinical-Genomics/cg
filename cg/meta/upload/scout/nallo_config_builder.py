@@ -113,7 +113,7 @@ class NalloConfigBuilder(ScoutConfigBuilder):
             hk_version=hk_version,
         )
         self.include_reviewer_files(
-            config_sample=config_sample, sample_id=sample_id, hk_version=hk_version
+            config_sample=config_sample, hk_version=hk_version
         )
         config_sample.reviewer.trgt = (
             "true"
