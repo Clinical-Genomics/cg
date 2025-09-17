@@ -85,6 +85,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             )
 
         # Update Statusdb with a germline Loqusdb ID
+        # TODO: Check what should be done (get from somatic and set on the samples?)
         loqusdb_id: str = str(self.loqusdb_tumor_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
 
