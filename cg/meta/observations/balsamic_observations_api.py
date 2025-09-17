@@ -32,6 +32,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
     def __init__(self, config: CGConfig):
         self.analysis_api = BalsamicAnalysisAPI(config)
         super().__init__(config=config, analysis_api=self.analysis_api)
+        # TODO maybe add loqusdb instances for panels or use get_loqusdb_api method
         self.loqusdb_somatic_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.SOMATIC)
         self.loqusdb_tumor_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.TUMOR)
 
@@ -50,6 +51,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         if self.analysis_api.is_analysis_normal_only(case_id):
             LOG.error(f"Normal only analysis {case_id} is not supported for Loqusdb uploads")
             return False
+        # TODO for panel: should only allow tumor only or normal only
         return True
 
     def is_case_eligible_for_observations_upload(self, case: Case) -> bool:
