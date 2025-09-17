@@ -72,6 +72,7 @@ class CustomerId(StrEnum):
     CUST132: str = "cust132"
     CUST143: str = "cust143"
     CUST147: str = "cust147"
+    CUST201: str = "cust201"
     CUST999: str = "cust999"
 
 
