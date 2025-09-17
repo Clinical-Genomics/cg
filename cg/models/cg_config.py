@@ -189,6 +189,7 @@ class BalsamicConfig(CommonAppConfig):
     gens_coverage_female_path: str
     gens_coverage_male_path: str
     gnomad_af5_path: str
+    head_job_partition: str
     loqusdb_path: str
     pon_path: str
     root: str
