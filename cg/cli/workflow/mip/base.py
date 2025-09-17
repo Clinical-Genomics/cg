@@ -23,6 +23,7 @@ from cg.constants.cli_options import DRY_RUN, LIMIT
 from cg.exc import AnalysisNotReadyError, CgError
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -205,10 +206,10 @@ def start_available(context: click.Context, dry_run: bool = False, limit: int | 
 
     analysis_api: MipAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
-    exit_code: int = EXIT_SUCCESS
-    cases = analysis_api.get_cases_to_analyze(limit=limit)
-
+    cases: list[Case] = analysis_api.get_cases_to_analyze(limit=limit)
     LOG.info(f"Starting {len(cases)} available MIP cases")
+
+    exit_code: int = EXIT_SUCCESS
     for case in cases:
         try:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
