@@ -92,6 +92,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self, case: Case, input_files: BalsamicObservationsInputFiles, loqusdb_api: LoqusdbAPI
     ) -> None:
         """Load cancer observations to a specific Loqusdb API."""
+        # TODO implement this logic for panel analyses
         is_somatic_db: bool = LoqusdbInstance.SOMATIC in str(loqusdb_api.config_path)
         is_paired_analysis: bool = (
             CancerAnalysisType.TUMOR_NORMAL
@@ -102,18 +103,19 @@ class BalsamicObservationsAPI(ObservationsAPI):
                 return
             LOG.info("Uploading somatic observations to Loqusdb")
             snv_vcf_path: Path = input_files.snv_vcf_path
-            sv_vcf_path: Path = input_files.sv_vcf_path
+            sv_vcf_path: Path = input_files.sv_vcf_path  # TODO: NO SV upload for TGA
         else:
             LOG.info("Uploading germline observations to Loqusdb")
             snv_vcf_path: Path = input_files.snv_germline_vcf_path
             sv_vcf_path: Path = input_files.sv_germline_vcf_path if is_paired_analysis else None
+            # TODO: NO SV upload for TGA
 
         load_output: dict = loqusdb_api.load(
             case_id=case.internal_id,
             snv_vcf_path=snv_vcf_path,
             sv_vcf_path=sv_vcf_path,
             qual_gq=True,
-            gq_threshold=(
+            gq_threshold=(  # TODO for the new uploads this value should be zero
                 BalsamicLoadParameters.QUAL_THRESHOLD.value
                 if is_somatic_db
                 else BalsamicLoadParameters.QUAL_GERMLINE_THRESHOLD.value
