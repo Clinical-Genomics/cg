@@ -56,7 +56,6 @@ RAREDISEASE_CASE_TAGS = dict(
     vcf_snv={"vcf-snv-clinical"},
     vcf_snv_research_mt={"vcf-sv-research", "mitochondria"},
     vcf_snv_mt={"vcf-sv-clinical", "mitochondria"},
-    str_catalog={"expansionhunter", "variant-catalog"},
     vcf_sv_research={"vcf-sv-research"},
     vcf_sv={"vcf-sv-clinical"},
     vcf_str={"vcf-str"},
@@ -68,7 +67,6 @@ NALLO_CASE_TAGS = dict(
     peddy_check={"ped-check", "peddy"},
     peddy_ped={"ped", "peddy"},
     peddy_sex={"sex-check", "peddy"},
-    str_catalog={"trgt", "variant-catalog"},
     vcf_snv_research={"vcf-snv-research"},
     vcf_snv={"vcf-snv-clinical"},
     vcf_sv_research={"vcf-sv-research"},
@@ -85,7 +83,6 @@ MIP_CASE_TAGS: dict[str, set[str]] = dict(
     smn_tsv={"smn-calling"},
     snv_research_vcf={"vcf-snv-research"},
     snv_vcf={"vcf-snv-clinical"},
-    str_catalog={"expansionhunter", "variant-catalog"},
     sv_research_vcf={"vcf-sv-research"},
     sv_vcf={"vcf-sv-clinical"},
     vcf_mei={"mobile-elements", "clinical", "vcf"},
@@ -134,6 +131,7 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
     reviewer_alignment={"expansionhunter", "bam"},
     reviewer_alignment_index={"expansionhunter", "bam-index"},
     reviewer_vcf={"expansionhunter", "vcf-str"},
+    reviewer_catalog={"expansionhunter", "variant-catalog"},
     mitodel_file={"mitodel"},
 )
 
@@ -146,6 +144,7 @@ NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
     reviewer_alignment={"repeats", "spanning", "bam"},
     reviewer_alignment_index={"repeats", "spanning", "bam-index"},
     reviewer_vcf={"vcf-str"},
+    reviewer_catalog={"trgt", "variant-catalog"},
     minor_allele_frequency_wig={"hificnv", "bigwig", "maf"},
 )
 
@@ -161,6 +160,7 @@ MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
     reviewer_alignment={"expansionhunter", "bam"},
     reviewer_alignment_index={"expansionhunter", "bam-index"},
     reviewer_vcf={"expansionhunter", "vcf-str"},
+    reviewer_catalog={"expansionhunter", "variant-catalog"},
     mitodel_file={"mitodel"},
     tiddit_coverage_wig={"tiddit-coverage", "bigwig"},
     rhocall_wig={"rhocall-viz"},

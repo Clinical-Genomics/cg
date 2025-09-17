@@ -270,7 +270,7 @@ class ScoutConfigBuilder:
             hk_version=hk_version,
         )
         config_sample.reviewer.catalog = self.get_file_from_hk(
-            hk_tags=self.case_tags.str_catalog,
+            hk_tags=self.sample_tags.reviewer_catalog,
             hk_version=hk_version,
         )
 
