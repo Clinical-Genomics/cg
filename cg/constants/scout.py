@@ -143,7 +143,7 @@ NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
     paraphase_alignment_path={AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE},
     reviewer_alignment={"repeats", "spanning", "bam"},
     reviewer_alignment_index={"repeats", "spanning", "bam-index"},
-    reviewer_vcf={"vcf-str"},
+    reviewer_vcf={"repeats", "sorted", "vcf"},
     reviewer_catalog={"trgt", "variant-catalog"},
     minor_allele_frequency_wig={"hificnv", "bigwig", "maf"},
 )
