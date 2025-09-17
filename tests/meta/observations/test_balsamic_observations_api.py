@@ -90,10 +90,12 @@ def test_is_case_not_eligible_for_observations_upload(
     # GIVEN a case and a Balsamic observations API
     case: Case = balsamic_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
-    # GIVEN a case with tumor sample and an invalid sequencing type
+    # GIVEN a case with an invalid sequencing type
     mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
     mocker.patch.object(
-        BalsamicAnalysisAPI, "get_data_analysis_type", return_value=CancerAnalysisType.TUMOR_PANEL
+        BalsamicAnalysisAPI,
+        "get_data_analysis_type",
+        return_value=CancerAnalysisType.TUMOR_NORMAL_PANEL,
     )
 
     # WHEN checking the upload eligibility for a case
