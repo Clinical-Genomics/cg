@@ -60,7 +60,9 @@ class BalsamicUploadAPI(UploadAPI):
 
         # Observations upload
         if (
-            self.analysis_api.get_case_application_type(case_id=case.internal_id)
+            self.analysis_api.get_case_application_type(
+                case_id=case.internal_id
+            )  # TODO: Allow for panel uploads
             == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
         ):
             ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
