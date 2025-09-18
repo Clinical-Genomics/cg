@@ -15,12 +15,13 @@ from cg.constants.observations import (
     BalsamicObservationsAnalysisTag,
     LoqusdbInstance,
 )
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, LoqusdbDuplicateRecordError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 from cg.utils.dict import get_full_path_dictionary
 
 LOG = logging.getLogger(__name__)
@@ -62,8 +63,15 @@ class BalsamicObservationsAPI(ObservationsAPI):
                 self.is_sequencing_method_eligible_for_observations_upload(case.internal_id),
                 self.is_analysis_type_eligible_for_observations_upload(case.internal_id),
                 self.is_sample_source_eligible_for_observations_upload(case.internal_id),
+                self.is_allowed_panel(case),
             ]
         )
+
+    def is_allowed_panel(self, case: Case) -> bool:
+        """Returns True if WGS or TGS with the allowed panels."""
+        sample: Sample = case.samples[0]
+        if sample.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING:
+            return True
 
     def load_observations(self, case: Case) -> None:
         """
