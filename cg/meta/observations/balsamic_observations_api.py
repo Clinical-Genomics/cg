@@ -47,11 +47,13 @@ class BalsamicObservationsAPI(ObservationsAPI):
         """Return sequencing methods that are eligible for cancer Loqusdb uploads."""
         return LOQUSDB_CANCER_SEQUENCING_METHODS
 
-    def is_analysis_type_eligible_for_observations_upload(self, case_id) -> bool:
+    def is_analysis_type_eligible_for_observations_upload(self, case: Case) -> bool:
         """Return whether the cancer analysis type is eligible for cancer Loqusdb uploads."""
-        if self.analysis_api.is_analysis_normal_only(case_id):
-            LOG.error(f"Normal only analysis {case_id} is not supported for Loqusdb uploads")
+        prep_category: str = case.samples[0].prep_category
+        if prep_category==SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING and self.analysis_api.is_analysis_normal_only(case.internal_id):
+            LOG.error(f"Normal only analysis {case.internal_id} is not supported for WGS Loqusdb uploads")
             return False
+        elif prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING and
         # TODO for panel: should only allow tumor only or normal only
         return True
 
@@ -67,7 +69,8 @@ class BalsamicObservationsAPI(ObservationsAPI):
             ]
         )
 
-    def is_panel_allowed_for_observations_upload(self, case: Case) -> bool:
+    @staticmethod
+    def is_panel_allowed_for_observations_upload(case: Case) -> bool:
         """
         Returns True if WGS or TGS with the allowed panels.
         This assumes that all samples in the case have the same prep-category
@@ -75,7 +78,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         sample: Sample = case.samples[0]
         if sample.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING:
             panel: str = sample.capture_kit
-            if panel not in ["GMSmyeloid", "GMSlymphoid", "Twist Exome Comprehensive"]:
+            if panel not in ["GMSmyeloid", "GMSlymphoid", "Twist Exome Comprehensive"]: # TODO: Think about a better solution for this list
                 return False
         return True
 
