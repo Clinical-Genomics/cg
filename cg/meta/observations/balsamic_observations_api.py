@@ -73,9 +73,10 @@ class BalsamicObservationsAPI(ObservationsAPI):
         This assumes that all samples in the case have the same prep-category
         """
         sample: Sample = case.samples[0]
+        if sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING:
+            return True
         if sample.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING:
-
-
+            return False  # Update this
 
     def load_observations(self, case: Case) -> None:
         """
