@@ -63,20 +63,21 @@ class BalsamicObservationsAPI(ObservationsAPI):
                 self.is_sequencing_method_eligible_for_observations_upload(case.internal_id),
                 self.is_analysis_type_eligible_for_observations_upload(case.internal_id),
                 self.is_sample_source_eligible_for_observations_upload(case.internal_id),
-                self.is_allowed_panel(case),
+                self.is_panel_allowed_for_observations_upload(case),
             ]
         )
 
-    def is_allowed_panel(self, case: Case) -> bool:
+    def is_panel_allowed_for_observations_upload(self, case: Case) -> bool:
         """
         Returns True if WGS or TGS with the allowed panels.
         This assumes that all samples in the case have the same prep-category
         """
         sample: Sample = case.samples[0]
-        if sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING:
-            return True
         if sample.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING:
-            return False  # Update this
+            panel: str = sample.capture_kit
+            if panel not in ["GMSmyeloid", "GMSlymphoid", "Twist Exome Comprehensive"]:
+                return False
+        return True
 
     def load_observations(self, case: Case) -> None:
         """
