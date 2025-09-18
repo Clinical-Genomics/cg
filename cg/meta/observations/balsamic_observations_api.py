@@ -50,11 +50,22 @@ class BalsamicObservationsAPI(ObservationsAPI):
     def is_analysis_type_eligible_for_observations_upload(self, case: Case) -> bool:
         """Return whether the cancer analysis type is eligible for cancer Loqusdb uploads."""
         prep_category: str = case.samples[0].prep_category
-        if prep_category==SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING and self.analysis_api.is_analysis_normal_only(case.internal_id):
-            LOG.error(f"Normal only analysis {case.internal_id} is not supported for WGS Loqusdb uploads")
+        if (
+            prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+            and self.analysis_api.is_analysis_normal_only(case.internal_id)
+        ):
+            LOG.error(
+                f"Normal only analysis {case.internal_id} is not supported for WGS Loqusdb uploads"
+            )
             return False
-        elif prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING and
-        # TODO for panel: should only allow tumor only or normal only
+        elif (
+            prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
+            and len(case.samples) > 1
+        ):
+            LOG.error(
+                f"Paired analysis {case.internal_id} is not supported for TGS Loqusdb uploads"
+            )
+            return False
         return True
 
     def is_case_eligible_for_observations_upload(self, case: Case) -> bool:
@@ -63,7 +74,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             [
                 self.is_customer_eligible_for_observations_upload(case.customer.internal_id),
                 self.is_sequencing_method_eligible_for_observations_upload(case.internal_id),
-                self.is_analysis_type_eligible_for_observations_upload(case.internal_id),
+                self.is_analysis_type_eligible_for_observations_upload(case),
                 self.is_sample_source_eligible_for_observations_upload(case.internal_id),
                 self.is_panel_allowed_for_observations_upload(case),
             ]
@@ -78,7 +89,11 @@ class BalsamicObservationsAPI(ObservationsAPI):
         sample: Sample = case.samples[0]
         if sample.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING:
             panel: str = sample.capture_kit
-            if panel not in ["GMSmyeloid", "GMSlymphoid", "Twist Exome Comprehensive"]: # TODO: Think about a better solution for this list
+            if panel not in [
+                "GMSmyeloid",
+                "GMSlymphoid",
+                "Twist Exome Comprehensive",
+            ]:  # TODO: Think about a better solution for this list
                 return False
         return True
 
