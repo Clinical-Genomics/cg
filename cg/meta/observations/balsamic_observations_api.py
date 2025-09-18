@@ -68,10 +68,14 @@ class BalsamicObservationsAPI(ObservationsAPI):
         )
 
     def is_allowed_panel(self, case: Case) -> bool:
-        """Returns True if WGS or TGS with the allowed panels."""
+        """
+        Returns True if WGS or TGS with the allowed panels.
+        This assumes that all samples in the case have the same prep-category
+        """
         sample: Sample = case.samples[0]
         if sample.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING:
-            return True
+
+
 
     def load_observations(self, case: Case) -> None:
         """
