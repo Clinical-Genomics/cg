@@ -133,7 +133,12 @@ def dev_start(
 @mip_dna.command("dev-start-available")
 @click.pass_obj
 def dev_start_available(cg_config: CGConfig):
-    """Starts all available MIP-DNA cases."""
+    """
+    Starts all available MIP-DNA cases. Configures the case and writes the following files:
+        - pedigree.yaml
+        - gene_panels.bed
+        - managed_variants.vcf
+    """
     LOG.info("Starting MIP-DNA workflow for all available cases.")
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.MIP_DNA)
