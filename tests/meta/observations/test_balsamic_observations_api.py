@@ -17,7 +17,7 @@ from cg.models.observations.input_files import BalsamicObservationsInputFiles
 from cg.store.models import Case, Sample
 
 
-def test_is_analysis_type_eligible_for_observations_upload(
+def test_is_analysis_type_eligible_for_observations_upload_eligible_wgs(
     case_id: str, balsamic_observations_api: BalsamicObservationsAPI, mocker: MockFixture
 ):
     """Test if the analysis type is eligible for observation uploads."""
@@ -36,7 +36,7 @@ def test_is_analysis_type_eligible_for_observations_upload(
     assert is_analysis_type_eligible_for_observations_upload
 
 
-def test_is_analysis_type_not_eligible_for_observations_upload(
+def test_is_analysis_type_eligible_for_observations_upload_not_eligible_wgs(
     case_id: str,
     balsamic_observations_api: BalsamicObservationsAPI,
     mocker: MockFixture,
@@ -59,9 +59,9 @@ def test_is_analysis_type_not_eligible_for_observations_upload(
     assert f"Normal only analysis {case_id} is not supported for Loqusdb uploads" in caplog.text
 
 
-def test_is_analysis_type_eligible_for_observations_tgs(cg_config_object: CGConfig):
+def test_is_analysis_type_eligible_for_observations_eligible_tgs(cg_context: CGConfig):
     # GIVEN a Balsamic Observations API
-    balsamic_observations_api = BalsamicObservationsAPI(config=cg_config_object)
+    balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
 
     # GIVEN a TGS case with a panel that allows for LoqusDB uploads and only one sample
     case: Case = create_autospec(
@@ -82,6 +82,32 @@ def test_is_analysis_type_eligible_for_observations_tgs(cg_config_object: CGConf
     )
 
     # THEN the analysis type should be eligible for observation uploads
+    assert is_eligible
+
+
+def test_is_analysis_type_eligible_for_observations_not_eligible_tgs(cg_context: CGConfig):
+    # GIVEN a Balsamic Observations API
+    balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
+
+    # GIVEN a TGS case with a panel that allows for LoqusDB uploads and two samples
+    sample = create_autospec(
+        Sample,
+        capture_kit="GMSmyeloid",
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+    )
+    case: Case = create_autospec(
+        Case,
+        internal_id="balsamic_tgs_case",
+        samples=[sample, sample],
+    )
+
+    # WHEN checking analysis type eligibility for a case
+    is_eligible: bool = balsamic_observations_api.is_analysis_type_eligible_for_observations_upload(
+        case
+    )
+
+    # THEN the analysis type should not be eligible for observation uploads
+    assert not is_eligible
 
 
 def test_is_case_eligible_for_observations_upload(

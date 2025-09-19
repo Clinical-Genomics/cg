@@ -59,7 +59,11 @@ class BalsamicObservationsAPI(ObservationsAPI):
             )
             return False
         elif (
-            prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
+            prep_category
+            in [
+                SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+                SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+            ]
             and len(case.samples) > 1
         ):
             LOG.error(
@@ -87,7 +91,10 @@ class BalsamicObservationsAPI(ObservationsAPI):
         This assumes that all samples in the case have the same prep-category
         """
         sample: Sample = case.samples[0]
-        if sample.prep_category == SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING:
+        if sample.prep_category in [
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+        ]:
             panel: str = sample.capture_kit
             if panel not in [
                 "GMSmyeloid",
