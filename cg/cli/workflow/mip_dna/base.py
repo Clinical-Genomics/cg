@@ -134,7 +134,7 @@ def dev_start(
 @click.pass_obj
 def dev_start_available(cg_config: CGConfig):
     """
-    Starts all available MIP-DNA cases. Configures the case and writes the following files:
+    Starts all available MIP-DNA cases. Configures the individual case and writes the following files for each case:
         - pedigree.yaml
         - gene_panels.bed
         - managed_variants.vcf
