@@ -96,6 +96,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
         ]:
             panel: str = sample.capture_kit
+            # TODO: Fetch panel from LIMS here instead of using StatusDB column
             if panel not in [
                 "GMSmyeloid",
                 "GMSlymphoid",
