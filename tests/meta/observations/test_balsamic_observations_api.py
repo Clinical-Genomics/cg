@@ -1,25 +1,28 @@
 """Test Balsamic observations API."""
 
 import logging
+from unittest.mock import create_autospec
 
 import pytest
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
 from cg.constants.constants import CancerAnalysisType
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import LoqusdbDuplicateRecordError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 
 
-def test_is_analysis_type_eligible_for_observations_upload(
+def test_is_analysis_type_eligible_for_observations_upload_eligible_wgs(
     case_id: str, balsamic_observations_api: BalsamicObservationsAPI, mocker: MockFixture
 ):
     """Test if the analysis type is eligible for observation uploads."""
 
-    # GIVEN a case ID and a Balsamic observations API
+    # GIVEN a WGS case ID and a Balsamic observations API
 
     # GIVEN a case with tumor samples
     mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
@@ -33,7 +36,7 @@ def test_is_analysis_type_eligible_for_observations_upload(
     assert is_analysis_type_eligible_for_observations_upload
 
 
-def test_is_analysis_type_not_eligible_for_observations_upload(
+def test_is_analysis_type_eligible_for_observations_upload_not_eligible_wgs(
     case_id: str,
     balsamic_observations_api: BalsamicObservationsAPI,
     mocker: MockFixture,
@@ -54,6 +57,57 @@ def test_is_analysis_type_not_eligible_for_observations_upload(
     # THEN the analysis type should not be eligible for observation uploads
     assert not is_analysis_type_eligible_for_observations_upload
     assert f"Normal only analysis {case_id} is not supported for Loqusdb uploads" in caplog.text
+
+
+def test_is_analysis_type_eligible_for_observations_eligible_tgs(cg_context: CGConfig):
+    # GIVEN a Balsamic Observations API
+    balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
+
+    # GIVEN a TGS case with a panel that allows for LoqusDB uploads and only one sample
+    case: Case = create_autospec(
+        Case,
+        internal_id="balsamic_tgs_case",
+        samples=[
+            create_autospec(
+                Sample,
+                capture_kit="GMSmyeloid",
+                prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            )
+        ],
+    )
+
+    # WHEN checking analysis type eligibility for a case
+    is_eligible: bool = balsamic_observations_api.is_analysis_type_eligible_for_observations_upload(
+        case
+    )
+
+    # THEN the analysis type should be eligible for observation uploads
+    assert is_eligible
+
+
+def test_is_analysis_type_eligible_for_observations_not_eligible_tgs(cg_context: CGConfig):
+    # GIVEN a Balsamic Observations API
+    balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
+
+    # GIVEN a TGS case with a panel that allows for LoqusDB uploads and two samples
+    sample = create_autospec(
+        Sample,
+        capture_kit="GMSmyeloid",
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+    )
+    case: Case = create_autospec(
+        Case,
+        internal_id="balsamic_tgs_case",
+        samples=[sample, sample],
+    )
+
+    # WHEN checking analysis type eligibility for a case
+    is_eligible: bool = balsamic_observations_api.is_analysis_type_eligible_for_observations_upload(
+        case
+    )
+
+    # THEN the analysis type should not be eligible for observation uploads
+    assert not is_eligible
 
 
 def test_is_case_eligible_for_observations_upload(
@@ -90,10 +144,12 @@ def test_is_case_not_eligible_for_observations_upload(
     # GIVEN a case and a Balsamic observations API
     case: Case = balsamic_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
-    # GIVEN a case with tumor sample and an invalid sequencing type
+    # GIVEN a case with an invalid sequencing type
     mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
     mocker.patch.object(
-        BalsamicAnalysisAPI, "get_data_analysis_type", return_value=CancerAnalysisType.TUMOR_PANEL
+        BalsamicAnalysisAPI,
+        "get_data_analysis_type",
+        return_value=CancerAnalysisType.TUMOR_NORMAL_PANEL,
     )
 
     # WHEN checking the upload eligibility for a case

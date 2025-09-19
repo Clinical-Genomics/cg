@@ -15,12 +15,13 @@ from cg.constants.observations import (
     BalsamicObservationsAnalysisTag,
     LoqusdbInstance,
 )
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, LoqusdbDuplicateRecordError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 from cg.utils.dict import get_full_path_dictionary
 
 LOG = logging.getLogger(__name__)
@@ -32,6 +33,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
     def __init__(self, config: CGConfig):
         self.analysis_api = BalsamicAnalysisAPI(config)
         super().__init__(config=config, analysis_api=self.analysis_api)
+        # TODO maybe add loqusdb instances for panels or use get_loqusdb_api method
         self.loqusdb_somatic_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.SOMATIC)
         self.loqusdb_tumor_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.TUMOR)
 
@@ -45,10 +47,28 @@ class BalsamicObservationsAPI(ObservationsAPI):
         """Return sequencing methods that are eligible for cancer Loqusdb uploads."""
         return LOQUSDB_CANCER_SEQUENCING_METHODS
 
-    def is_analysis_type_eligible_for_observations_upload(self, case_id) -> bool:
+    def is_analysis_type_eligible_for_observations_upload(self, case: Case) -> bool:
         """Return whether the cancer analysis type is eligible for cancer Loqusdb uploads."""
-        if self.analysis_api.is_analysis_normal_only(case_id):
-            LOG.error(f"Normal only analysis {case_id} is not supported for Loqusdb uploads")
+        prep_category: str = case.samples[0].prep_category
+        if (
+            prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+            and self.analysis_api.is_analysis_normal_only(case.internal_id)
+        ):
+            LOG.error(
+                f"Normal only analysis {case.internal_id} is not supported for WGS Loqusdb uploads"
+            )
+            return False
+        elif (
+            prep_category
+            in [
+                SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+                SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+            ]
+            and len(case.samples) > 1
+        ):
+            LOG.error(
+                f"Paired analysis {case.internal_id} is not supported for TGS Loqusdb uploads"
+            )
             return False
         return True
 
@@ -58,19 +78,44 @@ class BalsamicObservationsAPI(ObservationsAPI):
             [
                 self.is_customer_eligible_for_observations_upload(case.customer.internal_id),
                 self.is_sequencing_method_eligible_for_observations_upload(case.internal_id),
-                self.is_analysis_type_eligible_for_observations_upload(case.internal_id),
+                self.is_analysis_type_eligible_for_observations_upload(case),
                 self.is_sample_source_eligible_for_observations_upload(case.internal_id),
+                self.is_panel_allowed_for_observations_upload(case),
             ]
         )
 
+    @staticmethod
+    def is_panel_allowed_for_observations_upload(case: Case) -> bool:
+        """
+        Returns True if WGS or TGS with the allowed panels.
+        This assumes that all samples in the case have the same prep-category
+        """
+        sample: Sample = case.samples[0]
+        if sample.prep_category in [
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+        ]:
+            panel: str = sample.capture_kit
+            # TODO: Fetch panel from LIMS here instead of using StatusDB column
+            if panel not in [
+                "GMSmyeloid",
+                "GMSlymphoid",
+                "Twist Exome Comprehensive",
+            ]:  # TODO: Think about a better solution for this list
+                return False
+        return True
+
     def load_observations(self, case: Case) -> None:
         """
-        Load observation counts to Loqusdb for a Balsamic case.
+        Upload observation counts to Loqusdb for a Balsamic case.
 
         Raises:
             LoqusdbDuplicateRecordError: If case has already been uploaded.
         """
-        loqusdb_upload_apis: list[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
+        loqusdb_upload_apis: list[LoqusdbAPI] = [
+            self.loqusdb_somatic_api,
+            self.loqusdb_tumor_api,
+        ]  # TODO: Replace with if-statements
         for loqusdb_api in loqusdb_upload_apis:
             if self.is_duplicate(case=case, loqusdb_api=loqusdb_api):
                 LOG.error(f"Case {case.internal_id} has already been uploaded to Loqusdb")
@@ -83,6 +128,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             )
 
         # Update Statusdb with a germline Loqusdb ID
+        # TODO: Check what should be done (get from somatic and set on the samples?)
         loqusdb_id: str = str(self.loqusdb_tumor_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
 
@@ -90,6 +136,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self, case: Case, input_files: BalsamicObservationsInputFiles, loqusdb_api: LoqusdbAPI
     ) -> None:
         """Load cancer observations to a specific Loqusdb API."""
+        # TODO implement this logic for panel analyses
         is_somatic_db: bool = LoqusdbInstance.SOMATIC in str(loqusdb_api.config_path)
         is_paired_analysis: bool = (
             CancerAnalysisType.TUMOR_NORMAL
@@ -100,18 +147,19 @@ class BalsamicObservationsAPI(ObservationsAPI):
                 return
             LOG.info("Uploading somatic observations to Loqusdb")
             snv_vcf_path: Path = input_files.snv_vcf_path
-            sv_vcf_path: Path = input_files.sv_vcf_path
+            sv_vcf_path: Path = input_files.sv_vcf_path  # TODO: NO SV upload for TGA
         else:
             LOG.info("Uploading germline observations to Loqusdb")
             snv_vcf_path: Path = input_files.snv_germline_vcf_path
             sv_vcf_path: Path = input_files.sv_germline_vcf_path if is_paired_analysis else None
+            # TODO: NO SV upload for TGA
 
         load_output: dict = loqusdb_api.load(
             case_id=case.internal_id,
             snv_vcf_path=snv_vcf_path,
             sv_vcf_path=sv_vcf_path,
             qual_gq=True,
-            gq_threshold=(
+            gq_threshold=(  # TODO for the new uploads this value should be zero
                 BalsamicLoadParameters.QUAL_THRESHOLD.value
                 if is_somatic_db
                 else BalsamicLoadParameters.QUAL_GERMLINE_THRESHOLD.value

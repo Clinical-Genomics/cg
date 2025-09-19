@@ -368,7 +368,7 @@ def test_is_sequencing_method_eligible_for_observations_upload(
 @pytest.mark.parametrize(
     "workflow, analysis_api, sequencing_method",
     [
-        (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_PANEL),
+        (Workflow.BALSAMIC, BalsamicAnalysisAPI, CancerAnalysisType.TUMOR_NORMAL_PANEL),
         (
             Workflow.MIP_DNA,
             MipDNAAnalysisAPI,
