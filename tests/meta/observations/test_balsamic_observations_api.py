@@ -119,7 +119,7 @@ def test_is_analysis_type_eligible_for_observations_not_eligible_tgs(cg_context:
 @pytest.mark.parametrize(
     "bed_name, is_allowed", [("GMSmyeloid", True), ("Not valid bed name", False)]
 )
-def test_is_panel_allowed_for_observations_upload_eligible(
+def test_is_panel_allowed_for_observations_upload_bed_name(
     cg_context: CGConfig, bed_name: str, is_allowed: bool
 ):
     # GIVEN a Balsamic observations API
@@ -148,6 +148,61 @@ def test_is_panel_allowed_for_observations_upload_eligible(
 
     # THEN result is as expected
     assert is_panel_allowed == is_allowed
+
+
+def test_is_panel_allowed_for_upload_WGS(cg_context: CGConfig):
+    # GIVEN a Balsamic observations API
+    balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
+    balsamic_observations_api.lims_api = Mock()
+
+    # GIVEN a store
+    store: Store = create_autospec(Store)
+
+    # GIVEN a case that does not need a panel to be uploaded to LoqusDB
+    sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_id",
+        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+    )
+    case: Case = create_autospec(Case, internal_id="case_id", samples=[sample])
+    balsamic_observations_api.store = store
+
+    # WHEN calling is_panel_allowed_for_observations_upload
+    is_panel_allowed: bool = balsamic_observations_api.is_panel_allowed_for_observations_upload(
+        case
+    )
+
+    # THEN the result should be true
+    assert is_panel_allowed
+
+
+def test_is_panel_allowed_no_bed_version(cg_context: CGConfig):
+    # GIVEN a Balsamic observations API
+    balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
+    balsamic_observations_api.lims_api = Mock()
+
+    # GIVEN a store
+    store: Store = create_autospec(Store)
+
+    # GIVEN a case that needs a panel to be uploaded to LoqusDB
+    sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_id",
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+    )
+    case: Case = create_autospec(Case, internal_id="case_id", samples=[sample])
+
+    # GIVEN that the LIMS short name does not match any bed versions
+    store.get_bed_version_by_short_name = Mock(return_value=None)
+    balsamic_observations_api.store = store
+
+    # WHEN calling is_panel_allowed_for_observations_upload
+    is_panel_allowed: bool = balsamic_observations_api.is_panel_allowed_for_observations_upload(
+        case
+    )
+
+    # THEN the result should be false
+    assert not is_panel_allowed
 
 
 def test_is_case_eligible_for_observations_upload(
