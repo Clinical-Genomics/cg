@@ -38,9 +38,9 @@ class ObservationsAPI:
         self.loqusdb_wes_config: CommonAppConfig = config.loqusdb_wes
         self.loqusdb_somatic_config: CommonAppConfig = config.loqusdb_somatic
         self.loqusdb_tumor_config: CommonAppConfig = config.loqusdb_tumor
-        self.loqusdb_lymphoid_config: CommonAppConfig = config.loqusdb_lymphoid
-        self.loqusdb_myeloid_config: CommonAppConfig = config.loqusdb_myeloid
-        self.loqusdb_twist_exome_config: CommonAppConfig = config.loqusdb_twist_exome
+        self.loqusdb_somatic_lymphoid_config: CommonAppConfig = config.loqusdb_somatic_lymphoid
+        self.loqusdb_somatic_myeloid_config: CommonAppConfig = config.loqusdb_somatic_myeloid
+        self.loqusdb_somatic_exome_config: CommonAppConfig = config.loqusdb_somatic_exome
 
     def upload(self, case_id: str) -> None:
         """
@@ -100,17 +100,17 @@ class ObservationsAPI:
                 binary_path=self.loqusdb_tumor_config.binary_path,
                 config_path=self.loqusdb_tumor_config.config_path,
             ),
-            LoqusdbInstance.LYMPHOID: LoqusdbAPI(
-                binary_path=self.loqusdb_lymphoid_config.binary_path,
-                config_path=self.loqusdb_lymphoid_config.config_path,
+            LoqusdbInstance.SOMATIC_LYMPHOID: LoqusdbAPI(
+                binary_path=self.loqusdb_somatic_lymphoid_config.binary_path,
+                config_path=self.loqusdb_somatic_lymphoid_config.config_path,
             ),
-            LoqusdbInstance.MYELOID: LoqusdbAPI(
-                binary_path=self.loqusdb_myeloid_config.binary_path,
-                config_path=self.loqusdb_myeloid_config.config_path,
+            LoqusdbInstance.SOMATIC_MYELOID: LoqusdbAPI(
+                binary_path=self.loqusdb_somatic_myeloid_config.binary_path,
+                config_path=self.loqusdb_somatic_myeloid_config.config_path,
             ),
-            LoqusdbInstance.TWIST_EXOME: LoqusdbAPI(
-                binary_path=self.loqusdb_twist_exome_config.binary_path,
-                config_path=self.loqusdb_twist_exome_config.config_path,
+            LoqusdbInstance.SOMATIC_EXOME: LoqusdbAPI(
+                binary_path=self.loqusdb_somatic_exome_config.binary_path,
+                config_path=self.loqusdb_somatic_exome_config.config_path,
             ),
         }
         return loqusdb_apis[loqusdb_instance]

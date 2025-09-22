@@ -66,9 +66,9 @@ class LoqusdbInstance(StrEnum):
     WES = "loqusdb-wes"
     SOMATIC = "loqusdb-somatic"
     TUMOR = "loqusdb-tumor"
-    LYMPHOID = "loqusdb-gms-lymphoid"
-    MYELOID = "loqusdb-gms-myeloid"
-    TWIST_EXOME = "loqusdb-twist-exome-comprehensive"
+    SOMATIC_LYMPHOID = "loqusdb-somatic-lymphoid"
+    SOMATIC_MYELOID = "loqusdb-somatic-myeloid"
+    SOMATIC_EXOME = "loqusdb-somatic-exome"
 
 
 class MipDNALoadParameters(Enum):
