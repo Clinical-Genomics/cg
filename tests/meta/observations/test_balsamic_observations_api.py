@@ -115,6 +115,15 @@ def test_is_analysis_type_eligible_for_observations_not_eligible_tgs(cg_context:
     assert not is_eligible
 
 
+def test_is_panel_allowed_for_observations_upload_eligible(cg_context: CGConfig):
+    # GIVEN a case that needs a panel to be uploaded to LoqusDB
+
+    # GIVEN
+
+    # WHEN
+    pass
+
+
 def test_is_case_eligible_for_observations_upload(
     case_id: str, balsamic_observations_api: BalsamicObservationsAPI, mocker: MockFixture
 ):

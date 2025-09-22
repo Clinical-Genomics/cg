@@ -21,7 +21,7 @@ from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
-from cg.store.models import Case, Sample
+from cg.store.models import BedVersion, Case, Sample
 from cg.utils.dict import get_full_path_dictionary
 
 LOG = logging.getLogger(__name__)
@@ -34,6 +34,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self.analysis_api = BalsamicAnalysisAPI(config)
         super().__init__(config=config, analysis_api=self.analysis_api)
         # TODO maybe add loqusdb instances for panels or use get_loqusdb_api method
+        self.lims_api = config.lims_api
         self.loqusdb_somatic_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.SOMATIC)
         self.loqusdb_tumor_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.TUMOR)
 
@@ -84,8 +85,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             ]
         )
 
-    @staticmethod
-    def is_panel_allowed_for_observations_upload(case: Case) -> bool:
+    def is_panel_allowed_for_observations_upload(self, case: Case) -> bool:
         """
         Returns True if WGS or TGS with the allowed panels.
         This assumes that all samples in the case have the same prep-category
@@ -95,13 +95,21 @@ class BalsamicObservationsAPI(ObservationsAPI):
             SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
             SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
         ]:
-            panel: str = sample.capture_kit
-            # TODO: Fetch panel from LIMS here instead of using StatusDB column
-            if panel not in [
+            panel_short_name: str | None = self.lims_api.capture_kit(lims_id=sample.internal_id)
+            bed_version: BedVersion | None = self.store.get_bed_version_by_short_name(
+                panel_short_name
+            )
+            if not bed_version:
+                LOG.warning(
+                    f"No bed version found for LIMS panel {panel_short_name} for sample "
+                    f"{sample.internal_id} in case {case.internal_id}"
+                )
+                return False
+            if bed_version.bed.name not in [
                 "GMSmyeloid",
                 "GMSlymphoid",
                 "Twist Exome Comprehensive",
-            ]:  # TODO: Think about a better solution for this list
+            ]:  # TODO: Think about a better solution for this list (as a constant)
                 return False
         return True
 
