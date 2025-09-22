@@ -35,6 +35,8 @@ LOQUSDB_CANCER_SEQUENCING_METHODS = [
 
 
 class BalsamicObservationPanels(StrEnum):
+    """Group of panels which have associated LoqusDB instances."""
+
     EXOME = "Twist Exome Comprehensive"
     LYMPHOID = "GMSlymphoid"
     MYELOID = "GMSmyeloid"
@@ -59,11 +61,14 @@ class BalsamicObservationsAnalysisTag(StrEnum):
 class LoqusdbInstance(StrEnum):
     """Observations instances."""
 
-    LWP: str = "loqusdb-lwp"
-    WGS: str = "loqusdb"
-    WES: str = "loqusdb-wes"
-    SOMATIC: str = "loqusdb-somatic"
-    TUMOR: str = "loqusdb-tumor"
+    LWP = "loqusdb-lwp"
+    WGS = "loqusdb"
+    WES = "loqusdb-wes"
+    SOMATIC = "loqusdb-somatic"
+    TUMOR = "loqusdb-tumor"
+    LYMPHOID = "loqusdb-gms-lymphoid"
+    MYELOID = "loqusdb-gms-myeloid"
+    TWIST_EXOME = "loqusdb-twist-exome-comprehensive"
 
 
 class MipDNALoadParameters(Enum):
