@@ -26,10 +26,11 @@ def test_is_analysis_type_eligible_for_observations_upload_eligible_wgs(
 
     # GIVEN a case with tumor samples
     mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
+    case: Case = balsamic_observations_api.store.get_case_by_internal_id(case_id)
 
     # WHEN checking analysis type eligibility for a case
     is_analysis_type_eligible_for_observations_upload: bool = (
-        balsamic_observations_api.is_analysis_type_eligible_for_observations_upload(case_id)
+        balsamic_observations_api.is_analysis_type_eligible_for_observations_upload(case)
     )
 
     # THEN the analysis type should be eligible for observation uploads
@@ -48,15 +49,19 @@ def test_is_analysis_type_eligible_for_observations_upload_not_eligible_wgs(
 
     # GIVEN a case without tumor samples (normal-only analysis)
     mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=True)
+    case: Case = balsamic_observations_api.store.get_case_by_internal_id(case_id)
 
     # WHEN checking analysis type eligibility for a case
     is_analysis_type_eligible_for_observations_upload: bool = (
-        balsamic_observations_api.is_analysis_type_eligible_for_observations_upload(case_id)
+        balsamic_observations_api.is_analysis_type_eligible_for_observations_upload(case)
     )
 
     # THEN the analysis type should not be eligible for observation uploads
     assert not is_analysis_type_eligible_for_observations_upload
-    assert f"Normal only analysis {case_id} is not supported for Loqusdb uploads" in caplog.text
+    assert (
+        f"Normal only analysis {case.internal_id} is not supported for WGS Loqusdb uploads"
+        in caplog.text
+    )
 
 
 def test_is_analysis_type_eligible_for_observations_eligible_tgs(cg_context: CGConfig):
