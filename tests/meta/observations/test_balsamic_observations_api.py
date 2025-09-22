@@ -1,7 +1,7 @@
 """Test Balsamic observations API."""
 
 import logging
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 from _pytest.logging import LogCaptureFixture
@@ -14,7 +14,7 @@ from cg.meta.observations.balsamic_observations_api import BalsamicObservationsA
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
-from cg.store.models import Case, Sample
+from cg.store.models import Bed, BedVersion, Case, Sample
 from cg.store.store import Store
 
 
@@ -116,24 +116,38 @@ def test_is_analysis_type_eligible_for_observations_not_eligible_tgs(cg_context:
     assert not is_eligible
 
 
-def test_is_panel_allowed_for_observations_upload_eligible(cg_context: CGConfig):
+@pytest.mark.parametrize(
+    "bed_name, is_allowed", [("GMSmyeloid", True), ("Not valid bed name", False)]
+)
+def test_is_panel_allowed_for_observations_upload_eligible(
+    cg_context: CGConfig, bed_name: str, is_allowed: bool
+):
     # GIVEN a Balsamic observations API
     balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
+    balsamic_observations_api.lims_api = Mock()
 
     # GIVEN a store
     store: Store = create_autospec(Store)
 
-    # GIVEN a case
-    case: Case = create_autospec(
-        Case,
-    )
-
     # GIVEN a case that needs a panel to be uploaded to LoqusDB
+    sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_id",
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+    )
+    case: Case = create_autospec(Case, internal_id="case_id", samples=[sample])
+    bed: Bed = create_autospec(Bed)
+    bed.name = bed_name
+    store.get_bed_version_by_short_name = Mock(return_value=create_autospec(BedVersion, bed=bed))
+    balsamic_observations_api.store = store
 
     # WHEN calling is_panel_allowed_for_observations_upload
+    is_panel_allowed: bool = balsamic_observations_api.is_panel_allowed_for_observations_upload(
+        case
+    )
 
     # THEN result is as expected
-    pass
+    assert is_panel_allowed == is_allowed
 
 
 def test_is_case_eligible_for_observations_upload(
