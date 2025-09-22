@@ -106,7 +106,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
                     f"{sample.internal_id} in case {case.internal_id}"
                 )
                 return False
-            if bed_version.bed.name not in BalsamicObservationPanels:
+            if bed_version.bed.name not in list(BalsamicObservationPanels):
                 return False
         return True
 
