@@ -459,6 +459,9 @@ class CGConfig(BaseModel):
     loqusdb_somatic: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC.value)
     loqusdb_tumor: CommonAppConfig = Field(None, alias=LoqusdbInstance.TUMOR.value)
     loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
+    loqusdb_lymphoid: CommonAppConfig = Field(None, alias=LoqusdbInstance.LYMPHOID.value)
+    loqusdb_myeloid: CommonAppConfig = Field(None, alias=LoqusdbInstance.MYELOID.value)
+    loqusdb_twist_exome: CommonAppConfig = Field(None, alias=LoqusdbInstance.TWIST_EXOME.value)
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
