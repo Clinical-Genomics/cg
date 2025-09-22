@@ -15,6 +15,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 
 
 def test_is_analysis_type_eligible_for_observations_upload_eligible_wgs(
@@ -116,11 +117,22 @@ def test_is_analysis_type_eligible_for_observations_not_eligible_tgs(cg_context:
 
 
 def test_is_panel_allowed_for_observations_upload_eligible(cg_context: CGConfig):
+    # GIVEN a Balsamic observations API
+    balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
+
+    # GIVEN a store
+    store: Store = create_autospec(Store)
+
+    # GIVEN a case
+    case: Case = create_autospec(
+        Case,
+    )
+
     # GIVEN a case that needs a panel to be uploaded to LoqusDB
 
-    # GIVEN
+    # WHEN calling is_panel_allowed_for_observations_upload
 
-    # WHEN
+    # THEN result is as expected
     pass
 
 
