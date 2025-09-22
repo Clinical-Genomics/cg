@@ -9,7 +9,7 @@ from pydantic.v1 import ValidationError
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat, GenomeVersion, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
-from cg.constants.observations import ObservationsFileWildcards
+from cg.constants.observations import BalsamicObservationPanels, ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
 from cg.constants.scout import BALSAMIC_CASE_TAGS
 from cg.constants.sequencing import SeqLibraryPrepCategory, Variants
@@ -34,9 +34,9 @@ LOG = logging.getLogger(__name__)
 
 
 PANELS_WITH_LOQUSDB_DUMP_FILES_MAP: dict[str, str] = {
-    "GMSmyeloid": "loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz",
-    "GMSlymphoid": "loqusdb_cancer_somatic_lymphoid_snv_variants_export-20250920-.vcf.gz",
-    "Twist Exome Comprehensive": "loqusdb_cancer_somatic_exome_snv_variants_export-20250920-.vcf.gz",
+    BalsamicObservationPanels.MYELOID: "loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz",
+    BalsamicObservationPanels.LYMPHOID: "loqusdb_cancer_somatic_lymphoid_snv_variants_export-20250920-.vcf.gz",
+    BalsamicObservationPanels.EXOME: "loqusdb_cancer_somatic_exome_snv_variants_export-20250920-.vcf.gz",
 }
 
 LOQUSDB_WGS_DUMP_FILE = "loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz"

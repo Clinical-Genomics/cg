@@ -34,6 +34,12 @@ LOQUSDB_CANCER_SEQUENCING_METHODS = [
 ]
 
 
+class BalsamicObservationPanels(StrEnum):
+    EXOME = "Twist Exome Comprehensive"
+    LYMPHOID = "GMSlymphoid"
+    MYELOID = "GMSmyeloid"
+
+
 class BalsamicLoadParameters(Enum):
     """Cancer Loqusdb load command parameters."""
 

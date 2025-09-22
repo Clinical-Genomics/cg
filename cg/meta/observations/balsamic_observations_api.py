@@ -12,6 +12,7 @@ from cg.constants.observations import (
     LOQUSDB_CANCER_SEQUENCING_METHODS,
     LOQUSDB_ID,
     BalsamicLoadParameters,
+    BalsamicObservationPanels,
     BalsamicObservationsAnalysisTag,
     LoqusdbInstance,
 )
@@ -105,11 +106,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
                     f"{sample.internal_id} in case {case.internal_id}"
                 )
                 return False
-            if bed_version.bed.name not in [
-                "GMSmyeloid",
-                "GMSlymphoid",
-                "Twist Exome Comprehensive",
-            ]:  # TODO: Think about a better solution for this list (as a constant)
+            if bed_version.bed.name not in BalsamicObservationPanels:
                 return False
         return True
 
