@@ -345,29 +345,50 @@ def test_load_cancer_observations(
     # THEN the observations should be loaded successfully
     assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
 
-@pytest.mark.parametrize("prep_category, panel, file_name, expected_loqusdb_instance",
-                         [(SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING, )
-                          ]
+
+@pytest.mark.parametrize(
+    "prep_category, panel, loqusdb_instance",
+    [
+        (
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+            BalsamicObservationPanels.EXOME,
+            LoqusdbInstance.SOMATIC_EXOME,
+        ),
+        (
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            BalsamicObservationPanels.LYMPHOID,
+            LoqusdbInstance.SOMATIC_LYMPHOID,
+        ),
+        (
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            BalsamicObservationPanels.MYELOID,
+            LoqusdbInstance.SOMATIC_MYELOID,
+        ),
+    ],
+    ids=["Exome", "Lymphoid", "Myeloid"],
 )
-def test_panel_upload(mocker: MockerFixture):
+def test_panel_upload(
+    prep_category: SeqLibraryPrepCategory,
+    panel: BalsamicObservationPanels,
+    loqusdb_instance: LoqusdbInstance,
+    mocker: MockerFixture,
+):
     # GIVEN a panel case with a TGS sample
-    sample: Sample = create_autospec(
-        Sample, prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
-    )
+    sample: Sample = create_autospec(Sample, prep_category=prep_category)
     case: Case = create_autospec(
         Case, internal_id="case_id", samples=[sample], loqusdb_uploaded_samples=[]
     )
 
     # GIVEN that a known panel is set in LIMS
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.capture_kit = Mock(return_value="lymphoid_file.bed")
+    lims_api.capture_kit = Mock(return_value="file.bed")
 
     # GIVEN a store
     store: Store = create_autospec(Store)
     bed = create_autospec(Bed)
-    bed.name = BalsamicObservationPanels.LYMPHOID.value
+    bed.name = panel
     store.get_bed_version_by_file_name_strict = Mock(
-        return_value=create_autospec(BedVersion, bed=bed, filename="lymphoid_file.bed")
+        return_value=create_autospec(BedVersion, bed=bed, filename="file.bed")
     )
 
     # GIVEN balsamic observations API
@@ -401,16 +422,14 @@ def test_panel_upload(mocker: MockerFixture):
     mocker.patch.object(
         BalsamicObservationsAPI,
         "get_observations_files_from_hk",
-        return_value=create_autospec(
-            BalsamicObservationsInputFiles, snv_vcf_path=path_to_snv_file
-        ),
+        return_value=create_autospec(BalsamicObservationsInputFiles, snv_vcf_path=path_to_snv_file),
     )
 
     # WHEN uploading
     balsamic_observations_api.load_observations(case)
 
     # THEN the correct loqusDB instance is selected
-    loqusdb_selection.assert_called_once_with(ANY, LoqusdbInstance.SOMATIC_LYMPHOID)
+    loqusdb_selection.assert_called_once_with(ANY, loqusdb_instance)
 
     # THEN the case is uploaded
     loqusdb_load.assert_called_once_with(
