@@ -12,7 +12,7 @@ from cg.constants.observations import (
     LOQUSDB_CANCER_SEQUENCING_METHODS,
     LOQUSDB_ID,
     BalsamicLoadParameters,
-    BalsamicObservationPanels,
+    BalsamicObservationPanel,
     BalsamicObservationsAnalysisTag,
     LoqusdbInstance,
 )
@@ -28,9 +28,9 @@ from cg.utils.dict import get_full_path_dictionary
 LOG = logging.getLogger(__name__)
 
 PANEL_TO_LOQUSDB_INSTANCE_MAP: dict = {
-    BalsamicObservationPanels.LYMPHOID: LoqusdbInstance.SOMATIC_LYMPHOID,
-    BalsamicObservationPanels.MYELOID: LoqusdbInstance.SOMATIC_MYELOID,
-    BalsamicObservationPanels.EXOME: LoqusdbInstance.SOMATIC_EXOME,
+    BalsamicObservationPanel.LYMPHOID: LoqusdbInstance.SOMATIC_LYMPHOID,
+    BalsamicObservationPanel.MYELOID: LoqusdbInstance.SOMATIC_MYELOID,
+    BalsamicObservationPanel.EXOME: LoqusdbInstance.SOMATIC_EXOME,
 }
 
 
@@ -112,7 +112,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
                     f"{sample.internal_id} in case {case.internal_id}"
                 )
                 return False
-            if bed_version.bed.name not in list(BalsamicObservationPanels):
+            if bed_version.bed.name not in list(BalsamicObservationPanel):
                 return False
         return True
 
@@ -144,7 +144,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         bed_file_name: str = self.analysis_api.get_target_bed_from_lims(case.internal_id)
         bed_version: BedVersion = self.store.get_bed_version_by_file_name_strict(bed_file_name)
         panel: str = bed_version.bed.name
-        loqusdb_instance = PANEL_TO_LOQUSDB_INSTANCE_MAP[BalsamicObservationPanels(panel)]
+        loqusdb_instance = PANEL_TO_LOQUSDB_INSTANCE_MAP[BalsamicObservationPanel(panel)]
         loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(loqusdb_instance)
         if self.is_duplicate(case=case, loqusdb_api=loqusdb_api):
             LOG.error(f"Case {case.internal_id} has already been uploaded to Loqusdb")

@@ -10,8 +10,8 @@ from pytest_mock import MockerFixture, MockFixture
 
 from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
-from cg.constants.constants import CancerAnalysisType
-from cg.constants.observations import BalsamicObservationPanels, LoqusdbInstance
+from cg.constants.constants import CancerAnalysisType, CustomerId
+from cg.constants.observations import BalsamicObservationPanel, LoqusdbInstance
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import LoqusdbDuplicateRecordError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
@@ -19,7 +19,7 @@ from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig, IlluminaConfig, RunInstruments
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
-from cg.store.models import Bed, BedVersion, Case, Sample
+from cg.store.models import Bed, BedVersion, Case, Customer, Sample
 from cg.store.store import Store
 
 
@@ -351,17 +351,17 @@ def test_load_cancer_observations(
     [
         (
             SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
-            BalsamicObservationPanels.EXOME,
+            BalsamicObservationPanel.EXOME,
             LoqusdbInstance.SOMATIC_EXOME,
         ),
         (
             SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
-            BalsamicObservationPanels.LYMPHOID,
+            BalsamicObservationPanel.LYMPHOID,
             LoqusdbInstance.SOMATIC_LYMPHOID,
         ),
         (
             SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
-            BalsamicObservationPanels.MYELOID,
+            BalsamicObservationPanel.MYELOID,
             LoqusdbInstance.SOMATIC_MYELOID,
         ),
     ],
@@ -369,19 +369,15 @@ def test_load_cancer_observations(
 )
 def test_panel_upload(
     prep_category: SeqLibraryPrepCategory,
-    panel: BalsamicObservationPanels,
+    panel: BalsamicObservationPanel,
     loqusdb_instance: LoqusdbInstance,
     mocker: MockerFixture,
 ):
-    # GIVEN a panel case with a TGS sample
-    sample: Sample = create_autospec(Sample, prep_category=prep_category)
-    case: Case = create_autospec(
-        Case, internal_id="case_id", samples=[sample], loqusdb_uploaded_samples=[]
-    )
 
     # GIVEN that a known panel is set in LIMS
     lims_api: LimsAPI = create_autospec(LimsAPI)
     lims_api.capture_kit = Mock(return_value="file.bed")
+    lims_api.get_source = Mock(return_value="Not valid")
 
     # GIVEN a store
     store: Store = create_autospec(Store)
@@ -390,6 +386,18 @@ def test_panel_upload(
     store.get_bed_version_by_file_name_strict = Mock(
         return_value=create_autospec(BedVersion, bed=bed, filename="file.bed")
     )
+    # GIVEN a panel case with a TGS sample
+    customer = create_autospec(Customer, internal_id=CustomerId.CUST110)
+    sample: Sample = create_autospec(Sample, prep_category=prep_category)
+    case: Case = create_autospec(
+        Case,
+        internal_id="case_id",
+        samples=[sample],
+        loqusdb_uploaded_samples=[],
+        customer=customer,
+    )
+    store.get_case_by_internal_id = Mock(return_value=case)
+    store.get_sample_ids_by_case_id = Mock(return_value=[sample])
 
     # GIVEN balsamic observations API
     balsamic_observations_api = BalsamicObservationsAPI(
@@ -426,7 +434,7 @@ def test_panel_upload(
     )
 
     # WHEN uploading
-    balsamic_observations_api.load_observations(case)
+    balsamic_observations_api.upload(case.internal_id)
 
     # THEN the correct loqusDB instance is selected
     loqusdb_selection.assert_called_once_with(ANY, loqusdb_instance)

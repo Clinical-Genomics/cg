@@ -34,7 +34,7 @@ LOQUSDB_CANCER_SEQUENCING_METHODS = [
 ]
 
 
-class BalsamicObservationPanels(StrEnum):
+class BalsamicObservationPanel(StrEnum):
     """Group of panels which have associated LoqusDB instances."""
 
     EXOME = "Twist Exome Comprehensive"
