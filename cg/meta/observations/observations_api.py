@@ -78,7 +78,6 @@ class ObservationsAPI:
 
     def get_loqusdb_api(self, loqusdb_instance: LoqusdbInstance) -> LoqusdbAPI:
         """Returns a Loqusdb API for the given Loqusdb instance."""
-        # TODO: Add the three additional instances
         loqusdb_apis = {
             LoqusdbInstance.LWP: LoqusdbAPI(
                 binary_path=self.loqusdb_rd_lwp_config.binary_path,

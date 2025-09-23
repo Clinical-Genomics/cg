@@ -24,6 +24,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
 from cg.store.models import BedVersion, Case, Sample
 from cg.utils.dict import get_full_path_dictionary
+from tests.fixture_plugins.loqusdb_fixtures.loqusdb_api_fixtures import loqusdb_api
 
 LOG = logging.getLogger(__name__)
 
@@ -117,6 +118,31 @@ class BalsamicObservationsAPI(ObservationsAPI):
         Raises:
             LoqusdbDuplicateRecordError: If case has already been uploaded.
         """
+        if self._is_panel_upload(case):
+            self._upload_panel_case(case)
+        self._upload_wgs_case(case)
+
+    @staticmethod
+    def _is_panel_upload(case: Case) -> bool:
+        sample: Sample = case.samples[0]
+        return sample.prep_category in [SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING, SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING]
+
+    def _upload_panel_case(self, case: Case) -> None:
+        bed_file_name: str = self.analysis_api.get_target_bed_from_lims(case.internal_id)
+        bed_version: BedVersion | None = self.store.get_bed_version_by_file_name(bed_file_name)
+
+        if not bed_version:
+            return
+
+        panel: str = bed_version.bed.name
+
+        try:
+            loqusdb_instance = LoqusdbInstance(panel)
+            loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(loqusdb_instance)
+
+
+
+    def _upload_wgs_case(self, case: Case) -> None:
         loqusdb_upload_apis: list[LoqusdbAPI] = [
             self.loqusdb_somatic_api,
             self.loqusdb_tumor_api,
@@ -125,13 +151,11 @@ class BalsamicObservationsAPI(ObservationsAPI):
             if self.is_duplicate(case=case, loqusdb_api=loqusdb_api):
                 LOG.error(f"Case {case.internal_id} has already been uploaded to Loqusdb")
                 raise LoqusdbDuplicateRecordError
-
         input_files: BalsamicObservationsInputFiles = self.get_observations_input_files(case)
         for loqusdb_api in loqusdb_upload_apis:
             self.load_cancer_observations(
                 case=case, input_files=input_files, loqusdb_api=loqusdb_api
             )
-
         # Update Statusdb with a germline Loqusdb ID
         # TODO: Check what should be done (get from somatic and set on the samples?)
         loqusdb_id: str = str(self.loqusdb_tumor_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
