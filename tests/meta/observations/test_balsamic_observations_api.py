@@ -345,9 +345,11 @@ def test_load_cancer_observations(
     # THEN the observations should be loaded successfully
     assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
 
-
+@pytest.mark.parametrize("prep_category, panel, file_name, expected_loqusdb_instance",
+                         [(SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING, )
+                          ]
+)
 def test_panel_upload(mocker: MockerFixture):
-
     # GIVEN a panel case with a TGS sample
     sample: Sample = create_autospec(
         Sample, prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
@@ -395,11 +397,12 @@ def test_panel_upload(mocker: MockerFixture):
     loqusdb_load = mocker.patch.object(LoqusdbAPI, "load")
     mocker.patch.object(LoqusdbAPI, "get_case", return_value=None)
     mocker.patch.object(LoqusdbAPI, "get_duplicate", return_value=None)
+    path_to_snv_file = Path("snv/vcf/path")
     mocker.patch.object(
         BalsamicObservationsAPI,
         "get_observations_files_from_hk",
         return_value=create_autospec(
-            BalsamicObservationsInputFiles, snv_vcf_path=Path("snv/vcf/path")
+            BalsamicObservationsInputFiles, snv_vcf_path=path_to_snv_file
         ),
     )
 
@@ -412,5 +415,5 @@ def test_panel_upload(mocker: MockerFixture):
     # THEN the case is uploaded
     loqusdb_load.assert_called_once_with(
         case_id=case.internal_id,
-        snv_vcf_path="?",
+        snv_vcf_path=path_to_snv_file,
     )

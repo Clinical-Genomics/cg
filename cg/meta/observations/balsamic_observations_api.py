@@ -125,7 +125,8 @@ class BalsamicObservationsAPI(ObservationsAPI):
         """
         if self._is_panel_upload(case):
             self._upload_panel_case(case)
-        self._upload_wgs_case(case)
+        else:
+            self._upload_wgs_case(case)
 
     @staticmethod
     def _is_panel_upload(case: Case) -> bool:
