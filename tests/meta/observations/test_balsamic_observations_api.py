@@ -386,6 +386,10 @@ def test_panel_upload(
     store.get_bed_version_by_file_name_strict = Mock(
         return_value=create_autospec(BedVersion, bed=bed, filename="file.bed")
     )
+    store.get_bed_version_by_short_name = Mock(
+        return_value=create_autospec(BedVersion, bed=bed, filename="file.bed")
+    )
+
     # GIVEN a panel case with a TGS sample
     customer = create_autospec(Customer, internal_id=CustomerId.CUST110)
     sample: Sample = create_autospec(Sample, prep_category=prep_category)
