@@ -1,6 +1,7 @@
 """Test Balsamic observations API."""
 
 import logging
+from pathlib import Path
 from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
@@ -351,25 +352,56 @@ def test_panel_upload(mocker: MockerFixture):
     sample: Sample = create_autospec(
         Sample, prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
     )
-    case: Case = create_autospec(Case, internal_id="case_id", samples=[sample])
+    case: Case = create_autospec(
+        Case, internal_id="case_id", samples=[sample], loqusdb_uploaded_samples=[]
+    )
 
     # GIVEN that a known panel is set in LIMS
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.capture_kit = Mock(return_value=BalsamicObservationPanels.LYMPHOID)
+    lims_api.capture_kit = Mock(return_value="lymphoid_file.bed")
+
+    # GIVEN a store
+    store: Store = create_autospec(Store)
+    bed = create_autospec(Bed)
+    bed.name = BalsamicObservationPanels.LYMPHOID.value
+    store.get_bed_version_by_file_name_strict = Mock(
+        return_value=create_autospec(BedVersion, bed=bed, filename="lymphoid_file.bed")
+    )
 
     # GIVEN balsamic observations API
     balsamic_observations_api = BalsamicObservationsAPI(
         create_autospec(
             CGConfig,
             lims_api=lims_api,
+            balsamic=Mock(),
+            loqusdb=Mock(),
+            loqusdb_rd_lwp=Mock(),
+            loqusdb_wes=Mock(),
+            loqusdb_somatic=Mock(),
+            loqusdb_tumor=Mock(),
+            loqusdb_somatic_lymphoid=Mock(),
+            loqusdb_somatic_myeloid=Mock(),
+            loqusdb_somatic_exome=Mock(),
             run_instruments=create_autospec(
-                RunInstruments, illumina=create_autospec(IlluminaConfig)
+                RunInstruments,
+                illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="runs_dir"),
             ),
+            sentieon_licence_server=Mock(),
+            status_db=store,
         ),
     )
 
-    loqusdb_selection = mocker.spy(ObservationsAPI, "get_loqusdb_instance")
+    loqusdb_selection = mocker.spy(ObservationsAPI, "get_loqusdb_api")
     loqusdb_load = mocker.patch.object(LoqusdbAPI, "load")
+    mocker.patch.object(LoqusdbAPI, "get_case", return_value=None)
+    mocker.patch.object(LoqusdbAPI, "get_duplicate", return_value=None)
+    mocker.patch.object(
+        BalsamicObservationsAPI,
+        "get_observations_files_from_hk",
+        return_value=create_autospec(
+            BalsamicObservationsInputFiles, snv_vcf_path=Path("snv/vcf/path")
+        ),
+    )
 
     # WHEN uploading
     balsamic_observations_api.load_observations(case)
