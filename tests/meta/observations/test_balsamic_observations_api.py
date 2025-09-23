@@ -1,26 +1,25 @@
 """Test Balsamic observations API."""
 
 import logging
-from unittest.mock import Mock, create_autospec
+from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
 from _pytest.logging import LogCaptureFixture
-from pytest_mock import MockFixture, MockerFixture
+from pytest_mock import MockerFixture, MockFixture
 
 from cg.apps.lims import LimsAPI
+from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CancerAnalysisType
-from cg.constants.observations import BalsamicObservationPanels
+from cg.constants.observations import BalsamicObservationPanels, LoqusdbInstance
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import LoqusdbDuplicateRecordError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
+from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, IlluminaConfig, RunInstruments
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
 from cg.store.models import Bed, BedVersion, Case, Sample
 from cg.store.store import Store
-from tests.cli.workflow.fluffy.conftest import sample
-from tests.integration.test_start_available_mip_dna import status_db
-from tests.meta.upload.scout.conftest import lims_api
 
 
 def test_is_analysis_type_eligible_for_observations_upload_eligible_wgs(
@@ -345,10 +344,14 @@ def test_load_cancer_observations(
     # THEN the observations should be loaded successfully
     assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
 
-def test_panel_upload(mocker: MockerFixture,):
+
+def test_panel_upload(mocker: MockerFixture):
+
     # GIVEN a panel case with a TGS sample
-    sample: Sample = create_autospec(Sample, prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING)
-    case: Case = create_autospec(Case, internal_id = "case_id", samples=[sample])
+    sample: Sample = create_autospec(
+        Sample, prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
+    )
+    case: Case = create_autospec(Case, internal_id="case_id", samples=[sample])
 
     # GIVEN that a known panel is set in LIMS
     lims_api: LimsAPI = create_autospec(LimsAPI)
@@ -356,14 +359,26 @@ def test_panel_upload(mocker: MockerFixture,):
 
     # GIVEN balsamic observations API
     balsamic_observations_api = BalsamicObservationsAPI(
-        create_autospec(CGConfig,
-                        lims_api=lims_api,
-                        ),
+        create_autospec(
+            CGConfig,
+            lims_api=lims_api,
+            run_instruments=create_autospec(
+                RunInstruments, illumina=create_autospec(IlluminaConfig)
+            ),
+        ),
     )
+
+    loqusdb_selection = mocker.spy(ObservationsAPI, "get_loqusdb_instance")
+    loqusdb_load = mocker.patch.object(LoqusdbAPI, "load")
 
     # WHEN uploading
     balsamic_observations_api.load_observations(case)
 
     # THEN the correct loqusDB instance is selected
-    # THEN the case is uploaded
+    loqusdb_selection.assert_called_once_with(ANY, LoqusdbInstance.SOMATIC_LYMPHOID)
 
+    # THEN the case is uploaded
+    loqusdb_load.assert_called_once_with(
+        case_id=case.internal_id,
+        snv_vcf_path="?",
+    )
