@@ -7,11 +7,12 @@ from unittest.mock import ANY, Mock, create_autospec
 import pytest
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockerFixture, MockFixture
+from sqlalchemy.orm import Session
 
 from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CancerAnalysisType, CustomerId
-from cg.constants.observations import BalsamicObservationPanel, LoqusdbInstance
+from cg.constants.observations import LOQUSDB_ID, BalsamicObservationPanel, LoqusdbInstance
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import LoqusdbDuplicateRecordError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
@@ -380,7 +381,8 @@ def test_panel_upload(
     lims_api.get_source = Mock(return_value="Not valid")
 
     # GIVEN a store
-    store: Store = create_autospec(Store)
+    store_session = create_autospec(Session)
+    store: Store = create_autospec(Store, session=store_session)
     bed = create_autospec(Bed)
     bed.name = panel
     store.get_bed_version_by_file_name_strict = Mock(
@@ -392,7 +394,7 @@ def test_panel_upload(
 
     # GIVEN a panel case with a TGS sample
     customer = create_autospec(Customer, internal_id=CustomerId.CUST110)
-    sample: Sample = create_autospec(Sample, prep_category=prep_category)
+    sample: Sample = create_autospec(Sample, prep_category=prep_category, loqusdb_id=None)
     case: Case = create_autospec(
         Case,
         internal_id="case_id",
@@ -428,7 +430,7 @@ def test_panel_upload(
 
     loqusdb_selection = mocker.spy(ObservationsAPI, "get_loqusdb_api")
     loqusdb_load = mocker.patch.object(LoqusdbAPI, "load")
-    mocker.patch.object(LoqusdbAPI, "get_case", return_value=None)
+    mocker.patch.object(LoqusdbAPI, "get_case", side_effect=[None, {LOQUSDB_ID: 1}])
     mocker.patch.object(LoqusdbAPI, "get_duplicate", return_value=None)
     path_to_snv_file = Path("snv/vcf/path")
     mocker.patch.object(
@@ -448,3 +450,9 @@ def test_panel_upload(
         case_id=case.internal_id,
         snv_vcf_path=path_to_snv_file,
     )
+
+    # THEN the loqusdb id has been set
+    assert all(sample.loqusdb_id for sample in case.samples)
+
+    # THEN the ids should have been commited
+    store_session.commit.assert_called_once()

@@ -20,7 +20,7 @@ from cg.models.observations.input_files import (
     NalloObservationsInputFiles,
     RarediseaseObservationsInputFiles,
 )
-from cg.store.models import Analysis, Case
+from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -132,7 +132,7 @@ class ObservationsAPI:
         )
         return bool(loqusdb_case or duplicate or case.loqusdb_uploaded_samples)
 
-    def update_statusdb_loqusdb_id(self, samples: list[Case], loqusdb_id: str | None) -> None:
+    def update_statusdb_loqusdb_id(self, samples: list[Sample], loqusdb_id: str | None) -> None:
         """Update Loqusdb ID field in StatusDB for each of the provided samples."""
         for sample in samples:
             sample.loqusdb_id = loqusdb_id

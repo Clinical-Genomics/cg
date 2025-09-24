@@ -154,7 +154,8 @@ class BalsamicObservationsAPI(ObservationsAPI):
             case_id=case.internal_id,
             snv_vcf_path=input_files.snv_vcf_path,
         )
-        # TODO: get the loqusdb id and set it on the sample in statusdb
+        loqusdb_id: str = str(loqusdb_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
+        self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
 
     def _upload_wgs_case(self, case: Case) -> None:
         loqusdb_upload_apis: list[LoqusdbAPI] = [

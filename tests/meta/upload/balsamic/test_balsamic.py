@@ -80,7 +80,7 @@ def test_genotype_check_only_tumour(balsamic_context: CGConfig):
         SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     ],
 )
-def test_loqusdb_upload_based_on_prep_category_pass(
+def test_loqusdb_upload_baxsed_on_prep_category_pass(
     prep_category: SeqLibraryPrepCategory, mocker: MockerFixture
 ):
 
