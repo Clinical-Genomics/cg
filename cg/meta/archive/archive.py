@@ -305,6 +305,9 @@ class SpringArchiveAPI:
             except MissingFilesError as error:
                 LOG.warning(str(error))
                 continue
+            except SampleFilesCurrentlyArchivingError as error:
+                LOG.warning(f"Sample {sample.internal_id} will not be retrieved: {error}")
+                continue
 
     def retrieve_spring_files_for_sample(self, sample_id: str) -> None:
         sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
