@@ -1,23 +1,21 @@
 """Tests API upload methods for balsamic cases"""
 
+from unittest.mock import Mock, create_autospec
+
+import click
+import pytest
+from pytest_mock import MockerFixture
+
+from cg.cli.upload.observations import upload_observations_to_loqusdb
+from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
 from cg.meta.upload.gt import UploadGenotypesAPI
-from cg.models.cg_config import CGConfig
-from cg.store.models import Case
-from tests.cli.workflow.balsamic.conftest import (
-    balsamic_context,
-    balsamic_housekeeper,
-    balsamic_housekeeper_dir,
-    balsamic_lims,
-    balsamic_mock_fastq_files,
-    fastq_file_l_1_r_1,
-    fastq_file_l_1_r_2,
-    fastq_file_l_2_r_1,
-    fastq_file_l_2_r_2,
-    fastq_file_l_3_r_1,
-    fastq_file_l_3_r_2,
-    fastq_file_l_4_r_1,
-    fastq_file_l_4_r_2,
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.models.cg_config import CGConfig, IlluminaConfig, RunInstruments
+from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
+    DeliverFilesService,
 )
+from cg.store.models import Case
 
 
 def test_genotype_check_wgs_normal(balsamic_context: CGConfig):
@@ -59,5 +57,95 @@ def test_genotype_check_only_tumour(balsamic_context: CGConfig):
     assert not passed_check
 
 
-def test_loqusdb_upload_based_on_prep_category():
-    pass
+@pytest.mark.parametrize(
+    "prep_category",
+    [
+        SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+        SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+    ],
+)
+def test_loqusdb_upload_based_on_prep_category_pass(
+    prep_category: SeqLibraryPrepCategory, mocker: MockerFixture
+):
+
+    # GIVEN a Balsamic Upload API
+    upload_api = BalsamicUploadAPI(
+        create_autospec(
+            CGConfig,
+            delivery_path="delivery_path",
+            lims_api=Mock(),
+            balsamic=Mock(),
+            loqusdb=Mock(),
+            loqusdb_rd_lwp=Mock(),
+            loqusdb_wes=Mock(),
+            loqusdb_somatic=Mock(),
+            loqusdb_tumor=Mock(),
+            loqusdb_somatic_lymphoid=Mock(),
+            loqusdb_somatic_myeloid=Mock(),
+            loqusdb_somatic_exome=Mock(),
+            run_instruments=create_autospec(
+                RunInstruments,
+                illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="runs_dir"),
+            ),
+            sentieon_licence_server=Mock(),
+            status_db=Mock(),
+        ),
+    )
+
+    # GIVEN a case containing a sample with a TGS prep category
+    case: Case = create_autospec(Case, internal_id="case_id")
+
+    cli_mock = mocker.patch.object(click.Context, "invoke")
+    mocker.patch.object(DeliverFilesService, "deliver_files_for_case")
+    mocker.patch.object(AnalysisAPI, "get_case_application_type", return_value=prep_category)
+
+    # WHEN uploading
+    upload_api.upload(ctx=click.Context(command=Mock()), case=case, restart=False)
+
+    # THEN it should upload observations to LoqusDB
+    cli_mock.assert_called_with(upload_observations_to_loqusdb, case_id=case.internal_id)
+    assert cli_mock.call_count == 2
+
+
+def test_loqusdb_upload_based_on_prep_category_fail(mocker: MockerFixture):
+    # GIVEN a Balsamic Upload API
+    upload_api = BalsamicUploadAPI(
+        create_autospec(
+            CGConfig,
+            delivery_path="delivery_path",
+            lims_api=Mock(),
+            balsamic=Mock(),
+            loqusdb=Mock(),
+            loqusdb_rd_lwp=Mock(),
+            loqusdb_wes=Mock(),
+            loqusdb_somatic=Mock(),
+            loqusdb_tumor=Mock(),
+            loqusdb_somatic_lymphoid=Mock(),
+            loqusdb_somatic_myeloid=Mock(),
+            loqusdb_somatic_exome=Mock(),
+            run_instruments=create_autospec(
+                RunInstruments,
+                illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="runs_dir"),
+            ),
+            sentieon_licence_server=Mock(),
+            status_db=Mock(),
+        ),
+    )
+
+    # GIVEN a case containing a sample with a TGS prep category
+    case: Case = create_autospec(Case, internal_id="case_id")
+
+    cli_mock = mocker.patch.object(click.Context, "invoke")
+    mocker.patch.object(DeliverFilesService, "deliver_files_for_case")
+    mocker.patch.object(
+        AnalysisAPI,
+        "get_case_application_type",
+        return_value=SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
+    )
+
+    # WHEN uploading
+    upload_api.upload(ctx=click.Context(command=Mock()), case=case, restart=False)
+
+    # THEN it should upload observations to LoqusDB
+    assert cli_mock.call_count == 1
