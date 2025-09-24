@@ -280,6 +280,10 @@ class MissingFilesError(CgError):
     """Exception raised when there are missing files."""
 
 
+class SampleFilesCurrentlyArchivingError(CgError):
+    """Exception raised when not all of the samples' files have finished archiving."""
+
+
 class MetricsQCError(CgError):
     """Exception raised when QC metrics are not met."""
 

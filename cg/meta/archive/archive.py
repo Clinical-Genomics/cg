@@ -7,7 +7,7 @@ from housekeeper.store.models import Archive, File
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
-from cg.exc import ArchiveJobFailedError, MissingFilesError
+from cg.exc import ArchiveJobFailedError, MissingFilesError, SampleFilesCurrentlyArchivingError
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
@@ -316,7 +316,14 @@ class SpringArchiveAPI:
             raise MissingFilesError(
                 f"No archived Spring files found for sample {sample.internal_id}."
             )
+        if not self._are_all_files_archived(files_to_retrieve):
+            raise SampleFilesCurrentlyArchivingError(
+                f"Not all Spring files for sample {sample.internal_id} are archived - cannot retrieve files."
+            )
         files_and_samples: list[FileAndSample] = self.add_samples_to_files(files_to_retrieve)
         self.retrieve_files_from_archive_location(
             files_and_samples=files_and_samples, archive_location=sample.archive_location
         )
+
+    def _are_all_files_archived(self, files: list[File]) -> bool:
+        return all(self.is_file_archived(file) for file in files)

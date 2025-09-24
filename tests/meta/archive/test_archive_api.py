@@ -1,3 +1,4 @@
+import datetime as dt
 from pathlib import Path
 from unittest import mock
 from unittest.mock import Mock, create_autospec
@@ -313,6 +314,7 @@ def test_retrieve_case(
         spring_archive_api.housekeeper_api.add_archives(
             files=[file], archive_task_id=archival_job_id
         )
+        file.archive.archived_at = dt.datetime.now()
         assert not file.archive.retrieval_task_id
         assert file.archive
 
@@ -411,6 +413,7 @@ def test_retrieve_sample(
         spring_archive_api.housekeeper_api.add_archives(
             files=[file], archive_task_id=archival_job_id
         )
+        file.archive.archived_at = dt.datetime.now()
         assert not file.archive.retrieval_task_id
         assert file.archive
 
@@ -467,6 +470,7 @@ def test_retrieve_order(
         spring_archive_api.housekeeper_api.add_archives(
             files=[file], archive_task_id=archival_job_id
         )
+        file.archive.archived_at = dt.datetime.now()
         assert not file.archive.retrieval_task_id
         assert file.archive
 
