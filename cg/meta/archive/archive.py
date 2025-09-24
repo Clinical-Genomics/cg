@@ -289,11 +289,7 @@ class SpringArchiveAPI:
         else:
             order = self.status_db.get_order_by_ticket_id(id_)
         for case in order.cases:
-            try:
-                self.retrieve_spring_files_for_case(case.internal_id)
-            except MissingFilesError as error:
-                LOG.info(error)
-                continue
+            self.retrieve_spring_files_for_case(case.internal_id)
 
     def retrieve_spring_files_for_case(self, case_id: str) -> None:
         """Submits jobs to retrieve any archived files belonging to the given case, and updates the Archive entries
@@ -305,8 +301,7 @@ class SpringArchiveAPI:
             except MissingFilesError as error:
                 LOG.warning(str(error))
                 continue
-            except SampleFilesCurrentlyArchivingError as error:
-                LOG.warning(f"Sample {sample.internal_id} will not be retrieved: {error}")
+            except SampleFilesCurrentlyArchivingError:
                 continue
 
     def retrieve_spring_files_for_sample(self, sample_id: str) -> None:
