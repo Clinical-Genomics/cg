@@ -14,10 +14,14 @@ LOQUSDB_SUPPORTED_WORKFLOWS = [
 ]
 LOQUSDB_RARE_DISEASE_CUSTOMERS = [CustomerId.CUST002, CustomerId.CUST003, CustomerId.CUST004]
 LOQUSDB_CANCER_CUSTOMERS = [
+    CustomerId.CUST002,
+    CustomerId.CUST087,
     CustomerId.CUST110,
     CustomerId.CUST127,
     CustomerId.CUST143,
-    CustomerId.CUST147,  # TODO: update this list when given new info
+    CustomerId.CUST147,
+    CustomerId.CUST175,
+    CustomerId.CUST185,
 ]
 LOQUSDB_LONG_READ_CUSTOMERS = [CustomerId.CUST002, CustomerId.CUST003, CustomerId.CUST004]
 LOQUSDB_LONG_READ_SEQUENCING_METHODS = [
