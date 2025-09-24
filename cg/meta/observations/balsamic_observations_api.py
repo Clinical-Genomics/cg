@@ -140,8 +140,8 @@ class BalsamicObservationsAPI(ObservationsAPI):
         Uploads the case to one of the somatic panel LoqusDB instances. The case is known to have
         a panel with a known LoqusDB instance.
         """
-        bed_file_name: str = self.analysis_api.get_target_bed_from_lims(case.internal_id)
-        bed_version: BedVersion = self.store.get_bed_version_by_file_name_strict(bed_file_name)
+        bed_short_name: str = self.lims_api.capture_kit(lims_id=case.samples[0].internal_id)
+        bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(bed_short_name)
         panel: str = bed_version.bed.name
         loqusdb_instance = PANEL_TO_LOQUSDB_INSTANCE_MAP[BalsamicObservationPanel(panel)]
         loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(loqusdb_instance)

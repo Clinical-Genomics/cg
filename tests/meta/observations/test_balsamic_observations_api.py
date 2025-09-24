@@ -385,7 +385,7 @@ def test_panel_upload(
     store: Store = create_autospec(Store, session=store_session)
     bed = create_autospec(Bed)
     bed.name = panel
-    store.get_bed_version_by_file_name_strict = Mock(
+    store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(BedVersion, bed=bed, filename="file.bed")
     )
     store.get_bed_version_by_short_name = Mock(
