@@ -30,7 +30,7 @@ LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS = [
 LOQUSDB_CANCER_SEQUENCING_METHODS = [
     CancerAnalysisType.TUMOR_WGS,
     CancerAnalysisType.TUMOR_NORMAL_WGS,
-    CancerAnalysisType.TUMOR_PANEL,  # TODO: See if we can add the three panels as sequencing methods
+    CancerAnalysisType.TUMOR_PANEL,
 ]
 
 

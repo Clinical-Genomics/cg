@@ -154,12 +154,13 @@ class BalsamicObservationsAPI(ObservationsAPI):
             case_id=case.internal_id,
             snv_vcf_path=input_files.snv_vcf_path,
         )
+        # TODO: get the loqusdb id and set it on the sample in statusdb
 
     def _upload_wgs_case(self, case: Case) -> None:
         loqusdb_upload_apis: list[LoqusdbAPI] = [
             self.loqusdb_somatic_api,
             self.loqusdb_tumor_api,
-        ]  # TODO: Replace with if-statements
+        ]
         for loqusdb_api in loqusdb_upload_apis:
             if self.is_duplicate(case=case, loqusdb_api=loqusdb_api):
                 LOG.error(f"Case {case.internal_id} has already been uploaded to Loqusdb")
@@ -170,7 +171,6 @@ class BalsamicObservationsAPI(ObservationsAPI):
                 case=case, input_files=input_files, loqusdb_api=loqusdb_api
             )
         # Update Statusdb with a germline Loqusdb ID
-        # TODO: Check what should be done (get from somatic and set on the samples?)
         loqusdb_id: str = str(self.loqusdb_tumor_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
 
@@ -178,7 +178,6 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self, case: Case, input_files: BalsamicObservationsInputFiles, loqusdb_api: LoqusdbAPI
     ) -> None:
         """Load cancer observations to a specific Loqusdb API."""
-        # TODO implement this logic for panel analyses
         is_somatic_db: bool = LoqusdbInstance.SOMATIC in str(loqusdb_api.config_path)
         is_paired_analysis: bool = (
             CancerAnalysisType.TUMOR_NORMAL
@@ -189,19 +188,18 @@ class BalsamicObservationsAPI(ObservationsAPI):
                 return
             LOG.info("Uploading somatic observations to Loqusdb")
             snv_vcf_path: Path = input_files.snv_vcf_path
-            sv_vcf_path: Path = input_files.sv_vcf_path  # TODO: NO SV upload for TGA
+            sv_vcf_path: Path = input_files.sv_vcf_path
         else:
             LOG.info("Uploading germline observations to Loqusdb")
             snv_vcf_path: Path = input_files.snv_germline_vcf_path
             sv_vcf_path: Path = input_files.sv_germline_vcf_path if is_paired_analysis else None
-            # TODO: NO SV upload for TGA
 
         load_output: dict = loqusdb_api.load(
             case_id=case.internal_id,
             snv_vcf_path=snv_vcf_path,
             sv_vcf_path=sv_vcf_path,
             qual_gq=True,
-            gq_threshold=(  # TODO for the new uploads this value should be zero
+            gq_threshold=(
                 BalsamicLoadParameters.QUAL_THRESHOLD.value
                 if is_somatic_db
                 else BalsamicLoadParameters.QUAL_GERMLINE_THRESHOLD.value

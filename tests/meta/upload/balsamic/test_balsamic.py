@@ -57,3 +57,7 @@ def test_genotype_check_only_tumour(balsamic_context: CGConfig):
 
     # THEN it should return False
     assert not passed_check
+
+
+def test_loqusdb_upload_based_on_prep_category():
+    pass
