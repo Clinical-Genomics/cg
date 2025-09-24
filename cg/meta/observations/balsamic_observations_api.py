@@ -40,7 +40,6 @@ class BalsamicObservationsAPI(ObservationsAPI):
     def __init__(self, config: CGConfig):
         self.analysis_api = BalsamicAnalysisAPI(config)
         super().__init__(config=config, analysis_api=self.analysis_api)
-        # TODO maybe add loqusdb instances for panels or use get_loqusdb_api method
         self.lims_api = config.lims_api
         self.loqusdb_somatic_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.SOMATIC)
         self.loqusdb_tumor_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.TUMOR)
