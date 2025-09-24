@@ -211,6 +211,30 @@ def test_is_panel_allowed_no_bed_version(cg_context: CGConfig):
     assert not is_panel_allowed
 
 
+def test_is_panel_allowed_downsampled_sample(cg_context: CGConfig, mocker: MockerFixture):
+    # GIVEN a Balsamic observations API
+    balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
+    lims_mock = mocker.patch.object(LimsAPI, "capture_kit")
+
+    # GIVEN a case that needs a panel to be uploaded to LoqusDB
+    # GIVEN that its sample is downsampled, i.e. from_sample is set
+    sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_id",
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        from_sample="original_sample",
+    )
+    case: Case = create_autospec(Case, internal_id="case_id", samples=[sample])
+
+    balsamic_observations_api.store = Mock()
+
+    # WHEN calling is_panel_allowed_for_observations_upload
+    balsamic_observations_api.is_panel_allowed_for_observations_upload(case)
+
+    # THEN the result should be false
+    lims_mock.assert_called_once_with(sample.from_sample)
+
+
 def test_is_case_eligible_for_observations_upload(
     case_id: str, balsamic_observations_api: BalsamicObservationsAPI, mocker: MockFixture
 ):
@@ -378,7 +402,6 @@ def test_panel_upload(
     # GIVEN that a known panel is set in LIMS
     lims_api: LimsAPI = create_autospec(LimsAPI)
     lims_api.capture_kit = Mock(return_value="file.bed")
-    lims_api.get_source = Mock(return_value="Not valid")
 
     # GIVEN a store
     store_session = create_autospec(Session)
@@ -456,3 +479,98 @@ def test_panel_upload(
 
     # THEN the ids should have been commited
     store_session.commit.assert_called_once()
+
+
+def test_panel_upload_downsampled_sample(
+    mocker: MockerFixture,
+):
+
+    # GIVEN that a known panel is set in LIMS
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.capture_kit = Mock(return_value="file.bed")
+    capture_kit_spy = mocker.spy(lims_api, "capture_kit")
+
+    # GIVEN a store
+    store_session = create_autospec(Session)
+    store: Store = create_autospec(Store, session=store_session)
+    bed = create_autospec(Bed)
+    bed.name = BalsamicObservationPanel.LYMPHOID
+    store.get_bed_version_by_short_name_strict = Mock(
+        return_value=create_autospec(BedVersion, bed=bed, filename="file.bed")
+    )
+    store.get_bed_version_by_short_name = Mock(
+        return_value=create_autospec(BedVersion, bed=bed, filename="file.bed")
+    )
+
+    # GIVEN a panel case with a downsampled TGS sample
+    customer = create_autospec(Customer, internal_id=CustomerId.CUST110)
+    sample: Sample = create_autospec(
+        Sample,
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        loqusdb_id=None,
+        from_sample="original_sample",
+    )
+    case: Case = create_autospec(
+        Case,
+        internal_id="case_id",
+        samples=[sample],
+        loqusdb_uploaded_samples=[],
+        customer=customer,
+    )
+    store.get_case_by_internal_id = Mock(return_value=case)
+    store.get_sample_ids_by_case_id = Mock(return_value=[sample])
+
+    # GIVEN balsamic observations API
+    balsamic_observations_api = BalsamicObservationsAPI(
+        create_autospec(
+            CGConfig,
+            lims_api=lims_api,
+            balsamic=Mock(),
+            loqusdb=Mock(),
+            loqusdb_rd_lwp=Mock(),
+            loqusdb_wes=Mock(),
+            loqusdb_somatic=Mock(),
+            loqusdb_tumor=Mock(),
+            loqusdb_somatic_lymphoid=Mock(),
+            loqusdb_somatic_myeloid=Mock(),
+            loqusdb_somatic_exome=Mock(),
+            run_instruments=create_autospec(
+                RunInstruments,
+                illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="runs_dir"),
+            ),
+            sentieon_licence_server=Mock(),
+            status_db=store,
+        ),
+    )
+
+    loqusdb_selection = mocker.spy(ObservationsAPI, "get_loqusdb_api")
+    loqusdb_load = mocker.patch.object(LoqusdbAPI, "load")
+    mocker.patch.object(LoqusdbAPI, "get_case", side_effect=[None, {LOQUSDB_ID: 1}])
+    mocker.patch.object(LoqusdbAPI, "get_duplicate", return_value=None)
+    path_to_snv_file = Path("snv/vcf/path")
+    mocker.patch.object(
+        BalsamicObservationsAPI,
+        "get_observations_files_from_hk",
+        return_value=create_autospec(BalsamicObservationsInputFiles, snv_vcf_path=path_to_snv_file),
+    )
+
+    # WHEN uploading
+    balsamic_observations_api.upload(case.internal_id)
+
+    # THEN the correct loqusDB instance is selected
+    loqusdb_selection.assert_called_once_with(ANY, LoqusdbInstance.SOMATIC_LYMPHOID)
+
+    # THEN the case is uploaded
+    loqusdb_load.assert_called_once_with(
+        case_id=case.internal_id,
+        snv_vcf_path=path_to_snv_file,
+    )
+
+    # THEN the loqusdb id has been set
+    assert all(sample.loqusdb_id for sample in case.samples)
+
+    # THEN the ids should have been commited
+    store_session.commit.assert_called_once()
+
+    # THEN the capture kit should have been fetched from the original sample
+    capture_kit_spy.assert_called_with(sample.from_sample)
