@@ -11,7 +11,7 @@ from requests import HTTPError, Response
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.exc import MissingFilesError
+from cg.exc import MissingFilesError, SampleFilesCurrentlyArchivingError
 from cg.meta.archive.archive import ARCHIVE_HANDLERS, FileAndSample, SpringArchiveAPI
 from cg.meta.archive.ddn import ddn_data_flow_client
 from cg.meta.archive.ddn.constants import (
@@ -131,7 +131,6 @@ def test_convert_into_transfer_data(
 @pytest.mark.parametrize("limit", [None, -1, 0, 1])
 def test_archive_all_non_archived_spring_files(
     spring_archive_api: SpringArchiveAPI,
-    caplog,
     ok_miria_response,
     archive_request_json,
     header_with_test_auth_token,
@@ -196,10 +195,6 @@ def test_archive_all_non_archived_spring_files(
 def test_get_archival_status(
     spring_archive_api: SpringArchiveAPI,
     ddn_dataflow_client: DDNDataFlowClient,
-    caplog,
-    ok_miria_job_status_response,
-    archive_request_json,
-    header_with_test_auth_token,
     test_auth_token: AuthToken,
     archival_job_id: int,
     job_status: JobStatus,
@@ -246,10 +241,6 @@ def test_get_archival_status(
 def test_get_retrieval_status(
     spring_archive_api: SpringArchiveAPI,
     ddn_dataflow_client: DDNDataFlowClient,
-    caplog,
-    ok_miria_job_status_response,
-    archive_request_json,
-    header_with_test_auth_token,
     archival_job_id: int,
     retrieval_job_id: int,
     test_auth_token,
@@ -293,10 +284,7 @@ def test_get_retrieval_status(
 
 def test_retrieve_case(
     spring_archive_api: SpringArchiveAPI,
-    caplog,
     ok_miria_response,
-    trimmed_local_path,
-    local_storage_repository,
     retrieve_request_json,
     header_with_test_auth_token,
     test_auth_token,
@@ -351,7 +339,6 @@ def test_retrieve_case(
 def test_retrieve_sample_retrieval_already_ongoing(
     ddn_dataflow_config: DataFlowConfig,
     real_housekeeper_api: HousekeeperAPI,
-    mocker: MockerFixture,
 ):
     """Test retrieving files does not act on ongoing retrievals."""
     # GIVEN a sample_id
@@ -390,10 +377,7 @@ def test_retrieve_sample_retrieval_already_ongoing(
 
 def test_retrieve_sample(
     spring_archive_api: SpringArchiveAPI,
-    caplog,
     ok_miria_response,
-    trimmed_local_path,
-    local_storage_repository,
     retrieve_request_json,
     header_with_test_auth_token,
     test_auth_token,
@@ -417,7 +401,7 @@ def test_retrieve_sample(
         assert not file.archive.retrieval_task_id
         assert file.archive
 
-    # WHEN archiving all available files
+    # WHEN retrieving all available files
     mocker.patch.object(
         AuthToken,
         "model_validate",
@@ -445,12 +429,36 @@ def test_retrieve_sample(
         assert file.archive.retrieval_task_id
 
 
+def test_retrieve_sample_file_currently_archiving(
+    spring_archive_api: SpringArchiveAPI,
+    archival_job_id: int,
+    sample_with_spring_file: str,
+):
+    """
+    Test that trying to retrieve a sample that currently has files being archived raises an error.
+    """
+    # GIVEN a Housekeeper database with files for a sample that are currently being archived.
+    files: list[File] = spring_archive_api.housekeeper_api.get_files(
+        bundle=sample_with_spring_file, tags=[SequencingFileTag.SPRING]
+    ).all()
+    for file in files:
+        spring_archive_api.housekeeper_api.add_archives(
+            files=[file], archive_task_id=archival_job_id
+        )
+        assert file.archive.archiving_task_id
+        assert not file.archive.retrieval_task_id
+        assert not file.archive.archived_at
+
+    # WHEN retrieving all available files
+
+    # THEN a SampleFilesCurrentlyArchivingError is raised since no files should be retrieved
+    with pytest.raises(SampleFilesCurrentlyArchivingError):
+        spring_archive_api.retrieve_spring_files_for_sample(sample_with_spring_file)
+
+
 def test_retrieve_order(
     spring_archive_api: SpringArchiveAPI,
-    caplog,
     ok_miria_response,
-    trimmed_local_path,
-    local_storage_repository,
     retrieve_request_json,
     header_with_test_auth_token,
     test_auth_token,

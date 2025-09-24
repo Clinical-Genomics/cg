@@ -49,12 +49,6 @@ def ok_miria_response(ok_response: Response):
 
 
 @pytest.fixture
-def ok_miria_job_status_response(ok_response: Response):
-    ok_response._content = b'{"id": "123", "status": "Completed"}'
-    return ok_response
-
-
-@pytest.fixture
 def archive_request_json(
     remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
 ) -> dict:
@@ -99,12 +93,6 @@ def header_with_test_auth_token() -> dict:
         "accept": "application/json",
         "Authorization": "Bearer test_auth_token",
     }
-
-
-@pytest.fixture
-def miria_auth_token_response(ok_response: Response):
-    ok_response._content = b'{"access": "test_auth_token", "expire":15, "test_refresh_token":""}'
-    return ok_response
 
 
 @pytest.fixture
@@ -211,12 +199,6 @@ def local_storage_repository() -> str:
 def remote_storage_repository() -> str:
     """Returns a remote storage repository."""
     return "archive@repository:"
-
-
-@pytest.fixture
-def full_remote_path(remote_storage_repository: str, remote_path: Path) -> str:
-    """Returns the merged remote repository and path."""
-    return remote_storage_repository + remote_path.as_posix()
 
 
 @pytest.fixture
