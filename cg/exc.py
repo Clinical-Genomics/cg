@@ -281,7 +281,7 @@ class MissingFilesError(CgError):
 
 
 class SampleFilesCurrentlyArchivingError(CgError):
-    """Exception raised when not all of the samples' files have finished archiving."""
+    """Exception raised when not all of the sample files have finished archiving."""
 
 
 class MetricsQCError(CgError):
