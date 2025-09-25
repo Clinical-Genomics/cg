@@ -154,7 +154,9 @@ class BalsamicObservationsAPI(ObservationsAPI):
         bed_short_name: str = self.lims_api.capture_kit(sample.internal_id)
         bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(bed_short_name)
         panel: str = bed_version.bed.name
-        loqusdb_instance = PANEL_TO_LOQUSDB_INSTANCE_MAP[BalsamicObservationPanel(panel)]
+        loqusdb_instance: LoqusdbInstance = PANEL_TO_LOQUSDB_INSTANCE_MAP[
+            BalsamicObservationPanel(panel)
+        ]
         return self.get_loqusdb_api(loqusdb_instance)
 
     def _upload_wgs_case(self, case: Case) -> None:

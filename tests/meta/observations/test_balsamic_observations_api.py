@@ -523,6 +523,11 @@ def test_delete_case_panel(mocker: MockerFixture):
     store.get_case_by_internal_id = Mock(
         return_value=create_autospec(Case, internal_id="case_id", samples=samples)
     )
+    bed: Bed = create_autospec(Bed)
+    bed.name = BalsamicObservationPanel.MYELOID
+    store.get_bed_version_by_short_name_strict = Mock(
+        return_value=create_autospec(BedVersion, bed=bed)
+    )
 
     # GIVEN balsamic observations API
     balsamic_observations_api = BalsamicObservationsAPI(
@@ -546,17 +551,15 @@ def test_delete_case_panel(mocker: MockerFixture):
             status_db=store,
         ),
     )
-    balsamic_observations_api.loqusdb_somatic_api = Mock()
-    balsamic_observations_api.loqusdb_tumor_api = Mock()
+    mocker.patch.object(LoqusdbAPI, "get_case", return_value={LOQUSDB_ID: 1})
+    loqusdb_api_getter_spy = mocker.spy(ObservationsAPI, "get_loqusdb_api")
 
-    normal_spy = mocker.spy(balsamic_observations_api.loqusdb_somatic_api, "delete_case")
-    tumor_spy = mocker.spy(balsamic_observations_api.loqusdb_tumor_api, "delete_case")
     update_spy = mocker.spy(balsamic_observations_api, "update_statusdb_loqusdb_id")
+    mocker.patch.object(LoqusdbAPI, "delete_case")
 
     # WHEN deleting case in loqusdb
     balsamic_observations_api.delete_case("case_id")
 
     # THEN the correct loqusdb instances are selected
-    normal_spy.assert_called_once_with("case_id")
-    tumor_spy.assert_called_once_with("case_id")
     update_spy.assert_called_once_with(samples=samples, loqusdb_id=None)
+    loqusdb_api_getter_spy.assert_called_once_with(ANY, LoqusdbInstance.SOMATIC_MYELOID)
