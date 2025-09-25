@@ -66,12 +66,14 @@ def test_is_analysis_type_eligible_for_observations_upload_not_eligible_wgs(
     # THEN the analysis type should not be eligible for observation uploads
     assert not is_analysis_type_eligible_for_observations_upload
     assert (
-        f"Normal only analysis {case.internal_id} is not supported for WGS Loqusdb uploads"
+        f"Normal only analysis {case.internal_id} is not supported for Loqusdb uploads"
         in caplog.text
     )
 
 
-def test_is_analysis_type_eligible_for_observations_eligible_tgs(cg_context: CGConfig):
+def test_is_analysis_type_eligible_for_observations_eligible_tgs(
+    cg_context: CGConfig, mocker: MockerFixture
+):
     # GIVEN a Balsamic Observations API
     balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
 
@@ -88,6 +90,9 @@ def test_is_analysis_type_eligible_for_observations_eligible_tgs(cg_context: CGC
         ],
     )
 
+    # GIVEN that the case does not only contain normal samples
+    mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
+
     # WHEN checking analysis type eligibility for a case
     is_eligible: bool = balsamic_observations_api.is_analysis_type_eligible_for_observations_upload(
         case
@@ -97,7 +102,9 @@ def test_is_analysis_type_eligible_for_observations_eligible_tgs(cg_context: CGC
     assert is_eligible
 
 
-def test_is_analysis_type_eligible_for_observations_not_eligible_tgs(cg_context: CGConfig):
+def test_is_analysis_type_eligible_for_observations_not_eligible_tgs(
+    cg_context: CGConfig, mocker: MockerFixture
+):
     # GIVEN a Balsamic Observations API
     balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
 
@@ -111,6 +118,9 @@ def test_is_analysis_type_eligible_for_observations_not_eligible_tgs(cg_context:
         internal_id="balsamic_tgs_case",
         samples=[sample, sample],
     )
+
+    # GIVEN that the case does not only contain normal samples
+    mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
 
     # WHEN checking analysis type eligibility for a case
     is_eligible: bool = balsamic_observations_api.is_analysis_type_eligible_for_observations_upload(

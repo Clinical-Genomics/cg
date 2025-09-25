@@ -57,15 +57,12 @@ class BalsamicObservationsAPI(ObservationsAPI):
     def is_analysis_type_eligible_for_observations_upload(self, case: Case) -> bool:
         """Return whether the cancer analysis type is eligible for cancer Loqusdb uploads."""
         prep_category: str = case.samples[0].prep_category
-        if (
-            prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
-            and self.analysis_api.is_analysis_normal_only(case.internal_id)
-        ):
+        if self.analysis_api.is_analysis_normal_only(case.internal_id):
             LOG.error(
-                f"Normal only analysis {case.internal_id} is not supported for WGS Loqusdb uploads"
+                f"Normal only analysis {case.internal_id} is not supported for Loqusdb uploads"
             )
             return False
-        elif (
+        if (
             prep_category
             in [
                 SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
