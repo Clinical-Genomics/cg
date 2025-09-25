@@ -13,7 +13,7 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CancerAnalysisType, CustomerId
 from cg.constants.observations import LOQUSDB_ID, BalsamicObservationPanel, LoqusdbInstance
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import LoqusdbDuplicateRecordError
+from cg.exc import LoqusdbDeleteCaseError, LoqusdbDuplicateRecordError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -552,7 +552,7 @@ def test_delete_case_panel(mocker: MockerFixture):
         ),
     )
     mocker.patch.object(LoqusdbAPI, "get_case", return_value={LOQUSDB_ID: 1})
-    loqusdb_api_getter_spy = mocker.spy(ObservationsAPI, "get_loqusdb_api")
+    loqusdb_api_getter_spy = mocker.spy(balsamic_observations_api, "get_loqusdb_api")
 
     update_spy = mocker.spy(balsamic_observations_api, "update_statusdb_loqusdb_id")
     mocker.patch.object(LoqusdbAPI, "delete_case")
@@ -562,4 +562,50 @@ def test_delete_case_panel(mocker: MockerFixture):
 
     # THEN the correct loqusdb instances are selected
     update_spy.assert_called_once_with(samples=samples, loqusdb_id=None)
-    loqusdb_api_getter_spy.assert_called_once_with(ANY, LoqusdbInstance.SOMATIC_MYELOID)
+    loqusdb_api_getter_spy.assert_called_once_with(LoqusdbInstance.SOMATIC_MYELOID)
+
+
+def test_delete_case_panel_without_loqusdb_api():
+    # GIVEN a store
+    store: Store = create_autospec(Store)
+    # GIVEN a case containing a sample with prep category TGA
+    case: Case = create_autospec(
+        Case,
+        samples=[
+            create_autospec(Sample, prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING)
+        ],
+    )
+    store.get_case_by_internal_id = Mock(return_value=case)
+    bed: Bed = create_autospec(Bed)
+    bed.name = "Panel without LoqusDB API"
+    store.get_bed_version_by_short_name_strict = Mock(
+        return_value=create_autospec(BedVersion, bed=bed)
+    )
+
+    # GIVEN a BalsamicObservationsAPI
+    balsamic_observations_api = BalsamicObservationsAPI(
+        create_autospec(
+            CGConfig,
+            lims_api=Mock(),
+            balsamic=Mock(),
+            loqusdb=Mock(),
+            loqusdb_rd_lwp=Mock(),
+            loqusdb_wes=Mock(),
+            loqusdb_somatic=Mock(),
+            loqusdb_tumor=Mock(),
+            loqusdb_somatic_lymphoid=Mock(),
+            loqusdb_somatic_myeloid=Mock(),
+            loqusdb_somatic_exome=Mock(),
+            run_instruments=create_autospec(
+                RunInstruments,
+                illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="runs_dir"),
+            ),
+            sentieon_licence_server=Mock(),
+            status_db=store,
+        ),
+    )
+
+    # WHEN deleting the case from LoqusDB
+    # THEN a LoqusdbDeleteCaseError is raised
+    with pytest.raises(LoqusdbDeleteCaseError):
+        balsamic_observations_api.delete_case(case.internal_id)
