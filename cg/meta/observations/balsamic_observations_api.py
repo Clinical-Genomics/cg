@@ -101,9 +101,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
             SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
         ]:
-            panel_short_name: str | None = self.lims_api.capture_kit(
-                sample.from_sample or sample.internal_id
-            )
+            panel_short_name: str | None = self.lims_api.capture_kit(sample.internal_id)
             bed_version: BedVersion | None = self.store.get_bed_version_by_short_name(
                 panel_short_name
             )
@@ -143,7 +141,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         a panel with a known LoqusDB instance.
         """
         sample: Sample = case.samples[0]
-        bed_short_name: str = self.lims_api.capture_kit(sample.from_sample or sample.internal_id)
+        bed_short_name: str = self.lims_api.capture_kit(sample.internal_id)
         bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(bed_short_name)
         panel: str = bed_version.bed.name
         loqusdb_instance = PANEL_TO_LOQUSDB_INSTANCE_MAP[BalsamicObservationPanel(panel)]
