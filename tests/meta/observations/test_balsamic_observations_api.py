@@ -466,9 +466,50 @@ def test_panel_upload(
     store_commit.assert_called_once()
 
 
-def test_delete_case():
-    # GIVEN a balsamic case
+def test_delete_case(mocker: MockerFixture):
+    # GIVEN a store with a case
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id = Mock(
+        return_value=create_autospec(
+            Case,
+            internal_id="case_id",
+            samples=[
+                create_autospec(
+                    Sample, prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+                )
+            ],
+        )
+    )
+
+    # GIVEN balsamic observations API
+    balsamic_observations_api = BalsamicObservationsAPI(
+        create_autospec(
+            CGConfig,
+            lims_api=Mock(),
+            balsamic=Mock(),
+            loqusdb=Mock(),
+            loqusdb_rd_lwp=Mock(),
+            loqusdb_wes=Mock(),
+            loqusdb_somatic=Mock(),
+            loqusdb_tumor=Mock(),
+            loqusdb_somatic_lymphoid=Mock(),
+            loqusdb_somatic_myeloid=Mock(),
+            loqusdb_somatic_exome=Mock(),
+            run_instruments=create_autospec(
+                RunInstruments,
+                illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="runs_dir"),
+            ),
+            sentieon_licence_server=Mock(),
+            status_db=store,
+        ),
+    )
+
+    normal_spy = mocker.spy(balsamic_observations_api.loqusdb_somatic_api, "delete_case")
+    tumor_spy = mocker.spy(balsamic_observations_api.loqusdb_tumor_api, "delete_case")
+
     # WHEN deleting case in loqusdb
-    # THEN the correct loqusdb instance is selected
-    # THEN the loqusdb id is removed from the samples in statusdb
-    pass
+    balsamic_observations_api.delete_case("case_id")
+
+    # THEN the correct loqusdb instances are selected
+    normal_spy.assert_called_once_with("case_id")
+    tumor_spy.assert_called_once_with("case_id")
