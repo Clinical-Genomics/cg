@@ -7,7 +7,6 @@ from unittest.mock import ANY, Mock, create_autospec
 import pytest
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockerFixture, MockFixture
-from sqlalchemy.orm import Session
 
 from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
@@ -389,8 +388,7 @@ def test_panel_upload(
     lims_api.capture_kit = Mock(return_value="file.bed")
 
     # GIVEN a store
-    store_session = create_autospec(Session)
-    store: Store = create_autospec(Store, session=store_session)
+    store: Store = create_autospec(Store)
     bed = create_autospec(Bed)
     bed.name = panel
     store.get_bed_version_by_short_name_strict = Mock(
@@ -399,6 +397,7 @@ def test_panel_upload(
     store.get_bed_version_by_short_name = Mock(
         return_value=create_autospec(BedVersion, bed=bed, filename="file.bed")
     )
+    store_commit = store.commit_to_store = Mock()
 
     # GIVEN a panel case with a TGS sample
     customer = create_autospec(Customer, internal_id=CustomerId.CUST110)
@@ -463,4 +462,4 @@ def test_panel_upload(
     assert all(sample.loqusdb_id for sample in case.samples)
 
     # THEN the ids should have been commited
-    store_session.commit.assert_called_once()
+    store_commit.assert_called_once()
