@@ -463,3 +463,11 @@ def test_panel_upload(
 
     # THEN the ids should have been commited
     store_commit.assert_called_once()
+
+
+def test_delete_case():
+    # GIVEN a balsamic case
+    # WHEN deleting case in loqusdb
+    # THEN the correct loqusdb instance is selected
+    # THEN the loqusdb id is removed from the samples in statusdb
+    pass

@@ -137,12 +137,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         Uploads the case to one of the somatic panel LoqusDB instances. The case is known to have
         a panel with a known LoqusDB instance.
         """
-        sample: Sample = case.samples[0]
-        bed_short_name: str = self.lims_api.capture_kit(sample.internal_id)
-        bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(bed_short_name)
-        panel: str = bed_version.bed.name
-        loqusdb_instance = PANEL_TO_LOQUSDB_INSTANCE_MAP[BalsamicObservationPanel(panel)]
-        loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(loqusdb_instance)
+        loqusdb_api: LoqusdbAPI = self._get_panel_loqusdb_api(case)
         if self.is_duplicate(case=case, loqusdb_api=loqusdb_api):
             LOG.error(f"Case {case.internal_id} has already been uploaded to Loqusdb")
             raise LoqusdbDuplicateRecordError
@@ -153,6 +148,14 @@ class BalsamicObservationsAPI(ObservationsAPI):
         )
         loqusdb_id: str = str(loqusdb_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
+
+    def _get_panel_loqusdb_api(self, case: Case) -> LoqusdbAPI:
+        sample: Sample = case.samples[0]
+        bed_short_name: str = self.lims_api.capture_kit(sample.internal_id)
+        bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(bed_short_name)
+        panel: str = bed_version.bed.name
+        loqusdb_instance = PANEL_TO_LOQUSDB_INSTANCE_MAP[BalsamicObservationPanel(panel)]
+        return self.get_loqusdb_api(loqusdb_instance)
 
     def _upload_wgs_case(self, case: Case) -> None:
         loqusdb_upload_apis: list[LoqusdbAPI] = [
