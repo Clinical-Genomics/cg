@@ -246,9 +246,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
     def _get_relevant_loqusdb_apis(self, case: Case) -> list[LoqusdbAPI]:
         if not self._is_panel_upload(case):
             return [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
-        panel_loqusdb_api: LoqusdbAPI = self._get_panel_loqusdb_api(case)
-        if not panel_loqusdb_api:
-            raise LoqusdbDeleteCaseError(
-                f"No relevant LoqusDB instance found for case {case.internal_id}"
-            )
-        return [panel_loqusdb_api]
+        try:
+            return [self._get_panel_loqusdb_api(case)]
+        except ValueError as error:
+            raise LoqusdbDeleteCaseError from error
