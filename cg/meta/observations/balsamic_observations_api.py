@@ -17,7 +17,7 @@ from cg.constants.observations import (
     LoqusdbInstance,
 )
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import CaseNotFoundError, LoqusdbDuplicateRecordError
+from cg.exc import CaseNotFoundError, LoqusdbDeleteCaseError, LoqusdbDuplicateRecordError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -231,7 +231,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
     def delete_case(self, case_id: str) -> None:
         """Delete cancer case observations from Loqusdb."""
         case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
-        loqusdb_apis: list[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
+        loqusdb_apis: list[LoqusdbAPI] = self._get_relevant_loqusdb_apis(case)
         for loqusdb_api in loqusdb_apis:
             if not loqusdb_api.get_case(case_id):
                 LOG.error(f"Case {case_id} could not be found in Loqusdb. Skipping case deletion.")
@@ -244,4 +244,9 @@ class BalsamicObservationsAPI(ObservationsAPI):
     def _get_relevant_loqusdb_apis(self, case: Case) -> list[LoqusdbAPI]:
         if not self._is_panel_upload(case):
             return [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
-        return [self._get_panel_loqusdb_api(case)]
+        panel_loqusdb_api: LoqusdbAPI = self._get_panel_loqusdb_api(case)
+        if not panel_loqusdb_api:
+            raise LoqusdbDeleteCaseError(
+                f"No relevant LoqusDB instance found for case {case.internal_id}"
+            )
+        return [panel_loqusdb_api]
