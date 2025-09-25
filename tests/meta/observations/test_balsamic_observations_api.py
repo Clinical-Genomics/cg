@@ -101,10 +101,9 @@ def test_is_analysis_type_eligible_for_observations_not_eligible_tgs(cg_context:
     # GIVEN a Balsamic Observations API
     balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
 
-    # GIVEN a TGS case with a panel that allows for LoqusDB uploads and two samples
+    # GIVEN a TGS case with two samples
     sample = create_autospec(
         Sample,
-        capture_kit="GMSmyeloid",
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     case: Case = create_autospec(
