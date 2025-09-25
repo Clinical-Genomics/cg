@@ -158,6 +158,11 @@
   path: PATHTOCASE/repeats/family/CASEID/CASEID_repeats_annotated.vcf.gz.tbi
   step: repeats_annotated
   tag: vcf_str_index
+- format: meta
+  id: CASEID
+  path: /home/proj/production/workflows/nallo/references/v0.3.1/grch38_trgt_pathogenic_repeats.bed
+  step: trgt
+  tag: variant_catalog
 - format: vcf
   id: CASEID
   path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked.vcf.gz

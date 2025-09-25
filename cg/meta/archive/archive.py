@@ -82,7 +82,7 @@ class SpringArchiveAPI:
 
     def get_archived_files_from_sample(self, sample: Sample) -> list[File]:
         """Gets archived spring files from the bundles corresponding to the given list of samples."""
-        files: list[File] = self.housekeeper_api.get_archived_files_for_bundle(
+        files: list[File] = self.housekeeper_api.get_archived_files_not_being_retrieved_for_bundle(
             bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING]
         )
         return files

@@ -75,6 +75,7 @@ class CustomerId(StrEnum):
     CUST147 = "cust147"
     CUST175 = "cust175"
     CUST185 = "cust185"
+    CUST201 = "cust201"
     CUST999 = "cust999"
 
 

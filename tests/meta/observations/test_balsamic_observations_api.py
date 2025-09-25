@@ -437,12 +437,13 @@ def test_panel_upload(
 
     loqusdb_selection = mocker.spy(ObservationsAPI, "get_loqusdb_api")
     loqusdb_load = mocker.patch.object(LoqusdbAPI, "load")
+    # COMMENT side effect is used here to give different values each time the method is called.
     mocker.patch.object(LoqusdbAPI, "get_case", side_effect=[None, {LOQUSDB_ID: 1}])
     mocker.patch.object(LoqusdbAPI, "get_duplicate", return_value=None)
     path_to_snv_file = Path("snv/vcf/path")
     mocker.patch.object(
-        BalsamicObservationsAPI,
-        "get_observations_files_from_hk",
+        BalsamicObservationsInputFiles,
+        "model_validate",
         return_value=create_autospec(BalsamicObservationsInputFiles, snv_vcf_path=path_to_snv_file),
     )
 

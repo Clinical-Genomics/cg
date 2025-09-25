@@ -226,7 +226,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
                 version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SV_VCF]
             ).first(),
         }
-        return BalsamicObservationsInputFiles(**get_full_path_dictionary(input_files))
+        return BalsamicObservationsInputFiles.model_validate(get_full_path_dictionary(input_files))
 
     def delete_case(self, case_id: str) -> None:
         """Delete cancer case observations from Loqusdb."""
