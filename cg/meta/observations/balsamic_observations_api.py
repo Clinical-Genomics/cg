@@ -240,3 +240,8 @@ class BalsamicObservationsAPI(ObservationsAPI):
             loqusdb_api.delete_case(case_id)
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case_id} from Loqusdb")
+
+    def _get_relevant_loqusdb_apis(self, case: Case) -> list[LoqusdbAPI]:
+        if not self._is_panel_upload(case):
+            return [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
+        return [self._get_panel_loqusdb_api(case)]
