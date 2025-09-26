@@ -163,7 +163,7 @@ def test_is_panel_allowed_for_observations_upload_bed_name(
     assert is_panel_allowed == is_allowed
 
 
-def test_is_panel_allowed_for_upload_WGS(cg_context: CGConfig):
+def test_is_panel_allowed_for_upload_wgs(cg_context: CGConfig):
     # GIVEN a Balsamic observations API
     balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
     balsamic_observations_api.lims_api = Mock()
