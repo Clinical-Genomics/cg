@@ -141,7 +141,7 @@ def test_paired_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
     expected_file_path = (
         f"{balsamic_context.meta_apis['analysis_api'].loqusdb_path}/{LOQUSDB_WGS_DUMP_FILE}"
     )
-    assert f"--artefact-sv-observation {expected_file_path}" in caplog.text
+    assert f"--artefact-sv-observations {expected_file_path}" in caplog.text
     # THEN the flag related to TGS should not be included in the command
     assert "--cancer-somatic-snv-panel-observations" not in caplog.text
 
