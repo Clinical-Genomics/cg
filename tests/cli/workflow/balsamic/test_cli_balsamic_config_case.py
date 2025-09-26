@@ -428,7 +428,7 @@ def test_get_panel_loqusdb_dump(
     assert f"--cancer-somatic-snv-panel-observations {expected_path}" in caplog.text
 
     # THEN the flag for WGS is not included
-    assert "--artefact-sv-observation" not in caplog.text
+    assert "--artefact-sv-observations" not in caplog.text
 
 
 def test_tga_panel_with_no_loqusdb_dump(
