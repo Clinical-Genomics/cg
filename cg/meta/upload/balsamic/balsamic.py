@@ -58,14 +58,7 @@ class BalsamicUploadAPI(UploadAPI):
             LOG.info(f"Balsamic case {case.internal_id} is not compatible for Genotype upload")
 
         # Observations upload
-        if self.analysis_api.get_case_application_type(case_id=case.internal_id) in [
-            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
-            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
-            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
-        ]:
-            ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
-        else:
-            LOG.info(f"Balsamic case {case.internal_id} is not compatible for Observations upload")
+        ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
         LOG.info(
             f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
         )
