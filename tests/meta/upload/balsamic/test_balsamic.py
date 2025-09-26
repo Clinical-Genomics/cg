@@ -3,7 +3,21 @@
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
-from tests.cli.workflow.balsamic.conftest import balsamic_context
+from tests.cli.workflow.balsamic.conftest import (
+    balsamic_context,
+    balsamic_housekeeper,
+    balsamic_housekeeper_dir,
+    balsamic_lims,
+    balsamic_mock_fastq_files,
+    fastq_file_l_1_r_1,
+    fastq_file_l_1_r_2,
+    fastq_file_l_2_r_1,
+    fastq_file_l_2_r_2,
+    fastq_file_l_3_r_1,
+    fastq_file_l_3_r_2,
+    fastq_file_l_4_r_1,
+    fastq_file_l_4_r_2,
+)
 
 
 def test_genotype_check_wgs_normal(balsamic_context: CGConfig):
