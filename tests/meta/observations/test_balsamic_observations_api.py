@@ -28,7 +28,7 @@ def test_is_analysis_type_eligible_for_observations_upload_eligible_wgs(
 ):
     """Test if the analysis type is eligible for observation uploads."""
 
-    # GIVEN a WGS case ID and a Balsamic observations API
+    # GIVEN a case ID and a Balsamic observations API
 
     # GIVEN a case with tumor samples
     mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
@@ -83,7 +83,6 @@ def test_is_analysis_type_eligible_for_observations_eligible_tgs(
         samples=[
             create_autospec(
                 Sample,
-                capture_kit="GMSmyeloid",
                 prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
             )
         ],
