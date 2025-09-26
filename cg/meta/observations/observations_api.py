@@ -50,10 +50,7 @@ class ObservationsAPI:
             LoqusdbUploadCaseError: If case is not eligible for Loqusdb uploads
         """
         case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
-        is_case_eligible_for_observations_upload: bool = (
-            self.is_case_eligible_for_observations_upload(case)
-        )
-        if is_case_eligible_for_observations_upload:
+        if self.is_case_eligible_for_observations_upload(case):
             self.load_observations(case=case)
         else:
             LOG.error(f"Case {case.internal_id} is not eligible for observations upload")
@@ -136,7 +133,10 @@ class ObservationsAPI:
         return True
 
     def is_sample_source_eligible_for_observations_upload(self, case_id: str) -> bool:
-        """Check if the sample source is FFPE."""
+        """
+        Return False if the case samples come from a tissue whose quality is too low to be
+        considered for LoqusDB uploads.
+        """
         source_type: str | None = self.analysis_api.get_case_source_type(case_id)
         if source_type and SourceType.FFPE.lower() not in source_type.lower():
             return True

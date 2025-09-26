@@ -218,7 +218,7 @@ def test_is_panel_allowed_no_bed_version(cg_context: CGConfig):
     assert not is_panel_allowed
 
 
-def test_is_case_eligible_for_observations_upload(
+def test_is_non_normal_only_case_eligible_for_observations_upload(
     case_id: str, balsamic_observations_api: BalsamicObservationsAPI, mocker: MockFixture
 ):
     """Test whether a case is eligible for Balsamic observation uploads."""
@@ -227,9 +227,6 @@ def test_is_case_eligible_for_observations_upload(
     case: Case = balsamic_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
     # GIVEN an eligible sequencing method and a case with tumor samples
-    mocker.patch.object(
-        BalsamicAnalysisAPI, "get_data_analysis_type", return_value=CancerAnalysisType.TUMOR_WGS
-    )
     mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
 
     # WHEN checking the upload eligibility for a case
@@ -241,7 +238,7 @@ def test_is_case_eligible_for_observations_upload(
     assert is_case_eligible_for_observations_upload
 
 
-def test_is_case_not_eligible_for_observations_upload(
+def test_normal_only_case_is_not_eligible_for_observations_upload(
     case_id: str,
     balsamic_observations_api: BalsamicObservationsAPI,
     mocker: MockFixture,
@@ -253,12 +250,7 @@ def test_is_case_not_eligible_for_observations_upload(
     case: Case = balsamic_observations_api.analysis_api.status_db.get_case_by_internal_id(case_id)
 
     # GIVEN a case with an invalid sequencing type
-    mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=False)
-    mocker.patch.object(
-        BalsamicAnalysisAPI,
-        "get_data_analysis_type",
-        return_value=CancerAnalysisType.TUMOR_NORMAL_PANEL,
-    )
+    mocker.patch.object(BalsamicAnalysisAPI, "is_analysis_normal_only", return_value=True)
 
     # WHEN checking the upload eligibility for a case
     is_case_eligible_for_observations_upload: bool = (
