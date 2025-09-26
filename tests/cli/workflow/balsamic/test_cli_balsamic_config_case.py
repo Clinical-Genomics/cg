@@ -409,7 +409,7 @@ def test_get_panel_loqusdb_dump(
         BedVersion, bed=bed, short_name="BalsamicBed1", filename="balsamic_bed_1.bed"
     )
     store.get_case_by_internal_id = Mock(return_value=case)
-    store.get_bed_version_by_file_name_strict = Mock(return_value=bed_version)
+    store.get_bed_version_by_file_name = Mock(return_value=bed_version)
     store.get_bed_version_by_short_name = Mock(return_value=bed_version)
     store.get_samples_by_case_id = Mock(return_value=[sample])
 
@@ -460,7 +460,6 @@ def test_tga_panel_with_no_loqusdb_dump(
         BedVersion, bed=bed, short_name="BalsamicBed1", filename="balsamic_bed_1.bed"
     )
     store.get_case_by_internal_id = Mock(return_value=case)
-    store.get_bed_version_by_file_name_strict = Mock(return_value=bed_version)
     store.get_bed_version_by_short_name = Mock(return_value=bed_version)
     store.get_samples_by_case_id = Mock(return_value=[sample])
 

@@ -903,13 +903,6 @@ class ReadHandler(BaseHandler):
             filter_functions=[BedVersionFilter.BY_FILE_NAME],
         ).first()
 
-    def get_bed_version_by_file_name_strict(self, bed_version_file_name: str) -> BedVersion:
-        return apply_bed_version_filter(
-            bed_versions=self._get_query(table=BedVersion),
-            bed_version_file_name=bed_version_file_name,
-            filter_functions=[BedVersionFilter.BY_FILE_NAME],
-        ).one()
-
     def get_bed_version_by_short_name(self, bed_version_short_name: str) -> BedVersion:
         """Return bed version with short name."""
         return apply_bed_version_filter(
