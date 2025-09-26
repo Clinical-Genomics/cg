@@ -78,41 +78,21 @@ class ObservationsAPI:
 
     def get_loqusdb_api(self, loqusdb_instance: LoqusdbInstance) -> LoqusdbAPI:
         """Returns a Loqusdb API for the given Loqusdb instance."""
-        loqusdb_apis = {
-            LoqusdbInstance.LWP: LoqusdbAPI(
-                binary_path=self.loqusdb_rd_lwp_config.binary_path,
-                config_path=self.loqusdb_rd_lwp_config.config_path,
-            ),
-            LoqusdbInstance.WGS: LoqusdbAPI(
-                binary_path=self.loqusdb_config.binary_path,
-                config_path=self.loqusdb_config.config_path,
-            ),
-            LoqusdbInstance.WES: LoqusdbAPI(
-                binary_path=self.loqusdb_wes_config.binary_path,
-                config_path=self.loqusdb_wes_config.config_path,
-            ),
-            LoqusdbInstance.SOMATIC: LoqusdbAPI(
-                binary_path=self.loqusdb_somatic_config.binary_path,
-                config_path=self.loqusdb_somatic_config.config_path,
-            ),
-            LoqusdbInstance.TUMOR: LoqusdbAPI(
-                binary_path=self.loqusdb_tumor_config.binary_path,
-                config_path=self.loqusdb_tumor_config.config_path,
-            ),
-            LoqusdbInstance.SOMATIC_LYMPHOID: LoqusdbAPI(
-                binary_path=self.loqusdb_somatic_lymphoid_config.binary_path,
-                config_path=self.loqusdb_somatic_lymphoid_config.config_path,
-            ),
-            LoqusdbInstance.SOMATIC_MYELOID: LoqusdbAPI(
-                binary_path=self.loqusdb_somatic_myeloid_config.binary_path,
-                config_path=self.loqusdb_somatic_myeloid_config.config_path,
-            ),
-            LoqusdbInstance.SOMATIC_EXOME: LoqusdbAPI(
-                binary_path=self.loqusdb_somatic_exome_config.binary_path,
-                config_path=self.loqusdb_somatic_exome_config.config_path,
-            ),
+        loqusdb_app_config_map: dict = {
+            LoqusdbInstance.LWP: self.loqusdb_rd_lwp_config,
+            LoqusdbInstance.WGS: self.loqusdb_config,
+            LoqusdbInstance.WES: self.loqusdb_wes_config,
+            LoqusdbInstance.SOMATIC: self.loqusdb_somatic_config,
+            LoqusdbInstance.TUMOR: self.loqusdb_tumor_config,
+            LoqusdbInstance.SOMATIC_LYMPHOID: self.loqusdb_somatic_lymphoid_config,
+            LoqusdbInstance.SOMATIC_MYELOID: self.loqusdb_somatic_myeloid_config,
+            LoqusdbInstance.SOMATIC_EXOME: self.loqusdb_somatic_exome_config,
         }
-        return loqusdb_apis[loqusdb_instance]
+        loqusdb_config = loqusdb_app_config_map[loqusdb_instance]
+        return LoqusdbAPI(
+            binary_path=loqusdb_config.binary_path,
+            config_path=loqusdb_config.config_path,
+        )
 
     @staticmethod
     def is_duplicate(
