@@ -210,7 +210,7 @@ def test_single_wgs(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: L
     expected_file_path = (
         f"{balsamic_context.meta_apis['analysis_api'].loqusdb_path}/{LOQUSDB_WGS_DUMP_FILE}"
     )
-    assert f"--artefact-sv-observation {expected_file_path}" in caplog.text
+    assert f"--artefact-sv-observations {expected_file_path}" in caplog.text
 
 
 def test_single_panel(balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture):
