@@ -81,9 +81,8 @@ class BalsamicObservationsAPI(ObservationsAPI):
         return all(
             [
                 self.is_customer_eligible_for_observations_upload(case.customer.internal_id),
-                self.is_sequencing_method_eligible_for_observations_upload(case.internal_id),
                 self.is_analysis_type_eligible_for_observations_upload(case),
-                self.is_sample_source_eligible_for_observations_upload(case.internal_id),
+                self.is_sample_source_type_ffpe(case.internal_id),
                 self.is_panel_allowed_for_observations_upload(case),
             ]
         )
@@ -93,11 +92,8 @@ class BalsamicObservationsAPI(ObservationsAPI):
         Returns True if WGS or TGS with the allowed panels.
         This assumes that all samples in the case have the same prep-category
         """
-        sample: Sample = case.samples[0]
-        if sample.prep_category in [
-            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
-            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
-        ]:
+        if self._is_panel_upload(case):
+            sample: Sample = case.samples[0]
             panel_short_name: str | None = self.lims_api.capture_kit(sample.internal_id)
             bed_version: BedVersion | None = self.store.get_bed_version_by_short_name(
                 panel_short_name
