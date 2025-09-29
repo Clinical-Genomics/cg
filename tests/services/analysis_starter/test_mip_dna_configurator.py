@@ -59,7 +59,7 @@ def test_configure(mock_cg_config_mip: MipConfig, mocker: MockerFixture):
     # GIVEN a MIP DNA configurator
     root_dir = Path("root_dir")
     configurator = MIPDNAConfigurator(
-        config=mock_cg_config_mip,
+        cg_mip_config=mock_cg_config_mip,
         config_file_creator=create_autospec(MIPDNAConfigFileCreator),
         fastq_handler=Mock(),
         gene_panel_file_creator=create_autospec(GenePanelFileCreator),
@@ -112,7 +112,7 @@ def test_get_config(mock_cg_config_mip: MipConfig, mock_status_db: Store, mocker
 
     # GIVEN a MIP DNA configurator
     configurator = MIPDNAConfigurator(
-        config=mock_cg_config_mip,
+        cg_mip_config=mock_cg_config_mip,
         config_file_creator=Mock(),
         fastq_handler=Mock(),
         gene_panel_file_creator=Mock(),
@@ -144,7 +144,7 @@ def test_get_config_all_flags_set(
 
     # GIVEN a MIP DNA configurator
     configurator = MIPDNAConfigurator(
-        config=mock_cg_config_mip,
+        cg_mip_config=mock_cg_config_mip,
         config_file_creator=Mock(),
         fastq_handler=Mock(),
         gene_panel_file_creator=Mock(),
@@ -180,7 +180,7 @@ def test_get_config_validation(mock_cg_config_mip: MipConfig, mock_status_db: St
 
     # GIVEN a configurator
     configurator = MIPDNAConfigurator(
-        config=mock_cg_config_mip,
+        cg_mip_config=mock_cg_config_mip,
         config_file_creator=Mock(),
         fastq_handler=Mock(),
         gene_panel_file_creator=gene_panel_file_creator,

@@ -27,18 +27,19 @@ MIP_DNA_MANAGED_VARIANTS_FILE_NAME = "managed_variants.vcf"
 class MIPDNAConfigurator(Configurator):
     def __init__(
         self,
-        config: MipConfig,
+        cg_mip_config: MipConfig,
         config_file_creator: MIPDNAConfigFileCreator,
         fastq_handler: MipFastqHandler,
         gene_panel_file_creator: GenePanelFileCreator,
         managed_variants_file_creator: ManagedVariantsFileCreator,
         store: Store,
     ):
-        self.conda_binary = config.conda_binary
-        self.conda_environment = config.conda_env
-        self.pipeline_binary = f"{config.script} {config.workflow}"
-        self.pipeline_config_path = config.mip_config
-        self.root = config.root
+        self.conda_binary = cg_mip_config.conda_binary
+        self.conda_environment = cg_mip_config.conda_env
+        self.pipeline_binary = cg_mip_config.script
+        self.pipeline_command = cg_mip_config.workflow
+        self.pipeline_config_path = cg_mip_config.mip_config
+        self.root = cg_mip_config.root
 
         self.config_file_creator = config_file_creator
         self.fastq_handler = fastq_handler
@@ -70,6 +71,7 @@ class MIPDNAConfigurator(Configurator):
             conda_binary=self.conda_binary,
             conda_environment=self.conda_environment,
             pipeline_binary=self.pipeline_binary,
+            pipeline_command=self.pipeline_command,
             pipeline_config_path=self.pipeline_config_path,
             email=environ_email(),
             slurm_qos=case.slurm_priority,

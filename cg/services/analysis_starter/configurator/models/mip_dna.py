@@ -10,6 +10,7 @@ class MIPDNACaseConfig(CaseConfig):
     conda_environment: str
     email: str
     pipeline_binary: str
+    pipeline_command: str
     pipeline_config_path: str
     slurm_qos: SlurmQos
     start_after_recipe: str | None = Field(default=None, alias="start_after")
@@ -19,7 +20,7 @@ class MIPDNACaseConfig(CaseConfig):
 
     def get_start_command(self) -> str:
         start_command = (
-            "{conda_binary} run --name {conda_environment} {pipeline_binary} analyse rd_dna"
+            "{conda_binary} run --name {conda_environment} {pipeline_binary} {pipeline_command}"
             " --config {pipeline_config_path} {case_id} --slurm_quality_of_service "
             "{slurm_qos} --email {email}"
         ).format(**self.model_dump())

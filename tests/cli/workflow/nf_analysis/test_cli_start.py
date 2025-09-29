@@ -12,7 +12,9 @@ from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.cli.workflow.raredisease.base import dev_start as raredisease_start
 from cg.cli.workflow.rnafusion.base import start as rnafusion_start
-from cg.cli.workflow.taxprofiler.base import dev_start as taxprofiler_start
+from cg.cli.workflow.rnafusion.base import start_available as rnafusion_start_available
+from cg.cli.workflow.taxprofiler.base import start as taxprofiler_start
+from cg.cli.workflow.taxprofiler.base import start_available as taxprofiler_start_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -22,7 +24,7 @@ from cg.services.analysis_starter.service import AnalysisStarter
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_start(
     cli_runner: CliRunner,
@@ -66,7 +68,7 @@ def test_start(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_start_available(
     cli_runner: CliRunner,
