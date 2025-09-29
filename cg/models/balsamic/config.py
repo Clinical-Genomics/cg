@@ -53,11 +53,23 @@ class BalsamicConfigReference(BaseModel):
     @classmethod
     def extract_genome_version_from_path(cls, _, info: ValidationInfo) -> str:
         """
-        Return the genome version from the reference path:
-        /home/proj/stage/cancer/balsamic_cache/X.X.X/hg19/genome/human_g1k_v37.fasta
+        Return the genome version from the reference path.
+        Works with both old and new dict structures.
+
+        Example path:
+            /home/proj/stage/cancer/balsamic_cache/X.X.X/hg19/genome/human_g1k_v37.fasta
         """
 
-        return str(info.data.get("reference_genome")).split("/")[-3]
+        ref = info.data.get("reference_genome")
+
+        # New config format since v18.0.0 of balsamic
+        if isinstance(ref, dict) and "file" in ref:
+            path = ref["file"]
+        else:
+            # For backwards compatibility with old config format
+            path = ref
+
+        return str(path).split("/")[-3]
 
 
 class BalsamicConfigPanel(BaseModel):
