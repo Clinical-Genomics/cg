@@ -70,6 +70,7 @@ def test_track(customer_id: str, should_be_hidden: bool, mocker: MockerFixture):
         conda_environment="conda_env",
         email="some_email",
         pipeline_binary="pipeline/binary",
+        pipeline_command="analyse rd_dna",
         pipeline_config_path="some/path",
         slurm_qos=SlurmQos.NORMAL,
         use_bwa_mem=False,

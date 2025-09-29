@@ -36,7 +36,8 @@ class MIPDNAConfigurator(Configurator):
     ):
         self.conda_binary = cg_mip_config.conda_binary
         self.conda_environment = cg_mip_config.conda_env
-        self.pipeline_binary = f"{cg_mip_config.script} {cg_mip_config.workflow}"
+        self.pipeline_binary = cg_mip_config.script
+        self.pipeline_command = cg_mip_config.workflow
         self.pipeline_config_path = cg_mip_config.mip_config
         self.root = cg_mip_config.root
 
@@ -70,6 +71,7 @@ class MIPDNAConfigurator(Configurator):
             conda_binary=self.conda_binary,
             conda_environment=self.conda_environment,
             pipeline_binary=self.pipeline_binary,
+            pipeline_command=self.pipeline_command,
             pipeline_config_path=self.pipeline_config_path,
             email=environ_email(),
             slurm_qos=case.slurm_priority,
