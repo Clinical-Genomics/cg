@@ -238,7 +238,7 @@ def test_is_non_normal_only_case_eligible_for_observations_upload(
     assert is_case_eligible_for_observations_upload
 
 
-def test_normal_only_case_is_not_eligible_for_observations_upload(
+def test_is_normal_only_case_not_eligible_for_observations_upload(
     case_id: str,
     balsamic_observations_api: BalsamicObservationsAPI,
     mocker: MockFixture,

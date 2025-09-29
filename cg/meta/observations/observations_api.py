@@ -132,11 +132,7 @@ class ObservationsAPI:
             return False
         return True
 
-    def is_sample_source_eligible_for_observations_upload(self, case_id: str) -> bool:
-        """
-        Return False if the case samples come from a tissue whose quality is too low to be
-        considered for LoqusDB uploads.
-        """
+    def is_sample_source_type_ffpe(self, case_id: str) -> bool:
         source_type: str | None = self.analysis_api.get_case_source_type(case_id)
         if source_type and SourceType.FFPE.lower() not in source_type.lower():
             return True

@@ -82,7 +82,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             [
                 self.is_customer_eligible_for_observations_upload(case.customer.internal_id),
                 self.is_analysis_type_eligible_for_observations_upload(case),
-                self.is_sample_source_eligible_for_observations_upload(case.internal_id),
+                self.is_sample_source_type_ffpe(case.internal_id),
                 self.is_panel_allowed_for_observations_upload(case),
             ]
         )
