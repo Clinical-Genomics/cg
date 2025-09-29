@@ -27,6 +27,7 @@ from cg.services.analysis_starter.submitters.subprocess.submitter import (
         MIPDNACaseConfig(
             case_id="case_id",
             pipeline_binary="pipeline_binary",
+            pipeline_command="analyse rd_dna",
             conda_binary="conda_binary",
             pipeline_config_path="pipeline_config_path",
             conda_environment="conda_environment",
