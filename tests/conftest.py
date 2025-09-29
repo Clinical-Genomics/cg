@@ -2107,18 +2107,6 @@ def context_config(
             "config_path": "loqusdb-somatic.yaml",
         },
         "loqusdb-tumor": {"binary_path": "loqusdb-tumor", "config_path": "loqusdb-tumor.yaml"},
-        "loqusdb-somatic-lymphoid": {
-            "binary_path": "loqusdb-gms-lymphoid",
-            "config_path": "gms-lymphoid-loqusdb.yaml",
-        },
-        "loqusdb-somatic-myeloid": {
-            "binary_path": "loqusdb-gms-myeloid",
-            "config_path": "gms-myeloid-loqusdb.yaml",
-        },
-        "loqusdb-somatic-exome": {
-            "binary_path": "loqusdb-twist-exome-comprehensive",
-            "config_path": "twist-exome-comprehensive-loqusdb.yaml",
-        },
         "microsalt": {
             "binary_path": "echo",
             "conda_binary": "a_conda_binary",
