@@ -9,7 +9,7 @@ from cg.cli.workflow.microsalt.base import start_available as microsalt_start_av
 from cg.cli.workflow.mip_dna.base import dev_start_available as mip_dna_start_available
 from cg.cli.workflow.raredisease.base import dev_start_available as raredisease_start_available
 from cg.cli.workflow.rnafusion.base import start_available as rnafusion_start_available
-from cg.cli.workflow.taxprofiler.base import dev_start_available as taxprofiler_start_available
+from cg.cli.workflow.taxprofiler.base import start_available as taxprofiler_start_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.service import AnalysisStarter
