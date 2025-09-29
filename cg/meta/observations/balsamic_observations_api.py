@@ -89,8 +89,9 @@ class BalsamicObservationsAPI(ObservationsAPI):
 
     def is_panel_allowed_for_observations_upload(self, case: Case) -> bool:
         """
-        Returns True if WGS or TGS with the allowed panels.
-        This assumes that all samples in the case have the same prep-category
+        True if WGS.
+        If TGS/WES, True for panels with LoqusDB instances.
+        This assumes that all samples in the case have the same prep-category.
         """
         if self._is_panel_upload(case):
             sample: Sample = case.samples[0]

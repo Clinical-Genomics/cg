@@ -76,7 +76,7 @@ def test_is_analysis_type_eligible_for_observations_eligible_tgs(
     # GIVEN a Balsamic Observations API
     balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
 
-    # GIVEN a TGS case with a panel that allows for LoqusDB uploads and only one sample
+    # GIVEN a TGS case with a panel that allows for LoqusDB uploads and only one sample (tumor only)
     case: Case = create_autospec(
         Case,
         internal_id="balsamic_tgs_case",
@@ -106,7 +106,7 @@ def test_is_analysis_type_eligible_for_observations_not_eligible_tgs(
     # GIVEN a Balsamic Observations API
     balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
 
-    # GIVEN a TGS case with two samples
+    # GIVEN a TGS case with two samples (paired analysis, tumor sample paired with a normal sample)
     sample = create_autospec(
         Sample,
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
@@ -130,10 +130,10 @@ def test_is_analysis_type_eligible_for_observations_not_eligible_tgs(
 
 
 @pytest.mark.parametrize(
-    "bed_name, is_allowed", [("GMSmyeloid", True), ("Not valid bed name", False)]
+    "bed_name, should_be_allowed", [("GMSmyeloid", True), ("Not valid bed name", False)]
 )
 def test_is_panel_allowed_for_observations_upload_bed_name(
-    cg_context: CGConfig, bed_name: str, is_allowed: bool
+    cg_context: CGConfig, bed_name: str, should_be_allowed: bool
 ):
     # GIVEN a Balsamic observations API
     balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
@@ -160,7 +160,7 @@ def test_is_panel_allowed_for_observations_upload_bed_name(
     )
 
     # THEN result is as expected
-    assert is_panel_allowed == is_allowed
+    assert is_panel_allowed == should_be_allowed
 
 
 def test_is_panel_allowed_for_upload_wgs(cg_context: CGConfig):
@@ -205,7 +205,7 @@ def test_is_panel_allowed_no_bed_version(cg_context: CGConfig):
     )
     case: Case = create_autospec(Case, internal_id="case_id", samples=[sample])
 
-    # GIVEN that the LIMS short name does not match any bed versions
+    # GIVEN that the panel set in LIMS does not match any bed versions
     store.get_bed_version_by_short_name = Mock(return_value=None)
     balsamic_observations_api.store = store
 
