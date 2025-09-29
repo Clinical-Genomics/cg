@@ -75,7 +75,7 @@ class ObservationsAPI:
 
     def get_loqusdb_api(self, loqusdb_instance: LoqusdbInstance) -> LoqusdbAPI:
         """Returns a Loqusdb API for the given Loqusdb instance."""
-        loqusdb_app_config_map: dict = {
+        loqusdb_config_map: dict = {
             LoqusdbInstance.LWP: self.loqusdb_rd_lwp_config,
             LoqusdbInstance.WGS: self.loqusdb_config,
             LoqusdbInstance.WES: self.loqusdb_wes_config,
@@ -85,7 +85,7 @@ class ObservationsAPI:
             LoqusdbInstance.SOMATIC_MYELOID: self.loqusdb_somatic_myeloid_config,
             LoqusdbInstance.SOMATIC_EXOME: self.loqusdb_somatic_exome_config,
         }
-        loqusdb_config = loqusdb_app_config_map[loqusdb_instance]
+        loqusdb_config = loqusdb_config_map[loqusdb_instance]
         return LoqusdbAPI(
             binary_path=loqusdb_config.binary_path,
             config_path=loqusdb_config.config_path,

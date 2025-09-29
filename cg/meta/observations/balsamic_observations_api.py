@@ -62,19 +62,19 @@ class BalsamicObservationsAPI(ObservationsAPI):
             )
             return False
         prep_category: str = case.samples[0].prep_category
-        if (
-            prep_category
-            in [
-                SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
-                SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
-            ]
-            and len(case.samples) > 1
-        ):
+        if prep_category in [
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+        ] and self._is_paired_analysis(case):
             LOG.error(
                 f"Paired analysis {case.internal_id} is not supported for TGS Loqusdb uploads"
             )
             return False
         return True
+
+    @staticmethod
+    def _is_paired_analysis(case: Case) -> bool:
+        return len(case.samples) > 1
 
     def is_case_eligible_for_observations_upload(self, case: Case) -> bool:
         """Return whether a cancer case is eligible for observations upload."""
