@@ -81,6 +81,7 @@ def scout_export_panel_stdout() -> bytes:
     return b"22\t26995242\t27014052\t2397\tCRYBB1\n22\t38452318\t38471708\t9394\tPICK1\n"
 
 
+@pytest.mark.xdist_group(name="integration")
 @pytest.mark.parametrize(
     "test_command",
     ["start-available", "dev-start-available"],
@@ -281,13 +282,22 @@ def test_start_available_mip_dna(
         f"{case.internal_id} --slurm_quality_of_service normal --email {email}"
     )
 
-    analysis_subprocess_mock.run.assert_any_call(
-        expected_command,
-        check=False,
-        shell=True,
-        stdout=ANY,
-        stderr=ANY,
-    )
+    if test_command == "dev-start-available":
+        analysis_subprocess_mock.run.assert_any_call(
+            args=expected_command,
+            check=True,  # FIXME this should always be False after merging PR #4585
+            shell=True,
+            stdout=ANY,
+            stderr=ANY,
+        )
+    else:
+        analysis_subprocess_mock.run.assert_any_call(
+            expected_command,
+            check=False,
+            shell=True,
+            stdout=ANY,
+            stderr=ANY,
+        )
 
     # THEN a successful exit code is returned
     assert result.exit_code == 0
