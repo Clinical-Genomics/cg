@@ -51,6 +51,9 @@ def test_start_config_case(
     )
     helpers.relate_samples(base_store=status_db, case=case, samples=[sample])
 
+    bed_name = "balsamic_integration_test_bed"
+    helpers.ensure_bed_version(store=status_db, bed_name=bed_name)
+
     # GIVEN that a sub process can be started and run successfully
     subprocess_mock = mocker.patch.object(commands, "subprocess")
     subprocess_mock.run = Mock(
@@ -60,7 +63,7 @@ def test_start_config_case(
     )
 
     httpserver.expect_request(f"/lims/api/v2/samples/{sample.internal_id}").respond_with_data(
-        """<smp:sample xmlns:udf="http://genologics.com/ri/userdefined" xmlns:ri="http://genologics.com/ri" xmlns:file="http://genologics.com/ri/file" xmlns:smp="http://genologics.com/ri/sample" uri="http://127.0.0.1:8000/api/v2/samples/ACC2351A1" limsid="ACC2351A1">
+        f"""<smp:sample xmlns:udf="http://genologics.com/ri/userdefined" xmlns:ri="http://genologics.com/ri" xmlns:file="http://genologics.com/ri/file" xmlns:smp="http://genologics.com/ri/sample" uri="http://127.0.0.1:8000/api/v2/samples/ACC2351A1" limsid="ACC2351A1">
 <name>2016-02293</name>
 <date-received>2017-02-16</date-received>
 <project limsid="ACC2351" uri="http://127.0.0.1:8000/api/v2/projects/ACC2351"/>
@@ -89,73 +92,9 @@ def test_start_config_case(
 <udf:field type="String" name="Data Analysis">scout</udf:field>
 <udf:field type="String" name="Index number">NA</udf:field>
 <udf:field type="String" name="Application Tag Version">1</udf:field>
+<udf:field type="String" name="Bait Set">{bed_name}</udf:field>
 <udf:field type="String" name="Capture Library version">Agilent Sureselect V5</udf:field>
 </smp:sample>""",
-        content_type="application/xml",
-    )
-
-    httpserver.expect_request(
-        "/lims/api/v2/artifacts",
-        query_string={
-            "type": "Analyte",
-            "process-type": "obsolete_CG002 - Hybridize Library  (SS XT)",
-            "samplelimsid": sample.internal_id,
-        },
-    ).respond_with_data(
-        """<art:artifacts xmlns:art="http://genologics.com/ri/artifact">
-        </art:artifacts>""",
-        content_type="application/xml",
-    )
-
-    httpserver.expect_request(
-        "/lims/api/v2/artifacts",
-        query_string={
-            "type": "Analyte",
-            "process-type": "Hybridize Library TWIST v1",
-            "samplelimsid": sample.internal_id,
-        },
-    ).respond_with_data(
-        """<art:artifacts xmlns:art="http://genologics.com/ri/artifact">
-        </art:artifacts>""",
-        content_type="application/xml",
-    )
-
-    httpserver.expect_request(
-        "/lims/api/v2/artifacts",
-        query_string={
-            "type": "Analyte",
-            "process-type": "Hybridize Library TWIST v2",
-            "samplelimsid": sample.internal_id,
-        },
-    ).respond_with_data(
-        """<art:artifacts xmlns:art="http://genologics.com/ri/artifact">
-        </art:artifacts>""",
-        content_type="application/xml",
-    )
-
-    httpserver.expect_request(
-        "/lims/api/v2/artifacts",
-        query_string={
-            "type": "Analyte",
-            "process-type": "Target enrichment TWIST v1",
-            "samplelimsid": sample.internal_id,
-        },
-    ).respond_with_data(
-        """<art:artifacts xmlns:art="http://genologics.com/ri/artifact">
-        </art:artifacts>""",
-        content_type="application/xml",
-    )
-
-    httpserver.expect_request(
-        "/lims/api/v2/artifacts",
-        query_string={
-            "type": "Analyte",
-            "process-type": "Library Prep (Dev) v3",
-            "samplelimsid": sample.internal_id,
-        },
-    ).respond_with_data(
-        """<art:artifacts xmlns:art="http://genologics.com/ri/artifact">
-        </art:artifacts>""",
         content_type="application/xml",
     )
 
@@ -170,6 +109,7 @@ def test_start_config_case(
             "config-case",
             case.internal_id,
         ],
+        catch_exceptions=False,
     )
 
     assert result.exception is None
@@ -177,15 +117,19 @@ def test_start_config_case(
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path config case "
         f"--analysis-dir {test_root_dir}/balsamic_root_path "
-        f"--analysis-workflow balsamic --balsamic-cache {test_root_dir}/balsamic_cache "
-        f"--cadd-annotations {test_root_dir}/balsamic_cadd_path --case-id {case.internal_id} "
+        f"--analysis-workflow balsamic "
+        f"--balsamic-cache {test_root_dir}/balsamic_cache "
+        f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
+        f"--case-id {case.internal_id} "
         f"--fastq-path {test_root_dir}/balsamic_root_path/{case.internal_id}/fastq "
-        f"--gender female --genome-interval {test_root_dir}/balsamic_genome_interval_path "
+        f"--gender female "
         f"--genome-version hg19 "
-        f"--gens-coverage-pon {test_root_dir}/balsamic_gens_coverage_female_path "
         f"--gnomad-min-af5 {test_root_dir}/balsamic_gnomad_af5_path "
+        f"--panel-bed {test_root_dir}/balsamic_bed_path/dummy_filename "
+        "--exome "
         f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
-        f"--sentieon-license localhost --tumor-sample-name {sample.internal_id}",
+        f"--sentieon-license localhost "
+        f"--tumor-sample-name {sample.internal_id}",
         check=False,
         shell=True,
         stderr=ANY,
