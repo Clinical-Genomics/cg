@@ -309,11 +309,19 @@ def test_start_available_mip_dna(
     status_db.session.refresh(case)
     assert case.action == CaseActions.RUNNING
 
-    # THEN gene_panels and managed_variant files has been created
+    # THEN managed_variant and pedigree files has been created
     case_dir = Path(test_root_dir, "mip-dna", "cases", case.internal_id)
-    assert Path(case_dir, "gene_panels.bed").exists()
     assert Path(case_dir, "managed_variants.vcf").exists()
     assert Path(case_dir, "pedigree.yaml").exists()
+
+    # THEN the gene_panels file has been created with the correct contents
+    gene_panels_path = Path(case_dir, "gene_panels.bed")
+    expected_content: str = scout_export_panel_stdout.decode().removesuffix("\n")
+
+    assert gene_panels_path.exists()
+    with open(Path(case_dir, "gene_panels.bed")) as f:
+        gene_panels_content = f.read()
+        assert gene_panels_content == expected_content
 
 
 def create_qc_file(test_root_dir: Path, case: Case) -> Path:
