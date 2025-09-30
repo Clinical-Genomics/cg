@@ -69,17 +69,16 @@ def test_write_txt(txt_temp_path: Path, txt_file_path: Path):
     assert content == read_txt(file_path=txt_temp_path)
 
 
-def test_write_txt_with_newlines(mocker: MockerFixture):
+def test_write_txt_with_newlines(tmp_path: Path):
     # GIVEN a list of strings
     strings: list[str] = ["Line 1", "Line 2", "Line 3"]
 
-    # GIVEN that writing to a file succeeds
-    mocker.patch.object(IO, "write")
-
     # WHEN calling write_txt_with_newlines
-    write_txt_with_newlines(content=strings, file_path=Path("test_output.txt"))
+    write_txt_with_newlines(content=strings, file_path=tmp_path / "file.txt")
 
-    # THEN
+    # THEN the content of the written file is as expected
+    with open(tmp_path / "file.txt", "r") as file:
+        assert file.read() == "Line 1\nLine 2\nLine 3"
 
 
 def test_concat_txt(txt_file_path: Path, txt_file_path_2: Path):
