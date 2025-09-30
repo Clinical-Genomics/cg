@@ -17,7 +17,6 @@ class BalsamicConfigInput(BaseModel):
     balsamic_cache: Path
     cadd_annotations: Path
     cancer_germline_snv_observations: Path
-    cancer_germline_sv_observations: Path
     cancer_somatic_snv_observations: Path
     cancer_somatic_sv_observations: Path
     case_id: str
@@ -43,7 +42,7 @@ class BalsamicConfigInput(BaseModel):
     def dump_to_cli(self) -> str:
         """Dump the Balsamic case config to a CLI command. None flags are excluded and boolean flags are converted to
         only add the flag."""
-        command = f"{self.conda_binary} run {self.balsamic_binary} balsamic config case"
+        command = f"{self.conda_binary} run {self.balsamic_binary} config case"
         flags = {
             "--analysis-dir": self.analysis_dir,
             "--analysis-workflow": self.analysis_workflow,
@@ -51,7 +50,7 @@ class BalsamicConfigInput(BaseModel):
             "--cadd-annotations": self.cadd_annotations,
             "--artefact-snv-observations": self.artefact_snv_observations,
             "--cancer-germline-snv-observations": self.cancer_germline_snv_observations,
-            "--cancer-germline-sv-observations": self.cancer_germline_sv_observations,
+            "--cancer-somatic-snv-observations": self.cancer_somatic_snv_observations,
             "--cancer-somatic-sv-observations": self.cancer_somatic_sv_observations,
             "--case-id": self.case_id,
             "--clinical-snv-observations": self.clinical_snv_observations,

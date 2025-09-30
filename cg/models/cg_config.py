@@ -193,7 +193,6 @@ class BalsamicConfig(CommonAppConfig):
     loqusdb_path: str
     loqusdb_artefact_snv: Path
     loqusdb_cancer_germline_snv: Path
-    loqusdb_cancer_germline_sv: Path
     loqusdb_cancer_somatic_snv: Path
     loqusdb_cancer_somatic_sv: Path
     loqusdb_clinical_snv: Path
