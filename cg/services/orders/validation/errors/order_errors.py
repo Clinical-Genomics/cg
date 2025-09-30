@@ -19,8 +19,3 @@ class CustomerCannotSkipReceptionControlError(OrderError):
 class CustomerDoesNotExistError(OrderError):
     field: str = "customer"
     message: str = "Customer does not exist"
-
-
-class OrderNameRequiredError(OrderError):
-    field: str = "name"
-    message: str = "Order name is required"

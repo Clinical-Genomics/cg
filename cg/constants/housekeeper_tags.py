@@ -20,12 +20,6 @@ class AlignmentFileTag(StrEnum):
         return list(map(lambda tag: tag.value, cls))
 
 
-class ArchiveTag(StrEnum):
-    """Tags for archived status."""
-
-    ARCHIVED: str = "archived"
-
-
 class ScoutTag(StrEnum):
     """Tags for Scout."""
 

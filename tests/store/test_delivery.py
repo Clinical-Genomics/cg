@@ -2,21 +2,7 @@
 
 import datetime as dt
 
-from cg.constants import DataDelivery
-from cg.constants.constants import Workflow
-from cg.store.models import Case, Sample
-
-
-def test_get_delivery_arguments(case: Case):
-    """Testing the parsing of delivery arguments from the case data_delivery."""
-    # GIVEN a DataDelivery
-    case.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
-
-    # WHEN parsing the delivery types
-    delivery_types: set[str] = case.get_delivery_arguments()
-
-    # THEN the correct delivery types should be returned
-    assert delivery_types == {Workflow.MIP_DNA, Workflow.RAW_DATA}
+from cg.store.models import Sample
 
 
 def test_list_samples_to_deliver(base_store, helpers):

@@ -91,3 +91,10 @@ class BalsamicCaseConfig(CaseConfig):
     qos: SlurmQos
     sample_config: Path
     workflow: Workflow = Workflow.BALSAMIC
+
+    def get_start_command(self) -> str:
+        return (
+            "{conda_binary} run {binary} run analysis --account {account} --mail-user {mail_user} "
+            "--qos {qos} --sample-config {sample_config} --cluster-config {cluster_config} --run-analysis "
+            "--benchmark".format(**self.model_dump())
+        )

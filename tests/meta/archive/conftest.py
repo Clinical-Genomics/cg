@@ -2,11 +2,11 @@ import http
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
-from unittest import mock
 
 import pytest
 from click.testing import CliRunner
 from housekeeper.store.models import Bundle, File
+from pytest_mock import MockerFixture
 from requests import Response
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -16,6 +16,7 @@ from cg.constants.constants import DataDelivery, FileFormat, Workflow
 from cg.constants.subject import Sex
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
+from cg.meta.archive.ddn import ddn_data_flow_client
 from cg.meta.archive.ddn.constants import ROOT_TO_TRIM
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import AuthToken, MiriaObject, TransferPayload
@@ -44,12 +45,6 @@ def ddn_dataflow_config(
 @pytest.fixture
 def ok_miria_response(ok_response: Response):
     ok_response._content = b'{"jobId": "123"}'
-    return ok_response
-
-
-@pytest.fixture
-def ok_miria_job_status_response(ok_response: Response):
-    ok_response._content = b'{"id": "123", "status": "Completed"}'
     return ok_response
 
 
@@ -101,12 +96,6 @@ def header_with_test_auth_token() -> dict:
 
 
 @pytest.fixture
-def miria_auth_token_response(ok_response: Response):
-    ok_response._content = b'{"access": "test_auth_token", "expire":15, "test_refresh_token":""}'
-    return ok_response
-
-
-@pytest.fixture
 def test_auth_token() -> AuthToken:
     return AuthToken(
         access="test_auth_token",
@@ -126,7 +115,9 @@ def retrieval_job_id() -> int:
 
 
 @pytest.fixture
-def ddn_dataflow_client(ddn_dataflow_config: DataFlowConfig) -> DDNDataFlowClient:
+def ddn_dataflow_client(
+    ddn_dataflow_config: DataFlowConfig, mocker: MockerFixture
+) -> DDNDataFlowClient:
     """Returns a DDNApi without tokens being set."""
     mock_ddn_auth_success_response = Response()
     mock_ddn_auth_success_response.status_code = 200
@@ -138,11 +129,12 @@ def ddn_dataflow_client(ddn_dataflow_config: DataFlowConfig) -> DDNDataFlowClien
             "expire": int((datetime.now() + timedelta(minutes=20)).timestamp()),
         },
     ).encode()
-    with mock.patch(
-        "cg.meta.archive.ddn.ddn_data_flow_client.APIRequest.api_request_from_content",
+    mocker.patch.object(
+        ddn_data_flow_client,
+        "post",
         return_value=mock_ddn_auth_success_response,
-    ):
-        return DDNDataFlowClient(ddn_dataflow_config)
+    )
+    return DDNDataFlowClient(ddn_dataflow_config)
 
 
 @pytest.fixture
@@ -207,12 +199,6 @@ def local_storage_repository() -> str:
 def remote_storage_repository() -> str:
     """Returns a remote storage repository."""
     return "archive@repository:"
-
-
-@pytest.fixture
-def full_remote_path(remote_storage_repository: str, remote_path: Path) -> str:
-    """Returns the merged remote repository and path."""
-    return remote_storage_repository + remote_path.as_posix()
 
 
 @pytest.fixture
