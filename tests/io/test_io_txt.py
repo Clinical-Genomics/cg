@@ -1,8 +1,10 @@
 from pathlib import Path
+from typing import IO
 
 import pytest
+from pytest_mock import MockerFixture
 
-from cg.io.txt import concat_txt, read_txt, write_txt
+from cg.io.txt import concat_txt, read_txt, write_txt, write_txt_with_newlines
 
 
 def test_read_txt_to_list(txt_file_path: Path):
@@ -65,6 +67,19 @@ def test_write_txt(txt_temp_path: Path, txt_file_path: Path):
 
     # THEN the content should match the original content
     assert content == read_txt(file_path=txt_temp_path)
+
+
+def test_write_txt_with_newlines(mocker: MockerFixture):
+    # GIVEN a list of strings
+    strings: list[str] = ["Line 1", "Line 2", "Line 3"]
+
+    # GIVEN that writing to a file succeeds
+    mocker.patch.object(IO, "write")
+
+    # WHEN calling write_txt_with_newlines
+    write_txt_with_newlines(content=strings, file_path=Path("test_output.txt"))
+
+    # THEN
 
 
 def test_concat_txt(txt_file_path: Path, txt_file_path_2: Path):
