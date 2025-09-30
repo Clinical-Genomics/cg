@@ -91,7 +91,7 @@ def test_gene_panel_file_content(
     mocker.patch.object(gene_panel, "get_genome_build", return_value=GenePanelGenomeBuild.hg19)
 
     # GIVEN a mock writer
-    write_mock = mocker.patch.object(gene_panel, "write_txt")
+    write_mock = mocker.patch.object(gene_panel, "write_txt_with_newlines")
 
     # WHEN creating a gene panel file
     gene_panel_creator.create(case_id=raredisease_case_id, file_path=Path("nextflow.bed"))
@@ -194,7 +194,7 @@ def test_creating_file_for_workflows_using_correct_genome_build(
     mocker: MockerFixture,
 ):
     # GIVEN a mock writer
-    mocker.patch.object(gene_panel, "write_txt")
+    mocker.patch.object(gene_panel, "write_txt_with_newlines")
 
     # WHEN creating a gene panel file
     gene_panel_creator.create(case_id=case_id, file_path=Path("filename.bed"))
