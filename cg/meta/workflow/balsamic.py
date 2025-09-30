@@ -665,8 +665,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_genome_build(self, case_id: str) -> str:
         """Returns the reference genome build version of a Balsamic analysis."""
-        analysis_metadata: BalsamicAnalysis = self.get_latest_metadata(case_id)
-        return analysis_metadata.balsamic_config.reference.reference_genome_version
+        return GenomeVersion.HG19
 
     @staticmethod
     def get_variant_caller_version(var_caller_name: str, var_caller_versions: dict) -> str | None:

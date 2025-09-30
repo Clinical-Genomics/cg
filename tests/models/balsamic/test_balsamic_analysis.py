@@ -10,7 +10,6 @@ from cg.models.balsamic.config import (
     BalsamicConfigJSON,
     BalsamicConfigPanel,
     BalsamicConfigQC,
-    BalsamicConfigReference,
     BalsamicConfigSample,
     BalsamicVarCaller,
 )
@@ -76,12 +75,6 @@ def expected_tga_balsamic_analysis() -> BalsamicAnalysis:
                     },
                 ),
             ],
-            reference=BalsamicConfigReference(
-                reference_genome=Path(
-                    "/mock/path/balsamic_cache/8.2.5/hg19/genome/human_g1k_v37.fasta"
-                ),
-                reference_genome_version="hg19",
-            ),
             panel=BalsamicConfigPanel(
                 capture_kit="gicfdna_3.1_hg19_design.bed",
                 capture_kit_version="3.1",
@@ -513,10 +506,6 @@ def expected_wgs_balsamic_analysis() -> BalsamicAnalysis:
                     },
                 ),
             ],
-            reference=BalsamicConfigReference(
-                reference_genome=Path("/dummy_5/15.0.1/hg19/genome/human_g1k_v37.fasta"),
-                reference_genome_version="hg19",
-            ),
             panel=None,
             QC=BalsamicConfigQC(
                 adapter="AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
