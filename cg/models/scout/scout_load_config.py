@@ -37,7 +37,7 @@ class Reviewer(BaseModel):
     alignment_index: str | None = None
     vcf: str | None = None
     catalog: str | None = None
-    trgt: str | None = None
+    trgt: bool | None = None
 
 
 class ScoutIndividual(BaseModel):

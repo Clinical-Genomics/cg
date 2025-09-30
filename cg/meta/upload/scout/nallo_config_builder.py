@@ -114,7 +114,7 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         )
         self.include_reviewer_files(config_sample=config_sample, hk_version=hk_version)
         config_sample.reviewer.trgt = (
-            "true"
+            True
             if any(
                 [
                     config_sample.reviewer.alignment,
