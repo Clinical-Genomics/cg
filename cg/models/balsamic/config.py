@@ -38,40 +38,6 @@ class BalsamicConfigSample(BaseModel):
     fastq_info: dict[str, dict[str, Path]]
 
 
-class BalsamicConfigReference(BaseModel):
-    """Metadata of reference files.
-
-    Attributes:
-        reference_genome: reference genome fasta file
-        reference_genome_version: reference genome build version
-    """
-
-    reference_genome: Path
-    reference_genome_version: str | None = Field(default=None, validate_default=True)
-
-    @field_validator("reference_genome_version")
-    @classmethod
-    def extract_genome_version_from_path(cls, _, info: ValidationInfo) -> str:
-        """
-        Return the genome version from the reference path.
-        Works with both old and new dict structures.
-
-        Example path:
-            /home/proj/stage/cancer/balsamic_cache/X.X.X/hg19/genome/human_g1k_v37.fasta
-        """
-
-        ref = info.data.get("reference_genome")
-
-        # New config format since v18.0.0 of balsamic
-        if isinstance(ref, dict) and "file" in ref:
-            path = ref["file"]
-        else:
-            # For backwards compatibility with old config format
-            path = ref
-
-        return str(path).split("/")[-3]
-
-
 class BalsamicConfigPanel(BaseModel):
     """Balsamic attributes of a panel BED file.
 
@@ -146,13 +112,11 @@ class BalsamicConfigJSON(BaseModel):
     Attributes:
         analysis: config analysis attributes
         samples: sample attributes associated to a specific case
-        reference: BALSAMIC build reference
         panel: panel attributes (targeted analysis exclusively)
     """
 
     analysis: BalsamicConfigAnalysis
     samples: list[BalsamicConfigSample]
-    reference: BalsamicConfigReference
     panel: BalsamicConfigPanel | None = None
     QC: BalsamicConfigQC
     vcf: dict[str, BalsamicVarCaller]
