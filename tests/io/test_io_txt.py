@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import IO
 
 import pytest
 from pytest_mock import MockerFixture
