@@ -227,6 +227,7 @@ def test_start_available_mip_dna(
             "mip-dna",
             test_command,
         ],
+        catch_exceptions=False,
     )
 
     # THEN a scout command is called to export panel beds
