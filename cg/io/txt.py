@@ -23,8 +23,9 @@ def write_txt(content: list[str] | str, file_path: Path) -> None:
 
 
 def write_txt_with_newlines(content: list[str], file_path: Path) -> None:
-    """Write each element of a list on a new line."""
-    pass
+    """Write each element of a list on a new line to a file."""
+    with open(file_path, "w") as file:
+        file.write("\n".join(content))
 
 
 def concat_txt(
