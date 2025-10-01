@@ -15,15 +15,15 @@ from pytest import TempPathFactory
 from pytest_httpserver import HTTPServer
 from pytest_mock import MockerFixture
 
+from cg.apps.environ import environ_email
 from cg.apps.tb.api import IDTokenCredentials
 from cg.cli.base import base
-from cg.cli.workflow.mip import base as mip_base
 from cg.constants.constants import CaseActions, Workflow
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.tb import AnalysisType
-from cg.meta.workflow import analysis
+from cg.services.analysis_starter.submitters.subprocess import submitter
 from cg.store import database as cg_database
 from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Order, Sample
 from cg.store.store import Store
@@ -81,8 +81,14 @@ def scout_export_panel_stdout() -> bytes:
     return b"22\t26995242\t27014052\t2397\tCRYBB1\n22\t38452318\t38471708\t9394\tPICK1\n"
 
 
+@pytest.mark.xdist_group(name="integration")
+@pytest.mark.parametrize(
+    "test_command",
+    ["start-available", "dev-start-available"],
+)
 @pytest.mark.integration
 def test_start_available_mip_dna(
+    test_command: str,
     helpers: StoreHelpers,
     housekeeper_db_uri: str,
     housekeeper_db: HousekeeperStore,
@@ -173,8 +179,7 @@ def test_start_available_mip_dna(
     subprocess_mock.run = Mock(side_effect=mock_run)
 
     # GIVEN an email address can be determined from the environment
-    mocker.patch.object(mip_base, "environ_email", return_value="testuser@scilifelab.se")
-    mocker.patch.object(analysis, "environ_email", return_value="testuser@scilifelab.se")
+    email: str = environ_email()
 
     # GIVEN the Trailblazer API returns no ongoing analysis for the case
     httpserver.expect_request(
@@ -184,13 +189,14 @@ def test_start_available_mip_dna(
     # GIVEN a pending analysis can be added to the Trailblazer API
     httpserver.expect_request(
         "/trailblazer/add-pending-analysis",
-        data=b'{"case_id": "%(case_id)s", "email": "testuser@scilifelab.se", "type": "wgs", '
+        data=b'{"case_id": "%(case_id)s", "email": "%(email)s", "type": "wgs", '
         b'"config_path": "%(case_dir)s/analysis/slurm_job_ids.yaml",'
         b' "order_id": 1, "out_dir": "%(case_dir)s/analysis", '
         b'"priority": "normal", "workflow": "MIP-DNA", "ticket": "%(ticket_id)s", '
         b'"workflow_manager": "slurm", "tower_workflow_id": null, "is_hidden": true}'
         % {
             b"case_id": case.internal_id.encode(),
+            b"email": email.encode(),
             b"ticket_id": str(ticket_id).encode(),
             b"case_dir": str(Path(mip_dna_path, "cases", case.internal_id)).encode(),
         },
@@ -205,6 +211,12 @@ def test_start_available_mip_dna(
         }
     )
 
+    # GIVEN the analysis can be started as a sub process
+    if test_command == "dev-start-available":
+        analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
+    else:
+        analysis_subprocess_mock = subprocess_mock
+
     # WHEN running mip-dna start-available
     result: Result = cli_runner.invoke(
         base,
@@ -213,8 +225,9 @@ def test_start_available_mip_dna(
             config_path.as_posix(),
             "workflow",
             "mip-dna",
-            "start-available",
+            test_command,
         ],
+        catch_exceptions=False,
     )
 
     # THEN a scout command is called to export panel beds
@@ -264,15 +277,28 @@ def test_start_available_mip_dna(
     )
 
     # THEN a MIP-DNA analysis is started with the expected parameters
-    subprocess_mock.run.assert_any_call(
+    expected_command = (
         f"{mip_dna_path}/conda_bin run --name S_mip12.1 "
         f"{mip_dna_path}/bin analyse rd_dna --config {mip_dna_path}/config/mip12.1-dna-stage.yaml "
-        f"{case.internal_id} --slurm_quality_of_service normal --email testuser@scilifelab.se",
-        check=False,
-        shell=True,
-        stdout=ANY,
-        stderr=ANY,
+        f"{case.internal_id} --slurm_quality_of_service normal --email {email}"
     )
+
+    if test_command == "dev-start-available":
+        analysis_subprocess_mock.run.assert_any_call(
+            args=expected_command,
+            check=True,  # FIXME this should always be False after merging PR #4585
+            shell=True,
+            stdout=ANY,
+            stderr=ANY,
+        )
+    else:
+        analysis_subprocess_mock.run.assert_any_call(
+            expected_command,
+            check=False,
+            shell=True,
+            stdout=ANY,
+            stderr=ANY,
+        )
 
     # THEN a successful exit code is returned
     assert result.exit_code == 0
@@ -284,11 +310,19 @@ def test_start_available_mip_dna(
     status_db.session.refresh(case)
     assert case.action == CaseActions.RUNNING
 
-    # THEN gene_panels and managed_variant files has been created
+    # THEN managed_variant and pedigree files has been created
     case_dir = Path(test_root_dir, "mip-dna", "cases", case.internal_id)
-    assert Path(case_dir, "gene_panels.bed").exists()
     assert Path(case_dir, "managed_variants.vcf").exists()
     assert Path(case_dir, "pedigree.yaml").exists()
+
+    # THEN the gene_panels file has been created with the correct contents
+    gene_panels_path = Path(case_dir, "gene_panels.bed")
+    expected_content: str = scout_export_panel_stdout.decode().removesuffix("\n")
+
+    assert gene_panels_path.exists()
+    with open(Path(case_dir, "gene_panels.bed")) as f:
+        gene_panels_content = f.read()
+        assert gene_panels_content == expected_content
 
 
 def create_qc_file(test_root_dir: Path, case: Case) -> Path:
