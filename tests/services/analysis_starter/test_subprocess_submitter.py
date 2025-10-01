@@ -52,7 +52,7 @@ def test_subprocess_submitter_submit(case_config: SubprocessCaseConfig, mocker: 
     mock_run.assert_called_once_with(
         args=case_config.get_start_command(),
         shell=True,
-        check=True,
+        check=False,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -88,7 +88,7 @@ def test_microsalt_get_workflow_version(mocker: MockerFixture):
     mock_run.assert_called_once_with(
         args=f"{case_config.conda_binary} run {case_config.binary} --version",
         shell=True,
-        check=True,
+        check=False,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )

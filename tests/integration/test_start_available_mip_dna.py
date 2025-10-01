@@ -286,7 +286,7 @@ def test_start_available_mip_dna(
     if test_command == "dev-start-available":
         analysis_subprocess_mock.run.assert_any_call(
             args=expected_command,
-            check=True,  # FIXME this should always be False after merging PR #4585
+            check=False,
             shell=True,
             stdout=ANY,
             stderr=ANY,
