@@ -116,6 +116,9 @@ def test_start_available(
     # THEN it should successfully identify the one case eligible for auto-start
     assert case_id in caplog.text
 
+    # THEN it logs how many cases will be started
+    assert f"Starting 1 available {workflow} cases" in caplog.text
+
     # THEN the case without enough reads should not start
     assert case_id_not_enough_reads not in caplog.text
 

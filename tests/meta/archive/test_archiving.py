@@ -23,12 +23,9 @@ from cg.meta.archive.ddn.models import MiriaObject, TransferPayload
 from cg.meta.archive.ddn.utils import get_metadata
 from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import DataFlowConfig
-from cg.store.store import Store
 
 
-def test_correct_source_root(
-    local_directory: Path, miria_file_archive: MiriaObject, trimmed_local_directory: Path
-):
+def test_correct_source_root(miria_file_archive: MiriaObject, trimmed_local_directory: Path):
     """Tests the method for trimming the source directory."""
 
     # GIVEN a MiriaObject with a source path and a destination path
@@ -319,10 +316,6 @@ def test_archive_file(
 
 def test_retrieve_files(
     ddn_dataflow_client: DDNDataFlowClient,
-    remote_storage_repository: str,
-    local_storage_repository: str,
-    archive_store: Store,
-    trimmed_local_path: str,
     file_and_sample: FileAndSample,
     ok_miria_response,
     retrieve_request_json,

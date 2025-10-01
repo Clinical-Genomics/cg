@@ -58,7 +58,7 @@ class HousekeeperAPI:
 
     def set_to_archive(self, file: File, value: bool) -> None:
         """Sets the 'to_archive' field of a file."""
-        file.to_archive: bool = value
+        file.to_archive = value
         self.commit()
 
     def new_file(
@@ -111,7 +111,7 @@ class HousekeeperAPI:
             tags=[self.get_tag(tag_name) for tag_name in tags],
         )
 
-        new_file.version: Version = version_obj
+        new_file.version = version_obj
         self._store.session.add(new_file)
         return new_file
 
@@ -402,6 +402,15 @@ class HousekeeperAPI:
         """Returns all archived_files from a given bundle, tagged with the given tags"""
         LOG.debug(f"Getting archived files for bundle {bundle_name}")
         return self._store.get_archived_files_for_bundle(bundle_name=bundle_name, tags=tags or [])
+
+    def get_archived_files_not_being_retrieved_for_bundle(
+        self, bundle_name: str, tags: list | None = None
+    ) -> list[File]:
+        """Returns archived files from a bundle, excluding files currently being retrieved."""
+        LOG.debug(f"Getting archived files which are not being retrieved for bundle {bundle_name}.")
+        return self._store.get_archived_files_for_bundle_excluding_ongoing_retrievals(
+            bundle_name=bundle_name, tags=tags or []
+        )
 
     def add_archives(self, files: list[File], archive_task_id: int) -> None:
         """Creates an archive object for the given files, and adds the archive task id to them."""
