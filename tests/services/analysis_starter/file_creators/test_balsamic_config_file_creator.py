@@ -4,6 +4,7 @@ from pytest_mock import MockerFixture
 
 import cg.services.analysis_starter.configurator.file_creators.balsamic_config as creator
 from cg.constants import SexOptions
+from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
 )
@@ -11,7 +12,7 @@ from cg.store.models import Application, ApplicationVersion, Case, Sample
 from cg.store.store import Store
 
 
-def test_create_wgs_tumor_only(mocker: MockerFixture):
+def test_create_wgs_tumor_only(balsamic_config: BalsamicConfig, mocker: MockerFixture):
     # GIVEN a case with one tumor WGS sample
     application: Application = create_autospec(Application, prep_category="wgs")
     application_version: ApplicationVersion = create_autospec(
@@ -30,8 +31,12 @@ def test_create_wgs_tumor_only(mocker: MockerFixture):
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id = Mock(return_value=wgs_tumor_only_case)
 
+    # GIVEN a Lims API
+
     # GIVEN a BalsamicConfigFileCreator
-    config_file_creator = BalsamicConfigFileCreator(store)
+    config_file_creator = BalsamicConfigFileCreator(
+        status_db=store, lims_api=Mock(), cg_balsamic_config=balsamic_config
+    )
 
     # GIVEN that the subprocess exits successfully
     mock_runner = mocker.patch.object(creator.subprocess, "run")
