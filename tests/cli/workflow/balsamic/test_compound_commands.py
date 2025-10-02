@@ -175,6 +175,9 @@ def test_start_available(
     # THEN command exits with a successful exit code
     assert result.exit_code == EXIT_SUCCESS
 
+    # THEN it logs how many cases will be started
+    assert "Starting 1 available Balsamic cases" in caplog.text
+
     # THEN it should successfully identify the one case eligible for auto-start
     assert f"Starting analysis for {case_id_success}" in caplog.text
 
