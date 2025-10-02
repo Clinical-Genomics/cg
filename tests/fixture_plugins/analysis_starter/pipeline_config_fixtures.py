@@ -73,6 +73,7 @@ def balsamic_config(tmp_path) -> BalsamicConfig:
         gens_coverage_female_path=tmp_path / "coverage_female.txt",
         gens_coverage_male_path=tmp_path / "coverage_male.txt",
         gnomad_af5_path=tmp_path / "gnomad_af5.vcf",
+        head_job_partition="head-jobs",
         loqusdb_path="mongodb://localhost:27017/loqusdb",
         loqusdb_artefact_snv=tmp_path / "artefact_snv.vcf",
         loqusdb_cancer_germline_snv=tmp_path / "cancer_germline_snv.vcf",

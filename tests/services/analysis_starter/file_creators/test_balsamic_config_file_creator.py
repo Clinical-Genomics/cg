@@ -1,5 +1,6 @@
 from unittest.mock import Mock, create_autospec
 
+import pytest
 from pytest_mock import MockerFixture
 
 import cg.services.analysis_starter.configurator.file_creators.balsamic_config as creator
@@ -12,7 +13,14 @@ from cg.store.models import Application, ApplicationVersion, Case, Sample
 from cg.store.store import Store
 
 
-def test_create_wgs_tumor_only(balsamic_config: BalsamicConfig, mocker: MockerFixture):
+@pytest.fixture
+def expected_wgs_paired_command(balsamic_config: BalsamicConfig) -> str:
+    return f"config case --analysis-dir {balsamic_config.root} --analysis-workflow balsamic --balsamic-cache hello --cadd-annotations /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/cg0 --artefact-sv-observations /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/cg0/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz --case-id balsamic_case_wgs_paired --fastq-path /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/balsamic0/balsamic_case_wgs_paired/fastq --gender female --genome-interval /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/cg0 --genome-version hg19 --gens-coverage-pon /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/cg0 --gnomad-min-af5 /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/cg0 --normal-sample-name sample_case_wgs_paired_normal --sentieon-install-dir /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/cg0 --sentieon-license 127.0.0.1:8080 --tumor-sample-name sample_case_wgs_paired_tumor"
+
+
+def test_create_wgs_tumor_only(
+    balsamic_config: BalsamicConfig, expected_wgs_paired_command: str, mocker: MockerFixture
+):
     # GIVEN a case with one tumor WGS sample
     application: Application = create_autospec(Application, prep_category="wgs")
     application_version: ApplicationVersion = create_autospec(
@@ -44,7 +52,7 @@ def test_create_wgs_tumor_only(balsamic_config: BalsamicConfig, mocker: MockerFi
     # WHEN creating the config file
     config_file_creator.create(case_id="case_1")
 
-    mock_runner.assert_called_once_with("?")
+    mock_runner.assert_called_once_with(args=expected_wgs_paired_command)
 
     # # THEN the correct normal sample name should be set
     # assert cli_input.normal_sample_name is None
