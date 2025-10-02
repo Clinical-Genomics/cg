@@ -67,6 +67,8 @@ balsamic:
   "loqusdb_cancer_somatic_sv": "{test_root_dir}/balsamic_loqusdb_path/artefact_snv"
   "loqusdb_clinical_snv": "{test_root_dir}/balsamic_loqusdb_path/artefact_snv"
   "loqusdb_clinical_sv": "{test_root_dir}/balsamic_loqusdb_path/artefact_snv"
+  "loqusdb_panel_files": 
+    "GMSmyeloid": "{test_root_dir}/myeloid_path.vcf"
   "sentieon_licence_server": "127.0.0.1:8080"
   "swegen_path": "{test_root_dir}/balsamic_swegen_path"
   "swegen_snv": "{test_root_dir}/swegen_snv"
