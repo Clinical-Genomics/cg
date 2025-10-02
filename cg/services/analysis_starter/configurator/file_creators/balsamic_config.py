@@ -3,10 +3,12 @@ import re
 import subprocess
 from pathlib import Path
 
+from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.constants import GenomeVersion
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError
+from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicConfigInput
 from cg.store.models import Case, Sample
 from cg.store.store import Store
@@ -16,8 +18,35 @@ LOG = logging.getLogger(__name__)
 
 class BalsamicConfigFileCreator:
 
-    def __init__(self, status_db: Store):
+    def __init__(self, cg_balsamic_config: BalsamicConfig, lims_api: LimsAPI, status_db: Store):
         self.status_db = status_db
+        self.root_dir = cg_balsamic_config.root
+        self.lims_api: LimsAPI = lims_api
+        self.conda_binary: Path = cg_balsamic_config.conda_binary
+        self.balsamic_binary: Path = cg_balsamic_config.binary_path
+        self.root_dir: Path = cg_balsamic_config.root
+        self.bed_directory: Path = cg_balsamic_config.bed_path
+        self.cache_dir: Path = cg_balsamic_config.balsamic_cache
+        self.cadd_path: Path = cg_balsamic_config.cadd_path
+        self.default_cluster_config: Path = cg_balsamic_config.cluster_config
+        self.genome_interval_path: Path = cg_balsamic_config.genome_interval_path
+        self.gens_coverage_female_path: Path = cg_balsamic_config.gens_coverage_female_path
+        self.gens_coverage_male_path: Path = cg_balsamic_config.gens_coverage_male_path
+        self.gnomad_af5_path: Path = cg_balsamic_config.gnomad_af5_path
+        self.environment: str = cg_balsamic_config.conda_env
+        self.sentieon_licence_path: Path = cg_balsamic_config.sentieon_licence_path
+        self.sentieon_licence_server: str = cg_balsamic_config.sentieon_licence_server
+        self.loqusdb_artefact_snv: Path = cg_balsamic_config.loqusdb_artefact_snv
+        self.loqusdb_cancer_germline_snv: Path = cg_balsamic_config.loqusdb_cancer_germline_snv
+        self.loqusdb_cancer_somatic_snv: Path = cg_balsamic_config.loqusdb_cancer_somatic_snv
+        self.loqusdb_cancer_somatic_sv: Path = cg_balsamic_config.loqusdb_cancer_somatic_sv
+        self.loqusdb_clinical_snv: Path = cg_balsamic_config.loqusdb_clinical_snv
+        self.loqusdb_clinical_sv: Path = cg_balsamic_config.loqusdb_clinical_sv
+        self.pon_directory: Path = cg_balsamic_config.pon_path
+        self.slurm_account: str = cg_balsamic_config.slurm.account
+        self.slurm_mail_user: str = cg_balsamic_config.slurm.mail_user
+        self.swegen_snv: Path = cg_balsamic_config.swegen_snv
+        self.swegen_sv: Path = cg_balsamic_config.swegen_sv
 
     def create(self, case_id: str, **flags) -> None:
         config_cli_input: BalsamicConfigInput = self._build_cli_input(case_id=case_id, **flags)
@@ -36,7 +65,9 @@ class BalsamicConfigFileCreator:
         )
 
     def _build_cli_input(self, case_id, **flags) -> BalsamicConfigInput:
-        case: Case = self.status_db.get_case_by_internal_id(case_id)
+        case: Case = self.status_db.get_case_by_internal_id(
+            case_id
+        )  # TODO use strict version when available
         if self._all_samples_are_wgs(case):
             return self._build_wgs_config(case)
         else:
