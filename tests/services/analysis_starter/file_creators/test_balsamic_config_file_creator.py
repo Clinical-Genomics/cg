@@ -31,13 +31,13 @@ def test_create_wgs_tumor_only(mocker: MockerFixture):
     store.get_case_by_internal_id = Mock(return_value=wgs_tumor_only_case)
 
     # GIVEN a BalsamicConfigFileCreator
-    config_file_creator = BalsamicConfigFileCreator()
+    config_file_creator = BalsamicConfigFileCreator(store)
 
     # GIVEN that the subprocess exits successfully
     mock_runner = mocker.patch.object(creator.subprocess, "run")
 
     # WHEN creating the config file
-    config_file_creator.create()
+    config_file_creator.create(case_id="case_1")
 
     mock_runner.assert_called_once_with("?")
 

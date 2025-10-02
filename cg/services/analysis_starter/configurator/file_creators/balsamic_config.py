@@ -9,17 +9,22 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicConfigInput
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
 
 class BalsamicConfigFileCreator:
 
-    def create(self):
-        pass
+    def __init__(self, status_db: Store):
+        self.status_db = status_db
+
+    def create(self, case_id: str, **flags) -> None:
+        config_cli_input: BalsamicConfigInput = self._build_cli_input(case_id=case_id, **flags)
+        self._create_config_file(config_cli_input)
 
     @staticmethod
-    def create_config_file(config_cli_input: BalsamicConfigInput) -> None:
+    def _create_config_file(config_cli_input: BalsamicConfigInput) -> None:
         final_command: str = config_cli_input.dump_to_cli()
         LOG.debug(f"Running: {final_command}")
         subprocess.run(
@@ -31,7 +36,7 @@ class BalsamicConfigFileCreator:
         )
 
     def _build_cli_input(self, case_id, **flags) -> BalsamicConfigInput:
-        case: Case = self.store.get_case_by_internal_id(case_id)
+        case: Case = self.status_db.get_case_by_internal_id(case_id)
         if self._all_samples_are_wgs(case):
             return self._build_wgs_config(case)
         else:
@@ -138,7 +143,7 @@ class BalsamicConfigFileCreator:
 
     def _resolve_bed_file(self, case, **flags) -> Path:
         bed_name = flags.get("panel_bed") or self._get_bed_name_from_lims(case)
-        if db_bed := self.store.get_bed_version_by_short_name(bed_name):
+        if db_bed := self.status_db.get_bed_version_by_short_name(bed_name):
             return Path(self.bed_directory, db_bed.filename)
         raise BedFileNotFoundError(f"No Bed file found for with provided name {bed_name}.")
 
