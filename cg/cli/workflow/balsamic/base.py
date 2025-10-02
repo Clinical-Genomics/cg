@@ -1,6 +1,7 @@
 """CLI support to create config and/or start BALSAMIC."""
 
 import logging
+import traceback
 from typing import cast
 
 import rich_click as click
@@ -10,13 +11,13 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.balsamic.options import (
     OPTION_CACHE_VERSION,
-    OPTION_CLUSTER_CONFIG,
     OPTION_GENDER,
     OPTION_GENOME_VERSION,
     OPTION_OBSERVATIONS,
     OPTION_PANEL_BED,
     OPTION_PON_CNN,
     OPTION_QOS,
+    OPTION_WORKFLOW_PROFILE,
 )
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
 from cg.cli.workflow.utils import validate_force_store_option
@@ -30,6 +31,7 @@ from cg.services.analysis_starter.configurator.implementations.balsamic import B
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.service import AnalysisStarter
+from cg.store.models import Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -87,23 +89,25 @@ def config_case(
             dry_run=dry_run,
         )
     except CgError as error:
-        LOG.error(f"Could not create config: {error}")
+        error_info = f"Error: {type(error).__name__}: {str(error)}\n{traceback.format_exc()}"
+        LOG.error(f"Could not create config: {error_info}")
         raise click.Abort()
     except Exception as error:
-        LOG.error(f"Could not create config: {error}")
+        error_info = f"Error: {type(error).__name__}: {str(error)}\n{traceback.format_exc()}"
+        LOG.error(f"Could not create config: {error_info}")
         raise click.Abort()
 
 
 @balsamic.command("run")
 @ARGUMENT_CASE_ID
-@OPTION_CLUSTER_CONFIG
+@OPTION_WORKFLOW_PROFILE
 @DRY_RUN
 @OPTION_QOS
 @click.pass_obj
 def run(
     context: CGConfig,
     case_id: str,
-    cluster_config: click.Path,
+    workflow_profile: click.Path,
     slurm_quality_of_service: str,
     dry_run: bool,
 ):
@@ -115,7 +119,7 @@ def run(
         analysis_api.check_analysis_ongoing(case_id)
         analysis_api.run_analysis(
             case_id=case_id,
-            cluster_config=cluster_config,
+            workflow_profile=workflow_profile,
             slurm_quality_of_service=slurm_quality_of_service,
             dry_run=dry_run,
         )
@@ -123,7 +127,8 @@ def run(
             return
         analysis_api.on_analysis_started(case_id)
     except Exception as error:
-        LOG.error(f"Could not run analysis: {error}")
+        error_info = f"Error: {type(error).__name__}: {str(error)}\n{traceback.format_exc()}"
+        LOG.error(f"Could not run analysis: {error_info}")
         raise click.Abort()
 
 
@@ -199,7 +204,7 @@ def store_housekeeper(
 @OPTION_PON_CNN
 @OPTION_CACHE_VERSION
 @OPTION_OBSERVATIONS
-@OPTION_CLUSTER_CONFIG
+@OPTION_WORKFLOW_PROFILE
 @click.pass_context
 def start(
     context: click.Context,
@@ -211,7 +216,7 @@ def start(
     pon_cnn: str,
     observations: list[click.Path],
     slurm_quality_of_service: str,
-    cluster_config: click.Path,
+    workflow_profile: click.Path,
     dry_run: bool,
 ):
     """Start full workflow for case ID."""
@@ -233,7 +238,7 @@ def start(
     context.invoke(
         run,
         case_id=case_id,
-        cluster_config=cluster_config,
+        workflow_profile=workflow_profile,
         slurm_quality_of_service=slurm_quality_of_service,
         dry_run=dry_run,
     )
@@ -248,8 +253,11 @@ def start_available(context: click.Context, dry_run: bool = False, limit: int | 
 
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
+    cases: list[Case] = analysis_api.get_cases_to_analyze(limit=limit)
+    LOG.info(f"Starting {len(cases)} available Balsamic cases")
+
     exit_code: int = EXIT_SUCCESS
-    for case in analysis_api.get_cases_to_analyze(limit=limit):
+    for case in cases:
         try:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:
@@ -300,7 +308,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 
 @balsamic.command("dev-start")
 @OPTION_PANEL_BED
-@OPTION_CLUSTER_CONFIG
+@OPTION_WORKFLOW_PROFILE
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def dev_start(
@@ -339,7 +347,7 @@ def dev_config_case(cg_config: CGConfig, case_id: str, panel_bed: str | None):
 
 
 @balsamic.command()
-@OPTION_CLUSTER_CONFIG
+@OPTION_WORKFLOW_PROFILE
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def dev_run(cg_config: CGConfig, case_id: str, cluster_config: click.Path | None):

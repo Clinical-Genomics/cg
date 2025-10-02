@@ -152,24 +152,6 @@ class MipConfigBuilder(ScoutConfigBuilder):
                 hk_version=hk_version,
             )
         )
-        config_sample.reviewer.alignment = self.get_sample_file(
-            hk_tags=self.sample_tags.reviewer_alignment,
-            sample_id=sample_id,
-            hk_version=hk_version,
-        )
-        config_sample.reviewer.alignment_index = self.get_sample_file(
-            hk_tags=self.sample_tags.reviewer_alignment_index,
-            sample_id=sample_id,
-            hk_version=hk_version,
-        )
-        config_sample.reviewer.vcf = self.get_sample_file(
-            hk_tags=self.sample_tags.reviewer_vcf,
-            sample_id=sample_id,
-            hk_version=hk_version,
-        )
-        config_sample.reviewer.catalog = self.get_file_from_hk(
-            hk_tags=self.case_tags.str_catalog, hk_version=hk_version
-        )
         config_sample.mitodel_file = self.get_sample_file(
             hk_tags=self.sample_tags.mitodel_file,
             sample_id=sample_id,
@@ -184,3 +166,4 @@ class MipConfigBuilder(ScoutConfigBuilder):
         config_sample.upd_sites_bed = self.get_sample_file(
             hk_tags=self.sample_tags.upd_sites_bed, hk_version=hk_version, sample_id=sample_id
         )
+        self.include_reviewer_files(config_sample=config_sample, hk_version=hk_version)
