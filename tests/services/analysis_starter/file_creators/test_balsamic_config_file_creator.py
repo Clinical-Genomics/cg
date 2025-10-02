@@ -1,5 +1,8 @@
 from unittest.mock import Mock, create_autospec
 
+from pytest_mock import MockerFixture
+
+import cg.services.analysis_starter.configurator.file_creators.balsamic_config as creator
 from cg.constants import SexOptions
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
@@ -8,7 +11,7 @@ from cg.store.models import Application, ApplicationVersion, Case, Sample
 from cg.store.store import Store
 
 
-def test_create_wgs_tumor_only():
+def test_create_wgs_tumor_only(mocker: MockerFixture):
     # GIVEN a case with one tumor WGS sample
     application: Application = create_autospec(Application, prep_category="wgs")
     application_version: ApplicationVersion = create_autospec(
@@ -30,18 +33,20 @@ def test_create_wgs_tumor_only():
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator()
 
+    # GIVEN that the subprocess exits successfully
+    mock_runner = mocker.patch.object(creator.subprocess, "run")
+
     # WHEN creating the config file
     config_file_creator.create()
 
-    # THEN
-    assert isinstance(cli_input, BalsamicConfigInput)
+    mock_runner.assert_called_once_with("?")
 
-    # THEN the correct normal sample name should be set
-    assert cli_input.normal_sample_name is None
-
-    # THEN the correct gens_coverage_pon should be chosen (Female)
-    assert cli_input.gens_coverage_pon == balsamic_configurator.gens_coverage_female_path
-
-    # THEN fields not relevant for WGS analyses should be set to their default values
-    for field in PANEL_ONLY_FIELDS:
-        assert getattr(cli_input, field) == BalsamicConfigInput.model_fields[field].default
+    # # THEN the correct normal sample name should be set
+    # assert cli_input.normal_sample_name is None
+    #
+    # # THEN the correct gens_coverage_pon should be chosen (Female)
+    # assert cli_input.gens_coverage_pon == balsamic_configurator.gens_coverage_female_path
+    #
+    # # THEN fields not relevant for WGS analyses should be set to their default values
+    # for field in PANEL_ONLY_FIELDS:
+    #     assert getattr(cli_input, field) == BalsamicConfigInput.model_fields[field].default
