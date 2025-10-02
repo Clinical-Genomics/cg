@@ -3,7 +3,9 @@ from pathlib import Path
 from unittest.mock import ANY
 
 import pytest
-from click.testing import CliRunner
+from _pytest.logging import LogCaptureFixture
+from click.testing import CliRunner, Result
+from pytest_mock import MockerFixture
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
@@ -53,6 +55,44 @@ def test_start(
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
     assert case_id in caplog.text
+
+
+def test_workflow_profile_option(
+    cli_runner: CliRunner,
+    balsamic_context: CGConfig,
+    caplog: LogCaptureFixture,
+    tmp_path: Path,
+    mock_analysis_illumina_run,
+    mocker: MockerFixture,
+):
+    """Test start command with workflow-profile option."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN valid case-id
+    case_id = "balsamic_case_wgs_single"
+
+    # GIVEN that the workflow-profile path exists
+    workflow_profile = Path(tmp_path, "workflow_profile")
+    workflow_profile.mkdir(parents=True, exist_ok=True)
+
+    # WHEN dry running with the workflow-profile option specified and config case already exists
+    mocker.patch.object(BalsamicAnalysisAPI, "config_case", return_value=None)
+    result: Result = cli_runner.invoke(
+        start,
+        [
+            case_id,
+            "--dry-run",
+            "--workflow-profile",
+            workflow_profile.as_posix(),
+        ],
+        obj=balsamic_context,
+    )
+
+    # THEN command should execute successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN the workflow-profile option should be included in the run command
+    assert f"--workflow-profile {workflow_profile.as_posix()}" in caplog.text
 
 
 @pytest.mark.usefixtures("mock_config", "mock_deliverable")
@@ -134,6 +174,9 @@ def test_start_available(
 
     # THEN command exits with a successful exit code
     assert result.exit_code == EXIT_SUCCESS
+
+    # THEN it logs how many cases will be started
+    assert "Starting 1 available Balsamic cases" in caplog.text
 
     # THEN it should successfully identify the one case eligible for auto-start
     assert f"Starting analysis for {case_id_success}" in caplog.text

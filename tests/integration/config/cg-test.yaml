@@ -55,6 +55,7 @@ balsamic:
   gens_coverage_female_path: "{test_root_dir}/balsamic_gens_coverage_female_path"
   gens_coverage_male_path: "{test_root_dir}/balsamic_gens_coverage_male_path"
   gnomad_af5_path: "{test_root_dir}/balsamic_gnomad_af5_path"
+  head_job_partition: "head-jobs"
   loqusdb_path: "{test_root_dir}/balsamic_loqusdb_path"
   pon_path: "{test_root_dir}/balsamic_pon_path"
   root: "{test_root_dir}/balsamic_root_path"
@@ -67,13 +68,13 @@ balsamic:
   "loqusdb_cancer_somatic_sv": "{test_root_dir}/balsamic_loqusdb_path/artefact_snv"
   "loqusdb_clinical_snv": "{test_root_dir}/balsamic_loqusdb_path/artefact_snv"
   "loqusdb_clinical_sv": "{test_root_dir}/balsamic_loqusdb_path/artefact_snv"
-  "loqusdb_panel_files": 
+  "loqusdb_panel_files":
     "GMSmyeloid": "{test_root_dir}/myeloid_path.vcf"
   "sentieon_licence_server": "127.0.0.1:8080"
   "swegen_path": "{test_root_dir}/balsamic_swegen_path"
   "swegen_snv": "{test_root_dir}/swegen_snv"
   "swegen_sv": "{test_root_dir}/swegen_sv"
-  slurm: 
+  slurm:
     account: "balsamic_slurm_account"
     mail_user: "balsamic_mail_user@scilifelab.se"
     qos: "low"

@@ -2,16 +2,25 @@
 
 from pathlib import Path
 from typing import Any
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 
-from cg.constants import Workflow
+from cg.apps.coverage import ChanjoAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.lims import LimsAPI
+from cg.apps.scout.scoutapi import ScoutAPI
+from cg.constants import CancerAnalysisType, DataDelivery, Workflow
 from cg.exc import DeliveryReportError
+from cg.meta.delivery.delivery import DeliveryAPI
+from cg.meta.delivery_report.balsamic import BalsamicDeliveryReportAPI
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.analysis import AnalysisModel
+from cg.models.balsamic.analysis import BalsamicAnalysis
+from cg.models.delivery.delivery import DeliveryFile
 from cg.models.delivery_report.metadata import SampleMetadataModel
 from cg.models.delivery_report.report import (
     CaseModel,
@@ -25,7 +34,13 @@ from cg.models.delivery_report.sample import (
     SampleModel,
     TimestampModel,
 )
-from cg.store.models import Analysis, Case, Sample
+from cg.models.orders.sample_base import SexEnum
+from cg.store.models import Analysis, Case, CaseSample, Sample
+from cg.store.store import Store
+from tests.meta.delivery_report.conftest import (
+    EXPECTED_BALSAMIC_QC_TABLE_TGA,
+    EXPECTED_BALSAMIC_QC_TABLE_WGS,
+)
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
@@ -56,6 +71,216 @@ def test_get_delivery_report_html(request: FixtureRequest, workflow: Workflow):
     # THEN it should generate a valid HTML string
     assert delivery_report_html
     assert "<!DOCTYPE html>" in delivery_report_html
+
+
+def test_get_delivery_report_html_balsamic_tga(balsamic_tga_analysis: BalsamicAnalysis):
+    # GIVEN a store with a BALSAMIC TGA case linked to a sample
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id = Mock(
+        return_value=create_autospec(
+            Case,
+            data_analysis=Workflow.BALSAMIC,
+            data_delivery=DataDelivery.ANALYSIS_FILES,
+            internal_id="case_id",
+            panels=["some_panel"],
+        )
+    )
+    sample: Sample = create_autospec(
+        Sample, sex=SexEnum.male, is_tumour=True, internal_id="sample_id"
+    )
+    sample.name = "sample_name"
+    store.get_case_samples_by_case_id = Mock(
+        return_value=[create_autospec(CaseSample, sample=sample)]
+    )
+
+    # GIVEN a Delivery API
+    delivery_api: DeliveryAPI = create_autospec(DeliveryAPI)
+    delivery_api.is_analysis_delivery = Mock(return_value=True)
+    delivery_api.get_analysis_case_delivery_files = Mock(
+        return_value=[
+            create_autospec(
+                DeliveryFile, destination_path=Path("destination"), source_path=Path("source")
+            )
+        ]
+    )
+
+    # GIVEN a LIMS API
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.has_sample_passed_initial_qc = Mock(return_value=True)
+
+    # GIVEN a Balsamic Analysis API
+    analysis_api = create_autospec(
+        BalsamicAnalysisAPI,
+        chanjo_api=create_autospec(ChanjoAPI),
+        delivery_api=delivery_api,
+        housekeeper_api=create_autospec(HousekeeperAPI),
+        lims_api=lims_api,
+        scout_api=create_autospec(ScoutAPI),
+        status_db=store,
+        workflow=Workflow.BALSAMIC,
+    )
+    analysis_api.get_genome_build = Mock(return_value="some_genome_build")
+    analysis_api.get_pons = Mock(return_value=["some_pon"])
+    analysis_api.get_data_analysis_type = Mock(return_value=CancerAnalysisType.TUMOR_PANEL)
+    analysis_api.get_variant_callers = Mock(return_value=["some_variant_caller"])
+    analysis_api.get_latest_metadata = Mock(return_value=balsamic_tga_analysis)
+
+    # GIVEN a Balsamic delivery report API
+    delivery_report_api = BalsamicDeliveryReportAPI(analysis_api)
+
+    # WHEN we generate a delivery report
+    delivery_report: str = delivery_report_api.get_delivery_report_html(
+        analysis=create_autospec(
+            Analysis, comment="some comment", workflow=Workflow.BALSAMIC, workflow_version="18.0.0"
+        ),
+        force=False,
+    )
+
+    # THEN the QC table should be present in the HTML content
+    assert EXPECTED_BALSAMIC_QC_TABLE_TGA in delivery_report
+
+
+def test_get_delivery_report_html_balsamic_wgs(balsamic_wgs_analysis: BalsamicAnalysis):
+    # GIVEN a store with a BALSAMIC WGS case linked to a sample
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id = Mock(
+        return_value=create_autospec(
+            Case,
+            data_analysis=Workflow.BALSAMIC,
+            data_delivery=DataDelivery.ANALYSIS_FILES,
+            internal_id="case_id",
+        )
+    )
+    sample: Sample = create_autospec(
+        Sample, sex=SexEnum.male, is_tumour=True, internal_id="sample_id"
+    )
+    sample.name = "sample_name"
+    store.get_case_samples_by_case_id = Mock(
+        return_value=[create_autospec(CaseSample, sample=sample)]
+    )
+
+    # GIVEN a Delivery API
+    delivery_api: DeliveryAPI = create_autospec(DeliveryAPI)
+    delivery_api.is_analysis_delivery = Mock(return_value=True)
+    delivery_api.get_analysis_case_delivery_files = Mock(
+        return_value=[
+            create_autospec(
+                DeliveryFile, destination_path=Path("destination"), source_path=Path("source")
+            )
+        ]
+    )
+
+    # GIVEN a LIMS API
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.has_sample_passed_initial_qc = Mock(return_value=True)
+
+    # GIVEN a Balsamic Analysis API
+    analysis_api = create_autospec(
+        BalsamicAnalysisAPI,
+        chanjo_api=create_autospec(ChanjoAPI),
+        delivery_api=delivery_api,
+        housekeeper_api=create_autospec(HousekeeperAPI),
+        lims_api=lims_api,
+        scout_api=create_autospec(ScoutAPI),
+        status_db=store,
+        workflow=Workflow.BALSAMIC,
+    )
+    analysis_api.get_genome_build = Mock(return_value="some_genome_build")
+    analysis_api.get_pons = Mock(return_value=["some_pon"])
+    analysis_api.get_data_analysis_type = Mock(return_value=CancerAnalysisType.TUMOR_NORMAL_WGS)
+    analysis_api.get_variant_callers = Mock(return_value=["some_variant_caller"])
+    analysis_api.get_latest_metadata = Mock(return_value=balsamic_wgs_analysis)
+
+    # GIVEN a Balsamic delivery report API
+    delivery_report_api = BalsamicDeliveryReportAPI(analysis_api)
+
+    # WHEN we generate a delivery report
+    delivery_report: str = delivery_report_api.get_delivery_report_html(
+        analysis=create_autospec(
+            Analysis, comment="some comment", workflow=Workflow.BALSAMIC, workflow_version="18.0.0"
+        ),
+        force=False,
+    )
+
+    # THEN the QC table should be present in the HTML content
+    assert EXPECTED_BALSAMIC_QC_TABLE_WGS in delivery_report
+
+
+def test_get_delivery_report_html_balsamic_wgs_no_predicted_sex(
+    balsamic_wgs_analysis_without_predicted_sex: BalsamicAnalysis, caplog: LogCaptureFixture
+):
+    caplog.set_level("INFO")
+
+    # GIVEN a store with a BALSAMIC WGS case linked to a sample
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id = Mock(
+        return_value=create_autospec(
+            Case,
+            data_analysis=Workflow.BALSAMIC,
+            data_delivery=DataDelivery.ANALYSIS_FILES,
+            internal_id="case_id",
+        )
+    )
+    sample: Sample = create_autospec(
+        Sample, sex=SexEnum.male, is_tumour=True, internal_id="sample_id"
+    )
+    sample.name = "sample_name"
+    store.get_case_samples_by_case_id = Mock(
+        return_value=[create_autospec(CaseSample, sample=sample)]
+    )
+
+    # GIVEN a Delivery API
+    delivery_api: DeliveryAPI = create_autospec(DeliveryAPI)
+    delivery_api.is_analysis_delivery = Mock(return_value=True)
+    delivery_api.get_analysis_case_delivery_files = Mock(
+        return_value=[
+            create_autospec(
+                DeliveryFile, destination_path=Path("destination"), source_path=Path("source")
+            )
+        ]
+    )
+
+    # GIVEN a LIMS API
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.has_sample_passed_initial_qc = Mock(return_value=True)
+
+    # GIVEN a Balsamic Analysis API
+    analysis_api = create_autospec(
+        BalsamicAnalysisAPI,
+        chanjo_api=create_autospec(ChanjoAPI),
+        delivery_api=delivery_api,
+        housekeeper_api=create_autospec(HousekeeperAPI),
+        lims_api=lims_api,
+        scout_api=create_autospec(ScoutAPI),
+        status_db=store,
+        workflow=Workflow.BALSAMIC,
+    )
+    analysis_api.get_genome_build = Mock(return_value="some_genome_build")
+    analysis_api.get_pons = Mock(return_value=["some_pon"])
+    analysis_api.get_data_analysis_type = Mock(return_value=CancerAnalysisType.TUMOR_NORMAL_WGS)
+    analysis_api.get_variant_callers = Mock(return_value=["some_variant_caller"])
+    analysis_api.get_latest_metadata = Mock(
+        return_value=balsamic_wgs_analysis_without_predicted_sex
+    )
+
+    # GIVEN a Balsamic delivery report API
+    delivery_report_api = BalsamicDeliveryReportAPI(analysis_api)
+
+    # WHEN we generate a delivery report
+    # THEN a DeliveryReportError should be raised
+    with pytest.raises(DeliveryReportError):
+        delivery_report_api.get_delivery_report_html(
+            analysis=create_autospec(
+                Analysis,
+                comment="some comment",
+                workflow=Workflow.BALSAMIC,
+                workflow_version="18.0.0",
+            ),
+            force=False,
+        )
+
+    # THEN the stdout informs about predicted sex being missing as required field
+    assert "- predicted_sex" in caplog.text
 
 
 @pytest.mark.parametrize("workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION])
