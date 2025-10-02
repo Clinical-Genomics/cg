@@ -197,6 +197,9 @@ class BalsamicConfig(CommonAppConfig):
     loqusdb_cancer_somatic_sv: Path
     loqusdb_clinical_snv: Path
     loqusdb_clinical_sv: Path
+    # TODO add the WGS loqusdb dump file
+    # TODO try the str in the dict to be a BalsamicObservation Panel enum
+    loqusdb_panel_files: dict[str, Path]  # Includes the Exome file
     pon_path: Path
     root: Path
     sentieon_licence_path: Path
