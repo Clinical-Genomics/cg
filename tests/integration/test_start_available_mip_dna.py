@@ -326,9 +326,26 @@ def test_start_available_mip_dna(
     status_db.session.refresh(case)
     assert case.action == CaseActions.RUNNING
 
-    # THEN managed_variant and pedigree files has been created
+    # THEN the pedigree file has been created with the correct contents
     case_dir = Path(test_root_dir, "mip-dna", "cases", case.internal_id)
-    assert Path(case_dir, "pedigree.yaml").exists()
+
+    expected_pedigree_content: str = f"""---
+case: {case.internal_id}
+default_gene_panels:
+- panel_test
+samples:
+- analysis_type: wgs
+  capture_kit: twistexomecomprehensive_10.2_hg19_design.bed
+  expected_coverage: 30
+  father: '0'
+  mother: '0'
+  phenotype: unaffected
+  sample_display_name: sample_test
+  sample_id: {sample.internal_id}
+  sex: female
+"""
+    with open(Path(case_dir, "pedigree.yaml")) as f:
+        assert f.read() == expected_pedigree_content
 
     # THEN the managed_variants file has been created with the correct contents
     expected_managed_variants_content: str = scout_export_manged_variants_stdout.decode()
