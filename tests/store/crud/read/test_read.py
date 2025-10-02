@@ -1,7 +1,7 @@
 import logging
-from datetime import datetime
 
 import pytest
+from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability
@@ -376,6 +376,44 @@ def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name
 
     # THEN return a bed version with the supplied bed version short name
     assert bed_version.shortname == bed_version_short_name
+
+
+def test_get_bed_version_by_short_name_strict_fail(base_store: Store):
+    # GIVEN a store
+
+    # GIVEN a bed version shortname that does not exist
+    short_name = "fake_short_name"
+
+    # WHEN fetching the bed version
+    # THEN an error is raised
+    with pytest.raises(NoResultFound):
+        base_store.get_bed_version_by_short_name_strict(bed_version_short_name=short_name)
+
+
+def test_get_bed_version_by_short_name_strict_mutiple_fail(base_store: Store):
+    # GIVEN a store that contains two bed versions with the same short name
+    bed: Bed = base_store.add_bed(name="bed")
+    base_store.add_bed_version(bed=bed, version=1, filename="one.txt", shortname="short_name")
+    base_store.add_bed_version(bed=bed, version=2, filename="two.txt", shortname="short_name")
+    base_store.add_item_to_store(bed)
+    base_store.commit_to_store()
+
+    # WHEN fetching the bed version corresponding to the shortname
+    # THEN an error is raised
+    with pytest.raises(MultipleResultsFound):
+        base_store.get_bed_version_by_short_name_strict(bed_version_short_name="short_name")
+
+
+def test_get_bed_version_by_short_name_strict_success(base_store: Store):
+    # GIVEN a store that contains one bed version
+    bed: Bed = base_store.add_bed(name="bed")
+    base_store.add_bed_version(bed=bed, version=1, filename="one.txt", shortname="short_name")
+    base_store.add_item_to_store(bed)
+    base_store.commit_to_store()
+
+    # WHEN fetching the bed version corresponding to the shortname
+    # THEN success
+    base_store.get_bed_version_by_short_name_strict(bed_version_short_name="short_name")
 
 
 def test_get_customer_by_internal_id(base_store: Store, customer_id: str):
