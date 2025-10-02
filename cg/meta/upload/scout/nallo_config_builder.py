@@ -112,3 +112,16 @@ class NalloConfigBuilder(ScoutConfigBuilder):
             sample_id=sample_id,
             hk_version=hk_version,
         )
+        self.include_reviewer_files(config_sample=config_sample, hk_version=hk_version)
+        config_sample.reviewer.trgt = (
+            True
+            if any(
+                [
+                    config_sample.reviewer.alignment,
+                    config_sample.reviewer.alignment_index,
+                    config_sample.reviewer.vcf,
+                    config_sample.reviewer.catalog,
+                ]
+            )
+            else None
+        )
