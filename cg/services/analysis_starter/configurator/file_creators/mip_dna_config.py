@@ -45,7 +45,7 @@ class MIPDNAConfigFileCreator:
 
         phenotype = case_sample.status
         if len(case.links) == 1 and case_sample.status == StatusOptions.UNKNOWN:
-            phenotype = StatusOptions.UNAFFECTED
+            phenotype = StatusOptions.UNAFFECTED.value
 
         return {
             "analysis_type": sample.prep_category,
@@ -53,7 +53,7 @@ class MIPDNAConfigFileCreator:
             "expected_coverage": sample.application_version.application.min_sequencing_depth,
             "father": father,
             "mother": mother,
-            "phenotype": phenotype.value,  # YAML serialisation does not handle Enums properly
+            "phenotype": phenotype,
             "sample_display_name": sample.name,
             "sample_id": sample.internal_id,
             "sex": sample.sex,
