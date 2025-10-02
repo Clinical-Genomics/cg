@@ -81,6 +81,19 @@ def scout_export_panel_stdout() -> bytes:
     return b"22\t26995242\t27014052\t2397\tCRYBB1\n22\t38452318\t38471708\t9394\tPICK1\n"
 
 
+@pytest.fixture
+def scout_export_manged_variants_stdout() -> bytes:
+    return b"""##fileformat=VCFv4.2
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+##fileDate=2023-12-07 16:35:38.814086
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=TYPE,Number=1,Type=String,Description="Type of variant">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	48696925	.	G	C	.		END=48696925;TYPE=SNV
+14	76548781	.	CTGGACC	G	.		END=76548781;TYPE=INDEL"""
+
+
 @pytest.mark.xdist_group(name="integration")
 @pytest.mark.parametrize(
     "test_command",
@@ -95,6 +108,7 @@ def test_start_available_mip_dna(
     httpserver: HTTPServer,
     mocker: MockerFixture,
     scout_export_panel_stdout: bytes,
+    scout_export_manged_variants_stdout: bytes,
     status_db_uri: str,
     status_db: Store,
     tmp_path_factory: TempPathFactory,
@@ -174,6 +188,8 @@ def test_start_available_mip_dna(
 
         if ("export" in command) and ("panel" in command):
             stdout += scout_export_panel_stdout
+        elif ("export" in command) and ("managed" in command):
+            stdout += scout_export_manged_variants_stdout
         return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
 
     subprocess_mock.run = Mock(side_effect=mock_run)
@@ -310,19 +326,36 @@ def test_start_available_mip_dna(
     status_db.session.refresh(case)
     assert case.action == CaseActions.RUNNING
 
-    # THEN managed_variant and pedigree files has been created
+    # THEN the pedigree file has been created with the correct contents
     case_dir = Path(test_root_dir, "mip-dna", "cases", case.internal_id)
-    assert Path(case_dir, "managed_variants.vcf").exists()
-    assert Path(case_dir, "pedigree.yaml").exists()
+
+    expected_pedigree_content: str = f"""---
+case: {case.internal_id}
+default_gene_panels:
+- panel_test
+samples:
+- analysis_type: wgs
+  capture_kit: twistexomecomprehensive_10.2_hg19_design.bed
+  expected_coverage: 30
+  father: '0'
+  mother: '0'
+  phenotype: unaffected
+  sample_display_name: sample_test
+  sample_id: {sample.internal_id}
+  sex: female
+"""
+    with open(Path(case_dir, "pedigree.yaml")) as f:
+        assert f.read() == expected_pedigree_content
+
+    # THEN the managed_variants file has been created with the correct contents
+    expected_managed_variants_content: str = scout_export_manged_variants_stdout.decode()
+    with open(Path(case_dir, "managed_variants.vcf")) as f:
+        assert f.read() == expected_managed_variants_content
 
     # THEN the gene_panels file has been created with the correct contents
-    gene_panels_path = Path(case_dir, "gene_panels.bed")
-    expected_content: str = scout_export_panel_stdout.decode().removesuffix("\n")
-
-    assert gene_panels_path.exists()
+    expected_gene_panels_content: str = scout_export_panel_stdout.decode().removesuffix("\n")
     with open(Path(case_dir, "gene_panels.bed")) as f:
-        gene_panels_content = f.read()
-        assert gene_panels_content == expected_content
+        assert f.read() == expected_gene_panels_content
 
 
 def create_qc_file(test_root_dir: Path, case: Case) -> Path:
