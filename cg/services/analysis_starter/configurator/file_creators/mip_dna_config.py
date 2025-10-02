@@ -53,7 +53,7 @@ class MIPDNAConfigFileCreator:
             "expected_coverage": sample.application_version.application.min_sequencing_depth,
             "father": father,
             "mother": mother,
-            "phenotype": phenotype,
+            "phenotype": phenotype.value,  # YAML serialisation does not handle Enums properly
             "sample_display_name": sample.name,
             "sample_id": sample.internal_id,
             "sex": sample.sex,

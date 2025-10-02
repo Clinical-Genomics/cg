@@ -45,7 +45,7 @@ def test_managed_variants_content(
     """Test that the managed variants file content is created correctly."""
 
     # GIVEN a mocked write_txt
-    mocked_write_txt = mocker.patch.object(managed_variants, "write_txt")
+    mocked_write_txt = mocker.patch.object(managed_variants, "write_txt_with_newlines")
 
     # WHEN creating a managed variants file
     managed_variants_creator.create(case_id="case_id", file_path=Path("managed_variants.vcf"))
