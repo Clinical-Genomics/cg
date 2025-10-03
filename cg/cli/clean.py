@@ -173,7 +173,7 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
 @clean.command("illumina-runs")
 @DRY_RUN
 @click.option(
-    "--day_threshold", type=int, required=True, help="Number of days before a run can be deleted."
+    "--day-threshold", type=int, required=True, help="Number of days before a run can be deleted."
 )
 @click.pass_obj
 def clean_illumina_runs(context: CGConfig, day_threshold: int, dry_run: bool):

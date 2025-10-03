@@ -40,7 +40,7 @@ def test_clean_illumina_runs_cmd(
     ):
         result = cli_runner.invoke(
             clean_illumina_runs,
-            args=["--day_threshold", "7"],
+            args=["--day-threshold", "7"],
             obj=clean_illumina_sequencing_runs_context,
         )
 
@@ -76,7 +76,7 @@ def test_clean_illumina_runs_cmd_dry_run(
     ):
         result = cli_runner.invoke(
             clean_illumina_runs,
-            ["--dry-run", "--day_threshold", "7"],
+            ["--dry-run", "--day-threshold", "7"],
             obj=clean_illumina_sequencing_runs_context,
         )
 
