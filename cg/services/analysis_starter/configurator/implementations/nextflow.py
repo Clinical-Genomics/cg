@@ -118,7 +118,9 @@ class NextflowConfigurator(Configurator):
         config_file_path = Path(config.nextflow_config_file)
         samplesheet_file_path: Path = self._get_sample_sheet_path(config.case_id)
         if not (
-            self.pipeline_extension.do_required_files_exist()
+            self.pipeline_extension.do_required_files_exist(
+                case_run_directory=self._get_case_run_directory(config.case_id)
+            )
             and params_file_path.exists()
             and config_file_path.exists()
             and samplesheet_file_path.exists()
