@@ -1,13 +1,32 @@
+from collections import namedtuple
 from collections.abc import Generator
 from pathlib import Path
+from unittest.mock import create_autospec
 
 import pytest
 from housekeeper.store import database as hk_database
 from housekeeper.store.store import Store as HousekeeperStore
 from pytest import TempPathFactory
+from pytest_httpserver import HTTPServer
 
+from cg.apps.environ import environ_email
+from cg.apps.tb.api import IDTokenCredentials
+from cg.constants.constants import Workflow
+from cg.constants.tb import AnalysisType
 from cg.store import database as cg_database
+from cg.store.models import Case
 from cg.store.store import Store
+
+TestRunPaths = namedtuple("TestRunPaths", ["cg_config_file", "test_root_dir"])
+
+
+@pytest.fixture(autouse=True)
+def valid_google_token(mocker):
+    mocker.patch.object(
+        IDTokenCredentials,
+        "from_service_account_file",
+        return_value=create_autospec(IDTokenCredentials, token="some token"),
+    )
 
 
 @pytest.fixture(scope="session")
@@ -47,15 +66,55 @@ def housekeeper_db(
 
 
 @pytest.fixture
-def cg_config_file(
+def test_run_paths(
     status_db_uri: str, housekeeper_db_uri: str, tmp_path_factory: TempPathFactory
-) -> Path:
+) -> TestRunPaths:
     test_root_dir: Path = tmp_path_factory.mktemp("balsamic")
 
-    return create_parsed_config(
+    config_file_path = create_parsed_config(
         status_db_uri=status_db_uri,
         housekeeper_db_uri=housekeeper_db_uri,
         test_root_dir=test_root_dir.as_posix(),
+    )
+
+    return TestRunPaths(cg_config_file=config_file_path, test_root_dir=test_root_dir)
+
+
+def expect_to_add_pending_analysis_to_trailblazer(
+    trailblazer_server: HTTPServer,
+    case: Case,
+    ticket_id: int,
+    case_path: Path,
+    config_path: Path,
+    type: AnalysisType,
+    workflow: Workflow,
+):
+    trailblazer_server.expect_request(
+        "/trailblazer/add-pending-analysis",
+        data=b'{"case_id": "%(case_id)s", "email": "%(email)s", "type": "%(type)s", '
+        b'"config_path": "%(config_path)s",'
+        b' "order_id": 1, "out_dir": "%(case_path)s/analysis", '
+        b'"priority": "normal", "workflow": "%(workflow)s", "ticket": "%(ticket_id)s", '
+        b'"workflow_manager": "slurm", "tower_workflow_id": null, "is_hidden": true}'
+        % {
+            b"email": environ_email().encode(),
+            b"type": str(type).encode(),
+            b"case_id": case.internal_id.encode(),
+            b"ticket_id": str(ticket_id).encode(),
+            b"case_path": str(case_path).encode(),
+            b"config_path": str(config_path).encode(),
+            b"workflow": str(workflow).upper().encode(),
+        },
+        method="POST",
+    ).respond_with_json(
+        {
+            "id": "1",
+            "logged_at": "",
+            "started_at": "",
+            "completed_at": "",
+            "out_dir": "out/dir",
+            "config_path": "config/path",
+        }
     )
 
 

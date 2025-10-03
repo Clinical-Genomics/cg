@@ -20,12 +20,13 @@ from cg.constants.tb import AnalysisType
 from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Order, Sample
 from cg.store.store import Store
 from cg.utils import commands
+from tests.integration.conftest import TestRunPaths, expect_to_add_pending_analysis_to_trailblazer
 from tests.store_helpers import StoreHelpers
 
 
 @pytest.mark.integration
 def test_start_available(
-    cg_config_file: Path,
+    test_run_paths: TestRunPaths,
     helpers: StoreHelpers,
     housekeeper_db: HousekeeperStore,
     httpserver: HTTPServer,
@@ -41,9 +42,17 @@ def test_start_available(
         store=status_db, data_analysis=Workflow.BALSAMIC, ticket=str(ticket_id)
     )
 
+    # GIVEN an order associated with the case
+    order: Order = helpers.add_order(
+        store=status_db, ticket_id=ticket_id, customer_id=case.customer_id
+    )
+    status_db.link_case_to_order(order_id=order.id, case_id=case.id)
+
     # GIVEN a sample associated with the case
     sample: Sample = helpers.add_sample(
-        store=status_db, last_sequenced_at=datetime.now(), application_type=AnalysisType.WES
+        store=status_db,
+        last_sequenced_at=datetime.now(),
+        application_type=AnalysisType.TGS,
     )
     helpers.relate_samples(base_store=status_db, case=case, samples=[sample])
 
@@ -83,48 +92,35 @@ def test_start_available(
     bed_name = "balsamic_integration_test_bed"
     helpers.ensure_bed_version(store=status_db, bed_name=bed_name)
 
-    httpserver.expect_request(f"/lims/api/v2/samples/{sample.internal_id}").respond_with_data(
-        f"""<smp:sample xmlns:udf="http://genologics.com/ri/userdefined" xmlns:ri="http://genologics.com/ri" xmlns:file="http://genologics.com/ri/file" xmlns:smp="http://genologics.com/ri/sample" uri="http://127.0.0.1:8000/api/v2/samples/ACC2351A1" limsid="ACC2351A1">
-<name>2016-02293</name>
-<date-received>2017-02-16</date-received>
-<project limsid="ACC2351" uri="http://127.0.0.1:8000/api/v2/projects/ACC2351"/>
-<submitter uri="http://127.0.0.1:8000/api/v2/researchers/3">
-<first-name>API</first-name>
-<last-name>Access</last-name>
-</submitter>
-<artifact limsid="ACC2351A1PA1" uri="http://127.0.0.1:8000/api/v2/artifacts/ACC2351A1PA1?state=55264"/>
-<udf:field type="Boolean" name="Sample Delivered">true</udf:field>
-<udf:field type="String" name="Concentration (nM)">NA</udf:field>
-<udf:field type="String" name="customer">cust002</udf:field>
-<udf:field type="String" name="familyID">F0005063</udf:field>
-<udf:field type="String" name="Gender">M</udf:field>
-<udf:field type="String" name="priority">standard</udf:field>
-<udf:field type="String" name="Process only if QC OK">NA</udf:field>
-<udf:field type="Numeric" name="Reads missing (M)">0</udf:field>
-<udf:field type="String" name="Reference Genome Microbial">NA</udf:field>
-<udf:field type="String" name="Sample Buffer">NA</udf:field>
-<udf:field type="String" name="Sequencing Analysis">EXXCUSR000</udf:field>
-<udf:field type="String" name="Status">unaffected</udf:field>
-<udf:field type="String" name="Strain">NA</udf:field>
-<udf:field type="String" name="Source">NA</udf:field>
-<udf:field type="String" name="Volume (uL)">NA</udf:field>
-<udf:field type="String" name="Gene List">OMIM-AUTO</udf:field>
-<udf:field type="String" name="Index type">NA</udf:field>
-<udf:field type="String" name="Data Analysis">scout</udf:field>
-<udf:field type="String" name="Index number">NA</udf:field>
-<udf:field type="String" name="Application Tag Version">1</udf:field>
-<udf:field type="String" name="Bait Set">{bed_name}</udf:field>
-<udf:field type="String" name="Capture Library version">Agilent Sureselect V5</udf:field>
-</smp:sample>""",
-        content_type="application/xml",
-    )
+    expect_lims_sample_request(lims_server=httpserver, sample=sample, bed_name=bed_name)
 
-    # GIVEN that a sub process can be started and run successfully
+    # GIVEN a call to balsamic config case successfully generates a config file
     subprocess_mock = mocker.patch.object(commands, "subprocess")
-    subprocess_mock.run = Mock(
-        return_value=create_autospec(
-            CompletedProcess, returncode=EXIT_SUCCESS, stdout=b"", stderr=b""
-        )
+
+    def mock_run(*args, **kwargs):
+        command = args[0]
+        stdout = b""
+
+        if "balsamic_binary_path config case" in command:
+            create_tga_config_file(test_root_dir=test_run_paths.test_root_dir, case=case)
+        return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
+
+    subprocess_mock.run = Mock(side_effect=mock_run)
+
+    # GIVEN the Trailblazer API returns no ongoing analysis for the case
+    httpserver.expect_request(
+        "/trailblazer/get-latest-analysis", data='{"case_id": "' + case.internal_id + '"}'
+    ).respond_with_json(None)
+
+    case_path = Path(test_run_paths.test_root_dir, "balsamic_root_path", case.internal_id)
+    expect_to_add_pending_analysis_to_trailblazer(
+        trailblazer_server=httpserver,
+        case=case,
+        ticket_id=ticket_id,
+        case_path=case_path,
+        config_path=Path(case_path, "analysis", "slurm_jobids.yaml"),
+        workflow=Workflow.BALSAMIC,
+        type=AnalysisType.TGS,
     )
 
     # WHEN running balsamic start-available
@@ -132,7 +128,7 @@ def test_start_available(
         base,
         [
             "--config",
-            cg_config_file.as_posix(),
+            test_run_paths.cg_config_file.as_posix(),
             "workflow",
             "balsamic",
             "start-available",
@@ -144,17 +140,18 @@ def test_start_available(
 
 @pytest.mark.integration
 def test_start_config_case(
-    cg_config_file: Path,
+    test_run_paths: TestRunPaths,
     helpers: StoreHelpers,
     httpserver: HTTPServer,
     mocker: MockerFixture,
     status_db: Store,
 ):
     cli_runner = CliRunner()
+    cg_config_file = test_run_paths.cg_config_file
 
     # GIVEN a config file with valid database URIs and directories
 
-    test_root_dir = cg_config_file.parent
+    test_root_dir = test_run_paths.test_root_dir
 
     # GIVEN a case
     ticket_id = 12345
@@ -185,41 +182,7 @@ def test_start_config_case(
         )
     )
 
-    httpserver.expect_request(f"/lims/api/v2/samples/{sample.internal_id}").respond_with_data(
-        f"""<smp:sample xmlns:udf="http://genologics.com/ri/userdefined" xmlns:ri="http://genologics.com/ri" xmlns:file="http://genologics.com/ri/file" xmlns:smp="http://genologics.com/ri/sample" uri="http://127.0.0.1:8000/api/v2/samples/ACC2351A1" limsid="ACC2351A1">
-<name>2016-02293</name>
-<date-received>2017-02-16</date-received>
-<project limsid="ACC2351" uri="http://127.0.0.1:8000/api/v2/projects/ACC2351"/>
-<submitter uri="http://127.0.0.1:8000/api/v2/researchers/3">
-<first-name>API</first-name>
-<last-name>Access</last-name>
-</submitter>
-<artifact limsid="ACC2351A1PA1" uri="http://127.0.0.1:8000/api/v2/artifacts/ACC2351A1PA1?state=55264"/>
-<udf:field type="Boolean" name="Sample Delivered">true</udf:field>
-<udf:field type="String" name="Concentration (nM)">NA</udf:field>
-<udf:field type="String" name="customer">cust002</udf:field>
-<udf:field type="String" name="familyID">F0005063</udf:field>
-<udf:field type="String" name="Gender">M</udf:field>
-<udf:field type="String" name="priority">standard</udf:field>
-<udf:field type="String" name="Process only if QC OK">NA</udf:field>
-<udf:field type="Numeric" name="Reads missing (M)">0</udf:field>
-<udf:field type="String" name="Reference Genome Microbial">NA</udf:field>
-<udf:field type="String" name="Sample Buffer">NA</udf:field>
-<udf:field type="String" name="Sequencing Analysis">EXXCUSR000</udf:field>
-<udf:field type="String" name="Status">unaffected</udf:field>
-<udf:field type="String" name="Strain">NA</udf:field>
-<udf:field type="String" name="Source">NA</udf:field>
-<udf:field type="String" name="Volume (uL)">NA</udf:field>
-<udf:field type="String" name="Gene List">OMIM-AUTO</udf:field>
-<udf:field type="String" name="Index type">NA</udf:field>
-<udf:field type="String" name="Data Analysis">scout</udf:field>
-<udf:field type="String" name="Index number">NA</udf:field>
-<udf:field type="String" name="Application Tag Version">1</udf:field>
-<udf:field type="String" name="Bait Set">{bed_name}</udf:field>
-<udf:field type="String" name="Capture Library version">Agilent Sureselect V5</udf:field>
-</smp:sample>""",
-        content_type="application/xml",
-    )
+    expect_lims_sample_request(lims_server=httpserver, sample=sample, bed_name=bed_name)
 
     # WHEN running balsamic config-case
     result: Result = cli_runner.invoke(
@@ -257,4 +220,51 @@ def test_start_config_case(
         shell=True,
         stderr=ANY,
         stdout=ANY,
+    )
+
+
+def create_tga_config_file(test_root_dir: Path, case: Case) -> Path:
+    filepath = Path(
+        f"{test_root_dir}/balsamic_root_path/{case.internal_id}/{case.internal_id}.json"
+    )
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2("tests/fixtures/apps/balsamic/tga_case/config.json", filepath)
+    return filepath
+
+
+def expect_lims_sample_request(lims_server, sample, bed_name):
+    lims_server.expect_request(f"/lims/api/v2/samples/{sample.internal_id}").respond_with_data(
+        f"""<smp:sample xmlns:udf="http://genologics.com/ri/userdefined" xmlns:ri="http://genologics.com/ri" xmlns:file="http://genologics.com/ri/file" xmlns:smp="http://genologics.com/ri/sample" uri="http://127.0.0.1:8000/api/v2/samples/ACC2351A1" limsid="ACC2351A1">
+<name>2016-02293</name>
+<date-received>2017-02-16</date-received>
+<project limsid="ACC2351" uri="http://127.0.0.1:8000/api/v2/projects/ACC2351"/>
+<submitter uri="http://127.0.0.1:8000/api/v2/researchers/3">
+<first-name>API</first-name>
+<last-name>Access</last-name>
+</submitter>
+<artifact limsid="ACC2351A1PA1" uri="http://127.0.0.1:8000/api/v2/artifacts/ACC2351A1PA1?state=55264"/>
+<udf:field type="Boolean" name="Sample Delivered">true</udf:field>
+<udf:field type="String" name="Concentration (nM)">NA</udf:field>
+<udf:field type="String" name="customer">cust002</udf:field>
+<udf:field type="String" name="familyID">F0005063</udf:field>
+<udf:field type="String" name="Gender">M</udf:field>
+<udf:field type="String" name="priority">standard</udf:field>
+<udf:field type="String" name="Process only if QC OK">NA</udf:field>
+<udf:field type="Numeric" name="Reads missing (M)">0</udf:field>
+<udf:field type="String" name="Reference Genome Microbial">NA</udf:field>
+<udf:field type="String" name="Sample Buffer">NA</udf:field>
+<udf:field type="String" name="Sequencing Analysis">EXXCUSR000</udf:field>
+<udf:field type="String" name="Status">unaffected</udf:field>
+<udf:field type="String" name="Strain">NA</udf:field>
+<udf:field type="String" name="Source">NA</udf:field>
+<udf:field type="String" name="Volume (uL)">NA</udf:field>
+<udf:field type="String" name="Gene List">OMIM-AUTO</udf:field>
+<udf:field type="String" name="Index type">NA</udf:field>
+<udf:field type="String" name="Data Analysis">scout</udf:field>
+<udf:field type="String" name="Index number">NA</udf:field>
+<udf:field type="String" name="Application Tag Version">1</udf:field>
+<udf:field type="String" name="Bait Set">{bed_name}</udf:field>
+<udf:field type="String" name="Capture Library version">Agilent Sureselect V5</udf:field>
+</smp:sample>""",
+        content_type="application/xml",
     )

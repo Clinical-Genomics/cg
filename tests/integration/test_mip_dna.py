@@ -15,7 +15,6 @@ from pytest import TempPathFactory
 from pytest_httpserver import HTTPServer
 from pytest_mock import MockerFixture
 
-from cg.apps.tb.api import IDTokenCredentials
 from cg.cli.base import base
 from cg.cli.workflow.mip import base as mip_base
 from cg.constants.constants import CaseActions, Workflow
@@ -29,15 +28,6 @@ from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Order
 from cg.store.store import Store
 from cg.utils import commands
 from tests.store_helpers import StoreHelpers
-
-
-@pytest.fixture(autouse=True)
-def valid_google_token(mocker):
-    mocker.patch.object(
-        IDTokenCredentials,
-        "from_service_account_file",
-        return_value=create_autospec(IDTokenCredentials, token="some token"),
-    )
 
 
 @pytest.fixture
