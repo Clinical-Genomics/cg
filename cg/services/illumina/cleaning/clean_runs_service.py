@@ -7,7 +7,6 @@ from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.constants.time import TWENTY_ONE_DAYS
 from cg.exc import (
     HousekeeperBundleVersionMissingError,
     HousekeeperFileMissingError,
@@ -52,7 +51,7 @@ class IlluminaCleanRunsService:
         self.dry_run: bool = dry_run
         LOG.info(f"Trying to delete {sequencing_run_path}")
 
-    def delete_run_directory(self) -> None:
+    def delete_run_directory(self, day_threshold) -> None:
         """
         Delete the sequencing runs and demultiplexed runs directory if it fulfills all requirements.
         Raises:
@@ -60,7 +59,7 @@ class IlluminaCleanRunsService:
         """
         try:
             self.set_sample_sheet_path_from_housekeeper()
-            if self.can_run_directory_be_deleted():
+            if self.can_run_directory_be_deleted(day_threshold):
                 if self.dry_run:
                     LOG.debug(f"Dry run: Would have removed: {self.sequencing_run_dir_data.path}")
                     return
@@ -79,11 +78,11 @@ class IlluminaCleanRunsService:
         sample_sheet_path: Path = self.hk_api.get_sample_sheet_path(self.sequencing_run_dir_data.id)
         self.sequencing_run_dir_data.set_sample_sheet_path_hk(sample_sheet_path)
 
-    def can_run_directory_be_deleted(self) -> bool:
+    def can_run_directory_be_deleted(self, day_threshold: int) -> bool:
         """Determine whether a sequencing run or demultiplexed run can be deleted."""
         return all(
             [
-                self.is_directory_older_than_21_days(),
+                self.is_directory_older_than(day_threshold),
                 self.is_sequencing_run_in_statusdb(),
                 self.is_sequencing_run_backed_up(),
                 self.has_sequencing_metrics_in_statusdb(),
@@ -92,11 +91,11 @@ class IlluminaCleanRunsService:
             ]
         )
 
-    def is_directory_older_than_21_days(self) -> bool:
-        """Check if a given directory is older than 21 days."""
+    def is_directory_older_than(self, days: int) -> bool:
+        """Check if a given directory is older than the given days."""
         return is_directory_older_than_days_old(
             directory_path=self.sequencing_run_dir_data.path,
-            days_old=TWENTY_ONE_DAYS,
+            days_old=days,
         )
 
     def is_sequencing_run_in_statusdb(self) -> bool:

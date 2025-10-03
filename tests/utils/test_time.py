@@ -1,19 +1,18 @@
 """Test for the time utils functions."""
 
-import os
 import time
 from datetime import datetime
 from pathlib import Path
 
 import mock
 
-from cg.constants.time import TWENTY_ONE_DAYS, TWENTY_ONE_DAYS_IN_SECONDS
 from cg.utils.time import (
-    is_directory_older_than_days_old,
-    format_time_from_string,
-    DATE_TIME_FORMAT,
     format_time_from_ctime,
+    format_time_from_string,
+    is_directory_older_than_days_old,
 )
+
+TWENTY_ONE_DAYS_IN_SECONDS = 21 * 24 * 60 * 60
 
 
 def test_is_directory_older_than_days_old(tmp_path_factory):
@@ -26,9 +25,7 @@ def test_is_directory_older_than_days_old(tmp_path_factory):
         "time.time",
         return_value=time.time() + TWENTY_ONE_DAYS_IN_SECONDS,
     ):
-        assert is_directory_older_than_days_old(
-            directory_path=created_now_path, days_old=TWENTY_ONE_DAYS
-        )
+        assert is_directory_older_than_days_old(directory_path=created_now_path, days_old=21)
 
 
 def test_is_directory_not_older_than_days_old(tmp_path_factory):
@@ -36,9 +33,7 @@ def test_is_directory_not_older_than_days_old(tmp_path_factory):
     created_now_path: Path = tmp_path_factory.mktemp("created_now")
 
     # THEN checking whether a directory is older than 21 days returns false
-    assert not is_directory_older_than_days_old(
-        directory_path=created_now_path, days_old=TWENTY_ONE_DAYS
-    )
+    assert not is_directory_older_than_days_old(directory_path=created_now_path, days_old=21)
 
 
 def test_format_time_from_string():

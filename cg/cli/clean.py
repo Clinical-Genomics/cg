@@ -172,8 +172,11 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
 
 @clean.command("illumina-runs")
 @DRY_RUN
+@click.option(
+    "--day-threshold", type=int, required=True, help="Number of days before a run can be deleted."
+)
 @click.pass_obj
-def clean_illumina_runs(context: CGConfig, dry_run: bool):
+def clean_illumina_runs(context: CGConfig, day_threshold: int, dry_run: bool):
     """Remove Illumina sequencing and demultiplexed runs from hasta."""
 
     directories_to_check: list[Path] = []
@@ -192,7 +195,7 @@ def clean_illumina_runs(context: CGConfig, dry_run: bool):
                 housekeeper_api=context.housekeeper_api,
                 dry_run=dry_run,
             )
-            clean_service.delete_run_directory()
+            clean_service.delete_run_directory(day_threshold)
         except (IlluminaCleanRunError, FlowCellError) as error:
             LOG.error(repr(error))
             continue
