@@ -15,7 +15,7 @@ def get_case_message(case: Case) -> str:
         "The analysis has been uploaded to Scout for the following case:\n\n"
         f"{scout_link}\n\n"
         "The raw data files are currently being uploaded to your inbox on Caesar:\n\n"
-        f"{delivery_path} . \n\n"
+        f"{delivery_path} \n\n"
         f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
     )
 
