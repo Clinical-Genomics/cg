@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import cast
 from unittest.mock import Mock, create_autospec
 
 import pytest
@@ -75,7 +76,9 @@ def test_get_config(
     assert case_config == expected_case_config
 
     # THEN the pipeline extension should have been called with ensure_required_files_exist
-    extension.do_required_files_exist.assert_called_once()
+    cast(Mock, extension.do_required_files_exist).assert_called_once_with(
+        case_run_directory=Path(nextflow_root, nextflow_case_id)
+    )
 
 
 def test_get_config_missing_required_files(mocker: MockerFixture):
