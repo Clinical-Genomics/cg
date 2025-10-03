@@ -1,9 +1,9 @@
 from pathlib import Path
 
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.constants import FileExtensions, Workflow
+from cg.constants import Workflow
 from cg.constants.gene_panel import GenePanelGenomeBuild
-from cg.io.txt import write_txt
+from cg.io.txt import write_txt_with_newlines
 from cg.services.analysis_starter.configurator.file_creators.nextflow.utils import get_genome_build
 from cg.store.store import Store
 
@@ -14,10 +14,9 @@ class ManagedVariantsFileCreator:
         self.scout_api = scout_api
         self.store = store
 
-    def create(self, case_id: str, case_path: Path) -> None:
-        file_path = Path(case_path, "managed_variants").with_suffix(FileExtensions.VCF)
+    def create(self, case_id: str, file_path: Path) -> None:
         content: list[str] = self._get_content(case_id)
-        write_txt(file_path=file_path, content=content)
+        write_txt_with_newlines(file_path=file_path, content=content)
 
     def _get_content(self, case_id: str) -> list[str]:
         workflow = Workflow(self.store.get_case_by_internal_id(case_id).data_analysis)

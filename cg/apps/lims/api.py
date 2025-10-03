@@ -171,6 +171,11 @@ class LimsAPI(Lims, OrderHandler):
             LOG.warning(f"Sample {lims_id} not found in LIMS: {error}")
         return None
 
+    def get_capture_kit_strict(self, lims_id: str) -> str:
+        if capture_kit := self.capture_kit(lims_id):
+            return capture_kit
+        raise LimsDataError(f"No capture kit found for sample {lims_id}")
+
     def get_samples(self, *args, map_ids=False, **kwargs) -> dict[str, str] | list[Sample]:
         """Bypass to original method."""
         lims_samples = super(LimsAPI, self).get_samples(*args, **kwargs)
