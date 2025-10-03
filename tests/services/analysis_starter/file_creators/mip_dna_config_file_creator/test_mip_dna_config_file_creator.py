@@ -173,6 +173,10 @@ def test_create_wgs_only_one_sample_phenotype_unknown(
         content=expected_content_wgs, file_path=Path("pedigree.yaml")
     )
 
+    # THEN the type of the phenotype value should be str
+    # (not StrEnum since they don't serialize properly when using write_yaml)
+    assert type(mock_write.call_args.kwargs["content"]["samples"][0]["phenotype"]) is str
+
 
 def test_create_wes_no_bed_flag(
     case_id: str, expected_content_wes: dict, wes_mock_store: Store, mocker: MockerFixture
