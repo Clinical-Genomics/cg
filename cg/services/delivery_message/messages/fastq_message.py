@@ -1,5 +1,8 @@
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
-from cg.services.delivery_message.messages.utils import get_caesar_delivery_path
+from cg.services.delivery_message.messages.utils import (
+    REMINDER_TO_DOWNLOAD_MESSAGE,
+    get_caesar_delivery_path,
+)
 from cg.store.models import Case
 
 
@@ -14,5 +17,6 @@ class FastqMessage(DeliveryMessage):
             f"The fastq files for the following {sample_s_} have been uploaded to your inbox on Caesar:\n\n"
             f"{sample_names}\n\n"
             "Available under: \n\n"
-            f"{delivery_path}"
+            f"{delivery_path} \n\n"
+            f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
         )
