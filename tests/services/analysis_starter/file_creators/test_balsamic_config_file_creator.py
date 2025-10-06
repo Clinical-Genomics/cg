@@ -21,10 +21,10 @@ def expected_wgs_paired_command(balsamic_config: BalsamicConfig) -> str:
         f"config case --analysis-dir {balsamic_config.root} "
         f"--analysis-workflow balsamic "
         f"--balsamic-cache {balsamic_config.balsamic_cache} "
-        f"--cadd-annotations {balsamic_config.root.parent} "
+        f"--cadd-annotations {balsamic_config.cadd_path} "
         f"--artefact-sv-observations {balsamic_config.root.parent}/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz "
         f"--case-id balsamic_case_wgs_paired "
-        f"--fastq-path /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/balsamic0/balsamic_case_wgs_paired/fastq "
+        f"--fastq-path {balsamic_config.root.parent}/fastq "
         f"--gender female --genome-interval {balsamic_config.root.parent} "
         f"--genome-version hg19 "
         f"--gens-coverage-pon {balsamic_config.root.parent} "
@@ -36,23 +36,30 @@ def expected_wgs_paired_command(balsamic_config: BalsamicConfig) -> str:
     )
 
 
-def test_create_wgs_tumor_only(
+def test_create_wgs_paired(
     balsamic_config: BalsamicConfig, expected_wgs_paired_command: str, mocker: MockerFixture
 ):
-    # GIVEN a case with one tumor WGS sample
+    # GIVEN a case with one tumor and one normal WGS samples
     application: Application = create_autospec(Application, prep_category="wgs")
     application_version: ApplicationVersion = create_autospec(
         ApplicationVersion, application=application
     )
-    sample_1: Sample = create_autospec(
+    tumour_sample: Sample = create_autospec(
         Sample,
         internal_id="sample_1",
         is_tumour=True,
         sex=SexOptions.FEMALE,
         application_version=application_version,
     )
+    normal_sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_1",
+        is_tumour=False,
+        sex=SexOptions.FEMALE,
+        application_version=application_version,
+    )
     wgs_tumor_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample_1]
+        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id = Mock(return_value=wgs_tumor_only_case)
