@@ -50,6 +50,7 @@ class BalsamicConfigInput(BaseModel):
             "--balsamic-cache": self.balsamic_cache,
             "--cadd-annotations": self.cadd_annotations,
             "--artefact-snv-observations": self.artefact_snv_observations,
+            "--artefact-sv-observations": self.artefact_sv_observations,
             "--cancer-germline-snv-observations": self.cancer_germline_snv_observations,
             "--cancer-somatic-snv-observations": self.cancer_somatic_snv_observations,
             "--cancer-somatic-sv-observations": self.cancer_somatic_sv_observations,
