@@ -15,7 +15,25 @@ from cg.store.store import Store
 
 @pytest.fixture
 def expected_wgs_paired_command(balsamic_config: BalsamicConfig) -> str:
-    return f"{balsamic_config.conda_binary} run {balsamic_config.binary_path} config case --analysis-dir {balsamic_config.root} --analysis-workflow balsamic --balsamic-cache {balsamic_config.balsamic_cache} --cadd-annotations {balsamic_config.root.parent} --artefact-sv-observations {balsamic_config.root.parent}/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz --case-id balsamic_case_wgs_paired --fastq-path /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/balsamic0/balsamic_case_wgs_paired/fastq --gender female --genome-interval {balsamic_config.root.parent} --genome-version hg19 --gens-coverage-pon {balsamic_config.root.parent} --gnomad-min-af5 {balsamic_config.root.parent} --normal-sample-name sample_case_wgs_paired_normal --sentieon-install-dir {balsamic_config.root.parent} --sentieon-license 127.0.0.1:8080 --tumor-sample-name sample_case_wgs_paired_tumor"
+    return (
+        f"{balsamic_config.conda_binary} "
+        f"run {balsamic_config.binary_path} "
+        f"config case --analysis-dir {balsamic_config.root} "
+        f"--analysis-workflow balsamic "
+        f"--balsamic-cache {balsamic_config.balsamic_cache} "
+        f"--cadd-annotations {balsamic_config.root.parent} "
+        f"--artefact-sv-observations {balsamic_config.root.parent}/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz "
+        f"--case-id balsamic_case_wgs_paired "
+        f"--fastq-path /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/balsamic0/balsamic_case_wgs_paired/fastq "
+        f"--gender female --genome-interval {balsamic_config.root.parent} "
+        f"--genome-version hg19 "
+        f"--gens-coverage-pon {balsamic_config.root.parent} "
+        f"--gnomad-min-af5 {balsamic_config.root.parent} "
+        f"--normal-sample-name sample_case_wgs_paired_normal "
+        f"--sentieon-install-dir {balsamic_config.root.parent} "
+        f"--sentieon-license 127.0.0.1:8080 "
+        f"--tumor-sample-name sample_case_wgs_paired_tumor"
+    )
 
 
 def test_create_wgs_tumor_only(
