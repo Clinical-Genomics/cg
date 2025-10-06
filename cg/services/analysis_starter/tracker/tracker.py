@@ -43,6 +43,7 @@ class Tracker(ABC):
         self._create_analysis_statusdb(case_config=case_config, trailblazer_id=tb_analysis.id)
 
     def ensure_analysis_not_ongoing(self, case_id: str) -> None:
+        """Raises: AnalysisRunningError if the case has an analysis running in Trailblazer."""
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id):
             raise AnalysisRunningError(f"Analysis still ongoing in Trailblazer for case {case_id}")
 
@@ -106,7 +107,7 @@ class Tracker(ABC):
         Return the analysis type for sample.
         Only analysis types supported by Trailblazer are valid outputs.
         """
-        sample: Sample = self.store.get_case_by_internal_id(case_id).links[0].sample
+        sample: Sample = self.store.get_case_by_internal_id(case_id).samples[0]
         prep_category: str = sample.prep_category
         if prep_category and prep_category.lower() in {
             SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
