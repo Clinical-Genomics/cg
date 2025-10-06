@@ -111,9 +111,9 @@ STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
 class StatusOptions(StrEnum):
-    AFFECTED: str = "affected"
-    UNAFFECTED: str = "unaffected"
-    UNKNOWN: str = "unknown"
+    AFFECTED = "affected"
+    UNAFFECTED = "unaffected"
+    UNKNOWN = "unknown"
 
 
 class Workflow(StrEnum):

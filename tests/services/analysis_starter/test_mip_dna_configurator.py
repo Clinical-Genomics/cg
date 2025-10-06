@@ -1,0 +1,194 @@
+from pathlib import Path
+from unittest.mock import Mock, create_autospec
+
+import pytest
+from pytest_mock import MockerFixture
+
+from cg.constants.priority import SlurmQos
+from cg.exc import MissingConfigFilesError
+from cg.models.cg_config import MipConfig
+from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
+from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
+    ManagedVariantsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.mip_dna_config import (
+    MIPDNAConfigFileCreator,
+)
+from cg.services.analysis_starter.configurator.implementations import mip_dna
+from cg.services.analysis_starter.configurator.implementations.mip_dna import (
+    MIP_DNA_CONFIG_FILE_NAME,
+    MIP_DNA_GENE_PANEL_FILE_NAME,
+    MIP_DNA_MANAGED_VARIANTS_FILE_NAME,
+    MIPDNAConfigurator,
+)
+from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
+from cg.store.models import Case
+from cg.store.store import Store
+
+
+@pytest.fixture
+def mock_status_db() -> Store:
+    mock_store: Store = create_autospec(Store)
+    mock_case: Case = create_autospec(Case, slurm_priority=SlurmQos.NORMAL)
+    mock_store.get_case_by_internal_id_strict = Mock(return_value=mock_case)
+    return mock_store
+
+
+@pytest.fixture
+def mock_cg_config_mip() -> MipConfig:
+    return create_autospec(
+        MipConfig,
+        root="root_dir",
+        conda_binary="conda_binary",
+        conda_env="S_mip_dna",
+        mip_config="mip_config",
+        workflow="analyse rd_dna",
+        script="script",
+    )
+
+
+def test_configure(mock_cg_config_mip: MipConfig, mocker: MockerFixture):
+    # GIVEN a case id
+    case_id = "test_case"
+
+    store = create_autospec(Store)
+    store.get_case_by_internal_id_strict = Mock(
+        return_value=create_autospec(Case, slurm_priority=SlurmQos.NORMAL)
+    )
+
+    # GIVEN a MIP DNA configurator
+    root_dir = Path("root_dir")
+    configurator = MIPDNAConfigurator(
+        cg_mip_config=mock_cg_config_mip,
+        config_file_creator=create_autospec(MIPDNAConfigFileCreator),
+        fastq_handler=Mock(),
+        gene_panel_file_creator=create_autospec(GenePanelFileCreator),
+        managed_variants_file_creator=create_autospec(ManagedVariantsFileCreator),
+        store=store,
+    )
+
+    # GIVEN that we mock making the run directory
+    mock_create_dir = mocker.patch.object(Path, "mkdir")
+
+    # GIVEN that the relevant files exist
+    mocker.patch.object(Path, "exists", return_value=True)
+
+    # WHEN configuring a case
+    case_config: MIPDNACaseConfig = configurator.configure(
+        case_id=case_id, panel_bed="bed_file.bed"
+    )
+
+    # THEN the run directory should have been created
+    mock_create_dir.assert_called_with(parents=True, exist_ok=True)
+    assert isinstance(case_config, MIPDNACaseConfig)
+
+    # THEN the fastq handler should have been called with the case id
+    configurator.fastq_handler.link_fastq_files.assert_called_once_with(case_id)
+
+    # THEN the config file creator should have been called with the case id and the provided bed flag
+    configurator.config_file_creator.create.assert_called_once_with(
+        case_id=case_id,
+        bed_flag="bed_file.bed",
+        file_path=Path(root_dir, case_id, MIP_DNA_CONFIG_FILE_NAME),
+    )
+
+    # THEN the gene panel file creator should have been called with correct case id and path
+    configurator.gene_panel_file_creator.create.assert_called_once_with(
+        case_id=case_id,
+        file_path=Path(root_dir, case_id, MIP_DNA_GENE_PANEL_FILE_NAME),
+    )
+
+    configurator.managed_variants_file_creator.create.assert_called_once_with(
+        case_id=case_id,
+        file_path=Path(root_dir, case_id, MIP_DNA_MANAGED_VARIANTS_FILE_NAME),
+    )
+
+
+def test_get_config(mock_cg_config_mip: MipConfig, mock_status_db: Store, mocker: MockerFixture):
+    """Test that the MIP DNA configurator can get a case config."""
+
+    # GIVEN an email address in the environment
+    mocker.patch.object(mip_dna, "environ_email", return_value="test@scilifelab.se")
+
+    # GIVEN a MIP DNA configurator
+    configurator = MIPDNAConfigurator(
+        cg_mip_config=mock_cg_config_mip,
+        config_file_creator=Mock(),
+        fastq_handler=Mock(),
+        gene_panel_file_creator=Mock(),
+        managed_variants_file_creator=Mock(),
+        store=mock_status_db,
+    )
+
+    # GIVEN a case ID
+    case_id = "test_case"
+
+    # GIVEN that the relevant files exist
+    mocker.patch.object(Path, "exists", return_value=True)
+
+    # WHEN getting the case config
+    case_config: MIPDNACaseConfig = configurator.get_config(case_id=case_id)
+
+    # THEN case_id, slurm_qos and email should be set
+    assert case_config.case_id == "test_case"
+    assert case_config.slurm_qos == SlurmQos.NORMAL
+    assert case_config.email == "test@scilifelab.se"
+    assert case_config.start_after_recipe is None
+    assert case_config.start_with_recipe is None
+
+
+def test_get_config_all_flags_set(
+    mock_cg_config_mip: MipConfig, mock_status_db: Store, mocker: MockerFixture
+):
+    """Test that the MIP DNA configurator can get a case config."""
+
+    # GIVEN a MIP DNA configurator
+    configurator = MIPDNAConfigurator(
+        cg_mip_config=mock_cg_config_mip,
+        config_file_creator=Mock(),
+        fastq_handler=Mock(),
+        gene_panel_file_creator=Mock(),
+        managed_variants_file_creator=Mock(),
+        store=mock_status_db,
+    )
+
+    # GIVEN a case ID
+    case_id = "test_case"
+
+    # GIVEN that the relevant files exist
+    mocker.patch.object(Path, "exists", return_value=True)
+
+    # WHEN getting the case config
+    case_config: MIPDNACaseConfig = configurator.get_config(
+        case_id=case_id,
+        start_after_recipe="banana_bread",
+        start_with_recipe="short_bread",
+        use_bwa_mem=True,
+    )
+
+    # THEN we should run the analysis with bwa_mem instead of bwa_mem2
+    assert case_config.use_bwa_mem
+
+    assert case_config.start_after_recipe == "banana_bread"
+    assert case_config.start_with_recipe == "short_bread"
+
+
+def test_get_config_validation(mock_cg_config_mip: MipConfig, mock_status_db: Store):
+    # GIVEN at least one file creator that returns a path which does not exist
+    gene_panel_file_creator: GenePanelFileCreator = create_autospec(GenePanelFileCreator)
+    gene_panel_file_creator.get_file_path = Mock(return_value=Path("fake_path"))
+
+    # GIVEN a configurator
+    configurator = MIPDNAConfigurator(
+        cg_mip_config=mock_cg_config_mip,
+        config_file_creator=Mock(),
+        fastq_handler=Mock(),
+        gene_panel_file_creator=gene_panel_file_creator,
+        managed_variants_file_creator=Mock(),
+        store=mock_status_db,
+    )
+
+    # WHEN executing get_config for a case
+    # THEN an CaseNotConfiguredError should be raised
+    with pytest.raises(MissingConfigFilesError):
+        configurator.get_config(case_id="test_case")

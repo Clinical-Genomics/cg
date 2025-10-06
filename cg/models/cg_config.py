@@ -502,7 +502,7 @@ class CGConfig(BaseModel):
     fohm: FOHMConfig | None = None
     gisaid: GisaidConfig | None = None
     microsalt: MicrosaltConfig | None = None
-    mip_rd_dna: MipConfig | None = Field(None, alias="mip-rd-dna")
+    mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig | None = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig | None = None
     nallo: NalloConfig | None = None
