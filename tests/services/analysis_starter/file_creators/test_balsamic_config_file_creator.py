@@ -22,7 +22,7 @@ def expected_wgs_paired_command(balsamic_config: BalsamicConfig) -> str:
         f"--analysis-workflow balsamic "
         f"--balsamic-cache {balsamic_config.balsamic_cache} "
         f"--cadd-annotations {balsamic_config.cadd_path} "
-        f"--artefact-sv-observations {balsamic_config.root.parent}/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz "
+        f"--artefact-sv-observations {balsamic_config.loqusdb_artefact_sv}"
         f"--case-id balsamic_case_wgs_paired "
         f"--fastq-path {balsamic_config.root.parent}/fastq "
         f"--gender female --genome-interval {balsamic_config.root.parent} "

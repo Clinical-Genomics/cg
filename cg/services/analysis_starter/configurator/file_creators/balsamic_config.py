@@ -37,6 +37,7 @@ class BalsamicConfigFileCreator:
         self.sentieon_licence_path: Path = cg_balsamic_config.sentieon_licence_path
         self.sentieon_licence_server: str = cg_balsamic_config.sentieon_licence_server
         self.loqusdb_artefact_snv: Path = cg_balsamic_config.loqusdb_artefact_snv
+        self.loqusdb_artefact_sv: Path = cg_balsamic_config.loqusdb_artefact_sv
         self.loqusdb_cancer_germline_snv: Path = cg_balsamic_config.loqusdb_cancer_germline_snv
         self.loqusdb_cancer_somatic_snv: Path = cg_balsamic_config.loqusdb_cancer_somatic_snv
         self.loqusdb_cancer_somatic_sv: Path = cg_balsamic_config.loqusdb_cancer_somatic_sv
@@ -79,7 +80,7 @@ class BalsamicConfigFileCreator:
             analysis_dir=self.root_dir,
             analysis_workflow=case.data_analysis,
             artefact_snv_observations=self.loqusdb_artefact_snv,
-            artefact_sv_observations=Path("?"),
+            artefact_sv_observations=self.loqusdb_artefact_sv,
             balsamic_binary=self.balsamic_binary,
             balsamic_cache=self.cache_dir,
             cadd_annotations=self.cadd_path,
