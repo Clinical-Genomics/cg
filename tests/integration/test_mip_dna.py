@@ -27,6 +27,7 @@ from cg.store import database as cg_database
 from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Order, Sample
 from cg.store.store import Store
 from cg.utils import commands
+from tests.integration.conftest import expect_to_add_pending_analysis_to_trailblazer
 from tests.store_helpers import StoreHelpers
 
 
@@ -187,29 +188,16 @@ def test_start_available_mip_dna(
         "/trailblazer/get-latest-analysis", data='{"case_id": "' + case.internal_id + '"}'
     ).respond_with_json(None)
 
-    # GIVEN a pending analysis can be added to the Trailblazer API
-    httpserver.expect_request(
-        "/trailblazer/add-pending-analysis",
-        data=b'{"case_id": "%(case_id)s", "email": "%(email)s", "type": "wgs", '
-        b'"config_path": "%(case_dir)s/analysis/slurm_job_ids.yaml",'
-        b' "order_id": 1, "out_dir": "%(case_dir)s/analysis", '
-        b'"priority": "normal", "workflow": "MIP-DNA", "ticket": "%(ticket_id)s", '
-        b'"workflow_manager": "slurm", "tower_workflow_id": null, "is_hidden": true}'
-        % {
-            b"case_id": case.internal_id.encode(),
-            b"email": email.encode(),
-            b"ticket_id": str(ticket_id).encode(),
-            b"case_dir": str(Path(mip_dna_path, "cases", case.internal_id)).encode(),
-        },
-    ).respond_with_json(
-        {
-            "id": "1",
-            "logged_at": "",
-            "started_at": "",
-            "completed_at": "",
-            "out_dir": "out/dir",
-            "config_path": "config/path",
-        }
+    # GIVEN a new pending analysis can be added to the Trailblazer API
+    case_path = Path(mip_dna_path, "cases", case.internal_id)
+    expect_to_add_pending_analysis_to_trailblazer(
+        trailblazer_server=httpserver,
+        case=case,
+        ticket_id=ticket_id,
+        case_path=case_path,
+        config_path=Path(case_path, "analysis", "slurm_job_ids.yaml"),
+        workflow=Workflow.MIP_DNA,
+        type=AnalysisType.WGS,
     )
 
     # GIVEN the analysis can be started as a sub process

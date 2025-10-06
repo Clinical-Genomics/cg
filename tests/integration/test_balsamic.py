@@ -24,6 +24,7 @@ from tests.integration.conftest import TestRunPaths, expect_to_add_pending_analy
 from tests.store_helpers import StoreHelpers
 
 
+@pytest.mark.xdist_group(name="integration")
 @pytest.mark.integration
 def test_start_available(
     test_run_paths: TestRunPaths,
@@ -112,6 +113,7 @@ def test_start_available(
         "/trailblazer/get-latest-analysis", data='{"case_id": "' + case.internal_id + '"}'
     ).respond_with_json(None)
 
+    # GIVEN a new pending analysis can be added to the Trailblazer API
     case_path = Path(test_run_paths.test_root_dir, "balsamic_root_path", case.internal_id)
     expect_to_add_pending_analysis_to_trailblazer(
         trailblazer_server=httpserver,
@@ -138,6 +140,7 @@ def test_start_available(
     assert result.exception is None
 
 
+@pytest.mark.xdist_group(name="integration")
 @pytest.mark.integration
 def test_start_config_case(
     test_run_paths: TestRunPaths,
