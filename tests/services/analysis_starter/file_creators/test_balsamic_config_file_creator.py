@@ -15,7 +15,7 @@ from cg.store.store import Store
 
 @pytest.fixture
 def expected_wgs_paired_command(balsamic_config: BalsamicConfig) -> str:
-    return f"config case --analysis-dir {balsamic_config.root} --analysis-workflow balsamic --balsamic-cache hello --cadd-annotations /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/cg0 --artefact-sv-observations /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/cg0/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz --case-id balsamic_case_wgs_paired --fastq-path /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/balsamic0/balsamic_case_wgs_paired/fastq --gender female --genome-interval /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/cg0 --genome-version hg19 --gens-coverage-pon /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/cg0 --gnomad-min-af5 /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/cg0 --normal-sample-name sample_case_wgs_paired_normal --sentieon-install-dir /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/cg0 --sentieon-license 127.0.0.1:8080 --tumor-sample-name sample_case_wgs_paired_tumor"
+    return f"config case --analysis-dir {balsamic_config.root} --analysis-workflow balsamic --balsamic-cache hello --cadd-annotations {balsamic_config.root.parent} --artefact-sv-observations {balsamic_config.root.parent}/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz --case-id balsamic_case_wgs_paired --fastq-path /private/var/folders/rf/t6kttqvn7zd18vy23lhz5jz80000gp/T/pytest-of-isakohlsson/pytest-2/balsamic0/balsamic_case_wgs_paired/fastq --gender female --genome-interval {balsamic_config.root.parent} --genome-version hg19 --gens-coverage-pon {balsamic_config.root.parent} --gnomad-min-af5 {balsamic_config.root.parent} --normal-sample-name sample_case_wgs_paired_normal --sentieon-install-dir {balsamic_config.root.parent} --sentieon-license 127.0.0.1:8080 --tumor-sample-name sample_case_wgs_paired_tumor"
 
 
 def test_create_wgs_tumor_only(
@@ -52,7 +52,9 @@ def test_create_wgs_tumor_only(
     # WHEN creating the config file
     config_file_creator.create(case_id="case_1")
 
-    mock_runner.assert_called_once_with(args=expected_wgs_paired_command)
+    mock_runner.assert_called_once_with(
+        args=expected_wgs_paired_command, check=True, shell=True, stderr=-1, stdout=-1
+    )
 
     # # THEN the correct normal sample name should be set
     # assert cli_input.normal_sample_name is None
