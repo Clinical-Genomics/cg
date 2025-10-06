@@ -79,6 +79,7 @@ class BalsamicConfigFileCreator:
             analysis_dir=self.root_dir,
             analysis_workflow=case.data_analysis,
             artefact_snv_observations=self.loqusdb_artefact_snv,
+            artefact_sv_observations=Path("?"),
             balsamic_binary=self.balsamic_binary,
             balsamic_cache=self.cache_dir,
             cadd_annotations=self.cadd_path,

@@ -14,6 +14,7 @@ class BalsamicConfigInput(BaseModel):
     analysis_dir: Path
     analysis_workflow: Workflow
     artefact_snv_observations: Path
+    artefact_sv_observations: Path
     balsamic_cache: Path
     cadd_annotations: Path
     cancer_germline_snv_observations: Path
