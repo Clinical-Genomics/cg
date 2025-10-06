@@ -30,6 +30,7 @@ from cg.services.analysis_starter.configurator.implementations.balsamic import B
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.service import AnalysisStarter
+from cg.store.models import Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -248,8 +249,11 @@ def start_available(context: click.Context, dry_run: bool = False, limit: int | 
 
     analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
 
+    cases: list[Case] = analysis_api.get_cases_to_analyze(limit=limit)
+    LOG.info(f"Starting {len(cases)} available Balsamic cases")
+
     exit_code: int = EXIT_SUCCESS
-    for case in analysis_api.get_cases_to_analyze(limit=limit):
+    for case in cases:
         try:
             context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
         except AnalysisNotReadyError as error:

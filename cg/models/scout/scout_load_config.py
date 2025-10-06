@@ -37,6 +37,7 @@ class Reviewer(BaseModel):
     alignment_index: str | None = None
     vcf: str | None = None
     catalog: str | None = None
+    trgt: bool | None = None
 
 
 class ScoutIndividual(BaseModel):
@@ -85,6 +86,7 @@ class ScoutMipIndividual(ScoutIndividual):
 class ScoutNalloIndividual(ScoutIndividual):
     d4_file: str | None = None
     paraphase_alignment_path: str | None = None
+    reviewer: Reviewer = Reviewer()
     tiddit_coverage_wig: str | None = None
     minor_allele_frequency_wig: str | None = None
     assembly_alignment_path: str | None = None
@@ -162,7 +164,6 @@ class MipLoadConfig(ScoutLoadConfig):
     peddy_sex: str | None = None
     samples: list[ScoutMipIndividual] = []
     smn_tsv: str | None = None
-    variant_catalog: str | None = None
     vcf_mei: str | None = None
     vcf_mei_research: str | None = None
     vcf_snv: Annotated[str | None, AfterValidator(field_not_none)] = None
@@ -195,7 +196,6 @@ class RarediseaseLoadConfig(ScoutLoadConfig):
     samples: list[ScoutRarediseaseIndividual] = []
     custom_images: CustomImages | None = None
     smn_tsv: str | None = None
-    str_catalog: str | None = None
     vcf_mei: str | None = None
     vcf_mei_research: str | None = None
     vcf_snv: Annotated[str | None, AfterValidator(field_not_none)] = None

@@ -6,7 +6,7 @@ from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
-from cg.services.analysis_starter.constants import FASTQ_WORKFLOWS
+from cg.services.analysis_starter.constants import IMPLEMENTED_FASTQ_WORKFLOWS
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.input_fetcher.input_fetcher import InputFetcher
@@ -19,6 +19,7 @@ from cg.services.analysis_starter.submitters.submitter import Submitter
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.balsamic import BalsamicTracker
 from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
+from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
 from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
 from cg.services.analysis_starter.tracker.tracker import Tracker
 from cg.store.store import Store
@@ -54,7 +55,7 @@ class AnalysisStarterFactory:
         )
 
     def _get_input_fetcher(self, workflow: Workflow) -> InputFetcher:
-        if workflow in FASTQ_WORKFLOWS:
+        if workflow in IMPLEMENTED_FASTQ_WORKFLOWS:
             spring_archive_api = SpringArchiveAPI(
                 status_db=self.store,
                 housekeeper_api=self.housekeeper_api,
@@ -108,4 +109,9 @@ class AnalysisStarterFactory:
                 store=self.store,
                 trailblazer_api=self.cg_config.trailblazer_api,
                 workflow_root=str(self.cg_config.balsamic.root),
+        elif workflow == Workflow.MIP_DNA:
+            return MIPDNATracker(
+                store=self.store,
+                trailblazer_api=self.cg_config.trailblazer_api,
+                workflow_root=self.cg_config.mip_rd_dna.root,
             )

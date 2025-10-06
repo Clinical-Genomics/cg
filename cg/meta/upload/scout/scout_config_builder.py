@@ -251,6 +251,29 @@ class ScoutConfigBuilder:
             hk_tags=self.sample_tags.bam_file, sample_id=sample_id, hk_version=hk_version
         )
 
+    def include_reviewer_files(self, config_sample: ScoutIndividual, hk_version: Version) -> None:
+        LOG.info("Adding reviewer files to sample")
+        sample_id: str = config_sample.sample_id
+        config_sample.reviewer.alignment = self.get_sample_file(
+            hk_tags=self.sample_tags.reviewer_alignment,
+            sample_id=sample_id,
+            hk_version=hk_version,
+        )
+        config_sample.reviewer.alignment_index = self.get_sample_file(
+            hk_tags=self.sample_tags.reviewer_alignment_index,
+            sample_id=sample_id,
+            hk_version=hk_version,
+        )
+        config_sample.reviewer.vcf = self.get_sample_file(
+            hk_tags=self.sample_tags.reviewer_vcf,
+            sample_id=sample_id,
+            hk_version=hk_version,
+        )
+        config_sample.reviewer.catalog = self.get_file_from_hk(
+            hk_tags=self.sample_tags.reviewer_catalog,
+            hk_version=hk_version,
+        )
+
     def get_sample_file(self, hk_tags: set[str], sample_id: str, hk_version: Version) -> str | None:
         """Return a file that is specific for an individual from Housekeeper."""
         if hk_tags:  # skip if no tag found

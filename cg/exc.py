@@ -60,6 +60,12 @@ class BalsamicStartError(CgError):
     """
 
 
+class BedVersionNotFoundError(CgError):
+    """
+    Exception raised when a bed version is not found.
+    """
+
+
 class BundleAlreadyAddedError(CgError):
     """
     Exception raised when a bundle has already been added to Housekeeper.
@@ -338,3 +344,7 @@ class BalsamicMissingTumorError(CgError):
 
 class BedFileNotFoundError(CgError):
     """Exception raised not finding a bed file for a Balsamic case."""
+    
+    
+class MissingConfigFilesError(CgError):
+    """Exception raised when a case is being run with missing configuration files."""
