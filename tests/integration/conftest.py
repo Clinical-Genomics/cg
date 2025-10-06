@@ -1,6 +1,6 @@
-from collections import namedtuple
 from collections.abc import Generator
 from pathlib import Path
+from typing import NamedTuple
 from unittest.mock import create_autospec
 
 import pytest
@@ -17,7 +17,10 @@ from cg.store import database as cg_database
 from cg.store.models import Case
 from cg.store.store import Store
 
-TestRunPaths = namedtuple("TestRunPaths", ["cg_config_file", "test_root_dir"])
+
+class TestRunPaths(NamedTuple):
+    cg_config_file: Path
+    test_root_dir: Path
 
 
 @pytest.fixture(autouse=True)
@@ -67,9 +70,12 @@ def housekeeper_db(
 
 @pytest.fixture
 def test_run_paths(
-    status_db_uri: str, housekeeper_db_uri: str, tmp_path_factory: TempPathFactory
+    status_db_uri: str,
+    housekeeper_db_uri: str,
+    tmp_path_factory: TempPathFactory,
+    current_workflow,
 ) -> TestRunPaths:
-    test_root_dir: Path = tmp_path_factory.mktemp("balsamic")
+    test_root_dir: Path = tmp_path_factory.mktemp(current_workflow)
 
     config_file_path = create_parsed_config(
         status_db_uri=status_db_uri,

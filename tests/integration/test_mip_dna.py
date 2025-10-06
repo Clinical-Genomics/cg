@@ -1,5 +1,4 @@
 import shutil
-from collections.abc import Generator
 from datetime import datetime
 from pathlib import Path
 from subprocess import CompletedProcess
@@ -8,7 +7,6 @@ from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
 from click.testing import CliRunner, Result
-from housekeeper.store import database as hk_database
 from housekeeper.store.models import Bundle, Version
 from housekeeper.store.store import Store as HousekeeperStore
 from pytest import TempPathFactory
@@ -23,43 +21,16 @@ from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.tb import AnalysisType
 from cg.services.analysis_starter.submitters.subprocess import submitter
-from cg.store import database as cg_database
 from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Order, Sample
 from cg.store.store import Store
 from cg.utils import commands
-from tests.integration.conftest import expect_to_add_pending_analysis_to_trailblazer
+from tests.integration.conftest import TestRunPaths, expect_to_add_pending_analysis_to_trailblazer
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.fixture
-def status_db_uri() -> str:
-    return "sqlite:///file:cg?mode=memory&cache=shared&uri=true"
-
-
-@pytest.fixture
-def housekeeper_db_uri() -> str:
-    return "sqlite:///file:housekeeper?mode=memory&cache=shared&uri=true"
-
-
-@pytest.fixture
-def status_db(status_db_uri: str) -> Generator[Store, None, None]:
-    cg_database.initialize_database(status_db_uri)
-    cg_database.create_all_tables()
-    store = Store()
-    yield store
-    cg_database.drop_all_tables()
-
-
-@pytest.fixture
-def housekeeper_db(
-    housekeeper_db_uri: str, tmp_path_factory: TempPathFactory
-) -> Generator[HousekeeperStore, None, None]:
-    hk_database.initialize_database(housekeeper_db_uri)
-    hk_database.create_all_tables()
-    housekeeper_root: Path = tmp_path_factory.mktemp("housekeeper")
-    store = HousekeeperStore(root=housekeeper_root.as_posix())
-    yield store
-    hk_database.drop_all_tables()
+@pytest.fixture(autouse=True)
+def current_workflow() -> Workflow:
+    return Workflow.MIP_DNA
 
 
 @pytest.fixture
@@ -88,14 +59,13 @@ def scout_export_manged_variants_stdout() -> bytes:
 @pytest.mark.integration
 def test_start_available_mip_dna(
     test_command: str,
+    test_run_paths: TestRunPaths,
     helpers: StoreHelpers,
-    housekeeper_db_uri: str,
     housekeeper_db: HousekeeperStore,
     httpserver: HTTPServer,
     mocker: MockerFixture,
     scout_export_panel_stdout: bytes,
     scout_export_manged_variants_stdout: bytes,
-    status_db_uri: str,
     status_db: Store,
     tmp_path_factory: TempPathFactory,
 ):
@@ -104,13 +74,11 @@ def test_start_available_mip_dna(
     cli_runner = CliRunner()
 
     # GIVEN a MIP-DNA root directory
-    test_root_dir: Path = tmp_path_factory.mktemp("test_start_available_mip_dna")
+    test_root_dir: Path = test_run_paths.test_root_dir
+
     # GIVEN a config file with valid database URIs and directories
-    config_path: Path = create_parsed_config(
-        status_db_uri=status_db_uri,
-        housekeeper_db_uri=housekeeper_db_uri,
-        test_root_dir=test_root_dir.as_posix(),
-    )
+    config_path: Path = test_run_paths.cg_config_file
+
     mip_dna_path = Path(test_root_dir, "mip-dna")
 
     # GIVEN a case with existing qc files
@@ -338,20 +306,3 @@ def create_qc_file(test_root_dir: Path, case: Case) -> Path:
     filepath.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2("tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml", filepath)
     return filepath
-
-
-def create_parsed_config(status_db_uri: str, housekeeper_db_uri: str, test_root_dir: str):
-    template_path = "tests/integration/config/cg-test.yaml"
-    with open(template_path) as f:
-        config_content = f.read()
-
-    config_content = config_content.format(
-        test_root_dir=test_root_dir,
-        status_db_uri=status_db_uri,
-        housekeeper_db_uri=housekeeper_db_uri,
-    )
-
-    config_path = Path(test_root_dir, "cg-config.yaml")
-    with open(config_path, "w") as f:
-        f.write(config_content)
-    return config_path

@@ -24,6 +24,11 @@ from tests.integration.conftest import TestRunPaths, expect_to_add_pending_analy
 from tests.store_helpers import StoreHelpers
 
 
+@pytest.fixture(autouse=True)
+def current_workflow() -> Workflow:
+    return Workflow.BALSAMIC
+
+
 @pytest.mark.xdist_group(name="integration")
 @pytest.mark.integration
 def test_start_available(
@@ -202,6 +207,7 @@ def test_start_config_case(
     )
 
     assert result.exception is None
+    # Move this assertion to the test above and remove this test?
     subprocess_mock.run.assert_called_once_with(
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path config case "
