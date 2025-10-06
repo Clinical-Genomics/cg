@@ -60,6 +60,7 @@ def test_start_available_with_limit(
 
     # THEN only 1 case is picked up to start
     assert caplog.text.count("Starting full MIP analysis workflow for case") == 1
+    assert "Starting 1 available MIP cases" in caplog.text
 
 
 def test_dna_case_included(cli_runner, caplog, dna_case, mip_dna_context, mocker):
