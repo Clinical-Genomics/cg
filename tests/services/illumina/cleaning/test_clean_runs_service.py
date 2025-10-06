@@ -129,7 +129,7 @@ def test_is_directory_older_than_7_days_fail(
 
     # GIVEN an Illumina clean sequencing runs service with a current time that is set to now.
 
-    # WHEN checking whether a given sequencing run directory is older than 21 days
+    # WHEN checking whether a given sequencing run directory is older than 7 days
     is_older: bool = illumina_clean_service_can_be_removed.is_directory_older_than(7)
 
     # THEN checking whether a given sequencing run directory is older than 21 days is FALSE

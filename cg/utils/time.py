@@ -43,4 +43,4 @@ def is_directory_older_than_days_old(directory_path: Path, days_old: int) -> boo
     """
     days_in_seconds = 60 * 60 * 24 * days_old
     dir_creation_time_stamp: float = get_source_creation_time_stamp(source_path=directory_path)
-    return bool(dir_creation_time_stamp < time.time() - days_in_seconds)
+    return bool(dir_creation_time_stamp < time.time() - timedelta(days=days_old))

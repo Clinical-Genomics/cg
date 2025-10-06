@@ -51,7 +51,7 @@ class IlluminaCleanRunsService:
         self.dry_run: bool = dry_run
         LOG.info(f"Trying to delete {sequencing_run_path}")
 
-    def delete_run_directory(self, day_threshold) -> None:
+    def delete_run_directory(self, day_threshold: int) -> None:
         """
         Delete the sequencing runs and demultiplexed runs directory if it fulfills all requirements.
         Raises:
