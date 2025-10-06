@@ -7,7 +7,6 @@ from cg.constants import Workflow
 from cg.meta.workflow.fastq import MicrosaltFastqHandler, MipFastqHandler
 from cg.models.cg_config import CGConfig, MipConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
-from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
@@ -110,7 +109,7 @@ def test_get_mip_dna_configurator():
 
 def test_configurator_factory_failure(cg_context: CGConfig):
     # GIVEN a workflow we do not have support for
-    workflow = Workflow.MIP_DNA
+    workflow = Workflow.FLUFFY
 
     # GIVEN a configurator factory
     configurator_factory = ConfiguratorFactory(cg_config=cg_context)

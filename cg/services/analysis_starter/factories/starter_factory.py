@@ -109,6 +109,7 @@ class AnalysisStarterFactory:
                 store=self.store,
                 trailblazer_api=self.cg_config.trailblazer_api,
                 workflow_root=str(self.cg_config.balsamic.root),
+            )
         elif workflow == Workflow.MIP_DNA:
             return MIPDNATracker(
                 store=self.store,

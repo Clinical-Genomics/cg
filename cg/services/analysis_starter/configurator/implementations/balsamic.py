@@ -78,7 +78,7 @@ class BalsamicConfigurator(Configurator):
             sample_config=self._get_sample_config_path(case_id),
         )
         balsamic_config: BalsamicCaseConfig = self._set_flags(config=balsamic_config, **flags)
-        self._ensure_valid_config(balsamic_config)
+        self._ensure_required_config_files_exist(balsamic_config)
         return balsamic_config
 
     @staticmethod
@@ -239,8 +239,7 @@ class BalsamicConfigurator(Configurator):
     def _get_sample_config_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, f"{case_id}.json")
 
-    @staticmethod
-    def _ensure_valid_config(config: BalsamicCaseConfig) -> None:
+    def _ensure_required_config_files_exist(self, config: BalsamicCaseConfig) -> None:
         if not config.sample_config.exists():
             raise CaseNotConfiguredError(
                 f"Please ensure that the config file {config.sample_config.exists()} exists."
