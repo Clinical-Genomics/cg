@@ -1,14 +1,14 @@
 import logging
 
 import pytest
-from sqlalchemy.exc import MultipleResultsFound, NoResultFound
+from sqlalchemy.exc import MultipleResultsFound
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import CaseActions, MicrosaltAppTags, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
-from cg.exc import CgError
+from cg.exc import BedVersionNotFoundError, CgError
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.models import (
     Analysis,
@@ -386,8 +386,8 @@ def test_get_bed_version_by_short_name_strict_fail(base_store: Store):
 
     # WHEN fetching the bed version
     # THEN an error is raised
-    with pytest.raises(NoResultFound):
-        base_store.get_bed_version_by_short_name_strict(bed_version_short_name=short_name)
+    with pytest.raises(BedVersionNotFoundError):
+        base_store.get_bed_version_by_short_name_strict(short_name=short_name)
 
 
 def test_get_bed_version_by_short_name_strict_mutiple_fail(base_store: Store):
@@ -401,7 +401,7 @@ def test_get_bed_version_by_short_name_strict_mutiple_fail(base_store: Store):
     # WHEN fetching the bed version corresponding to the shortname
     # THEN an error is raised
     with pytest.raises(MultipleResultsFound):
-        base_store.get_bed_version_by_short_name_strict(bed_version_short_name="short_name")
+        base_store.get_bed_version_by_short_name_strict(short_name="short_name")
 
 
 def test_get_bed_version_by_short_name_strict_success(base_store: Store):
@@ -413,7 +413,7 @@ def test_get_bed_version_by_short_name_strict_success(base_store: Store):
 
     # WHEN fetching the bed version corresponding to the shortname
     # THEN success
-    base_store.get_bed_version_by_short_name_strict(bed_version_short_name="short_name")
+    base_store.get_bed_version_by_short_name_strict(short_name="short_name")
 
 
 def test_get_customer_by_internal_id(base_store: Store, customer_id: str):
