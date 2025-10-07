@@ -22,6 +22,7 @@ def expected_wgs_paired_command(balsamic_config: BalsamicConfig) -> str:
         f"--analysis-workflow balsamic "
         f"--balsamic-cache {balsamic_config.balsamic_cache} "
         f"--cadd-annotations {balsamic_config.cadd_path} "
+        f"--artefact-snv-observations {balsamic_config.loqusdb_artefact_snv} "
         f"--artefact-sv-observations {balsamic_config.loqusdb_artefact_sv} "
         f"--case-id balsamic_case_wgs_paired "
         f"--fastq-path {balsamic_config.root.parent}/fastq "
