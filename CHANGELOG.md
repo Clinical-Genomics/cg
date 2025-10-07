@@ -16,7 +16,15 @@ __________ DO NOT TOUCH ___________
 ### Changed
 ### Fixed
 
+
 __________ DO NOT TOUCH ___________ -->
+
+## [x.x.x]
+### Added
+### Changed
+### Fixed
+- README badge for CI - tests and coverage
+
 
 ## [22.26.0]
 ### Added
