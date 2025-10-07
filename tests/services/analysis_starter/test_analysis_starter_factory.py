@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, create_autospec
+from unittest.mock import MagicMock, Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -6,10 +6,17 @@ from pytest_mock import MockerFixture
 from cg.constants import Workflow
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress import CompressAPI
-from cg.models.cg_config import CGConfig, SeqeraPlatformConfig
+from cg.models.cg_config import (
+    CGConfig,
+    IlluminaConfig,
+    MipConfig,
+    RunInstruments,
+    SeqeraPlatformConfig,
+)
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
+from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories import starter_factory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
@@ -20,6 +27,7 @@ from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
     SeqeraPlatformSubmitter,
 )
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
+from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
 from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
 from cg.store.store import Store
 
@@ -41,6 +49,42 @@ def test_analysis_starter_factory_microsalt(cg_context: CGConfig, mocker: Mocker
     assert isinstance(analysis_starter.configurator, MicrosaltConfigurator)
     assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
     assert isinstance(analysis_starter.submitter, SubprocessSubmitter)
+
+
+def test_analysis_starter_factory_mip_dna():
+    # GIVEN a CGConfig with configuration info for MIP-DNA
+    mip_rd_dna_config: MipConfig = create_autospec(
+        MipConfig,
+        root="root",
+        conda_binary="conda/binary",
+        conda_env="conda_env",
+        mip_config="mip/config.config",
+        workflow=Workflow.MIP_DNA,
+        script="script",
+    )
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        mip_rd_dna=mip_rd_dna_config,
+        data_flow=Mock(),
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+        ),
+    )
+
+    # GIVEN an AnalysisStarterFactory
+    analysis_starter_factory = AnalysisStarterFactory(cg_config)
+
+    # WHEN getting the analysis starter for MIP-DNA
+    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
+        Workflow.MIP_DNA
+    )
+
+    # THEN the analysis starter should have been configured correctly
+    assert isinstance(analysis_starter.configurator, MIPDNAConfigurator)
+    assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
+    assert isinstance(analysis_starter.submitter, SubprocessSubmitter)
+    assert isinstance(analysis_starter.tracker, MIPDNATracker)
 
 
 @pytest.mark.parametrize(
