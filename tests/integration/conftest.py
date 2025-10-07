@@ -18,7 +18,7 @@ from cg.store.models import Case
 from cg.store.store import Store
 
 
-class TestRunPaths(NamedTuple):
+class IntegrationTestPaths(NamedTuple):
     cg_config_file: Path
     test_root_dir: Path
 
@@ -74,7 +74,7 @@ def test_run_paths(
     housekeeper_db_uri: str,
     tmp_path_factory: TempPathFactory,
     current_workflow,
-) -> TestRunPaths:
+) -> IntegrationTestPaths:
     test_root_dir: Path = tmp_path_factory.mktemp(current_workflow)
 
     config_file_path = create_parsed_config(
@@ -83,7 +83,7 @@ def test_run_paths(
         test_root_dir=test_root_dir.as_posix(),
     )
 
-    return TestRunPaths(cg_config_file=config_file_path, test_root_dir=test_root_dir)
+    return IntegrationTestPaths(cg_config_file=config_file_path, test_root_dir=test_root_dir)
 
 
 def expect_to_add_pending_analysis_to_trailblazer(

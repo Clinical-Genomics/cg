@@ -20,7 +20,10 @@ from cg.constants.tb import AnalysisType
 from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Order, Sample
 from cg.store.store import Store
 from cg.utils import commands
-from tests.integration.conftest import TestRunPaths, expect_to_add_pending_analysis_to_trailblazer
+from tests.integration.conftest import (
+    IntegrationTestPaths,
+    expect_to_add_pending_analysis_to_trailblazer,
+)
 from tests.store_helpers import StoreHelpers
 
 
@@ -32,7 +35,7 @@ def current_workflow() -> Workflow:
 @pytest.mark.xdist_group(name="integration")
 @pytest.mark.integration
 def test_start_available(
-    test_run_paths: TestRunPaths,
+    test_run_paths: IntegrationTestPaths,
     helpers: StoreHelpers,
     housekeeper_db: HousekeeperStore,
     httpserver: HTTPServer,
@@ -148,32 +151,34 @@ def test_start_available(
     assert result.exception is None
 
     # # THEN balsamic config case was called in the correct way
-    # TODO: find discrepancy here
-    # subprocess_mock.run.assert_called_with(
-    #     f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
-    #     f"{test_root_dir}/balsamic_binary_path config case "
-    #     f"--analysis-dir {test_root_dir}/balsamic_root_path "
-    #     f"--analysis-workflow balsamic "
-    #     f"--balsamic-cache {test_root_dir}/balsamic_cache "
-    #     f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
-    #     f"--case-id {case.internal_id} "
-    #     f"--fastq-path {test_root_dir}/balsamic_root_path/{case.internal_id}/fastq "
-    #     f"--gender female "
-    #     f"--genome-version hg19 "
-    #     f"--gnomad-min-af5 {test_root_dir}/balsamic_gnomad_af5_path "
-    #     f"--panel-bed {test_root_dir}/balsamic_bed_path/dummy_filename "
-    #     "--exome "
-    #     f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
-    #     f"--sentieon-license localhost "
-    #     f"--tumor-sample-name {sample.internal_id}",
-    #     check=False,
-    #     shell=True,
-    #     stderr=ANY,
-    #     stdout=ANY,
-    # )
+    expected_config_case_command = (
+        f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
+        f"{test_root_dir}/balsamic_binary_path config case "
+        f"--analysis-dir {test_root_dir}/balsamic_root_path "
+        f"--analysis-workflow balsamic "
+        f"--balsamic-cache {test_root_dir}/balsamic_cache "
+        f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
+        f"--case-id {case.internal_id} "
+        f"--fastq-path {test_root_dir}/balsamic_root_path/{case.internal_id}/fastq "
+        f"--gender female "
+        f"--genome-version hg19 "
+        f"--gnomad-min-af5 {test_root_dir}/balsamic_gnomad_af5_path "
+        f"--panel-bed {test_root_dir}/balsamic_bed_path/dummy_filename "
+        f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
+        f"--sentieon-license localhost "
+        f"--tumor-sample-name {sample.internal_id}"
+    )
+
+    subprocess_mock.run.assert_any_call(
+        expected_config_case_command,
+        check=False,
+        shell=True,
+        stderr=ANY,
+        stdout=ANY,
+    )
 
     # THEN balsamic run analysis was called in the correct way
-    subprocess_mock.run.assert_called_with(
+    subprocess_mock.run.assert_any_call(
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path run analysis "
         f"--account balsamic_slurm_account "

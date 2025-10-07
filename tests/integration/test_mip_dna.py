@@ -24,7 +24,10 @@ from cg.services.analysis_starter.submitters.subprocess import submitter
 from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Order, Sample
 from cg.store.store import Store
 from cg.utils import commands
-from tests.integration.conftest import TestRunPaths, expect_to_add_pending_analysis_to_trailblazer
+from tests.integration.conftest import (
+    IntegrationTestPaths,
+    expect_to_add_pending_analysis_to_trailblazer,
+)
 from tests.store_helpers import StoreHelpers
 
 
@@ -59,7 +62,7 @@ def scout_export_manged_variants_stdout() -> bytes:
 @pytest.mark.integration
 def test_start_available_mip_dna(
     test_command: str,
-    test_run_paths: TestRunPaths,
+    test_run_paths: IntegrationTestPaths,
     helpers: StoreHelpers,
     housekeeper_db: HousekeeperStore,
     httpserver: HTTPServer,
