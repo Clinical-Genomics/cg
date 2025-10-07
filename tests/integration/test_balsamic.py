@@ -2,19 +2,16 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 from subprocess import CompletedProcess
-from typing import cast
 from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
 from click.testing import CliRunner, Result
-from housekeeper.store.models import Bundle, Version
 from housekeeper.store.store import Store as HousekeeperStore
 from pytest_httpserver import HTTPServer
 from pytest_mock import MockerFixture
 
 from cg.cli.base import base
-from cg.constants.constants import Workflow
-from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.constants.constants import CaseActions, Workflow
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.tb import AnalysisType
 from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Order, Sample
@@ -22,6 +19,7 @@ from cg.store.store import Store
 from cg.utils import commands
 from tests.integration.conftest import (
     IntegrationTestPaths,
+    create_fastq_file_and_add_to_housekeeper,
     expect_to_add_pending_analysis_to_trailblazer,
 )
 from tests.store_helpers import StoreHelpers
@@ -78,32 +76,14 @@ def test_start_available(
     )
 
     # GIVEN that a gzipped-fastq file exists for the sample
-    fastq_base_path: Path = tmp_path_factory.mktemp("fastq_files")
-    fastq_file_path: Path = Path(fastq_base_path, "file.fastq.gz")
-    shutil.copy2("tests/integration/config/file.fastq.gz", fastq_file_path)
-
     # GIVEN bundle data with the fastq files exists in Housekeeper
-    bundle_data = {
-        "name": sample.internal_id,
-        "created": datetime.now(),
-        "expires": datetime.now(),
-        "files": [
-            {
-                "path": fastq_file_path.as_posix(),
-                "archive": False,
-                "tags": [sample.id, SequencingFileTag.FASTQ],
-            },
-        ],
-    }
+    create_fastq_file_and_add_to_housekeeper(
+        housekeeper_db=housekeeper_db, test_root_dir=test_root_dir, sample=sample
+    )
 
-    bundle, version = cast(tuple[Bundle, Version], housekeeper_db.add_bundle(bundle_data))
-    housekeeper_db.session.add(bundle)
-    housekeeper_db.session.add(version)
-    housekeeper_db.session.commit()
-
+    # GIVEN a bed version exists and a corresponding bed name is returned by lims for the sample
     bed_name = "balsamic_integration_test_bed"
     helpers.ensure_bed_version(store=status_db, bed_name=bed_name)
-
     expect_lims_sample_request(lims_server=httpserver, sample=sample, bed_name=bed_name)
 
     # GIVEN a call to balsamic config case successfully generates a config file
@@ -191,6 +171,13 @@ def test_start_available(
         stderr=ANY,
         stdout=ANY,
     )
+
+    # THEN an analysis has been created for the case
+    assert len(case.analyses) == 1
+
+    # THEN the case action is set to running
+    status_db.session.refresh(case)
+    assert case.action == CaseActions.RUNNING
 
 
 def create_tga_config_file(test_root_dir: Path, case: Case) -> Path:

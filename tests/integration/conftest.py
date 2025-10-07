@@ -1,10 +1,13 @@
+import shutil
 from collections.abc import Generator
+from datetime import datetime
 from pathlib import Path
-from typing import NamedTuple
+from typing import NamedTuple, cast
 from unittest.mock import create_autospec
 
 import pytest
 from housekeeper.store import database as hk_database
+from housekeeper.store.models import Bundle, Version
 from housekeeper.store.store import Store as HousekeeperStore
 from pytest import TempPathFactory
 from pytest_httpserver import HTTPServer
@@ -12,9 +15,10 @@ from pytest_httpserver import HTTPServer
 from cg.apps.environ import environ_email
 from cg.apps.tb.api import IDTokenCredentials
 from cg.constants.constants import Workflow
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.tb import AnalysisType
 from cg.store import database as cg_database
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
@@ -139,3 +143,33 @@ def create_parsed_config(status_db_uri: str, housekeeper_db_uri: str, test_root_
     with open(config_path, "w") as f:
         f.write(config_content)
     return config_path
+
+
+def create_fastq_file_and_add_to_housekeeper(
+    housekeeper_db: HousekeeperStore, sample: Sample, test_root_dir: Path
+) -> Path:
+    fastq_base_path: Path = Path(test_root_dir, "fastq_files")
+    fastq_base_path.mkdir(parents=True, exist_ok=True)
+
+    fastq_file_path: Path = Path(fastq_base_path, "file.fastq.gz")
+    shutil.copy2("tests/integration/config/file.fastq.gz", fastq_file_path)
+
+    bundle_data = {
+        "name": sample.internal_id,
+        "created": datetime.now(),
+        "expires": datetime.now(),
+        "files": [
+            {
+                "path": fastq_file_path.as_posix(),
+                "archive": False,
+                "tags": [sample.id, SequencingFileTag.FASTQ],
+            },
+        ],
+    }
+
+    bundle, version = cast(tuple[Bundle, Version], housekeeper_db.add_bundle(bundle_data))
+    housekeeper_db.session.add(bundle)
+    housekeeper_db.session.add(version)
+    housekeeper_db.session.commit()
+
+    return fastq_file_path

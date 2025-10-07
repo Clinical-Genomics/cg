@@ -2,14 +2,11 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 from subprocess import CompletedProcess
-from typing import cast
 from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
 from click.testing import CliRunner, Result
-from housekeeper.store.models import Bundle, Version
 from housekeeper.store.store import Store as HousekeeperStore
-from pytest import TempPathFactory
 from pytest_httpserver import HTTPServer
 from pytest_mock import MockerFixture
 
@@ -17,7 +14,6 @@ from cg.apps.environ import environ_email
 from cg.cli.base import base
 from cg.constants.constants import CaseActions, Workflow
 from cg.constants.gene_panel import GenePanelMasterList
-from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.tb import AnalysisType
 from cg.services.analysis_starter.submitters.subprocess import submitter
@@ -26,6 +22,7 @@ from cg.store.store import Store
 from cg.utils import commands
 from tests.integration.conftest import (
     IntegrationTestPaths,
+    create_fastq_file_and_add_to_housekeeper,
     expect_to_add_pending_analysis_to_trailblazer,
 )
 from tests.store_helpers import StoreHelpers
@@ -70,7 +67,6 @@ def test_start_available_mip_dna(
     scout_export_panel_stdout: bytes,
     scout_export_manged_variants_stdout: bytes,
     status_db: Store,
-    tmp_path_factory: TempPathFactory,
 ):
     """Test a successful run of the command 'cg workflow mip-dna start-available'
     with one case to be analysed that has not been analysed before."""
@@ -113,28 +109,10 @@ def test_start_available_mip_dna(
     )
 
     # GIVEN that a gzipped-fastq file exists for the sample
-    fastq_base_path: Path = tmp_path_factory.mktemp("fastq_files")
-    fastq_file_path: Path = Path(fastq_base_path, "file.fastq.gz")
-    shutil.copy2("tests/integration/config/file.fastq.gz", fastq_file_path)
-
     # GIVEN bundle data with the fastq files exists in Housekeeper
-    bundle_data = {
-        "name": sample.internal_id,
-        "created": datetime.now(),
-        "expires": datetime.now(),
-        "files": [
-            {
-                "path": fastq_file_path.as_posix(),
-                "archive": False,
-                "tags": [sample.id, SequencingFileTag.FASTQ],
-            },
-        ],
-    }
-
-    bundle, version = cast(tuple[Bundle, Version], housekeeper_db.add_bundle(bundle_data))
-    housekeeper_db.session.add(bundle)
-    housekeeper_db.session.add(version)
-    housekeeper_db.session.commit()
+    create_fastq_file_and_add_to_housekeeper(
+        test_root_dir=test_root_dir, housekeeper_db=housekeeper_db, sample=sample
+    )
 
     # GIVEN that the Scout command returns exported panel data
     subprocess_mock = mocker.patch.object(commands, "subprocess")
