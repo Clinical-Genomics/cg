@@ -1199,14 +1199,14 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_analyses_to_clean(
-        self, before: datetime = datetime.now(), workflow: Workflow | None = None
+        self, before: datetime, workflow: Workflow | None = None
     ) -> list[Analysis]:
         """Return analyses that haven't been cleaned."""
         filter_functions: list[Callable] = [
             AnalysisFilter.COMPLETED,
             AnalysisFilter.IS_UPLOADED,
             AnalysisFilter.IS_NOT_CLEANED,
-            AnalysisFilter.STARTED_AT_BEFORE,
+            AnalysisFilter.COMPLETED_AT_BEFORE,
             AnalysisFilter.CASE_ACTION_IS_NONE,
         ]
         if workflow:
@@ -1215,7 +1215,7 @@ class ReadHandler(BaseHandler):
             filter_functions=filter_functions,
             analyses=self._get_latest_analyses_for_cases_query(),
             workflow=workflow,
-            started_at_date=before,
+            completed_at_date=before,
         ).all()
 
     def get_completed_analyses_for_workflow_started_at_before(
