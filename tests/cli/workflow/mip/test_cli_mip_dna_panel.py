@@ -5,7 +5,7 @@ from pathlib import Path
 import mock
 from click.testing import CliRunner
 
-from cg.cli.workflow.mip_dna.base import panel
+from cg.cli.workflow.mip.base import panel
 from cg.constants.scout import ScoutExportFileName
 from cg.io.txt import read_txt
 from cg.meta.workflow.mip import MipAnalysisAPI

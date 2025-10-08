@@ -5,7 +5,7 @@ from unittest import mock
 
 from click.testing import CliRunner
 
-from cg.cli.workflow.mip_dna.base import start_available
+from cg.cli.workflow.mip.base import start_available
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI

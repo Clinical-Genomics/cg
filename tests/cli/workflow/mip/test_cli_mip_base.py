@@ -7,7 +7,7 @@ from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 from pytest_mock import MockFixture
 
-from cg.cli.workflow.mip_dna.base import start, start_available
+from cg.cli.workflow.mip.base import start, start_available
 from cg.constants.process import EXIT_SUCCESS
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig

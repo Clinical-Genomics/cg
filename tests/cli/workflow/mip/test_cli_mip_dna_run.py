@@ -2,7 +2,7 @@
 
 import logging
 
-from cg.cli.workflow.mip_dna.base import run
+from cg.cli.workflow.mip.base import run
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 
