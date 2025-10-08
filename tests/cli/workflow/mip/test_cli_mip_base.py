@@ -7,12 +7,16 @@ from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 from pytest_mock import MockFixture
 
-from cg.cli.workflow.mip.base import start, start_available
+from cg.cli.workflow.mip_rna.base import start, start_available
 from cg.constants.process import EXIT_SUCCESS
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from tests.cli.workflow.mip.conftest import setup_mocks
+
+# These tests are for the MIP-RNA start command, but are tested using MIP-DNA setup because this is
+# how they were originally written due to them sharing the same logic previously. They will be kept
+# in this state until MIP-RNA is also refactored to use the AnalysisStarter.
 
 
 def test_spring_decompression_needed_and_started(
