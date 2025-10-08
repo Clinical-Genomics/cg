@@ -32,7 +32,9 @@ def test_dry(cli_runner, mip_rna_context, caplog, mocker: MockerFixture):
     with mock.patch.object(MipRNAAnalysisAPI, "resolve_decompression", return_value=None):
 
         # WHEN using dry running
-        result = cli_runner.invoke(start_available, ["--dry-run"], obj=mip_rna_context)
+        result = cli_runner.invoke(
+            start_available, ["--dry-run"], obj=mip_rna_context, catch_exceptions=False
+        )
 
     # THEN command should have accepted the option happily
     assert result.exit_code == EXIT_SUCCESS
