@@ -1,4 +1,4 @@
-"""This script tests the cli methods to create prerequisites and start a mip-dna analysis"""
+"""This script tests the cli methods to create prerequisites and start a mip-rna analysis"""
 
 import logging
 from typing import cast

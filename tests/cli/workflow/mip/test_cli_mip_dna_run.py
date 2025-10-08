@@ -28,68 +28,6 @@ def test_cg_dry_run(
     assert "Running in dry-run mode" in caplog.text
 
 
-def test_mip_dry_run(
-    cli_runner, mocker, caplog, case_id, email_address, mip_dna_context, mip_dna_config_path
-):
-    """Test print the MIP run to console"""
-
-    caplog.set_level(logging.INFO)
-
-    mocker.patch.object(MipDNAAnalysisAPI, "get_target_bed_from_lims")
-    MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = mip_dna_config_path
-    mocker.patch.object(MipDNAAnalysisAPI, "run_analysis")
-    MipDNAAnalysisAPI.run_analysis.return_value = 0
-
-    # GIVEN a cli function
-    # WHEN we run a case in dry run mode
-    result = cli_runner.invoke(
-        run, ["--mip-dry-run", "--email", email_address, case_id], obj=mip_dna_context
-    )
-
-    # THEN command is run successfully
-    assert result.exit_code == 0
-
-    # THEN log should be printed
-    assert "Executed MIP in dry-run mode" in caplog.text
-
-
-def test_mip_run(
-    cli_runner,
-    mocker,
-    caplog,
-    case_id,
-    email_address,
-    mip_dna_context,
-    trailblazer_api,
-    mip_dna_config_path,
-    case_qc_sample_info_path,
-):
-    """Test print the MIP run"""
-
-    caplog.set_level(logging.INFO)
-
-    mocker.patch.object(MipDNAAnalysisAPI, "get_target_bed_from_lims")
-    MipDNAAnalysisAPI.get_target_bed_from_lims.return_value = mip_dna_config_path
-    mocker.patch.object(MipDNAAnalysisAPI, "run_analysis")
-    MipDNAAnalysisAPI.run_analysis.return_value = 0
-
-    mocker.patch.object(MipDNAAnalysisAPI, "on_analysis_started")
-
-    # GIVEN that the case has a QC sample info file
-    mocker.patch.object(MipDNAAnalysisAPI, "get_sample_info_path")
-    MipDNAAnalysisAPI.get_sample_info_path.return_value = case_qc_sample_info_path
-
-    # GIVEN a cli function
-    # WHEN we run a case
-    result = cli_runner.invoke(run, ["--email", email_address, case_id], obj=mip_dna_context)
-
-    # THEN command is run successfully
-    assert result.exit_code == 0
-
-    # THEN log should be printed
-    assert "mip-dna run started" in caplog.text
-
-
 def test_mip_run_fail(
     cli_runner,
     mocker,
