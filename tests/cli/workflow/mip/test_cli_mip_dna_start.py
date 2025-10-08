@@ -1,7 +1,7 @@
 """This script tests the cli methods to create prerequisites and start a mip-dna analysis"""
 
 import logging
-from unittest import mock
+from typing import cast
 from unittest.mock import Mock, create_autospec
 
 from click.testing import CliRunner
@@ -9,7 +9,6 @@ from pytest_mock import MockerFixture
 
 from cg.cli.workflow.mip.base import start_available
 from cg.constants import EXIT_SUCCESS, Workflow
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
@@ -17,12 +16,12 @@ from cg.store.models import Case
 from cg.store.store import Store
 
 
-def test_dry(cli_runner, mip_rna_context, caplog, mocker: MockerFixture):
-    """Test mip-dna start-available with --dry option"""
+def test_start_available_mip_rna(cli_runner, mip_rna_context, caplog, mocker: MockerFixture):
+    """Test mip-rna start-available with --dry option"""
     # GIVEN that the log messages are captured
     caplog.set_level(logging.INFO)
 
-    # GIVEN a mip_dna_context with 1 case that is ready for analysis
+    # GIVEN a mip_rna_context with 1 case that is ready for analysis
     analysis_api: MipRNAAnalysisAPI = create_autospec(MipRNAAnalysisAPI)
     analysis_api.get_cases_to_analyze = Mock(
         return_value=[create_autospec(Case, internal_id="case_id")]
@@ -38,33 +37,37 @@ def test_dry(cli_runner, mip_rna_context, caplog, mocker: MockerFixture):
     # THEN command should have accepted the option happily
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN the case are picked up to start
+    # THEN the case is picked up to start
     assert caplog.text.count("Starting full MIP analysis workflow for case") == 1
 
 
 def test_start_available_with_limit(
     cli_runner: CliRunner,
     caplog,
-    mip_dna_context: CGConfig,
-    mip_dna_analysis_api: MipDNAAnalysisAPI,
+    mip_rna_context: CGConfig,
 ):
-    """Test that the mip-dna start-available command picks up only the given max number of cases."""
+    """Test that the mip-rna start-available command picks up only the given max number of cases."""
     # GIVEN that the log messages are captured
     caplog.set_level(logging.INFO)
 
-    # GIVEN a mip_dna_context with 3 cases that are ready for analysis
-    assert len(mip_dna_analysis_api.get_cases_to_analyze()) == 3
+    # GIVEN a mip_rna_context with cases that are ready for analysis
+    analysis_api: MipRNAAnalysisAPI = create_autospec(MipRNAAnalysisAPI)
+    analysis_api.get_cases_to_analyze = Mock(
+        return_value=[
+            create_autospec(Case, internal_id="case_id"),
+        ]
+    )
+    analysis_api.status_db = create_autospec(Store)
+    mip_rna_context.meta_apis["analysis_api"] = analysis_api
 
-    # GIVEN that the cases do not need decompression
-    with mock.patch.object(MipDNAAnalysisAPI, "resolve_decompression", return_value=None):
-
-        # WHEN running start-available command with limit=1
-        result = cli_runner.invoke(
-            start_available, ["--dry-run", "--limit", 1], obj=mip_dna_context
-        )
+    # WHEN running start-available command with limit=1
+    result = cli_runner.invoke(start_available, ["--dry-run", "--limit", "1"], obj=mip_rna_context)
 
     # THEN command succeeds
     assert result.exit_code == EXIT_SUCCESS
+
+    # THEN the limit should have been used when getting cases to analyze
+    cast(Mock, analysis_api.get_cases_to_analyze).assert_called_once_with(limit=1)
 
     # THEN only 1 case is picked up to start
     assert caplog.text.count("Starting full MIP analysis workflow for case") == 1
