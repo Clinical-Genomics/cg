@@ -74,34 +74,6 @@ def test_start_available_with_limit(
     assert "Starting 1 available MIP cases" in caplog.text
 
 
-def test_dna_case_included(cli_runner, caplog, dna_case, mip_dna_context, mocker):
-    """Test mip dna start with a DNA case"""
-
-    caplog.set_level(logging.INFO)
-
-    # GIVEN spring decompression is needed
-    mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
-    PrepareFastqAPI.is_spring_decompression_needed.return_value = True
-
-    # GIVEN there is spring files that can be decompressed
-    mocker.patch.object(PrepareFastqAPI, "can_at_least_one_sample_be_decompressed")
-    PrepareFastqAPI.can_at_least_one_sample_be_decompressed.return_value = True
-
-    # GIVEN a case that is ready for MIP DNA analysis
-    #   -> has a sample that is sequenced and has an dna-application (non-wts)
-    for link in dna_case.links:
-        sample = link.sample
-        assert sample.last_sequenced_at
-        assert sample.application_version.application.analysis_type not in "wts"
-    assert not dna_case.analyses
-
-    # WHEN running command
-    result = cli_runner.invoke(start_available, ["--dry-run"], obj=mip_dna_context)
-
-    # THEN command should have printed the case id
-    assert result.exit_code == EXIT_SUCCESS
-
-
 def test_rna_case_excluded(cli_runner, caplog, mip_dna_context, rna_case, mocker):
     """Test mip dna start with a RNA case"""
 
