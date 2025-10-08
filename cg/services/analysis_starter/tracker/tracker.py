@@ -46,6 +46,7 @@ class Tracker(ABC):
         """Raises: AnalysisRunningError if the case has an analysis running in Trailblazer."""
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id):
             raise AnalysisRunningError(f"Analysis still ongoing in Trailblazer for case {case_id}")
+        LOG.info(f"No ongoing analysis in Trailblazer for case {case_id}")
 
     def set_case_as_running(self, case_id: str) -> None:
         self.store.update_case_action(case_internal_id=case_id, action=CaseActions.RUNNING)
