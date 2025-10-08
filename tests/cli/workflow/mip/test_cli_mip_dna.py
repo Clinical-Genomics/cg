@@ -35,7 +35,7 @@ def cg_config() -> CGConfig:
     )
 
 
-def test_mip_dna_dev_run_no_flags(cg_config: CGConfig, mocker: MockerFixture):
+def test_mip_dna_run_no_flags(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a CLI runner
     cli_runner = CliRunner()
 
@@ -68,7 +68,7 @@ def test_mip_dna_dev_run_no_flags(cg_config: CGConfig, mocker: MockerFixture):
     )
 
 
-def test_mip_dna_dev_run_all_flags(cg_config: CGConfig, mocker: MockerFixture):
+def test_mip_dna_run_all_flags(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a CLI runner
     cli_runner = CliRunner()
 
@@ -103,7 +103,7 @@ def test_mip_dna_dev_run_all_flags(cg_config: CGConfig, mocker: MockerFixture):
     )
 
 
-def test_mip_dna_dev_start_no_flags(
+def test_mip_dna_start_no_flags(
     cg_config: CGConfig,
     mocker: MockerFixture,
 ):
@@ -147,7 +147,7 @@ def test_mip_dna_dev_start_no_flags(
     )
 
 
-def test_mip_dna_dev_start_all_flags(
+def test_mip_dna_start_all_flags(
     cg_config: CGConfig,
     mocker: MockerFixture,
 ):
@@ -203,7 +203,7 @@ def test_mip_dna_dev_start_all_flags(
     )
 
 
-def test_mip_dna_dev_config_case_all_flags(cg_config: CGConfig, mocker: MockerFixture):
+def test_mip_dna_config_case_all_flags(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a CLIRunner
     cli_runner = CliRunner()
 
@@ -229,7 +229,7 @@ def test_mip_dna_dev_config_case_all_flags(cg_config: CGConfig, mocker: MockerFi
     mock_configure.assert_called_once_with(case_id=case_id, panel_bed="panel.bed")
 
 
-def test_mip_dna_dev_config_case_no_flags(cg_config: CGConfig, mocker: MockerFixture):
+def test_mip_dna_config_case_no_flags(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a CLIRunner
     cli_runner = CliRunner()
 
