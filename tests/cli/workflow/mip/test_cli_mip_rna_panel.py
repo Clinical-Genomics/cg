@@ -1,6 +1,7 @@
-""" Test the CLI for mip-dna panel"""
+"""Test the CLI for mip-rna panel"""
 
 from pathlib import Path
+from typing import cast
 
 import mock
 from click.testing import CliRunner
@@ -35,5 +36,5 @@ def test_panel_file_is_written(
     assert panel_file.exists()
 
     # THEN the file should contain the output from Scout
-    file_content: str = read_txt(file_path=panel_file, read_to_string=True)
+    file_content: str = cast(str, read_txt(file_path=panel_file, read_to_string=True))
     assert file_content == scout_panel_output
