@@ -2,7 +2,7 @@
 
 import logging
 from unittest import mock
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
@@ -14,6 +14,7 @@ from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
+from cg.store.store import Store
 
 
 def test_dry(cli_runner, mip_rna_context, caplog, mocker: MockerFixture):
@@ -21,26 +22,24 @@ def test_dry(cli_runner, mip_rna_context, caplog, mocker: MockerFixture):
     # GIVEN that the log messages are captured
     caplog.set_level(logging.INFO)
 
-    # GIVEN a mip_dna_context with 3 cases that are ready for analysis
-    analysis_api = MipRNAAnalysisAPI(config=mip_rna_context)
-    mocker.patch.object(analysis_api, "get_cases_to_analyze", return_value=[create_autospec(Case)])
+    # GIVEN a mip_dna_context with 1 case that is ready for analysis
+    analysis_api: MipRNAAnalysisAPI = create_autospec(MipRNAAnalysisAPI)
+    analysis_api.get_cases_to_analyze = Mock(
+        return_value=[create_autospec(Case, internal_id="case_id")]
+    )
+    analysis_api.status_db = create_autospec(Store)
     mip_rna_context.meta_apis["analysis_api"] = analysis_api
 
-    # assert len(analysis_api.get_cases_to_analyze()) == 3
-
-    # GIVEN that the cases do not need decompression
-    with mock.patch.object(MipRNAAnalysisAPI, "resolve_decompression", return_value=None):
-
-        # WHEN using dry running
-        result = cli_runner.invoke(
-            start_available, ["--dry-run"], obj=mip_rna_context, catch_exceptions=False
-        )
+    # WHEN using dry running
+    result = cli_runner.invoke(
+        start_available, ["--dry-run"], obj=mip_rna_context, catch_exceptions=False
+    )
 
     # THEN command should have accepted the option happily
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN that the 3 cases are picked up to start
-    assert caplog.text.count("Starting full MIP analysis workflow for case") == 3
+    # THEN the case are picked up to start
+    assert caplog.text.count("Starting full MIP analysis workflow for case") == 1
 
 
 def test_start_available_with_limit(
