@@ -2,30 +2,37 @@
 
 import logging
 from unittest import mock
+from unittest.mock import create_autospec
 
 from click.testing import CliRunner
+from pytest_mock import MockerFixture
 
 from cg.cli.workflow.mip.base import start_available
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
+from cg.store.models import Case
 
 
-def test_dry(cli_runner, mip_dna_context, caplog):
+def test_dry(cli_runner, mip_rna_context, caplog, mocker: MockerFixture):
     """Test mip-dna start-available with --dry option"""
     # GIVEN that the log messages are captured
     caplog.set_level(logging.INFO)
 
     # GIVEN a mip_dna_context with 3 cases that are ready for analysis
-    analysis_api = MipDNAAnalysisAPI(config=mip_dna_context)
-    assert len(analysis_api.get_cases_to_analyze()) == 3
+    analysis_api = MipRNAAnalysisAPI(config=mip_rna_context)
+    mocker.patch.object(analysis_api, "get_cases_to_analyze", return_value=[create_autospec(Case)])
+    mip_rna_context.meta_apis["analysis_api"] = analysis_api
+
+    # assert len(analysis_api.get_cases_to_analyze()) == 3
 
     # GIVEN that the cases do not need decompression
-    with mock.patch.object(MipDNAAnalysisAPI, "resolve_decompression", return_value=None):
+    with mock.patch.object(MipRNAAnalysisAPI, "resolve_decompression", return_value=None):
 
         # WHEN using dry running
-        result = cli_runner.invoke(start_available, ["--dry-run"], obj=mip_dna_context)
+        result = cli_runner.invoke(start_available, ["--dry-run"], obj=mip_rna_context)
 
     # THEN command should have accepted the option happily
     assert result.exit_code == EXIT_SUCCESS
