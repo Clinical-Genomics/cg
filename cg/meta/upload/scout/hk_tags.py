@@ -39,7 +39,7 @@ class CaseTags(BaseModel):
     multiqc: set[str] | None = Field(None, description="MultiQC report")
     delivery_report: set[str] | None = Field(None, description="Delivery report")
     str_catalog: set[str] | None = Field(
-        None, description="Variant catalog used with expansionhunter"
+        None, description="Variant catalog used with expansionhunter or TRGT"
     )
     gene_fusion: set[str] = Field(
         None, description="Arriba report for RNA fusions containing only clinical fusions"
@@ -91,3 +91,7 @@ class SampleTags(BaseModel):
     reviewer_vcf: set[str] | None = None
     mitodel_file: set[str] | None = None
     paraphase_alignment_path: set[str] | None = None
+    tiddit_coverage_wig: set[str] | None = None
+    rhocall_wig: set[str] | None = None
+    upd_regions_bed: set[str] | None = None
+    upd_sites_bed: set[str] | None = None

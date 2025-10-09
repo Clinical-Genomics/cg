@@ -15,16 +15,23 @@ class NfTowerStatus(StrEnum):
     UNKNOWN: str = "UNKNOWN"
 
 
-NALLO_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
+NALLO_GENERAL_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "median_coverage": {"norm": "gt", "threshold": 20},
     "predicted_sex_sex_check": {"norm": "eq", "threshold": None},
+}
+
+NALLO_PARENT_PEDDY_METRIC_CONDITION: dict[str, dict[str, Any]] = {
+    "parent_error_ped_check": {"norm": "eq", "threshold": "False"},
+}
+
+NALLO_RAW_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
+    "somalier_sex": {"norm": "eq", "threshold": None},
 }
 
 RAREDISEASE_PREDICTED_SEX_METRIC = "predicted_sex_sex_check"
 
 RAREDISEASE_METRIC_CONDITIONS_WES: dict[str, dict[str, Any]] = {
     "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.20},
-    "Contamination Status": {"norm": "eq", "threshold": "NO"},
     "PCT_PF_UQ_READS_ALIGNED": {"norm": "gt", "threshold": 0.95},
     "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
     "AT_DROPOUT": {"norm": "lt", "threshold": 10},
@@ -35,7 +42,6 @@ RAREDISEASE_METRIC_CONDITIONS_WES: dict[str, dict[str, Any]] = {
 
 RAREDISEASE_METRIC_CONDITIONS_WGS: dict[str, dict[str, Any]] = {
     "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.20},
-    "Contamination Status": {"norm": "eq", "threshold": "NO"},
     "PCT_PF_UQ_READS_ALIGNED": {"norm": "gt", "threshold": 0.95},
     "MEDIAN_TARGET_COVERAGE": {"norm": "gt", "threshold": 25},
     "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},

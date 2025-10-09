@@ -1,22 +1,30 @@
 import logging
+from unittest.mock import MagicMock
 
 import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
-from click.testing import CliRunner
+from click import BaseCommand
+from click.testing import CliRunner, Result
+from pytest_mock import MockerFixture
 
 from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
-from cg.constants import EXIT_SUCCESS, Workflow
-from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
+from cg.cli.workflow.raredisease.base import dev_start as raredisease_start
+from cg.cli.workflow.rnafusion.base import start as rnafusion_start
+from cg.cli.workflow.rnafusion.base import start_available as rnafusion_start_available
+from cg.cli.workflow.taxprofiler.base import start as taxprofiler_start
+from cg.cli.workflow.taxprofiler.base import start_available as taxprofiler_start_available
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.service import AnalysisStarter
 
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_start(
     cli_runner: CliRunner,
@@ -60,7 +68,7 @@ def test_start(
 
 @pytest.mark.parametrize(
     "workflow",
-    NEXTFLOW_WORKFLOWS + [Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_start_available(
     cli_runner: CliRunner,
@@ -108,5 +116,35 @@ def test_start_available(
     # THEN it should successfully identify the one case eligible for auto-start
     assert case_id in caplog.text
 
+    # THEN it logs how many cases will be started
+    assert f"Starting 1 available {workflow} cases" in caplog.text
+
     # THEN the case without enough reads should not start
     assert case_id_not_enough_reads not in caplog.text
+
+
+@pytest.mark.parametrize(
+    "start_command",
+    [raredisease_start, rnafusion_start, taxprofiler_start],
+    ids=["raredisease", "RNAFUSION", "Taxprofiler"],
+)
+def test_start_nextflow_calls_service(
+    start_command: BaseCommand,
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    mocker: MockerFixture,
+):
+    # GIVEN a valid context and a case id
+    case_id: str = "case_id"
+
+    # GIVEN a mocked AnalysisStarter that simulates the start method
+    service_call: MagicMock = mocker.patch.object(AnalysisStarter, "start")
+
+    # WHEN running the start command
+    result: Result = cli_runner.invoke(start_command, [case_id], obj=cg_context)
+
+    # THEN the analysis started should have been called with the flags set
+    service_call.assert_called_once_with(case_id=case_id)
+
+    # THEN the command should have executed without fail
+    assert result.exit_code == EXIT_SUCCESS

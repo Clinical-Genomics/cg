@@ -5,14 +5,17 @@ import logging
 from datetime import datetime
 from typing import Callable, Iterator
 
+import sqlalchemy
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import DNA_WORKFLOWS_WITH_SCOUT_UPLOAD, CustomerId, SampleType
+from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
     AnalysisNotCompletedError,
+    BedVersionNotFoundError,
     CaseNotFoundError,
     CgDataError,
     CgError,
@@ -115,18 +118,6 @@ class ReadHandler(BaseHandler):
             cases=cases_query, filter_functions=[CaseFilter.BY_ENTRY_ID], entry_id=entry_id
         ).first()
 
-    def has_active_cases_for_sample(self, internal_id: str) -> bool:
-        """Check if there are any active cases for a sample."""
-        sample = self.get_sample_by_internal_id(internal_id=internal_id)
-        active_actions = ["analyze", "running"]
-
-        for family_sample in sample.links:
-            case: Case = self.get_case_by_entry_id(entry_id=family_sample.case_id)
-            if case.action in active_actions:
-                return True
-
-        return False
-
     def get_application_by_case(self, case_id: str) -> Application:
         """Return the application of a case."""
 
@@ -173,22 +164,6 @@ class ReadHandler(BaseHandler):
             analyses=self._get_latest_analyses_for_cases_query(),
             workflow=workflow,
         ).all()
-
-    def get_analysis_by_case_entry_id_and_completed_at(
-        self, case_entry_id: int, completed_at_date: dt.datetime
-    ) -> Analysis | None:
-        """Fetch an analysis."""
-        filter_functions: list[Callable] = [
-            AnalysisFilter.BY_CASE_ENTRY_ID,
-            AnalysisFilter.BY_COMPLETED_AT,
-        ]
-
-        return apply_analysis_filter(
-            filter_functions=filter_functions,
-            analyses=self._get_query(Analysis),
-            case_entry_id=case_entry_id,
-            completed_at_date=completed_at_date,
-        ).first()
 
     def get_latest_started_analysis_for_case(self, case_id: str) -> Analysis:
         """Return the latest started analysis for a case.
@@ -373,7 +348,7 @@ class ReadHandler(BaseHandler):
 
     def get_latest_ticket_from_case(self, case_id: str) -> str:
         """Returns the ticket from the most recent sample in a case."""
-        return self.get_case_by_internal_id(internal_id=case_id).latest_ticket
+        return str(self.get_case_by_internal_id(internal_id=case_id).latest_order.ticket_id)
 
     def _is_case_found(self, case: Case, case_id: str) -> None:
         """Raise error if case is false."""
@@ -577,19 +552,6 @@ class ReadHandler(BaseHandler):
             filter_functions=[SampleFilter.BY_INVOICE_ID],
         ).all()
         return pools + samples
-
-    def get_case_sample_link(self, case_internal_id: str, sample_internal_id: str) -> CaseSample:
-        """Return a case-sample link between a family and a sample."""
-        filter_functions: list[CaseSampleFilter] = [
-            CaseSampleFilter.SAMPLES_IN_CASE_BY_INTERNAL_ID,
-            CaseSampleFilter.CASES_WITH_SAMPLE_BY_INTERNAL_ID,
-        ]
-        return apply_case_sample_filter(
-            filter_functions=filter_functions,
-            case_samples=self._get_join_case_sample_query(),
-            case_internal_id=case_internal_id,
-            sample_internal_id=sample_internal_id,
-        ).first()
 
     def new_invoice_id(self) -> int:
         """Fetch invoices."""
@@ -799,6 +761,25 @@ class ReadHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
+    def get_case_by_internal_id_strict(self, internal_id: str) -> Case:
+        """
+        Get case by internal id.
+        Raises:
+            CaseNotFoundError: If no case is found with the given internal id.
+            sqlalchemy.orm.exc.MultipleResultsFound: If multiple cases are found with the same
+            internal id. This should not happen due to database constraints.
+        """
+        try:
+            return apply_case_filter(
+                cases=self._get_query(table=Case),
+                filter_functions=[CaseFilter.BY_INTERNAL_ID],
+                internal_id=internal_id,
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise CaseNotFoundError(
+                f"Case with internal id {internal_id} was not found in the database."
+            )
+
     def get_cases_by_internal_ids(self, internal_ids: list[str]) -> list[Case]:
         """Get cases by internal ids."""
         return apply_case_filter(
@@ -950,6 +931,25 @@ class ReadHandler(BaseHandler):
             bed_version_short_name=bed_version_short_name,
             filter_functions=[BedVersionFilter.BY_SHORT_NAME],
         ).first()
+
+    def get_bed_version_by_short_name_strict(self, short_name: str) -> BedVersion:
+        """
+        Return bed version with short name.
+        Raises:
+            BedVersionNotFoundError: If no bed version is found with the given short name.
+            sqlalchemy.orm.exc.MultipleResultsFound: If multiple bed versions are found with the same
+            shortname.
+        """
+        try:
+            return apply_bed_version_filter(
+                bed_versions=self._get_query(table=BedVersion),
+                bed_version_short_name=short_name,
+                filter_functions=[BedVersionFilter.BY_SHORT_NAME],
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise BedVersionNotFoundError(
+                f"Bed version with short name {short_name} was not found in the database."
+            )
 
     def get_bed_by_entry_id(self, bed_entry_id: int) -> Bed:
         """Get panel bed with bed entry id."""
@@ -1109,10 +1109,6 @@ class ReadHandler(BaseHandler):
         )
         return records.order_by(Sample.prepared_at).all()
 
-    def get_cases_with_analyzes(self) -> Query:
-        """Return all cases in the database with an analysis."""
-        return self._get_outer_join_cases_with_analyses_query()
-
     def get_cases_with_samples(self) -> Query:
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
@@ -1203,14 +1199,14 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_analyses_to_clean(
-        self, before: datetime = datetime.now(), workflow: Workflow | None = None
+        self, before: datetime, workflow: Workflow | None = None
     ) -> list[Analysis]:
         """Return analyses that haven't been cleaned."""
         filter_functions: list[Callable] = [
             AnalysisFilter.COMPLETED,
             AnalysisFilter.IS_UPLOADED,
             AnalysisFilter.IS_NOT_CLEANED,
-            AnalysisFilter.STARTED_AT_BEFORE,
+            AnalysisFilter.COMPLETED_AT_BEFORE,
             AnalysisFilter.CASE_ACTION_IS_NONE,
         ]
         if workflow:
@@ -1219,7 +1215,7 @@ class ReadHandler(BaseHandler):
             filter_functions=filter_functions,
             analyses=self._get_latest_analyses_for_cases_query(),
             workflow=workflow,
-            started_at_date=before,
+            completed_at_date=before,
         ).all()
 
     def get_completed_analyses_for_workflow_started_at_before(
@@ -1803,6 +1799,16 @@ class ReadHandler(BaseHandler):
         if runs.count() == 0:
             raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()
+
+    def get_case_priority(self, case_id: str) -> SlurmQos:
+        """Get case priority."""
+        case: Case = self.get_case_by_internal_id(case_id)
+        return SlurmQos(case.slurm_priority)
+
+    def get_case_workflow(self, case_id: str) -> Workflow:
+        """Get case workflow."""
+        case: Case = self.get_case_by_internal_id(case_id)
+        return Workflow(case.data_analysis)
 
     def is_sample_name_used(self, sample: Sample, customer_entry_id: int) -> bool:
         """Check if a sample name is already used by the customer"""

@@ -50,7 +50,8 @@ def test_with_yes(
 
     analysis_to_clean = analysis_api.status_db.get_case_by_internal_id(
         balsamic_case_clean
-    ).analyses[0]
+    ).latest_completed_analysis
+    assert analysis_to_clean
     case_path = analysis_api.get_case_path(balsamic_case_clean)
     Path(case_path).mkdir(exist_ok=True, parents=True)
 
@@ -88,7 +89,9 @@ def test_dry_run(
         workflow=Workflow.BALSAMIC,
     )
 
-    analysis_to_clean = base_store.get_case_by_internal_id(balsamic_case_clean).analyses[0]
+    analysis_to_clean = base_store.get_case_by_internal_id(
+        balsamic_case_clean
+    ).latest_completed_analysis
     case_path = clean_context.meta_apis["analysis_api"].get_case_path(balsamic_case_clean)
     Path(case_path).mkdir(exist_ok=True, parents=True)
 
@@ -103,7 +106,9 @@ def test_dry_run(
     assert result.exit_code == EXIT_SUCCESS
     assert "Would have deleted" in caplog.text
     assert balsamic_case_clean in caplog.text
-    assert analysis_to_clean in base_store.get_analyses_to_clean(workflow=Workflow.BALSAMIC)
+    assert analysis_to_clean in base_store.get_analyses_to_clean(
+        before=dt.datetime.now(), workflow=Workflow.BALSAMIC
+    )
 
 
 def test_cleaned_at_valid(

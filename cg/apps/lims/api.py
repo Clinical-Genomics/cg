@@ -171,6 +171,11 @@ class LimsAPI(Lims, OrderHandler):
             LOG.warning(f"Sample {lims_id} not found in LIMS: {error}")
         return None
 
+    def get_capture_kit_strict(self, lims_id: str) -> str:
+        if capture_kit := self.capture_kit(lims_id):
+            return capture_kit
+        raise LimsDataError(f"No capture kit found for sample {lims_id}")
+
     def get_samples(self, *args, map_ids=False, **kwargs) -> dict[str, str] | list[Sample]:
         """Bypass to original method."""
         lims_samples = super(LimsAPI, self).get_samples(*args, **kwargs)
@@ -401,14 +406,6 @@ class LimsAPI(Lims, OrderHandler):
             for artifact in artifacts
             if artifact.udf.get(udf_key) is not None
         }
-
-    def get_sample_comment(self, sample_id: str) -> str | None:
-        """Return the comment of the sample."""
-        lims_sample: dict[str, Any] = self.sample(sample_id)
-        comment = None
-        if lims_sample:
-            comment: str = lims_sample.get("comment")
-        return comment
 
     def get_sample_project(self, sample_id: str) -> str | None:
         """Return the LIMS ID of the sample associated project if sample exists in LIMS."""

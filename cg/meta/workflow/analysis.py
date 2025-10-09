@@ -142,11 +142,6 @@ class AnalysisAPI(MetaAPI):
         """Path to file containing slurm/tower job ids for the case."""
         raise NotImplementedError
 
-    def get_sample_name_from_lims_id(self, lims_id: str) -> str:
-        """Retrieve sample name provided by customer for specific sample"""
-        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=lims_id)
-        return sample.name
-
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         """
         Links fastq files from Housekeeper to case working directory
@@ -209,10 +204,10 @@ class AnalysisAPI(MetaAPI):
         application_type: str = self.get_case_application_type(case_id)
         return application_type == AnalysisType.WES
 
-    def upload_bundle_housekeeper(
+    def create_housekeeper_bundle(
         self, case_id: str, dry_run: bool = False, force: bool = False
-    ) -> None:
-        """Storing bundle data in Housekeeper for a case."""
+    ) -> tuple[Bundle, Version]:
+        """Create and return bundle data in Housekeeper for a case."""
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
         bundle_data: dict = self.get_hermes_transformed_deliverables(case_id=case_id, force=force)
         bundle_result: tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
@@ -228,13 +223,14 @@ class AnalysisAPI(MetaAPI):
                 "The following files would be stored:\n%s",
                 "\n".join([f["path"] for f in bundle_data["files"]]),
             )
-            return
-        self.housekeeper_api.include(bundle_version)
-        self.housekeeper_api.add_commit(bundle_object)
-        self.housekeeper_api.add_commit(bundle_version)
-        LOG.info(
-            f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
-        )
+        else:
+            self.housekeeper_api.include(bundle_version)
+            self.housekeeper_api.add_commit(bundle_object)
+            self.housekeeper_api.add_commit(bundle_version)
+            LOG.info(
+                f"Analysis successfully stored in Housekeeper: {case_id} ({bundle_version.created_at})"
+            )
+        return bundle_result
 
     def _create_analysis_statusdb(self, case: Case, trailblazer_id: int | None) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
@@ -258,6 +254,7 @@ class AnalysisAPI(MetaAPI):
     def update_analysis_as_completed_statusdb(
         self,
         case_id: str,
+        hk_version_id: int,
         comment: str | None = None,
         dry_run: bool = False,
         force: bool = False,
@@ -280,7 +277,10 @@ class AnalysisAPI(MetaAPI):
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
         self.status_db.update_analysis_completed_at(
-            analysis_id=analysis.id, completed_at=self.get_bundle_created_date(case_id)
+            analysis_id=analysis.id, completed_at=datetime.now()
+        )
+        self.status_db.update_analysis_housekeeper_version_id(
+            analysis_id=analysis.id, version_id=hk_version_id
         )
         self.status_db.update_analysis_comment(analysis_id=analysis.id, comment=comment)
 
@@ -391,15 +391,6 @@ class AnalysisAPI(MetaAPI):
             case
             for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
-        ]
-
-    def get_cases_to_qc(self) -> list[Case]:
-        """Return cases where analysis finished successfully,
-        and is ready for QC metrics checks."""
-        return [
-            case
-            for case in self.status_db.get_running_cases_in_workflow(workflow=self.workflow)
-            if self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
 
     def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
@@ -689,9 +680,6 @@ class AnalysisAPI(MetaAPI):
             ) and not all(file.archive.retrieved_at for file in files):
                 return False
         return True
-
-    def get_archive_location_for_case(self, case_id: str) -> str:
-        return self.status_db.get_case_by_internal_id(case_id).customer.data_archive_location
 
     @staticmethod
     def _write_managed_variants(out_dir: Path, content: list[str]) -> None:

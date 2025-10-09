@@ -12,7 +12,6 @@ from housekeeper.store.models import Bundle, Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.compression import CRUNCHY_MIN_GB_PER_PROCESS, MAX_READS_PER_GB
 from cg.constants.slurm import SlurmProcessing
-from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
 from cg.store.models import Case
@@ -22,7 +21,9 @@ from cg.utils.date import get_date_days_ago
 LOG = logging.getLogger(__name__)
 
 
-def get_cases_to_process(days_back: int, store: Store, case_id: str | None = None) -> list[Case]:
+def get_cases_to_process(
+    days_back: int, store: Store, case_id: str | None = None
+) -> list[Case] | None:
     """Return cases to process."""
     cases: list[Case] = []
     if case_id:
@@ -36,17 +37,6 @@ def get_cases_to_process(days_back: int, store: Store, case_id: str | None = Non
         date_threshold: dt.datetime = get_date_days_ago(days_ago=days_back)
         cases: list[Case] = store.get_cases_to_compress(date_threshold=date_threshold)
     return cases
-
-
-def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
-    """Fetch individual ids from cases that are ready for SPRING compression"""
-    case_obj = store.get_case_by_internal_id(internal_id=case_id)
-    if not case_obj:
-        LOG.error(f"Could not find case {case_id}")
-        raise CaseNotFoundError("")
-
-    for link_obj in case_obj.links:
-        yield link_obj.sample.internal_id
 
 
 def set_memory_according_to_reads(

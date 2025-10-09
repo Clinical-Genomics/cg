@@ -35,11 +35,6 @@ class CompressionData:
         return self.stub.with_suffix(FileExtensions.SPRING)
 
     @property
-    def encrypted_spring_path(self) -> Path:
-        """Return the path to a SPRING file"""
-        return self.stub.with_suffix(FileExtensions.SPRING).with_suffix(FileExtensions.GPG)
-
-    @property
     def spring_metadata_path(self) -> Path:
         """Return the path to a SPRING metadata file"""
         return self.stub.with_suffix(".json")
@@ -268,3 +263,62 @@ class CompressionData:
 
     def __repr__(self):
         return f"CompressionData(stub:{self.stub})"
+
+
+class SampleCompressionData:
+    """Object encapsulating a sample's compression status."""
+
+    def __init__(self, sample_id: str, compression_objects: list[CompressionData]):
+        self.sample_id = sample_id
+        self.compression_objects = compression_objects
+
+    def is_decompression_needed(self) -> bool:
+        """Check if decompression is needed for the specified sample."""
+        LOG.debug(f"Checking if decompression is needed for {self.sample_id}.")
+        return any(
+            not compression_object.is_compression_pending and not compression_object.pair_exists()
+            for compression_object in self.compression_objects
+        )
+
+    def is_spring_decompression_running(self) -> bool:
+        """Check if sample is being decompressed"""
+        return any(
+            compression_object.is_compression_pending
+            for compression_object in self.compression_objects
+        )
+
+    def can_be_decompressed(self) -> bool:
+        """Returns True if at least one Spring file can be decompressed, otherwise False"""
+        return any(
+            compression_object.is_spring_decompression_possible
+            for compression_object in self.compression_objects
+        )
+
+
+class CaseCompressionData:
+    """Object encapsulating a case's compression status."""
+
+    def __init__(self, case_id: str, sample_compression_data: list[SampleCompressionData]):
+        self.case_id = case_id
+        self.sample_compression_data = sample_compression_data
+
+    def is_spring_decompression_needed(self) -> bool:
+        """Check if spring decompression needs to be started"""
+        return any(
+            sample_compression.is_decompression_needed()
+            for sample_compression in self.sample_compression_data
+        )
+
+    def is_spring_decompression_running(self) -> bool:
+        """Check if case is being decompressed"""
+        return any(
+            sample_compression.is_spring_decompression_running()
+            for sample_compression in self.sample_compression_data
+        )
+
+    def can_at_least_one_sample_be_decompressed(self) -> bool:
+        """Returns True if at least one sample can be decompressed, otherwise False"""
+        return any(
+            sample_compression.can_be_decompressed()
+            for sample_compression in self.sample_compression_data
+        )

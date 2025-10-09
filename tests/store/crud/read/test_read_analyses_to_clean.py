@@ -19,6 +19,7 @@ def test_analysis_included(
         uploaded_at=timestamp_yesterday,
         completed_at=timestamp_yesterday,
         cleaned_at=None,
+        housekeeper_version_id=1234,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: CaseSample = analysis_store.relate_sample(
@@ -47,7 +48,7 @@ def test_analysis_excluded(analysis_store: Store, helpers, timestamp_now: dateti
     analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_clean
-    analyses_to_clean = analysis_store.get_analyses_to_clean()
+    analyses_to_clean = analysis_store.get_analyses_to_clean(datetime.now())
 
     # THEN this analysis should be returned
     assert analysis not in analyses_to_clean
@@ -67,6 +68,7 @@ def test_workflow_included(
         completed_at=timestamp_yesterday,
         cleaned_at=None,
         workflow=workflow,
+        housekeeper_version_id=1234,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: CaseSample = analysis_store.relate_sample(
@@ -104,7 +106,9 @@ def test_workflow_excluded(analysis_store: Store, helpers, timestamp_now: dateti
     analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_clean specifying another workflow
-    analyses_to_clean = analysis_store.get_analyses_to_clean(workflow=wrong_workflow)
+    analyses_to_clean = analysis_store.get_analyses_to_clean(
+        before=datetime.now(), workflow=wrong_workflow
+    )
 
     # THEN this analysis should not be returned
     assert analysis not in analyses_to_clean
@@ -122,6 +126,7 @@ def test_non_cleaned_included(
         uploaded_at=timestamp_yesterday,
         completed_at=timestamp_yesterday,
         cleaned_at=None,
+        housekeeper_version_id=1234,
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: CaseSample = analysis_store.relate_sample(
@@ -154,7 +159,7 @@ def test_cleaned_excluded(analysis_store: Store, helpers, timestamp_now: datetim
     analysis_store.session.add(link)
 
     # WHEN calling the analyses_to_clean
-    analyses_to_clean = analysis_store.get_analyses_to_clean()
+    analyses_to_clean = analysis_store.get_analyses_to_clean(before=datetime.now())
 
     # THEN this analysis should not be returned
     assert analysis not in analyses_to_clean

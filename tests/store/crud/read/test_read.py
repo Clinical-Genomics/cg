@@ -236,7 +236,7 @@ def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
 def test_analyses_to_upload_when_no_workflow(helpers, sample_store, timestamp):
     """Test analyses to upload with no workflow specified."""
     # GIVEN a store with one analysis
-    helpers.add_analysis(store=sample_store, completed_at=timestamp)
+    helpers.add_analysis(store=sample_store, completed_at=timestamp, housekeeper_version_id=1234)
 
     # WHEN fetching all analysis that are ready for upload without specifying workflow
     records: list[Analysis] = [
@@ -250,7 +250,12 @@ def test_analyses_to_upload_when_no_workflow(helpers, sample_store, timestamp):
 def test_analyses_to_upload_when_analysis_has_workflow(helpers, sample_store, timestamp):
     """Test analyses to upload to when existing workflow."""
     # GIVEN a store with an analysis that has been run with MIP
-    helpers.add_analysis(store=sample_store, completed_at=timestamp, workflow=Workflow.MIP_DNA)
+    helpers.add_analysis(
+        store=sample_store,
+        completed_at=timestamp,
+        workflow=Workflow.MIP_DNA,
+        housekeeper_version_id=1234,
+    )
 
     # WHEN fetching all analyses that are ready for upload and analysed with MIP
     records: list[Analysis] = [
@@ -515,25 +520,6 @@ def test_get_user_when_email_is_none_returns_none(store_with_users: Store):
     assert filtered_user is None
 
 
-def test_get_analysis_by_case_entry_id_and_completed_at(
-    sample_store: Store, helpers: StoreHelpers, timestamp_now: datetime
-):
-    """Test returning an analysis using a date."""
-    # GIVEN a case with an analysis with a completed date in the database
-    analysis = helpers.add_analysis(
-        store=sample_store, started_at=timestamp_now, completed_at=timestamp_now
-    )
-    assert analysis.completed_at
-
-    # WHEN getting analysis via case_id and completed date
-    db_analysis = sample_store.get_analysis_by_case_entry_id_and_completed_at(
-        case_entry_id=analysis.case.id, completed_at_date=analysis.completed_at
-    )
-
-    # THEN the analysis should have been retrieved
-    assert db_analysis == analysis
-
-
 def test_get_illumina_sequencing_runs_by_case(
     store_with_illumina_sequencing_data: Store,
     selected_novaseq_x_case_ids: str,
@@ -769,28 +755,6 @@ def test_get_case_samples_by_case_id(
     assert case_samples
     assert isinstance(case_samples, list)
     assert isinstance(case_samples[0], CaseSample)
-
-
-def test_get_case_sample_link(
-    store_with_analyses_for_cases: Store,
-    case_id: str,
-    sample_id: str,
-):
-    """Test that the returned element is a CaseSample with the correct case and sample internal ids."""
-    # GIVEN a store with case-samples and valid case and sample internal ids
-
-    # WHEN fetching a case-sample with case and sample internal ids
-    case_sample: CaseSample = store_with_analyses_for_cases.get_case_sample_link(
-        case_internal_id=case_id,
-        sample_internal_id=sample_id,
-    )
-
-    # THEN the returned element is a CaseSample
-    assert isinstance(case_sample, CaseSample)
-
-    # THEN the returned family sample has the correct case and sample internal ids
-    assert case_sample.case.internal_id == case_id
-    assert case_sample.sample.internal_id == sample_id
 
 
 def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples: Store):

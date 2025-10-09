@@ -1,7 +1,3 @@
-from pathlib import Path
-
-from pydantic import Field
-
 from cg.constants.sequencing import SequencingPlatform
 from cg.models.nf_analysis import NextflowSampleSheetEntry, WorkflowParameters
 from cg.models.qc_metrics import QCMetrics
