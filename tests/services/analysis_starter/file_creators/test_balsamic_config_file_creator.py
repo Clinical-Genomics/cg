@@ -37,12 +37,12 @@ def expected_wgs_paired_command(balsamic_config: BalsamicConfig) -> str:
         f"--genome-version hg19 "
         f"--gens-coverage-pon {balsamic_config.gens_coverage_female_path} "
         f"--gnomad-min-af5 {balsamic_config.gnomad_af5_path} "
-        f"--normal-sample-name sample_1 "
+        f"--normal-sample-name sample_normal "
         f"--sentieon-install-dir {balsamic_config.sentieon_licence_path} "
         f"--sentieon-license {balsamic_config.sentieon_licence_server} "
         f"--swegen-snv {balsamic_config.swegen_snv} "
         f"--swegen-sv {balsamic_config.swegen_sv} "
-        f"--tumor-sample-name sample_1"
+        f"--tumor-sample-name sample_tumour"
     )
 
 
@@ -56,14 +56,14 @@ def test_create_wgs_paired(
     )
     tumour_sample: Sample = create_autospec(
         Sample,
-        internal_id="sample_1",
+        internal_id="sample_tumour",
         is_tumour=True,
         sex=SexOptions.FEMALE,
         application_version=application_version,
     )
     normal_sample: Sample = create_autospec(
         Sample,
-        internal_id="sample_1",
+        internal_id="sample_normal",
         is_tumour=False,
         sex=SexOptions.FEMALE,
         application_version=application_version,
