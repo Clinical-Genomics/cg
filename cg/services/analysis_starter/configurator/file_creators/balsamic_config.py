@@ -144,8 +144,7 @@ class BalsamicConfigFileCreator:
     def _all_samples_are_wgs(case: Case) -> bool:
         """Check if all samples in the case are WGS."""
         return all(
-            sample.application_version.application.prep_category
-            == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+            sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
             for sample in case.samples
         )
 

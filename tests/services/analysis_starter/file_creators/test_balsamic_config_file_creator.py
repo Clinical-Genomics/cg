@@ -5,12 +5,18 @@ from pytest_mock import MockerFixture
 
 import cg.services.analysis_starter.configurator.file_creators.balsamic_config as creator
 from cg.constants import SexOptions
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
 )
 from cg.store.models import Application, ApplicationVersion, Case, Sample
 from cg.store.store import Store
+
+
+@pytest.fixture
+def expected_wes_paired_command(balsamic_config: BalsamicConfig):
+    return f""
 
 
 @pytest.fixture
@@ -41,7 +47,7 @@ def expected_wgs_tumour_only_command(balsamic_config: BalsamicConfig) -> str:
         f"--sentieon-license {balsamic_config.sentieon_licence_server} "
         f"--swegen-snv {balsamic_config.swegen_snv} "
         f"--swegen-sv {balsamic_config.swegen_sv} "
-        f"--tumor-sample-name sample_tumour"
+        f"--tumor-sample-name sample_1"
     )
 
 
@@ -82,23 +88,19 @@ def test_create_wgs_paired(
     balsamic_config: BalsamicConfig, expected_wgs_paired_command: str, mocker: MockerFixture
 ):
     # GIVEN a case with one tumor and one normal WGS samples
-    application: Application = create_autospec(Application, prep_category="wgs")
-    application_version: ApplicationVersion = create_autospec(
-        ApplicationVersion, application=application
-    )
     tumour_sample: Sample = create_autospec(
         Sample,
         internal_id="sample_tumour",
         is_tumour=True,
         sex=SexOptions.FEMALE,
-        application_version=application_version,
+        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     )
     normal_sample: Sample = create_autospec(
         Sample,
         internal_id="sample_normal",
         is_tumour=False,
         sex=SexOptions.FEMALE,
-        application_version=application_version,
+        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     )
     wgs_tumor_only_case: Case = create_autospec(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
@@ -133,7 +135,8 @@ def test_create_wgs_tumor_only(
         Sample,
         internal_id="sample_1",
         is_tumour=True,
-        prep_category="wgs",
+        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        sex=SexOptions.FEMALE,
     )
     wgs_tumor_only_case: Case = create_autospec(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
@@ -156,3 +159,7 @@ def test_create_wgs_tumor_only(
     mock_runner.assert_called_once_with(
         args=expected_wgs_tumour_only_command, check=True, shell=True, stderr=-1, stdout=-1
     )
+
+
+def test_create_wes_paired(expected_wes_paired_command: str, mocker: MockerFixture):
+    pass
