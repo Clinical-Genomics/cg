@@ -40,7 +40,11 @@ class Tracker(ABC):
         tb_analysis: TrailblazerAnalysis = self._track_in_trailblazer(
             case_id=case_config.case_id, tower_workflow_id=tower_workflow_id
         )
+        LOG.info(
+            f"Analysis entry for case {case_config.case_id} created in Trailblazer with id {tb_analysis.id}"
+        )
         self._create_analysis_statusdb(case_config=case_config, trailblazer_id=tb_analysis.id)
+        LOG.info(f"Analysis entry for case {case_config.case_id} created in StatusDB")
 
     def ensure_analysis_not_ongoing(self, case_id: str) -> None:
         """Raises: AnalysisRunningError if the case has an analysis running in Trailblazer."""
