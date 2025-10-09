@@ -35,14 +35,14 @@ def expected_wgs_paired_command(balsamic_config: BalsamicConfig) -> str:
         f"--gender female "
         f"--genome-interval {balsamic_config.genome_interval_path} "
         f"--genome-version hg19 "
-        f"--gens-coverage-pon {balsamic_config.root.parent} "
-        f"--gnomad-min-af5 {balsamic_config.root.parent} "
-        f"--normal-sample-name sample_case_wgs_paired_normal "
-        f"--sentieon-install-dir {balsamic_config.root.parent} "
-        f"--sentieon-license 666.6.6.6:66666 "
+        f"--gens-coverage-pon {balsamic_config.gens_coverage_female_path} "
+        f"--gnomad-min-af5 {balsamic_config.gnomad_af5_path} "
+        f"--normal-sample-name sample_1 "
+        f"--sentieon-install-dir {balsamic_config.sentieon_licence_path} "
+        f"--sentieon-license {balsamic_config.sentieon_licence_server} "
         f"--swegen-snv {balsamic_config.swegen_snv} "
         f"--swegen-sv {balsamic_config.swegen_sv} "
-        f"--tumor-sample-name sample_case_wgs_paired_tumor"
+        f"--tumor-sample-name sample_1"
     )
 
 
