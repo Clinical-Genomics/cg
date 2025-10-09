@@ -47,6 +47,7 @@ class BalsamicConfigurator(Configurator):
         self.sentieon_licence_path: Path = config.sentieon_licence_path
         self.sentieon_licence_server: str = config.sentieon_licence_server
         self.loqusdb_artefact_snv: Path = config.loqusdb_artefact_snv
+        self.loqusdb_artefact_sv: Path = config.loqusdb_artefact_sv
         self.loqusdb_cancer_germline_snv: Path = config.loqusdb_cancer_germline_snv
         self.loqusdb_cancer_somatic_snv: Path = config.loqusdb_cancer_somatic_snv
         self.loqusdb_cancer_somatic_sv: Path = config.loqusdb_cancer_somatic_sv
@@ -106,6 +107,7 @@ class BalsamicConfigurator(Configurator):
             analysis_dir=self.root_dir,
             analysis_workflow=case.data_analysis,
             artefact_snv_observations=self.loqusdb_artefact_snv,
+            artefact_sv_observations=self.loqusdb_artefact_sv,
             balsamic_binary=self.balsamic_binary,
             balsamic_cache=self.cache_dir,
             cadd_annotations=self.cadd_path,
@@ -116,6 +118,7 @@ class BalsamicConfigurator(Configurator):
             clinical_snv_observations=self.loqusdb_clinical_snv,
             clinical_sv_observations=self.loqusdb_clinical_sv,
             conda_binary=self.conda_binary,
+            conda_env=self.environment,
             fastq_path=Path(self.root_dir, case.internal_id, "fastq"),
             gender=patient_sex,
             genome_interval=self.genome_interval_path,
@@ -137,6 +140,7 @@ class BalsamicConfigurator(Configurator):
             analysis_dir=self.root_dir,
             analysis_workflow=case.data_analysis,
             artefact_snv_observations=self.loqusdb_artefact_snv,
+            artefact_sv_observations=self.loqusdb_artefact_sv,
             balsamic_binary=self.balsamic_binary,
             balsamic_cache=self.cache_dir,
             cadd_annotations=self.cadd_path,
@@ -147,6 +151,7 @@ class BalsamicConfigurator(Configurator):
             clinical_snv_observations=self.loqusdb_clinical_snv,
             clinical_sv_observations=self.loqusdb_clinical_sv,
             conda_binary=self.conda_binary,
+            conda_env=self.environment,
             fastq_path=Path(self.root_dir, case.internal_id, "fastq"),
             gender=patient_sex,
             genome_version=GenomeVersion.HG19,
