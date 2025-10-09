@@ -14,6 +14,11 @@ from cg.store.store import Store
 
 
 @pytest.fixture
+def expected_wgs_tumour_only_command(balsamic_config: BalsamicConfig) -> str:
+    pass
+
+
+@pytest.fixture
 def expected_wgs_paired_command(balsamic_config: BalsamicConfig) -> str:
     return (
         f"{balsamic_config.conda_binary} "
