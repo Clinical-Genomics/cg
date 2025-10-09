@@ -167,7 +167,7 @@ def test_calls_on_analysis_started(cli_runner: CliRunner, balsamic_context: CGCo
     analysis_api: TypedMock[BalsamicAnalysisAPI] = create_typed_mock(
         BalsamicAnalysisAPI, status_db=PropertyMock(return_value=create_autospec(Store))
     )
-    balsamic_context.meta_apis["analysis_api"] = analysis_api
+    balsamic_context.meta_apis["analysis_api"] = analysis_api.as_type
     case_id = "some_balsamic_case_id"
 
     # WHEN successfully invoking the run command
