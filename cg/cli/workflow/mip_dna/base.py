@@ -72,7 +72,9 @@ def run(
 ):
     """
     Run a preconfigured MIP-DNA case.
-    Assumes that the following files are in the case run directory:
+
+    \b
+    Assumes that the following files exist in the case run directory:
         - pedigree.yaml
         - gene_panels.bed
         - managed_variants.vcf
@@ -100,7 +102,10 @@ def start(
     start_with: str | None,
 ):
     """
-    Start a MIP-DNA case. Configures the case and writes the following files:
+    Start a MIP-DNA case.
+
+    \b
+    Configures the case and writes the following files:
         - pedigree.yaml
         - gene_panels.bed
         - managed_variants.vcf
@@ -120,7 +125,10 @@ def start(
 @click.pass_obj
 def start_available(cg_config: CGConfig):
     """
-    Starts all available MIP-DNA cases. Configures the individual case and writes the following files for each case:
+    Starts all available MIP-DNA cases.
+
+    \b
+    Configures the individual case and writes the following files for each case:
         - pedigree.yaml
         - gene_panels.bed
         - managed_variants.vcf
@@ -143,7 +151,10 @@ def config_case(
     panel_bed: str | None,
 ):
     """
-    Configure a MIP-DNA case so that it is ready to be run. This creates the following files:
+    Configure a MIP-DNA case so that it is ready to be run.
+
+    \b
+    This creates the following files:
         - pedigree.yaml
         - gene_panels.bed
         - managed_variants.vcf
