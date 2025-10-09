@@ -33,19 +33,21 @@ class FastqFetcher(InputFetcher):
 
     def ensure_files_are_ready(self, case_id: str) -> None:
         """
-        Ensures Fastq files are ready to be analysed. Executes the following processes if needed:
+        Ensures FASTQ files are ready to be analysed. Executes the following processes if needed:
         1. Retrieval of flow cells via PDC.
         2. Retrieval of Spring files via DDN.
         3. Decompression of Spring files.
-        4. Adds decompressed Fastq files to Housekeeper.
+        4. Adds decompressed FASTQ files to Housekeeper.
         Raises:
             AnalysisNotReadyError if the FASTQ files are not ready to be analysed.
         """
-        LOG.info("Ensuring Fastq files are ready for analysis")
         self._ensure_files_are_present(case_id)
         self._resolve_decompression(case_id)
         if not self._are_fastq_files_ready_for_analysis(case_id):
-            raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
+            raise AnalysisNotReadyError(
+                f"FASTQ files needed to start case {case_id} are not present"
+            )
+        LOG.info(f"All FASTQ files are ready for analysing case {case_id}")
 
     def _ensure_files_are_present(self, case_id: str) -> None:
         """Checks if any Illumina runs need to be retrieved and queries PDC if that is the case.

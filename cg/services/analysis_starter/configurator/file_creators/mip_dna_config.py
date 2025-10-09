@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
@@ -6,6 +7,8 @@ from cg.constants.tb import AnalysisType
 from cg.io.yaml import write_yaml
 from cg.store.models import BedVersion, Case, CaseSample, Sample
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 class MIPDNAConfigFileCreator:
@@ -21,6 +24,7 @@ class MIPDNAConfigFileCreator:
             content=content,
             file_path=file_path,
         )
+        LOG.info(f"Created MIP-DNA config file for case {case_id} at {file_path}")
 
     def _get_content(self, provided_bed_file: str | None, case_id: str) -> dict:
         case: Case = self.store.get_case_by_internal_id_strict(case_id)

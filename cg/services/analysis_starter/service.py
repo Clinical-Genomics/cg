@@ -48,7 +48,7 @@ class AnalysisStarter:
 
     def start(self, case_id: str, **flags) -> None:
         """Fetches raw data, generates configuration files and runs the specified case."""
-        LOG.debug(f"Starting case {case_id}")
+        LOG.info(f"Starting case {case_id}")
         self.tracker.ensure_analysis_not_ongoing(case_id)
         self.input_fetcher.ensure_files_are_ready(case_id)
         parameters: CaseConfig = self.configurator.configure(case_id=case_id, **flags)

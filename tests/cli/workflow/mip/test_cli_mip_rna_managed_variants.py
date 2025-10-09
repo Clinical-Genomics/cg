@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import cast
 
 from click.testing import CliRunner
 from mock import mock
@@ -6,7 +7,7 @@ from mock import mock
 from cg.cli.workflow.mip.base import managed_variants
 from cg.constants.scout import ScoutExportFileName
 from cg.io.txt import read_txt
-from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from tests.conftest import create_process_response
 
@@ -14,11 +15,11 @@ from tests.conftest import create_process_response
 def test_managed_variants_is_written(
     case_id: str,
     cli_runner: CliRunner,
-    mip_dna_context: CGConfig,
+    mip_rna_context: CGConfig,
     scout_export_manged_variants_output: str,
 ):
     # GIVEN an analysis API
-    analysis_api: MipAnalysisAPI = mip_dna_context.meta_apis["analysis_api"]
+    analysis_api: MipRNAAnalysisAPI = mip_rna_context.meta_apis["analysis_api"]
 
     # GIVEN a case
 
@@ -28,7 +29,7 @@ def test_managed_variants_is_written(
         return_value=create_process_response(std_out=scout_export_manged_variants_output),
     ):
         # WHEN creating a managed_variants file
-        cli_runner.invoke(managed_variants, [case_id], obj=mip_dna_context)
+        cli_runner.invoke(managed_variants, [case_id], obj=mip_rna_context)
 
     managed_variants_file = Path(analysis_api.root, case_id, ScoutExportFileName.MANAGED_VARIANTS)
 
@@ -36,14 +37,14 @@ def test_managed_variants_is_written(
     assert managed_variants_file.exists()
 
     # THEN the file should contain the output from Scout
-    file_content: str = read_txt(file_path=managed_variants_file, read_to_string=True)
+    file_content: str = cast(str, read_txt(file_path=managed_variants_file, read_to_string=True))
     assert file_content == scout_export_manged_variants_output
 
 
 def test_managed_variants_dry_run(
     case_id: str,
     cli_runner: CliRunner,
-    mip_dna_context: CGConfig,
+    mip_rna_context: CGConfig,
     scout_export_manged_variants_output: str,
 ):
     # GIVEN a case
@@ -54,7 +55,7 @@ def test_managed_variants_dry_run(
         return_value=create_process_response(std_out=scout_export_manged_variants_output),
     ):
         # WHEN creating a managed_variants file using dry run
-        result = cli_runner.invoke(managed_variants, [case_id, "--dry-run"], obj=mip_dna_context)
+        result = cli_runner.invoke(managed_variants, [case_id, "--dry-run"], obj=mip_rna_context)
 
     # THEN the result should contain the output from Scout
     assert result.stdout.strip() == scout_export_manged_variants_output
