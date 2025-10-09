@@ -10,13 +10,38 @@ from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
 )
-from cg.store.models import Application, ApplicationVersion, Case, Sample
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
 @pytest.fixture
 def expected_wes_paired_command(balsamic_config: BalsamicConfig):
-    return f""
+    return (
+        f"{balsamic_config.conda_binary} "
+        f"run --name {balsamic_config.conda_env} "
+        f"{balsamic_config.binary_path} config case "
+        f"--analysis-dir {balsamic_config.root} "
+        f"--analysis-workflow balsamic "
+        f"--balsamic-cache {balsamic_config.balsamic_cache} "
+        f"--cadd-annotations {balsamic_config.cadd_path} "
+        f"--cancer-germline-snv-observations {balsamic_config.loqusdb_cancer_germline_snv} "
+        f"--cancer-somatic-snv-observations {balsamic_config.loqusdb_cancer_somatic_snv} "
+        f"--cancer-somatic-sv-observations {balsamic_config.loqusdb_cancer_somatic_sv} "
+        f"--case-id case_1 "
+        f"--clinical-snv-observations {balsamic_config.loqusdb_clinical_snv} "
+        f"--clinical-sv-observations {balsamic_config.loqusdb_clinical_sv} "
+        f"--fastq-path {balsamic_config.root}/case_1/fastq "
+        f"--gender female "
+        f"--genome-version hg19 "
+        f"--normal-sample-name sample_normal "
+        f"--sentieon-install-dir {balsamic_config.sentieon_licence_path} "
+        f"--sentieon-license {balsamic_config.sentieon_licence_server} "
+        f"--panel-bed TODO_BED "  # TODO actual bed
+        f"--exome "
+        f"--swegen-snv {balsamic_config.swegen_snv} "
+        f"--swegen-sv {balsamic_config.swegen_sv} "
+        f"--tumor-sample-name sample_tumour"
+    )
 
 
 @pytest.fixture
