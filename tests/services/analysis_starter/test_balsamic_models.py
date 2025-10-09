@@ -10,10 +10,12 @@ from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCo
 def balsamic_config_input(tmp_path: Path) -> BalsamicConfigInput:
     return BalsamicConfigInput(
         conda_binary=tmp_path / "conda",
+        conda_env="test_balsamic",
         balsamic_binary=tmp_path / "balsamic",
         analysis_dir=tmp_path / "analysis",
         analysis_workflow="balsamic",
         artefact_snv_observations=tmp_path / "artefact_snv.json",
+        artefact_sv_observations=tmp_path / "artefact_sv.json",
         balsamic_cache=tmp_path / "cache",
         cadd_annotations=tmp_path / "cadd_annotations.json",
         cancer_germline_snv_observations=tmp_path / "cancer_germline_snv.json",
