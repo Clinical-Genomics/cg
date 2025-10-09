@@ -10,6 +10,7 @@ from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 
 class BalsamicConfigInput(BaseModel):
     conda_binary: Path
+    conda_env: str
     balsamic_binary: Path
     analysis_dir: Path
     analysis_workflow: Workflow

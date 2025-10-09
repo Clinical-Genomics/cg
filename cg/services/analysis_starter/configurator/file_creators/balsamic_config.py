@@ -23,6 +23,7 @@ class BalsamicConfigFileCreator:
         self.root_dir = cg_balsamic_config.root
         self.lims_api: LimsAPI = lims_api
         self.conda_binary: Path = cg_balsamic_config.conda_binary
+        self.conda_env: str = cg_balsamic_config.conda_env
         self.balsamic_binary: Path = cg_balsamic_config.binary_path
         self.root_dir: Path = cg_balsamic_config.root
         self.bed_directory: Path = cg_balsamic_config.bed_path
@@ -91,6 +92,7 @@ class BalsamicConfigFileCreator:
             clinical_snv_observations=self.loqusdb_clinical_snv,
             clinical_sv_observations=self.loqusdb_clinical_sv,
             conda_binary=self.conda_binary,
+            conda_env=self.conda_env,
             fastq_path=Path(self.root_dir, case.internal_id, "fastq"),
             gender=patient_sex,
             genome_interval=self.genome_interval_path,
