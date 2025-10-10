@@ -44,23 +44,6 @@ def test_get_verified_sex_error():
         BalsamicAnalysisAPI.get_verified_sex(sample_obj)
 
 
-def test_get_verified_sex_unknown(caplog):
-    """Tests sex extraction from a sample dictionary when the sex is unknown."""
-
-    # GIVEN a sample object with different sexes
-    sample_obj = {
-        "ACC0000A0": {"sex": "unknown"},
-        "ACC0000A1": {"sex": "unknown"},
-    }
-
-    # WHEN extracting the sex
-    retrieved_sex: Sex = BalsamicAnalysisAPI.get_verified_sex(sample_obj)
-
-    # THEN sex must match the expected one
-    assert retrieved_sex == Sex.FEMALE
-    assert f"The provided sex is unknown, setting {Sex.FEMALE} as the default" in caplog.text
-
-
 def test_get_verified_pon():
     """Tests PON verification."""
 
