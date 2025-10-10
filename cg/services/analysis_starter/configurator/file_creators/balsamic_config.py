@@ -11,6 +11,7 @@ from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.models.balsamic import (
     BalsamicConfigInput,
+    BalsamicConfigInputPanel,
     BalsamicConfigInputWGS,
 )
 from cg.store.models import Case, Sample
@@ -82,7 +83,7 @@ class BalsamicConfigFileCreator:
         patient_sex: SexOptions = self._get_patient_sex(case)
         return BalsamicConfigInputWGS(
             analysis_dir=self.root_dir,
-            analysis_workflow=case.data_analysis,
+            analysis_workflow=case.data_analysis,  # TODO See if we can fix the typing in the data model
             artefact_snv_observations=self.loqusdb_artefact_snv,
             artefact_sv_observations=self.loqusdb_artefact_sv,
             balsamic_binary=self.balsamic_binary,
@@ -113,11 +114,10 @@ class BalsamicConfigFileCreator:
     def _build_targeted_config(self, case, **flags) -> BalsamicConfigInput:
         bed_file: Path = self._resolve_bed_file(case, **flags)
         patient_sex: SexOptions = self._get_patient_sex(case)
-        return BalsamicConfigInput(
+        return BalsamicConfigInputPanel(
             analysis_dir=self.root_dir,
             analysis_workflow=case.data_analysis,
             artefact_snv_observations=self.loqusdb_artefact_snv,
-            artefact_sv_observations=self.loqusdb_artefact_sv,
             balsamic_binary=self.balsamic_binary,
             balsamic_cache=self.cache_dir,
             cadd_annotations=self.cadd_path,
