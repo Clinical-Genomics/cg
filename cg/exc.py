@@ -334,5 +334,17 @@ class Chanjo2ResponseError(Chanjo2APIClientError):
     """Exception raised when the response from Chanjo2 API client fails validation."""
 
 
+class CaseNotConfiguredError(CgError):
+    """Exception raised when a case is being run without a configuration."""
+
+
+class BalsamicMissingTumorError(CgError):
+    """Exception raised when a Balsamic case is missing a tumor sample."""
+
+
+class BedFileNotFoundError(CgError):
+    """Exception raised not finding a bed file for a Balsamic case."""
+
+
 class MissingConfigFilesError(CgError):
     """Exception raised when a case is being run with missing configuration files."""

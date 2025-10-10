@@ -4,7 +4,8 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
-from cg.meta.workflow.fastq import MicrosaltFastqHandler, MipFastqHandler
+from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
+from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler, MipFastqHandler
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
@@ -43,6 +44,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
     RNAFusionSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
     TaxprofilerSampleSheetCreator,
 )
@@ -67,6 +69,8 @@ class ConfiguratorFactory:
             return self._get_nextflow_configurator(workflow)
         elif workflow == Workflow.MICROSALT:
             return self._get_microsalt_configurator()
+        elif workflow in [Workflow.BALSAMIC, workflow.BALSAMIC_UMI]:
+            return self._get_balsamic_configurator()
         elif workflow == Workflow.MIP_DNA:
             return self._get_mip_dna_configurator()
         raise NotImplementedError
@@ -149,6 +153,18 @@ class ConfiguratorFactory:
             self.cg_config.scout_api_38
             if workflow == Workflow.NALLO
             else self.cg_config.scout_api_37
+        )
+
+    def _get_balsamic_configurator(self) -> BalsamicConfigurator:
+        return BalsamicConfigurator(
+            fastq_handler=BalsamicFastqHandler(
+                housekeeper_api=self.housekeeper_api,
+                root_dir=Path(self.cg_config.balsamic.root),
+                status_db=self.store,
+            ),
+            lims_api=self.lims_api,
+            config=self.cg_config.balsamic,
+            store=self.store,
         )
 
     def _get_microsalt_configurator(self) -> MicrosaltConfigurator:

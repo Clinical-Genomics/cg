@@ -109,7 +109,7 @@ def test_get_mip_dna_configurator():
 
 def test_configurator_factory_failure(cg_context: CGConfig):
     # GIVEN a workflow we do not have support for
-    workflow = Workflow.BALSAMIC
+    workflow = Workflow.FLUFFY
 
     # GIVEN a configurator factory
     configurator_factory = ConfiguratorFactory(cg_config=cg_context)
