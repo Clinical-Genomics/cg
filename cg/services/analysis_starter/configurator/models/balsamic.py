@@ -74,13 +74,7 @@ class BalsamicConfigInputPanel(BalsamicConfigInput):
             "--swegen-sv": self.swegen_sv,
             "--tumor-sample-name": self.tumor_sample_name,
         }
-        for flag, value in flags.items():
-            if isinstance(value, bool):
-                if value is True:
-                    command += f" {flag}"
-            elif value is not None:
-                command += f" {flag} {value}"
-        return command
+        return _transform_flags(command=command, flags=flags)
 
 
 class BalsamicConfigInputWGS(BalsamicConfigInput):
@@ -120,13 +114,7 @@ class BalsamicConfigInputWGS(BalsamicConfigInput):
             "--swegen-sv": self.swegen_sv,
             "--tumor-sample-name": self.tumor_sample_name,
         }
-        for flag, value in flags.items():
-            if isinstance(value, bool):
-                if value is True:
-                    command += f" {flag}"
-            elif value is not None:
-                command += f" {flag} {value}"
-        return command
+        return _transform_flags(command=command, flags=flags)
 
 
 class BalsamicCaseConfig(CaseConfig):
@@ -146,3 +134,13 @@ class BalsamicCaseConfig(CaseConfig):
             "--qos {qos} --sample-config {sample_config} --cluster-config {cluster_config} --run-analysis "
             "--benchmark".format(**self.model_dump())
         )
+
+
+def _transform_flags(command: str, flags: dict):
+    for flag, value in flags.items():
+        if isinstance(value, bool):
+            if value is True:
+                command += f" {flag}"
+        elif value is not None:
+            command += f" {flag} {value}"
+    return command
