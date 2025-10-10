@@ -4,6 +4,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 import cg.services.analysis_starter.configurator.file_creators.balsamic_config as creator
+from cg.apps.lims import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.cg_config import BalsamicConfig
@@ -22,9 +23,9 @@ def expected_wes_paired_command(cg_balsamic_config: BalsamicConfig):
         f"{cg_balsamic_config.binary_path} config case "
         f"--analysis-dir {cg_balsamic_config.root} "
         f"--analysis-workflow balsamic "
-        f"--artefact-snv-observations {cg_balsamic_config.loqusdb_artefact_snv} "
         f"--balsamic-cache {cg_balsamic_config.balsamic_cache} "
         f"--cadd-annotations {cg_balsamic_config.cadd_path} "
+        f"--artefact-snv-observations {cg_balsamic_config.loqusdb_artefact_snv} "
         f"--cancer-germline-snv-observations {cg_balsamic_config.loqusdb_cancer_germline_snv} "
         f"--cancer-somatic-snv-observations {cg_balsamic_config.loqusdb_cancer_somatic_snv} "
         f"--cancer-somatic-sv-observations {cg_balsamic_config.loqusdb_cancer_somatic_sv} "
@@ -213,6 +214,8 @@ def test_create_wes_paired(
     store.get_case_by_internal_id = Mock(return_value=wes_paired_case)
 
     # GIVEN a Lims API
+    lims_api: Mock = create_autospec(LimsAPI)
+    lims_api.capture_kit = Mock(return_value="")
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
