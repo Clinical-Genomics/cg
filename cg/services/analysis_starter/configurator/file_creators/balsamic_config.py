@@ -154,8 +154,7 @@ class BalsamicConfigFileCreator:
     def _all_samples_are_exome(case: Case) -> bool:
         """Check if all samples in the case are exome."""
         return all(
-            sample.application_version.application.prep_category
-            == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
+            sample.prep_category == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
             for sample in case.samples
         )
 

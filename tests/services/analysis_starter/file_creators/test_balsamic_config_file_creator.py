@@ -1,9 +1,11 @@
+from typing import cast
 from unittest.mock import Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
 
 import cg.services.analysis_starter.configurator.file_creators.balsamic_config as creator
+from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.cg_config import BalsamicConfig
@@ -37,9 +39,9 @@ def expected_wes_paired_command(cg_balsamic_config: BalsamicConfig):
         f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
         f"--normal-sample-name sample_normal "
         f"--panel-bed {cg_balsamic_config.bed_path}/bed_version.bed "
+        f"--exome "
         f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
         f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
-        f"--exome "
         f"--swegen-snv {cg_balsamic_config.swegen_snv} "
         f"--swegen-sv {cg_balsamic_config.swegen_sv} "
         f"--tumor-sample-name sample_tumour"
@@ -216,6 +218,8 @@ def test_create_wes_paired(
     )
 
     # GIVEN a Lims API
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.capture_kit = Mock(return_value="bed_short_name")
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
@@ -227,6 +231,9 @@ def test_create_wes_paired(
 
     # WHEN creating the config file
     config_file_creator.create(case_id="case_1")
+
+    # THEN the bed version should have been fetched using the LIMS capture kit
+    cast(Mock, store.get_bed_version_by_short_name).assert_called_once_with("bed_short_name")
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
