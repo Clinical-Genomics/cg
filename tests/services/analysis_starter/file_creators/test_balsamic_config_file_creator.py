@@ -15,102 +15,102 @@ from cg.store.store import Store
 
 
 @pytest.fixture
-def expected_wes_paired_command(balsamic_config: BalsamicConfig):
+def expected_wes_paired_command(cg_balsamic_config: BalsamicConfig):
     return (
-        f"{balsamic_config.conda_binary} "
-        f"run --name {balsamic_config.conda_env} "
-        f"{balsamic_config.binary_path} config case "
-        f"--analysis-dir {balsamic_config.root} "
+        f"{cg_balsamic_config.conda_binary} "
+        f"run --name {cg_balsamic_config.conda_env} "
+        f"{cg_balsamic_config.binary_path} config case "
+        f"--analysis-dir {cg_balsamic_config.root} "
         f"--analysis-workflow balsamic "
-        f"--balsamic-cache {balsamic_config.balsamic_cache} "
-        f"--cadd-annotations {balsamic_config.cadd_path} "
-        f"--cancer-germline-snv-observations {balsamic_config.loqusdb_cancer_germline_snv} "
-        f"--cancer-somatic-snv-observations {balsamic_config.loqusdb_cancer_somatic_snv} "
-        f"--cancer-somatic-sv-observations {balsamic_config.loqusdb_cancer_somatic_sv} "
+        f"--balsamic-cache {cg_balsamic_config.balsamic_cache} "
+        f"--cadd-annotations {cg_balsamic_config.cadd_path} "
+        f"--cancer-germline-snv-observations {cg_balsamic_config.loqusdb_cancer_germline_snv} "
+        f"--cancer-somatic-snv-observations {cg_balsamic_config.loqusdb_cancer_somatic_snv} "
+        f"--cancer-somatic-sv-observations {cg_balsamic_config.loqusdb_cancer_somatic_sv} "
         f"--case-id case_1 "
-        f"--clinical-snv-observations {balsamic_config.loqusdb_clinical_snv} "
-        f"--clinical-sv-observations {balsamic_config.loqusdb_clinical_sv} "
-        f"--fastq-path {balsamic_config.root}/case_1/fastq "
+        f"--clinical-snv-observations {cg_balsamic_config.loqusdb_clinical_snv} "
+        f"--clinical-sv-observations {cg_balsamic_config.loqusdb_clinical_sv} "
+        f"--fastq-path {cg_balsamic_config.root}/case_1/fastq "
         f"--gender female "
         f"--genome-version hg19 "
         f"--normal-sample-name sample_normal "
-        f"--sentieon-install-dir {balsamic_config.sentieon_licence_path} "
-        f"--sentieon-license {balsamic_config.sentieon_licence_server} "
+        f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
+        f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
         f"--panel-bed TODO_BED "  # TODO actual bed
         f"--exome "
-        f"--swegen-snv {balsamic_config.swegen_snv} "
-        f"--swegen-sv {balsamic_config.swegen_sv} "
+        f"--swegen-snv {cg_balsamic_config.swegen_snv} "
+        f"--swegen-sv {cg_balsamic_config.swegen_sv} "
         f"--tumor-sample-name sample_tumour"
     )
 
 
 @pytest.fixture
-def expected_wgs_tumour_only_command(balsamic_config: BalsamicConfig) -> str:
+def expected_wgs_tumour_only_command(cg_balsamic_config: BalsamicConfig) -> str:
     return (
-        f"{balsamic_config.conda_binary} "
-        f"run --name {balsamic_config.conda_env} "
-        f"{balsamic_config.binary_path} config case "
-        f"--analysis-dir {balsamic_config.root} "
+        f"{cg_balsamic_config.conda_binary} "
+        f"run --name {cg_balsamic_config.conda_env} "
+        f"{cg_balsamic_config.binary_path} config case "
+        f"--analysis-dir {cg_balsamic_config.root} "
         f"--analysis-workflow balsamic "
-        f"--balsamic-cache {balsamic_config.balsamic_cache} "
-        f"--cadd-annotations {balsamic_config.cadd_path} "
-        f"--artefact-snv-observations {balsamic_config.loqusdb_artefact_snv} "
-        f"--artefact-sv-observations {balsamic_config.loqusdb_artefact_sv} "
-        f"--cancer-germline-snv-observations {balsamic_config.loqusdb_cancer_germline_snv} "
-        f"--cancer-somatic-snv-observations {balsamic_config.loqusdb_cancer_somatic_snv} "
-        f"--cancer-somatic-sv-observations {balsamic_config.loqusdb_cancer_somatic_sv} "
+        f"--balsamic-cache {cg_balsamic_config.balsamic_cache} "
+        f"--cadd-annotations {cg_balsamic_config.cadd_path} "
+        f"--artefact-snv-observations {cg_balsamic_config.loqusdb_artefact_snv} "
+        f"--artefact-sv-observations {cg_balsamic_config.loqusdb_artefact_sv} "
+        f"--cancer-germline-snv-observations {cg_balsamic_config.loqusdb_cancer_germline_snv} "
+        f"--cancer-somatic-snv-observations {cg_balsamic_config.loqusdb_cancer_somatic_snv} "
+        f"--cancer-somatic-sv-observations {cg_balsamic_config.loqusdb_cancer_somatic_sv} "
         f"--case-id case_1 "
-        f"--clinical-snv-observations {balsamic_config.loqusdb_clinical_snv} "
-        f"--clinical-sv-observations {balsamic_config.loqusdb_clinical_sv} "
-        f"--fastq-path {balsamic_config.root}/case_1/fastq "
+        f"--clinical-snv-observations {cg_balsamic_config.loqusdb_clinical_snv} "
+        f"--clinical-sv-observations {cg_balsamic_config.loqusdb_clinical_sv} "
+        f"--fastq-path {cg_balsamic_config.root}/case_1/fastq "
         f"--gender female "
-        f"--genome-interval {balsamic_config.genome_interval_path} "
+        f"--genome-interval {cg_balsamic_config.genome_interval_path} "
         f"--genome-version hg19 "
-        f"--gens-coverage-pon {balsamic_config.gens_coverage_female_path} "
-        f"--gnomad-min-af5 {balsamic_config.gnomad_af5_path} "
-        f"--sentieon-install-dir {balsamic_config.sentieon_licence_path} "
-        f"--sentieon-license {balsamic_config.sentieon_licence_server} "
-        f"--swegen-snv {balsamic_config.swegen_snv} "
-        f"--swegen-sv {balsamic_config.swegen_sv} "
+        f"--gens-coverage-pon {cg_balsamic_config.gens_coverage_female_path} "
+        f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
+        f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
+        f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
+        f"--swegen-snv {cg_balsamic_config.swegen_snv} "
+        f"--swegen-sv {cg_balsamic_config.swegen_sv} "
         f"--tumor-sample-name sample_1"
     )
 
 
 @pytest.fixture
-def expected_wgs_paired_command(balsamic_config: BalsamicConfig) -> str:
+def expected_wgs_paired_command(cg_balsamic_config: BalsamicConfig) -> str:
     return (
-        f"{balsamic_config.conda_binary} "
-        f"run --name {balsamic_config.conda_env} "
-        f"{balsamic_config.binary_path} config case "
-        f"--analysis-dir {balsamic_config.root} "
+        f"{cg_balsamic_config.conda_binary} "
+        f"run --name {cg_balsamic_config.conda_env} "
+        f"{cg_balsamic_config.binary_path} config case "
+        f"--analysis-dir {cg_balsamic_config.root} "
         f"--analysis-workflow balsamic "
-        f"--balsamic-cache {balsamic_config.balsamic_cache} "
-        f"--cadd-annotations {balsamic_config.cadd_path} "
-        f"--artefact-snv-observations {balsamic_config.loqusdb_artefact_snv} "
-        f"--artefact-sv-observations {balsamic_config.loqusdb_artefact_sv} "
-        f"--cancer-germline-snv-observations {balsamic_config.loqusdb_cancer_germline_snv} "
-        f"--cancer-somatic-snv-observations {balsamic_config.loqusdb_cancer_somatic_snv} "
-        f"--cancer-somatic-sv-observations {balsamic_config.loqusdb_cancer_somatic_sv} "
+        f"--balsamic-cache {cg_balsamic_config.balsamic_cache} "
+        f"--cadd-annotations {cg_balsamic_config.cadd_path} "
+        f"--artefact-snv-observations {cg_balsamic_config.loqusdb_artefact_snv} "
+        f"--artefact-sv-observations {cg_balsamic_config.loqusdb_artefact_sv} "
+        f"--cancer-germline-snv-observations {cg_balsamic_config.loqusdb_cancer_germline_snv} "
+        f"--cancer-somatic-snv-observations {cg_balsamic_config.loqusdb_cancer_somatic_snv} "
+        f"--cancer-somatic-sv-observations {cg_balsamic_config.loqusdb_cancer_somatic_sv} "
         f"--case-id case_1 "
-        f"--clinical-snv-observations {balsamic_config.loqusdb_clinical_snv} "
-        f"--clinical-sv-observations {balsamic_config.loqusdb_clinical_sv} "
-        f"--fastq-path {balsamic_config.root}/case_1/fastq "
+        f"--clinical-snv-observations {cg_balsamic_config.loqusdb_clinical_snv} "
+        f"--clinical-sv-observations {cg_balsamic_config.loqusdb_clinical_sv} "
+        f"--fastq-path {cg_balsamic_config.root}/case_1/fastq "
         f"--gender female "
-        f"--genome-interval {balsamic_config.genome_interval_path} "
+        f"--genome-interval {cg_balsamic_config.genome_interval_path} "
         f"--genome-version hg19 "
-        f"--gens-coverage-pon {balsamic_config.gens_coverage_female_path} "
-        f"--gnomad-min-af5 {balsamic_config.gnomad_af5_path} "
+        f"--gens-coverage-pon {cg_balsamic_config.gens_coverage_female_path} "
+        f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
         f"--normal-sample-name sample_normal "
-        f"--sentieon-install-dir {balsamic_config.sentieon_licence_path} "
-        f"--sentieon-license {balsamic_config.sentieon_licence_server} "
-        f"--swegen-snv {balsamic_config.swegen_snv} "
-        f"--swegen-sv {balsamic_config.swegen_sv} "
+        f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
+        f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
+        f"--swegen-snv {cg_balsamic_config.swegen_snv} "
+        f"--swegen-sv {cg_balsamic_config.swegen_sv} "
         f"--tumor-sample-name sample_tumour"
     )
 
 
 def test_create_wgs_paired(
-    balsamic_config: BalsamicConfig, expected_wgs_paired_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig, expected_wgs_paired_command: str, mocker: MockerFixture
 ):
     # GIVEN a case with one tumor and one normal WGS samples
     tumour_sample: Sample = create_autospec(
@@ -127,17 +127,17 @@ def test_create_wgs_paired(
         sex=SexOptions.FEMALE,
         prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     )
-    wgs_tumor_only_case: Case = create_autospec(
+    wgs_paired_case: Case = create_autospec(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
     )
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id = Mock(return_value=wgs_tumor_only_case)
+    store.get_case_by_internal_id = Mock(return_value=wgs_paired_case)
 
     # GIVEN a Lims API
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=Mock(), cg_balsamic_config=balsamic_config
+        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
     )
 
     # GIVEN that the subprocess exits successfully
@@ -153,7 +153,7 @@ def test_create_wgs_paired(
 
 
 def test_create_wgs_tumor_only(
-    balsamic_config: BalsamicConfig, expected_wgs_tumour_only_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig, expected_wgs_tumour_only_command: str, mocker: MockerFixture
 ):
     # GIVEN a case with one tumor WGS sample
     sample: Sample = create_autospec(
@@ -171,7 +171,7 @@ def test_create_wgs_tumor_only(
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=Mock(), cg_balsamic_config=balsamic_config
+        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
     )
 
     # GIVEN that the subprocess exits successfully
@@ -187,9 +187,9 @@ def test_create_wgs_tumor_only(
 
 
 def test_create_wes_paired(
-    balsamic_config: BalsamicConfig, expected_wes_paired_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig, expected_wes_paired_command: str, mocker: MockerFixture
 ):
-    # GIVEN a case with one tumor and one normal WGS samples
+    # GIVEN a case with one tumor and one normal WES samples
     tumour_sample: Sample = create_autospec(
         Sample,
         internal_id="sample_tumour",
@@ -204,17 +204,17 @@ def test_create_wes_paired(
         sex=SexOptions.FEMALE,
         prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
     )
-    wgs_tumor_only_case: Case = create_autospec(
+    wes_paired_case: Case = create_autospec(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
     )
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id = Mock(return_value=wgs_tumor_only_case)
+    store.get_case_by_internal_id = Mock(return_value=wes_paired_case)
 
     # GIVEN a Lims API
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=Mock(), cg_balsamic_config=balsamic_config
+        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
     )
 
     # GIVEN that the subprocess exits successfully

@@ -50,7 +50,7 @@ def balsamic_configurator(
     base_store: Store,
 ) -> BalsamicConfigurator:
     return BalsamicConfigurator(
-        config=balsamic_config,
+        config=cg_balsamic_config,
         fastq_handler=balsamic_fastq_handler,
         lims_api=lims_api,
         store=base_store,

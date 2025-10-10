@@ -60,7 +60,7 @@ def get_nextflow_config_dict(
 
 
 @pytest.fixture
-def balsamic_config(tmp_path) -> BalsamicConfig:
+def cg_balsamic_config(tmp_path) -> BalsamicConfig:
     return BalsamicConfig(
         balsamic_cache=tmp_path / "balsamic_cache",
         bed_path=tmp_path / "bed_file.bed",
