@@ -26,7 +26,7 @@ class BalsamicConfigInput(BaseModel):
     fastq_path: Path
     gender: SexOptions
     genome_version: GenomeVersion
-    gnomad_min_af5: Path | None = None
+    gnomad_min_af5: Path
     normal_sample_name: str | None = None
     pon_cnn: Path | None = None
     sentieon_install_dir: Path
