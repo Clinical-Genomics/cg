@@ -9,7 +9,10 @@ from cg.constants.constants import GenomeVersion
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError
 from cg.models.cg_config import BalsamicConfig
-from cg.services.analysis_starter.configurator.models.balsamic import BalsamicConfigInput
+from cg.services.analysis_starter.configurator.models.balsamic import (
+    BalsamicConfigInput,
+    BalsamicConfigInputWGS,
+)
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -77,7 +80,7 @@ class BalsamicConfigFileCreator:
 
     def _build_wgs_config(self, case: Case) -> BalsamicConfigInput:
         patient_sex: SexOptions = self._get_patient_sex(case)
-        return BalsamicConfigInput(
+        return BalsamicConfigInputWGS(
             analysis_dir=self.root_dir,
             analysis_workflow=case.data_analysis,
             artefact_snv_observations=self.loqusdb_artefact_snv,
