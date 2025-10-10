@@ -179,8 +179,8 @@ class BalsamicConfigFileCreator:
 
     def _resolve_bed_file(self, case, **flags) -> Path:
         bed_name = flags.get("panel_bed") or self._get_bed_name_from_lims(case)
-        if db_bed := self.status_db.get_bed_version_by_short_name(bed_name):
-            return Path(self.bed_directory, db_bed.filename)
+        if bed_version := self.status_db.get_bed_version_by_short_name(bed_name):
+            return Path(self.bed_directory, bed_version.filename)
         raise BedFileNotFoundError(f"No Bed file found for with provided name {bed_name}.")
 
     def _get_bed_name_from_lims(self, case: Case) -> str:

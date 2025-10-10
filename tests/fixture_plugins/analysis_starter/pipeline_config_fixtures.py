@@ -63,7 +63,7 @@ def get_nextflow_config_dict(
 def cg_balsamic_config(tmp_path) -> BalsamicConfig:
     return BalsamicConfig(
         balsamic_cache=tmp_path / "balsamic_cache",
-        bed_path=tmp_path / "bed_file.bed",
+        bed_path=tmp_path / "beds",
         binary_path=tmp_path / "binary",
         cadd_path=tmp_path / "cadd",
         cluster_config=tmp_path / "cluster.yaml",

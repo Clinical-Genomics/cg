@@ -4,14 +4,13 @@ import pytest
 from pytest_mock import MockerFixture
 
 import cg.services.analysis_starter.configurator.file_creators.balsamic_config as creator
-from cg.apps.lims import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
 )
-from cg.store.models import Case, Sample
+from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
 
 
@@ -37,9 +36,9 @@ def expected_wes_paired_command(cg_balsamic_config: BalsamicConfig):
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
         f"--normal-sample-name sample_normal "
+        f"--panel-bed {cg_balsamic_config.bed_path}/bed_version.bed "
         f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
         f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
-        f"--panel-bed TODO_BED "  # TODO actual bed
         f"--exome "
         f"--swegen-snv {cg_balsamic_config.swegen_snv} "
         f"--swegen-sv {cg_balsamic_config.swegen_sv} "
@@ -212,10 +211,11 @@ def test_create_wes_paired(
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id = Mock(return_value=wes_paired_case)
+    store.get_bed_version_by_short_name = Mock(
+        return_value=create_autospec(BedVersion, filename="bed_version.bed")
+    )
 
     # GIVEN a Lims API
-    lims_api: Mock = create_autospec(LimsAPI)
-    lims_api.capture_kit = Mock(return_value="")
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
