@@ -95,6 +95,7 @@ def test_start_available(
 
     # GIVEN a Balsamic root dir
     test_root_dir: Path = test_run_paths.test_root_dir
+    balsamic_root_dir: Path = Path(test_root_dir, "balsamic_root_path")
 
     # GIVEN a case
     # GIVEN an order associated with the case
@@ -102,13 +103,13 @@ def test_start_available(
     # GIVEN a flow cell and sequencing run associated with the sample
     # GIVEN that a gzipped-fastq file exists for the sample
     # GIVEN bundle data with the fastq files exists in Housekeeper
-    case = case_tgs_tumour_only
     sample = sample_tgs_tumour
+    case_id = case_tgs_tumour_only.internal_id
 
     # GIVEN a bed version exists and a corresponding bed name is returned by lims for the sample
     bed_name = "balsamic_integration_test_bed"
     helpers.ensure_bed_version(store=status_db, bed_name=bed_name)
-    expect_lims_sample_request(lims_server=httpserver, sample=sample_tgs_tumour, bed_name=bed_name)
+    expect_lims_sample_request(lims_server=httpserver, sample=sample, bed_name=bed_name)
 
     # GIVEN a call to balsamic config case successfully generates a config file
     subprocess_mock = mocker.patch.object(commands, "subprocess")
@@ -118,21 +119,22 @@ def test_start_available(
         stdout = b""
 
         if "balsamic_binary_path config case" in command:
-            create_tga_config_file(test_root_dir=test_root_dir, case=case)
+            create_tga_config_file(test_root_dir=test_root_dir, case=case_tgs_tumour_only)
         return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
 
     subprocess_mock.run = Mock(side_effect=mock_run)
 
     # GIVEN the Trailblazer API returns no ongoing analysis for the case
     httpserver.expect_request(
-        "/trailblazer/get-latest-analysis", data='{"case_id": "' + case.internal_id + '"}'
+        "/trailblazer/get-latest-analysis",
+        data='{"case_id": "' + case_id + '"}',
     ).respond_with_json(None)
 
     # GIVEN a new pending analysis can be added to the Trailblazer API
-    case_path = Path(test_root_dir, "balsamic_root_path", case.internal_id)
+    case_path = Path(test_root_dir, "balsamic_root_path", case_id)
     expect_to_add_pending_analysis_to_trailblazer(
         trailblazer_server=httpserver,
-        case=case,
+        case=case_tgs_tumour_only,
         ticket_id=ticket_id,
         case_path=case_path,
         config_path=Path(case_path, "analysis", "slurm_jobids.yaml"),
@@ -158,12 +160,12 @@ def test_start_available(
     expected_config_case_command = (
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path config case "
-        f"--analysis-dir {test_root_dir}/balsamic_root_path "
+        f"--analysis-dir {balsamic_root_dir} "
         f"--analysis-workflow balsamic "
         f"--balsamic-cache {test_root_dir}/balsamic_cache "
         f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
-        f"--case-id {case.internal_id} "
-        f"--fastq-path {test_root_dir}/balsamic_root_path/{case.internal_id}/fastq "
+        f"--case-id {case_id} "
+        f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
         f"--gender female "
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {test_root_dir}/balsamic_gnomad_af5_path "
@@ -188,7 +190,7 @@ def test_start_available(
         f"--account balsamic_slurm_account "
         f"--mail-user balsamic_mail_user@scilifelab.se "
         f"--qos normal "
-        f"--sample-config {test_root_dir}/balsamic_root_path/{case.internal_id}/{case.internal_id}.json "
+        f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
         f"--run-analysis --benchmark",
         check=False,
         shell=True,
@@ -197,11 +199,11 @@ def test_start_available(
     )
 
     # THEN an analysis has been created for the case
-    assert len(case.analyses) == 1
+    assert len(case_tgs_tumour_only.analyses) == 1
 
     # THEN the case action is set to running
-    status_db.session.refresh(case)
-    assert case.action == CaseActions.RUNNING
+    status_db.session.refresh(case_tgs_tumour_only)
+    assert case_tgs_tumour_only.action == CaseActions.RUNNING
 
 
 def create_tga_config_file(test_root_dir: Path, case: Case) -> Path:
