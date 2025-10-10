@@ -64,6 +64,66 @@ def sample_tgs_tumour(
 
 
 @pytest.fixture
+def sample_wgs_normal(
+    helpers: StoreHelpers,
+    housekeeper_db: HousekeeperStore,
+    status_db: Store,
+    test_run_paths: IntegrationTestPaths,
+) -> Sample:
+    sample: Sample = helpers.add_sample(
+        store=status_db,
+        is_tumour=False,
+        last_sequenced_at=datetime.now(),
+        application_type=AnalysisType.WGS,
+    )
+    flow_cell: IlluminaFlowCell = helpers.add_illumina_flow_cell(
+        store=status_db, flow_cell_id="sample_wgs_normal_flow_cell"
+    )
+    sequencing_run: IlluminaSequencingRun = helpers.add_illumina_sequencing_run(
+        store=status_db, flow_cell=flow_cell
+    )
+    helpers.add_illumina_sample_sequencing_metrics_object(
+        store=status_db, sample_id=sample.internal_id, sequencing_run=sequencing_run, lane=1
+    )
+
+    create_fastq_file_and_add_to_housekeeper(
+        housekeeper_db=housekeeper_db, test_root_dir=test_run_paths.test_root_dir, sample=sample
+    )
+
+    return sample
+
+
+@pytest.fixture
+def sample_wgs_tumour(
+    helpers: StoreHelpers,
+    housekeeper_db: HousekeeperStore,
+    status_db: Store,
+    test_run_paths: IntegrationTestPaths,
+) -> Sample:
+    sample: Sample = helpers.add_sample(
+        store=status_db,
+        is_tumour=True,
+        last_sequenced_at=datetime.now(),
+        application_type=AnalysisType.WGS,
+    )
+    flow_cell: IlluminaFlowCell = helpers.add_illumina_flow_cell(
+        store=status_db, flow_cell_id="sample_wgs_tumour_flow_cell"
+    )
+    sequencing_run: IlluminaSequencingRun = helpers.add_illumina_sequencing_run(
+        store=status_db, flow_cell=flow_cell
+    )
+    helpers.add_illumina_sample_sequencing_metrics_object(
+        store=status_db, sample_id=sample.internal_id, sequencing_run=sequencing_run, lane=1
+    )
+
+    create_fastq_file_and_add_to_housekeeper(
+        housekeeper_db=housekeeper_db, test_root_dir=test_run_paths.test_root_dir, sample=sample
+    )
+
+    return sample
+
+
+@pytest.fixture
 def case_tgs_tumour_only(
     helpers: StoreHelpers, status_db: Store, sample_tgs_tumour: Sample, ticket_id: int
 ) -> Case:
@@ -79,9 +139,31 @@ def case_tgs_tumour_only(
     return case
 
 
+@pytest.fixture
+def case_wgs_paired(
+    helpers: StoreHelpers,
+    sample_wgs_normal: Sample,
+    sample_wgs_tumour: Sample,
+    status_db: Store,
+    ticket_id: int,
+):
+    case: Case = helpers.add_case(
+        store=status_db, data_analysis=Workflow.BALSAMIC, ticket=str(ticket_id)
+    )
+    order: Order = helpers.add_order(
+        store=status_db, ticket_id=ticket_id, customer_id=case.customer_id
+    )
+    status_db.link_case_to_order(order_id=order.id, case_id=case.id)
+
+    helpers.relate_samples(
+        base_store=status_db, case=case, samples=[sample_wgs_normal, sample_wgs_tumour]
+    )
+    return case
+
+
 @pytest.mark.xdist_group(name="integration")
 @pytest.mark.integration
-def test_start_available(
+def test_start_available_tgs_tumour_only(
     case_tgs_tumour_only: Case,
     sample_tgs_tumour: Sample,
     test_run_paths: IntegrationTestPaths,
@@ -206,12 +288,151 @@ def test_start_available(
     assert case_tgs_tumour_only.action == CaseActions.RUNNING
 
 
+@pytest.mark.xdist_group(name="integration")
+@pytest.mark.integration
+def test_start_available_wgs_paired(
+    case_wgs_paired: Case,
+    sample_wgs_normal: Sample,
+    sample_wgs_tumour: Sample,
+    test_run_paths: IntegrationTestPaths,
+    helpers: StoreHelpers,
+    httpserver: HTTPServer,
+    mocker: MockerFixture,
+    status_db: Store,
+    ticket_id: int,
+):
+    cli_runner = CliRunner()
+
+    # GIVEN a Balsamic root dir
+    test_root_dir: Path = test_run_paths.test_root_dir
+    balsamic_root_dir: Path = Path(test_root_dir, "balsamic_root_path")
+
+    # GIVEN a case
+    # GIVEN an order associated with the case
+    # GIVEN a sample associated with the case
+    # GIVEN a flow cell and sequencing run associated with the sample
+    # GIVEN that a gzipped-fastq file exists for the sample
+    # GIVEN bundle data with the fastq files exists in Housekeeper
+    case_id = case_wgs_paired.internal_id
+
+    # GIVEN a bed version exists and a corresponding bed name is returned by lims for the sample
+    bed_name = "balsamic_integration_test_bed"
+    helpers.ensure_bed_version(store=status_db, bed_name=bed_name)
+    expect_lims_sample_request(lims_server=httpserver, sample=sample_wgs_normal, bed_name=bed_name)
+    expect_lims_sample_request(lims_server=httpserver, sample=sample_wgs_tumour, bed_name=bed_name)
+
+    # GIVEN a call to balsamic config case successfully generates a config file
+    subprocess_mock = mocker.patch.object(commands, "subprocess")
+
+    def mock_run(*args, **kwargs):
+        command = args[0]
+        stdout = b""
+
+        if "balsamic_binary_path config case" in command:
+            create_wgs_config_file(test_root_dir=test_root_dir, case=case_wgs_paired)
+        return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
+
+    subprocess_mock.run = Mock(side_effect=mock_run)
+
+    # GIVEN the Trailblazer API returns no ongoing analysis for the case
+    httpserver.expect_request(
+        "/trailblazer/get-latest-analysis",
+        data='{"case_id": "' + case_id + '"}',
+    ).respond_with_json(None)
+
+    # GIVEN a new pending analysis can be added to the Trailblazer API
+    case_path = Path(test_root_dir, "balsamic_root_path", case_id)
+    expect_to_add_pending_analysis_to_trailblazer(
+        trailblazer_server=httpserver,
+        case=case_wgs_paired,
+        ticket_id=ticket_id,
+        case_path=case_path,
+        config_path=Path(case_path, "analysis", "slurm_jobids.yaml"),
+        workflow=Workflow.BALSAMIC,
+        type=AnalysisType.WGS,
+    )
+
+    # WHEN running balsamic start-available
+    result: Result = cli_runner.invoke(
+        base,
+        [
+            "--config",
+            test_run_paths.cg_config_file.as_posix(),
+            "workflow",
+            "balsamic",
+            "start-available",
+        ],
+    )
+
+    assert result.exception is None
+
+    # THEN balsamic config case was called in the correct way
+    expected_config_case_command = (
+        f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
+        f"{test_root_dir}/balsamic_binary_path config case "
+        f"--analysis-dir {balsamic_root_dir} "
+        f"--analysis-workflow balsamic "
+        f"--balsamic-cache {test_root_dir}/balsamic_cache "
+        f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
+        f"--case-id {case_id} "
+        f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
+        f"--gender female "
+        f"--genome-interval {test_root_dir}/balsamic_genome_interval_path "
+        f"--genome-version hg19 "
+        f"--gens-coverage-pon {test_root_dir}/balsamic_gens_coverage_female_path "
+        f"--gnomad-min-af5 {test_root_dir}/balsamic_gnomad_af5_path "
+        f"--normal-sample-name {sample_wgs_normal.internal_id} "
+        f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
+        f"--sentieon-license localhost "
+        f"--tumor-sample-name {sample_wgs_tumour.internal_id}"
+    )
+
+    subprocess_mock.run.assert_any_call(
+        expected_config_case_command,
+        check=False,
+        shell=True,
+        stderr=ANY,
+        stdout=ANY,
+    )
+
+    # THEN balsamic run analysis was called in the correct way
+    subprocess_mock.run.assert_any_call(
+        f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
+        f"{test_root_dir}/balsamic_binary_path run analysis "
+        f"--account balsamic_slurm_account "
+        f"--mail-user balsamic_mail_user@scilifelab.se "
+        f"--qos normal "
+        f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
+        f"--run-analysis --benchmark",
+        check=False,
+        shell=True,
+        stderr=ANY,
+        stdout=ANY,
+    )
+
+    # THEN an analysis has been created for the case
+    assert len(case_wgs_paired.analyses) == 1
+
+    # THEN the case action is set to running
+    status_db.session.refresh(case_wgs_paired)
+    assert case_wgs_paired.action == CaseActions.RUNNING
+
+
 def create_tga_config_file(test_root_dir: Path, case: Case) -> Path:
     filepath = Path(
         f"{test_root_dir}/balsamic_root_path/{case.internal_id}/{case.internal_id}.json"
     )
     filepath.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2("tests/fixtures/apps/balsamic/tga_case/config.json", filepath)
+    return filepath
+
+
+def create_wgs_config_file(test_root_dir: Path, case: Case) -> Path:
+    filepath = Path(
+        f"{test_root_dir}/balsamic_root_path/{case.internal_id}/{case.internal_id}.json"
+    )
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2("tests/fixtures/apps/balsamic/wgs_case/config.json", filepath)
     return filepath
 
 

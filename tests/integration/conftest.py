@@ -151,7 +151,7 @@ def create_fastq_file_and_add_to_housekeeper(
     fastq_base_path: Path = Path(test_root_dir, "fastq_files")
     fastq_base_path.mkdir(parents=True, exist_ok=True)
 
-    fastq_file_path: Path = Path(fastq_base_path, "file.fastq.gz")
+    fastq_file_path: Path = Path(fastq_base_path, f"{sample.internal_id}.fastq.gz")
     shutil.copy2("tests/integration/config/file.fastq.gz", fastq_file_path)
 
     bundle_data = {
