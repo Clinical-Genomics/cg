@@ -12,10 +12,8 @@ class BalsamicConfigInput(BaseModel):
     analysis_dir: Path
     analysis_workflow: Workflow
     artefact_snv_observations: Path
-    balsamic_cache: Path
-    conda_binary: Path
-    conda_env: str
     balsamic_binary: Path
+    balsamic_cache: Path
     cadd_annotations: Path
     cancer_germline_snv_observations: Path
     cancer_somatic_snv_observations: Path
@@ -23,15 +21,15 @@ class BalsamicConfigInput(BaseModel):
     case_id: str
     clinical_snv_observations: Path
     clinical_sv_observations: Path
+    conda_binary: Path
+    conda_env: str
     fastq_path: Path
     gender: SexOptions
     genome_version: GenomeVersion
     gnomad_min_af5: Path
     normal_sample_name: str | None = None
-    pon_cnn: Path | None = None
     sentieon_install_dir: Path
     sentieon_license: str
-    soft_filter_normal: bool = False
     swegen_snv: Path
     swegen_sv: Path
     tumor_sample_name: str
@@ -40,6 +38,8 @@ class BalsamicConfigInput(BaseModel):
 class BalsamicConfigInputPanel(BalsamicConfigInput):
     exome: bool
     panel_bed: Path
+    pon_cnn: Path | None = None  # TODO: investigate if this can be required
+    soft_filter_normal: bool = False
 
     def dump_to_cli(self) -> str:
         """Dump the Balsamic case config to a CLI command. None flags are excluded and boolean flags are converted to
@@ -114,10 +114,8 @@ class BalsamicConfigInputWGS(BalsamicConfigInput):
             "--gens-coverage-pon": self.gens_coverage_pon,
             "--gnomad-min-af5": self.gnomad_min_af5,
             "--normal-sample-name": self.normal_sample_name,
-            "--pon-cnn": self.pon_cnn,
             "--sentieon-install-dir": self.sentieon_install_dir,
             "--sentieon-license": self.sentieon_license,
-            "--soft-filter-normal": self.soft_filter_normal,
             "--swegen-snv": self.swegen_snv,
             "--swegen-sv": self.swegen_sv,
             "--tumor-sample-name": self.tumor_sample_name,
