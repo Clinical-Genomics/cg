@@ -30,43 +30,24 @@ def current_workflow() -> Workflow:
     return Workflow.BALSAMIC
 
 
-@pytest.mark.xdist_group(name="integration")
-@pytest.mark.integration
-def test_start_available(
-    test_run_paths: IntegrationTestPaths,
+@pytest.fixture
+def ticket_id() -> int:
+    return 12345
+
+
+@pytest.fixture
+def sample_tgs_tumour(
     helpers: StoreHelpers,
     housekeeper_db: HousekeeperStore,
-    httpserver: HTTPServer,
-    mocker: MockerFixture,
     status_db: Store,
-    tmp_path_factory: pytest.TempPathFactory,
-):
-    cli_runner = CliRunner()
-
-    # GIVEN a Balsamic root dir
-    test_root_dir: Path = test_run_paths.test_root_dir
-
-    # GIVEN a case
-    ticket_id = 12345
-    case: Case = helpers.add_case(
-        store=status_db, data_analysis=Workflow.BALSAMIC, ticket=str(ticket_id)
-    )
-
-    # GIVEN an order associated with the case
-    order: Order = helpers.add_order(
-        store=status_db, ticket_id=ticket_id, customer_id=case.customer_id
-    )
-    status_db.link_case_to_order(order_id=order.id, case_id=case.id)
-
-    # GIVEN a sample associated with the case
+    test_run_paths: IntegrationTestPaths,
+) -> Sample:
     sample: Sample = helpers.add_sample(
         store=status_db,
+        is_tumour=True,
         last_sequenced_at=datetime.now(),
         application_type=AnalysisType.TGS,
     )
-    helpers.relate_samples(base_store=status_db, case=case, samples=[sample])
-
-    # GIVEN a flow cell and sequencing run associated with the sample
     flow_cell: IlluminaFlowCell = helpers.add_illumina_flow_cell(store=status_db)
     sequencing_run: IlluminaSequencingRun = helpers.add_illumina_sequencing_run(
         store=status_db, flow_cell=flow_cell
@@ -75,16 +56,59 @@ def test_start_available(
         store=status_db, sample_id=sample.internal_id, sequencing_run=sequencing_run, lane=1
     )
 
+    create_fastq_file_and_add_to_housekeeper(
+        housekeeper_db=housekeeper_db, test_root_dir=test_run_paths.test_root_dir, sample=sample
+    )
+
+    return sample
+
+
+@pytest.fixture
+def case_tgs_tumour_only(
+    helpers: StoreHelpers, status_db: Store, sample_tgs_tumour: Sample, ticket_id: int
+) -> Case:
+    case: Case = helpers.add_case(
+        store=status_db, data_analysis=Workflow.BALSAMIC, ticket=str(ticket_id)
+    )
+    order: Order = helpers.add_order(
+        store=status_db, ticket_id=ticket_id, customer_id=case.customer_id
+    )
+    status_db.link_case_to_order(order_id=order.id, case_id=case.id)
+
+    helpers.relate_samples(base_store=status_db, case=case, samples=[sample_tgs_tumour])
+    return case
+
+
+@pytest.mark.xdist_group(name="integration")
+@pytest.mark.integration
+def test_start_available(
+    case_tgs_tumour_only: Case,
+    sample_tgs_tumour: Sample,
+    test_run_paths: IntegrationTestPaths,
+    helpers: StoreHelpers,
+    httpserver: HTTPServer,
+    mocker: MockerFixture,
+    status_db: Store,
+    ticket_id: int,
+):
+    cli_runner = CliRunner()
+
+    # GIVEN a Balsamic root dir
+    test_root_dir: Path = test_run_paths.test_root_dir
+
+    # GIVEN a case
+    # GIVEN an order associated with the case
+    # GIVEN a sample associated with the case
+    # GIVEN a flow cell and sequencing run associated with the sample
     # GIVEN that a gzipped-fastq file exists for the sample
     # GIVEN bundle data with the fastq files exists in Housekeeper
-    create_fastq_file_and_add_to_housekeeper(
-        housekeeper_db=housekeeper_db, test_root_dir=test_root_dir, sample=sample
-    )
+    case = case_tgs_tumour_only
+    sample = sample_tgs_tumour
 
     # GIVEN a bed version exists and a corresponding bed name is returned by lims for the sample
     bed_name = "balsamic_integration_test_bed"
     helpers.ensure_bed_version(store=status_db, bed_name=bed_name)
-    expect_lims_sample_request(lims_server=httpserver, sample=sample, bed_name=bed_name)
+    expect_lims_sample_request(lims_server=httpserver, sample=sample_tgs_tumour, bed_name=bed_name)
 
     # GIVEN a call to balsamic config case successfully generates a config file
     subprocess_mock = mocker.patch.object(commands, "subprocess")
@@ -130,7 +154,7 @@ def test_start_available(
 
     assert result.exception is None
 
-    # # THEN balsamic config case was called in the correct way
+    # THEN balsamic config case was called in the correct way
     expected_config_case_command = (
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path config case "
