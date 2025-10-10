@@ -15,6 +15,70 @@ class BalsamicConfigInput(BaseModel):
     analysis_dir: Path
     analysis_workflow: Workflow
     artefact_snv_observations: Path
+    balsamic_cache: Path
+    cadd_annotations: Path
+    cancer_germline_snv_observations: Path
+    cancer_somatic_snv_observations: Path
+    cancer_somatic_sv_observations: Path
+    case_id: str
+    clinical_snv_observations: Path
+    clinical_sv_observations: Path
+    fastq_path: Path
+    gender: SexOptions
+    genome_interval: Path | None = None
+    genome_version: GenomeVersion
+    gnomad_min_af5: Path | None = None
+    normal_sample_name: str | None = None
+    pon_cnn: Path | None = None
+    sentieon_install_dir: Path
+    sentieon_license: str
+    soft_filter_normal: bool = False
+    swegen_snv: Path
+    swegen_sv: Path
+    tumor_sample_name: str
+
+
+class BalsamicTargetedConfigInput(BaseModel):
+    conda_binary: Path
+    conda_env: str
+    balsamic_binary: Path
+    analysis_dir: Path
+    analysis_workflow: Workflow
+    artefact_snv_observations: Path
+    artefact_sv_observations: Path
+    balsamic_cache: Path
+    cadd_annotations: Path
+    cancer_germline_snv_observations: Path
+    cancer_somatic_snv_observations: Path
+    cancer_somatic_sv_observations: Path
+    case_id: str
+    clinical_snv_observations: Path
+    clinical_sv_observations: Path
+    fastq_path: Path
+    gender: SexOptions
+    genome_interval: Path | None = None
+    genome_version: GenomeVersion
+    gens_coverage_pon: Path | None = None
+    gnomad_min_af5: Path | None = None
+    normal_sample_name: str | None = None
+    panel_bed: Path | None = None
+    pon_cnn: Path | None = None
+    exome: bool = False
+    sentieon_install_dir: Path
+    sentieon_license: str
+    soft_filter_normal: bool = False
+    swegen_snv: Path
+    swegen_sv: Path
+    tumor_sample_name: str
+
+
+class BalsamicWGSConfigInput(BaseModel):
+    conda_binary: Path
+    conda_env: str
+    balsamic_binary: Path
+    analysis_dir: Path
+    analysis_workflow: Workflow
+    artefact_snv_observations: Path
     artefact_sv_observations: Path
     balsamic_cache: Path
     cadd_annotations: Path

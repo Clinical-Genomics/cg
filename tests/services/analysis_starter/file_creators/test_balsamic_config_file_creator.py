@@ -42,6 +42,7 @@ def expected_wes_paired_command(cg_balsamic_config: BalsamicConfig):
         f"--exome "
         f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
         f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
+        f"--soft-filter-normal "
         f"--swegen-snv {cg_balsamic_config.swegen_snv} "
         f"--swegen-sv {cg_balsamic_config.swegen_sv} "
         f"--tumor-sample-name sample_tumour"
@@ -223,7 +224,7 @@ def test_create_wes_paired(
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
+        status_db=store, lims_api=lims_api, cg_balsamic_config=cg_balsamic_config
     )
 
     # GIVEN that the subprocess exits successfully
