@@ -1,4 +1,6 @@
+from abc import abstractmethod
 from pathlib import Path
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -34,20 +36,34 @@ class BalsamicConfigInput(BaseModel):
     swegen_sv: Path
     tumor_sample_name: str
 
-
-class BalsamicConfigInputPanel(BalsamicConfigInput):
-    exome: bool
-    panel_bed: Path
-    pon_cnn: Path | None = None  # TODO: investigate if this can be required
-    soft_filter_normal: bool = False
-
     def dump_to_cli(self) -> str:
         """Dump the Balsamic case config to a CLI command. None flags are excluded and boolean flags are converted to
         only add the flag."""
         command = (
             f"{self.conda_binary} run --name {self.conda_env} {self.balsamic_binary} config case"
         )
-        flags = {
+
+        for flag, value in self._get_flags().items():
+            if isinstance(value, bool):
+                if value is True:
+                    command += f" {flag}"
+            elif value is not None:
+                command += f" {flag} {value}"
+        return command
+
+    @abstractmethod
+    def _get_flags(self) -> dict[str, Any]:
+        pass
+
+
+class BalsamicConfigInputPanel(BalsamicConfigInput):
+    exome: bool
+    panel_bed: Path
+    pon_cnn: Path | None = None  # Equivalent to --gens-coverage-pon in wgs analysis
+    soft_filter_normal: bool = False
+
+    def _get_flags(self) -> dict[str, Any]:
+        return {
             "--analysis-dir": self.analysis_dir,
             "--analysis-workflow": self.analysis_workflow,
             "--balsamic-cache": self.balsamic_cache,
@@ -74,21 +90,15 @@ class BalsamicConfigInputPanel(BalsamicConfigInput):
             "--swegen-sv": self.swegen_sv,
             "--tumor-sample-name": self.tumor_sample_name,
         }
-        return _transform_flags(command=command, flags=flags)
 
 
 class BalsamicConfigInputWGS(BalsamicConfigInput):
     artefact_sv_observations: Path
     genome_interval: Path
-    gens_coverage_pon: Path
+    gens_coverage_pon: Path  # Equivalent to --pon-cnn in panel analysis
 
-    def dump_to_cli(self) -> str:
-        """Dump the Balsamic case config to a CLI command. None flags are excluded and boolean flags are converted to
-        only add the flag."""
-        command = (
-            f"{self.conda_binary} run --name {self.conda_env} {self.balsamic_binary} config case"
-        )
-        flags = {
+    def _get_flags(self) -> dict[str, Any]:
+        return {
             "--analysis-dir": self.analysis_dir,
             "--analysis-workflow": self.analysis_workflow,
             "--balsamic-cache": self.balsamic_cache,
@@ -114,7 +124,6 @@ class BalsamicConfigInputWGS(BalsamicConfigInput):
             "--swegen-sv": self.swegen_sv,
             "--tumor-sample-name": self.tumor_sample_name,
         }
-        return _transform_flags(command=command, flags=flags)
 
 
 class BalsamicCaseConfig(CaseConfig):
@@ -134,13 +143,3 @@ class BalsamicCaseConfig(CaseConfig):
             "--qos {qos} --sample-config {sample_config} --cluster-config {cluster_config} --run-analysis "
             "--benchmark".format(**self.model_dump())
         )
-
-
-def _transform_flags(command: str, flags: dict):
-    for flag, value in flags.items():
-        if isinstance(value, bool):
-            if value is True:
-                command += f" {flag}"
-        elif value is not None:
-            command += f" {flag} {value}"
-    return command
