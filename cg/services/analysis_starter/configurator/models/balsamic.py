@@ -39,6 +39,9 @@ class BalsamicConfigInput(BaseModel):
 
 
 class BalsamicConfigInputPanel(BalsamicConfigInput):
+    exome: bool
+    panel_bed: str
+
     def dump_to_cli(self) -> str:
         """Dump the Balsamic case config to a CLI command. None flags are excluded and boolean flags are converted to
         only add the flag."""
@@ -51,7 +54,6 @@ class BalsamicConfigInputPanel(BalsamicConfigInput):
             "--balsamic-cache": self.balsamic_cache,
             "--cadd-annotations": self.cadd_annotations,
             "--artefact-snv-observations": self.artefact_snv_observations,
-            "--artefact-sv-observations": self.artefact_sv_observations,
             "--cancer-germline-snv-observations": self.cancer_germline_snv_observations,
             "--cancer-somatic-snv-observations": self.cancer_somatic_snv_observations,
             "--cancer-somatic-sv-observations": self.cancer_somatic_sv_observations,
@@ -60,9 +62,7 @@ class BalsamicConfigInputPanel(BalsamicConfigInput):
             "--clinical-sv-observations": self.clinical_sv_observations,
             "--fastq-path": self.fastq_path,
             "--gender": self.gender,
-            "--genome-interval": self.genome_interval,
             "--genome-version": self.genome_version,
-            "--gens-coverage-pon": self.gens_coverage_pon,
             "--gnomad-min-af5": self.gnomad_min_af5,
             "--normal-sample-name": self.normal_sample_name,
             "--panel-bed": self.panel_bed,
