@@ -16,7 +16,6 @@ class BalsamicConfigInput(BaseModel):
     conda_binary: Path
     conda_env: str
     balsamic_binary: Path
-
     cadd_annotations: Path
     cancer_germline_snv_observations: Path
     cancer_somatic_snv_observations: Path
@@ -40,7 +39,7 @@ class BalsamicConfigInput(BaseModel):
 
 class BalsamicConfigInputPanel(BalsamicConfigInput):
     exome: bool
-    panel_bed: str
+    panel_bed: Path
 
     def dump_to_cli(self) -> str:
         """Dump the Balsamic case config to a CLI command. None flags are excluded and boolean flags are converted to

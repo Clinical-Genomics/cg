@@ -134,7 +134,7 @@ class BalsamicConfigFileCreator:
             genome_version=GenomeVersion.HG19,
             gnomad_min_af5=self.gnomad_af5_path,
             normal_sample_name=self._get_normal_sample_id(case),
-            panel_bed=bed_file.as_posix(),
+            panel_bed=bed_file,
             pon_cnn=self._get_pon_file(bed_file),
             exome=self._all_samples_are_exome(case),
             sentieon_install_dir=self.sentieon_licence_path,
