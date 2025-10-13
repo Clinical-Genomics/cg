@@ -1,11 +1,10 @@
 """Module to handle time functions"""
 
-import time
 import re
+import time
 from datetime import datetime
 from pathlib import Path
 
-from cg.constants.time import SECONDS_IN_A_DAY
 from cg.utils.files import get_source_creation_time_stamp
 
 DATE_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
@@ -42,6 +41,6 @@ def is_directory_older_than_days_old(directory_path: Path, days_old: int) -> boo
     """
     Check if the directory is older than the specified number of days.
     """
-    days_in_seconds = SECONDS_IN_A_DAY * days_old
+    days_in_seconds = 60 * 60 * 24 * days_old
     dir_creation_time_stamp: float = get_source_creation_time_stamp(source_path=directory_path)
     return bool(dir_creation_time_stamp < time.time() - days_in_seconds)
