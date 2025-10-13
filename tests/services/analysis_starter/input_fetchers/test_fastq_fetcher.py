@@ -9,12 +9,17 @@ from cg.store.store import Store
 
 
 def test_ensure_files_are_ready():
+    # GIVEN a sample and a case in StatusDB
     sample: Sample = create_autospec(Sample)
     case: Case = create_autospec(Case, samples=[sample])
     status_db: Store = create_autospec(Store)
     status_db.get_case_by_internal_id = Mock(return_value=case)
+
+    # GIVEN that the case is not down sampled nor external
     status_db.is_case_down_sampled = Mock(return_value=False)
     status_db.is_case_external = Mock(return_value=False)
+
+    # GIVEN that all Illumina runs are on disk
     status_db.are_all_illumina_runs_on_disk = Mock(return_value=True)
 
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
