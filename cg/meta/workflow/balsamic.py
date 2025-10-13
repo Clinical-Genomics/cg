@@ -223,7 +223,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                     f"The specified PON reference file {latest_pon} does not match the panel bed {panel_bed}"
                 )
         else:
-            latest_pon = self.get_latest_pon_file(panel_bed)  # HOW do we get here?
+            latest_pon = self.get_latest_pon_file(panel_bed)
             if latest_pon:
                 LOG.info(
                     f"The following PON reference file will be used for the analysis: {latest_pon}"
