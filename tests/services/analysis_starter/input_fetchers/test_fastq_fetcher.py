@@ -1,9 +1,8 @@
-from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress.compress import CompressAPI
-from cg.models.compression_data import CaseCompressionData, CompressionData, SampleCompressionData
+from cg.models.compression_data import CaseCompressionData
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.store.models import Case, Sample
 from cg.store.store import Store
@@ -14,23 +13,21 @@ def test_ensure_files_are_ready():
     case: Case = create_autospec(Case, samples=[sample])
     status_db: Store = create_autospec(Store)
     status_db.get_case_by_internal_id = Mock(return_value=case)
+    status_db.is_case_down_sampled = Mock(return_value=False)
+    status_db.is_case_external = Mock(return_value=False)
+    status_db.are_all_illumina_runs_on_disk = Mock(return_value=True)
 
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
     housekeeper_api.get_archived_files_for_bundle = Mock(return_value=[])
 
     compress_api: CompressAPI = create_autospec(CompressAPI)
-    compression_data = CompressionData(stub=Path("fastq_file"))
-    sample_compression_data = SampleCompressionData(
-        sample_id="sample_id", compression_objects=[compression_data]
-    )
-    compress_api.get_case_compression_data = Mock(
-        return_value=CaseCompressionData(
-            case_id="case_id", sample_compression_data=[sample_compression_data]
-        )
-    )
+    case_compression_data: CaseCompressionData = create_autospec(CaseCompressionData)
+    case_compression_data.is_spring_decompression_needed = Mock(return_value=False)
+    case_compression_data.is_spring_decompression_running = Mock(return_value=False)
+    compress_api.get_case_compression_data = Mock(return_value=case_compression_data)
 
     fastq_fetcher = FastqFetcher(
-        compress_api=Mock(),
+        compress_api=compress_api,
         housekeeper_api=housekeeper_api,
         spring_archive_api=Mock(),
         status_db=status_db,
