@@ -1,9 +1,11 @@
 from typing import cast
 from unittest.mock import Mock, create_autospec
 
+import pytest
 from housekeeper.store.models import Archive, File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.exc import AnalysisNotReadyError
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress.compress import CompressAPI
 from cg.models.compression_data import CaseCompressionData
@@ -88,7 +90,9 @@ def test_ensure_files_are_ready_archived_spring_files():
     )
 
     # WHEN ensuring that the files are ready for analysis
-    # THEN no error is raised
-    fastq_fetcher.ensure_files_are_ready("case_id")
+    # THEN an error is raised
+    with pytest.raises(AnalysisNotReadyError):
+        fastq_fetcher.ensure_files_are_ready("case_id")
 
+    # THEN the Spring files for the case should have started to be retrieved
     cast(Mock, spring_archive_api.retrieve_spring_files_for_case).assert_called_once_with("case_id")
