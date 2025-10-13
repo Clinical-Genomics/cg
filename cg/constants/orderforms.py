@@ -32,10 +32,10 @@ class Orderform(StrEnum):
         current_order_form_versions = {
             Orderform.MIP_DNA: "35",
             Orderform.RML: "20",
-            Orderform.MICROSALT: "11",
+            Orderform.MICROSALT: "12",
             Orderform.NALLO: "1",
             Orderform.SARS_COV_2: "10",
-            Orderform.MICROBIAL_FASTQ: "2",
+            Orderform.MICROBIAL_FASTQ: "3",
             Orderform.PACBIO_LONG_READ: "2",
         }
         return current_order_form_versions[order_form]
