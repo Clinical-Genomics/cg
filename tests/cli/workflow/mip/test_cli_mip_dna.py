@@ -4,7 +4,7 @@ import pytest
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
-from cg.cli.workflow.mip_dna.base import config_case, run, start
+from cg.cli.workflow.mip_dna.base import dev_config_case, dev_run, dev_start
 from cg.constants import Workflow
 from cg.models.cg_config import CGConfig, IlluminaConfig, MipConfig, RunInstruments
 from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
@@ -35,7 +35,7 @@ def cg_config() -> CGConfig:
     )
 
 
-def test_mip_dna_run_no_flags(cg_config: CGConfig, mocker: MockerFixture):
+def test_mip_dna_dev_run_no_flags(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a CLI runner
     cli_runner = CliRunner()
 
@@ -56,7 +56,7 @@ def test_mip_dna_run_no_flags(cg_config: CGConfig, mocker: MockerFixture):
     flags: list[str] = [case_id]
 
     # WHEN invoking cg workflow mip-dna dev-run
-    result = cli_runner.invoke(run, flags, obj=cg_config)
+    result = cli_runner.invoke(dev_run, flags, obj=cg_config)
 
     # THEN the command exits successfully
     assert result.exit_code == 0
@@ -68,7 +68,7 @@ def test_mip_dna_run_no_flags(cg_config: CGConfig, mocker: MockerFixture):
     )
 
 
-def test_mip_dna_run_all_flags(cg_config: CGConfig, mocker: MockerFixture):
+def test_mip_dna_dev_run_all_flags(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a CLI runner
     cli_runner = CliRunner()
 
@@ -91,7 +91,7 @@ def test_mip_dna_run_all_flags(cg_config: CGConfig, mocker: MockerFixture):
     flags = ["--start-with", start_with, "--start-after", start_after, "--use-bwa-mem", case_id]
 
     # WHEN invoking cg workflow mip-dna dev-run
-    result = cli_runner.invoke(run, flags, obj=cg_config)
+    result = cli_runner.invoke(dev_run, flags, obj=cg_config)
 
     # THEN the command exits successfully
     assert result.exit_code == 0
@@ -103,7 +103,7 @@ def test_mip_dna_run_all_flags(cg_config: CGConfig, mocker: MockerFixture):
     )
 
 
-def test_mip_dna_start_no_flags(
+def test_mip_dna_dev_start_no_flags(
     cg_config: CGConfig,
     mocker: MockerFixture,
 ):
@@ -128,7 +128,7 @@ def test_mip_dna_start_no_flags(
 
     # WHEN invoking cg workflow mip-dna dev-start
     result = cli_runner.invoke(
-        start,
+        dev_start,
         flags,
         obj=cg_config,
     )
@@ -147,7 +147,7 @@ def test_mip_dna_start_no_flags(
     )
 
 
-def test_mip_dna_start_all_flags(
+def test_mip_dna_dev_start_all_flags(
     cg_config: CGConfig,
     mocker: MockerFixture,
 ):
@@ -184,7 +184,7 @@ def test_mip_dna_start_all_flags(
 
     # WHEN invoking cg workflow mip-dna dev-start
     result = cli_runner.invoke(
-        start,
+        dev_start,
         flags,
         obj=cg_config,
     )
@@ -203,7 +203,7 @@ def test_mip_dna_start_all_flags(
     )
 
 
-def test_mip_dna_config_case_all_flags(cg_config: CGConfig, mocker: MockerFixture):
+def test_mip_dna_dev_config_case_all_flags(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a CLIRunner
     cli_runner = CliRunner()
 
@@ -219,7 +219,9 @@ def test_mip_dna_config_case_all_flags(cg_config: CGConfig, mocker: MockerFixtur
     mock_configure = mocker.patch.object(MIPDNAConfigurator, "configure")
 
     # WHEN invoking cg workflow mip-dna dev-case-config
-    result = cli_runner.invoke(config_case, ["--panel-bed", "panel.bed", case_id], obj=cg_config)
+    result = cli_runner.invoke(
+        dev_config_case, ["--panel-bed", "panel.bed", case_id], obj=cg_config
+    )
 
     # THEN the command exits successfully
     assert result.exit_code == 0
@@ -229,7 +231,7 @@ def test_mip_dna_config_case_all_flags(cg_config: CGConfig, mocker: MockerFixtur
     mock_configure.assert_called_once_with(case_id=case_id, panel_bed="panel.bed")
 
 
-def test_mip_dna_config_case_no_flags(cg_config: CGConfig, mocker: MockerFixture):
+def test_mip_dna_dev_config_case_no_flags(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a CLIRunner
     cli_runner = CliRunner()
 
@@ -245,7 +247,7 @@ def test_mip_dna_config_case_no_flags(cg_config: CGConfig, mocker: MockerFixture
     mock_configure = mocker.patch.object(MIPDNAConfigurator, "configure")
 
     # WHEN invoking cg workflow mip-dna dev-case-config
-    result = cli_runner.invoke(config_case, [case_id], obj=cg_config)
+    result = cli_runner.invoke(dev_config_case, [case_id], obj=cg_config)
 
     # THEN the command exits successfully
     assert result.exit_code == 0

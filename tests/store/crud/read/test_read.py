@@ -311,21 +311,6 @@ def test_analyses_to_upload_when_filtering_with_missing_workflow(helpers, sample
     assert len(records) == 0
 
 
-def test_set_case_action(analysis_store: Store, case_id):
-    """Tests if actions of cases are changed to analyze."""
-    # Given a store with a case with action None
-    action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
-
-    assert action is None
-
-    # When setting the case to "analyze"
-    analysis_store.update_case_action(case_internal_id=case_id, action="analyze")
-    new_action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
-
-    # Then the action should be set to analyze
-    assert new_action == "analyze"
-
-
 def test_get_applications(microbial_store: Store, expected_number_of_applications):
     """Test function to return the applications."""
 

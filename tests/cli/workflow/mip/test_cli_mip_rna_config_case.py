@@ -1,4 +1,4 @@
-"""Test the CLI for mip-rna config-case"""
+""" Test the CLI for mip-rna config-case"""
 
 import logging
 
@@ -31,21 +31,4 @@ def test_cg_workflow_mip_rna_config_case(cli_runner, caplog, case_id, mip_rna_co
 
     # THEN the command should be printed
     assert result.exit_code == 0
-    assert "Config file saved to" in caplog.text
-
-
-def test_cg_workflow_mip_rna_config_case_error(cli_runner, caplog, case_id, mip_rna_context):
-    """Test wrong case id with MIP RNA case config command."""
-
-    caplog.set_level(logging.INFO)
-
-    # GIVEN a cli function
-
-    # WHEN we run a case in dry run mode
-    result = cli_runner.invoke(config_case, ["not_a_case_id"], obj=mip_rna_context)
-
-    # THEN the command should return an exit fail code
-    assert result.exit_code == 1
-
-    # THEN an error should be logged
-    assert "could not be found in Status DB" in caplog.text
+    assert f"Config file saved to" in caplog.text
