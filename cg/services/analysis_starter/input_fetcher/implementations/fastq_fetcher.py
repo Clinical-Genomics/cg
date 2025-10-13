@@ -94,7 +94,7 @@ class FastqFetcher(InputFetcher):
             else:
                 self._decompress_case(case_id)
         elif case_compression_data.is_spring_decompression_running():
-            self.status_db.set_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
+            self.status_db.update_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
             return
 
         self._add_decompressed_fastq_files_to_housekeeper(case_id)
@@ -107,7 +107,7 @@ class FastqFetcher(InputFetcher):
         except DecompressionCouldNotStartError:
             LOG.warning(f"Decompression failed to start for {case_id}")
             return
-        self.status_db.set_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
+        self.status_db.update_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
         LOG.info(f"Decompression started for {case_id}")
 
     def _are_fastq_files_ready_for_analysis(self, case_id: str) -> bool:
@@ -153,7 +153,7 @@ class FastqFetcher(InputFetcher):
             LOG.info(
                 f"Decompression is running for {case_id}, analysis will be started when decompression is done"
             )
-            self.status_db.set_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
+            self.status_db.update_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
 
     @staticmethod
     def _should_skip_sample(case: Case, sample: Sample) -> bool:
