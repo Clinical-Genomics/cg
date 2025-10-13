@@ -167,3 +167,30 @@ def test_dump_to_cli_panel(balsamic_config_input: BalsamicConfigInput):
     # THEN the command should not include booleans as strings
     assert "True" not in cli_command
     assert "False" not in cli_command
+
+
+def test_dump_to_cli_wgs(balsamic_config_input: BalsamicConfigInput):
+    """Test that the dumping of the model to a CLI string works as expected."""
+    # GIVEN a BalsamicConfigInput
+
+    # GIVEN that an optional field is None
+    balsamic_config_input.gens_coverage_pon = None
+
+    # GIVEN that a boolean field is set to True
+    balsamic_config_input.soft_filter_normal = True
+
+    # GIVEN that a boolean field is set to False
+    balsamic_config_input.exome = False
+
+    # WHEN dumping to CLI
+    cli_command = balsamic_config_input.dump_to_cli()
+
+    # THEN the command should not include the gens-coverage-pon flag
+    assert "--gens-coverage-pon" not in cli_command
+
+    # THEN the command should include the soft-filter-normal flag
+    assert "--soft-filter-normal" in cli_command
+
+    # THEN the command should not include booleans as strings
+    assert "True" not in cli_command
+    assert "False" not in cli_command
