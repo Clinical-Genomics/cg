@@ -95,8 +95,13 @@ def scout_export_manged_variants_stdout() -> bytes:
 
 
 @pytest.mark.xdist_group(name="integration")
+@pytest.mark.parametrize(
+    "test_command",
+    ["start-available", "dev-start-available"],
+)
 @pytest.mark.integration
 def test_start_available_mip_dna(
+    test_command: str,
     helpers: StoreHelpers,
     housekeeper_db_uri: str,
     housekeeper_db: HousekeeperStore,
@@ -223,7 +228,10 @@ def test_start_available_mip_dna(
     )
 
     # GIVEN the analysis can be started as a sub process
-    analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
+    if test_command == "dev-start-available":
+        analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
+    else:
+        analysis_subprocess_mock = subprocess_mock
 
     # WHEN running mip-dna start-available
     result: Result = cli_runner.invoke(
@@ -233,7 +241,7 @@ def test_start_available_mip_dna(
             config_path.as_posix(),
             "workflow",
             "mip-dna",
-            "start-available",
+            test_command,
         ],
         catch_exceptions=False,
     )
@@ -291,13 +299,22 @@ def test_start_available_mip_dna(
         f"{case.internal_id} --slurm_quality_of_service normal --email {email}"
     )
 
-    analysis_subprocess_mock.run.assert_any_call(
-        args=expected_command,
-        check=False,
-        shell=True,
-        stdout=ANY,
-        stderr=ANY,
-    )
+    if test_command == "dev-start-available":
+        analysis_subprocess_mock.run.assert_any_call(
+            args=expected_command,
+            check=False,
+            shell=True,
+            stdout=ANY,
+            stderr=ANY,
+        )
+    else:
+        analysis_subprocess_mock.run.assert_any_call(
+            expected_command,
+            check=False,
+            shell=True,
+            stdout=ANY,
+            stderr=ANY,
+        )
 
     # THEN a successful exit code is returned
     assert result.exit_code == 0

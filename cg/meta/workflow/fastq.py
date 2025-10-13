@@ -45,12 +45,11 @@ class FastqHandler:
         self.status_db = status_db
 
     def link_fastq_files(self, case_id: str) -> None:
-        LOG.info(f"Linking Fastq files for case {case_id}")
+        LOG.debug("Linking Fastq files")
         case: Case = self.status_db.get_case_by_internal_id_strict(internal_id=case_id)
         for sample in case.samples:
             fastq_dir: Path = self.get_sample_fastq_destination_dir(case=case, sample=sample)
             self.link_fastq_files_for_sample(sample=sample, fastq_dir=fastq_dir)
-        LOG.info(f"Linked Fastq files for case {case_id}")
 
     def link_fastq_files_for_sample(self, sample: Sample, fastq_dir: Path) -> None:
         """
