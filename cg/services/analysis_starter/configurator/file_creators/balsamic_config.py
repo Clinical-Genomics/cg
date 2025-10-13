@@ -111,12 +111,12 @@ class BalsamicConfigFileCreator:
             tumor_sample_name=self._get_tumor_sample_id(case),
         )
 
-    def _build_targeted_config(self, case, **flags) -> BalsamicConfigInput:
+    def _build_targeted_config(self, case: Case, **flags) -> BalsamicConfigInput:
         bed_file: Path = self._resolve_bed_file(case, **flags)
         patient_sex: SexOptions = self._get_patient_sex(case)
         return BalsamicConfigInputPanel(
             analysis_dir=self.root_dir,
-            analysis_workflow=case.data_analysis,
+            analysis_workflow=case.data_analysis,  # TODO See if we can fix the typing in the data model
             artefact_snv_observations=self.loqusdb_artefact_snv,
             balsamic_binary=self.balsamic_binary,
             balsamic_cache=self.cache_dir,
