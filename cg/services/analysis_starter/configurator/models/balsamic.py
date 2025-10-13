@@ -20,7 +20,6 @@ class BalsamicConfigInput(BaseModel):
     cancer_germline_snv_observations: Path
     cancer_somatic_snv_observations: Path
     cancer_somatic_sv_observations: Path
-    # cancer_germline_sv?  # TODO: the file is missing in `/home/proj/production/cancer/reference/loqusdb`. It seems like its not used at the moment.
     case_id: str
     clinical_snv_observations: Path
     clinical_sv_observations: Path

@@ -169,21 +169,21 @@ def test_dump_to_cli_panel(balsamic_config_input_panel: BalsamicConfigInputPanel
     assert "False" not in cli_command
 
 
-def test_dump_to_cli_wgs(balsamic_config_input: BalsamicConfigInput):
+def test_dump_to_cli_wgs(balsamic_config_input_wgs: BalsamicConfigInputWGS):
     """Test that the dumping of the model to a CLI string works as expected."""
     # GIVEN a BalsamicConfigInput
 
     # GIVEN that an optional field is None
-    balsamic_config_input.gens_coverage_pon = None
+    balsamic_config_input_wgs.gens_coverage_pon = None
 
     # GIVEN that a boolean field is set to True
-    balsamic_config_input.soft_filter_normal = True
+    balsamic_config_input_wgs.soft_filter_normal = True
 
     # GIVEN that a boolean field is set to False
-    balsamic_config_input.exome = False
+    balsamic_config_input_wgs.exome = False
 
     # WHEN dumping to CLI
-    cli_command = balsamic_config_input.dump_to_cli()
+    cli_command = balsamic_config_input_wgs.dump_to_cli()
 
     # THEN the command should not include the gens-coverage-pon flag
     assert "--gens-coverage-pon" not in cli_command

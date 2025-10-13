@@ -44,7 +44,7 @@ from cg.store.store import Store
 
 @pytest.fixture
 def balsamic_configurator(
-    balsamic_config: BalsamicConfig,
+    cg_balsamic_config: BalsamicConfig,
     balsamic_fastq_handler: BalsamicFastqHandler,
     lims_api: LimsAPI,
     base_store: Store,
