@@ -8,7 +8,7 @@ from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
-def test_ensure_files_are_ready():
+def test_ensure_files_are_ready_success():
     # GIVEN a sample and a case in StatusDB
     sample: Sample = create_autospec(Sample)
     case: Case = create_autospec(Case, samples=[sample])
@@ -22,15 +22,18 @@ def test_ensure_files_are_ready():
     # GIVEN that all Illumina runs are on disk
     status_db.are_all_illumina_runs_on_disk = Mock(return_value=True)
 
+    # GIVEN that there are no files archived via DDN
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
     housekeeper_api.get_archived_files_for_bundle = Mock(return_value=[])
 
+    # GIVEN that all spring files are decompressed into FASTQ files
     compress_api: CompressAPI = create_autospec(CompressAPI)
     case_compression_data: CaseCompressionData = create_autospec(CaseCompressionData)
     case_compression_data.is_spring_decompression_needed = Mock(return_value=False)
     case_compression_data.is_spring_decompression_running = Mock(return_value=False)
     compress_api.get_case_compression_data = Mock(return_value=case_compression_data)
 
+    # GIVEN a FastqFetcher
     fastq_fetcher = FastqFetcher(
         compress_api=compress_api,
         housekeeper_api=housekeeper_api,
@@ -38,4 +41,6 @@ def test_ensure_files_are_ready():
         status_db=status_db,
     )
 
+    # WHEN ensuring that the files are ready for analysis
+    # THEN no error is raised
     fastq_fetcher.ensure_files_are_ready("case_id")
