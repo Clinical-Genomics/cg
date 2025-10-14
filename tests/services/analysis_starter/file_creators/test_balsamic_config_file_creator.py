@@ -17,7 +17,71 @@ from cg.store.store import Store
 
 
 @pytest.fixture
-def expected_wes_paired_command(cg_balsamic_config: BalsamicConfig):
+def expected_tgs_normal_only_command(cg_balsamic_config: BalsamicConfig) -> str:
+    return (
+        f"{cg_balsamic_config.conda_binary} "
+        f"run --name {cg_balsamic_config.conda_env} "
+        f"{cg_balsamic_config.binary_path} config case "
+        f"--analysis-dir {cg_balsamic_config.root} "
+        f"--analysis-workflow balsamic "
+        f"--balsamic-cache {cg_balsamic_config.balsamic_cache} "
+        f"--cadd-annotations {cg_balsamic_config.cadd_path} "
+        f"--artefact-snv-observations {cg_balsamic_config.loqusdb_artefact_snv} "
+        f"--cancer-germline-snv-observations {cg_balsamic_config.loqusdb_cancer_germline_snv} "
+        f"--cancer-somatic-snv-observations {cg_balsamic_config.loqusdb_cancer_somatic_snv} "
+        f"--cancer-somatic-sv-observations {cg_balsamic_config.loqusdb_cancer_somatic_sv} "
+        f"--case-id case_1 "
+        f"--clinical-snv-observations {cg_balsamic_config.loqusdb_clinical_snv} "
+        f"--clinical-sv-observations {cg_balsamic_config.loqusdb_clinical_sv} "
+        f"--fastq-path {cg_balsamic_config.root}/case_1/fastq "
+        f"--gender female "
+        f"--genome-version hg19 "
+        f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
+        f"--panel-bed {cg_balsamic_config.bed_path}/bed_version.bed "
+        f"--pon-cnn {cg_balsamic_config.pon_path} "  # TODO double check this
+        f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
+        f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
+        f"--soft-filter-normal "
+        f"--swegen-snv {cg_balsamic_config.swegen_snv} "
+        f"--swegen-sv {cg_balsamic_config.swegen_sv} "
+        f"--normal-sample-name sample_normal"
+    )
+
+
+@pytest.fixture
+def expected_tgs_paired_command(cg_balsamic_config: BalsamicConfig) -> str:
+    return (
+        f"{cg_balsamic_config.conda_binary} "
+        f"run --name {cg_balsamic_config.conda_env} "
+        f"{cg_balsamic_config.binary_path} config case "
+        f"--analysis-dir {cg_balsamic_config.root} "
+        f"--analysis-workflow balsamic "
+        f"--balsamic-cache {cg_balsamic_config.balsamic_cache} "
+        f"--cadd-annotations {cg_balsamic_config.cadd_path} "
+        f"--artefact-snv-observations {cg_balsamic_config.loqusdb_artefact_snv} "
+        f"--cancer-germline-snv-observations {cg_balsamic_config.loqusdb_cancer_germline_snv} "
+        f"--cancer-somatic-snv-observations {cg_balsamic_config.loqusdb_cancer_somatic_snv} "
+        f"--cancer-somatic-sv-observations {cg_balsamic_config.loqusdb_cancer_somatic_sv} "
+        f"--case-id case_1 "
+        f"--clinical-snv-observations {cg_balsamic_config.loqusdb_clinical_snv} "
+        f"--clinical-sv-observations {cg_balsamic_config.loqusdb_clinical_sv} "
+        f"--fastq-path {cg_balsamic_config.root}/case_1/fastq "
+        f"--gender female "
+        f"--genome-version hg19 "
+        f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
+        f"--normal-sample-name sample_normal "
+        f"--panel-bed {cg_balsamic_config.bed_path}/bed_version.bed "
+        f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
+        f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
+        f"--soft-filter-normal "
+        f"--swegen-snv {cg_balsamic_config.swegen_snv} "
+        f"--swegen-sv {cg_balsamic_config.swegen_sv} "
+        f"--tumor-sample-name sample_tumour "
+    )
+
+
+@pytest.fixture
+def expected_wes_paired_command(cg_balsamic_config: BalsamicConfig) -> str:
     return (
         f"{cg_balsamic_config.conda_binary} "
         f"run --name {cg_balsamic_config.conda_env} "

@@ -200,6 +200,7 @@ class BalsamicConfigFileCreator:
         These are versioned and named like: <bed_file_name>_hg19_design_CNVkit_PON_reference_v<version>.cnn
         This method returns the latest version of the PON file matching the bed name.
         """
+        # TODO: Discuss if we want to keep this logic or if we want to fetch this from servers
         identifier: str = bed_file.stem
         pattern: re.Pattern[str] = re.compile(rf"{re.escape(identifier)}.*_v(\d+)\.cnn$")
         candidates: list = []

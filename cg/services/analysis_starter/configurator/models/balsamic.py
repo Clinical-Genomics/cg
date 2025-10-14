@@ -60,7 +60,7 @@ class BalsamicConfigInputPanel(BalsamicConfigInput):
     exome: bool
     panel_bed: Path
     pon_cnn: Path | None = None  # Equivalent to --gens-coverage-pon in wgs analysis
-    soft_filter_normal: bool = False
+    soft_filter_normal: bool = False  # True for all panel analyses with a normal sample
 
     def _get_flags(self) -> dict[str, Any]:
         return {
