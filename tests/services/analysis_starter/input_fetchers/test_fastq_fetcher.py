@@ -141,18 +141,19 @@ def test_ensure_files_are_ready_fetch_flow_cell():
     status_db.as_mock.request_sequencing_runs_for_case.assert_called_once_with("case_id")
 
 
-def test_ensure_files_are_ready_external_data_not_fetched():
+@pytest.mark.parametrize(
+    "is_downsampled, is_external", [(False, True), (True, False), (True, True)]
+)
+def test_ensure_files_are_ready_down_sampled_or_external(is_downsampled: bool, is_external: bool):
     # GIVEN a sample and a case in StatusDB
     sample: Sample = create_autospec(Sample)
     case: Case = create_autospec(Case, samples=[sample])
     status_db: TypedMock[Store] = create_typed_mock(Store)
     status_db.as_type.get_case_by_internal_id = Mock(return_value=case)
 
-    # GIVEN that the case is not down sampled nor external
-    status_db.as_type.is_case_down_sampled = Mock(return_value=False)
-    status_db.as_type.is_case_external = Mock(return_value=False)
-
-    # GIVEN that not all Illumina runs are on disk
+    # GIVEN that the case is either down sampled and/or external so no flow cells are found in StatusDB
+    status_db.as_type.is_case_down_sampled = Mock(return_value=is_downsampled)
+    status_db.as_type.is_case_external = Mock(return_value=is_external)
     status_db.as_type.are_all_illumina_runs_on_disk = Mock(return_value=False)
 
     # GIVEN that there are no files archived via DDN
@@ -175,9 +176,5 @@ def test_ensure_files_are_ready_external_data_not_fetched():
     )
 
     # WHEN ensuring that the files are ready for analysis
-    # THEN an AnalysisNotReadyError is raised
-    with pytest.raises(AnalysisNotReadyError):
-        fastq_fetcher.ensure_files_are_ready("case_id")
-
-    # THEN the flow cells for the case should have been requested
-    status_db.as_mock.request_sequencing_runs_for_case.assert_called_once_with("case_id")
+    # THEN the files should be ready for analysis
+    fastq_fetcher.ensure_files_are_ready("case_id")
