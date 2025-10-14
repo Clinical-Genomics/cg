@@ -286,9 +286,12 @@ def test_create_tgs_normal_only(
     tgs_normal_only_case: Case = create_autospec(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
     )
-    store: Store = create_autospec(Store)
 
+    store: Store = create_autospec(Store)
     store.get_case_by_internal_id = Mock(return_value=tgs_normal_only_case)
+    store.get_bed_version_by_short_name = Mock(
+        return_value=create_autospec(BedVersion, filename="bed_version.bed")
+    )
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
