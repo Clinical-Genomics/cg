@@ -7,7 +7,7 @@ from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.constants import GenomeVersion
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError
+from cg.exc import BedFileNotFoundError
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.models.balsamic import (
     BalsamicConfigInput,
