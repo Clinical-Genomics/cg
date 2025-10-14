@@ -272,6 +272,41 @@ def expected_wgs_paired_command(cg_balsamic_config: BalsamicConfig) -> str:
     )
 
 
+def test_create_tgs_normal_only(
+    cg_balsamic_config: BalsamicConfig, expected_tgs_normal_only_command: str, mocker: MockerFixture
+):
+    # GIVEN a case with one normal TGS sample
+    sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_normal",
+        is_tumour=False,
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        sex=SexOptions.FEMALE,
+    )
+    tgs_normal_only_case: Case = create_autospec(
+        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
+    )
+    store: Store = create_autospec(Store)
+
+    store.get_case_by_internal_id = Mock(return_value=tgs_normal_only_case)
+
+    # GIVEN a BalsamicConfigFileCreator
+    config_file_creator = BalsamicConfigFileCreator(
+        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
+    )
+
+    # GIVEN that the subprocess exits successfully
+    mock_runner = mocker.patch.object(creator.subprocess, "run")
+
+    # WHEN creating the config file
+    config_file_creator.create(case_id="case_1")
+
+    # THEN the expected command is called
+    mock_runner.assert_called_once_with(
+        args=expected_tgs_normal_only_command, check=True, shell=True, stderr=-1, stdout=-1
+    )
+
+
 def test_create_wgs_paired(
     cg_balsamic_config: BalsamicConfig, expected_wgs_paired_command: str, mocker: MockerFixture
 ):
