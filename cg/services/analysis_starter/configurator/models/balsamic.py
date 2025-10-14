@@ -59,22 +59,25 @@ class BalsamicConfigInput(BaseModel):
 class BalsamicConfigInputPanel(BalsamicConfigInput):
     exome: bool
     panel_bed: Path
-    pon_cnn: Path | None = None  # Equivalent to --gens-coverage-pon in wgs analysis
+    pon_cnn: Path | None = (
+        None  # Equivalent to --gens-coverage-pon in wgs analysis, depends on the panel
+    )
     soft_filter_normal: bool = False  # True for all panel analyses with a normal sample
 
     def _get_flags(self) -> dict[str, Any]:
         return {
             "--analysis-dir": self.analysis_dir,
             "--analysis-workflow": self.analysis_workflow,
+            "--artefact-snv-observations": self.artefact_snv_observations,
             "--balsamic-cache": self.balsamic_cache,
             "--cadd-annotations": self.cadd_annotations,
-            "--artefact-snv-observations": self.artefact_snv_observations,
             "--cancer-germline-snv-observations": self.cancer_germline_snv_observations,
             "--cancer-somatic-snv-observations": self.cancer_somatic_snv_observations,
             "--cancer-somatic-sv-observations": self.cancer_somatic_sv_observations,
             "--case-id": self.case_id,
             "--clinical-snv-observations": self.clinical_snv_observations,
             "--clinical-sv-observations": self.clinical_sv_observations,
+            "--exome": self.exome,
             "--fastq-path": self.fastq_path,
             "--gender": self.gender,
             "--genome-version": self.genome_version,
@@ -82,7 +85,6 @@ class BalsamicConfigInputPanel(BalsamicConfigInput):
             "--normal-sample-name": self.normal_sample_name,
             "--panel-bed": self.panel_bed,
             "--pon-cnn": self.pon_cnn,
-            "--exome": self.exome,
             "--sentieon-install-dir": self.sentieon_install_dir,
             "--sentieon-license": self.sentieon_license,
             "--soft-filter-normal": self.soft_filter_normal,
@@ -95,16 +97,16 @@ class BalsamicConfigInputPanel(BalsamicConfigInput):
 class BalsamicConfigInputWGS(BalsamicConfigInput):
     artefact_sv_observations: Path
     genome_interval: Path
-    gens_coverage_pon: Path  # Equivalent to --pon-cnn in panel analysis
+    gens_coverage_pon: Path  # Equivalent to --pon-cnn in panel analysis, depends on the sex
 
     def _get_flags(self) -> dict[str, Any]:
         return {
             "--analysis-dir": self.analysis_dir,
             "--analysis-workflow": self.analysis_workflow,
-            "--balsamic-cache": self.balsamic_cache,
-            "--cadd-annotations": self.cadd_annotations,
             "--artefact-snv-observations": self.artefact_snv_observations,
             "--artefact-sv-observations": self.artefact_sv_observations,
+            "--balsamic-cache": self.balsamic_cache,
+            "--cadd-annotations": self.cadd_annotations,
             "--cancer-germline-snv-observations": self.cancer_germline_snv_observations,
             "--cancer-somatic-snv-observations": self.cancer_somatic_snv_observations,
             "--cancer-somatic-sv-observations": self.cancer_somatic_sv_observations,
