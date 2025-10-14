@@ -111,14 +111,14 @@ def test_ensure_files_are_ready_fetch_flow_cell():
     status_db.as_type.is_case_down_sampled = Mock(return_value=False)
     status_db.as_type.is_case_external = Mock(return_value=False)
 
-    # GIVEN that not all Illumina runs are on disk
+    # GIVEN that _not_ all Illumina runs are on disk
     status_db.as_type.are_all_illumina_runs_on_disk = Mock(return_value=False)
 
     # GIVEN that there are no files archived via DDN
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
     housekeeper_api.get_archived_files_for_bundle = Mock(return_value=[])
 
-    # GIVEN that all spring files are decompressed into FASTQ files
+    # GIVEN that all spring files on disk are decompressed into FASTQ files
     compress_api: CompressAPI = create_autospec(CompressAPI)
     case_compression_data: CaseCompressionData = create_autospec(CaseCompressionData)
     case_compression_data.is_spring_decompression_needed = Mock(return_value=False)
@@ -152,7 +152,7 @@ def test_ensure_files_are_ready_down_sampled_or_external(is_downsampled: bool, i
     status_db: TypedMock[Store] = create_typed_mock(Store)
     status_db.as_type.get_case_by_internal_id = Mock(return_value=case)
 
-    # GIVEN that the case is either down sampled and/or external so no flow cells are found in StatusDB
+    # GIVEN that the case is either down sampled and/or external so no flow cells are expected in StatusDB
     status_db.as_type.is_case_down_sampled = Mock(return_value=is_downsampled)
     status_db.as_type.is_case_external = Mock(return_value=is_external)
     status_db.as_type.are_all_illumina_runs_on_disk = Mock(return_value=False)
@@ -181,7 +181,7 @@ def test_ensure_files_are_ready_down_sampled_or_external(is_downsampled: bool, i
     fastq_fetcher.ensure_files_are_ready("case_id")
 
 
-def test_ensure_files_are_ready_decompression_needed():
+def test_ensure_files_are_ready_decompression_needed_and_decompression_possible():
     # GIVEN a sample and a case in StatusDB
     sample: Sample = create_autospec(Sample)
     case: Case = create_autospec(Case, samples=[sample])
@@ -203,6 +203,8 @@ def test_ensure_files_are_ready_decompression_needed():
     compress_api: TypedMock[CompressAPI] = create_typed_mock(CompressAPI)
     case_compression_data: CaseCompressionData = create_autospec(CaseCompressionData)
     case_compression_data.is_spring_decompression_needed = Mock(return_value=True)
+
+    # GIVEN that decompression is not running but can be started
     case_compression_data.is_spring_decompression_running = Mock(return_value=False)
     case_compression_data.can_at_least_one_sample_be_decompressed = Mock(return_value=True)
     compress_api.as_type.get_case_compression_data = Mock(return_value=case_compression_data)
@@ -229,6 +231,7 @@ def test_ensure_files_are_ready_decompression_needed():
     )
 
 
+# It is unclear why or if the following two scenarios are possible, but this is the current logic
 def test_ensure_files_are_ready_decompression_needed_but_no_samples_can_be_decompressed_and_decompression_is_already_running():
     # GIVEN a sample and a case in StatusDB
     sample: Sample = create_autospec(Sample)
@@ -259,7 +262,6 @@ def test_ensure_files_are_ready_decompression_needed_but_no_samples_can_be_decom
 
     # GIVEN that decompression is running
     case_compression_data.is_spring_decompression_running = Mock(return_value=True)
-
     compress_api.as_type.get_case_compression_data = Mock(return_value=case_compression_data)
 
     # GIVEN a FastqFetcher
@@ -311,7 +313,6 @@ def test_ensure_files_are_ready_decompression_needed_but_no_samples_can_be_decom
 
     # GIVEN that decompression is not running
     case_compression_data.is_spring_decompression_running = Mock(return_value=False)
-
     compress_api.as_type.get_case_compression_data = Mock(return_value=case_compression_data)
 
     # GIVEN a FastqFetcher
@@ -327,7 +328,7 @@ def test_ensure_files_are_ready_decompression_needed_but_no_samples_can_be_decom
     with pytest.raises(AnalysisNotReadyError):
         fastq_fetcher.ensure_files_are_ready("case_id")
 
-    # THEN the case should not have been set to analyze
+    # THEN the case should _not_ have been set to analyze
     assert not status_db.as_mock.update_case_action.called
 
 
