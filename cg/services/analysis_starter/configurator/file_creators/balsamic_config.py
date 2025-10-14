@@ -103,12 +103,12 @@ class BalsamicConfigFileCreator:
             genome_version=GenomeVersion.HG19,
             gens_coverage_pon=self._get_coverage_pon(patient_sex),
             gnomad_min_af5=self.gnomad_af5_path,
-            normal_sample_name=self._get_normal_sample_id(case),
+            normal_sample_name=self._get_normal_sample_id_from_paired_analysis(case),
             sentieon_install_dir=self.sentieon_licence_path,
             sentieon_license=self.sentieon_licence_server,
             swegen_snv=self.swegen_snv,
             swegen_sv=self.swegen_sv,
-            tumor_sample_name=self._get_tumor_sample_id(case),
+            tumor_sample_name=self._get_tumor_or_single_sample_id(case),
         )
 
     def _build_targeted_config(self, case: Case, **flags) -> BalsamicConfigInput:
@@ -133,18 +133,18 @@ class BalsamicConfigFileCreator:
             gender=patient_sex,
             genome_version=GenomeVersion.HG19,
             gnomad_min_af5=self.gnomad_af5_path,
-            normal_sample_name=self._get_normal_sample_id(case),
+            normal_sample_name=self._get_normal_sample_id_from_paired_analysis(case),
             panel_bed=bed_file,
             pon_cnn=self._get_pon_file(bed_file),
             exome=self._all_samples_are_exome(case),
             sentieon_install_dir=self.sentieon_licence_path,
             sentieon_license=self.sentieon_licence_server,
             soft_filter_normal=bool(
-                self._get_normal_sample_id(case)
+                self._get_normal_sample_id_from_paired_analysis(case)
             ),  # TODO soft filter normal should only be used for paired panel analyses (including exome)
             swegen_snv=self.swegen_snv,
             swegen_sv=self.swegen_sv,
-            tumor_sample_name=self._get_tumor_sample_id(case),
+            tumor_sample_name=self._get_tumor_or_single_sample_id(case),
         )
 
     @staticmethod
@@ -169,17 +169,24 @@ class BalsamicConfigFileCreator:
         return sample_sex.pop()
 
     @staticmethod
-    def _get_normal_sample_id(case) -> str | None:
-        for sample in case.samples:
-            if not sample.is_tumour:
-                return sample.internal_id
+    def _get_normal_sample_id_from_paired_analysis(case) -> str | None:
+        """Return the internal id of the normal sample if the case is a paired analysis, otherwise None."""
+        if len(case.samples) == 2:
+            for sample in case.samples:
+                if not sample.is_tumour:
+                    return sample.internal_id
 
     @staticmethod
-    def _get_tumor_sample_id(case) -> str:
+    def _get_tumor_or_single_sample_id(case) -> str:
+        """
+        Return the internal id of the tumour sample if the case is a paired analysis,
+        otherwise return the internal id of the single sample.
+        """
+        if len(case.samples) == 1:
+            return case.samples[0].internal_id
         for sample in case.samples:
             if sample.is_tumour:
                 return sample.internal_id
-        raise BalsamicMissingTumorError(f"Case {case.internal_id} does not contain a tumor sample")
 
     def _resolve_bed_file(self, case, **flags) -> Path:
         bed_name = flags.get("panel_bed") or self._get_bed_name_from_lims(case)
