@@ -227,3 +227,149 @@ def test_ensure_files_are_ready_decompression_needed():
     status_db.as_mock.update_case_action.assert_called_once_with(
         case_internal_id="case_id", action=CaseActions.ANALYZE
     )
+
+
+def test_ensure_files_are_ready_decompression_needed_but_no_samples_can_be_decompressed_and_decompression_is_already_running():
+    # GIVEN a sample and a case in StatusDB
+    sample: Sample = create_autospec(Sample)
+    case: Case = create_autospec(Case, samples=[sample])
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_case_by_internal_id = Mock(return_value=case)
+
+    # GIVEN that the case is not down sampled nor external
+    status_db.as_type.is_case_down_sampled = Mock(return_value=False)
+    status_db.as_type.is_case_external = Mock(return_value=False)
+
+    # GIVEN that all Illumina runs are on disk
+    status_db.as_type.are_all_illumina_runs_on_disk = Mock(return_value=True)
+
+    # GIVEN that there are no files archived via DDN
+    housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    housekeeper_api.get_archived_files_for_bundle = Mock(return_value=[])
+
+    # GIVEN that some spring files need to be decompressed into FASTQ files
+    compress_api: TypedMock[CompressAPI] = create_typed_mock(CompressAPI)
+    case_compression_data: CaseCompressionData = create_autospec(
+        CaseCompressionData, case_id="case_id"
+    )
+    case_compression_data.is_spring_decompression_needed = Mock(return_value=True)
+
+    # GIVEN that no samples can be decompressed
+    case_compression_data.can_at_least_one_sample_be_decompressed = Mock(return_value=False)
+
+    # GIVEN that decompression is running
+    case_compression_data.is_spring_decompression_running = Mock(return_value=True)
+
+    compress_api.as_type.get_case_compression_data = Mock(return_value=case_compression_data)
+
+    # GIVEN a FastqFetcher
+    fastq_fetcher = FastqFetcher(
+        compress_api=compress_api.as_type,
+        housekeeper_api=housekeeper_api,
+        spring_archive_api=Mock(),
+        status_db=status_db.as_type,
+    )
+
+    # WHEN ensuring that the files are ready for analysis
+    # THEN an AnalysisNotReadyError is raised
+    with pytest.raises(AnalysisNotReadyError):
+        fastq_fetcher.ensure_files_are_ready("case_id")
+
+    # THEN the case should have been set to analyze
+    status_db.as_mock.update_case_action.assert_called_once_with(
+        case_internal_id="case_id", action=CaseActions.ANALYZE
+    )
+
+
+def test_ensure_files_are_ready_decompression_needed_but_no_samples_can_be_decompressed_and_decompression_is_not_already_running():
+    # GIVEN a sample and a case in StatusDB
+    sample: Sample = create_autospec(Sample)
+    case: Case = create_autospec(Case, samples=[sample])
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_case_by_internal_id = Mock(return_value=case)
+
+    # GIVEN that the case is not down sampled nor external
+    status_db.as_type.is_case_down_sampled = Mock(return_value=False)
+    status_db.as_type.is_case_external = Mock(return_value=False)
+
+    # GIVEN that all Illumina runs are on disk
+    status_db.as_type.are_all_illumina_runs_on_disk = Mock(return_value=True)
+
+    # GIVEN that there are no files archived via DDN
+    housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    housekeeper_api.get_archived_files_for_bundle = Mock(return_value=[])
+
+    # GIVEN that some spring files need to be decompressed into FASTQ files
+    compress_api: TypedMock[CompressAPI] = create_typed_mock(CompressAPI)
+    case_compression_data: CaseCompressionData = create_autospec(
+        CaseCompressionData, case_id="case_id"
+    )
+    case_compression_data.is_spring_decompression_needed = Mock(return_value=True)
+
+    # GIVEN that no samples can be decompressed
+    case_compression_data.can_at_least_one_sample_be_decompressed = Mock(return_value=False)
+
+    # GIVEN that decompression is not running
+    case_compression_data.is_spring_decompression_running = Mock(return_value=False)
+
+    compress_api.as_type.get_case_compression_data = Mock(return_value=case_compression_data)
+
+    # GIVEN a FastqFetcher
+    fastq_fetcher = FastqFetcher(
+        compress_api=compress_api.as_type,
+        housekeeper_api=housekeeper_api,
+        spring_archive_api=Mock(),
+        status_db=status_db.as_type,
+    )
+
+    # WHEN ensuring that the files are ready for analysis
+    # THEN an AnalysisNotReadyError is raised
+    with pytest.raises(AnalysisNotReadyError):
+        fastq_fetcher.ensure_files_are_ready("case_id")
+
+    # THEN the case should not have been set to analyze
+    assert not status_db.as_mock.update_case_action.called
+
+
+def test_ensure_files_are_ready_decompression_running():
+    # GIVEN a sample and a case in StatusDB
+    sample: Sample = create_autospec(Sample)
+    case: Case = create_autospec(Case, samples=[sample])
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_case_by_internal_id = Mock(return_value=case)
+
+    # GIVEN that the case is not down sampled nor external
+    status_db.as_type.is_case_down_sampled = Mock(return_value=False)
+    status_db.as_type.is_case_external = Mock(return_value=False)
+
+    # GIVEN that all Illumina runs are on disk
+    status_db.as_type.are_all_illumina_runs_on_disk = Mock(return_value=True)
+
+    # GIVEN that there are no files archived via DDN
+    housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    housekeeper_api.get_archived_files_for_bundle = Mock(return_value=[])
+
+    # GIVEN that some spring files are currently being decompressed into FASTQ files
+    compress_api: TypedMock[CompressAPI] = create_typed_mock(CompressAPI)
+    case_compression_data: CaseCompressionData = create_autospec(CaseCompressionData)
+    case_compression_data.is_spring_decompression_needed = Mock(return_value=False)
+    case_compression_data.is_spring_decompression_running = Mock(return_value=True)
+    compress_api.as_type.get_case_compression_data = Mock(return_value=case_compression_data)
+
+    # GIVEN a FastqFetcher
+    fastq_fetcher = FastqFetcher(
+        compress_api=compress_api.as_type,
+        housekeeper_api=housekeeper_api,
+        spring_archive_api=Mock(),
+        status_db=status_db.as_type,
+    )
+
+    # WHEN ensuring that the files are ready for analysis
+    # THEN an AnalysisNotReadyError is raised
+    with pytest.raises(AnalysisNotReadyError):
+        fastq_fetcher.ensure_files_are_ready("case_id")
+
+    # THEN the case should have been set to analyze
+    status_db.as_mock.update_case_action.assert_called_once_with(
+        case_internal_id="case_id", action=CaseActions.ANALYZE
+    )
