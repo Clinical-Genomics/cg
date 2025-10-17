@@ -1,8 +1,10 @@
 """Test the Lims api"""
 
 import datetime as dt
+from unittest.mock import create_autospec
 
 from genologics import entities
+from genologics.entities import Sample
 from pytest_mock import MockerFixture
 from requests.exceptions import HTTPError
 
@@ -129,7 +131,8 @@ def test_get_capture_kit_strict(mocker: MockerFixture):
     lims_api = LimsAPI(config=config)
 
     # GIVEN a sample with a capture kit in LIMS
-    mocker.patch.object(entities.Sample, "udf", return_value={"Bait Set": "valid_capture_kit"})
+    lims_sample = create_autospec(Sample, udf={"Bait Set": "valid_capture_kit"})
+    mocker.patch.object(entities.Sample, "__init__", return_value=lims_sample)
 
     # WHEN getting the sample capture kit
     capture_kit = lims_api.get_capture_kit_strict(lims_id="sample_id")
