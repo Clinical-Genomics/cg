@@ -40,7 +40,6 @@ def expected_tgs_normal_only_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
         f"--panel-bed {cg_balsamic_config.bed_path}/bed_version.bed "
-        # f"--pon-cnn {cg_balsamic_config.pon_path} "  # TODO double check this
         f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
         f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
         f"--swegen-snv {cg_balsamic_config.swegen_snv} "
@@ -103,7 +102,6 @@ def expected_tgs_tumour_only_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
         f"--panel-bed {cg_balsamic_config.bed_path}/bed_version.bed "
-        # f"--pon-cnn {cg_balsamic_config.pon_path} "  # TODO add a check for with and without pon
         f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
         f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
         f"--swegen-snv {cg_balsamic_config.swegen_snv} "
@@ -135,7 +133,6 @@ def expected_wes_normal_only_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
         f"--panel-bed {cg_balsamic_config.bed_path}/bed_version.bed "
-        # f"--pon-cnn {cg_balsamic_config.pon_path} "
         f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
         f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
         f"--swegen-snv {cg_balsamic_config.swegen_snv} "
@@ -200,7 +197,6 @@ def expected_wes_tumour_only_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
         f"--panel-bed {cg_balsamic_config.bed_path}/bed_version.bed "
-        # f"--pon-cnn {cg_balsamic_config.pon_path} "
         f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
         f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
         f"--swegen-snv {cg_balsamic_config.swegen_snv} "

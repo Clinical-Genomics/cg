@@ -137,9 +137,7 @@ class BalsamicConfigFileCreator:
             exome=self._all_samples_are_exome(case),
             sentieon_install_dir=self.sentieon_licence_path,
             sentieon_license=self.sentieon_licence_server,
-            soft_filter_normal=bool(
-                self._get_normal_sample_id_from_paired_analysis(case)
-            ),  # TODO soft filter normal should only be used for paired panel analyses (including exome)
+            soft_filter_normal=self._is_case_paired_analysis(case),
             swegen_snv=self.swegen_snv,
             swegen_sv=self.swegen_sv,
             tumor_sample_name=self._get_tumor_or_single_sample_id(case),
@@ -185,6 +183,10 @@ class BalsamicConfigFileCreator:
         for sample in case.samples:
             if sample.is_tumour:
                 return sample.internal_id
+
+    @staticmethod
+    def _is_case_paired_analysis(case: Case) -> bool:
+        return len(case.samples) == 2
 
     def _resolve_bed_file(self, case, **flags) -> Path:
         """Get the bed name from LIMS. Assumes that all samples in the case have the same panel."""

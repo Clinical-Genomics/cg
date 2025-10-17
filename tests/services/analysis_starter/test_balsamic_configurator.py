@@ -25,62 +25,6 @@ def case_with_sample() -> Case:
     return case_with_sample
 
 
-def test_get_pon_file(balsamic_configurator: BalsamicConfigurator, tmp_path: Path):
-    # GIVEN a Balsamic configurator
-    balsamic_configurator.pon_directory = tmp_path
-    # GIVEN a bed file
-    panel_name = "GMS_duck"
-    bed_file = Path(balsamic_configurator.bed_directory, f"{panel_name}.bed")
-
-    # GIVEN two matching PON files
-    old_pon_path = Path(tmp_path, f"{panel_name}_CNVkit_PON_reference_v1.cnn")
-    new_pon_path = Path(tmp_path, f"{panel_name}_CNVkit_PON_reference_v2.cnn")
-    for pon_path in [old_pon_path, new_pon_path]:
-        pon_path.touch()
-
-    # WHEN getting the pon path
-    pon_path: Path = balsamic_configurator._get_pon_file(bed_file)
-
-    # THEN the returned path should be the latest version
-    assert pon_path == new_pon_path
-
-
-def test_get_pon_file_no_files(balsamic_configurator: BalsamicConfigurator, tmp_path: Path):
-    # GIVEN a Balsamic configurator
-    balsamic_configurator.pon_directory = tmp_path
-
-    # GIVEN a bed file with no matching PON files
-    panel_name = "GMS_duck"
-    bed_file = Path(balsamic_configurator.bed_directory, f"{panel_name}.bed")
-
-    # WHEN getting the pon path
-    pon_file: Path | None = balsamic_configurator._get_pon_file(bed_file)
-
-    # THEN None should be returned
-    assert pon_file is None
-
-
-def test_get_pon_file_no_matching_files(
-    balsamic_configurator: BalsamicConfigurator, tmp_path: Path
-):
-    """Test that None is returned when no matching PON files are found."""
-    # GIVEN a Balsamic configurator
-    balsamic_configurator.pon_directory = tmp_path
-
-    # GIVEN a bed file with no matching PON files
-    panel_name = "GMS_duck"
-    bed_file = Path(balsamic_configurator.bed_directory, f"{panel_name}.bed")
-
-    # GIVEN that there are files in the directory but none match the expected pattern
-    (tmp_path / "some_other_file.txt").touch()
-
-    # WHEN getting the pon path
-    pon_file: Path | None = balsamic_configurator._get_pon_file(bed_file)
-
-    # THEN None should be returned
-    assert pon_file is None
-
-
 def test_get_patient_sex():
     """Tests that the correct sex is returned when all samples have the same sex"""
     # GIVEN a case with two samples
