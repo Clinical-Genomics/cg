@@ -8,7 +8,7 @@ import cg.services.analysis_starter.configurator.file_creators.balsamic_config a
 from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import CaseNotFoundError
+from cg.exc import BedFileNotFoundError, CaseNotFoundError
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
@@ -628,4 +628,37 @@ def test_create_no_case_found(cg_balsamic_config: BalsamicConfig):
     # WHEN creating a config file for a non-existing case
     # THEN a CaseNotFoundError is raised
     with pytest.raises(CaseNotFoundError):
+        config_file_creator.create(case_id="non_existing_case")
+
+
+def test_create_no_capture_kit_in_lims(cg_balsamic_config: BalsamicConfig):
+    # GIVEN a store with a TGS Balsamic case
+    tumour_sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_tumour",
+        is_tumour=True,
+        sex=SexOptions.FEMALE,
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+    )
+    wgs_paired_case: Case = create_autospec(
+        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample]
+    )
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id_strict = Mock(return_value=wgs_paired_case)
+    store.get_bed_version_by_short_name = Mock(
+        return_value=create_autospec(BedVersion, filename="bed_version.bed")
+    )
+
+    # GIVEN a LIMS API without a capture kit for the given case
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.capture_kit = Mock(return_value=None)
+
+    # GIVEN a BalsamicConfigFileCreator
+    config_file_creator = BalsamicConfigFileCreator(
+        status_db=store, lims_api=lims_api, cg_balsamic_config=cg_balsamic_config
+    )
+
+    # WHEN creating the config file for the case
+    # THEN a BedFileNotFoundError error is raised
+    with pytest.raises(BedFileNotFoundError):
         config_file_creator.create(case_id="non_existing_case")

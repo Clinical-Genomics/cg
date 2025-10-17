@@ -190,7 +190,9 @@ class BalsamicConfigFileCreator:
         bed_name = flags.get("panel_bed") or self._get_bed_name_from_lims(case)
         if bed_version := self.status_db.get_bed_version_by_short_name(bed_name):
             return Path(self.bed_directory, bed_version.filename)
-        raise BedFileNotFoundError(f"No Bed file found for with provided name {bed_name}.")
+        raise BedFileNotFoundError(
+            f"No Bed file found in StatusDB with provided name {bed_name} for case {case.internal_id}."
+        )
 
     def _get_bed_name_from_lims(self, case: Case) -> str:
         """Get the bed name from LIMS. Assumes that all samples in the case have the same panel."""
