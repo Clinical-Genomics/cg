@@ -99,7 +99,7 @@ class BalsamicConfigFileCreator:
             gender=patient_sex,
             genome_interval=self.genome_interval_path,
             genome_version=GenomeVersion.HG19,
-            gens_coverage_pon=self._get_gens_coverage_pon(patient_sex),
+            gens_coverage_pon=self._get_gens_coverage_pon_file(patient_sex),
             gnomad_min_af5=self.gnomad_af5_path,
             normal_sample_name=self._get_normal_sample_id_from_paired_analysis(case),
             sentieon_install_dir=self.sentieon_licence_path,
@@ -222,7 +222,7 @@ class BalsamicConfigFileCreator:
     def _get_sample_config_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, f"{case_id}.json")
 
-    def _get_gens_coverage_pon(self, patient_sex: SexOptions) -> Path:
+    def _get_gens_coverage_pon_file(self, patient_sex: SexOptions) -> Path:
         """Return the corresponding PON file for WGS cases based on the patient's sex."""
         return (
             self.gens_coverage_female_path

@@ -725,5 +725,25 @@ def test_get_pon_file_no_matching_files(cg_balsamic_config: BalsamicConfig, tmp_
     assert pon_file is None
 
 
-def test_get_gens_coverage_pon():
-    pass  # Implement test for _get_coverage_pon method if needed
+@pytest.mark.parametrize(
+    "sex, expected_file",
+    [
+        (SexOptions.FEMALE, "coverage_female.txt"),
+        (SexOptions.MALE, "coverage_male.txt"),
+        (SexOptions.UNKNOWN, "coverage_male.txt"),
+    ],
+    ids=["female", "male", "unknown"],
+)
+def test_get_gens_coverage_pon(
+    cg_balsamic_config: BalsamicConfig, sex: SexOptions, expected_file: str
+):
+    # GIVEN a BalsamicConfigFileCreator
+    config_file_creator = BalsamicConfigFileCreator(
+        status_db=Mock(), lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
+    )
+
+    # WHEN getting the gens coverage file
+    gens_pon_file: Path = config_file_creator._get_gens_coverage_pon_file(sex)
+
+    # THEN the file is the expected
+    assert gens_pon_file.name == expected_file
