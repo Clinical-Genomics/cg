@@ -6,6 +6,7 @@ from unittest.mock import create_autospec
 import pytest
 from genologics import entities
 from genologics.entities import Sample
+from genologics.lims import Lims
 from pytest_mock import MockerFixture
 from requests.exceptions import HTTPError
 
@@ -144,7 +145,7 @@ def test_get_capture_kit_strict(mocker: MockerFixture):
 
 
 def test_get_capture_kit_strict_no_capture_kit(mocker: MockerFixture):
-    """."""
+    """Test scenario when capture kit is not set for a sample."""
     # GIVEN a cg config with LIMS information
     config: dict = {
         "lims": {
@@ -160,6 +161,7 @@ def test_get_capture_kit_strict_no_capture_kit(mocker: MockerFixture):
     # GIVEN a sample with no capture kit in LIMS
     lims_sample = create_autospec(Sample, udf={"Bait Set": None})
     mocker.patch.object(entities.Sample, "__new__", return_value=lims_sample)
+    mocker.patch.object(Lims, "get_artifacts", return_value=[])
 
     # WHEN getting the sample capture kit
     # THEN a LimsDataError is raised
