@@ -723,3 +723,7 @@ def test_get_pon_file_no_matching_files(cg_balsamic_config: BalsamicConfig, tmp_
 
     # THEN None should be returned
     assert pon_file is None
+
+
+def test_get_gens_coverage_pon():
+    pass  # Implement test for _get_coverage_pon method if needed
