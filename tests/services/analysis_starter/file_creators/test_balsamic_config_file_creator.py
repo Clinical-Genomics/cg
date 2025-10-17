@@ -8,7 +8,7 @@ import cg.services.analysis_starter.configurator.file_creators.balsamic_config a
 from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import BedFileNotFoundError, CaseNotFoundError
+from cg.exc import BedFileNotFoundError, CaseNotFoundError, LimsDataError
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
@@ -333,11 +333,11 @@ def test_create_tgs_paired(
         sex=SexOptions.FEMALE,
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
-    wgs_paired_case: Case = create_autospec(
+    tgs_paired_case: Case = create_autospec(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
     )
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(return_value=wgs_paired_case)
+    store.get_case_by_internal_id_strict = Mock(return_value=tgs_paired_case)
     store.get_bed_version_by_short_name = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
@@ -374,11 +374,11 @@ def test_create_tgs_tumour_only(
         sex=SexOptions.FEMALE,
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
-    wgs_paired_case: Case = create_autospec(
+    tgs_tumour_only_case: Case = create_autospec(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample]
     )
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(return_value=wgs_paired_case)
+    store.get_case_by_internal_id_strict = Mock(return_value=tgs_tumour_only_case)
     store.get_bed_version_by_short_name = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
@@ -640,18 +640,18 @@ def test_create_no_capture_kit_in_lims(cg_balsamic_config: BalsamicConfig):
         sex=SexOptions.FEMALE,
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
-    wgs_paired_case: Case = create_autospec(
+    case_without_capture_kit: Case = create_autospec(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample]
     )
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(return_value=wgs_paired_case)
+    store.get_case_by_internal_id_strict = Mock(return_value=case_without_capture_kit)
     store.get_bed_version_by_short_name = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
     # GIVEN a LIMS API without a capture kit for the given case
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.capture_kit = Mock(return_value=None)
+    lims_api.get_capture_kit_strict = Mock(side_effect=LimsDataError)
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
@@ -659,6 +659,6 @@ def test_create_no_capture_kit_in_lims(cg_balsamic_config: BalsamicConfig):
     )
 
     # WHEN creating the config file for the case
-    # THEN a BedFileNotFoundError error is raised
-    with pytest.raises(BedFileNotFoundError):
-        config_file_creator.create(case_id="non_existing_case")
+    # THEN a LimsDataError error is raised
+    with pytest.raises(LimsDataError):
+        config_file_creator.create(case_id="case_1")

@@ -7,7 +7,7 @@ from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.constants import GenomeVersion
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import BedFileNotFoundError
+from cg.exc import BedFileNotFoundError, LimsDataError
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.models.balsamic import (
     BalsamicConfigInput,
@@ -197,12 +197,7 @@ class BalsamicConfigFileCreator:
     def _get_bed_name_from_lims(self, case: Case) -> str:
         """Get the bed name from LIMS. Assumes that all samples in the case have the same panel."""
         first_sample: Sample = case.samples[0]
-        if lims_bed := self.lims_api.capture_kit(lims_id=first_sample.internal_id):
-            return lims_bed
-        else:
-            raise BedFileNotFoundError(
-                f"No bed file found in LIMS for sample {first_sample.internal_id} in case {case.internal_id}."
-            )
+        return self.lims_api.get_capture_kit_strict(lims_id=first_sample.internal_id)
 
     def _get_pon_file(self, bed_file: Path) -> Path | None:
         """Finds the corresponding PON file for the given bed file.
