@@ -8,6 +8,7 @@ import cg.services.analysis_starter.configurator.file_creators.balsamic_config a
 from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.exc import CaseNotFoundError
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
@@ -288,14 +289,18 @@ def test_create_tgs_normal_only(
     )
 
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id = Mock(return_value=tgs_normal_only_case)
+    store.get_case_by_internal_id_strict = Mock(return_value=tgs_normal_only_case)
     store.get_bed_version_by_short_name = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
+    # GIVEN a Lims API
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.capture_kit = Mock(return_value="bed_short_name")
+
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
+        status_db=store, lims_api=lims_api, cg_balsamic_config=cg_balsamic_config
     )
 
     # GIVEN that the subprocess exits successfully
@@ -332,14 +337,18 @@ def test_create_tgs_paired(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
     )
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id = Mock(return_value=wgs_paired_case)
+    store.get_case_by_internal_id_strict = Mock(return_value=wgs_paired_case)
     store.get_bed_version_by_short_name = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
+    # GIVEN a Lims API
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.capture_kit = Mock(return_value="bed_short_name")
+
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
+        status_db=store, lims_api=lims_api, cg_balsamic_config=cg_balsamic_config
     )
 
     # GIVEN that the subprocess exits successfully
@@ -369,14 +378,18 @@ def test_create_tgs_tumour_only(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample]
     )
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id = Mock(return_value=wgs_paired_case)
+    store.get_case_by_internal_id_strict = Mock(return_value=wgs_paired_case)
     store.get_bed_version_by_short_name = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
+    # GIVEN a Lims API
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.capture_kit = Mock(return_value="bed_short_name")
+
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
+        status_db=store, lims_api=lims_api, cg_balsamic_config=cg_balsamic_config
     )
 
     # GIVEN that the subprocess exits successfully
@@ -413,9 +426,7 @@ def test_create_wgs_paired(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
     )
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id = Mock(return_value=wgs_paired_case)
-
-    # GIVEN a Lims API
+    store.get_case_by_internal_id_strict = Mock(return_value=wgs_paired_case)
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
@@ -449,7 +460,7 @@ def test_create_wgs_tumor_only(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
     )
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id = Mock(return_value=wgs_tumor_only_case)
+    store.get_case_by_internal_id_strict = Mock(return_value=wgs_tumor_only_case)
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
@@ -483,14 +494,18 @@ def test_create_wes_normal_only(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
     )
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id = Mock(return_value=wes_normal_only_case)
+    store.get_case_by_internal_id_strict = Mock(return_value=wes_normal_only_case)
     store.get_bed_version_by_short_name = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
+    # GIVEN a Lims API
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.capture_kit = Mock(return_value="bed_short_name")
+
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
+        status_db=store, lims_api=lims_api, cg_balsamic_config=cg_balsamic_config
     )
 
     # GIVEN that the subprocess exits successfully
@@ -527,7 +542,7 @@ def test_create_wes_paired(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
     )
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id = Mock(return_value=wes_paired_case)
+    store.get_case_by_internal_id_strict = Mock(return_value=wes_paired_case)
     store.get_bed_version_by_short_name = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
@@ -571,14 +586,18 @@ def test_create_wes_tumour_only(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
     )
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id = Mock(return_value=wes_tumor_only_case)
+    store.get_case_by_internal_id_strict = Mock(return_value=wes_tumor_only_case)
     store.get_bed_version_by_short_name = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
+    # GIVEN a Lims API
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.capture_kit = Mock(return_value="bed_short_name")
+
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
+        status_db=store, lims_api=lims_api, cg_balsamic_config=cg_balsamic_config
     )
 
     # GIVEN that the subprocess exits successfully
@@ -587,7 +606,26 @@ def test_create_wes_tumour_only(
     # WHEN creating the config file
     config_file_creator.create(case_id="case_1")
 
+    # THEN the bed version should have been fetched using the LIMS capture kit
+    cast(Mock, store.get_bed_version_by_short_name).assert_called_once_with("bed_short_name")
+
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
         args=expected_wes_tumour_only_command, check=True, shell=True, stderr=-1, stdout=-1
     )
+
+
+def test_create_no_case_found(cg_balsamic_config: BalsamicConfig):
+    # GIVEN a store without cases
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id_strict = Mock(return_value=None, side_effect=CaseNotFoundError)
+
+    # GIVEN a BalsamicConfigFileCreator
+    config_file_creator = BalsamicConfigFileCreator(
+        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
+    )
+
+    # WHEN creating a config file for a non-existing case
+    # THEN a CaseNotFoundError is raised
+    with pytest.raises(CaseNotFoundError):
+        config_file_creator.create(case_id="non_existing_case")

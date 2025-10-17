@@ -71,9 +71,7 @@ class BalsamicConfigFileCreator:
         )
 
     def _build_cli_input(self, case_id, **flags) -> BalsamicConfigInput:
-        case: Case = self.status_db.get_case_by_internal_id(
-            case_id
-        )  # TODO use strict version when available
+        case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
         if self._all_samples_are_wgs(case):
             return self._build_wgs_config(case)
         else:
@@ -201,7 +199,7 @@ class BalsamicConfigFileCreator:
             return lims_bed
         else:
             raise BedFileNotFoundError(
-                f"No bed file found in LIMS for sample {first_sample.internal_id} in for case {case.internal_id}."
+                f"No bed file found in LIMS for sample {first_sample.internal_id} in case {case.internal_id}."
             )
 
     def _get_pon_file(self, bed_file: Path) -> Path | None:
