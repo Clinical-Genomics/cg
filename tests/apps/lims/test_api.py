@@ -4,7 +4,9 @@ import datetime as dt
 
 from requests.exceptions import HTTPError
 
+from cg.apps.lims import LimsAPI
 from cg.constants.lims import LimsProcess
+from tests.meta.upload.scout.conftest import lims_api
 from tests.mocks.limsmock import MockLimsAPI
 
 
@@ -108,3 +110,14 @@ def test_get_internal_negative_control_id_from_sample_in_pool(
 
     # THEN no errors are raised and the correct internal_negative_control_id is retrieved
     assert internal_negative_control_id == "internal_negative_control"
+
+
+def test_get_capture_kit_strict():
+    # GIVEN a LIMS API
+    #lims_api = LimsAPI(config="")
+
+    # GIVEN a sample with a capture kit in LIMS
+
+    # WHEN getting the sample capture kit
+
+    # THEN the capture kit is as expected

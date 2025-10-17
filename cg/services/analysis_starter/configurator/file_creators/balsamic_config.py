@@ -187,17 +187,13 @@ class BalsamicConfigFileCreator:
                 return sample.internal_id
 
     def _resolve_bed_file(self, case, **flags) -> Path:
-        bed_name = flags.get("panel_bed") or self._get_bed_name_from_lims(case)
-        if bed_version := self.status_db.get_bed_version_by_short_name(bed_name):
-            return Path(self.bed_directory, bed_version.filename)
-        raise BedFileNotFoundError(
-            f"No Bed file found in StatusDB with provided name {bed_name} for case {case.internal_id}."
-        )
-
-    def _get_bed_name_from_lims(self, case: Case) -> str:
         """Get the bed name from LIMS. Assumes that all samples in the case have the same panel."""
         first_sample: Sample = case.samples[0]
-        return self.lims_api.get_capture_kit_strict(lims_id=first_sample.internal_id)
+        bed_name = flags.get("panel_bed") or self.lims_api.get_capture_kit_strict(
+            first_sample.internal_id
+        )
+        bed_version = self.status_db.get_bed_version_by_short_name_strict(bed_name)
+        return Path(self.bed_directory, bed_version.filename)
 
     def _get_pon_file(self, bed_file: Path) -> Path | None:
         """Finds the corresponding PON file for the given bed file.
