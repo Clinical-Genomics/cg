@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import cast
 from unittest.mock import Mock, create_autospec
 
@@ -8,7 +9,7 @@ import cg.services.analysis_starter.configurator.file_creators.balsamic_config a
 from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import BedFileNotFoundError, CaseNotFoundError, LimsDataError
+from cg.exc import CaseNotFoundError, LimsDataError
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
@@ -290,13 +291,13 @@ def test_create_tgs_normal_only(
 
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_normal_only_case)
-    store.get_bed_version_by_short_name = Mock(
+    store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
     # GIVEN a Lims API
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.capture_kit = Mock(return_value="bed_short_name")
+    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
@@ -338,13 +339,13 @@ def test_create_tgs_paired(
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_paired_case)
-    store.get_bed_version_by_short_name = Mock(
+    store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
     # GIVEN a Lims API
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.capture_kit = Mock(return_value="bed_short_name")
+    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
@@ -379,13 +380,13 @@ def test_create_tgs_tumour_only(
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_tumour_only_case)
-    store.get_bed_version_by_short_name = Mock(
+    store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
     # GIVEN a Lims API
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.capture_kit = Mock(return_value="bed_short_name")
+    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
@@ -495,13 +496,13 @@ def test_create_wes_normal_only(
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wes_normal_only_case)
-    store.get_bed_version_by_short_name = Mock(
+    store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
     # GIVEN a Lims API
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.capture_kit = Mock(return_value="bed_short_name")
+    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
@@ -543,13 +544,13 @@ def test_create_wes_paired(
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wes_paired_case)
-    store.get_bed_version_by_short_name = Mock(
+    store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
     # GIVEN a Lims API
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.capture_kit = Mock(return_value="bed_short_name")
+    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
@@ -563,7 +564,7 @@ def test_create_wes_paired(
     config_file_creator.create(case_id="case_1")
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name).assert_called_once_with("bed_short_name")
+    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("bed_short_name")
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
@@ -587,13 +588,13 @@ def test_create_wes_tumour_only(
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wes_tumor_only_case)
-    store.get_bed_version_by_short_name = Mock(
+    store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
     # GIVEN a Lims API
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.capture_kit = Mock(return_value="bed_short_name")
+    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
@@ -607,7 +608,7 @@ def test_create_wes_tumour_only(
     config_file_creator.create(case_id="case_1")
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name).assert_called_once_with("bed_short_name")
+    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("bed_short_name")
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
@@ -645,7 +646,7 @@ def test_create_no_capture_kit_in_lims(cg_balsamic_config: BalsamicConfig):
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=case_without_capture_kit)
-    store.get_bed_version_by_short_name = Mock(
+    store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
@@ -662,3 +663,67 @@ def test_create_no_capture_kit_in_lims(cg_balsamic_config: BalsamicConfig):
     # THEN a LimsDataError error is raised
     with pytest.raises(LimsDataError):
         config_file_creator.create(case_id="case_1")
+
+
+def test_get_pon_file(cg_balsamic_config: BalsamicConfig, tmp_path: Path):
+    # GIVEN a BalsamicConfigFileCreator
+    config_file_creator = BalsamicConfigFileCreator(
+        status_db=create_autospec(Store), lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
+    )
+    config_file_creator.pon_directory = tmp_path
+
+    # GIVEN a bed file
+    panel_name = "GMS_duck"
+    bed_file = Path(config_file_creator.bed_directory, f"{panel_name}.bed")
+
+    # GIVEN two matching PON files
+    old_pon_path = Path(tmp_path, f"{panel_name}_CNVkit_PON_reference_v1.cnn")
+    new_pon_path = Path(tmp_path, f"{panel_name}_CNVkit_PON_reference_v2.cnn")
+    for pon_path in [old_pon_path, new_pon_path]:
+        pon_path.touch()
+
+    # WHEN getting the pon path
+    pon_path: Path | None = config_file_creator._get_pon_file(bed_file)
+
+    # THEN the returned path should be the latest version
+    assert pon_path == new_pon_path
+
+
+def test_get_pon_file_no_files(cg_balsamic_config: BalsamicConfig, tmp_path: Path):
+    # GIVEN a BalsamicConfigFileCreator
+    config_file_creator = BalsamicConfigFileCreator(
+        status_db=create_autospec(Store), lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
+    )
+    config_file_creator.pon_directory = tmp_path
+
+    # GIVEN a bed file with no matching PON files
+    panel_name = "GMS_duck"
+    bed_file = Path(config_file_creator.bed_directory, f"{panel_name}.bed")
+
+    # WHEN getting the pon path
+    pon_file: Path | None = config_file_creator._get_pon_file(bed_file)
+
+    # THEN None should be returned
+    assert pon_file is None
+
+
+def test_get_pon_file_no_matching_files(cg_balsamic_config: BalsamicConfig, tmp_path: Path):
+    """Test that None is returned when no matching PON files are found."""
+    # GIVEN a BalsamicConfigFileCreator
+    config_file_creator = BalsamicConfigFileCreator(
+        status_db=create_autospec(Store), lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
+    )
+    config_file_creator.pon_directory = tmp_path
+
+    # GIVEN a bed file with no matching PON files
+    panel_name = "GMS_duck"
+    bed_file = Path(config_file_creator.bed_directory, f"{panel_name}.bed")
+
+    # GIVEN that there are files in the directory but none match the expected pattern
+    (tmp_path / "some_other_file.txt").touch()
+
+    # WHEN getting the pon path
+    pon_file: Path | None = config_file_creator._get_pon_file(bed_file)
+
+    # THEN None should be returned
+    assert pon_file is None
