@@ -62,6 +62,7 @@ balsamic:
   sentieon_licence_path: "{test_root_dir}/balsamic_sention_licence_path"
   "cluster_config": "{test_root_dir}/cluster_config.json"
   "loqusdb_artefact_snv": "{test_root_dir}/balsamic_loqusdb_path/artefact_snv"
+  "loqusdb_artefact_sv": "{test_root_dir}/balsamic_loqusdb_path/artefact_sv"
   "loqusdb_cancer_germline_snv": "{test_root_dir}/balsamic_loqusdb_path/artefact_snv"
   "loqusdb_cancer_germline_sv": "{test_root_dir}/balsamic_loqusdb_path/artefact_snv"
   "loqusdb_cancer_somatic_snv": "{test_root_dir}/balsamic_loqusdb_path/artefact_snv"
