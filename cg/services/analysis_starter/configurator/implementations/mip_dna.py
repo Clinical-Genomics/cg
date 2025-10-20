@@ -62,7 +62,9 @@ class MIPDNAConfigurator(Configurator):
         self.managed_variants_file_creator.create(
             case_id=case_id, file_path=self._get_managed_variants_file_path(case_id)
         )
-        return self.get_config(case_id=case_id, **flags)
+        config: MIPDNACaseConfig = self.get_config(case_id=case_id, **flags)
+        LOG.info(f"Case {case_id} configured successfully")
+        return config
 
     def get_config(self, case_id: str, **flags) -> MIPDNACaseConfig:
         case: Case = self.store.get_case_by_internal_id_strict(case_id)
