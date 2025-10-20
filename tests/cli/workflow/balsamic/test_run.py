@@ -180,7 +180,7 @@ def test_calls_on_analysis_started(cli_runner: CliRunner, balsamic_context: CGCo
     # THEN the on_analysis_started function has been called
     analysis_api.as_mock.on_analysis_started.assert_called_with(case_id)
 
-    
+
 def test_workflow_profile_option(
     cli_runner: CliRunner,
     balsamic_context: CGConfig,
