@@ -224,7 +224,7 @@ class BalsamicConfigFileCreator:
     def _get_gens_coverage_pon_file(self, patient_sex: SexOptions) -> Path:
         """Return the corresponding PON file for WGS cases based on the patient's sex."""
         return (
-            self.gens_coverage_female_path
-            if patient_sex == SexOptions.FEMALE
-            else self.gens_coverage_male_path
+            self.gens_coverage_male_path
+            if patient_sex == SexOptions.MALE
+            else self.gens_coverage_female_path
         )
