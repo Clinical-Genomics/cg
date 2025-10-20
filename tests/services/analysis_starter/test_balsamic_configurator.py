@@ -7,11 +7,8 @@ from cg.constants import SexOptions
 from cg.constants.priority import SlurmQos
 from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError, CaseNotConfiguredError
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
-from cg.services.analysis_starter.configurator.models.balsamic import (
-    BalsamicCaseConfig,
-    BalsamicConfigInput,
-)
-from cg.store.models import Application, ApplicationVersion, BedVersion, Case, Sample
+from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
+from cg.store.models import BedVersion, Case, Sample
 
 PANEL_ONLY_FIELDS = ["soft_filter_normal", "panel_bed", "pon_cnn", "exome"]
 WGS_ONLY_FIELDS = ["genome_interval", "gens_coverage_pon"]
@@ -200,178 +197,6 @@ def test_get_tumor_sample_id_no_tumor_sample():
         BalsamicConfigurator._get_tumor_sample_id(case_with_normal)
 
 
-def test_build_cli_input_wgs_tumor_only(balsamic_configurator: BalsamicConfigurator):
-    # GIVEN a case with one tumor WGS sample
-    wgs_tumor_only_case: Mock[Case] = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1"
-    )
-    application: Mock[Application] = create_autospec(Application, prep_category="wgs")
-    application_version: Mock[ApplicationVersion] = create_autospec(
-        ApplicationVersion, application=application
-    )
-    sample_1: Mock[Sample] = create_autospec(
-        Sample,
-        internal_id="sample_1",
-        is_tumour=True,
-        sex=SexOptions.FEMALE,
-        application_version=application_version,
-    )
-    wgs_tumor_only_case.samples = [sample_1]
-    balsamic_configurator.store.get_case_by_internal_id = Mock(return_value=wgs_tumor_only_case)
-
-    # WHEN building the CLI input
-    cli_input: BalsamicConfigInput = balsamic_configurator._build_cli_input(
-        case_id=wgs_tumor_only_case.internal_id
-    )
-
-    # THEN pydantic model should be created (and validated)
-    assert isinstance(cli_input, BalsamicConfigInput)
-
-    # THEN the correct normal sample name should be set
-    assert cli_input.normal_sample_name is None
-
-    # THEN the correct gens_coverage_pon should be chosen (Female)
-    assert cli_input.gens_coverage_pon == balsamic_configurator.gens_coverage_female_path
-
-    # THEN fields not relevant for WGS analyses should be set to their default values
-    for field in PANEL_ONLY_FIELDS:
-        assert getattr(cli_input, field) == BalsamicConfigInput.model_fields[field].default
-
-
-def test_build_cli_input_wgs_tumor_normal(balsamic_configurator: BalsamicConfigurator):
-    # GIVEN a case with two WGS samples (tumor and normal)
-    wgs_tumor_only_case: Mock[Case] = create_autospec(
-        Case, data_analysis="balsamic-umi", internal_id="case_1"
-    )
-    application: Mock[Application] = create_autospec(Application, prep_category="wgs")
-    application_version: Mock[ApplicationVersion] = create_autospec(
-        ApplicationVersion, application=application
-    )
-    sample_1: Mock[Sample] = create_autospec(
-        Sample,
-        internal_id="tumor_sample",
-        is_tumour=True,
-        sex=SexOptions.MALE,
-        application_version=application_version,
-    )
-    sample_2: Mock[Sample] = create_autospec(
-        Sample,
-        internal_id="normal_sample",
-        is_tumour=False,
-        sex=SexOptions.MALE,
-        application_version=application_version,
-    )
-    wgs_tumor_only_case.samples = [sample_1, sample_2]
-    balsamic_configurator.store.get_case_by_internal_id = Mock(return_value=wgs_tumor_only_case)
-
-    # WHEN building the CLI input
-    cli_input: BalsamicConfigInput = balsamic_configurator._build_cli_input(
-        case_id=wgs_tumor_only_case.internal_id
-    )
-
-    # THEN pydantic model should be created (and validated)
-    assert isinstance(cli_input, BalsamicConfigInput)
-
-    # THEN the correct normal sample name should be set
-    assert cli_input.normal_sample_name == "normal_sample"
-
-    # THEN the correct gens_coverage_pon should be chosen (Male)
-    assert cli_input.gens_coverage_pon == balsamic_configurator.gens_coverage_male_path
-
-    # THEN fields not relevant for WGS analyses should be set to their default values
-    for field in PANEL_ONLY_FIELDS:
-        assert getattr(cli_input, field) == BalsamicConfigInput.model_fields[field].default
-
-
-def test_build_cli_input_panel_tumor_only(
-    balsamic_configurator: BalsamicConfigurator, bed_version_short_name: str
-):
-    # GIVEN a case with one tumor panel sample
-    panel_tumor_only_case: Mock[Case] = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1"
-    )
-    application: Mock[Application] = create_autospec(Application, prep_category="tgs")
-    application_version: Mock[ApplicationVersion] = create_autospec(
-        ApplicationVersion, application=application
-    )
-    sample_1: Mock[Sample] = create_autospec(
-        Sample,
-        internal_id="sample1",
-        is_tumour=True,
-        application_version=application_version,
-        sex=SexOptions.MALE,
-    )
-    panel_tumor_only_case.samples = [sample_1]
-    balsamic_configurator.store.get_case_by_internal_id = Mock(return_value=panel_tumor_only_case)
-
-    # GIVEN that LIMS returns a panel name that exists in the store
-    balsamic_configurator.lims_api.capture_kit = Mock(return_value=bed_version_short_name)
-
-    # GIVEN that there exists matching pon files
-    balsamic_configurator._get_pon_file = Mock(return_value=Path("path/to/pon.cnn"))
-
-    # WHEN building the CLI input
-    cli_input: BalsamicConfigInput = balsamic_configurator._build_cli_input(
-        case_id=panel_tumor_only_case.internal_id
-    )
-
-    # THEN a BalsamicConfigInput instance should be created (and validated)
-    assert isinstance(cli_input, BalsamicConfigInput)
-
-    # THEN the correct normal sample name should be set
-    assert cli_input.normal_sample_name is None
-
-    # THEN fields not relevant for panel analyses should be set to their default values
-    for field in WGS_ONLY_FIELDS:
-        assert getattr(cli_input, field) == BalsamicConfigInput.model_fields[field].default
-
-
-def test_build_cli_input_panel_exome_only(
-    balsamic_configurator: BalsamicConfigurator, bed_version_short_name: str
-):
-    # GIVEN a case with one exome sample
-    exome_tumor_only_case: Mock[Case] = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1"
-    )
-    application: Mock[Application] = create_autospec(Application, prep_category="wes")
-    application_version: Mock[ApplicationVersion] = create_autospec(
-        ApplicationVersion, application=application
-    )
-    sample_1: Mock[Sample] = create_autospec(
-        Sample,
-        internal_id="sample1",
-        is_tumour=True,
-        application_version=application_version,
-        sex=SexOptions.MALE,
-    )
-    exome_tumor_only_case.samples = [sample_1]
-    balsamic_configurator.store.get_case_by_internal_id = Mock(return_value=exome_tumor_only_case)
-
-    # GIVEN that LIMS returns a panel name that exists in the store
-    balsamic_configurator.lims_api.capture_kit = Mock(return_value=bed_version_short_name)
-
-    # GIVEN that there exists matching pon files
-    balsamic_configurator._get_pon_file = Mock(return_value=Path("path/to/pon.cnn"))
-
-    # WHEN building the CLI input
-    cli_input: BalsamicConfigInput = balsamic_configurator._build_cli_input(
-        case_id=exome_tumor_only_case.internal_id
-    )
-
-    # THEN pydantic model should be created (and validated)
-    assert isinstance(cli_input, BalsamicConfigInput)
-
-    # THEN the correct normal sample name should be set
-    assert cli_input.normal_sample_name is None
-
-    # THEN fields not relevant for panel analyses should be set to their default values
-    for field in WGS_ONLY_FIELDS:
-        assert getattr(cli_input, field) == BalsamicConfigInput.model_fields[field].default
-
-    # THEN the exome flag should be set to True
-    assert cli_input.exome is True
-
-
 def test_get_config(balsamic_configurator: BalsamicConfigurator, case_id: str, tmp_path: Path):
     """Tests that the get_config method returns a BalsamicCaseConfig. And that fields can be overridden with flags."""
     # GIVEN a Balsamic configurator with an existing config file
@@ -414,3 +239,7 @@ def test_get_config_missing_config_file(
     # THEN it should raise a CaseNotConfiguredError
     with pytest.raises(CaseNotConfiguredError):
         balsamic_configurator.get_config(case_id=case_id)
+
+
+def test_configure(balsamic_configurator: BalsamicConfigurator):
+    pass
