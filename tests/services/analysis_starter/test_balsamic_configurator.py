@@ -23,8 +23,8 @@ WGS_ONLY_FIELDS = ["genome_interval", "gens_coverage_pon"]
 
 @pytest.fixture
 def case_with_sample() -> Case:
-    case_with_sample: Mock[Case] = create_autospec(Case)
-    sample: Mock[Sample] = create_autospec(Sample, internal_id="sample1")
+    case_with_sample: Case = create_autospec(Case)
+    sample: Sample = create_autospec(Sample, internal_id="sample1")
     case_with_sample.samples = [sample]
     return case_with_sample
 
@@ -37,7 +37,7 @@ def test_get_config(balsamic_configurator: BalsamicConfigurator, case_id: str, t
     Path(balsamic_configurator.root_dir, case_id, f"{case_id}.json").touch()
 
     # GIVEN that the database returns a case with the provided case_id
-    case_to_configure: Mock[Case] = create_autospec(Case, internal_id=case_id)
+    case_to_configure: Case = create_autospec(Case, internal_id=case_id)
     case_to_configure.slurm_priority = SlurmQos.NORMAL
     balsamic_configurator.store.get_case_by_internal_id_strict = Mock(
         return_value=case_to_configure
@@ -65,7 +65,7 @@ def test_get_config_missing_config_file(
     # GIVEN that the config file does not exist
 
     # GIVEN that the database returns a case with the provided case_id
-    case_to_configure: Mock[Case] = create_autospec(Case, internal_id=case_id)
+    case_to_configure: Case = create_autospec(Case, internal_id=case_id)
     case_to_configure.slurm_priority = SlurmQos.NORMAL
     balsamic_configurator.store.get_case_by_internal_id_strict = Mock(
         return_value=case_to_configure
