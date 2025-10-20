@@ -13,14 +13,6 @@ from cg.cli.workflow.commands import (
     store,
     store_available,
 )
-from cg.cli.workflow.mip.base import (
-    config_case,
-    managed_variants,
-    panel,
-    run,
-    start,
-    start_available,
-)
 from cg.cli.workflow.mip.options import (
     ARGUMENT_CASE_ID,
     OPTION_BWA_MEM,
@@ -56,28 +48,22 @@ def mip_dna(
 
 
 for sub_cmd in [
-    config_case,
     ensure_illumina_runs_on_disk,
     link,
-    managed_variants,
-    panel,
     resolve_compression,
-    run,
-    start,
-    start_available,
     store,
     store_available,
 ]:
     mip_dna.add_command(sub_cmd)
 
 
-@mip_dna.command("dev-run")
+@mip_dna.command("run")
 @START_AFTER_PROGRAM
 @START_WITH_PROGRAM
 @OPTION_BWA_MEM
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_run(
+def run(
     cg_config: CGConfig,
     case_id: str,
     use_bwa_mem: bool,
@@ -86,7 +72,9 @@ def dev_run(
 ):
     """
     Run a preconfigured MIP-DNA case.
-    Assumes that the following files are in the case run directory:
+
+    \b
+    Assumes that the following files exist in the case run directory:
         - pedigree.yaml
         - gene_panels.bed
         - managed_variants.vcf
@@ -98,14 +86,14 @@ def dev_run(
     )
 
 
-@mip_dna.command("dev-start")
+@mip_dna.command("start")
 @START_AFTER_PROGRAM
 @START_WITH_PROGRAM
 @OPTION_BWA_MEM
 @OPTION_PANEL_BED
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_start(
+def start(
     cg_config: CGConfig,
     case_id: str,
     use_bwa_mem: bool,
@@ -114,7 +102,10 @@ def dev_start(
     start_with: str | None,
 ):
     """
-    Start a MIP-DNA case. Configures the case and writes the following files:
+    Start a MIP-DNA case.
+
+    \b
+    Configures the case and writes the following files:
         - pedigree.yaml
         - gene_panels.bed
         - managed_variants.vcf
@@ -130,11 +121,14 @@ def dev_start(
     )
 
 
-@mip_dna.command("dev-start-available")
+@mip_dna.command("start-available")
 @click.pass_obj
-def dev_start_available(cg_config: CGConfig):
+def start_available(cg_config: CGConfig):
     """
-    Starts all available MIP-DNA cases. Configures the individual case and writes the following files for each case:
+    Starts all available MIP-DNA cases.
+
+    \b
+    Configures the individual case and writes the following files for each case:
         - pedigree.yaml
         - gene_panels.bed
         - managed_variants.vcf
@@ -147,17 +141,20 @@ def dev_start_available(cg_config: CGConfig):
         raise click.Abort
 
 
-@mip_dna.command("dev-config-case")
+@mip_dna.command("config-case")
 @OPTION_PANEL_BED
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_config_case(
+def config_case(
     cg_config: CGConfig,
     case_id: str,
     panel_bed: str | None,
 ):
     """
-    Configure a MIP-DNA case so that it is ready to be run. This creates the following files:
+    Configure a MIP-DNA case so that it is ready to be run.
+
+    \b
+    This creates the following files:
         - pedigree.yaml
         - gene_panels.bed
         - managed_variants.vcf
