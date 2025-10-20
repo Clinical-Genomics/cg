@@ -730,7 +730,7 @@ def test_get_pon_file_no_matching_files(cg_balsamic_config: BalsamicConfig, tmp_
     [
         (SexOptions.FEMALE, "coverage_female.txt"),
         (SexOptions.MALE, "coverage_male.txt"),
-        (SexOptions.UNKNOWN, "coverage_male.txt"),
+        (SexOptions.UNKNOWN, "coverage_female.txt"),
     ],
     ids=["female", "male", "unknown"],
 )

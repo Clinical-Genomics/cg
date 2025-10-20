@@ -13,7 +13,6 @@ from requests.exceptions import HTTPError
 from cg.apps.lims import LimsAPI
 from cg.constants.lims import LimsProcess
 from cg.exc import LimsDataError
-from tests.meta.upload.scout.conftest import lims_api
 from tests.mocks.limsmock import MockLimsAPI
 
 
