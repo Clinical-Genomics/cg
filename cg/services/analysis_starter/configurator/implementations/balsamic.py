@@ -1,12 +1,9 @@
 import logging
 import re
-import subprocess
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
 from cg.constants import SexOptions
-from cg.constants.constants import GenomeVersion
-from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError, CaseNotConfiguredError
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.cg_config import BalsamicConfig
@@ -14,10 +11,7 @@ from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
 )
-from cg.services.analysis_starter.configurator.models.balsamic import (
-    BalsamicCaseConfig,
-    BalsamicConfigInput,
-)
+from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -85,110 +79,6 @@ class BalsamicConfigurator(Configurator):
         balsamic_config: BalsamicCaseConfig = self._set_flags(config=balsamic_config, **flags)
         self._ensure_required_config_files_exist(balsamic_config)
         return balsamic_config
-
-    @staticmethod
-    def create_config_file(config_cli_input: BalsamicConfigInput) -> None:
-        final_command: str = config_cli_input.dump_to_cli()
-        LOG.debug(f"Running: {final_command}")
-        subprocess.run(
-            args=final_command,
-            shell=True,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-
-    def _build_cli_input(self, case_id, **flags) -> BalsamicConfigInput:
-        case: Case = self.store.get_case_by_internal_id(case_id)
-        if self._all_samples_are_wgs(case):
-            return self._build_wgs_config(case)
-        else:
-            return self._build_targeted_config(case, **flags)
-
-    def _build_wgs_config(self, case: Case) -> BalsamicConfigInput:
-        patient_sex: SexOptions = self._get_patient_sex(case)
-        return BalsamicConfigInput(
-            analysis_dir=self.root_dir,
-            analysis_workflow=case.data_analysis,
-            artefact_snv_observations=self.loqusdb_artefact_snv,
-            artefact_sv_observations=self.loqusdb_artefact_sv,
-            balsamic_binary=self.balsamic_binary,
-            balsamic_cache=self.cache_dir,
-            cadd_annotations=self.cadd_path,
-            cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
-            cancer_somatic_snv_observations=self.loqusdb_cancer_somatic_snv,
-            cancer_somatic_sv_observations=self.loqusdb_cancer_somatic_sv,
-            case_id=case.internal_id,
-            clinical_snv_observations=self.loqusdb_clinical_snv,
-            clinical_sv_observations=self.loqusdb_clinical_sv,
-            conda_binary=self.conda_binary,
-            conda_env=self.environment,
-            fastq_path=Path(self.root_dir, case.internal_id, "fastq"),
-            gender=patient_sex,
-            genome_interval=self.genome_interval_path,
-            genome_version=GenomeVersion.HG19,
-            gens_coverage_pon=self._get_coverage_pon(patient_sex),
-            gnomad_min_af5=self.gnomad_af5_path,
-            normal_sample_name=self._get_normal_sample_id(case),
-            sentieon_install_dir=self.sentieon_licence_path,
-            sentieon_license=self.sentieon_licence_server,
-            swegen_snv=self.swegen_snv,
-            swegen_sv=self.swegen_sv,
-            tumor_sample_name=self._get_tumor_sample_id(case),
-        )
-
-    def _build_targeted_config(self, case, **flags) -> BalsamicConfigInput:
-        bed_file: Path = self._resolve_bed_file(case, **flags)
-        patient_sex: SexOptions = self._get_patient_sex(case)
-        return BalsamicConfigInput(
-            analysis_dir=self.root_dir,
-            analysis_workflow=case.data_analysis,
-            artefact_snv_observations=self.loqusdb_artefact_snv,
-            artefact_sv_observations=self.loqusdb_artefact_sv,
-            balsamic_binary=self.balsamic_binary,
-            balsamic_cache=self.cache_dir,
-            cadd_annotations=self.cadd_path,
-            cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
-            cancer_somatic_snv_observations=self.loqusdb_cancer_somatic_snv,
-            cancer_somatic_sv_observations=self.loqusdb_cancer_somatic_sv,
-            case_id=case.internal_id,
-            clinical_snv_observations=self.loqusdb_clinical_snv,
-            clinical_sv_observations=self.loqusdb_clinical_sv,
-            conda_binary=self.conda_binary,
-            conda_env=self.environment,
-            fastq_path=Path(self.root_dir, case.internal_id, "fastq"),
-            gender=patient_sex,
-            genome_version=GenomeVersion.HG19,
-            gnomad_min_af5=self.gnomad_af5_path,
-            normal_sample_name=self._get_normal_sample_id(case),
-            panel_bed=bed_file,
-            pon_cnn=self._get_pon_file(bed_file),
-            exome=self._all_samples_are_exome(case),
-            sentieon_install_dir=self.sentieon_licence_path,
-            sentieon_license=self.sentieon_licence_server,
-            soft_filter_normal=bool(self._get_normal_sample_id(case)),
-            swegen_snv=self.swegen_snv,
-            swegen_sv=self.swegen_sv,
-            tumor_sample_name=self._get_tumor_sample_id(case),
-        )
-
-    @staticmethod
-    def _all_samples_are_wgs(case: Case) -> bool:
-        """Check if all samples in the case are WGS."""
-        return all(
-            sample.application_version.application.prep_category
-            == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
-            for sample in case.samples
-        )
-
-    @staticmethod
-    def _all_samples_are_exome(case: Case) -> bool:
-        """Check if all samples in the case are exome."""
-        return all(
-            sample.application_version.application.prep_category
-            == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
-            for sample in case.samples
-        )
 
     @staticmethod
     def _get_patient_sex(case) -> SexOptions:
