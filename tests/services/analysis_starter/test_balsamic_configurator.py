@@ -3,11 +3,12 @@ from typing import cast
 from unittest.mock import Mock, create_autospec
 
 import pytest
+from pytest_mock import MockerFixture
 
 from cg.constants import SexOptions
 from cg.constants.priority import SlurmQos
 from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError, CaseNotConfiguredError
-from cg.meta.workflow.fastq import BalsamicFastqHandler, FastqHandler
+from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
@@ -248,7 +249,7 @@ def test_get_config_missing_config_file(
         balsamic_configurator.get_config(case_id=case_id)
 
 
-def test_configure(cg_balsamic_config: BalsamicConfig):
+def test_configure(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
     # GIVEN a fastq handler
     fastq_handler: BalsamicFastqHandler = create_autospec(BalsamicFastqHandler)
 
@@ -269,6 +270,9 @@ def test_configure(cg_balsamic_config: BalsamicConfig):
         lims_api=Mock(),
         store=store,
     )
+
+    # GIVEN that all relevant paths exist
+    mocker.patch.object(Path, "exists", return_value=True)
 
     # WHEN calling configure
     balsamic_configurator.configure(case_id="case_id")
