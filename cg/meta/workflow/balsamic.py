@@ -410,9 +410,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "genome_interval": self.genome_interval_path,
             "gnomad_min_af5": self.gnomad_af5_path,
             "gens_coverage_pon": (
-                self.gens_coverage_female_path
-                if sex == Sex.FEMALE
-                else self.gens_coverage_male_path
+                self.gens_coverage_male_path if sex == Sex.MALE else self.gens_coverage_female_path
             ),
         }
 
