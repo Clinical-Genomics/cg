@@ -7,11 +7,15 @@ import pytest
 from cg.constants import SexOptions
 from cg.constants.priority import SlurmQos
 from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError, CaseNotConfiguredError
-from cg.meta.workflow.fastq import FastqHandler
+from cg.meta.workflow.fastq import BalsamicFastqHandler, FastqHandler
 from cg.models.cg_config import BalsamicConfig
+from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
+    BalsamicConfigFileCreator,
+)
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.store.models import BedVersion, Case, Sample
+from cg.store.store import Store
 
 PANEL_ONLY_FIELDS = ["soft_filter_normal", "panel_bed", "pon_cnn", "exome"]
 WGS_ONLY_FIELDS = ["genome_interval", "gens_coverage_pon"]
@@ -246,11 +250,24 @@ def test_get_config_missing_config_file(
 
 def test_configure(cg_balsamic_config: BalsamicConfig):
     # GIVEN a fastq handler
-    fastq_handler: FastqHandler = create_autospec(FastqHandler)
+    fastq_handler: BalsamicFastqHandler = create_autospec(BalsamicFastqHandler)
+
+    # GIVEN a BalsamicConfigFileCreator
+    config_file_creator: BalsamicConfigFileCreator = create_autospec(BalsamicConfigFileCreator)
+
+    # GIVEN a store
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id_strict = Mock(
+        return_value=create_autospec(Case, slurm_priority=SlurmQos.NORMAL)
+    )
 
     # GIVEN Balsamic configurator
     balsamic_configurator = BalsamicConfigurator(
-        config=cg_balsamic_config, fastq_handler=fastq_handler, lims_api=Mock(), store=Mock()
+        config=cg_balsamic_config,
+        config_file_creator=config_file_creator,
+        fastq_handler=fastq_handler,
+        lims_api=Mock(),
+        store=store,
     )
 
     # WHEN calling configure
@@ -258,3 +275,6 @@ def test_configure(cg_balsamic_config: BalsamicConfig):
 
     # THEN the fastq files should be linked
     cast(Mock, fastq_handler.link_fastq_files).assert_called_once_with(case_id="case_id")
+
+    # THEN the config file should be created
+    cast(Mock, config_file_creator.create).assert_called_once_with(case_id="case_id")

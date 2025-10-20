@@ -11,6 +11,9 @@ from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError, CaseNotConfi
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
+from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
+    BalsamicConfigFileCreator,
+)
 from cg.services.analysis_starter.configurator.models.balsamic import (
     BalsamicCaseConfig,
     BalsamicConfigInput,
@@ -25,6 +28,7 @@ class BalsamicConfigurator(Configurator):
     def __init__(
         self,
         config: BalsamicConfig,
+        config_file_creator: BalsamicConfigFileCreator,
         fastq_handler: BalsamicFastqHandler,
         lims_api: LimsAPI,
         store: Store,
@@ -58,12 +62,12 @@ class BalsamicConfigurator(Configurator):
         self.slurm_mail_user: str = config.slurm.mail_user
         self.swegen_snv: Path = config.swegen_snv
         self.swegen_sv: Path = config.swegen_sv
+        self.config_file_creator: BalsamicConfigFileCreator = config_file_creator
 
     def configure(self, case_id: str, **flags) -> BalsamicCaseConfig:
         LOG.info(f"Configuring case {case_id}")
         self.fastq_handler.link_fastq_files(case_id)
-        config_cli_input: BalsamicConfigInput = self._build_cli_input(case_id)
-        self.create_config_file(config_cli_input)
+        self.config_file_creator.create(case_id=case_id, **flags)
         return self.get_config(case_id=case_id, **flags)
 
     def get_config(self, case_id: str, **flags) -> BalsamicCaseConfig:
@@ -75,7 +79,7 @@ class BalsamicConfigurator(Configurator):
             cluster_config=self.default_cluster_config,
             environment=self.environment,
             mail_user=self.slurm_mail_user,
-            qos=self.store.get_case_by_internal_id(case_id).slurm_priority,
+            qos=self.store.get_case_by_internal_id_strict(case_id).slurm_priority,
             sample_config=self._get_sample_config_path(case_id),
         )
         balsamic_config: BalsamicCaseConfig = self._set_flags(config=balsamic_config, **flags)
