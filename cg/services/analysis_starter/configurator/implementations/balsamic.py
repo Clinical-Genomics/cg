@@ -1,10 +1,8 @@
 import logging
-import re
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
-from cg.constants import SexOptions
-from cg.exc import BedFileNotFoundError, CaseNotConfiguredError
+from cg.exc import CaseNotConfiguredError
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
@@ -12,7 +10,6 @@ from cg.services.analysis_starter.configurator.file_creators.balsamic_config imp
     BalsamicConfigFileCreator,
 )
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
-from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -80,43 +77,6 @@ class BalsamicConfigurator(Configurator):
         self._ensure_required_config_files_exist(balsamic_config)
         return balsamic_config
 
-    def _resolve_bed_file(self, case, **flags) -> Path:
-        bed_name = flags.get("panel_bed") or self._get_bed_name_from_lims(case)
-        if db_bed := self.store.get_bed_version_by_short_name(bed_name):
-            return Path(self.bed_directory, db_bed.filename)
-        raise BedFileNotFoundError(f"No Bed file found for with provided name {bed_name}.")
-
-    def _get_bed_name_from_lims(self, case: Case) -> str:
-        """Get the bed name from LIMS. Assumes that all samples in the case have the same panel."""
-        first_sample: Sample = case.samples[0]
-        if lims_bed := self.lims_api.capture_kit(lims_id=first_sample.internal_id):
-            return lims_bed
-        else:
-            raise BedFileNotFoundError(
-                f"No bed file found in LIMS for sample {first_sample.internal_id} in for case {case.internal_id}."
-            )
-
-    def _get_pon_file(self, bed_file: Path) -> Path | None:
-        """Finds the corresponding PON file for the given bed file.
-        These are versioned and named like: <bed_file_name>_hg19_design_CNVkit_PON_reference_v<version>.cnn
-        This method returns the latest version of the PON file matching the bed name.
-        """
-        identifier: str = bed_file.stem
-        pattern: re.Pattern[str] = re.compile(rf"{re.escape(identifier)}.*_v(\d+)\.cnn$")
-        candidates: list = []
-
-        for file in self.pon_directory.glob("*.cnn"):
-            if match := pattern.search(file.name):
-                version = int(match[1])
-                candidates.append((version, file))
-
-        if not candidates:
-            LOG.info(f"No PON file found for bed file {bed_file.name}. Configuring without PON.")
-            return None
-        _, latest_file = max(candidates, key=lambda x: x[0])
-
-        return latest_file
-
     def _get_sample_config_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, f"{case_id}.json")
 
@@ -125,10 +85,3 @@ class BalsamicConfigurator(Configurator):
             raise CaseNotConfiguredError(
                 f"Please ensure that the config file {config.sample_config.exists()} exists."
             )
-
-    def _get_coverage_pon(self, patient_sex: SexOptions) -> Path:
-        return (
-            self.gens_coverage_female_path
-            if patient_sex == SexOptions.FEMALE
-            else self.gens_coverage_male_path
-        )

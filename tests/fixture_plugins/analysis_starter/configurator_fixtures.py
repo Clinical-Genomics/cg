@@ -1,3 +1,5 @@
+from unittest.mock import create_autospec
+
 import pytest
 
 from cg.apps.lims import LimsAPI
@@ -10,6 +12,9 @@ from cg.models.cg_config import (
     TaxprofilerConfig,
 )
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
+from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
+    BalsamicConfigFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.microsalt_config import (
     MicrosaltConfigFileCreator,
 )
@@ -51,6 +56,7 @@ def balsamic_configurator(
 ) -> BalsamicConfigurator:
     return BalsamicConfigurator(
         config=cg_balsamic_config,
+        config_file_creator=create_autospec(BalsamicConfigFileCreator),
         fastq_handler=balsamic_fastq_handler,
         lims_api=lims_api,
         store=base_store,

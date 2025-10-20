@@ -6,7 +6,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from cg.constants.priority import SlurmQos
-from cg.exc import BedFileNotFoundError, CaseNotConfiguredError
+from cg.exc import CaseNotConfiguredError
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
@@ -14,7 +14,7 @@ from cg.services.analysis_starter.configurator.file_creators.balsamic_config imp
 )
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
-from cg.store.models import BedVersion, Case, Sample
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 PANEL_ONLY_FIELDS = ["soft_filter_normal", "panel_bed", "pon_cnn", "exome"]
@@ -27,103 +27,6 @@ def case_with_sample() -> Case:
     sample: Mock[Sample] = create_autospec(Sample, internal_id="sample1")
     case_with_sample.samples = [sample]
     return case_with_sample
-
-
-def test_resolve_bed_file_correct_in_lims(
-    balsamic_configurator: BalsamicConfigurator, case_with_sample: Case
-):
-    """Test that the correct bed file is resolved when it exists in LIMS."""
-    # GIVEN a Balsamic configurator with a bed_directory
-    bed_directory = Path("path/to/bed/files")
-    balsamic_configurator.bed_directory = bed_directory
-
-    # GIVEN a case with a sample
-
-    # GIVEN that the sample has a panel set in LIMS
-    balsamic_configurator.lims_api.capture_kit = Mock(return_value="GMS_duck")
-
-    # GIVEN that the panel exists in the store
-    balsamic_configurator.store.get_bed_version_by_short_name = Mock(
-        return_value=create_autospec(BedVersion, filename="GMS_duck_v5.99_extra_floating.bed")
-    )
-
-    # WHEN resolving the bed file
-    bed_file = balsamic_configurator._resolve_bed_file(case_with_sample)
-
-    # THEN the correct bed file should be returned
-    assert bed_file == Path(bed_directory, "GMS_duck_v5.99_extra_floating.bed")
-
-
-def test_resolve_bed_file_not_in_store(
-    balsamic_configurator: BalsamicConfigurator, case_with_sample: Case
-):
-    """Test that an error is raised when the panel does not exist in the store."""
-    # GIVEN a Balsamic configurator with a bed_directory
-    bed_directory = Path("path/to/bed/files")
-    balsamic_configurator.bed_directory = bed_directory
-
-    # GIVEN a case with a sample
-
-    # GIVEN that the sample has a panel set in LIMS
-    balsamic_configurator.lims_api.capture_kit = Mock(return_value="GMS_duck")
-
-    # GIVEN that the panel does not exist in the store
-    balsamic_configurator.store.get_bed_version_by_short_name = Mock(return_value=None)
-
-    # WHEN resolving the bed file
-    # THEN it should raise a ValueError
-    with pytest.raises(BedFileNotFoundError):
-        balsamic_configurator._resolve_bed_file(case_with_sample)
-
-
-def test_resolve_bed_file_override_with_flag(
-    balsamic_configurator: BalsamicConfigurator, case_with_sample: Case
-):
-    """Test that the bed file can be overridden with a flag."""
-    # GIVEN a Balsamic configurator with a bed_directory
-    bed_directory = Path("path/to/bed/files")
-    balsamic_configurator.bed_directory = bed_directory
-
-    # GIVEN a case with a sample
-
-    # GIVEN that the sample has a panel set in LIMS
-    balsamic_configurator.lims_api.capture_kit = Mock(return_value=None)
-
-    # GIVEN that the panel exists in the store
-    balsamic_configurator.store.get_bed_version_by_short_name = Mock(
-        return_value=create_autospec(BedVersion, filename="NACG_goose_1_99_max_fluff.bed")
-    )
-
-    # WHEN resolving the bed file with an override flag
-    provided_bed_name = Path("NACG_goose")
-    bed_file = balsamic_configurator._resolve_bed_file(
-        case_with_sample, panel_bed=provided_bed_name
-    )
-
-    # THEN the overridden bed file should be returned
-    assert bed_file == Path(bed_directory, "NACG_goose_1_99_max_fluff.bed")
-
-    # THEN the LIMS API should not be called
-    balsamic_configurator.lims_api.capture_kit.assert_not_called()
-
-
-def test_get_bed_name_from_lims_missing_panel(
-    balsamic_configurator: BalsamicConfigurator, case_with_sample: Case
-):
-    """Test that an error is raised when the panel is not set in LIMS."""
-    # GIVEN a Balsamic configurator with a bed_directory
-    bed_directory = Path("path/to/bed/files")
-    balsamic_configurator.bed_directory = bed_directory
-
-    # GIVEN a case with a sample
-
-    # GIVEN that the sample does not have a panel set in LIMS
-    balsamic_configurator.lims_api.capture_kit = Mock(return_value=None)
-
-    # WHEN resolving the bed file
-    # THEN it should raise a ValueError
-    with pytest.raises(BedFileNotFoundError):
-        balsamic_configurator._resolve_bed_file(case_with_sample)
 
 
 def test_get_config(balsamic_configurator: BalsamicConfigurator, case_id: str, tmp_path: Path):
