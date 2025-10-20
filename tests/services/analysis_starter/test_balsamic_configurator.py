@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import cast
 from unittest.mock import Mock, create_autospec
 
 import pytest
@@ -6,6 +7,8 @@ import pytest
 from cg.constants import SexOptions
 from cg.constants.priority import SlurmQos
 from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError, CaseNotConfiguredError
+from cg.meta.workflow.fastq import FastqHandler
+from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.store.models import BedVersion, Case, Sample
@@ -241,5 +244,17 @@ def test_get_config_missing_config_file(
         balsamic_configurator.get_config(case_id=case_id)
 
 
-def test_configure(balsamic_configurator: BalsamicConfigurator):
-    pass
+def test_configure(cg_balsamic_config: BalsamicConfig):
+    # GIVEN a fastq handler
+    fastq_handler: FastqHandler = create_autospec(FastqHandler)
+
+    # GIVEN Balsamic configurator
+    balsamic_configurator = BalsamicConfigurator(
+        config=cg_balsamic_config, fastq_handler=fastq_handler, lims_api=Mock(), store=Mock()
+    )
+
+    # WHEN calling configure
+    balsamic_configurator.configure(case_id="case_id")
+
+    # THEN the fastq files should be linked
+    cast(Mock, fastq_handler.link_fastq_files).assert_called_once_with(case_id="case_id")
