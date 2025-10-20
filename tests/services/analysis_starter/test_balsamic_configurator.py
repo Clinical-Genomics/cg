@@ -39,7 +39,9 @@ def test_get_config(balsamic_configurator: BalsamicConfigurator, case_id: str, t
     # GIVEN that the database returns a case with the provided case_id
     case_to_configure: Mock[Case] = create_autospec(Case, internal_id=case_id)
     case_to_configure.slurm_priority = SlurmQos.NORMAL
-    balsamic_configurator.store.get_case_by_internal_id = Mock(return_value=case_to_configure)
+    balsamic_configurator.store.get_case_by_internal_id_strict = Mock(
+        return_value=case_to_configure
+    )
 
     # WHEN getting the config
     config: BalsamicCaseConfig = balsamic_configurator.get_config(
@@ -65,7 +67,9 @@ def test_get_config_missing_config_file(
     # GIVEN that the database returns a case with the provided case_id
     case_to_configure: Mock[Case] = create_autospec(Case, internal_id=case_id)
     case_to_configure.slurm_priority = SlurmQos.NORMAL
-    balsamic_configurator.store.get_case_by_internal_id = Mock(return_value=case_to_configure)
+    balsamic_configurator.store.get_case_by_internal_id_strict = Mock(
+        return_value=case_to_configure
+    )
 
     # WHEN getting the config
     # THEN it should raise a CaseNotConfiguredError
