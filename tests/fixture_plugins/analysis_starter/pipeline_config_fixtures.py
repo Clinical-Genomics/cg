@@ -60,10 +60,10 @@ def get_nextflow_config_dict(
 
 
 @pytest.fixture
-def balsamic_config(tmp_path) -> BalsamicConfig:
+def cg_balsamic_config(tmp_path) -> BalsamicConfig:
     return BalsamicConfig(
         balsamic_cache=tmp_path / "balsamic_cache",
-        bed_path=tmp_path / "bed_file.bed",
+        bed_path=tmp_path / "beds",
         binary_path=tmp_path / "binary",
         cadd_path=tmp_path / "cadd",
         cluster_config=tmp_path / "cluster.yaml",
@@ -73,15 +73,17 @@ def balsamic_config(tmp_path) -> BalsamicConfig:
         gens_coverage_female_path=tmp_path / "coverage_female.txt",
         gens_coverage_male_path=tmp_path / "coverage_male.txt",
         gnomad_af5_path=tmp_path / "gnomad_af5.vcf",
+        head_job_partition="head-jobs",
         loqusdb_path="mongodb://localhost:27017/loqusdb",
         loqusdb_artefact_snv=tmp_path / "artefact_snv.vcf",
+        loqusdb_artefact_sv=tmp_path / "artefact_sv.vcf",
         loqusdb_cancer_germline_snv=tmp_path / "cancer_germline_snv.vcf",
-        loqusdb_cancer_germline_sv=tmp_path / "cancer_germline_sv.vcf",
         loqusdb_cancer_somatic_snv=tmp_path / "cancer_somatic_snv.vcf",
         loqusdb_cancer_somatic_sv=tmp_path / "cancer_somatic_sv.vcf",
         loqusdb_clinical_snv=tmp_path / "clinical_snv.vcf",
         loqusdb_clinical_sv=tmp_path / "clinical_sv.vcf",
-        pon_path=tmp_path / "pon.vcf",
+        loqusdb_panel_files={"GMSmyeloid": tmp_path / "GMSmyeloid.vcf"},
+        pon_path=tmp_path / "pon.vcf",  # TODO: check the file extension
         root=tmp_path / "balsamic_root",
         sentieon_licence_path=tmp_path / "sentieon.lic",
         sentieon_licence_server="27001@sentieon-license",

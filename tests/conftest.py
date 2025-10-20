@@ -1940,6 +1940,7 @@ def context_config(
     email_address: str,
     fluffy_dir: Path,
     housekeeper_dir: Path,
+    head_job_partition: str,
     mip_dir: Path,
     cg_dir: Path,
     conda_binary: Path,
@@ -2015,14 +2016,17 @@ def context_config(
             "gens_coverage_female_path": str(cg_dir),
             "gens_coverage_male_path": str(cg_dir),
             "gnomad_af5_path": str(cg_dir),
+            "head_job_partition": head_job_partition,
             "loqusdb_path": str(cg_dir),
             "loqusdb_artefact_snv": str(cg_dir),
+            "loqusdb_artefact_sv": str(cg_dir),  # TODO add this to servers
             "loqusdb_cancer_germline_snv": str(cg_dir),
             "loqusdb_cancer_germline_sv": str(cg_dir),
             "loqusdb_cancer_somatic_snv": str(cg_dir),
             "loqusdb_cancer_somatic_sv": str(cg_dir),
             "loqusdb_clinical_snv": str(cg_dir),
             "loqusdb_clinical_sv": str(cg_dir),
+            "loqusdb_panel_files": {"GMSmyeloid": "bogus/path"},
             "pon_path": str(cg_dir),
             "root": str(balsamic_dir),
             "slurm": {
@@ -4597,3 +4601,9 @@ def capture_kit() -> str:
 def case(analysis_store: Store) -> Case:
     """Return a case models object."""
     return analysis_store.get_cases()[0]
+
+
+@pytest.fixture(scope="function")
+def head_job_partition() -> str:
+    """Return the name of the head job partition."""
+    return "head-job"

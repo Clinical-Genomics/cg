@@ -190,13 +190,17 @@ class BalsamicConfig(CommonAppConfig):
     gens_coverage_female_path: Path
     gens_coverage_male_path: Path
     gnomad_af5_path: Path
+    head_job_partition: str
     loqusdb_path: str
     loqusdb_artefact_snv: Path
+    loqusdb_artefact_sv: Path  # TODO add this to servers
     loqusdb_cancer_germline_snv: Path
     loqusdb_cancer_somatic_snv: Path
     loqusdb_cancer_somatic_sv: Path
     loqusdb_clinical_snv: Path
     loqusdb_clinical_sv: Path
+    # TODO try the str in the dict to be a BalsamicObservation Panel enum
+    loqusdb_panel_files: dict[str, Path]  # Includes the Exome file
     pon_path: Path
     root: Path
     sentieon_licence_path: Path
@@ -467,6 +471,13 @@ class CGConfig(BaseModel):
     loqusdb_somatic: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC.value)
     loqusdb_tumor: CommonAppConfig = Field(None, alias=LoqusdbInstance.TUMOR.value)
     loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
+    loqusdb_somatic_lymphoid: CommonAppConfig = Field(
+        None, alias=LoqusdbInstance.SOMATIC_LYMPHOID.value
+    )
+    loqusdb_somatic_myeloid: CommonAppConfig = Field(
+        None, alias=LoqusdbInstance.SOMATIC_MYELOID.value
+    )
+    loqusdb_somatic_exome: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC_EXOME.value)
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
