@@ -747,3 +747,6 @@ def test_get_gens_coverage_pon(
 
     # THEN the file is the expected
     assert gens_pon_file.name == expected_file
+
+
+# TODO add test for flags

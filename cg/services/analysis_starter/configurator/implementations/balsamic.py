@@ -4,7 +4,7 @@ from pathlib import Path
 
 from cg.apps.lims import LimsAPI
 from cg.constants import SexOptions
-from cg.exc import BalsamicMissingTumorError, BedFileNotFoundError, CaseNotConfiguredError
+from cg.exc import BedFileNotFoundError, CaseNotConfiguredError
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
@@ -79,24 +79,6 @@ class BalsamicConfigurator(Configurator):
         balsamic_config: BalsamicCaseConfig = self._set_flags(config=balsamic_config, **flags)
         self._ensure_required_config_files_exist(balsamic_config)
         return balsamic_config
-
-    @staticmethod
-    def _get_patient_sex(case) -> SexOptions:
-        sample_sex: set[SexOptions] = {sample.sex for sample in case.samples}
-        return sample_sex.pop()
-
-    @staticmethod
-    def _get_normal_sample_id(case) -> str | None:
-        for sample in case.samples:
-            if not sample.is_tumour:
-                return sample.internal_id
-
-    @staticmethod
-    def _get_tumor_sample_id(case) -> str:
-        for sample in case.samples:
-            if sample.is_tumour:
-                return sample.internal_id
-        raise BalsamicMissingTumorError(f"Case {case.internal_id} does not contain a tumor sample")
 
     def _resolve_bed_file(self, case, **flags) -> Path:
         bed_name = flags.get("panel_bed") or self._get_bed_name_from_lims(case)
