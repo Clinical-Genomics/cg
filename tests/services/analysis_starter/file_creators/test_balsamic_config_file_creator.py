@@ -421,13 +421,9 @@ def test_create_override_panel_bed(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
-    # GIVEN a Lims API
-    lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
-
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=lims_api, cg_balsamic_config=cg_balsamic_config
+        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
     )
 
     # GIVEN that the subprocess exits successfully
@@ -440,6 +436,9 @@ def test_create_override_panel_bed(
     mock_runner.assert_called_once_with(
         args=expected_tgs_tumour_only_command, check=True, shell=True, stderr=-1, stdout=-1
     )
+
+    # THEN the panel bed flag value is used
+    store.get_bed_version_by_short_name_strict.assert_called_once_with("bed-short-name")
 
 
 def test_create_wgs_paired(
@@ -788,6 +787,3 @@ def test_get_gens_coverage_pon(
 
     # THEN the file is the expected
     assert gens_pon_file.name == expected_file
-
-
-# TODO add test for flags
