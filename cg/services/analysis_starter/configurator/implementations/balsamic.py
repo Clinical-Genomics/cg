@@ -1,7 +1,6 @@
 import logging
 from pathlib import Path
 
-from cg.apps.lims import LimsAPI
 from cg.exc import CaseNotConfiguredError
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.cg_config import BalsamicConfig
@@ -21,38 +20,19 @@ class BalsamicConfigurator(Configurator):
         config: BalsamicConfig,
         config_file_creator: BalsamicConfigFileCreator,
         fastq_handler: BalsamicFastqHandler,
-        lims_api: LimsAPI,
         store: Store,
     ):
         self.store: Store = store
-        self.lims_api: LimsAPI = lims_api
-        self.conda_binary: Path = config.conda_binary
+
         self.balsamic_binary: Path = config.binary_path
-        self.root_dir: Path = config.root
-        self.fastq_handler: BalsamicFastqHandler = fastq_handler
-        self.bed_directory: Path = config.bed_path
-        self.cache_dir: Path = config.balsamic_cache
-        self.cadd_path: Path = config.cadd_path
+        self.conda_binary: Path = config.conda_binary
         self.default_cluster_config: Path = config.cluster_config
-        self.genome_interval_path: Path = config.genome_interval_path
-        self.gens_coverage_female_path: Path = config.gens_coverage_female_path
-        self.gens_coverage_male_path: Path = config.gens_coverage_male_path
-        self.gnomad_af5_path: Path = config.gnomad_af5_path
         self.environment: str = config.conda_env
-        self.sentieon_licence_path: Path = config.sentieon_licence_path
-        self.sentieon_licence_server: str = config.sentieon_licence_server
-        self.loqusdb_artefact_snv: Path = config.loqusdb_artefact_snv
-        self.loqusdb_artefact_sv: Path = config.loqusdb_artefact_sv
-        self.loqusdb_cancer_germline_snv: Path = config.loqusdb_cancer_germline_snv
-        self.loqusdb_cancer_somatic_snv: Path = config.loqusdb_cancer_somatic_snv
-        self.loqusdb_cancer_somatic_sv: Path = config.loqusdb_cancer_somatic_sv
-        self.loqusdb_clinical_snv: Path = config.loqusdb_clinical_snv
-        self.loqusdb_clinical_sv: Path = config.loqusdb_clinical_sv
-        self.pon_directory: Path = config.pon_path
+        self.root_dir: Path = config.root
         self.slurm_account: str = config.slurm.account
         self.slurm_mail_user: str = config.slurm.mail_user
-        self.swegen_snv: Path = config.swegen_snv
-        self.swegen_sv: Path = config.swegen_sv
+
+        self.fastq_handler: BalsamicFastqHandler = fastq_handler
         self.config_file_creator: BalsamicConfigFileCreator = config_file_creator
 
     def configure(self, case_id: str, **flags) -> BalsamicCaseConfig:

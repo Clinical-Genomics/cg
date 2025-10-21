@@ -169,7 +169,6 @@ class ConfiguratorFactory:
                 root_dir=Path(self.cg_config.balsamic.root),
                 status_db=self.store,
             ),
-            lims_api=self.lims_api,
             config=self.cg_config.balsamic,
             store=self.store,
         )
