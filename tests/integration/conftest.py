@@ -100,9 +100,9 @@ def create_integration_test_sample(
     status_db: Store,
     housekeeper_db: HousekeeperStore,
     test_run_paths: IntegrationTestPaths,
-    is_tumour: bool,
     application_type: AnalysisType,
     flow_cell_id: str,
+    is_tumour: bool = False,
 ) -> Sample:
     helpers = StoreHelpers()
     sample: Sample = helpers.add_sample(

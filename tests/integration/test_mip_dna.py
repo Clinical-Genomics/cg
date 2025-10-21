@@ -1,5 +1,4 @@
 import shutil
-from datetime import datetime
 from pathlib import Path
 from subprocess import CompletedProcess
 from unittest.mock import ANY, Mock, create_autospec
@@ -17,12 +16,12 @@ from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.tb import AnalysisType
 from cg.services.analysis_starter.submitters.subprocess import submitter
-from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Order, Sample
+from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
 from cg.utils import commands
 from tests.integration.conftest import (
     IntegrationTestPaths,
-    create_fastq_file_and_add_to_housekeeper,
+    create_integration_test_sample,
     expect_to_add_pending_analysis_to_trailblazer,
 )
 from tests.store_helpers import StoreHelpers
@@ -93,26 +92,19 @@ def test_start_available_mip_dna(
     )
     status_db.link_case_to_order(order_id=order.id, case_id=case.id)
 
-    # GIVEN a sample associated with the case
-    sample: Sample = helpers.add_sample(
-        store=status_db, last_sequenced_at=datetime.now(), application_type=AnalysisType.WGS
+    # GIVEN a sample associated with the case, with:
+    #  - flow cell and sequencing run stored in StatusDB
+    #  - a gzipped-fastq file on disk
+    #  - a bundle associated with the fastq file in Housekeeper
+    sample: Sample = create_integration_test_sample(
+        status_db=status_db,
+        housekeeper_db=housekeeper_db,
+        test_run_paths=test_run_paths,
+        application_type=AnalysisType.WGS,
+        flow_cell_id="mip-dna-flow-cell",
     )
+
     helpers.relate_samples(base_store=status_db, case=case, samples=[sample])
-
-    # GIVEN a flow cell and sequencing run associated with the sample
-    flow_cell: IlluminaFlowCell = helpers.add_illumina_flow_cell(store=status_db)
-    sequencing_run: IlluminaSequencingRun = helpers.add_illumina_sequencing_run(
-        store=status_db, flow_cell=flow_cell
-    )
-    helpers.add_illumina_sample_sequencing_metrics_object(
-        store=status_db, sample_id=sample.internal_id, sequencing_run=sequencing_run, lane=1
-    )
-
-    # GIVEN that a gzipped-fastq file exists for the sample
-    # GIVEN bundle data with the fastq files exists in Housekeeper
-    create_fastq_file_and_add_to_housekeeper(
-        test_root_dir=test_root_dir, housekeeper_db=housekeeper_db, sample=sample
-    )
 
     # GIVEN that the Scout command returns exported panel data
     subprocess_mock = mocker.patch.object(commands, "subprocess")
