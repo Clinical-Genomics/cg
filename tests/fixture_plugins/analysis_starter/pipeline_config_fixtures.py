@@ -83,7 +83,7 @@ def cg_balsamic_config(tmp_path) -> BalsamicConfig:
         loqusdb_clinical_snv=tmp_path / "clinical_snv.vcf",
         loqusdb_clinical_sv=tmp_path / "clinical_sv.vcf",
         loqusdb_panel_files={"GMSmyeloid": tmp_path / "GMSmyeloid.vcf"},
-        pon_path=tmp_path / "pon.vcf",  # TODO: check the file extension
+        pon_path=tmp_path / "pon.cnn",
         root=tmp_path / "balsamic_root",
         sentieon_licence_path=tmp_path / "sentieon.lic",
         sentieon_licence_server="27001@sentieon-license",

@@ -2,10 +2,11 @@ import logging
 import re
 import subprocess
 from pathlib import Path
+from typing import cast
 
 from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
-from cg.constants.constants import GenomeVersion
+from cg.constants.constants import GenomeVersion, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.models.balsamic import (
@@ -74,13 +75,13 @@ class BalsamicConfigFileCreator:
         if self._all_samples_are_wgs(case):
             return self._build_wgs_config(case)
         else:
-            return self._build_targeted_config(case, **flags)
+            return self._build_targeted_config(case=case, override_panel_bed=flags.get("panel_bed"))
 
     def _build_wgs_config(self, case: Case) -> BalsamicConfigInput:
         patient_sex: SexOptions = self._get_patient_sex(case)
         return BalsamicConfigInputWGS(
             analysis_dir=self.root_dir,
-            analysis_workflow=case.data_analysis,  # TODO See if we can fix the typing in the data model
+            analysis_workflow=cast(Workflow, case.data_analysis),
             artefact_snv_observations=self.loqusdb_artefact_snv,
             artefact_sv_observations=self.loqusdb_artefact_sv,
             balsamic_binary=self.balsamic_binary,
@@ -108,12 +109,14 @@ class BalsamicConfigFileCreator:
             tumor_sample_name=self._get_tumor_or_single_sample_id(case),
         )
 
-    def _build_targeted_config(self, case: Case, **flags) -> BalsamicConfigInput:
-        bed_file: Path = self._resolve_bed_file(case, **flags)
+    def _build_targeted_config(
+        self, case: Case, override_panel_bed: str | None
+    ) -> BalsamicConfigInput:
+        bed_file: Path = self._resolve_bed_file(case=case, override_panel_bed=override_panel_bed)
         patient_sex: SexOptions = self._get_patient_sex(case)
         return BalsamicConfigInputPanel(
             analysis_dir=self.root_dir,
-            analysis_workflow=case.data_analysis,  # TODO See if we can fix the typing in the data model
+            analysis_workflow=cast(Workflow, case.data_analysis),
             artefact_snv_observations=self.loqusdb_artefact_snv,
             balsamic_binary=self.balsamic_binary,
             balsamic_cache=self.cache_dir,
@@ -187,10 +190,10 @@ class BalsamicConfigFileCreator:
     def _is_case_paired_analysis(case: Case) -> bool:
         return len(case.samples) == 2
 
-    def _resolve_bed_file(self, case, **flags) -> Path:
+    def _resolve_bed_file(self, case: Case, override_panel_bed: str | None) -> Path:
         """Get the bed name from LIMS. Assumes that all samples in the case have the same panel."""
         first_sample: Sample = case.samples[0]
-        bed_name = flags.get("panel_bed") or self.lims_api.get_capture_kit_strict(
+        bed_name: str = override_panel_bed or self.lims_api.get_capture_kit_strict(
             first_sample.internal_id
         )
         bed_version = self.status_db.get_bed_version_by_short_name_strict(bed_name)

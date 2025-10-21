@@ -29,7 +29,7 @@ from tests.services.analysis_starter.file_creators.balsamic_config_file_creator.
 
 
 def test_create_tgs_normal_only(
-    cg_balsamic_config: BalsamicConfig, expected_tgs_normal_only_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig, expected_tgs_normal_only_command, mocker: MockerFixture
 ):
     # GIVEN a case with one normal TGS sample
     sample: Sample = create_autospec(
@@ -71,21 +71,21 @@ def test_create_tgs_normal_only(
 
 
 def test_create_tgs_paired(
-    cg_balsamic_config: BalsamicConfig, expected_tgs_paired_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig, expected_tgs_paired_command, mocker: MockerFixture
 ):
     # GIVEN a case with one tumor and one normal WGS samples
     tumour_sample: Sample = create_autospec(
         Sample,
         internal_id="sample_tumour",
         is_tumour=True,
-        sex=SexOptions.FEMALE,
+        sex=SexOptions.MALE,
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     normal_sample: Sample = create_autospec(
         Sample,
         internal_id="sample_normal",
         is_tumour=False,
-        sex=SexOptions.FEMALE,
+        sex=SexOptions.MALE,
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     tgs_paired_case: Case = create_autospec(
@@ -119,14 +119,14 @@ def test_create_tgs_paired(
 
 
 def test_create_tgs_tumour_only(
-    cg_balsamic_config: BalsamicConfig, expected_tgs_tumour_only_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig, expected_tgs_tumour_only_command, mocker: MockerFixture
 ):
     # GIVEN a case with one tumor TGS samples
     tumour_sample: Sample = create_autospec(
         Sample,
         internal_id="sample_tumour",
         is_tumour=True,
-        sex=SexOptions.FEMALE,
+        sex=SexOptions.UNKNOWN,
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     tgs_tumour_only_case: Case = create_autospec(
@@ -159,8 +159,48 @@ def test_create_tgs_tumour_only(
     )
 
 
+def test_create_override_panel_bed(
+    cg_balsamic_config: BalsamicConfig, expected_tgs_tumour_only_command, mocker: MockerFixture
+):
+    # GIVEN a case with one tumor TGS samples
+    tumour_sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_tumour",
+        is_tumour=True,
+        sex=SexOptions.UNKNOWN,
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+    )
+    tgs_tumour_only_case: Case = create_autospec(
+        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample]
+    )
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id_strict = Mock(return_value=tgs_tumour_only_case)
+    store.get_bed_version_by_short_name_strict = Mock(
+        return_value=create_autospec(BedVersion, filename="bed_version.bed")
+    )
+
+    # GIVEN a BalsamicConfigFileCreator
+    config_file_creator = BalsamicConfigFileCreator(
+        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
+    )
+
+    # GIVEN that the subprocess exits successfully
+    mock_runner = mocker.patch.object(creator.subprocess, "run")
+
+    # WHEN creating the config file
+    config_file_creator.create(case_id="case_1", panel_bed="bed-short-name")
+
+    # THEN the expected command is called
+    mock_runner.assert_called_once_with(
+        args=expected_tgs_tumour_only_command, check=True, shell=True, stderr=-1, stdout=-1
+    )
+
+    # THEN the panel bed flag value is used
+    store.get_bed_version_by_short_name_strict.assert_called_once_with("bed-short-name")
+
+
 def test_create_wgs_paired(
-    cg_balsamic_config: BalsamicConfig, expected_wgs_paired_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig, expected_wgs_paired_command, mocker: MockerFixture
 ):
     # GIVEN a case with one tumor and one normal WGS samples
     tumour_sample: Sample = create_autospec(
@@ -201,7 +241,7 @@ def test_create_wgs_paired(
 
 
 def test_create_wgs_tumor_only(
-    cg_balsamic_config: BalsamicConfig, expected_wgs_tumour_only_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig, expected_wgs_tumour_only_command, mocker: MockerFixture
 ):
     # GIVEN a case with one tumor WGS sample
     sample: Sample = create_autospec(
@@ -235,7 +275,7 @@ def test_create_wgs_tumor_only(
 
 
 def test_create_wes_normal_only(
-    cg_balsamic_config: BalsamicConfig, expected_wes_normal_only_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig, expected_wes_normal_only_command, mocker: MockerFixture
 ):
     # GIVEN a case with one normal WES sample
     sample: Sample = create_autospec(
@@ -276,7 +316,7 @@ def test_create_wes_normal_only(
 
 
 def test_create_wes_paired(
-    cg_balsamic_config: BalsamicConfig, expected_wes_paired_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig, expected_wes_paired_command, mocker: MockerFixture
 ):
     # GIVEN a case with one tumor and one normal WES samples
     tumour_sample: Sample = create_autospec(
@@ -327,7 +367,7 @@ def test_create_wes_paired(
 
 
 def test_create_wes_tumour_only(
-    cg_balsamic_config: BalsamicConfig, expected_wes_tumour_only_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig, expected_wes_tumour_only_command, mocker: MockerFixture
 ):
     # GIVEN a case with one tumor WES sample
     sample: Sample = create_autospec(
@@ -505,6 +545,3 @@ def test_get_gens_coverage_pon(
 
     # THEN the file is the expected
     assert gens_pon_file.name == expected_file
-
-
-# TODO add test for flags

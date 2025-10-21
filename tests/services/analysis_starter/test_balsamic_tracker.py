@@ -21,7 +21,7 @@ from cg.store.store import Store
 def balsamic_tracker(balsamic_store: Store, tmp_path: Path) -> BalsamicTracker:
     balsamic_root = tmp_path / "balsamic"
     balsamic_root.mkdir(parents=True, exist_ok=True)
-    trailblazer_api: Mock[TrailblazerAPI] = create_autospec(TrailblazerAPI)
+    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
     return BalsamicTracker(
         store=balsamic_store,
         trailblazer_api=trailblazer_api,
@@ -36,7 +36,7 @@ def test_balsamic_tracker_successful(
 ):
     # GIVEN a valid Balsamic case config
 
-    # GIVEN that the case exists in the da
+    # GIVEN that the case exists in the database
     db_case: Case = balsamic_tracker.store.get_case_by_internal_id(balsamic_case_config.case_id)
 
     # GIVEN that a Balsamic Config file exists

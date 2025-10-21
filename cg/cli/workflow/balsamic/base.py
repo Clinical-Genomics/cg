@@ -306,35 +306,6 @@ def store_available(context: click.Context, dry_run: bool) -> None:
         raise click.Abort()
 
 
-@balsamic.command("dev-start")
-@OPTION_PANEL_BED
-@OPTION_WORKFLOW_PROFILE
-@ARGUMENT_CASE_ID
-@click.pass_obj
-def dev_start(
-    cg_config: CGConfig,
-    case_id: str,
-    cluster_config: click.Path | None,
-    panel_bed: str | None,
-):
-    """Start a Balsamic case. Configures the case if needed."""
-    factory = AnalysisStarterFactory(cg_config)
-    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
-    analysis_starter.start(case_id=case_id, cluster_config=cluster_config, panel_bed=panel_bed)
-
-
-@balsamic.command("dev-start-available")
-@click.pass_obj
-def dev_start_available(cg_config: CGConfig):
-    """Starts all available raredisease cases."""
-    LOG.info("Starting Balsamic workflow for all available cases.")
-    factory = AnalysisStarterFactory(cg_config)
-    analysis_starter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
-    succeeded: bool = analysis_starter.start_available()
-    if not succeeded:
-        raise click.Abort
-
-
 @balsamic.command()
 @OPTION_PANEL_BED
 @ARGUMENT_CASE_ID
@@ -350,8 +321,37 @@ def dev_config_case(cg_config: CGConfig, case_id: str, panel_bed: str | None):
 @OPTION_WORKFLOW_PROFILE
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_run(cg_config: CGConfig, case_id: str, cluster_config: click.Path | None):
+def dev_run(cg_config: CGConfig, case_id: str, workflow_profile: click.Path | None):
     """Run a preconfigured Balsamic case."""
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
-    analysis_starter.run(case_id=case_id, cluster_config=cluster_config)
+    analysis_starter.run(case_id=case_id, workflow_profile=workflow_profile)
+
+
+@balsamic.command("dev-start")
+@OPTION_PANEL_BED
+@OPTION_WORKFLOW_PROFILE
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_start(
+    cg_config: CGConfig,
+    case_id: str,
+    panel_bed: str | None,
+    workflow_profile: click.Path | None,
+):
+    """Start a Balsamic case. Configures the case if needed."""
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
+    analysis_starter.start(case_id=case_id, workflow_profile=workflow_profile, panel_bed=panel_bed)
+
+
+@balsamic.command("dev-start-available")
+@click.pass_obj
+def dev_start_available(cg_config: CGConfig):
+    """Starts all available raredisease cases."""
+    LOG.info("Starting Balsamic workflow for all available cases.")
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
+    succeeded: bool = analysis_starter.start_available()
+    if not succeeded:
+        raise click.Abort
