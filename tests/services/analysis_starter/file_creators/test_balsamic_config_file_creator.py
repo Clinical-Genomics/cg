@@ -409,7 +409,7 @@ def test_create_override_panel_bed(
         Sample,
         internal_id="sample_tumour",
         is_tumour=True,
-        sex=SexOptions.FEMALE,
+        sex=SexOptions.UNKNOWN,
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     tgs_tumour_only_case: Case = create_autospec(

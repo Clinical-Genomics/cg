@@ -306,6 +306,28 @@ def store_available(context: click.Context, dry_run: bool) -> None:
         raise click.Abort()
 
 
+@balsamic.command()
+@OPTION_PANEL_BED
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_config_case(cg_config: CGConfig, case_id: str, panel_bed: str | None):
+    """Configure a Balsamic case so that it is ready to be run."""
+    factory = ConfiguratorFactory(cg_config)
+    configurator = cast(BalsamicConfigurator, factory.get_configurator(Workflow.BALSAMIC))
+    configurator.configure(case_id=case_id, panel_bed=panel_bed)
+
+
+@balsamic.command()
+@OPTION_WORKFLOW_PROFILE
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_run(cg_config: CGConfig, case_id: str, workflow_profile: click.Path | None):
+    """Run a preconfigured Balsamic case."""
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
+    analysis_starter.run(case_id=case_id, workflow_profile=workflow_profile)
+
+
 @balsamic.command("dev-start")
 @OPTION_PANEL_BED
 @OPTION_WORKFLOW_PROFILE
@@ -333,25 +355,3 @@ def dev_start_available(cg_config: CGConfig):
     succeeded: bool = analysis_starter.start_available()
     if not succeeded:
         raise click.Abort
-
-
-@balsamic.command()
-@OPTION_PANEL_BED
-@ARGUMENT_CASE_ID
-@click.pass_obj
-def dev_config_case(cg_config: CGConfig, case_id: str, panel_bed: str | None):
-    """Configure a Balsamic case so that it is ready to be run."""
-    factory = ConfiguratorFactory(cg_config)
-    configurator = cast(BalsamicConfigurator, factory.get_configurator(Workflow.BALSAMIC))
-    configurator.configure(case_id=case_id, panel_bed=panel_bed)
-
-
-@balsamic.command()
-@OPTION_WORKFLOW_PROFILE
-@ARGUMENT_CASE_ID
-@click.pass_obj
-def dev_run(cg_config: CGConfig, case_id: str, cluster_config: click.Path | None):
-    """Run a preconfigured Balsamic case."""
-    factory = AnalysisStarterFactory(cg_config)
-    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
-    analysis_starter.run(case_id=case_id, cluster_config=cluster_config)
