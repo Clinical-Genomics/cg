@@ -28,6 +28,11 @@ class IntegrationTestPaths(NamedTuple):
 
 
 @pytest.fixture(autouse=True)
+def current_workflow() -> Workflow:
+    raise NotImplementedError("Please add a current_workflow fixture to your integration test")
+
+
+@pytest.fixture(autouse=True)
 def valid_google_token(mocker):
     mocker.patch.object(
         IDTokenCredentials,
