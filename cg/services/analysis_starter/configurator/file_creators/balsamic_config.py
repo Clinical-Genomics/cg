@@ -2,10 +2,11 @@ import logging
 import re
 import subprocess
 from pathlib import Path
+from typing import cast
 
 from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
-from cg.constants.constants import GenomeVersion
+from cg.constants.constants import GenomeVersion, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.models.balsamic import (
@@ -80,7 +81,7 @@ class BalsamicConfigFileCreator:
         patient_sex: SexOptions = self._get_patient_sex(case)
         return BalsamicConfigInputWGS(
             analysis_dir=self.root_dir,
-            analysis_workflow=case.data_analysis,  # TODO See if we can fix the typing in the data model
+            analysis_workflow=cast(Workflow, case.data_analysis),
             artefact_snv_observations=self.loqusdb_artefact_snv,
             artefact_sv_observations=self.loqusdb_artefact_sv,
             balsamic_binary=self.balsamic_binary,
@@ -113,7 +114,7 @@ class BalsamicConfigFileCreator:
         patient_sex: SexOptions = self._get_patient_sex(case)
         return BalsamicConfigInputPanel(
             analysis_dir=self.root_dir,
-            analysis_workflow=case.data_analysis,  # TODO See if we can fix the typing in the data model
+            analysis_workflow=cast(Workflow, case.data_analysis),
             artefact_snv_observations=self.loqusdb_artefact_snv,
             balsamic_binary=self.balsamic_binary,
             balsamic_cache=self.cache_dir,

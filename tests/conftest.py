@@ -2019,7 +2019,7 @@ def context_config(
             "head_job_partition": head_job_partition,
             "loqusdb_path": str(cg_dir),
             "loqusdb_artefact_snv": str(cg_dir),
-            "loqusdb_artefact_sv": str(cg_dir),  # TODO add this to servers
+            "loqusdb_artefact_sv": str(cg_dir),
             "loqusdb_cancer_germline_snv": str(cg_dir),
             "loqusdb_cancer_germline_sv": str(cg_dir),
             "loqusdb_cancer_somatic_snv": str(cg_dir),
