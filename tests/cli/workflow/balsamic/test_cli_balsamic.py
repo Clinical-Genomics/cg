@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
@@ -27,6 +28,7 @@ def cg_config(cg_balsamic_config: BalsamicConfig) -> CGConfig:
 def test_balsamic_start_all_flags(
     cg_config: CGConfig,
     mocker: MockerFixture,
+    tmp_path: Path,
 ):
     # GIVEN a cli runner
     cli_runner = CliRunner()
@@ -46,7 +48,7 @@ def test_balsamic_start_all_flags(
 
     # GIVEN all possible flags
     panel_bed = "panel.bed"
-    workflow_profile = "profile"
+    workflow_profile = tmp_path
     flags: list[str] = [
         "--panel-bed",
         panel_bed,
