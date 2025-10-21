@@ -401,6 +401,47 @@ def test_create_tgs_tumour_only(
     )
 
 
+def test_create_override_panel_bed(
+    cg_balsamic_config: BalsamicConfig, expected_tgs_tumour_only_command: str, mocker: MockerFixture
+):
+    # GIVEN a case with one tumor TGS samples
+    tumour_sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_tumour",
+        is_tumour=True,
+        sex=SexOptions.FEMALE,
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+    )
+    tgs_tumour_only_case: Case = create_autospec(
+        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample]
+    )
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id_strict = Mock(return_value=tgs_tumour_only_case)
+    store.get_bed_version_by_short_name_strict = Mock(
+        return_value=create_autospec(BedVersion, filename="bed_version.bed")
+    )
+
+    # GIVEN a Lims API
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
+
+    # GIVEN a BalsamicConfigFileCreator
+    config_file_creator = BalsamicConfigFileCreator(
+        status_db=store, lims_api=lims_api, cg_balsamic_config=cg_balsamic_config
+    )
+
+    # GIVEN that the subprocess exits successfully
+    mock_runner = mocker.patch.object(creator.subprocess, "run")
+
+    # WHEN creating the config file
+    config_file_creator.create(case_id="case_1", panel_bed="bed-short-name")
+
+    # THEN the expected command is called
+    mock_runner.assert_called_once_with(
+        args=expected_tgs_tumour_only_command, check=True, shell=True, stderr=-1, stdout=-1
+    )
+
+
 def test_create_wgs_paired(
     cg_balsamic_config: BalsamicConfig, expected_wgs_paired_command: str, mocker: MockerFixture
 ):
