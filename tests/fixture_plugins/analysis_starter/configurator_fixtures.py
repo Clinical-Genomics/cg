@@ -51,14 +51,12 @@ from cg.store.store import Store
 def balsamic_configurator(
     cg_balsamic_config: BalsamicConfig,
     balsamic_fastq_handler: BalsamicFastqHandler,
-    lims_api: LimsAPI,
     base_store: Store,
 ) -> BalsamicConfigurator:
     return BalsamicConfigurator(
         config=cg_balsamic_config,
         config_file_creator=create_autospec(BalsamicConfigFileCreator),
         fastq_handler=balsamic_fastq_handler,
-        lims_api=lims_api,
         store=base_store,
     )
 

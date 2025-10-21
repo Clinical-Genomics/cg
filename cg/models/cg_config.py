@@ -193,13 +193,13 @@ class BalsamicConfig(CommonAppConfig):
     head_job_partition: str
     loqusdb_path: str
     loqusdb_artefact_snv: Path
-    loqusdb_artefact_sv: Path  # TODO add this to servers
+    loqusdb_artefact_sv: Path  # TODO add this to servers, remove when we have made the PR
     loqusdb_cancer_germline_snv: Path
     loqusdb_cancer_somatic_snv: Path
     loqusdb_cancer_somatic_sv: Path
     loqusdb_clinical_snv: Path
     loqusdb_clinical_sv: Path
-    # TODO try the str in the dict to be a BalsamicObservation Panel enum
+    # TODO try the str in the dict to be a BalsamicObservationPanel enum
     loqusdb_panel_files: dict[str, Path]  # Includes the Exome file
     pon_path: Path
     root: Path

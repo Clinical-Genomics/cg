@@ -95,7 +95,6 @@ def test_configure(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
         config=cg_balsamic_config,
         config_file_creator=config_file_creator,
         fastq_handler=fastq_handler,
-        lims_api=Mock(),
         store=store,
     )
 

@@ -11,6 +11,7 @@ from requests import Response
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
+from cg.cli.workflow.base import workflow
 from cg.constants import Workflow
 from cg.constants.priority import Priority, SlurmQos
 from cg.exc import AnalysisNotReadyError
@@ -358,6 +359,7 @@ def test_start_error_raised_in_run_and_track(workflow: Workflow, analysis_starte
 @pytest.mark.parametrize(
     "workflow",
     [
+        Workflow.BALSAMIC,
         Workflow.MICROSALT,
         Workflow.MIP_DNA,
         Workflow.RNAFUSION,
