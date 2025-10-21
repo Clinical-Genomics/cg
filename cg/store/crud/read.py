@@ -1648,6 +1648,7 @@ class ReadHandler(BaseHandler):
                 SampleFilter.BY_SUBJECT_ID,
                 SampleFilter.BY_TUMOUR,
                 SampleFilter.BY_CUSTOMER_ENTRY_IDS,
+                SampleFilter.IS_NOT_CANCELLED,
             ],
         )
         if samples.count() != 1:
