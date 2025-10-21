@@ -17,34 +17,39 @@ from cg.services.analysis_starter.configurator.file_creators.balsamic_config imp
 from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
 from tests.services.analysis_starter.file_creators.balsamic_config_file_creator.conftest import (
-    expected_tgs_normal_only_command,
-    expected_tgs_paired_command,
     expected_tgs_tumour_only_command,
-    expected_wes_normal_only_command,
-    expected_wes_paired_command,
-    expected_wes_tumour_only_command,
-    expected_wgs_paired_command,
-    expected_wgs_tumour_only_command,
 )
 
 
-def test_create_tgs_normal_only(
-    cg_balsamic_config: BalsamicConfig, expected_tgs_normal_only_command, mocker: MockerFixture
+@pytest.mark.parametrize(
+    "prep_category, expected_command_normal_only",
+    [
+        (SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING, "expected_tgs_normal_only_command"),
+        (SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING, "expected_wes_normal_only_command"),
+    ],
+    ids=["tgs", "wes"],
+)
+def test_create_normal_only(
+    cg_balsamic_config: BalsamicConfig,
+    expected_command_normal_only,
+    prep_category: SeqLibraryPrepCategory,
+    mocker: MockerFixture,
+    request: pytest.FixtureRequest,
 ):
     # GIVEN a case with one normal TGS sample
     sample: Sample = create_autospec(
         Sample,
         internal_id="sample_normal",
         is_tumour=False,
-        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        prep_category=prep_category,
         sex=SexOptions.FEMALE,
     )
-    tgs_normal_only_case: Case = create_autospec(
+    normal_only_case: Case = create_autospec(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
     )
 
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(return_value=tgs_normal_only_case)
+    store.get_case_by_internal_id_strict = Mock(return_value=normal_only_case)
     store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
@@ -65,28 +70,42 @@ def test_create_tgs_normal_only(
     config_file_creator.create(case_id="case_1")
 
     # THEN the expected command is called
+    expected_command_normal_only: str = request.getfixturevalue(expected_command_normal_only)
     mock_runner.assert_called_once_with(
-        args=expected_tgs_normal_only_command, check=True, shell=True, stderr=-1, stdout=-1
+        args=expected_command_normal_only, check=True, shell=True, stderr=-1, stdout=-1
     )
 
 
-def test_create_tgs_paired(
-    cg_balsamic_config: BalsamicConfig, expected_tgs_paired_command, mocker: MockerFixture
+@pytest.mark.parametrize(
+    "prep_category, expected_command_paired",
+    [
+        (SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING, "expected_tgs_paired_command"),
+        (SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING, "expected_wes_paired_command"),
+        (SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING, "expected_wgs_paired_command"),
+    ],
+    ids=["tgs", "wes", "wgs"],
+)
+def test_create_paired(
+    cg_balsamic_config: BalsamicConfig,
+    expected_command_paired,
+    prep_category: SeqLibraryPrepCategory,
+    mocker: MockerFixture,
+    request: pytest.FixtureRequest,
 ):
     # GIVEN a case with one tumor and one normal WGS samples
     tumour_sample: Sample = create_autospec(
         Sample,
         internal_id="sample_tumour",
         is_tumour=True,
-        sex=SexOptions.MALE,
-        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        sex=SexOptions.FEMALE,
+        prep_category=prep_category,
     )
     normal_sample: Sample = create_autospec(
         Sample,
         internal_id="sample_normal",
         is_tumour=False,
-        sex=SexOptions.MALE,
-        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        sex=SexOptions.FEMALE,
+        prep_category=prep_category,
     )
     tgs_paired_case: Case = create_autospec(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
@@ -113,21 +132,35 @@ def test_create_tgs_paired(
     config_file_creator.create(case_id="case_1")
 
     # THEN the expected command is called
+    expected_command_paired: str = request.getfixturevalue(expected_command_paired)
     mock_runner.assert_called_once_with(
-        args=expected_tgs_paired_command, check=True, shell=True, stderr=-1, stdout=-1
+        args=expected_command_paired, check=True, shell=True, stderr=-1, stdout=-1
     )
 
 
-def test_create_tgs_tumour_only(
-    cg_balsamic_config: BalsamicConfig, expected_tgs_tumour_only_command, mocker: MockerFixture
+@pytest.mark.parametrize(
+    "prep_category, expected_command_tumour_only",
+    [
+        (SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING, "expected_tgs_tumour_only_command"),
+        (SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING, "expected_wes_tumour_only_command"),
+        (SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING, "expected_wgs_tumour_only_command"),
+    ],
+    ids=["tgs", "wes", "wgs"],
+)
+def test_create_tumour_only(
+    cg_balsamic_config: BalsamicConfig,
+    expected_command_tumour_only,
+    prep_category: SeqLibraryPrepCategory,
+    mocker: MockerFixture,
+    request: pytest.FixtureRequest,
 ):
     # GIVEN a case with one tumor TGS samples
     tumour_sample: Sample = create_autospec(
         Sample,
         internal_id="sample_tumour",
         is_tumour=True,
-        sex=SexOptions.UNKNOWN,
-        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        sex=SexOptions.FEMALE,
+        prep_category=prep_category,
     )
     tgs_tumour_only_case: Case = create_autospec(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample]
@@ -154,8 +187,9 @@ def test_create_tgs_tumour_only(
     config_file_creator.create(case_id="case_1")
 
     # THEN the expected command is called
+    expected_command_tumour_only: str = request.getfixturevalue(expected_command_tumour_only)
     mock_runner.assert_called_once_with(
-        args=expected_tgs_tumour_only_command, check=True, shell=True, stderr=-1, stdout=-1
+        args=expected_command_tumour_only, check=True, shell=True, stderr=-1, stdout=-1
     )
 
 
@@ -167,7 +201,7 @@ def test_create_override_panel_bed(
         Sample,
         internal_id="sample_tumour",
         is_tumour=True,
-        sex=SexOptions.UNKNOWN,
+        sex=SexOptions.FEMALE,
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     tgs_tumour_only_case: Case = create_autospec(
@@ -197,217 +231,6 @@ def test_create_override_panel_bed(
 
     # THEN the panel bed flag value is used
     store.get_bed_version_by_short_name_strict.assert_called_once_with("bed-short-name")
-
-
-def test_create_wgs_paired(
-    cg_balsamic_config: BalsamicConfig, expected_wgs_paired_command, mocker: MockerFixture
-):
-    # GIVEN a case with one tumor and one normal WGS samples
-    tumour_sample: Sample = create_autospec(
-        Sample,
-        internal_id="sample_tumour",
-        is_tumour=True,
-        sex=SexOptions.FEMALE,
-        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
-    )
-    normal_sample: Sample = create_autospec(
-        Sample,
-        internal_id="sample_normal",
-        is_tumour=False,
-        sex=SexOptions.FEMALE,
-        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
-    )
-    wgs_paired_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
-    )
-    store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(return_value=wgs_paired_case)
-
-    # GIVEN a BalsamicConfigFileCreator
-    config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
-    )
-
-    # GIVEN that the subprocess exits successfully
-    mock_runner = mocker.patch.object(creator.subprocess, "run")
-
-    # WHEN creating the config file
-    config_file_creator.create(case_id="case_1")
-
-    # THEN the expected command is called
-    mock_runner.assert_called_once_with(
-        args=expected_wgs_paired_command, check=True, shell=True, stderr=-1, stdout=-1
-    )
-
-
-def test_create_wgs_tumor_only(
-    cg_balsamic_config: BalsamicConfig, expected_wgs_tumour_only_command, mocker: MockerFixture
-):
-    # GIVEN a case with one tumor WGS sample
-    sample: Sample = create_autospec(
-        Sample,
-        internal_id="sample_1",
-        is_tumour=True,
-        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
-        sex=SexOptions.FEMALE,
-    )
-    wgs_tumor_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
-    )
-    store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(return_value=wgs_tumor_only_case)
-
-    # GIVEN a BalsamicConfigFileCreator
-    config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
-    )
-
-    # GIVEN that the subprocess exits successfully
-    mock_runner = mocker.patch.object(creator.subprocess, "run")
-
-    # WHEN creating the config file
-    config_file_creator.create(case_id="case_1")
-
-    # THEN the expected command is called
-    mock_runner.assert_called_once_with(
-        args=expected_wgs_tumour_only_command, check=True, shell=True, stderr=-1, stdout=-1
-    )
-
-
-def test_create_wes_normal_only(
-    cg_balsamic_config: BalsamicConfig, expected_wes_normal_only_command, mocker: MockerFixture
-):
-    # GIVEN a case with one normal WES sample
-    sample: Sample = create_autospec(
-        Sample,
-        internal_id="sample_normal",
-        is_tumour=False,
-        prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
-        sex=SexOptions.FEMALE,
-    )
-    wes_normal_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
-    )
-    store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(return_value=wes_normal_only_case)
-    store.get_bed_version_by_short_name_strict = Mock(
-        return_value=create_autospec(BedVersion, filename="bed_version.bed")
-    )
-
-    # GIVEN a Lims API
-    lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
-
-    # GIVEN a BalsamicConfigFileCreator
-    config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=lims_api, cg_balsamic_config=cg_balsamic_config
-    )
-
-    # GIVEN that the subprocess exits successfully
-    mock_runner = mocker.patch.object(creator.subprocess, "run")
-
-    # WHEN creating the config file
-    config_file_creator.create(case_id="case_1")
-
-    # THEN the expected command is called
-    mock_runner.assert_called_once_with(
-        args=expected_wes_normal_only_command, check=True, shell=True, stderr=-1, stdout=-1
-    )
-
-
-def test_create_wes_paired(
-    cg_balsamic_config: BalsamicConfig, expected_wes_paired_command, mocker: MockerFixture
-):
-    # GIVEN a case with one tumor and one normal WES samples
-    tumour_sample: Sample = create_autospec(
-        Sample,
-        internal_id="sample_tumour",
-        is_tumour=True,
-        sex=SexOptions.FEMALE,
-        prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
-    )
-    normal_sample: Sample = create_autospec(
-        Sample,
-        internal_id="sample_normal",
-        is_tumour=False,
-        sex=SexOptions.FEMALE,
-        prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
-    )
-    wes_paired_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
-    )
-    store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(return_value=wes_paired_case)
-    store.get_bed_version_by_short_name_strict = Mock(
-        return_value=create_autospec(BedVersion, filename="bed_version.bed")
-    )
-
-    # GIVEN a Lims API
-    lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
-
-    # GIVEN a BalsamicConfigFileCreator
-    config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=lims_api, cg_balsamic_config=cg_balsamic_config
-    )
-
-    # GIVEN that the subprocess exits successfully
-    mock_runner = mocker.patch.object(creator.subprocess, "run")
-
-    # WHEN creating the config file
-    config_file_creator.create(case_id="case_1")
-
-    # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("bed_short_name")
-
-    # THEN the expected command is called
-    mock_runner.assert_called_once_with(
-        args=expected_wes_paired_command, check=True, shell=True, stderr=-1, stdout=-1
-    )
-
-
-def test_create_wes_tumour_only(
-    cg_balsamic_config: BalsamicConfig, expected_wes_tumour_only_command, mocker: MockerFixture
-):
-    # GIVEN a case with one tumor WES sample
-    sample: Sample = create_autospec(
-        Sample,
-        internal_id="sample_1",
-        is_tumour=True,
-        prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
-        sex=SexOptions.FEMALE,
-    )
-    wes_tumor_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
-    )
-    store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(return_value=wes_tumor_only_case)
-    store.get_bed_version_by_short_name_strict = Mock(
-        return_value=create_autospec(BedVersion, filename="bed_version.bed")
-    )
-
-    # GIVEN a Lims API
-    lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
-
-    # GIVEN a BalsamicConfigFileCreator
-    config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=lims_api, cg_balsamic_config=cg_balsamic_config
-    )
-
-    # GIVEN that the subprocess exits successfully
-    mock_runner = mocker.patch.object(creator.subprocess, "run")
-
-    # WHEN creating the config file
-    config_file_creator.create(case_id="case_1")
-
-    # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("bed_short_name")
-
-    # THEN the expected command is called
-    mock_runner.assert_called_once_with(
-        args=expected_wes_tumour_only_command, check=True, shell=True, stderr=-1, stdout=-1
-    )
 
 
 def test_create_no_case_found(cg_balsamic_config: BalsamicConfig):

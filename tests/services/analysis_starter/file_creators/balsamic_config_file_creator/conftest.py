@@ -186,7 +186,7 @@ def expected_wes_tumour_only_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
         f"--swegen-snv {cg_balsamic_config.swegen_snv} "
         f"--swegen-sv {cg_balsamic_config.swegen_sv} "
-        f"--tumor-sample-name sample_1"
+        f"--tumor-sample-name sample_tumour"
     )
 
 
@@ -251,5 +251,5 @@ def expected_wgs_tumour_only_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
         f"--swegen-snv {cg_balsamic_config.swegen_snv} "
         f"--swegen-sv {cg_balsamic_config.swegen_sv} "
-        f"--tumor-sample-name sample_1"
+        f"--tumor-sample-name sample_tumour"
     )
