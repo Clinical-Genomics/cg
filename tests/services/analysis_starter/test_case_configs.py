@@ -83,8 +83,8 @@ def test_mip_dna_get_start_command_all_flags_set():
         f"{mip_case_config.conda_binary} run --name {mip_case_config.conda_environment} {mip_case_config.pipeline_binary} analyse rd_dna"
         f" --config {mip_case_config.pipeline_config_path} {case_id} --slurm_quality_of_service "
         f"{mip_case_config.slurm_qos} --email {mip_case_config.email} "
-        f"--start_after_recipe {mip_case_config.start_after_recipe} "
-        f"--start_with_recipe {mip_case_config.start_with_recipe} "
+        f"--start_after_recipe {mip_case_config.start_after} "
+        f"--start_with_recipe {mip_case_config.start_with} "
         f"--bwa_mem 1 "
         f"--bwa_mem2 0"
     )
