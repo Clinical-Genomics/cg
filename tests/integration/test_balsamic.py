@@ -196,6 +196,9 @@ def test_start_available_tgs_tumour_only(
         ],
     )
 
+    # THEN a successful exit code is returned
+    assert result.exit_code == 0
+
     # THEN balsamic config case was called in the correct way
     expected_config_case_command = (
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
@@ -322,7 +325,8 @@ def test_start_available_wgs_paired(
         ],
     )
 
-    assert result.exception is None
+    # THEN a successful exit code is returned
+    assert result.exit_code == 0
 
     # THEN balsamic config case was called in the correct way
     expected_config_case_command = (
