@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from cg.apps.scout.scoutapi import ScoutAPI
@@ -8,6 +9,8 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.utils impo
 from cg.store.models import Case
 from cg.store.store import Store
 
+LOG = logging.getLogger(__name__)
+
 
 class GenePanelFileCreator:
     def __init__(self, store: Store, scout_api: ScoutAPI):
@@ -17,6 +20,7 @@ class GenePanelFileCreator:
     def create(self, case_id: str, file_path: Path) -> None:
         content: list[str] = self._get_content(case_id)
         write_txt_with_newlines(file_path=file_path, content=content)
+        LOG.info(f"Created gene panel file for case {case_id} at {file_path}")
 
     def _get_content(self, case_id: str) -> list[str]:
         case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
