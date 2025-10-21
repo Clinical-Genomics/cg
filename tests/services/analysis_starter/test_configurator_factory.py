@@ -36,9 +36,8 @@ from cg.services.analysis_starter.configurator.implementations.nextflow import N
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 
 
-def test_get_balsamic_configurator():
+def test_get_balsamic_configurator(cg_balsamic_config: BalsamicConfig):
     # GIVEN a CG Balsamic config
-    cg_balsamic_config: BalsamicConfig = create_autospec(BalsamicConfig, root="root")
     cg_config: CGConfig = create_autospec(CGConfig, balsamic=cg_balsamic_config)
 
     # GIVEN a configurator factory
