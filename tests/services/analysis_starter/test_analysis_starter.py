@@ -100,6 +100,7 @@ def analysis_starter_scenario() -> dict:
 @pytest.mark.parametrize(
     "workflow",
     [
+        Workflow.BALSAMIC,
         Workflow.MICROSALT,
         Workflow.MIP_DNA,
         Workflow.RNAFUSION,
@@ -118,7 +119,6 @@ def analysis_starter_scenario() -> dict:
 )
 def test_analysis_starter_start_available_error_handling(
     workflow: Workflow,
-    cg_context: CGConfig,
     attribute_name: str,
     function_name: str,
     error: type[Exception],
@@ -129,15 +129,15 @@ def test_analysis_starter_start_available_error_handling(
     depending on the errors raised.
     """
     # GIVEN a Store with a mock case
-    mock_store: Store = create_autospec(Store)
+    mock_store: TypedMock[Store] = create_typed_mock(Store)
     mock_case: Case = create_autospec(Case)
-    mock_store.get_cases_to_analyze.return_value = [mock_case]
+    mock_store.as_mock.get_cases_to_analyze.return_value = [mock_case]
 
     # GIVEN an analysis starter
     analysis_starter = AnalysisStarter(
         configurator=create_autospec(NextflowConfigurator),
         input_fetcher=create_autospec(FastqFetcher),
-        store=mock_store,
+        store=mock_store.as_type,
         submitter=create_autospec(SeqeraPlatformSubmitter),
         tracker=create_autospec(NextflowTracker),
         workflow=workflow,
@@ -317,6 +317,7 @@ def test_start(
 @pytest.mark.parametrize(
     "workflow",
     [
+        Workflow.BALSAMIC,
         Workflow.MICROSALT,
         Workflow.MIP_DNA,
         Workflow.RNAFUSION,
