@@ -1,4 +1,3 @@
-import shutil
 from pathlib import Path
 from subprocess import CompletedProcess
 from unittest.mock import ANY, Mock, create_autospec
@@ -21,6 +20,7 @@ from cg.store.store import Store
 from cg.utils import commands
 from tests.integration.conftest import (
     IntegrationTestPaths,
+    copy_integration_test_file,
     create_integration_test_sample,
     expect_to_add_pending_analysis_to_trailblazer,
 )
@@ -259,6 +259,9 @@ def create_qc_file(test_root_dir: Path, case: Case) -> Path:
     filepath = Path(
         f"{test_root_dir}/mip-dna/cases/{case.internal_id}/analysis/{case.internal_id}_qc_sample_info.yaml"
     )
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2("tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml", filepath)
+    copy_integration_test_file(
+        from_path=Path("tests/fixtures/apps/mip/dna/store/case_qc_sample_info.yaml"),
+        to_path=filepath,
+    )
+
     return filepath

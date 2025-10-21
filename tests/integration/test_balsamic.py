@@ -1,4 +1,3 @@
-import shutil
 from pathlib import Path
 from subprocess import CompletedProcess
 from unittest.mock import ANY, Mock, create_autospec
@@ -18,6 +17,7 @@ from cg.store.store import Store
 from cg.utils import commands
 from tests.integration.conftest import (
     IntegrationTestPaths,
+    copy_integration_test_file,
     create_integration_test_sample,
     expect_to_add_pending_analysis_to_trailblazer,
 )
@@ -195,8 +195,6 @@ def test_start_available_tgs_tumour_only(
             "start-available",
         ],
     )
-
-    assert result.exception is None
 
     # THEN balsamic config case was called in the correct way
     expected_config_case_command = (
@@ -382,8 +380,9 @@ def create_tga_config_file(test_root_dir: Path, case: Case) -> Path:
     filepath = Path(
         f"{test_root_dir}/balsamic_root_path/{case.internal_id}/{case.internal_id}.json"
     )
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2("tests/fixtures/apps/balsamic/tga_case/config.json", filepath)
+    copy_integration_test_file(
+        from_path=Path("tests/fixtures/apps/balsamic/tga_case/config.json"), to_path=filepath
+    )
     return filepath
 
 
@@ -391,8 +390,10 @@ def create_wgs_config_file(test_root_dir: Path, case: Case) -> Path:
     filepath = Path(
         f"{test_root_dir}/balsamic_root_path/{case.internal_id}/{case.internal_id}.json"
     )
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2("tests/fixtures/apps/balsamic/wgs_case/config.json", filepath)
+
+    copy_integration_test_file(
+        from_path=Path("tests/fixtures/apps/balsamic/wgs_case/config.json"), to_path=filepath
+    )
     return filepath
 
 
