@@ -66,7 +66,7 @@ def expected_tgs_paired_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--clinical-snv-observations {cg_balsamic_config.loqusdb_clinical_snv} "
         f"--clinical-sv-observations {cg_balsamic_config.loqusdb_clinical_sv} "
         f"--fastq-path {cg_balsamic_config.root}/case_1/fastq "
-        f"--gender female "
+        f"--gender male "
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
         f"--normal-sample-name sample_normal "
@@ -98,7 +98,7 @@ def expected_tgs_tumour_only_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--clinical-snv-observations {cg_balsamic_config.loqusdb_clinical_snv} "
         f"--clinical-sv-observations {cg_balsamic_config.loqusdb_clinical_sv} "
         f"--fastq-path {cg_balsamic_config.root}/case_1/fastq "
-        f"--gender female "
+        f"--gender unknown "
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
         f"--panel-bed {cg_balsamic_config.bed_path}/bed_version.bed "
@@ -320,14 +320,14 @@ def test_create_tgs_paired(
         Sample,
         internal_id="sample_tumour",
         is_tumour=True,
-        sex=SexOptions.FEMALE,
+        sex=SexOptions.MALE,
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     normal_sample: Sample = create_autospec(
         Sample,
         internal_id="sample_normal",
         is_tumour=False,
-        sex=SexOptions.FEMALE,
+        sex=SexOptions.MALE,
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     tgs_paired_case: Case = create_autospec(
@@ -368,7 +368,7 @@ def test_create_tgs_tumour_only(
         Sample,
         internal_id="sample_tumour",
         is_tumour=True,
-        sex=SexOptions.FEMALE,
+        sex=SexOptions.UNKNOWN,
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     tgs_tumour_only_case: Case = create_autospec(
