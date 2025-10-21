@@ -56,11 +56,7 @@ def test_balsamic_start_all_flags(
     ]
 
     # WHEN invoking cg workflow Balsamic dev-start
-    result = cli_runner.invoke(
-        dev_start,
-        flags,
-        obj=cg_config,
-    )
+    result = cli_runner.invoke(dev_start, flags, obj=cg_config, catch_exceptions=False)
 
     # THEN the command exits successfully
     assert result.exit_code == 0

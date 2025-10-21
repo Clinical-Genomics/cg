@@ -314,13 +314,13 @@ def store_available(context: click.Context, dry_run: bool) -> None:
 def dev_start(
     cg_config: CGConfig,
     case_id: str,
-    cluster_config: click.Path | None,
     panel_bed: str | None,
+    workflow_profile: click.Path | None,
 ):
     """Start a Balsamic case. Configures the case if needed."""
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
-    analysis_starter.start(case_id=case_id, cluster_config=cluster_config, panel_bed=panel_bed)
+    analysis_starter.start(case_id=case_id, workflow_profile=workflow_profile, panel_bed=panel_bed)
 
 
 @balsamic.command("dev-start-available")
