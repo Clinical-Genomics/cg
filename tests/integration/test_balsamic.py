@@ -1,5 +1,4 @@
 import shutil
-from datetime import datetime
 from pathlib import Path
 from subprocess import CompletedProcess
 from unittest.mock import ANY, Mock, create_autospec
@@ -14,12 +13,12 @@ from cg.cli.base import base
 from cg.constants.constants import CaseActions, Workflow
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.tb import AnalysisType
-from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Order, Sample
+from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
 from cg.utils import commands
 from tests.integration.conftest import (
     IntegrationTestPaths,
-    create_fastq_file_and_add_to_housekeeper,
+    create_integration_test_sample,
     expect_to_add_pending_analysis_to_trailblazer,
 )
 from tests.store_helpers import StoreHelpers
@@ -37,90 +36,51 @@ def ticket_id() -> int:
 
 @pytest.fixture
 def sample_tgs_tumour(
-    helpers: StoreHelpers,
     housekeeper_db: HousekeeperStore,
     status_db: Store,
     test_run_paths: IntegrationTestPaths,
 ) -> Sample:
-    sample: Sample = helpers.add_sample(
-        store=status_db,
-        is_tumour=True,
-        last_sequenced_at=datetime.now(),
+
+    return create_integration_test_sample(
         application_type=AnalysisType.TGS,
+        flow_cell_id="sample_tgs_tumour_flow_cell",
+        housekeeper_db=housekeeper_db,
+        is_tumour=True,
+        status_db=status_db,
+        test_run_paths=test_run_paths,
     )
-    flow_cell: IlluminaFlowCell = helpers.add_illumina_flow_cell(store=status_db)
-    sequencing_run: IlluminaSequencingRun = helpers.add_illumina_sequencing_run(
-        store=status_db, flow_cell=flow_cell
-    )
-    helpers.add_illumina_sample_sequencing_metrics_object(
-        store=status_db, sample_id=sample.internal_id, sequencing_run=sequencing_run, lane=1
-    )
-
-    create_fastq_file_and_add_to_housekeeper(
-        housekeeper_db=housekeeper_db, test_root_dir=test_run_paths.test_root_dir, sample=sample
-    )
-
-    return sample
 
 
 @pytest.fixture
 def sample_wgs_normal(
-    helpers: StoreHelpers,
     housekeeper_db: HousekeeperStore,
     status_db: Store,
     test_run_paths: IntegrationTestPaths,
 ) -> Sample:
-    sample: Sample = helpers.add_sample(
-        store=status_db,
-        is_tumour=False,
-        last_sequenced_at=datetime.now(),
+    return create_integration_test_sample(
         application_type=AnalysisType.WGS,
+        flow_cell_id="sample_wgs_normal_flow_cell",
+        housekeeper_db=housekeeper_db,
+        is_tumour=False,
+        status_db=status_db,
+        test_run_paths=test_run_paths,
     )
-    flow_cell: IlluminaFlowCell = helpers.add_illumina_flow_cell(
-        store=status_db, flow_cell_id="sample_wgs_normal_flow_cell"
-    )
-    sequencing_run: IlluminaSequencingRun = helpers.add_illumina_sequencing_run(
-        store=status_db, flow_cell=flow_cell
-    )
-    helpers.add_illumina_sample_sequencing_metrics_object(
-        store=status_db, sample_id=sample.internal_id, sequencing_run=sequencing_run, lane=1
-    )
-
-    create_fastq_file_and_add_to_housekeeper(
-        housekeeper_db=housekeeper_db, test_root_dir=test_run_paths.test_root_dir, sample=sample
-    )
-
-    return sample
 
 
 @pytest.fixture
 def sample_wgs_tumour(
-    helpers: StoreHelpers,
     housekeeper_db: HousekeeperStore,
     status_db: Store,
     test_run_paths: IntegrationTestPaths,
 ) -> Sample:
-    sample: Sample = helpers.add_sample(
-        store=status_db,
-        is_tumour=True,
-        last_sequenced_at=datetime.now(),
+    return create_integration_test_sample(
         application_type=AnalysisType.WGS,
+        flow_cell_id="sample_wgs_tumour_flow_cell",
+        housekeeper_db=housekeeper_db,
+        is_tumour=True,
+        status_db=status_db,
+        test_run_paths=test_run_paths,
     )
-    flow_cell: IlluminaFlowCell = helpers.add_illumina_flow_cell(
-        store=status_db, flow_cell_id="sample_wgs_tumour_flow_cell"
-    )
-    sequencing_run: IlluminaSequencingRun = helpers.add_illumina_sequencing_run(
-        store=status_db, flow_cell=flow_cell
-    )
-    helpers.add_illumina_sample_sequencing_metrics_object(
-        store=status_db, sample_id=sample.internal_id, sequencing_run=sequencing_run, lane=1
-    )
-
-    create_fastq_file_and_add_to_housekeeper(
-        housekeeper_db=housekeeper_db, test_root_dir=test_run_paths.test_root_dir, sample=sample
-    )
-
-    return sample
 
 
 @pytest.fixture

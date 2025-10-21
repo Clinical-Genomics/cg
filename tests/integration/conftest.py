@@ -18,8 +18,9 @@ from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.tb import AnalysisType
 from cg.store import database as cg_database
-from cg.store.models import Case, Sample
+from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Sample
 from cg.store.store import Store
+from tests.store_helpers import StoreHelpers
 
 
 class IntegrationTestPaths(NamedTuple):
@@ -93,6 +94,39 @@ def test_run_paths(
     )
 
     return IntegrationTestPaths(cg_config_file=config_file_path, test_root_dir=test_root_dir)
+
+
+def create_integration_test_sample(
+    status_db: Store,
+    housekeeper_db: HousekeeperStore,
+    test_run_paths: IntegrationTestPaths,
+    is_tumour: bool,
+    application_type: AnalysisType,
+    flow_cell_id: str,
+) -> Sample:
+    helpers = StoreHelpers()
+    sample: Sample = helpers.add_sample(
+        store=status_db,
+        is_tumour=is_tumour,
+        last_sequenced_at=datetime.now(),
+        application_type=application_type,
+    )
+    flow_cell: IlluminaFlowCell = helpers.add_illumina_flow_cell(
+        store=status_db, flow_cell_id=flow_cell_id
+    )
+    sequencing_run: IlluminaSequencingRun = helpers.add_illumina_sequencing_run(
+        store=status_db,
+        flow_cell=flow_cell,
+    )
+    helpers.add_illumina_sample_sequencing_metrics_object(
+        store=status_db, sample_id=sample.internal_id, sequencing_run=sequencing_run, lane=1
+    )
+
+    create_fastq_file_and_add_to_housekeeper(
+        housekeeper_db=housekeeper_db, test_root_dir=test_run_paths.test_root_dir, sample=sample
+    )
+
+    return sample
 
 
 def expect_to_add_pending_analysis_to_trailblazer(
