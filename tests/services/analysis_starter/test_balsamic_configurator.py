@@ -112,3 +112,37 @@ def test_configure(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
 
 
 # TODO add flag test
+def test_configure_with_flags(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
+    # GIVEN a fastq handler
+    fastq_handler: BalsamicFastqHandler = create_autospec(BalsamicFastqHandler)
+
+    # GIVEN a BalsamicConfigFileCreator
+    config_file_creator: BalsamicConfigFileCreator = create_autospec(BalsamicConfigFileCreator)
+
+    # GIVEN a store
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id_strict = Mock(
+        return_value=create_autospec(Case, slurm_priority=SlurmQos.NORMAL)
+    )
+
+    # GIVEN a Balsamic configurator
+    balsamic_configurator = BalsamicConfigurator(
+        config=cg_balsamic_config,
+        config_file_creator=config_file_creator,
+        fastq_handler=fastq_handler,
+        store=store,
+    )
+
+    # GIVEN that all relevant paths exist
+    mocker.patch.object(Path, "exists", return_value=True)
+
+    # WHEN calling configure
+    balsamic_configurator.configure(
+        case_id="case_id", panel_bed="panel_bed", workflow_profile="workflow_profile"
+    )
+
+    # THEN the fastq files should be linked
+    cast(Mock, fastq_handler.link_fastq_files).assert_called_once_with(case_id="case_id")
+
+    # THEN the config file should be created
+    cast(Mock, config_file_creator.create).assert_called_once_with(case_id="case_id")
