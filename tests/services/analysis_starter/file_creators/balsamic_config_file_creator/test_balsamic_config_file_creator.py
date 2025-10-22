@@ -18,10 +18,18 @@ from cg.store.store import Store
 
 
 @pytest.mark.parametrize(
-    "prep_category, expected_command_normal_only",
+    "prep_category, expected_command_normal_only, sex",
     [
-        (SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING, "expected_tgs_normal_only_command"),
-        (SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING, "expected_wes_normal_only_command"),
+        (
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            "expected_tgs_normal_only_command",
+            SexOptions.MALE,
+        ),
+        (
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+            "expected_wes_normal_only_command",
+            SexOptions.FEMALE,
+        ),
     ],
     ids=["tgs", "wes"],
 )
@@ -29,6 +37,7 @@ def test_create_normal_only(
     cg_balsamic_config: BalsamicConfig,
     expected_command_normal_only,
     prep_category: SeqLibraryPrepCategory,
+    sex: SexOptions,
     mocker: MockerFixture,
     request: pytest.FixtureRequest,
 ):
@@ -38,7 +47,7 @@ def test_create_normal_only(
         internal_id="sample_normal",
         is_tumour=False,
         prep_category=prep_category,
-        sex=SexOptions.FEMALE,
+        sex=sex,
     )
     normal_only_case: Case = create_autospec(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
@@ -73,11 +82,23 @@ def test_create_normal_only(
 
 
 @pytest.mark.parametrize(
-    "prep_category, expected_command_paired",
+    "prep_category, expected_command_paired, sex",
     [
-        (SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING, "expected_tgs_paired_command"),
-        (SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING, "expected_wes_paired_command"),
-        (SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING, "expected_wgs_paired_command"),
+        (
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            "expected_tgs_paired_command",
+            SexOptions.FEMALE,
+        ),
+        (
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+            "expected_wes_paired_command",
+            SexOptions.MALE,
+        ),
+        (
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+            "expected_wgs_paired_command",
+            SexOptions.UNKNOWN,
+        ),
     ],
     ids=["tgs", "wes", "wgs"],
 )
@@ -85,6 +106,7 @@ def test_create_paired(
     cg_balsamic_config: BalsamicConfig,
     expected_command_paired,
     prep_category: SeqLibraryPrepCategory,
+    sex: SexOptions,
     mocker: MockerFixture,
     request: pytest.FixtureRequest,
 ):
@@ -93,14 +115,14 @@ def test_create_paired(
         Sample,
         internal_id="sample_tumour",
         is_tumour=True,
-        sex=SexOptions.FEMALE,
+        sex=sex,
         prep_category=prep_category,
     )
     normal_sample: Sample = create_autospec(
         Sample,
         internal_id="sample_normal",
         is_tumour=False,
-        sex=SexOptions.FEMALE,
+        sex=sex,
         prep_category=prep_category,
     )
     paired_case: Case = create_autospec(
@@ -135,11 +157,23 @@ def test_create_paired(
 
 
 @pytest.mark.parametrize(
-    "prep_category, expected_command_tumour_only",
+    "prep_category, expected_command_tumour_only, sex",
     [
-        (SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING, "expected_tgs_tumour_only_command"),
-        (SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING, "expected_wes_tumour_only_command"),
-        (SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING, "expected_wgs_tumour_only_command"),
+        (
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            "expected_tgs_tumour_only_command",
+            SexOptions.UNKNOWN,
+        ),
+        (
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+            "expected_wes_tumour_only_command",
+            SexOptions.MALE,
+        ),
+        (
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+            "expected_wgs_tumour_only_command",
+            SexOptions.FEMALE,
+        ),
     ],
     ids=["tgs", "wes", "wgs"],
 )
@@ -147,6 +181,7 @@ def test_create_tumour_only(
     cg_balsamic_config: BalsamicConfig,
     expected_command_tumour_only,
     prep_category: SeqLibraryPrepCategory,
+    sex: SexOptions,
     mocker: MockerFixture,
     request: pytest.FixtureRequest,
 ):
@@ -155,7 +190,7 @@ def test_create_tumour_only(
         Sample,
         internal_id="sample_tumour",
         is_tumour=True,
-        sex=SexOptions.FEMALE,
+        sex=sex,
         prep_category=prep_category,
     )
     tumour_only_case: Case = create_autospec(
