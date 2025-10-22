@@ -154,4 +154,10 @@ def test_configure_with_flags(cg_balsamic_config: BalsamicConfig, mocker: Mocker
         case_id="case_id",
         account=cg_balsamic_config.slurm.account,
         binary=cg_balsamic_config.binary_path,
+        conda_binary=cg_balsamic_config.conda_binary,
+        workflow_profile="workflow_profile",
+        environment=cg_balsamic_config.conda_env,
+        mail_user=cg_balsamic_config.slurm.mail_user,
+        qos=SlurmQos.NORMAL,
+        sample_config=Path(cg_balsamic_config.root, "case_id", "case_id.json"),
     )
