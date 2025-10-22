@@ -53,7 +53,7 @@ def expected_tgs_paired_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--fastq-path {cg_balsamic_config.root}/case_1/fastq "
         f"--gender female "
         f"--genome-version hg19 "
-        f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "  # TODO are there 2 versions of this?
+        f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
         f"--normal-sample-name sample_normal "
         f"--panel-bed {cg_balsamic_config.bed_path}/bed_version.bed "
         f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
