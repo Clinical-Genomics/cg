@@ -162,17 +162,17 @@ def test_create_paired(
         (
             SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
             "expected_tgs_tumour_only_command",
-            SexOptions.UNKNOWN,
+            SexOptions.FEMALE,
         ),
         (
             SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
             "expected_wes_tumour_only_command",
-            SexOptions.MALE,
+            SexOptions.UNKNOWN,
         ),
         (
             SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
             "expected_wgs_tumour_only_command",
-            SexOptions.FEMALE,
+            SexOptions.MALE,
         ),
     ],
     ids=["tgs", "wes", "wgs"],
