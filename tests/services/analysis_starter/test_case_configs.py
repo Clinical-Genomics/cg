@@ -1,4 +1,7 @@
+from pathlib import Path
+
 from cg.constants.priority import SlurmQos
+from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 
@@ -87,5 +90,71 @@ def test_mip_dna_get_start_command_all_flags_set():
         f"--start_with_recipe {mip_case_config.start_with} "
         f"--bwa_mem 1 "
         f"--bwa_mem2 0"
+    )
+    assert start_command == expected_command
+
+
+def test_balsamic_get_start_command_no_flags_set():
+    # GIVEN a case id
+    case_id = "case_id"
+
+    # GIVEN a BALSAMIC case config
+    balsamic_case_config = BalsamicCaseConfig(
+        account="balsamic_account",
+        binary=Path("/path/to/balsamic_binary"),
+        conda_binary=Path("/path/to/conda"),
+        case_id=case_id,
+        environment="balsamic_environment",
+        head_job_partition="head_job_partition",
+        sample_config=Path("/path/to/sample/config"),
+        qos=SlurmQos.NORMAL,
+    )
+
+    # WHEN getting the slurm command
+    start_command: str = balsamic_case_config.get_start_command()
+
+    # THEN the command is as expected
+    expected_command = (
+        "/path/to/conda run "
+        "/path/to/balsamic_binary run analysis "
+        "--account balsamic_account "
+        "--qos normal "
+        "--sample-config /path/to/sample/config "
+        "--headjob-partition head_job_partition "
+        "--run-analysis"
+    )
+    assert start_command == expected_command
+
+
+def test_balsamic_get_start_command_all_flags_set():
+    # GIVEN a case id
+    case_id = "case_id"
+
+    # GIVEN a BALSAMIC case config
+    balsamic_case_config = BalsamicCaseConfig(
+        account="balsamic_account",
+        binary=Path("/path/to/balsamic_binary"),
+        conda_binary=Path("/path/to/conda"),
+        case_id=case_id,
+        environment="balsamic_environment",
+        head_job_partition="head_job_partition",
+        sample_config=Path("/path/to/sample/config"),
+        qos=SlurmQos.NORMAL,
+        workflow_profile=Path("/path/to/workflow/profile"),
+    )
+
+    # WHEN getting the slurm command
+    start_command: str = balsamic_case_config.get_start_command()
+
+    # THEN the command is as expected
+    expected_command = (
+        "/path/to/conda run "
+        "/path/to/balsamic_binary run analysis "
+        "--qos normal "
+        "--account balsamic_account "
+        "--sample-config /path/to/sample/config "
+        "--headjob-partition head_job_partition "
+        "--run-analysis "
+        "--workflow-profile /path/to/workflow/profile"
     )
     assert start_command == expected_command
