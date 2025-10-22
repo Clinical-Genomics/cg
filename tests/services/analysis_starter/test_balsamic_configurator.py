@@ -120,7 +120,6 @@ def test_configure(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
         conda_binary=cg_balsamic_config.conda_binary,
         environment=cg_balsamic_config.conda_env,
         head_job_partition=cg_balsamic_config.head_job_partition,
-        mail_user=cg_balsamic_config.slurm.mail_user,
         qos=SlurmQos.NORMAL,
         sample_config=Path(cg_balsamic_config.root, "case_id", "case_id.json"),
     )
@@ -174,7 +173,6 @@ def test_configure_with_flags(cg_balsamic_config: BalsamicConfig, mocker: Mocker
         conda_binary=cg_balsamic_config.conda_binary,
         environment=cg_balsamic_config.conda_env,
         head_job_partition=cg_balsamic_config.head_job_partition,
-        mail_user=cg_balsamic_config.slurm.mail_user,
         qos=SlurmQos.NORMAL,
         sample_config=Path(cg_balsamic_config.root, "case_id", "case_id.json"),
         workflow_profile=workflow_profile,

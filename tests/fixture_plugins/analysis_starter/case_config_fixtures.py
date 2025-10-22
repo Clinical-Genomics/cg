@@ -54,7 +54,6 @@ def balsamic_case_config(case_id: str, tmp_path: Path) -> BalsamicCaseConfig:
         conda_binary=tmp_path / "bin" / "conda",
         environment="T_BALSAMIC",
         head_job_partition="head-jobs",
-        mail_user="some@email.se",
         qos=SlurmQos.NORMAL,
         sample_config=tmp_path / case_id / f"{case_id}.json",
         workflow=Workflow.BALSAMIC,
