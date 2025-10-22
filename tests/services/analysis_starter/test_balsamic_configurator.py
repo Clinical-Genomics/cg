@@ -137,7 +137,7 @@ def test_configure_with_flags(cg_balsamic_config: BalsamicConfig, mocker: Mocker
     mocker.patch.object(Path, "exists", return_value=True)
 
     # WHEN calling configure
-    balsamic_configurator.configure(
+    balsamic_case_config: BalsamicCaseConfig = balsamic_configurator.configure(
         case_id="case_id", panel_bed="panel_bed", workflow_profile="workflow_profile"
     )
 
@@ -145,4 +145,13 @@ def test_configure_with_flags(cg_balsamic_config: BalsamicConfig, mocker: Mocker
     cast(Mock, fastq_handler.link_fastq_files).assert_called_once_with(case_id="case_id")
 
     # THEN the config file should be created
-    cast(Mock, config_file_creator.create).assert_called_once_with(case_id="case_id")
+    cast(Mock, config_file_creator.create).assert_called_once_with(
+        case_id="case_id", panel_bed="panel_bed", workflow_profile="workflow_profile"
+    )
+
+    # THEN the case config is as expected
+    assert balsamic_case_config == BalsamicCaseConfig(
+        case_id="case_id",
+        account=cg_balsamic_config.slurm.account,
+        binary=cg_balsamic_config.binary_path,
+    )
