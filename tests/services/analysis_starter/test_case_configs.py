@@ -17,7 +17,7 @@ def test_microsalt_get_start_command():
         fastq_directory="/path/to/microsalt_case/fastq",
     )
 
-    # WHEN getting the slurm command
+    # WHEN getting the start command
     start_command: str = microsalt_case_config.get_start_command()
 
     # THEN the command is as expected
@@ -47,7 +47,7 @@ def test_mip_dna_get_start_command_no_flags_set():
         use_bwa_mem=False,
     )
 
-    # WHEN getting the slurm command
+    # WHEN getting the start command
     start_command: str = mip_case_config.get_start_command()
 
     # THEN the command is as expected
@@ -78,7 +78,7 @@ def test_mip_dna_get_start_command_all_flags_set():
         use_bwa_mem=True,
     )
 
-    # WHEN getting the slurm command
+    # WHEN getting the start command
     start_command: str = mip_case_config.get_start_command()
 
     # THEN the command is as expected
@@ -110,7 +110,7 @@ def test_balsamic_get_start_command_no_flags_set():
         qos=SlurmQos.NORMAL,
     )
 
-    # WHEN getting the slurm command
+    # WHEN getting the start command
     start_command: str = balsamic_case_config.get_start_command()
 
     # THEN the command is as expected
@@ -143,7 +143,7 @@ def test_balsamic_get_start_command_all_flags_set():
         workflow_profile=Path("/path/to/workflow/profile"),
     )
 
-    # WHEN getting the slurm command
+    # WHEN getting the start command
     start_command: str = balsamic_case_config.get_start_command()
 
     # THEN the command is as expected
