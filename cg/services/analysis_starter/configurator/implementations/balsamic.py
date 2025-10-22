@@ -29,6 +29,7 @@ class BalsamicConfigurator(Configurator):
         self.balsamic_binary: Path = config.binary_path
         self.conda_binary: Path = config.conda_binary
         self.environment: str = config.conda_env
+        self.head_job_partition: str = config.head_job_partition
         self.root_dir: Path = config.root
         self.slurm_account: str = config.slurm.account
         self.slurm_mail_user: str = config.slurm.mail_user
@@ -49,6 +50,7 @@ class BalsamicConfigurator(Configurator):
             case_id=case_id,
             conda_binary=self.conda_binary,
             environment=self.environment,
+            head_job_partition=self.head_job_partition,
             mail_user=self.slurm_mail_user,
             qos=cast(SlurmQos, self.store.get_case_by_internal_id_strict(case_id).slurm_priority),
             sample_config=self._get_sample_config_path(case_id),

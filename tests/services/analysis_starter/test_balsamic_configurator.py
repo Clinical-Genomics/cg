@@ -37,8 +37,9 @@ def test_get_config(balsamic_configurator: BalsamicConfigurator, case_id: str, t
     Path(balsamic_configurator.root_dir, case_id, f"{case_id}.json").touch()
 
     # GIVEN that the database returns a case with the provided case_id
-    case_to_configure: Case = create_autospec(Case, internal_id=case_id)
-    case_to_configure.slurm_priority = SlurmQos.NORMAL
+    case_to_configure: Case = create_autospec(
+        Case, internal_id=case_id, slurm_priority=SlurmQos.NORMAL
+    )
     balsamic_configurator.store.get_case_by_internal_id_strict = Mock(
         return_value=case_to_configure
     )
@@ -65,8 +66,9 @@ def test_get_config_missing_config_file(
     # GIVEN that the config file does not exist
 
     # GIVEN that the database returns a case with the provided case_id
-    case_to_configure: Case = create_autospec(Case, internal_id=case_id)
-    case_to_configure.slurm_priority = SlurmQos.NORMAL
+    case_to_configure: Case = create_autospec(
+        Case, internal_id=case_id, slurm_priority=SlurmQos.NORMAL
+    )
     balsamic_configurator.store.get_case_by_internal_id_strict = Mock(
         return_value=case_to_configure
     )
@@ -117,6 +119,7 @@ def test_configure(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
         binary=cg_balsamic_config.binary_path,
         conda_binary=cg_balsamic_config.conda_binary,
         environment=cg_balsamic_config.conda_env,
+        head_job_partition=cg_balsamic_config.head_job_partition,
         mail_user=cg_balsamic_config.slurm.mail_user,
         qos=SlurmQos.NORMAL,
         sample_config=Path(cg_balsamic_config.root, "case_id", "case_id.json"),
@@ -169,9 +172,10 @@ def test_configure_with_flags(cg_balsamic_config: BalsamicConfig, mocker: Mocker
         account=cg_balsamic_config.slurm.account,
         binary=cg_balsamic_config.binary_path,
         conda_binary=cg_balsamic_config.conda_binary,
-        workflow_profile=workflow_profile,
         environment=cg_balsamic_config.conda_env,
+        head_job_partition=cg_balsamic_config.head_job_partition,
         mail_user=cg_balsamic_config.slurm.mail_user,
         qos=SlurmQos.NORMAL,
         sample_config=Path(cg_balsamic_config.root, "case_id", "case_id.json"),
+        workflow_profile=workflow_profile,
     )
