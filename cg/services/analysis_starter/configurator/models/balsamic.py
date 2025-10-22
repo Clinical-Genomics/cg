@@ -133,6 +133,7 @@ class BalsamicCaseConfig(CaseConfig):
     binary: Path
     conda_binary: Path
     environment: str
+    head_job_partition: str
     mail_user: str
     qos: SlurmQos
     sample_config: Path
@@ -142,7 +143,7 @@ class BalsamicCaseConfig(CaseConfig):
     def get_start_command(self) -> str:
         command = (
             "{conda_binary} run {binary} run analysis --account {account} --mail-user {mail_user} "
-            "--qos {qos} --sample-config {sample_config} --run-analysis "
+            "--qos {qos} --sample-config {sample_config} --headjob-partition --run-analysis "
             "--benchmark".format(**self.model_dump())
         )
         if self.workflow_profile:
