@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import cast
 from unittest.mock import Mock, create_autospec
 
 import pytest
@@ -16,9 +15,6 @@ from cg.services.analysis_starter.configurator.file_creators.balsamic_config imp
 )
 from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
-from tests.services.analysis_starter.file_creators.balsamic_config_file_creator.conftest import (
-    expected_tgs_tumour_only_command,
-)
 
 
 @pytest.mark.parametrize(
@@ -36,7 +32,7 @@ def test_create_normal_only(
     mocker: MockerFixture,
     request: pytest.FixtureRequest,
 ):
-    # GIVEN a case with one normal TGS sample
+    # GIVEN a case with one normal sample
     sample: Sample = create_autospec(
         Sample,
         internal_id="sample_normal",
@@ -92,7 +88,7 @@ def test_create_paired(
     mocker: MockerFixture,
     request: pytest.FixtureRequest,
 ):
-    # GIVEN a case with one tumor and one normal WGS samples
+    # GIVEN a case with one tumor and one normal samples
     tumour_sample: Sample = create_autospec(
         Sample,
         internal_id="sample_tumour",
@@ -107,11 +103,11 @@ def test_create_paired(
         sex=SexOptions.FEMALE,
         prep_category=prep_category,
     )
-    tgs_paired_case: Case = create_autospec(
+    paired_case: Case = create_autospec(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
     )
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(return_value=tgs_paired_case)
+    store.get_case_by_internal_id_strict = Mock(return_value=paired_case)
     store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
@@ -154,7 +150,7 @@ def test_create_tumour_only(
     mocker: MockerFixture,
     request: pytest.FixtureRequest,
 ):
-    # GIVEN a case with one tumor TGS samples
+    # GIVEN a case with one tumor samples
     tumour_sample: Sample = create_autospec(
         Sample,
         internal_id="sample_tumour",
@@ -162,11 +158,11 @@ def test_create_tumour_only(
         sex=SexOptions.FEMALE,
         prep_category=prep_category,
     )
-    tgs_tumour_only_case: Case = create_autospec(
+    tumour_only_case: Case = create_autospec(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample]
     )
     store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(return_value=tgs_tumour_only_case)
+    store.get_case_by_internal_id_strict = Mock(return_value=tumour_only_case)
     store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
