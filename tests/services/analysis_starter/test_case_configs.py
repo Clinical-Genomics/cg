@@ -95,15 +95,12 @@ def test_mip_dna_get_start_command_all_flags_set():
 
 
 def test_balsamic_get_start_command_no_flags_set():
-    # GIVEN a case id
-    case_id = "case_id"
-
     # GIVEN a BALSAMIC case config
     balsamic_case_config = BalsamicCaseConfig(
         account="balsamic_account",
         binary=Path("/path/to/balsamic_binary"),
         conda_binary=Path("/path/to/conda"),
-        case_id=case_id,
+        case_id="case_id",
         environment="balsamic_environment",
         head_job_partition="head_job_partition",
         sample_config=Path("/path/to/sample/config"),
@@ -127,15 +124,12 @@ def test_balsamic_get_start_command_no_flags_set():
 
 
 def test_balsamic_get_start_command_all_flags_set():
-    # GIVEN a case id
-    case_id = "case_id"
-
     # GIVEN a BALSAMIC case config
     balsamic_case_config = BalsamicCaseConfig(
         account="balsamic_account",
         binary=Path("/path/to/balsamic_binary"),
         conda_binary=Path("/path/to/conda"),
-        case_id=case_id,
+        case_id="case_id",
         environment="balsamic_environment",
         head_job_partition="head_job_partition",
         sample_config=Path("/path/to/sample/config"),
