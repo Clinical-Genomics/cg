@@ -1,6 +1,8 @@
 import logging
 from pathlib import Path
+from typing import cast
 
+from cg.constants.priority import SlurmQos
 from cg.exc import CaseNotConfiguredError
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.cg_config import BalsamicConfig
@@ -26,7 +28,6 @@ class BalsamicConfigurator(Configurator):
 
         self.balsamic_binary: Path = config.binary_path
         self.conda_binary: Path = config.conda_binary
-        self.default_cluster_config: Path = config.cluster_config
         self.environment: str = config.conda_env
         self.root_dir: Path = config.root
         self.slurm_account: str = config.slurm.account
@@ -47,10 +48,9 @@ class BalsamicConfigurator(Configurator):
             binary=self.balsamic_binary,
             case_id=case_id,
             conda_binary=self.conda_binary,
-            cluster_config=self.default_cluster_config,
             environment=self.environment,
             mail_user=self.slurm_mail_user,
-            qos=self.store.get_case_by_internal_id_strict(case_id).slurm_priority,
+            qos=cast(SlurmQos, self.store.get_case_by_internal_id_strict(case_id).slurm_priority),
             sample_config=self._get_sample_config_path(case_id),
         )
         balsamic_config: BalsamicCaseConfig = self._set_flags(config=balsamic_config, **flags)

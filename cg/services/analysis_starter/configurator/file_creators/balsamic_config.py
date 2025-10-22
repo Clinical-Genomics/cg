@@ -33,7 +33,6 @@ class BalsamicConfigFileCreator:
         self.bed_directory: Path = cg_balsamic_config.bed_path
         self.cache_dir: Path = cg_balsamic_config.balsamic_cache
         self.cadd_path: Path = cg_balsamic_config.cadd_path
-        self.default_cluster_config: Path = cg_balsamic_config.cluster_config
         self.genome_interval_path: Path = cg_balsamic_config.genome_interval_path
         self.gens_coverage_female_path: Path = cg_balsamic_config.gens_coverage_female_path
         self.gens_coverage_male_path: Path = cg_balsamic_config.gens_coverage_male_path

@@ -102,7 +102,7 @@ def test_configure(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
     mocker.patch.object(Path, "exists", return_value=True)
 
     # WHEN calling configure
-    balsamic_configurator.configure(case_id="case_id")
+    balsamic_case_config: BalsamicCaseConfig = balsamic_configurator.configure(case_id="case_id")
 
     # THEN the fastq files should be linked
     cast(Mock, fastq_handler.link_fastq_files).assert_called_once_with(case_id="case_id")
@@ -110,8 +110,19 @@ def test_configure(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
     # THEN the config file should be created
     cast(Mock, config_file_creator.create).assert_called_once_with(case_id="case_id")
 
+    # THEN the case config is as expected
+    assert balsamic_case_config == BalsamicCaseConfig(
+        case_id="case_id",
+        account=cg_balsamic_config.slurm.account,
+        binary=cg_balsamic_config.binary_path,
+        conda_binary=cg_balsamic_config.conda_binary,
+        environment=cg_balsamic_config.conda_env,
+        mail_user=cg_balsamic_config.slurm.mail_user,
+        qos=SlurmQos.NORMAL,
+        sample_config=Path(cg_balsamic_config.root, "case_id", "case_id.json"),
+    )
 
-# TODO add flag test
+
 def test_configure_with_flags(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
     # GIVEN a fastq handler
     fastq_handler: BalsamicFastqHandler = create_autospec(BalsamicFastqHandler)
@@ -136,17 +147,20 @@ def test_configure_with_flags(cg_balsamic_config: BalsamicConfig, mocker: Mocker
     # GIVEN that all relevant paths exist
     mocker.patch.object(Path, "exists", return_value=True)
 
+    # GIVEN that we have a workflow profile path
+    workflow_profile = Path("workflow_profile")
+
     # WHEN calling configure
     balsamic_case_config: BalsamicCaseConfig = balsamic_configurator.configure(
-        case_id="case_id", panel_bed="panel_bed", workflow_profile="workflow_profile"
+        case_id="case_id", panel_bed="panel_bed", workflow_profile=workflow_profile
     )
 
     # THEN the fastq files should be linked
     cast(Mock, fastq_handler.link_fastq_files).assert_called_once_with(case_id="case_id")
 
-    # THEN the config file should be created
+    # THEN the config file should be created with the provided panel bed
     cast(Mock, config_file_creator.create).assert_called_once_with(
-        case_id="case_id", panel_bed="panel_bed", workflow_profile="workflow_profile"
+        case_id="case_id", panel_bed="panel_bed", workflow_profile=workflow_profile
     )
 
     # THEN the case config is as expected
@@ -155,7 +169,7 @@ def test_configure_with_flags(cg_balsamic_config: BalsamicConfig, mocker: Mocker
         account=cg_balsamic_config.slurm.account,
         binary=cg_balsamic_config.binary_path,
         conda_binary=cg_balsamic_config.conda_binary,
-        workflow_profile="workflow_profile",
+        workflow_profile=workflow_profile,
         environment=cg_balsamic_config.conda_env,
         mail_user=cg_balsamic_config.slurm.mail_user,
         qos=SlurmQos.NORMAL,
