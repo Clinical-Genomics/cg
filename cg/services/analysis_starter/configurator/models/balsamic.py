@@ -131,7 +131,6 @@ class BalsamicConfigInputWGS(BalsamicConfigInput):
 class BalsamicCaseConfig(CaseConfig):
     account: str
     binary: Path
-    cluster_config: Path  # TODO Change to workflow profile
     conda_binary: Path
     environment: str
     mail_user: str
@@ -141,8 +140,11 @@ class BalsamicCaseConfig(CaseConfig):
     workflow_profile: Path | None = None
 
     def get_start_command(self) -> str:
-        return (
+        command = (
             "{conda_binary} run {binary} run analysis --account {account} --mail-user {mail_user} "
-            "--qos {qos} --sample-config {sample_config} --cluster-config {cluster_config} --run-analysis "
+            "--qos {qos} --sample-config {sample_config} --run-analysis "
             "--benchmark".format(**self.model_dump())
         )
+        if self.workflow_profile:
+            command += f" --workflow-profile {self.workflow_profile}"
+        return command
