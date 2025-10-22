@@ -2026,6 +2026,9 @@ def context_config(
             "loqusdb_cancer_somatic_sv": str(cg_dir),
             "loqusdb_clinical_snv": str(cg_dir),
             "loqusdb_clinical_sv": str(cg_dir),
+            "loqusdb_dump_files": {
+                "artefact_sv_observations": Path("bogus/artefact_sv_observations.txt"),
+            },
             "loqusdb_panel_files": {"GMSmyeloid": "bogus/path"},
             "pon_path": str(cg_dir),
             "root": str(balsamic_dir),
