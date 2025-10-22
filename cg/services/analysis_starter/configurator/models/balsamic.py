@@ -131,7 +131,7 @@ class BalsamicConfigInputWGS(BalsamicConfigInput):
 class BalsamicCaseConfig(CaseConfig):
     account: str
     binary: Path
-    cluster_config: Path
+    cluster_config: Path  # TODO Change to workflow profile
     conda_binary: Path
     environment: str
     mail_user: str

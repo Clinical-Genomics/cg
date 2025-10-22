@@ -317,7 +317,7 @@ def dev_config_case(cg_config: CGConfig, case_id: str, panel_bed: str | None):
     configurator.configure(case_id=case_id, panel_bed=panel_bed)
 
 
-@balsamic.command()
+@balsamic.command("dev-run")
 @OPTION_WORKFLOW_PROFILE
 @ARGUMENT_CASE_ID
 @click.pass_obj
