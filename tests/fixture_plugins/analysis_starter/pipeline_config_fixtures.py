@@ -3,8 +3,10 @@ from pathlib import Path
 
 import pytest
 
+from cg.constants.observations import BalsamicObservationPanel
 from cg.models.cg_config import (
     BalsamicConfig,
+    LoqusDBDumpFiles,
     RarediseaseConfig,
     RnafusionConfig,
     SlurmConfig,
@@ -75,12 +77,19 @@ def cg_balsamic_config(tmp_path) -> BalsamicConfig:
         head_job_partition="head-jobs",
         loqusdb_path="mongodb://localhost:27017/loqusdb",
         loqusdb_artefact_snv=tmp_path / "artefact_snv.vcf",
-        loqusdb_artefact_sv=tmp_path / "artefact_sv.vcf",
         loqusdb_cancer_germline_snv=tmp_path / "cancer_germline_snv.vcf",
         loqusdb_cancer_somatic_snv=tmp_path / "cancer_somatic_snv.vcf",
         loqusdb_cancer_somatic_sv=tmp_path / "cancer_somatic_sv.vcf",
         loqusdb_clinical_snv=tmp_path / "clinical_snv.vcf",
         loqusdb_clinical_sv=tmp_path / "clinical_sv.vcf",
+        loqusdb_dump_files=LoqusDBDumpFiles(
+            artefact_sv_observations=tmp_path / "artefact_sv.vcf",
+            cancer_somatic_snv_panel_observations={
+                BalsamicObservationPanel.MYELOID: tmp_path / "loqusdb_myeloid_dump",
+                BalsamicObservationPanel.LYMPHOID: tmp_path / "loqusdb_lymphoid_dump",
+                BalsamicObservationPanel.EXOME: tmp_path / "loqusdb_exome_dump",
+            },
+        ),
         loqusdb_panel_files={"GMSmyeloid": tmp_path / "GMSmyeloid.vcf"},
         pon_path=tmp_path / "pon.cnn",
         root=tmp_path / "balsamic_root",

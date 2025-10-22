@@ -197,7 +197,6 @@ class BalsamicConfig(CommonAppConfig):
     head_job_partition: str
     loqusdb_path: str
     loqusdb_artefact_snv: Path
-    loqusdb_artefact_sv: Path  # TODO add this to servers, remove when we have made the PR
     loqusdb_cancer_germline_snv: Path
     loqusdb_cancer_somatic_snv: Path
     loqusdb_cancer_somatic_sv: Path
