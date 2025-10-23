@@ -167,7 +167,7 @@ def expected_wes_paired_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
         f"--normal-sample-name sample_normal "
-        f"--panel-bed {cg_balsamic_config.bed_path}/bed_version.bed "
+        f"--panel-bed {cg_balsamic_config.bed_path}/exome.bed "
         f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
         f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
         f"--soft-filter-normal "
@@ -200,7 +200,7 @@ def expected_wes_tumour_only_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--gender female "
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
-        f"--panel-bed {cg_balsamic_config.bed_path}/bed_version.bed "
+        f"--panel-bed {cg_balsamic_config.bed_path}/exome.bed "
         f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
         f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
         f"--swegen-snv {cg_balsamic_config.swegen_snv} "
@@ -586,13 +586,15 @@ def test_create_wes_paired(
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wes_paired_case)
+    bed: Bed = create_autospec(Bed)
+    bed.name = "Twist Exome Comprehensive"
     store.get_bed_version_by_short_name_strict = Mock(
-        return_value=create_autospec(BedVersion, filename="bed_version.bed")
+        return_value=create_autospec(BedVersion, filename="exome.bed", bed=bed)
     )
 
     # GIVEN a Lims API
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
+    lims_api.get_capture_kit_strict = Mock(return_value="twist_exome")
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
@@ -606,7 +608,7 @@ def test_create_wes_paired(
     config_file_creator.create(case_id="case_1")
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("bed_short_name")
+    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("twist_exome")
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
@@ -630,13 +632,15 @@ def test_create_wes_tumour_only(
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wes_tumor_only_case)
+    bed: Bed = create_autospec(Bed)
+    bed.name = "Twist Exome Comprehensive"
     store.get_bed_version_by_short_name_strict = Mock(
-        return_value=create_autospec(BedVersion, filename="bed_version.bed")
+        return_value=create_autospec(BedVersion, filename="exome.bed", bed=bed)
     )
 
     # GIVEN a Lims API
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
+    lims_api.get_capture_kit_strict = Mock(return_value="twist_exome")
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
@@ -650,7 +654,7 @@ def test_create_wes_tumour_only(
     config_file_creator.create(case_id="case_1")
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("bed_short_name")
+    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("twist_exome")
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
