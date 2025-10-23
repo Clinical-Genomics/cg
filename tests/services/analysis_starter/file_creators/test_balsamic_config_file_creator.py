@@ -20,7 +20,7 @@ from cg.store.store import Store
 
 
 @pytest.fixture
-def expected_tgs_normal_only_command(cg_balsamic_config: BalsamicConfig) -> str:
+def expected_tgs_myeloid_normal_only_command(cg_balsamic_config: BalsamicConfig) -> str:
     return (
         f"{cg_balsamic_config.conda_binary} "
         f"run --name {cg_balsamic_config.conda_env} "
@@ -32,6 +32,7 @@ def expected_tgs_normal_only_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--cadd-annotations {cg_balsamic_config.cadd_path} "
         f"--cancer-germline-snv-observations {cg_balsamic_config.loqusdb_cancer_germline_snv} "
         f"--cancer-somatic-snv-observations {cg_balsamic_config.loqusdb_cancer_somatic_snv} "
+        f"--cancer-somatic-snv-panel-observations {cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations[BalsamicObservationPanel.MYELOID]} "
         f"--cancer-somatic-sv-observations {cg_balsamic_config.loqusdb_cancer_somatic_sv} "
         f"--case-id case_1 "
         f"--clinical-snv-observations {cg_balsamic_config.loqusdb_clinical_snv} "
@@ -40,7 +41,7 @@ def expected_tgs_normal_only_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--gender female "
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
-        f"--panel-bed {cg_balsamic_config.bed_path}/bed_version.bed "
+        f"--panel-bed {cg_balsamic_config.bed_path}/myeloid.bed "
         f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
         f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
         f"--swegen-snv {cg_balsamic_config.swegen_snv} "
@@ -50,7 +51,7 @@ def expected_tgs_normal_only_command(cg_balsamic_config: BalsamicConfig) -> str:
 
 
 @pytest.fixture
-def expected_tgs_paired_command(cg_balsamic_config: BalsamicConfig) -> str:
+def expected_tgs_lymphoid_paired_command(cg_balsamic_config: BalsamicConfig) -> str:
     return (
         f"{cg_balsamic_config.conda_binary} "
         f"run --name {cg_balsamic_config.conda_env} "
@@ -62,6 +63,7 @@ def expected_tgs_paired_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--cadd-annotations {cg_balsamic_config.cadd_path} "
         f"--cancer-germline-snv-observations {cg_balsamic_config.loqusdb_cancer_germline_snv} "
         f"--cancer-somatic-snv-observations {cg_balsamic_config.loqusdb_cancer_somatic_snv} "
+        f"--cancer-somatic-snv-panel-observations {cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations[BalsamicObservationPanel.LYMPHOID]} "
         f"--cancer-somatic-sv-observations {cg_balsamic_config.loqusdb_cancer_somatic_sv} "
         f"--case-id case_1 "
         f"--clinical-snv-observations {cg_balsamic_config.loqusdb_clinical_snv} "
@@ -71,7 +73,7 @@ def expected_tgs_paired_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
         f"--normal-sample-name sample_normal "
-        f"--panel-bed {cg_balsamic_config.bed_path}/bed_version.bed "
+        f"--panel-bed {cg_balsamic_config.bed_path}/lymphoid.bed "
         f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
         f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
         f"--soft-filter-normal "
@@ -275,7 +277,9 @@ def expected_wgs_tumour_only_command(cg_balsamic_config: BalsamicConfig) -> str:
 
 
 def test_create_tgs_normal_only(
-    cg_balsamic_config: BalsamicConfig, expected_tgs_normal_only_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig,
+    expected_tgs_myeloid_normal_only_command: str,
+    mocker: MockerFixture,
 ):
     # GIVEN a case with one normal TGS sample
     sample: Sample = create_autospec(
@@ -291,13 +295,15 @@ def test_create_tgs_normal_only(
 
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_normal_only_case)
+    bed: Bed = create_autospec(Bed)
+    bed.name = BalsamicObservationPanel.MYELOID
     store.get_bed_version_by_short_name_strict = Mock(
-        return_value=create_autospec(BedVersion, filename="bed_version.bed")
+        return_value=create_autospec(BedVersion, filename="myeloid.bed", bed=bed)
     )
 
     # GIVEN a Lims API
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
+    lims_api.get_capture_kit_strict = Mock(return_value="myeloid")
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
@@ -312,8 +318,11 @@ def test_create_tgs_normal_only(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_tgs_normal_only_command, check=True, shell=True, stderr=-1, stdout=-1
+        args=expected_tgs_myeloid_normal_only_command, check=True, shell=True, stderr=-1, stdout=-1
     )
+
+    # THEN the bed version should have been fetched using the LIMS capture kit
+    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("myeloid")
 
 
 def test_create_tgs_paired(
