@@ -91,7 +91,9 @@ class TransferLims(object):
         elif include == IncludeOptions.NOTINVOICED.value:
             samples = self.status.get_samples_not_invoiced()
         elif include == IncludeOptions.ALL.value:
-            samples = self.status.get_samples_not_down_sampled()
+            samples = (
+                self.status.get_samples_not_down_sampled()
+            )  # TODO: Could I add my filter here? What is going on?
         return samples
 
     def transfer_pools(self, status_type: PoolState):
