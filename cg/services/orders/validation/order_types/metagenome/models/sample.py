@@ -1,4 +1,6 @@
-from pydantic import BeforeValidator
+from typing import Any
+
+from pydantic import BeforeValidator, model_validator
 from typing_extensions import Annotated
 
 from cg.models.orders.sample_base import ControlEnum, PriorityEnum
@@ -15,3 +17,11 @@ class MetagenomeSample(Sample):
     quantity: int | None = None
     require_qc_ok: bool = False
     source: str
+
+    @model_validator(mode="before")
+    def set_other_source(cls, data: Any) -> Any:
+        """When source is sent as 'other', we should instead set the value sent as 'source_comment'."""
+        if isinstance(data, dict):
+            if data.get("source") == "other":
+                data["source"] = data.get("source_comment")
+        return data
