@@ -42,6 +42,7 @@ def expected_tgs_myeloid_normal_only_command(cg_balsamic_config: BalsamicConfig)
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
         f"--panel-bed {cg_balsamic_config.bed_path}/myeloid.bed "
+        f"--pon-cnn {cg_balsamic_config.panel_of_normals} "
         f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
         f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
         f"--swegen-snv {cg_balsamic_config.swegen_snv} "

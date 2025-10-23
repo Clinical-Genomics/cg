@@ -90,6 +90,7 @@ def cg_balsamic_config(tmp_path) -> BalsamicConfig:
                 BalsamicObservationPanel.EXOME: tmp_path / "loqusdb_exome_dump",
             },
         ),
+        panel_of_normals={"bed_short_name": Path("absolute_path_to_pon_file.cnn")},
         pon_path=tmp_path / "pon.cnn",
         root=tmp_path / "balsamic_root",
         sentieon_licence_path=tmp_path / "sentieon.lic",
