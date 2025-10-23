@@ -276,7 +276,7 @@ def expected_wgs_tumour_only_command(cg_balsamic_config: BalsamicConfig) -> str:
     )
 
 
-def test_create_tgs_normal_only(
+def test_create_tgs_myeloid_normal_only(
     cg_balsamic_config: BalsamicConfig,
     expected_tgs_myeloid_normal_only_command: str,
     mocker: MockerFixture,
@@ -303,7 +303,7 @@ def test_create_tgs_normal_only(
 
     # GIVEN a Lims API
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.get_capture_kit_strict = Mock(return_value="myeloid")
+    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
@@ -322,11 +322,13 @@ def test_create_tgs_normal_only(
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("myeloid")
+    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("bed_short_name")
 
 
-def test_create_tgs_paired(
-    cg_balsamic_config: BalsamicConfig, expected_tgs_paired_command: str, mocker: MockerFixture
+def test_create_tgs_lymphoid_paired(
+    cg_balsamic_config: BalsamicConfig,
+    expected_tgs_lymphoid_paired_command: str,
+    mocker: MockerFixture,
 ):
     # GIVEN a case with one tumor and one normal WGS samples
     tumour_sample: Sample = create_autospec(
@@ -348,8 +350,10 @@ def test_create_tgs_paired(
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_paired_case)
+    bed: Bed = create_autospec(Bed)
+    bed.name = BalsamicObservationPanel.LYMPHOID
     store.get_bed_version_by_short_name_strict = Mock(
-        return_value=create_autospec(BedVersion, filename="bed_version.bed")
+        return_value=create_autospec(BedVersion, filename="lymphoid.bed", bed=bed)
     )
 
     # GIVEN a Lims API
@@ -369,8 +373,11 @@ def test_create_tgs_paired(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_tgs_paired_command, check=True, shell=True, stderr=-1, stdout=-1
+        args=expected_tgs_lymphoid_paired_command, check=True, shell=True, stderr=-1, stdout=-1
     )
+
+    # THEN the bed version should have been fetched using the LIMS capture kit
+    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("bed_short_name")
 
 
 def test_create_tgs_tumour_only(
@@ -389,8 +396,10 @@ def test_create_tgs_tumour_only(
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_tumour_only_case)
+    bed: Bed = create_autospec(Bed)
+    bed.name = "bed_without_a_dump_file"
     store.get_bed_version_by_short_name_strict = Mock(
-        return_value=create_autospec(BedVersion, filename="bed_version.bed")
+        return_value=create_autospec(BedVersion, filename="bed_version.bed", bed=bed)
     )
 
     # GIVEN a Lims API
