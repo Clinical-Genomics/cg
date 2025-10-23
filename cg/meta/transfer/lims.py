@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from enum import Enum
 
 import genologics.entities
@@ -52,7 +53,11 @@ class TransferLims(object):
         }
 
     def transfer_samples(
-        self, status_type: SampleState, include: str = "unset", sample_id: str = None
+        self,
+        age_limit: int,
+        status_type: SampleState,
+        include: str = "unset",
+        sample_id: str = None,
     ):
         """Transfer information about samples."""
 
@@ -60,6 +65,11 @@ class TransferLims(object):
             samples: list[Sample] = self.status.get_samples_by_internal_id(internal_id=sample_id)
         else:
             samples: list[Sample] = self._get_samples_to_include(include, status_type)
+
+        if age_limit and samples:
+            samples: list[samples] = self._exclude_samples_based_on_order_at_date(
+                samples, age_limit
+            )
 
         if samples is None:
             LOG.info(f"No samples to process found with {include} {status_type.value}")
@@ -91,9 +101,7 @@ class TransferLims(object):
         elif include == IncludeOptions.NOTINVOICED.value:
             samples = self.status.get_samples_not_invoiced()
         elif include == IncludeOptions.ALL.value:
-            samples = (
-                self.status.get_samples_not_down_sampled()
-            )  # TODO: Could I add my filter here? What is going on?
+            samples = self.status.get_samples_not_down_sampled()
         return samples
 
     def transfer_pools(self, status_type: PoolState):
@@ -153,3 +161,13 @@ class TransferLims(object):
             )
             return False
         return True
+
+    @staticmethod
+    def _exclude_samples_with_an_older_order_at_date(
+        samples: list[Sample], age_limit: int
+    ) -> list[Sample]:
+        time_limit = datetime.year - age_limit
+        for sample in samples:
+            sample = sample.ordered_at >= time_limit
+            samples.pop(samples.index(sample))
+        return samples
