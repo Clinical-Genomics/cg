@@ -16,7 +16,6 @@ from cg.services.analysis_starter.configurator.models.balsamic import (
 )
 from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
-from tests.conftest import bed_file
 
 LOG = logging.getLogger(__name__)
 
@@ -117,7 +116,7 @@ class BalsamicConfigFileCreator:
     def _build_targeted_config(
         self, case: Case, override_panel_bed: str | None
     ) -> BalsamicConfigInput:
-        bed_version: BedVersion = self._resolve_bed_file(
+        bed_version: BedVersion = self._get_bed_version(
             case=case, override_panel_bed=override_panel_bed
         )
         bed_file: Path = Path(self.bed_directory, bed_version.filename)
@@ -201,8 +200,7 @@ class BalsamicConfigFileCreator:
     def _is_case_paired_analysis(case: Case) -> bool:
         return len(case.samples) == 2
 
-    def _resolve_bed_file(self, case: Case, override_panel_bed: str | None) -> BedVersion:
-        """Get the bed name from LIMS. Assumes that all samples in the case have the same panel."""
+    def _get_bed_version(self, case: Case, override_panel_bed: str | None) -> BedVersion:
         first_sample: Sample = case.samples[0]
         bed_name: str = override_panel_bed or self.lims_api.get_capture_kit_strict(
             first_sample.internal_id
