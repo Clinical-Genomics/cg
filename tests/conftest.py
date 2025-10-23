@@ -2033,7 +2033,7 @@ def context_config(
                     "Twist Exome Comprehensive": Path("loqusdb_exome_dump"),
                 },
             },
-            "loqusdb_panel_files": {"GMSmyeloid": "bogus/path"},
+            "panel_of_normals": {"bed_short_name": Path("absolute_path_to_pon_file.cnn")},
             "pon_path": str(cg_dir),
             "root": str(balsamic_dir),
             "slurm": {

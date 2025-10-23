@@ -195,7 +195,7 @@ class BalsamicConfig(CommonAppConfig):
     gens_coverage_male_path: Path
     gnomad_af5_path: Path
     head_job_partition: str
-    loqusdb_path: str
+    loqusdb_path: str  # TODO Remove?
     loqusdb_artefact_snv: Path
     loqusdb_cancer_germline_snv: Path
     loqusdb_cancer_somatic_snv: Path
@@ -203,8 +203,7 @@ class BalsamicConfig(CommonAppConfig):
     loqusdb_clinical_snv: Path
     loqusdb_clinical_sv: Path
     loqusdb_dump_files: LoqusDBDumpFiles
-    # TODO try the str in the dict to be a BalsamicObservationPanel enum
-    loqusdb_panel_files: dict[str, Path]  # Includes the Exome file
+    panel_of_normals: dict[str, Path]
     pon_path: Path
     root: Path
     sentieon_licence_path: Path
