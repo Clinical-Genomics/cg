@@ -195,7 +195,7 @@ class BalsamicConfig(CommonAppConfig):
     gens_coverage_male_path: Path
     gnomad_af5_path: Path
     head_job_partition: str
-    loqusdb_path: str  # TODO Remove?
+    loqusdb_path: str
     loqusdb_artefact_snv: Path
     loqusdb_cancer_germline_snv: Path
     loqusdb_cancer_somatic_snv: Path

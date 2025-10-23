@@ -52,7 +52,6 @@ class BalsamicConfigFileCreator:
         self.loqusdb_clinical_snv: Path = cg_balsamic_config.loqusdb_clinical_snv
         self.loqusdb_clinical_sv: Path = cg_balsamic_config.loqusdb_clinical_sv
         self.panel_of_normals: dict = cg_balsamic_config.panel_of_normals
-        self.pon_directory: Path = cg_balsamic_config.pon_path
         self.slurm_account: str = cg_balsamic_config.slurm.account
         self.slurm_mail_user: str = cg_balsamic_config.slurm.mail_user
         self.swegen_snv: Path = cg_balsamic_config.swegen_snv
