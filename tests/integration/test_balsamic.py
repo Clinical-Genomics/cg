@@ -212,7 +212,7 @@ def test_start_available_tgs_tumour_only(
         f"--gender female "
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {test_root_dir}/balsamic_gnomad_af5_path "
-        f"--panel-bed {test_root_dir}/balsamic_bed_path/panel_bed_file "
+        f"--panel-bed {test_root_dir}/balsamic_bed_path/dummy_filename "
         f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
         f"--sentieon-license localhost "
         f"--tumor-sample-name {sample.internal_id}"
