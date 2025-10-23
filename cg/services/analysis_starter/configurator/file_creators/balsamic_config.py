@@ -52,6 +52,7 @@ class BalsamicConfigFileCreator:
         self.loqusdb_cancer_somatic_sv: Path = cg_balsamic_config.loqusdb_cancer_somatic_sv
         self.loqusdb_clinical_snv: Path = cg_balsamic_config.loqusdb_clinical_snv
         self.loqusdb_clinical_sv: Path = cg_balsamic_config.loqusdb_clinical_sv
+        self.panel_of_normals: dict = cg_balsamic_config.panel_of_normals
         self.pon_directory: Path = cg_balsamic_config.pon_path
         self.slurm_account: str = cg_balsamic_config.slurm.account
         self.slurm_mail_user: str = cg_balsamic_config.slurm.mail_user
@@ -207,27 +208,16 @@ class BalsamicConfigFileCreator:
         )
         return self.status_db.get_bed_version_by_short_name_strict(bed_name)
 
-    def _get_pon_file(self, bed_file: Path) -> Path | None:
+    def _get_pon_file(self, bed_short_name: str) -> Path | None:
         """Finds the corresponding PON file for panel cases based on the given bed file.
         These are versioned and named like: <bed_file_name>_hg19_design_CNVkit_PON_reference_v<version>.cnn
         This method returns the latest version of the PON file matching the bed name.
         """
-        # TODO: Discuss if we want to keep this logic or if we want to fetch this from servers
-        identifier: str = bed_file.stem
-        pattern: re.Pattern[str] = re.compile(rf"{re.escape(identifier)}.*_v(\d+)\.cnn$")
-        candidates: list = []
-
-        for file in self.pon_directory.glob("*.cnn"):
-            if match := pattern.search(file.name):
-                version = int(match[1])
-                candidates.append((version, file))
-
-        if not candidates:
-            LOG.info(f"No PON file found for bed file {bed_file.name}. Configuring without PON.")
+        if pon_file := self.panel_of_normals.get(bed_short_name):
+            return pon_file
+        else:
+            LOG.info(f"No PON file found for bed file {pon_file}. Configuring without PON.")
             return None
-        _, latest_file = max(candidates, key=lambda x: x[0])
-
-        return latest_file
 
     def _get_sample_config_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, f"{case_id}.json")
