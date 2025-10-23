@@ -144,8 +144,8 @@ def test_balsamic_get_start_command_all_flags_set():
     expected_command = (
         "/path/to/conda run "
         "/path/to/balsamic_binary run analysis "
-        "--qos normal "
         "--account balsamic_account "
+        "--qos normal "
         "--sample-config /path/to/sample/config "
         "--headjob-partition head_job_partition "
         "--run-analysis "
