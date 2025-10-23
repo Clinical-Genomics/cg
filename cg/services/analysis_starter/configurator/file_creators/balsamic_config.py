@@ -1,5 +1,4 @@
 import logging
-import re
 import subprocess
 from pathlib import Path
 from typing import cast
@@ -146,7 +145,7 @@ class BalsamicConfigFileCreator:
             gnomad_min_af5=self.gnomad_af5_path,
             normal_sample_name=self._get_normal_sample_id_from_paired_analysis(case),
             panel_bed=bed_file,
-            pon_cnn=self._get_pon_file(bed_file),
+            pon_cnn=self._get_pon_file(bed_version.shortname),
             exome=self._all_samples_are_exome(case),
             sentieon_install_dir=self.sentieon_licence_path,
             sentieon_license=self.sentieon_licence_server,
@@ -208,7 +207,7 @@ class BalsamicConfigFileCreator:
         )
         return self.status_db.get_bed_version_by_short_name_strict(bed_name)
 
-    def _get_pon_file(self, bed_short_name: str) -> Path | None:
+    def _get_pon_file(self, bed_short_name: str | None) -> Path | None:
         """Finds the corresponding PON file for panel cases based on the given bed file.
         These are versioned and named like: <bed_file_name>_hg19_design_CNVkit_PON_reference_v<version>.cnn
         This method returns the latest version of the PON file matching the bed name.

@@ -299,7 +299,9 @@ def test_create_tgs_myeloid_normal_only(
     bed: Bed = create_autospec(Bed)
     bed.name = BalsamicObservationPanel.MYELOID
     store.get_bed_version_by_short_name_strict = Mock(
-        return_value=create_autospec(BedVersion, filename="myeloid.bed", bed=bed)
+        return_value=create_autospec(
+            BedVersion, filename="myeloid.bed", bed=bed, shortname="bed_short_name"
+        )
     )
 
     # GIVEN a Lims API
