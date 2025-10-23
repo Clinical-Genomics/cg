@@ -8,13 +8,14 @@ from pytest_mock import MockerFixture
 import cg.services.analysis_starter.configurator.file_creators.balsamic_config as creator
 from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
+from cg.constants.observations import BalsamicObservationPanel
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, LimsDataError
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
 )
-from cg.store.models import BedVersion, Case, Sample
+from cg.store.models import Bed, BedVersion, Case, Sample
 from cg.store.store import Store
 
 
@@ -123,6 +124,7 @@ def expected_wes_normal_only_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--cadd-annotations {cg_balsamic_config.cadd_path} "
         f"--cancer-germline-snv-observations {cg_balsamic_config.loqusdb_cancer_germline_snv} "
         f"--cancer-somatic-snv-observations {cg_balsamic_config.loqusdb_cancer_somatic_snv} "
+        f"--cancer-somatic-snv-panel-observations {cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations[BalsamicObservationPanel.EXOME]} "
         f"--cancer-somatic-sv-observations {cg_balsamic_config.loqusdb_cancer_somatic_sv} "
         f"--case-id case_1 "
         f"--clinical-snv-observations {cg_balsamic_config.loqusdb_clinical_snv} "
@@ -132,7 +134,7 @@ def expected_wes_normal_only_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--gender female "
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {cg_balsamic_config.gnomad_af5_path} "
-        f"--panel-bed {cg_balsamic_config.bed_path}/bed_version.bed "
+        f"--panel-bed {cg_balsamic_config.bed_path}/exome.bed "
         f"--sentieon-install-dir {cg_balsamic_config.sentieon_licence_path} "
         f"--sentieon-license {cg_balsamic_config.sentieon_licence_server} "
         f"--swegen-snv {cg_balsamic_config.swegen_snv} "
@@ -532,13 +534,15 @@ def test_create_wes_normal_only(
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wes_normal_only_case)
+    bed: Bed = create_autospec(Bed)
+    bed.name = "Twist Exome Comprehensive"
     store.get_bed_version_by_short_name_strict = Mock(
-        return_value=create_autospec(BedVersion, filename="bed_version.bed")
+        return_value=create_autospec(BedVersion, filename="exome.bed", bed=bed)
     )
 
     # GIVEN a Lims API
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.get_capture_kit_strict = Mock(return_value="bed_short_name")
+    lims_api.get_capture_kit_strict = Mock(return_value="twist_exome")
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
