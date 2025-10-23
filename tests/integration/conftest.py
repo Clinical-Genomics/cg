@@ -87,7 +87,7 @@ def test_run_paths(
 ) -> IntegrationTestPaths:
     test_root_dir: Path = tmp_path_factory.mktemp(current_workflow)
 
-    config_file_path = create_parsed_config(
+    config_file_path: Path = create_formatted_config(
         status_db_uri=status_db_uri,
         housekeeper_db_uri=housekeeper_db_uri,
         test_root_dir=test_root_dir.as_posix(),
@@ -135,7 +135,7 @@ def expect_to_add_pending_analysis_to_trailblazer(
     ticket_id: int,
     case_path: Path,
     config_path: Path,
-    type: AnalysisType,
+    analysis_type: AnalysisType,
     workflow: Workflow,
 ):
     trailblazer_server.expect_request(
@@ -147,7 +147,7 @@ def expect_to_add_pending_analysis_to_trailblazer(
         b'"workflow_manager": "slurm", "tower_workflow_id": null, "is_hidden": true}'
         % {
             b"email": environ_email().encode(),
-            b"type": str(type).encode(),
+            b"type": str(analysis_type).encode(),
             b"case_id": case.internal_id.encode(),
             b"ticket_id": str(ticket_id).encode(),
             b"case_path": str(case_path).encode(),
@@ -167,7 +167,7 @@ def expect_to_add_pending_analysis_to_trailblazer(
     )
 
 
-def create_parsed_config(status_db_uri: str, housekeeper_db_uri: str, test_root_dir: str):
+def create_formatted_config(status_db_uri: str, housekeeper_db_uri: str, test_root_dir: str):
     template_path = "tests/integration/config/cg-test.yaml"
     with open(template_path) as f:
         config_content = f.read()

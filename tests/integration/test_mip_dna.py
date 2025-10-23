@@ -133,7 +133,7 @@ def test_start_available_mip_dna(
         case_path=case_path,
         config_path=Path(case_path, "analysis", "slurm_job_ids.yaml"),
         workflow=Workflow.MIP_DNA,
-        type=AnalysisType.WGS,
+        analysis_type=AnalysisType.WGS,
     )
 
     # GIVEN the analysis can be started as a sub process

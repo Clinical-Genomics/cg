@@ -106,7 +106,7 @@ def case_wgs_paired(
     sample_wgs_tumour: Sample,
     status_db: Store,
     ticket_id: int,
-):
+) -> Case:
     case: Case = helpers.add_case(
         store=status_db, data_analysis=Workflow.BALSAMIC, ticket=str(ticket_id)
     )
@@ -181,7 +181,7 @@ def test_start_available_tgs_tumour_only(
         case_path=case_path,
         config_path=Path(case_path, "analysis", "slurm_jobids.yaml"),
         workflow=Workflow.BALSAMIC,
-        type=AnalysisType.TGS,
+        analysis_type=AnalysisType.TGS,
     )
 
     # WHEN running balsamic start-available
@@ -212,7 +212,7 @@ def test_start_available_tgs_tumour_only(
         f"--gender female "
         f"--genome-version hg19 "
         f"--gnomad-min-af5 {test_root_dir}/balsamic_gnomad_af5_path "
-        f"--panel-bed {test_root_dir}/balsamic_bed_path/dummy_filename "
+        f"--panel-bed {test_root_dir}/balsamic_bed_path/panel_bed_file "
         f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
         f"--sentieon-license localhost "
         f"--tumor-sample-name {sample.internal_id}"
@@ -226,7 +226,7 @@ def test_start_available_tgs_tumour_only(
         stdout=ANY,
     )
 
-    # THEN balsamic run analysis was called in the correct way
+    # THEN Balsamic run analysis was called in the correct way
     subprocess_mock.run.assert_any_call(
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path run analysis "
@@ -270,8 +270,8 @@ def test_start_available_wgs_paired(
 
     # GIVEN a case
     # GIVEN an order associated with the case
-    # GIVEN a sample associated with the case
-    # GIVEN a flow cell and sequencing run associated with the sample
+    # GIVEN a tumour sample and a normal sample associated with the case
+    # GIVEN a flow cell and sequencing run associated with the samples
     # GIVEN that a gzipped-fastq file exists for the sample
     # GIVEN bundle data with the fastq files exists in Housekeeper
     case_id = case_wgs_paired.internal_id
@@ -310,7 +310,7 @@ def test_start_available_wgs_paired(
         case_path=case_path,
         config_path=Path(case_path, "analysis", "slurm_jobids.yaml"),
         workflow=Workflow.BALSAMIC,
-        type=AnalysisType.WGS,
+        analysis_type=AnalysisType.WGS,
     )
 
     # WHEN running balsamic start-available
@@ -401,7 +401,7 @@ def create_wgs_config_file(test_root_dir: Path, case: Case) -> Path:
     return filepath
 
 
-def expect_lims_sample_request(lims_server, sample, bed_name):
+def expect_lims_sample_request(lims_server: HTTPServer, sample: Sample, bed_name: str):
     lims_server.expect_request(f"/lims/api/v2/samples/{sample.internal_id}").respond_with_data(
         f"""<smp:sample xmlns:udf="http://genologics.com/ri/userdefined" xmlns:ri="http://genologics.com/ri" xmlns:file="http://genologics.com/ri/file" xmlns:smp="http://genologics.com/ri/sample" uri="http://127.0.0.1:8000/api/v2/samples/ACC2351A1" limsid="ACC2351A1">
 <name>2016-02293</name>
