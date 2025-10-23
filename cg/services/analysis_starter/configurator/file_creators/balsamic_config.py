@@ -14,8 +14,9 @@ from cg.services.analysis_starter.configurator.models.balsamic import (
     BalsamicConfigInputPanel,
     BalsamicConfigInputWGS,
 )
-from cg.store.models import Case, Sample
+from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
+from tests.conftest import bed_file
 
 LOG = logging.getLogger(__name__)
 
@@ -46,6 +47,9 @@ class BalsamicConfigFileCreator:
         )
         self.loqusdb_cancer_germline_snv: Path = cg_balsamic_config.loqusdb_cancer_germline_snv
         self.loqusdb_cancer_somatic_snv: Path = cg_balsamic_config.loqusdb_cancer_somatic_snv
+        self.cancer_somatic_snv_panel_observations: dict = (
+            cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations
+        )
         self.loqusdb_cancer_somatic_sv: Path = cg_balsamic_config.loqusdb_cancer_somatic_sv
         self.loqusdb_clinical_snv: Path = cg_balsamic_config.loqusdb_clinical_snv
         self.loqusdb_clinical_sv: Path = cg_balsamic_config.loqusdb_clinical_sv
@@ -113,7 +117,10 @@ class BalsamicConfigFileCreator:
     def _build_targeted_config(
         self, case: Case, override_panel_bed: str | None
     ) -> BalsamicConfigInput:
-        bed_file: Path = self._resolve_bed_file(case=case, override_panel_bed=override_panel_bed)
+        bed_version: BedVersion = self._resolve_bed_file(
+            case=case, override_panel_bed=override_panel_bed
+        )
+        bed_file: Path = Path(self.bed_directory, bed_version.filename)
         patient_sex: SexOptions = self._get_patient_sex(case)
         return BalsamicConfigInputPanel(
             analysis_dir=self.root_dir,
@@ -124,6 +131,9 @@ class BalsamicConfigFileCreator:
             cadd_annotations=self.cadd_path,
             cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
             cancer_somatic_snv_observations=self.loqusdb_cancer_somatic_snv,
+            cancer_somatic_snv_panel_observations=self.cancer_somatic_snv_panel_observations.get(
+                bed_version.bed.name
+            ),
             cancer_somatic_sv_observations=self.loqusdb_cancer_somatic_sv,
             case_id=case.internal_id,
             clinical_snv_observations=self.loqusdb_clinical_snv,
@@ -191,14 +201,13 @@ class BalsamicConfigFileCreator:
     def _is_case_paired_analysis(case: Case) -> bool:
         return len(case.samples) == 2
 
-    def _resolve_bed_file(self, case: Case, override_panel_bed: str | None) -> Path:
+    def _resolve_bed_file(self, case: Case, override_panel_bed: str | None) -> BedVersion:
         """Get the bed name from LIMS. Assumes that all samples in the case have the same panel."""
         first_sample: Sample = case.samples[0]
         bed_name: str = override_panel_bed or self.lims_api.get_capture_kit_strict(
             first_sample.internal_id
         )
-        bed_version = self.status_db.get_bed_version_by_short_name_strict(bed_name)
-        return Path(self.bed_directory, bed_version.filename)
+        return self.status_db.get_bed_version_by_short_name_strict(bed_name)
 
     def _get_pon_file(self, bed_file: Path) -> Path | None:
         """Finds the corresponding PON file for panel cases based on the given bed file.
