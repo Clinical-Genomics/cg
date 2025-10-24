@@ -75,7 +75,7 @@ balsamic:
       GMSlymphoid: "{test_root_dir}/loqusdb/lymphoid.vcf.gz"
       GMSmyeloid: "{test_root_dir}/loqusdb/myeloid.vcf.gz"
       "Twist Exome Comprehensive": "{test_root_dir}/loqusdb/exome.vcf.gz"
-  loqusdb_path: "/home/proj/production/cancer/reference/loqusdb"
+  loqusdb_path: "{test_root_dir}/loqusdb"
   panel_of_normals:
     GMCKsolid4.1: "{test_root_dir}/PON/gmcksolid_4.1.cnn"
     gmck_solid_4.1: "{test_root_dir}/PON/gmcksolid_4.1.cnn"
