@@ -15,6 +15,5 @@ class BalsamicTracker(Tracker):
         return Path(self.workflow_root, case_id, "analysis", "slurm_jobids.yaml")
 
     def _get_workflow_version(self, case_config: BalsamicCaseConfig) -> str:
-        read_json(case_config.sample_config)
         config_data: dict = read_json(case_config.sample_config)
         return config_data["analysis"]["BALSAMIC_version"]
