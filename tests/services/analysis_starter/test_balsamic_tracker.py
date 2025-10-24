@@ -12,6 +12,7 @@ from cg.constants.constants import WorkflowManager
 from cg.constants.priority import TrailblazerPriority
 from cg.constants.tb import AnalysisType
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
+from cg.services.analysis_starter.tracker.implementations import balsamic
 from cg.services.analysis_starter.tracker.implementations.balsamic import BalsamicTracker
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
@@ -40,8 +41,9 @@ def test_balsamic_tracker_successful(
     db_case: Case = balsamic_tracker.store.get_case_by_internal_id(balsamic_case_config.case_id)
 
     # GIVEN that a Balsamic Config file exists
-    mocker.patch(
-        "cg.services.analysis_starter.tracker.implementations.balsamic.read_json",
+    mocker.patch.object(
+        balsamic,
+        "read_json",
         return_value={"analysis": {"BALSAMIC_version": "1.0.12"}},
     )
 
