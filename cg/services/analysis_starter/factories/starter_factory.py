@@ -101,7 +101,7 @@ class AnalysisStarterFactory:
                 trailblazer_api=self.cg_config.trailblazer_api,
                 workflow_root=self.cg_config.microsalt.root,
             )
-        if workflow in [
+        elif workflow in [
             Workflow.BALSAMIC,
             Workflow.BALSAMIC_UMI,
         ]:
