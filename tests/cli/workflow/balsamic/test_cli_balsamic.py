@@ -54,7 +54,7 @@ def test_balsamic_config_case_all_flags(
     # THEN the command exits successfully
     assert result.exit_code == 0
 
-    # THEN the configurator should have been created and called
+    # THEN the configurator should have been created and called with the flag values
     get_configurator_spy.assert_called_once_with(ANY, Workflow.BALSAMIC)
     mock_configure.assert_called_once_with(case_id=case_id, panel_bed="panel_short_name")
 
