@@ -12,6 +12,7 @@ from cg.cli.base import base
 from cg.constants.constants import CaseActions, Workflow
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.tb import AnalysisType
+from cg.services.analysis_starter.configurator.file_creators import balsamic_config
 from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
 from cg.utils import commands
@@ -123,8 +124,16 @@ def case_wgs_paired(
 
 @pytest.mark.xdist_group(name="integration")
 @pytest.mark.integration
+@pytest.mark.parametrize(
+    "command",
+    [
+        "start-available",
+        "dev-start-available",
+    ],
+)
 def test_start_available_tgs_tumour_only(
     case_tgs_tumour_only: Case,
+    command: str,
     sample_tgs_tumour: Sample,
     test_run_paths: IntegrationTestPaths,
     helpers: StoreHelpers,
@@ -154,10 +163,13 @@ def test_start_available_tgs_tumour_only(
     expect_lims_sample_request(lims_server=httpserver, sample=sample, bed_name=bed_name)
 
     # GIVEN a call to balsamic config case successfully generates a config file
-    subprocess_mock = mocker.patch.object(commands, "subprocess")
+    if command == "start-available":
+        subprocess_mock = mocker.patch.object(commands, "subprocess")
+    elif command == "dev-start-available":
+        subprocess_mock = mocker.patch.object(balsamic_config, "subprocess")
 
     def mock_run(*args, **kwargs):
-        command = args[0]
+        command = args[0] if args else kwargs["args"]
         stdout = b""
 
         if "balsamic_binary_path config case" in command:
@@ -192,8 +204,9 @@ def test_start_available_tgs_tumour_only(
             test_run_paths.cg_config_file.as_posix(),
             "workflow",
             "balsamic",
-            "start-available",
+            command,
         ],
+        catch_exceptions=False,
     )
 
     # THEN a successful exit code is returned
@@ -323,6 +336,7 @@ def test_start_available_wgs_paired(
             "balsamic",
             "start-available",
         ],
+        catch_exceptions=False,
     )
 
     # THEN a successful exit code is returned
