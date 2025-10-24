@@ -73,7 +73,7 @@ class BalsamicConfigFileCreator:
             stderr=subprocess.PIPE,
         )
 
-    def _build_cli_input(self, case_id, **flags) -> BalsamicConfigInput:
+    def _build_cli_input(self, case_id: str, **flags) -> BalsamicConfigInput:
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
         if self._all_samples_are_wgs(case):
             return self._build_wgs_config(case)
