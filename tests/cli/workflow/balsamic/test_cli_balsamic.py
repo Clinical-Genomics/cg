@@ -116,7 +116,7 @@ def test_balsamic_run_all_flags(
     # THEN the command exits successfully
     assert result.exit_code == 0
 
-    # THEN the analysis starter should have been created and called
+    # THEN the analysis starter should have been created and called with the flag values
     get_analysis_starter_spy.assert_called_once_with(ANY, Workflow.BALSAMIC)
     mock_run.assert_called_once_with(case_id=case_id, workflow_profile=workflow_profile)
 
