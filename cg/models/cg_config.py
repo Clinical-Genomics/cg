@@ -203,7 +203,7 @@ class BalsamicConfig(CommonAppConfig):
     loqusdb_clinical_snv: Path
     loqusdb_clinical_sv: Path
     loqusdb_dump_files: LoqusDBDumpFiles
-    panel_of_normals: dict[str, Path]
+    panel_of_normals: dict[str, Path]  # For TGS and Exome
     pon_path: Path
     root: Path
     sentieon_licence_path: Path
