@@ -1940,6 +1940,7 @@ def context_config(
     email_address: str,
     fluffy_dir: Path,
     housekeeper_dir: Path,
+    head_job_partition: str,
     mip_dir: Path,
     cg_dir: Path,
     conda_binary: Path,
@@ -2015,6 +2016,7 @@ def context_config(
             "gens_coverage_female_path": str(cg_dir),
             "gens_coverage_male_path": str(cg_dir),
             "gnomad_af5_path": str(cg_dir),
+            "head_job_partition": head_job_partition,
             "loqusdb_path": str(cg_dir),
             "pon_path": str(cg_dir),
             "root": str(balsamic_dir),
@@ -4587,3 +4589,9 @@ def capture_kit() -> str:
 def case(analysis_store: Store) -> Case:
     """Return a case models object."""
     return analysis_store.get_cases()[0]
+
+
+@pytest.fixture(scope="function")
+def head_job_partition() -> str:
+    """Return the name of the head job partition."""
+    return "head-job"
