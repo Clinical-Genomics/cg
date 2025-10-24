@@ -15,7 +15,7 @@ from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
 )
-from cg.store.models import Bed, BedVersion, Case, Sample
+from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
 
 
@@ -38,12 +38,13 @@ def test_create_tgs_myeloid_normal_only(
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_normal_only_case)
 
-    # GIVEN a bed and a bed version for a myeloid capture kit
-    bed: Bed = create_autospec(Bed)
-    bed.name = BalsamicObservationPanel.MYELOID
+    # GIVEN a bed version for a myeloid capture kit
     store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(
-            BedVersion, bed=bed, filename="myeloid.bed", shortname="myeloid_short_name"
+            BedVersion,
+            bed_name=BalsamicObservationPanel.MYELOID,
+            filename="myeloid.bed",
+            shortname="myeloid_short_name",
         )
     )
 
@@ -99,12 +100,13 @@ def test_create_tgs_lymphoid_paired(
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_paired_case)
 
-    # GIVEN a bed and a bed version for a lymphoid capture kit
-    bed: Bed = create_autospec(Bed)
-    bed.name = BalsamicObservationPanel.LYMPHOID
+    # GIVEN a bed version for a lymphoid capture kit
     store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(
-            BedVersion, bed=bed, filename="lymphoid.bed", shortname="lymphoid_short_name"
+            BedVersion,
+            bed_name=BalsamicObservationPanel.LYMPHOID,
+            filename="lymphoid.bed",
+            shortname="lymphoid_short_name",
         )
     )
 
@@ -151,13 +153,11 @@ def test_create_tgs_tumour_only(
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_tumour_only_case)
 
-    # GIVEN a bed and a bed version without a LoqusDB dump file nor PON file
-    bed: Bed = create_autospec(Bed)
-    bed.name = "bed_without_a_dump_file"
+    # GIVEN a bed version without a LoqusDB dump file nor PON file
     store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(
             BedVersion,
-            bed=bed,
+            bed_name="bed_without_a_dump_file",
             filename="bed_version.bed",
             shortname="bed_short_name",
         )
@@ -244,12 +244,13 @@ def test_create_wes_normal_only(
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wes_normal_only_case)
 
-    # GIVEN a bed and a bed version for the exome capture kit
-    bed: Bed = create_autospec(Bed)
-    bed.name = BalsamicObservationPanel.EXOME
+    # GIVEN a bed version for the exome capture kit
     store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(
-            BedVersion, bed=bed, filename="exome.bed", shortname="exome_short_name"
+            BedVersion,
+            bed_name=BalsamicObservationPanel.EXOME,
+            filename="exome.bed",
+            shortname="exome_short_name",
         )
     )
 
@@ -302,11 +303,14 @@ def test_create_wes_paired(
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wes_paired_case)
-    bed: Bed = create_autospec(Bed)
-    bed.name = BalsamicObservationPanel.EXOME
+
+    # GIVEN a bed version for the exome capture kit
     store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(
-            BedVersion, bed=bed, filename="exome.bed", shortname="exome_short_name"
+            BedVersion,
+            bed_name=BalsamicObservationPanel.EXOME,
+            filename="exome.bed",
+            shortname="exome_short_name",
         )
     )
 
@@ -350,11 +354,14 @@ def test_create_wes_tumour_only(
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wes_tumor_only_case)
-    bed: Bed = create_autospec(Bed)
-    bed.name = BalsamicObservationPanel.EXOME
+
+    # GIVEN a bed version for the exome capture kit
     store.get_bed_version_by_short_name_strict = Mock(
         return_value=create_autospec(
-            BedVersion, bed=bed, filename="exome.bed", shortname="exome_short_name"
+            BedVersion,
+            bed_name=BalsamicObservationPanel.EXOME,
+            filename="exome.bed",
+            shortname="exome_short_name",
         )
     )
 
@@ -434,7 +441,7 @@ def test_create_wgs_tumor_only(
         internal_id="sample_1",
         is_tumour=True,
         prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
-        sex=SexOptions.FEMALE,
+        sex=SexOptions.MALE,
     )
     wgs_tumor_only_case: Case = create_autospec(
         Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
