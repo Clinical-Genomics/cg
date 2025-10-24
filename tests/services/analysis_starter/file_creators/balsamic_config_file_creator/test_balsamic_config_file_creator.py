@@ -65,7 +65,7 @@ def test_create_tgs_myeloid_normal_only(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_tgs_myeloid_normal_only_command, check=True, shell=True, stderr=-1, stdout=-1
+        args=expected_tgs_myeloid_normal_only_command, check=False, shell=True, stderr=-1, stdout=-1
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
@@ -127,7 +127,7 @@ def test_create_tgs_lymphoid_paired(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_tgs_lymphoid_paired_command, check=True, shell=True, stderr=-1, stdout=-1
+        args=expected_tgs_lymphoid_paired_command, check=False, shell=True, stderr=-1, stdout=-1
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
@@ -180,7 +180,7 @@ def test_create_tgs_tumour_only(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_tgs_tumour_only_command, check=True, shell=True, stderr=-1, stdout=-1
+        args=expected_tgs_tumour_only_command, check=False, shell=True, stderr=-1, stdout=-1
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
@@ -220,7 +220,7 @@ def test_create_override_panel_bed(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_tgs_tumour_only_command, check=True, shell=True, stderr=-1, stdout=-1
+        args=expected_tgs_tumour_only_command, check=False, shell=True, stderr=-1, stdout=-1
     )
 
     # THEN the panel bed flag value is used
@@ -271,7 +271,7 @@ def test_create_wes_normal_only(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_wes_normal_only_command, check=True, shell=True, stderr=-1, stdout=-1
+        args=expected_wes_normal_only_command, check=False, shell=True, stderr=-1, stdout=-1
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
@@ -331,7 +331,7 @@ def test_create_wes_paired(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_wes_paired_command, check=True, shell=True, stderr=-1, stdout=-1
+        args=expected_wes_paired_command, check=False, shell=True, stderr=-1, stdout=-1
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
@@ -382,7 +382,7 @@ def test_create_wes_tumour_only(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_wes_tumour_only_command, check=True, shell=True, stderr=-1, stdout=-1
+        args=expected_wes_tumour_only_command, check=False, shell=True, stderr=-1, stdout=-1
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
@@ -428,7 +428,7 @@ def test_create_wgs_paired(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_wgs_paired_command, check=True, shell=True, stderr=-1, stdout=-1
+        args=expected_wgs_paired_command, check=False, shell=True, stderr=-1, stdout=-1
     )
 
 
@@ -462,7 +462,7 @@ def test_create_wgs_tumor_only(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_wgs_tumour_only_command, check=True, shell=True, stderr=-1, stdout=-1
+        args=expected_wgs_tumour_only_command, check=False, shell=True, stderr=-1, stdout=-1
     )
 
 
