@@ -1,6 +1,6 @@
 from pathlib import Path
 from subprocess import CompletedProcess
-from unittest.mock import ANY, Mock, create_autospec
+from unittest.mock import ANY, Mock, call, create_autospec
 
 import pytest
 from click.testing import CliRunner, Result
@@ -218,7 +218,7 @@ def test_start_available_tgs_tumour_only(
         f"--tumor-sample-name {sample.internal_id}"
     )
 
-    subprocess_mock.run.assert_any_call(
+    assert subprocess_mock.run.mock_calls[0] == call(
         expected_config_case_command,
         check=False,
         shell=True,
@@ -227,14 +227,14 @@ def test_start_available_tgs_tumour_only(
     )
 
     # THEN Balsamic run analysis was called in the correct way
-    subprocess_mock.run.assert_any_call(
+    assert subprocess_mock.run.mock_calls[1] == call(
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path run analysis "
         f"--account balsamic_slurm_account "
-        f"--mail-user balsamic_mail_user@scilifelab.se "
         f"--qos normal "
         f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
-        f"--run-analysis --benchmark",
+        f"--headjob-partition head-jobs "
+        f"--run-analysis",
         check=False,
         shell=True,
         stderr=ANY,
@@ -336,6 +336,7 @@ def test_start_available_wgs_paired(
         f"--analysis-workflow balsamic "
         f"--balsamic-cache {test_root_dir}/balsamic_cache "
         f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
+        f"--artefact-sv-observations {test_root_dir}/loqusdb/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz "
         f"--case-id {case_id} "
         f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
         f"--gender female "
@@ -349,7 +350,7 @@ def test_start_available_wgs_paired(
         f"--tumor-sample-name {sample_wgs_tumour.internal_id}"
     )
 
-    subprocess_mock.run.assert_any_call(
+    assert subprocess_mock.run.mock_calls[0] == call(
         expected_config_case_command,
         check=False,
         shell=True,
@@ -358,14 +359,14 @@ def test_start_available_wgs_paired(
     )
 
     # THEN balsamic run analysis was called in the correct way
-    subprocess_mock.run.assert_any_call(
+    assert subprocess_mock.run.mock_calls[1] == call(
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path run analysis "
         f"--account balsamic_slurm_account "
-        f"--mail-user balsamic_mail_user@scilifelab.se "
         f"--qos normal "
         f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
-        f"--run-analysis --benchmark",
+        f"--headjob-partition head-jobs "
+        f"--run-analysis",
         check=False,
         shell=True,
         stderr=ANY,
