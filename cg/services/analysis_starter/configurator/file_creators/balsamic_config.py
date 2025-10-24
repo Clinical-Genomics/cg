@@ -201,10 +201,10 @@ class BalsamicConfigFileCreator:
 
     def _get_bed_version(self, case: Case, override_panel_bed: str | None) -> BedVersion:
         first_sample: Sample = case.samples[0]
-        bed_name: str = override_panel_bed or self.lims_api.get_capture_kit_strict(
+        short_name: str = override_panel_bed or self.lims_api.get_capture_kit_strict(
             first_sample.internal_id
         )
-        return self.status_db.get_bed_version_by_short_name_strict(bed_name)
+        return self.status_db.get_bed_version_by_short_name_strict(short_name)
 
     def _get_pon_file(self, bed_short_name: str | None) -> Path | None:
         """Finds the corresponding PON file for panel cases based on the given bed file.
