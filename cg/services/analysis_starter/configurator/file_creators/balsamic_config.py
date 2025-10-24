@@ -1,5 +1,4 @@
 import logging
-import re
 import subprocess
 from pathlib import Path
 from typing import cast
@@ -14,7 +13,7 @@ from cg.services.analysis_starter.configurator.models.balsamic import (
     BalsamicConfigInputPanel,
     BalsamicConfigInputWGS,
 )
-from cg.store.models import Case, Sample
+from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -41,13 +40,18 @@ class BalsamicConfigFileCreator:
         self.sentieon_licence_path: Path = cg_balsamic_config.sentieon_licence_path
         self.sentieon_licence_server: str = cg_balsamic_config.sentieon_licence_server
         self.loqusdb_artefact_snv: Path = cg_balsamic_config.loqusdb_artefact_snv
-        self.loqusdb_artefact_sv: Path = cg_balsamic_config.loqusdb_artefact_sv
+        self.artefact_sv_observations: Path = (
+            cg_balsamic_config.loqusdb_dump_files.artefact_sv_observations
+        )
         self.loqusdb_cancer_germline_snv: Path = cg_balsamic_config.loqusdb_cancer_germline_snv
         self.loqusdb_cancer_somatic_snv: Path = cg_balsamic_config.loqusdb_cancer_somatic_snv
+        self.cancer_somatic_snv_panel_observations: dict = (
+            cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations
+        )
         self.loqusdb_cancer_somatic_sv: Path = cg_balsamic_config.loqusdb_cancer_somatic_sv
         self.loqusdb_clinical_snv: Path = cg_balsamic_config.loqusdb_clinical_snv
         self.loqusdb_clinical_sv: Path = cg_balsamic_config.loqusdb_clinical_sv
-        self.pon_directory: Path = cg_balsamic_config.pon_path
+        self.panel_of_normals: dict = cg_balsamic_config.panel_of_normals
         self.slurm_account: str = cg_balsamic_config.slurm.account
         self.slurm_mail_user: str = cg_balsamic_config.slurm.mail_user
         self.swegen_snv: Path = cg_balsamic_config.swegen_snv
@@ -82,7 +86,7 @@ class BalsamicConfigFileCreator:
             analysis_dir=self.root_dir,
             analysis_workflow=cast(Workflow, case.data_analysis),
             artefact_snv_observations=self.loqusdb_artefact_snv,
-            artefact_sv_observations=self.loqusdb_artefact_sv,
+            artefact_sv_observations=self.artefact_sv_observations,
             balsamic_binary=self.balsamic_binary,
             balsamic_cache=self.cache_dir,
             cadd_annotations=self.cadd_path,
@@ -111,7 +115,10 @@ class BalsamicConfigFileCreator:
     def _build_targeted_config(
         self, case: Case, override_panel_bed: str | None
     ) -> BalsamicConfigInput:
-        bed_file: Path = self._resolve_bed_file(case=case, override_panel_bed=override_panel_bed)
+        bed_version: BedVersion = self._get_bed_version(
+            case=case, override_panel_bed=override_panel_bed
+        )
+        bed_file: Path = Path(self.bed_directory, bed_version.filename)
         patient_sex: SexOptions = self._get_patient_sex(case)
         return BalsamicConfigInputPanel(
             analysis_dir=self.root_dir,
@@ -122,6 +129,9 @@ class BalsamicConfigFileCreator:
             cadd_annotations=self.cadd_path,
             cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
             cancer_somatic_snv_observations=self.loqusdb_cancer_somatic_snv,
+            cancer_somatic_snv_panel_observations=self.cancer_somatic_snv_panel_observations.get(
+                bed_version.bed_name
+            ),
             cancer_somatic_sv_observations=self.loqusdb_cancer_somatic_sv,
             case_id=case.internal_id,
             clinical_snv_observations=self.loqusdb_clinical_snv,
@@ -134,7 +144,7 @@ class BalsamicConfigFileCreator:
             gnomad_min_af5=self.gnomad_af5_path,
             normal_sample_name=self._get_normal_sample_id_from_paired_analysis(case),
             panel_bed=bed_file,
-            pon_cnn=self._get_pon_file(bed_file),
+            pon_cnn=self._get_pon_file(bed_version.shortname),
             exome=self._all_samples_are_exome(case),
             sentieon_install_dir=self.sentieon_licence_path,
             sentieon_license=self.sentieon_licence_server,
@@ -189,36 +199,19 @@ class BalsamicConfigFileCreator:
     def _is_case_paired_analysis(case: Case) -> bool:
         return len(case.samples) == 2
 
-    def _resolve_bed_file(self, case: Case, override_panel_bed: str | None) -> Path:
-        """Get the bed name from LIMS. Assumes that all samples in the case have the same panel."""
+    def _get_bed_version(self, case: Case, override_panel_bed: str | None) -> BedVersion:
         first_sample: Sample = case.samples[0]
-        bed_name: str = override_panel_bed or self.lims_api.get_capture_kit_strict(
+        short_name: str = override_panel_bed or self.lims_api.get_capture_kit_strict(
             first_sample.internal_id
         )
-        bed_version = self.status_db.get_bed_version_by_short_name_strict(bed_name)
-        return Path(self.bed_directory, bed_version.filename)
+        return self.status_db.get_bed_version_by_short_name_strict(short_name)
 
-    def _get_pon_file(self, bed_file: Path) -> Path | None:
-        """Finds the corresponding PON file for panel cases based on the given bed file.
-        These are versioned and named like: <bed_file_name>_hg19_design_CNVkit_PON_reference_v<version>.cnn
-        This method returns the latest version of the PON file matching the bed name.
-        """
-        # TODO: Discuss if we want to keep this logic or if we want to fetch this from servers
-        identifier: str = bed_file.stem
-        pattern: re.Pattern[str] = re.compile(rf"{re.escape(identifier)}.*_v(\d+)\.cnn$")
-        candidates: list = []
-
-        for file in self.pon_directory.glob("*.cnn"):
-            if match := pattern.search(file.name):
-                version = int(match[1])
-                candidates.append((version, file))
-
-        if not candidates:
-            LOG.info(f"No PON file found for bed file {bed_file.name}. Configuring without PON.")
+    def _get_pon_file(self, bed_short_name: str | None) -> Path | None:
+        if pon_file := self.panel_of_normals.get(bed_short_name):
+            return pon_file
+        else:
+            LOG.info(f"No PON file found for bed file {pon_file}. Configuring without PON.")
             return None
-        _, latest_file = max(candidates, key=lambda x: x[0])
-
-        return latest_file
 
     def _get_sample_config_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, f"{case_id}.json")

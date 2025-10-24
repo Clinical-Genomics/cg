@@ -57,6 +57,7 @@ class BalsamicConfigInput(BaseModel):
 
 
 class BalsamicConfigInputPanel(BalsamicConfigInput):
+    cancer_somatic_snv_panel_observations: Path | None = None
     exome: bool
     panel_bed: Path
     pon_cnn: Path | None = (
@@ -73,6 +74,7 @@ class BalsamicConfigInputPanel(BalsamicConfigInput):
             "--cadd-annotations": self.cadd_annotations,
             "--cancer-germline-snv-observations": self.cancer_germline_snv_observations,
             "--cancer-somatic-snv-observations": self.cancer_somatic_snv_observations,
+            "--cancer-somatic-snv-panel-observations": self.cancer_somatic_snv_panel_observations,
             "--cancer-somatic-sv-observations": self.cancer_somatic_sv_observations,
             "--case-id": self.case_id,
             "--clinical-snv-observations": self.clinical_snv_observations,

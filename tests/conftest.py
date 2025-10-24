@@ -2019,14 +2019,21 @@ def context_config(
             "head_job_partition": head_job_partition,
             "loqusdb_path": str(cg_dir),
             "loqusdb_artefact_snv": str(cg_dir),
-            "loqusdb_artefact_sv": str(cg_dir),
             "loqusdb_cancer_germline_snv": str(cg_dir),
             "loqusdb_cancer_germline_sv": str(cg_dir),
             "loqusdb_cancer_somatic_snv": str(cg_dir),
             "loqusdb_cancer_somatic_sv": str(cg_dir),
             "loqusdb_clinical_snv": str(cg_dir),
             "loqusdb_clinical_sv": str(cg_dir),
-            "loqusdb_panel_files": {"GMSmyeloid": "bogus/path"},
+            "loqusdb_dump_files": {
+                "artefact_sv_observations": Path("bogus/artefact_sv_observations.txt"),
+                "cancer_somatic_snv_panel_observations": {
+                    "GMSmyeloid": Path("loqusdb_myeloid_dump"),
+                    "GMSlymphoid": Path("loqusdb_lymphoid_dump"),
+                    "Twist Exome Comprehensive": Path("loqusdb_exome_dump"),
+                },
+            },
+            "panel_of_normals": {"bed_short_name": Path("absolute_path_to_pon_file.cnn")},
             "pon_path": str(cg_dir),
             "root": str(balsamic_dir),
             "slurm": {

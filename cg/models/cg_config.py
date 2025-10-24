@@ -22,7 +22,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.clients.arnold.api import ArnoldAPIClient
 from cg.clients.chanjo2.client import Chanjo2APIClient
 from cg.clients.janus.api import JanusAPIClient
-from cg.constants.observations import LoqusdbInstance
+from cg.constants.observations import BalsamicObservationPanel, LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
@@ -178,6 +178,11 @@ class MutaccAutoConfig(CommonAppConfig):
     padding: int = 300
 
 
+class LoqusDBDumpFiles(BaseModel):
+    artefact_sv_observations: Path  # WGS
+    cancer_somatic_snv_panel_observations: dict[BalsamicObservationPanel, Path]  # Panel
+
+
 class BalsamicConfig(CommonAppConfig):
     balsamic_cache: Path
     bed_path: Path
@@ -192,14 +197,13 @@ class BalsamicConfig(CommonAppConfig):
     head_job_partition: str
     loqusdb_path: str
     loqusdb_artefact_snv: Path
-    loqusdb_artefact_sv: Path  # TODO add this to servers, remove when we have made the PR
     loqusdb_cancer_germline_snv: Path
     loqusdb_cancer_somatic_snv: Path
     loqusdb_cancer_somatic_sv: Path
     loqusdb_clinical_snv: Path
     loqusdb_clinical_sv: Path
-    # TODO try the str in the dict to be a BalsamicObservationPanel enum
-    loqusdb_panel_files: dict[str, Path]  # Includes the Exome file
+    loqusdb_dump_files: LoqusDBDumpFiles
+    panel_of_normals: dict[str, Path]  # For TGS and Exome
     pon_path: Path
     root: Path
     sentieon_licence_path: Path
