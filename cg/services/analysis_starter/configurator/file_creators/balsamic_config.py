@@ -207,10 +207,6 @@ class BalsamicConfigFileCreator:
         return self.status_db.get_bed_version_by_short_name_strict(short_name)
 
     def _get_pon_file(self, bed_short_name: str | None) -> Path | None:
-        """Finds the corresponding PON file for panel cases based on the given bed file.
-        These are versioned and named like: <bed_file_name>_hg19_design_CNVkit_PON_reference_v<version>.cnn
-        This method returns the latest version of the PON file matching the bed name.
-        """
         if pon_file := self.panel_of_normals.get(bed_short_name):
             return pon_file
         else:
