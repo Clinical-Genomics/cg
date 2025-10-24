@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import create_autospec
 
 import pytest
 
@@ -17,9 +18,9 @@ def microsalt_fastq_handler(
 
 
 @pytest.fixture
-def balsamic_fastq_handler(
-    base_store: Store, real_housekeeper_api: HousekeeperAPI
-) -> BalsamicFastqHandler:
+def balsamic_fastq_handler() -> BalsamicFastqHandler:
     return BalsamicFastqHandler(
-        status_db=base_store, housekeeper_api=real_housekeeper_api, root_dir=Path("/dev/null")
+        status_db=create_autospec(Store),
+        housekeeper_api=create_autospec(HousekeeperAPI),
+        root_dir=Path("/dev/null"),
     )
