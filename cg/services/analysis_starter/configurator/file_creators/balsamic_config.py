@@ -130,7 +130,7 @@ class BalsamicConfigFileCreator:
             cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
             cancer_somatic_snv_observations=self.loqusdb_cancer_somatic_snv,
             cancer_somatic_snv_panel_observations=self.cancer_somatic_snv_panel_observations.get(
-                bed_version.bed.name
+                bed_version.bed_name
             ),
             cancer_somatic_sv_observations=self.loqusdb_cancer_somatic_sv,
             case_id=case.internal_id,
