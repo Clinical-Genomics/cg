@@ -324,7 +324,7 @@ class BedVersion(Base):
     __table_args__ = (UniqueConstraint("bed_id", "version", name="_app_version_uc"),)
 
     id: Mapped[PrimaryKeyInt]
-    shortname: Mapped[Str64 | None]
+    shortname: Mapped[Str64]
     version: Mapped[int]
     filename: Mapped[Str256]
     checksum: Mapped[Str32 | None]
