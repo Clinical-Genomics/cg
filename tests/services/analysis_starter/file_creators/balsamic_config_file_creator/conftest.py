@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from cg.constants.observations import BalsamicObservationPanel
@@ -6,6 +8,11 @@ from cg.models.cg_config import BalsamicConfig
 
 @pytest.fixture
 def expected_tgs_myeloid_normal_only_command(cg_balsamic_config: BalsamicConfig) -> str:
+    myeloid_panel_observations: Path = (
+        cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations[
+            BalsamicObservationPanel.MYELOID
+        ]
+    )
     return (
         f"{cg_balsamic_config.conda_binary} "
         f"run --name {cg_balsamic_config.conda_env} "
@@ -17,7 +24,7 @@ def expected_tgs_myeloid_normal_only_command(cg_balsamic_config: BalsamicConfig)
         f"--cadd-annotations {cg_balsamic_config.cadd_path} "
         f"--cancer-germline-snv-observations {cg_balsamic_config.loqusdb_cancer_germline_snv} "
         f"--cancer-somatic-snv-observations {cg_balsamic_config.loqusdb_cancer_somatic_snv} "
-        f"--cancer-somatic-snv-panel-observations {cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations[BalsamicObservationPanel.MYELOID]} "
+        f"--cancer-somatic-snv-panel-observations {myeloid_panel_observations} "
         f"--cancer-somatic-sv-observations {cg_balsamic_config.loqusdb_cancer_somatic_sv} "
         f"--case-id case_1 "
         f"--clinical-snv-observations {cg_balsamic_config.loqusdb_clinical_snv} "
@@ -38,6 +45,11 @@ def expected_tgs_myeloid_normal_only_command(cg_balsamic_config: BalsamicConfig)
 
 @pytest.fixture
 def expected_tgs_lymphoid_paired_command(cg_balsamic_config: BalsamicConfig) -> str:
+    lymphoid_panel_observations: Path = (
+        cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations[
+            BalsamicObservationPanel.LYMPHOID
+        ]
+    )
     return (
         f"{cg_balsamic_config.conda_binary} "
         f"run --name {cg_balsamic_config.conda_env} "
@@ -49,7 +61,7 @@ def expected_tgs_lymphoid_paired_command(cg_balsamic_config: BalsamicConfig) -> 
         f"--cadd-annotations {cg_balsamic_config.cadd_path} "
         f"--cancer-germline-snv-observations {cg_balsamic_config.loqusdb_cancer_germline_snv} "
         f"--cancer-somatic-snv-observations {cg_balsamic_config.loqusdb_cancer_somatic_snv} "
-        f"--cancer-somatic-snv-panel-observations {cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations[BalsamicObservationPanel.LYMPHOID]} "
+        f"--cancer-somatic-snv-panel-observations {lymphoid_panel_observations} "
         f"--cancer-somatic-sv-observations {cg_balsamic_config.loqusdb_cancer_somatic_sv} "
         f"--case-id case_1 "
         f"--clinical-snv-observations {cg_balsamic_config.loqusdb_clinical_snv} "
@@ -102,6 +114,11 @@ def expected_tgs_tumour_only_command(cg_balsamic_config: BalsamicConfig) -> str:
 
 @pytest.fixture
 def expected_wes_normal_only_command(cg_balsamic_config: BalsamicConfig) -> str:
+    exome_panel_observations: Path = (
+        cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations[
+            BalsamicObservationPanel.EXOME
+        ]
+    )
     return (
         f"{cg_balsamic_config.conda_binary} "
         f"run --name {cg_balsamic_config.conda_env} "
@@ -113,7 +130,7 @@ def expected_wes_normal_only_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--cadd-annotations {cg_balsamic_config.cadd_path} "
         f"--cancer-germline-snv-observations {cg_balsamic_config.loqusdb_cancer_germline_snv} "
         f"--cancer-somatic-snv-observations {cg_balsamic_config.loqusdb_cancer_somatic_snv} "
-        f"--cancer-somatic-snv-panel-observations {cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations[BalsamicObservationPanel.EXOME]} "
+        f"--cancer-somatic-snv-panel-observations {exome_panel_observations} "
         f"--cancer-somatic-sv-observations {cg_balsamic_config.loqusdb_cancer_somatic_sv} "
         f"--case-id case_1 "
         f"--clinical-snv-observations {cg_balsamic_config.loqusdb_clinical_snv} "
@@ -135,6 +152,11 @@ def expected_wes_normal_only_command(cg_balsamic_config: BalsamicConfig) -> str:
 
 @pytest.fixture
 def expected_wes_paired_command(cg_balsamic_config: BalsamicConfig) -> str:
+    exome_panel_observations: Path = (
+        cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations[
+            BalsamicObservationPanel.EXOME
+        ]
+    )
     return (
         f"{cg_balsamic_config.conda_binary} "
         f"run --name {cg_balsamic_config.conda_env} "
@@ -146,7 +168,7 @@ def expected_wes_paired_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--cadd-annotations {cg_balsamic_config.cadd_path} "
         f"--cancer-germline-snv-observations {cg_balsamic_config.loqusdb_cancer_germline_snv} "
         f"--cancer-somatic-snv-observations {cg_balsamic_config.loqusdb_cancer_somatic_snv} "
-        f"--cancer-somatic-snv-panel-observations {cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations[BalsamicObservationPanel.EXOME]} "
+        f"--cancer-somatic-snv-panel-observations {exome_panel_observations} "
         f"--cancer-somatic-sv-observations {cg_balsamic_config.loqusdb_cancer_somatic_sv} "
         f"--case-id case_1 "
         f"--clinical-snv-observations {cg_balsamic_config.loqusdb_clinical_snv} "
@@ -170,6 +192,11 @@ def expected_wes_paired_command(cg_balsamic_config: BalsamicConfig) -> str:
 
 @pytest.fixture
 def expected_wes_tumour_only_command(cg_balsamic_config: BalsamicConfig) -> str:
+    exome_panel_observations: Path = (
+        cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations[
+            BalsamicObservationPanel.EXOME
+        ]
+    )
     return (
         f"{cg_balsamic_config.conda_binary} "
         f"run --name {cg_balsamic_config.conda_env} "
@@ -181,7 +208,7 @@ def expected_wes_tumour_only_command(cg_balsamic_config: BalsamicConfig) -> str:
         f"--cadd-annotations {cg_balsamic_config.cadd_path} "
         f"--cancer-germline-snv-observations {cg_balsamic_config.loqusdb_cancer_germline_snv} "
         f"--cancer-somatic-snv-observations {cg_balsamic_config.loqusdb_cancer_somatic_snv} "
-        f"--cancer-somatic-snv-panel-observations {cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations[BalsamicObservationPanel.EXOME]} "
+        f"--cancer-somatic-snv-panel-observations {exome_panel_observations} "
         f"--cancer-somatic-sv-observations {cg_balsamic_config.loqusdb_cancer_somatic_sv} "
         f"--case-id case_1 "
         f"--clinical-snv-observations {cg_balsamic_config.loqusdb_clinical_snv} "
