@@ -10,6 +10,7 @@ from pytest_mock import MockerFixture
 
 from cg.cli.base import base
 from cg.constants.constants import CaseActions, Workflow
+from cg.constants.observations import BalsamicObservationPanel
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.tb import AnalysisType
 from cg.services.analysis_starter.configurator.file_creators import balsamic_config
@@ -158,7 +159,7 @@ def test_start_available_tgs_tumour_only(
     case_id = case_tgs_tumour_only.internal_id
 
     # GIVEN a bed version exists and a corresponding bed name is returned by lims for the sample
-    bed_name = "balsamic_integration_test_bed"
+    bed_name = BalsamicObservationPanel.MYELOID
     helpers.ensure_bed_version(store=status_db, bed_name=bed_name)
     expect_lims_sample_request(lims_server=httpserver, sample=sample, bed_name=bed_name)
 
@@ -212,6 +213,8 @@ def test_start_available_tgs_tumour_only(
     # THEN a successful exit code is returned
     assert result.exit_code == 0
 
+    # artefact_sv_observations seems to be in dev command but not v18 command?
+
     # THEN balsamic config case was called in the correct way
     expected_config_case_command = (
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
@@ -220,6 +223,7 @@ def test_start_available_tgs_tumour_only(
         f"--analysis-workflow balsamic "
         f"--balsamic-cache {test_root_dir}/balsamic_cache "
         f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
+        f"--cancer-somatic-snv-panel-observations {test_root_dir}/loqusdb/loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz "
         f"--case-id {case_id} "
         f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
         f"--gender female "
