@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -5,6 +6,8 @@ from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.io.csv import write_csv
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 HEADERS: list[str] = [
     "project",
@@ -24,6 +27,7 @@ class NalloSampleSheetCreator:
         self.status_db = status_db
 
     def create(self, case_id: str, file_path: Path) -> None:
+        LOG.debug(f"Creating sample sheet for case {case_id}")
         content: list[list[str]] = self._get_content(case_id)
         write_csv(content=content, file_path=file_path)
 
