@@ -192,7 +192,45 @@ def test_parse_fastq_header_raises_error():
         NextflowSampleSheetCreator._parse_fastq_header(line="Not a Fastq header")
 
 
-def test_create_nallo_sample_sheet(mocker: MockerFixture):
+@pytest.fixture
+def expected_nallo_sample_sheet_content() -> list[list[str]]:
+    """Return the expected sample sheet content for Nallo."""
+    headers: list[str] = [
+        "project",
+        "sample",
+        "file",
+        "family_id",
+        "paternal_id",
+        "maternal_id",
+        "sex",
+        "phenotype",
+    ]
+    row1: list[str] = [
+        "nallo_case",
+        "nallo_sample",
+        "/a/path/to/file1.bam",
+        "nallo_case",
+        "father",
+        "mother",
+        "1",
+        "2",
+    ]
+    row2: list[str] = [
+        "nallo_case",
+        "nallo_sample",
+        "/a/path/to/file2.bam",
+        "nallo_case",
+        "father",
+        "mother",
+        "1",
+        "2",
+    ]
+    return [headers, row1, row2]
+
+
+def test_create_nallo_sample_sheet(
+    expected_nallo_sample_sheet_content: list[list[str]], mocker: MockerFixture
+):
 
     # GIVEN a Nallo case in StatusDB
     case_id = "nallo_case"
@@ -230,4 +268,6 @@ def test_create_nallo_sample_sheet(mocker: MockerFixture):
     sample_sheet_creator.create(case_id=case_id, file_path=sample_sheet_path)
 
     # THEN the sample sheet should have been written to the correct path with the correct content
-    write_mock.assert_called_once_with(file_path=sample_sheet_path, content="")
+    write_mock.assert_called_once_with(
+        file_path=sample_sheet_path, content=expected_nallo_sample_sheet_content
+    )
