@@ -82,6 +82,7 @@ def test_get_config_missing_config_file(
 def test_configure(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
     # GIVEN a fastq handler
     fastq_handler: BalsamicFastqHandler = create_autospec(BalsamicFastqHandler)
+    fastq_handler.get_fastq_dir = Mock(return_value=Path("some/path"))
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator: BalsamicConfigFileCreator = create_autospec(BalsamicConfigFileCreator)
@@ -110,7 +111,9 @@ def test_configure(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
     cast(Mock, fastq_handler.link_fastq_files).assert_called_once_with(case_id="case_id")
 
     # THEN the config file should be created
-    cast(Mock, config_file_creator.create).assert_called_once_with(case_id="case_id")
+    cast(Mock, config_file_creator.create).assert_called_once_with(
+        case_id="case_id", fastq_path=Path("some/path")
+    )
 
     # THEN the case config is as expected
     assert balsamic_case_config == BalsamicCaseConfig(
@@ -128,6 +131,7 @@ def test_configure(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
 def test_configure_with_flags(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
     # GIVEN a fastq handler
     fastq_handler: BalsamicFastqHandler = create_autospec(BalsamicFastqHandler)
+    fastq_handler.get_fastq_dir = Mock(return_value=Path("some/path"))
 
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator: BalsamicConfigFileCreator = create_autospec(BalsamicConfigFileCreator)
@@ -162,7 +166,10 @@ def test_configure_with_flags(cg_balsamic_config: BalsamicConfig, mocker: Mocker
 
     # THEN the config file should be created with the provided panel bed
     cast(Mock, config_file_creator.create).assert_called_once_with(
-        case_id="case_id", panel_bed="panel_bed", workflow_profile=workflow_profile
+        case_id="case_id",
+        fastq_path=Path("some/path"),
+        panel_bed="panel_bed",
+        workflow_profile=workflow_profile,
     )
 
     # THEN the case config is as expected
