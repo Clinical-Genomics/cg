@@ -5,6 +5,7 @@ import pytest
 from pytest_mock import MockerFixture
 from sqlalchemy import Case
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.api import LimsAPI
 from cg.constants import Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
@@ -26,7 +27,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
     NalloSampleSheetCreator,
 )
-from cg.store.models import BedVersion, Sample
+from cg.store.models import BedVersion, CaseSample, Sample
 from cg.store.store import Store
 
 
@@ -191,17 +192,26 @@ def test_parse_fastq_header_raises_error():
 
 
 def test_create_nallo_sample_sheet(mocker: MockerFixture):
-    # GIVEN a NalloSampleSheetCreator
-    sample_sheet_creator = NalloSampleSheetCreator()
 
     # GIVEN a Nallo case id
     case_id = "nallo_case"
+    case_sample = create_autospec(
+        CaseSample, sample=create_autospec(Sample, internal_id="nallo_sample")
+    )
+    case = create_autospec(Case, links=[case_sample])
+    status_db: Store = create_autospec(Store)
+    status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
     # GIVEN a sample sheet path
     sample_sheet_path = Path("sample", "sheet", "path.csv")
 
     # GIVEN a file writer
     write_mock: MagicMock = mocker.patch.object(nallo, "write_csv")
+
+    # GIVEN a NalloSampleSheetCreator
+    sample_sheet_creator = NalloSampleSheetCreator(
+        housekeeper_api=create_autospec(HousekeeperAPI), status_db=status_db
+    )
 
     # WHEN creating the sample sheet
     sample_sheet_creator.create(case_id=case_id, file_path=sample_sheet_path)

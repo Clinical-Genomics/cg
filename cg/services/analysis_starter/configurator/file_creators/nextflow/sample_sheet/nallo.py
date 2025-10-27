@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.io.csv import write_csv
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
@@ -23,7 +24,8 @@ class NalloSampleSheetCreator:
         self.status_db = status_db
 
     def create(self, case_id: str, file_path: Path) -> None:
-        write_csv(content="", file_path=file_path)
+        content: list[list[str]] = self._get_content(case_id)
+        write_csv(content=content, file_path=file_path)
 
     def _get_content(self, case_id: str) -> list[list[str]]:
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
@@ -41,12 +43,12 @@ class NalloSampleSheetCreator:
             sample_sheet_entry: list[str] = [
                 case_sample.case.internal_id,
                 case_sample.sample.internal_id,
-                Path(bam_path),
+                bam_path.as_posix(),
                 case_sample.case.internal_id,
                 case_sample.get_paternal_sample_id or "0",
                 case_sample.get_maternal_sample_id or "0",
-                self.get_sex_code(case_sample.sample.sex),
-                self.get_phenotype_code(case_sample.status),
+                PlinkSex[case_sample.sample.sex.upper()],
+                str(PlinkPhenotypeStatus[case_sample.status.upper()]),
             ]
             sample_sheet_entries.append(sample_sheet_entry)
         return sample_sheet_entries
