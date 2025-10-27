@@ -426,7 +426,7 @@ def test_is_sample_source_eligible_for_observations_upload(
 
     # WHEN verifying that the sample source is eligible for observations uploads
     is_sample_source_eligible_for_observations_upload: bool = (
-        observations_api.is_sample_source_type_ffpe(case_id)
+        observations_api.is_sample_not_source_ffpe(case_id)
     )
 
     # THEN the source type should be eligible for observations uploads
@@ -454,7 +454,7 @@ def test_is_sample_source_not_eligible_for_observations_upload(
 
     # WHEN verifying that the sample source is eligible for observations uploads
     is_sample_source_eligible_for_observations_upload: bool = (
-        observations_api.is_sample_source_type_ffpe(case_id)
+        observations_api.is_sample_not_source_ffpe(case_id)
     )
 
     # THEN the source type should not be eligible for observations uploads
