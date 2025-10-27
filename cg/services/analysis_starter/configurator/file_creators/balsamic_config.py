@@ -58,7 +58,7 @@ class BalsamicConfigFileCreator:
         self.swegen_sv: Path = cg_balsamic_config.swegen_sv
 
     def create(self, case_id: str, fastq_path: Path, **flags) -> None:
-        config_cli_input: BalsamicConfigInput = self._build_cli_input(
+        config_cli_input: BalsamicConfigInput = self._build_config_input(
             case_id=case_id, fastq_path=fastq_path, **flags
         )
         self._create_config_file(config_cli_input)
@@ -75,7 +75,7 @@ class BalsamicConfigFileCreator:
             stderr=subprocess.PIPE,
         )
 
-    def _build_cli_input(self, case_id: str, fastq_path: Path, **flags) -> BalsamicConfigInput:
+    def _build_config_input(self, case_id: str, fastq_path: Path, **flags) -> BalsamicConfigInput:
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
         if self._all_samples_are_wgs(case):
             return self._build_wgs_config(case=case, fastq_path=fastq_path)
