@@ -1,7 +1,8 @@
 from pathlib import Path
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.io.csv import write_csv
-from cg.store.models import Case, CaseSample
+from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
 HEADERS: list[str] = [
@@ -17,7 +18,8 @@ HEADERS: list[str] = [
 
 
 class NalloSampleSheetCreator:
-    def __init__(self, status_db: Store) -> None:
+    def __init__(self, housekeeper_api: HousekeeperAPI, status_db: Store) -> None:
+        self.housekeeper_api = housekeeper_api
         self.status_db = status_db
 
     def create(self, case_id: str, file_path: Path) -> None:
@@ -32,19 +34,26 @@ class NalloSampleSheetCreator:
 
     def _get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
-        read_file_paths = self.get_bam_read_file_paths(sample=case_sample.sample)
+        read_file_paths = self._get_bam_read_file_paths(sample=case_sample.sample)
         sample_sheet_entries = []
 
         for bam_path in read_file_paths:
-            sample_sheet_entry = NalloSampleSheetEntry(
-                project=case_sample.case.internal_id,
-                sample=case_sample.sample.internal_id,
-                read_file=Path(bam_path),
-                family_id=case_sample.case.internal_id,
-                paternal_id=case_sample.get_paternal_sample_id or "0",
-                maternal_id=case_sample.get_maternal_sample_id or "0",
-                sex=self.get_sex_code(case_sample.sample.sex),
-                phenotype=self.get_phenotype_code(case_sample.status),
-            )
-            sample_sheet_entries.extend(sample_sheet_entry.reformat_sample_content)
+            sample_sheet_entry: list[str] = [
+                case_sample.case.internal_id,
+                case_sample.sample.internal_id,
+                Path(bam_path),
+                case_sample.case.internal_id,
+                case_sample.get_paternal_sample_id or "0",
+                case_sample.get_maternal_sample_id or "0",
+                self.get_sex_code(case_sample.sample.sex),
+                self.get_phenotype_code(case_sample.status),
+            ]
+            sample_sheet_entries.append(sample_sheet_entry)
         return sample_sheet_entries
+
+    def _get_bam_read_file_paths(self, sample: Sample) -> list[Path]:
+        """Gather BAM file path for a sample based on the BAM tag."""
+        return [
+            Path(hk_file.full_path)
+            for hk_file in self.housekeeper_api.files(bundle=sample.internal_id, tags={"bam"})
+        ]
