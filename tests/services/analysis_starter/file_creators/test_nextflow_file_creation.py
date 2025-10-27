@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import Mock, create_autospec
+from unittest.mock import MagicMock, Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -19,8 +19,12 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
     creator as samplesheet_creator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import nallo
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
+    NalloSampleSheetCreator,
 )
 from cg.store.models import BedVersion, Sample
 from cg.store.store import Store
@@ -131,7 +135,7 @@ def test_nextflow_config_file_content(
     # GIVEN a Nextflow config content creator and a case id
 
     # GIVEN a writer mock
-    write_mock: mocker.MagicMock = mocker.patch.object(config_file, "write_txt", return_value=None)
+    write_mock: MagicMock = mocker.patch.object(config_file, "write_txt", return_value=None)
 
     # WHEN creating a Nextflow config file
     file_path = Path(nextflow_case_path, f"{nextflow_case_id}_nextflow_config.json")
@@ -155,7 +159,7 @@ def test_nextflow_sample_sheet_creators(
 ):
     # GIVEN a sample sheet creator, an expected output and a mocked file writer
     sample_sheet_creator, expected_content = sample_sheet_scenario[workflow]
-    write_mock: mocker.MagicMock = mocker.patch.object(samplesheet_creator, "write_csv")
+    write_mock: MagicMock = mocker.patch.object(samplesheet_creator, "write_csv")
 
     # GIVEN a pair of Fastq files that have a header
     mocker.patch.object(
@@ -184,3 +188,23 @@ def test_parse_fastq_header_raises_error():
         # WHEN parsing the header
         # THEN the correct error is raised
         NextflowSampleSheetCreator._parse_fastq_header(line="Not a Fastq header")
+
+
+def test_create_nallo_sample_sheet(mocker: MockerFixture):
+    # GIVEN a NalloSampleSheetCreator
+    sample_sheet_creator = NalloSampleSheetCreator()
+
+    # GIVEN a Nallo case id
+    case_id = "nallo_case"
+
+    # GIVEN a sample sheet path
+    sample_sheet_path = Path("sample", "sheet", "path.csv")
+
+    # GIVEN a file writer
+    write_mock: MagicMock = mocker.patch.object(nallo, "write_csv")
+
+    # WHEN creating the sample sheet
+    sample_sheet_creator.create(case_id=case_id, file_path=sample_sheet_path)
+
+    # THEN the sample sheet should have been written to the correct path with the correct content
+    write_mock.assert_called_once_with(file_path=sample_sheet_path, content="")
