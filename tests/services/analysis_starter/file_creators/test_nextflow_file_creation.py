@@ -2,6 +2,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, Mock, create_autospec
 
 import pytest
+from housekeeper.store.models import File
 from pytest_mock import MockerFixture
 from sqlalchemy import Case
 
@@ -193,14 +194,26 @@ def test_parse_fastq_header_raises_error():
 
 def test_create_nallo_sample_sheet(mocker: MockerFixture):
 
-    # GIVEN a Nallo case id
+    # GIVEN a Nallo case in StatusDB
     case_id = "nallo_case"
     case_sample = create_autospec(
-        CaseSample, sample=create_autospec(Sample, internal_id="nallo_sample")
+        CaseSample,
+        get_maternal_sample_id="mother",
+        get_paternal_sample_id="father",
+        sample=create_autospec(Sample, internal_id="nallo_sample", sex="male"),
+        status="affected",
     )
-    case = create_autospec(Case, links=[case_sample])
+    case = create_autospec(Case, internal_id=case_id, links=[case_sample])
+    case_sample.case = case
+
     status_db: Store = create_autospec(Store)
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
+
+    # GIVEN Housekeeper with two BAM files
+    bam_file1 = create_autospec(File, full_path="/a/path/to/file1.bam")
+    bam_file2 = create_autospec(File, full_path="/a/path/to/file2.bam")
+    housekeeper_api = create_autospec(HousekeeperAPI)
+    housekeeper_api.files = Mock(return_value=[bam_file1, bam_file2])
 
     # GIVEN a sample sheet path
     sample_sheet_path = Path("sample", "sheet", "path.csv")
@@ -210,7 +223,7 @@ def test_create_nallo_sample_sheet(mocker: MockerFixture):
 
     # GIVEN a NalloSampleSheetCreator
     sample_sheet_creator = NalloSampleSheetCreator(
-        housekeeper_api=create_autospec(HousekeeperAPI), status_db=status_db
+        housekeeper_api=housekeeper_api, status_db=status_db
     )
 
     # WHEN creating the sample sheet

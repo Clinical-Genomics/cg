@@ -47,7 +47,7 @@ class NalloSampleSheetCreator:
                 case_sample.case.internal_id,
                 case_sample.get_paternal_sample_id or "0",
                 case_sample.get_maternal_sample_id or "0",
-                PlinkSex[case_sample.sample.sex.upper()],
+                PlinkSex[case_sample.sample.sex.upper()].value,
                 str(PlinkPhenotypeStatus[case_sample.status.upper()]),
             ]
             sample_sheet_entries.append(sample_sheet_entry)
