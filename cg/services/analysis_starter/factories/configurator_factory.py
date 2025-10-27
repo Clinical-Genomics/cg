@@ -40,6 +40,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
     NalloSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.protocol import (
+    SampleSheetFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
 )
@@ -114,9 +117,7 @@ class ConfiguratorFactory:
     def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
         return getattr(self.cg_config, workflow)
 
-    def _get_sample_sheet_creator(
-        self, workflow: Workflow
-    ) -> NextflowSampleSheetCreator | NalloSampleSheetCreator:
+    def _get_sample_sheet_creator(self, workflow: Workflow) -> SampleSheetFileCreator:
         match workflow:
             case Workflow.NALLO:
                 return NalloSampleSheetCreator(
