@@ -57,8 +57,10 @@ class BalsamicConfigFileCreator:
         self.swegen_snv: Path = cg_balsamic_config.swegen_snv
         self.swegen_sv: Path = cg_balsamic_config.swegen_sv
 
-    def create(self, case_id: str, **flags) -> None:
-        config_cli_input: BalsamicConfigInput = self._build_cli_input(case_id=case_id, **flags)
+    def create(self, case_id: str, fastq_path: Path, **flags) -> None:
+        config_cli_input: BalsamicConfigInput = self._build_cli_input(
+            case_id=case_id, fastq_path=fastq_path, **flags
+        )
         self._create_config_file(config_cli_input)
 
     @staticmethod
@@ -73,14 +75,16 @@ class BalsamicConfigFileCreator:
             stderr=subprocess.PIPE,
         )
 
-    def _build_cli_input(self, case_id: str, **flags) -> BalsamicConfigInput:
+    def _build_cli_input(self, case_id: str, fastq_path: Path, **flags) -> BalsamicConfigInput:
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
         if self._all_samples_are_wgs(case):
-            return self._build_wgs_config(case)
+            return self._build_wgs_config(case=case, fastq_path=fastq_path)
         else:
-            return self._build_targeted_config(case=case, override_panel_bed=flags.get("panel_bed"))
+            return self._build_targeted_config(
+                case=case, fastq_path=fastq_path, override_panel_bed=flags.get("panel_bed")
+            )
 
-    def _build_wgs_config(self, case: Case) -> BalsamicConfigInput:
+    def _build_wgs_config(self, case: Case, fastq_path: Path) -> BalsamicConfigInput:
         patient_sex: SexOptions = self._get_patient_sex(case)
         return BalsamicConfigInputWGS(
             analysis_dir=self.root_dir,
@@ -98,7 +102,7 @@ class BalsamicConfigFileCreator:
             clinical_sv_observations=self.loqusdb_clinical_sv,
             conda_binary=self.conda_binary,
             conda_env=self.conda_env,
-            fastq_path=Path(self.root_dir, case.internal_id, "fastq"),
+            fastq_path=fastq_path,
             gender=patient_sex,
             genome_interval=self.genome_interval_path,
             genome_version=GenomeVersion.HG19,
@@ -113,7 +117,7 @@ class BalsamicConfigFileCreator:
         )
 
     def _build_targeted_config(
-        self, case: Case, override_panel_bed: str | None
+        self, case: Case, fastq_path: Path, override_panel_bed: str | None
     ) -> BalsamicConfigInput:
         bed_version: BedVersion = self._get_bed_version(
             case=case, override_panel_bed=override_panel_bed
@@ -138,7 +142,7 @@ class BalsamicConfigFileCreator:
             clinical_sv_observations=self.loqusdb_clinical_sv,
             conda_binary=self.conda_binary,
             conda_env=self.conda_env,
-            fastq_path=Path(self.root_dir, case.internal_id, "fastq"),
+            fastq_path=fastq_path,
             gender=patient_sex,
             genome_version=GenomeVersion.HG19,
             gnomad_min_af5=self.gnomad_af5_path,

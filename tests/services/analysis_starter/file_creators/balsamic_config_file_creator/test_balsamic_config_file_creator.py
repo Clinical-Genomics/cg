@@ -61,7 +61,9 @@ def test_create_tgs_myeloid_normal_only(
     mock_runner = mocker.patch.object(creator.subprocess, "run")
 
     # WHEN creating the config file
-    config_file_creator.create(case_id="case_1")
+    config_file_creator.create(
+        case_id="case_1", fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq")
+    )
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
@@ -123,7 +125,9 @@ def test_create_tgs_lymphoid_paired(
     mock_runner = mocker.patch.object(creator.subprocess, "run")
 
     # WHEN creating the config file
-    config_file_creator.create(case_id="case_1")
+    config_file_creator.create(
+        case_id="case_1", fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq")
+    )
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
@@ -176,7 +180,9 @@ def test_create_tgs_tumour_only(
     mock_runner = mocker.patch.object(creator.subprocess, "run")
 
     # WHEN creating the config file
-    config_file_creator.create(case_id="case_1")
+    config_file_creator.create(
+        case_id="case_1", fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq")
+    )
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
@@ -216,7 +222,11 @@ def test_create_override_panel_bed(
     mock_runner = mocker.patch.object(creator.subprocess, "run")
 
     # WHEN creating the config file providing a panel bed
-    config_file_creator.create(case_id="case_1", panel_bed="override_panel_bed")
+    config_file_creator.create(
+        case_id="case_1",
+        fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq"),
+        panel_bed="override_panel_bed",
+    )
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
@@ -267,7 +277,9 @@ def test_create_wes_normal_only(
     mock_runner = mocker.patch.object(creator.subprocess, "run")
 
     # WHEN creating the config file
-    config_file_creator.create(case_id="case_1")
+    config_file_creator.create(
+        case_id="case_1", fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq")
+    )
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
@@ -327,7 +339,9 @@ def test_create_wes_paired(
     mock_runner = mocker.patch.object(creator.subprocess, "run")
 
     # WHEN creating the config file
-    config_file_creator.create(case_id="case_1")
+    config_file_creator.create(
+        case_id="case_1", fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq")
+    )
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
@@ -378,7 +392,9 @@ def test_create_wes_tumour_only(
     mock_runner = mocker.patch.object(creator.subprocess, "run")
 
     # WHEN creating the config file
-    config_file_creator.create(case_id="case_1")
+    config_file_creator.create(
+        case_id="case_1", fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq")
+    )
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
@@ -424,7 +440,9 @@ def test_create_wgs_paired(
     mock_runner = mocker.patch.object(creator.subprocess, "run")
 
     # WHEN creating the config file
-    config_file_creator.create(case_id="case_1")
+    config_file_creator.create(
+        case_id="case_1", fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq")
+    )
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
@@ -458,7 +476,9 @@ def test_create_wgs_tumor_only(
     mock_runner = mocker.patch.object(creator.subprocess, "run")
 
     # WHEN creating the config file
-    config_file_creator.create(case_id="case_1")
+    config_file_creator.create(
+        case_id="case_1", fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq")
+    )
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
@@ -479,7 +499,7 @@ def test_create_no_case_found(cg_balsamic_config: BalsamicConfig):
     # WHEN creating a config file for a non-existing case
     # THEN a CaseNotFoundError is raised
     with pytest.raises(CaseNotFoundError):
-        config_file_creator.create(case_id="non_existing_case")
+        config_file_creator.create(case_id="non_existing_case", fastq_path=Path("/some/path"))
 
 
 def test_create_no_capture_kit_in_lims(cg_balsamic_config: BalsamicConfig):
@@ -512,7 +532,9 @@ def test_create_no_capture_kit_in_lims(cg_balsamic_config: BalsamicConfig):
     # WHEN creating the config file for the case
     # THEN a LimsDataError error is raised
     with pytest.raises(LimsDataError):
-        config_file_creator.create(case_id="case_1")
+        config_file_creator.create(
+            case_id="case_1", fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq")
+        )
 
 
 @pytest.mark.parametrize(

@@ -39,7 +39,8 @@ class BalsamicConfigurator(Configurator):
     def configure(self, case_id: str, **flags) -> BalsamicCaseConfig:
         LOG.info(f"Configuring case {case_id}")
         self.fastq_handler.link_fastq_files(case_id)
-        self.config_file_creator.create(case_id=case_id, **flags)
+        fastq_path: Path = self.fastq_handler.get_fastq_dir(case_id)
+        self.config_file_creator.create(case_id=case_id, fastq_path=fastq_path, **flags)
         return self.get_config(case_id=case_id, **flags)
 
     def get_config(self, case_id: str, **flags) -> BalsamicCaseConfig:
