@@ -6,7 +6,7 @@ import pytest
 @pytest.fixture
 def nextflow_workflow_params_content() -> dict:
     """Return a dictionary with some parameters for the Nextflow params file."""
-    return {"someparam": "something"}
+    return {"workflow_param1": "some_value"}
 
 
 @pytest.fixture
@@ -31,6 +31,16 @@ def expected_raredisease_params_file_content(
         ),
     }
     return case_parameters | nextflow_workflow_params_content
+
+
+@pytest.fixture
+def expected_nallo_params_file_content():
+    return {
+        "filter_variants_hgnc_ids": "/root/case_id/gene_panels.tsv",
+        "input": Path("samplesheet/path"),
+        "outdir": Path("/root/case_id"),
+        "workflow_param1": "some_value",
+    }
 
 
 @pytest.fixture

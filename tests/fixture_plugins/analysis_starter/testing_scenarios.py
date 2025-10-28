@@ -3,8 +3,12 @@ from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
+    nallo,
     rnafusion,
     taxprofiler,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.nallo import (
+    NalloParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
     RNAFusionParamsFileCreator,
@@ -27,22 +31,25 @@ from cg.services.analysis_starter.configurator.models.nextflow import NextflowCa
 
 @pytest.fixture
 def params_file_scenario(
-    rnafusion_params_file_creator: RNAFusionParamsFileCreator,
+    expected_nallo_params_file_content: dict,
     expected_rnafusion_params_file_content: dict,
-    taxprofiler_params_file_creator: TaxprofilerParamsFileCreator,
     expected_taxprofiler_params_file_content: dict,
-    mocker: MockerFixture,
 ) -> dict:
     return {
+        Workflow.NALLO: (
+            NalloParamsFileCreator,
+            expected_nallo_params_file_content,
+            nallo,
+        ),
         Workflow.RNAFUSION: (
-            rnafusion_params_file_creator,
+            RNAFusionParamsFileCreator,
             expected_rnafusion_params_file_content,
-            mocker.patch.object(rnafusion, "write_yaml_nextflow_style", return_value=None),
+            rnafusion,
         ),
         Workflow.TAXPROFILER: (
-            taxprofiler_params_file_creator,
+            TaxprofilerParamsFileCreator,
             expected_taxprofiler_params_file_content,
-            mocker.patch.object(taxprofiler, "write_yaml_nextflow_style", return_value=None),
+            taxprofiler,
         ),
     }
 

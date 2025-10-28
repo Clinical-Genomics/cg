@@ -92,7 +92,7 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
     )
 
 
-@pytest.mark.parametrize("workflow", [Workflow.RNAFUSION, Workflow.TAXPROFILER])
+@pytest.mark.parametrize("workflow", [Workflow.NALLO, Workflow.RNAFUSION, Workflow.TAXPROFILER])
 def test_nextflow_params_file_creator(
     workflow: Workflow,
     params_file_scenario: dict,
@@ -117,31 +117,7 @@ def test_nextflow_params_file_creator(
         sample_sheet_path=nextflow_sample_sheet_path,
     )
 
+    read_yaml_mock.assert_called_once_with(Path("workflow_parameters.yaml"))
+
     # THEN the file should have been written with the expected content
-    read_yaml_mock.assert_called_once_with(Path("workflow_parameters.yaml"))
     write_yaml_mock.assert_called_once_with(file_path=file_path, content=expected_content)
-
-
-def test_nallo_params_file_creator(mocker: MockerFixture):
-    # GIVEN
-    file_creator = NalloParamsFileCreator(params="workflow_parameters.yaml")
-    write_yaml_mock = mocker.patch.object(nallo, "write_yaml_nextflow_style")
-    read_yaml_mock = mocker.patch.object(
-        nallo, "read_yaml", return_value={"workflow_param1": "some_value"}
-    )
-
-    file_creator.create(
-        case_id="nallo_case",
-        file_path=Path("directory", "file.txt"),
-        sample_sheet_path=Path("sample_sheet.csv"),
-    )
-    read_yaml_mock.assert_called_once_with(Path("workflow_parameters.yaml"))
-    write_yaml_mock.assert_called_once_with(
-        content={
-            "filter_variants_hgnc_ids": "directory/gene_panels.tsv",
-            "input": Path("sample_sheet.csv"),
-            "outdir": Path("directory"),
-            "workflow_param1": "some_value",
-        },
-        file_path=Path("directory", "file.txt"),
-    )
