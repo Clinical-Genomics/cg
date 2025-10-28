@@ -34,8 +34,11 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
     TaxprofilerParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowSampleSheetCreator,
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
+    NalloSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.protocol import (
+    SampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
@@ -74,7 +77,7 @@ class ConfiguratorFactory:
     def _get_nextflow_configurator(self, workflow: Workflow) -> NextflowConfigurator:
         config_file_creator = self._get_nextflow_config_file_creator(workflow)
         params_file_creator: ParamsFileCreator = self._get_params_file_creator(workflow)
-        sample_sheet_creator: NextflowSampleSheetCreator = self._get_sample_sheet_creator(workflow)
+        sample_sheet_creator: SampleSheetCreator = self._get_sample_sheet_creator(workflow)
         extension: PipelineExtension = self._get_pipeline_extension(workflow)
         return NextflowConfigurator(
             config_file_creator=config_file_creator,
@@ -111,20 +114,25 @@ class ConfiguratorFactory:
     def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
         return getattr(self.cg_config, workflow)
 
-    def _get_sample_sheet_creator(self, workflow: Workflow) -> NextflowSampleSheetCreator:
-        if workflow == Workflow.RAREDISEASE:
-            return RarediseaseSampleSheetCreator(
-                housekeeper_api=self.cg_config.housekeeper_api,
-                store=self.store,
-            )
-        elif workflow == Workflow.RNAFUSION:
-            return RNAFusionSampleSheetCreator(
-                housekeeper_api=self.housekeeper_api, store=self.store
-            )
-        elif workflow == Workflow.TAXPROFILER:
-            return TaxprofilerSampleSheetCreator(
-                housekeeper_api=self.housekeeper_api, store=self.store
-            )
+    def _get_sample_sheet_creator(self, workflow: Workflow) -> SampleSheetCreator:
+        match workflow:
+            case Workflow.NALLO:
+                return NalloSampleSheetCreator(
+                    housekeeper_api=self.housekeeper_api, status_db=self.store
+                )
+            case Workflow.RAREDISEASE:
+                return RarediseaseSampleSheetCreator(
+                    housekeeper_api=self.cg_config.housekeeper_api,
+                    store=self.store,
+                )
+            case Workflow.RNAFUSION:
+                return RNAFusionSampleSheetCreator(
+                    housekeeper_api=self.housekeeper_api, store=self.store
+                )
+            case Workflow.TAXPROFILER:
+                return TaxprofilerSampleSheetCreator(
+                    housekeeper_api=self.housekeeper_api, store=self.store
+                )
 
     def _get_pipeline_extension(self, workflow: Workflow) -> PipelineExtension:
         if workflow == Workflow.RAREDISEASE:

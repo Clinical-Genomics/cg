@@ -3,6 +3,9 @@ from pathlib import Path
 import pytest
 
 from cg.constants.sequencing import SequencingPlatform
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
+    HEADERS as NALLO_HEADERS,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     HEADERS as RAREDISEASE_HEADERS,
 )
@@ -12,6 +15,32 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
     HEADERS as TAXPROFILER_HEADERS,
 )
+
+
+@pytest.fixture
+def expected_nallo_sample_sheet_content() -> list[list[str]]:
+    """Return the expected sample sheet content for Nallo."""
+    row1: list[str] = [
+        "nallo_case",
+        "nallo_sample",
+        "/a/path/to/file1.bam",
+        "nallo_case",
+        "father",
+        "mother",
+        "1",
+        "2",
+    ]
+    row2: list[str] = [
+        "nallo_case",
+        "nallo_sample",
+        "/a/path/to/file2.bam",
+        "nallo_case",
+        "father",
+        "mother",
+        "1",
+        "2",
+    ]
+    return [NALLO_HEADERS, row1, row2]
 
 
 @pytest.fixture

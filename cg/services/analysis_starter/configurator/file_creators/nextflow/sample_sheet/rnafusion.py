@@ -2,14 +2,14 @@ from collections.abc import Iterator
 
 from cg.constants.constants import Strandedness
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowSampleSheetCreator,
+    NextflowFastqSampleSheetCreator,
 )
 from cg.store.models import Case, Sample
 
 HEADERS: list[str] = ["sample", "fastq_1", "fastq_2", "strandedness"]
 
 
-class RNAFusionSampleSheetCreator(NextflowSampleSheetCreator):
+class RNAFusionSampleSheetCreator(NextflowFastqSampleSheetCreator):
 
     def _get_content(self, case_id: str) -> list[list[str]]:
         content: list[list[str]] = [HEADERS]

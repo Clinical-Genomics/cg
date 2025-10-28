@@ -10,8 +10,8 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.config_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowSampleSheetCreator,
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.protocol import (
+    SampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.store.store import Store
@@ -23,7 +23,7 @@ class NextflowConfigurator(Configurator):
         config_file_creator: NextflowConfigFileCreator,
         params_file_creator: ParamsFileCreator,
         pipeline_config: CommonAppConfig,
-        sample_sheet_creator: NextflowSampleSheetCreator,
+        sample_sheet_creator: SampleSheetCreator,
         store: Store,
         pipeline_extension: PipelineExtension = PipelineExtension(),
     ):

@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import Mock, create_autospec
+from unittest.mock import MagicMock, Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -15,12 +15,6 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.config_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import raredisease
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
-    creator as samplesheet_creator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowSampleSheetCreator,
 )
 from cg.store.models import BedVersion, Sample
 from cg.store.store import Store
@@ -131,7 +125,7 @@ def test_nextflow_config_file_content(
     # GIVEN a Nextflow config content creator and a case id
 
     # GIVEN a writer mock
-    write_mock: mocker.MagicMock = mocker.patch.object(config_file, "write_txt", return_value=None)
+    write_mock: MagicMock = mocker.patch.object(config_file, "write_txt", return_value=None)
 
     # WHEN creating a Nextflow config file
     file_path = Path(nextflow_case_path, f"{nextflow_case_id}_nextflow_config.json")
@@ -141,46 +135,3 @@ def test_nextflow_config_file_content(
     write_mock.assert_called_once_with(
         file_path=file_path, content=expected_nextflow_config_content
     )
-
-
-@pytest.mark.parametrize(
-    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]
-)
-def test_nextflow_sample_sheet_creators(
-    workflow: Workflow,
-    sample_sheet_scenario: dict,
-    nextflow_case_id: str,
-    nextflow_case_path: Path,
-    mocker: MockerFixture,
-):
-    # GIVEN a sample sheet creator, an expected output and a mocked file writer
-    sample_sheet_creator, expected_content = sample_sheet_scenario[workflow]
-    write_mock: mocker.MagicMock = mocker.patch.object(samplesheet_creator, "write_csv")
-
-    # GIVEN a pair of Fastq files that have a header
-    mocker.patch.object(
-        samplesheet_creator,
-        "read_gzip_first_line",
-        side_effect=[
-            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
-            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/2",
-        ],
-    )
-    # GIVEN that the files exist
-    mocker.patch.object(Path, "is_file", return_value=True)
-
-    # WHEN creating the sample sheet
-    file_path = Path(nextflow_case_path, f"{nextflow_case_id}_samplesheet.csv")
-    sample_sheet_creator.create(case_id=nextflow_case_id, file_path=file_path)
-
-    # THEN the sample sheet should have been written to the correct path with the correct content
-    write_mock.assert_called_with(content=expected_content, file_path=file_path)
-
-
-def test_parse_fastq_header_raises_error():
-    # GIVEN a faulty FASTQ Header
-
-    with pytest.raises(TypeError):
-        # WHEN parsing the header
-        # THEN the correct error is raised
-        NextflowSampleSheetCreator._parse_fastq_header(line="Not a Fastq header")
