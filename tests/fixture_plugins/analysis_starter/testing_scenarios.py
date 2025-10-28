@@ -1,21 +1,6 @@
 import pytest
-from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
-    nallo,
-    rnafusion,
-    taxprofiler,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.nallo import (
-    NalloParamsFileCreator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
-    RNAFusionParamsFileCreator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
-    TaxprofilerParamsFileCreator,
-)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
 )
@@ -27,31 +12,6 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
-
-
-@pytest.fixture
-def params_file_scenario(
-    expected_nallo_params_file_content: dict,
-    expected_rnafusion_params_file_content: dict,
-    expected_taxprofiler_params_file_content: dict,
-) -> dict:
-    return {
-        Workflow.NALLO: (
-            NalloParamsFileCreator,
-            expected_nallo_params_file_content,
-            nallo,
-        ),
-        Workflow.RNAFUSION: (
-            RNAFusionParamsFileCreator,
-            expected_rnafusion_params_file_content,
-            rnafusion,
-        ),
-        Workflow.TAXPROFILER: (
-            TaxprofilerParamsFileCreator,
-            expected_taxprofiler_params_file_content,
-            taxprofiler,
-        ),
-    }
 
 
 @pytest.fixture
