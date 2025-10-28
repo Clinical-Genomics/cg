@@ -13,11 +13,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 
 
 class NalloParamsFileCreator(ParamsFileCreator):
-    def create(
-        self, case_id: str, case_run_directory: Path, file_path: Path, sample_sheet_path: Path
-    ) -> Any:
+    def create(self, case_id: str, file_path: Path, sample_sheet_path: Path) -> Any:
         content = self._get_content(
-            case_run_directory=case_run_directory, sample_sheet_path=sample_sheet_path
+            case_run_directory=file_path.parent, sample_sheet_path=sample_sheet_path
         )
         write_yaml_nextflow_style(content=content, file_path=file_path)
 
