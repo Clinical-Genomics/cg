@@ -154,7 +154,7 @@ def test_track(
     # GIVEN a pipeline-specific tracker
     workflow_root = "/some/root"
     tracker: Tracker = tracker_class(
-        store=status_db, trailblazer_api=trailblazer_api, workflow_root=workflow_root
+        store=status_db.as_type, trailblazer_api=trailblazer_api, workflow_root=workflow_root
     )
 
     # GIVEN an email
