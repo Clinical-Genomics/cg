@@ -248,9 +248,9 @@ def test_create_nallo_sample_sheet(
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
     # GIVEN Housekeeper with two BAM files
-    bam_file1 = create_autospec(File, full_path="/a/path/to/file1.bam")
-    bam_file2 = create_autospec(File, full_path="/a/path/to/file2.bam")
-    housekeeper_api = create_autospec(HousekeeperAPI)
+    bam_file1: File = create_autospec(File, full_path="/a/path/to/file1.bam")
+    bam_file2: File = create_autospec(File, full_path="/a/path/to/file2.bam")
+    housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
     housekeeper_api.files = Mock(return_value=[bam_file1, bam_file2])
 
     # GIVEN a sample sheet path
