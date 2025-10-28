@@ -117,9 +117,21 @@ def test_nextflow_params_file_creator(
 
 def test_nallo_params_file_creator(mocker: MockerFixture):
     file_creator = NalloParamsFileCreator(params="workflow_parameters")
-    mocker.patch.object(nallo, "write_yaml")
+    write_yaml_mock = mocker.patch.object(nallo, "write_yaml_nextflow_style")
+    mocker.patch.object(nallo, "read_yaml", return_value={"workflow_param1": "some_value"})
+
     file_creator.create(
         case_id="nallo_case",
+        case_run_directory=Path("case", "run", "directory"),
         file_path=Path("file", "params"),
         sample_sheet_path=Path("sample_sheet.csv"),
+    )
+    write_yaml_mock.assert_called_once_with(
+        content={
+            "filter_variants_hgnc_ids": "case/run/directory/gene_panels.tsv",
+            "input": Path("sample_sheet.csv"),
+            "outdir": Path("case/run/directory"),
+            "workflow_param1": "some_value",
+        },
+        file_path=Path("file", "params"),
     )
