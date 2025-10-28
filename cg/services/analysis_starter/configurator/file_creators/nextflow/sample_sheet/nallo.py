@@ -40,14 +40,14 @@ class NalloSampleSheetCreator:
 
     def _get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
-        read_file_paths = self._get_bam_read_file_paths(sample=case_sample.sample)
+        read_file_paths: list[str] = self._get_bam_read_file_paths(sample=case_sample.sample)
         sample_sheet_entries = []
 
         for bam_path in read_file_paths:
             sample_sheet_entry: list[str] = [
                 case_sample.case.internal_id,
                 case_sample.sample.internal_id,
-                bam_path.as_posix(),
+                bam_path,
                 case_sample.case.internal_id,
                 case_sample.get_paternal_sample_id or "0",
                 case_sample.get_maternal_sample_id or "0",
@@ -57,9 +57,9 @@ class NalloSampleSheetCreator:
             sample_sheet_entries.append(sample_sheet_entry)
         return sample_sheet_entries
 
-    def _get_bam_read_file_paths(self, sample: Sample) -> list[Path]:
+    def _get_bam_read_file_paths(self, sample: Sample) -> list[str]:
         """Gather BAM file path for a sample based on the BAM tag."""
         return [
-            Path(hk_file.full_path)
+            hk_file.full_path
             for hk_file in self.housekeeper_api.files(bundle=sample.internal_id, tags={"bam"})
         ]
