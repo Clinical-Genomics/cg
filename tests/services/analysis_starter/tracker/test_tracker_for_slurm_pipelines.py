@@ -4,7 +4,6 @@ from unittest.mock import Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
-from typed_mock import TypedMock, create_typed_mock
 
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
@@ -22,6 +21,7 @@ from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNAT
 from cg.services.analysis_starter.tracker.tracker import Tracker
 from cg.store.models import Analysis, Case, Customer, Order, Sample
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 BALSAMIC_VERSION = "v18.0.0"
 MIP_DNA_VERSION = "v8.2.5"
