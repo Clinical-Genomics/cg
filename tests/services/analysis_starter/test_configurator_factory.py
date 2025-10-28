@@ -22,7 +22,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
     ParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowSampleSheetCreator,
+    NextflowFastqSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
@@ -68,7 +68,7 @@ def test_nextflow_configurator_factory_success(
     # THEN the configurator is of the expected type
     assert isinstance(configurator, NextflowConfigurator)
     assert isinstance(configurator.params_file_creator, ParamsFileCreator)
-    assert isinstance(configurator.sample_sheet_creator, NextflowSampleSheetCreator)
+    assert isinstance(configurator.sample_sheet_creator, NextflowFastqSampleSheetCreator)
     assert isinstance(configurator.pipeline_extension, PipelineExtension)
 
 

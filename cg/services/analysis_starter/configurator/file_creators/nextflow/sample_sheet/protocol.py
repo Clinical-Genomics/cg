@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Protocol
 
 
-class SampleSheetFileCreator(Protocol):
+class SampleSheetCreator(Protocol):
     @abstractmethod
     def create(self, case_id: str, file_path: Path) -> None:
         raise NotImplementedError(

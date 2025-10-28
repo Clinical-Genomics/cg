@@ -13,7 +13,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import nallo
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowSampleSheetCreator,
+    NextflowFastqSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
     NalloSampleSheetCreator,
@@ -25,7 +25,7 @@ from cg.store.store import Store
 @pytest.mark.parametrize(
     "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]
 )
-def test_nextflow_sample_sheet_creators(
+def test_nextflow_fastq_sample_sheet_creators(
     workflow: Workflow,
     sample_sheet_scenario: dict,
     nextflow_case_id: str,
@@ -107,4 +107,4 @@ def test_parse_fastq_header_raises_error():
     with pytest.raises(TypeError):
         # WHEN parsing the header
         # THEN the correct error is raised
-        NextflowSampleSheetCreator._parse_fastq_header(line="Not a Fastq header")
+        NextflowFastqSampleSheetCreator._parse_fastq_header(line="Not a Fastq header")

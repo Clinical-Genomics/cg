@@ -34,14 +34,11 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
     TaxprofilerParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowSampleSheetCreator,
-)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
     NalloSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.protocol import (
-    SampleSheetFileCreator,
+    SampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
@@ -80,7 +77,7 @@ class ConfiguratorFactory:
     def _get_nextflow_configurator(self, workflow: Workflow) -> NextflowConfigurator:
         config_file_creator = self._get_nextflow_config_file_creator(workflow)
         params_file_creator: ParamsFileCreator = self._get_params_file_creator(workflow)
-        sample_sheet_creator: NextflowSampleSheetCreator = self._get_sample_sheet_creator(workflow)
+        sample_sheet_creator: SampleSheetCreator = self._get_sample_sheet_creator(workflow)
         extension: PipelineExtension = self._get_pipeline_extension(workflow)
         return NextflowConfigurator(
             config_file_creator=config_file_creator,
@@ -117,7 +114,7 @@ class ConfiguratorFactory:
     def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
         return getattr(self.cg_config, workflow)
 
-    def _get_sample_sheet_creator(self, workflow: Workflow) -> SampleSheetFileCreator:
+    def _get_sample_sheet_creator(self, workflow: Workflow) -> SampleSheetCreator:
         match workflow:
             case Workflow.NALLO:
                 return NalloSampleSheetCreator(
