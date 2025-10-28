@@ -7,12 +7,9 @@ from pytest_mock import MockerFixture
 from cg.apps.lims.api import LimsAPI
 from cg.constants.constants import Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
-    nallo,
-    raredisease,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.nallo import (
-    NalloParamsFileCreator,
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import raredisease
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
+    ParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
@@ -102,11 +99,11 @@ def test_nextflow_params_file_creator(
 ):
     """Test that the Nextflow params file is written correctly."""
     file_path = Path("/root", "case_id", "file_name.yaml")
-    # GIVEN a params file creator, an expected output and a mocked file writer
+    # GIVEN a params file creator class, an expected output and the module with the file creator
     file_creator_class, expected_content, module = params_file_scenario[workflow]
-    file_creator = file_creator_class(params="workflow_parameters.yaml")
-    write_yaml_mock = mocker.patch.object(module, "write_yaml_nextflow_style")
-    read_yaml_mock = mocker.patch.object(
+    file_creator: ParamsFileCreator = file_creator_class(params="workflow_parameters.yaml")
+    write_yaml_mock: Mock = mocker.patch.object(module, "write_yaml_nextflow_style")
+    read_yaml_mock: Mock = mocker.patch.object(
         module, "read_yaml", return_value={"workflow_param1": "some_value"}
     )
 
@@ -117,6 +114,7 @@ def test_nextflow_params_file_creator(
         sample_sheet_path=nextflow_sample_sheet_path,
     )
 
+    # THEN the workflow parameters was read from the correct file
     read_yaml_mock.assert_called_once_with(Path("workflow_parameters.yaml"))
 
     # THEN the file should have been written with the expected content
