@@ -98,11 +98,17 @@ def test_nextflow_params_file_creator(
     params_file_scenario: dict,
     nextflow_sample_sheet_path: Path,
     nextflow_case_id: str,
+    mocker: MockerFixture,
 ):
     """Test that the Nextflow params file is written correctly."""
     file_path = Path("/root", "case_id", "file_name.yaml")
     # GIVEN a params file creator, an expected output and a mocked file writer
-    file_creator, expected_content, write_yaml_mock = params_file_scenario[workflow]
+    file_creator_class, expected_content, module = params_file_scenario[workflow]
+    file_creator = file_creator_class(params="workflow_parameters.yaml")
+    write_yaml_mock = mocker.patch.object(module, "write_yaml_nextflow_style")
+    read_yaml_mock = mocker.patch.object(
+        module, "read_yaml", return_value={"workflow_param1": "some_value"}
+    )
 
     # WHEN creating the params file
     file_creator.create(
@@ -112,6 +118,7 @@ def test_nextflow_params_file_creator(
     )
 
     # THEN the file should have been written with the expected content
+    read_yaml_mock.assert_called_once_with(Path("workflow_parameters.yaml"))
     write_yaml_mock.assert_called_once_with(file_path=file_path, content=expected_content)
 
 
