@@ -7,7 +7,12 @@ from pytest_mock import MockerFixture
 
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants.constants import Workflow
-from cg.constants.gene_panel import GenePanelGenomeBuild, GenePanelMasterList
+from cg.constants.gene_panel import (
+    GENOME_BUILD_37,
+    GENOME_BUILD_38,
+    GenePanelGenomeBuild,
+    GenePanelMasterList,
+)
 from cg.services.analysis_starter.configurator.file_creators import gene_panel
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.store.models import Case
@@ -40,9 +45,27 @@ def tomte_case_id() -> str:
 
 
 @pytest.fixture
-def mock_scout(nextflow_gene_panel_file_content: list[str]) -> ScoutAPI:
+def nallo_gene_panel_file_content() -> list[str]:
+    return [
+        "##genome_build=38",
+        "##gene_panel=OMIM-AUTO,version=32.0,updated_at=2024-11-18,display_name=OMIM-AUTO",
+        "#chromosome     gene_start      gene_stop       hgnc_id hgnc_symbol",
+        "chr1    1001000 1014000 4053    ISG15",
+        "chr1    1020000 1056000 329     AGRN",
+    ]
+
+
+@pytest.fixture
+def mock_scout(
+    nallo_gene_panel_file_content: list[str], nextflow_gene_panel_file_content: list[str]
+) -> ScoutAPI:
     mock_scout: ScoutAPI = create_autospec(ScoutAPI)
-    mock_scout.export_panels = Mock(return_value=nextflow_gene_panel_file_content)
+    mock_scout.export_panels = lambda panels, build=GENOME_BUILD_37, dry_run=False: (
+        nallo_gene_panel_file_content
+        if build == GENOME_BUILD_38
+        else nextflow_gene_panel_file_content
+    )
+
     return mock_scout
 
 
@@ -100,6 +123,24 @@ def test_gene_panel_file_content(
     write_mock.assert_called_once_with(
         content=nextflow_gene_panel_file_content,
         file_path=Path("nextflow.bed"),
+    )
+
+
+def test_gene_panel_file_content_nallo_case(
+    gene_panel_creator: GenePanelFileCreator, nallo_case_id: str, mocker: MockerFixture
+):
+    # GIVEN a mock writer
+    write_mock = mocker.patch.object(gene_panel, "write_txt_with_newlines")
+
+    expected_nallo_gene_panel_file_content = [
+        "#chromosome     gene_start      gene_stop       hgnc_id hgnc_symbol",
+        "chr1    1001000 1014000 4053    ISG15",
+        "chr1    1020000 1056000 329     AGRN",
+    ]
+
+    gene_panel_creator.create(case_id=nallo_case_id, file_path=Path("nallo.bed"))
+    write_mock.assert_called_once_with(
+        content=expected_nallo_gene_panel_file_content, file_path=Path("nallo.bed")
     )
 
 

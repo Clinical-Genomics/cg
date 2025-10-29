@@ -3,6 +3,7 @@ from pathlib import Path
 
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import GenePanelMasterList
+from cg.constants.constants import Workflow
 from cg.constants.gene_panel import GenePanelCombo, GenePanelGenomeBuild
 from cg.io.txt import write_txt_with_newlines
 from cg.services.analysis_starter.configurator.file_creators.nextflow.utils import get_genome_build
@@ -28,7 +29,10 @@ class GenePanelFileCreator:
         all_panels: list[str] = self._get_aggregated_panels(
             customer_id=case.customer.internal_id, default_panels=set(case.panels)
         )
-        return self.scout_api.export_panels(build=genome_build, panels=all_panels)
+        panels = self.scout_api.export_panels(build=genome_build, panels=all_panels)
+        if case.data_analysis == Workflow.NALLO:
+            panels = [panel for panel in panels if not panel.startswith("##")]
+        return panels
 
     def _get_aggregated_panels(self, customer_id: str, default_panels: set[str]) -> list[str]:
         """Check if the customer is collaborator for gene panel master list
