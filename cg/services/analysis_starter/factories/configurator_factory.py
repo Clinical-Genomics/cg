@@ -25,6 +25,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.config_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.nallo import (
+    NalloParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
@@ -75,7 +78,9 @@ class ConfiguratorFactory:
         raise NotImplementedError
 
     def _get_nextflow_configurator(self, workflow: Workflow) -> NextflowConfigurator:
-        config_file_creator = self._get_nextflow_config_file_creator(workflow)
+        config_file_creator: NextflowConfigFileCreator = self._get_nextflow_config_file_creator(
+            workflow
+        )
         params_file_creator: ParamsFileCreator = self._get_params_file_creator(workflow)
         sample_sheet_creator: SampleSheetCreator = self._get_sample_sheet_creator(workflow)
         extension: PipelineExtension = self._get_pipeline_extension(workflow)
@@ -99,17 +104,18 @@ class ConfiguratorFactory:
         )
 
     def _get_params_file_creator(self, workflow: Workflow) -> ParamsFileCreator:
-        if workflow == Workflow.RAREDISEASE:
-            pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
-            return RarediseaseParamsFileCreator(
-                lims=self.lims_api, store=self.store, params=pipeline_config.params
-            )
-        elif workflow == Workflow.RNAFUSION:
-            pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
-            return RNAFusionParamsFileCreator(pipeline_config.params)
-        elif workflow == Workflow.TAXPROFILER:
-            pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
-            return TaxprofilerParamsFileCreator(pipeline_config.params)
+        params: str = self._get_pipeline_config(workflow).params
+        match workflow:
+            case Workflow.NALLO:
+                return NalloParamsFileCreator(params)
+            case Workflow.RAREDISEASE:
+                return RarediseaseParamsFileCreator(
+                    lims=self.lims_api, store=self.store, params=params
+                )
+            case Workflow.RNAFUSION:
+                return RNAFusionParamsFileCreator(params)
+            case Workflow.TAXPROFILER:
+                return TaxprofilerParamsFileCreator(params)
 
     def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
         return getattr(self.cg_config, workflow)
