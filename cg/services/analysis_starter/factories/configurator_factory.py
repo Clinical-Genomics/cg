@@ -200,6 +200,3 @@ class ConfiguratorFactory:
 
     def _get_mip_dna_config_file_creator(self, root: str) -> MIPDNAConfigFileCreator:
         return MIPDNAConfigFileCreator(lims_api=self.lims_api, root=root, store=self.store)
-
-    def _get_mip_dna_config_file_creator(self, root: str) -> MIPDNAConfigFileCreator:
-        return MIPDNAConfigFileCreator(lims_api=self.lims_api, root=root, store=self.store)
