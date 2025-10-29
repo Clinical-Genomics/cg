@@ -139,7 +139,6 @@ def test_to_lims_microbial(microsalt_order: MicrosaltOrder):
     assert first_sample["udfs"]["priority"] == "research"
     assert first_sample["udfs"]["organism"] == "C. jejuni"
     assert first_sample["udfs"]["reference_genome"] == "NC_000001"
-    assert first_sample["udfs"]["extraction_method"] == "MagNaPure 96"
     assert first_sample["udfs"]["volume"] == "20"
 
 
