@@ -104,20 +104,18 @@ class ConfiguratorFactory:
         )
 
     def _get_params_file_creator(self, workflow: Workflow) -> ParamsFileCreator:
+        params: str = self._get_pipeline_config(workflow).params
         match workflow:
             case Workflow.NALLO:
-                return NalloParamsFileCreator()
+                return NalloParamsFileCreator(params)
             case Workflow.RAREDISEASE:
-                pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
                 return RarediseaseParamsFileCreator(
-                    lims=self.lims_api, store=self.store, params=pipeline_config.params
+                    lims=self.lims_api, store=self.store, params=params
                 )
             case Workflow.RNAFUSION:
-                pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
-                return RNAFusionParamsFileCreator(pipeline_config.params)
+                return RNAFusionParamsFileCreator(params)
             case Workflow.TAXPROFILER:
-                pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
-                return TaxprofilerParamsFileCreator(pipeline_config.params)
+                return TaxprofilerParamsFileCreator(params)
 
     def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
         return getattr(self.cg_config, workflow)
