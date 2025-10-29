@@ -4,15 +4,15 @@ import logging
 from pathlib import Path
 
 from housekeeper.store.models import File, Version
-from pydantic.v1 import EmailStr, ValidationError
+from pydantic.v1 import ValidationError
 
 from cg.constants import Workflow
 from cg.constants.constants import FileFormat, GenomeVersion, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
-from cg.constants.observations import ObservationsFileWildcards
+from cg.constants.observations import BalsamicObservationPanel, ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
 from cg.constants.scout import BALSAMIC_CASE_TAGS
-from cg.constants.sequencing import Variants
+from cg.constants.sequencing import SeqLibraryPrepCategory, Variants
 from cg.constants.subject import Sex
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
@@ -31,6 +31,15 @@ from cg.utils import Process
 from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
 
 LOG = logging.getLogger(__name__)
+
+
+PANELS_WITH_LOQUSDB_DUMP_FILES_MAP: dict[str, str] = {
+    BalsamicObservationPanel.MYELOID: "loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz",
+    BalsamicObservationPanel.LYMPHOID: "loqusdb_cancer_somatic_lymphoid_snv_variants_export-20250920-.vcf.gz",
+    BalsamicObservationPanel.EXOME: "loqusdb_cancer_somatic_exome_snv_variants_export-20250920-.vcf.gz",
+}
+
+LOQUSDB_WGS_DUMP_FILE = "loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz"
 
 
 class BalsamicAnalysisAPI(AnalysisAPI):
@@ -52,11 +61,11 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.cadd_path: str = config.balsamic.cadd_path
         self.conda_binary: str = config.balsamic.conda_binary
         self.conda_env: str = config.balsamic.conda_env
-        self.email: EmailStr = config.balsamic.slurm.mail_user
         self.genome_interval_path: str = config.balsamic.genome_interval_path
         self.gens_coverage_female_path: str = config.balsamic.gens_coverage_female_path
         self.gens_coverage_male_path: str = config.balsamic.gens_coverage_male_path
         self.gnomad_af5_path: str = config.balsamic.gnomad_af5_path
+        self.head_job_partition: str = config.balsamic.head_job_partition
         self.loqusdb_path: str = config.balsamic.loqusdb_path
         self.pon_path: str = config.balsamic.pon_path
         self.qos: SlurmQos = config.balsamic.slurm.qos
@@ -253,10 +262,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if all(val["sex"] == sex for val in sample_data.values()) and sex in set(
             value for value in Sex
         ):
-            if sex not in [Sex.FEMALE, Sex.MALE]:
-                LOG.warning(f"The provided sex is unknown, setting {Sex.FEMALE} as the default")
-                sex = Sex.FEMALE
-
             return sex
         else:
             LOG.error(f"Unable to retrieve a valid sex from samples: {sample_data.keys()}")
@@ -308,8 +313,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_latest_metadata(self, case_id: str) -> BalsamicAnalysis:
         """Return the latest metadata of a specific BALSAMIC case."""
 
-        config_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.CONFIG)
-        metrics_raw_data = self.get_latest_raw_file_data(case_id, BalsamicAnalysisTag.QC_METRICS)
+        config_raw_data: dict = self.get_latest_raw_file_data(
+            case_id=case_id, tags=BalsamicAnalysisTag.CONFIG
+        )
+        metrics_raw_data: list[dict] = self.get_latest_raw_file_data(
+            case_id=case_id, tags=BalsamicAnalysisTag.QC_METRICS
+        )
 
         if config_raw_data and metrics_raw_data:
             try:
@@ -324,7 +333,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve the latest metadata for {case_id}")
             raise CgError
 
-    def parse_analysis(self, config_raw: dict, qc_metrics_raw: dict, **kwargs) -> BalsamicAnalysis:
+    def parse_analysis(
+        self, config_raw: dict, qc_metrics_raw: list[dict], **kwargs
+    ) -> BalsamicAnalysis:
         """Returns a formatted BalsamicAnalysis object"""
 
         sequencing_type = config_raw["analysis"]["sequencing_type"]
@@ -399,9 +410,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "genome_interval": self.genome_interval_path,
             "gnomad_min_af5": self.gnomad_af5_path,
             "gens_coverage_pon": (
-                self.gens_coverage_female_path
-                if sex == Sex.FEMALE
-                else self.gens_coverage_male_path
+                self.gens_coverage_male_path if sex == Sex.MALE else self.gens_coverage_female_path
             ),
         }
 
@@ -443,6 +452,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             raise BalsamicStartError(f"{case_id} has no samples tagged for BALSAMIC analysis!")
 
         verified_panel_bed = self.get_verified_bed(panel_bed=panel_bed, sample_data=sample_data)
+        loqusdb_panel_dump_file: str | None = self.get_panel_loqusdb_dump(verified_panel_bed)
         verified_pon = (
             self.get_verified_pon(pon_cnn=pon_cnn, panel_bed=verified_panel_bed)
             if verified_panel_bed
@@ -452,10 +462,16 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         verified_exome_argument: bool = self.has_case_only_exome_samples(case_id=case_id)
 
+        is_wgs_case: bool = self.has_case_only_wgs_samples(case_id=case_id)
+
         config_case: dict[str, str] = {
             "case_id": case_id,
             "analysis_workflow": self.workflow,
             "genome_version": genome_version,
+            "loqusdb_panel_dump_file": loqusdb_panel_dump_file,
+            "loqusdb_wgs_dump_file": (
+                f"{self.loqusdb_path}/{LOQUSDB_WGS_DUMP_FILE}" if is_wgs_case else None
+            ),
             "sex": verified_sex,
             "panel_bed": verified_panel_bed,
             "pon_cnn": verified_pon,
@@ -479,6 +495,22 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             )
 
         return config_case
+
+    def has_case_only_wgs_samples(self, case_id: str) -> bool:
+        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        return all(
+            sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+            for sample in case.samples
+        )
+
+    def get_panel_loqusdb_dump(self, bed_file: str | None) -> str | None:
+        if not bed_file:
+            return None
+        bed_file_name: str = Path(bed_file).name
+        bed_name: str = self.status_db.get_bed_version_by_file_name(bed_file_name).bed.name
+
+        if file_name := PANELS_WITH_LOQUSDB_DUMP_FILES_MAP.get(bed_name):
+            return f"{self.loqusdb_path}/{file_name}"
 
     @staticmethod
     def print_sample_params(case_id: str, sample_data: dict) -> None:
@@ -561,9 +593,11 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--cache-version": cache_version,
                 "--cadd-annotations": self.cadd_path,
                 "--artefact-snv-observations": arguments.get("artefact_somatic_snv"),
+                "--artefact-sv-observations": arguments.get("loqusdb_wgs_dump_file"),
                 "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
                 "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
                 "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
+                "--cancer-somatic-snv-panel-observations": arguments.get("loqusdb_panel_dump_file"),
                 "--cancer-somatic-sv-observations": arguments.get("cancer_somatic_sv"),
                 "--case-id": arguments.get("case_id"),
                 "--clinical-snv-observations": arguments.get("clinical_snv"),
@@ -595,7 +629,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def run_analysis(
         self,
         case_id: str,
-        cluster_config: Path | None = None,
+        workflow_profile: Path | None = None,
         slurm_quality_of_service: str | None = None,
         dry_run: bool = False,
     ) -> None:
@@ -603,17 +637,16 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         command = ["run", "analysis"]
         run_analysis = ["--run-analysis"] if not dry_run else []
-        benchmark = ["--benchmark"]
         options = build_command_from_dict(
             {
                 "--account": self.account,
-                "--mail-user": self.email,
                 "--qos": slurm_quality_of_service or self.get_slurm_qos_for_case(case_id=case_id),
                 "--sample-config": self.get_case_config_path(case_id=case_id),
-                "--cluster-config": cluster_config,
+                "--workflow-profile": workflow_profile,
+                "--headjob-partition": self.head_job_partition,
             }
         )
-        parameters = command + options + run_analysis + benchmark
+        parameters = command + options + run_analysis
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def report_deliver(self, case_id: str, dry_run: bool = False) -> None:
@@ -630,8 +663,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_genome_build(self, case_id: str) -> str:
         """Returns the reference genome build version of a Balsamic analysis."""
-        analysis_metadata: BalsamicAnalysis = self.get_latest_metadata(case_id)
-        return analysis_metadata.balsamic_config.reference.reference_genome_version
+        return GenomeVersion.HG19
 
     @staticmethod
     def get_variant_caller_version(var_caller_name: str, var_caller_versions: dict) -> str | None:
