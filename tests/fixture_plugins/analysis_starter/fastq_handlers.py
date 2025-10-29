@@ -1,9 +1,10 @@
 from pathlib import Path
+from unittest.mock import create_autospec
 
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.meta.workflow.fastq import MicrosaltFastqHandler
+from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler
 from cg.store.store import Store
 
 
@@ -13,4 +14,13 @@ def microsalt_fastq_handler(
 ) -> MicrosaltFastqHandler:
     return MicrosaltFastqHandler(
         status_db=base_store, housekeeper_api=real_housekeeper_api, root_dir=Path("/dev/null")
+    )
+
+
+@pytest.fixture
+def balsamic_fastq_handler() -> BalsamicFastqHandler:
+    return BalsamicFastqHandler(
+        status_db=create_autospec(Store),
+        housekeeper_api=create_autospec(HousekeeperAPI),
+        root_dir=Path("/dev/null"),
     )

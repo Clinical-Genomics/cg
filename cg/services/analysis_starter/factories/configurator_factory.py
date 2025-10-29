@@ -4,11 +4,14 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
-from cg.meta.workflow.fastq import MicrosaltFastqHandler, MipFastqHandler
+from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler, MipFastqHandler
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
+from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
+    BalsamicConfigFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
     ManagedVariantsFileCreator,
@@ -46,6 +49,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
     TaxprofilerSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
@@ -67,6 +71,8 @@ class ConfiguratorFactory:
             return self._get_nextflow_configurator(workflow)
         elif workflow == Workflow.MICROSALT:
             return self._get_microsalt_configurator()
+        elif workflow in [Workflow.BALSAMIC, workflow.BALSAMIC_UMI]:
+            return self._get_balsamic_configurator()
         elif workflow == Workflow.MIP_DNA:
             return self._get_mip_dna_configurator()
         raise NotImplementedError
@@ -149,6 +155,22 @@ class ConfiguratorFactory:
             self.cg_config.scout_api_38
             if workflow == Workflow.NALLO
             else self.cg_config.scout_api_37
+        )
+
+    def _get_balsamic_configurator(self) -> BalsamicConfigurator:
+        return BalsamicConfigurator(
+            config_file_creator=BalsamicConfigFileCreator(
+                cg_balsamic_config=self.cg_config.balsamic,
+                lims_api=self.lims_api,
+                status_db=self.store,
+            ),
+            fastq_handler=BalsamicFastqHandler(
+                housekeeper_api=self.housekeeper_api,
+                root_dir=Path(self.cg_config.balsamic.root),
+                status_db=self.store,
+            ),
+            config=self.cg_config.balsamic,
+            store=self.store,
         )
 
     def _get_microsalt_configurator(self) -> MicrosaltConfigurator:
