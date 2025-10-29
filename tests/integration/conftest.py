@@ -220,3 +220,8 @@ def copy_integration_test_file(from_path: Path, to_path: Path):
     to_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(from_path, to_path)
     return True
+
+
+def create_empty_file(file_path: Path):
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    file_path.touch()

@@ -20,6 +20,7 @@ from cg.utils import commands
 from tests.integration.conftest import (
     IntegrationTestPaths,
     copy_integration_test_file,
+    create_empty_file,
     create_integration_test_sample,
     expect_to_add_pending_analysis_to_trailblazer,
 )
@@ -163,6 +164,12 @@ def test_start_available_tgs_tumour_only(
     helpers.ensure_bed_version(store=status_db, bed_name=bed_name)
     expect_lims_sample_request(lims_server=httpserver, sample=sample, bed_name=bed_name)
 
+    # GIVEN a loqusdb dump file for the artefact-snv-observations flag exists
+    create_empty_file(Path(test_root_dir, "loqusdb", "artefact_somatic_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "artefact_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_germline_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_snv.vcf.gz"))
+
     # GIVEN a call to balsamic config case successfully generates a config file
     if command == "start-available":
         subprocess_mock = mocker.patch.object(commands, "subprocess")
@@ -213,18 +220,22 @@ def test_start_available_tgs_tumour_only(
     # THEN a successful exit code is returned
     assert result.exit_code == 0
 
-    # artefact_sv_observations seems to be in dev command but not v18 command?
-
     # THEN balsamic config case was called in the correct way
     expected_config_case_command = (
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path config case "
         f"--analysis-dir {balsamic_root_dir} "
         f"--analysis-workflow balsamic "
+        f"--artefact-snv-observations {test_root_dir}/loqusdb/artefact_somatic_snv.vcf.gz "
         f"--balsamic-cache {test_root_dir}/balsamic_cache "
         f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
+        f"--cancer-germline-snv-observations {test_root_dir}/loqusdb/cancer_germline_snv.vcf.gz "
+        f"--cancer-somatic-snv-observations {test_root_dir}/loqusdb/cancer_somatic_snv.vcf.gz "
         f"--cancer-somatic-snv-panel-observations {test_root_dir}/loqusdb/loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz "
+        f"--cancer-somatic-sv-observations {test_root_dir}/loqusdb/artefact_snv.vcf.gz "
         f"--case-id {case_id} "
+        f"--clinical-snv-observations {test_root_dir}/loqusdb/clinical_snv.vcf.gz "
+        f"--clinical-sv-observations {test_root_dir}/loqusdb/clinical_sv.vcf.gz "
         f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
         f"--gender female "
         f"--genome-version hg19 "
@@ -235,13 +246,33 @@ def test_start_available_tgs_tumour_only(
         f"--tumor-sample-name {sample.internal_id}"
     )
 
-    assert subprocess_mock.run.mock_calls[0] == call(
-        expected_config_case_command,
-        check=False,
-        shell=True,
-        stderr=ANY,
-        stdout=ANY,
-    )
+    first_call = subprocess_mock.run.mock_calls[0]
+    if command == "start-available":
+        assert first_call == call(
+            expected_config_case_command,
+            check=False,
+            shell=True,
+            stderr=ANY,
+            stdout=ANY,
+        )
+    else:
+        assert first_call == call(
+            args=ANY,
+            check=False,
+            shell=True,
+            stderr=ANY,
+            stdout=ANY,
+        )
+
+        actual_command = first_call.kwargs["args"]
+        parts = actual_command.split()[7:-1]
+        actual_key_values = list(zip(parts[::2], parts[1::2]))
+
+        parts = expected_config_case_command.split()[7:-1]
+        expected_key_values = list(zip(parts[::2], parts[1::2]))
+
+        for actual, expected in zip(actual_key_values, expected_key_values):
+            assert actual == expected
 
     # THEN Balsamic run analysis was called in the correct way
     assert subprocess_mock.run.mock_calls[1] == call(
