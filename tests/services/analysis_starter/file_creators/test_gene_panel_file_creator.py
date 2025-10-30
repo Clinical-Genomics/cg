@@ -60,10 +60,12 @@ def mock_scout(
     nallo_gene_panel_file_content: list[str], nextflow_gene_panel_file_content: list[str]
 ) -> ScoutAPI:
     mock_scout: ScoutAPI = create_autospec(ScoutAPI)
-    mock_scout.export_panels = lambda panels, build=GENOME_BUILD_37, dry_run=False: (
-        nallo_gene_panel_file_content
-        if build == GENOME_BUILD_38
-        else nextflow_gene_panel_file_content
+    mock_scout.export_panels = Mock(
+        side_effect=lambda panels, build=GENOME_BUILD_37, dry_run=False: (
+            nallo_gene_panel_file_content
+            if build == GENOME_BUILD_38
+            else nextflow_gene_panel_file_content
+        )
     )
 
     return mock_scout
@@ -93,7 +95,7 @@ def gene_panel_creator(
     }
 
     mock_store: Store = create_autospec(Store)
-    mock_store.get_case_by_internal_id = lambda internal_id: case_dictionary[internal_id]
+    mock_store.get_case_by_internal_id_strict = lambda internal_id: case_dictionary[internal_id]
 
     return GenePanelFileCreator(
         store=mock_store,
