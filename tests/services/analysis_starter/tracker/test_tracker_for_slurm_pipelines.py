@@ -164,7 +164,7 @@ def test_track(
     # WHEN calling track
     tracker.track(case_config=case_config)
 
-    # THEN analysis object should have been created in StatusDB
+    # THEN an analysis object should have been created in StatusDB
     status_db.as_mock.add_analysis.assert_called_with(
         completed_at=None,
         primary=True,
