@@ -24,12 +24,12 @@ class GenePanelFileCreator:
         LOG.info(f"Created gene panel file for case {case_id} at {file_path}")
 
     def _get_content(self, case_id: str) -> list[str]:
-        case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.store.get_case_by_internal_id_strict(internal_id=case_id)
         genome_build: GenePanelGenomeBuild = get_genome_build(workflow=case.data_analysis)
         all_panels: list[str] = self._get_aggregated_panels(
             customer_id=case.customer.internal_id, default_panels=set(case.panels)
         )
-        panels = self.scout_api.export_panels(build=genome_build, panels=all_panels)
+        panels: list[str] = self.scout_api.export_panels(build=genome_build, panels=all_panels)
         if case.data_analysis == Workflow.NALLO:
             panels = [panel for panel in panels if not panel.startswith("##")]
         return panels
