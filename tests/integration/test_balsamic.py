@@ -243,6 +243,8 @@ def test_start_available_tgs_tumour_only(
         f"--panel-bed {test_root_dir}/balsamic_bed_path/dummy_filename "
         f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
         f"--sentieon-license localhost "
+        f"--swegen-snv {test_root_dir}/swegen_snv.vcf.gz "
+        f"--swegen-sv {test_root_dir}/swegen_sv.vcf.gz "
         f"--tumor-sample-name {sample.internal_id}"
     )
 
