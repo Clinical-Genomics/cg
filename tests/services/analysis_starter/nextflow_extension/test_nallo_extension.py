@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import Mock
 
 from cg.constants.scout import ScoutExportFileName
 from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
@@ -24,3 +25,18 @@ def test_configure():
         file_path=case_run_directory / ScoutExportFileName.PANELS_TSV,
         header_filtering=True,
     )
+
+
+def test_do_required_files_exist_true(tmp_path: Path):
+    # GIVEN that there is a gene panel tsv file
+    scout_file = tmp_path / ScoutExportFileName.PANELS_TSV
+    scout_file.touch()
+
+    # GIVEN a Nallo extension
+    nallo_extension = NalloExtension(gene_panel_file_creator=Mock())
+
+    # WHEN checking that the required files exist
+    does_exist: bool = nallo_extension.do_required_files_exist(case_run_directory=tmp_path)
+
+    # THEN the required files should exist
+    assert does_exist
