@@ -14,6 +14,7 @@ from cg.constants.observations import BalsamicObservationPanel
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.tb import AnalysisType
 from cg.services.analysis_starter.configurator.file_creators import balsamic_config
+from cg.services.analysis_starter.submitters.subprocess import submitter
 from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
 from cg.utils import commands
@@ -172,9 +173,11 @@ def test_start_available_tgs_tumour_only(
 
     # GIVEN a call to balsamic config case successfully generates a config file
     if command == "start-available":
-        subprocess_mock = mocker.patch.object(commands, "subprocess")
+        config_case_subprocess_mock = mocker.patch.object(commands, "subprocess")
+        run_analysis_subprocess_mock = config_case_subprocess_mock
     elif command == "dev-start-available":
-        subprocess_mock = mocker.patch.object(balsamic_config, "subprocess")
+        config_case_subprocess_mock = mocker.patch.object(balsamic_config, "subprocess")
+        run_analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
 
     def mock_run(*args, **kwargs):
         command = args[0] if args else kwargs["args"]
@@ -184,7 +187,7 @@ def test_start_available_tgs_tumour_only(
             create_tga_config_file(test_root_dir=test_root_dir, case=case_tgs_tumour_only)
         return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
 
-    subprocess_mock.run = Mock(side_effect=mock_run)
+    config_case_subprocess_mock.run = Mock(side_effect=mock_run)
 
     # GIVEN the Trailblazer API returns no ongoing analysis for the case
     httpserver.expect_request(
@@ -248,16 +251,79 @@ def test_start_available_tgs_tumour_only(
         f"--tumor-sample-name {sample.internal_id}"
     )
 
-    first_call = subprocess_mock.run.mock_calls[0]
+    first_call = config_case_subprocess_mock.run.mock_calls[0]
     if command == "start-available":
+        expected_config_case_command = (
+            f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
+            f"{test_root_dir}/balsamic_binary_path config case "
+            f"--analysis-dir {balsamic_root_dir} "
+            f"--analysis-workflow balsamic "
+            f"--balsamic-cache {test_root_dir}/balsamic_cache "
+            f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
+            f"--artefact-snv-observations {test_root_dir}/loqusdb/artefact_somatic_snv.vcf.gz "
+            f"--cancer-germline-snv-observations {test_root_dir}/loqusdb/cancer_germline_snv.vcf.gz "
+            f"--cancer-somatic-snv-observations {test_root_dir}/loqusdb/cancer_somatic_snv.vcf.gz "
+            f"--cancer-somatic-snv-panel-observations {test_root_dir}/loqusdb/loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz "
+            f"--case-id {case_id} "
+            f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
+            f"--gender female "
+            f"--genome-version hg19 "
+            f"--gnomad-min-af5 {test_root_dir}/balsamic_gnomad_af5_path "
+            f"--panel-bed {test_root_dir}/balsamic_bed_path/dummy_filename "
+            f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
+            f"--sentieon-license localhost "
+            f"--cancer-somatic-sv-observations {test_root_dir}/loqusdb/artefact_snv.vcf.gz "
+            f"--clinical-snv-observations {test_root_dir}/loqusdb/clinical_snv.vcf.gz "
+            f"--clinical-sv-observations {test_root_dir}/loqusdb/clinical_sv.vcf.gz "
+            f"--swegen-snv {test_root_dir}/swegen_snv.vcf.gz "
+            f"--swegen-sv {test_root_dir}/swegen_sv.vcf.gz "
+            f"--tumor-sample-name {sample.internal_id}"
+        )
+
         assert first_call == call(
-            expected_config_case_command,
+            ANY,
             check=False,
             shell=True,
             stderr=ANY,
             stdout=ANY,
         )
+
+        actual_command = first_call.args[0]
+
+        assert_commands(
+            expected_command=expected_config_case_command,
+            actual_command=actual_command,
+            flags_start_at_word=7,
+            message="config-case command not as expected",
+        )
     else:
+        expected_config_case_command = (
+            f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
+            f"{test_root_dir}/balsamic_binary_path config case "
+            f"--analysis-dir {balsamic_root_dir} "
+            f"--analysis-workflow balsamic "
+            f"--artefact-snv-observations {test_root_dir}/loqusdb/artefact_somatic_snv.vcf.gz "
+            f"--balsamic-cache {test_root_dir}/balsamic_cache "
+            f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
+            f"--cancer-germline-snv-observations {test_root_dir}/loqusdb/cancer_germline_snv.vcf.gz "
+            f"--cancer-somatic-snv-observations {test_root_dir}/loqusdb/cancer_somatic_snv.vcf.gz "
+            f"--cancer-somatic-snv-panel-observations {test_root_dir}/loqusdb/loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz "
+            f"--cancer-somatic-sv-observations {test_root_dir}/loqusdb/artefact_snv.vcf.gz "
+            f"--case-id {case_id} "
+            f"--clinical-snv-observations {test_root_dir}/loqusdb/clinical_snv.vcf.gz "
+            f"--clinical-sv-observations {test_root_dir}/loqusdb/clinical_sv.vcf.gz "
+            f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
+            f"--gender female "
+            f"--genome-version hg19 "
+            f"--gnomad-min-af5 {test_root_dir}/balsamic_gnomad_af5_path "
+            f"--panel-bed {test_root_dir}/balsamic_bed_path/dummy_filename "
+            f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
+            f"--sentieon-license localhost "
+            f"--swegen-snv {test_root_dir}/swegen_snv.vcf.gz "
+            f"--swegen-sv {test_root_dir}/swegen_sv.vcf.gz "
+            f"--tumor-sample-name {sample.internal_id}"
+        )
+
         assert first_call == call(
             args=ANY,
             check=False,
@@ -265,31 +331,55 @@ def test_start_available_tgs_tumour_only(
             stderr=ANY,
             stdout=ANY,
         )
-
         actual_command = first_call.kwargs["args"]
-        parts = actual_command.split()[7:-1]
-        actual_key_values = list(zip(parts[::2], parts[1::2]))
-
-        parts = expected_config_case_command.split()[7:-1]
-        expected_key_values = list(zip(parts[::2], parts[1::2]))
-
-        for actual, expected in zip(actual_key_values, expected_key_values):
-            assert actual == expected
+        assert_commands(
+            expected_command=expected_config_case_command,
+            actual_command=actual_command,
+            flags_start_at_word=7,
+            message="config-case command not as expected",
+        )
 
     # THEN Balsamic run analysis was called in the correct way
-    assert subprocess_mock.run.mock_calls[1] == call(
-        f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
-        f"{test_root_dir}/balsamic_binary_path run analysis "
-        f"--account balsamic_slurm_account "
-        f"--qos normal "
-        f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
-        f"--headjob-partition head-jobs "
-        f"--run-analysis",
-        check=False,
-        shell=True,
-        stderr=ANY,
-        stdout=ANY,
-    )
+    if command == "start-available":
+        run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[1]
+
+        assert run_analysis_call == call(
+            f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
+            f"{test_root_dir}/balsamic_binary_path run analysis "
+            f"--account balsamic_slurm_account "
+            f"--qos normal "
+            f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
+            f"--headjob-partition head-jobs "
+            f"--run-analysis",
+            check=False,
+            shell=True,
+            stderr=ANY,
+            stdout=ANY,
+        )
+
+    else:
+        run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[0]
+
+        assert run_analysis_call == call(
+            args=ANY,
+            check=False,
+            shell=True,
+            stderr=ANY,
+            stdout=ANY,
+        )
+
+        assert_commands(
+            expected_command=f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
+            f"{test_root_dir}/balsamic_binary_path run analysis "
+            f"--qos normal "
+            f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
+            f"--headjob-partition head-jobs "
+            f"--account balsamic_slurm_account "
+            f"--run-analysis",
+            actual_command=run_analysis_call.kwargs["args"],
+            flags_start_at_word=7,
+            message="run analysis command not as expected",
+        )
 
     # THEN an analysis has been created for the case
     assert len(case_tgs_tumour_only.analyses) == 1
@@ -297,6 +387,25 @@ def test_start_available_tgs_tumour_only(
     # THEN the case action is set to running
     status_db.session.refresh(case_tgs_tumour_only)
     assert case_tgs_tumour_only.action == CaseActions.RUNNING
+
+
+def assert_commands(expected_command, actual_command, flags_start_at_word=7, message=""):
+    all_actual_words = actual_command.split()
+    all_expected_words = expected_command.split()
+
+    actual_parts = all_actual_words[flags_start_at_word:-1]
+    actual_key_values = list(zip(actual_parts[::2], actual_parts[1::2]))
+
+    expected_parts = all_expected_words[flags_start_at_word:-1]
+    expected_key_values = list(zip(expected_parts[::2], expected_parts[1::2]))
+
+    assert (
+        all_actual_words[0 : flags_start_at_word - 1]
+        == all_expected_words[0 : flags_start_at_word - 1]
+    ), message
+
+    for actual, expected in zip(actual_key_values, expected_key_values):
+        assert actual == expected, message
 
 
 @pytest.mark.xdist_group(name="integration")
