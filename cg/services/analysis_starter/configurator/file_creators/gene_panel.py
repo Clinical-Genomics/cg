@@ -3,7 +3,6 @@ from pathlib import Path
 
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import GenePanelMasterList
-from cg.constants.constants import Workflow
 from cg.constants.gene_panel import GenePanelCombo, GenePanelGenomeBuild
 from cg.io.txt import write_txt_with_newlines
 from cg.services.analysis_starter.configurator.file_creators.nextflow.utils import get_genome_build
@@ -18,19 +17,19 @@ class GenePanelFileCreator:
         self.store = store
         self.scout_api = scout_api
 
-    def create(self, case_id: str, file_path: Path) -> None:
-        content: list[str] = self._get_content(case_id)
+    def create(self, case_id: str, file_path: Path, header_filtering: bool = False) -> None:
+        content: list[str] = self._get_content(case_id=case_id, header_filtering=header_filtering)
         write_txt_with_newlines(file_path=file_path, content=content)
         LOG.info(f"Created gene panel file for case {case_id} at {file_path}")
 
-    def _get_content(self, case_id: str) -> list[str]:
+    def _get_content(self, case_id: str, header_filtering: bool) -> list[str]:
         case: Case = self.store.get_case_by_internal_id_strict(internal_id=case_id)
         genome_build: GenePanelGenomeBuild = get_genome_build(workflow=case.data_analysis)
         all_panels: list[str] = self._get_aggregated_panels(
             customer_id=case.customer.internal_id, default_panels=set(case.panels)
         )
         panels: list[str] = self.scout_api.export_panels(build=genome_build, panels=all_panels)
-        if case.data_analysis == Workflow.NALLO:
+        if header_filtering:
             panels = [panel for panel in panels if not panel.startswith("##")]
         return panels
 

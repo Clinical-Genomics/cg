@@ -128,7 +128,7 @@ def test_gene_panel_file_content(
     )
 
 
-def test_gene_panel_file_content_nallo_case(
+def test_gene_panel_file_creation_with_filtering(
     gene_panel_creator: GenePanelFileCreator, nallo_case_id: str, mocker: MockerFixture
 ):
     # GIVEN a mock writer
@@ -140,7 +140,9 @@ def test_gene_panel_file_content_nallo_case(
         "chr1    1020000 1056000 329     AGRN",
     ]
 
-    gene_panel_creator.create(case_id=nallo_case_id, file_path=Path("nallo.bed"))
+    gene_panel_creator.create(
+        case_id=nallo_case_id, file_path=Path("nallo.bed"), header_filtering=True
+    )
     write_mock.assert_called_once_with(
         content=expected_nallo_gene_panel_file_content, file_path=Path("nallo.bed")
     )

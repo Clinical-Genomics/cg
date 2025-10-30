@@ -11,5 +11,7 @@ class NalloExtension(PipelineExtension):
 
     def configure(self, case_id: str, case_run_directory: Path) -> None:
         self.gene_panel_file_creator.create(
-            case_id=case_id, file_path=case_run_directory / ScoutExportFileName.PANELS_TSV
+            case_id=case_id,
+            file_path=case_run_directory / ScoutExportFileName.PANELS_TSV,
+            header_filtering=True,
         )

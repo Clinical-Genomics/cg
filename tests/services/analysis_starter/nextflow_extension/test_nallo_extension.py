@@ -1,12 +1,8 @@
 from pathlib import Path
-from unittest.mock import create_autospec
 
 from cg.constants.scout import ScoutExportFileName
 from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
-from tests.services.analysis_starter.file_creators.test_gene_panel_file_creator import (
-    gene_panel_creator,
-)
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
@@ -24,5 +20,7 @@ def test_configure():
 
     # THEN a gene panel file should have been created
     gene_panel_file_creator.as_mock.create.assert_called_once_with(
-        case_id="nallo_case", file_path=case_run_directory / ScoutExportFileName.PANELS_TSV
+        case_id="nallo_case",
+        file_path=case_run_directory / ScoutExportFileName.PANELS_TSV,
+        header_filtering=True,
     )
