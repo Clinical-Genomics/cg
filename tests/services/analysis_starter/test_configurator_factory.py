@@ -63,6 +63,7 @@ def test_get_microsalt_configurator(cg_context: CGConfig):
 def test_nextflow_configurator_factory_success(
     cg_context: CGConfig,
     workflow: Workflow,
+    pipeline_extension_class: type,
 ):
     # GIVEN a workflow we have support for
 
@@ -76,7 +77,7 @@ def test_nextflow_configurator_factory_success(
     assert isinstance(configurator, NextflowConfigurator)
     assert isinstance(configurator.params_file_creator, ParamsFileCreator)
     assert isinstance(configurator.sample_sheet_creator, SampleSheetCreator)
-    assert isinstance(configurator.pipeline_extension, PipelineExtension)
+    assert isinstance(configurator.pipeline_extension, pipeline_extension_class)
 
 
 def test_get_mip_dna_configurator():

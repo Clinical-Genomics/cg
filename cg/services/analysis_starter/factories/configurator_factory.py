@@ -8,6 +8,7 @@ from cg.meta.workflow.fastq import MicrosaltFastqHandler, MipFastqHandler
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
+from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
@@ -146,16 +147,22 @@ class ConfiguratorFactory:
                 )
 
     def _get_pipeline_extension(self, workflow: Workflow) -> PipelineExtension:
-        if workflow == Workflow.RAREDISEASE:
-            gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(workflow)
-            managed_variants_creator: ManagedVariantsFileCreator = (
-                self._get_managed_variants_file_creator(workflow)
-            )
-            return RarediseaseExtension(
-                gene_panel_file_creator=gene_panel_creator,
-                managed_variants_file_creator=managed_variants_creator,
-            )
-        return PipelineExtension()
+        match workflow:
+            case Workflow.NALLO:
+                return NalloExtension()
+            case Workflow.RAREDISEASE:
+                gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(
+                    workflow
+                )
+                managed_variants_creator: ManagedVariantsFileCreator = (
+                    self._get_managed_variants_file_creator(workflow)
+                )
+                return RarediseaseExtension(
+                    gene_panel_file_creator=gene_panel_creator,
+                    managed_variants_file_creator=managed_variants_creator,
+                )
+            case _:
+                return PipelineExtension()
 
     def _get_gene_panel_file_creator(self, workflow: Workflow) -> GenePanelFileCreator:
         return GenePanelFileCreator(scout_api=self._get_scout_api(workflow), store=self.store)
