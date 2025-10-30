@@ -15,3 +15,6 @@ class NalloExtension(PipelineExtension):
             file_path=case_run_directory / ScoutExportFileName.PANELS_TSV,
             header_filtering=True,
         )
+
+    def do_required_files_exist(self, case_run_directory: Path) -> bool:
+        return case_run_directory.joinpath(ScoutExportFileName.PANELS_TSV).is_file()
