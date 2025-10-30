@@ -8,6 +8,8 @@ from cg.meta.workflow.fastq import MicrosaltFastqHandler, MipFastqHandler
 from cg.models.cg_config import CGConfig, MipConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
+from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
+from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
     ManagedVariantsFileCreator,
@@ -21,8 +23,8 @@ from cg.services.analysis_starter.configurator.file_creators.mip_dna_config impo
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowFastqSampleSheetCreator,
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.protocol import (
+    SampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
@@ -50,8 +52,13 @@ def test_get_microsalt_configurator(cg_context: CGConfig):
 
 
 @pytest.mark.parametrize(
-    "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    "workflow, pipeline_extension_class",
+    [
+        (Workflow.NALLO, NalloExtension),
+        (Workflow.RAREDISEASE, RarediseaseExtension),
+        (Workflow.RNAFUSION, PipelineExtension),
+        (Workflow.TAXPROFILER, PipelineExtension),
+    ],
 )
 def test_nextflow_configurator_factory_success(
     cg_context: CGConfig,
@@ -68,7 +75,7 @@ def test_nextflow_configurator_factory_success(
     # THEN the configurator is of the expected type
     assert isinstance(configurator, NextflowConfigurator)
     assert isinstance(configurator.params_file_creator, ParamsFileCreator)
-    assert isinstance(configurator.sample_sheet_creator, NextflowFastqSampleSheetCreator)
+    assert isinstance(configurator.sample_sheet_creator, SampleSheetCreator)
     assert isinstance(configurator.pipeline_extension, PipelineExtension)
 
 
