@@ -181,7 +181,7 @@ def test_track(
 
     out_dir = Path(workflow_root, case_id, "analysis")
 
-    # THEN analysis object should have been created in Trailblazer
+    # THEN an analysis object should have been created in Trailblazer
     trailblazer_api.add_pending_analysis.assert_called_with(
         analysis_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         case_id=case_id,
