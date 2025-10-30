@@ -127,3 +127,6 @@ def test_configurator_factory_failure(cg_context: CGConfig):
     # THEN a NotImplementedError should be raised
     with pytest.raises(NotImplementedError):
         configurator_factory.get_configurator(workflow)
+
+def test_get_scout_api():
+

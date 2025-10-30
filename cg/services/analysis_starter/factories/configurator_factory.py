@@ -149,7 +149,10 @@ class ConfiguratorFactory:
     def _get_pipeline_extension(self, workflow: Workflow) -> PipelineExtension:
         match workflow:
             case Workflow.NALLO:
-                return NalloExtension()
+                gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(
+                    workflow
+                )
+                return NalloExtension(gene_panel_file_creator=gene_panel_creator)
             case Workflow.RAREDISEASE:
                 gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(
                     workflow
