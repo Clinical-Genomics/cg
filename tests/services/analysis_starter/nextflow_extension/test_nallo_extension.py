@@ -8,12 +8,15 @@ from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_configure():
+    # GIVEN a gene panel file creator
     gene_panel_file_creator: TypedMock[GenePanelFileCreator] = create_typed_mock(
         GenePanelFileCreator
     )
 
     # GIVEN a Nallo extension
     nallo_extension = NalloExtension(gene_panel_file_creator=gene_panel_file_creator.as_type)
+
+    # GIVEN a case run directory
     case_run_directory = Path("case", "run", "directory")
 
     # WHEN configuring a case
