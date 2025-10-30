@@ -128,5 +128,30 @@ def test_configurator_factory_failure(cg_context: CGConfig):
     with pytest.raises(NotImplementedError):
         configurator_factory.get_configurator(workflow)
 
-def test_get_scout_api():
 
+def test_get_scout_api_38(cg_context: CGConfig):
+    # GIVEN a configurator factory
+    configurator_factory = ConfiguratorFactory(cg_config=cg_context)
+
+    # GIVEN Nallo
+    workflow = Workflow.NALLO
+
+    # WHEN getting the scout api instance
+    scout_api = configurator_factory._get_scout_api(workflow=workflow)
+
+    # THEN we should receive the HG38 instance
+    assert scout_api == cg_context.scout_api_38
+
+
+def test_get_scout_api_37(cg_context: CGConfig):
+    # GIVEN a configurator factory
+    configurator_factory = ConfiguratorFactory(cg_config=cg_context)
+
+    # GIVEN not Nallo
+    workflow = Workflow.MIP_DNA
+
+    # WHEN getting the scout api instance
+    scout_api = configurator_factory._get_scout_api(workflow=workflow)
+
+    # THEN we should receive the HG37 instance
+    assert scout_api == cg_context.scout_api_37
