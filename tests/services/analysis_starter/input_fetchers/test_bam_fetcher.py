@@ -16,7 +16,7 @@ from cg.store.store import Store
 @pytest.fixture
 def status_db() -> Store:
     status_db: Store = create_autospec(Store)
-    sample: Sample = create_autospec(Sample)
+    sample: Sample = create_autospec(Sample, internal_id="sample_id")
     case: Case = create_autospec(Case, samples=[sample])
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
     return status_db
