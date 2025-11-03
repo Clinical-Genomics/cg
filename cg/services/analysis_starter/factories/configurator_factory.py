@@ -124,6 +124,8 @@ class ConfiguratorFactory:
                 return RNAFusionParamsFileCreator(params)
             case Workflow.TAXPROFILER:
                 return TaxprofilerParamsFileCreator(params)
+            case _:
+                raise NotImplementedError(f"There is no params file creator for {workflow}")
 
     def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
         return getattr(self.cg_config, workflow)
@@ -147,6 +149,8 @@ class ConfiguratorFactory:
                 return TaxprofilerSampleSheetCreator(
                     housekeeper_api=self.housekeeper_api, store=self.store
                 )
+            case _:
+                raise NotImplementedError(f"No sample sheet creator implemented for {workflow}")
 
     def _get_pipeline_extension(self, workflow: Workflow) -> PipelineExtension:
         match workflow:
