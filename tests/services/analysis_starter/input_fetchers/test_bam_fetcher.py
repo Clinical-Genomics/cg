@@ -21,6 +21,16 @@ def test_ensure_files_are_ready_success():
     # GIVEN a BamFetcher
     bam_fetcher = BamFetcher(status_db=status_db, housekeeper_api=Mock())
 
+    housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    query = create_autospec(Query)
+    query.all = Mock(
+        return_value=[
+            create_autospec(File, full_path="non/existing/file1"),
+            create_autospec(File, full_path="non/existing/file2"),
+        ]
+    )
+    housekeeper_api.files = Mock(return_value=query)
+
     # WHEN ensuring that all files are ready
     bam_fetcher.ensure_files_are_ready("case_id")
 
@@ -35,14 +45,17 @@ def test_ensure_files_are_ready_failure():
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
-    housekeeper_api.files = Mock(
-        return_value=create_autospec(
-            Query, all=Mock(return_value=[create_autospec(File, full_path="non/existing/file")])
-        )
+    query = create_autospec(Query)
+    query.all = Mock(
+        return_value=[
+            create_autospec(File, full_path="non/existing/file1"),
+            create_autospec(File, full_path="non/existing/file2"),
+        ]
     )
+    housekeeper_api.files = Mock(return_value=query)
 
     # GIVEN a BamFetcher
-    bam_fetcher = BamFetcher(status_db=status_db, housekeeper_api=Mock())
+    bam_fetcher = BamFetcher(status_db=status_db, housekeeper_api=housekeeper_api)
 
     # WHEN ensuring that all files are ready
     # THEN an error is raised

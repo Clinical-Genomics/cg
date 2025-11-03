@@ -27,4 +27,6 @@ class BamFetcher(InputFetcher):
                 missing_files.append(file.full_path)
         if missing_files:
             missing_files_str = "\n".join(missing_files)
-            raise AnalysisNotReadyError(f"The following BAM files are missing: {missing_files_str}")
+            raise AnalysisNotReadyError(
+                f"The following BAM files are missing: \n{missing_files_str}"
+            )
