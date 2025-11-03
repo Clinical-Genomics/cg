@@ -14,21 +14,21 @@ from cg.store.store import Store
 
 
 def test_ensure_files_are_ready_success(mocker: MockerFixture):
-    # GIVEN a case with all BAM files on disk
+    # GIVEN a case with sample in StatusDB
     status_db: Store = create_autospec(Store)
     sample: Sample = create_autospec(Sample)
     case: Case = create_autospec(Case, samples=[sample])
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
+    # GIVEN that the samples have BAM files in Housekeeper and on disk
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
-    query = create_autospec(Query)
-    query.all = Mock(
+    file_query = create_autospec(Query)
+    file_query.all = Mock(
         return_value=[
             create_autospec(File, full_path="non/existing/file"),
         ]
     )
-    housekeeper_api.files = Mock(return_value=query)
-
+    housekeeper_api.files = Mock(return_value=file_query)
     mocker.patch.object(bam_path, "is_file", return_value=True)
 
     # GIVEN a BamFetcher
@@ -41,12 +41,13 @@ def test_ensure_files_are_ready_success(mocker: MockerFixture):
 
 
 def test_ensure_files_are_ready_failure(mocker: MockerFixture):
-    # GIVEN a case with all BAM files on disk
+    # GIVEN a case with sample in StatusDB
     status_db: Store = create_autospec(Store)
     sample: Sample = create_autospec(Sample)
     case: Case = create_autospec(Case, samples=[sample])
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
+    # GIVEN that the samples have BAM files in Housekeeper but not on disk
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
     query = create_autospec(Query)
     query.all = Mock(

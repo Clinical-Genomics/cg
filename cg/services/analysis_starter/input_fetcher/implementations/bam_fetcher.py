@@ -16,15 +16,16 @@ class BamFetcher(InputFetcher):
 
     def ensure_files_are_ready(self, case_id: str) -> None:
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
-        bam_files: list[File] = []
-        for sample in case.samples:
-            bam_files.extend(
-                self.housekeeper_api.files(bundle=sample.internal_id, tags={"bam"}).all()
-            )
         missing_files: list[str] = []
-        for file in bam_files:
-            if not Path(file.full_path).is_file():
-                missing_files.append(file.full_path)
+        for sample in case.samples:
+            sample_files: list[File] = self.housekeeper_api.files(
+                bundle=sample.internal_id, tags={"bam"}
+            ).all()
+            missing_sample_files: list[str] = [
+                file.full_path for file in sample_files if not Path(file.full_path).is_file()
+            ]
+            missing_files.extend(missing_sample_files)
+
         if missing_files:
             missing_files_str = "\n".join(missing_files)
             raise AnalysisNotReadyError(
