@@ -19,16 +19,7 @@ class BamFetcher(InputFetcher):
         samples_without_files: list[str] = self._get_samples_without_files(case)
         missing_files: list[str] = self._get_missing_file_paths(case)
         if samples_without_files or missing_files:
-            error_message = ""
-            if samples_without_files:
-                samples_without_files_str = "\n".join(samples_without_files)
-                error_message += f"The following samples are missing BAM files in Housekeeper: \n{samples_without_files_str}"
-            if missing_files:
-                missing_files_str = "\n".join(missing_files)
-                error_message += (
-                    f"\nThe following BAM files are missing on disk: \n{missing_files_str}"
-                )
-            raise AnalysisNotReadyError(error_message)
+            self._raise_error(missing_files, samples_without_files)
 
     def _get_samples_without_files(self, case: Case) -> list[str]:
         samples_without_files: list[str] = []
@@ -51,3 +42,14 @@ class BamFetcher(InputFetcher):
             ]
             missing_files.extend(missing_sample_files)
         return missing_files
+
+    @staticmethod
+    def _raise_error(missing_files: list[str] | None, samples_without_files: list[str]) -> None:
+        error_message = ""
+        if samples_without_files:
+            samples_without_files_str = "\n".join(samples_without_files)
+            error_message += f"The following samples are missing BAM files in Housekeeper: \n{samples_without_files_str}"
+        if missing_files:
+            missing_files_str = "\n".join(missing_files)
+            error_message += f"\nThe following BAM files are missing on disk: \n{missing_files_str}"
+        raise AnalysisNotReadyError(error_message)
