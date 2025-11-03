@@ -132,7 +132,7 @@ class ObservationsAPI:
             return False
         return True
 
-    def is_sample_not_source_ffpe(self, case_id: str) -> bool:
+    def is_sample_source_not_ffpe(self, case_id: str) -> bool:
         source_type: str | None = self.analysis_api.get_case_source_type(case_id)
         if source_type and SourceType.FFPE.lower() not in source_type.lower():
             return True

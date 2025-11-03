@@ -58,7 +58,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
                 self.is_customer_eligible_for_observations_upload(case.customer.internal_id),
                 self.is_sequencing_method_eligible_for_observations_upload(case.internal_id),
                 self.is_sample_type_eligible_for_observations_upload(case),
-                self.is_sample_not_source_ffpe(case.internal_id),
+                self.is_sample_source_not_ffpe(case.internal_id),
             ]
         )
 
