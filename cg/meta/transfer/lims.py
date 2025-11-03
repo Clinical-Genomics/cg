@@ -54,7 +54,7 @@ class TransferLims(object):
 
     def transfer_samples(
         self,
-        age_limit: int,
+        cutoff_time_limit: str,
         status_type: SampleState,
         include: str = "unset",
         sample_id: str = None,
@@ -66,9 +66,9 @@ class TransferLims(object):
         else:
             samples: list[Sample] = self._get_samples_to_include(include, status_type)
 
-        if age_limit and samples:
-            samples: list[samples] = self._exclude_samples_based_on_order_at_date(
-                samples, age_limit
+        if cutoff_time_limit and samples:
+            samples: list[Sample] = self._samples_order_after_cutoff_time_limit(
+                samples, cutoff_time_limit
             )
 
         if samples is None:
@@ -93,6 +93,12 @@ class TransferLims(object):
                 self.status.session.commit()
             else:
                 LOG.debug(f"no {status_type.value} date found for {sample_obj.internal_id}")
+
+    @staticmethod
+    def _samples_order_after_cutoff_time_limit(
+        samples: list[Sample], cutoff_time_limit: int
+    ) -> list[Sample]:
+        pass
 
     def _get_samples_to_include(self, include, status_type):
         samples = None

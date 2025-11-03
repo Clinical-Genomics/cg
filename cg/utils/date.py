@@ -73,7 +73,3 @@ def convert_string_to_datetime_object(date_time: str) -> datetime:
             continue
 
     raise ValueError(f"Could not convert '{date_time}' to a datetime object.")
-
-
-def subtract_time_from_date(date: datetime, subtract_date: datetime) -> datetime:
-    pass
