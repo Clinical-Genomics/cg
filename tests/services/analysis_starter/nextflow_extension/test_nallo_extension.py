@@ -26,7 +26,7 @@ def test_configure():
     gene_panel_file_creator.as_mock.create.assert_called_once_with(
         case_id="nallo_case",
         file_path=case_run_directory / ScoutExportFileName.PANELS_TSV,
-        header_filtering=True,
+        double_hashtag_filtering=True,
     )
 
 

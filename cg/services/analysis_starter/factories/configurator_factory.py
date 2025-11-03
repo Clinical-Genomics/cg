@@ -7,8 +7,10 @@ from cg.constants import Workflow
 from cg.meta.workflow.fastq import MicrosaltFastqHandler, MipFastqHandler
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
-from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
 from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
+from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
+    PipelineExtension,
+)
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (

@@ -3,7 +3,9 @@ import pytest
 from cg.apps.lims import LimsAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig, RarediseaseConfig, RnafusionConfig, TaxprofilerConfig
-from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
+from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
+    PipelineExtension,
+)
 from cg.services.analysis_starter.configurator.file_creators.microsalt_config import (
     MicrosaltConfigFileCreator,
 )

@@ -3,7 +3,9 @@ from pathlib import Path
 from cg.exc import MissingConfigFilesError
 from cg.models.cg_config import CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
-from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
+from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
+    PipelineExtension,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )

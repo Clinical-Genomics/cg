@@ -1,7 +1,9 @@
 from pathlib import Path
 
 from cg.constants.scout import ScoutExportFileName
-from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
+from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
+    PipelineExtension,
+)
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 
 
@@ -13,7 +15,7 @@ class NalloExtension(PipelineExtension):
         self.gene_panel_file_creator.create(
             case_id=case_id,
             file_path=case_run_directory / ScoutExportFileName.PANELS_TSV,
-            header_filtering=True,
+            double_hashtag_filtering=True,
         )
 
     def do_required_files_exist(self, case_run_directory: Path) -> bool:
