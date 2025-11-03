@@ -13,13 +13,16 @@ from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
-def test_ensure_files_are_ready_success(mocker: MockerFixture):
-    # GIVEN a case with sample in StatusDB
+@pytest.fixture
+def status_db() -> Store:
     status_db: Store = create_autospec(Store)
     sample: Sample = create_autospec(Sample)
     case: Case = create_autospec(Case, samples=[sample])
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
+    return status_db
 
+
+def test_ensure_files_are_ready_success(status_db: Store, mocker: MockerFixture):
     # GIVEN that the samples have BAM files in Housekeeper and on disk
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
     file_query = create_autospec(Query)
@@ -40,13 +43,7 @@ def test_ensure_files_are_ready_success(mocker: MockerFixture):
     # THEN no error is raised
 
 
-def test_ensure_files_are_ready_failure(mocker: MockerFixture):
-    # GIVEN a case with sample in StatusDB
-    status_db: Store = create_autospec(Store)
-    sample: Sample = create_autospec(Sample)
-    case: Case = create_autospec(Case, samples=[sample])
-    status_db.get_case_by_internal_id_strict = Mock(return_value=case)
-
+def test_ensure_files_are_ready_failure(status_db: Store, mocker: MockerFixture):
     # GIVEN that the samples have BAM files in Housekeeper but not on disk
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
     query = create_autospec(Query)
