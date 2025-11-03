@@ -15,7 +15,9 @@ from cg.models.cg_config import (
     RnafusionConfig,
     TaxprofilerConfig,
 )
-from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
+from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
+    PipelineExtension,
+)
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,

@@ -7,7 +7,11 @@ from cg.constants import Workflow
 from cg.meta.workflow.fastq import MicrosaltFastqHandler, MipFastqHandler
 from cg.models.cg_config import CGConfig, MipConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
-from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
+from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
+from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
+    PipelineExtension,
+)
+from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
     ManagedVariantsFileCreator,
@@ -21,8 +25,8 @@ from cg.services.analysis_starter.configurator.file_creators.mip_dna_config impo
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowFastqSampleSheetCreator,
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.protocol import (
+    SampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
@@ -50,12 +54,18 @@ def test_get_microsalt_configurator(cg_context: CGConfig):
 
 
 @pytest.mark.parametrize(
-    "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    "workflow, pipeline_extension_class",
+    [
+        (Workflow.NALLO, NalloExtension),
+        (Workflow.RAREDISEASE, RarediseaseExtension),
+        (Workflow.RNAFUSION, PipelineExtension),
+        (Workflow.TAXPROFILER, PipelineExtension),
+    ],
 )
 def test_nextflow_configurator_factory_success(
     cg_context: CGConfig,
     workflow: Workflow,
+    pipeline_extension_class: type,
 ):
     # GIVEN a workflow we have support for
 
@@ -68,8 +78,8 @@ def test_nextflow_configurator_factory_success(
     # THEN the configurator is of the expected type
     assert isinstance(configurator, NextflowConfigurator)
     assert isinstance(configurator.params_file_creator, ParamsFileCreator)
-    assert isinstance(configurator.sample_sheet_creator, NextflowFastqSampleSheetCreator)
-    assert isinstance(configurator.pipeline_extension, PipelineExtension)
+    assert isinstance(configurator.sample_sheet_creator, SampleSheetCreator)
+    assert isinstance(configurator.pipeline_extension, pipeline_extension_class)
 
 
 def test_get_mip_dna_configurator():
@@ -119,3 +129,31 @@ def test_configurator_factory_failure(cg_context: CGConfig):
     # THEN a NotImplementedError should be raised
     with pytest.raises(NotImplementedError):
         configurator_factory.get_configurator(workflow)
+
+
+def test_get_scout_api_38(cg_context: CGConfig):
+    # GIVEN a configurator factory
+    configurator_factory = ConfiguratorFactory(cg_config=cg_context)
+
+    # GIVEN Nallo
+    workflow = Workflow.NALLO
+
+    # WHEN getting the scout api instance
+    scout_api = configurator_factory._get_scout_api(workflow=workflow)
+
+    # THEN we should receive the HG38 instance
+    assert scout_api == cg_context.scout_api_38
+
+
+def test_get_scout_api_37(cg_context: CGConfig):
+    # GIVEN a configurator factory
+    configurator_factory = ConfiguratorFactory(cg_config=cg_context)
+
+    # GIVEN not Nallo
+    workflow = Workflow.MIP_DNA
+
+    # WHEN getting the scout api instance
+    scout_api = configurator_factory._get_scout_api(workflow=workflow)
+
+    # THEN we should receive the HG37 instance
+    assert scout_api == cg_context.scout_api_37
