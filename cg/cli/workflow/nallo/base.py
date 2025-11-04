@@ -6,7 +6,6 @@ import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS, echo_lines
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
-from cg.constants.cli_options import DRY_RUN
 from cg.cli.workflow.nf_analysis import (
     config_case,
     metrics_deliver,
@@ -18,7 +17,7 @@ from cg.cli.workflow.nf_analysis import (
     store_available,
     store_housekeeper,
 )
-
+from cg.constants.cli_options import DRY_RUN
 from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nallo import NalloAnalysisAPI
@@ -61,3 +60,23 @@ def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
         echo_lines(lines=bed_lines)
         return
     analysis_api.write_panel_as_tsv(case_id=case_id, content=bed_lines)
+
+
+@nallo.command("dev-config-case")
+def dev_config_case():
+    pass
+
+
+@nallo.command("dev-run")
+def dev_run():
+    pass
+
+
+@nallo.command("dev-start")
+def dev_start():
+    pass
+
+
+@nallo.command("dev-start-available")
+def dev_start_available():
+    pass
