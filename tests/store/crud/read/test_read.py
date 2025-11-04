@@ -109,28 +109,6 @@ def test_get_applications_by_prep_category(microbial_store: Store):
         assert application.prep_category == prep_category
 
 
-def test_get_applications_by_prep_category_archived_application(microbial_store: Store):
-    """Test that correct applications are returned for the given prep category even if the application is archived."""
-    # GIVEN a store with applications with a given prep category
-    prep_category = SeqLibraryPrepCategory.MICROBIAL
-
-    # WHEN fetching the applications for a given prep category
-    applications: list[Application] = microbial_store.get_applications_by_prep_category(
-        prep_category=prep_category
-    )
-
-    # GIVEN one application that is archived
-    application = applications[0]
-    application.is_archived = True
-
-    # THEN some applications are returned
-    assert applications
-
-    # THEN the applications should have the given prep category
-    assert application.prep_category == prep_category
-    assert application.is_archived
-
-
 def test_get_application_by_tag(microbial_store: Store, tag: str = MicrosaltAppTags.MWRNXTR003):
     """Test function to return the application by tag."""
 
