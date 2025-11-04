@@ -10,6 +10,7 @@ from cg.models.cg_config import (
     CGConfig,
     IlluminaConfig,
     MipConfig,
+    NalloConfig,
     RunInstruments,
     SeqeraPlatformConfig,
 )
@@ -169,14 +170,35 @@ def test_analysis_starter_factory_nextflow_starter(
 
 
 def test_get_analysis_starter_for_workflow_nallo():
+
+    nallo_config: NalloConfig = create_autospec(
+        NalloConfig,
+        config="config",
+        params="nallo/params/file",
+        platform="some_platform",
+        pre_run_script="some_pre_run_script",
+        profile="some_profile",
+        repository="some_repository",
+        resources="some_resources",
+        revision="some_revision",
+        root="nallo/root",
+        slurm=Mock(),
+    )
+    seqera_platform_config = SeqeraPlatformConfig(
+        base_url="http://seqera.platform",
+        bearer_token="secret_token",
+        compute_environments={},
+        workspace_id=1,
+    )
     cg_config = create_autospec(
         CGConfig,
         data_flow=Mock(),
-        nallo=Mock(),  # TODO: Implement something meaningful here
+        nallo=nallo_config,  # TODO: Implement something meaningful here
         run_instruments=create_autospec(
             RunInstruments,
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
         ),
+        seqera_platform=seqera_platform_config,
     )
     analysis_starter_factory = AnalysisStarterFactory(cg_config)
 

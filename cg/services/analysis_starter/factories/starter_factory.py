@@ -77,7 +77,12 @@ class AnalysisStarterFactory:
         raise NotImplementedError(f"No input fetcher for workflow {workflow}")
 
     def _get_submitter(self, workflow: Workflow) -> Submitter:
-        if workflow in [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]:
+        if workflow in [
+            Workflow.NALLO,
+            Workflow.RAREDISEASE,
+            Workflow.RNAFUSION,
+            Workflow.TAXPROFILER,
+        ]:
             return self._get_seqera_platform_submitter()
         else:
             return SubprocessSubmitter()
@@ -90,7 +95,12 @@ class AnalysisStarterFactory:
         )
 
     def _get_tracker(self, workflow: Workflow) -> Tracker:
-        if workflow in [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]:
+        if workflow in [
+            Workflow.NALLO,
+            Workflow.RAREDISEASE,
+            Workflow.RNAFUSION,
+            Workflow.TAXPROFILER,
+        ]:
             return NextflowTracker(
                 store=self.store,
                 trailblazer_api=self.cg_config.trailblazer_api,
