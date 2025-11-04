@@ -112,7 +112,6 @@ def dev_start(cg_config: CGConfig, case_id: str):
 
 
 @nallo.command("dev-start-available")
-@ARGUMENT_CASE_ID
 @click.pass_obj
 def dev_start_available(cg_config: CGConfig):
     """Starts all available Nallo cases."""
