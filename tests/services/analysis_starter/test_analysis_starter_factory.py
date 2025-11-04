@@ -185,7 +185,7 @@ def test_get_analysis_starter_for_workflow_nallo():
         slurm=Mock(),
     )
     seqera_platform_config = SeqeraPlatformConfig(
-        base_url="http://seqera.platform",
+        base_url="some_url",
         bearer_token="secret_token",
         compute_environments={},
         workspace_id=1,
@@ -193,7 +193,7 @@ def test_get_analysis_starter_for_workflow_nallo():
     cg_config = create_autospec(
         CGConfig,
         data_flow=Mock(),
-        nallo=nallo_config,  # TODO: Implement something meaningful here
+        nallo=nallo_config,
         run_instruments=create_autospec(
             RunInstruments,
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
