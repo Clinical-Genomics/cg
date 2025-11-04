@@ -12,6 +12,7 @@ from pytest_mock import MockerFixture
 
 from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
+from cg.cli.workflow.nallo.base import dev_config_case as nallo_config_case
 from cg.cli.workflow.raredisease.base import dev_config_case as raredisease_config_case
 from cg.cli.workflow.rnafusion.base import config_case as rnafusion_config_case
 from cg.cli.workflow.taxprofiler.base import config_case as taxprofiler_config_case
@@ -253,7 +254,8 @@ def test_config_case_dry_run(
 
 @pytest.mark.parametrize(
     "case_config_command",
-    [raredisease_config_case, rnafusion_config_case, taxprofiler_config_case],
+    [nallo_config_case, raredisease_config_case, rnafusion_config_case, taxprofiler_config_case],
+    ids=["nallo", "raredisease", "RNAFUSION", "taxprofiler"],
 )
 def test_nextflow_case_config(
     case_config_command: BaseCommand,
