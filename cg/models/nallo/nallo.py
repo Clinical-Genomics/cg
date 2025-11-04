@@ -16,6 +16,7 @@ class NalloQCMetrics(QCMetrics):
     coverage_bases: float | None
     median_coverage: float | None
     percent_duplicates: float | None
+    predicted_sex_sex_check: SexOptions
 
 
 class NalloSampleSheetEntry(BaseModel):
