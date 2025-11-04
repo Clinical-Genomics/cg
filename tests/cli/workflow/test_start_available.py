@@ -26,7 +26,7 @@ from cg.services.analysis_starter.service import AnalysisStarter
         mip_dna_start_available,
         microsalt_start_available,
     ],
-    ids=["nallo", "raredisease", "RNAFUSION", "Taxprofiler", "MIP-DNA", "microSALT"],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "MIP-DNA", "microSALT"],
 )
 @pytest.mark.parametrize(
     "succeeds, exit_status",

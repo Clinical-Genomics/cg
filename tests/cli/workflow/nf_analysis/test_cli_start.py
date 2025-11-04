@@ -125,7 +125,7 @@ def test_start_available(
 @pytest.mark.parametrize(
     "start_command",
     [nallo_start, raredisease_start, rnafusion_start, taxprofiler_start],
-    ids=["nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
 )
 def test_start_nextflow_calls_service(
     start_command: BaseCommand,

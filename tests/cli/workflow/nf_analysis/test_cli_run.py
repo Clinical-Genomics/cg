@@ -294,7 +294,7 @@ def test_resume_using_nextflow_dry_run(
 @pytest.mark.parametrize(
     "run_command",
     [nallo_run, raredisease_run, rnafusion_run, taxprofiler_run],
-    ids=["nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
 )
 def test_run_nextflow_calls_service(
     run_command: BaseCommand,

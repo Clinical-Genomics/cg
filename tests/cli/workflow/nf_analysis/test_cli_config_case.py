@@ -255,7 +255,7 @@ def test_config_case_dry_run(
 @pytest.mark.parametrize(
     "case_config_command",
     [nallo_config_case, raredisease_config_case, rnafusion_config_case, taxprofiler_config_case],
-    ids=["nallo", "raredisease", "RNAFUSION", "taxprofiler"],
+    ids=["Nallo", "raredisease", "RNAFUSION", "taxprofiler"],
 )
 def test_nextflow_case_config(
     case_config_command: BaseCommand,
