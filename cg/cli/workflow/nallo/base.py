@@ -71,9 +71,7 @@ def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def dev_config_case(cg_config: CGConfig, case_id: str):
-    """Configure a Nallo case so that it is ready to be run.
-
-    \b
+    """Configure a Nallo case so that it is ready to be run. \b
     Creates the following files in the case run directory:
         - CASE_ID_params_file.yaml
         - CASE_ID_nextflow_config.json
@@ -89,9 +87,7 @@ def dev_config_case(cg_config: CGConfig, case_id: str):
 @click.pass_obj
 def dev_run(cg_config: CGConfig, case_id: str) -> None:
     """
-    Run a preconfigured Nallo case.
-
-    \b
+    Run a preconfigured Nallo case. \b
     Assumes that the following files exist in the case run directory:
         - CASE_ID_params_file.yaml
         - CASE_ID_nextflow_config.json
@@ -106,6 +102,13 @@ def dev_run(cg_config: CGConfig, case_id: str) -> None:
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def dev_start(cg_config: CGConfig, case_id: str):
+    """Start a Nallo case. \b
+    Configures the case and writes the following files:
+        - CASE_ID_params_file.yaml
+        - CASE_ID_nextflow_config.json
+        - CASE_ID_samplesheet.csv
+    and submits the job to the Seqera Platform.
+    """
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.NALLO)
     analysis_starter.start(case_id=case_id)
