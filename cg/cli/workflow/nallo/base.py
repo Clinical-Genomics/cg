@@ -71,7 +71,8 @@ def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def dev_config_case(cg_config: CGConfig, case_id: str):
-    """Configure a Nallo case so that it is ready to be run. \b
+    """
+    Configure a Nallo case so that it is ready to be run. \b
     Creates the following files in the case run directory:
         - CASE_ID_params_file.yaml
         - CASE_ID_nextflow_config.json
@@ -102,7 +103,8 @@ def dev_run(cg_config: CGConfig, case_id: str) -> None:
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def dev_start(cg_config: CGConfig, case_id: str):
-    """Start a Nallo case. \b
+    """
+    Start a Nallo case. \b
     Configures the case and writes the following files:
         - CASE_ID_params_file.yaml
         - CASE_ID_nextflow_config.json
