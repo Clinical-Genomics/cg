@@ -10,6 +10,7 @@ from cg.models.cg_config import (
     CGConfig,
     IlluminaConfig,
     MipConfig,
+    NalloConfig,
     RunInstruments,
     SeqeraPlatformConfig,
 )
@@ -20,6 +21,7 @@ from cg.services.analysis_starter.configurator.implementations.mip_dna import MI
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories import starter_factory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
+from cg.services.analysis_starter.input_fetcher.implementations.bam_fetcher import BamFetcher
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.service import AnalysisStarter
 from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
@@ -165,3 +167,42 @@ def test_analysis_starter_factory_nextflow_starter(
         trailblazer_api=cg_context.trailblazer_api,
         workflow_root=getattr(cg_context, workflow).root,
     )
+
+
+def test_get_analysis_starter_for_workflow_nallo(seqera_platform_config: SeqeraPlatformConfig):
+
+    nallo_config: NalloConfig = create_autospec(
+        NalloConfig,
+        config="config",
+        params="nallo/params/file",
+        platform="some_platform",
+        pre_run_script="some_pre_run_script",
+        profile="some_profile",
+        repository="some_repository",
+        resources="some_resources",
+        revision="some_revision",
+        root="nallo/root",
+        slurm=Mock(),
+    )
+    cg_config = create_autospec(
+        CGConfig,
+        data_flow=Mock(),
+        nallo=nallo_config,
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+        ),
+        seqera_platform=seqera_platform_config,
+    )
+    analysis_starter_factory = AnalysisStarterFactory(cg_config)
+
+    # WHEN calling get_analysis_starter_for_workflow with workflow Nallo
+    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
+        Workflow.NALLO
+    )
+
+    # THEN the analysis starter should be as expected
+    assert isinstance(analysis_starter.input_fetcher, BamFetcher)
+    assert isinstance(analysis_starter.configurator, NextflowConfigurator)
+    assert isinstance(analysis_starter.submitter, SeqeraPlatformSubmitter)
+    assert isinstance(analysis_starter.tracker, NextflowTracker)
