@@ -19,7 +19,9 @@ class BamFetcher(InputFetcher):
         samples_without_files: list[str] = self._get_samples_without_files(case)
         missing_files: list[str] = self._get_missing_file_paths(case)
         if samples_without_files or missing_files:
-            self._raise_error(missing_files, samples_without_files)
+            self._raise_error(
+                missing_files=missing_files, samples_without_files=samples_without_files
+            )
 
     def _get_samples_without_files(self, case: Case) -> list[str]:
         samples_without_files: list[str] = []
@@ -44,7 +46,7 @@ class BamFetcher(InputFetcher):
         return missing_files
 
     @staticmethod
-    def _raise_error(missing_files: list[str] | None, samples_without_files: list[str]) -> None:
+    def _raise_error(missing_files: list[str], samples_without_files: list[str]) -> None:
         error_message = ""
         if samples_without_files:
             samples_without_files_str = "\n".join(samples_without_files)

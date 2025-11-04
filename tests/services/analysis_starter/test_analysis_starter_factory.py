@@ -169,7 +169,7 @@ def test_analysis_starter_factory_nextflow_starter(
     )
 
 
-def test_get_analysis_starter_for_workflow_nallo():
+def test_get_analysis_starter_for_workflow_nallo(seqera_platform_config: SeqeraPlatformConfig):
 
     nallo_config: NalloConfig = create_autospec(
         NalloConfig,
@@ -183,12 +183,6 @@ def test_get_analysis_starter_for_workflow_nallo():
         revision="some_revision",
         root="nallo/root",
         slurm=Mock(),
-    )
-    seqera_platform_config = SeqeraPlatformConfig(
-        base_url="some_url",
-        bearer_token="secret_token",
-        compute_environments={},
-        workspace_id=1,
     )
     cg_config = create_autospec(
         CGConfig,
