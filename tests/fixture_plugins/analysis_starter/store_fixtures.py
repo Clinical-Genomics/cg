@@ -20,6 +20,7 @@ from cg.store.models import (
 )
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 @pytest.fixture
@@ -77,6 +78,14 @@ def mock_housekeeper_for_nf_sample_sheet(fastq_path_1: Path, fastq_path_2: Path)
     housekeeper_mock: HousekeeperAPI = create_autospec(HousekeeperAPI)
     housekeeper_mock.files.return_value = [fastq_file1, fastq_file2]
     return housekeeper_mock
+
+
+@pytest.fixture
+def mock_store_for_nallo_file_creators() -> Store:
+    mock_store: TypedMock = create_typed_mock(Store)
+    mock_store.as_mock.get_case_workflow.return_value = Workflow.NALLO
+    mock_store.as_mock.get_case_priority.return_value = SlurmQos.NORMAL
+    return mock_store.as_type
 
 
 @pytest.fixture

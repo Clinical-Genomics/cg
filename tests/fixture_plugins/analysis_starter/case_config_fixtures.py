@@ -45,6 +45,11 @@ def get_nextflow_case_config_dict(
 
 
 @pytest.fixture
+def nallo_case_config(get_nextflow_case_config_dict: Callable) -> NextflowCaseConfig:
+    return NextflowCaseConfig(**get_nextflow_case_config_dict(workflow=Workflow.NALLO))
+
+
+@pytest.fixture
 def raredisease_case_config(get_nextflow_case_config_dict: Callable) -> NextflowCaseConfig:
     return NextflowCaseConfig(**get_nextflow_case_config_dict(workflow=Workflow.RAREDISEASE))
 
