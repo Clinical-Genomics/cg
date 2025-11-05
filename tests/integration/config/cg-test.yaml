@@ -88,9 +88,9 @@ balsamic:
 
 
   sentieon_licence_server: "localhost"
-  swegen_path: "{test_root_dir}/balsamic_swegen_path"
-  swegen_snv: "{test_root_dir}/swegen_snv.vcf.gz"
-  swegen_sv: "{test_root_dir}/swegen_sv.vcf.gz"
+  swegen_path: "{test_root_dir}/swegen"
+  swegen_snv: "{test_root_dir}/swegen/swegen_snv.vcf.gz"
+  swegen_sv: "{test_root_dir}/swegen/swegen_sv.vcf.gz"
   slurm:
     account: "balsamic_slurm_account"
     mail_user: "balsamic_mail_user@scilifelab.se"
