@@ -1,6 +1,5 @@
 from unittest.mock import MagicMock, Mock, create_autospec
 
-import pytest
 from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
@@ -11,6 +10,7 @@ from cg.models.cg_config import (
     IlluminaConfig,
     MipConfig,
     NalloConfig,
+    RarediseaseConfig,
     RunInstruments,
     SeqeraPlatformConfig,
 )
@@ -89,39 +89,48 @@ def test_analysis_starter_factory_mip_dna():
     assert isinstance(analysis_starter.tracker, MIPDNATracker)
 
 
-@pytest.mark.parametrize(
-    "workflow",
-    [Workflow.RNAFUSION, Workflow.RAREDISEASE, Workflow.TAXPROFILER],
-)
-def test_analysis_starter_factory_nextflow_starter(
-    cg_context: CGConfig,
-    workflow: Workflow,
+def test_get_analysis_starter_for_workflow_nextflow_fastq(
+    raredisease_config_object: RarediseaseConfig,
     seqera_platform_config: SeqeraPlatformConfig,
     mocker: MockerFixture,
 ):
-    """Test that the AnalysisStarterFactory creates a Nextflow AnalysisStarter correctly."""
+    """
+    Test that the AnalysisStarterFactory creates a correct AnalysisStarter instance.
+    This test uses fixtures from raredisease but is valid for all Nextflow workflows
+    that require FASTQ input fetching:
+     - raredisease
+     - RNAFUSION
+     - Taxprofiler
+     - Tomte
+    """
+    # GIVEN a CGConfig with valid Seqera platform, data flow and Nextflow pipeline configurations
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        data_flow=Mock(),
+        raredisease=raredisease_config_object,
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+        ),
+        seqera_platform=seqera_platform_config,
+    )
+
     # GIVEN an AnalysisStarterFactory
-    analysis_starter_factory = AnalysisStarterFactory(cg_context)
+    analysis_starter_factory = AnalysisStarterFactory(cg_config)
 
-    # GIVEN that the CGConfig has the seqera platform config set
-    cg_context.seqera_platform = seqera_platform_config
-
-    # GIVEN a case with a Nextflow workflow
-    mocker.patch.object(Store, "get_case_workflow", return_value=workflow)
-
-    # GIVEN a mock for the SeqeraPlatformSubmitter constructor and a mocked SeqeraPlatformClient
+    # GIVEN a SeqeraPlatformSubmitter constructor and a SeqeraPlatformClient
     mock_platform_submitter_init: MagicMock = mocker.patch.object(
         SeqeraPlatformSubmitter, "__init__", return_value=None
     )
     mock_client: SeqeraPlatformClient = create_autospec(SeqeraPlatformClient)
     mocker.patch.object(starter_factory, "SeqeraPlatformClient", return_value=mock_client)
 
-    # GIVEN a NextflowTracker mocked constructor
+    # GIVEN a NextflowTracker constructor
     mock_tracker_init: MagicMock = mocker.patch.object(
         NextflowTracker, "__init__", return_value=None
     )
 
-    # GIVEN mocks for the SpringArchiveAPI and CompressAPI constructors
+    # GIVEN SpringArchiveAPI and CompressAPI constructors
     mock_archive_api_init: MagicMock = mocker.patch.object(
         SpringArchiveAPI, "__init__", return_value=None
     )
@@ -129,9 +138,9 @@ def test_analysis_starter_factory_nextflow_starter(
         CompressAPI, "__init__", return_value=None
     )
 
-    # WHEN fetching the AnalysisStarter
-    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case(
-        "case_id"
+    # WHEN fetching the AnalysisStarter for a Nextflow workflow
+    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
+        Workflow.RAREDISEASE
     )
 
     # THEN the AnalysisStarter should have a Nextflow configurator
@@ -140,69 +149,73 @@ def test_analysis_starter_factory_nextflow_starter(
     # THEN the factory should have created a FastqFetcher correctly
     assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
     mock_archive_api_init.assert_called_once_with(
-        status_db=cg_context.status_db,
-        housekeeper_api=cg_context.housekeeper_api,
-        data_flow_config=cg_context.data_flow,
+        status_db=cg_config.status_db,
+        housekeeper_api=cg_config.housekeeper_api,
+        data_flow_config=cg_config.data_flow,
     )
     mock_compress_api_init.assert_called_once_with(
-        hk_api=cg_context.housekeeper_api,
-        crunchy_api=cg_context.crunchy_api,
-        demux_root=cg_context.run_instruments.illumina.demultiplexed_runs_dir,
+        hk_api=cg_config.housekeeper_api,
+        crunchy_api=cg_config.crunchy_api,
+        demux_root=cg_config.run_instruments.illumina.demultiplexed_runs_dir,
     )
 
     # THEN the AnalysisStarter should have a correct Store
-    assert analysis_starter.store == cg_context.status_db
+    assert analysis_starter.store == cg_config.status_db
 
     # THEN the factory should have created a SeqeraPlatformSubmitter correctly
     assert isinstance(analysis_starter.submitter, SeqeraPlatformSubmitter)
     mock_platform_submitter_init.assert_called_once_with(
         client=mock_client,
-        compute_environment_ids=cg_context.seqera_platform.compute_environments,
+        compute_environment_ids=cg_config.seqera_platform.compute_environments,
     )
 
     # THEN the factory should have created a NextflowTracker correctly
     assert isinstance(analysis_starter.tracker, NextflowTracker)
     mock_tracker_init.assert_called_once_with(
-        store=cg_context.status_db,
-        trailblazer_api=cg_context.trailblazer_api,
-        workflow_root=getattr(cg_context, workflow).root,
+        store=cg_config.status_db,
+        trailblazer_api=cg_config.trailblazer_api,
+        workflow_root=cg_config.raredisease.root,
     )
 
 
-def test_get_analysis_starter_for_workflow_nallo(seqera_platform_config: SeqeraPlatformConfig):
-
-    nallo_config: NalloConfig = create_autospec(
-        NalloConfig,
-        config="config",
-        params="nallo/params/file",
-        platform="some_platform",
-        pre_run_script="some_pre_run_script",
-        profile="some_profile",
-        repository="some_repository",
-        resources="some_resources",
-        revision="some_revision",
-        root="nallo/root",
-        slurm=Mock(),
-    )
-    cg_config = create_autospec(
+def test_get_analysis_starter_for_workflow_nallo(
+    nallo_config_object: NalloConfig,
+    mocker: MockerFixture,
+):
+    """Test that the AnalysisStarterFactory creates a Nallo AnalysisStarter correctly."""
+    # GIVEN a CGConfig with a Nallo pipeline configuration
+    cg_config: CGConfig = create_autospec(
         CGConfig,
-        data_flow=Mock(),
-        nallo=nallo_config,
+        nallo=nallo_config_object,
         run_instruments=create_autospec(
             RunInstruments,
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
         ),
-        seqera_platform=seqera_platform_config,
+        seqera_platform=Mock(),
     )
+
+    # GIVEN an AnalysisStarterFactory
     analysis_starter_factory = AnalysisStarterFactory(cg_config)
 
-    # WHEN calling get_analysis_starter_for_workflow with workflow Nallo
+    # GIVEN a BamFetcher constructor
+    mock_fetcher_init: MagicMock = mocker.patch.object(BamFetcher, "__init__", return_value=None)
+
+    # WHEN fetching the AnalysisStarter
     analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
         Workflow.NALLO
     )
 
-    # THEN the analysis starter should be as expected
-    assert isinstance(analysis_starter.input_fetcher, BamFetcher)
+    # THEN the AnalysisStarter should have a Nextflow configurator
     assert isinstance(analysis_starter.configurator, NextflowConfigurator)
+
+    # THEN the AnalysisStarter should have created a BamFetcher correctly
+    assert isinstance(analysis_starter.input_fetcher, BamFetcher)
+    mock_fetcher_init.assert_called_once_with(
+        housekeeper_api=cg_config.housekeeper_api, status_db=cg_config.status_db
+    )
+
+    # THEN the factory should have created a SeqeraPlatformSubmitter correctly
     assert isinstance(analysis_starter.submitter, SeqeraPlatformSubmitter)
+
+    # THEN the factory should have created a NextflowTracker correctly
     assert isinstance(analysis_starter.tracker, NextflowTracker)
