@@ -89,7 +89,7 @@ def test_analysis_starter_factory_mip_dna():
     assert isinstance(analysis_starter.tracker, MIPDNATracker)
 
 
-def test_analysis_starter_factory_nextflow_fastq_pipelines(
+def test_get_analysis_starter_for_case_nextflow_fastq_pipelines(
     raredisease_config_object: RarediseaseConfig,
     seqera_platform_config: SeqeraPlatformConfig,
     mocker: MockerFixture,
