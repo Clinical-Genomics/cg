@@ -371,10 +371,10 @@ def test_start_available_tgs_tumour_only(
         assert_commands(
             expected_command=f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
             f"{test_root_dir}/balsamic_binary_path run analysis "
+            f"--account balsamic_slurm_account "
             f"--qos normal "
             f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
             f"--headjob-partition head-jobs "
-            f"--account balsamic_slurm_account "
             f"--run-analysis",
             actual_command=run_analysis_call.kwargs["args"],
             flags_start_at_word=7,
