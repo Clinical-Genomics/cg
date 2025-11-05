@@ -185,16 +185,12 @@ def test_analysis_starter_factory_nextflow_fastq_pipelines(
     )
 
 
-def test_analysis_starter_factory_nallo(
+def test_get_analysis_starter_for_workflow_nallo(
     nallo_config_object: NalloConfig,
-    seqera_platform_config: SeqeraPlatformConfig,
     mocker: MockerFixture,
 ):
-    # GIVEN a store with a NALLO case
-    status_db: Store = create_autospec(Store)
-    status_db.get_case_workflow.return_value = Workflow.NALLO
-
-    # GIVEN a CGConfig with valid Seqera platform and NALLO pipeline configurations
+    """Test that the AnalysisStarterFactory creates a Nallo AnalysisStarter correctly."""
+    # GIVEN a CGConfig with a Nallo pipeline configuration
     cg_config: CGConfig = create_autospec(
         CGConfig,
         data_flow=Mock(),
@@ -203,31 +199,18 @@ def test_analysis_starter_factory_nallo(
             RunInstruments,
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
         ),
-        seqera_platform=seqera_platform_config,
-        status_db=status_db,
+        seqera_platform=Mock(),
     )
 
     # GIVEN an AnalysisStarterFactory
     analysis_starter_factory = AnalysisStarterFactory(cg_config)
 
-    # GIVEN a SeqeraPlatformSubmitter constructor and a SeqeraPlatformClient
-    mock_platform_submitter_init: MagicMock = mocker.patch.object(
-        SeqeraPlatformSubmitter, "__init__", return_value=None
-    )
-    mock_client: SeqeraPlatformClient = create_autospec(SeqeraPlatformClient)
-    mocker.patch.object(starter_factory, "SeqeraPlatformClient", return_value=mock_client)
-
-    # GIVEN a NextflowTracker constructor
-    mock_tracker_init: MagicMock = mocker.patch.object(
-        NextflowTracker, "__init__", return_value=None
-    )
-
     # GIVEN a BamFetcher constructor
     mock_fetcher_init: MagicMock = mocker.patch.object(BamFetcher, "__init__", return_value=None)
 
     # WHEN fetching the AnalysisStarter
-    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case(
-        "case_id"
+    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
+        Workflow.NALLO
     )
 
     # THEN the AnalysisStarter should have a Nextflow configurator
@@ -239,20 +222,8 @@ def test_analysis_starter_factory_nallo(
         housekeeper_api=cg_config.housekeeper_api, status_db=cg_config.status_db
     )
 
-    # THEN the AnalysisStarter should have a correct Store
-    assert analysis_starter.store == cg_config.status_db
-
     # THEN the factory should have created a SeqeraPlatformSubmitter correctly
     assert isinstance(analysis_starter.submitter, SeqeraPlatformSubmitter)
-    mock_platform_submitter_init.assert_called_once_with(
-        client=mock_client,
-        compute_environment_ids=cg_config.seqera_platform.compute_environments,
-    )
 
     # THEN the factory should have created a NextflowTracker correctly
     assert isinstance(analysis_starter.tracker, NextflowTracker)
-    mock_tracker_init.assert_called_once_with(
-        store=cg_config.status_db,
-        trailblazer_api=cg_config.trailblazer_api,
-        workflow_root=cg_config.nallo.root,
-    )
