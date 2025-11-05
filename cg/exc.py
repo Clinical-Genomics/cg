@@ -60,6 +60,12 @@ class BalsamicStartError(CgError):
     """
 
 
+class BedVersionNotFoundError(CgError):
+    """
+    Exception raised when a bed version is not found.
+    """
+
+
 class BundleAlreadyAddedError(CgError):
     """
     Exception raised when a bundle has already been added to Housekeeper.
@@ -280,6 +286,10 @@ class MissingFilesError(CgError):
     """Exception raised when there are missing files."""
 
 
+class SampleFilesCurrentlyArchivingError(CgError):
+    """Exception raised when not all of the sample files have finished archiving."""
+
+
 class MetricsQCError(CgError):
     """Exception raised when QC metrics are not met."""
 
@@ -324,5 +334,5 @@ class Chanjo2ResponseError(Chanjo2APIClientError):
     """Exception raised when the response from Chanjo2 API client fails validation."""
 
 
-class CaseNotConfiguredError(CgError):
-    """Exception raised when a case is being run without a configuration."""
+class MissingConfigFilesError(CgError):
+    """Exception raised when a case is being run with missing configuration files."""

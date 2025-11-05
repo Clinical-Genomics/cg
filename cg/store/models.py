@@ -324,7 +324,7 @@ class BedVersion(Base):
     __table_args__ = (UniqueConstraint("bed_id", "version", name="_app_version_uc"),)
 
     id: Mapped[PrimaryKeyInt]
-    shortname: Mapped[Str64 | None]
+    shortname: Mapped[Str64]
     version: Mapped[int]
     filename: Mapped[Str256]
     checksum: Mapped[Str32 | None]
@@ -572,8 +572,10 @@ class CaseSample(Base):
     __table_args__ = (UniqueConstraint("case_id", "sample_id", name="_case_sample_uc"),)
 
     id: Mapped[PrimaryKeyInt]
-    case_id: Mapped[str] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"))
-    sample_id: Mapped[int] = mapped_column(ForeignKey("sample.id", ondelete="CASCADE"))
+    case_id: Mapped[str] = mapped_column(ForeignKey("case.id", ondelete="CASCADE"), nullable=False)
+    sample_id: Mapped[int] = mapped_column(
+        ForeignKey("sample.id", ondelete="CASCADE"), nullable=False
+    )
     status: Mapped[str] = mapped_column(
         types.Enum(*(status.value for status in StatusOptions)), default=StatusOptions.UNKNOWN.value
     )
@@ -819,7 +821,7 @@ class Sample(Base, PriorityMixin):
         """Return the sample run metrics for the sample."""
         return self._sample_run_metrics
 
-    def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
+    def to_dict(self, links: bool = False) -> dict:
         """Represent as dictionary"""
         data = to_dict(model_instance=self)
         data["priority"] = self.priority_human
@@ -828,8 +830,6 @@ class Sample(Base, PriorityMixin):
         data["application"] = self.application_version.application.to_dict()
         if links:
             data["links"] = [link_obj.to_dict(family=True, parents=True) for link_obj in self.links]
-        if flowcells:
-            data["flowcells"] = [flow_cell.to_dict() for flow_cell in self.flow_cells]
         return data
 
 

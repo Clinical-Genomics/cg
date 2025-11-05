@@ -7,7 +7,7 @@ from housekeeper.store.models import Archive, File
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
-from cg.exc import ArchiveJobFailedError, MissingFilesError
+from cg.exc import ArchiveJobFailedError, MissingFilesError, SampleFilesCurrentlyArchivingError
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
@@ -82,7 +82,7 @@ class SpringArchiveAPI:
 
     def get_archived_files_from_sample(self, sample: Sample) -> list[File]:
         """Gets archived spring files from the bundles corresponding to the given list of samples."""
-        files: list[File] = self.housekeeper_api.get_archived_files_for_bundle(
+        files: list[File] = self.housekeeper_api.get_archived_files_not_being_retrieved_for_bundle(
             bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING]
         )
         return files
@@ -289,11 +289,7 @@ class SpringArchiveAPI:
         else:
             order = self.status_db.get_order_by_ticket_id(id_)
         for case in order.cases:
-            try:
-                self.retrieve_spring_files_for_case(case.internal_id)
-            except MissingFilesError as error:
-                LOG.info(error)
-                continue
+            self.retrieve_spring_files_for_case(case.internal_id)
 
     def retrieve_spring_files_for_case(self, case_id: str) -> None:
         """Submits jobs to retrieve any archived files belonging to the given case, and updates the Archive entries
@@ -303,6 +299,9 @@ class SpringArchiveAPI:
             try:
                 self._retrieve_spring_files_for_sample(sample)
             except MissingFilesError as error:
+                LOG.warning(str(error))
+                continue
+            except SampleFilesCurrentlyArchivingError as error:
                 LOG.warning(str(error))
                 continue
 
@@ -316,7 +315,14 @@ class SpringArchiveAPI:
             raise MissingFilesError(
                 f"No archived Spring files found for sample {sample.internal_id}."
             )
+        if not self._are_all_files_archived(files_to_retrieve):
+            raise SampleFilesCurrentlyArchivingError(
+                f"Not all Spring files for sample {sample.internal_id} are archived - cannot retrieve files."
+            )
         files_and_samples: list[FileAndSample] = self.add_samples_to_files(files_to_retrieve)
         self.retrieve_files_from_archive_location(
             files_and_samples=files_and_samples, archive_location=sample.archive_location
         )
+
+    def _are_all_files_archived(self, files: list[File]) -> bool:
+        return all(self.is_file_archived(file) for file in files)
