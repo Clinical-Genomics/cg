@@ -301,17 +301,21 @@ def test_start_available_tgs_tumour_only(
         )
 
     # THEN Balsamic run analysis was called in the correct way
+    expected_run_analysis_command = (
+        f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
+        f"{test_root_dir}/balsamic_binary_path run analysis "
+        f"--account balsamic_slurm_account "
+        f"--qos normal "
+        f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
+        f"--headjob-partition head-jobs "
+        f"--run-analysis"
+    )
+
     if command == "start-available":
         run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[1]
 
         assert run_analysis_call == call(
-            f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
-            f"{test_root_dir}/balsamic_binary_path run analysis "
-            f"--account balsamic_slurm_account "
-            f"--qos normal "
-            f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
-            f"--headjob-partition head-jobs "
-            f"--run-analysis",
+            expected_run_analysis_command,
             check=False,
             shell=True,
             stderr=ANY,
@@ -322,13 +326,7 @@ def test_start_available_tgs_tumour_only(
         run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[0]
 
         assert run_analysis_call == call(
-            args=f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
-            f"{test_root_dir}/balsamic_binary_path run analysis "
-            f"--account balsamic_slurm_account "
-            f"--qos normal "
-            f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
-            f"--headjob-partition head-jobs "
-            f"--run-analysis",
+            args=expected_run_analysis_command,
             check=False,
             shell=True,
             stderr=ANY,
@@ -524,17 +522,21 @@ def test_start_available_wgs_paired(
         )
 
     # THEN Balsamic run analysis was called in the correct way
+    expected_run_analysis_command = (
+        f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
+        f"{test_root_dir}/balsamic_binary_path run analysis "
+        f"--account balsamic_slurm_account "
+        f"--qos normal "
+        f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
+        f"--headjob-partition head-jobs "
+        f"--run-analysis"
+    )
+
     if command == "start-available":
         run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[1]
 
         assert run_analysis_call == call(
-            f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
-            f"{test_root_dir}/balsamic_binary_path run analysis "
-            f"--account balsamic_slurm_account "
-            f"--qos normal "
-            f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
-            f"--headjob-partition head-jobs "
-            f"--run-analysis",
+            expected_run_analysis_command,
             check=False,
             shell=True,
             stderr=ANY,
@@ -545,13 +547,7 @@ def test_start_available_wgs_paired(
         run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[0]
 
         assert run_analysis_call == call(
-            args=f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
-            f"{test_root_dir}/balsamic_binary_path run analysis "
-            f"--account balsamic_slurm_account "
-            f"--qos normal "
-            f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
-            f"--headjob-partition head-jobs "
-            f"--run-analysis",
+            args=expected_run_analysis_command,
             check=False,
             shell=True,
             stderr=ANY,
