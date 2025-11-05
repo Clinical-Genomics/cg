@@ -914,6 +914,4 @@ class PacbioSampleRunMetricsView(BaseView):
     column_searchable_list = [
         "sample.internal_id",
         "pacbio_sequencing_run.device.internal_id",
-        "pacbio_sequencing_run.run_name",
-        "pacbio_sequencing_run.plate",
     ]
