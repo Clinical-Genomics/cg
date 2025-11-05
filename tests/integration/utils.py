@@ -73,13 +73,17 @@ def create_integration_test_sample(
 
 def create_fastq_file_and_add_to_housekeeper(
     housekeeper_db: HousekeeperStore, sample: Sample, test_root_dir: Path
-) -> Path:
+) -> None:
     fastq_base_path: Path = Path(test_root_dir, "fastq_files")
     fastq_base_path.mkdir(parents=True, exist_ok=True)
 
-    fastq_file_path: Path = Path(fastq_base_path, f"{sample.internal_id}.fastq.gz")
+    fastq_file_path1: Path = Path(fastq_base_path, f"{sample.internal_id}.fastq.gz")
     copy_integration_test_file(
-        from_path=Path("tests/integration/config/file.fastq.gz"), to_path=fastq_file_path
+        from_path=Path("tests/integration/config/file.fastq.gz"), to_path=fastq_file_path1
+    )
+    fastq_file_path2: Path = Path(fastq_base_path, f"{sample.internal_id}2.fastq.gz")
+    copy_integration_test_file(
+        from_path=Path("tests/integration/config/file.fastq.gz"), to_path=fastq_file_path2
     )
 
     bundle_data = {
@@ -88,7 +92,12 @@ def create_fastq_file_and_add_to_housekeeper(
         "expires": datetime.now(),
         "files": [
             {
-                "path": fastq_file_path.as_posix(),
+                "path": fastq_file_path1.as_posix(),
+                "archive": False,
+                "tags": [sample.id, SequencingFileTag.FASTQ],
+            },
+            {
+                "path": fastq_file_path2.as_posix(),
                 "archive": False,
                 "tags": [sample.id, SequencingFileTag.FASTQ],
             },
@@ -99,8 +108,6 @@ def create_fastq_file_and_add_to_housekeeper(
     housekeeper_db.session.add(bundle)
     housekeeper_db.session.add(version)
     housekeeper_db.session.commit()
-
-    return fastq_file_path
 
 
 def create_empty_file(file_path: Path):
