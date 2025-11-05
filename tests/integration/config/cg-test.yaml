@@ -70,7 +70,7 @@ balsamic:
   loqusdb_clinical_snv: "{test_root_dir}/loqusdb/clinical_snv.vcf.gz"
   loqusdb_clinical_sv: "{test_root_dir}/loqusdb/clinical_sv.vcf.gz"
   loqusdb_dump_files:
-    artefact_sv_observations: "{test_root_dir}/loqusdb/loqusdb_artefact_somatic_sv_variants.vcf.gz"
+    artefact_sv_observations: "{test_root_dir}/loqusdb/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz"
     cancer_somatic_snv_panel_observations:
       GMSlymphoid: "{test_root_dir}/loqusdb/lymphoid.vcf.gz"
       GMSmyeloid: "{test_root_dir}/loqusdb/loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz"
