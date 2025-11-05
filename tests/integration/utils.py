@@ -150,3 +150,41 @@ def expect_to_add_pending_analysis_to_trailblazer(
             "config_path": "config/path",
         }
     )
+
+
+def expect_lims_sample_request(lims_server: HTTPServer, sample: Sample, bed_name: str):
+    lims_server.expect_request(f"/lims/api/v2/samples/{sample.internal_id}").respond_with_data(
+        f"""<smp:sample xmlns:udf="http://genologics.com/ri/userdefined" xmlns:ri="http://genologics.com/ri" xmlns:file="http://genologics.com/ri/file" xmlns:smp="http://genologics.com/ri/sample" uri="http://127.0.0.1:8000/api/v2/samples/ACC2351A1" limsid="ACC2351A1">
+<name>2016-02293</name>
+<date-received>2017-02-16</date-received>
+<project limsid="ACC2351" uri="http://127.0.0.1:8000/api/v2/projects/ACC2351"/>
+<submitter uri="http://127.0.0.1:8000/api/v2/researchers/3">
+<first-name>API</first-name>
+<last-name>Access</last-name>
+</submitter>
+<artifact limsid="ACC2351A1PA1" uri="http://127.0.0.1:8000/api/v2/artifacts/ACC2351A1PA1?state=55264"/>
+<udf:field type="Boolean" name="Sample Delivered">true</udf:field>
+<udf:field type="String" name="Concentration (nM)">NA</udf:field>
+<udf:field type="String" name="customer">cust002</udf:field>
+<udf:field type="String" name="familyID">F0005063</udf:field>
+<udf:field type="String" name="Gender">M</udf:field>
+<udf:field type="String" name="priority">standard</udf:field>
+<udf:field type="String" name="Process only if QC OK">NA</udf:field>
+<udf:field type="Numeric" name="Reads missing (M)">0</udf:field>
+<udf:field type="String" name="Reference Genome Microbial">NA</udf:field>
+<udf:field type="String" name="Sample Buffer">NA</udf:field>
+<udf:field type="String" name="Sequencing Analysis">EXXCUSR000</udf:field>
+<udf:field type="String" name="Status">unaffected</udf:field>
+<udf:field type="String" name="Strain">NA</udf:field>
+<udf:field type="String" name="Source">NA</udf:field>
+<udf:field type="String" name="Volume (uL)">NA</udf:field>
+<udf:field type="String" name="Gene List">OMIM-AUTO</udf:field>
+<udf:field type="String" name="Index type">NA</udf:field>
+<udf:field type="String" name="Data Analysis">scout</udf:field>
+<udf:field type="String" name="Index number">NA</udf:field>
+<udf:field type="String" name="Application Tag Version">1</udf:field>
+<udf:field type="String" name="Bait Set">{bed_name}</udf:field>
+<udf:field type="String" name="Capture Library version">Agilent Sureselect V5</udf:field>
+</smp:sample>""",
+        content_type="application/xml",
+    )

@@ -23,6 +23,7 @@ from tests.integration.utils import (
     copy_integration_test_file,
     create_empty_file,
     create_integration_test_sample,
+    expect_lims_sample_request,
     expect_to_add_pending_analysis_to_trailblazer,
 )
 from tests.store_helpers import StoreHelpers
@@ -166,14 +167,7 @@ def test_start_available_tgs_tumour_only(
     expect_lims_sample_request(lims_server=httpserver, sample=sample, bed_name=bed_name)
 
     # GIVEN files exists on disk for all flags requiring a file
-    create_empty_file(Path(test_root_dir, "loqusdb", "artefact_somatic_snv.vcf.gz"))
-    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_germline_snv.vcf.gz"))
-    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_snv.vcf.gz"))
-    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_sv.vcf.gz"))
-    create_empty_file(Path(test_root_dir, "loqusdb", "clinical_snv.vcf.gz"))
-    create_empty_file(Path(test_root_dir, "loqusdb", "clinical_sv.vcf.gz"))
-    create_empty_file(Path(test_root_dir, "swegen", "swegen_snv.vcf.gz"))
-    create_empty_file(Path(test_root_dir, "swegen", "swegen_sv.vcf.gz"))
+    _create_files_for_flags(test_root_dir)
 
     # GIVEN a call to balsamic config case successfully generates a config file
     match command:
@@ -189,7 +183,7 @@ def test_start_available_tgs_tumour_only(
         stdout = b""
 
         if "balsamic_binary_path config case" in command:
-            create_tga_config_file(test_root_dir=test_root_dir, case=case_tgs_tumour_only)
+            _create_tga_config_file(test_root_dir=test_root_dir, case=case_tgs_tumour_only)
         return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
 
     config_case_subprocess_mock.run = Mock(side_effect=mock_run)
@@ -360,14 +354,7 @@ def test_start_available_wgs_paired(
     expect_lims_sample_request(lims_server=httpserver, sample=sample_wgs_tumour, bed_name=bed_name)
 
     # GIVEN files exists on disk for all flags requiring a file
-    create_empty_file(Path(test_root_dir, "loqusdb", "artefact_somatic_snv.vcf.gz"))
-    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_germline_snv.vcf.gz"))
-    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_snv.vcf.gz"))
-    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_sv.vcf.gz"))
-    create_empty_file(Path(test_root_dir, "loqusdb", "clinical_snv.vcf.gz"))
-    create_empty_file(Path(test_root_dir, "loqusdb", "clinical_sv.vcf.gz"))
-    create_empty_file(Path(test_root_dir, "swegen", "swegen_snv.vcf.gz"))
-    create_empty_file(Path(test_root_dir, "swegen", "swegen_sv.vcf.gz"))
+    _create_files_for_flags(test_root_dir)
 
     # GIVEN a call to balsamic config case successfully generates a config file
     match command:
@@ -383,7 +370,7 @@ def test_start_available_wgs_paired(
         stdout = b""
 
         if "balsamic_binary_path config case" in command:
-            create_wgs_config_file(test_root_dir=test_root_dir, case=case_wgs_paired)
+            _create_wgs_config_file(test_root_dir=test_root_dir, case=case_wgs_paired)
         return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
 
     config_case_subprocess_mock.run = Mock(side_effect=mock_run)
@@ -514,7 +501,18 @@ def test_start_available_wgs_paired(
     assert case_wgs_paired.action == CaseActions.RUNNING
 
 
-def create_tga_config_file(test_root_dir: Path, case: Case) -> Path:
+def _create_files_for_flags(test_root_dir: Path):
+    create_empty_file(Path(test_root_dir, "loqusdb", "artefact_somatic_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_germline_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_sv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "clinical_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "clinical_sv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "swegen", "swegen_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "swegen", "swegen_sv.vcf.gz"))
+
+
+def _create_tga_config_file(test_root_dir: Path, case: Case) -> Path:
     filepath = Path(
         f"{test_root_dir}/balsamic_root_path/{case.internal_id}/{case.internal_id}.json"
     )
@@ -524,7 +522,7 @@ def create_tga_config_file(test_root_dir: Path, case: Case) -> Path:
     return filepath
 
 
-def create_wgs_config_file(test_root_dir: Path, case: Case) -> Path:
+def _create_wgs_config_file(test_root_dir: Path, case: Case) -> Path:
     filepath = Path(
         f"{test_root_dir}/balsamic_root_path/{case.internal_id}/{case.internal_id}.json"
     )
@@ -533,41 +531,3 @@ def create_wgs_config_file(test_root_dir: Path, case: Case) -> Path:
         from_path=Path("tests/fixtures/apps/balsamic/wgs_case/config.json"), to_path=filepath
     )
     return filepath
-
-
-def expect_lims_sample_request(lims_server: HTTPServer, sample: Sample, bed_name: str):
-    lims_server.expect_request(f"/lims/api/v2/samples/{sample.internal_id}").respond_with_data(
-        f"""<smp:sample xmlns:udf="http://genologics.com/ri/userdefined" xmlns:ri="http://genologics.com/ri" xmlns:file="http://genologics.com/ri/file" xmlns:smp="http://genologics.com/ri/sample" uri="http://127.0.0.1:8000/api/v2/samples/ACC2351A1" limsid="ACC2351A1">
-<name>2016-02293</name>
-<date-received>2017-02-16</date-received>
-<project limsid="ACC2351" uri="http://127.0.0.1:8000/api/v2/projects/ACC2351"/>
-<submitter uri="http://127.0.0.1:8000/api/v2/researchers/3">
-<first-name>API</first-name>
-<last-name>Access</last-name>
-</submitter>
-<artifact limsid="ACC2351A1PA1" uri="http://127.0.0.1:8000/api/v2/artifacts/ACC2351A1PA1?state=55264"/>
-<udf:field type="Boolean" name="Sample Delivered">true</udf:field>
-<udf:field type="String" name="Concentration (nM)">NA</udf:field>
-<udf:field type="String" name="customer">cust002</udf:field>
-<udf:field type="String" name="familyID">F0005063</udf:field>
-<udf:field type="String" name="Gender">M</udf:field>
-<udf:field type="String" name="priority">standard</udf:field>
-<udf:field type="String" name="Process only if QC OK">NA</udf:field>
-<udf:field type="Numeric" name="Reads missing (M)">0</udf:field>
-<udf:field type="String" name="Reference Genome Microbial">NA</udf:field>
-<udf:field type="String" name="Sample Buffer">NA</udf:field>
-<udf:field type="String" name="Sequencing Analysis">EXXCUSR000</udf:field>
-<udf:field type="String" name="Status">unaffected</udf:field>
-<udf:field type="String" name="Strain">NA</udf:field>
-<udf:field type="String" name="Source">NA</udf:field>
-<udf:field type="String" name="Volume (uL)">NA</udf:field>
-<udf:field type="String" name="Gene List">OMIM-AUTO</udf:field>
-<udf:field type="String" name="Index type">NA</udf:field>
-<udf:field type="String" name="Data Analysis">scout</udf:field>
-<udf:field type="String" name="Index number">NA</udf:field>
-<udf:field type="String" name="Application Tag Version">1</udf:field>
-<udf:field type="String" name="Bait Set">{bed_name}</udf:field>
-<udf:field type="String" name="Capture Library version">Agilent Sureselect V5</udf:field>
-</smp:sample>""",
-        content_type="application/xml",
-    )
