@@ -114,7 +114,9 @@ def test_track(
     mocker: MockerFixture,
 ):
     """
-    Test that analyses are correctly tracked for SLURM pipelines.
+    Test that analyses are correctly tracked. Test the following pipelines:
+        - BALSAMIC
+        - MIP_DNA
     It tests two scenarios per workflow:
         Creating one Trailblazer analysis that should be hidden and one that should not.
     """
