@@ -89,7 +89,7 @@ def test_analysis_starter_factory_mip_dna():
     assert isinstance(analysis_starter.tracker, MIPDNATracker)
 
 
-def test_get_analysis_starter_for_case_nextflow_fastq_pipelines(
+def test_get_analysis_starter_for_workflow_nextflow_fastq(
     raredisease_config_object: RarediseaseConfig,
     seqera_platform_config: SeqeraPlatformConfig,
     mocker: MockerFixture,
@@ -103,23 +103,16 @@ def test_get_analysis_starter_for_case_nextflow_fastq_pipelines(
      - Taxprofiler
      - Tomte
     """
-    # GIVEN a store with a Nextflow case
-    status_db: Store = create_autospec(Store)
-    status_db.get_case_workflow.return_value = Workflow.RAREDISEASE
-
-    # GIVEN a CGConfig with valid Seqera platform and Nextflow pipeline configurations
+    # GIVEN a CGConfig with valid Seqera platform, data flow and Nextflow pipeline configurations
     cg_config: CGConfig = create_autospec(
         CGConfig,
-        crunchy_api=Mock(),
         data_flow=Mock(),
-        housekeeper=Mock(),
         raredisease=raredisease_config_object,
         run_instruments=create_autospec(
             RunInstruments,
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
         ),
         seqera_platform=seqera_platform_config,
-        status_db=status_db,
     )
 
     # GIVEN an AnalysisStarterFactory
@@ -145,9 +138,9 @@ def test_get_analysis_starter_for_case_nextflow_fastq_pipelines(
         CompressAPI, "__init__", return_value=None
     )
 
-    # WHEN fetching the AnalysisStarter
-    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case(
-        "case_id"
+    # WHEN fetching the AnalysisStarter for a Nextflow workflow
+    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
+        Workflow.RAREDISEASE
     )
 
     # THEN the AnalysisStarter should have a Nextflow configurator
@@ -193,7 +186,6 @@ def test_get_analysis_starter_for_workflow_nallo(
     # GIVEN a CGConfig with a Nallo pipeline configuration
     cg_config: CGConfig = create_autospec(
         CGConfig,
-        data_flow=Mock(),
         nallo=nallo_config_object,
         run_instruments=create_autospec(
             RunInstruments,
