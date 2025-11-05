@@ -143,7 +143,7 @@ class BalsamicCaseConfig(CaseConfig):
 
     def get_start_command(self) -> str:
         command = (
-            "{conda_binary} run {binary} run analysis --account {account} "
+            "{conda_binary} run --name {environment} {binary} run analysis --account {account} "
             "--qos {qos} --sample-config {sample_config} --headjob-partition {head_job_partition} "
             "--run-analysis".format(**self.model_dump())
         )

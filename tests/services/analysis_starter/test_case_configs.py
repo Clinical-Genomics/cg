@@ -113,6 +113,7 @@ def test_balsamic_get_start_command_no_flags_set():
     # THEN the command is as expected
     expected_command = (
         "/path/to/conda run "
+        "--name balsamic_environment "
         "/path/to/balsamic_binary run analysis "
         "--account balsamic_account "
         "--qos normal "
@@ -143,6 +144,7 @@ def test_balsamic_get_start_command_all_flags_set():
     # THEN the command is as expected
     expected_command = (
         "/path/to/conda run "
+        "--name balsamic_environment "
         "/path/to/balsamic_binary run analysis "
         "--account balsamic_account "
         "--qos normal "
