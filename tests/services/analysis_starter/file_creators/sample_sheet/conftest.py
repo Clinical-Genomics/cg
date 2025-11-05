@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from cg.constants import Workflow
 from cg.constants.sequencing import SequencingPlatform
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
     HEADERS as NALLO_HEADERS,
@@ -9,11 +10,20 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     HEADERS as RAREDISEASE_HEADERS,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
+    RarediseaseSampleSheetCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
     HEADERS as RNAFUSION_HEADERS,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+    RNAFusionSampleSheetCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
     HEADERS as TAXPROFILER_HEADERS,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
+    TaxprofilerSampleSheetCreator,
 )
 
 
@@ -100,3 +110,28 @@ def taxprofiler_sample_sheet_expected_content(
         "",
     ]
     return [TAXPROFILER_HEADERS, row]
+
+
+@pytest.fixture
+def sample_sheet_scenario(
+    raredisease_sample_sheet_creator: RarediseaseSampleSheetCreator,
+    raredisease_sample_sheet_expected_content: list[list[str]],
+    rnafusion_sample_sheet_creator: RNAFusionSampleSheetCreator,
+    rnafusion_sample_sheet_expected_content: list[list[str]],
+    taxprofiler_sample_sheet_creator: TaxprofilerSampleSheetCreator,
+    taxprofiler_sample_sheet_expected_content: list[list[str]],
+) -> dict:
+    return {
+        Workflow.RAREDISEASE: (
+            raredisease_sample_sheet_creator,
+            raredisease_sample_sheet_expected_content,
+        ),
+        Workflow.RNAFUSION: (
+            rnafusion_sample_sheet_creator,
+            rnafusion_sample_sheet_expected_content,
+        ),
+        Workflow.TAXPROFILER: (
+            taxprofiler_sample_sheet_creator,
+            taxprofiler_sample_sheet_expected_content,
+        ),
+    }
