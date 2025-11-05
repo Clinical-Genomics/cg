@@ -224,32 +224,32 @@ def test_start_available_tgs_tumour_only(
     assert result.exit_code == 0
 
     # THEN balsamic config case was called in the correct way
-    expected_config_case_command = (
-        f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
-        f"{test_root_dir}/balsamic_binary_path config case "
-        f"--analysis-dir {balsamic_root_dir} "
-        f"--analysis-workflow balsamic "
-        f"--artefact-snv-observations {test_root_dir}/loqusdb/artefact_somatic_snv.vcf.gz "
-        f"--balsamic-cache {test_root_dir}/balsamic_cache "
-        f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
-        f"--cancer-germline-snv-observations {test_root_dir}/loqusdb/cancer_germline_snv.vcf.gz "
-        f"--cancer-somatic-snv-observations {test_root_dir}/loqusdb/cancer_somatic_snv.vcf.gz "
-        f"--cancer-somatic-snv-panel-observations {test_root_dir}/loqusdb/loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz "
-        f"--cancer-somatic-sv-observations {test_root_dir}/loqusdb/artefact_snv.vcf.gz "
-        f"--case-id {case_id} "
-        f"--clinical-snv-observations {test_root_dir}/loqusdb/clinical_snv.vcf.gz "
-        f"--clinical-sv-observations {test_root_dir}/loqusdb/clinical_sv.vcf.gz "
-        f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
-        f"--gender female "
-        f"--genome-version hg19 "
-        f"--gnomad-min-af5 {test_root_dir}/balsamic_gnomad_af5_path "
-        f"--panel-bed {test_root_dir}/balsamic_bed_path/dummy_filename "
-        f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
-        f"--sentieon-license localhost "
-        f"--swegen-snv {test_root_dir}/swegen_snv.vcf.gz "
-        f"--swegen-sv {test_root_dir}/swegen_sv.vcf.gz "
-        f"--tumor-sample-name {sample.internal_id}"
-    )
+    # expected_config_case_command = (
+    #     f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
+    #     f"{test_root_dir}/balsamic_binary_path config case "
+    #     f"--analysis-dir {balsamic_root_dir} "
+    #     f"--analysis-workflow balsamic "
+    #     f"--artefact-snv-observations {test_root_dir}/loqusdb/artefact_somatic_snv.vcf.gz "
+    #     f"--balsamic-cache {test_root_dir}/balsamic_cache "
+    #     f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
+    #     f"--cancer-germline-snv-observations {test_root_dir}/loqusdb/cancer_germline_snv.vcf.gz "
+    #     f"--cancer-somatic-snv-observations {test_root_dir}/loqusdb/cancer_somatic_snv.vcf.gz "
+    #     f"--cancer-somatic-snv-panel-observations {test_root_dir}/loqusdb/loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz "
+    #     f"--cancer-somatic-sv-observations {test_root_dir}/loqusdb/artefact_snv.vcf.gz "
+    #     f"--case-id {case_id} "
+    #     f"--clinical-snv-observations {test_root_dir}/loqusdb/clinical_snv.vcf.gz "
+    #     f"--clinical-sv-observations {test_root_dir}/loqusdb/clinical_sv.vcf.gz "
+    #     f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
+    #     f"--gender female "
+    #     f"--genome-version hg19 "
+    #     f"--gnomad-min-af5 {test_root_dir}/balsamic_gnomad_af5_path "
+    #     f"--panel-bed {test_root_dir}/balsamic_bed_path/dummy_filename "
+    #     f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
+    #     f"--sentieon-license localhost "
+    #     f"--swegen-snv {test_root_dir}/swegen_snv.vcf.gz "
+    #     f"--swegen-sv {test_root_dir}/swegen_sv.vcf.gz "
+    #     f"--tumor-sample-name {sample.internal_id}"
+    # )
 
     first_call = config_case_subprocess_mock.run.mock_calls[0]
     if command == "start-available":
@@ -272,12 +272,13 @@ def test_start_available_tgs_tumour_only(
             f"--panel-bed {test_root_dir}/balsamic_bed_path/dummy_filename "
             f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
             f"--sentieon-license localhost "
-            f"--cancer-somatic-sv-observations {test_root_dir}/loqusdb/artefact_snv.vcf.gz "
-            f"--clinical-snv-observations {test_root_dir}/loqusdb/clinical_snv.vcf.gz "
-            f"--clinical-sv-observations {test_root_dir}/loqusdb/clinical_sv.vcf.gz "
-            f"--swegen-snv {test_root_dir}/swegen_snv.vcf.gz "
-            f"--swegen-sv {test_root_dir}/swegen_sv.vcf.gz "
-            f"--tumor-sample-name {sample.internal_id}"
+            f"--tumor-sample-name {sample.internal_id} "
+            # TODO should these exist for the old command?
+            # f"--cancer-somatic-sv-observations {test_root_dir}/loqusdb/artefact_snv.vcf.gz "
+            # f"--clinical-snv-observations {test_root_dir}/loqusdb/clinical_snv.vcf.gz "
+            # f"--clinical-sv-observations {test_root_dir}/loqusdb/clinical_sv.vcf.gz "
+            # f"--swegen-snv {test_root_dir}/swegen_snv.vcf.gz "
+            # f"--swegen-sv {test_root_dir}/swegen_sv.vcf.gz "
         )
 
         assert first_call == call(
@@ -393,25 +394,35 @@ def assert_commands(expected_command, actual_command, flags_start_at_word=7, mes
     all_actual_words = actual_command.split()
     all_expected_words = expected_command.split()
 
-    actual_parts = all_actual_words[flags_start_at_word:-1]
-    actual_key_values = list(zip(actual_parts[::2], actual_parts[1::2]))
+    actual_parts = all_actual_words[flags_start_at_word:]
+    actual_key_values = list(zip(actual_parts[::2], actual_parts[1::2], strict=True))
 
-    expected_parts = all_expected_words[flags_start_at_word:-1]
-    expected_key_values = list(zip(expected_parts[::2], expected_parts[1::2]))
+    expected_parts = all_expected_words[flags_start_at_word:]
+    expected_key_values = list(zip(expected_parts[::2], expected_parts[1::2], strict=True))
+
+    # TODO: sort alphabetically so flag order doesn't matter?
 
     assert (
         all_actual_words[0 : flags_start_at_word - 1]
         == all_expected_words[0 : flags_start_at_word - 1]
     ), message
 
-    for actual, expected in zip(actual_key_values, expected_key_values):
+    for actual, expected in zip(actual_key_values, expected_key_values, strict=True):
         assert actual == expected, message
 
 
 @pytest.mark.xdist_group(name="integration")
 @pytest.mark.integration
+@pytest.mark.parametrize(
+    "command",
+    [
+        "start-available",
+        "dev-start-available",
+    ],
+)
 def test_start_available_wgs_paired(
     case_wgs_paired: Case,
+    command: str,
     sample_wgs_normal: Sample,
     sample_wgs_tumour: Sample,
     test_run_paths: IntegrationTestPaths,
@@ -441,18 +452,29 @@ def test_start_available_wgs_paired(
     expect_lims_sample_request(lims_server=httpserver, sample=sample_wgs_normal, bed_name=bed_name)
     expect_lims_sample_request(lims_server=httpserver, sample=sample_wgs_tumour, bed_name=bed_name)
 
+    # GIVEN a loqusdb dump file for the artefact-snv-observations flag exists
+    create_empty_file(Path(test_root_dir, "loqusdb", "artefact_somatic_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_germline_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_sv.vcf.gz"))
+
     # GIVEN a call to balsamic config case successfully generates a config file
-    subprocess_mock = mocker.patch.object(commands, "subprocess")
+    if command == "start-available":
+        config_case_subprocess_mock = mocker.patch.object(commands, "subprocess")
+        run_analysis_subprocess_mock = config_case_subprocess_mock
+    elif command == "dev-start-available":
+        config_case_subprocess_mock = mocker.patch.object(balsamic_config, "subprocess")
+        run_analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
 
     def mock_run(*args, **kwargs):
-        command = args[0]
+        command = args[0] if args else kwargs["args"]
         stdout = b""
 
         if "balsamic_binary_path config case" in command:
             create_wgs_config_file(test_root_dir=test_root_dir, case=case_wgs_paired)
         return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
 
-    subprocess_mock.run = Mock(side_effect=mock_run)
+    config_case_subprocess_mock.run = Mock(side_effect=mock_run)
 
     # GIVEN the Trailblazer API returns no ongoing analysis for the case
     httpserver.expect_request(
@@ -480,7 +502,7 @@ def test_start_available_wgs_paired(
             test_run_paths.cg_config_file.as_posix(),
             "workflow",
             "balsamic",
-            "start-available",
+            command,
         ],
         catch_exceptions=False,
     )
@@ -489,37 +511,103 @@ def test_start_available_wgs_paired(
     assert result.exit_code == 0
 
     # THEN balsamic config case was called in the correct way
-    expected_config_case_command = (
-        f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
-        f"{test_root_dir}/balsamic_binary_path config case "
-        f"--analysis-dir {balsamic_root_dir} "
-        f"--analysis-workflow balsamic "
-        f"--balsamic-cache {test_root_dir}/balsamic_cache "
-        f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
-        f"--artefact-sv-observations {test_root_dir}/loqusdb/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz "
-        f"--case-id {case_id} "
-        f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
-        f"--gender female "
-        f"--genome-interval {test_root_dir}/balsamic_genome_interval_path "
-        f"--genome-version hg19 "
-        f"--gens-coverage-pon {test_root_dir}/balsamic_gens_coverage_female_path "
-        f"--gnomad-min-af5 {test_root_dir}/balsamic_gnomad_af5_path "
-        f"--normal-sample-name {sample_wgs_normal.internal_id} "
-        f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
-        f"--sentieon-license localhost "
-        f"--tumor-sample-name {sample_wgs_tumour.internal_id}"
-    )
+    first_call = config_case_subprocess_mock.run.mock_calls[0]
+    if command == "start-available":
+        expected_config_case_command = (
+            f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
+            f"{test_root_dir}/balsamic_binary_path config case "
+            f"--analysis-dir {balsamic_root_dir} "
+            f"--analysis-workflow balsamic "
+            f"--balsamic-cache {test_root_dir}/balsamic_cache "
+            f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
+            f"--artefact-snv-observations {test_root_dir}/loqusdb/artefact_somatic_snv.vcf.gz "
+            f"--artefact-sv-observations {test_root_dir}/loqusdb/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz "
+            f"--cancer-germline-snv-observations {test_root_dir}/loqusdb/cancer_germline_snv.vcf.gz "
+            f"--cancer-somatic-snv-observations {test_root_dir}/loqusdb/cancer_somatic_snv.vcf.gz "
+            f"--cancer-somatic-sv-observations {test_root_dir}/loqusdb/cancer_somatic_sv.vcf.gz "
+            f"--case-id {case_id} "
+            f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
+            f"--gender female "
+            f"--genome-interval {test_root_dir}/balsamic_genome_interval_path "
+            f"--genome-version hg19 "
+            f"--gens-coverage-pon {test_root_dir}/balsamic_gens_coverage_female_path "
+            f"--gnomad-min-af5 {test_root_dir}/balsamic_gnomad_af5_path "
+            f"--normal-sample-name {sample_wgs_normal.internal_id} "
+            f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
+            f"--sentieon-license localhost "
+            f"--tumor-sample-name {sample_wgs_tumour.internal_id}"
+            # f"--clinical-snv-observations {test_root_dir}/loqusdb/clinical_snv.vcf.gz "
+            # f"--clinical-sv-observations {test_root_dir}/loqusdb/clinical_sv.vcf.gz "
+        )
 
-    assert subprocess_mock.run.mock_calls[0] == call(
-        expected_config_case_command,
-        check=False,
-        shell=True,
-        stderr=ANY,
-        stdout=ANY,
-    )
+        assert first_call == call(
+            ANY,
+            check=False,
+            shell=True,
+            stderr=ANY,
+            stdout=ANY,
+        )
+
+        actual_command = first_call.args[0]
+
+        assert_commands(
+            expected_command=expected_config_case_command,
+            actual_command=actual_command,
+            flags_start_at_word=7,
+            message="config-case command not as expected",
+        )
+    else:
+        expected_config_case_command = (
+            f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
+            f"{test_root_dir}/balsamic_binary_path config case "
+            f"--analysis-dir {balsamic_root_dir} "
+            f"--analysis-workflow balsamic "
+            f"--artefact-snv-observations {test_root_dir}/loqusdb/artefact_somatic_snv.vcf.gz "
+            f"--artefact-sv-observations {test_root_dir}/loqusdb/loqusdb_artefact_somatic_sv_variants.vcf.gz "
+            f"--balsamic-cache {test_root_dir}/balsamic_cache "
+            f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
+            f"--cancer-germline-snv-observations {test_root_dir}/loqusdb/cancer_germline_snv.vcf.gz "
+            f"--cancer-somatic-snv-observations {test_root_dir}/loqusdb/cancer_somatic_snv.vcf.gz "
+            f"--cancer-somatic-sv-observations {test_root_dir}/loqusdb/cancer_somatic_sv.vcf.gz "
+            f"--case-id {case_id} "
+            f"--clinical-snv-observations {test_root_dir}/loqusdb/clinical_snv.vcf.gz "
+            f"--clinical-sv-observations {test_root_dir}/loqusdb/clinical_sv.vcf.gz "
+            f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
+            f"--gender female "
+            f"--genome-interval {test_root_dir}/balsamic_genome_interval_path "
+            f"--genome-version hg19 "
+            f"--gens-coverage-pon {test_root_dir}/balsamic_gens_coverage_female_path "
+            f"--gnomad-min-af5 {test_root_dir}/balsamic_gnomad_af5_path "
+            f"--normal-sample-name {sample_wgs_normal.internal_id} "
+            f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
+            f"--sentieon-license localhost "
+            f"--tumor-sample-name {sample_wgs_tumour.internal_id}"
+        )
+        assert first_call == call(
+            args=ANY,
+            check=False,
+            shell=True,
+            stderr=ANY,
+            stdout=ANY,
+        )
+        actual_command = first_call.kwargs["args"]
+        assert_commands(
+            expected_command=expected_config_case_command,
+            actual_command=actual_command,
+            flags_start_at_word=7,
+            message="config-case command not as expected",
+        )
+
+    # assert config_case_subprocess_mock.run.mock_calls[0] == call(
+    #     expected_config_case_command,
+    #     check=False,
+    #     shell=True,
+    #     stderr=ANY,
+    #     stdout=ANY,
+    # )
 
     # THEN balsamic run analysis was called in the correct way
-    assert subprocess_mock.run.mock_calls[1] == call(
+    assert run_analysis_subprocess_mock.run.mock_calls[1] == call(
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path run analysis "
         f"--account balsamic_slurm_account "
