@@ -12,7 +12,6 @@ from wtforms.form import Form
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.models.orders.constants import OrderType
-from cg.server.admin_filters import PacbioRunNameFilter
 from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
@@ -893,23 +892,28 @@ class PacbioSmrtCellView(BaseView):
 
 
 class PacbioSampleRunMetricsView(BaseView):
-    column_filters = [PacbioRunNameFilter(None, "Pacbio Run Name")]
+    column_filters = ["pacbio_sequencing_run.run_name", "pacbio_sequencing_run.plate"]
     column_formatters = {
         "smrt_cell": PacbioSmrtCellView.view_smrt_cell_link,
         "sample": SampleView.view_sample_link,
     }
     column_labels = {
-        "instrument_run.run_name": "Run name",
-        "instrument_run.plate": "Plate",
+        "pacbio_sequencing_run.run_name": "Run name",
+        "pacbio_sequencing_run.plate": "Plate",
     }
     column_list = [
         "smrt_cell",
         "sample",
-        "instrument_run.run_name",
-        "instrument_run.plate",
+        "pacbio_sequencing_run.run_name",
+        "pacbio_sequencing_run.plate",
         "hifi_reads",
         "hifi_yield",
         "hifi_mean_read_length",
         "hifi_median_read_quality",
     ]
-    column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"]
+    column_searchable_list = [
+        "sample.internal_id",
+        "pacbio_sequencing_run.device.internal_id",
+        "pacbio_sequencing_run.run_name",
+        "pacbio_sequencing_run.plate",
+    ]
