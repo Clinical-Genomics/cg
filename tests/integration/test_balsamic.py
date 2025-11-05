@@ -165,9 +165,8 @@ def test_start_available_tgs_tumour_only(
     helpers.ensure_bed_version(store=status_db, bed_name=bed_name)
     expect_lims_sample_request(lims_server=httpserver, sample=sample, bed_name=bed_name)
 
-    # GIVEN a loqusdb dump file for the artefact-snv-observations flag exists
+    # GIVEN files exists on disk for all flags requiring a file
     create_empty_file(Path(test_root_dir, "loqusdb", "artefact_somatic_snv.vcf.gz"))
-    create_empty_file(Path(test_root_dir, "loqusdb", "artefact_snv.vcf.gz"))
     create_empty_file(Path(test_root_dir, "loqusdb", "cancer_germline_snv.vcf.gz"))
     create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_snv.vcf.gz"))
     create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_sv.vcf.gz"))
@@ -177,12 +176,13 @@ def test_start_available_tgs_tumour_only(
     create_empty_file(Path(test_root_dir, "swegen", "swegen_sv.vcf.gz"))
 
     # GIVEN a call to balsamic config case successfully generates a config file
-    if command == "start-available":
-        config_case_subprocess_mock = mocker.patch.object(commands, "subprocess")
-        run_analysis_subprocess_mock = config_case_subprocess_mock
-    elif command == "dev-start-available":
-        config_case_subprocess_mock = mocker.patch.object(balsamic_config, "subprocess")
-        run_analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
+    match command:
+        case "start-available":
+            config_case_subprocess_mock = mocker.patch.object(commands, "subprocess")
+            run_analysis_subprocess_mock = config_case_subprocess_mock
+        case "dev-start-available":
+            config_case_subprocess_mock = mocker.patch.object(balsamic_config, "subprocess")
+            run_analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
 
     def mock_run(*args, **kwargs):
         command = args[0] if args else kwargs["args"]
@@ -258,22 +258,23 @@ def test_start_available_tgs_tumour_only(
         f"--tumor-sample-name {sample.internal_id}"
     )
 
-    if command == "start-available":
-        assert first_call == call(
-            expected_config_case_command,
-            check=False,
-            shell=True,
-            stderr=ANY,
-            stdout=ANY,
-        )
-    else:
-        assert first_call == call(
-            args=expected_config_case_command,
-            check=False,
-            shell=True,
-            stderr=ANY,
-            stdout=ANY,
-        )
+    match command:
+        case "start-available":
+            assert first_call == call(
+                expected_config_case_command,
+                check=False,
+                shell=True,
+                stderr=ANY,
+                stdout=ANY,
+            )
+        case "dev-start-available":
+            assert first_call == call(
+                args=expected_config_case_command,
+                check=False,
+                shell=True,
+                stderr=ANY,
+                stdout=ANY,
+            )
 
     # THEN Balsamic run analysis was called in the correct way
     expected_run_analysis_command = (
@@ -286,27 +287,28 @@ def test_start_available_tgs_tumour_only(
         f"--run-analysis"
     )
 
-    if command == "start-available":
-        run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[1]
+    match command:
+        case "start-available":
+            run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[1]
 
-        assert run_analysis_call == call(
-            expected_run_analysis_command,
-            check=False,
-            shell=True,
-            stderr=ANY,
-            stdout=ANY,
-        )
+            assert run_analysis_call == call(
+                expected_run_analysis_command,
+                check=False,
+                shell=True,
+                stderr=ANY,
+                stdout=ANY,
+            )
 
-    else:
-        run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[0]
+        case "dev-start-available":
+            run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[0]
 
-        assert run_analysis_call == call(
-            args=expected_run_analysis_command,
-            check=False,
-            shell=True,
-            stderr=ANY,
-            stdout=ANY,
-        )
+            assert run_analysis_call == call(
+                args=expected_run_analysis_command,
+                check=False,
+                shell=True,
+                stderr=ANY,
+                stdout=ANY,
+            )
 
     # THEN an analysis has been created for the case
     assert len(case_tgs_tumour_only.analyses) == 1
@@ -357,7 +359,7 @@ def test_start_available_wgs_paired(
     expect_lims_sample_request(lims_server=httpserver, sample=sample_wgs_normal, bed_name=bed_name)
     expect_lims_sample_request(lims_server=httpserver, sample=sample_wgs_tumour, bed_name=bed_name)
 
-    # GIVEN a loqusdb dump file for the artefact-snv-observations flag exists
+    # GIVEN files exists on disk for all flags requiring a file
     create_empty_file(Path(test_root_dir, "loqusdb", "artefact_somatic_snv.vcf.gz"))
     create_empty_file(Path(test_root_dir, "loqusdb", "cancer_germline_snv.vcf.gz"))
     create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_snv.vcf.gz"))
@@ -368,12 +370,13 @@ def test_start_available_wgs_paired(
     create_empty_file(Path(test_root_dir, "swegen", "swegen_sv.vcf.gz"))
 
     # GIVEN a call to balsamic config case successfully generates a config file
-    if command == "start-available":
-        config_case_subprocess_mock = mocker.patch.object(commands, "subprocess")
-        run_analysis_subprocess_mock = config_case_subprocess_mock
-    elif command == "dev-start-available":
-        config_case_subprocess_mock = mocker.patch.object(balsamic_config, "subprocess")
-        run_analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
+    match command:
+        case "start-available":
+            config_case_subprocess_mock = mocker.patch.object(commands, "subprocess")
+            run_analysis_subprocess_mock = config_case_subprocess_mock
+        case "dev-start-available":
+            config_case_subprocess_mock = mocker.patch.object(balsamic_config, "subprocess")
+            run_analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
 
     def mock_run(*args, **kwargs):
         command = args[0] if args else kwargs["args"]
@@ -449,24 +452,25 @@ def test_start_available_wgs_paired(
         f"--swegen-sv {test_root_dir}/swegen/swegen_sv.vcf.gz "
         f"--tumor-sample-name {sample_wgs_tumour.internal_id}"
     )
-    if command == "start-available":
 
-        assert first_call == call(
-            expected_config_case_command,
-            check=False,
-            shell=True,
-            stderr=ANY,
-            stdout=ANY,
-        )
+    match command:
+        case "start-available":
+            assert first_call == call(
+                expected_config_case_command,
+                check=False,
+                shell=True,
+                stderr=ANY,
+                stdout=ANY,
+            )
 
-    else:
-        assert first_call == call(
-            args=expected_config_case_command,
-            check=False,
-            shell=True,
-            stderr=ANY,
-            stdout=ANY,
-        )
+        case "dev-start-available":
+            assert first_call == call(
+                args=expected_config_case_command,
+                check=False,
+                shell=True,
+                stderr=ANY,
+                stdout=ANY,
+            )
 
     # THEN Balsamic run analysis was called in the correct way
     expected_run_analysis_command = (
@@ -479,27 +483,28 @@ def test_start_available_wgs_paired(
         f"--run-analysis"
     )
 
-    if command == "start-available":
-        run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[1]
+    match command:
+        case "start-available":
+            run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[1]
 
-        assert run_analysis_call == call(
-            expected_run_analysis_command,
-            check=False,
-            shell=True,
-            stderr=ANY,
-            stdout=ANY,
-        )
+            assert run_analysis_call == call(
+                expected_run_analysis_command,
+                check=False,
+                shell=True,
+                stderr=ANY,
+                stdout=ANY,
+            )
 
-    else:
-        run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[0]
+        case "dev-start-available":
+            run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[0]
 
-        assert run_analysis_call == call(
-            args=expected_run_analysis_command,
-            check=False,
-            shell=True,
-            stderr=ANY,
-            stdout=ANY,
-        )
+            assert run_analysis_call == call(
+                args=expected_run_analysis_command,
+                check=False,
+                shell=True,
+                stderr=ANY,
+                stdout=ANY,
+            )
 
     # THEN an analysis has been created for the case
     assert len(case_wgs_paired.analyses) == 1
