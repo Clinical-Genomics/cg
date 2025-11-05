@@ -18,7 +18,7 @@ from cg.services.analysis_starter.submitters.subprocess import submitter
 from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
 from cg.utils import commands
-from tests.integration.conftest import (
+from tests.integration.utils import (
     IntegrationTestPaths,
     copy_integration_test_file,
     create_empty_file,

@@ -1,31 +1,17 @@
-import shutil
 from collections.abc import Generator
-from datetime import datetime
 from pathlib import Path
-from typing import NamedTuple, cast
 from unittest.mock import create_autospec
 
 import pytest
 from housekeeper.store import database as hk_database
-from housekeeper.store.models import Bundle, Version
 from housekeeper.store.store import Store as HousekeeperStore
 from pytest import TempPathFactory
-from pytest_httpserver import HTTPServer
 
-from cg.apps.environ import environ_email
 from cg.apps.tb.api import IDTokenCredentials
 from cg.constants.constants import Workflow
-from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.constants.tb import AnalysisType
 from cg.store import database as cg_database
-from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Sample
 from cg.store.store import Store
-from tests.store_helpers import StoreHelpers
-
-
-class IntegrationTestPaths(NamedTuple):
-    cg_config_file: Path
-    test_root_dir: Path
+from tests.integration.utils import IntegrationTestPaths, create_formatted_config
 
 
 @pytest.fixture(autouse=True)
@@ -94,134 +80,3 @@ def test_run_paths(
     )
 
     return IntegrationTestPaths(cg_config_file=config_file_path, test_root_dir=test_root_dir)
-
-
-def create_integration_test_sample(
-    status_db: Store,
-    housekeeper_db: HousekeeperStore,
-    test_run_paths: IntegrationTestPaths,
-    application_type: AnalysisType,
-    flow_cell_id: str,
-    is_tumour: bool = False,
-) -> Sample:
-    helpers = StoreHelpers()
-    sample: Sample = helpers.add_sample(
-        store=status_db,
-        is_tumour=is_tumour,
-        last_sequenced_at=datetime.now(),
-        application_type=application_type,
-    )
-    flow_cell: IlluminaFlowCell = helpers.add_illumina_flow_cell(
-        store=status_db, flow_cell_id=flow_cell_id
-    )
-    sequencing_run: IlluminaSequencingRun = helpers.add_illumina_sequencing_run(
-        store=status_db,
-        flow_cell=flow_cell,
-    )
-    helpers.add_illumina_sample_sequencing_metrics_object(
-        store=status_db, sample_id=sample.internal_id, sequencing_run=sequencing_run, lane=1
-    )
-
-    create_fastq_file_and_add_to_housekeeper(
-        housekeeper_db=housekeeper_db, test_root_dir=test_run_paths.test_root_dir, sample=sample
-    )
-
-    return sample
-
-
-def expect_to_add_pending_analysis_to_trailblazer(
-    trailblazer_server: HTTPServer,
-    case: Case,
-    ticket_id: int,
-    case_path: Path,
-    config_path: Path,
-    analysis_type: AnalysisType,
-    workflow: Workflow,
-):
-    trailblazer_server.expect_request(
-        "/trailblazer/add-pending-analysis",
-        data=b'{"case_id": "%(case_id)s", "email": "%(email)s", "type": "%(type)s", '
-        b'"config_path": "%(config_path)s",'
-        b' "order_id": 1, "out_dir": "%(case_path)s/analysis", '
-        b'"priority": "normal", "workflow": "%(workflow)s", "ticket": "%(ticket_id)s", '
-        b'"workflow_manager": "slurm", "tower_workflow_id": null, "is_hidden": true}'
-        % {
-            b"email": environ_email().encode(),
-            b"type": str(analysis_type).encode(),
-            b"case_id": case.internal_id.encode(),
-            b"ticket_id": str(ticket_id).encode(),
-            b"case_path": str(case_path).encode(),
-            b"config_path": str(config_path).encode(),
-            b"workflow": str(workflow).upper().encode(),
-        },
-        method="POST",
-    ).respond_with_json(
-        {
-            "id": "1",
-            "logged_at": "",
-            "started_at": "",
-            "completed_at": "",
-            "out_dir": "out/dir",
-            "config_path": "config/path",
-        }
-    )
-
-
-def create_formatted_config(status_db_uri: str, housekeeper_db_uri: str, test_root_dir: str):
-    template_path = "tests/integration/config/cg-test.yaml"
-    with open(template_path) as f:
-        config_content = f.read()
-
-    config_content = config_content.format(
-        test_root_dir=test_root_dir,
-        status_db_uri=status_db_uri,
-        housekeeper_db_uri=housekeeper_db_uri,
-    )
-
-    config_path = Path(test_root_dir, "cg-config.yaml")
-    with open(config_path, "w") as f:
-        f.write(config_content)
-    return config_path
-
-
-def create_fastq_file_and_add_to_housekeeper(
-    housekeeper_db: HousekeeperStore, sample: Sample, test_root_dir: Path
-) -> Path:
-    fastq_base_path: Path = Path(test_root_dir, "fastq_files")
-    fastq_base_path.mkdir(parents=True, exist_ok=True)
-
-    fastq_file_path: Path = Path(fastq_base_path, f"{sample.internal_id}.fastq.gz")
-    copy_integration_test_file(
-        from_path=Path("tests/integration/config/file.fastq.gz"), to_path=fastq_file_path
-    )
-
-    bundle_data = {
-        "name": sample.internal_id,
-        "created": datetime.now(),
-        "expires": datetime.now(),
-        "files": [
-            {
-                "path": fastq_file_path.as_posix(),
-                "archive": False,
-                "tags": [sample.id, SequencingFileTag.FASTQ],
-            },
-        ],
-    }
-
-    bundle, version = cast(tuple[Bundle, Version], housekeeper_db.add_bundle(bundle_data))
-    housekeeper_db.session.add(bundle)
-    housekeeper_db.session.add(version)
-    housekeeper_db.session.commit()
-
-    return fastq_file_path
-
-
-def copy_integration_test_file(from_path: Path, to_path: Path):
-    to_path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(from_path, to_path)
-    return True
-
-
-def create_empty_file(file_path: Path):
-    file_path.parent.mkdir(parents=True, exist_ok=True)
-    file_path.touch()
