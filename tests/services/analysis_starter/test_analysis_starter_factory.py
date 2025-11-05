@@ -125,22 +125,19 @@ def test_analysis_starter_factory_nextflow_fastq_pipelines(
     # GIVEN an AnalysisStarterFactory
     analysis_starter_factory = AnalysisStarterFactory(cg_config)
 
-    # GIVEN a case with a Nextflow workflow
-    mocker.patch.object(Store, "get_case_workflow", return_value=Workflow.RAREDISEASE)
-
-    # GIVEN a mock for the SeqeraPlatformSubmitter constructor and a mocked SeqeraPlatformClient
+    # GIVEN a SeqeraPlatformSubmitter constructor and a SeqeraPlatformClient
     mock_platform_submitter_init: MagicMock = mocker.patch.object(
         SeqeraPlatformSubmitter, "__init__", return_value=None
     )
     mock_client: SeqeraPlatformClient = create_autospec(SeqeraPlatformClient)
     mocker.patch.object(starter_factory, "SeqeraPlatformClient", return_value=mock_client)
 
-    # GIVEN a NextflowTracker mocked constructor
+    # GIVEN a NextflowTracker constructor
     mock_tracker_init: MagicMock = mocker.patch.object(
         NextflowTracker, "__init__", return_value=None
     )
 
-    # GIVEN mocks for the SpringArchiveAPI and CompressAPI constructors
+    # GIVEN SpringArchiveAPI and CompressAPI constructors
     mock_archive_api_init: MagicMock = mocker.patch.object(
         SpringArchiveAPI, "__init__", return_value=None
     )
@@ -213,20 +210,20 @@ def test_analysis_starter_factory_nallo(
     # GIVEN an AnalysisStarterFactory
     analysis_starter_factory = AnalysisStarterFactory(cg_config)
 
-    # GIVEN a case with a NALLO workflow
-    mocker.patch.object(Store, "get_case_workflow", return_value=Workflow.NALLO)
-
-    # GIVEN a mock for the SeqeraPlatformSubmitter constructor and a mocked SeqeraPlatformClient
+    # GIVEN a SeqeraPlatformSubmitter constructor and a SeqeraPlatformClient
     mock_platform_submitter_init: MagicMock = mocker.patch.object(
         SeqeraPlatformSubmitter, "__init__", return_value=None
     )
     mock_client: SeqeraPlatformClient = create_autospec(SeqeraPlatformClient)
     mocker.patch.object(starter_factory, "SeqeraPlatformClient", return_value=mock_client)
 
-    # GIVEN a NextflowTracker mocked constructor
+    # GIVEN a NextflowTracker constructor
     mock_tracker_init: MagicMock = mocker.patch.object(
         NextflowTracker, "__init__", return_value=None
     )
+
+    # GIVEN a BamFetcher constructor
+    mock_fetcher_init: MagicMock = mocker.patch.object(BamFetcher, "__init__", return_value=None)
 
     # WHEN fetching the AnalysisStarter
     analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case(
@@ -236,8 +233,11 @@ def test_analysis_starter_factory_nallo(
     # THEN the AnalysisStarter should have a Nextflow configurator
     assert isinstance(analysis_starter.configurator, NextflowConfigurator)
 
-    # THEN the AnalysisStarter should have a BamFetcher
+    # THEN the AnalysisStarter should have created a BamFetcher correctly
     assert isinstance(analysis_starter.input_fetcher, BamFetcher)
+    mock_fetcher_init.assert_called_once_with(
+        housekeeper_api=cg_config.housekeeper_api, status_db=cg_config.status_db
+    )
 
     # THEN the AnalysisStarter should have a correct Store
     assert analysis_starter.store == cg_config.status_db
