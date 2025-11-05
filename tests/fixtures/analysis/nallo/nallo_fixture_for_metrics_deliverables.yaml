@@ -121,9 +121,7 @@ metrics:
   name: percent_fails
   step: multiqc
   value: 30.0
-- condition:
-    norm: eq
-    threshold: female
+- condition: null
   header: null
   id: ADM1
   input: multiqc_data.json
