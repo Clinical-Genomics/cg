@@ -903,15 +903,14 @@ class ReadHandler(BaseHandler):
             valid_from=dt.datetime.now(),
         ).first()
 
-    def get_active_applications_by_prep_category(
+    def get_applications_by_prep_category(
         self, prep_category: SeqLibraryPrepCategory
     ) -> list[Application]:
-        """Return all active applications by prep category."""
+        """Return all applications by prep category."""
         return apply_application_filter(
             applications=self._get_query(table=Application),
             filter_functions=[
                 ApplicationFilter.BY_PREP_CATEGORIES,
-                ApplicationFilter.IS_NOT_ARCHIVED,
             ],
             prep_categories=[prep_category],
         ).all()
