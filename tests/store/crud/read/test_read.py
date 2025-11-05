@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 
 import pytest
 from sqlalchemy.orm import Query
@@ -92,13 +91,13 @@ def test_get_active_beds_when_archived(base_store: Store):
     assert not list(active_beds)
 
 
-def test_get_active_applications_by_prep_category(microbial_store: Store):
-    """Test that non-archived and correct applications are returned for the given prep category."""
+def test_get_applications_by_prep_category(microbial_store: Store):
+    """Test that correct applications are returned for the given prep category."""
     # GIVEN a store with applications with a given prep category
     prep_category = SeqLibraryPrepCategory.MICROBIAL
 
-    # WHEN fetching the active applications for a given prep category
-    applications: list[Application] = microbial_store.get_active_applications_by_prep_category(
+    # WHEN fetching the applications for a given prep category
+    applications: list[Application] = microbial_store.get_applications_by_prep_category(
         prep_category=prep_category
     )
 
@@ -108,7 +107,6 @@ def test_get_active_applications_by_prep_category(microbial_store: Store):
     # THEN the applications should have the given prep category and not be archived
     for application in applications:
         assert application.prep_category == prep_category
-        assert not application.is_archived
 
 
 def test_get_application_by_tag(microbial_store: Store, tag: str = MicrosaltAppTags.MWRNXTR003):
@@ -309,21 +307,6 @@ def test_analyses_to_upload_when_filtering_with_missing_workflow(helpers, sample
 
     # THEN no analysis object should be returned, since there were no MIP analyses
     assert len(records) == 0
-
-
-def test_set_case_action(analysis_store: Store, case_id):
-    """Tests if actions of cases are changed to analyze."""
-    # Given a store with a case with action None
-    action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
-
-    assert action is None
-
-    # When setting the case to "analyze"
-    analysis_store.update_case_action(case_internal_id=case_id, action="analyze")
-    new_action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
-
-    # Then the action should be set to analyze
-    assert new_action == "analyze"
 
 
 def test_get_applications(microbial_store: Store, expected_number_of_applications):

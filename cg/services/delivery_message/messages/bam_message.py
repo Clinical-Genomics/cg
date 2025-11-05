@@ -1,5 +1,8 @@
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
-from cg.services.delivery_message.messages.utils import get_caesar_delivery_path
+from cg.services.delivery_message.messages.utils import (
+    REMINDER_TO_DOWNLOAD_MESSAGE,
+    get_caesar_delivery_path,
+)
 from cg.store.models import Case
 
 
@@ -12,7 +15,8 @@ class BamMessage(DeliveryMessage):
             f"The following samples in this order have been sequenced:\n\n"
             f"{self.generate_sample_name_list(cases)}\n\n"
             f"The bam files have been uploaded to your inbox on Caesar at:\n\n"
-            f"{delivery_path}"
+            f"{delivery_path} \n\n"
+            f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
         )
 
     @staticmethod

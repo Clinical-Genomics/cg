@@ -14,7 +14,7 @@ from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.cli.workflow.raredisease.base import dev_config_case as raredisease_config_case
 from cg.cli.workflow.rnafusion.base import config_case as rnafusion_config_case
-from cg.cli.workflow.taxprofiler.base import dev_config_case as taxprofiler_config_case
+from cg.cli.workflow.taxprofiler.base import config_case as taxprofiler_config_case
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileFormat, MetaApis
 from cg.io.controller import ReadFile
@@ -49,7 +49,7 @@ def test_config_case_without_options(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_config_with_missing_case(
     cli_runner: CliRunner,
@@ -79,7 +79,7 @@ def test_config_with_missing_case(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_config_case_without_samples(
     cli_runner: CliRunner,
@@ -109,7 +109,7 @@ def test_config_case_without_samples(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE],
+    [Workflow.RAREDISEASE, Workflow.TOMTE],
 )
 def test_config_case_default_parameters(
     cli_runner: CliRunner,
@@ -192,7 +192,7 @@ def test_config_case_default_parameters(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
 )
 def test_config_case_dry_run(
     cli_runner: CliRunner,

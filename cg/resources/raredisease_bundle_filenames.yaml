@@ -25,9 +25,9 @@
   tag: tiddit_coverage
 - format: meta
   id: SAMPLEID
-  path: PATHTOCASE/qc_bam/SAMPLEID_mosdepth.per-base.d4
+  path: PATHTOCASE/qc_bam/SAMPLEID.d4
   step: qc_bam
-  tag: mosdepth_d4
+  tag: d4tools_d4
 - format: png
   id: SAMPLEID
   path: PATHTOCASE/qc_bam/SAMPLEID_chromographcov/SAMPLEID_tidditcov_1.png

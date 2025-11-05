@@ -40,11 +40,17 @@ class Tracker(ABC):
         tb_analysis: TrailblazerAnalysis = self._track_in_trailblazer(
             case_id=case_config.case_id, tower_workflow_id=tower_workflow_id
         )
+        LOG.info(
+            f"Analysis entry for case {case_config.case_id} created in Trailblazer with id {tb_analysis.id}"
+        )
         self._create_analysis_statusdb(case_config=case_config, trailblazer_id=tb_analysis.id)
+        LOG.info(f"Analysis entry for case {case_config.case_id} created in StatusDB")
 
     def ensure_analysis_not_ongoing(self, case_id: str) -> None:
+        """Raises: AnalysisRunningError if the case has an analysis running in Trailblazer."""
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id):
             raise AnalysisRunningError(f"Analysis still ongoing in Trailblazer for case {case_id}")
+        LOG.info(f"No ongoing analysis in Trailblazer for case {case_id}")
 
     def set_case_as_running(self, case_id: str) -> None:
         self.store.update_case_action(case_internal_id=case_id, action=CaseActions.RUNNING)
@@ -106,7 +112,7 @@ class Tracker(ABC):
         Return the analysis type for sample.
         Only analysis types supported by Trailblazer are valid outputs.
         """
-        sample: Sample = self.store.get_case_by_internal_id(case_id).links[0].sample
+        sample: Sample = self.store.get_case_by_internal_id(case_id).samples[0]
         prep_category: str = sample.prep_category
         if prep_category and prep_category.lower() in {
             SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
