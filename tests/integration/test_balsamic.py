@@ -170,6 +170,7 @@ def test_start_available_tgs_tumour_only(
     create_empty_file(Path(test_root_dir, "loqusdb", "artefact_snv.vcf.gz"))
     create_empty_file(Path(test_root_dir, "loqusdb", "cancer_germline_snv.vcf.gz"))
     create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_sv.vcf.gz"))
     create_empty_file(Path(test_root_dir, "loqusdb", "clinical_snv.vcf.gz"))
     create_empty_file(Path(test_root_dir, "loqusdb", "clinical_sv.vcf.gz"))
     create_empty_file(Path(test_root_dir, "swegen", "swegen_snv.vcf.gz"))
@@ -240,6 +241,7 @@ def test_start_available_tgs_tumour_only(
             f"--cancer-germline-snv-observations {test_root_dir}/loqusdb/cancer_germline_snv.vcf.gz "
             f"--cancer-somatic-snv-observations {test_root_dir}/loqusdb/cancer_somatic_snv.vcf.gz "
             f"--cancer-somatic-snv-panel-observations {test_root_dir}/loqusdb/loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz "
+            f"--cancer-somatic-sv-observations {test_root_dir}/loqusdb/cancer_somatic_sv.vcf.gz "
             f"--case-id {case_id} "
             f"--clinical-snv-observations {test_root_dir}/loqusdb/clinical_snv.vcf.gz "
             f"--clinical-sv-observations {test_root_dir}/loqusdb/clinical_sv.vcf.gz "
@@ -253,8 +255,6 @@ def test_start_available_tgs_tumour_only(
             f"--swegen-snv {test_root_dir}/swegen/swegen_snv.vcf.gz "
             f"--swegen-sv {test_root_dir}/swegen/swegen_sv.vcf.gz "
             f"--tumor-sample-name {sample.internal_id}"
-            # TODO should this exist for the old command?
-            # f"--cancer-somatic-sv-observations {test_root_dir}/loqusdb/artefact_snv.vcf.gz "
         )
 
         assert first_call == call(
