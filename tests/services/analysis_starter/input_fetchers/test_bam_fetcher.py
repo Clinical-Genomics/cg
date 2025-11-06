@@ -25,7 +25,7 @@ def status_db() -> Store:
 def test_ensure_files_are_ready_success(status_db: Store, mocker: MockerFixture):
     # GIVEN that the samples have BAM files in Housekeeper
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
-    file_query = create_autospec(Query)
+    file_query: Query = create_autospec(Query)
     file_query.all = Mock(
         return_value=[
             create_autospec(File, full_path="non/existing/file"),
@@ -48,7 +48,7 @@ def test_ensure_files_are_ready_success(status_db: Store, mocker: MockerFixture)
 def test_ensure_files_are_ready_bam_files_not_on_disk(status_db: Store, mocker: MockerFixture):
     # GIVEN that the samples have BAM files in Housekeeper
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
-    file_query = create_autospec(Query)
+    file_query: Query = create_autospec(Query)
     file_query.all = Mock(
         return_value=[
             create_autospec(File, full_path="non/existing/file1"),
@@ -72,7 +72,7 @@ def test_ensure_files_are_ready_bam_files_not_on_disk(status_db: Store, mocker: 
 def test_ensure_files_are_ready_missing_sample_files(status_db: Store):
     # GIVEN that the samples have no BAM files in Housekeeper
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
-    file_query = create_autospec(Query)
+    file_query: Query = create_autospec(Query)
     file_query.all = Mock(return_value=[])
     housekeeper_api.files = Mock(return_value=file_query)
 
