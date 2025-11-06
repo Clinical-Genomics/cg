@@ -202,7 +202,7 @@ def test_get_delivery_report_html_tomte(tomte_analysis: NextflowAnalysis):
     )
     analysis_api.get_latest_metadata = Mock(return_value=tomte_analysis)
 
-    # GIVEN a RNAFusion delivery report API
+    # GIVEN a Tomte delivery report API
     delivery_report_api = TomteDeliveryReportAPI(analysis_api)
 
     # WHEN generating a delivery report
