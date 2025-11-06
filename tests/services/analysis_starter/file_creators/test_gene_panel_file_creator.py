@@ -140,9 +140,12 @@ def test_gene_panel_file_creation_with_filtering(
         "chr1    1020000 1056000 329     AGRN",
     ]
 
+    # WHEN creating the gene panel file
     gene_panel_creator.create(
         case_id=nallo_case_id, file_path=Path("nallo.bed"), double_hashtag_filtering=True
     )
+
+    # THEN the result should be as expected
     write_mock.assert_called_once_with(
         content=expected_nallo_gene_panel_file_content, file_path=Path("nallo.bed")
     )
