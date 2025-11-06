@@ -4,6 +4,8 @@ import math
 from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
+import pytest
+
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -18,9 +20,11 @@ from cg.meta.delivery_report.data_validators import (
 from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
 from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.models.analysis import NextflowAnalysis
 from cg.models.delivery.delivery import DeliveryFile
 from cg.models.delivery_report.report import ReportModel
 from cg.models.orders.sample_base import SexEnum
+from cg.models.rnafusion.rnafusion import RnafusionQCMetrics
 from cg.store.models import Analysis, Application, ApplicationVersion, Case, CaseSample, Sample
 from cg.store.store import Store
 
@@ -69,13 +73,40 @@ def test_get_empty_report_data(
     assert "duplicates" in empty_report_data["metadata"][sample_id]
 
 
-def test_get_delivery_report_html_rnafusion():
+@pytest.fixture
+def rnafusion_analysis() -> NextflowAnalysis:
+    return NextflowAnalysis(
+        sample_metrics={
+            "sample_id": RnafusionQCMetrics(
+                after_filtering_gc_content=0.1,
+                after_filtering_q20_rate=0.1,
+                after_filtering_q30_rate=0.1,
+                after_filtering_read1_mean_length=0.1,
+                before_filtering_total_reads=0.1,
+                median_5prime_to_3prime_bias=0.1,
+                pct_adapter=0.1,
+                pct_mrna_bases=0.1,
+                pct_ribosomal_bases=0.1,
+                pct_surviving=0.1,
+                pct_duplication=0.1,
+                read_pairs_examined=0.1,
+                uniquely_mapped_percent=0.1,
+            )
+        },
+    )
+
+
+def test_get_delivery_report_html_rnafusion(rnafusion_analysis: NextflowAnalysis):
     # GIVEN a store with a RNAFusion case linked to a sample
     application_version = create_autospec(
         ApplicationVersion, application=create_autospec(Application)
     )
     sample: Sample = create_autospec(
-        Sample, sex=SexEnum.female, internal_id="sample_id", application_version=application_version
+        Sample,
+        sex=SexEnum.female,
+        internal_id="sample_id",
+        application_version=application_version,
+        is_tumour=False,
     )
     sample.name = "sample_name"
     case: Case = create_autospec(
@@ -89,7 +120,7 @@ def test_get_delivery_report_html_rnafusion():
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id = Mock(return_value=case)
     case_sample = create_autospec(CaseSample, sample=sample, case=case)
-    store.get_case_sample_by_internal_id = Mock(return_value=[case_sample])
+    store.get_case_samples_by_case_id = Mock(return_value=[case_sample])
 
     # GIVEN a Delivery API
     delivery_api: DeliveryAPI = create_autospec(DeliveryAPI)
@@ -117,6 +148,7 @@ def test_get_delivery_report_html_rnafusion():
         status_db=store,
         workflow=Workflow.RNAFUSION,
     )
+    analysis_api.get_latest_metadata = Mock(return_value=rnafusion_analysis)
 
     # GIVEN a RNAFusion delivery report API
     delivery_report_api = RnafusionDeliveryReportAPI(analysis_api)
@@ -131,6 +163,9 @@ def test_get_delivery_report_html_rnafusion():
         ),
         force=False,
     )
+
+    # THEN the report is generated as expected
+    assert delivery_report == "?"
 
 
 def test_get_missing_report_data(
