@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -11,10 +12,13 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
     replace_values_in_params_file,
 )
 
+LOG = logging.getLogger(__name__)
+
 
 class NalloParamsFileCreator(ParamsFileCreator):
     def create(self, case_id: str, file_path: Path, sample_sheet_path: Path) -> Any:
-        content = self._get_content(
+        LOG.debug(f"Creating params file for case {case_id}")
+        content: dict = self._get_content(
             case_run_directory=file_path.parent, sample_sheet_path=sample_sheet_path
         )
         write_yaml_nextflow_style(content=content, file_path=file_path)

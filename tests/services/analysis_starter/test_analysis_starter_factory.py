@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, Mock, create_autospec
+from unittest.mock import ANY, MagicMock, Mock, create_autospec
 
 from pytest_mock import MockerFixture
 
@@ -198,7 +198,7 @@ def test_get_analysis_starter_for_workflow_nallo(
     analysis_starter_factory = AnalysisStarterFactory(cg_config)
 
     # GIVEN a BamFetcher constructor
-    mock_fetcher_init: MagicMock = mocker.patch.object(BamFetcher, "__init__", return_value=None)
+    mock_fetcher_init: MagicMock = mocker.spy(BamFetcher, "__init__")
 
     # WHEN fetching the AnalysisStarter
     analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
@@ -211,7 +211,7 @@ def test_get_analysis_starter_for_workflow_nallo(
     # THEN the AnalysisStarter should have created a BamFetcher correctly
     assert isinstance(analysis_starter.input_fetcher, BamFetcher)
     mock_fetcher_init.assert_called_once_with(
-        housekeeper_api=cg_config.housekeeper_api, status_db=cg_config.status_db
+        ANY, housekeeper_api=cg_config.housekeeper_api, status_db=cg_config.status_db
     )
 
     # THEN the factory should have created a SeqeraPlatformSubmitter correctly
