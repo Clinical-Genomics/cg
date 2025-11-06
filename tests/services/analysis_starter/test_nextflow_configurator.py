@@ -226,7 +226,7 @@ def test_get_case_config_none_flags(
             TaxprofilerSampleSheetCreator,
         ),
     ],
-    ids=["nallo", "raredisease", "rnafusion", "taxprofiler"],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
 )
 def test_configure(
     workflow: Workflow,
