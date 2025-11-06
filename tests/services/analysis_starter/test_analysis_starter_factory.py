@@ -119,24 +119,16 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
     analysis_starter_factory = AnalysisStarterFactory(cg_config)
 
     # GIVEN a SeqeraPlatformSubmitter constructor and a SeqeraPlatformClient
-    mock_platform_submitter_init: MagicMock = mocker.patch.object(
-        SeqeraPlatformSubmitter, "__init__", return_value=None
-    )
+    mock_platform_submitter_init: MagicMock = mocker.spy(SeqeraPlatformSubmitter, "__init__")
     mock_client: SeqeraPlatformClient = create_autospec(SeqeraPlatformClient)
     mocker.patch.object(starter_factory, "SeqeraPlatformClient", return_value=mock_client)
 
     # GIVEN a NextflowTracker constructor
-    mock_tracker_init: MagicMock = mocker.patch.object(
-        NextflowTracker, "__init__", return_value=None
-    )
+    mock_tracker_init: MagicMock = mocker.spy(NextflowTracker, "__init__")
 
     # GIVEN SpringArchiveAPI and CompressAPI constructors
-    mock_archive_api_init: MagicMock = mocker.patch.object(
-        SpringArchiveAPI, "__init__", return_value=None
-    )
-    mock_compress_api_init: MagicMock = mocker.patch.object(
-        CompressAPI, "__init__", return_value=None
-    )
+    mock_archive_api_init: MagicMock = mocker.spy(SpringArchiveAPI, "__init__")
+    mock_compress_api_init: MagicMock = mocker.spy(CompressAPI, "__init__")
 
     # WHEN fetching the AnalysisStarter for a Nextflow workflow
     analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
@@ -149,11 +141,13 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
     # THEN the factory should have created a FastqFetcher correctly
     assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
     mock_archive_api_init.assert_called_once_with(
+        ANY,
         status_db=cg_config.status_db,
         housekeeper_api=cg_config.housekeeper_api,
         data_flow_config=cg_config.data_flow,
     )
     mock_compress_api_init.assert_called_once_with(
+        ANY,
         hk_api=cg_config.housekeeper_api,
         crunchy_api=cg_config.crunchy_api,
         demux_root=cg_config.run_instruments.illumina.demultiplexed_runs_dir,
@@ -165,6 +159,7 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
     # THEN the factory should have created a SeqeraPlatformSubmitter correctly
     assert isinstance(analysis_starter.submitter, SeqeraPlatformSubmitter)
     mock_platform_submitter_init.assert_called_once_with(
+        ANY,
         client=mock_client,
         compute_environment_ids=cg_config.seqera_platform.compute_environments,
     )
@@ -172,6 +167,7 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
     # THEN the factory should have created a NextflowTracker correctly
     assert isinstance(analysis_starter.tracker, NextflowTracker)
     mock_tracker_init.assert_called_once_with(
+        ANY,
         store=cg_config.status_db,
         trailblazer_api=cg_config.trailblazer_api,
         workflow_root=cg_config.raredisease.root,
