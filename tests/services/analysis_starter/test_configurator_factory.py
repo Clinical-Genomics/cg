@@ -3,6 +3,7 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
 from cg.meta.workflow.fastq import MicrosaltFastqHandler, MipFastqHandler
 from cg.models.cg_config import CGConfig, MipConfig
@@ -139,7 +140,7 @@ def test_get_scout_api_38(cg_context: CGConfig):
     workflow = Workflow.NALLO
 
     # WHEN getting the scout api instance
-    scout_api = configurator_factory._get_scout_api(workflow=workflow)
+    scout_api: ScoutAPI = configurator_factory._get_scout_api(workflow=workflow)
 
     # THEN we should receive the HG38 instance
     assert scout_api == cg_context.scout_api_38
@@ -153,7 +154,7 @@ def test_get_scout_api_37(cg_context: CGConfig):
     workflow = Workflow.MIP_DNA
 
     # WHEN getting the scout api instance
-    scout_api = configurator_factory._get_scout_api(workflow=workflow)
+    scout_api: ScoutAPI = configurator_factory._get_scout_api(workflow=workflow)
 
     # THEN we should receive the HG37 instance
     assert scout_api == cg_context.scout_api_37
