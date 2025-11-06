@@ -7,11 +7,9 @@ from housekeeper.store.models import File
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import DataDelivery, Workflow
 from cg.constants.priority import Priority, SlurmQos
-from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.store.models import (
     Application,
-    ApplicationVersion,
     BedVersion,
     Case,
     CaseSample,
@@ -142,38 +140,3 @@ def mock_store_for_taxprofiler_file_creators(nextflow_sample_id: str) -> Store:
     mock_store.get_case_workflow.return_value = Workflow.TAXPROFILER
     mock_store.get_case_priority.return_value = SlurmQos.NORMAL
     return mock_store
-
-
-@pytest.fixture
-def mock_store_for_nextflow_gene_panel_file_creator() -> Store:
-    """Fixture to provide a mock store for the gene panel file creator."""
-    case: Case = create_autospec(Case)
-    case.customer.internal_id = "cust000"
-    store: Store = create_autospec(Store)
-    store.get_case_by_internal_id.return_value = case
-    return store
-
-
-@pytest.fixture
-def balsamic_store(base_store: Store, case_id: str, helpers: StoreHelpers) -> Store:
-    """Fixture to create a BALSAMIC case in the store."""
-    order: Order = helpers.add_order(store=base_store, customer_id=1, ticket_id=123456)
-    balsamic_case: Case = helpers.ensure_case(
-        data_analysis=Workflow.BALSAMIC,
-        case_id=case_id,
-        order=order,
-        store=base_store,
-    )
-    application_version: ApplicationVersion = helpers.ensure_application_version(
-        store=base_store, prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
-    )
-    customer: Customer = base_store.get_customers()[1]
-
-    balsamic_sample: Sample = base_store.add_sample(
-        application_version=application_version,
-        customer=customer,
-        name="balsamic-sample",
-        sex=SexEnum.male,
-    )
-    helpers.relate_samples(case=balsamic_case, samples=[balsamic_sample], base_store=base_store)
-    return base_store
