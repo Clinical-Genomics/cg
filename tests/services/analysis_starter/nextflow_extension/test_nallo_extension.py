@@ -47,6 +47,8 @@ def test_do_required_files_exist_true(tmp_path: Path):
 
 def test_do_required_files_exist_false(tmp_path: Path):
     # GIVEN that there is no gene panel tsv file
+    scout_file = tmp_path / ScoutExportFileName.PANELS_TSV
+    assert not scout_file.exists()
 
     # GIVEN a Nallo extension
     nallo_extension = NalloExtension(gene_panel_file_creator=Mock())
