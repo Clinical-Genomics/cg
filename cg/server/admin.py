@@ -892,20 +892,20 @@ class PacbioSmrtCellView(BaseView):
 
 
 class PacbioSampleRunMetricsView(BaseView):
-    column_filters = ["pacbio_sequencing_run.run_name", "pacbio_sequencing_run.plate"]
+    column_filters = ["instrument_run.run_name", "instrument_run.plate"]
     column_formatters = {
         "smrt_cell": PacbioSmrtCellView.view_smrt_cell_link,
         "sample": SampleView.view_sample_link,
     }
     column_labels = {
-        "pacbio_sequencing_run.run_name": "Run name",
-        "pacbio_sequencing_run.plate": "Plate",
+        "instrument_run.run_name": "Run name",
+        "instrument_run.plate": "Plate",
     }
     column_list = [
         "smrt_cell",
         "sample",
-        "pacbio_sequencing_run.run_name",
-        "pacbio_sequencing_run.plate",
+        "instrument_run.run_name",
+        "instrument_run.plate",
         "hifi_reads",
         "hifi_yield",
         "hifi_mean_read_length",
@@ -913,5 +913,5 @@ class PacbioSampleRunMetricsView(BaseView):
     ]
     column_searchable_list = [
         "sample.internal_id",
-        "pacbio_sequencing_run.device.internal_id",
+        "instrument_run.device.internal_id",
     ]
