@@ -207,7 +207,6 @@ def test_start_available_tgs_tumour_only(
         f"--analysis-workflow balsamic "
         f"--balsamic-cache {test_root_dir}/balsamic_cache "
         f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
-        f"--artefact-sv-observations {test_root_dir}/balsamic_loqusdb_path/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz "
         f"--case-id {case_id} "
         f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
         f"--gender female "
