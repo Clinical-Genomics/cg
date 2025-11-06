@@ -72,18 +72,15 @@ class ConfiguratorFactory:
         self.store: Store = cg_config.status_db
 
     def get_configurator(self, workflow: Workflow) -> Configurator:
-        if workflow in [
-            Workflow.NALLO,
-            Workflow.RAREDISEASE,
-            Workflow.RNAFUSION,
-            Workflow.TAXPROFILER,
-        ]:
-            return self._get_nextflow_configurator(workflow)
-        elif workflow == Workflow.MICROSALT:
-            return self._get_microsalt_configurator()
-        elif workflow == Workflow.MIP_DNA:
-            return self._get_mip_dna_configurator()
-        raise NotImplementedError
+        match workflow:
+            case Workflow.NALLO | Workflow.RAREDISEASE | Workflow.RNAFUSION | Workflow.TAXPROFILER:
+                return self._get_nextflow_configurator(workflow)
+            case Workflow.MICROSALT:
+                return self._get_microsalt_configurator()
+            case Workflow.MIP_DNA:
+                return self._get_mip_dna_configurator()
+            case _:
+                raise NotImplementedError
 
     def _get_nextflow_configurator(self, workflow: Workflow) -> NextflowConfigurator:
         config_file_creator: NextflowConfigFileCreator = self._get_nextflow_config_file_creator(
