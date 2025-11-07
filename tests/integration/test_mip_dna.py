@@ -18,7 +18,7 @@ from cg.services.analysis_starter.submitters.subprocess import submitter
 from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
 from cg.utils import commands
-from tests.integration.conftest import (
+from tests.integration.utils import (
     IntegrationTestPaths,
     copy_integration_test_file,
     create_integration_test_sample,
@@ -79,7 +79,7 @@ def test_start_available_mip_dna(
     case: Case = helpers.add_case(
         store=status_db, data_analysis=Workflow.MIP_DNA, ticket=str(ticket_id)
     )
-    create_qc_file(test_root_dir, case)
+    _create_qc_file(test_root_dir, case)
 
     # GIVEN an order associated with the case
     order: Order = helpers.add_order(
@@ -255,7 +255,7 @@ samples:
         assert f.read() == expected_gene_panels_content
 
 
-def create_qc_file(test_root_dir: Path, case: Case) -> Path:
+def _create_qc_file(test_root_dir: Path, case: Case) -> Path:
     filepath = Path(
         f"{test_root_dir}/mip-dna/cases/{case.internal_id}/analysis/{case.internal_id}_qc_sample_info.yaml"
     )

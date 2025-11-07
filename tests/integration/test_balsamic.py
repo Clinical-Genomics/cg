@@ -15,8 +15,8 @@ from cg.constants.tb import AnalysisType
 from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
 from cg.utils import commands
-from tests.integration.conftest import (
-    IntegrationTestPaths,
+from tests.integration.conftest import IntegrationTestPaths
+from tests.integration.utils import (
     copy_integration_test_file,
     create_integration_test_sample,
     expect_to_add_pending_analysis_to_trailblazer,
