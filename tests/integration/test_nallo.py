@@ -30,17 +30,32 @@ def current_workflow() -> Workflow:
     return Workflow.NALLO
 
 
+@pytest.fixture
+def new_tower_id() -> str:
+    return "1uxZE9JM7Tl58r"
+
+
+@pytest.fixture(autouse=True)
+def mocked_commands_and_outputs(
+    new_tower_id: str, scout_export_manged_variants_stdout: bytes, scout_export_panel_stdout: bytes
+) -> dict[str, bytes]:
+    return {
+        "scout_38_config_path export panel": scout_export_panel_stdout,
+        "scout_38_config_path export managed": scout_export_manged_variants_stdout,
+        "tower_binary_path launch": f"Workflow {new_tower_id} submitted at [<WORKSPACE>] workspace.".encode(),
+    }
+
+
 @pytest.mark.xdist_group(name="integration")
 @pytest.mark.integration
 def test_start_available_nallo(
     helpers: StoreHelpers,
     housekeeper_db: HousekeeperStore,
     httpserver: HTTPServer,
-    scout_export_manged_variants_stdout: bytes,
-    scout_export_panel_stdout: bytes,
-    scout_mock_run: Callable,
     status_db: Store,
     test_run_paths: IntegrationTestPaths,
+    mock_run_commands: Callable,
+    new_tower_id: str,
     mocker: MockerFixture,
 ):
     """Test a successful run of the command 'cg workflow nallo start-available'
@@ -91,7 +106,7 @@ def test_start_available_nallo(
 
     # GIVEN that the Scout command returns exported panel data
     subprocess_mock = mocker.patch.object(commands, "subprocess")
-    subprocess_mock.run = Mock(side_effect=scout_mock_run)
+    subprocess_mock.run = Mock(side_effect=mock_run_commands)
 
     # GIVEN the Trailblazer API returns no ongoing analysis for the case
     expect_to_get_latest_analysis_with_empty_response_from_trailblazer(
@@ -107,6 +122,7 @@ def test_start_available_nallo(
         config_path=Path(test_root_dir, "nallo_root_path", case.internal_id, "tower_ids.yaml"),
         ticket_id=ticket_id,
         trailblazer_server=httpserver,
+        tower_workflow_id=new_tower_id,
         workflow=Workflow.NALLO,
         workflow_manager="nf_tower",
     )
@@ -135,4 +151,3 @@ def test_start_available_nallo(
     assert case.action == CaseActions.RUNNING
 
     # TODO check that all files have been created with correct contents
-    # TODO mock tower id and make sure it was included in file contents and call to trailblazer

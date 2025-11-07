@@ -103,6 +103,26 @@ def scout_export_manged_variants_stdout() -> bytes:
 
 
 @pytest.fixture
+def mocked_commands_and_outputs() -> dict:
+    return {}
+
+
+@pytest.fixture
+def mock_run_commands(mocked_commands_and_outputs: dict[str, bytes]):
+    def mock_run(*args, **kwargs):
+        command = args[0]
+        stdout = b""
+
+        for match_command, output in mocked_commands_and_outputs.items():
+            if match_command in " ".join(command):
+                stdout += output
+
+        return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
+
+    return mock_run
+
+
+@pytest.fixture
 def scout_mock_run(scout_export_panel_stdout: bytes, scout_export_manged_variants_stdout: bytes):
     def mock_run(*args, **kwargs):
         command = args[0]

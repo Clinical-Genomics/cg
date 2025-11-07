@@ -137,6 +137,7 @@ def expect_to_add_pending_analysis_to_trailblazer(
     config_path: Path,
     analysis_type: AnalysisType,
     workflow: Workflow,
+    tower_workflow_id: str | None = None,
     workflow_manager: str = "slurm",
 ):
     trailblazer_server.expect_request(
@@ -145,12 +146,15 @@ def expect_to_add_pending_analysis_to_trailblazer(
         b'"config_path": "%(config_path)s",'
         b' "order_id": 1, "out_dir": "%(out_dir)s", '
         b'"priority": "normal", "workflow": "%(workflow)s", "ticket": "%(ticket_id)s", '
-        b'"workflow_manager": "%(workflow_manager)s", "tower_workflow_id": null, "is_hidden": true}'
+        b'"workflow_manager": "%(workflow_manager)s", "tower_workflow_id": %(tower_workflow_id)s, "is_hidden": true}'
         % {
             b"email": environ_email().encode(),
             b"type": str(analysis_type).encode(),
             b"case_id": case.internal_id.encode(),
             b"ticket_id": str(ticket_id).encode(),
+            b"tower_workflow_id": (
+                f'"{tower_workflow_id}"' if tower_workflow_id else "null"
+            ).encode(),
             b"out_dir": str(out_dir).encode(),
             b"config_path": str(config_path).encode(),
             b"workflow": str(workflow).upper().encode(),
