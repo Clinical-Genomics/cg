@@ -1121,6 +1121,7 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
     polymerase_mean_read_length: Mapped[BigInt]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
+    pacbio_sequencing_run = orm.relationship(PacbioSequencingRun)
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
