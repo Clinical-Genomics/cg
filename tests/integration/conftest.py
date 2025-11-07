@@ -1,5 +1,6 @@
 from collections.abc import Generator
 from pathlib import Path
+from subprocess import CompletedProcess
 from unittest.mock import create_autospec
 
 import pytest
@@ -9,6 +10,7 @@ from pytest import TempPathFactory
 
 from cg.apps.tb.api import IDTokenCredentials
 from cg.constants.constants import Workflow
+from cg.constants.process import EXIT_SUCCESS
 from cg.store import database as cg_database
 from cg.store.store import Store
 from tests.integration.utils import IntegrationTestPaths, create_formatted_config
@@ -80,3 +82,36 @@ def test_run_paths(
     )
 
     return IntegrationTestPaths(cg_config_file=config_file_path, test_root_dir=test_root_dir)
+
+
+@pytest.fixture
+def scout_export_panel_stdout() -> bytes:
+    return b"22\t26995242\t27014052\t2397\tCRYBB1\n22\t38452318\t38471708\t9394\tPICK1\n"
+
+
+@pytest.fixture
+def scout_export_manged_variants_stdout() -> bytes:
+    return b"""##fileformat=VCFv4.2
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+##fileDate=2023-12-07 16:35:38.814086
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=TYPE,Number=1,Type=String,Description="Type of variant">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	48696925	.	G	C	.		END=48696925;TYPE=SNV
+14	76548781	.	CTGGACC	G	.		END=76548781;TYPE=INDEL"""
+
+
+@pytest.fixture
+def scout_mock_run(scout_export_panel_stdout: bytes, scout_export_manged_variants_stdout: bytes):
+    def mock_run(*args, **kwargs):
+        command = args[0]
+        stdout = b""
+
+        if ("export" in command) and ("panel" in command):
+            stdout += scout_export_panel_stdout
+        elif ("export" in command) and ("managed" in command):
+            stdout += scout_export_manged_variants_stdout
+        return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
+
+    return mock_run

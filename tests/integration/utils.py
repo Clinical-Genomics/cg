@@ -121,30 +121,40 @@ def copy_integration_test_file(from_path: Path, to_path: Path):
     return True
 
 
+def expect_to_get_latest_analysis_with_empty_response_from_trailblazer(
+    trailblazer_server: HTTPServer, case_id: str
+):
+    trailblazer_server.expect_request(
+        "/trailblazer/get-latest-analysis", data='{"case_id": "' + case_id + '"}'
+    ).respond_with_json(None)
+
+
 def expect_to_add_pending_analysis_to_trailblazer(
     trailblazer_server: HTTPServer,
     case: Case,
     ticket_id: int,
-    case_path: Path,
+    out_dir: Path,
     config_path: Path,
     analysis_type: AnalysisType,
     workflow: Workflow,
+    workflow_manager: str = "slurm",
 ):
     trailblazer_server.expect_request(
         "/trailblazer/add-pending-analysis",
         data=b'{"case_id": "%(case_id)s", "email": "%(email)s", "type": "%(type)s", '
         b'"config_path": "%(config_path)s",'
-        b' "order_id": 1, "out_dir": "%(case_path)s/analysis", '
+        b' "order_id": 1, "out_dir": "%(out_dir)s", '
         b'"priority": "normal", "workflow": "%(workflow)s", "ticket": "%(ticket_id)s", '
-        b'"workflow_manager": "slurm", "tower_workflow_id": null, "is_hidden": true}'
+        b'"workflow_manager": "%(workflow_manager)s", "tower_workflow_id": null, "is_hidden": true}'
         % {
             b"email": environ_email().encode(),
             b"type": str(analysis_type).encode(),
             b"case_id": case.internal_id.encode(),
             b"ticket_id": str(ticket_id).encode(),
-            b"case_path": str(case_path).encode(),
+            b"out_dir": str(out_dir).encode(),
             b"config_path": str(config_path).encode(),
             b"workflow": str(workflow).upper().encode(),
+            b"workflow_manager": str(workflow_manager).encode(),
         },
         method="POST",
     ).respond_with_json(

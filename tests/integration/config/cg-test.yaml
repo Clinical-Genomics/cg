@@ -37,13 +37,6 @@ chanjo:
 chanjo2:
   host: "http://localhost/chanjo2"
 
-microsalt:
-  root: "{test_root_dir}/microsalt"
-  conda_binary: "{test_root_dir}/microsalt/conda_bin"
-  conda_env: "{test_root_dir}/microsalt/conda_env"
-  binary_path: "{test_root_dir}/microsalt/bin"
-  queries_path: "{test_root_dir}/microsalt/queries"
-
 balsamic:
   conda_binary: "{test_root_dir}/balsamic_conda_binary"
   binary_path: "{test_root_dir}/balsamic_binary_path"
@@ -76,6 +69,14 @@ crunchy:
     number_tasks: 12
     conda_env: crunchy_conda_env
 
+data-delivery:
+  destination_path: {test_root_dir}/data-delivery_destination_path
+  covid_destination_path: {test_root_dir}/data-delivery_covid_destination_path
+  covid_report_path: {test_root_dir}/data-delivery_covid_report_path
+  base_path: {test_root_dir}/data-delivery_base_path
+  account: "development"
+  mail_user: "data-delivery-user@scilifelab.se"
+
 genotype:
   database: "sqlite:///file:genotype?mode=memory&cache=shared&uri=true"
   binary_path: "{test_root_dir}/genotype_binary_path"
@@ -91,6 +92,13 @@ lims:
   username: lims_username
   password: lims_password
 
+microsalt:
+  root: "{test_root_dir}/microsalt"
+  conda_binary: "{test_root_dir}/microsalt/conda_bin"
+  conda_env: "{test_root_dir}/microsalt/conda_env"
+  binary_path: "{test_root_dir}/microsalt/bin"
+  queries_path: "{test_root_dir}/microsalt/queries"
+
 mip-rd-dna:
   conda_binary: "{test_root_dir}/mip-dna/conda_bin"
   conda_env: S_mip12.1
@@ -103,6 +111,25 @@ mutacc-auto:
   config_path: "{test_root_dir}/mutacc-auto_config_path"
   binary_path: "{test_root_dir}/mutacc-auto_binary_path"
   padding: 300
+
+nallo:
+  compute_env: nallo_compute_env
+  conda_env: nallo_conda_env
+  config: {test_root_dir}/nallo_config.config
+  launch_directory: {test_root_dir}/nallo_launch_directory
+  params: {test_root_dir}/nallo_params.yaml
+  platform: {test_root_dir}/platform.config
+  profile: nallo_profile
+  resources: {test_root_dir}/nallo_resources.config
+  repository: nallo_repository
+  revision: nallo_revision
+  root: {test_root_dir}/nallo_root_path
+  slurm:
+    account: "nallo_slurm_account"
+    mail_user: "nallo_mail_user@scilifelab.se"
+    qos: "low"
+  tower_workflow: nallo_tower_workflow
+  workflow_bin_path: {test_root_dir}/nallo_workflow_bin_path
 
 encryption:
   encryption_dir: "{test_root_dir}/encryption_encryption_dir"
@@ -118,14 +145,6 @@ scout:
 scout_38:
   binary_path: {test_root_dir}/scout_38_binary_path
   config_path: {test_root_dir}/scout_38_config_path
-
-data-delivery:
-  destination_path: {test_root_dir}/data-delivery_destination_path
-  covid_destination_path: {test_root_dir}/data-delivery_covid_destination_path
-  covid_report_path: {test_root_dir}/data-delivery_covid_report_path
-  base_path: {test_root_dir}/data-delivery_base_path
-  account: "development"
-  mail_user: "data-delivery-user@scilifelab.se"
 
 trailblazer:
   database: "sqlite:///file:trailblazer?mode=memory&cache=shared&uri=true"
