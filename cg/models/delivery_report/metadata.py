@@ -167,7 +167,7 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
     pct_surviving: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     q20_rate: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
     q30_rate: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
-    ribosomal_bases: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
+    ribosomal_bases: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     rin: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     uniquely_mapped_reads: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
 
