@@ -143,6 +143,31 @@ def test_start_available_nallo(
     # THEN a successful exit code is returned
     assert result.exit_code == 0
 
+    # THEN the analysis should be started in the correct way
+    _first_call = subprocess_mock.mock_calls[0]
+    second_call = subprocess_mock.mock_calls[1]
+
+    expected_run_command: list[str] = [
+        f"{test_root_dir}/tower_binary_path",
+        "launch",
+        "--work-dir",
+        f"{test_root_dir}/nallo_root_path/{case.internal_id}/work",
+        "--profile",
+        "nallo_profile",
+        "--params-file",
+        f"{test_root_dir}/nallo_root_path/{case.internal_id}/{case.internal_id}_params_file.yaml",
+        "--config",
+        f"{test_root_dir}/nallo_root_path/{case.internal_id}/{case.internal_id}_nextflow_config.json",
+        "--name",
+        case.internal_id,
+        "--revision",
+        "nallo_revision",
+        "--compute-env",
+        "nallo_compute_env-normal",
+        "nallo_tower_workflow",
+    ]
+    assert second_call.args[0] == expected_run_command
+
     # THEN an analysis has been created for the case
     assert len(case.analyses) == 1
 
