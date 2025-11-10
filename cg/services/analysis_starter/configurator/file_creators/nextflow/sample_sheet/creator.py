@@ -16,7 +16,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-class NextflowSampleSheetCreator(ABC):
+class NextflowFastqSampleSheetCreator(ABC):
 
     def __init__(self, housekeeper_api: HousekeeperAPI, store: Store):
         self.housekeeper_api = housekeeper_api

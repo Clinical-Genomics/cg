@@ -11,17 +11,23 @@ from cg.constants.priority import SlurmQos
 from cg.exc import MissingConfigFilesError
 from cg.models.cg_config import (
     CommonAppConfig,
+    NalloConfig,
     RarediseaseConfig,
     RnafusionConfig,
     TaxprofilerConfig,
 )
-from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
+from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
+    PipelineExtension,
+)
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.nallo import (
+    NalloParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
@@ -31,6 +37,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
     TaxprofilerParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
+    NalloSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
@@ -48,7 +57,7 @@ from cg.store.store import Store
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.NALLO, Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 def test_get_config(
     workflow: Workflow,
@@ -131,7 +140,7 @@ def test_get_config_missing_required_files(mocker: MockerFixture):
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.NALLO, Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 def test_get_case_config_flags(
     workflow: Workflow,
@@ -160,7 +169,7 @@ def test_get_case_config_flags(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [Workflow.NALLO, Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
 )
 def test_get_case_config_none_flags(
     workflow: Workflow,
@@ -193,6 +202,12 @@ def test_get_case_config_none_flags(
     "workflow, params_file_creator_class, pipeline_config_class, sample_sheet_creator_class",
     [
         (
+            Workflow.NALLO,
+            NalloParamsFileCreator,
+            NalloConfig,
+            NalloSampleSheetCreator,
+        ),
+        (
             Workflow.RAREDISEASE,
             RarediseaseParamsFileCreator,
             RarediseaseConfig,
@@ -211,6 +226,7 @@ def test_get_case_config_none_flags(
             TaxprofilerSampleSheetCreator,
         ),
     ],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
 )
 def test_configure(
     workflow: Workflow,

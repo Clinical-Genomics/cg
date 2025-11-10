@@ -5,12 +5,6 @@ import pytest
 from cg.constants import FileExtensions
 
 
-@pytest.fixture(scope="session")
-def analysis_starter_fixtures(fixtures_dir: Path) -> Path:
-    """Return the path to the directory with analysis starter fixtures."""
-    return Path(fixtures_dir, "services", "analysis_starter")
-
-
 @pytest.fixture
 def raredisease_case_path(raredisease_dir: Path, raredisease_case_id: str) -> Path:
     return Path(raredisease_dir, raredisease_case_id)

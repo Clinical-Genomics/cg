@@ -3,7 +3,7 @@ from collections.abc import Iterator
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.symbols import EMPTY_STRING
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowSampleSheetCreator,
+    NextflowFastqSampleSheetCreator,
 )
 from cg.store.models import Case, Sample
 
@@ -17,7 +17,7 @@ HEADERS: list[str] = [
 ]
 
 
-class TaxprofilerSampleSheetCreator(NextflowSampleSheetCreator):
+class TaxprofilerSampleSheetCreator(NextflowFastqSampleSheetCreator):
 
     def _get_content(self, case_id: str) -> list[list[str]]:
         """Return formatted information required to build a sample sheet for a case.
