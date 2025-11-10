@@ -10,12 +10,11 @@ from pytest_mock import MockerFixture
 
 from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
+from cg.cli.workflow.nallo.base import dev_start as nallo_start
 from cg.cli.workflow.raredisease.base import dev_start as raredisease_start
 from cg.cli.workflow.rnafusion.base import start as rnafusion_start
-from cg.cli.workflow.rnafusion.base import start_available as rnafusion_start_available
 from cg.cli.workflow.taxprofiler.base import start as taxprofiler_start
-from cg.cli.workflow.taxprofiler.base import start_available as taxprofiler_start_available
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
+from cg.constants import EXIT_SUCCESS, Workflow
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -125,8 +124,8 @@ def test_start_available(
 
 @pytest.mark.parametrize(
     "start_command",
-    [raredisease_start, rnafusion_start, taxprofiler_start],
-    ids=["raredisease", "RNAFUSION", "Taxprofiler"],
+    [nallo_start, raredisease_start, rnafusion_start, taxprofiler_start],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
 )
 def test_start_nextflow_calls_service(
     start_command: BaseCommand,
