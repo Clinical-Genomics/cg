@@ -84,13 +84,16 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         """
         case: Case = self.store.get_case_by_internal_id_strict(internal_id=case_id)
         sample: Sample = case.samples[0]
-        target_bed_shortname: str = self.lims.capture_kit(sample.from_sample or sample.internal_id)
-        if not target_bed_shortname:
-            return ""
-        bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(
-            target_bed_shortname
+        target_bed_shortname: str | None = self.lims.capture_kit(
+            sample.from_sample or sample.internal_id
         )
-        return bed_version.filename
+        if target_bed_shortname:
+            bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(
+                target_bed_shortname
+            )
+            return bed_version.filename
+        else:
+            return ""
 
     def _create_sample_mapping_file(self, case_id: str, case_path: Path) -> Path:
         """Create a sample mapping file for the case and returns its path."""

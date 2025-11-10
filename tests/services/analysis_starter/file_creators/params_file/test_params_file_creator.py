@@ -18,7 +18,14 @@ from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
 
 
-def test_raredisease_params_file_creator(mocker: MockerFixture):
+@pytest.mark.parametrize(
+    "expected_bed_short_name, lims_capture_kit",
+    [("bed_version.bed", "target_bed_shortname_123"), ("", None)],
+    ids=["Capture kit is in LIMS", "Capture kit not in LIMS"],
+)
+def test_raredisease_params_file_creator(
+    lims_capture_kit: str | None, expected_bed_short_name: str, mocker: MockerFixture
+):
     # GIVEN a file path
     file_path = Path("some_path", "file_name.yaml")
 
@@ -42,7 +49,7 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
 
     # GIVEN that Lims returns a bed shortname
     lims = create_autospec(LimsAPI)
-    lims.capture_kit = Mock(return_value="target_bed_shortname_123")
+    lims.capture_kit = Mock(return_value=lims_capture_kit)
 
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
@@ -77,7 +84,7 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
             "outdir": Path("some_path"),
             "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
             "save_mapped_as_cram": True,
-            "target_bed_file": "bed_version.bed",
+            "target_bed_file": expected_bed_short_name,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
             "vep_filters_scout_fmt": "some_path/gene_panels.bed",
         },
