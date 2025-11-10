@@ -185,7 +185,11 @@ class HousekeeperAPI:
     def get_latest_file_strict(
         self, bundle: str, tags: list | None = None, version: int | None = None
     ) -> File:
-        """Return latest file from Housekeeper, filtered by bundle and/or tags and/or version."""
+        """
+        Return latest file from Housekeeper, filtered by bundle and/or tags and/or version.
+        Raises:
+            MissingFilesError if no file is found.
+        """
         files: Query = self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
         latest_file: File | None = files.order_by(File.id.desc()).first()
         if not latest_file:
