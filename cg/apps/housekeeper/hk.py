@@ -17,7 +17,6 @@ from cg.exc import (
     HousekeeperArchiveMissingError,
     HousekeeperBundleVersionMissingError,
     HousekeeperFileMissingError,
-    MissingFilesError,
 )
 
 LOG = logging.getLogger(__name__)
@@ -188,12 +187,12 @@ class HousekeeperAPI:
         """
         Return latest file from Housekeeper, filtered by bundle and/or tags and/or version.
         Raises:
-            MissingFilesError if no file is found.
+            HousekeeperFileMissingError if no file is found.
         """
         files: Query = self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
         latest_file: File | None = files.order_by(File.id.desc()).first()
         if not latest_file:
-            raise MissingFilesError(
+            raise HousekeeperFileMissingError(
                 f"No file matching bundle {bundle}, version {version} with tags {tags}"
             )
         else:
