@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.models.cg_config import RarediseaseConfig, RnafusionConfig, TaxprofilerConfig
+from cg.models.cg_config import NalloConfig, RarediseaseConfig, RnafusionConfig, TaxprofilerConfig
 
 
 @pytest.fixture
@@ -51,6 +51,12 @@ def get_nextflow_config_dict(
         }
 
     return _make_dict
+
+
+@pytest.fixture
+def nallo_config_object(get_nextflow_config_dict: Callable) -> NalloConfig:
+    config: dict = get_nextflow_config_dict(workflow="nallo")
+    return NalloConfig(**config)
 
 
 @pytest.fixture
