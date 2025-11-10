@@ -81,7 +81,7 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
             ).full_path,
             vcf_str=self.housekeeper_api.get_latest_file_strict(
                 bundle=case_id,
-                tags=[AnalysisTag.VCF_STR, case_id],
+                tags=[AnalysisTag.VCF_STR],
             ).full_path,
         )
 
