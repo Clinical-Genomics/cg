@@ -2,6 +2,7 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from cg.models.analysis import NextflowAnalysis
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.config import (
     BalsamicConfigAnalysis,
@@ -9,7 +10,6 @@ from cg.models.balsamic.config import (
     BalsamicConfigPanel,
 )
 from cg.models.balsamic.metrics import BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics
-from cg.models.analysis import NextflowAnalysis
 from cg.models.rnafusion.rnafusion import RnafusionQCMetrics
 from cg.models.tomte.tomte import TomteQCMetrics
 
@@ -68,7 +68,7 @@ def balsamic_wgs_analysis():
         },
     )
 
-  
+
 @pytest.fixture
 def rnafusion_analysis() -> NextflowAnalysis:
     return NextflowAnalysis(
@@ -113,9 +113,9 @@ def balsamic_wgs_analysis_without_predicted_sex() -> BalsamicAnalysis:
             )
         },
     )
-  
-  
-@pytest.fixture              
+
+
+@pytest.fixture
 def tomte_analysis() -> NextflowAnalysis:
     return NextflowAnalysis(
         sample_metrics={
