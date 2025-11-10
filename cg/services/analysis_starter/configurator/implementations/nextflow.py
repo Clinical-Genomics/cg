@@ -3,15 +3,17 @@ from pathlib import Path
 from cg.exc import MissingConfigFilesError
 from cg.models.cg_config import CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
-from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
+from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
+    PipelineExtension,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowSampleSheetCreator,
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.protocol import (
+    SampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.store.store import Store
@@ -23,7 +25,7 @@ class NextflowConfigurator(Configurator):
         config_file_creator: NextflowConfigFileCreator,
         params_file_creator: ParamsFileCreator,
         pipeline_config: CommonAppConfig,
-        sample_sheet_creator: NextflowSampleSheetCreator,
+        sample_sheet_creator: SampleSheetCreator,
         store: Store,
         pipeline_extension: PipelineExtension = PipelineExtension(),
     ):
