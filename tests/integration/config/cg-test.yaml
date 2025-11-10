@@ -56,7 +56,6 @@ balsamic:
   gens_coverage_male_path: "{test_root_dir}/balsamic_gens_coverage_male_path"
   gnomad_af5_path: "{test_root_dir}/balsamic_gnomad_af5_path"
   head_job_partition: "head-jobs"
-  loqusdb_path: "{test_root_dir}/balsamic_loqusdb_path"
   pon_path: "{test_root_dir}/balsamic_pon_path"
   root: "{test_root_dir}/balsamic_root_path"
   sentieon_licence_path: "{test_root_dir}/balsamic_sention_licence_path"
