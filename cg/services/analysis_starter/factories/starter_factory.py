@@ -8,6 +8,7 @@ from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.constants import IMPLEMENTED_FASTQ_WORKFLOWS
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
+from cg.services.analysis_starter.input_fetcher.implementations.bam_fetcher import BamFetcher
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.input_fetcher.input_fetcher import InputFetcher
 from cg.services.analysis_starter.service import AnalysisStarter
@@ -72,10 +73,17 @@ class AnalysisStarterFactory:
                 spring_archive_api=spring_archive_api,
                 status_db=self.store,
             )
-        return InputFetcher()
+        elif workflow == Workflow.NALLO:
+            return BamFetcher(housekeeper_api=self.housekeeper_api, status_db=self.store)
+        raise NotImplementedError(f"No input fetcher for workflow {workflow}")
 
     def _get_submitter(self, workflow: Workflow) -> Submitter:
-        if workflow in [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]:
+        if workflow in [
+            Workflow.NALLO,
+            Workflow.RAREDISEASE,
+            Workflow.RNAFUSION,
+            Workflow.TAXPROFILER,
+        ]:
             return self._get_seqera_platform_submitter()
         else:
             return SubprocessSubmitter()
@@ -88,7 +96,12 @@ class AnalysisStarterFactory:
         )
 
     def _get_tracker(self, workflow: Workflow) -> Tracker:
-        if workflow in [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]:
+        if workflow in [
+            Workflow.NALLO,
+            Workflow.RAREDISEASE,
+            Workflow.RNAFUSION,
+            Workflow.TAXPROFILER,
+        ]:
             return NextflowTracker(
                 store=self.store,
                 trailblazer_api=self.cg_config.trailblazer_api,

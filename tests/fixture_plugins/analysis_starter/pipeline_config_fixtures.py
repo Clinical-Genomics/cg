@@ -7,6 +7,7 @@ from cg.constants.observations import BalsamicObservationPanel
 from cg.models.cg_config import (
     BalsamicConfig,
     LoqusDBDumpFiles,
+    NalloConfig,
     RarediseaseConfig,
     RnafusionConfig,
     SlurmConfig,
@@ -107,6 +108,12 @@ def cg_balsamic_config(tmp_path) -> BalsamicConfig:
         swegen_snv=tmp_path / "swegen_snv.vcf",
         swegen_sv=tmp_path / "swegen_sv.vcf",
     )
+
+
+@pytest.fixture
+def nallo_config_object(get_nextflow_config_dict: Callable) -> NalloConfig:
+    config: dict = get_nextflow_config_dict(workflow="nallo")
+    return NalloConfig(**config)
 
 
 @pytest.fixture

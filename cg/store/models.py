@@ -445,7 +445,7 @@ class Case(Base, PriorityMixin):
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped["Customer"] = orm.relationship(foreign_keys=[customer_id])
-    data_analysis: Mapped[str] = mapped_column(
+    data_analysis: Mapped[Workflow] = mapped_column(
         types.Enum(*(workflow.value for workflow in Workflow))
     )
     data_delivery: Mapped[str | None] = mapped_column(
