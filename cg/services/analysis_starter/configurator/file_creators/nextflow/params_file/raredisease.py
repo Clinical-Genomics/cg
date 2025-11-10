@@ -84,9 +84,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         """
         case: Case = self.store.get_case_by_internal_id_strict(internal_id=case_id)
         sample: Sample = case.samples[0]
-        target_bed_shortname: str = self.lims.get_capture_kit_strict(
-            sample.from_sample or sample.internal_id
-        )
+        target_bed_shortname: str = self.lims.capture_kit(sample.from_sample or sample.internal_id)
         bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(
             target_bed_shortname
         )

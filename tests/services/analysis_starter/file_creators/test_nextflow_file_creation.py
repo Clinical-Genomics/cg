@@ -50,7 +50,7 @@ def test_raredisease_params_file_creator(mocker: MockerFixture):
 
     # GIVEN that Lims returns a bed shortname
     lims = create_autospec(LimsAPI)
-    lims.get_capture_kit_strict = Mock(return_value="target_bed_shortname_123")
+    lims.capture_kit = Mock(return_value="target_bed_shortname_123")
 
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
