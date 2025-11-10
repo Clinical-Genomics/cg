@@ -46,15 +46,107 @@ def mocked_commands_and_outputs(
     }
 
 
+@pytest.fixture
+def ticket_id() -> int:
+    return 12345
+
+
+@pytest.fixture
+def nallo_case(helpers: StoreHelpers, status_db: Store, ticket_id: int) -> Case:
+    return helpers.add_case(store=status_db, data_analysis=Workflow.NALLO, ticket=str(ticket_id))
+
+
+@pytest.fixture
+def expected_config_file_contents() -> str:
+    return """process.clusterOptions = "-A nallo_slurm_account --qos=normal"
+
+// For Nextflow version 24.04.0 and above
+params {
+    config_profile_description = 'Platform test file'
+    config_profile_contact = 'Clinical Genomics, Stockholm'
+    config_profile_url = 'https://github.com/Clinical-Genomics'
+}
+
+// Slurm as executor and slurm options
+executor {
+    name = 'slurm'
+    pollInterval = '2 min'
+    queueStatInterval = '5 min'
+    submitRateLimit = '2 sec'
+}
+
+
+
+"""
+
+
+@pytest.fixture
+def expected_params_file_contents(nallo_case: Case, test_run_paths: IntegrationTestPaths) -> str:
+    return f"""input: "{test_run_paths.test_root_dir}/nallo_root_path/{nallo_case.internal_id}/{nallo_case.internal_id}_samplesheet.csv"
+outdir: "{test_run_paths.test_root_dir}/nallo_root_path/{nallo_case.internal_id}"
+filter_variants_hgnc_ids: "{test_run_paths.test_root_dir}/nallo_root_path/{nallo_case.internal_id}/gene_panels.tsv"
+references: "/nallo/references/v0.3.1"
+resources: "/nallo/resources"
+alignment_processes: 64
+cadd_prescored_indels: "/nallo/references/v0.3.1/prescored"
+cadd_resources: "/nallo/references/v0.3.1/CADD-scripts/data/annotations"
+echtvar_snv_databases: "/nallo/resources/nallo_v1.0_prod_snv_databases.yaml"
+fasta: "/nallo/references/v0.3.1/GRCh38_GIABv3_no_alt_analysis_set_maskedGRC_decoys_MAP2K3_KMT2C_KCNJ18.fasta"
+filter_snvs_expression: "-e \'colorsdb_af > 0.05 || gnomad_af > 0.05 || Frq > 0.3\'"
+filter_svs_expression: "-e \'colorsdb_af > 0.05 || gnomad_af > 0.05 || clinical_genomics_loqusFrq > 0.3\'"
+genmod_reduced_penetrance: "/nallo/references/v0.3.1/grch38_reduced_penetrance_-v1.0-.tsv"
+genmod_score_config_snvs: "/nallo/references/v0.3.1/grch38_rank_model_snvs_-v1.0-.ini"
+genmod_score_config_svs: "/nallo/references/v0.3.1/grch38_rank_model_svs_-v1.0-.ini"
+hificnv_excluded_regions: "/nallo/references/v0.3.1/grch38_hificnv_excluded_regions_common_50_-v1.0-.bed.gz"
+hificnv_expected_xx_cn: "/nallo/references/v0.3.1/grch38_hificnv_expected_copynumer_xx_-v1.0-.bed"
+hificnv_expected_xy_cn: "/nallo/references/v0.3.1/grch38_hificnv_expected_copynumer_xy_-v1.0-.bed"
+par_regions: "/nallo/references/v0.3.1/grch38_par_-v1.0-.bed"
+publish_unannotated_family_svs: True
+skip_genome_assembly: True
+snv_calling_processes: 20
+somalier_sites: "/nallo/references/v0.3.1/sites.hg38.vcf.gz"
+stranger_repeat_catalog: "/nallo/references/v0.3.1/grch38_variant_catalog_stranger.json"
+svdb_sv_databases: "/nallo/resources/nallo_v1.0_prod_sv_databases.yaml"
+sv_caller: "sniffles"
+target_regions: "/nallo/references/v0.3.1/grch38_chromosomes_split_at_centromeres_-v1.0-.bed"
+str_bed: "/nallo/references/v0.3.1/grch38_trgt_pathogenic_repeats.bed"
+variant_consequences_snvs: "/nallo/references/v0.3.1/grch38_variant_consequences_-v1.0-.txt"
+variant_consequences_svs: "/nallo/references/v0.3.1/grch38_variant_consequences_-v1.0-.txt"
+vep_cache: "/nallo/references/v0.3.1/vep_cache"
+vep_plugin_files: "/nallo/resources/nallo_v1.0_prod_vep_files.yaml"
+"""
+
+
+@pytest.fixture
+def expected_samplesheet_contents() -> str:
+    # TODO: add more contents here?
+    return "project,sample,file,family_id,paternal_id,maternal_id,sex,phenotype\n"
+
+
+@pytest.fixture
+def expected_tower_ids_contents(nallo_case: Case, new_tower_id: str) -> str:
+    return f"""---
+{nallo_case.internal_id}:
+- {new_tower_id}
+"""
+
+
 @pytest.mark.xdist_group(name="integration")
 @pytest.mark.integration
 def test_start_available_nallo(
+    expected_config_file_contents: str,
+    expected_params_file_contents: str,
+    expected_samplesheet_contents: str,
+    expected_tower_ids_contents: str,
     helpers: StoreHelpers,
     housekeeper_db: HousekeeperStore,
     httpserver: HTTPServer,
+    scout_export_panel_stdout: bytes,
     status_db: Store,
     test_run_paths: IntegrationTestPaths,
+    ticket_id: int,
     mock_run_commands: Callable,
+    nallo_case: Case,
     new_tower_id: str,
     mocker: MockerFixture,
 ):
@@ -79,10 +171,7 @@ def test_start_available_nallo(
     create_empty_file(Path(test_root_dir, "nallo_resources.config"))
 
     # GIVEN a case with existing qc files
-    ticket_id = 12345
-    case: Case = helpers.add_case(
-        store=status_db, data_analysis=Workflow.NALLO, ticket=str(ticket_id)
-    )
+    case: Case = nallo_case
 
     # GIVEN an order associated with the case
     order: Order = helpers.add_order(
@@ -176,3 +265,24 @@ def test_start_available_nallo(
     assert case.action == CaseActions.RUNNING
 
     # TODO check that all files have been created with correct contents
+
+    # config file
+    case_directory = Path(test_root_dir, "nallo_root_path", case.internal_id)
+    with open(Path(case_directory, f"{case.internal_id}_nextflow_config.json")) as f:
+        assert f.read() == expected_config_file_contents
+
+    # params file
+    with open(Path(case_directory, f"{case.internal_id}_params_file.yaml")) as f:
+        assert f.read() == expected_params_file_contents
+
+    # sample sheet
+    with open(Path(case_directory, f"{case.internal_id}_samplesheet.csv")) as f:
+        assert f.read() == expected_samplesheet_contents
+
+    # gene panel
+    with open(Path(case_directory, "gene_panels.tsv")) as f:
+        assert f.read() == scout_export_panel_stdout.decode().removesuffix("\n")
+
+    # tower ids
+    with open(Path(case_directory, "tower_ids.yaml")) as f:
+        assert f.read() == expected_tower_ids_contents
