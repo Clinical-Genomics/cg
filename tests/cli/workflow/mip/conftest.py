@@ -5,16 +5,11 @@ import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
-from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
 from cg.constants.subject import Sex
-from cg.meta.compress import CompressAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
-from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
-from cg.store.crud.read import ReadHandler
-from cg.store.models import Case
 from tests.store_helpers import StoreHelpers
 
 
@@ -153,48 +148,6 @@ def mip_dna_context(
             helpers.add_relationship(store=_store, sample=sample, case=case_obj, status="affected")
     cg_context.meta_apis["analysis_api"] = mip_analysis_api
     return cg_context
-
-
-def setup_mocks(
-    mocker,
-    can_at_least_one_sample_be_decompressed: bool = False,
-    get_case_to_analyze: Case = None,
-    decompress_spring: bool = False,
-    is_spring_decompression_needed: bool = False,
-    is_spring_decompression_running: bool = False,
-) -> None:
-    """Helper function to set up the necessary mocks for the decompression logics."""
-    mocker.patch.object(ReadHandler, "get_cases_to_analyze")
-    ReadHandler.get_cases_to_analyze.return_value = [get_case_to_analyze]
-
-    mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
-    PrepareFastqAPI.is_spring_decompression_needed.return_value = is_spring_decompression_needed
-
-    mocker.patch.object(PrepareFastqAPI, "can_at_least_one_sample_be_decompressed")
-    PrepareFastqAPI.can_at_least_one_sample_be_decompressed.return_value = (
-        can_at_least_one_sample_be_decompressed
-    )
-
-    mocker.patch.object(CompressAPI, "decompress_spring")
-    CompressAPI.decompress_spring.return_value = decompress_spring
-
-    mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_running")
-    PrepareFastqAPI.is_spring_decompression_running.return_value = is_spring_decompression_running
-
-    mocker.patch.object(PrepareFastqAPI, "add_decompressed_fastq_files_to_housekeeper")
-    PrepareFastqAPI.add_decompressed_fastq_files_to_housekeeper.return_value = None
-
-    mocker.patch.object(MipDNAAnalysisAPI, "get_panel_bed")
-    MipDNAAnalysisAPI.get_panel_bed.return_value = "a_string"
-
-    mocker.patch.object(
-        ScoutAPI,
-        "export_managed_variants",
-        return_value=["a str"],
-    )
-
-    mocker.patch.object(ReadHandler, "are_all_illumina_runs_on_disk")
-    ReadHandler.are_all_illumina_runs_on_disk.return_value = True
 
 
 @pytest.fixture(scope="function")

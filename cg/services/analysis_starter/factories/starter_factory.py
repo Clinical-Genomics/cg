@@ -6,8 +6,9 @@ from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
-from cg.services.analysis_starter.constants import FASTQ_WORKFLOWS
+from cg.services.analysis_starter.constants import IMPLEMENTED_FASTQ_WORKFLOWS
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
+from cg.services.analysis_starter.input_fetcher.implementations.bam_fetcher import BamFetcher
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.input_fetcher.input_fetcher import InputFetcher
 from cg.services.analysis_starter.service import AnalysisStarter
@@ -18,6 +19,7 @@ from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
 from cg.services.analysis_starter.submitters.submitter import Submitter
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
+from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
 from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
 from cg.services.analysis_starter.tracker.tracker import Tracker
 from cg.store.store import Store
@@ -53,7 +55,7 @@ class AnalysisStarterFactory:
         )
 
     def _get_input_fetcher(self, workflow: Workflow) -> InputFetcher:
-        if workflow in FASTQ_WORKFLOWS:
+        if workflow in IMPLEMENTED_FASTQ_WORKFLOWS:
             spring_archive_api = SpringArchiveAPI(
                 status_db=self.store,
                 housekeeper_api=self.housekeeper_api,
@@ -70,10 +72,17 @@ class AnalysisStarterFactory:
                 spring_archive_api=spring_archive_api,
                 status_db=self.store,
             )
-        return InputFetcher()
+        elif workflow == Workflow.NALLO:
+            return BamFetcher(housekeeper_api=self.housekeeper_api, status_db=self.store)
+        raise NotImplementedError(f"No input fetcher for workflow {workflow}")
 
     def _get_submitter(self, workflow: Workflow) -> Submitter:
-        if workflow in [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]:
+        if workflow in [
+            Workflow.NALLO,
+            Workflow.RAREDISEASE,
+            Workflow.RNAFUSION,
+            Workflow.TAXPROFILER,
+        ]:
             return self._get_seqera_platform_submitter()
         else:
             return SubprocessSubmitter()
@@ -86,7 +95,12 @@ class AnalysisStarterFactory:
         )
 
     def _get_tracker(self, workflow: Workflow) -> Tracker:
-        if workflow in [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]:
+        if workflow in [
+            Workflow.NALLO,
+            Workflow.RAREDISEASE,
+            Workflow.RNAFUSION,
+            Workflow.TAXPROFILER,
+        ]:
             return NextflowTracker(
                 store=self.store,
                 trailblazer_api=self.cg_config.trailblazer_api,
@@ -98,4 +112,10 @@ class AnalysisStarterFactory:
                 subprocess_submitter=SubprocessSubmitter(),
                 trailblazer_api=self.cg_config.trailblazer_api,
                 workflow_root=self.cg_config.microsalt.root,
+            )
+        elif workflow == Workflow.MIP_DNA:
+            return MIPDNATracker(
+                store=self.store,
+                trailblazer_api=self.cg_config.trailblazer_api,
+                workflow_root=self.cg_config.mip_rd_dna.root,
             )

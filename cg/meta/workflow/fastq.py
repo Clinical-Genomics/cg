@@ -16,6 +16,7 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, SequencingFileTag
+from cg.constants.constants import FileFormat
 from cg.io.gzip import read_gzip_first_line
 from cg.models.fastq import FastqFileMeta, GetFastqFileMeta
 from cg.store.models import Case, Sample
@@ -44,11 +45,12 @@ class FastqHandler:
         self.status_db = status_db
 
     def link_fastq_files(self, case_id: str) -> None:
-        LOG.debug("Linking Fastq files")
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        LOG.info(f"Linking Fastq files for case {case_id}")
+        case: Case = self.status_db.get_case_by_internal_id_strict(internal_id=case_id)
         for sample in case.samples:
             fastq_dir: Path = self.get_sample_fastq_destination_dir(case=case, sample=sample)
             self.link_fastq_files_for_sample(sample=sample, fastq_dir=fastq_dir)
+        LOG.info(f"Linked Fastq files for case {case_id}")
 
     def link_fastq_files_for_sample(self, sample: Sample, fastq_dir: Path) -> None:
         """
@@ -227,6 +229,16 @@ class MipFastqHandler(FastqHandler):
         flow_cell = f"{flow_cell}-undetermined" if undetermined else flow_cell
         date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
         return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read_direction}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+
+    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
+        """Return the path to the FASTQ destination directory."""
+        return Path(
+            self.root_dir,
+            case.internal_id,
+            sample.prep_category,
+            sample.internal_id,
+            FileFormat.FASTQ,
+        )
 
 
 class MicrosaltFastqHandler(FastqHandler):

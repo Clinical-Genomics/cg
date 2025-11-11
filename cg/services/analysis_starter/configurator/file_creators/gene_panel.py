@@ -1,12 +1,15 @@
+import logging
 from pathlib import Path
 
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.constants import FileExtensions, GenePanelMasterList
+from cg.constants import GenePanelMasterList
 from cg.constants.gene_panel import GenePanelCombo, GenePanelGenomeBuild
-from cg.io.txt import write_txt
+from cg.io.txt import write_txt_with_newlines
 from cg.services.analysis_starter.configurator.file_creators.nextflow.utils import get_genome_build
 from cg.store.models import Case
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 class GenePanelFileCreator:
@@ -14,22 +17,23 @@ class GenePanelFileCreator:
         self.store = store
         self.scout_api = scout_api
 
-    @staticmethod
-    def get_file_path(case_path: Path) -> Path:
-        return Path(case_path, "gene_panels").with_suffix(FileExtensions.BED)
+    def create(self, case_id: str, file_path: Path, double_hashtag_filtering: bool = False) -> None:
+        content: list[str] = self._get_content(
+            case_id=case_id, double_hashtag_filtering=double_hashtag_filtering
+        )
+        write_txt_with_newlines(file_path=file_path, content=content)
+        LOG.info(f"Created gene panel file for case {case_id} at {file_path}")
 
-    def create(self, case_id: str, case_path: Path) -> None:
-        file_path: Path = self.get_file_path(case_path)
-        content: list[str] = self._get_content(case_id)
-        write_txt(file_path=file_path, content=content)
-
-    def _get_content(self, case_id: str) -> list[str]:
-        case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
+    def _get_content(self, case_id: str, double_hashtag_filtering: bool) -> list[str]:
+        case: Case = self.store.get_case_by_internal_id_strict(internal_id=case_id)
         genome_build: GenePanelGenomeBuild = get_genome_build(workflow=case.data_analysis)
         all_panels: list[str] = self._get_aggregated_panels(
             customer_id=case.customer.internal_id, default_panels=set(case.panels)
         )
-        return self.scout_api.export_panels(build=genome_build, panels=all_panels)
+        panels: list[str] = self.scout_api.export_panels(build=genome_build, panels=all_panels)
+        if double_hashtag_filtering:
+            panels = [panel for panel in panels if not panel.startswith("##")]
+        return panels
 
     def _get_aggregated_panels(self, customer_id: str, default_panels: set[str]) -> list[str]:
         """Check if the customer is collaborator for gene panel master list
@@ -42,7 +46,8 @@ class GenePanelFileCreator:
             return GenePanelMasterList.get_panel_names()
         all_panels: set[str] = self._add_gene_panels_in_combo(gene_panels=default_panels)
         all_panels |= GenePanelMasterList.get_non_specific_gene_panels()
-        return list(all_panels)
+        all_panels_list: list[str] = sorted(all_panels)
+        return all_panels_list
 
     @staticmethod
     def _add_gene_panels_in_combo(gene_panels: set[str]) -> set[str]:

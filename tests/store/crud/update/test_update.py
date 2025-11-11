@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 
 from cg.constants import SequencingRunDataAvailability
-from cg.constants.constants import ControlOptions
+from cg.constants.constants import CaseActions, ControlOptions
 from cg.constants.sequencing import Sequencers
 from cg.store.models import Analysis, IlluminaSampleSequencingMetrics, IlluminaSequencingRun, Sample
 from cg.store.store import Store
@@ -261,3 +261,18 @@ def test_update_analysis_delivery_report_date(store: Store, helpers: StoreHelper
     # THEN the delivery report created_at for the analysis is updated
     updated_analysis: Analysis = store.get_analysis_by_entry_id(analysis.id)
     assert updated_analysis.delivery_report_created_at == datetime.now()
+
+
+def test_update_case_action(analysis_store: Store, case_id: str):
+    """Tests if actions of cases are changed to analyze."""
+    # Given a store with a case with action None
+    action = analysis_store.get_case_by_internal_id_strict(internal_id=case_id).action
+
+    assert action is None
+
+    # When setting the case to "analyze"
+    analysis_store.update_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
+    new_action = analysis_store.get_case_by_internal_id_strict(internal_id=case_id).action
+
+    # Then the action should be set to analyze
+    assert new_action == "analyze"

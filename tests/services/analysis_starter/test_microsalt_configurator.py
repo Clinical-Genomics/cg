@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 
 from cg.constants import FileExtensions, Workflow
-from cg.exc import CaseNotConfiguredError, CgDataError
+from cg.exc import CgDataError, MissingConfigFilesError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.fastq import FastqHandler, MicrosaltFastqHandler
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
@@ -125,7 +125,7 @@ def test_get_config_path_config_not_ready(
 ):
     # GIVEN a microSALT case with no existing config file
 
-    with pytest.raises(CaseNotConfiguredError):
+    with pytest.raises(MissingConfigFilesError):
         # WHEN getting the config object
         microsalt_configurator.get_config(microsalt_case.internal_id)
         # THEN it raises a CaseNotConfiguredError
