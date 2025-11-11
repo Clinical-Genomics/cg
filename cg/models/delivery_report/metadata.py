@@ -92,6 +92,7 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
 
     mean_insert_size: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     fold_80: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    predicted_sex: str = NA_FIELD
 
 
 class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
