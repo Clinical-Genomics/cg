@@ -915,7 +915,7 @@ class ReadHandler(BaseHandler):
             prep_categories=[prep_category],
         ).all()
 
-    def get_bed_version_by_file_name(self, bed_version_file_name: str) -> BedVersion:
+    def get_bed_version_by_file_name(self, bed_version_file_name: str) -> BedVersion | None:
         """Return bed version with file name."""
         return apply_bed_version_filter(
             bed_versions=self._get_query(table=BedVersion),
