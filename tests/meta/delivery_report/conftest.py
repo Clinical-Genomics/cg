@@ -116,6 +116,29 @@ def rnafusion_analysis() -> NextflowAnalysis:
 
 
 @pytest.fixture
+def balsamic_wgs_analysis_without_predicted_sex() -> BalsamicAnalysis:
+    return BalsamicAnalysis(
+        balsamic_config=create_autospec(
+            BalsamicConfigJSON,
+            analysis=create_autospec(BalsamicConfigAnalysis, sequencing_type="wgs"),
+            panel=None,
+        ),
+        sample_metrics={
+            "sample_id": BalsamicWGSQCMetrics(
+                percent_duplication=0.01,
+                compare_predicted_to_given_sex=None,
+                mean_insert_size=1.0,
+                fold_80_base_penalty=1.0,
+                median_target_coverage=1.0,
+                pct_15x=1.0,
+                pct_60x=1.0,
+                pct_pf_reads_improper_pairs=1.0,
+            )
+        },
+    )
+
+
+@pytest.fixture
 def tomte_analysis() -> NextflowAnalysis:
     return NextflowAnalysis(
         sample_metrics={

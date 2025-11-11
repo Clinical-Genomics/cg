@@ -84,8 +84,6 @@ balsamic:
     gms_myeloid_5.4: "{test_root_dir}/PON/gmsmyeloid_5.4.cnn"
     gms_solid_15.2: "{test_root_dir}/PON/gmssolid.cnn"
     exome_comp_10.2: "{test_root_dir}/PON/twistexomecomprehensive_10.2.cnn"
-
-
   sentieon_licence_server: "localhost"
   swegen_path: "{test_root_dir}/swegen"
   swegen_snv: "{test_root_dir}/swegen/swegen_snv.vcf.gz"

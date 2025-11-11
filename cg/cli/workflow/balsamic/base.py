@@ -4,6 +4,7 @@ import logging
 import traceback
 from typing import cast
 
+
 import rich_click as click
 from pydantic.v1 import ValidationError
 
