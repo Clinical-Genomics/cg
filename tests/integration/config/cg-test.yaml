@@ -139,12 +139,12 @@ pdc:
   binary_path: "{test_root_dir}/pdc_binary_path"
 
 scout:
-  binary_path: {test_root_dir}/scout/binary
-  config_path: {test_root_dir}/scout/config
+  binary_path: /scout/binary
+  config_path: /scout/config
 
 scout_38:
-  binary_path: {test_root_dir}/scout_38_binary_path
-  config_path: {test_root_dir}/scout_38_config_path
+  binary_path: /scout_38/binary
+  config_path: /scout_38/config
 
 trailblazer:
   database: "sqlite:///file:trailblazer?mode=memory&cache=shared&uri=true"

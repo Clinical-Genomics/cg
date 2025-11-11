@@ -32,6 +32,17 @@ def current_workflow() -> Workflow:
     return Workflow.MIP_DNA
 
 
+@pytest.fixture(autouse=True)
+def mocked_commands_and_outputs(
+    scout_export_manged_variants_stdout: bytes,
+    scout_export_panel_stdout: bytes,
+) -> dict[str, bytes]:
+    return {
+        "/scout/binary --config /scout/config export panel": scout_export_panel_stdout,
+        "/scout/binary --config /scout/config export managed": scout_export_manged_variants_stdout,
+    }
+
+
 @pytest.mark.xdist_group(name="integration")
 @pytest.mark.integration
 def test_start_available_mip_dna(
@@ -39,11 +50,11 @@ def test_start_available_mip_dna(
     helpers: StoreHelpers,
     housekeeper_db: HousekeeperStore,
     httpserver: HTTPServer,
-    mocker: MockerFixture,
+    mock_run_commands: Callable,
     scout_export_panel_stdout: bytes,
     scout_export_manged_variants_stdout: bytes,
-    scout_mock_run: Callable,
     status_db: Store,
+    mocker: MockerFixture,
 ):
     """Test a successful run of the command 'cg workflow mip-dna start-available'
     with one case to be analysed that has not been analysed before."""
@@ -86,7 +97,7 @@ def test_start_available_mip_dna(
 
     # GIVEN that the Scout command returns exported panel data
     subprocess_mock = mocker.patch.object(commands, "subprocess")
-    subprocess_mock.run = Mock(side_effect=scout_mock_run)
+    subprocess_mock.run = Mock(side_effect=mock_run_commands)
 
     # GIVEN an email address can be determined from the environment
     email: str = environ_email()
@@ -127,9 +138,9 @@ def test_start_available_mip_dna(
     # THEN a scout command is called to export panel beds
     subprocess_mock.run.assert_any_call(
         [
-            f"{test_root_dir}/scout/binary",
+            "/scout/binary",
             "--config",
-            f"{test_root_dir}/scout/config",
+            "/scout/config",
             "export",
             "panel",
             "--bed",
@@ -157,9 +168,9 @@ def test_start_available_mip_dna(
     # THEN a scout command is called to export managed variants
     subprocess_mock.run.assert_any_call(
         [
-            f"{test_root_dir}/scout/binary",
+            "/scout/binary",
             "--config",
-            f"{test_root_dir}/scout/config",
+            "/scout/config",
             "export",
             "managed",
             "--build",

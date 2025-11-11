@@ -40,8 +40,8 @@ def mocked_commands_and_outputs(
     new_tower_id: str, scout_export_manged_variants_stdout: bytes, scout_export_panel_stdout: bytes
 ) -> dict[str, bytes]:
     return {
-        "scout_38_config_path export panel": scout_export_panel_stdout,
-        "scout_38_config_path export managed": scout_export_manged_variants_stdout,
+        "/scout_38/binary --config /scout_38/config export panel": scout_export_panel_stdout,
+        "/scout_38/binary --config /scout_38/config export managed": scout_export_manged_variants_stdout,
         "tower_binary_path launch": f"Workflow {new_tower_id} submitted at [<WORKSPACE>] workspace.".encode(),
     }
 

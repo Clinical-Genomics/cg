@@ -120,18 +120,3 @@ def mock_run_commands(mocked_commands_and_outputs: dict[str, bytes]):
         return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
 
     return mock_run
-
-
-@pytest.fixture
-def scout_mock_run(scout_export_panel_stdout: bytes, scout_export_manged_variants_stdout: bytes):
-    def mock_run(*args, **kwargs):
-        command = args[0]
-        stdout = b""
-
-        if ("export" in command) and ("panel" in command):
-            stdout += scout_export_panel_stdout
-        elif ("export" in command) and ("managed" in command):
-            stdout += scout_export_manged_variants_stdout
-        return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
-
-    return mock_run
