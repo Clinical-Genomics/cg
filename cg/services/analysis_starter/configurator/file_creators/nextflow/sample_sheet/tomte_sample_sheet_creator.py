@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Iterator
 
 from cg.constants.constants import Strandedness
@@ -11,9 +10,6 @@ HEADERS: list[str] = ["case", "sample", "fastq_1", "fastq_2", "strandedness"]
 
 
 class TomteSampleSheetCreator(NextflowFastqSampleSheetCreator):
-    def create(self, case_id: str, file_path: Path) -> None:
-        pass
-
     def _get_content(self, case_id: str) -> list[list[str]]:
         content: list[list[str]] = [HEADERS]
         case: Case = self.store.get_case_by_internal_id_strict(case_id)
@@ -30,6 +26,7 @@ class TomteSampleSheetCreator(NextflowFastqSampleSheetCreator):
         for fastq_forward_read_path, fastq_reverse_read_path in paired_fastq_files:
             content.append(
                 [
+                    case_id,
                     sample.internal_id,
                     fastq_forward_read_path,
                     fastq_reverse_read_path,
