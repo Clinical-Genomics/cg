@@ -196,12 +196,6 @@ class BalsamicConfig(CommonAppConfig):
     gnomad_af5_path: Path
     head_job_partition: str
     loqusdb_path: Path
-    loqusdb_artefact_snv: Path
-    loqusdb_cancer_germline_snv: Path
-    loqusdb_cancer_somatic_snv: Path
-    loqusdb_cancer_somatic_sv: Path
-    loqusdb_clinical_snv: Path
-    loqusdb_clinical_sv: Path
     loqusdb_dump_files: LoqusDBDumpFiles
     panel_of_normals: dict[str, Path]  # For TGS and Exome
     pon_path: Path
