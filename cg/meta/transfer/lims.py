@@ -54,7 +54,7 @@ class TransferLims(object):
 
     def transfer_samples(
         self,
-        cutoff_time_limit: str,
+        order_age_cutoff: int,
         status_type: SampleState,
         include: str = "unset",
         sample_id: str = None,
@@ -65,11 +65,6 @@ class TransferLims(object):
             samples: list[Sample] = self.status.get_samples_by_internal_id(internal_id=sample_id)
         else:
             samples: list[Sample] = self._get_samples_to_include(include, status_type)
-
-        if cutoff_time_limit and samples:  # TODO: Remove this part.
-            samples: list[Sample] = self._samples_order_after_cutoff_time_limit(
-                samples, cutoff_time_limit
-            )
 
         if samples is None:
             LOG.info(f"No samples to process found with {include} {status_type.value}")
