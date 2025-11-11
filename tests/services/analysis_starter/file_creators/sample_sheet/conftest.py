@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 
@@ -134,4 +135,5 @@ def sample_sheet_scenario(
             taxprofiler_sample_sheet_creator,
             taxprofiler_sample_sheet_expected_content,
         ),
+        Workflow.TOMTE: (Mock(), []),
     }
