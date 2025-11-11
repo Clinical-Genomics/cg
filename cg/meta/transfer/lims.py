@@ -66,7 +66,7 @@ class TransferLims(object):
         else:
             samples: list[Sample] = self._get_samples_to_include(include, status_type)
 
-        if cutoff_time_limit and samples:
+        if cutoff_time_limit and samples:  # TODO: Remove this part.
             samples: list[Sample] = self._samples_order_after_cutoff_time_limit(
                 samples, cutoff_time_limit
             )
@@ -100,7 +100,7 @@ class TransferLims(object):
     ) -> list[Sample]:
         pass
 
-    def _get_samples_to_include(self, include, status_type):
+    def _get_samples_to_include(self, include, status_type):  # TODO: add the date filter flag
         samples = None
         if include == IncludeOptions.UNSET.value:
             samples = self._get_samples_in_step(status_type)
@@ -108,6 +108,8 @@ class TransferLims(object):
             samples = self.status.get_samples_not_invoiced()
         elif include == IncludeOptions.ALL.value:
             samples = self.status.get_samples_not_down_sampled()
+        # TODO: add if statement with time cutoff, for-loop
+
         return samples
 
     def transfer_pools(self, status_type: PoolState):
