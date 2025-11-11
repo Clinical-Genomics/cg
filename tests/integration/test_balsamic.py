@@ -231,10 +231,10 @@ def test_start_available_tgs_tumour_only(
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path run analysis "
         f"--account balsamic_slurm_account "
-        f"--mail-user balsamic_mail_user@scilifelab.se "
         f"--qos normal "
         f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
-        f"--run-analysis --benchmark",
+        f"--headjob-partition head-jobs "
+        f"--run-analysis",
         check=False,
         shell=True,
         stderr=ANY,
@@ -336,6 +336,7 @@ def test_start_available_wgs_paired(
         f"--analysis-workflow balsamic "
         f"--balsamic-cache {test_root_dir}/balsamic_cache "
         f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
+        f"--artefact-sv-observations {test_root_dir}/balsamic_loqusdb_path/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz "
         f"--case-id {case_id} "
         f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
         f"--gender female "
@@ -358,14 +359,17 @@ def test_start_available_wgs_paired(
     )
 
     # THEN balsamic run analysis was called in the correct way
-    subprocess_mock.run.assert_any_call(
+    expected_run_analysis_command = (
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path run analysis "
         f"--account balsamic_slurm_account "
-        f"--mail-user balsamic_mail_user@scilifelab.se "
         f"--qos normal "
         f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
-        f"--run-analysis --benchmark",
+        f"--headjob-partition head-jobs "
+        f"--run-analysis"
+    )
+    subprocess_mock.run.assert_any_call(
+        expected_run_analysis_command,
         check=False,
         shell=True,
         stderr=ANY,
