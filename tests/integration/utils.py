@@ -9,7 +9,7 @@ from pytest_httpserver import HTTPServer
 
 from cg.apps.environ import environ_email
 from cg.constants.constants import Workflow
-from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.constants.housekeeper_tags import AlignmentFileTag, SequencingFileTag
 from cg.constants.tb import AnalysisType
 from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Sample
 from cg.store.store import Store
@@ -38,7 +38,7 @@ def create_formatted_config(status_db_uri: str, housekeeper_db_uri: str, test_ro
     return config_path
 
 
-def create_integration_test_sample(
+def create_integration_test_sample_fastq_files(
     status_db: Store,
     housekeeper_db: HousekeeperStore,
     test_run_paths: IntegrationTestPaths,
@@ -64,14 +64,30 @@ def create_integration_test_sample(
         store=status_db, sample_id=sample.internal_id, sequencing_run=sequencing_run, lane=1
     )
 
-    create_fastq_file_and_add_to_housekeeper(
+    _create_fastq_files_and_add_to_housekeeper(
         housekeeper_db=housekeeper_db, test_root_dir=test_run_paths.test_root_dir, sample=sample
     )
 
     return sample
 
 
-def create_fastq_file_and_add_to_housekeeper(
+def create_integration_test_sample_bam_files(
+    status_db: Store, housekeeper_db: HousekeeperStore, test_run_paths: IntegrationTestPaths
+) -> Sample:
+    helpers = StoreHelpers()
+    sample: Sample = helpers.add_sample(
+        application_type=AnalysisType.WGS, store=status_db, last_sequenced_at=datetime.now()
+    )
+    _create_bam_files_and_add_to_housekeeper(
+        housekeeper_db=housekeeper_db,
+        sample=sample,
+        test_root_dir=test_run_paths.test_root_dir,
+    )
+
+    return sample
+
+
+def _create_fastq_files_and_add_to_housekeeper(
     housekeeper_db: HousekeeperStore, sample: Sample, test_root_dir: Path
 ) -> None:
     fastq_base_path: Path = Path(test_root_dir, "fastq_files")
@@ -86,20 +102,50 @@ def create_fastq_file_and_add_to_housekeeper(
         from_path=Path("tests/integration/config/file.fastq.gz"), to_path=fastq_file_path2
     )
 
+    _create_bundle_for_sample(
+        housekeeper_db=housekeeper_db,
+        sample=sample,
+        file1_path=fastq_file_path1,
+        file2_path=fastq_file_path2,
+        file_extension=SequencingFileTag.FASTQ,
+    )
+
+
+def _create_bam_files_and_add_to_housekeeper(
+    housekeeper_db: HousekeeperStore, sample: Sample, test_root_dir: Path
+) -> None:
+    file1_path = Path(test_root_dir, "file1.bam")
+    file2_path = Path(test_root_dir, "file2.bam")
+
+    create_empty_file(file1_path)
+    create_empty_file(file2_path)
+
+    _create_bundle_for_sample(
+        housekeeper_db, sample, file1_path, file2_path, file_extension=AlignmentFileTag.BAM
+    )
+
+
+def _create_bundle_for_sample(
+    housekeeper_db: HousekeeperStore,
+    sample: Sample,
+    file1_path: Path,
+    file2_path: Path,
+    file_extension: str,
+):
     bundle_data = {
         "name": sample.internal_id,
         "created": datetime.now(),
         "expires": datetime.now(),
         "files": [
             {
-                "path": fastq_file_path1.as_posix(),
+                "path": file1_path.as_posix(),
                 "archive": False,
-                "tags": [sample.id, SequencingFileTag.FASTQ],
+                "tags": [sample.id, file_extension],
             },
             {
-                "path": fastq_file_path2.as_posix(),
+                "path": file2_path.as_posix(),
                 "archive": False,
-                "tags": [sample.id, SequencingFileTag.FASTQ],
+                "tags": [sample.id, file_extension],
             },
         ],
     }
@@ -119,13 +165,6 @@ def copy_integration_test_file(from_path: Path, to_path: Path):
     to_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(from_path, to_path)
     return True
-
-
-def expect_file_contents(file_path: Path, expected_file_contents: str):
-    with open(file_path) as f:
-        assert (
-            f.read() == expected_file_contents
-        ), f"The file at {file_path} did not have the expected contents"
 
 
 def expect_to_get_latest_analysis_with_empty_response_from_trailblazer(

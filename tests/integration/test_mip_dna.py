@@ -20,8 +20,7 @@ from cg.utils import commands
 from tests.integration.utils import (
     IntegrationTestPaths,
     copy_integration_test_file,
-    create_integration_test_sample,
-    expect_file_contents,
+    create_integration_test_sample_fastq_files,
     expect_to_add_pending_analysis_to_trailblazer,
     expect_to_get_latest_analysis_with_empty_response_from_trailblazer,
 )
@@ -86,7 +85,7 @@ def test_start_available_mip_dna(
     #  - flow cell and sequencing run stored in StatusDB
     #  - a gzipped-fastq file on disk
     #  - a bundle associated with the fastq file in Housekeeper
-    sample: Sample = create_integration_test_sample(
+    sample: Sample = create_integration_test_sample_fastq_files(
         status_db=status_db,
         housekeeper_db=housekeeper_db,
         test_run_paths=test_run_paths,
@@ -225,21 +224,18 @@ samples:
   sample_id: {sample.internal_id}
   sex: female
 """
-    expect_file_contents(
-        file_path=Path(case_dir, "pedigree.yaml"), expected_file_contents=expected_pedigree_content
-    )
+    assert Path(case_dir, "pedigree.yaml").open().read() == expected_pedigree_content
 
     # THEN the managed_variants file has been created with the correct contents
-    expect_file_contents(
-        file_path=Path(case_dir, "managed_variants.vcf"),
-        expected_file_contents=scout_export_manged_variants_stdout.decode(),
+    assert (
+        Path(case_dir, "managed_variants.vcf").open().read()
+        == scout_export_manged_variants_stdout.decode()
     )
 
     # THEN the gene_panels file has been created with the correct contents
-    expect_file_contents(
-        file_path=Path(case_dir, "gene_panels.bed"),
-        expected_file_contents=scout_export_panel_stdout.decode().removesuffix("\n"),
-    )
+    assert Path(
+        case_dir, "gene_panels.bed"
+    ).open().read() == scout_export_panel_stdout.decode().removesuffix("\n")
 
 
 def _create_qc_file(test_root_dir: Path, case: Case) -> Path:

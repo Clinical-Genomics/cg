@@ -18,8 +18,7 @@ from tests.integration.utils import (
     IntegrationTestPaths,
     copy_integration_test_file,
     create_empty_file,
-    create_integration_test_sample,
-    expect_file_contents,
+    create_integration_test_sample_bam_files,
     expect_to_add_pending_analysis_to_trailblazer,
     expect_to_get_latest_analysis_with_empty_response_from_trailblazer,
 )
@@ -55,6 +54,15 @@ def ticket_id() -> int:
 @pytest.fixture
 def nallo_case(helpers: StoreHelpers, status_db: Store, ticket_id: int) -> Case:
     return helpers.add_case(store=status_db, data_analysis=Workflow.NALLO, ticket=str(ticket_id))
+
+
+@pytest.fixture
+def nallo_sample(
+    housekeeper_db: HousekeeperStore, status_db: Store, test_run_paths: IntegrationTestPaths
+) -> Sample:
+    return create_integration_test_sample_bam_files(
+        status_db=status_db, housekeeper_db=housekeeper_db, test_run_paths=test_run_paths
+    )
 
 
 @pytest.fixture
@@ -119,9 +127,13 @@ vep_plugin_files: "/nallo/resources/nallo_v1.0_prod_vep_files.yaml"
 
 
 @pytest.fixture
-def expected_samplesheet_contents() -> str:
-    # TODO: add more contents here?
-    return "project,sample,file,family_id,paternal_id,maternal_id,sex,phenotype\n"
+def expected_samplesheet_contents(
+    nallo_case: Case, nallo_sample: Sample, test_run_paths: IntegrationTestPaths
+) -> str:
+    return f"""project,sample,file,family_id,paternal_id,maternal_id,sex,phenotype
+{nallo_case.internal_id},{nallo_sample.internal_id},{test_run_paths.test_root_dir}/file1.bam,{nallo_case.internal_id},0,0,2,0
+{nallo_case.internal_id},{nallo_sample.internal_id},{test_run_paths.test_root_dir}/file2.bam,{nallo_case.internal_id},0,0,2,0
+"""
 
 
 @pytest.fixture
@@ -140,7 +152,6 @@ def test_start_available_nallo(
     expected_samplesheet_contents: str,
     expected_tower_ids_contents: str,
     helpers: StoreHelpers,
-    housekeeper_db: HousekeeperStore,
     httpserver: HTTPServer,
     scout_export_panel_stdout: bytes,
     status_db: Store,
@@ -148,6 +159,7 @@ def test_start_available_nallo(
     ticket_id: int,
     mock_run_commands: Callable,
     nallo_case: Case,
+    nallo_sample: Sample,
     new_tower_id: str,
     mocker: MockerFixture,
 ):
@@ -155,6 +167,8 @@ def test_start_available_nallo(
     with one case to be analysed that has not been analysed before."""
     cli_runner = CliRunner()
 
+    # GIVEN a case
+    # GIVEN a sample
     # GIVEN a config file with valid database URIs and directories
     config_path: Path = test_run_paths.cg_config_file
 
@@ -171,28 +185,18 @@ def test_start_available_nallo(
     create_empty_file(Path(test_root_dir, "nallo_config.config"))
     create_empty_file(Path(test_root_dir, "nallo_resources.config"))
 
-    # GIVEN a case with existing qc files
-    case: Case = nallo_case
-
     # GIVEN an order associated with the case
     order: Order = helpers.add_order(
-        store=status_db, ticket_id=ticket_id, customer_id=case.customer_id
+        store=status_db, ticket_id=ticket_id, customer_id=nallo_case.customer_id
     )
-    status_db.link_case_to_order(order_id=order.id, case_id=case.id)
+    status_db.link_case_to_order(order_id=order.id, case_id=nallo_case.id)
 
     # GIVEN a sample associated with the case, with:
     #  - flow cell and sequencing run stored in StatusDB
     #  - a gzipped-fastq file on disk
     #  - a bundle associated with the fastq file in Housekeeper
-    sample: Sample = create_integration_test_sample(
-        status_db=status_db,
-        housekeeper_db=housekeeper_db,
-        test_run_paths=test_run_paths,
-        application_type=AnalysisType.WGS,
-        flow_cell_id="nallo_flow_cell_id",
-    )
-
-    helpers.relate_samples(base_store=status_db, case=case, samples=[sample])
+    sample: Sample = nallo_sample
+    helpers.relate_samples(base_store=status_db, case=nallo_case, samples=[sample])
 
     # GIVEN that the Scout command returns exported panel data
     subprocess_mock = mocker.patch.object(commands, "subprocess")
@@ -200,16 +204,18 @@ def test_start_available_nallo(
 
     # GIVEN the Trailblazer API returns no ongoing analysis for the case
     expect_to_get_latest_analysis_with_empty_response_from_trailblazer(
-        trailblazer_server=httpserver, case_id=case.internal_id
+        trailblazer_server=httpserver, case_id=nallo_case.internal_id
     )
 
     # GIVEN a new pending analysis can be added to the Trailblazer API
     # case_path = Path(mip_dna_path, "cases", case.internal_id)
     expect_to_add_pending_analysis_to_trailblazer(
         analysis_type=AnalysisType.WGS,
-        out_dir=Path(test_root_dir, "nallo_root_path", case.internal_id),
-        case=case,
-        config_path=Path(test_root_dir, "nallo_root_path", case.internal_id, "tower_ids.yaml"),
+        out_dir=Path(test_root_dir, "nallo_root_path", nallo_case.internal_id),
+        case=nallo_case,
+        config_path=Path(
+            test_root_dir, "nallo_root_path", nallo_case.internal_id, "tower_ids.yaml"
+        ),
         ticket_id=ticket_id,
         trailblazer_server=httpserver,
         tower_workflow_id=new_tower_id,
@@ -241,15 +247,15 @@ def test_start_available_nallo(
         f"{test_root_dir}/tower_binary_path",
         "launch",
         "--work-dir",
-        f"{test_root_dir}/nallo_root_path/{case.internal_id}/work",
+        f"{test_root_dir}/nallo_root_path/{nallo_case.internal_id}/work",
         "--profile",
         "nallo_profile",
         "--params-file",
-        f"{test_root_dir}/nallo_root_path/{case.internal_id}/{case.internal_id}_params_file.yaml",
+        f"{test_root_dir}/nallo_root_path/{nallo_case.internal_id}/{nallo_case.internal_id}_params_file.yaml",
         "--config",
-        f"{test_root_dir}/nallo_root_path/{case.internal_id}/{case.internal_id}_nextflow_config.json",
+        f"{test_root_dir}/nallo_root_path/{nallo_case.internal_id}/{nallo_case.internal_id}_nextflow_config.json",
         "--name",
-        case.internal_id,
+        nallo_case.internal_id,
         "--revision",
         "nallo_revision",
         "--compute-env",
@@ -259,11 +265,11 @@ def test_start_available_nallo(
     assert second_call.args[0] == expected_run_command
 
     # THEN an analysis has been created for the case
-    assert len(case.analyses) == 1
+    assert len(nallo_case.analyses) == 1
 
     # THEN the case action is set to running
-    status_db.session.refresh(case)
-    assert case.action == CaseActions.RUNNING
+    status_db.session.refresh(nallo_case)
+    assert nallo_case.action == CaseActions.RUNNING
 
     # THEN the following files have been created with the correct contents:
     # - CASE_ID_nextflow_config.json
@@ -272,29 +278,25 @@ def test_start_available_nallo(
     # - gene_panels.tsv
     # - tower_ids.yaml
 
-    case_directory = Path(test_root_dir, "nallo_root_path", case.internal_id)
+    case_directory = Path(test_root_dir, "nallo_root_path", nallo_case.internal_id)
 
-    expect_file_contents(
-        file_path=Path(case_directory, f"{case.internal_id}_nextflow_config.json"),
-        expected_file_contents=expected_config_file_contents,
+    assert (
+        Path(case_directory, f"{nallo_case.internal_id}_nextflow_config.json").open().read()
+        == expected_config_file_contents
     )
 
-    expect_file_contents(
-        file_path=Path(case_directory, f"{case.internal_id}_params_file.yaml"),
-        expected_file_contents=expected_params_file_contents,
+    assert (
+        Path(case_directory, f"{nallo_case.internal_id}_params_file.yaml").open().read()
+        == expected_params_file_contents
     )
 
-    expect_file_contents(
-        file_path=Path(case_directory, f"{case.internal_id}_samplesheet.csv"),
-        expected_file_contents=expected_samplesheet_contents,
+    assert (
+        Path(case_directory, f"{nallo_case.internal_id}_samplesheet.csv").open().read()
+        == expected_samplesheet_contents
     )
 
-    expect_file_contents(
-        Path(case_directory, "gene_panels.tsv"),
-        expected_file_contents=scout_export_panel_stdout.decode().removesuffix("\n"),
-    )
+    assert Path(
+        case_directory, "gene_panels.tsv"
+    ).open().read() == scout_export_panel_stdout.decode().removesuffix("\n")
 
-    expect_file_contents(
-        file_path=Path(case_directory, "tower_ids.yaml"),
-        expected_file_contents=expected_tower_ids_contents,
-    )
+    assert Path(case_directory, "tower_ids.yaml").open().read() == expected_tower_ids_contents
