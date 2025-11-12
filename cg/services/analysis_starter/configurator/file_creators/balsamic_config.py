@@ -49,7 +49,7 @@ class BalsamicConfigFileCreator:
         self.loqusdb_cancer_somatic_snv: Path = (
             cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv
         )
-        self.cancer_somatic_snv_panel_observations: dict = (
+        self.loqusdb_cancer_somatic_snv_panels: dict = (
             cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panels
         )
         self.loqusdb_cancer_somatic_sv: Path = (
@@ -139,7 +139,7 @@ class BalsamicConfigFileCreator:
             cadd_annotations=self.cadd_path,
             cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
             cancer_somatic_snv_observations=self.loqusdb_cancer_somatic_snv,
-            cancer_somatic_snv_panel_observations=self.cancer_somatic_snv_panel_observations.get(
+            cancer_somatic_snv_panel_observations=self.loqusdb_cancer_somatic_snv_panels.get(
                 bed_version.bed_name
             ),
             cancer_somatic_sv_observations=self.loqusdb_cancer_somatic_sv,
