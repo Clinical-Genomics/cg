@@ -17,10 +17,10 @@ from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
     MipDNAObservationsInputFiles,
-    RarediseaseObservationsInputFiles,
     NalloObservationsInputFiles,
+    RarediseaseObservationsInputFiles,
 )
-from cg.store.models import Analysis, Case
+from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -38,6 +38,9 @@ class ObservationsAPI:
         self.loqusdb_wes_config: CommonAppConfig = config.loqusdb_wes
         self.loqusdb_somatic_config: CommonAppConfig = config.loqusdb_somatic
         self.loqusdb_tumor_config: CommonAppConfig = config.loqusdb_tumor
+        self.loqusdb_somatic_lymphoid_config: CommonAppConfig = config.loqusdb_somatic_lymphoid
+        self.loqusdb_somatic_myeloid_config: CommonAppConfig = config.loqusdb_somatic_myeloid
+        self.loqusdb_somatic_exome_config: CommonAppConfig = config.loqusdb_somatic_exome
 
     def upload(self, case_id: str) -> None:
         """
@@ -47,10 +50,7 @@ class ObservationsAPI:
             LoqusdbUploadCaseError: If case is not eligible for Loqusdb uploads
         """
         case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
-        is_case_eligible_for_observations_upload: bool = (
-            self.is_case_eligible_for_observations_upload(case)
-        )
-        if is_case_eligible_for_observations_upload:
+        if self.is_case_eligible_for_observations_upload(case):
             self.load_observations(case=case)
         else:
             LOG.error(f"Case {case.internal_id} is not eligible for observations upload")
@@ -75,29 +75,21 @@ class ObservationsAPI:
 
     def get_loqusdb_api(self, loqusdb_instance: LoqusdbInstance) -> LoqusdbAPI:
         """Returns a Loqusdb API for the given Loqusdb instance."""
-        loqusdb_apis = {
-            LoqusdbInstance.LWP: LoqusdbAPI(
-                binary_path=self.loqusdb_rd_lwp_config.binary_path,
-                config_path=self.loqusdb_rd_lwp_config.config_path,
-            ),
-            LoqusdbInstance.WGS: LoqusdbAPI(
-                binary_path=self.loqusdb_config.binary_path,
-                config_path=self.loqusdb_config.config_path,
-            ),
-            LoqusdbInstance.WES: LoqusdbAPI(
-                binary_path=self.loqusdb_wes_config.binary_path,
-                config_path=self.loqusdb_wes_config.config_path,
-            ),
-            LoqusdbInstance.SOMATIC: LoqusdbAPI(
-                binary_path=self.loqusdb_somatic_config.binary_path,
-                config_path=self.loqusdb_somatic_config.config_path,
-            ),
-            LoqusdbInstance.TUMOR: LoqusdbAPI(
-                binary_path=self.loqusdb_tumor_config.binary_path,
-                config_path=self.loqusdb_tumor_config.config_path,
-            ),
+        loqusdb_config_map: dict = {
+            LoqusdbInstance.LWP: self.loqusdb_rd_lwp_config,
+            LoqusdbInstance.WGS: self.loqusdb_config,
+            LoqusdbInstance.WES: self.loqusdb_wes_config,
+            LoqusdbInstance.SOMATIC: self.loqusdb_somatic_config,
+            LoqusdbInstance.TUMOR: self.loqusdb_tumor_config,
+            LoqusdbInstance.SOMATIC_LYMPHOID: self.loqusdb_somatic_lymphoid_config,
+            LoqusdbInstance.SOMATIC_MYELOID: self.loqusdb_somatic_myeloid_config,
+            LoqusdbInstance.SOMATIC_EXOME: self.loqusdb_somatic_exome_config,
         }
-        return loqusdb_apis[loqusdb_instance]
+        loqusdb_config = loqusdb_config_map[loqusdb_instance]
+        return LoqusdbAPI(
+            binary_path=loqusdb_config.binary_path,
+            config_path=loqusdb_config.config_path,
+        )
 
     @staticmethod
     def is_duplicate(
@@ -117,11 +109,11 @@ class ObservationsAPI:
         )
         return bool(loqusdb_case or duplicate or case.loqusdb_uploaded_samples)
 
-    def update_statusdb_loqusdb_id(self, samples: list[Case], loqusdb_id: str | None) -> None:
+    def update_statusdb_loqusdb_id(self, samples: list[Sample], loqusdb_id: str | None) -> None:
         """Update Loqusdb ID field in StatusDB for each of the provided samples."""
         for sample in samples:
             sample.loqusdb_id = loqusdb_id
-        self.store.session.commit()
+        self.store.commit_to_store()
 
     def is_customer_eligible_for_observations_upload(self, customer_id: str) -> bool:
         """Return whether the customer has been whitelisted for uploading observations."""
@@ -140,8 +132,7 @@ class ObservationsAPI:
             return False
         return True
 
-    def is_sample_source_eligible_for_observations_upload(self, case_id: str) -> bool:
-        """Check if the sample source is FFPE."""
+    def is_sample_source_type_ffpe(self, case_id: str) -> bool:
         source_type: str | None = self.analysis_api.get_case_source_type(case_id)
         if source_type and SourceType.FFPE.lower() not in source_type.lower():
             return True
