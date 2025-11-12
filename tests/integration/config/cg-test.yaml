@@ -59,7 +59,6 @@ balsamic:
   pon_path: "{test_root_dir}/balsamic_pon_path"
   root: "{test_root_dir}/balsamic_root_path"
   sentieon_licence_path: "{test_root_dir}/balsamic_sention_licence_path"
-  cluster_config: "{test_root_dir}/cluster_config.json"
   loqusdb_dump_files:
     artefact_sv: "{test_root_dir}/loqusdb/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz"
     artefact_snv: "{test_root_dir}/loqusdb/artefact_somatic_snv.vcf.gz"

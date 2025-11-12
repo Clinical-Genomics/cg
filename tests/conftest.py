@@ -2004,7 +2004,6 @@ def context_config(
             "bed_path": str(cg_dir),
             "binary_path": "echo",
             "cadd_path": str(cg_dir),
-            "cluster_config": str(cg_dir),
             "conda_binary": "a_conda_binary",
             "conda_env": "S_balsamic",
             "genome_interval_path": str(cg_dir),
