@@ -148,7 +148,7 @@ def test_start_available_nallo(
     # GIVEN a config file with valid database URIs and directories
     config_path: Path = test_run_paths.cg_config_file
 
-    # GIVEN the necessary configured directories exist
+    # GIVEN the necessary configuration files exist on disk
     test_root_dir = test_run_paths.test_root_dir
     copy_integration_test_file(
         from_path=Path("tests/integration/config/nallo-params.yaml"),
@@ -168,8 +168,7 @@ def test_start_available_nallo(
     status_db.link_case_to_order(order_id=order.id, case_id=nallo_case.id)
 
     # GIVEN a sample associated with the case, with:
-    #  - flow cell and sequencing run stored in StatusDB
-    #  - a gzipped-fastq file on disk
+    #  - bam files on disk
     #  - a bundle associated with the fastq file in Housekeeper
     sample: Sample = nallo_sample
     helpers.relate_samples(base_store=status_db, case=nallo_case, samples=[sample])
@@ -184,7 +183,6 @@ def test_start_available_nallo(
     )
 
     # GIVEN a new pending analysis can be added to the Trailblazer API
-    # case_path = Path(mip_dna_path, "cases", case.internal_id)
     expect_to_add_pending_analysis_to_trailblazer(
         analysis_type=AnalysisType.WGS,
         out_dir=Path(test_root_dir, "nallo_root_path", nallo_case.internal_id),
@@ -216,9 +214,6 @@ def test_start_available_nallo(
     assert result.exit_code == 0
 
     # THEN the analysis should be started in the correct way
-    _first_call = subprocess_mock.mock_calls[0]
-    second_call = subprocess_mock.mock_calls[1]
-
     expected_run_command: list[str] = [
         f"{test_root_dir}/tower_binary_path",
         "launch",
@@ -238,6 +233,7 @@ def test_start_available_nallo(
         "nallo_compute_env-normal",
         "nallo_tower_workflow",
     ]
+    second_call = subprocess_mock.mock_calls[1]
     assert second_call.args[0] == expected_run_command
 
     # THEN an analysis has been created for the case
