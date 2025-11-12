@@ -121,6 +121,13 @@ def copy_integration_test_file(from_path: Path, to_path: Path):
     return True
 
 
+def expect_file_contents(file_path: Path, expected_file_contents: str):
+    with open(file_path) as f:
+        assert (
+            f.read() == expected_file_contents
+        ), f"The file at {file_path} did not have the expected contents"
+
+
 def expect_to_get_latest_analysis_with_empty_response_from_trailblazer(
     trailblazer_server: HTTPServer, case_id: str
 ):

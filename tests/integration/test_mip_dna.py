@@ -21,6 +21,7 @@ from tests.integration.utils import (
     IntegrationTestPaths,
     copy_integration_test_file,
     create_integration_test_sample,
+    expect_file_contents,
     expect_to_add_pending_analysis_to_trailblazer,
     expect_to_get_latest_analysis_with_empty_response_from_trailblazer,
 )
@@ -224,18 +225,21 @@ samples:
   sample_id: {sample.internal_id}
   sex: female
 """
-    with open(Path(case_dir, "pedigree.yaml")) as f:
-        assert f.read() == expected_pedigree_content
+    expect_file_contents(
+        file_path=Path(case_dir, "pedigree.yaml"), expected_file_contents=expected_pedigree_content
+    )
 
     # THEN the managed_variants file has been created with the correct contents
-    expected_managed_variants_content: str = scout_export_manged_variants_stdout.decode()
-    with open(Path(case_dir, "managed_variants.vcf")) as f:
-        assert f.read() == expected_managed_variants_content
+    expect_file_contents(
+        file_path=Path(case_dir, "managed_variants.vcf"),
+        expected_file_contents=scout_export_manged_variants_stdout.decode(),
+    )
 
     # THEN the gene_panels file has been created with the correct contents
-    expected_gene_panels_content: str = scout_export_panel_stdout.decode().removesuffix("\n")
-    with open(Path(case_dir, "gene_panels.bed")) as f:
-        assert f.read() == expected_gene_panels_content
+    expect_file_contents(
+        file_path=Path(case_dir, "gene_panels.bed"),
+        expected_file_contents=scout_export_panel_stdout.decode().removesuffix("\n"),
+    )
 
 
 def _create_qc_file(test_root_dir: Path, case: Case) -> Path:

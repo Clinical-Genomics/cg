@@ -19,6 +19,7 @@ from tests.integration.utils import (
     copy_integration_test_file,
     create_empty_file,
     create_integration_test_sample,
+    expect_file_contents,
     expect_to_add_pending_analysis_to_trailblazer,
     expect_to_get_latest_analysis_with_empty_response_from_trailblazer,
 )
@@ -264,25 +265,36 @@ def test_start_available_nallo(
     status_db.session.refresh(case)
     assert case.action == CaseActions.RUNNING
 
-    # TODO check that all files have been created with correct contents
+    # THEN the following files have been created with the correct contents:
+    # - CASE_ID_nextflow_config.json
+    # - CASE_ID_params_file.yaml
+    # - CASE_ID_samplesheet.csv
+    # - gene_panels.tsv
+    # - tower_ids.yaml
 
-    # config file
     case_directory = Path(test_root_dir, "nallo_root_path", case.internal_id)
-    with open(Path(case_directory, f"{case.internal_id}_nextflow_config.json")) as f:
-        assert f.read() == expected_config_file_contents
 
-    # params file
-    with open(Path(case_directory, f"{case.internal_id}_params_file.yaml")) as f:
-        assert f.read() == expected_params_file_contents
+    expect_file_contents(
+        file_path=Path(case_directory, f"{case.internal_id}_nextflow_config.json"),
+        expected_file_contents=expected_config_file_contents,
+    )
 
-    # sample sheet
-    with open(Path(case_directory, f"{case.internal_id}_samplesheet.csv")) as f:
-        assert f.read() == expected_samplesheet_contents
+    expect_file_contents(
+        file_path=Path(case_directory, f"{case.internal_id}_params_file.yaml"),
+        expected_file_contents=expected_params_file_contents,
+    )
 
-    # gene panel
-    with open(Path(case_directory, "gene_panels.tsv")) as f:
-        assert f.read() == scout_export_panel_stdout.decode().removesuffix("\n")
+    expect_file_contents(
+        file_path=Path(case_directory, f"{case.internal_id}_samplesheet.csv"),
+        expected_file_contents=expected_samplesheet_contents,
+    )
 
-    # tower ids
-    with open(Path(case_directory, "tower_ids.yaml")) as f:
-        assert f.read() == expected_tower_ids_contents
+    expect_file_contents(
+        Path(case_directory, "gene_panels.tsv"),
+        expected_file_contents=scout_export_panel_stdout.decode().removesuffix("\n"),
+    )
+
+    expect_file_contents(
+        file_path=Path(case_directory, "tower_ids.yaml"),
+        expected_file_contents=expected_tower_ids_contents,
+    )
