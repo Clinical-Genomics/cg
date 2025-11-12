@@ -45,7 +45,7 @@ def check_samples_in_lims(
     order_date_cutoff: datetime = get_date_days_ago(order_age_cutoff * 365)
     transfer_api: TransferLims = context.meta_apis["transfer_lims_api"]
     transfer_api.transfer_samples(
-        order_age_cutoff=order_date_cutoff,
+        order_date_cutoff=order_date_cutoff,
         status_type=SampleState[status.upper()],
         include=include,
         sample_id=sample_id,

@@ -120,30 +120,32 @@ def test_transfer_samples_include_unset_received_at_older_than_cutoff(
     sample_store = transfer_lims_api.status
     samples = sample_store._get_query(table=Sample).all()
     assert len(samples) >= 2
+
     # GIVEN time window
     order_date_cutoff: dt.datetime = dt.datetime.today() - dt.timedelta(days=365 * 3)
-    order_to_late: dt.datetime = order_date_cutoff - dt.timedelta(days=1)
+    order_too_late: dt.datetime = order_date_cutoff - dt.timedelta(days=1)
     order_right_on_time: dt.datetime = order_date_cutoff + dt.timedelta(days=1)
 
-    # GIVEN sample with unset received_at
+    # GIVEN sample with unset received_at and ordered BEFORE cutoff (should be excluded)
     untransfered_sample: Sample = samples[0]
-    untransfered_sample.ordered_at = order_to_late
+    untransfered_sample.ordered_at = order_too_late
     untransfered_sample.received_at = None
     untransfered_sample.preped_at = None
     untransfered_sample.last_sequenced_at = None
     untransfered_sample.delivered_at = None
 
-    # GIVEN sample with set received_at
+    # GIVEN sample with unset received_at and ordered AFTER cutoff (should be included)
     transfered_sample = samples[1]
     transfered_sample.ordered_at = order_right_on_time
-    transfered_sample.received_at = dt.datetime.today()
+    transfered_sample.received_at = None  # Changed to None since we want to test unset samples
     transfered_sample.preped_at = None
     transfered_sample.last_sequenced_at = None
     transfered_sample.delivered_at = None
 
-    # GIVEN both samples has received date in lims
+    # GIVEN both samples have received date in lims
     untransfered_sample_received_at_date = dt.datetime.today()
     transfered_sample_received_at_date = dt.datetime.today()
+
     lims_sample = sample_store.add_sample(
         name=untransfered_sample.name,
         sex=untransfered_sample.sex,
@@ -151,6 +153,7 @@ def test_transfer_samples_include_unset_received_at_older_than_cutoff(
         received=untransfered_sample_received_at_date,
     )
     lims_samples = [lims_sample]
+
     lims_sample = sample_store.add_sample(
         name=transfered_sample.name,
         sex=transfered_sample.sex,
@@ -158,14 +161,17 @@ def test_transfer_samples_include_unset_received_at_older_than_cutoff(
         received=transfered_sample_received_at_date,
     )
     lims_samples.append(lims_sample)
+
     lims_api = transfer_lims_api.lims
     lims_api.set_samples(lims_samples)
 
-    # WHEN calling transfer lims with include unset received_at
+    # WHEN calling transfer lims with include unset received_at and order_date_cutoff
     transfer_lims_api.transfer_samples(
-        status_type=SampleState.RECEIVED, include=IncludeOptions.UNSET.value
+        status_type=SampleState.RECEIVED,
+        include=IncludeOptions.UNSET.value,
+        order_date_cutoff=order_date_cutoff,
     )
 
-    # THEN the sample that was not set has been set and the other sample was not touched
-    assert has_same_received_at(lims_api, untransfered_sample)
-    assert not has_same_received_at(lims_api, transfered_sample)
+    # THEN only the sample ordered after cutoff should be updated
+    assert not has_same_received_at(lims_api, untransfered_sample)
+    assert has_same_received_at(lims_api, transfered_sample)

@@ -56,8 +56,8 @@ class TransferLims(object):
         self,
         status_type: SampleState,
         include: str = "unset",
-        sample_id: str = None,
         order_date_cutoff: datetime | None = None,
+        sample_id: str = None,
     ):
         """Transfer information about samples."""
 
@@ -68,6 +68,9 @@ class TransferLims(object):
                 include=include, status_type=status_type
             )
 
+        if order_date_cutoff:
+            LOG.info(f"Remove samples ordered before {str(order_date_cutoff)}")
+            self._remove_older_orders(samples=samples, order_date_cutoff=order_date_cutoff)
         if samples is None:
             LOG.info(f"No samples to process found with {include} {status_type.value}")
             return
@@ -91,13 +94,19 @@ class TransferLims(object):
             else:
                 LOG.debug(f"no {status_type.value} date found for {sample_obj.internal_id}")
 
-    @staticmethod
-    def _samples_order_after_cutoff_time_limit(
-        samples: list[Sample], cutoff_time_limit: int
-    ) -> list[Sample]:
-        pass
+    def _remove_older_orders(
+        self, samples: list[Sample], order_date_cutoff: datetime
+    ) -> list[Sample] | None:
+        no_samples_before_filtering: int = len(samples)
+        for sample_obj in samples:
+            if self._is_sample_ordered_before_order_date_cutoff(
+                sample_obj=sample_obj, order_date_cutoff=order_date_cutoff
+            ):
+                samples.remove(sample_obj)
+        LOG.info(f"Filter out {no_samples_before_filtering-len(samples)} samples")
+        return samples
 
-    def _get_samples_to_include(self, include, status_type):  # TODO: add the date filter flag
+    def _get_samples_to_include(self, include, status_type):
         samples = None
         if include == IncludeOptions.UNSET.value:
             samples = self._get_samples_in_step(status_type)
@@ -105,8 +114,6 @@ class TransferLims(object):
             samples = self.status.get_samples_not_invoiced()
         elif include == IncludeOptions.ALL.value:
             samples = self.status.get_samples_not_down_sampled()
-        # TODO: add if statement with time cutoff, for-loop
-
         return samples
 
     def transfer_pools(self, status_type: PoolState):
@@ -168,11 +175,7 @@ class TransferLims(object):
         return True
 
     @staticmethod
-    def _exclude_samples_with_an_older_order_at_date(
-        samples: list[Sample], age_limit: int
-    ) -> list[Sample]:
-        time_limit = datetime.year - age_limit
-        for sample in samples:
-            sample = sample.ordered_at >= time_limit
-            samples.pop(samples.index(sample))
-        return samples
+    def _is_sample_ordered_before_order_date_cutoff(
+        sample_obj: Sample, order_date_cutoff: datetime
+    ) -> bool:
+        return sample_obj.ordered_at < order_date_cutoff
