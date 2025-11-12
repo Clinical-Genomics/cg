@@ -85,7 +85,7 @@ def cg_balsamic_config(tmp_path) -> BalsamicConfig:
             cancer_somatic_sv=tmp_path / "cancer_somatic_sv.vcf",
             clinical_snv=tmp_path / "clinical_snv.vcf",
             clinical_sv=tmp_path / "clinical_sv.vcf",
-            cancer_somatic_snv_panel_observations={
+            cancer_somatic_snv_panels={
                 BalsamicObservationPanel.MYELOID: tmp_path / "loqusdb_myeloid_dump",
                 BalsamicObservationPanel.LYMPHOID: tmp_path / "loqusdb_lymphoid_dump",
                 BalsamicObservationPanel.EXOME: tmp_path / "loqusdb_exome_dump",

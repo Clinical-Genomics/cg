@@ -50,7 +50,7 @@ class BalsamicConfigFileCreator:
             cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv
         )
         self.cancer_somatic_snv_panel_observations: dict = (
-            cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations
+            cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panels
         )
         self.loqusdb_cancer_somatic_sv: Path = (
             cg_balsamic_config.loqusdb_dump_files.cancer_somatic_sv

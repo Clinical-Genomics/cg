@@ -2021,7 +2021,7 @@ def context_config(
                 "cancer_somatic_sv": str(cg_dir),
                 "clinical_snv": str(cg_dir),
                 "clinical_sv": str(cg_dir),
-                "cancer_somatic_snv_panel_observations": {
+                "cancer_somatic_snv_panels": {
                     "GMSmyeloid": Path("loqusdb_myeloid_dump"),
                     "GMSlymphoid": Path("loqusdb_lymphoid_dump"),
                     "Twist Exome Comprehensive": Path("loqusdb_exome_dump"),

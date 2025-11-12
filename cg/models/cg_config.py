@@ -186,7 +186,7 @@ class LoqusDBDumpFiles(BaseModel):
     cancer_somatic_sv: Path
     clinical_snv: Path
     clinical_sv: Path
-    cancer_somatic_snv_panel_observations: dict[BalsamicObservationPanel, Path]  # Panel
+    cancer_somatic_snv_panels: dict[BalsamicObservationPanel, Path]  # Panel
 
 
 class BalsamicConfig(CommonAppConfig):
