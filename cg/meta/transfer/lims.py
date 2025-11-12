@@ -54,17 +54,19 @@ class TransferLims(object):
 
     def transfer_samples(
         self,
-        order_age_cutoff: int,
         status_type: SampleState,
         include: str = "unset",
         sample_id: str = None,
+        order_date_cutoff: datetime | None = None,
     ):
         """Transfer information about samples."""
 
         if sample_id:
             samples: list[Sample] = self.status.get_samples_by_internal_id(internal_id=sample_id)
         else:
-            samples: list[Sample] = self._get_samples_to_include(include, status_type)
+            samples: list[Sample] = self._get_samples_to_include(
+                include=include, status_type=status_type
+            )
 
         if samples is None:
             LOG.info(f"No samples to process found with {include} {status_type.value}")

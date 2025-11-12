@@ -1,6 +1,7 @@
 """Transfer CLI."""
 
 import logging
+from datetime import datetime
 
 import rich_click as click
 
@@ -9,6 +10,7 @@ from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.meta.transfer import PoolState, SampleState, TransferLims
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
+from cg.utils.date import get_date_days_ago
 
 LOG = logging.getLogger(__name__)
 
@@ -40,9 +42,10 @@ def check_samples_in_lims(
     context: CGConfig, order_age_cutoff: int, status: str, include: str, sample_id: str
 ):
     """Check if samples have been updated in LIMS."""
+    order_date_cutoff: datetime = get_date_days_ago(order_age_cutoff * 365)
     transfer_api: TransferLims = context.meta_apis["transfer_lims_api"]
     transfer_api.transfer_samples(
-        order_age_cutoff=order_age_cutoff,
+        order_age_cutoff=order_date_cutoff,
         status_type=SampleState[status.upper()],
         include=include,
         sample_id=sample_id,
