@@ -180,7 +180,7 @@ class DeliveryServiceFactory:
         tag: str = case.samples[0].application_version.application.tag
         microbial_tags: list[str] = [
             application.tag
-            for application in self.store.get_active_applications_by_prep_category(
+            for application in self.store.get_applications_by_prep_category(
                 prep_category=SeqLibraryPrepCategory.MICROBIAL
             )
         ]

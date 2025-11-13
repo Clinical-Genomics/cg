@@ -249,6 +249,16 @@
   step: maf_depth_track
   tag: bigwig
 - format: meta
+  id: SAMPLEID
+  path: PATHTOCASE/qc/phasing_stats/SAMPLEID/SAMPLEID_stats.blocks.gtf.gz
+  step: phase_blocks
+  tag: gtf
+- format: meta
+  id: SAMPLEID
+  path: PATHTOCASE/qc/phasing_stats/SAMPLEID/SAMPLEID_stats.blocks.gtf.gz.tbi
+  step: phase_blocks
+  tag: gtf_index
+- format: meta
   id: CASEID
   path: PATHTOCASE/multiqc/multiqc_data/multiqc_data.json
   step: multiqc

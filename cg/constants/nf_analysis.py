@@ -17,7 +17,6 @@ class NfTowerStatus(StrEnum):
 
 NALLO_GENERAL_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "median_coverage": {"norm": "gt", "threshold": 20},
-    "predicted_sex_sex_check": {"norm": "eq", "threshold": None},
 }
 
 NALLO_PARENT_PEDDY_METRIC_CONDITION: dict[str, dict[str, Any]] = {
