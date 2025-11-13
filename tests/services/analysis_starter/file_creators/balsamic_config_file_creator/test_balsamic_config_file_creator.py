@@ -1,7 +1,7 @@
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import cast
-from unittest.mock import Mock, create_autospec
+from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -562,9 +562,8 @@ def test_balsamic_config_case_command_fails(
     )
 
     # GIVEN that the Balsamic config case command fails
-    mock_run = mocker.patch.object(subprocess, "run")
-    mock_run.side_effect = lambda *args, **kwargs: (
-        CalledProcessError(returncode=2, cmd="config case")
+    mock_run = mocker.patch.object(
+        subprocess, "run", side_effect=CalledProcessError(returncode=2, cmd="config case")
     )
 
     # WHEN creating the config file for the case
@@ -573,6 +572,9 @@ def test_balsamic_config_case_command_fails(
         config_file_creator.create(
             case_id="case_1", fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq")
         )
+
+    # THEN the run was called with check=True
+    mock_run.assert_called_once_with(args=ANY, shell=ANY, check=True, stdout=ANY, stderr=ANY)
 
 
 @pytest.mark.parametrize(
