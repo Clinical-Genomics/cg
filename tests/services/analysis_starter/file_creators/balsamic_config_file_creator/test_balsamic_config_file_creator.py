@@ -1,16 +1,17 @@
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
 from typing import cast
-from unittest.mock import ANY, Mock, create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
+from pytest import LogCaptureFixture
 from pytest_mock import MockerFixture
 
 import cg.services.analysis_starter.configurator.file_creators.balsamic_config as creator
 from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.observations import BalsamicObservationPanel
-from cg.constants.process import EXIT_SUCCESS
+from cg.constants.process import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, LimsDataError
 from cg.models.cg_config import BalsamicConfig
@@ -559,7 +560,7 @@ def test_create_no_capture_kit_in_lims(cg_balsamic_config: BalsamicConfig):
 
 
 def test_balsamic_config_case_command_fails(
-    cg_balsamic_config: BalsamicConfig, mocker: MockerFixture
+    caplog: LogCaptureFixture, cg_balsamic_config: BalsamicConfig, mocker: MockerFixture
 ):
     # GIVEN a store with a Balsamic case
     sample: Sample = create_autospec(
@@ -580,10 +581,14 @@ def test_balsamic_config_case_command_fails(
         status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
     )
 
+    def return_failed_process(*popenargs, check=False, **kwargs) -> CompletedProcess:
+        assert not check, "Expected check=False when calling Balsamic config case"
+        return CompletedProcess(
+            args="", returncode=EXIT_FAIL, stderr=b"Balsamic config case error!"
+        )
+
     # GIVEN that the Balsamic config case command fails
-    mock_run = mocker.patch.object(
-        subprocess, "run", side_effect=CalledProcessError(returncode=2, cmd="config case")
-    )
+    mocker.patch.object(subprocess, "run", side_effect=return_failed_process)
 
     # WHEN creating the config file for the case
     # THEN a CalledProcessError is raised
@@ -592,8 +597,8 @@ def test_balsamic_config_case_command_fails(
             case_id="case_1", fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq")
         )
 
-    # THEN the run was called with check=False
-    mock_run.assert_called_once_with(args=ANY, shell=ANY, check=False, stdout=ANY, stderr=ANY)
+    # THEN the error logs from Balsamic are logged
+    assert "Balsamic config case error!" in caplog.text
 
 
 @pytest.mark.parametrize(
