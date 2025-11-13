@@ -1,6 +1,7 @@
 """Transfer CLI."""
 
 import logging
+from datetime import datetime
 
 import rich_click as click
 
@@ -25,9 +26,10 @@ def transfer_group(context: CGConfig):
 
 @transfer_group.command("lims")
 @click.option(
-    "--order-age-cutoff",
+    "--max-order-age",
     type=int,
-    help="Exclude samples with order dates older than N years. If not set, include all samples.",
+    default=None,
+    help="Exclude samples with order dates older than N years. If not set, include all samples. Provide value in years.",
 )
 @click.option(
     "-s", "--status", type=click.Choice(["received", "prepared", "delivered"]), default="received"
@@ -38,16 +40,14 @@ def transfer_group(context: CGConfig):
 @click.option("--sample-id", help="Lims Submitted Sample id. use together with status.")
 @click.pass_obj
 def check_samples_in_lims(
-    context: CGConfig, order_age_cutoff: int, status: str, include: str, sample_id: str
+    context: CGConfig, max_order_age: int | None, status: str, include: str, sample_id: str
 ):
     """Check if samples have been updated in LIMS."""
-    if order_age_cutoff:
-        order_date_cutoff = get_date_days_ago(order_age_cutoff * 365)
-    else:
-        order_date_cutoff = None
+    if max_order_age:
+        max_order_age: datetime = get_date_days_ago(max_order_age * 365)
     transfer_api: TransferLims = context.meta_apis["transfer_lims_api"]
     transfer_api.transfer_samples(
-        order_date_cutoff=order_date_cutoff,
+        order_date_cutoff=max_order_age,
         status_type=SampleState[status.upper()],
         include=include,
         sample_id=sample_id,
