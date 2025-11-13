@@ -1,4 +1,5 @@
 from pathlib import Path
+from subprocess import CalledProcessError
 from typing import cast
 from unittest.mock import Mock, create_autospec
 
@@ -14,6 +15,7 @@ from cg.exc import CaseNotFoundError, LimsDataError
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
+    subprocess,
 )
 from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
@@ -532,6 +534,42 @@ def test_create_no_capture_kit_in_lims(cg_balsamic_config: BalsamicConfig):
     # WHEN creating the config file for the case
     # THEN a LimsDataError error is raised
     with pytest.raises(LimsDataError):
+        config_file_creator.create(
+            case_id="case_1", fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq")
+        )
+
+
+def test_balsamic_config_case_command_fails(
+    cg_balsamic_config: BalsamicConfig, mocker: MockerFixture
+):
+    # GIVEN a store with a Balsamic case
+    sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_1",
+        is_tumour=True,
+        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        sex=SexOptions.MALE,
+    )
+    wgs_tumor_only_case: Case = create_autospec(
+        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
+    )
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id_strict = Mock(return_value=wgs_tumor_only_case)
+
+    # GIVEN a BalsamicConfigFileCreator
+    config_file_creator = BalsamicConfigFileCreator(
+        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
+    )
+
+    # GIVEN that the Balsamic config case command fails
+    mock_run = mocker.patch.object(subprocess, "run")
+    mock_run.side_effect = lambda *args, **kwargs: (
+        CalledProcessError(returncode=2, cmd="config case")
+    )
+
+    # WHEN creating the config file for the case
+    # THEN a CalledProcessError is raised
+    with pytest.raises(CalledProcessError):
         config_file_creator.create(
             case_id="case_1", fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq")
         )

@@ -76,7 +76,7 @@ class BalsamicConfigFileCreator:
         subprocess.run(
             args=final_command,
             shell=True,
-            check=False,
+            check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
