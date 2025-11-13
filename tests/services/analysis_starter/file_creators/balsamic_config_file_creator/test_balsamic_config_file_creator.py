@@ -573,8 +573,8 @@ def test_balsamic_config_case_command_fails(
             case_id="case_1", fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq")
         )
 
-    # THEN the run was called with check=True
-    mock_run.assert_called_once_with(args=ANY, shell=ANY, check=True, stdout=ANY, stderr=ANY)
+    # THEN the run was called with check=False
+    mock_run.assert_called_once_with(args=ANY, shell=ANY, check=False, stdout=ANY, stderr=ANY)
 
 
 @pytest.mark.parametrize(

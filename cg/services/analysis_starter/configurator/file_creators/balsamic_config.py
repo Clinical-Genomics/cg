@@ -1,6 +1,7 @@
 import logging
 import subprocess
 from pathlib import Path
+from subprocess import CalledProcessError
 from typing import cast
 
 from pydantic import EmailStr
@@ -8,6 +9,7 @@ from pydantic import EmailStr
 from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.constants import GenomeVersion, Workflow
+from cg.constants.process import EXIT_SUCCESS
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.models.balsamic import (
@@ -73,13 +75,16 @@ class BalsamicConfigFileCreator:
     def _create_config_file(config_cli_input: BalsamicConfigInput) -> None:
         final_command: str = config_cli_input.dump_to_cli()
         LOG.debug(f"Running: {final_command}")
-        subprocess.run(
+        result = subprocess.run(
             args=final_command,
             shell=True,
-            check=True,
+            check=False,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
+        if result.returncode != EXIT_SUCCESS:
+            LOG.critical(result.stderr.decode("utf-8").rstrip())
+            raise CalledProcessError(result.returncode, final_command)
 
     def _build_config_input(self, case_id: str, fastq_path: Path, **flags) -> BalsamicConfigInput:
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
