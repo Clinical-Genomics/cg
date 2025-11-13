@@ -179,8 +179,14 @@ class MutaccAutoConfig(CommonAppConfig):
 
 
 class LoqusDBDumpFiles(BaseModel):
-    artefact_sv_observations: Path  # WGS
-    cancer_somatic_snv_panel_observations: dict[BalsamicObservationPanel, Path]  # Panel
+    artefact_sv: Path  # WGS
+    artefact_snv: Path
+    cancer_germline_snv: Path
+    cancer_somatic_snv: Path
+    cancer_somatic_sv: Path
+    clinical_snv: Path
+    clinical_sv: Path
+    cancer_somatic_snv_panels: dict[BalsamicObservationPanel, Path]  # Panel
 
 
 class BalsamicConfig(CommonAppConfig):
@@ -196,12 +202,6 @@ class BalsamicConfig(CommonAppConfig):
     gnomad_af5_path: Path
     head_job_partition: str
     loqusdb_path: Path
-    loqusdb_artefact_snv: Path
-    loqusdb_cancer_germline_snv: Path
-    loqusdb_cancer_somatic_snv: Path
-    loqusdb_cancer_somatic_sv: Path
-    loqusdb_clinical_snv: Path
-    loqusdb_clinical_sv: Path
     loqusdb_dump_files: LoqusDBDumpFiles
     panel_of_normals: dict[str, Path]  # For TGS and Exome
     pon_path: Path

@@ -64,5 +64,5 @@ class BalsamicConfigurator(Configurator):
     def _ensure_required_config_files_exist(self, config: BalsamicCaseConfig) -> None:
         if not config.sample_config.exists():
             raise CaseNotConfiguredError(
-                f"Please ensure that the config file {config.sample_config.exists()} exists."
+                f"Please ensure that the config file {config.sample_config} exists."
             )

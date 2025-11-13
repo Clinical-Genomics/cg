@@ -3,6 +3,8 @@ import subprocess
 from pathlib import Path
 from typing import cast
 
+from pydantic import EmailStr
+
 from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.constants import GenomeVersion, Workflow
@@ -39,21 +41,25 @@ class BalsamicConfigFileCreator:
         self.environment: str = cg_balsamic_config.conda_env
         self.sentieon_licence_path: Path = cg_balsamic_config.sentieon_licence_path
         self.sentieon_licence_server: str = cg_balsamic_config.sentieon_licence_server
-        self.loqusdb_artefact_snv: Path = cg_balsamic_config.loqusdb_artefact_snv
-        self.artefact_sv_observations: Path = (
-            cg_balsamic_config.loqusdb_dump_files.artefact_sv_observations
+        self.loqusdb_artefact_snv: Path = cg_balsamic_config.loqusdb_dump_files.artefact_snv
+        self.artefact_sv_observations: Path = cg_balsamic_config.loqusdb_dump_files.artefact_sv
+        self.loqusdb_cancer_germline_snv: Path = (
+            cg_balsamic_config.loqusdb_dump_files.cancer_germline_snv
         )
-        self.loqusdb_cancer_germline_snv: Path = cg_balsamic_config.loqusdb_cancer_germline_snv
-        self.loqusdb_cancer_somatic_snv: Path = cg_balsamic_config.loqusdb_cancer_somatic_snv
-        self.cancer_somatic_snv_panel_observations: dict = (
-            cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panel_observations
+        self.loqusdb_cancer_somatic_snv: Path = (
+            cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv
         )
-        self.loqusdb_cancer_somatic_sv: Path = cg_balsamic_config.loqusdb_cancer_somatic_sv
-        self.loqusdb_clinical_snv: Path = cg_balsamic_config.loqusdb_clinical_snv
-        self.loqusdb_clinical_sv: Path = cg_balsamic_config.loqusdb_clinical_sv
+        self.loqusdb_cancer_somatic_snv_panels: dict = (
+            cg_balsamic_config.loqusdb_dump_files.cancer_somatic_snv_panels
+        )
+        self.loqusdb_cancer_somatic_sv: Path = (
+            cg_balsamic_config.loqusdb_dump_files.cancer_somatic_sv
+        )
+        self.loqusdb_clinical_snv: Path = cg_balsamic_config.loqusdb_dump_files.clinical_snv
+        self.loqusdb_clinical_sv: Path = cg_balsamic_config.loqusdb_dump_files.clinical_sv
         self.panel_of_normals: dict = cg_balsamic_config.panel_of_normals
         self.slurm_account: str = cg_balsamic_config.slurm.account
-        self.slurm_mail_user: str = cg_balsamic_config.slurm.mail_user
+        self.slurm_mail_user: EmailStr = cg_balsamic_config.slurm.mail_user
         self.swegen_snv: Path = cg_balsamic_config.swegen_snv
         self.swegen_sv: Path = cg_balsamic_config.swegen_sv
 
@@ -133,7 +139,7 @@ class BalsamicConfigFileCreator:
             cadd_annotations=self.cadd_path,
             cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
             cancer_somatic_snv_observations=self.loqusdb_cancer_somatic_snv,
-            cancer_somatic_snv_panel_observations=self.cancer_somatic_snv_panel_observations.get(
+            cancer_somatic_snv_panel_observations=self.loqusdb_cancer_somatic_snv_panels.get(
                 bed_version.bed_name
             ),
             cancer_somatic_sv_observations=self.loqusdb_cancer_somatic_sv,
