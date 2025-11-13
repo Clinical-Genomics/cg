@@ -149,7 +149,7 @@ def test_start_available_nallo(
     config_path: Path = test_run_paths.cg_config_file
 
     # GIVEN the necessary configuration files exist on disk
-    test_root_dir = test_run_paths.test_root_dir
+    test_root_dir: Path = test_run_paths.test_root_dir
     copy_integration_test_file(
         from_path=Path("tests/integration/config/nallo-params.yaml"),
         to_path=Path(test_root_dir, "nallo_params.yaml"),
@@ -169,7 +169,7 @@ def test_start_available_nallo(
 
     # GIVEN a sample associated with the case, with:
     #  - bam files on disk
-    #  - a bundle associated with the fastq file in Housekeeper
+    #  - a bundle associated with the BAM file in Housekeeper
     sample: Sample = nallo_sample
     helpers.relate_samples(base_store=status_db, case=nallo_case, samples=[sample])
 
@@ -197,7 +197,7 @@ def test_start_available_nallo(
         workflow_manager="nf_tower",
     )
 
-    # WHEN running mip-dna start-available
+    # WHEN running nallo start-available
     result: Result = cli_runner.invoke(
         base,
         [
