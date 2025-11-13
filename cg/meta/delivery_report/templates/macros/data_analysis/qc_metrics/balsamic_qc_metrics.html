@@ -3,6 +3,7 @@
 {% macro balsamic_qc_metrics(samples, analysis_type) %}
   {% set
     metrics = [
+      {"name": "Kön",                         "key": "predicted_sex",      "description": "Kön beräknat genom bioinformatisk analys."},
       {"name": "Läspar [M]",                  "key": "million_read_pairs", "description": "Antal sekvenseringsläsningar i miljoner läspar."},
       {"name": "Duplikat [%]",                "key": "duplicates",         "description": "Sekvenseringsläsningar som är i duplikat och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserat bibliotek eller djup sekvensering."},
       {"name": "Medelfragmentlängd [baspar]", "key": "mean_insert_size",   "description": "Medelstorlek av provbiblioteken som laddats på sekvenseringsinstrument."},
