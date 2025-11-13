@@ -1,5 +1,5 @@
 from pathlib import Path
-from subprocess import CalledProcessError
+from subprocess import CalledProcessError, CompletedProcess
 from typing import cast
 from unittest.mock import ANY, Mock, create_autospec
 
@@ -10,6 +10,7 @@ import cg.services.analysis_starter.configurator.file_creators.balsamic_config a
 from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
 from cg.constants.observations import BalsamicObservationPanel
+from cg.constants.process import EXIT_SUCCESS
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CaseNotFoundError, LimsDataError
 from cg.models.cg_config import BalsamicConfig
@@ -60,7 +61,9 @@ def test_create_tgs_myeloid_normal_only(
     )
 
     # GIVEN that the subprocess exits successfully
-    mock_runner = mocker.patch.object(creator.subprocess, "run")
+    mock_runner = mocker.patch.object(
+        creator.subprocess, "run", return_value=CompletedProcess(args="", returncode=EXIT_SUCCESS)
+    )
 
     # WHEN creating the config file
     config_file_creator.create(
@@ -124,7 +127,9 @@ def test_create_tgs_lymphoid_paired(
     )
 
     # GIVEN that the subprocess exits successfully
-    mock_runner = mocker.patch.object(creator.subprocess, "run")
+    mock_runner = mocker.patch.object(
+        creator.subprocess, "run", return_value=CompletedProcess(args="", returncode=EXIT_SUCCESS)
+    )
 
     # WHEN creating the config file
     config_file_creator.create(
@@ -179,7 +184,9 @@ def test_create_tgs_tumour_only(
     )
 
     # GIVEN that the subprocess exits successfully
-    mock_runner = mocker.patch.object(creator.subprocess, "run")
+    mock_runner = mocker.patch.object(
+        creator.subprocess, "run", return_value=CompletedProcess(args="", returncode=EXIT_SUCCESS)
+    )
 
     # WHEN creating the config file
     config_file_creator.create(
@@ -221,7 +228,9 @@ def test_create_override_panel_bed(
     )
 
     # GIVEN that the subprocess exits successfully
-    mock_runner = mocker.patch.object(creator.subprocess, "run")
+    mock_runner = mocker.patch.object(
+        creator.subprocess, "run", return_value=CompletedProcess(args="", returncode=EXIT_SUCCESS)
+    )
 
     # WHEN creating the config file providing a panel bed
     config_file_creator.create(
@@ -276,7 +285,9 @@ def test_create_wes_normal_only(
     )
 
     # GIVEN that the subprocess exits successfully
-    mock_runner = mocker.patch.object(creator.subprocess, "run")
+    mock_runner = mocker.patch.object(
+        creator.subprocess, "run", return_value=CompletedProcess(args="", returncode=EXIT_SUCCESS)
+    )
 
     # WHEN creating the config file
     config_file_creator.create(
@@ -338,7 +349,9 @@ def test_create_wes_paired(
     )
 
     # GIVEN that the subprocess exits successfully
-    mock_runner = mocker.patch.object(creator.subprocess, "run")
+    mock_runner = mocker.patch.object(
+        creator.subprocess, "run", return_value=CompletedProcess(args="", returncode=EXIT_SUCCESS)
+    )
 
     # WHEN creating the config file
     config_file_creator.create(
@@ -391,7 +404,9 @@ def test_create_wes_tumour_only(
     )
 
     # GIVEN that the subprocess exits successfully
-    mock_runner = mocker.patch.object(creator.subprocess, "run")
+    mock_runner = mocker.patch.object(
+        creator.subprocess, "run", return_value=CompletedProcess(args="", returncode=EXIT_SUCCESS)
+    )
 
     # WHEN creating the config file
     config_file_creator.create(
@@ -439,7 +454,9 @@ def test_create_wgs_paired(
     )
 
     # GIVEN that the subprocess exits successfully
-    mock_runner = mocker.patch.object(creator.subprocess, "run")
+    mock_runner = mocker.patch.object(
+        creator.subprocess, "run", return_value=CompletedProcess(args="", returncode=EXIT_SUCCESS)
+    )
 
     # WHEN creating the config file
     config_file_creator.create(
@@ -475,7 +492,9 @@ def test_create_wgs_tumor_only(
     )
 
     # GIVEN that the subprocess exits successfully
-    mock_runner = mocker.patch.object(creator.subprocess, "run")
+    mock_runner = mocker.patch.object(
+        creator.subprocess, "run", return_value=CompletedProcess(args="", returncode=EXIT_SUCCESS)
+    )
 
     # WHEN creating the config file
     config_file_creator.create(

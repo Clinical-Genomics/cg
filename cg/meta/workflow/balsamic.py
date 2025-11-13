@@ -604,7 +604,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--case-id": arguments.get("case_id"),
                 "--clinical-snv-observations": arguments.get("clinical_snv"),
                 "--clinical-sv-observations": arguments.get("clinical_sv"),
-                "--exome": arguments.get("exome"),
                 "--fastq-path": self.get_sample_fastq_destination_dir(
                     self.status_db.get_case_by_internal_id(case_id)
                 ),
@@ -615,6 +614,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--gnomad-min-af5": arguments.get("gnomad_min_af5"),
                 "--normal-sample-name": arguments.get("normal_sample_name"),
                 "--panel-bed": arguments.get("panel_bed"),
+                "--exome": arguments.get("exome"),  # MUST be after panel bed
                 "--pon-cnn": arguments.get("pon_cnn"),
                 "--sentieon-install-dir": self.sentieon_licence_path,
                 "--sentieon-license": self.sentieon_licence_server,
