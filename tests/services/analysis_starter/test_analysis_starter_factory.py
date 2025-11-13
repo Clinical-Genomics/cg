@@ -6,6 +6,7 @@ from cg.constants import Workflow
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import (
+    BalsamicConfig,
     CGConfig,
     IlluminaConfig,
     MipConfig,
@@ -14,6 +15,7 @@ from cg.models.cg_config import (
     RunInstruments,
     SeqeraPlatformConfig,
 )
+from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
@@ -29,9 +31,37 @@ from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
     SeqeraPlatformSubmitter,
 )
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
+from cg.services.analysis_starter.tracker.implementations.balsamic import BalsamicTracker
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
 from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
 from cg.store.store import Store
+
+
+def test_analysis_starter_factory_balsamic(cg_balsamic_config: BalsamicConfig):
+    # GIVEN a CGConfig with configuration info for Balsamic
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        balsamic=cg_balsamic_config,
+        data_flow=Mock(),
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+        ),
+    )
+
+    # GIVEN an AnalysisStarterFactory
+    analysis_starter_factory = AnalysisStarterFactory(cg_config)
+
+    # WHEN getting the analysis starter for Balsamic
+    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
+        Workflow.BALSAMIC
+    )
+
+    # THEN the analysis starter should have been configured correctly
+    assert isinstance(analysis_starter.configurator, BalsamicConfigurator)
+    assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
+    assert isinstance(analysis_starter.submitter, SubprocessSubmitter)
+    assert isinstance(analysis_starter.tracker, BalsamicTracker)
 
 
 def test_analysis_starter_factory_microsalt(cg_context: CGConfig, mocker: MockerFixture):

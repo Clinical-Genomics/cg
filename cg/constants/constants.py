@@ -156,12 +156,12 @@ class FileFormat(StrEnum):
 
 
 class GenomeVersion(StrEnum):
-    GRCh37: str = "GRCh37"
-    GRCh38: str = "GRCh38"
-    T2T_CHM13: str = "T2T-CHM13v2.0"
+    GRCh37 = "GRCh37"
+    GRCh38 = "GRCh38"
+    T2T_CHM13 = "T2T-CHM13v2.0"
     CANFAM3 = auto()
-    HG19: str = "hg19"
-    HG38: str = "hg38"
+    HG19 = "hg19"
+    HG38 = "hg38"
 
 
 class SampleType(StrEnum):

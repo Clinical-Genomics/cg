@@ -70,29 +70,6 @@ def balsamic_wgs_analysis():
 
 
 @pytest.fixture
-def rnafusion_analysis() -> NextflowAnalysis:
-    return NextflowAnalysis(
-        sample_metrics={
-            "sample_id": RnafusionQCMetrics(
-                after_filtering_gc_content=0.1,
-                after_filtering_q20_rate=0.1,
-                after_filtering_q30_rate=0.1,
-                after_filtering_read1_mean_length=0.1,
-                before_filtering_total_reads=0.1,
-                median_5prime_to_3prime_bias=0.1,
-                pct_adapter=0.1,
-                pct_mrna_bases=0.1,
-                pct_ribosomal_bases=0.1,
-                pct_surviving=0.1,
-                pct_duplication=0.1,
-                read_pairs_examined=0.1,
-                uniquely_mapped_percent=0.1,
-            )
-        },
-    )
-
-
-@pytest.fixture
 def balsamic_wgs_analysis_without_predicted_sex() -> BalsamicAnalysis:
     return BalsamicAnalysis(
         balsamic_config=create_autospec(
@@ -110,6 +87,29 @@ def balsamic_wgs_analysis_without_predicted_sex() -> BalsamicAnalysis:
                 pct_15x=1.0,
                 pct_60x=1.0,
                 pct_pf_reads_improper_pairs=1.0,
+            )
+        },
+    )
+
+
+@pytest.fixture
+def rnafusion_analysis() -> NextflowAnalysis:
+    return NextflowAnalysis(
+        sample_metrics={
+            "sample_id": RnafusionQCMetrics(
+                after_filtering_gc_content=0.1,
+                after_filtering_q20_rate=0.1,
+                after_filtering_q30_rate=0.1,
+                after_filtering_read1_mean_length=0.1,
+                before_filtering_total_reads=0.1,
+                median_5prime_to_3prime_bias=0.1,
+                pct_adapter=0.1,
+                pct_mrna_bases=0.1,
+                pct_ribosomal_bases=0.1,
+                pct_surviving=0.1,
+                pct_duplication=0.1,
+                read_pairs_examined=0.1,
+                uniquely_mapped_percent=0.1,
             )
         },
     )

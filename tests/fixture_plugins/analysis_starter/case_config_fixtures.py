@@ -5,6 +5,7 @@ import pytest
 
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
+from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 
 
@@ -42,6 +43,21 @@ def get_nextflow_case_config_dict(
         }
 
     return _make_dict
+
+
+@pytest.fixture
+def balsamic_case_config(case_id: str, tmp_path: Path) -> BalsamicCaseConfig:
+    return BalsamicCaseConfig(
+        account="development",
+        binary=tmp_path / "bin" / "balsamic",
+        case_id=case_id,
+        conda_binary=tmp_path / "bin" / "conda",
+        environment="T_BALSAMIC",
+        head_job_partition="head-jobs",
+        qos=SlurmQos.NORMAL,
+        sample_config=tmp_path / case_id / f"{case_id}.json",
+        workflow=Workflow.BALSAMIC,
+    )
 
 
 @pytest.fixture
