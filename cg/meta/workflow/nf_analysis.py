@@ -882,7 +882,7 @@ class NfAnalysisAPI(AnalysisAPI):
         )
         if not is_latest_analysis_qc and not is_latest_analysis_completed and not force:
             LOG.error(
-                "Case not stored. Trailblazer status must be either QC or COMPLETE to be able to store"
+                "Case not stored. Trailblazer status must be either QC or COMPLETED to be able to store"
             )
             raise ValueError
 

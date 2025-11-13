@@ -6,7 +6,8 @@ from click.testing import CliRunner, Result
 from pytest_mock import MockerFixture
 
 from cg.cli.workflow.microsalt.base import start_available as microsalt_start_available
-from cg.cli.workflow.mip_dna.base import dev_start_available as mip_dna_start_available
+from cg.cli.workflow.mip_dna.base import start_available as mip_dna_start_available
+from cg.cli.workflow.nallo.base import dev_start_available as nallo_start_available
 from cg.cli.workflow.raredisease.base import dev_start_available as raredisease_start_available
 from cg.cli.workflow.rnafusion.base import start_available as rnafusion_start_available
 from cg.cli.workflow.taxprofiler.base import start_available as taxprofiler_start_available
@@ -18,13 +19,14 @@ from cg.services.analysis_starter.service import AnalysisStarter
 @pytest.mark.parametrize(
     "start_available_command",
     [
+        nallo_start_available,
         raredisease_start_available,
         rnafusion_start_available,
         taxprofiler_start_available,
         mip_dna_start_available,
         microsalt_start_available,
     ],
-    ids=["raredisease", "RNAFUSION", "Taxprofiler", "MIP-DNA", "microSALT"],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "MIP-DNA", "microSALT"],
 )
 @pytest.mark.parametrize(
     "succeeds, exit_status",

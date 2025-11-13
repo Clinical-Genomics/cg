@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from cg.services.delivery_message.messages.utils import (
+    REMINDER_TO_DOWNLOAD_MESSAGE,
     get_caesar_delivery_path,
     get_scout_links_row_separated,
 )
@@ -21,7 +22,8 @@ class RNAAnalysisStrategy(RNAUploadMessageStrategy):
     def get_file_upload_message(self, delivery_path: str) -> str:
         return (
             f"The analysis files are currently being uploaded to your inbox on Caesar:\n\n"
-            f"{delivery_path}"
+            f"{delivery_path} \n\n"
+            f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
         )
 
 
@@ -29,7 +31,8 @@ class RNAFastqAnalysisStrategy(RNAUploadMessageStrategy):
     def get_file_upload_message(self, delivery_path: str) -> str:
         return (
             f"The fastq and analysis files are currently being uploaded to your inbox on Caesar:\n\n"
-            f"{delivery_path}"
+            f"{delivery_path} \n\n"
+            f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
         )
 
 
@@ -37,7 +40,8 @@ class RNAFastqStrategy(RNAUploadMessageStrategy):
     def get_file_upload_message(self, delivery_path: str) -> str:
         return (
             f"The fastq files are currently being uploaded to your inbox on Caesar:\n\n"
-            f"{delivery_path}"
+            f"{delivery_path} \n\n"
+            f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
         )
 
 

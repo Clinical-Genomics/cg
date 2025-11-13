@@ -181,6 +181,23 @@ class HousekeeperAPI:
         files: Query = self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
         return files.order_by(File.id.desc()).first()
 
+    def get_latest_file_strict(
+        self, bundle: str, tags: list | None = None, version: int | None = None
+    ) -> File:
+        """
+        Return latest file from Housekeeper, filtered by bundle and/or tags and/or version.
+        Raises:
+            HousekeeperFileMissingError if no file is found.
+        """
+        files: Query = self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
+        latest_file: File | None = files.order_by(File.id.desc()).first()
+        if not latest_file:
+            raise HousekeeperFileMissingError(
+                f"No file matching bundle {bundle}, version {version} with tags {tags}"
+            )
+        else:
+            return latest_file
+
     def check_bundle_files(
         self,
         bundle_name: str,

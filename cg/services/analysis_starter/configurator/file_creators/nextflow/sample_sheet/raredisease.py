@@ -2,7 +2,7 @@ from typing import Iterator
 
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowSampleSheetCreator,
+    NextflowFastqSampleSheetCreator,
 )
 from cg.store.models import Case, CaseSample
 
@@ -19,7 +19,7 @@ HEADERS: list[str] = [
 ]
 
 
-class RarediseaseSampleSheetCreator(NextflowSampleSheetCreator):
+class RarediseaseSampleSheetCreator(NextflowFastqSampleSheetCreator):
 
     def _get_content(self, case_id: str) -> list[list[str]]:
         """Return formatted information required to build a sample sheet for a raredisease case.

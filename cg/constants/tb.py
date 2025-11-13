@@ -15,8 +15,8 @@ class AnalysisStatus:
 
 
 class AnalysisType(StrEnum):
-    OTHER: str = "other"
-    TGS: str = SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
-    WES: str = SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
-    WGS: str = SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
-    WTS: str = SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING
+    OTHER = "other"
+    TGS = SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING
+    WES = SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
+    WGS = SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+    WTS = SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING
