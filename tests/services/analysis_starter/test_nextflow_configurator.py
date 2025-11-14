@@ -193,6 +193,31 @@ def test_get_config_resume(
     assert case_config.session_id == "session_id"
 
 
+def test_get_config_resume_already_completed_analysis(
+    nextflow_case_id: str, raredisease_configurator: NextflowConfigurator, mocker: MockerFixture
+):
+    # GIVEN a Nextflow Configurator with a case and a
+    analysis: Analysis = create_autospec(Analysis, session_id="session_id")
+    raredisease_configurator.store.get_latest_started_analysis_for_case = Mock(
+        return_value=analysis
+    )
+
+    # GIVEN that all expected files are mocked to exist
+    mocker.patch.object(Path, "exists", return_value=True)
+    mocker.patch.object(
+        raredisease_configurator.pipeline_extension, "do_required_files_exist", return_value=True
+    )
+
+    # WHEN calling get_config using resume=True
+    case_config: NextflowCaseConfig = raredisease_configurator.get_config(
+        case_id=nextflow_case_id, resume=True
+    )
+
+    # THEN the resume attribute is True and the session id is as expected
+    assert case_config.resume is True
+    assert case_config.session_id == "session_id"
+
+
 @pytest.mark.parametrize(
     "workflow",
     [Workflow.NALLO, Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
