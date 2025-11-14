@@ -197,6 +197,37 @@ def view_customer_link(unused1, unused2, model, unused3):
     return markup
 
 
+def view_ticket_link(unused1, unused2, model, unused3):
+    """Column formatter used to add hyperlinks to ticket IDs, if applicable.
+    Can take several tickets if separated by commas."""
+    del unused1, unused2, unused3
+
+    # Harmonize behavior across different ticket attribute definitions
+    if hasattr(model, "tickets"):
+        tickets = model.tickets.split(sep=",")
+    elif hasattr(model, "original_ticket"):
+        tickets = [model.original_ticket]
+    elif hasattr(model, "ticket_id"):
+        tickets = [model.ticket_id]
+    elif hasattr(model, "ticket"):
+        tickets = [model.ticket]
+    else:
+        return None
+
+    formatted_tickets = []
+    for ticket in tickets:
+        # Freshdesk tickets have at least 7 digits
+        if len(ticket) >= 7:
+            ticket_link = f"https://scilifelab.freshdesk.com/a/tickets/{ticket}"
+            markup = Markup(f"<a href='{ticket_link}'>{ticket}</a>")
+            formatted_tickets.append(markup)
+        # Fallback: return without hyperlink formatting
+        else:
+            formatted_tickets.append(ticket)
+
+    return ",".join(formatted_tickets)
+
+
 class ApplicationView(BaseView):
     """Admin view for Model.Application"""
 
@@ -435,6 +466,7 @@ class CaseView(BaseView):
         "customer": view_customer_link,
         "internal_id": view_case_sample_link,
         "priority": view_priority,
+        "tickets": view_ticket_link,
     }
     column_searchable_list = [
         "internal_id",
@@ -650,7 +682,10 @@ class OrderView(BaseView):
 
     column_default_sort = ("order_date", True)
     column_editable_list = ["is_open"]
-    column_formatters = {"customer": view_customer_link}
+    column_formatters = {
+        "customer": view_customer_link,
+        "ticket_id": view_ticket_link,
+    }
     column_searchable_list = ["id", "ticket_id"]
     column_display_pk = True
     create_modal = True
@@ -684,6 +719,7 @@ class PoolView(BaseView):
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
         "invoice": InvoiceView.view_invoice_link,
+        "ticket": view_ticket_link,
     }
     column_searchable_list = ["name", "order", "ticket", "customer.internal_id"]
 
@@ -717,6 +753,7 @@ class SampleView(BaseView):
         "is_external": is_external_application,
         "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
+        "original_ticket": view_ticket_link,
         "priority": view_priority,
     }
     column_searchable_list = [
