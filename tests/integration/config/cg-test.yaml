@@ -139,6 +139,16 @@ encryption:
 pdc:
   binary_path: "{test_root_dir}/pdc_binary_path"
 
+seqera_platform:
+  base_url: "http://localhost:8888/tower"
+  bearer_token: "sequera_bearer_token"
+  compute_environments:
+    express: "3xpr355"
+    high: "h1gh"
+    low: "l0w"
+    normal: "n0rm41"
+  workspace_id: 1234567890
+
 scout:
   binary_path: /scout/binary
   config_path: /scout/config
