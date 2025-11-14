@@ -10,15 +10,9 @@ def fluffy_case_id() -> str:
 
 
 @pytest.fixture
-def microsalt_mwr_case_id() -> str:
-    """Return a microSALT case ID with MWR app tag."""
+def microsalt_case_id() -> str:
+    """Return a microSALT case ID"""
     return "microsalt_case_1"
-
-
-@pytest.fixture
-def microsalt_mwx_case_id() -> str:
-    """Return a microSALT case ID with MWX app tag."""
-    return "microsalt_case_2"
 
 
 @pytest.fixture
@@ -42,8 +36,7 @@ def _get_case_representation(
 @pytest.fixture
 def delivery_cases(
     fluffy_case_id: str,
-    microsalt_mwr_case_id: str,
-    microsalt_mwx_case_id: str,
+    microsalt_case_id: str,
     mip_case_id: str,
 ) -> list[dict]:
     """Return a list of dictionary representations of cases."""
@@ -55,14 +48,8 @@ def delivery_cases(
             data_delivery=DataDelivery.STATINA,
         ),
         _get_case_representation(
-            case_id=microsalt_mwr_case_id,
-            case_name=microsalt_mwr_case_id,
-            workflow=Workflow.MICROSALT,
-            data_delivery=DataDelivery.FASTQ_QC_ANALYSIS,
-        ),
-        _get_case_representation(
-            case_id=microsalt_mwx_case_id,
-            case_name=microsalt_mwx_case_id,
+            case_id=microsalt_case_id,
+            case_name=microsalt_case_id,
             workflow=Workflow.MICROSALT,
             data_delivery=DataDelivery.FASTQ_QC_ANALYSIS,
         ),

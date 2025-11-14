@@ -6,7 +6,7 @@ from cg.services.delivery_message.messages.utils import (
 from cg.store.models import Case
 
 
-class MicrosaltMwrMessage(DeliveryMessage):
+class MicrosaltMessage(DeliveryMessage):
     def create_message(self, cases: list[Case]) -> str:
         delivery_path: str = get_caesar_delivery_path(cases[0])
         return (

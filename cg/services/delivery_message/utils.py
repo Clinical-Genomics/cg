@@ -1,4 +1,4 @@
-from cg.constants.constants import DataDelivery, MicrosaltAppTags, Workflow
+from cg.constants.constants import DataDelivery, Workflow
 from cg.exc import CaseNotFoundError, OrderMismatchError
 from cg.services.delivery_message.messages import (
     AnalysisScoutMessage,
@@ -6,7 +6,7 @@ from cg.services.delivery_message.messages import (
     FastqAnalysisScoutMessage,
     FastqMessage,
     FastqScoutMessage,
-    MicrosaltMwrMessage,
+    MicrosaltMessage,
     ScoutMessage,
     StatinaMessage,
 )
@@ -14,7 +14,6 @@ from cg.services.delivery_message.messages.analysis_message import AnalysisMessa
 from cg.services.delivery_message.messages.bam_message import BamMessage
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
 from cg.services.delivery_message.messages.fastq_analysis_message import FastqAnalysisMessage
-from cg.services.delivery_message.messages.microsalt_mwx_message import MicrosaltMwxMessage
 from cg.services.delivery_message.messages.order_message import TaxprofilerDeliveryMessage
 from cg.services.delivery_message.messages.raw_data_analysis_message import RawDataAnalysisMessage
 from cg.services.delivery_message.messages.raw_data_analysis_scout_message import (
@@ -29,7 +28,7 @@ from cg.services.delivery_message.messages.rna_delivery_message import (
     RNAScoutStrategy,
     RNAUploadMessageStrategy,
 )
-from cg.store.models import Case, Sample
+from cg.store.models import Case
 from cg.store.store import Store
 
 MESSAGE_MAP = {
@@ -64,7 +63,7 @@ def get_message(cases: list[Case], store: Store) -> str:
 
 def get_message_strategy(case: Case, store: Store) -> DeliveryMessage:
     if case.data_analysis == Workflow.MICROSALT:
-        return get_microsalt_message_strategy(case)
+        return MicrosaltMessage()
 
     if case.data_analysis == Workflow.MUTANT:
         return CovidMessage()
@@ -94,41 +93,6 @@ def get_rna_message_strategy_from_data_delivery(
     if message_strategy := RNA_STRATEGY_MAP.get(case.data_delivery):
         return RNADeliveryMessage(store=store, strategy=message_strategy())
     return MESSAGE_MAP[case.data_delivery]()
-
-
-def get_microsalt_message_strategy(case: Case) -> DeliveryMessage:
-    if has_mwx_samples(case) or has_vwg_samples(case):
-        return MicrosaltMwxMessage()
-
-    if has_mwr_samples(case):
-        return MicrosaltMwrMessage()
-
-    app_tag: str = get_case_app_tag(case)
-    raise NotImplementedError(f"Microsalt apptag {app_tag} not supported.")
-
-
-def has_mwx_samples(case: Case) -> bool:
-    case_app_tag: str = get_case_app_tag(case)
-    return case_app_tag == MicrosaltAppTags.MWXNXTR003
-
-
-def has_mwr_samples(case: Case) -> bool:
-    case_app_tag: str = get_case_app_tag(case)
-    return case_app_tag == MicrosaltAppTags.MWRNXTR003
-
-
-def has_vwg_samples(case: Case) -> bool:
-    case_app_tag: str = get_case_app_tag(case)
-    return case_app_tag == MicrosaltAppTags.VWGNXTR001
-
-
-def get_case_app_tag(case: Case) -> str:
-    sample: Sample = case.samples[0]
-    return get_sample_app_tag(sample)
-
-
-def get_sample_app_tag(sample: Sample) -> str:
-    return sample.application_version.application.tag
 
 
 def validate_cases(cases: list[Case], case_ids: list[str]) -> None:
