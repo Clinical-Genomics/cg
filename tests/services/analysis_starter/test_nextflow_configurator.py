@@ -52,6 +52,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
+from cg.store.models import Analysis, Case
 from cg.store.store import Store
 
 
@@ -167,9 +168,28 @@ def test_get_case_config_flags(
     assert case_config.pre_run_script == "overridden"
 
 
-def test_get_config_resume():
-    # GIVEN
-    pass
+def test_get_config_resume(
+    nextflow_case_id: str, raredisease_configurator: NextflowConfigurator, mocker: MockerFixture
+):
+    # GIVEN a Nextflow Configurator with a case and a
+    analysis: Analysis = create_autospec(Analysis, session_id="session_id")
+    case: Case = create_autospec(Case, analyses=[analysis])
+    raredisease_configurator.store.get_case_by_internal_id_strict = Mock(return_value=case)
+
+    # GIVEN that all expected files are mocked to exist
+    mocker.patch.object(Path, "exists", return_value=True)
+    mocker.patch.object(
+        raredisease_configurator.pipeline_extension, "do_required_files_exist", return_value=True
+    )
+
+    # WHEN calling get_config using resume=True
+    case_config: NextflowCaseConfig = raredisease_configurator.get_config(
+        case_id=nextflow_case_id, resume=True
+    )
+
+    # THEN the resume attribute is True and the session id is as expected
+    assert case_config.resume is True
+    assert case_config.session_id == "session_id"
 
 
 @pytest.mark.parametrize(

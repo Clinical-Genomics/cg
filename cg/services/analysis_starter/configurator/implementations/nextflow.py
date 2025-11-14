@@ -87,6 +87,9 @@ class NextflowConfigurator(Configurator):
         self._ensure_required_config_files_exist(config)
         return config
 
+    def _set_flags(self, config: NextflowCaseConfig, **flags):
+        pass
+
     def _get_config_file_path(self, case_id: str) -> Path:
         """Return the path to the Nextflow config file."""
         return Path(self._get_case_run_directory(case_id), f"{case_id}_nextflow_config.json")
