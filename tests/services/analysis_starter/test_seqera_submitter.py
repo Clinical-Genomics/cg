@@ -1,15 +1,43 @@
+from unittest.mock import create_autospec
+
+import pytest
 from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
+from cg.models.cg_config import SeqeraPlatformConfig
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.submitters.seqera_platform import (
     seqera_platform_submitter as submitter,
 )
-from cg.services.analysis_starter.submitters.seqera_platform.dtos import WorkflowLaunchRequest
+from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
+from cg.services.analysis_starter.submitters.seqera_platform.dtos import (
+    LaunchRequest,
+    WorkflowLaunchRequest,
+)
 from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_submitter import (
     SeqeraPlatformSubmitter,
 )
+
+
+@pytest.fixture
+def expected_workflow_launch_request_with_resume() -> WorkflowLaunchRequest:
+    return WorkflowLaunchRequest(
+        launch=LaunchRequest(
+            computeEnvId="NormalComputeEnvId",
+            configProfiles=["profile"],
+            configText="includeConfig path_to_config.config",
+            paramsText="some-params-content",
+            pipeline="some.repository",
+            preRunScript="pre-run-script",
+            pullLatest=False,
+            resume=True,
+            revision="3.0.0",
+            runName="case_id",
+            sessionId="some_session_id",
+            workDir="work/dir",
+        )
+    )
 
 
 def test_create_launch_request(
@@ -35,7 +63,12 @@ def test_create_launch_request(
     assert workflow_launch_request == expected_workflow_launch_request
 
 
-def test_submit_with_resume(seqera_platform_submitter: SeqeraPlatformSubmitter):
+def test_submit_with_resume(
+    expected_workflow_launch_request_with_resume: WorkflowLaunchRequest,
+    seqera_platform_config: SeqeraPlatformConfig,
+    mocker: MockerFixture,
+):
+
     # GIVEN a case config containing a session id and resume set to True
     case_config = NextflowCaseConfig(
         case_id="case_id",
@@ -50,6 +83,14 @@ def test_submit_with_resume(seqera_platform_submitter: SeqeraPlatformSubmitter):
         workflow=Workflow.RAREDISEASE,
     )
 
+    # GIVEN a SeqeraPlatformSubmitter
+    client = create_autospec(SeqeraPlatformClient)
+    seqera_platform_submitter = SeqeraPlatformSubmitter(
+        client=client, compute_environment_ids=seqera_platform_config.compute_environments
+    )
+
+    mocker.patch.object(submitter, "read_yaml", return_value="some-params-content")
+
     # WHEN calling submit
     session_id, workflow_id = seqera_platform_submitter.submit(case_config)
 
@@ -58,3 +99,4 @@ def test_submit_with_resume(seqera_platform_submitter: SeqeraPlatformSubmitter):
     assert workflow_id == "some_workflow_id"
 
     # THEN assert that the run request provided to the client is correct
+    client.run_case.assert_called_once_with(expected_workflow_launch_request_with_resume)
