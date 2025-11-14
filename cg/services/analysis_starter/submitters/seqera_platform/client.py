@@ -17,7 +17,7 @@ class SeqeraPlatformClient:
         self.compute_environment_ids: dict[SlurmQos, str] = config.compute_environments
         self.workspace_id: int = config.workspace_id
 
-    def run_case(self, request: WorkflowLaunchRequest) -> str:
+    def run_case(self, request: WorkflowLaunchRequest) -> dict:
         """Launches a case from the request and returns the workflow ID."""
         url = f"{self.base_url}/workflow/launch"
         params: dict = {"workspaceId": self.workspace_id}
@@ -31,4 +31,4 @@ class SeqeraPlatformClient:
             json=request.model_dump(),
         )
         response.raise_for_status()
-        return response.json()["workflowId"]
+        return response.json()

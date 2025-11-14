@@ -1,4 +1,4 @@
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -24,7 +24,7 @@ from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_sub
 def expected_workflow_launch_request_with_resume() -> WorkflowLaunchRequest:
     return WorkflowLaunchRequest(
         launch=LaunchRequest(
-            computeEnvId="NormalComputeEnvId",
+            computeEnvId="normal-id",
             configProfiles=["profile"],
             configText="includeConfig path_to_config.config",
             paramsText="some-params-content",
@@ -78,18 +78,23 @@ def test_submit_with_resume(
         params_file="params_file.yaml",
         pipeline_repository="some.repository",
         pre_run_script="pre-run-script",
+        resume=True,
         revision="3.0.0",
+        session_id="some_session_id",
         work_dir="work/dir",
         workflow=Workflow.RAREDISEASE,
     )
 
     # GIVEN a SeqeraPlatformSubmitter
     client = create_autospec(SeqeraPlatformClient)
+    client.run_case = Mock(
+        return_value={"workflowId": "some_workflow_id", "sessionId": "some_session_id"}
+    )
     seqera_platform_submitter = SeqeraPlatformSubmitter(
         client=client, compute_environment_ids=seqera_platform_config.compute_environments
     )
 
-    mocker.patch.object(submitter, "read_yaml", return_value="some-params-content")
+    mocker.patch.object(submitter, "read_yaml", return_value={"content": "some-params-content"})
 
     # WHEN calling submit
     session_id, workflow_id = seqera_platform_submitter.submit(case_config)
