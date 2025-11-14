@@ -1,5 +1,5 @@
 """
-    Cg Exceptions.
+Cg Exceptions.
 """
 
 
@@ -33,6 +33,12 @@ class AnalysisAlreadyUploadedError(CgError):
 class AnalysisNotReadyError(CgError):
     """
     Exception raised when some FASTQ file are missing when starting an analysis.
+    """
+
+
+class AnalysisAlreadyCompletedError(CgError):
+    """
+    Exception raised when the latest analysis is already completed.
     """
 
 

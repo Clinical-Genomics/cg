@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from typing import cast
 from unittest.mock import Mock, create_autospec
@@ -8,7 +9,7 @@ from pytest_mock import MockerFixture
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
-from cg.exc import MissingConfigFilesError
+from cg.exc import AnalysisAlreadyCompletedError, MissingConfigFilesError
 from cg.models.cg_config import (
     CommonAppConfig,
     NalloConfig,
@@ -197,7 +198,9 @@ def test_get_config_resume_already_completed_analysis(
     nextflow_case_id: str, raredisease_configurator: NextflowConfigurator, mocker: MockerFixture
 ):
     # GIVEN a Nextflow Configurator with a case and a
-    analysis: Analysis = create_autospec(Analysis, session_id="session_id")
+    analysis: Analysis = create_autospec(
+        Analysis, session_id="session_id", completed_at=datetime.now()
+    )
     raredisease_configurator.store.get_latest_started_analysis_for_case = Mock(
         return_value=analysis
     )
@@ -209,13 +212,9 @@ def test_get_config_resume_already_completed_analysis(
     )
 
     # WHEN calling get_config using resume=True
-    case_config: NextflowCaseConfig = raredisease_configurator.get_config(
-        case_id=nextflow_case_id, resume=True
-    )
-
-    # THEN the resume attribute is True and the session id is as expected
-    assert case_config.resume is True
-    assert case_config.session_id == "session_id"
+    # THEN an error is raised because the latest analysis is completed
+    with pytest.raises(AnalysisAlreadyCompletedError):
+        raredisease_configurator.get_config(case_id=nextflow_case_id, resume=True)
 
 
 @pytest.mark.parametrize(
