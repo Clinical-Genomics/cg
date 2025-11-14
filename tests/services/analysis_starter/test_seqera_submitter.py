@@ -26,8 +26,8 @@ def expected_workflow_launch_request_with_resume() -> WorkflowLaunchRequest:
         launch=LaunchRequest(
             computeEnvId="normal-id",
             configProfiles=["profile"],
-            configText="includeConfig path_to_config.config",
-            paramsText="some-params-content",
+            configText="includeConfig 'path_to_config.config'",
+            paramsText="content: some-params-content\n",
             pipeline="some.repository",
             preRunScript="pre-run-script",
             pullLatest=False,

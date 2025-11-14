@@ -33,8 +33,10 @@ class SeqeraPlatformSubmitter(Submitter):
             paramsText=parameter_stream,
             pipeline=case_config.pipeline_repository,
             preRunScript=case_config.pre_run_script,
+            resume=case_config.resume,
             revision=case_config.revision,
             runName=case_config.case_id,
+            sessionId=case_config.session_id,
             workDir=case_config.work_dir,
         )
         return WorkflowLaunchRequest(launch=launch_request)
