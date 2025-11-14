@@ -1,9 +1,11 @@
 from pytest_mock import MockerFixture
 
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
-from cg.services.analysis_starter.submitters.seqera_platform import submitter
+from cg.services.analysis_starter.submitters.seqera_platform import (
+    seqera_platform_submitter as submitter,
+)
 from cg.services.analysis_starter.submitters.seqera_platform.dtos import WorkflowLaunchRequest
-from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
+from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_submitter import (
     SeqeraPlatformSubmitter,
 )
 
