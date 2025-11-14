@@ -9,5 +9,7 @@ class NextflowCaseConfig(CaseConfig):
     params_file: str
     pipeline_repository: str
     pre_run_script: str
+    resume: bool = False
     revision: str
+    session_id: str | None = None
     work_dir: str

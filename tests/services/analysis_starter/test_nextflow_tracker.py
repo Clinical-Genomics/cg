@@ -10,7 +10,7 @@ from cg.constants.tb import AnalysisType
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
-from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
+from cg.services.analysis_starter.tracker.implementations.nextflow_tracker import NextflowTracker
 from cg.store.models import Case, CaseSample, Customer, Order
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers

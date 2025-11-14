@@ -30,13 +30,13 @@ from cg.services.analysis_starter.configurator.models.nextflow import NextflowCa
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.service import AnalysisStarter
-from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
+from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_submitter import (
     SeqeraPlatformSubmitter,
 )
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
-from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
+from cg.services.analysis_starter.tracker.implementations.nextflow_tracker import NextflowTracker
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 

@@ -13,14 +13,14 @@ from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher im
 from cg.services.analysis_starter.input_fetcher.input_fetcher import InputFetcher
 from cg.services.analysis_starter.service import AnalysisStarter
 from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
-from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
+from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_submitter import (
     SeqeraPlatformSubmitter,
 )
 from cg.services.analysis_starter.submitters.submitter import Submitter
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
-from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
+from cg.services.analysis_starter.tracker.implementations.nextflow_tracker import NextflowTracker
 from cg.services.analysis_starter.tracker.tracker import Tracker
 from cg.store.store import Store
 

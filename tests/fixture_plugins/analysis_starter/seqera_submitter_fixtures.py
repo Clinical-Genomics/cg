@@ -8,7 +8,7 @@ from cg.services.analysis_starter.submitters.seqera_platform.dtos import (
     LaunchRequest,
     WorkflowLaunchRequest,
 )
-from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
+from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_submitter import (
     SeqeraPlatformSubmitter,
 )
 

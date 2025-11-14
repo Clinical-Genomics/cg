@@ -99,6 +99,7 @@ class Tracker(ABC):
             version=workflow_version,
             completed_at=None,
             primary=is_primary,
+            session_id=getattr(case_config, "session_id", None),
             started_at=analysis_start,
             trailblazer_id=trailblazer_id,
         )
