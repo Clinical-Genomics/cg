@@ -16,6 +16,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
     SampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
+from cg.store.models import Analysis
 from cg.store.store import Store
 
 
@@ -87,8 +88,14 @@ class NextflowConfigurator(Configurator):
         self._ensure_required_config_files_exist(config)
         return config
 
-    def _set_flags(self, config: NextflowCaseConfig, **flags):
-        pass
+    def _set_session_id(self, config: NextflowCaseConfig, **flags) -> NextflowCaseConfig:
+        if flags.get("resume"):
+            analysis: Analysis = self.store.get_latest_started_analysis_for_case(
+                case_id=config.case_id
+            )
+            #  TODO: Make sure that we fail if analysis is completed
+            config.session_id = analysis.session_id
+        return config
 
     def _get_config_file_path(self, case_id: str) -> Path:
         """Return the path to the Nextflow config file."""
