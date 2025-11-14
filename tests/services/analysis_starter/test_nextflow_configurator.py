@@ -52,7 +52,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
-from cg.store.models import Analysis, Case
+from cg.store.models import Analysis
 from cg.store.store import Store
 
 
@@ -173,8 +173,9 @@ def test_get_config_resume(
 ):
     # GIVEN a Nextflow Configurator with a case and a
     analysis: Analysis = create_autospec(Analysis, session_id="session_id")
-    case: Case = create_autospec(Case, analyses=[analysis])
-    raredisease_configurator.store.get_case_by_internal_id_strict = Mock(return_value=case)
+    raredisease_configurator.store.get_latest_started_analysis_for_case = Mock(
+        return_value=analysis
+    )
 
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)

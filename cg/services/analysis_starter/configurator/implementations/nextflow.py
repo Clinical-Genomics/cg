@@ -85,17 +85,19 @@ class NextflowConfigurator(Configurator):
             workflow=self.store.get_case_workflow(case_id),
         )
         config: NextflowCaseConfig = self._set_flags(config=config, **flags)
+        config: NextflowCaseConfig = self._set_session_id(config=config, **flags)
         self._ensure_required_config_files_exist(config)
         return config
 
     def _set_session_id(self, config: NextflowCaseConfig, **flags) -> NextflowCaseConfig:
+        new_config: NextflowCaseConfig = config.model_copy()
         if flags.get("resume"):
             analysis: Analysis = self.store.get_latest_started_analysis_for_case(
-                case_id=config.case_id
+                case_id=new_config.case_id
             )
             #  TODO: Make sure that we fail if analysis is completed
-            config.session_id = analysis.session_id
-        return config
+            new_config.session_id = analysis.session_id
+        return new_config
 
     def _get_config_file_path(self, case_id: str) -> Path:
         """Return the path to the Nextflow config file."""
