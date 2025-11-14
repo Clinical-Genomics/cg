@@ -167,6 +167,11 @@ def test_get_case_config_flags(
     assert case_config.pre_run_script == "overridden"
 
 
+def test_get_config_resume():
+    # GIVEN
+    pass
+
+
 @pytest.mark.parametrize(
     "workflow",
     [Workflow.NALLO, Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],

@@ -68,7 +68,6 @@ def test_submit_with_resume(
     seqera_platform_config: SeqeraPlatformConfig,
     mocker: MockerFixture,
 ):
-
     # GIVEN a case config containing a session id and resume set to True
     case_config = NextflowCaseConfig(
         case_id="case_id",
