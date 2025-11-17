@@ -91,6 +91,7 @@ def test_track(customer_id: str, should_be_hidden: bool, mocker: MockerFixture):
     mock_status_db.add_analysis.assert_called_with(
         completed_at=None,
         primary=True,
+        session_id=None,
         started_at=datetime.now(),
         trailblazer_id=1,
         version=mip_version,

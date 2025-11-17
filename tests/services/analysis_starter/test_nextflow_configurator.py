@@ -173,7 +173,7 @@ def test_get_config_resume(
     nextflow_case_id: str, raredisease_configurator: NextflowConfigurator, mocker: MockerFixture
 ):
     # GIVEN a Nextflow Configurator with a case and a
-    analysis: Analysis = create_autospec(Analysis, session_id="session_id")
+    analysis: Analysis = create_autospec(Analysis, session_id="session_id", completed_at=None)
     raredisease_configurator.store.get_latest_started_analysis_for_case = Mock(
         return_value=analysis
     )
