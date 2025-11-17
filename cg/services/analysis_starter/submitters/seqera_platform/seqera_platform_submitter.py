@@ -21,7 +21,10 @@ class SeqeraPlatformSubmitter(Submitter):
         """Starts a case and returns the workflow id for the job."""
         run_request: WorkflowLaunchRequest = self._create_launch_request(case_config)
         response: dict = self.client.run_case(run_request)
-        return response["sessionId"], response["workflowId"]
+        return (
+            response["sessionId"],
+            response["workflowId"],
+        )  # TODO: Create a named tuple for the session_id and workflow_id
 
     def _create_launch_request(self, case_config: NextflowCaseConfig) -> WorkflowLaunchRequest:
         parameters: dict = read_yaml(Path(case_config.params_file))
