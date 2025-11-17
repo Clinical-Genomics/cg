@@ -1,7 +1,7 @@
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import cast
-from unittest.mock import ANY, create_autospec
+from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
 import requests
@@ -67,21 +67,21 @@ def analysis_starter_scenario() -> dict:
             create_autospec(NextflowCaseConfig),
             create_autospec(SeqeraPlatformSubmitter),
             create_autospec(NextflowTracker),
-            "tower_id",
+            ("session_id", "tower_id"),
         ),
         Workflow.RAREDISEASE: (
             create_autospec(NextflowConfigurator),
             create_autospec(NextflowCaseConfig),
             create_autospec(SeqeraPlatformSubmitter),
             create_autospec(NextflowTracker),
-            "tower_id",
+            ("session_id", "tower_id"),
         ),
         Workflow.TAXPROFILER: (
             create_autospec(NextflowConfigurator),
             create_autospec(NextflowCaseConfig),
             create_autospec(SeqeraPlatformSubmitter),
             create_autospec(NextflowTracker),
-            "tower_id",
+            ("session_id", "tower_id"),
         ),
     }
 
@@ -361,9 +361,11 @@ def test_run(
     case_id: str = "case_id"
 
     # GIVEN a mock configurator, submitter, tracker, and case config
-    mock_configurator, mock_case_config, mock_submitter, mock_tracker, _ = (
+    mock_configurator, mock_case_config, mock_submitter, mock_tracker, submit_result = (
         analysis_starter_scenario[workflow]
     )
+
+    mock_submitter.submit = Mock(return_value=submit_result)
 
     # GIVEN that the get_config method from the configurator returns the mock case config
     mock_configurator.get_config.return_value = mock_case_config

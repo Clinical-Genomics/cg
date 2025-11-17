@@ -283,6 +283,7 @@ class Analysis(Base):
     case: Mapped["Case"] = orm.relationship(back_populates="analyses")
     trailblazer_id: Mapped[int | None]
     housekeeper_version_id: Mapped[int | None]
+    session_id: Mapped[str | None]
 
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
