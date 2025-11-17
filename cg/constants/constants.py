@@ -238,7 +238,6 @@ class APIMethods(StrEnum):
 
 class MicrosaltQC:
     AVERAGE_COVERAGE_THRESHOLD: int = 10
-    MWX_THRESHOLD_SAMPLES_PASSING: float = 0.9
     COVERAGE_10X_THRESHOLD: float = 0.75
     DUPLICATION_RATE_THRESHOLD: float = 0.8
     INSERT_SIZE_THRESHOLD: int = 100

@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+
 from cg.meta.workflow.microsalt.quality_controller.models import (
     CaseQualityResult,
     SampleQualityResult,
@@ -43,10 +44,6 @@ def get_case_fail_message(case: CaseQualityResult) -> str:
 
     if not case.control_passes_qc:
         fail_reasons.append("The negative control sample failed QC.\n")
-    if not case.urgent_passes_qc:
-        fail_reasons.append("The urgent samples failed QC.\n")
-    if not case.non_urgent_passes_qc:
-        fail_reasons.append("The non-urgent samples failed QC.\n")
     fail_message = "QC failed.\n"
     return fail_message + "".join(fail_reasons)
 

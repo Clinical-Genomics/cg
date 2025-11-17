@@ -1164,6 +1164,14 @@ class ReadHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
+    def get_sample_by_internal_id_strict(self, internal_id: str) -> Sample:
+        """Return a sample by lims id."""
+        return apply_sample_filter(
+            filter_functions=[SampleFilter.BY_INTERNAL_ID],
+            samples=self._get_query(table=Sample),
+            internal_id=internal_id,
+        ).one()
+
     def get_samples_by_identifier(self, object_type: str, identifier: str) -> list[Sample]:
         """Return all samples from a flow cell, case or sample id"""
         object_to_filter: dict[str, Callable] = {

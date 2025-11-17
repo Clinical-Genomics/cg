@@ -1,20 +1,15 @@
 import logging
 from pathlib import Path
+from typing import cast
 
 from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
-from cg.meta.workflow.microsalt.metrics_parser import (
-    MetricsParser,
-    QualityMetrics,
-    SampleMetrics,
-)
+from cg.meta.workflow.microsalt.metrics_parser import MetricsParser, QualityMetrics, SampleMetrics
 from cg.meta.workflow.microsalt.quality_controller.models import (
     CaseQualityResult,
     QualityResult,
     SampleQualityResult,
 )
-from cg.meta.workflow.microsalt.quality_controller.report_generator import (
-    ReportGenerator,
-)
+from cg.meta.workflow.microsalt.quality_controller.report_generator import ReportGenerator
 from cg.meta.workflow.microsalt.quality_controller.result_logger import ResultLogger
 from cg.meta.workflow.microsalt.quality_controller.utils import (
     get_application_tag,
@@ -70,7 +65,7 @@ class MicroSALTQualityController:
         valid_coverage: bool = has_valid_average_coverage(metrics)
         valid_10x_coverage: bool = has_valid_10x_coverage(metrics)
 
-        sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
+        sample: Sample = self.status_db.get_sample_by_internal_id_strict(sample_id)
         application_tag: str = get_application_tag(sample)
 
         if is_control := is_sample_negative_control(sample):
@@ -111,7 +106,8 @@ class MicroSALTQualityController:
         ResultLogger.log_sample_result(sample_quality)
         return sample_quality
 
-    def is_qc_required(self, case_run_dir: Path) -> bool:
+    @staticmethod
+    def is_qc_required(case_run_dir: Path | None) -> bool:
         if not case_run_dir:
             LOG.warning(f"Skipping QC, run directory {case_run_dir} does not exist.")
             return False
@@ -122,10 +118,10 @@ class MicroSALTQualityController:
         return not qc_done_path.exists()
 
     def has_valid_total_reads(self, sample_id: str) -> bool:
-        sample: Sample = self.status_db.get_sample_by_internal_id(sample_id)
+        sample: Sample = self.status_db.get_sample_by_internal_id_strict(sample_id)
         target_reads: int = get_sample_target_reads(sample)
         percent_reads_guaranteed: int = get_percent_reads_guaranteed(sample)
-        sample_reads: int = sample.reads
+        sample_reads: int = cast(int, sample.reads)
 
         if is_sample_negative_control(sample):
             return is_valid_total_reads_for_negative_control(
