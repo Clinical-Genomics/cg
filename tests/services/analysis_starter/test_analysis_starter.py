@@ -33,6 +33,7 @@ from cg.services.analysis_starter.service import AnalysisStarter
 from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_submitter import (
     SeqeraPlatformSubmitter,
 )
+from cg.services.analysis_starter.submitters.submitter import Submitter
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
@@ -107,7 +108,6 @@ def analysis_starter_scenario() -> dict:
 )
 def test_analysis_starter_start_available_error_handling(
     workflow: Workflow,
-    cg_context: CGConfig,
     attribute_name: str,
     function_name: str,
     error: type[Exception],
@@ -122,12 +122,16 @@ def test_analysis_starter_start_available_error_handling(
     mock_case: Case = create_autospec(Case)
     mock_store.get_cases_to_analyze.return_value = [mock_case]
 
+    # GIVEN a Submitter
+    submitter: Submitter = create_autospec(Submitter)
+    submitter.submit = Mock(return_value=("session_id", "workflow_id"))
+
     # GIVEN an analysis starter
     analysis_starter = AnalysisStarter(
         configurator=create_autospec(NextflowConfigurator),
         input_fetcher=create_autospec(FastqFetcher),
         store=mock_store,
-        submitter=create_autospec(SeqeraPlatformSubmitter),
+        submitter=submitter,
         tracker=create_autospec(NextflowTracker),
         workflow=workflow,
     )
