@@ -1,7 +1,7 @@
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import cast
-from unittest.mock import ANY, Mock, create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 import requests
@@ -262,7 +262,7 @@ def test_start(
     flags: dict[str, str] = {"flag1": "value1", "flag2": "value2"}
 
     # GIVEN a mock configurator, case config, submitter, tracker, and tower_id
-    mock_configurator, mock_case_config, mock_submitter, mock_tracker, tower_id = (
+    mock_configurator, mock_case_config, mock_submitter, mock_tracker, submit_result = (
         analysis_starter_scenario[workflow]
     )
 
@@ -275,8 +275,8 @@ def test_start(
     # GIVEN a Store
     mock_store: Store = create_autospec(Store)
 
-    # GIVEN that the submitter returns a tower_id or None when submitting the analysis
-    mock_submitter.submit.return_value = tower_id
+    # GIVEN that the submitter returns a (session id and tower id) or None when submitting the analysis
+    mock_submitter.submit.return_value = submit_result
 
     # GIVEN an analysis starter initialised with the previously mocked classes
     analysis_starter = AnalysisStarter(
@@ -292,13 +292,14 @@ def test_start(
     analysis_starter.start(case_id, **flags)
 
     # THEN the analysis should be started successfully
+    expected_tower_workflow_id = submit_result[1] if submit_result else None
     mock_tracker.ensure_analysis_not_ongoing.assert_called_once_with(case_id)
     input_fetcher.ensure_files_are_ready.assert_called_once_with(case_id)
     mock_configurator.configure.assert_called_once_with(case_id=case_id, **flags)
     mock_tracker.set_case_as_running.assert_called_once_with(case_id)
     mock_submitter.submit.assert_called_once_with(mock_case_config)
     mock_tracker.track.assert_called_once_with(
-        case_config=mock_case_config, tower_workflow_id=tower_id
+        case_config=mock_case_config, tower_workflow_id=expected_tower_workflow_id
     )
 
 
@@ -393,4 +394,11 @@ def test_run(
     mock_submitter.submit.assert_called_once_with(mock_case_config)
 
     # THEN the tracker should track the case
-    mock_tracker.track.assert_called_once_with(case_config=mock_case_config, tower_workflow_id=ANY)
+    if submit_result:
+        mock_tracker.track.assert_called_once_with(
+            case_config=mock_case_config, tower_workflow_id=submit_result[1]
+        )
+    else:
+        mock_tracker.track.assert_called_once_with(
+            case_config=mock_case_config, tower_workflow_id=None
+        )
