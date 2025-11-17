@@ -1,11 +1,14 @@
 from pathlib import Path
+from unittest.mock import Mock, create_autospec
 
-import mock
 import pytest
+from pytest_mock import MockerFixture
 
 from cg.apps.environ import environ_email
 from cg.apps.tb import TrailblazerAPI
+from cg.constants import Priority
 from cg.constants.constants import Workflow, WorkflowManager
+from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisType
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import StatusEnum
@@ -39,9 +42,14 @@ def nextflow_tracker(cg_context: CGConfig, helpers: StoreHelpers, raredisease_ca
     )
 
 
-def test_nextflow_tracker(nextflow_tracker: NextflowTracker, raredisease_case_id: str):
+def test_nextflow_tracker(
+    nextflow_tracker: NextflowTracker, raredisease_case_id: str, mocker: MockerFixture
+):
     # GIVEN a raredisease case
-    case: Case = nextflow_tracker.store.get_case_by_internal_id(raredisease_case_id)
+    store: Store = create_autospec(Store)
+    case: Case = create_autospec(Case, slurm_priority=SlurmQos.NORMAL, priority=Priority.standard)
+    store.get_case_by_internal_id = Mock(return_value=case)
+    nextflow_tracker.store = store
     case_config = NextflowCaseConfig(
         case_id=raredisease_case_id,
         workflow=Workflow.RAREDISEASE,
@@ -55,8 +63,8 @@ def test_nextflow_tracker(nextflow_tracker: NextflowTracker, raredisease_case_id
         work_dir="work/dir",
     )
 
-    # WHEN wanting to track the started microSALT analysis
-    with mock.patch.object(
+    # WHEN wanting to track the started raredisease analysis
+    request_submitter = mocker.patch.object(
         TrailblazerAPI,
         "query_trailblazer",
         return_value={
@@ -67,8 +75,8 @@ def test_nextflow_tracker(nextflow_tracker: NextflowTracker, raredisease_case_id
             "out_dir": "",
             "config_path": "",
         },
-    ) as request_submitter:
-        nextflow_tracker.track(case_config=case_config, tower_workflow_id="1")
+    )
+    nextflow_tracker.track(case_config=case_config, tower_workflow_id="1")
 
     # THEN the appropriate POST should have been sent
     config_path: Path = nextflow_tracker._get_job_ids_path(raredisease_case_id)
