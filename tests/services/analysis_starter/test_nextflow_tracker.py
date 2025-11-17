@@ -89,7 +89,9 @@ def test_nextflow_tracker(
             "config_path": "",
         },
     )
-    nextflow_tracker.track(case_config=case_config, tower_workflow_id="1")
+    nextflow_tracker.track(
+        case_config=case_config, session_id="session-abc-666", tower_workflow_id="1"
+    )
 
     # THEN the appropriate POST should have been sent
     config_path: Path = nextflow_tracker._get_job_ids_path(raredisease_case_id)
