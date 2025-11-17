@@ -9,12 +9,13 @@ from cg.apps.tb import TrailblazerAPI
 from cg.constants import Priority
 from cg.constants.constants import Workflow, WorkflowManager
 from cg.constants.priority import SlurmQos
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisType
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.tracker.implementations.nextflow_tracker import NextflowTracker
-from cg.store.models import Case, CaseSample, Customer, Order
+from cg.store.models import Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -47,8 +48,20 @@ def test_nextflow_tracker(
 ):
     # GIVEN a raredisease case
     store: Store = create_autospec(Store)
-    case: Case = create_autospec(Case, slurm_priority=SlurmQos.NORMAL, priority=Priority.standard)
+    sample: Sample = create_autospec(
+        Sample, prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+    )
+    case: Case = create_autospec(
+        Case,
+        customer=create_autospec(Customer, internal_id="cust000"),
+        data_analysis=Workflow.RAREDISEASE,
+        slurm_priority=SlurmQos.NORMAL,
+        priority=Priority.standard,
+        samples=[sample],
+    )
     store.get_case_by_internal_id = Mock(return_value=case)
+    store.get_case_workflow = Mock(return_value=Workflow.RAREDISEASE)
+    store.get_latest_ticket_from_case = Mock(return_value=666666)
     nextflow_tracker.store = store
     case_config = NextflowCaseConfig(
         case_id=raredisease_case_id,
@@ -89,7 +102,7 @@ def test_nextflow_tracker(
         "out_dir": config_path.parent.as_posix(),
         "priority": nextflow_tracker._get_trailblazer_priority(raredisease_case_id),
         "workflow": Workflow.RAREDISEASE.upper(),
-        "ticket": str(case.latest_order.ticket_id),
+        "ticket": 666666,
         "workflow_manager": WorkflowManager.Tower,
         "tower_workflow_id": "1",
         "is_hidden": True,
