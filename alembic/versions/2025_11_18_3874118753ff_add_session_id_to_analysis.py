@@ -18,7 +18,9 @@ depends_on = None
 
 
 def upgrade():
-    op.add_column(table_name="analysis", column=sa.Column("session_id", sa.String(), nullable=True))
+    op.add_column(
+        table_name="analysis", column=sa.Column("session_id", sa.String(length=128), nullable=True)
+    )
 
 
 def downgrade():
