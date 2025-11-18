@@ -7,6 +7,7 @@ import genologics.entities
 from cg.apps.lims import LimsAPI
 from cg.store.models import Pool, Sample
 from cg.store.store import Store
+from cg.utils.date import get_date_days_ago
 
 LOG = logging.getLogger(__name__)
 
@@ -56,7 +57,7 @@ class TransferLims(object):
         self,
         status_type: SampleState,
         include: str = "unset",
-        order_date_cutoff: datetime | None = None,
+        max_order_age: int | None = None,
         sample_id: str = None,
     ):
         """Transfer information about samples."""
@@ -68,7 +69,8 @@ class TransferLims(object):
                 include=include, status_type=status_type
             )
 
-        if order_date_cutoff:
+        if max_order_age:
+            order_date_cutoff: datetime = get_date_days_ago(max_order_age * 365)
             LOG.info(f"Remove samples ordered before {str(order_date_cutoff)}")
             self._remove_older_orders(samples=samples, order_date_cutoff=order_date_cutoff)
         if samples is None:
@@ -97,14 +99,14 @@ class TransferLims(object):
     def _remove_older_orders(
         self, samples: list[Sample], order_date_cutoff: datetime
     ) -> list[Sample] | None:
-        no_samples_before_filtering: int = len(samples)
-        for sample_obj in samples:
-            if self._is_sample_ordered_before_order_date_cutoff(
-                sample_obj=sample_obj, order_date_cutoff=order_date_cutoff
+        sample_within_time_window: list[Sample] = []
+        for sample in samples:
+            if not self._is_sample_order_too_old(
+                sample=sample, order_date_cutoff=order_date_cutoff
             ):
-                samples.remove(sample_obj)
-        LOG.info(f"Filter out {no_samples_before_filtering-len(samples)} samples")
-        return samples
+                sample_within_time_window.append(sample)
+        LOG.debug(f"Filter out {len(samples)-len(sample_within_time_window)} samples")
+        return sample_within_time_window
 
     def _get_samples_to_include(self, include, status_type):
         samples = None
@@ -175,7 +177,5 @@ class TransferLims(object):
         return True
 
     @staticmethod
-    def _is_sample_ordered_before_order_date_cutoff(
-        sample_obj: Sample, order_date_cutoff: datetime
-    ) -> bool:
-        return sample_obj.ordered_at < order_date_cutoff
+    def _is_sample_order_too_old(sample: Sample, order_date_cutoff: datetime) -> bool:
+        return sample.ordered_at < order_date_cutoff

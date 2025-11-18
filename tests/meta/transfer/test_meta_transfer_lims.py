@@ -137,7 +137,7 @@ def test_transfer_samples_include_unset_received_at_older_than_cutoff(
     # GIVEN sample with unset received_at and ordered AFTER cutoff (should be included)
     transfered_sample = samples[1]
     transfered_sample.ordered_at = order_right_on_time
-    transfered_sample.received_at = None  # Changed to None since we want to test unset samples
+    transfered_sample.received_at = None
     transfered_sample.preped_at = None
     transfered_sample.last_sequenced_at = None
     transfered_sample.delivered_at = None
@@ -169,7 +169,7 @@ def test_transfer_samples_include_unset_received_at_older_than_cutoff(
     transfer_lims_api.transfer_samples(
         status_type=SampleState.RECEIVED,
         include=IncludeOptions.UNSET.value,
-        order_date_cutoff=order_date_cutoff,
+        max_order_age=3,
     )
 
     # THEN only the sample ordered after cutoff should be updated
