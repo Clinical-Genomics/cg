@@ -68,8 +68,8 @@ class AnalysisStarter:
             if submit_result:
                 session_id, workflow_id = submit_result
             self.tracker.track(
-                case_config=parameters, tower_workflow_id=workflow_id
-            )  # TODO: Add the session_id to the function.
+                case_config=parameters, session_id=session_id, tower_workflow_id=workflow_id
+            )
         except CalledProcessError as exception:
             self.tracker.set_case_as_not_running(case_id)
             raise exception
