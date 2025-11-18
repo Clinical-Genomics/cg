@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Annotated
+from typing import Annotated, cast
 
 import sqlalchemy
 from sqlalchemy import (
@@ -549,11 +549,11 @@ class Case(Base, PriorityMixin):
         return [link.sample for link in self.links if link.sample.loqusdb_id]
 
     @property
-    def slurm_priority(self) -> str:
+    def slurm_priority(self) -> SlurmQos:
         """Get Quality of service (SLURM QOS) for the case."""
         if self.are_all_samples_control():
             return SlurmQos.EXPRESS
-        return Priority.priority_to_slurm_qos().get(self.priority)
+        return cast(SlurmQos, Priority.priority_to_slurm_qos().get(self.priority))
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
         """Represent as dictionary."""

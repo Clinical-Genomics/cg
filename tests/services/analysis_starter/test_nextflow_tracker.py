@@ -116,6 +116,7 @@ def test_nextflow_tracker(
         command="add-pending-analysis", request_body=expected_request_body
     )
 
+    # THEN an analysis was created in StatusDB
     store.as_mock.add_analysis.assert_called_once_with(
         case=case,
         completed_at=None,
