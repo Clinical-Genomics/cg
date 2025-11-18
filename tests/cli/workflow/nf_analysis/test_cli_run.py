@@ -310,4 +310,4 @@ def test_run_nextflow_calls_service(
     cli_runner.invoke(run_command, [case_id], obj=cg_context)
 
     # THEN the analysis started should have been called with the flags set
-    service_call.assert_called_once_with(case_id=case_id)
+    service_call.assert_called_once_with(case_id=case_id, resume=False)
