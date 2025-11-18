@@ -170,23 +170,23 @@ def test_rnafusion_start(
     # GIVEN a case with appropriate parameters set
     mock_sample: Sample = create_autospec(Sample)
     mock_case: Case = create_autospec(Case, samples=[mock_sample])
-    mock_store.get_case_by_internal_id.return_value = mock_case
+    mock_store.get_case_by_internal_id_strict = Mock(return_value=mock_case)
     mock_case.priority = Priority.standard
     mock_case.data_analysis = Workflow.RNAFUSION
 
     # GIVEN that the case is not downsampled nor external
-    mock_store.is_case_down_sampled.return_value = False
-    mock_store.is_case_external.return_value = False
+    mock_store.is_case_down_sampled = Mock(return_value=False)
+    mock_store.is_case_external = Mock(return_value=False)
 
     # GIVEN that the case has a priority and a workflow
-    mock_store.get_case_priority.return_value = SlurmQos.NORMAL
-    mock_store.get_case_workflow.return_value = Workflow.RNAFUSION
+    mock_store.get_case_priority = Mock(return_value=SlurmQos.NORMAL)
+    mock_store.get_case_workflow = Mock(return_value=Workflow.RNAFUSION)
 
     # GIVEN that no analysis is running for the case
     mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing", return_value=False)
 
     # GIVEN that the flow cells are on disk
-    mock_store.are_all_illumina_runs_on_disk.return_value = True
+    mock_store.are_all_illumina_runs_on_disk = Mock(return_value=True)
 
     # GIVEN that there are no archived spring files
     mocker.patch.object(HousekeeperAPI, "get_archived_files_for_bundle", return_value=[])

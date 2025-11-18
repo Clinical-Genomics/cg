@@ -71,4 +71,4 @@ def test_run_tracks_case(cli_runner: CliRunner, cg_context: CGConfig, mocker: Mo
         environment=microsalt_config.conda_env,
         fastq_directory=expected_fastq_dir.as_posix(),
     )
-    track_mock.assert_called_once_with(case_config=expected_case_config)
+    track_mock.assert_called_once_with(case_config=expected_case_config, tower_workflow_id=None)
