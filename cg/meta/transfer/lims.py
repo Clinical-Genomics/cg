@@ -96,7 +96,7 @@ class TransferLims(object):
             else:
                 LOG.debug(f"no {status_type.value} date found for {sample_obj.internal_id}")
 
-    def _remove_older_orders(
+    def _filter_out_older_orders(
         self, samples: list[Sample], order_date_cutoff: datetime
     ) -> list[Sample] | None:
         sample_within_time_window: list[Sample] = []
