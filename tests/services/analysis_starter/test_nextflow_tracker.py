@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
@@ -18,6 +19,7 @@ from cg.services.analysis_starter.tracker.implementations.nextflow_tracker impor
 from cg.store.models import Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 @pytest.fixture
@@ -43,11 +45,12 @@ def nextflow_tracker(cg_context: CGConfig, helpers: StoreHelpers, raredisease_ca
     )
 
 
+@pytest.mark.freeze_time
 def test_nextflow_tracker(
     nextflow_tracker: NextflowTracker, raredisease_case_id: str, mocker: MockerFixture
 ):
     # GIVEN a raredisease case
-    store: Store = create_autospec(Store)
+    store: TypedMock[Store] = create_typed_mock(Store)
     sample: Sample = create_autospec(
         Sample, prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
     )
@@ -59,10 +62,10 @@ def test_nextflow_tracker(
         priority=Priority.standard,
         samples=[sample],
     )
-    store.get_case_by_internal_id = Mock(return_value=case)
-    store.get_case_workflow = Mock(return_value=Workflow.RAREDISEASE)
-    store.get_latest_ticket_from_case = Mock(return_value=666666)
-    nextflow_tracker.store = store
+    store.as_type.get_case_by_internal_id_strict = Mock(return_value=case)
+    store.as_type.get_case_workflow = Mock(return_value=Workflow.RAREDISEASE)
+    store.as_type.get_latest_ticket_from_case = Mock(return_value=666666)
+    nextflow_tracker.store = store.as_type
     case_config = NextflowCaseConfig(
         case_id=raredisease_case_id,
         workflow=Workflow.RAREDISEASE,
@@ -111,4 +114,15 @@ def test_nextflow_tracker(
     }
     request_submitter.assert_called_with(
         command="add-pending-analysis", request_body=expected_request_body
+    )
+
+    store.as_mock.add_analysis.assert_called_once_with(
+        case=case,
+        completed_at=None,
+        primary=True,
+        session_id="session-abc-666",
+        started_at=datetime.now(),
+        trailblazer_id=123456,
+        version="1.0.0",
+        workflow=Workflow.RAREDISEASE,
     )

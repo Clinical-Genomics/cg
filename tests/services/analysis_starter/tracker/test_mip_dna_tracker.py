@@ -44,7 +44,7 @@ def test_track(customer_id: str, should_be_hidden: bool, mocker: MockerFixture):
 
     # GIVEN a StatusDB mock
     mock_status_db: Store = create_autospec(Store)
-    mock_status_db.get_case_by_internal_id = Mock(return_value=case)
+    mock_status_db.get_case_by_internal_id_strict = Mock(return_value=case)
     mock_status_db.add_analysis = Mock(return_value=analysis)
     mock_status_db.get_latest_ticket_from_case = Mock(return_value="123456")
     mock_status_db.get_case_workflow = Mock(return_value=Workflow.MIP_DNA)

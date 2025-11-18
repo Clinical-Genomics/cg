@@ -98,6 +98,7 @@ class Tracker(ABC):
         analysis_start: datetime = datetime.now()
         workflow_version: str = self._get_workflow_version(case_config)
         new_analysis: Analysis = self.store.add_analysis(
+            case=case,
             workflow=Workflow(case.data_analysis),
             version=workflow_version,
             completed_at=None,
@@ -106,7 +107,6 @@ class Tracker(ABC):
             started_at=analysis_start,
             trailblazer_id=trailblazer_id,
         )
-        new_analysis.case = case
         self.store.add_item_to_store(new_analysis)
         self.store.commit_to_store()
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
