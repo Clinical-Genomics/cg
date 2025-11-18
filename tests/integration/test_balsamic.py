@@ -15,10 +15,10 @@ from cg.constants.tb import AnalysisType
 from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
 from cg.utils import commands
-from tests.integration.conftest import (
-    IntegrationTestPaths,
+from tests.integration.conftest import IntegrationTestPaths
+from tests.integration.utils import (
     copy_integration_test_file,
-    create_integration_test_sample,
+    create_integration_test_sample_fastq_files,
     expect_to_add_pending_analysis_to_trailblazer,
 )
 from tests.store_helpers import StoreHelpers
@@ -41,7 +41,7 @@ def sample_tgs_tumour(
     test_run_paths: IntegrationTestPaths,
 ) -> Sample:
 
-    return create_integration_test_sample(
+    return create_integration_test_sample_fastq_files(
         application_type=AnalysisType.TGS,
         flow_cell_id="sample_tgs_tumour_flow_cell",
         housekeeper_db=housekeeper_db,
@@ -57,7 +57,7 @@ def sample_wgs_normal(
     status_db: Store,
     test_run_paths: IntegrationTestPaths,
 ) -> Sample:
-    return create_integration_test_sample(
+    return create_integration_test_sample_fastq_files(
         application_type=AnalysisType.WGS,
         flow_cell_id="sample_wgs_normal_flow_cell",
         housekeeper_db=housekeeper_db,
@@ -73,7 +73,7 @@ def sample_wgs_tumour(
     status_db: Store,
     test_run_paths: IntegrationTestPaths,
 ) -> Sample:
-    return create_integration_test_sample(
+    return create_integration_test_sample_fastq_files(
         application_type=AnalysisType.WGS,
         flow_cell_id="sample_wgs_tumour_flow_cell",
         housekeeper_db=housekeeper_db,
@@ -178,7 +178,7 @@ def test_start_available_tgs_tumour_only(
         trailblazer_server=httpserver,
         case=case_tgs_tumour_only,
         ticket_id=ticket_id,
-        case_path=case_path,
+        out_dir=Path(case_path, "analysis"),
         config_path=Path(case_path, "analysis", "slurm_jobids.yaml"),
         workflow=Workflow.BALSAMIC,
         analysis_type=AnalysisType.TGS,
@@ -307,7 +307,7 @@ def test_start_available_wgs_paired(
         trailblazer_server=httpserver,
         case=case_wgs_paired,
         ticket_id=ticket_id,
-        case_path=case_path,
+        out_dir=Path(case_path, "analysis"),
         config_path=Path(case_path, "analysis", "slurm_jobids.yaml"),
         workflow=Workflow.BALSAMIC,
         analysis_type=AnalysisType.WGS,
