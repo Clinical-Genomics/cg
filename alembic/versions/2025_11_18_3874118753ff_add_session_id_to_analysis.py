@@ -18,8 +18,8 @@ depends_on = None
 
 
 def upgrade():
-    pass
+    op.add_column(table_name="analysis", column=sa.Column("session_id", sa.String(), nullable=True))
 
 
 def downgrade():
-    pass
+    op.drop_column(table_name="analysis", column_name="session_id")
