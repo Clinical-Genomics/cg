@@ -72,7 +72,7 @@ class TransferLims(object):
         if max_order_age:
             order_date_cutoff: datetime = get_date_days_ago(max_order_age * 365)
             LOG.info(f"Remove samples ordered before {str(order_date_cutoff)}")
-            self._remove_older_orders(samples=samples, order_date_cutoff=order_date_cutoff)
+            self._filter_out_older_orders(samples=samples, order_date_cutoff=order_date_cutoff)
         if samples is None:
             LOG.info(f"No samples to process found with {include} {status_type.value}")
             return
