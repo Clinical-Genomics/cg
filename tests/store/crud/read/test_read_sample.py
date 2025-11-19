@@ -4,11 +4,11 @@ from typing import Any
 
 import pytest
 from _pytest.fixtures import FixtureRequest
-from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Query
 
 from cg.constants import SexOptions
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
+from cg.exc import SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.server.dto.samples.requests import CollaboratorSamplesRequest
 from cg.store.models import Customer, Invoice, OrderTypeApplication, Sample
@@ -393,7 +393,7 @@ def test_get_sample_by_internal_id_strict_no_match(store: Store):
 
     # WHEN finding a sample by internal id
     # THEN a NoResultFound should be raised
-    with pytest.raises(NoResultFound):
+    with pytest.raises(SampleNotFoundError):
         store.get_sample_by_internal_id_strict(internal_id="internal_id")
 
 

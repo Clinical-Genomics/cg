@@ -247,13 +247,6 @@ class MicrosaltQC:
     TARGET_READS_FAIL_THRESHOLD: float = 0.7
 
 
-class MicrosaltAppTags(StrEnum):
-    MWRNXTR003: str = "MWRNXTR003"
-    MWXNXTR003: str = "MWXNXTR003"
-    VWGNXTR001: str = "VWGNXTR001"
-    PREP_CATEGORY: str = "mic"
-
-
 class MutantQC:
     EXTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD: int = 100000
     INTERNAL_NEGATIVE_CONTROL_READS_THRESHOLD: int = 2000

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
+from cg.constants.constants import MicrosaltQC
 from cg.meta.workflow.microsalt.constants import QUALITY_REPORT_FILE_NAME
 from cg.meta.workflow.microsalt.metrics_parser.models import SampleMetrics
 from cg.meta.workflow.microsalt.quality_controller.models import (
@@ -63,11 +63,6 @@ def has_valid_average_coverage(metrics: SampleMetrics) -> bool:
 def has_valid_10x_coverage(metrics: SampleMetrics) -> bool:
     coverage_10x: float | None = metrics.microsalt_samtools_stats.coverage_10x
     return is_valid_10x_coverage(coverage_10x) if coverage_10x else False
-
-
-def has_non_microbial_apptag(sample: Sample) -> bool:
-    app_tag: str = get_application_tag(sample)
-    return app_tag not in list(MicrosaltAppTags)
 
 
 def get_negative_control_result(results: list[SampleQualityResult]) -> SampleQualityResult | None:

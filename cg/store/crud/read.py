@@ -1169,8 +1169,6 @@ class ReadHandler(BaseHandler):
         Return a sample by lims id.
         Raises:
             SampleNotFoundError: If no sample is found with the given internal id.
-            sqlalchemy.orm.exc.MultipleResultsFound: If multiple samples are found with the same
-            internal id.
         """
         try:
             return apply_sample_filter(
