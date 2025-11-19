@@ -2,8 +2,6 @@ from enum import StrEnum
 
 from cg.constants.sequencing import SeqLibraryPrepCategory
 
-TOKEN_CACHE_DURATION_MINUTES = 50
-
 
 class AnalysisStatus:
     CANCELLED: str = "cancelled"
