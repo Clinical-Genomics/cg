@@ -311,3 +311,25 @@ def test_run_nextflow_calls_service(
 
     # THEN the analysis started should have been called with the flags set
     service_call.assert_called_once_with(case_id=case_id, resume=True)
+
+
+@pytest.mark.parametrize(
+    "run_command",
+    [nallo_run, raredisease_run, rnafusion_run, taxprofiler_run],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
+)
+def test_run_nextflow_calls_service_resume_false(
+    run_command: BaseCommand,
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    mocker: MockerFixture,
+):
+    # GIVEN a case id
+    case_id: str = "case_id"
+
+    # GIVEN that the dev run command is run with flags
+    service_call = mocker.patch.object(AnalysisStarter, "run")
+    cli_runner.invoke(run_command, [case_id, "--resume", "false"], obj=cg_context)
+
+    # THEN the analysis started should have been called with the flags set
+    service_call.assert_called_once_with(case_id=case_id, resume=False)
