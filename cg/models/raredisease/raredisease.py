@@ -10,7 +10,7 @@ class RarediseaseQCMetrics(QCMetrics):
     """Raredisease QC metrics."""
 
     mapped_reads: int
-    percent_duplicates: float
+    percent_duplication: float
     predicted_sex_sex_check: SexOptions
     total_reads: int
 
