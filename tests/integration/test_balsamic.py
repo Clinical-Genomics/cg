@@ -23,8 +23,8 @@ from tests.integration.utils import (
     copy_integration_test_file,
     create_empty_file,
     create_integration_test_sample_fastq_files,
+    expect_lims_sample_request,
     expect_to_add_pending_analysis_to_trailblazer,
-    expect_lims_sample_request
 )
 from tests.store_helpers import StoreHelpers
 
