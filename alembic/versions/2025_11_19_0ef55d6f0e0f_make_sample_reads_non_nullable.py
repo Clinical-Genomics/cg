@@ -6,7 +6,6 @@ Create Date: 2025-11-19 16:22:00.571238
 
 """
 
-import sqlalchemy as sa
 from sqlalchemy import orm
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
