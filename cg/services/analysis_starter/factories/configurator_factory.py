@@ -4,11 +4,17 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
-from cg.meta.workflow.fastq import MicrosaltFastqHandler, MipFastqHandler
+from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler, MipFastqHandler
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
-from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
+from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
+from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
+    PipelineExtension,
+)
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
+from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
+    BalsamicConfigFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
     ManagedVariantsFileCreator,
@@ -25,6 +31,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.config_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.nallo import (
+    NalloParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
 )
@@ -34,8 +43,11 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
     TaxprofilerParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowSampleSheetCreator,
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
+    NalloSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.protocol import (
+    SampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
@@ -46,6 +58,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
     TaxprofilerSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
@@ -63,18 +76,24 @@ class ConfiguratorFactory:
         self.store: Store = cg_config.status_db
 
     def get_configurator(self, workflow: Workflow) -> Configurator:
-        if workflow in [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]:
-            return self._get_nextflow_configurator(workflow)
-        elif workflow == Workflow.MICROSALT:
-            return self._get_microsalt_configurator()
-        elif workflow == Workflow.MIP_DNA:
-            return self._get_mip_dna_configurator()
-        raise NotImplementedError
+        match workflow:
+            case Workflow.BALSAMIC | Workflow.BALSAMIC_UMI:
+                return self._get_balsamic_configurator()
+            case Workflow.MICROSALT:
+                return self._get_microsalt_configurator()
+            case Workflow.MIP_DNA:
+                return self._get_mip_dna_configurator()
+            case Workflow.NALLO | Workflow.RAREDISEASE | Workflow.RNAFUSION | Workflow.TAXPROFILER:
+                return self._get_nextflow_configurator(workflow)
+            case _:
+                raise NotImplementedError
 
     def _get_nextflow_configurator(self, workflow: Workflow) -> NextflowConfigurator:
-        config_file_creator = self._get_nextflow_config_file_creator(workflow)
+        config_file_creator: NextflowConfigFileCreator = self._get_nextflow_config_file_creator(
+            workflow
+        )
         params_file_creator: ParamsFileCreator = self._get_params_file_creator(workflow)
-        sample_sheet_creator: NextflowSampleSheetCreator = self._get_sample_sheet_creator(workflow)
+        sample_sheet_creator: SampleSheetCreator = self._get_sample_sheet_creator(workflow)
         extension: PipelineExtension = self._get_pipeline_extension(workflow)
         return NextflowConfigurator(
             config_file_creator=config_file_creator,
@@ -96,47 +115,66 @@ class ConfiguratorFactory:
         )
 
     def _get_params_file_creator(self, workflow: Workflow) -> ParamsFileCreator:
-        if workflow == Workflow.RAREDISEASE:
-            pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
-            return RarediseaseParamsFileCreator(
-                lims=self.lims_api, store=self.store, params=pipeline_config.params
-            )
-        elif workflow == Workflow.RNAFUSION:
-            pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
-            return RNAFusionParamsFileCreator(pipeline_config.params)
-        elif workflow == Workflow.TAXPROFILER:
-            pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
-            return TaxprofilerParamsFileCreator(pipeline_config.params)
+        params: str = self._get_pipeline_config(workflow).params
+        match workflow:
+            case Workflow.NALLO:
+                return NalloParamsFileCreator(params)
+            case Workflow.RAREDISEASE:
+                return RarediseaseParamsFileCreator(
+                    lims=self.lims_api, store=self.store, params=params
+                )
+            case Workflow.RNAFUSION:
+                return RNAFusionParamsFileCreator(params)
+            case Workflow.TAXPROFILER:
+                return TaxprofilerParamsFileCreator(params)
+            case _:
+                raise NotImplementedError(f"There is no params file creator for {workflow}")
 
     def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
         return getattr(self.cg_config, workflow)
 
-    def _get_sample_sheet_creator(self, workflow: Workflow) -> NextflowSampleSheetCreator:
-        if workflow == Workflow.RAREDISEASE:
-            return RarediseaseSampleSheetCreator(
-                housekeeper_api=self.cg_config.housekeeper_api,
-                store=self.store,
-            )
-        elif workflow == Workflow.RNAFUSION:
-            return RNAFusionSampleSheetCreator(
-                housekeeper_api=self.housekeeper_api, store=self.store
-            )
-        elif workflow == Workflow.TAXPROFILER:
-            return TaxprofilerSampleSheetCreator(
-                housekeeper_api=self.housekeeper_api, store=self.store
-            )
+    def _get_sample_sheet_creator(self, workflow: Workflow) -> SampleSheetCreator:
+        match workflow:
+            case Workflow.NALLO:
+                return NalloSampleSheetCreator(
+                    housekeeper_api=self.housekeeper_api, status_db=self.store
+                )
+            case Workflow.RAREDISEASE:
+                return RarediseaseSampleSheetCreator(
+                    housekeeper_api=self.cg_config.housekeeper_api,
+                    store=self.store,
+                )
+            case Workflow.RNAFUSION:
+                return RNAFusionSampleSheetCreator(
+                    housekeeper_api=self.housekeeper_api, store=self.store
+                )
+            case Workflow.TAXPROFILER:
+                return TaxprofilerSampleSheetCreator(
+                    housekeeper_api=self.housekeeper_api, store=self.store
+                )
+            case _:
+                raise NotImplementedError(f"No sample sheet creator implemented for {workflow}")
 
     def _get_pipeline_extension(self, workflow: Workflow) -> PipelineExtension:
-        if workflow == Workflow.RAREDISEASE:
-            gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(workflow)
-            managed_variants_creator: ManagedVariantsFileCreator = (
-                self._get_managed_variants_file_creator(workflow)
-            )
-            return RarediseaseExtension(
-                gene_panel_file_creator=gene_panel_creator,
-                managed_variants_file_creator=managed_variants_creator,
-            )
-        return PipelineExtension()
+        match workflow:
+            case Workflow.NALLO:
+                gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(
+                    workflow
+                )
+                return NalloExtension(gene_panel_file_creator=gene_panel_creator)
+            case Workflow.RAREDISEASE:
+                gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(
+                    workflow
+                )
+                managed_variants_creator: ManagedVariantsFileCreator = (
+                    self._get_managed_variants_file_creator(workflow)
+                )
+                return RarediseaseExtension(
+                    gene_panel_file_creator=gene_panel_creator,
+                    managed_variants_file_creator=managed_variants_creator,
+                )
+            case _:
+                return PipelineExtension()
 
     def _get_gene_panel_file_creator(self, workflow: Workflow) -> GenePanelFileCreator:
         return GenePanelFileCreator(scout_api=self._get_scout_api(workflow), store=self.store)
@@ -149,6 +187,22 @@ class ConfiguratorFactory:
             self.cg_config.scout_api_38
             if workflow == Workflow.NALLO
             else self.cg_config.scout_api_37
+        )
+
+    def _get_balsamic_configurator(self) -> BalsamicConfigurator:
+        return BalsamicConfigurator(
+            config_file_creator=BalsamicConfigFileCreator(
+                cg_balsamic_config=self.cg_config.balsamic,
+                lims_api=self.lims_api,
+                status_db=self.store,
+            ),
+            fastq_handler=BalsamicFastqHandler(
+                housekeeper_api=self.housekeeper_api,
+                root_dir=Path(self.cg_config.balsamic.root),
+                status_db=self.store,
+            ),
+            config=self.cg_config.balsamic,
+            store=self.store,
         )
 
     def _get_microsalt_configurator(self) -> MicrosaltConfigurator:

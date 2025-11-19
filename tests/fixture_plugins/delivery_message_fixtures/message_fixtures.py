@@ -17,20 +17,8 @@ def analysis_scout_message(mip_case_id: str, customer_id: str, ticket_id: str) -
 
 
 @pytest.fixture
-def microsalt_mwx_message(customer_id: str, ticket_id: str) -> str:
-    """Return the delivery message for a microSALT MWX case."""
-    return (
-        "Hello,\n\n"
-        "The analysis is now complete and the fastq files are being uploaded to:\n\n"
-        f"/home/{customer_id}/inbox/{ticket_id} \n\n"
-        "The QC report can be found attached. \n\n"
-        f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
-    )
-
-
-@pytest.fixture
-def microsalt_mwr_message(customer_id: str, ticket_id: str) -> str:
-    """Return the delivery message for a microSALT MWX case."""
+def microsalt_message(customer_id: str, ticket_id: str) -> str:
+    """Return the delivery message for a microSALT case."""
     return (
         "Hello,\n\n"
         "The analysis is now complete and the fastq files are being uploaded to:\n\n"

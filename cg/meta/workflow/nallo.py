@@ -168,7 +168,6 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         if "-" not in sample_id:
             metric_conditions: dict[str, dict[str, Any]] = NALLO_GENERAL_METRIC_CONDITIONS.copy()
             metric_conditions.update(NALLO_RAW_METRIC_CONDITIONS)
-            self.set_peddy_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
             self.set_somalier_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
         else:
             metric_conditions = NALLO_PARENT_PEDDY_METRIC_CONDITION.copy()
@@ -234,10 +233,6 @@ class NalloAnalysisAPI(NfAnalysisAPI):
                 metrics.append(parent_error_metric)
         metrics = self.get_deduplicated_metrics(metrics=metrics)
         return metrics
-
-    @staticmethod
-    def set_peddy_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
-        metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
 
     @staticmethod
     def set_somalier_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
