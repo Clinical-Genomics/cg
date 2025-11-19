@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 from housekeeper.store.models import File, Version
+from pydantic import EmailStr
 from pydantic.v1 import ValidationError
 
 from cg.constants import Workflow
@@ -55,23 +56,24 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     ):
         super().__init__(workflow=workflow, config=config)
         self.account: str = config.balsamic.slurm.account
-        self.balsamic_cache: str = config.balsamic.balsamic_cache
-        self.bed_path: str = config.balsamic.bed_path
-        self.binary_path: str = config.balsamic.binary_path
-        self.cadd_path: str = config.balsamic.cadd_path
-        self.conda_binary: str = config.balsamic.conda_binary
+        self.balsamic_cache: str = str(config.balsamic.balsamic_cache)
+        self.bed_path: str = str(config.balsamic.bed_path)
+        self.binary_path: str = str(config.balsamic.binary_path)
+        self.cadd_path: str = str(config.balsamic.cadd_path)
+        self.conda_binary: str = str(config.balsamic.conda_binary)
         self.conda_env: str = config.balsamic.conda_env
-        self.genome_interval_path: str = config.balsamic.genome_interval_path
-        self.gens_coverage_female_path: str = config.balsamic.gens_coverage_female_path
-        self.gens_coverage_male_path: str = config.balsamic.gens_coverage_male_path
-        self.gnomad_af5_path: str = config.balsamic.gnomad_af5_path
+        self.email: EmailStr = config.balsamic.slurm.mail_user
+        self.genome_interval_path: str = str(config.balsamic.genome_interval_path)
+        self.gens_coverage_female_path: str = str(config.balsamic.gens_coverage_female_path)
+        self.gens_coverage_male_path: str = str(config.balsamic.gens_coverage_male_path)
+        self.gnomad_af5_path: str = str(config.balsamic.gnomad_af5_path)
         self.head_job_partition: str = config.balsamic.head_job_partition
-        self.loqusdb_path: str = config.balsamic.loqusdb_path
-        self.pon_path: str = config.balsamic.pon_path
+        self.loqusdb_path: str = str(config.balsamic.loqusdb_path)
+        self.pon_path: str = str(config.balsamic.pon_path)
         self.qos: SlurmQos = config.balsamic.slurm.qos
-        self.root_dir: str = config.balsamic.root
-        self.sentieon_licence_path: str = config.balsamic.sentieon_licence_path
-        self.sentieon_licence_server: str = config.sentieon_licence_server
+        self.root_dir: str = str(config.balsamic.root)
+        self.sentieon_licence_path: str = str(config.balsamic.sentieon_licence_path)
+        self.sentieon_licence_server: str = config.balsamic.sentieon_licence_server
         self.swegen_path: str = config.balsamic.swegen_path
 
     @property
@@ -589,11 +591,11 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             {
                 "--analysis-dir": self.root_dir,
                 "--analysis-workflow": arguments.get("analysis_workflow"),
+                "--artefact-snv-observations": arguments.get("artefact_somatic_snv"),
+                "--artefact-sv-observations": arguments.get("loqusdb_wgs_dump_file"),
                 "--balsamic-cache": self.balsamic_cache,
                 "--cache-version": cache_version,
                 "--cadd-annotations": self.cadd_path,
-                "--artefact-snv-observations": arguments.get("artefact_somatic_snv"),
-                "--artefact-sv-observations": arguments.get("loqusdb_wgs_dump_file"),
                 "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
                 "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
                 "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
@@ -612,8 +614,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--gnomad-min-af5": arguments.get("gnomad_min_af5"),
                 "--normal-sample-name": arguments.get("normal_sample_name"),
                 "--panel-bed": arguments.get("panel_bed"),
+                "--exome": arguments.get("exome"),  # MUST be after panel bed
                 "--pon-cnn": arguments.get("pon_cnn"),
-                "--exome": arguments.get("exome"),
                 "--sentieon-install-dir": self.sentieon_licence_path,
                 "--sentieon-license": self.sentieon_licence_server,
                 "--soft-filter-normal": arguments.get("soft_filter_normal"),
