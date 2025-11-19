@@ -30,7 +30,7 @@ def case_with_sample() -> Case:
 
 
 def test_get_config(balsamic_configurator: BalsamicConfigurator, case_id: str, tmp_path: Path):
-    """Tests that the get_config method returns a BalsamicCaseConfig. And that fields can be overridden with flags."""
+    """Tests that the get_config method returns a BalsamicCaseConfig and that fields can be overridden with flags."""
     # GIVEN a Balsamic configurator with an existing config file
     balsamic_configurator.root_dir = tmp_path
     Path(balsamic_configurator.root_dir, case_id).mkdir()
