@@ -44,7 +44,7 @@ def test_balsamic_config_case_all_flags(
     # GIVEN that the configurator can configure the case
     mock_configure = mocker.patch.object(BalsamicConfigurator, "configure")
 
-    # WHEN invoking cg workflow mip-dna dev-case-config
+    # WHEN invoking cg workflow balsamic dev-case-config
     result = cli_runner.invoke(
         dev_config_case,
         ["--panel-bed", "panel_short_name", case_id],
@@ -59,7 +59,7 @@ def test_balsamic_config_case_all_flags(
     mock_configure.assert_called_once_with(case_id=case_id, panel_bed="panel_short_name")
 
 
-def test_mip_dna_config_case_no_flags(cg_config_for_balsamic_cli: CGConfig, mocker: MockerFixture):
+def test_balsamic_config_case_no_flags(cg_config_for_balsamic_cli: CGConfig, mocker: MockerFixture):
     # GIVEN a CLIRunner
     cli_runner = CliRunner()
 
@@ -74,7 +74,7 @@ def test_mip_dna_config_case_no_flags(cg_config_for_balsamic_cli: CGConfig, mock
     # GIVEN that the configurator can configure the case
     mock_configure = mocker.patch.object(BalsamicConfigurator, "configure")
 
-    # WHEN invoking cg workflow mip-dna dev-case-config
+    # WHEN invoking cg workflow balsamic dev-case-config
     result = cli_runner.invoke(dev_config_case, [case_id], obj=cg_config_for_balsamic_cli)
 
     # THEN the command exits successfully
@@ -108,7 +108,7 @@ def test_balsamic_run_all_flags(
     workflow_profile = tmp_path
     flags: list[str] = ["--workflow-profile", workflow_profile, case_id]
 
-    # WHEN invoking cg workflow mip-dna dev-run
+    # WHEN invoking cg workflow balsamic dev-run
     result = cli_runner.invoke(
         dev_run, flags, obj=cg_config_for_balsamic_cli, catch_exceptions=False
     )
@@ -141,7 +141,7 @@ def test_balsamic_run_no_flags(cg_config_for_balsamic_cli: CGConfig, mocker: Moc
     # GIVEN no flags
     flags: list[str] = [case_id]
 
-    # WHEN invoking cg workflow mip-dna dev-run
+    # WHEN invoking cg workflow balsamic dev-run
     result = cli_runner.invoke(
         dev_run, flags, obj=cg_config_for_balsamic_cli, catch_exceptions=False
     )
@@ -186,7 +186,7 @@ def test_balsamic_start_all_flags(
         case_id,
     ]
 
-    # WHEN invoking cg workflow Balsamic dev-start
+    # WHEN invoking cg workflow balsamic dev-start with the flags
     result = cli_runner.invoke(
         dev_start, flags, obj=cg_config_for_balsamic_cli, catch_exceptions=False
     )
@@ -223,7 +223,7 @@ def test_balsamic_start_no_flags(cg_config_for_balsamic_cli: CGConfig, mocker: M
     # GIVEN no cli flags
     flags: list[str] = [case_id]
 
-    # WHEN invoking cg workflow mip-dna dev-start
+    # WHEN invoking cg workflow balsamic dev-start
     result = cli_runner.invoke(
         dev_start, flags, obj=cg_config_for_balsamic_cli, catch_exceptions=False
     )

@@ -95,7 +95,7 @@ def test_mip_dna_get_start_command_all_flags_set():
 
 
 def test_balsamic_get_start_command_no_flags_set():
-    # GIVEN a BALSAMIC case config
+    # GIVEN a Balsamic case config
     balsamic_case_config = BalsamicCaseConfig(
         account="balsamic_account",
         binary=Path("/path/to/balsamic_binary"),
@@ -125,7 +125,7 @@ def test_balsamic_get_start_command_no_flags_set():
 
 
 def test_balsamic_get_start_command_all_flags_set():
-    # GIVEN a BALSAMIC case config
+    # GIVEN a Balsamic case config
     balsamic_case_config = BalsamicCaseConfig(
         account="balsamic_account",
         binary=Path("/path/to/balsamic_binary"),

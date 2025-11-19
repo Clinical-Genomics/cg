@@ -77,7 +77,7 @@ class ConfiguratorFactory:
 
     def get_configurator(self, workflow: Workflow) -> Configurator:
         match workflow:
-            case Workflow.BALSAMIC | workflow.BALSAMIC_UMI:
+            case Workflow.BALSAMIC | Workflow.BALSAMIC_UMI:
                 return self._get_balsamic_configurator()
             case Workflow.MICROSALT:
                 return self._get_microsalt_configurator()
