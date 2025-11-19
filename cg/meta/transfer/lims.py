@@ -180,5 +180,5 @@ class TransferLims(object):
         return True
 
     @staticmethod
-    def _is_sample_order_too_old(sample: Sample, order_date_cutoff: datetime) -> bool:
+    def _is_sample_too_old(sample: Sample, order_date_cutoff: datetime) -> bool:
         return sample.ordered_at < order_date_cutoff
