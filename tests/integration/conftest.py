@@ -1,6 +1,6 @@
 import shutil
 from collections.abc import Generator
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import NamedTuple, cast
 from unittest.mock import create_autospec
@@ -35,10 +35,12 @@ def current_workflow() -> Workflow:
 
 @pytest.fixture(autouse=True)
 def valid_google_token(mocker):
+    credentials = create_autospec(IDTokenCredentials, token="some token")
+    credentials.expiry = datetime.now(timezone.utc) + timedelta(minutes=5)
     mocker.patch.object(
         IDTokenCredentials,
         "from_service_account_file",
-        return_value=create_autospec(IDTokenCredentials, token="some token"),
+        return_value=credentials,
     )
 
 

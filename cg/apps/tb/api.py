@@ -1,7 +1,7 @@
 """Trailblazer API for cg."""
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 from google.auth.transport.requests import Request
@@ -13,7 +13,7 @@ from cg.apps.tb.models import AnalysesResponse, TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
 from cg.constants.priority import TrailblazerPriority
-from cg.constants.tb import TOKEN_CACHE_DURATION_MINUTES, AnalysisStatus
+from cg.constants.tb import AnalysisStatus
 from cg.exc import AnalysisNotCompletedError, TrailblazerAnalysisNotFound, TrailblazerAPIHTTPError
 from cg.io.controller import APIRequest, ReadStream
 
@@ -34,20 +34,24 @@ class TrailblazerAPI:
         self.service_account = config["trailblazer"]["service_account"]
         self.service_account_auth_file = config["trailblazer"]["service_account_auth_file"]
         self.host = config["trailblazer"]["host"]
-        self._cached_token: Optional[str] = None
-        self._token_expiry: Optional[datetime] = None
-        self._token_cache_duration = timedelta(minutes=TOKEN_CACHE_DURATION_MINUTES)
+        self._credentials: IDTokenCredentials | None = None
 
-    def _is_token_valid(self) -> bool:
-        """Check if the cached token is still valid."""
-        return (
-            self._cached_token is not None
-            and self._token_expiry is not None
-            and datetime.now() < self._token_expiry
-        )
+    def _credentials_expired(self) -> bool:
+        """Return True when there are no cached credentials or the token has expired."""
+        if not self._credentials:
+            return True
 
-    def _refresh_token(self) -> str:
-        """Refresh the Google OAuth token and cache it."""
+        expiry: datetime | None = getattr(self._credentials, "expiry", None)
+        if expiry is None:
+            return True
+
+        if expiry.tzinfo is None:
+            expiry = expiry.replace(tzinfo=timezone.utc)
+
+        return datetime.now(tz=timezone.utc) >= expiry
+
+    def _refresh_credentials(self) -> IDTokenCredentials:
+        """Refresh the Google OAuth token and cache the credential object."""
         LOG.debug("Refreshing Google OAuth token for Trailblazer authentication")
         credentials: IDTokenCredentials = IDTokenCredentials.from_service_account_file(
             filename=self.service_account_auth_file,
@@ -55,19 +59,21 @@ class TrailblazerAPI:
         )
         credentials.refresh(Request())
 
-        self._cached_token = credentials.token
-        self._token_expiry = datetime.now() + self._token_cache_duration
-
-        LOG.debug(f"Token cached until {self._token_expiry}")
-        return self._cached_token
+        self._credentials = credentials
+        expiry: datetime | None = getattr(self._credentials, "expiry", None)
+        if expiry:
+            LOG.debug(f"Token cached until {expiry}")
+        else:
+            LOG.debug("Token refreshed without expiry timestamp")
+        return self._credentials
 
     @property
     def auth_header(self) -> dict:
         """Get authorization header with cached token to prevent Google rate limiting."""
-        if not self._is_token_valid():
-            self._refresh_token()
+        if not self._credentials or self._credentials_expired():
+            self._refresh_credentials()
 
-        return {"Authorization": f"Bearer {self._cached_token}"}
+        return {"Authorization": f"Bearer {self._credentials.token}"}
 
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST
