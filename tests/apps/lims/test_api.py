@@ -1,10 +1,18 @@
 """Test the Lims api"""
 
 import datetime as dt
+from unittest.mock import create_autospec
 
+import pytest
+from genologics import entities
+from genologics.entities import Sample
+from genologics.lims import Lims
+from pytest_mock import MockerFixture
 from requests.exceptions import HTTPError
 
+from cg.apps.lims import LimsAPI
 from cg.constants.lims import LimsProcess
+from cg.exc import LimsDataError
 from tests.mocks.limsmock import MockLimsAPI
 
 
@@ -108,3 +116,53 @@ def test_get_internal_negative_control_id_from_sample_in_pool(
 
     # THEN no errors are raised and the correct internal_negative_control_id is retrieved
     assert internal_negative_control_id == "internal_negative_control"
+
+
+def test_get_capture_kit_strict(mocker: MockerFixture):
+    """Test to get the capture kit for a sample in LIMS."""
+    # GIVEN a cg config with LIMS information
+    config: dict = {
+        "lims": {
+            "host": "https://lims.scilifelab.se",
+            "password": "password",
+            "username": "user",
+        },
+    }
+
+    # GIVEN a LIMS API
+    lims_api = LimsAPI(config=config)
+
+    # GIVEN a sample with a capture kit in LIMS
+    lims_sample = create_autospec(Sample, udf={"Bait Set": "valid_capture_kit"})
+    mocker.patch.object(entities.Sample, "__new__", return_value=lims_sample)
+
+    # WHEN getting the sample capture kit
+    capture_kit = lims_api.get_capture_kit_strict(lims_id="sample_id")
+
+    # THEN the capture kit is as expected
+    assert capture_kit == "valid_capture_kit"
+
+
+def test_get_capture_kit_strict_no_capture_kit(mocker: MockerFixture):
+    """Test scenario when capture kit is not set for a sample."""
+    # GIVEN a cg config with LIMS information
+    config: dict = {
+        "lims": {
+            "host": "https://lims.scilifelab.se",
+            "password": "password",
+            "username": "user",
+        },
+    }
+
+    # GIVEN a LIMS API
+    lims_api = LimsAPI(config=config)
+
+    # GIVEN a sample with no capture kit in LIMS
+    lims_sample = create_autospec(Sample, udf={"Bait Set": None})
+    mocker.patch.object(entities.Sample, "__new__", return_value=lims_sample)
+    mocker.patch.object(Lims, "get_artifacts", return_value=[])
+
+    # WHEN getting the sample capture kit
+    # THEN a LimsDataError is raised
+    with pytest.raises(LimsDataError):
+        lims_api.get_capture_kit_strict(lims_id="sample_id")

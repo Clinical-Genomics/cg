@@ -374,7 +374,7 @@ def test_get_bed_version_by_short_name_strict_fail(base_store: Store):
         base_store.get_bed_version_by_short_name_strict(short_name=short_name)
 
 
-def test_get_bed_version_by_short_name_strict_mutiple_fail(base_store: Store):
+def test_get_bed_version_by_short_name_strict_multiple_fail(base_store: Store):
     # GIVEN a store that contains two bed versions with the same short name
     bed: Bed = base_store.add_bed(name="bed")
     base_store.add_bed_version(bed=bed, version=1, filename="one.txt", shortname="short_name")

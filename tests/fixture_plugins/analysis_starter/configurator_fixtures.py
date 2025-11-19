@@ -3,13 +3,17 @@ from unittest.mock import Mock, create_autospec
 import pytest
 
 from cg.apps.lims import LimsAPI
-from cg.meta.workflow.fastq import MicrosaltFastqHandler
+from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler
 from cg.models.cg_config import (
+    BalsamicConfig,
     CGConfig,
     NalloConfig,
     RarediseaseConfig,
     RnafusionConfig,
     TaxprofilerConfig,
+)
+from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
+    BalsamicConfigFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.microsalt_config import (
     MicrosaltConfigFileCreator,
@@ -41,11 +45,25 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
     TaxprofilerSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.store.store import Store
+
+
+@pytest.fixture
+def balsamic_configurator(
+    cg_balsamic_config: BalsamicConfig,
+    balsamic_fastq_handler: BalsamicFastqHandler,
+) -> BalsamicConfigurator:
+    return BalsamicConfigurator(
+        config=cg_balsamic_config,
+        config_file_creator=create_autospec(BalsamicConfigFileCreator),
+        fastq_handler=balsamic_fastq_handler,
+        store=create_autospec(Store),
+    )
 
 
 @pytest.fixture
