@@ -38,7 +38,7 @@ def transfer_group(context: CGConfig):
 @click.option("--sample-id", help="Lims Submitted Sample id. use together with status.")
 @click.pass_obj
 def check_samples_in_lims(
-    context: CGConfig, max_order_age: int, status: str, include: str, sample_id: str
+    context: CGConfig, max_order_age: int | None, status: str, include: str, sample_id: str
 ):
     """Check if samples have been updated in LIMS."""
     transfer_api: TransferLims = context.meta_apis["transfer_lims_api"]
