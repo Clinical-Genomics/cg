@@ -17,6 +17,7 @@ from cg.services.analysis_starter.tracker.implementations import mip_dna as mip_
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
 from cg.store.models import Analysis, Case, Customer, Order, Sample
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 @pytest.mark.parametrize(
@@ -43,11 +44,11 @@ def test_track(customer_id: str, should_be_hidden: bool, mocker: MockerFixture):
     analysis: Analysis = create_autospec(Analysis)
 
     # GIVEN a StatusDB mock
-    mock_status_db: Store = create_autospec(Store)
-    mock_status_db.get_case_by_internal_id_strict = Mock(return_value=case)
-    mock_status_db.add_analysis = Mock(return_value=analysis)
-    mock_status_db.get_latest_ticket_from_case = Mock(return_value="123456")
-    mock_status_db.get_case_workflow = Mock(return_value=Workflow.MIP_DNA)
+    mock_status_db: TypedMock[Store] = create_typed_mock(Store)
+    mock_status_db.as_type.get_case_by_internal_id_strict = Mock(return_value=case)
+    mock_status_db.as_type.add_analysis = Mock(return_value=analysis)
+    mock_status_db.as_type.get_latest_ticket_from_case = Mock(return_value="123456")
+    mock_status_db.as_type.get_case_workflow = Mock(return_value=Workflow.MIP_DNA)
 
     # GIVEN a mock TrailblazerAPI
     mock_trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
@@ -60,7 +61,9 @@ def test_track(customer_id: str, should_be_hidden: bool, mocker: MockerFixture):
     # GIVEN MIP-DNA tracker
     workflow_root = "/some/root"
     tracker = MIPDNATracker(
-        store=mock_status_db, trailblazer_api=mock_trailblazer_api, workflow_root=workflow_root
+        store=mock_status_db.as_type,
+        trailblazer_api=mock_trailblazer_api,
+        workflow_root=workflow_root,
     )
 
     # GIVEN MIP-DNA case config
@@ -88,7 +91,8 @@ def test_track(customer_id: str, should_be_hidden: bool, mocker: MockerFixture):
     tracker.track(case_config=case_config)
 
     # THEN analysis object should have been created in StatusDB
-    mock_status_db.add_analysis.assert_called_with(
+    mock_status_db.as_type.add_analysis.assert_called_with(
+        case=case,
         completed_at=None,
         primary=True,
         session_id=None,
@@ -97,11 +101,10 @@ def test_track(customer_id: str, should_be_hidden: bool, mocker: MockerFixture):
         version=mip_version,
         workflow=Workflow.MIP_DNA,
     )
-    assert analysis.case == case
 
     # THEN the items are added to the database
-    mock_status_db.add_item_to_store.assert_called_with(analysis)
-    mock_status_db.commit_to_store.assert_called_once()
+    mock_status_db.as_mock.add_item_to_store.assert_called_with(analysis)
+    mock_status_db.as_mock.commit_to_store.assert_called_once()
 
     out_dir = Path(workflow_root, case_id, "analysis")
 

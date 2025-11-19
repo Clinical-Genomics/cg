@@ -110,8 +110,6 @@ def case_result():
     return CaseQualityResult(
         passes_qc=False,
         control_passes_qc=True,
-        urgent_passes_qc=True,
-        non_urgent_passes_qc=True,
     )
 
 
