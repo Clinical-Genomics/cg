@@ -212,6 +212,14 @@ class BalsamicFastqHandler(FastqHandler):
         date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
         return f"{lane}_{date}_{flow_cell}_{sample}_{index}_R_{read_direction}{FileExtensions.FASTQ}{FileExtensions.GZIP}"
 
+    def get_sample_fastq_destination_dir(self, case: Case, sample: Sample) -> Path:
+        """Get FASTQ file paths for a Balsamic case (sample-independent)."""
+        return self.get_fastq_dir(case_id=case.internal_id)
+
+    def get_fastq_dir(self, case_id: str) -> Path:
+        """Get the FASTQ directory for a Balsamic case."""
+        return Path(self.root_dir, case_id, "fastq")
+
 
 class MipFastqHandler(FastqHandler):
     @staticmethod

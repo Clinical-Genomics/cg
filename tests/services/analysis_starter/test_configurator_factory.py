@@ -5,14 +5,17 @@ import pytest
 
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
-from cg.meta.workflow.fastq import MicrosaltFastqHandler, MipFastqHandler
-from cg.models.cg_config import CGConfig, MipConfig
+from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler, MipFastqHandler
+from cg.models.cg_config import BalsamicConfig, CGConfig, MipConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
     PipelineExtension,
 )
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
+from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
+    BalsamicConfigFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
     ManagedVariantsFileCreator,
@@ -29,12 +32,33 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.protocol import (
     SampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
 from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
+
+
+def test_get_balsamic_configurator(cg_balsamic_config: BalsamicConfig):
+    # GIVEN a CG Balsamic config
+    cg_config: CGConfig = create_autospec(CGConfig, balsamic=cg_balsamic_config)
+
+    # GIVEN a configurator factory
+    configurator_factory = ConfiguratorFactory(cg_config=cg_config)
+
+    # WHEN getting the configurator for the Balsamic workflow
+    configurator: Configurator = configurator_factory.get_configurator(Workflow.BALSAMIC)
+
+    # THEN the configurator is of type BalsamicConfigurator
+    assert isinstance(configurator, BalsamicConfigurator)
+
+    # THEN the config file creator is of type BalsamicConfigFileCreator
+    assert isinstance(configurator.config_file_creator, BalsamicConfigFileCreator)
+
+    # THEN the fastq handler is of type BalsamicFastqHandler
+    assert isinstance(configurator.fastq_handler, BalsamicFastqHandler)
 
 
 def test_get_microsalt_configurator(cg_context: CGConfig):
@@ -120,7 +144,7 @@ def test_get_mip_dna_configurator():
 
 def test_configurator_factory_failure(cg_context: CGConfig):
     # GIVEN a workflow we do not have support for
-    workflow = Workflow.BALSAMIC
+    workflow = Workflow.FLUFFY
 
     # GIVEN a configurator factory
     configurator_factory = ConfiguratorFactory(cg_config=cg_context)
