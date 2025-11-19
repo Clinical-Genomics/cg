@@ -63,15 +63,16 @@ def dev_config_case(cg_config: CGConfig, case_id: str):
 
 
 @raredisease.command()
+@OPTION_REVISION
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_run(cg_config: CGConfig, case_id: str):
+def dev_run(cg_config: CGConfig, case_id: str, revision: str | None):
     """Run a preconfigured raredisease case."""
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RAREDISEASE
     )
-    analysis_starter.run(case_id=case_id)
+    analysis_starter.run(case_id=case_id, revision=revision)
 
 
 @raredisease.command()

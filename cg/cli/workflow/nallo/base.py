@@ -85,9 +85,10 @@ def dev_config_case(cg_config: CGConfig, case_id: str):
 
 
 @nallo.command("dev-run")
+@OPTION_REVISION
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_run(cg_config: CGConfig, case_id: str) -> None:
+def dev_run(cg_config: CGConfig, case_id: str, revision: str | None) -> None:
     """
     Run a preconfigured Nallo case. \b
     Assumes that the following files exist in the case run directory:
@@ -97,7 +98,7 @@ def dev_run(cg_config: CGConfig, case_id: str) -> None:
     """
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.NALLO)
-    analysis_starter.run(case_id=case_id)
+    analysis_starter.run(case_id=case_id, revision=revision)
 
 
 @nallo.command("dev-start")
