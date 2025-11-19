@@ -9,7 +9,7 @@ from pytest_httpserver import HTTPServer
 
 from cg.apps.environ import environ_email
 from cg.constants.constants import Workflow
-from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.constants.housekeeper_tags import AlignmentFileTag, SequencingFileTag
 from cg.constants.tb import AnalysisType
 from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Sample
 from cg.store.store import Store
@@ -38,7 +38,7 @@ def create_formatted_config(status_db_uri: str, housekeeper_db_uri: str, test_ro
     return config_path
 
 
-def create_integration_test_sample(
+def create_integration_test_sample_fastq_files(
     status_db: Store,
     housekeeper_db: HousekeeperStore,
     test_run_paths: IntegrationTestPaths,
@@ -64,14 +64,30 @@ def create_integration_test_sample(
         store=status_db, sample_id=sample.internal_id, sequencing_run=sequencing_run, lane=1
     )
 
-    create_fastq_file_and_add_to_housekeeper(
+    _create_fastq_files_and_add_to_housekeeper(
         housekeeper_db=housekeeper_db, test_root_dir=test_run_paths.test_root_dir, sample=sample
     )
 
     return sample
 
 
-def create_fastq_file_and_add_to_housekeeper(
+def create_integration_test_sample_bam_files(
+    status_db: Store, housekeeper_db: HousekeeperStore, test_run_paths: IntegrationTestPaths
+) -> Sample:
+    helpers = StoreHelpers()
+    sample: Sample = helpers.add_sample(
+        application_type=AnalysisType.WGS, store=status_db, last_sequenced_at=datetime.now()
+    )
+    _create_bam_files_and_add_to_housekeeper(
+        housekeeper_db=housekeeper_db,
+        sample=sample,
+        test_root_dir=test_run_paths.test_root_dir,
+    )
+
+    return sample
+
+
+def _create_fastq_files_and_add_to_housekeeper(
     housekeeper_db: HousekeeperStore, sample: Sample, test_root_dir: Path
 ) -> None:
     fastq_base_path: Path = Path(test_root_dir, "fastq_files")
@@ -86,20 +102,50 @@ def create_fastq_file_and_add_to_housekeeper(
         from_path=Path("tests/integration/config/file.fastq.gz"), to_path=fastq_file_path2
     )
 
+    _create_bundle_for_sample(
+        housekeeper_db=housekeeper_db,
+        sample=sample,
+        file1_path=fastq_file_path1,
+        file2_path=fastq_file_path2,
+        file_extension=SequencingFileTag.FASTQ,
+    )
+
+
+def _create_bam_files_and_add_to_housekeeper(
+    housekeeper_db: HousekeeperStore, sample: Sample, test_root_dir: Path
+) -> None:
+    file1_path = Path(test_root_dir, "file1.bam")
+    file2_path = Path(test_root_dir, "file2.bam")
+
+    create_empty_file(file1_path)
+    create_empty_file(file2_path)
+
+    _create_bundle_for_sample(
+        housekeeper_db, sample, file1_path, file2_path, file_extension=AlignmentFileTag.BAM
+    )
+
+
+def _create_bundle_for_sample(
+    housekeeper_db: HousekeeperStore,
+    sample: Sample,
+    file1_path: Path,
+    file2_path: Path,
+    file_extension: str,
+):
     bundle_data = {
         "name": sample.internal_id,
         "created": datetime.now(),
         "expires": datetime.now(),
         "files": [
             {
-                "path": fastq_file_path1.as_posix(),
+                "path": file1_path.as_posix(),
                 "archive": False,
-                "tags": [sample.id, SequencingFileTag.FASTQ],
+                "tags": [sample.id, file_extension],
             },
             {
-                "path": fastq_file_path2.as_posix(),
+                "path": file2_path.as_posix(),
                 "archive": False,
-                "tags": [sample.id, SequencingFileTag.FASTQ],
+                "tags": [sample.id, file_extension],
             },
         ],
     }
@@ -121,30 +167,44 @@ def copy_integration_test_file(from_path: Path, to_path: Path):
     return True
 
 
+def expect_to_get_latest_analysis_with_empty_response_from_trailblazer(
+    trailblazer_server: HTTPServer, case_id: str
+):
+    trailblazer_server.expect_request(
+        "/trailblazer/get-latest-analysis", data='{"case_id": "' + case_id + '"}'
+    ).respond_with_json(None)
+
+
 def expect_to_add_pending_analysis_to_trailblazer(
     trailblazer_server: HTTPServer,
     case: Case,
     ticket_id: int,
-    case_path: Path,
+    out_dir: Path,
     config_path: Path,
     analysis_type: AnalysisType,
     workflow: Workflow,
+    tower_workflow_id: str | None = None,
+    workflow_manager: str = "slurm",
 ):
     trailblazer_server.expect_request(
         "/trailblazer/add-pending-analysis",
         data=b'{"case_id": "%(case_id)s", "email": "%(email)s", "type": "%(type)s", '
         b'"config_path": "%(config_path)s",'
-        b' "order_id": 1, "out_dir": "%(case_path)s/analysis", '
+        b' "order_id": 1, "out_dir": "%(out_dir)s", '
         b'"priority": "normal", "workflow": "%(workflow)s", "ticket": "%(ticket_id)s", '
-        b'"workflow_manager": "slurm", "tower_workflow_id": null, "is_hidden": true}'
+        b'"workflow_manager": "%(workflow_manager)s", "tower_workflow_id": %(tower_workflow_id)s, "is_hidden": true}'
         % {
             b"email": environ_email().encode(),
             b"type": str(analysis_type).encode(),
             b"case_id": case.internal_id.encode(),
             b"ticket_id": str(ticket_id).encode(),
-            b"case_path": str(case_path).encode(),
+            b"tower_workflow_id": (
+                f'"{tower_workflow_id}"' if tower_workflow_id else "null"
+            ).encode(),
+            b"out_dir": str(out_dir).encode(),
             b"config_path": str(config_path).encode(),
             b"workflow": str(workflow).upper().encode(),
+            b"workflow_manager": str(workflow_manager).encode(),
         },
         method="POST",
     ).respond_with_json(

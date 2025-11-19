@@ -1,6 +1,6 @@
+from collections.abc import Callable
 from pathlib import Path
-from subprocess import CompletedProcess
-from unittest.mock import ANY, Mock, create_autospec
+from unittest.mock import ANY, Mock
 
 import pytest
 from click.testing import CliRunner, Result
@@ -12,7 +12,6 @@ from cg.apps.environ import environ_email
 from cg.cli.base import base
 from cg.constants.constants import CaseActions, Workflow
 from cg.constants.gene_panel import GenePanelMasterList
-from cg.constants.process import EXIT_SUCCESS
 from cg.constants.tb import AnalysisType
 from cg.services.analysis_starter.submitters.subprocess import submitter
 from cg.store.models import Case, Order, Sample
@@ -21,8 +20,9 @@ from cg.utils import commands
 from tests.integration.utils import (
     IntegrationTestPaths,
     copy_integration_test_file,
-    create_integration_test_sample,
+    create_integration_test_sample_fastq_files,
     expect_to_add_pending_analysis_to_trailblazer,
+    expect_to_get_latest_analysis_with_empty_response_from_trailblazer,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -32,22 +32,15 @@ def current_workflow() -> Workflow:
     return Workflow.MIP_DNA
 
 
-@pytest.fixture
-def scout_export_panel_stdout() -> bytes:
-    return b"22\t26995242\t27014052\t2397\tCRYBB1\n22\t38452318\t38471708\t9394\tPICK1\n"
-
-
-@pytest.fixture
-def scout_export_manged_variants_stdout() -> bytes:
-    return b"""##fileformat=VCFv4.2
-##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
-##fileDate=2023-12-07 16:35:38.814086
-##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
-##INFO=<ID=TYPE,Number=1,Type=String,Description="Type of variant">
-##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
-#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
-1	48696925	.	G	C	.		END=48696925;TYPE=SNV
-14	76548781	.	CTGGACC	G	.		END=76548781;TYPE=INDEL"""
+@pytest.fixture(autouse=True)
+def mocked_commands_and_outputs(
+    scout_export_manged_variants_stdout: bytes,
+    scout_export_panel_stdout: bytes,
+) -> dict[str, bytes]:
+    return {
+        "/scout/binary --config /scout/config export panel": scout_export_panel_stdout,
+        "/scout/binary --config /scout/config export managed": scout_export_manged_variants_stdout,
+    }
 
 
 @pytest.mark.xdist_group(name="integration")
@@ -57,10 +50,11 @@ def test_start_available_mip_dna(
     helpers: StoreHelpers,
     housekeeper_db: HousekeeperStore,
     httpserver: HTTPServer,
-    mocker: MockerFixture,
+    mock_run_commands: Callable,
     scout_export_panel_stdout: bytes,
     scout_export_manged_variants_stdout: bytes,
     status_db: Store,
+    mocker: MockerFixture,
 ):
     """Test a successful run of the command 'cg workflow mip-dna start-available'
     with one case to be analysed that has not been analysed before."""
@@ -91,7 +85,7 @@ def test_start_available_mip_dna(
     #  - flow cell and sequencing run stored in StatusDB
     #  - a gzipped-fastq file on disk
     #  - a bundle associated with the fastq file in Housekeeper
-    sample: Sample = create_integration_test_sample(
+    sample: Sample = create_integration_test_sample_fastq_files(
         status_db=status_db,
         housekeeper_db=housekeeper_db,
         test_run_paths=test_run_paths,
@@ -103,35 +97,24 @@ def test_start_available_mip_dna(
 
     # GIVEN that the Scout command returns exported panel data
     subprocess_mock = mocker.patch.object(commands, "subprocess")
-
-    def mock_run(*args, **kwargs):
-        command = args[0]
-        stdout = b""
-
-        if ("export" in command) and ("panel" in command):
-            stdout += scout_export_panel_stdout
-        elif ("export" in command) and ("managed" in command):
-            stdout += scout_export_manged_variants_stdout
-        return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
-
-    subprocess_mock.run = Mock(side_effect=mock_run)
+    subprocess_mock.run = Mock(side_effect=mock_run_commands)
 
     # GIVEN an email address can be determined from the environment
     email: str = environ_email()
 
     # GIVEN the Trailblazer API returns no ongoing analysis for the case
-    httpserver.expect_request(
-        "/trailblazer/get-latest-analysis", data='{"case_id": "' + case.internal_id + '"}'
-    ).respond_with_json(None)
+    expect_to_get_latest_analysis_with_empty_response_from_trailblazer(
+        trailblazer_server=httpserver, case_id=case.internal_id
+    )
 
     # GIVEN a new pending analysis can be added to the Trailblazer API
-    case_path = Path(mip_dna_path, "cases", case.internal_id)
+    analysis_path = Path(mip_dna_path, "cases", case.internal_id, "analysis")
     expect_to_add_pending_analysis_to_trailblazer(
         trailblazer_server=httpserver,
         case=case,
         ticket_id=ticket_id,
-        case_path=case_path,
-        config_path=Path(case_path, "analysis", "slurm_job_ids.yaml"),
+        out_dir=analysis_path,
+        config_path=Path(analysis_path, "slurm_job_ids.yaml"),
         workflow=Workflow.MIP_DNA,
         analysis_type=AnalysisType.WGS,
     )
@@ -155,9 +138,9 @@ def test_start_available_mip_dna(
     # THEN a scout command is called to export panel beds
     subprocess_mock.run.assert_any_call(
         [
-            f"{test_root_dir}/scout/binary",
+            "/scout/binary",
             "--config",
-            f"{test_root_dir}/scout/config",
+            "/scout/config",
             "export",
             "panel",
             "--bed",
@@ -185,9 +168,9 @@ def test_start_available_mip_dna(
     # THEN a scout command is called to export managed variants
     subprocess_mock.run.assert_any_call(
         [
-            f"{test_root_dir}/scout/binary",
+            "/scout/binary",
             "--config",
-            f"{test_root_dir}/scout/config",
+            "/scout/config",
             "export",
             "managed",
             "--build",
@@ -241,18 +224,18 @@ samples:
   sample_id: {sample.internal_id}
   sex: female
 """
-    with open(Path(case_dir, "pedigree.yaml")) as f:
-        assert f.read() == expected_pedigree_content
+    assert Path(case_dir, "pedigree.yaml").open().read() == expected_pedigree_content
 
     # THEN the managed_variants file has been created with the correct contents
-    expected_managed_variants_content: str = scout_export_manged_variants_stdout.decode()
-    with open(Path(case_dir, "managed_variants.vcf")) as f:
-        assert f.read() == expected_managed_variants_content
+    assert (
+        Path(case_dir, "managed_variants.vcf").open().read()
+        == scout_export_manged_variants_stdout.decode()
+    )
 
     # THEN the gene_panels file has been created with the correct contents
-    expected_gene_panels_content: str = scout_export_panel_stdout.decode().removesuffix("\n")
-    with open(Path(case_dir, "gene_panels.bed")) as f:
-        assert f.read() == expected_gene_panels_content
+    assert Path(
+        case_dir, "gene_panels.bed"
+    ).open().read() == scout_export_panel_stdout.decode().removesuffix("\n")
 
 
 def _create_qc_file(test_root_dir: Path, case: Case) -> Path:
