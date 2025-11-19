@@ -65,7 +65,7 @@ class TransferLims(object):
         if sample_id:
             samples: list[Sample] = self.status.get_samples_by_internal_id(internal_id=sample_id)
         else:
-            samples: list[Sample] = self._get_samples_to_include(
+            samples: list[Sample] | None = self._get_samples_to_include(
                 include=include, status_type=status_type
             )
 
@@ -95,7 +95,7 @@ class TransferLims(object):
                 )
 
                 setattr(sample_obj, f"{status_type.value}_at", lims_date)
-                self.status.session.commit()
+                self.status.commit_to_store()
             else:
                 LOG.debug(f"no {status_type.value} date found for {sample_obj.internal_id}")
 

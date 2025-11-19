@@ -1,10 +1,14 @@
 import datetime as dt
+from unittest.mock import Mock, create_autospec
+
+import pytest
 
 from cg.apps.lims import LimsAPI
 from cg.meta.transfer import TransferLims
 from cg.meta.transfer.lims import IncludeOptions, SampleState
 from cg.store.models import Sample
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def has_same_received_at(lims, sample_obj):
@@ -114,56 +118,37 @@ def test_transfer_samples_include_unset_received_at(transfer_lims_api: TransferL
     assert not has_same_received_at(lims_api, transfered_sample)
 
 
-def test_transfer_samples_include_unset_received_at_older_than_cutoff(
-    transfer_lims_api: TransferLims,
-):
-    sample_store = transfer_lims_api.status
-    samples = sample_store._get_query(table=Sample).all()
-    assert len(samples) >= 2
-
-    # GIVEN time window
+@pytest.mark.freeze_time
+def test_transfer_samples_include_unset_received_at_older_than_cutoff():
+    # GIVEN a time window
     order_date_cutoff: dt.datetime = dt.datetime.today() - dt.timedelta(days=365 * 3)
     order_too_late: dt.datetime = order_date_cutoff - dt.timedelta(days=1)
     order_right_on_time: dt.datetime = order_date_cutoff + dt.timedelta(days=1)
 
-    # GIVEN sample with unset received_at and ordered BEFORE cutoff (should be excluded)
-    untransfered_sample: Sample = samples[0]
-    untransfered_sample.ordered_at = order_too_late
-    untransfered_sample.received_at = None
-    untransfered_sample.preped_at = None
-    untransfered_sample.last_sequenced_at = None
-    untransfered_sample.delivered_at = None
+    # GIVEN a store
+    store: TypedMock[Store] = create_typed_mock(Store)
 
-    # GIVEN sample with unset received_at and ordered AFTER cutoff (should be included)
-    transfered_sample = samples[1]
-    transfered_sample.ordered_at = order_right_on_time
-    transfered_sample.received_at = None
-    transfered_sample.preped_at = None
-    transfered_sample.last_sequenced_at = None
-    transfered_sample.delivered_at = None
-
-    # GIVEN both samples have received date in lims
-    untransfered_sample_received_at_date = dt.datetime.today()
-    transfered_sample_received_at_date = dt.datetime.today()
-
-    lims_sample = sample_store.add_sample(
-        name=untransfered_sample.name,
-        sex=untransfered_sample.sex,
-        internal_id=untransfered_sample.internal_id,
-        received=untransfered_sample_received_at_date,
+    # GIVEN two samples
+    untransfered_sample: Sample = create_autospec(
+        Sample,
+        ordered_at=order_too_late,
+        received_at=None,
     )
-    lims_samples = [lims_sample]
-
-    lims_sample = sample_store.add_sample(
-        name=transfered_sample.name,
-        sex=transfered_sample.sex,
-        internal_id=transfered_sample.internal_id,
-        received=transfered_sample_received_at_date,
+    transfered_sample: Sample = create_autospec(
+        Sample,
+        ordered_at=order_right_on_time,
+        received_at=None,
     )
-    lims_samples.append(lims_sample)
+    store.as_type.get_samples_to_receive = Mock(
+        return_value=[untransfered_sample, transfered_sample]
+    )
 
-    lims_api = transfer_lims_api.lims
-    lims_api.set_samples(lims_samples)
+    # GIVEN a LimsAPI
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.get_received_date = Mock(return_value=dt.datetime.today())
+
+    # GIVEN a TransferLIMS
+    transfer_lims_api: TransferLims = TransferLims(status=store.as_type, lims=lims_api)
 
     # WHEN calling transfer lims with include unset received_at and order_date_cutoff
     transfer_lims_api.transfer_samples(
@@ -173,5 +158,8 @@ def test_transfer_samples_include_unset_received_at_older_than_cutoff(
     )
 
     # THEN only the sample ordered after cutoff should be updated
-    assert not has_same_received_at(lims_api, untransfered_sample)
-    assert has_same_received_at(lims_api, transfered_sample)
+    assert untransfered_sample.received_at is None
+    assert transfered_sample.received_at == dt.datetime.today()
+
+    # THEN changes should have been commited to the store
+    store.as_mock.commit_to_store.assert_called_once()
