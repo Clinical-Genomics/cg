@@ -104,9 +104,7 @@ class TransferLims(object):
     ) -> list[Sample]:
         sample_within_time_window: list[Sample] = []
         for sample in samples:
-            if not self._is_sample_order_too_old(
-                sample=sample, order_date_cutoff=order_date_cutoff
-            ):
+            if not self._is_sample_too_old(sample=sample, order_date_cutoff=order_date_cutoff):
                 sample_within_time_window.append(sample)
         LOG.debug(f"Filter out {len(samples)-len(sample_within_time_window)} samples")
         return sample_within_time_window
