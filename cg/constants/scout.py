@@ -18,8 +18,8 @@ class ScoutExportFileName(StrEnum):
 
 
 class UploadTrack(StrEnum):
-    RARE_DISEASE: str = "rare"
-    CANCER: str = "cancer"
+    RARE_DISEASE = "rare"
+    CANCER = "cancer"
 
 
 class ScoutCustomCaseReportTags(StrEnum):
@@ -141,6 +141,7 @@ NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
     d4_file={"coverage", "d4"},
     hificnv_coverage={"hificnv", "bigwig"},
     paraphase_alignment_path={AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE},
+    phase_blocks={"whatshap", "gtf"},
     reviewer_alignment={"repeats", "spanning", "bam"},
     reviewer_alignment_index={"repeats", "spanning", "bam-index"},
     reviewer_vcf={"repeats", "sorted", "vcf"},
