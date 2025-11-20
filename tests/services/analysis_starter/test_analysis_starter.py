@@ -143,7 +143,7 @@ def test_analysis_starter_start_available_error_handling(
         configurator=create_autospec(NextflowConfigurator),
         input_fetcher=create_autospec(FastqFetcher),
         store=mock_store.as_type,
-        submitter=create_autospec(SeqeraPlatformSubmitter),
+        submitter=submitter,
         tracker=create_autospec(NextflowTracker),
         workflow=workflow,
     )
