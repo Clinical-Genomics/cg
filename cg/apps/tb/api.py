@@ -62,6 +62,8 @@ class TrailblazerAPI:
         self._credentials = credentials
         expiry: datetime | None = getattr(self._credentials, "expiry", None)
         if expiry:
+            if expiry.tzinfo is None:
+                expiry = expiry.replace(tzinfo=timezone.utc)
             LOG.debug(f"Token cached until {expiry}")
         else:
             LOG.debug("Token refreshed without expiry timestamp")
