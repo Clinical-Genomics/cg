@@ -238,7 +238,6 @@ class APIMethods(StrEnum):
 
 class MicrosaltQC:
     AVERAGE_COVERAGE_THRESHOLD: int = 10
-    MWX_THRESHOLD_SAMPLES_PASSING: float = 0.9
     COVERAGE_10X_THRESHOLD: float = 0.75
     DUPLICATION_RATE_THRESHOLD: float = 0.8
     INSERT_SIZE_THRESHOLD: int = 100
@@ -246,13 +245,6 @@ class MicrosaltQC:
     NEGATIVE_CONTROL_READS_THRESHOLD: float = 0.2
     TARGET_READS: int = 6000000
     TARGET_READS_FAIL_THRESHOLD: float = 0.7
-
-
-class MicrosaltAppTags(StrEnum):
-    MWRNXTR003: str = "MWRNXTR003"
-    MWXNXTR003: str = "MWXNXTR003"
-    VWGNXTR001: str = "VWGNXTR001"
-    PREP_CATEGORY: str = "mic"
 
 
 class MutantQC:

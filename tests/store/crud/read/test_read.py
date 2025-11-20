@@ -5,7 +5,7 @@ from sqlalchemy.exc import MultipleResultsFound
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability
-from cg.constants.constants import CaseActions, MicrosaltAppTags, Workflow
+from cg.constants.constants import CaseActions, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import BedVersionNotFoundError, CgError
@@ -110,7 +110,7 @@ def test_get_applications_by_prep_category(microbial_store: Store):
         assert application.prep_category == prep_category
 
 
-def test_get_application_by_tag(microbial_store: Store, tag: str = MicrosaltAppTags.MWRNXTR003):
+def test_get_application_by_tag(microbial_store: Store, tag: str = "MWRNXTR003"):
     """Test function to return the application by tag."""
 
     # GIVEN a store with application records
