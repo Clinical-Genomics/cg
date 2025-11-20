@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 
 from cg.constants.priority import SlurmQos
@@ -38,11 +39,15 @@ class SeqeraPlatformSubmitter(Submitter):
             preRunScript=case_config.pre_run_script,
             resume=case_config.resume,
             revision=case_config.revision,
-            runName=case_config.case_id,
+            runName=self._create_run_name(case_id=case_config.case_id, resume=case_config.resume),
             sessionId=case_config.session_id,
             workDir=case_config.work_dir,
         )
         return WorkflowLaunchRequest(launch=launch_request)
 
-    def _create_resumed_job_name(self):
-        pass
+    @staticmethod
+    def _create_run_name(case_id: str, resume: bool) -> str:
+        if resume:
+            return f"{case_id}_resumed_{datetime.now().strftime('%Y-%m-%d_%H-%M')}"
+        else:
+            return case_id
