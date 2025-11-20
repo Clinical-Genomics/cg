@@ -1,7 +1,7 @@
 """Trailblazer API for cg."""
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from google.auth.transport.requests import Request
@@ -35,6 +35,7 @@ class TrailblazerAPI:
         self.service_account_auth_file = config["trailblazer"]["service_account_auth_file"]
         self.host = config["trailblazer"]["host"]
         self._credentials: IDTokenCredentials | None = None
+        self._clock_skew_tolerance = timedelta(seconds=60)
 
     def _credentials_expired(self) -> bool:
         """Return True when there are no cached credentials or the token has expired."""
@@ -48,7 +49,8 @@ class TrailblazerAPI:
         if expiry.tzinfo is None:
             expiry = expiry.replace(tzinfo=timezone.utc)
 
-        return datetime.now(tz=timezone.utc) >= expiry
+        skewed_expiry: datetime = expiry - self._clock_skew_tolerance
+        return datetime.now(tz=timezone.utc) >= skewed_expiry
 
     def _refresh_credentials(self) -> IDTokenCredentials:
         """Refresh the Google OAuth token and cache the credential object."""
