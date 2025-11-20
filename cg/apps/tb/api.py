@@ -1,7 +1,7 @@
 """Trailblazer API for cg."""
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Any
 
 from google.auth.transport.requests import Request
@@ -36,7 +36,7 @@ class TrailblazerAPI:
         self.host = config["trailblazer"]["host"]
         self._credentials: IDTokenCredentials | None = None
 
-    def _credentials_expired(self) -> bool:
+    def _are_credentials_expired(self) -> bool:
         """Return True when there are no cached credentials or the token has expired."""
         if not self._credentials:
             return True
@@ -76,7 +76,7 @@ class TrailblazerAPI:
     @property
     def auth_header(self) -> dict:
         """Get authorization header with cached token to prevent Google rate limiting."""
-        if not self._credentials or self._credentials_expired():
+        if not self._credentials or self._are_credentials_expired():
             self._refresh_credentials()
 
         return {"Authorization": f"Bearer {self._credentials.token}"}
