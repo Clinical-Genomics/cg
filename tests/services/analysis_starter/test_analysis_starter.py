@@ -19,11 +19,13 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
     RNAFusionSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
 from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
+from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
@@ -35,11 +37,13 @@ from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_sub
 )
 from cg.services.analysis_starter.submitters.submitter import Submitter
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
+from cg.services.analysis_starter.tracker.implementations.balsamic import BalsamicTracker
 from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
 from cg.services.analysis_starter.tracker.implementations.nextflow_tracker import NextflowTracker
 from cg.store.models import Case, Sample
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 @pytest.fixture
@@ -49,6 +53,13 @@ def analysis_starter_scenario() -> dict:
     value for testing the analysis starter for each pipeline.
     """
     return {
+        Workflow.BALSAMIC: (
+            create_autospec(BalsamicConfigurator),
+            create_autospec(BalsamicCaseConfig),
+            create_autospec(SubprocessSubmitter),
+            create_autospec(BalsamicTracker),
+            None,
+        ),
         Workflow.MICROSALT: (
             create_autospec(MicrosaltConfigurator),
             create_autospec(MicrosaltCaseConfig),
@@ -90,6 +101,7 @@ def analysis_starter_scenario() -> dict:
 @pytest.mark.parametrize(
     "workflow",
     [
+        Workflow.BALSAMIC,
         Workflow.MICROSALT,
         Workflow.MIP_DNA,
         Workflow.RNAFUSION,
@@ -118,9 +130,9 @@ def test_analysis_starter_start_available_error_handling(
     depending on the errors raised.
     """
     # GIVEN a Store with a mock case
-    mock_store: Store = create_autospec(Store)
+    mock_store: TypedMock[Store] = create_typed_mock(Store)
     mock_case: Case = create_autospec(Case)
-    mock_store.get_cases_to_analyze.return_value = [mock_case]
+    mock_store.as_mock.get_cases_to_analyze.return_value = [mock_case]
 
     # GIVEN a Submitter
     submitter: Submitter = create_autospec(Submitter)
@@ -130,8 +142,8 @@ def test_analysis_starter_start_available_error_handling(
     analysis_starter = AnalysisStarter(
         configurator=create_autospec(NextflowConfigurator),
         input_fetcher=create_autospec(FastqFetcher),
-        store=mock_store,
-        submitter=submitter,
+        store=mock_store.as_type,
+        submitter=create_autospec(SeqeraPlatformSubmitter),
         tracker=create_autospec(NextflowTracker),
         workflow=workflow,
     )
@@ -247,6 +259,7 @@ def test_rnafusion_start(
 @pytest.mark.parametrize(
     "workflow",
     [
+        Workflow.BALSAMIC,
         Workflow.MICROSALT,
         Workflow.MIP_DNA,
         Workflow.RNAFUSION,
@@ -274,7 +287,7 @@ def test_start(
     mock_configurator.configure.return_value = mock_case_config
 
     # GIVEN a FastqFetcher
-    input_fetcher: FastqFetcher = create_autospec(FastqFetcher)
+    input_fetcher: TypedMock[FastqFetcher] = create_typed_mock(FastqFetcher)
 
     # GIVEN a Store
     mock_store: Store = create_autospec(Store)
@@ -285,7 +298,7 @@ def test_start(
     # GIVEN an analysis starter initialised with the previously mocked classes
     analysis_starter = AnalysisStarter(
         configurator=mock_configurator,
-        input_fetcher=input_fetcher,
+        input_fetcher=input_fetcher.as_type,
         store=mock_store,
         submitter=mock_submitter,
         tracker=mock_tracker,
@@ -300,7 +313,7 @@ def test_start(
         submit_result if submit_result else (None, None)
     )
     mock_tracker.ensure_analysis_not_ongoing.assert_called_once_with(case_id)
-    input_fetcher.ensure_files_are_ready.assert_called_once_with(case_id)
+    input_fetcher.as_mock.ensure_files_are_ready.assert_called_once_with(case_id)
     mock_configurator.configure.assert_called_once_with(case_id=case_id, **flags)
     mock_tracker.set_case_as_running.assert_called_once_with(case_id)
     mock_submitter.submit.assert_called_once_with(mock_case_config)
@@ -314,6 +327,7 @@ def test_start(
 @pytest.mark.parametrize(
     "workflow",
     [
+        Workflow.BALSAMIC,
         Workflow.MICROSALT,
         Workflow.MIP_DNA,
         Workflow.RNAFUSION,
@@ -354,6 +368,7 @@ def test_start_error_raised_in_run_and_track(workflow: Workflow, analysis_starte
 @pytest.mark.parametrize(
     "workflow",
     [
+        Workflow.BALSAMIC,
         Workflow.MICROSALT,
         Workflow.MIP_DNA,
         Workflow.RNAFUSION,

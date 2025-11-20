@@ -340,5 +340,9 @@ class Chanjo2ResponseError(Chanjo2APIClientError):
     """Exception raised when the response from Chanjo2 API client fails validation."""
 
 
+class CaseNotConfiguredError(CgError):
+    """Exception raised when a case is being run without a configuration."""
+
+
 class MissingConfigFilesError(CgError):
     """Exception raised when a case is being run with missing configuration files."""

@@ -339,6 +339,10 @@ class BedVersion(Base):
 
     bed: Mapped[Bed] = orm.relationship(back_populates="versions")
 
+    @property
+    def bed_name(self) -> str:
+        return self.bed.name
+
     def __str__(self) -> str:
         return f"{self.bed.name} ({self.version})"
 
