@@ -59,9 +59,9 @@ def sample_result_message(samples: list[SampleQualityResult]) -> str:
     return f"Sample results: {failed_count} failed, {passed_count} passed, {total_count} total."
 
 
-def get_failed_results(samples: list[SampleQualityResult]) -> list[str]:
+def get_failed_results(samples: list[SampleQualityResult]) -> list[SampleQualityResult]:
     return [result for result in samples if not result.passes_qc]
 
 
-def get_passed_results(samples: list[SampleQualityResult]) -> list[str]:
+def get_passed_results(samples: list[SampleQualityResult]) -> list[SampleQualityResult]:
     return [result for result in samples if result.passes_qc]
