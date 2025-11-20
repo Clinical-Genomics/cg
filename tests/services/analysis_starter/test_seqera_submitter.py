@@ -33,7 +33,7 @@ def expected_workflow_launch_request_with_resume() -> WorkflowLaunchRequest:
             pullLatest=False,
             resume=True,
             revision="3.0.0",
-            runName="case_id",
+            runName="case_id_resumed_2025-11-20_13-37",
             sessionId="some_session_id",
             workDir="work/dir",
         )
@@ -63,6 +63,7 @@ def test_create_launch_request(
     assert workflow_launch_request == expected_workflow_launch_request
 
 
+@pytest.mark.freeze_time("2025-11-20 13:37")
 def test_submit_with_resume(
     expected_workflow_launch_request_with_resume: WorkflowLaunchRequest,
     seqera_platform_config: SeqeraPlatformConfig,

@@ -43,3 +43,6 @@ class SeqeraPlatformSubmitter(Submitter):
             workDir=case_config.work_dir,
         )
         return WorkflowLaunchRequest(launch=launch_request)
+
+    def _create_resumed_job_name(self):
+        pass
