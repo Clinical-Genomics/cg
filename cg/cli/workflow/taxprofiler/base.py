@@ -8,6 +8,7 @@ import rich_click as click
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
+    OPTION_REVISION,
     metrics_deliver,
     report_deliver,
     store,
@@ -35,9 +36,10 @@ def taxprofiler(context: click.Context) -> None:
 
 
 @taxprofiler.command()
+@OPTION_REVISION
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def start(cg_config: CGConfig, case_id: str) -> None:
+def start(cg_config: CGConfig, case_id: str, revision: str | None) -> None:
     """Start a Taxprofiler case. \n
     Configures the case and writes the following files: \n
         - CASE_ID_params_file.yaml \n
@@ -49,7 +51,7 @@ def start(cg_config: CGConfig, case_id: str) -> None:
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.TAXPROFILER
     )
-    analysis_starter.start(case_id=case_id)
+    analysis_starter.start(case_id=case_id, revision=revision)
 
 
 @taxprofiler.command()
@@ -67,9 +69,10 @@ def start_available(cg_config: CGConfig) -> None:
 
 
 @taxprofiler.command()
+@OPTION_REVISION
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def run(cg_config: CGConfig, case_id: str) -> None:
+def run(cg_config: CGConfig, case_id: str, revision: str | None) -> None:
     """Run a preconfigured Taxprofiler case. \n
     Assumes that the following files are in the case run directory: \n
         - CASE_ID_params_file.yaml \n
@@ -80,7 +83,7 @@ def run(cg_config: CGConfig, case_id: str) -> None:
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.TAXPROFILER
     )
-    analysis_starter.run(case_id=case_id)
+    analysis_starter.run(case_id=case_id, revision=revision)
 
 
 @taxprofiler.command()
