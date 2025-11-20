@@ -161,10 +161,10 @@ def test_get_case_config_flags(
     )
 
     # WHEN getting the case config overriding the revision
-    case_config = configurator.get_config(case_id=nextflow_case_id, pre_run_script="overridden")
+    case_config = configurator.get_config(case_id=nextflow_case_id, revision="revision")
 
     # THEN we should get back a case config with updated value
-    assert case_config.pre_run_script == "overridden"
+    assert case_config.revision == "revision"
 
 
 @pytest.mark.parametrize(
