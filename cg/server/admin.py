@@ -210,10 +210,7 @@ def view_ticket_link(unused1, unused2, model, attribute_name):
 
     # Freshdesk ticket IDs have >=7 digits
     if len(ticket_str) >= 7:
-        base_url = app_config.freshdesk_url.replace(
-            "company", "scilifelab"
-        )  # TODO Check whether to put this upstream instead
-        ticket_link = f"{base_url}/a/tickets/{ticket_str}"
+        ticket_link = f"{app_config.freshdesk_url}/a/tickets/{ticket_str}"
         ticket_markup = Markup(f"<a href='{ticket_link}'>{ticket_str}</a>")
         return ticket_markup
     else:
@@ -234,12 +231,9 @@ def view_tickets_links(unused1, unused2, model, unused3):
 
         # Freshdesk ticket IDs have >=7 digits
         if len(ticket_str) >= 7:
-            base_url = app_config.freshdesk_url.replace(
-                "company", "scilifelab"
-            )  # TODO Check whether to put this upstream instead
-            ticket_link = f"{base_url}/a/tickets/{ticket_str}"
-            markup = Markup(f"<a href='{ticket_link}'>{ticket_str}</a>")
-            tickets_markups.append(markup)
+            ticket_link = f"{app_config.freshdesk_url}/a/tickets/{ticket_str}"
+            ticket_markup = Markup(f"<a href='{ticket_link}'>{ticket_str}</a>")
+            tickets_markups.append(ticket_markup)
         else:
             tickets_markups.append(ticket_str)
 
