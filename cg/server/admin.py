@@ -197,35 +197,48 @@ def view_customer_link(unused1, unused2, model, unused3):
     return markup
 
 
-def view_ticket_link(unused1, unused2, model, unused3):
-    """Column formatter used to add hyperlinks to ticket IDs, if applicable.
-    Can take several tickets if separated by commas."""
+def view_ticket_link(unused1, unused2, model, attribute_name):
+    """Column formatter used to add hyperlink to ticket ID, if applicable."""
+    del unused1, unused2
+
+    # Ticket attribute called differently from models, infer attribute name from args
+    if not hasattr(model, attribute_name):
+        return None
+    ticket_attr = getattr(model, attribute_name)
+    ticket_str = str(ticket_attr).strip()
+
+    # Freshdesk ticket IDs have >=7 digits
+    if len(ticket_str) >= 7:
+        ticket_link = (
+            f"https://scilifelab.freshdesk.com/a/tickets/{ticket_str}"  # TODO take URL from config
+        )
+        ticket_markup = Markup(f"<a href='{ticket_link}'>{ticket_str}</a>")
+        return ticket_markup
+    else:
+        return ticket_str
+
+
+def view_tickets_links(unused1, unused2, model, unused3):
+    """Column formatter used to add hyperlinks to comma-separated ticket IDs, if applicable. Assumes attribute name 'tickets'."""
     del unused1, unused2, unused3
 
-    # Harmonize behavior across different ticket attribute definitions
-    if hasattr(model, "tickets"):
-        tickets = model.tickets.split(sep=",")
-    elif hasattr(model, "original_ticket"):
-        tickets = [model.original_ticket]
-    elif hasattr(model, "ticket_id"):
-        tickets = [model.ticket_id]
-    elif hasattr(model, "ticket"):
-        tickets = [model.ticket]
-    else:
+    if not hasattr(model, "tickets"):
         return None
+    tickets_list = str(model.tickets).strip().split(sep=",")
 
-    formatted_tickets = []
-    for ticket in tickets:
-        # Freshdesk tickets have at least 7 digits
-        if len(ticket) >= 7:
-            ticket_link = f"https://scilifelab.freshdesk.com/a/tickets/{ticket}"
-            markup = Markup(f"<a href='{ticket_link}'>{ticket}</a>")
-            formatted_tickets.append(markup)
-        # Fallback: return without hyperlink formatting
+    tickets_markups = []
+    for ticket in tickets_list:
+        ticket_str = str(ticket).strip()
+
+        # Freshdesk ticket IDs have >=7 digits
+        if len(ticket_str) >= 7:
+            ticket_link = f"https://scilifelab.freshdesk.com/a/tickets/{ticket_str}"  # TODO take URL from config
+            markup = Markup(f"<a href='{ticket_link}'>{ticket_str}</a>")
+            tickets_markups.append(markup)
         else:
-            formatted_tickets.append(ticket)
+            tickets_markups.append(ticket_str)
 
-    return ",".join(formatted_tickets)
+    return markup(", ".join(tickets_markups))
 
 
 class ApplicationView(BaseView):
@@ -466,7 +479,7 @@ class CaseView(BaseView):
         "customer": view_customer_link,
         "internal_id": view_case_sample_link,
         "priority": view_priority,
-        "tickets": view_ticket_link,
+        "tickets": view_tickets_links,
     }
     column_searchable_list = [
         "internal_id",
