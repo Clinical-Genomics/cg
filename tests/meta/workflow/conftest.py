@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from cg.constants import SequencingFileTag
-from cg.constants.constants import CaseActions, MicrosaltAppTags, MicrosaltQC, Workflow
+from cg.constants.constants import CaseActions, MicrosaltQC, Workflow
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -207,8 +207,8 @@ def qc_microsalt_context(
     for sample in qc_pass_microsalt_samples[1:]:
         sample_to_add: Sample = helpers.add_sample(
             store=store,
-            application_tag=MicrosaltAppTags.MWRNXTR003,
-            application_type=MicrosaltAppTags.PREP_CATEGORY,
+            application_tag="MWRNXTR003",
+            application_type="mic",
             internal_id=sample,
             reads=MicrosaltQC.TARGET_READS,
             last_sequenced_at=datetime.datetime.now(),
@@ -220,8 +220,8 @@ def qc_microsalt_context(
     negative_control_sample: Sample = helpers.add_sample(
         store=store,
         internal_id=qc_pass_microsalt_samples[0],
-        application_tag=MicrosaltAppTags.MWRNXTR003,
-        application_type=MicrosaltAppTags.PREP_CATEGORY,
+        application_tag="MWRNXTR003",
+        application_type="mic",
         reads=0,
         last_sequenced_at=datetime.datetime.now(),
         control=ControlEnum.negative,
@@ -241,8 +241,8 @@ def qc_microsalt_context(
     for sample in qc_fail_microsalt_samples:
         sample_to_add: Sample = helpers.add_sample(
             store=store,
-            application_tag=MicrosaltAppTags.MWXNXTR003,
-            application_type=MicrosaltAppTags.PREP_CATEGORY,
+            application_tag="MWXNXTR003",
+            application_type="mic",
             internal_id=sample,
             reads=MicrosaltQC.TARGET_READS,
             last_sequenced_at=datetime.datetime.now(),
@@ -252,12 +252,8 @@ def qc_microsalt_context(
         helpers.add_relationship(store=store, case=microsalt_case_qc_fail, sample=sample_to_add)
 
     # Setting the target reads to correspond with statusDB
-    store.get_application_by_tag(tag=MicrosaltAppTags.MWRNXTR003).target_reads = (
-        MicrosaltQC.TARGET_READS
-    )
-    store.get_application_by_tag(tag=MicrosaltAppTags.MWXNXTR003).target_reads = (
-        MicrosaltQC.TARGET_READS
-    )
+    store.get_application_by_tag(tag="MWRNXTR003").target_reads = MicrosaltQC.TARGET_READS
+    store.get_application_by_tag(tag="MWXNXTR003").target_reads = MicrosaltQC.TARGET_READS
 
     cg_context.meta_apis["analysis_api"] = analysis_api
 
