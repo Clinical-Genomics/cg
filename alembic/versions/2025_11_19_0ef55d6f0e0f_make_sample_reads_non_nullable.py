@@ -6,6 +6,7 @@ Create Date: 2025-11-19 16:22:00.571238
 
 """
 
+import sqlalchemy as sa
 from sqlalchemy import orm
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -25,6 +26,7 @@ class Base(DeclarativeBase):
 
 class Sample(Base):
     __tablename__ = "sample"
+    id: Mapped[int] = mapped_column(primary_key=True)
     reads: Mapped[BigInt | None] = mapped_column(default=0)
 
 
@@ -35,8 +37,12 @@ def upgrade():
         sample.reads = 0
         session.add(sample)
     session.commit()
-    op.alter_column(table_name="sample", column_name="reads", nullable=False)
+    op.alter_column(
+        table_name="sample", column_name="reads", nullable=False, existing_type=sa.BigInteger
+    )
 
 
 def downgrade():
-    op.alter_column(table_name="sample", column_name="reads", nullable=True)
+    op.alter_column(
+        table_name="sample", column_name="reads", nullable=True, existing_type=sa.BigInteger
+    )
