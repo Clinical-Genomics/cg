@@ -58,42 +58,42 @@ def analysis_starter_scenario() -> dict:
             create_autospec(BalsamicCaseConfig),
             create_autospec(SubprocessSubmitter),
             create_autospec(BalsamicTracker),
-            None,
+            create_autospec(BalsamicCaseConfig),
         ),
         Workflow.MICROSALT: (
             create_autospec(MicrosaltConfigurator),
             create_autospec(MicrosaltCaseConfig),
             create_autospec(SubprocessSubmitter),
             create_autospec(MicrosaltTracker),
-            None,
+            create_autospec(MicrosaltCaseConfig),
         ),
         Workflow.MIP_DNA: (
             create_autospec(MIPDNAConfigurator),
             create_autospec(MIPDNACaseConfig),
             create_autospec(SubprocessSubmitter),
             create_autospec(MIPDNATracker),
-            None,
+            create_autospec(MIPDNACaseConfig),
         ),
         Workflow.RNAFUSION: (
             create_autospec(NextflowConfigurator),
             create_autospec(NextflowCaseConfig),
             create_autospec(SeqeraPlatformSubmitter),
             create_autospec(NextflowTracker),
-            ("session_id", "tower_id"),
+            create_autospec(NextflowCaseConfig, session_id="session_id", tower_id="tower_id"),
         ),
         Workflow.RAREDISEASE: (
             create_autospec(NextflowConfigurator),
             create_autospec(NextflowCaseConfig),
             create_autospec(SeqeraPlatformSubmitter),
             create_autospec(NextflowTracker),
-            ("session_id", "tower_id"),
+            create_autospec(NextflowCaseConfig, session_id="session_id", tower_id="tower_id"),
         ),
         Workflow.TAXPROFILER: (
             create_autospec(NextflowConfigurator),
             create_autospec(NextflowCaseConfig),
             create_autospec(SeqeraPlatformSubmitter),
             create_autospec(NextflowTracker),
-            ("session_id", "tower_id"),
+            create_autospec(NextflowCaseConfig, session_id="session_id", tower_id="tower_id"),
         ),
     }
 
@@ -417,13 +417,8 @@ def test_run(
     mock_submitter.submit.assert_called_once_with(mock_case_config)
 
     # THEN the tracker should track the case
-    if submit_result:
-        mock_tracker.track.assert_called_once_with(
-            case_config=mock_case_config,
-            session_id=submit_result[0],
-            tower_workflow_id=submit_result[1],
-        )
-    else:
-        mock_tracker.track.assert_called_once_with(
-            case_config=mock_case_config, session_id=None, tower_workflow_id=None
-        )
+    mock_tracker.track.assert_called_once_with(
+        case_config=mock_case_config,
+        session_id=submit_result.get_session_id(),
+        tower_workflow_id=submit_result.get_workflow_id(),
+    )

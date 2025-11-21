@@ -64,7 +64,7 @@ class AnalysisStarter:
         self.tracker.set_case_as_running(case_id)
         try:
             submit_result: CaseConfig = self.submitter.submit(parameters)
-            self.tracker.track(case_config=submit_result)
+            self.tracker.track(case_config=submit_result)  # TODO rename the case config objects
         except CalledProcessError as exception:
             self.tracker.set_case_as_not_running(case_id)
             raise exception

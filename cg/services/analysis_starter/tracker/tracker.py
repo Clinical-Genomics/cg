@@ -35,8 +35,6 @@ class Tracker(ABC):
     def track(
         self,
         case_config: CaseConfig,
-        session_id: str | None = None,
-        tower_workflow_id: str | None = None,
     ) -> None:
         tb_analysis: TrailblazerAnalysis = self._track_in_trailblazer(
             case_id=case_config.case_id, tower_workflow_id=case_config.get_workflow_id()
@@ -44,9 +42,7 @@ class Tracker(ABC):
         LOG.info(
             f"Analysis entry for case {case_config.case_id} created in Trailblazer with id {tb_analysis.id}"
         )
-        self._create_analysis_statusdb(
-            case_config=case_config, session_id=session_id, trailblazer_id=tb_analysis.id
-        )
+        self._create_analysis_statusdb(case_config=case_config, trailblazer_id=tb_analysis.id)
         LOG.info(f"Analysis entry for case {case_config.case_id} created in StatusDB")
 
     def ensure_analysis_not_ongoing(self, case_id: str) -> None:
@@ -88,7 +84,7 @@ class Tracker(ABC):
         )
 
     def _create_analysis_statusdb(
-        self, case_config: CaseConfig, session_id: str | None, trailblazer_id: int | None
+        self, case_config: CaseConfig, trailblazer_id: int | None
     ) -> None:
         """Storing an analysis bundle in StatusDB for a provided case."""
         case_id: str = case_config.case_id
@@ -103,7 +99,7 @@ class Tracker(ABC):
             version=workflow_version,
             completed_at=None,
             primary=is_primary,
-            session_id=session_id,
+            session_id=case_config.get_session_id(),
             started_at=analysis_start,
             trailblazer_id=trailblazer_id,
         )
