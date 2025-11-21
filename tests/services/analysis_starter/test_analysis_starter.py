@@ -47,7 +47,17 @@ from tests.typed_mock import TypedMock, create_typed_mock
 
 
 @pytest.fixture
-def analysis_starter_scenario() -> dict:
+def nextflow_case_config_with_session_id_and_workflow_id() -> NextflowCaseConfig:
+    case_config: NextflowCaseConfig = create_autospec(NextflowCaseConfig)
+    case_config.get_session_id = Mock(return_value="session_id")
+    case_config.get_workflow_id = Mock(return_value="workflow_id")
+    return case_config
+
+
+@pytest.fixture
+def analysis_starter_scenario(
+    nextflow_case_config_with_session_id_and_workflow_id: NextflowCaseConfig,
+) -> dict:
     """
     Return a dict with mocks for configurator, case_config, submitter, tracker and submit return
     value for testing the analysis starter for each pipeline.
@@ -79,21 +89,21 @@ def analysis_starter_scenario() -> dict:
             create_autospec(NextflowCaseConfig),
             create_autospec(SeqeraPlatformSubmitter),
             create_autospec(NextflowTracker),
-            create_autospec(NextflowCaseConfig, session_id="session_id", tower_id="tower_id"),
+            nextflow_case_config_with_session_id_and_workflow_id,
         ),
         Workflow.RAREDISEASE: (
             create_autospec(NextflowConfigurator),
             create_autospec(NextflowCaseConfig),
             create_autospec(SeqeraPlatformSubmitter),
             create_autospec(NextflowTracker),
-            create_autospec(NextflowCaseConfig, session_id="session_id", tower_id="tower_id"),
+            nextflow_case_config_with_session_id_and_workflow_id,
         ),
         Workflow.TAXPROFILER: (
             create_autospec(NextflowConfigurator),
             create_autospec(NextflowCaseConfig),
             create_autospec(SeqeraPlatformSubmitter),
             create_autospec(NextflowTracker),
-            create_autospec(NextflowCaseConfig, session_id="session_id", tower_id="tower_id"),
+            nextflow_case_config_with_session_id_and_workflow_id,
         ),
     }
 
@@ -417,8 +427,4 @@ def test_run(
     mock_submitter.submit.assert_called_once_with(mock_case_config)
 
     # THEN the tracker should track the case
-    mock_tracker.track.assert_called_once_with(
-        case_config=mock_case_config,
-        session_id=submit_result.get_session_id(),
-        tower_workflow_id=submit_result.get_workflow_id(),
-    )
+    mock_tracker.track.assert_called_once_with(case_config=submit_result)
