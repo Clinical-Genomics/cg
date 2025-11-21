@@ -24,6 +24,12 @@ def transfer_group(context: CGConfig):
 
 @transfer_group.command("lims")
 @click.option(
+    "--max-order-age",
+    type=click.IntRange(min=1),
+    default=None,
+    help="Exclude samples with order dates older than N years. Must be greater than or equal to 1.",
+)
+@click.option(
     "-s", "--status", type=click.Choice(["received", "prepared", "delivered"]), default="received"
 )
 @click.option(
@@ -31,11 +37,16 @@ def transfer_group(context: CGConfig):
 )
 @click.option("--sample-id", help="Lims Submitted Sample id. use together with status.")
 @click.pass_obj
-def check_samples_in_lims(context: CGConfig, status: str, include: str, sample_id: str):
+def check_samples_in_lims(
+    context: CGConfig, max_order_age: int | None, status: str, include: str, sample_id: str
+):
     """Check if samples have been updated in LIMS."""
     transfer_api: TransferLims = context.meta_apis["transfer_lims_api"]
     transfer_api.transfer_samples(
-        status_type=SampleState[status.upper()], include=include, sample_id=sample_id
+        include=include,
+        max_order_age=max_order_age,
+        sample_id=sample_id,
+        status_type=SampleState[status.upper()],
     )
 
 

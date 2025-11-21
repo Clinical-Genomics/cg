@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from enum import Enum
 
 import genologics.entities
@@ -6,6 +7,7 @@ import genologics.entities
 from cg.apps.lims import LimsAPI
 from cg.store.models import Pool, Sample
 from cg.store.store import Store
+from cg.utils.date import get_date_days_ago
 
 LOG = logging.getLogger(__name__)
 
@@ -52,14 +54,27 @@ class TransferLims(object):
         }
 
     def transfer_samples(
-        self, status_type: SampleState, include: str = "unset", sample_id: str = None
+        self,
+        status_type: SampleState,
+        include: str = "unset",
+        max_order_age: int | None = None,
+        sample_id: str = None,
     ):
         """Transfer information about samples."""
 
         if sample_id:
             samples: list[Sample] = self.status.get_samples_by_internal_id(internal_id=sample_id)
         else:
-            samples: list[Sample] = self._get_samples_to_include(include, status_type)
+            samples: list[Sample] | None = self._get_samples_to_include(
+                include=include, status_type=status_type
+            )
+
+        if max_order_age:
+            order_date_cutoff: datetime = get_date_days_ago(max_order_age * 365)
+            LOG.info(f"Remove samples ordered before {str(order_date_cutoff)}")
+            samples: list[Sample] = self._filter_out_older_orders(
+                samples=samples, order_date_cutoff=order_date_cutoff
+            )
 
         if samples is None:
             LOG.info(f"No samples to process found with {include} {status_type.value}")
@@ -80,9 +95,19 @@ class TransferLims(object):
                 )
 
                 setattr(sample_obj, f"{status_type.value}_at", lims_date)
-                self.status.session.commit()
+                self.status.commit_to_store()
             else:
                 LOG.debug(f"no {status_type.value} date found for {sample_obj.internal_id}")
+
+    def _filter_out_older_orders(
+        self, samples: list[Sample], order_date_cutoff: datetime
+    ) -> list[Sample]:
+        sample_within_time_window: list[Sample] = []
+        for sample in samples:
+            if not self._is_sample_too_old(sample=sample, order_date_cutoff=order_date_cutoff):
+                sample_within_time_window.append(sample)
+        LOG.debug(f"Filter out {len(samples)-len(sample_within_time_window)} samples")
+        return sample_within_time_window
 
     def _get_samples_to_include(self, include, status_type):
         samples = None
@@ -151,3 +176,7 @@ class TransferLims(object):
             )
             return False
         return True
+
+    @staticmethod
+    def _is_sample_too_old(sample: Sample, order_date_cutoff: datetime) -> bool:
+        return sample.ordered_at < order_date_cutoff
