@@ -6,6 +6,7 @@ from pytest_mock import MockerFixture
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
 from cg.models.cg_config import SeqeraPlatformConfig
+from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.submitters.seqera_platform import (
     seqera_platform_submitter as submitter,
@@ -97,11 +98,11 @@ def test_submit_with_resume(
     mocker.patch.object(submitter, "read_yaml", return_value={"content": "some-params-content"})
 
     # WHEN calling submit
-    session_id, workflow_id = seqera_platform_submitter.submit(case_config)
+    submit_result: CaseConfig = seqera_platform_submitter.submit(case_config)
 
     # THEN the session id and the workflow id should be as expected
-    assert session_id == "some_session_id"
-    assert workflow_id == "some_workflow_id"
+    assert submit_result.get_session_id() == "some_session_id"
+    assert submit_result.get_workflow_id() == "some_workflow_id"
 
     # THEN assert that the run request provided to the client is correct
     client.run_case.assert_called_once_with(expected_workflow_launch_request_with_resume)

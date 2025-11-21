@@ -319,19 +319,12 @@ def test_start(
     analysis_starter.start(case_id, **flags)
 
     # THEN the analysis should be started successfully
-    expected_session_id, expected_tower_workflow_id = (
-        submit_result if submit_result else (None, None)
-    )
     mock_tracker.ensure_analysis_not_ongoing.assert_called_once_with(case_id)
     input_fetcher.as_mock.ensure_files_are_ready.assert_called_once_with(case_id)
     mock_configurator.configure.assert_called_once_with(case_id=case_id, **flags)
     mock_tracker.set_case_as_running.assert_called_once_with(case_id)
     mock_submitter.submit.assert_called_once_with(mock_case_config)
-    mock_tracker.track.assert_called_once_with(
-        case_config=mock_case_config,
-        session_id=expected_session_id,
-        tower_workflow_id=expected_tower_workflow_id,
-    )
+    mock_tracker.track.assert_called_once_with(case_config=submit_result)
 
 
 @pytest.mark.parametrize(

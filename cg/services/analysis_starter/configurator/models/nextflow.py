@@ -15,5 +15,8 @@ class NextflowCaseConfig(CaseConfig):
     work_dir: str
     workflow_id: str | None = None
 
+    def get_session_id(self) -> str | None:
+        return self.session_id
+
     def get_workflow_id(self) -> str | None:
         return self.workflow_id

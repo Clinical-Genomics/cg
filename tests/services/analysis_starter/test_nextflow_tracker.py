@@ -60,13 +60,13 @@ def test_nextflow_tracker():
         pipeline_repository="github/raredisease",
         pre_run_script="pre_run_script",
         revision="1.0.0",
+        session_id="session-abc-666",
         work_dir="work/dir",
+        workflow_id="1",
     )
 
     # WHEN wanting to track the started raredisease analysis
-    nextflow_tracker.track(
-        case_config=case_config, session_id="session-abc-666", tower_workflow_id="1"
-    )
+    nextflow_tracker.track(case_config=case_config)
 
     # THEN the appropriate POST should have been sent
     config_path: Path = nextflow_tracker._get_job_ids_path(case_id)
