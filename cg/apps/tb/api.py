@@ -101,7 +101,7 @@ class TrailblazerAPI:
         return ReadStream.get_content_from_stream(file_format=FileFormat.JSON, stream=response.text)
 
     def get_latest_completed_analysis(self, case_id: str) -> TrailblazerAnalysis | None:
-        endpoint = f"analyses?case_id={case_id}&status[]={AnalysisStatus.COMPLETED}&limit=1"
+        endpoint = f"analyses?case_id={case_id}&status[]={AnalysisStatus.COMPLETED}&include_hidden=True&limit=1"
         response = self.query_trailblazer(command=endpoint, request_body={}, method=APIMethods.GET)
         validated_response = AnalysesResponse.model_validate(response)
         if validated_response.analyses:
