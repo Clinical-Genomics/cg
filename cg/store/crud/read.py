@@ -903,20 +903,19 @@ class ReadHandler(BaseHandler):
             valid_from=dt.datetime.now(),
         ).first()
 
-    def get_active_applications_by_prep_category(
+    def get_applications_by_prep_category(
         self, prep_category: SeqLibraryPrepCategory
     ) -> list[Application]:
-        """Return all active applications by prep category."""
+        """Return all applications by prep category."""
         return apply_application_filter(
             applications=self._get_query(table=Application),
             filter_functions=[
                 ApplicationFilter.BY_PREP_CATEGORIES,
-                ApplicationFilter.IS_NOT_ARCHIVED,
             ],
             prep_categories=[prep_category],
         ).all()
 
-    def get_bed_version_by_file_name(self, bed_version_file_name: str) -> BedVersion:
+    def get_bed_version_by_file_name(self, bed_version_file_name: str) -> BedVersion | None:
         """Return bed version with file name."""
         return apply_bed_version_filter(
             bed_versions=self._get_query(table=BedVersion),
@@ -1164,6 +1163,23 @@ class ReadHandler(BaseHandler):
             samples=self._get_query(table=Sample),
             internal_id=internal_id,
         ).first()
+
+    def get_sample_by_internal_id_strict(self, internal_id: str) -> Sample:
+        """
+        Return a sample by lims id.
+        Raises:
+            SampleNotFoundError: If no sample is found with the given internal id.
+        """
+        try:
+            return apply_sample_filter(
+                filter_functions=[SampleFilter.BY_INTERNAL_ID],
+                samples=self._get_query(table=Sample),
+                internal_id=internal_id,
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise SampleNotFoundError(
+                f"Sample with internal id {internal_id} was not found in the database."
+            )
 
     def get_samples_by_identifier(self, object_type: str, identifier: str) -> list[Sample]:
         """Return all samples from a flow cell, case or sample id"""

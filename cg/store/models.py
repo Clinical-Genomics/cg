@@ -338,6 +338,10 @@ class BedVersion(Base):
 
     bed: Mapped[Bed] = orm.relationship(back_populates="versions")
 
+    @property
+    def bed_name(self) -> str:
+        return self.bed.name
+
     def __str__(self) -> str:
         return f"{self.bed.name} ({self.version})"
 
@@ -441,7 +445,7 @@ class Case(Base, PriorityMixin):
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped["Customer"] = orm.relationship(foreign_keys=[customer_id])
-    data_analysis: Mapped[str] = mapped_column(
+    data_analysis: Mapped[Workflow] = mapped_column(
         types.Enum(*(workflow.value for workflow in Workflow))
     )
     data_delivery: Mapped[str | None] = mapped_column(
@@ -1117,6 +1121,7 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
     polymerase_mean_read_length: Mapped[BigInt]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
+    instrument_run = orm.relationship(PacbioSequencingRun, back_populates="sample_metrics")
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""

@@ -10,6 +10,7 @@ from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
 from cg.cli.workflow.base import workflow as workflow_cli
+from cg.cli.workflow.nallo.base import dev_run as nallo_run
 from cg.cli.workflow.raredisease.base import dev_run as raredisease_run
 from cg.cli.workflow.rnafusion.base import run as rnafusion_run
 from cg.cli.workflow.taxprofiler.base import run as taxprofiler_run
@@ -292,8 +293,8 @@ def test_resume_using_nextflow_dry_run(
 
 @pytest.mark.parametrize(
     "run_command",
-    [raredisease_run, rnafusion_run, taxprofiler_run],
-    ids=["raredisease", "RNAFUSION", "Taxprofiler"],
+    [nallo_run, raredisease_run, rnafusion_run, taxprofiler_run],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
 )
 def test_run_nextflow_calls_service(
     run_command: BaseCommand,
@@ -306,7 +307,7 @@ def test_run_nextflow_calls_service(
 
     # GIVEN that the dev run command is run with flags
     service_call = mocker.patch.object(AnalysisStarter, "run")
-    cli_runner.invoke(run_command, [case_id], obj=cg_context)
+    cli_runner.invoke(run_command, [case_id, "--revision", "revision"], obj=cg_context)
 
     # THEN the analysis started should have been called with the flags set
-    service_call.assert_called_once_with(case_id=case_id)
+    service_call.assert_called_once_with(case_id=case_id, revision="revision")

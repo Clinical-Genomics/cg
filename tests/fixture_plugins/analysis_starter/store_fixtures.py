@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 from housekeeper.store.models import File
@@ -80,6 +80,14 @@ def mock_housekeeper_for_nf_sample_sheet(fastq_path_1: Path, fastq_path_2: Path)
 
 
 @pytest.fixture
+def mock_store_for_nallo_file_creators() -> Store:
+    mock_store: Store = create_autospec(Store)
+    mock_store.get_case_workflow = Mock(return_value=Workflow.NALLO)
+    mock_store.get_case_priority = Mock(return_value=SlurmQos.NORMAL)
+    return mock_store
+
+
+@pytest.fixture
 def mock_store_for_raredisease_file_creators(
     nextflow_case_id: str, nextflow_sample_id: str
 ) -> Store:
@@ -140,13 +148,3 @@ def mock_store_for_taxprofiler_file_creators(nextflow_sample_id: str) -> Store:
     mock_store.get_case_workflow.return_value = Workflow.TAXPROFILER
     mock_store.get_case_priority.return_value = SlurmQos.NORMAL
     return mock_store
-
-
-@pytest.fixture
-def mock_store_for_nextflow_gene_panel_file_creator() -> Store:
-    """Fixture to provide a mock store for the gene panel file creator."""
-    case: Case = create_autospec(Case)
-    case.customer.internal_id = "cust000"
-    store: Store = create_autospec(Store)
-    store.get_case_by_internal_id.return_value = case
-    return store

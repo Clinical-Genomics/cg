@@ -1,13 +1,14 @@
 """CLI support to create config and/or start NALLO."""
 
 import logging
+from typing import cast
 
 import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS, echo_lines
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
-from cg.constants.cli_options import DRY_RUN
 from cg.cli.workflow.nf_analysis import (
+    OPTION_REVISION,
     config_case,
     metrics_deliver,
     report_deliver,
@@ -18,11 +19,15 @@ from cg.cli.workflow.nf_analysis import (
     store_available,
     store_housekeeper,
 )
-
-from cg.constants.constants import MetaApis
+from cg.constants.cli_options import DRY_RUN
+from cg.constants.constants import MetaApis, Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
+from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
+from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
+from cg.services.analysis_starter.service import AnalysisStarter
 
 LOG = logging.getLogger(__name__)
 
@@ -61,3 +66,66 @@ def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
         echo_lines(lines=bed_lines)
         return
     analysis_api.write_panel_as_tsv(case_id=case_id, content=bed_lines)
+
+
+@nallo.command("dev-config-case")
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_config_case(cg_config: CGConfig, case_id: str):
+    """
+    Configure a Nallo case so that it is ready to be run. \b
+    Creates the following files in the case run directory:
+        - CASE_ID_params_file.yaml
+        - CASE_ID_nextflow_config.json
+        - CASE_ID_samplesheet.csv
+    """
+    factory = ConfiguratorFactory(cg_config)
+    configurator = cast(NextflowConfigurator, factory.get_configurator(Workflow.NALLO))
+    configurator.configure(case_id=case_id)
+
+
+@nallo.command("dev-run")
+@OPTION_REVISION
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_run(cg_config: CGConfig, case_id: str, revision: str | None) -> None:
+    """
+    Run a preconfigured Nallo case. \b
+    Assumes that the following files exist in the case run directory:
+        - CASE_ID_params_file.yaml
+        - CASE_ID_nextflow_config.json
+        - CASE_ID_samplesheet.csv
+    """
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.NALLO)
+    analysis_starter.run(case_id=case_id, revision=revision)
+
+
+@nallo.command("dev-start")
+@OPTION_REVISION
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def dev_start(cg_config: CGConfig, case_id: str, revision: str | None):
+    """
+    Start a Nallo case. \b
+    Configures the case and writes the following files:
+        - CASE_ID_params_file.yaml
+        - CASE_ID_nextflow_config.json
+        - CASE_ID_samplesheet.csv
+    and submits the job to the Seqera Platform.
+    """
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.NALLO)
+    analysis_starter.start(case_id=case_id, revision=revision)
+
+
+@nallo.command("dev-start-available")
+@click.pass_obj
+def dev_start_available(cg_config: CGConfig):
+    """Starts all available Nallo cases."""
+    LOG.info("Starting Nallo workflow for all available cases.")
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.NALLO)
+    succeeded: bool = analysis_starter.start_available()
+    if not succeeded:
+        raise click.Abort

@@ -8,6 +8,7 @@ import rich_click as click
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS, echo_lines
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
+    OPTION_REVISION,
     config_case,
     metrics_deliver,
     report_deliver,
@@ -62,27 +63,29 @@ def dev_config_case(cg_config: CGConfig, case_id: str):
 
 
 @raredisease.command()
+@OPTION_REVISION
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_run(cg_config: CGConfig, case_id: str):
+def dev_run(cg_config: CGConfig, case_id: str, revision: str | None):
     """Run a preconfigured raredisease case."""
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RAREDISEASE
     )
-    analysis_starter.run(case_id=case_id)
+    analysis_starter.run(case_id=case_id, revision=revision)
 
 
 @raredisease.command()
+@OPTION_REVISION
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_start(cg_config: CGConfig, case_id: str):
+def dev_start(cg_config: CGConfig, case_id: str, revision: str | None):
     """Start a raredisease case. Configures the case if needed."""
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RAREDISEASE
     )
-    analysis_starter.start(case_id=case_id)
+    analysis_starter.start(case_id=case_id, revision=revision)
 
 
 @raredisease.command()
