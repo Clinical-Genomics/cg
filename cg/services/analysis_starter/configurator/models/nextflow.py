@@ -13,3 +13,7 @@ class NextflowCaseConfig(CaseConfig):
     revision: str
     session_id: str | None = None
     work_dir: str
+    workflow_id: str | None = None
+
+    def get_workflow_id(self) -> str | None:
+        return self.workflow_id

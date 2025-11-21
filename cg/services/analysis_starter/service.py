@@ -63,13 +63,8 @@ class AnalysisStarter:
     def _run_and_track(self, case_id: str, parameters: CaseConfig):
         self.tracker.set_case_as_running(case_id)
         try:
-            session_id, workflow_id = None, None
-            submit_result: tuple | None = self.submitter.submit(parameters)
-            if submit_result:
-                session_id, workflow_id = submit_result
-            self.tracker.track(
-                case_config=parameters, session_id=session_id, tower_workflow_id=workflow_id
-            )
+            submit_result: CaseConfig = self.submitter.submit(parameters)
+            self.tracker.track(case_config=submit_result)
         except CalledProcessError as exception:
             self.tracker.set_case_as_not_running(case_id)
             raise exception

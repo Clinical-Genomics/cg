@@ -18,14 +18,14 @@ class SeqeraPlatformSubmitter(Submitter):
         self.client: SeqeraPlatformClient = client
         self.compute_environment_ids: dict[str, str] = compute_environment_ids
 
-    def submit(self, case_config: NextflowCaseConfig) -> tuple[str, str]:
+    def submit(self, case_config: NextflowCaseConfig) -> NextflowCaseConfig:
         """Starts a case and returns the workflow id for the job."""
-        run_request: WorkflowLaunchRequest = self._create_launch_request(case_config)
+        new_case_config: NextflowCaseConfig = case_config.model_copy()
+        run_request: WorkflowLaunchRequest = self._create_launch_request(new_case_config)
         response: dict = self.client.run_case(run_request)
-        return (
-            response["sessionId"],
-            response["workflowId"],
-        )  # TODO: Create a named tuple for the session_id and workflow_id
+        new_case_config.session_id = response["sessionId"]
+        new_case_config.workflow_id = response["workflowId"]
+        return new_case_config
 
     def _create_launch_request(self, case_config: NextflowCaseConfig) -> WorkflowLaunchRequest:
         parameters: dict = read_yaml(Path(case_config.params_file))

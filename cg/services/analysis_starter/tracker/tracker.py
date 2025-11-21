@@ -39,7 +39,7 @@ class Tracker(ABC):
         tower_workflow_id: str | None = None,
     ) -> None:
         tb_analysis: TrailblazerAnalysis = self._track_in_trailblazer(
-            case_id=case_config.case_id, tower_workflow_id=tower_workflow_id
+            case_id=case_config.case_id, tower_workflow_id=case_config.get_workflow_id()
         )
         LOG.info(
             f"Analysis entry for case {case_config.case_id} created in Trailblazer with id {tb_analysis.id}"
@@ -62,7 +62,7 @@ class Tracker(ABC):
         self.store.update_case_action(case_internal_id=case_id, action=None)
 
     def _track_in_trailblazer(
-        self, case_id: str, tower_workflow_id: int | None
+        self, case_id: str, tower_workflow_id: str | None
     ) -> TrailblazerAnalysis:
         analysis_type: str = self._get_analysis_type(case_id)
         config_path: Path = self._get_job_ids_path(case_id)
