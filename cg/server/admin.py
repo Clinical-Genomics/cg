@@ -16,6 +16,7 @@ from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
+from cg.server.app_config import app_config
 
 
 class BaseView(ModelView):
@@ -209,9 +210,8 @@ def view_ticket_link(unused1, unused2, model, attribute_name):
 
     # Freshdesk ticket IDs have >=7 digits
     if len(ticket_str) >= 7:
-        ticket_link = (
-            f"https://scilifelab.freshdesk.com/a/tickets/{ticket_str}"  # TODO take URL from config
-        )
+        base_url = app_config.freshdesk_url.replace("company", "scilifelab")
+        ticket_link = f"{base_url}/a/tickets/{ticket_str}"
         ticket_markup = Markup(f"<a href='{ticket_link}'>{ticket_str}</a>")
         return ticket_markup
     else:
@@ -232,7 +232,8 @@ def view_tickets_links(unused1, unused2, model, unused3):
 
         # Freshdesk ticket IDs have >=7 digits
         if len(ticket_str) >= 7:
-            ticket_link = f"https://scilifelab.freshdesk.com/a/tickets/{ticket_str}"  # TODO take URL from config
+            base_url = app_config.freshdesk_url.replace("company", "scilifelab")
+            ticket_link = f"{base_url}/a/tickets/{ticket_str}"
             markup = Markup(f"<a href='{ticket_link}'>{ticket_str}</a>")
             tickets_markups.append(markup)
         else:
