@@ -1,6 +1,6 @@
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import BeforeValidator, Field
+from pydantic import BeforeValidator, Field, model_validator
 from typing_extensions import Annotated
 
 from cg.models.orders.sample_base import NAME_PATTERN, ControlEnum, SexEnum, StatusEnum
@@ -26,3 +26,11 @@ class MIPDNASample(Sample):
     subject_id: str = Field(pattern=NAME_PATTERN, max_length=128)
     tissue_block_size: TissueBlockEnum | None = None
     concentration_ng_ul: float | None = None
+
+    @model_validator(mode="before")
+    def set_other_source(cls, data: Any) -> Any:
+        """When source is sent as 'other', we should instead set the value sent as 'source_comment'."""
+        if isinstance(data, dict):
+            if data.get("source") == "other":
+                data["source"] = data.get("source_comment")
+        return data
