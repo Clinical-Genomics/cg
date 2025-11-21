@@ -731,7 +731,6 @@ class PoolView(BaseView):
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
         "invoice": InvoiceView.view_invoice_link,
-        "ticket": view_ticket_link,
     }
     column_searchable_list = ["name", "order", "ticket", "customer.internal_id"]
 
