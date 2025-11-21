@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 
 from cg.constants.priority import SlurmQos
@@ -17,10 +18,14 @@ class SeqeraPlatformSubmitter(Submitter):
         self.client: SeqeraPlatformClient = client
         self.compute_environment_ids: dict[str, str] = compute_environment_ids
 
-    def submit(self, case_config: NextflowCaseConfig) -> str:
+    def submit(self, case_config: NextflowCaseConfig) -> NextflowCaseConfig:
         """Starts a case and returns the workflow id for the job."""
-        run_request: WorkflowLaunchRequest = self._create_launch_request(case_config)
-        return self.client.run_case(run_request)
+        new_case_config: NextflowCaseConfig = case_config.model_copy()
+        run_request: WorkflowLaunchRequest = self._create_launch_request(new_case_config)
+        response: dict = self.client.run_case(run_request)
+        new_case_config.session_id = response["sessionId"]
+        new_case_config.workflow_id = response["workflowId"]
+        return new_case_config
 
     def _create_launch_request(self, case_config: NextflowCaseConfig) -> WorkflowLaunchRequest:
         parameters: dict = read_yaml(Path(case_config.params_file))
@@ -32,8 +37,17 @@ class SeqeraPlatformSubmitter(Submitter):
             paramsText=parameter_stream,
             pipeline=case_config.pipeline_repository,
             preRunScript=case_config.pre_run_script,
+            resume=case_config.resume,
             revision=case_config.revision,
-            runName=case_config.case_id,
+            runName=self._create_run_name(case_id=case_config.case_id, resume=case_config.resume),
+            sessionId=case_config.session_id,
             workDir=case_config.work_dir,
         )
         return WorkflowLaunchRequest(launch=launch_request)
+
+    @staticmethod
+    def _create_run_name(case_id: str, resume: bool) -> str:
+        if resume:
+            return f"{case_id}_resumed_{datetime.now().strftime('%Y-%m-%d_%H-%M')}"
+        else:
+            return case_id

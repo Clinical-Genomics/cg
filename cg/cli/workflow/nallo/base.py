@@ -8,6 +8,7 @@ import rich_click as click
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS, echo_lines
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.nf_analysis import (
+    OPTION_RESUME,
     OPTION_REVISION,
     config_case,
     metrics_deliver,
@@ -86,9 +87,10 @@ def dev_config_case(cg_config: CGConfig, case_id: str):
 
 @nallo.command("dev-run")
 @OPTION_REVISION
+@OPTION_RESUME
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_run(cg_config: CGConfig, case_id: str, revision: str | None) -> None:
+def dev_run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None) -> None:
     """
     Run a preconfigured Nallo case. \b
     Assumes that the following files exist in the case run directory:
@@ -98,7 +100,7 @@ def dev_run(cg_config: CGConfig, case_id: str, revision: str | None) -> None:
     """
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.NALLO)
-    analysis_starter.run(case_id=case_id, revision=revision)
+    analysis_starter.run(case_id=case_id, resume=resume, revision=revision)
 
 
 @nallo.command("dev-start")

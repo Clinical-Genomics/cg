@@ -296,7 +296,7 @@ def test_resume_using_nextflow_dry_run(
     [nallo_run, raredisease_run, rnafusion_run, taxprofiler_run],
     ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
 )
-def test_run_nextflow_calls_service(
+def test_run_nextflow_calls_service_default_flag_values(
     run_command: BaseCommand,
     cli_runner: CliRunner,
     cg_context: CGConfig,
@@ -305,9 +305,33 @@ def test_run_nextflow_calls_service(
     # GIVEN a case id
     case_id: str = "case_id"
 
-    # GIVEN that the dev run command is run with flags
+    # WHEN the dev run command is run without flags
     service_call = mocker.patch.object(AnalysisStarter, "run")
-    cli_runner.invoke(run_command, [case_id, "--revision", "revision"], obj=cg_context)
+    cli_runner.invoke(run_command, [case_id], obj=cg_context)
 
-    # THEN the analysis started should have been called with the flags set
-    service_call.assert_called_once_with(case_id=case_id, revision="revision")
+    # THEN the analysis starter should have been called with the default flag values
+    service_call.assert_called_once_with(case_id=case_id, resume=True, revision=None)
+
+
+@pytest.mark.parametrize(
+    "run_command",
+    [nallo_run, raredisease_run, rnafusion_run, taxprofiler_run],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
+)
+def test_run_nextflow_calls_service_all_flags_set(
+    run_command: BaseCommand,
+    cli_runner: CliRunner,
+    cg_context: CGConfig,
+    mocker: MockerFixture,
+):
+    # GIVEN a case id
+    case_id: str = "case_id"
+
+    # WHEN the dev run command is run with all flags set
+    service_call = mocker.patch.object(AnalysisStarter, "run")
+    cli_runner.invoke(
+        run_command, [case_id, "--resume", "false", "--revision", "some_revision"], obj=cg_context
+    )
+
+    # THEN the analysis starter should have been called with the flags set
+    service_call.assert_called_once_with(case_id=case_id, resume=False, revision="some_revision")

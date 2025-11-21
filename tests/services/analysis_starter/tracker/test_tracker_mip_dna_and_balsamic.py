@@ -140,7 +140,7 @@ def test_track(
 
     # GIVEN a StatusDB instance
     status_db: TypedMock[Store] = create_typed_mock(Store)
-    status_db.as_type.get_case_by_internal_id = Mock(return_value=case)
+    status_db.as_type.get_case_by_internal_id_strict = Mock(return_value=case)
     status_db.as_type.add_analysis = Mock(return_value=analysis)
     status_db.as_type.get_latest_ticket_from_case = Mock(return_value="123456")
     status_db.as_type.get_case_workflow = Mock(return_value=workflow)
@@ -168,14 +168,15 @@ def test_track(
 
     # THEN an analysis object should have been created in StatusDB
     status_db.as_mock.add_analysis.assert_called_with(
+        case=case,
         completed_at=None,
         primary=True,
         started_at=datetime.now(),
+        session_id=None,
         trailblazer_id=1,
         version=pipeline_version,
         workflow=workflow,
     )
-    assert analysis.case == case
 
     # THEN the items are added to the database
     status_db.as_mock.add_item_to_store.assert_called_with(analysis)
