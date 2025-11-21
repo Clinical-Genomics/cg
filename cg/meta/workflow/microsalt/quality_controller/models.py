@@ -17,8 +17,6 @@ class SampleQualityResult(BaseModel):
 class CaseQualityResult(BaseModel):
     passes_qc: bool
     control_passes_qc: bool
-    urgent_passes_qc: bool
-    non_urgent_passes_qc: bool
 
 
 class QualityResult(BaseModel):
