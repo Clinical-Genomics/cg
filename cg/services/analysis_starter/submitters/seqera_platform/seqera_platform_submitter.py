@@ -6,10 +6,12 @@ from cg.constants.priority import SlurmQos
 from cg.exc import SeqeraError
 from cg.io.yaml import read_yaml, write_yaml_stream
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
-from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
 from cg.services.analysis_starter.submitters.seqera_platform.dtos import (
     LaunchRequest,
     WorkflowLaunchRequest,
+)
+from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_client import (
+    SeqeraPlatformClient,
 )
 from cg.services.analysis_starter.submitters.submitter import Submitter
 

@@ -174,6 +174,7 @@ def test_rnafusion_start(
     cg_context: CGConfig,
     http_workflow_launch_response: Response,
     mocker: MockerFixture,
+    http_get_workflow_response: Response,
 ):
     # GIVEN a case_id
     case_id: str = "case_id"
@@ -242,6 +243,13 @@ def test_rnafusion_start(
         requests,
         "post",
         return_value=http_workflow_launch_response,
+    )
+
+    # GIVEN that the GET to the submitter is successful
+    submit_mock = mocker.patch.object(
+        requests,
+        "get",
+        return_value=http_get_workflow_response,
     )
 
     # GIVEN that the Trailblazer tracking is successful

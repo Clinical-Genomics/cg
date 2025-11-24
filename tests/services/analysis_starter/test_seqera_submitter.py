@@ -12,10 +12,12 @@ from cg.services.analysis_starter.configurator.models.nextflow import NextflowCa
 from cg.services.analysis_starter.submitters.seqera_platform import (
     seqera_platform_submitter as submitter,
 )
-from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
 from cg.services.analysis_starter.submitters.seqera_platform.dtos import (
     LaunchRequest,
     WorkflowLaunchRequest,
+)
+from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_client import (
+    SeqeraPlatformClient,
 )
 from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_submitter import (
     SeqeraPlatformSubmitter,

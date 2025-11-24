@@ -25,13 +25,24 @@ class SeqeraPlatformClient:
             f"Sending request body {request.model_dump()} \n Headers: {self.auth_headers} \n Params: {params}"
         )
         response: requests.Response = requests.post(
-            url=url,
             headers=self.auth_headers,
-            params=params,
             json=request.model_dump(),
+            params=params,
+            url=url,
         )
         response.raise_for_status()
         return response.json()
 
     def get_workflow(self, workflow_id: str) -> dict:
         url = f"{self.base_url}/workflow/{workflow_id}"
+        params: dict = {"workspaceId": self.workspace_id}
+        LOG.debug(
+            f"Get seqera workflow with id: {workflow_id} \n Headers: {self.auth_headers} \n Params: {params}"
+        )
+        response: requests.Response = requests.get(
+            headers=self.auth_headers,
+            params=params,
+            url=url,
+        )
+        response.raise_for_status()
+        return response.json()

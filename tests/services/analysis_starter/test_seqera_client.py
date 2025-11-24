@@ -5,8 +5,10 @@ import requests
 from pytest_mock import MockerFixture
 from requests import Response
 
-from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
 from cg.services.analysis_starter.submitters.seqera_platform.dtos import WorkflowLaunchRequest
+from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_client import (
+    SeqeraPlatformClient,
+)
 
 
 def test_run_case(
@@ -27,10 +29,10 @@ def test_run_case(
 
     # THEN the request should be sent to the Seqera platform API
     mock_submitter.assert_called_once_with(
-        url=f"{seqera_platform_client.base_url}/workflow/launch",
-        params={"workspaceId": seqera_platform_client.workspace_id},
         headers=seqera_platform_client.auth_headers,
         json=workflow_launch_request.model_dump(),
+        params={"workspaceId": seqera_platform_client.workspace_id},
+        url=f"{seqera_platform_client.base_url}/workflow/launch",
     )
 
 
@@ -60,13 +62,21 @@ def test_get_workflow(
     # GIVEN a seqera platform client
 
     # GIVEN the seqera platform responds as expected
-    mock_submitter: Mock = mocker.patch.object(
+    mock_get: Mock = mocker.patch.object(
         requests,
         "get",
         return_value=http_get_workflow_response,
     )
     # WHEN getting the workflow
     response_json = seqera_platform_client.get_workflow("workflow_id")
+
+    # THEN request was as expected
+    mock_get.assert_called_once_with(
+        headers=seqera_platform_client.auth_headers,
+        params={"workspaceId": seqera_platform_client.workspace_id},
+        url=f"{seqera_platform_client.base_url}/workflow/workflow_id",
+    )
+
     # THEN the response is as expected
     assert response_json == {
         "workflow": {
