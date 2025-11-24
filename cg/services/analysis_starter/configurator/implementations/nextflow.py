@@ -96,7 +96,9 @@ class NextflowConfigurator(Configurator):
                 case_id=new_config.case_id
             )
             if analysis.completed_at:
-                raise AnalysisAlreadyCompletedError()
+                raise AnalysisAlreadyCompletedError(
+                    "Resume not possible for an already completed analysis"
+                )
             new_config.session_id = analysis.session_id
         return new_config
 
