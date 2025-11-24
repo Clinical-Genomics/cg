@@ -89,8 +89,15 @@ def test_submit_with_resume(
 
     # GIVEN a SeqeraPlatformSubmitter
     client = create_autospec(SeqeraPlatformClient)
-    client.run_case = Mock(
-        return_value={"workflowId": "some_workflow_id", "sessionId": "some_session_id"}
+    client.run_case = Mock(return_value={"workflowId": "some_workflow_id"})
+    client.get_workflow = Mock(
+        return_value={
+            "workflow": {
+                "id": "some_id",
+                "runName": "case_id",
+                "sessionId": "some_session_id",
+            }
+        }
     )
     seqera_platform_submitter = SeqeraPlatformSubmitter(
         client=client, compute_environment_ids=seqera_platform_config.compute_environments
