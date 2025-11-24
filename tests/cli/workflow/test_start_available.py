@@ -5,7 +5,7 @@ from click import BaseCommand
 from click.testing import CliRunner, Result
 from pytest_mock import MockerFixture
 
-from cg.cli.workflow.balsamic.base import dev_start_available as balsamic_start_available
+from cg.cli.workflow.balsamic.base import start_available as balsamic_start_available
 from cg.cli.workflow.microsalt.base import start_available as microsalt_start_available
 from cg.cli.workflow.mip_dna.base import start_available as mip_dna_start_available
 from cg.cli.workflow.nallo.base import dev_start_available as nallo_start_available
