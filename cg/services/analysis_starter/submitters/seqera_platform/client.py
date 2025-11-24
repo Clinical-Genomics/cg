@@ -33,5 +33,5 @@ class SeqeraPlatformClient:
         response.raise_for_status()
         return response.json()
 
-    def get_workflow(self):
+    def get_workflow(self, workflow_id: str) -> dict:
         pass

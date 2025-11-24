@@ -114,6 +114,7 @@ def test_submit_with_resume(
 
     # THEN assert that the run request provided to the client is correct
     client.run_case.assert_called_once_with(expected_workflow_launch_request_with_resume)
+    client.get_workflow.assert_called_once_with("some_workflow_id")
 
 
 def test_submit_no_session_or_workflow_id(

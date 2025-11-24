@@ -27,7 +27,7 @@ class SeqeraPlatformSubmitter(Submitter):
         if not response.get("workflowId"):
             raise SeqeraError(f"workflowId missing from response: {response}")
         new_case_config.workflow_id = response["workflowId"]
-        workflow_response: dict = self.client.get_workflow()
+        workflow_response: dict = self.client.get_workflow(new_case_config.workflow_id)
 
         new_case_config.session_id = workflow_response["workflow"]["sessionId"]
         return new_case_config
