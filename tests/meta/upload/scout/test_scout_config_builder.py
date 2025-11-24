@@ -282,3 +282,11 @@ def test_remove_chromosome_substring(mip_config_builder: MipConfigBuilder):
     # THEN
     assert mip_config_builder.remove_chromosome_substring(file_path1) == generic_path
     assert mip_config_builder.remove_chromosome_substring(file_path2) == generic_path
+
+
+def test_nallo_config_builder():
+    # GIVEN a Nallo config builder
+
+    # GIVEN files exist in Housekeeper
+
+    pass
