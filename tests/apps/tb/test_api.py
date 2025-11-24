@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from unittest.mock import create_autospec
 
 import pytest
@@ -17,6 +18,7 @@ from cg.io.controller import APIRequest
 def valid_google_credentials(mocker) -> IDTokenCredentials:
     credentials: IDTokenCredentials = create_autospec(IDTokenCredentials)
     credentials.token = "some_token"
+    credentials.expiry = datetime.now(timezone.utc) + timedelta(minutes=5)
     mocker.patch.object(IDTokenCredentials, "from_service_account_file", return_value=credentials)
     return credentials
 
