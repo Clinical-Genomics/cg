@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+from typing import cast
 
 from cg.constants.priority import SlurmQos
 from cg.exc import SeqeraError
@@ -27,7 +28,7 @@ class SeqeraPlatformSubmitter(Submitter):
         if not response.get("workflowId"):
             raise SeqeraError(f"workflowId missing from response: {response}")
         new_case_config.workflow_id = response["workflowId"]
-        workflow_response: dict = self.client.get_workflow(new_case_config.workflow_id)
+        workflow_response: dict = self.client.get_workflow(cast(str, new_case_config.workflow_id))
 
         new_case_config.session_id = workflow_response["workflow"]["sessionId"]
         return new_case_config

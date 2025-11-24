@@ -34,4 +34,4 @@ class SeqeraPlatformClient:
         return response.json()
 
     def get_workflow(self, workflow_id: str) -> dict:
-        pass
+        url = f"{self.base_url}/workflow/{workflow_id}"

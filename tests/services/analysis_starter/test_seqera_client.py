@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 import pytest
 import requests
 from pytest_mock import MockerFixture
@@ -48,3 +50,28 @@ def test_run_case_raises_exception_on_error(
     # WHEN running the case using the request, then it should raise an HTTPError
     with pytest.raises(requests.exceptions.HTTPError):
         seqera_platform_client.run_case(workflow_launch_request)
+
+
+def test_get_workflow(
+    http_get_workflow_response: Response,
+    seqera_platform_client: SeqeraPlatformClient,
+    mocker: MockerFixture,
+):
+    # GIVEN a seqera platform client
+
+    # GIVEN the seqera platform responds as expected
+    mock_submitter: Mock = mocker.patch.object(
+        requests,
+        "get",
+        return_value=http_get_workflow_response,
+    )
+    # WHEN getting the workflow
+    response_json = seqera_platform_client.get_workflow("workflow_id")
+    # THEN the response is as expected
+    assert response_json == {
+        "workflow": {
+            "id": "some_id",
+            "runName": "case_id",
+            "sessionId": "some_session_id",
+        }
+    }

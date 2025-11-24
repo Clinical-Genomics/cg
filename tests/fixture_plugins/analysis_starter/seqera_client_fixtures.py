@@ -60,7 +60,23 @@ def http_workflow_launch_response() -> Response:
     response = Response()
     response.status_code = HTTPStatus.OK.value
     response._content = write_json_stream(
-        {"sessionId": "session-id", "workflowId": "DummyId"}
+        {"sessionId": "session-id", "workflowId": "DummyId"}  # TODO remove sessionId
+    ).encode()
+    return response
+
+
+@pytest.fixture
+def http_get_workflow_response() -> Response:
+    response = Response()
+    response.status_code = HTTPStatus.OK.value
+    response._content = write_json_stream(
+        {
+            "workflow": {
+                "id": "some_id",
+                "runName": "case_id",
+                "sessionId": "some_session_id",
+            }
+        }
     ).encode()
     return response
 
