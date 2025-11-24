@@ -30,6 +30,6 @@ class SeqeraPlatformClient:
             params=params,
             json=request.model_dump(),
         )
-        LOG.debug(f"raw response: {response.raw}")
+        LOG.debug(f"raw response: {response.text}")
         response.raise_for_status()
         return response.json()
