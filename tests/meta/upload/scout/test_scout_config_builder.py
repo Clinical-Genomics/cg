@@ -321,25 +321,27 @@ def test_nallo_config_builder(mocker: MockerFixture):
     )
 
     # Case Files
-    delivery_report = create_autospec(File, full_path="delivery_report.yaml")
-    multiqc = create_autospec(File, full_path="multiqc.html")
-    peddy_check = create_autospec(File, full_path="check.peddy")
-    peddy_ped = create_autospec(File, full_path="ped.peddy")
-    peddy_sex = create_autospec(File, full_path="sex.peddy")
-    vcf_snv_research = create_autospec(File, full_path="snv_research.vcf")
-    vcf_snv = create_autospec(File, full_path="snv_clinical.vcf")
-    vcf_sv = create_autospec(File, full_path="sv.vcf")
-    vcf_sv_research = create_autospec(File, full_path="sv_research.vcf")
-    vcf_snv_research = create_autospec(File, full_path="snv_research.vcf")
-    vcf_str = create_autospec(File, full_path="str.vcf")
+    delivery_report: File = create_autospec(File, full_path="delivery_report.yaml")
+    multiqc: File = create_autospec(File, full_path="multiqc.html")
+    peddy_check: File = create_autospec(File, full_path="check.peddy")
+    peddy_ped: File = create_autospec(File, full_path="ped.peddy")
+    peddy_sex: File = create_autospec(File, full_path="sex.peddy")
+    vcf_snv_research: File = create_autospec(File, full_path="snv_research.vcf")
+    vcf_snv: File = create_autospec(File, full_path="snv_clinical.vcf")
+    vcf_sv: File = create_autospec(File, full_path="sv.vcf")
+    vcf_sv_research: File = create_autospec(File, full_path="sv_research.vcf")
+    vcf_snv_research: File = create_autospec(File, full_path="snv_research.vcf")
+    vcf_str: File = create_autospec(File, full_path="str.vcf")
 
     # Sample files
-    alignment_path = create_autospec(File, full_path="haplo.bam")
-    d4_file = create_autospec(File, full_path="coverage.d4")
-    tiddit_coverage_wig = create_autospec(File, full_path="bigwig_hifi.cnv")
-    paraphase_alignment_path = create_autospec(File, full_path="paraphase.bam")
-    phase_blocks = create_autospec(File, full_path="phase_blocks.gtf")
-    minor_allele_frequency_wig = create_autospec(File, full_path="minor_allele_frequency.bigwig")
+    alignment_path: File = create_autospec(File, full_path="haplo.bam")
+    d4_file: File = create_autospec(File, full_path="coverage.d4")
+    tiddit_coverage_wig: File = create_autospec(File, full_path="bigwig_hifi.cnv")
+    paraphase_alignment_path: File = create_autospec(File, full_path="paraphase.bam")
+    phase_blocks: File = create_autospec(File, full_path="phase_blocks.gtf")
+    minor_allele_frequency_wig: File = create_autospec(
+        File, full_path="minor_allele_frequency.bigwig"
+    )
 
     # GIVEN files exist in Housekeeper for each set of NALLO_CASE_TAG and NALLO_SAMPLE_TAG
     def mock_get_file_from_version(version: Version, tags: set[str]) -> File | None:
@@ -426,43 +428,71 @@ def test_nallo_config_builder(mocker: MockerFixture):
         hk_version=version, analysis=analysis
     )
 
-    # THEN all case files should have been included in the config
-    assert all(
-        [
-            load_config.delivery_report == delivery_report.full_path,
-            load_config.multiqc == multiqc.full_path,
-            load_config.peddy_check == peddy_check.full_path,
-            load_config.peddy_ped == peddy_ped.full_path,
-            load_config.peddy_sex == peddy_sex.full_path,
-            load_config.vcf_snv_research == vcf_snv_research.full_path,
-            load_config.vcf_snv == vcf_snv.full_path,
-            load_config.vcf_sv == vcf_sv.full_path,
-            load_config.vcf_sv_research == vcf_sv_research.full_path,
-            load_config.vcf_snv_research == vcf_snv_research.full_path,
-            load_config.vcf_str == vcf_str.full_path,
-        ]
+    expected_load_config = NalloLoadConfig(
+        owner=customer.internal_id,
+        family=case.internal_id,
+        family_name=case.name,
+        status=None,
+        synopsis=None,
+        phenotype_terms=None,
+        phenotype_groups=None,
+        gene_panels=[],
+        default_gene_panels=[],
+        cohorts=[],
+        human_genome_build="38",
+        rank_model_version="1.0",
+        rank_score_threshold=8,
+        sv_rank_model_version="1.0",
+        analysis_date=datetime.now(),
+        samples=[
+            ScoutNalloIndividual(
+                alignment_path=alignment_path.full_path,
+                rna_alignment_path=None,
+                analysis_type="wgs",
+                capture_kit=None,
+                confirmed_parent=None,
+                confirmed_sex=None,
+                father="0",
+                mother="0",
+                phenotype=case_sample.status,
+                sample_id=sample.internal_id,
+                sample_name=sample.name,
+                sex=sample.sex,
+                subject_id=sample.subject_id,
+                tissue_type="unknown",
+                assembly_alignment_path=None,
+                d4_file=d4_file.full_path,
+                minor_allele_frequency_wig=minor_allele_frequency_wig.full_path,
+                mt_bam=alignment_path.full_path,
+                paraphase_alignment_path=paraphase_alignment_path.full_path,
+                phase_blocks=phase_blocks.full_path,
+                reviewer=Reviewer(
+                    alignment="repeats_spanning.bam",
+                    alignment_index="repeats_spanning.index",
+                    vcf="repeats_sorted.vcf",
+                    catalog="variant_catalog.trgt",
+                    trgt=True,
+                ),
+                tiddit_coverage_wig="bigwig_hifi.cnv",
+            )
+        ],
+        customer_images=None,
+        delivery_report=delivery_report.full_path,
+        coverage_qc_report=None,
+        cnv_report=None,
+        multiqc=multiqc.full_path,
+        track="rare",
+        madeline=None,
+        peddy_check=peddy_check.full_path,
+        peddy_ped=peddy_ped.full_path,
+        peddy_sex=peddy_sex.full_path,
+        somalier_samples=None,
+        somalier_pairs=None,
+        vcf_snv=vcf_snv.full_path,
+        vcf_snv_research=vcf_snv_research.full_path,
+        vcf_sv=vcf_sv.full_path,
+        vcf_sv_research=vcf_sv_research.full_path,
+        vcf_str=vcf_str.full_path,
     )
 
-    # THEN all sample files should have been included in the config
-    sample: ScoutNalloIndividual = load_config.samples[0]
-    assert all(
-        [
-            sample.alignment_path == alignment_path.full_path,
-            sample.d4_file == d4_file.full_path,
-            sample.mt_bam == alignment_path.full_path,
-            sample.tiddit_coverage_wig == tiddit_coverage_wig.full_path,
-            sample.paraphase_alignment_path == paraphase_alignment_path.full_path,
-            sample.phase_blocks == phase_blocks.full_path,
-            sample.minor_allele_frequency_wig == minor_allele_frequency_wig.full_path,
-        ]
-    )
-
-    # THEN the reviewer looks as it should
-    expected_reviewer = Reviewer(
-        alignment="repeats_spanning.bam",
-        alignment_index="repeats_spanning.index",
-        vcf="repeats_sorted.vcf",
-        catalog="variant_catalog.trgt",
-        trgt=True,
-    )
-    assert sample.reviewer == expected_reviewer
+    assert load_config == expected_load_config
