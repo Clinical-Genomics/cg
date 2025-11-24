@@ -6,6 +6,7 @@ import pytest
 
 from cg.apps.environ import environ_email
 from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Priority
 from cg.constants.constants import Workflow, WorkflowManager
 from cg.constants.priority import SlurmQos
@@ -42,7 +43,9 @@ def test_nextflow_tracker():
     # GIVEN a TrailblazerAPI
     trailblazer_entry_id = 123456
     tb_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
-    tb_submitter = tb_api.add_pending_analysis = Mock(return_value=Mock(id=trailblazer_entry_id))
+    tb_submitter = tb_api.add_pending_analysis = Mock(
+        return_value=create_autospec(TrailblazerAnalysis, id=trailblazer_entry_id)
+    )
 
     # GIVEN a NextflowTracker
     nextflow_tracker = NextflowTracker(
