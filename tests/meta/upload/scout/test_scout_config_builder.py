@@ -1,16 +1,40 @@
 """Tests for the file handlers."""
 
 import logging
+from datetime import datetime
+from unittest.mock import Mock
 
-from housekeeper.store.models import Version
+import pytest
+from housekeeper.store.models import File, Version
+from mock import create_autospec
+from pytest_mock import MockerFixture
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.lims.api import LimsAPI
+from cg.apps.madeline.api import MadelineAPI
+from cg.constants import Priority, Workflow
+from cg.constants.constants import SexOptions
+from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.nallo_config_builder import NalloConfigBuilder
 from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
+from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
-from cg.store.models import Analysis
+from cg.models.orders.sample_base import StatusEnum
+from cg.models.scout.scout_load_config import NalloLoadConfig, Reviewer, ScoutNalloIndividual
+from cg.store.models import (
+    Analysis,
+    Application,
+    ApplicationVersion,
+    Case,
+    CaseSample,
+    Customer,
+    Sample,
+)
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
@@ -284,9 +308,161 @@ def test_remove_chromosome_substring(mip_config_builder: MipConfigBuilder):
     assert mip_config_builder.remove_chromosome_substring(file_path2) == generic_path
 
 
-def test_nallo_config_builder():
+@pytest.mark.freeze_time
+def test_nallo_config_builder(mocker: MockerFixture):
+    lims_api = create_autospec(LimsAPI)
+    lims_api.sample = Mock(return_value={"tissue_type": "blood"})
+
     # GIVEN a Nallo config builder
+    nallo_config_builder = NalloConfigBuilder(
+        nallo_analysis_api=create_autospec(NalloAnalysisAPI),
+        lims_api=lims_api,
+        madeline_api=create_autospec(MadelineAPI),
+    )
 
-    # GIVEN files exist in Housekeeper
+    # Case Files
+    delivery_report = create_autospec(File, full_path="delivery_report.yaml")
+    multiqc = create_autospec(File, full_path="multiqc.html")
+    peddy_check = create_autospec(File, full_path="check.peddy")
+    peddy_ped = create_autospec(File, full_path="ped.peddy")
+    peddy_sex = create_autospec(File, full_path="sex.peddy")
+    vcf_snv_research = create_autospec(File, full_path="snv_research.vcf")
+    vcf_snv = create_autospec(File, full_path="snv_clinical.vcf")
+    vcf_sv = create_autospec(File, full_path="sv.vcf")
+    vcf_sv_research = create_autospec(File, full_path="sv_research.vcf")
+    vcf_snv_research = create_autospec(File, full_path="snv_research.vcf")
+    vcf_str = create_autospec(File, full_path="str.vcf")
 
-    pass
+    # Sample files
+    alignment_path = create_autospec(File, full_path="haplo.bam")
+    d4_file = create_autospec(File, full_path="coverage.d4")
+    tiddit_coverage_wig = create_autospec(File, full_path="bigwig_hifi.cnv")
+    paraphase_alignment_path = create_autospec(File, full_path="paraphase.bam")
+    phase_blocks = create_autospec(File, full_path="phase_blocks.gtf")
+    minor_allele_frequency_wig = create_autospec(File, full_path="minor_allele_frequency.bigwig")
+
+    # GIVEN files exist in Housekeeper for each set of NALLO_CASE_TAG and NALLO_SAMPLE_TAG
+    def mock_get_file_from_version(version: Version, tags: set[str]) -> File | None:
+        # Case tags
+        if tags == {"delivery-report"}:
+            return delivery_report
+        elif tags == {"multiqc-html"}:
+            return multiqc
+        elif tags == {"ped-check", "peddy"}:
+            return peddy_check
+        elif tags == {"ped", "peddy"}:
+            return peddy_ped
+        elif tags == {"sex-check", "peddy"}:
+            return peddy_sex
+        elif tags == {"vcf-snv-research"}:
+            return vcf_snv_research
+        elif tags == {"vcf-snv-clinical"}:
+            return vcf_snv
+        elif tags == {"vcf-sv-research"}:
+            return vcf_sv_research
+        elif tags == {"vcf-sv-clinical"}:
+            return vcf_sv
+        elif tags == {"vcf-str"}:
+            return vcf_str
+        # Sample tags
+        elif tags == {AlignmentFileTag.BAM, "haplotags", "sample_id"}:
+            return alignment_path
+        elif tags == {"coverage", "d4", "sample_id"}:
+            return d4_file
+        elif tags == {"hificnv", "bigwig", "sample_id"}:
+            return tiddit_coverage_wig
+        elif tags == {AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE, "sample_id"}:
+            return paraphase_alignment_path
+        elif tags == {"whatshap", "gtf", "sample_id"}:
+            return phase_blocks
+        elif tags == {"repeats", "spanning", "bam", "sample_id"}:
+            return create_autospec(File, full_path="repeats_spanning.bam")
+        elif tags == {"repeats", "spanning", "bam-index", "sample_id"}:
+            return create_autospec(File, full_path="repeats_spanning.index")
+        elif tags == {"repeats", "sorted", "vcf", "sample_id"}:
+            return create_autospec(File, full_path="repeats_sorted.vcf")
+        elif tags == {"trgt", "variant-catalog"}:
+            return create_autospec(File, full_path="variant_catalog.trgt")
+        elif tags == {"hificnv", "bigwig", "maf", "sample_id"}:
+            return minor_allele_frequency_wig
+        raise Exception
+
+    mocker.patch.object(
+        HousekeeperAPI, "get_file_from_version", side_effect=mock_get_file_from_version
+    )
+    version = create_autospec(Version)
+
+    # GIVEN an analysis tied to a case which is in turn tied to a sample and a customer
+    application: Application = create_autospec(
+        Application, analysis_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
+    )
+    sample: Sample = create_autospec(
+        Sample,
+        application_version=create_autospec(ApplicationVersion, application=application),
+        internal_id="sample_id",
+        sex=SexOptions.FEMALE,
+        subject_id="sample_subject",
+    )
+    sample.name = "sample_name"
+    case_sample: CaseSample = create_autospec(
+        CaseSample, father=None, mother=None, sample=sample, status=StatusEnum.affected
+    )
+    customer: Customer = create_autospec(Customer, internal_id="cust000")
+    case: Case = create_autospec(
+        Case,
+        customer=customer,
+        data_analysis=Workflow.NALLO,
+        internal_id="case_id",
+        links=[case_sample],
+        priority=Priority.standard,
+        synopsis=None,
+    )
+    case_sample.case = case
+    case.name = "case_name"
+    analysis: Analysis = create_autospec(Analysis, case=case, completed_at=datetime.now())
+
+    # WHEN building the Nallo Scout load config
+    load_config: NalloLoadConfig = nallo_config_builder.build_load_config(
+        hk_version=version, analysis=analysis
+    )
+
+    # THEN all case files should have been included in the config
+    assert all(
+        [
+            load_config.delivery_report == delivery_report.full_path,
+            load_config.multiqc == multiqc.full_path,
+            load_config.peddy_check == peddy_check.full_path,
+            load_config.peddy_ped == peddy_ped.full_path,
+            load_config.peddy_sex == peddy_sex.full_path,
+            load_config.vcf_snv_research == vcf_snv_research.full_path,
+            load_config.vcf_snv == vcf_snv.full_path,
+            load_config.vcf_sv == vcf_sv.full_path,
+            load_config.vcf_sv_research == vcf_sv_research.full_path,
+            load_config.vcf_snv_research == vcf_snv_research.full_path,
+            load_config.vcf_str == vcf_str.full_path,
+        ]
+    )
+
+    # THEN all sample files should have been included in the config
+    sample: ScoutNalloIndividual = load_config.samples[0]
+    assert all(
+        [
+            sample.alignment_path == alignment_path.full_path,
+            sample.d4_file == d4_file.full_path,
+            sample.mt_bam == alignment_path.full_path,
+            sample.tiddit_coverage_wig == tiddit_coverage_wig.full_path,
+            sample.paraphase_alignment_path == paraphase_alignment_path.full_path,
+            sample.phase_blocks == phase_blocks.full_path,
+            sample.minor_allele_frequency_wig == minor_allele_frequency_wig.full_path,
+        ]
+    )
+
+    # THEN the reviewer looks as it should
+    expected_reviewer = Reviewer(
+        alignment="repeats_spanning.bam",
+        alignment_index="repeats_spanning.index",
+        vcf="repeats_sorted.vcf",
+        catalog="variant_catalog.trgt",
+        trgt=True,
+    )
+    assert sample.reviewer == expected_reviewer
