@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 
 from cg.constants.priority import SlurmQos
+from cg.exc import SeqeraError
 from cg.io.yaml import read_yaml, write_yaml_stream
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
@@ -23,6 +24,8 @@ class SeqeraPlatformSubmitter(Submitter):
         new_case_config: NextflowCaseConfig = case_config.model_copy()
         run_request: WorkflowLaunchRequest = self._create_launch_request(new_case_config)
         response: dict = self.client.run_case(run_request)
+        if not response.get("sessionId") or not response.get("workflowId"):
+            raise SeqeraError(f"sessionId and/or workflowId missing from response: {response}")
         new_case_config.session_id = response["sessionId"]
         new_case_config.workflow_id = response["workflowId"]
         return new_case_config

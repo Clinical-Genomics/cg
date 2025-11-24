@@ -5,6 +5,7 @@ from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
+from cg.exc import SeqeraError
 from cg.models.cg_config import SeqeraPlatformConfig
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
@@ -106,3 +107,38 @@ def test_submit_with_resume(
 
     # THEN assert that the run request provided to the client is correct
     client.run_case.assert_called_once_with(expected_workflow_launch_request_with_resume)
+
+
+def test_submit_no_session_or_workflow_id(
+    seqera_platform_config: SeqeraPlatformConfig, mocker: MockerFixture
+):
+    # GIVEN a case config
+    case_config = NextflowCaseConfig(
+        case_id="case_id",
+        case_priority=SlurmQos.NORMAL,
+        config_profiles=["profile"],
+        nextflow_config_file="path_to_config.config",
+        params_file="params_file.yaml",
+        pipeline_repository="some.repository",
+        pre_run_script="pre-run-script",
+        resume=False,
+        revision="3.0.0",
+        session_id=None,
+        work_dir="work/dir",
+        workflow=Workflow.RAREDISEASE,
+    )
+
+    # GIVEN a SeqeraPlatformSubmitter without sessionId and/or workflowId
+    client = create_autospec(SeqeraPlatformClient)
+    client.run_case = Mock(return_value={"cat": "dog"})
+    seqera_platform_submitter = SeqeraPlatformSubmitter(
+        client=client, compute_environment_ids=seqera_platform_config.compute_environments
+    )
+
+    # GIVEN that the read_yaml method returns the expected parameters content
+    mocker.patch.object(submitter, "read_yaml", return_value={})
+
+    # WHEN calling submit
+    # THEN a SeqeraError is raised
+    with pytest.raises(SeqeraError):
+        seqera_platform_submitter.submit(case_config)

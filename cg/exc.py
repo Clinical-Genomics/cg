@@ -346,3 +346,7 @@ class CaseNotConfiguredError(CgError):
 
 class MissingConfigFilesError(CgError):
     """Exception raised when a case is being run with missing configuration files."""
+
+
+class SeqeraError(CgError):
+    """Exception raised when receiving an unexpected response from Seqera platform"""
