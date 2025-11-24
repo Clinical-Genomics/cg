@@ -128,14 +128,14 @@ def test_submit_no_session_or_workflow_id(
         workflow=Workflow.RAREDISEASE,
     )
 
-    # GIVEN a SeqeraPlatformSubmitter without sessionId and/or workflowId
+    # GIVEN that Seqera platform does not respond with both a sessionId and workflowId
     client = create_autospec(SeqeraPlatformClient)
     client.run_case = Mock(return_value={"cat": "dog"})
     seqera_platform_submitter = SeqeraPlatformSubmitter(
         client=client, compute_environment_ids=seqera_platform_config.compute_environments
     )
 
-    # GIVEN that the read_yaml method returns the expected parameters content
+    # GIVEN that yamls can be read
     mocker.patch.object(submitter, "read_yaml", return_value={})
 
     # WHEN calling submit
