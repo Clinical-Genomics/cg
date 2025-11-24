@@ -203,8 +203,6 @@ def view_ticket_link(unused1, unused2, model, attribute_name):
     del unused1, unused2
 
     # Ticket attribute called differently from models, infer attribute name from args
-    if not hasattr(model, attribute_name):
-        return None
     ticket_attr = getattr(model, attribute_name)
     ticket_str = str(ticket_attr).strip()
 
@@ -221,8 +219,6 @@ def view_tickets_links(unused1, unused2, model, unused3):
     """Column formatter used to add hyperlinks to comma-separated ticket IDs, if applicable. Assumes attribute name 'tickets'."""
     del unused1, unused2, unused3
 
-    if not hasattr(model, "tickets"):
-        return None
     tickets_list = str(model.tickets).strip().split(sep=",")
 
     tickets_markups = []
