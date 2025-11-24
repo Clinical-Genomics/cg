@@ -24,7 +24,7 @@ class SeqeraPlatformSubmitter(Submitter):
         new_case_config: NextflowCaseConfig = case_config.model_copy()
         run_request: WorkflowLaunchRequest = self._create_launch_request(new_case_config)
         response: dict = self.client.run_case(run_request)
-        if not response.get("sessionId") or not response.get("workflowId"):
+        if (not response.get("sessionId")) or (not response.get("workflowId")):
             raise SeqeraError(f"sessionId and/or workflowId missing from response: {response}")
         new_case_config.session_id = response["sessionId"]
         new_case_config.workflow_id = response["workflowId"]
