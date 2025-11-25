@@ -16,6 +16,7 @@ from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
+from cg.server.app_config import app_config
 
 
 class BaseView(ModelView):
@@ -195,6 +196,44 @@ def view_customer_link(unused1, unused2, model, unused3):
         )
 
     return markup
+
+
+def view_ticket_link(unused1, unused2, model, attribute_name):
+    """Column formatter used to add hyperlink to ticket ID, if applicable."""
+    del unused1, unused2
+
+    # Ticket attribute called differently from models, infer attribute name from args
+    ticket_attr = getattr(model, attribute_name)
+    ticket_str = str(ticket_attr).strip()
+
+    # Freshdesk ticket IDs have >=7 digits
+    if len(ticket_str) >= 7:
+        ticket_link = f"{app_config.freshdesk_url}/a/tickets/{ticket_str}"
+        ticket_markup = Markup(f"<a href='{ticket_link}'>{ticket_str}</a>")
+        return ticket_markup
+    else:
+        return ticket_str
+
+
+def view_tickets_links(unused1, unused2, model, unused3):
+    """Column formatter used to add hyperlinks to comma-separated ticket IDs, if applicable. Assumes attribute name 'tickets'."""
+    del unused1, unused2, unused3
+
+    tickets_list = str(model.tickets).strip().split(sep=",")
+
+    tickets_markups = []
+    for ticket in tickets_list:
+        ticket_str = str(ticket).strip()
+
+        # Freshdesk ticket IDs have >=7 digits
+        if len(ticket_str) >= 7:
+            ticket_link = f"{app_config.freshdesk_url}/a/tickets/{ticket_str}"
+            ticket_markup = Markup(f"<a href='{ticket_link}'>{ticket_str}</a>")
+            tickets_markups.append(ticket_markup)
+        else:
+            tickets_markups.append(ticket_str)
+
+    return Markup(", ".join(tickets_markups))
 
 
 class ApplicationView(BaseView):
@@ -435,6 +474,7 @@ class CaseView(BaseView):
         "customer": view_customer_link,
         "internal_id": view_case_sample_link,
         "priority": view_priority,
+        "tickets": view_tickets_links,
     }
     column_searchable_list = [
         "internal_id",
@@ -650,7 +690,10 @@ class OrderView(BaseView):
 
     column_default_sort = ("order_date", True)
     column_editable_list = ["is_open"]
-    column_formatters = {"customer": view_customer_link}
+    column_formatters = {
+        "customer": view_customer_link,
+        "ticket_id": view_ticket_link,
+    }
     column_searchable_list = ["id", "ticket_id"]
     column_display_pk = True
     create_modal = True
@@ -717,6 +760,7 @@ class SampleView(BaseView):
         "is_external": is_external_application,
         "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
+        "original_ticket": view_ticket_link,
         "priority": view_priority,
     }
     column_searchable_list = [

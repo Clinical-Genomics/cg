@@ -17,7 +17,6 @@ from cg.services.analysis_starter.configurator.file_creators import balsamic_con
 from cg.services.analysis_starter.submitters.subprocess import submitter
 from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
-from cg.utils import commands
 from tests.integration.conftest import IntegrationTestPaths
 from tests.integration.utils import (
     copy_integration_test_file,
@@ -128,16 +127,8 @@ def case_wgs_paired(
 
 @pytest.mark.xdist_group(name="integration")
 @pytest.mark.integration
-@pytest.mark.parametrize(
-    "command",
-    [
-        "start-available",
-        "dev-start-available",
-    ],
-)
 def test_start_available_tgs_tumour_only(
     case_tgs_tumour_only: Case,
-    command: str,
     sample_tgs_tumour: Sample,
     test_run_paths: IntegrationTestPaths,
     helpers: StoreHelpers,
@@ -170,13 +161,8 @@ def test_start_available_tgs_tumour_only(
     _create_files_for_flags(test_root_dir)
 
     # GIVEN a call to balsamic config case successfully generates a config file
-    match command:
-        case "start-available":
-            config_case_subprocess_mock = mocker.patch.object(commands, "subprocess")
-            run_analysis_subprocess_mock = config_case_subprocess_mock
-        case "dev-start-available":
-            config_case_subprocess_mock = mocker.patch.object(balsamic_config, "subprocess")
-            run_analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
+    config_case_subprocess_mock = mocker.patch.object(balsamic_config, "subprocess")
+    run_analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
 
     def mock_run(*args, **kwargs):
         command = args[0] if args else kwargs["args"]
@@ -214,7 +200,7 @@ def test_start_available_tgs_tumour_only(
             test_run_paths.cg_config_file.as_posix(),
             "workflow",
             "balsamic",
-            command,
+            "start-available",
         ],
         catch_exceptions=False,
     )
@@ -251,24 +237,13 @@ def test_start_available_tgs_tumour_only(
         f"--swegen-sv {test_root_dir}/swegen/swegen_sv.vcf.gz "
         f"--tumor-sample-name {sample.internal_id}"
     )
-
-    match command:
-        case "start-available":
-            assert first_call == call(
-                expected_config_case_command,
-                check=False,
-                shell=True,
-                stderr=ANY,
-                stdout=ANY,
-            )
-        case "dev-start-available":
-            assert first_call == call(
-                args=expected_config_case_command,
-                check=False,
-                shell=True,
-                stderr=ANY,
-                stdout=ANY,
-            )
+    assert first_call == call(
+        args=expected_config_case_command,
+        check=False,
+        shell=True,
+        stderr=ANY,
+        stdout=ANY,
+    )
 
     # THEN Balsamic run analysis was called in the correct way
     expected_run_analysis_command = (
@@ -280,29 +255,14 @@ def test_start_available_tgs_tumour_only(
         f"--headjob-partition head-jobs "
         f"--run-analysis"
     )
-
-    match command:
-        case "start-available":
-            run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[1]
-
-            assert run_analysis_call == call(
-                expected_run_analysis_command,
-                check=False,
-                shell=True,
-                stderr=ANY,
-                stdout=ANY,
-            )
-
-        case "dev-start-available":
-            run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[0]
-
-            assert run_analysis_call == call(
-                args=expected_run_analysis_command,
-                check=False,
-                shell=True,
-                stderr=ANY,
-                stdout=ANY,
-            )
+    run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[0]
+    assert run_analysis_call == call(
+        args=expected_run_analysis_command,
+        check=False,
+        shell=True,
+        stderr=ANY,
+        stdout=ANY,
+    )
 
     # THEN an analysis has been created for the case
     assert len(case_tgs_tumour_only.analyses) == 1
@@ -314,16 +274,8 @@ def test_start_available_tgs_tumour_only(
 
 @pytest.mark.xdist_group(name="integration")
 @pytest.mark.integration
-@pytest.mark.parametrize(
-    "command",
-    [
-        "start-available",
-        "dev-start-available",
-    ],
-)
 def test_start_available_wgs_paired(
     case_wgs_paired: Case,
-    command: str,
     sample_wgs_normal: Sample,
     sample_wgs_tumour: Sample,
     test_run_paths: IntegrationTestPaths,
@@ -357,13 +309,8 @@ def test_start_available_wgs_paired(
     _create_files_for_flags(test_root_dir)
 
     # GIVEN a call to balsamic config case successfully generates a config file
-    match command:
-        case "start-available":
-            config_case_subprocess_mock = mocker.patch.object(commands, "subprocess")
-            run_analysis_subprocess_mock = config_case_subprocess_mock
-        case "dev-start-available":
-            config_case_subprocess_mock = mocker.patch.object(balsamic_config, "subprocess")
-            run_analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
+    config_case_subprocess_mock = mocker.patch.object(balsamic_config, "subprocess")
+    run_analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
 
     def mock_run(*args, **kwargs):
         command = args[0] if args else kwargs["args"]
@@ -401,7 +348,7 @@ def test_start_available_wgs_paired(
             test_run_paths.cg_config_file.as_posix(),
             "workflow",
             "balsamic",
-            command,
+            "start-available",
         ],
         catch_exceptions=False,
     )
@@ -439,25 +386,13 @@ def test_start_available_wgs_paired(
         f"--swegen-sv {test_root_dir}/swegen/swegen_sv.vcf.gz "
         f"--tumor-sample-name {sample_wgs_tumour.internal_id}"
     )
-
-    match command:
-        case "start-available":
-            assert first_call == call(
-                expected_config_case_command,
-                check=False,
-                shell=True,
-                stderr=ANY,
-                stdout=ANY,
-            )
-
-        case "dev-start-available":
-            assert first_call == call(
-                args=expected_config_case_command,
-                check=False,
-                shell=True,
-                stderr=ANY,
-                stdout=ANY,
-            )
+    assert first_call == call(
+        args=expected_config_case_command,
+        check=False,
+        shell=True,
+        stderr=ANY,
+        stdout=ANY,
+    )
 
     # THEN Balsamic run analysis was called in the correct way
     expected_run_analysis_command = (
@@ -469,29 +404,15 @@ def test_start_available_wgs_paired(
         f"--headjob-partition head-jobs "
         f"--run-analysis"
     )
+    run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[0]
 
-    match command:
-        case "start-available":
-            run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[1]
-
-            assert run_analysis_call == call(
-                expected_run_analysis_command,
-                check=False,
-                shell=True,
-                stderr=ANY,
-                stdout=ANY,
-            )
-
-        case "dev-start-available":
-            run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[0]
-
-            assert run_analysis_call == call(
-                args=expected_run_analysis_command,
-                check=False,
-                shell=True,
-                stderr=ANY,
-                stdout=ANY,
-            )
+    assert run_analysis_call == call(
+        args=expected_run_analysis_command,
+        check=False,
+        shell=True,
+        stderr=ANY,
+        stdout=ANY,
+    )
 
     # THEN an analysis has been created for the case
     assert len(case_wgs_paired.analyses) == 1
