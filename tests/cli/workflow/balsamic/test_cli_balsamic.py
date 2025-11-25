@@ -5,7 +5,7 @@ import pytest
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
-from cg.cli.workflow.balsamic.base import dev_config_case, dev_run, dev_start
+from cg.cli.workflow.balsamic.base import config_case, run, start
 from cg.constants import Workflow
 from cg.models.cg_config import BalsamicConfig, CGConfig, IlluminaConfig, RunInstruments
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
@@ -46,7 +46,7 @@ def test_balsamic_config_case_all_flags(
 
     # WHEN invoking cg workflow balsamic dev-case-config
     result = cli_runner.invoke(
-        dev_config_case,
+        config_case,
         ["--panel-bed", "panel_short_name", case_id],
         obj=cg_config_for_balsamic_cli,
     )
@@ -75,7 +75,7 @@ def test_balsamic_config_case_no_flags(cg_config_for_balsamic_cli: CGConfig, moc
     mock_configure = mocker.patch.object(BalsamicConfigurator, "configure")
 
     # WHEN invoking cg workflow balsamic dev-case-config
-    result = cli_runner.invoke(dev_config_case, [case_id], obj=cg_config_for_balsamic_cli)
+    result = cli_runner.invoke(config_case, [case_id], obj=cg_config_for_balsamic_cli)
 
     # THEN the command exits successfully
     assert result.exit_code == 0
@@ -109,9 +109,7 @@ def test_balsamic_run_all_flags(
     flags: list[str] = ["--workflow-profile", workflow_profile, case_id]
 
     # WHEN invoking cg workflow balsamic dev-run
-    result = cli_runner.invoke(
-        dev_run, flags, obj=cg_config_for_balsamic_cli, catch_exceptions=False
-    )
+    result = cli_runner.invoke(run, flags, obj=cg_config_for_balsamic_cli, catch_exceptions=False)
 
     # THEN the command exits successfully
     assert result.exit_code == 0
@@ -142,9 +140,7 @@ def test_balsamic_run_no_flags(cg_config_for_balsamic_cli: CGConfig, mocker: Moc
     flags: list[str] = [case_id]
 
     # WHEN invoking cg workflow balsamic dev-run
-    result = cli_runner.invoke(
-        dev_run, flags, obj=cg_config_for_balsamic_cli, catch_exceptions=False
-    )
+    result = cli_runner.invoke(run, flags, obj=cg_config_for_balsamic_cli, catch_exceptions=False)
 
     # THEN the command exits successfully
     assert result.exit_code == 0
@@ -187,9 +183,7 @@ def test_balsamic_start_all_flags(
     ]
 
     # WHEN invoking cg workflow balsamic dev-start with the flags
-    result = cli_runner.invoke(
-        dev_start, flags, obj=cg_config_for_balsamic_cli, catch_exceptions=False
-    )
+    result = cli_runner.invoke(start, flags, obj=cg_config_for_balsamic_cli, catch_exceptions=False)
 
     # THEN the command exits successfully
     assert result.exit_code == 0
@@ -224,9 +218,7 @@ def test_balsamic_start_no_flags(cg_config_for_balsamic_cli: CGConfig, mocker: M
     flags: list[str] = [case_id]
 
     # WHEN invoking cg workflow balsamic dev-start
-    result = cli_runner.invoke(
-        dev_start, flags, obj=cg_config_for_balsamic_cli, catch_exceptions=False
-    )
+    result = cli_runner.invoke(start, flags, obj=cg_config_for_balsamic_cli, catch_exceptions=False)
 
     # THEN the command exits successfully
     assert result.exit_code == 0
