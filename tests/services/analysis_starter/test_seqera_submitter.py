@@ -119,9 +119,7 @@ def test_submit_with_resume(
     client.get_workflow.assert_called_once_with("some_workflow_id")
 
 
-def test_submit_no_session_or_workflow_id(
-    seqera_platform_config: SeqeraPlatformConfig, mocker: MockerFixture
-):
+def test_submit_no_workflow_id(seqera_platform_config: SeqeraPlatformConfig, mocker: MockerFixture):
     # GIVEN a case config
     case_config = NextflowCaseConfig(
         case_id="case_id",
@@ -138,9 +136,43 @@ def test_submit_no_session_or_workflow_id(
         workflow=Workflow.RAREDISEASE,
     )
 
-    # GIVEN that Seqera platform does not respond with both a sessionId and workflowId
+    # GIVEN that Seqera platform does not respond with a workflowId
     client = create_autospec(SeqeraPlatformClient)
     client.run_case = Mock(return_value={"cat": "dog"})
+    seqera_platform_submitter = SeqeraPlatformSubmitter(
+        client=client, compute_environment_ids=seqera_platform_config.compute_environments
+    )
+
+    # GIVEN that yamls can be read
+    mocker.patch.object(submitter, "read_yaml", return_value={})
+
+    # WHEN calling submit
+    # THEN a SeqeraError is raised
+    with pytest.raises(SeqeraError):
+        seqera_platform_submitter.submit(case_config)
+
+
+def test_submit_no_session_id(seqera_platform_config: SeqeraPlatformConfig, mocker: MockerFixture):
+    # GIVEN a case config
+    case_config = NextflowCaseConfig(
+        case_id="case_id",
+        case_priority=SlurmQos.NORMAL,
+        config_profiles=["profile"],
+        nextflow_config_file="path_to_config.config",
+        params_file="params_file.yaml",
+        pipeline_repository="some.repository",
+        pre_run_script="pre-run-script",
+        resume=False,
+        revision="3.0.0",
+        session_id=None,
+        work_dir="work/dir",
+        workflow=Workflow.RAREDISEASE,
+    )
+
+    # GIVEN that Seqera platform responds with a workflowId but no sessionId
+    client = create_autospec(SeqeraPlatformClient)
+    client.run_case = Mock(return_value={"workflowId": "some_workflow_id"})
+    client.get_workflow = Mock(return_value={"cat": "dog"})
     seqera_platform_submitter = SeqeraPlatformSubmitter(
         client=client, compute_environment_ids=seqera_platform_config.compute_environments
     )
