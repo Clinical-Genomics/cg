@@ -246,7 +246,7 @@ def test_rnafusion_start(
     )
 
     # GIVEN that the GET to the submitter is successful
-    submit_mock = mocker.patch.object(
+    get_workflow_mock = mocker.patch.object(
         requests,
         "get",
         return_value=http_get_workflow_response,
@@ -271,6 +271,7 @@ def test_rnafusion_start(
 
     # THEN the case should have been submitted and tracked
     submit_mock.assert_called_once()
+    get_workflow_mock.assert_called_once()
     track_mock.assert_called_once()
 
 
