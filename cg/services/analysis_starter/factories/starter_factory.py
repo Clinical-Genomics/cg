@@ -5,13 +5,13 @@ from cg.constants import Workflow
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.constants import IMPLEMENTED_FASTQ_WORKFLOWS
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.input_fetcher.implementations.bam_fetcher import BamFetcher
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.input_fetcher.input_fetcher import InputFetcher
-from cg.services.analysis_starter.service import AnalysisStarter
 from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_client import (
     SeqeraPlatformClient,
 )

@@ -1,13 +1,12 @@
 from unittest.mock import MagicMock
 
-import pytest
 from click.testing import CliRunner, Result
 from pytest_mock import MockerFixture
 
-from cg.cli.workflow.microsalt.base import start, start_available
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.cli.workflow.microsalt.base import start
+from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.service import AnalysisStarter
+from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 
 
 def test_start(cli_runner: CliRunner, cg_context: CGConfig, mocker: MockerFixture):

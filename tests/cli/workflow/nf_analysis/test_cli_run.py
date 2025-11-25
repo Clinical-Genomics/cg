@@ -16,7 +16,7 @@ from cg.cli.workflow.rnafusion.base import run as rnafusion_run
 from cg.cli.workflow.taxprofiler.base import run as taxprofiler_run
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.service import AnalysisStarter
+from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 
 
 @pytest.mark.parametrize(
