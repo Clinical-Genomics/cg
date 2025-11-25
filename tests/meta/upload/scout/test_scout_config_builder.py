@@ -473,7 +473,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
                     catalog="variant_catalog.trgt",
                     trgt=True,
                 ),
-                tiddit_coverage_wig="bigwig_hifi.cnv",
+                tiddit_coverage_wig=tiddit_coverage_wig.full_path,
             )
         ],
         customer_images=None,
