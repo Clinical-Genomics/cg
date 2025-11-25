@@ -91,7 +91,7 @@ def test_submit_with_resume(
 
     # GIVEN a SeqeraPlatformSubmitter
     client = create_autospec(SeqeraPlatformClient)
-    client.run_case = Mock(return_value={"workflowId": "some_workflow_id"})
+    client.launch_workflow = Mock(return_value={"workflowId": "some_workflow_id"})
     client.get_workflow = Mock(
         return_value={
             "workflow": {
@@ -115,7 +115,7 @@ def test_submit_with_resume(
     assert submit_result.get_workflow_id() == "some_workflow_id"
 
     # THEN assert that the run request provided to the client is correct
-    client.run_case.assert_called_once_with(expected_workflow_launch_request_with_resume)
+    client.launch_workflow.assert_called_once_with(expected_workflow_launch_request_with_resume)
     client.get_workflow.assert_called_once_with("some_workflow_id")
 
 
@@ -138,7 +138,7 @@ def test_submit_no_workflow_id(seqera_platform_config: SeqeraPlatformConfig, moc
 
     # GIVEN that Seqera platform does not respond with a workflowId
     client = create_autospec(SeqeraPlatformClient)
-    client.run_case = Mock(return_value={"cat": "dog"})
+    client.launch_workflow = Mock(return_value={"cat": "dog"})
     seqera_platform_submitter = SeqeraPlatformSubmitter(
         client=client, compute_environment_ids=seqera_platform_config.compute_environments
     )
@@ -171,7 +171,7 @@ def test_submit_no_session_id(seqera_platform_config: SeqeraPlatformConfig, mock
 
     # GIVEN that Seqera platform responds with a workflowId but no sessionId
     client = create_autospec(SeqeraPlatformClient)
-    client.run_case = Mock(return_value={"workflowId": "some_workflow_id"})
+    client.launch_workflow = Mock(return_value={"workflowId": "some_workflow_id"})
     client.get_workflow = Mock(return_value={"cat": "dog"})
     seqera_platform_submitter = SeqeraPlatformSubmitter(
         client=client, compute_environment_ids=seqera_platform_config.compute_environments

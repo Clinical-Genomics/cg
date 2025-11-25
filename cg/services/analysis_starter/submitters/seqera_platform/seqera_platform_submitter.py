@@ -27,7 +27,7 @@ class SeqeraPlatformSubmitter(Submitter):
         new_case_config: NextflowCaseConfig = case_config.model_copy()
         run_request: WorkflowLaunchRequest = self._create_launch_request(new_case_config)
 
-        response: dict = self.client.run_case(run_request)
+        response: dict = self.client.launch_workflow(run_request)
         if not (workflow_id := response.get("workflowId")):
             raise SeqeraError(f"workflowId missing from response: {response}")
         new_case_config.workflow_id = workflow_id

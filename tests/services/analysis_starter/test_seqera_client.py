@@ -25,7 +25,7 @@ def test_run_case(
         "post",
         return_value=http_workflow_launch_response,
     )
-    seqera_platform_client.run_case(workflow_launch_request)
+    seqera_platform_client.launch_workflow(workflow_launch_request)
 
     # THEN the request should be sent to the Seqera platform API
     mock_submitter.assert_called_once_with(
@@ -51,7 +51,7 @@ def test_run_case_raises_exception_on_error(
 
     # WHEN running the case using the request, then it should raise an HTTPError
     with pytest.raises(requests.exceptions.HTTPError):
-        seqera_platform_client.run_case(workflow_launch_request)
+        seqera_platform_client.launch_workflow(workflow_launch_request)
 
 
 def test_get_workflow(
