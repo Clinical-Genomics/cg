@@ -35,6 +35,7 @@ class SeqeraPlatformClient:
         return response.json()
 
     def get_workflow(self, workflow_id: str) -> dict[str, Any]:
+        """Gets information about the specified workflow (the Seqera equivalent of an analysis) in Seqera."""
         url = f"{self.base_url}/workflow/{workflow_id}"
         params: dict = {"workspaceId": self.workspace_id}
         LOG.debug(
