@@ -1,4 +1,4 @@
-from pathlib import Path
+from typing import cast
 
 import mock
 import pytest
@@ -7,7 +7,7 @@ from cg.apps.environ import environ_email
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import Workflow, WorkflowManager
 from cg.constants.tb import AnalysisType
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, RarediseaseConfig
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
@@ -35,13 +35,15 @@ def nextflow_tracker(cg_context: CGConfig, helpers: StoreHelpers, raredisease_ca
     return NextflowTracker(
         store=cg_context.status_db,
         trailblazer_api=cg_context.trailblazer_api,
-        workflow_root=cg_context.raredisease.root,
+        workflow_root=cast(RarediseaseConfig, cg_context.raredisease).root,
     )
 
 
-def test_nextflow_tracker(nextflow_tracker: NextflowTracker, raredisease_case_id: str):
+def test_nextflow_tracker(
+    cg_context: CGConfig, nextflow_tracker: NextflowTracker, raredisease_case_id: str
+):
     # GIVEN a raredisease case
-    case: Case = nextflow_tracker.store.get_case_by_internal_id(raredisease_case_id)
+    case: Case = cast(Case, nextflow_tracker.store.get_case_by_internal_id(raredisease_case_id))
     case_config = NextflowCaseConfig(
         case_id=raredisease_case_id,
         workflow=Workflow.RAREDISEASE,
@@ -54,6 +56,9 @@ def test_nextflow_tracker(nextflow_tracker: NextflowTracker, raredisease_case_id
         revision="1.0.0",
         work_dir="work/dir",
     )
+
+    # GIVEN a root directory is set
+    root_directory: str = cast(RarediseaseConfig, cg_context.raredisease).root
 
     # WHEN wanting to track the started microSALT analysis
     with mock.patch.object(
@@ -71,14 +76,13 @@ def test_nextflow_tracker(nextflow_tracker: NextflowTracker, raredisease_case_id
         nextflow_tracker.track(case_config=case_config, tower_workflow_id="1")
 
     # THEN the appropriate POST should have been sent
-    config_path: Path = nextflow_tracker._get_job_ids_path(raredisease_case_id)
     expected_request_body: dict = {
         "case_id": raredisease_case_id,
         "email": environ_email(),
         "type": AnalysisType.WGS,
-        "config_path": config_path.as_posix(),
+        "config_path": None,
         "order_id": case.latest_order.id,
-        "out_dir": config_path.parent.as_posix(),
+        "out_dir": f"{root_directory}/{raredisease_case_id}",
         "priority": nextflow_tracker._get_trailblazer_priority(raredisease_case_id),
         "workflow": Workflow.RAREDISEASE.upper(),
         "ticket": str(case.latest_order.ticket_id),
