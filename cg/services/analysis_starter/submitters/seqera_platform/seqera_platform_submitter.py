@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 
 from cg.constants.priority import SlurmQos
 from cg.exc import SeqeraError
@@ -26,13 +26,26 @@ class SeqeraPlatformSubmitter(Submitter):
         """Starts a case and returns the workflow id for the job."""
         new_case_config: NextflowCaseConfig = case_config.model_copy()
         run_request: WorkflowLaunchRequest = self._create_launch_request(new_case_config)
+
         response: dict = self.client.run_case(run_request)
-        if not response.get("workflowId"):
+        if not (workflow_id := response.get("workflowId")):
             raise SeqeraError(f"workflowId missing from response: {response}")
-        new_case_config.workflow_id = response["workflowId"]
+        new_case_config.workflow_id = workflow_id
+
         workflow_response: dict = self.client.get_workflow(cast(str, new_case_config.workflow_id))
-        new_case_config.session_id = workflow_response["workflow"]["sessionId"]
+        if not (session_id := self._get_session_id(workflow_response)):
+            raise SeqeraError(f"No sessionId found in response: {workflow_response}")
+        new_case_config.session_id = session_id
+
         return new_case_config
+
+    @staticmethod
+    def _get_session_id(workflow_response: dict[str, Any]) -> str | None:
+        workflow: dict | None = workflow_response.get("workflow")
+        if workflow and (session_id := workflow.get("sessionId")):
+            return session_id
+        else:
+            return None
 
     def _create_launch_request(self, case_config: NextflowCaseConfig) -> WorkflowLaunchRequest:
         parameters: dict = read_yaml(Path(case_config.params_file))

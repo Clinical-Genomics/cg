@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import requests
 
@@ -33,7 +34,7 @@ class SeqeraPlatformClient:
         response.raise_for_status()
         return response.json()
 
-    def get_workflow(self, workflow_id: str) -> dict:
+    def get_workflow(self, workflow_id: str) -> dict[str, Any]:
         url = f"{self.base_url}/workflow/{workflow_id}"
         params: dict = {"workspaceId": self.workspace_id}
         LOG.debug(
