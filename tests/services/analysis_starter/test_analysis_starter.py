@@ -6,15 +6,16 @@ from unittest.mock import Mock, create_autospec
 import pytest
 import requests
 from pytest_mock import MockerFixture
-from requests import Response
+from requests import HTTPError, Response
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.priority import Priority, SlurmQos
-from cg.exc import AnalysisNotReadyError
+from cg.exc import AnalysisNotReadyError, SeqeraError
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import creator
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
     RNAFusionSampleSheetCreator,
@@ -31,7 +32,6 @@ from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseC
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
-from cg.services.analysis_starter.service import AnalysisStarter
 from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_submitter import (
     SeqeraPlatformSubmitter,
 )
@@ -342,12 +342,11 @@ def test_start(
         Workflow.BALSAMIC,
         Workflow.MICROSALT,
         Workflow.MIP_DNA,
-        Workflow.RNAFUSION,
-        Workflow.RAREDISEASE,
-        Workflow.TAXPROFILER,
     ],
 )
-def test_start_error_raised_in_run_and_track(workflow: Workflow, analysis_starter_scenario: dict):
+def test_start_subprocess_error_raised_in_run_and_track(
+    workflow: Workflow, analysis_starter_scenario: dict
+):
     """Test that an error raised in submitting the analysis job is handled correctly."""
     # GIVEN a case_id
     case_id: str = "case_id"
@@ -375,6 +374,40 @@ def test_start_error_raised_in_run_and_track(workflow: Workflow, analysis_starte
 
     # THEN the error is propagated and the case should be set as not running
     mock_tracker.set_case_as_not_running.assert_called_once_with(case_id)
+
+
+@pytest.mark.parametrize(
+    "error_type",
+    [HTTPError, SeqeraError],
+)
+def test_start_seqera_related_error_raised_in_run_and_track(error_type: type[Exception]):
+    """Test that an error raised in submitting the analysis job is handled correctly."""
+    # GIVEN a case_id
+    case_id: str = "case_id"
+
+    # GIVEN a submitter and a tracker
+    submitter: SeqeraPlatformSubmitter = create_autospec(SeqeraPlatformSubmitter)
+    tracker: TypedMock[NextflowTracker] = create_typed_mock(NextflowTracker)
+
+    # GIVEN an analysis starter
+    analysis_starter = AnalysisStarter(
+        configurator=create_autospec(NextflowConfigurator),
+        input_fetcher=create_autospec(FastqFetcher),
+        store=create_autospec(Store),
+        submitter=submitter,
+        tracker=tracker.as_type,
+        workflow=Workflow.RAREDISEASE,
+    )
+
+    # GIVEN that the submitter raises an error when submitting the analysis job
+    submitter.submit = Mock(side_effect=error_type)
+
+    # WHEN the case is started
+    with pytest.raises(error_type):
+        analysis_starter.start(case_id)
+
+    # THEN the error is propagated and the case should be set as not running
+    tracker.as_mock.set_case_as_not_running.assert_called_once_with(case_id)
 
 
 @pytest.mark.parametrize(
