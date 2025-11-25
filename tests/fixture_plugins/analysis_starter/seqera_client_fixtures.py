@@ -61,9 +61,7 @@ def workflow_launch_request(launch_request: LaunchRequest) -> WorkflowLaunchRequ
 def http_workflow_launch_response() -> Response:
     response = Response()
     response.status_code = HTTPStatus.OK.value
-    response._content = write_json_stream(
-        {"sessionId": "session-id", "workflowId": "DummyId"}  # TODO remove sessionId
-    ).encode()
+    response._content = write_json_stream({"workflowId": "DummyId"}).encode()
     return response
 
 
