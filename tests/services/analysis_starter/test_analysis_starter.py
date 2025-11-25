@@ -385,8 +385,9 @@ def test_start_seqera_related_error_raised_in_run_and_track(error_type: type[Exc
     # GIVEN a case_id
     case_id: str = "case_id"
 
-    submitter = create_autospec(SeqeraPlatformSubmitter)
-    tracker = create_autospec(NextflowTracker)
+    # GIVEN a submitter and a tracker
+    submitter: SeqeraPlatformSubmitter = create_autospec(SeqeraPlatformSubmitter)
+    tracker: TypedMock[NextflowTracker] = create_typed_mock(NextflowTracker)
 
     # GIVEN an analysis starter
     analysis_starter = AnalysisStarter(
@@ -394,7 +395,7 @@ def test_start_seqera_related_error_raised_in_run_and_track(error_type: type[Exc
         input_fetcher=create_autospec(FastqFetcher),
         store=create_autospec(Store),
         submitter=submitter,
-        tracker=tracker,
+        tracker=tracker.as_type,
         workflow=Workflow.RAREDISEASE,
     )
 
@@ -406,7 +407,7 @@ def test_start_seqera_related_error_raised_in_run_and_track(error_type: type[Exc
         analysis_starter.start(case_id)
 
     # THEN the error is propagated and the case should be set as not running
-    tracker.set_case_as_not_running.assert_called_once_with(case_id)
+    tracker.as_mock.set_case_as_not_running.assert_called_once_with(case_id)
 
 
 @pytest.mark.parametrize(
