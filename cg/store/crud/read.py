@@ -1112,7 +1112,9 @@ class ReadHandler(BaseHandler):
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
 
-    def get_cases_to_analyze(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
+    def get_cases_to_analyze(
+        self, workflow: Workflow = None, limit: int | None = None
+    ) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed.
         1. Get cases to be analyzed using BE query
         2. Use the latest analysis for case to determine if the case is to be analyzed"""

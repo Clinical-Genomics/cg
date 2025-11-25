@@ -7,10 +7,12 @@ from cg.constants.priority import SlurmQos
 from cg.io.json import write_json_stream
 from cg.models.cg_config import SeqeraPlatformConfig
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
-from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
 from cg.services.analysis_starter.submitters.seqera_platform.dtos import (
     LaunchRequest,
     WorkflowLaunchRequest,
+)
+from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_client import (
+    SeqeraPlatformClient,
 )
 
 
@@ -60,6 +62,22 @@ def http_workflow_launch_response() -> Response:
     response = Response()
     response.status_code = HTTPStatus.OK.value
     response._content = write_json_stream({"workflowId": "DummyId"}).encode()
+    return response
+
+
+@pytest.fixture
+def http_get_workflow_response() -> Response:
+    response = Response()
+    response.status_code = HTTPStatus.OK.value
+    response._content = write_json_stream(
+        {
+            "workflow": {
+                "id": "some_id",
+                "runName": "case_id",
+                "sessionId": "some_session_id",
+            }
+        }
+    ).encode()
     return response
 
 
