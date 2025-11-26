@@ -60,20 +60,23 @@ DEFAULT_CAPTURE_KIT = "twistexomecomprehensive_10.2_hg19_design.bed"
 
 
 class CustomerId(StrEnum):
-    CG_INTERNAL_CUSTOMER: str = "cust000"
-    CUST001: str = "cust001"
-    CUST002: str = "cust002"
-    CUST003: str = "cust003"
-    CUST004: str = "cust004"
-    CUST032: str = "cust032"
-    CUST042: str = "cust042"
-    CUST110: str = "cust110"
-    CUST127: str = "cust127"
-    CUST132: str = "cust132"
-    CUST143: str = "cust143"
-    CUST147: str = "cust147"
-    CUST201: str = "cust201"
-    CUST999: str = "cust999"
+    CG_INTERNAL_CUSTOMER = "cust000"
+    CUST001 = "cust001"
+    CUST002 = "cust002"
+    CUST003 = "cust003"
+    CUST004 = "cust004"
+    CUST032 = "cust032"
+    CUST042 = "cust042"
+    CUST087 = "cust087"
+    CUST110 = "cust110"
+    CUST127 = "cust127"
+    CUST132 = "cust132"
+    CUST143 = "cust143"
+    CUST147 = "cust147"
+    CUST175 = "cust175"
+    CUST185 = "cust185"
+    CUST201 = "cust201"
+    CUST999 = "cust999"
 
 
 class SequencingRunDataAvailability(StrEnum):
@@ -153,12 +156,12 @@ class FileFormat(StrEnum):
 
 
 class GenomeVersion(StrEnum):
-    GRCh37: str = "GRCh37"
-    GRCh38: str = "GRCh38"
-    T2T_CHM13: str = "T2T-CHM13v2.0"
+    GRCh37 = "GRCh37"
+    GRCh38 = "GRCh38"
+    T2T_CHM13 = "T2T-CHM13v2.0"
     CANFAM3 = auto()
-    HG19: str = "hg19"
-    HG38: str = "hg38"
+    HG19 = "hg19"
+    HG38 = "hg38"
 
 
 class SampleType(StrEnum):
@@ -235,7 +238,6 @@ class APIMethods(StrEnum):
 
 class MicrosaltQC:
     AVERAGE_COVERAGE_THRESHOLD: int = 10
-    MWX_THRESHOLD_SAMPLES_PASSING: float = 0.9
     COVERAGE_10X_THRESHOLD: float = 0.75
     DUPLICATION_RATE_THRESHOLD: float = 0.8
     INSERT_SIZE_THRESHOLD: int = 100
@@ -243,13 +245,6 @@ class MicrosaltQC:
     NEGATIVE_CONTROL_READS_THRESHOLD: float = 0.2
     TARGET_READS: int = 6000000
     TARGET_READS_FAIL_THRESHOLD: float = 0.7
-
-
-class MicrosaltAppTags(StrEnum):
-    MWRNXTR003: str = "MWRNXTR003"
-    MWXNXTR003: str = "MWXNXTR003"
-    VWGNXTR001: str = "VWGNXTR001"
-    PREP_CATEGORY: str = "mic"
 
 
 class MutantQC:

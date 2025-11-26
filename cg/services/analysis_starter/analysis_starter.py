@@ -1,8 +1,10 @@
 import logging
 from subprocess import CalledProcessError
 
+from requests import HTTPError
+
 from cg.constants import Workflow
-from cg.exc import AnalysisNotReadyError
+from cg.exc import AnalysisNotReadyError, SeqeraError
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.input_fetcher.input_fetcher import InputFetcher
@@ -51,20 +53,20 @@ class AnalysisStarter:
         LOG.info(f"Starting case {case_id}")
         self.tracker.ensure_analysis_not_ongoing(case_id)
         self.input_fetcher.ensure_files_are_ready(case_id)
-        parameters: CaseConfig = self.configurator.configure(case_id=case_id, **flags)
-        self._run_and_track(case_id=case_id, parameters=parameters)
+        case_config: CaseConfig = self.configurator.configure(case_id=case_id, **flags)
+        self._run_and_track(case_id=case_id, case_config=case_config)
 
     def run(self, case_id: str, **flags) -> None:
         """Run a case using an assumed existing configuration."""
         self.tracker.ensure_analysis_not_ongoing(case_id)
-        parameters: CaseConfig = self.configurator.get_config(case_id=case_id, **flags)
-        self._run_and_track(case_id=case_id, parameters=parameters)
+        case_config: CaseConfig = self.configurator.get_config(case_id=case_id, **flags)
+        self._run_and_track(case_id=case_id, case_config=case_config)
 
-    def _run_and_track(self, case_id: str, parameters: CaseConfig):
+    def _run_and_track(self, case_id: str, case_config: CaseConfig):
         self.tracker.set_case_as_running(case_id)
         try:
-            tower_workflow_id: str | None = self.submitter.submit(parameters)
-            self.tracker.track(case_config=parameters, tower_workflow_id=tower_workflow_id)
-        except CalledProcessError as exception:
+            submitted_case_config: CaseConfig = self.submitter.submit(case_config)
+            self.tracker.track(case_config=submitted_case_config)
+        except (CalledProcessError, HTTPError, SeqeraError) as exception:
             self.tracker.set_case_as_not_running(case_id)
             raise exception

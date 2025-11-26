@@ -39,27 +39,6 @@ def balsamic_housekeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
 
 
 @pytest.fixture
-def balsamic_pon_1_path(balsamic_dir: Path) -> str:
-    balsamic_reference_path = Path(balsamic_dir, "balsamic_bed_1_case_PON_reference.cnn")
-    balsamic_reference_path.touch(exist_ok=True)
-    return balsamic_reference_path.as_posix()
-
-
-@pytest.fixture
-def balsamic_bed_1_path(balsamic_dir: Path) -> str:
-    balsamic_bed_1_path = Path(balsamic_dir, "balsamic_bed_1.bed")
-    balsamic_bed_1_path.touch(exist_ok=True)
-    return balsamic_bed_1_path.as_posix()
-
-
-@pytest.fixture
-def balsamic_bed_2_path(balsamic_dir: Path) -> str:
-    balsamic_bed_2_path = Path(balsamic_dir, "balsamic_bed_2.bed")
-    balsamic_bed_2_path.touch(exist_ok=True)
-    return balsamic_bed_2_path.as_posix()
-
-
-@pytest.fixture
 def fastq_file_l_1_r_1(balsamic_housekeeper_dir: Path) -> str:
     fastq_filename = Path(
         balsamic_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz"
@@ -898,13 +877,6 @@ def malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
     malformed_deliverable.pop("workflow")
 
     return malformed_deliverable
-
-
-@pytest.fixture
-def mock_analysis_finish(balsamic_dir: Path, balsamic_case_id: str) -> None:
-    """Create analysis_finish file for testing"""
-    Path.mkdir(Path(balsamic_dir, balsamic_case_id, "analysis"), parents=True, exist_ok=True)
-    Path(balsamic_dir, balsamic_case_id, "analysis", "analysis_finish").touch(exist_ok=True)
 
 
 @pytest.fixture

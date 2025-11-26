@@ -14,10 +14,14 @@ LOQUSDB_SUPPORTED_WORKFLOWS = [
 ]
 LOQUSDB_RARE_DISEASE_CUSTOMERS = [CustomerId.CUST002, CustomerId.CUST003, CustomerId.CUST004]
 LOQUSDB_CANCER_CUSTOMERS = [
+    CustomerId.CUST002,
+    CustomerId.CUST087,
     CustomerId.CUST110,
     CustomerId.CUST127,
     CustomerId.CUST143,
     CustomerId.CUST147,
+    CustomerId.CUST175,
+    CustomerId.CUST185,
 ]
 LOQUSDB_LONG_READ_CUSTOMERS = [
     CustomerId.CUST002,
@@ -35,7 +39,16 @@ LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS = [
 LOQUSDB_CANCER_SEQUENCING_METHODS = [
     CancerAnalysisType.TUMOR_WGS,
     CancerAnalysisType.TUMOR_NORMAL_WGS,
+    CancerAnalysisType.TUMOR_PANEL,
 ]
+
+
+class BalsamicObservationPanel(StrEnum):
+    """Group of panels which have associated LoqusDB instances."""
+
+    EXOME = "Twist Exome Comprehensive"
+    LYMPHOID = "GMSlymphoid"
+    MYELOID = "GMSmyeloid"
 
 
 class BalsamicLoadParameters(Enum):
@@ -57,11 +70,14 @@ class BalsamicObservationsAnalysisTag(StrEnum):
 class LoqusdbInstance(StrEnum):
     """Observations instances."""
 
-    LWP: str = "loqusdb-lwp"
-    WGS: str = "loqusdb"
-    WES: str = "loqusdb-wes"
-    SOMATIC: str = "loqusdb-somatic"
-    TUMOR: str = "loqusdb-tumor"
+    LWP = "loqusdb-lwp"
+    WGS = "loqusdb"
+    WES = "loqusdb-wes"
+    SOMATIC = "loqusdb-somatic"
+    TUMOR = "loqusdb-tumor"
+    SOMATIC_LYMPHOID = "loqusdb-somatic-lymphoid"
+    SOMATIC_MYELOID = "loqusdb-somatic-myeloid"
+    SOMATIC_EXOME = "loqusdb-somatic-exome"
 
 
 class MipDNALoadParameters(Enum):

@@ -34,7 +34,7 @@ class Priority(IntEnum):
     express = 4
 
     @classmethod
-    def priority_to_slurm_qos(cls) -> dict[int, str]:
+    def priority_to_slurm_qos(cls) -> dict["Priority", SlurmQos]:
         return {
             Priority.research: SlurmQos.LOW,
             Priority.standard: SlurmQos.NORMAL,

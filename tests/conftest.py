@@ -1935,6 +1935,7 @@ def context_config(
     email_address: str,
     fluffy_dir: Path,
     housekeeper_dir: Path,
+    head_job_partition: str,
     mip_dir: Path,
     cg_dir: Path,
     conda_binary: Path,
@@ -1986,7 +1987,6 @@ def context_config(
             "sender_password": "",
         },
         "madeline_exe": "echo",
-        "sentieon_licence_server": "127.0.0.1:8080",
         "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
         "pon_path": str(cg_dir),
         "illumina_backup_service": {
@@ -2010,7 +2010,24 @@ def context_config(
             "gens_coverage_female_path": str(cg_dir),
             "gens_coverage_male_path": str(cg_dir),
             "gnomad_af5_path": str(cg_dir),
+            "head_job_partition": head_job_partition,
             "loqusdb_path": str(cg_dir),
+            "loqusdb_dump_files": {
+                "artefact_sv": Path("bogus/artefact_sv_observations.txt"),
+                "artefact_snv": str(cg_dir),
+                "cancer_germline_snv": str(cg_dir),
+                "cancer_germline_sv": str(cg_dir),
+                "cancer_somatic_snv": str(cg_dir),
+                "cancer_somatic_sv": str(cg_dir),
+                "clinical_snv": str(cg_dir),
+                "clinical_sv": str(cg_dir),
+                "cancer_somatic_snv_panels": {
+                    "GMSmyeloid": Path("loqusdb_myeloid_dump"),
+                    "GMSlymphoid": Path("loqusdb_lymphoid_dump"),
+                    "Twist Exome Comprehensive": Path("loqusdb_exome_dump"),
+                },
+            },
+            "panel_of_normals": {"bed_short_name": Path("absolute_path_to_pon_file.cnn")},
             "pon_path": str(cg_dir),
             "root": str(balsamic_dir),
             "slurm": {
@@ -2019,7 +2036,10 @@ def context_config(
                 "qos": SlurmQos.LOW,
             },
             "sentieon_licence_path": str(cg_dir),
+            "sentieon_licence_server": "127.0.0.1:8080",
             "swegen_path": str(cg_dir),
+            "swegen_snv": str(cg_dir),
+            "swegen_sv": str(cg_dir),
         },
         "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
         "chanjo2": {"host": "chanjo2_host"},
@@ -4582,3 +4602,9 @@ def capture_kit() -> str:
 def case(analysis_store: Store) -> Case:
     """Return a case models object."""
     return analysis_store.get_cases()[0]
+
+
+@pytest.fixture(scope="function")
+def head_job_partition() -> str:
+    """Return the name of the head job partition."""
+    return "head-job"

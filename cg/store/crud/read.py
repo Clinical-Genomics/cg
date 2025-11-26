@@ -915,7 +915,7 @@ class ReadHandler(BaseHandler):
             prep_categories=[prep_category],
         ).all()
 
-    def get_bed_version_by_file_name(self, bed_version_file_name: str) -> BedVersion:
+    def get_bed_version_by_file_name(self, bed_version_file_name: str) -> BedVersion | None:
         """Return bed version with file name."""
         return apply_bed_version_filter(
             bed_versions=self._get_query(table=BedVersion),
@@ -1112,7 +1112,9 @@ class ReadHandler(BaseHandler):
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
 
-    def get_cases_to_analyze(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
+    def get_cases_to_analyze(
+        self, workflow: Workflow = None, limit: int | None = None
+    ) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed.
         1. Get cases to be analyzed using BE query
         2. Use the latest analysis for case to determine if the case is to be analyzed"""
@@ -1163,6 +1165,23 @@ class ReadHandler(BaseHandler):
             samples=self._get_query(table=Sample),
             internal_id=internal_id,
         ).first()
+
+    def get_sample_by_internal_id_strict(self, internal_id: str) -> Sample:
+        """
+        Return a sample by lims id.
+        Raises:
+            SampleNotFoundError: If no sample is found with the given internal id.
+        """
+        try:
+            return apply_sample_filter(
+                filter_functions=[SampleFilter.BY_INTERNAL_ID],
+                samples=self._get_query(table=Sample),
+                internal_id=internal_id,
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise SampleNotFoundError(
+                f"Sample with internal id {internal_id} was not found in the database."
+            )
 
     def get_samples_by_identifier(self, object_type: str, identifier: str) -> list[Sample]:
         """Return all samples from a flow cell, case or sample id"""
