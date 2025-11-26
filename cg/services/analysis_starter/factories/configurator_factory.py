@@ -58,6 +58,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
     TaxprofilerSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
+    TomteSampleSheetCreator,
+)
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
@@ -150,6 +153,10 @@ class ConfiguratorFactory:
                 )
             case Workflow.TAXPROFILER:
                 return TaxprofilerSampleSheetCreator(
+                    housekeeper_api=self.housekeeper_api, store=self.store
+                )
+            case Workflow.TOMTE:
+                return TomteSampleSheetCreator(
                     housekeeper_api=self.housekeeper_api, store=self.store
                 )
             case _:
