@@ -253,6 +253,11 @@
   path: PATHTOCASE/call_snv/genome/CASEID_snv.vcf.gz.tbi
   step: call_snv
   tag: call_snv_index
+- format: meta
+  id: SAMPLEID
+  path: PATHTOCASE/call_snv/genome/SAMPLEID_deepvar.visual_report.html
+  step: deepvariant
+  tag: report
 - format: vcf
   id: CASEID
   path: PATHTOCASE/call_snv/mitochondria/CASEID_mitochondria.vcf.gz
