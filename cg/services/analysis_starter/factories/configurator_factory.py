@@ -43,6 +43,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
     TaxprofilerParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.tomte_params_file_creator import (
+    TomteParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
     NalloSampleSheetCreator,
 )
@@ -124,12 +127,16 @@ class ConfiguratorFactory:
                 return NalloParamsFileCreator(params)
             case Workflow.RAREDISEASE:
                 return RarediseaseParamsFileCreator(
-                    lims=self.lims_api, store=self.store, params=params
+                    lims=self.lims_api, params=params, store=self.store
                 )
             case Workflow.RNAFUSION:
                 return RNAFusionParamsFileCreator(params)
             case Workflow.TAXPROFILER:
                 return TaxprofilerParamsFileCreator(params)
+            case Workflow.TOMTE:
+                return TomteParamsFileCreator(
+                    lims_api=self.lims_api, params=params, status_db=self.store
+                )
             case _:
                 raise NotImplementedError(f"There is no params file creator for {workflow}")
 

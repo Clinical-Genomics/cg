@@ -103,18 +103,46 @@ def test_raredisease_params_file_creator(
 
 
 def test_tomte_params_file_creator(mocker: MockerFixture):
+    # GIVEN statusDB and connection to the LIMS API
+    status_db: Store = create_autospec(Store)
+    status_db.get_sample_ids_by_case_id = Mock(return_value=["sample_1", "sample_2"])
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+
+    # GIVEN all sample have the same source, the best kind.
+    lims_api.get_source = Mock(return_value="the_best_kind_of_source")
+
+    # GIVEN a Tomte params file creator.
     file_creator = TomteParamsFileCreator(
-        "/path/to/params_file", lims_api=create_autospec(LimsAPI), status_db=create_autospec(Store)
+        "/path/to/params_file", lims_api=lims_api, status_db=status_db
     )
+
+    # GIVEN a workflow parameters file
+    mocker.patch.object(tomte_params_file_creator, "read_yaml", return_value={"cat": "grep"})
+
+    # GIVEN yaml can be written
     write_yaml_mock: Mock = mocker.patch.object(
         tomte_params_file_creator, "write_yaml_nextflow_style"
     )
+
+    # WHEN calling create
     file_creator.create(
         case_id="santa_case",
         file_path=Path("down", "the", "chimney"),
         sample_sheet_path=Path("wish", "list"),
     )
-    write_yaml_mock.assert_called_once_with(content="?", file_path=Path("down", "the", "chimney"))
+
+    # THEN the params file was created with expected content
+    write_yaml_mock.assert_called_once_with(
+        content={
+            "cat": "grep",
+            "gene_panel_clinical_filter": Path("down", "the", "gene_panels.bed"),
+            "genome": "GRCh38",
+            "input": Path("wish", "list"),
+            "outdir": Path("down", "the"),
+            "tissue": "the_best_kind_of_source",
+        },
+        file_path=Path("down", "the", "chimney"),
+    )
 
 
 @pytest.mark.parametrize("workflow", [Workflow.NALLO, Workflow.RNAFUSION, Workflow.TAXPROFILER])
