@@ -48,7 +48,13 @@ raredisease.add_command(store_housekeeper)
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def config_case(cg_config: CGConfig, case_id: str):
-    """Configure a raredisease case so that it is ready to be run."""
+    """
+    Configure a raredisease case so that it is ready to be run. \b
+    Creates the following files in the case run directory:
+        - CASE_ID_params_file.yaml
+        - CASE_ID_nextflow_config.json
+        - CASE_ID_samplesheet.csv
+    """
     factory = ConfiguratorFactory(cg_config)
     configurator = cast(NextflowConfigurator, factory.get_configurator(Workflow.RAREDISEASE))
     configurator.configure(case_id=case_id)
@@ -60,7 +66,13 @@ def config_case(cg_config: CGConfig, case_id: str):
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None):
-    """Run a preconfigured raredisease case."""
+    """
+    Run a preconfigured raredisease case. \b
+    Assumes that the following files exist in the case run directory:
+        - CASE_ID_params_file.yaml
+        - CASE_ID_nextflow_config.json
+        - CASE_ID_samplesheet.csv
+    """
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RAREDISEASE
@@ -73,7 +85,14 @@ def run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None):
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def start(cg_config: CGConfig, case_id: str, revision: str | None):
-    """Start a raredisease case. Configures the case if needed."""
+    """
+    Start a raredisease case. \b
+    Configures the case and writes the following files:
+        - CASE_ID_params_file.yaml
+        - CASE_ID_nextflow_config.json
+        - CASE_ID_samplesheet.csv
+    and submits the job to the Seqera Platform.
+    """
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RAREDISEASE
