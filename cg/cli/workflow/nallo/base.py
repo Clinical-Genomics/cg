@@ -61,7 +61,7 @@ def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
     analysis_api.write_panel_as_tsv(case_id=case_id, content=bed_lines)
 
 
-@nallo.command("dev-config-case")
+@nallo.command("config-case")
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def config_case(cg_config: CGConfig, case_id: str):
@@ -77,7 +77,7 @@ def config_case(cg_config: CGConfig, case_id: str):
     configurator.configure(case_id=case_id)
 
 
-@nallo.command("dev-run")
+@nallo.command("run")
 @OPTION_REVISION
 @OPTION_RESUME
 @ARGUMENT_CASE_ID
@@ -95,7 +95,7 @@ def run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None) -
     analysis_starter.run(case_id=case_id, resume=resume, revision=revision)
 
 
-@nallo.command("dev-start")
+@nallo.command("start")
 @OPTION_REVISION
 @ARGUMENT_CASE_ID
 @click.pass_obj
@@ -113,7 +113,7 @@ def start(cg_config: CGConfig, case_id: str, revision: str | None):
     analysis_starter.start(case_id=case_id, revision=revision)
 
 
-@nallo.command("dev-start-available")
+@nallo.command("start-available")
 @click.pass_obj
 def start_available(cg_config: CGConfig):
     """Starts all available Nallo cases."""
