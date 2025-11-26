@@ -26,6 +26,12 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
     TaxprofilerSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
+    HEADERS as TOMTE_HEADERS,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
+    TomteSampleSheetCreator,
+)
 
 
 @pytest.fixture
@@ -114,6 +120,18 @@ def taxprofiler_sample_sheet_expected_content(
 
 
 @pytest.fixture
+def tomte_sample_sheet_expected_content() -> list[list[str]]:
+    """Return the expected sample sheet content for RNAFUSION."""
+    row: list[str] = [
+        nextflow_sample_id,
+        fastq_path_1.as_posix(),
+        fastq_path_2.as_posix(),
+        strandedness.value,
+    ]
+    return [TOMTE_HEADERS, row]
+
+
+@pytest.fixture
 def sample_sheet_scenario(
     raredisease_sample_sheet_creator: RarediseaseSampleSheetCreator,
     raredisease_sample_sheet_expected_content: list[list[str]],
@@ -121,6 +139,7 @@ def sample_sheet_scenario(
     rnafusion_sample_sheet_expected_content: list[list[str]],
     taxprofiler_sample_sheet_creator: TaxprofilerSampleSheetCreator,
     taxprofiler_sample_sheet_expected_content: list[list[str]],
+    tomte_sample_sheet_creator: TomteSampleSheetCreator,
 ) -> dict:
     return {
         Workflow.RAREDISEASE: (
@@ -135,5 +154,5 @@ def sample_sheet_scenario(
             taxprofiler_sample_sheet_creator,
             taxprofiler_sample_sheet_expected_content,
         ),
-        Workflow.TOMTE: (Mock(), []),
+        Workflow.TOMTE: (tomte_sample_sheet_creator,),
     }
