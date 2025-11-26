@@ -1,32 +1,26 @@
 """CLI support to create config and/or start BALSAMIC."""
 
 import logging
-import traceback
+from typing import cast
 
 import rich_click as click
 from pydantic.v1 import ValidationError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.cli.workflow.balsamic.options import (
-    OPTION_CACHE_VERSION,
-    OPTION_GENDER,
-    OPTION_GENOME_VERSION,
-    OPTION_OBSERVATIONS,
-    OPTION_PANEL_BED,
-    OPTION_PON_CNN,
-    OPTION_QOS,
-    OPTION_WORKFLOW_PROFILE,
-)
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
+from cg.cli.workflow.balsamic.options import OPTION_PANEL_BED, OPTION_WORKFLOW_PROFILE
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.utils import validate_force_store_option
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.cli_options import COMMENT, DRY_RUN, FORCE, LIMIT
-from cg.exc import AnalysisNotReadyError, CgError
+from cg.constants import Workflow
+from cg.constants.cli_options import COMMENT, DRY_RUN, FORCE
+from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case
+from cg.services.analysis_starter.analysis_starter import AnalysisStarter
+from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
+from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
+from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -43,88 +37,6 @@ def balsamic(context: click.Context):
 
 
 balsamic.add_command(resolve_compression)
-balsamic.add_command(link)
-
-
-@balsamic.command("config-case")
-@ARGUMENT_CASE_ID
-@OPTION_GENDER
-@OPTION_GENOME_VERSION
-@OPTION_PANEL_BED
-@OPTION_PON_CNN
-@OPTION_OBSERVATIONS
-@OPTION_CACHE_VERSION
-@DRY_RUN
-@click.pass_obj
-def config_case(
-    context: CGConfig,
-    case_id: str,
-    gender: str,
-    genome_version: str,
-    panel_bed: str,
-    pon_cnn: click.Path,
-    observations: list[click.Path],
-    cache_version: str,
-    dry_run: bool,
-):
-    """Create config file for BALSAMIC analysis for a given CASE_ID."""
-
-    analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-    try:
-        LOG.info(f"Creating config file for {case_id}.")
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.config_case(
-            case_id=case_id,
-            gender=gender,
-            genome_version=genome_version,
-            panel_bed=panel_bed,
-            pon_cnn=pon_cnn,
-            observations=observations,
-            cache_version=cache_version,
-            dry_run=dry_run,
-        )
-    except CgError as error:
-        error_info = f"Error: {type(error).__name__}: {str(error)}\n{traceback.format_exc()}"
-        LOG.error(f"Could not create config: {error_info}")
-        raise click.Abort()
-    except Exception as error:
-        error_info = f"Error: {type(error).__name__}: {str(error)}\n{traceback.format_exc()}"
-        LOG.error(f"Could not create config: {error_info}")
-        raise click.Abort()
-
-
-@balsamic.command("run")
-@ARGUMENT_CASE_ID
-@OPTION_WORKFLOW_PROFILE
-@DRY_RUN
-@OPTION_QOS
-@click.pass_obj
-def run(
-    context: CGConfig,
-    case_id: str,
-    workflow_profile: click.Path,
-    slurm_quality_of_service: str,
-    dry_run: bool,
-):
-    """Run balsamic analysis for given CASE ID"""
-    analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-    try:
-        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
-        analysis_api.check_analysis_ongoing(case_id)
-        analysis_api.run_analysis(
-            case_id=case_id,
-            workflow_profile=workflow_profile,
-            slurm_quality_of_service=slurm_quality_of_service,
-            dry_run=dry_run,
-        )
-        if dry_run:
-            return
-        analysis_api.on_analysis_started(case_id)
-    except Exception as error:
-        error_info = f"Error: {type(error).__name__}: {str(error)}\n{traceback.format_exc()}"
-        LOG.error(f"Could not run analysis: {error_info}")
-        raise click.Abort()
 
 
 @balsamic.command("report-deliver")
@@ -189,84 +101,6 @@ def store_housekeeper(
         raise click.Abort()
 
 
-@balsamic.command("start")
-@ARGUMENT_CASE_ID
-@OPTION_GENDER
-@OPTION_GENOME_VERSION
-@OPTION_QOS
-@DRY_RUN
-@OPTION_PANEL_BED
-@OPTION_PON_CNN
-@OPTION_CACHE_VERSION
-@OPTION_OBSERVATIONS
-@OPTION_WORKFLOW_PROFILE
-@click.pass_context
-def start(
-    context: click.Context,
-    case_id: str,
-    gender: str,
-    genome_version: str,
-    cache_version: str,
-    panel_bed: str,
-    pon_cnn: str,
-    observations: list[click.Path],
-    slurm_quality_of_service: str,
-    workflow_profile: click.Path,
-    dry_run: bool,
-):
-    """Start full workflow for case ID."""
-    analysis_api: BalsamicAnalysisAPI = context.obj.meta_apis["analysis_api"]
-    analysis_api.prepare_fastq_files(case_id=case_id, dry_run=dry_run)
-    LOG.info(f"Starting analysis for {case_id}")
-    context.invoke(link, case_id=case_id, dry_run=dry_run)
-    context.invoke(
-        config_case,
-        case_id=case_id,
-        gender=gender,
-        genome_version=genome_version,
-        cache_version=cache_version,
-        panel_bed=panel_bed,
-        pon_cnn=pon_cnn,
-        observations=observations,
-        dry_run=dry_run,
-    )
-    context.invoke(
-        run,
-        case_id=case_id,
-        workflow_profile=workflow_profile,
-        slurm_quality_of_service=slurm_quality_of_service,
-        dry_run=dry_run,
-    )
-
-
-@balsamic.command("start-available")
-@DRY_RUN
-@LIMIT
-@click.pass_context
-def start_available(context: click.Context, dry_run: bool = False, limit: int | None = None):
-    """Start full workflow for all cases ready for analysis"""
-
-    analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
-
-    cases: list[Case] = analysis_api.get_cases_to_analyze(limit=limit)
-    LOG.info(f"Starting {len(cases)} available Balsamic cases")
-
-    exit_code: int = EXIT_SUCCESS
-    for case in cases:
-        try:
-            context.invoke(start, case_id=case.internal_id, dry_run=dry_run)
-        except AnalysisNotReadyError as error:
-            LOG.error(error)
-        except CgError as error:
-            LOG.error(error)
-            exit_code = EXIT_FAIL
-        except Exception as error:
-            LOG.error(f"Unspecified error occurred: {error}")
-            exit_code = EXIT_FAIL
-    if exit_code:
-        raise click.Abort
-
-
 @balsamic.command("store")
 @ARGUMENT_CASE_ID
 @COMMENT
@@ -299,3 +133,54 @@ def store_available(context: click.Context, dry_run: bool) -> None:
             was_successful = False
     if not was_successful:
         raise click.Abort()
+
+
+@balsamic.command("config-case")
+@OPTION_PANEL_BED
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def config_case(cg_config: CGConfig, case_id: str, panel_bed: str | None):
+    """Configure a Balsamic case so that it is ready to be run."""
+    factory = ConfiguratorFactory(cg_config)
+    configurator = cast(BalsamicConfigurator, factory.get_configurator(Workflow.BALSAMIC))
+    configurator.configure(case_id=case_id, panel_bed=panel_bed)
+
+
+@balsamic.command("run")
+@OPTION_WORKFLOW_PROFILE
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def run(cg_config: CGConfig, case_id: str, workflow_profile: click.Path | None):
+    """Run a preconfigured Balsamic case."""
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
+    analysis_starter.run(case_id=case_id, workflow_profile=workflow_profile)
+
+
+@balsamic.command("start")
+@OPTION_PANEL_BED
+@OPTION_WORKFLOW_PROFILE
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def start(
+    cg_config: CGConfig,
+    case_id: str,
+    panel_bed: str | None,
+    workflow_profile: click.Path | None,
+):
+    """Start a Balsamic case. Configures the case if needed."""
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
+    analysis_starter.start(case_id=case_id, workflow_profile=workflow_profile, panel_bed=panel_bed)
+
+
+@balsamic.command("start-available")
+@click.pass_obj
+def start_available(cg_config: CGConfig):
+    """Starts all available raredisease cases."""
+    LOG.info("Starting Balsamic workflow for all available cases.")
+    factory = AnalysisStarterFactory(cg_config)
+    analysis_starter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC)
+    succeeded: bool = analysis_starter.start_available()
+    if not succeeded:
+        raise click.Abort

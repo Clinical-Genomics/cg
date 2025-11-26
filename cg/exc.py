@@ -1,5 +1,5 @@
 """
-    Cg Exceptions.
+Cg Exceptions.
 """
 
 
@@ -33,6 +33,12 @@ class AnalysisAlreadyUploadedError(CgError):
 class AnalysisNotReadyError(CgError):
     """
     Exception raised when some FASTQ file are missing when starting an analysis.
+    """
+
+
+class AnalysisAlreadyCompletedError(CgError):
+    """
+    Exception raised when the latest analysis is already completed.
     """
 
 
@@ -334,5 +340,13 @@ class Chanjo2ResponseError(Chanjo2APIClientError):
     """Exception raised when the response from Chanjo2 API client fails validation."""
 
 
+class CaseNotConfiguredError(CgError):
+    """Exception raised when a case is being run without a configuration."""
+
+
 class MissingConfigFilesError(CgError):
     """Exception raised when a case is being run with missing configuration files."""
+
+
+class SeqeraError(CgError):
+    """Exception raised when receiving an unexpected response from Seqera platform"""

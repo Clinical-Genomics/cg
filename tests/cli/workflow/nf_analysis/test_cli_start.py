@@ -18,7 +18,7 @@ from cg.constants import EXIT_SUCCESS, Workflow
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.service import AnalysisStarter
+from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 
 
 @pytest.mark.parametrize(
@@ -140,10 +140,12 @@ def test_start_nextflow_calls_service(
     service_call: MagicMock = mocker.patch.object(AnalysisStarter, "start")
 
     # WHEN running the start command
-    result: Result = cli_runner.invoke(start_command, [case_id], obj=cg_context)
+    result: Result = cli_runner.invoke(
+        start_command, [case_id, "--revision", "revision"], obj=cg_context
+    )
 
     # THEN the analysis started should have been called with the flags set
-    service_call.assert_called_once_with(case_id=case_id)
+    service_call.assert_called_once_with(case_id=case_id, revision="revision")
 
     # THEN the command should have executed without fail
     assert result.exit_code == EXIT_SUCCESS

@@ -1,6 +1,6 @@
 from pathlib import Path
 from subprocess import CompletedProcess
-from unittest.mock import ANY, Mock, create_autospec
+from unittest.mock import ANY, Mock, call, create_autospec
 
 import pytest
 from click.testing import CliRunner, Result
@@ -10,15 +10,19 @@ from pytest_mock import MockerFixture
 
 from cg.cli.base import base
 from cg.constants.constants import CaseActions, Workflow
+from cg.constants.observations import BalsamicObservationPanel
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.tb import AnalysisType
+from cg.services.analysis_starter.configurator.file_creators import balsamic_config
+from cg.services.analysis_starter.submitters.subprocess import submitter
 from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
-from cg.utils import commands
 from tests.integration.conftest import IntegrationTestPaths
 from tests.integration.utils import (
     copy_integration_test_file,
+    create_empty_file,
     create_integration_test_sample_fastq_files,
+    expect_lims_sample_request,
     expect_to_add_pending_analysis_to_trailblazer,
 )
 from tests.store_helpers import StoreHelpers
@@ -149,22 +153,26 @@ def test_start_available_tgs_tumour_only(
     case_id = case_tgs_tumour_only.internal_id
 
     # GIVEN a bed version exists and a corresponding bed name is returned by lims for the sample
-    bed_name = "balsamic_integration_test_bed"
+    bed_name = BalsamicObservationPanel.MYELOID
     helpers.ensure_bed_version(store=status_db, bed_name=bed_name)
     expect_lims_sample_request(lims_server=httpserver, sample=sample, bed_name=bed_name)
 
+    # GIVEN files exists on disk for all flags requiring a file
+    _create_files_for_flags(test_root_dir)
+
     # GIVEN a call to balsamic config case successfully generates a config file
-    subprocess_mock = mocker.patch.object(commands, "subprocess")
+    config_case_subprocess_mock = mocker.patch.object(balsamic_config, "subprocess")
+    run_analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
 
     def mock_run(*args, **kwargs):
-        command = args[0]
+        command = args[0] if args else kwargs["args"]
         stdout = b""
 
         if "balsamic_binary_path config case" in command:
-            create_tga_config_file(test_root_dir=test_root_dir, case=case_tgs_tumour_only)
+            _create_tga_config_file(test_root_dir=test_root_dir, case=case_tgs_tumour_only)
         return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
 
-    subprocess_mock.run = Mock(side_effect=mock_run)
+    config_case_subprocess_mock.run = Mock(side_effect=mock_run)
 
     # GIVEN the Trailblazer API returns no ongoing analysis for the case
     httpserver.expect_request(
@@ -194,20 +202,30 @@ def test_start_available_tgs_tumour_only(
             "balsamic",
             "start-available",
         ],
+        catch_exceptions=False,
     )
 
     # THEN a successful exit code is returned
     assert result.exit_code == 0
 
-    # THEN balsamic config case was called in the correct way
+    # THEN Balsamic config case was called in the correct way
+    first_call = config_case_subprocess_mock.run.mock_calls[0]
+
     expected_config_case_command = (
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path config case "
         f"--analysis-dir {balsamic_root_dir} "
         f"--analysis-workflow balsamic "
+        f"--artefact-snv-observations {test_root_dir}/loqusdb/artefact_somatic_snv.vcf.gz "
         f"--balsamic-cache {test_root_dir}/balsamic_cache "
         f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
+        f"--cancer-germline-snv-observations {test_root_dir}/loqusdb/cancer_germline_snv.vcf.gz "
+        f"--cancer-somatic-snv-observations {test_root_dir}/loqusdb/cancer_somatic_snv.vcf.gz "
+        f"--cancer-somatic-snv-panel-observations {test_root_dir}/loqusdb/loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz "
+        f"--cancer-somatic-sv-observations {test_root_dir}/loqusdb/cancer_somatic_sv.vcf.gz "
         f"--case-id {case_id} "
+        f"--clinical-snv-observations {test_root_dir}/loqusdb/clinical_snv.vcf.gz "
+        f"--clinical-sv-observations {test_root_dir}/loqusdb/clinical_sv.vcf.gz "
         f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
         f"--gender female "
         f"--genome-version hg19 "
@@ -215,11 +233,12 @@ def test_start_available_tgs_tumour_only(
         f"--panel-bed {test_root_dir}/balsamic_bed_path/dummy_filename "
         f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
         f"--sentieon-license localhost "
+        f"--swegen-snv {test_root_dir}/swegen/swegen_snv.vcf.gz "
+        f"--swegen-sv {test_root_dir}/swegen/swegen_sv.vcf.gz "
         f"--tumor-sample-name {sample.internal_id}"
     )
-
-    subprocess_mock.run.assert_any_call(
-        expected_config_case_command,
+    assert first_call == call(
+        args=expected_config_case_command,
         check=False,
         shell=True,
         stderr=ANY,
@@ -227,14 +246,18 @@ def test_start_available_tgs_tumour_only(
     )
 
     # THEN Balsamic run analysis was called in the correct way
-    subprocess_mock.run.assert_any_call(
+    expected_run_analysis_command = (
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path run analysis "
         f"--account balsamic_slurm_account "
         f"--qos normal "
         f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
         f"--headjob-partition head-jobs "
-        f"--run-analysis",
+        f"--run-analysis"
+    )
+    run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[0]
+    assert run_analysis_call == call(
+        args=expected_run_analysis_command,
         check=False,
         shell=True,
         stderr=ANY,
@@ -282,18 +305,22 @@ def test_start_available_wgs_paired(
     expect_lims_sample_request(lims_server=httpserver, sample=sample_wgs_normal, bed_name=bed_name)
     expect_lims_sample_request(lims_server=httpserver, sample=sample_wgs_tumour, bed_name=bed_name)
 
+    # GIVEN files exists on disk for all flags requiring a file
+    _create_files_for_flags(test_root_dir)
+
     # GIVEN a call to balsamic config case successfully generates a config file
-    subprocess_mock = mocker.patch.object(commands, "subprocess")
+    config_case_subprocess_mock = mocker.patch.object(balsamic_config, "subprocess")
+    run_analysis_subprocess_mock = mocker.patch.object(submitter, "subprocess")
 
     def mock_run(*args, **kwargs):
-        command = args[0]
+        command = args[0] if args else kwargs["args"]
         stdout = b""
 
         if "balsamic_binary_path config case" in command:
-            create_wgs_config_file(test_root_dir=test_root_dir, case=case_wgs_paired)
+            _create_wgs_config_file(test_root_dir=test_root_dir, case=case_wgs_paired)
         return create_autospec(CompletedProcess, returncode=EXIT_SUCCESS, stdout=stdout, stderr=b"")
 
-    subprocess_mock.run = Mock(side_effect=mock_run)
+    config_case_subprocess_mock.run = Mock(side_effect=mock_run)
 
     # GIVEN the Trailblazer API returns no ongoing analysis for the case
     httpserver.expect_request(
@@ -323,21 +350,29 @@ def test_start_available_wgs_paired(
             "balsamic",
             "start-available",
         ],
+        catch_exceptions=False,
     )
 
     # THEN a successful exit code is returned
     assert result.exit_code == 0
 
     # THEN balsamic config case was called in the correct way
+    first_call = config_case_subprocess_mock.run.mock_calls[0]
     expected_config_case_command = (
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path config case "
         f"--analysis-dir {balsamic_root_dir} "
         f"--analysis-workflow balsamic "
+        f"--artefact-snv-observations {test_root_dir}/loqusdb/artefact_somatic_snv.vcf.gz "
+        f"--artefact-sv-observations {test_root_dir}/loqusdb/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz "
         f"--balsamic-cache {test_root_dir}/balsamic_cache "
         f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
-        f"--artefact-sv-observations {test_root_dir}/balsamic_loqusdb_path/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz "
+        f"--cancer-germline-snv-observations {test_root_dir}/loqusdb/cancer_germline_snv.vcf.gz "
+        f"--cancer-somatic-snv-observations {test_root_dir}/loqusdb/cancer_somatic_snv.vcf.gz "
+        f"--cancer-somatic-sv-observations {test_root_dir}/loqusdb/cancer_somatic_sv.vcf.gz "
         f"--case-id {case_id} "
+        f"--clinical-snv-observations {test_root_dir}/loqusdb/clinical_snv.vcf.gz "
+        f"--clinical-sv-observations {test_root_dir}/loqusdb/clinical_sv.vcf.gz "
         f"--fastq-path {balsamic_root_dir}/{case_id}/fastq "
         f"--gender female "
         f"--genome-interval {test_root_dir}/balsamic_genome_interval_path "
@@ -347,18 +382,19 @@ def test_start_available_wgs_paired(
         f"--normal-sample-name {sample_wgs_normal.internal_id} "
         f"--sentieon-install-dir {test_root_dir}/balsamic_sention_licence_path "
         f"--sentieon-license localhost "
+        f"--swegen-snv {test_root_dir}/swegen/swegen_snv.vcf.gz "
+        f"--swegen-sv {test_root_dir}/swegen/swegen_sv.vcf.gz "
         f"--tumor-sample-name {sample_wgs_tumour.internal_id}"
     )
-
-    subprocess_mock.run.assert_any_call(
-        expected_config_case_command,
+    assert first_call == call(
+        args=expected_config_case_command,
         check=False,
         shell=True,
         stderr=ANY,
         stdout=ANY,
     )
 
-    # THEN balsamic run analysis was called in the correct way
+    # THEN Balsamic run analysis was called in the correct way
     expected_run_analysis_command = (
         f"{test_root_dir}/balsamic_conda_binary run --name conda_env_balsamic "
         f"{test_root_dir}/balsamic_binary_path run analysis "
@@ -368,8 +404,10 @@ def test_start_available_wgs_paired(
         f"--headjob-partition head-jobs "
         f"--run-analysis"
     )
-    subprocess_mock.run.assert_any_call(
-        expected_run_analysis_command,
+    run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[0]
+
+    assert run_analysis_call == call(
+        args=expected_run_analysis_command,
         check=False,
         shell=True,
         stderr=ANY,
@@ -384,7 +422,18 @@ def test_start_available_wgs_paired(
     assert case_wgs_paired.action == CaseActions.RUNNING
 
 
-def create_tga_config_file(test_root_dir: Path, case: Case) -> Path:
+def _create_files_for_flags(test_root_dir: Path):
+    create_empty_file(Path(test_root_dir, "loqusdb", "artefact_somatic_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_germline_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "cancer_somatic_sv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "clinical_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "loqusdb", "clinical_sv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "swegen", "swegen_snv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "swegen", "swegen_sv.vcf.gz"))
+
+
+def _create_tga_config_file(test_root_dir: Path, case: Case) -> Path:
     filepath = Path(
         f"{test_root_dir}/balsamic_root_path/{case.internal_id}/{case.internal_id}.json"
     )
@@ -394,7 +443,7 @@ def create_tga_config_file(test_root_dir: Path, case: Case) -> Path:
     return filepath
 
 
-def create_wgs_config_file(test_root_dir: Path, case: Case) -> Path:
+def _create_wgs_config_file(test_root_dir: Path, case: Case) -> Path:
     filepath = Path(
         f"{test_root_dir}/balsamic_root_path/{case.internal_id}/{case.internal_id}.json"
     )
@@ -403,41 +452,3 @@ def create_wgs_config_file(test_root_dir: Path, case: Case) -> Path:
         from_path=Path("tests/fixtures/apps/balsamic/wgs_case/config.json"), to_path=filepath
     )
     return filepath
-
-
-def expect_lims_sample_request(lims_server: HTTPServer, sample: Sample, bed_name: str):
-    lims_server.expect_request(f"/lims/api/v2/samples/{sample.internal_id}").respond_with_data(
-        f"""<smp:sample xmlns:udf="http://genologics.com/ri/userdefined" xmlns:ri="http://genologics.com/ri" xmlns:file="http://genologics.com/ri/file" xmlns:smp="http://genologics.com/ri/sample" uri="http://127.0.0.1:8000/api/v2/samples/ACC2351A1" limsid="ACC2351A1">
-<name>2016-02293</name>
-<date-received>2017-02-16</date-received>
-<project limsid="ACC2351" uri="http://127.0.0.1:8000/api/v2/projects/ACC2351"/>
-<submitter uri="http://127.0.0.1:8000/api/v2/researchers/3">
-<first-name>API</first-name>
-<last-name>Access</last-name>
-</submitter>
-<artifact limsid="ACC2351A1PA1" uri="http://127.0.0.1:8000/api/v2/artifacts/ACC2351A1PA1?state=55264"/>
-<udf:field type="Boolean" name="Sample Delivered">true</udf:field>
-<udf:field type="String" name="Concentration (nM)">NA</udf:field>
-<udf:field type="String" name="customer">cust002</udf:field>
-<udf:field type="String" name="familyID">F0005063</udf:field>
-<udf:field type="String" name="Gender">M</udf:field>
-<udf:field type="String" name="priority">standard</udf:field>
-<udf:field type="String" name="Process only if QC OK">NA</udf:field>
-<udf:field type="Numeric" name="Reads missing (M)">0</udf:field>
-<udf:field type="String" name="Reference Genome Microbial">NA</udf:field>
-<udf:field type="String" name="Sample Buffer">NA</udf:field>
-<udf:field type="String" name="Sequencing Analysis">EXXCUSR000</udf:field>
-<udf:field type="String" name="Status">unaffected</udf:field>
-<udf:field type="String" name="Strain">NA</udf:field>
-<udf:field type="String" name="Source">NA</udf:field>
-<udf:field type="String" name="Volume (uL)">NA</udf:field>
-<udf:field type="String" name="Gene List">OMIM-AUTO</udf:field>
-<udf:field type="String" name="Index type">NA</udf:field>
-<udf:field type="String" name="Data Analysis">scout</udf:field>
-<udf:field type="String" name="Index number">NA</udf:field>
-<udf:field type="String" name="Application Tag Version">1</udf:field>
-<udf:field type="String" name="Bait Set">{bed_name}</udf:field>
-<udf:field type="String" name="Capture Library version">Agilent Sureselect V5</udf:field>
-</smp:sample>""",
-        content_type="application/xml",
-    )

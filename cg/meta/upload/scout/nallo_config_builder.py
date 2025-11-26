@@ -1,4 +1,5 @@
 import logging
+from typing import cast
 
 from housekeeper.store.models import Version
 
@@ -88,27 +89,36 @@ class NalloConfigBuilder(ScoutConfigBuilder):
     ) -> None:
         """Include sample level files that are optional."""
         LOG.info("Including NALLO specific sample level files")
-        sample_id: str = config_sample.sample_id
+        sample_id: str = cast(str, config_sample.sample_id)
         config_sample.d4_file = self.get_sample_file(
-            hk_tags=self.sample_tags.d4_file, sample_id=sample_id, hk_version=hk_version
+            hk_tags=cast(set[str], self.sample_tags.d4_file),
+            sample_id=sample_id,
+            hk_version=hk_version,
         )
         config_sample.paraphase_alignment_path = self.get_sample_file(
-            hk_tags=self.sample_tags.paraphase_alignment_path,
+            hk_tags=cast(set[str], self.sample_tags.paraphase_alignment_path),
             sample_id=sample_id,
             hk_version=hk_version,
         )
         config_sample.tiddit_coverage_wig = self.get_sample_file(
-            hk_tags=self.sample_tags.hificnv_coverage,
+            hk_tags=cast(set[str], self.sample_tags.hificnv_coverage),
             sample_id=sample_id,
             hk_version=hk_version,
         )
         config_sample.minor_allele_frequency_wig = self.get_sample_file(
-            hk_tags=self.sample_tags.minor_allele_frequency_wig,
+            hk_tags=cast(set[str], self.sample_tags.minor_allele_frequency_wig),
             sample_id=sample_id,
             hk_version=hk_version,
         )
-        config_sample.alignment_path = self.get_sample_file(
-            hk_tags=self.sample_tags.alignment_path,
+        alignment_and_mt_bam_path: str | None = self.get_sample_file(
+            hk_tags=cast(set[str], self.sample_tags.alignment_path),
+            sample_id=sample_id,
+            hk_version=hk_version,
+        )
+        config_sample.alignment_path = alignment_and_mt_bam_path
+        config_sample.mt_bam = alignment_and_mt_bam_path
+        config_sample.phase_blocks = self.get_sample_file(
+            hk_tags=cast(set[str], self.sample_tags.phase_blocks),
             sample_id=sample_id,
             hk_version=hk_version,
         )
