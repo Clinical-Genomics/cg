@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Annotated
+from typing import Annotated, cast
 
 import sqlalchemy
 from sqlalchemy import (
@@ -283,6 +283,7 @@ class Analysis(Base):
     case: Mapped["Case"] = orm.relationship(back_populates="analyses")
     trailblazer_id: Mapped[int | None]
     housekeeper_version_id: Mapped[int | None]
+    session_id: Mapped[str | None]
 
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
@@ -337,6 +338,10 @@ class BedVersion(Base):
     bed_id: Mapped[int] = mapped_column(ForeignKey(Bed.id))
 
     bed: Mapped[Bed] = orm.relationship(back_populates="versions")
+
+    @property
+    def bed_name(self) -> str:
+        return self.bed.name
 
     def __str__(self) -> str:
         return f"{self.bed.name} ({self.version})"
@@ -548,11 +553,11 @@ class Case(Base, PriorityMixin):
         return [link.sample for link in self.links if link.sample.loqusdb_id]
 
     @property
-    def slurm_priority(self) -> str:
+    def slurm_priority(self) -> SlurmQos:
         """Get Quality of service (SLURM QOS) for the case."""
         if self.are_all_samples_control():
             return SlurmQos.EXPRESS
-        return Priority.priority_to_slurm_qos().get(self.priority)
+        return cast(SlurmQos, Priority.priority_to_slurm_qos().get(self.priority))
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
         """Represent as dictionary."""

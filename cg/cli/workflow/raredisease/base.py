@@ -8,6 +8,9 @@ import rich_click as click
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
+    OPTION_RESUME,
+    OPTION_REVISION,
+    config_case,
     metrics_deliver,
     report_deliver,
     store,
@@ -18,10 +21,10 @@ from cg.constants.constants import MetaApis, Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
-from cg.services.analysis_starter.service import AnalysisStarter
 
 LOG = logging.getLogger(__name__)
 
@@ -53,27 +56,30 @@ def config_case(cg_config: CGConfig, case_id: str):
 
 
 @raredisease.command()
+@OPTION_REVISION
+@OPTION_RESUME
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def run(cg_config: CGConfig, case_id: str):
+def run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None):
     """Run a preconfigured raredisease case."""
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RAREDISEASE
     )
-    analysis_starter.run(case_id=case_id)
+    analysis_starter.run(case_id=case_id, resume=resume, revision=revision)
 
 
 @raredisease.command()
+@OPTION_REVISION
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def start(cg_config: CGConfig, case_id: str):
+def start(cg_config: CGConfig, case_id: str, revision: str | None):
     """Start a raredisease case. Configures the case if needed."""
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RAREDISEASE
     )
-    analysis_starter.start(case_id=case_id)
+    analysis_starter.start(case_id=case_id, revision=revision)
 
 
 @raredisease.command()

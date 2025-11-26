@@ -37,13 +37,6 @@ chanjo:
 chanjo2:
   host: "http://localhost/chanjo2"
 
-microsalt:
-  root: "{test_root_dir}/microsalt"
-  conda_binary: "{test_root_dir}/microsalt/conda_bin"
-  conda_env: "{test_root_dir}/microsalt/conda_env"
-  binary_path: "{test_root_dir}/microsalt/bin"
-  queries_path: "{test_root_dir}/microsalt/queries"
-
 balsamic:
   conda_binary: "{test_root_dir}/balsamic_conda_binary"
   binary_path: "{test_root_dir}/balsamic_binary_path"
@@ -56,16 +49,40 @@ balsamic:
   gens_coverage_male_path: "{test_root_dir}/balsamic_gens_coverage_male_path"
   gnomad_af5_path: "{test_root_dir}/balsamic_gnomad_af5_path"
   head_job_partition: "head-jobs"
-  loqusdb_path: "{test_root_dir}/balsamic_loqusdb_path"
   pon_path: "{test_root_dir}/balsamic_pon_path"
   root: "{test_root_dir}/balsamic_root_path"
   sentieon_licence_path: "{test_root_dir}/balsamic_sention_licence_path"
+  loqusdb_dump_files:
+    artefact_sv: "{test_root_dir}/loqusdb/loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz"
+    artefact_snv: "{test_root_dir}/loqusdb/artefact_somatic_snv.vcf.gz"
+    cancer_germline_snv: "{test_root_dir}/loqusdb/cancer_germline_snv.vcf.gz"
+    cancer_germline_sv: "{test_root_dir}/balsamic_loqusdb_path/loqusdb_cancer_germline_sv"
+    cancer_somatic_snv: "{test_root_dir}/loqusdb/cancer_somatic_snv.vcf.gz"
+    cancer_somatic_sv: "{test_root_dir}/loqusdb/cancer_somatic_sv.vcf.gz"
+    clinical_snv: "{test_root_dir}/loqusdb/clinical_snv.vcf.gz"
+    clinical_sv: "{test_root_dir}/loqusdb/clinical_sv.vcf.gz"
+    cancer_somatic_snv_panels:
+      GMSlymphoid: "{test_root_dir}/loqusdb/lymphoid.vcf.gz"
+      GMSmyeloid: "{test_root_dir}/loqusdb/loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz"
+      "Twist Exome Comprehensive": "{test_root_dir}/loqusdb/exome.vcf.gz"
+  loqusdb_path: "{test_root_dir}/loqusdb"
+  panel_of_normals:
+    GMCKsolid4.1: "{test_root_dir}/PON/gmcksolid_4.1.cnn"
+    gmck_solid_4.1: "{test_root_dir}/PON/gmcksolid_4.1.cnn"
+    gmck_solid_4.2: "{test_root_dir}/PON/gmcksolid_4.2.cnn"
+    gms_lymphoid_7.4: "{test_root_dir}/PON/gmslymphoid_7.3.cnn"
+    gms_myeloid_5.3: "{test_root_dir}/PON/gmsmyeloid_5.3.cnn"
+    gms_myeloid_5.4: "{test_root_dir}/PON/gmsmyeloid_5.4.cnn"
+    gms_solid_15.2: "{test_root_dir}/PON/gmssolid.cnn"
+    exome_comp_10.2: "{test_root_dir}/PON/twistexomecomprehensive_10.2.cnn"
+  sentieon_licence_server: "localhost"
+  swegen_path: "{test_root_dir}/swegen"
+  swegen_snv: "{test_root_dir}/swegen/swegen_snv.vcf.gz"
+  swegen_sv: "{test_root_dir}/swegen/swegen_sv.vcf.gz"
   slurm:
     account: "balsamic_slurm_account"
     mail_user: "balsamic_mail_user@scilifelab.se"
     qos: "low"
-  swegen_path: "{test_root_dir}/balsamic_swegen_path"
-
 crunchy:
   conda_binary: "{test_root_dir}/crunchy_conda_binary"
   cram_reference: "{test_root_dir}/crunchy_cram_reference"
@@ -76,6 +93,14 @@ crunchy:
     memory: 50
     number_tasks: 12
     conda_env: crunchy_conda_env
+
+data-delivery:
+  destination_path: {test_root_dir}/data-delivery_destination_path
+  covid_destination_path: {test_root_dir}/data-delivery_covid_destination_path
+  covid_report_path: {test_root_dir}/data-delivery_covid_report_path
+  base_path: {test_root_dir}/data-delivery_base_path
+  account: "development"
+  mail_user: "data-delivery-user@scilifelab.se"
 
 genotype:
   database: "sqlite:///file:genotype?mode=memory&cache=shared&uri=true"
@@ -92,6 +117,13 @@ lims:
   username: lims_username
   password: lims_password
 
+microsalt:
+  root: "{test_root_dir}/microsalt"
+  conda_binary: "{test_root_dir}/microsalt/conda_bin"
+  conda_env: "{test_root_dir}/microsalt/conda_env"
+  binary_path: "{test_root_dir}/microsalt/bin"
+  queries_path: "{test_root_dir}/microsalt/queries"
+
 mip-rd-dna:
   conda_binary: "{test_root_dir}/mip-dna/conda_bin"
   conda_env: S_mip12.1
@@ -105,6 +137,25 @@ mutacc-auto:
   binary_path: "{test_root_dir}/mutacc-auto_binary_path"
   padding: 300
 
+nallo:
+  compute_env: nallo_compute_env
+  conda_env: nallo_conda_env
+  config: {test_root_dir}/nallo_config.config
+  launch_directory: {test_root_dir}/nallo_launch_directory
+  params: {test_root_dir}/nallo_params.yaml
+  platform: {test_root_dir}/platform.config
+  profile: nallo_profile
+  resources: {test_root_dir}/nallo_resources.config
+  repository: nallo_repository
+  revision: nallo_revision
+  root: {test_root_dir}/nallo_root_path
+  slurm:
+    account: "nallo_slurm_account"
+    mail_user: "nallo_mail_user@scilifelab.se"
+    qos: "low"
+  tower_workflow: nallo_tower_workflow
+  workflow_bin_path: {test_root_dir}/nallo_workflow_bin_path
+
 encryption:
   encryption_dir: "{test_root_dir}/encryption_encryption_dir"
   binary_path: "{test_root_dir}/encryption_binary_path"
@@ -112,21 +163,23 @@ encryption:
 pdc:
   binary_path: "{test_root_dir}/pdc_binary_path"
 
+seqera_platform:
+  base_url: "http://localhost:8888/tower"
+  bearer_token: "sequera_bearer_token"
+  compute_environments:
+    express: "3xpr355"
+    high: "h1gh"
+    low: "l0w"
+    normal: "n0rm41"
+  workspace_id: 1234567890
+
 scout:
-  binary_path: {test_root_dir}/scout/binary
-  config_path: {test_root_dir}/scout/config
+  binary_path: /scout/binary
+  config_path: /scout/config
 
 scout_38:
-  binary_path: {test_root_dir}/scout_38_binary_path
-  config_path: {test_root_dir}/scout_38_config_path
-
-data-delivery:
-  destination_path: {test_root_dir}/data-delivery_destination_path
-  covid_destination_path: {test_root_dir}/data-delivery_covid_destination_path
-  covid_report_path: {test_root_dir}/data-delivery_covid_report_path
-  base_path: {test_root_dir}/data-delivery_base_path
-  account: "development"
-  mail_user: "data-delivery-user@scilifelab.se"
+  binary_path: /scout_38/binary
+  config_path: /scout_38/config
 
 trailblazer:
   database: "sqlite:///file:trailblazer?mode=memory&cache=shared&uri=true"
