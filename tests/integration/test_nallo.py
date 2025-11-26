@@ -203,6 +203,9 @@ def test_start_available_nallo(
         httpserver.expect_request(
             "/tower/workflow/launch", query_string="workspaceId=1234567890"
         ).respond_with_json({"workflowId": new_tower_id})
+        httpserver.expect_request(f"/tower/workflow/{new_tower_id}").respond_with_json(
+            {"workflow": {"sessionId": "some_session_id"}}
+        )
 
     # WHEN running nallo start-available
     result: Result = cli_runner.invoke(
