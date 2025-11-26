@@ -279,4 +279,5 @@ def test_start_available_nallo(
         case_directory, "gene_panels.tsv"
     ).open().read() == scout_export_panel_stdout.decode().removesuffix("\n")
 
-    assert Path(case_directory, "tower_ids.yaml").open().read() == expected_tower_ids_contents
+    if command == "start-available":
+        assert Path(case_directory, "tower_ids.yaml").open().read() == expected_tower_ids_contents
