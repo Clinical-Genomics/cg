@@ -1,17 +1,34 @@
+from pathlib import Path
+from typing import Any, Iterator
+
+from cg.apps.lims import LimsAPI
+from cg.constants.scout import ScoutExportFileName
+from cg.exc import CgError
 from cg.io.yaml import read_yaml
 from cg.models.tomte.tomte import TomteParameters
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
+from cg.store.store import Store
+from tests.meta.upload.scout.conftest import lims_api
 
 
 class TomteParamsFileCreator(ParamsFileCreator):
+    def __init__(self, params: str, lims_api: LimsAPI, status_db: Store):
+        super().__init__(params)
+        self.lims_api = lims_api
+        self.status_db = status_db
 
-    def _get_content(self, case_id: str) -> TomteParameters:
+    def create(self, case_id: str, file_path: Path, sample_sheet_path: Path) -> Any:
+        content: dict = self._get_content(
+            case_run_directory=file_path.parent, sample_sheet_path=sample_sheet_path
+        )
+
+    def _get_content(self, case_id: str, case_run_directory: Path, sample_sheet_path: Path):
         case_parameters = TomteParameters(
-            input=self.get_sample_sheet_path(case_id=case_id),
-            outdir=self.get_case_path(case_id=case_id),
-            gene_panel_clinical_filter=self.get_gene_panels_path(case_id=case_id),
+            input=sample_sheet_path,
+            outdir=case_run_directory,
+            gene_panel_clinical_filter=Path(case_run_directory, ScoutExportFileName.PANELS),
             tissue=self.get_case_source_type(case_id=case_id),
             genome=self.get_genome_build(case_id=case_id),
         ).model_dump()
@@ -24,3 +41,18 @@ class TomteParamsFileCreator(ParamsFileCreator):
 
     def _get_workflow_params(self) -> dict:
         return read_yaml(self.params)
+
+    def get_case_source_type(self, case_id: str) -> str | None:
+        """
+        Return the sample source type of a case.
+
+        Raises:
+            CgError: If different sources are set for the samples linked to a case.
+        """
+        sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id=case_id)
+        source_types: set[str | None] = {
+            self.lims_api.get_source(sample_id) for sample_id in sample_ids
+        }
+        if len(source_types) > 1:
+            raise CgError(f"Different source types found for case: {case_id} ({source_types})")
+        return source_types.pop()
