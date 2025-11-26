@@ -7,12 +7,18 @@ from pytest_mock import MockerFixture
 from cg.apps.lims.api import LimsAPI
 from cg.constants.constants import Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import raredisease
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
+    raredisease,
+    tomte_params_file_creator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
     RarediseaseParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.tomte_params_file_creator import (
+    TomteParamsFileCreator,
 )
 from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
@@ -94,6 +100,21 @@ def test_raredisease_params_file_creator(
         content=[["customer_id", "internal_id"], ["sample_name", "ACC"]],
         file_path=Path("some_path", f"{case_id}_customer_internal_mapping.csv"),
     )
+
+
+def test_tomte_params_file_creator(mocker: MockerFixture):
+    file_creator = TomteParamsFileCreator(
+        "/path/to/params_file", lims_api=create_autospec(LimsAPI), status_db=create_autospec(Store)
+    )
+    write_yaml_mock: Mock = mocker.patch.object(
+        tomte_params_file_creator, "write_yaml_nextflow_style"
+    )
+    file_creator.create(
+        case_id="santa_case",
+        file_path=Path("down", "the", "chimney"),
+        sample_sheet_path=Path("wish", "list"),
+    )
+    write_yaml_mock.assert_called_once_with(content="?", file_path=Path("down", "the", "chimney"))
 
 
 @pytest.mark.parametrize("workflow", [Workflow.NALLO, Workflow.RNAFUSION, Workflow.TAXPROFILER])

@@ -1,11 +1,11 @@
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Iterator
 
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import GenomeVersion
 from cg.constants.scout import ScoutExportFileName
 from cg.exc import CgError
-from cg.io.yaml import read_yaml
+from cg.io.yaml import read_yaml, write_yaml_nextflow_style
 from cg.models.tomte.tomte import TomteParameters
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
@@ -22,10 +22,13 @@ class TomteParamsFileCreator(ParamsFileCreator):
         self.lims_api = lims_api
         self.status_db = status_db
 
-    def create(self, case_id: str, file_path: Path, sample_sheet_path: Path) -> Any:
+    def create(self, case_id: str, file_path: Path, sample_sheet_path: Path) -> None:
         content: dict = self._get_content(
-            case_run_directory=file_path.parent, sample_sheet_path=sample_sheet_path
+            case_id=case_id,
+            case_run_directory=file_path.parent,
+            sample_sheet_path=sample_sheet_path,
         )
+        write_yaml_nextflow_style(content=content, file_path=file_path)
 
     def _get_content(self, case_id: str, case_run_directory: Path, sample_sheet_path: Path):
         case_parameters = TomteParameters(
@@ -38,9 +41,7 @@ class TomteParamsFileCreator(ParamsFileCreator):
 
         workflow_params = self._get_workflow_params()
         workflow_parameters: dict = workflow_params | case_parameters
-        replaced_workflow_parameters: dict = replace_values_in_params_file(
-            workflow_parameters=workflow_parameters
-        )
+        return replace_values_in_params_file(workflow_parameters=workflow_parameters)
 
     def _get_workflow_params(self) -> dict:
         return read_yaml(self.params)
