@@ -293,3 +293,50 @@ def application_tgs(base_store: Store) -> Application:
 @pytest.fixture
 def tomte_rule_set() -> RuleSet:
     return ORDER_TYPE_RULE_SET_MAP[OrderType.TOMTE]
+
+
+@pytest.fixture
+def rnafusion_order_with_existing_sample() -> dict:
+    """Return a Tomte order with an existing sample."""
+    return {
+        "name": "RNAfusion-order",
+        "customer": "cust000",
+        "delivery_type": "fastq-analysis",
+        "project_type": "rnafusion",
+        "comment": "",
+        "cases": [
+            {
+                "cohorts": None,
+                "name": "RnaFusionCase3",
+                "panels": None,
+                "priority": "standard",
+                "samples": [
+                    {
+                        "application": "RNAPOAR025",
+                        "cohorts": [""],
+                        "comment": "this is a sample comment",
+                        "container": "96 well plate",
+                        "container_name": "CMMS",
+                        "data_analysis": None,
+                        "data_delivery": None,
+                        "family_name": "RnaFusionCase3",
+                        "internal_id": "ACC123A1",
+                        "name": "sample1-rna-t3",
+                        "phenotype_groups": [""],
+                        "phenotype_terms": [""],
+                        "priority": "standard",
+                        "quantity": "220",
+                        "require_qc_ok": False,
+                        "sex": "female",
+                        "source": "tissue (fresh frozen)",
+                        "synopsis": "",
+                        "subject_id": "subject-sample1-rna-t3",
+                        "tumour": False,
+                        "volume": "20",
+                        "well_position": "B:1",
+                    }
+                ],
+                "synopsis": "A synopsis",
+            }
+        ],
+    }
