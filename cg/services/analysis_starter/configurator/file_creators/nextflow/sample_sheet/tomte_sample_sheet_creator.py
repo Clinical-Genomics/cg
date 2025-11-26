@@ -23,7 +23,6 @@ class TomteSampleSheetCreator(NextflowFastqSampleSheetCreator):
     def _get_sample_sheet_content_per_sample(self, case_id: str, sample: Sample) -> list[list[str]]:
         """Collect and format information required to build a sample sheet for a single sample."""
         paired_fastq_files: Iterator[tuple[str, str]] = self._get_paired_read_paths(sample)
-        # TODO: Make sure that the validation of paired fastq is present in the input fetcher
         content: list[list[str]] = []
         for fastq_forward_read_path, fastq_reverse_read_path in paired_fastq_files:
             content.append(
