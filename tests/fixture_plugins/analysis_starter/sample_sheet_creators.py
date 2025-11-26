@@ -1,4 +1,4 @@
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 
@@ -15,6 +15,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
     TomteSampleSheetCreator,
 )
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
@@ -55,7 +56,12 @@ def taxprofiler_sample_sheet_creator(
 def tomte_sample_sheet_creator(
     mock_housekeeper_for_nf_sample_sheet: HousekeeperAPI,
 ) -> TomteSampleSheetCreator:
+    store: Store = create_autospec(Store)
+    sample: Sample = create_autospec(Sample, internal_id="tomte_sample")
+    case: Case = create_autospec(Case, internal_id="tomte_case", samples=[sample])
+    store.get_case_by_internal_id_strict = Mock(return_value=case)
+
     return TomteSampleSheetCreator(
-        store=create_autospec(Store),
+        store=store,
         housekeeper_api=mock_housekeeper_for_nf_sample_sheet,
     )

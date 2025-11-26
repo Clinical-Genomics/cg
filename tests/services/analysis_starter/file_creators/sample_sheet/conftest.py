@@ -1,9 +1,9 @@
 from pathlib import Path
-from unittest.mock import Mock
 
 import pytest
 
 from cg.constants import Workflow
+from cg.constants.constants import Strandedness
 from cg.constants.sequencing import SequencingPlatform
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
     HEADERS as NALLO_HEADERS,
@@ -120,13 +120,16 @@ def taxprofiler_sample_sheet_expected_content(
 
 
 @pytest.fixture
-def tomte_sample_sheet_expected_content() -> list[list[str]]:
+def tomte_sample_sheet_expected_content(
+    fastq_path_1: Path, fastq_path_2: Path, nextflow_case_id: str, nextflow_sample_id: str
+) -> list[list[str]]:
     """Return the expected sample sheet content for RNAFUSION."""
     row: list[str] = [
+        nextflow_case_id,
         nextflow_sample_id,
         fastq_path_1.as_posix(),
         fastq_path_2.as_posix(),
-        strandedness.value,
+        Strandedness.REVERSE,
     ]
     return [TOMTE_HEADERS, row]
 
@@ -140,6 +143,7 @@ def sample_sheet_scenario(
     taxprofiler_sample_sheet_creator: TaxprofilerSampleSheetCreator,
     taxprofiler_sample_sheet_expected_content: list[list[str]],
     tomte_sample_sheet_creator: TomteSampleSheetCreator,
+    tomte_sample_sheet_expected_content: list[list[str]],
 ) -> dict:
     return {
         Workflow.RAREDISEASE: (
@@ -154,5 +158,5 @@ def sample_sheet_scenario(
             taxprofiler_sample_sheet_creator,
             taxprofiler_sample_sheet_expected_content,
         ),
-        Workflow.TOMTE: (tomte_sample_sheet_creator,),
+        Workflow.TOMTE: (tomte_sample_sheet_creator, tomte_sample_sheet_expected_content),
     }
