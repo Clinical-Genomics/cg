@@ -55,12 +55,13 @@ def taxprofiler_sample_sheet_creator(
 @pytest.fixture
 def tomte_sample_sheet_creator(
     mock_housekeeper_for_nf_sample_sheet: HousekeeperAPI,
+    nextflow_case_id: str,
+    nextflow_sample_id: str,
 ) -> TomteSampleSheetCreator:
     store: Store = create_autospec(Store)
-    sample: Sample = create_autospec(Sample, internal_id="tomte_sample")
-    case: Case = create_autospec(Case, internal_id="tomte_case", samples=[sample])
+    sample: Sample = create_autospec(Sample, internal_id=nextflow_sample_id)
+    case: Case = create_autospec(Case, internal_id=nextflow_case_id, samples=[sample])
     store.get_case_by_internal_id_strict = Mock(return_value=case)
-
     return TomteSampleSheetCreator(
         store=store,
         housekeeper_api=mock_housekeeper_for_nf_sample_sheet,
