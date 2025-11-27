@@ -97,7 +97,7 @@ def config_case(
     cache_version: str,
     dry_run: bool,
 ):
-    """Create config file for BALSAMIC analysis for a given CASE_ID."""
+    """Create config file for BALSAMIC UMI analysis for a given CASE_ID."""
 
     analysis_api: BalsamicUmiAnalysisAPI = context.meta_apis["analysis_api"]
     try:
@@ -136,7 +136,7 @@ def run(
     slurm_quality_of_service: str,
     dry_run: bool,
 ):
-    """Run balsamic analysis for given CASE ID"""
+    """Run Balsamic UMI analysis for given CASE ID"""
     analysis_api: BalsamicUmiAnalysisAPI = context.meta_apis["analysis_api"]
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
@@ -217,7 +217,7 @@ def start_available(context: click.Context, dry_run: bool = False, limit: int | 
     analysis_api: BalsamicUmiAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     cases: list[Case] = analysis_api.get_cases_to_analyze(limit=limit)
-    LOG.info(f"Starting {len(cases)} available Balsamic cases")
+    LOG.info(f"Starting {len(cases)} available Balsamic UMI cases")
 
     exit_code: int = EXIT_SUCCESS
     for case in cases:
