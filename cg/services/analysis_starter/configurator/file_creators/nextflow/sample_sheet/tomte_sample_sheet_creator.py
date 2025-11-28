@@ -1,4 +1,3 @@
-# TODO: Rename other implementation files to compile to new naming conventions
 from typing import Iterator
 
 from cg.constants.constants import Strandedness
