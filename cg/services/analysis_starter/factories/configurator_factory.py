@@ -90,7 +90,13 @@ class ConfiguratorFactory:
                 return self._get_microsalt_configurator()
             case Workflow.MIP_DNA:
                 return self._get_mip_dna_configurator()
-            case Workflow.NALLO | Workflow.RAREDISEASE | Workflow.RNAFUSION | Workflow.TAXPROFILER:
+            case (
+                Workflow.NALLO
+                | Workflow.RAREDISEASE
+                | Workflow.RNAFUSION
+                | Workflow.TAXPROFILER
+                | Workflow.TOMTE
+            ):
                 return self._get_nextflow_configurator(workflow)
             case _:
                 raise NotImplementedError
