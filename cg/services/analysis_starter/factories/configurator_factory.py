@@ -12,6 +12,7 @@ from cg.services.analysis_starter.configurator.extensions.pipeline_extension imp
     PipelineExtension,
 )
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
+from cg.services.analysis_starter.configurator.extensions.tomte_extension import TomteExtension
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
 )
@@ -187,6 +188,11 @@ class ConfiguratorFactory:
                     gene_panel_file_creator=gene_panel_creator,
                     managed_variants_file_creator=managed_variants_creator,
                 )
+            case Workflow.TOMTE:
+                gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(
+                    workflow
+                )
+                return TomteExtension(gene_panel_file_creator=gene_panel_creator)
             case _:
                 return PipelineExtension()
 
