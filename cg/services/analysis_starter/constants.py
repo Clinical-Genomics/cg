@@ -7,6 +7,7 @@ IMPLEMENTED_FASTQ_WORKFLOWS = [
     Workflow.RAREDISEASE,
     Workflow.RNAFUSION,
     Workflow.TAXPROFILER,
+    Workflow.TOMTE,
 ]
 
 BAM_WORKFLOWS = [Workflow.NALLO]

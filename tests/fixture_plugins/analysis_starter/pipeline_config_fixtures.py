@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from cg.constants import Workflow
 from cg.constants.observations import BalsamicObservationPanel
 from cg.models.cg_config import (
     BalsamicConfig,
@@ -12,6 +13,7 @@ from cg.models.cg_config import (
     RnafusionConfig,
     SlurmConfig,
     TaxprofilerConfig,
+    TomteConfig,
 )
 
 
@@ -112,23 +114,29 @@ def cg_balsamic_config(tmp_path) -> BalsamicConfig:
 
 @pytest.fixture
 def nallo_config_object(get_nextflow_config_dict: Callable) -> NalloConfig:
-    config: dict = get_nextflow_config_dict(workflow="nallo")
+    config: dict = get_nextflow_config_dict(workflow=Workflow.NALLO)
     return NalloConfig(**config)
 
 
 @pytest.fixture
 def raredisease_config_object(get_nextflow_config_dict: Callable) -> RarediseaseConfig:
-    config: dict = get_nextflow_config_dict(workflow="raredisease")
+    config: dict = get_nextflow_config_dict(workflow=Workflow.RAREDISEASE)
     return RarediseaseConfig(**config)
 
 
 @pytest.fixture
 def rnafusion_config_object(get_nextflow_config_dict: Callable) -> RnafusionConfig:
-    config: dict = get_nextflow_config_dict(workflow="rnafusion")
+    config: dict = get_nextflow_config_dict(workflow=Workflow.RNAFUSION)
     return RnafusionConfig(**config)
 
 
 @pytest.fixture
 def taxprofiler_config_object(get_nextflow_config_dict: Callable) -> TaxprofilerConfig:
-    config: dict = get_nextflow_config_dict(workflow="taxprofiler")
+    config: dict = get_nextflow_config_dict(workflow=Workflow.TAXPROFILER)
     return TaxprofilerConfig(**config)
+
+
+@pytest.fixture
+def tomte_config_object(get_nextflow_config_dict: Callable) -> TomteConfig:
+    config: dict = get_nextflow_config_dict(workflow=Workflow.TOMTE)
+    return TomteConfig(**config)

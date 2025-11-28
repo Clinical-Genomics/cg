@@ -15,6 +15,8 @@ def configurator_scenario(
     rnafusion_case_config: NextflowCaseConfig,
     taxprofiler_configurator: NextflowConfigurator,
     taxprofiler_case_config: NextflowCaseConfig,
+    tomte_configurator: NextflowConfigurator,
+    tomte_case_config: NextflowCaseConfig,
 ) -> dict:
     return {
         Workflow.NALLO: (
@@ -32,5 +34,9 @@ def configurator_scenario(
         Workflow.TAXPROFILER: (
             taxprofiler_configurator,
             taxprofiler_case_config,
+        ),
+        Workflow.TOMTE: (
+            tomte_configurator,
+            tomte_case_config,
         ),
     }

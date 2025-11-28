@@ -13,6 +13,7 @@ from cg.services.analysis_starter.configurator.extensions.pipeline_extension imp
     PipelineExtension,
 )
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
+from cg.services.analysis_starter.configurator.extensions.tomte_extension import TomteExtension
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
 )
@@ -85,6 +86,7 @@ def test_get_microsalt_configurator(cg_context: CGConfig):
         (Workflow.RAREDISEASE, RarediseaseExtension),
         (Workflow.RNAFUSION, PipelineExtension),
         (Workflow.TAXPROFILER, PipelineExtension),
+        (Workflow.TOMTE, TomteExtension),
     ],
 )
 def test_nextflow_configurator_factory_success(

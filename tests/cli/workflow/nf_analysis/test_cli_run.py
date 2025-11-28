@@ -14,6 +14,7 @@ from cg.cli.workflow.nallo.base import dev_run as nallo_run
 from cg.cli.workflow.raredisease.base import dev_run as raredisease_run
 from cg.cli.workflow.rnafusion.base import run as rnafusion_run
 from cg.cli.workflow.taxprofiler.base import run as taxprofiler_run
+from cg.cli.workflow.tomte.base import dev_run as tomte_run
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
@@ -293,8 +294,8 @@ def test_resume_using_nextflow_dry_run(
 
 @pytest.mark.parametrize(
     "run_command",
-    [nallo_run, raredisease_run, rnafusion_run, taxprofiler_run],
-    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
+    [nallo_run, raredisease_run, rnafusion_run, taxprofiler_run, tomte_run],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte"],
 )
 def test_run_nextflow_calls_service_default_flag_values(
     run_command: BaseCommand,
@@ -315,8 +316,8 @@ def test_run_nextflow_calls_service_default_flag_values(
 
 @pytest.mark.parametrize(
     "run_command",
-    [nallo_run, raredisease_run, rnafusion_run, taxprofiler_run],
-    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
+    [nallo_run, raredisease_run, rnafusion_run, taxprofiler_run, tomte_run],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte"],
 )
 def test_run_nextflow_calls_service_all_flags_set(
     run_command: BaseCommand,
