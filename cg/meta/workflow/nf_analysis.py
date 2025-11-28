@@ -11,7 +11,6 @@ from pydantic.v1 import ValidationError
 
 from cg.constants import Workflow
 from cg.constants.constants import (
-    CaseActions,
     FileExtensions,
     FileFormat,
     GenomeVersion,
@@ -90,12 +89,6 @@ class NfAnalysisAPI(AnalysisAPI):
     @process.setter
     def process(self, process: Process):
         self._process = process
-
-    @property
-    def use_read_count_threshold(self) -> bool:
-        """Defines whether the threshold for adequate read count should be passed for all samples
-        when determining if the analysis for a case should be automatically started."""
-        return True
 
     @property
     def sample_sheet_headers(self) -> list[str]:
@@ -889,7 +882,7 @@ class NfAnalysisAPI(AnalysisAPI):
         )
         if not is_latest_analysis_qc and not is_latest_analysis_completed and not force:
             LOG.error(
-                "Case not stored. Trailblazer status must be either QC or COMPLETE to be able to store"
+                "Case not stored. Trailblazer status must be either QC or COMPLETED to be able to store"
             )
             raise ValueError
 

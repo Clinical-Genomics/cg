@@ -21,7 +21,7 @@ log() {{
 log "Running on: $(hostname)"
 """
 
-DRAGEN_SBATCH_HEADER_TEMPLATE = """#! /bin/bash
+DRAGEN_SBATCH_HEADER_TEMPLATE = """#! /bin/bash -l
 #SBATCH --job-name={job_name}
 #SBATCH --partition={partition}
 #SBATCH --account={account}

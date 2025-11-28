@@ -1,9 +1,11 @@
+import logging
 from pathlib import Path
 
-from cg.constants import FileExtensions
 from cg.io.txt import concat_txt, write_txt
 from cg.store.models import Case
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 class NextflowConfigFileCreator:
@@ -17,14 +19,9 @@ class NextflowConfigFileCreator:
         self.store = store
         self.workflow_config_path = workflow_config_path
 
-    @staticmethod
-    def get_file_path(case_id: str, case_path: Path) -> Path:
-        """Return the path to the Nextflow config file."""
-        return Path(case_path, f"{case_id}_nextflow_config").with_suffix(FileExtensions.JSON)
-
-    def create(self, case_id: str, case_path: Path) -> None:
+    def create(self, case_id: str, file_path: Path) -> None:
         """Create the Nextflow config file for a case."""
-        file_path: Path = self.get_file_path(case_id=case_id, case_path=case_path)
+        LOG.debug(f"Creating Nextflow config file for case {case_id}")
         content: str = self._get_content(case_id)
         write_txt(file_path=file_path, content=content)
 

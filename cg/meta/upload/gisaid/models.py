@@ -1,15 +1,9 @@
 from datetime import datetime
-from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from cg.meta.upload.gisaid.constants import AUTHORS
-
-
-class FastaFile(BaseModel):
-    header: str
-    sequence: str
 
 
 class GisaidAccession(BaseModel):
@@ -33,12 +27,6 @@ def _parse_accession_nr(log_message: str) -> str:
 
 def _parse_sample_id_from_log(log_message: str) -> str:
     return log_message.split("/")[2].split("_")[2]
-
-
-class UploadFiles(BaseModel):
-    csv_file: Path
-    fasta_file: Path
-    log_file: Path
 
 
 class GisaidSample(BaseModel):

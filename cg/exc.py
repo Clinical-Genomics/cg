@@ -1,5 +1,5 @@
 """
-    Cg Exceptions.
+Cg Exceptions.
 """
 
 
@@ -36,6 +36,12 @@ class AnalysisNotReadyError(CgError):
     """
 
 
+class AnalysisAlreadyCompletedError(CgError):
+    """
+    Exception raised when the latest analysis is already completed.
+    """
+
+
 class AnalysisNotCompletedError(CgError):
     """
     Exception raised when an analysis has not completed.
@@ -57,6 +63,12 @@ class AnalysisRunningError(CgError):
 class BalsamicStartError(CgError):
     """
     Exception raised when Balsamic fails to start.
+    """
+
+
+class BedVersionNotFoundError(CgError):
+    """
+    Exception raised when a bed version is not found.
     """
 
 
@@ -98,10 +110,6 @@ class IlluminaCleanRunError(CgError):
 
 class DsmcAlreadyRunningError(CgError):
     """Raised when there is already a DCms process running on the system."""
-
-
-class DecompressionNeededError(CgError):
-    """Raised when decompression still needed to start analysis."""
 
 
 class DecompressionCouldNotStartError(CgError):
@@ -176,33 +184,15 @@ class LimsDataError(CgError):
     """
 
 
-class MicrosaltError(CgError):
-    """
-    Error related to Microsalt analysis.
-    """
-
-
 class MissingAnalysisRunDirectory(CgError):
     """
     Error related to missing analysis.
     """
 
 
-class NfAnalysisError(CgError):
-    """
-    Error related to nf analysis.
-    """
-
-
 class OrderError(CgError):
     """
     Exception related to orders.
-    """
-
-
-class OrderSubmissionError(CgError):
-    """
-    Exception related to order submission.
     """
 
 
@@ -266,10 +256,6 @@ class ValidationError(CgError):
     """
 
 
-class DeleteDemuxError(CgError):
-    """Raised when there is an issue with wiping a flowcell before start."""
-
-
 class LoqusdbError(CgError):
     """Exception related to the Loqusdb app."""
 
@@ -306,16 +292,16 @@ class MissingFilesError(CgError):
     """Exception raised when there are missing files."""
 
 
+class SampleFilesCurrentlyArchivingError(CgError):
+    """Exception raised when not all of the sample files have finished archiving."""
+
+
 class MetricsQCError(CgError):
     """Exception raised when QC metrics are not met."""
 
 
 class MissingMetrics(CgError):
     """Exception raised when mandatory metrics are missing."""
-
-
-class MissingSequencingMetricsError(CgError):
-    """Exception raised when sequencing metrics are missing."""
 
 
 class ArchiveJobFailedError(CgError):
@@ -338,10 +324,6 @@ class OrderNotDeliverableError(CgError):
     """Exception raised when no analysis is ready for delivery for an order."""
 
 
-class DeliveryMessageNotSupportedError(CgError):
-    """Exception raised when trying to fetch delivery messages for unsupported workflows."""
-
-
 class OverrideCyclesError(CgError):
     """Exception raised when the override cycles are not correct."""
 
@@ -360,3 +342,11 @@ class Chanjo2ResponseError(Chanjo2APIClientError):
 
 class CaseNotConfiguredError(CgError):
     """Exception raised when a case is being run without a configuration."""
+
+
+class MissingConfigFilesError(CgError):
+    """Exception raised when a case is being run with missing configuration files."""
+
+
+class SeqeraError(CgError):
+    """Exception raised when receiving an unexpected response from Seqera platform"""

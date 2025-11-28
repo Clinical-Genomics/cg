@@ -2,9 +2,8 @@
 API for compressing files. Functionality to compress FASTQ, decompress SPRING and clean files
 """
 
-from datetime import datetime, timedelta
 import logging
-import re
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from housekeeper.store.models import File, Version
@@ -13,6 +12,7 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
+from cg.constants.constants import PIPELINES_USING_PARTIAL_ANALYSES
 from cg.exc import DecompressionCouldNotStartError
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
@@ -46,17 +46,6 @@ class CompressAPI:
             self.crunchy_api.set_dry_run(dry_run)
         if self.backup_api:
             self.backup_api.dry_run = self.dry_run
-
-    def get_flow_cell_id(self, fastq_path: Path) -> str:
-        """Extract the flow cell id from a fastq path assuming flow cell id is the first word in the file name."""
-        flow_cell_id: str = ""
-        regexp = r"(\A[A-Z0-9]+)"
-        try:
-            flow_cell_id: str = re.search(regexp, fastq_path.name).group()
-        except AttributeError as error:
-            LOG.error(error)
-            LOG.info(f"Could not find flow cell id from fastq path: {fastq_path.as_posix()}")
-        return flow_cell_id
 
     def compress_fastq(self, sample_id: str) -> bool:
         """Compress the FASTQ files for an individual."""
@@ -401,6 +390,9 @@ class CompressAPI:
         """Return an object containing compression data for a case."""
         sample_compressions: list[SampleCompressionData] = []
         for sample in case.samples:
+            if self._should_skip_sample(case=case, sample=sample):
+                LOG.debug(f"Skipping sample {sample.internal_id} - it has no reads.")
+                continue
             sample_compression_data: SampleCompressionData = self.get_sample_compression_data(
                 sample.internal_id
             )
@@ -414,3 +406,13 @@ class CompressAPI:
         version: Version = self.hk_api.get_latest_bundle_version(sample_id)
         compression_objects.extend(files.get_spring_paths(version))
         return SampleCompressionData(sample_id=sample_id, compression_objects=compression_objects)
+
+    @staticmethod
+    def _should_skip_sample(case: Case, sample: Sample) -> bool:
+        """
+        For some workflows, we want to start a partial analysis skipping the samples with no reads.
+        This method returns true if we should skip the sample.
+        """
+        if case.data_analysis in PIPELINES_USING_PARTIAL_ANALYSES and not sample.has_reads:
+            return True
+        return False

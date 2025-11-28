@@ -12,14 +12,14 @@ class GenomeBuild(StrEnum):
 
 
 class ScoutExportFileName(StrEnum):
-    MANAGED_VARIANTS: str = f"managed_variants{FileExtensions.VCF}"
-    PANELS: str = f"gene_panels{FileExtensions.BED}"
-    PANELS_TSV: str = f"gene_panels{FileExtensions.TSV}"
+    MANAGED_VARIANTS = f"managed_variants{FileExtensions.VCF}"
+    PANELS = f"gene_panels{FileExtensions.BED}"
+    PANELS_TSV = f"gene_panels{FileExtensions.TSV}"
 
 
 class UploadTrack(StrEnum):
-    RARE_DISEASE: str = "rare"
-    CANCER: str = "cancer"
+    RARE_DISEASE = "rare"
+    CANCER = "cancer"
 
 
 class ScoutCustomCaseReportTags(StrEnum):
@@ -56,7 +56,6 @@ RAREDISEASE_CASE_TAGS = dict(
     vcf_snv={"vcf-snv-clinical"},
     vcf_snv_research_mt={"vcf-sv-research", "mitochondria"},
     vcf_snv_mt={"vcf-sv-clinical", "mitochondria"},
-    str_catalog={"expansionhunter", "variant-catalog"},
     vcf_sv_research={"vcf-sv-research"},
     vcf_sv={"vcf-sv-clinical"},
     vcf_str={"vcf-str"},
@@ -84,7 +83,6 @@ MIP_CASE_TAGS: dict[str, set[str]] = dict(
     smn_tsv={"smn-calling"},
     snv_research_vcf={"vcf-snv-research"},
     snv_vcf={"vcf-snv-clinical"},
-    str_catalog={"expansionhunter", "variant-catalog"},
     sv_research_vcf={"vcf-sv-research"},
     sv_vcf={"vcf-sv-clinical"},
     vcf_mei={"mobile-elements", "clinical", "vcf"},
@@ -133,6 +131,7 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
     reviewer_alignment={"expansionhunter", "bam"},
     reviewer_alignment_index={"expansionhunter", "bam-index"},
     reviewer_vcf={"expansionhunter", "vcf-str"},
+    reviewer_catalog={"expansionhunter", "variant-catalog"},
     mitodel_file={"mitodel"},
 )
 
@@ -142,6 +141,11 @@ NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
     d4_file={"coverage", "d4"},
     hificnv_coverage={"hificnv", "bigwig"},
     paraphase_alignment_path={AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE},
+    phase_blocks={"whatshap", "gtf"},
+    reviewer_alignment={"repeats", "spanning", "bam"},
+    reviewer_alignment_index={"repeats", "spanning", "bam-index"},
+    reviewer_vcf={"repeats", "sorted", "vcf"},
+    reviewer_catalog={"trgt", "variant-catalog"},
     minor_allele_frequency_wig={"hificnv", "bigwig", "maf"},
 )
 
@@ -157,7 +161,12 @@ MIP_SAMPLE_TAGS: dict[str, set[str]] = dict(
     reviewer_alignment={"expansionhunter", "bam"},
     reviewer_alignment_index={"expansionhunter", "bam-index"},
     reviewer_vcf={"expansionhunter", "vcf-str"},
+    reviewer_catalog={"expansionhunter", "variant-catalog"},
     mitodel_file={"mitodel"},
+    tiddit_coverage_wig={"tiddit-coverage", "bigwig"},
+    rhocall_wig={"rhocall-viz"},
+    upd_regions_bed={"upd", "regions", "bigbed"},
+    upd_sites_bed={"upd", "sites", "bigbed"},
 )
 
 BALSAMIC_SAMPLE_TAGS = dict(

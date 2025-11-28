@@ -1,14 +1,14 @@
 import logging
-from datetime import datetime
 
 import pytest
+from sqlalchemy.exc import MultipleResultsFound
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability
-from cg.constants.constants import CaseActions, MicrosaltAppTags, Workflow
+from cg.constants.constants import CaseActions, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
-from cg.exc import CgError
+from cg.exc import BedVersionNotFoundError, CgError
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.models import (
     Analysis,
@@ -92,13 +92,13 @@ def test_get_active_beds_when_archived(base_store: Store):
     assert not list(active_beds)
 
 
-def test_get_active_applications_by_prep_category(microbial_store: Store):
-    """Test that non-archived and correct applications are returned for the given prep category."""
+def test_get_applications_by_prep_category(microbial_store: Store):
+    """Test that correct applications are returned for the given prep category."""
     # GIVEN a store with applications with a given prep category
     prep_category = SeqLibraryPrepCategory.MICROBIAL
 
-    # WHEN fetching the active applications for a given prep category
-    applications: list[Application] = microbial_store.get_active_applications_by_prep_category(
+    # WHEN fetching the applications for a given prep category
+    applications: list[Application] = microbial_store.get_applications_by_prep_category(
         prep_category=prep_category
     )
 
@@ -108,10 +108,9 @@ def test_get_active_applications_by_prep_category(microbial_store: Store):
     # THEN the applications should have the given prep category and not be archived
     for application in applications:
         assert application.prep_category == prep_category
-        assert not application.is_archived
 
 
-def test_get_application_by_tag(microbial_store: Store, tag: str = MicrosaltAppTags.MWRNXTR003):
+def test_get_application_by_tag(microbial_store: Store, tag: str = "MWRNXTR003"):
     """Test function to return the application by tag."""
 
     # GIVEN a store with application records
@@ -311,21 +310,6 @@ def test_analyses_to_upload_when_filtering_with_missing_workflow(helpers, sample
     assert len(records) == 0
 
 
-def test_set_case_action(analysis_store: Store, case_id):
-    """Tests if actions of cases are changed to analyze."""
-    # Given a store with a case with action None
-    action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
-
-    assert action is None
-
-    # When setting the case to "analyze"
-    analysis_store.update_case_action(case_internal_id=case_id, action="analyze")
-    new_action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
-
-    # Then the action should be set to analyze
-    assert new_action == "analyze"
-
-
 def test_get_applications(microbial_store: Store, expected_number_of_applications):
     """Test function to return the applications."""
 
@@ -376,6 +360,44 @@ def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name
 
     # THEN return a bed version with the supplied bed version short name
     assert bed_version.shortname == bed_version_short_name
+
+
+def test_get_bed_version_by_short_name_strict_fail(base_store: Store):
+    # GIVEN a store
+
+    # GIVEN a bed version shortname that does not exist
+    short_name = "fake_short_name"
+
+    # WHEN fetching the bed version
+    # THEN an error is raised
+    with pytest.raises(BedVersionNotFoundError):
+        base_store.get_bed_version_by_short_name_strict(short_name=short_name)
+
+
+def test_get_bed_version_by_short_name_strict_multiple_fail(base_store: Store):
+    # GIVEN a store that contains two bed versions with the same short name
+    bed: Bed = base_store.add_bed(name="bed")
+    base_store.add_bed_version(bed=bed, version=1, filename="one.txt", shortname="short_name")
+    base_store.add_bed_version(bed=bed, version=2, filename="two.txt", shortname="short_name")
+    base_store.add_item_to_store(bed)
+    base_store.commit_to_store()
+
+    # WHEN fetching the bed version corresponding to the shortname
+    # THEN an error is raised
+    with pytest.raises(MultipleResultsFound):
+        base_store.get_bed_version_by_short_name_strict(short_name="short_name")
+
+
+def test_get_bed_version_by_short_name_strict_success(base_store: Store):
+    # GIVEN a store that contains one bed version
+    bed: Bed = base_store.add_bed(name="bed")
+    base_store.add_bed_version(bed=bed, version=1, filename="one.txt", shortname="short_name")
+    base_store.add_item_to_store(bed)
+    base_store.commit_to_store()
+
+    # WHEN fetching the bed version corresponding to the shortname
+    # THEN success
+    base_store.get_bed_version_by_short_name_strict(short_name="short_name")
 
 
 def test_get_customer_by_internal_id(base_store: Store, customer_id: str):
@@ -755,28 +777,6 @@ def test_get_case_samples_by_case_id(
     assert case_samples
     assert isinstance(case_samples, list)
     assert isinstance(case_samples[0], CaseSample)
-
-
-def test_get_case_sample_link(
-    store_with_analyses_for_cases: Store,
-    case_id: str,
-    sample_id: str,
-):
-    """Test that the returned element is a CaseSample with the correct case and sample internal ids."""
-    # GIVEN a store with case-samples and valid case and sample internal ids
-
-    # WHEN fetching a case-sample with case and sample internal ids
-    case_sample: CaseSample = store_with_analyses_for_cases.get_case_sample_link(
-        case_internal_id=case_id,
-        sample_internal_id=sample_id,
-    )
-
-    # THEN the returned element is a CaseSample
-    assert isinstance(case_sample, CaseSample)
-
-    # THEN the returned family sample has the correct case and sample internal ids
-    assert case_sample.case.internal_id == case_id
-    assert case_sample.sample.internal_id == sample_id
 
 
 def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples: Store):

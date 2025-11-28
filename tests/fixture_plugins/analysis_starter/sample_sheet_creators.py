@@ -1,17 +1,46 @@
 import pytest
 
-from cg.models.cg_config import CGConfig
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
     RarediseaseSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+    RNAFusionSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
+    TaxprofilerSampleSheetCreator,
+)
+from cg.store.store import Store
 
 
 @pytest.fixture
 def raredisease_sample_sheet_creator(
-    raredisease_context: CGConfig,
+    mock_store_for_raredisease_file_creators: Store,
+    mock_housekeeper_for_nf_sample_sheet: HousekeeperAPI,
 ) -> RarediseaseSampleSheetCreator:
     return RarediseaseSampleSheetCreator(
-        store=raredisease_context.status_db,
-        housekeeper_api=raredisease_context.housekeeper_api,
-        lims=raredisease_context.lims_api,
+        store=mock_store_for_raredisease_file_creators,
+        housekeeper_api=mock_housekeeper_for_nf_sample_sheet,
+    )
+
+
+@pytest.fixture
+def rnafusion_sample_sheet_creator(
+    mock_store_for_rnafusion_file_creators: Store,
+    mock_housekeeper_for_nf_sample_sheet: HousekeeperAPI,
+) -> RNAFusionSampleSheetCreator:
+    return RNAFusionSampleSheetCreator(
+        store=mock_store_for_rnafusion_file_creators,
+        housekeeper_api=mock_housekeeper_for_nf_sample_sheet,
+    )
+
+
+@pytest.fixture
+def taxprofiler_sample_sheet_creator(
+    mock_store_for_taxprofiler_file_creators: Store,
+    mock_housekeeper_for_nf_sample_sheet: HousekeeperAPI,
+) -> TaxprofilerSampleSheetCreator:
+    return TaxprofilerSampleSheetCreator(
+        store=mock_store_for_taxprofiler_file_creators,
+        housekeeper_api=mock_housekeeper_for_nf_sample_sheet,
     )

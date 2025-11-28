@@ -5,20 +5,17 @@ import logging
 from datetime import datetime
 from typing import Callable, Iterator
 
+import sqlalchemy
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import (
-    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
-    CaseActions,
-    CustomerId,
-    SampleType,
-)
+from cg.constants.constants import DNA_WORKFLOWS_WITH_SCOUT_UPLOAD, CustomerId, SampleType
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
     AnalysisNotCompletedError,
+    BedVersionNotFoundError,
     CaseNotFoundError,
     CgDataError,
     CgError,
@@ -120,18 +117,6 @@ class ReadHandler(BaseHandler):
         return apply_case_filter(
             cases=cases_query, filter_functions=[CaseFilter.BY_ENTRY_ID], entry_id=entry_id
         ).first()
-
-    def has_active_cases_for_sample(self, internal_id: str) -> bool:
-        """Check if there are any active cases for a sample."""
-        sample = self.get_sample_by_internal_id(internal_id=internal_id)
-        active_actions = ["analyze", "running"]
-
-        for family_sample in sample.links:
-            case: Case = self.get_case_by_entry_id(entry_id=family_sample.case_id)
-            if case.action in active_actions:
-                return True
-
-        return False
 
     def get_application_by_case(self, case_id: str) -> Application:
         """Return the application of a case."""
@@ -568,19 +553,6 @@ class ReadHandler(BaseHandler):
         ).all()
         return pools + samples
 
-    def get_case_sample_link(self, case_internal_id: str, sample_internal_id: str) -> CaseSample:
-        """Return a case-sample link between a family and a sample."""
-        filter_functions: list[CaseSampleFilter] = [
-            CaseSampleFilter.SAMPLES_IN_CASE_BY_INTERNAL_ID,
-            CaseSampleFilter.CASES_WITH_SAMPLE_BY_INTERNAL_ID,
-        ]
-        return apply_case_sample_filter(
-            filter_functions=filter_functions,
-            case_samples=self._get_join_case_sample_query(),
-            case_internal_id=case_internal_id,
-            sample_internal_id=sample_internal_id,
-        ).first()
-
     def new_invoice_id(self) -> int:
         """Fetch invoices."""
         query: Query = self._get_query(table=Invoice)
@@ -789,6 +761,25 @@ class ReadHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
+    def get_case_by_internal_id_strict(self, internal_id: str) -> Case:
+        """
+        Get case by internal id.
+        Raises:
+            CaseNotFoundError: If no case is found with the given internal id.
+            sqlalchemy.orm.exc.MultipleResultsFound: If multiple cases are found with the same
+            internal id. This should not happen due to database constraints.
+        """
+        try:
+            return apply_case_filter(
+                cases=self._get_query(table=Case),
+                filter_functions=[CaseFilter.BY_INTERNAL_ID],
+                internal_id=internal_id,
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise CaseNotFoundError(
+                f"Case with internal id {internal_id} was not found in the database."
+            )
+
     def get_cases_by_internal_ids(self, internal_ids: list[str]) -> list[Case]:
         """Get cases by internal ids."""
         return apply_case_filter(
@@ -912,20 +903,19 @@ class ReadHandler(BaseHandler):
             valid_from=dt.datetime.now(),
         ).first()
 
-    def get_active_applications_by_prep_category(
+    def get_applications_by_prep_category(
         self, prep_category: SeqLibraryPrepCategory
     ) -> list[Application]:
-        """Return all active applications by prep category."""
+        """Return all applications by prep category."""
         return apply_application_filter(
             applications=self._get_query(table=Application),
             filter_functions=[
                 ApplicationFilter.BY_PREP_CATEGORIES,
-                ApplicationFilter.IS_NOT_ARCHIVED,
             ],
             prep_categories=[prep_category],
         ).all()
 
-    def get_bed_version_by_file_name(self, bed_version_file_name: str) -> BedVersion:
+    def get_bed_version_by_file_name(self, bed_version_file_name: str) -> BedVersion | None:
         """Return bed version with file name."""
         return apply_bed_version_filter(
             bed_versions=self._get_query(table=BedVersion),
@@ -940,6 +930,25 @@ class ReadHandler(BaseHandler):
             bed_version_short_name=bed_version_short_name,
             filter_functions=[BedVersionFilter.BY_SHORT_NAME],
         ).first()
+
+    def get_bed_version_by_short_name_strict(self, short_name: str) -> BedVersion:
+        """
+        Return bed version with short name.
+        Raises:
+            BedVersionNotFoundError: If no bed version is found with the given short name.
+            sqlalchemy.orm.exc.MultipleResultsFound: If multiple bed versions are found with the same
+            shortname.
+        """
+        try:
+            return apply_bed_version_filter(
+                bed_versions=self._get_query(table=BedVersion),
+                bed_version_short_name=short_name,
+                filter_functions=[BedVersionFilter.BY_SHORT_NAME],
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise BedVersionNotFoundError(
+                f"Bed version with short name {short_name} was not found in the database."
+            )
 
     def get_bed_by_entry_id(self, bed_entry_id: int) -> Bed:
         """Get panel bed with bed entry id."""
@@ -1099,15 +1108,13 @@ class ReadHandler(BaseHandler):
         )
         return records.order_by(Sample.prepared_at).all()
 
-    def get_cases_with_analyzes(self) -> Query:
-        """Return all cases in the database with an analysis."""
-        return self._get_outer_join_cases_with_analyses_query()
-
     def get_cases_with_samples(self) -> Query:
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
 
-    def get_cases_to_analyze(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
+    def get_cases_to_analyze(
+        self, workflow: Workflow = None, limit: int | None = None
+    ) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed.
         1. Get cases to be analyzed using BE query
         2. Use the latest analysis for case to determine if the case is to be analyzed"""
@@ -1159,6 +1166,23 @@ class ReadHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
+    def get_sample_by_internal_id_strict(self, internal_id: str) -> Sample:
+        """
+        Return a sample by lims id.
+        Raises:
+            SampleNotFoundError: If no sample is found with the given internal id.
+        """
+        try:
+            return apply_sample_filter(
+                filter_functions=[SampleFilter.BY_INTERNAL_ID],
+                samples=self._get_query(table=Sample),
+                internal_id=internal_id,
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise SampleNotFoundError(
+                f"Sample with internal id {internal_id} was not found in the database."
+            )
+
     def get_samples_by_identifier(self, object_type: str, identifier: str) -> list[Sample]:
         """Return all samples from a flow cell, case or sample id"""
         object_to_filter: dict[str, Callable] = {
@@ -1193,14 +1217,14 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_analyses_to_clean(
-        self, before: datetime = datetime.now(), workflow: Workflow | None = None
+        self, before: datetime, workflow: Workflow | None = None
     ) -> list[Analysis]:
         """Return analyses that haven't been cleaned."""
         filter_functions: list[Callable] = [
             AnalysisFilter.COMPLETED,
             AnalysisFilter.IS_UPLOADED,
             AnalysisFilter.IS_NOT_CLEANED,
-            AnalysisFilter.STARTED_AT_BEFORE,
+            AnalysisFilter.COMPLETED_AT_BEFORE,
             AnalysisFilter.CASE_ACTION_IS_NONE,
         ]
         if workflow:
@@ -1209,7 +1233,7 @@ class ReadHandler(BaseHandler):
             filter_functions=filter_functions,
             analyses=self._get_latest_analyses_for_cases_query(),
             workflow=workflow,
-            started_at_date=before,
+            completed_at_date=before,
         ).all()
 
     def get_completed_analyses_for_workflow_started_at_before(

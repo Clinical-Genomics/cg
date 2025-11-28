@@ -1,6 +1,5 @@
 import pytest
 
-from cg.constants.constants import MicrosaltAppTags
 from cg.meta.workflow.microsalt.metrics_parser.models import (
     MicrosaltSamtoolsStats,
     PicardMarkduplicate,
@@ -41,7 +40,7 @@ def create_quality_result(
     sample_id: str = "sample_1",
     passes_qc: bool = True,
     is_control: bool = False,
-    application_tag: str = MicrosaltAppTags.MWRNXTR003,
+    application_tag: str = "MWRNXTR003",
     passes_reads_qc: bool = True,
     passes_mapping_qc: bool = True,
     passes_duplication_qc: bool = True,
@@ -70,7 +69,7 @@ def quality_results() -> list[SampleQualityResult]:
             sample_id="sample_1",
             passes_qc=False,
             is_control=True,
-            application_tag=MicrosaltAppTags.MWRNXTR003,
+            application_tag="MWRNXTR003",
             passes_reads_qc=True,
             passes_mapping_qc=True,
             passes_duplication_qc=False,
@@ -82,7 +81,7 @@ def quality_results() -> list[SampleQualityResult]:
             sample_id="sample_2",
             passes_qc=True,
             is_control=False,
-            application_tag=MicrosaltAppTags.MWRNXTR003,
+            application_tag="MWRNXTR003",
             passes_reads_qc=True,
             passes_mapping_qc=True,
             passes_duplication_qc=True,
@@ -94,7 +93,7 @@ def quality_results() -> list[SampleQualityResult]:
             sample_id="sample_3",
             passes_qc=False,
             is_control=False,
-            application_tag=MicrosaltAppTags.MWRNXTR003,
+            application_tag="MWRNXTR003",
             passes_reads_qc=False,
             passes_mapping_qc=True,
             passes_duplication_qc=False,

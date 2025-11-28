@@ -15,9 +15,16 @@ class NfTowerStatus(StrEnum):
     UNKNOWN: str = "UNKNOWN"
 
 
-NALLO_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
+NALLO_GENERAL_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "median_coverage": {"norm": "gt", "threshold": 20},
-    "predicted_sex_sex_check": {"norm": "eq", "threshold": None},
+}
+
+NALLO_PARENT_PEDDY_METRIC_CONDITION: dict[str, dict[str, Any]] = {
+    "parent_error_ped_check": {"norm": "eq", "threshold": "False"},
+}
+
+NALLO_RAW_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
+    "somalier_sex": {"norm": "eq", "threshold": None},
 }
 
 RAREDISEASE_PREDICTED_SEX_METRIC = "predicted_sex_sex_check"

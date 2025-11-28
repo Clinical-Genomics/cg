@@ -6,7 +6,9 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from sqlalchemy.orm import Query
 
+from cg.constants import SexOptions
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
+from cg.exc import SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.server.dto.samples.requests import CollaboratorSamplesRequest
 from cg.store.models import Customer, Invoice, OrderTypeApplication, Sample
@@ -129,34 +131,6 @@ def test_get_sample_by_name(store_with_samples_that_have_names: Store, name="tes
 
     # THEN one sample should be returned
     assert samples and samples.name == name
-
-
-def test_has_active_cases_for_sample_analyze(
-    store_with_active_sample_analyze: Store,
-    sample_internal_id: str = "test_sample_internal_id",
-):
-    """Test that a sample is active."""
-    # GIVEN a store with an active case
-
-    # THEN the sample should be active
-    assert (
-        store_with_active_sample_analyze.has_active_cases_for_sample(internal_id=sample_internal_id)
-        is True
-    )
-
-
-def test_has_active_cases_for_sample_running(
-    store_with_active_sample_running: Store,
-    sample_internal_id: str = "test_sample_internal_id",
-):
-    """Test that a sample is active."""
-    # GIVEN a store with an active case
-
-    # THEN the sample should be active
-    assert (
-        store_with_active_sample_running.has_active_cases_for_sample(internal_id=sample_internal_id)
-        is True
-    )
 
 
 def test_get_samples_by_customer_and_name(
@@ -387,6 +361,40 @@ def test_get_sample_by_internal_id(sample_store, internal_id="test_internal_id")
 
     # THEN it should return the sample
     assert sample.internal_id == internal_id
+
+
+def test_get_sample_by_internal_id_strict_success(store: Store):
+    """Test fetching a sample by internal id."""
+    # GIVEN a store with a sample
+    sample: Sample = store.add_sample(
+        application_version_id=1,
+        customer_id=1,
+        internal_id="internal_id",
+        name="sample_name",
+        sex=SexOptions.FEMALE,
+    )
+    store.add_item_to_store(sample)
+    store.commit_to_store()
+
+    # WHEN finding a sample by internal id
+    sample: Sample = store.get_sample_by_internal_id_strict(internal_id="internal_id")
+
+    # THEN no error should be raised
+    # THEN a sample should be returned
+    assert isinstance(sample, Sample)
+
+    # THEN the sample should have a matching internal id
+    assert sample.internal_id == "internal_id"
+
+
+def test_get_sample_by_internal_id_strict_no_match(store: Store):
+    """Test fetching a sample by internal id."""
+    # GIVEN a store without a sample
+
+    # WHEN finding a sample by internal id
+    # THEN a NoResultFound should be raised
+    with pytest.raises(SampleNotFoundError):
+        store.get_sample_by_internal_id_strict(internal_id="internal_id")
 
 
 @pytest.mark.parametrize(

@@ -1,6 +1,9 @@
 """Raredisease Delivery Report API."""
 
+from housekeeper.store.models import File
+
 from cg.clients.chanjo2.models import CoverageMetrics
+from cg.constants.housekeeper_tags import AnalysisTag
 from cg.constants.report import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,
@@ -43,7 +46,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
         )
         return RarediseaseSampleMetadataModel(
             bait_set=self.lims_api.capture_kit(sample.internal_id),
-            duplicates=sample_metrics.percent_duplicates,
+            duplicates=round(sample_metrics.percent_duplication * 100, 2),
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
             mapped_reads=round((sample_metrics.mapped_reads / sample_metrics.total_reads) * 100, 2),
             mean_target_coverage=coverage_metrics.mean_coverage if coverage_metrics else None,
@@ -69,9 +72,10 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
         sv_vcf: str | None = self.get_scout_uploaded_file_from_hk(
             case_id=case_id, scout_key=ScoutUploadKey.VCF_SV
         )
-        vcf_str: str | None = self.get_scout_uploaded_file_from_hk(
-            case_id=case_id, scout_key=ScoutUploadKey.VCF_STR
+        vcf_str_file: File | None = self.housekeeper_api.get_latest_file(
+            bundle=case_id, tags=[AnalysisTag.VCF_STR, case_id]
         )
+        vcf_str: str | None = vcf_str_file.full_path if vcf_str_file else None
         smn_tsv: str | None = self.get_scout_uploaded_file_from_hk(
             case_id=case_id, scout_key=ScoutUploadKey.SMN_TSV
         )

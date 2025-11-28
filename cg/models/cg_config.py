@@ -22,7 +22,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.clients.arnold.api import ArnoldAPIClient
 from cg.clients.chanjo2.client import Chanjo2APIClient
 from cg.clients.janus.api import JanusAPIClient
-from cg.constants.observations import LoqusdbInstance
+from cg.constants.observations import BalsamicObservationPanel, LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
@@ -178,23 +178,40 @@ class MutaccAutoConfig(CommonAppConfig):
     padding: int = 300
 
 
+class LoqusDBDumpFiles(BaseModel):
+    artefact_sv: Path  # WGS
+    artefact_snv: Path
+    cancer_germline_snv: Path
+    cancer_somatic_snv: Path
+    cancer_somatic_sv: Path
+    clinical_snv: Path
+    clinical_sv: Path
+    cancer_somatic_snv_panels: dict[BalsamicObservationPanel, Path]  # Panel
+
+
 class BalsamicConfig(CommonAppConfig):
-    balsamic_cache: str
-    bed_path: str
-    binary_path: str
-    cadd_path: str
-    conda_binary: str
+    balsamic_cache: Path
+    bed_path: Path
+    binary_path: Path
+    cadd_path: Path
+    conda_binary: Path
     conda_env: str
-    genome_interval_path: str
-    gens_coverage_female_path: str
-    gens_coverage_male_path: str
-    gnomad_af5_path: str
-    loqusdb_path: str
-    pon_path: str
-    root: str
-    sentieon_licence_path: str
+    genome_interval_path: Path
+    gens_coverage_female_path: Path
+    gens_coverage_male_path: Path
+    gnomad_af5_path: Path
+    head_job_partition: str
+    loqusdb_path: Path
+    loqusdb_dump_files: LoqusDBDumpFiles
+    panel_of_normals: dict[str, Path]  # For TGS and Exome
+    pon_path: Path
+    root: Path
+    sentieon_licence_path: Path
+    sentieon_licence_server: str
     slurm: SlurmConfig
-    swegen_path: str
+    swegen_path: Path
+    swegen_snv: Path
+    swegen_sv: Path
 
 
 class MutantConfig(BaseModel):
@@ -224,7 +241,9 @@ class NalloConfig(CommonAppConfig):
     resources: str
     launch_directory: str
     workflow_bin_path: str
+    pre_run_script: str = ""
     profile: str
+    repository: str
     revision: str
     root: str
     slurm: SlurmConfig
@@ -261,7 +280,9 @@ class TomteConfig(CommonAppConfig):
     config: str
     resources: str
     workflow_bin_path: str
+    pre_run_script: str = ""
     profile: str
+    repository: str
     revision: str
     root: str
     slurm: SlurmConfig
@@ -278,7 +299,9 @@ class RnafusionConfig(CommonAppConfig):
     config: str
     resources: str
     launch_directory: str
+    pre_run_script: str = ""
     profile: str
+    repository: str
     revision: str
     root: str
     slurm: SlurmConfig
@@ -296,7 +319,9 @@ class TaxprofilerConfig(CommonAppConfig):
     config: str
     resources: str
     workflow_bin_path: str
+    pre_run_script: str = ""
     profile: str
+    repository: str
     revision: str
     root: str
     slurm: SlurmConfig
@@ -407,7 +432,6 @@ class CGConfig(BaseModel):
     max_flowcells: int | None = None
     nanopore_data_directory: str
     run_instruments: RunInstruments
-    sentieon_licence_server: str
     tower_binary_path: str
 
     # Base APIs that always should exist
@@ -450,6 +474,13 @@ class CGConfig(BaseModel):
     loqusdb_somatic: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC.value)
     loqusdb_tumor: CommonAppConfig = Field(None, alias=LoqusdbInstance.TUMOR.value)
     loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
+    loqusdb_somatic_lymphoid: CommonAppConfig = Field(
+        None, alias=LoqusdbInstance.SOMATIC_LYMPHOID.value
+    )
+    loqusdb_somatic_myeloid: CommonAppConfig = Field(
+        None, alias=LoqusdbInstance.SOMATIC_MYELOID.value
+    )
+    loqusdb_somatic_exome: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC_EXOME.value)
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
@@ -474,7 +505,7 @@ class CGConfig(BaseModel):
     fohm: FOHMConfig | None = None
     gisaid: GisaidConfig | None = None
     microsalt: MicrosaltConfig | None = None
-    mip_rd_dna: MipConfig | None = Field(None, alias="mip-rd-dna")
+    mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig | None = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig | None = None
     nallo: NalloConfig | None = None
