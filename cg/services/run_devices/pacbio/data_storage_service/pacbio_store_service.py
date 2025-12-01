@@ -60,13 +60,7 @@ class PacBioStoreService(PostProcessingStoreService):
             sample_dto.sample_internal_id for sample_dto in sample_run_metrics_dtos
         }
         for sample_id in sample_ids_to_update:
-            reads = sum(
-                metric.hifi_reads
-                for metric in self.store.get_pacbio_sample_sequencing_metrics(
-                    sample_id=sample_id, smrt_cell_ids=None
-                )
-            )
-            self.store.update_sample_reads_pacbio(internal_id=sample_id, reads=reads)
+            self.store.update_sample_reads_pacbio(sample_id)
             self.store.update_sample_sequenced_at(internal_id=sample_id, date=sequencing_date)
 
     @handle_post_processing_errors(
