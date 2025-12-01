@@ -114,7 +114,7 @@ class IlluminaBackupService:
         """Process a flow cell from backup. Return elapsed time."""
         start_time: float = get_start_time()
         run_dir = Path(self.sequencing_runs_dir)
-        sequencing_run_output_dir = Path(run_dir, archived_run.name.split(".")[0])
+        sequencing_run_output_dir = self._get_sequencing_run_output_dir(archived_run)
         self.retrieve_archived_key(
             archived_key=archived_key, sequencing_run=sequencing_run, run_dir=run_dir
         )
@@ -144,6 +144,14 @@ class IlluminaBackupService:
             raise error
 
         return get_elapsed_time(start_time=start_time)
+
+    def _get_sequencing_run_output_dir(self, archived_run: Path) -> Path:
+        """Return the full name of the sequencing run from the archived run path."""
+        if archived_run.as_posix().startswith("/home/proj/production/encrypt/"):
+            run_full_name: str = archived_run.parts[3]
+        else:
+            run_full_name = archived_run.name.split(".")[0]
+        return Path(self.sequencing_runs_dir, run_full_name)
 
     def unlink_files(
         self,
