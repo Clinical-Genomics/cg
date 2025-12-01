@@ -85,6 +85,7 @@ class AnalysisStarterFactory:
             Workflow.RAREDISEASE,
             Workflow.RNAFUSION,
             Workflow.TAXPROFILER,
+            Workflow.TOMTE,
         ]:
             return self._get_seqera_platform_submitter()
         else:
