@@ -146,11 +146,13 @@ class IlluminaBackupService:
         return get_elapsed_time(start_time=start_time)
 
     def _get_sequencing_run_output_dir(self, archived_run: Path) -> Path:
-        """Return the full name of the sequencing run from the archived run path."""
-        if archived_run.as_posix().startswith("/home/proj/production/encrypt/"):
-            run_full_name: str = archived_run.parts[3]
+        """Return the path to the sequencing run based on the archived run path."""
+        if archived_run.as_posix().startswith(
+            Path(self.pdc_archiving_directory.current).parent.as_posix()
+        ):
+            run_full_name: str = archived_run.parent.name
         else:
-            run_full_name = archived_run.name.split(".")[0]
+            run_full_name = archived_run.stem
         return Path(self.sequencing_runs_dir, run_full_name)
 
     def unlink_files(
