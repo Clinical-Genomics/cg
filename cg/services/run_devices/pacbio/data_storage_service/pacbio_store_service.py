@@ -56,13 +56,18 @@ class PacBioStoreService(PostProcessingStoreService):
         sequencing_date: datetime,
     ) -> None:
         """Update the reads and last sequenced date for the SMRT cell samples."""
-        for sample_dto in sample_run_metrics_dtos:
-            self.store.update_sample_reads_pacbio(
-                internal_id=sample_dto.sample_internal_id, reads=sample_dto.hifi_reads
+        sample_ids_to_update: set[str] = {
+            sample_dto.sample_internal_id for sample_dto in sample_run_metrics_dtos
+        }
+        for sample_id in sample_ids_to_update:
+            reads = sum(
+                metric.hifi_reads
+                for metric in self.store.get_pacbio_sample_sequencing_metrics(
+                    sample_id=sample_id, smrt_cell_ids=None
+                )
             )
-            self.store.update_sample_sequenced_at(
-                internal_id=sample_dto.sample_internal_id, date=sequencing_date
-            )
+            self.store.update_sample_reads_pacbio(internal_id=sample_id, reads=reads)
+            self.store.update_sample_sequenced_at(internal_id=sample_id, date=sequencing_date)
 
     @handle_post_processing_errors(
         to_except=(PostProcessingDataTransferError, ValueError),
