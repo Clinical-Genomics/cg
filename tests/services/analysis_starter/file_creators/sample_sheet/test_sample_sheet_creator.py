@@ -23,7 +23,7 @@ from cg.store.store import Store
 
 
 @pytest.mark.parametrize(
-    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER]
+    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE]
 )
 def test_nextflow_fastq_sample_sheet_creators(
     workflow: Workflow,

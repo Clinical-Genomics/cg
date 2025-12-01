@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from cg.constants import Workflow
+from cg.constants.constants import Strandedness
 from cg.constants.sequencing import SequencingPlatform
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
     HEADERS as NALLO_HEADERS,
@@ -24,6 +25,12 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
     TaxprofilerSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
+    HEADERS as TOMTE_HEADERS,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
+    TomteSampleSheetCreator,
 )
 
 
@@ -113,6 +120,21 @@ def taxprofiler_sample_sheet_expected_content(
 
 
 @pytest.fixture
+def tomte_sample_sheet_expected_content(
+    fastq_path_1: Path, fastq_path_2: Path, nextflow_case_id: str, nextflow_sample_id: str
+) -> list[list[str]]:
+    """Return the expected sample sheet content for Tomte."""
+    row: list[str] = [
+        nextflow_case_id,
+        nextflow_sample_id,
+        fastq_path_1.as_posix(),
+        fastq_path_2.as_posix(),
+        Strandedness.REVERSE,
+    ]
+    return [TOMTE_HEADERS, row]
+
+
+@pytest.fixture
 def sample_sheet_scenario(
     raredisease_sample_sheet_creator: RarediseaseSampleSheetCreator,
     raredisease_sample_sheet_expected_content: list[list[str]],
@@ -120,6 +142,8 @@ def sample_sheet_scenario(
     rnafusion_sample_sheet_expected_content: list[list[str]],
     taxprofiler_sample_sheet_creator: TaxprofilerSampleSheetCreator,
     taxprofiler_sample_sheet_expected_content: list[list[str]],
+    tomte_sample_sheet_creator: TomteSampleSheetCreator,
+    tomte_sample_sheet_expected_content: list[list[str]],
 ) -> dict:
     return {
         Workflow.RAREDISEASE: (
@@ -134,4 +158,5 @@ def sample_sheet_scenario(
             taxprofiler_sample_sheet_creator,
             taxprofiler_sample_sheet_expected_content,
         ),
+        Workflow.TOMTE: (tomte_sample_sheet_creator, tomte_sample_sheet_expected_content),
     }
