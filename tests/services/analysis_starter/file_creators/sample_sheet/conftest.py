@@ -123,7 +123,7 @@ def taxprofiler_sample_sheet_expected_content(
 def tomte_sample_sheet_expected_content(
     fastq_path_1: Path, fastq_path_2: Path, nextflow_case_id: str, nextflow_sample_id: str
 ) -> list[list[str]]:
-    """Return the expected sample sheet content for RNAFUSION."""
+    """Return the expected sample sheet content for Tomte."""
     row: list[str] = [
         nextflow_case_id,
         nextflow_sample_id,
