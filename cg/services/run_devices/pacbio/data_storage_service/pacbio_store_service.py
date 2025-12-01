@@ -57,7 +57,7 @@ class PacBioStoreService(PostProcessingStoreService):
     ) -> None:
         """Update the reads and last sequenced date for the SMRT cell samples."""
         for sample_dto in sample_run_metrics_dtos:
-            self.store.update_sample_reads(
+            self.store.update_sample_reads_pacbio(
                 internal_id=sample_dto.sample_internal_id, reads=sample_dto.hifi_reads
             )
             self.store.update_sample_sequenced_at(
