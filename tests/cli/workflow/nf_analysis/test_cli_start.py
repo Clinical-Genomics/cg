@@ -14,6 +14,7 @@ from cg.cli.workflow.nallo.base import dev_start as nallo_start
 from cg.cli.workflow.raredisease.base import start as raredisease_start
 from cg.cli.workflow.rnafusion.base import start as rnafusion_start
 from cg.cli.workflow.taxprofiler.base import start as taxprofiler_start
+from cg.cli.workflow.tomte.base import dev_start as tomte_start
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -124,8 +125,8 @@ def test_start_available(
 
 @pytest.mark.parametrize(
     "start_command",
-    [nallo_start, raredisease_start, rnafusion_start, taxprofiler_start],
-    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
+    [nallo_start, raredisease_start, rnafusion_start, taxprofiler_start, tomte_start],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte"],
 )
 def test_start_nextflow_calls_service(
     start_command: BaseCommand,

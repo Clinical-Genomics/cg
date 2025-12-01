@@ -16,6 +16,7 @@ from cg.cli.workflow.nallo.base import dev_config_case as nallo_config_case
 from cg.cli.workflow.raredisease.base import config_case as raredisease_config_case
 from cg.cli.workflow.rnafusion.base import config_case as rnafusion_config_case
 from cg.cli.workflow.taxprofiler.base import config_case as taxprofiler_config_case
+from cg.cli.workflow.tomte.base import dev_config_case as tomte_config_case
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileFormat, MetaApis
 from cg.io.controller import ReadFile
@@ -254,8 +255,14 @@ def test_config_case_dry_run(
 
 @pytest.mark.parametrize(
     "case_config_command",
-    [nallo_config_case, raredisease_config_case, rnafusion_config_case, taxprofiler_config_case],
-    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
+    [
+        nallo_config_case,
+        raredisease_config_case,
+        rnafusion_config_case,
+        taxprofiler_config_case,
+        tomte_config_case,
+    ],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte"],
 )
 def test_nextflow_case_config(
     case_config_command: BaseCommand,
