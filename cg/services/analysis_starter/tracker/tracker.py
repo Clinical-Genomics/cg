@@ -10,7 +10,7 @@ from cg.constants.constants import CaseActions, CustomerId, Workflow
 from cg.constants.priority import TrailblazerPriority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisType
-from cg.exc import AnalysisRunningError, CgError
+from cg.exc import AnalysisRunningError
 from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.store.models import Analysis, Case, Sample
@@ -140,11 +140,9 @@ class Tracker(ABC):
     def _get_job_ids_path(self, case_id: str) -> Path | None:
         pass
 
+    @abstractmethod
     def _get_out_dir_path(self, case_id: str) -> Path:
-        if ids_path := self._get_job_ids_path(case_id):
-            return ids_path.parent
-        else:
-            raise CgError(f"Cannot track case: {case_id}. Out dir path is not set")
+        pass
 
     @abstractmethod
     def _get_workflow_version(self, case_config: CaseConfig) -> str:
