@@ -8,8 +8,8 @@ from pytest_mock import MockerFixture
 from cg.cli.workflow.balsamic.base import start_available as balsamic_start_available
 from cg.cli.workflow.microsalt.base import start_available as microsalt_start_available
 from cg.cli.workflow.mip_dna.base import start_available as mip_dna_start_available
-from cg.cli.workflow.nallo.base import dev_start_available as nallo_start_available
-from cg.cli.workflow.raredisease.base import dev_start_available as raredisease_start_available
+from cg.cli.workflow.nallo.base import start_available as nallo_start_available
+from cg.cli.workflow.raredisease.base import start_available as raredisease_start_available
 from cg.cli.workflow.rnafusion.base import start_available as rnafusion_start_available
 from cg.cli.workflow.taxprofiler.base import start_available as taxprofiler_start_available
 from cg.cli.workflow.tomte.base import dev_start_available as tomte_start_available
