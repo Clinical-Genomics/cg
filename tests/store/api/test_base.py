@@ -94,7 +94,7 @@ def test_update_pacbio_sample_reads(base_store: Store, helpers: StoreHelpers):
     base_store.commit_to_store()
 
     # WHEN updating a samples reads
-    base_store.update_sample_reads_pacbio("sample_id")
+    base_store.recalculate_sample_reads_pacbio("sample_id")
 
     # THEN the sample should have updated the reads to the sum of the sample sequencing metrics
     assert base_store.get_sample_by_internal_id_strict(sample_id).reads == initial_reads + new_reads

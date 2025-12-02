@@ -60,7 +60,7 @@ class PacBioStoreService(PostProcessingStoreService):
             sample_dto.sample_internal_id for sample_dto in sample_run_metrics_dtos
         }
         for sample_id in sample_ids_to_update:
-            self.store.update_sample_reads_pacbio(sample_id)
+            self.store.recalculate_sample_reads_pacbio(sample_id)
             self.store.update_sample_sequenced_at(internal_id=sample_id, date=sequencing_date)
 
     @handle_post_processing_errors(
