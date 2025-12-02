@@ -6,7 +6,7 @@ from pathlib import Path
 from cg.apps.environ import environ_email
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.constants.constants import CaseActions, CustomerId, Workflow
+from cg.constants.constants import CaseActions, CustomerId, Workflow, WorkflowManager
 from cg.constants.priority import TrailblazerPriority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisType
@@ -80,7 +80,7 @@ class Tracker(ABC):
             ticket=ticket,
             workflow=self.store.get_case_workflow(case_id),
             workflow_manager=self._workflow_manager(),
-            tower_workflow_id=tower_workflow_id,
+            tower_workflow_id=str(tower_workflow_id) if tower_workflow_id else None,
             is_hidden=is_case_for_development,
         )
 
@@ -133,7 +133,7 @@ class Tracker(ABC):
         return case.customer.internal_id == CustomerId.CG_INTERNAL_CUSTOMER
 
     @abstractmethod
-    def _workflow_manager(self):
+    def _workflow_manager(self) -> WorkflowManager:
         pass
 
     @abstractmethod
