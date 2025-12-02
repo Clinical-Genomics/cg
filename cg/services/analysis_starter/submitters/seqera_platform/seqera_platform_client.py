@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import requests
 
@@ -17,7 +18,7 @@ class SeqeraPlatformClient:
         self.compute_environment_ids: dict[SlurmQos, str] = config.compute_environments
         self.workspace_id: int = config.workspace_id
 
-    def run_case(self, request: WorkflowLaunchRequest) -> str:
+    def launch_workflow(self, request: WorkflowLaunchRequest) -> dict:
         """Launches a case from the request and returns the workflow ID."""
         url = f"{self.base_url}/workflow/launch"
         params: dict = {"workspaceId": self.workspace_id}
@@ -25,10 +26,25 @@ class SeqeraPlatformClient:
             f"Sending request body {request.model_dump()} \n Headers: {self.auth_headers} \n Params: {params}"
         )
         response: requests.Response = requests.post(
-            url=url,
             headers=self.auth_headers,
-            params=params,
             json=request.model_dump(),
+            params=params,
+            url=url,
         )
         response.raise_for_status()
-        return response.json()["workflowId"]
+        return response.json()
+
+    def get_workflow(self, workflow_id: str) -> dict[str, Any]:
+        """Gets information about the specified workflow (the Seqera equivalent of an analysis) in Seqera."""
+        url = f"{self.base_url}/workflow/{workflow_id}"
+        params: dict = {"workspaceId": self.workspace_id}
+        LOG.debug(
+            f"Get seqera workflow with id: {workflow_id} \n Headers: {self.auth_headers} \n Params: {params}"
+        )
+        response: requests.Response = requests.get(
+            headers=self.auth_headers,
+            params=params,
+            url=url,
+        )
+        response.raise_for_status()
+        return response.json()

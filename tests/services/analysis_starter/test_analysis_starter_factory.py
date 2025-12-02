@@ -1,5 +1,6 @@
 from unittest.mock import ANY, MagicMock, Mock, create_autospec
 
+import pytest
 from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
@@ -12,9 +13,13 @@ from cg.models.cg_config import (
     MipConfig,
     NalloConfig,
     RarediseaseConfig,
+    RnafusionConfig,
     RunInstruments,
     SeqeraPlatformConfig,
+    TaxprofilerConfig,
+    TomteConfig,
 )
+from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
@@ -25,15 +30,16 @@ from cg.services.analysis_starter.factories import starter_factory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.input_fetcher.implementations.bam_fetcher import BamFetcher
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
-from cg.services.analysis_starter.service import AnalysisStarter
-from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
-from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
+from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_client import (
+    SeqeraPlatformClient,
+)
+from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_submitter import (
     SeqeraPlatformSubmitter,
 )
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.balsamic import BalsamicTracker
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
-from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
+from cg.services.analysis_starter.tracker.implementations.nextflow_tracker import NextflowTracker
 from cg.store.store import Store
 
 
@@ -119,9 +125,17 @@ def test_analysis_starter_factory_mip_dna():
     assert isinstance(analysis_starter.tracker, MIPDNATracker)
 
 
+@pytest.mark.parametrize(
+    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE]
+)
 def test_get_analysis_starter_for_workflow_nextflow_fastq(
+    nextflow_root: str,
     raredisease_config_object: RarediseaseConfig,
+    rnafusion_config_object: RnafusionConfig,
     seqera_platform_config: SeqeraPlatformConfig,
+    taxprofiler_config_object: TaxprofilerConfig,
+    tomte_config_object: TomteConfig,
+    workflow: Workflow,
     mocker: MockerFixture,
 ):
     """
@@ -138,11 +152,14 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
         CGConfig,
         data_flow=Mock(),
         raredisease=raredisease_config_object,
+        rnafusion=rnafusion_config_object,
         run_instruments=create_autospec(
             RunInstruments,
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
         ),
         seqera_platform=seqera_platform_config,
+        taxprofiler=taxprofiler_config_object,
+        tomte=tomte_config_object,
     )
 
     # GIVEN an AnalysisStarterFactory
@@ -162,7 +179,7 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
 
     # WHEN fetching the AnalysisStarter for a Nextflow workflow
     analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
-        Workflow.RAREDISEASE
+        workflow
     )
 
     # THEN the AnalysisStarter should have a Nextflow configurator
@@ -200,7 +217,7 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
         ANY,
         store=cg_config.status_db,
         trailblazer_api=cg_config.trailblazer_api,
-        workflow_root=cg_config.raredisease.root,
+        workflow_root=nextflow_root,
     )
 
 
