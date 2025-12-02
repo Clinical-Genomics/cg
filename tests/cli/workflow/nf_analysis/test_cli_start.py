@@ -10,7 +10,7 @@ from pytest_mock import MockerFixture
 
 from cg.apps.lims import LimsAPI
 from cg.cli.workflow.base import workflow as workflow_cli
-from cg.cli.workflow.nallo.base import dev_start as nallo_start
+from cg.cli.workflow.nallo.base import start as nallo_start
 from cg.cli.workflow.raredisease.base import start as raredisease_start
 from cg.cli.workflow.rnafusion.base import start as rnafusion_start
 from cg.cli.workflow.taxprofiler.base import start as taxprofiler_start
@@ -24,7 +24,7 @@ from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.TOMTE],
 )
 def test_start(
     cli_runner: CliRunner,
@@ -68,7 +68,7 @@ def test_start(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.TOMTE],
 )
 def test_start_available(
     cli_runner: CliRunner,
