@@ -175,32 +175,32 @@
   tag: vcf_snv_research_index
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_filtered.vcf.gz
+  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_clinical.vcf.gz
   step: snv_annotated_filtered
   tag: vcf_snv_clinical
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_filtered.vcf.gz.tbi
+  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_clinical.vcf.gz.tbi
   step: snv_annotated_filtered
   tag: vcf_snv_clinical_index
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked.vcf.gz
+  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked_research.vcf.gz
   step: sv_annotated_ranked
   tag: vcf_sv_research
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked.vcf.gz.tbi
+  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked_research.vcf.gz.tbi
   step: sv_annotated_ranked
   tag: vcf_sv_research_index
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked_filtered.vcf.gz
+  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked_clinical.vcf.gz
   step: sv_annotated_ranked_filtered
   tag: vcf_sv_clinical
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked_filtered.vcf.gz.tbi
+  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked_clinical.vcf.gz.tbi
   step: sv_annotated_ranked_filtered
   tag: vcf_sv_clinical_index
 - format: vcf
