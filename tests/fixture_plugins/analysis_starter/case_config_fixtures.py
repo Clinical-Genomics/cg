@@ -78,3 +78,8 @@ def rnafusion_case_config(get_nextflow_case_config_dict: Callable) -> NextflowCa
 @pytest.fixture
 def taxprofiler_case_config(get_nextflow_case_config_dict: Callable) -> NextflowCaseConfig:
     return NextflowCaseConfig(**get_nextflow_case_config_dict(workflow=Workflow.TAXPROFILER))
+
+
+@pytest.fixture
+def tomte_case_config(get_nextflow_case_config_dict: Callable) -> NextflowCaseConfig:
+    return NextflowCaseConfig(**get_nextflow_case_config_dict(workflow=Workflow.TOMTE))
