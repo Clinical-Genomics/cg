@@ -5,6 +5,15 @@ title: "Technical debt"
 labels: technical-debt
 assignees: ""
 ---
+<!--
+IMPORTANT: DO NOT WRITE ANY SENSITIVE INFORMATION IN THIS ISSUE, SUCH AS:
+- SAMPLE NAMES
+- SAMPLE INTERNAL IDS
+- CASE NAMES
+- CASE INTERNAL IDS
+- CUSTOMER INFORMATION
+-->
+
 
 ## 🧩 Technical Debt Report
 
