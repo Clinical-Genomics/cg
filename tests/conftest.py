@@ -3174,16 +3174,6 @@ def mock_deliverable(
     )
 
 
-# TODO: Remove fixtures?
-@pytest.fixture(scope="function")
-def raredisease_config(raredisease_dir: Path, raredisease_case_id: str) -> None:
-    """Create samplesheet.csv file for testing"""
-    Path.mkdir(Path(raredisease_dir, raredisease_case_id), parents=True, exist_ok=True)
-    Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet").with_suffix(
-        FileExtensions.CSV
-    ).touch(exist_ok=True)
-
-
 @pytest.fixture(scope="function")
 def raredisease_metrics_deliverables(raredisease_analysis_dir: Path) -> list[dict]:
     """Returns the content of a mock metrics deliverables file."""
