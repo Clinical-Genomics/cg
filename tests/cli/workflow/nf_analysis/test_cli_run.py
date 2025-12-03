@@ -10,10 +10,11 @@ from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
 from cg.cli.workflow.base import workflow as workflow_cli
-from cg.cli.workflow.nallo.base import dev_run as nallo_run
-from cg.cli.workflow.raredisease.base import dev_run as raredisease_run
+from cg.cli.workflow.nallo.base import run as nallo_run
+from cg.cli.workflow.raredisease.base import run as raredisease_run
 from cg.cli.workflow.rnafusion.base import run as rnafusion_run
 from cg.cli.workflow.taxprofiler.base import run as taxprofiler_run
+from cg.cli.workflow.tomte.base import dev_run as tomte_run
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
@@ -21,7 +22,7 @@ from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TAXPROFILER, Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.TOMTE],
 )
 def test_run_without_options(cli_runner: CliRunner, workflow: Workflow, request: FixtureRequest):
     """Test run command for workflow without options."""
@@ -41,7 +42,7 @@ def test_run_without_options(cli_runner: CliRunner, workflow: Workflow, request:
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.TOMTE],
 )
 def test_run_with_missing_case(
     cli_runner: CliRunner,
@@ -70,7 +71,7 @@ def test_run_with_missing_case(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.TOMTE],
 )
 def test_run_case_without_samples(
     cli_runner: CliRunner,
@@ -100,7 +101,7 @@ def test_run_case_without_samples(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.TOMTE],
 )
 def test_run_case_without_config_files(
     cli_runner: CliRunner,
@@ -127,7 +128,7 @@ def test_run_case_without_config_files(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.TOMTE],
 )
 def test_run_case_from_start_dry_run(
     cli_runner: CliRunner,
@@ -161,7 +162,7 @@ def test_run_case_from_start_dry_run(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.TOMTE],
 )
 def test_run_case_with_revision_dry_run(
     cli_runner: CliRunner,
@@ -195,7 +196,7 @@ def test_run_case_with_revision_dry_run(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.TOMTE],
 )
 def test_resume_case_dry_run(
     cli_runner: CliRunner,
@@ -228,7 +229,7 @@ def test_resume_case_dry_run(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.TOMTE],
 )
 def test_resume_case_with_missing_tower_id(
     cli_runner: CliRunner,
@@ -256,7 +257,7 @@ def test_resume_case_with_missing_tower_id(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.RAREDISEASE, Workflow.TOMTE, Workflow.NALLO],
+    [Workflow.TOMTE],
 )
 def test_resume_using_nextflow_dry_run(
     cli_runner: CliRunner,
@@ -293,8 +294,8 @@ def test_resume_using_nextflow_dry_run(
 
 @pytest.mark.parametrize(
     "run_command",
-    [nallo_run, raredisease_run, rnafusion_run, taxprofiler_run],
-    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
+    [nallo_run, raredisease_run, rnafusion_run, taxprofiler_run, tomte_run],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte"],
 )
 def test_run_nextflow_calls_service_default_flag_values(
     run_command: BaseCommand,
@@ -315,8 +316,8 @@ def test_run_nextflow_calls_service_default_flag_values(
 
 @pytest.mark.parametrize(
     "run_command",
-    [nallo_run, raredisease_run, rnafusion_run, taxprofiler_run],
-    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
+    [nallo_run, raredisease_run, rnafusion_run, taxprofiler_run, tomte_run],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte"],
 )
 def test_run_nextflow_calls_service_all_flags_set(
     run_command: BaseCommand,

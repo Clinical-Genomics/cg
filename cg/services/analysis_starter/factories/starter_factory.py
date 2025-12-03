@@ -85,6 +85,7 @@ class AnalysisStarterFactory:
             Workflow.RAREDISEASE,
             Workflow.RNAFUSION,
             Workflow.TAXPROFILER,
+            Workflow.TOMTE,
         ]:
             return self._get_seqera_platform_submitter()
         else:
@@ -103,6 +104,7 @@ class AnalysisStarterFactory:
             Workflow.RAREDISEASE,
             Workflow.RNAFUSION,
             Workflow.TAXPROFILER,
+            Workflow.TOMTE,
         ]:
             return NextflowTracker(
                 store=self.store,
@@ -131,3 +133,5 @@ class AnalysisStarterFactory:
                 trailblazer_api=self.cg_config.trailblazer_api,
                 workflow_root=self.cg_config.mip_rd_dna.root,
             )
+        else:
+            raise NotImplementedError(f"No {workflow} tracker")
