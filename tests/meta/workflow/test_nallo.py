@@ -1,3 +1,4 @@
+from cg.constants import SexOptions
 from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
@@ -48,4 +49,10 @@ def test_parse_analysis(
     analysis_model: NextflowAnalysis = analysis_api.parse_analysis(qc_metrics)
 
     # THEN the analysis model and its content should have been correctly extracted
-    assert analysis_model.sample_metrics[sample_id].model_dump() == rnafusion_metrics
+    assert analysis_model.sample_metrics[sample_id].model_dump() == {
+        "avg_sequence_length": 12792.931765117017,
+        "coverage_bases": 99366056494.0,
+        "median_coverage": 33.0,
+        "percent_duplicates": 1.7232745723252236,
+        "predicted_sex_sex_check": SexOptions.FEMALE,
+    }
