@@ -186,7 +186,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
     ) -> MetricsBase | None:
         """Return the parsed metrics for pedigree error given a concatenated pair of sample ids."""
         metric_name: str = "parent_error_ped_check"
-        peddy_metrics: dict[str, dict] = multiqc_raw_data["multiqc_peddy"]
+        peddy_metrics: dict[str, dict] = multiqc_raw_data["multiqc_peddy"]  # TODO update this
         if sample_pair_metrics := peddy_metrics.get(pair_sample_ids, None):
             return self.get_multiqc_metric(
                 metric_name=metric_name,

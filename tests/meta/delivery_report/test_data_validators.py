@@ -15,9 +15,11 @@ from cg.meta.delivery_report.data_validators import (
     get_million_read_pairs,
     get_missing_report_data,
 )
+from cg.meta.delivery_report.nallo import NalloDeliveryReportAPI
 from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
 from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
 from cg.meta.delivery_report.tomte import TomteDeliveryReportAPI
+from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
@@ -27,6 +29,7 @@ from cg.models.orders.sample_base import SexEnum
 from cg.store.models import Analysis, Application, ApplicationVersion, Case, CaseSample, Sample
 from cg.store.store import Store
 from tests.meta.delivery_report.conftest import (
+    EXPECTED_NALLO_QC,
     EXPECTED_RNAFUSION_QC_TABLE_WTS,
     EXPECTED_TOMTE_QC_TABLE_WTS,
 )
@@ -218,6 +221,80 @@ def test_get_delivery_report_html_tomte(tomte_analysis: NextflowAnalysis):
 
     # THEN the report is generated as expected
     assert EXPECTED_TOMTE_QC_TABLE_WTS in delivery_report
+
+
+def test_get_delivery_report_html_nallo(nallo_analysis: NextflowAnalysis):
+    # GIVEN a store with a Nallo case linked to a sample
+    application_version = create_autospec(
+        ApplicationVersion, application=create_autospec(Application)
+    )
+    sample: Sample = create_autospec(
+        Sample,
+        sex=SexEnum.female,
+        internal_id="sample_id",
+        application_version=application_version,
+        is_tumour=False,
+    )
+    sample.name = "sample_name"
+    case: Case = create_autospec(
+        Case,
+        data_analysis=Workflow.NALLO,
+        data_delivery=DataDelivery.ANALYSIS_FILES,
+        internal_id="case_id",
+        sample=[sample],
+        panels=["some_panel"],
+    )
+
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id = Mock(return_value=case)
+    case_sample = create_autospec(CaseSample, sample=sample, case=case)
+    store.get_case_samples_by_case_id = Mock(return_value=[case_sample])
+
+    # GIVEN a Delivery API
+    delivery_api: DeliveryAPI = create_autospec(DeliveryAPI)
+    delivery_api.is_analysis_delivery = Mock(return_value=True)
+    delivery_api.get_analysis_case_delivery_files = Mock(
+        return_value=[
+            create_autospec(
+                DeliveryFile, destination_path=Path("destination"), source_path=Path("source")
+            )
+        ]
+    )
+
+    # GIVEN a LIMS API
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.has_sample_passed_initial_qc = Mock(return_value=True)
+
+    # GIVEN a Nallo Analysis API
+    analysis_api = create_autospec(
+        NalloAnalysisAPI,
+        chanjo_api=create_autospec(ChanjoAPI),
+        delivery_api=delivery_api,
+        housekeeper_api=create_autospec(HousekeeperAPI),
+        lims_api=lims_api,
+        scout_api=create_autospec(ScoutAPI),
+        status_db=store,
+        workflow=Workflow.NALLO,
+    )
+
+    analysis_api.get_latest_metadata = Mock(return_value=nallo_analysis)
+
+    # GIVEN a Nallo delivery report API
+    delivery_report_api = NalloDeliveryReportAPI(analysis_api)
+
+    # WHEN generating a delivery report
+    delivery_report: str = delivery_report_api.get_delivery_report_html(
+        create_autospec(
+            Analysis,
+            comment="some comment",
+            workflow=Workflow.NALLO,
+            workflow_version="1.0.0",
+        ),
+        force=False,
+    )
+
+    # THEN the report is generated as expected
+    assert EXPECTED_NALLO_QC in delivery_report
 
 
 def test_get_missing_report_data(

@@ -52,7 +52,7 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
             median_coverage=sample_metrics.median_coverage,
             million_read_pairs=get_million_read_pairs(sample.reads),
             pct_10x=coverage_metrics.coverage_completeness_percent if coverage_metrics else None,
-            sex=sample_metrics.predicted_sex_sex_check,
+            sex=sample_metrics.sex,
         )
 
     def is_report_accredited(
