@@ -10,12 +10,8 @@ from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
     OPTION_RESUME,
     OPTION_REVISION,
-    config_case,
     metrics_deliver,
     report_deliver,
-    run,
-    start,
-    start_available,
     store,
     store_available,
     store_housekeeper,
@@ -41,10 +37,6 @@ def tomte(context: click.Context) -> None:
 
 
 tomte.add_command(resolve_compression)
-tomte.add_command(config_case)
-tomte.add_command(run)
-tomte.add_command(start)
-tomte.add_command(start_available)
 tomte.add_command(metrics_deliver)
 tomte.add_command(report_deliver)
 tomte.add_command(store_housekeeper)
@@ -52,10 +44,10 @@ tomte.add_command(store)
 tomte.add_command(store_available)
 
 
-@tomte.command("dev-config-case")
+@tomte.command("config-case")
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_config_case(cg_config: CGConfig, case_id: str):
+def config_case(cg_config: CGConfig, case_id: str):
     """
     Configure a Tomte case so that it is ready to be run. \b
     Creates the following files in the case run directory:
@@ -69,12 +61,12 @@ def dev_config_case(cg_config: CGConfig, case_id: str):
     configurator.configure(case_id=case_id)
 
 
-@tomte.command("dev-run")
+@tomte.command("run")
 @OPTION_REVISION
 @OPTION_RESUME
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None) -> None:
+def run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None) -> None:
     """
     Run a preconfigured Tomte case. \b
     Assumes that the following files exist in the case run directory:
@@ -88,11 +80,11 @@ def dev_run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | Non
     analysis_starter.run(case_id=case_id, resume=resume, revision=revision)
 
 
-@tomte.command("dev-start")
+@tomte.command("start")
 @OPTION_REVISION
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def dev_start(cg_config: CGConfig, case_id: str, revision: str | None):
+def start(cg_config: CGConfig, case_id: str, revision: str | None):
     """
     Start a Tomte case. \b
     Configures the case and writes the following files:
@@ -107,9 +99,9 @@ def dev_start(cg_config: CGConfig, case_id: str, revision: str | None):
     analysis_starter.start(case_id=case_id, revision=revision)
 
 
-@tomte.command("dev-start-available")
+@tomte.command("start-available")
 @click.pass_obj
-def dev_start_available(cg_config: CGConfig):
+def start_available(cg_config: CGConfig):
     """Starts all available Tomte cases."""
     LOG.info("Starting Tomte workflow for all available cases.")
     factory = AnalysisStarterFactory(cg_config)
