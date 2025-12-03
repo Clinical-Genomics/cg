@@ -123,11 +123,32 @@ def test_update_sample_reads_pacbio(
     reads: int = 10000
 
     # WHEN updating the reads for the sample
-    store.update_sample_reads(internal_id=pacbio_barcoded_sample_internal_id, reads=reads)
+    store.update_sample_reads_pacbio(internal_id=pacbio_barcoded_sample_internal_id, reads=reads)
 
     # THEN the reads for the sample is updated
     sample: Sample = store.get_sample_by_internal_id(pacbio_barcoded_sample_internal_id)
     assert sample.reads == reads
+
+
+def test_update_sample_reads_pacbio_not_incremented(
+    pacbio_barcoded_sample_internal_id: str,
+    store: Store,
+    helpers: StoreHelpers,
+):
+    """Tests that updating the reads for a PacBio sample does not increment the reads."""
+    # GIVEN a store with a PacBio sample with reads
+    sample: Sample = helpers.add_sample(store=store, internal_id=pacbio_barcoded_sample_internal_id)
+    sample.reads = 1
+    new_reads = 10000
+
+    # WHEN updating the reads for the sample
+    store.update_sample_reads_pacbio(
+        internal_id=pacbio_barcoded_sample_internal_id, reads=new_reads
+    )
+
+    # THEN the reads for the sample are updated
+    sample: Sample = store.get_sample_by_internal_id_strict(pacbio_barcoded_sample_internal_id)
+    assert sample.reads == new_reads
 
 
 @pytest.mark.parametrize(
