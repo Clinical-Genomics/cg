@@ -3174,6 +3174,7 @@ def mock_deliverable(
     )
 
 
+# TODO: Remove fixtures?
 @pytest.fixture(scope="function")
 def raredisease_config(raredisease_dir: Path, raredisease_case_id: str) -> None:
     """Create samplesheet.csv file for testing"""
