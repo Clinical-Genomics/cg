@@ -44,7 +44,7 @@ def test_decompress_case(compress_api: CompressAPI):
     # GIVEN a decompress_spring method that is mocked
     compress_api.decompress_spring = Mock()
     # WHEN decompressing the case
-    compress_api.decompress_case(case.as_type)
+    compress_api.decompress_case(case)
 
     # THEN the method to decompress spring is called for each sample in the case
     assert compress_api.decompress_spring.call_count == 3
