@@ -28,6 +28,11 @@
   path: PATHTOCASE/qc_bam/SAMPLEID.d4
   step: qc_bam
   tag: d4tools_d4
+- format: meta
+  id: SAMPLEID
+  path: PATHTOCASE/qc_bam/SAMPLEID_sambamba_depth.bed
+  step: qc_bam
+  tag: sambamba_depth
 - format: png
   id: SAMPLEID
   path: PATHTOCASE/qc_bam/SAMPLEID_chromographcov/SAMPLEID_tidditcov_1.png
