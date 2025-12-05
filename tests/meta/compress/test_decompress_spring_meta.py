@@ -1,11 +1,10 @@
 """Test do decompress a spring archive"""
 
 import logging
-from unittest.mock import Mock
+from unittest.mock import Mock, create_autospec
 
 from cg.meta.compress import CompressAPI
 from cg.store.models import Case, Sample
-from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_decompress_spring(populated_decompress_spring_api, compression_files, sample, caplog):
@@ -37,16 +36,14 @@ def test_decompress_spring(populated_decompress_spring_api, compression_files, s
 def test_decompress_case(compress_api: CompressAPI):
     """Test that decompressing a case attempts to decompress all samples in the case"""
     # GIVEN a case with three samples
-    sample_1 = create_typed_mock(Sample)
-    sample_2 = create_typed_mock(Sample)
-    sample_3 = create_typed_mock(Sample)
-    case: TypedMock[Case] = create_typed_mock(
-        Case, samples=[sample_1.as_type, sample_2.as_type, sample_3.as_type]
-    )
+    sample_1: Sample = create_autospec(Sample)
+    sample_2: Sample = create_autospec(Sample)
+    sample_3: Sample = create_autospec(Sample)
+    case: Case = create_autospec(Case, samples=[sample_1, sample_2, sample_3])
 
     # GIVEN a decompress_spring method that is mocked
     compress_api.decompress_spring = Mock()
-    # WHEN
+    # WHEN decompressing the case
     compress_api.decompress_case(case.as_type)
 
     # THEN the method to decompress spring is called for each sample in the case
