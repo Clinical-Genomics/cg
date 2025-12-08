@@ -1,5 +1,6 @@
 from enum import StrEnum
 from pathlib import Path
+from typing import Annotated
 
 from pydantic import BaseModel, BeforeValidator, field_validator
 
@@ -27,7 +28,7 @@ class NalloQCMetrics(QCMetrics):
     coverage_bases: float | None
     median_coverage: float | None
     percent_duplicates: float | None
-    sex: [SexOptions, BeforeValidator(convert_sex)]
+    sex: Annotated[SexOptions, BeforeValidator(convert_sex)]
 
 
 class NalloSampleSheetEntry(BaseModel):

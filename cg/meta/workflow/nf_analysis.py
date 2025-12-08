@@ -733,12 +733,7 @@ class NfAnalysisAPI(AnalysisAPI):
     ) -> list[MetricsBase]:
         """Parse a MultiqcDataJson and returns a list of metrics."""
         metrics: list[MetricsBase] = []
-        dict_list = copy.deepcopy(multiqc_json.report_general_stats_data)
-        dict_list.append(
-            multiqc_json.report_saved_raw_data["multiqc_somalier"]
-        )  # TODO - only do this for Nallo
-
-        for section in dict_list:
+        for section in multiqc_json.report_general_stats_data:
             for subsection, metrics_dict in section.items():
                 if self._is_pattern_found(
                     pattern=search_pattern, text=subsection, exact_match=exact_match

@@ -36,7 +36,6 @@ def test_parse_analysis(
     nallo_case_id: str,
     sample_id: str,
     nallo_multiqc_json_metrics: dict,
-    rnafusion_metrics: dict,
     nallo_mock_analysis_finish,
 ):
     """Test Nallo output analysis files parsing."""
