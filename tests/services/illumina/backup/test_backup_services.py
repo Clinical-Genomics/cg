@@ -666,3 +666,9 @@ def test_backup_illumina_run_when_unable_to_archive(
                 store=base_store,
                 sequencing_run=sequencing_run,
             )
+
+def test_process_run_current():
+    # GIVEN an Illumina backup service
+    # GIVEN an Illumina sequencing run
+    # WHEN calling _process_run on a flow cell that is archived in the 'current' archiving location
+    # THEN

@@ -115,7 +115,7 @@ class IlluminaBackupService:
         start_time: float = get_start_time()
         run_dir = Path(self.sequencing_runs_dir)
         is_current: bool = self._is_archiving_directory_current(archived_run)
-        sequencing_run_output_dir = self._get_sequencing_run_output_dir(
+        sequencing_run_output_dir: Path = self._get_sequencing_run_output_dir(
             archived_run=archived_run, is_current=is_current
         )
         self.retrieve_archived_key(
