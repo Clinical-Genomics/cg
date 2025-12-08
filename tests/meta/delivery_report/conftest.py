@@ -2,7 +2,6 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from cg.constants import SexOptions
 from cg.models.analysis import NextflowAnalysis
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.config import (
@@ -151,7 +150,7 @@ def nallo_analysis() -> NextflowAnalysis:
                 coverage_bases=0.1,
                 median_coverage=0.1,
                 percent_duplicates=0.1,
-                predicted_sex_sex_check=SexOptions.FEMALE,
+                sex=2.0,  # TODO is there a way to type hint this correctly?
             )
         }
     )
