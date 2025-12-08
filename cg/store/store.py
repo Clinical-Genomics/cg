@@ -11,7 +11,7 @@ class Store(
     UpdateMixin,
 ):
     def recalculate_sample_reads_pacbio(self, sample_id: str) -> None:
-        reads = sum(
+        reads: int = sum(
             metric.hifi_reads
             for metric in self.get_pacbio_sample_sequencing_metrics(
                 sample_id=sample_id, smrt_cell_ids=None
