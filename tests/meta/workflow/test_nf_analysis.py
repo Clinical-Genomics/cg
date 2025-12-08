@@ -20,7 +20,6 @@ from tests.cli.workflow.conftest import deliverables_template_content
         Workflow.RNAFUSION,
         Workflow.TAXPROFILER,
         Workflow.TOMTE,
-        Workflow.NALLO,
     ],
 )
 def test_create_metrics_deliverables_content(
@@ -48,6 +47,28 @@ def test_create_metrics_deliverables_content(
 
     # THEN assert that the content created is correct
     assert metrics_deliverables_content == metrics_deliverables
+
+
+def test_create_metrics_deliverables_content_nallo(
+    nallo_case_id: str,
+    nallo_context: CGConfig,
+    nallo_metrics_deliverables: dict,
+    nallo_mock_analysis_finish,
+):
+    """Test metrics deliverables file content function for nextflow pipelines."""
+
+    # GIVEN a Nallo context and Nallo case id
+
+    # GIVEN a Nextflow workflow analysis API and a list of QC metrics
+    analysis_api: NfAnalysisAPI = nallo_context.meta_apis["analysis_api"]
+
+    # WHEN writing the metrics deliverables file
+    metrics_deliverables_content: dict[str, list[dict[str, Any]]] = (
+        analysis_api.create_metrics_deliverables_content(nallo_case_id)
+    )
+
+    # THEN assert that the content created is correct
+    assert metrics_deliverables_content == nallo_metrics_deliverables
 
 
 @pytest.mark.parametrize(
