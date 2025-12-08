@@ -6,6 +6,7 @@ from typing import Callable
 
 import mock
 import pytest
+from pytest_mock import MockerFixture
 
 from cg.constants import EXIT_FAIL, SequencingRunDataAvailability
 from cg.exc import (
@@ -15,6 +16,7 @@ from cg.exc import (
     PdcError,
 )
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
+from cg.services.illumina.backup import backup_service
 from cg.services.illumina.backup.backup_service import IlluminaBackupService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.backup.utils import (
@@ -398,6 +400,56 @@ def test_fetch_sequencing_run_integration(
     assert result > 0
 
 
+def test_fetch_sequencing_run_integration_current(
+    cg_context,
+    store_with_illumina_sequencing_data: Store,
+    novaseq_x_flow_cell_id: str,
+    dsmc_q_archive_output,
+    caplog,
+    mocker: MockerFixture,
+):
+    """Component integration test for the BackupAPI, fetching a specified sequencing run."""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN we want to retrieve a specific sequencing run from PDC
+    backup_api = IlluminaBackupService(
+        encryption_api=mock.Mock(),
+        pdc_archiving_directory=cg_context.illumina_backup_service.pdc_archiving_directory,
+        status_db=store_with_illumina_sequencing_data,
+        tar_api=mock.Mock(),
+        pdc_service=mock.Mock(),
+        sequencing_runs_dir=cg_context.run_instruments.illumina.sequencing_runs_dir,
+    )
+    sequencing_run: IlluminaSequencingRun = (
+        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+            novaseq_x_flow_cell_id
+        )
+    )
+    sequencing_run.data_availability = SequencingRunDataAvailability.REQUESTED
+
+    mocker.patch.object(IlluminaBackupService, "unlink_files")
+    mocker.patch.object(IlluminaBackupService, "create_rta_complete")
+    mocker.patch.object(IlluminaBackupService, "create_copy_complete")
+    mocker.patch.object(
+        IlluminaBackupService, "query_pdc_for_sequencing_run", return_value=dsmc_q_archive_output
+    )
+    mocker.patch.object(backup_service, "get_latest_archived_sequencing_run_path")
+    mocker.patch.object(backup_service, "get_latest_archived_encryption_key_path")
+
+    backup_api.tar_api.run_tar_command.return_value = None
+    result = backup_api.fetch_sequencing_run(sequencing_run=sequencing_run)
+
+    # THEN the process to retrieve the sequencing run from PDC is started
+    assert "retrieving from PDC" in caplog.text
+
+    # AND when done the status of that sequencing run is set to "retrieved"
+    assert sequencing_run.data_availability == SequencingRunDataAvailability.RETRIEVED
+
+    # AND the elapsed time of the retrieval process is returned
+    assert result > 0
+
+
 def test_validate_is_sequencing_run_backup_possible(
     base_store: Store,
     caplog,
@@ -667,8 +719,10 @@ def test_backup_illumina_run_when_unable_to_archive(
                 sequencing_run=sequencing_run,
             )
 
+
 def test_process_run_current():
     # GIVEN an Illumina backup service
     # GIVEN an Illumina sequencing run
     # WHEN calling _process_run on a flow cell that is archived in the 'current' archiving location
     # THEN
+    pass
