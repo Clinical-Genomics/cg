@@ -11,11 +11,13 @@ from cg.constants import Workflow
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
     creator as samplesheet_creator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import nallo
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
+    nallo_sample_sheet_creator as nallo,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowFastqSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo_sample_sheet_creator import (
     NalloSampleSheetCreator,
 )
 from cg.store.models import CaseSample, Sample

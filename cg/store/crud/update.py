@@ -78,10 +78,10 @@ class UpdateMixin(ReadHandler):
         sample.reads = total_reads_for_sample
         self.commit_to_store()
 
-    def update_sample_reads(self, internal_id: str, reads: int):
+    def update_sample_reads_pacbio(self, internal_id: str, reads: int):
         """Add reads to the current reads for a sample."""
-        sample: Sample = self.get_sample_by_internal_id(internal_id)
-        sample.reads += reads
+        sample: Sample = self.get_sample_by_internal_id_strict(internal_id)
+        sample.reads = reads
         self.commit_to_store()
 
     def update_sample_sequenced_at(self, internal_id: str, date: datetime):
