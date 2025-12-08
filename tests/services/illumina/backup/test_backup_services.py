@@ -15,6 +15,7 @@ from cg.exc import (
     IlluminaRunEncryptionError,
     PdcError,
 )
+from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.services.illumina.backup import backup_service
 from cg.services.illumina.backup.backup_service import IlluminaBackupService
@@ -27,6 +28,7 @@ from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
 from tests.conftest import create_process_response
+from tests.typed_mock import create_typed_mock
 
 
 @pytest.mark.parametrize(
@@ -417,7 +419,7 @@ def test_fetch_sequencing_run_integration_current(
         encryption_api=mock.Mock(),
         pdc_archiving_directory=cg_context.illumina_backup_service.pdc_archiving_directory,
         status_db=store_with_illumina_sequencing_data,
-        tar_api=mock.Mock(),
+        tar_api=create_typed_mock(TarAPI).as_type,
         pdc_service=mock.Mock(),
         sequencing_runs_dir=cg_context.run_instruments.illumina.sequencing_runs_dir,
     )
@@ -437,6 +439,12 @@ def test_fetch_sequencing_run_integration_current(
     mocker.patch.object(backup_service, "get_latest_archived_sequencing_run_path")
     mocker.patch.object(backup_service, "get_latest_archived_encryption_key_path")
 
+    # GO MY SPIES
+    is_archiving_run_directory_current_spy = mocker.spy(
+        backup_api, "_is_archiving_run_directory_current"
+    )
+    get_sequencing_run_output_dir_spy = mocker.spy(backup_api, "get_sequencing_run_output_dir")
+
     backup_api.tar_api.run_tar_command.return_value = None
     result = backup_api.fetch_sequencing_run(sequencing_run=sequencing_run)
 
@@ -448,6 +456,12 @@ def test_fetch_sequencing_run_integration_current(
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0
+
+    # THEN _is_archiving_run_directory_current() returns true
+    is_archiving_run_directory_current_spy
+    # THEN get_sequencing_run_output_dir() should have been called with 'is_current'=True
+
+    # THEN get_extract_file_command() should have been called with 'is_current'=True
 
 
 def test_validate_is_sequencing_run_backup_possible(
