@@ -114,7 +114,10 @@ class IlluminaBackupService:
         """Process a flow cell from backup. Return elapsed time."""
         start_time: float = get_start_time()
         run_dir = Path(self.sequencing_runs_dir)
-        sequencing_run_output_dir = self._get_sequencing_run_output_dir(archived_run)
+        is_current: bool = self._is_archiving_directory_current(archived_run)
+        sequencing_run_output_dir = self._get_sequencing_run_output_dir(
+            archived_run=archived_run, is_current=is_current
+        )
         self.retrieve_archived_key(
             archived_key=archived_key, sequencing_run=sequencing_run, run_dir=run_dir
         )
@@ -131,7 +134,9 @@ class IlluminaBackupService:
             ) = self.decrypt_sequencing_run(
                 archived_run=archived_run, archived_key=archived_key, run_dir=run_dir
             )
-            self.extract_sequencing_run(decrypted_run=decrypted_run, run_dir=run_dir)
+            self.extract_sequencing_run(
+                decrypted_run=decrypted_run, is_current=is_current, run_dir=run_dir
+            )
             self.create_rta_complete(sequencing_run_output_dir)
             self.create_copy_complete(sequencing_run_output_dir)
             self.unlink_files(decrypted_run, encryption_key, retrieved_run, retrieved_key)
@@ -146,9 +151,9 @@ class IlluminaBackupService:
 
         return get_elapsed_time(start_time=start_time)
 
-    def _get_sequencing_run_output_dir(self, archived_run: Path) -> Path:
+    def _get_sequencing_run_output_dir(self, archived_run: Path, is_current: bool) -> Path:
         """Return the path to the sequencing run based on the archived run path."""
-        if self._is_archiving_directory_current(archived_run):
+        if is_current:
             run_full_name: str = archived_run.parent.name
         else:
             run_full_name = archived_run.stem
@@ -199,12 +204,12 @@ class IlluminaBackupService:
         """Create a CopyComplete.txt file in the flow cell run directory."""
         Path(flow_cell_directory, DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
 
-    def extract_sequencing_run(self, decrypted_run: Path, run_dir: Path) -> None:
+    def extract_sequencing_run(self, decrypted_run: Path, is_current: bool, run_dir: Path) -> None:
         """Extract the sequencing run tar archive."""
         extraction_command: list[str] = self.tar_api.get_extract_file_command(
             input_file=decrypted_run,
             output_dir=run_dir,
-            is_current=self._is_archiving_directory_current(),
+            is_current=is_current,
         )
         LOG.debug(f"Extract sequencing run command: {extraction_command}")
         self.tar_api.run_tar_command(extraction_command)
