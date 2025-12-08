@@ -1,6 +1,10 @@
 """Test do decompress a spring archive"""
 
 import logging
+from unittest.mock import Mock, create_autospec
+
+from cg.meta.compress import CompressAPI
+from cg.store.models import Case, Sample
 
 
 def test_decompress_spring(populated_decompress_spring_api, compression_files, sample, caplog):
@@ -27,3 +31,20 @@ def test_decompress_spring(populated_decompress_spring_api, compression_files, s
     assert res is True
     # THEN assert that the correct information is communicated
     assert f"Decompressing {spring_path} to FASTQ format for sample {sample}" in caplog.text
+
+
+def test_decompress_case(compress_api: CompressAPI):
+    """Test that decompressing a case attempts to decompress all samples in the case"""
+    # GIVEN a case with three samples
+    sample_1: Sample = create_autospec(Sample)
+    sample_2: Sample = create_autospec(Sample)
+    sample_3: Sample = create_autospec(Sample)
+    case: Case = create_autospec(Case, samples=[sample_1, sample_2, sample_3])
+
+    # GIVEN a decompress_spring method that is mocked
+    compress_api.decompress_spring = Mock()
+    # WHEN decompressing the case
+    compress_api.decompress_case(case)
+
+    # THEN the method to decompress spring is called for each sample in the case
+    assert compress_api.decompress_spring.call_count == 3
