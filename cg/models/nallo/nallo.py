@@ -2,7 +2,7 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Annotated
 
-from pydantic import BaseModel, BeforeValidator, field_validator
+from pydantic import BaseModel, BeforeValidator, Field, field_validator
 
 from cg.constants import SexOptions
 from cg.exc import NfSampleSheetError
@@ -28,7 +28,7 @@ class NalloQCMetrics(QCMetrics):
     coverage_bases: float | None
     median_coverage: float | None
     percent_duplicates: float | None
-    sex: Annotated[SexOptions, BeforeValidator(convert_sex)]
+    sex: Annotated[SexOptions, BeforeValidator(convert_sex)] = Field(alias="somalier_sex")
 
 
 class NalloSampleSheetEntry(BaseModel):

@@ -245,7 +245,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         """Parse a MultiqcDataJson and returns a list of metrics."""
         metrics: list[MetricsBase] = []
         dict_list = copy.deepcopy(multiqc_json.report_general_stats_data)
-        dict_list.append(multiqc_json.report_saved_raw_data["multiqc_somalier"])
+        dict_list.append(self._get_somalier_dict(multiqc_json))
 
         for section in dict_list:
             for subsection, metrics_dict in section.items():
@@ -258,6 +258,13 @@ class NalloAnalysisAPI(NfAnalysisAPI):
                         )
                         metrics.append(metric)
         return metrics
+
+    def _get_somalier_dict(self, multiqc_json: MultiqcDataJson) -> dict[str, Any]:
+        somalier_raw = copy.deepcopy(multiqc_json.report_saved_raw_data["multiqc_somalier"])
+        for sample_id, value in somalier_raw.items():
+            for metric_key, metric_value in value.items():
+                somalier_raw[sample_id].update({f"somalier_{metric_key}": metric_value})
+        return somalier_raw
 
     @staticmethod
     def set_somalier_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:

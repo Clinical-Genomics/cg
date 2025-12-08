@@ -28,7 +28,12 @@
         },
         {
             "ADM1": {
-                "predicted_sex_sex_check": "male"
+                "family_id": "nallo",
+                "paternal_id": 0.0,
+                "maternal_id": 0.0,
+                "sex": 1.0,
+                "predicted_sex_sex_check": "male",
+                "phenotype": 2.0
             }
         }
     ],
