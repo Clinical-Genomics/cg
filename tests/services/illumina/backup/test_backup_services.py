@@ -4,7 +4,7 @@ import fnmatch
 import logging
 from pathlib import Path
 from typing import Callable
-from unittest.mock import ANY, create_autospec
+from unittest.mock import ANY, Mock, create_autospec
 
 import mock
 import pytest
@@ -437,22 +437,29 @@ def test_fetch_sequencing_run_integration_current(
         ),
     )
 
+    status_db: Store = create_autospec(Store)
+    sequencing_run: IlluminaSequencingRun = create_autospec(
+        IlluminaSequencingRun, data_availability=SequencingRunDataAvailability.REQUESTED
+    )
+    status_db.get_illumina_sequencing_run_by_device_internal_id = Mock(return_value=sequencing_run)
+
     # GIVEN we want to retrieve a specific sequencing run from PDC
     tar_api: TypedMock[TarAPI] = create_typed_mock(TarAPI)
     backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
         pdc_archiving_directory=cg_config.illumina_backup_service.pdc_archiving_directory,
-        status_db=store_with_illumina_sequencing_data,
+        status_db=status_db,
         tar_api=tar_api.as_type,
         pdc_service=mock.Mock(),
         sequencing_runs_dir=cg_config.run_instruments.illumina.sequencing_runs_dir,
     )
-    sequencing_run: IlluminaSequencingRun = (
-        store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
-            novaseq_x_flow_cell_id
-        )  # TODO: Autospec this store
-    )
-    sequencing_run.data_availability = SequencingRunDataAvailability.REQUESTED
+    # TODO
+    # sequencing_run: IlluminaSequencingRun = (
+    #     store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
+    #         novaseq_x_flow_cell_id
+    #     )  # TODO: Autospec this store
+    # )
+    # sequencing_run.data_availability = SequencingRunDataAvailability.REQUESTED
 
     mocker.patch.object(IlluminaBackupService, "unlink_files")
     mocker.patch.object(IlluminaBackupService, "create_rta_complete")
@@ -466,7 +473,6 @@ def test_fetch_sequencing_run_integration_current(
     )
     mocker.patch.object(backup_service, "get_latest_archived_encryption_key_path")
 
-    # GO MY SPIES
     get_sequencing_run_output_dir_spy = mocker.spy(backup_api, "_get_sequencing_run_output_dir")
 
     # WHEN fetching the sequencing run from PDC
