@@ -35,10 +35,9 @@ class Tracker(ABC):
     def track(
         self,
         case_config: CaseConfig,
-        tower_workflow_id: str | None = None,
     ) -> None:
         tb_analysis: TrailblazerAnalysis = self._track_in_trailblazer(
-            case_id=case_config.case_id, tower_workflow_id=tower_workflow_id
+            case_id=case_config.case_id, tower_workflow_id=case_config.get_workflow_id()
         )
         LOG.info(
             f"Analysis entry for case {case_config.case_id} created in Trailblazer with id {tb_analysis.id}"
@@ -59,7 +58,7 @@ class Tracker(ABC):
         self.store.update_case_action(case_internal_id=case_id, action=None)
 
     def _track_in_trailblazer(
-        self, case_id: str, tower_workflow_id: int | None
+        self, case_id: str, tower_workflow_id: str | None
     ) -> TrailblazerAnalysis:
         analysis_type: str = self._get_analysis_type(case_id)
         config_path: Path | None = self._get_job_ids_path(case_id)
@@ -90,19 +89,20 @@ class Tracker(ABC):
         """Storing an analysis bundle in StatusDB for a provided case."""
         case_id: str = case_config.case_id
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
-        case: Case = self.store.get_case_by_internal_id(case_id)
+        case: Case = self.store.get_case_by_internal_id_strict(case_id)
         is_primary: bool = len(case.analyses) == 0
         analysis_start: datetime = datetime.now()
         workflow_version: str = self._get_workflow_version(case_config)
         new_analysis: Analysis = self.store.add_analysis(
+            case=case,
             workflow=Workflow(case.data_analysis),
             version=workflow_version,
             completed_at=None,
             primary=is_primary,
+            session_id=case_config.get_session_id(),
             started_at=analysis_start,
             trailblazer_id=trailblazer_id,
         )
-        new_analysis.case = case
         self.store.add_item_to_store(new_analysis)
         self.store.commit_to_store()
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
@@ -112,7 +112,7 @@ class Tracker(ABC):
         Return the analysis type for sample.
         Only analysis types supported by Trailblazer are valid outputs.
         """
-        sample: Sample = self.store.get_case_by_internal_id(case_id).samples[0]
+        sample: Sample = self.store.get_case_by_internal_id_strict(case_id).samples[0]
         prep_category: str = sample.prep_category
         if prep_category and prep_category.lower() in {
             SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
@@ -125,11 +125,11 @@ class Tracker(ABC):
 
     def _get_trailblazer_priority(self, case_id: str) -> TrailblazerPriority:
         """Get the priority for the case in Trailblazer."""
-        case: Case = self.store.get_case_by_internal_id(internal_id=case_id)
+        case: Case = self.store.get_case_by_internal_id_strict(internal_id=case_id)
         return MAP_TO_TRAILBLAZER_PRIORITY[case.priority]
 
     def _is_case_for_development(self, case_id: str) -> bool:
-        case: Case = self.store.get_case_by_internal_id(case_id)
+        case: Case = self.store.get_case_by_internal_id_strict(case_id)
         return case.customer.internal_id == CustomerId.CG_INTERNAL_CUSTOMER
 
     @abstractmethod

@@ -1,23 +1,23 @@
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import cast
-from unittest.mock import ANY, create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 import requests
 from pytest_mock import MockerFixture
-from requests import Response
+from requests import HTTPError, Response
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.cli.workflow.base import workflow
 from cg.constants import Workflow
 from cg.constants.priority import Priority, SlurmQos
-from cg.exc import AnalysisNotReadyError
+from cg.exc import AnalysisNotReadyError, SeqeraError
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import creator
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion_sample_sheet_creator import (
     RNAFusionSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
@@ -32,22 +32,32 @@ from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseC
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
-from cg.services.analysis_starter.service import AnalysisStarter
-from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
+from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_submitter import (
     SeqeraPlatformSubmitter,
 )
+from cg.services.analysis_starter.submitters.submitter import Submitter
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.balsamic import BalsamicTracker
 from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
-from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
+from cg.services.analysis_starter.tracker.implementations.nextflow_tracker import NextflowTracker
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
 @pytest.fixture
-def analysis_starter_scenario() -> dict:
+def nextflow_case_config_with_session_id_and_workflow_id() -> NextflowCaseConfig:
+    case_config: NextflowCaseConfig = create_autospec(NextflowCaseConfig)
+    case_config.get_session_id = Mock(return_value="session_id")
+    case_config.get_workflow_id = Mock(return_value="workflow_id")
+    return case_config
+
+
+@pytest.fixture
+def analysis_starter_scenario(
+    nextflow_case_config_with_session_id_and_workflow_id: NextflowCaseConfig,
+) -> dict:
     """
     Return a dict with mocks for configurator, case_config, submitter, tracker and submit return
     value for testing the analysis starter for each pipeline.
@@ -58,42 +68,42 @@ def analysis_starter_scenario() -> dict:
             create_autospec(BalsamicCaseConfig),
             create_autospec(SubprocessSubmitter),
             create_autospec(BalsamicTracker),
-            None,
+            create_autospec(BalsamicCaseConfig),
         ),
         Workflow.MICROSALT: (
             create_autospec(MicrosaltConfigurator),
             create_autospec(MicrosaltCaseConfig),
             create_autospec(SubprocessSubmitter),
             create_autospec(MicrosaltTracker),
-            None,
+            create_autospec(MicrosaltCaseConfig),
         ),
         Workflow.MIP_DNA: (
             create_autospec(MIPDNAConfigurator),
             create_autospec(MIPDNACaseConfig),
             create_autospec(SubprocessSubmitter),
             create_autospec(MIPDNATracker),
-            None,
+            create_autospec(MIPDNACaseConfig),
         ),
         Workflow.RNAFUSION: (
             create_autospec(NextflowConfigurator),
             create_autospec(NextflowCaseConfig),
             create_autospec(SeqeraPlatformSubmitter),
             create_autospec(NextflowTracker),
-            "tower_id",
+            nextflow_case_config_with_session_id_and_workflow_id,
         ),
         Workflow.RAREDISEASE: (
             create_autospec(NextflowConfigurator),
             create_autospec(NextflowCaseConfig),
             create_autospec(SeqeraPlatformSubmitter),
             create_autospec(NextflowTracker),
-            "tower_id",
+            nextflow_case_config_with_session_id_and_workflow_id,
         ),
         Workflow.TAXPROFILER: (
             create_autospec(NextflowConfigurator),
             create_autospec(NextflowCaseConfig),
             create_autospec(SeqeraPlatformSubmitter),
             create_autospec(NextflowTracker),
-            "tower_id",
+            nextflow_case_config_with_session_id_and_workflow_id,
         ),
     }
 
@@ -134,12 +144,16 @@ def test_analysis_starter_start_available_error_handling(
     mock_case: Case = create_autospec(Case)
     mock_store.as_mock.get_cases_to_analyze.return_value = [mock_case]
 
+    # GIVEN a Submitter
+    submitter: Submitter = create_autospec(Submitter)
+    submitter.submit = Mock(return_value=("session_id", "workflow_id"))
+
     # GIVEN an analysis starter
     analysis_starter = AnalysisStarter(
         configurator=create_autospec(NextflowConfigurator),
         input_fetcher=create_autospec(FastqFetcher),
         store=mock_store.as_type,
-        submitter=create_autospec(SeqeraPlatformSubmitter),
+        submitter=submitter,
         tracker=create_autospec(NextflowTracker),
         workflow=workflow,
     )
@@ -160,6 +174,7 @@ def test_rnafusion_start(
     cg_context: CGConfig,
     http_workflow_launch_response: Response,
     mocker: MockerFixture,
+    http_get_workflow_response: Response,
 ):
     # GIVEN a case_id
     case_id: str = "case_id"
@@ -178,23 +193,23 @@ def test_rnafusion_start(
     # GIVEN a case with appropriate parameters set
     mock_sample: Sample = create_autospec(Sample)
     mock_case: Case = create_autospec(Case, samples=[mock_sample])
-    mock_store.get_case_by_internal_id.return_value = mock_case
+    mock_store.get_case_by_internal_id_strict = Mock(return_value=mock_case)
     mock_case.priority = Priority.standard
     mock_case.data_analysis = Workflow.RNAFUSION
 
     # GIVEN that the case is not downsampled nor external
-    mock_store.is_case_down_sampled.return_value = False
-    mock_store.is_case_external.return_value = False
+    mock_store.is_case_down_sampled = Mock(return_value=False)
+    mock_store.is_case_external = Mock(return_value=False)
 
     # GIVEN that the case has a priority and a workflow
-    mock_store.get_case_priority.return_value = SlurmQos.NORMAL
-    mock_store.get_case_workflow.return_value = Workflow.RNAFUSION
+    mock_store.get_case_priority = Mock(return_value=SlurmQos.NORMAL)
+    mock_store.get_case_workflow = Mock(return_value=Workflow.RNAFUSION)
 
     # GIVEN that no analysis is running for the case
     mocker.patch.object(TrailblazerAPI, "is_latest_analysis_ongoing", return_value=False)
 
     # GIVEN that the flow cells are on disk
-    mock_store.are_all_illumina_runs_on_disk.return_value = True
+    mock_store.are_all_illumina_runs_on_disk = Mock(return_value=True)
 
     # GIVEN that there are no archived spring files
     mocker.patch.object(HousekeeperAPI, "get_archived_files_for_bundle", return_value=[])
@@ -230,6 +245,13 @@ def test_rnafusion_start(
         return_value=http_workflow_launch_response,
     )
 
+    # GIVEN that the GET to the submitter is successful
+    get_workflow_mock = mocker.patch.object(
+        requests,
+        "get",
+        return_value=http_get_workflow_response,
+    )
+
     # GIVEN that the Trailblazer tracking is successful
     tb_analysis = create_autospec(TrailblazerAnalysis)
     tb_analysis.id = 1
@@ -249,6 +271,7 @@ def test_rnafusion_start(
 
     # THEN the case should have been submitted and tracked
     submit_mock.assert_called_once()
+    get_workflow_mock.assert_called_once()
     track_mock.assert_called_once()
 
 
@@ -275,7 +298,7 @@ def test_start(
     flags: dict[str, str] = {"flag1": "value1", "flag2": "value2"}
 
     # GIVEN a mock configurator, case config, submitter, tracker, and tower_id
-    mock_configurator, mock_case_config, mock_submitter, mock_tracker, tower_id = (
+    mock_configurator, mock_case_config, mock_submitter, mock_tracker, submit_result = (
         analysis_starter_scenario[workflow]
     )
 
@@ -288,8 +311,8 @@ def test_start(
     # GIVEN a Store
     mock_store: Store = create_autospec(Store)
 
-    # GIVEN that the submitter returns a tower_id or None when submitting the analysis
-    mock_submitter.submit.return_value = tower_id
+    # GIVEN that the submitter returns a (session id and tower id) or None when submitting the analysis
+    mock_submitter.submit = Mock(return_value=submit_result)
 
     # GIVEN an analysis starter initialised with the previously mocked classes
     analysis_starter = AnalysisStarter(
@@ -310,9 +333,7 @@ def test_start(
     mock_configurator.configure.assert_called_once_with(case_id=case_id, **flags)
     mock_tracker.set_case_as_running.assert_called_once_with(case_id)
     mock_submitter.submit.assert_called_once_with(mock_case_config)
-    mock_tracker.track.assert_called_once_with(
-        case_config=mock_case_config, tower_workflow_id=tower_id
-    )
+    mock_tracker.track.assert_called_once_with(case_config=submit_result)
 
 
 @pytest.mark.parametrize(
@@ -321,12 +342,11 @@ def test_start(
         Workflow.BALSAMIC,
         Workflow.MICROSALT,
         Workflow.MIP_DNA,
-        Workflow.RNAFUSION,
-        Workflow.RAREDISEASE,
-        Workflow.TAXPROFILER,
     ],
 )
-def test_start_error_raised_in_run_and_track(workflow: Workflow, analysis_starter_scenario: dict):
+def test_start_subprocess_error_raised_in_run_and_track(
+    workflow: Workflow, analysis_starter_scenario: dict
+):
     """Test that an error raised in submitting the analysis job is handled correctly."""
     # GIVEN a case_id
     case_id: str = "case_id"
@@ -357,6 +377,40 @@ def test_start_error_raised_in_run_and_track(workflow: Workflow, analysis_starte
 
 
 @pytest.mark.parametrize(
+    "error_type",
+    [HTTPError, SeqeraError],
+)
+def test_start_seqera_related_error_raised_in_run_and_track(error_type: type[Exception]):
+    """Test that an error raised in submitting the analysis job is handled correctly."""
+    # GIVEN a case_id
+    case_id: str = "case_id"
+
+    # GIVEN a submitter and a tracker
+    submitter: SeqeraPlatformSubmitter = create_autospec(SeqeraPlatformSubmitter)
+    tracker: TypedMock[NextflowTracker] = create_typed_mock(NextflowTracker)
+
+    # GIVEN an analysis starter
+    analysis_starter = AnalysisStarter(
+        configurator=create_autospec(NextflowConfigurator),
+        input_fetcher=create_autospec(FastqFetcher),
+        store=create_autospec(Store),
+        submitter=submitter,
+        tracker=tracker.as_type,
+        workflow=Workflow.RAREDISEASE,
+    )
+
+    # GIVEN that the submitter raises an error when submitting the analysis job
+    submitter.submit = Mock(side_effect=error_type)
+
+    # WHEN the case is started
+    with pytest.raises(error_type):
+        analysis_starter.start(case_id)
+
+    # THEN the error is propagated and the case should be set as not running
+    tracker.as_mock.set_case_as_not_running.assert_called_once_with(case_id)
+
+
+@pytest.mark.parametrize(
     "workflow",
     [
         Workflow.BALSAMIC,
@@ -376,9 +430,11 @@ def test_run(
     case_id: str = "case_id"
 
     # GIVEN a mock configurator, submitter, tracker, and case config
-    mock_configurator, mock_case_config, mock_submitter, mock_tracker, _ = (
+    mock_configurator, mock_case_config, mock_submitter, mock_tracker, submit_result = (
         analysis_starter_scenario[workflow]
     )
+
+    mock_submitter.submit = Mock(return_value=submit_result)
 
     # GIVEN that the get_config method from the configurator returns the mock case config
     mock_configurator.get_config.return_value = mock_case_config
@@ -406,4 +462,4 @@ def test_run(
     mock_submitter.submit.assert_called_once_with(mock_case_config)
 
     # THEN the tracker should track the case
-    mock_tracker.track.assert_called_once_with(case_config=mock_case_config, tower_workflow_id=ANY)
+    mock_tracker.track.assert_called_once_with(case_config=submit_result)

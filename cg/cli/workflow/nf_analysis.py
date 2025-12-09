@@ -24,11 +24,10 @@ OPTION_WORKDIR = click.option(
 )
 OPTION_RESUME = click.option(
     "--resume",
-    is_flag=True,
-    default=False,
+    default=True,
     show_default=True,
-    help="Execute the script using the cached results, useful to continue \
-        executions that was stopped by an error",
+    help="Execute the script using the cached results, useful to continue "
+    "executions that were stopped by an error",
 )
 OPTION_PROFILE = click.option(
     "--profile",

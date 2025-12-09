@@ -1,51 +1,60 @@
-from typing import cast
+from datetime import datetime
+from pathlib import Path
+from unittest.mock import Mock, create_autospec
 
-import mock
 import pytest
 
 from cg.apps.environ import environ_email
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
+from cg.constants import Priority
 from cg.constants.constants import Workflow, WorkflowManager
+from cg.constants.priority import SlurmQos
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisType
-from cg.models.cg_config import CGConfig, RarediseaseConfig
-from cg.models.orders.sample_base import StatusEnum
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
-from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
-from cg.store.models import Case, CaseSample, Customer, Order
+from cg.services.analysis_starter.tracker.implementations.nextflow_tracker import NextflowTracker
+from cg.store.models import Case, Customer, Sample
 from cg.store.store import Store
-from tests.store_helpers import StoreHelpers
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
-@pytest.fixture
-def nextflow_tracker(cg_context: CGConfig, helpers: StoreHelpers, raredisease_case_id: str):
-    store: Store = cg_context.status_db
-    customer: Customer = store.get_customers()[0]
-    order: Order = store.add_order(customer=customer, ticket_id=1)
-    store.add_item_to_store(order)
-    store.commit_to_store()
-    case: Case = helpers.ensure_case(
-        case_id=raredisease_case_id, data_analysis=Workflow.RAREDISEASE, order=order, store=store
+@pytest.mark.freeze_time
+def test_nextflow_tracker():
+    # GIVEN a store with a raredisease case
+    case_id = "case_id"
+    ticket_id = 666666
+    store: TypedMock[Store] = create_typed_mock(Store)
+    sample: Sample = create_autospec(
+        Sample, prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
     )
-    sample = helpers.add_sample(store=store, application_type=AnalysisType.WGS)
-    case_sample: CaseSample = store.relate_sample(
-        sample=sample, case=case, status=StatusEnum.unknown
+    case: Case = create_autospec(
+        Case,
+        customer=create_autospec(Customer, internal_id="cust000"),
+        data_analysis=Workflow.RAREDISEASE,
+        slurm_priority=SlurmQos.NORMAL,
+        priority=Priority.standard,
+        samples=[sample],
     )
-    store.add_multiple_items_to_store([case, sample, case_sample])
-    store.commit_to_store()
-    return NextflowTracker(
-        store=cg_context.status_db,
-        trailblazer_api=cg_context.trailblazer_api,
-        workflow_root=cast(RarediseaseConfig, cg_context.raredisease).root,
+    store.as_type.get_case_by_internal_id_strict = Mock(return_value=case)
+    store.as_type.get_case_workflow = Mock(return_value=Workflow.RAREDISEASE)
+    store.as_type.get_latest_ticket_from_case = Mock(return_value=ticket_id)
+
+    # GIVEN a TrailblazerAPI
+    trailblazer_entry_id = 123456
+    tb_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
+    tb_submitter = tb_api.add_pending_analysis = Mock(
+        return_value=create_autospec(TrailblazerAnalysis, id=trailblazer_entry_id)
     )
 
+    # GIVEN a NextflowTracker
+    nextflow_tracker = NextflowTracker(
+        store=store.as_type, trailblazer_api=tb_api, workflow_root="some-root"
+    )
 
-def test_nextflow_tracker(
-    cg_context: CGConfig, nextflow_tracker: NextflowTracker, raredisease_case_id: str
-):
-    # GIVEN a raredisease case
-    case: Case = cast(Case, nextflow_tracker.store.get_case_by_internal_id(raredisease_case_id))
+    # GIVEN a NextflowCaseConfig for raredisease
     case_config = NextflowCaseConfig(
-        case_id=raredisease_case_id,
+        case_id=case_id,
         workflow=Workflow.RAREDISEASE,
         case_priority=case.slurm_priority,
         config_profiles=[],
@@ -54,42 +63,40 @@ def test_nextflow_tracker(
         pipeline_repository="github/raredisease",
         pre_run_script="pre_run_script",
         revision="1.0.0",
+        session_id="session-abc-666",
         work_dir="work/dir",
+        workflow_id="1",
     )
 
-    # GIVEN a root directory is set
-    root_directory: str = cast(RarediseaseConfig, cg_context.raredisease).root
-
-    # WHEN wanting to track the started microSALT analysis
-    with mock.patch.object(
-        TrailblazerAPI,
-        "query_trailblazer",
-        return_value={
-            "id": 123456,
-            "logged_at": "",
-            "started_at": "",
-            "completed_at": "",
-            "out_dir": "",
-            "config_path": "",
-        },
-    ) as request_submitter:
-        nextflow_tracker.track(case_config=case_config, tower_workflow_id="1")
+    # WHEN wanting to track the started raredisease analysis
+    nextflow_tracker.track(case_config=case_config)
 
     # THEN the appropriate POST should have been sent
+    config_path: Path = nextflow_tracker._get_job_ids_path(case_id)
     expected_request_body: dict = {
-        "case_id": raredisease_case_id,
+        "analysis_type": AnalysisType.WGS,
+        "case_id": case_id,
         "email": environ_email(),
-        "type": AnalysisType.WGS,
         "config_path": None,
         "order_id": case.latest_order.id,
-        "out_dir": f"{root_directory}/{raredisease_case_id}",
-        "priority": nextflow_tracker._get_trailblazer_priority(raredisease_case_id),
-        "workflow": Workflow.RAREDISEASE.upper(),
-        "ticket": str(case.latest_order.ticket_id),
+        "out_dir": config_path.parent.as_posix(),
+        "priority": nextflow_tracker._get_trailblazer_priority(case_id),
+        "workflow": Workflow.RAREDISEASE,
+        "ticket": ticket_id,
         "workflow_manager": WorkflowManager.Tower,
         "tower_workflow_id": "1",
         "is_hidden": True,
     }
-    request_submitter.assert_called_with(
-        command="add-pending-analysis", request_body=expected_request_body
+    tb_submitter.assert_called_once_with(**expected_request_body)
+
+    # THEN an analysis was created in StatusDB
+    store.as_mock.add_analysis.assert_called_once_with(
+        case=case,
+        completed_at=None,
+        primary=True,
+        session_id="session-abc-666",
+        started_at=datetime.now(),
+        trailblazer_id=trailblazer_entry_id,
+        version="1.0.0",
+        workflow=Workflow.RAREDISEASE,
     )
