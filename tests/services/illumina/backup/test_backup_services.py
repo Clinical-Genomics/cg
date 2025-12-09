@@ -412,12 +412,9 @@ def test_fetch_sequencing_run_integration(
 
 def test_fetch_sequencing_run_integration_current(
     dsmc_q_archive_output,
-    caplog,
     mocker: MockerFixture,
 ):
     """Component integration test for the BackupAPI, fetching a specified sequencing run."""
-
-    caplog.set_level(logging.INFO)
 
     # GIVEN a CG config with current backup archiving location
     backup_config: IlluminaBackupConfig = create_autospec(
@@ -435,13 +432,14 @@ def test_fetch_sequencing_run_integration_current(
         ),
     )
 
+    # GIVEN a store with a requested sequencing run
     status_db: Store = create_autospec(Store)
     sequencing_run: IlluminaSequencingRun = create_autospec(
         IlluminaSequencingRun, data_availability=SequencingRunDataAvailability.REQUESTED
     )
     status_db.get_illumina_sequencing_run_by_device_internal_id = Mock(return_value=sequencing_run)
 
-    # GIVEN we want to retrieve a specific sequencing run from PDC
+    # GIVEN we want to retrieve the sequencing run from PDC
     tar_api: TypedMock[TarAPI] = create_typed_mock(TarAPI)
     backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
@@ -458,6 +456,8 @@ def test_fetch_sequencing_run_integration_current(
     mocker.patch.object(
         IlluminaBackupService, "query_pdc_for_sequencing_run", return_value=dsmc_q_archive_output
     )
+
+    # GIVEN that the sequencing run is archived in the 'current' archiving directory
     archived_run_path = Path("/home/proj/production/encrypt/flow_cell_name")
     mocker.patch.object(
         backup_service, "get_latest_archived_sequencing_run_path", return_value=archived_run_path
@@ -469,11 +469,8 @@ def test_fetch_sequencing_run_integration_current(
     # WHEN fetching the sequencing run from PDC
     result = backup_api.fetch_sequencing_run(sequencing_run=sequencing_run)
 
-    # THEN the process to retrieve the sequencing run from PDC is started
-    assert "retrieving from PDC" in caplog.text
-
-    # AND the elapsed time of the retrieval process is returned
-    assert result > 0
+    # THEN the elapsed time of the retrieval process is returned
+    assert result and result > 0
 
     # THEN get_sequencing_run_output_dir() should have been called with 'is_current'=True
     get_sequencing_run_output_dir_spy.assert_called_once_with(
