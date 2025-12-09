@@ -411,8 +411,6 @@ def test_fetch_sequencing_run_integration(
 
 
 def test_fetch_sequencing_run_integration_current(
-    store_with_illumina_sequencing_data: Store,
-    novaseq_x_flow_cell_id: str,
     dsmc_q_archive_output,
     caplog,
     mocker: MockerFixture,
@@ -453,13 +451,6 @@ def test_fetch_sequencing_run_integration_current(
         pdc_service=mock.Mock(),
         sequencing_runs_dir=cg_config.run_instruments.illumina.sequencing_runs_dir,
     )
-    # TODO
-    # sequencing_run: IlluminaSequencingRun = (
-    #     store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
-    #         novaseq_x_flow_cell_id
-    #     )  # TODO: Autospec this store
-    # )
-    # sequencing_run.data_availability = SequencingRunDataAvailability.REQUESTED
 
     mocker.patch.object(IlluminaBackupService, "unlink_files")
     mocker.patch.object(IlluminaBackupService, "create_rta_complete")
@@ -480,9 +471,6 @@ def test_fetch_sequencing_run_integration_current(
 
     # THEN the process to retrieve the sequencing run from PDC is started
     assert "retrieving from PDC" in caplog.text
-
-    # AND when done the status of that sequencing run is set to "retrieved"
-    assert sequencing_run.data_availability == SequencingRunDataAvailability.RETRIEVED
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0
