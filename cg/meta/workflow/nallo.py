@@ -236,12 +236,12 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         return metrics
 
     def _get_list_of_metric_dicts(self, multiqc_json: MultiqcDataJson) -> list[dict[str, Any]]:
-        if list := multiqc_json.report_general_stats_data:
-            list_copy = copy.deepcopy(list)
-            list_copy.append(self._get_somalier_dict(multiqc_json))
-            return list_copy
-        else:
-            raise ValueError("No report_general_stats_data found in MultiqcDataJson")
+        metric_dicts: list[dict[str, Any]] = super()._get_list_of_metric_dicts(multiqc_json)
+
+        list_copy: list[dict[str, Any]] = copy.deepcopy(metric_dicts)
+        list_copy.append(self._get_somalier_dict(multiqc_json))
+
+        return list_copy
 
     def _get_somalier_dict(self, multiqc_json: MultiqcDataJson) -> dict[str, Any]:
         somalier_raw = copy.deepcopy(multiqc_json.report_saved_raw_data["multiqc_somalier"])
