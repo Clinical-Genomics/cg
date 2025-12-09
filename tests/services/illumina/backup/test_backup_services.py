@@ -411,7 +411,6 @@ def test_fetch_sequencing_run_integration(
 
 
 def test_fetch_sequencing_run_integration_current(
-    cg_context,  # TODO: replace this for a more simple cg_context if possible
     store_with_illumina_sequencing_data: Store,
     novaseq_x_flow_cell_id: str,
     dsmc_q_archive_output,
@@ -423,18 +422,18 @@ def test_fetch_sequencing_run_integration_current(
     caplog.set_level(logging.INFO)
 
     # GIVEN a CG config with current backup archiving location
-    backup_config = create_autospec(
+    backup_config: IlluminaBackupConfig = create_autospec(
         IlluminaBackupConfig,
         pdc_archiving_directory=create_autospec(
             PDCArchivingDirectory, current="/home/proj/production/encrypt"
         ),
     )
-    cg_context = create_autospec(
+    cg_config: CGConfig = create_autospec(
         CGConfig,
         illumina_backup_service=backup_config,
         run_instruments=create_autospec(
             RunInstruments,
-            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+            illumina=create_autospec(IlluminaConfig, sequencing_runs_dir="some_dir"),
         ),
     )
 
@@ -442,11 +441,11 @@ def test_fetch_sequencing_run_integration_current(
     tar_api: TypedMock[TarAPI] = create_typed_mock(TarAPI)
     backup_api = IlluminaBackupService(
         encryption_api=mock.Mock(),
-        pdc_archiving_directory=cg_context.illumina_backup_service.pdc_archiving_directory,
+        pdc_archiving_directory=cg_config.illumina_backup_service.pdc_archiving_directory,
         status_db=store_with_illumina_sequencing_data,
         tar_api=tar_api.as_type,
         pdc_service=mock.Mock(),
-        sequencing_runs_dir=cg_context.run_instruments.illumina.sequencing_runs_dir,
+        sequencing_runs_dir=cg_config.run_instruments.illumina.sequencing_runs_dir,
     )
     sequencing_run: IlluminaSequencingRun = (
         store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
@@ -468,9 +467,6 @@ def test_fetch_sequencing_run_integration_current(
     mocker.patch.object(backup_service, "get_latest_archived_encryption_key_path")
 
     # GO MY SPIES
-    is_archiving_run_directory_current_spy = mocker.spy(
-        backup_api, "_is_archiving_directory_current"
-    )
     get_sequencing_run_output_dir_spy = mocker.spy(backup_api, "_get_sequencing_run_output_dir")
 
     # WHEN fetching the sequencing run from PDC
@@ -485,8 +481,6 @@ def test_fetch_sequencing_run_integration_current(
     # AND the elapsed time of the retrieval process is returned
     assert result > 0
 
-    # THEN _is_archiving_run_directory_current() returns true
-    # assert is_archiving_run_directory_current_spy.return_value is True
     # THEN get_sequencing_run_output_dir() should have been called with 'is_current'=True
     get_sequencing_run_output_dir_spy.assert_called_once_with(
         archived_run=archived_run_path, is_current=True
