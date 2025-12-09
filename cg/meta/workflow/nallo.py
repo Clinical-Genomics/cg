@@ -235,29 +235,13 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         metrics = self.get_deduplicated_metrics(metrics=metrics)
         return metrics
 
-    def get_metrics_from_multiqc_json_with_pattern(
-        self,
-        search_pattern: str,
-        multiqc_json: MultiqcDataJson,
-        metric_id: str,
-        exact_match: bool = False,
-    ) -> list[MetricsBase]:
-        """Parse a MultiqcDataJson and returns a list of metrics."""
-        metrics: list[MetricsBase] = []
-        dict_list = copy.deepcopy(multiqc_json.report_general_stats_data)
-        dict_list.append(self._get_somalier_dict(multiqc_json))
-
-        for section in dict_list:
-            for subsection, metrics_dict in section.items():
-                if self._is_pattern_found(
-                    pattern=search_pattern, text=subsection, exact_match=exact_match
-                ):
-                    for metric_name, metric_value in metrics_dict.items():
-                        metric: MetricsBase = self.get_multiqc_metric(
-                            metric_name=metric_name, metric_value=metric_value, metric_id=metric_id
-                        )
-                        metrics.append(metric)
-        return metrics
+    def _get_list_of_metric_dicts(self, multiqc_json: MultiqcDataJson) -> list[dict[str, Any]]:
+        if list := multiqc_json.report_general_stats_data:
+            list_copy = copy.deepcopy(list)
+            list_copy.append(self._get_somalier_dict(multiqc_json))
+            return list_copy
+        else:
+            raise ValueError("No report_general_stats_data found in MultiqcDataJson")
 
     def _get_somalier_dict(self, multiqc_json: MultiqcDataJson) -> dict[str, Any]:
         somalier_raw = copy.deepcopy(multiqc_json.report_saved_raw_data["multiqc_somalier"])
