@@ -10,7 +10,6 @@ from _pytest.logging import LogCaptureFixture
 from cg.constants import Workflow
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
-from tests.cli.workflow.conftest import deliverables_template_content
 
 
 @pytest.mark.parametrize(
@@ -105,4 +104,7 @@ def test_get_formatted_file_deliverable(
         )
 
         # THEN assert that the new path is correct
+        assert "get_case_path" in formatted_file_deliverable.path
+        # THEN assert that the new path is correct
+        assert "get_case_path" in formatted_file_deliverable.path
         assert "get_case_path" in formatted_file_deliverable.path

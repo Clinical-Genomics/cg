@@ -28,7 +28,7 @@ class NalloQCMetrics(QCMetrics):
     coverage_bases: float | None
     median_coverage: float | None
     percent_duplicates: float | None
-    sex: Annotated[SexOptions, BeforeValidator(convert_sex)] = Field(alias="somalier_sex")
+    predicted_sex: Annotated[SexOptions, BeforeValidator(convert_sex)] = Field(alias="somalier_sex")
 
 
 class NalloSampleSheetEntry(BaseModel):

@@ -2,12 +2,15 @@
 
 import datetime
 import shutil
+from collections.abc import Generator
 from pathlib import Path
 
 import pytest
 
+from cg.apps.crunchy.crunchy import CrunchyAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.constants.constants import CaseActions, MicrosaltQC, Workflow
+from cg.constants.constants import CaseActions, FileExtensions, MicrosaltQC, Workflow
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -15,7 +18,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.compression_data import CompressionData
 from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Case, Sample
-from tests.meta.compress.conftest import compress_api
 from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
@@ -25,6 +27,43 @@ from tests.store_helpers import StoreHelpers
 def analysis_api_balsamic(cg_context: CGConfig) -> MockBalsamicAnalysis:
     """BALSAMIC ReportAPI fixture."""
     return MockBalsamicAnalysis(cg_context)
+
+
+@pytest.fixture
+def compress_api(
+    illumina_demultiplexed_runs_directory: Path,
+    real_crunchy_api: CrunchyAPI,
+    housekeeper_api: HousekeeperAPI,
+    project_dir: Path,
+) -> Generator[CompressAPI, None, None]:
+    """Return Compress API."""
+    yield CompressAPI(
+        crunchy_api=real_crunchy_api, hk_api=housekeeper_api, demux_root=project_dir.as_posix()
+    )
+
+
+@pytest.fixture(scope="session")
+def deliverables_template_content() -> list[dict]:
+    return [
+        {
+            "format": "yml",
+            "id": "CASEID",
+            "path": Path("PATHTOCASE", "pipeline_info", "software_versions.yml").as_posix(),
+            "path_index": None,
+            "step": "software-versions",
+            "tag": "software-versions",
+        },
+        {
+            "format": "json",
+            "id": "CASEID",
+            "path": Path("PATHTOCASE", "multiqc", "multiqc_data", "multiqc_data")
+            .with_suffix(FileExtensions.JSON)
+            .as_posix(),
+            "path_index": None,
+            "step": "multiqc-json",
+            "tag": "multiqc-json",
+        },
+    ]
 
 
 @pytest.fixture(scope="function")

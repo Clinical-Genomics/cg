@@ -53,5 +53,5 @@ def test_parse_analysis(
         "coverage_bases": 99366056494.0,
         "median_coverage": 33.0,
         "percent_duplicates": 1.7232745723252236,
-        "sex": SexOptions.FEMALE,
+        "predicted_sex": SexOptions.FEMALE,
     }
