@@ -405,7 +405,7 @@ def test_fetch_sequencing_run_integration(
 
 
 def test_fetch_sequencing_run_integration_current(
-    cg_context,
+    cg_context,  # TODO: replace this for a more simple cg_context if possible
     store_with_illumina_sequencing_data: Store,
     novaseq_x_flow_cell_id: str,
     dsmc_q_archive_output,
@@ -429,7 +429,7 @@ def test_fetch_sequencing_run_integration_current(
     sequencing_run: IlluminaSequencingRun = (
         store_with_illumina_sequencing_data.get_illumina_sequencing_run_by_device_internal_id(
             novaseq_x_flow_cell_id
-        )
+        )  # TODO: Autospec this store
     )
     sequencing_run.data_availability = SequencingRunDataAvailability.REQUESTED
 
