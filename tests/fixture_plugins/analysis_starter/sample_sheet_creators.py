@@ -3,13 +3,13 @@ from unittest.mock import Mock, create_autospec
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease_sample_sheet_creator import (
     RarediseaseSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion_sample_sheet_creator import (
     RNAFusionSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler_sample_sheet_creator import (
     TaxprofilerSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
