@@ -11,7 +11,9 @@ from cg.models.cg_config import (
     RarediseaseConfig,
     RnafusionConfig,
     TaxprofilerConfig,
+    TomteConfig,
 )
+from cg.services.analysis_starter.configurator.extensions.tomte_extension import TomteExtension
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
 )
@@ -33,17 +35,23 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
     TaxprofilerParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.tomte_params_file_creator import (
+    TomteParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo_sample_sheet_creator import (
     NalloSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease_sample_sheet_creator import (
     RarediseaseSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion_sample_sheet_creator import (
     RNAFusionSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler_sample_sheet_creator import (
     TaxprofilerSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
+    TomteSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
@@ -139,4 +147,19 @@ def taxprofiler_configurator(
         pipeline_config=taxprofiler_config_object,
         sample_sheet_creator=create_autospec(TaxprofilerSampleSheetCreator),
         pipeline_extension=Mock(),
+    )
+
+
+@pytest.fixture
+def tomte_configurator(
+    mock_store_for_tomte_file_creators: Store,
+    tomte_config_object: TomteConfig,
+) -> NextflowConfigurator:
+    return NextflowConfigurator(
+        store=mock_store_for_tomte_file_creators,
+        config_file_creator=create_autospec(NextflowConfigFileCreator),
+        params_file_creator=create_autospec(TomteParamsFileCreator),
+        pipeline_config=tomte_config_object,
+        sample_sheet_creator=create_autospec(TomteSampleSheetCreator),
+        pipeline_extension=create_autospec(TomteExtension),
     )

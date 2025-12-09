@@ -729,7 +729,7 @@ class Sample(Base, PriorityMixin):
     prepared_at: Mapped[datetime | None]
 
     priority: Mapped[Priority] = mapped_column(default=Priority.standard)
-    reads: Mapped[BigInt | None] = mapped_column(default=0)
+    reads: Mapped[BigInt] = mapped_column(default=0)
     last_sequenced_at: Mapped[datetime | None]
     received_at: Mapped[datetime | None]
     reference_genome: Mapped[Str255 | None]
