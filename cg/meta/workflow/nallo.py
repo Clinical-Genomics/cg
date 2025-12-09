@@ -261,9 +261,10 @@ class NalloAnalysisAPI(NfAnalysisAPI):
 
     def _get_somalier_dict(self, multiqc_json: MultiqcDataJson) -> dict[str, Any]:
         somalier_raw = copy.deepcopy(multiqc_json.report_saved_raw_data["multiqc_somalier"])
-        for sample_id, value in somalier_raw.items():
-            for metric_key, metric_value in value.items():
-                somalier_raw[sample_id].update({f"somalier_{metric_key}": metric_value})
+
+        for sample_id, metrics in somalier_raw.items():
+            somalier_raw[sample_id] = {f"somalier_{k}": v for k, v in metrics.items()}
+
         return somalier_raw
 
     @staticmethod
