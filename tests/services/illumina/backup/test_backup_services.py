@@ -4,7 +4,7 @@ import fnmatch
 import logging
 from pathlib import Path
 from typing import Callable
-from unittest.mock import ANY
+from unittest.mock import ANY, create_autospec
 
 import mock
 import pytest
@@ -18,7 +18,13 @@ from cg.exc import (
     PdcError,
 )
 from cg.meta.tar.tar import TarAPI
-from cg.models.cg_config import CGConfig, PDCArchivingDirectory
+from cg.models.cg_config import (
+    CGConfig,
+    IlluminaBackupConfig,
+    IlluminaConfig,
+    PDCArchivingDirectory,
+    RunInstruments,
+)
 from cg.services.illumina.backup import backup_service
 from cg.services.illumina.backup.backup_service import IlluminaBackupService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
@@ -416,6 +422,22 @@ def test_fetch_sequencing_run_integration_current(
 
     caplog.set_level(logging.INFO)
 
+    # GIVEN a CG config with current backup archiving location
+    backup_config = create_autospec(
+        IlluminaBackupConfig,
+        pdc_archiving_directory=create_autospec(
+            PDCArchivingDirectory, current="/home/proj/production/encrypt"
+        ),
+    )
+    cg_context = create_autospec(
+        CGConfig,
+        illumina_backup_service=backup_config,
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+        ),
+    )
+
     # GIVEN we want to retrieve a specific sequencing run from PDC
     tar_api: TypedMock[TarAPI] = create_typed_mock(TarAPI)
     backup_api = IlluminaBackupService(
@@ -439,7 +461,7 @@ def test_fetch_sequencing_run_integration_current(
     mocker.patch.object(
         IlluminaBackupService, "query_pdc_for_sequencing_run", return_value=dsmc_q_archive_output
     )
-    archived_run_path = Path("some/archived/run/with/at/least_seven/flow_cell_name")
+    archived_run_path = Path("/home/proj/production/encrypt/flow_cell_name")
     mocker.patch.object(
         backup_service, "get_latest_archived_sequencing_run_path", return_value=archived_run_path
     )
@@ -451,6 +473,7 @@ def test_fetch_sequencing_run_integration_current(
     )
     get_sequencing_run_output_dir_spy = mocker.spy(backup_api, "_get_sequencing_run_output_dir")
 
+    # WHEN fetching the sequencing run from PDC
     result = backup_api.fetch_sequencing_run(sequencing_run=sequencing_run)
 
     # THEN the process to retrieve the sequencing run from PDC is started
