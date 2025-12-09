@@ -105,6 +105,3 @@ def test_get_formatted_file_deliverable(
 
         # THEN assert that the new path is correct
         assert "get_case_path" in formatted_file_deliverable.path
-        # THEN assert that the new path is correct
-        assert "get_case_path" in formatted_file_deliverable.path
-        assert "get_case_path" in formatted_file_deliverable.path
