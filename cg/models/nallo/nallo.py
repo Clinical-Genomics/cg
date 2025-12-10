@@ -11,11 +11,11 @@ from cg.models.qc_metrics import QCMetrics
 
 
 def convert_sex(plink_sex: float) -> SexOptions:
-    if plink_sex == 2.0:
+    if plink_sex == 2:
         return SexOptions.FEMALE
-    elif plink_sex == 1.0:
+    elif plink_sex == 1:
         return SexOptions.MALE
-    elif plink_sex == 0.0:
+    elif plink_sex == 0:
         return SexOptions.UNKNOWN
     else:
         raise NotImplementedError
