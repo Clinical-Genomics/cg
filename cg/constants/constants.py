@@ -100,9 +100,9 @@ class CancerAnalysisType(StrEnum):
 
 
 class SexOptions(StrEnum):
-    MALE: str = "male"
-    FEMALE: str = "female"
-    UNKNOWN: str = "unknown"
+    MALE = "male"
+    FEMALE = "female"
+    UNKNOWN = "unknown"
 
 
 SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
