@@ -156,7 +156,7 @@ class IlluminaBackupService:
         if is_current:
             run_full_name: str = archived_run.parent.name
         else:
-            run_full_name = archived_run.stem
+            run_full_name = archived_run.name.split(".")[0]
         return Path(self.sequencing_runs_dir, run_full_name)
 
     def _is_archiving_directory_current(self, archived_run: Path) -> bool:
