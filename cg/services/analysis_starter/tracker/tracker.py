@@ -63,8 +63,8 @@ class Tracker(ABC):
         analysis_type: str = self._get_analysis_type(case_id)
         config_path: Path | None = self._get_job_ids_path(case_id)
         email: str = environ_email()
-        order_id: int = self.store.get_case_by_internal_id(case_id).latest_order.id
-        out_dir: Path = self._get_out_dir_path(case_id)
+        order_id: int = self.store.get_case_by_internal_id_strict(case_id).latest_order.id
+        out_dir: str = self._get_out_dir_path(case_id).as_posix()
         priority: TrailblazerPriority = self._get_trailblazer_priority(case_id)
         ticket: str = self.store.get_latest_ticket_from_case(case_id)
         is_case_for_development: bool = self._is_case_for_development(case_id)
@@ -74,12 +74,12 @@ class Tracker(ABC):
             config_path=config_path.as_posix() if config_path else None,
             email=email,
             order_id=order_id,
-            out_dir=out_dir.as_posix(),
+            out_dir=out_dir,
             priority=priority,
             ticket=ticket,
             workflow=self.store.get_case_workflow(case_id),
             workflow_manager=self._workflow_manager(),
-            tower_workflow_id=str(tower_workflow_id) if tower_workflow_id else None,
+            tower_workflow_id=tower_workflow_id,
             is_hidden=is_case_for_development,
         )
 
