@@ -3,51 +3,58 @@
 from unittest import mock
 from unittest.mock import Mock, create_autospec
 
+from housekeeper.store.models import File
 from sqlalchemy.orm import Query
 
 from cg.apps.coverage.api import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.coverage import UploadCoverageApi
-from cg.store.models import Analysis, Case
+from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
-from tests.meta.upload.conftest import MockCoverage
 
 
-def test_data(
-    analysis_store: Store,
-    case_id: str,
-    chanjo_config,
-):
+def test_data():
     """Test that getting data for coverage upload returns the expected structure."""
 
     def files(version, tags):
-        return create_autospec(Query)
+        query = create_autospec(Query)
+        if tags == {"sample_id", "chanjo", "sambamba-depth", "coverage"}:
+            query.one = Mock(return_value=create_autospec(File, full_path="path/to/coverage/file"))
+        else:
+            query.one = Mock(side_effect=ValueError("No file found"))
+        return query
 
     # GIVEN a coverage upload API
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
     housekeeper_api.files = Mock(side_effect=files)
 
     coverage_upload_api = UploadCoverageApi(
-        status_api=None, hk_api=housekeeper_api, chanjo_api=MockCoverage(chanjo_config)
+        status_api=None, hk_api=housekeeper_api, chanjo_api=Mock()
     )
 
-    # GIVEN a coverage api and an analysis with a case
-    case: Case = analysis_store.get_case_by_internal_id(internal_id=case_id)
-    analysis: Analysis = create_autospec(Analysis)
-    analysis.case = case
-    analysis.housekeeper_version_id = 1234
+    # GIVEN an analysis with a case and a sample
+    sample: Sample = create_autospec(Sample, internal_id="sample_id")
+    sample.name = "sample_name"
+    case: Case = create_autospec(Case, internal_id="case_id", samples=[sample])
+    case.name = "case_name"
+    analysis: Analysis = create_autospec(Analysis, case=case, housekeeper_version_id=1234)
 
     # WHEN using the data method
-    # with mock.patch.object(HousekeeperAPI, "files") as mock_files:
-    # mock_files.return_value.one.return_value.full_path = "path/to/coverage/file"
-    # mock_files.return_value.one.return_value.internal_id = 1
-    # mock_files.return_value.one.return_value.tags = ["coverage"]
     results = coverage_upload_api.data(analysis=analysis)
 
     # THEN this returns the data needed to upload samples to chanjo
-    assert results["family"] == case_id
-    for sample in results["samples"]:
-        assert set(sample.keys()) == set(["coverage", "sample", "sample_name"])
+    expected_result = {
+        "family": "case_id",
+        "family_name": "case_name",
+        "samples": [
+            {
+                "coverage": "path/to/coverage/file",
+                "sample": "sample_id",
+                "sample_name": "sample_name",
+            }
+        ],
+    }
+    assert results == expected_result
 
 
 def test_upload(
