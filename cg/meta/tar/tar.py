@@ -25,7 +25,8 @@ class TarAPI:
 
     @staticmethod
     def get_extract_file_command(input_file: Path, output_dir: Path, is_current: bool) -> list[str]:
-        """Generates the Tar command for flow cel run directory extraction"""
+        """Generates the Tar command for flow cel run directory extraction. If the is_current flag
+        is set, the command will strip the first 6 components of the file path when extracting."""
         extraction_parameters: list = FlowCellExtractionParameters.EXTRACT_FILE.copy()
         extraction_parameters.append(str(input_file))
         exclude_files: list = FlowCellExtractionParameters.EXCLUDE_FILES.copy()
