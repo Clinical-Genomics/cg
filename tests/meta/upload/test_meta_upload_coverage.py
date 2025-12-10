@@ -11,11 +11,17 @@ from cg.store.store import Store
 
 
 def test_data(
-    coverage_upload_api: UploadCoverageApi,
     analysis_store: Store,
     case_id: str,
 ):
     """Test that getting data for coverage upload returns the expected structure."""
+
+    # GIVEN a coverage upload API
+    housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    coverage_upload_api = UploadCoverageApi(
+        status_api=None, hk_api=housekeeper_api, chanjo_api=MockCoverage(chanjo_config)
+    )
+
     # GIVEN a coverage api and an analysis with a case
     case: Case = analysis_store.get_case_by_internal_id(internal_id=case_id)
     analysis: Analysis = create_autospec(Analysis)
@@ -24,9 +30,9 @@ def test_data(
 
     # WHEN using the data method
     with mock.patch.object(HousekeeperAPI, "files") as mock_files:
-        mock_files.return_value.first.return_value.full_path = "path/to/coverage/file"
-        mock_files.return_value.first.return_value.internal_id = 1
-        mock_files.return_value.first.return_value.tags = ["coverage"]
+        # mock_files.return_value.one.return_value.full_path = "path/to/coverage/file"
+        # mock_files.return_value.one.return_value.internal_id = 1
+        # mock_files.return_value.one.return_value.tags = ["coverage"]
         results = coverage_upload_api.data(analysis=analysis)
 
     # THEN this returns the data needed to upload samples to chanjo
