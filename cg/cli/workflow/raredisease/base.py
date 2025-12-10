@@ -16,7 +16,9 @@ from cg.cli.workflow.nf_analysis import (
     store_available,
     store_housekeeper,
 )
-from cg.constants.constants import Workflow
+from cg.constants.constants import MetaApis, Workflow
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
@@ -30,8 +32,8 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def raredisease(context: click.Context) -> None:
     """NF-core/raredisease analysis workflow."""
-    if context.invoked_subcommand is None:
-        click.echo(context.get_help())
+    AnalysisAPI.get_help(context)
+    context.obj.meta_apis[MetaApis.ANALYSIS_API] = RarediseaseAnalysisAPI(config=context.obj)
 
 
 raredisease.add_command(metrics_deliver)

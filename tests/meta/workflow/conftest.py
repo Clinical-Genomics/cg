@@ -338,7 +338,7 @@ def taxprofiler_metrics() -> dict[str, float]:
 @pytest.fixture(scope="function")
 def nallo_metrics_deliverables(
     nallo_analysis_dir: Path,
-) -> dict[str, list]:  # TODO add this data to a file
+) -> dict[str, list]:
     return {
         "metrics": [
             {
