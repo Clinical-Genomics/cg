@@ -733,7 +733,9 @@ class NfAnalysisAPI(AnalysisAPI):
     ) -> list[MetricsBase]:
         """Parse a MultiqcDataJson and returns a list of metrics."""
         metrics: list[MetricsBase] = []
-        for section in multiqc_json.report_general_stats_data:
+        list_of_metric_dicts: list[dict[str, Any]] = self._get_list_of_metric_dicts(multiqc_json)
+
+        for section in list_of_metric_dicts:
             for subsection, metrics_dict in section.items():
                 if self._is_pattern_found(
                     pattern=search_pattern, text=subsection, exact_match=exact_match
@@ -744,6 +746,12 @@ class NfAnalysisAPI(AnalysisAPI):
                         )
                         metrics.append(metric)
         return metrics
+
+    def _get_list_of_metric_dicts(self, multiqc_json: MultiqcDataJson) -> list[dict[str, Any]]:
+        if metric_dicts := multiqc_json.report_general_stats_data:
+            return metric_dicts
+        else:
+            raise ValueError("No report_general_stats_data found in MultiqcDataJson")
 
     def get_multiqc_metric(
         self, metric_name: str, metric_value: str | int | float, metric_id: str
