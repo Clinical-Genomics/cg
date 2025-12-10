@@ -17,7 +17,7 @@ from cg.exc import AnalysisNotReadyError, SeqeraError
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import creator
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion_sample_sheet_creator import (
     RNAFusionSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
