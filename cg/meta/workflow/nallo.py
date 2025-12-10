@@ -1,5 +1,6 @@
 """Module for Nallo Analysis API."""
 
+import copy
 import logging
 from itertools import permutations
 from pathlib import Path
@@ -233,6 +234,22 @@ class NalloAnalysisAPI(NfAnalysisAPI):
                 metrics.append(parent_error_metric)
         metrics = self.get_deduplicated_metrics(metrics=metrics)
         return metrics
+
+    def _get_list_of_metric_dicts(self, multiqc_json: MultiqcDataJson) -> list[dict[str, Any]]:
+        metric_dicts: list[dict[str, Any]] = super()._get_list_of_metric_dicts(multiqc_json)
+
+        list_copy: list[dict[str, Any]] = copy.deepcopy(metric_dicts)
+        list_copy.append(self._get_somalier_dict(multiqc_json))
+
+        return list_copy
+
+    def _get_somalier_dict(self, multiqc_json: MultiqcDataJson) -> dict[str, Any]:
+        somalier_raw = copy.deepcopy(multiqc_json.report_saved_raw_data["multiqc_somalier"])
+
+        for sample_id, metrics in somalier_raw.items():
+            somalier_raw[sample_id] = {f"somalier_{k}": v for k, v in metrics.items()}
+
+        return somalier_raw
 
     @staticmethod
     def set_somalier_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:

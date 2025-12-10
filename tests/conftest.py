@@ -2774,14 +2774,6 @@ def nallo_gene_panel_path(nallo_dir, nallo_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def nallo_metrics_deliverables(nallo_analysis_dir: Path) -> list[dict]:
-    """Returns the content of a mock metrics deliverables file."""
-    return read_yaml(
-        file_path=Path(nallo_analysis_dir, "nallo_fixture_for_metrics_deliverables.yaml")
-    )
-
-
-@pytest.fixture(scope="function")
 def nallo_metrics_deliverables_path(nallo_dir: Path, nallo_case_id: str) -> Path:
     """Path to deliverables file."""
     return Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_metrics_deliverables").with_suffix(
