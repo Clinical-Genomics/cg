@@ -411,7 +411,7 @@ def test_fetch_sequencing_run_integration(
 
 
 def test_fetch_sequencing_run_integration_current(
-    dsmc_q_archive_output,
+    dsmc_q_archive_output: list[str],
     mocker: MockerFixture,
 ):
     """Component integration test for the BackupAPI, fetching a specified sequencing run."""
