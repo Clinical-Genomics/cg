@@ -1,23 +1,32 @@
 """Tests for coverage meta API"""
 
 from unittest import mock
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
+
+from sqlalchemy.orm import Query
 
 from cg.apps.coverage.api import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
+from tests.meta.upload.conftest import MockCoverage
 
 
 def test_data(
     analysis_store: Store,
     case_id: str,
+    chanjo_config,
 ):
     """Test that getting data for coverage upload returns the expected structure."""
 
+    def files(version, tags):
+        return create_autospec(Query)
+
     # GIVEN a coverage upload API
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    housekeeper_api.files = Mock(side_effect=files)
+
     coverage_upload_api = UploadCoverageApi(
         status_api=None, hk_api=housekeeper_api, chanjo_api=MockCoverage(chanjo_config)
     )
@@ -29,11 +38,11 @@ def test_data(
     analysis.housekeeper_version_id = 1234
 
     # WHEN using the data method
-    with mock.patch.object(HousekeeperAPI, "files") as mock_files:
-        # mock_files.return_value.one.return_value.full_path = "path/to/coverage/file"
-        # mock_files.return_value.one.return_value.internal_id = 1
-        # mock_files.return_value.one.return_value.tags = ["coverage"]
-        results = coverage_upload_api.data(analysis=analysis)
+    # with mock.patch.object(HousekeeperAPI, "files") as mock_files:
+    # mock_files.return_value.one.return_value.full_path = "path/to/coverage/file"
+    # mock_files.return_value.one.return_value.internal_id = 1
+    # mock_files.return_value.one.return_value.tags = ["coverage"]
+    results = coverage_upload_api.data(analysis=analysis)
 
     # THEN this returns the data needed to upload samples to chanjo
     assert results["family"] == case_id
