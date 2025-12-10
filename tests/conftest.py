@@ -307,13 +307,6 @@ def sbatch_process(sbatch_job_number: int) -> ProcessMock:
     return slurm_process
 
 
-@pytest.fixture(scope="function")
-def dna_case(analysis_store, helpers) -> Case:
-    """Case with DNA application"""
-    cust = helpers.ensure_customer(analysis_store)
-    return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="dna_case")
-
-
 @pytest.fixture
 def analysis_family_single_case(
     case_id: str, family_name: str, sample_id: str, ticket_id: str
@@ -3164,15 +3157,6 @@ def mock_deliverable(
             raredisease_dir, raredisease_case_id, raredisease_case_id + deliverables_yaml
         ),
     )
-
-
-@pytest.fixture(scope="function")
-def raredisease_config(raredisease_dir: Path, raredisease_case_id: str) -> None:
-    """Create samplesheet.csv file for testing"""
-    Path.mkdir(Path(raredisease_dir, raredisease_case_id), parents=True, exist_ok=True)
-    Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet").with_suffix(
-        FileExtensions.CSV
-    ).touch(exist_ok=True)
 
 
 @pytest.fixture(scope="function")
