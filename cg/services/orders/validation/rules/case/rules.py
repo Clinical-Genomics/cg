@@ -181,4 +181,12 @@ def validate_samples_in_case_have_same_prep_category(
 def validate_samples_in_case_have_same_bed_version(
     order: BalsamicOrder,
 ) -> list[MultipleCaptureKitError]:
-    pass
+    errors: list[MultipleCaptureKitError] = []
+    for case_index, case in order.enumerated_new_cases:
+        capture_kits: set[str] = set()
+        for _, sample in case.enumerated_new_samples:
+            capture_kits.add(sample.capture_kit)
+        if len(capture_kits) > 1:
+            error = MultipleCaptureKitError(case_index=case_index)
+            errors.append(error)
+    return errors

@@ -13,6 +13,7 @@ from cg.services.orders.validation.errors.case_errors import (
     RepeatedCaseNameError,
 )
 from cg.services.orders.validation.models.existing_case import ExistingCase
+from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.order_types.balsamic.constants import BalsamicDeliveryType
 from cg.services.orders.validation.order_types.balsamic.models.case import BalsamicCase
@@ -242,15 +243,7 @@ def test_case_samples_have_different_bed_versions():
                         source="blood",
                         subject_id="subjectID",
                     ),
-                    BalsamicSample(
-                        application="PANKTTR060",
-                        capture_kit="capture_kit2",
-                        container=ContainerEnum.tube,
-                        name="sample2",
-                        sex=SexEnum.male,
-                        source="blood",
-                        subject_id="subjectID",
-                    ),
+                    ExistingSample(),
                 ],
             ),
         ],
