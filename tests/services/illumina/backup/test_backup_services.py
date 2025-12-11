@@ -2,10 +2,13 @@
 
 import fnmatch
 import logging
+from pathlib import Path
 from typing import Callable
+from unittest.mock import ANY, Mock, create_autospec
 
 import mock
 import pytest
+from pytest_mock import MockerFixture
 
 from cg.constants import EXIT_FAIL, SequencingRunDataAvailability
 from cg.exc import (
@@ -14,7 +17,15 @@ from cg.exc import (
     IlluminaRunEncryptionError,
     PdcError,
 )
-from cg.models.cg_config import CGConfig, PDCArchivingDirectory
+from cg.meta.tar.tar import TarAPI
+from cg.models.cg_config import (
+    CGConfig,
+    IlluminaBackupConfig,
+    IlluminaConfig,
+    PDCArchivingDirectory,
+    RunInstruments,
+)
+from cg.services.illumina.backup import backup_service
 from cg.services.illumina.backup.backup_service import IlluminaBackupService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.backup.utils import (
@@ -25,6 +36,7 @@ from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
 from tests.conftest import create_process_response
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 @pytest.mark.parametrize(
@@ -396,6 +408,78 @@ def test_fetch_sequencing_run_integration(
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0
+
+
+def test_fetch_sequencing_run_integration_current(
+    dsmc_q_archive_output: list[str],
+    mocker: MockerFixture,
+):
+    """Component integration test for the BackupAPI, fetching a specified sequencing run."""
+
+    # GIVEN a CG config with current backup archiving location
+    backup_config: IlluminaBackupConfig = create_autospec(
+        IlluminaBackupConfig,
+        pdc_archiving_directory=create_autospec(
+            PDCArchivingDirectory, current="/home/proj/production/encrypt"
+        ),
+    )
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        illumina_backup_service=backup_config,
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, sequencing_runs_dir="some_dir"),
+        ),
+    )
+
+    # GIVEN a store with a requested sequencing run
+    status_db: Store = create_autospec(Store)
+    sequencing_run: IlluminaSequencingRun = create_autospec(
+        IlluminaSequencingRun, data_availability=SequencingRunDataAvailability.REQUESTED
+    )
+    status_db.get_illumina_sequencing_run_by_device_internal_id = Mock(return_value=sequencing_run)
+
+    # GIVEN we want to retrieve the sequencing run from PDC
+    tar_api: TypedMock[TarAPI] = create_typed_mock(TarAPI)
+    backup_api = IlluminaBackupService(
+        encryption_api=mock.Mock(),
+        pdc_archiving_directory=cg_config.illumina_backup_service.pdc_archiving_directory,
+        status_db=status_db,
+        tar_api=tar_api.as_type,
+        pdc_service=mock.Mock(),
+        sequencing_runs_dir=cg_config.run_instruments.illumina.sequencing_runs_dir,
+    )
+
+    mocker.patch.object(IlluminaBackupService, "unlink_files")
+    mocker.patch.object(IlluminaBackupService, "create_rta_complete")
+    mocker.patch.object(IlluminaBackupService, "create_copy_complete")
+    mocker.patch.object(
+        IlluminaBackupService, "query_pdc_for_sequencing_run", return_value=dsmc_q_archive_output
+    )
+
+    # GIVEN that the sequencing run is archived in the 'current' archiving directory
+    archived_run_path = Path("/home/proj/production/encrypt/flow_cell_name")
+    mocker.patch.object(
+        backup_service, "get_latest_archived_sequencing_run_path", return_value=archived_run_path
+    )
+    mocker.patch.object(backup_service, "get_latest_archived_encryption_key_path")
+
+    get_sequencing_run_output_dir_spy = mocker.spy(backup_api, "_get_sequencing_run_output_dir")
+
+    # WHEN fetching the sequencing run from PDC
+    result = backup_api.fetch_sequencing_run(sequencing_run=sequencing_run)
+
+    # THEN the elapsed time of the retrieval process is returned
+    assert result and result > 0
+
+    # THEN get_sequencing_run_output_dir() should have been called with 'is_current'=True
+    get_sequencing_run_output_dir_spy.assert_called_once_with(
+        archived_run=archived_run_path, is_current=True
+    )
+    # THEN get_extract_file_command() should have been called with 'is_current'=True
+    tar_api.as_mock.get_extract_file_command.assert_called_once_with(
+        input_file=ANY, output_dir=ANY, is_current=True
+    )
 
 
 def test_validate_is_sequencing_run_backup_possible(

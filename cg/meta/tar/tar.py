@@ -24,8 +24,9 @@ class TarAPI:
         self.process.run_command(command, dry_run=self.dry_run)
 
     @staticmethod
-    def get_extract_file_command(input_file: Path, output_dir: Path) -> list[str]:
-        """Generates the Tar command for flow cel run directory extraction"""
+    def get_extract_file_command(input_file: Path, output_dir: Path, is_current: bool) -> list[str]:
+        """Generates the Tar command for flow cel run directory extraction. If the is_current flag
+        is set, the command will strip the first 6 components of the file path when extracting."""
         extraction_parameters: list = FlowCellExtractionParameters.EXTRACT_FILE.copy()
         extraction_parameters.append(str(input_file))
         exclude_files: list = FlowCellExtractionParameters.EXCLUDE_FILES.copy()
@@ -33,6 +34,8 @@ class TarAPI:
         target_directory_parameters: list = FlowCellExtractionParameters.CHANGE_TO_DIR.copy()
         extraction_parameters.extend(target_directory_parameters)
         extraction_parameters.append(str(output_dir))
+        if is_current:
+            extraction_parameters.append("--strip-components=6")
         return extraction_parameters
 
     def get_compress_cmd(self, input_path: Path) -> str:
