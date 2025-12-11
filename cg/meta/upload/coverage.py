@@ -25,15 +25,15 @@ class UploadCoverageApi:
         """Get data for uploading coverage."""
         case_id = analysis.case.internal_id
         data = {"family": case_id, "family_name": analysis.case.name, "samples": []}
-        for link_obj in analysis.case.links:
+        for sample in analysis.case.samples:
             hk_coverage: File = self.hk_api.files(
                 version=analysis.housekeeper_version_id,
-                tags=[link_obj.sample.internal_id, "coverage"],
-            ).first()
+                tags={sample.internal_id, "coverage", "sambamba-depth", "chanjo"},
+            ).one()
             data["samples"].append(
                 {
-                    "sample": link_obj.sample.internal_id,
-                    "sample_name": link_obj.sample.name,
+                    "sample": sample.internal_id,
+                    "sample_name": sample.name,
                     "coverage": hk_coverage.full_path,
                 }
             )

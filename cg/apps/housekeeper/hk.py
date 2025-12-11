@@ -120,7 +120,7 @@ class HousekeeperAPI:
         *,
         bundle: str = None,
         tags: set[str] = None,
-        version: int = None,
+        version: int | None = None,
         path: str = None,
     ) -> Query:
         """Fetch files."""
