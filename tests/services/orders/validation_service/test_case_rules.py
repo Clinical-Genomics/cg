@@ -219,3 +219,7 @@ def test_case_samples_multiple_prep_categories(
 
     # THEN the error should concern the first case
     assert error.case_index == 0
+
+
+def test_case_samples_have_different_bed_versions():
+    pass
