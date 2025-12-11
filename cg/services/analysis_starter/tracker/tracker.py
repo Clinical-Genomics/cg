@@ -6,7 +6,7 @@ from pathlib import Path
 from cg.apps.environ import environ_email
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.constants.constants import CaseActions, CustomerId, Workflow
+from cg.constants.constants import CaseActions, CustomerId, Workflow, WorkflowManager
 from cg.constants.priority import TrailblazerPriority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.tb import AnalysisType
@@ -61,17 +61,17 @@ class Tracker(ABC):
         self, case_id: str, tower_workflow_id: str | None
     ) -> TrailblazerAnalysis:
         analysis_type: str = self._get_analysis_type(case_id)
-        config_path: Path = self._get_job_ids_path(case_id)
+        config_path: Path | None = self._get_job_ids_path(case_id)
         email: str = environ_email()
         order_id: int = self.store.get_case_by_internal_id_strict(case_id).latest_order.id
-        out_dir: str = config_path.parent.as_posix()
+        out_dir: str = self._get_out_dir_path(case_id).as_posix()
         priority: TrailblazerPriority = self._get_trailblazer_priority(case_id)
         ticket: str = self.store.get_latest_ticket_from_case(case_id)
         is_case_for_development: bool = self._is_case_for_development(case_id)
         return self.trailblazer_api.add_pending_analysis(
             analysis_type=analysis_type,
             case_id=case_id,
-            config_path=config_path.as_posix(),
+            config_path=config_path.as_posix() if config_path else None,
             email=email,
             order_id=order_id,
             out_dir=out_dir,
@@ -133,11 +133,15 @@ class Tracker(ABC):
         return case.customer.internal_id == CustomerId.CG_INTERNAL_CUSTOMER
 
     @abstractmethod
-    def _workflow_manager(self):
+    def _workflow_manager(self) -> WorkflowManager:
         pass
 
     @abstractmethod
-    def _get_job_ids_path(self, case_id: str):
+    def _get_job_ids_path(self, case_id: str) -> Path | None:
+        pass
+
+    @abstractmethod
+    def _get_out_dir_path(self, case_id: str) -> Path:
         pass
 
     @abstractmethod

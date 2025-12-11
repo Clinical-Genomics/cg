@@ -180,7 +180,7 @@ def expect_to_add_pending_analysis_to_trailblazer(
     case: Case,
     ticket_id: int,
     out_dir: Path,
-    config_path: Path,
+    config_path: Path | None,
     analysis_type: AnalysisType,
     workflow: Workflow,
     tower_workflow_id: str | None = None,
@@ -189,7 +189,7 @@ def expect_to_add_pending_analysis_to_trailblazer(
     trailblazer_server.expect_request(
         "/trailblazer/add-pending-analysis",
         data=b'{"case_id": "%(case_id)s", "email": "%(email)s", "type": "%(type)s", '
-        b'"config_path": "%(config_path)s",'
+        b'"config_path": %(config_path)s,'
         b' "order_id": 1, "out_dir": "%(out_dir)s", '
         b'"priority": "normal", "workflow": "%(workflow)s", "ticket": "%(ticket_id)s", '
         b'"workflow_manager": "%(workflow_manager)s", "tower_workflow_id": %(tower_workflow_id)s, "is_hidden": true}'
@@ -198,11 +198,9 @@ def expect_to_add_pending_analysis_to_trailblazer(
             b"type": str(analysis_type).encode(),
             b"case_id": case.internal_id.encode(),
             b"ticket_id": str(ticket_id).encode(),
-            b"tower_workflow_id": (
-                f'"{tower_workflow_id}"' if tower_workflow_id else "null"
-            ).encode(),
+            b"tower_workflow_id": _quoted_string_or_null(tower_workflow_id),
             b"out_dir": str(out_dir).encode(),
-            b"config_path": str(config_path).encode(),
+            b"config_path": _quoted_string_or_null(config_path),
             b"workflow": str(workflow).upper().encode(),
             b"workflow_manager": str(workflow_manager).encode(),
         },
@@ -217,6 +215,10 @@ def expect_to_add_pending_analysis_to_trailblazer(
             "config_path": "config/path",
         }
     )
+
+
+def _quoted_string_or_null(value: str | Path | None) -> bytes:
+    return (f'"{value}"' if value else "null").encode()
 
 
 def expect_lims_sample_request(lims_server: HTTPServer, sample: Sample, bed_name: str):

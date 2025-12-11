@@ -34,6 +34,9 @@ class MicrosaltTracker(Tracker):
             f"{project_id}_slurm_ids{FileExtensions.YAML}",
         )
 
+    def _get_out_dir_path(self, case_id: str) -> Path:
+        return self._get_job_ids_path(case_id).parent
+
     def _get_file_name_start(self, case_id: str) -> str:
         """Returns the LIMS project id if the case contains multiple samples, else the sample id."""
         case: Case = self.store.get_case_by_internal_id(case_id)
