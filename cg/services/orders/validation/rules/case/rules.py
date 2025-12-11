@@ -175,3 +175,7 @@ def validate_samples_in_case_have_same_prep_category(
             error = MultiplePrepCategoriesError(case_index=case_index)
             errors.append(error)
     return errors
+
+
+def validate_samples_in_case_have_same_bed_version():
+    pass

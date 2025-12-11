@@ -1,4 +1,5 @@
-from cg.constants import GenePanelMasterList
+from cg.constants import DataDelivery, GenePanelMasterList
+from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
     CaseDoesNotExistError,
@@ -12,6 +13,9 @@ from cg.services.orders.validation.errors.case_errors import (
 )
 from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
+from cg.services.orders.validation.order_types.balsamic.models.case import BalsamicCase
+from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
+from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
 from cg.services.orders.validation.order_types.rna_fusion.models.sample import RNAFusionSample
@@ -23,6 +27,7 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_existing_cases_belong_to_collaboration,
     validate_existing_cases_have_an_affected_sample,
     validate_one_sample_per_case,
+    validate_samples_in_case_have_same_bed_version,
     validate_samples_in_case_have_same_prep_category,
 )
 from cg.store.models import Application, Case
@@ -222,4 +227,16 @@ def test_case_samples_multiple_prep_categories(
 
 
 def test_case_samples_have_different_bed_versions():
-    pass
+    # GIVEN a Balsamic order
+    balsamic_order = BalsamicOrder(
+        cases=[
+            BalsamicCase(samples=[BalsamicSample(), BalsamicSample()]),
+        ],
+        customer="cust000",
+        delivery_type=DataDelivery.RAW_DATA_SCOUT,
+        name="BalsamicOrder1",
+        project_type=OrderType.BALSAMIC,
+    )
+
+    # WHEN validating that samples in a case have the same bed version
+    validate_samples_in_case_have_same_bed_version(balsamic_order)
