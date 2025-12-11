@@ -6,11 +6,11 @@ import pytest
 
 from cg.apps.environ import environ_email
 from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.constants import Workflow, WorkflowManager
-from cg.constants.priority import Priority
+from cg.constants.priority import Priority, TrailblazerPriority
 from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.exc import AnalysisRunningError
-from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
 from cg.services.analysis_starter.tracker.implementations.microsalt import MicrosaltTracker
@@ -25,19 +25,45 @@ def microsalt_store() -> Store:
 
 
 @pytest.fixture
-def microsalt_tracker(cg_context: CGConfig, microsalt_store: Store):
+def trailblazer_api() -> TypedMock[TrailblazerAPI]:
+    trailblazer_api: TypedMock[TrailblazerAPI] = create_typed_mock(TrailblazerAPI)
+    trailblazer_api.as_type.add_pending_analysis = Mock(
+        return_value=TrailblazerAnalysis(
+            id=1,
+            logged_at=None,
+            started_at=None,
+            completed_at=None,
+            out_dir=Path(),
+            config_path=None,
+        )
+    )
+    return trailblazer_api
+
+
+@pytest.fixture
+def microsalt_tracker(
+    microsalt_store: Store, trailblazer_api: TypedMock[TrailblazerAPI]
+) -> MicrosaltTracker:
     return MicrosaltTracker(
         store=microsalt_store,
         subprocess_submitter=SubprocessSubmitter(),
-        trailblazer_api=cg_context.trailblazer_api,
-        workflow_root=cg_context.microsalt.root,
+        trailblazer_api=trailblazer_api.as_type,
+        workflow_root="microsalt/workflow/root",
     )
 
 
-def test_microsalt_tracker_successful(microsalt_tracker: MicrosaltTracker, microsalt_store: Store):
+def test_microsalt_tracker_successful(
+    microsalt_tracker: MicrosaltTracker,
+    microsalt_store: Store,
+    trailblazer_api: TypedMock[TrailblazerAPI],
+):
+    # GIVEN case and ticket IDs
+    case_id: str = "microparakeet"
+    ticket_id: str = "ticket_id123"
+
     # GIVEN a microSALT case config
     case_config = MicrosaltCaseConfig(
-        case_id="microparakeet",
+        case_id=case_id,
         binary="binary",
         conda_binary="conda/binary",
         config_file="config/file",
@@ -45,11 +71,11 @@ def test_microsalt_tracker_successful(microsalt_tracker: MicrosaltTracker, micro
         fastq_directory="fastq/dir",
     )
 
-    case_id: str = case_config.case_id
-    order: Order = create_autospec(Order, id=567, ticket_id="ticket_id123")
+    # GIVEN an order, sample and case
+    order: Order = create_autospec(Order, id=567, ticket_id=ticket_id)
     sample: Sample = create_autospec(Sample, internal_id="microsalt_sample")
 
-    case: TypedMock[Case] = create_typed_mock(
+    case: Case = create_autospec(
         Case,
         data_analysis=Workflow.MICROSALT,
         internal_id=case_id,
@@ -58,45 +84,28 @@ def test_microsalt_tracker_successful(microsalt_tracker: MicrosaltTracker, micro
         samples=[sample],
     )
 
-    microsalt_store.get_case_by_internal_id_strict = Mock(return_value=case.as_type)
-    microsalt_store.get_case_by_internal_id = Mock(return_value=case.as_type)
+    microsalt_store.get_case_by_internal_id_strict = Mock(return_value=case)
+    microsalt_store.get_case_by_internal_id = Mock(return_value=case)
     microsalt_store.get_case_workflow = Mock(return_value=Workflow.MICROSALT)
-    microsalt_store.get_latest_ticket_from_case = Mock(return_value="ticket_id123")
+    microsalt_store.get_latest_ticket_from_case = Mock(return_value=ticket_id)
 
     # WHEN wanting to track the started microSALT analysis
-    with mock.patch.object(
-        TrailblazerAPI,
-        "query_trailblazer",
-        return_value={
-            "id": 123456,
-            "logged_at": "",
-            "started_at": "",
-            "completed_at": "",
-            "out_dir": "",
-            "config_path": "",
-        },
-    ) as request_submitter:
-        microsalt_tracker.track(case_config)
+    microsalt_tracker.track(case_config)
 
-    # THEN the appropriate POST should have been sent
-
-    config_path: Path = microsalt_tracker._get_job_ids_path(case_id)
-    expected_request_body: dict = {
-        "case_id": case_id,
-        "email": environ_email(),
-        "type": AnalysisType.OTHER,
-        "config_path": f"{microsalt_tracker.workflow_root}/results/reports/trailblazer/microsalt_sample_slurm_ids.yaml",
-        "order_id": 567,
-        "out_dir": config_path.parent.as_posix(),
-        "priority": microsalt_tracker._get_trailblazer_priority(case_id),
-        "workflow": Workflow.MICROSALT.upper(),
-        "ticket": "ticket_id123",
-        "workflow_manager": WorkflowManager.Slurm,
-        "tower_workflow_id": None,
-        "is_hidden": False,
-    }
-    request_submitter.assert_called_with(
-        command="add-pending-analysis", request_body=expected_request_body
+    # THEN the trailblazer api should have been called with the correct information
+    trailblazer_api.as_mock.add_pending_analysis.assert_called_with(
+        analysis_type=AnalysisType.OTHER,
+        case_id=case_id,
+        email=environ_email(),
+        config_path=f"{microsalt_tracker.workflow_root}/results/reports/trailblazer/microsalt_sample_slurm_ids.yaml",
+        order_id=567,
+        out_dir=f"{microsalt_tracker.workflow_root}/results/reports/trailblazer",
+        priority=TrailblazerPriority.NORMAL,
+        workflow=Workflow.MICROSALT,
+        ticket=ticket_id,
+        workflow_manager=WorkflowManager.Slurm,
+        tower_workflow_id=None,
+        is_hidden=False,
     )
 
 
