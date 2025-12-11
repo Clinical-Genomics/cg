@@ -1,3 +1,6 @@
+from unittest.mock import Mock, create_autospec
+
+from cg.apps.lims.api import LimsAPI
 from cg.constants import GenePanelMasterList
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
@@ -33,7 +36,7 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_samples_in_case_have_same_bed_version,
     validate_samples_in_case_have_same_prep_category,
 )
-from cg.store.models import Application, Case
+from cg.store.models import Application, Bed, BedVersion, Case
 from cg.store.store import Store
 
 
@@ -227,7 +230,7 @@ def test_case_samples_multiple_prep_categories(
     assert error.case_index == 0
 
 
-def test_case_samples_have_different_bed_versions():
+def test_case_samples_have_same_bed_versions():
     # GIVEN a Balsamic order with samples that have different capture kits
     balsamic_order = BalsamicOrder(
         cases=[
@@ -236,14 +239,14 @@ def test_case_samples_have_different_bed_versions():
                 samples=[
                     BalsamicSample(
                         application="PANKTTR060",
-                        capture_kit="capture_kit1",
+                        capture_kit="capture_kit_name",
                         container=ContainerEnum.tube,
                         name="sample1",
                         sex=SexEnum.male,
                         source="blood",
                         subject_id="subjectID",
                     ),
-                    ExistingSample(),
+                    ExistingSample(internal_id="ACC123"),
                 ],
             ),
         ],
@@ -253,8 +256,54 @@ def test_case_samples_have_different_bed_versions():
         project_type=OrderType.BALSAMIC,
     )
 
-    # WHEN validating that samples in a case have the same bed version
-    errors = validate_samples_in_case_have_same_bed_version(balsamic_order)
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.get_capture_kit_strict = Mock(return_value="capture_kit_version2")
 
-    # THEN an error should be raised
+    version_old = create_autospec(BedVersion)
+    version_latest = create_autospec(BedVersion)
+    bed = create_autospec(Bed, versions=[version_old, version_latest])
+
+    status_db: Store = create_autospec(Store)
+    status_db.get_bed_by_name = Mock(return_value=bed)
+
+    # WHEN validating that samples in a case have the same bed version
+    errors = validate_samples_in_case_have_same_bed_version(lims_api=lims_api, order=balsamic_order)
+
+    # THEN no errors should be returned
+    assert not errors
+
+
+def test_case_samples_have_different_bed_versions():
+    # GIVEN a Balsamic order with samples that have different capture kits
+    balsamic_order = BalsamicOrder(
+        cases=[
+            BalsamicCase(
+                name="BalsamicCase1",
+                samples=[
+                    BalsamicSample(
+                        application="PANKTTR060",
+                        capture_kit="capture_kit_name",
+                        container=ContainerEnum.tube,
+                        name="sample1",
+                        sex=SexEnum.male,
+                        source="blood",
+                        subject_id="subjectID",
+                    ),
+                    ExistingSample(internal_id="ACC123"),
+                ],
+            ),
+        ],
+        customer="cust000",
+        delivery_type=BalsamicDeliveryType.SCOUT,
+        name="BalsamicOrder1",
+        project_type=OrderType.BALSAMIC,
+    )
+
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.get_capture_kit_strict = Mock(return_value="capture_kit_version2")
+
+    # WHEN validating that samples in a case have the same bed version
+    errors = validate_samples_in_case_have_same_bed_version(lims_api=lims_api, order=balsamic_order)
+
+    # THEN an error should be returned
     assert errors == [MultipleCaptureKitError(case_index=0)]
