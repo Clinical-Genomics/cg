@@ -1,3 +1,4 @@
+from cg.apps.lims.api import LimsAPI
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
     CaseDoesNotExistError,
@@ -7,6 +8,7 @@ from cg.services.orders.validation.errors.case_errors import (
     DoubleTumourError,
     ExistingCaseWithoutAffectedSampleError,
     MoreThanTwoSamplesInCaseError,
+    MultipleCaptureKitError,
     MultiplePrepCategoriesError,
     MultipleSamplesInCaseError,
     NewCaseWithoutAffectedSampleError,
@@ -173,5 +175,21 @@ def validate_samples_in_case_have_same_prep_category(
         prep_categories: set[str] = get_case_prep_categories(case=case, store=store)
         if len(prep_categories) > 1:
             error = MultiplePrepCategoriesError(case_index=case_index)
+            errors.append(error)
+    return errors
+
+
+def validate_samples_in_case_have_same_bed_version(
+    lims_api: LimsAPI, order: BalsamicOrder, **kwargs
+) -> list[MultipleCaptureKitError]:
+    errors: list[MultipleCaptureKitError] = []
+    for case_index, case in order.enumerated_new_cases:
+        capture_kits: set[str] = set()
+        for _, sample in case.enumerated_new_samples:
+            capture_kits.add(sample.capture_kit)
+        for _, sample in case.enumerated_existing_samples:
+            capture_kits.add(lims_api.get_capture_kit_strict(sample.internal_id))
+        if len(capture_kits) > 1:
+            error = MultipleCaptureKitError(case_index=case_index)
             errors.append(error)
     return errors
