@@ -177,5 +177,5 @@ def validate_samples_in_case_have_same_prep_category(
     return errors
 
 
-def validate_samples_in_case_have_same_bed_version():
+def validate_samples_in_case_have_same_bed_version(order: BalsamicOrder):
     pass

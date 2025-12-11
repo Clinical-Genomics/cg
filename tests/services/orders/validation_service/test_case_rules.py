@@ -1,4 +1,4 @@
-from cg.constants import DataDelivery, GenePanelMasterList
+from cg.constants import GenePanelMasterList
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
@@ -13,6 +13,7 @@ from cg.services.orders.validation.errors.case_errors import (
 )
 from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
+from cg.services.orders.validation.order_types.balsamic.constants import BalsamicDeliveryType
 from cg.services.orders.validation.order_types.balsamic.models.case import BalsamicCase
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
@@ -60,7 +61,6 @@ def test_case_internal_ids_does_not_exist(
     valid_order: OrderWithCases,
     store_with_multiple_cases_and_samples: Store,
 ):
-
     # GIVEN an order with a case marked as existing but which does not exist in the database
     existing_case = ExistingCase(internal_id="Non-existent case", panels=[GenePanelMasterList.AID])
     valid_order.cases.append(existing_case)
@@ -121,7 +121,6 @@ def test_multiple_samples_in_case(rnafusion_order: RNAFusionOrder):
 def test_case_outside_of_collaboration(
     mip_dna_order: MIPDNAOrder, store_with_multiple_cases_and_samples: Store
 ):
-
     # GIVEN a customer from outside the order's customer's collaboration
     new_customer = store_with_multiple_cases_and_samples.add_customer(
         internal_id="NewCustomer",
@@ -230,10 +229,32 @@ def test_case_samples_have_different_bed_versions():
     # GIVEN a Balsamic order
     balsamic_order = BalsamicOrder(
         cases=[
-            BalsamicCase(samples=[BalsamicSample(), BalsamicSample()]),
+            BalsamicCase(
+                name="BalsamicCase1",
+                samples=[
+                    BalsamicSample(
+                        application="PANKTTR060",
+                        capture_kit="capture_kit1",
+                        container=ContainerEnum.tube,
+                        name="sample1",
+                        sex=SexEnum.male,
+                        source="blood",
+                        subject_id="subjectID",
+                    ),
+                    BalsamicSample(
+                        application="PANKTTR060",
+                        capture_kit="capture_kit2",
+                        container=ContainerEnum.tube,
+                        name="sample2",
+                        sex=SexEnum.male,
+                        source="blood",
+                        subject_id="subjectID",
+                    ),
+                ],
+            ),
         ],
         customer="cust000",
-        delivery_type=DataDelivery.RAW_DATA_SCOUT,
+        delivery_type=BalsamicDeliveryType.SCOUT,
         name="BalsamicOrder1",
         project_type=OrderType.BALSAMIC,
     )
