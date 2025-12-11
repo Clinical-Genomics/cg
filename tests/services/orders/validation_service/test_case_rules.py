@@ -6,6 +6,7 @@ from cg.services.orders.validation.errors.case_errors import (
     CaseNameNotAvailableError,
     CaseOutsideOfCollaborationError,
     ExistingCaseWithoutAffectedSampleError,
+    MultipleCaptureKitError,
     MultiplePrepCategoriesError,
     MultipleSamplesInCaseError,
     NewCaseWithoutAffectedSampleError,
@@ -226,7 +227,7 @@ def test_case_samples_multiple_prep_categories(
 
 
 def test_case_samples_have_different_bed_versions():
-    # GIVEN a Balsamic order
+    # GIVEN a Balsamic order with samples that have different capture kits
     balsamic_order = BalsamicOrder(
         cases=[
             BalsamicCase(
@@ -260,4 +261,7 @@ def test_case_samples_have_different_bed_versions():
     )
 
     # WHEN validating that samples in a case have the same bed version
-    validate_samples_in_case_have_same_bed_version(balsamic_order)
+    errors = validate_samples_in_case_have_same_bed_version(balsamic_order)
+
+    # THEN an error should be raised
+    assert errors == [MultipleCaptureKitError(case_index=0)]

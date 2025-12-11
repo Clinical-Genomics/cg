@@ -7,6 +7,7 @@ from cg.services.orders.validation.errors.case_errors import (
     DoubleTumourError,
     ExistingCaseWithoutAffectedSampleError,
     MoreThanTwoSamplesInCaseError,
+    MultipleCaptureKitError,
     MultiplePrepCategoriesError,
     MultipleSamplesInCaseError,
     NewCaseWithoutAffectedSampleError,
@@ -177,5 +178,7 @@ def validate_samples_in_case_have_same_prep_category(
     return errors
 
 
-def validate_samples_in_case_have_same_bed_version(order: BalsamicOrder):
+def validate_samples_in_case_have_same_bed_version(
+    order: BalsamicOrder,
+) -> list[MultipleCaptureKitError]:
     pass
