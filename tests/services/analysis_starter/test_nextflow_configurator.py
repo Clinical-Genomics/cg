@@ -192,9 +192,9 @@ def test_get_case_config_fake_flags(
     raredisease_configurator: NextflowConfigurator,
     mocker: MockerFixture,
 ):
-    """Test that using flags when configuring a case overrides the case config default values."""
+    """Test that flags with nonsensical names are ignored."""
 
-    # GIVEN a Nextflow configurator
+    # GIVEN a configurator
 
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)
