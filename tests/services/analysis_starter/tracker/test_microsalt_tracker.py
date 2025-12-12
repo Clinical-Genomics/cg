@@ -71,7 +71,7 @@ def test_microsalt_tracker_successful(
         fastq_directory="fastq/dir",
     )
 
-    # GIVEN an order, sample and case
+    # GIVEN an order, sample and case in StatusDB
     order: Order = create_autospec(Order, id=567, ticket_id=ticket_id)
     sample: Sample = create_autospec(Sample, internal_id="microsalt_sample")
 
