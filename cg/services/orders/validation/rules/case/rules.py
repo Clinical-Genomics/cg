@@ -180,13 +180,14 @@ def validate_samples_in_case_have_same_prep_category(
 
 
 def validate_samples_in_case_have_same_bed_version(
-    lims_api: LimsAPI, order: BalsamicOrder, **kwargs
+    lims_api: LimsAPI, order: BalsamicOrder, status_db: Store, **kwargs
 ) -> list[MultipleCaptureKitError]:
     errors: list[MultipleCaptureKitError] = []
     for case_index, case in order.enumerated_new_cases:
         capture_kits: set[str] = set()
         for _, sample in case.enumerated_new_samples:
-            capture_kits.add(sample.capture_kit)
+            capture_kit = status_db.get_bed_by_name(sample.capture_kit).versions[0]
+            capture_kits.add(capture_kit)
         for _, sample in case.enumerated_existing_samples:
             capture_kits.add(lims_api.get_capture_kit_strict(sample.internal_id))
         if len(capture_kits) > 1:
