@@ -269,7 +269,7 @@ def test_case_samples_have_same_bed_versions():
 
     # WHEN validating that samples in a case have the same bed version
     errors = validate_samples_in_case_have_same_bed_version(
-        lims_api=lims_api, order=balsamic_order, status_db=status_db
+        lims_api=lims_api, order=balsamic_order, store=status_db
     )
 
     # THEN no errors should be returned
@@ -314,7 +314,7 @@ def test_case_samples_have_different_bed_versions():
 
     # WHEN validating that samples in a case have the same bed version
     errors = validate_samples_in_case_have_same_bed_version(
-        lims_api=lims_api, order=balsamic_order, status_db=status_db
+        lims_api=lims_api, order=balsamic_order, store=status_db
     )
 
     # THEN an error should be returned
@@ -351,7 +351,7 @@ def test_case_samples_no_bed_versions():
 
     # WHEN validating that samples in a case have the same bed version
     errors = validate_samples_in_case_have_same_bed_version(
-        lims_api=lims_api, order=balsamic_order, status_db=Mock()
+        lims_api=lims_api, order=balsamic_order, store=Mock()
     )
 
     # THEN an error should not be returned
@@ -401,7 +401,7 @@ def test_case_exome_sample_bed_versions():
 
     # WHEN validating that samples in a case have the same bed version
     errors = validate_samples_in_case_have_same_bed_version(
-        lims_api=lims_api, order=balsamic_order, status_db=status_db
+        lims_api=lims_api, order=balsamic_order, store=status_db
     )
 
     # THEN an error should not be returned

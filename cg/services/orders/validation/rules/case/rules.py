@@ -182,12 +182,12 @@ def validate_samples_in_case_have_same_prep_category(
 
 
 def validate_samples_in_case_have_same_bed_version(
-    lims_api: LimsAPI, order: BalsamicOrder | BalsamicUmiOrder, status_db: Store, **kwargs
+    lims_api: LimsAPI, order: BalsamicOrder | BalsamicUmiOrder, store: Store, **kwargs
 ) -> list[MultipleCaptureKitError]:
     errors: list[MultipleCaptureKitError] = []
     for case_index, case in order.enumerated_new_cases:
         capture_kits_for_new_samples: set[str | None] = get_capture_kits_for_new_samples(
-            status_db=status_db, case=case
+            status_db=store, case=case
         )
         capture_kits_for_existing_samples: set[str | None] = get_capture_kits_for_existing_samples(
             case=case, lims_api=lims_api
