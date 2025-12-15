@@ -27,15 +27,12 @@ class MicrosaltTracker(Tracker):
     def _get_job_ids_path(self, case_id: str) -> Path:
         project_id: str = self._get_file_name_start(case_id)
         return Path(
-            self.workflow_root,
-            "results",
-            "reports",
-            "trailblazer",
+            self._get_out_dir_path(case_id),
             f"{project_id}_slurm_ids{FileExtensions.YAML}",
         )
 
     def _get_out_dir_path(self, case_id: str) -> Path:
-        return self._get_job_ids_path(case_id).parent
+        return Path(self.workflow_root, "results", "reports", "trailblazer")
 
     def _get_file_name_start(self, case_id: str) -> str:
         """Returns the LIMS project id if the case contains multiple samples, else the sample id."""
