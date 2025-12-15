@@ -93,6 +93,7 @@ def balsamic_validation_service(
     base_store.add_item_to_store(user)
     base_store.add_item_to_store(balsamic_application)
     bed = base_store.add_bed("GIcfDNA")
+    base_store.add_bed_version(bed=bed, version=1, filename="some/file.bed", shortname="short_name")
     base_store.add_item_to_store(bed)
     base_store.commit_to_store()
     return OrderValidationService(lims_api=create_autospec(LimsAPI), store=base_store)
