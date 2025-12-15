@@ -1,4 +1,5 @@
 from cg.apps.lims.api import LimsAPI
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
     CaseDoesNotExistError,
@@ -32,6 +33,7 @@ from cg.services.orders.validation.rules.case.utils import (
     is_normal_only_wgs,
 )
 from cg.services.orders.validation.rules.case_sample.utils import get_repeated_case_name_errors
+from cg.store.models import Application
 from cg.store.models import Case as DbCase
 from cg.store.store import Store
 
@@ -190,6 +192,14 @@ def validate_samples_in_case_have_same_bed_version(
                 capture_kit = status_db.get_bed_by_name(sample.capture_kit).versions[-1].shortname
                 capture_kits.add(capture_kit)
             else:
+                application: Application | None = status_db.get_application_by_tag(
+                    sample.application
+                )
+                if not application:
+                    return errors
+                else:
+                    if application.prep_category == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
+                        capture_kit = None
                 capture_kits.add(None)
         for _, sample in case.enumerated_existing_samples:
             capture_kits.add(lims_api.capture_kit(sample.internal_id))
