@@ -230,26 +230,6 @@ class MipConfig(BaseModel):
     script: str
 
 
-class NextflowConfig(CommonAppConfig):
-    binary_path: str | None = None
-    config_path: str | None = None
-    container_mount_volume: str | None = None
-    compute_env: str
-    conda_binary: str | None = None
-    conda_env: str
-    platform: str
-    params: str
-    config: str
-    resources: str
-    launch_directory: str
-    workflow_bin_path: str
-    profile: str
-    revision: str
-    root: str
-    slurm: SlurmConfig
-    tower_workflow: str
-
-
 class NalloConfig(CommonAppConfig):
     binary_path: str | None = None
     compute_env: str
