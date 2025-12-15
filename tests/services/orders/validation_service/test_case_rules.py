@@ -355,3 +355,47 @@ def test_case_samples_no_bed_versions():
 
     # THEN an error should not be returned
     assert not errors
+
+
+def test_case_exome_sample_bed_versions():
+    # GIVEN a Balsamic order with samples that have no capture kits
+    balsamic_order = BalsamicOrder(
+        cases=[
+            BalsamicCase(
+                name="BalsamicCase1",
+                samples=[
+                    BalsamicSample(
+                        application="EXOKTTR060",
+                        container=ContainerEnum.tube,
+                        name="sample1",
+                        sex=SexEnum.male,
+                        source="blood",
+                        subject_id="subjectID",
+                    ),
+                    ExistingSample(internal_id="ACC123", father=None, mother=None),
+                ],
+            ),
+        ],
+        customer="cust000",
+        delivery_type=BalsamicDeliveryType.SCOUT,
+        name="BalsamicOrder1",
+        project_type=OrderType.BALSAMIC,
+    )
+
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.capture_kit = Mock(return_value="exome_capture_kit")
+
+    version_old = create_autospec(BedVersion)
+    version_latest = create_autospec(BedVersion, shortname="capture_kit_version1")
+    bed = create_autospec(Bed, versions=[version_old, version_latest])
+
+    status_db: Store = create_autospec(Store)
+    status_db.get_bed_by_name = Mock(return_value=bed)
+
+    # WHEN validating that samples in a case have the same bed version
+    errors = validate_samples_in_case_have_same_bed_version(
+        lims_api=lims_api, order=balsamic_order, status_db=status_db
+    )
+
+    # THEN an error should not be returned
+    assert not errors
