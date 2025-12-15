@@ -257,7 +257,7 @@ def test_case_samples_have_same_bed_versions():
     )
 
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.get_capture_kit_strict = Mock(return_value="capture_kit_version2")
+    lims_api.capture_kit = Mock(return_value="capture_kit_version2")
 
     version_old = create_autospec(BedVersion)
     version_latest = create_autospec(BedVersion, shortname="capture_kit_version2")
@@ -302,7 +302,7 @@ def test_case_samples_have_different_bed_versions():
     )
 
     lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.get_capture_kit_strict = Mock(return_value="capture_kit_version2")
+    lims_api.capture_kit = Mock(return_value="capture_kit_version2")
 
     version_old = create_autospec(BedVersion)
     version_latest = create_autospec(BedVersion, shortname="capture_kit_version1")
@@ -318,3 +318,40 @@ def test_case_samples_have_different_bed_versions():
 
     # THEN an error should be returned
     assert errors == [MultipleCaptureKitError(case_index=0)]
+
+
+def test_case_samples_no_bed_versions():
+    # GIVEN a Balsamic order with samples that have no capture kits
+    balsamic_order = BalsamicOrder(
+        cases=[
+            BalsamicCase(
+                name="BalsamicCase1",
+                samples=[
+                    BalsamicSample(
+                        application="WGSPCFC030",
+                        container=ContainerEnum.tube,
+                        name="sample1",
+                        sex=SexEnum.male,
+                        source="blood",
+                        subject_id="subjectID",
+                    ),
+                    ExistingSample(internal_id="ACC123", father=None, mother=None),
+                ],
+            ),
+        ],
+        customer="cust000",
+        delivery_type=BalsamicDeliveryType.SCOUT,
+        name="BalsamicOrder1",
+        project_type=OrderType.BALSAMIC,
+    )
+
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.capture_kit = Mock(return_value=None)
+
+    # WHEN validating that samples in a case have the same bed version
+    errors = validate_samples_in_case_have_same_bed_version(
+        lims_api=lims_api, order=balsamic_order, status_db=Mock()
+    )
+
+    # THEN an error should not be returned
+    assert not errors

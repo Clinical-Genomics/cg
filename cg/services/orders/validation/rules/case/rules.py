@@ -184,12 +184,15 @@ def validate_samples_in_case_have_same_bed_version(
 ) -> list[MultipleCaptureKitError]:
     errors: list[MultipleCaptureKitError] = []
     for case_index, case in order.enumerated_new_cases:
-        capture_kits: set[str] = set()
+        capture_kits: set[str | None] = set()
         for _, sample in case.enumerated_new_samples:
-            capture_kit = status_db.get_bed_by_name(sample.capture_kit).versions[-1].shortname
-            capture_kits.add(capture_kit)
+            if sample.capture_kit:
+                capture_kit = status_db.get_bed_by_name(sample.capture_kit).versions[-1].shortname
+                capture_kits.add(capture_kit)
+            else:
+                capture_kits.add(None)
         for _, sample in case.enumerated_existing_samples:
-            capture_kits.add(lims_api.get_capture_kit_strict(sample.internal_id))
+            capture_kits.add(lims_api.capture_kit(sample.internal_id))
         if len(capture_kits) > 1:
             error = MultipleCaptureKitError(case_index=case_index)
             errors.append(error)
