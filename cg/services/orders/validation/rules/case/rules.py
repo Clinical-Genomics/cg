@@ -199,8 +199,12 @@ def validate_samples_in_case_have_same_bed_version(
                     return errors
                 else:
                     if application.prep_category == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
-                        capture_kit = status_db.get_latest_exome_bed_version()  # TODO not defined
-                capture_kits.add(None)
+                        capture_kit = status_db.get_latest_bed_version_by_bed_name(
+                            "Twist Exome Comprehensive"
+                        ).shortname
+                        capture_kits.add(capture_kit)
+                    else:
+                        capture_kits.add(None)
         for _, sample in case.enumerated_existing_samples:
             capture_kits.add(lims_api.capture_kit(sample.internal_id))
         if len(capture_kits) > 1:

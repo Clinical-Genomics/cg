@@ -2,6 +2,7 @@ from unittest.mock import Mock, create_autospec
 
 from cg.apps.lims.api import LimsAPI
 from cg.constants import GenePanelMasterList
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
@@ -386,11 +387,17 @@ def test_case_exome_sample_bed_versions():
     lims_api.capture_kit = Mock(return_value="exome_capture_kit")
 
     version_old = create_autospec(BedVersion)
-    version_latest = create_autospec(BedVersion, shortname="capture_kit_version1")
+    version_latest = create_autospec(BedVersion, shortname="exome_capture_kit")
     bed = create_autospec(Bed, versions=[version_old, version_latest])
 
     status_db: Store = create_autospec(Store)
     status_db.get_bed_by_name = Mock(return_value=bed)
+    status_db.get_latest_bed_version_by_bed_name = Mock(return_value=version_latest)
+    status_db.get_application_by_tag = Mock(
+        return_value=create_autospec(
+            Application, prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
+        )
+    )
 
     # WHEN validating that samples in a case have the same bed version
     errors = validate_samples_in_case_have_same_bed_version(
