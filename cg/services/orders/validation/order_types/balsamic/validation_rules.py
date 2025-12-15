@@ -5,6 +5,7 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_case_names_not_repeated,
     validate_existing_cases_belong_to_collaboration,
     validate_number_of_normal_samples,
+    validate_samples_in_case_have_same_bed_version,
 )
 from cg.services.orders.validation.rules.case_sample.rules import (
     reset_optional_capture_kits,
@@ -41,6 +42,7 @@ BALSAMIC_CASE_RULES: list[callable] = [
     validate_case_names_not_repeated,
     validate_existing_cases_belong_to_collaboration,
     validate_number_of_normal_samples,
+    validate_samples_in_case_have_same_bed_version,
 ]
 
 BALSAMIC_CASE_SAMPLE_RULES: list[callable] = [
