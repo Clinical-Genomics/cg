@@ -1,5 +1,4 @@
 from cg.apps.lims.api import LimsAPI
-from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
     CaseDoesNotExistError,
@@ -20,14 +19,14 @@ from cg.services.orders.validation.errors.case_errors import (
 )
 from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
-from cg.services.orders.validation.order_types.balsamic.models.case import BalsamicCase
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
-from cg.services.orders.validation.order_types.balsamic_umi.models.case import BalsamicUmiCase
 from cg.services.orders.validation.order_types.balsamic_umi.models.order import BalsamicUmiOrder
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.order_types.nallo.models.order import NalloOrder
 from cg.services.orders.validation.rules.case.utils import (
     contains_duplicates,
+    get_capture_kits_for_existing_samples,
+    get_capture_kits_for_new_samples,
     get_case_prep_categories,
     is_case_not_from_collaboration,
     is_double_normal,
@@ -35,7 +34,6 @@ from cg.services.orders.validation.rules.case.utils import (
     is_normal_only_wgs,
 )
 from cg.services.orders.validation.rules.case_sample.utils import get_repeated_case_name_errors
-from cg.store.models import Application
 from cg.store.models import Case as DbCase
 from cg.store.store import Store
 
@@ -188,50 +186,13 @@ def validate_samples_in_case_have_same_bed_version(
 ) -> list[MultipleCaptureKitError]:
     errors: list[MultipleCaptureKitError] = []
     for case_index, case in order.enumerated_new_cases:
-        capture_kits: set[str | None] = get_capture_kits_for_new_samples(
+        capture_kits_for_new_samples: set[str | None] = get_capture_kits_for_new_samples(
             status_db=status_db, case=case
         )
-        capture_kits.union(get_capture_kits_for_exisisting_samples(case=case, lims_api=lims_api))
-        if len(capture_kits) > 1:
+        capture_kits_for_existing_samples: set[str | None] = get_capture_kits_for_existing_samples(
+            case=case, lims_api=lims_api
+        )
+        if len(capture_kits_for_new_samples | capture_kits_for_existing_samples) > 1:
             error = MultipleCaptureKitError(case_index=case_index)
             errors.append(error)
     return errors
-
-
-def get_capture_kits_for_exisisting_samples(
-    case: BalsamicCase | BalsamicUmiCase, lims_api: LimsAPI
-):
-    capture_kits: set[str | None] = set()
-    for _, sample in case.enumerated_existing_samples:
-        capture_kits.add(lims_api.capture_kit(sample.internal_id))
-    return capture_kits
-
-
-def get_capture_kits_for_new_samples(
-    status_db: Store, case: BalsamicCase | BalsamicUmiCase
-) -> set[str | None]:
-    capture_kits: set[str | None] = set()
-
-    for _, sample in case.enumerated_new_samples:
-        if sample.capture_kit:
-            capture_kit = status_db.get_bed_by_name(sample.capture_kit).versions[-1].shortname
-            capture_kits.add(capture_kit)
-        else:
-            application: Application | None = status_db.get_application_by_tag(sample.application)
-            if not application:
-                continue
-            capture_kits.add(
-                get_capture_kit_when_missing(application=application, status_db=status_db)
-            )
-
-    return capture_kits
-
-
-def get_capture_kit_when_missing(application: Application, status_db: Store) -> str | None:
-    if application.prep_category == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
-        capture_kit = status_db.get_latest_bed_version_by_bed_name(
-            "Twist Exome Comprehensive"
-        ).shortname
-        return capture_kit
-    else:
-        return None

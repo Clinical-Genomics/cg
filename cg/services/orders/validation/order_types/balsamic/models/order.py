@@ -16,8 +16,8 @@ class BalsamicOrder(OrderWithCases):
     delivery_type: BalsamicDeliveryType
 
     @property
-    def enumerated_new_cases(self) -> list[tuple[int, BalsamicCase | ExistingCase]]:
-        cases: list[tuple[int, BalsamicCase | ExistingCase]] = []
+    def enumerated_new_cases(self) -> list[tuple[int, BalsamicCase]]:
+        cases: list[tuple[int, BalsamicCase]] = []
         for case_index, case in self.enumerated_cases:
             if case.is_new:
                 cases.append((case_index, case))
