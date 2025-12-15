@@ -231,6 +231,11 @@ class MipConfig(BaseModel):
 
 
 class NextflowConfig(BaseModel):
+    """This parent class should contain all attributes which are ubiquitous for Nextflow pipelines.
+    Any child classes should contain attributes which are not.
+    """
+
+    binary_path: str
     compute_env: str
     conda_binary: str
     conda_env: str
@@ -249,12 +254,10 @@ class NextflowConfig(BaseModel):
 
 
 class NalloConfig(NextflowConfig):
-    binary_path: str
     launch_directory: str
 
 
 class RarediseaseConfig(NextflowConfig):
-    binary_path: str
     launch_directory: str
 
 
@@ -263,13 +266,11 @@ class TomteConfig(NextflowConfig):
 
 
 class RnafusionConfig(NextflowConfig):
-    binary_path: str
     launch_directory: str
 
 
 class TaxprofilerConfig(NextflowConfig):
-    binary_path: str
-    databases: str
+    databases: str  # TODO vulture complains this is unused, but it's present in cg.yaml and might be passed in a config file to Nextflow.
     launch_directory: str
 
 

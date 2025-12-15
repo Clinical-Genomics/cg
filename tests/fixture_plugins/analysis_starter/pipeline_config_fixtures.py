@@ -43,15 +43,16 @@ def get_nextflow_config_dict(
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": f"S_{workflow}",
-            "platform": str(nf_analysis_platform_config_path),
-            "params": str(nf_analysis_pipeline_params_path),
             "config": str(nf_analysis_pipeline_config_path),
-            "resources": str(nf_analysis_pipeline_resource_optimisation_path),
+            "databases": Path("path", "to", "databases").as_posix(),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "workflow_bin_path": Path("workflow", "path").as_posix(),
+            "params": str(nf_analysis_pipeline_params_path),
+            "platform": str(nf_analysis_platform_config_path),
+            "pre_run_script": "",
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
             "repository": nextflow_repository,
+            "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "revision": nextflow_pipeline_revision,
             "root": nextflow_root,
             "slurm": {
@@ -59,6 +60,7 @@ def get_nextflow_config_dict(
                 "mail_user": email_address,
             },
             "tower_workflow": workflow,
+            "workflow_bin_path": Path("workflow", "path").as_posix(),
         }
 
     return _make_dict
