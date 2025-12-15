@@ -196,18 +196,23 @@ def validate_samples_in_case_have_same_bed_version(
                     sample.application
                 )
                 if not application:
-                    return errors
-                else:
-                    if application.prep_category == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
-                        capture_kit = status_db.get_latest_bed_version_by_bed_name(
-                            "Twist Exome Comprehensive"
-                        ).shortname
-                        capture_kits.add(capture_kit)
-                    else:
-                        capture_kits.add(None)
+                    continue
+                capture_kits.add(
+                    get_capture_kit_when_missing(application=application, status_db=status_db)
+                )
         for _, sample in case.enumerated_existing_samples:
             capture_kits.add(lims_api.capture_kit(sample.internal_id))
         if len(capture_kits) > 1:
             error = MultipleCaptureKitError(case_index=case_index)
             errors.append(error)
     return errors
+
+
+def get_capture_kit_when_missing(application: Application, status_db: Store) -> str | None:
+    if application.prep_category == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
+        capture_kit = status_db.get_latest_bed_version_by_bed_name(
+            "Twist Exome Comprehensive"
+        ).shortname
+        return capture_kit
+    else:
+        return None
