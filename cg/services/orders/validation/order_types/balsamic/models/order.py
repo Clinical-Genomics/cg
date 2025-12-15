@@ -1,3 +1,5 @@
+from typing import cast
+
 from pydantic import Discriminator, Tag
 from typing_extensions import Annotated
 
@@ -20,5 +22,5 @@ class BalsamicOrder(OrderWithCases):
         cases: list[tuple[int, BalsamicCase]] = []
         for case_index, case in self.enumerated_cases:
             if case.is_new:
-                cases.append((case_index, case))
+                cases.append((case_index, cast(BalsamicCase, case)))
         return cases

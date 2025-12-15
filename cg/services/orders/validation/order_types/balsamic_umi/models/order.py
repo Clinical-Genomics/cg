@@ -1,3 +1,5 @@
+from typing import cast
+
 from pydantic import Discriminator, Tag
 from typing_extensions import Annotated
 
@@ -16,9 +18,9 @@ class BalsamicUmiOrder(BalsamicOrder):
     delivery_type: BalsamicUmiDeliveryType
 
     @property
-    def enumerated_new_cases(self) -> list[tuple[int, BalsamicUmiCase | ExistingCase]]:
-        cases: list[tuple[int, BalsamicUmiCase | ExistingCase]] = []
+    def enumerated_new_cases(self) -> list[tuple[int, BalsamicUmiCase]]:
+        cases: list[tuple[int, BalsamicUmiCase]] = []
         for case_index, case in self.enumerated_cases:
             if case.is_new:
-                cases.append((case_index, case))
+                cases.append((case_index, cast(BalsamicUmiCase, case)))
         return cases
