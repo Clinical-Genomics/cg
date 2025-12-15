@@ -1,5 +1,6 @@
 import logging
 
+from cg.apps.lims.api import LimsAPI
 from cg.exc import OrderError as OrderValidationError
 from cg.models.orders.constants import OrderType
 from cg.services.orders.validation.errors.case_errors import CaseError
@@ -28,8 +29,9 @@ LOG = logging.getLogger(__name__)
 
 
 class OrderValidationService:
-    def __init__(self, store: Store):
+    def __init__(self, store: Store, lims_api: LimsAPI):
         self.store = store
+        self.lims_api = lims_api
 
     def get_validation_response(self, raw_order: dict, order_type: OrderType, user_id: int) -> dict:
         model = ORDER_TYPE_MODEL_MAP[order_type]
@@ -66,7 +68,6 @@ class OrderValidationService:
         return errors
 
     def _get_rule_validation_errors(self, order: Order, rule_set: RuleSet) -> ValidationErrors:
-
         case_errors = []
         case_sample_errors = []
         order_errors: list[OrderError] = apply_order_validation(
@@ -77,8 +78,9 @@ class OrderValidationService:
         sample_errors = []
         if isinstance(order, OrderWithCases):
             case_errors: list[CaseError] = apply_case_validation(
-                rules=rule_set.case_rules,
+                lims_api=self.lims_api,
                 order=order,
+                rules=rule_set.case_rules,
                 store=self.store,
             )
             case_sample_errors: list[CaseSampleError] = apply_case_sample_validation(
