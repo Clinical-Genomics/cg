@@ -1154,6 +1154,14 @@ def test_get_illumina_sequencing_run_by_device_internal_id(
     assert run
     assert run.device.internal_id == novaseq_x_flow_cell_id
 
+def test_get_latest_bed_version_by_bed_name_successful(store: Store):
+    # GIVEN store with one bed two versions
+    bed: Bed =store.add_bed(name="bed")
+    store.add_item_to_store(bed)
+    store.commit_to_store()
+
+    store.add_bed_version(bed=bed, version=1, filename="some_bed_filename.bed", shortname="bed_version_1")
+
 
 def test_case_with_name_exists(
     store_with_case_and_sample_with_reads: Store, downsample_case_internal_id: str
