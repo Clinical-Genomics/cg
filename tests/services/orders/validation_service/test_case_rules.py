@@ -260,14 +260,16 @@ def test_case_samples_have_same_bed_versions():
     lims_api.get_capture_kit_strict = Mock(return_value="capture_kit_version2")
 
     version_old = create_autospec(BedVersion)
-    version_latest = create_autospec(BedVersion)
+    version_latest = create_autospec(BedVersion, shortname="capture_kit_version2")
     bed = create_autospec(Bed, versions=[version_old, version_latest])
 
     status_db: Store = create_autospec(Store)
     status_db.get_bed_by_name = Mock(return_value=bed)
 
     # WHEN validating that samples in a case have the same bed version
-    errors = validate_samples_in_case_have_same_bed_version(lims_api=lims_api, order=balsamic_order)
+    errors = validate_samples_in_case_have_same_bed_version(
+        lims_api=lims_api, order=balsamic_order, status_db=status_db
+    )
 
     # THEN no errors should be returned
     assert not errors
@@ -302,8 +304,17 @@ def test_case_samples_have_different_bed_versions():
     lims_api: LimsAPI = create_autospec(LimsAPI)
     lims_api.get_capture_kit_strict = Mock(return_value="capture_kit_version2")
 
+    version_old = create_autospec(BedVersion)
+    version_latest = create_autospec(BedVersion, shortname="capture_kit_version1")
+    bed = create_autospec(Bed, versions=[version_old, version_latest])
+
+    status_db: Store = create_autospec(Store)
+    status_db.get_bed_by_name = Mock(return_value=bed)
+
     # WHEN validating that samples in a case have the same bed version
-    errors = validate_samples_in_case_have_same_bed_version(lims_api=lims_api, order=balsamic_order)
+    errors = validate_samples_in_case_have_same_bed_version(
+        lims_api=lims_api, order=balsamic_order, status_db=status_db
+    )
 
     # THEN an error should be returned
     assert errors == [MultipleCaptureKitError(case_index=0)]
