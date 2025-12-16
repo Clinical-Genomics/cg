@@ -160,7 +160,7 @@
   tag: vcf_str_index
 - format: meta
   id: CASEID
-  path: /home/proj/production/workflows/nallo/references/v0.3.1/grch38_trgt_pathogenic_repeats.bed
+  path: /home/proj/production/workflows/nallo/references/v0.4.0/grch38_trgt_pathogenic_repeats.bed
   step: trgt
   tag: variant_catalog
 - format: vcf
