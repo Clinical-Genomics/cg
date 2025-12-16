@@ -1,6 +1,5 @@
 """Module for Raredisease Analysis API."""
 
-import csv
 import logging
 from itertools import permutations
 from pathlib import Path
@@ -24,22 +23,15 @@ from cg.constants.nf_analysis import (
     RAREDISEASE_METRIC_CONDITIONS_WGS,
     RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
 )
-from cg.constants.scout import RAREDISEASE_CASE_TAGS, ScoutExportFileName
+from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
-from cg.constants.tb import AnalysisType
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
-from cg.models.raredisease.raredisease import (
-    RarediseaseParameters,
-    RarediseaseQCMetrics,
-    RarediseaseSampleSheetEntry,
-    RarediseaseSampleSheetHeaders,
-)
+from cg.models.raredisease.raredisease import RarediseaseQCMetrics
 from cg.resources import RAREDISEASE_BUNDLE_FILENAMES_PATH
-from cg.store.models import CaseSample, Sample
+from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -70,26 +62,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.compute_env_base: str = config.raredisease.compute_env
         self.revision: str = config.raredisease.revision
         self.nextflow_binary_path: str = config.raredisease.binary_path
-
-    @staticmethod
-    def get_phenotype_code(phenotype: str) -> int:
-        """Return Raredisease phenotype code."""
-        LOG.debug("Translate phenotype to integer code")
-        try:
-            code = PlinkPhenotypeStatus[phenotype.upper()]
-        except KeyError:
-            raise ValueError(f"{phenotype} is not a valid phenotype")
-        return code
-
-    @staticmethod
-    def get_sex_code(sex: str) -> int:
-        """Return Raredisease sex code."""
-        LOG.debug("Translate sex to integer code")
-        try:
-            code = PlinkSex[sex.upper()]
-        except KeyError:
-            raise ValueError(f"{sex} is not a valid sex")
-        return code
 
     @staticmethod
     def get_bundle_filenames_path() -> Path:
@@ -218,20 +190,3 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         return super().parse_analysis(
             qc_metrics_raw=qc_metrics_raw, qc_metrics_model=qc_metrics_model, **kwargs
         )
-
-    def get_sample_name_mapping_csv_path(self, case: str) -> Path:
-        """Return the path to the CSV file containing the mapping between sample names and internal ids."""
-        return Path(self.get_case_path(case), f"{case}_customer_internal_mapping.csv")
-
-    def export_customer_internal_mapping_csv(self, case: str, output_path: Path):
-        """Export a CSV file mapping customer sample names to internal sample IDs."""
-        LOG.info(f"Exporting customer internal mapping CSV for case {case} to {output_path}")
-        with output_path.open("w", newline="") as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(
-                ["customer_id", "internal_id"]
-            )  # this is the header expected by the pipeline
-            for link in self.status_db.get_case_by_internal_id(case).links:
-                customer_sample_name = link.sample.name
-                internal_id = link.sample.internal_id
-                writer.writerow([customer_sample_name, internal_id])

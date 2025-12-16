@@ -15,7 +15,7 @@ from cg.clients.chanjo2.models import (
     CoverageSample,
 )
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat, GenomeVersion
+from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import (
     NALLO_COVERAGE_FILE_TAGS,
     NALLO_COVERAGE_INTERVAL_TYPE,
@@ -24,21 +24,15 @@ from cg.constants.nf_analysis import (
     NALLO_PARENT_PEDDY_METRIC_CONDITION,
     NALLO_RAW_METRIC_CONDITIONS,
 )
-from cg.constants.scout import NALLO_CASE_TAGS, ScoutExportFileName
-from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
-from cg.io.controller import WriteFile
+from cg.constants.scout import NALLO_CASE_TAGS
+from cg.constants.subject import PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
-from cg.models.nallo.nallo import (
-    NalloParameters,
-    NalloQCMetrics,
-    NalloSampleSheetEntry,
-    NalloSampleSheetHeaders,
-)
+from cg.models.nallo.nallo import NalloQCMetrics
 from cg.resources import NALLO_BUNDLE_FILENAMES_PATH
-from cg.store.models import CaseSample, Sample
+from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -69,26 +63,6 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         self.compute_env_base: str = config.nallo.compute_env
         self.revision: str = config.nallo.revision
         self.nextflow_binary_path: str = config.nallo.binary_path
-
-    @staticmethod
-    def get_phenotype_code(phenotype: str) -> int:
-        """Return Nallo phenotype code."""
-        LOG.debug("Translate phenotype to integer code")
-        try:
-            code = PlinkPhenotypeStatus[phenotype.upper()]
-        except KeyError:
-            raise ValueError(f"{phenotype} is not a valid phenotype")
-        return code
-
-    @staticmethod
-    def get_sex_code(sex: str) -> int:
-        """Return Nallo sex code."""
-        LOG.debug("Translate sex to integer code")
-        try:
-            code = PlinkSex[sex.upper()]
-        except KeyError:
-            raise ValueError(f"{sex} is not a valid sex")
-        return code
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a Nallo case. Currently fixed for hg38."""

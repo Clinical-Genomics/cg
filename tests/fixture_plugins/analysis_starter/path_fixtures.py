@@ -15,6 +15,7 @@ def raredisease_work_dir_path(raredisease_case_path: Path, raredisease_case_id: 
     return Path(raredisease_case_path, "work")
 
 
+# TODO: Remove or rename
 @pytest.fixture(scope="function")
 def raredisease_gene_panel_path2(nextflow_case_path: Path) -> Path:
     """Path to gene panel file."""

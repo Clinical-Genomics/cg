@@ -1,6 +1,4 @@
-import copy
 import logging
-import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterator, Type
@@ -17,16 +15,12 @@ from cg.constants.constants import (
     MultiQC,
     WorkflowManager,
 )
-from cg.constants.gene_panel import GenePanelGenomeBuild
-from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
-from cg.io.txt import concat_txt, write_txt
-from cg.io.yaml import read_yaml, write_yaml_nextflow_style
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.analysis import NextflowAnalysis
@@ -37,14 +31,9 @@ from cg.models.deliverables.metric_deliverables import (
     MultiqcDataJson,
 )
 from cg.models.fastq import FastqFileMeta
-from cg.models.nf_analysis import (
-    FileDeliverable,
-    NfCommandArgs,
-    WorkflowDeliverables,
-    WorkflowParameters,
-)
+from cg.models.nf_analysis import FileDeliverable, NfCommandArgs, WorkflowDeliverables
 from cg.models.qc_metrics import QCMetrics
-from cg.store.models import Analysis, Case, CaseSample, Sample
+from cg.store.models import Analysis, Case, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -96,11 +85,6 @@ class NfAnalysisAPI(AnalysisAPI):
         If false, pattern must be present but does not need to be exact."""
         return False
 
-    @property
-    def is_managed_variants_required(self) -> bool:
-        """Return True if a managed variant export needs to be exported it from Scout."""
-        return False
-
     def get_profile(self, profile: str | None = None) -> str:
         """Get NF profiles."""
         return profile or self.profile
@@ -112,27 +96,6 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_workflow_version(self, case_id: str) -> str:
         """Get workflow version from config."""
         return self.revision
-
-    def get_built_workflow_parameters(
-        self, case_id: str, dry_run: bool = False
-    ) -> WorkflowParameters:
-        """Return workflow parameters."""
-        raise NotImplementedError
-
-    def get_nextflow_config_content(self, case_id: str) -> str:
-        """Return nextflow config content."""
-        config_files_list: list[str] = [
-            self.platform,
-            self.workflow_config_path,
-            self.resources,
-        ]
-        extra_parameters_str: list[str] = [
-            self.set_cluster_options(case_id=case_id),
-        ]
-        return concat_txt(
-            file_paths=config_files_list,
-            str_content=extra_parameters_str,
-        )
 
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
@@ -182,11 +145,6 @@ class NfAnalysisAPI(AnalysisAPI):
             FileExtensions.YAML
         )
 
-    def create_case_directory(self, case_id: str, dry_run: bool = False) -> None:
-        """Create case directory."""
-        if not dry_run:
-            Path(self.get_case_path(case_id=case_id)).mkdir(parents=True, exist_ok=True)
-
     def get_log_path(self, case_id: str, workflow: str) -> Path:
         """Path to NF log."""
         launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
@@ -200,15 +158,6 @@ class NfAnalysisAPI(AnalysisAPI):
         if work_dir:
             return work_dir.absolute()
         return Path(self.get_case_path(case_id), NFX_WORK_DIR)
-
-    def get_gene_panels_path(self, case_id: str) -> Path:
-        """Path to gene panels bed file exported from Scout."""
-        return Path(self.get_case_path(case_id=case_id), "gene_panels").with_suffix(
-            FileExtensions.BED
-        )
-
-    def set_cluster_options(self, case_id: str) -> str:
-        return f'process.clusterOptions = "-A {self.account} --qos={self.get_slurm_qos_for_case(case_id=case_id)}"\n'
 
     @staticmethod
     def extract_read_files(
@@ -228,30 +177,6 @@ class NfAnalysisAPI(AnalysisAPI):
             if fastq_file.read_direction == read_direction
         ]
 
-    def get_paired_read_paths(self, sample: Sample) -> tuple[list[str], list[str]]:
-        """Returns a tuple of paired fastq file paths for the forward and reverse read."""
-        sample_metadata: list[FastqFileMeta] = self.gather_file_metadata_for_sample(sample=sample)
-        fastq_forward_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata, forward_read=True
-        )
-        fastq_reverse_read_paths: list[str] = self.extract_read_files(
-            metadata=sample_metadata, reverse_read=True
-        )
-        return fastq_forward_read_paths, fastq_reverse_read_paths
-
-    def get_bam_read_file_paths(self, sample: Sample) -> list[Path]:
-        """Gather BAM file path for a sample based on the BAM tag."""
-        return [
-            Path(hk_file.full_path)
-            for hk_file in self.housekeeper_api.files(
-                bundle=sample.internal_id, tags={AlignmentFileTag.BAM}
-            )
-        ]
-
-    def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
-        """Collect and format information required to build a sample sheet for a single sample."""
-        raise NotImplementedError
-
     def verify_sample_sheet_exists(self, case_id: str, dry_run: bool = False) -> None:
         """Raise an error if sample sheet file is not found."""
         if not dry_run and not Path(self.get_sample_sheet_path(case_id=case_id)).exists():
@@ -261,17 +186,6 @@ class NfAnalysisAPI(AnalysisAPI):
         """Raise an error if a deliverable file is not found."""
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
-
-    def write_params_file(self, case_id: str, replaced_workflow_parameters: dict = None) -> None:
-        """Write params-file for analysis."""
-        LOG.debug("Writing parameters file")
-        if replaced_workflow_parameters:
-            write_yaml_nextflow_style(
-                content=replaced_workflow_parameters,
-                file_path=self.get_params_file_path(case_id=case_id),
-            )
-        else:
-            self.get_params_file_path(case_id=case_id).touch()
 
     @staticmethod
     def write_deliverables_file(
@@ -291,16 +205,6 @@ class NfAnalysisAPI(AnalysisAPI):
             file_format=FileFormat.YAML,
             file_path=config_path,
         )
-
-    def create_nextflow_config(self, case_id: str, dry_run: bool = False) -> None:
-        """Create nextflow config file."""
-        if content := self.get_nextflow_config_content(case_id=case_id):
-            LOG.debug("Writing nextflow config file")
-            if not dry_run:
-                write_txt(
-                    content=content,
-                    file_path=self.get_nextflow_config_path(case_id=case_id),
-                )
 
     def _run_analysis_with_nextflow(
         self, case_id: str, command_args: NfCommandArgs, dry_run: bool
@@ -793,24 +697,6 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         raise NotImplementedError
-
-    def get_gene_panel_genome_build(self, case_id: str) -> GenePanelGenomeBuild:
-        """Return build version of the gene panel for a case."""
-        reference_genome: GenomeVersion = self.get_genome_build(case_id=case_id)
-        try:
-            return getattr(GenePanelGenomeBuild, reference_genome)
-        except AttributeError as error:
-            raise CgError(
-                f"Reference {reference_genome} has no associated genome build for panels: {error}"
-            ) from error
-
-    def get_gene_panel(self, case_id: str, dry_run: bool = False) -> list[str]:
-        """Create and return the aggregated gene panel file."""
-        return self._get_gene_panel(
-            case_id=case_id,
-            genome_build=self.get_gene_panel_genome_build(case_id=case_id),
-            dry_run=dry_run,
-        )
 
     def parse_analysis(
         self, qc_metrics_raw: list[MetricsBase], qc_metrics_model: Type[QCMetrics], **kwargs

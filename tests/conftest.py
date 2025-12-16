@@ -41,10 +41,8 @@ from cg.constants.constants import (
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AlignmentFileTag
 from cg.constants.priority import SlurmQos
-from cg.constants.scout import ScoutExportFileName
 from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
-from cg.constants.tb import AnalysisType
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json, write_json
 from cg.io.yaml import read_yaml, write_yaml
@@ -59,11 +57,7 @@ from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
 from cg.models.compression_data import CompressionData
 from cg.models.downsample.downsample_data import DownsampleData
-from cg.models.nallo.nallo import NalloSampleSheetHeaders
-from cg.models.raredisease.raredisease import RarediseaseParameters, RarediseaseSampleSheetHeaders
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
-from cg.models.taxprofiler.taxprofiler import TaxprofilerParameters, TaxprofilerSampleSheetEntry
-from cg.models.tomte.tomte import TomteParameters, TomteSampleSheetHeaders
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
@@ -2597,6 +2591,7 @@ def bam_unmapped_read_paths(housekeeper_dir: Path) -> Path:
     return bam_unmapped_read_path
 
 
+# TODO: Remove?
 @pytest.fixture(scope="session")
 def sequencing_platform() -> str:
     """Return a default sequencing platform."""
@@ -2710,15 +2705,6 @@ def nallo_dir(tmpdir_factory, apps_dir: Path) -> str:
 
 
 @pytest.fixture(scope="function")
-def nallo_config(nallo_dir: Path, nallo_case_id: str) -> None:
-    """Create Nallo samplesheet.csv file for testing"""
-    Path.mkdir(Path(nallo_dir, nallo_case_id), parents=True, exist_ok=True)
-    Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_samplesheet").with_suffix(
-        FileExtensions.CSV
-    ).touch(exist_ok=True)
-
-
-@pytest.fixture(scope="function")
 def nallo_deliverable_data(nallo_dir: Path, nallo_case_id: str, sample_id: str) -> dict:
     return {
         "files": [
@@ -2765,12 +2751,6 @@ def nallo_malformed_hermes_deliverables(nallo_hermes_deliverables: dict) -> dict
     malformed_deliverable: dict = nallo_hermes_deliverables.copy()
     malformed_deliverable.pop("workflow")
     return malformed_deliverable
-
-
-@pytest.fixture(scope="function")
-def nallo_gene_panel_path(nallo_dir, nallo_case_id) -> Path:
-    """Path to gene panel file."""
-    return Path(nallo_dir, nallo_case_id, "gene_panels").with_suffix(FileExtensions.TSV)
 
 
 @pytest.fixture(scope="function")
@@ -2865,53 +2845,6 @@ def nallo_multiqc_json_metrics(nallo_analysis_dir) -> dict:
     return read_json(file_path=Path(nallo_analysis_dir, multiqc_json_file))
 
 
-@pytest.fixture(scope="function")
-def nallo_nextflow_config_file_path(nallo_dir, nallo_case_id) -> Path:
-    """Path to config file."""
-    return Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_nextflow_config").with_suffix(
-        FileExtensions.JSON
-    )
-
-
-@pytest.fixture(scope="function")
-def nallo_params_file_path(nallo_dir, nallo_case_id) -> Path:
-    """Path to parameters file."""
-    return Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_params_file").with_suffix(
-        FileExtensions.YAML
-    )
-
-
-@pytest.fixture(scope="function")
-def nallo_sample_sheet_content(
-    sample_id: str,
-    nallo_case_id: str,
-    bam_unmapped_read_paths: Path,
-) -> str:
-    """Return the expected sample sheet content for Nallo."""
-    headers: str = ",".join(NalloSampleSheetHeaders.list())
-    row: str = ",".join(
-        [
-            nallo_case_id,
-            sample_id,
-            bam_unmapped_read_paths.as_posix(),
-            nallo_case_id,
-            "0",
-            "0",
-            "2",
-            "2",
-        ]
-    )
-    return "\n".join([headers, row])
-
-
-@pytest.fixture(scope="function")
-def nallo_sample_sheet_path(nallo_dir, nallo_case_id) -> Path:
-    """Path to sample sheet."""
-    return Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_samplesheet").with_suffix(
-        FileExtensions.CSV
-    )
-
-
 # Raredisease fixtures
 @pytest.fixture(scope="function")
 def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
@@ -2924,31 +2857,6 @@ def raredisease_dir(tmpdir_factory, apps_dir: Path) -> str:
 def raredisease_case_id() -> str:
     """Returns a raredisease case id."""
     return "raredisease_case_enough_reads"
-
-
-@pytest.fixture(scope="function")
-def raredisease_sample_sheet_content(
-    sample_id: str,
-    raredisease_case_id: str,
-    fastq_forward_read_path: Path,
-    fastq_reverse_read_path: Path,
-) -> str:
-    """Return the expected sample sheet content  for raredisease."""
-    headers: str = ",".join(RarediseaseSampleSheetHeaders.list())
-    row: str = ",".join(
-        [
-            sample_id,
-            "1",
-            fastq_forward_read_path.as_posix(),
-            fastq_reverse_read_path.as_posix(),
-            "2",
-            "0",
-            "",
-            "",
-            raredisease_case_id,
-        ]
-    )
-    return "\n".join([headers, row])
 
 
 @pytest.fixture(scope="function")
@@ -2976,45 +2884,6 @@ def raredisease_deliverables_file_path(raredisease_dir, raredisease_case_id) -> 
     return Path(
         raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_deliverables"
     ).with_suffix(FileExtensions.YAML)
-
-
-@pytest.fixture
-def raredisease_gene_panel_path(raredisease_case_path: Path) -> Path:
-    """Path to gene panel file."""
-    return Path(raredisease_case_path, "gene_panels").with_suffix(FileExtensions.BED)
-
-
-@pytest.fixture(scope="function")
-def raredisease_sample_id_map(raredisease_dir: str, raredisease_case_id: str) -> Path:
-    """Return sample id map path."""
-    return Path(
-        raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_customer_internal_mapping"
-    ).with_suffix(FileExtensions.CSV)
-
-
-@pytest.fixture(scope="function")
-def raredisease_parameters_default(
-    raredisease_dir: Path,
-    raredisease_case_id: str,
-    raredisease_sample_sheet_path: Path,
-    bed_version_file_name: str,
-    raredisease_sample_id_map: Path,
-) -> RarediseaseParameters:
-    """Return Tomte parameters."""
-    return RarediseaseParameters(
-        input=raredisease_sample_sheet_path,
-        outdir=Path(raredisease_dir, raredisease_case_id),
-        target_bed_file=bed_version_file_name,
-        analysis_type=AnalysisType.WES,
-        save_mapped_as_cram=True,
-        sample_id_map=raredisease_sample_id_map,
-        vcfanno_extra_resources=str(
-            Path(raredisease_dir, raredisease_case_id + ScoutExportFileName.MANAGED_VARIANTS)
-        ),
-        vep_filters_scout_fmt=str(
-            Path(raredisease_dir, raredisease_case_id + ScoutExportFileName.PANELS)
-        ),
-    )
 
 
 @pytest.fixture(scope="function")
@@ -3620,45 +3489,6 @@ def tomte_dir(tmpdir_factory, apps_dir: Path) -> str:
 
 
 @pytest.fixture(scope="function")
-def tomte_sample_sheet_path(tomte_dir, tomte_case_id) -> Path:
-    """Path to sample sheet."""
-    return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_samplesheet").with_suffix(
-        FileExtensions.CSV
-    )
-
-
-@pytest.fixture(scope="function")
-def tomte_params_file_path(tomte_dir, tomte_case_id) -> Path:
-    """Path to parameters file."""
-    return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_params_file").with_suffix(
-        FileExtensions.YAML
-    )
-
-
-@pytest.fixture(scope="function")
-def tomte_nextflow_config_file_path(tomte_dir, tomte_case_id) -> Path:
-    """Path to config file."""
-    return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_nextflow_config").with_suffix(
-        FileExtensions.JSON
-    )
-
-
-@pytest.fixture(scope="function")
-def tomte_gene_panel_path(tomte_dir, tomte_case_id) -> Path:
-    """Path to gene panel file."""
-    return Path(tomte_dir, tomte_case_id, "gene_panels").with_suffix(FileExtensions.BED)
-
-
-@pytest.fixture(scope="function")
-def tomte_config(tomte_dir: Path, tomte_case_id: str) -> None:
-    """Create Tomte samplesheet.csv file for testing."""
-    Path.mkdir(Path(tomte_dir, tomte_case_id), parents=True, exist_ok=True)
-    Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_samplesheet").with_suffix(
-        FileExtensions.CSV
-    ).touch(exist_ok=True)
-
-
-@pytest.fixture(scope="function")
 def tomte_metrics_deliverables_path(tomte_dir: Path, tomte_case_id: str) -> Path:
     """Path to deliverables file."""
     return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_metrics_deliverables").with_suffix(
@@ -3733,28 +3563,6 @@ def tomte_mock_deliverable_dir(
 def strandedness() -> str:
     """Return a default strandedness."""
     return Strandedness.REVERSE
-
-
-@pytest.fixture(scope="function")
-def tomte_sample_sheet_content(
-    tomte_case_id: str,
-    sample_id: str,
-    fastq_forward_read_path: Path,
-    fastq_reverse_read_path: Path,
-    strandedness: str,
-) -> str:
-    """Return the expected sample sheet content for tomte."""
-    headers: str = ",".join(TomteSampleSheetHeaders.list())
-    row: str = ",".join(
-        [
-            tomte_case_id,
-            sample_id,
-            fastq_forward_read_path.as_posix(),
-            fastq_reverse_read_path.as_posix(),
-            strandedness,
-        ]
-    )
-    return "\n".join([headers, row])
 
 
 @pytest.fixture(scope="function")
@@ -3842,24 +3650,6 @@ def tomte_deliverables_response_data(
 
 
 @pytest.fixture(scope="function")
-def tomte_parameters_default(
-    tomte_dir: Path,
-    tomte_case_id: str,
-    tomte_sample_sheet_path: Path,
-    tomte_gene_panel_path: Path,
-    existing_directory: Path,
-) -> TomteParameters:
-    """Return Tomte parameters."""
-    return TomteParameters(
-        input=tomte_sample_sheet_path,
-        outdir=Path(tomte_dir, tomte_case_id),
-        gene_panel_clinical_filter=tomte_gene_panel_path,
-        tissue="unkown",
-        genome="hg38",
-    )
-
-
-@pytest.fixture(scope="function")
 def tomte_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
@@ -3935,15 +3725,6 @@ def tomte_context(
 # Taxprofiler fixtures
 
 
-@pytest.fixture(scope="function")
-def taxprofiler_config(taxprofiler_dir: Path, taxprofiler_case_id: str) -> None:
-    """Create CSV sample sheet file for testing."""
-    Path.mkdir(Path(taxprofiler_dir, taxprofiler_case_id), parents=True, exist_ok=True)
-    Path(taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet").with_suffix(
-        FileExtensions.CSV
-    ).touch(exist_ok=True)
-
-
 @pytest.fixture(scope="session")
 def taxprofiler_case_id() -> str:
     """Returns a taxprofiler case id."""
@@ -3964,52 +3745,6 @@ def taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="function")
-def taxprofiler_sample_sheet_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
-    """Path to sample sheet."""
-    return Path(
-        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_samplesheet"
-    ).with_suffix(FileExtensions.CSV)
-
-
-@pytest.fixture(scope="function")
-def taxprofiler_nextflow_config_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
-    """Path to config file."""
-    return Path(
-        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_nextflow_config"
-    ).with_suffix(FileExtensions.JSON)
-
-
-@pytest.fixture(scope="function")
-def taxprofiler_sample_sheet_content(
-    sample_name: str,
-    sequencing_platform: str,
-    fastq_forward_read_path: Path,
-    fastq_reverse_read_path: Path,
-) -> str:
-    """Return the expected sample sheet content  for taxprofiler."""
-    headers: str = ",".join(TaxprofilerSampleSheetEntry.headers())
-    row: str = ",".join(
-        [
-            sample_name,
-            "1",
-            sequencing_platform,
-            fastq_forward_read_path.as_posix(),
-            fastq_reverse_read_path.as_posix(),
-            "",
-        ]
-    )
-    return "\n".join([headers, row])
-
-
-@pytest.fixture(scope="function")
-def taxprofiler_params_file_path(taxprofiler_dir, taxprofiler_case_id) -> Path:
-    """Path to parameters file."""
-    return Path(
-        taxprofiler_dir, taxprofiler_case_id, f"{taxprofiler_case_id}_params_file"
-    ).with_suffix(FileExtensions.YAML)
-
-
-@pytest.fixture(scope="function")
 def taxprofiler_hermes_deliverables(
     taxprofiler_deliverable_data: dict, taxprofiler_case_id: str
 ) -> dict:
@@ -4027,20 +3762,6 @@ def taxprofiler_malformed_hermes_deliverables(taxprofiler_hermes_deliverables: d
     malformed_deliverable: dict = taxprofiler_hermes_deliverables.copy()
     malformed_deliverable.pop("workflow")
     return malformed_deliverable
-
-
-@pytest.fixture(scope="function")
-def taxprofiler_parameters_default(
-    taxprofiler_dir: Path,
-    taxprofiler_case_id: str,
-    taxprofiler_sample_sheet_path: Path,
-    existing_directory: Path,
-) -> TaxprofilerParameters:
-    """Return Taxprofiler parameters."""
-    return TaxprofilerParameters(
-        input=taxprofiler_sample_sheet_path,
-        outdir=Path(taxprofiler_dir, taxprofiler_case_id),
-    )
 
 
 @pytest.fixture(scope="function")
@@ -4302,28 +4023,6 @@ def nf_analysis_housekeeper(
     }
     helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
     return housekeeper_api
-
-
-@pytest.fixture(scope="session")
-def expected_total_reads() -> int:
-    return 1_000_000
-
-
-@pytest.fixture
-def expected_average_q30_for_sample() -> float:
-    """Return expected average Q30 for a sample."""
-    return (85.5 + 80.5) / 2
-
-
-@pytest.fixture
-def expected_average_q30_for_flow_cell() -> float:
-    return (((85.5 + 80.5) / 2) + ((83.5 + 81.5) / 2)) / 2
-
-
-@pytest.fixture
-def expected_total_reads_hiseq_x_flow_cell() -> int:
-    """Return an expected read count"""
-    return 8_000_000
 
 
 @pytest.fixture

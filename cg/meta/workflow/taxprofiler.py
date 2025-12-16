@@ -5,19 +5,13 @@ from pathlib import Path
 
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
-from cg.constants.sequencing import SequencingPlatform
-from cg.constants.symbols import EMPTY_STRING
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
-from cg.models.taxprofiler.taxprofiler import (
-    TaxprofilerParameters,
-    TaxprofilerQCMetrics,
-    TaxprofilerSampleSheetEntry,
-)
+from cg.models.taxprofiler.taxprofiler import TaxprofilerQCMetrics
 from cg.resources import TAXPROFILER_BUNDLE_FILENAMES_PATH
-from cg.store.models import CaseSample, Sample
+from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -58,15 +52,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def get_bundle_filenames_path() -> Path:
         """Return Taxprofiler bundle filenames path."""
         return TAXPROFILER_BUNDLE_FILENAMES_PATH
-
-    def get_built_workflow_parameters(
-        self, case_id: str, dry_run: bool = False
-    ) -> TaxprofilerParameters:
-        """Return Taxprofiler parameters."""
-        return TaxprofilerParameters(
-            input=self.get_sample_sheet_path(case_id=case_id),
-            outdir=self.get_case_path(case_id=case_id),
-        )
 
     def get_multiqc_search_patterns(self, case_id: str) -> dict:
         """Return search patterns for MultiQC for Taxprofiler."""
