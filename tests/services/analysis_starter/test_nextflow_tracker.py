@@ -1,11 +1,10 @@
 from datetime import datetime
-from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
 import pytest
 
 from cg.apps.environ import environ_email
-from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Priority
 from cg.constants.constants import Workflow, WorkflowManager
@@ -49,7 +48,7 @@ def test_nextflow_tracker():
 
     # GIVEN a NextflowTracker
     nextflow_tracker = NextflowTracker(
-        store=store.as_type, trailblazer_api=tb_api, workflow_root="some-root"
+        store=store.as_type, trailblazer_api=tb_api, workflow_root="some-workflow-root"
     )
 
     # GIVEN a NextflowCaseConfig for raredisease
@@ -72,14 +71,13 @@ def test_nextflow_tracker():
     nextflow_tracker.track(case_config=case_config)
 
     # THEN the appropriate POST should have been sent
-    config_path: Path = nextflow_tracker._get_job_ids_path(case_id)
     expected_request_body: dict = {
         "analysis_type": AnalysisType.WGS,
         "case_id": case_id,
         "email": environ_email(),
-        "config_path": config_path.as_posix(),
+        "config_path": None,
         "order_id": case.latest_order.id,
-        "out_dir": config_path.parent.as_posix(),
+        "out_dir": "some-workflow-root/case_id",
         "priority": nextflow_tracker._get_trailblazer_priority(case_id),
         "workflow": Workflow.RAREDISEASE,
         "ticket": ticket_id,
