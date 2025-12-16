@@ -30,7 +30,6 @@ from cg.models.deliverables.metric_deliverables import (
     MetricsDeliverablesCondition,
     MultiqcDataJson,
 )
-from cg.models.fastq import FastqFileMeta
 from cg.models.nf_analysis import FileDeliverable, NfCommandArgs, WorkflowDeliverables
 from cg.models.qc_metrics import QCMetrics
 from cg.store.models import Analysis, Case, Sample
@@ -158,24 +157,6 @@ class NfAnalysisAPI(AnalysisAPI):
         if work_dir:
             return work_dir.absolute()
         return Path(self.get_case_path(case_id), NFX_WORK_DIR)
-
-    @staticmethod
-    def extract_read_files(
-        metadata: list[FastqFileMeta], forward_read: bool = False, reverse_read: bool = False
-    ) -> list[str]:
-        """Extract a list of fastq file paths for either forward or reverse reads."""
-        if forward_read and not reverse_read:
-            read_direction = 1
-        elif reverse_read and not forward_read:
-            read_direction = 2
-        else:
-            raise ValueError("Either forward or reverse needs to be specified")
-        sorted_metadata: list = sorted(metadata, key=lambda k: k.path)
-        return [
-            fastq_file.path
-            for fastq_file in sorted_metadata
-            if fastq_file.read_direction == read_direction
-        ]
 
     def verify_sample_sheet_exists(self, case_id: str, dry_run: bool = False) -> None:
         """Raise an error if sample sheet file is not found."""

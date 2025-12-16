@@ -3,11 +3,6 @@ from pathlib import Path
 from pydantic import BaseModel, field_validator
 
 
-class WorkflowParameters(BaseModel):
-    input: Path
-    outdir: Path
-
-
 class NfCommandArgs(BaseModel):
     """Model for arguments and options supported."""
 

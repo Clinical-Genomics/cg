@@ -3,7 +3,6 @@ from typing import Annotated
 from pydantic import BeforeValidator, Field
 
 from cg.constants import SexOptions
-from cg.models.nf_analysis import WorkflowParameters
 from cg.models.qc_metrics import QCMetrics
 
 
@@ -26,10 +25,3 @@ class NalloQCMetrics(QCMetrics):
     median_coverage: float | None
     percent_duplicates: float | None
     predicted_sex: Annotated[SexOptions, BeforeValidator(convert_sex)] = Field(alias="somalier_sex")
-
-
-# TODO: Move
-class NalloParameters(WorkflowParameters):
-    """Model for Nallo parameters."""
-
-    filter_variants_hgnc_ids: str
