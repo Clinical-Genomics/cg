@@ -217,10 +217,20 @@
   id: CASEID
   path: PATHTOCASE/svs/family/CASEID/CASEID_sawfish_svs.vcf.gz
   step: svs_per_caller
-  tag: vcf_severus
+  tag: vcf_sawfish
 - format: vcf
   id: CASEID
   path: PATHTOCASE/svs/family/CASEID/CASEID_sawfish_svs.vcf.gz.tbi
+  step: svs_per_caller
+  tag: vcf_sawfish_index
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_severus_svs.vcf.gz
+  step: svs_per_caller
+  tag: vcf_severus
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_severus_svs.vcf.gz.tbi
   step: svs_per_caller
   tag: vcf_severus_index
 - format: vcf
