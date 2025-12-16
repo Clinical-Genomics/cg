@@ -39,7 +39,7 @@ from cg.store.models import (
     Order,
     Organism,
     PacbioSampleSequencingMetrics,
-    PacbioSequencingRun,
+    PacbioSMRTCellMetrics,
     Panel,
     Pool,
     Sample,
@@ -158,7 +158,7 @@ def _register_admin_views():
     ext.admin.add_view(
         admin.IlluminaSampleSequencingMetricsView(IlluminaSampleSequencingMetrics, ext.db.session)
     )
-    ext.admin.add_view(admin.PacbioSmrtCellView(PacbioSequencingRun, ext.db.session))
+    ext.admin.add_view(admin.PacbioSmrtCellView(PacbioSMRTCellMetrics, ext.db.session))
     ext.admin.add_view(
         admin.PacbioSampleRunMetricsView(PacbioSampleSequencingMetrics, ext.db.session)
     )

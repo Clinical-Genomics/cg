@@ -19,7 +19,7 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSMRTCellDTO,
 )
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.store.models import PacbioSequencingRun, PacbioSMRTCell
+from cg.store.models import PacbioSMRTCell, PacbioSMRTCellMetrics
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ class PacBioStoreService(PostProcessingStoreService):
 
     def _create_instrument_run(
         self, instrument_run_dto: PacBioSequencingRunDTO, smrt_cell: PacbioSMRTCell
-    ) -> PacbioSequencingRun:
+    ) -> PacbioSMRTCellMetrics:
         return self.store.create_pac_bio_sequencing_run(
             sequencing_run_dto=instrument_run_dto, smrt_cell=smrt_cell
         )
@@ -43,7 +43,7 @@ class PacBioStoreService(PostProcessingStoreService):
     def _create_sample_run_metrics(
         self,
         sample_run_metrics_dtos: list[PacBioSampleSequencingMetricsDTO],
-        sequencing_run: PacbioSequencingRun,
+        sequencing_run: PacbioSMRTCellMetrics,
     ) -> None:
         for sample_run_metric in sample_run_metrics_dtos:
             self.store.create_pac_bio_sample_sequencing_run(
@@ -70,7 +70,7 @@ class PacBioStoreService(PostProcessingStoreService):
     def store_post_processing_data(self, run_data: PacBioRunData, dry_run: bool = False) -> None:
         dtos: PacBioDTOs = self.data_transfer_service.get_post_processing_dtos(run_data)
         smrt_cell: PacbioSMRTCell = self._create_run_device(dtos.run_device)
-        sequencing_run: PacbioSequencingRun = self._create_instrument_run(
+        sequencing_run: PacbioSMRTCellMetrics = self._create_instrument_run(
             instrument_run_dto=dtos.sequencing_run, smrt_cell=smrt_cell
         )
         self._create_sample_run_metrics(

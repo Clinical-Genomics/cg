@@ -1023,7 +1023,7 @@ class IlluminaSequencingRun(InstrumentRun):
         return data
 
 
-class PacbioSequencingRun(InstrumentRun):
+class PacbioSMRTCellMetrics(InstrumentRun):
     __tablename__ = "pacbio_sequencing_run"
 
     id: Mapped[int] = mapped_column(
@@ -1122,7 +1122,7 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
     polymerase_mean_read_length: Mapped[BigInt]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
-    instrument_run = orm.relationship(PacbioSequencingRun, back_populates="sample_metrics")
+    instrument_run = orm.relationship(PacbioSMRTCellMetrics, back_populates="sample_metrics")
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
