@@ -10,7 +10,7 @@
   tag: kraken2_report
 - format: txt
   id: SAMPLEID
-  path: PATHTOCASE/kraken2/k2_pluspf/SAMPLE_ID_pe_k2_pluspf.kraken2.kraken2.classifiedreads.txt
+  path: PATHTOCASE/kraken2/k2_pluspf/SAMPLENAME_pe_k2_pluspf.kraken2.kraken2.classifiedreads.txt
   step: kraken2
   tag: kraken2_classified_reads
 - format: html
@@ -97,7 +97,7 @@
   id: CASEID
   path: PATHTOCASE/taxpasta/kraken2_k2_pluspf.tsv
   step: taxpasta
-  tag: kraken2_taxpasta_tsv
+  tag: kraken2_taxpasta
 - format: tsv
   id: CASEID
   path: PATHTOCASE/taxpasta/centrifuge_p_compressed+h+v.tsv
