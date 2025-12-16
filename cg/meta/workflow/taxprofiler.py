@@ -50,11 +50,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.compute_env_base: str = config.taxprofiler.compute_env
 
     @property
-    def sample_sheet_headers(self) -> list[str]:
-        """Headers for sample sheet."""
-        return TaxprofilerSampleSheetEntry.headers()
-
-    @property
     def is_multiqc_pattern_search_exact(self) -> bool:
         """Only exact pattern search is allowed to collect metrics information from multiqc file."""
         return True
@@ -63,22 +58,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     def get_bundle_filenames_path() -> Path:
         """Return Taxprofiler bundle filenames path."""
         return TAXPROFILER_BUNDLE_FILENAMES_PATH
-
-    def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
-        """Collect and format information required to build a sample sheet for a single sample."""
-        sample_name: str = case_sample.sample.name
-        fastq_forward_read_paths, fastq_reverse_read_paths = self.get_paired_read_paths(
-            sample=case_sample.sample
-        )
-        sample_sheet_entry = TaxprofilerSampleSheetEntry(
-            name=sample_name,
-            run_accession=sample_name,
-            instrument_platform=SequencingPlatform.ILLUMINA,
-            fastq_forward_read_paths=fastq_forward_read_paths,
-            fastq_reverse_read_paths=fastq_reverse_read_paths,
-            fasta=EMPTY_STRING,
-        )
-        return sample_sheet_entry.reformat_sample_content()
 
     def get_built_workflow_parameters(
         self, case_id: str, dry_run: bool = False

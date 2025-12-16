@@ -48,16 +48,6 @@ class TomteAnalysisAPI(NfAnalysisAPI):
         self.revision: str = config.tomte.revision
         self.nextflow_binary_path: str = config.tomte.binary_path
 
-    @property
-    def sample_sheet_headers(self) -> list[str]:
-        """Headers for sample sheet."""
-        return TomteSampleSheetHeaders.list()
-
-    @property
-    def is_gene_panel_required(self) -> bool:
-        """Return True if a gene panel is needs to be created using the information in StatusDB and exporting it from Scout."""
-        return True
-
     @staticmethod
     def get_bundle_filenames_path() -> Path:
         """Return path to bundle template."""

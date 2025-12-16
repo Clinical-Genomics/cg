@@ -51,11 +51,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.nextflow_binary_path: str = config.rnafusion.binary_path
 
     @property
-    def sample_sheet_headers(self) -> list[str]:
-        """Headers for sample sheet."""
-        return RnafusionSampleSheetEntry.headers()
-
-    @property
     def is_multiple_samples_allowed(self) -> bool:
         """Return whether the analysis supports multiple samples to be linked to the case."""
         return False
@@ -68,19 +63,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def get_bundle_filenames_path() -> Path:
         """Return Rnafusion bundle filenames path."""
         return RNAFUSION_BUNDLE_FILENAMES_PATH
-
-    def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
-        """Collect and format information required to build a sample sheet for a single sample."""
-        fastq_forward_read_paths, fastq_reverse_read_paths = self.get_paired_read_paths(
-            sample=case_sample.sample
-        )
-        sample_sheet_entry = RnafusionSampleSheetEntry(
-            name=case_sample.sample.internal_id,
-            fastq_forward_read_paths=fastq_forward_read_paths,
-            fastq_reverse_read_paths=fastq_reverse_read_paths,
-            strandedness=Strandedness.REVERSE,
-        )
-        return sample_sheet_entry.reformat_sample_content()
 
     def get_built_workflow_parameters(
         self, case_id: str, dry_run: bool = False

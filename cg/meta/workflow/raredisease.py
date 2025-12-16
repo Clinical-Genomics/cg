@@ -71,56 +71,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.revision: str = config.raredisease.revision
         self.nextflow_binary_path: str = config.raredisease.binary_path
 
-    @property
-    def sample_sheet_headers(self) -> list[str]:
-        """Headers for sample sheet."""
-        return RarediseaseSampleSheetHeaders.list()
-
-    def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
-        """Collect and format information required to build a sample sheet for a single sample."""
-        fastq_forward_read_paths, fastq_reverse_read_paths = self.get_paired_read_paths(
-            sample=case_sample.sample
-        )
-        sample_sheet_entry = RarediseaseSampleSheetEntry(
-            name=case_sample.sample.internal_id,
-            fastq_forward_read_paths=fastq_forward_read_paths,
-            fastq_reverse_read_paths=fastq_reverse_read_paths,
-            sex=self.get_sex_code(case_sample.sample.sex),
-            phenotype=self.get_phenotype_code(case_sample.status),
-            paternal_id=case_sample.get_paternal_sample_id,
-            maternal_id=case_sample.get_maternal_sample_id,
-            case_id=case_sample.case.internal_id,
-        )
-        return sample_sheet_entry.reformat_sample_content
-
-    @property
-    def is_gene_panel_required(self) -> bool:
-        """Return True if a gene panel needs to be created using the information in StatusDB and exporting it from Scout."""
-        return True
-
-    def get_built_workflow_parameters(
-        self, case_id: str, dry_run: bool = False
-    ) -> RarediseaseParameters:
-        """Return parameters."""
-        analysis_type: AnalysisType = self.get_data_analysis_type(case_id=case_id)
-        target_bed_file: str = self.get_target_bed_from_lims(case_id=case_id) or ""
-        outdir = self.get_case_path(case_id=case_id)
-        sample_id_map: Path = self.get_sample_name_mapping_csv_path(case=case_id)
-        # Build the sample_id_map path
-        if not dry_run:
-            self.export_customer_internal_mapping_csv(case=case_id, output_path=sample_id_map)
-
-        return RarediseaseParameters(
-            input=self.get_sample_sheet_path(case_id=case_id),
-            outdir=outdir,
-            analysis_type=analysis_type,
-            target_bed_file=target_bed_file,
-            save_mapped_as_cram=True,
-            vcfanno_extra_resources=f"{outdir}/{ScoutExportFileName.MANAGED_VARIANTS}",
-            vep_filters_scout_fmt=f"{outdir}/{ScoutExportFileName.PANELS}",
-            sample_id_map=sample_id_map,
-        )
-
     @staticmethod
     def get_phenotype_code(phenotype: str) -> int:
         """Return Raredisease phenotype code."""
@@ -145,20 +95,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_bundle_filenames_path() -> Path:
         """Return Raredisease bundle filenames path."""
         return RAREDISEASE_BUNDLE_FILENAMES_PATH
-
-    @property
-    def is_managed_variants_required(self) -> bool:
-        """Return True if a managed variants needs to be exported from Scout."""
-        return True
-
-    def write_managed_variants(self, case_id: str, content: list[str]) -> None:
-        self._write_managed_variants(out_dir=Path(self.root, case_id), content=content)
-
-    def get_managed_variants(self, case_id: str) -> list[str]:
-        """Create and return the managed variants."""
-        return self._get_managed_variants(
-            genome_build=self.get_gene_panel_genome_build(case_id=case_id)
-        )
 
     def get_workflow_metrics(self, sample_id: str) -> dict:
         """Return Raredisease workflow metric conditions for a sample."""
