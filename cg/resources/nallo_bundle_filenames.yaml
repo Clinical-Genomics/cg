@@ -290,7 +290,7 @@
   tag: manifest
 - format: yml
   id: CASEID
-  path: PATHTOCASE/pipeline_info/nallo_pipeline_software_mqc_versions.yml
+  path: PATHTOCASE/pipeline_info/nallo_software_mqc_versions.yml
   step: software-versions
   tag: software-versions
 - format: yaml
