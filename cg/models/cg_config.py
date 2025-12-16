@@ -253,27 +253,6 @@ class NextflowConfig(BaseModel):
     workflow_bin_path: str
 
 
-class NalloConfig(NextflowConfig):
-    launch_directory: str
-
-
-class RarediseaseConfig(NextflowConfig):
-    launch_directory: str
-
-
-class TomteConfig(NextflowConfig):
-    references: str
-
-
-class RnafusionConfig(NextflowConfig):
-    launch_directory: str
-
-
-class TaxprofilerConfig(NextflowConfig):
-    databases: str  # TODO vulture complains this is unused, but it's present in cg.yaml and might be passed in a config file to Nextflow.
-    launch_directory: str
-
-
 class MicrosaltConfig(BaseModel):
     binary_path: str
     conda_binary: str
@@ -454,12 +433,12 @@ class CGConfig(BaseModel):
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig | None = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig | None = None
-    nallo: NalloConfig | None = None
-    raredisease: RarediseaseConfig | None = None
-    rnafusion: RnafusionConfig | None = None
+    nallo: NextflowConfig | None = None
+    raredisease: NextflowConfig | None = None
+    rnafusion: NextflowConfig | None = None
     statina: StatinaConfig | None = None
-    taxprofiler: TaxprofilerConfig | None = None
-    tomte: TomteConfig | None = None
+    taxprofiler: NextflowConfig | None = None
+    tomte: NextflowConfig | None = None
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}

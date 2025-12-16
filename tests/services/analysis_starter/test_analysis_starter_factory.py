@@ -11,13 +11,9 @@ from cg.models.cg_config import (
     CGConfig,
     IlluminaConfig,
     MipConfig,
-    NalloConfig,
-    RarediseaseConfig,
-    RnafusionConfig,
+    NextflowConfig,
     RunInstruments,
     SeqeraPlatformConfig,
-    TaxprofilerConfig,
-    TomteConfig,
 )
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
@@ -130,11 +126,11 @@ def test_analysis_starter_factory_mip_dna():
 )
 def test_get_analysis_starter_for_workflow_nextflow_fastq(
     nextflow_root: str,
-    raredisease_config_object: RarediseaseConfig,
-    rnafusion_config_object: RnafusionConfig,
+    raredisease_config_object: NextflowConfig,
+    rnafusion_config_object: NextflowConfig,
     seqera_platform_config: SeqeraPlatformConfig,
-    taxprofiler_config_object: TaxprofilerConfig,
-    tomte_config_object: TomteConfig,
+    taxprofiler_config_object: NextflowConfig,
+    tomte_config_object: NextflowConfig,
     workflow: Workflow,
     mocker: MockerFixture,
 ):
@@ -222,7 +218,7 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
 
 
 def test_get_analysis_starter_for_workflow_nallo(
-    nallo_config_object: NalloConfig,
+    nallo_config_object: NextflowConfig,
     mocker: MockerFixture,
 ):
     """Test that the AnalysisStarterFactory creates a Nallo AnalysisStarter correctly."""
