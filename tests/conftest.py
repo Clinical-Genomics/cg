@@ -39,9 +39,8 @@ from cg.constants.constants import (
     Strandedness,
 )
 from cg.constants.gene_panel import GenePanelMasterList
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AlignmentFileTag
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.priority import SlurmQos
-from cg.constants.sequencing import SequencingPlatform
 from cg.constants.subject import Sex
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json, write_json
@@ -97,7 +96,6 @@ pytest_plugins = [
     "tests.fixture_plugins.analysis_starter.configurator_fixtures",
     "tests.fixture_plugins.analysis_starter.fastq_handlers",
     "tests.fixture_plugins.analysis_starter.name_fixtures",
-    "tests.fixture_plugins.analysis_starter.nextflow_mock_yaml_writers",
     "tests.fixture_plugins.analysis_starter.path_fixtures",
     "tests.fixture_plugins.analysis_starter.sample_sheet_creators",
     "tests.fixture_plugins.analysis_starter.seqera_client_fixtures",
@@ -2545,12 +2543,6 @@ def no_sample_case_id() -> str:
 
 
 @pytest.fixture(scope="session")
-def workflow_version() -> str:
-    """Return a workflow version."""
-    return "2.2.0"
-
-
-@pytest.fixture(scope="session")
 def fastq_forward_read_path(housekeeper_dir: Path) -> Path:
     """Path to existing fastq forward read file."""
     fastq_file_path = Path(housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001").with_suffix(
@@ -2576,26 +2568,6 @@ def fastq_reverse_read_path(housekeeper_dir: Path) -> Path:
 def mock_fastq_files(fastq_forward_read_path: Path, fastq_reverse_read_path: Path) -> list[Path]:
     """Return list of all mock fastq files to commit to mock housekeeper."""
     return [fastq_forward_read_path, fastq_reverse_read_path]
-
-
-@pytest.fixture(scope="session")
-def bam_unmapped_read_paths(housekeeper_dir: Path) -> Path:
-    """Path to existing bam read file."""
-    bam_unmapped_read_path = Path(
-        housekeeper_dir, "m00000_000000_000000_s4.hifi_reads.bc2021"
-    ).with_suffix(f".{AlignmentFileTag.BAM}")
-    with open(bam_unmapped_read_path, "wb") as wh:
-        wh.write(
-            b"1f 8b 08 04 00 00 00 00 00 ff 06 00 42 43 02 00 1b 00 03 00 00 00 00 00 00 00 00 00"
-        )
-    return bam_unmapped_read_path
-
-
-# TODO: Remove?
-@pytest.fixture(scope="session")
-def sequencing_platform() -> str:
-    """Return a default sequencing platform."""
-    return SequencingPlatform.ILLUMINA
 
 
 # Nallo fixtures
