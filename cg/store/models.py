@@ -1024,7 +1024,7 @@ class IlluminaSequencingRun(InstrumentRun):
 
 
 class PacbioSMRTCellMetrics(InstrumentRun):
-    __tablename__ = "pacbio_sequencing_run"
+    __tablename__ = "pacbio_smrt_cell_metrics"
 
     id: Mapped[int] = mapped_column(
         ForeignKey("instrument_run.id", ondelete="CASCADE"), primary_key=True
