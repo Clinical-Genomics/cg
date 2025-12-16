@@ -49,7 +49,9 @@ raredisease.add_command(store_housekeeper)
 @click.pass_obj
 def config_case(cg_config: CGConfig, case_id: str):
     """
-    Configure a raredisease case so that it is ready to be run. \b
+    Configure a raredisease case so that it is ready to be run.
+
+    \b
     Creates the following files in the case run directory:
         - CASE_ID_params_file.yaml
         - CASE_ID_nextflow_config.json
