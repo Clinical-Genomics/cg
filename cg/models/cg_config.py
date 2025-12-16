@@ -231,9 +231,8 @@ class MipConfig(BaseModel):
 
 
 class NextflowConfig(BaseModel):
-    """This parent class should contain all attributes which are ubiquitous for Nextflow pipelines.
-    Any child classes should contain attributes which are not.
-    """
+    """Contains the Nextflow parameters (different from pipeline parameters!)
+    used for running Nextflow pipelines."""
 
     binary_path: str
     compute_env: str
