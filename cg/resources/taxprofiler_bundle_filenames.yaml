@@ -97,9 +97,9 @@
   id: CASEID
   path: PATHTOCASE/taxpasta/kraken2_k2_pluspf.tsv
   step: taxpasta
-  tag: kraken2_taxpasta
+  tag: kraken2
 - format: tsv
   id: CASEID
   path: PATHTOCASE/taxpasta/centrifuge_p_compressed+h+v.tsv
   step: taxpasta
-  tag: centrifuge_taxpasta
+  tag: centrifuge
