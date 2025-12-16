@@ -158,7 +158,9 @@ def _register_admin_views():
     ext.admin.add_view(
         admin.IlluminaSampleSequencingMetricsView(IlluminaSampleSequencingMetrics, ext.db.session)
     )
-    ext.admin.add_view(admin.PacbioSmrtCellView(PacbioSMRTCellMetrics, ext.db.session))
+    ext.admin.add_view(
+        admin.PacbioSmrtCellView(PacbioSMRTCellMetrics, ext.db.session, "Pacbio SMRT Cell Metrics")
+    )
     ext.admin.add_view(
         admin.PacbioSampleRunMetricsView(PacbioSampleSequencingMetrics, ext.db.session)
     )
