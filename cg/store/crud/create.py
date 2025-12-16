@@ -500,10 +500,10 @@ class CreateMixin(ReadHandler):
         self.add_item_to_store(new_smrt_cell)
         return new_smrt_cell
 
-    def create_pac_bio_sequencing_run(
+    def create_pacbio_smrt_cell_metrics(
         self, sequencing_run_dto: PacBioSequencingRunDTO, smrt_cell: PacbioSMRTCell
     ) -> PacbioSMRTCellMetrics:
-        LOG.debug(f"Creating Pacbio sequencing run for SMRT cell {smrt_cell.internal_id}")
+        LOG.debug(f"Creating Pacbio SMRT cell metrics for SMRT cell {smrt_cell.internal_id}")
         new_sequencing_run = PacbioSMRTCellMetrics(
             type=sequencing_run_dto.type,
             well=sequencing_run_dto.well,
