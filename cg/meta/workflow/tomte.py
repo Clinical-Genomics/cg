@@ -32,7 +32,6 @@ class TomteAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.tomte.root
-        self.workflow_bin_path: str = config.tomte.workflow_bin_path
         self.profile: str = config.tomte.profile
         self.conda_env: str = config.tomte.conda_env
         self.conda_binary: str = config.tomte.conda_binary

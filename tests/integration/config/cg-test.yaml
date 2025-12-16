@@ -154,7 +154,6 @@ nallo:
     mail_user: "nallo_mail_user@scilifelab.se"
     qos: "low"
   tower_workflow: nallo_tower_workflow
-  workflow_bin_path: {test_root_dir}/nallo_workflow_bin_path
 
 encryption:
   encryption_dir: "{test_root_dir}/encryption_encryption_dir"
