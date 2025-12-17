@@ -29,4 +29,4 @@ def upgrade():
 
 
 def downgrade():
-    pass
+    op.drop_table(table_name="pacbio_sequencing_run")
