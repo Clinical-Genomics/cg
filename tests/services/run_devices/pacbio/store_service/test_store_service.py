@@ -46,6 +46,7 @@ def test_store_post_processing_data(
     assert not pac_bio_store_service.store._get_query(PacbioSampleSequencingMetrics).first()
     assert not pac_bio_store_service.store._get_query(PacbioSMRTCellMetrics).first()
     assert not pac_bio_store_service.store._get_query(PacbioSMRTCell).first()
+    assert not pac_bio_store_service.store._get_query(PacbioSequencingRun).first()
 
     # GIVEN a data transfer service that returns the correct DTOs
 
