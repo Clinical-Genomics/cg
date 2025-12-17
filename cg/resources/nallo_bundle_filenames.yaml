@@ -235,12 +235,12 @@
   tag: vcf_severus_index
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_sniffles_svs_merged.vcf.gz
+  path: PATHTOCASE/svs/family/CASEID/CASEID_sniffles_svs.vcf.gz
   step: svs_per_caller
   tag: vcf_sniffles
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_sniffles_svs_merged.vcf.gz.tbi
+  path: PATHTOCASE/svs/family/CASEID/CASEID_sniffles_svs.vcf.gz.tbi
   step: svs_per_caller
   tag: vcf_sniffles_index
 - format: meta
