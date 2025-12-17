@@ -145,6 +145,10 @@ MASTER_STEPS_UDFS = {
             "atlas_document": "Sequencing Method",
             "atlas_version": "Atlas Version",
         },
+        "Set Up Sequencing Run (Revio) v2": {
+            "atlas_document": "Sequencing Method",
+            "atlas_version": "Atlas Version",
+        },
     },
     "delivery_method_step": {
         "CG002 - Delivery": {

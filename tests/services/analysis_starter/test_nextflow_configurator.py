@@ -16,6 +16,7 @@ from cg.models.cg_config import (
     RarediseaseConfig,
     RnafusionConfig,
     TaxprofilerConfig,
+    TomteConfig,
 )
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
     PipelineExtension,
@@ -39,17 +40,23 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
     TaxprofilerParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.tomte_params_file_creator import (
+    TomteParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo_sample_sheet_creator import (
     NalloSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease_sample_sheet_creator import (
     RarediseaseSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion_sample_sheet_creator import (
     RNAFusionSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler_sample_sheet_creator import (
     TaxprofilerSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
+    TomteSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
@@ -59,7 +66,13 @@ from cg.store.store import Store
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.NALLO, Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [
+        Workflow.NALLO,
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+    ],
 )
 def test_get_config(
     workflow: Workflow,
@@ -142,7 +155,13 @@ def test_get_config_missing_required_files(mocker: MockerFixture):
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.NALLO, Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [
+        Workflow.NALLO,
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+    ],
 )
 def test_get_case_config_flags(
     workflow: Workflow,
@@ -219,7 +238,13 @@ def test_get_config_resume_already_completed_analysis(
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.NALLO, Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [
+        Workflow.NALLO,
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+    ],
 )
 def test_get_case_config_none_flags(
     workflow: Workflow,
@@ -275,8 +300,14 @@ def test_get_case_config_none_flags(
             TaxprofilerConfig,
             TaxprofilerSampleSheetCreator,
         ),
+        (
+            Workflow.TOMTE,
+            TomteParamsFileCreator,
+            TomteConfig,
+            TomteSampleSheetCreator,
+        ),
     ],
-    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte"],
 )
 def test_configure(
     workflow: Workflow,

@@ -134,7 +134,7 @@ class TrailblazerAPI:
         self,
         case_id: str,
         analysis_type: str,
-        config_path: str,
+        config_path: str | None,
         out_dir: str,
         priority: TrailblazerPriority,
         workflow: Workflow,

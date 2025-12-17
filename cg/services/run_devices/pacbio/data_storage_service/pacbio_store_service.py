@@ -19,7 +19,7 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSMRTCellDTO,
 )
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.store.models import PacbioSequencingRun, PacbioSMRTCell
+from cg.store.models import PacbioSMRTCell, PacbioSMRTCellMetrics
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -35,15 +35,15 @@ class PacBioStoreService(PostProcessingStoreService):
 
     def _create_instrument_run(
         self, instrument_run_dto: PacBioSequencingRunDTO, smrt_cell: PacbioSMRTCell
-    ) -> PacbioSequencingRun:
-        return self.store.create_pac_bio_sequencing_run(
+    ) -> PacbioSMRTCellMetrics:
+        return self.store.create_pacbio_smrt_cell_metrics(
             sequencing_run_dto=instrument_run_dto, smrt_cell=smrt_cell
         )
 
     def _create_sample_run_metrics(
         self,
         sample_run_metrics_dtos: list[PacBioSampleSequencingMetricsDTO],
-        sequencing_run: PacbioSequencingRun,
+        sequencing_run: PacbioSMRTCellMetrics,
     ) -> None:
         for sample_run_metric in sample_run_metrics_dtos:
             self.store.create_pac_bio_sample_sequencing_run(
@@ -56,13 +56,12 @@ class PacBioStoreService(PostProcessingStoreService):
         sequencing_date: datetime,
     ) -> None:
         """Update the reads and last sequenced date for the SMRT cell samples."""
-        for sample_dto in sample_run_metrics_dtos:
-            self.store.update_sample_reads(
-                internal_id=sample_dto.sample_internal_id, reads=sample_dto.hifi_reads
-            )
-            self.store.update_sample_sequenced_at(
-                internal_id=sample_dto.sample_internal_id, date=sequencing_date
-            )
+        sample_ids_to_update: set[str] = {
+            sample_dto.sample_internal_id for sample_dto in sample_run_metrics_dtos
+        }
+        for sample_id in sample_ids_to_update:
+            self.store.recalculate_sample_reads_pacbio(sample_id)
+            self.store.update_sample_sequenced_at(internal_id=sample_id, date=sequencing_date)
 
     @handle_post_processing_errors(
         to_except=(PostProcessingDataTransferError, ValueError),
@@ -71,7 +70,7 @@ class PacBioStoreService(PostProcessingStoreService):
     def store_post_processing_data(self, run_data: PacBioRunData, dry_run: bool = False) -> None:
         dtos: PacBioDTOs = self.data_transfer_service.get_post_processing_dtos(run_data)
         smrt_cell: PacbioSMRTCell = self._create_run_device(dtos.run_device)
-        sequencing_run: PacbioSequencingRun = self._create_instrument_run(
+        sequencing_run: PacbioSMRTCellMetrics = self._create_instrument_run(
             instrument_run_dto=dtos.sequencing_run, smrt_cell=smrt_cell
         )
         self._create_sample_run_metrics(

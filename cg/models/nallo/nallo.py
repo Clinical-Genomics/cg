@@ -1,12 +1,24 @@
 from enum import StrEnum
 from pathlib import Path
+from typing import Annotated
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, BeforeValidator, Field, field_validator
 
 from cg.constants import SexOptions
 from cg.exc import NfSampleSheetError
 from cg.models.nf_analysis import WorkflowParameters
 from cg.models.qc_metrics import QCMetrics
+
+
+def convert_sex(plink_sex: float) -> SexOptions:
+    if plink_sex == 2:
+        return SexOptions.FEMALE
+    elif plink_sex == 1:
+        return SexOptions.MALE
+    elif plink_sex == 0:
+        return SexOptions.UNKNOWN
+    else:
+        raise NotImplementedError
 
 
 class NalloQCMetrics(QCMetrics):
@@ -16,7 +28,7 @@ class NalloQCMetrics(QCMetrics):
     coverage_bases: float | None
     median_coverage: float | None
     percent_duplicates: float | None
-    predicted_sex_sex_check: SexOptions
+    predicted_sex: Annotated[SexOptions, BeforeValidator(convert_sex)] = Field(alias="somalier_sex")
 
 
 class NalloSampleSheetEntry(BaseModel):

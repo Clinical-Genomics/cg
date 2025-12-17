@@ -112,23 +112,12 @@ def expected_samplesheet_contents(
 """
 
 
-@pytest.fixture
-def expected_tower_ids_contents(nallo_case: Case, new_tower_id: str) -> str:
-    return f"""---
-{nallo_case.internal_id}:
-- {new_tower_id}
-"""
-
-
 @pytest.mark.xdist_group(name="integration")
 @pytest.mark.integration
-@pytest.mark.parametrize("command", ["start-available", "dev-start-available"])
 def test_start_available_nallo(
-    command: str,
     expected_config_file_contents: str,
     expected_params_file_contents: str,
     expected_samplesheet_contents: str,
-    expected_tower_ids_contents: str,
     helpers: StoreHelpers,
     httpserver: HTTPServer,
     scout_export_panel_stdout: bytes,
@@ -189,9 +178,7 @@ def test_start_available_nallo(
         analysis_type=AnalysisType.WGS,
         out_dir=Path(test_root_dir, "nallo_root_path", nallo_case.internal_id),
         case=nallo_case,
-        config_path=Path(
-            test_root_dir, "nallo_root_path", nallo_case.internal_id, "tower_ids.yaml"
-        ),
+        config_path=None,
         ticket_id=ticket_id,
         trailblazer_server=httpserver,
         tower_workflow_id=new_tower_id,
@@ -199,13 +186,12 @@ def test_start_available_nallo(
         workflow_manager="nf_tower",
     )
 
-    if command == "dev-start-available":
-        httpserver.expect_request(
-            "/tower/workflow/launch", query_string="workspaceId=1234567890"
-        ).respond_with_json({"workflowId": new_tower_id})
-        httpserver.expect_request(f"/tower/workflow/{new_tower_id}").respond_with_json(
-            {"workflow": {"sessionId": "some_session_id"}}
-        )
+    httpserver.expect_request(
+        "/tower/workflow/launch", query_string="workspaceId=1234567890"
+    ).respond_with_json({"workflowId": new_tower_id})
+    httpserver.expect_request(f"/tower/workflow/{new_tower_id}").respond_with_json(
+        {"workflow": {"sessionId": "some_session_id"}}
+    )
 
     # WHEN running nallo start-available
     result: Result = cli_runner.invoke(
@@ -215,37 +201,13 @@ def test_start_available_nallo(
             config_path.as_posix(),
             "workflow",
             "nallo",
-            command,
+            "start-available",
         ],
         catch_exceptions=False,
     )
 
     # THEN a successful exit code is returned
     assert result.exit_code == 0
-
-    if command == "start-available":
-        # THEN the analysis should be started in the correct way
-        expected_run_command: list[str] = [
-            f"{test_root_dir}/tower_binary_path",
-            "launch",
-            "--work-dir",
-            f"{test_root_dir}/nallo_root_path/{nallo_case.internal_id}/work",
-            "--profile",
-            "nallo_profile",
-            "--params-file",
-            f"{test_root_dir}/nallo_root_path/{nallo_case.internal_id}/{nallo_case.internal_id}_params_file.yaml",
-            "--config",
-            f"{test_root_dir}/nallo_root_path/{nallo_case.internal_id}/{nallo_case.internal_id}_nextflow_config.json",
-            "--name",
-            nallo_case.internal_id,
-            "--revision",
-            "nallo_revision",
-            "--compute-env",
-            "nallo_compute_env-normal",
-            "nallo_tower_workflow",
-        ]
-        second_call = subprocess_mock.mock_calls[1]
-        assert second_call.args[0] == expected_run_command
 
     # THEN an analysis has been created for the case
     assert len(nallo_case.analyses) == 1
@@ -281,6 +243,3 @@ def test_start_available_nallo(
     assert Path(
         case_directory, "gene_panels.tsv"
     ).open().read() == scout_export_panel_stdout.decode().removesuffix("\n")
-
-    if command == "start-available":
-        assert Path(case_directory, "tower_ids.yaml").open().read() == expected_tower_ids_contents
