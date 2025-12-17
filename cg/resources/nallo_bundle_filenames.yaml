@@ -165,12 +165,12 @@
   tag: variant_catalog
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked.vcf.gz
+  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_research.vcf.gz
   step: snv_annotated
   tag: vcf_snv_research
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked.vcf.gz.tbi
+  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_research.vcf.gz.tbi
   step: snv_annotated
   tag: vcf_snv_research_index
 - format: vcf
