@@ -96,8 +96,13 @@ class CompressAPI:
     def decompress_case(self, case: Case) -> None:
         """Decompresses all Spring files tied to the case.
         Raises:
-            DecompressionFailedToStartError if no sample could start decompressing."""
-        if not any(self.decompress_spring(sample.internal_id) for sample in case.samples):
+            DecompressionCouldNotStartError if no sample could start decompressing.
+        """
+        success = False
+        for sample in case.samples:
+            if self.decompress_spring(sample.internal_id):
+                success = True
+        if not success:
             raise DecompressionCouldNotStartError(
                 f"No sample could be decompressed for {case.internal_id}"
             )

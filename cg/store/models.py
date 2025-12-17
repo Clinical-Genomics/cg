@@ -729,7 +729,7 @@ class Sample(Base, PriorityMixin):
     prepared_at: Mapped[datetime | None]
 
     priority: Mapped[Priority] = mapped_column(default=Priority.standard)
-    reads: Mapped[BigInt | None] = mapped_column(default=0)
+    reads: Mapped[BigInt] = mapped_column(default=0)
     last_sequenced_at: Mapped[datetime | None]
     received_at: Mapped[datetime | None]
     reference_genome: Mapped[Str255 | None]
@@ -1023,8 +1023,8 @@ class IlluminaSequencingRun(InstrumentRun):
         return data
 
 
-class PacbioSequencingRun(InstrumentRun):
-    __tablename__ = "pacbio_sequencing_run"
+class PacbioSMRTCellMetrics(InstrumentRun):
+    __tablename__ = "pacbio_smrt_cell_metrics"
 
     id: Mapped[int] = mapped_column(
         ForeignKey("instrument_run.id", ondelete="CASCADE"), primary_key=True
@@ -1122,7 +1122,7 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
     polymerase_mean_read_length: Mapped[BigInt]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
-    instrument_run = orm.relationship(PacbioSequencingRun, back_populates="sample_metrics")
+    instrument_run = orm.relationship(PacbioSMRTCellMetrics, back_populates="sample_metrics")
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
