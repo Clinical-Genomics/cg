@@ -62,7 +62,11 @@ class PacBioSampleSequencingMetricsDTO(BaseModel):
     polymerase_mean_read_length: int
 
 
+# TODO: Add sequencing run DTO definition
+
+
 class PacBioDTOs(PostProcessingDTOs):
     run_device: PacBioSMRTCellDTO
-    sequencing_run: PacBioSequencingRunDTO
+    sequencing_run: PacBioSequencingRunDTO  # TODO: Change the naming Pacbio_SMRT...
     sample_sequencing_metrics: list[PacBioSampleSequencingMetricsDTO]
+    # TODO: Add sequencing run DTO
