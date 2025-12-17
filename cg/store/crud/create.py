@@ -548,7 +548,7 @@ class CreateMixin(ReadHandler):
     def create_pac_bio_sample_sequencing_run(
         self,
         sample_run_metrics_dto: PacBioSampleSequencingMetricsDTO,
-        sequencing_run: PacbioSMRTCellMetrics,
+        smrt_cell_metrics: PacbioSMRTCellMetrics,
     ) -> PacbioSampleSequencingMetrics:
         sample_id: str = sample_run_metrics_dto.sample_internal_id
         LOG.debug(f"Creating Pacbio sample sequencing metric for sample {sample_id}")
@@ -562,7 +562,7 @@ class CreateMixin(ReadHandler):
             hifi_yield=sample_run_metrics_dto.hifi_yield,
             hifi_mean_read_length=sample_run_metrics_dto.hifi_mean_read_length,
             hifi_median_read_quality=sample_run_metrics_dto.hifi_median_read_quality,
-            instrument_run=sequencing_run,
+            instrument_run=smrt_cell_metrics,
             polymerase_mean_read_length=sample_run_metrics_dto.polymerase_mean_read_length,
         )
         self.add_item_to_store(new_sample_sequencing_run)

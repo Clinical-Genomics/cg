@@ -43,11 +43,11 @@ class PacBioStoreService(PostProcessingStoreService):
     def _create_sample_run_metrics(
         self,
         sample_run_metrics_dtos: list[PacBioSampleSequencingMetricsDTO],
-        sequencing_run: PacbioSMRTCellMetrics,
+        smrt_cell_metrics: PacbioSMRTCellMetrics,
     ) -> None:
         for sample_run_metric in sample_run_metrics_dtos:
             self.store.create_pac_bio_sample_sequencing_run(
-                sample_run_metrics_dto=sample_run_metric, sequencing_run=sequencing_run
+                sample_run_metrics_dto=sample_run_metric, smrt_cell_metrics=smrt_cell_metrics
             )
 
     def _update_sample(
@@ -70,15 +70,16 @@ class PacBioStoreService(PostProcessingStoreService):
     def store_post_processing_data(self, run_data: PacBioRunData, dry_run: bool = False) -> None:
         dtos: PacBioDTOs = self.data_transfer_service.get_post_processing_dtos(run_data)
         smrt_cell: PacbioSMRTCell = self._create_run_device(dtos.run_device)
-        sequencing_run: PacbioSMRTCellMetrics = self._create_instrument_run(
+        smrt_cell_metrics: PacbioSMRTCellMetrics = self._create_instrument_run(
             instrument_run_dto=dtos.sequencing_run, smrt_cell=smrt_cell
         )
         self._create_sample_run_metrics(
-            sample_run_metrics_dtos=dtos.sample_sequencing_metrics, sequencing_run=sequencing_run
+            sample_run_metrics_dtos=dtos.sample_sequencing_metrics,
+            smrt_cell_metrics=smrt_cell_metrics,
         )
         self._update_sample(
             sample_run_metrics_dtos=dtos.sample_sequencing_metrics,
-            sequencing_date=sequencing_run.completed_at,
+            sequencing_date=smrt_cell_metrics.completed_at,
         )
         if dry_run:
             self.store.rollback()

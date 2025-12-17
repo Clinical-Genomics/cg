@@ -74,7 +74,7 @@ def test_update_pacbio_sample_reads(base_store: Store, helpers: StoreHelpers):
         polymerase_mean_read_length=1,
     )
     base_store.create_pac_bio_sample_sequencing_run(
-        sample_run_metrics_dto=sample_run_metrics_dto, sequencing_run=sequencing_run
+        sample_run_metrics_dto=sample_run_metrics_dto, smrt_cell_metrics=sequencing_run
     )
     base_store.commit_to_store()
 
@@ -89,7 +89,7 @@ def test_update_pacbio_sample_reads(base_store: Store, helpers: StoreHelpers):
         polymerase_mean_read_length=1,
     )
     base_store.create_pac_bio_sample_sequencing_run(
-        sample_run_metrics_dto=new_sample_run_metrics_dto, sequencing_run=sequencing_run
+        sample_run_metrics_dto=new_sample_run_metrics_dto, smrt_cell_metrics=sequencing_run
     )
     base_store.commit_to_store()
 

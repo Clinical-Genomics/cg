@@ -4,6 +4,7 @@ from unittest import mock
 
 import pytest
 
+from cg.constants.devices import RevioNames
 from cg.services.run_devices.exc import (
     PostProcessingDataTransferError,
     PostProcessingStoreDataError,
@@ -18,6 +19,7 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioDTOs
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.store.models import (
     PacbioSampleSequencingMetrics,
+    PacbioSequencingRun,
     PacbioSMRTCell,
     PacbioSMRTCellMetrics,
     Sample,
@@ -59,12 +61,12 @@ def test_store_post_processing_data(
     assert smrt_cell
     assert smrt_cell.internal_id == pac_bio_dtos.run_device.internal_id
 
-    # THEN the sequencing run is stored with the correct data
-    sequencing_run: PacbioSMRTCellMetrics = pac_bio_store_service.store._get_query(
+    # THEN the SMRT cell metrics are stored with the correct data
+    smrt_cell_metrics: PacbioSMRTCellMetrics = pac_bio_store_service.store._get_query(
         PacbioSMRTCellMetrics
     ).first()
-    assert sequencing_run
-    assert sequencing_run.well == pac_bio_dtos.sequencing_run.well
+    assert smrt_cell_metrics
+    assert smrt_cell_metrics.well == pac_bio_dtos.sequencing_run.well
 
     # THEN the sample sequencing metrics are stored with the correct data
     sample_sequencing_run_metrics: list[PacbioSampleSequencingMetrics] = (
@@ -76,6 +78,13 @@ def test_store_post_processing_data(
             sample_metrics.sample.internal_id
             == pac_bio_dtos.sample_sequencing_metrics[0].sample_internal_id
         )
+
+    # THEN a PacbioSequencingRun is stored with the correct data
+    pacbio_sequencing_run: PacbioSequencingRun = pac_bio_store_service.store._get_query(
+        PacbioSequencingRun
+    ).one()
+    assert pacbio_sequencing_run.run_name == "?"
+    assert pacbio_sequencing_run.instrument_name == RevioNames.WILMA
 
     # THEN the sample reads and sequenced date are updated
     for sample_metrics_dto in pac_bio_dtos.sample_sequencing_metrics:
