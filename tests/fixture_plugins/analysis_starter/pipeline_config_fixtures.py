@@ -10,7 +10,6 @@ from cg.models.cg_config import BalsamicConfig, LoqusDBDumpFiles, NextflowConfig
 
 @pytest.fixture
 def get_nextflow_config_dict(
-    nextflow_binary: Path,
     nextflow_root: str,
     conda_binary: Path,
     nf_analysis_platform_config_path: Path,
@@ -30,7 +29,6 @@ def get_nextflow_config_dict(
 
     def _make_dict(workflow: str) -> dict:
         return {
-            "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": f"S_{workflow}",

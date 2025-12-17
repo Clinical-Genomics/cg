@@ -2148,7 +2148,6 @@ def context_config(
             "root": str(mip_dir),
         },
         "nallo": {
-            "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_nallo",
@@ -2169,7 +2168,6 @@ def context_config(
             "workflow_bin_path": Path("workflow", "path").as_posix(),
         },
         "raredisease": {
-            "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_raredisease",
@@ -2191,7 +2189,6 @@ def context_config(
             "workflow_bin_path": Path("workflow", "path").as_posix(),
         },
         "tomte": {
-            "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_tomte",
@@ -2213,7 +2210,6 @@ def context_config(
             "workflow_bin_path": Path("workflow", "path").as_posix(),
         },
         "rnafusion": {
-            "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_RNAFUSION",
@@ -2237,7 +2233,6 @@ def context_config(
         "pigz": {"binary_path": "/bin/pigz"},
         "pdc": {"binary_path": "/bin/dsmc"},
         "taxprofiler": {
-            "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_taxprofiler",
