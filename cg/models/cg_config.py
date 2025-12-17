@@ -249,7 +249,9 @@ class NextflowConfig(BaseModel):
     root: str
     slurm: SlurmConfig
     tower_workflow: str
-    workflow_bin_path: str
+    workflow_bin_path: (
+        str | None
+    )  # Needed only for Taxprofiler as of 2025-12-17, plan is to phase out
 
 
 class MicrosaltConfig(BaseModel):
