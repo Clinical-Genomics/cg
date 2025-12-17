@@ -3,7 +3,7 @@ import pytest
 from cg.server.endpoints.sequencing_run.dtos import PacbioSequencingRunsResponse
 from cg.services.run_devices.pacbio.sequencing_runs_service import PacbioSequencingRunsService
 from cg.store.exc import EntryNotFoundError
-from cg.store.models import PacbioSequencingRun
+from cg.store.models import PacbioSMRTCellMetrics
 
 
 def test_get_pacbio_sequencing_runs_by_name(
@@ -12,8 +12,8 @@ def test_get_pacbio_sequencing_runs_by_name(
     """Tests getting Pacbio sequencing runs from the store filtered on run name."""
 
     # GIVEN that there are multiple Pacbio sequencing runs with different run names
-    all_runs: list[PacbioSequencingRun] = pacbio_sequencing_runs_service.store._get_query(
-        table=PacbioSequencingRun
+    all_runs: list[PacbioSMRTCellMetrics] = pacbio_sequencing_runs_service.store._get_query(
+        table=PacbioSMRTCellMetrics
     ).all()
     assert any(run.run_name != pacbio_run_name_to_fetch for run in all_runs)
 
@@ -32,8 +32,8 @@ def test_get_pacbio_sequencing_runs_by_name_no_matches(
     """Tests getting Pacbio runs from the store filtered on a non-existent run name."""
 
     # GIVEN that there are no Pacbio sequencing runs with a specific run name
-    all_runs: list[PacbioSequencingRun] = pacbio_sequencing_runs_service.store._get_query(
-        table=PacbioSequencingRun
+    all_runs: list[PacbioSMRTCellMetrics] = pacbio_sequencing_runs_service.store._get_query(
+        table=PacbioSMRTCellMetrics
     ).all()
     assert all(run.run_name != "Non-existent run" for run in all_runs)
 

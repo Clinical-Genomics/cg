@@ -8,7 +8,7 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSampleSequencingMetricsDTO,
     PacBioSMRTCellDTO,
 )
-from cg.store.models import CaseSample, PacbioSequencingRun
+from cg.store.models import CaseSample, PacbioSMRTCellMetrics
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -62,7 +62,7 @@ def test_update_pacbio_sample_reads(base_store: Store, helpers: StoreHelpers):
     pacbio_smrt_cell = PacBioSMRTCellDTO(type=DeviceType.PACBIO, internal_id="EA123")
     pacbio_smrt_cell = base_store.create_pac_bio_smrt_cell(pacbio_smrt_cell)
     base_store.commit_to_store()
-    sequencing_run: PacbioSequencingRun = helpers.add_pacbio_sequencing_run(
+    sequencing_run: PacbioSMRTCellMetrics = helpers.add_pacbio_sequencing_run(
         store=base_store, id=1, device_id=pacbio_smrt_cell.id, run_name="run_name"
     )
     sample_run_metrics_dto = PacBioSampleSequencingMetricsDTO(
