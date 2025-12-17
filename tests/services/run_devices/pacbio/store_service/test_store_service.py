@@ -18,8 +18,8 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioDTOs
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.store.models import (
     PacbioSampleSequencingMetrics,
-    PacbioSequencingRun,
     PacbioSMRTCell,
+    PacbioSMRTCellMetrics,
     Sample,
 )
 from cg.store.store import Store
@@ -42,7 +42,7 @@ def test_store_post_processing_data(
 
     # GIVEN that the store has no sequencing data
     assert not pac_bio_store_service.store._get_query(PacbioSampleSequencingMetrics).first()
-    assert not pac_bio_store_service.store._get_query(PacbioSequencingRun).first()
+    assert not pac_bio_store_service.store._get_query(PacbioSMRTCellMetrics).first()
     assert not pac_bio_store_service.store._get_query(PacbioSMRTCell).first()
 
     # GIVEN a data transfer service that returns the correct DTOs
@@ -60,8 +60,8 @@ def test_store_post_processing_data(
     assert smrt_cell.internal_id == pac_bio_dtos.run_device.internal_id
 
     # THEN the sequencing run is stored with the correct data
-    sequencing_run: PacbioSequencingRun = pac_bio_store_service.store._get_query(
-        PacbioSequencingRun
+    sequencing_run: PacbioSMRTCellMetrics = pac_bio_store_service.store._get_query(
+        PacbioSMRTCellMetrics
     ).first()
     assert sequencing_run
     assert sequencing_run.well == pac_bio_dtos.sequencing_run.well
