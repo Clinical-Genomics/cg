@@ -30,6 +30,7 @@ class ExtractionMethod(StrEnum):
 
 
 class IndexEnum(StrEnum):
+    ARCHER_SET_B = "Archer Set B"
     AVIDA_INDEX_PLATE = "Avida Index plate"
     AVIDA_INDEX_STRIP = "Avida Index strip"
     IDT_DS_B = "IDT DupSeq 10 bp Set B"
@@ -37,6 +38,7 @@ class IndexEnum(StrEnum):
     IDT_XGEN_UDI = "IDT xGen UDI Adapters"
     IDT10_UDI_NIPT = "IDT10 UDI NIPT"
     KAPA_UDI_NIPT = "KAPA UDI NIPT"
+    NEBNEXT_LV_Unique_Dual_2A = "NEBNext LV Unique Dual Index Primers Set 2A"
     NEXTERA_XT = "Nextera XT Dual"
     NEXTFLEX_UDI_96 = "NEXTflex® Unique Dual Index Barcodes 1 - 96"
     NEXTFLEX_V2_UDI_96 = "NEXTflex® v2 UDI Barcodes 1 - 96"
@@ -46,4 +48,5 @@ class IndexEnum(StrEnum):
     TWIST_UDI_B = "TWIST UDI Set B"
     TWIST_UDI_C = "TWIST UDI Set C"
     TRUSEQ_DNA_HT = "TruSeq DNA HT Dual-index (D7-D5)"
+    XGEN_UDI_10_1_4 = "xGen UDI 10nt Primer Plates 1-4"
     NO_INDEX = "NoIndex"
