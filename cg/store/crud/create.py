@@ -17,8 +17,8 @@ from cg.services.illumina.data_transfer.models import (
 )
 from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSampleSequencingMetricsDTO,
-    PacBioSequencingRunDTO,
     PacBioSMRTCellDTO,
+    PacBioSMRTCellMetricsDTO,
 )
 from cg.store.crud.read import ReadHandler
 from cg.store.database import get_session
@@ -501,7 +501,7 @@ class CreateMixin(ReadHandler):
         return new_smrt_cell
 
     def create_pacbio_smrt_cell_metrics(
-        self, sequencing_run_dto: PacBioSequencingRunDTO, smrt_cell: PacbioSMRTCell
+        self, sequencing_run_dto: PacBioSMRTCellMetricsDTO, smrt_cell: PacbioSMRTCell
     ) -> PacbioSMRTCellMetrics:
         LOG.debug(f"Creating Pacbio SMRT cell metrics for SMRT cell {smrt_cell.internal_id}")
         new_sequencing_run = PacbioSMRTCellMetrics(
