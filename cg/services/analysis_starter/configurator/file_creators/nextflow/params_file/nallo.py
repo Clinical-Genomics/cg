@@ -4,9 +4,11 @@ from typing import Any
 
 from cg.constants.scout import ScoutExportFileName
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
-from cg.models.nallo.nallo import NalloParameters
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.models import (
+    NalloParameters,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.utils import (
     replace_values_in_params_file,

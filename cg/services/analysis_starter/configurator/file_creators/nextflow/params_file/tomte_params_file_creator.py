@@ -6,9 +6,11 @@ from cg.constants.constants import GenomeVersion
 from cg.constants.scout import ScoutExportFileName
 from cg.exc import CgError
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
-from cg.models.tomte.tomte import TomteParameters
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.models import (
+    TomteParameters,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.utils import (
     replace_values_in_params_file,
