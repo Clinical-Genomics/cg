@@ -314,7 +314,6 @@ class TaxprofilerConfig(CommonAppConfig):
     params: str
     config: str
     resources: str
-    workflow_bin_path: str
     pre_run_script: str = ""
     profile: str
     repository: str

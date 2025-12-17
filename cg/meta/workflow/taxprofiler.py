@@ -33,7 +33,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.taxprofiler.root
-        self.workflow_bin_path: str = config.taxprofiler.workflow_bin_path
         self.profile: str = config.taxprofiler.profile
         self.conda_env: str = config.taxprofiler.conda_env
         self.conda_binary: str = config.taxprofiler.conda_binary

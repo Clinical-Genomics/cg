@@ -57,7 +57,6 @@ class NfAnalysisAPI(AnalysisAPI):
         super().__init__(workflow=workflow, config=config)
         self.workflow: Workflow = workflow
         self.root_dir: str | None = None
-        self.workflow_bin_path: str | None = None
         self.references: str | None = None
         self.profile: str | None = None
         self.conda_env: str | None = None
