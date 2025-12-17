@@ -1130,7 +1130,7 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
 
 
 class PacbioSequencingRun(Base):
-    """TBD"""
+    """PacBio sequencing run, consisting of a set of SMRT-cells sequenced simultaneously."""
 
     __tablename__ = "pacbio_sequencing_run"
 
