@@ -13,6 +13,7 @@ from cg.store.models import (
     Customer,
     IlluminaFlowCell,
     Organism,
+    PacbioSequencingRun,
     Sample,
     User,
 )
@@ -158,6 +159,15 @@ def test_add_illumina_flow_cell_already_exists(
 
 
 def test_create_pacbio_sequencing_run(store: Store):
+    # GIVEN a PacBioSequencingRunDTO
     pacbio_sequencing_run_dto = PacBioSequencingRunDTO(
         instrument_name=RevioNames.WILMA, run_name="run_name"
     )
+
+    # WHEN creating a Pacbio sequencing run in Store
+    store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
+
+    # THEN the PacbioSequencingRun exists and has the correct attributes
+    pacbio_sequencing_run: PacbioSequencingRun = store._get_query(table=PacbioSequencingRun).one()
+    assert pacbio_sequencing_run.instrument_name == RevioNames.WILMA
+    assert pacbio_sequencing_run.run_name == "run_name"

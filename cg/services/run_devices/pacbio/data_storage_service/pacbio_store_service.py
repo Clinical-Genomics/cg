@@ -15,7 +15,6 @@ from cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service 
 from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioDTOs,
     PacBioSampleSequencingMetricsDTO,
-    PacBioSequencingRunDTO,
     PacBioSMRTCellDTO,
     PacBioSMRTCellMetricsDTO,
 )
@@ -40,9 +39,6 @@ class PacBioStoreService(PostProcessingStoreService):
         return self.store.create_pacbio_smrt_cell_metrics(
             sequencing_run_dto=instrument_run_dto, smrt_cell=smrt_cell
         )
-
-    def _create_pacbio_sequencing_run(self, sequencing_run_dto: PacBioSequencingRunDTO):
-        pass
 
     def _create_sample_run_metrics(
         self,
@@ -74,10 +70,7 @@ class PacBioStoreService(PostProcessingStoreService):
     def store_post_processing_data(self, run_data: PacBioRunData, dry_run: bool = False) -> None:
         dtos: PacBioDTOs = self.data_transfer_service.get_post_processing_dtos(run_data)
         smrt_cell: PacbioSMRTCell = self._create_run_device(dtos.run_device)
-        self.store.create_pacbio_sequencing_run(
-            instrument_name=dtos.sequencing_run.instrument_name,
-            run_name=dtos.sequencing_run.run_name,
-        )
+        self.store.create_pacbio_sequencing_run(dtos.sequencing_run)
         smrt_cell_metrics: PacbioSMRTCellMetrics = self._create_instrument_run(
             instrument_run_dto=dtos.smrt_cell_metrics, smrt_cell=smrt_cell
         )
