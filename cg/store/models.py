@@ -1136,8 +1136,8 @@ class PacbioSequencingRun(Base):
 
     id: Mapped[PrimaryKeyInt]
     run_name: Mapped[Str64]
-    processed: Mapped[bool]
-    comment: Mapped[Text]
+    processed: Mapped[bool] = mapped_column(default=False)
+    comment: Mapped[Text] = mapped_column(default="")
     instrument_name: Mapped[RevioNames]
 
 

@@ -2,17 +2,19 @@ from datetime import datetime as dt
 
 import pytest
 
+from cg.constants.devices import RevioNames
 from cg.constants.subject import Sex
 from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
-from cg.store.exc import EntryNotFoundError, EntryAlreadyExistsError
+from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioSequencingRunDTO
+from cg.store.exc import EntryAlreadyExistsError, EntryNotFoundError
 from cg.store.models import (
     ApplicationVersion,
     Collaboration,
     Customer,
+    IlluminaFlowCell,
     Organism,
     Sample,
     User,
-    IlluminaFlowCell,
 )
 from cg.store.store import Store
 
@@ -153,3 +155,9 @@ def test_add_illumina_flow_cell_already_exists(
     # THEN a EntryAlreadyExistsError should be raised
     with pytest.raises(EntryAlreadyExistsError):
         store.add_illumina_flow_cell(illumina_flow_cell_dto)
+
+
+def test_create_pacbio_sequencing_run(store: Store):
+    pacbio_sequencing_run_dto = PacBioSequencingRunDTO(
+        instrument_name=RevioNames.WILMA, run_name="run_name"
+    )

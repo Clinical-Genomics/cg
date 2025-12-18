@@ -54,7 +54,6 @@ def test_get_latest_analyses_for_cases_query(
 
 
 def test_update_pacbio_sample_reads(base_store: Store, helpers: StoreHelpers):
-
     # GIVEN a sample in the database with some initial reads and corresponding sample sequencing metrics
     initial_reads = 1000
     sample_id = "sample_id"

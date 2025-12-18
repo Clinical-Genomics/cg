@@ -502,6 +502,7 @@ class CreateMixin(ReadHandler):
         self.add_item_to_store(new_smrt_cell)
         return new_smrt_cell
 
+    # TODO: Create a test for this function
     def create_pacbio_sequencing_run(
         self, instrument_name: RevioNames, run_name: str
     ) -> PacbioSequencingRun:
