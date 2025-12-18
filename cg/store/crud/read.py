@@ -95,8 +95,8 @@ from cg.store.models import (
     OrderTypeApplication,
     Organism,
     PacbioSampleSequencingMetrics,
-    PacbioSequencingRun,
     PacbioSMRTCell,
+    PacbioSMRTCellMetrics,
     Panel,
     Pool,
     RunDevice,
@@ -1806,14 +1806,14 @@ class ReadHandler(BaseHandler):
             sequencing_metrics = sequencing_metrics.filter(RunDevice.internal_id.in_(smrt_cell_ids))
         return sequencing_metrics.all()
 
-    def get_pacbio_sequencing_runs_by_run_name(self, run_name: str) -> list[PacbioSequencingRun]:
+    def get_pacbio_sequencing_runs_by_run_name(self, run_name: str) -> list[PacbioSMRTCellMetrics]:
         """
         Fetches data from PacbioSequencingRunDTO filtered on run name.
         Raises:
             EntryNotFoundError if no sequencing runs are found for the run name
         """
-        runs: Query = self._get_query(table=PacbioSequencingRun)
-        runs = runs.filter(PacbioSequencingRun.run_name == run_name)
+        runs: Query = self._get_query(table=PacbioSMRTCellMetrics)
+        runs = runs.filter(PacbioSMRTCellMetrics.run_name == run_name)
         if runs.count() == 0:
             raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()

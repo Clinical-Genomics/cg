@@ -178,9 +178,7 @@ def test_start_available_nallo(
         analysis_type=AnalysisType.WGS,
         out_dir=Path(test_root_dir, "nallo_root_path", nallo_case.internal_id),
         case=nallo_case,
-        config_path=Path(
-            test_root_dir, "nallo_root_path", nallo_case.internal_id, "tower_ids.yaml"
-        ),
+        config_path=None,
         ticket_id=ticket_id,
         trailblazer_server=httpserver,
         tower_workflow_id=new_tower_id,

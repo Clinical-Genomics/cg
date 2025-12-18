@@ -12,7 +12,10 @@ class MIPDNATracker(Tracker):
         return WorkflowManager.Slurm
 
     def _get_job_ids_path(self, case_id: str) -> Path:
-        return Path(self.workflow_root, case_id, "analysis", "slurm_job_ids.yaml")
+        return Path(self._get_out_dir_path(case_id), "slurm_job_ids.yaml")
+
+    def _get_out_dir_path(self, case_id: str) -> Path:
+        return Path(self.workflow_root, case_id, "analysis")
 
     def _get_sample_info_path(self, case_id: str) -> Path:
         return Path(self.workflow_root, case_id, "analysis", f"{case_id}_qc_sample_info.yaml")
