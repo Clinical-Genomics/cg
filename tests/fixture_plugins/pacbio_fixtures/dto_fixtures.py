@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from cg.constants.devices import DeviceType, RevioNames
+from cg.constants.devices import DeviceType
 from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioDTOs,
     PacBioSampleSequencingMetricsDTO,
@@ -20,7 +20,7 @@ def pac_bio_smrt_cell_dto() -> PacBioSMRTCellDTO:
 @pytest.fixture
 def pacbio_sequencing_run_dto(pac_bio_test_run_name: str) -> PacBioSequencingRunDTO:
     return PacBioSequencingRunDTO(
-        instrument_name=RevioNames("Wilma"),
+        instrument_name="Wilma",
         run_name=pac_bio_test_run_name,
     )
 

@@ -1,4 +1,4 @@
-from cg.constants.devices import DeviceType, RevioNames
+from cg.constants.devices import DeviceType
 from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSampleSequencingMetricsDTO,
     PacBioSequencingRunDTO,
@@ -76,8 +76,10 @@ def get_sample_sequencing_metrics_dtos(
     return sample_metrics_dtos
 
 
-def get_sequencing_run_dto(metrics: PacBioMetrics, run_data: PacBioRunData):
+def get_sequencing_run_dto(
+    metrics: PacBioMetrics, run_data: PacBioRunData
+) -> PacBioSequencingRunDTO:
     return PacBioSequencingRunDTO(
-        instrument_name=RevioNames(metrics.dataset_metrics.instrument_name),
+        instrument_name=metrics.dataset_metrics.instrument_name,
         run_name=run_data.sequencing_run_name,
     )
