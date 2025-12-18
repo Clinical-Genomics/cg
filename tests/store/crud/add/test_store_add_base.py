@@ -159,6 +159,9 @@ def test_add_illumina_flow_cell_already_exists(
 
 
 def test_create_pacbio_sequencing_run(store: Store):
+    # GIVEN a Store without Pacbio sequencing runs
+    assert not store._get_query(table=PacbioSequencingRun).all()
+
     # GIVEN a PacBioSequencingRunDTO
     pacbio_sequencing_run_dto = PacBioSequencingRunDTO(
         instrument_name=RevioNames.WILMA, run_name="run_name"

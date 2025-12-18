@@ -33,7 +33,7 @@ class PacBioStoreService(PostProcessingStoreService):
     def _create_run_device(self, run_device_dto: PacBioSMRTCellDTO) -> PacbioSMRTCell:
         return self.store.create_pac_bio_smrt_cell(run_device_dto)
 
-    def _create_instrument_run(  # TODO: See if we can rename this. Run is a different thing now
+    def _create_pacbio_smrt_cell_metrics(
         self, instrument_run_dto: PacBioSMRTCellMetricsDTO, smrt_cell: PacbioSMRTCell
     ) -> PacbioSMRTCellMetrics:
         return self.store.create_pacbio_smrt_cell_metrics(
@@ -71,7 +71,7 @@ class PacBioStoreService(PostProcessingStoreService):
         dtos: PacBioDTOs = self.data_transfer_service.get_post_processing_dtos(run_data)
         smrt_cell: PacbioSMRTCell = self._create_run_device(dtos.run_device)
         self.store.create_pacbio_sequencing_run(dtos.sequencing_run)
-        smrt_cell_metrics: PacbioSMRTCellMetrics = self._create_instrument_run(
+        smrt_cell_metrics: PacbioSMRTCellMetrics = self._create_pacbio_smrt_cell_metrics(
             instrument_run_dto=dtos.smrt_cell_metrics, smrt_cell=smrt_cell
         )
         self._create_sample_run_metrics(
