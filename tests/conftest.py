@@ -307,13 +307,6 @@ def sbatch_process(sbatch_job_number: int) -> ProcessMock:
     return slurm_process
 
 
-@pytest.fixture(scope="function")
-def dna_case(analysis_store, helpers) -> Case:
-    """Case with DNA application"""
-    cust = helpers.ensure_customer(analysis_store)
-    return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="dna_case")
-
-
 @pytest.fixture
 def analysis_family_single_case(
     case_id: str, family_name: str, sample_id: str, ticket_id: str
@@ -2781,14 +2774,6 @@ def nallo_gene_panel_path(nallo_dir, nallo_case_id) -> Path:
 
 
 @pytest.fixture(scope="function")
-def nallo_metrics_deliverables(nallo_analysis_dir: Path) -> list[dict]:
-    """Returns the content of a mock metrics deliverables file."""
-    return read_yaml(
-        file_path=Path(nallo_analysis_dir, "nallo_fixture_for_metrics_deliverables.yaml")
-    )
-
-
-@pytest.fixture(scope="function")
 def nallo_metrics_deliverables_path(nallo_dir: Path, nallo_case_id: str) -> Path:
     """Path to deliverables file."""
     return Path(nallo_dir, nallo_case_id, f"{nallo_case_id}_metrics_deliverables").with_suffix(
@@ -3172,15 +3157,6 @@ def mock_deliverable(
             raredisease_dir, raredisease_case_id, raredisease_case_id + deliverables_yaml
         ),
     )
-
-
-@pytest.fixture(scope="function")
-def raredisease_config(raredisease_dir: Path, raredisease_case_id: str) -> None:
-    """Create samplesheet.csv file for testing"""
-    Path.mkdir(Path(raredisease_dir, raredisease_case_id), parents=True, exist_ok=True)
-    Path(raredisease_dir, raredisease_case_id, f"{raredisease_case_id}_samplesheet").with_suffix(
-        FileExtensions.CSV
-    ).touch(exist_ok=True)
 
 
 @pytest.fixture(scope="function")

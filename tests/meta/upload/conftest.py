@@ -5,20 +5,13 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.coverage.api import ChanjoAPI
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
-from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
-
-
-class MockCoverage(ChanjoAPI):
-    """Mock chanjo coverage api."""
 
 
 @pytest.fixture
@@ -64,16 +57,6 @@ def upload_genotypes_api(
     )
 
     return _api
-
-
-@pytest.fixture(scope="function")
-def coverage_upload_api(
-    chanjo_config: dict[str, dict[str, str]], populated_housekeeper_api: HousekeeperAPI
-):
-    """Return a upload coverage API."""
-    return UploadCoverageApi(
-        status_api=None, hk_api=populated_housekeeper_api, chanjo_api=MockCoverage(chanjo_config)
-    )
 
 
 @pytest.fixture(name="genotype_analysis_sex")
