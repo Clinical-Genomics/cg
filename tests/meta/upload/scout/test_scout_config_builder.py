@@ -325,7 +325,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
     multiqc: File = create_autospec(File, full_path="multiqc.html")
     peddy_check: File = create_autospec(File, full_path="check.peddy")
     peddy_ped: File = create_autospec(File, full_path="ped.peddy")
-    peddy_sex: File = create_autospec(File, full_path="sex.peddy")
+    somalier_samples: File = create_autospec(File, full_path="somalier.samples")
     vcf_snv_research: File = create_autospec(File, full_path="snv_research.vcf")
     vcf_snv: File = create_autospec(File, full_path="snv_clinical.vcf")
     vcf_sv: File = create_autospec(File, full_path="sv.vcf")
@@ -354,8 +354,8 @@ def test_nallo_config_builder(mocker: MockerFixture):
             return peddy_check
         elif tags == {"ped", "peddy"}:
             return peddy_ped
-        elif tags == {"sex-check", "peddy"}:
-            return peddy_sex
+        elif tags == {"relate-samples", "somalier"}:
+            return somalier_samples
         elif tags == {"vcf-snv-research"}:
             return vcf_snv_research
         elif tags == {"vcf-snv-clinical"}:
@@ -485,8 +485,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
         madeline=None,
         peddy_check=peddy_check.full_path,
         peddy_ped=peddy_ped.full_path,
-        peddy_sex=peddy_sex.full_path,
-        somalier_samples=None,
+        somalier_samples=somalier_samples.full_path,
         somalier_pairs=None,
         vcf_snv=vcf_snv.full_path,
         vcf_snv_research=vcf_snv_research.full_path,
