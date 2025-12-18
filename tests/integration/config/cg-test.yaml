@@ -139,11 +139,12 @@ mutacc-auto:
 
 nallo:
   compute_env: nallo_compute_env
+  conda_binary: "conda_binary"
   conda_env: nallo_conda_env
   config: {test_root_dir}/nallo_config.config
-  launch_directory: {test_root_dir}/nallo_launch_directory
   params: {test_root_dir}/nallo_params.yaml
   platform: {test_root_dir}/platform.config
+  pre_run_script: "pre_run_script.sh"
   profile: nallo_profile
   resources: {test_root_dir}/nallo_resources.config
   repository: nallo_repository
