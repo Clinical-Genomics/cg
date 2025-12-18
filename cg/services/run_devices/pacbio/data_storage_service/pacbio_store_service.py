@@ -74,7 +74,10 @@ class PacBioStoreService(PostProcessingStoreService):
     def store_post_processing_data(self, run_data: PacBioRunData, dry_run: bool = False) -> None:
         dtos: PacBioDTOs = self.data_transfer_service.get_post_processing_dtos(run_data)
         smrt_cell: PacbioSMRTCell = self._create_run_device(dtos.run_device)
-
+        self.store.create_pacbio_sequencing_run(
+            instrument_name=dtos.sequencing_run.instrument_name,
+            run_name=dtos.sequencing_run.run_name,
+        )
         smrt_cell_metrics: PacbioSMRTCellMetrics = self._create_instrument_run(
             instrument_run_dto=dtos.smrt_cell_metrics, smrt_cell=smrt_cell
         )

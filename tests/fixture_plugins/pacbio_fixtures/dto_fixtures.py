@@ -87,11 +87,13 @@ def pac_bio_sample_sequencing_metrics_dto(
 
 @pytest.fixture
 def pac_bio_dtos(
+    pacbio_sequencing_run_dto: PacBioSequencingRunDTO,
     pac_bio_smrt_cell_dto: PacBioSMRTCellDTO,
     pacbio_smrt_cell_metrics_dto: PacBioSMRTCellMetricsDTO,
     pac_bio_sample_sequencing_metrics_dto: list[PacBioSampleSequencingMetricsDTO],
 ) -> PacBioDTOs:
     return PacBioDTOs(
+        sequencing_run=pacbio_sequencing_run_dto,
         run_device=pac_bio_smrt_cell_dto,
         smrt_cell_metrics=pacbio_smrt_cell_metrics_dto,
         sample_sequencing_metrics=pac_bio_sample_sequencing_metrics_dto,
