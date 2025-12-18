@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
+from cg.constants.devices import RevioNames
 from cg.models.orders.constants import OrderType
 from cg.services.illumina.data_transfer.models import (
     IlluminaFlowCellDTO,
@@ -42,6 +43,7 @@ from cg.store.models import (
     OrderTypeApplication,
     Organism,
     PacbioSampleSequencingMetrics,
+    PacbioSequencingRun,
     PacbioSMRTCell,
     PacbioSMRTCellMetrics,
     Panel,
@@ -499,6 +501,14 @@ class CreateMixin(ReadHandler):
         )
         self.add_item_to_store(new_smrt_cell)
         return new_smrt_cell
+
+    def create_pacbio_sequencing_run(
+        self, instrument_name: RevioNames, run_name: str
+    ) -> PacbioSequencingRun:
+        LOG.debug(f"Creating Pacbio Sequencing Run for {run_name}")
+        sequencing_run = PacbioSequencingRun(instrument_name=instrument_name, run_name=run_name)
+        self.add_item_to_store(sequencing_run)
+        return sequencing_run
 
     def create_pacbio_smrt_cell_metrics(
         self, sequencing_run_dto: PacBioSMRTCellMetricsDTO, smrt_cell: PacbioSMRTCell
