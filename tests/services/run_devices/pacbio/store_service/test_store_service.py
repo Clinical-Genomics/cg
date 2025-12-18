@@ -143,3 +143,8 @@ def test_store_post_processing_data_error_parser(
         # THEN a PostProcessingStoreDataError is raised
         with pytest.raises(PostProcessingStoreDataError):
             pac_bio_store_service.store_post_processing_data(pacbio_barcoded_run_data)
+
+
+# TODO: Fill this test
+def test_store_post_processing_multiple_smrt_cells():
+    pass

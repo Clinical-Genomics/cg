@@ -150,6 +150,10 @@ class IlluminaRunAlreadyBackedUpError(CgError):
     """Raised when a flow cell is already backed-up."""
 
 
+class PacbioSequencingRunNotFoundError(CgError):
+    """Raised when a PacBio sequencing run is not found."""
+
+
 class HousekeeperFileMissingError(CgError):
     """
     Exception raised when a file is missing in Housekeeper.
