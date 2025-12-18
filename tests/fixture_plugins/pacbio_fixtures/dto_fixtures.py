@@ -20,7 +20,7 @@ def pac_bio_smrt_cell_dto() -> PacBioSMRTCellDTO:
 @pytest.fixture
 def pacbio_sequencing_run_dto(pac_bio_test_run_name: str) -> PacBioSequencingRunDTO:
     return PacBioSequencingRunDTO(
-        instrument_name=RevioNames.WILMA,
+        instrument_name=RevioNames("Wilma"),
         run_name=pac_bio_test_run_name,
     )
 

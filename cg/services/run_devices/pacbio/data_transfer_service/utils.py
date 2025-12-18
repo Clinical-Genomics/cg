@@ -78,6 +78,6 @@ def get_sample_sequencing_metrics_dtos(
 
 def get_sequencing_run_dto(metrics: PacBioMetrics, run_data: PacBioRunData):
     return PacBioSequencingRunDTO(
-        instrument_name=RevioNames[metrics.dataset_metrics.instrument_name],
+        instrument_name=RevioNames(metrics.dataset_metrics.instrument_name),
         run_name=run_data.sequencing_run_name,
     )
