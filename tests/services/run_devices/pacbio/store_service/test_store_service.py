@@ -4,6 +4,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from cg.constants.devices import RevioNames
+from cg.exc import PacbioSequencingRunAlreadyExistsError
 from cg.services.run_devices.exc import (
     PostProcessingDataTransferError,
     PostProcessingStoreDataError,
@@ -165,6 +166,7 @@ def test_store_post_processing_multiple_smrt_cells(
     mocker.patch.object(
         PacBioDataTransferService, "get_post_processing_dtos", return_value=pac_bio_dtos
     )
+    already_exists_spy = mocker.spy(PacbioSequencingRunAlreadyExistsError, "__init__")
     pac_bio_store_service.store_post_processing_data(run_data=pacbio_barcoded_run_data)
 
     # THEN no additional PacBio sequencing run should be added
@@ -172,3 +174,4 @@ def test_store_post_processing_multiple_smrt_cells(
         PacbioSequencingRun
     ).all()
     assert len(sequencing_runs) == 1
+    already_exists_spy.assert_called()
