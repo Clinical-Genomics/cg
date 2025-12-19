@@ -326,12 +326,12 @@ def test_nallo_config_builder(mocker: MockerFixture):
     peddy_check: File = create_autospec(File, full_path="check.peddy")
     peddy_ped: File = create_autospec(File, full_path="ped.peddy")
     somalier_samples: File = create_autospec(File, full_path="somalier.samples")
-    vcf_snv_research: File = create_autospec(File, full_path="snv_research.vcf")
     vcf_snv: File = create_autospec(File, full_path="snv_clinical.vcf")
-    vcf_sv: File = create_autospec(File, full_path="sv.vcf")
-    vcf_sv_research: File = create_autospec(File, full_path="sv_research.vcf")
+    vcf_snv_research: File = create_autospec(File, full_path="snv_research.vcf")
     vcf_snv_research: File = create_autospec(File, full_path="snv_research.vcf")
     vcf_str: File = create_autospec(File, full_path="str.vcf")
+    vcf_sv: File = create_autospec(File, full_path="sv.vcf")
+    vcf_sv_research: File = create_autospec(File, full_path="sv_research.vcf")
 
     # Sample files
     alignment_path: File = create_autospec(File, full_path="haplo.bam")
@@ -476,22 +476,23 @@ def test_nallo_config_builder(mocker: MockerFixture):
                 tiddit_coverage_wig=tiddit_coverage_wig.full_path,
             )
         ],
+        cnv_report=None,
+        coverage_qc_report=None,
         customer_images=None,
         delivery_report=delivery_report.full_path,
-        coverage_qc_report=None,
-        cnv_report=None,
-        multiqc=multiqc.full_path,
-        track="rare",
         madeline=None,
+        multiqc=multiqc.full_path,
         peddy_check=peddy_check.full_path,
         peddy_ped=peddy_ped.full_path,
-        somalier_samples=somalier_samples.full_path,
+        peddy_sex=None,
         somalier_pairs=None,
+        somalier_samples=somalier_samples.full_path,
+        track="rare",
         vcf_snv=vcf_snv.full_path,
         vcf_snv_research=vcf_snv_research.full_path,
+        vcf_str=vcf_str.full_path,
         vcf_sv=vcf_sv.full_path,
         vcf_sv_research=vcf_sv_research.full_path,
-        vcf_str=vcf_str.full_path,
     )
 
     assert load_config == expected_load_config
