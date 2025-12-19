@@ -4,6 +4,7 @@ import pytest
 
 from cg.constants.devices import RevioNames
 from cg.constants.subject import Sex
+from cg.exc import PacbioSequencingRunAlreadyExistsError
 from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
 from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioSequencingRunDTO
 from cg.store.exc import EntryAlreadyExistsError, EntryNotFoundError
@@ -174,3 +175,22 @@ def test_create_pacbio_sequencing_run(store: Store):
     pacbio_sequencing_run: PacbioSequencingRun = store._get_query(table=PacbioSequencingRun).one()
     assert pacbio_sequencing_run.instrument_name == RevioNames.WILMA
     assert pacbio_sequencing_run.run_name == "run_name"
+
+
+def test_create_pacbio_sequencing_run_already_exists(store: Store):
+    # GIVEN a Store without Pacbio sequencing runs
+    assert not store._get_query(table=PacbioSequencingRun).all()
+
+    # GIVEN a PacBioSequencingRunDTO
+    pacbio_sequencing_run_dto = PacBioSequencingRunDTO(
+        instrument_name=RevioNames.WILMA, run_name="run_name"
+    )
+
+    # GIVEN a Pacbio sequencing run in Store
+    store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
+
+    # WHEN creating the same Pacbio sequencing run in Store
+    # THEN a PacbioSequencingRunAlreadyExistsError should be raised
+    # with pytest.raises(PacbioSequencingRunAlreadyExistsError):
+    store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
+    store.commit_to_store()

@@ -154,6 +154,10 @@ class PacbioSequencingRunNotFoundError(CgError):
     """Raised when a PacBio sequencing run is not found."""
 
 
+class PacbioSequencingRunAlreadyExistsError(CgError):
+    """Raised when a PacBio sequencing run already exists."""
+
+
 class HousekeeperFileMissingError(CgError):
     """
     Exception raised when a file is missing in Housekeeper.
