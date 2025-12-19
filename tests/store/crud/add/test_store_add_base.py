@@ -188,9 +188,9 @@ def test_create_pacbio_sequencing_run_already_exists(store: Store):
 
     # GIVEN a Pacbio sequencing run in Store
     store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
+    store.commit_to_store()
 
     # WHEN creating the same Pacbio sequencing run in Store
     # THEN a PacbioSequencingRunAlreadyExistsError should be raised
-    # with pytest.raises(PacbioSequencingRunAlreadyExistsError):
-    store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
-    store.commit_to_store()
+    with pytest.raises(PacbioSequencingRunAlreadyExistsError):
+        store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
