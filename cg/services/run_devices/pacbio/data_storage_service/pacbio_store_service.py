@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime
 
-from cg.exc import PacbioSequencingRunNotFoundError
+from cg.exc import PacbioSequencingRunAlreadyExistsError, PacbioSequencingRunNotFoundError
 from cg.services.run_devices.abstract_classes import PostProcessingStoreService
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import (
@@ -39,10 +39,8 @@ class PacBioStoreService(PostProcessingStoreService):
         self, sequencing_run_dto: PacBioSequencingRunDTO
     ) -> None:
         try:
-            self.store.get_pacbio_sequencing_run_by_name(sequencing_run_dto.run_name)
-        except PacbioSequencingRunNotFoundError:
             self.store.create_pacbio_sequencing_run(sequencing_run_dto)
-        else:
+        except PacbioSequencingRunAlreadyExistsError:
             LOG.debug(f"Sequencing run {sequencing_run_dto.run_name} already exists")
 
     def _create_pacbio_smrt_cell_metrics(

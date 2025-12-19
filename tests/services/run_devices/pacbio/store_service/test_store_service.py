@@ -145,6 +145,12 @@ def test_store_post_processing_data_error_parser(
             pac_bio_store_service.store_post_processing_data(pacbio_barcoded_run_data)
 
 
-# TODO: Fill this test
-def test_store_post_processing_multiple_smrt_cells():
-    pass
+def test_store_post_processing_multiple_smrt_cells(pac_bio_store_service: PacBioStoreService):
+    # GIVEN a PacBioStoreService
+    
+    
+    # GIVEN that the store already has a PacBio sequencing run with the same run name
+    
+    # WHEN creating PacBio sequencing run with the run name
+    
+    # THEN no additional PacBio sequencing run should be added
