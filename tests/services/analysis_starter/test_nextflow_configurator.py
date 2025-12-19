@@ -188,6 +188,29 @@ def test_get_case_config_flags(
     assert case_config.revision == "revision"
 
 
+def test_get_case_config_fake_flags(
+    raredisease_configurator: NextflowConfigurator,
+    mocker: MockerFixture,
+):
+    """Test that flags with nonsensical names are ignored."""
+
+    # GIVEN a configurator
+
+    # GIVEN that all expected files are mocked to exist
+    mocker.patch.object(Path, "exists", return_value=True)
+    mocker.patch.object(
+        raredisease_configurator.pipeline_extension, "do_required_files_exist", return_value=True
+    )
+
+    # WHEN getting the case config using a non-existent flag
+    case_config: NextflowCaseConfig = raredisease_configurator.get_config(
+        case_id="case_id", fake_flag="fake-flag"
+    )
+
+    # THEN the case config should not contain the flag
+    assert not getattr(case_config, "fake_flag", None)
+
+
 def test_get_config_resume(
     nextflow_case_id: str, raredisease_configurator: NextflowConfigurator, mocker: MockerFixture
 ):
