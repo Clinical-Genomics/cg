@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
-from cg.exc import PacbioSequencingRunAlreadyExistsError, PacbioSequencingRunNotFoundError
+from cg.exc import PacbioSequencingRunAlreadyExistsError
 from cg.models.orders.constants import OrderType
 from cg.services.illumina.data_transfer.models import (
     IlluminaFlowCellDTO,
@@ -507,19 +507,21 @@ class CreateMixin(ReadHandler):
         self, pacbio_sequencing_run_dto: PacBioSequencingRunDTO
     ) -> PacbioSequencingRun:
         LOG.debug(f"Creating Pacbio Sequencing Run for {pacbio_sequencing_run_dto.run_name}")
-        try:
-            self.get_pacbio_sequencing_run_by_name(run_name=pacbio_sequencing_run_dto.run_name)
-        except PacbioSequencingRunNotFoundError:
+        if (
+            self._get_query(table=PacbioSequencingRun)
+            .filter(PacbioSequencingRun.run_name == pacbio_sequencing_run_dto.run_name)
+            .first()
+        ):
+            raise PacbioSequencingRunAlreadyExistsError(
+                message=f"{pacbio_sequencing_run_dto.run_name} already exists."
+            )
+        else:
             sequencing_run = PacbioSequencingRun(
                 instrument_name=pacbio_sequencing_run_dto.instrument_name,
                 run_name=pacbio_sequencing_run_dto.run_name,
             )
             self.add_item_to_store(sequencing_run)
             return sequencing_run
-        else:
-            raise PacbioSequencingRunAlreadyExistsError(
-                message=f"{pacbio_sequencing_run_dto.run_name} already exists."
-            )
 
     def create_pacbio_smrt_cell_metrics(
         self, sequencing_run_dto: PacBioSMRTCellMetricsDTO, smrt_cell: PacbioSMRTCell
