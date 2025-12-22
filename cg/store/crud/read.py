@@ -1824,7 +1824,16 @@ class ReadHandler(BaseHandler):
     def get_pacbio_sequencing_runs(
         self, page: int = 0, page_size: int = 0
     ) -> list[PacbioSequencingRun]:
-        return self._get_query(PacbioSequencingRun).order_by(PacbioSequencingRun.id).all()
+        if page and page_size:
+            return (
+                self._get_query(PacbioSequencingRun)
+                .order_by(PacbioSequencingRun.id)
+                .limit(page_size)
+                .offset((page - 1) * page_size)
+                .all()
+            )
+        else:
+            return self._get_query(PacbioSequencingRun).order_by(PacbioSequencingRun.id).all()
 
     def get_case_priority(self, case_id: str) -> SlurmQos:
         """Get case priority."""
