@@ -12,7 +12,7 @@ from cg.cli.post_process.utils import (
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN
 from cg.models.cg_config import CGConfig
-from cg.services.run_devices.abstract_classes import PostProcessingService
+from cg.services.run_devices.protocols import PostProcessingService
 
 LOG = logging.getLogger(__name__)
 

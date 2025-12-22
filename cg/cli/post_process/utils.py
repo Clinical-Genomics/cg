@@ -6,8 +6,8 @@ from pydantic import BaseModel, ConfigDict
 
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
-from cg.services.run_devices.abstract_classes import PostProcessingService
 from cg.services.run_devices.pacbio.post_processing_service import PacBioPostProcessingService
+from cg.services.run_devices.protocols import PostProcessingService
 from cg.services.run_devices.run_names.service import RunNamesService
 from cg.utils.mapping import get_item_by_pattern_in_source
 
