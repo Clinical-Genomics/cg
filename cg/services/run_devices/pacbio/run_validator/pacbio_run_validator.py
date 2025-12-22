@@ -4,10 +4,10 @@ from pathlib import Path
 from cg.constants.constants import FileFormat
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.decompression_service.decompressor import Decompressor
-from cg.services.run_devices.abstract_classes import RunValidator
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.services.run_devices.pacbio.run_file_manager.models import PacBioRunValidatorFiles
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
+from cg.services.run_devices.protocols import RunValidator
 from cg.services.validate_file_transfer_service.validate_file_transfer_service import (
     ValidateFileTransferService,
 )

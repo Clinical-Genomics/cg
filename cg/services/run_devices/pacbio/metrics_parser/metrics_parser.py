@@ -6,7 +6,6 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from cg.constants.pacbio import PacBioDirsAndFiles
-from cg.services.run_devices.abstract_classes import PostProcessingMetricsParser
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import (
     PostProcessingParsingError,
@@ -28,6 +27,7 @@ from cg.services.run_devices.pacbio.metrics_parser.utils import (
 )
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
+from cg.services.run_devices.protocols import PostProcessingMetricsParser
 
 LOG = logging.getLogger(__name__)
 

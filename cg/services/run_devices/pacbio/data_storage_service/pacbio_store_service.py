@@ -4,7 +4,6 @@ import logging
 from datetime import datetime
 
 from cg.exc import PacbioSequencingRunAlreadyExistsError
-from cg.services.run_devices.abstract_classes import PostProcessingStoreService
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import (
     PostProcessingDataTransferError,
@@ -21,6 +20,7 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSMRTCellMetricsDTO,
 )
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.protocols import PostProcessingStoreService
 from cg.store.models import PacbioSMRTCell, PacbioSMRTCellMetrics
 from cg.store.store import Store
 

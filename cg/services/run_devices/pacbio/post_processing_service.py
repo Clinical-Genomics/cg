@@ -1,7 +1,6 @@
 import logging
 from pathlib import Path
 
-from cg.services.run_devices.abstract_classes import PostProcessingService
 from cg.services.run_devices.constants import POST_PROCESSING_COMPLETED
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import (
@@ -22,6 +21,7 @@ from cg.services.run_devices.pacbio.run_data_generator.pacbio_run_data_generator
 )
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import PacBioRunValidator
+from cg.services.run_devices.protocols import PostProcessingService
 
 LOG = logging.getLogger(__name__)
 
