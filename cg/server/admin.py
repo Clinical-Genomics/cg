@@ -12,11 +12,11 @@ from wtforms.form import Form
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.models.orders.constants import OrderType
+from cg.server.app_config import app_config
 from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
-from cg.server.app_config import app_config
 
 
 class BaseView(ModelView):
@@ -878,7 +878,7 @@ class IlluminaSampleSequencingMetricsView(BaseView):
     column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"]
 
 
-class PacbioSmrtCellView(BaseView):
+class PacbioSmrtCellMetricsView(BaseView):
     """Admin view for Model.PacbioSMRTCell"""
 
     column_list = (
@@ -924,7 +924,7 @@ class PacbioSmrtCellView(BaseView):
                 "<a href='%s'>%s</a>"
                 % (
                     url_for(
-                        "pacbiosequencingrun.index_view",
+                        "pacbiosmrtcellmetrics.index_view",
                         search=model.instrument_run.device.internal_id,
                     ),
                     model.instrument_run.device.internal_id,
@@ -938,7 +938,7 @@ class PacbioSmrtCellView(BaseView):
 class PacbioSampleRunMetricsView(BaseView):
     column_filters = ["instrument_run.run_name", "instrument_run.plate"]
     column_formatters = {
-        "smrt_cell": PacbioSmrtCellView.view_smrt_cell_link,
+        "smrt_cell": PacbioSmrtCellMetricsView.view_smrt_cell_link,
         "sample": SampleView.view_sample_link,
     }
     column_labels = {

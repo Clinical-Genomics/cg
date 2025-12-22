@@ -39,7 +39,7 @@ from cg.store.models import (
     Order,
     OrderTypeApplication,
     Organism,
-    PacbioSequencingRun,
+    PacbioSMRTCellMetrics,
     Panel,
     Pool,
     RunDevice,
@@ -1138,8 +1138,8 @@ class StoreHelpers:
         id: int,
         device_id: int,
         run_name: str = "run_name",
-    ) -> PacbioSequencingRun:
-        run = PacbioSequencingRun(
+    ) -> PacbioSMRTCellMetrics:
+        run = PacbioSMRTCellMetrics(
             barcoded_hifi_reads=123456700,
             barcoded_hifi_yield=12345600,
             barcoded_hifi_reads_percentage=99.9,

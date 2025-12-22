@@ -47,7 +47,7 @@ class GenePanelMasterList(StrEnum):
     SOVM = "SOVM"
     STROKE = "STROKE"
     AID = "AID"
-    INHERITED_CANCER = "Inherited cancer"
+    IHC = "IHC"
     VEO_IBD = "VEO-IBD"
     KIDNEY = "Kidney"
     CAKUT = "CAKUT"
