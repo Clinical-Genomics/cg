@@ -178,17 +178,15 @@ def test_create_pacbio_sequencing_run(store: Store):
 
 
 def test_create_pacbio_sequencing_run_already_exists(store: Store):
-    # GIVEN a Store without Pacbio sequencing runs
-    assert not store._get_query(table=PacbioSequencingRun).all()
+    # GIVEN a Store with a Pacbio sequencing run
+    store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
+    store.commit_to_store()
+    assert store._get_query(table=PacbioSequencingRun).one()
 
     # GIVEN a PacBioSequencingRunDTO
     pacbio_sequencing_run_dto = PacBioSequencingRunDTO(
         instrument_name=RevioNames.WILMA, run_name="run_name"
     )
-
-    # GIVEN a Pacbio sequencing run in Store
-    store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
-    store.commit_to_store()
 
     # WHEN creating the same Pacbio sequencing run in Store
     # THEN a PacbioSequencingRunAlreadyExistsError should be raised
