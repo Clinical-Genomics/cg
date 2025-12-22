@@ -8,12 +8,12 @@ from cg.server.endpoints.sequencing_run.dtos import (
     PacbioSequencingRunDTO,
     PacbioSequencingRunResponse,
 )
-from cg.server.ext import pacbio_sequencing_runs_service as pacbio_global_service
+from cg.server.ext import pacbio_sequencing_runs_service as sequencing_runs_service
 
 
 def test_get_pacbio_sequencing_runs(client: FlaskClient):
     # GIVEN two sequencing runs exists
-    pacbio_global_service.get_all_sequencing_runs = Mock(
+    sequencing_runs_service.get_all_sequencing_runs = Mock(
         return_value=PacbioSequencingRunResponse(
             pacbio_sequencing_runs=[
                 PacbioSequencingRunDTO(
