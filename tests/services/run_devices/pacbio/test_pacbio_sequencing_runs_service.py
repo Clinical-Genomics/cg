@@ -82,3 +82,17 @@ def test_get_all_pacbio_sequencing_runs():
             PacbioSequencingRunDTO(run_name="Nisse", comment="Tomtens hjälpreda", processed=False),
         ]
     )
+
+
+def test_get_sequencing_runs_with_pagination():
+    # GIVEN a store
+    status_db = create_autospec(Store)
+
+    # GIVEN a PacBio sequencing run service
+    pacbio_sequencing_run_service = PacbioSequencingRunsService(store=status_db)
+
+    # WHEN passing page and page_size to the method
+    pacbio_sequencing_run_service.get_sequencing_runs(page=5, page_size=50)
+
+    # THEN the method should be called with these arguments
+    status_db.get_pacbio_sequencing_runs.assert_called_once_with(page=5, page_size=50)
