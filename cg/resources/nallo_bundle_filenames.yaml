@@ -30,6 +30,11 @@
   tag: assembly_aligned_index
 - format: bed
   id: SAMPLEID
+  path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz
+  step: methylation_pileup
+  tag: hap1
+- format: bed
+  id: SAMPLEID
   path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz.tbi
   step: methylation_pileup
   tag: hap1_index
