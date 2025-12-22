@@ -30,32 +30,32 @@
   tag: assembly_aligned_index
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz
+  path: PATHTOCASE/methylation/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz
   step: methylation_pileup
   tag: hap1
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz.tbi
+  path: PATHTOCASE/methylation/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz.tbi
   step: methylation_pileup
   tag: hap1_index
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz
+  path: PATHTOCASE/methylation/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz
   step: methylation_pileup
   tag: hap2
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz.tbi
+  path: PATHTOCASE/methylation/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz.tbi
   step: methylation_pileup
   tag: hap2_index
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz
+  path: PATHTOCASE/methylation/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz
   step: methylation_pileup
   tag: ungrouped
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz.tbi
+  path: PATHTOCASE/methylation/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz.tbi
   step: methylation_pileup
   tag: ungrouped_index
 - format: meta
