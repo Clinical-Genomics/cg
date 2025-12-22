@@ -15,11 +15,13 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSampleSequencingMetricsDTO,
     PacBioSequencingRunDTO,
     PacBioSMRTCellDTO,
+    PacBioSMRTCellMetricsDTO,
 )
 from cg.services.run_devices.pacbio.data_transfer_service.utils import (
     get_sample_sequencing_metrics_dtos,
     get_sequencing_run_dto,
     get_smrt_cell_dto,
+    get_smrt_cell_metrics_dto,
 )
 from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
 from cg.services.run_devices.pacbio.metrics_parser.models import PacBioMetrics
@@ -38,8 +40,11 @@ class PacBioDataTransferService(PostProcessingDataTransferService):
     )
     def get_post_processing_dtos(self, run_data: PacBioRunData) -> PacBioDTOs:
         metrics: PacBioMetrics = self.metrics_service.parse_metrics(run_data)
-        smrt_cell_dto: PacBioSMRTCellDTO = get_smrt_cell_dto(metrics)
         sequencing_run_dto: PacBioSequencingRunDTO = get_sequencing_run_dto(
+            metrics=metrics, run_data=run_data
+        )
+        smrt_cell_dto: PacBioSMRTCellDTO = get_smrt_cell_dto(metrics)
+        smrt_cell_metrics_dto: PacBioSMRTCellMetricsDTO = get_smrt_cell_metrics_dto(
             metrics=metrics, run_data=run_data
         )
         sample_sequencing_metrics_dtos: list[PacBioSampleSequencingMetricsDTO] = (
@@ -48,6 +53,7 @@ class PacBioDataTransferService(PostProcessingDataTransferService):
         LOG.debug("DTOs created")
         return PacBioDTOs(
             run_device=smrt_cell_dto,
-            sequencing_run=sequencing_run_dto,
+            smrt_cell_metrics=smrt_cell_metrics_dto,
             sample_sequencing_metrics=sample_sequencing_metrics_dtos,
+            sequencing_run=sequencing_run_dto,
         )
