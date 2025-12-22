@@ -31,6 +31,6 @@ def get_sequencing_runs(run_name: str):
 @handle_missing_entries
 def get_sequencing_runs_new():  # TODO rename endpoint to pacbio_sequencing_runs
     sequencing_runs: PacbioSequencingRunResponse = (
-        pacbio_sequencing_runs_service.get_all_sequencing_runs()
+        pacbio_sequencing_runs_service.get_sequencing_runs()
     )
     return jsonify(sequencing_runs.model_dump())

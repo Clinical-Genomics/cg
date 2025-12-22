@@ -71,7 +71,7 @@ def test_get_all_pacbio_sequencing_runs():
     pacbio_sequencing_run_service = PacbioSequencingRunsService(store=status_db)
 
     # WHEN getting all PacBio sequencing runs
-    sequencing_runs = pacbio_sequencing_run_service.get_all_sequencing_runs()
+    sequencing_runs = pacbio_sequencing_run_service.get_sequencing_runs()
 
     # THEN all PacBio sequencing run are returned
     assert sequencing_runs == PacbioSequencingRunResponse(

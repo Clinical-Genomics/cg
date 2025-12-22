@@ -13,7 +13,7 @@ from cg.server.ext import pacbio_sequencing_runs_service as sequencing_runs_serv
 
 def test_get_pacbio_sequencing_runs(client: FlaskClient):
     # GIVEN two sequencing runs exists
-    sequencing_runs_service.get_all_sequencing_runs = Mock(
+    sequencing_runs_service.get_sequencing_runs = Mock(
         return_value=PacbioSequencingRunResponse(
             pacbio_sequencing_runs=[
                 PacbioSequencingRunDTO(
@@ -36,3 +36,9 @@ def test_get_pacbio_sequencing_runs(client: FlaskClient):
         {"run_name": "rudolf", "comment": "This one was crazy!", "processed": True},
         {"run_name": "santa", "comment": "Ho, Ho, Ho", "processed": False},
     ]
+
+
+def test_get_pacbio_sequencing_runs_with_pagination(client: FlaskClient):
+
+    # WHEN a request is made to get a delivery message for the case
+    response: TestResponse = client.get("/api/v1/pacbio_sequencing_runs?page=5&page_size=50")
