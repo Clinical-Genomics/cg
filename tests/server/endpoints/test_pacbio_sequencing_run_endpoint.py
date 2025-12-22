@@ -15,11 +15,14 @@ def test_get_pacbio_sequencing_runs(client: FlaskClient):
     )
 
     # WHEN a request is made to get a delivery message for the case
-    response: TestResponse = client.get(f"/api/v1/pacbio_sequencing_run")
+    response: TestResponse = client.get("/api/v1/pacbio_sequencing_runs")
 
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
 
     # THEN the response contains a message
     assert response.json
-    assert response.json["pacbio_sequencing_runs"]
+    assert response.json["pacbio_sequencing_runs"] == [
+        {"run_name": "rudolf", "comments": "This one was crazy!", "processed": True},
+        {"run_name": "santa", "comments": "Ho, Ho, Ho", "processed": False},
+    ]
