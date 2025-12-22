@@ -39,6 +39,13 @@ def test_get_pacbio_sequencing_runs(client: FlaskClient):
 
 
 def test_get_pacbio_sequencing_runs_with_pagination(client: FlaskClient):
+    # GIVEN a sequencing run service
+    sequencing_runs_service.get_sequencing_runs = Mock(
+        return_value=PacbioSequencingRunResponse(pacbio_sequencing_runs=[])
+    )
 
     # WHEN a request is made to get a delivery message for the case
-    response: TestResponse = client.get("/api/v1/pacbio_sequencing_runs?page=5&page_size=50")
+    client.get("/api/v1/pacbio_sequencing_runs?page=5&pageSize=50")
+
+    # THEN the page number and the page size should be passed
+    sequencing_runs_service.get_sequencing_runs.assert_called_once_with(page=5, page_size=50)
