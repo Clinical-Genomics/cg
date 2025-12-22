@@ -29,7 +29,7 @@ from cg.utils.mapping import get_item_by_pattern_in_source
 LOG = logging.getLogger(__name__)
 
 
-class PacBioHousekeeperService(PostProcessingHKService):
+class PacBioHousekeeperService(PostProcessingHKService[PacBioRunData]):
 
     def __init__(
         self,

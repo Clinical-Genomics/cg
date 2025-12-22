@@ -32,7 +32,7 @@ from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import Pac
 LOG = logging.getLogger(__name__)
 
 
-class PacBioMetricsParser(PostProcessingMetricsParser):
+class PacBioMetricsParser(PostProcessingMetricsParser[PacBioRunData, PacBioMetrics]):
     """Class for parsing PacBio sequencing metrics."""
 
     def __init__(self, file_manager: PacBioRunFileManager):

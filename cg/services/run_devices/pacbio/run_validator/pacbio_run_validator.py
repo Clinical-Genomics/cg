@@ -15,7 +15,7 @@ from cg.services.validate_file_transfer_service.validate_file_transfer_service i
 LOG = logging.getLogger(__name__)
 
 
-class PacBioRunValidator(RunValidator):
+class PacBioRunValidator(RunValidator[PacBioRunData]):
     """
     PacBio run validator.
     Ensure that the post-processing of a pacbio run can start.

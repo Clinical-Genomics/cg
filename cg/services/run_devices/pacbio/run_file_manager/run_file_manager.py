@@ -11,7 +11,7 @@ from cg.services.run_devices.validators import validate_files_or_directories_exi
 from cg.utils.files import get_files_matching_pattern
 
 
-class PacBioRunFileManager(RunFileManager):
+class PacBioRunFileManager(RunFileManager[PacBioRunData]):
 
     @handle_post_processing_errors(
         to_except=(FileNotFoundError,), to_raise=PostProcessingRunFileManagerError

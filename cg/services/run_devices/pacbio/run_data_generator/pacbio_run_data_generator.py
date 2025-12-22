@@ -7,7 +7,7 @@ from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRun
 from cg.services.run_devices.validators import validate_has_expected_parts, validate_name_pre_fix
 
 
-class PacBioRunDataGenerator(RunDataGenerator):
+class PacBioRunDataGenerator(RunDataGenerator[PacBioRunData]):
 
     @staticmethod
     def _validate_run_name(run_name) -> None:

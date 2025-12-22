@@ -26,7 +26,7 @@ from cg.services.run_devices.pacbio.run_validator.pacbio_run_validator import Pa
 LOG = logging.getLogger(__name__)
 
 
-class PacBioPostProcessingService(PostProcessingService):
+class PacBioPostProcessingService(PostProcessingService[PacBioRunData]):
     """Service for handling post-processing of PacBio sequencing runs."""
 
     def __init__(

@@ -27,7 +27,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-class PacBioStoreService(PostProcessingStoreService):
+class PacBioStoreService(PostProcessingStoreService[PacBioRunData]):
     def __init__(self, store: Store, data_transfer_service: PacBioDataTransferService):
         self.store = store
         self.data_transfer_service = data_transfer_service

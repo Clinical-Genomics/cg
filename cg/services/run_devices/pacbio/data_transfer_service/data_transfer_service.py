@@ -30,7 +30,7 @@ from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRun
 LOG = logging.getLogger(__name__)
 
 
-class PacBioDataTransferService(PostProcessingDataTransferService):
+class PacBioDataTransferService(PostProcessingDataTransferService[PacBioRunData, PacBioDTOs]):
     def __init__(self, metrics_service: PacBioMetricsParser):
         self.metrics_service: PacBioMetricsParser = metrics_service
 
