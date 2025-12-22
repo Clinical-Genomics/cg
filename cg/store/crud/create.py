@@ -511,7 +511,6 @@ class CreateMixin(ReadHandler):
         Raises PacbioSequencingRunAlreadyExistsError:
         - When run name already exists in the database
         """
-        LOG.debug(f"Creating Pacbio Sequencing Run for {pacbio_sequencing_run_dto.run_name}")
         if (
             self._get_query(table=PacbioSequencingRun)
             .filter(PacbioSequencingRun.run_name == pacbio_sequencing_run_dto.run_name)
@@ -521,6 +520,7 @@ class CreateMixin(ReadHandler):
                 message=f"{pacbio_sequencing_run_dto.run_name} already exists."
             )
         else:
+            LOG.debug(f"Creating Pacbio Sequencing Run for {pacbio_sequencing_run_dto.run_name}")
             sequencing_run = PacbioSequencingRun(
                 instrument_name=pacbio_sequencing_run_dto.instrument_name,
                 run_name=pacbio_sequencing_run_dto.run_name,
