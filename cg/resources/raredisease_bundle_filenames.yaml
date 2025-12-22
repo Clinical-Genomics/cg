@@ -165,7 +165,7 @@
   tag: json
 - format: meta
   id: CASEID
-  path: /home/proj/production/workflows/raredisease/references/references_2.0.1_mtp_1/grch37_expansionhunter_variant_catalog_-5.0.0-.json
+  path: /home/proj/production/workflows/raredisease/references/v1.0/grch37_expansionhunter_variant_catalog_-5.0.0-.json
   step: expansionhunter
   tag: variant_catalog
 - format: vcf
