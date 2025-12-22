@@ -506,6 +506,11 @@ class CreateMixin(ReadHandler):
     def create_pacbio_sequencing_run(
         self, pacbio_sequencing_run_dto: PacBioSequencingRunDTO
     ) -> PacbioSequencingRun:
+        """Create a new PacBio sequencing run
+
+        Raises PacbioSequencingRunAlreadyExistsError:
+        - When run name already exists in the database
+        """
         LOG.debug(f"Creating Pacbio Sequencing Run for {pacbio_sequencing_run_dto.run_name}")
         if (
             self._get_query(table=PacbioSequencingRun)

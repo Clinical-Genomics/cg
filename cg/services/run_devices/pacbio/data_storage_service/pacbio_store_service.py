@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime
 
-from cg.exc import PacbioSequencingRunAlreadyExistsError, PacbioSequencingRunNotFoundError
+from cg.exc import PacbioSequencingRunAlreadyExistsError
 from cg.services.run_devices.abstract_classes import PostProcessingStoreService
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import (
