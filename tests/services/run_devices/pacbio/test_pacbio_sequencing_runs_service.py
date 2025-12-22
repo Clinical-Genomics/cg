@@ -65,7 +65,7 @@ def test_get_all_pacbio_sequencing_runs():
         ),
     ]
     status_db = create_autospec(Store)
-    status_db.get_all_pacbio_sequencing_runs = Mock(return_value=runs)
+    status_db.get_pacbio_sequencing_runs = Mock(return_value=runs)
 
     # GIVEN a PacBio sequencing run service
     pacbio_sequencing_run_service = PacbioSequencingRunsService(store=status_db)

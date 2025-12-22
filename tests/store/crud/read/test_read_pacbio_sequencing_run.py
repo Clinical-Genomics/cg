@@ -1,0 +1,14 @@
+from cg.constants.devices import RevioNames
+from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioSequencingRunDTO
+from cg.store.store import Store
+
+
+def test_get_pacbio_sequencing_runs(
+    store: Store,
+):
+    # GIVEN a store with two runs
+    store.create_pacbio_sequencing_run(
+        pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
+            instrument_name=RevioNames.BETTY, run_name="pinocchio"
+        )
+    )
