@@ -6,6 +6,14 @@ labels: User Story, Work Item
 assignees: ''
 
 ---
+<!--
+IMPORTANT: DO NOT WRITE ANY SENSITIVE INFORMATION IN THIS ISSUE, SUCH AS:
+- SAMPLE NAMES
+- SAMPLE INTERNAL IDS
+- CASE NAMES
+- CASE INTERNAL IDS
+- CUSTOMER INFORMATION
+-->
 
 <!--
 Filled in by the Product Owner or the Stakeholders.
