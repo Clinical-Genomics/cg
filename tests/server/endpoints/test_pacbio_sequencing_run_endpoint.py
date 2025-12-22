@@ -1,11 +1,18 @@
 from http import HTTPStatus
+from unittest.mock import Mock, create_autospec
 
 from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 
+from cg.server.ext import pacbio_sequencing_runs_service as pacbio_global_service
+from cg.store.models import PacbioSequencingRun
+
 
 def test_get_pacbio_sequencing_runs(client: FlaskClient):
     # GIVEN two sequencing runs exists
+    pacbio_global_service.get_all_sequencing_runs = Mock(
+        return_value=[create_autospec(PacbioSequencingRun), create_autospec(PacbioSequencingRun)]
+    )
 
     # WHEN a request is made to get a delivery message for the case
     response: TestResponse = client.get(f"/api/v1/pacbio_sequencing_run")
@@ -15,4 +22,4 @@ def test_get_pacbio_sequencing_runs(client: FlaskClient):
 
     # THEN the response contains a message
     assert response.json
-    assert response.json["message"]
+    assert response.json["pacbio_sequencing_runs"]

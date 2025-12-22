@@ -2,7 +2,7 @@ from cg.server.endpoints.sequencing_run.dtos import (
     PacbioSequencingRunDTO,
     PacbioSequencingRunsResponse,
 )
-from cg.store.models import PacbioSMRTCellMetrics
+from cg.store.models import PacbioSequencingRun, PacbioSMRTCellMetrics
 from cg.store.store import Store
 
 
@@ -21,3 +21,6 @@ class PacbioSequencingRunsService:
             run = PacbioSequencingRunDTO.model_validate(run_dict)
             runs.append(run)
         return PacbioSequencingRunsResponse(runs=runs)
+
+    def get_all_sequencing_runs(self) -> list[PacbioSequencingRun]:
+        pass
