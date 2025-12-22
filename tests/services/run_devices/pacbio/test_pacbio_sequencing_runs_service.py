@@ -52,8 +52,7 @@ def test_get_pacbio_sequencing_runs_by_name_no_matches(
 
 
 def test_get_all_pacbio_sequencing_runs():
-    """Tests getting all Pacbio sequencing runs from the store."""
-    # GIVEN that there are two Pacbio sequencing runs in the store
+    # GIVEN that there are two PacBio sequencing runs in the store
     runs = [
         create_autospec(
             PacbioSequencingRun,
@@ -68,12 +67,13 @@ def test_get_all_pacbio_sequencing_runs():
     status_db = create_autospec(Store)
     status_db.get_all_pacbio_sequencing_runs = Mock(return_value=runs)
 
+    # GIVEN a PacBio sequencing run service
     pacbio_sequencing_run_service = PacbioSequencingRunsService(store=status_db)
 
-    # WHEN getting all Pacbio sequencing runs
+    # WHEN getting all PacBio sequencing runs
     sequencing_runs = pacbio_sequencing_run_service.get_all_sequencing_runs()
 
-    #
+    # THEN all PacBio sequencing run are returned
     assert sequencing_runs == PacbioSequencingRunResponse(
         pacbio_sequencing_runs=[
             PacbioSequencingRunDTO(
