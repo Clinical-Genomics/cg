@@ -1822,7 +1822,11 @@ class ReadHandler(BaseHandler):
         return runs.all()
 
     def get_pacbio_sequencing_runs(self) -> list[PacbioSequencingRun]:
+<<<<<<< HEAD
         pass
+=======
+        return self._get_query(PacbioSequencingRun).order_by(PacbioSequencingRun.id).all()
+>>>>>>> c9f49e33e (Created test_get_pacbio_sequencing_runs)
 
     def get_case_priority(self, case_id: str) -> SlurmQos:
         """Get case priority."""

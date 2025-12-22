@@ -12,3 +12,15 @@ def test_get_pacbio_sequencing_runs(
             instrument_name=RevioNames.BETTY, run_name="pinocchio"
         )
     )
+    store.create_pacbio_sequencing_run(
+        pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
+            instrument_name=RevioNames.WILMA, run_name="grinch"
+        )
+    )
+
+    # WHEN fetching the runs
+    runs = store.get_pacbio_sequencing_runs()
+
+    # THEN the two runs should be returned
+    assert runs[0].run_name == "pinocchio"
+    assert runs[1].run_name == "grinch"
