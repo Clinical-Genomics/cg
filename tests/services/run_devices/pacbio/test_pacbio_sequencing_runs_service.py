@@ -1,6 +1,6 @@
 import pytest
 
-from cg.server.endpoints.sequencing_run.dtos import PacbioSequencingRunsResponse
+from cg.server.endpoints.sequencing_run.dtos import PacbioSmrtCellMetricsResponse
 from cg.services.run_devices.pacbio.sequencing_runs_service import PacbioSequencingRunsService
 from cg.store.exc import EntryNotFoundError
 from cg.store.models import PacbioSMRTCellMetrics
@@ -18,8 +18,8 @@ def test_get_pacbio_sequencing_runs_by_name(
     assert any(run.run_name != pacbio_run_name_to_fetch for run in all_runs)
 
     # WHEN fetching sequencing runs filtered by run name
-    runs: PacbioSequencingRunsResponse = pacbio_sequencing_runs_service.get_sequencing_runs_by_name(
-        pacbio_run_name_to_fetch
+    runs: PacbioSmrtCellMetricsResponse = (
+        pacbio_sequencing_runs_service.get_sequencing_runs_by_name(pacbio_run_name_to_fetch)
     )
 
     # THEN all the returned runs have the correct run name
