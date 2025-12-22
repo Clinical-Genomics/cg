@@ -25,7 +25,7 @@ class PacbioSequencingRunsService:
         return PacbioSmrtCellMetricsResponse(runs=runs)
 
     def get_sequencing_runs(self, page: int = 0, page_size: int = 0) -> PacbioSequencingRunResponse:
-        db_runs = self.store.get_pacbio_sequencing_runs()
+        db_runs = self.store.get_pacbio_sequencing_runs(page=page, page_size=page_size)
         runs: list[PacbioSequencingRunDTO] = []
         for db_run in db_runs:
             run = PacbioSequencingRunDTO(

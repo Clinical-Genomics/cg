@@ -1821,7 +1821,9 @@ class ReadHandler(BaseHandler):
             raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()
 
-    def get_pacbio_sequencing_runs(self) -> list[PacbioSequencingRun]:
+    def get_pacbio_sequencing_runs(
+        self, page: int = 0, page_size: int = 0
+    ) -> list[PacbioSequencingRun]:
         return self._get_query(PacbioSequencingRun).order_by(PacbioSequencingRun.id).all()
 
     def get_case_priority(self, case_id: str) -> SlurmQos:
