@@ -179,6 +179,9 @@ def test_create_pacbio_sequencing_run(store: Store):
 
 def test_create_pacbio_sequencing_run_already_exists(store: Store):
     # GIVEN a Store with a Pacbio sequencing run
+    pacbio_sequencing_run_dto = PacBioSequencingRunDTO(
+        instrument_name=RevioNames.WILMA, run_name="run_name"
+    )
     store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
     store.commit_to_store()
     assert store._get_query(table=PacbioSequencingRun).one()
