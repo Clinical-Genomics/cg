@@ -47,7 +47,7 @@ class PacBioStoreService(PostProcessingStoreService):
         self, instrument_run_dto: PacBioSMRTCellMetricsDTO, smrt_cell: PacbioSMRTCell
     ) -> PacbioSMRTCellMetrics:
         return self.store.create_pacbio_smrt_cell_metrics(
-            sequencing_run_dto=instrument_run_dto, smrt_cell=smrt_cell
+            smrt_cell_metrics_dto=instrument_run_dto, smrt_cell=smrt_cell
         )
 
     def _create_sample_run_metrics(
