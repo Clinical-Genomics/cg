@@ -1,4 +1,5 @@
 from cg.server.endpoints.sequencing_run.dtos import (
+    PacbioSequencingRunDTO,
     PacbioSequencingRunResponse,
     PacbioSmrtCellMetricsDTO,
     PacbioSmrtCellMetricsResponse,
@@ -24,4 +25,13 @@ class PacbioSequencingRunsService:
         return PacbioSmrtCellMetricsResponse(runs=runs)
 
     def get_all_sequencing_runs(self) -> PacbioSequencingRunResponse:
-        pass
+        db_runs = self.store.get_all_pacbio_sequencing_runs()
+        runs: list[PacbioSequencingRunDTO] = []
+        for db_run in db_runs:
+            run = PacbioSequencingRunDTO(
+                run_name=db_run.run_name,
+                comment=db_run.comment,
+                processed=db_run.processed,
+            )
+            runs.append(run)
+        return PacbioSequencingRunResponse(pacbio_sequencing_runs=runs)

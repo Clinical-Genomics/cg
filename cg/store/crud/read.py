@@ -95,6 +95,7 @@ from cg.store.models import (
     OrderTypeApplication,
     Organism,
     PacbioSampleSequencingMetrics,
+    PacbioSequencingRun,
     PacbioSMRTCell,
     PacbioSMRTCellMetrics,
     Panel,
@@ -1819,6 +1820,9 @@ class ReadHandler(BaseHandler):
         if runs.count() == 0:
             raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()
+
+    def get_all_pacbio_sequencing_runs(self) -> list[PacbioSequencingRun]:
+        pass
 
     def get_case_priority(self, case_id: str) -> SlurmQos:
         """Get case priority."""
