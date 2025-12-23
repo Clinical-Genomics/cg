@@ -1,5 +1,7 @@
 """Fixtures for PacBio metrics objects."""
 
+from typing import Any
+
 import pytest
 
 from cg.constants.pacbio import (
@@ -78,9 +80,10 @@ def pac_bio_smrtlink_databases_metrics(
     barcoded_smrt_cell_internal_id: str,
     pacbio_barcoded_1_c01_cell_full_name: str,
 ) -> SmrtlinkDatasetsMetrics:
-    data: dict[str, any] = {
+    data: dict[str, Any] = {
         SmrtLinkDatabasesAliases.CELL_ID: barcoded_smrt_cell_internal_id,
         SmrtLinkDatabasesAliases.CELL_INDEX: 2,
+        SmrtLinkDatabasesAliases.INSTRUMENT_NAME: "Wilma",
         SmrtLinkDatabasesAliases.MOVIE_NAME: pacbio_barcoded_1_c01_cell_full_name,
         SmrtLinkDatabasesAliases.PATH: "/srv/cg_data/pacbio/r84202_20240913_121403/1_C01/pb_formats/m84202_240913_162115_s3.hifi_reads.consensusreadset.xml",
         SmrtLinkDatabasesAliases.RUN_COMPLETED_AT: "2024-09-15T14:11:32.418Z",
