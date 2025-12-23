@@ -9,12 +9,12 @@ def test_get_pacbio_sequencing_runs(
     # GIVEN a store with two runs
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name="pinocchio"
+            instrument_name=RevioNames.BETTY, run_name="older"
         )
     )
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.WILMA, run_name="grinch"
+            instrument_name=RevioNames.WILMA, run_name="newer"
         )
     )
 
@@ -22,8 +22,8 @@ def test_get_pacbio_sequencing_runs(
     runs = store.get_pacbio_sequencing_runs()
 
     # THEN the two runs should be returned
-    assert runs[0].run_name == "pinocchio"
-    assert runs[1].run_name == "grinch"
+    assert runs[0].run_name == "newer"
+    assert runs[1].run_name == "older"
 
 
 def test_get_pacbio_sequencing_runs_with_pagination(
@@ -55,5 +55,5 @@ def test_get_pacbio_sequencing_runs_with_pagination(
     runs = store.get_pacbio_sequencing_runs(page=2, page_size=2)
 
     # THEN the two runs should be returned
-    assert runs[0].run_name == "sauron"
-    assert runs[1].run_name == "jesus_christ"
+    assert runs[0].run_name == "grinch"
+    assert runs[1].run_name == "pinocchio"
