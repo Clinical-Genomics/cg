@@ -19,11 +19,12 @@ def test_get_pacbio_sequencing_runs(
     )
 
     # WHEN fetching the runs
-    runs = store.get_pacbio_sequencing_runs()
+    runs, total_count = store.get_pacbio_sequencing_runs()
 
     # THEN the two runs should be returned
     assert runs[0].run_name == "newer"
     assert runs[1].run_name == "older"
+    assert total_count == 2
 
 
 def test_get_pacbio_sequencing_runs_with_pagination(
@@ -52,8 +53,9 @@ def test_get_pacbio_sequencing_runs_with_pagination(
     )
 
     # WHEN fetching the runs
-    runs = store.get_pacbio_sequencing_runs(page=2, page_size=2)
+    runs, total_count = store.get_pacbio_sequencing_runs(page=2, page_size=2)
 
     # THEN the two runs should be returned
     assert runs[0].run_name == "grinch"
     assert runs[1].run_name == "pinocchio"
+    assert total_count == 4

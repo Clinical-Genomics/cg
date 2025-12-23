@@ -64,14 +64,16 @@ def test_get_all_pacbio_sequencing_runs():
             PacbioSequencingRun, run_name="Nisse", comment="Tomtens hjälpreda", processed=False
         ),
     ]
-    status_db = create_autospec(Store)
-    status_db.get_pacbio_sequencing_runs = Mock(return_value=runs)
+    status_db: Store = create_autospec(Store)
+    status_db.get_pacbio_sequencing_runs = Mock(return_value=(runs, 2))
 
     # GIVEN a PacBio sequencing run service
     pacbio_sequencing_run_service = PacbioSequencingRunsService(store=status_db)
 
     # WHEN getting all PacBio sequencing runs
-    sequencing_runs = pacbio_sequencing_run_service.get_sequencing_runs()
+    sequencing_runs: PacbioSequencingRunResponse = (
+        pacbio_sequencing_run_service.get_sequencing_runs()
+    )
 
     # THEN all PacBio sequencing run are returned
     assert sequencing_runs == PacbioSequencingRunResponse(
@@ -80,13 +82,15 @@ def test_get_all_pacbio_sequencing_runs():
                 run_name="santas_little_helper", comment="hunden i Simpsons", processed=True
             ),
             PacbioSequencingRunDTO(run_name="Nisse", comment="Tomtens hjälpreda", processed=False),
-        ]
+        ],
+        total_count=2,
     )
 
 
 def test_get_sequencing_runs_with_pagination():
     # GIVEN a store
     status_db = create_autospec(Store)
+    status_db.get_pacbio_sequencing_runs = Mock(return_value=([], 0))
 
     # GIVEN a PacBio sequencing run service
     pacbio_sequencing_run_service = PacbioSequencingRunsService(store=status_db)

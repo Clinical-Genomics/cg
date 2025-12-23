@@ -20,7 +20,8 @@ def test_get_pacbio_sequencing_runs(client: FlaskClient):
                     run_name="rudolf", comment="This one was crazy!", processed=True
                 ),
                 PacbioSequencingRunDTO(run_name="santa", comment="Ho, Ho, Ho", processed=False),
-            ]
+            ],
+            total_count=2,
         )
     )
 
@@ -32,6 +33,7 @@ def test_get_pacbio_sequencing_runs(client: FlaskClient):
 
     # THEN the response contains a message
     assert response.json
+    assert response.json["total_count"] == 2
     assert response.json["pacbio_sequencing_runs"] == [
         {"run_name": "rudolf", "comment": "This one was crazy!", "processed": True},
         {"run_name": "santa", "comment": "Ho, Ho, Ho", "processed": False},
@@ -41,7 +43,7 @@ def test_get_pacbio_sequencing_runs(client: FlaskClient):
 def test_get_pacbio_sequencing_runs_with_pagination(client: FlaskClient):
     # GIVEN a sequencing run service
     sequencing_runs_service.get_sequencing_runs = Mock(
-        return_value=PacbioSequencingRunResponse(pacbio_sequencing_runs=[])
+        return_value=PacbioSequencingRunResponse(pacbio_sequencing_runs=[], total_count=0)
     )
 
     # WHEN a request is made to get a delivery message for the case

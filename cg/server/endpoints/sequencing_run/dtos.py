@@ -36,3 +36,4 @@ class PacbioSequencingRunDTO(BaseModel):
 
 class PacbioSequencingRunResponse(BaseModel):
     pacbio_sequencing_runs: list[PacbioSequencingRunDTO]
+    total_count: int
