@@ -1,3 +1,5 @@
+from typing import cast
+
 from pydantic import Discriminator, Tag
 from typing_extensions import Annotated
 
@@ -14,3 +16,7 @@ class BalsamicCase(Case):
     cohorts: list[str] | None = None
     samples: list[Annotated[NewSample | OldSample, Discriminator(has_internal_id)]]
     synopsis: str | None = None
+
+    @property
+    def enumerated_new_samples(self) -> list[tuple[int, BalsamicSample]]:
+        return cast(list[tuple[int, BalsamicSample]], super().enumerated_new_samples)

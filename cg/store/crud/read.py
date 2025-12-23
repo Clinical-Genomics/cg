@@ -845,6 +845,11 @@ class ReadHandler(BaseHandler):
             tag=tag,
         ).first()
 
+    def get_latest_bed_version_by_bed_name(self, bed_name: str) -> BedVersion:
+        bed: Bed = self.get_bed_by_name(bed_name)
+        versions: list[BedVersion] = bed.versions
+        return versions[-1]
+
     def get_applications_is_not_archived(self) -> list[Application]:
         """Return applications that are not archived."""
         return (

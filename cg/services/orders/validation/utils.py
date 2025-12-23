@@ -1,5 +1,6 @@
 from typing import Callable
 
+from cg.apps.lims import LimsAPI
 from cg.models.orders.sample_base import ControlEnum
 from cg.services.orders.validation.constants import ElutionBuffer, ExtractionMethod
 from cg.services.orders.validation.errors.case_errors import CaseError
@@ -18,10 +19,12 @@ def apply_order_validation(rules: list[Callable], order: Order, store: Store) ->
     return errors
 
 
-def apply_case_validation(rules: list[Callable], order: Order, store: Store) -> list[CaseError]:
+def apply_case_validation(
+    lims_api: LimsAPI, rules: list[Callable], order: Order, store: Store
+) -> list[CaseError]:
     errors: list[CaseError] = []
     for rule in rules:
-        rule_errors: list[CaseError] = rule(order=order, store=store)
+        rule_errors: list[CaseError] = rule(lims_api=lims_api, order=order, store=store)
         errors.extend(rule_errors)
     return errors
 

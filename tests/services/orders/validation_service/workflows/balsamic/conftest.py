@@ -1,5 +1,8 @@
+from unittest.mock import create_autospec
+
 import pytest
 
+from cg.apps.lims import LimsAPI
 from cg.constants.constants import CAPTUREKIT_CANCER_OPTIONS, GenomeVersion
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
@@ -90,9 +93,10 @@ def balsamic_validation_service(
     base_store.add_item_to_store(user)
     base_store.add_item_to_store(balsamic_application)
     bed = base_store.add_bed("GIcfDNA")
+    base_store.add_bed_version(bed=bed, version=1, filename="some/file.bed", shortname="short_name")
     base_store.add_item_to_store(bed)
     base_store.commit_to_store()
-    return OrderValidationService(base_store)
+    return OrderValidationService(lims_api=create_autospec(LimsAPI), store=base_store)
 
 
 @pytest.fixture

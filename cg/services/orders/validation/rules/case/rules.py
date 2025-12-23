@@ -1,3 +1,4 @@
+from cg.apps.lims.api import LimsAPI
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
     CaseDoesNotExistError,
@@ -7,6 +8,7 @@ from cg.services.orders.validation.errors.case_errors import (
     DoubleTumourError,
     ExistingCaseWithoutAffectedSampleError,
     MoreThanTwoSamplesInCaseError,
+    MultipleCaptureKitError,
     MultiplePrepCategoriesError,
     MultipleSamplesInCaseError,
     NewCaseWithoutAffectedSampleError,
@@ -23,6 +25,8 @@ from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDN
 from cg.services.orders.validation.order_types.nallo.models.order import NalloOrder
 from cg.services.orders.validation.rules.case.utils import (
     contains_duplicates,
+    get_capture_kits_for_existing_samples,
+    get_capture_kits_for_new_samples,
     get_case_prep_categories,
     is_case_not_from_collaboration,
     is_double_normal,
@@ -173,5 +177,22 @@ def validate_samples_in_case_have_same_prep_category(
         prep_categories: set[str] = get_case_prep_categories(case=case, store=store)
         if len(prep_categories) > 1:
             error = MultiplePrepCategoriesError(case_index=case_index)
+            errors.append(error)
+    return errors
+
+
+def validate_samples_in_case_have_same_bed_version(
+    lims_api: LimsAPI, order: BalsamicOrder | BalsamicUmiOrder, store: Store, **kwargs
+) -> list[MultipleCaptureKitError]:
+    errors: list[MultipleCaptureKitError] = []
+    for case_index, case in order.enumerated_new_cases:
+        capture_kits_for_new_samples: set[str | None] = get_capture_kits_for_new_samples(
+            status_db=store, case=case
+        )
+        capture_kits_for_existing_samples: set[str | None] = get_capture_kits_for_existing_samples(
+            case=case, lims_api=lims_api
+        )
+        if len(capture_kits_for_new_samples | capture_kits_for_existing_samples) > 1:
+            error = MultipleCaptureKitError(case_index=case_index)
             errors.append(error)
     return errors
