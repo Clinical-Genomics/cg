@@ -46,7 +46,6 @@ class TomteAnalysisAPI(NfAnalysisAPI):
         self.email: str = config.tomte.slurm.mail_user
         self.compute_env_base: str = config.tomte.compute_env
         self.revision: str = config.tomte.revision
-        self.nextflow_binary_path: str = config.tomte.binary_path
 
     @property
     def sample_sheet_headers(self) -> list[str]:

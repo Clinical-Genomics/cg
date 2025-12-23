@@ -69,7 +69,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.email: str = config.raredisease.slurm.mail_user
         self.compute_env_base: str = config.raredisease.compute_env
         self.revision: str = config.raredisease.revision
-        self.nextflow_binary_path: str = config.raredisease.binary_path
 
     @property
     def sample_sheet_headers(self) -> list[str]:

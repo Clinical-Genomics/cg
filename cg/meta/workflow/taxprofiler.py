@@ -46,7 +46,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.tower_workflow: str = config.taxprofiler.tower_workflow
         self.account: str = config.taxprofiler.slurm.account
         self.email: str = config.taxprofiler.slurm.mail_user
-        self.nextflow_binary_path: str = config.taxprofiler.binary_path
         self.compute_env_base: str = config.taxprofiler.compute_env
 
     @property
