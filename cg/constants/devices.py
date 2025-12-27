@@ -11,5 +11,5 @@ class DeviceType(Enum):
 
 
 class RevioNames(StrEnum):
-    BETTY = "Betty"
-    WILMA = "Wilma"
+    Betty = "Betty"
+    Wilma = "Wilma"

@@ -85,7 +85,7 @@ def test_store_post_processing_data(
         PacbioSequencingRun
     ).one()
     assert pacbio_sequencing_run.run_name == "r84202_20240522_133539"
-    assert pacbio_sequencing_run.instrument_name == RevioNames.WILMA
+    assert pacbio_sequencing_run.instrument_name == RevioNames.Wilma
 
     # THEN the sample reads and sequenced date are updated
     for sample_metrics_dto in pac_bio_dtos.sample_sequencing_metrics:
