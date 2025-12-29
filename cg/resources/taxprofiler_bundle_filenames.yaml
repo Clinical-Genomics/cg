@@ -8,6 +8,11 @@
   path: PATHTOCASE/kraken2/k2_pluspf/SAMPLENAME_pe_k2_pluspf.kraken2.kraken2.report.txt
   step: kraken2
   tag: kraken2_report
+- format: txt
+  id: SAMPLEID
+  path: PATHTOCASE/kraken2/k2_pluspf/SAMPLENAME_pe_k2_pluspf.kraken2.kraken2.classifiedreads.txt
+  step: kraken2
+  tag: kraken2_classified_reads
 - format: html
   id: CASEID
   path: PATHTOCASE/krona/kraken2_k2_pluspf.html
@@ -38,6 +43,11 @@
   path: PATHTOCASE/centrifuge/p_compressed+h+v/SAMPLENAME_pe_p_compressed+h+v.centrifuge.txt
   step: centrifuge
   tag: centrifuge_report
+- format: txt
+  id: SAMPLEID
+  path: PATHTOCASE/centrifuge/p_compressed+h+v/SAMPLENAME_pe_p_compressed+h+v.centrifuge.results.txt
+  step: centrifuge
+  tag: centrifuge_results
 - format: html
   id: CASEID
   path: PATHTOCASE/multiqc/multiqc_report.html
@@ -83,3 +93,13 @@
   path: PATHTOCASE/manifest.json
   step: manifest
   tag: manifest
+- format: tsv
+  id: CASEID
+  path: PATHTOCASE/taxpasta/kraken2_k2_pluspf.tsv
+  step: taxpasta
+  tag: kraken2
+- format: tsv
+  id: CASEID
+  path: PATHTOCASE/taxpasta/centrifuge_p_compressed+h+v.tsv
+  step: taxpasta
+  tag: centrifuge
