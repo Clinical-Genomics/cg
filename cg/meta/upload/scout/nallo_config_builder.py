@@ -90,6 +90,20 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         """Include sample level files that are optional."""
         LOG.info("Including NALLO specific sample level files")
         sample_id: str = cast(str, config_sample.sample_id)
+        config_sample.chromograph_images.autozygous = self.remove_chromosome_substring(
+            self.get_sample_file(  # TODO do we need the chr substring?
+                hk_tags=self.sample_tags.chromograph_autozyg,
+                sample_id=sample_id,
+                hk_version=hk_version,
+            )
+        )
+        config_sample.chromograph_images.coverage = self.remove_chromosome_substring(
+            self.get_sample_file(
+                hk_tags=self.sample_tags.chromograph_coverage,
+                sample_id=sample_id,
+                hk_version=hk_version,
+            )
+        )
         config_sample.d4_file = self.get_sample_file(
             hk_tags=cast(set[str], self.sample_tags.d4_file),
             sample_id=sample_id,

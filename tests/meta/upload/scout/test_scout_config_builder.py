@@ -25,7 +25,12 @@ from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.orders.sample_base import StatusEnum
-from cg.models.scout.scout_load_config import NalloLoadConfig, Reviewer, ScoutNalloIndividual
+from cg.models.scout.scout_load_config import (
+    ChromographImages,
+    NalloLoadConfig,
+    Reviewer,
+    ScoutNalloIndividual,
+)
 from cg.store.models import (
     Analysis,
     Application,
@@ -342,6 +347,8 @@ def test_nallo_config_builder(mocker: MockerFixture):
     minor_allele_frequency_wig: File = create_autospec(
         File, full_path="minor_allele_frequency.bigwig"
     )
+    chromograph_autozyg: File = create_autospec(File, full_path="chromograph_autozyg_chr9.png")
+    chromograph_coverage: File = create_autospec(File, full_path="chromograph_coverage_chr9.png")
 
     # GIVEN files exist in Housekeeper for each set of NALLO_CASE_TAG and NALLO_SAMPLE_TAG
     def mock_get_file_from_version(version: Version, tags: set[str]) -> File | None:
@@ -387,6 +394,10 @@ def test_nallo_config_builder(mocker: MockerFixture):
             return create_autospec(File, full_path="variant_catalog.trgt")
         elif tags == {"hificnv", "bigwig", "maf", "sample_id"}:
             return minor_allele_frequency_wig
+        elif tags == {"chromograph", "autozyg", "sample_id"}:
+            return chromograph_autozyg
+        elif tags == {"chromograph", "tcov", "sample_id"}:
+            return chromograph_coverage
         raise Exception
 
     mocker.patch.object(
@@ -450,6 +461,10 @@ def test_nallo_config_builder(mocker: MockerFixture):
                 rna_alignment_path=None,
                 analysis_type="wgs",
                 capture_kit=None,
+                chromograph_images=ChromographImages(
+                    autozygous="chromograph_autozyg_chr",
+                    coverage="chromograph_coverage_chr",
+                ),
                 confirmed_parent=None,
                 confirmed_sex=None,
                 father="0",
