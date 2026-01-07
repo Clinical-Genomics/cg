@@ -1850,3 +1850,7 @@ class ReadHandler(BaseHandler):
         ):
             return True
         return False
+
+    def get_pacbio_sequencing_run_by_id(self, id: int):
+        """"""
+        return self._get_query(table=PacbioSequencingRun).filter(PacbioSequencingRun.id == id).one()
