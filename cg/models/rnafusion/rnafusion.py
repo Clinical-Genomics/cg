@@ -24,6 +24,8 @@ class RnafusionQCMetrics(QCMetrics):
 class RnafusionParameters(WorkflowParameters):
     """Rnafusion parameters."""
 
+    samplename: str
+
 
 class RnafusionSampleSheetEntry(NextflowSampleSheetEntry):
     """Rnafusion sample sheet model."""
