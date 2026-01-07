@@ -13,6 +13,7 @@ from cg.store.models import (
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
     Order,
+    PacbioSequencingRun,
     Sample,
 )
 
@@ -134,7 +135,11 @@ class UpdateMixin(ReadHandler):
         self.commit_to_store()
 
     def update_pacbio_sequencing_run_comment(self, id: int, comment: str):
-        pass
+        sequencing_run: PacbioSequencingRun = self.get_pacbio_sequencing_run_by_id(id)
+        sequencing_run.comment = comment
+        self.commit_to_store()
 
     def update_pacbio_sequencing_run_processed(self, id: int, processed: bool):
-        pass
+        sequencing_run: PacbioSequencingRun = self.get_pacbio_sequencing_run_by_id(id)
+        sequencing_run.processed = processed
+        self.commit_to_store()

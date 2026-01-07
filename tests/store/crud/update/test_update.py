@@ -7,13 +7,7 @@ from cg.constants.constants import CaseActions, ControlOptions
 from cg.constants.devices import RevioNames
 from cg.constants.sequencing import Sequencers
 from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioSequencingRunDTO
-from cg.store.models import (
-    Analysis,
-    IlluminaSampleSequencingMetrics,
-    IlluminaSequencingRun,
-    PacbioSequencingRun,
-    Sample,
-)
+from cg.store.models import Analysis, IlluminaSampleSequencingMetrics, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -302,13 +296,22 @@ def test_update_pacbio_sequencing_run_comment(store: Store):
     )
 
     # THEN the comment should have been updated
-    updated_sequencing_run = (
-        store._get_query(table=PacbioSequencingRun)
-        .filter(PacbioSequencingRun.id == sequencing_run.id)
-        .one()
-    )
+    updated_sequencing_run = store.get_pacbio_sequencing_run_by_id(sequencing_run.id)
     assert updated_sequencing_run.comment == "The first comment of the new year! Happy 1926!"
 
 
-def test_update_pacbio_sequencing_run_processed():
-    pass
+def test_update_pacbio_sequencing_run_processed(store: Store):
+    # GIVEN a store with a PacBio sequencing run
+    sequencing_run = store.create_pacbio_sequencing_run(
+        pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
+            instrument_name=RevioNames.BETTY, run_name="the_perfect_run"
+        )
+    )
+    store.commit_to_store()
+
+    # WHEN updating the processed field of the sequencing run
+    store.update_pacbio_sequencing_run_processed(id=sequencing_run.id, processed=True)
+
+    # THEN the processed field should have been updated
+    updated_sequencing_run = store.get_pacbio_sequencing_run_by_id(sequencing_run.id)
+    assert updated_sequencing_run.processed is True

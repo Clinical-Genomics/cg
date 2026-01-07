@@ -20,6 +20,7 @@ from cg.exc import (
     CgDataError,
     CgError,
     OrderNotFoundError,
+    PacbioSequencingRunNotFoundError,
     SampleNotFoundError,
 )
 from cg.models.orders.constants import OrderType
@@ -1852,5 +1853,18 @@ class ReadHandler(BaseHandler):
         return False
 
     def get_pacbio_sequencing_run_by_id(self, id: int):
-        """"""
-        return self._get_query(table=PacbioSequencingRun).filter(PacbioSequencingRun.id == id).one()
+        """
+        Get Pacbio Sequencing run by id.
+        Raises:
+            PacbioSequencingRunNotFoundError: If no Pacbio sequencing run is found with the given id.
+        """
+        try:
+            return (
+                self._get_query(table=PacbioSequencingRun)
+                .filter(PacbioSequencingRun.id == id)
+                .one()
+            )
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise PacbioSequencingRunNotFoundError(
+                f"Pacbio Sequencing run with id {id} was not found in the database."
+            )
