@@ -220,10 +220,6 @@ class RunParametersError(CgError):
     """Raised when something is wrong with the run parameters file."""
 
 
-class NfSampleSheetError(CgError):
-    """Raised when something is wrong with the sample sheet."""
-
-
 class SampleSheetContentError(CgError):
     """Raised when something is wrong with the sample sheet content."""
 
