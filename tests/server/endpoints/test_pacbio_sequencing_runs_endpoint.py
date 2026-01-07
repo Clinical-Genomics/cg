@@ -7,6 +7,7 @@ from werkzeug.test import TestResponse
 from cg.server.endpoints.sequencing_run.dtos import (
     PacbioSequencingRunDTO,
     PacbioSequencingRunResponse,
+    PacbioSequencingRunUpdateRequest,
 )
 from cg.server.ext import pacbio_sequencing_runs_service as sequencing_runs_service
 
@@ -54,12 +55,17 @@ def test_get_pacbio_sequencing_runs_with_pagination(client: FlaskClient):
 
 
 def test_patch_pacbio_sequencing_runs_successful(client: FlaskClient):
-
+    # GIVEN a pacbio sequencing run update request
     sequencing_runs_service.update_sequencing_run = Mock()
     body = {"comment": "This is a comment", "processed": True}
 
-    # WHEN
+    # WHEN a request is made to update a pacbio sequencing run
     response = client.patch("/api/v1/pacbio_sequencing_runs/1", json=body)
 
-    assert response.status_code == HTTPStatus.OK
-    sequencing_runs_service.update_sequencing_run.assert_called_once_with(id=1, **body)
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.NO_CONTENT
+
+    # THEN the sequencing run service should be called with the update request
+    sequencing_runs_service.update_sequencing_run.assert_called_once_with(
+        update_request=PacbioSequencingRunUpdateRequest(id=1, **body)
+    )

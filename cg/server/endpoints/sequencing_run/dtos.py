@@ -39,6 +39,7 @@ class PacbioSequencingRunResponse(BaseModel):
     total_count: int
 
 
-class PacBioSequencingRunUpdateRequest(BaseModel):
+class PacbioSequencingRunUpdateRequest(BaseModel):
+    id: int
     comment: str | None = None
     processed: bool | None = None

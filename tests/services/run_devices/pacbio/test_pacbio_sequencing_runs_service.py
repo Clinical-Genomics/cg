@@ -5,6 +5,7 @@ import pytest
 from cg.server.endpoints.sequencing_run.dtos import (
     PacbioSequencingRunDTO,
     PacbioSequencingRunResponse,
+    PacbioSequencingRunUpdateRequest,
     PacbioSmrtCellMetricsResponse,
 )
 from cg.services.run_devices.pacbio.sequencing_runs_service import PacbioSequencingRunsService
@@ -100,3 +101,21 @@ def test_get_sequencing_runs_with_pagination():
 
     # THEN the method should be called with these arguments
     status_db.get_pacbio_sequencing_runs.assert_called_once_with(page=5, page_size=50)
+
+
+def test_update_sequencing_run():
+    # GIVEN a store
+    status_db = create_autospec(Store)
+
+    update_request = PacbioSequencingRunUpdateRequest(
+        id=1, comment="This is a comment", processed=True
+    )
+
+    # GIVEN a PacBio sequencing run service
+    pacbio_sequencing_run_service = PacbioSequencingRunsService(store=status_db)
+
+    # WHEN updating a sequencing run
+    pacbio_sequencing_run_service.update_sequencing_run(update_request=update_request)
+
+    # THEN
+    status_db.update_pacbio_sequencing_run.assert_called_once_with(update_request=update_request)

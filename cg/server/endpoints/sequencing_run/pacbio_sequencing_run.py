@@ -5,7 +5,7 @@ from flask import Blueprint, Response, jsonify, request
 from cg.server.endpoints.error_handler import handle_missing_entries
 from cg.server.endpoints.sequencing_run.dtos import (
     PacbioSequencingRunResponse,
-    PacBioSequencingRunUpdateRequest,
+    PacbioSequencingRunUpdateRequest,
     PacbioSmrtCellMetricsResponse,
 )
 from cg.server.endpoints.utils import before_request
@@ -43,7 +43,7 @@ def get_sequencing_runs_new():  # TODO rename endpoint to pacbio_sequencing_runs
 
 @PACBIO_SEQUENCING_RUNS_BLUEPRINT.route("/pacbio_sequencing_runs/<id>", methods=["PATCH"])
 @handle_missing_entries
-def update_sequencing_run(id: int):
-    update_request = PacBioSequencingRunUpdateRequest.model_validate(request.json)
-    pacbio_sequencing_runs_service.update_sequencing_run(id=id, update_request=update_request)
+def update_sequencing_run(id: str):
+    update_request = PacbioSequencingRunUpdateRequest(id=id, **request.json)
+    pacbio_sequencing_runs_service.update_sequencing_run(update_request=update_request)
     return Response(status=HTTPStatus.NO_CONTENT)
