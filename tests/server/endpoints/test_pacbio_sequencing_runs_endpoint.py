@@ -56,10 +56,10 @@ def test_get_pacbio_sequencing_runs_with_pagination(client: FlaskClient):
 def test_patch_pacbio_sequencing_runs_successful(client: FlaskClient):
 
     sequencing_runs_service.update_sequencing_run = Mock()
+    body = {"comment": "This is a comment", "processed": True}
+
     # WHEN
-    response = client.patch(
-        "/api/v1/pacbio_sequencing_runs/1", {"comment": "This is a comment", "processed": True}
-    )
+    response = client.patch("/api/v1/pacbio_sequencing_runs/1", json=body)
 
     assert response.status == HTTPStatus.OK
-    sequencing_runs_service.update_sequencing_run.assert_called_once_with()
+    sequencing_runs_service.update_sequencing_run.assert_called_once_with(id=1, **body)

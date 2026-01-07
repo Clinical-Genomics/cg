@@ -35,3 +35,6 @@ class PacbioSequencingRunsService:
             )
             runs.append(run)
         return PacbioSequencingRunResponse(pacbio_sequencing_runs=runs, total_count=total_count)
+
+    def update_sequencing_run(self):
+        pass

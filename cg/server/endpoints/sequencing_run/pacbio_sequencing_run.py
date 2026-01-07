@@ -36,3 +36,9 @@ def get_sequencing_runs_new():  # TODO rename endpoint to pacbio_sequencing_runs
         pacbio_sequencing_runs_service.get_sequencing_runs(page=page, page_size=page_size)
     )
     return jsonify(sequencing_runs.model_dump())
+
+
+@PACBIO_SEQUENCING_RUNS_BLUEPRINT.route("/pacbio_sequencing_runs/<id>", methods=["PATCH"])
+@handle_missing_entries
+def update_sequencing_run(id: int):
+    pass
