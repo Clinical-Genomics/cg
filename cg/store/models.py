@@ -28,7 +28,7 @@ from cg.constants.constants import (
     SexOptions,
     StatusOptions,
 )
-from cg.constants.devices import DeviceType
+from cg.constants.devices import DeviceType, RevioNames
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
@@ -1127,6 +1127,18 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
     def to_dict(self) -> dict:
         """Represent as dictionary"""
         return to_dict(self)
+
+
+class PacbioSequencingRun(Base):
+    """PacBio sequencing run, consisting of a set of SMRT-cells sequenced simultaneously."""
+
+    __tablename__ = "pacbio_sequencing_run"
+
+    id: Mapped[PrimaryKeyInt]
+    run_name: Mapped[Str64] = mapped_column(unique=True)
+    processed: Mapped[bool] = mapped_column(default=False)
+    comment: Mapped[Text] = mapped_column(default="")
+    instrument_name: Mapped[RevioNames]
 
 
 class OrderTypeApplication(Base):

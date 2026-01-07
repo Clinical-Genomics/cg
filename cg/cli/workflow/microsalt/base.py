@@ -41,7 +41,9 @@ microsalt.add_command(resolve_compression)
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def config_case(cg_config: CGConfig, case_id: str) -> None:
-    """Create a config file for a microSALT case."""
+    """
+    Configure a microSALT case so that it is ready to be run.
+    """
     factory = ConfiguratorFactory(cg_config)
     configurator = cast(MicrosaltConfigurator, factory.get_configurator(Workflow.MICROSALT))
     configurator.configure(case_id=case_id)
