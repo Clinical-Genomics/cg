@@ -95,6 +95,7 @@ from cg.store.models import (
     OrderTypeApplication,
     Organism,
     PacbioSampleSequencingMetrics,
+    PacbioSequencingRun,
     PacbioSMRTCell,
     PacbioSMRTCellMetrics,
     Panel,
@@ -1819,6 +1820,18 @@ class ReadHandler(BaseHandler):
         if runs.count() == 0:
             raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()
+
+    def get_pacbio_sequencing_runs(
+        self, page: int = 0, page_size: int = 0
+    ) -> tuple[list[PacbioSequencingRun], int]:
+        query = self._get_query(PacbioSequencingRun).order_by(PacbioSequencingRun.id.desc())
+
+        if page and page_size:
+            query = query.limit(page_size).offset((page - 1) * page_size)
+
+        total_count: int = self._get_query(table=PacbioSequencingRun).count()
+
+        return query.all(), total_count
 
     def get_case_priority(self, case_id: str) -> SlurmQos:
         """Get case priority."""
