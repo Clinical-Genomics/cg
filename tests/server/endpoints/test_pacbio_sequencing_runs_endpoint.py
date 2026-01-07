@@ -61,5 +61,5 @@ def test_patch_pacbio_sequencing_runs_successful(client: FlaskClient):
     # WHEN
     response = client.patch("/api/v1/pacbio_sequencing_runs/1", json=body)
 
-    assert response.status == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.OK
     sequencing_runs_service.update_sequencing_run.assert_called_once_with(id=1, **body)
