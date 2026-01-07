@@ -107,8 +107,9 @@ def test_update_sequencing_run():
     # GIVEN a store
     status_db = create_autospec(Store)
 
+    # GIVEN an incoming request with comment and processed set
     update_request = PacbioSequencingRunUpdateRequest(
-        id=1, comment="This is a comment", processed=True
+        id=1, comment="This is a comment", processed=False
     )
 
     # GIVEN a PacBio sequencing run service
@@ -117,5 +118,10 @@ def test_update_sequencing_run():
     # WHEN updating a sequencing run
     pacbio_sequencing_run_service.update_sequencing_run(update_request=update_request)
 
-    # THEN
-    status_db.update_pacbio_sequencing_run.assert_called_once_with(update_request=update_request)
+    # THEN the fields in the sequencing run are updated
+    status_db.update_pacbio_sequencing_run_comment.assert_called_once_with(
+        id=update_request.id, comment=update_request.comment
+    )
+    status_db.update_pacbio_sequencing_run_processed.assert_called_once_with(
+        id=update_request.id, processed=update_request.processed
+    )

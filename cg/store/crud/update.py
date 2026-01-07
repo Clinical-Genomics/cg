@@ -132,3 +132,9 @@ class UpdateMixin(ReadHandler):
         analysis: Analysis = self.get_analysis_by_entry_id(analysis_id)
         analysis.delivery_report_created_at = delivery_report_date
         self.commit_to_store()
+
+    def update_pacbio_sequencing_run_comment(self, id: int, comment: str):
+        pass
+
+    def update_pacbio_sequencing_run_processed(self, id: int, processed: bool):
+        pass
