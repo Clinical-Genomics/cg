@@ -54,7 +54,6 @@ def test_get_latest_analyses_for_cases_query(
 
 
 def test_update_pacbio_sample_reads(base_store: Store, helpers: StoreHelpers):
-
     # GIVEN a sample in the database with some initial reads and corresponding sample sequencing metrics
     initial_reads = 1000
     sample_id = "sample_id"
@@ -62,7 +61,7 @@ def test_update_pacbio_sample_reads(base_store: Store, helpers: StoreHelpers):
     pacbio_smrt_cell = PacBioSMRTCellDTO(type=DeviceType.PACBIO, internal_id="EA123")
     pacbio_smrt_cell = base_store.create_pac_bio_smrt_cell(pacbio_smrt_cell)
     base_store.commit_to_store()
-    sequencing_run: PacbioSMRTCellMetrics = helpers.add_pacbio_sequencing_run(
+    smrt_cell_metrics: PacbioSMRTCellMetrics = helpers.add_pacbio_sequencing_run(
         store=base_store, id=1, device_id=pacbio_smrt_cell.id, run_name="run_name"
     )
     sample_run_metrics_dto = PacBioSampleSequencingMetricsDTO(
@@ -74,7 +73,7 @@ def test_update_pacbio_sample_reads(base_store: Store, helpers: StoreHelpers):
         polymerase_mean_read_length=1,
     )
     base_store.create_pac_bio_sample_sequencing_run(
-        sample_run_metrics_dto=sample_run_metrics_dto, sequencing_run=sequencing_run
+        sample_run_metrics_dto=sample_run_metrics_dto, smrt_cell_metrics=smrt_cell_metrics
     )
     base_store.commit_to_store()
 
@@ -89,7 +88,7 @@ def test_update_pacbio_sample_reads(base_store: Store, helpers: StoreHelpers):
         polymerase_mean_read_length=1,
     )
     base_store.create_pac_bio_sample_sequencing_run(
-        sample_run_metrics_dto=new_sample_run_metrics_dto, sequencing_run=sequencing_run
+        sample_run_metrics_dto=new_sample_run_metrics_dto, smrt_cell_metrics=smrt_cell_metrics
     )
     base_store.commit_to_store()
 
