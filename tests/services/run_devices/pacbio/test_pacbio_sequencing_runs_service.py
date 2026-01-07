@@ -108,9 +108,7 @@ def test_update_sequencing_run():
     status_db = create_autospec(Store)
 
     # GIVEN an incoming request with comment and processed set
-    update_request = PacbioSequencingRunUpdateRequest(
-        id=1, comment="This is a comment", processed=False
-    )
+    update_request = PacbioSequencingRunUpdateRequest(id=1, comment="", processed=False)
 
     # GIVEN a PacBio sequencing run service
     pacbio_sequencing_run_service = PacbioSequencingRunsService(store=status_db)
@@ -122,6 +120,26 @@ def test_update_sequencing_run():
     status_db.update_pacbio_sequencing_run_comment.assert_called_once_with(
         id=update_request.id, comment=update_request.comment
     )
+    status_db.update_pacbio_sequencing_run_processed.assert_called_once_with(
+        id=update_request.id, processed=update_request.processed
+    )
+
+
+def test_update_sequencing_run_only_processed():
+    # GIVEN a store
+    status_db = create_autospec(Store)
+
+    # GIVEN an incoming request with only processed set
+    update_request = PacbioSequencingRunUpdateRequest(id=1, processed=True)
+
+    # GIVEN a PacBio sequencing run service
+    pacbio_sequencing_run_service = PacbioSequencingRunsService(store=status_db)
+
+    # WHEN updating a sequencing run
+    pacbio_sequencing_run_service.update_sequencing_run(update_request=update_request)
+
+    # THEN only processed is updated
+    status_db.update_pacbio_sequencing_run_comment.assert_not_called()
     status_db.update_pacbio_sequencing_run_processed.assert_called_once_with(
         id=update_request.id, processed=update_request.processed
     )

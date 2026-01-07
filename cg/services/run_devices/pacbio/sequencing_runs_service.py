@@ -44,4 +44,6 @@ class PacbioSequencingRunsService:
             )
 
         if update_request.processed is not None:
-            pass
+            self.store.update_pacbio_sequencing_run_processed(
+                id=update_request.id, processed=update_request.processed
+            )
