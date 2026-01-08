@@ -75,7 +75,15 @@ class PacbioSequencingRun(Base):
     )
 
 
-class PacbioSMRTCellMetrics(Base):  # TODO: See if this works
+class InstrumentRun(Base):
+    """Parent model for the different types of instrument runs."""
+
+    __tablename__ = "instrument_run"
+
+    id: Mapped[PrimaryKeyInt]
+
+
+class PacbioSMRTCellMetrics(InstrumentRun):
     __tablename__ = "pacbio_smrt_cell_metrics"
 
     id: Mapped[int] = mapped_column(
@@ -91,7 +99,12 @@ def upgrade():
     op.add_column(
         "pacbio_smrt_cell_metrics",
         sa.Column(
-            "pacbio_sequencing_run_id", sa.ForeignKey("pacbio_sequencing_run.id"), nullable=True
+            "pacbio_sequencing_run_id",
+            sa.Integer,
+            sa.ForeignKey(
+                "pacbio_sequencing_run.id", name="pacbio_smrt_cell_metrics_pacbio_sequencing_run_fk"
+            ),
+            nullable=True,
         ),
     )
     for smrt_cell_metric in session.query(PacbioSMRTCellMetrics).all():
@@ -100,7 +113,12 @@ def upgrade():
         )
         smrt_cell_metric.pacbio_sequencing_run_id = pacbio_run.id
     session.commit()
-    op.alter_column("pacbio_smrt_cell_metrics", "pacbio_sequencing_run_id", nullable=False)
+    op.alter_column(
+        "pacbio_smrt_cell_metrics",
+        "pacbio_sequencing_run_id",
+        existing_type=sa.Integer,
+        nullable=False,
+    )
     op.drop_column("pacbio_smrt_cell_metrics", "run_name")
     session.close()
 
@@ -119,6 +137,13 @@ def downgrade():
         )
         smrt_cell_metric.run_name = pacbio_run.run_name
     session.commit()
-    op.alter_column("pacbio_smrt_cell_metrics", "run_name", nullable=False)
+    op.alter_column(
+        "pacbio_smrt_cell_metrics", "run_name", existing_type=sa.String(length=32), nullable=False
+    )
+    op.drop_constraint(
+        constraint_name="pacbio_smrt_cell_metrics_pacbio_sequencing_run_fk",
+        table_name="pacbio_smrt_cell_metrics",
+        type_="foreignkey",
+    )
     op.drop_column("pacbio_smrt_cell_metrics", "pacbio_sequencing_run_id")
     session.close()
