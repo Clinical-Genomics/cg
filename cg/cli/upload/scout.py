@@ -8,7 +8,7 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.cli.upload.utils import get_scout_api, suggest_cases_to_upload
+from cg.cli.upload.utils import get_scout_api_by_case, suggest_cases_to_upload
 from cg.constants import Workflow
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.constants import FileFormat
@@ -145,7 +145,7 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
     LOG.info("----------------- UPLOAD -----------------------")
 
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    scout_api: ScoutAPI = get_scout_api(cg_config=context, case_id=case_id)
+    scout_api: ScoutAPI = get_scout_api_by_case(cg_config=context, case_id=case_id)
 
     tag_name: str = UploadScoutAPI.get_load_config_tag()
     version: Version = housekeeper_api.last_version(bundle=case_id)

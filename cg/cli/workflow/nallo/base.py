@@ -5,7 +5,7 @@ from typing import cast
 
 import rich_click as click
 
-from cg.cli.utils import CLICK_CONTEXT_SETTINGS, echo_lines
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.nf_analysis import (
     OPTION_RESUME,
@@ -16,7 +16,6 @@ from cg.cli.workflow.nf_analysis import (
     store_available,
     store_housekeeper,
 )
-from cg.constants.cli_options import DRY_RUN
 from cg.constants.constants import MetaApis, Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nallo import NalloAnalysisAPI
@@ -44,29 +43,14 @@ nallo.add_command(store_housekeeper)
 nallo.add_command(metrics_deliver)
 
 
-@nallo.command("panel")
-@DRY_RUN
-@ARGUMENT_CASE_ID
-@click.pass_obj
-def panel(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Write aggregated gene panel file exported from Scout."""
-
-    analysis_api: NalloAnalysisAPI = context.meta_apis["analysis_api"]
-    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-
-    bed_lines: list[str] = analysis_api.get_gene_panel(case_id=case_id)
-    if dry_run:
-        echo_lines(lines=bed_lines)
-        return
-    analysis_api.write_panel_as_tsv(case_id=case_id, content=bed_lines)
-
-
 @nallo.command("config-case")
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def config_case(cg_config: CGConfig, case_id: str):
     """
-    Configure a Nallo case so that it is ready to be run. \b
+    Configure a Nallo case so that it is ready to be run.
+
+    \b
     Creates the following files in the case run directory:
         - CASE_ID_params_file.yaml
         - CASE_ID_nextflow_config.json
@@ -84,7 +68,9 @@ def config_case(cg_config: CGConfig, case_id: str):
 @click.pass_obj
 def run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None) -> None:
     """
-    Run a preconfigured Nallo case. \b
+    Run a preconfigured Nallo case.
+
+    \b
     Assumes that the following files exist in the case run directory:
         - CASE_ID_params_file.yaml
         - CASE_ID_nextflow_config.json
@@ -101,7 +87,9 @@ def run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None) -
 @click.pass_obj
 def start(cg_config: CGConfig, case_id: str, revision: str | None):
     """
-    Start a Nallo case. \b
+    Start a Nallo case.
+
+    \b
     Configures the case and writes the following files:
         - CASE_ID_params_file.yaml
         - CASE_ID_nextflow_config.json

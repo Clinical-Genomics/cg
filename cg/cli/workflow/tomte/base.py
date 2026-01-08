@@ -49,7 +49,9 @@ tomte.add_command(store_available)
 @click.pass_obj
 def config_case(cg_config: CGConfig, case_id: str):
     """
-    Configure a Tomte case so that it is ready to be run. \b
+    Configure a Tomte case so that it is ready to be run.
+
+    \b
     Creates the following files in the case run directory:
         - CASE_ID_params_file.yaml
         - CASE_ID_nextflow_config.json
@@ -68,7 +70,9 @@ def config_case(cg_config: CGConfig, case_id: str):
 @click.pass_obj
 def run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None) -> None:
     """
-    Run a preconfigured Tomte case. \b
+    Run a preconfigured Tomte case.
+
+    \b
     Assumes that the following files exist in the case run directory:
         - CASE_ID_params_file.yaml
         - CASE_ID_nextflow_config.json
@@ -86,7 +90,9 @@ def run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None) -
 @click.pass_obj
 def start(cg_config: CGConfig, case_id: str, revision: str | None):
     """
-    Start a Tomte case. \b
+    Start a Tomte case.
+
+    \b
     Configures the case and writes the following files:
         - CASE_ID_params_file.yaml
         - CASE_ID_nextflow_config.json

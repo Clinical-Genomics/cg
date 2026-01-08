@@ -150,6 +150,14 @@ class IlluminaRunAlreadyBackedUpError(CgError):
     """Raised when a flow cell is already backed-up."""
 
 
+class PacbioSequencingRunAlreadyExistsError(CgError):
+    """Raised when a PacBio sequencing run already exists."""
+
+
+class PacbioSequencingRunNotFoundError(CgError):
+    """Raised when a PacBio sequencing run is not found."""
+
+
 class HousekeeperFileMissingError(CgError):
     """
     Exception raised when a file is missing in Housekeeper.
@@ -214,10 +222,6 @@ class PedigreeConfigError(CgError):
 
 class RunParametersError(CgError):
     """Raised when something is wrong with the run parameters file."""
-
-
-class NfSampleSheetError(CgError):
-    """Raised when something is wrong with the sample sheet."""
 
 
 class SampleSheetContentError(CgError):

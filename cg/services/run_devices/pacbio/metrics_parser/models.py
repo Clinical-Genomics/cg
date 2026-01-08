@@ -98,6 +98,7 @@ class SmrtlinkDatasetsMetrics(BaseModel):
     cell_index: int = Field(..., alias=SmrtLinkDatabasesAliases.CELL_INDEX)
     path: str = Field(..., alias=SmrtLinkDatabasesAliases.PATH)
     plate: int
+    instrument_name: str = Field(..., alias=SmrtLinkDatabasesAliases.INSTRUMENT_NAME)
 
     @model_validator(mode="before")
     @classmethod

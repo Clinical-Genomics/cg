@@ -8,6 +8,7 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSampleSequencingMetricsDTO,
     PacBioSequencingRunDTO,
     PacBioSMRTCellDTO,
+    PacBioSMRTCellMetricsDTO,
 )
 
 
@@ -17,7 +18,15 @@ def pac_bio_smrt_cell_dto() -> PacBioSMRTCellDTO:
 
 
 @pytest.fixture
-def pac_bio_sequencing_run_dto(pac_bio_test_run_name: str) -> PacBioSequencingRunDTO:
+def pacbio_sequencing_run_dto(pac_bio_test_run_name: str) -> PacBioSequencingRunDTO:
+    return PacBioSequencingRunDTO(
+        instrument_name="Wilma",
+        run_name=pac_bio_test_run_name,
+    )
+
+
+@pytest.fixture
+def pacbio_smrt_cell_metrics_dto(pac_bio_test_run_name: str) -> PacBioSMRTCellMetricsDTO:
     sample_data = {
         "type": DeviceType.PACBIO,
         "well": "A1",
@@ -58,7 +67,7 @@ def pac_bio_sequencing_run_dto(pac_bio_test_run_name: str) -> PacBioSequencingRu
         "unbarcoded_hifi_mean_read_length": 6200,
         "movie_name": "movie123",
     }
-    return PacBioSequencingRunDTO(**sample_data)
+    return PacBioSMRTCellMetricsDTO(**sample_data)
 
 
 @pytest.fixture
@@ -78,12 +87,14 @@ def pac_bio_sample_sequencing_metrics_dto(
 
 @pytest.fixture
 def pac_bio_dtos(
+    pacbio_sequencing_run_dto: PacBioSequencingRunDTO,
     pac_bio_smrt_cell_dto: PacBioSMRTCellDTO,
-    pac_bio_sequencing_run_dto: PacBioSequencingRunDTO,
+    pacbio_smrt_cell_metrics_dto: PacBioSMRTCellMetricsDTO,
     pac_bio_sample_sequencing_metrics_dto: list[PacBioSampleSequencingMetricsDTO],
 ) -> PacBioDTOs:
     return PacBioDTOs(
+        sequencing_run=pacbio_sequencing_run_dto,
         run_device=pac_bio_smrt_cell_dto,
-        sequencing_run=pac_bio_sequencing_run_dto,
+        smrt_cell_metrics=pacbio_smrt_cell_metrics_dto,
         sample_sequencing_metrics=pac_bio_sample_sequencing_metrics_dto,
     )

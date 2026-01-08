@@ -20,6 +20,7 @@ from cg.exc import (
     CgDataError,
     CgError,
     OrderNotFoundError,
+    PacbioSequencingRunNotFoundError,
     SampleNotFoundError,
 )
 from cg.models.orders.constants import OrderType
@@ -95,6 +96,7 @@ from cg.store.models import (
     OrderTypeApplication,
     Organism,
     PacbioSampleSequencingMetrics,
+    PacbioSequencingRun,
     PacbioSMRTCell,
     PacbioSMRTCellMetrics,
     Panel,
@@ -1806,7 +1808,9 @@ class ReadHandler(BaseHandler):
             sequencing_metrics = sequencing_metrics.filter(RunDevice.internal_id.in_(smrt_cell_ids))
         return sequencing_metrics.all()
 
-    def get_pacbio_sequencing_runs_by_run_name(self, run_name: str) -> list[PacbioSMRTCellMetrics]:
+    def get_pacbio_smrt_cell_metrics_by_run_name(
+        self, run_name: str
+    ) -> list[PacbioSMRTCellMetrics]:
         """
         Fetches data from PacbioSequencingRunDTO filtered on run name.
         Raises:
@@ -1817,6 +1821,18 @@ class ReadHandler(BaseHandler):
         if runs.count() == 0:
             raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()
+
+    def get_pacbio_sequencing_runs(
+        self, page: int = 0, page_size: int = 0
+    ) -> tuple[list[PacbioSequencingRun], int]:
+        query = self._get_query(PacbioSequencingRun).order_by(PacbioSequencingRun.id.desc())
+
+        if page and page_size:
+            query = query.limit(page_size).offset((page - 1) * page_size)
+
+        total_count: int = self._get_query(table=PacbioSequencingRun).count()
+
+        return query.all(), total_count
 
     def get_case_priority(self, case_id: str) -> SlurmQos:
         """Get case priority."""
@@ -1835,3 +1851,20 @@ class ReadHandler(BaseHandler):
         ):
             return True
         return False
+
+    def get_pacbio_sequencing_run_by_id(self, id: int):
+        """
+        Get Pacbio Sequencing run by id.
+        Raises:
+            PacbioSequencingRunNotFoundError: If no Pacbio sequencing run is found with the given id.
+        """
+        try:
+            return (
+                self._get_query(table=PacbioSequencingRun)
+                .filter(PacbioSequencingRun.id == id)
+                .one()
+            )
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise PacbioSequencingRunNotFoundError(
+                f"Pacbio Sequencing run with id {id} was not found in the database."
+            )

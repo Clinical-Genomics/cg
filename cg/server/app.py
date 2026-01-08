@@ -19,7 +19,13 @@ from cg.server.endpoints.sequencing_metrics.illumina_sequencing_metrics import F
 from cg.server.endpoints.sequencing_metrics.pacbio_sequencing_metrics import (
     PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT,
 )
-from cg.server.endpoints.sequencing_run.pacbio_sequencing_run import PACBIO_SEQUENCING_RUN_BLUEPRINT
+from cg.server.endpoints.sequencing_run.pacbio_sequencing_run import (
+    PACBIO_SEQUENCING_RUN_BLUEPRINT,
+    PACBIO_SEQUENCING_RUNS_BLUEPRINT,
+)
+from cg.server.endpoints.sequencing_run.pacbio_smrt_cell_metrics import (
+    PACBIO_SMRT_CELL_METRICS_BLUEPRINT,
+)
 from cg.server.endpoints.users import USERS_BLUEPRINT
 from cg.store.database import get_scoped_session_registry
 from cg.store.models import (
@@ -108,6 +114,8 @@ def _register_blueprints(app: Flask):
     app.register_blueprint(USERS_BLUEPRINT)
     app.register_blueprint(PACBIO_SAMPLE_SEQUENCING_METRICS_BLUEPRINT)
     app.register_blueprint(PACBIO_SEQUENCING_RUN_BLUEPRINT)
+    app.register_blueprint(PACBIO_SEQUENCING_RUNS_BLUEPRINT)
+    app.register_blueprint(PACBIO_SMRT_CELL_METRICS_BLUEPRINT)
     app.register_blueprint(INDEX_SEQUENCES_BLUEPRINT)
     _register_admin_views()
 
@@ -119,6 +127,7 @@ def _register_blueprints(app: Flask):
     ext.csrf.exempt(FLOW_CELLS_BLUEPRINT)
     ext.csrf.exempt(ANALYSES_BLUEPRINT)
     ext.csrf.exempt(USERS_BLUEPRINT)
+    ext.csrf.exempt(PACBIO_SEQUENCING_RUNS_BLUEPRINT)
 
     @app.route("/")
     def index():
