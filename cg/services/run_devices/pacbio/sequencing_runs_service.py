@@ -1,6 +1,7 @@
 from cg.server.endpoints.sequencing_run.dtos import (
     PacbioSequencingRunDTO,
     PacbioSequencingRunResponse,
+    PacbioSequencingRunUpdateRequest,
     PacbioSmrtCellMetricsDTO,
     PacbioSmrtCellMetricsResponse,
 )
@@ -35,3 +36,14 @@ class PacbioSequencingRunsService:
             )
             runs.append(run)
         return PacbioSequencingRunResponse(pacbio_sequencing_runs=runs, total_count=total_count)
+
+    def update_sequencing_run(self, update_request: PacbioSequencingRunUpdateRequest) -> None:
+        if update_request.comment is not None:
+            self.store.update_pacbio_sequencing_run_comment(
+                id=update_request.id, comment=update_request.comment
+            )
+
+        if update_request.processed is not None:
+            self.store.update_pacbio_sequencing_run_processed(
+                id=update_request.id, processed=update_request.processed
+            )
