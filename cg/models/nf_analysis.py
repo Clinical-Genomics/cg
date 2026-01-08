@@ -9,7 +9,6 @@ class NfCommandArgs(BaseModel):
     log: str | Path | None = None
     resume: bool | None = None
     profile: str | None = None
-    stub_run: bool | None = None
     config: str | Path | None = None
     name: str | None = None
     revision: str | None = None
@@ -17,7 +16,6 @@ class NfCommandArgs(BaseModel):
     id: str | None = None
     with_tower: bool | None = None
     use_nextflow: bool | None = None
-    compute_env: str | None = None
     work_dir: str | Path | None = None
     params_file: str | Path | None = None
 

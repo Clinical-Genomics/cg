@@ -41,7 +41,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.account: str = config.taxprofiler.slurm.account
         self.email: str = config.taxprofiler.slurm.mail_user
         self.nextflow_binary_path: str = config.taxprofiler.binary_path
-        self.compute_env_base: str = config.taxprofiler.compute_env
 
     @property
     def is_multiqc_pattern_search_exact(self) -> bool:

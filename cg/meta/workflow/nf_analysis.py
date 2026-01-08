@@ -16,7 +16,6 @@ from cg.constants.constants import (
     WorkflowManager,
 )
 from cg.constants.nextflow import NFX_WORK_DIR
-from cg.constants.nf_analysis import NfTowerStatus
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.controller import ReadFile, WriteFile
@@ -58,7 +57,6 @@ class NfAnalysisAPI(AnalysisAPI):
         self.tower_workflow: str | None = None
         self.account: str | None = None
         self.email: str | None = None
-        self.compute_env_base: str | None = None
         self.revision: str | None = None
         self.nextflow_binary_path: str | None = None
 
@@ -84,10 +82,6 @@ class NfAnalysisAPI(AnalysisAPI):
         If false, pattern must be present but does not need to be exact."""
         return False
 
-    def get_profile(self, profile: str | None = None) -> str:
-        """Get NF profiles."""
-        return profile or self.profile
-
     def get_workflow_manager(self) -> str:
         """Get workflow manager from Tower."""
         return WorkflowManager.Tower.value
@@ -106,20 +100,6 @@ class NfAnalysisAPI(AnalysisAPI):
             FileExtensions.CSV
         )
 
-    def get_compute_env(self, case_id: str) -> str:
-        """Get the compute environment for the head job based on the case priority."""
-        return f"{self.compute_env_base}-{self.get_slurm_qos_for_case(case_id=case_id)}"
-
-    def get_nextflow_config_path(
-        self, case_id: str, nextflow_config: Path | str | None = None
-    ) -> Path:
-        """Path to nextflow config file."""
-        if nextflow_config:
-            return Path(nextflow_config).absolute()
-        return Path((self.get_case_path(case_id)), f"{case_id}_nextflow_config").with_suffix(
-            FileExtensions.JSON
-        )
-
     def get_job_ids_path(self, case_id: str) -> Path:
         """Return the path to a Trailblazer config file containing Tower IDs."""
         return Path(self.root_dir, case_id, "tower_ids").with_suffix(FileExtensions.YAML)
@@ -136,32 +116,11 @@ class NfAnalysisAPI(AnalysisAPI):
             FileExtensions.YAML
         )
 
-    def get_params_file_path(self, case_id: str, params_file: Path | None = None) -> Path:
-        """Return parameters file or a path where the default parameters file for a case id should be located."""
-        if params_file:
-            return Path(params_file).absolute()
-        return Path((self.get_case_path(case_id)), f"{case_id}_params_file").with_suffix(
-            FileExtensions.YAML
-        )
-
-    def get_log_path(self, case_id: str, workflow: str) -> Path:
-        """Path to NF log."""
-        launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
-        return Path(
-            self.get_case_path(case_id),
-            f"{case_id}_{workflow}_nextflow_{launch_time}",
-        ).with_suffix(FileExtensions.LOG)
-
     def get_workdir_path(self, case_id: str, work_dir: Path | None = None) -> Path:
         """Path to NF work directory."""
         if work_dir:
             return work_dir.absolute()
         return Path(self.get_case_path(case_id), NFX_WORK_DIR)
-
-    def verify_sample_sheet_exists(self, case_id: str, dry_run: bool = False) -> None:
-        """Raise an error if sample sheet file is not found."""
-        if not dry_run and not Path(self.get_sample_sheet_path(case_id=case_id)).exists():
-            raise ValueError(f"No config file found for case {case_id}")
 
     def verify_deliverables_file_exists(self, case_id: str) -> None:
         """Raise an error if a deliverable file is not found."""
@@ -246,90 +205,6 @@ class NfAnalysisAPI(AnalysisAPI):
             self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
             return tower_id
         LOG.info(self.process.stdout)
-
-    def get_command_args(
-        self,
-        case_id: str,
-        work_dir: str,
-        from_start: bool,
-        profile: str,
-        config: str,
-        params_file: str | None,
-        revision: str,
-        compute_env: str,
-        nf_tower_id: str | None,
-        stub_run: bool,
-    ) -> NfCommandArgs:
-        command_args: NfCommandArgs = NfCommandArgs(
-            **{
-                "log": self.get_log_path(case_id=case_id, workflow=self.workflow),
-                "work_dir": self.get_workdir_path(case_id=case_id, work_dir=work_dir),
-                "resume": not from_start,
-                "profile": self.get_profile(profile=profile),
-                "config": self.get_nextflow_config_path(case_id=case_id, nextflow_config=config),
-                "params_file": self.get_params_file_path(case_id=case_id, params_file=params_file),
-                "name": case_id,
-                "compute_env": compute_env or self.get_compute_env(case_id=case_id),
-                "revision": revision or self.revision,
-                "wait": NfTowerStatus.SUBMITTED,
-                "id": nf_tower_id,
-                "stub_run": stub_run,
-            }
-        )
-        return command_args
-
-    def run_nextflow_analysis(
-        self,
-        case_id: str,
-        use_nextflow: bool,
-        work_dir: str,
-        from_start: bool,
-        profile: str,
-        config: str,
-        params_file: str | None,
-        revision: str,
-        compute_env: str,
-        stub_run: bool,
-        nf_tower_id: str | None = None,
-        dry_run: bool = False,
-    ) -> None:
-        """Prepare and start run analysis: check existence of all input files generated by config-case and sync with trailblazer."""
-        self.status_db.verify_case_exists(case_internal_id=case_id)
-
-        command_args = self.get_command_args(
-            case_id=case_id,
-            work_dir=work_dir,
-            from_start=from_start,
-            profile=profile,
-            config=config,
-            params_file=params_file,
-            revision=revision,
-            compute_env=compute_env,
-            nf_tower_id=nf_tower_id,
-            stub_run=stub_run,
-        )
-
-        try:
-            self.verify_sample_sheet_exists(case_id=case_id, dry_run=dry_run)
-            self.check_analysis_ongoing(case_id=case_id)
-            LOG.info(f"Running analysis for {case_id}")
-            tower_workflow_id: str | None = self.run_analysis(
-                case_id=case_id,
-                command_args=command_args,
-                use_nextflow=use_nextflow,
-                dry_run=dry_run,
-            )
-            if not dry_run:
-                self.on_analysis_started(case_id=case_id, tower_workflow_id=tower_workflow_id)
-        except FileNotFoundError as error:
-            LOG.error(f"Could not resume analysis: {error}")
-            raise FileNotFoundError
-        except ValueError as error:
-            LOG.error(f"Could not run analysis: {error}")
-            raise ValueError
-        except CgError as error:
-            LOG.error(f"Could not run analysis: {error}")
-            raise CgError
 
     def run_analysis(
         self,

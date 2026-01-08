@@ -1,19 +1,6 @@
 """Nf-tower related constants."""
 
-from enum import StrEnum
 from typing import Any
-
-
-class NfTowerStatus(StrEnum):
-    """NF-Tower job submission status."""
-
-    SUBMITTED: str = "SUBMITTED"
-    RUNNING: str = "RUNNING"
-    SUCCEEDED: str = "SUCCEEDED"
-    FAILED: str = "FAILED"
-    CANCELLED: str = "CANCELLED"
-    UNKNOWN: str = "UNKNOWN"
-
 
 NALLO_GENERAL_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "median_coverage": {"norm": "gt", "threshold": 20},
