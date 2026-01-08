@@ -15,13 +15,11 @@ from cg.constants.constants import (
     MultiQC,
     WorkflowManager,
 )
-from cg.constants.nextflow import NFX_WORK_DIR
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.nf_handlers import NextflowHandler, NfTowerHandler
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
@@ -29,7 +27,7 @@ from cg.models.deliverables.metric_deliverables import (
     MetricsDeliverablesCondition,
     MultiqcDataJson,
 )
-from cg.models.nf_analysis import FileDeliverable, NfCommandArgs, WorkflowDeliverables
+from cg.models.nf_analysis import FileDeliverable, WorkflowDeliverables
 from cg.models.qc_metrics import QCMetrics
 from cg.store.models import Analysis, Case, Sample
 from cg.utils import Process
@@ -58,7 +56,6 @@ class NfAnalysisAPI(AnalysisAPI):
         self.account: str | None = None
         self.email: str | None = None
         self.revision: str | None = None
-        self.nextflow_binary_path: str | None = None
 
     @property
     def root(self) -> str:
@@ -116,12 +113,6 @@ class NfAnalysisAPI(AnalysisAPI):
             FileExtensions.YAML
         )
 
-    def get_workdir_path(self, case_id: str, work_dir: Path | None = None) -> Path:
-        """Path to NF work directory."""
-        if work_dir:
-            return work_dir.absolute()
-        return Path(self.get_case_path(case_id), NFX_WORK_DIR)
-
     def verify_deliverables_file_exists(self, case_id: str) -> None:
         """Raise an error if a deliverable file is not found."""
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
@@ -145,87 +136,6 @@ class NfAnalysisAPI(AnalysisAPI):
             file_format=FileFormat.YAML,
             file_path=config_path,
         )
-
-    def _run_analysis_with_nextflow(
-        self, case_id: str, command_args: NfCommandArgs, dry_run: bool
-    ) -> None:
-        """Run analysis with given options using Nextflow."""
-        self.process = Process(
-            binary=self.nextflow_binary_path,
-            environment=self.conda_env,
-            conda_binary=self.conda_binary,
-            launch_directory=self.get_case_path(case_id=case_id),
-        )
-        LOG.info("Workflow will be executed using Nextflow")
-        parameters: list[str] = NextflowHandler.get_nextflow_run_parameters(
-            case_id=case_id,
-            workflow_bin_path=self.workflow_bin_path,
-            root_dir=self.root_dir,
-            command_args=command_args.dict(),
-        )
-        self.process.export_variables(
-            export=NextflowHandler.get_variables_to_export(),
-        )
-        command: str = self.process.get_command(parameters=parameters)
-        LOG.info(f"{command}")
-        sbatch_number: int = NextflowHandler.execute_head_job(
-            case_id=case_id,
-            case_directory=self.get_case_path(case_id=case_id),
-            slurm_account=self.account,
-            email=self.email,
-            qos=self.get_slurm_qos_for_case(case_id=case_id),
-            commands=command,
-            dry_run=dry_run,
-        )
-        LOG.info(f"Nextflow head job running as job: {sbatch_number}")
-
-    def _run_analysis_with_tower(
-        self, case_id: str, command_args: NfCommandArgs, dry_run: bool
-    ) -> str | None:
-        """Run analysis with given options using NF-Tower."""
-        LOG.info("Workflow will be executed using Tower")
-        if command_args.resume:
-            from_tower_id: int = command_args.id or NfTowerHandler.get_last_tower_id(
-                case_id=case_id,
-                trailblazer_config=self.get_job_ids_path(case_id=case_id),
-            )
-            LOG.info(f"Workflow will be resumed from run with Tower id: {from_tower_id}.")
-            parameters: list[str] = NfTowerHandler.get_tower_relaunch_parameters(
-                from_tower_id=from_tower_id, command_args=command_args.dict()
-            )
-        else:
-            parameters: list[str] = NfTowerHandler.get_tower_launch_parameters(
-                tower_workflow=self.tower_workflow, command_args=command_args.dict()
-            )
-        self.process.run_command(parameters=parameters, dry_run=dry_run)
-        if self.process.stderr:
-            LOG.error(self.process.stderr)
-        if not dry_run:
-            tower_id = NfTowerHandler.get_tower_id(stdout_lines=self.process.stdout_lines())
-            self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
-            return tower_id
-        LOG.info(self.process.stdout)
-
-    def run_analysis(
-        self,
-        case_id: str,
-        command_args: NfCommandArgs,
-        use_nextflow: bool,
-        dry_run: bool = False,
-    ) -> str | None:
-        """Execute run analysis with given options."""
-        if use_nextflow:
-            self._run_analysis_with_nextflow(
-                case_id=case_id,
-                command_args=command_args,
-                dry_run=dry_run,
-            )
-        else:
-            return self._run_analysis_with_tower(
-                case_id=case_id,
-                command_args=command_args,
-                dry_run=dry_run,
-            )
 
     def get_deliverables_template_content(self) -> list[dict[str, str]]:
         """Return deliverables file template content."""

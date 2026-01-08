@@ -60,7 +60,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.account: str = config.raredisease.slurm.account
         self.email: str = config.raredisease.slurm.mail_user
         self.revision: str = config.raredisease.revision
-        self.nextflow_binary_path: str = config.raredisease.binary_path
 
     @staticmethod
     def get_bundle_filenames_path() -> Path:

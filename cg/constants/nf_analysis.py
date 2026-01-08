@@ -55,17 +55,6 @@ TOMTE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "pct_duplication": {"norm": "lt", "threshold": 70},
 }
 
-
-MULTIQC_NEXFLOW_CONFIG = """process {
-    withName:'MULTIQC' {
-        memory = { 4.GB * task.attempt }
-        time   = { 4.h  * task.attempt }
-        cpus = 2
-        ext.args = ' --data-format json --cl-config "max_table_rows: 10000" '
-    }
-}
-"""
-
 NALLO_COVERAGE_FILE_TAGS: list[str] = ["d4"]
 NALLO_COVERAGE_INTERVAL_TYPE: str = "genes"
 NALLO_COVERAGE_THRESHOLD: int = 10

@@ -61,7 +61,6 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         self.account: str = config.nallo.slurm.account
         self.email: str = config.nallo.slurm.mail_user
         self.revision: str = config.nallo.revision
-        self.nextflow_binary_path: str = config.nallo.binary_path
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a Nallo case. Currently fixed for hg38."""
