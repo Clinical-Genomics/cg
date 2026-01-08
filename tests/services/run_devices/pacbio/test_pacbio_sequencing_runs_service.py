@@ -57,12 +57,17 @@ def test_get_all_pacbio_sequencing_runs():
     runs = [
         create_autospec(
             PacbioSequencingRun,
+            id=6,
             run_name="santas_little_helper",
             comment="hunden i Simpsons",
             processed=True,
         ),
         create_autospec(
-            PacbioSequencingRun, run_name="Nisse", comment="Tomtens hjälpreda", processed=False
+            PacbioSequencingRun,
+            id=4,
+            run_name="Nisse",
+            comment="Tomtens hjälpreda",
+            processed=False,
         ),
     ]
     status_db: Store = create_autospec(Store)
@@ -80,9 +85,11 @@ def test_get_all_pacbio_sequencing_runs():
     assert sequencing_runs == PacbioSequencingRunResponse(
         pacbio_sequencing_runs=[
             PacbioSequencingRunDTO(
-                run_name="santas_little_helper", comment="hunden i Simpsons", processed=True
+                id=6, run_name="santas_little_helper", comment="hunden i Simpsons", processed=True
             ),
-            PacbioSequencingRunDTO(run_name="Nisse", comment="Tomtens hjälpreda", processed=False),
+            PacbioSequencingRunDTO(
+                id=4, run_name="Nisse", comment="Tomtens hjälpreda", processed=False
+            ),
         ],
         total_count=2,
     )
