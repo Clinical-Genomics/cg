@@ -2,10 +2,11 @@
 
 from sqlalchemy.orm import Query
 
-from cg.constants.devices import DeviceType
+from cg.constants.devices import DeviceType, RevioNames
 from cg.constants.subject import PhenotypeStatus
 from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSampleSequencingMetricsDTO,
+    PacBioSequencingRunDTO,
     PacBioSMRTCellDTO,
 )
 from cg.store.models import CaseSample, PacbioSMRTCellMetrics
@@ -61,8 +62,16 @@ def test_update_pacbio_sample_reads(base_store: Store, helpers: StoreHelpers):
     pacbio_smrt_cell = PacBioSMRTCellDTO(type=DeviceType.PACBIO, internal_id="EA123")
     pacbio_smrt_cell = base_store.create_pac_bio_smrt_cell(pacbio_smrt_cell)
     base_store.commit_to_store()
-    smrt_cell_metrics: PacbioSMRTCellMetrics = helpers.add_pacbio_sequencing_run(
-        store=base_store, id=1, device_id=pacbio_smrt_cell.id, run_name="run_name"
+    sequencing_run = base_store.create_pacbio_sequencing_run(
+        pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
+            instrument_name=RevioNames.BETTY, run_name="run_name"
+        )
+    )
+    smrt_cell_metrics: PacbioSMRTCellMetrics = helpers.add_pacbio_smrt_cell_metrics(
+        store=base_store,
+        id=1,
+        device_id=pacbio_smrt_cell.id,
+        sequencing_run=sequencing_run,
     )
     sample_run_metrics_dto = PacBioSampleSequencingMetricsDTO(
         sample_internal_id=sample_id,

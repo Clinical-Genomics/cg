@@ -883,7 +883,6 @@ class PacbioSmrtCellMetricsView(BaseView):
 
     column_list = (
         "internal_id",
-        "run_name",
         "movie_name",
         "well",
         "plate",
@@ -908,7 +907,7 @@ class PacbioSmrtCellMetricsView(BaseView):
         "model": view_smrt_cell_model,
     }
     column_default_sort = ("completed_at", True)
-    column_searchable_list = ["device.internal_id", "run_name", "movie_name"]
+    column_searchable_list = ["device.internal_id", "movie_name"]
     column_sortable_list = [
         ("internal_id", "device.internal_id"),
         "started_at",
@@ -936,19 +935,17 @@ class PacbioSmrtCellMetricsView(BaseView):
 
 
 class PacbioSampleRunMetricsView(BaseView):
-    column_filters = ["instrument_run.run_name", "instrument_run.plate"]
+    column_filters = ["instrument_run.plate"]  # TODO: Add back run_name somehow
     column_formatters = {
         "smrt_cell": PacbioSmrtCellMetricsView.view_smrt_cell_link,
         "sample": SampleView.view_sample_link,
     }
-    column_labels = {
-        "instrument_run.run_name": "Run name",
+    column_labels = {  # TODO: Add back run_name somehow
         "instrument_run.plate": "Plate",
     }
     column_list = [
         "smrt_cell",
-        "sample",
-        "instrument_run.run_name",
+        "sample",  # TODO: Add back run_name somehow
         "instrument_run.plate",
         "hifi_reads",
         "hifi_yield",

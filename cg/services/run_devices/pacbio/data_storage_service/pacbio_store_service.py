@@ -21,7 +21,7 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSMRTCellMetricsDTO,
 )
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
-from cg.store.models import PacbioSMRTCell, PacbioSMRTCellMetrics
+from cg.store.models import PacbioSequencingRun, PacbioSMRTCell, PacbioSMRTCellMetrics
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -37,17 +37,23 @@ class PacBioStoreService(PostProcessingStoreService):
 
     def _create_pacbio_sequencing_run_if_non_existent(
         self, sequencing_run_dto: PacBioSequencingRunDTO
-    ) -> None:
+    ) -> PacbioSequencingRun:
         try:
-            self.store.create_pacbio_sequencing_run(sequencing_run_dto)
+            return self.store.create_pacbio_sequencing_run(sequencing_run_dto)
         except PacbioSequencingRunAlreadyExistsError:
             LOG.debug(f"Sequencing run {sequencing_run_dto.run_name} already exists")
+            return self.store.get_pacbio_sequencing_run_by_run_name(sequencing_run_dto.run_name)
 
     def _create_pacbio_smrt_cell_metrics(
-        self, instrument_run_dto: PacBioSMRTCellMetricsDTO, smrt_cell: PacbioSMRTCell
+        self,
+        instrument_run_dto: PacBioSMRTCellMetricsDTO,
+        sequencing_run: PacbioSequencingRun,
+        smrt_cell: PacbioSMRTCell,
     ) -> PacbioSMRTCellMetrics:
         return self.store.create_pacbio_smrt_cell_metrics(
-            smrt_cell_metrics_dto=instrument_run_dto, smrt_cell=smrt_cell
+            smrt_cell_metrics_dto=instrument_run_dto,
+            sequencing_run=sequencing_run,
+            smrt_cell=smrt_cell,
         )
 
     def _create_sample_run_metrics(
@@ -79,10 +85,12 @@ class PacBioStoreService(PostProcessingStoreService):
     )
     def store_post_processing_data(self, run_data: PacBioRunData, dry_run: bool = False) -> None:
         dtos: PacBioDTOs = self.data_transfer_service.get_post_processing_dtos(run_data)
-        self._create_pacbio_sequencing_run_if_non_existent(dtos.sequencing_run)
+        sequencing_run = self._create_pacbio_sequencing_run_if_non_existent(dtos.sequencing_run)
         smrt_cell: PacbioSMRTCell = self._create_run_device(dtos.run_device)
         smrt_cell_metrics: PacbioSMRTCellMetrics = self._create_pacbio_smrt_cell_metrics(
-            instrument_run_dto=dtos.smrt_cell_metrics, smrt_cell=smrt_cell
+            instrument_run_dto=dtos.smrt_cell_metrics,
+            sequencing_run=sequencing_run,
+            smrt_cell=smrt_cell,
         )
         self._create_sample_run_metrics(
             sample_run_metrics_dtos=dtos.sample_sequencing_metrics,
