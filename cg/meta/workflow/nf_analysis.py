@@ -8,13 +8,7 @@ from pydantic import TypeAdapter
 from pydantic.v1 import ValidationError
 
 from cg.constants import Workflow
-from cg.constants.constants import (
-    FileExtensions,
-    FileFormat,
-    GenomeVersion,
-    MultiQC,
-    WorkflowManager,
-)
+from cg.constants.constants import FileExtensions, FileFormat, GenomeVersion, MultiQC
 from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.controller import ReadFile, WriteFile
@@ -30,7 +24,6 @@ from cg.models.deliverables.metric_deliverables import (
 from cg.models.nf_analysis import FileDeliverable, WorkflowDeliverables
 from cg.models.qc_metrics import QCMetrics
 from cg.store.models import Analysis, Case, Sample
-from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -62,40 +55,14 @@ class NfAnalysisAPI(AnalysisAPI):
         return self.root_dir
 
     @property
-    def process(self):
-        if not self._process:
-            self._process = Process(
-                binary=self.tower_binary_path,
-            )
-        return self._process
-
-    @process.setter
-    def process(self, process: Process):
-        self._process = process
-
-    @property
     def is_multiqc_pattern_search_exact(self) -> bool:
         """Return True if only exact pattern search is allowed to collect metrics information from MultiQC file.
         If false, pattern must be present but does not need to be exact."""
         return False
 
-    def get_workflow_manager(self) -> str:
-        """Get workflow manager from Tower."""
-        return WorkflowManager.Tower.value
-
-    def get_workflow_version(self, case_id: str) -> str:
-        """Get workflow version from config."""
-        return self.revision
-
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
         return Path(self.root_dir, case_id)
-
-    def get_sample_sheet_path(self, case_id: str) -> Path:
-        """Path to sample sheet."""
-        return Path(self.get_case_path(case_id), f"{case_id}_samplesheet").with_suffix(
-            FileExtensions.CSV
-        )
 
     def get_job_ids_path(self, case_id: str) -> Path:
         """Return the path to a Trailblazer config file containing Tower IDs."""
