@@ -29,6 +29,7 @@ class PacbioSmrtCellMetricsResponse(BaseModel):
 
 
 class PacbioSequencingRunDTO(BaseModel):
+    id: int
     run_name: str
     comment: str
     processed: bool

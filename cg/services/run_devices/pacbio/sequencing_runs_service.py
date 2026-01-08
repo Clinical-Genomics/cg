@@ -30,6 +30,7 @@ class PacbioSequencingRunsService:
         runs: list[PacbioSequencingRunDTO] = []
         for db_run in db_runs:
             run = PacbioSequencingRunDTO(
+                id=db_run.id,
                 run_name=db_run.run_name,
                 comment=db_run.comment,
                 processed=db_run.processed,
