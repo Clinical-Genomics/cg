@@ -1029,42 +1029,56 @@ class PacbioSMRTCellMetrics(InstrumentRun):
     id: Mapped[int] = mapped_column(
         ForeignKey("instrument_run.id", ondelete="CASCADE"), primary_key=True
     )
-    well: Mapped[Str32]
-    plate: Mapped[int]
-    run_name: Mapped[Str32]
-    movie_name: Mapped[Str32]
-    started_at: Mapped[datetime]
+    barcoded_hifi_mean_read_length: Mapped[BigInt]
+    barcoded_hifi_reads_percentage: Mapped[Num_6_2]
+    barcoded_hifi_reads: Mapped[BigInt]
+    barcoded_hifi_yield_percentage: Mapped[Num_6_2]
+    barcoded_hifi_yield: Mapped[BigInt]
     completed_at: Mapped[datetime]
-    hifi_reads: Mapped[BigInt]
-    hifi_yield: Mapped[BigInt]
+    control_mean_read_concordance: Mapped[Num_6_2]
+    control_mean_read_length: Mapped[BigInt]
+    control_mode_read_concordance: Mapped[Num_6_2]
+    control_reads: Mapped[BigInt]
+    failed_mean_read_length: Mapped[BigInt]
+    failed_reads: Mapped[BigInt]
+    failed_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
     hifi_median_read_quality: Mapped[Str32]
-    percent_reads_passing_q30: Mapped[Num_6_2]
+    hifi_reads: Mapped[BigInt]
+    hifi_yield: Mapped[BigInt]
+    movie_name: Mapped[Str32]
     p0_percent: Mapped[Num_6_2]
     p1_percent: Mapped[Num_6_2]
     p2_percent: Mapped[Num_6_2]
-    productive_zmws: Mapped[BigInt]
+    pacbio_sequencing_run_id: Mapped[int] = mapped_column(
+        ForeignKey(
+            "pacbio_sequencing_run.id",
+            ondelete="CASCADE",
+            name="pacbio_smrt_cell_metrics_pacbio_sequencing_run_fk",
+        )
+    )
+    percent_reads_passing_q30: Mapped[Num_6_2]
+    plate: Mapped[int]
+    polymerase_longest_subread_n50: Mapped[BigInt]
+    polymerase_mean_longest_subread: Mapped[BigInt]
     polymerase_mean_read_length: Mapped[BigInt]
     polymerase_read_length_n50: Mapped[BigInt]
-    polymerase_mean_longest_subread: Mapped[BigInt]
-    polymerase_longest_subread_n50: Mapped[BigInt]
-    control_reads: Mapped[BigInt]
-    control_mean_read_length: Mapped[BigInt]
-    control_mean_read_concordance: Mapped[Num_6_2]
-    control_mode_read_concordance: Mapped[Num_6_2]
-    failed_reads: Mapped[BigInt]
-    failed_yield: Mapped[BigInt]
-    failed_mean_read_length: Mapped[BigInt]
-    barcoded_hifi_reads: Mapped[BigInt]
-    barcoded_hifi_reads_percentage: Mapped[Num_6_2]
-    barcoded_hifi_yield: Mapped[BigInt]
-    barcoded_hifi_yield_percentage: Mapped[Num_6_2]
-    barcoded_hifi_mean_read_length: Mapped[BigInt]
+    productive_zmws: Mapped[BigInt]
+    started_at: Mapped[datetime]
+    unbarcoded_hifi_mean_read_length: Mapped[BigInt]
     unbarcoded_hifi_reads: Mapped[BigInt]
     unbarcoded_hifi_yield: Mapped[BigInt]
-    unbarcoded_hifi_mean_read_length: Mapped[BigInt]
+    well: Mapped[Str32]
+
+    sequencing_run: Mapped["PacbioSequencingRun"] = orm.relationship(
+        back_populates="smrt_cell_metrics"
+    )
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
+
+    @property
+    def run_name(self) -> str:
+        return self.sequencing_run.run_name
 
     def to_dict(self):
         return to_dict(self)
@@ -1140,6 +1154,10 @@ class PacbioSequencingRun(Base):
     comment: Mapped[Text] = mapped_column(default="")
     instrument_name: Mapped[RevioNames] = mapped_column(
         types.Enum(*(revio_name.value for revio_name in RevioNames))
+    )
+
+    smrt_cell_metrics: Mapped[list[PacbioSMRTCellMetrics]] = orm.relationship(
+        back_populates="sequencing_run"
     )
 
 
