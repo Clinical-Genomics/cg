@@ -64,10 +64,6 @@ class NfAnalysisAPI(AnalysisAPI):
         """Path to case working directory."""
         return Path(self.root_dir, case_id)
 
-    def get_job_ids_path(self, case_id: str) -> Path:
-        """Return the path to a Trailblazer config file containing Tower IDs."""
-        return Path(self.root_dir, case_id, "tower_ids").with_suffix(FileExtensions.YAML)
-
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Path to deliverables file for a case."""
         return Path(self.get_case_path(case_id), f"{case_id}_deliverables").with_suffix(
@@ -92,16 +88,6 @@ class NfAnalysisAPI(AnalysisAPI):
         """Write deliverables file."""
         WriteFile.write_file_from_content(
             content=deliverables_content, file_format=file_format, file_path=file_path
-        )
-
-    def write_trailblazer_config(self, case_id: str, tower_id: str) -> None:
-        """Write Tower IDs to a file used as the Trailblazer config."""
-        config_path: Path = self.get_job_ids_path(case_id=case_id)
-        LOG.info(f"Writing Tower ID to {config_path.as_posix()}")
-        WriteFile.write_file_from_content(
-            content={case_id: [tower_id]},
-            file_format=FileFormat.YAML,
-            file_path=config_path,
         )
 
     def get_deliverables_template_content(self) -> list[dict[str, str]]:
