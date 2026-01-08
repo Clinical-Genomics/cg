@@ -772,7 +772,6 @@ age_at_sampling  # unused variable (cg/server/dto/samples/samples_response.py:81
 pacbio_sequencing_runs  # unused variable (cg/server/endpoints/sequencing_run/dtos.py:38)
 widget  # unused variable (cg/server/utils.py:6)
 option_widget  # unused variable (cg/server/utils.py:7)
-outdir  # unused variable (cg/services/analysis_starter/configurator/file_creators/nextflow/params_file/models.py:12)
 CG_ID_project  # unused variable (cg/services/analysis_starter/configurator/models/microsalt.py:8)
 Customer_ID_project  # unused variable (cg/services/analysis_starter/configurator/models/microsalt.py:9)
 CG_ID_sample  # unused variable (cg/services/analysis_starter/configurator/models/microsalt.py:10)
