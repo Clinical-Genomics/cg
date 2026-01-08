@@ -69,3 +69,33 @@ def test_patch_pacbio_sequencing_runs_successful(client: FlaskClient):
     sequencing_runs_service.update_sequencing_run.assert_called_once_with(
         update_request=PacbioSequencingRunUpdateRequest(id=1, **body)
     )
+
+
+def test_patch_pacbio_sequencing_runs_malformed_processed_value(client: FlaskClient):
+    # GIVEN a pacbio sequencing run update request with a malformed processed value
+    sequencing_runs_service.update_sequencing_run = Mock()
+    body = {"processed": "Santa Claus"}
+
+    # WHEN a request is made to update a pacbio sequencing run
+    response = client.patch("/api/v1/pacbio_sequencing_runs/1", json=body)
+
+    # THEN the response should not be successful
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+    # THEN the sequencing run service should not be called with the update request
+    sequencing_runs_service.update_sequencing_run.assert_not_called()
+
+
+def test_patch_pacbio_sequencing_runs_internal_server_error(client: FlaskClient):
+    # GIVEN a pacbio sequencing run update request with a malformed processed value
+    sequencing_runs_service.update_sequencing_run = Mock(side_effect=Exception("No gifts for you!"))
+    body = {"processed": True}
+
+    # WHEN a request is made to update a pacbio sequencing run
+    response = client.patch("/api/v1/pacbio_sequencing_runs/1", json=body)
+
+    # THEN the response should not be successful
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+    # THEN the sequencing run service should not be called with the update request
+    sequencing_runs_service.update_sequencing_run.assert_not_called()
