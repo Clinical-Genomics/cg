@@ -91,7 +91,7 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         LOG.info("Including NALLO specific sample level files")
         sample_id: str = cast(str, config_sample.sample_id)
         config_sample.chromograph_images.autozygous = self.remove_chromosome_substring(
-            self.get_sample_file(  # TODO do we need the chr substring?
+            self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_autozyg,
                 sample_id=sample_id,
                 hk_version=hk_version,
