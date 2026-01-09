@@ -33,7 +33,7 @@ def get_sequencing_runs(run_name: str):
 
 @PACBIO_SEQUENCING_RUNS_BLUEPRINT.route("/pacbio_sequencing_runs", methods=["GET"])
 @handle_missing_entries
-def get_sequencing_runs_new():
+def get_sequencing_runs_new():  # TODO rename endpoint to pacbio_sequencing_runs
     page: int = int(request.args.get("page", "0"))
     page_size: int = int(request.args.get("pageSize", "0"))
     sequencing_runs: PacbioSequencingRunResponse = (
