@@ -58,13 +58,6 @@ class Process:
         self._stdout = ""
         self._stderr = ""
 
-    def export_variables(self, export: dict[str, str]) -> None:
-        """Export variables prior to execution."""
-        if export:
-            self.base_call.insert(
-                0, " ".join([f"export {variable}={value};" for variable, value in export.items()])
-            )
-
     def run_command(self, parameters: list = None, dry_run: bool = False) -> int:
         """Execute a command in the shell.
         If environment is supplied - shell=True has to be supplied to enable passing as a string for executing multiple
@@ -106,15 +99,6 @@ class Process:
             raise CalledProcessError(res.returncode, command)
 
         return res.returncode
-
-    def get_command(self, parameters: list = None) -> str:
-        """Returns a command string given a list of parameters."""
-
-        command: list[str] = copy.deepcopy(self.base_call)
-        if parameters:
-            command.extend(parameters)
-
-        return " ".join(command)
 
     @property
     def stdout(self):

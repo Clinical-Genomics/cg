@@ -3,25 +3,6 @@ from pathlib import Path
 from pydantic import BaseModel, field_validator
 
 
-class NfCommandArgs(BaseModel):
-    """Model for arguments and options supported."""
-
-    log: str | Path | None = None
-    resume: bool | None = None
-    profile: str | None = None
-    stub_run: bool | None = None
-    config: str | Path | None = None
-    name: str | None = None
-    revision: str | None = None
-    wait: str | None = None
-    id: str | None = None
-    with_tower: bool | None = None
-    use_nextflow: bool | None = None
-    compute_env: str | None = None
-    work_dir: str | Path | None = None
-    params_file: str | Path | None = None
-
-
 class FileDeliverable(BaseModel):
     """Specification for a general deliverables file."""
 

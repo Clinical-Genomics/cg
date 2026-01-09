@@ -232,7 +232,6 @@ class MipConfig(BaseModel):
 
 class NalloConfig(CommonAppConfig):
     binary_path: str | None = None
-    compute_env: str
     conda_binary: str | None = None
     conda_env: str
     platform: str
@@ -252,7 +251,6 @@ class NalloConfig(CommonAppConfig):
 
 class RarediseaseConfig(CommonAppConfig):
     binary_path: str | None = None
-    compute_env: str
     conda_binary: str | None = None
     conda_env: str
     platform: str
@@ -272,7 +270,6 @@ class RarediseaseConfig(CommonAppConfig):
 
 class TomteConfig(CommonAppConfig):
     binary_path: str | None = None
-    compute_env: str
     conda_binary: str | None = None
     conda_env: str
     platform: str
@@ -291,7 +288,6 @@ class TomteConfig(CommonAppConfig):
 
 class RnafusionConfig(CommonAppConfig):
     binary_path: str
-    compute_env: str
     conda_binary: str | None = None
     conda_env: str
     platform: str
@@ -313,7 +309,6 @@ class TaxprofilerConfig(CommonAppConfig):
     binary_path: str
     conda_binary: str | None = None
     conda_env: str
-    compute_env: str
     platform: str
     params: str
     config: str
