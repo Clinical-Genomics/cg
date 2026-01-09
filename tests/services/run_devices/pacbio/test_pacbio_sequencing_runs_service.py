@@ -23,7 +23,6 @@ def test_get_pacbio_smrt_cell_metrics_by_name(
     all_runs: list[PacbioSMRTCellMetrics] = pacbio_sequencing_runs_service.store._get_query(
         table=PacbioSMRTCellMetrics
     ).all()
-    print("sd")
     assert any(run.run_name != pacbio_run_name_to_fetch for run in all_runs)
 
     # WHEN fetching smrt cell metrics filtered by run name
