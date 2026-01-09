@@ -43,7 +43,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.email: str = config.rnafusion.slurm.mail_user
         self.compute_env_base: str = config.rnafusion.compute_env
         self.revision: str = config.rnafusion.revision
-        self.nextflow_binary_path: str = config.rnafusion.binary_path
 
     @property
     def is_multiple_samples_allowed(self) -> bool:

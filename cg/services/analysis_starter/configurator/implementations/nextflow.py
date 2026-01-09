@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.exc import AnalysisAlreadyCompletedError, MissingConfigFilesError
-from cg.models.cg_config import CommonAppConfig
+from cg.models.cg_config import NextflowConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
     PipelineExtension,
@@ -25,7 +25,7 @@ class NextflowConfigurator(Configurator):
         self,
         config_file_creator: NextflowConfigFileCreator,
         params_file_creator: ParamsFileCreator,
-        pipeline_config: CommonAppConfig,
+        pipeline_config: NextflowConfig,
         sample_sheet_creator: SampleSheetCreator,
         store: Store,
         pipeline_extension: PipelineExtension = PipelineExtension(),

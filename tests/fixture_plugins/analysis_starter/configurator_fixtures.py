@@ -4,15 +4,7 @@ import pytest
 
 from cg.apps.lims import LimsAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler
-from cg.models.cg_config import (
-    BalsamicConfig,
-    CGConfig,
-    NalloConfig,
-    RarediseaseConfig,
-    RnafusionConfig,
-    TaxprofilerConfig,
-    TomteConfig,
-)
+from cg.models.cg_config import BalsamicConfig, CGConfig, NextflowConfig
 from cg.services.analysis_starter.configurator.extensions.tomte_extension import TomteExtension
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
@@ -93,7 +85,7 @@ def microsalt_configurator(
 
 @pytest.fixture
 def nallo_configurator(
-    mock_store_for_nallo_file_creators: Store, nallo_config_object: NalloConfig
+    mock_store_for_nallo_file_creators: Store, nallo_config_object: NextflowConfig
 ) -> NextflowConfigurator:
     return NextflowConfigurator(
         store=mock_store_for_nallo_file_creators,
@@ -108,7 +100,7 @@ def nallo_configurator(
 @pytest.fixture
 def raredisease_configurator(
     mock_store_for_raredisease_file_creators: Store,
-    raredisease_config_object: RarediseaseConfig,
+    raredisease_config_object: NextflowConfig,
 ) -> NextflowConfigurator:
     return NextflowConfigurator(
         store=mock_store_for_raredisease_file_creators,
@@ -123,7 +115,7 @@ def raredisease_configurator(
 @pytest.fixture
 def rnafusion_configurator(
     mock_store_for_rnafusion_file_creators: Store,
-    rnafusion_config_object: RnafusionConfig,
+    rnafusion_config_object: NextflowConfig,
 ) -> NextflowConfigurator:
     return NextflowConfigurator(
         store=mock_store_for_rnafusion_file_creators,
@@ -138,7 +130,7 @@ def rnafusion_configurator(
 @pytest.fixture
 def taxprofiler_configurator(
     mock_store_for_taxprofiler_file_creators: Store,
-    taxprofiler_config_object: TaxprofilerConfig,
+    taxprofiler_config_object: NextflowConfig,
 ) -> NextflowConfigurator:
     return NextflowConfigurator(
         store=mock_store_for_taxprofiler_file_creators,
@@ -153,7 +145,7 @@ def taxprofiler_configurator(
 @pytest.fixture
 def tomte_configurator(
     mock_store_for_tomte_file_creators: Store,
-    tomte_config_object: TomteConfig,
+    tomte_config_object: NextflowConfig,
 ) -> NextflowConfigurator:
     return NextflowConfigurator(
         store=mock_store_for_tomte_file_creators,
