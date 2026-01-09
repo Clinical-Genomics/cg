@@ -935,7 +935,10 @@ class PacbioSmrtCellMetricsView(BaseView):
 
 
 class PacbioSampleRunMetricsView(BaseView):
-    column_filters = ["instrument_run.plate"]  # TODO: Add back run_name somehow
+    column_filters = [
+        "instrument_run.plate",
+        "instrument_run.sequencing_run.run_name",
+    ]  # TODO: Add back run_name somehow
     column_formatters = {
         "smrt_cell": PacbioSmrtCellMetricsView.view_smrt_cell_link,
         "sample": SampleView.view_sample_link,
