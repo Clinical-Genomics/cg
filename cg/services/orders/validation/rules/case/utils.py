@@ -1,3 +1,4 @@
+from cg.apps.lims import LimsAPI
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.existing_case import ExistingCase
@@ -10,6 +11,8 @@ from cg.store.models import Application
 from cg.store.models import Case as DbCase
 from cg.store.models import Customer, Sample
 from cg.store.store import Store
+
+EXOME_BED_NAME = "Twist Exome Comprehensive"
 
 
 def contains_duplicates(input_list: list) -> bool:
@@ -87,3 +90,36 @@ def get_case_prep_categories(case: Case, store: Store) -> set[str]:
         if db_sample and db_sample.prep_category:
             prep_categories.add(db_sample.prep_category)
     return prep_categories
+
+
+def get_capture_kits_for_existing_samples(case: BalsamicCase | BalsamicUmiCase, lims_api: LimsAPI):
+    capture_kits: set[str | None] = set()
+    for _, sample in case.enumerated_existing_samples:
+        capture_kits.add(lims_api.capture_kit(sample.internal_id))
+    return capture_kits
+
+
+def get_capture_kits_for_new_samples(
+    status_db: Store, case: BalsamicCase | BalsamicUmiCase
+) -> set[str | None]:
+    capture_kits: set[str | None] = set()
+
+    for _, sample in case.enumerated_new_samples:
+        if sample.capture_kit:
+            capture_kit = status_db.get_bed_by_name(sample.capture_kit).versions[-1].shortname
+            capture_kits.add(capture_kit)
+        else:
+            application: Application | None = status_db.get_application_by_tag(sample.application)
+            if not application:
+                continue
+            capture_kits.add(get_wes_capture_kit(application=application, status_db=status_db))
+
+    return capture_kits
+
+
+def get_wes_capture_kit(application: Application, status_db: Store) -> str | None:
+    if application.prep_category == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
+        capture_kit = status_db.get_latest_bed_version_by_bed_name(EXOME_BED_NAME).shortname
+        return capture_kit
+    else:
+        return None

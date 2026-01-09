@@ -27,7 +27,6 @@ from cg.services.web_services.case.service import CaseWebService
 from cg.services.web_services.sample.service import SampleService
 from cg.store.database import initialize_database
 from cg.store.store import Store
-from cg.server.app_config import app_config
 
 
 class FlaskLims(LimsAPI):
@@ -100,7 +99,7 @@ storing_service_registry: StoringServiceRegistry = setup_storing_service_registr
     status_db=db,
 )
 
-order_validation_service = OrderValidationService(store=db)
+order_validation_service = OrderValidationService(lims_api=lims, store=db)
 freshdesk_client = FreshdeskClient(
     base_url=app_config.freshdesk_url, api_key=app_config.freshdesk_api_key
 )
