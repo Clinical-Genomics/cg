@@ -10,7 +10,7 @@ from enum import StrEnum
 from typing import Annotated
 
 import sqlalchemy as sa
-from sqlalchemy import BLOB, DECIMAL, VARCHAR, BigInteger, ForeignKey, Numeric, String
+from sqlalchemy import ForeignKey, String
 from sqlalchemy import Text as SQLText
 from sqlalchemy import types
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
@@ -23,21 +23,10 @@ down_revision = "8ae1f94131ba"
 branch_labels = None
 depends_on = None
 
-BigInt = Annotated[int, None]
-Blob = Annotated[bytes, None]
-Decimal = Annotated[float, None]
-Num_6_2 = Annotated[float, 6]
 Str32 = Annotated[str, 32]
 Str64 = Annotated[str, 64]
-Str128 = Annotated[str, 128]
-Str255 = Annotated[str, 255]
-Str256 = Annotated[str, 256]
 Text = Annotated[str, None]
-VarChar128 = Annotated[str, 128]
-
 PrimaryKeyInt = Annotated[int, mapped_column(primary_key=True)]
-UniqueStr = Annotated[str, mapped_column(String(32), unique=True)]
-UniqueStr64 = Annotated[str, mapped_column(String(64), unique=True)]
 
 
 class RevioNames(StrEnum):
@@ -47,17 +36,9 @@ class RevioNames(StrEnum):
 
 class Base(DeclarativeBase):
     type_annotation_map = {
-        BigInt: BigInteger,
-        Blob: BLOB,
-        Decimal: DECIMAL,
-        Num_6_2: Numeric(6, 2),
         Str32: String(32),
         Str64: String(64),
-        Str128: String(128),
-        Str255: String(255),
-        Str256: String(256),
         Text: SQLText,
-        VarChar128: VARCHAR(128),
     }
 
 
