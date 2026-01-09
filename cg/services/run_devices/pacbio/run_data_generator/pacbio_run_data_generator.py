@@ -1,13 +1,13 @@
 from pathlib import Path
 
-from cg.services.run_devices.abstract_classes import RunDataGenerator
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import PostProcessingRunDataGeneratorError
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.protocols import RunDataGenerator
 from cg.services.run_devices.validators import validate_has_expected_parts, validate_name_pre_fix
 
 
-class PacBioRunDataGenerator(RunDataGenerator):
+class PacBioRunDataGenerator(RunDataGenerator[PacBioRunData]):
 
     @staticmethod
     def _validate_run_name(run_name) -> None:

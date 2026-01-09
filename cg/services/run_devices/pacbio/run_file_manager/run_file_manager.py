@@ -2,16 +2,16 @@ from pathlib import Path
 
 from cg.constants import FileExtensions
 from cg.constants.pacbio import MANIFEST_FILE_PATTERN, ZIPPED_REPORTS_PATTERN, PacBioDirsAndFiles
-from cg.services.run_devices.abstract_classes import RunFileManager
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import PostProcessingRunFileManagerError
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.services.run_devices.pacbio.run_file_manager.models import PacBioRunValidatorFiles
+from cg.services.run_devices.protocols import RunFileManager
 from cg.services.run_devices.validators import validate_files_or_directories_exist
 from cg.utils.files import get_files_matching_pattern
 
 
-class PacBioRunFileManager(RunFileManager):
+class PacBioRunFileManager(RunFileManager[PacBioRunData]):
 
     @handle_post_processing_errors(
         to_except=(FileNotFoundError,), to_raise=PostProcessingRunFileManagerError

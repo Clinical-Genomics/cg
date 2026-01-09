@@ -12,7 +12,6 @@ from cg.constants.pacbio import (
     PacBioHousekeeperTags,
     file_pattern_to_bundle_type,
 )
-from cg.services.run_devices.abstract_classes import PostProcessingHKService
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import (
     PostProcessingParsingError,
@@ -24,12 +23,13 @@ from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioM
 from cg.services.run_devices.pacbio.metrics_parser.models import PacBioMetrics
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
+from cg.services.run_devices.protocols import PostProcessingHKService
 from cg.utils.mapping import get_item_by_pattern_in_source
 
 LOG = logging.getLogger(__name__)
 
 
-class PacBioHousekeeperService(PostProcessingHKService):
+class PacBioHousekeeperService(PostProcessingHKService[PacBioRunData]):
 
     def __init__(
         self,

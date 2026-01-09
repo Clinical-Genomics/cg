@@ -4,7 +4,6 @@ import logging
 
 from pydantic import ValidationError
 
-from cg.services.run_devices.abstract_classes import PostProcessingDataTransferService
 from cg.services.run_devices.error_handler import handle_post_processing_errors
 from cg.services.run_devices.exc import (
     PostProcessingDataTransferError,
@@ -26,11 +25,12 @@ from cg.services.run_devices.pacbio.data_transfer_service.utils import (
 from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
 from cg.services.run_devices.pacbio.metrics_parser.models import PacBioMetrics
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.protocols import PostProcessingDataTransferService
 
 LOG = logging.getLogger(__name__)
 
 
-class PacBioDataTransferService(PostProcessingDataTransferService):
+class PacBioDataTransferService(PostProcessingDataTransferService[PacBioRunData, PacBioDTOs]):
     def __init__(self, metrics_service: PacBioMetricsParser):
         self.metrics_service: PacBioMetricsParser = metrics_service
 
