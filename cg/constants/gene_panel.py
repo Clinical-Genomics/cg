@@ -20,6 +20,7 @@ class GenePanelMasterList(StrEnum):
     CH = "CH"
     CHILDHYPOTONIA = "CHILDHYPOTONIA"
     CTD = "CTD"
+    COMPD = "COMPD"
     DIAB = "DIAB"
     ENDO = "ENDO"
     EP = "EP"
