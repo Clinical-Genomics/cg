@@ -66,12 +66,12 @@ NALLO_CASE_TAGS = dict(
     multiqc={"multiqc-html"},
     peddy_check={"ped-check", "peddy"},
     peddy_ped={"ped", "peddy"},
-    peddy_sex={"sex-check", "peddy"},
-    vcf_snv_research={"vcf-snv-research"},
+    somalier_samples={"somalier", "relate-samples"},
     vcf_snv={"vcf-snv-clinical"},
-    vcf_sv_research={"vcf-sv-research"},
-    vcf_sv={"vcf-sv-clinical"},
+    vcf_snv_research={"vcf-snv-research"},
     vcf_str={"vcf-str"},
+    vcf_sv={"vcf-sv-clinical"},
+    vcf_sv_research={"vcf-sv-research"},
 )
 
 MIP_CASE_TAGS: dict[str, set[str]] = dict(
