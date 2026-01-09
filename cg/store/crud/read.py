@@ -1871,9 +1871,7 @@ class ReadHandler(BaseHandler):
                 f"Pacbio Sequencing run with id {id} was not found in the database."
             )
 
-    def get_pacbio_sequencing_run_by_run_name(
-        self, run_name: str
-    ) -> PacbioSequencingRun:  # TODO add a test
+    def get_pacbio_sequencing_run_by_run_name(self, run_name: str) -> PacbioSequencingRun:
         """
         Get Pacbio Sequencing run by run name.
         Raises:
