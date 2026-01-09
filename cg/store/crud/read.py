@@ -20,6 +20,7 @@ from cg.exc import (
     CgDataError,
     CgError,
     OrderNotFoundError,
+    PacbioSequencingRunNotFoundError,
     SampleNotFoundError,
 )
 from cg.models.orders.constants import OrderType
@@ -95,6 +96,7 @@ from cg.store.models import (
     OrderTypeApplication,
     Organism,
     PacbioSampleSequencingMetrics,
+    PacbioSequencingRun,
     PacbioSMRTCell,
     PacbioSMRTCellMetrics,
     Panel,
@@ -1820,6 +1822,18 @@ class ReadHandler(BaseHandler):
             raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()
 
+    def get_pacbio_sequencing_runs(
+        self, page: int = 0, page_size: int = 0
+    ) -> tuple[list[PacbioSequencingRun], int]:
+        query = self._get_query(PacbioSequencingRun).order_by(PacbioSequencingRun.id.desc())
+
+        if page and page_size:
+            query = query.limit(page_size).offset((page - 1) * page_size)
+
+        total_count: int = self._get_query(table=PacbioSequencingRun).count()
+
+        return query.all(), total_count
+
     def get_case_priority(self, case_id: str) -> SlurmQos:
         """Get case priority."""
         case: Case = self.get_case_by_internal_id(case_id)
@@ -1837,3 +1851,20 @@ class ReadHandler(BaseHandler):
         ):
             return True
         return False
+
+    def get_pacbio_sequencing_run_by_id(self, id: int):
+        """
+        Get Pacbio Sequencing run by id.
+        Raises:
+            PacbioSequencingRunNotFoundError: If no Pacbio sequencing run is found with the given id.
+        """
+        try:
+            return (
+                self._get_query(table=PacbioSequencingRun)
+                .filter(PacbioSequencingRun.id == id)
+                .one()
+            )
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise PacbioSequencingRunNotFoundError(
+                f"Pacbio Sequencing run with id {id} was not found in the database."
+            )
