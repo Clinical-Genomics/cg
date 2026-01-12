@@ -147,6 +147,8 @@ class Application(Base):
     min_sequencing_depth: Mapped[int] = mapped_column(default=0)
     target_reads: Mapped[BigInt | None] = mapped_column(default=0)
     percent_reads_guaranteed: Mapped[int]
+    target_hifi_yield: Mapped[BigInt | None] = mapped_column(default=None)
+    percent_hifi_yield_guaranteed: Mapped[int | None] = mapped_column(default=None)
     sample_amount: Mapped[int | None]
     sample_volume: Mapped[Text | None]
     sample_concentration: Mapped[Text | None]
