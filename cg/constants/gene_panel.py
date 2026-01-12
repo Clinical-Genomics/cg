@@ -13,7 +13,7 @@ class GenePanelGenomeBuild(StrEnum):
     hg38 = GENOME_BUILD_38
 
 
-class GenePanelMasterList(StrEnum):  # noqa: F841
+class GenePanelMasterList(StrEnum):
     BRAIN = "BRAIN"
     CARDIOLOGY = "Cardiology"
     CILM = "CILM"
