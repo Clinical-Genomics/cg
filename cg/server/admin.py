@@ -246,6 +246,8 @@ class ApplicationView(BaseView):
         "is_accredited",
         "target_reads",
         "percent_reads_guaranteed",
+        "target_hifi_yield",
+        "percent_hifi_yield_guaranteed",
         "comment",
         "prep_category",
         "sequencing_depth",
