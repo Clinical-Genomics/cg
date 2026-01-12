@@ -85,6 +85,7 @@ class ScoutMipIndividual(ScoutIndividual):
 
 class ScoutNalloIndividual(ScoutIndividual):
     assembly_alignment_path: str | None = None
+    chromograph_images: ChromographImages = ChromographImages()
     d4_file: str | None = None
     minor_allele_frequency_wig: str | None = None
     mt_bam: str | None = None
