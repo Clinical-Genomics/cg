@@ -883,7 +883,7 @@ class PacbioSmrtCellMetricsView(BaseView):
 
     column_list = (
         "internal_id",
-        "run_name",
+        "sequencing_run.run_name",
         "movie_name",
         "well",
         "plate",
@@ -907,8 +907,9 @@ class PacbioSmrtCellMetricsView(BaseView):
         "internal_id": view_pacbio_sample_sequencing_metrics_link,
         "model": view_smrt_cell_model,
     }
+    column_labels = {"sequencing_run.run_name": "Run Name"}
     column_default_sort = ("completed_at", True)
-    column_searchable_list = ["device.internal_id", "run_name", "movie_name"]
+    column_searchable_list = ["device.internal_id", "movie_name", "sequencing_run.run_name"]
     column_sortable_list = [
         ("internal_id", "device.internal_id"),
         "started_at",
@@ -936,19 +937,22 @@ class PacbioSmrtCellMetricsView(BaseView):
 
 
 class PacbioSampleRunMetricsView(BaseView):
-    column_filters = ["instrument_run.run_name", "instrument_run.plate"]
+    column_filters = [
+        "instrument_run.plate",
+        "instrument_run.sequencing_run.run_name",
+    ]
     column_formatters = {
         "smrt_cell": PacbioSmrtCellMetricsView.view_smrt_cell_link,
         "sample": SampleView.view_sample_link,
     }
     column_labels = {
-        "instrument_run.run_name": "Run name",
         "instrument_run.plate": "Plate",
+        "instrument_run.sequencing_run.run_name": "Run Name",
     }
     column_list = [
         "smrt_cell",
         "sample",
-        "instrument_run.run_name",
+        "instrument_run.sequencing_run.run_name",
         "instrument_run.plate",
         "hifi_reads",
         "hifi_yield",
@@ -958,4 +962,5 @@ class PacbioSampleRunMetricsView(BaseView):
     column_searchable_list = [
         "sample.internal_id",
         "instrument_run.device.internal_id",
+        "instrument_run.sequencing_run.run_name",
     ]

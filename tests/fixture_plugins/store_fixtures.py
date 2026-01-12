@@ -3,8 +3,10 @@ from typing import Generator
 import pytest
 
 from cg.constants.constants import ControlOptions
-from cg.constants.devices import DeviceType
+from cg.constants.devices import DeviceType, RevioNames
+from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioSequencingRunDTO
 from cg.store.store import Store
+from tests.conftest import base_store, run_name
 from tests.store_helpers import StoreHelpers
 
 
@@ -151,13 +153,25 @@ def pacbio_sequencing_runs_store(
     device = helpers.add_run_device(
         store=base_store, id=1, type=DeviceType.PACBIO, internal_id="device_internal_id"
     )
-    helpers.add_pacbio_sequencing_run(
-        store=base_store, id=1, run_name=pacbio_run_name_to_fetch, device_id=device.id
+    sequencing_run = base_store.create_pacbio_sequencing_run(
+        pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
+            instrument_name=RevioNames.BETTY, run_name=pacbio_run_name_to_fetch
+        )
     )
-    helpers.add_pacbio_sequencing_run(
-        store=base_store, id=2, run_name=pacbio_run_name_to_fetch, device_id=device.id
+
+    sequencing_run_not_to_fetch = base_store.create_pacbio_sequencing_run(
+        pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
+            instrument_name=RevioNames.BETTY, run_name=pacbio_run_name_not_to_fetch
+        )
     )
-    helpers.add_pacbio_sequencing_run(
-        store=base_store, id=3, run_name=pacbio_run_name_not_to_fetch, device_id=device.id
+
+    helpers.add_pacbio_smrt_cell_metrics(
+        store=base_store, id=1, sequencing_run=sequencing_run, device_id=device.id
+    )
+    helpers.add_pacbio_smrt_cell_metrics(
+        store=base_store, id=2, sequencing_run=sequencing_run, device_id=device.id
+    )
+    helpers.add_pacbio_smrt_cell_metrics(
+        store=base_store, id=3, sequencing_run=sequencing_run_not_to_fetch, device_id=device.id
     )
     return base_store
