@@ -15,7 +15,7 @@ from cg.models.orders.constants import OrderType
 from cg.server.app_config import app_config
 from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
-from cg.store.models import Application
+from cg.store.models import Application, Sample
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -196,6 +196,14 @@ def view_customer_link(unused1, unused2, model, unused3):
         )
 
     return markup
+
+
+def view_hifi_yield(unused1, unused2, model, unused3):
+    del unused1, unused2, unused3
+    if model.sample_run_metrics:
+        return sum(getattr(metric, "hifi_yield", 0) for metric in model.sample_run_metrics)
+    else:
+        return 0
 
 
 def view_ticket_link(unused1, unused2, model, attribute_name):
@@ -734,6 +742,8 @@ class PoolView(BaseView):
 class SampleView(BaseView):
     """Admin view for Model.Sample"""
 
+    column_list = list(inspect(Sample).columns) + ["HiFi Yield"]
+
     column_exclude_list = [
         "age_at_sampling",
         "_phenotype_groups",
@@ -757,6 +767,7 @@ class SampleView(BaseView):
     column_formatters = {
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
+        "HiFi Yield": view_hifi_yield,
         "is_external": is_external_application,
         "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
