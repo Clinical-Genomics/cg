@@ -1816,8 +1816,10 @@ class ReadHandler(BaseHandler):
         Raises:
             EntryNotFoundError if no sequencing runs are found for the run name
         """
-        runs: Query = self._get_query(table=PacbioSMRTCellMetrics)
-        runs = runs.filter(PacbioSMRTCellMetrics.run_name == run_name)
+        runs: Query = self._get_query(table=PacbioSMRTCellMetrics).join(
+            PacbioSMRTCellMetrics.sequencing_run
+        )
+        runs = runs.filter(PacbioSequencingRun.run_name == run_name)
         if runs.count() == 0:
             raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
         return runs.all()
@@ -1867,4 +1869,17 @@ class ReadHandler(BaseHandler):
         except sqlalchemy.orm.exc.NoResultFound:
             raise PacbioSequencingRunNotFoundError(
                 f"Pacbio Sequencing run with id {id} was not found in the database."
+            )
+
+    def get_pacbio_sequencing_run_by_run_name(self, run_name: str) -> PacbioSequencingRun:
+        """
+        Get Pacbio Sequencing run by run name.
+        Raises:
+            PacbioSequencingRunNotFoundError: If no Pacbio sequencing run is found with the given run name.
+        """
+        try:
+            return self._get_query(table=PacbioSequencingRun).filter_by(run_name=run_name).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise PacbioSequencingRunNotFoundError(
+                f"Pacbio Sequencing run with run_name {run_name} was not found in the database."
             )

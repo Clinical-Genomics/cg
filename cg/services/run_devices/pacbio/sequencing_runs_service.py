@@ -21,6 +21,7 @@ class PacbioSequencingRunsService:
         for db_run in db_runs:
             run_dict = db_run.to_dict()
             run_dict["internal_id"] = db_run.device.internal_id
+            run_dict["run_name"] = db_run.sequencing_run.run_name
             run = PacbioSmrtCellMetricsDTO.model_validate(run_dict)
             runs.append(run)
         return PacbioSmrtCellMetricsResponse(runs=runs)
