@@ -302,10 +302,11 @@ class ApplicationView(BaseView):
     def on_model_change(self, form: Form, model: Application, is_created: bool):
         """Override to persist entries to the OrderTypeApplication table."""
         super(ApplicationView, self).on_model_change(form=form, model=model, is_created=is_created)
-        order_types: list[OrderType] = form["suitable_order_types"].data
-        applications_service.update_application_order_types(
-            application=model, order_types=order_types
-        )
+        if "suitable_order_types" in form.data:
+            order_types: list[OrderType] = form["suitable_order_types"].data
+            applications_service.update_application_order_types(
+                application=model, order_types=order_types
+            )
 
     def edit_form(self, obj=None):
         """Override to prefill the order types according to the current Application entry."""
