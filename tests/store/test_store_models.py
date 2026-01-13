@@ -1,14 +1,21 @@
 from cg.constants.constants import ControlOptions
-from cg.store.models import Application, ApplicationVersion, Case, Customer, Sample
+from cg.store.models import (
+    Application,
+    ApplicationVersion,
+    Case,
+    Customer,
+    IlluminaSampleSequencingMetrics,
+    PacbioSampleSequencingMetrics,
+    Sample,
+)
 from cg.store.store import Store
-from tests.cli.conftest import application_tag
 from tests.store_helpers import StoreHelpers
 
 
-def test_application_version_has_application(store: Store, helpers: StoreHelpers, application_tag):
+def test_application_version_has_application(store: Store, helpers: StoreHelpers):
     """Test that an Application version has the application that was instantiated to."""
     # GIVEN an application
-    application: Application = helpers.ensure_application(store=store, tag=application_tag)
+    application: Application = helpers.ensure_application(store=store, tag="dummy_tag")
 
     # WHEN initialising an application version with the application
     application_version = ApplicationVersion(application=application)
@@ -148,3 +155,45 @@ def test_sample_is_not_external():
     )
     # THEN the sample is not external
     assert not sample.is_external
+
+
+def test_hifi_yield_pacbio_sample():
+    # GIVEN a PacBio sample with pacbio sequencing runs
+    sample = Sample(
+        _sample_run_metrics=[
+            PacbioSampleSequencingMetrics(hifi_yield=10),
+            PacbioSampleSequencingMetrics(hifi_yield=90),
+        ]
+    )
+    # WHEN getting the accumulated HiFi yield
+    hifi_yield: int | None = sample.hifi_yield
+
+    # THEN the value is the sum of all the sample metric yields
+    assert hifi_yield == 100
+
+
+def test_hifi_yield_illumina_sample():
+    # GIVEN a Illumina sample with Illumina sequencing runs
+    sample = Sample(
+        _sample_run_metrics=[
+            IlluminaSampleSequencingMetrics(),
+            IlluminaSampleSequencingMetrics(),
+        ]
+    )
+
+    # WHEN getting the accumulated HiFi yield
+    hifi_yield: int | None = sample.hifi_yield
+
+    # THEN the value should be None
+    assert hifi_yield is None
+
+
+def test_hifi_yield_no_sample_sequencing_metrics():
+    # GIVEN sample without sequencing metrics
+    sample = Sample()
+
+    # WHEN getting the accumulated HiFi yield
+    hifi_yield: int | None = sample.hifi_yield
+
+    # THEN the value should be None
+    assert hifi_yield is None
