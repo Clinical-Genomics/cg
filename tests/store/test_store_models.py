@@ -157,7 +157,7 @@ def test_sample_is_not_external():
     assert not sample.is_external
 
 
-def test_accumulated_hifi_yield_pacbio_sample():
+def test_hifi_yield_pacbio_sample():
     # GIVEN a PacBio sample with pacbio sequencing runs
     sample = Sample(
         _sample_run_metrics=[
@@ -172,7 +172,7 @@ def test_accumulated_hifi_yield_pacbio_sample():
     assert hifi_yield == 100
 
 
-def test_accumulated_hifi_yield_illumina_sample():
+def test_hifi_yield_illumina_sample():
     # GIVEN a Illumina sample with Illumina sequencing runs
     sample = Sample(
         _sample_run_metrics=[
@@ -188,7 +188,7 @@ def test_accumulated_hifi_yield_illumina_sample():
     assert hifi_yield is None
 
 
-def test_accumulated_hifi_yield_no_sample_sequencing_metrics():
+def test_hifi_yield_no_sample_sequencing_metrics():
     # GIVEN sample without sequencing metrics
     sample = Sample()
 
