@@ -274,3 +274,11 @@ def test_any_sample_in_case_has_reads(
     any_sample_in_case_has_reads_result: bool = any_sample_in_case_has_reads(case)
     # THEN the result should be as expected
     assert any_sample_in_case_has_reads_result == expected_result
+
+def test_case_yield_check_passes():
+    # GIVEN an application with target yield and expected yield
+    # GIVEN an application version 
+    # GIVEN a case
+    # GIVEN a sample with enough yield
+    # WHEN calling blalba
+    # THEN it passes 

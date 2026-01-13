@@ -1,11 +1,12 @@
+from collections.abc import Callable
 from enum import Enum
-from typing import Callable
 
 from cg.constants import Workflow
 from cg.services.sequencing_qc_service.quality_checks.utils import (
     all_samples_in_case_have_reads,
     any_sample_in_case_has_reads,
     case_pass_sequencing_qc,
+    case_yield_check,
     sample_pass_sequencing_qc,
 )
 from cg.store.models import Case
@@ -19,6 +20,7 @@ class QualityCheck(Enum):
 
 class SequencingQCCheck(QualityCheck):
     CASE_PASSES: Callable = case_pass_sequencing_qc
+    CASE_YIELD_CHECK: Callable = case_yield_check
     SAMPLE_PASSES: Callable = sample_pass_sequencing_qc
     ALL_SAMPLES_IN_CASE_HAVE_READS: Callable = all_samples_in_case_have_reads
     ANY_SAMPLE_IN_CASE_HAS_READS: Callable = any_sample_in_case_has_reads
@@ -42,7 +44,7 @@ def get_sequencing_quality_check_for_case(case: Case) -> Callable:
         Workflow.MICROSALT: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,
         Workflow.MUTANT: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,
         Workflow.TAXPROFILER: SequencingQCCheck.ALL_SAMPLES_IN_CASE_HAVE_READS,
-        Workflow.NALLO: SequencingQCCheck.ALL_SAMPLES_IN_CASE_HAVE_READS,
+        Workflow.NALLO: SequencingQCCheck.CASE_YIELD_CHECK,
     }
 
     if workflow in workflow_qc_mapping:

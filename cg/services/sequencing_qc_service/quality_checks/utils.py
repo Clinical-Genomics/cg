@@ -25,6 +25,10 @@ def case_pass_sequencing_qc(case: Case) -> bool:
     return all(sample_has_enough_reads(sample) for sample in case.samples)
 
 
+def case_yield_check(case: Case):
+    pass
+
+
 def express_case_pass_sequencing_qc(case: Case) -> bool:
     """
     Checks if all samples in an express case have enough reads.
