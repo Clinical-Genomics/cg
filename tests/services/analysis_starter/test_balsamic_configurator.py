@@ -197,7 +197,7 @@ def test_configure_mixed_capture_kits(cg_balsamic_config: BalsamicConfig, mocker
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator: BalsamicConfigFileCreator = create_autospec(BalsamicConfigFileCreator)
 
-    # GIVEN a store
+    # GIVEN a store containing a case with two samples
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(
         return_value=create_autospec(
@@ -207,11 +207,11 @@ def test_configure_mixed_capture_kits(cg_balsamic_config: BalsamicConfig, mocker
         )
     )
 
-    # GIVEN a LimsAPI
+    # GIVEN a LimsAPI which returns two different capture kits for the two samples
     lims_api: TypedMock[LimsAPI] = create_typed_mock(LimsAPI)
     lims_api.as_type.capture_kit = Mock(side_effect=["capture_kit_1", "capture_kit_2"])
 
-    # GIVEN Balsamic configurator
+    # GIVEN a Balsamic configurator
     balsamic_configurator = BalsamicConfigurator(
         config=cg_balsamic_config,
         config_file_creator=config_file_creator,
