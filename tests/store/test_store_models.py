@@ -4,6 +4,7 @@ from cg.store.models import (
     ApplicationVersion,
     Case,
     Customer,
+    IlluminaSampleSequencingMetrics,
     PacbioSampleSequencingMetrics,
     Sample,
 )
@@ -165,8 +166,28 @@ def test_accumulated_hifi_yield_pacbio_sample():
         ]
     )
     # WHEN getting the accumulated HiFi yield
+    hifi_yield: int = sample.accumulated_hifi_yield
+    
     # THEN the value is the sum of all the sample metric yields
+    assert hifi_yield == 100
 
 
 def test_accumulated_hifi_yield_illumina_sample():
-    pass
+    # GIVEN a Illumina sample with Illumina sequencing runs
+    sample = Sample(
+        _sample_run_metrics=[
+            IlluminaSampleSequencingMetrics(),
+            IlluminaSampleSequencingMetrics(),
+        ]
+    )
+    
+    # WHEN getting the accumulated HiFi yield 
+    hifi_yield: int | None = sample.accumulated_hifi_yield
+    
+    # THEN the value should be None
+    assert hifi_yield is None
+    
+def test_accumulated_hifi_yield_no_sample_sequencing_metrics():
+    # GIVEN sample without sequencing metrics
+    # WHEN getting the accumulated HiFi yield
+    # THEN 

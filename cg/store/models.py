@@ -763,7 +763,10 @@ class Sample(Base, PriorityMixin):
 
     @property
     def accumulated_hifi_yield(self):
-        pass
+        if getattr(self._sample_run_metrics[0], "hifi_yield", False):
+            return sum(metric.hifi_yield for metric in self._sample_run_metrics)
+        else:
+            return None
 
     @property
     def archive_location(self) -> str:
