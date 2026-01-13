@@ -348,6 +348,13 @@ class CaseNotConfiguredError(CgError):
     """Exception raised when a case is being run without a configuration."""
 
 
+class CaseWorkflowMismatchError(CgError):
+    """
+    Exception raised when a case is being run with a workflow different from the one specified
+    for it in the database.
+    """
+
+
 class MissingConfigFilesError(CgError):
     """Exception raised when a case is being run with missing configuration files."""
 

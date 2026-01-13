@@ -4,7 +4,7 @@ from subprocess import CalledProcessError
 from requests import HTTPError
 
 from cg.constants import Workflow
-from cg.exc import AnalysisNotReadyError, SeqeraError
+from cg.exc import AnalysisNotReadyError, CaseWorkflowMismatchError, SeqeraError
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.input_fetcher.input_fetcher import InputFetcher
@@ -51,6 +51,7 @@ class AnalysisStarter:
     def start(self, case_id: str, **flags) -> None:
         """Fetches raw data, generates configuration files and runs the specified case."""
         LOG.info(f"Starting case {case_id}")
+        self._ensure_case_matches_workflow(case_id)
         self.tracker.ensure_analysis_not_ongoing(case_id)
         self.input_fetcher.ensure_files_are_ready(case_id)
         case_config: CaseConfig = self.configurator.configure(case_id=case_id, **flags)
@@ -58,6 +59,7 @@ class AnalysisStarter:
 
     def run(self, case_id: str, **flags) -> None:
         """Run a case using an assumed existing configuration."""
+        self._ensure_case_matches_workflow(case_id)
         self.tracker.ensure_analysis_not_ongoing(case_id)
         case_config: CaseConfig = self.configurator.get_config(case_id=case_id, **flags)
         self._run_and_track(case_id=case_id, case_config=case_config)
@@ -70,3 +72,10 @@ class AnalysisStarter:
         except (CalledProcessError, HTTPError, SeqeraError) as exception:
             self.tracker.set_case_as_not_running(case_id)
             raise exception
+
+    def _ensure_case_matches_workflow(self, case_id: str) -> None:
+        case: Case = self.store.get_case_by_internal_id_strict(case_id)
+        if case.workflow != self.workflow:
+            raise CaseWorkflowMismatchError(
+                f"Case {case_id} is assigned to workflow {case.workflow}, " f"not {self.workflow}."
+            )
