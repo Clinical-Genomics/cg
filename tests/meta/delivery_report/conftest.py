@@ -2,6 +2,7 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from cg.constants import SexOptions
 from cg.models.analysis import NextflowAnalysis
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.config import (
@@ -11,6 +12,7 @@ from cg.models.balsamic.config import (
 )
 from cg.models.balsamic.metrics import BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics
 from cg.models.nallo.nallo import NalloQCMetrics
+from cg.models.raredisease.raredisease import RarediseaseQCMetrics
 from cg.models.rnafusion.rnafusion import RnafusionQCMetrics
 from cg.models.tomte.tomte import TomteQCMetrics
 
@@ -151,6 +153,20 @@ def nallo_analysis() -> NextflowAnalysis:
                 median_coverage=0.1,
                 percent_duplicates=0.1,
                 somalier_sex=2.0,  # type: ignore (will be translated to SexOptions by validator)
+            )
+        }
+    )
+
+
+@pytest.fixture
+def raredisease_analysis() -> NextflowAnalysis:
+    return NextflowAnalysis(
+        sample_metrics={
+            "sample_id": RarediseaseQCMetrics(
+                mapped_reads=10,
+                percent_duplication=0.1,
+                predicted_sex_sex_check=SexOptions.MALE,
+                total_reads=10,
             )
         }
     )

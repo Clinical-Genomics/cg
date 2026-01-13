@@ -157,7 +157,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
     ) -> CoverageMetrics | None:
-        """Return sample coverage metrics from Chanjo2."""
+        """Return sample coverage metrics from Chanjo2."""  # TODO: change docsting
         genome_version: GenomeVersion = self.get_genome_build(case_id)
         coverage_file_path: str | None = self.get_sample_coverage_file_path(
             bundle_name=case_id, sample_id=sample_id
@@ -170,7 +170,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
                 interval_type=RAREDISEASE_COVERAGE_INTERVAL_TYPE,
                 samples=[CoverageSample(coverage_file_path=coverage_file_path, name=sample_id)],
             )
-            post_response: CoveragePostResponse = self.chanjo2_api.get_coverage(post_request)
+            post_response: CoveragePostResponse = self.chanjo2_api.get_coverage(
+                post_request
+            )  # TODO: Propably change to chanjo1
             return post_response.get_sample_coverage_metrics(sample_id)
         except Exception as error:
             LOG.error(f"Error getting coverage for sample '{sample_id}', error: {error}")
