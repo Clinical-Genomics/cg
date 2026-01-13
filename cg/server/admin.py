@@ -15,7 +15,7 @@ from cg.models.orders.constants import OrderType
 from cg.server.app_config import app_config
 from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
-from cg.store.models import Application, Sample
+from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -110,12 +110,6 @@ def view_pacbio_sample_sequencing_metrics_link(unused1, unused2, model, unused3)
             model.device.internal_id,
         )
     )
-
-
-def is_external_application(unused1, unused2, model, unused3):
-    """column formatter to open this view"""
-    del unused1, unused2, unused3
-    return model.application_version.application.is_external if model.application_version else ""
 
 
 def view_order_types(unused1, unused2, model, unused3):
@@ -760,7 +754,7 @@ class SampleView(BaseView):
         "prepared_at",
         "priority",
         "reads",
-        "accumulated_hifi_yield",
+        "hifi_yield",
         "last_sequenced_at",
         "received_at",
         "reference_genome",
