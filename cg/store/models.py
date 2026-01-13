@@ -762,6 +762,13 @@ class Sample(Base, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
+    def hifi_yield(self) -> int | None:
+        if self._sample_run_metrics and getattr(self._sample_run_metrics[0], "hifi_yield", False):
+            return sum(metric.hifi_yield for metric in self._sample_run_metrics)  # type: ignore
+        else:
+            return None
+
+    @property
     def archive_location(self) -> str:
         """Returns the data_archive_location if the customer linked to the sample."""
         return self.customer.data_archive_location
