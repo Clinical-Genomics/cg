@@ -762,9 +762,9 @@ class Sample(Base, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
-    def accumulated_hifi_yield(self):
-        if getattr(self._sample_run_metrics[0], "hifi_yield", False):
-            return sum(metric.hifi_yield for metric in self._sample_run_metrics)
+    def accumulated_hifi_yield(self) -> int | None:
+        if self._sample_run_metrics and getattr(self._sample_run_metrics[0], "hifi_yield", False):
+            return sum(metric.hifi_yield for metric in self._sample_run_metrics)  # type: ignore
         else:
             return None
 
