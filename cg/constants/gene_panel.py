@@ -36,6 +36,7 @@ class GenePanelMasterList(StrEnum):
     MTDNA = "mtDNA"
     NBS_M = "NBS-M"
     NEURODEG = "NEURODEG"
+    NOONAN = "NOONAN"
     NMD = "NMD"
     OMIM_AUTO = "OMIM-AUTO"
     OPTIC = "OPTIC"
