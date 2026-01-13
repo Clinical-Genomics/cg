@@ -5,7 +5,7 @@ from cg.constants import Workflow
 from cg.services.sequencing_qc_service.quality_checks.utils import (
     all_samples_in_case_have_reads,
     any_sample_in_case_has_reads,
-    case_pass_sequencing_qc,
+    case_pass_sequencing_qc_with_enough_reads,
     sample_pass_sequencing_qc,
 )
 from cg.store.models import Case
@@ -18,7 +18,7 @@ class QualityCheck(Enum):
 
 
 class SequencingQCCheck(QualityCheck):
-    CASE_PASSES: Callable = case_pass_sequencing_qc
+    CASE_PASSES_WITH_ENOUGH_READS: Callable = case_pass_sequencing_qc_with_enough_reads
     SAMPLE_PASSES: Callable = sample_pass_sequencing_qc
     ALL_SAMPLES_IN_CASE_HAVE_READS: Callable = all_samples_in_case_have_reads
     ANY_SAMPLE_IN_CASE_HAS_READS: Callable = any_sample_in_case_has_reads
@@ -29,14 +29,14 @@ def get_sequencing_quality_check_for_case(case: Case) -> Callable:
     workflow: Workflow = case.data_analysis
 
     workflow_qc_mapping = {
-        Workflow.BALSAMIC: SequencingQCCheck.CASE_PASSES,
-        Workflow.BALSAMIC_PON: SequencingQCCheck.CASE_PASSES,
-        Workflow.BALSAMIC_UMI: SequencingQCCheck.CASE_PASSES,
-        Workflow.MIP_DNA: SequencingQCCheck.CASE_PASSES,
-        Workflow.MIP_RNA: SequencingQCCheck.CASE_PASSES,
-        Workflow.RAREDISEASE: SequencingQCCheck.CASE_PASSES,
-        Workflow.RNAFUSION: SequencingQCCheck.CASE_PASSES,
-        Workflow.TOMTE: SequencingQCCheck.CASE_PASSES,
+        Workflow.BALSAMIC: SequencingQCCheck.CASE_PASSES_WITH_ENOUGH_READS,
+        Workflow.BALSAMIC_PON: SequencingQCCheck.CASE_PASSES_WITH_ENOUGH_READS,
+        Workflow.BALSAMIC_UMI: SequencingQCCheck.CASE_PASSES_WITH_ENOUGH_READS,
+        Workflow.MIP_DNA: SequencingQCCheck.CASE_PASSES_WITH_ENOUGH_READS,
+        Workflow.MIP_RNA: SequencingQCCheck.CASE_PASSES_WITH_ENOUGH_READS,
+        Workflow.RAREDISEASE: SequencingQCCheck.CASE_PASSES_WITH_ENOUGH_READS,
+        Workflow.RNAFUSION: SequencingQCCheck.CASE_PASSES_WITH_ENOUGH_READS,
+        Workflow.TOMTE: SequencingQCCheck.CASE_PASSES_WITH_ENOUGH_READS,
         Workflow.FLUFFY: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,
         Workflow.RAW_DATA: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,
         Workflow.MICROSALT: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,

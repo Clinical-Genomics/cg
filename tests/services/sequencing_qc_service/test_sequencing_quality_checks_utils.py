@@ -3,7 +3,7 @@ import pytest
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.sequencing_qc_service.quality_checks.utils import (
     any_sample_in_case_has_reads,
-    case_pass_sequencing_qc,
+    case_pass_sequencing_qc_with_enough_reads,
     express_case_pass_sequencing_qc,
     express_sample_has_enough_reads,
     get_express_reads_threshold_for_sample,
@@ -168,7 +168,7 @@ def test_get_sequencing_qc_of_case(
     # WHEN getting the sequencing quality check of the case
     # THEN the sequencing quality check of the case should be as expected
 
-    assert case_pass_sequencing_qc(case) == expected_result
+    assert case_pass_sequencing_qc_with_enough_reads(case) == expected_result
 
 
 @pytest.mark.parametrize(

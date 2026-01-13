@@ -7,7 +7,7 @@ from cg.store.models import Case, Sample
 LOG = logging.getLogger(__name__)
 
 
-def case_pass_sequencing_qc(case: Case) -> bool:
+def case_pass_sequencing_qc_with_enough_reads(case: Case) -> bool:
     """
     Get the sequencing QC of a case. The checks are performed in the following order:
     1. If the case is a ready-made library, the ready made library QC is used.
