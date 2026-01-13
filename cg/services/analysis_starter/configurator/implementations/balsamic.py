@@ -66,16 +66,16 @@ class BalsamicConfigurator(Configurator):
     def _get_sample_config_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, f"{case_id}.json")
 
+    def _ensure_consistent_capture_kits(self, case_id):
+        case: Case = self.store.get_case_by_internal_id_strict(case_id)
+        capture_kits = {self.lims_api.capture_kit(sample.internal_id) for sample in case.samples}
+        if len(capture_kits) > 1:
+            raise MultipleCaptureKitsError(
+                f"Multiple capture kits found for {case_id}: {capture_kits}"
+            )
+
     def _ensure_required_config_files_exist(self, config: BalsamicCaseConfig) -> None:
         if not config.sample_config.exists():
             raise CaseNotConfiguredError(
                 f"Please ensure that the config file {config.sample_config} exists."
-            )
-
-    def _ensure_consistent_capture_kits(self, case_id):
-        case: Case = self.store.get_case_by_internal_id_strict(case_id)
-        capture_kits = set(self.lims_api.capture_kit(sample.internal_id) for sample in case.samples)
-        if len(capture_kits) > 1:
-            raise MultipleCaptureKitsError(
-                f"Multiple capture kits found for {case_id}: {capture_kits}"
             )
