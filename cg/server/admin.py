@@ -198,14 +198,6 @@ def view_customer_link(unused1, unused2, model, unused3):
     return markup
 
 
-def view_hifi_yield(unused1, unused2, model, unused3):
-    del unused1, unused2, unused3
-    if model.sample_run_metrics:
-        return sum(getattr(metric, "hifi_yield", 0) for metric in model.sample_run_metrics)
-    else:
-        return 0
-
-
 def view_ticket_link(unused1, unused2, model, attribute_name):
     """Column formatter used to add hyperlink to ticket ID, if applicable."""
     del unused1, unused2
@@ -744,12 +736,36 @@ class PoolView(BaseView):
 class SampleView(BaseView):
     """Admin view for Model.Sample"""
 
-    column_list = list(inspect(Sample).columns) + ["HiFi Yield"]
-
-    column_exclude_list = [
-        "age_at_sampling",
-        "_phenotype_groups",
-        "_phenotype_terms",
+    column_list = [
+        "application_version",
+        "customer",
+        "organism",
+        "no_invoice",
+        "invoice",
+        "is_cancelled",
+        "capture_kit",
+        "comment",
+        "control",
+        "created_at",
+        "delivered_at",
+        "downsampled_to",
+        "from_sample",
+        "internal_id",
+        "is_tumour",
+        "loqusdb_id",
+        "name",
+        "order",
+        "ordered_at",
+        "original_ticket",
+        "prepared_at",
+        "priority",
+        "reads",
+        "accumulated_hifi_yield",
+        "last_sequenced_at",
+        "received_at",
+        "reference_genome",
+        "sex",
+        "subject_id",
     ]
     column_default_sort = ("created_at", True)
     column_editable_list = [
@@ -769,8 +785,6 @@ class SampleView(BaseView):
     column_formatters = {
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
-        "HiFi Yield": view_hifi_yield,
-        "is_external": is_external_application,
         "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
         "original_ticket": view_ticket_link,
