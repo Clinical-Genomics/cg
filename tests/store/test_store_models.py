@@ -1,7 +1,13 @@
 from cg.constants.constants import ControlOptions
-from cg.store.models import Application, ApplicationVersion, Case, Customer, Sample
+from cg.store.models import (
+    Application,
+    ApplicationVersion,
+    Case,
+    Customer,
+    PacbioSampleSequencingMetrics,
+    Sample,
+)
 from cg.store.store import Store
-from tests.cli.conftest import application_tag
 from tests.store_helpers import StoreHelpers
 
 
@@ -148,3 +154,19 @@ def test_sample_is_not_external():
     )
     # THEN the sample is not external
     assert not sample.is_external
+
+
+def test_accumulated_hifi_yield_pacbio_sample():
+    # GIVEN a PacBio sample with pacbio sequencing runs
+    sample = Sample(
+        _sample_run_metrics=[
+            PacbioSampleSequencingMetrics(hifi_yield=10),
+            PacbioSampleSequencingMetrics(hifi_yield=90),
+        ]
+    )
+    # WHEN getting the accumulated HiFi yield
+    # THEN the value is the sum of all the sample metric yields
+
+
+def test_accumulated_hifi_yield_illumina_sample():
+    pass
