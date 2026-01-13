@@ -112,12 +112,6 @@ def view_pacbio_sample_sequencing_metrics_link(unused1, unused2, model, unused3)
     )
 
 
-def is_external_application(unused1, unused2, model, unused3):
-    """column formatter to open this view"""
-    del unused1, unused2, unused3
-    return model.application_version.application.is_external if model.application_version else ""
-
-
 def view_order_types(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
     order_type_list = "<br>".join(model.order_types)
@@ -736,10 +730,36 @@ class PoolView(BaseView):
 class SampleView(BaseView):
     """Admin view for Model.Sample"""
 
-    column_exclude_list = [
-        "age_at_sampling",
-        "_phenotype_groups",
-        "_phenotype_terms",
+    column_list = [
+        "application_version",
+        "customer",
+        "organism",
+        "invoice",
+        "is_cancelled",
+        "capture_kit",
+        "comment",
+        "control",
+        "created_at",
+        "delivered_at",
+        "downsampled_to",
+        "from_sample",
+        "internal_id",
+        "is_tumour",
+        "loqusdb_id",
+        "name",
+        "no_invoice",
+        "order",
+        "ordered_at",
+        "original_ticket",
+        "prepared_at",
+        "priority",
+        "reads",
+        "hifi_yield",
+        "last_sequenced_at",
+        "received_at",
+        "reference_genome",
+        "sex",
+        "subject_id",
     ]
     column_default_sort = ("created_at", True)
     column_editable_list = [
@@ -759,7 +779,6 @@ class SampleView(BaseView):
     column_formatters = {
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
-        "is_external": is_external_application,
         "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
         "original_ticket": view_ticket_link,
