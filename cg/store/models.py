@@ -197,6 +197,11 @@ class Application(Base):
         return self.target_reads * self.percent_reads_guaranteed / 100
 
     @property
+    def expected_hifi_yield(self) -> float:
+        # TODO: Add a test for this property
+        return self.target_hifi_yield * self.percent_hifi_yield_guaranteed / 100
+
+    @property
     def analysis_type(self) -> str:
         if self.prep_category == SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
             return SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
@@ -777,6 +782,11 @@ class Sample(Base, PriorityMixin):
     def expected_reads_for_sample(self) -> int:
         """Return the expected reads of the sample."""
         return self.application_version.application.expected_reads
+
+    @property
+    def expected_hifi_yield(self) -> int:
+        """Return the expected HiFi yield of the sample."""
+        return self.application_version.application.expected_hifi_yield
 
     @property
     def has_reads(self) -> bool:

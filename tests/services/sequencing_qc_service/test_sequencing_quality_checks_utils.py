@@ -1,9 +1,12 @@
+from unittest.mock import create_autospec
+
 import pytest
 
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.sequencing_qc_service.quality_checks.utils import (
     any_sample_in_case_has_reads,
     case_pass_sequencing_qc,
+    case_yield_check,
     express_case_pass_sequencing_qc,
     express_sample_has_enough_reads,
     get_express_reads_threshold_for_sample,
@@ -275,10 +278,16 @@ def test_any_sample_in_case_has_reads(
     # THEN the result should be as expected
     assert any_sample_in_case_has_reads_result == expected_result
 
+
 def test_case_yield_check_passes():
-    # GIVEN an application with target yield and expected yield
-    # GIVEN an application version 
-    # GIVEN a case
     # GIVEN a sample with enough yield
-    # WHEN calling blalba
-    # THEN it passes 
+    sample: Sample = create_autospec(Sample, expected_hifi_yield=45, hifi_yield=45)
+
+    # GIVEN a case
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling case_yield_check on the case
+    result: bool = case_yield_check(case)
+
+    # THEN the case passes sequencing qc
+    assert result

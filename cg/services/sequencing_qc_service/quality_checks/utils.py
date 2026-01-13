@@ -25,8 +25,9 @@ def case_pass_sequencing_qc(case: Case) -> bool:
     return all(sample_has_enough_reads(sample) for sample in case.samples)
 
 
-def case_yield_check(case: Case):
-    pass
+def case_yield_check(case: Case) -> bool:
+    # TODO: Add express prio case handling
+    return all(sample_has_enough_hifi_yield(sample) for sample in case.samples)
 
 
 def express_case_pass_sequencing_qc(case: Case) -> bool:
@@ -145,6 +146,16 @@ def sample_has_enough_reads(sample: Sample) -> bool:
     if not enough_reads:
         LOG.warning(f"Sample {sample.internal_id} has too few reads.")
     return enough_reads
+
+
+def sample_has_enough_hifi_yield(sample: Sample) -> bool:
+    """
+    Check if the sample has more than or equal HiFi yield to the expected for the sample.
+    """
+    enough_hifi_yield: bool = sample.hifi_yield >= sample.expected_hifi_yield
+    if not enough_hifi_yield:
+        LOG.warning(f"Sample {sample.internal_id} does not have enough HiFi yield.")
+    return enough_hifi_yield
 
 
 def is_sample_express_priority(sample: Sample) -> bool:
