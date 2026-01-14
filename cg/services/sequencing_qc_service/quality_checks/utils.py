@@ -2,6 +2,7 @@ import logging
 
 from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.exc import MissingHifiYieldDataForSample
 from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
@@ -27,6 +28,8 @@ def case_pass_sequencing_qc(case: Case) -> bool:
 
 def case_yield_check(case: Case) -> bool:
     # TODO: Add express prio case handling
+    if is_case_express_priority(case):
+        return express_case_pass_sequencing_qc_on_yield(case)
     return all(sample_has_enough_hifi_yield(sample) for sample in case.samples)
 
 
@@ -35,6 +38,10 @@ def express_case_pass_sequencing_qc(case: Case) -> bool:
     Checks if all samples in an express case have enough reads.
     """
     return all(express_sample_has_enough_reads(sample) for sample in case.samples)
+
+
+def express_case_pass_sequencing_qc_on_yield(case: Case) -> bool:
+    return all(express_sample_has_enough_yield(sample) for sample in case.samples)
 
 
 def express_sample_pass_sequencing_qc(sample: Sample) -> bool:
@@ -111,11 +118,28 @@ def express_sample_has_enough_reads(sample: Sample) -> bool:
     return enough_reads
 
 
+def express_sample_has_enough_yield(sample: Sample) -> bool:
+    express_yield_threshold: int = get_express_yield_threshold_for_sample(sample)
+    enough_yield: bool = sample.reads >= express_yield_threshold
+    if not enough_yield:
+        LOG.warning(f"Sample {sample.internal_id} does not have enough yield.")
+    return enough_yield
+
+
 def get_express_reads_threshold_for_sample(sample: Sample) -> int:
     """
     Get the express reads threshold for a sample.
     """
     return round(sample.application_version.application.target_reads / 2)
+
+
+def get_express_yield_threshold_for_sample(sample: Sample) -> int:
+    if target_hifi_yield := sample.application_version.application.target_hifi_yield:
+        return round(target_hifi_yield / 2)
+    else:
+        raise MissingHifiYieldDataForSample(
+            f"Sample {sample.internal_id} does not have target hifi yield."
+        )
 
 
 def is_sample_ready_made_library(sample: Sample) -> bool:
