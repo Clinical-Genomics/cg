@@ -143,8 +143,8 @@ def get_express_reads_threshold_for_sample(sample: Sample) -> int:
 
 
 def get_express_yield_threshold_for_sample(sample: Sample) -> int:
-    if target_hifi_yield := sample.application_version.application.expected_express_hifi_yield:
-        return target_hifi_yield
+    if threshold := sample.application_version.application.expected_express_hifi_yield:
+        return threshold
     else:
         raise ApplicationDoesNotHaveHiFiYieldError(
             f"Application for sample {sample.internal_id} does not have target HiFi yield."

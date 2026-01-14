@@ -310,7 +310,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_fails():
 
 
 def test_case_pass_sequencing_qc_on_hifi_yield_wrong_application():
-    # GIVEN a case with an application without targeted HiFi yield
+    # GIVEN a case with an application without target HiFi yield
     sample: Sample = create_autospec(Sample, hifi_yield=25, expected_hifi_yield=None)
     case: Case = create_autospec(Case, samples=[sample])
 
@@ -356,3 +356,22 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_fails():
 
     # THEN the case does not pass sequencing qc
     assert not passes
+
+
+def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_wrong_application():
+    # GIVEN an express priority case with an application without expected express HiFi yield
+    # because of a missing target_hifi_yield
+    sample: Sample = create_autospec(
+        Sample,
+        hifi_yield=25,
+        application_version=create_autospec(
+            ApplicationVersion,
+            application=create_autospec(Application, expected_express_hifi_yield=None),
+        ),
+    )
+    case: Case = create_autospec(Case, samples=[sample], priority=Priority.express)
+
+    # WHEN calling the case_pass_sequencing_qc_on_hifi_yield on the case
+    # THEN an error is raised
+    with pytest.raises(ApplicationDoesNotHaveHiFiYieldError):
+        case_pass_sequencing_qc_on_hifi_yield(case)
