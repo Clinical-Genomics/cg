@@ -31,6 +31,7 @@ from cg.store.models import Analysis, Application, ApplicationVersion, Case, Cas
 from cg.store.store import Store
 from tests.meta.delivery_report.conftest import (
     EXPECTED_NALLO_QC,
+    EXPECTED_RAREDISEASE_QC,
     EXPECTED_RNAFUSION_QC_TABLE_WTS,
     EXPECTED_TOMTE_QC_TABLE_WTS,
 )
@@ -307,6 +308,7 @@ def test_get_delivery_report_html_raredisease(raredisease_analysis: NextflowAnal
         application_version=create_autospec(
             ApplicationVersion, application=create_autospec(Application)
         ),
+        is_tumour=False,
     )
     sample.name = "sample_name"
     case: Case = create_autospec(
@@ -315,6 +317,7 @@ def test_get_delivery_report_html_raredisease(raredisease_analysis: NextflowAnal
         data_delivery=DataDelivery.ANALYSIS_FILES,
         internal_id="case_id",
         sample=[sample],
+        panels=["some_panel"],
     )
 
     # GIVEN a case sample relationship
@@ -366,8 +369,7 @@ def test_get_delivery_report_html_raredisease(raredisease_analysis: NextflowAnal
         ),
         force=False,
     )
-
-    assert "?" == delivery_report
+    assert EXPECTED_RAREDISEASE_QC in delivery_report
 
 
 def test_get_missing_report_data(
