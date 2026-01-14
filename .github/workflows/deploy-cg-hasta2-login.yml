@@ -3,11 +3,6 @@ name: deploy cg - hasta2 login
 on:
   workflow_dispatch:
     inputs:
-      ref_name:
-        description: "CG ref to deploy (branch or tag)"
-        required: true
-        default: "main"
-        type: string
       ref_type:
         description: "branch or release"
         required: true
@@ -16,6 +11,11 @@ on:
         options:
           - branch
           - release
+      ref_name:
+        description: "CG ref to deploy (branch or tag)"
+        required: true
+        default: "main"
+        type: string
 
 jobs:
   dispatch:
