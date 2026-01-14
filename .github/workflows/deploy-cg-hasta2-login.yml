@@ -1,0 +1,11 @@
+name: deploy cg - hasta2 login
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  dummy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dummy placeholder
+        run: echo "Placeholder workflow for testing branch visibility."
