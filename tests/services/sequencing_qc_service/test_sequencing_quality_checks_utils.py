@@ -308,7 +308,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_fails():
     assert not passes
 
 
-def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_pass():
+def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_passes():
     # GIVEN a case with a PacBio application, express priority and half of the target yield
     sample: Sample = create_autospec(
         Sample,
@@ -327,7 +327,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_pass():
     assert passes
 
 
-def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_fail():
+def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_fails():
     # GIVEN a case with a PacBio application, express priority and less than half the target yield
     sample: Sample = create_autospec(
         Sample,
