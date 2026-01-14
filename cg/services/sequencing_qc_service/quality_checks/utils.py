@@ -27,7 +27,13 @@ def case_pass_sequencing_qc(case: Case) -> bool:
 
 
 def case_yield_check(case: Case) -> bool:
-    # TODO: Add express prio case handling
+    """
+    Get the sequencing QC of a case using yield. The checks are performed in the following order:
+    1. If the case is express priority, the express QC is used.
+    2. If the above condition is not met then it checks if all samples have enough yield.
+
+    The express QC should be checked before the standard QC.
+    """
     if is_case_express_priority(case):
         return express_case_pass_sequencing_qc_on_yield(case)
     return all(sample_has_enough_hifi_yield(sample) for sample in case.samples)
