@@ -1,0 +1,42 @@
+name: deploy cg - hasta2 login
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref_name:
+        description: "CG ref to deploy (branch or tag)"
+        required: true
+        default: "main"
+        type: string
+      ref_type:
+        description: "branch or release"
+        required: true
+        default: "branch"
+        type: choice
+        options:
+          - branch
+          - release
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger cg-hasta2.0 deploy workflow
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.CG_HASTA2_ACTIONS_TOKEN }}
+          script: |
+            const refType = context.payload.inputs.ref_type;
+            const refName = context.payload.inputs.ref_name;
+            await github.rest.actions.createWorkflowDispatch({
+              owner: "Clinical-Genomics",
+              repo: "cg-hasta2.0",
+              workflow_id: "deploy-cg.yml",
+              ref: "main",
+              inputs: {
+                limit: "login",
+                ref_type: refType,
+                ref_name: refName,
+                check_mode: "false",
+              },
+            });
