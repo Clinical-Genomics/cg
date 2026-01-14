@@ -4,6 +4,7 @@ import pytest
 
 from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.exc import ApplicationDoesNotHaveHiFiYieldError
 from cg.services.sequencing_qc_service.quality_checks.utils import (
     any_sample_in_case_has_reads,
     case_pass_sequencing_qc_on_hifi_yield,
@@ -287,7 +288,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_passes():
     # GIVEN a case
     case: Case = create_autospec(Case, samples=[sample])
 
-    # WHEN calling case_yield_check on the case
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
     passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
 
     # THEN the case passes sequencing qc
@@ -301,11 +302,22 @@ def test_case_pass_sequencing_qc_on_hifi_yield_fails():
     # GIVEN a case
     case: Case = create_autospec(Case, samples=[sample])
 
-    # WHEN calling case_yield_check on the case
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
     passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
 
     # THEN the case passes sequencing qc
     assert not passes
+
+
+def test_case_pass_sequencing_qc_on_hifi_yield_wrong_application():
+    # GIVEN a case with an application without targeted HiFi yield
+    sample: Sample = create_autospec(Sample, hifi_yield=25, expected_hifi_yield=None)
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling the case_pass_sequencing_qc_on_hifi_yield on the case
+    # THEN an error is raised
+    with pytest.raises(ApplicationDoesNotHaveHiFiYieldError):
+        case_pass_sequencing_qc_on_hifi_yield(case)
 
 
 def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_passes():
@@ -320,7 +332,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_passes():
     )
     case: Case = create_autospec(Case, samples=[sample], priority=Priority.express)
 
-    # WHEN calling case_yield_check on the case
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
     passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
 
     # THEN the case passes sequencing qc
@@ -339,7 +351,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_fails():
     )
     case: Case = create_autospec(Case, samples=[sample], priority=Priority.express)
 
-    # WHEN calling case_yield_check on the case
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
     passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
 
     # THEN the case does not pass sequencing qc
