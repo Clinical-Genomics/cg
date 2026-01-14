@@ -17,4 +17,4 @@ def test_nallo_qc():
     qc_check: Callable = get_sequencing_quality_check_for_case(case)
 
     # THEN a yield based qc check was returned
-    assert qc_check == SequencingQCCheck.CASE_YIELD_CHECK
+    assert qc_check == SequencingQCCheck.CASE_PASSES_ON_YIELD

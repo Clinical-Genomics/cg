@@ -57,6 +57,26 @@ def express_sample_pass_sequencing_qc_on_reads(sample: Sample) -> bool:
     return express_sample_has_enough_reads(sample)
 
 
+def express_sample_has_enough_reads(sample: Sample) -> bool:
+    """
+    Checks if given express sample has enough reads. Gets the threshold from the sample's
+    application version.
+    """
+    express_reads_threshold: int = get_express_reads_threshold_for_sample(sample)
+    enough_reads: bool = sample.reads >= express_reads_threshold
+    if not enough_reads:
+        LOG.warning(f"Sample {sample.internal_id} has too few reads.")
+    return enough_reads
+
+
+def express_sample_has_enough_yield(sample: Sample) -> bool:
+    express_yield_threshold: int = get_express_yield_threshold_for_sample(sample)
+    enough_yield: bool = sample.hifi_yield >= express_yield_threshold  # type: ignore
+    if not enough_yield:
+        LOG.warning(f"Sample {sample.internal_id} does not have enough yield.")
+    return enough_yield
+
+
 def sample_pass_sequencing_qc_on_reads(sample: Sample) -> bool:
     """
     Get the standard sequencing QC of a sample. The checks are performed in the following order:
@@ -113,26 +133,6 @@ def is_case_express_priority(case: Case) -> bool:
     Check if a case is express priority.
     """
     return case.priority == Priority.express
-
-
-def express_sample_has_enough_reads(sample: Sample) -> bool:
-    """
-    Checks if given express sample has enough reads. Gets the threshold from the sample's
-    application version.
-    """
-    express_reads_threshold: int = get_express_reads_threshold_for_sample(sample)
-    enough_reads: bool = sample.reads >= express_reads_threshold
-    if not enough_reads:
-        LOG.warning(f"Sample {sample.internal_id} has too few reads.")
-    return enough_reads
-
-
-def express_sample_has_enough_yield(sample: Sample) -> bool:
-    express_yield_threshold: int = get_express_yield_threshold_for_sample(sample)
-    enough_yield: bool = sample.hifi_yield >= express_yield_threshold  # type: ignore
-    if not enough_yield:
-        LOG.warning(f"Sample {sample.internal_id} does not have enough yield.")
-    return enough_yield
 
 
 def get_express_reads_threshold_for_sample(sample: Sample) -> int:
