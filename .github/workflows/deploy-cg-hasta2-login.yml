@@ -22,22 +22,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger cg-hasta2.0 deploy workflow
-        env:
-          GH_TOKEN: ${{ secrets.CG_HASTA2_ACTIONS_TOKEN }}
-        run: |
-          response=$(curl -sS -w "\n%{http_code}" -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/Clinical-Genomics/cg-hasta2.0/actions/workflows/deploy-cg.yml/dispatches \
-            -d "$(jq -n \
-              --arg ref_type "${{ inputs.ref_type }}" \
-              --arg ref_name "${{ inputs.ref_name }}" \
-              '{ref: "main", inputs: {limit: "login", ref_type: $ref_type, ref_name: $ref_name, check_mode: "false"}}')")
-          http_code=$(echo "$response" | tail -n1)
-          if [ "$http_code" != "204" ]; then
-            echo "::error::Failed to dispatch workflow (HTTP $http_code)"
-            echo "$response" | head -n -1
-            exit 1
-          fi
-          echo "✓ Workflow dispatched successfully"
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.CG_HASTA2_ACTIONS_TOKEN }}
+          script: |
+            const refType = context.payload.inputs.ref_type;
+            const refName = context.payload.inputs.ref_name;
+            await github.rest.actions.createWorkflowDispatch({
+              owner: "Clinical-Genomics",
+              repo: "cg-hasta2.0",
+              workflow_id: "deploy-cg.yml",
+              ref: "main",
+              inputs: {
+                limit: "login",
+                ref_type: refType,
+                ref_name: refName,
+                check_mode: "false",
+              },
+            });
