@@ -128,7 +128,7 @@ def express_sample_has_enough_reads(sample: Sample) -> bool:
 
 
 def express_sample_has_enough_yield(sample: Sample) -> bool:
-    if not sample.hifi_yield:
+    if not sample.has_hifi_yield:
         raise MissingHifiYieldForSampleError(f"Sample {sample.internal_id} has no hifi yield.")
 
     express_yield_threshold: int = get_express_yield_threshold_for_sample(sample)

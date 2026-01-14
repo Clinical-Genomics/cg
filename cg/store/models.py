@@ -797,6 +797,10 @@ class Sample(Base, PriorityMixin):
         return bool(self.reads)
 
     @property
+    def has_hifi_yield(self) -> bool:
+        return bool(self.hifi_yield)
+
+    @property
     def is_negative_control(self) -> bool:
         return self.control == ControlOptions.NEGATIVE
 
