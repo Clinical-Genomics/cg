@@ -6,9 +6,9 @@ from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.sequencing_qc_service.quality_checks.utils import (
     any_sample_in_case_has_reads,
-    case_pass_sequencing_qc,
-    case_yield_check,
-    express_case_pass_sequencing_qc,
+    case_pass_sequencing_qc_on_hifi_yield,
+    case_pass_sequencing_qc_on_reads,
+    express_case_pass_sequencing_qc_on_reads,
     express_sample_has_enough_reads,
     get_express_reads_threshold_for_sample,
     is_case_express_priority,
@@ -172,7 +172,7 @@ def test_get_sequencing_qc_of_case(
     # WHEN getting the sequencing quality check of the case
     # THEN the sequencing quality check of the case should be as expected
 
-    assert case_pass_sequencing_qc(case) == expected_result
+    assert case_pass_sequencing_qc_on_reads(case) == expected_result
 
 
 @pytest.mark.parametrize(
@@ -239,7 +239,7 @@ def test_express_case_pass_sequencing_qc(
     # GIVEN a case with express priority and a sample
     case: Case = request.getfixturevalue(case_fixture)
     # WHEN getting the express sequencing quality check of the case
-    express_sequencing_qc_of_case: bool = express_case_pass_sequencing_qc(case)
+    express_sequencing_qc_of_case: bool = express_case_pass_sequencing_qc_on_reads(case)
     # THEN the express sequencing quality check of the case should be as expected
     assert express_sequencing_qc_of_case == expected_result
 
@@ -288,7 +288,7 @@ def test_case_yield_check_passes():
     case: Case = create_autospec(Case, samples=[sample])
 
     # WHEN calling case_yield_check on the case
-    result: bool = case_yield_check(case)
+    result: bool = case_pass_sequencing_qc_on_hifi_yield(case)
 
     # THEN the case passes sequencing qc
     assert result
@@ -307,7 +307,7 @@ def test_case_yield_check_express_priority():
     case: Case = create_autospec(Case, samples=[sample], priority=Priority.express)
 
     # WHEN calling case_yield_check on the case
-    result: bool = case_yield_check(case)
+    result: bool = case_pass_sequencing_qc_on_hifi_yield(case)
 
     # THEN the case passes sequencing qc
     assert result

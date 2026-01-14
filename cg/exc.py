@@ -358,3 +358,7 @@ class SeqeraError(CgError):
 
 class SampleNotPacbioError(CgError):
     """Exception raised when a value for PacBio is tried to be accessed in a Illumina Sample."""
+
+
+class MissingHifiYieldForSampleError(CgError):
+    """Exception raised when HiFi yield is missing for a sample."""

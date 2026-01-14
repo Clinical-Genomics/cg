@@ -2,13 +2,13 @@ import logging
 
 from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import SampleNotPacbioError
+from cg.exc import MissingHifiYieldForSampleError, SampleNotPacbioError
 from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
 
 
-def case_pass_sequencing_qc(case: Case) -> bool:
+def case_pass_sequencing_qc_on_reads(case: Case) -> bool:
     """
     Get the sequencing QC of a case. The checks are performed in the following order:
     1. If the case is a ready-made library, the ready made library QC is used.
@@ -22,11 +22,11 @@ def case_pass_sequencing_qc(case: Case) -> bool:
     if is_case_ready_made_library(case):
         return ready_made_library_case_pass_sequencing_qc(case)
     if is_case_express_priority(case):
-        return express_case_pass_sequencing_qc(case)
+        return express_case_pass_sequencing_qc_on_reads(case)
     return all(sample_has_enough_reads(sample) for sample in case.samples)
 
 
-def case_yield_check(case: Case) -> bool:
+def case_pass_sequencing_qc_on_hifi_yield(case: Case) -> bool:
     """
     Get the sequencing QC of a case using yield. The checks are performed in the following order:
     1. If the case is express priority, the express QC is used.
@@ -35,26 +35,29 @@ def case_yield_check(case: Case) -> bool:
     The express QC should be checked before the standard QC.
     """
     if is_case_express_priority(case):
-        return express_case_pass_sequencing_qc_on_yield(case)
+        return express_case_pass_sequencing_qc_on_hifi_yield(case)
     return all(sample_has_enough_hifi_yield(sample) for sample in case.samples)
 
 
-def express_case_pass_sequencing_qc(case: Case) -> bool:
+def express_case_pass_sequencing_qc_on_reads(case: Case) -> bool:
     """
     Checks if all samples in an express case have enough reads.
     """
     return all(express_sample_has_enough_reads(sample) for sample in case.samples)
 
 
-def express_case_pass_sequencing_qc_on_yield(case: Case) -> bool:
+def express_case_pass_sequencing_qc_on_hifi_yield(case: Case) -> bool:
+    """
+    Checks if all samples in an express case have enough hifi yield.
+    """
     return all(express_sample_has_enough_yield(sample) for sample in case.samples)
 
 
-def express_sample_pass_sequencing_qc(sample: Sample) -> bool:
+def express_sample_pass_sequencing_qc_on_reads(sample: Sample) -> bool:
     return express_sample_has_enough_reads(sample)
 
 
-def sample_pass_sequencing_qc(sample: Sample) -> bool:
+def sample_pass_sequencing_qc_on_reads(sample: Sample) -> bool:
     """
     Get the standard sequencing QC of a sample. The checks are performed in the following order:
     1. If the sample is express priority, the express QC is used.
@@ -65,7 +68,7 @@ def sample_pass_sequencing_qc(sample: Sample) -> bool:
     checked before the standard QC.
     """
     if is_sample_express_priority(sample):
-        return express_sample_pass_sequencing_qc(sample)
+        return express_sample_pass_sequencing_qc_on_reads(sample)
     if is_sample_ready_made_library(sample):
         return ready_made_library_sample_has_enough_reads(sample)
     return sample_has_enough_reads(sample)
@@ -125,6 +128,9 @@ def express_sample_has_enough_reads(sample: Sample) -> bool:
 
 
 def express_sample_has_enough_yield(sample: Sample) -> bool:
+    if not sample.hifi_yield:
+        raise MissingHifiYieldForSampleError(f"Sample {sample.internal_id} has no hifi yield.")
+
     express_yield_threshold: int = get_express_yield_threshold_for_sample(sample)
     enough_yield: bool = sample.hifi_yield >= express_yield_threshold
     if not enough_yield:
