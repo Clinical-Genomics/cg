@@ -17,7 +17,7 @@ from cg.services.sequencing_qc_service.quality_checks.utils import (
     ready_made_library_sample_has_enough_reads,
     sample_has_enough_reads,
 )
-from cg.store.models import Case, Sample
+from cg.store.models import Application, ApplicationVersion, Case, Sample
 from cg.store.store import Store
 from tests.conftest import StoreHelpers
 from tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario import (
@@ -295,11 +295,14 @@ def test_case_yield_check_passes():
 
 
 def test_case_yield_check_express_priority():
-    # GIVEN a case with express priority and half of the target yield
+    # GIVEN a case with a PacBio application, express priority and half of the target yield
     sample: Sample = create_autospec(
         Sample,
-        expected_express_hifi_yield=25,
         hifi_yield=25,
+        application_version=create_autospec(
+            ApplicationVersion,
+            application=create_autospec(Application, expected_express_hifi_yield=25),
+        ),
     )
     case: Case = create_autospec(Case, samples=[sample], priority=Priority.express)
 

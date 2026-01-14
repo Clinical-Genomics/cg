@@ -2,7 +2,7 @@ import logging
 
 from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import MissingHifiYieldDataForSample
+from cg.exc import SampleNotPacbioError
 from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
@@ -134,12 +134,10 @@ def get_express_reads_threshold_for_sample(sample: Sample) -> int:
 
 
 def get_express_yield_threshold_for_sample(sample: Sample) -> int:
-    if target_hifi_yield := sample.application_version.application.target_hifi_yield:
-        return round(target_hifi_yield / 2)
+    if target_hifi_yield := sample.application_version.application.expected_express_hifi_yield:
+        return target_hifi_yield
     else:
-        raise MissingHifiYieldDataForSample(
-            f"Sample {sample.internal_id} does not have target hifi yield."
-        )
+        raise SampleNotPacbioError(f"Sample {sample.internal_id} does not have a PacBio apptag.")
 
 
 def is_sample_ready_made_library(sample: Sample) -> bool:

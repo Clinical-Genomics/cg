@@ -202,8 +202,8 @@ class Application(Base):
         return self.target_hifi_yield * self.percent_hifi_yield_guaranteed / 100
 
     @property
-    def expected_express_hifi_yield(self) -> float:
-        return self.target_hifi_yield * 0.5
+    def expected_express_hifi_yield(self) -> int | None:
+        return round(self.target_hifi_yield * 0.5) if self.target_hifi_yield else None
 
     @property
     def analysis_type(self) -> str:
