@@ -1,0 +1,43 @@
+name: deploy cg - hasta2 login
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref_name:
+        description: "CG ref to deploy (branch or tag)"
+        required: true
+        default: "main"
+        type: string
+      ref_type:
+        description: "branch or release"
+        required: true
+        default: "branch"
+        type: choice
+        options:
+          - branch
+          - release
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger cg-hasta2.0 deploy workflow
+        env:
+          GH_TOKEN: ${{ secrets.CG_HASTA2_ACTIONS_TOKEN }}
+        run: |
+          response=$(curl -sS -w "\n%{http_code}" -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/Clinical-Genomics/cg-hasta2.0/actions/workflows/deploy-cg.yml/dispatches \
+            -d "$(jq -n \
+              --arg ref_type "${{ inputs.ref_type }}" \
+              --arg ref_name "${{ inputs.ref_name }}" \
+              '{ref: "main", inputs: {limit: "login", ref_type: $ref_type, ref_name: $ref_name, check_mode: "false"}}')")
+          http_code=$(echo "$response" | tail -n1)
+          if [ "$http_code" != "204" ]; then
+            echo "::error::Failed to dispatch workflow (HTTP $http_code)"
+            echo "$response" | head -n -1
+            exit 1
+          fi
+          echo "✓ Workflow dispatched successfully"
