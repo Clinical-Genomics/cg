@@ -207,7 +207,7 @@ def test_application_expected_hifi_yield():
     )
 
     # WHEN getting the expected HiFi yield
-    expected_hifi_yield: int = application.expected_hifi_yield
+    expected_hifi_yield: float | None = application.expected_hifi_yield
 
     # THEN the value should be calculated correctly
     assert expected_hifi_yield == 150
@@ -221,7 +221,7 @@ def test_application_expected_hifi_yield_no_target_hifi_yield():
     )
 
     # WHEN getting the expected HiFi yield
-    expected_hifi_yield: int | None = application.expected_hifi_yield
+    expected_hifi_yield: float | None = application.expected_hifi_yield
 
     # THEN the value should be None
     assert expected_hifi_yield is None

@@ -132,7 +132,7 @@ def express_sample_has_enough_yield(sample: Sample) -> bool:
         raise MissingHifiYieldForSampleError(f"Sample {sample.internal_id} has no hifi yield.")
 
     express_yield_threshold: int = get_express_yield_threshold_for_sample(sample)
-    enough_yield: bool = sample.hifi_yield >= express_yield_threshold
+    enough_yield: bool = sample.hifi_yield >= express_yield_threshold  # type: ignore
     if not enough_yield:
         LOG.warning(f"Sample {sample.internal_id} does not have enough yield.")
     return enough_yield
@@ -186,6 +186,14 @@ def sample_has_enough_hifi_yield(sample: Sample) -> bool:
     """
     Check if the sample has more than or equal HiFi yield to the expected for the sample.
     """
+    if not sample.hifi_yield:
+        raise MissingHifiYieldForSampleError(f"Sample {sample.internal_id} has no HiFi yield.")
+
+    if not sample.expected_hifi_yield:
+        raise SampleNotPacbioError(
+            f"Apptag for sample {sample.internal_id} does not have HiFi yield."
+        )
+
     enough_hifi_yield: bool = sample.hifi_yield >= sample.expected_hifi_yield
     if not enough_hifi_yield:
         LOG.warning(f"Sample {sample.internal_id} does not have enough HiFi yield.")

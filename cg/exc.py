@@ -356,6 +356,7 @@ class SeqeraError(CgError):
     """Exception raised when receiving an unexpected response from Seqera platform"""
 
 
+# TODO rename this
 class SampleNotPacbioError(CgError):
     """Exception raised when a value for PacBio is tried to be accessed in a Illumina Sample."""
 
