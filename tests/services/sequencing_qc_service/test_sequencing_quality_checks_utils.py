@@ -296,7 +296,11 @@ def test_case_yield_check_passes():
 
 def test_case_yield_check_express_priority():
     # GIVEN a case with express priority and half of the target yield
-    sample: Sample = create_autospec(Sample, expected_hifi_yield=50, hifi_yield=25)
+    sample: Sample = create_autospec(
+        Sample,
+        expected_express_hifi_yield=25,
+        hifi_yield=25,
+    )
     case: Case = create_autospec(Case, samples=[sample], priority=Priority.express)
 
     # WHEN calling case_yield_check on the case

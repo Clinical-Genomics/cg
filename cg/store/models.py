@@ -202,6 +202,10 @@ class Application(Base):
         return self.target_hifi_yield * self.percent_hifi_yield_guaranteed / 100
 
     @property
+    def expected_express_hifi_yield(self) -> float:
+        return self.target_hifi_yield * 0.5
+
+    @property
     def analysis_type(self) -> str:
         if self.prep_category == SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
             return SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
