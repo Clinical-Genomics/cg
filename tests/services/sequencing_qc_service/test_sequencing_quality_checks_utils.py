@@ -2,6 +2,7 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.sequencing_qc_service.quality_checks.utils import (
     any_sample_in_case_has_reads,
@@ -285,6 +286,18 @@ def test_case_yield_check_passes():
 
     # GIVEN a case
     case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling case_yield_check on the case
+    result: bool = case_yield_check(case)
+
+    # THEN the case passes sequencing qc
+    assert result
+
+
+def test_case_yield_check_express_priority():
+    # GIVEN a case with express priority and half of the target yield
+    sample: Sample = create_autospec(Sample, expected_hifi_yield=50, hifi_yield=25)
+    case: Case = create_autospec(Case, samples=[sample], priority=Priority.express)
 
     # WHEN calling case_yield_check on the case
     result: bool = case_yield_check(case)

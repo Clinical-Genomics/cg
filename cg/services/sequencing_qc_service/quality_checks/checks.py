@@ -57,5 +57,5 @@ def get_sample_sequencing_quality_check() -> Callable:
     return SequencingQCCheck.SAMPLE_PASSES
 
 
-def run_quality_checks(quality_checks: list[QualityCheck], **kwargs) -> bool:
+def run_quality_checks(quality_checks: list[Callable], **kwargs) -> bool:
     return all(quality_check(**kwargs) for quality_check in quality_checks)
