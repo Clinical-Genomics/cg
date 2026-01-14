@@ -2,7 +2,7 @@ import logging
 
 from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import MissingHifiYieldForSampleError, SampleNotPacbioError
+from cg.exc import ApplicationDoesNotHaveHiFiYieldError
 from cg.store.models import Case, Sample
 
 LOG = logging.getLogger(__name__)
@@ -128,9 +128,6 @@ def express_sample_has_enough_reads(sample: Sample) -> bool:
 
 
 def express_sample_has_enough_yield(sample: Sample) -> bool:
-    if not sample.has_hifi_yield:
-        raise MissingHifiYieldForSampleError(f"Sample {sample.internal_id} has no hifi yield.")
-
     express_yield_threshold: int = get_express_yield_threshold_for_sample(sample)
     enough_yield: bool = sample.hifi_yield >= express_yield_threshold  # type: ignore
     if not enough_yield:
@@ -149,7 +146,9 @@ def get_express_yield_threshold_for_sample(sample: Sample) -> int:
     if target_hifi_yield := sample.application_version.application.expected_express_hifi_yield:
         return target_hifi_yield
     else:
-        raise SampleNotPacbioError(f"Sample {sample.internal_id} does not have a PacBio apptag.")
+        raise ApplicationDoesNotHaveHiFiYieldError(
+            f"Application for sample {sample.internal_id} does not have target HiFi yield."
+        )
 
 
 def is_sample_ready_made_library(sample: Sample) -> bool:
@@ -186,15 +185,12 @@ def sample_has_enough_hifi_yield(sample: Sample) -> bool:
     """
     Check if the sample has more than or equal HiFi yield to the expected for the sample.
     """
-    if not sample.hifi_yield:
-        raise MissingHifiYieldForSampleError(f"Sample {sample.internal_id} has no HiFi yield.")
-
     if not sample.expected_hifi_yield:
-        raise SampleNotPacbioError(
-            f"Apptag for sample {sample.internal_id} does not have HiFi yield."
+        raise ApplicationDoesNotHaveHiFiYieldError(
+            f"Application for sample {sample.internal_id} does not have target HiFi yield."
         )
 
-    enough_hifi_yield: bool = sample.hifi_yield >= sample.expected_hifi_yield
+    enough_hifi_yield: bool = sample.hifi_yield >= sample.expected_hifi_yield  # type: ignore
     if not enough_hifi_yield:
         LOG.warning(f"Sample {sample.internal_id} does not have enough HiFi yield.")
     return enough_hifi_yield

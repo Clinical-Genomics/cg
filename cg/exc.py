@@ -356,10 +356,5 @@ class SeqeraError(CgError):
     """Exception raised when receiving an unexpected response from Seqera platform"""
 
 
-# TODO rename this
-class SampleNotPacbioError(CgError):
-    """Exception raised when a value for PacBio is tried to be accessed in a Illumina Sample."""
-
-
-class MissingHifiYieldForSampleError(CgError):
-    """Exception raised when HiFi yield is missing for a sample."""
+class ApplicationDoesNotHaveHiFiYieldError(CgError):
+    """Exception raised when application does not have HiFi yield set."""
