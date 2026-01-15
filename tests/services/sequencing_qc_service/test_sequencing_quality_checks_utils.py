@@ -1,10 +1,15 @@
+from unittest.mock import create_autospec
+
 import pytest
 
+from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.exc import ApplicationDoesNotHaveHiFiYieldError
 from cg.services.sequencing_qc_service.quality_checks.utils import (
     any_sample_in_case_has_reads,
-    case_pass_sequencing_qc,
-    express_case_pass_sequencing_qc,
+    case_pass_sequencing_qc_on_hifi_yield,
+    case_pass_sequencing_qc_on_reads,
+    express_case_pass_sequencing_qc_on_reads,
     express_sample_has_enough_reads,
     get_express_reads_threshold_for_sample,
     is_case_express_priority,
@@ -13,7 +18,7 @@ from cg.services.sequencing_qc_service.quality_checks.utils import (
     ready_made_library_sample_has_enough_reads,
     sample_has_enough_reads,
 )
-from cg.store.models import Case, Sample
+from cg.store.models import Application, ApplicationVersion, Case, Sample
 from cg.store.store import Store
 from tests.conftest import StoreHelpers
 from tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario import (
@@ -168,7 +173,7 @@ def test_get_sequencing_qc_of_case(
     # WHEN getting the sequencing quality check of the case
     # THEN the sequencing quality check of the case should be as expected
 
-    assert case_pass_sequencing_qc(case) == expected_result
+    assert case_pass_sequencing_qc_on_reads(case) == expected_result
 
 
 @pytest.mark.parametrize(
@@ -235,7 +240,7 @@ def test_express_case_pass_sequencing_qc(
     # GIVEN a case with express priority and a sample
     case: Case = request.getfixturevalue(case_fixture)
     # WHEN getting the express sequencing quality check of the case
-    express_sequencing_qc_of_case: bool = express_case_pass_sequencing_qc(case)
+    express_sequencing_qc_of_case: bool = express_case_pass_sequencing_qc_on_reads(case)
     # THEN the express sequencing quality check of the case should be as expected
     assert express_sequencing_qc_of_case == expected_result
 
@@ -274,3 +279,145 @@ def test_any_sample_in_case_has_reads(
     any_sample_in_case_has_reads_result: bool = any_sample_in_case_has_reads(case)
     # THEN the result should be as expected
     assert any_sample_in_case_has_reads_result == expected_result
+
+
+def test_case_pass_sequencing_qc_on_hifi_yield_passes():
+    # GIVEN a sample with enough yield
+    sample: Sample = create_autospec(Sample, expected_hifi_yield=45, hifi_yield=45)
+
+    # GIVEN a case
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
+    passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
+
+    # THEN the case passes sequencing qc
+    assert passes
+
+
+def test_case_pass_sequencing_qc_on_hifi_yield_fails():
+    # GIVEN a sample without enough yield
+    sample: Sample = create_autospec(Sample, expected_hifi_yield=45, hifi_yield=44)
+
+    # GIVEN a case
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
+    passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
+
+    # THEN the case passes sequencing qc
+    assert not passes
+
+
+def test_case_pass_sequencing_qc_on_hifi_yield_missing_hifi_yield():
+    # GIVEN a case with two samples, where one is missing HiFi yield
+    sample_with_yield: Sample = create_autospec(Sample, hifi_yield=45, expected_hifi_yield=45)
+    sample_without_yield: Sample = create_autospec(
+        Sample,
+        hifi_yield=None,
+        expected_hifi_yield=45,
+    )
+
+    # GIVEN a case with the two samples above
+    case: Case = create_autospec(Case, samples=[sample_with_yield, sample_without_yield])
+
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
+    passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
+
+    # THEN the case does not pass sequencing qc
+    assert not passes
+
+
+def test_case_pass_sequencing_qc_on_hifi_yield_wrong_application():
+    # GIVEN a case with an application without target HiFi yield
+    sample: Sample = create_autospec(Sample, hifi_yield=25, expected_hifi_yield=None)
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling the case_pass_sequencing_qc_on_hifi_yield on the case
+    # THEN an error is raised
+    with pytest.raises(ApplicationDoesNotHaveHiFiYieldError):
+        case_pass_sequencing_qc_on_hifi_yield(case)
+
+
+def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_passes():
+    # GIVEN a case with a PacBio application, express priority and half of the target yield
+    sample: Sample = create_autospec(
+        Sample,
+        hifi_yield=25,
+        application_version=create_autospec(
+            ApplicationVersion,
+            application=create_autospec(Application, expected_express_hifi_yield=25),
+        ),
+    )
+    case: Case = create_autospec(Case, samples=[sample], priority=Priority.express)
+
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
+    passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
+
+    # THEN the case passes sequencing qc
+    assert passes
+
+
+def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_fails():
+    # GIVEN a case with a PacBio application, express priority and less than half the target yield
+    sample: Sample = create_autospec(
+        Sample,
+        hifi_yield=24,
+        application_version=create_autospec(
+            ApplicationVersion,
+            application=create_autospec(Application, expected_express_hifi_yield=25),
+        ),
+    )
+    case: Case = create_autospec(Case, samples=[sample], priority=Priority.express)
+
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
+    passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
+
+    # THEN the case does not pass sequencing qc
+    assert not passes
+
+
+def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_missing_hifi_yield():
+    # GIVEN two PacBio samples, were one is missing HiFi yield
+    application_version = create_autospec(
+        ApplicationVersion,
+        application=create_autospec(Application, expected_express_hifi_yield=25),
+    )
+    sample_with_yield: Sample = create_autospec(
+        Sample, hifi_yield=24, application_version=application_version
+    )
+    sample_without_yield: Sample = create_autospec(
+        Sample,
+        hifi_yield=None,
+        application_version=application_version,
+    )
+
+    # GIVEN a case with a PacBio application express priority, with the two sample above
+    case: Case = create_autospec(
+        Case, samples=[sample_with_yield, sample_without_yield], priority=Priority.express
+    )
+
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
+    passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
+
+    # THEN the case does not pass sequencing qc
+    assert not passes
+
+
+def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_wrong_application():
+    # GIVEN an express priority case with an application without expected express HiFi yield
+    # because of a missing target_hifi_yield
+    sample: Sample = create_autospec(
+        Sample,
+        hifi_yield=25,
+        application_version=create_autospec(
+            ApplicationVersion,
+            application=create_autospec(Application, expected_express_hifi_yield=None),
+        ),
+    )
+    case: Case = create_autospec(Case, samples=[sample], priority=Priority.express)
+
+    # WHEN calling the case_pass_sequencing_qc_on_hifi_yield on the case
+    # THEN an error is raised
+    with pytest.raises(ApplicationDoesNotHaveHiFiYieldError):
+        case_pass_sequencing_qc_on_hifi_yield(case)

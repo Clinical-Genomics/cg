@@ -197,3 +197,31 @@ def test_hifi_yield_no_sample_sequencing_metrics():
 
     # THEN the value should be None
     assert hifi_yield is None
+
+
+def test_application_expected_hifi_yield():
+    # GIVEN an application with target_hifi_yield and percent_hifi_yield_guaranteed
+    application = Application(
+        target_hifi_yield=200,
+        percent_hifi_yield_guaranteed=75,
+    )
+
+    # WHEN getting the expected HiFi yield
+    expected_hifi_yield: float | None = application.expected_hifi_yield
+
+    # THEN the value should be calculated correctly
+    assert expected_hifi_yield == 150
+
+
+def test_application_expected_hifi_yield_no_target_hifi_yield():
+    # GIVEN an application without target_hifi_yield
+    application = Application(
+        target_hifi_yield=None,
+        percent_hifi_yield_guaranteed=None,
+    )
+
+    # WHEN getting the expected HiFi yield
+    expected_hifi_yield: float | None = application.expected_hifi_yield
+
+    # THEN the value should be None
+    assert expected_hifi_yield is None
