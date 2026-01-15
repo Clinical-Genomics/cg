@@ -2,15 +2,13 @@ import logging
 from typing import Callable
 
 from cg.constants.constants import SequencingQCStatus
-from cg.services.sequencing_qc_service.utils import qc_bool_to_status
-from typing import Callable
-
-from cg.store.models import Case, Sample
 from cg.services.sequencing_qc_service.quality_checks.checks import (
-    run_quality_checks,
-    get_sequencing_quality_check_for_case,
     get_sample_sequencing_quality_check,
+    get_sequencing_quality_check_for_case,
+    run_quality_checks,
 )
+from cg.services.sequencing_qc_service.utils import qc_bool_to_status
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
