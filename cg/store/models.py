@@ -193,8 +193,19 @@ class Application(Base):
         return self.tag
 
     @property
-    def expected_reads(self):
+    def expected_reads(self) -> float:
         return self.target_reads * self.percent_reads_guaranteed / 100
+
+    @property
+    def expected_hifi_yield(self) -> int | None:
+        if self.target_hifi_yield and self.percent_hifi_yield_guaranteed:
+            return round(self.target_hifi_yield * self.percent_hifi_yield_guaranteed / 100)
+        else:
+            return None
+
+    @property
+    def expected_express_hifi_yield(self) -> int | None:
+        return round(self.target_hifi_yield * 0.5) if self.target_hifi_yield else None
 
     @property
     def analysis_type(self) -> str:
@@ -774,9 +785,14 @@ class Sample(Base, PriorityMixin):
         return self.customer.data_archive_location
 
     @property
-    def expected_reads_for_sample(self) -> int:
+    def expected_reads_for_sample(self) -> float | None:
         """Return the expected reads of the sample."""
         return self.application_version.application.expected_reads
+
+    @property
+    def expected_hifi_yield(self) -> int | None:
+        """Return the expected HiFi yield of the sample."""
+        return self.application_version.application.expected_hifi_yield
 
     @property
     def has_reads(self) -> bool:
