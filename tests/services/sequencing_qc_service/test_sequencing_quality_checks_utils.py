@@ -311,7 +311,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_fails():
 
 def test_case_pass_sequencing_qc_on_hifi_yield_missing_hifi_yield():
     # GIVEN a case with two samples, where one is missing HiFi yield
-    sample_with_yield: Sample = create_autospec(Sample, hifi_yield=44, expected_hifi_yield=45)
+    sample_with_yield: Sample = create_autospec(Sample, hifi_yield=45, expected_hifi_yield=45)
     sample_without_yield: Sample = create_autospec(
         Sample,
         hifi_yield=None,
