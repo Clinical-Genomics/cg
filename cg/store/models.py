@@ -193,13 +193,13 @@ class Application(Base):
         return self.tag
 
     @property
-    def expected_reads(self):
+    def expected_reads(self) -> float:
         return self.target_reads * self.percent_reads_guaranteed / 100
 
     @property
-    def expected_hifi_yield(self) -> float | None:
+    def expected_hifi_yield(self) -> int | None:
         if self.target_hifi_yield and self.percent_hifi_yield_guaranteed:
-            return self.target_hifi_yield * self.percent_hifi_yield_guaranteed / 100
+            return round(self.target_hifi_yield * self.percent_hifi_yield_guaranteed / 100)
         else:
             return None
 
@@ -790,7 +790,7 @@ class Sample(Base, PriorityMixin):
         return self.application_version.application.expected_reads
 
     @property
-    def expected_hifi_yield(self) -> float | None:
+    def expected_hifi_yield(self) -> int | None:
         """Return the expected HiFi yield of the sample."""
         return self.application_version.application.expected_hifi_yield
 
