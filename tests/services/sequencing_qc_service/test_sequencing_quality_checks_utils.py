@@ -358,6 +358,33 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_fails():
     assert not passes
 
 
+def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_missing_hifi_yield():
+    # GIVEN two PacBio samples, were one is missing HiFi yield
+    application_version = create_autospec(
+        ApplicationVersion,
+        application=create_autospec(Application, expected_express_hifi_yield=25),
+    )
+    sample_with_yield: Sample = create_autospec(
+        Sample, hifi_yield=24, application_version=application_version
+    )
+    sample_without_yield: Sample = create_autospec(
+        Sample,
+        hifi_yield=None,
+        application_version=application_version,
+    )
+
+    # GIVEN a case with a PacBio application express priority, with the two sample above
+    case: Case = create_autospec(
+        Case, samples=[sample_with_yield, sample_without_yield], priority=Priority.express
+    )
+
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
+    passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
+
+    # THEN the case does not pass sequencing qc
+    assert not passes
+
+
 def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_wrong_application():
     # GIVEN an express priority case with an application without expected express HiFi yield
     # because of a missing target_hifi_yield
