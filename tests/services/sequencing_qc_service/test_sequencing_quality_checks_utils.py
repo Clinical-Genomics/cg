@@ -309,6 +309,25 @@ def test_case_pass_sequencing_qc_on_hifi_yield_fails():
     assert not passes
 
 
+def test_case_pass_sequencing_qc_on_hifi_yield_missing_hifi_yield():
+    # GIVEN a case with two samples, where one is missing HiFi yield
+    sample_with_yield: Sample = create_autospec(Sample, hifi_yield=44, expected_hifi_yield=45)
+    sample_without_yield: Sample = create_autospec(
+        Sample,
+        hifi_yield=None,
+        expected_hifi_yield=45,
+    )
+
+    # GIVEN a case with the two samples above
+    case: Case = create_autospec(Case, samples=[sample_with_yield, sample_without_yield])
+
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
+    passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
+
+    # THEN the case does not pass sequencing qc
+    assert not passes
+
+
 def test_case_pass_sequencing_qc_on_hifi_yield_wrong_application():
     # GIVEN a case with an application without target HiFi yield
     sample: Sample = create_autospec(Sample, hifi_yield=25, expected_hifi_yield=None)
