@@ -75,7 +75,7 @@ def express_sample_has_enough_yield(sample: Sample) -> bool:
         return False
 
     express_yield_threshold: int = get_express_yield_threshold_for_sample(sample)
-    enough_yield: bool = sample.hifi_yield >= express_yield_threshold  # type: ignore
+    enough_yield: bool = sample.hifi_yield >= express_yield_threshold
     if not enough_yield:
         LOG.warning(f"Sample {sample.internal_id} does not have enough yield.")
     return enough_yield
@@ -187,14 +187,21 @@ def sample_has_enough_reads(sample: Sample) -> bool:
 
 def sample_has_enough_hifi_yield(sample: Sample) -> bool:
     """
-    Check if the sample has more than or equal HiFi yield to the expected for the sample.
+    Return true if the sample's HiFi yield is greater than or equal to the threshold.
+    Returns false if the HiFi yield is lower than the threshold or None.
+    Raises:
+        ApplicationDoesNotHaveHiFiYieldError if the sample doesn't have expected HiFi yield.
     """
     if not sample.expected_hifi_yield:
         raise ApplicationDoesNotHaveHiFiYieldError(
             f"Application for sample {sample.internal_id} does not have target HiFi yield."
         )
 
-    enough_hifi_yield: bool = sample.hifi_yield >= sample.expected_hifi_yield  # type: ignore
+    if not sample.hifi_yield:
+        LOG.debug(f"Sample {sample.internal_id} has no hifi yield.")
+        return False
+
+    enough_hifi_yield: bool = sample.hifi_yield >= sample.expected_hifi_yield
     if not enough_hifi_yield:
         LOG.warning(f"Sample {sample.internal_id} does not have enough HiFi yield.")
     return enough_hifi_yield
