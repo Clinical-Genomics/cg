@@ -2,8 +2,7 @@ from unittest.mock import Mock, create_autospec
 
 from pytest_mock import MockerFixture
 
-from cg.services import sequencing_qc_service as module
-from cg.services.sequencing_qc_service import SequencingQCService
+from cg.services.sequencing_qc_service import SequencingQCService, sequencing_qc_service
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -19,7 +18,7 @@ def test_run_sequencing_qc_handles_exception(mocker: MockerFixture):
 
     # GIVEN that an exception is raised during quality check
     mocker.patch.object(
-        module,
+        sequencing_qc_service,
         "get_sequencing_quality_check_for_case",
         return_value=Mock(side_effect=Exception("BOOM!")),
     )

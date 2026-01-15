@@ -22,10 +22,14 @@ class SequencingQCService:
         """Run QC for samples in pending or failed cases and store the aggregated score on each case."""
         cases: list[Case] = self.store.get_cases_for_sequencing_qc()
         for case in cases:
-            passes_qc: bool = self.case_pass_sequencing_qc(case)
-            qc_status: SequencingQCStatus = qc_bool_to_status(passes_qc)
-            self.store.update_sequencing_qc_status(case=case, status=qc_status)
-            LOG.info(f"Sequencing QC status for case {case.internal_id}: {qc_status}")
+            LOG.debug(f"Performing sequencing QC for case: {case.internal_id}")
+            try:
+                passes_qc: bool = self.case_pass_sequencing_qc(case)
+                qc_status: SequencingQCStatus = qc_bool_to_status(passes_qc)
+                self.store.update_sequencing_qc_status(case=case, status=qc_status)
+                LOG.info(f"Sequencing QC status for case {case.internal_id}: {qc_status}")
+            except Exception as e:
+                LOG.error(f"Error found during sequencing QC of case: {case.internal_id}: {e}")
 
     @staticmethod
     def case_pass_sequencing_qc(case: Case) -> bool:
