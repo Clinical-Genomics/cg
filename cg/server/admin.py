@@ -112,12 +112,6 @@ def view_pacbio_sample_sequencing_metrics_link(unused1, unused2, model, unused3)
     )
 
 
-def is_external_application(unused1, unused2, model, unused3):
-    """column formatter to open this view"""
-    del unused1, unused2, unused3
-    return model.application_version.application.is_external if model.application_version else ""
-
-
 def view_order_types(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
     order_type_list = "<br>".join(model.order_types)
@@ -246,6 +240,8 @@ class ApplicationView(BaseView):
         "is_accredited",
         "target_reads",
         "percent_reads_guaranteed",
+        "target_hifi_yield",
+        "percent_hifi_yield_guaranteed",
         "comment",
         "prep_category",
         "sequencing_depth",
@@ -306,10 +302,11 @@ class ApplicationView(BaseView):
     def on_model_change(self, form: Form, model: Application, is_created: bool):
         """Override to persist entries to the OrderTypeApplication table."""
         super(ApplicationView, self).on_model_change(form=form, model=model, is_created=is_created)
-        order_types: list[OrderType] = form["suitable_order_types"].data
-        applications_service.update_application_order_types(
-            application=model, order_types=order_types
-        )
+        if "suitable_order_types" in form.data:
+            order_types: list[OrderType] = form["suitable_order_types"].data
+            applications_service.update_application_order_types(
+                application=model, order_types=order_types
+            )
 
     def edit_form(self, obj=None):
         """Override to prefill the order types according to the current Application entry."""
@@ -734,10 +731,36 @@ class PoolView(BaseView):
 class SampleView(BaseView):
     """Admin view for Model.Sample"""
 
-    column_exclude_list = [
-        "age_at_sampling",
-        "_phenotype_groups",
-        "_phenotype_terms",
+    column_list = [
+        "application_version",
+        "customer",
+        "organism",
+        "invoice",
+        "is_cancelled",
+        "capture_kit",
+        "comment",
+        "control",
+        "created_at",
+        "delivered_at",
+        "downsampled_to",
+        "from_sample",
+        "internal_id",
+        "is_tumour",
+        "loqusdb_id",
+        "name",
+        "no_invoice",
+        "order",
+        "ordered_at",
+        "original_ticket",
+        "prepared_at",
+        "priority",
+        "reads",
+        "hifi_yield",
+        "last_sequenced_at",
+        "received_at",
+        "reference_genome",
+        "sex",
+        "subject_id",
     ]
     column_default_sort = ("created_at", True)
     column_editable_list = [
@@ -757,7 +780,6 @@ class SampleView(BaseView):
     column_formatters = {
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
-        "is_external": is_external_application,
         "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
         "original_ticket": view_ticket_link,
@@ -883,7 +905,7 @@ class PacbioSmrtCellMetricsView(BaseView):
 
     column_list = (
         "internal_id",
-        "run_name",
+        "sequencing_run.run_name",
         "movie_name",
         "well",
         "plate",
@@ -907,8 +929,9 @@ class PacbioSmrtCellMetricsView(BaseView):
         "internal_id": view_pacbio_sample_sequencing_metrics_link,
         "model": view_smrt_cell_model,
     }
+    column_labels = {"sequencing_run.run_name": "Run Name"}
     column_default_sort = ("completed_at", True)
-    column_searchable_list = ["device.internal_id", "run_name", "movie_name"]
+    column_searchable_list = ["device.internal_id", "movie_name", "sequencing_run.run_name"]
     column_sortable_list = [
         ("internal_id", "device.internal_id"),
         "started_at",
@@ -936,19 +959,22 @@ class PacbioSmrtCellMetricsView(BaseView):
 
 
 class PacbioSampleRunMetricsView(BaseView):
-    column_filters = ["instrument_run.run_name", "instrument_run.plate"]
+    column_filters = [
+        "instrument_run.plate",
+        "instrument_run.sequencing_run.run_name",
+    ]
     column_formatters = {
         "smrt_cell": PacbioSmrtCellMetricsView.view_smrt_cell_link,
         "sample": SampleView.view_sample_link,
     }
     column_labels = {
-        "instrument_run.run_name": "Run name",
         "instrument_run.plate": "Plate",
+        "instrument_run.sequencing_run.run_name": "Run Name",
     }
     column_list = [
         "smrt_cell",
         "sample",
-        "instrument_run.run_name",
+        "instrument_run.sequencing_run.run_name",
         "instrument_run.plate",
         "hifi_reads",
         "hifi_yield",
@@ -958,4 +984,5 @@ class PacbioSampleRunMetricsView(BaseView):
     column_searchable_list = [
         "sample.internal_id",
         "instrument_run.device.internal_id",
+        "instrument_run.sequencing_run.run_name",
     ]

@@ -28,34 +28,284 @@
   path: PATHTOCASE/assembly/sample/SAMPLEID/SAMPLEID_aligned_assembly.bam.bai
   step: assembly
   tag: assembly_aligned_index
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr1.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr2.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr3.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr4.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr5.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr6.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr7.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr8.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr9.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr10.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr11.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr12.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr13.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr14.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr15.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr16.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr17.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr18.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr19.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr20.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr21.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr22.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chrX.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chrY.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chrM.png
+  step: chromograph_cov
+  tag: tcov
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr1.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr2.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr3.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr4.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr5.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr6.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr7.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr8.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr9.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr10.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr11.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr12.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr13.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr14.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr15.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr16.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr17.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr18.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr19.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr20.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr21.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chr22.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chrX.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chrY.png
+  step: chromograph_rhoviz
+  tag: autozyg
+- format: png
+  id: SAMPLEID
+  path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_autozyg_chrM.png
+  step: chromograph_rhoviz
+  tag: autozyg
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz
+  path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz
   step: methylation_pileup
   tag: hap1
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz.tbi
+  path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz.tbi
   step: methylation_pileup
   tag: hap1_index
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz
+  path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz
   step: methylation_pileup
   tag: hap2
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz.tbi
+  path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz.tbi
   step: methylation_pileup
   tag: hap2_index
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz
+  path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz
   step: methylation_pileup
   tag: ungrouped
 - format: bed
   id: SAMPLEID
-  path: PATHTOCASE/methylation/modkit/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz.tbi
+  path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz.tbi
   step: methylation_pileup
   tag: ungrouped_index
 - format: meta
@@ -160,77 +410,87 @@
   tag: vcf_str_index
 - format: meta
   id: CASEID
-  path: /home/proj/production/workflows/nallo/references/v0.3.1/grch38_trgt_pathogenic_repeats.bed
+  path: /home/proj/production/workflows/nallo/references/v0.4.0/grch38_trgt_pathogenic_repeats.bed
   step: trgt
   tag: variant_catalog
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked.vcf.gz
+  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_research.vcf.gz
   step: snv_annotated
   tag: vcf_snv_research
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked.vcf.gz.tbi
+  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_research.vcf.gz.tbi
   step: snv_annotated
   tag: vcf_snv_research_index
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_filtered.vcf.gz
+  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_clinical.vcf.gz
   step: snv_annotated_filtered
   tag: vcf_snv_clinical
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_filtered.vcf.gz.tbi
+  path: PATHTOCASE/snvs/family/CASEID/CASEID_snvs_annotated_ranked_clinical.vcf.gz.tbi
   step: snv_annotated_filtered
   tag: vcf_snv_clinical_index
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked.vcf.gz
+  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_annotated_ranked_research.vcf.gz
   step: sv_annotated_ranked
   tag: vcf_sv_research
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked.vcf.gz.tbi
+  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_annotated_ranked_research.vcf.gz.tbi
   step: sv_annotated_ranked
   tag: vcf_sv_research_index
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked_filtered.vcf.gz
+  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_annotated_ranked_clinical.vcf.gz
   step: sv_annotated_ranked_filtered
   tag: vcf_sv_clinical
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_cnvs_merged_annotated_ranked_filtered.vcf.gz.tbi
+  path: PATHTOCASE/svs/family/CASEID/CASEID_svs_annotated_ranked_clinical.vcf.gz.tbi
   step: sv_annotated_ranked_filtered
   tag: vcf_sv_clinical_index
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_hificnv_cnvs_merged.vcf.gz
+  path: PATHTOCASE/svs/family/CASEID/CASEID_hificnv_svs.vcf.gz
   step: svs_per_caller
   tag: vcf_hificnv
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_hificnv_cnvs_merged.vcf.gz.tbi
+  path: PATHTOCASE/svs/family/CASEID/CASEID_hificnv_svs.vcf.gz.tbi
   step: svs_per_caller
   tag: vcf_hificnv_index
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_severus_svs_merged.vcf.gz
+  path: PATHTOCASE/svs/family/CASEID/CASEID_sawfish_svs.vcf.gz
+  step: svs_per_caller
+  tag: vcf_sawfish
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_sawfish_svs.vcf.gz.tbi
+  step: svs_per_caller
+  tag: vcf_sawfish_index
+- format: vcf
+  id: CASEID
+  path: PATHTOCASE/svs/family/CASEID/CASEID_severus_svs.vcf.gz
   step: svs_per_caller
   tag: vcf_severus
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_severus_svs_merged.vcf.gz.tbi
+  path: PATHTOCASE/svs/family/CASEID/CASEID_severus_svs.vcf.gz.tbi
   step: svs_per_caller
   tag: vcf_severus_index
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_sniffles_svs_merged.vcf.gz
+  path: PATHTOCASE/svs/family/CASEID/CASEID_sniffles_svs.vcf.gz
   step: svs_per_caller
   tag: vcf_sniffles
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/svs/family/CASEID/CASEID_sniffles_svs_merged.vcf.gz.tbi
+  path: PATHTOCASE/svs/family/CASEID/CASEID_sniffles_svs.vcf.gz.tbi
   step: svs_per_caller
   tag: vcf_sniffles_index
 - format: meta
@@ -290,7 +550,7 @@
   tag: manifest
 - format: yml
   id: CASEID
-  path: PATHTOCASE/pipeline_info/nallo_pipeline_software_mqc_versions.yml
+  path: PATHTOCASE/pipeline_info/nallo_software_mqc_versions.yml
   step: software-versions
   tag: software-versions
 - format: yaml
