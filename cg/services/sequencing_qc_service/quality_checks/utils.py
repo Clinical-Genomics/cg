@@ -146,6 +146,8 @@ def raw_data_case_pass_qc(case: Case) -> bool:
 
 def is_case_yield_based(case: Case) -> bool:
     sample: Sample = case.samples[0]
+    # TODO: This is to avoid the code failing if not all samples have been post-processed.
+    # This scenario should be handled better because it is checked in several parts of the code
     if metrics := sample.sample_run_metrics[0]:
         return metrics.type == DeviceType.PACBIO
     return False
