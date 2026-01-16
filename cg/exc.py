@@ -354,3 +354,7 @@ class MissingConfigFilesError(CgError):
 
 class SeqeraError(CgError):
     """Exception raised when receiving an unexpected response from Seqera platform"""
+
+
+class ApplicationDoesNotHaveHiFiYieldError(CgError):
+    """Exception raised when application does not have HiFi yield set."""
