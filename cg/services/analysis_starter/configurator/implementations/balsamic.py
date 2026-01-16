@@ -68,7 +68,9 @@ class BalsamicConfigurator(Configurator):
 
     def _ensure_consistent_capture_kits(self, case_id):
         case: Case = self.store.get_case_by_internal_id_strict(case_id)
-        capture_kits = {self.lims_api.capture_kit(sample.internal_id) for sample in case.samples}
+        capture_kits: set[str | None] = {
+            self.lims_api.capture_kit(sample.internal_id) for sample in case.samples
+        }
         if len(capture_kits) > 1:
             raise MultipleCaptureKitsError(
                 f"Multiple capture kits found for {case_id}: {capture_kits}"
