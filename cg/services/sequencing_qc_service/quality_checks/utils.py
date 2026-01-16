@@ -138,11 +138,17 @@ def raw_data_case_pass_qc(case: Case) -> bool:
         return ready_made_library_case_pass_sequencing_qc(case)
     if is_case_yield_based(case):
         return all(sample_has_enough_hifi_yield(sample) for sample in case.samples)
-    return all(sample_has_enough_reads(sample) for sample in case.samples)
+    elif is_case_read_based(case):
+        return all(sample_has_enough_reads(sample) for sample in case.samples)
+    LOG.warning(f"Not all samples for case {case.internal_id} have been post-processed.")
+    return False
 
 
 def is_case_yield_based(case: Case) -> bool:
-    return case.samples[0].sample_run_metrics[0].type == DeviceType.PACBIO
+    sample: Sample = case.samples[0]
+    if metrics := sample.sample_run_metrics[0]:
+        return metrics.type == DeviceType.PACBIO
+    return False
 
 
 def is_case_express_priority(case: Case) -> bool:
