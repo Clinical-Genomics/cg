@@ -1,5 +1,6 @@
 import logging
 
+from cg.constants.devices import DeviceType
 from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import ApplicationDoesNotHaveHiFiYieldError
@@ -133,7 +134,15 @@ def any_sample_in_case_has_reads(case: Case) -> bool:
 
 
 def raw_data_case_pass_qc(case: Case) -> bool:
-    pass
+    if is_case_ready_made_library(case):
+        return ready_made_library_case_pass_sequencing_qc(case)
+    if is_case_yield_based(case):
+        return all(sample_has_enough_hifi_yield(sample) for sample in case.samples)
+    return all(sample_has_enough_reads(sample) for sample in case.samples)
+
+
+def is_case_yield_based(case: Case) -> bool:
+    return case.samples[0].sample_run_metrics[0].type == DeviceType.PACBIO
 
 
 def is_case_express_priority(case: Case) -> bool:

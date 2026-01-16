@@ -15,6 +15,7 @@ from cg.services.sequencing_qc_service.quality_checks.utils import (
     is_case_express_priority,
     is_sample_express_priority,
     is_sample_ready_made_library,
+    raw_data_case_pass_qc,
     ready_made_library_sample_has_enough_reads,
     sample_has_enough_reads,
 )
@@ -423,14 +424,93 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_wrong_applicatio
         case_pass_sequencing_qc_on_hifi_yield(case)
 
 
-def test_raw_data_case_pass_qc_rml():
+def test_raw_data_case_pass_qc_rml_passes():
     # GIVEN two RML samples for which their summed reads pass the application threshold
-    sample_1: Sample = create_autospec(Sample, reads=10, expected_reads_for_sample=20)
-    sample_2: Sample = create_autospec(Sample, reads=10, expected_reads_for_sample=20)
+    sample_1: Sample = create_autospec(
+        Sample,
+        reads=10,
+        expected_reads_for_sample=20,
+        prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
+    )
+    sample_2: Sample = create_autospec(
+        Sample,
+        reads=10,
+        expected_reads_for_sample=20,
+        prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
+    )
 
-    # GIVEN a raw data RML case
+    # GIVEN a case with the RML samples
     case: Case = create_autospec(Case, samples=[sample_1, sample_2])
 
     # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
 
-    # THEN
+    # THEN the case passes QC
+    assert passes
+
+
+def test_raw_data_case_pass_qc_rml_fails():
+    # GIVEN two RML samples for which their summed reads does not reach the application threshold
+    sample_1: Sample = create_autospec(
+        Sample,
+        reads=1,
+        expected_reads_for_sample=20,
+        prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
+    )
+    sample_2: Sample = create_autospec(
+        Sample,
+        reads=1,
+        expected_reads_for_sample=20,
+        prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
+    )
+
+    # GIVEN a case with the RML samples
+    case: Case = create_autospec(Case, samples=[sample_1, sample_2])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case fails QC
+    assert not passes
+
+
+def test_raw_data_case_pass_qc_read_based_not_rml_passes():
+    # GIVEN a raw-data non rml sample with enough reads
+    sample: Sample = create_autospec(Sample, reads=10, expected_reads_for_sample=10)
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case passes QC
+    assert passes
+
+
+def test_raw_data_case_pass_qc_read_based_not_rml_fails():
+    # GIVEN a raw-data non rml sample without enough reads
+    sample: Sample = create_autospec(Sample, reads=10, expected_reads_for_sample=20)
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case fails QC
+    assert not passes
+
+
+def test_raw_data_case_pass_qc_hifi_yield_based_passes():
+    # GIVEN a raw-data yield based sample
+    sample: Sample = create_autospec(Sample, hifi_yield=10, expected_hifi_yield=10)
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case passes QC
+    assert passes
