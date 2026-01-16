@@ -7,6 +7,7 @@ from cg.services.sequencing_qc_service.quality_checks.utils import (
     any_sample_in_case_has_reads,
     case_pass_sequencing_qc_on_hifi_yield,
     case_pass_sequencing_qc_on_reads,
+    raw_data_case_pass_qc,
     sample_pass_sequencing_qc_on_reads,
 )
 from cg.store.models import Case
@@ -24,6 +25,7 @@ class SequencingQCCheck(QualityCheck):
     SAMPLE_PASSES: Callable = sample_pass_sequencing_qc_on_reads
     ALL_SAMPLES_IN_CASE_HAVE_READS: Callable = all_samples_in_case_have_reads
     ANY_SAMPLE_IN_CASE_HAS_READS: Callable = any_sample_in_case_has_reads
+    RAW_DATA_CASE_QC: Callable = raw_data_case_pass_qc
 
 
 def get_sequencing_quality_check_for_case(case: Case) -> Callable:
@@ -41,7 +43,7 @@ def get_sequencing_quality_check_for_case(case: Case) -> Callable:
         Workflow.MUTANT: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,
         Workflow.NALLO: SequencingQCCheck.CASE_PASSES_ON_YIELD,
         Workflow.RAREDISEASE: SequencingQCCheck.CASE_PASSES_ON_READS,
-        Workflow.RAW_DATA: SequencingQCCheck.ANY_SAMPLE_IN_CASE_HAS_READS,
+        Workflow.RAW_DATA: SequencingQCCheck.RAW_DATA_CASE_QC,
         Workflow.RNAFUSION: SequencingQCCheck.CASE_PASSES_ON_READS,
         Workflow.TAXPROFILER: SequencingQCCheck.ALL_SAMPLES_IN_CASE_HAVE_READS,
         Workflow.TOMTE: SequencingQCCheck.CASE_PASSES_ON_READS,

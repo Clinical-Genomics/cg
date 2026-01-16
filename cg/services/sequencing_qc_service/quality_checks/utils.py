@@ -132,6 +132,10 @@ def any_sample_in_case_has_reads(case: Case) -> bool:
     return passed_quality_check
 
 
+def raw_data_case_pass_qc(case: Case) -> bool:
+    pass
+
+
 def is_case_express_priority(case: Case) -> bool:
     """
     Check if a case is express priority.

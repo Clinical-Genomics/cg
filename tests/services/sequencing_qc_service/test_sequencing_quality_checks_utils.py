@@ -421,3 +421,16 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_wrong_applicatio
     # THEN an error is raised
     with pytest.raises(ApplicationDoesNotHaveHiFiYieldError):
         case_pass_sequencing_qc_on_hifi_yield(case)
+
+
+def test_raw_data_case_pass_qc_rml():
+    # GIVEN two RML samples for which their summed reads pass the application threshold
+    sample_1: Sample = create_autospec(Sample, reads=10, expected_reads_for_sample=20)
+    sample_2: Sample = create_autospec(Sample, reads=10, expected_reads_for_sample=20)
+
+    # GIVEN a raw data RML case
+    case: Case = create_autospec(Case, samples=[sample_1, sample_2])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+
+    # THEN
