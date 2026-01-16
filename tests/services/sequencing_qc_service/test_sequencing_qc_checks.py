@@ -2,13 +2,11 @@ from collections.abc import Callable
 from unittest.mock import create_autospec
 
 from cg.constants.constants import Workflow
-from cg.constants.devices import DeviceType
-from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.sequencing_qc_service.quality_checks.checks import (
     SequencingQCCheck,
     get_sequencing_quality_check_for_case,
 )
-from cg.store.models import Case, Sample, SampleRunMetrics
+from cg.store.models import Case
 
 
 def test_nallo_qc():
