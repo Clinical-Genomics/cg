@@ -151,6 +151,13 @@ def is_case_yield_based(case: Case) -> bool:
     return False
 
 
+def is_case_read_based(case: Case) -> bool:
+    sample: Sample = case.samples[0]
+    if metrics := sample.sample_run_metrics[0]:
+        return metrics.type == DeviceType.ILLUMINA
+    return False
+
+
 def is_case_express_priority(case: Case) -> bool:
     """
     Check if a case is express priority.
