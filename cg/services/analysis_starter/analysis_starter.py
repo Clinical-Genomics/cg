@@ -75,7 +75,8 @@ class AnalysisStarter:
 
     def _ensure_case_matches_workflow(self, case_id: str) -> None:
         case: Case = self.store.get_case_by_internal_id_strict(case_id)
-        if case.workflow != self.workflow:
+        if case.data_analysis != self.workflow:
             raise CaseWorkflowMismatchError(
-                f"Case {case_id} is assigned to workflow {case.workflow}, " f"not {self.workflow}."
+                f"Case {case_id} is assigned to workflow {case.data_analysis}, "
+                f"not {self.workflow}."
             )

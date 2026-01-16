@@ -141,7 +141,7 @@ def test_analysis_starter_start_available_error_handling(
     """
     # GIVEN a Store with a mock case
     mock_store: TypedMock[Store] = create_typed_mock(Store)
-    mock_case: Case = create_autospec(Case, workflow=workflow)
+    mock_case: Case = create_autospec(Case, data_analysis=workflow)
     mock_store.as_mock.get_cases_to_analyze.return_value = [mock_case]
     mock_store.as_mock.get_case_by_internal_id_strict.return_value = mock_case
 
@@ -311,7 +311,7 @@ def test_start(
 
     # GIVEN a Store with a case with the correct workflow
     store: Store = create_autospec(Store)
-    case: Case = create_autospec(Case, workflow=workflow)
+    case: Case = create_autospec(Case, data_analysis=workflow)
     store.get_case_by_internal_id_strict = Mock(return_value=case)
 
     # GIVEN that the submitter returns a (session id and tower id) or None when submitting the analysis
@@ -363,7 +363,7 @@ def test_start_subprocess_error_raised_in_run_and_track(
 
     # GIVEN a Store with a case with the correct workflow
     store: Store = create_autospec(Store)
-    case: Case = create_autospec(Case, workflow=workflow)
+    case: Case = create_autospec(Case, data_analysis=workflow)
     store.get_case_by_internal_id_strict = Mock(return_value=case)
 
     # GIVEN an analysis starter initialised with the previously mocked classes
@@ -400,7 +400,7 @@ def test_start_seqera_related_error_raised_in_run_and_track(error_type: type[Exc
     # GIVEN a Store with a case with the correct workflow
     workflow: Workflow = Workflow.RAREDISEASE
     store: Store = create_autospec(Store)
-    case: Case = create_autospec(Case, workflow=workflow)
+    case: Case = create_autospec(Case, data_analysis=workflow)
     store.get_case_by_internal_id_strict = Mock(return_value=case)
 
     # GIVEN an analysis starter
@@ -455,7 +455,7 @@ def test_run(
 
     # GIVEN a Store with a case with the correct workflow
     store: Store = create_autospec(Store)
-    case: Case = create_autospec(Case, workflow=workflow)
+    case: Case = create_autospec(Case, data_analysis=workflow)
     store.get_case_by_internal_id_strict = Mock(return_value=case)
 
     # GIVEN an analysis starter initialised with the previously mocked classes
