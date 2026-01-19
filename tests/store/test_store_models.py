@@ -1,8 +1,10 @@
 from cg.constants.constants import ControlOptions
+from cg.constants.priority import Priority
 from cg.store.models import (
     Application,
     ApplicationVersion,
     Case,
+    CaseSample,
     Customer,
     IlluminaSampleSequencingMetrics,
     PacbioSampleSequencingMetrics,
@@ -225,3 +227,32 @@ def test_application_expected_hifi_yield_no_target_hifi_yield():
 
     # THEN the value should be None
     assert expected_hifi_yield is None
+
+
+def test_sample_to_dict_success():
+    application = Application(tag="PACBIOTAG")
+    application_version = ApplicationVersion(application=application)
+
+    customer = Customer(internal_id="cust000")
+
+    case_sample = CaseSample(case_id=666)
+
+    metrics = PacbioSampleSequencingMetrics(hifi_yield=13)
+
+    sample = Sample(
+        application_version=application_version,
+        customer=customer,
+        priority=Priority.standard,
+        _sample_run_metrics=[metrics],
+        links=[case_sample],
+    )
+
+    # WHEN serializing the sample
+    dict_sample = sample.to_dict()
+
+    # THEN the serialized sample has the expected entries
+    assert dict_sample["priority"] == "standard"
+    assert dict_sample["customer"]["internal_id"] == "cust000"
+    assert dict_sample["application"]["tag"] == "PACBIOTAG"
+    assert dict_sample["application_version"]
+    assert dict_sample["hifi_yield"] == 13

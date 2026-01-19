@@ -858,6 +858,7 @@ class Sample(Base, PriorityMixin):
         data["customer"] = self.customer.to_dict()
         data["application_version"] = self.application_version.to_dict()
         data["application"] = self.application_version.application.to_dict()
+        data["hifi_yield"] = self.hifi_yield
         if links:
             data["links"] = [link_obj.to_dict(family=True, parents=True) for link_obj in self.links]
         return data
