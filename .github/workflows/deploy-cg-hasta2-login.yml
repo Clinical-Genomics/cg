@@ -21,22 +21,13 @@ jobs:
   dispatch:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger cg-hasta2.0 deploy workflow
-        uses: actions/github-script@v7
+      - name: Trigger cg-hasta2.0 deploy workflow and wait
+        uses: the-actions-org/workflow-dispatch@v4
         with:
-          github-token: ${{ secrets.CG_HASTA2_ACTIONS_TOKEN }}
-          script: |
-            const refType = context.payload.inputs.ref_type;
-            const refName = context.payload.inputs.ref_name;
-            await github.rest.actions.createWorkflowDispatch({
-              owner: "Clinical-Genomics",
-              repo: "cg-hasta2.0",
-              workflow_id: "deploy-cg.yml",
-              ref: "main",
-              inputs: {
-                limit: "login",
-                ref_type: refType,
-                ref_name: refName,
-                check_mode: "false",
-              },
-            });
+          workflow: deploy-cg.yml
+          repo: Clinical-Genomics/cg-hasta2.0
+          ref: main
+          token: ${{ secrets.CG_HASTA2_ACTIONS_TOKEN }}
+          wait-for-completion: true
+          wait-for-completion-timeout: 1h
+          inputs: '{ "limit": "login", "ref_type": "${{ inputs.ref_type }}", "ref_name": "${{ inputs.ref_name }}", "check_mode": "false" }'
