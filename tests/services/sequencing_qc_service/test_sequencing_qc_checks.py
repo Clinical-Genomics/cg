@@ -18,3 +18,14 @@ def test_nallo_qc():
 
     # THEN a yield based qc check was returned
     assert qc_check == SequencingQCCheck.CASE_PASSES_ON_YIELD
+
+
+def test_raw_data_qc_case():
+    # GIVEN a Raw Data case
+    case: Case = create_autospec(Case, data_analysis=Workflow.RAW_DATA)
+
+    # WHEN getting the sequencing qc check for the case
+    qc_check: Callable = get_sequencing_quality_check_for_case(case)
+
+    # THEN a read based qc check was returned
+    assert qc_check == SequencingQCCheck.RAW_DATA_CASE_QC

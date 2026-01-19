@@ -2,6 +2,7 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from cg.constants.devices import DeviceType
 from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import ApplicationDoesNotHaveHiFiYieldError
@@ -15,10 +16,11 @@ from cg.services.sequencing_qc_service.quality_checks.utils import (
     is_case_express_priority,
     is_sample_express_priority,
     is_sample_ready_made_library,
+    raw_data_case_pass_qc,
     ready_made_library_sample_has_enough_reads,
     sample_has_enough_reads,
 )
-from cg.store.models import Application, ApplicationVersion, Case, Sample
+from cg.store.models import Application, ApplicationVersion, Case, Sample, SampleRunMetrics
 from cg.store.store import Store
 from tests.conftest import StoreHelpers
 from tests.fixture_plugins.quality_controller_fixtures.sequencing_qc_check_scenario import (
@@ -421,3 +423,187 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_wrong_applicatio
     # THEN an error is raised
     with pytest.raises(ApplicationDoesNotHaveHiFiYieldError):
         case_pass_sequencing_qc_on_hifi_yield(case)
+
+
+def test_raw_data_case_pass_qc_rml_passes():
+    # GIVEN two RML samples for which their summed reads pass the application threshold
+    sample_1: Sample = create_autospec(
+        Sample,
+        reads=10,
+        expected_reads_for_sample=20,
+        prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
+    )
+    sample_2: Sample = create_autospec(
+        Sample,
+        reads=10,
+        expected_reads_for_sample=20,
+        prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
+    )
+
+    # GIVEN a case with the RML samples
+    case: Case = create_autospec(Case, samples=[sample_1, sample_2])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case passes QC
+    assert passes
+
+
+def test_raw_data_case_pass_qc_rml_fails():
+    # GIVEN two RML samples for which their summed reads does not reach the application threshold
+    sample_1: Sample = create_autospec(
+        Sample,
+        reads=1,
+        expected_reads_for_sample=20,
+        prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
+    )
+    sample_2: Sample = create_autospec(
+        Sample,
+        reads=1,
+        expected_reads_for_sample=20,
+        prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
+    )
+
+    # GIVEN a case with the RML samples
+    case: Case = create_autospec(Case, samples=[sample_1, sample_2])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case fails QC
+    assert not passes
+
+
+def test_raw_data_case_pass_qc_read_based_not_rml_passes():
+    # GIVEN a raw-data non rml sample with enough reads
+    sample: Sample = create_autospec(
+        Sample,
+        reads=10,
+        expected_reads_for_sample=10,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
+    )
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case passes QC
+    assert passes
+
+
+def test_raw_data_case_pass_qc_read_based_not_rml_fails():
+    # GIVEN a raw-data non rml sample without enough reads
+    sample: Sample = create_autospec(
+        Sample,
+        reads=10,
+        expected_reads_for_sample=20,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
+    )
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case fails QC
+    assert not passes
+
+
+def test_raw_data_case_pass_qc_hifi_yield_based_passes():
+    # GIVEN a raw-data yield based sample with enough HiFi yield
+    sample: Sample = create_autospec(
+        Sample,
+        hifi_yield=10,
+        expected_hifi_yield=10,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
+    )
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case passes QC
+    assert passes
+
+
+def test_raw_data_case_pass_qc_hifi_yield_based_fails():
+    # GIVEN a raw-data yield based sample without enough HiFi yield
+    sample: Sample = create_autospec(
+        Sample,
+        hifi_yield=10,
+        expected_hifi_yield=20,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
+    )
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case fails QC
+    assert not passes
+
+
+def test_raw_data_case_pass_qc_sample_run_metrics_missing():
+    # GIVEN a raw-data sample without sample run metrics
+    sample: Sample = create_autospec(Sample, sample_run_metrics=[])
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case fails QC
+    assert not passes
+
+
+def test_raw_data_yield_based_case_pass_qc_second_sample_missing_sample_run_metrics():
+    # GIVEN two raw-data samples, the second sample is missing sample_run_metrics
+    sample_1: Sample = create_autospec(
+        Sample,
+        hifi_yield=10,
+        expected_hifi_yield=10,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
+    )
+    sample_2: Sample = create_autospec(
+        Sample, hifi_yield=None, expected_hifi_yield=10, sample_run_metrics=[]
+    )
+
+    # GIVEN a case with the samples above
+    case: Case = create_autospec(Case, samples=[sample_1, sample_2])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case fails QC
+    assert not passes
+
+
+def test_raw_data_read_based_case_pass_qc_second_sample_missing_sample_run_metrics():
+    # GIVEN two raw-data samples, the second sample is missing sample_run_metrics
+    sample_1: Sample = create_autospec(
+        Sample,
+        reads=10,
+        expected_reads_for_sample=10,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
+    )
+    sample_2: Sample = create_autospec(
+        Sample, reads=0, expected_reads_for_sample=10, sample_run_metrics=[]
+    )
+
+    # GIVEN a case with the samples above
+    case: Case = create_autospec(Case, samples=[sample_1, sample_2])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case fails QC
+    assert not passes
