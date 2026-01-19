@@ -565,7 +565,7 @@ def test_raw_data_case_pass_qc_sample_run_metrics_missing():
     assert not passes
 
 
-def test_raw_data_case_pass_qc_second_sample_missing_sample_run_metrics():
+def test_raw_data_yield_based_case_pass_qc_second_sample_missing_sample_run_metrics():
     # GIVEN two raw-data samples, the second sample is missing sample_run_metrics
     sample_1: Sample = create_autospec(
         Sample,
@@ -577,7 +577,29 @@ def test_raw_data_case_pass_qc_second_sample_missing_sample_run_metrics():
         Sample, hifi_yield=None, expected_hifi_yield=10, sample_run_metrics=[]
     )
 
-    # GIVEN a case with the sample above
+    # GIVEN a case with the samples above
+    case: Case = create_autospec(Case, samples=[sample_1, sample_2])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case fails QC
+    assert not passes
+
+
+def test_raw_data_read_based_case_pass_qc_second_sample_missing_sample_run_metrics():
+    # GIVEN two raw-data samples, the second sample is missing sample_run_metrics
+    sample_1: Sample = create_autospec(
+        Sample,
+        reads=10,
+        expected_reads_for_sample=10,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
+    )
+    sample_2: Sample = create_autospec(
+        Sample, reads=0, expected_reads_for_sample=10, sample_run_metrics=[]
+    )
+
+    # GIVEN a case with the samples above
     case: Case = create_autospec(Case, samples=[sample_1, sample_2])
 
     # WHEN calling the raw_data_case_pass_qc function on the case
