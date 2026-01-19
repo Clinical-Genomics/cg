@@ -851,6 +851,13 @@ class Sample(Base, PriorityMixin):
         """Return the sample run metrics for the sample."""
         return self._sample_run_metrics
 
+    @property
+    def device_type(self) -> DeviceType | None:
+        """Return the device type the sample was sequenced on."""
+        if self._sample_run_metrics:
+            return self._sample_run_metrics[0].type
+        return None
+
     def to_dict(self, links: bool = False) -> dict:
         """Represent as dictionary"""
         data = to_dict(model_instance=self)
@@ -859,7 +866,9 @@ class Sample(Base, PriorityMixin):
         data["application_version"] = self.application_version.to_dict()
         data["application"] = self.application_version.application.to_dict()
         data["hifi_yield"] = self.hifi_yield
-        data["uses_reads"] = False
+        data["uses_reads"] = True
+        if self.device_type == DeviceType.PACBIO:
+            data["uses_reads"] = False
         if links:
             data["links"] = [link_obj.to_dict(family=True, parents=True) for link_obj in self.links]
         return data
