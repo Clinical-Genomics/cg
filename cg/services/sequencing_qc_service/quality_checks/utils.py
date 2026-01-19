@@ -1,5 +1,6 @@
 import logging
 
+from cg.constants.devices import DeviceType
 from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import ApplicationDoesNotHaveHiFiYieldError
@@ -130,6 +131,31 @@ def any_sample_in_case_has_reads(case: Case) -> bool:
     if not passed_quality_check:
         LOG.warning("No samples in case have reads.")
     return passed_quality_check
+
+
+def raw_data_case_pass_qc(case: Case) -> bool:
+    if is_case_ready_made_library(case):
+        return ready_made_library_case_pass_sequencing_qc(case)
+    if is_first_sample_yield_based_and_processed(case):
+        return all(sample_has_enough_hifi_yield(sample) for sample in case.samples)
+    elif is_first_sample_reads_based_and_processed(case):
+        return all(sample_has_enough_reads(sample) for sample in case.samples)
+    LOG.warning(f"Not all samples for case {case.internal_id} have been post-processed.")
+    return False
+
+
+def is_first_sample_yield_based_and_processed(case: Case) -> bool:
+    sample: Sample = case.samples[0]
+    if metrics := sample.sample_run_metrics:
+        return metrics[0].type == DeviceType.PACBIO
+    return False
+
+
+def is_first_sample_reads_based_and_processed(case: Case) -> bool:
+    sample: Sample = case.samples[0]
+    if metrics := sample.sample_run_metrics:
+        return metrics[0].type == DeviceType.ILLUMINA
+    return False
 
 
 def is_case_express_priority(case: Case) -> bool:
