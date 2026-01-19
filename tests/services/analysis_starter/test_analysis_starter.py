@@ -13,7 +13,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.priority import Priority, SlurmQos
-from cg.exc import AnalysisNotReadyError, SeqeraError
+from cg.exc import AnalysisNotReadyError, CaseWorkflowMismatchError, SeqeraError
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import creator
@@ -337,6 +337,31 @@ def test_start(
     mock_tracker.set_case_as_running.assert_called_once_with(case_id)
     mock_submitter.submit.assert_called_once_with(mock_case_config)
     mock_tracker.track.assert_called_once_with(case_config=submit_result)
+
+
+def test_start_fails_workflow_mismatch():
+    """Test that starting a case with a mismatched workflow raises an error."""
+    # GIVEN a case_id
+    case_id: str = "case_id"
+
+    # GIVEN a Store with a  MIP-DNA case
+    store: Store = create_autospec(Store)
+    case: Case = create_autospec(Case, data_analysis=Workflow.MIP_DNA)
+    store.get_case_by_internal_id_strict = Mock(return_value=case)
+
+    # GIVEN an analysis starter for raredisease
+    analysis_starter = AnalysisStarter(
+        configurator=create_autospec(NextflowConfigurator),
+        input_fetcher=create_autospec(FastqFetcher),
+        store=store,
+        submitter=create_autospec(SeqeraPlatformSubmitter),
+        tracker=create_autospec(NextflowTracker),
+        workflow=Workflow.RAREDISEASE,
+    )
+
+    # WHEN starting the case
+    with pytest.raises(CaseWorkflowMismatchError):
+        analysis_starter.start(case_id)
 
 
 @pytest.mark.parametrize(
