@@ -356,5 +356,9 @@ class SeqeraError(CgError):
     """Exception raised when receiving an unexpected response from Seqera platform"""
 
 
+class MultipleCaptureKitsError(CgError):
+    """Exception raised when multiple capture kits are found where only one is expected."""
+
+
 class ApplicationDoesNotHaveHiFiYieldError(CgError):
     """Exception raised when application does not have HiFi yield set."""
