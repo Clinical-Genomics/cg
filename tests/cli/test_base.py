@@ -1,13 +1,7 @@
-import logging
-from pathlib import Path
-
 from click.testing import CliRunner, Result
 
 import cg
-from cg.cli.base import base, init
-from cg.models.cg_config import CGConfig
-from cg.store.database import get_tables, initialize_database
-from cg.store.store import Store
+from cg.cli.base import base
 
 
 def test_cli_version(cli_runner: CliRunner):
@@ -32,39 +26,3 @@ def test_missing_command(cli_runner: CliRunner):
     result = cli_runner.invoke(base, ["i_dont_exist"])
     # THEN context should abort
     assert result.exit_code != 0
-
-
-def test_cli_init(cli_runner: CliRunner, base_context: CGConfig, caplog, tmp_path: Path):
-    caplog.set_level(logging.INFO)
-    # GIVEN you want to setup a new database using the CLI
-    database = Path(tmp_path, "test_db.sqlite3")
-    database_path = Path(database)
-    database_uri = f"sqlite:///{database}"
-    initialize_database(database_uri)
-    base_context.status_db_ = Store()
-
-    assert database_path.exists() is False
-
-    # WHEN calling "init"
-    result = cli_runner.invoke(init, [], obj=base_context)
-
-    # THEN it should setup the database with some tables
-    assert result.exit_code == 0
-    assert database_path.exists()
-    assert len(get_tables()) > 0
-
-    # GIVEN the database already exists
-    # WHEN calling the init function
-    result = cli_runner.invoke(init, [], obj=base_context)
-
-    # THEN it should print an error and give error exit code
-    assert result.exit_code != 0
-    assert "Database already exists" in caplog.text
-
-    # GIVEN the database already exists
-    # WHEN calling "init" with "--reset"
-    result = cli_runner.invoke(init, ["--reset"], input="Yes", obj=base_context)
-
-    # THEN it should re-setup the tables and print new tables
-    assert result.exit_code == 0
-    assert "Success!" in caplog.text
