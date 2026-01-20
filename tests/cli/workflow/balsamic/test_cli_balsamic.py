@@ -7,7 +7,14 @@ from pytest_mock import MockerFixture
 
 from cg.cli.workflow.balsamic.base import config_case, run, start
 from cg.constants import Workflow
-from cg.models.cg_config import BalsamicConfig, CGConfig, IlluminaConfig, RunInstruments
+from cg.models.cg_config import (
+    BalsamicConfig,
+    CGConfig,
+    CommonAppConfig,
+    Encryption,
+    IlluminaConfig,
+    RunInstruments,
+)
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
@@ -20,6 +27,8 @@ def cg_config_for_balsamic_cli(cg_balsamic_config: BalsamicConfig) -> CGConfig:
         CGConfig,
         balsamic=cg_balsamic_config,
         data_flow=Mock(),
+        encryption=create_autospec(Encryption, binary_path="encryption.bin"),
+        pdc=create_autospec(CommonAppConfig, binary_path="pdc.bin"),
         run_instruments=create_autospec(
             RunInstruments,
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
