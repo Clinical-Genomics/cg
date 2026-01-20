@@ -155,7 +155,6 @@ def test_archive_all_non_archived_spring_files(
 
     # THEN the DDN archiving function should have been called with the correct destination and source if limit > 0
     if limit not in [0, -1]:
-        sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id_strict(sample_id)
         mock_request_submitter.assert_called_with(
             url="some/api/files/archive",
             headers=header_with_test_auth_token,
