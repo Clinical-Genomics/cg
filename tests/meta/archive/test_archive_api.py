@@ -14,15 +14,9 @@ from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import MissingFilesError, SampleFilesCurrentlyArchivingError
 from cg.meta.archive.archive import ARCHIVE_HANDLERS, FileAndSample, SpringArchiveAPI
 from cg.meta.archive.ddn import ddn_data_flow_client
-from cg.meta.archive.ddn.constants import (
-    FAILED_JOB_STATUSES,
-    METADATA_LIST,
-    ONGOING_JOB_STATUSES,
-    JobStatus,
-)
+from cg.meta.archive.ddn.constants import FAILED_JOB_STATUSES, ONGOING_JOB_STATUSES, JobStatus
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import AuthToken, GetJobStatusResponse, MiriaObject
-from cg.meta.archive.ddn.utils import get_metadata
 from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
@@ -74,9 +68,10 @@ def test_get_sample_exists(sample_id: str, spring_archive_api: SpringArchiveAPI)
     file: File = spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first()
 
     # WHEN getting the sample
-    sample: Sample = spring_archive_api.get_sample(file)
+    sample: Sample | None = spring_archive_api.get_sample(file)
 
     # THEN the correct sample should be returned
+    assert sample
     assert sample.internal_id == sample_id
 
 
@@ -92,7 +87,7 @@ def test_get_sample_not_exists(
     file.version.bundle.name = sample_id
 
     # WHEN getting the sample
-    sample: Sample = spring_archive_api.get_sample(file)
+    sample: Sample | None = spring_archive_api.get_sample(file)
 
     # THEN the no sample should be returned
     # THEN both sample_id and file path should be logged
@@ -108,7 +103,7 @@ def test_convert_into_transfer_data(
     # GIVEN file and Sample
     file_and_sample = FileAndSample(
         file=spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first(),
-        sample=spring_archive_api.status_db.get_sample_by_internal_id(sample_id),
+        sample=spring_archive_api.status_db.get_sample_by_internal_id_strict(sample_id),
     )
     with mock.patch.object(
         DDNDataFlowClient,
@@ -160,9 +155,7 @@ def test_archive_all_non_archived_spring_files(
 
     # THEN the DDN archiving function should have been called with the correct destination and source if limit > 0
     if limit not in [0, -1]:
-        sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(sample_id)
-        metadata: list[dict] = get_metadata(sample)
-        archive_request_json[METADATA_LIST] = metadata
+        sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id_strict(sample_id)
         mock_request_submitter.assert_called_with(
             url="some/api/files/archive",
             headers=header_with_test_auth_token,
@@ -175,7 +168,7 @@ def test_archive_all_non_archived_spring_files(
         files: list[File] = spring_archive_api.housekeeper_api.files().all()
         for file in files:
             if SequencingFileTag.SPRING in [tag.name for tag in file.tags]:
-                sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id(
+                sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id_strict(
                     file.version.bundle.name
                 )
                 if sample and sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET:
