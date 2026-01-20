@@ -70,21 +70,6 @@
   tag: qc-metrics
 - format: json
   id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_fastp.json
-  step: multiqc-json
-  tag: multiqc-fastp
-- format: json
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_samtools_stats.json
-  step: multiqc-json
-  tag: multiqc-samtools-stats
-- format: json
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_kraken.json
-  step: multiqc-json
-  tag: multiqc-kraken
-- format: json
-  id: CASEID
   path: PATHTOCASE/manifest.json
   step: manifest
   tag: manifest
