@@ -55,7 +55,7 @@
   tag: multiqc-html
 - format: yml
   id: CASEID
-  path: PATHTOCASE/pipeline_info/nf_core_pipeline_software_mqc_versions.yml
+  path: PATHTOCASE/pipeline_info/nf_core_taxprofiler_software_mqc_versions.yml
   step: software-versions
   tag: software-versions
 - format: json
