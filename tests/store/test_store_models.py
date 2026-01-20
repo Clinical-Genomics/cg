@@ -1,8 +1,10 @@
 from cg.constants.constants import ControlOptions
+from cg.constants.priority import Priority
 from cg.store.models import (
     Application,
     ApplicationVersion,
     Case,
+    CaseSample,
     Customer,
     IlluminaSampleSequencingMetrics,
     PacbioSampleSequencingMetrics,
@@ -225,3 +227,59 @@ def test_application_expected_hifi_yield_no_target_hifi_yield():
 
     # THEN the value should be None
     assert expected_hifi_yield is None
+
+
+def test_sample_to_dict_pacbio_success():
+    # GIVEN a PacBio sample with application, customer, sequencing_metrics, priority and a case
+    application = Application(tag="PACBIOTAG")
+    application_version = ApplicationVersion(application=application)
+    customer = Customer(internal_id="cust000")
+    case_sample = CaseSample(case_id=666)
+    metrics = PacbioSampleSequencingMetrics(hifi_yield=13)
+    sample = Sample(
+        application_version=application_version,
+        customer=customer,
+        priority=Priority.standard,
+        _sample_run_metrics=[metrics],
+        links=[case_sample],
+    )
+
+    # WHEN serialising the sample
+    dict_sample = sample.to_dict()
+
+    # THEN the serialised sample has the expected entries
+    assert dict_sample["priority"] == "standard"
+    assert dict_sample["customer"]["internal_id"] == "cust000"
+    assert dict_sample["application"]["tag"] == "PACBIOTAG"
+    assert dict_sample["application_version"]
+    assert dict_sample["hifi_yield"] == 13
+    assert not dict_sample["uses_reads"]
+
+
+def test_sample_to_dict_illumina_success():
+    # GIVEN a Illumina sample with application, customer, sequencing_metrics, priority and a case
+    application = Application(tag="ILLUMINATAG")
+    application_version = ApplicationVersion(application=application)
+    customer = Customer(internal_id="cust000")
+    case_sample = CaseSample(case_id=666)
+    metrics = IlluminaSampleSequencingMetrics()
+    sample = Sample(
+        application_version=application_version,
+        customer=customer,
+        priority=Priority.standard,
+        _sample_run_metrics=[metrics],
+        links=[case_sample],
+        reads=13,
+    )
+
+    # WHEN serialising the sample
+    dict_sample = sample.to_dict()
+
+    # THEN the serialised sample has the expected entries
+    assert dict_sample["priority"] == "standard"
+    assert dict_sample["customer"]["internal_id"] == "cust000"
+    assert dict_sample["application"]["tag"] == "ILLUMINATAG"
+    assert dict_sample["application_version"]
+    assert dict_sample["hifi_yield"] is None
+    assert dict_sample["reads"] == 13
+    assert dict_sample["uses_reads"]
