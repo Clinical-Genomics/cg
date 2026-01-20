@@ -256,19 +256,15 @@ def test_sample_to_dict_pacbio_success():
     assert dict_sample["application"]["tag"] == "PACBIOTAG"
     assert dict_sample["application_version"]
     assert dict_sample["hifi_yield"] == 13
-    assert dict_sample["uses_reads"] == False
+    assert not dict_sample["uses_reads"]
 
 
 def test_sample_to_dict_illumina_success():
     application = Application(tag="ILLUMINATAG")
     application_version = ApplicationVersion(application=application)
-
     customer = Customer(internal_id="cust000")
-
     case_sample = CaseSample(case_id=666)
-
     metrics = IlluminaSampleSequencingMetrics()
-
     sample = Sample(
         application_version=application_version,
         customer=customer,
@@ -278,14 +274,14 @@ def test_sample_to_dict_illumina_success():
         reads=13,
     )
 
-    # WHEN serializing the sample
+    # WHEN serialising the sample
     dict_sample = sample.to_dict()
 
-    # THEN the serialized sample has the expected entries
+    # THEN the serialised sample has the expected entries
     assert dict_sample["priority"] == "standard"
     assert dict_sample["customer"]["internal_id"] == "cust000"
     assert dict_sample["application"]["tag"] == "ILLUMINATAG"
     assert dict_sample["application_version"]
     assert dict_sample["hifi_yield"] is None
     assert dict_sample["reads"] == 13
-    assert dict_sample["uses_reads"] == True
+    assert dict_sample["uses_reads"]
