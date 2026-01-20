@@ -70,11 +70,6 @@
   tag: qc-metrics
 - format: json
   id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_general_stats.json
-  step: multiqc-json
-  tag: multiqc-general-stats
-- format: json
-  id: CASEID
   path: PATHTOCASE/multiqc/multiqc_data/multiqc_fastp.json
   step: multiqc-json
   tag: multiqc-fastp
