@@ -230,15 +230,12 @@ def test_application_expected_hifi_yield_no_target_hifi_yield():
 
 
 def test_sample_to_dict_pacbio_success():
+    # GIVEN a PacBio sample with application, customer, sequencing_metrics, priority and a case
     application = Application(tag="PACBIOTAG")
     application_version = ApplicationVersion(application=application)
-
     customer = Customer(internal_id="cust000")
-
     case_sample = CaseSample(case_id=666)
-
     metrics = PacbioSampleSequencingMetrics(hifi_yield=13)
-
     sample = Sample(
         application_version=application_version,
         customer=customer,
@@ -247,10 +244,10 @@ def test_sample_to_dict_pacbio_success():
         links=[case_sample],
     )
 
-    # WHEN serializing the sample
+    # WHEN serialising the sample
     dict_sample = sample.to_dict()
 
-    # THEN the serialized sample has the expected entries
+    # THEN the serialised sample has the expected entries
     assert dict_sample["priority"] == "standard"
     assert dict_sample["customer"]["internal_id"] == "cust000"
     assert dict_sample["application"]["tag"] == "PACBIOTAG"
@@ -260,6 +257,7 @@ def test_sample_to_dict_pacbio_success():
 
 
 def test_sample_to_dict_illumina_success():
+    # GIVEN a Illumina sample with application, customer, sequencing_metrics, priority and a case
     application = Application(tag="ILLUMINATAG")
     application_version = ApplicationVersion(application=application)
     customer = Customer(internal_id="cust000")
