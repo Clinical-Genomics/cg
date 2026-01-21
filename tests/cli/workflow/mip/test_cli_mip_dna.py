@@ -6,7 +6,14 @@ from pytest_mock import MockerFixture
 
 from cg.cli.workflow.mip_dna.base import config_case, run, start
 from cg.constants import Workflow
-from cg.models.cg_config import CGConfig, IlluminaConfig, MipConfig, RunInstruments
+from cg.models.cg_config import (
+    CGConfig,
+    CommonAppConfig,
+    Encryption,
+    IlluminaConfig,
+    MipConfig,
+    RunInstruments,
+)
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.mip_dna import MIPDNAConfigurator
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
@@ -28,6 +35,8 @@ def cg_config() -> CGConfig:
         CGConfig,
         mip_rd_dna=mip_rd_dna_config,
         data_flow=Mock(),
+        encryption=create_autospec(Encryption, binary_path="encryption.bin"),
+        pdc=create_autospec(CommonAppConfig, binary_path="pdc.bin"),
         run_instruments=create_autospec(
             RunInstruments,
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
