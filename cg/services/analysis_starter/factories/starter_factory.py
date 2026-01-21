@@ -3,7 +3,9 @@ import logging
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
 from cg.meta.archive.archive import SpringArchiveAPI
+from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import CompressAPI
+from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.configurator import Configurator
@@ -25,6 +27,7 @@ from cg.services.analysis_starter.tracker.implementations.microsalt import Micro
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
 from cg.services.analysis_starter.tracker.implementations.nextflow_tracker import NextflowTracker
 from cg.services.analysis_starter.tracker.tracker import Tracker
+from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -65,6 +68,13 @@ class AnalysisStarterFactory:
                 data_flow_config=self.cg_config.data_flow,
             )
             compress_api = CompressAPI(
+                backup_api=SpringBackupAPI(
+                    encryption_api=SpringEncryptionAPI(
+                        binary_path=self.cg_config.encryption.binary_path
+                    ),
+                    hk_api=self.cg_config.housekeeper_api,
+                    pdc_service=PdcService(self.cg_config.pdc.binary_path),
+                ),
                 hk_api=self.housekeeper_api,
                 crunchy_api=self.cg_config.crunchy_api,
                 demux_root=self.cg_config.run_instruments.illumina.demultiplexed_runs_dir,
