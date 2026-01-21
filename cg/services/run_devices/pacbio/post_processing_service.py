@@ -57,8 +57,8 @@ class PacBioPostProcessingService(PostProcessingService):
             run_name=run_name, sequencing_dir=self.sequencing_dir
         )
         self.run_validator.ensure_post_processing_can_start(run_data)
-        self.store_service.store_post_processing_data(run_data=run_data, dry_run=dry_run)
         self.hk_service.store_files_in_housekeeper(run_data=run_data, dry_run=dry_run)
+        self.store_service.store_post_processing_data(run_data=run_data, dry_run=dry_run)
         self._touch_post_processing_complete(run_data=run_data, dry_run=dry_run)
 
     def is_run_processed(self, run_name: str) -> bool:

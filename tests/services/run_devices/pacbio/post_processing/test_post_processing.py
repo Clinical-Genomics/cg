@@ -1,9 +1,9 @@
 """Tests for the PacBioPostprocessingService."""
 
-from unittest import mock
 from unittest.mock import Mock
 
 import pytest
+from pytest_mock import MockerFixture
 
 from cg.models.cg_config import CGConfig
 from cg.services.run_devices.exc import (
@@ -36,25 +36,25 @@ def test_pac_bio_post_processing_run_name_error(pac_bio_context):
 
 
 def test_pac_bio_post_processing_store_data_error(
-    pac_bio_context: CGConfig, pacbio_barcoded_sequencing_run_name: str
+    pac_bio_context: CGConfig, pacbio_barcoded_sequencing_run_name: str, mocker: MockerFixture
 ):
     # GIVEN a PacBioPostProcessingService that raises an error when storing data in StatusDB
-
     post_processing_service: PacBioPostProcessingService = (
         pac_bio_context.post_processing_services.pacbio
     )
 
     # WHEN storing post-processing data raises an error
-    with mock.patch.object(
+    mocker.patch.object(
         PacBioStoreService, "store_post_processing_data", side_effect=PostProcessingStoreDataError
-    ):
-        # THEN a PostProcessingError is raised
-        with pytest.raises(PostProcessingError):
-            post_processing_service.post_process(run_name=pacbio_barcoded_sequencing_run_name)
+    )
+
+    # THEN a PostProcessingError is raised
+    with pytest.raises(PostProcessingError):
+        post_processing_service.post_process(run_name=pacbio_barcoded_sequencing_run_name)
 
 
 def test_pac_bio_post_processing_store_files_error(
-    pac_bio_context: CGConfig, pacbio_barcoded_sequencing_run_name: str
+    pac_bio_context: CGConfig, pacbio_barcoded_sequencing_run_name: str, mocker: MockerFixture
 ):
     # GIVEN a PacBioPostProcessingService that raises an error when storing files in Housekeeper
     post_processing_service: PacBioPostProcessingService = (
@@ -63,14 +63,18 @@ def test_pac_bio_post_processing_store_files_error(
     post_processing_service.store_service = Mock()
 
     # WHEN storing post-processing files raises an error
-    with mock.patch.object(
+    mocker.patch.object(
         PacBioHousekeeperService,
         "store_files_in_housekeeper",
         side_effect=PostProcessingStoreFileError,
-    ):
-        # THEN a PostProcessingError is raised
-        with pytest.raises(PostProcessingError):
-            post_processing_service.post_process(run_name=pacbio_barcoded_sequencing_run_name)
+    )
+
+    # THEN a PostProcessingError is raised
+    with pytest.raises(PostProcessingError):
+        post_processing_service.post_process(run_name=pacbio_barcoded_sequencing_run_name)
+
+    # THEN no data is stored in StatusDB
+    post_processing_service.store_service.store_post_processing_data.assert_not_called()
 
 
 def test_can_post_processing_start_true(
