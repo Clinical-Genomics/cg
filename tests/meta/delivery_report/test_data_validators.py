@@ -300,7 +300,7 @@ def test_get_delivery_report_html_nallo(nallo_analysis: NextflowAnalysis):
 
 
 def test_get_delivery_report_html_raredisease(raredisease_analysis: NextflowAnalysis):
-    # GIVEN a sample within a Raredisease case
+    # GIVEN a Raredisease case
     sample: Sample = create_autospec(
         Sample,
         sex=SexEnum.female,
