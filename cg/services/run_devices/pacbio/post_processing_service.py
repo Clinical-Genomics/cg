@@ -51,10 +51,12 @@ class PacBioPostProcessingService(PostProcessingService):
         ),
         to_raise=PostProcessingError,
     )
-    def post_process(self, run_name: str, dry_run: bool = False) -> None:
+    def post_process(
+        self, run_name: str, dry_run: bool = False
+    ) -> None:  # TODO: Rename input parameter
         LOG.info(f"Starting Pacbio post-processing for run: {run_name}")
         run_data: PacBioRunData = self.run_data_generator.get_run_data(
-            run_name=run_name, sequencing_dir=self.sequencing_dir
+            internal_id=run_name, sequencing_dir=self.sequencing_dir
         )
         self.run_validator.ensure_post_processing_can_start(run_data)
         self.store_service.store_post_processing_data(run_data=run_data, dry_run=dry_run)
@@ -75,11 +77,11 @@ class PacBioPostProcessingService(PostProcessingService):
         )
         return all_smrt_cells_are_ready
 
-    def is_smrt_cell_ready_for_post_processing(self, run_name: str) -> bool:
+    def is_smrt_cell_ready_for_post_processing(self, run_name: str) -> bool:  # TODO: Rename in data
         LOG.info(f"Checking if Pacbio SMRT-cell {run_name} is ready for postprocessing")
         try:
             run_data: PacBioRunData = self.run_data_generator.get_run_data(
-                run_name=run_name, sequencing_dir=self.sequencing_dir
+                internal_id=run_name, sequencing_dir=self.sequencing_dir
             )
             self.run_validator.validate_run_files(run_data)
         except PostProcessingRunFileManagerError as error:

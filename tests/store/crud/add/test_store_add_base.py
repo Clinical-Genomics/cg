@@ -165,7 +165,7 @@ def test_create_pacbio_sequencing_run(store: Store):
 
     # GIVEN a PacBioSequencingRunDTO
     pacbio_sequencing_run_dto = PacBioSequencingRunDTO(
-        instrument_name=RevioNames.WILMA, run_name="run_name"
+        instrument_name=RevioNames.WILMA, run_name="internal_id"
     )
 
     # WHEN creating a Pacbio sequencing run in Store
@@ -174,13 +174,13 @@ def test_create_pacbio_sequencing_run(store: Store):
     # THEN the PacbioSequencingRun exists and has the correct attributes
     pacbio_sequencing_run: PacbioSequencingRun = store._get_query(table=PacbioSequencingRun).one()
     assert pacbio_sequencing_run.instrument_name == RevioNames.WILMA
-    assert pacbio_sequencing_run.internal_id == "run_name"
+    assert pacbio_sequencing_run.internal_id == "internal_id"
 
 
 def test_create_pacbio_sequencing_run_already_exists(store: Store):
     # GIVEN a Store with a Pacbio sequencing run
     pacbio_sequencing_run_dto = PacBioSequencingRunDTO(
-        instrument_name=RevioNames.WILMA, run_name="run_name"
+        instrument_name=RevioNames.WILMA, run_name="internal_id"
     )
     store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
     store.commit_to_store()
@@ -188,7 +188,7 @@ def test_create_pacbio_sequencing_run_already_exists(store: Store):
 
     # GIVEN a PacBioSequencingRunDTO
     pacbio_sequencing_run_dto = PacBioSequencingRunDTO(
-        instrument_name=RevioNames.WILMA, run_name="run_name"
+        instrument_name=RevioNames.WILMA, run_name="internal_id"
     )
 
     # WHEN creating the same Pacbio sequencing run in Store

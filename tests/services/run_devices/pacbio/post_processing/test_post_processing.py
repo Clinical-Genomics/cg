@@ -23,7 +23,7 @@ from cg.services.run_devices.pacbio.post_processing_service import PacBioPostPro
 
 def test_pac_bio_post_processing_run_name_error(pac_bio_context):
     # GIVEN a PacBioPostProcessingService and a wrong run name
-    run_name: str = "run_name"
+    run_name: str = "internal_id"  # TODO: Rename
     post_processing_service: PacBioPostProcessingService = (
         pac_bio_context.post_processing_services.pacbio
     )
