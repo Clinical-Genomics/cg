@@ -157,26 +157,13 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
     ) -> CoverageMetrics | None:
-        """Return sample coverage metrics from Chanjo2."""  # TODO: change docsting
-        genome_version: GenomeVersion = self.get_genome_build(case_id)
-        coverage_file_path: str | None = self.get_sample_coverage_file_path(
-            bundle_name=case_id, sample_id=sample_id
+        sample_coverage = self.chanjo_api.sample_coverage(
+            sample_id=sample.internal_id, panel_genes=genes
         )
-        try:
-            post_request = CoveragePostRequest(
-                build=self.translate_genome_reference(genome_version),
-                coverage_threshold=RAREDISEASE_COVERAGE_THRESHOLD,
-                hgnc_gene_ids=gene_ids,
-                interval_type=RAREDISEASE_COVERAGE_INTERVAL_TYPE,
-                samples=[CoverageSample(coverage_file_path=coverage_file_path, name=sample_id)],
-            )
-            post_response: CoveragePostResponse = self.chanjo2_api.get_coverage(
-                post_request
-            )  # TODO: Propably change to chanjo1
-            return post_response.get_sample_coverage_metrics(sample_id)
-        except Exception as error:
-            LOG.error(f"Error getting coverage for sample '{sample_id}', error: {error}")
-            return None
+        if sample_coverage:
+            return sample_coverage
+        LOG.warning(f"Could not calculate sample coverage for: {sample.internal_id}")
+        return None  # TODO need(?) to parse the sample_coverage into CoverageMetrics
 
     def get_scout_upload_case_tags(self) -> dict:
         """Return Raredisease Scout upload case tags."""
