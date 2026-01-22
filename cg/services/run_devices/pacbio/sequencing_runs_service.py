@@ -21,7 +21,7 @@ class PacbioSequencingRunsService:
         for metric in db_smrt_cell_metrics:
             metric_dict = metric.to_dict()
             metric_dict["internal_id"] = metric.device.internal_id
-            metric_dict["run_internal_id"] = metric.sequencing_run.internal_id
+            metric_dict["run_name"] = metric.sequencing_run.internal_id
             metrics.append(PacbioSmrtCellMetricsDTO.model_validate(metric_dict))
         return PacbioSmrtCellMetricsResponse(runs=metrics)
 

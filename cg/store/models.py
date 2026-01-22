@@ -1113,7 +1113,7 @@ class PacbioSMRTCellMetrics(InstrumentRun):
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
     @property
-    def run_name(self) -> str:  # TODO: Rename property
+    def run_internal_id(self) -> str:
         return self.sequencing_run.internal_id
 
     def to_dict(self):

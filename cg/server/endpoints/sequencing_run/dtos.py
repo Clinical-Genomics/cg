@@ -19,7 +19,7 @@ class PacbioSmrtCellMetricsDTO(BaseModel):
     p2_percent: float
     percent_reads_passing_q30: float
     plate: int
-    run_internal_id: str
+    run_name: str
     started_at: datetime
     well: str
 
