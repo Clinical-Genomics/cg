@@ -30,7 +30,7 @@ class PacbioSmrtCellMetricsResponse(BaseModel):
 
 class PacbioSequencingRunDTO(BaseModel):
     id: int
-    internal_id: str  # TODO rollback this change
+    run_name: str
     comment: str
     processed: bool
 

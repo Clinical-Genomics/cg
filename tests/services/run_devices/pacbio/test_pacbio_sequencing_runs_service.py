@@ -85,12 +85,12 @@ def test_get_all_pacbio_sequencing_runs():
         pacbio_sequencing_runs=[
             PacbioSequencingRunDTO(
                 id=6,
-                internal_id="santas_little_helper",
+                run_name="santas_little_helper",
                 comment="hunden i Simpsons",
                 processed=True,
             ),
             PacbioSequencingRunDTO(
-                id=4, internal_id="Nisse", comment="Tomtens hjälpreda", processed=False
+                id=4, run_name="Nisse", comment="Tomtens hjälpreda", processed=False
             ),
         ],
         total_count=2,

@@ -18,10 +18,10 @@ def test_get_pacbio_sequencing_runs(client: FlaskClient):
         return_value=PacbioSequencingRunResponse(
             pacbio_sequencing_runs=[
                 PacbioSequencingRunDTO(
-                    id=9, internal_id="rudolf", comment="This one was crazy!", processed=True
+                    id=9, run_name="rudolf", comment="This one was crazy!", processed=True
                 ),
                 PacbioSequencingRunDTO(
-                    id=1, internal_id="santa", comment="Ho, Ho, Ho", processed=False
+                    id=1, run_name="santa", comment="Ho, Ho, Ho", processed=False
                 ),
             ],
             total_count=2,
@@ -38,8 +38,8 @@ def test_get_pacbio_sequencing_runs(client: FlaskClient):
     assert response.json
     assert response.json["total_count"] == 2
     assert response.json["pacbio_sequencing_runs"] == [
-        {"id": 9, "internal_id": "rudolf", "comment": "This one was crazy!", "processed": True},
-        {"id": 1, "internal_id": "santa", "comment": "Ho, Ho, Ho", "processed": False},
+        {"id": 9, "run_name": "rudolf", "comment": "This one was crazy!", "processed": True},
+        {"id": 1, "run_name": "santa", "comment": "Ho, Ho, Ho", "processed": False},
     ]
 
 
