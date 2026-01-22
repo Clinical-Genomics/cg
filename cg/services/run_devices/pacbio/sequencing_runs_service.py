@@ -32,7 +32,7 @@ class PacbioSequencingRunsService:
         for db_run in db_runs:
             run = PacbioSequencingRunDTO(
                 id=db_run.id,
-                run_name=db_run.internal_id,
+                internal_id=db_run.internal_id,
                 comment=db_run.comment,
                 processed=db_run.processed,
             )

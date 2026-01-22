@@ -19,7 +19,7 @@ class PacbioSmrtCellMetricsDTO(BaseModel):
     p2_percent: float
     percent_reads_passing_q30: float
     plate: int
-    run_name: str
+    run_name: str  # TODO change to internal_id
     started_at: datetime
     well: str
 
@@ -28,9 +28,9 @@ class PacbioSmrtCellMetricsResponse(BaseModel):
     runs: list[PacbioSmrtCellMetricsDTO]
 
 
-class PacbioSequencingRunDTO(BaseModel):  # TODO: Rename run_name to internal_id
+class PacbioSequencingRunDTO(BaseModel):
     id: int
-    run_name: str
+    internal_id: str
     comment: str
     processed: bool
 
