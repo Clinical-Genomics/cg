@@ -57,14 +57,14 @@ def test_get_all_pacbio_sequencing_runs():
         create_autospec(
             PacbioSequencingRun,
             id=6,
-            run_name="santas_little_helper",
+            internal_id="santas_little_helper",
             comment="hunden i Simpsons",
             processed=True,
         ),
         create_autospec(
             PacbioSequencingRun,
             id=4,
-            run_name="Nisse",
+            internal_id="Nisse",
             comment="Tomtens hjälpreda",
             processed=False,
         ),

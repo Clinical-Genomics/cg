@@ -174,7 +174,7 @@ def test_create_pacbio_sequencing_run(store: Store):
     # THEN the PacbioSequencingRun exists and has the correct attributes
     pacbio_sequencing_run: PacbioSequencingRun = store._get_query(table=PacbioSequencingRun).one()
     assert pacbio_sequencing_run.instrument_name == RevioNames.WILMA
-    assert pacbio_sequencing_run.run_name == "run_name"
+    assert pacbio_sequencing_run.internal_id == "run_name"
 
 
 def test_create_pacbio_sequencing_run_already_exists(store: Store):

@@ -513,7 +513,7 @@ class CreateMixin(ReadHandler):
         """
         if (
             self._get_query(table=PacbioSequencingRun)
-            .filter(PacbioSequencingRun.run_name == pacbio_sequencing_run_dto.run_name)
+            .filter(PacbioSequencingRun.internal_id == pacbio_sequencing_run_dto.run_name)
             .first()
         ):
             raise PacbioSequencingRunAlreadyExistsError(
@@ -523,7 +523,7 @@ class CreateMixin(ReadHandler):
             LOG.debug(f"Creating Pacbio Sequencing Run for {pacbio_sequencing_run_dto.run_name}")
             sequencing_run = PacbioSequencingRun(
                 instrument_name=pacbio_sequencing_run_dto.instrument_name,
-                run_name=pacbio_sequencing_run_dto.run_name,
+                internal_id=pacbio_sequencing_run_dto.run_name,
             )
             self.add_item_to_store(sequencing_run)
             return sequencing_run

@@ -26,8 +26,8 @@ def test_get_pacbio_sequencing_runs(
     runs, total_count = store.get_pacbio_sequencing_runs()
 
     # THEN the two runs should be returned
-    assert runs[0].run_name == "newer"
-    assert runs[1].run_name == "older"
+    assert runs[0].internal_id == "newer"
+    assert runs[1].internal_id == "older"
     assert total_count == 2
 
 
@@ -60,8 +60,8 @@ def test_get_pacbio_sequencing_runs_with_pagination(
     runs, total_count = store.get_pacbio_sequencing_runs(page=2, page_size=2)
 
     # THEN the two runs should be returned
-    assert runs[0].run_name == "grinch"
-    assert runs[1].run_name == "pinocchio"
+    assert runs[0].internal_id == "grinch"
+    assert runs[1].internal_id == "pinocchio"
     assert total_count == 4
 
 
@@ -105,9 +105,9 @@ def test_get_pacbio_sequencing_run_by_run_name_successful(store: Store):
     )
     store.commit_to_store()
 
-    # WHEN getting the sequencing run by run_name
+    # WHEN getting the sequencing run by internal_id
     fetched_run: PacbioSequencingRun = store.get_pacbio_sequencing_run_by_run_name(
-        sequencing_run.run_name
+        sequencing_run.internal_id
     )
 
     # THEN the fetched run is as expected
@@ -123,7 +123,7 @@ def test_get_pacbio_sequencing_run_by_run_name_unsuccessful(store: Store):
     )
     store.commit_to_store()
 
-    # WHEN getting the sequencing run by the wrong run_name
+    # WHEN getting the sequencing run by the wrong internal_id
     # THEN an error stating that the run was not found is raised
     with pytest.raises(PacbioSequencingRunNotFoundError):
         store.get_pacbio_sequencing_run_by_run_name("Geppetto")

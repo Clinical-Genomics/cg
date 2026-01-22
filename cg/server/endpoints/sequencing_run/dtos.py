@@ -28,7 +28,7 @@ class PacbioSmrtCellMetricsResponse(BaseModel):
     runs: list[PacbioSmrtCellMetricsDTO]
 
 
-class PacbioSequencingRunDTO(BaseModel):
+class PacbioSequencingRunDTO(BaseModel):  # TODO: Rename run_name to internal_id
     id: int
     run_name: str
     comment: str
