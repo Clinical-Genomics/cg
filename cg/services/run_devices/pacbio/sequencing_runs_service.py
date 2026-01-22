@@ -14,17 +14,16 @@ class PacbioSequencingRunsService:
         self.store = store
 
     def get_sequencing_runs_by_name(self, run_name: str) -> PacbioSmrtCellMetricsResponse:
-        runs: list[PacbioSmrtCellMetricsDTO] = []
-        db_runs: list[PacbioSMRTCellMetrics] = self.store.get_pacbio_smrt_cell_metrics_by_run_name(
-            run_name
+        metrics: list[PacbioSmrtCellMetricsDTO] = []
+        db_smrt_cell_metrics: list[PacbioSMRTCellMetrics] = (
+            self.store.get_pacbio_smrt_cell_metrics_by_run_name(run_name)
         )
-        for db_run in db_runs:
-            run_dict = db_run.to_dict()
-            run_dict["internal_id"] = db_run.device.internal_id
-            run_dict["run_name"] = db_run.sequencing_run.internal_id
-            run = PacbioSmrtCellMetricsDTO.model_validate(run_dict)
-            runs.append(run)
-        return PacbioSmrtCellMetricsResponse(runs=runs)
+        for metric in db_smrt_cell_metrics:
+            metric_dict = metric.to_dict()
+            metric_dict["internal_id"] = metric.device.internal_id
+            metric_dict["run_internal_id"] = metric.sequencing_run.internal_id
+            metrics.append(PacbioSmrtCellMetricsDTO.model_validate(metric_dict))
+        return PacbioSmrtCellMetricsResponse(runs=metrics)
 
     def get_sequencing_runs(self, page: int = 0, page_size: int = 0) -> PacbioSequencingRunResponse:
         db_runs, total_count = self.store.get_pacbio_sequencing_runs(page=page, page_size=page_size)
