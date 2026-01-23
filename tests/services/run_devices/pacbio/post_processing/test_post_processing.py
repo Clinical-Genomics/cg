@@ -23,7 +23,7 @@ from cg.services.run_devices.pacbio.post_processing_service import PacBioPostPro
 
 def test_pac_bio_post_processing_run_name_error(pac_bio_context):
     # GIVEN a PacBioPostProcessingService and a wrong run name
-    run_name: str = "internal_id"  # TODO: Rename
+    internal_id: str = "internal_id"
     post_processing_service: PacBioPostProcessingService = (
         pac_bio_context.post_processing_services.pacbio
     )
@@ -32,7 +32,7 @@ def test_pac_bio_post_processing_run_name_error(pac_bio_context):
 
     # THEN a PostProcessingError is raised
     with pytest.raises(PostProcessingError):
-        post_processing_service.post_process(run_name=run_name)
+        post_processing_service.post_process(run_name=internal_id)
 
 
 def test_pac_bio_post_processing_store_data_error(
