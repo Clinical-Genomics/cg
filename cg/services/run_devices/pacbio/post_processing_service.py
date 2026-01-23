@@ -51,9 +51,7 @@ class PacBioPostProcessingService(PostProcessingService):
         ),
         to_raise=PostProcessingError,
     )
-    def post_process(
-        self, run_name: str, dry_run: bool = False
-    ) -> None:  # TODO: Rename input parameter
+    def post_process(self, run_name: str, dry_run: bool = False) -> None:
         LOG.info(f"Starting Pacbio post-processing for run: {run_name}")
         run_data: PacBioRunData = self.run_data_generator.get_run_data(
             smrt_cell_full_name=run_name, sequencing_dir=self.sequencing_dir

@@ -110,5 +110,5 @@ class PacBioStoreService(PostProcessingStoreService):
                 f"Dry run, no entries will be added to database for SMRT cell {run_data.full_path}."
             )
             return
-        LOG.debug(f"Data stored in statusDB for run {run_data.sequencing_run_name}")
+        LOG.debug(f"Data stored in statusDB for run {run_data.run_internal_id}")
         self.store.commit_to_store()

@@ -27,7 +27,7 @@ class PacBioRunDataGenerator(RunDataGenerator):
 
         return PacBioRunData(
             full_path=full_path,
-            sequencing_run_name=self._get_sequencing_run_internal_id(smrt_cell_full_name),
+            run_internal_id=self._get_sequencing_run_internal_id(smrt_cell_full_name),
             well_name=self._get_well(smrt_cell_full_name),
             plate=self._get_plate(smrt_cell_full_name),
         )
