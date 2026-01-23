@@ -29,14 +29,14 @@ class PacBioRunDataGenerator(RunDataGenerator):
             full_path=full_path,
             run_internal_id=self._get_sequencing_run_internal_id(smrt_cell_full_name),
             well_name=self._get_well(smrt_cell_full_name),
-            plate=self._get_plate(smrt_cell_full_name),
+            plate=self._get_plate(smrt_cell_full_name),  # type: ignore Pydantic transforming
         )
 
     @staticmethod
     def _get_sequencing_run_internal_id(
-        run_name: str,
+        smrt_cell_full_name: str,
     ) -> str:  # TODO: Rename input to something more meaningful
-        return run_name.split("/")[0]
+        return smrt_cell_full_name.split("/")[0]
 
     @staticmethod
     def _get_plate_well(run_name: str) -> str:
