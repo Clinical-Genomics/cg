@@ -297,6 +297,20 @@ def test_case_pass_sequencing_qc_on_hifi_yield_passes():
     assert passes
 
 
+def test_case_pass_sequencing_qc_on_hifi_yield_expected_hifi_yield_is_zero_passes():
+    # GIVEN a sample with expected_hifi_yield set to zero
+    sample: Sample = create_autospec(Sample, expected_hifi_yield=0, hifi_yield=45)
+
+    # GIVEN a case
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
+    passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
+
+    # THEN the case passes sequencing qc
+    assert passes
+
+
 def test_case_pass_sequencing_qc_on_hifi_yield_fails():
     # GIVEN a sample without enough yield
     sample: Sample = create_autospec(Sample, expected_hifi_yield=45, hifi_yield=44)
@@ -607,3 +621,22 @@ def test_raw_data_read_based_case_pass_qc_second_sample_missing_sample_run_metri
 
     # THEN the case fails QC
     assert not passes
+
+
+def test_raw_data_case_pass_qc_hifi_yield_based_expected_hifi_yield_is_zero_passes():
+    # GIVEN a raw-data yield based sample with an expected_hifi_yield set to zero
+    sample: Sample = create_autospec(
+        Sample,
+        hifi_yield=10,
+        expected_hifi_yield=0,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
+    )
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case passes QC
+    assert passes

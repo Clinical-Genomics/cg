@@ -218,7 +218,7 @@ def sample_has_enough_hifi_yield(sample: Sample) -> bool:
     Raises:
         ApplicationDoesNotHaveHiFiYieldError if the sample doesn't have expected HiFi yield.
     """
-    if not sample.expected_hifi_yield:
+    if sample.expected_hifi_yield is None:
         raise ApplicationDoesNotHaveHiFiYieldError(
             f"Application for sample {sample.internal_id} does not have target HiFi yield."
         )
