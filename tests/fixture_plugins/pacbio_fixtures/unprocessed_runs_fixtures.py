@@ -17,11 +17,11 @@ def pacbio_unprocessed_run_info(
 
 @pytest.fixture
 def pacbio_barcoded_unprocessed_run_info(
-    pacbio_barcoded_sequencing_run_name: str,
+    pacbio_barcoded_smrt_cell_full_name: str,
     pac_bio_post_processing_service: PacBioPostProcessingService,
 ) -> UnprocessedRunInfo:
     return UnprocessedRunInfo(
-        name=pacbio_barcoded_sequencing_run_name,
+        name=pacbio_barcoded_smrt_cell_full_name,
         post_processing_service=pac_bio_post_processing_service,
         instrument="pacbio",
     )

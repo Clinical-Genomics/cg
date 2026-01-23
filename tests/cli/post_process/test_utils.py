@@ -10,7 +10,7 @@ from cg.services.run_devices.pacbio.post_processing_service import PacBioPostPro
 
 
 def test_get_post_processing_service_from_run_name(
-    pac_bio_context: CGConfig, pacbio_barcoded_sequencing_run_name: str
+    pac_bio_context: CGConfig, pacbio_barcoded_smrt_cell_full_name: str
 ):
     """Test that a the correct post processing service is returned given a run name."""
     # GIVEN a context with a post-processing service for the run name
@@ -18,7 +18,7 @@ def test_get_post_processing_service_from_run_name(
 
     # WHEN getting the post-processing service from the run name
     service: PacBioPostProcessingService = get_post_processing_service_from_run_name(
-        context=pac_bio_context, run_name=pacbio_barcoded_sequencing_run_name
+        context=pac_bio_context, run_name=pacbio_barcoded_smrt_cell_full_name
     )
     # THEN a the correct post-processing service should be returned
     assert isinstance(service, PacBioPostProcessingService)
@@ -51,7 +51,7 @@ def test_get_post_processing_service_from_wrong_run_name(
 
 def test_get_unprocessed_runs_info_pacbio(
     pac_bio_context: CGConfig,
-    pacbio_barcoded_sequencing_run_name: str,
+    pacbio_barcoded_smrt_cell_full_name: str,
     pacbio_smrt_cell_full_name: str,
 ):
     """Test that a list of unprocessed runs is returned for Pacbio."""
@@ -60,7 +60,7 @@ def test_get_unprocessed_runs_info_pacbio(
     instrument: str = "pacbio"
 
     # GIVEN that there are unprocessed run in the directory
-    expected_run_names: set[str] = {pacbio_smrt_cell_full_name, pacbio_barcoded_sequencing_run_name}
+    expected_run_names: set[str] = {pacbio_smrt_cell_full_name, pacbio_barcoded_smrt_cell_full_name}
 
     # GIVEN that there is an already processed run in the directory
     number_of_runs: int = len(pac_bio_context.run_names_services.pacbio.get_run_names())
