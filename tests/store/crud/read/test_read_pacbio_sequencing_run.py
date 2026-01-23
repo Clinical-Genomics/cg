@@ -13,12 +13,12 @@ def test_get_pacbio_sequencing_runs(
     # GIVEN a store with two runs
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name="older"
+            instrument_name=RevioNames.BETTY, internal_id="older"
         )
     )
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.WILMA, run_name="newer"
+            instrument_name=RevioNames.WILMA, internal_id="newer"
         )
     )
 
@@ -37,22 +37,22 @@ def test_get_pacbio_sequencing_runs_with_pagination(
     # GIVEN a store with two runs
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name="pinocchio"
+            instrument_name=RevioNames.BETTY, internal_id="pinocchio"
         )
     )
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.WILMA, run_name="grinch"
+            instrument_name=RevioNames.WILMA, internal_id="grinch"
         )
     )
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name="sauron"
+            instrument_name=RevioNames.BETTY, internal_id="sauron"
         )
     )
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.WILMA, run_name="jesus_christ"
+            instrument_name=RevioNames.WILMA, internal_id="jesus_christ"
         )
     )
 
@@ -69,7 +69,7 @@ def test_get_pacbio_sequencing_run_by_id_successful(store: Store):
     # GIVEN a store with a Pacbio sequencing run
     sequencing_run: PacbioSequencingRun = store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name="pinocchio"
+            instrument_name=RevioNames.BETTY, internal_id="pinocchio"
         )
     )
     store.commit_to_store()
@@ -85,7 +85,7 @@ def test_get_pacbio_sequencing_run_by_id_unsuccessful(store: Store):
     # GIVEN a store with a Pacbio sequencing run
     sequencing_run: PacbioSequencingRun = store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name="pinocchio"
+            instrument_name=RevioNames.BETTY, internal_id="pinocchio"
         )
     )
     store.commit_to_store()
@@ -100,7 +100,7 @@ def test_get_pacbio_sequencing_run_by_run_name_successful(store: Store):
     # GIVEN a store with a Pacbio sequencing run
     sequencing_run: PacbioSequencingRun = store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name="pinocchio"
+            instrument_name=RevioNames.BETTY, internal_id="pinocchio"
         )
     )
     store.commit_to_store()
@@ -118,7 +118,7 @@ def test_get_pacbio_sequencing_run_by_run_name_unsuccessful(store: Store):
     # GIVEN a store with a Pacbio sequencing run
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name="pinocchio"
+            instrument_name=RevioNames.BETTY, internal_id="pinocchio"
         )
     )
     store.commit_to_store()

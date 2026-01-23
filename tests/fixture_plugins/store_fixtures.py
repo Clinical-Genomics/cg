@@ -6,7 +6,6 @@ from cg.constants.constants import ControlOptions
 from cg.constants.devices import DeviceType, RevioNames
 from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioSequencingRunDTO
 from cg.store.store import Store
-from tests.conftest import base_store, run_name
 from tests.store_helpers import StoreHelpers
 
 
@@ -155,13 +154,13 @@ def pacbio_sequencing_runs_store(
     )
     sequencing_run = base_store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name=pacbio_run_name_to_fetch
+            instrument_name=RevioNames.BETTY, internal_id=pacbio_run_name_to_fetch
         )
     )
 
     sequencing_run_not_to_fetch = base_store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name=pacbio_run_name_not_to_fetch
+            instrument_name=RevioNames.BETTY, internal_id=pacbio_run_name_not_to_fetch
         )
     )
 

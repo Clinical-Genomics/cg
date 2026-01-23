@@ -21,7 +21,7 @@ def pac_bio_smrt_cell_dto() -> PacBioSMRTCellDTO:
 def pacbio_sequencing_run_dto(pac_bio_test_run_name: str) -> PacBioSequencingRunDTO:
     return PacBioSequencingRunDTO(
         instrument_name="Wilma",
-        run_name=pac_bio_test_run_name,
+        internal_id=pac_bio_test_run_name,
     )
 
 
