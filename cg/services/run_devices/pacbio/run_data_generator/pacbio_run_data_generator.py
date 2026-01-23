@@ -17,9 +17,7 @@ class PacBioRunDataGenerator(RunDataGenerator):
     @handle_post_processing_errors(
         to_except=(ValueError,), to_raise=PostProcessingRunDataGeneratorError
     )
-    def get_run_data(
-        self, internal_id: str, sequencing_dir: str
-    ) -> PacBioRunData:  # TODO: Rename input run_name to internal_id
+    def get_run_data(self, internal_id: str, sequencing_dir: str) -> PacBioRunData:
         """
         Get the run data for a PacBio SMRT cell run.
         internal_id should include the PacBio run including plate well, e.g. 'r84202_20240522_133539/1_A01'
@@ -29,13 +27,15 @@ class PacBioRunDataGenerator(RunDataGenerator):
 
         return PacBioRunData(
             full_path=full_path,
-            sequencing_run_name=self._get_sequencing_run_name(internal_id),
+            sequencing_run_name=self._get_sequencing_run_internal_id(internal_id),
             well_name=self._get_well(internal_id),
             plate=self._get_plate(internal_id),
         )
 
     @staticmethod
-    def _get_sequencing_run_name(run_name: str) -> str:  # TODO: Rename method
+    def _get_sequencing_run_internal_id(
+        run_name: str,
+    ) -> str:  # TODO: Rename input to something more meaningful
         return run_name.split("/")[0]
 
     @staticmethod

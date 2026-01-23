@@ -7,6 +7,6 @@ class PacBioRunData(RunData):
     """Holds information on a single SMRTcell of a PacBio run."""
 
     full_path: Path
-    sequencing_run_name: str
+    sequencing_run_name: str  # TODO rename sequencing_run_name to run_internal_id
     well_name: str
     plate: int
