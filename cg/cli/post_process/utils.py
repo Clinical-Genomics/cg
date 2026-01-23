@@ -48,7 +48,7 @@ def get_unprocessed_runs_info(context: CGConfig, instrument: str) -> list[Unproc
         run_names_service: RunNamesService = getattr(context.run_names_services, instrument_name)
         runs.extend(
             _get_unprocessed_runs_from_run_names(
-                run_names=run_names_service.get_run_names(),
+                run_names=run_names_service.get_run_full_names(),
                 post_processing_service=getattr(context.post_processing_services, instrument_name),
                 instrument_name=instrument_name,
             )

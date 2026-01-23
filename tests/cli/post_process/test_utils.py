@@ -63,7 +63,7 @@ def test_get_unprocessed_runs_info_pacbio(
     expected_run_names: set[str] = {pacbio_smrt_cell_full_name, pacbio_barcoded_smrt_cell_full_name}
 
     # GIVEN that there is an already processed run in the directory
-    number_of_runs: int = len(pac_bio_context.run_names_services.pacbio.get_run_names())
+    number_of_runs: int = len(pac_bio_context.run_names_services.pacbio.get_run_full_names())
     number_unprocessed: int = len(expected_run_names)
     assert number_of_runs > number_unprocessed
 
