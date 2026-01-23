@@ -31,7 +31,7 @@ def pacbio_smrt_cell_metrics_dto(pac_bio_test_run_name: str) -> PacBioSMRTCellMe
         "type": DeviceType.PACBIO,
         "well": "A1",
         "plate": 1,
-        "run_name": pac_bio_test_run_name,
+        "run_internal_id": pac_bio_test_run_name,
         "started_at": datetime.now(),
         "completed_at": datetime.now(),
         "movie_time_hours": 10,

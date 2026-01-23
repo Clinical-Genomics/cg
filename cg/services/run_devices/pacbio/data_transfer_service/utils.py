@@ -22,7 +22,7 @@ def get_smrt_cell_metrics_dto(
         type=DeviceType.PACBIO,
         well=metrics.dataset_metrics.well,
         plate=metrics.dataset_metrics.plate,
-        run_name=run_data.sequencing_run_name,
+        run_internal_id=run_data.sequencing_run_name,
         started_at=metrics.dataset_metrics.run_started_at,
         completed_at=metrics.dataset_metrics.run_completed_at,
         hifi_reads=metrics.read.hifi_reads,

@@ -12,7 +12,7 @@ class PacBioSMRTCellMetricsDTO(BaseModel):
     type: DeviceType
     well: str
     plate: int
-    run_name: str
+    run_internal_id: str
     movie_name: str
     started_at: datetime
     completed_at: datetime
