@@ -97,7 +97,7 @@ class PostProcessingService(ABC):
         pass
 
     @abstractmethod
-    def can_post_processing_start(self, run_name: str) -> bool:
+    def can_post_processing_start(self, run_full_name: str) -> bool:
         """Check if a run can be post processed."""
         pass
 
