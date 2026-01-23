@@ -67,7 +67,7 @@ class PacBioPostProcessingService(PostProcessingService):
         return processing_complete_file.exists()
 
     def can_post_processing_start(self, run_full_name: str) -> bool:
-        LOG.info(f"Checking if Pacbio post-processing can start for run: {run_full_name}")
+        LOG.debug(f"Checking if Pacbio post-processing can start for run: {run_full_name}")
         parent_directory: Path = Path(self.sequencing_dir, run_full_name).parent
         all_smrt_cells_are_ready: bool = all(
             self.is_smrt_cell_ready_for_post_processing(f"{parent_directory.name}/{smrt_cell.name}")
@@ -76,7 +76,7 @@ class PacBioPostProcessingService(PostProcessingService):
         return all_smrt_cells_are_ready
 
     def is_smrt_cell_ready_for_post_processing(self, smrt_cell_full_name: str) -> bool:
-        LOG.info(f"Checking if Pacbio SMRT-cell {smrt_cell_full_name} is ready for postprocessing")
+        LOG.debug(f"Checking if Pacbio SMRT-cell {smrt_cell_full_name} is ready for postprocessing")
         try:
             run_data: PacBioRunData = self.run_data_generator.get_run_data(
                 smrt_cell_full_name=smrt_cell_full_name, sequencing_dir=self.sequencing_dir
