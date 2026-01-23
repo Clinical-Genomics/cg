@@ -4,7 +4,7 @@ from cg.services.run_devices.run_names.pacbio import PacbioRunNamesService
 
 
 def test_pacbio_get_run_names(
-    pacbio_run_names_service: PacbioRunNamesService, pacbio_run_names: set
+    pacbio_run_names_service: PacbioRunNamesService, pacbio_smrt_cell_full_names: set
 ):
     """Test that getting PacBio run names works."""
     # GIVEN a PacBio run names service
@@ -13,7 +13,7 @@ def test_pacbio_get_run_names(
     run_names: list[str] = pacbio_run_names_service.get_run_names()
 
     # THEN the run names are returned
-    assert set(run_names) == pacbio_run_names
+    assert set(run_names) == pacbio_smrt_cell_full_names
 
 
 def test_pacbio_get_run_names_empty(tmp_path: Path):

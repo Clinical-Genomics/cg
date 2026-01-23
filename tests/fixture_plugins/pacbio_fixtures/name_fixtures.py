@@ -49,7 +49,7 @@ def pacbio_processed_smrt_cell_full_name(
 
 
 @pytest.fixture
-def pacbio_run_names(
+def pacbio_smrt_cell_full_names(
     pacbio_smrt_cell_full_name: str,
     pacbio_barcoded_smrt_cell_full_name: str,
     pacbio_processed_smrt_cell_full_name: str,
@@ -62,7 +62,7 @@ def pacbio_run_names(
 
 
 @pytest.fixture
-def pacbio_barcoded_1_c01_cell_full_name() -> str:
+def pacbio_barcoded_1_c01_movie_name() -> str:
     """Return the full name of a PacBio SMRT cell."""
     return "m84202_240913_162115_s3"
 
