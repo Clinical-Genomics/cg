@@ -1808,9 +1808,9 @@ class ReadHandler(BaseHandler):
             sequencing_metrics = sequencing_metrics.filter(RunDevice.internal_id.in_(smrt_cell_ids))
         return sequencing_metrics.all()
 
-    def get_pacbio_smrt_cell_metrics_by_run_name(
-        self, run_name: str
-    ) -> list[PacbioSMRTCellMetrics]:  # TODO: Rename method and input
+    def get_pacbio_smrt_cell_metrics_by_run_internal_id(
+        self, run_internal_id: str
+    ) -> list[PacbioSMRTCellMetrics]:
         """
         Fetches data from PacbioSequencingRunDTO filtered on run name.
         Raises:
@@ -1819,9 +1819,9 @@ class ReadHandler(BaseHandler):
         runs: Query = self._get_query(table=PacbioSMRTCellMetrics).join(
             PacbioSMRTCellMetrics.sequencing_run
         )
-        runs = runs.filter(PacbioSequencingRun.internal_id == run_name)
+        runs = runs.filter(PacbioSequencingRun.internal_id == run_internal_id)
         if runs.count() == 0:
-            raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
+            raise EntryNotFoundError(f"Could not find any sequencing runs for {run_internal_id}")
         return runs.all()
 
     def get_pacbio_sequencing_runs(

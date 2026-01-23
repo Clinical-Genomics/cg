@@ -16,7 +16,7 @@ class PacbioSequencingRunsService:
     def get_sequencing_runs_by_name(self, run_name: str) -> PacbioSmrtCellMetricsResponse:
         metrics: list[PacbioSmrtCellMetricsDTO] = []
         db_smrt_cell_metrics: list[PacbioSMRTCellMetrics] = (
-            self.store.get_pacbio_smrt_cell_metrics_by_run_name(run_name)
+            self.store.get_pacbio_smrt_cell_metrics_by_run_internal_id(run_name)
         )
         for metric in db_smrt_cell_metrics:
             metric_dict = metric.to_dict()
