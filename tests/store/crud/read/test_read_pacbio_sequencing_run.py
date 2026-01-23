@@ -106,7 +106,7 @@ def test_get_pacbio_sequencing_run_by_run_name_successful(store: Store):
     store.commit_to_store()
 
     # WHEN getting the sequencing run by internal_id
-    fetched_run: PacbioSequencingRun = store.get_pacbio_sequencing_run_by_run_name(
+    fetched_run: PacbioSequencingRun = store.get_pacbio_sequencing_run_by_internal_id(
         sequencing_run.internal_id
     )
 
@@ -126,4 +126,4 @@ def test_get_pacbio_sequencing_run_by_run_name_unsuccessful(store: Store):
     # WHEN getting the sequencing run by the wrong internal_id
     # THEN an error stating that the run was not found is raised
     with pytest.raises(PacbioSequencingRunNotFoundError):
-        store.get_pacbio_sequencing_run_by_run_name("Geppetto")
+        store.get_pacbio_sequencing_run_by_internal_id("Geppetto")

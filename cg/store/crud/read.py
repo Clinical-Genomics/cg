@@ -1871,17 +1871,18 @@ class ReadHandler(BaseHandler):
                 f"Pacbio Sequencing run with id {id} was not found in the database."
             )
 
-    def get_pacbio_sequencing_run_by_run_name(
-        self, run_name: str
-    ) -> PacbioSequencingRun:  # TODO Rename in param and method name
+    def get_pacbio_sequencing_run_by_internal_id(self, internal_id: str) -> PacbioSequencingRun:
         """
-        Get Pacbio Sequencing run by run name.
+        Get Pacbio Sequencing run by internal ID.
         Raises:
-            PacbioSequencingRunNotFoundError: If no Pacbio sequencing run is found with the given run name.
+            PacbioSequencingRunNotFoundError: If no Pacbio sequencing run is found with the given
+            internal ID.
         """
         try:
-            return self._get_query(table=PacbioSequencingRun).filter_by(internal_id=run_name).one()
+            return (
+                self._get_query(table=PacbioSequencingRun).filter_by(internal_id=internal_id).one()
+            )
         except sqlalchemy.orm.exc.NoResultFound:
             raise PacbioSequencingRunNotFoundError(
-                f"Pacbio Sequencing run with run_name {run_name} was not found in the database."
+                f"Pacbio Sequencing run with internal ID {internal_id} was not found in the database."
             )

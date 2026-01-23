@@ -42,7 +42,9 @@ class PacBioStoreService(PostProcessingStoreService):
             return self.store.create_pacbio_sequencing_run(sequencing_run_dto)
         except PacbioSequencingRunAlreadyExistsError:
             LOG.debug(f"Sequencing run {sequencing_run_dto.internal_id} already exists")
-            return self.store.get_pacbio_sequencing_run_by_run_name(sequencing_run_dto.internal_id)
+            return self.store.get_pacbio_sequencing_run_by_internal_id(
+                sequencing_run_dto.internal_id
+            )
 
     def _create_pacbio_smrt_cell_metrics(
         self,
