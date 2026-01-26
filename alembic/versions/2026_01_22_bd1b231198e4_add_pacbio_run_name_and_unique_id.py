@@ -19,11 +19,11 @@ depends_on = None
 
 def upgrade():
     op.alter_column(
-        table_name="pacbio_sequencing_run", column_name="run_name", new_column_name="internal_id"
+        table_name="pacbio_sequencing_run", column_name="run_name", new_column_name="run_id"
     )
     op.add_column(
         table_name="pacbio_sequencing_run",
-        column=sa.Column("name", sa.String(64), nullable=True, index=True),
+        column=sa.Column("run_name", sa.String(64), nullable=True, index=True),
     )
     op.add_column(
         table_name="pacbio_sequencing_run",
@@ -33,7 +33,7 @@ def upgrade():
 
 def downgrade():
     op.drop_column(table_name="pacbio_sequencing_run", column_name="unique_id")
-    op.drop_column(table_name="pacbio_sequencing_run", column_name="name")
+    op.drop_column(table_name="pacbio_sequencing_run", column_name="run_name")
     op.alter_column(
-        table_name="pacbio_sequencing_run", column_name="internal_id", new_column_name="run_name"
+        table_name="pacbio_sequencing_run", column_name="run_id", new_column_name="run_name"
     )
