@@ -42,8 +42,8 @@ def test_parse_analysis(
 
 def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixture):
     # GIVEN Raredisease case
-    sample: Sample = create_autospec(Sample)
-    case: Case = create_autospec(Case, panels=["omim-auto"])
+    sample: Sample = create_autospec(Sample, internal_id="internal_id")
+    case: Case = create_autospec(Case, internal_id="case_id", panels=["omim-auto"])
 
     # GIVEN Raredisease analysis API
     analysis_api: RarediseaseAnalysisAPI = RarediseaseAnalysisAPI(
@@ -52,16 +52,18 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
     chanjo_api: TypedMock[ChanjoAPI] = create_typed_mock(ChanjoAPI)
     analysis_api.chanjo_api = chanjo_api.as_type
 
-    # GIVEN
+    # GIVEN a response from ScoutAPI
     mocker.patch.object(ScoutAPI, "get_genes", return_value=[])
 
     # GIVEN some gene ids
     gene_ids: list[int] = analysis_api.get_gene_ids_from_scout(case.panels)
 
-    # WHEN
+    # WHEN getting the chanjo coverage for the sample
     analysis_api.get_sample_coverage(
         case_id=case.internal_id, sample_id=sample.internal_id, gene_ids=gene_ids
     )
 
-    # THEN
-    chanjo_api.as_mock.sample_coverage.assert_called_once_with()
+    # THEN the sample coverage should have been called with the right information
+    chanjo_api.as_mock.sample_coverage.assert_called_once_with(
+        sample_id="internal_id", panel_genes=[]
+    )

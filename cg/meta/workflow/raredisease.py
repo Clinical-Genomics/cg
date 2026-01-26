@@ -7,18 +7,11 @@ from typing import Any
 
 from housekeeper.store.models import File
 
-from cg.clients.chanjo2.models import (
-    CoverageMetrics,
-    CoveragePostRequest,
-    CoveragePostResponse,
-    CoverageSample,
-)
+from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import (
     RAREDISEASE_COVERAGE_FILE_TAGS,
-    RAREDISEASE_COVERAGE_INTERVAL_TYPE,
-    RAREDISEASE_COVERAGE_THRESHOLD,
     RAREDISEASE_METRIC_CONDITIONS_WES,
     RAREDISEASE_METRIC_CONDITIONS_WGS,
     RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
@@ -157,13 +150,14 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
     ) -> CoverageMetrics | None:
-        sample_coverage = self.chanjo_api.sample_coverage(
-            sample_id=sample.internal_id, panel_genes=genes
-        )
+        sample_coverage = self.chanjo_api.sample_coverage(sample_id=sample_id, panel_genes=gene_ids)
         if sample_coverage:
-            return sample_coverage
-        LOG.warning(f"Could not calculate sample coverage for: {sample.internal_id}")
-        return None  # TODO need(?) to parse the sample_coverage into CoverageMetrics
+            return CoverageMetrics(
+                coverage_completeness_percent=sample_coverage.get("mean_completeness"),
+                mean_coverage=sample_coverage.get("mean_coverage"),
+            )
+        LOG.warning(f"Could not calculate sample coverage for: {sample_id}")
+        return None
 
     def get_scout_upload_case_tags(self) -> dict:
         """Return Raredisease Scout upload case tags."""
