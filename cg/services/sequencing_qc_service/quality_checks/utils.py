@@ -138,7 +138,7 @@ def raw_data_case_pass_qc(case: Case) -> bool:
         return ready_made_library_case_pass_sequencing_qc(case)
     if is_any_processed_sample_yield_based(case):
         return all(sample_has_enough_hifi_yield(sample) for sample in case.samples)
-    elif is_first_sample_reads_based_and_processed(case):
+    elif is_any_processed_sample_read_based(case):
         return all(sample_has_enough_reads(sample) for sample in case.samples)
     elif are_all_samples_external(case):
         LOG.info(f"All samples in case {case.internal_id} are external, QC passes.")
@@ -155,11 +155,11 @@ def is_any_processed_sample_yield_based(case: Case) -> bool:
     )
 
 
-def is_first_sample_reads_based_and_processed(case: Case) -> bool:
-    sample: Sample = case.samples[0]
-    if metrics := sample.sample_run_metrics:
-        return metrics[0].type == DeviceType.ILLUMINA
-    return False
+def is_any_processed_sample_read_based(case: Case) -> bool:
+    return any(
+        any(metric.type == DeviceType.ILLUMINA for metric in sample.sample_run_metrics)
+        for sample in case.samples
+    )
 
 
 def are_all_samples_external(case: Case) -> bool:
