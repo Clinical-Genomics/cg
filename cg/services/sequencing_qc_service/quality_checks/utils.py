@@ -141,6 +141,7 @@ def raw_data_case_pass_qc(case: Case) -> bool:
     elif is_first_sample_reads_based_and_processed(case):
         return all(sample_has_enough_reads(sample) for sample in case.samples)
     elif are_all_samples_external(case):
+        LOG.info(f"All samples in case {case.internal_id} are external, QC passes.")
         return True
     LOG.warning(f"Not all samples for case {case.internal_id} have been post-processed.")
     return False
