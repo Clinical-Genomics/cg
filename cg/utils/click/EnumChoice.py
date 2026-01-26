@@ -1,4 +1,4 @@
-""" class to use when the click option is an Enum
+"""class to use when the click option is an Enum
 based on suggestion https://github.com/pallets/click/issues/605#issuecomment-277539425
 """
 
