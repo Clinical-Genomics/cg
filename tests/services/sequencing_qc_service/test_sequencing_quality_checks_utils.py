@@ -565,9 +565,9 @@ def test_raw_data_case_pass_qc_hifi_yield_based_fails():
     assert not passes
 
 
-def test_raw_data_case_pass_qc_sample_run_metrics_missing():
+def test_raw_data_case_pass_qc_sample_run_metrics_missing_fails():
     # GIVEN a raw-data sample without sample run metrics
-    sample: Sample = create_autospec(Sample, sample_run_metrics=[])
+    sample: Sample = create_autospec(Sample, is_external=False, sample_run_metrics=[])
 
     # GIVEN a case with the sample above
     case: Case = create_autospec(Case, samples=[sample])
@@ -577,6 +577,44 @@ def test_raw_data_case_pass_qc_sample_run_metrics_missing():
 
     # THEN the case fails QC
     assert not passes
+
+
+def test_raw_data_case_pass_qc_sample_run_metrics_missing_passes():
+    # GIVEN a raw-data sample without sample run metrics
+    sample: Sample = create_autospec(Sample, is_external=True, sample_run_metrics=[])
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case passes QC
+    assert passes
+
+
+def test_raw_data_case_pass_qc_mixed_internal_and_external_passes():
+    internal_sample: Sample = create_autospec(
+        Sample,
+        expected_hifi_yield=10,
+        hifi_yield=10,
+        is_external=False,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
+    )
+    external_sample: Sample = create_autospec(
+        Sample,
+        is_external=True,
+        sample_run_metrics=[],
+    )
+
+    # GIVEN a case with the samples above
+    case: Case = create_autospec(Case, samples=[external_sample, internal_sample])
+
+    # WHEN calling the raw_data_case_pass_qc function on the case
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case passes QC
+    assert passes
 
 
 def test_raw_data_yield_based_case_pass_qc_second_sample_missing_sample_run_metrics():

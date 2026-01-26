@@ -140,6 +140,8 @@ def raw_data_case_pass_qc(case: Case) -> bool:
         return all(sample_has_enough_hifi_yield(sample) for sample in case.samples)
     elif is_first_sample_reads_based_and_processed(case):
         return all(sample_has_enough_reads(sample) for sample in case.samples)
+    elif are_all_samples_external(case):
+        return True
     LOG.warning(f"Not all samples for case {case.internal_id} have been post-processed.")
     return False
 
@@ -157,6 +159,10 @@ def is_first_sample_reads_based_and_processed(case: Case) -> bool:
     if metrics := sample.sample_run_metrics:
         return metrics[0].type == DeviceType.ILLUMINA
     return False
+
+
+def are_all_samples_external(case: Case) -> bool:
+    return all(sample.is_external for sample in case.samples)
 
 
 def is_case_express_priority(case: Case) -> bool:
@@ -219,10 +225,10 @@ def sample_has_enough_hifi_yield(sample: Sample) -> bool:
     Raises:
         ApplicationDoesNotHaveHiFiYieldError if the sample doesn't have expected HiFi yield.
     """
-    # if sample.is_external:
-    #    # An external sample will have None as yield in StatusDB
-    #    LOG.info(f"Sample {sample.internal_id} is external, skipping check.")
-    #    return True
+    if sample.is_external:
+        # An external sample will have None as yield in StatusDB
+        LOG.info(f"Sample {sample.internal_id} is external, skipping check.")
+        return True
 
     if sample.expected_hifi_yield is None:
         raise ApplicationDoesNotHaveHiFiYieldError(
