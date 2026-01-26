@@ -63,6 +63,9 @@ def express_sample_has_enough_reads(sample: Sample) -> bool:
     Checks if given express sample has enough reads. Gets the threshold from the sample's
     application version.
     """
+    if sample.is_external:
+        LOG.info(f"Sample {sample.internal_id} is external, skipping check.")
+        return True
     express_reads_threshold: int = get_express_reads_threshold_for_sample(sample)
     enough_reads: bool = sample.reads >= express_reads_threshold
     if not enough_reads:
@@ -71,6 +74,9 @@ def express_sample_has_enough_reads(sample: Sample) -> bool:
 
 
 def express_sample_has_enough_yield(sample: Sample) -> bool:
+    if sample.is_external:
+        LOG.info(f"Sample {sample.internal_id} is external, skipping check.")
+        return True
     if not sample.hifi_yield:
         LOG.debug(f"Sample {sample.internal_id} has no hifi yield.")
         return False
@@ -213,6 +219,9 @@ def sample_has_enough_reads(sample: Sample) -> bool:
     """
     Check if the sample has more or equal reads than the expected reads for the sample.
     """
+    if sample.is_external:
+        LOG.info(f"Sample {sample.internal_id} is external, skipping check.")
+        return True
     enough_reads: bool = sample.reads >= sample.expected_reads_for_sample
     if not enough_reads:
         LOG.warning(f"Sample {sample.internal_id} has too few reads.")
