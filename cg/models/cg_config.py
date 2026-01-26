@@ -230,102 +230,25 @@ class MipConfig(BaseModel):
     script: str
 
 
-class NalloConfig(CommonAppConfig):
-    binary_path: str | None = None
+class NextflowConfig(BaseModel):
+    """Contains the Nextflow parameters (different from pipeline parameters!)
+    used for running Nextflow pipelines."""
+
     compute_env: str
-    conda_binary: str | None = None
+    conda_binary: str
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
-    launch_directory: str
-    workflow_bin_path: str
-    pre_run_script: str = ""
+    params: str
+    platform: str
+    pre_run_script: str
     profile: str
     repository: str
-    revision: str
-    root: str
-    slurm: SlurmConfig
-    tower_workflow: str
-
-
-class RarediseaseConfig(CommonAppConfig):
-    binary_path: str | None = None
-    compute_env: str
-    conda_binary: str | None = None
-    conda_env: str
-    platform: str
-    params: str
-    config: str
     resources: str
-    launch_directory: str
-    workflow_bin_path: str
-    pre_run_script: str = ""
-    profile: str
-    repository: str
-    revision: str
-    root: str
-    slurm: SlurmConfig
-    tower_workflow: str
-
-
-class TomteConfig(CommonAppConfig):
-    binary_path: str | None = None
-    compute_env: str
-    conda_binary: str | None = None
-    conda_env: str
-    platform: str
-    params: str
-    config: str
-    resources: str
-    workflow_bin_path: str
-    pre_run_script: str = ""
-    profile: str
-    repository: str
-    revision: str
-    root: str
-    slurm: SlurmConfig
-    tower_workflow: str
-
-
-class RnafusionConfig(CommonAppConfig):
-    binary_path: str
-    compute_env: str
-    conda_binary: str | None = None
-    conda_env: str
-    platform: str
-    params: str
-    config: str
-    resources: str
-    launch_directory: str
-    pre_run_script: str = ""
-    profile: str
-    repository: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
     workflow_bin_path: str
-
-
-class TaxprofilerConfig(CommonAppConfig):
-    binary_path: str
-    conda_binary: str | None = None
-    conda_env: str
-    compute_env: str
-    platform: str
-    params: str
-    config: str
-    resources: str
-    workflow_bin_path: str
-    pre_run_script: str = ""
-    profile: str
-    repository: str
-    revision: str
-    root: str
-    slurm: SlurmConfig
-    tower_workflow: str
 
 
 class MicrosaltConfig(BaseModel):
@@ -508,12 +431,12 @@ class CGConfig(BaseModel):
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig | None = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig | None = None
-    nallo: NalloConfig | None = None
-    raredisease: RarediseaseConfig | None = None
-    rnafusion: RnafusionConfig | None = None
+    nallo: NextflowConfig | None = None
+    raredisease: NextflowConfig | None = None
+    rnafusion: NextflowConfig | None = None
     statina: StatinaConfig | None = None
-    taxprofiler: TaxprofilerConfig | None = None
-    tomte: TomteConfig | None = None
+    taxprofiler: NextflowConfig | None = None
+    tomte: NextflowConfig | None = None
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}

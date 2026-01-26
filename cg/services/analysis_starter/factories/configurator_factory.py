@@ -5,7 +5,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
 from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler, MipFastqHandler
-from cg.models.cg_config import CGConfig, CommonAppConfig
+from cg.models.cg_config import CGConfig, NextflowConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
@@ -75,7 +75,6 @@ from cg.store.store import Store
 
 
 class ConfiguratorFactory:
-
     def __init__(self, cg_config: CGConfig):
         self.cg_config = cg_config
         self.housekeeper_api: HousekeeperAPI = cg_config.housekeeper_api
@@ -118,7 +117,7 @@ class ConfiguratorFactory:
         )
 
     def _get_nextflow_config_file_creator(self, workflow: Workflow) -> NextflowConfigFileCreator:
-        pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
+        pipeline_config: NextflowConfig = self._get_pipeline_config(workflow)
         return NextflowConfigFileCreator(
             account=pipeline_config.slurm.account,
             platform=pipeline_config.platform,
@@ -147,7 +146,7 @@ class ConfiguratorFactory:
             case _:
                 raise NotImplementedError(f"There is no params file creator for {workflow}")
 
-    def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
+    def _get_pipeline_config(self, workflow: Workflow) -> NextflowConfig:
         return getattr(self.cg_config, workflow)
 
     def _get_sample_sheet_creator(self, workflow: Workflow) -> SampleSheetCreator:

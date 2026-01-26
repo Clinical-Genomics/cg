@@ -5,21 +5,11 @@ import pytest
 
 from cg.constants import Workflow
 from cg.constants.observations import BalsamicObservationPanel
-from cg.models.cg_config import (
-    BalsamicConfig,
-    LoqusDBDumpFiles,
-    NalloConfig,
-    RarediseaseConfig,
-    RnafusionConfig,
-    SlurmConfig,
-    TaxprofilerConfig,
-    TomteConfig,
-)
+from cg.models.cg_config import BalsamicConfig, LoqusDBDumpFiles, NextflowConfig, SlurmConfig
 
 
 @pytest.fixture
 def get_nextflow_config_dict(
-    nextflow_binary: Path,
     nextflow_root: str,
     conda_binary: Path,
     nf_analysis_platform_config_path: Path,
@@ -39,19 +29,16 @@ def get_nextflow_config_dict(
 
     def _make_dict(workflow: str) -> dict:
         return {
-            "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": f"S_{workflow}",
-            "platform": str(nf_analysis_platform_config_path),
-            "params": str(nf_analysis_pipeline_params_path),
             "config": str(nf_analysis_pipeline_config_path),
-            "resources": str(nf_analysis_pipeline_resource_optimisation_path),
-            "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "workflow_bin_path": Path("workflow", "path").as_posix(),
+            "params": str(nf_analysis_pipeline_params_path),
+            "platform": str(nf_analysis_platform_config_path),
+            "pre_run_script": "",
             "profile": "myprofile",
-            "references": Path("path", "to", "references").as_posix(),
             "repository": nextflow_repository,
+            "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "revision": nextflow_pipeline_revision,
             "root": nextflow_root,
             "slurm": {
@@ -59,6 +46,7 @@ def get_nextflow_config_dict(
                 "mail_user": email_address,
             },
             "tower_workflow": workflow,
+            "workflow_bin_path": Path("workflow", "path").as_posix(),
         }
 
     return _make_dict
@@ -113,30 +101,30 @@ def cg_balsamic_config(tmp_path) -> BalsamicConfig:
 
 
 @pytest.fixture
-def nallo_config_object(get_nextflow_config_dict: Callable) -> NalloConfig:
+def nallo_config_object(get_nextflow_config_dict: Callable) -> NextflowConfig:
     config: dict = get_nextflow_config_dict(workflow=Workflow.NALLO)
-    return NalloConfig(**config)
+    return NextflowConfig(**config)
 
 
 @pytest.fixture
-def raredisease_config_object(get_nextflow_config_dict: Callable) -> RarediseaseConfig:
+def raredisease_config_object(get_nextflow_config_dict: Callable) -> NextflowConfig:
     config: dict = get_nextflow_config_dict(workflow=Workflow.RAREDISEASE)
-    return RarediseaseConfig(**config)
+    return NextflowConfig(**config)
 
 
 @pytest.fixture
-def rnafusion_config_object(get_nextflow_config_dict: Callable) -> RnafusionConfig:
+def rnafusion_config_object(get_nextflow_config_dict: Callable) -> NextflowConfig:
     config: dict = get_nextflow_config_dict(workflow=Workflow.RNAFUSION)
-    return RnafusionConfig(**config)
+    return NextflowConfig(**config)
 
 
 @pytest.fixture
-def taxprofiler_config_object(get_nextflow_config_dict: Callable) -> TaxprofilerConfig:
+def taxprofiler_config_object(get_nextflow_config_dict: Callable) -> NextflowConfig:
     config: dict = get_nextflow_config_dict(workflow=Workflow.TAXPROFILER)
-    return TaxprofilerConfig(**config)
+    return NextflowConfig(**config)
 
 
 @pytest.fixture
-def tomte_config_object(get_nextflow_config_dict: Callable) -> TomteConfig:
+def tomte_config_object(get_nextflow_config_dict: Callable) -> NextflowConfig:
     config: dict = get_nextflow_config_dict(workflow=Workflow.TOMTE)
-    return TomteConfig(**config)
+    return NextflowConfig(**config)

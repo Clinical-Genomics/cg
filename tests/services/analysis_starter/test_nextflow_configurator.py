@@ -10,14 +10,7 @@ from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCre
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
 from cg.exc import AnalysisAlreadyCompletedError, MissingConfigFilesError
-from cg.models.cg_config import (
-    CommonAppConfig,
-    NalloConfig,
-    RarediseaseConfig,
-    RnafusionConfig,
-    TaxprofilerConfig,
-    TomteConfig,
-)
+from cg.models.cg_config import CommonAppConfig, NextflowConfig
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
     PipelineExtension,
 )
@@ -110,7 +103,7 @@ def test_get_config_missing_required_files(mocker: MockerFixture):
 
     # GIVEN a raredisease config
     pipeline_config = create_autospec(
-        RarediseaseConfig,
+        NextflowConfig,
         root="/root",
         repository="https://repo.scilifelab.se",
         revision="rev123",
@@ -302,31 +295,31 @@ def test_get_case_config_none_flags(
         (
             Workflow.NALLO,
             NalloParamsFileCreator,
-            NalloConfig,
+            NextflowConfig,
             NalloSampleSheetCreator,
         ),
         (
             Workflow.RAREDISEASE,
             RarediseaseParamsFileCreator,
-            RarediseaseConfig,
+            NextflowConfig,
             RarediseaseSampleSheetCreator,
         ),
         (
             Workflow.RNAFUSION,
             RNAFusionParamsFileCreator,
-            RnafusionConfig,
+            NextflowConfig,
             RNAFusionSampleSheetCreator,
         ),
         (
             Workflow.TAXPROFILER,
             TaxprofilerParamsFileCreator,
-            TaxprofilerConfig,
+            NextflowConfig,
             TaxprofilerSampleSheetCreator,
         ),
         (
             Workflow.TOMTE,
             TomteParamsFileCreator,
-            TomteConfig,
+            NextflowConfig,
             TomteSampleSheetCreator,
         ),
     ],
