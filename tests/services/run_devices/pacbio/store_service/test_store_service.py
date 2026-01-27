@@ -84,7 +84,7 @@ def test_store_post_processing_data(
     pacbio_sequencing_run: PacbioSequencingRun = pac_bio_store_service.store._get_query(
         PacbioSequencingRun
     ).one()
-    assert pacbio_sequencing_run.internal_id == "r84202_20240522_133539"
+    assert pacbio_sequencing_run.run_id == "r84202_20240522_133539"
     assert pacbio_sequencing_run.instrument_name == RevioNames.WILMA
 
     # THEN the sample reads and sequenced date are updated

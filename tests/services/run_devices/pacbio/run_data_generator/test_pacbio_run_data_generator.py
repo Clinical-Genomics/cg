@@ -12,15 +12,15 @@ from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRun
 
 
 @pytest.mark.parametrize(
-    "run_internal_id_fixture, smrt_cell_name_fixture, run_data_fixture",
+    "run_id_fixture, smrt_cell_name_fixture, run_data_fixture",
     [
         (
-            "pac_bio_test_run_internal_id",
+            "pac_bio_test_run_id",
             "pac_bio_smrt_cell_name",
             "expected_pac_bio_run_data_1_b01",
         ),
         (
-            "pacbio_barcoded_run_internal_id",
+            "pacbio_barcoded_run_id",
             "pacbio_barcoded_smrt_cell_name",
             "pacbio_barcoded_run_data",
         ),
@@ -30,16 +30,16 @@ from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRun
 def test_get_run_data(
     pac_bio_run_data_generator: PacBioRunDataGenerator,
     pac_bio_runs_dir: Path,
-    run_internal_id_fixture: str,
+    run_id_fixture: str,
     smrt_cell_name_fixture: str,
     run_data_fixture: str,
     request: pytest.FixtureRequest,
 ):
     # GIVEN a run directory, a run internal id and a SMRT cell name
-    run_internal_id: str = request.getfixturevalue(run_internal_id_fixture)
+    run_id: str = request.getfixturevalue(run_id_fixture)
     smrt_cell_name: str = request.getfixturevalue(smrt_cell_name_fixture)
     expected_run_data: PacBioRunData = request.getfixturevalue(run_data_fixture)
-    smrt_cell_full_name: str = "/".join([run_internal_id, smrt_cell_name])
+    smrt_cell_full_name: str = "/".join([run_id, smrt_cell_name])
 
     # WHEN Generating run data
     run_data: PacBioRunData = pac_bio_run_data_generator.get_run_data(

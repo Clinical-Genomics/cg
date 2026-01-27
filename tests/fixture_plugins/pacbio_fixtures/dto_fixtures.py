@@ -18,20 +18,20 @@ def pac_bio_smrt_cell_dto() -> PacBioSMRTCellDTO:
 
 
 @pytest.fixture
-def pacbio_sequencing_run_dto(pac_bio_test_run_internal_id: str) -> PacBioSequencingRunDTO:
+def pacbio_sequencing_run_dto(pac_bio_test_run_id: str) -> PacBioSequencingRunDTO:
     return PacBioSequencingRunDTO(
         instrument_name="Wilma",
-        internal_id=pac_bio_test_run_internal_id,
+        run_id=pac_bio_test_run_id,
     )
 
 
 @pytest.fixture
-def pacbio_smrt_cell_metrics_dto(pac_bio_test_run_internal_id: str) -> PacBioSMRTCellMetricsDTO:
+def pacbio_smrt_cell_metrics_dto(pac_bio_test_run_id: str) -> PacBioSMRTCellMetricsDTO:
     sample_data = {
         "type": DeviceType.PACBIO,
         "well": "A1",
         "plate": 1,
-        "run_internal_id": pac_bio_test_run_internal_id,
+        "run_id": pac_bio_test_run_id,
         "started_at": datetime.now(),
         "completed_at": datetime.now(),
         "movie_time_hours": 10,

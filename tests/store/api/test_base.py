@@ -64,7 +64,7 @@ def test_update_pacbio_sample_reads(base_store: Store, helpers: StoreHelpers):
     base_store.commit_to_store()
     sequencing_run = base_store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, internal_id="internal_id"
+            instrument_name=RevioNames.BETTY, run_id="r123_123_123"
         )
     )
     smrt_cell_metrics: PacbioSMRTCellMetrics = helpers.add_pacbio_smrt_cell_metrics(

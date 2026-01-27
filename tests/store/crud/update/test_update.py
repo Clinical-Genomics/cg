@@ -285,7 +285,7 @@ def test_update_pacbio_sequencing_run_comment(store: Store):
     # GIVEN a store with a PacBio sequencing run
     sequencing_run = store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, internal_id="the_perfect_run"
+            instrument_name=RevioNames.BETTY, run_id="the_perfect_run"
         )
     )
     store.commit_to_store()
@@ -304,7 +304,7 @@ def test_update_pacbio_sequencing_run_processed(store: Store):
     # GIVEN a store with a PacBio sequencing run
     sequencing_run = store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, internal_id="the_perfect_run"
+            instrument_name=RevioNames.BETTY, run_id="the_perfect_run"
         )
     )
     store.commit_to_store()

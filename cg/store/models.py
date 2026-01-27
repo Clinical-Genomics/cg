@@ -1113,8 +1113,8 @@ class PacbioSMRTCellMetrics(InstrumentRun):
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
 
     @property
-    def run_internal_id(self) -> str:
-        return self.sequencing_run.internal_id
+    def run_id(self) -> str:
+        return self.sequencing_run.run_id
 
     def to_dict(self):
         return to_dict(self)
@@ -1185,7 +1185,7 @@ class PacbioSequencingRun(Base):
     __tablename__ = "pacbio_sequencing_run"
 
     id: Mapped[PrimaryKeyInt]
-    internal_id: Mapped[Str64] = mapped_column(unique=True)
+    run_id: Mapped[Str64] = mapped_column(unique=True)
     processed: Mapped[bool] = mapped_column(default=False)
     comment: Mapped[Text] = mapped_column(default="")
     instrument_name: Mapped[RevioNames] = mapped_column(

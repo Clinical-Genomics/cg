@@ -23,7 +23,7 @@ def test_get_pacbio_smrt_cell_metrics_by_name(
     all_runs: list[PacbioSMRTCellMetrics] = pacbio_sequencing_runs_service.store._get_query(
         table=PacbioSMRTCellMetrics
     ).all()
-    assert any(run.run_internal_id != pacbio_run_name_to_fetch for run in all_runs)
+    assert any(run.run_id != pacbio_run_name_to_fetch for run in all_runs)
 
     # WHEN fetching smrt cell metrics filtered by run name
     runs: PacbioSmrtCellMetricsResponse = (
@@ -42,7 +42,7 @@ def test_get_pacbio_sequencing_runs_by_name_no_matches(
     all_runs: list[PacbioSMRTCellMetrics] = pacbio_sequencing_runs_service.store._get_query(
         table=PacbioSMRTCellMetrics
     ).all()
-    assert all(run.run_internal_id != "Non-existent run" for run in all_runs)
+    assert all(run.run_id != "Non-existent run" for run in all_runs)
 
     # WHEN fetching sequencing runs filtered by run name
 
@@ -57,14 +57,14 @@ def test_get_all_pacbio_sequencing_runs():
         create_autospec(
             PacbioSequencingRun,
             id=6,
-            internal_id="santas_little_helper",
+            run_id="santas_little_helper",
             comment="hunden i Simpsons",
             processed=True,
         ),
         create_autospec(
             PacbioSequencingRun,
             id=4,
-            internal_id="Nisse",
+            run_id="Nisse",
             comment="Tomtens hjälpreda",
             processed=False,
         ),

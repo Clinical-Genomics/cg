@@ -10,7 +10,7 @@ def test_pacbio_run_validator(tmp_path: Path, mock_pacbio_run_validator: PacBioR
     # GIVEN run data and a run validator
     run_data = PacBioRunData(
         full_path=tmp_path,
-        run_internal_id="not_relevant",
+        run_id="not_relevant",
         well_name="not_relevant",
         plate=1,
     )
@@ -32,7 +32,7 @@ def test_pacbio_run_validator_skip_if_validated(
     # GIVEN run data and a run validator
     run_data = PacBioRunData(
         full_path=tmp_path,
-        run_internal_id="not_relevant",
+        run_id="not_relevant",
         well_name="not_relevant",
         plate=1,
     )

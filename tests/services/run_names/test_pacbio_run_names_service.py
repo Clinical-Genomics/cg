@@ -10,10 +10,10 @@ def test_pacbio_get_run_full_names(
     # GIVEN a PacBio run names service
 
     # WHEN getting the run names
-    run_names: list[str] = pacbio_run_names_service.get_run_full_names()
+    run_full_names: list[str] = pacbio_run_names_service.get_run_full_names()
 
     # THEN the run names are returned
-    assert set(run_names) == pacbio_smrt_cell_full_names
+    assert set(run_full_names) == pacbio_smrt_cell_full_names
 
 
 def test_pacbio_get_run_full_names_empty(tmp_path: Path):
@@ -23,10 +23,10 @@ def test_pacbio_get_run_full_names_empty(tmp_path: Path):
     )
 
     # WHEN getting the run names
-    run_names: list[str] = pacbio_run_names_service.get_run_full_names()
+    run_full_names: list[str] = pacbio_run_names_service.get_run_full_names()
 
     # THEN no run names are returned
-    assert run_names == []
+    assert run_full_names == []
 
 
 def test_pacbio_get_run_full_names_with_files_return_empty(tmp_path: Path):
@@ -40,10 +40,10 @@ def test_pacbio_get_run_full_names_with_files_return_empty(tmp_path: Path):
     )
 
     # WHEN getting the run names
-    run_names: list[str] = pacbio_run_names_service.get_run_full_names()
+    run_full_names: list[str] = pacbio_run_names_service.get_run_full_names()
 
     # THEN no run names are returned
-    assert run_names == []
+    assert run_full_names == []
 
 
 def test_pacbio_get_run_full_names_with_subfolders_return_empty(tmp_path: Path):
@@ -57,7 +57,7 @@ def test_pacbio_get_run_full_names_with_subfolders_return_empty(tmp_path: Path):
     )
 
     # WHEN getting the run names
-    run_names: list[str] = pacbio_run_names_service.get_run_full_names()
+    run_full_names: list[str] = pacbio_run_names_service.get_run_full_names()
 
     # THEN no run names are returned
-    assert run_names == []
+    assert run_full_names == []

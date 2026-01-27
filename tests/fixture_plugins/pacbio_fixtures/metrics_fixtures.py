@@ -94,12 +94,8 @@ def pac_bio_smrtlink_databases_metrics(
 
 
 @pytest.fixture
-def pacbio_barcodes_metrics(
-    barcoded_smrt_cell_internal_id: str,
-    pacbio_barcoded_sample_internal_id: str,
-    pacbio_barcoded_1_c01_movie_name: str,
-) -> BarcodeMetrics:
-    data: dict[str, any] = {
+def pacbio_barcodes_metrics() -> BarcodeMetrics:
+    data: dict[str, Any] = {
         BarcodeMetricsAliases.BARCODED_HIFI_READS: 7785983,
         BarcodeMetricsAliases.BARCODED_HIFI_READS_PERCENTAGE: 0.9962486409672513,
         BarcodeMetricsAliases.BARCODED_HIFI_YIELD: 114676808325,
@@ -113,12 +109,8 @@ def pacbio_barcodes_metrics(
 
 
 @pytest.fixture
-def pacbio_barcoded_sample_metrics(
-    barcoded_smrt_cell_internal_id: str,
-    pacbio_barcoded_sample_internal_id: str,
-    pacbio_barcoded_1_c01_movie_name: str,
-) -> SampleMetrics:
-    data: dict[str, any] = {
+def pacbio_barcoded_sample_metrics(pacbio_barcoded_sample_internal_id: str) -> SampleMetrics:
+    data: dict[str, Any] = {
         SampleMetricsAliases.BARCODE_NAME: "bc2004--bc2004",
         SampleMetricsAliases.HIFI_MEAN_READ_LENGTH: 14728,
         SampleMetricsAliases.HIFI_READ_QUALITY: "Q35",
@@ -131,12 +123,8 @@ def pacbio_barcoded_sample_metrics(
 
 
 @pytest.fixture
-def pacbio_unassigned_sample_metrics(
-    barcoded_smrt_cell_internal_id: str,
-    pacbio_unassigned_sample_internal_id: str,
-    pacbio_barcoded_1_c01_movie_name: str,
-) -> SampleMetrics:
-    data: dict[str, any] = {
+def pacbio_unassigned_sample_metrics(pacbio_unassigned_sample_internal_id: str) -> SampleMetrics:
+    data: dict[str, Any] = {
         SampleMetricsAliases.BARCODE_NAME: "Not Barcoded",
         SampleMetricsAliases.HIFI_MEAN_READ_LENGTH: 14477,
         SampleMetricsAliases.HIFI_READ_QUALITY: "Q28",

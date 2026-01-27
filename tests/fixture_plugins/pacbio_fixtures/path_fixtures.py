@@ -28,15 +28,15 @@ def pac_bio_runs_dir(pac_bio_fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture
-def pac_bio_test_run_dir(pac_bio_runs_dir: Path, pac_bio_test_run_internal_id: str) -> Path:
+def pac_bio_test_run_dir(pac_bio_runs_dir: Path, pac_bio_test_run_id: str) -> Path:
     """Return the path to a PacBio run directory."""
-    return Path(pac_bio_runs_dir, pac_bio_test_run_internal_id)
+    return Path(pac_bio_runs_dir, pac_bio_test_run_id)
 
 
 @pytest.fixture
-def pacbio_barcoded_run_dir(pac_bio_runs_dir: Path, pacbio_barcoded_run_internal_id: str) -> Path:
+def pacbio_barcoded_run_dir(pac_bio_runs_dir: Path, pacbio_barcoded_run_id: str) -> Path:
     """Return the path to a PacBio run directory."""
-    return Path(pac_bio_runs_dir, pacbio_barcoded_run_internal_id)
+    return Path(pac_bio_runs_dir, pacbio_barcoded_run_id)
 
 
 @pytest.fixture

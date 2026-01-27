@@ -14,38 +14,36 @@ def pacbio_barcoded_smrt_cell_name() -> str:
 
 
 @pytest.fixture
-def pac_bio_test_run_internal_id() -> str:
-    """Return the internal ID of a PacBio sequencing run."""
+def pac_bio_test_run_id() -> str:
+    """Return the run ID of a PacBio sequencing run."""
     return "r84202_20240522_133539"
 
 
 @pytest.fixture
-def pacbio_barcoded_run_internal_id() -> str:
+def pacbio_barcoded_run_id() -> str:
     return "r84202_20240913_121403"
 
 
 @pytest.fixture
-def pacbio_smrt_cell_full_name(
-    pac_bio_test_run_internal_id: str, pac_bio_smrt_cell_name: str
-) -> str:
+def pacbio_smrt_cell_full_name(pac_bio_test_run_id: str, pac_bio_smrt_cell_name: str) -> str:
     """Return the full name of a PacBio SMRT cell."""
-    return f"{pac_bio_test_run_internal_id}/{pac_bio_smrt_cell_name}"
+    return f"{pac_bio_test_run_id}/{pac_bio_smrt_cell_name}"
 
 
 @pytest.fixture
 def pacbio_barcoded_smrt_cell_full_name(
-    pacbio_barcoded_run_internal_id: str, pacbio_barcoded_smrt_cell_name: str
+    pacbio_barcoded_run_id: str, pacbio_barcoded_smrt_cell_name: str
 ) -> str:
     """Return the full name of a barcoded PacBio SMRT cell."""
-    return f"{pacbio_barcoded_run_internal_id}/{pacbio_barcoded_smrt_cell_name}"
+    return f"{pacbio_barcoded_run_id}/{pacbio_barcoded_smrt_cell_name}"
 
 
 @pytest.fixture
 def pacbio_processed_smrt_cell_full_name(
-    pacbio_barcoded_run_internal_id: str, pac_bio_smrt_cell_name: str
+    pacbio_barcoded_run_id: str, pac_bio_smrt_cell_name: str
 ) -> str:
     """Return the full name of a processed PacBio SMRT cell."""
-    return f"{pacbio_barcoded_run_internal_id}/{pac_bio_smrt_cell_name}"
+    return f"{pacbio_barcoded_run_id}/{pac_bio_smrt_cell_name}"
 
 
 @pytest.fixture
