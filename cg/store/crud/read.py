@@ -1814,13 +1814,14 @@ class ReadHandler(BaseHandler):
         Raises:
             EntryNotFoundError if no sequencing runs are found for the run ID
         """
-        runs: Query = self._get_query(table=PacbioSMRTCellMetrics).join(
-            PacbioSMRTCellMetrics.sequencing_run
+        metrics: Query = (
+            self._get_query(table=PacbioSMRTCellMetrics)
+            .join(PacbioSMRTCellMetrics.sequencing_run)
+            .filter(PacbioSequencingRun.run_id == run_id)
         )
-        runs = runs.filter(PacbioSequencingRun.run_id == run_id)
-        if runs.count() == 0:
+        if metrics.count() == 0:
             raise EntryNotFoundError(f"Could not find any SMRT Cell metrics for run {run_id}")
-        return runs.all()
+        return metrics.all()
 
     def get_pacbio_sequencing_runs(
         self, page: int = 0, page_size: int = 0
