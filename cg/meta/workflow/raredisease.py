@@ -7,7 +7,7 @@ from typing import Any
 
 from housekeeper.store.models import File
 
-from cg.clients.chanjo2.models import CoverageMetrics
+from cg.clients.chanjo2.models import CoverageMetricsChanjo1
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import (
@@ -149,10 +149,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
-    ) -> CoverageMetrics | None:
+    ) -> CoverageMetricsChanjo1 | None:
         sample_coverage = self.chanjo_api.sample_coverage(sample_id=sample_id, panel_genes=gene_ids)
         if sample_coverage:
-            return CoverageMetrics(
+            return CoverageMetricsChanjo1(
                 coverage_completeness_percent=sample_coverage.get("mean_completeness"),
                 mean_coverage=sample_coverage.get("mean_coverage"),
             )
