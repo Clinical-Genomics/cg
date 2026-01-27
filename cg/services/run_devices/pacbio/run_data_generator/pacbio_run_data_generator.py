@@ -34,9 +34,9 @@ class PacBioRunDataGenerator(RunDataGenerator):
 
     @staticmethod
     def _get_run_id_from_run_full_name(
-        smrt_cell_full_name: str,
+        run_full_name: str,
     ) -> str:
-        return smrt_cell_full_name.split("/")[0]
+        return run_full_name.split("/")[0]
 
     @staticmethod
     def _get_plate_well(run_name: str) -> str:
