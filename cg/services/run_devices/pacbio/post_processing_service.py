@@ -67,6 +67,7 @@ class PacBioPostProcessingService(PostProcessingService):
         return processing_complete_file.exists()
 
     def can_post_processing_start(self, run_full_name: str) -> bool:
+        """Makes sure that all SMRT cells in the sequencing run are ready to be post-processed."""
         LOG.debug(f"Checking if Pacbio post-processing can start for run: {run_full_name}")
         parent_directory: Path = Path(self.sequencing_dir, run_full_name).parent
         all_smrt_cells_are_ready: bool = all(
