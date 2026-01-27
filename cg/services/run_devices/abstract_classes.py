@@ -92,7 +92,7 @@ class PostProcessingService(ABC):
         pass
 
     @abstractmethod
-    def is_run_processed(self, run_name: str) -> bool:
+    def is_run_processed(self, run_full_name: str) -> bool:
         """Check if a run has been post-processed."""
         pass
 
