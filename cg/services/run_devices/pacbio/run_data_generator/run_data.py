@@ -7,6 +7,6 @@ class PacBioRunData(RunData):
     """Holds information on a single SMRTcell of a PacBio run."""
 
     full_path: Path
-    run_internal_id: str
+    run_id: str
     well_name: str
     plate: int

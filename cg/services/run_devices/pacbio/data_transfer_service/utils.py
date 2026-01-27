@@ -22,7 +22,7 @@ def get_smrt_cell_metrics_dto(
         type=DeviceType.PACBIO,
         well=metrics.dataset_metrics.well,
         plate=metrics.dataset_metrics.plate,
-        run_internal_id=run_data.run_internal_id,
+        run_id=run_data.run_id,
         started_at=metrics.dataset_metrics.run_started_at,
         completed_at=metrics.dataset_metrics.run_completed_at,
         hifi_reads=metrics.read.hifi_reads,
@@ -81,5 +81,5 @@ def get_sequencing_run_dto(
 ) -> PacBioSequencingRunDTO:
     return PacBioSequencingRunDTO(
         instrument_name=metrics.dataset_metrics.instrument_name,  # type: ignore - pydantic will convert to correct type
-        internal_id=run_data.run_internal_id,
+        run_id=run_data.run_id,
     )
