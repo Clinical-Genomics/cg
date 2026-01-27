@@ -1,4 +1,6 @@
-from pydantic import BeforeValidator, Field
+from typing import Any
+
+from pydantic import BeforeValidator, Field, model_validator
 from typing_extensions import Annotated
 
 from cg.models.orders.sample_base import NAME_PATTERN, ControlEnum, SexEnum, StatusEnum
@@ -26,3 +28,11 @@ class BalsamicSample(Sample):
     tissue_block_size: TissueBlockEnum | None = None
     tumour: bool = False
     tumour_purity: int | None = None
+
+    @model_validator(mode="before")
+    def set_other_source(cls, data: Any) -> Any:
+        """When source is sent as 'other', we should instead set the value sent as 'source_comment'."""
+        if isinstance(data, dict):
+            if data.get("source") == "other":
+                data["source"] = data.get("source_comment")
+        return data
