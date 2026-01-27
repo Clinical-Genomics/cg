@@ -36,7 +36,7 @@ def post_process_run(context: CGConfig, run_name: str, dry_run: bool) -> None:
     post_processing_service: PostProcessingService = get_post_processing_service_from_run_name(
         context=context, run_name=run_name
     )
-    post_processing_service.post_process(run_name=run_name, dry_run=dry_run)
+    post_processing_service.post_process(run_full_name=run_name, dry_run=dry_run)
 
 
 @post_process_group.command(name="all")

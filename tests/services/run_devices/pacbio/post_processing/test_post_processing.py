@@ -32,7 +32,7 @@ def test_pac_bio_post_processing_run_name_error(pac_bio_context):
 
     # THEN a PostProcessingError is raised
     with pytest.raises(PostProcessingError):
-        post_processing_service.post_process(run_name=wrong_run_full_name)
+        post_processing_service.post_process(run_full_name=wrong_run_full_name)
 
 
 def test_pac_bio_post_processing_store_data_error(
@@ -50,7 +50,7 @@ def test_pac_bio_post_processing_store_data_error(
     ):
         # THEN a PostProcessingError is raised
         with pytest.raises(PostProcessingError):
-            post_processing_service.post_process(run_name=pacbio_barcoded_smrt_cell_full_name)
+            post_processing_service.post_process(run_full_name=pacbio_barcoded_smrt_cell_full_name)
 
 
 def test_pac_bio_post_processing_store_files_error(
@@ -70,7 +70,7 @@ def test_pac_bio_post_processing_store_files_error(
     ):
         # THEN a PostProcessingError is raised
         with pytest.raises(PostProcessingError):
-            post_processing_service.post_process(run_name=pacbio_barcoded_smrt_cell_full_name)
+            post_processing_service.post_process(run_full_name=pacbio_barcoded_smrt_cell_full_name)
 
 
 def test_can_post_processing_start_true(

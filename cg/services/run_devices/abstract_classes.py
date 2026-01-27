@@ -87,7 +87,7 @@ class PostProcessingService(ABC):
     """Abstract class that encapsulates the logic required for post-processing a sequencing run."""
 
     @abstractmethod
-    def post_process(self, run_name: str, dry_run: bool = False):
+    def post_process(self, run_full_name: str, dry_run: bool = False):
         """Store sequencing metrics in StatusDB and relevant files in Housekeeper."""
         pass
 

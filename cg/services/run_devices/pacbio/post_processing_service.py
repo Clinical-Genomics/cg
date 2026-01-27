@@ -51,10 +51,10 @@ class PacBioPostProcessingService(PostProcessingService):
         ),
         to_raise=PostProcessingError,
     )
-    def post_process(self, run_name: str, dry_run: bool = False) -> None:
-        LOG.info(f"Starting Pacbio post-processing for run: {run_name}")
+    def post_process(self, run_full_name: str, dry_run: bool = False) -> None:
+        LOG.info(f"Starting Pacbio post-processing for run: {run_full_name}")
         run_data: PacBioRunData = self.run_data_generator.get_run_data(
-            run_full_name=run_name, sequencing_dir=self.sequencing_dir
+            run_full_name=run_full_name, sequencing_dir=self.sequencing_dir
         )
         self.run_validator.ensure_post_processing_can_start(run_data)
         self.store_service.store_post_processing_data(run_data=run_data, dry_run=dry_run)
