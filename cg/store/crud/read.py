@@ -1810,9 +1810,9 @@ class ReadHandler(BaseHandler):
 
     def get_pacbio_smrt_cell_metrics_by_run_id(self, run_id: str) -> list[PacbioSMRTCellMetrics]:
         """
-        Fetches data from PacbioSequencingRunDTO filtered on run ID.
+        Fetches data from PacbioSMRTCellMetrics filtered on run ID.
         Raises:
-            EntryNotFoundError if no sequencing runs are found for the run ID
+            EntryNotFoundError if no SMRT cell metrics are found for the run ID
         """
         metrics: Query = (
             self._get_query(table=PacbioSMRTCellMetrics)
