@@ -31,8 +31,8 @@ class BaseView(ModelView):
         return redirect(url_for("google.login", next=request.url))
 
 
-def view_hifi_yield_in_gb(unused1, unused2, model, property_name):
-    del unused1, unused2
+def view_hifi_yield_in_gb(unused1, unused2, model, unused3):
+    del unused1, unused2, unused3
     return Markup(f"{round(model.hifi_yield/1E9, 1)} Gb") if model.hifi_yield else ""
 
 
