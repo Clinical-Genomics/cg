@@ -1,19 +1,6 @@
 """Nf-tower related constants."""
 
-from enum import StrEnum
 from typing import Any
-
-
-class NfTowerStatus(StrEnum):
-    """NF-Tower job submission status."""
-
-    SUBMITTED: str = "SUBMITTED"
-    RUNNING: str = "RUNNING"
-    SUCCEEDED: str = "SUCCEEDED"
-    FAILED: str = "FAILED"
-    CANCELLED: str = "CANCELLED"
-    UNKNOWN: str = "UNKNOWN"
-
 
 NALLO_GENERAL_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "median_coverage": {"norm": "gt", "threshold": 20},
@@ -67,17 +54,6 @@ TOMTE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "PCT_RIBOSOMAL_BASES": {"norm": "lt", "threshold": 5},
     "pct_duplication": {"norm": "lt", "threshold": 70},
 }
-
-
-MULTIQC_NEXFLOW_CONFIG = """process {
-    withName:'MULTIQC' {
-        memory = { 4.GB * task.attempt }
-        time   = { 4.h  * task.attempt }
-        cpus = 2
-        ext.args = ' --data-format json --cl-config "max_table_rows: 10000" '
-    }
-}
-"""
 
 NALLO_COVERAGE_FILE_TAGS: list[str] = ["d4"]
 NALLO_COVERAGE_INTERVAL_TYPE: str = "genes"
