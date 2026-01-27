@@ -81,10 +81,10 @@ def pacbio_unassigned_sample_internal_id() -> str:
 
 
 @pytest.fixture
-def pacbio_run_name_to_fetch() -> str:
+def pacbio_run_id_to_fetch() -> str:
     return "run_to_fetch"
 
 
 @pytest.fixture
-def pacbio_run_name_not_to_fetch() -> str:
+def pacbio_run_id_not_to_fetch() -> str:
     return "run_not_to_fetch"

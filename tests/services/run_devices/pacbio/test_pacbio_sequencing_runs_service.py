@@ -15,7 +15,7 @@ from cg.store.store import Store
 
 
 def test_get_pacbio_smrt_cell_metrics_by_name(
-    pacbio_sequencing_runs_service: PacbioSequencingRunsService, pacbio_run_name_to_fetch: str
+    pacbio_sequencing_runs_service: PacbioSequencingRunsService, pacbio_run_id_to_fetch: str
 ):
     """Tests getting Pacbio smrt cell metrics from the store filtered on run name."""
 
@@ -23,14 +23,14 @@ def test_get_pacbio_smrt_cell_metrics_by_name(
     all_metrics: list[PacbioSMRTCellMetrics] = pacbio_sequencing_runs_service.store._get_query(
         table=PacbioSMRTCellMetrics
     ).all()
-    assert any(metric.run_id != pacbio_run_name_to_fetch for metric in all_metrics)
+    assert any(metric.run_id != pacbio_run_id_to_fetch for metric in all_metrics)
 
     # WHEN fetching smrt cell metrics filtered by run name
     response: PacbioSmrtCellMetricsResponse = (
-        pacbio_sequencing_runs_service.get_sequencing_runs_by_name(pacbio_run_name_to_fetch)
+        pacbio_sequencing_runs_service.get_sequencing_runs_by_name(pacbio_run_id_to_fetch)
     )
     # THEN all the returned runs have the correct run name
-    assert all(run.run_name == pacbio_run_name_to_fetch for run in response.runs)
+    assert all(run.run_name == pacbio_run_id_to_fetch for run in response.runs)
 
 
 def test_get_pacbio_sequencing_runs_by_name_no_matches(

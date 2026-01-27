@@ -146,21 +146,21 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
 def pacbio_sequencing_runs_store(
     base_store: Store,
     helpers: StoreHelpers,
-    pacbio_run_name_to_fetch: str,
-    pacbio_run_name_not_to_fetch: str,
+    pacbio_run_id_to_fetch: str,
+    pacbio_run_id_not_to_fetch: str,
 ) -> Store:
     device = helpers.add_run_device(
         store=base_store, id=1, type=DeviceType.PACBIO, internal_id="device_internal_id"
     )
     sequencing_run = base_store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_id=pacbio_run_name_to_fetch
+            instrument_name=RevioNames.BETTY, run_id=pacbio_run_id_to_fetch
         )
     )
 
     sequencing_run_not_to_fetch = base_store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_id=pacbio_run_name_not_to_fetch
+            instrument_name=RevioNames.BETTY, run_id=pacbio_run_id_not_to_fetch
         )
     )
 
