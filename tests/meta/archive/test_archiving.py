@@ -20,7 +20,6 @@ from cg.meta.archive.ddn.constants import (
 )
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import MiriaObject, TransferPayload
-from cg.meta.archive.ddn.utils import get_metadata
 from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import DataFlowConfig
 
@@ -84,7 +83,6 @@ def test_transfer_payload_model_dump(transfer_payload: TransferPayload):
     # THEN the following fields should exist
     assert dict_representation.get("pathInfo")
     assert dict_representation.get("osType")
-    assert isinstance(dict_representation.get("metadataList"), list)
 
     # THEN the pathInfo fields should contain source and destination fields
     assert dict_representation.get("pathInfo")[0].get("source")
@@ -307,7 +305,7 @@ def test_archive_file(
             ],
             "osType": OSTYPE,
             "createFolder": True,
-            "metadataList": get_metadata(file_and_sample.sample),
+            "metadataList": [],
             "settings": [],
         },
         verify=False,

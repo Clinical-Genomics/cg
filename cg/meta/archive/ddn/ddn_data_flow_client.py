@@ -31,7 +31,7 @@ from cg.meta.archive.ddn.models import (
     RetrievalResponse,
     TransferPayload,
 )
-from cg.meta.archive.ddn.utils import get_metadata, get_request_log
+from cg.meta.archive.ddn.utils import get_request_log
 from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
 
@@ -109,9 +109,8 @@ class DDNDataFlowClient(ArchiveHandler):
         miria_file_data: list[MiriaObject] = self.convert_into_transfer_data(
             [file_and_sample], is_archiving=True
         )
-        metadata: list[dict] = get_metadata(file_and_sample.sample)
         archival_request: TransferPayload = self.create_transfer_request(
-            miria_file_data=miria_file_data, is_archiving_request=True, metadata=metadata
+            miria_file_data=miria_file_data, is_archiving_request=True
         )
         archival_response: ArchivalResponse = self._archive_file(
             headers=dict(self.headers, **self.auth_header),
@@ -138,7 +137,6 @@ class DDNDataFlowClient(ArchiveHandler):
         self,
         miria_file_data: list[MiriaObject],
         is_archiving_request: bool,
-        metadata: list[dict] = [],
     ) -> TransferPayload:
         """Performs the necessary curation of paths for the request to be valid, depending on if
         it is an archiving or a retrieve request.
@@ -156,7 +154,6 @@ class DDNDataFlowClient(ArchiveHandler):
         transfer_request = TransferPayload(
             files_to_transfer=miria_file_data,
             createFolder=is_archiving_request,
-            metadataList=metadata,
         )
         transfer_request.trim_paths(attribute_to_trim=attribute)
         transfer_request.add_repositories(
