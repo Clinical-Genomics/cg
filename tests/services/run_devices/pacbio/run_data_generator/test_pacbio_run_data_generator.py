@@ -43,7 +43,7 @@ def test_get_run_data(
 
     # WHEN Generating run data
     run_data: PacBioRunData = pac_bio_run_data_generator.get_run_data(
-        smrt_cell_full_name=smrt_cell_full_name, sequencing_dir=pac_bio_runs_dir.as_posix()
+        run_full_name=smrt_cell_full_name, sequencing_dir=pac_bio_runs_dir.as_posix()
     )
 
     # THEN the correct run data are returned
@@ -63,5 +63,5 @@ def test_get_run_data_improper_name(
     # THEN an PostProcessingRunDataGeneratorError is raised
     with pytest.raises(PostProcessingRunDataGeneratorError):
         pac_bio_run_data_generator.get_run_data(
-            smrt_cell_full_name=wrong_run_name, sequencing_dir=pac_bio_runs_dir.as_posix()
+            run_full_name=wrong_run_name, sequencing_dir=pac_bio_runs_dir.as_posix()
         )

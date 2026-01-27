@@ -14,7 +14,7 @@ class RunDataGenerator(ABC):
     """Abstract class that holds functionality to create a run data object."""
 
     @abstractmethod
-    def get_run_data(self, run_id: str, sequencing_dir: str) -> RunData:
+    def get_run_data(self, run_full_name: str, sequencing_dir: str) -> RunData:
         """Get the run data for a sequencing run."""
         pass
 
