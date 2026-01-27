@@ -20,17 +20,17 @@ def test_get_pacbio_smrt_cell_metrics_by_name(
     """Tests getting Pacbio smrt cell metrics from the store filtered on run name."""
 
     # GIVEN that there are multiple Pacbio smrt cell metrics with different run names
-    all_runs: list[PacbioSMRTCellMetrics] = pacbio_sequencing_runs_service.store._get_query(
+    all_metrics: list[PacbioSMRTCellMetrics] = pacbio_sequencing_runs_service.store._get_query(
         table=PacbioSMRTCellMetrics
     ).all()
-    assert any(run.run_id != pacbio_run_name_to_fetch for run in all_runs)
+    assert any(metric.run_id != pacbio_run_name_to_fetch for metric in all_metrics)
 
     # WHEN fetching smrt cell metrics filtered by run name
-    runs: PacbioSmrtCellMetricsResponse = (
+    response: PacbioSmrtCellMetricsResponse = (
         pacbio_sequencing_runs_service.get_sequencing_runs_by_name(pacbio_run_name_to_fetch)
     )
     # THEN all the returned runs have the correct run name
-    assert all(run.run_name == pacbio_run_name_to_fetch for run in runs.runs)
+    assert all(run.run_name == pacbio_run_name_to_fetch for run in response.runs)
 
 
 def test_get_pacbio_sequencing_runs_by_name_no_matches(
