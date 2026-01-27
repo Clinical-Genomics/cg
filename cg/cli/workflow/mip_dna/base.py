@@ -6,13 +6,7 @@ from typing import cast
 import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
-from cg.cli.workflow.commands import (
-    ensure_illumina_runs_on_disk,
-    link,
-    resolve_compression,
-    store,
-    store_available,
-)
+from cg.cli.workflow.commands import ensure_illumina_runs_on_disk, store, store_available
 from cg.cli.workflow.mip.options import (
     ARGUMENT_CASE_ID,
     OPTION_BWA_MEM,
@@ -49,8 +43,6 @@ def mip_dna(
 
 for sub_cmd in [
     ensure_illumina_runs_on_disk,
-    link,
-    resolve_compression,
     store,
     store_available,
 ]:
