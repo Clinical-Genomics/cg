@@ -228,6 +228,7 @@ class ConfiguratorFactory:
                 status_db=self.store,
             ),
             config=self.cg_config.balsamic,
+            lims_api=self.lims_api,
             store=self.store,
         )
 

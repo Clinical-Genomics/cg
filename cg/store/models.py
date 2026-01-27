@@ -193,8 +193,19 @@ class Application(Base):
         return self.tag
 
     @property
-    def expected_reads(self):
+    def expected_reads(self) -> float:
         return self.target_reads * self.percent_reads_guaranteed / 100
+
+    @property
+    def expected_hifi_yield(self) -> int | None:
+        if self.target_hifi_yield and self.percent_hifi_yield_guaranteed:
+            return round(self.target_hifi_yield * self.percent_hifi_yield_guaranteed / 100)
+        else:
+            return None
+
+    @property
+    def expected_express_hifi_yield(self) -> int | None:
+        return round(self.target_hifi_yield * 0.5) if self.target_hifi_yield else None
 
     @property
     def analysis_type(self) -> str:
@@ -774,9 +785,14 @@ class Sample(Base, PriorityMixin):
         return self.customer.data_archive_location
 
     @property
-    def expected_reads_for_sample(self) -> int:
+    def expected_reads_for_sample(self) -> float | None:
         """Return the expected reads of the sample."""
         return self.application_version.application.expected_reads
+
+    @property
+    def expected_hifi_yield(self) -> int | None:
+        """Return the expected HiFi yield of the sample."""
+        return self.application_version.application.expected_hifi_yield
 
     @property
     def has_reads(self) -> bool:
@@ -835,6 +851,13 @@ class Sample(Base, PriorityMixin):
         """Return the sample run metrics for the sample."""
         return self._sample_run_metrics
 
+    @property
+    def device_type(self) -> DeviceType | None:
+        """Return the device type the sample was sequenced on."""
+        if self._sample_run_metrics:
+            return self._sample_run_metrics[0].type
+        return None
+
     def to_dict(self, links: bool = False) -> dict:
         """Represent as dictionary"""
         data = to_dict(model_instance=self)
@@ -842,6 +865,10 @@ class Sample(Base, PriorityMixin):
         data["customer"] = self.customer.to_dict()
         data["application_version"] = self.application_version.to_dict()
         data["application"] = self.application_version.application.to_dict()
+        data["hifi_yield"] = self.hifi_yield
+        data["uses_reads"] = True
+        if self.device_type == DeviceType.PACBIO:
+            data["uses_reads"] = False
         if links:
             data["links"] = [link_obj.to_dict(family=True, parents=True) for link_obj in self.links]
         return data

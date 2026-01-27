@@ -9,6 +9,8 @@ from cg.meta.compress import CompressAPI
 from cg.models.cg_config import (
     BalsamicConfig,
     CGConfig,
+    CommonAppConfig,
+    Encryption,
     IlluminaConfig,
     MipConfig,
     NalloConfig,
@@ -49,6 +51,8 @@ def test_analysis_starter_factory_balsamic(cg_balsamic_config: BalsamicConfig):
         CGConfig,
         balsamic=cg_balsamic_config,
         data_flow=Mock(),
+        encryption=create_autospec(Encryption, binary_path="encryption.bin"),
+        pdc=create_autospec(CommonAppConfig, binary_path="pdc.bin"),
         run_instruments=create_autospec(
             RunInstruments,
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
@@ -104,6 +108,8 @@ def test_analysis_starter_factory_mip_dna():
         CGConfig,
         mip_rd_dna=mip_rd_dna_config,
         data_flow=Mock(),
+        encryption=create_autospec(Encryption, binary_path="encryption.bin"),
+        pdc=create_autospec(CommonAppConfig, binary_path="pdc.bin"),
         run_instruments=create_autospec(
             RunInstruments,
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
@@ -151,6 +157,8 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
     cg_config: CGConfig = create_autospec(
         CGConfig,
         data_flow=Mock(),
+        encryption=create_autospec(Encryption, binary_path="encryption.bin"),
+        pdc=create_autospec(CommonAppConfig, binary_path="pdc.bin"),
         raredisease=raredisease_config_object,
         rnafusion=rnafusion_config_object,
         run_instruments=create_autospec(
@@ -195,6 +203,7 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
     )
     mock_compress_api_init.assert_called_once_with(
         ANY,
+        backup_api=ANY,
         hk_api=cg_config.housekeeper_api,
         crunchy_api=cg_config.crunchy_api,
         demux_root=cg_config.run_instruments.illumina.demultiplexed_runs_dir,

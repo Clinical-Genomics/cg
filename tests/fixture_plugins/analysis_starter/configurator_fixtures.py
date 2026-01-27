@@ -70,6 +70,7 @@ def balsamic_configurator(
         config=cg_balsamic_config,
         config_file_creator=create_autospec(BalsamicConfigFileCreator),
         fastq_handler=balsamic_fastq_handler,
+        lims_api=create_autospec(LimsAPI),
         store=create_autospec(Store),
     )
 
