@@ -50,11 +50,11 @@ def test_get_run_data(
     assert run_data == expected_run_data
 
 
-@pytest.mark.parametrize("wrong_run_name", ["rimproper_name", "d_improper_name "])
+@pytest.mark.parametrize("wrong_run_full_name", ["rimproper_name", "d_improper_name "])
 def test_get_run_data_improper_name(
     pac_bio_run_data_generator: PacBioRunDataGenerator,
     pac_bio_runs_dir: Path,
-    wrong_run_name: str,
+    wrong_run_full_name: str,
 ):
     # GIVEN a PacBioRunDataGenerator and a wrong run name
 
@@ -63,5 +63,5 @@ def test_get_run_data_improper_name(
     # THEN an PostProcessingRunDataGeneratorError is raised
     with pytest.raises(PostProcessingRunDataGeneratorError):
         pac_bio_run_data_generator.get_run_data(
-            run_full_name=wrong_run_name, sequencing_dir=pac_bio_runs_dir.as_posix()
+            run_full_name=wrong_run_full_name, sequencing_dir=pac_bio_runs_dir.as_posix()
         )
