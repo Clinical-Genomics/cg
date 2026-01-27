@@ -31,6 +31,11 @@ class BaseView(ModelView):
         return redirect(url_for("google.login", next=request.url))
 
 
+def view_hifi_yield_in_gb(unused1, unused2, model, property_name):
+    del unused1, unused2
+    return Markup(f"{round(model.hifi_yield/1E9, 1)} Gb") if model.hifi_yield else ""
+
+
 def view_priority(unused1, unused2, model, unused3):
     """column formatter for priority"""
     del unused1, unused2, unused3
@@ -780,6 +785,7 @@ class SampleView(BaseView):
     column_formatters = {
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
+        "hifi_yield": view_hifi_yield_in_gb,
         "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
         "original_ticket": view_ticket_link,
