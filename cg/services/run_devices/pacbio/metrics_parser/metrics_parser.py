@@ -64,6 +64,7 @@ class PacBioMetricsParser(PostProcessingMetricsParser):
             metrics_files=metrics_files, file_name=PacBioDirsAndFiles.BARCODES_REPORT
         )
         sample_metrics: list[SampleMetrics] = get_parsed_sample_metrics(metrics_files)
+        # TODO add parse metadata xml file
         LOG.debug(f"All metrics parsed for run {run_data.run_id}")
         return PacBioMetrics(
             read=read_metrics,
@@ -73,4 +74,5 @@ class PacBioMetricsParser(PostProcessingMetricsParser):
             dataset_metrics=dataset_metrics,
             barcodes=barcodes_metrics,
             samples=sample_metrics,
+            # TODO add metadata to PacBioMetrics
         )

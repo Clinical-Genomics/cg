@@ -26,6 +26,7 @@ def _get_data_model_from_pattern(pattern: str) -> Type[BaseMetrics]:
         PacBioDirsAndFiles.LOADING_REPORT: ProductivityMetrics,
         PacBioDirsAndFiles.RAW_DATA_REPORT: PolymeraseMetrics,
         PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: SmrtlinkDatasetsMetrics,
+        # TODO add entry for metadata file
     }
     return pattern_to_model.get(pattern)
 
@@ -78,3 +79,5 @@ def get_parsed_sample_metrics(metrics_files: list[Path]) -> list[SampleMetrics]:
         MetricsFileFields.COLUMNS
     )
     return _parse_sample_data(sample_data)
+
+# TODO create get parsed metadata file
