@@ -25,17 +25,17 @@ class UnprocessedRunInfo(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-def get_post_processing_service_from_run_name(
-    context: CGConfig, run_name: str
+def get_post_processing_service_from_run_full_name(
+    context: CGConfig, run_full_name: str
 ) -> PacBioPostProcessingService:
-    """Get the correct post-processing service based on the run name."""
+    """Get the correct post-processing service based on the run full name."""
     try:
         device: str = get_item_by_pattern_in_source(
-            source=run_name, pattern_map=PATTERN_TO_DEVICE_MAP
+            source=run_full_name, pattern_map=PATTERN_TO_DEVICE_MAP
         )
     except CgError as error:
         raise NameError(
-            f"Run name {run_name} does not match with any known sequencing run name pattern"
+            f"Run name {run_full_name} does not match with any known sequencing run name pattern"
         ) from error
     return getattr(context.post_processing_services, device)
 
@@ -48,7 +48,7 @@ def get_unprocessed_runs_info(context: CGConfig, instrument: str) -> list[Unproc
         run_names_service: RunNamesService = getattr(context.run_names_services, instrument_name)
         runs.extend(
             _get_unprocessed_runs_from_run_names(
-                run_names=run_names_service.get_run_names(),
+                run_full_names=run_names_service.get_run_full_names(),
                 post_processing_service=getattr(context.post_processing_services, instrument_name),
                 instrument_name=instrument_name,
             )
@@ -63,18 +63,18 @@ def _instruments_to_check(instrument: str) -> list[str]:
 
 
 def _get_unprocessed_runs_from_run_names(
-    run_names: list[str], post_processing_service: PostProcessingService, instrument_name
+    run_full_names: list[str], post_processing_service: PostProcessingService, instrument_name
 ) -> list[UnprocessedRunInfo]:
     LOG.debug(f"Adding {instrument_name} run names to the post-processing list")
     runs: list[UnprocessedRunInfo] = []
-    for name in run_names:
-        if post_processing_service.is_run_processed(name):
-            LOG.debug(f"Run {name} has already been post-processed. Skipping")
+    for full_name in run_full_names:
+        if post_processing_service.is_run_processed(full_name):
+            LOG.debug(f"Run {full_name} has already been post-processed. Skipping")
             continue
-        if post_processing_service.can_post_processing_start(name):
+        if post_processing_service.can_post_processing_start(full_name):
             runs.append(
                 UnprocessedRunInfo(
-                    name=name,
+                    name=full_name,
                     post_processing_service=post_processing_service,
                     instrument=instrument_name,
                 )
