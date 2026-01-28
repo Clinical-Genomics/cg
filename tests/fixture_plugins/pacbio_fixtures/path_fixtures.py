@@ -28,15 +28,15 @@ def pac_bio_runs_dir(pac_bio_fixtures_dir: Path) -> Path:
 
 
 @pytest.fixture
-def pac_bio_test_run_dir(pac_bio_runs_dir: Path, pac_bio_test_run_name: str) -> Path:
+def pac_bio_test_run_dir(pac_bio_runs_dir: Path, pac_bio_test_run_id: str) -> Path:
     """Return the path to a PacBio run directory."""
-    return Path(pac_bio_runs_dir, pac_bio_test_run_name)
+    return Path(pac_bio_runs_dir, pac_bio_test_run_id)
 
 
 @pytest.fixture
-def pacbio_barcoded_run_dir(pac_bio_runs_dir: Path, pacbio_barcoded_run_name: str) -> Path:
+def pacbio_barcoded_run_dir(pac_bio_runs_dir: Path, pacbio_barcoded_run_id: str) -> Path:
     """Return the path to a PacBio run directory."""
-    return Path(pac_bio_runs_dir, pacbio_barcoded_run_name)
+    return Path(pac_bio_runs_dir, pacbio_barcoded_run_id)
 
 
 @pytest.fixture
@@ -102,12 +102,12 @@ def pacbio_barcodes_report_file(
 
 @pytest.fixture
 def pacbio_barcoded_ccs_report_file(
-    pacbio_barcoded_run_statistics_dir: Path, pacbio_barcoded_1_c01_cell_full_name: str
+    pacbio_barcoded_run_statistics_dir: Path, pacbio_barcoded_1_c01_movie_name: str
 ) -> Path:
     """Return the path to the PacBio CCS report file."""
     return Path(
         pacbio_barcoded_run_statistics_dir,
-        f"{pacbio_barcoded_1_c01_cell_full_name}.{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}",
+        f"{pacbio_barcoded_1_c01_movie_name}.{PacBioDirsAndFiles.CCS_REPORT_SUFFIX}",
     )
 
 
@@ -169,23 +169,23 @@ def pacbio_barcoded_report_files_to_parse(
 
 @pytest.fixture
 def pacbio_barcoded_hifi_read_file(
-    pacbio_barcoded_hifi_reads_dir: Path, pacbio_barcoded_1_c01_cell_full_name: str
+    pacbio_barcoded_hifi_reads_dir: Path, pacbio_barcoded_1_c01_movie_name: str
 ) -> Path:
     """Return the Pacbio bacrcoded HiFi read file."""
     return Path(
         pacbio_barcoded_hifi_reads_dir,
-        f"{pacbio_barcoded_1_c01_cell_full_name}.hifi_reads.bc2004.bam",
+        f"{pacbio_barcoded_1_c01_movie_name}.hifi_reads.bc2004.bam",
     )
 
 
 @pytest.fixture
 def pacbio_unassigned_hifi_read_file(
-    pacbio_barcoded_hifi_reads_dir: Path, pacbio_barcoded_1_c01_cell_full_name: str
+    pacbio_barcoded_hifi_reads_dir: Path, pacbio_barcoded_1_c01_movie_name: str
 ) -> Path:
     """Return the Pacbio unassigned HiFi read file."""
     return Path(
         pacbio_barcoded_hifi_reads_dir,
-        f"{pacbio_barcoded_1_c01_cell_full_name}.hifi_reads.unassigned.bam",
+        f"{pacbio_barcoded_1_c01_movie_name}.hifi_reads.unassigned.bam",
     )
 
 
