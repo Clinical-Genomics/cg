@@ -64,7 +64,7 @@ class PacBioMetricsParser(PostProcessingMetricsParser):
             metrics_files=metrics_files, file_name=PacBioDirsAndFiles.BARCODES_REPORT
         )
         sample_metrics: list[SampleMetrics] = get_parsed_sample_metrics(metrics_files)
-        LOG.debug(f"All metrics parsed for run {run_data.sequencing_run_name}")
+        LOG.debug(f"All metrics parsed for run {run_data.run_id}")
         return PacBioMetrics(
             read=read_metrics,
             control=control_metrics,

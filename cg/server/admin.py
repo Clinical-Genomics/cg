@@ -31,6 +31,11 @@ class BaseView(ModelView):
         return redirect(url_for("google.login", next=request.url))
 
 
+def view_hifi_yield_in_gb(unused1, unused2, model, unused3):
+    del unused1, unused2, unused3
+    return Markup(f"{round(model.hifi_yield/1E9, 1)} Gb") if model.hifi_yield else ""
+
+
 def view_priority(unused1, unused2, model, unused3):
     """column formatter for priority"""
     del unused1, unused2, unused3
@@ -780,6 +785,7 @@ class SampleView(BaseView):
     column_formatters = {
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
+        "hifi_yield": view_hifi_yield_in_gb,
         "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
         "original_ticket": view_ticket_link,
@@ -905,7 +911,7 @@ class PacbioSmrtCellMetricsView(BaseView):
 
     column_list = (
         "internal_id",
-        "sequencing_run.run_name",
+        "sequencing_run.run_id",
         "movie_name",
         "well",
         "plate",
@@ -929,9 +935,9 @@ class PacbioSmrtCellMetricsView(BaseView):
         "internal_id": view_pacbio_sample_sequencing_metrics_link,
         "model": view_smrt_cell_model,
     }
-    column_labels = {"sequencing_run.run_name": "Run Name"}
+    column_labels = {"sequencing_run.run_id": "Run ID"}
     column_default_sort = ("completed_at", True)
-    column_searchable_list = ["device.internal_id", "movie_name", "sequencing_run.run_name"]
+    column_searchable_list = ["device.internal_id", "movie_name", "sequencing_run.run_id"]
     column_sortable_list = [
         ("internal_id", "device.internal_id"),
         "started_at",
@@ -961,7 +967,7 @@ class PacbioSmrtCellMetricsView(BaseView):
 class PacbioSampleRunMetricsView(BaseView):
     column_filters = [
         "instrument_run.plate",
-        "instrument_run.sequencing_run.run_name",
+        "instrument_run.sequencing_run.run_id",
     ]
     column_formatters = {
         "smrt_cell": PacbioSmrtCellMetricsView.view_smrt_cell_link,
@@ -969,12 +975,12 @@ class PacbioSampleRunMetricsView(BaseView):
     }
     column_labels = {
         "instrument_run.plate": "Plate",
-        "instrument_run.sequencing_run.run_name": "Run Name",
+        "instrument_run.sequencing_run.run_id": "Run ID",
     }
     column_list = [
         "smrt_cell",
         "sample",
-        "instrument_run.sequencing_run.run_name",
+        "instrument_run.sequencing_run.run_id",
         "instrument_run.plate",
         "hifi_reads",
         "hifi_yield",
@@ -984,5 +990,5 @@ class PacbioSampleRunMetricsView(BaseView):
     column_searchable_list = [
         "sample.internal_id",
         "instrument_run.device.internal_id",
-        "instrument_run.sequencing_run.run_name",
+        "instrument_run.sequencing_run.run_id",
     ]
