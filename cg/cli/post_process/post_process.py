@@ -6,7 +6,7 @@ import rich_click as click
 
 from cg.cli.post_process.utils import (
     UnprocessedRunInfo,
-    get_post_processing_service_from_run_name,
+    get_post_processing_service_from_run_full_name,
     get_unprocessed_runs_info,
 )
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
@@ -25,18 +25,18 @@ def post_process_group():
 
 @post_process_group.command(name="run")
 @DRY_RUN
-@click.argument("run-name")
+@click.argument("run-full-name")
 @click.pass_obj
-def post_process_run(context: CGConfig, run_name: str, dry_run: bool) -> None:
+def post_process_run(context: CGConfig, run_full_name: str, dry_run: bool) -> None:
     """Post-process a sequencing run from the PacBio instrument.
 
-    run-name is the full name of the sequencing unit of run. For example:
+    run-full-name is the full name of the sequencing unit of run. For example:
         PacBio: 'r84202_20240522_133539/1_A01'
     """
-    post_processing_service: PostProcessingService = get_post_processing_service_from_run_name(
-        context=context, run_name=run_name
+    post_processing_service: PostProcessingService = get_post_processing_service_from_run_full_name(
+        context=context, run_full_name=run_full_name
     )
-    post_processing_service.post_process(run_full_name=run_name, dry_run=dry_run)
+    post_processing_service.post_process(run_full_name=run_full_name, dry_run=dry_run)
 
 
 @post_process_group.command(name="all")

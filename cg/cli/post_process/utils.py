@@ -25,17 +25,17 @@ class UnprocessedRunInfo(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-def get_post_processing_service_from_run_name(
-    context: CGConfig, run_name: str
+def get_post_processing_service_from_run_full_name(
+    context: CGConfig, run_full_name: str
 ) -> PacBioPostProcessingService:
-    """Get the correct post-processing service based on the run name."""
+    """Get the correct post-processing service based on the run full name."""
     try:
         device: str = get_item_by_pattern_in_source(
-            source=run_name, pattern_map=PATTERN_TO_DEVICE_MAP
+            source=run_full_name, pattern_map=PATTERN_TO_DEVICE_MAP
         )
     except CgError as error:
         raise NameError(
-            f"Run name {run_name} does not match with any known sequencing run name pattern"
+            f"Run name {run_full_name} does not match with any known sequencing run name pattern"
         ) from error
     return getattr(context.post_processing_services, device)
 

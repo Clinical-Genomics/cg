@@ -66,7 +66,7 @@ def test_post_process_run_pacbio_success(mocker: MockerFixture):
 
     mocker.patch.object(
         post_process,
-        "get_post_processing_service_from_run_name",
+        "get_post_processing_service_from_run_full_name",
         return_value=post_processing_service.as_type,
     )
 

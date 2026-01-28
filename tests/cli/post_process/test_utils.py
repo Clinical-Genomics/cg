@@ -2,7 +2,7 @@ import pytest
 
 from cg.cli.post_process.utils import (
     UnprocessedRunInfo,
-    get_post_processing_service_from_run_name,
+    get_post_processing_service_from_run_full_name,
     get_unprocessed_runs_info,
 )
 from cg.models.cg_config import CGConfig
@@ -17,8 +17,8 @@ def test_get_post_processing_service_from_run_name(
     assert pac_bio_context.post_processing_services.pacbio
 
     # WHEN getting the post-processing service from the run name
-    service: PacBioPostProcessingService = get_post_processing_service_from_run_name(
-        context=pac_bio_context, run_name=pacbio_barcoded_smrt_cell_full_name
+    service: PacBioPostProcessingService = get_post_processing_service_from_run_full_name(
+        context=pac_bio_context, run_full_name=pacbio_barcoded_smrt_cell_full_name
     )
     # THEN a the correct post-processing service should be returned
     assert isinstance(service, PacBioPostProcessingService)
@@ -44,7 +44,9 @@ def test_get_post_processing_service_from_wrong_run_name(
 
     # WHEN getting the post-processing service from the run name
     with pytest.raises(NameError):
-        get_post_processing_service_from_run_name(context=pac_bio_context, run_name=wrong_run_name)
+        get_post_processing_service_from_run_full_name(
+            context=pac_bio_context, run_full_name=wrong_run_name
+        )
 
     # THEN an error is raised
 
