@@ -106,7 +106,7 @@ class ScoutRarediseaseIndividual(ScoutIndividual):
     vcf2cytosure: str | None = None
     mitodel_file: str | None = None
     reviewer: Reviewer = Reviewer()
-    d4_file: str | None = None
+    d4_file: str | None = None  # TODO: Probably remove this one
 
 
 class ScoutCancerIndividual(ScoutIndividual):
