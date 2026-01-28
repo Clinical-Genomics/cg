@@ -88,6 +88,5 @@ def get_parsed_metadata_file(metrics_files: list[Path]) -> MetadataMetrics:
     metadata_file: Path = get_file_with_pattern_from_list(
         files=metrics_files, pattern=PacBioDirsAndFiles.METADATA_FILE
     )
-    metadata = ElementTree.parse(metadata_file)
-    run = metadata.find("Run")
-    return MetadataMetrics(run_name=run.find("Name"), unique_id=run.find("UniqueId"))
+    root = ElementTree.parse(metadata_file).getroot()
+    return MetadataMetrics(run_name=root.find("Name"), unique_id=root.find("UniqueId"))
