@@ -148,7 +148,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
     ) -> CoverageMetricsChanjo1 | None:
-        sample_coverage = self.chanjo_api.sample_coverage(sample_id=sample_id, panel_genes=gene_ids)
+        sample_coverage: dict = self.chanjo_api.sample_coverage(
+            sample_id=sample_id, panel_genes=gene_ids
+        )
         if sample_coverage:
             return CoverageMetricsChanjo1(
                 coverage_completeness_percent=sample_coverage.get("mean_completeness"),
