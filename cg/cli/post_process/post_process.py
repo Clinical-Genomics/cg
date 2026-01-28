@@ -58,7 +58,7 @@ def post_process_all_runs(context: CGConfig, instrument: str, dry_run: bool) -> 
     )
     for run in unprocessed_runs:
         try:
-            run.post_processing_service.post_process(run_name=run.name, dry_run=dry_run)
+            run.post_processing_service.post_process(run_full_name=run.name, dry_run=dry_run)
         except Exception as error:
             LOG.error(f"Could not post-process {run.instrument} run {run.name}: {error}")
             exit_success = False
