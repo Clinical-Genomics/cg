@@ -156,6 +156,13 @@ class SampleMetrics(RunMetrics):
     sample_internal_id: str = Field(..., alias=SampleMetricsAliases.SAMPLE_INTERNAL_ID)
 
 
+class MetadataMetrics(BaseModel):
+    """Model that holds metadata for a specific run."""
+
+    run_name: str  # TODO add alias
+    unique_id: str  # TODO add alias
+
+
 class PacBioMetrics(RunMetrics):
     """Model that holds all relevant PacBio metrics."""
 

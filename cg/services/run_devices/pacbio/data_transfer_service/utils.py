@@ -79,6 +79,7 @@ def get_sample_sequencing_metrics_dtos(
 def get_sequencing_run_dto(
     metrics: PacBioMetrics, run_data: PacBioRunData
 ) -> PacBioSequencingRunDTO:
+    # TODO: include unique_id and run_name from the metadata metrics
     return PacBioSequencingRunDTO(
         instrument_name=metrics.dataset_metrics.instrument_name,  # type: ignore - pydantic will convert to correct type
         run_id=run_data.run_id,

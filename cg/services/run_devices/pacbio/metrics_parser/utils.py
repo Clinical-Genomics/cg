@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any, Type
+from xml.etree import ElementTree
 
 from cg.constants.constants import FileFormat
 from cg.constants.pacbio import MetricsFileFields, PacBioDirsAndFiles
@@ -8,6 +9,7 @@ from cg.services.run_devices.pacbio.metrics_parser.models import (
     BarcodeMetrics,
     BaseMetrics,
     ControlMetrics,
+    MetadataMetrics,
     PolymeraseMetrics,
     ProductivityMetrics,
     ReadMetrics,
@@ -26,6 +28,7 @@ def _get_data_model_from_pattern(pattern: str) -> Type[BaseMetrics]:
         PacBioDirsAndFiles.LOADING_REPORT: ProductivityMetrics,
         PacBioDirsAndFiles.RAW_DATA_REPORT: PolymeraseMetrics,
         PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: SmrtlinkDatasetsMetrics,
+        # TODO add entry for metadata file
     }
     return pattern_to_model.get(pattern)
 
@@ -78,3 +81,12 @@ def get_parsed_sample_metrics(metrics_files: list[Path]) -> list[SampleMetrics]:
         MetricsFileFields.COLUMNS
     )
     return _parse_sample_data(sample_data)
+
+
+# TODO create get parsed metadata file
+def get_parsed_metadata_file(metrics_files: list[Path]) -> MetadataMetrics:
+    metadata_file: Path = get_file_with_pattern_from_list(
+        files=metrics_files, pattern=PacBioDirsAndFiles.METADATA_FILE
+    )
+    root = ElementTree.parse(metadata_file).getroot()
+    return MetadataMetrics(run_name=root.find("Name"), unique_id=root.find("UniqueId"))
