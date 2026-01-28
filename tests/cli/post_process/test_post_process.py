@@ -20,13 +20,16 @@ def test_post_process_all_pacbio_success(mocker: MockerFixture):
         PostProcessingService
     )
 
+    # GIVEN a run_full_name
+    run_full_name = "r123_123_123/1_A01"
+
     # GIVEN one run ready to be post processed
     unprocessed_run_info = create_autospec(
         UnprocessedRunInfo,
         instrument="pacbio",
         post_processing_service=post_processing_service.as_type,
     )
-    unprocessed_run_info.name = "run_name"
+    unprocessed_run_info.name = run_full_name
 
     mocker.patch.object(
         post_process,
@@ -45,5 +48,5 @@ def test_post_process_all_pacbio_success(mocker: MockerFixture):
 
     # THEN the post processing service should have been called
     post_processing_service.as_mock.post_process.assert_called_once_with(
-        run_full_name="run_name", dry_run=False
+        run_full_name=run_full_name, dry_run=False
     )
