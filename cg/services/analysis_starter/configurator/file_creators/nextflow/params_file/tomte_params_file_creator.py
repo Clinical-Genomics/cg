@@ -37,7 +37,7 @@ class TomteParamsFileCreator(ParamsFileCreator):
             input=sample_sheet_path,
             outdir=case_run_directory,
             gene_panel_clinical_filter=Path(case_run_directory, ScoutExportFileName.PANELS),
-            tissue=self._get_case_source_type(case_id),  # type:ignore
+            tissue=self._get_case_source_type(case_id),  # type: ignore
             genome=GenomeVersion.HG38,
         ).model_dump()
 

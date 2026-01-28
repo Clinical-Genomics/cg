@@ -1,4 +1,4 @@
-"""CLI support to create config and/or start BALSAMIC """
+"""CLI support to create config and/or start BALSAMIC"""
 
 import logging
 import traceback

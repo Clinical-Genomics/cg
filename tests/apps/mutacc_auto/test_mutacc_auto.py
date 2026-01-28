@@ -1,4 +1,4 @@
-""" Tests for cg.apps.mutacc_auto module"""
+"""Tests for cg.apps.mutacc_auto module"""
 
 import subprocess
 

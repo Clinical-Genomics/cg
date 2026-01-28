@@ -1,4 +1,4 @@
-""" Module for retrieving flow cells from backup."""
+"""Module for retrieving flow cells from backup."""
 
 import logging
 import subprocess

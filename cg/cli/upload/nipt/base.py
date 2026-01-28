@@ -1,4 +1,4 @@
-""" Upload NIPT results via the CLI"""
+"""Upload NIPT results via the CLI"""
 
 import logging
 import traceback

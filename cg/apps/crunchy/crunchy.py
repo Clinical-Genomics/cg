@@ -1,8 +1,8 @@
 """
-    Module for interacting with crunchy to perform:
-        1. Compressing: FASTQ to SPRING
-        2. Decompressing: SPRING to FASTQ
-    along with the helper methods.
+Module for interacting with crunchy to perform:
+    1. Compressing: FASTQ to SPRING
+    2. Decompressing: SPRING to FASTQ
+along with the helper methods.
 """
 
 import logging

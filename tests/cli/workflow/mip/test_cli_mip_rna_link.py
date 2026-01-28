@@ -1,4 +1,4 @@
-""" Test the CLI for mip-rna link"""
+"""Test the CLI for mip-rna link"""
 
 import logging
 

@@ -1,7 +1,7 @@
 """add retrieved status to flowcell table
 
 Revision ID: 6d74453565f2
-Revises: 
+Revises:
 Create Date: 2021-02-02 11:11:59.273754
 
 """

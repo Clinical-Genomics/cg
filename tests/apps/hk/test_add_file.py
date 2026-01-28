@@ -1,4 +1,4 @@
-""" Test adding files with Housekeeper API."""
+"""Test adding files with Housekeeper API."""
 
 from pathlib import Path
 from typing import Any
