@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any, Type
+from xml.etree import ElementTree
 
 from cg.constants.constants import FileFormat
 from cg.constants.pacbio import MetricsFileFields, PacBioDirsAndFiles
@@ -84,4 +85,9 @@ def get_parsed_sample_metrics(metrics_files: list[Path]) -> list[SampleMetrics]:
 
 # TODO create get parsed metadata file
 def get_parsed_metadata_file(metrics_files: list[Path]) -> MetadataMetrics:
-    pass
+    metadata_file: Path = get_file_with_pattern_from_list(
+        files=metrics_files, pattern=PacBioDirsAndFiles.METADATA_FILE
+    )
+    metadata = ElementTree.parse(metadata_file)
+    run = metadata.find("Run")
+    return MetadataMetrics(run_name=run.find("Name"), unique_id=run.find("UniqueId"))

@@ -95,7 +95,12 @@ def test_parse_dataset_metrics_validation_error(
 
 def test_get_parsed_metadata_file():
     # GIVEN a list of metrics files
-    files = [Path("file1"), Path("movie_name.metadata.xml")]
+    files = [
+        Path("file1"),
+        Path(
+            "tests/fixtures/devices/pacbio/SMRTcells/r84202_20240913_121403/1_C01/metadata/m84202_240913_162115_s3.metadata.xml"
+        ),
+    ]
     # WHEN parsing the metadata file
     parsed_metadata: MetadataMetrics = get_parsed_metadata_file(files)
     # THEN the output is as expected
