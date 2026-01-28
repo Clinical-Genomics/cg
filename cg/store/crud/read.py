@@ -1872,7 +1872,6 @@ class ReadHandler(BaseHandler):
 
     def get_pacbio_sequencing_run_by_run_id(self, run_id: str) -> PacbioSequencingRun:
         """
-        Get Pacbio Sequencing run ID.
         Raises:
             PacbioSequencingRunNotFoundError: If no Pacbio sequencing run is found with the given
             run ID.
