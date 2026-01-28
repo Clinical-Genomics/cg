@@ -505,7 +505,7 @@ class CreateMixin(ReadHandler):
 
     def create_pacbio_sequencing_run(
         self, pacbio_sequencing_run_dto: PacBioSequencingRunDTO
-    ) -> PacbioSequencingRun:
+    ) -> PacbioSequencingRun:  # TODO: Modify this method to persist unique_id and run_name
         """Create a new PacBio sequencing run
 
         Raises PacbioSequencingRunAlreadyExistsError:

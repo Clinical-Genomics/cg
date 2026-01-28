@@ -80,4 +80,5 @@ def get_parsed_sample_metrics(metrics_files: list[Path]) -> list[SampleMetrics]:
     )
     return _parse_sample_data(sample_data)
 
+
 # TODO create get parsed metadata file
