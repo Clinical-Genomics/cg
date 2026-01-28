@@ -5,8 +5,11 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 
 from cg.constants.pacbio import PacBioDirsAndFiles
-from cg.services.run_devices.pacbio.metrics_parser.models import BaseMetrics
-from cg.services.run_devices.pacbio.metrics_parser.utils import get_parsed_metrics_from_file_name
+from cg.services.run_devices.pacbio.metrics_parser.models import BaseMetrics, MetadataMetrics
+from cg.services.run_devices.pacbio.metrics_parser.utils import (
+    get_parsed_metadata_file,
+    get_parsed_metrics_from_file_name,
+)
 
 
 @pytest.mark.parametrize(
@@ -88,3 +91,12 @@ def test_parse_dataset_metrics_validation_error(
     with pytest.raises(Exception):
         # THEN a PacBioMetricsParsingError is raised
         get_parsed_metrics_from_file_name(metrics_files=metrics_files, file_name=metrics_file_name)
+
+
+def test_get_parsed_metadata_file():
+    # GIVEN a list of metrics files
+    files = [Path("file1"), Path("movie_name.metadata.xml")]
+    # WHEN parsing the metadata file
+    parsed_metadata: MetadataMetrics = get_parsed_metadata_file(files)
+    # THEN the output is as expected
+    assert parsed_metadata == MetadataMetrics(run_name="run_name", unique_id="unique_id")

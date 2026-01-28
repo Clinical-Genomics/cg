@@ -8,6 +8,7 @@ from cg.services.run_devices.pacbio.metrics_parser.models import (
     BarcodeMetrics,
     BaseMetrics,
     ControlMetrics,
+    MetadataMetrics,
     PolymeraseMetrics,
     ProductivityMetrics,
     ReadMetrics,
@@ -82,3 +83,5 @@ def get_parsed_sample_metrics(metrics_files: list[Path]) -> list[SampleMetrics]:
 
 
 # TODO create get parsed metadata file
+def get_parsed_metadata_file(metrics_files: list[Path]) -> MetadataMetrics:
+    pass
