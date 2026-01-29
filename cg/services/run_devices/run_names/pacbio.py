@@ -5,9 +5,9 @@ from cg.services.run_devices.run_names.service import RunNamesService
 
 class PacbioRunNamesService(RunNamesService):
 
-    def get_run_names(self) -> list[str]:
+    def get_run_full_names(self) -> list[str]:
         """
-        Get all the run names from the PacBio sequencing directory in the form
+        Get all the SMRTcell full names from the PacBio sequencing directory in the form
         <sequencing_run>/<SMRTcell>, for example:
             r84202_20240913_121403/1_C01
         """

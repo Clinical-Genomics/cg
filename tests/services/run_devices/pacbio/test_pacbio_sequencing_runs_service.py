@@ -15,22 +15,22 @@ from cg.store.store import Store
 
 
 def test_get_pacbio_smrt_cell_metrics_by_name(
-    pacbio_sequencing_runs_service: PacbioSequencingRunsService, pacbio_run_name_to_fetch: str
+    pacbio_sequencing_runs_service: PacbioSequencingRunsService, pacbio_run_id_to_fetch: str
 ):
     """Tests getting Pacbio smrt cell metrics from the store filtered on run name."""
 
     # GIVEN that there are multiple Pacbio smrt cell metrics with different run names
-    all_runs: list[PacbioSMRTCellMetrics] = pacbio_sequencing_runs_service.store._get_query(
+    all_metrics: list[PacbioSMRTCellMetrics] = pacbio_sequencing_runs_service.store._get_query(
         table=PacbioSMRTCellMetrics
     ).all()
-    assert any(run.run_name != pacbio_run_name_to_fetch for run in all_runs)
+    assert any(metric.run_id != pacbio_run_id_to_fetch for metric in all_metrics)
 
     # WHEN fetching smrt cell metrics filtered by run name
-    runs: PacbioSmrtCellMetricsResponse = (
-        pacbio_sequencing_runs_service.get_sequencing_runs_by_name(pacbio_run_name_to_fetch)
+    response: PacbioSmrtCellMetricsResponse = (
+        pacbio_sequencing_runs_service.get_sequencing_runs_by_name(pacbio_run_id_to_fetch)
     )
     # THEN all the returned runs have the correct run name
-    assert all(run.run_name == pacbio_run_name_to_fetch for run in runs.runs)
+    assert all(run.run_name == pacbio_run_id_to_fetch for run in response.runs)
 
 
 def test_get_pacbio_sequencing_runs_by_name_no_matches(
@@ -39,16 +39,16 @@ def test_get_pacbio_sequencing_runs_by_name_no_matches(
     """Tests getting Pacbio runs from the store filtered on a non-existent run name."""
 
     # GIVEN that there are no Pacbio sequencing runs with a specific run name
-    all_runs: list[PacbioSMRTCellMetrics] = pacbio_sequencing_runs_service.store._get_query(
+    all_metrics: list[PacbioSMRTCellMetrics] = pacbio_sequencing_runs_service.store._get_query(
         table=PacbioSMRTCellMetrics
     ).all()
-    assert all(run.run_name != "Non-existent run" for run in all_runs)
+    assert all(metric.run_id != "Non-existent run" for metric in all_metrics)
 
     # WHEN fetching sequencing runs filtered by run name
 
     # THEN an EntryNotFoundError should be raised when trying to get sequencing runs filtered on that name
     with pytest.raises(EntryNotFoundError):
-        pacbio_sequencing_runs_service.get_sequencing_runs_by_name("Non-existent run")
+        pacbio_sequencing_runs_service.get_sequencing_runs_by_name("Non-existent metric")
 
 
 def test_get_all_pacbio_sequencing_runs():
@@ -57,14 +57,14 @@ def test_get_all_pacbio_sequencing_runs():
         create_autospec(
             PacbioSequencingRun,
             id=6,
-            run_name="santas_little_helper",
+            run_id="santas_little_helper",
             comment="hunden i Simpsons",
             processed=True,
         ),
         create_autospec(
             PacbioSequencingRun,
             id=4,
-            run_name="Nisse",
+            run_id="Nisse",
             comment="Tomtens hjälpreda",
             processed=False,
         ),
@@ -84,7 +84,10 @@ def test_get_all_pacbio_sequencing_runs():
     assert sequencing_runs == PacbioSequencingRunResponse(
         pacbio_sequencing_runs=[
             PacbioSequencingRunDTO(
-                id=6, run_name="santas_little_helper", comment="hunden i Simpsons", processed=True
+                id=6,
+                run_name="santas_little_helper",
+                comment="hunden i Simpsons",
+                processed=True,
             ),
             PacbioSequencingRunDTO(
                 id=4, run_name="Nisse", comment="Tomtens hjälpreda", processed=False
