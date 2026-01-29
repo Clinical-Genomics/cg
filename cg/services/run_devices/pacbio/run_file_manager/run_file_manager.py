@@ -59,7 +59,7 @@ class PacBioRunFileManager(RunFileManager):
         """Return the path to the metadata file."""
         metadata_dir: Path = Path(run_path, PacBioDirsAndFiles.METADATA_DIR)
         files: list[Path] = get_files_matching_pattern(
-            directory=metadata_dir, pattern=PacBioDirsAndFiles.METADATA_FILE
+            directory=metadata_dir, pattern=f"*{PacBioDirsAndFiles.METADATA_FILE}"
         )
         if not files:
             raise FileNotFoundError(f"No metadata file found in {metadata_dir}")

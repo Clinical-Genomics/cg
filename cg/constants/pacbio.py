@@ -14,7 +14,7 @@ class PacBioDirsAndFiles:
     STATISTICS_DIR: str = "statistics"
     UNZIPPED_REPORTS_DIR: str = "unzipped_reports"
     METADATA_DIR: str = "metadata"
-    METADATA_FILE: str = "metadata.xml"
+    METADATA_FILE: str = "metadata.xml"  # TODO: Rename to suffix
     RUN_IS_VALID: str = "is_valid"
 
 
@@ -101,6 +101,7 @@ class PacBioHousekeeperTags:
     LOADING_REPORT: str = "loading-report"
     RAWDATA_REPORT: str = "raw-data-report"
     DATASETS_REPORT: str = "datasets-report"
+    METADATA: str = "smrt-link-metadata"
 
 
 class PacBioBundleTypes:
