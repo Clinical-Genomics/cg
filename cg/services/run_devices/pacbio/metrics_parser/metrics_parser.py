@@ -23,6 +23,7 @@ from cg.services.run_devices.pacbio.metrics_parser.models import (
     SmrtlinkDatasetsMetrics,
 )
 from cg.services.run_devices.pacbio.metrics_parser.utils import (
+    get_parsed_metadata_file,
     get_parsed_metrics_from_file_name,
     get_parsed_sample_metrics,
 )
@@ -74,5 +75,5 @@ class PacBioMetricsParser(PostProcessingMetricsParser):
             dataset_metrics=dataset_metrics,
             barcodes=barcodes_metrics,
             samples=sample_metrics,
-            # TODO add metadata to PacBioMetrics
+            metadata=get_parsed_metadata_file(metrics_files),
         )

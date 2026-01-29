@@ -16,6 +16,7 @@ from cg.constants.pacbio import (
 from cg.services.run_devices.pacbio.metrics_parser.models import (
     BarcodeMetrics,
     ControlMetrics,
+    MetadataMetrics,
     PacBioMetrics,
     PolymeraseMetrics,
     ProductivityMetrics,
@@ -109,6 +110,11 @@ def pacbio_barcodes_metrics() -> BarcodeMetrics:
 
 
 @pytest.fixture
+def pacbio_barcoded_metadata_metrics() -> MetadataMetrics:
+    return MetadataMetrics(run_name="run-name", unique_id="unique-id")
+
+
+@pytest.fixture
 def pacbio_barcoded_sample_metrics(pacbio_barcoded_sample_internal_id: str) -> SampleMetrics:
     data: dict[str, Any] = {
         SampleMetricsAliases.BARCODE_NAME: "bc2004--bc2004",
@@ -123,20 +129,6 @@ def pacbio_barcoded_sample_metrics(pacbio_barcoded_sample_internal_id: str) -> S
 
 
 @pytest.fixture
-def pacbio_unassigned_sample_metrics(pacbio_unassigned_sample_internal_id: str) -> SampleMetrics:
-    data: dict[str, Any] = {
-        SampleMetricsAliases.BARCODE_NAME: "Not Barcoded",
-        SampleMetricsAliases.HIFI_MEAN_READ_LENGTH: 14477,
-        SampleMetricsAliases.HIFI_READ_QUALITY: "Q28",
-        SampleMetricsAliases.HIFI_READS: 29318,
-        SampleMetricsAliases.HIFI_YIELD: 424465869,
-        SampleMetricsAliases.POLYMERASE_READ_LENGTH: 142228,
-        SampleMetricsAliases.SAMPLE_INTERNAL_ID: pacbio_unassigned_sample_internal_id,
-    }
-    return SampleMetrics.model_validate(data)
-
-
-@pytest.fixture
 def pac_bio_metrics(
     pac_bio_read_metrics: ReadMetrics,
     pac_bio_control_metrics: ControlMetrics,
@@ -144,8 +136,8 @@ def pac_bio_metrics(
     pac_bio_polymerase_metrics: PolymeraseMetrics,
     pac_bio_smrtlink_databases_metrics: SmrtlinkDatasetsMetrics,
     pacbio_barcodes_metrics: BarcodeMetrics,
+    pacbio_barcoded_metadata_metrics: MetadataMetrics,
     pacbio_barcoded_sample_metrics: SampleMetrics,
-    pacbio_unassigned_sample_metrics: SampleMetrics,
 ) -> PacBioMetrics:
     return PacBioMetrics(
         read=pac_bio_read_metrics,
@@ -154,5 +146,6 @@ def pac_bio_metrics(
         polymerase=pac_bio_polymerase_metrics,
         dataset_metrics=pac_bio_smrtlink_databases_metrics,
         barcodes=pacbio_barcodes_metrics,
-        samples=[pacbio_barcoded_sample_metrics, pacbio_unassigned_sample_metrics],
+        metadata=pacbio_barcoded_metadata_metrics,
+        samples=[pacbio_barcoded_sample_metrics],
     )

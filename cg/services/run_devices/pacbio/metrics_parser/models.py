@@ -172,4 +172,5 @@ class PacBioMetrics(RunMetrics):
     polymerase: PolymeraseMetrics
     dataset_metrics: SmrtlinkDatasetsMetrics
     barcodes: BarcodeMetrics
+    metadata: MetadataMetrics
     samples: list[SampleMetrics]
