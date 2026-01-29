@@ -16,9 +16,7 @@ class PacBioRunFileManager(RunFileManager):
     @handle_post_processing_errors(
         to_except=(FileNotFoundError,), to_raise=PostProcessingRunFileManagerError
     )
-    def get_files_to_parse(
-        self, run_data: PacBioRunData
-    ) -> list[Path]:  # TODO: This need to return the path to the metadata file
+    def get_files_to_parse(self, run_data: PacBioRunData) -> list[Path]:
         """Get the file paths required by the PacBioMetricsParser."""
         run_path: Path = run_data.full_path
         validate_files_or_directories_exist([run_path])
@@ -59,7 +57,7 @@ class PacBioRunFileManager(RunFileManager):
         """Return the path to the metadata file."""
         metadata_dir: Path = Path(run_path, PacBioDirsAndFiles.METADATA_DIR)
         files: list[Path] = get_files_matching_pattern(
-            directory=metadata_dir, pattern=f"*{PacBioDirsAndFiles.METADATA_FILE}"
+            directory=metadata_dir, pattern=f"*{PacBioDirsAndFiles.METADATA_FILE_SUFFIX}"
         )
         if not files:
             raise FileNotFoundError(f"No metadata file found in {metadata_dir}")

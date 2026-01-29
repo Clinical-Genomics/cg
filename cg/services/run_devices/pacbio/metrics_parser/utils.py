@@ -28,7 +28,6 @@ def _get_data_model_from_pattern(pattern: str) -> Type[BaseMetrics]:
         PacBioDirsAndFiles.LOADING_REPORT: ProductivityMetrics,
         PacBioDirsAndFiles.RAW_DATA_REPORT: PolymeraseMetrics,
         PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: SmrtlinkDatasetsMetrics,
-        # TODO add entry for metadata file
     }
     return pattern_to_model.get(pattern)
 
@@ -86,7 +85,7 @@ def get_parsed_sample_metrics(metrics_files: list[Path]) -> list[SampleMetrics]:
 def get_parsed_metadata_file(metrics_files: list[Path]) -> MetadataMetrics:
     namespaces = {"pb": "http://pacificbiosciences.com/PacBioDataModel.xsd"}  # NOSONAR
     metadata_file: Path = get_file_with_pattern_from_list(
-        files=metrics_files, pattern=PacBioDirsAndFiles.METADATA_FILE
+        files=metrics_files, pattern=PacBioDirsAndFiles.METADATA_FILE_SUFFIX
     )
     root = ElementTree.parse(metadata_file).getroot()
     run = root.find(".//pb:Run", namespaces=namespaces)

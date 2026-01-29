@@ -15,6 +15,7 @@ from cg.services.run_devices.exc import (
 from cg.services.run_devices.pacbio.metrics_parser.models import (
     BarcodeMetrics,
     ControlMetrics,
+    MetadataMetrics,
     PacBioMetrics,
     PolymeraseMetrics,
     ProductivityMetrics,
@@ -64,8 +65,8 @@ class PacBioMetricsParser(PostProcessingMetricsParser):
         barcodes_metrics: BarcodeMetrics = get_parsed_metrics_from_file_name(
             metrics_files=metrics_files, file_name=PacBioDirsAndFiles.BARCODES_REPORT
         )
+        metadata_metrics: MetadataMetrics = get_parsed_metadata_file(metrics_files)
         sample_metrics: list[SampleMetrics] = get_parsed_sample_metrics(metrics_files)
-        # TODO add parse metadata xml file
         LOG.debug(f"All metrics parsed for run {run_data.run_id}")
         return PacBioMetrics(
             read=read_metrics,
@@ -74,6 +75,6 @@ class PacBioMetricsParser(PostProcessingMetricsParser):
             polymerase=polymerase_metrics,
             dataset_metrics=dataset_metrics,
             barcodes=barcodes_metrics,
+            metadata=metadata_metrics,
             samples=sample_metrics,
-            metadata=get_parsed_metadata_file(metrics_files),
         )

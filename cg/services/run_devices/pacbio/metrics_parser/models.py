@@ -159,8 +159,8 @@ class SampleMetrics(RunMetrics):
 class MetadataMetrics(BaseModel):
     """Model that holds metadata for a specific run."""
 
-    run_name: str  # TODO add alias
-    unique_id: str  # TODO add alias
+    run_name: str
+    unique_id: str
 
 
 class PacBioMetrics(RunMetrics):

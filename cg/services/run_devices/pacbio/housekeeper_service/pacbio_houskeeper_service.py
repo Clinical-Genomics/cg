@@ -86,7 +86,7 @@ class PacBioHousekeeperService(PostProcessingHKService):
             PacBioDirsAndFiles.RAW_DATA_REPORT: [PacBioHousekeeperTags.RAWDATA_REPORT],
             PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: [PacBioHousekeeperTags.DATASETS_REPORT],
             f"{PacBioDirsAndFiles.HIFI_READS}.*{FileExtensions.BAM}$": [AlignmentFileTag.BAM],
-            f".*{PacBioDirsAndFiles.METADATA_FILE}$": [PacBioHousekeeperTags.METADATA],
+            f".*{PacBioDirsAndFiles.METADATA_FILE_SUFFIX}$": [PacBioHousekeeperTags.METADATA],
         }
         return get_item_by_pattern_in_source(source=file_path.name, pattern_map=file_pattern_to_tag)
 
