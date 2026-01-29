@@ -1,15 +1,23 @@
 import shutil
 from pathlib import Path
+from unittest.mock import Mock, create_autospec
 
 import pytest
 from _pytest.fixtures import FixtureRequest
 
 from cg.constants.pacbio import PacBioDirsAndFiles
-from cg.services.run_devices.pacbio.metrics_parser.models import BaseMetrics, MetadataMetrics
+from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
+from cg.services.run_devices.pacbio.metrics_parser.models import (
+    BaseMetrics,
+    MetadataMetrics,
+    PacBioMetrics,
+)
 from cg.services.run_devices.pacbio.metrics_parser.utils import (
     get_parsed_metadata_file,
     get_parsed_metrics_from_file_name,
 )
+from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
 
 
 @pytest.mark.parametrize(
@@ -93,15 +101,28 @@ def test_parse_dataset_metrics_validation_error(
         get_parsed_metrics_from_file_name(metrics_files=metrics_files, file_name=metrics_file_name)
 
 
-def test_get_parsed_metadata_file():
+def test_get_parsed_metadata_file(pacbio_barcoded_smrt_cell_dir_1_c01: Path):
     # GIVEN a list of metrics files
-    files = [
-        Path("file1"),
-        Path(
-            "tests/fixtures/devices/pacbio/SMRTcells/r84202_20240913_121403/1_C01/metadata/m84202_240913_162115_s3.metadata.xml"
-        ),
-    ]
+    metadata_dir = Path(pacbio_barcoded_smrt_cell_dir_1_c01, PacBioDirsAndFiles.METADATA_DIR)
+    files = [Path("file1"), Path(metadata_dir, "m84202_240913_162115_s3.metadata.xml")]
     # WHEN parsing the metadata file
     parsed_metadata: MetadataMetrics = get_parsed_metadata_file(files)
     # THEN the output is as expected
     assert parsed_metadata == MetadataMetrics(run_name="run-name", unique_id="unique-id")
+
+
+def test_parse_metrics(
+    pacbio_barcoded_report_files_to_parse: list[Path],
+    pacbio_barcoded_run_data: PacBioRunData,
+    pac_bio_metrics: PacBioMetrics,
+):
+    # GIVEN a PacBioMetricsParser and a PacBioRunData
+    file_manager = create_autospec(PacBioRunFileManager)
+    file_manager.get_files_to_parse = Mock(return_value=pacbio_barcoded_report_files_to_parse)
+    parser = PacBioMetricsParser(file_manager=file_manager)
+
+    # WHEN parsing the metrics
+    metrics = parser.parse_metrics(pacbio_barcoded_run_data)
+
+    # THEN the metrics should be as expected
+    assert metrics == pac_bio_metrics

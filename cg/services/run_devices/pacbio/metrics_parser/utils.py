@@ -83,7 +83,6 @@ def get_parsed_sample_metrics(metrics_files: list[Path]) -> list[SampleMetrics]:
     return _parse_sample_data(sample_data)
 
 
-# TODO create get parsed metadata file
 def get_parsed_metadata_file(metrics_files: list[Path]) -> MetadataMetrics:
     NAMESPACE = {"pb": "http://pacificbiosciences.com/PacBioDataModel.xsd"}
     metadata_file: Path = get_file_with_pattern_from_list(
