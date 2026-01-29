@@ -22,6 +22,8 @@ def pacbio_sequencing_run_dto(pac_bio_test_run_id: str) -> PacBioSequencingRunDT
     return PacBioSequencingRunDTO(
         instrument_name="Wilma",
         run_id=pac_bio_test_run_id,
+        run_name="run-name",
+        unique_id="unique-id",
     )
 
 

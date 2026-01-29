@@ -13,12 +13,18 @@ def test_get_pacbio_sequencing_runs(
     # GIVEN a store with two runs
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_id="r_older"
+            instrument_name=RevioNames.BETTY,
+            run_id="r_older",
+            run_name="run-name-older",
+            unique_id="unique-id-older",
         )
     )
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.WILMA, run_id="r_newer"
+            instrument_name=RevioNames.WILMA,
+            run_id="r_newer",
+            run_name="run-name-newer",
+            unique_id="unique-id-newer",
         )
     )
 
@@ -37,22 +43,34 @@ def test_get_pacbio_sequencing_runs_with_pagination(
     # GIVEN a store with two runs
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_id="pinocchio"
+            instrument_name=RevioNames.BETTY,
+            run_id="pinocchio",
+            run_name="run-name-1",
+            unique_id="unique-id-1",
         )
     )
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.WILMA, run_id="grinch"
+            instrument_name=RevioNames.WILMA,
+            run_id="grinch",
+            run_name="run-name-2",
+            unique_id="unique-id-2",
         )
     )
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_id="sauron"
+            instrument_name=RevioNames.BETTY,
+            run_id="sauron",
+            run_name="run-name-3",
+            unique_id="unique-id-3",
         )
     )
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.WILMA, run_id="jesus_christ"
+            instrument_name=RevioNames.WILMA,
+            run_id="jesus_christ",
+            run_name="run-name-4",
+            unique_id="unique-id-4",
         )
     )
 
@@ -69,7 +87,10 @@ def test_get_pacbio_sequencing_run_by_id_successful(store: Store):
     # GIVEN a store with a Pacbio sequencing run
     sequencing_run: PacbioSequencingRun = store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_id="pinocchio"
+            instrument_name=RevioNames.BETTY,
+            run_id="pinocchio",
+            run_name="run-name",
+            unique_id="unique-id",
         )
     )
     store.commit_to_store()
@@ -85,7 +106,10 @@ def test_get_pacbio_sequencing_run_by_id_unsuccessful(store: Store):
     # GIVEN a store with a Pacbio sequencing run
     sequencing_run: PacbioSequencingRun = store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_id="pinocchio"
+            instrument_name=RevioNames.BETTY,
+            run_id="pinocchio",
+            run_name="run-name",
+            unique_id="unique-id",
         )
     )
     store.commit_to_store()
@@ -100,7 +124,10 @@ def test_get_pacbio_sequencing_run_by_run_name_successful(store: Store):
     # GIVEN a store with a Pacbio sequencing run
     sequencing_run: PacbioSequencingRun = store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_id="pinocchio"
+            instrument_name=RevioNames.BETTY,
+            run_id="pinocchio",
+            run_name="run-name",
+            unique_id="unique-id",
         )
     )
     store.commit_to_store()
@@ -118,7 +145,10 @@ def test_get_pacbio_sequencing_run_by_run_name_unsuccessful(store: Store):
     # GIVEN a store with a Pacbio sequencing run
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_id="pinocchio"
+            instrument_name=RevioNames.BETTY,
+            run_id="pinocchio",
+            run_name="run-name",
+            unique_id="unique-id",
         )
     )
     store.commit_to_store()
