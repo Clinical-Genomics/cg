@@ -28,7 +28,7 @@ from cg.services.run_devices.pacbio.metrics_parser.models import (
 
 @pytest.fixture
 def pac_bio_read_metrics() -> ReadMetrics:
-    data: dict[str, any] = {
+    data: dict[str, Any] = {
         CCSAttributeAliases.HIFI_READS: 7815301,
         CCSAttributeAliases.HIFI_YIELD: 115338856495,
         CCSAttributeAliases.HIFI_MEAN_READ_LENGTH: 14758,
@@ -45,7 +45,7 @@ def pac_bio_read_metrics() -> ReadMetrics:
 
 @pytest.fixture
 def pac_bio_control_metrics() -> ControlMetrics:
-    data: dict[str, any] = {
+    data: dict[str, Any] = {
         ControlAttributeAliases.NUMBER_OF_READS: 2368,
         ControlAttributeAliases.MEAN_READ_LENGTH: 69936,
         ControlAttributeAliases.PERCENT_MEAN_READ_CONCORDANCE: 0.90038,
@@ -56,7 +56,7 @@ def pac_bio_control_metrics() -> ControlMetrics:
 
 @pytest.fixture
 def pac_bio_productivity_metrics() -> ProductivityMetrics:
-    data: dict[str, any] = {
+    data: dict[str, Any] = {
         LoadingAttributesAliases.PRODUCTIVE_ZMWS: 25165824,
         LoadingAttributesAliases.P_0: 6257733,
         LoadingAttributesAliases.P_1: 18766925,
@@ -67,7 +67,7 @@ def pac_bio_productivity_metrics() -> ProductivityMetrics:
 
 @pytest.fixture
 def pac_bio_polymerase_metrics() -> PolymeraseMetrics:
-    data: dict[str, any] = {
+    data: dict[str, Any] = {
         PolymeraseDataAttributeAliases.MEAN_READ_LENGTH: 85641,
         PolymeraseDataAttributeAliases.READ_LENGTH_N50: 168750,
         PolymeraseDataAttributeAliases.MEAN_LONGEST_SUBREAD_LENGTH: 18042,
