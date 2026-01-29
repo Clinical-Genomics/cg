@@ -101,12 +101,13 @@ def test_parse_dataset_metrics_validation_error(
         get_parsed_metrics_from_file_name(metrics_files=metrics_files, file_name=metrics_file_name)
 
 
-def test_get_parsed_metadata_file(pacbio_barcoded_smrt_cell_dir_1_c01: Path):
+def test_get_parsed_metadata_file(pacbio_barcoded_metadata_file: Path):
     # GIVEN a list of metrics files
-    metadata_dir = Path(pacbio_barcoded_smrt_cell_dir_1_c01, PacBioDirsAndFiles.METADATA_DIR)
-    files = [Path("file1"), Path(metadata_dir, "m84202_240913_162115_s3.metadata.xml")]
+    files = [Path("file1"), pacbio_barcoded_metadata_file]
+
     # WHEN parsing the metadata file
     parsed_metadata: MetadataMetrics = get_parsed_metadata_file(files)
+
     # THEN the output is as expected
     assert parsed_metadata == MetadataMetrics(run_name="run-name", unique_id="unique-id")
 

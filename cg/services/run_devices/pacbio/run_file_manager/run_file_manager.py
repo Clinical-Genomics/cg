@@ -55,6 +55,16 @@ class PacBioRunFileManager(RunFileManager):
             raise FileNotFoundError(f"No CCS report file found in {statistics_dir}")
         return files[0]
 
+    def _get_metadata_file(self, run_path: Path) -> Path:
+        """Return the path to the metadata file."""
+        metadata_dir: Path = Path(run_path, PacBioDirsAndFiles.METADATA_DIR)
+        files: list[Path] = get_files_matching_pattern(
+            directory=metadata_dir, pattern=PacBioDirsAndFiles.METADATA_FILE
+        )
+        if not files:
+            raise FileNotFoundError(f"No metadata file found in {metadata_dir}")
+        return files[0]
+
     def _get_report_files(self, run_path: Path) -> list[Path]:
         """Return the paths to the report files."""
         unzipped_dir: Path = self._get_unzipped_reports_dir(run_path)
@@ -65,6 +75,7 @@ class PacBioRunFileManager(RunFileManager):
             Path(unzipped_dir, PacBioDirsAndFiles.RAW_DATA_REPORT),
             Path(unzipped_dir, PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT),
             self._get_ccs_report_file(run_path),
+            self._get_metadata_file(run_path),
         ]
         validate_files_or_directories_exist(report_files)
         return report_files

@@ -84,10 +84,10 @@ def get_parsed_sample_metrics(metrics_files: list[Path]) -> list[SampleMetrics]:
 
 
 def get_parsed_metadata_file(metrics_files: list[Path]) -> MetadataMetrics:
-    NAMESPACE = {"pb": "http://pacificbiosciences.com/PacBioDataModel.xsd"}
+    namespaces = {"pb": "http://pacificbiosciences.com/PacBioDataModel.xsd"}  # NOSONAR
     metadata_file: Path = get_file_with_pattern_from_list(
         files=metrics_files, pattern=PacBioDirsAndFiles.METADATA_FILE
     )
     root = ElementTree.parse(metadata_file).getroot()
-    run = root.find(".//pb:Run", namespaces=NAMESPACE)
+    run = root.find(".//pb:Run", namespaces=namespaces)
     return MetadataMetrics(run_name=run.get("Name"), unique_id=run.get("UniqueId"))
