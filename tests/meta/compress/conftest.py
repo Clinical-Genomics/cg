@@ -135,7 +135,7 @@ def compression_files(compression_object: MockCompressionData) -> MockCompressio
 
 @pytest.fixture(name="real_crunchy_api")
 def real_crunchy_api(
-    crunchy_config: dict[str, dict[str, Any]]
+    crunchy_config: dict[str, dict[str, Any]],
 ) -> Generator[CrunchyAPI, None, None]:
     """Crunchy API fixture."""
     yield CrunchyAPI(crunchy_config)

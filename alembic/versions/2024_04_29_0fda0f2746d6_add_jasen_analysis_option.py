@@ -6,12 +6,13 @@ Create Date: 2024-04-25 12:17:39.250700
 
 """
 
-from alembic import op
 from enum import StrEnum
+
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import declarative_base
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "0fda0f2746d6"
