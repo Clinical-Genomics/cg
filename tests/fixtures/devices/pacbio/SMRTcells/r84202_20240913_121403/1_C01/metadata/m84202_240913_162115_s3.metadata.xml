@@ -4,7 +4,7 @@
     <InvestigatorName>Default</InvestigatorName>
     <CreatedDate>2024-10-02</CreatedDate>
     <Runs>
-      <Run Name="run_name" Description="Samples from a run" CreatedAt="2023-10-03T10:58:10.325+00:00" ModifiedAt="0001-01-01T00:00:00" UniqueId="unique-id" MetaType="Run" TimeStampedName="r84202_20240913_121403" Status="Running" ChipType="25mChip" InstrumentType="Revio" CreatedBy="Santa.Claus" StartedBy="unknown" WhenStarted="2023-10-03T11:03:18.3944321Z">
+      <Run Name="run-name" Description="Samples from a run" CreatedAt="2023-10-03T10:58:10.325+00:00" ModifiedAt="0001-01-01T00:00:00" UniqueId="unique-id" MetaType="Run" TimeStampedName="r84202_20240913_121403" Status="Running" ChipType="25mChip" InstrumentType="Revio" CreatedBy="Santa.Claus" StartedBy="unknown" WhenStarted="2023-10-03T11:03:18.3944321Z">
       </Run>
     </Runs>
   </ExperimentContainer>

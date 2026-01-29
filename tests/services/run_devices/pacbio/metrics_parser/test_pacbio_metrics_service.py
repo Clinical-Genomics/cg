@@ -104,4 +104,4 @@ def test_get_parsed_metadata_file():
     # WHEN parsing the metadata file
     parsed_metadata: MetadataMetrics = get_parsed_metadata_file(files)
     # THEN the output is as expected
-    assert parsed_metadata == MetadataMetrics(run_name="run_name", unique_id="unique_id")
+    assert parsed_metadata == MetadataMetrics(run_name="run-name", unique_id="unique-id")
