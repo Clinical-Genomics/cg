@@ -119,7 +119,7 @@ def test_get_parsed_metadata_file_success(pacbio_barcoded_metadata_file: Path):
 def test_get_parsed_metadata_file_parsing_fails(
     pacbio_barcoded_metadata_file: Path, mocker: MockerFixture
 ):
-    # GIVEN a list of metrics files
+    # GIVEN a list of metrics files with a valid path
     files = [Path("file1"), pacbio_barcoded_metadata_file]
 
     # GIVEN that parsing the metadata file raises a ParseError
