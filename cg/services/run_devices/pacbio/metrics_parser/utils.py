@@ -92,9 +92,14 @@ def get_parsed_metadata_file(metrics_files: list[Path]) -> MetadataMetrics:
         files=metrics_files, pattern=PacBioDirsAndFiles.METADATA_FILE_SUFFIX
     )
     root: Element = ElementTree.parse(metadata_file).getroot()
-    run = root.find(".//pb:Run", namespaces=namespaces)
+    run: Element | None = root.find(".//pb:Run", namespaces=namespaces)
     if run is not None:
         run_name, unique_id = run.get("Name"), run.get("UniqueId")
         if run_name and unique_id:
-            return MetadataMetrics(run_name=run.get("Name"), unique_id=run.get("UniqueId"))
-    raise XMLError(f"No 'Run' element found in {metadata_file}")
+            return MetadataMetrics(run_name=run_name, unique_id=unique_id)
+        else:
+            raise XMLError(
+                f"'Run' element is missing either 'Name' or 'UniqueId' in {metadata_file}"
+            )
+    else:
+        raise XMLError(f"No 'Run' element found in {metadata_file}")
