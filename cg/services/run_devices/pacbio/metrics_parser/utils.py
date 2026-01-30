@@ -5,6 +5,7 @@ from xml.etree.ElementTree import Element
 
 from cg.constants.constants import FileFormat
 from cg.constants.pacbio import MetricsFileFields, PacBioDirsAndFiles
+from cg.exc import XMLError
 from cg.io.controller import ReadFile
 from cg.services.run_devices.pacbio.metrics_parser.models import (
     BarcodeMetrics,
@@ -91,5 +92,7 @@ def get_parsed_metadata_file(metrics_files: list[Path]) -> MetadataMetrics:
         files=metrics_files, pattern=PacBioDirsAndFiles.METADATA_FILE_SUFFIX
     )
     root: Element = ElementTree.parse(metadata_file).getroot()
-    run: Element | None = root.find(".//pb:Run", namespaces=namespaces)
-    return MetadataMetrics(run_name=run.get("Name"), unique_id=run.get("UniqueId"))
+    if run := root.find(".//pb:Run", namespaces=namespaces):
+        return MetadataMetrics(run_name=run.get("Name"), unique_id=run.get("UniqueId"))
+    else:
+        raise XMLError(f"No 'Run' element found in {metadata_file}")

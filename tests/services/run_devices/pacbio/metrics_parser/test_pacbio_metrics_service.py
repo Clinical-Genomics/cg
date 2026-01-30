@@ -150,6 +150,27 @@ def test_get_parsed_metadata_file_run_element_not_found(
         get_parsed_metadata_file(files)
 
 
+def test_get_parsed_metadata_file_run_element_without_attributes(
+    pacbio_barcoded_metadata_file: Path, mocker: MockerFixture
+):
+    # GIVEN a list of metrics files with a valid path
+    files = [Path("file1"), pacbio_barcoded_metadata_file]
+
+    # GIVEN that the Run element can't be found in the XML
+    tree: ElementTree.ElementTree = create_autospec(ElementTree.ElementTree)
+    root: Element = create_autospec(Element)
+    run_element: Element = Element("Root")
+    # run_element.get = Mock(return_value=None)
+    root.find = Mock(return_value=run_element)
+    tree.getroot = Mock(return_value=root)
+    mocker.patch.object(ElementTree, "parse", return_value=tree)
+
+    # WHEN parsing the metadata file
+    # THEN an error is raised
+    with pytest.raises(XMLError):
+        get_parsed_metadata_file(files)
+
+
 def test_parse_metrics(
     pacbio_barcoded_report_files_to_parse: list[Path],
     pacbio_barcoded_run_data: PacBioRunData,
