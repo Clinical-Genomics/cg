@@ -48,7 +48,6 @@ class NalloAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.root_dir: str = config.nallo.root
-        self.workflow_bin_path: str = config.nallo.workflow_bin_path
         self.profile: str = config.nallo.profile
         self.conda_env: str = config.nallo.conda_env
         self.conda_binary: str = config.nallo.conda_binary

@@ -239,7 +239,6 @@ class NalloConfig(CommonAppConfig):
     config: str
     resources: str
     launch_directory: str
-    workflow_bin_path: str
     pre_run_script: str = ""
     profile: str
     repository: str
@@ -258,7 +257,6 @@ class RarediseaseConfig(CommonAppConfig):
     config: str
     resources: str
     launch_directory: str
-    workflow_bin_path: str
     pre_run_script: str = ""
     profile: str
     repository: str
@@ -276,7 +274,6 @@ class TomteConfig(CommonAppConfig):
     params: str
     config: str
     resources: str
-    workflow_bin_path: str
     pre_run_script: str = ""
     profile: str
     repository: str
@@ -302,7 +299,6 @@ class RnafusionConfig(CommonAppConfig):
     root: str
     slurm: SlurmConfig
     tower_workflow: str
-    workflow_bin_path: str
 
 
 class TaxprofilerConfig(CommonAppConfig):
