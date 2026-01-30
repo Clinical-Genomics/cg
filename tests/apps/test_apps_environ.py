@@ -1,4 +1,4 @@
-""" Test the environ app """
+"""Test the environ app"""
 
 import os
 from unittest import mock

@@ -1,4 +1,4 @@
-""" Module to decouple cg code from Housekeeper code """
+"""Module to decouple cg code from Housekeeper code"""
 
 import logging
 import os

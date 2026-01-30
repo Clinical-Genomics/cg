@@ -1,5 +1,5 @@
 """
-    Tests for GenotypeAPI
+Tests for GenotypeAPI
 """
 
 import logging

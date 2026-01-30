@@ -60,7 +60,7 @@ class PacBioHousekeeperService(PostProcessingHKService):
                 file_path=bundle_info.file_path,
                 tags=bundle_info.tags,
             )
-        LOG.debug(f"Files stored in Housekeeper for run {run_data.sequencing_run_name}")
+        LOG.debug(f"Files stored in Housekeeper for run {run_data.run_id}")
 
     @staticmethod
     def _get_bundle_type_for_file(file_path: Path) -> str:

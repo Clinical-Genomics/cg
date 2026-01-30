@@ -17,24 +17,26 @@ class PacBioRunDataGenerator(RunDataGenerator):
     @handle_post_processing_errors(
         to_except=(ValueError,), to_raise=PostProcessingRunDataGeneratorError
     )
-    def get_run_data(self, run_name: str, sequencing_dir: str) -> PacBioRunData:
+    def get_run_data(self, run_full_name: str, sequencing_dir: str) -> PacBioRunData:
         """
         Get the run data for a PacBio SMRT cell run.
-        run_name should include the PacBio run including plate well, e.g. 'r84202_20240522_133539/1_A01'
+        run_full_name should include the PacBio run including plate well, e.g. 'r84202_20240522_133539/1_A01'
         """
-        self._validate_run_name(run_name)
-        full_path = Path(sequencing_dir, run_name)
+        self._validate_run_name(run_full_name)
+        full_path = Path(sequencing_dir, run_full_name)
 
         return PacBioRunData(
             full_path=full_path,
-            sequencing_run_name=self._get_sequencing_run_name(run_name),
-            well_name=self._get_well(run_name),
-            plate=self._get_plate(run_name),
+            run_id=self._get_run_id_from_run_full_name(run_full_name),
+            well_name=self._get_well(run_full_name),
+            plate=self._get_plate(run_full_name),  # type: ignore Pydantic transforming
         )
 
     @staticmethod
-    def _get_sequencing_run_name(run_name: str) -> str:
-        return run_name.split("/")[0]
+    def _get_run_id_from_run_full_name(
+        run_full_name: str,
+    ) -> str:
+        return run_full_name.split("/")[0]
 
     @staticmethod
     def _get_plate_well(run_name: str) -> str:

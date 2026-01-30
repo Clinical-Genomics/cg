@@ -1,4 +1,4 @@
-""" Tests for Loqusdb API."""
+"""Tests for Loqusdb API."""
 
 import logging
 from subprocess import CalledProcessError

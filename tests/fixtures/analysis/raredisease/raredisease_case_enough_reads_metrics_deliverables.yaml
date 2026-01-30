@@ -1297,6 +1297,15 @@ metrics:
   name: Contamination Level
   step: multiqc
   value: ND
+- condition:
+    norm: lt
+    threshold: 0.02
+  header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: FREEMIX
+  step: multiqc
+  value: 5.68993e-05
 - condition: null
   header: null
   id: ADM2
