@@ -86,13 +86,15 @@ def get_parsed_sample_metrics(metrics_files: list[Path]) -> list[SampleMetrics]:
 
 def get_parsed_metadata_file(metrics_files: list[Path]) -> MetadataMetrics:
     namespaces: dict[str, str] = {
-        "pb": "http://pacificbiosciences.com/PacBioDataModel.xsd"
-    }  # NOSONAR
+        "pb": "http://pacificbiosciences.com/PacBioDataModel.xsd"  # NOSONAR
+    }
     metadata_file: Path = get_file_with_pattern_from_list(
         files=metrics_files, pattern=PacBioDirsAndFiles.METADATA_FILE_SUFFIX
     )
     root: Element = ElementTree.parse(metadata_file).getroot()
-    if run := root.find(".//pb:Run", namespaces=namespaces):
-        return MetadataMetrics(run_name=run.get("Name"), unique_id=run.get("UniqueId"))
-    else:
-        raise XMLError(f"No 'Run' element found in {metadata_file}")
+    run = root.find(".//pb:Run", namespaces=namespaces)
+    if run is not None:
+        run_name, unique_id = run.get("Name"), run.get("UniqueId")
+        if run_name and unique_id:
+            return MetadataMetrics(run_name=run.get("Name"), unique_id=run.get("UniqueId"))
+    raise XMLError(f"No 'Run' element found in {metadata_file}")

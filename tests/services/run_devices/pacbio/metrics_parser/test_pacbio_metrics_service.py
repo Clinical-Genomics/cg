@@ -159,8 +159,8 @@ def test_get_parsed_metadata_file_run_element_without_attributes(
     # GIVEN that the Run element can't be found in the XML
     tree: ElementTree.ElementTree = create_autospec(ElementTree.ElementTree)
     root: Element = create_autospec(Element)
-    run_element: Element = Element("Root")
-    # run_element.get = Mock(return_value=None)
+    run_element: Element = create_autospec(Element)
+    run_element.get = Mock(return_value=None)
     root.find = Mock(return_value=run_element)
     tree.getroot = Mock(return_value=root)
     mocker.patch.object(ElementTree, "parse", return_value=tree)
