@@ -1,7 +1,5 @@
 from unittest.mock import Mock, create_autospec
 
-import pytest
-
 from cg.services.run_devices.pacbio.data_transfer_service.data_transfer_service import (
     PacBioDataTransferService,
 )
@@ -11,8 +9,6 @@ from cg.services.run_devices.pacbio.metrics_parser.models import PacBioMetrics
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 
 
-# TODO
-@pytest.mark.skip("Sebas will fix it")
 def test_get_post_processing_dtos(
     pacbio_barcoded_run_data: PacBioRunData,
     pac_bio_dtos: PacBioDTOs,

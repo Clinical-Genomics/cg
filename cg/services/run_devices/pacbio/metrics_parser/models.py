@@ -135,7 +135,7 @@ class BarcodeMetrics(RunMetrics):
         ..., alias=BarcodeMetricsAliases.BARCODED_HIFI_YIELD_PERCENTAGE
     )
     barcoded_hifi_mean_read_length: int = Field(
-        ..., alias=BarcodeMetricsAliases.UNBARCODED_HIFI_MEAN_READ_LENGTH
+        ..., alias=BarcodeMetricsAliases.BARCODED_MEAN_READ_LENGTH
     )
     unbarcoded_hifi_reads: int = Field(..., alias=BarcodeMetricsAliases.UNBARCODED_HIFI_READS)
     unbarcoded_hifi_yield: int = Field(..., alias=BarcodeMetricsAliases.UNBARCODED_HIFI_YIELD)

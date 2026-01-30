@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import pytest
 
 from cg.constants.devices import DeviceType
@@ -13,61 +11,64 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import (
 
 
 @pytest.fixture
-def pac_bio_smrt_cell_dto() -> PacBioSMRTCellDTO:
-    return PacBioSMRTCellDTO(type=DeviceType.PACBIO, internal_id="internal_id")
+def pac_bio_smrt_cell_dto(barcoded_smrt_cell_internal_id: str) -> PacBioSMRTCellDTO:
+    return PacBioSMRTCellDTO(type=DeviceType.PACBIO, internal_id=barcoded_smrt_cell_internal_id)
 
 
 @pytest.fixture
-def pacbio_sequencing_run_dto(pac_bio_test_run_id: str) -> PacBioSequencingRunDTO:
+def pacbio_sequencing_run_dto(pacbio_barcoded_run_id: str) -> PacBioSequencingRunDTO:
     return PacBioSequencingRunDTO(
-        instrument_name="Wilma",
-        run_id=pac_bio_test_run_id,
+        instrument_name="Wilma",  # type: ignore
+        run_id=pacbio_barcoded_run_id,
         run_name="run-name",
         unique_id="unique-id",
     )
 
 
 @pytest.fixture
-def pacbio_smrt_cell_metrics_dto(pac_bio_test_run_id: str) -> PacBioSMRTCellMetricsDTO:
+def pacbio_smrt_cell_metrics_dto(
+    pacbio_barcoded_run_id: str,
+    pacbio_barcoded_1_c01_movie_name: str,
+) -> PacBioSMRTCellMetricsDTO:
     sample_data = {
         "type": DeviceType.PACBIO,
-        "well": "A1",
+        "well": "C01",
         "plate": 1,
-        "run_id": pac_bio_test_run_id,
-        "started_at": datetime.now(),
-        "completed_at": datetime.now(),
+        "run_id": pacbio_barcoded_run_id,
+        "started_at": "2024-09-13T16:21:15",
+        "completed_at": "2024-09-15T14:11:32.418Z",
         "movie_time_hours": 10,
-        "hifi_reads": 500000,
-        "hifi_yield": 3000000000,
-        "hifi_mean_read_length": 6000,
-        "hifi_median_read_length": 6000,
-        "hifi_mean_length_n50": 5000,
-        "hifi_median_read_quality": "Q20",
-        "percent_reads_passing_q30": 99.5,
-        "productive_zmws": 150000,
-        "p0_percent": 0.5,
-        "p1_percent": 1.5,
-        "p2_percent": 98.0,
-        "polymerase_mean_read_length": 7000,
-        "polymerase_read_length_n50": 6500,
-        "polymerase_mean_longest_subread": 12000,
-        "polymerase_longest_subread_n50": 11000,
-        "control_reads": 10000,
-        "control_mean_read_length": 5000,
-        "control_mean_read_concordance": 99.0,
-        "control_mode_read_concordance": 99.5,
-        "failed_reads": 1000,
-        "failed_yield": 500000000,
-        "failed_mean_read_length": 3000,
-        "barcoded_hifi_reads": 450000,
-        "barcoded_hifi_reads_percentage": 95.6,
-        "barcoded_hifi_yield": 1025000000,
-        "barcoded_hifi_yield_percentage": 96.7,
-        "barcoded_hifi_mean_read_length": 6100,
-        "unbarcoded_hifi_reads": 50000,
-        "unbarcoded_hifi_yield": 1975000000,
-        "unbarcoded_hifi_mean_read_length": 6200,
-        "movie_name": "movie123",
+        "hifi_reads": 7815301,
+        "hifi_yield": 115338856495,
+        "hifi_mean_read_length": 14758,
+        "hifi_median_read_length": 14679,
+        "hifi_mean_length_n50": 14679,
+        "hifi_median_read_quality": "Q35",
+        "percent_reads_passing_q30": 93.10000000000001,
+        "productive_zmws": 25165824,
+        "p0_percent": round((6257733 / 25165824) * 100, 0),
+        "p1_percent": round((18766925 / 25165824) * 100, 0),
+        "p2_percent": round((141166 / 25165824) * 100, 0),
+        "polymerase_mean_read_length": 85641,
+        "polymerase_read_length_n50": 168750,
+        "polymerase_mean_longest_subread": 18042,
+        "polymerase_longest_subread_n50": 21750,
+        "control_reads": 2368,
+        "control_mean_read_length": 69936,
+        "control_mean_read_concordance": 90.038,
+        "control_mode_read_concordance": 91.0,
+        "failed_reads": 469053,
+        "failed_yield": 7404831038,
+        "failed_mean_read_length": 15786,
+        "barcoded_hifi_reads": 7785983,
+        "barcoded_hifi_reads_percentage": 99.62486409672513,
+        "barcoded_hifi_yield": 114676808325,
+        "barcoded_hifi_yield_percentage": 99.63122400514475,
+        "barcoded_hifi_mean_read_length": 14728,
+        "unbarcoded_hifi_reads": 29318,
+        "unbarcoded_hifi_yield": 424465869,
+        "unbarcoded_hifi_mean_read_length": 14477,
+        "movie_name": pacbio_barcoded_1_c01_movie_name,
     }
     return PacBioSMRTCellMetricsDTO(**sample_data)
 
@@ -78,11 +79,11 @@ def pac_bio_sample_sequencing_metrics_dto(
 ) -> list[PacBioSampleSequencingMetricsDTO]:
     sample_metrics_data = {
         "sample_internal_id": pacbio_barcoded_sample_internal_id,
-        "hifi_reads": 450000,
-        "hifi_yield": 2750000000,
-        "hifi_mean_read_length": 6100,
-        "hifi_median_read_quality": "Q30",
-        "polymerase_mean_read_length": 70000,
+        "hifi_reads": 7785983,
+        "hifi_yield": 114676808325,
+        "hifi_mean_read_length": 14728,
+        "hifi_median_read_quality": "Q35",
+        "polymerase_mean_read_length": 163451,
     }
     return [PacBioSampleSequencingMetricsDTO(**sample_metrics_data)]
 
