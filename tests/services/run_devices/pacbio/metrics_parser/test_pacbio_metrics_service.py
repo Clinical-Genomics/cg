@@ -1,21 +1,22 @@
 import shutil
 from pathlib import Path
 from unittest.mock import Mock, create_autospec
-from xml.etree.ElementTree import ParseError
+from xml.etree.ElementTree import Element, ParseError
 
 import pytest
 from _pytest.fixtures import FixtureRequest
 from pytest_mock import MockerFixture
 
 from cg.constants.pacbio import PacBioDirsAndFiles
+from cg.exc import XMLError
 from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
 from cg.services.run_devices.pacbio.metrics_parser.models import (
     BaseMetrics,
     MetadataMetrics,
     PacBioMetrics,
 )
-from cg.services.run_devices.pacbio.metrics_parser.utils import ElementTree as imported_elementtree
 from cg.services.run_devices.pacbio.metrics_parser.utils import (
+    ElementTree,
     get_parsed_metadata_file,
     get_parsed_metrics_from_file_name,
 )
@@ -115,18 +116,38 @@ def test_get_parsed_metadata_file_success(pacbio_barcoded_metadata_file: Path):
     assert parsed_metadata == MetadataMetrics(run_name="run-name", unique_id="unique-id")
 
 
-def test_get_parsed_metadata_file_fail(pacbio_barcoded_metadata_file: Path, mocker: MockerFixture):
+def test_get_parsed_metadata_file_parsing_fails(
+    pacbio_barcoded_metadata_file: Path, mocker: MockerFixture
+):
     # GIVEN a list of metrics files
     files = [Path("file1"), pacbio_barcoded_metadata_file]
 
-    #
-    mocker.patch.object(imported_elementtree, "parse", side_effect=ParseError)
+    # GIVEN that parsing the metadata file raises a ParseError
+    mocker.patch.object(ElementTree, "parse", side_effect=ParseError)
 
     # WHEN parsing the metadata file
-    parsed_metadata: MetadataMetrics = get_parsed_metadata_file(files)
+    # THEN an error is raised
+    with pytest.raises(ParseError):
+        get_parsed_metadata_file(files)
 
-    # THEN the output is not as expected
-    assert parsed_metadata == MetadataMetrics(run_name="run-name", unique_id="unique-id")
+
+def test_get_parsed_metadata_file_run_element_not_found(
+    pacbio_barcoded_metadata_file: Path, mocker: MockerFixture
+):
+    # GIVEN a list of metrics files with a valid path
+    files = [Path("file1"), pacbio_barcoded_metadata_file]
+
+    # GIVEN that the Run element can't be found in the XML
+    tree: ElementTree.ElementTree = create_autospec(ElementTree.ElementTree)
+    root: Element = create_autospec(Element)
+    root.find = Mock(return_value=None)
+    tree.getroot = Mock(return_value=root)
+    mocker.patch.object(ElementTree, "parse", return_value=tree)
+
+    # WHEN parsing the metadata file
+    # THEN an error is raised
+    with pytest.raises(XMLError):
+        get_parsed_metadata_file(files)
 
 
 def test_parse_metrics(
