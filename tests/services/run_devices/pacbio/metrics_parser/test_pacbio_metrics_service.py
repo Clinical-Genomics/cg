@@ -1,9 +1,11 @@
 import shutil
 from pathlib import Path
 from unittest.mock import Mock, create_autospec
+from xml.etree.ElementTree import ParseError
 
 import pytest
 from _pytest.fixtures import FixtureRequest
+from pytest_mock import MockerFixture
 
 from cg.constants.pacbio import PacBioDirsAndFiles
 from cg.services.run_devices.pacbio.metrics_parser.metrics_parser import PacBioMetricsParser
@@ -12,6 +14,7 @@ from cg.services.run_devices.pacbio.metrics_parser.models import (
     MetadataMetrics,
     PacBioMetrics,
 )
+from cg.services.run_devices.pacbio.metrics_parser.utils import ElementTree as imported_elementtree
 from cg.services.run_devices.pacbio.metrics_parser.utils import (
     get_parsed_metadata_file,
     get_parsed_metrics_from_file_name,
@@ -101,7 +104,7 @@ def test_parse_dataset_metrics_validation_error(
         get_parsed_metrics_from_file_name(metrics_files=metrics_files, file_name=metrics_file_name)
 
 
-def test_get_parsed_metadata_file(pacbio_barcoded_metadata_file: Path):
+def test_get_parsed_metadata_file_success(pacbio_barcoded_metadata_file: Path):
     # GIVEN a list of metrics files
     files = [Path("file1"), pacbio_barcoded_metadata_file]
 
@@ -109,6 +112,20 @@ def test_get_parsed_metadata_file(pacbio_barcoded_metadata_file: Path):
     parsed_metadata: MetadataMetrics = get_parsed_metadata_file(files)
 
     # THEN the output is as expected
+    assert parsed_metadata == MetadataMetrics(run_name="run-name", unique_id="unique-id")
+
+
+def test_get_parsed_metadata_file_fail(pacbio_barcoded_metadata_file: Path, mocker: MockerFixture):
+    # GIVEN a list of metrics files
+    files = [Path("file1"), pacbio_barcoded_metadata_file]
+
+    #
+    mocker.patch.object(imported_elementtree, "parse", side_effect=ParseError)
+
+    # WHEN parsing the metadata file
+    parsed_metadata: MetadataMetrics = get_parsed_metadata_file(files)
+
+    # THEN the output is not as expected
     assert parsed_metadata == MetadataMetrics(run_name="run-name", unique_id="unique-id")
 
 

@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Any, Type
 from xml.etree import ElementTree
+from xml.etree.ElementTree import Element
 
 from cg.constants.constants import FileFormat
 from cg.constants.pacbio import MetricsFileFields, PacBioDirsAndFiles
@@ -83,10 +84,12 @@ def get_parsed_sample_metrics(metrics_files: list[Path]) -> list[SampleMetrics]:
 
 
 def get_parsed_metadata_file(metrics_files: list[Path]) -> MetadataMetrics:
-    namespaces = {"pb": "http://pacificbiosciences.com/PacBioDataModel.xsd"}  # NOSONAR
+    namespaces: dict[str, str] = {
+        "pb": "http://pacificbiosciences.com/PacBioDataModel.xsd"
+    }  # NOSONAR
     metadata_file: Path = get_file_with_pattern_from_list(
         files=metrics_files, pattern=PacBioDirsAndFiles.METADATA_FILE_SUFFIX
     )
-    root = ElementTree.parse(metadata_file).getroot()
-    run = root.find(".//pb:Run", namespaces=namespaces)
+    root: Element = ElementTree.parse(metadata_file).getroot()
+    run: Element | None = root.find(".//pb:Run", namespaces=namespaces)
     return MetadataMetrics(run_name=run.get("Name"), unique_id=run.get("UniqueId"))
