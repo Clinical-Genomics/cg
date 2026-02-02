@@ -23,7 +23,7 @@ class PacbioSequencingRunsService:
             metric_dict["internal_id"] = metric.device.internal_id
             metric_dict["run_id"] = metric.run_id
             metrics.append(PacbioSmrtCellMetricsDTO.model_validate(metric_dict))
-        return PacbioSmrtCellMetricsResponse(runs=metrics)
+        return PacbioSmrtCellMetricsResponse(metrics=metrics)
 
     def get_sequencing_runs(self, page: int = 0, page_size: int = 0) -> PacbioSequencingRunResponse:
         db_runs, total_count = self.store.get_pacbio_sequencing_runs(page=page, page_size=page_size)

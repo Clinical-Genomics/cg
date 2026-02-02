@@ -25,7 +25,7 @@ class PacbioSmrtCellMetricsDTO(BaseModel):
 
 
 class PacbioSmrtCellMetricsResponse(BaseModel):
-    runs: list[PacbioSmrtCellMetricsDTO]
+    metrics: list[PacbioSmrtCellMetricsDTO]
 
 
 class PacbioSequencingRunDTO(BaseModel):
