@@ -165,7 +165,10 @@ def test_create_pacbio_sequencing_run(store: Store):
 
     # GIVEN a PacBioSequencingRunDTO
     pacbio_sequencing_run_dto = PacBioSequencingRunDTO(
-        instrument_name=RevioNames.WILMA, run_id="r123_123_123"
+        instrument_name=RevioNames.WILMA,
+        run_id="r123_123_123",
+        run_name="run-name",
+        unique_id="unique-id",
     )
 
     # WHEN creating a Pacbio sequencing run in Store
@@ -180,7 +183,10 @@ def test_create_pacbio_sequencing_run(store: Store):
 def test_create_pacbio_sequencing_run_already_exists(store: Store):
     # GIVEN a Store with a Pacbio sequencing run
     pacbio_sequencing_run_dto = PacBioSequencingRunDTO(
-        instrument_name=RevioNames.WILMA, run_id="r123_123_123"
+        instrument_name=RevioNames.WILMA,
+        run_id="r123_123_123",
+        run_name="run-name",
+        unique_id="unique-id",
     )
     store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
     store.commit_to_store()
@@ -188,7 +194,10 @@ def test_create_pacbio_sequencing_run_already_exists(store: Store):
 
     # GIVEN a PacBioSequencingRunDTO
     pacbio_sequencing_run_dto = PacBioSequencingRunDTO(
-        instrument_name=RevioNames.WILMA, run_id="r123_123_123"
+        instrument_name=RevioNames.WILMA,
+        run_id="r123_123_123",
+        run_name="run-name",
+        unique_id="unique-id",
     )
 
     # WHEN creating the same Pacbio sequencing run in Store

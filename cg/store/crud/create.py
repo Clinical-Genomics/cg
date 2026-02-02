@@ -524,6 +524,8 @@ class CreateMixin(ReadHandler):
             sequencing_run = PacbioSequencingRun(
                 instrument_name=pacbio_sequencing_run_dto.instrument_name,
                 run_id=pacbio_sequencing_run_dto.run_id,
+                run_name=pacbio_sequencing_run_dto.run_name,
+                unique_id=pacbio_sequencing_run_dto.unique_id,
             )
             self.add_item_to_store(sequencing_run)
             return sequencing_run
