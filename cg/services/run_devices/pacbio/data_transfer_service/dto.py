@@ -12,7 +12,7 @@ class PacBioSMRTCellMetricsDTO(BaseModel):
     type: DeviceType
     well: str
     plate: int
-    run_name: str
+    run_id: str
     movie_name: str
     started_at: datetime
     completed_at: datetime
@@ -64,7 +64,9 @@ class PacBioSampleSequencingMetricsDTO(BaseModel):
 
 class PacBioSequencingRunDTO(BaseModel):
     instrument_name: RevioNames
+    run_id: str
     run_name: str
+    unique_id: str
 
 
 class PacBioDTOs(PostProcessingDTOs):

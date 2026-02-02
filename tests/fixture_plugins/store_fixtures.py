@@ -6,7 +6,6 @@ from cg.constants.constants import ControlOptions
 from cg.constants.devices import DeviceType, RevioNames
 from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioSequencingRunDTO
 from cg.store.store import Store
-from tests.conftest import base_store, run_name
 from tests.store_helpers import StoreHelpers
 
 
@@ -147,21 +146,27 @@ def mutant_store(store: Store, helpers: StoreHelpers) -> Store:
 def pacbio_sequencing_runs_store(
     base_store: Store,
     helpers: StoreHelpers,
-    pacbio_run_name_to_fetch: str,
-    pacbio_run_name_not_to_fetch: str,
+    pacbio_run_id_to_fetch: str,
+    pacbio_run_id_not_to_fetch: str,
 ) -> Store:
     device = helpers.add_run_device(
         store=base_store, id=1, type=DeviceType.PACBIO, internal_id="device_internal_id"
     )
     sequencing_run = base_store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name=pacbio_run_name_to_fetch
+            instrument_name=RevioNames.BETTY,
+            run_id=pacbio_run_id_to_fetch,
+            run_name="run-name",
+            unique_id="unique-id",
         )
     )
 
     sequencing_run_not_to_fetch = base_store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name=pacbio_run_name_not_to_fetch
+            instrument_name=RevioNames.BETTY,
+            run_id=pacbio_run_id_not_to_fetch,
+            run_name="run-name-2",
+            unique_id="unique-id-2",
         )
     )
 

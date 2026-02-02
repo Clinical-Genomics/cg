@@ -348,9 +348,24 @@ class CaseNotConfiguredError(CgError):
     """Exception raised when a case is being run without a configuration."""
 
 
+class CaseWorkflowMismatchError(CgError):
+    """
+    Exception raised when a case is being run with a workflow different from the one specified
+    for it in the database.
+    """
+
+
 class MissingConfigFilesError(CgError):
     """Exception raised when a case is being run with missing configuration files."""
 
 
 class SeqeraError(CgError):
     """Exception raised when receiving an unexpected response from Seqera platform"""
+
+
+class MultipleCaptureKitsError(CgError):
+    """Exception raised when multiple capture kits are found where only one is expected."""
+
+
+class ApplicationDoesNotHaveHiFiYieldError(CgError):
+    """Exception raised when application does not have HiFi yield set."""
