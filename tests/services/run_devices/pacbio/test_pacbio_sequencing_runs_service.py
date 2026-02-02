@@ -57,16 +57,20 @@ def test_get_all_pacbio_sequencing_runs():
         create_autospec(
             PacbioSequencingRun,
             id=6,
-            run_id="santas_little_helper",
+            run_id="r123_dog",
+            run_name="santas_little_helper",
             comment="hunden i Simpsons",
             processed=True,
+            unique_id="abc-123-432-aw2",
         ),
         create_autospec(
             PacbioSequencingRun,
             id=4,
-            run_id="Nisse",
+            run_id="r234_small_dog",
+            run_name="Nisse",
             comment="Tomtens hjälpreda",
             processed=False,
+            unique_id="ett_tu1_tre",
         ),
     ]
     status_db: Store = create_autospec(Store)
@@ -85,12 +89,19 @@ def test_get_all_pacbio_sequencing_runs():
         pacbio_sequencing_runs=[
             PacbioSequencingRunDTO(
                 id=6,
+                run_id="r234_small_dog",
                 run_name="santas_little_helper",
                 comment="hunden i Simpsons",
                 processed=True,
+                unique_id="abc-123-432-aw2",
             ),
             PacbioSequencingRunDTO(
-                id=4, run_name="Nisse", comment="Tomtens hjälpreda", processed=False
+                id=4,
+                run_id="r234_small_dog",
+                run_name="Nisse",
+                comment="Tomtens hjälpreda",
+                processed=False,
+                unique_id="ett_tu1_tre",
             ),
         ],
         total_count=2,

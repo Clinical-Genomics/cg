@@ -30,9 +30,11 @@ class PacbioSmrtCellMetricsResponse(BaseModel):
 
 class PacbioSequencingRunDTO(BaseModel):
     id: int
-    run_name: str
     comment: str
     processed: bool
+    run_id: str | None
+    run_name: str
+    unique_id: str | None
 
 
 class PacbioSequencingRunResponse(BaseModel):
