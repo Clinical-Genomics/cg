@@ -221,7 +221,4 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             sample_id=sample_id,
             hk_version=hk_version,
         )
-        config_sample.d4_file = self.get_sample_file(  # TODO: this should probably go as well
-            hk_tags=self.sample_tags.d4_file, sample_id=sample_id, hk_version=hk_version
-        )
         self.include_reviewer_files(config_sample=config_sample, hk_version=hk_version)

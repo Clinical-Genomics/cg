@@ -551,7 +551,6 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     upd_sites_bed: File = create_autospec(File, full_path="chromograph_sites.bed")
     vcf2cytosure: File = create_autospec(File, full_path="sample_id.cgh")
     mitodel_file: File = create_autospec(File, full_path="mitodel.txt")
-    d4_file: File = create_autospec(File, full_path="coverage.d4")
 
     chromograph_autozyg: File = create_autospec(File, full_path="chromograph_autozyg_chr9.png")
     chromograph_coverage: File = create_autospec(File, full_path="chromograph_coverage_chr9.png")
@@ -590,9 +589,9 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         if tags == {"vcf-snv-clinical"}:
             return vcf_snv
         if tags == {"vcf-sv-research", "mitochondria"}:
-            return vcf_snv_research_mt  # TODO are these correct? MT = mitochondria, but sv not snv
+            return vcf_snv_research_mt
         if tags == {"vcf-sv-clinical", "mitochondria"}:
-            return vcf_snv_mt  # TODO are these correct? MT = mitochondria, but sv not snv
+            return vcf_snv_mt
         if tags == {"vcf-sv-research"}:
             return vcf_sv_research
         if tags == {"vcf-sv-clinical"}:
@@ -603,8 +602,6 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         # Sample tags
         if tags == {AlignmentFileTag.CRAM, "sample_id"}:
             return alignment_path
-        if tags == {"d4", "sample_id"}:
-            return d4_file
         if tags == {"vcf2cytosure", "sample_id"}:
             return vcf2cytosure
         if tags == {"bam-mt", "sample_id"}:
@@ -728,7 +725,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
                     catalog="reviewer_catalog.vcf",
                     trgt=None,
                 ),
-                d4_file=d4_file.full_path,
+                d4_file=None,
             )
         ],
         customer_images=None,
