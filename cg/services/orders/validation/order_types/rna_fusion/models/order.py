@@ -11,6 +11,6 @@ NewCase = Annotated[RNAFusionCase, Tag("new")]
 OldCase = Annotated[ExistingCase, Tag("existing")]
 
 
-class RNAFusionOrder(OrderWithCases):
+class RNAFusionOrder(OrderWithCases[RNAFusionCase]):
     cases: list[Annotated[NewCase | OldCase, Discriminator(has_internal_id)]]
     delivery_type: RNAFusionDeliveryType

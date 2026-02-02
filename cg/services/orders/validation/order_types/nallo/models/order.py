@@ -12,7 +12,7 @@ NewCase = Annotated[NalloCase, Tag("new")]
 OldCase = Annotated[ExistingCase, Tag("existing")]
 
 
-class NalloOrder(OrderWithCases):
+class NalloOrder(OrderWithCases[NalloCase]):
     cases: list[Annotated[NewCase | OldCase, Discriminator(has_internal_id)]]
     delivery_type: NalloDeliveryType
 

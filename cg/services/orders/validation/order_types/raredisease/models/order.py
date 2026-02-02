@@ -11,6 +11,6 @@ NewCase = Annotated[RarediseaseCase, Tag("new")]
 OldCase = Annotated[ExistingCase, Tag("existing")]
 
 
-class RarediseaseOrder(OrderWithCases):
+class RarediseaseOrder(OrderWithCases[RarediseaseCase]):
     cases: list[Annotated[NewCase | OldCase, Discriminator(has_internal_id)]]
     delivery_type: RarediseaseDeliveryType

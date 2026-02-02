@@ -11,6 +11,6 @@ NewCase = Annotated[MIPRNACase, Tag("new")]
 OldCase = Annotated[ExistingCase, Tag("existing")]
 
 
-class MIPRNAOrder(OrderWithCases):
+class MIPRNAOrder(OrderWithCases[MIPRNACase]):
     cases: list[Annotated[NewCase | OldCase, Discriminator(has_internal_id)]]
     delivery_type: MIPRNADeliveryType

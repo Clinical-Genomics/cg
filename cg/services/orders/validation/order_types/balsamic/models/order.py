@@ -11,7 +11,7 @@ NewCase = Annotated[BalsamicCase, Tag("new")]
 OldCase = Annotated[ExistingCase, Tag("existing")]
 
 
-class BalsamicOrder(OrderWithCases):
+class BalsamicOrder(OrderWithCases[BalsamicCase]):
     cases: list[Annotated[NewCase | OldCase, Discriminator(has_internal_id)]]
     delivery_type: BalsamicDeliveryType
 

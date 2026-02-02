@@ -11,6 +11,6 @@ NewCase = Annotated[TomteCase, Tag("new")]
 OldCase = Annotated[ExistingCase, Tag("existing")]
 
 
-class TomteOrder(OrderWithCases):
+class TomteOrder(OrderWithCases[TomteCase]):
     cases: list[Annotated[NewCase | OldCase, Discriminator(has_internal_id)]]
     delivery_type: TomteDeliveryType

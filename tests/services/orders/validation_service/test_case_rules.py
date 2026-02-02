@@ -1,4 +1,8 @@
+from unittest.mock import create_autospec
+
 from cg.constants import GenePanelMasterList
+from cg.constants.constants import DataDelivery
+from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
     CaseDoesNotExistError,
@@ -9,13 +13,19 @@ from cg.services.orders.validation.errors.case_errors import (
     MultipleSamplesInCaseError,
     NewCaseWithoutAffectedSampleError,
     RepeatedCaseNameError,
+    SamplesNotRelatedError,
 )
 from cg.services.orders.validation.models.existing_case import ExistingCase
+from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
+from cg.services.orders.validation.order_types.mip_dna.constants import MIPDNADeliveryType
+from cg.services.orders.validation.order_types.mip_dna.models.case import MIPDNACase
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
+from cg.services.orders.validation.order_types.mip_dna.models.sample import MIPDNASample
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
 from cg.services.orders.validation.order_types.rna_fusion.models.sample import RNAFusionSample
 from cg.services.orders.validation.rules.case.rules import (
+    validate_case_contains_related_samples,
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
