@@ -15,6 +15,6 @@ PACBIO_SMRT_CELL_METRICS_BLUEPRINT.before_request(before_request)
 @handle_missing_entries
 def get_smrt_cell_metrics(run_name: str):
     response: PacbioSmrtCellMetricsResponse = (
-        pacbio_sequencing_runs_service.get_sequencing_runs_by_name(run_name)
+        pacbio_sequencing_runs_service.get_sequencing_runs_by_run_id(run_name)
     )
     return jsonify(response.model_dump())
