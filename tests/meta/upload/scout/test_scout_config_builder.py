@@ -81,7 +81,7 @@ def test_balsamic_config_builder(
     assert isinstance(file_handler.case_tags, CaseTags)
 
 
-def test_raredisease_config_builder(
+def test_raredisease_config_builder_instantiation(
     lims_api: MockLimsAPI,
     raredisease_analysis_api: RarediseaseAnalysisAPI,
     madeline_api: MockMadelineAPI,
@@ -547,11 +547,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     # GIVEN sample files
     alignment_path: File = create_autospec(File, full_path="sort_md.cram")
     mt_bam: File = create_autospec(File, full_path="sort_md.cram")
-    rhocall_bed: File = create_autospec(File, full_path="rhocallviz.bed")
-    rhocall_wig: File = create_autospec(File, full_path="rhocallviz.bw")
-    tiddit_coverage_wig: File = create_autospec(File, full_path="tidditcov.bw")
-    upd_regions_bed: File = create_autospec(File, full_path="upd_regions_bed.bed")
-    upd_sites_bed: File = create_autospec(File, full_path="upd_sites_bed.bed")
+    upd_regions_bed: File = create_autospec(File, full_path="chromograph_regions.bed")
+    upd_sites_bed: File = create_autospec(File, full_path="chromograph_sites.bed")
     vcf2cytosure: File = create_autospec(File, full_path="sample_id.cgh")
     mitodel_file: File = create_autospec(File, full_path="mitodel.txt")
     d4_file: File = create_autospec(File, full_path="coverage.d4")
@@ -607,7 +604,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         if tags == {AlignmentFileTag.CRAM, "sample_id"}:
             return alignment_path
         if tags == {"d4", "sample_id"}:
-            return
+            return d4_file
         if tags == {"vcf2cytosure", "sample_id"}:
             return vcf2cytosure
         if tags == {"bam-mt", "sample_id"}:
@@ -687,10 +684,10 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         gene_panels=[],
         default_gene_panels=[],
         cohorts=[],
-        human_genome_build="38",
-        rank_model_version="1.0",
-        rank_score_threshold=8,
-        sv_rank_model_version="1.0",
+        human_genome_build="37",
+        rank_model_version="1.38",
+        rank_score_threshold=5,
+        sv_rank_model_version="1.12",
         analysis_date=datetime.now(),
         samples=[
             ScoutRarediseaseIndividual(
@@ -714,20 +711,22 @@ def test_raredisease_config_builder(mocker: MockerFixture):
                 chromograph_images=ChromographImages(
                     autozygous="chromograph_autozyg_chr",
                     coverage="chromograph_coverage_chr",
+                    upd_regions=upd_regions_bed.full_path,
+                    upd_sites=upd_sites_bed.full_path,
                 ),
-                rhocall_bed=rhocall_bed.full_path,
-                rhocall_wig=rhocall_wig.full_path,
-                tiddit_coverage_wig=tiddit_coverage_wig.full_path,
-                upd_regions_bed=upd_regions_bed.full_path,
-                upd_sites_bed=upd_sites_bed.full_path,
+                rhocall_bed=None,
+                rhocall_wig=None,
+                tiddit_coverage_wig=None,
+                upd_regions_bed=None,
+                upd_sites_bed=None,
                 vcf2cytosure=vcf2cytosure.full_path,
                 mitodel_file=mitodel_file.full_path,
                 reviewer=Reviewer(
-                    alignment="repeats_spanning.bam",
-                    alignment_index="repeats_spanning.index",
-                    vcf="repeats_sorted.vcf",
-                    catalog="variant_catalog.trgt",
-                    trgt=True,
+                    alignment="reviewer_alignment.vcf",
+                    alignment_index="reviewer_alignment_index.vcf",
+                    vcf="reviewer_vcf.vcf",
+                    catalog="reviewer_catalog.vcf",
+                    trgt=None,
                 ),
                 d4_file=d4_file.full_path,
             )
