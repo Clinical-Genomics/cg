@@ -30,9 +30,21 @@ def upgrade():
         nullable=False,
         existing_type=sa.String(64),
     )
+    op.alter_column(
+        table_name="pacbio_sequencing_run",
+        column_name="run_id",
+        nullable=False,
+        existing_type=sa.String(64),
+    )
 
 
 def downgrade():
+    op.alter_column(
+        table_name="pacbio_sequencing_run",
+        column_name="run_id",
+        nullable=True,
+        existing_type=sa.String(64),
+    )
     op.alter_column(
         table_name="pacbio_sequencing_run",
         column_name="unique_id",
