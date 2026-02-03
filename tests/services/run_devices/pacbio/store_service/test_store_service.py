@@ -1,5 +1,7 @@
 """Module to test the PacBioStoreService."""
 
+from datetime import timezone
+
 import pytest
 from pytest_mock import MockerFixture
 
@@ -32,6 +34,7 @@ def test_store_post_processing_data(
     pac_bio_store_service: PacBioStoreService,
     pac_bio_dtos: PacBioDTOs,
     pacbio_barcoded_run_data: PacBioRunData,
+    pacbio_barcoded_run_id: str,
     helpers: StoreHelpers,
     mocker: MockerFixture,
 ):
@@ -50,11 +53,11 @@ def test_store_post_processing_data(
     assert not pac_bio_store_service.store._get_query(PacbioSequencingRun).first()
 
     # GIVEN a data transfer service that returns the correct DTOs
-
-    # WHEN storing data for a PacBio instrument run
     mocker.patch.object(
         PacBioDataTransferService, "get_post_processing_dtos", return_value=pac_bio_dtos
     )
+
+    # WHEN storing data for a PacBio instrument run
     pac_bio_store_service.store_post_processing_data(pacbio_barcoded_run_data)
 
     # THEN the SMRT cell data is stored with the correct data
@@ -84,8 +87,10 @@ def test_store_post_processing_data(
     pacbio_sequencing_run: PacbioSequencingRun = pac_bio_store_service.store._get_query(
         PacbioSequencingRun
     ).one()
-    assert pacbio_sequencing_run.run_name == "r84202_20240522_133539"
+    assert pacbio_sequencing_run.run_id == pacbio_barcoded_run_id
     assert pacbio_sequencing_run.instrument_name == RevioNames.WILMA
+    assert pacbio_sequencing_run.run_name == "run-name"
+    assert pacbio_sequencing_run.unique_id == "unique-id"
 
     # THEN the sample reads and sequenced date are updated
     for sample_metrics_dto in pac_bio_dtos.sample_sequencing_metrics:
@@ -94,7 +99,10 @@ def test_store_post_processing_data(
         )
         assert sample
         assert sample.reads == sample_metrics_dto.hifi_reads
-        assert sample.last_sequenced_at == pac_bio_dtos.smrt_cell_metrics.completed_at
+        assert (
+            sample.last_sequenced_at.replace(tzinfo=timezone.utc)
+            == pac_bio_dtos.smrt_cell_metrics.completed_at
+        )
 
 
 def test_store_post_processing_data_error_database(
