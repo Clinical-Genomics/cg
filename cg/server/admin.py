@@ -911,6 +911,7 @@ class PacbioSmrtCellMetricsView(BaseView):
 
     column_list = (
         "internal_id",
+        "sequencing_run.run_name",
         "sequencing_run.run_id",
         "movie_name",
         "well",
@@ -935,9 +936,14 @@ class PacbioSmrtCellMetricsView(BaseView):
         "internal_id": view_pacbio_sample_sequencing_metrics_link,
         "model": view_smrt_cell_model,
     }
-    column_labels = {"sequencing_run.run_id": "Run ID"}
+    column_labels = {"sequencing_run.run_name": "Run Name", "sequencing_run.run_id": "Run ID"}
     column_default_sort = ("completed_at", True)
-    column_searchable_list = ["device.internal_id", "movie_name", "sequencing_run.run_id"]
+    column_searchable_list = [
+        "device.internal_id",
+        "movie_name",
+        "sequencing_run.run_id",
+        "sequencing_run.run_name",
+    ]
     column_sortable_list = [
         ("internal_id", "device.internal_id"),
         "started_at",
