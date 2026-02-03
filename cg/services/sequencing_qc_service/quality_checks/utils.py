@@ -63,6 +63,9 @@ def express_sample_has_enough_reads(sample: Sample) -> bool:
     Checks if given express sample has enough reads. Gets the threshold from the sample's
     application version.
     """
+    if sample.is_external:
+        LOG.info(f"Sample {sample.internal_id} is external, skipping check.")
+        return True
     express_reads_threshold: int = get_express_reads_threshold_for_sample(sample)
     enough_reads: bool = sample.reads >= express_reads_threshold
     if not enough_reads:
@@ -71,6 +74,9 @@ def express_sample_has_enough_reads(sample: Sample) -> bool:
 
 
 def express_sample_has_enough_yield(sample: Sample) -> bool:
+    if sample.is_external:
+        LOG.info(f"Sample {sample.internal_id} is external, skipping check.")
+        return True
     if not sample.hifi_yield:
         LOG.debug(f"Sample {sample.internal_id} has no hifi yield.")
         return False
@@ -136,26 +142,34 @@ def any_sample_in_case_has_reads(case: Case) -> bool:
 def raw_data_case_pass_qc(case: Case) -> bool:
     if is_case_ready_made_library(case):
         return ready_made_library_case_pass_sequencing_qc(case)
-    if is_first_sample_yield_based_and_processed(case):
+    if is_any_processed_sample_yield_based(case):
         return all(sample_has_enough_hifi_yield(sample) for sample in case.samples)
-    elif is_first_sample_reads_based_and_processed(case):
+    elif is_any_processed_sample_read_based(case):
         return all(sample_has_enough_reads(sample) for sample in case.samples)
+    elif are_all_samples_external(case):
+        LOG.info(f"All samples in case {case.internal_id} are external, QC passes.")
+        return True
     LOG.warning(f"Not all samples for case {case.internal_id} have been post-processed.")
     return False
 
 
-def is_first_sample_yield_based_and_processed(case: Case) -> bool:
-    sample: Sample = case.samples[0]
-    if metrics := sample.sample_run_metrics:
-        return metrics[0].type == DeviceType.PACBIO
-    return False
+def is_any_processed_sample_yield_based(case: Case) -> bool:
+    """Returns True if any sample has any sample sequencing metrics of Pacbio type."""
+    return any(
+        any(metric.type == DeviceType.PACBIO for metric in sample.sample_run_metrics)
+        for sample in case.samples
+    )
 
 
-def is_first_sample_reads_based_and_processed(case: Case) -> bool:
-    sample: Sample = case.samples[0]
-    if metrics := sample.sample_run_metrics:
-        return metrics[0].type == DeviceType.ILLUMINA
-    return False
+def is_any_processed_sample_read_based(case: Case) -> bool:
+    return any(
+        any(metric.type == DeviceType.ILLUMINA for metric in sample.sample_run_metrics)
+        for sample in case.samples
+    )
+
+
+def are_all_samples_external(case: Case) -> bool:
+    return all(sample.is_external for sample in case.samples)
 
 
 def is_case_express_priority(case: Case) -> bool:
@@ -205,6 +219,9 @@ def sample_has_enough_reads(sample: Sample) -> bool:
     """
     Check if the sample has more or equal reads than the expected reads for the sample.
     """
+    if sample.is_external:
+        LOG.info(f"Sample {sample.internal_id} is external, skipping check.")
+        return True
     enough_reads: bool = sample.reads >= sample.expected_reads_for_sample
     if not enough_reads:
         LOG.warning(f"Sample {sample.internal_id} has too few reads.")
@@ -218,7 +235,12 @@ def sample_has_enough_hifi_yield(sample: Sample) -> bool:
     Raises:
         ApplicationDoesNotHaveHiFiYieldError if the sample doesn't have expected HiFi yield.
     """
-    if not sample.expected_hifi_yield:
+    if sample.is_external:
+        # An external sample will have None as yield in StatusDB
+        LOG.info(f"Sample {sample.internal_id} is external, skipping check.")
+        return True
+
+    if sample.expected_hifi_yield is None:
         raise ApplicationDoesNotHaveHiFiYieldError(
             f"Application for sample {sample.internal_id} does not have target HiFi yield."
         )
