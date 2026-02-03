@@ -1186,13 +1186,13 @@ class PacbioSequencingRun(Base):
 
     id: Mapped[PrimaryKeyInt]
     run_id: Mapped[Str64] = mapped_column(unique=True)
-    run_name: Mapped[Str64 | None]
+    run_name: Mapped[Str64]
     processed: Mapped[bool] = mapped_column(default=False)
     comment: Mapped[Text] = mapped_column(default="")
     instrument_name: Mapped[RevioNames] = mapped_column(
         types.Enum(*(revio_name.value for revio_name in RevioNames))
     )
-    unique_id: Mapped[Str64 | None] = mapped_column(unique=True)
+    unique_id: Mapped[Str64] = mapped_column(unique=True)
 
     smrt_cell_metrics: Mapped[list[PacbioSMRTCellMetrics]] = orm.relationship(
         back_populates="sequencing_run"
