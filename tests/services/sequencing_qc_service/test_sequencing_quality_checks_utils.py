@@ -602,7 +602,8 @@ def test_raw_data_case_pass_qc_sample_run_metrics_missing_fails():
     assert not passes
 
 
-def test_raw_data_case_pass_qc_sample_run_metrics_missing_passes():
+# Unlikely scenario but included to display that it's possible
+def test_raw_data_case_pass_qc_sample_run_external_sample_passes():
     # GIVEN a raw-data sample without sample run metrics
     sample: Sample = create_autospec(Sample, is_external=True, sample_run_metrics=[])
 
