@@ -12,6 +12,7 @@ from wtforms.form import Form
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
 from cg.models.orders.constants import OrderType
+from cg.server.app_config import app_config
 from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
@@ -28,6 +29,11 @@ class BaseView(ModelView):
     def inaccessible_callback(self, name, **kwargs):
         # redirect to login page if user doesn't have access
         return redirect(url_for("google.login", next=request.url))
+
+
+def view_hifi_yield_in_gb(unused1, unused2, model, unused3):
+    del unused1, unused2, unused3
+    return Markup(f"{round(model.hifi_yield/1E9, 1)} Gb") if model.hifi_yield else ""
 
 
 def view_priority(unused1, unused2, model, unused3):
@@ -111,12 +117,6 @@ def view_pacbio_sample_sequencing_metrics_link(unused1, unused2, model, unused3)
     )
 
 
-def is_external_application(unused1, unused2, model, unused3):
-    """column formatter to open this view"""
-    del unused1, unused2, unused3
-    return model.application_version.application.is_external if model.application_version else ""
-
-
 def view_order_types(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
     order_type_list = "<br>".join(model.order_types)
@@ -197,6 +197,44 @@ def view_customer_link(unused1, unused2, model, unused3):
     return markup
 
 
+def view_ticket_link(unused1, unused2, model, attribute_name):
+    """Column formatter used to add hyperlink to ticket ID, if applicable."""
+    del unused1, unused2
+
+    # Ticket attribute called differently from models, infer attribute name from args
+    ticket_attr = getattr(model, attribute_name)
+    ticket_str = str(ticket_attr).strip()
+
+    # Freshdesk ticket IDs have >=7 digits
+    if len(ticket_str) >= 7:
+        ticket_link = f"{app_config.freshdesk_url}/a/tickets/{ticket_str}"
+        ticket_markup = Markup(f"<a href='{ticket_link}'>{ticket_str}</a>")
+        return ticket_markup
+    else:
+        return ticket_str
+
+
+def view_tickets_links(unused1, unused2, model, unused3):
+    """Column formatter used to add hyperlinks to comma-separated ticket IDs, if applicable. Assumes attribute name 'tickets'."""
+    del unused1, unused2, unused3
+
+    tickets_list = str(model.tickets).strip().split(sep=",")
+
+    tickets_markups = []
+    for ticket in tickets_list:
+        ticket_str = str(ticket).strip()
+
+        # Freshdesk ticket IDs have >=7 digits
+        if len(ticket_str) >= 7:
+            ticket_link = f"{app_config.freshdesk_url}/a/tickets/{ticket_str}"
+            ticket_markup = Markup(f"<a href='{ticket_link}'>{ticket_str}</a>")
+            tickets_markups.append(ticket_markup)
+        else:
+            tickets_markups.append(ticket_str)
+
+    return Markup(", ".join(tickets_markups))
+
+
 class ApplicationView(BaseView):
     """Admin view for Model.Application"""
 
@@ -207,6 +245,8 @@ class ApplicationView(BaseView):
         "is_accredited",
         "target_reads",
         "percent_reads_guaranteed",
+        "target_hifi_yield",
+        "percent_hifi_yield_guaranteed",
         "comment",
         "prep_category",
         "sequencing_depth",
@@ -267,10 +307,11 @@ class ApplicationView(BaseView):
     def on_model_change(self, form: Form, model: Application, is_created: bool):
         """Override to persist entries to the OrderTypeApplication table."""
         super(ApplicationView, self).on_model_change(form=form, model=model, is_created=is_created)
-        order_types: list[OrderType] = form["suitable_order_types"].data
-        applications_service.update_application_order_types(
-            application=model, order_types=order_types
-        )
+        if "suitable_order_types" in form.data:
+            order_types: list[OrderType] = form["suitable_order_types"].data
+            applications_service.update_application_order_types(
+                application=model, order_types=order_types
+            )
 
     def edit_form(self, obj=None):
         """Override to prefill the order types according to the current Application entry."""
@@ -435,6 +476,7 @@ class CaseView(BaseView):
         "customer": view_customer_link,
         "internal_id": view_case_sample_link,
         "priority": view_priority,
+        "tickets": view_tickets_links,
     }
     column_searchable_list = [
         "internal_id",
@@ -650,7 +692,10 @@ class OrderView(BaseView):
 
     column_default_sort = ("order_date", True)
     column_editable_list = ["is_open"]
-    column_formatters = {"customer": view_customer_link}
+    column_formatters = {
+        "customer": view_customer_link,
+        "ticket_id": view_ticket_link,
+    }
     column_searchable_list = ["id", "ticket_id"]
     column_display_pk = True
     create_modal = True
@@ -691,10 +736,36 @@ class PoolView(BaseView):
 class SampleView(BaseView):
     """Admin view for Model.Sample"""
 
-    column_exclude_list = [
-        "age_at_sampling",
-        "_phenotype_groups",
-        "_phenotype_terms",
+    column_list = [
+        "application_version",
+        "customer",
+        "organism",
+        "invoice",
+        "is_cancelled",
+        "capture_kit",
+        "comment",
+        "control",
+        "created_at",
+        "delivered_at",
+        "downsampled_to",
+        "from_sample",
+        "internal_id",
+        "is_tumour",
+        "loqusdb_id",
+        "name",
+        "no_invoice",
+        "order",
+        "ordered_at",
+        "original_ticket",
+        "prepared_at",
+        "priority",
+        "reads",
+        "hifi_yield",
+        "last_sequenced_at",
+        "received_at",
+        "reference_genome",
+        "sex",
+        "subject_id",
     ]
     column_default_sort = ("created_at", True)
     column_editable_list = [
@@ -714,9 +785,10 @@ class SampleView(BaseView):
     column_formatters = {
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
-        "is_external": is_external_application,
+        "hifi_yield": view_hifi_yield_in_gb,
         "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
+        "original_ticket": view_ticket_link,
         "priority": view_priority,
     }
     column_searchable_list = [
@@ -834,12 +906,13 @@ class IlluminaSampleSequencingMetricsView(BaseView):
     column_searchable_list = ["sample.internal_id", "instrument_run.device.internal_id"]
 
 
-class PacbioSmrtCellView(BaseView):
+class PacbioSmrtCellMetricsView(BaseView):
     """Admin view for Model.PacbioSMRTCell"""
 
     column_list = (
         "internal_id",
-        "run_name",
+        "sequencing_run.run_name",
+        "sequencing_run.run_id",
         "movie_name",
         "well",
         "plate",
@@ -863,8 +936,14 @@ class PacbioSmrtCellView(BaseView):
         "internal_id": view_pacbio_sample_sequencing_metrics_link,
         "model": view_smrt_cell_model,
     }
+    column_labels = {"sequencing_run.run_name": "Run Name", "sequencing_run.run_id": "Run ID"}
     column_default_sort = ("completed_at", True)
-    column_searchable_list = ["device.internal_id", "run_name", "movie_name"]
+    column_searchable_list = [
+        "device.internal_id",
+        "movie_name",
+        "sequencing_run.run_id",
+        "sequencing_run.run_name",
+    ]
     column_sortable_list = [
         ("internal_id", "device.internal_id"),
         "started_at",
@@ -880,7 +959,7 @@ class PacbioSmrtCellView(BaseView):
                 "<a href='%s'>%s</a>"
                 % (
                     url_for(
-                        "pacbiosequencingrun.index_view",
+                        "pacbiosmrtcellmetrics.index_view",
                         search=model.instrument_run.device.internal_id,
                     ),
                     model.instrument_run.device.internal_id,
@@ -892,19 +971,22 @@ class PacbioSmrtCellView(BaseView):
 
 
 class PacbioSampleRunMetricsView(BaseView):
-    column_filters = ["instrument_run.run_name", "instrument_run.plate"]
+    column_filters = [
+        "instrument_run.plate",
+        "instrument_run.sequencing_run.run_id",
+    ]
     column_formatters = {
-        "smrt_cell": PacbioSmrtCellView.view_smrt_cell_link,
+        "smrt_cell": PacbioSmrtCellMetricsView.view_smrt_cell_link,
         "sample": SampleView.view_sample_link,
     }
     column_labels = {
-        "instrument_run.run_name": "Run name",
         "instrument_run.plate": "Plate",
+        "instrument_run.sequencing_run.run_id": "Run ID",
     }
     column_list = [
         "smrt_cell",
         "sample",
-        "instrument_run.run_name",
+        "instrument_run.sequencing_run.run_id",
         "instrument_run.plate",
         "hifi_reads",
         "hifi_yield",
@@ -914,4 +996,5 @@ class PacbioSampleRunMetricsView(BaseView):
     column_searchable_list = [
         "sample.internal_id",
         "instrument_run.device.internal_id",
+        "instrument_run.sequencing_run.run_id",
     ]

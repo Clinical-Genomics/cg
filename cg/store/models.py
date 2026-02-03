@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Annotated
+from typing import Annotated, cast
 
 import sqlalchemy
 from sqlalchemy import (
@@ -28,7 +28,7 @@ from cg.constants.constants import (
     SexOptions,
     StatusOptions,
 )
-from cg.constants.devices import DeviceType
+from cg.constants.devices import DeviceType, RevioNames
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
@@ -147,6 +147,8 @@ class Application(Base):
     min_sequencing_depth: Mapped[int] = mapped_column(default=0)
     target_reads: Mapped[BigInt | None] = mapped_column(default=0)
     percent_reads_guaranteed: Mapped[int]
+    target_hifi_yield: Mapped[BigInt | None] = mapped_column(default=None)
+    percent_hifi_yield_guaranteed: Mapped[int | None] = mapped_column(default=None)
     sample_amount: Mapped[int | None]
     sample_volume: Mapped[Text | None]
     sample_concentration: Mapped[Text | None]
@@ -191,8 +193,19 @@ class Application(Base):
         return self.tag
 
     @property
-    def expected_reads(self):
+    def expected_reads(self) -> float:
         return self.target_reads * self.percent_reads_guaranteed / 100
+
+    @property
+    def expected_hifi_yield(self) -> int | None:
+        if self.target_hifi_yield and self.percent_hifi_yield_guaranteed:
+            return round(self.target_hifi_yield * self.percent_hifi_yield_guaranteed / 100)
+        else:
+            return None
+
+    @property
+    def expected_express_hifi_yield(self) -> int | None:
+        return round(self.target_hifi_yield * 0.5) if self.target_hifi_yield else None
 
     @property
     def analysis_type(self) -> str:
@@ -283,6 +296,7 @@ class Analysis(Base):
     case: Mapped["Case"] = orm.relationship(back_populates="analyses")
     trailblazer_id: Mapped[int | None]
     housekeeper_version_id: Mapped[int | None]
+    session_id: Mapped[str | None]
 
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
@@ -337,6 +351,10 @@ class BedVersion(Base):
     bed_id: Mapped[int] = mapped_column(ForeignKey(Bed.id))
 
     bed: Mapped[Bed] = orm.relationship(back_populates="versions")
+
+    @property
+    def bed_name(self) -> str:
+        return self.bed.name
 
     def __str__(self) -> str:
         return f"{self.bed.name} ({self.version})"
@@ -548,11 +566,11 @@ class Case(Base, PriorityMixin):
         return [link.sample for link in self.links if link.sample.loqusdb_id]
 
     @property
-    def slurm_priority(self) -> str:
+    def slurm_priority(self) -> SlurmQos:
         """Get Quality of service (SLURM QOS) for the case."""
         if self.are_all_samples_control():
             return SlurmQos.EXPRESS
-        return Priority.priority_to_slurm_qos().get(self.priority)
+        return cast(SlurmQos, Priority.priority_to_slurm_qos().get(self.priority))
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
         """Represent as dictionary."""
@@ -724,7 +742,7 @@ class Sample(Base, PriorityMixin):
     prepared_at: Mapped[datetime | None]
 
     priority: Mapped[Priority] = mapped_column(default=Priority.standard)
-    reads: Mapped[BigInt | None] = mapped_column(default=0)
+    reads: Mapped[BigInt] = mapped_column(default=0)
     last_sequenced_at: Mapped[datetime | None]
     received_at: Mapped[datetime | None]
     reference_genome: Mapped[Str255 | None]
@@ -755,14 +773,26 @@ class Sample(Base, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
+    def hifi_yield(self) -> int | None:
+        if self._sample_run_metrics and getattr(self._sample_run_metrics[0], "hifi_yield", False):
+            return sum(metric.hifi_yield for metric in self._sample_run_metrics)  # type: ignore
+        else:
+            return None
+
+    @property
     def archive_location(self) -> str:
         """Returns the data_archive_location if the customer linked to the sample."""
         return self.customer.data_archive_location
 
     @property
-    def expected_reads_for_sample(self) -> int:
+    def expected_reads_for_sample(self) -> float | None:
         """Return the expected reads of the sample."""
         return self.application_version.application.expected_reads
+
+    @property
+    def expected_hifi_yield(self) -> int | None:
+        """Return the expected HiFi yield of the sample."""
+        return self.application_version.application.expected_hifi_yield
 
     @property
     def has_reads(self) -> bool:
@@ -821,6 +851,13 @@ class Sample(Base, PriorityMixin):
         """Return the sample run metrics for the sample."""
         return self._sample_run_metrics
 
+    @property
+    def device_type(self) -> DeviceType | None:
+        """Return the device type the sample was sequenced on."""
+        if self._sample_run_metrics:
+            return self._sample_run_metrics[0].type
+        return None
+
     def to_dict(self, links: bool = False) -> dict:
         """Represent as dictionary"""
         data = to_dict(model_instance=self)
@@ -828,6 +865,10 @@ class Sample(Base, PriorityMixin):
         data["customer"] = self.customer.to_dict()
         data["application_version"] = self.application_version.to_dict()
         data["application"] = self.application_version.application.to_dict()
+        data["hifi_yield"] = self.hifi_yield
+        data["uses_reads"] = True
+        if self.device_type == DeviceType.PACBIO:
+            data["uses_reads"] = False
         if links:
             data["links"] = [link_obj.to_dict(family=True, parents=True) for link_obj in self.links]
         return data
@@ -1018,48 +1059,62 @@ class IlluminaSequencingRun(InstrumentRun):
         return data
 
 
-class PacbioSequencingRun(InstrumentRun):
-    __tablename__ = "pacbio_sequencing_run"
+class PacbioSMRTCellMetrics(InstrumentRun):
+    __tablename__ = "pacbio_smrt_cell_metrics"
 
     id: Mapped[int] = mapped_column(
         ForeignKey("instrument_run.id", ondelete="CASCADE"), primary_key=True
     )
-    well: Mapped[Str32]
-    plate: Mapped[int]
-    run_name: Mapped[Str32]
-    movie_name: Mapped[Str32]
-    started_at: Mapped[datetime]
+    barcoded_hifi_mean_read_length: Mapped[BigInt]
+    barcoded_hifi_reads_percentage: Mapped[Num_6_2]
+    barcoded_hifi_reads: Mapped[BigInt]
+    barcoded_hifi_yield_percentage: Mapped[Num_6_2]
+    barcoded_hifi_yield: Mapped[BigInt]
     completed_at: Mapped[datetime]
-    hifi_reads: Mapped[BigInt]
-    hifi_yield: Mapped[BigInt]
+    control_mean_read_concordance: Mapped[Num_6_2]
+    control_mean_read_length: Mapped[BigInt]
+    control_mode_read_concordance: Mapped[Num_6_2]
+    control_reads: Mapped[BigInt]
+    failed_mean_read_length: Mapped[BigInt]
+    failed_reads: Mapped[BigInt]
+    failed_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
     hifi_median_read_quality: Mapped[Str32]
-    percent_reads_passing_q30: Mapped[Num_6_2]
+    hifi_reads: Mapped[BigInt]
+    hifi_yield: Mapped[BigInt]
+    movie_name: Mapped[Str32]
     p0_percent: Mapped[Num_6_2]
     p1_percent: Mapped[Num_6_2]
     p2_percent: Mapped[Num_6_2]
-    productive_zmws: Mapped[BigInt]
+    pacbio_sequencing_run_id: Mapped[int] = mapped_column(
+        ForeignKey(
+            "pacbio_sequencing_run.id",
+            ondelete="CASCADE",
+            name="pacbio_smrt_cell_metrics_pacbio_sequencing_run_fk",
+        )
+    )
+    percent_reads_passing_q30: Mapped[Num_6_2]
+    plate: Mapped[int]
+    polymerase_longest_subread_n50: Mapped[BigInt]
+    polymerase_mean_longest_subread: Mapped[BigInt]
     polymerase_mean_read_length: Mapped[BigInt]
     polymerase_read_length_n50: Mapped[BigInt]
-    polymerase_mean_longest_subread: Mapped[BigInt]
-    polymerase_longest_subread_n50: Mapped[BigInt]
-    control_reads: Mapped[BigInt]
-    control_mean_read_length: Mapped[BigInt]
-    control_mean_read_concordance: Mapped[Num_6_2]
-    control_mode_read_concordance: Mapped[Num_6_2]
-    failed_reads: Mapped[BigInt]
-    failed_yield: Mapped[BigInt]
-    failed_mean_read_length: Mapped[BigInt]
-    barcoded_hifi_reads: Mapped[BigInt]
-    barcoded_hifi_reads_percentage: Mapped[Num_6_2]
-    barcoded_hifi_yield: Mapped[BigInt]
-    barcoded_hifi_yield_percentage: Mapped[Num_6_2]
-    barcoded_hifi_mean_read_length: Mapped[BigInt]
+    productive_zmws: Mapped[BigInt]
+    started_at: Mapped[datetime]
+    unbarcoded_hifi_mean_read_length: Mapped[BigInt]
     unbarcoded_hifi_reads: Mapped[BigInt]
     unbarcoded_hifi_yield: Mapped[BigInt]
-    unbarcoded_hifi_mean_read_length: Mapped[BigInt]
+    well: Mapped[Str32]
+
+    sequencing_run: Mapped["PacbioSequencingRun"] = orm.relationship(
+        back_populates="smrt_cell_metrics"
+    )
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
+
+    @property
+    def run_id(self) -> str:
+        return self.sequencing_run.run_id
 
     def to_dict(self):
         return to_dict(self)
@@ -1117,11 +1172,31 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
     polymerase_mean_read_length: Mapped[BigInt]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
-    instrument_run = orm.relationship(PacbioSequencingRun, back_populates="sample_metrics")
+    instrument_run = orm.relationship(PacbioSMRTCellMetrics, back_populates="sample_metrics")
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
         return to_dict(self)
+
+
+class PacbioSequencingRun(Base):
+    """PacBio sequencing run, consisting of a set of SMRT-cells sequenced simultaneously."""
+
+    __tablename__ = "pacbio_sequencing_run"
+
+    id: Mapped[PrimaryKeyInt]
+    run_id: Mapped[Str64] = mapped_column(unique=True)
+    run_name: Mapped[Str64]
+    processed: Mapped[bool] = mapped_column(default=False)
+    comment: Mapped[Text] = mapped_column(default="")
+    instrument_name: Mapped[RevioNames] = mapped_column(
+        types.Enum(*(revio_name.value for revio_name in RevioNames))
+    )
+    unique_id: Mapped[Str64] = mapped_column(unique=True)
+
+    smrt_cell_metrics: Mapped[list[PacbioSMRTCellMetrics]] = orm.relationship(
+        back_populates="sequencing_run"
+    )
 
 
 class OrderTypeApplication(Base):

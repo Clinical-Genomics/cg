@@ -4,7 +4,9 @@ import pytest
 
 from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import CaseActions, ControlOptions
+from cg.constants.devices import RevioNames
 from cg.constants.sequencing import Sequencers
+from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioSequencingRunDTO
 from cg.store.models import Analysis, IlluminaSampleSequencingMetrics, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -110,24 +112,25 @@ def test_update_sample_reads_illumina_negative_control(
     assert sample.reads == total_reads_for_sample
 
 
-def test_update_sample_reads_pacbio(
+def test_update_sample_reads_pacbio_not_incremented(
     pacbio_barcoded_sample_internal_id: str,
     store: Store,
     helpers: StoreHelpers,
 ):
-    """Test updating the reads for a PacBio sample."""
-    # GIVEN a store with a PacBio sample
+    """Tests that updating the reads for a PacBio sample does not increment the reads."""
+    # GIVEN a store with a PacBio sample with reads
     sample: Sample = helpers.add_sample(store=store, internal_id=pacbio_barcoded_sample_internal_id)
-    assert sample
-    assert sample.reads == 0
-    reads: int = 10000
+    sample.reads = 1
+    new_reads = 10000
 
     # WHEN updating the reads for the sample
-    store.update_sample_reads(internal_id=pacbio_barcoded_sample_internal_id, reads=reads)
+    store.update_sample_reads_pacbio(
+        internal_id=pacbio_barcoded_sample_internal_id, reads=new_reads
+    )
 
-    # THEN the reads for the sample is updated
-    sample: Sample = store.get_sample_by_internal_id(pacbio_barcoded_sample_internal_id)
-    assert sample.reads == reads
+    # THEN the reads for the sample are updated
+    sample: Sample = store.get_sample_by_internal_id_strict(pacbio_barcoded_sample_internal_id)
+    assert sample.reads == new_reads
 
 
 @pytest.mark.parametrize(
@@ -265,14 +268,56 @@ def test_update_analysis_delivery_report_date(store: Store, helpers: StoreHelper
 
 def test_update_case_action(analysis_store: Store, case_id: str):
     """Tests if actions of cases are changed to analyze."""
-    # Given a store with a case with action None
+    # GIVEN a store with a case with action None
     action = analysis_store.get_case_by_internal_id_strict(internal_id=case_id).action
 
     assert action is None
 
-    # When setting the case to "analyze"
+    # WHEN setting the case to "analyze"
     analysis_store.update_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
     new_action = analysis_store.get_case_by_internal_id_strict(internal_id=case_id).action
 
-    # Then the action should be set to analyze
+    # THEN the action should be set to analyze
     assert new_action == "analyze"
+
+
+def test_update_pacbio_sequencing_run_comment(store: Store):
+    # GIVEN a store with a PacBio sequencing run
+    sequencing_run = store.create_pacbio_sequencing_run(
+        pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
+            instrument_name=RevioNames.BETTY,
+            run_id="the_perfect_run",
+            run_name="run-name",
+            unique_id="unique-id",
+        )
+    )
+    store.commit_to_store()
+
+    # WHEN updating the comment of the sequencing run
+    store.update_pacbio_sequencing_run_comment(
+        id=sequencing_run.id, comment="The first comment of the new year! Happy 1926!"
+    )
+
+    # THEN the comment should have been updated
+    updated_sequencing_run = store.get_pacbio_sequencing_run_by_id(sequencing_run.id)
+    assert updated_sequencing_run.comment == "The first comment of the new year! Happy 1926!"
+
+
+def test_update_pacbio_sequencing_run_processed(store: Store):
+    # GIVEN a store with a PacBio sequencing run
+    sequencing_run = store.create_pacbio_sequencing_run(
+        pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
+            instrument_name=RevioNames.BETTY,
+            run_id="the_perfect_run",
+            run_name="run-name",
+            unique_id="unique-id",
+        )
+    )
+    store.commit_to_store()
+
+    # WHEN updating the processed field of the sequencing run
+    store.update_pacbio_sequencing_run_processed(id=sequencing_run.id, processed=True)
+
+    # THEN the processed field should have been updated
+    updated_sequencing_run = store.get_pacbio_sequencing_run_by_id(sequencing_run.id)
+    assert updated_sequencing_run.processed is True

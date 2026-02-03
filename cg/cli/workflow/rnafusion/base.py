@@ -8,6 +8,8 @@ import rich_click as click
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nf_analysis import (
+    OPTION_RESUME,
+    OPTION_REVISION,
     metrics_deliver,
     report_deliver,
     store,
@@ -18,10 +20,10 @@ from cg.constants.constants import MetaApis, Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
-from cg.services.analysis_starter.service import AnalysisStarter
 
 LOG = logging.getLogger(__name__)
 
@@ -46,35 +48,63 @@ rnafusion.add_command(store_available)
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def config_case(cg_config: CGConfig, case_id: str):
-    """Configure an RNAFUSION case so that it is ready to be run."""
+    """
+    Configure an RNAFUSION case so that it is ready to be run.
+
+    \b
+    Creates the following files in the case run directory:
+        - CASE_ID_params_file.yaml
+        - CASE_ID_nextflow_config.json
+        - CASE_ID_samplesheet.csv
+    """
     factory = ConfiguratorFactory(cg_config)
     configurator = cast(NextflowConfigurator, factory.get_configurator(Workflow.RNAFUSION))
     configurator.configure(case_id=case_id)
 
 
 @rnafusion.command()
+@OPTION_REVISION
+@OPTION_RESUME
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def run(cg_config: CGConfig, case_id: str):
-    """Run a preconfigured RNAFUSION case."""
+def run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None):
+    """
+    Run a preconfigured RNAFUSION case.
+
+    \b
+    Assumes that the following files exist in the case run directory:
+        - CASE_ID_params_file.yaml
+        - CASE_ID_nextflow_config.json
+        - CASE_ID_samplesheet.csv
+    """
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RNAFUSION
     )
-    analysis_starter.run(case_id=case_id)
+    analysis_starter.run(case_id=case_id, resume=resume, revision=revision)
 
 
 @rnafusion.command()
+@OPTION_REVISION
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def start(cg_config: CGConfig, case_id: str):
-    """Start an RNAFUSION case. Configures the case if needed."""
+def start(cg_config: CGConfig, case_id: str, revision: str | None):
+    """
+    Start an RNAFUSION case. Configures the case if needed.
+
+    \b
+    Configures the case and writes the following files:
+        - CASE_ID_params_file.yaml
+        - CASE_ID_nextflow_config.json
+        - CASE_ID_samplesheet.csv
+    and submits the job to the Seqera Platform.
+    """
     LOG.info(f"Starting RNAFUSION workflow for case {case_id}.")
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
         Workflow.RNAFUSION
     )
-    analysis_starter.start(case_id=case_id)
+    analysis_starter.start(case_id=case_id, revision=revision)
 
 
 @rnafusion.command()

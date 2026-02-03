@@ -242,7 +242,8 @@
         {
             "ADM1": {
                 "Contamination Status": "YES",
-                "Contamination Level": "ND"
+                "Contamination Level": "ND",
+                "FREEMIX": 5.68993e-05
             }
         },
         {

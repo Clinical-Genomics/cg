@@ -1,0 +1,5 @@
+references: "/nallo/references/v0.0.1"
+resources: "/nallo/resources"
+cadd_prescored_indels: "{{references}}/prescored"
+cadd_resources: "{{references}}/CADD-scripts/data/annotations"
+echtvar_snv_databases: "{{resources}}/nallo_v1.0_databases.yaml"

@@ -1,5 +1,5 @@
 """
-    Cg Exceptions.
+Cg Exceptions.
 """
 
 
@@ -33,6 +33,12 @@ class AnalysisAlreadyUploadedError(CgError):
 class AnalysisNotReadyError(CgError):
     """
     Exception raised when some FASTQ file are missing when starting an analysis.
+    """
+
+
+class AnalysisAlreadyCompletedError(CgError):
+    """
+    Exception raised when the latest analysis is already completed.
     """
 
 
@@ -144,6 +150,14 @@ class IlluminaRunAlreadyBackedUpError(CgError):
     """Raised when a flow cell is already backed-up."""
 
 
+class PacbioSequencingRunAlreadyExistsError(CgError):
+    """Raised when a PacBio sequencing run already exists."""
+
+
+class PacbioSequencingRunNotFoundError(CgError):
+    """Raised when a PacBio sequencing run is not found."""
+
+
 class HousekeeperFileMissingError(CgError):
     """
     Exception raised when a file is missing in Housekeeper.
@@ -208,10 +222,6 @@ class PedigreeConfigError(CgError):
 
 class RunParametersError(CgError):
     """Raised when something is wrong with the run parameters file."""
-
-
-class NfSampleSheetError(CgError):
-    """Raised when something is wrong with the sample sheet."""
 
 
 class SampleSheetContentError(CgError):
@@ -334,5 +344,28 @@ class Chanjo2ResponseError(Chanjo2APIClientError):
     """Exception raised when the response from Chanjo2 API client fails validation."""
 
 
+class CaseNotConfiguredError(CgError):
+    """Exception raised when a case is being run without a configuration."""
+
+
+class CaseWorkflowMismatchError(CgError):
+    """
+    Exception raised when a case is being run with a workflow different from the one specified
+    for it in the database.
+    """
+
+
 class MissingConfigFilesError(CgError):
     """Exception raised when a case is being run with missing configuration files."""
+
+
+class SeqeraError(CgError):
+    """Exception raised when receiving an unexpected response from Seqera platform"""
+
+
+class MultipleCaptureKitsError(CgError):
+    """Exception raised when multiple capture kits are found where only one is expected."""
+
+
+class ApplicationDoesNotHaveHiFiYieldError(CgError):
+    """Exception raised when application does not have HiFi yield set."""

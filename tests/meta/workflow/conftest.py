@@ -2,12 +2,15 @@
 
 import datetime
 import shutil
+from collections.abc import Generator
 from pathlib import Path
 
 import pytest
 
+from cg.apps.crunchy.crunchy import CrunchyAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.constants.constants import CaseActions, MicrosaltAppTags, MicrosaltQC, Workflow
+from cg.constants.constants import CaseActions, FileExtensions, MicrosaltQC, Workflow
 from cg.meta.compress.compress import CompressAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -15,13 +18,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.compression_data import CompressionData
 from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Case, Sample
-from tests.cli.workflow.balsamic.conftest import (
-    balsamic_housekeeper_dir,
-    fastq_file_l_1_r_1,
-    fastq_file_l_2_r_1,
-    fastq_file_l_2_r_2,
-)
-from tests.meta.compress.conftest import compress_api, real_crunchy_api
 from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
@@ -31,6 +27,43 @@ from tests.store_helpers import StoreHelpers
 def analysis_api_balsamic(cg_context: CGConfig) -> MockBalsamicAnalysis:
     """BALSAMIC ReportAPI fixture."""
     return MockBalsamicAnalysis(cg_context)
+
+
+@pytest.fixture
+def compress_api(
+    illumina_demultiplexed_runs_directory: Path,
+    real_crunchy_api: CrunchyAPI,
+    housekeeper_api: HousekeeperAPI,
+    project_dir: Path,
+) -> Generator[CompressAPI, None, None]:
+    """Return Compress API."""
+    yield CompressAPI(
+        crunchy_api=real_crunchy_api, hk_api=housekeeper_api, demux_root=project_dir.as_posix()
+    )
+
+
+@pytest.fixture(scope="session")
+def deliverables_template_content() -> list[dict]:
+    return [
+        {
+            "format": "yml",
+            "id": "CASEID",
+            "path": Path("PATHTOCASE", "pipeline_info", "software_versions.yml").as_posix(),
+            "path_index": None,
+            "step": "software-versions",
+            "tag": "software-versions",
+        },
+        {
+            "format": "json",
+            "id": "CASEID",
+            "path": Path("PATHTOCASE", "multiqc", "multiqc_data", "multiqc_data")
+            .with_suffix(FileExtensions.JSON)
+            .as_posix(),
+            "path_index": None,
+            "step": "multiqc-json",
+            "tag": "multiqc-json",
+        },
+    ]
 
 
 @pytest.fixture(scope="function")
@@ -207,8 +240,8 @@ def qc_microsalt_context(
     for sample in qc_pass_microsalt_samples[1:]:
         sample_to_add: Sample = helpers.add_sample(
             store=store,
-            application_tag=MicrosaltAppTags.MWRNXTR003,
-            application_type=MicrosaltAppTags.PREP_CATEGORY,
+            application_tag="MWRNXTR003",
+            application_type="mic",
             internal_id=sample,
             reads=MicrosaltQC.TARGET_READS,
             last_sequenced_at=datetime.datetime.now(),
@@ -220,8 +253,8 @@ def qc_microsalt_context(
     negative_control_sample: Sample = helpers.add_sample(
         store=store,
         internal_id=qc_pass_microsalt_samples[0],
-        application_tag=MicrosaltAppTags.MWRNXTR003,
-        application_type=MicrosaltAppTags.PREP_CATEGORY,
+        application_tag="MWRNXTR003",
+        application_type="mic",
         reads=0,
         last_sequenced_at=datetime.datetime.now(),
         control=ControlEnum.negative,
@@ -241,8 +274,8 @@ def qc_microsalt_context(
     for sample in qc_fail_microsalt_samples:
         sample_to_add: Sample = helpers.add_sample(
             store=store,
-            application_tag=MicrosaltAppTags.MWXNXTR003,
-            application_type=MicrosaltAppTags.PREP_CATEGORY,
+            application_tag="MWXNXTR003",
+            application_type="mic",
             internal_id=sample,
             reads=MicrosaltQC.TARGET_READS,
             last_sequenced_at=datetime.datetime.now(),
@@ -252,12 +285,8 @@ def qc_microsalt_context(
         helpers.add_relationship(store=store, case=microsalt_case_qc_fail, sample=sample_to_add)
 
     # Setting the target reads to correspond with statusDB
-    store.get_application_by_tag(tag=MicrosaltAppTags.MWRNXTR003).target_reads = (
-        MicrosaltQC.TARGET_READS
-    )
-    store.get_application_by_tag(tag=MicrosaltAppTags.MWXNXTR003).target_reads = (
-        MicrosaltQC.TARGET_READS
-    )
+    store.get_application_by_tag(tag="MWRNXTR003").target_reads = MicrosaltQC.TARGET_READS
+    store.get_application_by_tag(tag="MWXNXTR003").target_reads = MicrosaltQC.TARGET_READS
 
     cg_context.meta_apis["analysis_api"] = analysis_api
 
@@ -303,4 +332,446 @@ def taxprofiler_metrics() -> dict[str, float]:
         "reads_mapped": 19014950.0,
         "total_reads": 12400055,
         "paired_aligned_none": 1409340,
+    }
+
+
+@pytest.fixture(scope="function")
+def nallo_metrics_deliverables(
+    nallo_analysis_dir: Path,
+) -> dict[str, list]:
+    return {
+        "metrics": [
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "mean_coverage",
+                "step": "multiqc",
+                "value": 32.18,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "min_coverage",
+                "step": "multiqc",
+                "value": 0.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "max_coverage",
+                "step": "multiqc",
+                "value": 63906.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "coverage_bases",
+                "step": "multiqc",
+                "value": 99366056494,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "length",
+                "step": "multiqc",
+                "value": 3088286377,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "1_x_pc",
+                "step": "multiqc",
+                "value": 94.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "5_x_pc",
+                "step": "multiqc",
+                "value": 94.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "10_x_pc",
+                "step": "multiqc",
+                "value": 93.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "30_x_pc",
+                "step": "multiqc",
+                "value": 65.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "50_x_pc",
+                "step": "multiqc",
+                "value": 2.0,
+            },
+            {
+                "condition": {"norm": "gt", "threshold": 20.0},
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "median_coverage",
+                "step": "multiqc",
+                "value": 33,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "total_sequences",
+                "step": "multiqc",
+                "value": 2944513.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "percent_gc",
+                "step": "multiqc",
+                "value": 39.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "avg_sequence_length",
+                "step": "multiqc",
+                "value": 12792.931765117017,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "median_sequence_length",
+                "step": "multiqc",
+                "value": 12999,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "percent_duplicates",
+                "step": "multiqc",
+                "value": 1.7232745723252236,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "percent_fails",
+                "step": "multiqc",
+                "value": 30.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "family_id",
+                "step": "multiqc",
+                "value": "nallo",
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "paternal_id",
+                "step": "multiqc",
+                "value": 0.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "maternal_id",
+                "step": "multiqc",
+                "value": 0.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "sex",
+                "step": "multiqc",
+                "value": 1.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "predicted_sex_sex_check",
+                "step": "multiqc",
+                "value": "male",
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "phenotype",
+                "step": "multiqc",
+                "value": 2.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_family_id",
+                "step": "multiqc",
+                "value": "nallo",
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_paternal_id",
+                "step": "multiqc",
+                "value": 0.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_maternal_id",
+                "step": "multiqc",
+                "value": 0.0,
+            },
+            {
+                "condition": {"norm": "eq", "threshold": 2.0},
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_sex",
+                "step": "multiqc",
+                "value": 2.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_phenotype",
+                "step": "multiqc",
+                "value": 2.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_original_pedigree_sex",
+                "step": "multiqc",
+                "value": "female",
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_gt_depth_mean",
+                "step": "multiqc",
+                "value": 20.4,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_gt_depth_sd",
+                "step": "multiqc",
+                "value": 6.5,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_depth_mean",
+                "step": "multiqc",
+                "value": 20.3,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_depth_sd",
+                "step": "multiqc",
+                "value": 6.6,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_ab_mean",
+                "step": "multiqc",
+                "value": 0.52,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_ab_std",
+                "step": "multiqc",
+                "value": 0.42,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_n_hom_ref",
+                "step": "multiqc",
+                "value": 4727.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_n_het",
+                "step": "multiqc",
+                "value": 6126.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_n_hom_alt",
+                "step": "multiqc",
+                "value": 5668.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_n_unknown",
+                "step": "multiqc",
+                "value": 863.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_p_middling_ab",
+                "step": "multiqc",
+                "value": 0.007,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_X_depth_mean",
+                "step": "multiqc",
+                "value": 12.24,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_X_n",
+                "step": "multiqc",
+                "value": 325.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_X_hom_ref",
+                "step": "multiqc",
+                "value": 148.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_X_het",
+                "step": "multiqc",
+                "value": 0.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_X_hom_alt",
+                "step": "multiqc",
+                "value": 177.0,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_Y_depth_mean",
+                "step": "multiqc",
+                "value": 12.73,
+            },
+            {
+                "condition": None,
+                "header": None,
+                "id": "ADM1",
+                "input": "multiqc_data.json",
+                "name": "somalier_Y_n",
+                "step": "multiqc",
+                "value": 15.0,
+            },
+            {
+                "condition": {"norm": "eq", "threshold": "False"},
+                "header": None,
+                "id": "ADM1-ADM2",
+                "input": "multiqc_data.json",
+                "name": "parent_error_ped_check",
+                "step": "multiqc",
+                "value": "False",
+            },
+        ]
     }

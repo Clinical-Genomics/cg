@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from typing import cast
 from unittest.mock import Mock, create_autospec
@@ -8,13 +9,14 @@ from pytest_mock import MockerFixture
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
-from cg.exc import MissingConfigFilesError
+from cg.exc import AnalysisAlreadyCompletedError, MissingConfigFilesError
 from cg.models.cg_config import (
     CommonAppConfig,
     NalloConfig,
     RarediseaseConfig,
     RnafusionConfig,
     TaxprofilerConfig,
+    TomteConfig,
 )
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
     PipelineExtension,
@@ -38,26 +40,39 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
     TaxprofilerParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.tomte_params_file_creator import (
+    TomteParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo_sample_sheet_creator import (
     NalloSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease_sample_sheet_creator import (
     RarediseaseSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion_sample_sheet_creator import (
     RNAFusionSampleSheetCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler_sample_sheet_creator import (
     TaxprofilerSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
+    TomteSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
+from cg.store.models import Analysis
 from cg.store.store import Store
 
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.NALLO, Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [
+        Workflow.NALLO,
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+    ],
 )
 def test_get_config(
     workflow: Workflow,
@@ -140,7 +155,13 @@ def test_get_config_missing_required_files(mocker: MockerFixture):
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.NALLO, Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [
+        Workflow.NALLO,
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+    ],
 )
 def test_get_case_config_flags(
     workflow: Workflow,
@@ -161,15 +182,92 @@ def test_get_case_config_flags(
     )
 
     # WHEN getting the case config overriding the revision
-    case_config = configurator.get_config(case_id=nextflow_case_id, pre_run_script="overridden")
+    case_config = configurator.get_config(case_id=nextflow_case_id, revision="revision")
 
     # THEN we should get back a case config with updated value
-    assert case_config.pre_run_script == "overridden"
+    assert case_config.revision == "revision"
+
+
+def test_get_case_config_fake_flags(
+    raredisease_configurator: NextflowConfigurator,
+    mocker: MockerFixture,
+):
+    """Test that flags with nonsensical names are ignored."""
+
+    # GIVEN a configurator
+
+    # GIVEN that all expected files are mocked to exist
+    mocker.patch.object(Path, "exists", return_value=True)
+    mocker.patch.object(
+        raredisease_configurator.pipeline_extension, "do_required_files_exist", return_value=True
+    )
+
+    # WHEN getting the case config using a non-existent flag
+    case_config: NextflowCaseConfig = raredisease_configurator.get_config(
+        case_id="case_id", fake_flag="fake-flag"
+    )
+
+    # THEN the case config should not contain the flag
+    assert not getattr(case_config, "fake_flag", None)
+
+
+def test_get_config_resume(
+    nextflow_case_id: str, raredisease_configurator: NextflowConfigurator, mocker: MockerFixture
+):
+    # GIVEN a Nextflow Configurator with a case and a
+    analysis: Analysis = create_autospec(Analysis, session_id="session_id", completed_at=None)
+    raredisease_configurator.store.get_latest_started_analysis_for_case = Mock(
+        return_value=analysis
+    )
+
+    # GIVEN that all expected files are mocked to exist
+    mocker.patch.object(Path, "exists", return_value=True)
+    mocker.patch.object(
+        raredisease_configurator.pipeline_extension, "do_required_files_exist", return_value=True
+    )
+
+    # WHEN calling get_config using resume=True
+    case_config: NextflowCaseConfig = raredisease_configurator.get_config(
+        case_id=nextflow_case_id, resume=True
+    )
+
+    # THEN the resume attribute is True and the session id is as expected
+    assert case_config.resume is True
+    assert case_config.session_id == "session_id"
+
+
+def test_get_config_resume_already_completed_analysis(
+    nextflow_case_id: str, raredisease_configurator: NextflowConfigurator, mocker: MockerFixture
+):
+    # GIVEN a Nextflow Configurator with a case and a
+    analysis: Analysis = create_autospec(
+        Analysis, session_id="session_id", completed_at=datetime.now()
+    )
+    raredisease_configurator.store.get_latest_started_analysis_for_case = Mock(
+        return_value=analysis
+    )
+
+    # GIVEN that all expected files are mocked to exist
+    mocker.patch.object(Path, "exists", return_value=True)
+    mocker.patch.object(
+        raredisease_configurator.pipeline_extension, "do_required_files_exist", return_value=True
+    )
+
+    # WHEN calling get_config using resume=True
+    # THEN an error is raised because the latest analysis is completed
+    with pytest.raises(AnalysisAlreadyCompletedError):
+        raredisease_configurator.get_config(case_id=nextflow_case_id, resume=True)
 
 
 @pytest.mark.parametrize(
     "workflow",
-    [Workflow.NALLO, Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER],
+    [
+        Workflow.NALLO,
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+    ],
 )
 def test_get_case_config_none_flags(
     workflow: Workflow,
@@ -225,8 +323,14 @@ def test_get_case_config_none_flags(
             TaxprofilerConfig,
             TaxprofilerSampleSheetCreator,
         ),
+        (
+            Workflow.TOMTE,
+            TomteParamsFileCreator,
+            TomteConfig,
+            TomteSampleSheetCreator,
+        ),
     ],
-    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler"],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte"],
 )
 def test_configure(
     workflow: Workflow,

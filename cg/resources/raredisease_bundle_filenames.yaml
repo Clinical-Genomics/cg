@@ -28,6 +28,11 @@
   path: PATHTOCASE/qc_bam/SAMPLEID.d4
   step: qc_bam
   tag: d4tools_d4
+- format: meta
+  id: SAMPLEID
+  path: PATHTOCASE/qc_bam/SAMPLEID_sambamba_depth.bed
+  step: qc_bam
+  tag: sambamba_depth
 - format: png
   id: SAMPLEID
   path: PATHTOCASE/qc_bam/SAMPLEID_chromographcov/SAMPLEID_tidditcov_1.png
@@ -160,7 +165,7 @@
   tag: json
 - format: meta
   id: CASEID
-  path: /home/proj/production/workflows/raredisease/references/references_2.0.1_mtp_1/grch37_expansionhunter_variant_catalog_-5.0.0-.json
+  path: /home/proj/production/workflows/raredisease/references/v1.0/grch37_expansionhunter_variant_catalog_-5.0.0-.json
   step: expansionhunter
   tag: variant_catalog
 - format: vcf
@@ -253,6 +258,11 @@
   path: PATHTOCASE/call_snv/genome/CASEID_snv.vcf.gz.tbi
   step: call_snv
   tag: call_snv_index
+- format: meta
+  id: SAMPLEID
+  path: PATHTOCASE/call_snv/genome/SAMPLEID_deepvar.visual_report.html
+  step: deepvariant
+  tag: report
 - format: vcf
   id: CASEID
   path: PATHTOCASE/call_snv/mitochondria/CASEID_mitochondria.vcf.gz

@@ -18,8 +18,8 @@ class ScoutExportFileName(StrEnum):
 
 
 class UploadTrack(StrEnum):
-    RARE_DISEASE: str = "rare"
-    CANCER: str = "cancer"
+    RARE_DISEASE = "rare"
+    CANCER = "cancer"
 
 
 class ScoutCustomCaseReportTags(StrEnum):
@@ -66,12 +66,12 @@ NALLO_CASE_TAGS = dict(
     multiqc={"multiqc-html"},
     peddy_check={"ped-check", "peddy"},
     peddy_ped={"ped", "peddy"},
-    peddy_sex={"sex-check", "peddy"},
-    vcf_snv_research={"vcf-snv-research"},
+    somalier_samples={"somalier", "relate-samples"},
     vcf_snv={"vcf-snv-clinical"},
-    vcf_sv_research={"vcf-sv-research"},
-    vcf_sv={"vcf-sv-clinical"},
+    vcf_snv_research={"vcf-snv-research"},
     vcf_str={"vcf-str"},
+    vcf_sv={"vcf-sv-clinical"},
+    vcf_sv_research={"vcf-sv-research"},
 )
 
 MIP_CASE_TAGS: dict[str, set[str]] = dict(
@@ -120,7 +120,6 @@ RNAFUSION_CASE_TAGS: dict[str, set[str]] = dict(
 
 RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
     alignment_file={AlignmentFileTag.CRAM},
-    d4_file={"d4"},
     vcf2cytosure={"vcf2cytosure"},
     mt_bam={"bam-mt"},
     eklipse_path={"eklipse-png"},
@@ -138,9 +137,12 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
 NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
     alignment_path={AlignmentFileTag.BAM, "haplotags"},
     assembly_alignment_path={AlignmentFileTag.BAM, "assembly"},
+    chromograph_autozyg={"chromograph", "autozyg"},
+    chromograph_coverage={"chromograph", "tcov"},
     d4_file={"coverage", "d4"},
     hificnv_coverage={"hificnv", "bigwig"},
     paraphase_alignment_path={AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE},
+    phase_blocks={"whatshap", "gtf"},
     reviewer_alignment={"repeats", "spanning", "bam"},
     reviewer_alignment_index={"repeats", "spanning", "bam-index"},
     reviewer_vcf={"repeats", "sorted", "vcf"},

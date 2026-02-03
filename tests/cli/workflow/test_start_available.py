@@ -5,28 +5,41 @@ from click import BaseCommand
 from click.testing import CliRunner, Result
 from pytest_mock import MockerFixture
 
+from cg.cli.workflow.balsamic.base import start_available as balsamic_start_available
 from cg.cli.workflow.microsalt.base import start_available as microsalt_start_available
 from cg.cli.workflow.mip_dna.base import start_available as mip_dna_start_available
-from cg.cli.workflow.nallo.base import dev_start_available as nallo_start_available
-from cg.cli.workflow.raredisease.base import dev_start_available as raredisease_start_available
+from cg.cli.workflow.nallo.base import start_available as nallo_start_available
+from cg.cli.workflow.raredisease.base import start_available as raredisease_start_available
 from cg.cli.workflow.rnafusion.base import start_available as rnafusion_start_available
 from cg.cli.workflow.taxprofiler.base import start_available as taxprofiler_start_available
+from cg.cli.workflow.tomte.base import start_available as tomte_start_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
-from cg.services.analysis_starter.service import AnalysisStarter
+from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 
 
 @pytest.mark.parametrize(
     "start_available_command",
     [
+        balsamic_start_available,
+        mip_dna_start_available,
+        microsalt_start_available,
         nallo_start_available,
         raredisease_start_available,
         rnafusion_start_available,
         taxprofiler_start_available,
-        mip_dna_start_available,
-        microsalt_start_available,
+        tomte_start_available,
     ],
-    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "MIP-DNA", "microSALT"],
+    ids=[
+        "Balsamic",
+        "MIP-DNA",
+        "microSALT",
+        "Nallo",
+        "raredisease",
+        "RNAFUSION",
+        "Taxprofiler",
+        "Tomte",
+    ],
 )
 @pytest.mark.parametrize(
     "succeeds, exit_status",

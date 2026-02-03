@@ -100,9 +100,9 @@ class CancerAnalysisType(StrEnum):
 
 
 class SexOptions(StrEnum):
-    MALE: str = "male"
-    FEMALE: str = "female"
-    UNKNOWN: str = "unknown"
+    MALE = "male"
+    FEMALE = "female"
+    UNKNOWN = "unknown"
 
 
 SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
@@ -156,12 +156,12 @@ class FileFormat(StrEnum):
 
 
 class GenomeVersion(StrEnum):
-    GRCh37: str = "GRCh37"
-    GRCh38: str = "GRCh38"
-    T2T_CHM13: str = "T2T-CHM13v2.0"
+    GRCh37 = "GRCh37"
+    GRCh38 = "GRCh38"
+    T2T_CHM13 = "T2T-CHM13v2.0"
     CANFAM3 = auto()
-    HG19: str = "hg19"
-    HG38: str = "hg38"
+    HG19 = "hg19"
+    HG38 = "hg38"
 
 
 class SampleType(StrEnum):
@@ -238,7 +238,6 @@ class APIMethods(StrEnum):
 
 class MicrosaltQC:
     AVERAGE_COVERAGE_THRESHOLD: int = 10
-    MWX_THRESHOLD_SAMPLES_PASSING: float = 0.9
     COVERAGE_10X_THRESHOLD: float = 0.75
     DUPLICATION_RATE_THRESHOLD: float = 0.8
     INSERT_SIZE_THRESHOLD: int = 100
@@ -246,13 +245,6 @@ class MicrosaltQC:
     NEGATIVE_CONTROL_READS_THRESHOLD: float = 0.2
     TARGET_READS: int = 6000000
     TARGET_READS_FAIL_THRESHOLD: float = 0.7
-
-
-class MicrosaltAppTags(StrEnum):
-    MWRNXTR003: str = "MWRNXTR003"
-    MWXNXTR003: str = "MWXNXTR003"
-    VWGNXTR001: str = "VWGNXTR001"
-    PREP_CATEGORY: str = "mic"
 
 
 class MutantQC:

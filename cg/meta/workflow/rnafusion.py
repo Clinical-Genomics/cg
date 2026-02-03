@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from cg.constants import Workflow
-from cg.constants.constants import GenomeVersion, Strandedness
+from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import RNAFUSION_METRIC_CONDITIONS
 from cg.constants.scout import RNAFUSION_CASE_TAGS
 from cg.exc import MissingMetrics
@@ -12,13 +12,8 @@ from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
-from cg.models.rnafusion.rnafusion import (
-    RnafusionParameters,
-    RnafusionQCMetrics,
-    RnafusionSampleSheetEntry,
-)
+from cg.models.rnafusion.rnafusion import RnafusionQCMetrics
 from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
-from cg.store.models import CaseSample
 
 LOG = logging.getLogger(__name__)
 
@@ -46,14 +41,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.tower_workflow: str = config.rnafusion.tower_workflow
         self.account: str = config.rnafusion.slurm.account
         self.email: str = config.rnafusion.slurm.mail_user
-        self.compute_env_base: str = config.rnafusion.compute_env
         self.revision: str = config.rnafusion.revision
-        self.nextflow_binary_path: str = config.rnafusion.binary_path
-
-    @property
-    def sample_sheet_headers(self) -> list[str]:
-        """Headers for sample sheet."""
-        return RnafusionSampleSheetEntry.headers()
 
     @property
     def is_multiple_samples_allowed(self) -> bool:
@@ -68,28 +56,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def get_bundle_filenames_path() -> Path:
         """Return Rnafusion bundle filenames path."""
         return RNAFUSION_BUNDLE_FILENAMES_PATH
-
-    def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
-        """Collect and format information required to build a sample sheet for a single sample."""
-        fastq_forward_read_paths, fastq_reverse_read_paths = self.get_paired_read_paths(
-            sample=case_sample.sample
-        )
-        sample_sheet_entry = RnafusionSampleSheetEntry(
-            name=case_sample.sample.internal_id,
-            fastq_forward_read_paths=fastq_forward_read_paths,
-            fastq_reverse_read_paths=fastq_reverse_read_paths,
-            strandedness=Strandedness.REVERSE,
-        )
-        return sample_sheet_entry.reformat_sample_content()
-
-    def get_built_workflow_parameters(
-        self, case_id: str, dry_run: bool = False
-    ) -> RnafusionParameters:
-        """Get Rnafusion parameters."""
-        return RnafusionParameters(
-            input=self.get_sample_sheet_path(case_id=case_id),
-            outdir=self.get_case_path(case_id=case_id),
-        )
 
     @staticmethod
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:

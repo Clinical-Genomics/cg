@@ -1,19 +1,28 @@
 from unittest.mock import ANY, MagicMock, Mock, create_autospec
 
+import pytest
 from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import (
+    BalsamicConfig,
     CGConfig,
+    CommonAppConfig,
+    Encryption,
     IlluminaConfig,
     MipConfig,
     NalloConfig,
     RarediseaseConfig,
+    RnafusionConfig,
     RunInstruments,
     SeqeraPlatformConfig,
+    TaxprofilerConfig,
+    TomteConfig,
 )
+from cg.services.analysis_starter.analysis_starter import AnalysisStarter
+from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
@@ -23,15 +32,46 @@ from cg.services.analysis_starter.factories import starter_factory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.analysis_starter.input_fetcher.implementations.bam_fetcher import BamFetcher
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
-from cg.services.analysis_starter.service import AnalysisStarter
-from cg.services.analysis_starter.submitters.seqera_platform.client import SeqeraPlatformClient
-from cg.services.analysis_starter.submitters.seqera_platform.submitter import (
+from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_client import (
+    SeqeraPlatformClient,
+)
+from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_submitter import (
     SeqeraPlatformSubmitter,
 )
 from cg.services.analysis_starter.submitters.subprocess.submitter import SubprocessSubmitter
+from cg.services.analysis_starter.tracker.implementations.balsamic import BalsamicTracker
 from cg.services.analysis_starter.tracker.implementations.mip_dna import MIPDNATracker
-from cg.services.analysis_starter.tracker.implementations.nextflow import NextflowTracker
+from cg.services.analysis_starter.tracker.implementations.nextflow_tracker import NextflowTracker
 from cg.store.store import Store
+
+
+def test_analysis_starter_factory_balsamic(cg_balsamic_config: BalsamicConfig):
+    # GIVEN a CGConfig with configuration info for Balsamic
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        balsamic=cg_balsamic_config,
+        data_flow=Mock(),
+        encryption=create_autospec(Encryption, binary_path="encryption.bin"),
+        pdc=create_autospec(CommonAppConfig, binary_path="pdc.bin"),
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+        ),
+    )
+
+    # GIVEN an AnalysisStarterFactory
+    analysis_starter_factory = AnalysisStarterFactory(cg_config)
+
+    # WHEN getting the analysis starter for Balsamic
+    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
+        Workflow.BALSAMIC
+    )
+
+    # THEN the analysis starter should have been configured correctly
+    assert isinstance(analysis_starter.configurator, BalsamicConfigurator)
+    assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
+    assert isinstance(analysis_starter.submitter, SubprocessSubmitter)
+    assert isinstance(analysis_starter.tracker, BalsamicTracker)
 
 
 def test_analysis_starter_factory_microsalt(cg_context: CGConfig, mocker: MockerFixture):
@@ -68,6 +108,8 @@ def test_analysis_starter_factory_mip_dna():
         CGConfig,
         mip_rd_dna=mip_rd_dna_config,
         data_flow=Mock(),
+        encryption=create_autospec(Encryption, binary_path="encryption.bin"),
+        pdc=create_autospec(CommonAppConfig, binary_path="pdc.bin"),
         run_instruments=create_autospec(
             RunInstruments,
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
@@ -89,9 +131,17 @@ def test_analysis_starter_factory_mip_dna():
     assert isinstance(analysis_starter.tracker, MIPDNATracker)
 
 
+@pytest.mark.parametrize(
+    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE]
+)
 def test_get_analysis_starter_for_workflow_nextflow_fastq(
+    nextflow_root: str,
     raredisease_config_object: RarediseaseConfig,
+    rnafusion_config_object: RnafusionConfig,
     seqera_platform_config: SeqeraPlatformConfig,
+    taxprofiler_config_object: TaxprofilerConfig,
+    tomte_config_object: TomteConfig,
+    workflow: Workflow,
     mocker: MockerFixture,
 ):
     """
@@ -107,12 +157,17 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
     cg_config: CGConfig = create_autospec(
         CGConfig,
         data_flow=Mock(),
+        encryption=create_autospec(Encryption, binary_path="encryption.bin"),
+        pdc=create_autospec(CommonAppConfig, binary_path="pdc.bin"),
         raredisease=raredisease_config_object,
+        rnafusion=rnafusion_config_object,
         run_instruments=create_autospec(
             RunInstruments,
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
         ),
         seqera_platform=seqera_platform_config,
+        taxprofiler=taxprofiler_config_object,
+        tomte=tomte_config_object,
     )
 
     # GIVEN an AnalysisStarterFactory
@@ -132,7 +187,7 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
 
     # WHEN fetching the AnalysisStarter for a Nextflow workflow
     analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
-        Workflow.RAREDISEASE
+        workflow
     )
 
     # THEN the AnalysisStarter should have a Nextflow configurator
@@ -148,6 +203,7 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
     )
     mock_compress_api_init.assert_called_once_with(
         ANY,
+        backup_api=ANY,
         hk_api=cg_config.housekeeper_api,
         crunchy_api=cg_config.crunchy_api,
         demux_root=cg_config.run_instruments.illumina.demultiplexed_runs_dir,
@@ -170,7 +226,7 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
         ANY,
         store=cg_config.status_db,
         trailblazer_api=cg_config.trailblazer_api,
-        workflow_root=cg_config.raredisease.root,
+        workflow_root=nextflow_root,
     )
 
 

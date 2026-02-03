@@ -14,6 +14,7 @@ class PacBioDirsAndFiles:
     STATISTICS_DIR: str = "statistics"
     UNZIPPED_REPORTS_DIR: str = "unzipped_reports"
     METADATA_DIR: str = "metadata"
+    METADATA_FILE_SUFFIX: str = "metadata.xml"
     RUN_IS_VALID: str = "is_valid"
 
 
@@ -64,6 +65,7 @@ class SmrtLinkDatabasesAliases:
     BIO_SAMPLE_NAME: str = "bioSampleName"
     CELL_ID: str = "cellId"
     CELL_INDEX: str = "cellIndex"
+    INSTRUMENT_NAME: str = "instrumentName"
     MOVIE_NAME: str = "metadataContextId"
     PATH: str = "path"
     RUN_COMPLETED_AT = "createdAt"
@@ -76,7 +78,7 @@ class BarcodeMetricsAliases:
     BARCODED_HIFI_READS_PERCENTAGE: str = "barcode.percent_barcoded_reads"
     BARCODED_HIFI_YIELD: str = "barcode.barcoded_bases"
     BARCODED_HIFI_YIELD_PERCENTAGE: str = "barcode.percent_barcoded_bases"
-    BARCODED_MEAN_READ_LENGTH: str = "barcode.n_barcoded_readlength_mean"
+    BARCODED_MEAN_READ_LENGTH: str = "barcode.mean_read_length"
     UNBARCODED_HIFI_READS: str = "barcode.n_unbarcoded_reads"
     UNBARCODED_HIFI_YIELD: str = "barcode.unbarcoded_bases"
     UNBARCODED_HIFI_MEAN_READ_LENGTH: str = "barcode.mean_unbarcoded_read_length"
@@ -99,6 +101,7 @@ class PacBioHousekeeperTags:
     LOADING_REPORT: str = "loading-report"
     RAWDATA_REPORT: str = "raw-data-report"
     DATASETS_REPORT: str = "datasets-report"
+    METADATA: str = "smrt-link-metadata"
 
 
 class PacBioBundleTypes:
@@ -114,6 +117,7 @@ file_pattern_to_bundle_type: dict[str, str] = {
     PacBioDirsAndFiles.RAW_DATA_REPORT: PacBioBundleTypes.SMRT_CELL,
     PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT: PacBioBundleTypes.SMRT_CELL,
     f"{PacBioDirsAndFiles.HIFI_READS}.*{FileExtensions.BAM}$": PacBioBundleTypes.SAMPLE,
+    f".*{PacBioDirsAndFiles.METADATA_FILE_SUFFIX}$": PacBioBundleTypes.SMRT_CELL,
 }
 
 ZIPPED_REPORTS_PATTERN: str = "*reports.zip"

@@ -1,5 +1,6 @@
 """Module for Nallo Analysis API."""
 
+import copy
 import logging
 from itertools import permutations
 from pathlib import Path
@@ -14,7 +15,7 @@ from cg.clients.chanjo2.models import (
     CoverageSample,
 )
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat, GenomeVersion
+from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import (
     NALLO_COVERAGE_FILE_TAGS,
     NALLO_COVERAGE_INTERVAL_TYPE,
@@ -23,21 +24,15 @@ from cg.constants.nf_analysis import (
     NALLO_PARENT_PEDDY_METRIC_CONDITION,
     NALLO_RAW_METRIC_CONDITIONS,
 )
-from cg.constants.scout import NALLO_CASE_TAGS, ScoutExportFileName
-from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
-from cg.io.controller import WriteFile
+from cg.constants.scout import NALLO_CASE_TAGS
+from cg.constants.subject import PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
-from cg.models.nallo.nallo import (
-    NalloParameters,
-    NalloQCMetrics,
-    NalloSampleSheetEntry,
-    NalloSampleSheetHeaders,
-)
+from cg.models.nallo.nallo import NalloQCMetrics
 from cg.resources import NALLO_BUNDLE_FILENAMES_PATH
-from cg.store.models import CaseSample, Sample
+from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -65,93 +60,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         self.tower_workflow: str = config.nallo.tower_workflow
         self.account: str = config.nallo.slurm.account
         self.email: str = config.nallo.slurm.mail_user
-        self.compute_env_base: str = config.nallo.compute_env
         self.revision: str = config.nallo.revision
-        self.nextflow_binary_path: str = config.nallo.binary_path
-
-    @property
-    def sample_sheet_headers(self) -> list[str]:
-        """Headers for sample sheet."""
-        return NalloSampleSheetHeaders.list()
-
-    def get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
-        """Collect and format information required to build a sample sheet for a single sample."""
-        read_file_paths = self.get_bam_read_file_paths(sample=case_sample.sample)
-        sample_sheet_entries = []
-
-        for bam_path in read_file_paths:
-            sample_sheet_entry = NalloSampleSheetEntry(
-                project=case_sample.case.internal_id,
-                sample=case_sample.sample.internal_id,
-                read_file=Path(bam_path),
-                family_id=case_sample.case.internal_id,
-                paternal_id=case_sample.get_paternal_sample_id or "0",
-                maternal_id=case_sample.get_maternal_sample_id or "0",
-                sex=self.get_sex_code(case_sample.sample.sex),
-                phenotype=self.get_phenotype_code(case_sample.status),
-            )
-            sample_sheet_entries.extend(sample_sheet_entry.reformat_sample_content)
-        return sample_sheet_entries
-
-    @staticmethod
-    def get_phenotype_code(phenotype: str) -> int:
-        """Return Nallo phenotype code."""
-        LOG.debug("Translate phenotype to integer code")
-        try:
-            code = PlinkPhenotypeStatus[phenotype.upper()]
-        except KeyError:
-            raise ValueError(f"{phenotype} is not a valid phenotype")
-        return code
-
-    @staticmethod
-    def get_sex_code(sex: str) -> int:
-        """Return Nallo sex code."""
-        LOG.debug("Translate sex to integer code")
-        try:
-            code = PlinkSex[sex.upper()]
-        except KeyError:
-            raise ValueError(f"{sex} is not a valid sex")
-        return code
-
-    def get_built_workflow_parameters(self, case_id: str, dry_run: bool = False) -> NalloParameters:
-        """Return parameters."""
-        outdir = self.get_case_path(case_id=case_id)
-
-        return NalloParameters(
-            input=self.get_sample_sheet_path(case_id=case_id),
-            outdir=outdir,
-            filter_variants_hgnc_ids=f"{outdir}/{ScoutExportFileName.PANELS_TSV}",
-        )
-
-    @property
-    def is_gene_panel_required(self) -> bool:
-        """Return True if a gene panel needs to be created using information in StatusDB and exporting it from Scout."""
-        return True
-
-    def create_gene_panel(self, case_id: str, dry_run: bool) -> None:
-        """Create and write an aggregated gene panel file exported from Scout as tsv file."""
-        LOG.info("Creating gene panel file")
-        bed_lines: list[str] = self.get_gene_panel(case_id=case_id, dry_run=dry_run)
-        if dry_run:
-            bed_lines: str = "\n".join(bed_lines)
-            LOG.debug(f"{bed_lines}")
-            return
-        self.write_panel_as_tsv(case_id=case_id, content=bed_lines)
-
-    def write_panel_as_tsv(self, case_id: str, content: list[str]) -> None:
-        """Write the gene panel to case dir."""
-        self._write_panel_as_tsv(out_dir=Path(self.root, case_id), content=content)
-
-    @staticmethod
-    def _write_panel_as_tsv(out_dir: Path, content: list[str]) -> None:
-        """Write the gene panel to case dir while omitted the commented BED lines."""
-        filtered_content = [line for line in content if not line.startswith("##")]
-        out_dir.mkdir(parents=True, exist_ok=True)
-        WriteFile.write_file_from_content(
-            content="\n".join(filtered_content),
-            file_format=FileFormat.TXT,
-            file_path=Path(out_dir, ScoutExportFileName.PANELS_TSV),
-        )
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a Nallo case. Currently fixed for hg38."""
@@ -233,6 +142,22 @@ class NalloAnalysisAPI(NfAnalysisAPI):
                 metrics.append(parent_error_metric)
         metrics = self.get_deduplicated_metrics(metrics=metrics)
         return metrics
+
+    def _get_list_of_metric_dicts(self, multiqc_json: MultiqcDataJson) -> list[dict[str, Any]]:
+        metric_dicts: list[dict[str, Any]] = super()._get_list_of_metric_dicts(multiqc_json)
+
+        list_copy: list[dict[str, Any]] = copy.deepcopy(metric_dicts)
+        list_copy.append(self._get_somalier_dict(multiqc_json))
+
+        return list_copy
+
+    def _get_somalier_dict(self, multiqc_json: MultiqcDataJson) -> dict[str, Any]:
+        somalier_raw = copy.deepcopy(multiqc_json.report_saved_raw_data["multiqc_somalier"])
+
+        for sample_id, metrics in somalier_raw.items():
+            somalier_raw[sample_id] = {f"somalier_{k}": v for k, v in metrics.items()}
+
+        return somalier_raw
 
     @staticmethod
     def set_somalier_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:

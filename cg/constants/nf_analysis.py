@@ -1,19 +1,6 @@
 """Nf-tower related constants."""
 
-from enum import StrEnum
 from typing import Any
-
-
-class NfTowerStatus(StrEnum):
-    """NF-Tower job submission status."""
-
-    SUBMITTED: str = "SUBMITTED"
-    RUNNING: str = "RUNNING"
-    SUCCEEDED: str = "SUCCEEDED"
-    FAILED: str = "FAILED"
-    CANCELLED: str = "CANCELLED"
-    UNKNOWN: str = "UNKNOWN"
-
 
 NALLO_GENERAL_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "median_coverage": {"norm": "gt", "threshold": 20},
@@ -37,6 +24,7 @@ RAREDISEASE_METRIC_CONDITIONS_WES: dict[str, dict[str, Any]] = {
     "GC_DROPOUT": {"norm": "lt", "threshold": 10},
     RAREDISEASE_PREDICTED_SEX_METRIC: {"norm": "eq", "threshold": None},
     "gender": {"norm": "eq", "threshold": None},
+    "FREEMIX": {"norm": "lt", "threshold": 0.02},
 }
 
 RAREDISEASE_METRIC_CONDITIONS_WGS: dict[str, dict[str, Any]] = {
@@ -48,6 +36,7 @@ RAREDISEASE_METRIC_CONDITIONS_WGS: dict[str, dict[str, Any]] = {
     "GC_DROPOUT": {"norm": "lt", "threshold": 5},
     RAREDISEASE_PREDICTED_SEX_METRIC: {"norm": "eq", "threshold": None},
     "gender": {"norm": "eq", "threshold": None},
+    "FREEMIX": {"norm": "lt", "threshold": 0.02},
 }
 
 RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION: dict[str, dict[str, Any]] = {
@@ -68,21 +57,8 @@ TOMTE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "pct_duplication": {"norm": "lt", "threshold": 70},
 }
 
-
-MULTIQC_NEXFLOW_CONFIG = """process {
-    withName:'MULTIQC' {
-        memory = { 4.GB * task.attempt }
-        time   = { 4.h  * task.attempt }
-        cpus = 2
-        ext.args = ' --data-format json --cl-config "max_table_rows: 10000" '
-    }
-}
-"""
-
 NALLO_COVERAGE_FILE_TAGS: list[str] = ["d4"]
 NALLO_COVERAGE_INTERVAL_TYPE: str = "genes"
 NALLO_COVERAGE_THRESHOLD: int = 10
 
 RAREDISEASE_COVERAGE_FILE_TAGS: list[str] = ["coverage", "d4"]
-RAREDISEASE_COVERAGE_INTERVAL_TYPE: str = "genes"
-RAREDISEASE_COVERAGE_THRESHOLD: int = 10

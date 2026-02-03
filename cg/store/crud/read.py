@@ -20,6 +20,7 @@ from cg.exc import (
     CgDataError,
     CgError,
     OrderNotFoundError,
+    PacbioSequencingRunNotFoundError,
     SampleNotFoundError,
 )
 from cg.models.orders.constants import OrderType
@@ -97,6 +98,7 @@ from cg.store.models import (
     PacbioSampleSequencingMetrics,
     PacbioSequencingRun,
     PacbioSMRTCell,
+    PacbioSMRTCellMetrics,
     Panel,
     Pool,
     RunDevice,
@@ -1112,7 +1114,9 @@ class ReadHandler(BaseHandler):
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
 
-    def get_cases_to_analyze(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
+    def get_cases_to_analyze(
+        self, workflow: Workflow = None, limit: int | None = None
+    ) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed.
         1. Get cases to be analyzed using BE query
         2. Use the latest analysis for case to determine if the case is to be analyzed"""
@@ -1163,6 +1167,23 @@ class ReadHandler(BaseHandler):
             samples=self._get_query(table=Sample),
             internal_id=internal_id,
         ).first()
+
+    def get_sample_by_internal_id_strict(self, internal_id: str) -> Sample:
+        """
+        Return a sample by lims id.
+        Raises:
+            SampleNotFoundError: If no sample is found with the given internal id.
+        """
+        try:
+            return apply_sample_filter(
+                filter_functions=[SampleFilter.BY_INTERNAL_ID],
+                samples=self._get_query(table=Sample),
+                internal_id=internal_id,
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise SampleNotFoundError(
+                f"Sample with internal id {internal_id} was not found in the database."
+            )
 
     def get_samples_by_identifier(self, object_type: str, identifier: str) -> list[Sample]:
         """Return all samples from a flow cell, case or sample id"""
@@ -1787,17 +1808,32 @@ class ReadHandler(BaseHandler):
             sequencing_metrics = sequencing_metrics.filter(RunDevice.internal_id.in_(smrt_cell_ids))
         return sequencing_metrics.all()
 
-    def get_pacbio_sequencing_runs_by_run_name(self, run_name: str) -> list[PacbioSequencingRun]:
+    def get_pacbio_smrt_cell_metrics_by_run_id(self, run_id: str) -> list[PacbioSMRTCellMetrics]:
         """
-        Fetches data from PacbioSequencingRunDTO filtered on run name.
+        Fetches data from PacbioSMRTCellMetrics filtered on run ID.
         Raises:
-            EntryNotFoundError if no sequencing runs are found for the run name
+            EntryNotFoundError if no SMRT cell metrics are found for the run ID
         """
-        runs: Query = self._get_query(table=PacbioSequencingRun)
-        runs = runs.filter(PacbioSequencingRun.run_name == run_name)
-        if runs.count() == 0:
-            raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
-        return runs.all()
+        metrics: Query = (
+            self._get_query(table=PacbioSMRTCellMetrics)
+            .join(PacbioSMRTCellMetrics.sequencing_run)
+            .filter(PacbioSequencingRun.run_id == run_id)
+        )
+        if metrics.count() == 0:
+            raise EntryNotFoundError(f"Could not find any SMRT Cell metrics for run {run_id}")
+        return metrics.all()
+
+    def get_pacbio_sequencing_runs(
+        self, page: int = 0, page_size: int = 0
+    ) -> tuple[list[PacbioSequencingRun], int]:
+        query = self._get_query(PacbioSequencingRun).order_by(PacbioSequencingRun.id.desc())
+
+        if page and page_size:
+            query = query.limit(page_size).offset((page - 1) * page_size)
+
+        total_count: int = self._get_query(table=PacbioSequencingRun).count()
+
+        return query.all(), total_count
 
     def get_case_priority(self, case_id: str) -> SlurmQos:
         """Get case priority."""
@@ -1816,3 +1852,33 @@ class ReadHandler(BaseHandler):
         ):
             return True
         return False
+
+    def get_pacbio_sequencing_run_by_id(self, id: int):
+        """
+        Get Pacbio Sequencing run by database id.
+        Raises:
+            PacbioSequencingRunNotFoundError: If no Pacbio sequencing run is found with the given id.
+        """
+        try:
+            return (
+                self._get_query(table=PacbioSequencingRun)
+                .filter(PacbioSequencingRun.id == id)
+                .one()
+            )
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise PacbioSequencingRunNotFoundError(
+                f"Pacbio Sequencing run with id {id} was not found in the database."
+            )
+
+    def get_pacbio_sequencing_run_by_run_id(self, run_id: str) -> PacbioSequencingRun:
+        """
+        Raises:
+            PacbioSequencingRunNotFoundError: If no Pacbio sequencing run is found with the given
+            run ID.
+        """
+        try:
+            return self._get_query(table=PacbioSequencingRun).filter_by(run_id=run_id).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise PacbioSequencingRunNotFoundError(
+                f"Pacbio Sequencing run with ID {run_id} was not found in the database."
+            )

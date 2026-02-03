@@ -3,11 +3,9 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSampleSequencingMetricsDTO,
     PacBioSequencingRunDTO,
     PacBioSMRTCellDTO,
+    PacBioSMRTCellMetricsDTO,
 )
-from cg.services.run_devices.pacbio.metrics_parser.models import (
-    PacBioMetrics,
-    SampleMetrics,
-)
+from cg.services.run_devices.pacbio.metrics_parser.models import PacBioMetrics, SampleMetrics
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
 
 
@@ -16,15 +14,15 @@ def get_smrt_cell_dto(metrics: PacBioMetrics) -> PacBioSMRTCellDTO:
     return PacBioSMRTCellDTO(type=DeviceType.PACBIO, internal_id=internal_id)
 
 
-def get_sequencing_run_dto(
+def get_smrt_cell_metrics_dto(
     metrics: PacBioMetrics, run_data: PacBioRunData
-) -> PacBioSequencingRunDTO:
+) -> PacBioSMRTCellMetricsDTO:
     hifi_mean_read_quality: str = f"Q{metrics.read.hifi_median_read_quality}"
-    return PacBioSequencingRunDTO(
+    return PacBioSMRTCellMetricsDTO(
         type=DeviceType.PACBIO,
         well=metrics.dataset_metrics.well,
         plate=metrics.dataset_metrics.plate,
-        run_name=run_data.sequencing_run_name,
+        run_id=run_data.run_id,
         started_at=metrics.dataset_metrics.run_started_at,
         completed_at=metrics.dataset_metrics.run_completed_at,
         hifi_reads=metrics.read.hifi_reads,
@@ -76,3 +74,14 @@ def get_sample_sequencing_metrics_dtos(
         )
         sample_metrics_dtos.append(sample_sequencing_metrics_dto)
     return sample_metrics_dtos
+
+
+def get_sequencing_run_dto(
+    metrics: PacBioMetrics, run_data: PacBioRunData
+) -> PacBioSequencingRunDTO:
+    return PacBioSequencingRunDTO(
+        instrument_name=metrics.dataset_metrics.instrument_name,  # type: ignore - pydantic will convert to correct type
+        run_id=run_data.run_id,
+        run_name=metrics.metadata.run_name,
+        unique_id=metrics.metadata.unique_id,
+    )

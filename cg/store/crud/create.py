@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
+from cg.exc import PacbioSequencingRunAlreadyExistsError
 from cg.models.orders.constants import OrderType
 from cg.services.illumina.data_transfer.models import (
     IlluminaFlowCellDTO,
@@ -19,6 +20,7 @@ from cg.services.run_devices.pacbio.data_transfer_service.dto import (
     PacBioSampleSequencingMetricsDTO,
     PacBioSequencingRunDTO,
     PacBioSMRTCellDTO,
+    PacBioSMRTCellMetricsDTO,
 )
 from cg.store.crud.read import ReadHandler
 from cg.store.database import get_session
@@ -44,6 +46,7 @@ from cg.store.models import (
     PacbioSampleSequencingMetrics,
     PacbioSequencingRun,
     PacbioSMRTCell,
+    PacbioSMRTCellMetrics,
     Panel,
     Pool,
     Sample,
@@ -500,47 +503,77 @@ class CreateMixin(ReadHandler):
         self.add_item_to_store(new_smrt_cell)
         return new_smrt_cell
 
-    def create_pac_bio_sequencing_run(
-        self, sequencing_run_dto: PacBioSequencingRunDTO, smrt_cell: PacbioSMRTCell
+    def create_pacbio_sequencing_run(
+        self, pacbio_sequencing_run_dto: PacBioSequencingRunDTO
     ) -> PacbioSequencingRun:
-        LOG.debug(f"Creating Pacbio sequencing run for SMRT cell {smrt_cell.internal_id}")
-        new_sequencing_run = PacbioSequencingRun(
-            type=sequencing_run_dto.type,
-            well=sequencing_run_dto.well,
-            plate=sequencing_run_dto.plate,
-            run_name=sequencing_run_dto.run_name,
-            movie_name=sequencing_run_dto.movie_name,
-            started_at=sequencing_run_dto.started_at,
-            completed_at=sequencing_run_dto.completed_at,
-            hifi_reads=sequencing_run_dto.hifi_reads,
-            hifi_yield=sequencing_run_dto.hifi_yield,
-            hifi_mean_read_length=sequencing_run_dto.hifi_mean_read_length,
-            hifi_median_read_quality=sequencing_run_dto.hifi_median_read_quality,
-            percent_reads_passing_q30=sequencing_run_dto.percent_reads_passing_q30,
-            productive_zmws=sequencing_run_dto.productive_zmws,
-            p0_percent=sequencing_run_dto.p0_percent,
-            p1_percent=sequencing_run_dto.p1_percent,
-            p2_percent=sequencing_run_dto.p2_percent,
-            polymerase_mean_read_length=sequencing_run_dto.polymerase_mean_read_length,
-            polymerase_read_length_n50=sequencing_run_dto.polymerase_read_length_n50,
-            polymerase_mean_longest_subread=sequencing_run_dto.polymerase_mean_longest_subread,
-            polymerase_longest_subread_n50=sequencing_run_dto.polymerase_longest_subread_n50,
-            control_reads=sequencing_run_dto.control_reads,
-            control_mean_read_length=sequencing_run_dto.control_mean_read_length,
-            control_mean_read_concordance=sequencing_run_dto.control_mean_read_concordance,
-            control_mode_read_concordance=sequencing_run_dto.control_mode_read_concordance,
-            failed_reads=sequencing_run_dto.failed_reads,
-            failed_yield=sequencing_run_dto.failed_yield,
-            failed_mean_read_length=sequencing_run_dto.failed_mean_read_length,
-            barcoded_hifi_reads=sequencing_run_dto.barcoded_hifi_reads,
-            barcoded_hifi_reads_percentage=sequencing_run_dto.barcoded_hifi_reads_percentage,
-            barcoded_hifi_yield=sequencing_run_dto.barcoded_hifi_yield,
-            barcoded_hifi_yield_percentage=sequencing_run_dto.barcoded_hifi_yield_percentage,
-            barcoded_hifi_mean_read_length=sequencing_run_dto.barcoded_hifi_mean_read_length,
-            unbarcoded_hifi_reads=sequencing_run_dto.unbarcoded_hifi_reads,
-            unbarcoded_hifi_yield=sequencing_run_dto.unbarcoded_hifi_yield,
-            unbarcoded_hifi_mean_read_length=sequencing_run_dto.unbarcoded_hifi_mean_read_length,
+        """Create a new PacBio sequencing run
+
+        Raises PacbioSequencingRunAlreadyExistsError:
+        - When run name already exists in the database
+        """
+        if (
+            self._get_query(table=PacbioSequencingRun)
+            .filter(PacbioSequencingRun.run_id == pacbio_sequencing_run_dto.run_id)
+            .first()
+        ):
+            raise PacbioSequencingRunAlreadyExistsError(
+                message=f"{pacbio_sequencing_run_dto.run_id} already exists."
+            )
+        else:
+            LOG.debug(f"Creating Pacbio Sequencing Run for {pacbio_sequencing_run_dto.run_id}")
+            sequencing_run = PacbioSequencingRun(
+                instrument_name=pacbio_sequencing_run_dto.instrument_name,
+                run_id=pacbio_sequencing_run_dto.run_id,
+                run_name=pacbio_sequencing_run_dto.run_name,
+                unique_id=pacbio_sequencing_run_dto.unique_id,
+            )
+            self.add_item_to_store(sequencing_run)
+            return sequencing_run
+
+    def create_pacbio_smrt_cell_metrics(
+        self,
+        sequencing_run: PacbioSequencingRun,
+        smrt_cell_metrics_dto: PacBioSMRTCellMetricsDTO,
+        smrt_cell: PacbioSMRTCell,
+    ) -> PacbioSMRTCellMetrics:
+        LOG.debug(f"Creating Pacbio SMRT cell metrics for SMRT cell {smrt_cell.internal_id}")
+        new_sequencing_run = PacbioSMRTCellMetrics(
+            barcoded_hifi_mean_read_length=smrt_cell_metrics_dto.barcoded_hifi_mean_read_length,
+            barcoded_hifi_reads=smrt_cell_metrics_dto.barcoded_hifi_reads,
+            barcoded_hifi_reads_percentage=smrt_cell_metrics_dto.barcoded_hifi_reads_percentage,
+            barcoded_hifi_yield=smrt_cell_metrics_dto.barcoded_hifi_yield,
+            barcoded_hifi_yield_percentage=smrt_cell_metrics_dto.barcoded_hifi_yield_percentage,
+            completed_at=smrt_cell_metrics_dto.completed_at,
+            control_mean_read_concordance=smrt_cell_metrics_dto.control_mean_read_concordance,
+            control_mean_read_length=smrt_cell_metrics_dto.control_mean_read_length,
+            control_mode_read_concordance=smrt_cell_metrics_dto.control_mode_read_concordance,
+            control_reads=smrt_cell_metrics_dto.control_reads,
             device=smrt_cell,
+            failed_mean_read_length=smrt_cell_metrics_dto.failed_mean_read_length,
+            failed_reads=smrt_cell_metrics_dto.failed_reads,
+            failed_yield=smrt_cell_metrics_dto.failed_yield,
+            hifi_mean_read_length=smrt_cell_metrics_dto.hifi_mean_read_length,
+            hifi_median_read_quality=smrt_cell_metrics_dto.hifi_median_read_quality,
+            hifi_reads=smrt_cell_metrics_dto.hifi_reads,
+            hifi_yield=smrt_cell_metrics_dto.hifi_yield,
+            movie_name=smrt_cell_metrics_dto.movie_name,
+            p0_percent=smrt_cell_metrics_dto.p0_percent,
+            p1_percent=smrt_cell_metrics_dto.p1_percent,
+            p2_percent=smrt_cell_metrics_dto.p2_percent,
+            percent_reads_passing_q30=smrt_cell_metrics_dto.percent_reads_passing_q30,
+            plate=smrt_cell_metrics_dto.plate,
+            polymerase_longest_subread_n50=smrt_cell_metrics_dto.polymerase_longest_subread_n50,
+            polymerase_mean_longest_subread=smrt_cell_metrics_dto.polymerase_mean_longest_subread,
+            polymerase_mean_read_length=smrt_cell_metrics_dto.polymerase_mean_read_length,
+            polymerase_read_length_n50=smrt_cell_metrics_dto.polymerase_read_length_n50,
+            productive_zmws=smrt_cell_metrics_dto.productive_zmws,
+            sequencing_run=sequencing_run,
+            started_at=smrt_cell_metrics_dto.started_at,
+            type=smrt_cell_metrics_dto.type,
+            unbarcoded_hifi_mean_read_length=smrt_cell_metrics_dto.unbarcoded_hifi_mean_read_length,
+            unbarcoded_hifi_reads=smrt_cell_metrics_dto.unbarcoded_hifi_reads,
+            unbarcoded_hifi_yield=smrt_cell_metrics_dto.unbarcoded_hifi_yield,
+            well=smrt_cell_metrics_dto.well,
         )
         self.add_item_to_store(new_sequencing_run)
         return new_sequencing_run
@@ -548,11 +581,11 @@ class CreateMixin(ReadHandler):
     def create_pac_bio_sample_sequencing_run(
         self,
         sample_run_metrics_dto: PacBioSampleSequencingMetricsDTO,
-        sequencing_run: PacbioSequencingRun,
+        smrt_cell_metrics: PacbioSMRTCellMetrics,
     ) -> PacbioSampleSequencingMetrics:
         sample_id: str = sample_run_metrics_dto.sample_internal_id
         LOG.debug(f"Creating Pacbio sample sequencing metric for sample {sample_id}")
-        sample: Sample = self.get_sample_by_internal_id(sample_id)
+        sample: Sample = self.get_sample_by_internal_id_strict(sample_id)
         if not sample:
             self.rollback()
             raise EntryNotFoundError(f"Sample not found: {sample_id}")
@@ -562,7 +595,7 @@ class CreateMixin(ReadHandler):
             hifi_yield=sample_run_metrics_dto.hifi_yield,
             hifi_mean_read_length=sample_run_metrics_dto.hifi_mean_read_length,
             hifi_median_read_quality=sample_run_metrics_dto.hifi_median_read_quality,
-            instrument_run=sequencing_run,
+            instrument_run=smrt_cell_metrics,
             polymerase_mean_read_length=sample_run_metrics_dto.polymerase_mean_read_length,
         )
         self.add_item_to_store(new_sample_sequencing_run)

@@ -1,4 +1,4 @@
-""" Module to decouple cg code from Housekeeper code """
+"""Module to decouple cg code from Housekeeper code"""
 
 import logging
 import os
@@ -120,7 +120,7 @@ class HousekeeperAPI:
         *,
         bundle: str = None,
         tags: set[str] = None,
-        version: int = None,
+        version: int | None = None,
         path: str = None,
     ) -> Query:
         """Fetch files."""
