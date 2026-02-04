@@ -933,6 +933,7 @@ class ReadHandler(BaseHandler):
             filter_functions=[BedVersionFilter.BY_SHORT_NAME],
         ).first()
 
+    # TODO create a function that includes reference genom as filter
     def get_bed_version_by_short_name_strict(self, short_name: str) -> BedVersion:
         """
         Return bed version with short name.

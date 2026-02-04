@@ -88,6 +88,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             sample.from_sample or sample.internal_id
         )
         if target_bed_shortname:
+            # TODO use another filter function including reference genome
             bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(
                 target_bed_shortname
             )
