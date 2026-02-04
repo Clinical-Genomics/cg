@@ -22,6 +22,7 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 from cg.constants import DataDelivery, Priority, SequencingRunDataAvailability, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import (
+    BedVersionGenomeVersion,
     CaseActions,
     ControlOptions,
     SequencingQCStatus,
@@ -348,7 +349,9 @@ class BedVersion(Base):
     filename: Mapped[Str256]
     checksum: Mapped[Str32 | None]
     panel_size: Mapped[int | None]
-    genome_version: Mapped[Str32] = mapped_column(types.Enum("hg19", "hg38", "cfam3"))
+    genome_version: Mapped[BedVersionGenomeVersion] = mapped_column(
+        types.Enum(*(genome_version.value for genome_version in BedVersionGenomeVersion))
+    )
     designer: Mapped[Str256 | None]
     comment: Mapped[Text | None]
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
