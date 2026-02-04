@@ -8,7 +8,6 @@ from cg.models.orders.sample_base import NAME_PATTERN
 from cg.services.orders.validation.models.discriminators import has_internal_id
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.sample import Sample
-from cg.services.orders.validation.models.sample_aliases import SampleInCase
 from cg.store.models import Sample as DbSample
 from cg.store.store import Store
 
@@ -36,10 +35,10 @@ class Case(BaseModel, Generic[SampleType]):
         return enumerate(self.samples)
 
     @property
-    def enumerated_new_samples(self) -> list[tuple[int, SampleInCase]]:
-        samples: list[tuple[int, SampleInCase]] = []
+    def enumerated_new_samples(self) -> list[tuple[int, SampleType]]:
+        samples: list[tuple[int, SampleType]] = []
         for sample_index, sample in self.enumerated_samples:
-            if sample.is_new:
+            if not isinstance(sample, ExistingSample):
                 samples.append((sample_index, sample))
         return samples
 
@@ -47,11 +46,11 @@ class Case(BaseModel, Generic[SampleType]):
     def enumerated_existing_samples(self) -> list[tuple[int, ExistingSample]]:
         samples: list[tuple[int, ExistingSample]] = []
         for sample_index, sample in self.enumerated_samples:
-            if not sample.is_new:
+            if isinstance(sample, ExistingSample):
                 samples.append((sample_index, sample))
         return samples
 
-    def get_new_sample(self, sample_name: str) -> SampleInCase | None:
+    def get_new_sample(self, sample_name: str) -> SampleType | None:
         for _, sample in self.enumerated_new_samples:
             if sample.name == sample_name:
                 return sample

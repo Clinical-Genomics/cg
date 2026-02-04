@@ -189,6 +189,8 @@ def validate_case_contains_related_samples(
 ) -> list[SamplesNotRelatedError]:
     errors: list[SamplesNotRelatedError] = []
     for case_index, case in order.enumerated_new_cases:
+        if len(case.samples) == 1:
+            continue
         case_has_error = False
         for _, sample in case.enumerated_samples:
             if not is_sample_related_in_case(sample=sample, case=case, store=store):
