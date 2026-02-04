@@ -190,10 +190,3 @@ class ExistingSampleWrongTypeError(CaseSampleError):
 class SampleNameAlreadyExistsError(CaseSampleError):
     field: str = "name"
     message: str = "Sample name already exists in a previous order"
-
-
-class SampleNotRelatedError(CaseSampleError):
-    field: str = (
-        "internal_id"  # TODO: Change to a reasonable field (maybe one for mother and one for father)
-    )
-    message: str = "The sample must be related to at least one other sample in the case."

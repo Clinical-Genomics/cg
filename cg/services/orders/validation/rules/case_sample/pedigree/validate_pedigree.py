@@ -1,7 +1,4 @@
-from cg.services.orders.validation.errors.case_sample_errors import (
-    PedigreeError,
-    SampleNotRelatedError,
-)
+from cg.services.orders.validation.errors.case_sample_errors import PedigreeError
 from cg.services.orders.validation.order_types.mip_dna.models.case import MIPDNACase
 from cg.services.orders.validation.order_types.raredisease.models.case import RarediseaseCase
 from cg.services.orders.validation.order_types.tomte.models.case import TomteCase
@@ -16,10 +13,3 @@ def get_pedigree_errors(
     """Return a list of errors if any sample is labelled as its own ancestor in the family tree."""
     pedigree = FamilyTree(case=case, case_index=case_index, store=store)
     return validate_tree(pedigree)
-
-def get_isolated_sample_errors(
-    case: TomteCase | MIPDNACase | RarediseaseCase, case_index: int, store: Store
-) -> list[SampleNotRelatedError]:
-    pedigree = FamilyTree(case=case, case_index=case_index, store=store)
-    for node in pedigree.nodes:
-        pass

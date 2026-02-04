@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar, cast
+from typing import Generic, TypeVar
 
 from pydantic import Discriminator, Tag
 from typing_extensions import Annotated

@@ -34,7 +34,6 @@ from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
-from cg.services.orders.validation.rules.case.rules import validate_case_contains_related_samples
 from cg.services.orders.validation.rules.case_sample.rules import (
     validate_application_compatibility,
     validate_application_exists,
@@ -692,81 +691,3 @@ def test_validate_sample_names_available(
     assert errors[0].sample_index == 0 and errors[0].case_index == 0
     # THEN the error should concern the sample name
     assert isinstance(errors[0], SampleNameAlreadyExistsError)
-
-
-def test_order_with_cases_without_relationships():
-    # GIVEN a MIPDNAOrder containing a case with multiple samples, none of which are related
-    sample_1 = MIPDNASample(  # type: ignore
-        application="WGSPCFC030",
-        container=ContainerEnum.tube,
-        name="sample1",
-        sex=SexEnum.female,
-        source="blood",
-        status=StatusEnum.affected.value,
-        subject_id="subject1",
-    )
-    sample_2 = MIPDNASample(  # type: ignore
-        application="WGSPCFC030",
-        container=ContainerEnum.tube,
-        name="sample2",
-        sex=SexEnum.female,
-        source="blood",
-        status=StatusEnum.affected.value,
-        subject_id="subject2",
-    )
-    sample_3 = ExistingSample(internal_id="ACC123")  # type: ignore
-    case = MIPDNACase(name="mip-case", panels=["OMIM-AUTO"], samples=[sample_1, sample_2, sample_3])
-    order = MIPDNAOrder(
-        cases=[case],
-        customer="cust000",
-        delivery_type=MIPDNADeliveryType.ANALYSIS,
-        name="Order without relationships",
-        project_type=OrderType.MIP_DNA,
-    )
-
-    # WHEN validating that all the cases with multiple samples should have specified relationships
-    errors: list[SamplesNotRelatedError] = validate_case_contains_related_samples(
-        order=order, store=create_autospec(Store)
-    )
-
-    # THEN an error should be returned of the correct type
-    assert isinstance(errors[0], SamplesNotRelatedError)
-
-
-def test_order_with_cases_with_relationships_passes():
-    # GIVEN a MIPDNAOrder containing a case with multiple samples, one related to the others
-    sample_1 = MIPDNASample(  # type: ignore
-        application="WGSPCFC030",
-        container=ContainerEnum.tube,
-        name="sample1",
-        sex=SexEnum.female,
-        source="blood",
-        status=StatusEnum.affected.value,
-        subject_id="subject1",
-    )
-    sample_2 = MIPDNASample(  # type: ignore
-        application="WGSPCFC030",
-        container=ContainerEnum.tube,
-        name="sample2",
-        sex=SexEnum.female,
-        source="blood",
-        status=StatusEnum.affected.value,
-        subject_id="subject2",
-    )
-    sample_3 = ExistingSample(internal_id="ACC123", mother="sample2", father="sample3")  # type: ignore
-    case = MIPDNACase(name="mip-case", panels=["OMIM-AUTO"], samples=[sample_1, sample_2, sample_3])
-    order = MIPDNAOrder(
-        cases=[case],
-        customer="cust000",
-        delivery_type=MIPDNADeliveryType.ANALYSIS,
-        name="Order without relationships",
-        project_type=OrderType.MIP_DNA,
-    )
-
-    # WHEN validating that all the samples are related as they should
-    errors: list[SampleNotRelatedError] = validate_case_contains_related_samples(
-        order=order, store=create_autospec(Store)
-    )
-
-    # THEN no error should be returned
-    assert not errors

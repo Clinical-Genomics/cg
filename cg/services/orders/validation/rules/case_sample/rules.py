@@ -28,7 +28,6 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     SampleNameAlreadyExistsError,
     SampleNameRepeatedError,
     SampleNameSameAsCaseNameError,
-    SampleNotRelatedError,
     SampleOutsideOfCollaborationError,
     SexSubjectIdError,
     StatusUnknownError,
@@ -38,15 +37,10 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     WellFormatError,
     WellPositionMissingError,
 )
-from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.sample_aliases import SampleInCase
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.order_types.balsamic_umi.models.order import BalsamicUmiOrder
-from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
-from cg.services.orders.validation.order_types.mip_dna.models.sample import MIPDNASample
-from cg.services.orders.validation.order_types.raredisease.models.order import RarediseaseOrder
-from cg.services.orders.validation.order_types.raredisease.models.sample import RarediseaseSample
 from cg.services.orders.validation.rules.case_sample.pedigree.validate_pedigree import (
     get_pedigree_errors,
 )
@@ -549,16 +543,4 @@ def validate_sample_names_available(
         if store.is_sample_name_used(sample=sample, customer_entry_id=customer_entry_id):
             error = SampleNameAlreadyExistsError(case_index=case_index, sample_index=sample_index)
             errors.append(error)
-    return errors
-
-
-def validate_case_contains_related_samples(
-    order: MIPDNAOrder | RarediseaseOrder, store: Store, **kwargs
-) -> list[SamplesNotRelatedError]:
-    errors: list[SampleNotRelatedError] = []
-    for case_index, case in order.enumerated_new_cases:
-        for sample_index, sample in case.enumerated_samples:
-            if not is_sample_related_in_case(sample=sample, case=case):
-                error = SampleNotRelatedError(case_index=case_index, sample_index=sample_index)
-                errors.append(error)
     return errors

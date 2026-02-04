@@ -1,5 +1,3 @@
-from typing import cast
-
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
     CaseDoesNotExistError,
@@ -23,9 +21,11 @@ from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.order_types.balsamic_umi.models.order import BalsamicUmiOrder
+from cg.services.orders.validation.order_types.mip_dna.models.case import MIPDNACase
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.order_types.mip_dna.models.sample import MIPDNASample
 from cg.services.orders.validation.order_types.nallo.models.order import NalloOrder
+from cg.services.orders.validation.order_types.raredisease.models.case import RarediseaseCase
 from cg.services.orders.validation.order_types.raredisease.models.order import RarediseaseOrder
 from cg.services.orders.validation.order_types.raredisease.models.sample import RarediseaseSample
 from cg.services.orders.validation.rules.case.utils import (
@@ -182,3 +182,33 @@ def validate_samples_in_case_have_same_prep_category(
             error = MultiplePrepCategoriesError(case_index=case_index)
             errors.append(error)
     return errors
+
+
+def validate_case_contains_related_samples(
+    order: MIPDNAOrder | RarediseaseOrder, store: Store, **kwargs
+) -> list[SamplesNotRelatedError]:
+    errors: list[SamplesNotRelatedError] = []
+    for case_index, case in order.enumerated_new_cases:
+        case_has_error = False
+        for _, sample in case.enumerated_samples:
+            if not is_sample_related_in_case(sample=sample, case=case, store=store):
+                case_has_error = True
+        if case_has_error:
+            error = SamplesNotRelatedError(case_index=case_index)
+            errors.append(error)
+    return errors
+
+
+def is_sample_related_in_case(
+    sample: MIPDNASample | RarediseaseSample | ExistingSample,
+    case: MIPDNACase | RarediseaseCase,
+    store: Store,
+):
+    if not (sample.mother or sample.father):
+        if isinstance(sample, ExistingSample):
+            sample_name = store.get_sample_by_internal_id_strict(sample.internal_id).name
+        else:
+            sample_name = sample.name
+        if all((sample_name not in [sample.mother, sample.father] for sample in case.samples)):
+            return False
+    return True

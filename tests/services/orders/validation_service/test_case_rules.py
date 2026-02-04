@@ -1,7 +1,6 @@
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 from cg.constants import GenePanelMasterList
-from cg.constants.constants import DataDelivery
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
@@ -35,7 +34,7 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_one_sample_per_case,
     validate_samples_in_case_have_same_prep_category,
 )
-from cg.store.models import Application, Case
+from cg.store.models import Application, Case, Sample
 from cg.store.store import Store
 
 
@@ -229,3 +228,88 @@ def test_case_samples_multiple_prep_categories(
 
     # THEN the error should concern the first case
     assert error.case_index == 0
+
+
+def test_order_with_cases_without_relationships():
+    # GIVEN a MIPDNAOrder containing a case with multiple samples, none of which are related
+    sample_1 = MIPDNASample(  # type: ignore
+        application="WGSPCFC030",
+        container=ContainerEnum.tube,
+        name="sample1",
+        sex=SexEnum.female,
+        source="blood",
+        status=StatusEnum.affected.value,
+        subject_id="subject1",
+    )
+    sample_2 = MIPDNASample(  # type: ignore
+        application="WGSPCFC030",
+        container=ContainerEnum.tube,
+        name="sample2",
+        sex=SexEnum.female,
+        source="blood",
+        status=StatusEnum.affected.value,
+        subject_id="subject2",
+    )
+    sample_3 = ExistingSample(internal_id="ACC123")  # type: ignore
+    case = MIPDNACase(name="mip-case", panels=["OMIM-AUTO"], samples=[sample_1, sample_2, sample_3])
+    order = MIPDNAOrder(
+        cases=[case],
+        customer="cust000",
+        delivery_type=MIPDNADeliveryType.ANALYSIS,
+        name="Order without relationships",
+        project_type=OrderType.MIP_DNA,
+    )
+
+    # WHEN validating that all the cases with multiple samples should have specified relationships
+    errors: list[SamplesNotRelatedError] = validate_case_contains_related_samples(
+        order=order, store=create_autospec(Store)
+    )
+
+    # THEN an error should be returned of the correct type
+    assert isinstance(errors[0], SamplesNotRelatedError)
+
+
+def test_order_with_cases_with_relationships_passes():
+    # GIVEN a MIPDNAOrder containing a case with multiple samples, one related to the others
+    sample_1 = MIPDNASample(  # type: ignore
+        application="WGSPCFC030",
+        container=ContainerEnum.tube,
+        name="sample1",
+        sex=SexEnum.female,
+        source="blood",
+        status=StatusEnum.affected.value,
+        subject_id="subject1",
+    )
+    sample_2 = MIPDNASample(  # type: ignore
+        application="WGSPCFC030",
+        container=ContainerEnum.tube,
+        mother="sample1",
+        father="sample3",
+        name="sample2",
+        sex=SexEnum.female,
+        source="blood",
+        status=StatusEnum.affected.value,
+        subject_id="subject2",
+    )
+    sample_3 = ExistingSample(internal_id="ACC123")  # type: ignore
+    case = MIPDNACase(name="mip-case", panels=["OMIM-AUTO"], samples=[sample_1, sample_2, sample_3])
+    order = MIPDNAOrder(
+        cases=[case],
+        customer="cust000",
+        delivery_type=MIPDNADeliveryType.ANALYSIS,
+        name="Order without relationships",
+        project_type=OrderType.MIP_DNA,
+    )
+
+    store = create_autospec(Store)
+    db_sample: Sample = create_autospec(Sample)
+    db_sample.name = "sample3"
+    store.get_sample_by_internal_id_strict = Mock(return_value=db_sample)
+
+    # WHEN validating that all the samples are related as they should
+    errors: list[SamplesNotRelatedError] = validate_case_contains_related_samples(
+        order=order, store=store
+    )
+
+    # THEN no error should be returned
+    assert not errors
