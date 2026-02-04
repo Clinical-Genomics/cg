@@ -19,20 +19,15 @@ branch_labels = None
 depends_on = None
 
 
-class GenomeVersion(StrEnum):
-    hg19 = "hg19"
-    hg38 = "hg38"
-    cfam3 = "cfam3"
-
-
 def upgrade():
     op.alter_column(
         table_name="bed_version",
         column_name="genome_version",
         existing_type=sa.VARCHAR(length=32),
-        type_=GenomeVersion,
+        type_=mysql.ENUM("hg19", "hg38", "cfam3"),
         nullable=False,
     )
+    # TODO: See if we can add a constrain involving both genome_version and shortname
 
 
 def downgrade():
