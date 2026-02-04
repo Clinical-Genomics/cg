@@ -285,25 +285,7 @@ def test_any_sample_in_case_has_reads(
 
 def test_case_pass_sequencing_qc_on_hifi_yield_passes():
     # GIVEN a sample with enough yield
-    sample: Sample = create_autospec(
-        Sample, is_external=False, expected_hifi_yield=45, hifi_yield=45
-    )
-
-    # GIVEN a case
-    case: Case = create_autospec(Case, samples=[sample])
-
-    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
-    passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
-
-    # THEN the case passes sequencing qc
-    assert passes
-
-
-def test_case_pass_sequencing_qc_on_hifi_yield_expected_hifi_yield_is_zero_passes():
-    # GIVEN a sample with expected_hifi_yield set to zero
-    sample: Sample = create_autospec(
-        Sample, is_external=False, expected_hifi_yield=0, hifi_yield=45
-    )
+    sample: Sample = create_autospec(Sample, expected_hifi_yield=45, hifi_yield=45)
 
     # GIVEN a case
     case: Case = create_autospec(Case, samples=[sample])
@@ -317,9 +299,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_expected_hifi_yield_is_zero_passe
 
 def test_case_pass_sequencing_qc_on_hifi_yield_fails():
     # GIVEN a sample without enough yield
-    sample: Sample = create_autospec(
-        Sample, expected_hifi_yield=45, hifi_yield=44, is_external=False
-    )
+    sample: Sample = create_autospec(Sample, expected_hifi_yield=45, hifi_yield=44)
 
     # GIVEN a case
     case: Case = create_autospec(Case, samples=[sample])
@@ -333,14 +313,11 @@ def test_case_pass_sequencing_qc_on_hifi_yield_fails():
 
 def test_case_pass_sequencing_qc_on_hifi_yield_missing_hifi_yield():
     # GIVEN a case with two samples, where one is missing HiFi yield
-    sample_with_yield: Sample = create_autospec(
-        Sample, hifi_yield=45, expected_hifi_yield=45, is_external=False
-    )
+    sample_with_yield: Sample = create_autospec(Sample, hifi_yield=45, expected_hifi_yield=45)
     sample_without_yield: Sample = create_autospec(
         Sample,
         hifi_yield=None,
         expected_hifi_yield=45,
-        is_external=False,
     )
 
     # GIVEN a case with the two samples above
@@ -355,9 +332,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_missing_hifi_yield():
 
 def test_case_pass_sequencing_qc_on_hifi_yield_wrong_application():
     # GIVEN a case with an application without target HiFi yield
-    sample: Sample = create_autospec(
-        Sample, hifi_yield=25, expected_hifi_yield=None, is_external=False
-    )
+    sample: Sample = create_autospec(Sample, hifi_yield=25, expected_hifi_yield=None)
     case: Case = create_autospec(Case, samples=[sample])
 
     # WHEN calling the case_pass_sequencing_qc_on_hifi_yield on the case
@@ -371,7 +346,6 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_passes():
     sample: Sample = create_autospec(
         Sample,
         hifi_yield=25,
-        is_external=False,
         application_version=create_autospec(
             ApplicationVersion,
             application=create_autospec(Application, expected_express_hifi_yield=25),
@@ -391,7 +365,6 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_fails():
     sample: Sample = create_autospec(
         Sample,
         hifi_yield=24,
-        is_external=False,
         application_version=create_autospec(
             ApplicationVersion,
             application=create_autospec(Application, expected_express_hifi_yield=25),
@@ -413,11 +386,10 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_missing_hifi_yie
         application=create_autospec(Application, expected_express_hifi_yield=25),
     )
     sample_with_yield: Sample = create_autospec(
-        Sample, is_external=False, hifi_yield=24, application_version=application_version
+        Sample, hifi_yield=24, application_version=application_version
     )
     sample_without_yield: Sample = create_autospec(
         Sample,
-        is_external=False,
         hifi_yield=None,
         application_version=application_version,
     )
@@ -440,7 +412,6 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_wrong_applicatio
     sample: Sample = create_autospec(
         Sample,
         hifi_yield=25,
-        is_external=False,
         application_version=create_autospec(
             ApplicationVersion,
             application=create_autospec(Application, expected_express_hifi_yield=None),
@@ -458,14 +429,12 @@ def test_raw_data_case_pass_qc_rml_passes():
     # GIVEN two RML samples for which their summed reads pass the application threshold
     sample_1: Sample = create_autospec(
         Sample,
-        is_external=False,
         reads=10,
         expected_reads_for_sample=20,
         prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
     )
     sample_2: Sample = create_autospec(
         Sample,
-        is_external=False,
         reads=10,
         expected_reads_for_sample=20,
         prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
@@ -485,14 +454,12 @@ def test_raw_data_case_pass_qc_rml_fails():
     # GIVEN two RML samples for which their summed reads does not reach the application threshold
     sample_1: Sample = create_autospec(
         Sample,
-        is_external=False,
         reads=1,
         expected_reads_for_sample=20,
         prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
     )
     sample_2: Sample = create_autospec(
         Sample,
-        is_external=False,
         reads=1,
         expected_reads_for_sample=20,
         prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
@@ -512,7 +479,6 @@ def test_raw_data_case_pass_qc_read_based_not_rml_passes():
     # GIVEN a raw-data non rml sample with enough reads
     sample: Sample = create_autospec(
         Sample,
-        is_external=False,
         reads=10,
         expected_reads_for_sample=10,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
@@ -532,7 +498,6 @@ def test_raw_data_case_pass_qc_read_based_not_rml_fails():
     # GIVEN a raw-data non rml sample without enough reads
     sample: Sample = create_autospec(
         Sample,
-        is_external=False,
         reads=10,
         expected_reads_for_sample=20,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
@@ -555,7 +520,6 @@ def test_raw_data_case_pass_qc_hifi_yield_based_passes():
         hifi_yield=10,
         expected_hifi_yield=10,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
-        is_external=False,
     )
 
     # GIVEN a case with the sample above
@@ -575,7 +539,6 @@ def test_raw_data_case_pass_qc_hifi_yield_based_fails():
         hifi_yield=10,
         expected_hifi_yield=20,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
-        is_external=False,
     )
 
     # GIVEN a case with the sample above
@@ -588,9 +551,9 @@ def test_raw_data_case_pass_qc_hifi_yield_based_fails():
     assert not passes
 
 
-def test_raw_data_case_pass_qc_sample_run_metrics_missing_fails():
+def test_raw_data_case_pass_qc_sample_run_metrics_missing():
     # GIVEN a raw-data sample without sample run metrics
-    sample: Sample = create_autospec(Sample, is_external=False, sample_run_metrics=[])
+    sample: Sample = create_autospec(Sample, sample_run_metrics=[])
 
     # GIVEN a case with the sample above
     case: Case = create_autospec(Case, samples=[sample])
@@ -600,45 +563,6 @@ def test_raw_data_case_pass_qc_sample_run_metrics_missing_fails():
 
     # THEN the case fails QC
     assert not passes
-
-
-# Unlikely scenario but included to display that it's possible
-def test_raw_data_case_pass_qc_sample_run_external_sample_passes():
-    # GIVEN a raw-data sample without sample run metrics
-    sample: Sample = create_autospec(Sample, is_external=True, sample_run_metrics=[])
-
-    # GIVEN a case with the sample above
-    case: Case = create_autospec(Case, samples=[sample])
-
-    # WHEN calling the raw_data_case_pass_qc function on the case
-    passes = raw_data_case_pass_qc(case)
-
-    # THEN the case passes QC
-    assert passes
-
-
-def test_raw_data_case_pass_qc_mixed_internal_and_external_passes():
-    internal_sample: Sample = create_autospec(
-        Sample,
-        expected_hifi_yield=10,
-        hifi_yield=10,
-        is_external=False,
-        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
-    )
-    external_sample: Sample = create_autospec(
-        Sample,
-        is_external=True,
-        sample_run_metrics=[],
-    )
-
-    # GIVEN a case with the samples above
-    case: Case = create_autospec(Case, samples=[external_sample, internal_sample])
-
-    # WHEN calling the raw_data_case_pass_qc function on the case
-    passes = raw_data_case_pass_qc(case)
-
-    # THEN the case passes QC
-    assert passes
 
 
 def test_raw_data_yield_based_case_pass_qc_second_sample_missing_sample_run_metrics():
@@ -648,10 +572,9 @@ def test_raw_data_yield_based_case_pass_qc_second_sample_missing_sample_run_metr
         hifi_yield=10,
         expected_hifi_yield=10,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
-        is_external=False,
     )
     sample_2: Sample = create_autospec(
-        Sample, hifi_yield=None, expected_hifi_yield=10, sample_run_metrics=[], is_external=False
+        Sample, hifi_yield=None, expected_hifi_yield=10, sample_run_metrics=[]
     )
 
     # GIVEN a case with the samples above
@@ -668,13 +591,12 @@ def test_raw_data_read_based_case_pass_qc_second_sample_missing_sample_run_metri
     # GIVEN two raw-data samples, the second sample is missing sample_run_metrics
     sample_1: Sample = create_autospec(
         Sample,
-        is_external=False,
         reads=10,
         expected_reads_for_sample=10,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
     )
     sample_2: Sample = create_autospec(
-        Sample, is_external=False, reads=0, expected_reads_for_sample=10, sample_run_metrics=[]
+        Sample, reads=0, expected_reads_for_sample=10, sample_run_metrics=[]
     )
 
     # GIVEN a case with the samples above
@@ -685,44 +607,3 @@ def test_raw_data_read_based_case_pass_qc_second_sample_missing_sample_run_metri
 
     # THEN the case fails QC
     assert not passes
-
-
-def test_raw_data_read_based_case_pass_qc_second_sample_external():
-    # GIVEN two raw-data samples, the second sample is missing sample_run_metrics
-    sample_1: Sample = create_autospec(
-        Sample,
-        is_external=False,
-        reads=10,
-        expected_reads_for_sample=10,
-        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
-    )
-    sample_2: Sample = create_autospec(Sample, is_external=True, sample_run_metrics=[])
-
-    # GIVEN a case with the samples above
-    case: Case = create_autospec(Case, samples=[sample_1, sample_2])
-
-    # WHEN calling the raw_data_case_pass_qc function on the case
-    passes = raw_data_case_pass_qc(case)
-
-    # THEN the case passes QC
-    assert passes
-
-
-def test_raw_data_case_pass_qc_hifi_yield_based_expected_hifi_yield_is_zero_passes():
-    # GIVEN a raw-data yield based sample with an expected_hifi_yield set to zero
-    sample: Sample = create_autospec(
-        Sample,
-        hifi_yield=10,
-        is_external=False,
-        expected_hifi_yield=0,
-        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
-    )
-
-    # GIVEN a case with the sample above
-    case: Case = create_autospec(Case, samples=[sample])
-
-    # WHEN calling the raw_data_case_pass_qc function on the case
-    passes = raw_data_case_pass_qc(case)
-
-    # THEN the case passes QC
-    assert passes
