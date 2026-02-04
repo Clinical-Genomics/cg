@@ -9,6 +9,7 @@ Create Date: 2026-02-04 11:33:44.131245
 from enum import StrEnum
 
 import sqlalchemy as sa
+from sqlalchemy.dialects import mysql
 
 from alembic import op
 
@@ -27,8 +28,21 @@ def upgrade():
         type_=mysql.ENUM("hg19", "hg38", "cfam3"),
         nullable=False,
     )
-    # TODO: See if we can add a constrain involving both genome_version and shortname
+    op.create_unique_constraint(
+        constraint_name="shortname_version_genome_version_uc",
+        table_name="bed_version",
+        columns=["shortname", "version", "genome_version"],
+    )
 
 
 def downgrade():
-    pass
+    op.drop_constraint(
+        constraint_name="shortname_version_genome_version_uc", table_name="bed_version"
+    )
+    op.alter_column(
+        table_name="bed_version",
+        column_name="genome_version",
+        existing_type=mysql.ENUM("hg19", "hg38", "cfam3"),
+        type_=sa.VARCHAR(length=32),
+        nullable=True,
+    )
