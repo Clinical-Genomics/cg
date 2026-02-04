@@ -37,7 +37,9 @@ def upgrade():
 
 def downgrade():
     op.drop_constraint(
-        constraint_name="shortname_version_genome_version_uc", table_name="bed_version"
+        constraint_name="shortname_version_genome_version_uc",
+        table_name="bed_version",
+        type_="unique",
     )
     op.alter_column(
         table_name="bed_version",
