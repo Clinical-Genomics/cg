@@ -6,6 +6,10 @@ from cg.services.orders.validation.order_types.balsamic.models.case import Balsa
 from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
 from cg.services.orders.validation.order_types.balsamic_umi.models.case import BalsamicUmiCase
 from cg.services.orders.validation.order_types.balsamic_umi.models.sample import BalsamicUmiSample
+from cg.services.orders.validation.order_types.mip_dna.models.case import MIPDNACase
+from cg.services.orders.validation.order_types.mip_dna.models.sample import MIPDNASample
+from cg.services.orders.validation.order_types.raredisease.models.case import RarediseaseCase
+from cg.services.orders.validation.order_types.raredisease.models.sample import RarediseaseSample
 from cg.store.models import Application
 from cg.store.models import Case as DbCase
 from cg.store.models import Customer, Sample
@@ -87,3 +91,33 @@ def get_case_prep_categories(case: Case, store: Store) -> set[str]:
         if db_sample and db_sample.prep_category:
             prep_categories.add(db_sample.prep_category)
     return prep_categories
+
+
+def does_case_exist(case: MIPDNACase | RarediseaseCase | ExistingCase, store: Store):
+    if isinstance(case, ExistingCase):
+        return bool(store.get_case_by_internal_id(case.internal_id))
+    return True
+
+
+def is_single_sample_case(case: MIPDNACase | RarediseaseCase | ExistingCase, store: Store):
+    if isinstance(case, ExistingCase):
+        db_case: DbCase = store.get_case_by_internal_id_strict(case.internal_id)
+        contains_one_sample = bool(len(db_case.samples) == 1)
+    else:
+        contains_one_sample = bool(len(case.samples) == 1)
+    return contains_one_sample
+
+
+def is_sample_related_in_case(
+    sample: MIPDNASample | RarediseaseSample | ExistingSample,
+    case: MIPDNACase | RarediseaseCase,
+    store: Store,
+):
+    if not (sample.mother or sample.father):
+        if isinstance(sample, ExistingSample):
+            sample_name = store.get_sample_by_internal_id_strict(sample.internal_id).name
+        else:
+            sample_name = sample.name
+        if all((sample_name not in [sample.mother, sample.father] for sample in case.samples)):
+            return False
+    return True

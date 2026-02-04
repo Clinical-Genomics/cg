@@ -17,24 +17,22 @@ from cg.services.orders.validation.errors.case_errors import (
     SamplesNotRelatedError,
 )
 from cg.services.orders.validation.models.case import Case
-from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.order_types.balsamic_umi.models.order import BalsamicUmiOrder
-from cg.services.orders.validation.order_types.mip_dna.models.case import MIPDNACase
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
-from cg.services.orders.validation.order_types.mip_dna.models.sample import MIPDNASample
 from cg.services.orders.validation.order_types.nallo.models.order import NalloOrder
-from cg.services.orders.validation.order_types.raredisease.models.case import RarediseaseCase
 from cg.services.orders.validation.order_types.raredisease.models.order import RarediseaseOrder
-from cg.services.orders.validation.order_types.raredisease.models.sample import RarediseaseSample
 from cg.services.orders.validation.rules.case.utils import (
     contains_duplicates,
+    does_case_exist,
     get_case_prep_categories,
     is_case_not_from_collaboration,
     is_double_normal,
     is_double_tumour,
     is_normal_only_wgs,
+    is_sample_related_in_case,
+    is_single_sample_case,
 )
 from cg.services.orders.validation.rules.case_sample.utils import get_repeated_case_name_errors
 from cg.store.models import Case as DbCase
@@ -189,7 +187,9 @@ def validate_case_contains_related_samples(
 ) -> list[SamplesNotRelatedError]:
     errors: list[SamplesNotRelatedError] = []
     for case_index, case in order.enumerated_new_cases:
-        if len(case.samples) == 1:
+        if not does_case_exist(case=case, store=store):  # Error should be raised elsewhere
+            continue
+        if is_single_sample_case(case=case, store=store):  # This should always pass
             continue
         case_has_error = False
         for _, sample in case.enumerated_samples:
@@ -199,18 +199,3 @@ def validate_case_contains_related_samples(
             error = SamplesNotRelatedError(case_index=case_index)
             errors.append(error)
     return errors
-
-
-def is_sample_related_in_case(
-    sample: MIPDNASample | RarediseaseSample | ExistingSample,
-    case: MIPDNACase | RarediseaseCase,
-    store: Store,
-):
-    if not (sample.mother or sample.father):
-        if isinstance(sample, ExistingSample):
-            sample_name = store.get_sample_by_internal_id_strict(sample.internal_id).name
-        else:
-            sample_name = sample.name
-        if all((sample_name not in [sample.mother, sample.father] for sample in case.samples)):
-            return False
-    return True
