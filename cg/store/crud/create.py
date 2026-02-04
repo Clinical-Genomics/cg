@@ -192,7 +192,7 @@ class CreateMixin(ReadHandler):
     def add_bed_version(self, bed: Bed, version: int, filename: str, shortname: str) -> BedVersion:
         """Build a new bed version record."""
         bed_version: BedVersion = BedVersion(
-            version=version, filename=filename, shortname=shortname
+            version=version, filename=filename, shortname=shortname, genome_version="hg19"
         )
         bed_version.bed = bed
         return bed_version
