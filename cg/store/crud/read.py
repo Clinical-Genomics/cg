@@ -953,26 +953,6 @@ class ReadHandler(BaseHandler):
                 f"Bed version with short name {short_name} and genome version {genome_version} was not found in the database."
             )
 
-    # TODO Replace with version that filters on genome version
-    def get_bed_version_by_short_name_strict(self, short_name: str) -> BedVersion:
-        """
-        Return bed version with short name.
-        Raises:
-            BedVersionNotFoundError: If no bed version is found with the given short name.
-            sqlalchemy.orm.exc.MultipleResultsFound: If multiple bed versions are found with the same
-            shortname.
-        """
-        try:
-            return apply_bed_version_filter(
-                bed_versions=self._get_query(table=BedVersion),
-                bed_version_short_name=short_name,
-                filter_functions=[BedVersionFilter.BY_SHORT_NAME],
-            ).one()
-        except sqlalchemy.orm.exc.NoResultFound:
-            raise BedVersionNotFoundError(
-                f"Bed version with short name {short_name} was not found in the database."
-            )
-
     def get_bed_by_entry_id(self, bed_entry_id: int) -> Bed:
         """Get panel bed with bed entry id."""
         return apply_bed_filter(
