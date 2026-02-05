@@ -941,8 +941,17 @@ class ReadHandler(BaseHandler):
 
     def get_bed_version_by_short_name_and_genome_version_strict(
         self, short_name: str, genome_version: BedVersionGenomeVersion
-    ):
-        pass
+    ) -> BedVersion:
+        try:
+            return (
+                self._get_query(table=BedVersion)
+                .filter_by(short_name=short_name, genome_version=genome_version)
+                .one()
+            )
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise BedVersionNotFoundError(
+                f"Bed version with short name {short_name} and genome version {genome_version} was not found in the database."
+            )
 
     # TODO Replace with version that filters on genome version
     def get_bed_version_by_short_name_strict(self, short_name: str) -> BedVersion:
