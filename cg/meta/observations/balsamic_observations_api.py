@@ -20,8 +20,9 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import (
     BedVersionNotFoundError,
     CaseNotFoundError,
+    LimsDataError,
     LoqusdbDeleteCaseError,
-    LoqusdbDuplicateRecordError, LimsDataError,
+    LoqusdbDuplicateRecordError,
 )
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI

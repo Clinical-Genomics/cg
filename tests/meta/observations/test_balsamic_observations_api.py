@@ -13,7 +13,12 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import CancerAnalysisType, CustomerId
 from cg.constants.observations import LOQUSDB_ID, BalsamicObservationPanel, LoqusdbInstance
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import LoqusdbDeleteCaseError, LoqusdbDuplicateRecordError
+from cg.exc import (
+    BedVersionNotFoundError,
+    LimsDataError,
+    LoqusdbDeleteCaseError,
+    LoqusdbDuplicateRecordError,
+)
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -164,15 +169,62 @@ def test_is_panel_allowed_for_observations_upload_bed_name(
     # THEN result is as expected
     assert is_panel_allowed == should_be_allowed
 
-def test_is_panel_allowed_for_observations_upload_lims_error(cg_context: CGConfig, mocker: MockerFixture):
-    # GIVEN a Balsamic observations API
-    balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
+
+def test_is_panel_allowed_for_observations_upload_lims_error(cg_context: CGConfig):
+    # GIVEN a Store with a case with a sample that needs a panel to be uploaded to LoqusDB
+    store: Store = create_autospec(Store)
+    sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_id",
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+    )
+    case: Case = create_autospec(Case, internal_id="case_id", samples=[sample])
 
     # GIVEN the sample has no capture kit in LIMS
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.capture_kit = Mock(side_effect=LimsDataError)
 
-    balsamic_observations_api.lims_api = Mock()
+    # GIVEN a Balsamic observations API
+    balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
+    balsamic_observations_api.lims_api = lims_api
+    balsamic_observations_api.store = store
+
+    # WHEN calling is_panel_allowed_for_observations_upload
+    is_allowed = balsamic_observations_api.is_panel_allowed_for_observations_upload(case)
+
+    # THEN the method should handle the LimsDataError and return False
+    assert not is_allowed
 
 
+def test_is_panel_allowed_for_observations_upload_bed_version_not_found(cg_context: CGConfig):
+    # GIVEN a Store with a case with a sample that needs a panel to be uploaded to LoqusDB
+    store: Store = create_autospec(Store)
+    sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_id",
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+    )
+    case: Case = create_autospec(Case, internal_id="case_id", samples=[sample])
+
+    # GIVEN the sample has a capture kit in LIMS
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.capture_kit = Mock(return_value="panel_short_name")
+
+    # GIVEN the store does not find a bed version for the panel short name
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
+        side_effect=BedVersionNotFoundError
+    )
+
+    # GIVEN a Balsamic observations API
+    balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
+    balsamic_observations_api.lims_api = lims_api
+    balsamic_observations_api.store = store
+
+    # WHEN calling is_panel_allowed_for_observations_upload
+    is_allowed = balsamic_observations_api.is_panel_allowed_for_observations_upload(case)
+
+    # THEN the method should handle the BedVersionNotFoundError and return False
+    assert not is_allowed
 
 
 def test_is_panel_allowed_for_upload_wgs(cg_context: CGConfig):
