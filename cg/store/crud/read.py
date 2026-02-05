@@ -9,7 +9,12 @@ import sqlalchemy
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import DNA_WORKFLOWS_WITH_SCOUT_UPLOAD, CustomerId, SampleType
+from cg.constants.constants import (
+    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+    BedVersionGenomeVersion,
+    CustomerId,
+    SampleType,
+)
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
@@ -925,6 +930,7 @@ class ReadHandler(BaseHandler):
             filter_functions=[BedVersionFilter.BY_FILE_NAME],
         ).first()
 
+    # TODO: Replace with version that filters on genome_version
     def get_bed_version_by_short_name(self, bed_version_short_name: str) -> BedVersion:
         """Return bed version with short name."""
         return apply_bed_version_filter(
@@ -933,7 +939,12 @@ class ReadHandler(BaseHandler):
             filter_functions=[BedVersionFilter.BY_SHORT_NAME],
         ).first()
 
-    # TODO create a function that includes reference genom as filter
+    def get_bed_version_by_short_name_and_genome_version_strict(
+        self, short_name: str, genome_version: BedVersionGenomeVersion
+    ):
+        pass
+
+    # TODO Replace with version that filters on genome version
     def get_bed_version_by_short_name_strict(self, short_name: str) -> BedVersion:
         """
         Return bed version with short name.
