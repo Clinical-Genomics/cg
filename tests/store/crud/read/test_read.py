@@ -416,7 +416,13 @@ def test_get_bed_version_by_short_name_and_genome_version_strict_success(store: 
         bed=bed_hg38, version=1, filename="bed_hg38.bed", shortname="b"
     )
     bed_version_to_fetch.genome_version = BedVersionGenomeVersion.HG38
-    store.add_multiple_items_to_store([bed_version_with_different_genome_version, bed_version_with_different_shortname, bed_version_to_fetch])
+    store.add_multiple_items_to_store(
+        [
+            bed_version_with_different_genome_version,
+            bed_version_with_different_shortname,
+            bed_version_to_fetch,
+        ]
+    )
 
     # WHEN getting the bed version of hg38 genome version
     bed_version = store.get_bed_version_by_short_name_and_genome_version_strict(
@@ -425,9 +431,6 @@ def test_get_bed_version_by_short_name_and_genome_version_strict_success(store: 
 
     # THEN the expected bed version is returned
     assert bed_version == bed_version_to_fetch
-
-
-
 
 
 def test_get_customer_by_internal_id(base_store: Store, customer_id: str):
