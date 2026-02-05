@@ -412,6 +412,7 @@ def test_get_bed_version_by_short_name_and_genome_version_strict_success(store: 
         bed=bed_hg38, version=1, filename="bed_hg38.bed", shortname="b"
     )
     bed_version_to_fetch.genome_version = BedVersionGenomeVersion.HG38
+    store.add_multiple_items_to_store([bed_version1, bed_version_to_fetch])
 
     # WHEN getting the bed version of hg38 genome version
     bed_version = store.get_bed_version_by_short_name_and_genome_version_strict(

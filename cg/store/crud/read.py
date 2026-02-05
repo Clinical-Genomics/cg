@@ -945,7 +945,7 @@ class ReadHandler(BaseHandler):
         try:
             return (
                 self._get_query(table=BedVersion)
-                .filter_by(short_name=short_name, genome_version=genome_version)
+                .filter_by(shortname=short_name, genome_version=genome_version)
                 .one()
             )
         except sqlalchemy.orm.exc.NoResultFound:
