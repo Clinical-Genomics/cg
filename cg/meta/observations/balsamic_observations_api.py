@@ -21,7 +21,7 @@ from cg.exc import (
     BedVersionNotFoundError,
     CaseNotFoundError,
     LoqusdbDeleteCaseError,
-    LoqusdbDuplicateRecordError,
+    LoqusdbDuplicateRecordError, LimsDataError,
 )
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -100,13 +100,16 @@ class BalsamicObservationsAPI(ObservationsAPI):
         """
         if self._is_panel_upload(case):
             sample: Sample = case.samples[0]
-            panel_short_name: str | None = self.lims_api.capture_kit(sample.internal_id)
             try:
+                panel_short_name: str = self.lims_api.get_capture_kit_strict(sample.internal_id)
                 bed_version: BedVersion = (
                     self.store.get_bed_version_by_short_name_and_genome_version_strict(
                         short_name=panel_short_name, genome_version=BedVersionGenomeVersion.HG19
                     )
                 )
+            except LimsDataError:
+                LOG.warning(f"Sample {sample.internal_id} has no capture kit in LIMS.")
+                return False
             except BedVersionNotFoundError:
                 LOG.warning(
                     f"No bed version found for LIMS panel {panel_short_name} for sample "

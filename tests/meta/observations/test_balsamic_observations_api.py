@@ -164,6 +164,16 @@ def test_is_panel_allowed_for_observations_upload_bed_name(
     # THEN result is as expected
     assert is_panel_allowed == should_be_allowed
 
+def test_is_panel_allowed_for_observations_upload_lims_error(cg_context: CGConfig, mocker: MockerFixture):
+    # GIVEN a Balsamic observations API
+    balsamic_observations_api = BalsamicObservationsAPI(config=cg_context)
+
+    # GIVEN the sample has no capture kit in LIMS
+
+    balsamic_observations_api.lims_api = Mock()
+
+
+
 
 def test_is_panel_allowed_for_upload_wgs(cg_context: CGConfig):
     # GIVEN a Balsamic observations API
