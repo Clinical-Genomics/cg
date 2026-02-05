@@ -6,7 +6,7 @@ from pathlib import Path
 from housekeeper.store.models import File, Version
 
 from cg.apps.loqus import LoqusdbAPI
-from cg.constants.constants import CancerAnalysisType, CustomerId
+from cg.constants.constants import BedVersionGenomeVersion, CancerAnalysisType, CustomerId
 from cg.constants.observations import (
     LOQUSDB_CANCER_CUSTOMERS,
     LOQUSDB_CANCER_SEQUENCING_METHODS,
@@ -148,8 +148,12 @@ class BalsamicObservationsAPI(ObservationsAPI):
 
     def _get_panel_loqusdb_api(self, case: Case) -> LoqusdbAPI:
         sample: Sample = case.samples[0]
-        bed_short_name: str = self.lims_api.capture_kit(sample.internal_id)
-        bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(bed_short_name)
+        bed_short_name: str | None = self.lims_api.capture_kit(sample.internal_id)
+        bed_version: BedVersion = (
+            self.store.get_bed_version_by_short_name_and_genome_version_strict(
+                short_name=bed_short_name, genome_version=BedVersionGenomeVersion.HG19
+            )
+        )
         panel: str = bed_version.bed.name
         loqusdb_instance: LoqusdbInstance = PANEL_TO_LOQUSDB_INSTANCE_MAP[
             BalsamicObservationPanel(panel)

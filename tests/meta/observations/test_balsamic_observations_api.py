@@ -382,7 +382,7 @@ def test_panel_upload(
     store: Store = create_autospec(Store)
     bed = create_autospec(Bed)
     bed.name = panel
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(BedVersion, bed=bed, filename="file.bed")
     )
     store.get_bed_version_by_short_name = Mock(
@@ -516,7 +516,7 @@ def test_delete_case_panel(mocker: MockerFixture):
     )
     bed: Bed = create_autospec(Bed)
     bed.name = BalsamicObservationPanel.MYELOID
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(BedVersion, bed=bed)
     )
 
