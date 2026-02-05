@@ -170,7 +170,7 @@ def test_archive_all_non_archived_spring_files(
                 sample: Sample = spring_archive_api.status_db.get_sample_by_internal_id_strict(
                     file.version.bundle.name
                 )
-                if sample and sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET:
+                if sample.archive_location == ArchiveLocations.KAROLINSKA_BUCKET:
                     assert file.archive
     else:
         mock_request_submitter.assert_not_called()
