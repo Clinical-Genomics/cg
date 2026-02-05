@@ -31,9 +31,30 @@ class BaseView(ModelView):
         return redirect(url_for("google.login", next=request.url))
 
 
-def view_hifi_yield_in_gb(unused1, unused2, model, unused3):
+def view_hifi_yield_formatted(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
-    return Markup(f"{round(model.hifi_yield/1E9, 1)} Gb") if model.hifi_yield else ""
+    text = formatter(model.hifi_yield)
+    return None if text is None else Markup(text)
+
+
+def view_reads_formatted(unused1, unused2, model, unused3):
+    del unused1, unused2, unused3
+    text = formatter(model.reads)
+    return None if text is None else Markup(text)
+
+
+def formatter(value: float | int | None) -> str | None:
+    if value is None:
+        return None
+
+    units = [(1e9, "Gb", 1), (1e6, "Mb", 1), (1e3, "Kb", 1), (1, "b", 0)]
+
+    for threshold, unit, decimals in units:
+        if value >= threshold:
+            return f"{value / threshold:.{decimals}f} {unit}"
+
+    # Fallback, Negative values etc
+    return f"{value} b"
 
 
 def view_priority(unused1, unused2, model, unused3):
@@ -785,7 +806,8 @@ class SampleView(BaseView):
     column_formatters = {
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
-        "hifi_yield": view_hifi_yield_in_gb,
+        "reads": view_reads_formatted,
+        "hifi_yield": view_hifi_yield_formatted,
         "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
         "original_ticket": view_ticket_link,
