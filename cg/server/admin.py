@@ -33,21 +33,21 @@ class BaseView(ModelView):
 
 def view_hifi_yield_formatted(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
-    text = formatter(model.hifi_yield)
+    text = formatter_si_prefix_base_pairs(model.hifi_yield)
     return None if text is None else Markup(text)
 
 
 def view_reads_formatted(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
-    text = formatter(model.reads)
+    text = formatter_si_prefix_base_pairs(model.reads)
     return None if text is None else Markup(text)
 
 
-def formatter(value: float | int | None) -> str | None:
+def formatter_si_prefix_base_pairs(value: float | int | None) -> str | None:
     if value is None:
         return None
 
-    units = [(1e9, "Gb", 1), (1e6, "Mb", 1), (1e3, "Kb", 1), (1, "b", 0)]
+    units = [(1e12, "Tb", 1), (1e9, "Gb", 1), (1e6, "Mb", 1), (1e3, "kb", 1), (1, "b", 0)]
 
     for threshold, unit, decimals in units:
         if value >= threshold:
