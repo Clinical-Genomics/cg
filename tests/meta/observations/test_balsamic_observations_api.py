@@ -567,11 +567,6 @@ def test_delete_case_panel_without_loqusdb_api():
         ],
     )
     store.get_case_by_internal_id = Mock(return_value=case)
-    bed: Bed = create_autospec(Bed)
-    bed.name = "Panel without LoqusDB API"
-    store.get_bed_version_by_short_name_strict = Mock(
-        return_value=create_autospec(BedVersion, bed=bed)
-    )
 
     # GIVEN a BalsamicObservationsAPI
     balsamic_observations_api = BalsamicObservationsAPI(
