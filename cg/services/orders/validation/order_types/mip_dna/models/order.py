@@ -1,5 +1,3 @@
-from typing import cast
-
 from pydantic import Discriminator, Tag
 from typing_extensions import Annotated
 
@@ -16,11 +14,3 @@ OldCase = Annotated[ExistingCase, Tag("existing")]
 class MIPDNAOrder(OrderWithCases[MIPDNACase]):
     cases: list[Annotated[NewCase | OldCase, Discriminator(has_internal_id)]]
     delivery_type: MIPDNADeliveryType
-
-    @property
-    def enumerated_new_cases(self) -> list[tuple[int, MIPDNACase]]:
-        cases: list[tuple[int, MIPDNACase]] = []
-        for case_index, case in self.enumerated_cases:
-            if isinstance(case, MIPDNACase):
-                cases.append((case_index, case))
-        return cases

@@ -14,11 +14,3 @@ OldCase = Annotated[ExistingCase, Tag("existing")]
 class BalsamicOrder(OrderWithCases[BalsamicCase]):
     cases: list[Annotated[NewCase | OldCase, Discriminator(has_internal_id)]]
     delivery_type: BalsamicDeliveryType
-
-    @property
-    def enumerated_new_cases(self) -> list[tuple[int, BalsamicCase | ExistingCase]]:
-        cases: list[tuple[int, BalsamicCase | ExistingCase]] = []
-        for case_index, case in self.enumerated_cases:
-            if case.is_new:
-                cases.append((case_index, case))
-        return cases

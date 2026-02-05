@@ -16,7 +16,6 @@ from cg.services.orders.validation.errors.case_errors import (
     RepeatedGenePanelsError,
     SamplesNotRelatedError,
 )
-from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.order_types.balsamic_umi.models.order import BalsamicUmiOrder
@@ -69,8 +68,8 @@ def validate_case_internal_ids_exist(
 ) -> list[CaseDoesNotExistError]:
     errors: list[CaseDoesNotExistError] = []
     for case_index, case in order.enumerated_existing_cases:
-        case: Case | None = store.get_case_by_internal_id(case.internal_id)
-        if not case:
+        db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
+        if not db_case:
             error = CaseDoesNotExistError(case_index=case_index)
             errors.append(error)
     return errors
@@ -163,7 +162,9 @@ def validate_existing_cases_have_an_affected_sample(
 ) -> list[ExistingCaseWithoutAffectedSampleError]:
     errors: list[ExistingCaseWithoutAffectedSampleError] = []
     for case_index, case in order.enumerated_existing_cases:
-        db_case: DbCase = store.get_case_by_internal_id(case.internal_id)
+        db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
+        if not db_case:  # Error should be returned elsewhere
+            continue
         if all(link.status != StatusEnum.affected for link in db_case.links):
             error = ExistingCaseWithoutAffectedSampleError(case_index=case_index)
             errors.append(error)
