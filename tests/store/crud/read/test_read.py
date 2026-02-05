@@ -348,20 +348,6 @@ def test_get_bed_version_by_file_name(base_store: Store, bed_version_file_name: 
     assert bed_version.filename == bed_version_file_name
 
 
-def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name: str):
-    """Test function to return the bed version by short name."""
-
-    # GIVEN a store with bed versions records
-
-    # WHEN getting the query for the bed versions
-    bed_version: BedVersion = base_store.get_bed_version_by_short_name(
-        bed_version_short_name=bed_version_short_name
-    )
-
-    # THEN return a bed version with the supplied bed version short name
-    assert bed_version.shortname == bed_version_short_name
-
-
 def test_get_bed_version_by_short_name_and_genome_version_strict_success(store: Store):
     # GIVEN a store with three bed versions
     bed_hg19: Bed = store.add_bed("bed_hg19")

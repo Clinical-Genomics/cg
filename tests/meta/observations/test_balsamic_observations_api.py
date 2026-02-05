@@ -270,7 +270,9 @@ def test_is_panel_allowed_no_bed_version(cg_context: CGConfig):
     case: Case = create_autospec(Case, internal_id="case_id", samples=[sample])
 
     # GIVEN that the panel set in LIMS does not match any bed versions
-    store.get_bed_version_by_short_name = Mock(return_value=None)
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
+        side_effect=BedVersionNotFoundError
+    )
     balsamic_observations_api.store = store
 
     # WHEN calling is_panel_allowed_for_observations_upload
@@ -447,9 +449,6 @@ def test_panel_upload(
     bed = create_autospec(Bed)
     bed.name = panel
     store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
-        return_value=create_autospec(BedVersion, bed=bed, filename="file.bed")
-    )
-    store.get_bed_version_by_short_name = Mock(
         return_value=create_autospec(BedVersion, bed=bed, filename="file.bed")
     )
     store_commit = store.commit_to_store = Mock()
