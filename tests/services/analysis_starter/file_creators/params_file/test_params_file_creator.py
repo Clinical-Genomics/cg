@@ -5,7 +5,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from cg.apps.lims.api import LimsAPI
-from cg.constants.constants import Workflow
+from cg.constants.constants import BedVersionGenomeVersion, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
     raredisease,
@@ -47,10 +47,13 @@ def test_raredisease_params_file_creator(
     store_mock: Store = create_autospec(Store)
     store_mock.get_samples_by_case_id = Mock(return_value=[super_sample])
     store_mock.get_case_by_internal_id_strict = Mock(return_value=case)
-    store_mock.get_bed_version_by_short_name_strict = lambda short_name: (
-        create_autospec(BedVersion, filename="bed_version.bed")
-        if short_name == "target_bed_shortname_123"
-        else create_autospec(BedVersion)
+    store_mock.get_bed_version_by_short_name_and_genome_version_strict = (
+        lambda short_name, genome_version: (
+            create_autospec(BedVersion, filename="bed_version.bed")
+            if short_name == "target_bed_shortname_123"
+            and genome_version == BedVersionGenomeVersion.HG38
+            else create_autospec(BedVersion)
+        )
     )
 
     # GIVEN that Lims returns a bed shortname
