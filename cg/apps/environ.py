@@ -1,4 +1,4 @@
-""" Ask questions to the shell """
+"""Ask questions to the shell"""
 
 import getpass
 import os

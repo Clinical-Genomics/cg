@@ -1,24 +1,21 @@
 import logging
-from pathlib import Path
 import re
+from pathlib import Path
 
-from cg.constants.constants import ReadDirection, FileFormat, FileExtensions
+from cg.constants.constants import FileExtensions, ReadDirection
+from cg.services.deliver_files.file_fetcher.models import SampleFile
+from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
 from cg.services.deliver_files.file_formatter.files.abstract import FileFormatter
 from cg.services.deliver_files.file_formatter.files.models import FastqFile
+from cg.services.deliver_files.file_formatter.files.sample_service import FileManager
 from cg.services.deliver_files.file_formatter.path_name.abstract import PathNameFormatter
-
+from cg.services.deliver_files.file_formatter.path_name.nested_structure import (
+    NestedStructurePathFormatter,
+)
 from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
     FastqConcatenationService,
 )
 from cg.services.fastq_concatenation_service.utils import generate_concatenated_fastq_delivery_path
-from cg.services.deliver_files.file_fetcher.models import SampleFile
-from cg.services.deliver_files.file_formatter.destination.models import FormattedFile
-from cg.services.deliver_files.file_formatter.files.sample_service import (
-    FileManager,
-)
-from cg.services.deliver_files.file_formatter.path_name.nested_structure import (
-    NestedStructurePathFormatter,
-)
 from cg.utils.files import get_all_files_in_directory_tree
 
 LOG = logging.getLogger(__name__)
@@ -279,7 +276,7 @@ class SampleFileConcatenationFormatter(FileFormatter):
 
     @staticmethod
     def _validate_sample_fastq_file_share_same_directory(
-        sample_fastq_files: dict[str, list[FastqFile]]
+        sample_fastq_files: dict[str, list[FastqFile]],
     ) -> None:
         """
         Assert that all fastq files for a sample share the same directory.

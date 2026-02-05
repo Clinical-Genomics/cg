@@ -1808,21 +1808,20 @@ class ReadHandler(BaseHandler):
             sequencing_metrics = sequencing_metrics.filter(RunDevice.internal_id.in_(smrt_cell_ids))
         return sequencing_metrics.all()
 
-    def get_pacbio_smrt_cell_metrics_by_run_name(
-        self, run_name: str
-    ) -> list[PacbioSMRTCellMetrics]:
+    def get_pacbio_smrt_cell_metrics_by_run_id(self, run_id: str) -> list[PacbioSMRTCellMetrics]:
         """
-        Fetches data from PacbioSequencingRunDTO filtered on run name.
+        Fetches data from PacbioSMRTCellMetrics filtered on run ID.
         Raises:
-            EntryNotFoundError if no sequencing runs are found for the run name
+            EntryNotFoundError if no SMRT cell metrics are found for the run ID
         """
-        runs: Query = self._get_query(table=PacbioSMRTCellMetrics).join(
-            PacbioSMRTCellMetrics.sequencing_run
+        metrics: Query = (
+            self._get_query(table=PacbioSMRTCellMetrics)
+            .join(PacbioSMRTCellMetrics.sequencing_run)
+            .filter(PacbioSequencingRun.run_id == run_id)
         )
-        runs = runs.filter(PacbioSequencingRun.run_name == run_name)
-        if runs.count() == 0:
-            raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
-        return runs.all()
+        if metrics.count() == 0:
+            raise EntryNotFoundError(f"Could not find any SMRT Cell metrics for run {run_id}")
+        return metrics.all()
 
     def get_pacbio_sequencing_runs(
         self, page: int = 0, page_size: int = 0
@@ -1856,7 +1855,7 @@ class ReadHandler(BaseHandler):
 
     def get_pacbio_sequencing_run_by_id(self, id: int):
         """
-        Get Pacbio Sequencing run by id.
+        Get Pacbio Sequencing run by database id.
         Raises:
             PacbioSequencingRunNotFoundError: If no Pacbio sequencing run is found with the given id.
         """
@@ -1871,15 +1870,15 @@ class ReadHandler(BaseHandler):
                 f"Pacbio Sequencing run with id {id} was not found in the database."
             )
 
-    def get_pacbio_sequencing_run_by_run_name(self, run_name: str) -> PacbioSequencingRun:
+    def get_pacbio_sequencing_run_by_run_id(self, run_id: str) -> PacbioSequencingRun:
         """
-        Get Pacbio Sequencing run by run name.
         Raises:
-            PacbioSequencingRunNotFoundError: If no Pacbio sequencing run is found with the given run name.
+            PacbioSequencingRunNotFoundError: If no Pacbio sequencing run is found with the given
+            run ID.
         """
         try:
-            return self._get_query(table=PacbioSequencingRun).filter_by(run_name=run_name).one()
+            return self._get_query(table=PacbioSequencingRun).filter_by(run_id=run_id).one()
         except sqlalchemy.orm.exc.NoResultFound:
             raise PacbioSequencingRunNotFoundError(
-                f"Pacbio Sequencing run with run_name {run_name} was not found in the database."
+                f"Pacbio Sequencing run with ID {run_id} was not found in the database."
             )

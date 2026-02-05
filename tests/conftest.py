@@ -958,7 +958,7 @@ def file_does_not_exist() -> Path:
 # Compression fixtures
 
 
-@pytest.fixture(name="run_name")
+@pytest.fixture
 def run_name() -> str:
     """Return the name of a fastq run."""
     return "fastq_run"

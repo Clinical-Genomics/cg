@@ -164,6 +164,12 @@ class GenomeVersion(StrEnum):
     HG38 = "hg38"
 
 
+class BedVersionGenomeVersion(StrEnum):
+    HG19 = "hg19"
+    HG38 = "hg38"
+    CFAM3 = "cfam3"
+
+
 class SampleType(StrEnum):
     TUMOR: str = "tumor"
     NORMAL: str = "normal"

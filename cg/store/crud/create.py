@@ -192,7 +192,7 @@ class CreateMixin(ReadHandler):
     def add_bed_version(self, bed: Bed, version: int, filename: str, shortname: str) -> BedVersion:
         """Build a new bed version record."""
         bed_version: BedVersion = BedVersion(
-            version=version, filename=filename, shortname=shortname
+            version=version, filename=filename, shortname=shortname, genome_version="hg19"
         )
         bed_version.bed = bed
         return bed_version
@@ -513,17 +513,19 @@ class CreateMixin(ReadHandler):
         """
         if (
             self._get_query(table=PacbioSequencingRun)
-            .filter(PacbioSequencingRun.run_name == pacbio_sequencing_run_dto.run_name)
+            .filter(PacbioSequencingRun.run_id == pacbio_sequencing_run_dto.run_id)
             .first()
         ):
             raise PacbioSequencingRunAlreadyExistsError(
-                message=f"{pacbio_sequencing_run_dto.run_name} already exists."
+                message=f"{pacbio_sequencing_run_dto.run_id} already exists."
             )
         else:
-            LOG.debug(f"Creating Pacbio Sequencing Run for {pacbio_sequencing_run_dto.run_name}")
+            LOG.debug(f"Creating Pacbio Sequencing Run for {pacbio_sequencing_run_dto.run_id}")
             sequencing_run = PacbioSequencingRun(
                 instrument_name=pacbio_sequencing_run_dto.instrument_name,
+                run_id=pacbio_sequencing_run_dto.run_id,
                 run_name=pacbio_sequencing_run_dto.run_name,
+                unique_id=pacbio_sequencing_run_dto.unique_id,
             )
             self.add_item_to_store(sequencing_run)
             return sequencing_run

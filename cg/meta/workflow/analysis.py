@@ -781,7 +781,7 @@ class AnalysisAPI(MetaAPI):
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
     ) -> CoverageMetrics | None:
-        """Return sample coverage data from Chanjo2."""
+        """Return sample coverage data from Chanjo or Chanjo2."""
         raise NotImplementedError
 
     def get_scout_upload_case_tags(self):
