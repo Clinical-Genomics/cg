@@ -27,7 +27,7 @@ class OrderWithCases(Order, Generic[CaseType]):
     def enumerated_new_cases(self) -> list[tuple[int, CaseType]]:
         cases: list[tuple[int, CaseType]] = []
         for case_index, case in self.enumerated_cases:
-            if case.is_new:
+            if not isinstance(case, ExistingCase):
                 cases.append((case_index, case))
         return cases
 
