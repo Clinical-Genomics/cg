@@ -17,7 +17,12 @@ from cg.constants.observations import (
     LoqusdbInstance,
 )
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import CaseNotFoundError, LoqusdbDeleteCaseError, LoqusdbDuplicateRecordError
+from cg.exc import (
+    BedVersionNotFoundError,
+    CaseNotFoundError,
+    LoqusdbDeleteCaseError,
+    LoqusdbDuplicateRecordError,
+)
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -96,10 +101,13 @@ class BalsamicObservationsAPI(ObservationsAPI):
         if self._is_panel_upload(case):
             sample: Sample = case.samples[0]
             panel_short_name: str | None = self.lims_api.capture_kit(sample.internal_id)
-            bed_version: BedVersion | None = self.store.get_bed_version_by_short_name(
-                panel_short_name
-            )
-            if not bed_version:
+            try:
+                bed_version: BedVersion = (
+                    self.store.get_bed_version_by_short_name_and_genome_version_strict(
+                        short_name=panel_short_name, genome_version=BedVersionGenomeVersion.HG19
+                    )
+                )
+            except BedVersionNotFoundError:
                 LOG.warning(
                     f"No bed version found for LIMS panel {panel_short_name} for sample "
                     f"{sample.internal_id} in case {case.internal_id}"

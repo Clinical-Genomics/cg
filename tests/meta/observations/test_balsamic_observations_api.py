@@ -151,7 +151,9 @@ def test_is_panel_allowed_for_observations_upload_bed_name(
     case: Case = create_autospec(Case, internal_id="case_id", samples=[sample])
     bed: Bed = create_autospec(Bed)
     bed.name = bed_name
-    store.get_bed_version_by_short_name = Mock(return_value=create_autospec(BedVersion, bed=bed))
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
+        return_value=create_autospec(BedVersion, bed=bed)
+    )
     balsamic_observations_api.store = store
 
     # WHEN calling is_panel_allowed_for_observations_upload
