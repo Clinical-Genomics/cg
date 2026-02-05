@@ -65,4 +65,4 @@ For development, use `poetry install --all-extras` to install development depend
 [black-image]: https://img.shields.io/badge/code%20style-black-000000.svg
 [black-url]: https://github.com/psf/black
 
-Old codes find the light, Newer maps trace hidden flaws, Healing starts with data.
+Old codes find the light, Newer maps trace hidden flaws, Healing with data.
