@@ -282,32 +282,67 @@
   id: SAMPLEID
   path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz
   step: methylation_pileup
-  tag: hap1
+  tag: modkit_hap1
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_1.bed.gz.tbi
   step: methylation_pileup
-  tag: hap1_index
+  tag: modkit_hap1_index
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz
   step: methylation_pileup
-  tag: hap2
+  tag: modkit_hap2
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_2.bed.gz.tbi
   step: methylation_pileup
-  tag: hap2_index
+  tag: modkit_hap2_index
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz
   step: methylation_pileup
-  tag: ungrouped
+  tag: modkit_ungrouped
 - format: bed
   id: SAMPLEID
   path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_modkit_pileup_ungrouped.bed.gz.tbi
   step: methylation_pileup
-  tag: ungrouped_index
+  tag: modkit_ungrouped_index
+- format: bed
+  id: SAMPLEID
+  path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_pbcpgtools.hap1.bed.gz
+  step: methylation_pileup
+  tag: methbat_hap1
+- format: bed
+  id: SAMPLEID
+  path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_pbcpgtools.hap1.bed.gz.tbi
+  step: methylation_pileup
+  tag: methbat_hap1_index
+- format: bed
+  id: SAMPLEID
+  path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_pbcpgtools.hap2.bed.gz
+  step: methylation_pileup
+  tag: methbat_hap2
+- format: bed
+  id: SAMPLEID
+  path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_pbcpgtools.hap2.bed.gz.tbi
+  step: methylation_pileup
+  tag: methbat_hap2_index
+- format: bed
+  id: SAMPLEID
+  path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_pbcpgtools.combined.bed.gz
+  step: methylation_pileup
+  tag: methbat_combined
+- format: bed
+  id: SAMPLEID
+  path: PATHTOCASE/methylation/pileup/SAMPLEID/SAMPLEID_pbcpgtools.combined.bed.gz.tbi
+  step: methylation_pileup
+  tag: methbat_combined_index
+- format: tsv
+  id: SAMPLEID
+  path: PATHTOCASE/methylation/profile/SAMPLEID/SAMPLEID_methbat_profile.tsv
+  step: methylation_calling
+  tag: methbat_profile
 - format: meta
   id: SAMPLEID
   path: PATHTOCASE/qc/mosdepth/SAMPLEID/SAMPLEID.per-base.d4

@@ -1,14 +1,9 @@
-""" Tests for cg.meta.upload.mutacc module """
+"""Tests for cg.meta.upload.mutacc module"""
 
 import os
 
 from cg.apps.scout.scout_export import ScoutExportCase
-from cg.meta.upload.mutacc import (
-    UploadToMutaccAPI,
-    resolve_parent,
-    resolve_phenotype,
-    resolve_sex,
-)
+from cg.meta.upload.mutacc import UploadToMutaccAPI, resolve_parent, resolve_phenotype, resolve_sex
 
 
 def test_instantiate():

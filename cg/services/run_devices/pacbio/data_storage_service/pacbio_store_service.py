@@ -41,8 +41,8 @@ class PacBioStoreService(PostProcessingStoreService):
         try:
             return self.store.create_pacbio_sequencing_run(sequencing_run_dto)
         except PacbioSequencingRunAlreadyExistsError:
-            LOG.debug(f"Sequencing run {sequencing_run_dto.run_name} already exists")
-            return self.store.get_pacbio_sequencing_run_by_run_name(sequencing_run_dto.run_name)
+            LOG.debug(f"Sequencing run {sequencing_run_dto.run_id} already exists")
+            return self.store.get_pacbio_sequencing_run_by_run_id(sequencing_run_dto.run_id)
 
     def _create_pacbio_smrt_cell_metrics(
         self,
@@ -108,5 +108,5 @@ class PacBioStoreService(PostProcessingStoreService):
                 f"Dry run, no entries will be added to database for SMRT cell {run_data.full_path}."
             )
             return
-        LOG.debug(f"Data stored in statusDB for run {run_data.sequencing_run_name}")
+        LOG.debug(f"Data stored in statusDB for run {run_data.run_id}")
         self.store.commit_to_store()
