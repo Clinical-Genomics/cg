@@ -28,6 +28,26 @@
   path: PATHTOCASE/assembly/sample/SAMPLEID/SAMPLEID_aligned_assembly.bam.bai
   step: assembly
   tag: assembly_aligned_index
+- format: bed
+  id: SAMPLEID
+  path: PATHTOCASE/gens/SAMPLEID/SAMPLEID.baf.bed.gz
+  step: gens_generatedata
+  tag: baf
+- format: bed
+  id: SAMPLEID
+  path: PATHTOCASE/gens/SAMPLEID/SAMPLEID.baf.bed.gz.tbi
+  step: gens_generatedata
+  tag: baf_index
+- format: bed
+  id: SAMPLEID
+  path: PATHTOCASE/gens/SAMPLEID/SAMPLEID.cov.bed.gz
+  step: gens_generatedata
+  tag: cov
+- format: bed
+  id: SAMPLEID
+  path: PATHTOCASE/gens/SAMPLEID/SAMPLEID.cov.bed.gz.tbi
+  step: gens_generatedata
+  tag: cov_index
 - format: png
   id: SAMPLEID
   path: PATHTOCASE/images/chromograph/sample/SAMPLEID/SAMPLEID_chromograph_coverage_chr1.png
@@ -545,12 +565,12 @@
   tag: bigwig
 - format: meta
   id: SAMPLEID
-  path: PATHTOCASE/qc/phasing_stats/SAMPLEID/SAMPLEID_stats.blocks.gtf.gz
+  path: PATHTOCASE/qc/phasing_stats/SAMPLEID/SAMPLEID_whatshap_stats.gtf.gz
   step: phase_blocks
   tag: gtf
 - format: meta
   id: SAMPLEID
-  path: PATHTOCASE/qc/phasing_stats/SAMPLEID/SAMPLEID_stats.blocks.gtf.gz.tbi
+  path: PATHTOCASE/qc/phasing_stats/SAMPLEID/SAMPLEID_whatshap_stats.gtf.gz.tbi
   step: phase_blocks
   tag: gtf_index
 - format: meta
