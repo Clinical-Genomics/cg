@@ -12,12 +12,12 @@ from cg.services.orders.validation.models.sample import Sample
 
 CaseType = TypeVar("CaseType", bound=Case)
 
-NewCaseType = Annotated[CaseType, Tag("new")]
+NewCase = Annotated[CaseType, Tag("new")]
 ExistingCaseType = Annotated[ExistingCase, Tag("existing")]
 
 
 class OrderWithCases(Order, Generic[CaseType]):
-    cases: list[Annotated[NewCaseType | ExistingCaseType, Discriminator(has_internal_id)]]
+    cases: list[Annotated[NewCase | ExistingCaseType, Discriminator(has_internal_id)]]
 
     @property
     def enumerated_cases(self) -> enumerate[CaseType | ExistingCase]:
