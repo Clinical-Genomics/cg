@@ -91,7 +91,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         if target_bed_shortname:
             bed_version: BedVersion = (
                 self.store.get_bed_version_by_short_name_and_genome_version_strict(
-                    short_name=target_bed_shortname, genome_version=BedVersionGenomeVersion.HG38
+                    short_name=target_bed_shortname, genome_version=BedVersionGenomeVersion.HG19
                 )
             )
             return bed_version.filename
