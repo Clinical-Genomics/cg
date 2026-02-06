@@ -10,16 +10,15 @@ from housekeeper.store.store import Store as HousekeeperStore
 from pytest import TempPathFactory
 
 from cg.apps.tb.api import IDTokenCredentials
-from cg.constants.constants import Workflow
 from cg.constants.process import EXIT_SUCCESS
 from cg.store import database as cg_database
 from cg.store.store import Store
 from tests.integration.utils import IntegrationTestPaths, create_formatted_config
 
 
-@pytest.fixture(autouse=True)
-def current_workflow() -> Workflow:
-    raise NotImplementedError("Please add a current_workflow fixture to your integration test")
+@pytest.fixture()
+def root_dir(tmp_path_factory: TempPathFactory):
+    return tmp_path_factory.mktemp("root_dir")
 
 
 @pytest.fixture(autouse=True)
@@ -71,20 +70,17 @@ def housekeeper_db(
 
 @pytest.fixture
 def test_run_paths(
-    status_db_uri: str,
     housekeeper_db_uri: str,
-    tmp_path_factory: TempPathFactory,
-    current_workflow,
+    root_dir: Path,
+    status_db_uri: str,
 ) -> IntegrationTestPaths:
-    test_root_dir: Path = tmp_path_factory.mktemp(current_workflow)
-
     config_file_path: Path = create_formatted_config(
         status_db_uri=status_db_uri,
         housekeeper_db_uri=housekeeper_db_uri,
-        test_root_dir=test_root_dir.as_posix(),
+        test_root_dir=root_dir.as_posix(),
     )
 
-    return IntegrationTestPaths(cg_config_file=config_file_path, test_root_dir=test_root_dir)
+    return IntegrationTestPaths(cg_config_file=config_file_path, test_root_dir=root_dir)
 
 
 @pytest.fixture
