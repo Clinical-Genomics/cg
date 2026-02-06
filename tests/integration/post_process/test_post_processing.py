@@ -96,6 +96,9 @@ def test_post_processing(
         f"{smrt_cell_id}/{today}/m84202_240522_155607_s2.ccs_report.json",
     ] == smrtcell_files
 
+    # THEN a file was created to mark the run as validated
+    assert Path(test_root_dir, "pacbio_data_dir", run_id, "1_B01", "is_valid").is_file()
+
     # THEN a file was created to mark post processing as completed
     assert Path(
         test_root_dir, "pacbio_data_dir", run_id, "1_B01", "post_processing_completed"
