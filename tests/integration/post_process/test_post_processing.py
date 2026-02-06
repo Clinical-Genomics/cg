@@ -49,8 +49,6 @@ def test_post_processing(
         [
             "--config",
             config_path.as_posix(),
-            "-l",
-            "DEBUG",
             "post-process",
             "all",
         ],
