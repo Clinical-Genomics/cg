@@ -10,7 +10,7 @@ NewSample = Annotated[MIPDNASample, Tag("new")]
 OldSample = Annotated[ExistingSample, Tag("existing")]
 
 
-class MIPDNACase(Case):
+class MIPDNACase(Case[MIPDNASample]):
     cohorts: list[str] | None = None
     panels: list[str]
     synopsis: str | None = None
