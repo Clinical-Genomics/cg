@@ -154,13 +154,19 @@ def pacbio_sequencing_runs_store(
     )
     sequencing_run = base_store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_id=pacbio_run_id_to_fetch
+            instrument_name=RevioNames.BETTY,
+            run_id=pacbio_run_id_to_fetch,
+            run_name="run-name",
+            unique_id="unique-id",
         )
     )
 
     sequencing_run_not_to_fetch = base_store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_id=pacbio_run_id_not_to_fetch
+            instrument_name=RevioNames.BETTY,
+            run_id=pacbio_run_id_not_to_fetch,
+            run_name="run-name-2",
+            unique_id="unique-id-2",
         )
     )
 

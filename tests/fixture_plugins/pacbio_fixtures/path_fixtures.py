@@ -136,6 +136,12 @@ def pacbio_barcoded_smrtlink_datasets_report_file(pacbio_barcoded_run_reports_di
 
 
 @pytest.fixture
+def pacbio_barcoded_metadata_file(pacbio_barcoded_smrt_cell_dir_1_c01: Path) -> Path:
+    metadata_dir = Path(pacbio_barcoded_smrt_cell_dir_1_c01, PacBioDirsAndFiles.METADATA_DIR)
+    return Path(metadata_dir, "m84202_240913_162115_s3.metadata.xml")
+
+
+@pytest.fixture
 def pac_bio_transferdone_file_1_b01(pac_bio_run_metadata_dir_1_b01: Path) -> Path:
     """Return the path to the PacBio SMRTLink datasets report file."""
     return Path(pac_bio_run_metadata_dir_1_b01, "m84202_240522_155607_s2.transferdone")
@@ -155,6 +161,7 @@ def pacbio_barcoded_report_files_to_parse(
     pacbio_barcoded_loading_report_file: Path,
     pacbio_barcoded_raw_data_report_file: Path,
     pacbio_barcoded_smrtlink_datasets_report_file: Path,
+    pacbio_barcoded_metadata_file: Path,
 ) -> list[Path]:
     """Return the list of PacBio report files to parse."""
     return [
@@ -164,6 +171,7 @@ def pacbio_barcoded_report_files_to_parse(
         pacbio_barcoded_raw_data_report_file,
         pacbio_barcoded_smrtlink_datasets_report_file,
         pacbio_barcoded_ccs_report_file,
+        pacbio_barcoded_metadata_file,
     ]
 
 
