@@ -1,6 +1,7 @@
 """CLI commands to post-process a sequencing run."""
 
 import logging
+import traceback
 
 import rich_click as click
 
@@ -60,7 +61,9 @@ def post_process_all_runs(context: CGConfig, instrument: str, dry_run: bool) -> 
         try:
             run.post_processing_service.post_process(run_full_name=run.name, dry_run=dry_run)
         except Exception as error:
-            LOG.error(f"Could not post-process {run.instrument} run {run.name}: {error}")
+            LOG.error(
+                f"Could not post-process {run.instrument} run {run.name}: {traceback.format_exc()}"
+            )
             exit_success = False
     if not exit_success:
         raise click.Abort
