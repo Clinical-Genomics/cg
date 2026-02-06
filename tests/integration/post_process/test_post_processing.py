@@ -35,10 +35,13 @@ def test_post_processing(
 
     helpers.add_sample(store=status_db, internal_id=sample_id)
 
-    shutil.copytree(
-        Path("tests", "fixtures", "devices", "pacbio", "SMRTcells", run_id),
-        Path(test_root_dir, "pacbio_data_dir", run_id),
-    )
+    src = Path("tests", "fixtures", "devices", "pacbio", "SMRTcells", run_id).resolve()
+    dst = Path(test_root_dir, "pacbio_data_dir", run_id).resolve()
+
+    print(f"DEBUG: Copying from {src} (exists: {src.exists()})")
+    print(f"DEBUG: Copying to {dst}")
+
+    shutil.copytree(src, dst, dirs_exist_ok=True)
 
     # WHEN running post-process all
     result: Result = cli_runner.invoke(
