@@ -1,12 +1,14 @@
 import shutil
+from datetime import date
 from pathlib import Path
+from typing import cast
 
 import pytest
 from click.testing import CliRunner, Result
 from housekeeper.store.store import Store as HousekeeperStore
 
 from cg.cli.base import base
-from cg.store.models import PacbioSequencingRun, PacbioSMRTCellMetrics
+from cg.store.models import PacbioSequencingRun, PacbioSMRTCell, PacbioSMRTCellMetrics
 from cg.store.store import Store
 from tests.integration.utils import IntegrationTestPaths
 from tests.store_helpers import StoreHelpers
@@ -62,13 +64,30 @@ def test_post_processing(
     smrt_cell_metrics: list[PacbioSMRTCellMetrics] = created_sequencing_run.smrt_cell_metrics
 
     assert len(smrt_cell_metrics) == 1
-    assert smrt_cell_metrics[0].barcoded_hifi_mean_read_length == 14477
-    assert smrt_cell_metrics[0].device.samples[0].internal_id == sample_id
+    metrics: PacbioSMRTCellMetrics = smrt_cell_metrics[0]
+    smrt_cell = cast(PacbioSMRTCell, metrics.device)
 
+    assert metrics.barcoded_hifi_mean_read_length == 14477
+    assert metrics.device.samples[0].internal_id == sample_id
+
+    today = today = date.today()
     # THEN the BAM file was stored in the Sample housekeeper bundle
-    files = housekeeper_db.get_files(bundle_name=sample_id).all()
-    assert "m84202_240522_155607_s2.hifi_reads.bc2004.bam" in files[0].path
+    sample_files = housekeeper_db.get_files(bundle_name=sample_id).all()
+    assert (
+        f"ACC15752A3/{today}/m84202_240522_155607_s2.hifi_reads.bc2004.bam" == sample_files[0].path
+    )
+
+    smrtcell_files = [
+        file.path for file in housekeeper_db.get_files(bundle_name=smrt_cell.internal_id).all()
+    ]
+    assert [
+        f"EA094869/{today}/barcodes.report.json",
+        f"EA094869/{today}/control.report.json",
+        f"EA094869/{today}/loading.report.json",
+        f"EA094869/{today}/raw_data.report.json",
+        f"EA094869/{today}/smrtlink-datasets.json",
+        f"EA094869/{today}/m84202_240522_155607_s2.ccs_report.json",
+    ] == smrtcell_files
 
     # TODO:
-    # assert smrtcell bundles
     # assert post processing complete file was created
