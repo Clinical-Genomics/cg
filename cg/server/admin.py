@@ -33,14 +33,8 @@ class BaseView(ModelView):
 
 def view_hifi_yield_formatted(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
-    text = formatter_si_prefix_base_pairs(model.hifi_yield)
-    return None if text is None else Markup(text)
-
-
-def view_reads_formatted(unused1, unused2, model, unused3):
-    del unused1, unused2, unused3
-    text = formatter_si_prefix_base_pairs(model.reads)
-    return None if text is None else Markup(text)
+    formatted_number = formatter_si_prefix_base_pairs(model.hifi_yield)
+    return None if formatted_number is None else Markup(formatted_number)
 
 
 def formatter_si_prefix_base_pairs(value: float | int | None) -> str | None:
@@ -48,13 +42,24 @@ def formatter_si_prefix_base_pairs(value: float | int | None) -> str | None:
         return None
 
     units = [(1e12, "Tb", 1), (1e9, "Gb", 1), (1e6, "Mb", 1), (1e3, "kb", 1), (1, "b", 0)]
-
     for threshold, unit, decimals in units:
         if value >= threshold:
             return f"{value / threshold:.{decimals}f} {unit}"
 
-    # Fallback, Negative values etc
+    # Fallback
     return f"{value} b"
+
+
+def view_reads_formatted(unused1, unused2, model, unused3):
+    del unused1, unused2, unused3
+    formatted_number = fromat_large_number_space(model.reads)
+    return None if formatted_number is None else Markup(formatted_number)
+
+
+def fromat_large_number_space(value: float | int | None) -> str | None:
+    if value is None:
+        return None
+    return f"{value:,d}"
 
 
 def view_priority(unused1, unused2, model, unused3):
