@@ -36,7 +36,7 @@ def test_post_processing(
     helpers.add_sample(store=status_db, internal_id=sample_id)
 
     shutil.copytree(
-        Path("tests/fixtures/devices/pacbio/SMRTcells/", run_id),
+        Path("tests", "fixtures", "devices", "pacbio", "SMRTcells", run_id),
         Path(test_root_dir, "pacbio_data_dir", run_id),
     )
 
