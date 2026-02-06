@@ -26,6 +26,7 @@ from cg.services.orders.validation.rules.case.utils import (
     contains_duplicates,
     does_case_exist,
     get_case_prep_categories,
+    get_sample_name,
     is_case_not_from_collaboration,
     is_double_normal,
     is_double_tumour,
@@ -193,10 +194,15 @@ def validate_case_contains_related_samples(
         if is_single_sample_case(case=case, store=store):  # This should always pass
             continue
         case_has_error = False
+        isolated_samples: list[str] = []
         for _, sample in case.enumerated_samples:
             if not is_sample_related_in_case(sample=sample, case=case, store=store):
                 case_has_error = True
+                isolated_samples.append(get_sample_name(sample=sample, store=store))
         if case_has_error:
-            error = SamplesNotRelatedError(case_index=case_index)
+            error = SamplesNotRelatedError(
+                case_index=case_index,
+                message=f"Samples {isolated_samples} are not related to other samples within the case.",
+            )
             errors.append(error)
     return errors

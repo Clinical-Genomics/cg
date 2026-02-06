@@ -81,4 +81,4 @@ class MultiplePrepCategoriesError(CaseError):
 
 class SamplesNotRelatedError(CaseError):
     field: str = "sample_errors"
-    message: str = "Every sample in the case needs to be related to at least one other sample."
+    message: str
