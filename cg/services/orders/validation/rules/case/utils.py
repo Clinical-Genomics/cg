@@ -114,15 +114,18 @@ def is_sample_related_in_case(
     store: Store,
 ):
     if not (sample.mother or sample.father):
-        sample_name = get_sample_name(sample=sample, store=store)
-        if all((sample_name not in [sample.mother, sample.father] for sample in case.samples)):
+        sample_name: str = get_sample_name(sample=sample, store=store)
+        if any(
+            sample_name in [sample_in_case.mother, sample_in_case.father]
+            for sample_in_case in case.samples
+        ):
             return False
     return True
 
 
 def get_sample_name(sample: MIPDNASample | RarediseaseSample | ExistingSample, store: Store) -> str:
     if isinstance(sample, ExistingSample):
-        sample_name = store.get_sample_by_internal_id_strict(sample.internal_id).name
+        sample_name: str = store.get_sample_by_internal_id_strict(sample.internal_id).name
     else:
-        sample_name = sample.name
+        sample_name: str = sample.name
     return sample_name
