@@ -31,7 +31,7 @@ class BaseView(ModelView):
         return redirect(url_for("google.login", next=request.url))
 
 
-def view_hifi_yield_formatted(unused1, unused2, model, unused3):
+def view_hifi_yield_si_prefix_formatted(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
     formatted_number = formatter_si_prefix_base_pairs(model.hifi_yield)
     return None if formatted_number is None else Markup(formatted_number)
@@ -41,7 +41,7 @@ def formatter_si_prefix_base_pairs(value: float | int | None) -> str | None:
     if value is None:
         return None
 
-    units = [(1e12, "Tb", 1), (1e9, "Gb", 1), (1e6, "Mb", 1), (1e3, "kb", 1), (1, "b", 0)]
+    units = [(1e12, "Tb", 2), (1e9, "Gb", 2), (1e6, "Mb", 2), (1e3, "kb", 2), (1, "b", 0)]
     for threshold, unit, decimals in units:
         if value >= threshold:
             return f"{value / threshold:.{decimals}f} {unit}"
@@ -50,13 +50,13 @@ def formatter_si_prefix_base_pairs(value: float | int | None) -> str | None:
     return f"{value} b"
 
 
-def view_reads_formatted(unused1, unused2, model, unused3):
+def view_reads_large_number_comma_formatted(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
-    formatted_number = fromat_large_number_space(model.reads)
+    formatted_number = format_large_number_space(model.reads)
     return None if formatted_number is None else Markup(formatted_number)
 
 
-def fromat_large_number_space(value: float | int | None) -> str | None:
+def format_large_number_space(value: float | int | None) -> str | None:
     if value is None:
         return None
     return f"{value:,d}"
@@ -811,8 +811,8 @@ class SampleView(BaseView):
     column_formatters = {
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
-        "reads": view_reads_formatted,
-        "hifi_yield": view_hifi_yield_formatted,
+        "reads": view_reads_large_number_comma_formatted,
+        "hifi_yield": view_hifi_yield_si_prefix_formatted,
         "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
         "original_ticket": view_ticket_link,
