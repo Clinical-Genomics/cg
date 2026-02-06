@@ -8,7 +8,7 @@ from pydantic import EmailStr
 
 from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
-from cg.constants.constants import GenomeVersion, Workflow
+from cg.constants.constants import BedVersionGenomeVersion, GenomeVersion, Workflow
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.cg_config import BalsamicConfig
@@ -219,7 +219,9 @@ class BalsamicConfigFileCreator:
         short_name: str = override_panel_bed or self.lims_api.get_capture_kit_strict(
             first_sample.internal_id
         )
-        return self.status_db.get_bed_version_by_short_name_strict(short_name)
+        return self.status_db.get_bed_version_by_short_name_and_genome_version_strict(
+            short_name=short_name, genome_version=BedVersionGenomeVersion.HG19
+        )
 
     def _get_pon_file(self, bed_short_name: str | None) -> Path | None:
         if pon_file := self.panel_of_normals.get(bed_short_name):
