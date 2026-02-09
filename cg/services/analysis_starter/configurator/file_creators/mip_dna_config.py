@@ -2,7 +2,12 @@ import logging
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
-from cg.constants.constants import DEFAULT_CAPTURE_KIT, FileExtensions, StatusOptions
+from cg.constants.constants import (
+    DEFAULT_CAPTURE_KIT,
+    BedVersionGenomeVersion,
+    FileExtensions,
+    StatusOptions,
+)
 from cg.constants.tb import AnalysisType
 from cg.io.yaml import write_yaml
 from cg.store.models import BedVersion, Case, CaseSample, Sample
@@ -66,7 +71,11 @@ class MIPDNAConfigFileCreator:
     def _get_bed_file_name(self, bed_flag: str) -> str:
         if bed_flag.endswith(FileExtensions.BED):
             return bed_flag
-        bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(bed_flag)
+        bed_version: BedVersion = (
+            self.store.get_bed_version_by_short_name_and_genome_version_strict(
+                short_name=bed_flag, genome_version=BedVersionGenomeVersion.HG19
+            )
+        )
         return bed_version.filename
 
     def _get_sample_bed_file(self, case: Case, sample: Sample) -> str:
@@ -81,5 +90,9 @@ class MIPDNAConfigFileCreator:
         bed_shortname: str = self.lims_api.get_capture_kit_strict(
             sample.from_sample or sample.internal_id
         )
-        bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(bed_shortname)
+        bed_version: BedVersion = (
+            self.store.get_bed_version_by_short_name_and_genome_version_strict(
+                short_name=bed_shortname, genome_version=BedVersionGenomeVersion.HG19
+            )
+        )
         return bed_version.filename

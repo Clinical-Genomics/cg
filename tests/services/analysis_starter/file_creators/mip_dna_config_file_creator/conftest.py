@@ -130,5 +130,5 @@ def wes_mock_store(case_id: str, wes_sample: Sample) -> Store:
     store.get_case_by_internal_id_strict = Mock(return_value=case)
 
     bed_version: BedVersion = create_autospec(BedVersion, filename="mock_bed_version.bed")
-    store.get_bed_version_by_short_name_strict = Mock(return_value=bed_version)
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(return_value=bed_version)
     return store
