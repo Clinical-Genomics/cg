@@ -35,6 +35,7 @@ def test_post_processing(
 
     helpers.add_sample(store=status_db, internal_id=sample_id)
 
+    # TODO add metadata file and assert that run_id and unique_id was set from it
     shutil.copytree(
         Path("tests", "fixtures", "devices", "pacbio", "SMRTcells", run_id),
         Path(test_root_dir, "pacbio_data_dir", run_id),
@@ -59,7 +60,9 @@ def test_post_processing(
         run_id
     )
 
+    assert created_sequencing_run.run_name == "Run241002"
     assert created_sequencing_run.run_id == run_id
+    assert created_sequencing_run.unique_id == "0ec000fd-0000-0dbb-00bb-00fc00000d00"
     assert created_sequencing_run.instrument_name == "Wilma"
 
     # THEN PacbioSMRTCellMetrics was persisted with the parsed data
@@ -68,7 +71,7 @@ def test_post_processing(
     assert len(smrt_cell_metrics) == 1
     metrics: PacbioSMRTCellMetrics = smrt_cell_metrics[0]
 
-    assert metrics.barcoded_hifi_mean_read_length == 14477
+    assert metrics.barcoded_hifi_mean_read_length == 14728
     assert metrics.device.samples[0].internal_id == sample_id
 
     # THEN a PacbioSMRTCell was persisted with the parsed data
@@ -94,6 +97,7 @@ def test_post_processing(
         f"{smrt_cell_id}/{today}/raw_data.report.json",
         f"{smrt_cell_id}/{today}/smrtlink-datasets.json",
         f"{smrt_cell_id}/{today}/m84202_240522_155607_s2.ccs_report.json",
+        f"{smrt_cell_id}/{today}/m84202_240522_155607_s3.metadata.xml",
     ] == smrtcell_files
 
     # THEN a file was created to mark the run as validated
