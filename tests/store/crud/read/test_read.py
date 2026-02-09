@@ -348,19 +348,21 @@ def test_get_bed_version_by_file_name(base_store: Store, bed_version_file_name: 
     assert bed_version.filename == bed_version_file_name
 
 
-def test_get_bed_version_by_short_name_and_genome_version_strict_success(store: Store):
+def test_get_bed_version_by_short_name_and_genome_version_strict_success(
+    store: Store, helpers: StoreHelpers
+):
     # GIVEN a store with three bed versions
-    bed_hg19: Bed = store.add_bed("bed_hg19")
-    bed_hg38: Bed = store.add_bed("bed_hg38")
-    bed_version_with_different_genome_version: BedVersion = store.add_bed_version(
+    bed_hg19: Bed = helpers.add_bed("bed_hg19")
+    bed_hg38: Bed = helpers.add_bed("bed_hg38")
+    bed_version_with_different_genome_version: BedVersion = helpers.add_bed_version(
         bed=bed_hg19, version=1, filename="bed_hg19.bed", shortname="b"
     )
     bed_version_with_different_genome_version.genome_version = BedVersionGenomeVersion.HG19
-    bed_version_with_different_shortname: BedVersion = store.add_bed_version(
+    bed_version_with_different_shortname: BedVersion = helpers.add_bed_version(
         bed=bed_hg38, version=2, filename="bed_hg38.bed", shortname="a"
     )
     bed_version_with_different_shortname.genome_version = BedVersionGenomeVersion.HG38
-    bed_version_to_fetch: BedVersion = store.add_bed_version(
+    bed_version_to_fetch: BedVersion = helpers.add_bed_version(
         bed=bed_hg38, version=1, filename="bed_hg38.bed", shortname="b"
     )
     bed_version_to_fetch.genome_version = BedVersionGenomeVersion.HG38
@@ -395,14 +397,15 @@ def test_get_bed_version_by_short_name_and_genome_version_strict_no_result_found
 
 def test_get_bed_version_by_short_name_and_genome_version_strict_multiple_results_found(
     store: Store,
+    helpers: StoreHelpers,
 ):
     # GIVEN a store with two bed versions with the same shortname and genome_version
-    bed_hg38: Bed = store.add_bed("bed_hg38")
-    bed_version_1: BedVersion = store.add_bed_version(
+    bed_hg38: Bed = helpers.add_bed("bed_hg38")
+    bed_version_1: BedVersion = helpers.add_bed_version(
         bed=bed_hg38, version=2, filename="bed_hg38.bed", shortname="b"
     )
     bed_version_1.genome_version = BedVersionGenomeVersion.HG38
-    bed_version_2: BedVersion = store.add_bed_version(
+    bed_version_2: BedVersion = helpers.add_bed_version(
         bed=bed_hg38, version=1, filename="bed_hg38.bed", shortname="b"
     )
     bed_version_2.genome_version = BedVersionGenomeVersion.HG38

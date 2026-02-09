@@ -56,6 +56,20 @@ class StoreHelpers:
     """Class to hold helper functions that needs to be used all over."""
 
     @staticmethod
+    def add_bed(name: str) -> Bed:
+        """Build a new bed record."""
+        return Bed(name=name)
+
+    @staticmethod
+    def add_bed_version(bed: Bed, version: int, filename: str, shortname: str) -> BedVersion:
+        """Build a new bed version record."""
+        bed_version: BedVersion = BedVersion(
+            version=version, filename=filename, shortname=shortname, genome_version="hg19"
+        )
+        bed_version.bed = bed
+        return bed_version
+
+    @staticmethod
     def ensure_hk_bundle(store: HousekeeperAPI, bundle_data: dict, include: bool = False) -> Bundle:
         """Utility function to add a bundle of information to a housekeeper api."""
 
@@ -296,10 +310,10 @@ class StoreHelpers:
         """Return existing or create and return bed version for tests."""
         bed: Bed | None = store.get_bed_by_name(bed_name)
         if not bed:
-            bed: Bed = store.add_bed(name=bed_name)
+            bed: Bed = StoreHelpers.add_bed(name=bed_name)
             store.session.add(bed)
 
-        bed_version: BedVersion = store.add_bed_version(
+        bed_version: BedVersion = StoreHelpers.add_bed_version(
             bed=bed, version=1, filename="dummy_filename", shortname=bed_name
         )
         store.session.add(bed_version)

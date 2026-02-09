@@ -50,7 +50,7 @@ def store_to_submit_and_validate_orders(
     helpers.ensure_panel(store=store, panel_abbreviation="OMIM-AUTO")
     order = Order(customer_id=1, id=MAF_ORDER_ID, ticket_id=100000000)
     store.add_item_to_store(order)
-    bed = store.add_bed("GIcfDNA")
+    bed = helpers.add_bed("GIcfDNA")
     store.add_item_to_store(bed)
     store.commit_to_store()
     return store
