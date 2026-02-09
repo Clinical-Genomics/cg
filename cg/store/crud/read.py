@@ -933,6 +933,13 @@ class ReadHandler(BaseHandler):
     def get_bed_version_by_short_name_and_genome_version_strict(
         self, short_name: str, genome_version: BedVersionGenomeVersion
     ) -> BedVersion:
+        """
+        Get bed version by short name and genome version.
+        Raises:
+            BedVersionNotFoundError: If no bed version was found with the given shortname and genome version.
+            sqlalchemy.orm.exc.MultipleResultsFound: If multiple bed versions are found with the same
+            shortname and genome version.
+        """
         try:
             return (
                 self._get_query(table=BedVersion)
