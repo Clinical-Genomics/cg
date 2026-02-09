@@ -8,7 +8,7 @@ from pydantic import EmailStr
 from pydantic.v1 import ValidationError
 
 from cg.constants import Workflow
-from cg.constants.constants import FileFormat, GenomeVersion, SampleType
+from cg.constants.constants import BedVersionGenomeVersion, FileFormat, GenomeVersion, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.observations import BalsamicObservationPanel, ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
@@ -173,8 +173,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return panel_bed
         derived_panel_bed: Path = Path(
             self.bed_path,
-            self.status_db.get_bed_version_by_short_name(
-                bed_version_short_name=panel_bed.as_posix()
+            self.status_db.get_bed_version_by_short_name_and_genome_version_strict(
+                short_name=panel_bed.as_posix(), genome_version=BedVersionGenomeVersion.HG19
             ).filename,
         )
         if not derived_panel_bed.is_file():
