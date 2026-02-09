@@ -160,7 +160,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
 
     def _get_panel_loqusdb_api(self, case: Case) -> LoqusdbAPI:
         sample: Sample = case.samples[0]
-        bed_short_name: str | None = self.lims_api.capture_kit(sample.internal_id)
+        bed_short_name: str = self.lims_api.get_capture_kit_strict(sample.internal_id)
         bed_version: BedVersion = (
             self.store.get_bed_version_by_short_name_and_genome_version_strict(
                 short_name=bed_short_name, genome_version=BedVersionGenomeVersion.HG19

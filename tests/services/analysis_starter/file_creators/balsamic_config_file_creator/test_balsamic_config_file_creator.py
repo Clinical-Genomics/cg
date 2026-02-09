@@ -1,6 +1,5 @@
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
-from typing import cast
 from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
@@ -77,9 +76,7 @@ def test_create_tgs_myeloid_normal_only(
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(
-        Mock, store.get_bed_version_by_short_name_and_genome_version_strict
-    ).assert_called_once_with(
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
         short_name="myeloid_short_name", genome_version=BedVersionGenomeVersion.HG19
     )
 
@@ -145,9 +142,7 @@ def test_create_tgs_lymphoid_paired(
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(
-        Mock, store.get_bed_version_by_short_name_and_genome_version_strict
-    ).assert_called_once_with(
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
         short_name="lymphoid_short_name",
         genome_version=BedVersionGenomeVersion.HG19,
     )
@@ -205,9 +200,7 @@ def test_create_tgs_tumour_only(
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(
-        Mock, store.get_bed_version_by_short_name_and_genome_version_strict
-    ).assert_called_once_with(
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
         short_name="bed_short_name",
         genome_version=BedVersionGenomeVersion.HG19,
     )
@@ -314,9 +307,7 @@ def test_create_wes_normal_only(
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(
-        Mock, store.get_bed_version_by_short_name_and_genome_version_strict
-    ).assert_called_once_with(
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
         short_name="exome_short_name",
         genome_version=BedVersionGenomeVersion.HG19,
     )
@@ -381,9 +372,7 @@ def test_create_wes_paired(
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(
-        Mock, store.get_bed_version_by_short_name_and_genome_version_strict
-    ).assert_called_once_with(
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
         short_name="twist_exome",
         genome_version=BedVersionGenomeVersion.HG19,
     )
@@ -441,9 +430,7 @@ def test_create_wes_tumour_only(
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(
-        Mock, store.get_bed_version_by_short_name_and_genome_version_strict
-    ).assert_called_once_with(
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
         short_name="exome_short_name",
         genome_version=BedVersionGenomeVersion.HG19,
     )
