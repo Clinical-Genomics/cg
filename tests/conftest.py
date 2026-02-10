@@ -958,7 +958,7 @@ def file_does_not_exist() -> Path:
 # Compression fixtures
 
 
-@pytest.fixture(name="run_name")
+@pytest.fixture
 def run_name() -> str:
     """Return the name of a fastq run."""
     return "fastq_run"
@@ -2952,7 +2952,6 @@ def raredisease_context(
     mocker.patch.object(RarediseaseAnalysisAPI, "get_genome_build", return_value=GenomeVersion.HG38)
 
     mocker.patch.object(RarediseaseAnalysisAPI, "get_target_bed_from_lims")
-    RarediseaseAnalysisAPI.get_target_bed_from_lims.return_value = "some_target_bed_file"
 
     return cg_context
 

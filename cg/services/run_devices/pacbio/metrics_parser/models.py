@@ -135,7 +135,7 @@ class BarcodeMetrics(RunMetrics):
         ..., alias=BarcodeMetricsAliases.BARCODED_HIFI_YIELD_PERCENTAGE
     )
     barcoded_hifi_mean_read_length: int = Field(
-        ..., alias=BarcodeMetricsAliases.UNBARCODED_HIFI_MEAN_READ_LENGTH
+        ..., alias=BarcodeMetricsAliases.BARCODED_MEAN_READ_LENGTH
     )
     unbarcoded_hifi_reads: int = Field(..., alias=BarcodeMetricsAliases.UNBARCODED_HIFI_READS)
     unbarcoded_hifi_yield: int = Field(..., alias=BarcodeMetricsAliases.UNBARCODED_HIFI_YIELD)
@@ -156,6 +156,13 @@ class SampleMetrics(RunMetrics):
     sample_internal_id: str = Field(..., alias=SampleMetricsAliases.SAMPLE_INTERNAL_ID)
 
 
+class MetadataMetrics(BaseModel):
+    """Model that holds metadata for a specific run."""
+
+    run_name: str
+    unique_id: str
+
+
 class PacBioMetrics(RunMetrics):
     """Model that holds all relevant PacBio metrics."""
 
@@ -165,4 +172,5 @@ class PacBioMetrics(RunMetrics):
     polymerase: PolymeraseMetrics
     dataset_metrics: SmrtlinkDatasetsMetrics
     barcodes: BarcodeMetrics
+    metadata: MetadataMetrics
     samples: list[SampleMetrics]
