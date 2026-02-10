@@ -51,7 +51,7 @@ def test_raredisease_params_file_creator(
         lambda short_name, genome_version: (
             create_autospec(BedVersion, filename="bed_version.bed")
             if short_name == "target_bed_shortname_123"
-            and genome_version == BedVersionGenomeVersion.HG19
+            and genome_version == BedVersionGenomeVersion.HG38
             else create_autospec(BedVersion)
         )
     )

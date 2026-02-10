@@ -24,7 +24,6 @@ LOG = logging.getLogger(__name__)
 
 
 class RarediseaseParamsFileCreator(ParamsFileCreator):
-
     def __init__(self, store: Store, lims: LimsAPI, params: str):
         super().__init__(params)
         self.store = store
@@ -91,7 +90,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         if target_bed_shortname:
             bed_version: BedVersion = (
                 self.store.get_bed_version_by_short_name_and_genome_version_strict(
-                    short_name=target_bed_shortname, genome_version=BedVersionGenomeVersion.HG19
+                    short_name=target_bed_shortname, genome_version=BedVersionGenomeVersion.HG38
                 )
             )
             return bed_version.filename

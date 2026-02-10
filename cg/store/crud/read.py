@@ -940,7 +940,6 @@ class ReadHandler(BaseHandler):
             sqlalchemy.orm.exc.MultipleResultsFound: If multiple bed versions are found with the same
             shortname and genome version.
         """
-        # TODO remove this todo
         try:
             return (
                 self._get_query(table=BedVersion)
