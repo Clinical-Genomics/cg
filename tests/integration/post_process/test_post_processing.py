@@ -78,7 +78,7 @@ def test_post_processing(
     assert smrt_cell.internal_id == smrt_cell_id
 
     # THEN the BAM file was stored in the Sample housekeeper bundle with the correct path
-    today = today = date.today()
+    today: date = date.today()
 
     sample_files = housekeeper_db.get_files(bundle_name=sample_id).all()
     assert (
