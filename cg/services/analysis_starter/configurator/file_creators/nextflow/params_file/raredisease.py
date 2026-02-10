@@ -3,6 +3,7 @@ from pathlib import Path
 
 from cg.apps.lims import LimsAPI
 from cg.constants import FileExtensions
+from cg.constants.constants import BedVersionGenomeVersion
 from cg.constants.scout import ScoutExportFileName
 from cg.exc import CgDataError
 from cg.io.csv import write_csv
@@ -88,8 +89,10 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             sample.from_sample or sample.internal_id
         )
         if target_bed_shortname:
-            bed_version: BedVersion = self.store.get_bed_version_by_short_name_strict(
-                target_bed_shortname
+            bed_version: BedVersion = (
+                self.store.get_bed_version_by_short_name_and_genome_version_strict(
+                    short_name=target_bed_shortname, genome_version=BedVersionGenomeVersion.HG19
+                )
             )
             return bed_version.filename
         else:
