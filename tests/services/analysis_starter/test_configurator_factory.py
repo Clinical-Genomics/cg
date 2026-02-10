@@ -110,8 +110,6 @@ def test_nextflow_configurator_factory_success(
 def test_nextflow_configurator_factory_raredisease_success(
     cg_context: CGConfig,
 ):
-    # GIVEN a workflow we have support for
-
     # GIVEN a configurator factory
     configurator_factory = ConfiguratorFactory(cg_config=cg_context)
 
@@ -137,8 +135,6 @@ def test_nextflow_configurator_factory_raredisease_success(
 def test_nextflow_configurator_factory_nallo_success(
     cg_context: CGConfig,
 ):
-    # GIVEN a workflow we have support for
-
     # GIVEN a configurator factory
     configurator_factory = ConfiguratorFactory(cg_config=cg_context)
 
