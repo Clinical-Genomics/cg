@@ -211,7 +211,7 @@ class ConfiguratorFactory:
     def _get_scout_api(self, workflow: Workflow) -> ScoutAPI:
         return (
             self.cg_config.scout_api_38
-            if workflow == Workflow.NALLO
+            if workflow in [Workflow.NALLO, Workflow.RAREDISEASE]
             else self.cg_config.scout_api_37
         )
 
