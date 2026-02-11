@@ -8,6 +8,7 @@ from housekeeper.store.store import Store as HousekeeperStore
 from pytest_httpserver import HTTPServer
 
 from cg.apps.environ import environ_email
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, SequencingFileTag
 from cg.constants.tb import AnalysisType
@@ -19,6 +20,12 @@ from tests.store_helpers import StoreHelpers
 class IntegrationTestPaths(NamedTuple):
     cg_config_file: Path
     test_root_dir: Path
+
+
+class HousekeeperAPIForIntegrationTests(HousekeeperAPI):
+    def __init__(self, config: dict, store: HousekeeperStore):
+        self._store = store
+        self.root_dir: str = config["housekeeper"]["root"]
 
 
 def create_formatted_config(status_db_uri: str, housekeeper_db_uri: str, test_root_dir: str):
