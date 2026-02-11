@@ -2,11 +2,11 @@ from pathlib import Path
 
 import pytest
 from click.testing import CliRunner, Result
-from integration.utils import IntegrationTestPaths
-from store_helpers import StoreHelpers
 
 from cg.cli.base import base
 from cg.store.store import Store
+from tests.integration.utils import IntegrationTestPaths
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.mark.xdist_group(name="integration")
