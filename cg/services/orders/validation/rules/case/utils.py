@@ -115,7 +115,7 @@ def is_sample_related_in_case(
 ):
     if not (sample.mother or sample.father):
         sample_name: str = get_sample_name(sample=sample, store=store)
-        if any(
+        if not any(
             sample_name in [sample_in_case.mother, sample_in_case.father]
             for sample_in_case in case.samples
         ):
