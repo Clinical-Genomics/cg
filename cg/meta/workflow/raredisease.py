@@ -165,7 +165,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a raredisease case. Currently fixed for hg19."""
-        return GenomeVersion.HG19
+        return GenomeVersion.HG19  # TODO change
 
     def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
         """Parse Nextflow output analysis files and return an analysis model."""

@@ -200,6 +200,7 @@ def test_configurator_factory_failure(cg_context: CGConfig):
         configurator_factory.get_configurator(workflow)
 
 
+# TODO complete these tests to have full coverage
 def test_get_scout_api_38(cg_context: CGConfig):
     # GIVEN a configurator factory
     configurator_factory = ConfiguratorFactory(cg_config=cg_context)
