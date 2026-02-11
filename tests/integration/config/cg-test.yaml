@@ -94,6 +94,25 @@ crunchy:
     number_tasks: 12
     conda_env: crunchy_conda_env
 
+raredisease:
+  compute_env: raredisease_compute_env
+  conda_env: raredisease_conda_env
+  config: {test_root_dir}/raredisease_config.config
+  launch_directory: {test_root_dir}/raredisease_launch_directory
+  params: {test_root_dir}/raredisease_params.yaml
+  platform: {test_root_dir}/platform.config
+  profile: raredisease_profile
+  resources: {test_root_dir}/raredisease_resources.config
+  repository: raredisease_repository
+  revision: raredisease_revision
+  root: {test_root_dir}/raredisease_root_path
+  slurm:
+    account: "raredisease_slurm_account"
+    mail_user: "raredisease_mail_user@scilifelab.se"
+    qos: "low"
+  tower_workflow: raredisease_tower_workflow
+  workflow_bin_path: {test_root_dir}/raredisease_workflow_bin_path
+
 data-delivery:
   destination_path: {test_root_dir}/data-delivery_destination_path
   covid_destination_path: {test_root_dir}/data-delivery_covid_destination_path
