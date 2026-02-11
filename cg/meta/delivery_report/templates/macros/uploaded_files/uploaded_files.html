@@ -28,7 +28,7 @@
 <h4 class="mt-4 mb-3">Scout</h4>
 <div class="alert alert-info" role="alert">
   Varianter finns uppladdade i Scout:
-  {% if "nallo" in workflow %} <!-- #TODO add raredisease here -->
+  {% if workflow in ["nallo", "raredisease"] %}
   <a href="https://scout38.sys.scilifelab.se/{{ customer_id }}/{{ case.name }}" class="alert-link">
     https://scout38.sys.scilifelab.se/{{ customer_id }}/{{ case.name }}</a>.
   {% else %}
