@@ -1519,6 +1519,7 @@ def base_store(
     bed_version_short_name: str,
     collaboration_id: str,
     customer_id: str,
+    helpers: StoreHelpers,
     invoice_address: str,
     invoice_reference: str,
     store: Store,
@@ -1660,10 +1661,10 @@ def base_store(
     ]
     store.session.add_all(versions)
 
-    beds: list[Bed] = [store.add_bed(name=bed_name)]
+    beds: list[Bed] = [helpers.add_bed(name=bed_name)]
     store.session.add_all(beds)
     bed_versions: list[BedVersion] = [
-        store.add_bed_version(
+        helpers.add_bed_version(
             bed=bed,
             version=1,
             filename=bed_name + FileExtensions.BED,
