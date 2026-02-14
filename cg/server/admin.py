@@ -18,7 +18,7 @@ from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
 
-SI_THIN_SPACE = "\u202F"
+SI_THIN_SPACE = "\u202f"
 
 
 class BaseView(ModelView):
