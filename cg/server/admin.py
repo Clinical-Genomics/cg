@@ -18,6 +18,8 @@ from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
 
+SI_THIN_SPACE = "\u202F"
+
 
 class BaseView(ModelView):
     """Base for the specific views."""
@@ -44,22 +46,22 @@ def formatter_si_prefix_base_pairs(value: float | int | None) -> str | None:
     units = [(1e12, "Tb", 2), (1e9, "Gb", 2), (1e6, "Mb", 2), (1e3, "kb", 2), (1, "b", 0)]
     for threshold, unit, decimals in units:
         if value >= threshold:
-            return f"{value / threshold:.{decimals}f} {unit}"
+            return f"{value / threshold:.{decimals}f}{SI_THIN_SPACE}{unit}"
 
     # Fallback
-    return f"{value} b"
+    return f"{value}{SI_THIN_SPACE}b"
 
 
 def view_reads_large_number_comma_formatted(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
-    formatted_number = format_large_number_space(model.reads)
+    formatted_number = format_large_number_thinspace(model.reads)
     return None if formatted_number is None else Markup(formatted_number)
 
 
-def format_large_number_space(value: float | int | None) -> str | None:
+def format_large_number_thinspace(value: float | int | None) -> str | None:
     if value is None:
         return None
-    return f"{value:,d}"
+    return f"{value:,d}".replace(",", SI_THIN_SPACE)
 
 
 def view_priority(unused1, unused2, model, unused3):
