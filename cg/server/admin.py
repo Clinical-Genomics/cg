@@ -17,8 +17,7 @@ from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
-
-SI_THIN_SPACE = "\u202f"
+from cg.utils.number_formatter import Si
 
 
 class BaseView(ModelView):
@@ -35,33 +34,14 @@ class BaseView(ModelView):
 
 def view_hifi_yield_si_prefix_formatted(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
-    formatted_number = formatter_si_prefix_base_pairs(model.hifi_yield)
+    formatted_number = Si.prefix(value=model.hifi_yield, unit="b")
     return None if formatted_number is None else Markup(formatted_number)
-
-
-def formatter_si_prefix_base_pairs(value: float | int | None) -> str | None:
-    if value is None:
-        return None
-
-    units = [(1e12, "Tb", 2), (1e9, "Gb", 2), (1e6, "Mb", 2), (1e3, "kb", 2), (1, "b", 0)]
-    for threshold, unit, decimals in units:
-        if value >= threshold:
-            return f"{value / threshold:.{decimals}f}{SI_THIN_SPACE}{unit}"
-
-    # Fallback
-    return f"{value}{SI_THIN_SPACE}b"
 
 
 def view_reads_large_number_comma_formatted(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
-    formatted_number = format_large_number_thinspace(model.reads)
+    formatted_number = Si.group_digits(model.reads)
     return None if formatted_number is None else Markup(formatted_number)
-
-
-def format_large_number_thinspace(value: float | int | None) -> str | None:
-    if value is None:
-        return None
-    return f"{value:,d}".replace(",", SI_THIN_SPACE)
 
 
 def view_priority(unused1, unused2, model, unused3):
