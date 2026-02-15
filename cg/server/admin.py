@@ -34,12 +34,20 @@ class BaseView(ModelView):
 
 def view_hifi_yield_si_prefix_formatted(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
+
+    if model.hifi_yield is None:
+        return None
+
     formatted_number = Si.prefix(value=model.hifi_yield, unit="b")
     return None if formatted_number is None else Markup(formatted_number)
 
 
 def view_reads_large_number_comma_formatted(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
+
+    if model.reads is None:
+        return None
+
     formatted_number = Si.group_digits(model.reads)
     return None if formatted_number is None else Markup(formatted_number)
 

@@ -1,6 +1,4 @@
-import math
-
-SI_THIN_SPACE = "\u202f"
+NARROW_NO_BREAK_SPACE = "\u202f"
 
 SI_PREFIXES = [(1e12, "T", 2), (1e9, "G", 2), (1e6, "M", 2), (1e3, "k", 2), (1, "", 0)]
 
@@ -23,23 +21,20 @@ class Si:
         for threshold, prefix, decimals in SI_PREFIXES:
             if value >= threshold:
                 scaled_value = value / threshold
-                return f"{scaled_value:.{decimals}f}{SI_THIN_SPACE}{prefix}{unit}"
-        return f"{value}{SI_THIN_SPACE}{unit}"
+                return f"{scaled_value:.{decimals}f}{NARROW_NO_BREAK_SPACE}{prefix}{unit}"
+        return f"{value}{NARROW_NO_BREAK_SPACE}{unit}"
 
     @staticmethod
     def group_digits(value: int | float) -> str:
         """
-        Format according to SI group digits, section 5.4.4, BIPM (2019). The International System of Units (SI Brochure), 9th edition.
+        Format according to SI group digits, section 5.4.4 of SI Brochure, 9th edition
         """
         value = Si._integer_convert(value)
-        return f"{value:,d}".replace(",", SI_THIN_SPACE)
+        return f"{value:,d}".replace(",", NARROW_NO_BREAK_SPACE)
 
     @staticmethod
     def _integer_convert(value: int | float) -> int:
         """
-        Convert a float to an integer using classic rounding: .5 always rounds up.
+        Convert a number to an integer using SI-compliant round-half-to-even.
         """
-        if value >= 0:
-            return int(math.floor(value + 0.5))
-        else:
-            return int(math.ceil(value - 0.5))
+        return int(round(value))
