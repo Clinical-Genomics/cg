@@ -29,7 +29,7 @@ def microsalt_message(customer_id: str, ticket_id: str) -> str:
 
 
 @pytest.fixture
-def nallo_raw_data_analysis_message(customer_id: str, nallo_case_id: str, ticket_id: str) -> str:
+def raw_data_analysis_message(customer_id: str, nallo_case_id: str, ticket_id: str) -> str:
     """Return the delivery message for case with raw-data and analysis delivery."""
     return (
         "Hello,\n\n"
@@ -43,9 +43,7 @@ def nallo_raw_data_analysis_message(customer_id: str, nallo_case_id: str, ticket
 
 
 @pytest.fixture
-def nallo_raw_data_analysis_scout_message(
-    customer_id: str, nallo_case_id: str, ticket_id: str
-) -> str:
+def raw_data_analysis_scout38_message(customer_id: str, nallo_case_id: str, ticket_id: str) -> str:
     """Return the delivery message for a Nallo case with raw-data, analysis and Scout delivery."""
     return (
         "Hello,\n\n"
@@ -58,7 +56,7 @@ def nallo_raw_data_analysis_scout_message(
 
 
 @pytest.fixture
-def nallo_raw_data_scout_message(customer_id: str, nallo_case_id: str, ticket_id: str) -> str:
+def raw_data_scout38_message(customer_id: str, nallo_case_id: str, ticket_id: str) -> str:
     """Return the delivery message for a Nallo case with Scout delivery."""
     return (
         "Hello,\n\n"

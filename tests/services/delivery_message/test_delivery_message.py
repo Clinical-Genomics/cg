@@ -44,38 +44,41 @@ def test_get_delivery_message_for_single_case(
         (
             Workflow.NALLO,
             DataDelivery.RAW_DATA_ANALYSIS,
-            "nallo_raw_data_analysis_message",
+            "raw_data_analysis_message",
         ),
         (
             Workflow.NALLO,
             DataDelivery.RAW_DATA_ANALYSIS_SCOUT,
-            "nallo_raw_data_analysis_scout_message",
+            "raw_data_analysis_scout38_message",
         ),
         (
             Workflow.NALLO,
             DataDelivery.RAW_DATA_SCOUT,
-            "nallo_raw_data_scout_message",
+            "raw_data_scout38_message",
         ),
         (
             Workflow.RAREDISEASE,
             DataDelivery.RAW_DATA_ANALYSIS,
-            "nallo_raw_data_analysis_message",
+            "raw_data_analysis_message",
         ),
         (
             Workflow.RAREDISEASE,
             DataDelivery.RAW_DATA_ANALYSIS_SCOUT,
-            "nallo_raw_data_analysis_scout_message",
+            "raw_data_analysis_scout38_message",
         ),
         (
             Workflow.RAREDISEASE,
             DataDelivery.RAW_DATA_SCOUT,
-            "nallo_raw_data_scout_message",
+            "raw_data_scout38_message",
         ),
     ],
     ids=[
-        "RAW_DATA_ANALYSIS",
-        "RAW_DATA_ANALYSIS_SCOUT",
-        "RAW_DATA_SCOUT",
+        "NALLO_RAW_DATA_ANALYSIS",
+        "NALLO_RAW_DATA_ANALYSIS_SCOUT",
+        "NALLO_RAW_DATA_SCOUT",
+        "RAREDISEASE_RAW_DATA_ANALYSIS",
+        "RAREDISEASE_RAW_DATA_ANALYSIS_SCOUT",
+        "RAREDISEASE_RAW_DATA_SCOUT",
     ],
 )
 def test_get_delivery_message_nallo_case(
