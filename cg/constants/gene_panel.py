@@ -18,6 +18,7 @@ class GenePanelMasterList(StrEnum):
     CARDIOLOGY = "Cardiology"
     CILM = "CILM"
     CH = "CH"
+    CHD = "CHD"
     CHILDHYPOTONIA = "CHILDHYPOTONIA"
     CTD = "CTD"
     COMPD = "COMPD"

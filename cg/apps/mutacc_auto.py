@@ -48,6 +48,7 @@ class MutaccAutoAPI:
                 WriteStream.write_stream_from_content(content=case, file_format=FileFormat.JSON),
                 "--padding",
                 str(self.mutacc_padding),
+                "--conda",
             ]
         )
 
