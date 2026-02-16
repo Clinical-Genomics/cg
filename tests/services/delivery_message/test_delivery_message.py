@@ -39,11 +39,38 @@ def test_get_delivery_message_for_single_case(
 
 
 @pytest.mark.parametrize(
-    "delivery_type, expected_message_fixture",
+    "workflow, delivery_type, expected_message_fixture",
     [
-        (DataDelivery.RAW_DATA_ANALYSIS, "nallo_raw_data_analysis_message"),
-        (DataDelivery.RAW_DATA_ANALYSIS_SCOUT, "nallo_raw_data_analysis_scout_message"),
-        (DataDelivery.RAW_DATA_SCOUT, "nallo_raw_data_scout_message"),
+        (
+            Workflow.NALLO,
+            DataDelivery.RAW_DATA_ANALYSIS,
+            "nallo_raw_data_analysis_message",
+        ),
+        (
+            Workflow.NALLO,
+            DataDelivery.RAW_DATA_ANALYSIS_SCOUT,
+            "nallo_raw_data_analysis_scout_message",
+        ),
+        (
+            Workflow.NALLO,
+            DataDelivery.RAW_DATA_SCOUT,
+            "nallo_raw_data_scout_message",
+        ),
+        (
+            Workflow.RAREDISEASE,
+            DataDelivery.RAW_DATA_ANALYSIS,
+            "nallo_raw_data_analysis_message",
+        ),
+        (
+            Workflow.RAREDISEASE,
+            DataDelivery.RAW_DATA_ANALYSIS_SCOUT,
+            "nallo_raw_data_analysis_scout_message",
+        ),
+        (
+            Workflow.RAREDISEASE,
+            DataDelivery.RAW_DATA_SCOUT,
+            "nallo_raw_data_scout_message",
+        ),
     ],
     ids=[
         "RAW_DATA_ANALYSIS",
@@ -55,6 +82,7 @@ def test_get_delivery_message_nallo_case(
     nallo_case_id: str,
     delivery_message_service: DeliveryMessageService,
     helpers: StoreHelpers,
+    workflow: Workflow,
     delivery_type: DataDelivery,
     expected_message_fixture: str,
     request: pytest.FixtureRequest,
@@ -69,7 +97,7 @@ def test_get_delivery_message_nallo_case(
         store=store,
         case_id=nallo_case_id,
         case_name=nallo_case_id,
-        data_analysis=Workflow.NALLO,
+        data_analysis=workflow,
         data_delivery=delivery_type,
         order=order,
     )
