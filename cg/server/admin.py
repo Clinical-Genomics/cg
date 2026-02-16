@@ -32,7 +32,7 @@ class BaseView(ModelView):
         return redirect(url_for("google.login", next=request.url))
 
 
-def view_hifi_yield_si_prefix_formatted(unused1, unused2, model, unused3):
+def view_hifi_yield_si_unit_formatted(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
 
     if model.hifi_yield is None:
