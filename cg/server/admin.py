@@ -801,8 +801,8 @@ class SampleView(BaseView):
     column_formatters = {
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
-        "reads": view_reads_large_number_comma_formatted,
-        "hifi_yield": view_hifi_yield_si_prefix_formatted,
+        "reads": view_reads_large_number_formatted,
+        "hifi_yield": view_hifi_yield_si_unit_formatted,
         "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
         "original_ticket": view_ticket_link,
