@@ -81,7 +81,7 @@ def test_get_delivery_message_for_single_case(
         "RAREDISEASE_RAW_DATA_SCOUT",
     ],
 )
-def test_get_delivery_message_nallo_case(
+def test_get_delivery_message_scout38_case(
     nallo_case_id: str,
     delivery_message_service: DeliveryMessageService,
     helpers: StoreHelpers,
@@ -91,7 +91,7 @@ def test_get_delivery_message_nallo_case(
     request: pytest.FixtureRequest,
 ) -> None:
     """Test that the delivery message is created correctly for a given case."""
-    # GIVEN a delivery message service and a Nallo case ID
+    # GIVEN a delivery message service and case ID
 
     # GIVEN that the store contains the case
     store: Store = delivery_message_service.store
