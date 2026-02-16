@@ -203,9 +203,13 @@ def ready_made_library_sample_has_enough_reads(sample: Sample) -> bool:
 
 def sample_has_enough_reads(sample: Sample) -> bool:
     """
-    Check if the sample has more or equal reads than the expected reads for the sample.
+    Return True if:
+    - The sample has at least the expected number of reads, or
+    - The sample has already been delivered.
     """
-    enough_reads: bool = sample.reads >= sample.expected_reads_for_sample
+    enough_reads: bool = (
+        sample.reads >= sample.expected_reads_for_sample or sample.delivered_at is not None
+    )
     if not enough_reads:
         LOG.warning(f"Sample {sample.internal_id} has too few reads.")
     return enough_reads
@@ -214,6 +218,7 @@ def sample_has_enough_reads(sample: Sample) -> bool:
 def sample_has_enough_hifi_yield(sample: Sample) -> bool:
     """
     Return true if the sample's HiFi yield is greater than or equal to the threshold.
+    Returns true if sample has already been delivered.
     Returns false if the HiFi yield is lower than the threshold or None.
     Raises:
         ApplicationDoesNotHaveHiFiYieldError if the sample doesn't have expected HiFi yield.
@@ -227,7 +232,9 @@ def sample_has_enough_hifi_yield(sample: Sample) -> bool:
         LOG.debug(f"Sample {sample.internal_id} has no hifi yield.")
         return False
 
-    enough_hifi_yield: bool = sample.hifi_yield >= sample.expected_hifi_yield
+    enough_hifi_yield: bool = (
+        sample.hifi_yield >= sample.expected_hifi_yield or sample.delivered_at is not None
+    )
     if not enough_hifi_yield:
         LOG.warning(f"Sample {sample.internal_id} does not have enough HiFi yield.")
     return enough_hifi_yield
