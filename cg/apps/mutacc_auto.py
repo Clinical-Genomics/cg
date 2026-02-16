@@ -1,5 +1,5 @@
 """
-    Module for mutacc-auto API
+Module for mutacc-auto API
 """
 
 import copy

@@ -15,6 +15,7 @@ from cg.apps.tb.models import TrailblazerAnalysis
 from cg.clients.chanjo2.models import CoverageMetrics
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Priority, SequencingFileTag, Workflow
 from cg.constants.constants import (
+    BedVersionGenomeVersion,
     CaseActions,
     CustomerId,
     FileFormat,
@@ -29,6 +30,7 @@ from cg.constants.tb import AnalysisType
 from cg.exc import (
     AnalysisAlreadyStoredError,
     AnalysisNotReadyError,
+    BedVersionNotFoundError,
     BundleAlreadyAddedError,
     CaseNotFoundError,
     CgDataError,
@@ -469,10 +471,13 @@ class AnalysisAPI(MetaAPI):
         target_bed_shortname: str | None = self.lims_api.capture_kit(lims_id=sample.internal_id)
         if not target_bed_shortname:
             return None
-        bed_version: BedVersion | None = self.status_db.get_bed_version_by_short_name(
-            bed_version_short_name=target_bed_shortname
-        )
-        if not bed_version:
+        try:
+            bed_version: BedVersion = (
+                self.status_db.get_bed_version_by_short_name_and_genome_version_strict(
+                    short_name=target_bed_shortname, genome_version=BedVersionGenomeVersion.HG19
+                )
+            )
+        except BedVersionNotFoundError:
             raise CgDataError(f"Bed-version {target_bed_shortname} does not exist")
         return bed_version.filename
 
@@ -781,7 +786,7 @@ class AnalysisAPI(MetaAPI):
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
     ) -> CoverageMetrics | None:
-        """Return sample coverage data from Chanjo2."""
+        """Return sample coverage data from Chanjo or Chanjo2."""
         raise NotImplementedError
 
     def get_scout_upload_case_tags(self):

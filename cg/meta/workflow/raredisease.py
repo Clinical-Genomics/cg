@@ -7,18 +7,11 @@ from typing import Any
 
 from housekeeper.store.models import File
 
-from cg.clients.chanjo2.models import (
-    CoverageMetrics,
-    CoveragePostRequest,
-    CoveragePostResponse,
-    CoverageSample,
-)
+from cg.clients.chanjo2.models import CoverageMetricsChanjo1
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import (
     RAREDISEASE_COVERAGE_FILE_TAGS,
-    RAREDISEASE_COVERAGE_INTERVAL_TYPE,
-    RAREDISEASE_COVERAGE_THRESHOLD,
     RAREDISEASE_METRIC_CONDITIONS_WES,
     RAREDISEASE_METRIC_CONDITIONS_WGS,
     RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
@@ -59,9 +52,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.tower_workflow: str = config.raredisease.tower_workflow
         self.account: str = config.raredisease.slurm.account
         self.email: str = config.raredisease.slurm.mail_user
-        self.compute_env_base: str = config.raredisease.compute_env
         self.revision: str = config.raredisease.revision
-        self.nextflow_binary_path: str = config.raredisease.binary_path
 
     @staticmethod
     def get_bundle_filenames_path() -> Path:
@@ -156,25 +147,17 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
-    ) -> CoverageMetrics | None:
-        """Return sample coverage metrics from Chanjo2."""
-        genome_version: GenomeVersion = self.get_genome_build(case_id)
-        coverage_file_path: str | None = self.get_sample_coverage_file_path(
-            bundle_name=case_id, sample_id=sample_id
+    ) -> CoverageMetricsChanjo1 | None:
+        sample_coverage: dict = self.chanjo_api.sample_coverage(
+            sample_id=sample_id, panel_genes=gene_ids
         )
-        try:
-            post_request = CoveragePostRequest(
-                build=self.translate_genome_reference(genome_version),
-                coverage_threshold=RAREDISEASE_COVERAGE_THRESHOLD,
-                hgnc_gene_ids=gene_ids,
-                interval_type=RAREDISEASE_COVERAGE_INTERVAL_TYPE,
-                samples=[CoverageSample(coverage_file_path=coverage_file_path, name=sample_id)],
+        if sample_coverage:
+            return CoverageMetricsChanjo1(
+                coverage_completeness_percent=sample_coverage.get("mean_completeness"),
+                mean_coverage=sample_coverage.get("mean_coverage"),
             )
-            post_response: CoveragePostResponse = self.chanjo2_api.get_coverage(post_request)
-            return post_response.get_sample_coverage_metrics(sample_id)
-        except Exception as error:
-            LOG.error(f"Error getting coverage for sample '{sample_id}', error: {error}")
-            return None
+        LOG.warning(f"Could not calculate sample coverage for: {sample_id}")
+        return None
 
     def get_scout_upload_case_tags(self) -> dict:
         """Return Raredisease Scout upload case tags."""
