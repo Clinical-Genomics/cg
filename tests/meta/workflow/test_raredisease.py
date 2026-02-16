@@ -6,6 +6,7 @@ from pytest_mock import MockerFixture
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import SexOptions, Workflow
+from cg.constants.constants import GenomeVersion
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import (
@@ -104,3 +105,7 @@ def test_get_genome_build():
     )
 
     analysis_api = RarediseaseAnalysisAPI(config=cg_config)
+
+    # WHEN getting the genome build
+    # THEN it is hg38
+    assert analysis_api.get_genome_build(case_id="ChevyCase") == GenomeVersion.HG38
