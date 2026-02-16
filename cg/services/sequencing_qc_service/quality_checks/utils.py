@@ -76,7 +76,9 @@ def express_sample_has_enough_yield(sample: Sample) -> bool:
         return False
 
     express_yield_threshold: int = get_express_yield_threshold_for_sample(sample)
-    enough_yield: bool = sample.hifi_yield >= express_yield_threshold
+    enough_yield: bool = (
+        sample.hifi_yield >= express_yield_threshold or sample.delivered_at is not None
+    )
     if not enough_yield:
         LOG.warning(f"Sample {sample.internal_id} does not have enough yield.")
     return enough_yield
@@ -204,12 +206,12 @@ def ready_made_library_sample_has_enough_reads(sample: Sample) -> bool:
 def sample_has_enough_reads(sample: Sample) -> bool:
     """
     Return True if:
-    - The sample has at least the expected number of reads, or
+    - The sample has at least the expected number of reads
     - The sample has already been delivered.
     """
     enough_reads: bool = (
         sample.reads >= sample.expected_reads_for_sample or sample.delivered_at is not None
-    )  # TODO why is this red?
+    )
     if not enough_reads:
         LOG.warning(f"Sample {sample.internal_id} has too few reads.")
     return enough_reads

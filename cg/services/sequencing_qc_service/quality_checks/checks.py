@@ -21,9 +21,7 @@ class QualityCheck(Enum):
 
 class SequencingQCCheck(QualityCheck):
     CASE_PASSES_ON_READS: Callable = case_pass_sequencing_qc_on_reads
-    CASE_PASSES_ON_YIELD: Callable = (
-        case_pass_sequencing_qc_on_hifi_yield  # TODO add a pass for samples with a delivered_at date.
-    )
+    CASE_PASSES_ON_YIELD: Callable = case_pass_sequencing_qc_on_hifi_yield
     SAMPLE_PASSES: Callable = sample_pass_sequencing_qc_on_reads
     ALL_SAMPLES_IN_CASE_HAVE_READS: Callable = (
         all_samples_in_case_have_reads  # TODO what is the expected behavior here?
