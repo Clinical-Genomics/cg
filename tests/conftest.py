@@ -2904,7 +2904,6 @@ def raredisease_context(
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
-        reference_genome=GenomeVersion.HG19,  # TODO HG38
     )
 
     another_sample_enough_reads: Sample = helpers.add_sample(
@@ -2914,7 +2913,6 @@ def raredisease_context(
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
-        reference_genome=GenomeVersion.HG19,  # TODO HG38
     )
 
     helpers.add_relationship(
