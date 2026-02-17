@@ -138,9 +138,10 @@ class Workflow(StrEnum):
 
 
 DNA_WORKFLOWS_WITH_SCOUT_UPLOAD: list[Workflow] = [
-    Workflow.MIP_DNA,
-    Workflow.BALSAMIC,
     Workflow.BALSAMIC_UMI,
+    Workflow.BALSAMIC,
+    Workflow.MIP_DNA,
+    Workflow.RAREDISEASE,
 ]
 
 
