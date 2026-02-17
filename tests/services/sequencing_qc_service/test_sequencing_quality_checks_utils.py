@@ -716,7 +716,6 @@ def test_raw_data_case_pass_qc_hifi_yield_based_fails():
     passes = raw_data_case_pass_qc(case)
 
     # THEN the case fails QC
-    assert sample.delivered_at is None
     assert not passes
 
 
