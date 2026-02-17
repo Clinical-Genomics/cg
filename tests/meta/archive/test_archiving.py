@@ -287,7 +287,7 @@ def test_archive_file(
         "post",
         return_value=ok_miria_response,
     )
-    job_id: int = ddn_dataflow_client.archive_file(file_and_sample)
+    job_id: int = ddn_dataflow_client.archive_files([file_and_sample])
 
     # THEN an integer should be returned
     assert isinstance(job_id, int)
