@@ -480,6 +480,17 @@ def test_case_pass_sequencing_qc_on_hifi_yield_wrong_application():
         case_pass_sequencing_qc_on_hifi_yield(case)
 
 
+def test_case_pass_sequencing_qc_on_hifi_yield_express_wrong_application():
+    # GIVEN a case with an application without target HiFi yield
+    sample: Sample = create_autospec(Sample, hifi_yield=25, expected_hifi_yield=None)
+    case: Case = create_autospec(Case, samples=[sample], priority=Priority.express)
+
+    # WHEN calling the case_pass_sequencing_qc_on_hifi_yield on the case
+    # THEN an error is raised
+    with pytest.raises(ApplicationDoesNotHaveHiFiYieldError):
+        case_pass_sequencing_qc_on_hifi_yield(case)
+
+
 def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_passes():
     # GIVEN a case with a PacBio application, express priority and half of the target yield
     sample: Sample = create_autospec(
