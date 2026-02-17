@@ -120,7 +120,7 @@ def test_case_pass_sequencing_qc_on_reads_express_delivered_at_pass():
     )
     case: Case = create_autospec(Case, samples=[sample], priority=Priority.express)
 
-    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
+    # WHEN calling case_pass_sequencing_qc_on_reads on the case
     passes: bool = case_pass_sequencing_qc_on_reads(case)
 
     # THEN the case does pass sequencing qc
@@ -390,7 +390,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_delivered_at_pass():
     # GIVEN a case
     case: Case = create_autospec(Case, samples=[sample])
 
-    # WHEN calling the raw_data_case_pass_qc function on the case
+    # WHEN calling the case_pass_sequencing_qc_on_hifi_yield function on the case
     passes = case_pass_sequencing_qc_on_hifi_yield(case)
 
     # THEN the case fails QC
@@ -420,7 +420,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_delivered_at_mixed_case_pass():
     # GIVEN a case
     case: Case = create_autospec(Case, samples=[sample_1, sample_2])
 
-    # WHEN calling the raw_data_case_pass_qc function on the case
+    # WHEN calling the case_pass_sequencing_qc_on_hifi_yield function on the case
     passes = case_pass_sequencing_qc_on_hifi_yield(case)
 
     # THEN the case passes QC
