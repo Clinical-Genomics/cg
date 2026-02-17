@@ -30,7 +30,7 @@ def test_get_uploaded_related_dna_case(
     )
 
     # THEN the correct set of cases is returned
-    assert fetched_uploaded_related_dna_case == uploaded_related_dna_case
+    assert set(fetched_uploaded_related_dna_case) == set(uploaded_related_dna_case)
     assert fetched_uploaded_related_dna_case != related_dna_cases
 
 

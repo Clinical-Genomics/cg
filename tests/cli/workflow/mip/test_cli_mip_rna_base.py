@@ -228,7 +228,7 @@ def test_case_needs_to_be_stored(
 
     # GIVEN that, a panel is returned
     mocker.patch.object(
-        mip_rna_context.scout_api_37,
+        mip_rna_context.scout_api_38,
         "export_panels",
         return_value=["OMIM-AUTO"],
     )
