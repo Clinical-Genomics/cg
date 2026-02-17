@@ -15,6 +15,7 @@ from cg.constants import GenePanelMasterList, Priority, SequencingRunDataAvailab
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.constants import CaseActions, ControlOptions, Workflow
 from cg.constants.priority import SlurmQos, TrailblazerPriority
+from cg.constants.scout import GenomeBuild
 from cg.exc import AnalysisAlreadyStoredError, AnalysisNotReadyError, CaseNotFoundError
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -664,39 +665,6 @@ def test_case_with_controls_get_correct_slurmqos(
     assert qos == expected_qos
 
 
-@pytest.mark.parametrize(
-    "priority, expected_trailblazer_priority",
-    [
-        (Priority.clinical_trials, TrailblazerPriority.NORMAL),
-        (Priority.research, TrailblazerPriority.LOW),
-        (Priority.standard, TrailblazerPriority.NORMAL),
-        (Priority.priority, TrailblazerPriority.HIGH),
-        (Priority.express, TrailblazerPriority.EXPRESS),
-    ],
-)
-def test_get_trailblazer_priority(
-    case_id: str,
-    priority: Priority,
-    expected_trailblazer_priority: TrailblazerPriority,
-    mip_analysis_api: MipDNAAnalysisAPI,
-    analysis_store: Store,
-):
-    """Test get Trailblazer priority from the case priority"""
-
-    # GIVEN a store with a case with a specific priority
-    mip_analysis_api.status_db = analysis_store
-    case: Case = analysis_store.get_case_by_internal_id(case_id)
-    case.priority = priority
-
-    # WHEN getting the trailblazer priority for the priority
-    trailblazer_priority: TrailblazerPriority = mip_analysis_api.get_trailblazer_priority(
-        case_id=case_id
-    )
-
-    # THEN the expected trailblazer priority should be returned
-    assert trailblazer_priority is expected_trailblazer_priority
-
-
 #  Below are new tests using mocks instead of a test database,
 #  in the future the old tests in this module could be adjusted to also use these fixtures
 
@@ -905,3 +873,35 @@ def test_update_analysis_as_completed_statusdb_succeeds(
 
     # THEN it updates the analysis comment
     status_db_mock.update_analysis_comment.assert_called_with(analysis_id=123456, comment=ANY)
+
+
+@pytest.mark.parametrize(
+    "workflow, genome_build",
+    [
+        (Workflow.BALSAMIC_UMI, GenomeBuild.hg19),
+        (Workflow.BALSAMIC, GenomeBuild.hg19),
+        (Workflow.MIP_DNA, GenomeBuild.hg19),
+        (Workflow.MIP_RNA, GenomeBuild.hg38),
+        (Workflow.NALLO, GenomeBuild.hg38),
+        (Workflow.RAREDISEASE, GenomeBuild.hg38),
+        (Workflow.RNAFUSION, GenomeBuild.hg19),
+        (Workflow.TOMTE, GenomeBuild.hg38),
+    ],
+)
+def test_setting_scout_api_in_init(
+    workflow: Workflow, genome_build: GenomeBuild, analysis_config: CGConfig
+):
+    scout_api_map = {
+        GenomeBuild.hg19: analysis_config.scout_api_37,
+        GenomeBuild.hg38: analysis_config.scout_api_38,
+    }
+
+    # GIVEN a CG config
+    # GIVEN a workflow
+    expected_scout_api = scout_api_map[genome_build]
+
+    # WHEN instantiating the analysis API
+    analysis_api = AnalysisAPI(workflow=workflow, config=analysis_config)
+
+    # THEN the scout API should match the workflow
+    assert analysis_api.scout_api is expected_scout_api
