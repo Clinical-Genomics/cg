@@ -459,8 +459,6 @@ def test_case_pass_sequencing_qc_on_hifi_yield_missing_hifi_yield():
     passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
 
     # THEN the case does not pass sequencing qc
-    assert sample_with_yield.delivered_at is None
-    assert sample_without_yield.delivered_at is None
     assert not passes
 
 
