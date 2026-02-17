@@ -82,7 +82,6 @@ def test_get_delivery_message_for_single_case(
     ],
 )
 def test_get_delivery_message_scout38_case(
-    nallo_case_id: str,
     delivery_message_service: DeliveryMessageService,
     helpers: StoreHelpers,
     workflow: Workflow,
@@ -98,15 +97,15 @@ def test_get_delivery_message_scout38_case(
     order: Order = store.get_order_by_id(1)
     helpers.ensure_case(
         store=store,
-        case_id=nallo_case_id,
-        case_name=nallo_case_id,
+        case_id="case_id",
+        case_name="case_id",
         data_analysis=workflow,
         data_delivery=delivery_type,
         order=order,
     )
 
     # WHEN the delivery message is requested
-    message: str = delivery_message_service._get_delivery_message(case_ids={nallo_case_id})
+    message: str = delivery_message_service._get_delivery_message(case_ids={"case_id"})
 
     # THEN the message should be as expected
     expected_message: str = request.getfixturevalue(expected_message_fixture)
