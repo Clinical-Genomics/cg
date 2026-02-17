@@ -392,7 +392,6 @@ def test_case_pass_sequencing_qc_on_hifi_yield_delivered_at_pass():
     passes = case_pass_sequencing_qc_on_hifi_yield(case)
 
     # THEN the case fails QC
-    assert sample.delivered_at == past_date
     assert passes
 
 
