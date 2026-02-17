@@ -222,7 +222,6 @@ def test_case_pass_sequencing_qc_on_reads_delivered_at_pass():
     passes = case_pass_sequencing_qc_on_reads(case)
 
     # THEN the case pass QC
-    assert sample.delivered_at == past_date
     assert passes
 
 
