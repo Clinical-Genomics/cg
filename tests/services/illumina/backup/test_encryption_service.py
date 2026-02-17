@@ -1,18 +1,15 @@
 """Module for the Illumina encrypt run service test."""
 
 import logging
-
 import shutil
 from pathlib import Path
 
-
 import pytest
 
-from cg.exc import IlluminaRunEncryptionError, FlowCellError
-from cg.services.illumina.backup.encrypt_service import (
-    IlluminaRunEncryptionService,
-)
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.exc import FlowCellError, IlluminaRunEncryptionError
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 
 
 def test_illumina_run_encryption_service(
@@ -217,3 +214,18 @@ def test_start_encryption(
 
     # THEN sbatch should be submitted
     assert f"Run encryption running as job {sbatch_job_number}" in caplog.text
+
+
+def test_copy_run_dir_to_tmp_excludes_analysis(
+    illumina_run_encryption_service: IlluminaRunEncryptionService,
+):
+    # GIVEN an IlluminaRunEncryptionService
+
+    # WHEN generating the copy command
+    command: str = illumina_run_encryption_service.copy_run_dir_to_tmp()
+
+    # THEN the command should exclude the Analysis directory
+    assert f"--exclude={DemultiplexingDirsAndFiles.ANALYSIS}" in command
+
+    # THEN the command should use rsync
+    assert command.startswith("rsync")
