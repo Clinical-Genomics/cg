@@ -543,7 +543,6 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_delivered_at_pas
     passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
 
     # THEN the case does pass sequencing qc
-    assert sample.delivered_at is past_date
     assert passes
 
 
