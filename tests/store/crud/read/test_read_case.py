@@ -31,7 +31,7 @@ def test_get_uploaded_related_dna_case(
 
     # THEN the correct set of cases is returned
     assert set(fetched_uploaded_related_dna_case) == set(uploaded_related_dna_case)
-    assert fetched_uploaded_related_dna_case != related_dna_cases
+    assert set(fetched_uploaded_related_dna_case) != set(related_dna_cases)
 
 
 def test_get_case_by_internal_id_strict_works(store_with_cases_and_customers: Store):
