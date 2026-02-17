@@ -200,29 +200,24 @@ def test_configurator_factory_failure(cg_context: CGConfig):
         configurator_factory.get_configurator(workflow)
 
 
-def test_get_scout_api_38(cg_context: CGConfig):
+@pytest.mark.parametrize(
+    "workflow, scout_instance",
+    [
+        (Workflow.BALSAMIC, "scout_api_37"),
+        (Workflow.BALSAMIC_UMI, "scout_api_37"),
+        (Workflow.MIP_DNA, "scout_api_37"),
+        (Workflow.MIP_RNA, "scout_api_37"),
+        (Workflow.NALLO, "scout_api_38"),
+        (Workflow.RAREDISEASE, "scout_api_38"),
+        (Workflow.TOMTE, "scout_api_37"),
+    ],
+)
+def test_get_scout_api(workflow: Workflow, scout_instance: str, cg_context: CGConfig):
     # GIVEN a configurator factory
     configurator_factory = ConfiguratorFactory(cg_config=cg_context)
 
-    # GIVEN Nallo
-    workflow = Workflow.NALLO
-
-    # WHEN getting the scout api instance
+    # WHEN getting the scout api instance for a given workflow
     scout_api: ScoutAPI = configurator_factory._get_scout_api(workflow=workflow)
 
-    # THEN we should receive the HG38 instance
-    assert scout_api == cg_context.scout_api_38
-
-
-def test_get_scout_api_37(cg_context: CGConfig):
-    # GIVEN a configurator factory
-    configurator_factory = ConfiguratorFactory(cg_config=cg_context)
-
-    # GIVEN not Nallo
-    workflow = Workflow.MIP_DNA
-
-    # WHEN getting the scout api instance
-    scout_api: ScoutAPI = configurator_factory._get_scout_api(workflow=workflow)
-
-    # THEN we should receive the HG37 instance
-    assert scout_api == cg_context.scout_api_37
+    # THEN we should receive the correct scout instance
+    assert scout_api == getattr(cg_context, scout_instance)

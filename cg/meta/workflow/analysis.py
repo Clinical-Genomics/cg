@@ -67,7 +67,7 @@ class AnalysisAPI(MetaAPI):
     def __init__(self, workflow: Workflow, config: CGConfig):
         super().__init__(config=config)
         self.workflow = workflow
-        if self.workflow == Workflow.NALLO:
+        if self.workflow in [Workflow.NALLO, Workflow.RAREDISEASE]:
             self.scout_api: ScoutAPI = self.scout_api_38
         else:
             self.scout_api: ScoutAPI = self.scout_api_37

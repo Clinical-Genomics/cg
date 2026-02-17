@@ -14,6 +14,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.nallo import NalloAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -31,22 +32,24 @@ WORKFLOWS_TO_TEST: list = [
 ]
 
 ANALYSIS_API: list = [
-    (Workflow.BALSAMIC, BalsamicAnalysisAPI),
-    (Workflow.MIP_DNA, MipDNAAnalysisAPI),
-    (Workflow.MIP_RNA, MipRNAAnalysisAPI),
-    (Workflow.NALLO, NalloAnalysisAPI),
-    (Workflow.RNAFUSION, RnafusionAnalysisAPI),
-    (Workflow.TOMTE, TomteAnalysisAPI),
+    (Workflow.BALSAMIC, BalsamicAnalysisAPI, "scout_api_37"),
+    (Workflow.MIP_DNA, MipDNAAnalysisAPI, "scout_api_37"),
+    (Workflow.MIP_RNA, MipRNAAnalysisAPI, "scout_api_37"),
+    (Workflow.NALLO, NalloAnalysisAPI, "scout_api_38"),
+    (Workflow.RAREDISEASE, RarediseaseAnalysisAPI, "scout_api_38"),
+    (Workflow.RNAFUSION, RnafusionAnalysisAPI, "scout_api_37"),
+    (Workflow.TOMTE, TomteAnalysisAPI, "scout_api_37"),
 ]
 
 
 @pytest.mark.parametrize(
-    "workflow,analysis_api",
+    "workflow,analysis_api, scout_instance",
     ANALYSIS_API,
 )
 def test_get_upload_api(
     cg_context: CGConfig,
     case_id: str,
+    scout_instance: str,
     helpers: StoreHelpers,
     workflow: Workflow,
     analysis_api: AnalysisAPI,
@@ -63,6 +66,7 @@ def test_get_upload_api(
 
     # THEN assert that the type of upload API is correct
     assert isinstance(upload_api.analysis_api, analysis_api)
+    assert upload_api.analysis_api.scout_api is getattr(upload_api.analysis_api, scout_instance)
 
 
 @pytest.mark.parametrize(
