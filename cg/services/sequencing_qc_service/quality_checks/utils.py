@@ -85,13 +85,7 @@ def express_sample_has_enough_hifi_yield(sample: Sample) -> bool:
         The sample has enough HiFi yield.
     Returns false if:
         The HiFi yield is lower than the threshold or None.
-    Raises:
-        ApplicationDoesNotHaveHiFiYieldError if the sample doesn't have expected HiFi yield.
     """
-    if not sample.expected_hifi_yield:
-        raise ApplicationDoesNotHaveHiFiYieldError(
-            f"Application for sample {sample.internal_id} does not have target HiFi yield."
-        )
 
     if not sample.hifi_yield:
         LOG.debug(f"Sample {sample.internal_id} has no hifi yield.")
