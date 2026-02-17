@@ -1,3 +1,5 @@
+from string import Template
+
 import pytest
 
 from cg.constants.constants import DataDelivery, Workflow
@@ -39,7 +41,7 @@ def test_get_delivery_message_for_single_case(
 
 
 @pytest.mark.parametrize(
-    "workflow, delivery_type, expected_message_fixture",
+    "workflow, delivery_type, expected_message_template_fixture",
     [
         (
             Workflow.NALLO,
@@ -86,7 +88,7 @@ def test_get_delivery_message_scout38_case(
     helpers: StoreHelpers,
     workflow: Workflow,
     delivery_type: DataDelivery,
-    expected_message_fixture: str,
+    expected_message_template_fixture: str,
     request: pytest.FixtureRequest,
 ) -> None:
     """Test that the delivery message is created correctly for a given case."""
@@ -108,5 +110,9 @@ def test_get_delivery_message_scout38_case(
     message: str = delivery_message_service._get_delivery_message(case_ids={"case_id"})
 
     # THEN the message should be as expected
-    expected_message: str = request.getfixturevalue(expected_message_fixture)
+    expected_message_template: Template = request.getfixturevalue(expected_message_template_fixture)
+    expected_message: str = expected_message_template.substitute(
+        case_id="case_id", customer_id=order.customer.internal_id, ticket_id=order.ticket_id
+    )
+
     assert message == expected_message
