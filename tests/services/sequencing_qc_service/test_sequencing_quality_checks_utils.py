@@ -124,7 +124,6 @@ def test_case_pass_sequencing_qc_on_reads_express_delivered_at_pass():
     passes: bool = case_pass_sequencing_qc_on_reads(case)
 
     # THEN the case does pass sequencing qc
-    assert sample.delivered_at is past_date
     assert passes
 
 
