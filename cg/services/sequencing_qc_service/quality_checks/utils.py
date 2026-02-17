@@ -64,7 +64,7 @@ def express_sample_has_enough_reads(sample: Sample) -> bool:
     application version.
     """
     express_reads_threshold: int = get_express_reads_threshold_for_sample(sample)
-    enough_reads: bool = sample.reads >= express_reads_threshold
+    enough_reads: bool = sample.reads >= express_reads_threshold or sample.delivered_at is not None
     if not enough_reads:
         LOG.warning(f"Sample {sample.internal_id} has too few reads.")
     return enough_reads

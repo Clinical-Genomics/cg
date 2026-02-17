@@ -23,12 +23,8 @@ class SequencingQCCheck(QualityCheck):
     CASE_PASSES_ON_READS: Callable = case_pass_sequencing_qc_on_reads
     CASE_PASSES_ON_YIELD: Callable = case_pass_sequencing_qc_on_hifi_yield
     SAMPLE_PASSES: Callable = sample_pass_sequencing_qc_on_reads
-    ALL_SAMPLES_IN_CASE_HAVE_READS: Callable = (
-        all_samples_in_case_have_reads  # TODO what is the expected behavior here?
-    )
-    ANY_SAMPLE_IN_CASE_HAS_READS: Callable = (
-        any_sample_in_case_has_reads  # TODO what is the expected behavior here?
-    )
+    ALL_SAMPLES_IN_CASE_HAVE_READS: Callable = all_samples_in_case_have_reads
+    ANY_SAMPLE_IN_CASE_HAS_READS: Callable = any_sample_in_case_has_reads
     RAW_DATA_CASE_QC: Callable = raw_data_case_pass_qc
 
 

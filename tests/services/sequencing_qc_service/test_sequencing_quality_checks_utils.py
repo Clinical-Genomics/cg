@@ -102,17 +102,20 @@ def test_is_sample_express_priority(
     assert is_sample_express_priority(sample) == expected_result
 
 
-def test_case_pass_sequencing_qc_on_reads_express_delivered_at_pass():  # TODO patch test
+def test_case_pass_sequencing_qc_on_reads_express_delivered_at_pass():
     # GIVEN a case with express priority and less than half the target reads
     # GIVEN that the sample has a delivered at date
     past_date: datetime = datetime(2026, 2, 16, 0, 0, 0)
     sample: Sample = create_autospec(
         Sample,
         delivered_at=past_date,
-        hifi_yield=24,
+        reads=9,
         application_version=create_autospec(
             ApplicationVersion,
-            application=create_autospec(Application, expected_express_hifi_yield=25),
+            application=create_autospec(
+                Application,
+                target_reads=20,
+            ),
         ),
     )
     case: Case = create_autospec(Case, samples=[sample], priority=Priority.express)
@@ -440,6 +443,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_fails():
     # GIVEN a case with a PacBio application, express priority and less than half the target yield
     sample: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         hifi_yield=24,
         application_version=create_autospec(
             ApplicationVersion,
@@ -452,6 +456,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_fails():
     passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
 
     # THEN the case does not pass sequencing qc
+    assert sample.delivered_at is None
     assert not passes
 
 
