@@ -29,43 +29,42 @@ def microsalt_message(customer_id: str, ticket_id: str) -> str:
 
 
 @pytest.fixture
-def nallo_raw_data_analysis_message(customer_id: str, nallo_case_id: str, ticket_id: str) -> str:
-    """Return the delivery message for case with raw-data and analysis delivery."""
+def raw_data_analysis_message() -> str:
+    """Return the delivery message template for a case with raw-data and analysis delivery."""
+
     return (
         "Hello,\n\n"
         "The raw data and analysis files for the following case are currently being "
         "uploaded to your inbox on Caesar:\n\n"
-        f"{nallo_case_id}\n\n"
+        "{case_id}\n\n"
         "Available under: \n"
-        f"/home/{customer_id}/inbox/{ticket_id} \n\n"
+        "/home/{customer_id}/inbox/{ticket_id} \n\n"
         f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
     )
 
 
 @pytest.fixture
-def nallo_raw_data_analysis_scout_message(
-    customer_id: str, nallo_case_id: str, ticket_id: str
-) -> str:
-    """Return the delivery message for a Nallo case with raw-data, analysis and Scout delivery."""
+def raw_data_analysis_scout38_message() -> str:
+    """Return the delivery message template for a scout38 case with raw-data, analysis and Scout delivery."""
     return (
         "Hello,\n\n"
         "The analysis has been uploaded to Scout for the following case:\n\n"
-        f"https://scout38.sys.scilifelab.se/{customer_id}/{nallo_case_id}\n\n"
+        "https://scout38.sys.scilifelab.se/{customer_id}/{case_id}\n\n"
         "The raw data and analysis files are currently being uploaded to your inbox on Caesar:\n\n"
-        f"/home/{customer_id}/inbox/{ticket_id} \n\n"
+        "/home/{customer_id}/inbox/{ticket_id} \n\n"
         f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
     )
 
 
 @pytest.fixture
-def nallo_raw_data_scout_message(customer_id: str, nallo_case_id: str, ticket_id: str) -> str:
-    """Return the delivery message for a Nallo case with Scout delivery."""
+def raw_data_scout38_message() -> str:
+    """Return the delivery message template for a scout38 case with Scout delivery."""
     return (
         "Hello,\n\n"
         "The analysis has been uploaded to Scout for the following case:\n\n"
-        f"https://scout38.sys.scilifelab.se/{customer_id}/{nallo_case_id}\n\n"
+        "https://scout38.sys.scilifelab.se/{customer_id}/{case_id}\n\n"
         "The raw data files are currently being uploaded to your inbox on Caesar:\n\n"
-        f"/home/{customer_id}/inbox/{ticket_id} \n\n"
+        "/home/{customer_id}/inbox/{ticket_id} \n\n"
         f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
     )
 
