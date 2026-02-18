@@ -249,6 +249,17 @@ class NalloConfig(CommonAppConfig):
     tower_workflow: str
 
 
+class VerifybamidSvdResources(BaseModel):
+    bed: Path
+    mu: Path
+    ud: Path
+
+
+class VerifybamidSvdResourcesSet(BaseModel):
+    wes: VerifybamidSvdResources
+    wgs: VerifybamidSvdResources
+
+
 class RarediseaseConfig(CommonAppConfig):
     binary_path: str | None = None
     conda_binary: str | None = None
@@ -266,6 +277,7 @@ class RarediseaseConfig(CommonAppConfig):
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    verifybamid_svd: VerifybamidSvdResourcesSet
 
 
 class TomteConfig(CommonAppConfig):
