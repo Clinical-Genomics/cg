@@ -3,6 +3,7 @@
 import logging
 from unittest.mock import Mock, create_autospec
 
+import pytest
 from click.testing import CliRunner
 from housekeeper.store.models import File
 
@@ -34,13 +35,27 @@ def test_upload_gens(
     assert "Dry run" in caplog.text
 
 
-def test_upload_gens_genome_build_38(cli_runner: CliRunner, upload_gens_context: CGConfig):
+@pytest.mark.parametrize(
+    "workflow, genome_build",
+    [
+        (Workflow.BALSAMIC, GenomeBuild.hg19),
+        (Workflow.BALSAMIC_UMI, GenomeBuild.hg19),
+        (Workflow.MIP_DNA, GenomeBuild.hg19),
+        (Workflow.RAREDISEASE, GenomeBuild.hg38),
+    ],
+)
+def test_upload_gens_genome_build(
+    workflow: Workflow,
+    genome_build: GenomeBuild,
+    cli_runner: CliRunner,
+    upload_gens_context: CGConfig,
+):
     # GIVEN a store
     status_db: Store = create_autospec(Store)
 
     # GIVEN a Raredisease case with a sample
     sample: Sample = create_autospec(Sample, internal_id="sample_id")
-    case: Case = create_autospec(Case, data_analysis=Workflow.RAREDISEASE, samples=[sample])
+    case: Case = create_autospec(Case, data_analysis=workflow, samples=[sample])
 
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
     upload_gens_context.status_db_ = status_db
@@ -63,6 +78,6 @@ def test_upload_gens_genome_build_38(cli_runner: CliRunner, upload_gens_context:
         baf_path=file_path,
         case_id="some_case",
         coverage_path=file_path,
-        genome_build=GenomeBuild.hg38,
+        genome_build=genome_build,
         sample_id="sample_id",
     )
