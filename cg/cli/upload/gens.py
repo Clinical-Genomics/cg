@@ -38,9 +38,9 @@ def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool):
         suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
 
-    family: Case = status_db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = status_db.get_case_by_internal_id_strict(internal_id=case_id)
 
-    for sample in family.samples:
+    for sample in case.samples:
         hk_coverage: File = housekeeper_api.get_file_from_latest_version(
             bundle_name=case_id, tags=[sample.internal_id] + GensAnalysisTag.COVERAGE
         )
