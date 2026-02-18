@@ -7,18 +7,34 @@ from cg.store.models import PacbioSequencingRun
 from cg.store.store import Store
 
 
+@pytest.fixture
+def pacbio_sequencing_run_dto() -> PacBioSequencingRunDTO:
+    return PacBioSequencingRunDTO(
+        instrument_name=RevioNames.BETTY,
+        run_id="pinocchio",
+        run_name="run-name",
+        unique_id="unique-id",
+    )
+
+
 def test_get_pacbio_sequencing_runs(
     store: Store,
 ):
     # GIVEN a store with two runs
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name="older"
+            instrument_name=RevioNames.BETTY,
+            run_id="r_older",
+            run_name="run-name-older",
+            unique_id="unique-id-older",
         )
     )
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.WILMA, run_name="newer"
+            instrument_name=RevioNames.WILMA,
+            run_id="r_newer",
+            run_name="run-name-newer",
+            unique_id="unique-id-newer",
         )
     )
 
@@ -26,51 +42,63 @@ def test_get_pacbio_sequencing_runs(
     runs, total_count = store.get_pacbio_sequencing_runs()
 
     # THEN the two runs should be returned
-    assert runs[0].run_name == "newer"
-    assert runs[1].run_name == "older"
+    assert runs[0].run_id == "r_newer"
+    assert runs[1].run_id == "r_older"
     assert total_count == 2
 
 
 def test_get_pacbio_sequencing_runs_with_pagination(
     store: Store,
 ):
-    # GIVEN a store with two runs
+    # GIVEN a store with four runs
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name="pinocchio"
+            instrument_name=RevioNames.BETTY,
+            run_id="pinocchio",
+            run_name="run-name-1",
+            unique_id="unique-id-1",
         )
     )
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.WILMA, run_name="grinch"
+            instrument_name=RevioNames.WILMA,
+            run_id="grinch",
+            run_name="run-name-2",
+            unique_id="unique-id-2",
         )
     )
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name="sauron"
+            instrument_name=RevioNames.BETTY,
+            run_id="sauron",
+            run_name="run-name-3",
+            unique_id="unique-id-3",
         )
     )
     store.create_pacbio_sequencing_run(
         pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.WILMA, run_name="jesus_christ"
+            instrument_name=RevioNames.WILMA,
+            run_id="jesus_christ",
+            run_name="run-name-4",
+            unique_id="unique-id-4",
         )
     )
 
-    # WHEN fetching the runs
+    # WHEN fetching the second page of runs with page size two
     runs, total_count = store.get_pacbio_sequencing_runs(page=2, page_size=2)
 
     # THEN the two runs should be returned
-    assert runs[0].run_name == "grinch"
-    assert runs[1].run_name == "pinocchio"
+    assert runs[0].run_id == "grinch"
+    assert runs[1].run_id == "pinocchio"
     assert total_count == 4
 
 
-def test_get_pacbio_sequencing_run_by_id_successful(store: Store):
+def test_get_pacbio_sequencing_run_by_id_successful(
+    store: Store, pacbio_sequencing_run_dto: PacBioSequencingRunDTO
+):
     # GIVEN a store with a Pacbio sequencing run
     sequencing_run: PacbioSequencingRun = store.create_pacbio_sequencing_run(
-        pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name="pinocchio"
-        )
+        pacbio_sequencing_run_dto
     )
     store.commit_to_store()
 
@@ -81,12 +109,12 @@ def test_get_pacbio_sequencing_run_by_id_successful(store: Store):
     assert fetched_run == sequencing_run
 
 
-def test_get_pacbio_sequencing_run_by_id_unsuccessful(store: Store):
+def test_get_pacbio_sequencing_run_by_id_unsuccessful(
+    store: Store, pacbio_sequencing_run_dto: PacBioSequencingRunDTO
+):
     # GIVEN a store with a Pacbio sequencing run
     sequencing_run: PacbioSequencingRun = store.create_pacbio_sequencing_run(
-        pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name="pinocchio"
-        )
+        pacbio_sequencing_run_dto
     )
     store.commit_to_store()
 
@@ -96,34 +124,32 @@ def test_get_pacbio_sequencing_run_by_id_unsuccessful(store: Store):
         store.get_pacbio_sequencing_run_by_id(sequencing_run.id + 1)
 
 
-def test_get_pacbio_sequencing_run_by_run_name_successful(store: Store):
+def test_get_pacbio_sequencing_run_by_run_name_successful(
+    store: Store, pacbio_sequencing_run_dto: PacBioSequencingRunDTO
+):
     # GIVEN a store with a Pacbio sequencing run
     sequencing_run: PacbioSequencingRun = store.create_pacbio_sequencing_run(
-        pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name="pinocchio"
-        )
+        pacbio_sequencing_run_dto
     )
     store.commit_to_store()
 
-    # WHEN getting the sequencing run by run_name
-    fetched_run: PacbioSequencingRun = store.get_pacbio_sequencing_run_by_run_name(
-        sequencing_run.run_name
+    # WHEN getting the sequencing run by run ID
+    fetched_run: PacbioSequencingRun = store.get_pacbio_sequencing_run_by_run_id(
+        sequencing_run.run_id
     )
 
     # THEN the fetched run is as expected
     assert fetched_run == sequencing_run
 
 
-def test_get_pacbio_sequencing_run_by_run_name_unsuccessful(store: Store):
+def test_get_pacbio_sequencing_run_by_run_name_unsuccessful(
+    store: Store, pacbio_sequencing_run_dto: PacBioSequencingRunDTO
+):
     # GIVEN a store with a Pacbio sequencing run
-    store.create_pacbio_sequencing_run(
-        pacbio_sequencing_run_dto=PacBioSequencingRunDTO(
-            instrument_name=RevioNames.BETTY, run_name="pinocchio"
-        )
-    )
+    store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
     store.commit_to_store()
 
-    # WHEN getting the sequencing run by the wrong run_name
+    # WHEN getting the sequencing run by the wrong run ID
     # THEN an error stating that the run was not found is raised
     with pytest.raises(PacbioSequencingRunNotFoundError):
-        store.get_pacbio_sequencing_run_by_run_name("Geppetto")
+        store.get_pacbio_sequencing_run_by_run_id("Geppetto")

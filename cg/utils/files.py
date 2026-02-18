@@ -27,7 +27,7 @@ def get_file_in_directory(directory: Path, file_name: str) -> Path:
     raise FileNotFoundError(f"File {file_name} not found in {directory}")
 
 
-def get_file_with_pattern_from_list(files: list[Path], pattern: str) -> Path | None:
+def get_file_with_pattern_from_list(files: list[Path], pattern: str) -> Path:
     """
     Return the path whose name matches a pattern from a list of paths.
     Raises:

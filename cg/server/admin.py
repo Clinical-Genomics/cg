@@ -17,6 +17,7 @@ from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
+from cg.utils.number_formatter import Si
 
 
 class BaseView(ModelView):
@@ -29,6 +30,26 @@ class BaseView(ModelView):
     def inaccessible_callback(self, name, **kwargs):
         # redirect to login page if user doesn't have access
         return redirect(url_for("google.login", next=request.url))
+
+
+def view_hifi_yield_si_unit_formatted(unused1, unused2, model, unused3):
+    del unused1, unused2, unused3
+
+    if model.hifi_yield is None:
+        return None
+
+    formatted_number = Si.prefix(value=model.hifi_yield, unit="b")
+    return Markup(formatted_number)
+
+
+def view_reads_large_number_formatted(unused1, unused2, model, unused3):
+    del unused1, unused2, unused3
+
+    if model.reads is None:
+        return None
+
+    formatted_number = Si.group_digits(model.reads)
+    return Markup(formatted_number)
 
 
 def view_priority(unused1, unused2, model, unused3):
@@ -780,6 +801,8 @@ class SampleView(BaseView):
     column_formatters = {
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
+        "reads": view_reads_large_number_formatted,
+        "hifi_yield": view_hifi_yield_si_unit_formatted,
         "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
         "original_ticket": view_ticket_link,
@@ -906,6 +929,7 @@ class PacbioSmrtCellMetricsView(BaseView):
     column_list = (
         "internal_id",
         "sequencing_run.run_name",
+        "sequencing_run.run_id",
         "movie_name",
         "well",
         "plate",
@@ -929,9 +953,14 @@ class PacbioSmrtCellMetricsView(BaseView):
         "internal_id": view_pacbio_sample_sequencing_metrics_link,
         "model": view_smrt_cell_model,
     }
-    column_labels = {"sequencing_run.run_name": "Run Name"}
+    column_labels = {"sequencing_run.run_name": "Run Name", "sequencing_run.run_id": "Run ID"}
     column_default_sort = ("completed_at", True)
-    column_searchable_list = ["device.internal_id", "movie_name", "sequencing_run.run_name"]
+    column_searchable_list = [
+        "device.internal_id",
+        "movie_name",
+        "sequencing_run.run_id",
+        "sequencing_run.run_name",
+    ]
     column_sortable_list = [
         ("internal_id", "device.internal_id"),
         "started_at",
@@ -961,7 +990,7 @@ class PacbioSmrtCellMetricsView(BaseView):
 class PacbioSampleRunMetricsView(BaseView):
     column_filters = [
         "instrument_run.plate",
-        "instrument_run.sequencing_run.run_name",
+        "instrument_run.sequencing_run.run_id",
     ]
     column_formatters = {
         "smrt_cell": PacbioSmrtCellMetricsView.view_smrt_cell_link,
@@ -969,12 +998,12 @@ class PacbioSampleRunMetricsView(BaseView):
     }
     column_labels = {
         "instrument_run.plate": "Plate",
-        "instrument_run.sequencing_run.run_name": "Run Name",
+        "instrument_run.sequencing_run.run_id": "Run ID",
     }
     column_list = [
         "smrt_cell",
         "sample",
-        "instrument_run.sequencing_run.run_name",
+        "instrument_run.sequencing_run.run_id",
         "instrument_run.plate",
         "hifi_reads",
         "hifi_yield",
@@ -984,5 +1013,5 @@ class PacbioSampleRunMetricsView(BaseView):
     column_searchable_list = [
         "sample.internal_id",
         "instrument_run.device.internal_id",
-        "instrument_run.sequencing_run.run_name",
+        "instrument_run.sequencing_run.run_id",
     ]

@@ -13,18 +13,17 @@ class PacbioSequencingRunsService:
     def __init__(self, store: Store):
         self.store = store
 
-    def get_sequencing_runs_by_name(self, run_name: str) -> PacbioSmrtCellMetricsResponse:
-        runs: list[PacbioSmrtCellMetricsDTO] = []
-        db_runs: list[PacbioSMRTCellMetrics] = self.store.get_pacbio_smrt_cell_metrics_by_run_name(
-            run_name
+    def get_sequencing_runs_by_run_id(self, run_id: str) -> PacbioSmrtCellMetricsResponse:
+        metrics: list[PacbioSmrtCellMetricsDTO] = []
+        db_smrt_cell_metrics: list[PacbioSMRTCellMetrics] = (
+            self.store.get_pacbio_smrt_cell_metrics_by_run_id(run_id)
         )
-        for db_run in db_runs:
-            run_dict = db_run.to_dict()
-            run_dict["internal_id"] = db_run.device.internal_id
-            run_dict["run_name"] = db_run.sequencing_run.run_name
-            run = PacbioSmrtCellMetricsDTO.model_validate(run_dict)
-            runs.append(run)
-        return PacbioSmrtCellMetricsResponse(runs=runs)
+        for metric in db_smrt_cell_metrics:
+            metric_dict = metric.to_dict()
+            metric_dict["internal_id"] = metric.device.internal_id
+            metric_dict["run_id"] = metric.run_id
+            metrics.append(PacbioSmrtCellMetricsDTO.model_validate(metric_dict))
+        return PacbioSmrtCellMetricsResponse(metrics=metrics)
 
     def get_sequencing_runs(self, page: int = 0, page_size: int = 0) -> PacbioSequencingRunResponse:
         db_runs, total_count = self.store.get_pacbio_sequencing_runs(page=page, page_size=page_size)
@@ -32,9 +31,11 @@ class PacbioSequencingRunsService:
         for db_run in db_runs:
             run = PacbioSequencingRunDTO(
                 id=db_run.id,
+                run_id=db_run.run_id,
                 run_name=db_run.run_name,
                 comment=db_run.comment,
                 processed=db_run.processed,
+                unique_id=db_run.unique_id,
             )
             runs.append(run)
         return PacbioSequencingRunResponse(pacbio_sequencing_runs=runs, total_count=total_count)

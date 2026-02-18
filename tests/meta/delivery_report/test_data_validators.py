@@ -20,6 +20,7 @@ from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
 from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
 from cg.meta.delivery_report.tomte import TomteDeliveryReportAPI
 from cg.meta.workflow.nallo import NalloAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
@@ -30,6 +31,7 @@ from cg.store.models import Analysis, Application, ApplicationVersion, Case, Cas
 from cg.store.store import Store
 from tests.meta.delivery_report.conftest import (
     EXPECTED_NALLO_QC,
+    EXPECTED_RAREDISEASE_QC,
     EXPECTED_RNAFUSION_QC_TABLE_WTS,
     EXPECTED_TOMTE_QC_TABLE_WTS,
 )
@@ -295,6 +297,79 @@ def test_get_delivery_report_html_nallo(nallo_analysis: NextflowAnalysis):
 
     # THEN the report is generated as expected
     assert EXPECTED_NALLO_QC in delivery_report
+
+
+def test_get_delivery_report_html_raredisease(raredisease_analysis: NextflowAnalysis):
+    # GIVEN a Raredisease case
+    sample: Sample = create_autospec(
+        Sample,
+        sex=SexEnum.female,
+        internal_id="sample_id",
+        application_version=create_autospec(
+            ApplicationVersion, application=create_autospec(Application)
+        ),
+        is_tumour=False,
+    )
+    sample.name = "sample_name"
+    case: Case = create_autospec(
+        Case,
+        data_analysis=Workflow.RAREDISEASE,
+        data_delivery=DataDelivery.ANALYSIS_FILES,
+        internal_id="case_id",
+        sample=[sample],
+        panels=["some_panel"],
+    )
+
+    # GIVEN a case sample relationship
+    case_sample = create_autospec(CaseSample, sample=sample, case=case)
+
+    # GIVEN a store and mocked store functions
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id = Mock(return_value=case)
+    store.get_case_samples_by_case_id = Mock(return_value=[case_sample])
+
+    # GIVEN a Delivery API with mocked functions
+    delivery_api: DeliveryAPI = create_autospec(DeliveryAPI)
+    delivery_api.is_analysis_delivery = Mock(return_value=True)
+    delivery_api.get_analysis_case_delivery_files = Mock(
+        return_value=[
+            create_autospec(
+                DeliveryFile, destination_path=Path("destination"), source_path=Path("source")
+            )
+        ]
+    )
+
+    # GIVEN a LIMS API with and mocked return for the initial qc check
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.has_sample_passed_initial_qc = Mock(return_value=True)
+
+    # GIVEN a Raredisease Analysis API and a Raredisease analysis
+    analysis_api = create_autospec(
+        RarediseaseAnalysisAPI,
+        chanjo_api=create_autospec(ChanjoAPI),
+        delivery_api=delivery_api,
+        housekeeper_api=create_autospec(HousekeeperAPI),
+        lims_api=lims_api,
+        scout_api=create_autospec(ScoutAPI),
+        status_db=store,
+        workflow=Workflow.RAREDISEASE,
+    )
+    analysis_api.get_latest_metadata = Mock(return_value=raredisease_analysis)
+
+    # GIVEN a Raredisease Delivery Report API
+    delivery_report_api = RarediseaseDeliveryReportAPI(analysis_api)
+
+    # WHEN generating a delivery report
+    delivery_report: str = delivery_report_api.get_delivery_report_html(
+        create_autospec(
+            Analysis,
+            comment="some comment",
+            workflow=Workflow.RAREDISEASE,
+            workflow_version="1.0.0",
+        ),
+        force=False,
+    )
+    assert EXPECTED_RAREDISEASE_QC in delivery_report
 
 
 def test_get_missing_report_data(
