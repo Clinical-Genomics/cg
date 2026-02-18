@@ -1,5 +1,3 @@
-from string import Template
-
 import pytest
 
 from cg.constants.constants import DataDelivery, Workflow
@@ -110,8 +108,8 @@ def test_get_delivery_message_scout38_case(
     message: str = delivery_message_service._get_delivery_message(case_ids={"case_id"})
 
     # THEN the message should be as expected
-    expected_message_template: Template = request.getfixturevalue(expected_message_template_fixture)
-    expected_message: str = expected_message_template.substitute(
+    expected_message_template: str = request.getfixturevalue(expected_message_template_fixture)
+    expected_message: str = expected_message_template.format(
         case_id="case_id", customer_id=order.customer.internal_id, ticket_id=order.ticket_id
     )
 
