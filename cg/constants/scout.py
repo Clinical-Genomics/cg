@@ -7,8 +7,8 @@ HGNC_ID = "hgnc_id"
 
 
 class GenomeBuild(StrEnum):
-    hg19: str = "37"
-    hg38: str = "38"
+    hg19 = "37"
+    hg38 = "38"
 
 
 class ScoutExportFileName(StrEnum):

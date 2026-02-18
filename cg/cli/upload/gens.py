@@ -53,6 +53,6 @@ def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool):
                 baf_path=hk_fracsnp.full_path,
                 case_id=case_id,
                 coverage_path=hk_coverage.full_path,
-                genome_build=GENOME_BUILD_37,
+                genome_build=GENOME_BUILD_37,  # TODO
                 sample_id=sample.internal_id,
             )
