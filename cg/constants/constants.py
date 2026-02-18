@@ -2,7 +2,6 @@
 
 from enum import Enum, IntEnum, StrEnum, auto
 
-from cg.constants.scout import GenomeBuild
 from cg.utils.date import get_date
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
@@ -144,6 +143,12 @@ DNA_WORKFLOWS_WITH_SCOUT_UPLOAD: list[Workflow] = [
     Workflow.MIP_DNA,
     Workflow.RAREDISEASE,
 ]
+
+
+class GenomeBuild(StrEnum):
+    hg19 = "37"
+    hg38 = "38"
+
 
 WORKFLOW_TO_GENOME_VERSION_MAP: dict[Workflow, GenomeBuild] = {
     Workflow.BALSAMIC: GenomeBuild.hg19,

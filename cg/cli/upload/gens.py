@@ -10,7 +10,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.constants.cli_options import DRY_RUN
-from cg.constants.gene_panel import GENOME_BUILD_37
+from cg.constants.constants import WORKFLOW_TO_GENOME_VERSION_MAP
 from cg.constants.housekeeper_tags import GensAnalysisTag
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
@@ -53,6 +53,6 @@ def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool):
                 baf_path=hk_fracsnp.full_path,
                 case_id=case_id,
                 coverage_path=hk_coverage.full_path,
-                genome_build=GENOME_BUILD_37,  # TODO
+                genome_build=WORKFLOW_TO_GENOME_VERSION_MAP[case.data_analysis],
                 sample_id=sample.internal_id,
             )

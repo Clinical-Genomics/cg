@@ -6,11 +6,6 @@ from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
 HGNC_ID = "hgnc_id"
 
 
-class GenomeBuild(StrEnum):
-    hg19 = "37"
-    hg38 = "38"
-
-
 class ScoutExportFileName(StrEnum):
     MANAGED_VARIANTS = f"managed_variants{FileExtensions.VCF}"
     PANELS = f"gene_panels{FileExtensions.BED}"
