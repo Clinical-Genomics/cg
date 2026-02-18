@@ -96,6 +96,9 @@ def test_raredisease_params_file_creator(
             "target_bed_file": expected_bed_short_name,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
             "vep_filters_scout_fmt": "some_path/gene_panels.bed",
+            "verifybamid_svd_bed": Path("some/sleeping_quarters.bed"),
+            "verifybamid_svd_mu": Path("some/cow.mu"),
+            "verifybamid_svd_ud": Path("some/department_of_external_affairs.UD"),
         },
     )
     # THEN auxiliary file is written and with the correct content

@@ -26,7 +26,10 @@ class RarediseaseParameters(WorkflowParameters):
     save_mapped_as_cram: bool
     vcfanno_extra_resources: str
     vep_filters_scout_fmt: str
-    sample_id_map: Path  # TODO add verifybamid_svd_bed and verifybamid_svd_mu verifybamid_svd_ud
+    sample_id_map: Path
+    verifybamid_svd_bed: Path
+    verifybamid_svd_mu: Path
+    verifybamid_svd_ud: Path
 
 
 class RNAFusionParameters(WorkflowParameters):

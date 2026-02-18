@@ -5,9 +5,11 @@ from cg.apps.lims import LimsAPI
 from cg.constants import FileExtensions
 from cg.constants.constants import BedVersionGenomeVersion
 from cg.constants.scout import ScoutExportFileName
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CgDataError
 from cg.io.csv import write_csv
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
+from cg.models.cg_config import RarediseaseConfig, VerifybamidSvdResources
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
@@ -24,8 +26,9 @@ LOG = logging.getLogger(__name__)
 
 
 class RarediseaseParamsFileCreator(ParamsFileCreator):
-    def __init__(self, store: Store, lims: LimsAPI, params: str):
+    def __init__(self, config: RarediseaseConfig, store: Store, lims: LimsAPI, params: str):
         super().__init__(params)
+        self.config = config
         self.store = store
         self.lims = lims
 
@@ -52,10 +55,13 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         self, case_id: str, case_path: Path, sample_sheet_path: Path
     ) -> RarediseaseParameters:
         """Return case-specific parameters for the analysis."""
-        analysis_type: str = self._get_arbitrary_prep_category_in_case(case_id)
+        analysis_type: SeqLibraryPrepCategory = self._get_arbitrary_prep_category_in_case(case_id)
         target_bed_file: str = self._get_target_bed_from_lims(case_id)
         sample_mapping_file: Path = self._create_sample_mapping_file(
             case_id=case_id, case_path=case_path
+        )
+        verifybamid_resources: VerifybamidSvdResources = self._get_verifybamid_resources(
+            analysis_type
         )
         return RarediseaseParameters(
             input=sample_sheet_path,
@@ -66,9 +72,24 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             vcfanno_extra_resources=f"{case_path}/{ScoutExportFileName.MANAGED_VARIANTS}",
             vep_filters_scout_fmt=f"{case_path}/{ScoutExportFileName.PANELS}",
             sample_id_map=sample_mapping_file,
+            verifybamid_svd_bed=verifybamid_resources.bed,
+            verifybamid_svd_mu=verifybamid_resources.mu,
+            verifybamid_svd_ud=verifybamid_resources.ud,
         )
 
-    def _get_arbitrary_prep_category_in_case(self, case_id: str) -> str:
+    def _get_verifybamid_resources(
+        self, analysis_type: SeqLibraryPrepCategory
+    ) -> VerifybamidSvdResources:
+        if analysis_type == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
+            return self.config.verifybamid_svd.wes
+        elif analysis_type == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING:
+            return self.config.verifybamid_svd.wgs
+        else:
+            raise NotImplementedError(
+                f"Prep category is {analysis_type}. Only WES and WGS are implemented."
+            )
+
+    def _get_arbitrary_prep_category_in_case(self, case_id: str) -> SeqLibraryPrepCategory:
         """
         Returns prep category. Assumes all case samples have the same
         prep category.

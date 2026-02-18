@@ -133,7 +133,7 @@ class ConfiguratorFactory:
             case Workflow.NALLO:
                 return NalloParamsFileCreator(params)
             case Workflow.RAREDISEASE:
-                return RarediseaseParamsFileCreator(
+                return RarediseaseParamsFileCreator(  # TODO update init
                     lims=self.lims_api, params=params, store=self.store
                 )
             case Workflow.RNAFUSION:
