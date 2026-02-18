@@ -51,7 +51,7 @@ def express_case_pass_sequencing_qc_on_hifi_yield(case: Case) -> bool:
     """
     Checks if all samples in an express case have enough hifi yield.
     """
-    return all(express_sample_has_enough_hifi_yield(sample) for sample in case.samples)
+    return all(express_sample_has_enough_yield(sample) for sample in case.samples)
 
 
 def express_sample_pass_sequencing_qc_on_reads(sample: Sample) -> bool:
@@ -60,17 +60,9 @@ def express_sample_pass_sequencing_qc_on_reads(sample: Sample) -> bool:
 
 def express_sample_has_enough_reads(sample: Sample) -> bool:
     """
-    Return true if:
-        The sample has already been delivered.
-        The sample has enough reads.
-    Returns false if:
-        The reads is lower than the express reads threshold or None.
+    Checks if given express sample has enough reads. Gets the threshold from the sample's
+    application version.
     """
-
-    if sample.delivered_at is not None:
-        LOG.info(f"Sample {sample.internal_id} has already been delivered - passing check")
-        return True
-
     express_reads_threshold: int = get_express_reads_threshold_for_sample(sample)
     enough_reads: bool = sample.reads >= express_reads_threshold
     if not enough_reads:
@@ -78,22 +70,10 @@ def express_sample_has_enough_reads(sample: Sample) -> bool:
     return enough_reads
 
 
-def express_sample_has_enough_hifi_yield(sample: Sample) -> bool:
-    """
-    Return true if:
-        The sample has already been delivered.
-        The sample has enough HiFi yield.
-    Returns false if:
-        The HiFi yield is lower than the threshold or None.
-    """
-
+def express_sample_has_enough_yield(sample: Sample) -> bool:
     if not sample.hifi_yield:
         LOG.debug(f"Sample {sample.internal_id} has no hifi yield.")
         return False
-
-    if sample.delivered_at is not None:
-        LOG.info(f"Sample {sample.internal_id} has already been delivered - passing check")
-        return True
 
     express_yield_threshold: int = get_express_yield_threshold_for_sample(sample)
     enough_yield: bool = sample.hifi_yield >= express_yield_threshold
@@ -223,17 +203,8 @@ def ready_made_library_sample_has_enough_reads(sample: Sample) -> bool:
 
 def sample_has_enough_reads(sample: Sample) -> bool:
     """
-    Return true if:
-        The sample has already been delivered.
-        The sample has enough reads.
-    Returns false if:
-        The reads is lower than the threshold or None.
+    Check if the sample has more or equal reads than the expected reads for the sample.
     """
-
-    if sample.delivered_at is not None:
-        LOG.info(f"Sample {sample.internal_id} has already been delivered - passing check")
-        return True
-
     enough_reads: bool = sample.reads >= sample.expected_reads_for_sample
     if not enough_reads:
         LOG.warning(f"Sample {sample.internal_id} has too few reads.")
@@ -242,11 +213,8 @@ def sample_has_enough_reads(sample: Sample) -> bool:
 
 def sample_has_enough_hifi_yield(sample: Sample) -> bool:
     """
-    Return true if:
-        The sample has already been delivered.
-        The sample has enough HiFi yield.
-    Returns false if:
-        The HiFi yield is lower than the threshold or None.
+    Return true if the sample's HiFi yield is greater than or equal to the threshold.
+    Returns false if the HiFi yield is lower than the threshold or None.
     Raises:
         ApplicationDoesNotHaveHiFiYieldError if the sample doesn't have expected HiFi yield.
     """
@@ -258,10 +226,6 @@ def sample_has_enough_hifi_yield(sample: Sample) -> bool:
     if not sample.hifi_yield:
         LOG.debug(f"Sample {sample.internal_id} has no hifi yield.")
         return False
-
-    if sample.delivered_at is not None:
-        LOG.info(f"Sample {sample.internal_id} has already been delivered - passing check")
-        return True
 
     enough_hifi_yield: bool = sample.hifi_yield >= sample.expected_hifi_yield
     if not enough_hifi_yield:
