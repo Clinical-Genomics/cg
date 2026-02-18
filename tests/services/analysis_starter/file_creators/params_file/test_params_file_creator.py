@@ -20,7 +20,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.tomte_params_file_creator import (
     TomteParamsFileCreator,
 )
-from cg.store.models import BedVersion, Case, Sample
+from cg.store.models import BedVersion, Case, CGConfig, Sample
 from cg.store.store import Store
 
 
@@ -61,8 +61,9 @@ def test_raredisease_params_file_creator(
     lims.capture_kit = Mock(return_value=lims_capture_kit)
 
     # GIVEN a params file creator
+    cg_config: CGConfig = create_autospec(CGConfig)
     file_creator = RarediseaseParamsFileCreator(
-        store=store_mock, lims=lims, params="Path_to_file.yaml"
+        config=cg_config, store=store_mock, lims=lims, params="Path_to_file.yaml"
     )
 
     # GIVEN case id

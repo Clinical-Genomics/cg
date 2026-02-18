@@ -75,7 +75,6 @@ from cg.store.store import Store
 
 
 class ConfiguratorFactory:
-
     def __init__(self, cg_config: CGConfig):
         self.cg_config = cg_config
         self.housekeeper_api: HousekeeperAPI = cg_config.housekeeper_api
@@ -133,8 +132,11 @@ class ConfiguratorFactory:
             case Workflow.NALLO:
                 return NalloParamsFileCreator(params)
             case Workflow.RAREDISEASE:
-                return RarediseaseParamsFileCreator(  # TODO update init
-                    lims=self.lims_api, params=params, store=self.store
+                return RarediseaseParamsFileCreator(
+                    config=self.cg_config.raredisease,
+                    lims=self.lims_api,
+                    params=params,
+                    store=self.store,
                 )
             case Workflow.RNAFUSION:
                 return RNAFusionParamsFileCreator(params)

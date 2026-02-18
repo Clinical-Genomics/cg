@@ -121,6 +121,18 @@ def nallo_config_object(get_nextflow_config_dict: Callable) -> NalloConfig:
 @pytest.fixture
 def raredisease_config_object(get_nextflow_config_dict: Callable) -> RarediseaseConfig:
     config: dict = get_nextflow_config_dict(workflow=Workflow.RAREDISEASE)
+    config["verifybamid_svd"] = {
+        "wes": {
+            "bed": Path("path", "to", "sleeping_quarters.bed"),
+            "mu": Path("path", "to", "cow.mu"),
+            "ud": Path("path", "to", "department_of_external_affairs.UD"),
+        },
+        "wgs": {
+            "bed": Path("path", "to", "sleeping_quarters.bed"),
+            "mu": Path("path", "to", "cow.mu"),
+            "ud": Path("path", "to", "department_of_external_affairs.UD"),
+        },
+    }
     return RarediseaseConfig(**config)
 
 
