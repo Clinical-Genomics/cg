@@ -29,7 +29,7 @@ def get_nextflow_config_dict(
     nextflow_repository: str,
     nextflow_pipeline_revision: str,
     email_address: str,
-) -> callable:
+) -> Callable:
     """
     Return a config dictionary factory for Nextflow pipelines. The returned factory can be called
     by adding the workflow as parameter to obtain the config dictionary.
