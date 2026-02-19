@@ -29,7 +29,7 @@ def get_nextflow_config_dict(
     nextflow_repository: str,
     nextflow_pipeline_revision: str,
     email_address: str,
-) -> callable:
+) -> Callable:
     """
     Return a config dictionary factory for Nextflow pipelines. The returned factory can be called
     by adding the workflow as parameter to obtain the config dictionary.
@@ -121,6 +121,18 @@ def nallo_config_object(get_nextflow_config_dict: Callable) -> NalloConfig:
 @pytest.fixture
 def raredisease_config_object(get_nextflow_config_dict: Callable) -> RarediseaseConfig:
     config: dict = get_nextflow_config_dict(workflow=Workflow.RAREDISEASE)
+    config["verifybamid_svd"] = {
+        "wes": {
+            "bed": Path("path", "to", "sleeping_quarters.bed"),
+            "mu": Path("path", "to", "cow.mu"),
+            "ud": Path("path", "to", "department_of_external_affairs.UD"),
+        },
+        "wgs": {
+            "bed": Path("path", "to", "sleeping_quarters.bed"),
+            "mu": Path("path", "to", "cow.mu"),
+            "ud": Path("path", "to", "department_of_external_affairs.UD"),
+        },
+    }
     return RarediseaseConfig(**config)
 
 

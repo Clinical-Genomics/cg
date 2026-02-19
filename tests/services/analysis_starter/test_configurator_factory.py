@@ -30,8 +30,14 @@ from cg.services.analysis_starter.configurator.file_creators.mip_dna_config impo
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease_params_file_creator import (
+    RarediseaseParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.protocol import (
     SampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease_sample_sheet_creator import (
+    RarediseaseSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
@@ -120,8 +126,8 @@ def test_nextflow_configurator_factory_raredisease_success(
 
     # THEN the configurator is of the expected type
     assert isinstance(configurator, NextflowConfigurator)
-    assert isinstance(configurator.params_file_creator, ParamsFileCreator)
-    assert isinstance(configurator.sample_sheet_creator, SampleSheetCreator)
+    assert isinstance(configurator.params_file_creator, RarediseaseParamsFileCreator)
+    assert isinstance(configurator.sample_sheet_creator, RarediseaseSampleSheetCreator)
     assert isinstance(configurator.pipeline_extension, RarediseaseExtension)
     assert (
         configurator.pipeline_extension.gene_panel_file_creator.scout_api == cg_context.scout_api_38

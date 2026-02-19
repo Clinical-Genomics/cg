@@ -27,6 +27,9 @@ class RarediseaseParameters(WorkflowParameters):
     vcfanno_extra_resources: str
     vep_filters_scout_fmt: str
     sample_id_map: Path
+    verifybamid_svd_bed: Path
+    verifybamid_svd_mu: Path
+    verifybamid_svd_ud: Path
 
 
 class RNAFusionParameters(WorkflowParameters):

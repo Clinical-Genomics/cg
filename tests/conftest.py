@@ -2184,6 +2184,18 @@ def context_config(
                 "mail_user": email_address,
             },
             "tower_workflow": "raredisease",
+            "verifybamid_svd": {
+                "wes": {
+                    "bed": Path("path", "to", "sleeping_quarters.bed"),
+                    "mu": Path("path", "to", "cow.mu"),
+                    "ud": Path("path", "to", "department_of_external_affairs.UD"),
+                },
+                "wgs": {
+                    "bed": Path("path", "to", "sleeping_quarters.bed"),
+                    "mu": Path("path", "to", "cow.mu"),
+                    "ud": Path("path", "to", "department_of_external_affairs.UD"),
+                },
+            },
         },
         "tomte": {
             "binary_path": nextflow_binary.as_posix(),

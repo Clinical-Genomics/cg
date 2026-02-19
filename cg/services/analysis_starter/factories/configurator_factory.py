@@ -35,7 +35,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.nallo import (
     NalloParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease_params_file_creator import (
     RarediseaseParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
@@ -75,7 +75,6 @@ from cg.store.store import Store
 
 
 class ConfiguratorFactory:
-
     def __init__(self, cg_config: CGConfig):
         self.cg_config = cg_config
         self.housekeeper_api: HousekeeperAPI = cg_config.housekeeper_api
@@ -134,7 +133,10 @@ class ConfiguratorFactory:
                 return NalloParamsFileCreator(params)
             case Workflow.RAREDISEASE:
                 return RarediseaseParamsFileCreator(
-                    lims=self.lims_api, params=params, store=self.store
+                    verifybamid_files_set=self.cg_config.raredisease.verifybamid_svd,
+                    lims=self.lims_api,
+                    params=params,
+                    store=self.store,
                 )
             case Workflow.RNAFUSION:
                 return RNAFusionParamsFileCreator(params)
