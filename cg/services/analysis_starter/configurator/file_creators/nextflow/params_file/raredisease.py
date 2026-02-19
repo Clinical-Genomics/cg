@@ -9,7 +9,7 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CgDataError
 from cg.io.csv import write_csv
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
-from cg.models.cg_config import RarediseaseConfig, VerifybamidSvdResources
+from cg.models.cg_config import VerifybamidSvdResources, VerifybamidSvdResourcesSet
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
@@ -26,9 +26,15 @@ LOG = logging.getLogger(__name__)
 
 
 class RarediseaseParamsFileCreator(ParamsFileCreator):
-    def __init__(self, config: RarediseaseConfig, store: Store, lims: LimsAPI, params: str):
+    def __init__(
+        self,
+        verifybamid_svd_resources_set: VerifybamidSvdResourcesSet,
+        store: Store,
+        lims: LimsAPI,
+        params: str,
+    ):
         super().__init__(params)
-        self.config = config
+        self.verifybamid_svd_resources_set = verifybamid_svd_resources_set
         self.store = store
         self.lims = lims
 
@@ -81,9 +87,9 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         self, analysis_type: SeqLibraryPrepCategory
     ) -> VerifybamidSvdResources:
         if analysis_type == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
-            return self.config.verifybamid_svd.wes
+            return self.verifybamid_svd_resources_set.wes
         elif analysis_type == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING:
-            return self.config.verifybamid_svd.wgs
+            return self.verifybamid_svd_resources_set.wgs
         else:
             raise NotImplementedError(
                 f"Prep category is {analysis_type}. Only WES and WGS are implemented."

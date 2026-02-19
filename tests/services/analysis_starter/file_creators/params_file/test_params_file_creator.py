@@ -7,12 +7,7 @@ from pytest_mock import MockerFixture
 from cg.apps.lims.api import LimsAPI
 from cg.constants.constants import BedVersionGenomeVersion, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.models.cg_config import (
-    CGConfig,
-    RarediseaseConfig,
-    VerifybamidSvdResources,
-    VerifybamidSvdResourcesSet,
-)
+from cg.models.cg_config import VerifybamidSvdResources, VerifybamidSvdResourcesSet
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
     raredisease,
     tomte_params_file_creator,
@@ -78,11 +73,11 @@ def test_raredisease_params_file_creator(
         ud=Path("some/department_of_external_affairs.UD"),
     )
     verifybamid_svd_resources_set = VerifybamidSvdResourcesSet(wes=wes_resources, wgs=wgs_resources)
-    raredisease_config: RarediseaseConfig = create_autospec(
-        RarediseaseConfig, verifybamid_svd=verifybamid_svd_resources_set
-    )
     file_creator = RarediseaseParamsFileCreator(
-        config=raredisease_config, store=store_mock, lims=lims, params="Path_to_file.yaml"
+        verifybamid_svd_resources_set=verifybamid_svd_resources_set,
+        store=store_mock,
+        lims=lims,
+        params="Path_to_file.yaml",
     )
 
     # GIVEN case id
