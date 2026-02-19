@@ -21,12 +21,16 @@ class NalloParameters(WorkflowParameters):
 class RarediseaseParameters(WorkflowParameters):
     """Model for Raredisease parameters."""
 
-    target_bed_file: str
     analysis_type: str
+    gcnvcaller_model: Path
+    ploidy_model: Path
+    readcount_interval: Path
+    sample_id_map: Path
     save_mapped_as_cram: bool
+    skip_germlinecnvcaller: bool
+    target_bed_file: str
     vcfanno_extra_resources: str
     vep_filters_scout_fmt: str
-    sample_id_map: Path
     verifybamid_svd_bed: Path
     verifybamid_svd_mu: Path
     verifybamid_svd_ud: Path

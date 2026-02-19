@@ -9,7 +9,7 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CgDataError
 from cg.io.csv import write_csv
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
-from cg.models.cg_config import VerifybamidSvdFiles, VerifybamidSvdFilesSet
+from cg.models.cg_config import GCNVCallerFiles, VerifybamidSvdFiles, VerifybamidSvdFilesSet
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
@@ -29,12 +29,14 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
     def __init__(
         self,
         verifybamid_files_set: VerifybamidSvdFilesSet,
+        gcnvcaller_files: GCNVCallerFiles,
         store: Store,
         lims: LimsAPI,
         params: str,
     ):
         super().__init__(params)
         self.verifybamid_files_set = verifybamid_files_set
+        self.gcnvcaller_files = gcnvcaller_files
         self.store = store
         self.lims = lims
 
@@ -49,7 +51,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         """Return the merged dictionary with case-specific parameters and workflow parameters."""
         case_parameters: dict = self._get_case_parameters(
             case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
-        ).model_dump()
+        ).model_dump()  # TODO exclude_none=True potentially
         workflow_parameters: dict = read_yaml(self.params)
         if duplicate_keys := set(case_parameters.keys()) & set(workflow_parameters.keys()):
             raise CgDataError(f"Duplicate parameter keys found: {duplicate_keys}")
