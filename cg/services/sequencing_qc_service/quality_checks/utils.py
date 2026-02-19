@@ -68,7 +68,7 @@ def express_sample_has_enough_reads(sample: Sample) -> bool:
     """
 
     if sample.delivered_at is not None:
-        LOG.info(f"Sample {sample.internal_id} has already been delivered - passing check")
+        LOG.debug(f"Sample {sample.internal_id} has already been delivered - passing check")
         return True
 
     express_reads_threshold: int = get_express_reads_threshold_for_sample(sample)
@@ -92,7 +92,7 @@ def express_sample_has_enough_hifi_yield(sample: Sample) -> bool:
         return False
 
     if sample.delivered_at is not None:
-        LOG.info(f"Sample {sample.internal_id} has already been delivered - passing check")
+        LOG.debug(f"Sample {sample.internal_id} has already been delivered - passing check")
         return True
 
     express_yield_threshold: int = get_express_yield_threshold_for_sample(sample)
@@ -231,7 +231,7 @@ def sample_has_enough_reads(sample: Sample) -> bool:
     """
 
     if sample.delivered_at is not None:
-        LOG.info(f"Sample {sample.internal_id} has already been delivered - passing check")
+        LOG.debug(f"Sample {sample.internal_id} has already been delivered - passing check")
         return True
 
     enough_reads: bool = sample.reads >= sample.expected_reads_for_sample
@@ -260,7 +260,7 @@ def sample_has_enough_hifi_yield(sample: Sample) -> bool:
         return False
 
     if sample.delivered_at is not None:
-        LOG.info(f"Sample {sample.internal_id} has already been delivered - passing check")
+        LOG.debug(f"Sample {sample.internal_id} has already been delivered - passing check")
         return True
 
     enough_hifi_yield: bool = sample.hifi_yield >= sample.expected_hifi_yield
