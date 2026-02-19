@@ -391,7 +391,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_delivered_at_pass():
     # WHEN calling the case_pass_sequencing_qc_on_hifi_yield function on the case
     passes = case_pass_sequencing_qc_on_hifi_yield(case)
 
-    # THEN the case fails QC
+    # THEN the case passes QC
     assert passes
 
 
