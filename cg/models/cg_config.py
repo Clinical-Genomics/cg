@@ -249,15 +249,15 @@ class NalloConfig(CommonAppConfig):
     tower_workflow: str
 
 
-class VerifybamidSvdResources(BaseModel):
+class VerifybamidSvdFiles(BaseModel):
     bed: Path
     mu: Path
     ud: Path
 
 
-class VerifybamidSvdResourcesSet(BaseModel):
-    wes: VerifybamidSvdResources
-    wgs: VerifybamidSvdResources
+class VerifybamidSvdFilesSet(BaseModel):
+    wes: VerifybamidSvdFiles
+    wgs: VerifybamidSvdFiles
 
 
 class RarediseaseConfig(CommonAppConfig):
@@ -277,7 +277,7 @@ class RarediseaseConfig(CommonAppConfig):
     root: str
     slurm: SlurmConfig
     tower_workflow: str
-    verifybamid_svd: VerifybamidSvdResourcesSet
+    verifybamid_svd: VerifybamidSvdFilesSet
 
 
 class TomteConfig(CommonAppConfig):

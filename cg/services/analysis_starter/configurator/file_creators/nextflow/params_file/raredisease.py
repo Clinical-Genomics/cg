@@ -9,7 +9,7 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CgDataError
 from cg.io.csv import write_csv
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
-from cg.models.cg_config import VerifybamidSvdResources, VerifybamidSvdResourcesSet
+from cg.models.cg_config import VerifybamidSvdFiles, VerifybamidSvdFilesSet
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
@@ -28,13 +28,13 @@ LOG = logging.getLogger(__name__)
 class RarediseaseParamsFileCreator(ParamsFileCreator):
     def __init__(
         self,
-        verifybamid_svd_resources_set: VerifybamidSvdResourcesSet,
+        verifybamid_files_set: VerifybamidSvdFilesSet,
         store: Store,
         lims: LimsAPI,
         params: str,
     ):
         super().__init__(params)
-        self.verifybamid_svd_resources_set = verifybamid_svd_resources_set
+        self.verifybamid_files_set = verifybamid_files_set
         self.store = store
         self.lims = lims
 
@@ -66,9 +66,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         sample_mapping_file: Path = self._create_sample_mapping_file(
             case_id=case_id, case_path=case_path
         )
-        verifybamid_resources: VerifybamidSvdResources = self._get_verifybamid_resources(
-            analysis_type
-        )
+        verifybamid_files: VerifybamidSvdFiles = self._get_verifybamid_files(analysis_type)
         return RarediseaseParameters(
             input=sample_sheet_path,
             outdir=case_path,
@@ -78,18 +76,16 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             vcfanno_extra_resources=f"{case_path}/{ScoutExportFileName.MANAGED_VARIANTS}",
             vep_filters_scout_fmt=f"{case_path}/{ScoutExportFileName.PANELS}",
             sample_id_map=sample_mapping_file,
-            verifybamid_svd_bed=verifybamid_resources.bed,
-            verifybamid_svd_mu=verifybamid_resources.mu,
-            verifybamid_svd_ud=verifybamid_resources.ud,
+            verifybamid_svd_bed=verifybamid_files.bed,
+            verifybamid_svd_mu=verifybamid_files.mu,
+            verifybamid_svd_ud=verifybamid_files.ud,
         )
 
-    def _get_verifybamid_resources(
-        self, analysis_type: SeqLibraryPrepCategory
-    ) -> VerifybamidSvdResources:
+    def _get_verifybamid_files(self, analysis_type: SeqLibraryPrepCategory) -> VerifybamidSvdFiles:
         if analysis_type == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
-            return self.verifybamid_svd_resources_set.wes
+            return self.verifybamid_files_set.wes
         elif analysis_type == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING:
-            return self.verifybamid_svd_resources_set.wgs
+            return self.verifybamid_files_set.wgs
         else:
             raise NotImplementedError(
                 f"Prep category is {analysis_type}. Only WES and WGS are implemented."

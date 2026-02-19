@@ -133,7 +133,7 @@ class ConfiguratorFactory:
                 return NalloParamsFileCreator(params)
             case Workflow.RAREDISEASE:
                 return RarediseaseParamsFileCreator(
-                    config=self.cg_config.raredisease,
+                    verifybamid_files_set=self.cg_config.raredisease.verifybamid_svd,
                     lims=self.lims_api,
                     params=params,
                     store=self.store,
