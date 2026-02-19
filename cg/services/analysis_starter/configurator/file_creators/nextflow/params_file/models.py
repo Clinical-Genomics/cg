@@ -19,12 +19,13 @@ class NalloParameters(WorkflowParameters):
 
 
 class RarediseaseParameters(WorkflowParameters):
-    """Model for Raredisease parameters."""
+    """Model for Raredisease parameters.
+    Make sure to exclude None when serializing to make it readable for raredisease"""
 
     analysis_type: str
-    gcnvcaller_model: Path
-    ploidy_model: Path
-    readcount_interval: Path
+    gcnvcaller_model: Path | None
+    ploidy_model: Path | None
+    readcount_intervals: Path | None
     sample_id_map: Path
     save_mapped_as_cram: bool
     skip_germlinecnvcaller: bool

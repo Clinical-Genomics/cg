@@ -284,7 +284,7 @@ class RarediseaseConfig(CommonAppConfig):
     slurm: SlurmConfig
     tower_workflow: str
     verifybamid_svd: VerifybamidSvdFilesSet
-    gcnvcaller: GCNVCallerFiles
+    gcnvcaller: dict[str, GCNVCallerFiles]
 
 
 class TomteConfig(CommonAppConfig):

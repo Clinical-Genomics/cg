@@ -272,7 +272,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_included(
 
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
-        gcnvcaller_files=gcnvcaller_files,
+        gcnvcaller_files={"twistexomecomprehensive_10.2_hg38_design.bed": gcnvcaller_files},
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
         lims=lims,
@@ -308,9 +308,11 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_included(
             "gcnvcaller_model": Path("tyra", "bananks"),
             "input": Path("root/samplesheet.csv"),
             "outdir": Path("some_path"),
+            "ploidy_model": Path("tom/bananks"),
+            "readcount_intervals": Path("richard/banankins"),
             "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
             "save_mapped_as_cram": True,
-            "skip_germlincallersnv": False,
+            "skip_germlinecnvcaller": False,
             "target_bed_file": ANY,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
             "vep_filters_scout_fmt": "some_path/gene_panels.bed",
