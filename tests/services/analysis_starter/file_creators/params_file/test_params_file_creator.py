@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 from cg.apps.lims.api import LimsAPI
 from cg.constants.constants import BedVersionGenomeVersion, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
     raredisease,
     tomte_params_file_creator,
@@ -61,8 +62,9 @@ def test_raredisease_params_file_creator(
     lims.capture_kit = Mock(return_value=lims_capture_kit)
 
     # GIVEN a params file creator
+    cg_config: CGConfig = create_autospec(CGConfig, verifybamid_svd=Mock())
     file_creator = RarediseaseParamsFileCreator(
-        store=store_mock, lims=lims, params="Path_to_file.yaml"
+        config=cg_config, store=store_mock, lims=lims, params="Path_to_file.yaml"
     )
 
     # GIVEN case id
