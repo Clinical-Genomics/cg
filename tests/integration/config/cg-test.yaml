@@ -111,6 +111,15 @@ raredisease:
     mail_user: "raredisease_mail_user@scilifelab.se"
     qos: "low"
   tower_workflow: raredisease_tower_workflow
+  verifybamid_svd:
+    wes:
+      bed: {test_root_dir}/raredisease/wes/file.bed
+      mu: {test_root_dir}/raredisease/wes/file.mu
+      ud: {test_root_dir}/raredisease/wes/file.UD
+    wgs:
+      bed: {test_root_dir}/raredisease/wgs/file.bed
+      mu: {test_root_dir}/raredisease/wgs/file.mu
+      ud: {test_root_dir}/raredisease/wgs/file.UD
   workflow_bin_path: {test_root_dir}/raredisease_workflow_bin_path
 
 data-delivery:

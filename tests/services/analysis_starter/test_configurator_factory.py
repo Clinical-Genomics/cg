@@ -30,7 +30,7 @@ from cg.services.analysis_starter.configurator.file_creators.mip_dna_config impo
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease_params_file_creator import (
     RarediseaseParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.protocol import (

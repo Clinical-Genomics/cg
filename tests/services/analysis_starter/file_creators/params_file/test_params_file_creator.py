@@ -10,13 +10,13 @@ from cg.constants.constants import BedVersionGenomeVersion, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.cg_config import VerifybamidSvdFiles, VerifybamidSvdFilesSet
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
-    raredisease,
+    raredisease_params_file_creator,
     tomte_params_file_creator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease_params_file_creator import (
     RarediseaseParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.tomte_params_file_creator import (
@@ -95,9 +95,11 @@ def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
     sample_sheet_path = Path("root", "samplesheet.csv")
 
     # GIVEN IO is mocked
-    write_yaml_mock = mocker.patch.object(raredisease, "write_yaml_nextflow_style")
-    write_csv_mock = mocker.patch.object(raredisease, "write_csv")
-    mocker.patch.object(raredisease, "read_yaml", return_value={"Key": "Value"})
+    write_yaml_mock = mocker.patch.object(
+        raredisease_params_file_creator, "write_yaml_nextflow_style"
+    )
+    write_csv_mock = mocker.patch.object(raredisease_params_file_creator, "write_csv")
+    mocker.patch.object(raredisease_params_file_creator, "read_yaml", return_value={"Key": "Value"})
 
     # WHEN creating the params file
     file_creator.create(
@@ -195,9 +197,11 @@ def test_raredisease_params_file_creator_different_prep_categories(
     sample_sheet_path = Path("root", "samplesheet.csv")
 
     # GIVEN IO is mocked
-    write_yaml_mock = mocker.patch.object(raredisease, "write_yaml_nextflow_style")
-    write_csv_mock = mocker.patch.object(raredisease, "write_csv")
-    mocker.patch.object(raredisease, "read_yaml", return_value={"Key": "Value"})
+    write_yaml_mock = mocker.patch.object(
+        raredisease_params_file_creator, "write_yaml_nextflow_style"
+    )
+    write_csv_mock = mocker.patch.object(raredisease_params_file_creator, "write_csv")
+    mocker.patch.object(raredisease_params_file_creator, "read_yaml", return_value={"Key": "Value"})
 
     # WHEN creating the params file
     file_creator.create(
