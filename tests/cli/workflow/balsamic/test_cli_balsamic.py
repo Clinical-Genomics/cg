@@ -22,10 +22,10 @@ from cg.services.analysis_starter.factories.starter_factory import AnalysisStart
 
 
 @pytest.fixture
-def cg_config_for_balsamic_cli(cg_balsamic_config: BalsamicConfig) -> CGConfig:
+def cg_config_for_balsamic_cli(cg_balsamic_config_all_flags: BalsamicConfig) -> CGConfig:
     return create_autospec(
         CGConfig,
-        balsamic=cg_balsamic_config,
+        balsamic=cg_balsamic_config_all_flags,
         data_flow=Mock(),
         encryption=create_autospec(Encryption, binary_path="encryption.bin"),
         pdc=create_autospec(CommonAppConfig, binary_path="pdc.bin"),

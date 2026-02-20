@@ -16,6 +16,7 @@ class BalsamicConfigInput(BaseModel):
     artefact_snv_observations: Path
     balsamic_binary: Path
     balsamic_cache: Path
+    cache_version: str | None
     cadd_annotations: Path
     cancer_germline_snv_observations: Path
     cancer_somatic_snv_observations: Path
@@ -71,6 +72,7 @@ class BalsamicConfigInputPanel(BalsamicConfigInput):
             "--analysis-workflow": self.analysis_workflow,
             "--artefact-snv-observations": self.artefact_snv_observations,
             "--balsamic-cache": self.balsamic_cache,
+            "--cache-version": self.cache_version,
             "--cadd-annotations": self.cadd_annotations,
             "--cancer-germline-snv-observations": self.cancer_germline_snv_observations,
             "--cancer-somatic-snv-observations": self.cancer_somatic_snv_observations,
@@ -108,6 +110,7 @@ class BalsamicConfigInputWGS(BalsamicConfigInput):
             "--artefact-snv-observations": self.artefact_snv_observations,
             "--artefact-sv-observations": self.artefact_sv_observations,
             "--balsamic-cache": self.balsamic_cache,
+            "--cache-version": self.cache_version,
             "--cadd-annotations": self.cadd_annotations,
             "--cancer-germline-snv-observations": self.cancer_germline_snv_observations,
             "--cancer-somatic-snv-observations": self.cancer_somatic_snv_observations,
