@@ -5,13 +5,12 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, GenomeBuild
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag, NFAnalysisTags
 from cg.constants.scout import (
     RANK_MODEL_THRESHOLD,
     RAREDISEASE_CASE_TAGS,
     RAREDISEASE_SAMPLE_TAGS,
-    GenomeBuild,
     UploadTrack,
 )
 from cg.constants.sequencing import Variants
@@ -69,7 +68,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         self.load_custom_image_sample(
             load_config=load_config, analysis=analysis, hk_version=hk_version
         )
-        load_config.human_genome_build = GenomeBuild.hg19
+        load_config.human_genome_build = GenomeBuild.hg38
         load_config.rank_score_threshold = RANK_MODEL_THRESHOLD
         load_config.rank_model_version = self.get_rank_model_version(
             variant_type=Variants.SNV, hk_version=hk_version

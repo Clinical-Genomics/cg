@@ -249,6 +249,23 @@ class NalloConfig(CommonAppConfig):
     tower_workflow: str
 
 
+class VerifybamidSvdFiles(BaseModel):
+    bed: Path
+    mu: Path
+    ud: Path
+
+
+class VerifybamidSvdFilesSet(BaseModel):
+    wes: VerifybamidSvdFiles
+    wgs: VerifybamidSvdFiles
+
+
+class GCNVCallerFiles(BaseModel):
+    gcnvcaller_model: Path
+    ploidy_model: Path
+    readcount_intervals: Path
+
+
 class RarediseaseConfig(CommonAppConfig):
     binary_path: str | None = None
     conda_binary: str | None = None
@@ -266,6 +283,8 @@ class RarediseaseConfig(CommonAppConfig):
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    verifybamid_svd: VerifybamidSvdFilesSet
+    gcnvcaller: dict[str, GCNVCallerFiles]
 
 
 class TomteConfig(CommonAppConfig):

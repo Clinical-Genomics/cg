@@ -2184,6 +2184,25 @@ def context_config(
                 "mail_user": email_address,
             },
             "tower_workflow": "raredisease",
+            "verifybamid_svd": {
+                "wes": {
+                    "bed": Path("path", "to", "sleeping_quarters.bed"),
+                    "mu": Path("path", "to", "cow.mu"),
+                    "ud": Path("path", "to", "department_of_external_affairs.UD"),
+                },
+                "wgs": {
+                    "bed": Path("path", "to", "sleeping_quarters.bed"),
+                    "mu": Path("path", "to", "cow.mu"),
+                    "ud": Path("path", "to", "department_of_external_affairs.UD"),
+                },
+            },
+            "gcnvcaller": {
+                "twistexomecomprehensive_10.2_hg38_design.bed": {
+                    "gcnvcaller_model": Path("path", "to", "gcnvcaller_model"),
+                    "ploidy_model": Path("path", "to", "ploidy_model_"),
+                    "readcount_intervals": Path("path", "to", "readcount.intervals"),
+                }
+            },
         },
         "tomte": {
             "binary_path": nextflow_binary.as_posix(),
@@ -2905,7 +2924,6 @@ def raredisease_context(
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
-        reference_genome=GenomeVersion.HG19,
     )
 
     another_sample_enough_reads: Sample = helpers.add_sample(
@@ -2915,7 +2933,6 @@ def raredisease_context(
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
-        reference_genome=GenomeVersion.HG19,
     )
 
     helpers.add_relationship(

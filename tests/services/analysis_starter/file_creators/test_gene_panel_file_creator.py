@@ -223,7 +223,7 @@ def test_add_gene_panels_in_combo(
     "case_id, expected_genome_build",
     [
         (MIP_DNA_CASE_ID, GenePanelGenomeBuild.hg19),
-        (RAREDISEASE_CASE_ID, GenePanelGenomeBuild.hg19),
+        (RAREDISEASE_CASE_ID, GenePanelGenomeBuild.hg38),
         (NALLO_CASE_ID, GenePanelGenomeBuild.hg38),
         (TOMTE_CASE_ID, GenePanelGenomeBuild.hg38),
     ],
