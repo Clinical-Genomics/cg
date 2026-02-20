@@ -1,9 +1,7 @@
 import logging
 from pathlib import Path
-from typing import cast
 
 from cg.apps.lims.api import LimsAPI
-from cg.constants.priority import SlurmQos
 from cg.exc import CaseNotConfiguredError, MultipleCaptureKitsError
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.cg_config import BalsamicConfig
@@ -56,8 +54,9 @@ class BalsamicConfigurator(Configurator):
             conda_binary=self.conda_binary,
             environment=self.environment,
             head_job_partition=self.head_job_partition,
-            qos=cast(SlurmQos, self.store.get_case_by_internal_id_strict(case_id).slurm_priority),
+            qos=self.store.get_case_by_internal_id_strict(case_id).slurm_priority,
             sample_config=self._get_sample_config_path(case_id),
+            workflow=self.store.get_case_workflow(case_id),
         )
         balsamic_config: BalsamicCaseConfig = self._set_flags(config=balsamic_config, **flags)
         self._ensure_required_config_files_exist(balsamic_config)
