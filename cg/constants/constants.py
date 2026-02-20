@@ -145,6 +145,11 @@ DNA_WORKFLOWS_WITH_SCOUT_UPLOAD: list[Workflow] = [
 ]
 
 
+class GenomeBuild(StrEnum):
+    hg19 = "37"
+    hg38 = "38"
+
+
 class FileFormat(StrEnum):
     CSV: str = "csv"
     FASTQ: str = "fastq"
