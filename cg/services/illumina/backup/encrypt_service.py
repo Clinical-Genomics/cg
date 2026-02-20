@@ -1,12 +1,13 @@
 from pathlib import Path
 
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.constants import FileExtensions, SPACE
+from cg.constants import SPACE, FileExtensions
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.encryption import GPGParameters
 from cg.constants.priority import SlurmQos
 from cg.exc import FlowCellError, IlluminaRunEncryptionError
-from cg.meta.encryption.encryption import EncryptionAPI, LIMIT_PIGZ_TASK, LOG
-from cg.meta.encryption.sbatch import ILLUMINA_RUN_ENCRYPT_ERROR, ILLUMINA_RUN_ENCRYPT_COMMANDS
+from cg.meta.encryption.encryption import LIMIT_PIGZ_TASK, LOG, EncryptionAPI
+from cg.meta.encryption.sbatch import ILLUMINA_RUN_ENCRYPT_COMMANDS, ILLUMINA_RUN_ENCRYPT_ERROR
 from cg.meta.tar.tar import TarAPI
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.models.slurm.sbatch import Sbatch
@@ -136,7 +137,10 @@ class IlluminaRunEncryptionService(EncryptionAPI):
         return f"mkdir -p {self.run_encrypt_tmp_dir}"
 
     def copy_run_dir_to_tmp(self) -> str:
-        return f"cp -r {self.run_dir_data.path} {self.run_encrypt_tmp_dir}"
+        return (
+            f"rsync -r --exclude={DemultiplexingDirsAndFiles.ANALYSIS}"
+            f" {self.run_dir_data.path}/ {self.run_encrypt_tmp_dir}/{self.run_dir_data.path.name}"
+        )
 
     def remove_tmp_encrypt_dir(self) -> str:
         return f"rm -rf {self.run_encrypt_tmp_dir}"

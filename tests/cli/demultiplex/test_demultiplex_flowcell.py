@@ -2,13 +2,20 @@
 
 import logging
 from pathlib import Path
+from unittest.mock import MagicMock
 
 from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.utils import add_and_include_sample_sheet_path_to_housekeeper
-from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_sequencing_run
+from cg.cli.demultiplex.demux import (
+    copy_novaseqx_sequencing_runs,
+    demultiplex_all,
+    demultiplex_sequencing_run,
+)
+from cg.constants.constants import Workflow
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.tb import AnalysisStatus
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
@@ -139,3 +146,47 @@ def test_is_demultiplexing_not_complete(
 
     # THEN the property should return true
     assert not hiseq_2500_dual_index_demux_runs_flow_cell.is_demultiplexing_complete
+
+
+def test_copy_novaseqx_sequencing_runs_notifies_trailblazer(
+    cli_runner: testing.CliRunner,
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
+    cg_context: CGConfig,
+    tmp_path: Path,
+    mocker,
+):
+    """Test that copy_novaseqx_sequencing_runs adds a Trailblazer analysis marked as completed."""
+    # GIVEN a context with sequencing runs dir containing a ready NovaSeqX flow cell
+    sequencing_runs_dir: Path = novaseqx_flow_cell_dir_with_analysis_data.parent
+    demultiplexed_runs_dir: Path = Path(tmp_path, "demultiplexed-runs-out")
+    demultiplexed_runs_dir.mkdir()
+    cg_context.run_instruments.illumina.sequencing_runs_dir = sequencing_runs_dir.as_posix()
+    cg_context.run_instruments.illumina.demultiplexed_runs_dir = demultiplexed_runs_dir.as_posix()
+
+    # GIVEN mocked file operations to avoid actual hardlinking
+    mocker.patch("cg.cli.demultiplex.demux.hardlink_flow_cell_analysis_data")
+    mocker.patch("cg.cli.demultiplex.demux.mark_as_demultiplexed")
+
+    # GIVEN a mock Trailblazer API
+    mock_tb_api = MagicMock()
+    cg_context.trailblazer_api_ = mock_tb_api
+
+    # WHEN running the copy command
+    result: testing.Result = cli_runner.invoke(
+        copy_novaseqx_sequencing_runs,
+        obj=cg_context,
+    )
+
+    # THEN the command exits without problems
+    assert result.exit_code == 0
+
+    # THEN a pending analysis was added with the DEMULTIPLEX workflow
+    mock_tb_api.add_pending_analysis.assert_called_once()
+    call_kwargs = mock_tb_api.add_pending_analysis.call_args.kwargs
+    assert call_kwargs["workflow"] == Workflow.DEMULTIPLEX
+    assert call_kwargs["config_path"] is None
+
+    # THEN the analysis status was immediately set to COMPLETED
+    mock_tb_api.set_analysis_status.assert_called_once()
+    status_kwargs = mock_tb_api.set_analysis_status.call_args.kwargs
+    assert status_kwargs["status"] == AnalysisStatus.COMPLETED
