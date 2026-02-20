@@ -10,6 +10,7 @@ from cg.meta.upload.nallo.nallo_upload_api import (
     NalloUploadAPI,
     generate_delivery_report,
     upload_observations_to_loqusdb,
+    upload_to_gens,
     upload_to_scout,
 )
 from cg.models.cg_config import CGConfig, IlluminaConfig, NalloConfig, RunInstruments, SlurmConfig
@@ -82,6 +83,7 @@ def test_upload_succeeds():
         call(generate_delivery_report, case_id="case_id"),
         call(upload_to_scout, case_id="case_id", re_upload=False),
         call(upload_observations_to_loqusdb, case_id="case_id"),
+        call(upload_to_gens, case_id="case_id"),
     ]
 
     click_context.invoke.assert_has_calls(invoke_calls)
