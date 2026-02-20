@@ -51,7 +51,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         """Return the merged dictionary with case-specific parameters and workflow parameters."""
         case_parameters: dict = self._get_case_parameters(
             case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
-        ).model_dump()  # TODO exclude_none=True potentially
+        ).model_dump(exclude_none=True)
         workflow_parameters: dict = read_yaml(self.params)
         if duplicate_keys := set(case_parameters.keys()) & set(workflow_parameters.keys()):
             raise CgDataError(f"Duplicate parameter keys found: {duplicate_keys}")
