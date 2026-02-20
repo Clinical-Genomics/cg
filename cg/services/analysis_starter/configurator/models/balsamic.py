@@ -138,7 +138,7 @@ class BalsamicCaseConfig(CaseConfig):
     head_job_partition: str
     qos: SlurmQos
     sample_config: Path
-    workflow: Workflow = Workflow.BALSAMIC
+    workflow: Workflow
     workflow_profile: Path | None = None
 
     def get_start_command(self) -> str:
