@@ -1,11 +1,12 @@
 from pathlib import Path
+from typing import cast
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
 from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler, MipFastqHandler
-from cg.models.cg_config import CGConfig, CommonAppConfig
+from cg.models.cg_config import CGConfig, CommonAppConfig, RarediseaseConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
@@ -132,8 +133,10 @@ class ConfiguratorFactory:
             case Workflow.NALLO:
                 return NalloParamsFileCreator(params)
             case Workflow.RAREDISEASE:
+                raredisease_config = cast(RarediseaseConfig, self.cg_config.raredisease)
                 return RarediseaseParamsFileCreator(
-                    verifybamid_files_set=self.cg_config.raredisease.verifybamid_svd,
+                    gcnvcaller_files=raredisease_config.gcnvcaller,
+                    verifybamid_files_set=raredisease_config.verifybamid_svd,
                     lims=self.lims_api,
                     params=params,
                     store=self.store,

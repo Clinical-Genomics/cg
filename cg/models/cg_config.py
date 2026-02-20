@@ -260,6 +260,12 @@ class VerifybamidSvdFilesSet(BaseModel):
     wgs: VerifybamidSvdFiles
 
 
+class GCNVCallerFiles(BaseModel):
+    gcnvcaller_model: Path
+    ploidy_model: Path
+    readcount_intervals: Path
+
+
 class RarediseaseConfig(CommonAppConfig):
     binary_path: str | None = None
     conda_binary: str | None = None
@@ -278,6 +284,7 @@ class RarediseaseConfig(CommonAppConfig):
     slurm: SlurmConfig
     tower_workflow: str
     verifybamid_svd: VerifybamidSvdFilesSet
+    gcnvcaller: dict[str, GCNVCallerFiles]
 
 
 class TomteConfig(CommonAppConfig):

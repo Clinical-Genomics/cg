@@ -9,7 +9,7 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CgDataError
 from cg.io.csv import write_csv
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
-from cg.models.cg_config import VerifybamidSvdFiles, VerifybamidSvdFilesSet
+from cg.models.cg_config import GCNVCallerFiles, VerifybamidSvdFiles, VerifybamidSvdFilesSet
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
@@ -29,12 +29,14 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
     def __init__(
         self,
         verifybamid_files_set: VerifybamidSvdFilesSet,
+        gcnvcaller_files: dict[str, GCNVCallerFiles],
         store: Store,
         lims: LimsAPI,
         params: str,
     ):
         super().__init__(params)
         self.verifybamid_files_set = verifybamid_files_set
+        self.gcnvcaller_files = gcnvcaller_files
         self.store = store
         self.lims = lims
 
@@ -49,7 +51,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         """Return the merged dictionary with case-specific parameters and workflow parameters."""
         case_parameters: dict = self._get_case_parameters(
             case_id=case_id, case_path=case_path, sample_sheet_path=sample_sheet_path
-        ).model_dump()
+        ).model_dump(exclude_none=True)
         workflow_parameters: dict = read_yaml(self.params)
         if duplicate_keys := set(case_parameters.keys()) & set(workflow_parameters.keys()):
             raise CgDataError(f"Duplicate parameter keys found: {duplicate_keys}")
@@ -61,25 +63,39 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         self, case_id: str, case_path: Path, sample_sheet_path: Path
     ) -> RarediseaseParameters:
         """Return case-specific parameters for the analysis."""
-        analysis_type: SeqLibraryPrepCategory = self._get_arbitrary_prep_category_in_case(case_id)
+        prep_category: SeqLibraryPrepCategory = self._get_arbitrary_prep_category_in_case(case_id)
         target_bed_file: str = self._get_target_bed_from_lims(case_id)
         sample_mapping_file: Path = self._create_sample_mapping_file(
             case_id=case_id, case_path=case_path
         )
-        verifybamid_files: VerifybamidSvdFiles = self._get_verifybamid_files(analysis_type)
+        verifybamid_files: VerifybamidSvdFiles = self._get_verifybamid_files(prep_category)
+        skip_germlinecnvcaller, gcnvcaller_model, ploidy_model, readcount_intervals = (
+            self._get_gcnvcaller_args(prep_category=prep_category, target_bed_file=target_bed_file)
+        )
         return RarediseaseParameters(
+            analysis_type=prep_category,
+            gcnvcaller_model=gcnvcaller_model,
             input=sample_sheet_path,
             outdir=case_path,
-            analysis_type=analysis_type,
-            target_bed_file=target_bed_file,
+            ploidy_model=ploidy_model,
+            readcount_intervals=readcount_intervals,
+            sample_id_map=sample_mapping_file,
             save_mapped_as_cram=True,
+            skip_germlinecnvcaller=skip_germlinecnvcaller,
+            target_bed_file=target_bed_file,
             vcfanno_extra_resources=f"{case_path}/{ScoutExportFileName.MANAGED_VARIANTS}",
             vep_filters_scout_fmt=f"{case_path}/{ScoutExportFileName.PANELS}",
-            sample_id_map=sample_mapping_file,
             verifybamid_svd_bed=verifybamid_files.bed,
             verifybamid_svd_mu=verifybamid_files.mu,
             verifybamid_svd_ud=verifybamid_files.ud,
         )
+
+    def _get_gcnvcaller_args(self, prep_category: SeqLibraryPrepCategory, target_bed_file: str):
+        if prep_category == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
+            if files := self.gcnvcaller_files.get(target_bed_file):
+                return False, files.gcnvcaller_model, files.ploidy_model, files.readcount_intervals
+
+        return True, None, None, None
 
     def _get_verifybamid_files(self, analysis_type: SeqLibraryPrepCategory) -> VerifybamidSvdFiles:
         if analysis_type == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:

@@ -2196,6 +2196,13 @@ def context_config(
                     "ud": Path("path", "to", "department_of_external_affairs.UD"),
                 },
             },
+            "gcnvcaller": {
+                "twistexomecomprehensive_10.2_hg38_design.bed": {
+                    "gcnvcaller_model": Path("path", "to", "gcnvcaller_model"),
+                    "ploidy_model": Path("path", "to", "ploidy_model_"),
+                    "readcount_intervals": Path("path", "to", "readcount.intervals"),
+                }
+            },
         },
         "tomte": {
             "binary_path": nextflow_binary.as_posix(),
