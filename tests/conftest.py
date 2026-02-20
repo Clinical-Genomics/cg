@@ -2198,9 +2198,9 @@ def context_config(
             },
             "gcnvcaller": {
                 "twistexomecomprehensive_10.2_hg38_design.bed": {
-                    "gcnvcaller_model": Path(),
-                    "ploidy_model": Path(),
-                    "readcount_intervals": Path(),
+                    "gcnvcaller_model": Path("path", "to", "gcnvcaller_model"),
+                    "ploidy_model": Path("path", "to", "ploidy_model_"),
+                    "readcount_intervals": Path("path", "to", "readcount.intervals"),
                 }
             },
         },

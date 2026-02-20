@@ -98,6 +98,11 @@ raredisease:
   compute_env: raredisease_compute_env
   conda_env: raredisease_conda_env
   config: {test_root_dir}/raredisease_config.config
+  gcnvcaller:
+    twistexomecomprehensive_10.2_hg38_design.bed:
+      gcnvcaller_model: {test_root_dir}/tyra/bananks
+      ploidy_model: {test_root_dir}/tom/bananks
+      readcount_intervals: {test_root_dir}/richard/banankins
   launch_directory: {test_root_dir}/raredisease_launch_directory
   params: {test_root_dir}/raredisease_params.yaml
   platform: {test_root_dir}/platform.config
