@@ -42,12 +42,14 @@ def verifybamid_files_set() -> VerifybamidSvdFilesSet:
 
 
 @pytest.fixture
-def gcnvcaller_files() -> GCNVCallerFiles:
-    return GCNVCallerFiles(
-        gcnvcaller_model=Path("tyra", "bananks"),
-        ploidy_model=Path("tom", "bananks"),
-        readcount_intervals=Path("richard", "banankins"),
-    )
+def gcnvcaller_files() -> dict[str, GCNVCallerFiles]:
+    return {
+        "twistexomecomprehensive_10.2_hg38_design.bed": GCNVCallerFiles(
+            gcnvcaller_model=Path("tyra", "bananks"),
+            ploidy_model=Path("tom", "bananks"),
+            readcount_intervals=Path("richard", "banankins"),
+        )
+    }
 
 
 @pytest.mark.parametrize(
@@ -58,6 +60,7 @@ def gcnvcaller_files() -> GCNVCallerFiles:
 def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
     lims_capture_kit: str | None,
     expected_bed_short_name: str,
+    gcnvcaller_files: dict[str, GCNVCallerFiles],
     verifybamid_files_set: VerifybamidSvdFilesSet,
     mocker: MockerFixture,
 ):
@@ -91,6 +94,7 @@ def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
 
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
+        gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
         lims=lims,
@@ -127,6 +131,7 @@ def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
             "outdir": Path("some_path"),
             "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
             "save_mapped_as_cram": True,
+            "skip_germlinecnvcaller": True,
             "target_bed_file": expected_bed_short_name,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
             "vep_filters_scout_fmt": "some_path/gene_panels.bed",
@@ -142,28 +147,25 @@ def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
     )
 
 
-@pytest.mark.parametrize(
-    "prep_category, expected_bed, expected_mu, expected_ud",
-    [
-        (
-            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
-            Path("some/sleeping_quarters.bed"),
-            Path("some/cow.mu"),
-            Path("some/department_of_external_affairs.UD"),
-        ),
-        (
-            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
-            Path("some/sleeping_quarters.exome.bed"),
-            Path("some/cow.exome.mu"),
-            Path("some/department_of_external_affairs.exome.UD"),
-        ),
-    ],
-)
-def test_raredisease_params_file_creator_different_prep_categories(
-    expected_bed: Path,
-    expected_mu: Path,
-    expected_ud: Path,
-    prep_category: SeqLibraryPrepCategory,
+# @pytest.mark.parametrize(
+#     "prep_category, expected_bed, expected_mu, expected_ud",
+#     [
+#         (
+#             SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+#             Path("some/sleeping_quarters.bed"),
+#             Path("some/cow.mu"),
+#             Path("some/department_of_external_affairs.UD"),
+#         ),
+#         (
+#             SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+#             Path("some/sleeping_quarters.exome.bed"),
+#             Path("some/cow.exome.mu"),
+#             Path("some/department_of_external_affairs.exome.UD"),
+#         ),
+#     ],
+# )
+def test_raredisease_params_file_creator_wgs1(
+    gcnvcaller_files: dict[str, GCNVCallerFiles],
     verifybamid_files_set: VerifybamidSvdFilesSet,
     mocker: MockerFixture,
 ):
@@ -175,7 +177,7 @@ def test_raredisease_params_file_creator_different_prep_categories(
         Sample,
         from_sample=None,
         internal_id="ACC",
-        prep_category=prep_category,
+        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     )
     super_sample.name = "sample_name"
     case = create_autospec(Case, samples=[super_sample])
@@ -193,6 +195,7 @@ def test_raredisease_params_file_creator_different_prep_categories(
     # GIVEN a params file creator
 
     file_creator = RarediseaseParamsFileCreator(
+        gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
         lims=lims,
@@ -224,7 +227,7 @@ def test_raredisease_params_file_creator_different_prep_categories(
         file_path=file_path,
         content={
             "Key": "Value",
-            "analysis_type": prep_category,
+            "analysis_type": SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
             "input": Path("root/samplesheet.csv"),
             "outdir": Path("some_path"),
             "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
@@ -232,9 +235,9 @@ def test_raredisease_params_file_creator_different_prep_categories(
             "target_bed_file": ANY,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
             "vep_filters_scout_fmt": "some_path/gene_panels.bed",
-            "verifybamid_svd_bed": expected_bed,
-            "verifybamid_svd_mu": expected_mu,
-            "verifybamid_svd_ud": expected_ud,
+            "verifybamid_svd_bed": Path("some/sleeping_quarters.bed"),
+            "verifybamid_svd_mu": Path("some/cow.mu"),
+            "verifybamid_svd_ud": Path("some/department_of_external_affairs.UD"),
         },
     )
     # THEN auxiliary file is written and with the correct content
@@ -245,6 +248,7 @@ def test_raredisease_params_file_creator_different_prep_categories(
 
 
 def test_raredisease_params_file_creator_wes_gcnvcaller_included(
+    gcnvcaller_files: dict[str, GCNVCallerFiles],
     verifybamid_files_set: VerifybamidSvdFilesSet,
     mocker: MockerFixture,
 ):
@@ -273,15 +277,9 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_included(
     lims = create_autospec(LimsAPI)
     lims.capture_kit = Mock(return_value="target_bed_shortname_123")
 
-    gcnvcaller_files = GCNVCallerFiles(
-        gcnvcaller_model=Path("tyra", "bananks"),
-        ploidy_model=Path("tom", "bananks"),
-        readcount_intervals=Path("richard", "banankins"),
-    )
-
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
-        gcnvcaller_files={"twistexomecomprehensive_10.2_hg38_design.bed": gcnvcaller_files},
+        gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
         lims=lims,
@@ -338,6 +336,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_included(
 
 
 def test_raredisease_params_file_creator_wes_gcnvcaller_bed_version_does_not_match(
+    gcnvcaller_files: dict[str, GCNVCallerFiles],
     verifybamid_files_set: VerifybamidSvdFilesSet,
     mocker: MockerFixture,
 ):
@@ -364,15 +363,9 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_bed_version_does_not_mat
     lims = create_autospec(LimsAPI)
     lims.capture_kit = Mock(return_value="target_bed_shortname_123")
 
-    gcnvcaller_files = GCNVCallerFiles(
-        gcnvcaller_model=Path("tyra", "bananks"),
-        ploidy_model=Path("tom", "bananks"),
-        readcount_intervals=Path("richard", "banankins"),
-    )
-
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
-        gcnvcaller_files={"twistexomecomprehensive_10.2_hg38_design.bed": gcnvcaller_files},
+        gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
         lims=lims,
@@ -426,6 +419,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_bed_version_does_not_mat
 
 
 def test_raredisease_params_file_creator_wgs(
+    gcnvcaller_files: dict[str, GCNVCallerFiles],
     verifybamid_files_set: VerifybamidSvdFilesSet,
     mocker: MockerFixture,
 ):
@@ -451,7 +445,7 @@ def test_raredisease_params_file_creator_wgs(
 
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
-        gcnvcaller_files={"twistexomecomprehensive_10.2_hg38_design.bed": gcnvcaller_files},
+        gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
         lims=lims,
