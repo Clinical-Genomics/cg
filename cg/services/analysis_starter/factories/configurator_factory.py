@@ -135,6 +135,7 @@ class ConfiguratorFactory:
             case Workflow.RAREDISEASE:
                 raredisease_config = cast(RarediseaseConfig, self.cg_config.raredisease)
                 return RarediseaseParamsFileCreator(
+                    default_target_bed=raredisease_config.default_target_bed,
                     gcnvcaller_files=raredisease_config.gcnvcaller,
                     verifybamid_files_set=raredisease_config.verifybamid_svd,
                     lims=self.lims_api,

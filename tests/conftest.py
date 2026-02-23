@@ -2164,6 +2164,7 @@ def context_config(
             "tower_workflow": "nallo",
         },
         "raredisease": {
+            "default_target_bed": "twistexomecomprehensive_10.2_hg38_design.bed",
             "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),

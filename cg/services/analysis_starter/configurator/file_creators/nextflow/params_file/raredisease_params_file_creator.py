@@ -28,6 +28,7 @@ LOG = logging.getLogger(__name__)
 class RarediseaseParamsFileCreator(ParamsFileCreator):
     def __init__(
         self,
+        default_target_bed: str,
         verifybamid_files_set: VerifybamidSvdFilesSet,
         gcnvcaller_files: dict[str, GCNVCallerFiles],
         references_directory: Path,
@@ -36,6 +37,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         params: str,
     ):
         super().__init__(params)
+        self.default_target_bed = default_target_bed
         self.verifybamid_files_set = verifybamid_files_set
         self.gcnvcaller_files = gcnvcaller_files
         self.references_directory = references_directory
@@ -136,7 +138,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             )
             return bed_version.filename
         else:
-            return ""
+            return self.default_target_bed
 
     def _create_sample_mapping_file(self, case_id: str, case_path: Path) -> Path:
         """Create a sample mapping file for the case and returns its path."""

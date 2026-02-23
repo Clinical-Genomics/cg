@@ -56,7 +56,7 @@ def gcnvcaller_files() -> dict[str, GCNVCallerFiles]:
     "expected_bed_short_name, lims_capture_kit",
     [
         (Path("/some/full/path/bed_version.bed"), "target_bed_shortname_123"),
-        (Path("/some/full/path"), None),
+        (Path("/some/full/path/default.bed"), None),
     ],
     ids=["Capture kit is in LIMS", "Capture kit not in LIMS"],
 )
@@ -97,6 +97,7 @@ def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
 
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
+        default_target_bed="default.bed",
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
@@ -182,6 +183,7 @@ def test_raredisease_params_file_creator_wgs(
     # GIVEN a params file creator
 
     file_creator = RarediseaseParamsFileCreator(
+        default_target_bed="default.bed",
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
@@ -268,6 +270,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_included(
 
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
+        default_target_bed="default.bed",
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         references_directory=Path("some_path"),
@@ -356,6 +359,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_bed_version_does_not_mat
 
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
+        default_target_bed="default.bed",
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         references_directory=Path("/any/path"),

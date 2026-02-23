@@ -271,6 +271,7 @@ class RarediseaseConfig(CommonAppConfig):
     conda_binary: str | None = None
     conda_env: str
     config: str
+    default_target_bed: str
     gcnvcaller: dict[str, GCNVCallerFiles]
     launch_directory: str
     params: str
