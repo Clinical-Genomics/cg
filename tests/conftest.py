@@ -2176,6 +2176,7 @@ def context_config(
             "workflow_bin_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
+            "references_directory": Path("path", "to", "references").as_posix(),
             "repository": "https://some_url",
             "revision": "2.2.0",
             "root": str(raredisease_dir),

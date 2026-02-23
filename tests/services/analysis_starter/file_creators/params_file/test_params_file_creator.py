@@ -97,6 +97,7 @@ def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
+        references_directory=Path("/some/full/path/"),
         lims=lims,
         params="Path_to_file.yaml",
     )
@@ -181,6 +182,7 @@ def test_raredisease_params_file_creator_wgs(
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
+        references_directory=Path("/some/full/path/"),
         lims=lims,
         params="Path_to_file.yaml",
     )
@@ -216,7 +218,7 @@ def test_raredisease_params_file_creator_wgs(
             "skip_germlinecnvcaller": True,
             "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
             "save_mapped_as_cram": True,
-            "target_bed_file": ANY,
+            "target_bed": ANY,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
             "vep_filters_scout_fmt": "some_path/gene_panels.bed",
             "verifybamid_svd_bed": Path("some/sleeping_quarters.bed"),
@@ -262,7 +264,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_included(
     lims.capture_kit = Mock(return_value="target_bed_shortname_123")
 
     # GIVEN a params file creator
-    file_creator = RarediseaseParamsFileCreator(
+    file_creator = RarediseaseParamsFileCreator(  # TODO add references_directory
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
@@ -304,7 +306,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_included(
             "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
             "save_mapped_as_cram": True,
             "skip_germlinecnvcaller": False,
-            "target_bed_file": ANY,
+            "target_bed": ANY,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
             "vep_filters_scout_fmt": "some_path/gene_panels.bed",
             "verifybamid_svd_bed": Path("some/sleeping_quarters.exome.bed"),
@@ -349,7 +351,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_bed_version_does_not_mat
     lims.capture_kit = Mock(return_value="target_bed_shortname_123")
 
     # GIVEN a params file creator
-    file_creator = RarediseaseParamsFileCreator(
+    file_creator = RarediseaseParamsFileCreator(  # TODO add references_directory
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
@@ -388,7 +390,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_bed_version_does_not_mat
             "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
             "save_mapped_as_cram": True,
             "skip_germlinecnvcaller": True,
-            "target_bed_file": ANY,
+            "target_bed": ANY,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
             "vep_filters_scout_fmt": "some_path/gene_panels.bed",
             "verifybamid_svd_bed": ANY,

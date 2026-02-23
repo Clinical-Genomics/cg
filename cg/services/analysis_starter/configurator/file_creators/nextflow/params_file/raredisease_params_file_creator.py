@@ -30,6 +30,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         self,
         verifybamid_files_set: VerifybamidSvdFilesSet,
         gcnvcaller_files: dict[str, GCNVCallerFiles],
+        references_directory: Path,
         store: Store,
         lims: LimsAPI,
         params: str,
@@ -37,6 +38,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         super().__init__(params)
         self.verifybamid_files_set = verifybamid_files_set
         self.gcnvcaller_files = gcnvcaller_files
+        self.references_directory = references_directory
         self.store = store
         self.lims = lims
 
@@ -64,13 +66,13 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
     ) -> RarediseaseParameters:
         """Return case-specific parameters for the analysis."""
         prep_category: SeqLibraryPrepCategory = self._get_arbitrary_prep_category_in_case(case_id)
-        target_bed_file: str = self._get_target_bed_from_lims(case_id)
+        target_bed: str = self._get_target_bed_from_lims(case_id)
         sample_mapping_file: Path = self._create_sample_mapping_file(
             case_id=case_id, case_path=case_path
         )
         verifybamid_files: VerifybamidSvdFiles = self._get_verifybamid_files(prep_category)
         skip_germlinecnvcaller, gcnvcaller_model, ploidy_model, readcount_intervals = (
-            self._get_gcnvcaller_args(prep_category=prep_category, target_bed_file=target_bed_file)
+            self._get_gcnvcaller_args(prep_category=prep_category, target_bed_file=target_bed)
         )
         return RarediseaseParameters(
             analysis_type=prep_category,
@@ -82,7 +84,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             sample_id_map=sample_mapping_file,
             save_mapped_as_cram=True,
             skip_germlinecnvcaller=skip_germlinecnvcaller,
-            target_bed_file=target_bed_file,
+            target_bed=target_bed,
             vcfanno_extra_resources=f"{case_path}/{ScoutExportFileName.MANAGED_VARIANTS}",
             vep_filters_scout_fmt=f"{case_path}/{ScoutExportFileName.PANELS}",
             verifybamid_svd_bed=verifybamid_files.bed,
@@ -132,7 +134,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
                     short_name=target_bed_shortname, genome_version=BedVersionGenomeVersion.HG38
                 )
             )
-            return bed_version.filename
+            return f"{self.references_directory}/{bed_version.filename}"
         else:
             return ""
 

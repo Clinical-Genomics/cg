@@ -139,6 +139,7 @@ class ConfiguratorFactory:
                     verifybamid_files_set=raredisease_config.verifybamid_svd,
                     lims=self.lims_api,
                     params=params,
+                    references_directory=raredisease_config.references_directory,
                     store=self.store,
                 )
             case Workflow.RNAFUSION:
