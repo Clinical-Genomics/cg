@@ -6,9 +6,9 @@ from pydantic import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import FileExtensions, Workflow
-from cg.constants.constants import FileFormat
+from cg.constants.constants import BedVersionGenomeVersion, FileFormat
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
-from cg.exc import CgError
+from cg.exc import BedVersionNotFoundError, CgError
 from cg.io.controller import ReadFile, WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
@@ -85,10 +85,13 @@ class MipAnalysisAPI(AnalysisAPI):
             return None
         if panel_bed.endswith(FileExtensions.BED):
             return panel_bed
-        bed_version: BedVersion | None = self.status_db.get_bed_version_by_short_name(
-            bed_version_short_name=panel_bed
-        )
-        if not bed_version:
+        try:
+            bed_version: BedVersion = (
+                self.status_db.get_bed_version_by_short_name_and_genome_version_strict(
+                    short_name=panel_bed, genome_version=BedVersionGenomeVersion.HG19
+                )
+            )
+        except BedVersionNotFoundError:
             raise CgError("Please provide a valid panel shortname or a path to panel.bed file!")
         return bed_version.filename
 

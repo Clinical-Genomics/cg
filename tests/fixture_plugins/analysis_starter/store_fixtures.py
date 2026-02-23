@@ -114,7 +114,6 @@ def mock_store_for_raredisease_file_creators(
     store.get_sample_by_internal_id.return_value = sample
     bed_version: BedVersion = create_autospec(BedVersion)
     bed_version.filename = "bed_version_file.bed"
-    store.get_bed_version_by_short_name.return_value = bed_version
     return store
 
 

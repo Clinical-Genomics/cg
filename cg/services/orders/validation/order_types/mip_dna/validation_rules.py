@@ -1,4 +1,5 @@
 from cg.services.orders.validation.rules.case.rules import (
+    validate_case_contains_related_samples,
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
@@ -50,6 +51,7 @@ MIP_DNA_CASE_RULES: list[callable] = [
     validate_gene_panels_exist,
     validate_gene_panels_unique,
     validate_samples_in_case_have_same_prep_category,
+    validate_case_contains_related_samples,
 ]
 
 MIP_DNA_CASE_SAMPLE_RULES: list[callable] = [

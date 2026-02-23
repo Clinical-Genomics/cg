@@ -138,9 +138,10 @@ class Workflow(StrEnum):
 
 
 DNA_WORKFLOWS_WITH_SCOUT_UPLOAD: list[Workflow] = [
-    Workflow.MIP_DNA,
     Workflow.BALSAMIC,
     Workflow.BALSAMIC_UMI,
+    Workflow.MIP_DNA,
+    Workflow.RAREDISEASE,
 ]
 
 
@@ -162,6 +163,12 @@ class GenomeVersion(StrEnum):
     CANFAM3 = auto()
     HG19 = "hg19"
     HG38 = "hg38"
+
+
+class BedVersionGenomeVersion(StrEnum):
+    HG19 = "hg19"
+    HG38 = "hg38"
+    CFAM3 = "cfam3"
 
 
 class SampleType(StrEnum):
