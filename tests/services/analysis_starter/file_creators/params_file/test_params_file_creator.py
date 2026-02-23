@@ -54,7 +54,7 @@ def gcnvcaller_files() -> dict[str, GCNVCallerFiles]:
 
 @pytest.mark.parametrize(
     "expected_bed_short_name, lims_capture_kit",
-    [("/some/full/path/bed_version.bed", "target_bed_shortname_123"), ("", None)],
+    [(Path("/some/full/path/bed_version.bed"), "target_bed_shortname_123"), (Path(""), None)],
     ids=["Capture kit is in LIMS", "Capture kit not in LIMS"],
 )
 def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
@@ -267,6 +267,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_included(
     file_creator = RarediseaseParamsFileCreator(
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
+        references_directory=Path("some_path"),
         store=store_mock,
         lims=lims,
         params="Path_to_file.yaml",

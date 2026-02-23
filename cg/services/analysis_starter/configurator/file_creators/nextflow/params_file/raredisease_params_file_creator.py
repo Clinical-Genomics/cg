@@ -84,7 +84,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             sample_id_map=sample_mapping_file,
             save_mapped_as_cram=True,
             skip_germlinecnvcaller=skip_germlinecnvcaller,
-            target_bed=target_bed,
+            target_bed=Path(self.references_directory, target_bed),
             vcfanno_extra_resources=f"{case_path}/{ScoutExportFileName.MANAGED_VARIANTS}",
             vep_filters_scout_fmt=f"{case_path}/{ScoutExportFileName.PANELS}",
             verifybamid_svd_bed=verifybamid_files.bed,
@@ -134,7 +134,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
                     short_name=target_bed_shortname, genome_version=BedVersionGenomeVersion.HG38
                 )
             )
-            return f"{self.references_directory}/{bed_version.filename}"
+            return bed_version.filename
         else:
             return ""
 
