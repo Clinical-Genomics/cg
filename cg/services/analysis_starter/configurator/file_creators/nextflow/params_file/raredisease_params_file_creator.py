@@ -68,7 +68,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
     ) -> RarediseaseParameters:
         """Return case-specific parameters for the analysis."""
         prep_category: SeqLibraryPrepCategory = self._get_arbitrary_prep_category_in_case(case_id)
-        target_bed: str = self._get_target_bed_from_lims(case_id)
+        target_bed: str = self._get_target_bed(case_id)
         sample_mapping_file: Path = self._create_sample_mapping_file(
             case_id=case_id, case_path=case_path
         )
@@ -119,9 +119,9 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         sample: Sample = self.store.get_samples_by_case_id(case_id=case_id)[0]
         return sample.prep_category
 
-    def _get_target_bed_from_lims(self, case_id: str) -> str:
+    def _get_target_bed(self, case_id: str) -> str:
         """
-        Get target bed filename from LIMS. Return an empty string if no target bed is found in LIMS.
+        Get target bed filename from LIMS. Return the default bed when none was found in LIMS.
         Raises:
             CgDataError: if the bed target capture version is not found in StatusDB.
         """
