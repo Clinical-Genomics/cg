@@ -135,6 +135,15 @@ def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
         return False
 
     files_at_source: list[Path] = parse_manifest_file(existing_manifest_file)
+
+    analysis_path: Path | None = get_latest_analysis_path(source_directory)
+    if analysis_path:
+        analysis_manifest: Path | None = get_existing_manifest_file(analysis_path)
+        if analysis_manifest:
+            analysis_prefix = analysis_path.relative_to(source_directory)
+            analysis_files = parse_manifest_file(analysis_manifest)
+            files_at_source.extend(Path(analysis_prefix, f) for f in analysis_files)
+
     return are_all_files_synced(files_at_source=files_at_source, target_directory=target_directory)
 
 
