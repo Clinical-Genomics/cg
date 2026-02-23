@@ -264,7 +264,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_included(
     lims.capture_kit = Mock(return_value="target_bed_shortname_123")
 
     # GIVEN a params file creator
-    file_creator = RarediseaseParamsFileCreator(  # TODO add references_directory
+    file_creator = RarediseaseParamsFileCreator(
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,

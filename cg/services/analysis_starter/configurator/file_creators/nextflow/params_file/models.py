@@ -26,10 +26,10 @@ class RarediseaseParameters(WorkflowParameters):
     gcnvcaller_model: Path | None
     ploidy_model: Path | None
     readcount_intervals: Path | None
-    references_directory: Path
     sample_id_map: Path
     save_mapped_as_cram: bool
     skip_germlinecnvcaller: bool
+    target_bed: Path
     vcfanno_extra_resources: str
     vep_filters_scout_fmt: str
     verifybamid_svd_bed: Path
