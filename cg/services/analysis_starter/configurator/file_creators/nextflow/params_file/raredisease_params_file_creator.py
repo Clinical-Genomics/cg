@@ -74,7 +74,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         )
         verifybamid_files: VerifybamidSvdFiles = self._get_verifybamid_files(prep_category)
         skip_germlinecnvcaller, gcnvcaller_model, ploidy_model, readcount_intervals = (
-            self._get_gcnvcaller_args(prep_category=prep_category, target_bed_file=target_bed)
+            self._get_gcnvcaller_args(prep_category=prep_category, target_bed=target_bed)
         )
         return RarediseaseParameters(
             analysis_type=prep_category,
@@ -94,9 +94,9 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             verifybamid_svd_ud=verifybamid_files.ud,
         )
 
-    def _get_gcnvcaller_args(self, prep_category: SeqLibraryPrepCategory, target_bed_file: str):
+    def _get_gcnvcaller_args(self, prep_category: SeqLibraryPrepCategory, target_bed: str):
         if prep_category == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
-            if files := self.gcnvcaller_files.get(target_bed_file):
+            if files := self.gcnvcaller_files.get(target_bed):
                 return False, files.gcnvcaller_model, files.ploidy_model, files.readcount_intervals
 
         return True, None, None, None
