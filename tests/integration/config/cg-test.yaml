@@ -98,6 +98,7 @@ raredisease:
   compute_env: raredisease_compute_env
   conda_env: raredisease_conda_env
   config: {test_root_dir}/raredisease_config.config
+  default_target_bed: twistexomecomprehensive_10.2_hg38_design.bed
   gcnvcaller:
     twistexomecomprehensive_10.2_hg38_design.bed:
       gcnvcaller_model: {test_root_dir}/tyra/bananks
@@ -107,6 +108,7 @@ raredisease:
   params: {test_root_dir}/raredisease_params.yaml
   platform: {test_root_dir}/platform.config
   profile: raredisease_profile
+  references_directory: {test_root_dir}/raredisease_references_directory
   resources: {test_root_dir}/raredisease_resources.config
   repository: raredisease_repository
   revision: raredisease_revision

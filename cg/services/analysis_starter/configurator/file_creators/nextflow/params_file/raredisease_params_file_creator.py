@@ -28,15 +28,19 @@ LOG = logging.getLogger(__name__)
 class RarediseaseParamsFileCreator(ParamsFileCreator):
     def __init__(
         self,
+        default_target_bed: str,
         verifybamid_files_set: VerifybamidSvdFilesSet,
         gcnvcaller_files: dict[str, GCNVCallerFiles],
+        references_directory: Path,
         store: Store,
         lims: LimsAPI,
         params: str,
     ):
         super().__init__(params)
+        self.default_target_bed = default_target_bed
         self.verifybamid_files_set = verifybamid_files_set
         self.gcnvcaller_files = gcnvcaller_files
+        self.references_directory = references_directory
         self.store = store
         self.lims = lims
 
@@ -64,13 +68,13 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
     ) -> RarediseaseParameters:
         """Return case-specific parameters for the analysis."""
         prep_category: SeqLibraryPrepCategory = self._get_arbitrary_prep_category_in_case(case_id)
-        target_bed_file: str = self._get_target_bed_from_lims(case_id)
+        target_bed: str = self._get_target_bed(case_id)
         sample_mapping_file: Path = self._create_sample_mapping_file(
             case_id=case_id, case_path=case_path
         )
         verifybamid_files: VerifybamidSvdFiles = self._get_verifybamid_files(prep_category)
         skip_germlinecnvcaller, gcnvcaller_model, ploidy_model, readcount_intervals = (
-            self._get_gcnvcaller_args(prep_category=prep_category, target_bed_file=target_bed_file)
+            self._get_gcnvcaller_args(prep_category=prep_category, target_bed=target_bed)
         )
         return RarediseaseParameters(
             analysis_type=prep_category,
@@ -82,7 +86,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             sample_id_map=sample_mapping_file,
             save_mapped_as_cram=True,
             skip_germlinecnvcaller=skip_germlinecnvcaller,
-            target_bed_file=target_bed_file,
+            target_bed=Path(self.references_directory, target_bed),
             vcfanno_extra_resources=f"{case_path}/{ScoutExportFileName.MANAGED_VARIANTS}",
             vep_filters_scout_fmt=f"{case_path}/{ScoutExportFileName.PANELS}",
             verifybamid_svd_bed=verifybamid_files.bed,
@@ -90,9 +94,9 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             verifybamid_svd_ud=verifybamid_files.ud,
         )
 
-    def _get_gcnvcaller_args(self, prep_category: SeqLibraryPrepCategory, target_bed_file: str):
+    def _get_gcnvcaller_args(self, prep_category: SeqLibraryPrepCategory, target_bed: str):
         if prep_category == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
-            if files := self.gcnvcaller_files.get(target_bed_file):
+            if files := self.gcnvcaller_files.get(target_bed):
                 return False, files.gcnvcaller_model, files.ploidy_model, files.readcount_intervals
 
         return True, None, None, None
@@ -115,9 +119,9 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         sample: Sample = self.store.get_samples_by_case_id(case_id=case_id)[0]
         return sample.prep_category
 
-    def _get_target_bed_from_lims(self, case_id: str) -> str:
+    def _get_target_bed(self, case_id: str) -> str:
         """
-        Get target bed filename from LIMS. Return an empty string if no target bed is found in LIMS.
+        Get target bed filename from LIMS. Return the default bed when none was found in LIMS.
         Raises:
             CgDataError: if the bed target capture version is not found in StatusDB.
         """
@@ -134,7 +138,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             )
             return bed_version.filename
         else:
-            return ""
+            return self.default_target_bed
 
     def _create_sample_mapping_file(self, case_id: str, case_path: Path) -> Path:
         """Create a sample mapping file for the case and returns its path."""

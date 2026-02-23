@@ -29,7 +29,7 @@ class RarediseaseParameters(WorkflowParameters):
     sample_id_map: Path
     save_mapped_as_cram: bool
     skip_germlinecnvcaller: bool
-    target_bed_file: str
+    target_bed: Path
     vcfanno_extra_resources: str
     vep_filters_scout_fmt: str
     verifybamid_svd_bed: Path

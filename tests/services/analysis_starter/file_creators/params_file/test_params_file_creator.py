@@ -54,7 +54,10 @@ def gcnvcaller_files() -> dict[str, GCNVCallerFiles]:
 
 @pytest.mark.parametrize(
     "expected_bed_short_name, lims_capture_kit",
-    [("bed_version.bed", "target_bed_shortname_123"), ("", None)],
+    [
+        (Path("/some/full/path/bed_version.bed"), "target_bed_shortname_123"),
+        (Path("/some/full/path/default.bed"), None),
+    ],
     ids=["Capture kit is in LIMS", "Capture kit not in LIMS"],
 )
 def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
@@ -94,9 +97,11 @@ def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
 
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
+        default_target_bed="default.bed",
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
+        references_directory=Path("/some/full/path/"),
         lims=lims,
         params="Path_to_file.yaml",
     )
@@ -132,7 +137,7 @@ def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
             "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
             "save_mapped_as_cram": True,
             "skip_germlinecnvcaller": True,
-            "target_bed_file": expected_bed_short_name,
+            "target_bed": expected_bed_short_name,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
             "vep_filters_scout_fmt": "some_path/gene_panels.bed",
             "verifybamid_svd_bed": ANY,
@@ -178,9 +183,11 @@ def test_raredisease_params_file_creator_wgs(
     # GIVEN a params file creator
 
     file_creator = RarediseaseParamsFileCreator(
+        default_target_bed="default.bed",
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
+        references_directory=Path("/some/full/path/"),
         lims=lims,
         params="Path_to_file.yaml",
     )
@@ -216,7 +223,7 @@ def test_raredisease_params_file_creator_wgs(
             "skip_germlinecnvcaller": True,
             "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
             "save_mapped_as_cram": True,
-            "target_bed_file": ANY,
+            "target_bed": ANY,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
             "vep_filters_scout_fmt": "some_path/gene_panels.bed",
             "verifybamid_svd_bed": Path("some/sleeping_quarters.bed"),
@@ -263,8 +270,10 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_included(
 
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
+        default_target_bed="default.bed",
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
+        references_directory=Path("some_path"),
         store=store_mock,
         lims=lims,
         params="Path_to_file.yaml",
@@ -304,7 +313,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_included(
             "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
             "save_mapped_as_cram": True,
             "skip_germlinecnvcaller": False,
-            "target_bed_file": ANY,
+            "target_bed": ANY,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
             "vep_filters_scout_fmt": "some_path/gene_panels.bed",
             "verifybamid_svd_bed": Path("some/sleeping_quarters.exome.bed"),
@@ -350,8 +359,10 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_bed_version_does_not_mat
 
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
+        default_target_bed="default.bed",
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
+        references_directory=Path("/any/path"),
         store=store_mock,
         lims=lims,
         params="Path_to_file.yaml",
@@ -388,7 +399,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_bed_version_does_not_mat
             "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
             "save_mapped_as_cram": True,
             "skip_germlinecnvcaller": True,
-            "target_bed_file": ANY,
+            "target_bed": ANY,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
             "vep_filters_scout_fmt": "some_path/gene_panels.bed",
             "verifybamid_svd_bed": ANY,

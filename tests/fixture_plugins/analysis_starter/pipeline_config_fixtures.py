@@ -121,6 +121,7 @@ def nallo_config_object(get_nextflow_config_dict: Callable) -> NalloConfig:
 @pytest.fixture
 def raredisease_config_object(get_nextflow_config_dict: Callable) -> RarediseaseConfig:
     config: dict = get_nextflow_config_dict(workflow=Workflow.RAREDISEASE)
+    config["default_target_bed"] = "twistexomecomprehensive_10.2_hg38_design.bed"
     config["gcnvcaller"] = {
         "twistexomecomprehensive_10.2_hg38_design.bed": {
             "gcnvcaller_model": "tyra/bananks",
@@ -128,6 +129,7 @@ def raredisease_config_object(get_nextflow_config_dict: Callable) -> Raredisease
             "readcount_intervals": "richard/banankins",
         }
     }
+    config["references_directory"] = Path("/raredisease/references")
     config["verifybamid_svd"] = {
         "wes": {
             "bed": Path("path", "to", "sleeping_quarters.bed"),
