@@ -107,6 +107,7 @@ raredisease:
   params: {test_root_dir}/raredisease_params.yaml
   platform: {test_root_dir}/platform.config
   profile: raredisease_profile
+  references_directory: {test_root_dir}/raredisease_references_directory
   resources: {test_root_dir}/raredisease_resources.config
   repository: raredisease_repository
   revision: raredisease_revision

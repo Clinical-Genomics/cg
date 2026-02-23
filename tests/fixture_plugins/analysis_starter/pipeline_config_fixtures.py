@@ -128,6 +128,7 @@ def raredisease_config_object(get_nextflow_config_dict: Callable) -> Raredisease
             "readcount_intervals": "richard/banankins",
         }
     }
+    config["references_directory"] = Path("/raredisease/references")
     config["verifybamid_svd"] = {
         "wes": {
             "bed": Path("path", "to", "sleeping_quarters.bed"),
