@@ -139,7 +139,7 @@ class ConfiguratorFactory:
                     gcnvcaller_files=raredisease_config.gcnvcaller,
                     verifybamid_files_set=raredisease_config.verifybamid_svd,
                     lims=self.lims_api,
-                    params=params,
+                    params=raredisease_config.params,
                     references_directory=raredisease_config.references_directory,
                     store=self.store,
                 )
