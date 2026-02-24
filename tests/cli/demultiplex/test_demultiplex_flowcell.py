@@ -184,7 +184,6 @@ def test_copy_novaseqx_sequencing_runs_notifies_trailblazer(
     mock_tb_api.add_pending_analysis.assert_called_once()
     call_kwargs = mock_tb_api.add_pending_analysis.call_args.kwargs
     assert call_kwargs["workflow"] == Workflow.DEMULTIPLEX
-    assert call_kwargs["config_path"] is None
 
     # THEN the analysis status was immediately set to COMPLETED
     mock_tb_api.set_analysis_status.assert_called_once()

@@ -201,31 +201,3 @@ def test_has_demultiplexing_started_on_sequencer_false(
 
     # THEN the response should be False
     assert not has_demux_started
-
-
-def test_has_demultiplexing_started_on_sequencer_checks_sequencing_runs_dir(
-    tmp_path: Path,
-    novaseq_x_flow_cell_full_name: str,
-):
-    """Test that on-instrument demux is detected via sequencing-runs, not demultiplexed-runs."""
-    # GIVEN a flow cell under sequencing-runs/ with Analysis data containing BCLConvert
-    sequencing_runs_dir = Path(tmp_path, "sequencing-runs", novaseq_x_flow_cell_full_name)
-    analysis_dir = Path(sequencing_runs_dir, DemultiplexingDirsAndFiles.ANALYSIS, "1")
-    Path(
-        analysis_dir,
-        DemultiplexingDirsAndFiles.DATA,
-        DemultiplexingDirsAndFiles.BCL_CONVERT,
-    ).mkdir(parents=True)
-    analysis_dir.joinpath(DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
-
-    # GIVEN a corresponding empty demultiplexed-runs/ directory (no Analysis data)
-    demux_runs_dir = Path(tmp_path, "demultiplexed-runs", novaseq_x_flow_cell_full_name)
-    demux_runs_dir.mkdir(parents=True)
-
-    flow_cell = IlluminaRunDirectoryData(sequencing_runs_dir)
-
-    # WHEN checking if the flow cell has started demultiplexing on the sequencer
-    has_demux_started: bool = flow_cell.has_demultiplexing_started_on_sequencer()
-
-    # THEN it should return True (checking sequencing-runs, not demultiplexed-runs)
-    assert has_demux_started

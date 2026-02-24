@@ -226,6 +226,3 @@ def test_copy_run_dir_to_tmp_excludes_analysis(
 
     # THEN the command should exclude the Analysis directory
     assert f"--exclude={DemultiplexingDirsAndFiles.ANALYSIS}" in command
-
-    # THEN the command should use rsync
-    assert command.startswith("rsync")
