@@ -94,6 +94,41 @@ crunchy:
     number_tasks: 12
     conda_env: crunchy_conda_env
 
+raredisease:
+  compute_env: raredisease_compute_env
+  conda_env: raredisease_conda_env
+  config: {test_root_dir}/raredisease_config.config
+  default_target_bed: twistexomecomprehensive_10.2_hg38_design.bed
+  gcnvcaller:
+    twistexomecomprehensive_10.2_hg38_design.bed:
+      gcnvcaller_model: {test_root_dir}/tyra/bananks
+      ploidy_model: {test_root_dir}/tom/bananks
+      readcount_intervals: {test_root_dir}/richard/banankins
+  launch_directory: {test_root_dir}/raredisease_launch_directory
+  params: {test_root_dir}/raredisease_params.yaml
+  platform: {test_root_dir}/platform.config
+  profile: raredisease_profile
+  references_directory: {test_root_dir}/raredisease_references_directory
+  resources: {test_root_dir}/raredisease_resources.config
+  repository: raredisease_repository
+  revision: raredisease_revision
+  root: {test_root_dir}/raredisease_root_path
+  slurm:
+    account: "raredisease_slurm_account"
+    mail_user: "raredisease_mail_user@scilifelab.se"
+    qos: "low"
+  tower_workflow: raredisease_tower_workflow
+  verifybamid_svd:
+    wes:
+      bed: {test_root_dir}/raredisease/wes/file.bed
+      mu: {test_root_dir}/raredisease/wes/file.mu
+      ud: {test_root_dir}/raredisease/wes/file.UD
+    wgs:
+      bed: {test_root_dir}/raredisease/wgs/file.bed
+      mu: {test_root_dir}/raredisease/wgs/file.mu
+      ud: {test_root_dir}/raredisease/wgs/file.UD
+  workflow_bin_path: {test_root_dir}/raredisease_workflow_bin_path
+
 data-delivery:
   destination_path: {test_root_dir}/data-delivery_destination_path
   covid_destination_path: {test_root_dir}/data-delivery_covid_destination_path

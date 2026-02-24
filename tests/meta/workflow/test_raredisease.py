@@ -1,13 +1,21 @@
-from unittest.mock import create_autospec
+from pathlib import Path
+from unittest.mock import Mock, create_autospec
 
 from pytest_mock import MockerFixture
 
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.constants import SexOptions
+from cg.constants import SexOptions, Workflow
+from cg.constants.constants import GenomeVersion
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import (
+    CGConfig,
+    IlluminaConfig,
+    RarediseaseConfig,
+    RunInstruments,
+    SlurmConfig,
+)
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.store.models import Case, Sample
 from tests.typed_mock import TypedMock, create_typed_mock
@@ -67,3 +75,37 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
     chanjo_api.as_mock.sample_coverage.assert_called_once_with(
         sample_id="internal_id", panel_genes=[]
     )
+
+
+def test_get_genome_build():
+    # GIVEN the RarediseaseAnalysisAPI
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        raredisease=create_autospec(
+            RarediseaseConfig,
+            conda_binary="conda/bin",
+            conda_env="conda/env",
+            config="here/is/my/config",
+            params="here/is/my/params/file",
+            platform="platform",
+            profile="profile",
+            resources="resources",
+            revision="1.0.0",
+            root="/I/am/Root",
+            slurm=create_autospec(SlurmConfig, account="account", mail_user="user"),
+            tower_workflow=Workflow.RAREDISEASE,
+            workflow_bin_path=Path("I", "am", "workflow", "bin", "path"),
+        ),
+        data_flow=Mock(),
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+        ),
+        tower_binary_path="tower/path",
+    )
+
+    analysis_api = RarediseaseAnalysisAPI(config=cg_config)
+
+    # WHEN getting the genome build
+    # THEN it is hg38
+    assert analysis_api.get_genome_build(case_id="ChevyCase") == GenomeVersion.HG38

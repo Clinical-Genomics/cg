@@ -249,23 +249,44 @@ class NalloConfig(CommonAppConfig):
     tower_workflow: str
 
 
+class VerifybamidSvdFiles(BaseModel):
+    bed: Path
+    mu: Path
+    ud: Path
+
+
+class VerifybamidSvdFilesSet(BaseModel):
+    wes: VerifybamidSvdFiles
+    wgs: VerifybamidSvdFiles
+
+
+class GCNVCallerFiles(BaseModel):
+    gcnvcaller_model: Path
+    ploidy_model: Path
+    readcount_intervals: Path
+
+
 class RarediseaseConfig(CommonAppConfig):
     binary_path: str | None = None
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
+    default_target_bed: str
+    gcnvcaller: dict[str, GCNVCallerFiles]
     launch_directory: str
-    workflow_bin_path: str
+    params: str
+    platform: str
     pre_run_script: str = ""
     profile: str
+    references_directory: Path
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    verifybamid_svd: VerifybamidSvdFilesSet
+    workflow_bin_path: str
 
 
 class TomteConfig(CommonAppConfig):
