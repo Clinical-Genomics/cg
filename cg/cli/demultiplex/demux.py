@@ -7,9 +7,11 @@ from pydantic import ValidationError
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
+from cg.apps.demultiplex.sample_sheet.utils import add_and_include_sample_sheet_path_to_housekeeper
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     create_manifest_file,
+    get_latest_analysis_path,
     hardlink_flow_cell_analysis_data,
     is_flow_cell_sync_confirmed,
     is_manifest_file_required,
@@ -153,6 +155,12 @@ def copy_novaseqx_sequencing_runs(context: CGConfig):
             mark_as_demultiplexed(demultiplexed_runs_flow_cell_dir)
 
             sequencing_run = IlluminaRunDirectoryData(sequencing_run_dir)
+            analysis_path: Path = get_latest_analysis_path(sequencing_run_dir)
+            add_and_include_sample_sheet_path_to_housekeeper(
+                flow_cell_directory=Path(analysis_path, DemultiplexingDirsAndFiles.DATA),
+                flow_cell_name=sequencing_run.id,
+                hk_api=context.housekeeper_api,
+            )
             tb_api: TrailblazerAPI = context.trailblazer_api
             tb_api.add_pending_analysis(
                 case_id=sequencing_run.id,

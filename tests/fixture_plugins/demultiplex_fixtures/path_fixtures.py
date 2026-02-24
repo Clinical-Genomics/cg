@@ -337,6 +337,7 @@ def add_novaseqx_analysis_data(novaseqx_flow_cell_directory: Path, analysis_vers
     data = analysis_path.joinpath(DemultiplexingDirsAndFiles.DATA)
     data.mkdir()
     data.joinpath(DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED).touch()
+    data.joinpath(DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME).touch()
 
 
 @pytest.fixture(scope="function")
