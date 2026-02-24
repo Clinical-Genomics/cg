@@ -16,7 +16,7 @@ class BalsamicConfigInput(BaseModel):
     artefact_snv_observations: Path
     balsamic_binary: Path
     balsamic_cache: Path
-    cache_version: str | None = None
+    cache_version: str
     cadd_annotations: Path
     cancer_germline_snv_observations: Path
     cancer_somatic_snv_observations: Path

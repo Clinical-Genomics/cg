@@ -35,7 +35,7 @@ class BalsamicConfigFileCreator:
         self.root_dir: Path = cg_balsamic_config.root
         self.bed_directory: Path = cg_balsamic_config.bed_path
         self.cache_dir: Path = cg_balsamic_config.balsamic_cache
-        self.cache_version: str | None = cg_balsamic_config.cache_version
+        self.cache_version: str = cg_balsamic_config.cache_version
         self.cadd_path: Path = cg_balsamic_config.cadd_path
         self.genome_interval_path: Path = cg_balsamic_config.genome_interval_path
         self.gens_coverage_female_path: Path = cg_balsamic_config.gens_coverage_female_path
