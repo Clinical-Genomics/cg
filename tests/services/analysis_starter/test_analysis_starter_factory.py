@@ -45,7 +45,8 @@ from cg.services.analysis_starter.tracker.implementations.nextflow_tracker impor
 from cg.store.store import Store
 
 
-def test_analysis_starter_factory_balsamic(cg_balsamic_config: BalsamicConfig):
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
+def test_analysis_starter_factory_balsamic(cg_balsamic_config: BalsamicConfig, workflow: Workflow):
     # GIVEN a CGConfig with configuration info for Balsamic
     cg_config: CGConfig = create_autospec(
         CGConfig,
@@ -64,7 +65,7 @@ def test_analysis_starter_factory_balsamic(cg_balsamic_config: BalsamicConfig):
 
     # WHEN getting the analysis starter for Balsamic
     analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
-        Workflow.BALSAMIC
+        workflow
     )
 
     # THEN the analysis starter should have been configured correctly
@@ -72,6 +73,7 @@ def test_analysis_starter_factory_balsamic(cg_balsamic_config: BalsamicConfig):
     assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
     assert isinstance(analysis_starter.submitter, SubprocessSubmitter)
     assert isinstance(analysis_starter.tracker, BalsamicTracker)
+    assert analysis_starter.workflow == workflow
 
 
 def test_analysis_starter_factory_microsalt(cg_context: CGConfig, mocker: MockerFixture):
