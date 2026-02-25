@@ -21,7 +21,9 @@ def test_process_solved_success(mocker: MockerFixture):
 
     scout_api: ScoutAPI = create_autospec(ScoutAPI)
     scout_api.get_solved_cases = Mock(return_value=[scout_case])
-    mocker.patch.object(mutacc, "get_scout_api_by_genome_build", return_value=scout_api)
+    get_scout_api_call = mocker.patch.object(
+        mutacc, "get_scout_api_by_genome_build", return_value=scout_api
+    )
 
     upload_to_mutacc_api = create_autospec(UploadToMutaccAPI)
     mocker.patch.object(UploadToMutaccAPI, "__new__", return_value=upload_to_mutacc_api)
@@ -39,8 +41,9 @@ def test_process_solved_success(mocker: MockerFixture):
     # GIVEN a cli_runner
     cli_runner = CliRunner()
     result = cli_runner.invoke(
-        process_solved, ["--scout-instance", "hg19", "--days-ago", 1], obj=cg_config
+        process_solved, ["--scout-instance", "hg19", "--days-ago", "1"], obj=cg_config
     )
 
     assert result.exit_code == EXIT_SUCCESS
+    get_scout_api_call.assert_called_once_with(cg_config=cg_config, genome_build="hg19")
     upload_to_mutacc_api.extract_reads.assert_called_once_with(scout_case)
