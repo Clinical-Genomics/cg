@@ -84,9 +84,9 @@ def process_solved(
         LOG.info(f"No cases were solved within the last {days_ago} days")
 
 
-@mutacc.command("processed-solved")
+@mutacc.command("add-to-database")
 @click.pass_obj
-def processed_solved(context: CGConfig):
+def add_to_database(context: CGConfig):
     """Upload solved cases that has been processed by mutacc to the mutacc database"""
 
     mutacc_auto_api: MutaccAutoAPI = MutaccAutoAPI(config=context.dict())

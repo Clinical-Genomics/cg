@@ -12,7 +12,7 @@ from cg.cli.upload.fohm import fohm
 from cg.cli.upload.genotype import upload_genotypes
 from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.gisaid import upload_to_gisaid
-from cg.cli.upload.mutacc import process_solved, processed_solved
+from cg.cli.upload.mutacc import add_to_database, process_solved
 from cg.cli.upload.nipt import nipt
 from cg.cli.upload.observations import (
     upload_available_observations_to_loqusdb,
@@ -147,7 +147,7 @@ upload.add_command(create_scout_load_config)
 upload.add_command(fohm)
 upload.add_command(nipt)
 upload.add_command(process_solved)
-upload.add_command(processed_solved)
+upload.add_command(add_to_database)
 upload.add_command(upload_available_observations_to_loqusdb)
 upload.add_command(upload_case_to_scout)
 upload.add_command(upload_coverage)

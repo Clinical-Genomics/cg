@@ -78,3 +78,7 @@ def test_process_solved_success(
     )
     # THEN the reads were extracted for the case returned by Scout
     extract_reads_mock.assert_called_once_with(scout_case)
+
+def test_add_to_database_success():
+    # GIVEN
+
