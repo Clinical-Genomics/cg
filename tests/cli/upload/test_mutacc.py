@@ -53,6 +53,11 @@ def test_process_solved_success(mocker: MockerFixture):
 
     # THEN the command exits successfully
     assert result.exit_code == EXIT_SUCCESS
+
+    # THEN the correct Scout instance was used for the export
     get_scout_api_call.assert_called_once_with(cg_config=cg_config, genome_build="hg19")
-    extract_reads_mock.assert_called_once_with(scout_case)
+    # THEN the mutacc auto api was used correctly
     mutacc_auto_init.assert_called_once_with(ANY, config=cg_config.mutacc_auto)
+
+    # THEN the reads were extracted for the case returned by Scout
+    extract_reads_mock.assert_called_once_with(scout_case)
