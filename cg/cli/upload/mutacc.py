@@ -8,6 +8,7 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload.utils import get_scout_api_by_genome_build
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.models.cg_config import CGConfig
@@ -15,21 +16,26 @@ from cg.models.cg_config import CGConfig
 LOG = logging.getLogger(__name__)
 
 
-@click.command("process-solved")
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
+def mutacc():
+    pass
+
+
+@mutacc.command("process-solved")
 @click.option("-c", "--case-id", help="internal case id, leave empty to process all")
 @click.option("-d", "--days-ago", type=int, default=1, help="days since solved")
 @click.option("-C", "--customers", type=str, multiple=True, help="Filter on customers")
 @click.option(
-    "--scout-instance",
+    "--genome-version",
     type=click.Choice(["hg19", "hg38"]),
-    help="Which scout instance to fetch cases from",
+    help="Determines Scout and MutAcc instances.",
     required=True,
 )
 @DRY_RUN
 @click.pass_obj
 def process_solved(
     context: CGConfig,
-    scout_instance: str,
+    genome_version: str,
     case_id: str | None,
     days_ago: int,
     customers: tuple[str],
@@ -41,7 +47,7 @@ def process_solved(
     LOG.info("----------------- PROCESS-SOLVED ----------------")
 
     scout_api: ScoutAPI = get_scout_api_by_genome_build(
-        cg_config=context, genome_build=scout_instance
+        cg_config=context, genome_build=genome_version
     )
     mutacc_auto_api: MutaccAutoAPI = MutaccAutoAPI(config=context.mutacc_auto)
     mutacc_upload_api = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)

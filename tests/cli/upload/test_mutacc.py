@@ -48,7 +48,7 @@ def test_process_solved_success(mocker: MockerFixture):
 
     # WHEN running process_solved
     result = cli_runner.invoke(
-        process_solved, ["--scout-instance", "hg19", "--days-ago", "1"], obj=cg_config
+        process_solved, ["--genome-version", "hg19", "--days-ago", "1"], obj=cg_config
     )
 
     # THEN the command exits successfully
