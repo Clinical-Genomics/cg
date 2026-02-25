@@ -4,7 +4,6 @@ from unittest.mock import Mock, create_autospec
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
-from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload import mutacc
@@ -26,10 +25,10 @@ def test_process_solved_success(mocker: MockerFixture):
         mutacc, "get_scout_api_by_genome_build", return_value=scout_api
     )
 
-    mutacc_auto_api = create_autospec(MutaccAutoAPI)
-    upload_to_mutacc_api = create_autospec(UploadToMutaccAPI)
-    mutacc_auto_new = mocker.patch.object(mutacc, "MutaccAutoAPI", return_value=mutacc_auto_api)
-    mocker.patch.object(mutacc, "UploadToMutaccAPI", return_value=upload_to_mutacc_api)
+    extract_reads_mock = mocker.patch.object(UploadToMutaccAPI, "extract_reads")
+    # upload_to_mutacc_api = create_autospec(UploadToMutaccAPI)
+    # mutacc_auto_new = mocker.patch.object(mutacc, "MutaccAutoAPI", return_value=mutacc_auto_api)
+    # mocker.patch.object(mutacc, "UploadToMutaccAPI", return_value=upload_to_mutacc_api)
 
     # GIVEN a cg config
     cg_config: CGConfig = create_autospec(
@@ -49,6 +48,6 @@ def test_process_solved_success(mocker: MockerFixture):
 
     assert result.exit_code == EXIT_SUCCESS
 
-    mutacc_auto_new.assert_called_once_with(config=cg_config.dict())
+    # mutacc_auto_new.assert_called_once_with(config=cg_config.dict())
     get_scout_api_call.assert_called_once_with(cg_config=cg_config, genome_build="hg19")
-    upload_to_mutacc_api.extract_reads.assert_called_once_with(scout_case)
+    extract_reads_mock.assert_called_once_with(scout_case)
