@@ -33,7 +33,7 @@ class MetaAPI:
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.lims_api: LimsAPI = config.lims_api
         self.madeline_api: MadelineAPI = config.madeline_api
-        self.mutacc_auto_api = MutaccAutoAPI(config=config.dict())
+        self.mutacc_auto_api = MutaccAutoAPI(config=config.mutacc_auto)
         self.prepare_fastq_api: PrepareFastqAPI = PrepareFastqAPI(
             store=config.status_db,
             compress_api=CompressAPI(

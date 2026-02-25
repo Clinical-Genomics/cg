@@ -4,37 +4,6 @@ conftest for mutacc-auto api
 
 import pytest
 
-from cg.apps.mutacc_auto import MutaccAutoAPI
-
-CONFIG = {
-    "mutacc_auto": {
-        "config_path": "mutacc-auto_config",
-        "binary_path": "mutacc-auto",
-        "padding": 111,
-    }
-}
-
-
-@pytest.fixture(scope="function")
-def mutacc_config():
-    """
-    mutacc config fixture
-    """
-
-    _config = CONFIG
-    return _config
-
-
-@pytest.fixture(scope="function")
-def mutacc_auto_api():
-    """
-    mutacc-auto api
-    """
-
-    _api = MutaccAutoAPI(CONFIG)
-
-    return _api
-
 
 class MockFailedProcess:
     """

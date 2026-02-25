@@ -16,7 +16,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.clients.arnold.api import ArnoldAPIClient
@@ -501,7 +500,6 @@ class CGConfig(BaseModel):
     loqusdb_somatic_exome: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC_EXOME.value)
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
-    mutacc_auto_api_: MutaccAutoAPI = None
     pdc: CommonAppConfig | None = None
     pdc_service_: PdcService | None = None
     post_processing_services_: PostProcessingServices | None = None
