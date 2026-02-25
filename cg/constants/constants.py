@@ -138,9 +138,10 @@ class Workflow(StrEnum):
 
 
 DNA_WORKFLOWS_WITH_SCOUT_UPLOAD: list[Workflow] = [
-    Workflow.MIP_DNA,
     Workflow.BALSAMIC,
     Workflow.BALSAMIC_UMI,
+    Workflow.MIP_DNA,
+    Workflow.RAREDISEASE,
 ]
 
 
@@ -153,6 +154,11 @@ class FileFormat(StrEnum):
     TXT: str = "txt"
     XML: str = "xml"
     YAML: str = "yaml"
+
+
+class GenomeBuild(StrEnum):
+    hg19 = "37"
+    hg38 = "38"
 
 
 class GenomeVersion(StrEnum):

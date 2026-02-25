@@ -10,7 +10,7 @@ NewSample = Annotated[MIPRNASample, Tag("new")]
 OldSample = Annotated[ExistingSample, Tag("existing")]
 
 
-class MIPRNACase(Case):
+class MIPRNACase(Case[MIPRNASample]):
     cohorts: list[str] | None = None
     synopsis: str | None = None
     samples: list[Annotated[NewSample | OldSample, Discriminator(has_internal_id)]]
