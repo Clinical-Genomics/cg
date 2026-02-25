@@ -43,7 +43,7 @@ def process_solved(
     scout_api: ScoutAPI = get_scout_api_by_genome_build(
         cg_config=context, genome_build=scout_instance
     )
-    mutacc_auto_api: MutaccAutoAPI = MutaccAutoAPI(config=context.dict())
+    mutacc_auto_api: MutaccAutoAPI = MutaccAutoAPI(config=context.mutacc_auto)
     mutacc_upload_api = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
     # Get cases to upload into mutacc from scout
