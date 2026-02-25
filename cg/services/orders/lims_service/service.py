@@ -34,6 +34,8 @@ class OrderLimsService:
                 dict_sample["priority"] = sample._case_priority
             if skip_reception_control:
                 dict_sample["skip_reception_control"] = True
+            if dict_sample.get("source") and dict_sample["source"] == "other":
+                dict_sample["source"] = dict_sample.get("source_comment") or "other"
             lims_sample: LimsSample = LimsSample.parse_obj(dict_sample)
             samples_lims.append(lims_sample)
         return samples_lims
