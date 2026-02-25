@@ -18,7 +18,6 @@ class PacbioSample(Sample):
     @model_validator(mode="before")
     def set_other_source(cls, data: Any) -> Any:
         """When source is sent as 'other', we should instead set the value sent as 'source_comment'."""
-        if isinstance(data, dict):
-            if data.get("source") == "other":
-                data["source"] = data.get("source_comment")
+        if isinstance(data, dict) and data.get("source") == "other":
+            data["source"] = data.get("source_comment")
         return data
