@@ -77,7 +77,7 @@ def process_solved(
 def processed_solved(context: CGConfig):
     """Upload solved cases that has been processed by mutacc to the mutacc database"""
 
-    mutacc_auto_api: MutaccAutoAPI = context.mutacc_auto_api
+    mutacc_auto_api: MutaccAutoAPI = MutaccAutoAPI(config=context.dict())
 
     LOG.info("----------------- PROCESSED-SOLVED ----------------")
 

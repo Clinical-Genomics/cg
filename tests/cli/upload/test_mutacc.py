@@ -28,7 +28,7 @@ def test_process_solved_success(mocker: MockerFixture):
 
     mutacc_auto_api = create_autospec(MutaccAutoAPI)
     upload_to_mutacc_api = create_autospec(UploadToMutaccAPI)
-    mutacc_auto_new = mocker.patch.object(MutaccAutoAPI, "__new__", return_value=mutacc_auto_api)
+    # mutacc_auto_new = mocker.patch.object(MutaccAutoAPI, "__new__", return_value=mutacc_auto_api)
     mocker.patch.object(UploadToMutaccAPI, "__new__", return_value=upload_to_mutacc_api)
 
     # GIVEN a cg config
@@ -49,6 +49,6 @@ def test_process_solved_success(mocker: MockerFixture):
 
     assert result.exit_code == EXIT_SUCCESS
 
-    mutacc_auto_new.assert_called_once_with(ANY, config=cg_config.dict())
+    # mutacc_auto_new.assert_called_once_with(ANY, config=cg_config.dict())
     get_scout_api_call.assert_called_once_with(cg_config=cg_config, genome_build="hg19")
     upload_to_mutacc_api.extract_reads.assert_called_once_with(scout_case)

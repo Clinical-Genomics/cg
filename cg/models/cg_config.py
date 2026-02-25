@@ -174,7 +174,9 @@ class CrunchyConfig(BaseModel):
     slurm: SlurmConfig
 
 
-class MutaccAutoConfig(CommonAppConfig):
+class MutaccAutoConfig(BaseModel):
+    binary_path: str
+    config_path: str
     padding: int = 300
 
 
@@ -657,15 +659,6 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating madeline api")
             api = MadelineAPI(config=self.dict())
             self.madeline_api_ = api
-        return api
-
-    @property
-    def mutacc_auto_api(self) -> MutaccAutoAPI:
-        api = self.__dict__.get("mutacc_auto_api_")
-        if api is None:
-            LOG.debug("Instantiating mutacc_auto api")
-            api = MutaccAutoAPI(config=self.dict())
-            self.mutacc_auto_api_ = api
         return api
 
     @property
