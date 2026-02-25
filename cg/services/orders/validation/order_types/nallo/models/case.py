@@ -10,7 +10,7 @@ NewSample = Annotated[NalloSample, Tag("new")]
 OldSample = Annotated[ExistingSample, Tag("existing")]
 
 
-class NalloCase(Case):
+class NalloCase(Case[NalloSample]):
     cohorts: list[str] | None = None
     panels: list[str]
     synopsis: str | None = None

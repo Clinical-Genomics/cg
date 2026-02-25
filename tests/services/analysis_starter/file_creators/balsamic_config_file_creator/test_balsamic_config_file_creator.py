@@ -1,6 +1,5 @@
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
-from typing import cast
 from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
@@ -9,6 +8,7 @@ from pytest_mock import MockerFixture
 import cg.services.analysis_starter.configurator.file_creators.balsamic_config as creator
 from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
+from cg.constants.constants import BedVersionGenomeVersion
 from cg.constants.observations import BalsamicObservationPanel
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.sequencing import SeqLibraryPrepCategory
@@ -42,7 +42,7 @@ def test_create_tgs_myeloid_normal_only(
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_normal_only_case)
 
     # GIVEN a bed version for a myeloid capture kit
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(
             BedVersion,
             bed_name=BalsamicObservationPanel.MYELOID,
@@ -76,8 +76,8 @@ def test_create_tgs_myeloid_normal_only(
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with(
-        "myeloid_short_name"
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
+        short_name="myeloid_short_name", genome_version=BedVersionGenomeVersion.HG19
     )
 
 
@@ -108,7 +108,7 @@ def test_create_tgs_lymphoid_paired(
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_paired_case)
 
     # GIVEN a bed version for a lymphoid capture kit
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(
             BedVersion,
             bed_name=BalsamicObservationPanel.LYMPHOID,
@@ -142,8 +142,9 @@ def test_create_tgs_lymphoid_paired(
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with(
-        "lymphoid_short_name"
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
+        short_name="lymphoid_short_name",
+        genome_version=BedVersionGenomeVersion.HG19,
     )
 
 
@@ -165,7 +166,7 @@ def test_create_tgs_tumour_only(
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_tumour_only_case)
 
     # GIVEN a bed version without a LoqusDB dump file nor PON file
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(
             BedVersion,
             bed_name="bed_without_a_dump_file",
@@ -199,7 +200,10 @@ def test_create_tgs_tumour_only(
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("bed_short_name")
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
+        short_name="bed_short_name",
+        genome_version=BedVersionGenomeVersion.HG19,
+    )
 
 
 def test_create_override_panel_bed(
@@ -218,7 +222,7 @@ def test_create_override_panel_bed(
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_tumour_only_case)
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
@@ -245,7 +249,10 @@ def test_create_override_panel_bed(
     )
 
     # THEN the panel bed flag value is used
-    store.get_bed_version_by_short_name_strict.assert_called_once_with("override_panel_bed")
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
+        short_name="override_panel_bed",
+        genome_version=BedVersionGenomeVersion.HG19,
+    )
 
 
 def test_create_wes_normal_only(
@@ -266,7 +273,7 @@ def test_create_wes_normal_only(
     store.get_case_by_internal_id_strict = Mock(return_value=wes_normal_only_case)
 
     # GIVEN a bed version for the exome capture kit
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(
             BedVersion,
             bed_name=BalsamicObservationPanel.EXOME,
@@ -300,8 +307,9 @@ def test_create_wes_normal_only(
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with(
-        "exome_short_name"
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
+        short_name="exome_short_name",
+        genome_version=BedVersionGenomeVersion.HG19,
     )
 
 
@@ -330,7 +338,7 @@ def test_create_wes_paired(
     store.get_case_by_internal_id_strict = Mock(return_value=wes_paired_case)
 
     # GIVEN a bed version for the exome capture kit
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(
             BedVersion,
             bed_name=BalsamicObservationPanel.EXOME,
@@ -364,7 +372,10 @@ def test_create_wes_paired(
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("twist_exome")
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
+        short_name="twist_exome",
+        genome_version=BedVersionGenomeVersion.HG19,
+    )
 
 
 def test_create_wes_tumour_only(
@@ -385,7 +396,7 @@ def test_create_wes_tumour_only(
     store.get_case_by_internal_id_strict = Mock(return_value=wes_tumor_only_case)
 
     # GIVEN a bed version for the exome capture kit
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(
             BedVersion,
             bed_name=BalsamicObservationPanel.EXOME,
@@ -419,8 +430,9 @@ def test_create_wes_tumour_only(
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with(
-        "exome_short_name"
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
+        short_name="exome_short_name",
+        genome_version=BedVersionGenomeVersion.HG19,
     )
 
 
@@ -537,7 +549,7 @@ def test_create_no_capture_kit_in_lims(cg_balsamic_config: BalsamicConfig):
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=case_without_capture_kit)
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
