@@ -499,7 +499,8 @@ class CGConfig(BaseModel):
     )
     loqusdb_somatic_exome: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC_EXOME.value)
     madeline_api_: MadelineAPI = None
-    mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
+    mutacc_auto_hg19: MutaccAutoConfig
+    mutacc_auto_hg38: MutaccAutoConfig
     pdc: CommonAppConfig | None = None
     pdc_service_: PdcService | None = None
     post_processing_services_: PostProcessingServices | None = None

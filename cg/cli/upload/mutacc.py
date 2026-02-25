@@ -10,8 +10,9 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload.utils import get_scout_api_by_genome_build
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN
+from cg.constants.constants import BedVersionGenomeVersion
 from cg.meta.upload.mutacc import UploadToMutaccAPI
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, MutaccAutoConfig
 
 LOG = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ def mutacc():
 @click.pass_obj
 def process_solved(
     context: CGConfig,
-    genome_version: str,
+    genome_version: BedVersionGenomeVersion,
     case_id: str | None,
     days_ago: int,
     customers: tuple[str],
@@ -49,7 +50,12 @@ def process_solved(
     scout_api: ScoutAPI = get_scout_api_by_genome_build(
         cg_config=context, genome_build=genome_version
     )
-    mutacc_auto_api: MutaccAutoAPI = MutaccAutoAPI(config=context.mutacc_auto)
+    mutacc_config: MutaccAutoConfig = (
+        context.mutacc_auto_hg19
+        if genome_version == BedVersionGenomeVersion.HG19
+        else context.mutacc_auto_hg38
+    )
+    mutacc_auto_api: MutaccAutoAPI = MutaccAutoAPI(config=mutacc_config)
     mutacc_upload_api = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
     # Get cases to upload into mutacc from scout
@@ -78,7 +84,7 @@ def process_solved(
         LOG.info(f"No cases were solved within the last {days_ago} days")
 
 
-@click.command("processed-solved")
+@mutacc.command("processed-solved")
 @click.pass_obj
 def processed_solved(context: CGConfig):
     """Upload solved cases that has been processed by mutacc to the mutacc database"""
