@@ -98,21 +98,22 @@ def test_add_to_database_success(
     expected_mutacc_auto_config: str,
     mocker: MockerFixture,
 ):
-    # GIVEN
-    cli_runner = CliRunner()
-
-    # GIVEN a cg config
-
     mutacc_auto_init = mocker.spy(MutaccAutoAPI, "__init__")
     import_reads_call = mocker.patch.object(MutaccAutoAPI, "import_reads")
 
+    # GIVEN a cg config
+    cli_runner = CliRunner()
+
+    # WHEN calling mutacc function add_to_database
     result = cli_runner.invoke(
         add_to_database, args=["--genome-version", genome_version], obj=cg_config
     )
 
+    # THEN the command exits successfully
     assert result.exit_code == EXIT_SUCCESS
+    # THEN the mutacc auto api was used correctly
     mutacc_auto_init.assert_called_once_with(
         ANY, config=getattr(cg_config, expected_mutacc_auto_config)
     )
-    import_reads_call.assert_called_once()
+    # THEN the import reads method is called
     import_reads_call.assert_called_once()
