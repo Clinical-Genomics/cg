@@ -65,6 +65,7 @@ MASTER_STEPS_UDFS = {
     },
     "rna_prep_step": {
         "Aliquot Samples for Fragmentation (RNA) v1": "Amount needed (ng)",
+        "Aliquot Samples for RNA Depletion v1": "Amount needed (ng)",
     },
     "prep_method_step": {
         "Library Preparation (Cov) v1": {
@@ -118,6 +119,10 @@ MASTER_STEPS_UDFS = {
             "atlas_version": "Atlas Version",
         },
         "SMRTbell library prep (Revio) v1": {
+            "atlas_document": "Library Preparation Method",
+            "atlas_version": "Atlas Version",
+        },
+        "FFPE Treatment & Library Prep (RNA Depletion) v1": {
             "atlas_document": "Library Preparation Method",
             "atlas_version": "Atlas Version",
         },
