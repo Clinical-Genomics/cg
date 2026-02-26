@@ -7,19 +7,23 @@ from pydantic import ValidationError
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
+from cg.apps.demultiplex.sample_sheet.utils import add_and_include_sample_sheet_path_to_housekeeper
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
-    hardlink_flow_cell_analysis_data,
-    is_ready_for_post_processing,
-    mark_as_demultiplexed,
-    mark_flow_cell_as_queued_for_post_processing,
-    is_manifest_file_required,
     create_manifest_file,
-    is_syncing_complete,
+    get_latest_analysis_path,
+    hardlink_flow_cell_analysis_data,
     is_flow_cell_sync_confirmed,
+    is_manifest_file_required,
+    is_ready_for_post_processing,
+    is_syncing_complete,
+    mark_as_demultiplexed,
 )
 from cg.constants.cli_options import DRY_RUN
+from cg.constants.constants import Workflow
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.priority import TrailblazerPriority
+from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.exc import CgError, FlowCellError, SampleSheetContentError
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -149,7 +153,24 @@ def copy_novaseqx_sequencing_runs(context: CGConfig):
                 demultiplexed_runs_dir, sequencing_run_dir.name
             )
             mark_as_demultiplexed(demultiplexed_runs_flow_cell_dir)
-            mark_flow_cell_as_queued_for_post_processing(sequencing_run_dir)
+
+            sequencing_run = IlluminaRunDirectoryData(sequencing_run_dir)
+            analysis_path: Path = get_latest_analysis_path(sequencing_run_dir)
+            add_and_include_sample_sheet_path_to_housekeeper(
+                flow_cell_directory=Path(analysis_path, DemultiplexingDirsAndFiles.DATA),
+                flow_cell_name=sequencing_run.id,
+                hk_api=context.housekeeper_api,
+            )
+            tb_api: TrailblazerAPI = context.trailblazer_api
+            tb_api.add_pending_analysis(
+                case_id=sequencing_run.id,
+                analysis_type=AnalysisType.OTHER,
+                config_path=None,
+                out_dir=demultiplexed_runs_flow_cell_dir.as_posix(),
+                priority=TrailblazerPriority.HIGH,
+                workflow=Workflow.DEMULTIPLEX,
+            )
+            tb_api.set_analysis_status(case_id=sequencing_run.id, status=AnalysisStatus.COMPLETED)
         else:
             LOG.info(
                 f"Flow cell {sequencing_run_dir.name} is not ready for post processing, skipping."

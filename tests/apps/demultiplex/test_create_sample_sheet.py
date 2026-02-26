@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -88,3 +89,36 @@ def test_get_create_sample_sheet_flow_cell_has_bcl2fastq_sample_sheet(
 
     # THEN the sample sheet in the flow cell directory is replaced with the BCLConvert sample sheet
     sample_sheet_api.validate_sample_sheet(flow_cell.sample_sheet_path)
+
+
+def test_get_or_create_sample_sheet_skips_on_instrument_demuxed_runs(
+    sample_sheet_context_broken_flow_cells: CGConfig,
+    tmp_flow_cell_with_bcl2fastq_sample_sheet: Path,
+    mocker: MockFixture,
+    caplog: LogCaptureFixture,
+):
+    """Test that get_or_create_sample_sheet returns early for on-instrument demuxed runs."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a sample sheet API
+    sample_sheet_api = sample_sheet_context_broken_flow_cells.sample_sheet_api
+
+    # GIVEN a flow cell that was demultiplexed on the sequencer
+    flow_cell = IlluminaRunDirectoryData(tmp_flow_cell_with_bcl2fastq_sample_sheet)
+    mocker.patch.object(
+        IlluminaRunDirectoryData,
+        "has_demultiplexing_started_on_sequencer",
+        return_value=True,
+    )
+
+    # GIVEN that the sample sheet creation is tracked
+    mock_create = mocker.patch.object(sample_sheet_api, "_create_sample_sheet_file")
+
+    # WHEN getting or creating the sample sheet
+    sample_sheet_api.get_or_create_sample_sheet(flow_cell.full_name)
+
+    # THEN no sample sheet was created
+    mock_create.assert_not_called()
+
+    # THEN a log message indicates the flow cell was skipped
+    assert "was demultiplexed on the sequencer" in caplog.text
