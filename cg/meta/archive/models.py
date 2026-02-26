@@ -1,6 +1,6 @@
 """Contains base models to be inherited from in other archive software files."""
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 from housekeeper.store.models import File
 from pydantic import BaseModel, ConfigDict
@@ -27,7 +27,7 @@ class FileTransferData(BaseModel):
         pass
 
 
-class ArchiveHandler:
+class ArchiveHandler(ABC):
     """Base class for classes handling different archiving programs."""
 
     @abstractmethod
@@ -36,13 +36,13 @@ class ArchiveHandler:
         pass
 
     @abstractmethod
-    def archive_file(self, file_and_sample: FileAndSample):
+    def archive_files(self, files_and_samples: list[FileAndSample]) -> int:
         """Archives all folders provided, to their corresponding destination,
         as given by sources and destination parameter."""
         pass
 
     @abstractmethod
-    def retrieve_files(self, files_and_samples: list[FileAndSample]):
+    def retrieve_files(self, files_and_samples: list[FileAndSample]) -> int:
         """Retrieves all files for all samples for the given flowcell."""
         pass
 
