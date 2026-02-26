@@ -1,46 +1,26 @@
 name: CG CI
-
 on:
   pull_request:
   push:
     branches:
       - master
-
 jobs:
-  tests-coverage:
+  tests:
     runs-on: 8_core_linux
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
       - name: Install and configure Poetry
         uses: snok/install-poetry@v1
         with:
           virtualenvs-create: false
-
       - name: Install Dependencies
         run: poetry install --no-interaction --all-extras
-
-      - name: Test with Pytest & Coveralls
+      - name: Test with Pytest
         run: |
-          pytest -n logical --cov=cg/
+          pytest -n logical -m "not integration"
           pytest -m integration
-          coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-
-  finish:
-    needs: tests-coverage
-    runs-on: ubuntu-latest
-    steps:
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@v2.2.3
-        with:
-          github-token: ${{ secrets.github_token }}
-          parallel-finished: true
