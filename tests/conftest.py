@@ -1989,6 +1989,7 @@ def context_config(
             "balsamic_cache": "hello",
             "bed_path": str(cg_dir),
             "binary_path": "echo",
+            "cache_version": "19.0.2",
             "cadd_path": str(cg_dir),
             "conda_binary": "a_conda_binary",
             "conda_env": "S_balsamic",

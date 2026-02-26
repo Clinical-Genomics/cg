@@ -42,6 +42,7 @@ balsamic:
   binary_path: "{test_root_dir}/balsamic_binary_path"
   balsamic_cache: "{test_root_dir}/balsamic_cache"
   bed_path: "{test_root_dir}/balsamic_bed_path"
+  cache_version: "0.0.1"
   cadd_path: "{test_root_dir}/balsamic_cadd_path"
   conda_env: "conda_env_balsamic"
   genome_interval_path: "{test_root_dir}/balsamic_genome_interval_path"

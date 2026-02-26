@@ -70,6 +70,7 @@ def cg_balsamic_config(tmp_path) -> BalsamicConfig:
         balsamic_cache=tmp_path / "balsamic_cache",
         bed_path=tmp_path / "beds",
         binary_path=tmp_path / "binary",
+        cache_version="0.0.0.1337",
         cadd_path=tmp_path / "cadd",
         conda_binary=tmp_path / "conda",
         conda_env="balsamic_env",
