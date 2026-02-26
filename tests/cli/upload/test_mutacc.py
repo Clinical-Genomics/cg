@@ -85,6 +85,49 @@ def test_process_solved_success(
     extract_reads_mock.assert_called_once_with(scout_case)
 
 
+def test_process_solved_exclude_nallo(
+    mocker: MockerFixture,
+    cg_config: CGConfig,
+):
+    # GIVEN a case can be exported from Scout
+    rd_scout_case = ScoutExportCase(
+        _id="1", analysis_date=datetime.now(), owner="owner", individuals=[]
+    )
+    nallo_scout_case = ScoutExportCase(
+        _id="2", analysis_date=datetime.now(), owner="owner", individuals=[]
+    )
+    scout_api: ScoutAPI = create_autospec(ScoutAPI)
+    scout_api.get_solved_cases = Mock(return_value=[rd_scout_case, nallo_scout_case])
+    get_scout_api_call = mocker.patch.object(
+        mutacc, "get_scout_api_by_genome_build", return_value=scout_api
+    )
+
+    mutacc_auto_init = mocker.spy(MutaccAutoAPI, "__init__")
+    extract_reads_mock = mocker.patch.object(UploadToMutaccAPI, "extract_reads")
+
+    # GIVEN a cli_runner
+    cli_runner = CliRunner()
+
+    # WHEN running process_solved
+    result = cli_runner.invoke(
+        process_solved,
+        ["--genome-version", BedVersionGenomeVersion.HG38, "--days-ago", "1"],
+        obj=cg_config,
+    )
+
+    # THEN the command exits successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN the correct Scout instance was used for the export
+    get_scout_api_call.assert_called_once_with(
+        cg_config=cg_config, genome_build=BedVersionGenomeVersion.HG38
+    )
+    # THEN the mutacc auto api was used correctly
+    mutacc_auto_init.assert_called_once_with(ANY, config=cg_config.mutacc_auto_hg38)
+    # THEN the reads were extracted for the case returned by Scout
+    extract_reads_mock.assert_called_once_with(rd_scout_case)
+
+
 @pytest.mark.parametrize(
     "genome_version, expected_mutacc_auto_config",
     [
