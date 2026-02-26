@@ -9,7 +9,7 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload import mutacc
-from cg.cli.upload.mutacc import process_solved
+from cg.cli.upload.mutacc import add_to_database, process_solved
 from cg.constants.constants import BedVersionGenomeVersion
 from cg.constants.process import EXIT_SUCCESS
 from cg.meta.upload.mutacc import UploadToMutaccAPI
@@ -79,6 +79,35 @@ def test_process_solved_success(
     # THEN the reads were extracted for the case returned by Scout
     extract_reads_mock.assert_called_once_with(scout_case)
 
-def test_add_to_database_success():
-    # GIVEN
 
+def test_add_to_database_success(mocker: MockerFixture):
+    # GIVEN
+    cli_runner = CliRunner()
+
+    # GIVEN a cg config
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        delivery_path="delivery/path",
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+        ),
+        mutacc_auto_hg19=MutaccAutoConfig(
+            binary_path="crazy_path",
+            config_path="a_path",
+            padding=1337,
+        ),
+        mutacc_auto_hg38=MutaccAutoConfig(
+            binary_path="what_in_the_world",
+            config_path="no_path",
+            padding=666,
+        ),
+    )
+
+    mutacc_auto_init = mocker.spy(MutaccAutoAPI, "__init__")
+    mocker.patch.object(MutaccAutoAPI, "import_reads")
+
+    result = cli_runner.invoke(add_to_database, obj=cg_config)
+
+    assert result.exit_code == EXIT_SUCCESS
+    mutacc_auto_init.assert_called_once_with(ANY, config=cg_config.mutacc_auto_hg19)

@@ -414,6 +414,16 @@ def base_config_dict() -> dict:
             "sender_password": "",
         },
         "sentieon_licence_server": "127.0.0.1:8080",
+        "mutacc_auto_hg19": {
+            "binary_path": "echo",
+            "config_path": "mutacc-auto-stage-hg19.yaml",
+            "padding": 300,
+        },
+        "mutacc_auto_hg38": {
+            "binary_path": "echo",
+            "config_path": "mutacc-auto-stage-hg38.yaml",
+            "padding": 300,
+        },
     }
 
 
@@ -2129,9 +2139,14 @@ def context_config(
             "root": str(mip_dir),
             "script": "mip",
         },
-        "mutacc-auto": {
+        "mutacc_auto_hg19": {
             "binary_path": "echo",
-            "config_path": "mutacc-auto-stage.yaml",
+            "config_path": "mutacc-auto-stage-hg19.yaml",
+            "padding": 300,
+        },
+        "mutacc_auto_hg38": {
+            "binary_path": "echo",
+            "config_path": "mutacc-auto-stage-hg38.yaml",
             "padding": 300,
         },
         "mutant": {
