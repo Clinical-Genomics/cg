@@ -5,12 +5,12 @@
   tag: kraken2_combined_report
 - format: txt
   id: SAMPLEID
-  path: PATHTOCASE/kraken2/k2_pluspf/SAMPLENAME_pe_k2_pluspf.kraken2.kraken2.report.txt
+  path: PATHTOCASE/kraken2/k2_pluspf/SAMPLENAME_k2_pluspf.kraken2.kraken2.report.txt
   step: kraken2
   tag: kraken2_report
 - format: txt
   id: SAMPLEID
-  path: PATHTOCASE/kraken2/k2_pluspf/SAMPLENAME_pe_k2_pluspf.kraken2.kraken2.classifiedreads.txt
+  path: PATHTOCASE/kraken2/k2_pluspf/SAMPLENAME_k2_pluspf.kraken2.kraken2.classifiedreads.txt
   step: kraken2
   tag: kraken2_classified_reads
 - format: html
@@ -30,7 +30,7 @@
   tag: bracken_combined_report
 - format: tsv
   id: SAMPLEID
-  path: PATHTOCASE/bracken/bracken/SAMPLENAME_pe_bracken.bracken.tsv
+  path: PATHTOCASE/bracken/bracken/SAMPLENAME_bracken.bracken.tsv
   step: bracken
   tag: bracken_report
 - format: txt
@@ -40,12 +40,12 @@
   tag: centrifuge_combined_report
 - format: txt
   id: SAMPLEID
-  path: PATHTOCASE/centrifuge/p_compressed+h+v/SAMPLENAME_pe_p_compressed+h+v.centrifuge.txt
+  path: PATHTOCASE/centrifuge/p_compressed+h+v/SAMPLENAME_p_compressed+h+v.centrifuge.txt
   step: centrifuge
   tag: centrifuge_report
 - format: txt
   id: SAMPLEID
-  path: PATHTOCASE/centrifuge/p_compressed+h+v/SAMPLENAME_pe_p_compressed+h+v.centrifuge.results.txt
+  path: PATHTOCASE/centrifuge/p_compressed+h+v/SAMPLENAME_p_compressed+h+v.centrifuge.results.txt
   step: centrifuge
   tag: centrifuge_results
 - format: html
@@ -55,7 +55,7 @@
   tag: multiqc-html
 - format: yml
   id: CASEID
-  path: PATHTOCASE/pipeline_info/nf_core_pipeline_software_mqc_versions.yml
+  path: PATHTOCASE/pipeline_info/nf_core_taxprofiler_software_mqc_versions.yml
   step: software-versions
   tag: software-versions
 - format: json
@@ -68,26 +68,6 @@
   path: PATHTOCASE/CASEID_metrics_deliverables.yaml
   step: qc-metrics
   tag: qc-metrics
-- format: json
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_general_stats.json
-  step: multiqc-json
-  tag: multiqc-general-stats
-- format: json
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_fastp.json
-  step: multiqc-json
-  tag: multiqc-fastp
-- format: json
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_samtools_stats.json
-  step: multiqc-json
-  tag: multiqc-samtools-stats
-- format: json
-  id: CASEID
-  path: PATHTOCASE/multiqc/multiqc_data/multiqc_kraken.json
-  step: multiqc-json
-  tag: multiqc-kraken
 - format: json
   id: CASEID
   path: PATHTOCASE/manifest.json
