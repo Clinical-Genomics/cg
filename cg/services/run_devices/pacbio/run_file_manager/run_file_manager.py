@@ -110,7 +110,10 @@ class PacBioRunFileManager(RunFileManager):
         return file_list[0]
 
     def _get_zipped_reports_file(self, run_path) -> Path:
-        return get_files_matching_pattern(
+        file_list: list[Path] = get_files_matching_pattern(
             directory=self._get_statistics_dir(run_path),
             pattern=ZIPPED_REPORTS_PATTERN,
-        )[0]
+        )
+        if not file_list:
+            raise FileNotFoundError(f"No Zipped reports file found in {run_path}")
+        return file_list[0]
