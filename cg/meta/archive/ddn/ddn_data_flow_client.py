@@ -103,16 +103,16 @@ class DDNDataFlowClient(ArchiveHandler):
             self._refresh_auth_token()
         return {"Authorization": f"Bearer {self.auth_token}"}
 
-    def archive_file(self, file_and_sample: FileAndSample) -> int:
+    def archive_files(self, files_and_samples: list[FileAndSample]) -> int:
         """Archives all files provided, to their corresponding destination, as given by sources
         and destination in TransferData. Returns the job ID of the archiving task."""
         miria_file_data: list[MiriaObject] = self.convert_into_transfer_data(
-            [file_and_sample], is_archiving=True
+            files_and_samples=files_and_samples, is_archiving=True
         )
         archival_request: TransferPayload = self.create_transfer_request(
             miria_file_data=miria_file_data, is_archiving_request=True
         )
-        archival_response: ArchivalResponse = self._archive_file(
+        archival_response: ArchivalResponse = self._archive_files(
             headers=dict(self.headers, **self.auth_header),
             body=archival_request,
         )
@@ -211,7 +211,7 @@ class DDNDataFlowClient(ArchiveHandler):
                 f"Deletion failed with message {delete_file_response.message}"
             )
 
-    def _archive_file(self, body: BaseModel, headers: dict) -> ArchivalResponse:
+    def _archive_files(self, body: BaseModel, headers: dict) -> ArchivalResponse:
         """Archives a file via DDN and validates the response."""
         response: Response = self._post_request(
             body=body, endpoint=DataflowEndpoints.ARCHIVE_FILES, headers=headers
