@@ -16,31 +16,9 @@ from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.models.cg_config import CGConfig, IlluminaConfig, MutaccAutoConfig, RunInstruments
 
 
-@pytest.mark.parametrize(
-    "genome_version, expected_mutacc_auto_config",
-    [
-        (BedVersionGenomeVersion.HG19, "mutacc_auto_hg19"),
-        (BedVersionGenomeVersion.HG38, "mutacc_auto_hg38"),
-    ],
-)
-def test_process_solved_success(
-    mocker: MockerFixture, genome_version: BedVersionGenomeVersion, expected_mutacc_auto_config: str
-):
-    # GIVEN a case can be exported from Scout
-    scout_case = ScoutExportCase(
-        _id="1", analysis_date=datetime.now(), owner="owner", individuals=[]
-    )
-    scout_api: ScoutAPI = create_autospec(ScoutAPI)
-    scout_api.get_solved_cases = Mock(return_value=[scout_case])
-    get_scout_api_call = mocker.patch.object(
-        mutacc, "get_scout_api_by_genome_build", return_value=scout_api
-    )
-
-    mutacc_auto_init = mocker.spy(MutaccAutoAPI, "__init__")
-    extract_reads_mock = mocker.patch.object(UploadToMutaccAPI, "extract_reads")
-
-    # GIVEN a cg config
-    cg_config: CGConfig = create_autospec(
+@pytest.fixture
+def cg_config() -> CGConfig:
+    return create_autospec(
         CGConfig,
         delivery_path="delivery/path",
         run_instruments=create_autospec(
@@ -58,6 +36,33 @@ def test_process_solved_success(
             padding=666,
         ),
     )
+
+
+@pytest.mark.parametrize(
+    "genome_version, expected_mutacc_auto_config",
+    [
+        (BedVersionGenomeVersion.HG19, "mutacc_auto_hg19"),
+        (BedVersionGenomeVersion.HG38, "mutacc_auto_hg38"),
+    ],
+)
+def test_process_solved_success(
+    mocker: MockerFixture,
+    cg_config: CGConfig,
+    genome_version: BedVersionGenomeVersion,
+    expected_mutacc_auto_config: str,
+):
+    # GIVEN a case can be exported from Scout
+    scout_case = ScoutExportCase(
+        _id="1", analysis_date=datetime.now(), owner="owner", individuals=[]
+    )
+    scout_api: ScoutAPI = create_autospec(ScoutAPI)
+    scout_api.get_solved_cases = Mock(return_value=[scout_case])
+    get_scout_api_call = mocker.patch.object(
+        mutacc, "get_scout_api_by_genome_build", return_value=scout_api
+    )
+
+    mutacc_auto_init = mocker.spy(MutaccAutoAPI, "__init__")
+    extract_reads_mock = mocker.patch.object(UploadToMutaccAPI, "extract_reads")
 
     # GIVEN a cli_runner
     cli_runner = CliRunner()
@@ -80,34 +85,34 @@ def test_process_solved_success(
     extract_reads_mock.assert_called_once_with(scout_case)
 
 
-def test_add_to_database_success(mocker: MockerFixture):
+@pytest.mark.parametrize(
+    "genome_version, expected_mutacc_auto_config",
+    [
+        (BedVersionGenomeVersion.HG19, "mutacc_auto_hg19"),
+        (BedVersionGenomeVersion.HG38, "mutacc_auto_hg38"),
+    ],
+)
+def test_add_to_database_success(
+    cg_config: CGConfig,
+    genome_version: BedVersionGenomeVersion,
+    expected_mutacc_auto_config: str,
+    mocker: MockerFixture,
+):
     # GIVEN
     cli_runner = CliRunner()
 
     # GIVEN a cg config
-    cg_config: CGConfig = create_autospec(
-        CGConfig,
-        delivery_path="delivery/path",
-        run_instruments=create_autospec(
-            RunInstruments,
-            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
-        ),
-        mutacc_auto_hg19=MutaccAutoConfig(
-            binary_path="crazy_path",
-            config_path="a_path",
-            padding=1337,
-        ),
-        mutacc_auto_hg38=MutaccAutoConfig(
-            binary_path="what_in_the_world",
-            config_path="no_path",
-            padding=666,
-        ),
-    )
 
     mutacc_auto_init = mocker.spy(MutaccAutoAPI, "__init__")
-    mocker.patch.object(MutaccAutoAPI, "import_reads")
+    import_reads_call = mocker.patch.object(MutaccAutoAPI, "import_reads")
 
-    result = cli_runner.invoke(add_to_database, obj=cg_config)
+    result = cli_runner.invoke(
+        add_to_database, args=["--genome-version", genome_version], obj=cg_config
+    )
 
     assert result.exit_code == EXIT_SUCCESS
-    mutacc_auto_init.assert_called_once_with(ANY, config=cg_config.mutacc_auto_hg19)
+    mutacc_auto_init.assert_called_once_with(
+        ANY, config=getattr(cg_config, expected_mutacc_auto_config)
+    )
+    import_reads_call.assert_called_once()
+    import_reads_call.assert_called_once()

@@ -85,11 +85,21 @@ def process_solved(
 
 
 @mutacc.command("add-to-database")
+@click.option(
+    "--genome-version",
+    type=click.Choice(["hg19", "hg38"]),
+    help="Determines MutAcc instance.",
+    required=True,
+)
 @click.pass_obj
-def add_to_database(context: CGConfig):
+def add_to_database(context: CGConfig, genome_version: BedVersionGenomeVersion):
     """Upload solved cases that has been processed by mutacc to the mutacc database"""
-
-    mutacc_auto_api: MutaccAutoAPI = MutaccAutoAPI(config=context.dict())
+    mutacc_config: MutaccAutoConfig = (
+        context.mutacc_auto_hg19
+        if genome_version == BedVersionGenomeVersion.HG19
+        else context.mutacc_auto_hg38
+    )
+    mutacc_auto_api: MutaccAutoAPI = MutaccAutoAPI(config=mutacc_config)
 
     LOG.info("----------------- PROCESSED-SOLVED ----------------")
 
