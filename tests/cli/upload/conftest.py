@@ -7,13 +7,12 @@ from tempfile import tempdir
 
 import pytest
 
-from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import DELIVERY_REPORT_FILE_NAME
 from cg.constants.constants import FileFormat
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, GensAnalysisTag, HkMipAnalysisTag
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, HkMipAnalysisTag
 from cg.io.controller import ReadFile
 from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
@@ -26,7 +25,6 @@ from cg.store.store import Store
 from tests.meta.upload.scout.conftest import mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
-from tests.store_helpers import StoreHelpers
 
 LOG = logging.getLogger(__name__)
 
@@ -69,63 +67,6 @@ def upload_genotypes_hk_api(
     hk_version = real_housekeeper_api.last_version(analysis.case.internal_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
-
-
-@pytest.fixture
-def upload_gens_hk_bundle(
-    case_id: str,
-    gens_coverage_path: Path,
-    gens_fracsnp_path: Path,
-    later_timestamp: datetime,
-    sample_id: str,
-    timestamp: datetime,
-) -> dict:
-    """Returns a dictionary in Housekeeper format with files used in upload gens process."""
-    return {
-        "name": case_id,
-        "created": timestamp,
-        "expires": later_timestamp,
-        "files": [
-            {
-                "path": gens_coverage_path.as_posix(),
-                "archive": False,
-                "tags": [sample_id] + GensAnalysisTag.COVERAGE,
-            },
-            {
-                "path": gens_fracsnp_path.as_posix(),
-                "archive": False,
-                "tags": [sample_id] + GensAnalysisTag.FRACSNP,
-            },
-        ],
-    }
-
-
-@pytest.fixture
-def upload_gens_hk_api(
-    case_id: str,
-    helpers: StoreHelpers,
-    real_housekeeper_api: HousekeeperAPI,
-    upload_gens_hk_bundle: dict,
-) -> HousekeeperAPI:
-    """Add and include files from upload_gens_hk_bundle."""
-    helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=upload_gens_hk_bundle)
-    hk_version = real_housekeeper_api.last_version(bundle=case_id)
-    real_housekeeper_api.include(hk_version)
-    return real_housekeeper_api
-
-
-@pytest.fixture
-def upload_gens_context(
-    analysis_store_trio: Store,
-    base_context: CGConfig,
-    gens_api: GensAPI,
-    upload_gens_hk_api: HousekeeperAPI,
-) -> CGConfig:
-    """Create a gens upload context."""
-    base_context.gens_api_ = gens_api
-    base_context.housekeeper_api_ = upload_gens_hk_api
-    base_context.status_db_ = analysis_store_trio
-    return base_context
 
 
 @pytest.fixture
