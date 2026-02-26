@@ -50,9 +50,7 @@ def test_nallo_storing_service_success(
     assert sample_names == [sample.name for case in order.cases for sample in case.samples]
 
 
-def test_source_over_ride(
-    store_generic_order_service: StoreCaseOrderService, mocker: MockerFixture
-):
+def test_source_override(store_generic_order_service: StoreCaseOrderService, mocker: MockerFixture):
     # GIVEN a Nallo order with one of the samples having "other" as source
     lims_submit = mocker.patch.object(MockLimsAPI, "submit_project")
     mocker.patch.object(LimsAPI, "get_samples")
@@ -125,7 +123,7 @@ def test_source_over_ride(
                     "selection_criteria": None,
                     "sex": "F",
                     "skip_reception_control": None,
-                    "source": sample.source_comment,  # This is what the essence of the test asserts
+                    "source": sample.source_comment,  # This is the essential part of the test
                     "tissue_block_size": None,
                     "tumour": False,
                     "tumour_purity": None,
