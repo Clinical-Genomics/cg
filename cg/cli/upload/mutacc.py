@@ -10,9 +10,10 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload.utils import get_scout_api_by_genome_build
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN
-from cg.constants.constants import BedVersionGenomeVersion
+from cg.constants.constants import BedVersionGenomeVersion, Workflow
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.models.cg_config import CGConfig, MutaccAutoConfig
+from cg.store.models import Case
 
 LOG = logging.getLogger(__name__)
 
@@ -67,18 +68,24 @@ def process_solved(
     else:
         LOG.info("Please enter option '--case-id' or '--days-ago'")
 
+    cases_to_process: list[ScoutExportCase] = []
+    for scout_case in finished_cases:
+        statusdb_case: Case = context.status_db.get_case_by_internal_id_strict(scout_case.id)
+        if statusdb_case.data_analysis != Workflow.NALLO:
+            cases_to_process.append(scout_case)
+
     number_processed = 0
-    for case in finished_cases:
+    for scout_case in cases_to_process:
         number_processed += 1
-        if customers and case.owner not in customers:
-            LOG.info(f"skipping {case.id}: Not valid customer {case.owner}")
+        if customers and scout_case.owner not in customers:
+            LOG.info(f"skipping {scout_case.id}: Not valid customer {scout_case.owner}")
             continue
         if dry_run:
-            LOG.info(f"Would process case {case.id} with mutacc")
+            LOG.info(f"Would process case {scout_case.id} with mutacc")
             continue
 
-        LOG.info(f"Start processing case {case.id} with mutacc")
-        mutacc_upload_api.extract_reads(case)
+        LOG.info(f"Start processing case {scout_case.id} with mutacc")
+        mutacc_upload_api.extract_reads(scout_case)
 
     if number_processed == 0:
         LOG.info(f"No cases were solved within the last {days_ago} days")
