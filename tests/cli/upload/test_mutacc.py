@@ -10,10 +10,13 @@ from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload import mutacc
 from cg.cli.upload.mutacc import add_to_database, process_solved
+from cg.constants import Workflow
 from cg.constants.constants import BedVersionGenomeVersion
 from cg.constants.process import EXIT_SUCCESS
 from cg.meta.upload.mutacc import UploadToMutaccAPI
 from cg.models.cg_config import CGConfig, IlluminaConfig, MutaccAutoConfig, RunInstruments
+from cg.store.models import Case
+from cg.store.store import Store
 
 
 @pytest.fixture
@@ -91,10 +94,10 @@ def test_process_solved_exclude_nallo(
 ):
     # GIVEN a case can be exported from Scout
     rd_scout_case = ScoutExportCase(
-        _id="1", analysis_date=datetime.now(), owner="owner", individuals=[]
+        _id="case_id_raredisease", analysis_date=datetime.now(), owner="owner", individuals=[]
     )
     nallo_scout_case = ScoutExportCase(
-        _id="2", analysis_date=datetime.now(), owner="owner", individuals=[]
+        _id="case_id_nallo", analysis_date=datetime.now(), owner="owner", individuals=[]
     )
     scout_api: ScoutAPI = create_autospec(ScoutAPI)
     scout_api.get_solved_cases = Mock(return_value=[rd_scout_case, nallo_scout_case])
@@ -104,6 +107,19 @@ def test_process_solved_exclude_nallo(
 
     mutacc_auto_init = mocker.spy(MutaccAutoAPI, "__init__")
     extract_reads_mock = mocker.patch.object(UploadToMutaccAPI, "extract_reads")
+
+    # GIVEN a mocked store with a Raredisease case and a Nallo case
+    rd_statusdb_case: Case = create_autospec(
+        Case, internal_id="case_id_raredisease", data_analysis=Workflow.RAREDISEASE
+    )
+    nallo_statusdb_case: Case = create_autospec(
+        Case, internal_id="case_id_nallo", data_analysis=Workflow.NALLO
+    )
+    status_db: Store = create_autospec(Store)
+    setattr(cg_config, "status_db", status_db)
+    status_db.get_case_by_internal_id_strict = lambda internal_id: (
+        rd_statusdb_case if internal_id == "case_id_raredisease" else nallo_statusdb_case
+    )
 
     # GIVEN a cli_runner
     cli_runner = CliRunner()
