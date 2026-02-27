@@ -29,6 +29,7 @@ def expected_tgs_myeloid_normal_only_command(cg_balsamic_config: BalsamicConfig)
         f"--case-id case_1 "
         f"--clinical-snv-observations {cg_balsamic_config.loqusdb_dump_files.clinical_snv} "
         f"--clinical-sv-observations {cg_balsamic_config.loqusdb_dump_files.clinical_sv} "
+        f"--cust-case-id case_name "
         f"--fastq-path {cg_balsamic_config.root}/case_1/fastq "
         f"--gender female "
         f"--genome-version hg19 "

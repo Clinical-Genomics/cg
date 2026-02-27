@@ -36,7 +36,7 @@ def test_create_tgs_myeloid_normal_only(
         sex=SexOptions.FEMALE,
     )
     tgs_normal_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
+        Case, data_analysis="balsamic", internal_id="case_1", name="case_name", samples=[sample]
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_normal_only_case)
