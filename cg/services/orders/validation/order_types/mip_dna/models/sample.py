@@ -22,6 +22,7 @@ class MIPDNASample(Sample):
     require_qc_ok: bool = False
     sex: SexEnum
     source: str
+    source_comment: str | None = None
     status: Literal[StatusEnum.affected.value, StatusEnum.unaffected.value]
     subject_id: str = Field(pattern=NAME_PATTERN, max_length=128)
     tissue_block_size: TissueBlockEnum | None = None

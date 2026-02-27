@@ -20,6 +20,7 @@ class TomteSample(Sample):
     require_qc_ok: bool = False
     sex: SexEnum
     source: str
+    source_comment: str | None = None
     status: StatusEnum
     subject_id: str = Field(pattern=NAME_PATTERN, min_length=1, max_length=128)
     tissue_block_size: TissueBlockEnum | None = None
