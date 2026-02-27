@@ -38,6 +38,7 @@ def cg_config() -> CGConfig:
             config_path="no_path",
             padding=666,
         ),
+        status_db=create_autospec(Store),
     )
 
 
@@ -66,6 +67,10 @@ def test_process_solved_success(
 
     mutacc_auto_init = mocker.spy(MutaccAutoAPI, "__init__")
     extract_reads_mock = mocker.patch.object(UploadToMutaccAPI, "extract_reads")
+
+    # GIVEN a mocked store with a non-Nallo case
+    statusdb_case: Case = create_autospec(Case, internal_id="1", data_analysis=Workflow.RAREDISEASE)
+    cg_config.status_db.get_case_by_internal_id_strict = Mock(return_value=statusdb_case)
 
     # GIVEN a cli_runner
     cli_runner = CliRunner()
@@ -115,9 +120,7 @@ def test_process_solved_exclude_nallo(
     nallo_statusdb_case: Case = create_autospec(
         Case, internal_id="case_id_nallo", data_analysis=Workflow.NALLO
     )
-    status_db: Store = create_autospec(Store)
-    setattr(cg_config, "status_db", status_db)
-    status_db.get_case_by_internal_id_strict = lambda internal_id: (
+    cg_config.status_db.get_case_by_internal_id_strict = lambda internal_id: (
         rd_statusdb_case if internal_id == "case_id_raredisease" else nallo_statusdb_case
     )
 
