@@ -100,7 +100,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
             return self.get_multiqc_metric(
                 metric_name=metric_name,
                 metric_value=sample_pair_metrics[metric_name],
-                metric_id=pair_sample_ids,
+                sample_id=pair_sample_ids,
             )
 
     def get_nallo_raw_metric(self, sample_id: str, multiqc_raw_data: dict) -> MetricsBase | None:
@@ -111,7 +111,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
             return self.get_multiqc_metric(
                 metric_name="somalier_sex",
                 metric_value=sample_metrics[metric_name],
-                metric_id=sample_id,
+                sample_id=sample_id,
             )
 
     def get_nallo_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
@@ -119,12 +119,12 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
         metrics = []
 
-        for search_pattern, metric_id in self.get_multiqc_search_patterns(case_id).items():
+        for pattern in self.get_multiqc_search_patterns(case_id):
             metrics_for_pattern: list[MetricsBase] = (
                 self.get_metrics_from_multiqc_json_with_pattern(
-                    search_pattern=search_pattern,
+                    search_pattern=pattern.pattern,
                     multiqc_json=multiqc_json,
-                    metric_id=metric_id,
+                    sample_id=pattern.sample_id,
                     exact_match=self.is_multiqc_pattern_search_exact,
                 )
             )

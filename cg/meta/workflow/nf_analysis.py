@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Iterator, Type
+from typing import Any, Iterator, NamedTuple, Type
 
 from dateutil.parser import parse
 from pydantic import TypeAdapter
@@ -26,6 +26,11 @@ from cg.models.qc_metrics import QCMetrics
 from cg.store.models import Analysis, Case, Sample
 
 LOG = logging.getLogger(__name__)
+
+
+class MultiQCSearchPattern(NamedTuple):
+    pattern: str
+    sample_id: str
 
 
 class NfAnalysisAPI(AnalysisAPI):
@@ -169,17 +174,18 @@ class NfAnalysisAPI(AnalysisAPI):
             MultiQC.MULTIQC_DATA + FileExtensions.JSON,
         )
 
-    def get_workflow_metrics(self, metric_id: str) -> dict:
+    def get_workflow_metrics(self, sample_id: str) -> dict:
         """Get nf-core workflow metrics constants."""
         return {}
 
-    def get_multiqc_search_patterns(self, case_id: str) -> dict:
-        """Return search patterns for MultiQC. Each key is a search pattern and each value
-        corresponds to the metric ID to set in the metrics deliverables file.
-        Multiple search patterns can be added. Ideally, used patterns should be sample ids, e.g.
-        {sample_id_1: sample_id_1, sample_id_2: sample_id_2}."""
+    def get_multiqc_search_patterns(self, case_id: str) -> list[MultiQCSearchPattern]:
+        """Return a list of MultiQC search patterns for a case.
+        Each pattern pairs a search string with its corresponding sample ID.
+        Search patterns are typically sample IDs used to extract metrics from MultiQC data."""
         sample_ids: Iterator[str] = self.status_db.get_sample_ids_by_case_id(case_id)
-        return {sample_id: sample_id for sample_id in sample_ids}
+        return [
+            MultiQCSearchPattern(pattern=sample_id, sample_id=sample_id) for sample_id in sample_ids
+        ]
 
     @staticmethod
     def get_deduplicated_metrics(metrics: list[MetricsBase]) -> list[MetricsBase]:
@@ -200,12 +206,12 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return a list of the metrics specified in a MultiQC json file."""
         multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
         metrics = []
-        for search_pattern, metric_id in self.get_multiqc_search_patterns(case_id=case_id).items():
+        for pattern in self.get_multiqc_search_patterns(case_id=case_id):
             metrics_for_pattern: list[MetricsBase] = (
                 self.get_metrics_from_multiqc_json_with_pattern(
-                    search_pattern=search_pattern,
+                    search_pattern=pattern.pattern,
                     multiqc_json=multiqc_json,
-                    metric_id=metric_id,
+                    sample_id=pattern.sample_id,
                     exact_match=self.is_multiqc_pattern_search_exact,
                 )
             )
@@ -225,7 +231,7 @@ class NfAnalysisAPI(AnalysisAPI):
         self,
         search_pattern: str,
         multiqc_json: MultiqcDataJson,
-        metric_id: str,
+        sample_id: str,
         exact_match: bool = False,
     ) -> list[MetricsBase]:
         """Parse a MultiqcDataJson and returns a list of metrics."""
@@ -239,7 +245,7 @@ class NfAnalysisAPI(AnalysisAPI):
                 ):
                     for metric_name, metric_value in metrics_dict.items():
                         metric: MetricsBase = self.get_multiqc_metric(
-                            metric_name=metric_name, metric_value=metric_value, metric_id=metric_id
+                            metric_name=metric_name, metric_value=metric_value, sample_id=sample_id
                         )
                         metrics.append(metric)
         return metrics
@@ -251,17 +257,17 @@ class NfAnalysisAPI(AnalysisAPI):
             raise ValueError("No report_general_stats_data found in MultiqcDataJson")
 
     def get_multiqc_metric(
-        self, metric_name: str, metric_value: str | int | float, metric_id: str
+        self, metric_name: str, metric_value: str | int | float, sample_id: str
     ) -> MetricsBase:
         """Return a MetricsBase object for a given metric."""
         return MetricsBase(
             header=None,
-            id=metric_id,
+            id=sample_id,
             input=MultiQC.MULTIQC_DATA + FileExtensions.JSON,
             name=metric_name,
             step=MultiQC.MULTIQC,
             value=metric_value,
-            condition=self.get_workflow_metrics(metric_id).get(metric_name, None),
+            condition=self.get_workflow_metrics(sample_id).get(metric_name, None),
         )
 
     @staticmethod
