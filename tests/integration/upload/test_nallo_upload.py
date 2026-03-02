@@ -1,7 +1,7 @@
 """Integration test for the upload command for a NALLO case."""
 
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import cast
 from unittest.mock import Mock
@@ -154,5 +154,5 @@ def test_upload_nallo(
 
     # THEN the analysis upload timestamps have been set
     status_db.session.refresh(nallo_analysis)
-    assert nallo_analysis.upload_started_at is not None
-    assert nallo_analysis.uploaded_at is not None
+    assert nallo_analysis.upload_started_at > datetime.now() - timedelta(hours=1)
+    assert nallo_analysis.uploaded_at > datetime.now() - timedelta(hours=1)
