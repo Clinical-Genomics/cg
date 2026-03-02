@@ -71,7 +71,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         """Return Nallo bundle filenames path."""
         return NALLO_BUNDLE_FILENAMES_PATH
 
-    def get_workflow_metrics(self, sample_id: str) -> dict:
+    def get_qc_conditions_for_workflow(self, sample_id: str) -> dict:
         """Return Nallo workflow metric conditions for a sample."""
         sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
         if "-" not in sample_id:

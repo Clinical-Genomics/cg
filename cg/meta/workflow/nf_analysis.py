@@ -174,7 +174,7 @@ class NfAnalysisAPI(AnalysisAPI):
             MultiQC.MULTIQC_DATA + FileExtensions.JSON,
         )
 
-    def get_workflow_metrics(self, sample_id: str) -> dict:
+    def get_qc_conditions_for_workflow(self, sample_id: str) -> dict:
         """Get nf-core workflow metrics constants."""
         return {}
 
@@ -267,7 +267,7 @@ class NfAnalysisAPI(AnalysisAPI):
             name=metric_name,
             step=MultiQC.MULTIQC,
             value=metric_value,
-            condition=self.get_workflow_metrics(sample_id).get(metric_name, None),
+            condition=self.get_qc_conditions_for_workflow(sample_id).get(metric_name, None),
         )
 
     @staticmethod

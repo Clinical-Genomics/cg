@@ -2,7 +2,10 @@
 
 from unittest.mock import create_autospec
 
-from cg.constants.nf_analysis import RNAFUSION_METRIC_CONDITIONS
+from cg.constants.nf_analysis import (
+    RNAFUSION_METRIC_CONDITIONS,
+    RNAFUSION_METRIC_CONDITIONS_DEPLETION,
+)
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import (
@@ -13,6 +16,7 @@ from cg.models.cg_config import (
     SlurmConfig,
 )
 from cg.models.deliverables.metric_deliverables import MetricsBase
+from cg.store.models import Application, ApplicationVersion, Sample
 
 
 def test_parse_analysis(
@@ -52,7 +56,7 @@ def test_get_latest_metadata(
     assert latest_metadata.sample_metrics
 
 
-def test_get_workflow_metrics():
+def test_get_qc_conditions_for_workflow():
     # GIVEN a cg config
     config = create_autospec(
         CGConfig,
@@ -83,7 +87,52 @@ def test_get_workflow_metrics():
     rna_fusion_analysis_api = RnafusionAnalysisAPI(config=config)
 
     # WHEN calling
-    metrics = rna_fusion_analysis_api.get_workflow_metrics("sample_id")
+    metrics = rna_fusion_analysis_api.get_qc_conditions_for_workflow("sample_id")
 
     # THEN
     assert metrics == RNAFUSION_METRIC_CONDITIONS
+
+
+def test_get_qc_conditions_for_workflow_with_special_apptag():
+    # GIVEN a cg config
+    config = create_autospec(
+        CGConfig,
+        tower_binary_path="/path/to/tower",
+        rnafusion=RnafusionConfig(
+            binary_path="/path/to/nextflow",
+            conda_env="S_rnafusion",
+            platform="slurm",
+            params="/path/to/params.yaml",
+            config="/path/to/nextflow.config",
+            resources="/path/to/resources.yaml",
+            launch_directory="/path/to/launch",
+            profile="singularity",
+            repository="https://repo",
+            revision="3.0.1",
+            root="/path/to/root",
+            slurm=SlurmConfig(account="development", mail_user="test@test.com"),
+            tower_workflow="nf-core/rnafusion",
+            workflow_bin_path="/path/to/workflow/bin",
+        ),
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="/some/dir"),
+        ),
+    )
+
+    # GIVEN a sample with the apptag RNAWDPR100
+    sample: Sample = create_autospec(
+        Sample,
+        application_version=create_autospec(
+            ApplicationVersion, application=create_autospec(Application, tag="RNAWDPR100")
+        ),
+    )
+
+    # GIVEN a RNA Fusion API
+    rna_fusion_analysis_api = RnafusionAnalysisAPI(config=config)
+
+    # WHEN calling
+    metrics = rna_fusion_analysis_api.get_qc_conditions_for_workflow("sample_id")
+
+    # THEN
+    assert metrics == RNAFUSION_METRIC_CONDITIONS_DEPLETION
