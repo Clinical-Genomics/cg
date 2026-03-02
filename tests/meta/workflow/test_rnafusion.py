@@ -1,4 +1,5 @@
 """Module for Rnafusion analysis API tests."""
+from unittest.mock import create_autospec
 
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
@@ -41,3 +42,10 @@ def test_get_latest_metadata(
     # THEN the latest metadata should have been parsed
     assert latest_metadata
     assert latest_metadata.sample_metrics
+
+def test_get_workflow_metrics():
+    # GIVEN a cg config
+    config = create_autospec(CGConfig)
+
+    # GIVEN a RNA Fusion API
+    RnafusionAnalysisAPI(config=config)

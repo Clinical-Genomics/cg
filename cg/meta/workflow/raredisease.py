@@ -107,7 +107,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         metrics = []
         for pattern in self.get_multiqc_search_patterns(case_id=case_id):
             metrics_for_pattern: list[MetricsBase] = (
-                self.get_metrics_from_multiqc_json_with_pattern(
+                self.get_multiqc_metrics_for_sample(
                     search_pattern=pattern.pattern,
                     multiqc_json=multiqc_json,
                     sample_id=pattern.sample_id,
