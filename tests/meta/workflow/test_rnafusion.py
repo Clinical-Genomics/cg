@@ -1,9 +1,16 @@
 """Module for Rnafusion analysis API tests."""
+
 from unittest.mock import create_autospec
 
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import (
+    CGConfig,
+    IlluminaConfig,
+    RnafusionConfig,
+    RunInstruments,
+    SlurmConfig,
+)
 from cg.models.deliverables.metric_deliverables import MetricsBase
 
 
@@ -43,9 +50,33 @@ def test_get_latest_metadata(
     assert latest_metadata
     assert latest_metadata.sample_metrics
 
+
 def test_get_workflow_metrics():
     # GIVEN a cg config
-    config = create_autospec(CGConfig)
+    config = create_autospec(
+        CGConfig,
+        tower_binary_path="/path/to/tower",
+        rnafusion=RnafusionConfig(
+            binary_path="/path/to/nextflow",
+            conda_env="S_rnafusion",
+            platform="slurm",
+            params="/path/to/params.yaml",
+            config="/path/to/nextflow.config",
+            resources="/path/to/resources.yaml",
+            launch_directory="/path/to/launch",
+            profile="singularity",
+            repository="https://repo",
+            revision="3.0.1",
+            root="/path/to/root",
+            slurm=SlurmConfig(account="development", mail_user="test@test.com"),
+            tower_workflow="nf-core/rnafusion",
+            workflow_bin_path="/path/to/workflow/bin",
+        ),
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="/some/dir"),
+        ),
+    )
 
     # GIVEN a RNA Fusion API
     RnafusionAnalysisAPI(config=config)
