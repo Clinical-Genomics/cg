@@ -139,6 +139,19 @@ def test_upload_nallo(
     # THEN the command exits successfully
     assert result.exit_code == 0
 
+    # THEN the correct Scout instance (scout_38) was used to check if the case exists and to load it
+    all_calls = [" ".join(call.args[0]) for call in subprocess_mock.run.call_args_list]
+    assert any(
+        f"/scout_38/binary --config /scout_38/config export cases --json --case-id {nallo_case.internal_id}"
+        in cmd
+        for cmd in all_calls
+    )
+    assert any(
+        f"/scout_38/binary --config /scout_38/config load case {test_run_paths.test_root_dir}/housekeeper_root/{nallo_case.internal_id}"
+        in cmd
+        for cmd in all_calls
+    )
+
     # THEN the analysis upload timestamps have been set
     status_db.session.refresh(nallo_analysis)
     assert nallo_analysis.upload_started_at is not None
