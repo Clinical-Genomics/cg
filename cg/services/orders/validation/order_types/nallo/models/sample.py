@@ -17,5 +17,6 @@ class NalloSample(Sample):
     require_qc_ok: bool = False
     sex: SexEnum
     source: str
+    source_comment: str | None = None
     status: StatusEnum
     subject_id: str = Field(pattern=NAME_PATTERN, max_length=128)
