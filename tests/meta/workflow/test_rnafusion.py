@@ -2,6 +2,7 @@
 
 from unittest.mock import create_autospec
 
+from cg.constants.nf_analysis import RNAFUSION_METRIC_CONDITIONS
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import (
@@ -79,4 +80,10 @@ def test_get_workflow_metrics():
     )
 
     # GIVEN a RNA Fusion API
-    RnafusionAnalysisAPI(config=config)
+    rna_fusion_analysis_api = RnafusionAnalysisAPI(config=config)
+
+    # WHEN calling
+    metrics = rna_fusion_analysis_api.get_workflow_metrics("sample_id")
+
+    # THEN
+    assert metrics == RNAFUSION_METRIC_CONDITIONS
