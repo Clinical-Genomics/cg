@@ -16,6 +16,7 @@ def validate(context: CGConfig, family_id: str | None):
     """Validate a family of samples."""
 
     status_db: Store = context.status_db
+    # TODO: select correct genome version chanjo_api ?
     chanjo_api: ChanjoAPI = context.chanjo_api
 
     click.echo(click.style("----------------- VALIDATE --------------------"))
