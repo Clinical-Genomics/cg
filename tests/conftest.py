@@ -53,7 +53,7 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
-from cg.models.cg_config import CGConfig, PDCArchivingDirectory
+from cg.models.cg_config import CGConfig, ChanjoConfig, PDCArchivingDirectory
 from cg.models.compression_data import CompressionData
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -424,9 +424,9 @@ def cg_config_object(base_config_dict: dict) -> CGConfig:
 
 
 @pytest.fixture
-def chanjo_config() -> dict[str, dict[str, str]]:
+def chanjo_config() -> ChanjoConfig:
     """Return Chanjo config."""
-    return {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
+    return ChanjoConfig(config_path="chanjo_config", binary_path="chanjo")
 
 
 @pytest.fixture

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Query
 from cg.apps.coverage.api import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.coverage import UploadCoverageApi
+from cg.models.cg_config import ChanjoConfig
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
 
@@ -58,7 +59,7 @@ def test_data():
 
 
 def test_upload(
-    chanjo_config: dict,
+    chanjo_config: ChanjoConfig,
     populated_housekeeper_api: HousekeeperAPI,
     analysis_store: Store,
     mocker,

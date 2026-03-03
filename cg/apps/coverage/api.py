@@ -5,6 +5,7 @@ import tempfile
 
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadStream
+from cg.models.cg_config import ChanjoConfig
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -13,9 +14,9 @@ LOG = logging.getLogger(__name__)
 class ChanjoAPI:
     """Interface to Chanjo, the coverage analysis tool"""
 
-    def __init__(self, config: dict):
-        self.chanjo_config = config["chanjo"]["config_path"]
-        self.chanjo_binary = config["chanjo"]["binary_path"]
+    def __init__(self, config: ChanjoConfig):
+        self.chanjo_config = config.config_path
+        self.chanjo_binary = config.binary_path
         self.process = Process(binary=self.chanjo_binary, config=self.chanjo_config)
 
     def upload(
