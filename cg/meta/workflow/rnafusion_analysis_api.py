@@ -77,9 +77,7 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_qc_conditions_for_workflow(self, sample_id: str) -> dict:
         sample: Sample = self.status_db.get_sample_by_internal_id_strict(sample_id)
-        if conditions := RNAFUSION_METRIC_CONDITIONS_FOR_APPTAG.get(
-            sample.application_version.application.tag
-        ):
+        if conditions := RNAFUSION_METRIC_CONDITIONS_FOR_APPTAG.get(sample.application_tag):
             return conditions
         else:
             return RNAFUSION_METRIC_CONDITIONS
