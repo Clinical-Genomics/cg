@@ -120,13 +120,11 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         metrics = []
 
         for pattern in self.get_multiqc_search_patterns(case_id):
-            metrics_for_pattern: list[MetricsBase] = (
-                self.get_multiqc_metrics_for_sample(
-                    search_pattern=pattern.pattern,
-                    multiqc_json=multiqc_json,
-                    sample_id=pattern.sample_id,
-                    exact_match=self.is_multiqc_pattern_search_exact,
-                )
+            metrics_for_pattern: list[MetricsBase] = self.get_multiqc_metrics_for_sample(
+                search_pattern=pattern.pattern,
+                multiqc_json=multiqc_json,
+                sample_id=pattern.sample_id,
+                exact_match=self.is_multiqc_pattern_search_exact,
             )
             metrics.extend(metrics_for_pattern)
         for sample_id in self.status_db.get_sample_ids_by_case_id(case_id):
