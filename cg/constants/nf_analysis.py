@@ -57,6 +57,10 @@ RNAFUSION_METRIC_CONDITIONS_DEPLETION: dict[str, dict[str, Any]] = {
     "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.7},
 }
 
+RNAFUSION_METRIC_CONDITIONS_FOR_APPTAG: dict[str, dict[str, dict[str, Any]]] = {
+    "RNAWDPR100": RNAFUSION_METRIC_CONDITIONS_DEPLETION
+}
+
 TOMTE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "uniquely_mapped_percent": {"norm": "gt", "threshold": 60},
     "PCT_MRNA_BASES": {"norm": "gt", "threshold": 80},
