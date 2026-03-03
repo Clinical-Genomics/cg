@@ -59,7 +59,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return Raredisease bundle filenames path."""
         return RAREDISEASE_BUNDLE_FILENAMES_PATH
 
-    def get_workflow_metrics(self, sample_id: str) -> dict:
+    def get_qc_conditions_for_workflow(self, sample_id: str) -> dict:
         """Return Raredisease workflow metric conditions for a sample."""
         sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
         if "-" not in sample_id:
@@ -98,21 +98,19 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             return self.get_multiqc_metric(
                 metric_name=metric_name,
                 metric_value=sample_pair_metrics[metric_name],
-                metric_id=pair_sample_ids,
+                sample_id=pair_sample_ids,
             )
 
     def get_raredisease_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Return a list of the metrics specified in a MultiQC json file."""
         multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
         metrics = []
-        for search_pattern, metric_id in self.get_multiqc_search_patterns(case_id).items():
-            metrics_for_pattern: list[MetricsBase] = (
-                self.get_metrics_from_multiqc_json_with_pattern(
-                    search_pattern=search_pattern,
-                    multiqc_json=multiqc_json,
-                    metric_id=metric_id,
-                    exact_match=self.is_multiqc_pattern_search_exact,
-                )
+        for pattern in self.get_multiqc_search_patterns(case_id=case_id):
+            metrics_for_pattern: list[MetricsBase] = self.get_multiqc_metrics_for_sample(
+                search_pattern=pattern.pattern,
+                multiqc_json=multiqc_json,
+                sample_id=pattern.sample_id,
+                exact_match=self.is_multiqc_pattern_search_exact,
             )
             metrics.extend(metrics_for_pattern)
         for sample_pair in self._get_sample_pair_patterns(case_id):
