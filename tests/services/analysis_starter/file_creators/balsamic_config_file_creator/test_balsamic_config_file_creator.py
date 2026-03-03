@@ -91,18 +91,22 @@ def test_create_tgs_lymphoid_paired(
         Sample,
         internal_id="sample_tumour",
         is_tumour=True,
-        sex=SexOptions.MALE,
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        sex=SexOptions.MALE,
     )
     normal_sample: Sample = create_autospec(
         Sample,
         internal_id="sample_normal",
         is_tumour=False,
-        sex=SexOptions.MALE,
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        sex=SexOptions.MALE,
     )
     tgs_paired_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
+        Case,
+        data_analysis="balsamic",
+        name="cust_case_name",
+        internal_id="case_1",
+        samples=[tumour_sample, normal_sample],
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_paired_case)
@@ -160,7 +164,11 @@ def test_create_tgs_tumour_only(
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     tgs_tumour_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample]
+        Case,
+        data_analysis="balsamic",
+        name="cust_case_name",
+        internal_id="case_1",
+        samples=[tumour_sample],
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_tumour_only_case)
@@ -267,7 +275,11 @@ def test_create_wes_normal_only(
         sex=SexOptions.FEMALE,
     )
     wes_normal_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
+        Case,
+        data_analysis="balsamic",
+        name="cust_case_name",
+        internal_id="case_1",
+        samples=[sample],
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wes_normal_only_case)
@@ -332,7 +344,11 @@ def test_create_wes_paired(
         prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
     )
     wes_paired_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
+        Case,
+        data_analysis="balsamic",
+        internal_id="case_1",
+        name="cust_case_name",
+        samples=[tumour_sample, normal_sample],
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wes_paired_case)
@@ -390,7 +406,11 @@ def test_create_wes_tumour_only(
         sex=SexOptions.FEMALE,
     )
     wes_tumor_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
+        Case,
+        data_analysis="balsamic",
+        name="cust_case_name",
+        internal_id="case_1",
+        samples=[sample],
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wes_tumor_only_case)
@@ -455,7 +475,11 @@ def test_create_wgs_paired(
         prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     )
     wgs_paired_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
+        Case,
+        data_analysis="balsamic",
+        internal_id="case_1",
+        name="cust_case_name",
+        samples=[tumour_sample, normal_sample],
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wgs_paired_case)
@@ -493,7 +517,11 @@ def test_create_wgs_tumor_only(
         sex=SexOptions.MALE,
     )
     wgs_tumor_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
+        Case,
+        data_analysis="balsamic",
+        name="cust_case_name",
+        internal_id="case_1",
+        samples=[sample],
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wgs_tumor_only_case)
