@@ -834,7 +834,7 @@ class Sample(Base, PriorityMixin):
 
     @property
     def application_tag(self) -> str:
-        """Return the preparation category of the sample."""
+        """Return the application tag of the application related to the sample."""
         return self.application_version.application.tag
 
     @property
