@@ -27,6 +27,11 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
+def mocked_commands_and_outputs() -> dict:
+    return {"db samples": b"[]"}
+
+
+@pytest.fixture
 def nallo_case(helpers: StoreHelpers, status_db: Store) -> Case:
     return helpers.add_case(store=status_db, data_analysis=Workflow.NALLO)
 
@@ -43,6 +48,7 @@ def nallo_sample(
 @pytest.fixture
 def nallo_case_bundle(
     nallo_case: Case,
+    nallo_sample: Sample,
     housekeeper_db: HousekeeperStore,
     test_run_paths: IntegrationTestPaths,
 ) -> tuple[Bundle, Version]:
@@ -53,6 +59,12 @@ def nallo_case_bundle(
         "snv_research.vcf.gz": ["vcf-snv-research"],
         "sv_clinical.vcf.gz": ["vcf-sv-clinical"],
         "sv_research.vcf.gz": ["vcf-sv-research"],
+        f"{nallo_sample.internal_id}.sambamba_depth.bed": [
+            nallo_sample.internal_id,
+            "coverage",
+            "sambamba-depth",
+            "chanjo",
+        ],
     }
     hk_files = []
     for filename, tags in case_files.items():

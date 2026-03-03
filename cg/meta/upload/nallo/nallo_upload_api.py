@@ -6,6 +6,7 @@ import logging
 import rich_click as click
 
 from cg.cli.generate.delivery_report.base import generate_delivery_report
+from cg.cli.upload.coverage import upload_coverage
 from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.scout import upload_to_scout
@@ -42,6 +43,7 @@ class NalloUploadAPI(UploadAPI):
 
         ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
         ctx.invoke(upload_to_gens, case_id=case.internal_id)
+        ctx.invoke(upload_coverage, family_id=case.internal_id, genome_version="hg38")
 
         # Clinical delivery upload
         self.upload_files_to_customer_inbox(case)
