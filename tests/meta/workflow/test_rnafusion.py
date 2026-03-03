@@ -95,7 +95,7 @@ def test_get_qc_conditions_for_workflow(config):
     # WHEN calling
     metrics = rna_fusion_analysis_api.get_qc_conditions_for_workflow("sample_id")
 
-    # THEN
+    # THEN we get the default metric conditions for RNAFusion
     assert metrics == RNAFUSION_METRIC_CONDITIONS
 
 
