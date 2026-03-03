@@ -6,7 +6,7 @@ from cg.constants.nf_analysis import (
     RNAFUSION_METRIC_CONDITIONS,
     RNAFUSION_METRIC_CONDITIONS_DEPLETION,
 )
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.rnafusion_analysis_api import RnafusionAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import (
     CGConfig,

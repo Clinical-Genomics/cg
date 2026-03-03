@@ -18,7 +18,7 @@ from cg.cli.workflow.nf_analysis import (
 )
 from cg.constants.constants import MetaApis, Workflow
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.rnafusion_analysis_api import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator

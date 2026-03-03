@@ -7,7 +7,7 @@ from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
 from cg.constants.nf_analysis import (
     RNAFUSION_METRIC_CONDITIONS,
-    RNAFUSION_METRIC_CONDITIONS_DEPLETION,
+    RNAFUSION_METRIC_CONDITIONS_FOR_APPTAG,
 )
 from cg.constants.scout import RNAFUSION_CASE_TAGS
 from cg.exc import MissingMetrics
@@ -77,8 +77,10 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
 
     def get_qc_conditions_for_workflow(self, sample_id: str) -> dict:
         sample: Sample = self.status_db.get_sample_by_internal_id_strict(sample_id)
-        if sample.application_version.application.tag == "RNAWDPR100":
-            return RNAFUSION_METRIC_CONDITIONS_DEPLETION
+        if conditions := RNAFUSION_METRIC_CONDITIONS_FOR_APPTAG.get(
+            sample.application_version.application.tag
+        ):
+            return conditions
         else:
             return RNAFUSION_METRIC_CONDITIONS
 
