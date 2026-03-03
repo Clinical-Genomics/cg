@@ -1,6 +1,6 @@
 """Module for Rnafusion analysis API tests."""
 
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 from cg.constants.nf_analysis import (
     RNAFUSION_METRIC_CONDITIONS,
@@ -17,6 +17,7 @@ from cg.models.cg_config import (
 )
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.store.models import Application, ApplicationVersion, Sample
+from cg.store.store import Store
 
 
 def test_parse_analysis(
@@ -94,9 +95,13 @@ def test_get_qc_conditions_for_workflow():
 
 
 def test_get_qc_conditions_for_workflow_with_special_apptag():
+    # GIVEN a status db connection
+    status_db = create_autospec(Store)
+
     # GIVEN a cg config
     config = create_autospec(
         CGConfig,
+        status_db=status_db,
         tower_binary_path="/path/to/tower",
         rnafusion=RnafusionConfig(
             binary_path="/path/to/nextflow",
@@ -126,13 +131,16 @@ def test_get_qc_conditions_for_workflow_with_special_apptag():
         application_version=create_autospec(
             ApplicationVersion, application=create_autospec(Application, tag="RNAWDPR100")
         ),
+        internal_id="sample1",
     )
+
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=sample)
 
     # GIVEN a RNA Fusion API
     rna_fusion_analysis_api = RnafusionAnalysisAPI(config=config)
 
     # WHEN calling
-    metrics = rna_fusion_analysis_api.get_qc_conditions_for_workflow("sample_id")
+    metrics = rna_fusion_analysis_api.get_qc_conditions_for_workflow(sample.internal_id)
 
     # THEN
     assert metrics == RNAFUSION_METRIC_CONDITIONS_DEPLETION

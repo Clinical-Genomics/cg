@@ -5,7 +5,10 @@ from pathlib import Path
 
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
-from cg.constants.nf_analysis import RNAFUSION_METRIC_CONDITIONS
+from cg.constants.nf_analysis import (
+    RNAFUSION_METRIC_CONDITIONS,
+    RNAFUSION_METRIC_CONDITIONS_DEPLETION,
+)
 from cg.constants.scout import RNAFUSION_CASE_TAGS
 from cg.exc import MissingMetrics
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
@@ -14,6 +17,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.rnafusion.rnafusion import RnafusionQCMetrics
 from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
+from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -72,7 +76,11 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
             raise MissingMetrics()
 
     def get_qc_conditions_for_workflow(self, sample_id: str) -> dict:
-        return RNAFUSION_METRIC_CONDITIONS
+        sample: Sample = self.status_db.get_sample_by_internal_id_strict(sample_id)
+        if sample.application_version.application.tag == "RNAWDPR100":
+            return RNAFUSION_METRIC_CONDITIONS_DEPLETION
+        else:
+            return RNAFUSION_METRIC_CONDITIONS
 
     def get_scout_upload_case_tags(self) -> dict:
         """Return Rnafusion Scout upload case tags."""
