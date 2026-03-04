@@ -17,7 +17,7 @@ def test_store_pacbio_order_data_in_status_db(
     # GIVEN a basic store with no samples, cases and only a MAF order
     assert not store_to_submit_and_validate_orders._get_query(table=Sample).first()
     assert store_to_submit_and_validate_orders._get_query(table=Case).count() == 0
-    assert store_to_submit_and_validate_orders._get_query(table=Order).count() == 1
+    assert store_to_submit_and_validate_orders._get_query(table=Order).count() == 0
 
     # WHEN storing the order
     new_samples: list[Sample] = store_pacbio_order_service.store_order_data_in_status_db(
@@ -25,7 +25,7 @@ def test_store_pacbio_order_data_in_status_db(
     )
 
     # THEN it should store the order
-    assert store_to_submit_and_validate_orders._get_query(table=Order).count() == 2
+    assert store_to_submit_and_validate_orders._get_query(table=Order).count() == 1
 
     # THEN it should store the samples and create a case for each sample
     assert len(new_samples) == 3
