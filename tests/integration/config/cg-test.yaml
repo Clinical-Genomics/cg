@@ -168,9 +168,14 @@ mip-rd-dna:
   root: "{test_root_dir}/mip-dna/cases"
   script: "{test_root_dir}/mip-dna/bin"
 
-mutacc-auto:
-  config_path: "{test_root_dir}/mutacc-auto_config_path"
-  binary_path: "{test_root_dir}/mutacc-auto_binary_path"
+mutacc_auto_hg19:
+  config_path: "{test_root_dir}/mutacc-auto_config_path-hg19"
+  binary_path: "{test_root_dir}/mutacc-auto_binary_path-hg19"
+  padding: 300
+
+mutacc_auto_hg38:
+  config_path: "{test_root_dir}/mutacc-auto_config_path-hg38"
+  binary_path: "{test_root_dir}/mutacc-auto_binary_path-hg38"
   padding: 300
 
 nallo:

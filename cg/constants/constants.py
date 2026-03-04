@@ -155,6 +155,7 @@ WORKFLOW_TO_GENOME_VERSION_MAP: dict[Workflow, GenomeBuild] = {
     Workflow.BALSAMIC_UMI: GenomeBuild.hg19,
     Workflow.MIP_DNA: GenomeBuild.hg19,
     Workflow.RAREDISEASE: GenomeBuild.hg38,
+    Workflow.NALLO: GenomeBuild.hg38,
 }
 
 
@@ -167,11 +168,6 @@ class FileFormat(StrEnum):
     TXT: str = "txt"
     XML: str = "xml"
     YAML: str = "yaml"
-
-
-class GenomeBuild(StrEnum):
-    hg19 = "37"
-    hg38 = "38"
 
 
 class GenomeVersion(StrEnum):
