@@ -19,7 +19,7 @@ from cg.meta.delivery_report.data_validators import (
     get_million_read_pairs,
 )
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.rnafusion_analysis_api import RnafusionAnalysisAPI
 from cg.models.analysis import AnalysisModel, NextflowAnalysis
 from cg.models.delivery_report.metadata import RnafusionSampleMetadataModel
 from cg.models.delivery_report.report import CaseModel, ReportRequiredFields, ScoutVariantsFiles

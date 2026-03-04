@@ -374,6 +374,11 @@
   step: pedigree
   tag: pedigree_fam
 - format: meta
+  id: SAMPLEID
+  path: PATHTOCASE/qc/sambamba_depth/SAMPLEID/SAMPLEID_sambamba_depth.bed
+  step: qc_bam
+  tag: sambamba_depth
+- format: meta
   id: CASEID
   path: PATHTOCASE/qc/somalier/relate/CASEID/CASEID.html
   step: somalier

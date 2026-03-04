@@ -833,6 +833,11 @@ class Sample(Base, PriorityMixin):
         self._phenotype_terms = ",".join(phenotype_term_list) if phenotype_term_list else None
 
     @property
+    def application_tag(self) -> str:
+        """Return the application tag of the application related to the sample."""
+        return self.application_version.application.tag
+
+    @property
     def prep_category(self) -> SeqLibraryPrepCategory:
         """Return the preparation category of the sample."""
         return self.application_version.application.prep_category
