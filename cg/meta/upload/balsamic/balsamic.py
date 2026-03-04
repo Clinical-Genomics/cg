@@ -6,13 +6,12 @@ import logging
 import rich_click as click
 
 from cg.cli.generate.delivery_report.base import generate_delivery_report
-from cg.cli.upload.genotype import upload_genotypes
+
+# from cg.cli.upload.genotype import upload_genotypes
 from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.scout import upload_to_scout
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
-from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -51,16 +50,11 @@ class BalsamicUploadAPI(UploadAPI):
                 f"the specified data delivery ({case.data_delivery})"
             )
 
-        # Genotype specific upload
-        if UploadGenotypesAPI.is_suitable_for_genotype_upload(case):
-            ctx.invoke(upload_genotypes, family_id=case.internal_id, re_upload=restart)
-        else:
-            LOG.info(f"Balsamic case {case.internal_id} is not compatible for Genotype upload")
-
         # Observations upload
         ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
         LOG.info(
             f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
         )
 
+        self.update_uploaded_at(analysis=analysis)
         self.update_uploaded_at(analysis=analysis)

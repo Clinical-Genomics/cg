@@ -8,12 +8,11 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import FileExtensions, FileFormat, Workflow
 from cg.constants.housekeeper_tags import GenotypeAnalysisTag, HkAnalysisMetricsTag
 from cg.constants.nf_analysis import RAREDISEASE_PREDICTED_SEX_METRIC
-from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import Sex
 from cg.io.controller import ReadFile
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
-from cg.store.models import Analysis, Case, Sample
+from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
 
@@ -30,6 +29,7 @@ class UploadGenotypesAPI(object):
         self.hk = hk_api
         self.gt = gt_api
 
+    # TODO delete
     def get_genotype_data(self, analysis: Analysis) -> dict[dict[str, dict[str, str]]]:
         """Return data about an analysis to load genotypes.
 
@@ -61,24 +61,6 @@ class UploadGenotypesAPI(object):
         else:
             raise ValueError(f"Workflow {analysis.workflow} does not support Genotype upload")
         return genotype_load_config
-
-    def upload(self, genotype_load_config: dict, replace: bool = False):
-        """Upload a genotype config for a case."""
-        self.gt.upload(
-            str(genotype_load_config["bcf"]), genotype_load_config["samples_sex"], force=replace
-        )
-
-    @staticmethod
-    def is_suitable_for_genotype_upload(case: Case) -> bool:
-        """Returns True if there are any non-tumor WHOLE_GENOME_SEQUENCING samples in the case."""
-        samples: list[Sample] = case.samples
-        return any(
-            (
-                not sample.is_tumour
-                and SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING == sample.prep_category
-            )
-            for sample in samples
-        )
 
     def _get_genotype_file(self, case_id: str) -> File:
         "Returns latest genotype file in housekeeper for given case, raises FileNotFoundError if not found."
