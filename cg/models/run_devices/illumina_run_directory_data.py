@@ -244,7 +244,7 @@ class IlluminaRunDirectoryData:
 
     def has_demultiplexing_started_on_sequencer(self) -> bool:
         """Check if demultiplexing has started on the NovaSeqX machine."""
-        latest_analysis: Path = get_latest_analysis_path(self.get_demultiplexed_runs_dir())
+        latest_analysis: Path = get_latest_analysis_path(self.get_sequencing_runs_dir())
         if not latest_analysis:
             return False
         return Path(

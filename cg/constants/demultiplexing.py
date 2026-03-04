@@ -19,7 +19,6 @@ class DemultiplexingDirsAndFiles(StrEnum):
     RUN_PARAMETERS_CAMEL_CASE: str = "runParameters.xml"
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
-    QUEUED_FOR_POST_PROCESSING: str = "post_processing_queued.txt"
     ANALYSIS_COMPLETED: str = "Secondary_Analysis_Complete.txt"
     ANALYSIS: str = "Analysis"
     DATA: str = "Data"

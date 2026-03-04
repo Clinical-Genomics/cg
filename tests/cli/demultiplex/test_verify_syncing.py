@@ -1,6 +1,7 @@
 import shutil
 from pathlib import Path
 
+from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import is_syncing_complete
 from cg.cli.demultiplex.demux import create_manifest_files
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.io.csv import read_csv
@@ -75,3 +76,80 @@ def assert_manifest_file_contains_all_files(
         Path(file[0].strip()) for file in read_csv(delimiter="\t", file_path=manifest_file)
     ]
     assert all(file in files_in_manifest for file in all_files_in_directory)
+
+
+def _write_manifest(manifest_path: Path, files: list[str]) -> None:
+    """Write a TSV manifest file listing the given file paths."""
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    from cg.io.csv import write_csv
+
+    write_csv(content=[[f] for f in files], file_path=manifest_path, delimiter="\t")
+
+
+def test_is_syncing_complete_includes_analysis_manifest(tmp_path: Path):
+    """Test that is_syncing_complete checks files from both root and analysis manifests."""
+    # GIVEN a source directory with a root manifest and an analysis manifest
+    source = Path(tmp_path, "source")
+    target = Path(tmp_path, "target")
+    source.mkdir()
+    target.mkdir()
+
+    root_files = ["Data/sample1.bcl", "InterOp/metrics.bin"]
+    analysis_files = ["Data/demux_sample1.fastq.gz"]
+
+    _write_manifest(Path(source, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST), root_files)
+
+    analysis_dir = Path(source, DemultiplexingDirsAndFiles.ANALYSIS, "1")
+    analysis_dir.mkdir(parents=True)
+    _write_manifest(
+        Path(analysis_dir, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST), analysis_files
+    )
+
+    # GIVEN the target has only the root files
+    for file in root_files:
+        target_file = Path(target, file)
+        target_file.parent.mkdir(parents=True, exist_ok=True)
+        target_file.touch()
+
+    # WHEN checking if syncing is complete
+    result = is_syncing_complete(source_directory=source, target_directory=target)
+
+    # THEN syncing is not complete because the analysis files are missing
+    assert result is False
+
+
+def test_is_syncing_complete_with_all_files_present(tmp_path: Path):
+    """Test that is_syncing_complete returns True when both root and analysis files are present."""
+    # GIVEN a source directory with a root manifest and an analysis manifest
+    source = Path(tmp_path, "source")
+    target = Path(tmp_path, "target")
+    source.mkdir()
+    target.mkdir()
+
+    root_files = ["Data/sample1.bcl", "InterOp/metrics.bin"]
+    analysis_files = ["Data/demux_sample1.fastq.gz"]
+
+    _write_manifest(Path(source, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST), root_files)
+
+    analysis_dir = Path(source, DemultiplexingDirsAndFiles.ANALYSIS, "1")
+    analysis_dir.mkdir(parents=True)
+    _write_manifest(
+        Path(analysis_dir, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST), analysis_files
+    )
+
+    # GIVEN the target has all files including the analysis files
+    for file in root_files:
+        target_file = Path(target, file)
+        target_file.parent.mkdir(parents=True, exist_ok=True)
+        target_file.touch()
+
+    for file in analysis_files:
+        target_file = Path(target, DemultiplexingDirsAndFiles.ANALYSIS, "1", file)
+        target_file.parent.mkdir(parents=True, exist_ok=True)
+        target_file.touch()
+
+    # WHEN checking if syncing is complete
+    result = is_syncing_complete(source_directory=source, target_directory=target)
+
+    # THEN syncing is complete
+    assert result is True

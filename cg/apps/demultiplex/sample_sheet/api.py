@@ -250,6 +250,14 @@ class IlluminaSampleSheetService:
         housekeeper or creating it if there is not a valid sample sheet.
         """
         flow_cell: IlluminaRunDirectoryData = self._get_flow_cell(flow_cell_name)
+
+        if flow_cell.has_demultiplexing_started_on_sequencer():
+            LOG.info(
+                f"Flow cell {flow_cell_name} was demultiplexed on the sequencer. "
+                "Skipping sample sheet creation."
+            )
+            return
+
         LOG.debug(f"Fetching and validating sample sheet for {flow_cell_name} from Housekeeper")
         try:
             self._use_sample_sheet_from_housekeeper(flow_cell)

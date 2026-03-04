@@ -49,20 +49,6 @@ def test_flow_cell_is_not_ready_for_post_processing_when_not_demultiplexed(
     assert not is_flow_cell_ready
 
 
-def test_flow_cell_is_not_ready_when_already_post_processed(
-    post_processed_novaseqx_flow_cell: Path, tmp_illumina_demultiplexed_runs_directory: Path
-):
-    # GIVEN a flow cell for which post processing is done
-
-    # WHEN checking if the flow cell is ready for post processing
-    is_flow_cell_ready: bool = is_ready_for_post_processing(
-        post_processed_novaseqx_flow_cell, tmp_illumina_demultiplexed_runs_directory
-    )
-
-    # THEN the flow cell is not ready for post processing as the the flow cell has already been post processed
-    assert not is_flow_cell_ready
-
-
 def test_previously_copied_flow_cell_is_not_ready(
     novaseqx_flow_cell_dir_with_analysis_data: Path,
     tmp_illumina_demultiplexed_runs_directory: Path,
