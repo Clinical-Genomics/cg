@@ -21,7 +21,6 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
-from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
@@ -60,7 +59,6 @@ from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirecto
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
-from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import (
     Application,
@@ -554,18 +552,6 @@ def hk_config_dict(root_path: Path):
 
 
 @pytest.fixture
-def genotype_config() -> dict:
-    """Genotype config fixture."""
-    return {
-        "genotype": {
-            "database": "database",
-            "config_path": "config/path",
-            "binary_path": "gtdb",
-        }
-    }
-
-
-@pytest.fixture
 def gens_config() -> dict[str, dict[str, str]]:
     """Gens config fixture."""
     return {
@@ -655,14 +641,6 @@ def delivery_rsync_service(cg_context: CGConfig) -> DeliveryRsyncService:
 def external_data_api(analysis_store, cg_context: CGConfig) -> ExternalDataAPI:
     """ExternalDataAPI fixture."""
     return ExternalDataAPI(config=cg_context)
-
-
-@pytest.fixture
-def genotype_api(genotype_config: dict) -> GenotypeAPI:
-    """Genotype API fixture."""
-    _genotype_api = GenotypeAPI(genotype_config)
-    _genotype_api.set_dry_run(True)
-    return _genotype_api
 
 
 @pytest.fixture
@@ -1687,8 +1665,6 @@ def base_store(
     organism = store.add_organism("C. jejuni", "C. jejuni")
     store.session.add(organism)
 
-    order: Order = Order(customer_id=1, id=MAF_ORDER_ID, ticket_id="100000000")
-    store.add_multiple_items_to_store([order])
     store.session.commit()
 
     yield store
@@ -2089,10 +2065,6 @@ def context_config(
                 "remote_path": "sftpremotepath",
                 "port": 22,
             },
-        },
-        "genotype": {
-            "binary_path": "echo",
-            "config_path": "genotype-stage.yaml",
         },
         "gisaid": {
             "binary_path": "/path/to/gisaid_uploader.py",

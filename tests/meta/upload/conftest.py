@@ -1,38 +1,14 @@
 """Fixtures for meta/upload tests."""
 
 from datetime import datetime
-from pathlib import Path
 
 import pytest
 
 from cg.constants import Workflow
-from cg.constants.housekeeper_tags import HkMipAnalysisTag
-from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
-
-
-@pytest.fixture
-def upload_genotypes_hk_bundle(
-    case_id: str, timestamp, case_qc_metrics_deliverables: Path, bcf_file: Path
-) -> dict:
-    """Returns a dictionary in Housekeeper format with files used in upload Genotype process."""
-    data = {
-        "name": case_id,
-        "created": timestamp,
-        "expires": timestamp,
-        "files": [
-            {
-                "path": str(case_qc_metrics_deliverables),
-                "archive": False,
-                "tags": HkMipAnalysisTag.QC_METRICS,
-            },
-            {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf", "genotype"]},
-        ],
-    }
-    return data
 
 
 @pytest.fixture
@@ -43,26 +19,6 @@ def analysis(
     case_obj = analysis_store_trio.get_case_by_internal_id(internal_id=case_id)
     helpers.add_analysis(store=analysis_store_trio, case=case_obj, started_at=timestamp)
     return analysis_store_trio.get_case_by_internal_id(internal_id=case_id).analyses[0]
-
-
-@pytest.fixture
-def upload_genotypes_api(
-    real_housekeeper_api, genotype_api, upload_genotypes_hk_bundle, helpers: StoreHelpers
-) -> UploadGenotypesAPI:
-    """Create a upload genotypes api."""
-    helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle, include=True)
-    _api = UploadGenotypesAPI(
-        hk_api=real_housekeeper_api,
-        gt_api=genotype_api,
-    )
-
-    return _api
-
-
-@pytest.fixture(name="genotype_analysis_sex")
-def genotype_analysis_sex() -> dict:
-    """Return predicted sex per sample_id."""
-    return {"ADM1": "male", "ADM2": "male", "ADM3": "female"}
 
 
 @pytest.fixture(name="mip_dna_case")

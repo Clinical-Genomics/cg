@@ -138,11 +138,6 @@ data-delivery:
   account: "development"
   mail_user: "data-delivery-user@scilifelab.se"
 
-genotype:
-  database: "sqlite:///file:genotype?mode=memory&cache=shared&uri=true"
-  binary_path: "{test_root_dir}/genotype_binary_path"
-  config_path: "{test_root_dir}/genotype_config_path"
-
 hermes:
   binary_path: "{test_root_dir}/hermes_binary_path"
   container_path: "{test_root_dir}/hermes_container_path"

@@ -427,11 +427,6 @@ To re-upload an already existing analysis, use:
 
 ```$ cg upload coverage --re-upload FAMILY_ID```
 
-### cg upload genotypes
-Upload genotypes from an analysis to Genotype.
-
-```$ cg upload genotypes FAMILY_ID```
-
 ### cg upload observations
 Upload observations from an analysis to LoqusDB.
 
