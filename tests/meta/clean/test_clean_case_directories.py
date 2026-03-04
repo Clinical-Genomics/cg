@@ -4,7 +4,7 @@ import pytest
 from dateutil.parser import parse
 
 from cg.constants import Workflow
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.rnafusion_analysis_api import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis
