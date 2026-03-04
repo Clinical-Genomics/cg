@@ -444,7 +444,6 @@ class CGConfig(BaseModel):
     arnold_api_: ArnoldAPIClient | None = None
     illumina_backup_service: IlluminaBackupConfig | None = None
     chanjo: ChanjoConfig | None = None
-    chanjo_api_: Any = None
     chanjo_38: ChanjoConfig | None = None
     chanjo2: ClientConfig | None = None
     chanjo2_api_: Chanjo2APIClient | None = None
@@ -528,17 +527,6 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating arnold api")
             api = ArnoldAPIClient(config=self.dict())
             self.arnold_api_ = api
-        return api
-
-    @property
-    def chanjo_api(self):
-        api = self.__dict__.get("chanjo_api_")
-        if (api is None) and self.chanjo:
-            from cg.apps.coverage import ChanjoAPI
-
-            LOG.debug("Instantiating chanjo api")
-            api = ChanjoAPI(config=self.chanjo)
-            self.chanjo_api_ = api
         return api
 
     @property

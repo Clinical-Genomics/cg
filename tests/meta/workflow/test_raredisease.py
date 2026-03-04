@@ -5,12 +5,12 @@ from pytest_mock import MockerFixture
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import SexOptions
+from cg.meta.workflow import raredisease as raredisease_analysis_api
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.store.models import Case, Sample
-from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_parse_analysis(
@@ -45,12 +45,16 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
     sample: Sample = create_autospec(Sample, internal_id="internal_id")
     case: Case = create_autospec(Case, internal_id="case_id", panels=["omim-auto"])
 
+    # GIVEN a mocked chanjo API
+    chanjo_api = create_autospec(ChanjoAPI)
+    mock_init_chanjo = mocker.patch.object(
+        raredisease_analysis_api, "ChanjoAPI", return_value=chanjo_api
+    )
+
     # GIVEN Raredisease analysis API
     analysis_api: RarediseaseAnalysisAPI = RarediseaseAnalysisAPI(
         config=raredisease_context,
     )
-    chanjo_api: TypedMock[ChanjoAPI] = create_typed_mock(ChanjoAPI)
-    analysis_api.chanjo_api = chanjo_api.as_type
 
     # GIVEN a response from ScoutAPI
     mocker.patch.object(ScoutAPI, "get_genes", return_value=[])
@@ -63,7 +67,8 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
         case_id=case.internal_id, sample_id=sample.internal_id, gene_ids=gene_ids
     )
 
+    # THEN chanjo was configured with the correct config
+    mock_init_chanjo.assert_called_once_with(raredisease_context.chanjo)
+
     # THEN the sample coverage should have been called with the right information
-    chanjo_api.as_mock.sample_coverage.assert_called_once_with(
-        sample_id="internal_id", panel_genes=[]
-    )
+    chanjo_api.sample_coverage.assert_called_once_with(sample_id="internal_id", panel_genes=[])
