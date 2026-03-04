@@ -6,8 +6,6 @@ import logging
 import rich_click as click
 
 from cg.cli.generate.delivery_report.base import generate_delivery_report
-
-# from cg.cli.upload.genotype import upload_genotypes
 from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.scout import upload_to_scout
