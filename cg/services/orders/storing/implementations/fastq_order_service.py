@@ -63,7 +63,6 @@ class StoreFastqOrderService(StoreOrderService):
                     ticket_id=str(db_order.ticket_id),
                     customer=db_order.customer,
                 )
-                self._create_maf_case(db_sample=db_sample, db_order=db_order, db_case=db_case)
                 case_sample: CaseSample = self.status_db.relate_sample(
                     case=db_case, sample=db_sample, status=StatusEnum.unknown
                 )
