@@ -8,28 +8,37 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scout_export import ScoutExportCase
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload.utils import get_scout_api_by_genome_build
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN
+from cg.constants.constants import BedVersionGenomeVersion, Workflow
 from cg.meta.upload.mutacc import UploadToMutaccAPI
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, MutaccAutoConfig
+from cg.store.models import Case
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
 
-@click.command("process-solved")
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
+def mutacc():
+    pass
+
+
+@mutacc.command("process-solved")
 @click.option("-c", "--case-id", help="internal case id, leave empty to process all")
 @click.option("-d", "--days-ago", type=int, default=1, help="days since solved")
 @click.option("-C", "--customers", type=str, multiple=True, help="Filter on customers")
 @click.option(
-    "--scout-instance",
+    "--genome-version",
     type=click.Choice(["hg19", "hg38"]),
-    help="Which scout instance to fetch cases from",
+    help="Determines Scout and MutAcc instances.",
     required=True,
 )
 @DRY_RUN
 @click.pass_obj
 def process_solved(
     context: CGConfig,
-    scout_instance: str,
+    genome_version: BedVersionGenomeVersion,
     case_id: str | None,
     days_ago: int,
     customers: tuple[str],
@@ -41,9 +50,13 @@ def process_solved(
     LOG.info("----------------- PROCESS-SOLVED ----------------")
 
     scout_api: ScoutAPI = get_scout_api_by_genome_build(
-        cg_config=context, genome_build=scout_instance
+        cg_config=context, genome_build=genome_version
     )
-    mutacc_auto_api: MutaccAutoAPI = context.mutacc_auto_api
+
+    mutacc_config: MutaccAutoConfig = _select_mutacc_config(
+        context=context, genome_version=genome_version
+    )
+    mutacc_auto_api: MutaccAutoAPI = MutaccAutoAPI(config=mutacc_config)
     mutacc_upload_api = UploadToMutaccAPI(scout_api=scout_api, mutacc_auto_api=mutacc_auto_api)
 
     # Get cases to upload into mutacc from scout
@@ -55,32 +68,62 @@ def process_solved(
     else:
         LOG.info("Please enter option '--case-id' or '--days-ago'")
 
+    cases_to_process: list[ScoutExportCase] = _exclude_nallo_cases(
+        status_db=context.status_db, finished_cases=finished_cases
+    )
+
     number_processed = 0
-    for case in finished_cases:
+    for scout_case in cases_to_process:
         number_processed += 1
-        if customers and case.owner not in customers:
-            LOG.info(f"skipping {case.id}: Not valid customer {case.owner}")
+        if customers and scout_case.owner not in customers:
+            LOG.info(f"skipping {scout_case.id}: Not valid customer {scout_case.owner}")
             continue
         if dry_run:
-            LOG.info(f"Would process case {case.id} with mutacc")
+            LOG.info(f"Would process case {scout_case.id} with mutacc")
             continue
 
-        LOG.info(f"Start processing case {case.id} with mutacc")
-        mutacc_upload_api.extract_reads(case)
-
+        LOG.info(f"Start processing case {scout_case.id} with mutacc")
+        mutacc_upload_api.extract_reads(scout_case)
     if number_processed == 0:
         LOG.info(f"No cases were solved within the last {days_ago} days")
 
 
-@click.command("processed-solved")
+@mutacc.command("add-to-database")
+@click.option(
+    "--genome-version",
+    type=click.Choice(["hg19", "hg38"]),
+    help="Determines MutAcc instance.",
+    required=True,
+)
 @click.pass_obj
-def processed_solved(context: CGConfig):
+def add_to_database(context: CGConfig, genome_version: BedVersionGenomeVersion):
     """Upload solved cases that has been processed by mutacc to the mutacc database"""
-
-    mutacc_auto_api: MutaccAutoAPI = context.mutacc_auto_api
+    mutacc_config: MutaccAutoConfig = _select_mutacc_config(
+        context=context, genome_version=genome_version
+    )
+    mutacc_auto_api: MutaccAutoAPI = MutaccAutoAPI(config=mutacc_config)
 
     LOG.info("----------------- PROCESSED-SOLVED ----------------")
 
     LOG.info("Uploading processed cases by mutacc to the mutacc database")
 
     mutacc_auto_api.import_reads()
+
+
+def _select_mutacc_config(context: CGConfig, genome_version: BedVersionGenomeVersion):
+    return (
+        context.mutacc_auto_hg19
+        if genome_version == BedVersionGenomeVersion.HG19
+        else context.mutacc_auto_hg38
+    )
+
+
+def _exclude_nallo_cases(
+    status_db: Store, finished_cases: list[ScoutExportCase]
+) -> list[ScoutExportCase]:
+    cases_to_process: list[ScoutExportCase] = []
+    for scout_case in finished_cases:
+        status_db_case: Case = status_db.get_case_by_internal_id_strict(scout_case.id)
+        if status_db_case.data_analysis != Workflow.NALLO:
+            cases_to_process.append(scout_case)
+    return cases_to_process

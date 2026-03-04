@@ -5,10 +5,25 @@ import subprocess
 import pytest
 
 from cg.apps.mutacc_auto import MutaccAutoAPI, run_command
+from cg.models.cg_config import MutaccAutoConfig
 
 
-def test_instatiate(mutacc_config):
-    """Test to instatiate an MutaccAutoAPI object"""
+@pytest.fixture(scope="function")
+def mutacc_config():
+    return MutaccAutoConfig(
+        config_path="mutacc-auto_config",
+        binary_path="mutacc-auto",
+        padding=111,
+    )
+
+
+@pytest.fixture(scope="function")
+def mutacc_auto_api(mutacc_config: MutaccAutoConfig):
+    return MutaccAutoAPI(mutacc_config)
+
+
+def test_instantiate(mutacc_config):
+    """Test to instantiate an MutaccAutoAPI object"""
     # GIVEN a dict with config data to
 
     # WHEN instatiating a mutacc_auto API
@@ -17,13 +32,13 @@ def test_instatiate(mutacc_config):
 
     # THEN the object attributes are set correctly
 
-    assert mutacc_api.mutacc_auto_config == mutacc_config["mutacc_auto"]["config_path"]
-    assert mutacc_api.mutacc_auto_binary == mutacc_config["mutacc_auto"]["binary_path"]
-    assert mutacc_api.mutacc_padding == mutacc_config["mutacc_auto"]["padding"]
+    assert mutacc_api.mutacc_auto_config == mutacc_config.config_path
+    assert mutacc_api.mutacc_auto_binary == mutacc_config.binary_path
+    assert mutacc_api.mutacc_padding == mutacc_config.padding
     assert mutacc_api.base_call == [
-        mutacc_config["mutacc_auto"]["binary_path"],
+        mutacc_config.binary_path,
         "--config-file",
-        mutacc_config["mutacc_auto"]["config_path"],
+        mutacc_config.config_path,
     ]
 
 

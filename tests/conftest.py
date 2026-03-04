@@ -414,6 +414,16 @@ def base_config_dict() -> dict:
             "sender_password": "",
         },
         "sentieon_licence_server": "127.0.0.1:8080",
+        "mutacc_auto_hg19": {
+            "binary_path": "echo",
+            "config_path": "mutacc-auto-stage-hg19.yaml",
+            "padding": 300,
+        },
+        "mutacc_auto_hg38": {
+            "binary_path": "echo",
+            "config_path": "mutacc-auto-stage-hg38.yaml",
+            "padding": 300,
+        },
     }
 
 
@@ -2130,9 +2140,14 @@ def context_config(
             "root": str(mip_dir),
             "script": "mip",
         },
-        "mutacc-auto": {
+        "mutacc_auto_hg19": {
             "binary_path": "echo",
-            "config_path": "mutacc-auto-stage.yaml",
+            "config_path": "mutacc-auto-stage-hg19.yaml",
+            "padding": 300,
+        },
+        "mutacc_auto_hg38": {
+            "binary_path": "echo",
+            "config_path": "mutacc-auto-stage-hg38.yaml",
             "padding": 300,
         },
         "mutant": {
@@ -2165,6 +2180,7 @@ def context_config(
             "tower_workflow": "nallo",
         },
         "raredisease": {
+            "default_target_bed": "twistexomecomprehensive_10.2_hg38_design.bed",
             "binary_path": nextflow_binary.as_posix(),
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
@@ -2176,7 +2192,7 @@ def context_config(
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_bin_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
-            "references": Path("path", "to", "references").as_posix(),
+            "references_directory": Path("path", "to", "references").as_posix(),
             "repository": "https://some_url",
             "revision": "2.2.0",
             "root": str(raredisease_dir),
@@ -2185,6 +2201,25 @@ def context_config(
                 "mail_user": email_address,
             },
             "tower_workflow": "raredisease",
+            "verifybamid_svd": {
+                "wes": {
+                    "bed": Path("path", "to", "sleeping_quarters.bed"),
+                    "mu": Path("path", "to", "cow.mu"),
+                    "ud": Path("path", "to", "department_of_external_affairs.UD"),
+                },
+                "wgs": {
+                    "bed": Path("path", "to", "sleeping_quarters.bed"),
+                    "mu": Path("path", "to", "cow.mu"),
+                    "ud": Path("path", "to", "department_of_external_affairs.UD"),
+                },
+            },
+            "gcnvcaller": {
+                "twistexomecomprehensive_10.2_hg38_design.bed": {
+                    "gcnvcaller_model": Path("path", "to", "gcnvcaller_model"),
+                    "ploidy_model": Path("path", "to", "ploidy_model_"),
+                    "readcount_intervals": Path("path", "to", "readcount.intervals"),
+                }
+            },
         },
         "tomte": {
             "binary_path": nextflow_binary.as_posix(),
@@ -2906,7 +2941,6 @@ def raredisease_context(
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
-        reference_genome=GenomeVersion.HG19,
     )
 
     another_sample_enough_reads: Sample = helpers.add_sample(
@@ -2916,7 +2950,6 @@ def raredisease_context(
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
-        reference_genome=GenomeVersion.HG19,
     )
 
     helpers.add_relationship(

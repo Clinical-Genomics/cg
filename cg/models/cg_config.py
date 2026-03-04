@@ -16,7 +16,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.clients.arnold.api import ArnoldAPIClient
@@ -174,7 +173,9 @@ class CrunchyConfig(BaseModel):
     slurm: SlurmConfig
 
 
-class MutaccAutoConfig(CommonAppConfig):
+class MutaccAutoConfig(BaseModel):
+    binary_path: str
+    config_path: str
     padding: int = 300
 
 
@@ -250,23 +251,44 @@ class NalloConfig(CommonAppConfig):
     tower_workflow: str
 
 
+class VerifybamidSvdFiles(BaseModel):
+    bed: Path
+    mu: Path
+    ud: Path
+
+
+class VerifybamidSvdFilesSet(BaseModel):
+    wes: VerifybamidSvdFiles
+    wgs: VerifybamidSvdFiles
+
+
+class GCNVCallerFiles(BaseModel):
+    gcnvcaller_model: Path
+    ploidy_model: Path
+    readcount_intervals: Path
+
+
 class RarediseaseConfig(CommonAppConfig):
     binary_path: str | None = None
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
+    default_target_bed: str
+    gcnvcaller: dict[str, GCNVCallerFiles]
     launch_directory: str
-    workflow_bin_path: str
+    params: str
+    platform: str
     pre_run_script: str = ""
     profile: str
+    references_directory: Path
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    verifybamid_svd: VerifybamidSvdFilesSet
+    workflow_bin_path: str
 
 
 class TomteConfig(CommonAppConfig):
@@ -478,8 +500,8 @@ class CGConfig(BaseModel):
     )
     loqusdb_somatic_exome: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC_EXOME.value)
     madeline_api_: MadelineAPI = None
-    mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
-    mutacc_auto_api_: MutaccAutoAPI = None
+    mutacc_auto_hg19: MutaccAutoConfig
+    mutacc_auto_hg38: MutaccAutoConfig
     pdc: CommonAppConfig | None = None
     pdc_service_: PdcService | None = None
     post_processing_services_: PostProcessingServices | None = None
@@ -637,15 +659,6 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating madeline api")
             api = MadelineAPI(config=self.dict())
             self.madeline_api_ = api
-        return api
-
-    @property
-    def mutacc_auto_api(self) -> MutaccAutoAPI:
-        api = self.__dict__.get("mutacc_auto_api_")
-        if api is None:
-            LOG.debug("Instantiating mutacc_auto api")
-            api = MutaccAutoAPI(config=self.dict())
-            self.mutacc_auto_api_ = api
         return api
 
     @property

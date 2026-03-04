@@ -135,7 +135,7 @@ class Application(Base):
     id: Mapped[PrimaryKeyInt]
 
     tag: Mapped[UniqueStr]
-    prep_category: Mapped[str] = mapped_column(
+    prep_category: Mapped[SeqLibraryPrepCategory] = mapped_column(
         types.Enum(*(category.value for category in SeqLibraryPrepCategory))
     )
     is_external: Mapped[bool] = mapped_column(default=False)
@@ -838,7 +838,7 @@ class Sample(Base, PriorityMixin):
         return self.application_version.application.tag
 
     @property
-    def prep_category(self) -> str:
+    def prep_category(self) -> SeqLibraryPrepCategory:
         """Return the preparation category of the sample."""
         return self.application_version.application.prep_category
 

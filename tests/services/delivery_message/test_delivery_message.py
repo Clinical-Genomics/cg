@@ -39,44 +39,78 @@ def test_get_delivery_message_for_single_case(
 
 
 @pytest.mark.parametrize(
-    "delivery_type, expected_message_fixture",
+    "workflow, delivery_type, expected_message_template_fixture",
     [
-        (DataDelivery.RAW_DATA_ANALYSIS, "nallo_raw_data_analysis_message"),
-        (DataDelivery.RAW_DATA_ANALYSIS_SCOUT, "nallo_raw_data_analysis_scout_message"),
-        (DataDelivery.RAW_DATA_SCOUT, "nallo_raw_data_scout_message"),
+        (
+            Workflow.NALLO,
+            DataDelivery.RAW_DATA_ANALYSIS,
+            "raw_data_analysis_message",
+        ),
+        (
+            Workflow.NALLO,
+            DataDelivery.RAW_DATA_ANALYSIS_SCOUT,
+            "raw_data_analysis_scout38_message",
+        ),
+        (
+            Workflow.NALLO,
+            DataDelivery.RAW_DATA_SCOUT,
+            "raw_data_scout38_message",
+        ),
+        (
+            Workflow.RAREDISEASE,
+            DataDelivery.RAW_DATA_ANALYSIS,
+            "raw_data_analysis_message",
+        ),
+        (
+            Workflow.RAREDISEASE,
+            DataDelivery.RAW_DATA_ANALYSIS_SCOUT,
+            "raw_data_analysis_scout38_message",
+        ),
+        (
+            Workflow.RAREDISEASE,
+            DataDelivery.RAW_DATA_SCOUT,
+            "raw_data_scout38_message",
+        ),
     ],
     ids=[
-        "RAW_DATA_ANALYSIS",
-        "RAW_DATA_ANALYSIS_SCOUT",
-        "RAW_DATA_SCOUT",
+        "NALLO_RAW_DATA_ANALYSIS",
+        "NALLO_RAW_DATA_ANALYSIS_SCOUT",
+        "NALLO_RAW_DATA_SCOUT",
+        "RAREDISEASE_RAW_DATA_ANALYSIS",
+        "RAREDISEASE_RAW_DATA_ANALYSIS_SCOUT",
+        "RAREDISEASE_RAW_DATA_SCOUT",
     ],
 )
-def test_get_delivery_message_nallo_case(
-    nallo_case_id: str,
+def test_get_delivery_message_scout38_case(
     delivery_message_service: DeliveryMessageService,
     helpers: StoreHelpers,
+    workflow: Workflow,
     delivery_type: DataDelivery,
-    expected_message_fixture: str,
+    expected_message_template_fixture: str,
     request: pytest.FixtureRequest,
 ) -> None:
     """Test that the delivery message is created correctly for a given case."""
-    # GIVEN a delivery message service and a Nallo case ID
+    # GIVEN a delivery message service and case ID
 
     # GIVEN that the store contains the case
     store: Store = delivery_message_service.store
     order: Order = store.get_order_by_id(1)
     helpers.ensure_case(
         store=store,
-        case_id=nallo_case_id,
-        case_name=nallo_case_id,
-        data_analysis=Workflow.NALLO,
+        case_id="case_id",
+        case_name="case_id",
+        data_analysis=workflow,
         data_delivery=delivery_type,
         order=order,
     )
 
     # WHEN the delivery message is requested
-    message: str = delivery_message_service._get_delivery_message(case_ids={nallo_case_id})
+    message: str = delivery_message_service._get_delivery_message(case_ids={"case_id"})
 
     # THEN the message should be as expected
-    expected_message: str = request.getfixturevalue(expected_message_fixture)
+    expected_message_template: str = request.getfixturevalue(expected_message_template_fixture)
+    expected_message: str = expected_message_template.format(
+        case_id="case_id", customer_id=order.customer.internal_id, ticket_id=order.ticket_id
+    )
+
     assert message == expected_message
