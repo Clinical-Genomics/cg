@@ -36,7 +36,11 @@ def test_create_tgs_myeloid_normal_only(
         sex=SexOptions.FEMALE,
     )
     tgs_normal_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", name="case_name", samples=[sample]
+        Case,
+        data_analysis="balsamic",
+        internal_id="case_1",
+        name="cust_case_name",
+        samples=[sample],
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_normal_only_case)
@@ -226,7 +230,11 @@ def test_create_override_panel_bed(
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     tgs_tumour_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample]
+        Case,
+        data_analysis="balsamic",
+        name="cust_case_name",
+        internal_id="case_1",
+        samples=[tumour_sample],
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_tumour_only_case)
@@ -573,7 +581,11 @@ def test_create_no_capture_kit_in_lims(cg_balsamic_config: BalsamicConfig):
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     case_without_capture_kit: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample]
+        Case,
+        data_analysis="balsamic",
+        name="cust_case_name",
+        internal_id="case_1",
+        samples=[tumour_sample],
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=case_without_capture_kit)
@@ -610,7 +622,11 @@ def test_balsamic_config_case_command_fails(
         sex=SexOptions.MALE,
     )
     wgs_tumor_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
+        Case,
+        data_analysis="balsamic",
+        name="cust_case_name",
+        internal_id="case_1",
+        samples=[sample],
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wgs_tumor_only_case)
