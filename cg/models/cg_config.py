@@ -16,7 +16,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.clients.arnold.api import ArnoldAPIClient
@@ -174,7 +173,9 @@ class CrunchyConfig(BaseModel):
     slurm: SlurmConfig
 
 
-class MutaccAutoConfig(CommonAppConfig):
+class MutaccAutoConfig(BaseModel):
+    binary_path: str
+    config_path: str
     padding: int = 300
 
 
@@ -498,8 +499,8 @@ class CGConfig(BaseModel):
     )
     loqusdb_somatic_exome: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC_EXOME.value)
     madeline_api_: MadelineAPI = None
-    mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
-    mutacc_auto_api_: MutaccAutoAPI = None
+    mutacc_auto_hg19: MutaccAutoConfig
+    mutacc_auto_hg38: MutaccAutoConfig
     pdc: CommonAppConfig | None = None
     pdc_service_: PdcService | None = None
     post_processing_services_: PostProcessingServices | None = None
@@ -657,15 +658,6 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating madeline api")
             api = MadelineAPI(config=self.dict())
             self.madeline_api_ = api
-        return api
-
-    @property
-    def mutacc_auto_api(self) -> MutaccAutoAPI:
-        api = self.__dict__.get("mutacc_auto_api_")
-        if api is None:
-            LOG.debug("Instantiating mutacc_auto api")
-            api = MutaccAutoAPI(config=self.dict())
-            self.mutacc_auto_api_ = api
         return api
 
     @property
