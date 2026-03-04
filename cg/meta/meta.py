@@ -1,6 +1,5 @@
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -27,7 +26,6 @@ class MetaAPI:
         self.config = config
         self.crunchy_api: CrunchyAPI = config.crunchy_api
         self.delivery_api: DeliveryAPI = config.delivery_api
-        self.genotype_api: GenotypeAPI = config.genotype_api
         self.hermes_api: HermesApi = config.hermes_api
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.lims_api: LimsAPI = config.lims_api

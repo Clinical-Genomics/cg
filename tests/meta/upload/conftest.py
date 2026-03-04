@@ -7,7 +7,6 @@ import pytest
 
 from cg.constants import Workflow
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
-from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
@@ -43,20 +42,6 @@ def analysis(
     case_obj = analysis_store_trio.get_case_by_internal_id(internal_id=case_id)
     helpers.add_analysis(store=analysis_store_trio, case=case_obj, started_at=timestamp)
     return analysis_store_trio.get_case_by_internal_id(internal_id=case_id).analyses[0]
-
-
-@pytest.fixture
-def upload_genotypes_api(
-    real_housekeeper_api, genotype_api, upload_genotypes_hk_bundle, helpers: StoreHelpers
-) -> UploadGenotypesAPI:
-    """Create a upload genotypes api."""
-    helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle, include=True)
-    _api = UploadGenotypesAPI(
-        hk_api=real_housekeeper_api,
-        gt_api=genotype_api,
-    )
-
-    return _api
 
 
 @pytest.fixture(name="genotype_analysis_sex")
