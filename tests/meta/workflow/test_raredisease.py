@@ -8,11 +8,11 @@ from cg.clients.chanjo2.models import CoverageMetricsChanjo1
 from cg.constants import SexOptions
 from cg.constants.constants import GenomeBuild
 from cg.meta.workflow import raredisease as raredisease_analysis_api
-from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI, chanjo1
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
-from cg.store.models import Case, Sample
+from cg.store.models import Sample
 
 
 def test_parse_analysis(
@@ -45,7 +45,6 @@ def test_parse_analysis(
 def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixture):
     # GIVEN Raredisease case
     sample: Sample = create_autospec(Sample, internal_id="internal_id")
-    case: Case = create_autospec(Case, internal_id="case_id", panels=["omim-auto"])
 
     # GIVEN a mocked chanjo API
     chanjo_api = create_autospec(ChanjoAPI)
@@ -56,6 +55,8 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
         raredisease_analysis_api, "chanjo_api_for_genome_build", return_value=chanjo_api
     )
 
+    get_sample_coverage_spy = mocker.spy(chanjo1, "get_sample_coverage")
+
     # GIVEN Raredisease analysis API
     analysis_api: RarediseaseAnalysisAPI = RarediseaseAnalysisAPI(
         config=raredisease_context,
@@ -65,11 +66,11 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
     mocker.patch.object(ScoutAPI, "get_genes", return_value=[])
 
     # GIVEN some gene ids
-    gene_ids: list[int] = analysis_api.get_gene_ids_from_scout(case.panels)
+    gene_ids: list[int] = [1, 2, 3]
 
     # WHEN getting the chanjo coverage for the sample
     sample_coverage: CoverageMetricsChanjo1 | None = analysis_api.get_sample_coverage(
-        case_id=case.internal_id, sample_id=sample.internal_id, gene_ids=gene_ids
+        case_id="case_id", sample_id=sample.internal_id, gene_ids=gene_ids
     )
 
     assert sample_coverage == CoverageMetricsChanjo1(
@@ -80,4 +81,6 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
     mock_chanjo_factory.assert_called_once_with(raredisease_context, GenomeBuild.hg19)
 
     # THEN the sample coverage should have been called with the right information
-    chanjo_api.sample_coverage.assert_called_once_with(sample_id="internal_id", panel_genes=[])
+    get_sample_coverage_spy.assert_called_once_with(
+        chanjo_api=chanjo_api, gene_ids=gene_ids, sample_id="internal_id"
+    )

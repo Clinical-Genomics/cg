@@ -2028,7 +2028,8 @@ def context_config(
             "swegen_snv": str(cg_dir),
             "swegen_sv": str(cg_dir),
         },
-        "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
+        "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage-hg19.yaml"},
+        "chanjo_38": {"binary_path": "echo", "config_path": "chanjo-stage-hg38.yaml"},
         "chanjo2": {"host": "chanjo2_host"},
         "crunchy": {
             "conda_binary": "a_conda_binary",

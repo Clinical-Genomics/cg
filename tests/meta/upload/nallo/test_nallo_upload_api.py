@@ -14,7 +14,14 @@ from cg.meta.upload.nallo.nallo_upload_api import (
     upload_to_gens,
     upload_to_scout,
 )
-from cg.models.cg_config import CGConfig, IlluminaConfig, NalloConfig, RunInstruments, SlurmConfig
+from cg.models.cg_config import (
+    CGConfig,
+    ChanjoConfig,
+    IlluminaConfig,
+    NalloConfig,
+    RunInstruments,
+    SlurmConfig,
+)
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
@@ -35,6 +42,7 @@ def test_upload_succeeds():
     status_db = create_autospec(Store, session=Mock())
     cg_config = create_autospec(
         CGConfig,
+        chanjo_38=ChanjoConfig(binary_path="chanjo_binary_path", config_path="chanjo_config_path"),
         delivery_path="delivery/path",
         delivery_service_factory=delivery_service_factory,
         nallo=create_autospec(

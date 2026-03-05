@@ -5,14 +5,10 @@ from itertools import permutations
 from pathlib import Path
 from typing import Any
 
-from housekeeper.store.models import File
-
 from cg.apps.coverage import ChanjoAPI, chanjo_api_for_genome_build
-from cg.clients.chanjo2.models import CoverageMetricsChanjo1
 from cg.constants import Workflow
 from cg.constants.constants import WORKFLOW_TO_GENOME_VERSION_MAP, GenomeVersion
 from cg.constants.nf_analysis import (
-    RAREDISEASE_COVERAGE_FILE_TAGS,
     RAREDISEASE_METRIC_CONDITIONS_WES,
     RAREDISEASE_METRIC_CONDITIONS_WGS,
     RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
@@ -20,6 +16,7 @@ from cg.constants.nf_analysis import (
 from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.workflow.utils import chanjo1
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
@@ -136,30 +133,12 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
         metric_conditions["gender"]["threshold"] = sample.sex
 
-    def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
-        """Return the Raredisease d4 coverage file path."""
-        coverage_file_tags: list[str] = RAREDISEASE_COVERAGE_FILE_TAGS + [sample_id]
-        coverage_file: File | None = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=bundle_name, tags=coverage_file_tags
-        )
-        if coverage_file:
-            return coverage_file.full_path
-        LOG.warning(f"No coverage file found with the tags: {coverage_file_tags}")
-        return None
-
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
-    ) -> CoverageMetricsChanjo1 | None:
-        sample_coverage: dict = self.chanjo_api.sample_coverage(
-            sample_id=sample_id, panel_genes=gene_ids
+    ) -> chanjo1.CoverageMetricsChanjo1 | None:
+        return chanjo1.get_sample_coverage(
+            chanjo_api=self.chanjo_api, sample_id=sample_id, gene_ids=gene_ids
         )
-        if sample_coverage:
-            return CoverageMetricsChanjo1(
-                coverage_completeness_percent=sample_coverage.get("mean_completeness"),
-                mean_coverage=sample_coverage.get("mean_coverage"),
-            )
-        LOG.warning(f"Could not calculate sample coverage for: {sample_id}")
-        return None
 
     def get_scout_upload_case_tags(self) -> dict:
         """Return Raredisease Scout upload case tags."""
