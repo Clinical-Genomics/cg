@@ -107,10 +107,6 @@ data-delivery:
   account: "development"
   mail_user: "data-delivery-user@scilifelab.se"
 
-gens:
-  binary_path: "{test_root_dir}/gens_binary_path"
-  config_path: "{test_root_dir}/gens_config_path"
-
 genotype:
   database: "sqlite:///file:genotype?mode=memory&cache=shared&uri=true"
   binary_path: "{test_root_dir}/genotype_binary_path"
@@ -125,18 +121,6 @@ lims:
   host: "http://localhost:8888/lims"
   username: lims_username
   password: lims_password
-
-loqusdb-lwp:
-  binary_path: "{test_root_dir}/loqusdb_lwp_binary_path"
-  config_path: "{test_root_dir}/loqusdb_lwp_config_path"
-
-loqusdb-somatic:
-  binary_path: "{test_root_dir}/loqusdb_somatic_binary_path"
-  config_path: "{test_root_dir}/loqusdb_somatic_config_path"
-
-loqusdb-tumor:
-  binary_path: "{test_root_dir}/loqusdb_tumor_binary_path"
-  config_path: "{test_root_dir}/loqusdb_tumor_config_path"
 
 microsalt:
   root: "{test_root_dir}/microsalt"
@@ -176,78 +160,6 @@ nallo:
     qos: "low"
   tower_workflow: nallo_tower_workflow
   workflow_bin_path: {test_root_dir}/nallo_workflow_bin_path
-
-raredisease:
-  conda_env: raredisease_conda_env
-  config: {test_root_dir}/raredisease_config.config
-  launch_directory: {test_root_dir}/raredisease_launch_directory
-  params: {test_root_dir}/raredisease_params.yaml
-  platform: {test_root_dir}/platform.config
-  profile: raredisease_profile
-  resources: {test_root_dir}/raredisease_resources.config
-  repository: raredisease_repository
-  revision: raredisease_revision
-  root: {test_root_dir}/raredisease_root_path
-  slurm:
-    account: "raredisease_slurm_account"
-    mail_user: "raredisease_mail_user@scilifelab.se"
-    qos: "low"
-  tower_workflow: raredisease_tower_workflow
-  workflow_bin_path: {test_root_dir}/raredisease_workflow_bin_path
-
-rnafusion:
-  binary_path: "{test_root_dir}/rnafusion_binary_path"
-  conda_env: rnafusion_conda_env
-  config: {test_root_dir}/rnafusion_config.config
-  launch_directory: {test_root_dir}/rnafusion_launch_directory
-  params: {test_root_dir}/rnafusion_params.yaml
-  platform: {test_root_dir}/platform.config
-  profile: rnafusion_profile
-  resources: {test_root_dir}/rnafusion_resources.config
-  repository: rnafusion_repository
-  revision: rnafusion_revision
-  root: {test_root_dir}/rnafusion_root_path
-  slurm:
-    account: "rnafusion_slurm_account"
-    mail_user: "rnafusion_mail_user@scilifelab.se"
-    qos: "low"
-  tower_workflow: rnafusion_tower_workflow
-  workflow_bin_path: {test_root_dir}/rnafusion_workflow_bin_path
-
-taxprofiler:
-  binary_path: "{test_root_dir}/taxprofiler_binary_path"
-  conda_env: taxprofiler_conda_env
-  config: {test_root_dir}/taxprofiler_config.config
-  params: {test_root_dir}/taxprofiler_params.yaml
-  platform: {test_root_dir}/platform.config
-  profile: taxprofiler_profile
-  resources: {test_root_dir}/taxprofiler_resources.config
-  repository: taxprofiler_repository
-  revision: taxprofiler_revision
-  root: {test_root_dir}/taxprofiler_root_path
-  slurm:
-    account: "taxprofiler_slurm_account"
-    mail_user: "taxprofiler_mail_user@scilifelab.se"
-    qos: "low"
-  tower_workflow: taxprofiler_tower_workflow
-  workflow_bin_path: {test_root_dir}/taxprofiler_workflow_bin_path
-
-tomte:
-  conda_env: tomte_conda_env
-  config: {test_root_dir}/tomte_config.config
-  params: {test_root_dir}/tomte_params.yaml
-  platform: {test_root_dir}/platform.config
-  profile: tomte_profile
-  resources: {test_root_dir}/tomte_resources.config
-  repository: tomte_repository
-  revision: tomte_revision
-  root: {test_root_dir}/tomte_root_path
-  slurm:
-    account: "tomte_slurm_account"
-    mail_user: "tomte_mail_user@scilifelab.se"
-    qos: "low"
-  tower_workflow: tomte_tower_workflow
-  workflow_bin_path: {test_root_dir}/tomte_workflow_bin_path
 
 encryption:
   encryption_dir: "{test_root_dir}/encryption_encryption_dir"
