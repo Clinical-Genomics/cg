@@ -2,7 +2,7 @@
 
 import rich_click as click
 
-from cg.apps.coverage.chanjo_api import ChanjoAPI, chanjo_api_for_genome_build
+from cg.apps.coverage import ChanjoAPI, chanjo_api_for_genome_build
 from cg.constants.constants import GenomeBuild
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.models.cg_config import CGConfig

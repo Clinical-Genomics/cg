@@ -2,7 +2,7 @@ from unittest.mock import Mock, create_autospec
 
 from pytest_mock import MockerFixture
 
-from cg.apps.coverage.chanjo_api import ChanjoAPI
+from cg.apps.coverage import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims.api import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI

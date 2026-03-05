@@ -2,8 +2,7 @@
 
 from pathlib import Path
 
-from cg.apps.coverage import chanjo_api
-from cg.apps.coverage.chanjo_api import ChanjoAPI
+from cg.apps.coverage import ChanjoAPI, chanjo_api
 from cg.models.cg_config import ChanjoConfig
 from cg.utils.commands import Process
 

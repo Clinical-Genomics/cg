@@ -2,7 +2,7 @@ from unittest.mock import create_autospec
 
 from pytest_mock import MockerFixture
 
-from cg.apps.coverage.chanjo_api import ChanjoAPI
+from cg.apps.coverage import ChanjoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import SexOptions
 from cg.constants.constants import GenomeBuild

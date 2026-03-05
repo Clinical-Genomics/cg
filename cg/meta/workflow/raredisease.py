@@ -7,7 +7,7 @@ from typing import Any
 
 from housekeeper.store.models import File
 
-from cg.apps.coverage.chanjo_api import ChanjoAPI, chanjo_api_for_genome_build
+from cg.apps.coverage import ChanjoAPI, chanjo_api_for_genome_build
 from cg.clients.chanjo2.models import CoverageMetricsChanjo1
 from cg.constants import Workflow
 from cg.constants.constants import WORKFLOW_TO_GENOME_VERSION_MAP, GenomeVersion

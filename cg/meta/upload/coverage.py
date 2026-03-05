@@ -4,7 +4,7 @@ import logging
 
 from housekeeper.store.models import File
 
-from cg.apps.coverage.chanjo_api import ChanjoAPI
+from cg.apps.coverage import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.store.models import Analysis
 from cg.store.store import Store
