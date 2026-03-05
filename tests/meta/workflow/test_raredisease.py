@@ -2,9 +2,10 @@ from unittest.mock import create_autospec
 
 from pytest_mock import MockerFixture
 
-from cg.apps.coverage import ChanjoAPI
+from cg.apps.coverage.chanjo_api import ChanjoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import SexOptions
+from cg.constants.constants import GenomeBuild
 from cg.meta.workflow import raredisease as raredisease_analysis_api
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
@@ -47,8 +48,8 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
 
     # GIVEN a mocked chanjo API
     chanjo_api = create_autospec(ChanjoAPI)
-    mock_init_chanjo = mocker.patch.object(
-        raredisease_analysis_api, "ChanjoAPI", return_value=chanjo_api
+    mock_chanjo_factory = mocker.patch.object(
+        raredisease_analysis_api, "chanjo_api_for_genome_build", return_value=chanjo_api
     )
 
     # GIVEN Raredisease analysis API
@@ -68,7 +69,7 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
     )
 
     # THEN chanjo was configured with the correct config
-    mock_init_chanjo.assert_called_once_with(raredisease_context.chanjo)
+    mock_chanjo_factory.assert_called_once_with(raredisease_context, GenomeBuild.hg19)
 
     # THEN the sample coverage should have been called with the right information
     chanjo_api.sample_coverage.assert_called_once_with(sample_id="internal_id", panel_genes=[])

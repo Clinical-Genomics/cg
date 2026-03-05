@@ -3,14 +3,14 @@
 import logging
 from itertools import permutations
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 from housekeeper.store.models import File
 
-from cg.apps.coverage.chanjo_api import ChanjoAPI
+from cg.apps.coverage.chanjo_api import ChanjoAPI, chanjo_api_for_genome_build
 from cg.clients.chanjo2.models import CoverageMetricsChanjo1
 from cg.constants import Workflow
-from cg.constants.constants import GenomeVersion
+from cg.constants.constants import WORKFLOW_TO_GENOME_VERSION_MAP, GenomeVersion
 from cg.constants.nf_analysis import (
     RAREDISEASE_COVERAGE_FILE_TAGS,
     RAREDISEASE_METRIC_CONDITIONS_WES,
@@ -21,7 +21,7 @@ from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
-from cg.models.cg_config import CGConfig, ChanjoConfig
+from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.raredisease.raredisease import RarediseaseQCMetrics
 from cg.resources import RAREDISEASE_BUNDLE_FILENAMES_PATH
@@ -40,7 +40,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         workflow: Workflow = Workflow.RAREDISEASE,
     ):
         super().__init__(config=config, workflow=workflow)
-        self.chanjo_api: ChanjoAPI = ChanjoAPI(cast(ChanjoConfig, config.chanjo))
+        self.chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
+            config, WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.RAREDISEASE]
+        )
         self.root_dir: str = config.raredisease.root
         self.workflow_bin_path: str = config.raredisease.workflow_bin_path
         self.profile: str = config.raredisease.profile

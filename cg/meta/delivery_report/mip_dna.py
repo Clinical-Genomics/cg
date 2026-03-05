@@ -1,9 +1,9 @@
 import logging
-from typing import Iterable, cast
+from collections.abc import Iterable
 
 from housekeeper.store.models import File, Version
 
-from cg.apps.coverage.chanjo_api import ChanjoAPI
+from cg.apps.coverage.chanjo_api import ChanjoAPI, chanjo_api_for_genome_build
 from cg.constants import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,
@@ -16,11 +16,11 @@ from cg.constants import (
     REQUIRED_SAMPLE_MIP_DNA_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
 )
+from cg.constants.constants import WORKFLOW_TO_GENOME_VERSION_MAP, Workflow
 from cg.constants.scout import ScoutUploadKey
 from cg.meta.delivery_report.data_validators import get_million_read_pairs
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-from cg.models.cg_config import ChanjoConfig
 from cg.models.delivery_report.metadata import MipDNASampleMetadataModel
 from cg.models.delivery_report.report import CaseModel, ReportRequiredFields, ScoutVariantsFiles
 from cg.models.delivery_report.sample import SampleModel
@@ -36,7 +36,9 @@ class MipDNADeliveryReportAPI(DeliveryReportAPI):
 
     def __init__(self, analysis_api: MipDNAAnalysisAPI):
         super().__init__(analysis_api=analysis_api)
-        self.chanjo_api: ChanjoAPI = ChanjoAPI(cast(ChanjoConfig, analysis_api.config.chanjo))
+        self.chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
+            analysis_api.config, WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.MIP_DNA]
+        )
 
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: MipAnalysis

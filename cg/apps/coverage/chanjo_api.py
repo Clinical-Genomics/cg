@@ -3,9 +3,9 @@
 import logging
 import tempfile
 
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, GenomeBuild
 from cg.io.controller import ReadStream
-from cg.models.cg_config import ChanjoConfig
+from cg.models.cg_config import CGConfig, ChanjoConfig
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -88,3 +88,13 @@ class ChanjoAPI:
         return ReadStream.get_content_from_stream(
             file_format=FileFormat.JSON, stream=self.process.stdout
         ).get(sample_id)
+
+
+def chanjo_api_for_genome_build(config: CGConfig, genome_build: GenomeBuild) -> ChanjoAPI:
+    """Return the chanjo configuration for the given genome build."""
+    chanjo_config: ChanjoConfig | None = (
+        config.chanjo_38 if genome_build == GenomeBuild.hg38 else config.chanjo
+    )
+    if not chanjo_config:
+        raise ValueError(f"No chanjo configuration found for genome build: {genome_build}")
+    return ChanjoAPI(config=chanjo_config)

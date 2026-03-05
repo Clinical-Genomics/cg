@@ -1,11 +1,10 @@
 """Code for validating an upload via CLI"""
 
-from typing import cast
-
 import rich_click as click
 
-from cg.apps.coverage.chanjo_api import ChanjoAPI
-from cg.models.cg_config import CGConfig, ChanjoConfig
+from cg.apps.coverage.chanjo_api import ChanjoAPI, chanjo_api_for_genome_build
+from cg.constants.constants import GenomeBuild
+from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
 from .utils import suggest_cases_to_upload
@@ -24,10 +23,7 @@ def validate(context: CGConfig, family_id: str | None, genome_version: str):
     """Validate a family of samples."""
 
     status_db: Store = context.status_db
-    chanjo_config = cast(
-        ChanjoConfig, context.chanjo_38 if genome_version == "hg38" else context.chanjo
-    )
-    chanjo_api = ChanjoAPI(config=chanjo_config)
+    chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(context, GenomeBuild[genome_version])
 
     click.echo(click.style("----------------- VALIDATE --------------------"))
 
