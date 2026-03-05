@@ -11,6 +11,7 @@ from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.scout import upload_to_scout
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
+from cg.constants.constants import WORKFLOW_TO_GENOME_VERSION_MAP, GenomeBuild, Workflow
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -41,9 +42,11 @@ class NalloUploadAPI(UploadAPI):
             f"Upload of case {case.internal_id} was successful. Uploaded at {dt.datetime.now()} in StatusDB"
         )
 
+        genome_version: GenomeBuild = WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.NALLO]
+
         ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
         ctx.invoke(upload_to_gens, case_id=case.internal_id)
-        ctx.invoke(upload_coverage, family_id=case.internal_id, genome_version="hg38")
+        ctx.invoke(upload_coverage, family_id=case.internal_id, genome_version=genome_version.name)
 
         # Clinical delivery upload
         self.upload_files_to_customer_inbox(case)
