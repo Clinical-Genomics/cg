@@ -3,7 +3,7 @@ from collections.abc import Iterable
 
 from housekeeper.store.models import File, Version
 
-from cg.apps.coverage.chanjo_api import ChanjoAPI, chanjo_api_for_genome_build
+from cg.apps.coverage import ChanjoAPI, chanjo_api_for_genome_build
 from cg.constants import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,

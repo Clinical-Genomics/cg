@@ -91,7 +91,6 @@ class ChanjoAPI:
 
 
 def chanjo_api_for_genome_build(config: CGConfig, genome_build: GenomeBuild) -> ChanjoAPI:
-    """Return the chanjo configuration for the given genome build."""
     chanjo_config: ChanjoConfig | None = (
         config.chanjo_38 if genome_build == GenomeBuild.hg38 else config.chanjo
     )
