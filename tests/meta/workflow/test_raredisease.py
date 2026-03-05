@@ -1,9 +1,10 @@
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 from pytest_mock import MockerFixture
 
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.clients.chanjo2.models import CoverageMetricsChanjo1
 from cg.constants import SexOptions
 from cg.constants.constants import GenomeBuild
 from cg.meta.workflow import raredisease as raredisease_analysis_api
@@ -48,6 +49,9 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
 
     # GIVEN a mocked chanjo API
     chanjo_api = create_autospec(ChanjoAPI)
+    chanjo_api.sample_coverage = Mock(
+        return_value={"mean_coverage": 28.9, "mean_completeness": 88.5}
+    )
     mock_chanjo_factory = mocker.patch.object(
         raredisease_analysis_api, "chanjo_api_for_genome_build", return_value=chanjo_api
     )
@@ -64,8 +68,12 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
     gene_ids: list[int] = analysis_api.get_gene_ids_from_scout(case.panels)
 
     # WHEN getting the chanjo coverage for the sample
-    analysis_api.get_sample_coverage(
+    sample_coverage: CoverageMetricsChanjo1 | None = analysis_api.get_sample_coverage(
         case_id=case.internal_id, sample_id=sample.internal_id, gene_ids=gene_ids
+    )
+
+    assert sample_coverage == CoverageMetricsChanjo1(
+        coverage_completeness_percent=88.5, mean_coverage=28.9
     )
 
     # THEN chanjo was configured with the correct config
