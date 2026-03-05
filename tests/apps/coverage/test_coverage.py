@@ -2,7 +2,8 @@
 
 from pathlib import Path
 
-from cg.apps.coverage.api import ChanjoAPI
+from cg.apps.coverage import chanjo_api
+from cg.apps.coverage.chanjo_api import ChanjoAPI
 from cg.models.cg_config import ChanjoConfig
 from cg.utils.commands import Process
 
@@ -75,7 +76,7 @@ def test_chanjo_api_sample_existing(
     mocked_stdout = '[{"id": "%s"}]' % sample_id
     mocked_stderr = ""
     MockedProcess = mock_process(result_stderr=mocked_stderr, result_stdout=mocked_stdout)
-    mocked_process = mocker.patch("cg.apps.coverage.api.Process")
+    mocked_process = mocker.patch.object(chanjo_api, "Process")
     mocked_process.return_value = MockedProcess(
         binary=chanjo_config.binary_path,
         config=chanjo_config.config_path,
@@ -98,7 +99,7 @@ def test_chanjo_api_sample_non_existing(
     mocked_stdout = "[]"
     mocked_stderr = ""
     MockedProcess = mock_process(result_stderr=mocked_stderr, result_stdout=mocked_stdout)
-    mocked_process = mocker.patch("cg.apps.coverage.api.Process")
+    mocked_process = mocker.patch.object(chanjo_api, "Process")
     mocked_process.return_value = MockedProcess(
         binary=chanjo_config.binary_path,
         config=chanjo_config.config_path,
@@ -142,7 +143,7 @@ def test_chanjo_api_omim_coverage(
     )
     mocked_stderr = ""
     MockedProcess = mock_process(result_stderr=mocked_stderr, result_stdout=mocked_stdout)
-    mocked_process = mocker.patch("cg.apps.coverage.api.Process")
+    mocked_process = mocker.patch.object(chanjo_api, "Process")
     mocked_process.return_value = MockedProcess(
         binary=chanjo_config.binary_path,
         config=chanjo_config.config_path,
@@ -175,7 +176,7 @@ def test_chanjo_api_coverage(
     )
     mocked_stderr = ""
     MockedProcess = mock_process(result_stderr=mocked_stderr, result_stdout=mocked_stdout)
-    mocked_process = mocker.patch("cg.apps.coverage.api.Process")
+    mocked_process = mocker.patch.object(chanjo_api, "Process")
     mocked_process.return_value = MockedProcess(
         binary=chanjo_config.binary_path,
         config=chanjo_config.config_path,

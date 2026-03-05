@@ -6,7 +6,7 @@ from unittest.mock import Mock, create_autospec
 from housekeeper.store.models import File
 from sqlalchemy.orm import Query
 
-from cg.apps.coverage.api import ChanjoAPI
+from cg.apps.coverage.chanjo_api import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.models.cg_config import ChanjoConfig

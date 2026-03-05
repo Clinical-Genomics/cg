@@ -4,7 +4,7 @@ from typing import cast
 
 import rich_click as click
 
-from cg.apps.coverage.api import ChanjoAPI
+from cg.apps.coverage.chanjo_api import ChanjoAPI
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.models.cg_config import CGConfig, ChanjoConfig
 from cg.store.models import Case
