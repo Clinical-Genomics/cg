@@ -92,10 +92,3 @@ class GenePanelMasterList(StrEnum):
     @staticmethod
     def get_non_specific_gene_panels() -> set[str]:
         return {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
-
-
-class GenePanelCombo:
-    COMBO_1: dict[str, set[str]] = {
-        "CM": {"CNM", "CM"},
-        "Horsel": {"Horsel", "141217", "141201"},
-    }
