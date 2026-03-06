@@ -96,4 +96,6 @@ def chanjo_api_for_genome_build(config: CGConfig, genome_build: GenomeBuild) -> 
     )
     if not chanjo_config:
         raise ValueError(f"No chanjo configuration found for genome build: {genome_build}")
+
+    LOG.debug(f"Instantiating chanjo api, genome build {genome_build}")
     return ChanjoAPI(config=chanjo_config)
