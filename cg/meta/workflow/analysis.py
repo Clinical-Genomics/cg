@@ -19,7 +19,6 @@ from cg.constants.constants import (
     CaseActions,
     CustomerId,
     FileFormat,
-    GenomeVersion,
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
@@ -771,17 +770,6 @@ class AnalysisAPI(MetaAPI):
                 f"Case samples have different analysis types {', '.join(analysis_types)}"
             )
         return analysis_types.pop() if analysis_types else None
-
-    @staticmethod
-    def translate_genome_reference(genome_version: GenomeVersion) -> GenomeVersion:
-        """Translates a genome reference assembly to its corresponding alternate name."""
-        translation_map = {
-            GenomeVersion.GRCh37: GenomeVersion.HG19,
-            GenomeVersion.GRCh38: GenomeVersion.HG38,
-            GenomeVersion.HG19: GenomeVersion.GRCh37,
-            GenomeVersion.HG38: GenomeVersion.GRCh38,
-        }
-        return translation_map.get(genome_version, genome_version)
 
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]

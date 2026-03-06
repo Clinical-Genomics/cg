@@ -2,26 +2,27 @@
 
 from pathlib import Path
 
-from cg.apps.coverage.api import ChanjoAPI
+from cg.apps.coverage import ChanjoAPI, chanjo_api
+from cg.models.cg_config import ChanjoConfig
 from cg.utils.commands import Process
 
 
-def test_chanjo_api_init(chanjo_config: dict[str, dict[str, str]]):
+def test_chanjo_api_init(chanjo_config: ChanjoConfig):
     """Test __init__."""
-    # GIVEN a config dict
+    # GIVEN a chanjo config
 
     # WHEN instantiating a chanjo API
     api = ChanjoAPI(chanjo_config)
 
     # THEN attributes chanjo_config and chanjo_binary are set
-    assert api.chanjo_config == chanjo_config["chanjo"]["config_path"]
-    assert api.chanjo_binary == chanjo_config["chanjo"]["binary_path"]
+    assert api.chanjo_config == chanjo_config.config_path
+    assert api.chanjo_binary == chanjo_config.binary_path
 
 
 def test_chanjo_api_upload(
     bed_file: Path,
     case_id: str,
-    chanjo_config: dict[str, dict[str, str]],
+    chanjo_config: ChanjoConfig,
     family_name: str,
     mocker,
     sample_id: str,
@@ -61,7 +62,7 @@ def test_chanjo_api_upload(
 
 
 def test_chanjo_api_sample_existing(
-    chanjo_config: dict[str, dict[str, str]],
+    chanjo_config: ChanjoConfig,
     mocker,
     mock_process,
     sample_id: str,
@@ -74,10 +75,10 @@ def test_chanjo_api_sample_existing(
     mocked_stdout = '[{"id": "%s"}]' % sample_id
     mocked_stderr = ""
     MockedProcess = mock_process(result_stderr=mocked_stderr, result_stdout=mocked_stdout)
-    mocked_process = mocker.patch("cg.apps.coverage.api.Process")
+    mocked_process = mocker.patch.object(chanjo_api, "Process")
     mocked_process.return_value = MockedProcess(
-        binary=chanjo_config["chanjo"]["binary_path"],
-        config=chanjo_config["chanjo"]["config_path"],
+        binary=chanjo_config.binary_path,
+        config=chanjo_config.config_path,
     )
     api = ChanjoAPI(chanjo_config)
     sample = api.sample(sample_id=sample_id)
@@ -87,7 +88,7 @@ def test_chanjo_api_sample_existing(
 
 
 def test_chanjo_api_sample_non_existing(
-    chanjo_config: dict[str, dict[str, str]], mocker, mock_process, sample_id: str
+    chanjo_config: ChanjoConfig, mocker, mock_process, sample_id: str
 ):
     """Test sample method."""
 
@@ -97,10 +98,10 @@ def test_chanjo_api_sample_non_existing(
     mocked_stdout = "[]"
     mocked_stderr = ""
     MockedProcess = mock_process(result_stderr=mocked_stderr, result_stdout=mocked_stdout)
-    mocked_process = mocker.patch("cg.apps.coverage.api.Process")
+    mocked_process = mocker.patch.object(chanjo_api, "Process")
     mocked_process.return_value = MockedProcess(
-        binary=chanjo_config["chanjo"]["binary_path"],
-        config=chanjo_config["chanjo"]["config_path"],
+        binary=chanjo_config.binary_path,
+        config=chanjo_config.config_path,
     )
     api = ChanjoAPI(chanjo_config)
     sample = api.sample(sample_id=sample_id)
@@ -109,7 +110,7 @@ def test_chanjo_api_sample_non_existing(
     assert sample is None
 
 
-def test_chanjo_api_delete_sample(chanjo_config: dict[str, dict[str, str]], mocker, sample_id: str):
+def test_chanjo_api_delete_sample(chanjo_config: ChanjoConfig, mocker, sample_id: str):
     """Test delete method."""
     # GIVEN a sample_id
 
@@ -123,7 +124,7 @@ def test_chanjo_api_delete_sample(chanjo_config: dict[str, dict[str, str]], mock
 
 
 def test_chanjo_api_omim_coverage(
-    chanjo_config: dict[str, dict[str, str]],
+    chanjo_config: ChanjoConfig,
     chanjo_mean_completeness: int,
     chanjo_mean_coverage: int,
     mocker,
@@ -141,10 +142,10 @@ def test_chanjo_api_omim_coverage(
     )
     mocked_stderr = ""
     MockedProcess = mock_process(result_stderr=mocked_stderr, result_stdout=mocked_stdout)
-    mocked_process = mocker.patch("cg.apps.coverage.api.Process")
+    mocked_process = mocker.patch.object(chanjo_api, "Process")
     mocked_process.return_value = MockedProcess(
-        binary=chanjo_config["chanjo"]["binary_path"],
-        config=chanjo_config["chanjo"]["config_path"],
+        binary=chanjo_config.binary_path,
+        config=chanjo_config.config_path,
     )
     api = ChanjoAPI(chanjo_config)
     samples = api.omim_coverage(samples=[{"id": sample_id}])
@@ -156,7 +157,7 @@ def test_chanjo_api_omim_coverage(
 
 
 def test_chanjo_api_coverage(
-    chanjo_config: dict[str, dict[str, str]],
+    chanjo_config: ChanjoConfig,
     chanjo_mean_completeness: int,
     chanjo_mean_coverage: int,
     mocker,
@@ -174,10 +175,10 @@ def test_chanjo_api_coverage(
     )
     mocked_stderr = ""
     MockedProcess = mock_process(result_stderr=mocked_stderr, result_stdout=mocked_stdout)
-    mocked_process = mocker.patch("cg.apps.coverage.api.Process")
+    mocked_process = mocker.patch.object(chanjo_api, "Process")
     mocked_process.return_value = MockedProcess(
-        binary=chanjo_config["chanjo"]["binary_path"],
-        config=chanjo_config["chanjo"]["config_path"],
+        binary=chanjo_config.binary_path,
+        config=chanjo_config.config_path,
     )
     api = ChanjoAPI(chanjo_config)
     samples = api.sample_coverage(sample_id=sample_id, panel_genes=["123"])
