@@ -5,7 +5,7 @@
   tag: kraken2_combined_report
 - format: txt
   id: SAMPLEID
-  path: PATHTOCASE/kraken2/k2_pluspf/SAMPLENAME_k2_pluspf.kraken2.kraken2.report.txtt
+  path: PATHTOCASE/kraken2/k2_pluspf/SAMPLENAME_k2_pluspf.kraken2.kraken2.report.txt
   step: kraken2
   tag: kraken2_report
 - format: txt
