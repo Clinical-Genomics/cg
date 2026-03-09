@@ -48,7 +48,7 @@ balsamic_umi.add_command(store_available)
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def config_case(cg_config: CGConfig, case_id: str, panel_bed: str | None):
-    """Configure a Balsamic case so that it is ready to be run.
+    """Configure a Balsamic-UMI case so that it is ready to be run.
 
     \b
     Creates the case config file:
@@ -65,7 +65,7 @@ def config_case(cg_config: CGConfig, case_id: str, panel_bed: str | None):
 @click.pass_obj
 def run(cg_config: CGConfig, case_id: str, workflow_profile: click.Path | None):
     """
-    Run a preconfigured Balsamic case.
+    Run a preconfigured Balsamic-UMI case.
 
     \b
     Assumes that case config file exist in the case run directory:
@@ -90,7 +90,7 @@ def start(
     workflow_profile: click.Path | None,
 ):
     """
-    Starts a Balsamic cases.
+    Starts a Balsamic-UMI case.
 
     \b
     Configures the case and creates the case config file:
@@ -108,7 +108,7 @@ def start(
 @click.pass_obj
 def start_available(cg_config: CGConfig):
     """
-    Starts all available Balsamic cases.
+    Starts all available Balsamic-UMI cases.
 
     \b
     Configures the individual case and creates its case config file:
