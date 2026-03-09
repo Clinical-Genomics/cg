@@ -164,9 +164,13 @@ def test_copy_novaseqx_sequencing_runs_notifies_trailblazer(
     cg_context.run_instruments.illumina.demultiplexed_runs_dir = demultiplexed_runs_dir.as_posix()
 
     # GIVEN mocked file operations to avoid actual hardlinking
-    mocker.patch("cg.cli.demultiplex.demux.hardlink_flow_cell_analysis_data")
-    mocker.patch("cg.cli.demultiplex.demux.mark_as_demultiplexed")
-    mocker.patch("cg.cli.demultiplex.demux.add_and_include_sample_sheet_path_to_housekeeper")
+    mocker.patch(
+        "cg.cli.demultiplex.copy_novaseqx_demultiplex_data.hardlink_flow_cell_analysis_data"
+    )
+    mocker.patch("cg.cli.demultiplex.copy_novaseqx_demultiplex_data.mark_as_demultiplexed")
+    mocker.patch(
+        "cg.cli.demultiplex.copy_novaseqx_demultiplex_data.add_and_include_sample_sheet_path_to_housekeeper"
+    )
 
     # GIVEN a mock Trailblazer API
     mock_tb_api = MagicMock()
@@ -208,10 +212,12 @@ def test_copy_novaseqx_sequencing_runs_saves_sample_sheet_to_housekeeper(
     cg_context.run_instruments.illumina.demultiplexed_runs_dir = demultiplexed_runs_dir.as_posix()
 
     # GIVEN mocked file operations
-    mocker.patch("cg.cli.demultiplex.demux.hardlink_flow_cell_analysis_data")
-    mocker.patch("cg.cli.demultiplex.demux.mark_as_demultiplexed")
+    mocker.patch(
+        "cg.cli.demultiplex.copy_novaseqx_demultiplex_data.hardlink_flow_cell_analysis_data"
+    )
+    mocker.patch("cg.cli.demultiplex.copy_novaseqx_demultiplex_data.mark_as_demultiplexed")
     mock_add_ss = mocker.patch(
-        "cg.cli.demultiplex.demux.add_and_include_sample_sheet_path_to_housekeeper"
+        "cg.cli.demultiplex.copy_novaseqx_demultiplex_data.add_and_include_sample_sheet_path_to_housekeeper"
     )
     mock_tb_api = MagicMock()
     cg_context.trailblazer_api_ = mock_tb_api

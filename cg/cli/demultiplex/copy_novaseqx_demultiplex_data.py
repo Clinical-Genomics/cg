@@ -3,7 +3,13 @@ import os
 import shutil
 from pathlib import Path
 
+from cg.apps.demultiplex.sample_sheet.utils import add_and_include_sample_sheet_path_to_housekeeper
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.constants.constants import Workflow
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.priority import TrailblazerPriority
+from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.io.csv import read_csv, write_csv
 
 LOG = logging.getLogger(__name__)
@@ -212,3 +218,34 @@ def is_file_relevant_for_demultiplexing(file: Path) -> bool:
         if relevant_directory in file.parts:
             return True
     return False
+
+
+def copy_novaseqx_flow_cell(
+    sequencing_run_dir: Path,
+    demultiplexed_runs_dir: Path,
+    flow_cell_id: str,
+    hk_api: HousekeeperAPI,
+    tb_api: TrailblazerAPI,
+) -> None:
+    """Copy a NovaSeqX sequencing run to demultiplexed runs and notify downstream systems."""
+    hardlink_flow_cell_analysis_data(
+        flow_cell_dir=sequencing_run_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
+    )
+    demultiplexed_runs_flow_cell_dir = Path(demultiplexed_runs_dir, sequencing_run_dir.name)
+    mark_as_demultiplexed(demultiplexed_runs_flow_cell_dir)
+
+    analysis_path: Path = get_latest_analysis_path(sequencing_run_dir)
+    add_and_include_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=Path(analysis_path, DemultiplexingDirsAndFiles.DATA),
+        flow_cell_name=flow_cell_id,
+        hk_api=hk_api,
+    )
+    tb_api.add_pending_analysis(
+        case_id=flow_cell_id,
+        analysis_type=AnalysisType.OTHER,
+        config_path=None,
+        out_dir=demultiplexed_runs_flow_cell_dir.as_posix(),
+        priority=TrailblazerPriority.HIGH,
+        workflow=Workflow.DEMULTIPLEX,
+    )
+    tb_api.set_analysis_status(case_id=flow_cell_id, status=AnalysisStatus.COMPLETED)
