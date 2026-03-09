@@ -20,6 +20,7 @@ def expected_tgs_myeloid_normal_only_command(cg_balsamic_config: BalsamicConfig)
         f"--analysis-dir {cg_balsamic_config.root} "
         f"--analysis-workflow balsamic "
         f"--artefact-snv-observations {cg_balsamic_config.loqusdb_dump_files.artefact_snv} "
+        # TODO add         f"--cancer-genelist  "
         f"--balsamic-cache {cg_balsamic_config.balsamic_cache} "
         f"--cache-version 0.0.0.1337 "
         f"--cadd-annotations {cg_balsamic_config.cadd_path} "

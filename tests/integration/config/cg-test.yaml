@@ -44,6 +44,7 @@ balsamic:
   bed_path: "{test_root_dir}/balsamic_bed_path"
   cache_version: "0.0.1"
   cadd_path: "{test_root_dir}/balsamic_cadd_path"
+  cancer_genelist: "{test_root_dir}/cancer_gene_list.tsv"
   conda_env: "conda_env_balsamic"
   genome_interval_path: "{test_root_dir}/balsamic_genome_interval_path"
   gens_coverage_female_path: "{test_root_dir}/balsamic_gens_coverage_female_path"

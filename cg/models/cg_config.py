@@ -195,6 +195,7 @@ class BalsamicConfig(CommonAppConfig):
     binary_path: Path
     cache_version: str
     cadd_path: Path
+    cancer_genelist: Path
     conda_binary: Path
     conda_env: str
     genome_interval_path: Path
