@@ -115,7 +115,7 @@ def start_available(cg_config: CGConfig):
         - CASE_ID.json
     and submits the job to slurm.
     """
-    LOG.info("Starting Balsamic workflow for all available cases.")
+    LOG.info("Starting Balsamic-UMI workflow for all available cases.")
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter = factory.get_analysis_starter_for_workflow(Workflow.BALSAMIC_UMI)
     succeeded: bool = analysis_starter.start_available()
