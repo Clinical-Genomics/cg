@@ -40,7 +40,7 @@ from cg.meta.upload.microsalt.microsalt_upload_api import MicrosaltUploadAPI
 from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
 from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
 from cg.meta.upload.mutant.mutant import MutantUploadAPI
-from cg.meta.upload.nallo.nallo import NalloUploadAPI
+from cg.meta.upload.nallo.nallo_upload_api import NalloUploadAPI
 from cg.meta.upload.nf_analysis import NfAnalysisUploadAPI
 from cg.meta.upload.raredisease.raredisease import RarediseaseUploadAPI
 from cg.meta.upload.tomte.tomte import TomteUploadAPI

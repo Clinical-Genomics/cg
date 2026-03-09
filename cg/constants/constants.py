@@ -156,6 +156,11 @@ class FileFormat(StrEnum):
     YAML: str = "yaml"
 
 
+class GenomeBuild(StrEnum):
+    hg19 = "37"
+    hg38 = "38"
+
+
 class GenomeVersion(StrEnum):
     GRCh37 = "GRCh37"
     GRCh38 = "GRCh38"

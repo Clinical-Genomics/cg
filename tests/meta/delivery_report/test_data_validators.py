@@ -21,7 +21,7 @@ from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
 from cg.meta.delivery_report.tomte import TomteDeliveryReportAPI
 from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.rnafusion_analysis_api import RnafusionAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.delivery.delivery import DeliveryFile

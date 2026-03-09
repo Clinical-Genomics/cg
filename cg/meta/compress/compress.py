@@ -258,7 +258,9 @@ class CompressAPI:
             LOG.warning(f"Could not find any spring paths for {sample.internal_id}")
         for compression in spring_paths:
             if not compression.is_spring_decompression_done:
-                LOG.info(f"SPRING to FASTQ decompression not finished {sample.internal_id}")
+                LOG.info(
+                    f"SPRING to FASTQ decompression has not completed or was never started for {sample.internal_id}"
+                )
                 return False
 
             fastq_first: Path = compression.fastq_first
