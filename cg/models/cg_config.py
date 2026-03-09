@@ -10,7 +10,6 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.apps.gens import GensAPI
-from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -476,8 +475,6 @@ class CGConfig(BaseModel):
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
     external: ExternalConfig = None
-    genotype: CommonAppConfig = None
-    genotype_api_: GenotypeAPI = None
     gens: CommonAppConfig = None
     gens_api_: GensAPI = None
     hermes: HermesConfig = None
@@ -585,15 +582,6 @@ class CGConfig(BaseModel):
             )
             self.demultiplex_api_ = demultiplex_api
         return demultiplex_api
-
-    @property
-    def genotype_api(self) -> GenotypeAPI:
-        api = self.__dict__.get("genotype_api_")
-        if api is None:
-            LOG.debug("Instantiating genotype api")
-            api = GenotypeAPI(config=self.dict())
-            self.genotype_api_ = api
-        return api
 
     @property
     def gens_api(self) -> GensAPI:

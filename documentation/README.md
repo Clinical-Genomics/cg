@@ -7,7 +7,6 @@ We rely on a set of specialized "apps" to deal with a lot of complexity like:
 
 - [Trailblazer][trailblazer]: Python wrapper around [MIP][mip], a rare disease genomics workflow
 - [Housekeeper][housekeeper]: storage, retrieval, and archival of files
-- [Genotype][genotype]: managing genotypes for detecting sample mix-ups
 
 In this context, `cg` provides the interface between these tools to facilitate automation and other necessary cross-talk. It also exposes some APIs:
 
@@ -44,10 +43,6 @@ Interface to Trailblazer.
 
 - One responsibility is to define the set of files from MIP to store (in Housekeeper)
 - Also used to interact with the workflow for starting it
-
-#### gt
-
-Interface to Genotype. For uploading results from the workflow about genotypes to compare and validate that we are clear of sample mix-ups.
 
 #### hk
 
@@ -172,13 +167,7 @@ cg upload auto
 You can of course specify which upload you want to do yourself as well:
 
 ```bash
-cg upload [coverage|genotypes|observations|scout] raredragon
-```
-
-You can force a reupload of sequencing genotypes:
-
-```bash
-cg upload genotypes --re-upload raredragon
+cg upload [coverage|observations|scout] raredragon
 ```
 
 ### `meta`
@@ -218,12 +207,6 @@ Some info if primarily stored in LIMS and needs to be syncronized over to `statu
 Includes: `status`, `hk`, `coverage`
 
 The API will fetch information about an analysis like name and id of the family and related samples from `status`. It will get the Sambamba output from `hk` and use the `coverage` app interface to upload the data to Chanjo for each individual sample.
-
-##### gt
-
-Includes: `status`, `hk`, `tb`, `gt`
-
-Given an analysis, the API will fetch information about the family. It will fetch the gBCF + qcmetrics files from `hk`. It will parse the qcmetrics file using `tb` to find out the predicted sex of each sample. It will then upload the results to Genotype. Subsequent upload of the same samples will overwrite existing information while logging the event.
 
 ##### observations
 
@@ -290,7 +273,6 @@ Another module `/exc.py` contains the custom Exception classes that are used acr
 [trailblazer]: https://github.com/Clinical-Genomics/trailblazer
 [trailblazer-ui]: https://trailblazer.scilifelab.se/
 [housekeeper]: https://github.com/Clinical-Genomics/housekeeper
-[genotype]: https://github.com/Clinical-Genomics/genotype
 [chanjo]: https://github.com/robinandeer/chanjo
 [scout]: https://github.com/Clinical-Genomics/scout
 [mip]: https://github.com/Clinical-Genomics/mip
