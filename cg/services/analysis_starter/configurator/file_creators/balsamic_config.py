@@ -37,6 +37,7 @@ class BalsamicConfigFileCreator:
         self.cache_dir: Path = cg_balsamic_config.balsamic_cache
         self.cache_version: str = cg_balsamic_config.cache_version
         self.cadd_path: Path = cg_balsamic_config.cadd_path
+        self.cancer_genelist: Path = cg_balsamic_config.cancer_genelist
         self.genome_interval_path: Path = cg_balsamic_config.genome_interval_path
         self.gens_coverage_female_path: Path = cg_balsamic_config.gens_coverage_female_path
         self.gens_coverage_male_path: Path = cg_balsamic_config.gens_coverage_male_path
@@ -146,6 +147,7 @@ class BalsamicConfigFileCreator:
             balsamic_cache=self.cache_dir,
             cache_version=self.cache_version,
             cadd_annotations=self.cadd_path,
+            cancer_genelist=self.cancer_genelist,
             cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
             cancer_somatic_snv_observations=self.loqusdb_cancer_somatic_snv,
             cancer_somatic_snv_panel_observations=self.loqusdb_cancer_somatic_snv_panels.get(

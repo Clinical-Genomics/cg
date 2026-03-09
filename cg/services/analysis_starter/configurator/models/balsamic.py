@@ -18,6 +18,7 @@ class BalsamicConfigInput(BaseModel):
     balsamic_cache: Path
     cache_version: str
     cadd_annotations: Path
+    cancer_genelist: Path | None = None
     cancer_germline_snv_observations: Path
     cancer_somatic_snv_observations: Path
     cancer_somatic_sv_observations: Path
@@ -75,6 +76,7 @@ class BalsamicConfigInputPanel(BalsamicConfigInput):
             "--balsamic-cache": self.balsamic_cache,
             "--cache-version": self.cache_version,
             "--cadd-annotations": self.cadd_annotations,
+            "--cancer-genelist": self.cancer_genelist,
             "--cancer-germline-snv-observations": self.cancer_germline_snv_observations,
             "--cancer-somatic-snv-observations": self.cancer_somatic_snv_observations,
             "--cancer-somatic-snv-panel-observations": self.cancer_somatic_snv_panel_observations,
