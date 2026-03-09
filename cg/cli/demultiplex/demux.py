@@ -165,8 +165,8 @@ def confirm_sequencing_run_sync(context: CGConfig, source_directory: str):
     If so it creates a CopyComplete.txt file to show that that is the case."""
     target_sequencing_runs_directory = Path(context.run_instruments.illumina.sequencing_runs_dir)
     for source_sequencing_run in Path(source_directory).iterdir():
-        target_sequencig_run = Path(target_sequencing_runs_directory, source_sequencing_run.name)
-        if is_flow_cell_sync_confirmed(target_sequencig_run):
+        target_sequencing_run = Path(target_sequencing_runs_directory, source_sequencing_run.name)
+        if is_flow_cell_sync_confirmed(target_sequencing_run):
             LOG.debug(f"Flow cell {source_sequencing_run} has already been confirmed, skipping.")
             continue
         if is_syncing_complete(
