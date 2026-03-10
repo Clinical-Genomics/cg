@@ -1,4 +1,7 @@
+from typing import Callable
+
 from cg.services.orders.validation.rules.case.rules import (
+    validate_case_contains_related_samples,
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
@@ -39,7 +42,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_wells_contain_at_most_one_sample,
 )
 
-RAREDISEASE_CASE_RULES: list[callable] = [
+RAREDISEASE_CASE_RULES: list[Callable] = [
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
@@ -48,9 +51,10 @@ RAREDISEASE_CASE_RULES: list[callable] = [
     validate_existing_cases_belong_to_collaboration,
     validate_gene_panels_unique,
     validate_samples_in_case_have_same_prep_category,
+    validate_case_contains_related_samples,
 ]
 
-RAREDISEASE_CASE_SAMPLE_RULES: list[callable] = [
+RAREDISEASE_CASE_SAMPLE_RULES: list[Callable] = [
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,

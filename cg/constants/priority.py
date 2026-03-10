@@ -19,11 +19,11 @@ class TrailblazerPriority(StrEnum):
 
 
 class PriorityTerms(StrEnum):
-    EXPRESS: str = "express"
-    PRIORITY: str = "priority"
-    RESEARCH: str = "research"
-    STANDARD: str = "standard"
-    CLINICAL_TRIALS: str = "clinical_trials"
+    EXPRESS = "express"
+    PRIORITY = "priority"
+    RESEARCH = "research"
+    STANDARD = "standard"
+    CLINICAL_TRIALS = "clinical_trials"
 
 
 class Priority(IntEnum):

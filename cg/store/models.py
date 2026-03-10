@@ -22,6 +22,7 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 from cg.constants import DataDelivery, Priority, SequencingRunDataAvailability, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.constants import (
+    BedVersionGenomeVersion,
     CaseActions,
     ControlOptions,
     SequencingQCStatus,
@@ -335,7 +336,12 @@ class BedVersion(Base):
     """Model for bed target captures versions"""
 
     __tablename__ = "bed_version"
-    __table_args__ = (UniqueConstraint("bed_id", "version", name="_app_version_uc"),)
+    __table_args__ = (
+        UniqueConstraint("bed_id", "version", name="_app_version_uc"),
+        UniqueConstraint(
+            "shortname", "version", "genome_version", name="shortname_version_genome_version_uc"
+        ),
+    )
 
     id: Mapped[PrimaryKeyInt]
     shortname: Mapped[Str64]
@@ -343,7 +349,9 @@ class BedVersion(Base):
     filename: Mapped[Str256]
     checksum: Mapped[Str32 | None]
     panel_size: Mapped[int | None]
-    genome_version: Mapped[Str32 | None]
+    genome_version: Mapped[BedVersionGenomeVersion] = mapped_column(
+        types.Enum(*(genome_version.value for genome_version in BedVersionGenomeVersion))
+    )
     designer: Mapped[Str256 | None]
     comment: Mapped[Text | None]
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
@@ -825,6 +833,11 @@ class Sample(Base, PriorityMixin):
         self._phenotype_terms = ",".join(phenotype_term_list) if phenotype_term_list else None
 
     @property
+    def application_tag(self) -> str:
+        """Return the application tag of the application related to the sample."""
+        return self.application_version.application.tag
+
+    @property
     def prep_category(self) -> str:
         """Return the preparation category of the sample."""
         return self.application_version.application.prep_category
@@ -1186,11 +1199,13 @@ class PacbioSequencingRun(Base):
 
     id: Mapped[PrimaryKeyInt]
     run_id: Mapped[Str64] = mapped_column(unique=True)
+    run_name: Mapped[Str64]
     processed: Mapped[bool] = mapped_column(default=False)
     comment: Mapped[Text] = mapped_column(default="")
     instrument_name: Mapped[RevioNames] = mapped_column(
         types.Enum(*(revio_name.value for revio_name in RevioNames))
     )
+    unique_id: Mapped[Str64] = mapped_column(unique=True)
 
     smrt_cell_metrics: Mapped[list[PacbioSMRTCellMetrics]] = orm.relationship(
         back_populates="sequencing_run"

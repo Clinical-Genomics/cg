@@ -138,9 +138,10 @@ class Workflow(StrEnum):
 
 
 DNA_WORKFLOWS_WITH_SCOUT_UPLOAD: list[Workflow] = [
-    Workflow.MIP_DNA,
     Workflow.BALSAMIC,
     Workflow.BALSAMIC_UMI,
+    Workflow.MIP_DNA,
+    Workflow.RAREDISEASE,
 ]
 
 
@@ -155,6 +156,11 @@ class FileFormat(StrEnum):
     YAML: str = "yaml"
 
 
+class GenomeBuild(StrEnum):
+    hg19 = "37"
+    hg38 = "38"
+
+
 class GenomeVersion(StrEnum):
     GRCh37 = "GRCh37"
     GRCh38 = "GRCh38"
@@ -162,6 +168,12 @@ class GenomeVersion(StrEnum):
     CANFAM3 = auto()
     HG19 = "hg19"
     HG38 = "hg38"
+
+
+class BedVersionGenomeVersion(StrEnum):
+    HG19 = "hg19"
+    HG38 = "hg38"
+    CFAM3 = "cfam3"
 
 
 class SampleType(StrEnum):

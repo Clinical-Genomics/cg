@@ -10,7 +10,7 @@ NewSample = Annotated[BalsamicSample, Tag("new")]
 OldSample = Annotated[ExistingSample, Tag("existing")]
 
 
-class BalsamicCase(Case):
+class BalsamicCase(Case[BalsamicSample]):
     cohorts: list[str] | None = None
     samples: list[Annotated[NewSample | OldSample, Discriminator(has_internal_id)]]
     synopsis: str | None = None

@@ -30,8 +30,6 @@ from cg.store.models import (
     Application,
     ApplicationLimitations,
     ApplicationVersion,
-    Bed,
-    BedVersion,
     Case,
     CaseSample,
     Collaboration,
@@ -184,18 +182,6 @@ class CreateMixin(ReadHandler):
             updated_at=updated_at,
             **kwargs,
         )
-
-    def add_bed(self, name: str) -> Bed:
-        """Build a new bed record."""
-        return Bed(name=name)
-
-    def add_bed_version(self, bed: Bed, version: int, filename: str, shortname: str) -> BedVersion:
-        """Build a new bed version record."""
-        bed_version: BedVersion = BedVersion(
-            version=version, filename=filename, shortname=shortname
-        )
-        bed_version.bed = bed
-        return bed_version
 
     def add_sample(
         self,
@@ -524,6 +510,8 @@ class CreateMixin(ReadHandler):
             sequencing_run = PacbioSequencingRun(
                 instrument_name=pacbio_sequencing_run_dto.instrument_name,
                 run_id=pacbio_sequencing_run_dto.run_id,
+                run_name=pacbio_sequencing_run_dto.run_name,
+                unique_id=pacbio_sequencing_run_dto.unique_id,
             )
             self.add_item_to_store(sequencing_run)
             return sequencing_run

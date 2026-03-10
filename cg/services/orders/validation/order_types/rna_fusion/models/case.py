@@ -10,7 +10,7 @@ NewSample = Annotated[RNAFusionSample, Tag("new")]
 OldSample = Annotated[ExistingSample, Tag("existing")]
 
 
-class RNAFusionCase(Case):
+class RNAFusionCase(Case[RNAFusionSample]):
     cohorts: list[str] | None = None
     synopsis: str | None = None
     samples: list[Annotated[NewSample | OldSample, Discriminator(has_internal_id)]]

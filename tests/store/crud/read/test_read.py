@@ -5,7 +5,7 @@ from sqlalchemy.exc import MultipleResultsFound
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability
-from cg.constants.constants import CaseActions, Workflow
+from cg.constants.constants import BedVersionGenomeVersion, CaseActions, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import BedVersionNotFoundError, CgError
@@ -348,56 +348,75 @@ def test_get_bed_version_by_file_name(base_store: Store, bed_version_file_name: 
     assert bed_version.filename == bed_version_file_name
 
 
-def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name: str):
-    """Test function to return the bed version by short name."""
-
-    # GIVEN a store with bed versions records
-
-    # WHEN getting the query for the bed versions
-    bed_version: BedVersion = base_store.get_bed_version_by_short_name(
-        bed_version_short_name=bed_version_short_name
+def test_get_bed_version_by_short_name_and_genome_version_strict_success(
+    store: Store, helpers: StoreHelpers
+):
+    # GIVEN a store with three bed versions
+    bed_hg19: Bed = helpers.add_bed("bed_hg19")
+    bed_hg38: Bed = helpers.add_bed("bed_hg38")
+    bed_version_with_different_genome_version: BedVersion = helpers.add_bed_version(
+        bed=bed_hg19, version=1, filename="bed_hg19.bed", shortname="b"
+    )
+    bed_version_with_different_genome_version.genome_version = BedVersionGenomeVersion.HG19
+    bed_version_with_different_shortname: BedVersion = helpers.add_bed_version(
+        bed=bed_hg38, version=2, filename="bed_hg38.bed", shortname="a"
+    )
+    bed_version_with_different_shortname.genome_version = BedVersionGenomeVersion.HG38
+    bed_version_to_fetch: BedVersion = helpers.add_bed_version(
+        bed=bed_hg38, version=1, filename="bed_hg38.bed", shortname="b"
+    )
+    bed_version_to_fetch.genome_version = BedVersionGenomeVersion.HG38
+    store.add_multiple_items_to_store(
+        [
+            bed_version_with_different_genome_version,
+            bed_version_with_different_shortname,
+            bed_version_to_fetch,
+        ]
     )
 
-    # THEN return a bed version with the supplied bed version short name
-    assert bed_version.shortname == bed_version_short_name
+    # WHEN getting the bed version of hg38 genome version
+    bed_version = store.get_bed_version_by_short_name_and_genome_version_strict(
+        short_name="b", genome_version=BedVersionGenomeVersion.HG38
+    )
+
+    # THEN the expected bed version is returned
+    assert bed_version == bed_version_to_fetch
 
 
-def test_get_bed_version_by_short_name_strict_fail(base_store: Store):
-    # GIVEN a store
+def test_get_bed_version_by_short_name_and_genome_version_strict_no_result_found(store: Store):
+    # GIVEN a store without bed versions
+    assert store._get_query(table=BedVersion).count() == 0
 
-    # GIVEN a bed version shortname that does not exist
-    short_name = "fake_short_name"
-
-    # WHEN fetching the bed version
-    # THEN an error is raised
+    # WHEN getting a bed version by a short name and a genome version
+    # THEN a BedVersionNotFoundError is raised
     with pytest.raises(BedVersionNotFoundError):
-        base_store.get_bed_version_by_short_name_strict(short_name=short_name)
+        store.get_bed_version_by_short_name_and_genome_version_strict(
+            short_name="short_name", genome_version=BedVersionGenomeVersion.HG19
+        )
 
 
-def test_get_bed_version_by_short_name_strict_multiple_fail(base_store: Store):
-    # GIVEN a store that contains two bed versions with the same short name
-    bed: Bed = base_store.add_bed(name="bed")
-    base_store.add_bed_version(bed=bed, version=1, filename="one.txt", shortname="short_name")
-    base_store.add_bed_version(bed=bed, version=2, filename="two.txt", shortname="short_name")
-    base_store.add_item_to_store(bed)
-    base_store.commit_to_store()
+def test_get_bed_version_by_short_name_and_genome_version_strict_multiple_results_found(
+    store: Store,
+    helpers: StoreHelpers,
+):
+    # GIVEN a store with two bed versions with the same shortname and genome_version
+    bed_hg38: Bed = helpers.add_bed("bed_hg38")
+    bed_version_1: BedVersion = helpers.add_bed_version(
+        bed=bed_hg38, version=2, filename="bed_hg38.bed", shortname="b"
+    )
+    bed_version_1.genome_version = BedVersionGenomeVersion.HG38
+    bed_version_2: BedVersion = helpers.add_bed_version(
+        bed=bed_hg38, version=1, filename="bed_hg38.bed", shortname="b"
+    )
+    bed_version_2.genome_version = BedVersionGenomeVersion.HG38
+    store.add_multiple_items_to_store([bed_version_1, bed_version_2])
 
-    # WHEN fetching the bed version corresponding to the shortname
-    # THEN an error is raised
+    # WHEN getting a bed version by shortname and genome_version
+    # THEN a MultipleResultsFound error is raised
     with pytest.raises(MultipleResultsFound):
-        base_store.get_bed_version_by_short_name_strict(short_name="short_name")
-
-
-def test_get_bed_version_by_short_name_strict_success(base_store: Store):
-    # GIVEN a store that contains one bed version
-    bed: Bed = base_store.add_bed(name="bed")
-    base_store.add_bed_version(bed=bed, version=1, filename="one.txt", shortname="short_name")
-    base_store.add_item_to_store(bed)
-    base_store.commit_to_store()
-
-    # WHEN fetching the bed version corresponding to the shortname
-    # THEN success
-    base_store.get_bed_version_by_short_name_strict(short_name="short_name")
+        store.get_bed_version_by_short_name_and_genome_version_strict(
+            short_name="b", genome_version=BedVersionGenomeVersion.HG38
+        )
 
 
 def test_get_customer_by_internal_id(base_store: Store, customer_id: str):

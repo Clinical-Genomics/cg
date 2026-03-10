@@ -18,10 +18,20 @@ def test_get_pacbio_sequencing_runs(client: FlaskClient):
         return_value=PacbioSequencingRunResponse(
             pacbio_sequencing_runs=[
                 PacbioSequencingRunDTO(
-                    id=9, run_name="rudolf", comment="This one was crazy!", processed=True
+                    id=9,
+                    run_id="r123_123_123",
+                    run_name="rudolf",
+                    comment="This one was crazy!",
+                    processed=True,
+                    unique_id="abc-123-r3d",
                 ),
                 PacbioSequencingRunDTO(
-                    id=1, run_name="santa", comment="Ho, Ho, Ho", processed=False
+                    id=1,
+                    run_id="r234_234_234",
+                    run_name="santa",
+                    comment="Ho, Ho, Ho",
+                    processed=False,
+                    unique_id="bcd-234-r4d",
                 ),
             ],
             total_count=2,
@@ -38,8 +48,22 @@ def test_get_pacbio_sequencing_runs(client: FlaskClient):
     assert response.json
     assert response.json["total_count"] == 2
     assert response.json["pacbio_sequencing_runs"] == [
-        {"id": 9, "run_name": "rudolf", "comment": "This one was crazy!", "processed": True},
-        {"id": 1, "run_name": "santa", "comment": "Ho, Ho, Ho", "processed": False},
+        {
+            "id": 9,
+            "run_id": "r123_123_123",
+            "run_name": "rudolf",
+            "comment": "This one was crazy!",
+            "processed": True,
+            "unique_id": "abc-123-r3d",
+        },
+        {
+            "id": 1,
+            "run_id": "r234_234_234",
+            "run_name": "santa",
+            "comment": "Ho, Ho, Ho",
+            "processed": False,
+            "unique_id": "bcd-234-r4d",
+        },
     ]
 
 

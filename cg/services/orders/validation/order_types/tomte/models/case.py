@@ -10,7 +10,7 @@ NewSample = Annotated[TomteSample, Tag("new")]
 OldSample = Annotated[ExistingSample, Tag("existing")]
 
 
-class TomteCase(Case):
+class TomteCase(Case[TomteSample]):
     cohorts: list[str] | None = None
     panels: list[str]
     synopsis: str | None = None

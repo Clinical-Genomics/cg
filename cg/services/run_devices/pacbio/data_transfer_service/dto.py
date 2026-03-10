@@ -65,6 +65,8 @@ class PacBioSampleSequencingMetricsDTO(BaseModel):
 class PacBioSequencingRunDTO(BaseModel):
     instrument_name: RevioNames
     run_id: str
+    run_name: str
+    unique_id: str
 
 
 class PacBioDTOs(PostProcessingDTOs):

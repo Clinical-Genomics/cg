@@ -50,7 +50,7 @@ from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.jasen import JasenAnalysisAPI
 from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.rnafusion_analysis_api import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.cg_config import CGConfig, PDCArchivingDirectory
@@ -1519,6 +1519,7 @@ def base_store(
     bed_version_short_name: str,
     collaboration_id: str,
     customer_id: str,
+    helpers: StoreHelpers,
     invoice_address: str,
     invoice_reference: str,
     store: Store,
@@ -1660,10 +1661,10 @@ def base_store(
     ]
     store.session.add_all(versions)
 
-    beds: list[Bed] = [store.add_bed(name=bed_name)]
+    beds: list[Bed] = [helpers.add_bed(name=bed_name)]
     store.session.add_all(beds)
     bed_versions: list[BedVersion] = [
-        store.add_bed_version(
+        helpers.add_bed_version(
             bed=bed,
             version=1,
             filename=bed_name + FileExtensions.BED,
@@ -1988,6 +1989,7 @@ def context_config(
             "balsamic_cache": "hello",
             "bed_path": str(cg_dir),
             "binary_path": "echo",
+            "cache_version": "19.0.2",
             "cadd_path": str(cg_dir),
             "conda_binary": "a_conda_binary",
             "conda_env": "S_balsamic",
@@ -2952,7 +2954,6 @@ def raredisease_context(
     mocker.patch.object(RarediseaseAnalysisAPI, "get_genome_build", return_value=GenomeVersion.HG38)
 
     mocker.patch.object(RarediseaseAnalysisAPI, "get_target_bed_from_lims")
-    RarediseaseAnalysisAPI.get_target_bed_from_lims.return_value = "some_target_bed_file"
 
     return cg_context
 

@@ -19,20 +19,22 @@ class PacbioSmrtCellMetricsDTO(BaseModel):
     p2_percent: float
     percent_reads_passing_q30: float
     plate: int
-    run_name: str
+    run_id: str
     started_at: datetime
     well: str
 
 
 class PacbioSmrtCellMetricsResponse(BaseModel):
-    runs: list[PacbioSmrtCellMetricsDTO]
+    metrics: list[PacbioSmrtCellMetricsDTO]
 
 
 class PacbioSequencingRunDTO(BaseModel):
     id: int
-    run_name: str
     comment: str
     processed: bool
+    run_id: str
+    run_name: str | None
+    unique_id: str | None
 
 
 class PacbioSequencingRunResponse(BaseModel):

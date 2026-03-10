@@ -82,4 +82,6 @@ def get_sequencing_run_dto(
     return PacBioSequencingRunDTO(
         instrument_name=metrics.dataset_metrics.instrument_name,  # type: ignore - pydantic will convert to correct type
         run_id=run_data.run_id,
+        run_name=metrics.metadata.run_name,
+        unique_id=metrics.metadata.unique_id,
     )

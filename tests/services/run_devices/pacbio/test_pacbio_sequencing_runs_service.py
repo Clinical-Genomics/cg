@@ -14,41 +14,41 @@ from cg.store.models import PacbioSequencingRun, PacbioSMRTCellMetrics
 from cg.store.store import Store
 
 
-def test_get_pacbio_smrt_cell_metrics_by_name(
+def test_get_pacbio_smrt_cell_metrics_by_run_id(
     pacbio_sequencing_runs_service: PacbioSequencingRunsService, pacbio_run_id_to_fetch: str
 ):
-    """Tests getting Pacbio smrt cell metrics from the store filtered on run name."""
+    """Tests getting Pacbio smrt cell metrics from the store filtered on run id."""
 
-    # GIVEN that there are multiple Pacbio smrt cell metrics with different run names
+    # GIVEN that there are multiple Pacbio smrt cell metrics with different run ids
     all_metrics: list[PacbioSMRTCellMetrics] = pacbio_sequencing_runs_service.store._get_query(
         table=PacbioSMRTCellMetrics
     ).all()
     assert any(metric.run_id != pacbio_run_id_to_fetch for metric in all_metrics)
 
-    # WHEN fetching smrt cell metrics filtered by run name
+    # WHEN fetching smrt cell metrics filtered by run id
     response: PacbioSmrtCellMetricsResponse = (
-        pacbio_sequencing_runs_service.get_sequencing_runs_by_name(pacbio_run_id_to_fetch)
+        pacbio_sequencing_runs_service.get_sequencing_runs_by_run_id(pacbio_run_id_to_fetch)
     )
-    # THEN all the returned runs have the correct run name
-    assert all(run.run_name == pacbio_run_id_to_fetch for run in response.runs)
+    # THEN all the returned metrics have the correct run id
+    assert all(run.run_id == pacbio_run_id_to_fetch for run in response.metrics)
 
 
-def test_get_pacbio_sequencing_runs_by_name_no_matches(
+def test_get_pacbio_sequencing_runs_by_run_id_no_matches(
     pacbio_sequencing_runs_service: PacbioSequencingRunsService,
 ):
-    """Tests getting Pacbio runs from the store filtered on a non-existent run name."""
+    """Tests getting Pacbio runs from the store filtered on a non-existent run id."""
 
-    # GIVEN that there are no Pacbio sequencing runs with a specific run name
+    # GIVEN that there are no Pacbio sequencing runs with a specific run id
     all_metrics: list[PacbioSMRTCellMetrics] = pacbio_sequencing_runs_service.store._get_query(
         table=PacbioSMRTCellMetrics
     ).all()
     assert all(metric.run_id != "Non-existent run" for metric in all_metrics)
 
-    # WHEN fetching sequencing runs filtered by run name
+    # WHEN fetching sequencing runs filtered by run id
 
-    # THEN an EntryNotFoundError should be raised when trying to get sequencing runs filtered on that name
+    # THEN an EntryNotFoundError should be raised when trying to get sequencing runs filtered on that run_id
     with pytest.raises(EntryNotFoundError):
-        pacbio_sequencing_runs_service.get_sequencing_runs_by_name("Non-existent metric")
+        pacbio_sequencing_runs_service.get_sequencing_runs_by_run_id("Non-existent metric")
 
 
 def test_get_all_pacbio_sequencing_runs():
@@ -57,16 +57,20 @@ def test_get_all_pacbio_sequencing_runs():
         create_autospec(
             PacbioSequencingRun,
             id=6,
-            run_id="santas_little_helper",
+            run_id="r123_dog",
+            run_name="santas_little_helper",
             comment="hunden i Simpsons",
             processed=True,
+            unique_id="abc-123-432-aw2",
         ),
         create_autospec(
             PacbioSequencingRun,
             id=4,
-            run_id="Nisse",
+            run_id="r234_small_dog",
+            run_name="Nisse",
             comment="Tomtens hjälpreda",
             processed=False,
+            unique_id="ett_tu1_tre",
         ),
     ]
     status_db: Store = create_autospec(Store)
@@ -85,12 +89,19 @@ def test_get_all_pacbio_sequencing_runs():
         pacbio_sequencing_runs=[
             PacbioSequencingRunDTO(
                 id=6,
+                run_id="r123_dog",
                 run_name="santas_little_helper",
                 comment="hunden i Simpsons",
                 processed=True,
+                unique_id="abc-123-432-aw2",
             ),
             PacbioSequencingRunDTO(
-                id=4, run_name="Nisse", comment="Tomtens hjälpreda", processed=False
+                id=4,
+                run_id="r234_small_dog",
+                run_name="Nisse",
+                comment="Tomtens hjälpreda",
+                processed=False,
+                unique_id="ett_tu1_tre",
             ),
         ],
         total_count=2,

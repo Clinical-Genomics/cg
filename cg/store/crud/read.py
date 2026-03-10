@@ -9,7 +9,12 @@ import sqlalchemy
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import DNA_WORKFLOWS_WITH_SCOUT_UPLOAD, CustomerId, SampleType
+from cg.constants.constants import (
+    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+    BedVersionGenomeVersion,
+    CustomerId,
+    SampleType,
+)
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
@@ -925,31 +930,25 @@ class ReadHandler(BaseHandler):
             filter_functions=[BedVersionFilter.BY_FILE_NAME],
         ).first()
 
-    def get_bed_version_by_short_name(self, bed_version_short_name: str) -> BedVersion:
-        """Return bed version with short name."""
-        return apply_bed_version_filter(
-            bed_versions=self._get_query(table=BedVersion),
-            bed_version_short_name=bed_version_short_name,
-            filter_functions=[BedVersionFilter.BY_SHORT_NAME],
-        ).first()
-
-    def get_bed_version_by_short_name_strict(self, short_name: str) -> BedVersion:
+    def get_bed_version_by_short_name_and_genome_version_strict(
+        self, short_name: str, genome_version: BedVersionGenomeVersion
+    ) -> BedVersion:
         """
-        Return bed version with short name.
+        Get bed version by short name and genome version.
         Raises:
-            BedVersionNotFoundError: If no bed version is found with the given short name.
+            BedVersionNotFoundError: If no bed version was found with the given shortname and genome version.
             sqlalchemy.orm.exc.MultipleResultsFound: If multiple bed versions are found with the same
-            shortname.
+            shortname and genome version.
         """
         try:
-            return apply_bed_version_filter(
-                bed_versions=self._get_query(table=BedVersion),
-                bed_version_short_name=short_name,
-                filter_functions=[BedVersionFilter.BY_SHORT_NAME],
-            ).one()
+            return (
+                self._get_query(table=BedVersion)
+                .filter_by(shortname=short_name, genome_version=genome_version)
+                .one()
+            )
         except sqlalchemy.orm.exc.NoResultFound:
             raise BedVersionNotFoundError(
-                f"Bed version with short name {short_name} was not found in the database."
+                f"Bed version with short name {short_name} and genome version {genome_version} was not found in the database."
             )
 
     def get_bed_by_entry_id(self, bed_entry_id: int) -> Bed:

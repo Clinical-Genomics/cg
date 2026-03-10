@@ -193,6 +193,7 @@ class BalsamicConfig(CommonAppConfig):
     balsamic_cache: Path
     bed_path: Path
     binary_path: Path
+    cache_version: str
     cadd_path: Path
     conda_binary: Path
     conda_env: str

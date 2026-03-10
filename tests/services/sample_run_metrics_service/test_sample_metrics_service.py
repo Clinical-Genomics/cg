@@ -69,17 +69,18 @@ def test_get_pacbio_metrics_by_non_existent_sample_internal_id(
 
 def test_get_pacbio_metrics_by_smrt_cell_id(
     sample_run_metrics_service: SampleRunMetricsService,
+    barcoded_smrt_cell_internal_id: str,
 ):
     # GIVEN a SampleRunMetricsService and a database containing Pacbio data
 
     # WHEN fetching a specific PacbioSampleSequencingMetrics
-    metrics_request = PacbioSequencingMetricsRequest(smrt_cell_ids=["internal_id"])
+    metrics_request = PacbioSequencingMetricsRequest(smrt_cell_ids=[barcoded_smrt_cell_internal_id])
     sequencing_metrics: list[PacbioSequencingMetricsDTO] = (
         sample_run_metrics_service.get_pacbio_metrics(metrics_request)
     )
 
     # THEN metrics should be returned for the specified smrt_cell
-    assert [metrics.smrt_cell_id == "internal_id" for metrics in sequencing_metrics]
+    assert [metric.smrt_cell_id == barcoded_smrt_cell_internal_id for metric in sequencing_metrics]
 
 
 def test_get_pacbio_metrics_by_non_existent_smrt_cell_id(
