@@ -491,7 +491,7 @@
             }
         }
     ],
-        "report_saved_raw_data": {
+    "report_saved_raw_data": {
         "multiqc_peddy": {
             "ADM1-ADM2": {
                 "rel_ped_check": 0.4917,

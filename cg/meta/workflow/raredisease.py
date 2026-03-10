@@ -127,6 +127,10 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.ensure_mandatory_metrics_present(metrics=metrics)
         return {"metrics": [metric.dict() for metric in metrics]}
 
+    # def _get_list_of_metric_dicts(self, multiqc_json: MultiqcDataJson):
+    # TODO: 1. Implement and add aux functions
+    # pass
+
     @staticmethod
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
