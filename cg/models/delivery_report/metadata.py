@@ -108,6 +108,7 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     bait_set_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
+    at_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     gc_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     median_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_250x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD

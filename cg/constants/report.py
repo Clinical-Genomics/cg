@@ -220,6 +220,7 @@ REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS: list[str] = (
         "median_target_coverage",
         "pct_250x",
         "pct_500x",
+        "at_dropout",
         "gc_dropout",
     ]
 )

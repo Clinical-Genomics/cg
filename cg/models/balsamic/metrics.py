@@ -44,6 +44,7 @@ class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
     pct_target_bases_500x: float | None = None
     pct_target_bases_1000x: float | None = None
     pct_off_bait: float | None = None
+    at_dropout: float | None = None
     gc_dropout: float | None = None
 
     _pct_values: float = field_validator(
