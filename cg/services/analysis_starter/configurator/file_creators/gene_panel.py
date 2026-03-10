@@ -3,7 +3,7 @@ from pathlib import Path
 
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import GenePanelMasterList
-from cg.constants.gene_panel import GenePanelCombo, GenePanelGenomeBuild
+from cg.constants.gene_panel import GenePanelGenomeBuild
 from cg.io.txt import write_txt_with_newlines
 from cg.services.analysis_starter.configurator.file_creators.nextflow.utils import get_genome_build
 from cg.store.models import Case
@@ -44,23 +44,5 @@ class GenePanelFileCreator:
             customer_id=customer_id, gene_panels=default_panels
         ):
             return GenePanelMasterList.get_panel_names()
-        all_panels: set[str] = self._add_gene_panels_in_combo(gene_panels=default_panels)
-        all_panels |= GenePanelMasterList.get_non_specific_gene_panels()
-        all_panels_list: list[str] = sorted(all_panels)
-        return all_panels_list
-
-    @staticmethod
-    def _add_gene_panels_in_combo(gene_panels: set[str]) -> set[str]:
-        """
-        Return an expanded list of gene panels with all gene panels that belong to the same combo.
-
-        Some panels require the presence of other panels. These panels are said to belong to the
-        same combo. This method expands the given panel set, adding all necessary panels
-        (panels in the same combo) for each panel in the given set.
-        """
-        additional_panels = set()
-        for panel in gene_panels:
-            if panel in GenePanelCombo.COMBO_1:
-                additional_panels |= GenePanelCombo.COMBO_1.get(panel)
-        gene_panels |= additional_panels
-        return gene_panels
+        all_panels: set[str] = default_panels | GenePanelMasterList.get_non_specific_gene_panels()
+        return sorted(all_panels)
