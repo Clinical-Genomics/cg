@@ -46,7 +46,7 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
     sample: Sample = create_autospec(Sample, internal_id="internal_id")
 
     # GIVEN a mocked chanjo API
-    chanjo_api = create_autospec(ChanjoAPI)
+    chanjo_api: ChanjoAPI = create_autospec(ChanjoAPI)
     chanjo_api.sample_coverage = Mock(
         return_value={"mean_coverage": 28.9, "mean_completeness": 88.5}
     )
