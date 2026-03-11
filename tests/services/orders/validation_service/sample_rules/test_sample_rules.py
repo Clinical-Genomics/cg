@@ -1,4 +1,5 @@
 from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, PriorityEnum
 from cg.services.orders.validation.constants import ElutionBuffer, IndexEnum
 from cg.services.orders.validation.errors.sample_errors import (
@@ -9,6 +10,7 @@ from cg.services.orders.validation.errors.sample_errors import (
     ContainerNameRepeatedError,
     IndexNumberMissingError,
     IndexNumberOutOfRangeError,
+    MissingSourceCommentError,
     PoolApplicationError,
     PoolPriorityError,
     SampleNameNotAvailableControlError,
@@ -24,6 +26,9 @@ from cg.services.orders.validation.order_types.microsalt.models.order import Mic
 from cg.services.orders.validation.order_types.mutant.models.order import MutantOrder
 from cg.services.orders.validation.order_types.rml.models.order import RMLOrder
 from cg.services.orders.validation.order_types.rml.models.sample import RMLSample
+from cg.services.orders.validation.order_types.taxprofiler.constants import TaxprofilerDeliveryType
+from cg.services.orders.validation.order_types.taxprofiler.models.order import TaxprofilerOrder
+from cg.services.orders.validation.order_types.taxprofiler.models.sample import TaxprofilerSample
 from cg.services.orders.validation.rules.sample.rules import (
     validate_buffer_skip_rc_condition,
     validate_capture_kit_compatible,
@@ -37,6 +42,7 @@ from cg.services.orders.validation.rules.sample.rules import (
     validate_pools_contain_one_application,
     validate_pools_contain_one_priority,
     validate_sample_names_available,
+    validate_source_comment_required,
     validate_tube_container_name_unique,
     validate_volume_required,
     validate_well_position_format,
@@ -449,3 +455,32 @@ def test_validate_capture_kit_incompatible(
 
     # THEN an error should be returned
     assert errors
+
+
+def test_validate_source_comment_required():
+    # GIVEN an order with source set to other but the source comment not being filled in
+    new_sample = TaxprofilerSample(  # pyright: ignore
+        application="TaxprofilerTag",
+        container=ContainerEnum.tube,
+        elution_buffer=ElutionBuffer.TRIS_HCL,
+        name="taxprofiler-sample",
+        priority=PriorityEnum.standard,
+        source="other",
+        source_comment=None,
+    )
+    new_order = TaxprofilerOrder(
+        customer="cust000",
+        delivery_type=TaxprofilerDeliveryType.ANALYSIS,
+        name="taxprofiler-order",
+        project_type=OrderType.TAXPROFILER,
+        samples=[new_sample],
+    )
+
+    # WHEN the validation for source_comment being set is run
+    errors: list[MissingSourceCommentError] = validate_source_comment_required(order=new_order)
+
+    # THEN an error is returned
+    assert len(errors) == 1
+
+    # THEN the error should be the expected error
+    assert errors[0] == MissingSourceCommentError(sample_index=0)
