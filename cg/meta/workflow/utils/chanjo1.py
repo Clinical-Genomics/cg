@@ -8,7 +8,7 @@ from cg.clients.chanjo2.models import CoverageMetricsChanjo1
 LOG = logging.getLogger(__name__)
 
 
-def get_sample_coverage(
+def chanjo1_get_sample_coverage(
     chanjo_api: ChanjoAPI, sample_id: str, gene_ids: list[int]
 ) -> CoverageMetricsChanjo1 | None:
     sample_coverage: dict = chanjo_api.sample_coverage(sample_id=sample_id, panel_genes=gene_ids)

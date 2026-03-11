@@ -37,7 +37,9 @@ def test_upload_succeeds():
     deliver_files_service: TypedMock[DeliverFilesService] = create_typed_mock(DeliverFilesService)
 
     delivery_service_factory: DeliveryServiceFactory = create_autospec(DeliveryServiceFactory)
-    delivery_service_factory.build_delivery_service = Mock(return_value=deliver_files_service)
+    delivery_service_factory.build_delivery_service = Mock(
+        return_value=deliver_files_service.as_type
+    )
 
     # GIVEN a cg config with necessary contents for Nallo and a connection to StatusDB
     status_db: TypedMock[Store] = create_typed_mock(Store, session=Mock())
@@ -67,7 +69,7 @@ def test_upload_succeeds():
             RunInstruments,
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
         ),
-        status_db=status_db,
+        status_db=status_db.as_type,
         tower_binary_path="tower/binary/path",
     )
 

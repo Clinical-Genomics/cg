@@ -3,12 +3,11 @@ from unittest.mock import Mock, create_autospec
 from pytest_mock import MockerFixture
 
 from cg.apps.coverage.chanjo_api import ChanjoAPI
-from cg.clients.chanjo2.models import CoverageMetricsChanjo1
-from cg.meta.workflow.utils import chanjo1
+from cg.meta.workflow.utils.chanjo1 import CoverageMetricsChanjo1, chanjo1_get_sample_coverage
 from cg.store.models import Sample
 
 
-def test_get_sample_coverage(mocker: MockerFixture):
+def test_chanjo1_get_sample_coverage(mocker: MockerFixture):
     # GIVEN a sample
     sample: Sample = create_autospec(Sample, internal_id="internal_id")
 
@@ -22,7 +21,7 @@ def test_get_sample_coverage(mocker: MockerFixture):
     gene_ids: list[int] = [5, 8]
 
     # WHEN getting the chanjo coverage for the sample
-    sample_coverage: CoverageMetricsChanjo1 | None = chanjo1.get_sample_coverage(
+    sample_coverage: CoverageMetricsChanjo1 | None = chanjo1_get_sample_coverage(
         chanjo_api=chanjo_api,
         sample_id=sample.internal_id,
         gene_ids=gene_ids,

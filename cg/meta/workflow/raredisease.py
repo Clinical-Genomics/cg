@@ -17,7 +17,7 @@ from cg.constants.nf_analysis import (
 from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
-from cg.meta.workflow.utils import chanjo1
+from cg.meta.workflow.utils.chanjo1 import CoverageMetricsChanjo1, chanjo1_get_sample_coverage
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
@@ -154,8 +154,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
-    ) -> chanjo1.CoverageMetricsChanjo1 | None:
-        return chanjo1.get_sample_coverage(
+    ) -> CoverageMetricsChanjo1 | None:
+        return chanjo1_get_sample_coverage(
             chanjo_api=self.chanjo_api, sample_id=sample_id, gene_ids=gene_ids
         )
 

@@ -8,7 +8,7 @@ from cg.clients.chanjo2.models import CoverageMetricsChanjo1
 from cg.constants import SexOptions
 from cg.constants.constants import GenomeBuild
 from cg.meta.workflow import raredisease as raredisease_analysis_api
-from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI, chanjo1
+from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
@@ -54,7 +54,7 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
         raredisease_analysis_api, "chanjo_api_for_genome_build", return_value=chanjo_api
     )
 
-    get_sample_coverage_spy = mocker.spy(chanjo1, "get_sample_coverage")
+    get_sample_coverage_spy = mocker.spy(raredisease_analysis_api, "chanjo1_get_sample_coverage")
 
     # GIVEN Raredisease analysis API
     analysis_api: RarediseaseAnalysisAPI = RarediseaseAnalysisAPI(
