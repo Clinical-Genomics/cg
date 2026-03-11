@@ -166,6 +166,7 @@ def raredisease_analysis() -> NextflowAnalysis:
             "sample_id": RarediseaseQCMetrics(
                 mapped_reads=10,
                 percent_duplication=0.1,
+                picard_pct_pf_reads_aligned=0.9,
                 predicted_sex_sex_check=SexOptions.MALE,
                 total_reads=10,
             )

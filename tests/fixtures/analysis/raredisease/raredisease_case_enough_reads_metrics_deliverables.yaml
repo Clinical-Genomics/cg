@@ -2610,6 +2610,13 @@ metrics:
   name: Contamination Level
   step: multiqc
   value: ND
+- condition: null
+  header: null
+  id: ADM2
+  input: multiqc_data.json
+  name: picard_PCT_PF_READS_ALIGNED
+  step: multiqc
+  value: 0.9996
 - condition:
     norm: eq
     threshold: 'False'
