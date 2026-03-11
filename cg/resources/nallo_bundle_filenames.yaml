@@ -424,10 +424,20 @@
   step: paraphase
   tag: paraphase_index
 - format: json
-  id: CASEID
-  path: PATHTOCASE/paraphase/family/CASEID/CASEID_merged.json
+  id: SAMPLEID
+  path: PATHTOCASE/paraphase/sample/SAMPLEID/SAMPLEID.paraphase.json
   step: paraphase
   tag: json
+- format: json
+  id: CASEID
+  path: PATHTOCASE/paraphase/family/CASEID/CASEID_annotated.json
+  step: paraphrase
+  tag: json
+- format: tsv
+  id: CASEID
+  path: PATHTOCASE/paraphase/family/CASEID/CASEID_annotated.tsv
+  step: paraphrase
+  tag: tsv
 - format: vcf
   id: CASEID
   path: PATHTOCASE/paraphase/family/CASEID/CASEID_paraphase_merged.vcf.gz
