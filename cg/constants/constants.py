@@ -139,7 +139,6 @@ class Workflow(StrEnum):
 
 DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD: list[Workflow] = [
     Workflow.RAREDISEASE,
-    # TODO: What to do with Nallo?
 ]
 
 
