@@ -13,9 +13,8 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import GenePanelMasterList, Priority, SequencingRunDataAvailability
 from cg.constants.archiving import ArchiveLocations
-from cg.constants.constants import CaseActions, ControlOptions, Workflow
+from cg.constants.constants import CaseActions, ControlOptions, GenomeBuild, Workflow
 from cg.constants.priority import SlurmQos, TrailblazerPriority
-from cg.constants.scout import GenomeBuild
 from cg.exc import AnalysisAlreadyStoredError, AnalysisNotReadyError, CaseNotFoundError
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.workflow.analysis import AnalysisAPI

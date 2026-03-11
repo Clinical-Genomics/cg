@@ -7,7 +7,6 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from housekeeper.store.models import File
 
-import cg.store as Store
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
 from cg.constants.scout import ScoutCustomCaseReportTags
@@ -15,6 +14,7 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import RNADNACollection, UploadScoutAPI
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 from tests.mocks.hk_mock import MockFile, MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
 
@@ -525,7 +525,7 @@ def test_create_rna_dna_collections(
     """Test that the create_rna_dna_collections returns a list of RNADNACollections."""
 
     # GIVEN an RNA case with RNA samples that are connected by subject ID to DNA samples in a DNA case
-    rna_case: Case = rna_store.get_case_by_internal_id(rna_case_id)
+    rna_case: Case = rna_store.get_case_by_internal_id_strict(rna_case_id)
 
     # WHEN running the method to create a list of RNADNACollections
     # with the relationships between RNA/DNA samples and DNA cases
@@ -538,6 +538,11 @@ def test_create_rna_dna_collections(
         isinstance(rna_dna_collection, RNADNACollection)
         for rna_dna_collection in rna_dna_collections
     )
+
+    for collection in rna_dna_collections:
+        for dna_case_id in collection.dna_case_ids:
+            dna_case = rna_store.get_case_by_internal_id_strict(dna_case_id)
+            assert dna_case.data_analysis in [Workflow.RAREDISEASE, Workflow.NALLO]
 
 
 def test_add_rna_sample(
