@@ -190,3 +190,8 @@ class ExistingSampleWrongTypeError(CaseSampleError):
 class SampleNameAlreadyExistsError(CaseSampleError):
     field: str = "name"
     message: str = "Sample name already exists in a previous order"
+
+
+class MissingSourceCommentError(CaseSampleError):
+    field: str = "source_comment"
+    message: str = "Other source must be filled in when source is 'other'"
