@@ -21,7 +21,7 @@ from .utils import suggest_cases_to_upload
     help="Which chanjo instance to upload to",
 )
 @click.pass_obj
-def upload_coverage(context: CGConfig, family_id, genome_version: str):
+def upload_coverage(context: CGConfig, family_id: str | None, genome_version: str):
     """Upload coverage from an analysis to Chanjo."""
 
     click.echo(click.style("----------------- COVERAGE --------------------"))
