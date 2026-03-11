@@ -53,7 +53,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         self.email: str = config.nallo.slurm.mail_user
         self.revision: str = config.nallo.revision
         self.chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
-            config, WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.NALLO]
+            config=config, genome_build=WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.NALLO]
         )
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:

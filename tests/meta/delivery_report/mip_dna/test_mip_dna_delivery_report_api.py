@@ -54,5 +54,7 @@ def test_mip_dna_get_sample_coverage(mocker: MockerFixture):
     assert result == expected_coverage
 
     # THEN chanjo was configured and called correctly
-    mock_chanjo_factory.assert_called_once_with(analysis_api.config, GenomeBuild.hg19)
+    mock_chanjo_factory.assert_called_once_with(
+        config=analysis_api.config, genome_build=GenomeBuild.hg19
+    )
     chanjo_api.sample_coverage.assert_called_once_with(sample_id="sample_id", panel_genes=[1])

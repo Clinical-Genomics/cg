@@ -33,7 +33,9 @@ def upload_coverage(context: CGConfig, family_id, genome_version: str):
         raise click.Abort
 
     case: Case = status_db.get_case_by_internal_id(internal_id=family_id)
-    chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(context, GenomeBuild[genome_version])
+    chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
+        config=context, genome_build=GenomeBuild[genome_version]
+    )
     upload_coverage_api = UploadCoverageApi(
         status_api=status_db,
         hk_api=context.housekeeper_api,

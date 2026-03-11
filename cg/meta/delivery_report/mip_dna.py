@@ -37,7 +37,8 @@ class MipDNADeliveryReportAPI(DeliveryReportAPI):
     def __init__(self, analysis_api: MipDNAAnalysisAPI):
         super().__init__(analysis_api=analysis_api)
         self.chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
-            analysis_api.config, WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.MIP_DNA]
+            config=analysis_api.config,
+            genome_build=WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.MIP_DNA],
         )
 
     def get_sample_metadata(

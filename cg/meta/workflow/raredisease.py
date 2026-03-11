@@ -39,7 +39,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
-            config, WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.RAREDISEASE]
+            config=config, genome_build=WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.RAREDISEASE]
         )
         self.root_dir: str = config.raredisease.root
         self.workflow_bin_path: str = config.raredisease.workflow_bin_path

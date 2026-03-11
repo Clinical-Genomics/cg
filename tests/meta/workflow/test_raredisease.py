@@ -77,7 +77,9 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
     )
 
     # THEN chanjo was configured with the correct config
-    mock_chanjo_factory.assert_called_once_with(raredisease_context, GenomeBuild.hg19)
+    mock_chanjo_factory.assert_called_once_with(
+        config=raredisease_context, genome_build=GenomeBuild.hg19
+    )
 
     # THEN the sample coverage should have been called with the right information
     get_sample_coverage_spy.assert_called_once_with(
