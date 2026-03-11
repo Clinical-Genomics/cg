@@ -23,7 +23,7 @@ from cg.constants.paths import TMP_DIR as TMP_DIR
 from cg.constants.priority import Priority as Priority
 from cg.constants.process import EXIT_FAIL as EXIT_FAIL
 from cg.constants.process import EXIT_SUCCESS as EXIT_SUCCESS
-from cg.constants.report import *
+from cg.constants.report import *  # noqa
 from cg.constants.sample_sources import ANALYSIS_SOURCES as ANALYSIS_SOURCES
 from cg.constants.sample_sources import METAGENOME_SOURCES as METAGENOME_SOURCES
 from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD as FLOWCELL_Q30_THRESHOLD
