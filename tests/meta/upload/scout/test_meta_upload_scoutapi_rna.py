@@ -19,6 +19,11 @@ from tests.mocks.hk_mock import MockFile, MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
 
 
+@pytest.fixture
+def expected_dna_case_id() -> str:
+    return "raredisease_dna_case"
+
+
 def set_is_tumour_on_case(store: Store, case_id: str, is_tumour: bool):
     for link in store.get_case_by_internal_id(internal_id=case_id).links:
         link.sample.is_tumour = is_tumour
@@ -206,7 +211,7 @@ def test_upload_rna_coverage_bigwig_to_scout(
 
 def test_upload_clinical_rna_fusion_report_to_scout(
     caplog: Generator[LogCaptureFixture, None, None],
-    dna_case_id: str,
+    expected_dna_case_id: str,
     dna_sample_son_id: str,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
@@ -232,7 +237,7 @@ def test_upload_clinical_rna_fusion_report_to_scout(
     assert "Upload Clinical fusion report finished!" in caplog.text
 
     # THEN the dna case id should have been mentioned in the logging (and used in the upload)
-    assert dna_case_id in caplog.text
+    assert expected_dna_case_id in caplog.text
 
     # THEN the customers dna samples name should NOT have been mentioned in the logging
     dna_customer_sample_name: str = rna_store.get_sample_by_internal_id(
@@ -243,7 +248,7 @@ def test_upload_clinical_rna_fusion_report_to_scout(
 
 def test_upload_research_rna_fusion_report_to_scout(
     caplog: Generator[LogCaptureFixture, None, None],
-    dna_case_id: str,
+    expected_dna_case_id: str,
     dna_sample_son_id: str,
     mip_rna_analysis_hk_api: HousekeeperAPI,
     rna_case_id: str,
@@ -269,7 +274,7 @@ def test_upload_research_rna_fusion_report_to_scout(
     assert "Upload Research fusion report finished!" in caplog.text
 
     # THEN the dna case id should have been mentioned in the logging (and used in the upload)
-    assert dna_case_id in caplog.text
+    assert expected_dna_case_id in caplog.text
 
     # THEN the customers dna samples name should NOT have been mentioned in the logging
     dna_customer_sample_name: str = rna_store.get_sample_by_internal_id(
@@ -601,17 +606,15 @@ def test_link_rna_sample_to_dna_sample(
 
 
 def test_add_dna_cases_to_dna_sample(
-    dna_case_id: str,
-    dna_sample_son_id: str,
+    expected_dna_case_id: str,
     rna_sample_son_id: str,
     rna_store: Store,
-    upload_scout_api: UploadScoutAPI,
 ):
     """Test for a given RNA sample, the DNA case name matches to the case name of the DNA sample in the RNADNACollection."""
 
     # GIVEN an RNA sample, a DNA sample, and a DNA case
-    rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
-    dna_case: Case = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
+    rna_sample: Sample = rna_store.get_sample_by_internal_id_strict(internal_id=rna_sample_son_id)
+    dna_case: Case = rna_store.get_case_by_internal_id_strict(internal_id=expected_dna_case_id)
 
     # WHEN adding creating the RNADNACollection
     rna_dna_collection: list[RNADNACollection] = rna_store.get_related_dna_cases_with_samples(
