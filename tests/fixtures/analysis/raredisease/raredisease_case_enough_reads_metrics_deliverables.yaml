@@ -1308,6 +1308,13 @@ metrics:
   value: 5.68993e-05
 - condition: null
   header: null
+  id: ADM1
+  input: multiqc_data.json
+  name: picard_PCT_PF_READS_ALIGNED
+  step: multiqc
+  value: 0.999729
+- condition: null
+  header: null
   id: ADM2
   input: multiqc_data.json
   name: percent_gc

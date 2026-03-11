@@ -492,6 +492,11 @@
         }
     ],
     "report_saved_raw_data": {
+        "multiqc_picard_AlignmentSummaryMetrics": {
+            "ADM1": {
+                "PCT_PF_READS_ALIGNED": 0.999729
+            }
+        },
         "multiqc_peddy": {
             "ADM1-ADM2": {
                 "rel_ped_check": 0.4917,
