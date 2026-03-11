@@ -1,3 +1,5 @@
+from typing import Callable
+
 from cg.services.orders.validation.rules.sample.rules import (
     validate_application_compatibility,
     validate_application_exists,
@@ -19,7 +21,7 @@ from cg.services.orders.validation.rules.sample.rules import (
     validate_wells_contain_at_most_one_sample,
 )
 
-FASTQ_SAMPLE_RULES: list[callable] = [
+FASTQ_SAMPLE_RULES: list[Callable] = [
     validate_application_compatibility,
     validate_application_exists,
     validate_applications_not_archived,

@@ -1,3 +1,5 @@
+from typing import Callable
+
 from cg.services.orders.validation.rules.case.rules import (
     validate_at_most_two_samples_per_case,
     validate_case_internal_ids_exist,
@@ -35,7 +37,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_wells_contain_at_most_one_sample,
 )
 
-BALSAMIC_CASE_RULES: list[callable] = [
+BALSAMIC_CASE_RULES: list[Callable] = [
     validate_at_most_two_samples_per_case,
     validate_case_internal_ids_exist,
     validate_case_names_available,
@@ -44,7 +46,7 @@ BALSAMIC_CASE_RULES: list[callable] = [
     validate_number_of_normal_samples,
 ]
 
-BALSAMIC_CASE_SAMPLE_RULES: list[callable] = [
+BALSAMIC_CASE_SAMPLE_RULES: list[Callable] = [
     reset_optional_capture_kits,
     validate_application_compatibility,
     validate_application_exists,

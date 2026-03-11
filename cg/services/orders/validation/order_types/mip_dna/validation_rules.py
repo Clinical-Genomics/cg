@@ -44,7 +44,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_wells_contain_at_most_one_sample,
 )
 
-MIP_DNA_CASE_RULES: list[callable] = [
+MIP_DNA_CASE_RULES: list[Callable] = [
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
