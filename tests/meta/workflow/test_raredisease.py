@@ -35,10 +35,9 @@ def test_parse_analysis(
 
     # THEN the analysis model and its content should have been correctly extracted
     assert analysis_model.sample_metrics[sample_id].model_dump() == {
-        "mapped_reads": 582035646,
         "percent_duplication": 0.0438,
+        "picard_pct_pf_reads_aligned": 0.999729,
         "predicted_sex_sex_check": SexOptions.FEMALE,
-        "total_reads": 582127482,
     }
 
 
