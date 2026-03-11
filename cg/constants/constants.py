@@ -137,11 +137,9 @@ class Workflow(StrEnum):
     TOMTE = "tomte"
 
 
-DNA_WORKFLOWS_WITH_SCOUT_UPLOAD: list[Workflow] = [
-    Workflow.BALSAMIC,
-    Workflow.BALSAMIC_UMI,
-    Workflow.MIP_DNA,
+DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD: list[Workflow] = [
     Workflow.RAREDISEASE,
+    # TODO: What to do with Nallo?
 ]
 
 

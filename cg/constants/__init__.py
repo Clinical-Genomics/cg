@@ -6,14 +6,14 @@ from cg.constants.constants import (
     CAPTUREKIT_OPTIONS,
     CONTAINER_OPTIONS,
     DEFAULT_CAPTURE_KIT,
-    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+    DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD,
     STATUS_OPTIONS,
     DataDelivery,
     FileExtensions,
     SequencingRunDataAvailability,
     SexOptions,
 )
-from cg.constants.gene_panel import GenePanelMasterList
+from cg.constants.gene_panel import GenePanelMasterList as GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_FASTQ_TAGS, HK_MULTIQC_HTML_TAG, SequencingFileTag
 from cg.constants.paths import TMP_DIR
 from cg.constants.priority import Priority

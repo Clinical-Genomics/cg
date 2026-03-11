@@ -286,6 +286,7 @@ def rna_store(
         link.sample.internal_id = link.sample.name
 
     helpers.add_analysis(store=store, case=mip_dna_case, uploaded_at=datetime.now())
+    helpers.add_analysis(store=store, case=raredisease_dna_case, uploaded_at=datetime.now())
 
     store.session.commit()
     return store

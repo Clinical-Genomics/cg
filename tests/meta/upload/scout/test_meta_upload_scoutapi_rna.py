@@ -539,10 +539,15 @@ def test_create_rna_dna_collections(
         for rna_dna_collection in rna_dna_collections
     )
 
-    for collection in rna_dna_collections:
-        for dna_case_id in collection.dna_case_ids:
-            dna_case = rna_store.get_case_by_internal_id_strict(dna_case_id)
-            assert dna_case.data_analysis in [Workflow.RAREDISEASE, Workflow.NALLO]
+    # THEN each sample should have a collection
+    assert len(rna_dna_collections) == 4
+
+    # THEN each sample should only be matched with cases with valid workflows
+    found_dna_case_ids = rna_dna_collections[0].dna_case_ids
+    assert len(found_dna_case_ids) == 1
+    dna_case_id: str = found_dna_case_ids[0]
+    dna_case: Case = rna_store.get_case_by_internal_id_strict(dna_case_id)
+    assert dna_case.data_analysis == Workflow.RAREDISEASE
 
 
 def test_add_rna_sample(
