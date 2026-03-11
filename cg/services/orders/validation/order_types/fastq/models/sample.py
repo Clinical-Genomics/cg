@@ -16,5 +16,6 @@ class FastqSample(Sample):
     require_qc_ok: bool = False
     sex: SexEnum
     source: str
+    source_comment: str | None = None
     subject_id: str = Field(pattern=NAME_PATTERN, max_length=128)
     tumour: bool = False

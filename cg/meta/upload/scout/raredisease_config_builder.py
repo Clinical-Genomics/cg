@@ -5,13 +5,12 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, GenomeBuild
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag, NFAnalysisTags
 from cg.constants.scout import (
     RANK_MODEL_THRESHOLD,
     RAREDISEASE_CASE_TAGS,
     RAREDISEASE_SAMPLE_TAGS,
-    GenomeBuild,
     UploadTrack,
 )
 from cg.constants.sequencing import Variants

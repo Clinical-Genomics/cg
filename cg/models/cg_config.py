@@ -10,13 +10,11 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.apps.gens import GensAPI
-from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.clients.arnold.api import ArnoldAPIClient
@@ -174,7 +172,9 @@ class CrunchyConfig(BaseModel):
     slurm: SlurmConfig
 
 
-class MutaccAutoConfig(CommonAppConfig):
+class MutaccAutoConfig(BaseModel):
+    binary_path: str
+    config_path: str
     padding: int = 300
 
 
@@ -193,6 +193,7 @@ class BalsamicConfig(CommonAppConfig):
     balsamic_cache: Path
     bed_path: Path
     binary_path: Path
+    cache_version: str
     cadd_path: Path
     conda_binary: Path
     conda_env: str
@@ -249,23 +250,44 @@ class NalloConfig(CommonAppConfig):
     tower_workflow: str
 
 
+class VerifybamidSvdFiles(BaseModel):
+    bed: Path
+    mu: Path
+    ud: Path
+
+
+class VerifybamidSvdFilesSet(BaseModel):
+    wes: VerifybamidSvdFiles
+    wgs: VerifybamidSvdFiles
+
+
+class GCNVCallerFiles(BaseModel):
+    gcnvcaller_model: Path
+    ploidy_model: Path
+    readcount_intervals: Path
+
+
 class RarediseaseConfig(CommonAppConfig):
     binary_path: str | None = None
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
+    default_target_bed: str
+    gcnvcaller: dict[str, GCNVCallerFiles]
     launch_directory: str
-    workflow_bin_path: str
+    params: str
+    platform: str
     pre_run_script: str = ""
     profile: str
+    references_directory: Path
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    verifybamid_svd: VerifybamidSvdFilesSet
+    workflow_bin_path: str
 
 
 class TomteConfig(CommonAppConfig):
@@ -453,8 +475,6 @@ class CGConfig(BaseModel):
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
     external: ExternalConfig = None
-    genotype: CommonAppConfig = None
-    genotype_api_: GenotypeAPI = None
     gens: CommonAppConfig = None
     gens_api_: GensAPI = None
     hermes: HermesConfig = None
@@ -477,8 +497,8 @@ class CGConfig(BaseModel):
     )
     loqusdb_somatic_exome: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC_EXOME.value)
     madeline_api_: MadelineAPI = None
-    mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
-    mutacc_auto_api_: MutaccAutoAPI = None
+    mutacc_auto_hg19: MutaccAutoConfig
+    mutacc_auto_hg38: MutaccAutoConfig
     pdc: CommonAppConfig | None = None
     pdc_service_: PdcService | None = None
     post_processing_services_: PostProcessingServices | None = None
@@ -564,15 +584,6 @@ class CGConfig(BaseModel):
         return demultiplex_api
 
     @property
-    def genotype_api(self) -> GenotypeAPI:
-        api = self.__dict__.get("genotype_api_")
-        if api is None:
-            LOG.debug("Instantiating genotype api")
-            api = GenotypeAPI(config=self.dict())
-            self.genotype_api_ = api
-        return api
-
-    @property
     def gens_api(self) -> GensAPI:
         """Returns Gens API after making sure it has been instantiated."""
         api = self.__dict__.get("gens_api_")
@@ -636,15 +647,6 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating madeline api")
             api = MadelineAPI(config=self.dict())
             self.madeline_api_ = api
-        return api
-
-    @property
-    def mutacc_auto_api(self) -> MutaccAutoAPI:
-        api = self.__dict__.get("mutacc_auto_api_")
-        if api is None:
-            LOG.debug("Instantiating mutacc_auto api")
-            api = MutaccAutoAPI(config=self.dict())
-            self.mutacc_auto_api_ = api
         return api
 
     @property

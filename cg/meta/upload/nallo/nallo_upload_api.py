@@ -6,6 +6,7 @@ import logging
 import rich_click as click
 
 from cg.cli.generate.delivery_report.base import generate_delivery_report
+from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.scout import upload_to_scout
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
@@ -39,8 +40,8 @@ class NalloUploadAPI(UploadAPI):
             f"Upload of case {case.internal_id} was successful. Uploaded at {dt.datetime.now()} in StatusDB"
         )
 
-        # Upload to loqusdb
         ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
+        ctx.invoke(upload_to_gens, case_id=case.internal_id)
 
         # Clinical delivery upload
         self.upload_files_to_customer_inbox(case)

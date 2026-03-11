@@ -9,10 +9,9 @@ import rich_click as click
 from cg.cli.upload.coverage import upload_coverage
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
 from cg.cli.upload.fohm import fohm
-from cg.cli.upload.genotype import upload_genotypes
 from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.gisaid import upload_to_gisaid
-from cg.cli.upload.mutacc import process_solved, processed_solved
+from cg.cli.upload.mutacc import mutacc
 from cg.cli.upload.nipt import nipt
 from cg.cli.upload.observations import (
     upload_available_observations_to_loqusdb,
@@ -40,7 +39,7 @@ from cg.meta.upload.microsalt.microsalt_upload_api import MicrosaltUploadAPI
 from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
 from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
 from cg.meta.upload.mutant.mutant import MutantUploadAPI
-from cg.meta.upload.nallo.nallo import NalloUploadAPI
+from cg.meta.upload.nallo.nallo_upload_api import NalloUploadAPI
 from cg.meta.upload.nf_analysis import NfAnalysisUploadAPI
 from cg.meta.upload.raredisease.raredisease import RarediseaseUploadAPI
 from cg.meta.upload.tomte.tomte import TomteUploadAPI
@@ -75,7 +74,7 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
     elif case_id:  # Provided case ID without a subcommand: upload everything
         try:
             upload_api.analysis_api.status_db.verify_case_exists(case_id)
-            case: Case = upload_api.status_db.get_case_by_internal_id(case_id)
+            case: Case = upload_api.status_db.get_case_by_internal_id_strict(case_id)
             upload_api.verify_analysis_upload(case_obj=case, restart=restart)
         except AnalysisAlreadyUploadedError:
             # Analysis being uploaded or it has been already uploaded
@@ -145,14 +144,12 @@ def upload_all_completed_analyses(context: click.Context, workflow: Workflow = N
 
 upload.add_command(create_scout_load_config)
 upload.add_command(fohm)
+upload.add_command(mutacc)
 upload.add_command(nipt)
-upload.add_command(process_solved)
-upload.add_command(processed_solved)
 upload.add_command(upload_available_observations_to_loqusdb)
 upload.add_command(upload_case_to_scout)
 upload.add_command(upload_coverage)
 upload.add_command(upload_delivery_report_to_scout)
-upload.add_command(upload_genotypes)
 upload.add_command(upload_multiqc_to_scout)
 upload.add_command(upload_observations_to_loqusdb)
 upload.add_command(upload_rna_alignment_file_to_scout)

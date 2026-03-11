@@ -29,7 +29,7 @@ def get_nextflow_config_dict(
     nextflow_repository: str,
     nextflow_pipeline_revision: str,
     email_address: str,
-) -> callable:
+) -> Callable:
     """
     Return a config dictionary factory for Nextflow pipelines. The returned factory can be called
     by adding the workflow as parameter to obtain the config dictionary.
@@ -70,6 +70,7 @@ def cg_balsamic_config(tmp_path) -> BalsamicConfig:
         balsamic_cache=tmp_path / "balsamic_cache",
         bed_path=tmp_path / "beds",
         binary_path=tmp_path / "binary",
+        cache_version="0.0.0.1337",
         cadd_path=tmp_path / "cadd",
         conda_binary=tmp_path / "conda",
         conda_env="balsamic_env",
@@ -121,6 +122,27 @@ def nallo_config_object(get_nextflow_config_dict: Callable) -> NalloConfig:
 @pytest.fixture
 def raredisease_config_object(get_nextflow_config_dict: Callable) -> RarediseaseConfig:
     config: dict = get_nextflow_config_dict(workflow=Workflow.RAREDISEASE)
+    config["default_target_bed"] = "twistexomecomprehensive_10.2_hg38_design.bed"
+    config["gcnvcaller"] = {
+        "twistexomecomprehensive_10.2_hg38_design.bed": {
+            "gcnvcaller_model": "tyra/bananks",
+            "ploidy_model": "tom/bananks",
+            "readcount_intervals": "richard/banankins",
+        }
+    }
+    config["references_directory"] = Path("/raredisease/references")
+    config["verifybamid_svd"] = {
+        "wes": {
+            "bed": Path("path", "to", "sleeping_quarters.bed"),
+            "mu": Path("path", "to", "cow.mu"),
+            "ud": Path("path", "to", "department_of_external_affairs.UD"),
+        },
+        "wgs": {
+            "bed": Path("path", "to", "sleeping_quarters.bed"),
+            "mu": Path("path", "to", "cow.mu"),
+            "ud": Path("path", "to", "department_of_external_affairs.UD"),
+        },
+    }
     return RarediseaseConfig(**config)
 
 

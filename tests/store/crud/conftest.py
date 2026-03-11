@@ -282,7 +282,7 @@ def store_with_rna_and_dna_samples_and_cases(store: Store, helpers: StoreHelpers
 
 @pytest.fixture
 def rna_sample(store_with_rna_and_dna_samples_and_cases: Store) -> Sample:
-    return store_with_rna_and_dna_samples_and_cases.get_sample_by_internal_id(
+    return store_with_rna_and_dna_samples_and_cases.get_sample_by_internal_id_strict(
         internal_id="rna_sample"
     )
 
@@ -294,13 +294,13 @@ def rna_sample_collaborators(rna_sample: Sample) -> set[Customer]:
 
 @pytest.fixture
 def rna_case(store_with_rna_and_dna_samples_and_cases: Store) -> Case:
-    return store_with_rna_and_dna_samples_and_cases.get_case_by_internal_id("rna_case")
+    return store_with_rna_and_dna_samples_and_cases.get_case_by_internal_id_strict("rna_case")
 
 
 @pytest.fixture
 def related_dna_samples(store_with_rna_and_dna_samples_and_cases: Store) -> list[Sample]:
     related_dna_sample_1: Sample = (
-        store_with_rna_and_dna_samples_and_cases.get_sample_by_internal_id(
+        store_with_rna_and_dna_samples_and_cases.get_sample_by_internal_id_strict(
             internal_id="related_dna_sample_1"
         )
     )
