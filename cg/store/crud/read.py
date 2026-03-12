@@ -10,7 +10,7 @@ from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import (
-    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+    DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD,
     BedVersionGenomeVersion,
     CustomerId,
     SampleType,
@@ -1734,7 +1734,7 @@ class ReadHandler(BaseHandler):
         )
         dna_samples_cases_analysis_query: Query = apply_case_filter(
             cases=dna_samples_cases_analysis_query,
-            workflows=DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+            workflows=DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD,
             customer_entry_ids=customer_ids,
             filter_functions=[
                 CaseFilter.BY_WORKFLOWS,

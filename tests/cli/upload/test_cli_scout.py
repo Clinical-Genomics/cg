@@ -34,11 +34,11 @@ WORKFLOWS_TO_TEST: list = [
 ANALYSIS_API: list = [
     (Workflow.BALSAMIC, BalsamicAnalysisAPI, "scout_api_37"),
     (Workflow.MIP_DNA, MipDNAAnalysisAPI, "scout_api_37"),
-    (Workflow.MIP_RNA, MipRNAAnalysisAPI, "scout_api_37"),
+    (Workflow.MIP_RNA, MipRNAAnalysisAPI, "scout_api_38"),
     (Workflow.NALLO, NalloAnalysisAPI, "scout_api_38"),
     (Workflow.RAREDISEASE, RarediseaseAnalysisAPI, "scout_api_38"),
     (Workflow.RNAFUSION, RnafusionAnalysisAPI, "scout_api_37"),
-    (Workflow.TOMTE, TomteAnalysisAPI, "scout_api_37"),
+    (Workflow.TOMTE, TomteAnalysisAPI, "scout_api_38"),
 ]
 
 
