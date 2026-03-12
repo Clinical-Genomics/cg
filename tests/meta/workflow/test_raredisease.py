@@ -13,6 +13,7 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import (
     CGConfig,
+    ChanjoConfig,
     IlluminaConfig,
     RarediseaseConfig,
     RunInstruments,
@@ -85,7 +86,7 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
 
     # THEN chanjo was configured with the correct config
     mock_chanjo_factory.assert_called_once_with(
-        config=raredisease_context, genome_build=GenomeBuild.hg19
+        config=raredisease_context, genome_build=GenomeBuild.hg38
     )
 
     # THEN the sample coverage should have been called with the right information
@@ -113,6 +114,7 @@ def test_get_genome_build():
             tower_workflow=Workflow.RAREDISEASE,
             workflow_bin_path=Path("I", "am", "workflow", "bin", "path"),
         ),
+        chanjo_38=ChanjoConfig(binary_path="binary/path", config_path="config/path"),
         data_flow=Mock(),
         run_instruments=create_autospec(
             RunInstruments,
