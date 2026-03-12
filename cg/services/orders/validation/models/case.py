@@ -19,12 +19,7 @@ ExistingSampleType = Annotated[ExistingSample, Tag("existing")]
 class Case(BaseModel, Generic[SampleType]):
     name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
     priority: PriorityTerms = PriorityTerms.STANDARD
-    samples: list[
-        Annotated[
-            NewSample | ExistingSampleType,
-            Discriminator(has_internal_id),
-        ]
-    ]
+    samples: list[Annotated[NewSample | ExistingSampleType, Discriminator(has_internal_id)]]
 
     @property
     def is_new(self) -> bool:

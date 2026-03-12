@@ -1,5 +1,6 @@
 """Module for Raredisease Analysis API."""
 
+import copy
 import logging
 from itertools import permutations
 from pathlib import Path
@@ -126,6 +127,24 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         metrics: list[MetricsBase] = self.get_raredisease_multiqc_json_metrics(case_id=case_id)
         self.ensure_mandatory_metrics_present(metrics=metrics)
         return {"metrics": [metric.dict() for metric in metrics]}
+
+    def _get_list_of_metric_dicts(self, multiqc_json: MultiqcDataJson):
+        metric_dicts: list[dict[str, Any]] = super()._get_list_of_metric_dicts(multiqc_json)
+        list_copy: list[dict[str, Any]] = copy.deepcopy(metric_dicts)
+        list_copy.append(self._get_multiqc_picard_dict(multiqc_json))
+
+        return list_copy
+
+    @staticmethod
+    def _get_multiqc_picard_dict(multiqc_json: MultiqcDataJson) -> dict:
+        """Return the Picard Align Summary metrics from a MultiQC json file as a dictionary."""
+        picard_raw = copy.deepcopy(
+            multiqc_json.report_saved_raw_data["multiqc_picard_AlignmentSummaryMetrics"]
+        )
+        for sample_id, metrics in picard_raw.items():
+            picard_raw[sample_id] = {f"picard_{k}": v for k, v in metrics.items()}
+
+        return picard_raw
 
     @staticmethod
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
