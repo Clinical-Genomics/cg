@@ -5,7 +5,6 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from typing_extensions import Literal
 
-from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
@@ -143,6 +142,11 @@ class CommonAppConfig(BaseModel):
     binary_path: str | None = None
     config_path: str | None = None
     container_mount_volume: str | None = None
+
+
+class ChanjoConfig(BaseModel):
+    binary_path: str
+    config_path: str
 
 
 class HermesConfig(CommonAppConfig):
@@ -439,8 +443,8 @@ class CGConfig(BaseModel):
     arnold: ArnoldConfig | None = None
     arnold_api_: ArnoldAPIClient | None = None
     illumina_backup_service: IlluminaBackupConfig | None = None
-    chanjo: CommonAppConfig = None
-    chanjo_api_: ChanjoAPI = None
+    chanjo: ChanjoConfig | None = None
+    chanjo_38: ChanjoConfig | None = None
     chanjo2: ClientConfig | None = None
     chanjo2_api_: Chanjo2APIClient | None = None
     crunchy: CrunchyConfig = None
@@ -523,15 +527,6 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating arnold api")
             api = ArnoldAPIClient(config=self.dict())
             self.arnold_api_ = api
-        return api
-
-    @property
-    def chanjo_api(self) -> ChanjoAPI:
-        api = self.__dict__.get("chanjo_api_")
-        if api is None:
-            LOG.debug("Instantiating chanjo api")
-            api = ChanjoAPI(config=self.dict())
-            self.chanjo_api_ = api
         return api
 
     @property
