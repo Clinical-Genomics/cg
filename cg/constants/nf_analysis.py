@@ -67,9 +67,3 @@ TOMTE_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "PCT_RIBOSOMAL_BASES": {"norm": "lt", "threshold": 5},
     "pct_duplication": {"norm": "lt", "threshold": 70},
 }
-
-NALLO_COVERAGE_FILE_TAGS: list[str] = ["d4"]
-NALLO_COVERAGE_INTERVAL_TYPE: str = "genes"
-NALLO_COVERAGE_THRESHOLD: int = 10
-
-RAREDISEASE_COVERAGE_FILE_TAGS: list[str] = ["coverage", "d4"]

@@ -2,7 +2,8 @@
 
 import rich_click as click
 
-from cg.apps.coverage import ChanjoAPI
+from cg.apps.coverage.chanjo_api import ChanjoAPI, chanjo_api_for_genome_build
+from cg.constants.constants import GenomeBuild
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
@@ -11,12 +12,20 @@ from .utils import suggest_cases_to_upload
 
 @click.command()
 @click.argument("family_id", required=False)
+@click.option(
+    "--genome-version",
+    type=click.Choice(["hg19", "hg38"]),
+    default="hg19",
+    help="Which chanjo instance to validate against",
+)
 @click.pass_obj
-def validate(context: CGConfig, family_id: str | None):
+def validate(context: CGConfig, family_id: str | None, genome_version: str):
     """Validate a family of samples."""
 
     status_db: Store = context.status_db
-    chanjo_api: ChanjoAPI = context.chanjo_api
+    chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
+        config=context, genome_build=GenomeBuild[genome_version]
+    )
 
     click.echo(click.style("----------------- VALIDATE --------------------"))
 

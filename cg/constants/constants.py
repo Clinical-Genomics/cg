@@ -161,6 +161,15 @@ class GenomeBuild(StrEnum):
     hg38 = "38"
 
 
+WORKFLOW_TO_GENOME_VERSION_MAP: dict[Workflow, GenomeBuild] = {
+    Workflow.BALSAMIC: GenomeBuild.hg19,
+    Workflow.BALSAMIC_UMI: GenomeBuild.hg19,
+    Workflow.MIP_DNA: GenomeBuild.hg19,
+    Workflow.RAREDISEASE: GenomeBuild.hg19,
+    Workflow.NALLO: GenomeBuild.hg38,
+}
+
+
 class GenomeVersion(StrEnum):
     GRCh37 = "GRCh37"
     GRCh38 = "GRCh38"
