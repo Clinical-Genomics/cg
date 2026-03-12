@@ -1991,6 +1991,7 @@ def context_config(
             "binary_path": "echo",
             "cache_version": "19.0.2",
             "cadd_path": str(cg_dir),
+            "cancer_genelist": Path("gene_list"),
             "conda_binary": "a_conda_binary",
             "conda_env": "S_balsamic",
             "genome_interval_path": str(cg_dir),

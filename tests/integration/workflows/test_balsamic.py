@@ -220,6 +220,7 @@ def test_start_available_tgs_tumour_only(
         f"--balsamic-cache {test_root_dir}/balsamic_cache "
         f"--cache-version 0.0.1 "
         f"--cadd-annotations {test_root_dir}/balsamic_cadd_path "
+        f"--cancer-genelist {test_root_dir}/cancer_gene_list.tsv "
         f"--cancer-germline-snv-observations {test_root_dir}/loqusdb/cancer_germline_snv.vcf.gz "
         f"--cancer-somatic-snv-observations {test_root_dir}/loqusdb/cancer_somatic_snv.vcf.gz "
         f"--cancer-somatic-snv-panel-observations {test_root_dir}/loqusdb/loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz "

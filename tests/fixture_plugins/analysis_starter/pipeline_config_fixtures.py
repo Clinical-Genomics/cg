@@ -72,6 +72,7 @@ def cg_balsamic_config(tmp_path) -> BalsamicConfig:
         binary_path=tmp_path / "binary",
         cache_version="0.0.0.1337",
         cadd_path=tmp_path / "cadd",
+        cancer_genelist=tmp_path / "genelist.tsv",
         conda_binary=tmp_path / "conda",
         conda_env="balsamic_env",
         genome_interval_path=tmp_path / "intervals.interval_list",
