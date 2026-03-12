@@ -75,6 +75,7 @@ def cg_balsamic_config(tmp_path) -> BalsamicConfig:
         cancer_genelist=tmp_path / "genelist.tsv",
         conda_binary=tmp_path / "conda",
         conda_env="balsamic_env",
+        cosmic_path=tmp_path / "path_to_the_stars_coding_muts_v97.vcf.gz",
         genome_interval_path=tmp_path / "intervals.interval_list",
         gens_coverage_female_path=tmp_path / "coverage_female.txt",
         gens_coverage_male_path=tmp_path / "coverage_male.txt",
