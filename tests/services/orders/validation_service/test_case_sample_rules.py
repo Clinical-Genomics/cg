@@ -14,6 +14,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     InvalidBufferError,
     InvalidConcentrationIfSkipRCError,
     InvalidVolumeError,
+    MissingSourceCommentError,
     OccupiedWellError,
     SampleDoesNotExistError,
     SampleNameAlreadyExistsError,
@@ -32,6 +33,8 @@ from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
+from cg.services.orders.validation.order_types.tomte.constants import TomteDeliveryType
+from cg.services.orders.validation.order_types.tomte.models.case import TomteCase
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
 from cg.services.orders.validation.rules.case_sample.rules import (
@@ -50,6 +53,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_sample_names_different_from_case_names,
     validate_sample_names_not_repeated,
     validate_samples_exist,
+    validate_source_comment_required,
     validate_subject_ids_different_from_case_names,
     validate_subject_ids_different_from_sample_names,
     validate_subject_sex_consistency,
@@ -691,3 +695,34 @@ def test_validate_sample_names_available(
     assert errors[0].sample_index == 0 and errors[0].case_index == 0
     # THEN the error should concern the sample name
     assert isinstance(errors[0], SampleNameAlreadyExistsError)
+
+
+def test_validate_source_comment_required():
+    # GIVEN an order with source set to other but the source comment not being filled in
+    new_sample = TomteSample(  # pyright: ignore
+        application="TomteTag",
+        container=ContainerEnum.tube,
+        name="tomte-sample",
+        sex=SexEnum.female,
+        source="other",
+        source_comment=None,
+        status=StatusEnum.affected,
+        subject_id="test-subject",
+    )
+    new_case = TomteCase(name="tomte-case", panels=["OMIM-AUTO"], samples=[new_sample])
+    new_order = TomteOrder(
+        cases=[new_case],
+        customer="cust000",
+        delivery_type=TomteDeliveryType.ANALYSIS_SCOUT,
+        name="tomte-order",
+        project_type=OrderType.TOMTE,
+    )
+
+    # WHEN the validation for source_comment being set is run
+    errors: list[MissingSourceCommentError] = validate_source_comment_required(order=new_order)
+
+    # THEN an error is returned
+    assert len(errors) == 1
+
+    # THEN the error should be the expected error
+    assert errors[0] == MissingSourceCommentError(case_index=0, sample_index=0)

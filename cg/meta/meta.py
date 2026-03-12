@@ -1,4 +1,3 @@
-from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -21,7 +20,6 @@ class MetaAPI:
     """MetaAPI class initializing all App APIs used within CG in non-conflicting manner"""
 
     def __init__(self, config: CGConfig):
-        self.chanjo_api: ChanjoAPI = config.chanjo_api
         self.chanjo2_api: Chanjo2APIClient = config.chanjo2_api
         self.config = config
         self.crunchy_api: CrunchyAPI = config.crunchy_api

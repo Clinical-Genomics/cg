@@ -142,6 +142,17 @@ DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD: list[Workflow] = [
 ]
 
 
+class FileFormat(StrEnum):
+    CSV: str = "csv"
+    FASTQ: str = "fastq"
+    JSON: str = "json"
+    PNG: str = "png"
+    TSV: str = "tsv"
+    TXT: str = "txt"
+    XML: str = "xml"
+    YAML: str = "yaml"
+
+
 class GenomeBuild(StrEnum):
     hg19 = "37"
     hg38 = "38"
@@ -154,17 +165,6 @@ WORKFLOW_TO_GENOME_VERSION_MAP: dict[Workflow, GenomeBuild] = {
     Workflow.RAREDISEASE: GenomeBuild.hg38,
     Workflow.NALLO: GenomeBuild.hg38,
 }
-
-
-class FileFormat(StrEnum):
-    CSV: str = "csv"
-    FASTQ: str = "fastq"
-    JSON: str = "json"
-    PNG: str = "png"
-    TSV: str = "tsv"
-    TXT: str = "txt"
-    XML: str = "xml"
-    YAML: str = "yaml"
 
 
 class GenomeVersion(StrEnum):

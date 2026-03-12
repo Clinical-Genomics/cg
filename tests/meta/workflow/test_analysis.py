@@ -92,7 +92,7 @@ def test_get_trailblazer_priority(
     assert trailblazer_priority is expected_trailblazer_priority
 
 
-def test_gene_panels_not_part_of_master_list(customer_id: str):
+def test_gene_panels_customer_is_collaborator_and_panel_not_part_of_master_list(customer_id: str):
     """Test get only broad non-specific gene panels and custom gene panel list if a supplied gene panels is not part of master list."""
     # GIVEN a customer who is a collaborator on the master list
 
@@ -125,25 +125,6 @@ def test_gene_panels_customer_collaborator_and_panel_part_of_master_list(custome
 
     # THEN the list of gene panels used should return all gene panels in the master list
     assert set(list_of_gene_panels_used) == set(GenePanelMasterList.get_panel_names())
-
-
-def test_gene_panels_customer_is_collaborator_and_panel_not_part_of_master_list(customer_id: str):
-    """Test get gene panels when customer is collaborator for gene panel master list, but supplied gene panels are not a subset of the masters list."""
-
-    # GIVEN a case that has a customer collaborator for the gene panel master list
-
-    # GIVEN a gene panel not in the master list
-    default_panels: list[str] = ["A_PANEL_NOT_IN_MASTER_LIST"]
-
-    # WHEN converting the gene panels between the default and the gene panel master list
-    list_of_gene_panels_used: list[str] = MipAnalysisAPI.get_aggregated_panels(
-        customer_id=customer_id, default_panels=set(default_panels)
-    )
-
-    # THEN the list of gene panels returned the custom panel and broad non-specific panels
-    assert set(
-        list_of_gene_panels_used
-    ) == GenePanelMasterList.get_non_specific_gene_panels().union(set(default_panels))
 
 
 def test_gene_panels_customer_not_collaborator_for_gene_master_list():

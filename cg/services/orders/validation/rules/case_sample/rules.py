@@ -21,6 +21,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     InvalidFatherSexError,
     InvalidMotherSexError,
     InvalidVolumeError,
+    MissingSourceCommentError,
     MotherNotInCaseError,
     OccupiedWellError,
     PedigreeError,
@@ -41,6 +42,11 @@ from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.sample_aliases import SampleInCase
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.order_types.balsamic_umi.models.order import BalsamicUmiOrder
+from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
+from cg.services.orders.validation.order_types.mip_rna.models.order import MIPRNAOrder
+from cg.services.orders.validation.order_types.nallo.models.order import NalloOrder
+from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
+from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.services.orders.validation.rules.case_sample.pedigree.validate_pedigree import (
     get_pedigree_errors,
 )
@@ -543,4 +549,25 @@ def validate_sample_names_available(
         if store.is_sample_name_used(sample=sample, customer_entry_id=customer_entry_id):
             error = SampleNameAlreadyExistsError(case_index=case_index, sample_index=sample_index)
             errors.append(error)
+    return errors
+
+
+def validate_source_comment_required(
+    order: (
+        BalsamicOrder
+        | BalsamicUmiOrder
+        | MIPDNAOrder
+        | MIPRNAOrder
+        | NalloOrder
+        | RNAFusionOrder
+        | TomteOrder
+    ),
+    **kwargs,
+) -> list[MissingSourceCommentError]:
+    errors: list[MissingSourceCommentError] = []
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
+            if sample.source == "other" and not sample.source_comment:
+                error = MissingSourceCommentError(case_index=case_index, sample_index=sample_index)
+                errors.append(error)
     return errors

@@ -19,10 +19,9 @@ from cg.constants.constants import (
     CaseActions,
     CustomerId,
     FileFormat,
-    GenomeVersion,
     WorkflowManager,
 )
-from cg.constants.gene_panel import GenePanelCombo, GenePanelMasterList
+from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.priority import TrailblazerPriority
 from cg.constants.scout import HGNC_ID, ScoutExportFileName
 from cg.constants.sequencing import SeqLibraryPrepCategory
@@ -47,16 +46,6 @@ from cg.models.fastq import FastqFileMeta
 from cg.store.models import Analysis, BedVersion, Case, CaseSample, Sample
 
 LOG = logging.getLogger(__name__)
-
-
-def add_gene_panel_combo(gene_panels: set[str]) -> set[str]:
-    """Add gene panels combinations for gene panels being part of gene panel combination and return updated gene panels."""
-    additional_panels = set()
-    for panel in gene_panels:
-        if panel in GenePanelCombo.COMBO_1:
-            additional_panels |= GenePanelCombo.COMBO_1.get(panel)
-    gene_panels |= additional_panels
-    return gene_panels
 
 
 class AnalysisAPI(MetaAPI):
@@ -741,8 +730,7 @@ class AnalysisAPI(MetaAPI):
             customer_id=customer_id, gene_panels=default_panels
         ):
             return GenePanelMasterList.get_panel_names()
-        all_panels: set[str] = add_gene_panel_combo(gene_panels=default_panels)
-        all_panels |= GenePanelMasterList.get_non_specific_gene_panels()
+        all_panels: set[str] = default_panels | GenePanelMasterList.get_non_specific_gene_panels()
         return list(all_panels)
 
     def run_analysis(self, *args, **kwargs):
@@ -776,17 +764,6 @@ class AnalysisAPI(MetaAPI):
                 f"Case samples have different analysis types {', '.join(analysis_types)}"
             )
         return analysis_types.pop() if analysis_types else None
-
-    @staticmethod
-    def translate_genome_reference(genome_version: GenomeVersion) -> GenomeVersion:
-        """Translates a genome reference assembly to its corresponding alternate name."""
-        translation_map = {
-            GenomeVersion.GRCh37: GenomeVersion.HG19,
-            GenomeVersion.GRCh38: GenomeVersion.HG38,
-            GenomeVersion.HG19: GenomeVersion.GRCh37,
-            GenomeVersion.HG38: GenomeVersion.GRCh38,
-        }
-        return translation_map.get(genome_version, genome_version)
 
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
