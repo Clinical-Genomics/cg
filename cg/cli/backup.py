@@ -4,8 +4,8 @@ import logging
 from pathlib import Path
 from typing import Iterable
 
-import rich_click as click
 import housekeeper.store.models as hk_models
+import rich_click as click
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
@@ -29,9 +29,7 @@ from cg.models.run_devices.illumina_run_directory_data import (
     get_sequencing_runs_from_path,
 )
 from cg.services.illumina.backup.backup_service import IlluminaBackupService
-from cg.services.illumina.backup.encrypt_service import (
-    IlluminaRunEncryptionService,
-)
+from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.exc import EntryNotFoundError
 from cg.store.models import IlluminaSequencingRun, Sample
@@ -242,6 +240,7 @@ def retrieve_spring_files(
     dry_run: bool,
 ):
     """Retrieve all spring files for a given identity."""
+    # TODO remove
     status_api: Store = config.status_db
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
 
@@ -266,6 +265,7 @@ def retrieve_spring_files(
 @click.pass_obj
 def retrieve_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
     """Retrieve a spring file from PDC."""
+    # TODO remove
     LOG.info(f"Attempting PDC retrieval and decryption file {spring_file_path}")
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
     pdc_service: PdcService = PdcService(binary_path=config.pdc.binary_path, dry_run=dry_run)

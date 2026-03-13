@@ -1186,6 +1186,7 @@ class ReadHandler(BaseHandler):
 
     def get_samples_by_identifier(self, object_type: str, identifier: str) -> list[Sample]:
         """Return all samples from a flow cell, case or sample id"""
+        # TODO remove? Function is broad and un-used
         object_to_filter: dict[str, Callable] = {
             "sample": self.get_sample_by_internal_id,
             "case": self.get_samples_by_case_id,

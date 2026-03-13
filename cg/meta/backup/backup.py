@@ -71,6 +71,7 @@ class SpringBackupAPI:
 
     def retrieve_and_decrypt_spring_file(self, spring_file_path: Path) -> None:
         """Retrieves and decrypts a spring file and its decryption key."""
+        # TODO remove?
         LOG.info(f"*** START RETRIEVAL PROCESS OF SPRING FILE {spring_file_path} ***")
         try:
             self.pdc.retrieve_file_from_pdc(

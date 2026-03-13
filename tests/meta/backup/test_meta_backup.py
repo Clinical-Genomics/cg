@@ -3,17 +3,19 @@
 import logging
 import subprocess
 from pathlib import Path
+
 import mock
 from mock import call
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import ChecksumFailedError
 from cg.meta.backup.backup import SpringBackupAPI
-from cg.services.illumina.backup.backup_service import IlluminaBackupService
-from cg.services.pdc_service.pdc_service import PdcService
 from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
+from cg.services.illumina.backup.backup_service import IlluminaBackupService
+from cg.services.pdc_service.pdc_service import PdcService
 from tests.mocks.hk_mock import MockFile
 
 
@@ -186,6 +188,7 @@ def test_decrypt_and_retrieve_spring_file(
     mock_housekeeper: HousekeeperAPI,
     spring_file_path,
 ):
+    # TODO remove?
     # GIVEN a spring file that needs to be decrypted and retrieved from PDC
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api,
@@ -220,6 +223,7 @@ def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
     spring_file_path,
     caplog,
 ):
+    # TODO remove?
     # GIVEN a spring file that needs to be encrypted and archived to PDC
     spring_backup_api = SpringBackupAPI(
         encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_service=mock_pdc
