@@ -2,17 +2,13 @@
 
 import logging
 from pathlib import Path
-from typing import Iterable
 
-import housekeeper.store.models as hk_models
 import rich_click as click
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.constants import SequencingRunDataAvailability
-from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import (
     DsmcAlreadyRunningError,
     FlowCellError,
@@ -20,8 +16,7 @@ from cg.exc import (
     IlluminaRunEncryptionError,
     PdcError,
 )
-from cg.meta.backup.backup import SpringBackupAPI
-from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
+from cg.meta.encryption.encryption import EncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import (
@@ -30,7 +25,6 @@ from cg.models.run_devices.illumina_run_directory_data import (
 )
 from cg.services.illumina.backup.backup_service import IlluminaBackupService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
-from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.exc import EntryNotFoundError
 from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
@@ -179,46 +173,3 @@ def fetch_illumina_run(context: CGConfig, dry_run: bool, flow_cell_id: str | Non
         status_db.update_illumina_sequencing_run_data_availability(
             sequencing_run=sequencing_run, data_availability=SequencingRunDataAvailability.REQUESTED
         )
-
-
-@backup.command("archive-spring-files")
-@DRY_RUN
-@click.pass_context
-@click.pass_obj
-def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool):
-    """Archive spring files to PDC."""
-    housekeeper_api: HousekeeperAPI = config.housekeeper_api
-    LOG.info("Getting all spring files from Housekeeper.")
-    spring_files: Iterable[hk_models.File] = housekeeper_api.files(
-        tags=[SequencingFileTag.SPRING]
-    ).filter(hk_models.File.path.contains(f"{config.environment}/{config.demultiplex.out_dir}"))
-    for spring_file in spring_files:
-        LOG.info(f"Attempting encryption and PDC archiving for file {spring_file.path}")
-        if Path(spring_file.path).exists():
-            context.invoke(archive_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
-        else:
-            LOG.warning(
-                f"Spring file {spring_file.path} found in Housekeeper, but not on disk! Archiving process skipped!"
-            )
-
-
-@backup.command("archive-spring-file")
-@click.argument("spring-file-path", type=click.Path(exists=True))
-@DRY_RUN
-@click.pass_obj
-def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
-    """Archive a spring file to PDC."""
-    housekeeper_api: HousekeeperAPI = config.housekeeper_api
-    pdc_service: PdcService = PdcService(binary_path=config.pdc.binary_path, dry_run=dry_run)
-    encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
-        binary_path=config.encryption.binary_path,
-        dry_run=dry_run,
-    )
-    spring_backup_api: SpringBackupAPI = SpringBackupAPI(
-        encryption_api=encryption_api,
-        hk_api=housekeeper_api,
-        pdc_service=pdc_service,
-        dry_run=dry_run,
-    )
-    LOG.debug("Start spring encryption/backup")
-    spring_backup_api.encrypt_and_archive_spring_file(Path(spring_file_path))
