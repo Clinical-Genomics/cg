@@ -198,6 +198,7 @@ class BalsamicConfig(CommonAppConfig):
     cancer_genelist: Path
     conda_binary: Path
     conda_env: str
+    cosmic_path: Path
     genome_interval_path: Path
     gens_coverage_female_path: Path
     gens_coverage_male_path: Path

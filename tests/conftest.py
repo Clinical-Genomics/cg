@@ -1994,6 +1994,7 @@ def context_config(
             "cancer_genelist": Path("gene_list"),
             "conda_binary": "a_conda_binary",
             "conda_env": "S_balsamic",
+            "cosmic_path": Path("cosmic_path"),
             "genome_interval_path": str(cg_dir),
             "gens_coverage_female_path": str(cg_dir),
             "gens_coverage_male_path": str(cg_dir),

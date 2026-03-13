@@ -38,6 +38,7 @@ class BalsamicConfigFileCreator:
         self.cache_version: str = cg_balsamic_config.cache_version
         self.cadd_path: Path = cg_balsamic_config.cadd_path
         self.cancer_genelist: Path = cg_balsamic_config.cancer_genelist
+        self.cosmic_path: Path = cg_balsamic_config.cosmic_path
         self.genome_interval_path: Path = cg_balsamic_config.genome_interval_path
         self.gens_coverage_female_path: Path = cg_balsamic_config.gens_coverage_female_path
         self.gens_coverage_male_path: Path = cg_balsamic_config.gens_coverage_male_path
@@ -117,6 +118,7 @@ class BalsamicConfigFileCreator:
             clinical_sv_observations=self.loqusdb_clinical_sv,
             conda_binary=self.conda_binary,
             conda_env=self.conda_env,
+            cosmic_path=self.cosmic_path,
             fastq_path=fastq_path,
             gender=patient_sex,
             genome_interval=self.genome_interval_path,
@@ -160,6 +162,7 @@ class BalsamicConfigFileCreator:
             clinical_sv_observations=self.loqusdb_clinical_sv,
             conda_binary=self.conda_binary,
             conda_env=self.conda_env,
+            cosmic_path=self.cosmic_path,
             fastq_path=fastq_path,
             gender=patient_sex,
             genome_version=GenomeVersion.HG19,

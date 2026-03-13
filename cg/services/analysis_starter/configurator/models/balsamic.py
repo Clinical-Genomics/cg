@@ -28,6 +28,7 @@ class BalsamicConfigInput(BaseModel):
     clinical_sv_observations: Path
     conda_binary: Path
     conda_env: str
+    cosmic_path: Path
     fastq_path: Path
     gender: SexOptions
     genome_version: GenomeVersion
@@ -84,6 +85,7 @@ class BalsamicConfigInputPanel(BalsamicConfigInput):
             "--case-id": self.case_id,
             "--clinical-snv-observations": self.clinical_snv_observations,
             "--clinical-sv-observations": self.clinical_sv_observations,
+            "--cosmic": self.cosmic_path,
             "--cust-case-id": self.case_name,
             "--fastq-path": self.fastq_path,
             "--gender": self.gender,
@@ -122,6 +124,7 @@ class BalsamicConfigInputWGS(BalsamicConfigInput):
             "--case-id": self.case_id,
             "--clinical-snv-observations": self.clinical_snv_observations,
             "--clinical-sv-observations": self.clinical_sv_observations,
+            "--cosmic": self.cosmic_path,
             "--cust-case-id": self.case_name,
             "--fastq-path": self.fastq_path,
             "--gender": self.gender,
