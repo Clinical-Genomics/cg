@@ -94,11 +94,11 @@ def test_upload_succeeds():
 
     # THEN a delivery report has been generated and the case has been uploaded to scout and loqusdb
     invoke_calls = [
-        call(generate_delivery_report, case_id="case_id"),
-        call(upload_to_scout, case_id="case_id", re_upload=False),
+        call(upload_coverage, family_id="case_id", genome_version="hg38"),
         call(upload_observations_to_loqusdb, case_id="case_id"),
         call(upload_to_gens, case_id="case_id"),
-        call(upload_coverage, family_id="case_id", genome_version="hg38"),
+        call(generate_delivery_report, case_id="case_id"),
+        call(upload_to_scout, case_id="case_id", re_upload=False),
     ]
 
     click_context.as_mock.invoke.assert_has_calls(invoke_calls)
