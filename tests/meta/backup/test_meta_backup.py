@@ -1,7 +1,6 @@
 """Tests for the meta BackupAPI."""
 
 import logging
-import subprocess
 from pathlib import Path
 
 import mock
@@ -177,70 +176,6 @@ def test_mark_file_as_archived_dry_run(
     # THEN the set_to_archive method in the Housekeeper API should be called with the new value True
     mock_housekeeper.set_to_archive.assert_not_called()
     assert f"Dry run, no changes made to {spring_file_path}" in caplog.text
-
-
-@mock.patch("cg.apps.housekeeper.hk")
-@mock.patch("cg.meta.encryption.encryption")
-@mock.patch("cg.services.pdc_service.pdc_service.PdcService")
-def test_decrypt_and_retrieve_spring_file(
-    mock_pdc_service: PdcService,
-    mock_spring_encryption_api: SpringEncryptionAPI,
-    mock_housekeeper: HousekeeperAPI,
-    spring_file_path,
-):
-    # TODO remove?
-    # GIVEN a spring file that needs to be decrypted and retrieved from PDC
-    spring_backup_api = SpringBackupAPI(
-        encryption_api=mock_spring_encryption_api,
-        hk_api=mock_housekeeper,
-        pdc_service=mock_pdc_service,
-    )
-
-    # WHEN running the decryption and retrieval process
-    mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
-        spring_file_path.with_suffix(FileExtensions.SPRING + FileExtensions.GPG)
-    )
-    mock_spring_encryption_api.encrypted_key_path.return_value = spring_file_path.with_suffix(
-        FileExtensions.KEY + FileExtensions.GPG
-    )
-    spring_backup_api.retrieve_and_decrypt_spring_file(spring_file_path)
-
-    # THEN the encrypted spring file AND the encrypted key should be retrieved
-    calls = [
-        call(file_path=str(mock_spring_encryption_api.encrypted_spring_file_path.return_value)),
-        call(file_path=str(mock_spring_encryption_api.encrypted_key_path.return_value)),
-    ]
-    mock_pdc_service.retrieve_file_from_pdc.assert_has_calls(calls)
-
-
-@mock.patch("cg.apps.housekeeper.hk")
-@mock.patch("cg.meta.encryption.encryption")
-@mock.patch("cg.services.pdc_service.pdc_service.PdcService")
-def test_decrypt_and_retrieve_spring_file_pdc_retrieval_failed(
-    mock_pdc: PdcService,
-    mock_spring_encryption_api: SpringEncryptionAPI,
-    mock_housekeeper: HousekeeperAPI,
-    spring_file_path,
-    caplog,
-):
-    # TODO remove?
-    # GIVEN a spring file that needs to be encrypted and archived to PDC
-    spring_backup_api = SpringBackupAPI(
-        encryption_api=mock_spring_encryption_api, hk_api=mock_housekeeper, pdc_service=mock_pdc
-    )
-
-    # WHEN running the encryption and archiving process
-    mock_spring_encryption_api.encrypted_spring_file_path.return_value = (
-        spring_file_path.with_suffix(FileExtensions.SPRING + FileExtensions.GPG)
-    )
-    mock_spring_encryption_api.encrypted_key_path.return_value = spring_file_path.with_suffix(
-        FileExtensions.KEY + FileExtensions.GPG
-    )
-    mock_pdc.retrieve_file_from_pdc.side_effect = subprocess.CalledProcessError(1, "echo")
-    spring_backup_api.retrieve_and_decrypt_spring_file(spring_file_path=spring_file_path)
-
-    # THEN the decryption failure should be logged
-    assert "Decryption failed" in caplog.text
 
 
 def test_create_copy_complete_file_exist(

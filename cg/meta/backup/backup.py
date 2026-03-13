@@ -69,27 +69,6 @@ class SpringBackupAPI:
             self.encryption_api.cleanup(spring_file_path)
             LOG.debug("*** CHECKSUM PROCESS FAILED! ***")
 
-    def retrieve_and_decrypt_spring_file(self, spring_file_path: Path) -> None:
-        """Retrieves and decrypts a spring file and its decryption key."""
-        # TODO remove?
-        LOG.info(f"*** START RETRIEVAL PROCESS OF SPRING FILE {spring_file_path} ***")
-        try:
-            self.pdc.retrieve_file_from_pdc(
-                file_path=str(self.encryption_api.encrypted_spring_file_path(spring_file_path)),
-            )
-            self.pdc.retrieve_file_from_pdc(
-                file_path=str(self.encryption_api.encrypted_key_path(spring_file_path)),
-            )
-            self.encryption_api.key_asymmetric_decryption(spring_file_path)
-            self.encryption_api.spring_symmetric_decryption(
-                spring_file_path, output_file=spring_file_path
-            )
-        except subprocess.CalledProcessError as error:
-            LOG.error(f"Decryption failed: {error.stderr}")
-            LOG.debug("*** RETRIEVAL PROCESS FAILED! ***")
-        self.encryption_api.cleanup(spring_file_path)
-        LOG.debug("*** RETRIEVAL PROCESS COMPLETED SUCCESSFULLY ***")
-
     def mark_file_as_archived(self, spring_file_path: Path) -> None:
         """Set the field 'to_archive' of the file in Housekeeper to mark that it has been
         archived to PDC."""

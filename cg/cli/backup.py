@@ -32,7 +32,7 @@ from cg.services.illumina.backup.backup_service import IlluminaBackupService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.exc import EntryNotFoundError
-from cg.store.models import IlluminaSequencingRun, Sample
+from cg.store.models import IlluminaSequencingRun
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -222,62 +222,3 @@ def archive_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
     )
     LOG.debug("Start spring encryption/backup")
     spring_backup_api.encrypt_and_archive_spring_file(Path(spring_file_path))
-
-
-@backup.command("retrieve-spring-files")
-@DRY_RUN
-@click.option("-s", "--sample-id", "object_type", flag_value="sample", type=str)
-@click.option("-c", "--case-id", "object_type", flag_value="case", type=str)
-@click.option("-f", "--flow-cell-id", "object_type", flag_value="flow_cell", type=str)
-@click.argument("identifier", type=str)
-@click.pass_context
-@click.pass_obj
-def retrieve_spring_files(
-    config: CGConfig,
-    context: click.Context,
-    object_type: str,
-    identifier: str,
-    dry_run: bool,
-):
-    """Retrieve all spring files for a given identity."""
-    # TODO remove
-    status_api: Store = config.status_db
-    housekeeper_api: HousekeeperAPI = config.housekeeper_api
-
-    samples: list[Sample] = status_api.get_samples_by_identifier(
-        object_type=object_type, identifier=identifier
-    )
-
-    for sample in samples:
-        latest_version: hk_models.Version = housekeeper_api.last_version(bundle=sample.internal_id)
-        spring_files: Iterable[hk_models.File] = housekeeper_api.files(
-            bundle=sample.internal_id,
-            tags=[SequencingFileTag.SPRING],
-            version=latest_version.id,
-        )
-        for spring_file in spring_files:
-            context.invoke(retrieve_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
-
-
-@backup.command("retrieve-spring-file")
-@click.argument("spring-file-path", type=click.Path())
-@DRY_RUN
-@click.pass_obj
-def retrieve_spring_file(config: CGConfig, spring_file_path: str, dry_run: bool):
-    """Retrieve a spring file from PDC."""
-    # TODO remove
-    LOG.info(f"Attempting PDC retrieval and decryption file {spring_file_path}")
-    housekeeper_api: HousekeeperAPI = config.housekeeper_api
-    pdc_service: PdcService = PdcService(binary_path=config.pdc.binary_path, dry_run=dry_run)
-    encryption_api: SpringEncryptionAPI = SpringEncryptionAPI(
-        binary_path=config.encryption.binary_path,
-        dry_run=dry_run,
-    )
-    LOG.debug(f"Start spring retrieval if not dry run mode={dry_run}")
-    spring_backup_api: SpringBackupAPI = SpringBackupAPI(
-        encryption_api=encryption_api,
-        hk_api=housekeeper_api,
-        pdc_service=pdc_service,
-        dry_run=dry_run,
-    )
-    spring_backup_api.retrieve_and_decrypt_spring_file(Path(spring_file_path))
