@@ -9,31 +9,43 @@ from cg.constants.constants import DataDelivery
 from cg.meta.upload.nallo.nallo_upload_api import (
     NalloUploadAPI,
     generate_delivery_report,
+    upload_coverage,
     upload_observations_to_loqusdb,
     upload_to_gens,
     upload_to_scout,
 )
-from cg.models.cg_config import CGConfig, IlluminaConfig, NalloConfig, RunInstruments, SlurmConfig
+from cg.models.cg_config import (
+    CGConfig,
+    ChanjoConfig,
+    IlluminaConfig,
+    NalloConfig,
+    RunInstruments,
+    SlurmConfig,
+)
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
 from cg.services.deliver_files.factory import DeliveryServiceFactory
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 @pytest.mark.freeze_time
 def test_upload_succeeds():
     # GIVEN the file delivery service can be created for this use case
-    deliver_files_service = create_autospec(DeliverFilesService)
+    deliver_files_service: TypedMock[DeliverFilesService] = create_typed_mock(DeliverFilesService)
 
     delivery_service_factory: DeliveryServiceFactory = create_autospec(DeliveryServiceFactory)
-    delivery_service_factory.build_delivery_service = Mock(return_value=deliver_files_service)
+    delivery_service_factory.build_delivery_service = Mock(
+        return_value=deliver_files_service.as_type
+    )
 
     # GIVEN a cg config with necessary contents for Nallo and a connection to StatusDB
-    status_db = create_autospec(Store, session=Mock())
-    cg_config = create_autospec(
+    status_db: TypedMock[Store] = create_typed_mock(Store, session=Mock())
+    cg_config: CGConfig = create_autospec(
         CGConfig,
+        chanjo_38=ChanjoConfig(binary_path="chanjo_binary_path", config_path="chanjo_config_path"),
         delivery_path="delivery/path",
         delivery_service_factory=delivery_service_factory,
         nallo=create_autospec(
@@ -57,15 +69,17 @@ def test_upload_succeeds():
             RunInstruments,
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
         ),
-        status_db=status_db,
+        status_db=status_db.as_type,
         tower_binary_path="tower/binary/path",
     )
 
     # GIVEN a case with analysis and scout delivery and a completed analysis
-    case = create_autospec(Case, internal_id="case_id", data_delivery=DataDelivery.ANALYSIS_SCOUT)
-    analysis = create_autospec(Analysis)
+    case: Case = create_autospec(
+        Case, internal_id="case_id", data_delivery=DataDelivery.ANALYSIS_SCOUT
+    )
+    analysis: Analysis = create_autospec(Analysis)
 
-    status_db.get_latest_completed_analysis_for_case = lambda internal_id: (
+    status_db.as_mock.get_latest_completed_analysis_for_case = lambda internal_id: (
         analysis if internal_id == case.internal_id else None
     )
 
@@ -73,10 +87,10 @@ def test_upload_succeeds():
     nallo_upload_api = NalloUploadAPI(config=cg_config)
 
     # GIVEN a click context is provided
-    click_context = create_autospec(Context)
+    click_context: TypedMock[Context] = create_typed_mock(Context)
 
     # WHEN upload is called
-    nallo_upload_api.upload(ctx=click_context, case=case, restart=False)
+    nallo_upload_api.upload(ctx=click_context.as_type, case=case, restart=False)
 
     # THEN a delivery report has been generated and the case has been uploaded to scout and loqusdb
     invoke_calls = [
@@ -84,12 +98,13 @@ def test_upload_succeeds():
         call(upload_to_scout, case_id="case_id", re_upload=False),
         call(upload_observations_to_loqusdb, case_id="case_id"),
         call(upload_to_gens, case_id="case_id"),
+        call(upload_coverage, family_id="case_id", genome_version="hg38"),
     ]
 
-    click_context.invoke.assert_has_calls(invoke_calls)
+    click_context.as_mock.invoke.assert_has_calls(invoke_calls)
 
     # THEN the files for the case has been delivered
-    deliver_files_service.deliver_files_for_case.assert_called_once_with(
+    deliver_files_service.as_mock.deliver_files_for_case.assert_called_once_with(
         case=case, delivery_base_path=Path("delivery/path")
     )
 
