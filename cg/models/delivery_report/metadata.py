@@ -93,6 +93,8 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
     mean_insert_size: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     fold_80: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     predicted_sex: str = NA_FIELD
+    at_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    gc_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
 
 
 class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
@@ -108,7 +110,6 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     bait_set_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    gc_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     median_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_250x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_500x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD

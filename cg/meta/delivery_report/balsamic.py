@@ -80,6 +80,7 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
             bait_set_version=analysis_metadata.balsamic_config.panel.capture_kit_version,
             duplicates=sample_metrics.percent_duplication if sample_metrics else None,
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
+            at_dropout=sample_metrics.at_dropout if sample_metrics else None,
             gc_dropout=sample_metrics.gc_dropout if sample_metrics else None,
             initial_qc=passed_initial_qc,
             mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
@@ -102,6 +103,8 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
         return BalsamicWGSSampleMetadataModel(
             duplicates=sample_metrics.percent_duplication if sample_metrics else None,
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
+            at_dropout=sample_metrics.at_dropout if sample_metrics else None,
+            gc_dropout=sample_metrics.gc_dropout if sample_metrics else None,
             initial_qc=passed_initial_qc,
             mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
             median_coverage=sample_metrics.median_target_coverage if sample_metrics else None,

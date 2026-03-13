@@ -30,6 +30,8 @@ class BalsamicQCMetrics(QCMetrics):
     median_target_coverage: float | None = None
     percent_duplication: float | None = None
     compare_predicted_to_given_sex: Annotated[str | None, AfterValidator(get_sex_as_string)] = None
+    at_dropout: float | None = None
+    gc_dropout: float | None = None
 
     _percent_duplication: float = field_validator("percent_duplication")(percent_value_validation)
 
@@ -44,7 +46,6 @@ class BalsamicTargetedQCMetrics(BalsamicQCMetrics):
     pct_target_bases_500x: float | None = None
     pct_target_bases_1000x: float | None = None
     pct_off_bait: float | None = None
-    gc_dropout: float | None = None
 
     _pct_values: float = field_validator(
         "pct_target_bases_50x",
