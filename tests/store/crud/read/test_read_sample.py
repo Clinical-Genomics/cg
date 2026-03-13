@@ -412,6 +412,7 @@ def test_get_samples_by_identifier(
     identifier_fixture: str,
     request: FixtureRequest,
 ):
+    # TODO remove?
     """Test that samples are returned for any instance of an identifier."""
     # GIVEN a store with samples, an identifier and an object type
     store: Store = re_sequenced_sample_illumina_data_store
