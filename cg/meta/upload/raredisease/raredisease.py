@@ -11,6 +11,7 @@ from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.scout import upload_to_scout
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
+from cg.constants.constants import WORKFLOW_TO_GENOME_VERSION_MAP, GenomeBuild, Workflow
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -31,7 +32,8 @@ class RarediseaseUploadAPI(UploadAPI):
         analysis: Analysis = self.status_db.get_latest_completed_analysis_for_case(case.internal_id)
         self.update_upload_started_at(analysis=analysis)
 
-        ctx.invoke(upload_coverage, family_id=case.internal_id)
+        genome_version: GenomeBuild = WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.RAREDISEASE]
+        ctx.invoke(upload_coverage, family_id=case.internal_id, genome_version=genome_version.name)
 
         # Delivery report generation
         if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
