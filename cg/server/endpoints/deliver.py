@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify, request
 
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import analysis_client, db
-from cg.store.models import Analysis, Sample
+from cg.store.models import Analysis, Case, CaseSample, Sample
 
 DELIVER_BLUEPRINT = Blueprint("deliver", __name__, url_prefix="/api/v1")
 DELIVER_BLUEPRINT.before_request(before_request)
@@ -22,11 +22,11 @@ def deliver_analysis():
 
     if trailblazer_id := request.args.get("trailblazer_id", type=int):
         analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
-        samples: list[Sample] = analysis.case.samples
-        for sample in samples:
-            # TODO original case logic
-            if not sample.delivered_at:
-                sample.delivered_at = datetime.now()
+        case: Case = analysis.case
+        samples: list[Sample] = case.samples
+        for case_sample in case.links:
+            if case_sample.is_invoicable and not case_sample.sample.delivered_at:
+                case_sample.sample.delivered_at = datetime.now()
         analysis_client.mark_analyses_as_delivered(trailblazer_ids=[trailblazer_id])
         return jsonify({}), HTTPStatus.OK
     else:
