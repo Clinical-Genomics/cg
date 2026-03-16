@@ -9,7 +9,7 @@ DELIVER_BLUEPRINT.before_request(before_request)
 @DELIVER_BLUEPRINT.route("/deliver")  # TODO
 def deliver_analysis():
     """TODO"""
-    trailblazer_analysis_id: int | None = request.args.get("trailblazer_analysis_id", type=int)
+    trailblazer_id: int | None = request.args.get("trailblazer_id", type=int)
     # TODO
     # - Get analysis.case.samples from trailblazer analysis ID
     # - Filter samples, select the ones from the original case
