@@ -11,6 +11,7 @@ from cg.server.app_config import app_config
 from cg.server.endpoints.analyses import ANALYSES_BLUEPRINT
 from cg.server.endpoints.applications import APPLICATIONS_BLUEPRINT
 from cg.server.endpoints.cases import CASES_BLUEPRINT
+from cg.server.endpoints.deliver import DELIVER_BLUEPRINT
 from cg.server.endpoints.index_sequences import INDEX_SEQUENCES_BLUEPRINT
 from cg.server.endpoints.orders import ORDERS_BLUEPRINT
 from cg.server.endpoints.pools import POOLS_BLUEPRINT
@@ -105,6 +106,7 @@ def _register_blueprints(app: Flask):
     app.register_blueprint(oauth_bp, url_prefix="/login")
     app.register_blueprint(APPLICATIONS_BLUEPRINT)
     app.register_blueprint(CASES_BLUEPRINT)
+    app.register_blueprint(DELIVER_BLUEPRINT)
     app.register_blueprint(ORDERS_BLUEPRINT)
     app.register_blueprint(SAMPLES_BLUEPRINT)
     app.register_blueprint(POOLS_BLUEPRINT)
