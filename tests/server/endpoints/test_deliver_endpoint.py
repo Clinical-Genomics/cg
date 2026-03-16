@@ -1,10 +1,10 @@
+from datetime import datetime
 from http import HTTPStatus
 from unittest.mock import Mock, create_autospec
 
 from flask.testing import FlaskClient
 from pytest_mock import MockerFixture
 
-from cg.apps.tb import TrailblazerAPI
 from cg.server.endpoints import deliver
 from cg.server.ext import AnalysisClient, FlaskStore
 from cg.store.models import Analysis, Case, Sample
@@ -17,6 +17,10 @@ def test_deliver_trailblazer_analysis(client: FlaskClient, mocker: MockerFixture
     # GIVEN samples that should be delivered
     sample_1: Sample = create_autospec(Sample, delivered_at=None)
     sample_2: Sample = create_autospec(Sample, delivered_at=None)
+
+    # GIVEN a sample that is already delivered
+    pre_time = datetime.now()
+    sample_3: Sample = create_autospec(Sample, delivered_at=pre_time)
 
     # GIVEN a case to be delivered
     case: Case = create_autospec(Case, samples=[sample_1, sample_2])
