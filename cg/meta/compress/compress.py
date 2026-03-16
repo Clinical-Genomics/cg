@@ -14,7 +14,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.constants import PIPELINES_USING_PARTIAL_ANALYSES
 from cg.exc import DecompressionCouldNotStartError
-from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
 from cg.models.compression_data import CaseCompressionData, CompressionData, SampleCompressionData
 from cg.store.models import Case, Sample
@@ -30,12 +29,10 @@ class CompressAPI:
         hk_api: HousekeeperAPI,
         demux_root: str,
         crunchy_api: CrunchyAPI,
-        backup_api: SpringBackupAPI = None,
         dry_run: bool = False,
     ):
         self.hk_api: HousekeeperAPI = hk_api
         self.crunchy_api: CrunchyAPI = crunchy_api
-        self.backup_api: SpringBackupAPI = backup_api
         self.demux_root: Path = Path(demux_root)
         self.dry_run: bool = dry_run
 
@@ -44,8 +41,6 @@ class CompressAPI:
         self.dry_run = dry_run
         if self.crunchy_api.dry_run is False:
             self.crunchy_api.set_dry_run(dry_run)
-        if self.backup_api:
-            self.backup_api.dry_run = self.dry_run
 
     def compress_fastq(self, sample_id: str) -> bool:
         """Compress the FASTQ files for an individual."""
@@ -131,15 +126,7 @@ class CompressAPI:
                         f"Spring file {compression.spring_path.as_posix()} is already being decompressed."
                     )
                     continue
-                if not self.backup_api.is_to_be_retrieved_and_decrypted(
-                    spring_file_path=compression.spring_path
-                ):
-                    LOG.warning(f"Could not find {compression.spring_path} on disk")
-                    return False
-                LOG.info("The SPRING file will be retrieved from PDC and decrypted")
-                self.backup_api.retrieve_and_decrypt_spring_file(
-                    spring_file_path=Path(compression.spring_path)
-                )
+                # TODO figure out whether to add anything here
 
             LOG.info(
                 f"Decompressing {compression.spring_path} to FASTQ format for sample {sample_id}"
