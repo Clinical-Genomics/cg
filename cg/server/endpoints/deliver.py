@@ -4,7 +4,7 @@ from http import HTTPStatus
 from flask import Blueprint, jsonify, request
 
 from cg.server.endpoints.utils import before_request
-from cg.server.ext import db
+from cg.server.ext import analysis_client, db
 from cg.store.models import Analysis, Sample
 
 DELIVER_BLUEPRINT = Blueprint("deliver", __name__, url_prefix="/api/v1")
@@ -25,6 +25,7 @@ def deliver_analysis():
         samples: list[Sample] = analysis.case.samples
         for sample in samples:
             sample.delivered_at = datetime.now()
+        analysis_client.mark_analyses_as_delivered(trailblazer_ids=[trailblazer_id])
         return jsonify({}), HTTPStatus.OK
     else:
         # TODO add test

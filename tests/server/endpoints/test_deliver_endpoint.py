@@ -4,8 +4,9 @@ from unittest.mock import Mock, create_autospec
 from flask.testing import FlaskClient
 from pytest_mock import MockerFixture
 
+from cg.apps.tb import TrailblazerAPI
 from cg.server.endpoints import deliver
-from cg.server.ext import FlaskStore
+from cg.server.ext import AnalysisClient, FlaskStore
 from cg.store.models import Analysis, Case, Sample
 
 
@@ -28,6 +29,10 @@ def test_deliver_trailblazer_analysis(client: FlaskClient, mocker: MockerFixture
     status_db.get_analysis_by_trailblazer_id = Mock(return_value=analysis)
     mocker.patch.object(deliver, "db", status_db)
 
+    # GIVEN a TrailblazerAPI
+    analysis_client = create_autospec(AnalysisClient)
+    mocker.patch.object(deliver, "analysis_client", analysis_client)
+
     # WHEN calling the endpoint
     response = client.post(f"/api/v1/deliver?trailblazer_id={trailblazer_id}")
 
@@ -38,4 +43,7 @@ def test_deliver_trailblazer_analysis(client: FlaskClient, mocker: MockerFixture
     assert sample_1.delivered_at is not None
     assert sample_2.delivered_at is not None
 
-    # THEN endpoint in trailblazer was called
+    # THEN endpoint in Trailblazer was called
+    analysis_client.mark_analyses_as_delivered.assert_called_once_with(
+        trailblazer_ids=[trailblazer_id]
+    )

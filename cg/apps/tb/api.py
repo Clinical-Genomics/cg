@@ -209,7 +209,8 @@ class TrailblazerAPI:
         response_data = SummariesResponse.model_validate(response)
         return response_data.summaries
 
-    def new_method():
+    def mark_analyses_as_delivered(self, trailblazer_ids: list[int]) -> None:
+        # TODO: Implement and test
         pass
 
     def get_analyses_to_deliver(self, order_id: int) -> list[TrailblazerAnalysis]:
