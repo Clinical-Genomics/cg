@@ -19,14 +19,3 @@ def get_analyses():
         analyses: list[Analysis] = db.get_analyses()
     parsed_analysis: list[dict] = [analysis.to_dict() for analysis in analyses[:30]]
     return jsonify(analyses=parsed_analysis, total=len(analyses))
-
-
-@ANALYSES_BLUEPRINT.route("/")  # TODO
-def deliver_analysis():
-    """TODO"""
-    # TODO
-    # - Get analysis.case.samples from trailblazer analysis ID
-    # - Filter samples, select the ones from the original case
-    # - Update the sample.delivered_at
-    # - Call trailblazer to mark the analysis as delivered
-    pass
