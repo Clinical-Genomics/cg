@@ -24,7 +24,9 @@ def deliver_analysis():
         analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
         samples: list[Sample] = analysis.case.samples
         for sample in samples:
-            sample.delivered_at = datetime.now()
+            # TODO original case logic
+            if not sample.delivered_at:
+                sample.delivered_at = datetime.now()
         analysis_client.mark_analyses_as_delivered(trailblazer_ids=[trailblazer_id])
         return jsonify({}), HTTPStatus.OK
     else:
