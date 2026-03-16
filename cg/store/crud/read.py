@@ -209,6 +209,11 @@ class ReadHandler(BaseHandler):
             entry_id=entry_id,
         ).first()
 
+    def get_analysis_by_trailblazer_id(self, trailblazer_id: int) -> Analysis:
+        """Return an analysis by trailblazer ID."""
+        # TODO test this
+        return self._get_query(table=Analysis).filter_by(trailblazer_id=trailblazer_id).one()
+
     def get_cases_by_customer_and_case_name_search(
         self, customer: Customer, case_name_search: str
     ) -> list[Case]:
