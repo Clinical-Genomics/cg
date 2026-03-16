@@ -209,6 +209,9 @@ class TrailblazerAPI:
         response_data = SummariesResponse.model_validate(response)
         return response_data.summaries
 
+    def new_method():
+        pass
+
     def get_analyses_to_deliver(self, order_id: int) -> list[TrailblazerAnalysis]:
         """Return the analyses in the order ready to be delivered."""
         endpoint = (
