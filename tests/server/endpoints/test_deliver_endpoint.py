@@ -1,12 +1,15 @@
 from http import HTTPStatus
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 from flask.testing import FlaskClient
+from pytest_mock import MockerFixture
 
+from cg.server.endpoints import deliver
+from cg.server.ext import FlaskStore
 from cg.store.models import Analysis, Case, Sample
 
 
-def test_deliver_trailblazer_analysis(client: FlaskClient):
+def test_deliver_trailblazer_analysis(client: FlaskClient, mocker: MockerFixture):
     # GIVEN a trailblazer analysis id
     trailblazer_id = 666666
 
@@ -19,6 +22,11 @@ def test_deliver_trailblazer_analysis(client: FlaskClient):
 
     # GIVEN an analysis linked to the case
     analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
+
+    # GIVEN a store
+    status_db: FlaskStore = create_autospec(FlaskStore)
+    status_db.get_analysis_by_trailblazer_id = Mock(return_value=analysis)
+    mocker.patch.object(deliver, "db", status_db)
 
     # WHEN calling the endpoint
     response = client.post(f"/api/v1/deliver?trailblazer_id={trailblazer_id}")

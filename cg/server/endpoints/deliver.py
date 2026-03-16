@@ -15,10 +15,10 @@ DELIVER_BLUEPRINT.before_request(before_request)
 def deliver_analysis():
     """TODO"""
     # TODO
-    # - Get analysis.case.samples from trailblazer analysis ID
     # - Filter samples, select the ones from the original case
     # - Update the sample.delivered_at
     # - Call trailblazer to mark the analysis as delivered
+    # - Commit changes to  StatusDb if TB call went well, else rollback
 
     if trailblazer_id := request.args.get("trailblazer_id", type=int):
         analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
