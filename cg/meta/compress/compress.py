@@ -126,11 +126,7 @@ class CompressAPI:
                         f"Spring file {compression.spring_path.as_posix()} is already being decompressed."
                     )
                     continue
-                if not self.backup_api.is_to_be_retrieved_and_decrypted(
-                    spring_file_path=compression.spring_path
-                ):
-                    LOG.warning(f"Could not find {compression.spring_path} on disk")
-                    return False
+                # TODO any additional logs or actions here?
 
             LOG.info(
                 f"Decompressing {compression.spring_path} to FASTQ format for sample {sample_id}"
