@@ -19,11 +19,12 @@ def deliver_analysis():
     - [x] Filter samples, select the ones from the original case
     - [x] Update the sample.delivered_at
     - [x] Call trailblazer to mark the analysis as delivered
-    - [ ] Commit changes to  StatusDb if TB call went well, else rollback
+    - [x] Commit changes to  StatusDb if TB call went well, else rollback
     """
 
     if trailblazer_id := request.args.get("trailblazer_id", type=int):
         # TODO: consider scenario when trailblazer id does not match an analysis
+
         analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
         case: Case = analysis.case
         for case_sample in case.links:
@@ -43,9 +44,7 @@ def deliver_analysis():
             db.commit_to_store()
         return Response(status=HTTPStatus.NO_CONTENT)
     else:
-        # TODO add test
-        # TODO add error message shaming the bad request
-        return jsonify({}), HTTPStatus.BAD_REQUEST
+        return Response(status=HTTPStatus.BAD_REQUEST)
 
 
 def passes_on_reads(case_sample: CaseSample) -> bool:
