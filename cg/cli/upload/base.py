@@ -3,9 +3,11 @@
 import logging
 import sys
 import traceback
+from pathlib import Path
 
 import rich_click as click
 
+from cg.cli.deliver import utils
 from cg.cli.upload.coverage import upload_coverage
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
 from cg.cli.upload.fohm import fohm
@@ -46,6 +48,7 @@ from cg.meta.upload.raredisease.raredisease import RarediseaseUploadAPI
 from cg.meta.upload.tomte.tomte import TomteUploadAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
+from cg.services.deliver_files.factory import DeliveryServiceFactory
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
 from cg.utils.click.EnumChoice import EnumChoice
@@ -100,6 +103,19 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
             upload_api = NfAnalysisUploadAPI(config_object, case.data_analysis)
         elif case.data_analysis == Workflow.MUTANT:
             upload_api = MutantUploadAPI(config_object)
+        elif case.data_analysis == Workflow.RAW_DATA:
+            service_builder: DeliveryServiceFactory = config_object.delivery_service_factory
+            utils.deliver_raw_data_for_analyses(
+                analyses=case.analyses,
+                status_db=config_object.status_db,
+                delivery_path=Path(config_object.delivery_path),
+                service_builder=service_builder,
+                dry_run=False,
+            )
+            click.echo(
+                click.style(f"{case_id} analysis has been successfully uploaded", fg="green")
+            )
+            return
 
         context.obj.meta_apis["upload_api"] = upload_api
         upload_api.upload(ctx=context, case=case, restart=restart)

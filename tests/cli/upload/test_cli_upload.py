@@ -1,12 +1,18 @@
 """Test CG CLI upload module."""
 
 from datetime import datetime, timedelta
+from pathlib import Path
+from unittest.mock import Mock, create_autospec
 
-from click.testing import CliRunner
+from click.testing import CliRunner, Result
+from pytest_mock import MockerFixture
 
-from cg.cli.upload.base import upload
-from cg.models.cg_config import CGConfig
-from cg.store.models import Case
+from cg.cli.upload.base import upload, utils
+from cg.constants.constants import DataDelivery, Workflow
+from cg.constants.process import EXIT_SUCCESS
+from cg.models.cg_config import CGConfig, IlluminaConfig, RunInstruments
+from cg.services.deliver_files.factory import DeliveryServiceFactory
+from cg.store.models import Analysis, Case
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -49,3 +55,45 @@ def test_upload_force_restart(cli_runner: CliRunner, base_context: CGConfig, hel
 
     # THEN it tries to restart the upload
     assert "already started" not in result.output
+
+
+def test_upload_raw_data_case(cli_runner: CliRunner, mocker: MockerFixture):
+    analysis: Analysis = create_autospec(Analysis, uploaded_at=None, upload_started_at=None)
+    case: Case = create_autospec(
+        Case,
+        analyses=[analysis],
+        data_analysis=Workflow.RAW_DATA,
+        data_delivery=DataDelivery.SCOUT,
+        internal_id="raw_data_case",
+    )
+
+    status_db: Store = create_autospec(Store)
+    status_db.verify_case_exists = Mock(return_value=True)
+    status_db.get_case_by_internal_id = Mock(return_value=case)
+
+    raw_data_deliver_spy = mocker.spy(utils, "deliver_raw_data_for_analyses")
+    delivery_service_factory = create_autospec(DeliveryServiceFactory)
+
+    context: CGConfig = create_autospec(
+        CGConfig,
+        status_db=status_db,
+        meta_apis={},
+        delivery_path="delivery_path",
+        delivery_service_factory=delivery_service_factory,
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+        ),
+    )
+
+    result: Result = cli_runner.invoke(upload, ["--case", case.internal_id], obj=context)
+
+    assert result.exit_code == EXIT_SUCCESS
+
+    raw_data_deliver_spy.assert_called_once_with(
+        analyses=[analysis],
+        status_db=status_db,
+        delivery_path=Path("delivery_path"),
+        service_builder=delivery_service_factory,
+        dry_run=False,
+    )
