@@ -121,7 +121,7 @@ class CompressAPI:
             LOG.info(
                 f"Decompressing {compression.spring_path} to FASTQ format for sample {sample_id}"
             )
-            if compression.is_spring_decompression_possible:
+            if not compression.is_spring_decompression_possible:
                 LOG.info(f"Decompression not possible for {compression.spring_path}.")
             else:
                 self.crunchy_api.spring_to_fastq(compression_obj=compression, sample_id=sample_id)
