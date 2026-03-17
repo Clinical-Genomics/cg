@@ -22,29 +22,30 @@ def deliver_analysis():
     - [x] Commit changes to  StatusDb if TB call went well, else rollback
     """
 
-    if trailblazer_id := request.args.get("trailblazer_id", type=int):
-        try:
-            analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
-            case: Case = analysis.case
-            for case_sample in case.links:
-                # TODO group meditation on attribute name
-                if (
-                    case_sample.is_original
-                    and not case_sample.sample.delivered_at
-                    and passes_on_reads(case_sample)
-                ):
-                    case_sample.sample.delivered_at = datetime.now()
-            analysis_client.mark_analyses_as_delivered(trailblazer_ids=[trailblazer_id])
-        except AnalysisDoesNotExistError:
-            return Response(status=HTTPStatus.BAD_REQUEST)
-        except TrailblazerAPIHTTPError:
-            db.rollback()
-            return Response(status=HTTPStatus.BAD_GATEWAY)
-        finally:
-            db.commit_to_store()
-        return Response(status=HTTPStatus.NO_CONTENT)
-    else:
+    trailblazer_id = request.args.get("trailblazer_id", type=int)
+    if trailblazer_id is not None:
         return Response(status=HTTPStatus.BAD_REQUEST)
+    try:
+        analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
+    except AnalysisDoesNotExistError:
+        return Response(status=HTTPStatus.BAD_REQUEST)
+    try:
+        case: Case = analysis.case
+        for case_sample in case.links:
+            # TODO group meditation on attribute name
+            if (
+                case_sample.is_original
+                and not case_sample.sample.delivered_at
+                and passes_on_reads(case_sample)
+            ):
+                case_sample.sample.delivered_at = datetime.now()
+        analysis_client.mark_analyses_as_delivered(trailblazer_ids=[trailblazer_id])
+    except TrailblazerAPIHTTPError:
+        db.rollback()
+        return Response(status=HTTPStatus.BAD_GATEWAY)
+    finally:
+        db.commit_to_store()
+    return Response(status=HTTPStatus.NO_CONTENT)
 
 
 def passes_on_reads(case_sample: CaseSample) -> bool:
