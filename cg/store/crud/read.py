@@ -212,6 +212,7 @@ class ReadHandler(BaseHandler):
     def get_analysis_by_trailblazer_id(self, trailblazer_id: int) -> Analysis:
         """Return an analysis by trailblazer ID."""
         # TODO test this
+        # TODO wrap the error into AnalysisDoesNotExistError
         return self._get_query(table=Analysis).filter_by(trailblazer_id=trailblazer_id).one()
 
     def get_cases_by_customer_and_case_name_search(

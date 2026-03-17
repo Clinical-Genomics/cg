@@ -7,7 +7,7 @@ from flask.testing import FlaskClient
 from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
-from cg.exc import TrailblazerAPIHTTPError
+from cg.exc import AnalysisDoesNotExistError, TrailblazerAPIHTTPError
 from cg.server.endpoints import deliver
 from cg.server.ext import AnalysisClient, FlaskStore
 from cg.store.models import Analysis, Case, CaseSample, Sample
@@ -295,44 +295,17 @@ def test_no_trailblazer_id_given(client: FlaskClient):
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
-def test_deliver_trailblazer_analysis(
-    client: FlaskClient, status_db: TypedMock[FlaskStore], mocker: MockerFixture
+def test_trailblazer_id_not_found_in_database(
+    client: FlaskClient, status_db: TypedMock[FlaskStore]
 ):
     # GIVEN a trailblazer analysis id
     trailblazer_id = 666666
 
-    # GIVEN samples that should be delivered
-    sample_1: Sample = create_autospec(Sample, delivered_at=None)
-    sample_2: Sample = create_autospec(Sample, delivered_at=None)
-
-    # GIVEN a case to be delivered
-    case: Case = create_autospec(Case)
-    case_sample_1 = create_autospec(CaseSample, case=case, sample=sample_1, is_original=True)
-    case_sample_2 = create_autospec(CaseSample, case=case, sample=sample_2, is_original=True)
-    case.links = [case_sample_1, case_sample_2]
-
-    # GIVEN an analysis linked to the case
-    analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
-    status_db.as_type.get_analysis_by_trailblazer_id = Mock(return_value=analysis)
-
-    # GIVEN a TrailblazerAPI
-    analysis_client = create_autospec(AnalysisClient)
-    mocker.patch.object(deliver, "analysis_client", analysis_client)
+    # GIVEN that the trailblazer id has no matching analysis
+    status_db.as_type.get_analysis_by_trailblazer_id = Mock(side_effect=AnalysisDoesNotExistError)
 
     # WHEN calling the endpoint
     response = client.post(f"/api/v1/deliver?trailblazer_id={trailblazer_id}")
 
-    # THEN the response should be successful
-    assert response.status_code == HTTPStatus.NO_CONTENT
-
-    # THEN the samples should have been delivered
-    assert sample_1.delivered_at is not None
-    assert sample_2.delivered_at is not None
-
-    # THEN endpoint in Trailblazer was called
-    analysis_client.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id]
-    )
-
-    # THEN these changes were commited to the database
-    status_db.as_mock.commit_to_store.assert_called_once()
+    # THEN the response should be a bad request
+    assert response.status_code == HTTPStatus.BAD_REQUEST

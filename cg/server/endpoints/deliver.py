@@ -4,7 +4,7 @@ from http import HTTPStatus
 from flask import Blueprint, Response, jsonify, request
 
 from cg.constants import Workflow
-from cg.exc import TrailblazerAPIHTTPError
+from cg.exc import AnalysisDoesNotExistError, TrailblazerAPIHTTPError
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import analysis_client, db
 from cg.store.models import Analysis, Case, CaseSample
@@ -23,20 +23,20 @@ def deliver_analysis():
     """
 
     if trailblazer_id := request.args.get("trailblazer_id", type=int):
-        # TODO: consider scenario when trailblazer id does not match an analysis
-
-        analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
-        case: Case = analysis.case
-        for case_sample in case.links:
-            # TODO group meditation on attribute name
-            if (
-                case_sample.is_original
-                and not case_sample.sample.delivered_at
-                and passes_on_reads(case_sample)
-            ):
-                case_sample.sample.delivered_at = datetime.now()
         try:
+            analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
+            case: Case = analysis.case
+            for case_sample in case.links:
+                # TODO group meditation on attribute name
+                if (
+                    case_sample.is_original
+                    and not case_sample.sample.delivered_at
+                    and passes_on_reads(case_sample)
+                ):
+                    case_sample.sample.delivered_at = datetime.now()
             analysis_client.mark_analyses_as_delivered(trailblazer_ids=[trailblazer_id])
+        except AnalysisDoesNotExistError:
+            return Response(status=HTTPStatus.BAD_REQUEST)
         except TrailblazerAPIHTTPError:
             db.rollback()
             return Response(status=HTTPStatus.BAD_GATEWAY)
