@@ -1,7 +1,7 @@
 from datetime import datetime
 from http import HTTPStatus
 
-from flask import Blueprint, Response, jsonify, request
+from flask import Blueprint, Response, request
 
 from cg.constants import Workflow
 from cg.exc import AnalysisDoesNotExistError, TrailblazerAPIHTTPError
@@ -22,23 +22,25 @@ def deliver_analysis():
     - [x] Commit changes to  StatusDb if TB call went well, else rollback
     """
 
+    # TODO endpoint?
     trailblazer_id = request.args.get("trailblazer_id", type=int)
-    if trailblazer_id is not None:
+    if trailblazer_id is None:
         return Response(status=HTTPStatus.BAD_REQUEST)
+    # TODO service?
     try:
         analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
     except AnalysisDoesNotExistError:
         return Response(status=HTTPStatus.BAD_REQUEST)
+    case: Case = analysis.case
+    for case_sample in case.links:
+        # TODO group meditation on attribute name
+        if (
+            case_sample.is_original
+            and not case_sample.sample.delivered_at
+            and passes_on_reads(case_sample)
+        ):
+            case_sample.sample.delivered_at = datetime.now()
     try:
-        case: Case = analysis.case
-        for case_sample in case.links:
-            # TODO group meditation on attribute name
-            if (
-                case_sample.is_original
-                and not case_sample.sample.delivered_at
-                and passes_on_reads(case_sample)
-            ):
-                case_sample.sample.delivered_at = datetime.now()
         analysis_client.mark_analyses_as_delivered(trailblazer_ids=[trailblazer_id])
     except TrailblazerAPIHTTPError:
         db.rollback()
