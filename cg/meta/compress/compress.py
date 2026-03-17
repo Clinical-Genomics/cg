@@ -125,8 +125,6 @@ class CompressAPI:
                         f"Spring file {compression.spring_path.as_posix()} is already being decompressed."
                     )
                     continue
-                # TODO any additional logs or actions here?
-
             LOG.info(
                 f"Decompressing {compression.spring_path} to FASTQ format for sample {sample_id}"
             )
