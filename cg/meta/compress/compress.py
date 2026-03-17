@@ -111,7 +111,6 @@ class CompressAPI:
             - Housekeeper will be updated to include FASTQ files
             - Housekeeper will still have the SPRING and SPRING metadata file
             - The SPRING metadata file will be updated to include date for decompression
-            - PDC archived SPRING files will be retrieved and decrypted before decompression
         """
         version: Version = self.hk_api.get_latest_bundle_version(bundle_name=sample_id)
         if not version:
