@@ -24,19 +24,21 @@ def test_deliver_trailblazer_analysis(client: FlaskClient, mocker: MockerFixture
 
     # GIVEN a sample originating from a different case
     existing_sample: Sample = create_autospec(Sample, delivered_at=None)
-    case_sample_original: CaseSample = create_autospec(
-        CaseSample, case=create_autospec(Case), sample=existing_sample, invoiceable=True
-    )
 
     # GIVEN a case to be delivered
     case: Case = create_autospec(
         Case, samples=[sample_1, sample_2, delivered_sample, existing_sample]
     )
 
-    case_sample_new: CaseSample = create_autospec(
-        CaseSample, case=case, sample=existing_sample, invoiceable=False
+    case_sample_1 = create_autospec(CaseSample, case=case, sample=sample_1, is_original=True)
+    case_sample_2 = create_autospec(CaseSample, case=case, sample=sample_2, is_original=True)
+    delivered_case_sample = create_autospec(
+        CaseSample, case=case, sample=delivered_sample, is_original=True
     )
-    existing_sample.links = [case_sample_original, case_sample_new]
+    case_sample_new: CaseSample = create_autospec(
+        CaseSample, case=case, sample=existing_sample, is_original=False
+    )
+    case.links = [case_sample_1, case_sample_2, delivered_case_sample, case_sample_new]
 
     # GIVEN an analysis linked to the case
     analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
