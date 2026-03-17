@@ -3,9 +3,10 @@ from http import HTTPStatus
 
 from flask import Blueprint, Response, jsonify, request
 
+from cg.constants import Workflow
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import analysis_client, db
-from cg.store.models import Analysis, Case
+from cg.store.models import Analysis, Case, CaseSample, Sample
 
 DELIVER_BLUEPRINT = Blueprint("deliver", __name__, url_prefix="/api/v1")
 DELIVER_BLUEPRINT.before_request(before_request)
@@ -25,7 +26,11 @@ def deliver_analysis():
         case: Case = analysis.case
         for case_sample in case.links:
             # TODO group meditation on attribute name
-            if case_sample.is_original and not case_sample.sample.delivered_at:
+            if (
+                case_sample.is_original
+                and not case_sample.sample.delivered_at
+                and passes_on_reads(case_sample)
+            ):
                 case_sample.sample.delivered_at = datetime.now()
         analysis_client.mark_analyses_as_delivered(trailblazer_ids=[trailblazer_id])
         return Response(status=HTTPStatus.NO_CONTENT)
@@ -33,3 +38,10 @@ def deliver_analysis():
         # TODO add test
         # TODO add error message shaming the bad request
         return jsonify({}), HTTPStatus.BAD_REQUEST
+
+
+def passes_on_reads(case_sample: CaseSample) -> bool:
+    if case_sample.case.data_analysis in [Workflow.MICROSALT, Workflow.TAXPROFILER]:
+        return case_sample.sample.reads >= case_sample.sample.expected_reads_for_sample
+    else:
+        return True

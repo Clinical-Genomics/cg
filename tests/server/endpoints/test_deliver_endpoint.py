@@ -5,6 +5,7 @@ from unittest.mock import Mock, create_autospec
 from flask.testing import FlaskClient
 from pytest_mock import MockerFixture
 
+from cg.constants import Workflow
 from cg.server.endpoints import deliver
 from cg.server.ext import AnalysisClient, FlaskStore
 from cg.store.models import Analysis, Case, CaseSample, Sample
@@ -19,7 +20,7 @@ def test_deliver_trailblazer_analysis(client: FlaskClient, mocker: MockerFixture
     sample_2: Sample = create_autospec(Sample, delivered_at=None)
 
     # GIVEN a case to be delivered
-    case: Case = create_autospec(Case, samples=[sample_1, sample_2])
+    case: Case = create_autospec(Case)
     case_sample_1 = create_autospec(CaseSample, case=case, sample=sample_1, is_original=True)
     case_sample_2 = create_autospec(CaseSample, case=case, sample=sample_2, is_original=True)
     case.links = [case_sample_1, case_sample_2]
@@ -61,7 +62,7 @@ def test_deliver_mix_original_non_original_samples(client: FlaskClient, mocker: 
     sample_existing: Sample = create_autospec(Sample, delivered_at=None)
 
     # GIVEN a case with the two samples
-    case: Case = create_autospec(Case, samples=[sample_new, sample_existing])
+    case: Case = create_autospec(Case)
 
     case_sample_new = create_autospec(CaseSample, case=case, sample=sample_new, is_original=True)
     case_sample_existing = create_autospec(
@@ -107,7 +108,7 @@ def test_deliver_rerun_case(client: FlaskClient, mocker: MockerFixture):
     sample_2: Sample = create_autospec(Sample, delivered_at=yesterday)
 
     # GIVEN a case with the two samples
-    case: Case = create_autospec(Case, samples=[sample_1, sample_2])
+    case: Case = create_autospec(Case)
     case_sample_1 = create_autospec(CaseSample, case=case, sample=sample_1, is_original=True)
     case_sample_2 = create_autospec(CaseSample, case=case, sample=sample_2, is_original=False)
     case.links = [case_sample_1, case_sample_2]
@@ -188,15 +189,22 @@ def test_partial_delivery(client: FlaskClient, mocker: MockerFixture):
     trailblazer_id = 666666
 
     # GIVEN one delivered sample and one undelivered sample
-    yesterday = datetime.now() - timedelta(days=1)
-    sample_1: Sample = create_autospec(Sample, delivered_at=yesterday)
-    sample_2: Sample = create_autospec(Sample, delivered_at=None)
+    sample_enough_reads: Sample = create_autospec(
+        Sample, delivered_at=None, expected_reads_for_sample=10, reads=11
+    )
+    sample_not_enough_reads: Sample = create_autospec(
+        Sample, delivered_at=None, expected_reads_for_sample=10, reads=9
+    )
 
     # GIVEN that the two samples originally belong to this given case
-    case: Case = create_autospec(Case, samples=[sample_1, sample_2])
-    case_sample_1 = create_autospec(CaseSample, case=case, sample=sample_1, is_original=True)
-    case_sample_2 = create_autospec(CaseSample, case=case, sample=sample_2, is_original=True)
-    case.links = [case_sample_1, case_sample_2]
+    case: Case = create_autospec(Case, data_analysis=Workflow.TAXPROFILER)
+    case_sample_enough_reads = create_autospec(
+        CaseSample, case=case, sample=sample_enough_reads, is_original=True
+    )
+    case_sample_not_enough_reads = create_autospec(
+        CaseSample, case=case, sample=sample_not_enough_reads, is_original=True
+    )
+    case.links = [case_sample_enough_reads, case_sample_not_enough_reads]
 
     # GIVEN an analysis linked to the case
     analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
@@ -216,9 +224,9 @@ def test_partial_delivery(client: FlaskClient, mocker: MockerFixture):
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.NO_CONTENT
 
-    # THEN only the delivered_at of the undelivered sample is updated
-    assert sample_1.delivered_at is yesterday
-    assert sample_2.delivered_at is not None
+    # THEN only the delivered_at of the sample with enough reads is updated
+    assert sample_enough_reads.delivered_at is not None
+    assert sample_not_enough_reads.delivered_at is None
 
     # THEN endpoint in Trailblazer was called
     analysis_client.mark_analyses_as_delivered.assert_called_once_with(
