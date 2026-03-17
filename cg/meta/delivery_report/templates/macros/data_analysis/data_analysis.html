@@ -42,13 +42,13 @@
   <table class="table w-auto text-center align-middle" aria-describedby="data-analysis-table">
     <thead class="table-secondary">
       <tr>
-        <th scope="col">Fall</th>
+        <th scope="col">Fall (*)</th>
         <th scope="col">Bioinformatisk analys</th>
         <th scope="col">Genomversion</th>
-        <th scope="col">{% if "balsamic" in workflow %} Analystyp {% endif %}</th>
+        <th scope="col">{% if "balsamic" in workflow %} Analystyp (*) {% endif %}</th>
         <th scope="col">{% if "balsamic" in workflow and case.data_analysis.pons != "N/A" %} Panel of Normals {% endif %}</th>
         <th scope="col">{% if workflow in ("balsamic", "balsamic-umi") %} Variantanropare {% endif %}</th>
-        <th scope="col">{% if workflow in ("mip-dna", "nallo", "raredisease", "rnafusion", "tomte") %} Genpaneler {% endif %}</th>
+        <th scope="col">{% if workflow in ("mip-dna", "nallo", "raredisease", "rnafusion", "tomte") %} Genpaneler (*) {% endif %}</th>
       </tr>
     </thead>
     <tbody>
