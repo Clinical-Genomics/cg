@@ -9,8 +9,8 @@ from cg.apps.lims import LimsAPI
 from cg.apps.tb.api import TrailblazerAPI
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.server.app_config import app_config
-from cg.services.deliver_samples.deliver_samples import MarkSamplesAsDeliveredService
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
+from cg.services.mark_as_delivered_service import MarkAsDeliveredService
 from cg.services.orders.order_service.order_service import OrderService
 from cg.services.orders.order_summary_service.order_summary_service import OrderSummaryService
 from cg.services.orders.storing.service_registry import (
@@ -94,9 +94,7 @@ case_service = CaseWebService(store=db)
 order_service = OrderService(store=db, status_service=summary_service)
 pacbio_sequencing_runs_service = PacbioSequencingRunsService(db)
 sample_service = SampleService(db)
-mark_samples_as_delivered_service = MarkSamplesAsDeliveredService(
-    status_db=db, trailblazer_api=analysis_client
-)
+mark_as_delivered_service = MarkAsDeliveredService(status_db=db, trailblazer_api=analysis_client)
 sample_run_metrics_service = SampleRunMetricsService(db)
 storing_service_registry: StoringServiceRegistry = setup_storing_service_registry(
     lims=lims,

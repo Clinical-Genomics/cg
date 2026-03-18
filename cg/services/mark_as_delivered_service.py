@@ -6,15 +6,14 @@ from cg.store.models import Analysis, Case, CaseSample
 from cg.store.store import Store
 
 
-class MarkSamplesAsDeliveredService:
+class MarkAsDeliveredService:
     def __init__(self, status_db: Store, trailblazer_api: TrailblazerAPI) -> None:
         self.status_db = status_db
         self.trailblazer_api = trailblazer_api
 
-    def mark_samples_as_delivered(self, analysis: Analysis):
+    def mark_analysis(self, analysis: Analysis):
         case: Case = analysis.case
         for case_sample in case.links:
-            # TODO group meditation on attribute name
             if self._should_sample_be_delivered(case_sample):
                 case_sample.sample.delivered_at = datetime.now()
         self.trailblazer_api.mark_analyses_as_delivered(trailblazer_ids=[analysis.trailblazer_id])
