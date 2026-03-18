@@ -3,6 +3,7 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from cg.constants.constants import Workflow
 from cg.server.ext import AnalysisClient, FlaskStore
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
 from cg.store.models import Analysis, Case, CaseSample, Sample
@@ -135,4 +136,107 @@ def test_mark_analysis_rerun_case(trailblazer_id: int):
 
 def test_mark_analysis_mixed_delivered_at_original_samples(trailblazer_id: int):
     """Tests that delivering a case with one already delivered original sample does not deliver that sample again."""
-    pass
+    # GIVEN a TrailblazerAPI
+    analysis_client = create_autospec(AnalysisClient)
+
+    # GIVEN a store
+    status_db: FlaskStore = create_autospec(FlaskStore)
+
+    # GIVEN a service that marks the analysis as delivered
+    mark_as_delivered_service = MarkAsDeliveredService(
+        status_db=status_db, trailblazer_api=analysis_client
+    )
+
+    # GIVEN one delivered sample and one undelivered sample
+    yesterday = datetime.now() - timedelta(days=1)
+    sample_1: Sample = create_autospec(Sample, delivered_at=yesterday)
+    sample_2: Sample = create_autospec(Sample, delivered_at=None)
+
+    # GIVEN that the two samples originally belong to this given case
+    case: Case = create_autospec(Case, samples=[sample_1, sample_2])
+    case_sample_1 = create_autospec(CaseSample, case=case, sample=sample_1, is_original=True)
+    case_sample_2 = create_autospec(CaseSample, case=case, sample=sample_2, is_original=True)
+    case.links = [case_sample_1, case_sample_2]
+
+    # GIVEN an analysis linked to the case
+    analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
+
+    # WHEN we call mark_analysis
+    mark_as_delivered_service.mark_analysis(analysis)
+
+    # THEN only the delivered_at of the undelivered sample is updated
+    assert sample_1.delivered_at is yesterday
+    assert sample_2.delivered_at is not None
+
+    # THEN endpoint in Trailblazer was called
+    analysis_client.mark_analyses_as_delivered.assert_called_once_with(
+        trailblazer_ids=[trailblazer_id]
+    )
+
+
+def test_mark_analysis_partial_delivery(trailblazer_id: int):
+    """Test that delivering a case with a sample with not enough reads does not deliver that sample."""
+    # GIVEN a TrailblazerAPI
+    analysis_client = create_autospec(AnalysisClient)
+
+    # GIVEN a store
+    status_db: FlaskStore = create_autospec(FlaskStore)
+
+    # GIVEN a service that marks the analysis as delivered
+    mark_as_delivered_service = MarkAsDeliveredService(
+        status_db=status_db, trailblazer_api=analysis_client
+    )
+
+    # GIVEN one delivered sample and one undelivered sample
+    sample_enough_reads: Sample = create_autospec(
+        Sample, delivered_at=None, expected_reads_for_sample=10, reads=11
+    )
+    sample_not_enough_reads: Sample = create_autospec(
+        Sample, delivered_at=None, expected_reads_for_sample=10, reads=9
+    )
+
+    # GIVEN that the two samples originally belong to this given case
+    case: Case = create_autospec(Case, data_analysis=Workflow.TAXPROFILER)
+    case_sample_enough_reads = create_autospec(
+        CaseSample, case=case, sample=sample_enough_reads, is_original=True
+    )
+    case_sample_not_enough_reads = create_autospec(
+        CaseSample, case=case, sample=sample_not_enough_reads, is_original=True
+    )
+    case.links = [case_sample_enough_reads, case_sample_not_enough_reads]
+
+    # GIVEN an analysis linked to the case
+    analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
+
+    # WHEN we call mark_analysis
+    mark_as_delivered_service.mark_analysis(analysis)
+
+    # THEN only the delivered_at of the sample with enough reads is updated
+    assert sample_enough_reads.delivered_at is not None
+    assert sample_not_enough_reads.delivered_at is None
+
+    # THEN endpoint in Trailblazer was called
+    analysis_client.mark_analyses_as_delivered.assert_called_once_with(
+        trailblazer_ids=[trailblazer_id]
+    )
+
+
+def test_mark_analysis_trailblazer_error(trailblazer: int):
+    """Test that a TrailblazerAPIHTTPError is propagated from the service."""
+    # GIVEN a TrailblazerAPI
+    analysis_client = create_autospec(AnalysisClient)
+
+    # GIVEN a store
+    status_db: FlaskStore = create_autospec(FlaskStore)
+
+    # GIVEN a service that marks the analysis as delivered
+    mark_as_delivered_service = MarkAsDeliveredService(
+        status_db=status_db, trailblazer_api=analysis_client
+    )
+
+    # GIVEN a case to be delivered
+    case: Case = create_autospec(Case)
+    case.links = []
+
+    # GIVEN an analysis linked to the case
+    analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
