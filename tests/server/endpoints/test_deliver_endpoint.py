@@ -70,7 +70,7 @@ def test_deliver_trailblazer_analysis_client_error(client: FlaskClient, mocker: 
 
 def test_no_trailblazer_id_given(client: FlaskClient):
     # WHEN calling the endpoint without a trailblazer id
-    response = client.post(f"/api/v1/deliver")
+    response = client.post("/api/v1/deliver")
 
     # THEN the response is a bad request
     assert response.status_code == HTTPStatus.BAD_REQUEST
