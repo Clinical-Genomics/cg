@@ -27,25 +27,12 @@ def test_deliver_trailblazer_analysis(
     # GIVEN a trailblazer analysis id
     trailblazer_id = 666666
 
-    # GIVEN samples that should be delivered
-    sample_1: Sample = create_autospec(Sample, delivered_at=None)
-    sample_2: Sample = create_autospec(Sample, delivered_at=None)
-
-    # GIVEN a case to be delivered
-    case: Case = create_autospec(Case)
-    case_sample_1 = create_autospec(CaseSample, case=case, sample=sample_1, is_original=True)
-    case_sample_2 = create_autospec(CaseSample, case=case, sample=sample_2, is_original=True)
-    case.links = [case_sample_1, case_sample_2]
-
-    # GIVEN an analysis linked to the case
-    analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
+    # GIVEN an analysis linked to the trailblazer analysis
+    analysis: Analysis = create_autospec(Analysis, trailblazer_id=trailblazer_id)
     status_db.as_type.get_analysis_by_trailblazer_id = Mock(return_value=analysis)
 
-    # GIVEN a TrailblazerAPI
-    analysis_client = create_autospec(AnalysisClient)
-    mocker.patch.object(mark_as_delivered_service, "trailblazer_api", analysis_client)
-
-    mocker.patch.object(mark_as_delivered_service, "status_db", status_db.as_type)
+    # GIVEN a service to mark the analysis as delivered
+    mark_analysis_spy = mocker.spy(mark_as_delivered_service, "mark_analysis")
 
     # WHEN calling the endpoint
     response = client.post(f"/api/v1/deliver?trailblazer_id={trailblazer_id}")
@@ -53,16 +40,10 @@ def test_deliver_trailblazer_analysis(
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.NO_CONTENT
 
-    # THEN the samples should have been delivered
-    assert sample_1.delivered_at is not None
-    assert sample_2.delivered_at is not None
+    # THEN the analysis was marked as delivered
+    mark_analysis_spy.assert_called_once_with(analysis)
 
-    # THEN endpoint in Trailblazer was called
-    analysis_client.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id]
-    )
-
-    # THEN these changes were commited to the database
+    # THEN these changes were committed to the database
     status_db.as_mock.commit_to_store.assert_called_once()
 
 
