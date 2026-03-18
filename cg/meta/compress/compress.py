@@ -122,10 +122,14 @@ class CompressAPI:
                 f"Decompressing {compression.spring_path} to FASTQ format for sample {sample_id}"
             )
             if not compression.is_spring_decompression_possible:
-                LOG.info(f"Decompression not possible for {compression.spring_path}.")
+                if not (
+                    compression.is_compression_pending or compression.is_spring_decompression_done
+                ):
+                    return False
             else:
                 self.crunchy_api.spring_to_fastq(compression_obj=compression, sample_id=sample_id)
                 update_metadata_date(spring_metadata_path=compression.spring_metadata_path)
+
         return True
 
     def _is_sample_linked_to_newer_case(self, sample: Sample, days_back: int) -> bool:
