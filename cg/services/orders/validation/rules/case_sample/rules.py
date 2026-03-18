@@ -23,6 +23,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     InvalidVolumeError,
     MissingSourceCommentError,
     MotherNotInCaseError,
+    NormalSampleNotAllowedError,
     OccupiedWellError,
     PedigreeError,
     SampleDoesNotExistError,
@@ -569,5 +570,21 @@ def validate_source_comment_required(
         for sample_index, sample in case.enumerated_new_samples:
             if sample.source == "other" and not sample.source_comment:
                 error = MissingSourceCommentError(case_index=case_index, sample_index=sample_index)
+                errors.append(error)
+    return errors
+
+
+def validate_existing_samples_not_normal(
+    order: RNAFusionOrder, store: Store, **kwargs
+) -> list[NormalSampleNotAllowedError]:
+    errors: list[NormalSampleNotAllowedError] = []
+    for case_index, sample_index, sample in order.enumerated_existing_samples:
+        if db_sample := store.get_sample_by_internal_id(
+            sample.internal_id
+        ):  # If it is not found in the database, the error should be raised elsewhere
+            if not db_sample.is_tumour:
+                error = NormalSampleNotAllowedError(
+                    case_index=case_index, sample_index=sample_index
+                )
                 errors.append(error)
     return errors

@@ -195,3 +195,8 @@ class SampleNameAlreadyExistsError(CaseSampleError):
 class MissingSourceCommentError(CaseSampleError):
     field: str = "source_comment"
     message: str = "Other source must be filled in when source is 'other'"
+
+
+class NormalSampleNotAllowedError(CaseSampleError):
+    field: str = "internal_id"
+    message: str = "Existing samples must be tumour samples"
