@@ -150,7 +150,11 @@ def test_add_pending_analysis_fails(valid_trailblazer_config: dict, mocker):
         )
 
 
-def test_mark_analyses_as_delivered(valid_trailblazer_config: dict, mocker: MockerFixture):
+def test_mark_analyses_as_delivered(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
     # GIVEN a Trailblazer API
     tb_api = TrailblazerAPI(config=valid_trailblazer_config)
 
@@ -170,6 +174,24 @@ def test_mark_analyses_as_delivered(valid_trailblazer_config: dict, mocker: Mock
 
     patch_call.assert_called_once_with(
         url=f"{tb_api.host}/analyses",
-        headers={},
+        headers={"Authorization": f"Bearer {valid_google_credentials.token}"},
         json=expected_request,
     )
+
+
+def test_mark_analyses_as_delivered_fails_with_http_error(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a Trailblazer API
+    tb_api = TrailblazerAPI(config=valid_trailblazer_config)
+
+    mocker.patch.object(
+        requests, "patch", return_value=create_autospec(requests.Response, ok=False)
+    )
+
+    # WHEN marking analyses as delivered
+    # THEN a TrailblazerAPIHTTPError is raised
+    with pytest.raises(TrailblazerAPIHTTPError):
+        tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])
