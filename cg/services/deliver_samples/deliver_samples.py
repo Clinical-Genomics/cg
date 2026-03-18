@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from cg.constants import Workflow
 from cg.store.models import Analysis, Case, CaseSample
 from cg.store.store import Store
 
@@ -14,12 +15,19 @@ class MarkSamplesAsDeliveredService:
         case: Case = analysis.case
         for case_sample in case.links:
             # TODO group meditation on attribute name
-            if (
-                case_sample.is_original
-                and not case_sample.sample.delivered_at
-                and passes_on_reads(case_sample)
-            ):
+            if self._should_sample_be_delivered(case_sample):
                 case_sample.sample.delivered_at = datetime.now()
 
     def _should_sample_be_delivered(self, case_sample: CaseSample) -> bool:
-        pass
+        return (
+            case_sample.is_original
+            and not case_sample.sample.delivered_at
+            and self._passes_on_reads(case_sample)
+        )
+
+    @staticmethod
+    def _passes_on_reads(case_sample: CaseSample) -> bool:
+        if case_sample.case.data_analysis in [Workflow.MICROSALT, Workflow.TAXPROFILER]:
+            return case_sample.sample.reads >= case_sample.sample.expected_reads_for_sample
+        else:
+            return True

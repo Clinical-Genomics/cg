@@ -1,4 +1,3 @@
-from datetime import datetime
 from http import HTTPStatus
 
 from flask import Blueprint, Response, request
@@ -6,8 +5,8 @@ from flask import Blueprint, Response, request
 from cg.constants import Workflow
 from cg.exc import AnalysisDoesNotExistError, TrailblazerAPIHTTPError
 from cg.server.endpoints.utils import before_request
-from cg.server.ext import analysis_client, db
-from cg.store.models import Analysis, Case, CaseSample
+from cg.server.ext import analysis_client, db, mark_samples_as_delivered_service
+from cg.store.models import Analysis, CaseSample
 
 DELIVER_BLUEPRINT = Blueprint("deliver", __name__, url_prefix="/api/v1")
 DELIVER_BLUEPRINT.before_request(before_request)
@@ -31,15 +30,7 @@ def deliver_analysis():
         analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
     except AnalysisDoesNotExistError:
         return Response(status=HTTPStatus.BAD_REQUEST)
-    case: Case = analysis.case
-    for case_sample in case.links:
-        # TODO group meditation on attribute name
-        if (
-            case_sample.is_original
-            and not case_sample.sample.delivered_at
-            and passes_on_reads(case_sample)
-        ):
-            case_sample.sample.delivered_at = datetime.now()
+    mark_samples_as_delivered_service.mark_samples_as_delivered(trailblazer_id)
     try:
         analysis_client.mark_analyses_as_delivered(trailblazer_ids=[trailblazer_id])
     except TrailblazerAPIHTTPError:
