@@ -3,9 +3,10 @@ from unittest.mock import create_autospec
 
 import pytest
 from google.oauth2.service_account import IDTokenCredentials
+from pytest_mock import MockerFixture
 from requests import Response
 
-from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.api import TrailblazerAPI, requests
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.constants import APIMethods, Workflow, WorkflowManager
 from cg.constants.priority import TrailblazerPriority
@@ -149,9 +150,11 @@ def test_add_pending_analysis_fails(valid_trailblazer_config: dict, mocker):
         )
 
 
-def test_mark_analyses_as_delivered(valid_trailblazer_config: dict):
+def test_mark_analyses_as_delivered(valid_trailblazer_config: dict, mocker: MockerFixture):
     # GIVEN a Trailblazer API
     tb_api = TrailblazerAPI(config=valid_trailblazer_config)
+
+    patch_call = mocker.patch.object(requests, "patch")
 
     # WHEN marking analyses as delivered
     tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])
@@ -164,3 +167,9 @@ def test_mark_analyses_as_delivered(valid_trailblazer_config: dict):
             {"id": 3, "is_delivered": True},
         ]
     }
+
+    patch_call.assert_called_once_with(
+        url=f"{tb_api.host}/analyses",
+        headers={},
+        json=expected_request,
+    )

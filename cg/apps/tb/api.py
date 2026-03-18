@@ -4,6 +4,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Any
 
+import requests
 from google.auth.transport.requests import Request
 from google.oauth2.service_account import IDTokenCredentials
 
@@ -211,7 +212,7 @@ class TrailblazerAPI:
 
     def mark_analyses_as_delivered(self, trailblazer_ids: list[int]) -> None:
         # TODO: Implement and test
-        pass
+        requests.patch()
 
     def get_analyses_to_deliver(self, order_id: int) -> list[TrailblazerAnalysis]:
         """Return the analyses in the order ready to be delivered."""
