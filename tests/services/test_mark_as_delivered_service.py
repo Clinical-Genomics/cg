@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 
 from cg.constants.constants import Workflow
+from cg.exc import TrailblazerAPIHTTPError
 from cg.server.ext import AnalysisClient, FlaskStore
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
 from cg.store.models import Analysis, Case, CaseSample, Sample
@@ -174,7 +175,8 @@ def test_mark_analysis_mixed_delivered_at_original_samples(trailblazer_id: int):
     )
 
 
-def test_mark_analysis_partial_delivery(trailblazer_id: int):
+@pytest.mark.parametrize("workflow", [Workflow.MICROSALT, Workflow.TAXPROFILER])
+def test_mark_analysis_partial_delivery(trailblazer_id: int, workflow: Workflow):
     """Test that delivering a case with a sample with not enough reads does not deliver that sample."""
     # GIVEN a TrailblazerAPI
     analysis_client = create_autospec(AnalysisClient)
@@ -196,7 +198,7 @@ def test_mark_analysis_partial_delivery(trailblazer_id: int):
     )
 
     # GIVEN that the two samples originally belong to this given case
-    case: Case = create_autospec(Case, data_analysis=Workflow.TAXPROFILER)
+    case: Case = create_autospec(Case, data_analysis=workflow)
     case_sample_enough_reads = create_autospec(
         CaseSample, case=case, sample=sample_enough_reads, is_original=True
     )
@@ -221,10 +223,11 @@ def test_mark_analysis_partial_delivery(trailblazer_id: int):
     )
 
 
-def test_mark_analysis_trailblazer_error(trailblazer: int):
+def test_mark_analysis_trailblazer_error(trailblazer_id: int):
     """Test that a TrailblazerAPIHTTPError is propagated from the service."""
-    # GIVEN a TrailblazerAPI
+    # GIVEN a TrailblazerAPI that fails
     analysis_client = create_autospec(AnalysisClient)
+    analysis_client.mark_analyses_as_delivered = Mock(side_effect=TrailblazerAPIHTTPError)
 
     # GIVEN a store
     status_db: FlaskStore = create_autospec(FlaskStore)
@@ -240,3 +243,8 @@ def test_mark_analysis_trailblazer_error(trailblazer: int):
 
     # GIVEN an analysis linked to the case
     analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
+
+    # WHEN we call mark_analysis
+    # THEN an error is raised
+    with pytest.raises(TrailblazerAPIHTTPError):
+        mark_as_delivered_service.mark_analysis(analysis)

@@ -49,41 +49,20 @@ def test_deliver_trailblazer_analysis_client_error(client: FlaskClient, mocker: 
     # GIVEN a trailblazer analysis id
     trailblazer_id = 666666
 
-    # GIVEN samples that should be delivered
-    sample_1: Sample = create_autospec(Sample, delivered_at=None)
-    sample_2: Sample = create_autospec(Sample, delivered_at=None)
-
-    # GIVEN a case to be delivered
-    case: Case = create_autospec(Case)
-    case_sample_1 = create_autospec(CaseSample, case=case, sample=sample_1, is_original=True)
-    case_sample_2 = create_autospec(CaseSample, case=case, sample=sample_2, is_original=True)
-    case.links = [case_sample_1, case_sample_2]
-
-    # GIVEN an analysis linked to the case
-    analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
-
     # GIVEN a store
     status_db: TypedMock[FlaskStore] = create_typed_mock(FlaskStore)
-    status_db.as_type.get_analysis_by_trailblazer_id = Mock(return_value=analysis)
     mocker.patch.object(deliver, "db", status_db.as_type)
 
-    # GIVEN a TrailblazerAPI
-    analysis_client = create_autospec(AnalysisClient)
-    analysis_client.mark_analyses_as_delivered = Mock(side_effect=TrailblazerAPIHTTPError)
-    mocker.patch.object(mark_as_delivered_service, "trailblazer_api", analysis_client)
-
-    mocker.patch.object(mark_as_delivered_service, "status_db", status_db.as_type)
+    # GIVEN a service that marks the analysis as delivered that fails when calling Trailblazer
+    mocker.patch.object(
+        mark_as_delivered_service, "mark_analysis", side_effect=TrailblazerAPIHTTPError
+    )
 
     # WHEN calling the endpoint
     response = client.post(f"/api/v1/deliver?trailblazer_id={trailblazer_id}")
 
     # THEN the response should be bad gateway
     assert response.status_code == HTTPStatus.BAD_GATEWAY
-
-    # THEN endpoint in Trailblazer was called
-    analysis_client.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id]
-    )
 
     # THEN the database changes were rolled back
     status_db.as_mock.rollback.assert_called_once()
