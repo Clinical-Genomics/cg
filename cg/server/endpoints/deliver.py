@@ -30,7 +30,7 @@ def deliver_analysis():
         analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
     except AnalysisDoesNotExistError:
         return Response(status=HTTPStatus.BAD_REQUEST)
-    mark_samples_as_delivered_service.mark_samples_as_delivered(trailblazer_id)
+    mark_samples_as_delivered_service.mark_samples_as_delivered(analysis)
     try:
         analysis_client.mark_analyses_as_delivered(trailblazer_ids=[trailblazer_id])
     except TrailblazerAPIHTTPError:
@@ -39,10 +39,3 @@ def deliver_analysis():
     finally:
         db.commit_to_store()
     return Response(status=HTTPStatus.NO_CONTENT)
-
-
-def passes_on_reads(case_sample: CaseSample) -> bool:
-    if case_sample.case.data_analysis in [Workflow.MICROSALT, Workflow.TAXPROFILER]:
-        return case_sample.sample.reads >= case_sample.sample.expected_reads_for_sample
-    else:
-        return True
