@@ -1,13 +1,14 @@
 from datetime import datetime
 
 from cg.constants import Workflow
+from cg.server.ext import AnalysisClient, FlaskStore
 from cg.store.models import Analysis, Case, CaseSample
-from cg.store.store import Store
 
 
 class MarkSamplesAsDeliveredService:
-    def __init__(self, status_db: Store) -> None:
+    def __init__(self, status_db: FlaskStore, trailblazer_api: AnalysisClient) -> None:
         self.status_db = status_db
+        self.trailblazer_api = trailblazer_api
 
     def mark_samples_as_delivered(self, analysis: Analysis):
         case: Case = analysis.case
@@ -15,6 +16,7 @@ class MarkSamplesAsDeliveredService:
             # TODO group meditation on attribute name
             if self._should_sample_be_delivered(case_sample):
                 case_sample.sample.delivered_at = datetime.now()
+        self.trailblazer_api.mark_analyses_as_delivered(trailblazer_ids=[analysis.trailblazer_id])
 
     def _should_sample_be_delivered(self, case_sample: CaseSample) -> bool:
         return (
