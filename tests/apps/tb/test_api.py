@@ -147,3 +147,20 @@ def test_add_pending_analysis_fails(valid_trailblazer_config: dict, mocker):
             ticket=ticket,
             tower_workflow_id=tower_workflow_id,
         )
+
+
+def test_mark_analyses_as_delivered(valid_trailblazer_config: dict):
+    # GIVEN a Trailblazer API
+    tb_api = TrailblazerAPI(config=valid_trailblazer_config)
+
+    # WHEN marking analyses as delivered
+    tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])
+
+    # THEN the expected request should have been sent
+    expected_request = {
+        "analyses": [
+            {"id": 1, "is_delivered": True},
+            {"id": 2, "is_delivered": True},
+            {"id": 3, "is_delivered": True},
+        ]
+    }
