@@ -94,7 +94,9 @@ case_service = CaseWebService(store=db)
 order_service = OrderService(store=db, status_service=summary_service)
 pacbio_sequencing_runs_service = PacbioSequencingRunsService(db)
 sample_service = SampleService(db)
-mark_samples_as_delivered_service = MarkSamplesAsDeliveredService(db)
+mark_samples_as_delivered_service = MarkSamplesAsDeliveredService(
+    status_db=db, trailblazer_api=analysis_client
+)
 sample_run_metrics_service = SampleRunMetricsService(db)
 storing_service_registry: StoringServiceRegistry = setup_storing_service_registry(
     lims=lims,

@@ -1,12 +1,13 @@
 from datetime import datetime
 
+from cg.apps.tb.api import TrailblazerAPI
 from cg.constants import Workflow
-from cg.server.ext import AnalysisClient, FlaskStore
 from cg.store.models import Analysis, Case, CaseSample
+from cg.store.store import Store
 
 
 class MarkSamplesAsDeliveredService:
-    def __init__(self, status_db: FlaskStore, trailblazer_api: AnalysisClient) -> None:
+    def __init__(self, status_db: Store, trailblazer_api: TrailblazerAPI) -> None:
         self.status_db = status_db
         self.trailblazer_api = trailblazer_api
 

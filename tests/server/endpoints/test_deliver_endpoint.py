@@ -43,7 +43,7 @@ def test_deliver_trailblazer_analysis(
 
     # GIVEN a TrailblazerAPI
     analysis_client = create_autospec(AnalysisClient)
-    mocker.patch.object(deliver, "analysis_client", analysis_client)
+    mocker.patch.object(mark_samples_as_delivered_service, "trailblazer_api", analysis_client)
 
     mocker.patch.object(mark_samples_as_delivered_service, "status_db", status_db.as_type)
 
@@ -95,7 +95,7 @@ def test_deliver_mix_original_non_original_samples(client: FlaskClient, mocker: 
 
     # GIVEN a TrailblazerAPI
     analysis_client = create_autospec(AnalysisClient)
-    mocker.patch.object(deliver, "analysis_client", analysis_client)
+    mocker.patch.object(mark_samples_as_delivered_service, "trailblazer_api", analysis_client)
 
     # WHEN calling the endpoint
     response = client.post(f"/api/v1/deliver?trailblazer_id={trailblazer_id}")
@@ -140,7 +140,7 @@ def test_deliver_rerun_case(client: FlaskClient, mocker: MockerFixture):
 
     # GIVEN a TrailblazerAPI
     analysis_client = create_autospec(AnalysisClient)
-    mocker.patch.object(deliver, "analysis_client", analysis_client)
+    mocker.patch.object(mark_samples_as_delivered_service, "trailblazer_api", analysis_client)
 
     # WHEN calling the endpoint
     response = client.post(f"/api/v1/deliver?trailblazer_id={trailblazer_id}")
@@ -185,7 +185,7 @@ def test_mixed_delivered_at_original_samples(client: FlaskClient, mocker: Mocker
 
     # GIVEN a TrailblazerAPI
     analysis_client = create_autospec(AnalysisClient)
-    mocker.patch.object(deliver, "analysis_client", analysis_client)
+    mocker.patch.object(mark_samples_as_delivered_service, "trailblazer_api", analysis_client)
 
     # WHEN calling the endpoint
     response = client.post(f"/api/v1/deliver?trailblazer_id={trailblazer_id}")
@@ -237,7 +237,7 @@ def test_partial_delivery(client: FlaskClient, mocker: MockerFixture):
 
     # GIVEN a TrailblazerAPI
     analysis_client = create_autospec(AnalysisClient)
-    mocker.patch.object(deliver, "analysis_client", analysis_client)
+    mocker.patch.object(mark_samples_as_delivered_service, "trailblazer_api", analysis_client)
 
     # WHEN calling the endpoint
     response = client.post(f"/api/v1/deliver?trailblazer_id={trailblazer_id}")
@@ -280,7 +280,7 @@ def test_deliver_trailblazer_analysis_client_error(client: FlaskClient, mocker: 
     # GIVEN a TrailblazerAPI
     analysis_client = create_autospec(AnalysisClient)
     analysis_client.mark_analyses_as_delivered = Mock(side_effect=TrailblazerAPIHTTPError)
-    mocker.patch.object(deliver, "analysis_client", analysis_client)
+    mocker.patch.object(mark_samples_as_delivered_service, "trailblazer_api", analysis_client)
 
     mocker.patch.object(mark_samples_as_delivered_service, "status_db", status_db.as_type)
 

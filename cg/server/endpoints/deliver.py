@@ -20,11 +20,9 @@ def deliver_analysis():
     - [x] Commit changes to  StatusDb if TB call went well, else rollback
     """
 
-    # TODO endpoint?
     trailblazer_id = request.args.get("trailblazer_id", type=int)
     if trailblazer_id is None:
         return Response(status=HTTPStatus.BAD_REQUEST)
-    # TODO service?
     try:
         analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
     except AnalysisDoesNotExistError:
