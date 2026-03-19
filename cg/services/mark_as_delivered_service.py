@@ -11,12 +11,18 @@ class MarkAsDeliveredService:
         self.status_db = status_db
         self.trailblazer_api = trailblazer_api
 
-    def mark_analysis(self, analysis: Analysis):
+    def mark_analyses(self, analyses: list[Analysis]):
+        for analysis in analyses:
+            self._mark_analysis(analysis)
+        self.trailblazer_api.mark_analyses_as_delivered(
+            trailblazer_ids=[analysis.trailblazer_id for analysis in analyses]
+        )
+
+    def _mark_analysis(self, analysis: Analysis):
         case: Case = analysis.case
         for case_sample in case.links:
             if self._should_sample_be_delivered(case_sample):
                 case_sample.sample.delivered_at = datetime.now()
-        self.trailblazer_api.mark_analyses_as_delivered(trailblazer_ids=[analysis.trailblazer_id])
 
     def _should_sample_be_delivered(self, case_sample: CaseSample) -> bool:
         return (

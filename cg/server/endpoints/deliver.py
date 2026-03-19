@@ -21,8 +21,8 @@ def deliver_analysis():
         for trailblazer_id in trailblazer_ids:
             analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
             analyses.append(analysis)
-        mark_as_delivered_service.mark_analysis(analyses)
-    except (AnalysisDoesNotExistError, KeyError, ValueError):
+        mark_as_delivered_service._mark_analysis(analyses)
+    except (AnalysisDoesNotExistError, KeyError, TypeError):
         return Response(status=HTTPStatus.BAD_REQUEST)
     except TrailblazerAPIHTTPError:
         db.rollback()

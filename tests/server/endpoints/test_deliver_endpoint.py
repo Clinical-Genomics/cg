@@ -74,12 +74,12 @@ def test_deliver_trailblazer_analysis_client_error(client: FlaskClient, mocker: 
     status_db.as_mock.rollback.assert_called_once()
 
 
-def test_no_trailblazer_id_given(client: FlaskClient):
-    # WHEN calling the endpoint without a trailblazer id
+def test_no_trailblazer_ids_given(client: FlaskClient):
+    # WHEN calling the endpoint without Trailblazer ids
     response = client.post("/api/v1/deliver")
 
-    # THEN the response is a bad request
-    assert response.status_code == HTTPStatus.BAD_REQUEST
+    # THEN the response is unsupported media type
+    assert response.status_code == HTTPStatus.UNSUPPORTED_MEDIA_TYPE
 
 
 def test_trailblazer_id_not_found_in_database(
@@ -92,7 +92,7 @@ def test_trailblazer_id_not_found_in_database(
     status_db.as_type.get_analysis_by_trailblazer_id = Mock(side_effect=AnalysisDoesNotExistError)
 
     # WHEN calling the endpoint
-    response = client.post(f"/api/v1/deliver?trailblazer_id={trailblazer_id}")
+    response = client.post(path="/api/v1/deliver", json={"trailblazer_ids": [trailblazer_id]})
 
     # THEN the response should be a bad request
     assert response.status_code == HTTPStatus.BAD_REQUEST

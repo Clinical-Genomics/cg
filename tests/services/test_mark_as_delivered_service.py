@@ -55,7 +55,7 @@ def test_mark_analysis(
     analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
 
     # WHEN we call mark_analysis
-    mark_as_delivered_service.mark_analysis(analysis)
+    mark_as_delivered_service._mark_analysis(analysis)
 
     # THEN the samples should have been delivered
     assert sample_1.delivered_at is not None
@@ -91,7 +91,7 @@ def test_mark_analysis_mix_original_non_original_samples(
     analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
 
     # WHEN we call mark_analysis
-    mark_as_delivered_service.mark_analysis(analysis)
+    mark_as_delivered_service._mark_analysis(analysis)
 
     # THEN only the new sample should be delivered
     assert sample_new.delivered_at is not None
@@ -125,7 +125,7 @@ def test_mark_analysis_rerun_case(
     analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
 
     # WHEN we call mark_analysis
-    mark_as_delivered_service.mark_analysis(analysis)
+    mark_as_delivered_service._mark_analysis(analysis)
 
     # THEN the delivered_at for both samples should be untouched
     assert sample_1.delivered_at is yesterday
@@ -159,7 +159,7 @@ def test_mark_analysis_mixed_delivered_at_original_samples(
     analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
 
     # WHEN we call mark_analysis
-    mark_as_delivered_service.mark_analysis(analysis)
+    mark_as_delivered_service._mark_analysis(analysis)
 
     # THEN only the delivered_at of the undelivered sample is updated
     assert sample_1.delivered_at is yesterday
@@ -202,7 +202,7 @@ def test_mark_analysis_partial_delivery(
     analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
 
     # WHEN we call mark_analysis
-    mark_as_delivered_service.mark_analysis(analysis)
+    mark_as_delivered_service._mark_analysis(analysis)
 
     # THEN only the delivered_at of the sample with enough reads is updated
     assert sample_enough_reads.delivered_at is not None
@@ -238,4 +238,4 @@ def test_mark_analysis_trailblazer_error(
     # WHEN we call mark_analysis
     # THEN an error is raised
     with pytest.raises(TrailblazerAPIHTTPError):
-        mark_as_delivered_service.mark_analysis(analysis)
+        mark_as_delivered_service._mark_analysis(analysis)
