@@ -6,13 +6,10 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.clients.chanjo2.client import Chanjo2APIClient
-from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import CompressAPI
 from cg.meta.delivery.delivery import DeliveryAPI
-from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
-from cg.services.pdc_service.pdc_service import PdcService
 from cg.store.store import Store
 
 
@@ -34,13 +31,6 @@ class MetaAPI:
                 hk_api=config.housekeeper_api,
                 crunchy_api=config.crunchy_api,
                 demux_root=config.run_instruments.illumina.demultiplexed_runs_dir,
-                backup_api=SpringBackupAPI(
-                    encryption_api=SpringEncryptionAPI(
-                        binary_path=config.dict()["encryption"]["binary_path"]
-                    ),
-                    hk_api=config.housekeeper_api,
-                    pdc_service=PdcService(config.dict()["pdc"]["binary_path"]),
-                ),
             ),
         )
         self.scout_api_37: ScoutAPI = config.scout_api_37

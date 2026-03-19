@@ -205,7 +205,6 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
     )
     mock_compress_api_init.assert_called_once_with(
         ANY,
-        backup_api=ANY,
         hk_api=cg_config.housekeeper_api,
         crunchy_api=cg_config.crunchy_api,
         demux_root=cg_config.run_instruments.illumina.demultiplexed_runs_dir,
