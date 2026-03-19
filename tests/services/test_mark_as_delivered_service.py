@@ -47,11 +47,15 @@ def test_mark_analyses(
 
     # GIVEN two cases to be delivered
     case_1: Case = create_autospec(Case)
-    case_sample_1 = create_autospec(CaseSample, case=case_1, sample=sample_1, is_original=True)
+    case_sample_1 = create_autospec(
+        CaseSample, case=case_1, sample=sample_1, should_deliver_sample=True
+    )
     case_1.links = [case_sample_1]
 
     case_2: Case = create_autospec(Case)
-    case_sample_2 = create_autospec(CaseSample, case=case_2, sample=sample_2, is_original=True)
+    case_sample_2 = create_autospec(
+        CaseSample, case=case_2, sample=sample_2, should_deliver_sample=True
+    )
     case_2.links = [case_sample_2]
 
     # GIVEN an analysis linked to each case
@@ -85,9 +89,11 @@ def test_mark_analyses_mix_original_non_original_samples(
     # GIVEN a case with the two samples
     case: Case = create_autospec(Case)
 
-    case_sample_new = create_autospec(CaseSample, case=case, sample=sample_new, is_original=True)
+    case_sample_new = create_autospec(
+        CaseSample, case=case, sample=sample_new, should_deliver_sample=True
+    )
     case_sample_existing = create_autospec(
-        CaseSample, case=case, sample=sample_existing, is_original=False
+        CaseSample, case=case, sample=sample_existing, should_deliver_sample=False
     )
     case.links = [case_sample_new, case_sample_existing]
 
@@ -121,8 +127,12 @@ def test_mark_analyses_rerun_case(
 
     # GIVEN a case with the two samples
     case: Case = create_autospec(Case)
-    case_sample_1 = create_autospec(CaseSample, case=case, sample=sample_1, is_original=True)
-    case_sample_2 = create_autospec(CaseSample, case=case, sample=sample_2, is_original=False)
+    case_sample_1 = create_autospec(
+        CaseSample, case=case, sample=sample_1, should_deliver_sample=True
+    )
+    case_sample_2 = create_autospec(
+        CaseSample, case=case, sample=sample_2, should_deliver_sample=False
+    )
     case.links = [case_sample_1, case_sample_2]
 
     # GIVEN an analysis linked to the case
@@ -155,8 +165,12 @@ def test_mark_analyses_mixed_delivered_at_original_samples(
 
     # GIVEN that the two samples originally belong to this given case
     case: Case = create_autospec(Case, samples=[sample_1, sample_2])
-    case_sample_1 = create_autospec(CaseSample, case=case, sample=sample_1, is_original=True)
-    case_sample_2 = create_autospec(CaseSample, case=case, sample=sample_2, is_original=True)
+    case_sample_1 = create_autospec(
+        CaseSample, case=case, sample=sample_1, should_deliver_sample=True
+    )
+    case_sample_2 = create_autospec(
+        CaseSample, case=case, sample=sample_2, should_deliver_sample=True
+    )
     case.links = [case_sample_1, case_sample_2]
 
     # GIVEN an analysis linked to the case
@@ -195,10 +209,10 @@ def test_mark_analyses_partial_delivery(
     # GIVEN that the two samples originally belong to this given case
     case: Case = create_autospec(Case, data_analysis=workflow)
     case_sample_enough_reads = create_autospec(
-        CaseSample, case=case, sample=sample_enough_reads, is_original=True
+        CaseSample, case=case, sample=sample_enough_reads, should_deliver_sample=True
     )
     case_sample_not_enough_reads = create_autospec(
-        CaseSample, case=case, sample=sample_not_enough_reads, is_original=True
+        CaseSample, case=case, sample=sample_not_enough_reads, should_deliver_sample=True
     )
     case.links = [case_sample_enough_reads, case_sample_not_enough_reads]
 

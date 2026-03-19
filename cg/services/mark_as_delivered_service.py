@@ -26,7 +26,7 @@ class MarkAsDeliveredService:
 
     def _should_sample_be_delivered(self, case_sample: CaseSample) -> bool:
         return (
-            case_sample.is_original
+            case_sample.should_deliver_sample
             and not case_sample.sample.delivered_at
             and self._passes_on_reads(case_sample)
         )
