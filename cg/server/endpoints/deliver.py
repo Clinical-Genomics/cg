@@ -15,10 +15,13 @@ DELIVER_BLUEPRINT.before_request(before_request)
 def deliver_analysis():
     """..."""
     try:
-        trailblazer_ids = request.json
-
-        analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_ids)
-        mark_as_delivered_service.mark_analysis(analysis)
+        trailblazer_ids: list[int] = request.json["trailblazer_ids"]
+        analyses = []
+        # TODO: decide if this logic belogs to this endpoint
+        for trailblazer_id in trailblazer_ids:
+            analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
+            analyses.append(analysis)
+        mark_as_delivered_service.mark_analysis(analyses)
     except (AnalysisDoesNotExistError, KeyError, ValueError):
         return Response(status=HTTPStatus.BAD_REQUEST)
     except TrailblazerAPIHTTPError:

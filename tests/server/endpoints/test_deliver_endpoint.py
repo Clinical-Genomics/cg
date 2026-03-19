@@ -22,24 +22,30 @@ def status_db(mocker: MockerFixture) -> TypedMock[FlaskStore]:
 def test_deliver_trailblazer_analysis(
     client: FlaskClient, status_db: TypedMock[FlaskStore], mocker: MockerFixture
 ):
-    # GIVEN a trailblazer analysis id
-    trailblazer_id = 666666
+    # GIVEN two trailblazer analysis ids
+    trailblazer_id_1 = 666666
+    trailblazer_id_2 = 555555
 
     # GIVEN an analysis linked to the trailblazer analysis
-    analysis: Analysis = create_autospec(Analysis, trailblazer_id=trailblazer_id)
-    status_db.as_type.get_analysis_by_trailblazer_id = Mock(return_value=analysis)
+    analysis_1: Analysis = create_autospec(Analysis, trailblazer_id=trailblazer_id_1)
+    analysis_2: Analysis = create_autospec(Analysis, trailblazer_id=trailblazer_id_2)
+    status_db.as_type.get_analysis_by_trailblazer_id = lambda trailblazer_id: (
+        analysis_1 if trailblazer_id == trailblazer_id_1 else analysis_2
+    )
 
     # GIVEN a service to mark the analysis as delivered
     mark_analysis_mock = mocker.patch.object(mark_as_delivered_service, "mark_analysis")
 
     # WHEN calling the endpoint
-    response = client.post(path="/api/v1/deliver", json={"trailblazer_ids": [trailblazer_id]})
+    response = client.post(
+        path="/api/v1/deliver", json={"trailblazer_ids": [trailblazer_id_1, trailblazer_id_2]}
+    )
 
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.NO_CONTENT
 
     # THEN the analysis was marked as delivered
-    mark_analysis_mock.assert_called_once_with(analysis)
+    mark_analysis_mock.assert_called_once_with([analysis_1, analysis_2])
 
     # THEN these changes were committed to the database
     status_db.as_mock.commit_to_store.assert_called_once()
@@ -59,7 +65,7 @@ def test_deliver_trailblazer_analysis_client_error(client: FlaskClient, mocker: 
     )
 
     # WHEN calling the endpoint
-    response = client.post(f"/api/v1/deliver?trailblazer_id={trailblazer_id}")
+    response = client.post(path="/api/v1/deliver", json={"trailblazer_ids": [trailblazer_id]})
 
     # THEN the response should be bad gateway
     assert response.status_code == HTTPStatus.BAD_GATEWAY
