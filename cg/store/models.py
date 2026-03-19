@@ -611,7 +611,7 @@ class CaseSample(Base):
 
     mother_id: Mapped[int | None] = mapped_column(ForeignKey("sample.id"))
     father_id: Mapped[int | None] = mapped_column(ForeignKey("sample.id"))
-    should_deliver_sample: Mapped[bool]
+    should_deliver_sample: Mapped[bool] = mapped_column(default=False)
 
     case: Mapped[Case] = orm.relationship(back_populates="links")
     sample: Mapped["Sample"] = orm.relationship(foreign_keys=[sample_id], back_populates="links")
