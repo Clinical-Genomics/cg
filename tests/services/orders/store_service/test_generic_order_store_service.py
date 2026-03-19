@@ -4,12 +4,22 @@ The function store_order_data_in_status_db is never expected to fail, as its inp
 have always been validated before calling the function.
 """
 
+from unittest.mock import Mock, create_autospec
+
+from pytest_mock import MockerFixture
+
 from cg.constants import DataDelivery, Priority, Workflow
+from cg.models.orders.constants import OrderType
+from cg.models.orders.sample_base import ContainerEnum, SexEnum
+from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.implementations.case_order_service import StoreCaseOrderService
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.order_types.mip_rna.models.order import MIPRNAOrder
+from cg.services.orders.validation.order_types.rna_fusion.constants import RNAFusionDeliveryType
+from cg.services.orders.validation.order_types.rna_fusion.models.case import RNAFusionCase
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
+from cg.services.orders.validation.order_types.rna_fusion.models.sample import RNAFusionSample
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.store.models import Case, Sample
 from cg.store.store import Store
@@ -166,3 +176,39 @@ def test_store_tomte_order(
     assert new_link.sample.name == "sample1"
     assert new_link.sample.application_version.application.tag == "RNAPOAR025"
     assert new_link
+
+
+def test_store_rnafusion_sample_is_set_to_tumour(store: Store, mocker: MockerFixture):
+    # GIVEN an RNAFusion order with a new sample in it
+    rna_fusion_sample = RNAFusionSample(
+        application="rnafusiontag",
+        container=ContainerEnum.tube,
+        name="rnafusionsample",
+        sex=SexEnum.female,
+        source="blood",
+        subject_id="rnafusion-subject",
+    )
+    rna_fusion_case = RNAFusionCase(name="rna-fusion-case", samples=[rna_fusion_sample])
+    rna_fusion_order = RNAFusionOrder(
+        cases=[rna_fusion_case],
+        customer="cust000",
+        project_type=OrderType.RNAFUSION,
+        name="rna-fusion-order",
+        delivery_type=RNAFusionDeliveryType.ANALYSIS_SCOUT,
+    )
+
+    # GIVEN that persisting to StatusDB and LIMS is successful
+    mocker.patch.object(store, "commit_to_store")
+    lims_service: OrderLimsService = create_autospec(OrderLimsService)
+    lims_service.process_lims = Mock(
+        return_value=("project_data", {rna_fusion_sample.name: "rnafusion_sample_id"})
+    )
+
+    # WHEN persisting the order data
+    storing_service = StoreCaseOrderService(status_db=store, lims_service=lims_service)
+    new_data: dict = storing_service.store_order(rna_fusion_order)
+
+    # THEN the new sample is a tumour sample
+    new_cases: list[Case] = new_data["records"]
+    new_sample = new_cases[0].samples[0]
+    assert new_sample.is_tumour

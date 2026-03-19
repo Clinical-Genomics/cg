@@ -736,6 +736,7 @@ def test_validate_source_comment_required():
 
 
 def test_validate_existing_samples_not_normal():
+    # GIVEN an RNAFusion order containing an existing sample
     rna_fusion_sample = ExistingSample(internal_id="rna-fusion-id")  # pyright: ignore
     rna_fusion_case = RNAFusionCase(name="rna-fusion-case", samples=[rna_fusion_sample])
     rna_fusion_order = RNAFusionOrder(
@@ -746,12 +747,16 @@ def test_validate_existing_samples_not_normal():
         delivery_type=RNAFusionDeliveryType.ANALYSIS_SCOUT,
     )
 
+    # GIVEN that the existing sample in the order is a normal sample in the database
     status_db: Store = create_autospec(Store)
     status_db.get_sample_by_internal_id = Mock(
         return_value=create_autospec(Sample, is_tumour=False)
     )
+
+    # WHEN validating that the order's existing samples are all tumour samples
     errors: list[NormalSampleNotAllowedError] = validate_existing_samples_not_normal(
         order=rna_fusion_order, store=status_db
     )
 
+    # THEN an error should be returned
     assert errors

@@ -579,9 +579,9 @@ def validate_existing_samples_not_normal(
 ) -> list[NormalSampleNotAllowedError]:
     errors: list[NormalSampleNotAllowedError] = []
     for case_index, sample_index, sample in order.enumerated_existing_samples:
-        if db_sample := store.get_sample_by_internal_id(
+        if db_sample := store.get_sample_by_internal_id(  # If it is not found in the database, the error should be raised elsewhere
             sample.internal_id
-        ):  # If it is not found in the database, the error should be raised elsewhere
+        ):
             if not db_sample.is_tumour:
                 error = NormalSampleNotAllowedError(
                     case_index=case_index, sample_index=sample_index
