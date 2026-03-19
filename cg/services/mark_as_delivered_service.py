@@ -13,12 +13,12 @@ class MarkAsDeliveredService:
 
     def mark_analyses(self, analyses: list[Analysis]):
         for analysis in analyses:
-            self._mark_analysis(analysis)
+            self._mark_samples_in_analysis(analysis)
         self.trailblazer_api.mark_analyses_as_delivered(
             trailblazer_ids=[analysis.trailblazer_id for analysis in analyses]
         )
 
-    def _mark_analysis(self, analysis: Analysis):
+    def _mark_samples_in_analysis(self, analysis: Analysis):
         case: Case = analysis.case
         for case_sample in case.links:
             if self._should_sample_be_delivered(case_sample):

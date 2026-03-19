@@ -19,7 +19,7 @@ def status_db(mocker: MockerFixture) -> TypedMock[FlaskStore]:
     return status_db
 
 
-def test_deliver_trailblazer_analysis(
+def test_deliver_trailblazer_analyses(
     client: FlaskClient, status_db: TypedMock[FlaskStore], mocker: MockerFixture
 ):
     # GIVEN two trailblazer analysis ids
@@ -34,7 +34,7 @@ def test_deliver_trailblazer_analysis(
     )
 
     # GIVEN a service to mark the analysis as delivered
-    mark_analysis_mock = mocker.patch.object(mark_as_delivered_service, "mark_analysis")
+    mark_analysis_mock = mocker.patch.object(mark_as_delivered_service, "mark_analyses")
 
     # WHEN calling the endpoint
     response = client.post(
@@ -51,7 +51,7 @@ def test_deliver_trailblazer_analysis(
     status_db.as_mock.commit_to_store.assert_called_once()
 
 
-def test_deliver_trailblazer_analysis_client_error(client: FlaskClient, mocker: MockerFixture):
+def test_deliver_trailblazer_analyses_client_error(client: FlaskClient, mocker: MockerFixture):
     # GIVEN a trailblazer analysis id
     trailblazer_id = 666666
 
@@ -61,7 +61,7 @@ def test_deliver_trailblazer_analysis_client_error(client: FlaskClient, mocker: 
 
     # GIVEN a service that marks the analysis as delivered that fails when calling Trailblazer
     mocker.patch.object(
-        mark_as_delivered_service, "mark_analysis", side_effect=TrailblazerAPIHTTPError
+        mark_as_delivered_service, "mark_analyses", side_effect=TrailblazerAPIHTTPError
     )
 
     # WHEN calling the endpoint

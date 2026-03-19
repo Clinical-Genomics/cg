@@ -12,16 +12,16 @@ DELIVER_BLUEPRINT.before_request(before_request)
 
 
 @DELIVER_BLUEPRINT.route("/deliver", methods=["POST"])
-def deliver_analysis():
+def deliver_analyses():
     """..."""
     try:
-        trailblazer_ids: list[int] = request.json["trailblazer_ids"]
+        trailblazer_ids: list[int] = request.json["trailblazer_ids"]  # type: ignore None is handled
         analyses = []
-        # TODO: decide if this logic belogs to this endpoint
+        # TODO: decide if this logic belongs to this endpoint
         for trailblazer_id in trailblazer_ids:
             analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
             analyses.append(analysis)
-        mark_as_delivered_service._mark_analysis(analyses)
+        mark_as_delivered_service.mark_analyses(analyses)
     except (AnalysisDoesNotExistError, KeyError, TypeError):
         return Response(status=HTTPStatus.BAD_REQUEST)
     except TrailblazerAPIHTTPError:

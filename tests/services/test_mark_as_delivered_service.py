@@ -35,7 +35,7 @@ def mark_as_delivered_service(
     return MarkAsDeliveredService(status_db=status_db, trailblazer_api=analysis_client.as_type)
 
 
-def test_mark_analysis(
+def test_mark_analyses(
     analysis_client: TypedMock[AnalysisClient],
     mark_as_delivered_service: MarkAsDeliveredService,
     status_db: FlaskStore,
@@ -45,17 +45,21 @@ def test_mark_analysis(
     sample_1: Sample = create_autospec(Sample, delivered_at=None)
     sample_2: Sample = create_autospec(Sample, delivered_at=None)
 
-    # GIVEN a case to be delivered
-    case: Case = create_autospec(Case)
-    case_sample_1 = create_autospec(CaseSample, case=case, sample=sample_1, is_original=True)
-    case_sample_2 = create_autospec(CaseSample, case=case, sample=sample_2, is_original=True)
-    case.links = [case_sample_1, case_sample_2]
+    # GIVEN two cases to be delivered
+    case_1: Case = create_autospec(Case)
+    case_sample_1 = create_autospec(CaseSample, case=case_1, sample=sample_1, is_original=True)
+    case_1.links = [case_sample_1]
 
-    # GIVEN an analysis linked to the case
-    analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
+    case_2: Case = create_autospec(Case)
+    case_sample_2 = create_autospec(CaseSample, case=case_2, sample=sample_2, is_original=True)
+    case_2.links = [case_sample_2]
 
-    # WHEN we call mark_analysis
-    mark_as_delivered_service._mark_analysis(analysis)
+    # GIVEN an analysis linked to each case
+    analysis_1: Analysis = create_autospec(Analysis, case=case_1, trailblazer_id=trailblazer_id)
+    analysis_2: Analysis = create_autospec(Analysis, case=case_2, trailblazer_id=555555)
+
+    # WHEN we call mark_analyses
+    mark_as_delivered_service.mark_analyses([analysis_1, analysis_2])
 
     # THEN the samples should have been delivered
     assert sample_1.delivered_at is not None
@@ -63,11 +67,11 @@ def test_mark_analysis(
 
     # THEN endpoint in Trailblazer was called
     analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id]
+        trailblazer_ids=[trailblazer_id, 555555]
     )
 
 
-def test_mark_analysis_mix_original_non_original_samples(
+def test_mark_analyses_mix_original_non_original_samples(
     analysis_client: TypedMock[AnalysisClient],
     mark_as_delivered_service: MarkAsDeliveredService,
     status_db: FlaskStore,
@@ -90,8 +94,8 @@ def test_mark_analysis_mix_original_non_original_samples(
     # GIVEN an analysis linked to the case
     analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
 
-    # WHEN we call mark_analysis
-    mark_as_delivered_service._mark_analysis(analysis)
+    # WHEN we call mark_analyses
+    mark_as_delivered_service.mark_analyses([analysis])
 
     # THEN only the new sample should be delivered
     assert sample_new.delivered_at is not None
@@ -103,7 +107,7 @@ def test_mark_analysis_mix_original_non_original_samples(
     )
 
 
-def test_mark_analysis_rerun_case(
+def test_mark_analyses_rerun_case(
     analysis_client: TypedMock[AnalysisClient],
     mark_as_delivered_service: MarkAsDeliveredService,
     status_db: FlaskStore,
@@ -124,8 +128,8 @@ def test_mark_analysis_rerun_case(
     # GIVEN an analysis linked to the case
     analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
 
-    # WHEN we call mark_analysis
-    mark_as_delivered_service._mark_analysis(analysis)
+    # WHEN we call mark_analyses
+    mark_as_delivered_service.mark_analyses([analysis])
 
     # THEN the delivered_at for both samples should be untouched
     assert sample_1.delivered_at is yesterday
@@ -137,7 +141,7 @@ def test_mark_analysis_rerun_case(
     )
 
 
-def test_mark_analysis_mixed_delivered_at_original_samples(
+def test_mark_analyses_mixed_delivered_at_original_samples(
     analysis_client: TypedMock[AnalysisClient],
     mark_as_delivered_service: MarkAsDeliveredService,
     status_db: FlaskStore,
@@ -158,8 +162,8 @@ def test_mark_analysis_mixed_delivered_at_original_samples(
     # GIVEN an analysis linked to the case
     analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
 
-    # WHEN we call mark_analysis
-    mark_as_delivered_service._mark_analysis(analysis)
+    # WHEN we call mark_analyses
+    mark_as_delivered_service.mark_analyses([analysis])
 
     # THEN only the delivered_at of the undelivered sample is updated
     assert sample_1.delivered_at is yesterday
@@ -172,7 +176,7 @@ def test_mark_analysis_mixed_delivered_at_original_samples(
 
 
 @pytest.mark.parametrize("workflow", [Workflow.MICROSALT, Workflow.TAXPROFILER])
-def test_mark_analysis_partial_delivery(
+def test_mark_analyses_partial_delivery(
     analysis_client: TypedMock[AnalysisClient],
     mark_as_delivered_service: MarkAsDeliveredService,
     status_db: FlaskStore,
@@ -201,8 +205,8 @@ def test_mark_analysis_partial_delivery(
     # GIVEN an analysis linked to the case
     analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
 
-    # WHEN we call mark_analysis
-    mark_as_delivered_service._mark_analysis(analysis)
+    # WHEN we call mark_analyses
+    mark_as_delivered_service.mark_analyses([analysis])
 
     # THEN only the delivered_at of the sample with enough reads is updated
     assert sample_enough_reads.delivered_at is not None
@@ -214,7 +218,7 @@ def test_mark_analysis_partial_delivery(
     )
 
 
-def test_mark_analysis_trailblazer_error(
+def test_mark_analyses_trailblazer_error(
     status_db: FlaskStore,
     trailblazer_id: int,
 ):
@@ -235,7 +239,7 @@ def test_mark_analysis_trailblazer_error(
     # GIVEN an analysis linked to the case
     analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
 
-    # WHEN we call mark_analysis
+    # WHEN we call mark_analyses
     # THEN an error is raised
     with pytest.raises(TrailblazerAPIHTTPError):
-        mark_as_delivered_service._mark_analysis(analysis)
+        mark_as_delivered_service.mark_analyses([analysis])
