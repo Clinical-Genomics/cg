@@ -33,7 +33,7 @@ def test_deliver_trailblazer_analysis(
     mark_analysis_mock = mocker.patch.object(mark_as_delivered_service, "mark_analysis")
 
     # WHEN calling the endpoint
-    response = client.post(f"/api/v1/deliver?trailblazer_id={trailblazer_id}")
+    response = client.post(path="/api/v1/deliver", json={"trailblazer_ids": [trailblazer_id]})
 
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.NO_CONTENT
