@@ -206,7 +206,7 @@ def test_case_needs_to_be_stored(
     mip_rna_context: CGConfig,
     case: Case,
 ):
-    """Test starting MIP when files are decompressed but not stored in housekeeper"""
+    """Test starting MIP when files are decompressed but not stored in housekeeper."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a case is available for analysis

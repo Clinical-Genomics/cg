@@ -43,7 +43,7 @@ ANALYSIS_API: list = [
 
 
 @pytest.mark.parametrize(
-    "workflow,analysis_api, scout_instance",
+    "workflow, analysis_api, scout_instance",
     ANALYSIS_API,
 )
 def test_get_upload_api(
