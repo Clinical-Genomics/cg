@@ -24,12 +24,6 @@ class EncryptionUserID(StrEnum):
 
 
 class GPGParameters(ListEnum):
-    ASYMMETRIC_ENCRYPTION: list[str] = [
-        "--encrypt",
-        "--yes",
-        "--recipient",
-        EncryptionUserID.HASTA_USER_ID,
-    ]
     ASYMMETRIC_DECRYPTION: list = [
         "--decrypt",
         "--yes",
