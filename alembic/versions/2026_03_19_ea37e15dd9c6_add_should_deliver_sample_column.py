@@ -18,20 +18,21 @@ depends_on = None
 
 
 def upgrade():
+    op.create_index("ix_analysis_trailblazer_id", "analysis", ["trailblazer_id"], unique=True)
     op.add_column(
         table_name="case_sample",
         column=sa.Column(
-            name="should_deliver_sample", type="boolean", nullable=False, server_default="false"
+            name="should_deliver_sample",
+            type_=sa.Boolean,
+            nullable=False,
+            server_default=sa.text("false"),
         ),
     )
     op.alter_column(
         table_name="case_sample", column_name="should_deliver_sample", server_default=None
     )
-    op.create_index("ix_analysis_trailblazer_id", "analysis", ["trailblazer_id"], unique=True)
-    op.create_unique_constraint("uq_analysis_trailblazer_id", "analysis", ["trailblazer_id"])
 
 
 def downgrade():
-    op.drop_constraint("uq_analysis_trailblazer_id", "analysis", type_="unique")
-    op.drop_index("ix_analysis_trailblazer_id", table_name="analysis")
     op.drop_column(table_name="case_sample", column_name="should_deliver_sample")
+    op.drop_index("ix_analysis_trailblazer_id", table_name="analysis")
