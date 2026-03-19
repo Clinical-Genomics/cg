@@ -55,4 +55,3 @@ class BalsamicUploadAPI(UploadAPI):
         )
 
         self.update_uploaded_at(analysis=analysis)
-        self.update_uploaded_at(analysis=analysis)
