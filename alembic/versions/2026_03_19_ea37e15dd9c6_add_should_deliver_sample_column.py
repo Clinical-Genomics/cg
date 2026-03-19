@@ -20,7 +20,12 @@ depends_on = None
 def upgrade():
     op.add_column(
         table_name="case_sample",
-        column=sa.Column(name="should_deliver_sample", type="boolean", nullable=False),
+        column=sa.Column(
+            name="should_deliver_sample", type="boolean", nullable=False, server_default="false"
+        ),
+    )
+    op.alter_column(
+        table_name="case_sample", column_name="should_deliver_sample", server_default=None
     )
     op.create_index("ix_analysis_trailblazer_id", "analysis", ["trailblazer_id"], unique=True)
     op.create_unique_constraint("uq_analysis_trailblazer_id", "analysis", ["trailblazer_id"])
