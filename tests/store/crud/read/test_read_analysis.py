@@ -655,12 +655,26 @@ def test_get_latest_completed_analysis_for_case_no_completed_analysis(
 
 
 def test_get_analysis_by_trailblazer_id(store: Store):
-    # GIVEN an analysis in the store with a trailblazer id
-    store.add_analysis(workflow=Workflow.NALLO, trailblazer_id=666666)
-    store.add_analysis(workflow=Workflow.NALLO, trailblazer_id=555555)
+    # GIVEN two analyses in the store with different trailblazer ids
+    analysis_to_fetch = store.add_analysis(
+        case_id=1, workflow=Workflow.NALLO, trailblazer_id=666666
+    )
+    analysis_not_to_fetch = store.add_analysis(
+        case_id=1, workflow=Workflow.NALLO, trailblazer_id=555555
+    )
+    store.add_multiple_items_to_store([analysis_to_fetch, analysis_not_to_fetch])
+    store.commit_to_store()
 
-    # WHEN getting the analysis by its trailblazer id
+    # WHEN getting one analysis by its trailblazer id
     analysis = store.get_analysis_by_trailblazer_id(666666)
 
     # THEN the analysis is returned
     assert analysis.trailblazer_id == 666666
+
+
+def test_get_analysis_by_trailblazer_id_does_not_exist(store: Store):
+    # GIVEN an empty store
+    # WHEN getting an analysis by trailblazer
+    with pytest.raises(AnalysisDoesNotExistError):
+        # THEN an AnalysisDoesNotExistError is raised
+        store.get_analysis_by_trailblazer_id(666666)
