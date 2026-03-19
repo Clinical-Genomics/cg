@@ -7,8 +7,8 @@ from pytest_mock import MockerFixture
 
 from cg.exc import AnalysisDoesNotExistError, TrailblazerAPIHTTPError
 from cg.server.endpoints import deliver
-from cg.server.ext import AnalysisClient, FlaskStore, mark_as_delivered_service
-from cg.store.models import Analysis, Case, CaseSample, Sample
+from cg.server.ext import FlaskStore, mark_as_delivered_service
+from cg.store.models import Analysis
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
@@ -30,7 +30,7 @@ def test_deliver_trailblazer_analysis(
     status_db.as_type.get_analysis_by_trailblazer_id = Mock(return_value=analysis)
 
     # GIVEN a service to mark the analysis as delivered
-    mark_analysis_spy = mocker.spy(mark_as_delivered_service, "mark_analysis")
+    mark_analysis_mock = mocker.patch.object(mark_as_delivered_service, "mark_analysis")
 
     # WHEN calling the endpoint
     response = client.post(f"/api/v1/deliver?trailblazer_id={trailblazer_id}")
@@ -39,7 +39,7 @@ def test_deliver_trailblazer_analysis(
     assert response.status_code == HTTPStatus.NO_CONTENT
 
     # THEN the analysis was marked as delivered
-    mark_analysis_spy.assert_called_once_with(analysis)
+    mark_analysis_mock.assert_called_once_with(analysis)
 
     # THEN these changes were committed to the database
     status_db.as_mock.commit_to_store.assert_called_once()

@@ -2,13 +2,13 @@ from datetime import datetime, timedelta
 from unittest.mock import Mock, create_autospec
 
 import pytest
-from typed_mock import TypedMock, create_typed_mock
 
 from cg.constants.constants import Workflow
 from cg.exc import TrailblazerAPIHTTPError
 from cg.server.ext import AnalysisClient, FlaskStore
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
 from cg.store.models import Analysis, Case, CaseSample, Sample
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 @pytest.fixture

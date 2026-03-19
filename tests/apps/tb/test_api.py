@@ -188,7 +188,11 @@ def test_mark_analyses_as_delivered_fails_with_http_error(
     tb_api = TrailblazerAPI(config=valid_trailblazer_config)
 
     mocker.patch.object(
-        requests, "patch", return_value=create_autospec(requests.Response, ok=False)
+        requests,
+        "patch",
+        return_value=create_autospec(
+            requests.Response, ok=False, reason="I did not feel like it :("
+        ),
     )
 
     # WHEN marking analyses as delivered
