@@ -115,6 +115,7 @@ class CreateMixin(ReadHandler):
         description: str,
         percent_kth: int,
         percent_reads_guaranteed: int,
+        read_type: str,
         is_accredited: bool = False,
         min_sequencing_depth: int = 0,
         **kwargs,
@@ -129,6 +130,7 @@ class CreateMixin(ReadHandler):
             min_sequencing_depth=min_sequencing_depth,
             percent_kth=percent_kth,
             percent_reads_guaranteed=percent_reads_guaranteed,
+            read_type=read_type,
             **kwargs,
         )
 

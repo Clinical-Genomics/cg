@@ -364,6 +364,7 @@ def rml_pool_store(
         percent_reads_guaranteed=75,
         sequencing_depth=0,
         target_reads=800,
+        read_type="short-read",
     )
     store.session.add(application)
 

@@ -76,6 +76,7 @@ def archived_application(base_store: Store) -> Application:
         percent_kth=100,
         percent_reads_guaranteed=90,
         is_archived=True,
+        read_type="short-read",
     )
 
 
@@ -228,6 +229,7 @@ def application_with_concentration_interval(base_store: Store) -> Application:
         percent_reads_guaranteed=90,
         sample_concentration_minimum=50,
         sample_concentration_maximum=250,
+        read_type="short-read",
     )
     application.order_types = [OrderType.TOMTE]
     base_store.session.add(application)
@@ -284,6 +286,7 @@ def application_tgs(base_store: Store) -> Application:
         description="Panel-based sequencing, 20 M read pairs.",
         percent_kth=59,
         percent_reads_guaranteed=75,
+        read_type="short-read",
     )
     base_store.session.add(application)
     base_store.commit_to_store()

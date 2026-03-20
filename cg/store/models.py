@@ -163,6 +163,7 @@ class Application(Base):
     percent_kth: Mapped[int]
     comment: Mapped[Text | None]
     is_archived: Mapped[bool] = mapped_column(default=False)
+    read_type: Mapped[str] = mapped_column(types.Enum("long-read", "short-read", "optical-mapping"))
 
     created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=datetime.now)

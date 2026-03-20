@@ -74,6 +74,7 @@ def balsamic_application(base_store: Store) -> Application:
         percent_reads_guaranteed=90,
         sample_concentration_minimum=50,
         sample_concentration_maximum=250,
+        read_type="short-read",
     )
     application.order_types = [OrderType.BALSAMIC]
     base_store.session.add(application)

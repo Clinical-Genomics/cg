@@ -147,6 +147,7 @@ class StoreHelpers:
         is_accredited: bool = False,
         version: int = 1,
         valid_from: datetime = datetime.now(),
+        read_type: str = "short-read",
         **kwargs,
     ) -> ApplicationVersion:
         """Utility function to return existing or create application version for tests."""
@@ -164,6 +165,7 @@ class StoreHelpers:
                 description=description,
                 is_accredited=is_accredited,
                 sequencing_depth=sequencing_depth,
+                read_type=read_type,
                 **kwargs,
             )
 
@@ -216,6 +218,7 @@ class StoreHelpers:
         prep_category: str = "wgs",
         description: str = "dummy_description",
         is_archived: bool = False,
+        read_type: str = "short-read",
         **kwargs,
     ) -> Application:
         """Ensure that application exists in store."""
@@ -227,6 +230,7 @@ class StoreHelpers:
                 prep_category=prep_category,
                 description=description,
                 is_archived=is_archived,
+                read_type=read_type,
                 **kwargs,
             )
         return application
@@ -243,6 +247,7 @@ class StoreHelpers:
         is_accredited: bool = False,
         is_external: bool = False,
         min_sequencing_depth: int = 30,
+        read_type: str = "short-read",
         **kwargs,
     ) -> Application:
         """Utility function to add a application to a store."""
@@ -264,6 +269,7 @@ class StoreHelpers:
             limitations="A limitation",
             is_external=is_external,
             min_sequencing_depth=min_sequencing_depth,
+            read_type=read_type,
             **kwargs,
         )
         store.session.add(application)
