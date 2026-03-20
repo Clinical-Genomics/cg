@@ -5,16 +5,14 @@ from pathlib import Path
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
-from cg.services.deliver_files.factory import (
-    DeliveryServiceFactory,
-)
+from cg.services.deliver_files.factory import DeliveryServiceFactory
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
 
-def deliver_raw_data_for_analyses(
+def deliver_analyses(
     analyses: list[Analysis],
     status_db: Store,
     delivery_path: Path,

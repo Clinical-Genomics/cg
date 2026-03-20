@@ -6,12 +6,12 @@ from pathlib import Path
 import rich_click as click
 
 from cg.apps.tb import TrailblazerAPI
-from cg.cli.deliver.utils import deliver_raw_data_for_analyses
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants import Workflow
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.delivery import FileDeliveryOption
 from cg.models.cg_config import CGConfig
+from cg.services.deliver_files import deliver_raw_data
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
@@ -194,7 +194,8 @@ def deliver_auto_raw_data(context: CGConfig, dry_run: bool):
     analyses: list[Analysis] = context.analysis_service.get_analyses_to_upload_for_workflow(
         workflow=Workflow.RAW_DATA
     )
-    deliver_raw_data_for_analyses(
+
+    deliver_raw_data.deliver_analyses(
         analyses=analyses,
         status_db=context.status_db,
         delivery_path=Path(context.delivery_path),
