@@ -3,8 +3,9 @@
 import logging
 import tempfile
 
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, GenomeBuild
 from cg.io.controller import ReadStream
+from cg.models.cg_config import CGConfig, ChanjoConfig
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -13,9 +14,9 @@ LOG = logging.getLogger(__name__)
 class ChanjoAPI:
     """Interface to Chanjo, the coverage analysis tool"""
 
-    def __init__(self, config: dict):
-        self.chanjo_config = config["chanjo"]["config_path"]
-        self.chanjo_binary = config["chanjo"]["binary_path"]
+    def __init__(self, config: ChanjoConfig):
+        self.chanjo_config = config.config_path
+        self.chanjo_binary = config.binary_path
         self.process = Process(binary=self.chanjo_binary, config=self.chanjo_config)
 
     def upload(
@@ -87,3 +88,14 @@ class ChanjoAPI:
         return ReadStream.get_content_from_stream(
             file_format=FileFormat.JSON, stream=self.process.stdout
         ).get(sample_id)
+
+
+def chanjo_api_for_genome_build(config: CGConfig, genome_build: GenomeBuild) -> ChanjoAPI:
+    chanjo_config: ChanjoConfig | None = (
+        config.chanjo_38 if genome_build == GenomeBuild.hg38 else config.chanjo
+    )
+    if not chanjo_config:
+        raise ValueError(f"No chanjo configuration found for genome build: {genome_build}")
+
+    LOG.debug(f"Instantiating chanjo api, genome build {genome_build}")
+    return ChanjoAPI(config=chanjo_config)

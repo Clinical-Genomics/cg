@@ -1,17 +1,15 @@
 """Module for Raredisease Analysis API."""
 
+import copy
 import logging
 from itertools import permutations
 from pathlib import Path
 from typing import Any
 
-from housekeeper.store.models import File
-
-from cg.clients.chanjo2.models import CoverageMetricsChanjo1
+from cg.apps.coverage import ChanjoAPI, chanjo_api_for_genome_build
 from cg.constants import Workflow
-from cg.constants.constants import GenomeVersion
+from cg.constants.constants import WORKFLOW_TO_GENOME_VERSION_MAP, GenomeVersion
 from cg.constants.nf_analysis import (
-    RAREDISEASE_COVERAGE_FILE_TAGS,
     RAREDISEASE_METRIC_CONDITIONS_WES,
     RAREDISEASE_METRIC_CONDITIONS_WGS,
     RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
@@ -19,6 +17,7 @@ from cg.constants.nf_analysis import (
 from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.workflow.utils.chanjo1 import CoverageMetricsChanjo1, chanjo1_get_sample_coverage
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
@@ -39,6 +38,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         workflow: Workflow = Workflow.RAREDISEASE,
     ):
         super().__init__(config=config, workflow=workflow)
+        self.chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
+            config=config, genome_build=WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.RAREDISEASE]
+        )
         self.root_dir: str = config.raredisease.root
         self.workflow_bin_path: str = config.raredisease.workflow_bin_path
         self.profile: str = config.raredisease.profile
@@ -59,7 +61,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         """Return Raredisease bundle filenames path."""
         return RAREDISEASE_BUNDLE_FILENAMES_PATH
 
-    def get_workflow_metrics(self, sample_id: str) -> dict:
+    def get_qc_conditions_for_workflow(self, sample_id: str) -> dict:
         """Return Raredisease workflow metric conditions for a sample."""
         sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
         if "-" not in sample_id:
@@ -98,21 +100,19 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             return self.get_multiqc_metric(
                 metric_name=metric_name,
                 metric_value=sample_pair_metrics[metric_name],
-                metric_id=pair_sample_ids,
+                sample_id=pair_sample_ids,
             )
 
     def get_raredisease_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
         """Return a list of the metrics specified in a MultiQC json file."""
         multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
         metrics = []
-        for search_pattern, metric_id in self.get_multiqc_search_patterns(case_id).items():
-            metrics_for_pattern: list[MetricsBase] = (
-                self.get_metrics_from_multiqc_json_with_pattern(
-                    search_pattern=search_pattern,
-                    multiqc_json=multiqc_json,
-                    metric_id=metric_id,
-                    exact_match=self.is_multiqc_pattern_search_exact,
-                )
+        for pattern in self.get_multiqc_search_patterns(case_id=case_id):
+            metrics_for_pattern: list[MetricsBase] = self.get_multiqc_metrics_for_sample(
+                search_pattern=pattern.pattern,
+                multiqc_json=multiqc_json,
+                sample_id=pattern.sample_id,
+                exact_match=self.is_multiqc_pattern_search_exact,
             )
             metrics.extend(metrics_for_pattern)
         for sample_pair in self._get_sample_pair_patterns(case_id):
@@ -129,35 +129,35 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.ensure_mandatory_metrics_present(metrics=metrics)
         return {"metrics": [metric.dict() for metric in metrics]}
 
+    def _get_list_of_metric_dicts(self, multiqc_json: MultiqcDataJson):
+        metric_dicts: list[dict[str, Any]] = super()._get_list_of_metric_dicts(multiqc_json)
+        list_copy: list[dict[str, Any]] = copy.deepcopy(metric_dicts)
+        list_copy.append(self._get_multiqc_picard_dict(multiqc_json))
+
+        return list_copy
+
+    @staticmethod
+    def _get_multiqc_picard_dict(multiqc_json: MultiqcDataJson) -> dict:
+        """Return the Picard Align Summary metrics from a MultiQC json file as a dictionary."""
+        picard_raw = copy.deepcopy(
+            multiqc_json.report_saved_raw_data["multiqc_picard_AlignmentSummaryMetrics"]
+        )
+        for sample_id, metrics in picard_raw.items():
+            picard_raw[sample_id] = {f"picard_{k}": v for k, v in metrics.items()}
+
+        return picard_raw
+
     @staticmethod
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
         metric_conditions["gender"]["threshold"] = sample.sex
 
-    def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
-        """Return the Raredisease d4 coverage file path."""
-        coverage_file_tags: list[str] = RAREDISEASE_COVERAGE_FILE_TAGS + [sample_id]
-        coverage_file: File | None = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=bundle_name, tags=coverage_file_tags
-        )
-        if coverage_file:
-            return coverage_file.full_path
-        LOG.warning(f"No coverage file found with the tags: {coverage_file_tags}")
-        return None
-
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
     ) -> CoverageMetricsChanjo1 | None:
-        sample_coverage: dict = self.chanjo_api.sample_coverage(
-            sample_id=sample_id, panel_genes=gene_ids
+        return chanjo1_get_sample_coverage(
+            chanjo_api=self.chanjo_api, sample_id=sample_id, gene_ids=gene_ids
         )
-        if sample_coverage:
-            return CoverageMetricsChanjo1(
-                coverage_completeness_percent=sample_coverage.get("mean_completeness"),
-                mean_coverage=sample_coverage.get("mean_coverage"),
-            )
-        LOG.warning(f"Could not calculate sample coverage for: {sample_id}")
-        return None
 
     def get_scout_upload_case_tags(self) -> dict:
         """Return Raredisease Scout upload case tags."""

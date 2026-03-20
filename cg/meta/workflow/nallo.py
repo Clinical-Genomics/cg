@@ -6,20 +6,10 @@ from itertools import permutations
 from pathlib import Path
 from typing import Any
 
-from click import File
-
-from cg.clients.chanjo2.models import (
-    CoverageMetrics,
-    CoveragePostRequest,
-    CoveragePostResponse,
-    CoverageSample,
-)
+from cg.apps.coverage import ChanjoAPI, chanjo_api_for_genome_build
 from cg.constants import Workflow
-from cg.constants.constants import GenomeVersion
+from cg.constants.constants import WORKFLOW_TO_GENOME_VERSION_MAP, GenomeVersion
 from cg.constants.nf_analysis import (
-    NALLO_COVERAGE_FILE_TAGS,
-    NALLO_COVERAGE_INTERVAL_TYPE,
-    NALLO_COVERAGE_THRESHOLD,
     NALLO_GENERAL_METRIC_CONDITIONS,
     NALLO_PARENT_PEDDY_METRIC_CONDITION,
     NALLO_RAW_METRIC_CONDITIONS,
@@ -27,6 +17,7 @@ from cg.constants.nf_analysis import (
 from cg.constants.scout import NALLO_CASE_TAGS
 from cg.constants.subject import PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.workflow.utils.chanjo1 import CoverageMetricsChanjo1, chanjo1_get_sample_coverage
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
@@ -61,6 +52,9 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         self.account: str = config.nallo.slurm.account
         self.email: str = config.nallo.slurm.mail_user
         self.revision: str = config.nallo.revision
+        self.chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
+            config=config, genome_build=WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.NALLO]
+        )
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a Nallo case. Currently fixed for hg38."""
@@ -71,7 +65,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         """Return Nallo bundle filenames path."""
         return NALLO_BUNDLE_FILENAMES_PATH
 
-    def get_workflow_metrics(self, sample_id: str) -> dict:
+    def get_qc_conditions_for_workflow(self, sample_id: str) -> dict:
         """Return Nallo workflow metric conditions for a sample."""
         sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
         if "-" not in sample_id:
@@ -100,7 +94,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
             return self.get_multiqc_metric(
                 metric_name=metric_name,
                 metric_value=sample_pair_metrics[metric_name],
-                metric_id=pair_sample_ids,
+                sample_id=pair_sample_ids,
             )
 
     def get_nallo_raw_metric(self, sample_id: str, multiqc_raw_data: dict) -> MetricsBase | None:
@@ -111,7 +105,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
             return self.get_multiqc_metric(
                 metric_name="somalier_sex",
                 metric_value=sample_metrics[metric_name],
-                metric_id=sample_id,
+                sample_id=sample_id,
             )
 
     def get_nallo_multiqc_json_metrics(self, case_id: str) -> list[MetricsBase]:
@@ -119,14 +113,12 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         multiqc_json: MultiqcDataJson = self.get_multiqc_data_json(case_id=case_id)
         metrics = []
 
-        for search_pattern, metric_id in self.get_multiqc_search_patterns(case_id).items():
-            metrics_for_pattern: list[MetricsBase] = (
-                self.get_metrics_from_multiqc_json_with_pattern(
-                    search_pattern=search_pattern,
-                    multiqc_json=multiqc_json,
-                    metric_id=metric_id,
-                    exact_match=self.is_multiqc_pattern_search_exact,
-                )
+        for pattern in self.get_multiqc_search_patterns(case_id):
+            metrics_for_pattern: list[MetricsBase] = self.get_multiqc_metrics_for_sample(
+                search_pattern=pattern.pattern,
+                multiqc_json=multiqc_json,
+                sample_id=pattern.sample_id,
+                exact_match=self.is_multiqc_pattern_search_exact,
             )
             metrics.extend(metrics_for_pattern)
         for sample_id in self.status_db.get_sample_ids_by_case_id(case_id):
@@ -170,40 +162,12 @@ class NalloAnalysisAPI(NfAnalysisAPI):
                 }[sample.sex]
             )
 
-    def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
-        """Return the Nallo d4 coverage file path."""
-        nallo_coverage_file_tags: list[str] = NALLO_COVERAGE_FILE_TAGS + [sample_id]
-        nallo_coverage_file: File | None = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=bundle_name, tags=nallo_coverage_file_tags
-        )
-        if nallo_coverage_file:
-            return nallo_coverage_file.full_path
-        LOG.warning(f"No Nallo coverage file found with the tags: {nallo_coverage_file_tags}")
-        return None
-
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
-    ) -> CoverageMetrics | None:
-        """Return sample coverage metrics from Chanjo2."""
-        nallo_genome_version: GenomeVersion = self.get_genome_build(case_id)
-        nallo_coverage_file_path: str | None = self.get_sample_coverage_file_path(
-            bundle_name=case_id, sample_id=sample_id
+    ) -> CoverageMetricsChanjo1 | None:
+        return chanjo1_get_sample_coverage(
+            chanjo_api=self.chanjo_api, sample_id=sample_id, gene_ids=gene_ids
         )
-        try:
-            post_request = CoveragePostRequest(
-                build=self.translate_genome_reference(nallo_genome_version),
-                coverage_threshold=NALLO_COVERAGE_THRESHOLD,
-                hgnc_gene_ids=gene_ids,
-                interval_type=NALLO_COVERAGE_INTERVAL_TYPE,
-                samples=[
-                    CoverageSample(coverage_file_path=nallo_coverage_file_path, name=sample_id)
-                ],
-            )
-            post_response: CoveragePostResponse = self.chanjo2_api.get_coverage(post_request)
-            return post_response.get_sample_coverage_metrics(sample_id)
-        except Exception as error:
-            LOG.error(f"Error getting coverage for sample '{sample_id}', error: {error}")
-            return None
 
     def get_scout_upload_case_tags(self) -> dict:
         """Return Nallo Scout upload case tags."""

@@ -1,6 +1,5 @@
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
-from typing import cast
 from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
@@ -9,6 +8,7 @@ from pytest_mock import MockerFixture
 import cg.services.analysis_starter.configurator.file_creators.balsamic_config as creator
 from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
+from cg.constants.constants import BedVersionGenomeVersion, Workflow
 from cg.constants.observations import BalsamicObservationPanel
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.sequencing import SeqLibraryPrepCategory
@@ -22,9 +22,11 @@ from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
 
 
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
 def test_create_tgs_myeloid_normal_only(
     cg_balsamic_config: BalsamicConfig,
     expected_tgs_myeloid_normal_only_command: str,
+    workflow: Workflow,
     mocker: MockerFixture,
 ):
     # GIVEN a store with a TGS normal-only case
@@ -36,13 +38,13 @@ def test_create_tgs_myeloid_normal_only(
         sex=SexOptions.FEMALE,
     )
     tgs_normal_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
+        Case, data_analysis=workflow, internal_id="case_1", samples=[sample]
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_normal_only_case)
 
     # GIVEN a bed version for a myeloid capture kit
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(
             BedVersion,
             bed_name=BalsamicObservationPanel.MYELOID,
@@ -72,18 +74,24 @@ def test_create_tgs_myeloid_normal_only(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_tgs_myeloid_normal_only_command, check=False, shell=True, stderr=-1, stdout=-1
+        args=expected_tgs_myeloid_normal_only_command.format(workflow=workflow),
+        check=False,
+        shell=True,
+        stderr=-1,
+        stdout=-1,
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with(
-        "myeloid_short_name"
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
+        short_name="myeloid_short_name", genome_version=BedVersionGenomeVersion.HG19
     )
 
 
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
 def test_create_tgs_lymphoid_paired(
     cg_balsamic_config: BalsamicConfig,
     expected_tgs_lymphoid_paired_command: str,
+    workflow: Workflow,
     mocker: MockerFixture,
 ):
     # GIVEN a store with TGS paired case
@@ -102,13 +110,13 @@ def test_create_tgs_lymphoid_paired(
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     tgs_paired_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
+        Case, data_analysis=workflow, internal_id="case_1", samples=[tumour_sample, normal_sample]
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_paired_case)
 
     # GIVEN a bed version for a lymphoid capture kit
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(
             BedVersion,
             bed_name=BalsamicObservationPanel.LYMPHOID,
@@ -138,17 +146,26 @@ def test_create_tgs_lymphoid_paired(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_tgs_lymphoid_paired_command, check=False, shell=True, stderr=-1, stdout=-1
+        args=expected_tgs_lymphoid_paired_command.format(workflow=workflow),
+        check=False,
+        shell=True,
+        stderr=-1,
+        stdout=-1,
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with(
-        "lymphoid_short_name"
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
+        short_name="lymphoid_short_name",
+        genome_version=BedVersionGenomeVersion.HG19,
     )
 
 
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
 def test_create_tgs_tumour_only(
-    cg_balsamic_config: BalsamicConfig, expected_tgs_tumour_only_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig,
+    expected_tgs_tumour_only_command: str,
+    workflow: Workflow,
+    mocker: MockerFixture,
 ):
     # GIVEN a store with a TGS tumor-only case
     tumour_sample: Sample = create_autospec(
@@ -159,13 +176,13 @@ def test_create_tgs_tumour_only(
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     tgs_tumour_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample]
+        Case, data_analysis=workflow, internal_id="case_1", samples=[tumour_sample]
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_tumour_only_case)
 
     # GIVEN a bed version without a LoqusDB dump file nor PON file
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(
             BedVersion,
             bed_name="bed_without_a_dump_file",
@@ -195,15 +212,26 @@ def test_create_tgs_tumour_only(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_tgs_tumour_only_command, check=False, shell=True, stderr=-1, stdout=-1
+        args=expected_tgs_tumour_only_command.format(workflow=workflow),
+        check=False,
+        shell=True,
+        stderr=-1,
+        stdout=-1,
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("bed_short_name")
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
+        short_name="bed_short_name",
+        genome_version=BedVersionGenomeVersion.HG19,
+    )
 
 
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
 def test_create_override_panel_bed(
-    cg_balsamic_config: BalsamicConfig, expected_tgs_tumour_only_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig,
+    expected_tgs_tumour_only_command: str,
+    workflow: Workflow,
+    mocker: MockerFixture,
 ):
     # GIVEN a store with a TGS tumor-only case
     tumour_sample: Sample = create_autospec(
@@ -214,11 +242,11 @@ def test_create_override_panel_bed(
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     tgs_tumour_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample]
+        Case, data_analysis=workflow, internal_id="case_1", samples=[tumour_sample]
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=tgs_tumour_only_case)
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
@@ -241,15 +269,26 @@ def test_create_override_panel_bed(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_tgs_tumour_only_command, check=False, shell=True, stderr=-1, stdout=-1
+        args=expected_tgs_tumour_only_command.format(workflow=workflow),
+        check=False,
+        shell=True,
+        stderr=-1,
+        stdout=-1,
     )
 
     # THEN the panel bed flag value is used
-    store.get_bed_version_by_short_name_strict.assert_called_once_with("override_panel_bed")
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
+        short_name="override_panel_bed",
+        genome_version=BedVersionGenomeVersion.HG19,
+    )
 
 
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
 def test_create_wes_normal_only(
-    cg_balsamic_config: BalsamicConfig, expected_wes_normal_only_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig,
+    expected_wes_normal_only_command: str,
+    workflow: Workflow,
+    mocker: MockerFixture,
 ):
     # GIVEN a case with one normal WES sample
     sample: Sample = create_autospec(
@@ -260,13 +299,13 @@ def test_create_wes_normal_only(
         sex=SexOptions.FEMALE,
     )
     wes_normal_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
+        Case, data_analysis=workflow, internal_id="case_1", samples=[sample]
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wes_normal_only_case)
 
     # GIVEN a bed version for the exome capture kit
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(
             BedVersion,
             bed_name=BalsamicObservationPanel.EXOME,
@@ -296,17 +335,26 @@ def test_create_wes_normal_only(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_wes_normal_only_command, check=False, shell=True, stderr=-1, stdout=-1
+        args=expected_wes_normal_only_command.format(workflow=workflow),
+        check=False,
+        shell=True,
+        stderr=-1,
+        stdout=-1,
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with(
-        "exome_short_name"
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
+        short_name="exome_short_name",
+        genome_version=BedVersionGenomeVersion.HG19,
     )
 
 
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
 def test_create_wes_paired(
-    cg_balsamic_config: BalsamicConfig, expected_wes_paired_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig,
+    expected_wes_paired_command: str,
+    workflow: Workflow,
+    mocker: MockerFixture,
 ):
     # GIVEN a store with a WES paired case
     tumour_sample: Sample = create_autospec(
@@ -324,13 +372,13 @@ def test_create_wes_paired(
         prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
     )
     wes_paired_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
+        Case, data_analysis=workflow, internal_id="case_1", samples=[tumour_sample, normal_sample]
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wes_paired_case)
 
     # GIVEN a bed version for the exome capture kit
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(
             BedVersion,
             bed_name=BalsamicObservationPanel.EXOME,
@@ -360,15 +408,26 @@ def test_create_wes_paired(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_wes_paired_command, check=False, shell=True, stderr=-1, stdout=-1
+        args=expected_wes_paired_command.format(workflow=workflow),
+        check=False,
+        shell=True,
+        stderr=-1,
+        stdout=-1,
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with("twist_exome")
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
+        short_name="twist_exome",
+        genome_version=BedVersionGenomeVersion.HG19,
+    )
 
 
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
 def test_create_wes_tumour_only(
-    cg_balsamic_config: BalsamicConfig, expected_wes_tumour_only_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig,
+    expected_wes_tumour_only_command: str,
+    workflow: Workflow,
+    mocker: MockerFixture,
 ):
     # GIVEN a case with one tumor WES sample
     sample: Sample = create_autospec(
@@ -379,13 +438,13 @@ def test_create_wes_tumour_only(
         sex=SexOptions.FEMALE,
     )
     wes_tumor_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
+        Case, data_analysis=workflow, internal_id="case_1", samples=[sample]
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wes_tumor_only_case)
 
     # GIVEN a bed version for the exome capture kit
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(
             BedVersion,
             bed_name=BalsamicObservationPanel.EXOME,
@@ -415,17 +474,26 @@ def test_create_wes_tumour_only(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_wes_tumour_only_command, check=False, shell=True, stderr=-1, stdout=-1
+        args=expected_wes_tumour_only_command.format(workflow=workflow),
+        check=False,
+        shell=True,
+        stderr=-1,
+        stdout=-1,
     )
 
     # THEN the bed version should have been fetched using the LIMS capture kit
-    cast(Mock, store.get_bed_version_by_short_name_strict).assert_called_once_with(
-        "exome_short_name"
+    store.get_bed_version_by_short_name_and_genome_version_strict.assert_called_once_with(
+        short_name="exome_short_name",
+        genome_version=BedVersionGenomeVersion.HG19,
     )
 
 
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
 def test_create_wgs_paired(
-    cg_balsamic_config: BalsamicConfig, expected_wgs_paired_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig,
+    expected_wgs_paired_command: str,
+    workflow: Workflow,
+    mocker: MockerFixture,
 ):
     # GIVEN a store with a WGS paired case
     tumour_sample: Sample = create_autospec(
@@ -443,7 +511,7 @@ def test_create_wgs_paired(
         prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     )
     wgs_paired_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample, normal_sample]
+        Case, data_analysis=workflow, internal_id="case_1", samples=[tumour_sample, normal_sample]
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wgs_paired_case)
@@ -465,12 +533,20 @@ def test_create_wgs_paired(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_wgs_paired_command, check=False, shell=True, stderr=-1, stdout=-1
+        args=expected_wgs_paired_command.format(workflow=workflow),
+        check=False,
+        shell=True,
+        stderr=-1,
+        stdout=-1,
     )
 
 
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
 def test_create_wgs_tumor_only(
-    cg_balsamic_config: BalsamicConfig, expected_wgs_tumour_only_command: str, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig,
+    expected_wgs_tumour_only_command: str,
+    workflow: Workflow,
+    mocker: MockerFixture,
 ):
     # GIVEN a store with a WGS tumor-only case
     sample: Sample = create_autospec(
@@ -481,7 +557,7 @@ def test_create_wgs_tumor_only(
         sex=SexOptions.MALE,
     )
     wgs_tumor_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
+        Case, data_analysis=workflow, internal_id="case_1", samples=[sample]
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wgs_tumor_only_case)
@@ -503,7 +579,11 @@ def test_create_wgs_tumor_only(
 
     # THEN the expected command is called
     mock_runner.assert_called_once_with(
-        args=expected_wgs_tumour_only_command, check=False, shell=True, stderr=-1, stdout=-1
+        args=expected_wgs_tumour_only_command.format(workflow=workflow),
+        check=False,
+        shell=True,
+        stderr=-1,
+        stdout=-1,
     )
 
 
@@ -523,7 +603,8 @@ def test_create_no_case_found(cg_balsamic_config: BalsamicConfig):
         config_file_creator.create(case_id="non_existing_case", fastq_path=Path("/some/path"))
 
 
-def test_create_no_capture_kit_in_lims(cg_balsamic_config: BalsamicConfig):
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
+def test_create_no_capture_kit_in_lims(cg_balsamic_config: BalsamicConfig, workflow: Workflow):
     # GIVEN a store with a TGS Balsamic case
     tumour_sample: Sample = create_autospec(
         Sample,
@@ -533,11 +614,11 @@ def test_create_no_capture_kit_in_lims(cg_balsamic_config: BalsamicConfig):
         prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     )
     case_without_capture_kit: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[tumour_sample]
+        Case, data_analysis=workflow, internal_id="case_1", samples=[tumour_sample]
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=case_without_capture_kit)
-    store.get_bed_version_by_short_name_strict = Mock(
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
@@ -558,8 +639,9 @@ def test_create_no_capture_kit_in_lims(cg_balsamic_config: BalsamicConfig):
         )
 
 
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
 def test_balsamic_config_case_command_fails(
-    cg_balsamic_config: BalsamicConfig, mocker: MockerFixture
+    cg_balsamic_config: BalsamicConfig, workflow: Workflow, mocker: MockerFixture
 ):
     # GIVEN a store with a Balsamic case
     sample: Sample = create_autospec(
@@ -570,7 +652,7 @@ def test_balsamic_config_case_command_fails(
         sex=SexOptions.MALE,
     )
     wgs_tumor_only_case: Case = create_autospec(
-        Case, data_analysis="balsamic", internal_id="case_1", samples=[sample]
+        Case, data_analysis=workflow, internal_id="case_1", samples=[sample]
     )
     store: Store = create_autospec(Store)
     store.get_case_by_internal_id_strict = Mock(return_value=wgs_tumor_only_case)

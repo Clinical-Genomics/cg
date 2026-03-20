@@ -2,13 +2,12 @@ import logging
 import subprocess
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import cast
 
 from pydantic import EmailStr
 
 from cg.apps.lims.api import LimsAPI
 from cg.constants import SexOptions
-from cg.constants.constants import GenomeVersion, Workflow
+from cg.constants.constants import BedVersionGenomeVersion, GenomeVersion
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.cg_config import BalsamicConfig
@@ -35,6 +34,7 @@ class BalsamicConfigFileCreator:
         self.root_dir: Path = cg_balsamic_config.root
         self.bed_directory: Path = cg_balsamic_config.bed_path
         self.cache_dir: Path = cg_balsamic_config.balsamic_cache
+        self.cache_version: str = cg_balsamic_config.cache_version
         self.cadd_path: Path = cg_balsamic_config.cadd_path
         self.genome_interval_path: Path = cg_balsamic_config.genome_interval_path
         self.gens_coverage_female_path: Path = cg_balsamic_config.gens_coverage_female_path
@@ -99,11 +99,12 @@ class BalsamicConfigFileCreator:
         patient_sex: SexOptions = self._get_patient_sex(case)
         return BalsamicConfigInputWGS(
             analysis_dir=self.root_dir,
-            analysis_workflow=cast(Workflow, case.data_analysis),
+            analysis_workflow=case.data_analysis,
             artefact_snv_observations=self.loqusdb_artefact_snv,
             artefact_sv_observations=self.artefact_sv_observations,
             balsamic_binary=self.balsamic_binary,
             balsamic_cache=self.cache_dir,
+            cache_version=self.cache_version,
             cadd_annotations=self.cadd_path,
             cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
             cancer_somatic_snv_observations=self.loqusdb_cancer_somatic_snv,
@@ -137,10 +138,11 @@ class BalsamicConfigFileCreator:
         patient_sex: SexOptions = self._get_patient_sex(case)
         return BalsamicConfigInputPanel(
             analysis_dir=self.root_dir,
-            analysis_workflow=cast(Workflow, case.data_analysis),
+            analysis_workflow=case.data_analysis,
             artefact_snv_observations=self.loqusdb_artefact_snv,
             balsamic_binary=self.balsamic_binary,
             balsamic_cache=self.cache_dir,
+            cache_version=self.cache_version,
             cadd_annotations=self.cadd_path,
             cancer_germline_snv_observations=self.loqusdb_cancer_germline_snv,
             cancer_somatic_snv_observations=self.loqusdb_cancer_somatic_snv,
@@ -219,7 +221,9 @@ class BalsamicConfigFileCreator:
         short_name: str = override_panel_bed or self.lims_api.get_capture_kit_strict(
             first_sample.internal_id
         )
-        return self.status_db.get_bed_version_by_short_name_strict(short_name)
+        return self.status_db.get_bed_version_by_short_name_and_genome_version_strict(
+            short_name=short_name, genome_version=BedVersionGenomeVersion.HG19
+        )
 
     def _get_pon_file(self, bed_short_name: str | None) -> Path | None:
         if pon_file := self.panel_of_normals.get(bed_short_name):

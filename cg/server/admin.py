@@ -17,6 +17,7 @@ from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
+from cg.utils.number_formatter import Si
 
 
 class BaseView(ModelView):
@@ -31,9 +32,24 @@ class BaseView(ModelView):
         return redirect(url_for("google.login", next=request.url))
 
 
-def view_hifi_yield_in_gb(unused1, unused2, model, unused3):
+def view_hifi_yield_si_unit_formatted(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
-    return Markup(f"{round(model.hifi_yield/1E9, 1)} Gb") if model.hifi_yield else ""
+
+    if model.hifi_yield is None:
+        return None
+
+    formatted_number = Si.prefix(value=model.hifi_yield, unit="b")
+    return Markup(formatted_number)
+
+
+def view_reads_large_number_formatted(unused1, unused2, model, unused3):
+    del unused1, unused2, unused3
+
+    if model.reads is None:
+        return None
+
+    formatted_number = Si.group_digits(model.reads)
+    return Markup(formatted_number)
 
 
 def view_priority(unused1, unused2, model, unused3):
@@ -785,7 +801,8 @@ class SampleView(BaseView):
     column_formatters = {
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
-        "hifi_yield": view_hifi_yield_in_gb,
+        "reads": view_reads_large_number_formatted,
+        "hifi_yield": view_hifi_yield_si_unit_formatted,
         "internal_id": view_case_sample_link,
         "invoice": InvoiceView.view_invoice_link,
         "original_ticket": view_ticket_link,

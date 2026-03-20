@@ -6,9 +6,12 @@ import logging
 import rich_click as click
 
 from cg.cli.generate.delivery_report.base import generate_delivery_report
+from cg.cli.upload.coverage import upload_coverage
+from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.scout import upload_to_scout
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
+from cg.constants.constants import WORKFLOW_TO_GENOME_VERSION_MAP, GenomeBuild, Workflow
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -28,6 +31,13 @@ class NalloUploadAPI(UploadAPI):
         """Uploads NALLO analysis data and files."""
         analysis: Analysis = self.status_db.get_latest_completed_analysis_for_case(case.internal_id)
         self.update_upload_started_at(analysis=analysis)
+
+        # Main upload
+        genome_version: GenomeBuild = WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.NALLO]
+        ctx.invoke(upload_coverage, family_id=case.internal_id, genome_version=genome_version.name)
+        ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
+        ctx.invoke(upload_to_gens, case_id=case.internal_id)
+
         # Delivery report generation
         if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
             ctx.invoke(generate_delivery_report, case_id=case.internal_id)
@@ -38,9 +48,6 @@ class NalloUploadAPI(UploadAPI):
         LOG.info(
             f"Upload of case {case.internal_id} was successful. Uploaded at {dt.datetime.now()} in StatusDB"
         )
-
-        # Upload to loqusdb
-        ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
 
         # Clinical delivery upload
         self.upload_files_to_customer_inbox(case)

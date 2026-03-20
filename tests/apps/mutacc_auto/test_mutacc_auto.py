@@ -49,6 +49,7 @@ def test_extract_reads(mutacc_auto_api, mocker):
         str(case),
         "--padding",
         str(mutacc_auto_api.mutacc_padding),
+        "--conda",
     ]
 
     mock_run_command.assert_called_with(expected_call)

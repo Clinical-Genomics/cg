@@ -14,7 +14,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.constants import PIPELINES_USING_PARTIAL_ANALYSES
 from cg.exc import DecompressionCouldNotStartError
-from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
 from cg.models.compression_data import CaseCompressionData, CompressionData, SampleCompressionData
 from cg.store.models import Case, Sample
@@ -30,12 +29,10 @@ class CompressAPI:
         hk_api: HousekeeperAPI,
         demux_root: str,
         crunchy_api: CrunchyAPI,
-        backup_api: SpringBackupAPI = None,
         dry_run: bool = False,
     ):
         self.hk_api: HousekeeperAPI = hk_api
         self.crunchy_api: CrunchyAPI = crunchy_api
-        self.backup_api: SpringBackupAPI = backup_api
         self.demux_root: Path = Path(demux_root)
         self.dry_run: bool = dry_run
 
@@ -44,8 +41,6 @@ class CompressAPI:
         self.dry_run = dry_run
         if self.crunchy_api.dry_run is False:
             self.crunchy_api.set_dry_run(dry_run)
-        if self.backup_api:
-            self.backup_api.dry_run = self.dry_run
 
     def compress_fastq(self, sample_id: str) -> bool:
         """Compress the FASTQ files for an individual."""
@@ -116,7 +111,6 @@ class CompressAPI:
             - Housekeeper will be updated to include FASTQ files
             - Housekeeper will still have the SPRING and SPRING metadata file
             - The SPRING metadata file will be updated to include date for decompression
-            - PDC archived SPRING files will be retrieved and decrypted before decompression
         """
         version: Version = self.hk_api.get_latest_bundle_version(bundle_name=sample_id)
         if not version:
@@ -124,29 +118,18 @@ class CompressAPI:
 
         compressions: list[CompressionData] = files.get_spring_paths(version_obj=version)
         for compression in compressions:
-            if not compression.is_spring_decompression_possible:
-                LOG.info(f"SPRING to FASTQ decompression not possible for {sample_id}")
-                if compression.is_compression_pending or compression.is_spring_decompression_done:
-                    LOG.info(
-                        f"Spring file {compression.spring_path.as_posix()} is already being decompressed."
-                    )
-                    continue
-                if not self.backup_api.is_to_be_retrieved_and_decrypted(
-                    spring_file_path=compression.spring_path
-                ):
-                    LOG.warning(f"Could not find {compression.spring_path} on disk")
-                    return False
-                LOG.info("The SPRING file will be retrieved from PDC and decrypted")
-                self.backup_api.retrieve_and_decrypt_spring_file(
-                    spring_file_path=Path(compression.spring_path)
-                )
-
             LOG.info(
                 f"Decompressing {compression.spring_path} to FASTQ format for sample {sample_id}"
             )
+            if not compression.is_spring_decompression_possible:
+                if not (
+                    compression.is_compression_pending or compression.is_spring_decompression_done
+                ):
+                    return False
+            else:
+                self.crunchy_api.spring_to_fastq(compression_obj=compression, sample_id=sample_id)
+                update_metadata_date(spring_metadata_path=compression.spring_metadata_path)
 
-            self.crunchy_api.spring_to_fastq(compression_obj=compression, sample_id=sample_id)
-            update_metadata_date(spring_metadata_path=compression.spring_metadata_path)
         return True
 
     def _is_sample_linked_to_newer_case(self, sample: Sample, days_back: int) -> bool:
@@ -258,7 +241,9 @@ class CompressAPI:
             LOG.warning(f"Could not find any spring paths for {sample.internal_id}")
         for compression in spring_paths:
             if not compression.is_spring_decompression_done:
-                LOG.info(f"SPRING to FASTQ decompression not finished {sample.internal_id}")
+                LOG.info(
+                    f"SPRING to FASTQ decompression has not completed or was never started for {sample.internal_id}"
+                )
                 return False
 
             fastq_first: Path = compression.fastq_first

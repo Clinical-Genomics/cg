@@ -48,7 +48,7 @@ class TomteAnalysisAPI(NfAnalysisAPI):
     def get_genome_build(self, case_id: str) -> str:
         return GenomeVersion.HG38
 
-    def get_workflow_metrics(self, metric_id: str) -> dict:
+    def get_qc_conditions_for_workflow(self, sample_id: str) -> dict:
         return TOMTE_METRIC_CONDITIONS
 
     def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:

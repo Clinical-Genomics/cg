@@ -195,7 +195,7 @@
   tag: str_alignment_index
 - format: meta
   id: SAMPLEID
-  path: PATHTOCASE/vcf2cytosure/SAMPLEID.cgh
+  path: PATHTOCASE/vcf2cytosure/SAMPLENAME.cgh
   step: vcf2cytosure
   tag: vcf2cytosure
 - format: bed
