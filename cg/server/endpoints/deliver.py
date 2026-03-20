@@ -17,7 +17,6 @@ def deliver_analyses():
     try:
         trailblazer_ids: list[int] = request.json["trailblazer_ids"]  # type: ignore None is handled
         analyses = []
-        # TODO: decide if this logic belongs to this endpoint
         for trailblazer_id in trailblazer_ids:
             analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
             analyses.append(analysis)

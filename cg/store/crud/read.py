@@ -1199,16 +1199,6 @@ class ReadHandler(BaseHandler):
                 f"Sample with internal id {internal_id} was not found in the database."
             )
 
-    def get_samples_by_identifier(self, object_type: str, identifier: str) -> list[Sample]:
-        """Return all samples from a flow cell, case or sample id"""
-        object_to_filter: dict[str, Callable] = {
-            "sample": self.get_sample_by_internal_id,
-            "case": self.get_samples_by_case_id,
-            "flow_cell": self.get_samples_by_illumina_flow_cell,
-        }
-        samples: Sample | list[Sample] = object_to_filter[object_type](identifier)
-        return samples if isinstance(samples, list) else [samples]
-
     def get_samples_by_internal_id(self, internal_id: str) -> list[Sample]:
         """Return all samples by lims id."""
         return apply_sample_filter(
