@@ -128,6 +128,7 @@ def _register_blueprints(app: Flask):
     ext.csrf.exempt(ANALYSES_BLUEPRINT)
     ext.csrf.exempt(USERS_BLUEPRINT)
     ext.csrf.exempt(PACBIO_SEQUENCING_RUNS_BLUEPRINT)
+    ext.csrf.exempt(DELIVER_BLUEPRINT)
 
     @app.route("/")
     def index():
