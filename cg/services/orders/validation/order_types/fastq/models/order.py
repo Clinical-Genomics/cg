@@ -3,10 +3,5 @@ from cg.services.orders.validation.order_types.fastq.constants import FastqDeliv
 from cg.services.orders.validation.order_types.fastq.models.sample import FastqSample
 
 
-class FastqOrder(OrderWithSamples):
+class FastqOrder(OrderWithSamples[FastqSample]):
     delivery_type: FastqDeliveryType
-    samples: list[FastqSample]
-
-    @property
-    def enumerated_samples(self) -> enumerate[FastqSample]:
-        return enumerate(self.samples)

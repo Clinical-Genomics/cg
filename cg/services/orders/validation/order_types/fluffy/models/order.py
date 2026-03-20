@@ -3,13 +3,8 @@ from cg.services.orders.validation.order_types.fluffy.constants import FluffyDel
 from cg.services.orders.validation.order_types.fluffy.models.sample import FluffySample
 
 
-class FluffyOrder(OrderWithSamples):
+class FluffyOrder(OrderWithSamples[FluffySample]):
     delivery_type: FluffyDeliveryType
-    samples: list[FluffySample]
-
-    @property
-    def enumerated_samples(self) -> enumerate[FluffySample]:
-        return enumerate(self.samples)
 
     @property
     def pools(self) -> dict[str, list[FluffySample]]:

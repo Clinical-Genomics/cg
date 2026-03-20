@@ -7,10 +7,5 @@ from cg.services.orders.validation.order_types.microbial_fastq.models.sample imp
 )
 
 
-class MicrobialFastqOrder(OrderWithSamples):
+class MicrobialFastqOrder(OrderWithSamples[MicrobialFastqSample]):
     delivery_type: MicrobialFastqDeliveryType
-    samples: list[MicrobialFastqSample]
-
-    @property
-    def enumerated_samples(self) -> enumerate[MicrobialFastqSample]:
-        return enumerate(self.samples)

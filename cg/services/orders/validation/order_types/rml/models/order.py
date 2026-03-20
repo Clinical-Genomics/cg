@@ -3,13 +3,8 @@ from cg.services.orders.validation.order_types.rml.constants import RMLDeliveryT
 from cg.services.orders.validation.order_types.rml.models.sample import RMLSample
 
 
-class RMLOrder(OrderWithSamples):
+class RMLOrder(OrderWithSamples[RMLSample]):
     delivery_type: RMLDeliveryType
-    samples: list[RMLSample]
-
-    @property
-    def enumerated_samples(self) -> enumerate[RMLSample]:
-        return enumerate(self.samples)
 
     @property
     def pools(self) -> dict[str, list[RMLSample]]:

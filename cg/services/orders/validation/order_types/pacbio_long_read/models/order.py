@@ -3,10 +3,5 @@ from cg.services.orders.validation.order_types.pacbio_long_read.constants import
 from cg.services.orders.validation.order_types.pacbio_long_read.models.sample import PacbioSample
 
 
-class PacbioOrder(OrderWithSamples):
+class PacbioOrder(OrderWithSamples[PacbioSample]):
     delivery_type: PacbioDeliveryType
-    samples: list[PacbioSample]
-
-    @property
-    def enumerated_samples(self) -> enumerate[PacbioSample]:
-        return enumerate(self.samples)

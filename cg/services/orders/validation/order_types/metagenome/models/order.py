@@ -3,10 +3,5 @@ from cg.services.orders.validation.order_types.metagenome.constants import Metag
 from cg.services.orders.validation.order_types.metagenome.models.sample import MetagenomeSample
 
 
-class MetagenomeOrder(OrderWithSamples):
+class MetagenomeOrder(OrderWithSamples[MetagenomeSample]):
     delivery_type: MetagenomeDeliveryType
-    samples: list[MetagenomeSample]
-
-    @property
-    def enumerated_samples(self) -> enumerate[MetagenomeSample]:
-        return enumerate(self.samples)

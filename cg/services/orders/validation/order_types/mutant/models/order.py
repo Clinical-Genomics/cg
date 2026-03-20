@@ -3,10 +3,5 @@ from cg.services.orders.validation.order_types.mutant.constants import MutantDel
 from cg.services.orders.validation.order_types.mutant.models.sample import MutantSample
 
 
-class MutantOrder(OrderWithSamples):
+class MutantOrder(OrderWithSamples[MutantSample]):
     delivery_type: MutantDeliveryType
-    samples: list[MutantSample]
-
-    @property
-    def enumerated_samples(self) -> enumerate[MutantSample]:
-        return enumerate(self.samples)
