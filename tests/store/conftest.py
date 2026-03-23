@@ -331,7 +331,10 @@ def store_with_analyses_for_cases(
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: CaseSample = analysis_store.relate_sample(
-            case=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
+            case=oldest_analysis.case,
+            sample=sample,
+            status=PhenotypeStatus.UNKNOWN,
+            should_deliver_sample=True,
         )
         analysis_store.session.add(link)
     return analysis_store
@@ -446,7 +449,10 @@ def store_with_analyses_for_cases_not_uploaded_fluffy(
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: CaseSample = analysis_store.relate_sample(
-            case=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
+            case=oldest_analysis.case,
+            sample=sample,
+            status=PhenotypeStatus.UNKNOWN,
+            should_deliver_sample=True,
         )
         analysis_store.session.add(link)
     return analysis_store

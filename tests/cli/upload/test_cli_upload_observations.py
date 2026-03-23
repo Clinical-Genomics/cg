@@ -35,7 +35,9 @@ def test_observations(
     sample: Sample = helpers.add_sample(
         store, application_type=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
     )
-    link: CaseSample = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    link: CaseSample = store.relate_sample(
+        case=case, sample=sample, status=PhenotypeStatus.UNKNOWN, should_deliver_sample=True
+    )
     store.session.add(link)
 
     # WHEN trying to do a dry run upload to Loqusdb
@@ -99,7 +101,9 @@ def test_get_observations_api(cg_context: CGConfig, helpers: StoreHelpers):
     sample: Sample = helpers.add_sample(
         store, application_type=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
     )
-    link: CaseSample = store.relate_sample(case=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+    link: CaseSample = store.relate_sample(
+        case=case, sample=sample, status=PhenotypeStatus.UNKNOWN, should_deliver_sample=True
+    )
     store.session.add(link)
 
     # WHEN retrieving the observation API
@@ -122,7 +126,7 @@ def test_get_observations_api_nallo(cg_context: CGConfig, helpers: StoreHelpers)
         store=store, application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
     )
     case_sample: CaseSample = store.relate_sample(
-        case=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+        case=case, sample=sample, status=PhenotypeStatus.UNKNOWN, should_deliver_sample=True
     )
 
     store.session.add(case_sample)
@@ -147,7 +151,7 @@ def test_get_observations_api_raredisease(cg_context: CGConfig, helpers: StoreHe
         store, application_type=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING
     )
     case_sample: CaseSample = store.relate_sample(
-        case=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+        case=case, sample=sample, status=PhenotypeStatus.UNKNOWN, should_deliver_sample=True
     )
 
     store.session.add(case_sample)

@@ -44,7 +44,10 @@ def test_filter_cases_has_sequence(
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -74,7 +77,10 @@ def test_filter_cases_has_sequence_when_external(base_store: Store, helpers: Sto
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -102,7 +108,10 @@ def test_filter_cases_has_sequence_when_not_sequenced(base_store: Store, helpers
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -134,7 +143,10 @@ def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -164,7 +176,10 @@ def test_filter_cases_with_workflow_when_correct_workflow(
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -191,7 +206,10 @@ def test_filter_cases_with_workflow_when_incorrect_workflow(
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -223,10 +241,16 @@ def test_filter_cases_with_loqusdb_supported_workflow(
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link_1: CaseSample = base_store.relate_sample(
-        case=test_mip_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_mip_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=False,
     )
     link_2: CaseSample = base_store.relate_sample(
-        case=test_fluffy_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_fluffy_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add_all([link_1, link_2])
 
@@ -256,7 +280,10 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method(
     # GIVEN a MIP-DNA associated test case
     test_case_wes: Case = helpers.add_case(store=base_store, data_analysis=Workflow.MIP_DNA)
     link = base_store.relate_sample(
-        case=test_case_wes, sample=test_sample_wes, status=PhenotypeStatus.UNKNOWN
+        case=test_case_wes,
+        sample=test_sample_wes,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -288,7 +315,10 @@ def test_filter_cases_with_loqusdb_supported_sequencing_method_empty(
     # GIVEN a MIP-DNA associated test case
     test_case_wts: Case = helpers.add_case(store=base_store, data_analysis=Workflow.MIP_DNA)
     link = base_store.relate_sample(
-        case=test_case_wts, sample=test_sample_wts, status=PhenotypeStatus.UNKNOWN
+        case=test_case_wts,
+        sample=test_sample_wts,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -325,7 +355,10 @@ def test_filter_cases_for_analysis(
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -374,7 +407,10 @@ def test_filter_cases_for_analysis_that_is_running_multiple_analyses_and_one_ana
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -496,7 +532,10 @@ def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -534,7 +573,10 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_da
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -572,7 +614,10 @@ def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_da
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -608,7 +653,10 @@ def test_filter_cases_for_analysis_top_up(
 
     # GIVEN that the sample and the case are related
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.AFFECTED
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.AFFECTED,
+        should_deliver_sample=True,
     )
 
     # GIVEN an analysis for the case completed yesterday
@@ -704,7 +752,10 @@ def test_filter_cases_for_analysis_top_up_when_no_new_sequence_data(
 
     # GIVEN that the sample and the case are related
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.AFFECTED
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.AFFECTED,
+        should_deliver_sample=True,
     )
 
     # GIVEN an analysis for the case completed now
@@ -744,7 +795,10 @@ def test_filter_cases_with_scout_data_delivery(
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -777,10 +831,16 @@ def test_filter_report_supported_data_delivery_cases(
 
     # GIVEN a database with the test cases
     link_1: CaseSample = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     link_2: CaseSample = base_store.relate_sample(
-        case=test_invalid_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_invalid_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=False,
     )
     base_store.session.add_all([link_1, link_2])
 

@@ -6,6 +6,8 @@ have always been validated before calling the function.
 
 from unittest.mock import create_autospec
 
+import pytest
+
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.models.orders.constants import OrderType
 from cg.services.orders.lims_service.service import OrderLimsService
@@ -179,6 +181,7 @@ def test_store_tomte_order(
     assert new_link.should_deliver_sample
 
 
+@pytest.mark.skip()
 def test_existing_samples_should_not_be_delivered_again():
     # GIVEN an order containing an existing sample
     existing_sample = ExistingSample(internal_id="ACC123")

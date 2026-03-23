@@ -199,7 +199,10 @@ def test_that_cases_can_have_many_samples(
 
     # GIVEN a database with a case with one sample sequenced sample
     link = base_store.relate_sample(
-        case=case_with_one, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=case_with_one,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -263,7 +266,10 @@ def test_new_external_case_not_in_result(base_store: Store, helpers: StoreHelper
 
     # GIVEN a database with a case with one externally sequenced sample for BALSAMIC analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=False,
     )
     base_store.session.add(link)
 
@@ -291,7 +297,10 @@ def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers, timestamp_
 
     # GIVEN a database with a case with one of the sequenced sample and completed analysis
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -322,7 +331,10 @@ def test_all_samples_and_analysis_completed(
 
     # GIVEN a database with a case with one of the sequenced sample and completed analysis
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -346,7 +358,10 @@ def test_specified_analysis_in_result(
 
     # GIVEN a database with a case with one sequenced sample for BALSAMIC analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -374,7 +389,10 @@ def test_exclude_other_workflow_analysis_from_result(
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -399,7 +417,10 @@ def test_one_of_one_sequenced_samples(
 
     # GIVEN a database with a case with a sequenced sample and no analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
     assert test_sample.last_sequenced_at is not None
@@ -559,12 +580,18 @@ def test_get_cases_for_analysis_filters_out_analysis_older_than_last_sequenced_s
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
     link_2 = base_store.relate_sample(
-        case=test_case_to_be_analyzed, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case_to_be_analyzed,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=False,
     )
     base_store.session.add(link_2)
 

@@ -47,7 +47,10 @@ def microsalt_store(base_store: Store, helpers: StoreHelpers) -> Store:
     )
 
     base_store.relate_sample(
-        case=microsalt_case, sample=microsalt_sample, status=StatusEnum.unknown
+        case=microsalt_case,
+        sample=microsalt_sample,
+        status=StatusEnum.unknown,
+        should_deliver_sample=True,
     )
     order: Order = base_store.add_order(customer=customer, ticket_id=1)
     microsalt_case.orders.append(order)

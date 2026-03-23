@@ -23,7 +23,7 @@ def test_analysis_included(
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: CaseSample = analysis_store.relate_sample(
-        case=analysis.case, sample=sample, status="unknown"
+        case=analysis.case, sample=sample, status="unknown", should_deliver_sample=True
     )
     analysis_store.session.add(link)
 
@@ -43,7 +43,7 @@ def test_analysis_excluded(analysis_store: Store, helpers, timestamp_now: dateti
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     link: CaseSample = analysis_store.relate_sample(
-        case=analysis.case, sample=sample, status="unknown"
+        case=analysis.case, sample=sample, status="unknown", should_deliver_sample=True
     )
     analysis_store.session.add(link)
 
@@ -72,7 +72,7 @@ def test_workflow_included(
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: CaseSample = analysis_store.relate_sample(
-        case=analysis.case, sample=sample, status="unknown"
+        case=analysis.case, sample=sample, status="unknown", should_deliver_sample=True
     )
     analysis_store.session.add(link)
 
@@ -101,7 +101,7 @@ def test_workflow_excluded(analysis_store: Store, helpers, timestamp_now: dateti
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     link: CaseSample = analysis_store.relate_sample(
-        case=analysis.case, sample=sample, status="unknown"
+        case=analysis.case, sample=sample, status="unknown", should_deliver_sample=True
     )
     analysis_store.session.add(link)
 
@@ -130,7 +130,7 @@ def test_non_cleaned_included(
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     link: CaseSample = analysis_store.relate_sample(
-        case=analysis.case, sample=sample, status="unknown"
+        case=analysis.case, sample=sample, status="unknown", should_deliver_sample=True
     )
     analysis_store.session.add(link)
 
