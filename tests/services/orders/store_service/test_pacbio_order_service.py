@@ -36,9 +36,11 @@ def test_store_pacbio_order_data_in_status_db(
         assert new_sample.sex == SexEnum.male
         # THEN the sample should have a relationship with a case
         assert len(new_sample.links) == 1
-        case_link = new_sample.links[0]
-        assert case_link.case in store_to_submit_and_validate_orders.get_cases()
+        case_sample = new_sample.links[0]
+        assert case_sample.case in store_to_submit_and_validate_orders.get_cases()
         # THEN the analysis for the case should be RAW_DATA
-        assert case_link.case.data_analysis == Workflow.RAW_DATA
+        assert case_sample.case.data_analysis == Workflow.RAW_DATA
         # THEN the delivery type for the case should be BAM or NO_DELIVERY
-        assert case_link.case.data_delivery in [DataDelivery.BAM, DataDelivery.NO_DELIVERY]
+        assert case_sample.case.data_delivery in [DataDelivery.BAM, DataDelivery.NO_DELIVERY]
+        # THEN the case-sample should deliver the sample
+        assert case_sample.should_deliver_sample
