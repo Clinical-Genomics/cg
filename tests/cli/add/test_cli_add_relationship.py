@@ -6,7 +6,7 @@ from cg.cli.add import add
 from cg.constants import EXIT_FAIL
 from cg.constants.subject import Sex
 from cg.models.cg_config import CGConfig
-from cg.store.models import CaseSample
+from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -23,7 +23,9 @@ def test_add_relationship_required(cli_runner: CliRunner, base_context: CGConfig
 
     # WHEN adding a relationship
     result = cli_runner.invoke(
-        add, ["relationship", case_id, sample_id, "-s", status], obj=base_context
+        add,
+        ["relationship", case_id, sample_id, "-s", status, "--should-deliver-sample", True],
+        obj=base_context,
     )
 
     # THEN it should be added
@@ -46,13 +48,7 @@ def test_add_relationship_bad_sample(cli_runner: CliRunner, base_context: CGConf
     status = "affected"
     result = cli_runner.invoke(
         add,
-        [
-            "relationship",
-            case_id,
-            sample_id,
-            "-s",
-            status,
-        ],
+        ["relationship", case_id, sample_id, "-s", status, "--should-deliver-sample", True],
         obj=base_context,
     )
 
@@ -73,13 +69,7 @@ def test_add_relationship_bad_family(cli_runner: CliRunner, base_context: CGConf
     status = "affected"
     result = cli_runner.invoke(
         add,
-        [
-            "relationship",
-            case_id,
-            sample_id,
-            "-s",
-            status,
-        ],
+        ["relationship", case_id, sample_id, "-s", status, "--should-deliver-sample", True],
         obj=base_context,
     )
 
@@ -102,13 +92,7 @@ def test_add_relationship_bad_status(cli_runner: CliRunner, base_context: CGConf
 
     result = cli_runner.invoke(
         add,
-        [
-            "relationship",
-            case_id,
-            sample_id,
-            "-s",
-            status,
-        ],
+        ["relationship", case_id, sample_id, "-s", status, "--should-deliver-sample", True],
         obj=base_context,
     )
 
@@ -142,6 +126,8 @@ def test_add_relationship_mother(
             status,
             "-m",
             mother_id,
+            "--should-deliver-sample",
+            False,
         ],
         obj=base_context,
     )
@@ -177,6 +163,8 @@ def test_add_relationship_bad_mother(
             status,
             "-m",
             mother_id,
+            "--should-deliver-sample",
+            False,
         ],
         obj=base_context,
     )
@@ -214,6 +202,8 @@ def test_add_relationship_father(
             status,
             "-f",
             father_id,
+            "--should-deliver-sample",
+            False,
         ],
         obj=base_context,
     )
@@ -251,6 +241,8 @@ def test_add_relationship_bad_father(
             status,
             "-f",
             father_id,
+            "--should-deliver-sample",
+            False,
         ],
         obj=base_context,
     )
@@ -287,6 +279,8 @@ def test_add_relationship_mother_not_female(
             status,
             "-m",
             male_mother_id,
+            "--should-deliver-sample",
+            False,
         ],
         obj=base_context,
     )
@@ -323,6 +317,8 @@ def test_add_relationship_father_not_male(
             status,
             "-f",
             female_father_id,
+            "--should-deliver-sample",
+            False,
         ],
         obj=base_context,
     )
@@ -330,3 +326,6 @@ def test_add_relationship_father_not_male(
     # THEN it should fail because the father is not male
     assert result.exit_code == EXIT_FAIL
     assert disk_store._get_query(table=CaseSample).count() == 0
+
+
+# TODO: Add tests for --should-deliver-sample parameter

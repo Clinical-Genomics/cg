@@ -42,10 +42,13 @@ def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, lo
     sample = helpers.add_sample(store, loqusdb_id=loqusdb_id)
     sample_not_uploaded = helpers.add_sample(store, internal_id=sample_id)
     link_1: CaseSample = sample_store.relate_sample(
-        case=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+        case=case, sample=sample, status=PhenotypeStatus.UNKNOWN, should_deliver_sample=True
     )
     link_2: CaseSample = sample_store.relate_sample(
-        case=case, sample=sample_not_uploaded, status=PhenotypeStatus.UNKNOWN
+        case=case,
+        sample=sample_not_uploaded,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=False,
     )
     sample_store.session.add_all([link_1, link_2])
 
