@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest.mock import create_autospec
 
 import pytest
@@ -101,6 +102,31 @@ def test_is_sample_express_priority(
     assert is_sample_express_priority(sample) == expected_result
 
 
+def test_case_pass_sequencing_qc_on_reads_express_delivered_at_pass():
+    # GIVEN a case with express priority and less than half the target reads
+    # GIVEN that the sample has a delivered at date
+    past_date: datetime = datetime(2026, 2, 16, 0, 0, 0)
+    sample: Sample = create_autospec(
+        Sample,
+        delivered_at=past_date,
+        reads=9,
+        application_version=create_autospec(
+            ApplicationVersion,
+            application=create_autospec(
+                Application,
+                target_reads=20,
+            ),
+        ),
+    )
+    case: Case = create_autospec(Case, samples=[sample], priority=Priority.express)
+
+    # WHEN calling case_pass_sequencing_qc_on_reads on the case
+    passes: bool = case_pass_sequencing_qc_on_reads(case)
+
+    # THEN the case does pass sequencing qc
+    assert passes
+
+
 @pytest.mark.parametrize(
     "sample_fixture, expected_result",
     [
@@ -176,6 +202,57 @@ def test_get_sequencing_qc_of_case(
     # THEN the sequencing quality check of the case should be as expected
 
     assert case_pass_sequencing_qc_on_reads(case) == expected_result
+
+
+def test_case_pass_sequencing_qc_on_reads_delivered_at_pass():
+    # GIVEN a sample with a delivered at data with less than enough amount of reads
+    past_date: datetime = datetime(2026, 2, 16, 0, 0, 0)
+    sample: Sample = create_autospec(
+        Sample,
+        delivered_at=past_date,
+        reads=10,
+        expected_reads_for_sample=20,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
+    )
+
+    # GIVEN a case
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling the case_pass_sequencing_qc_on_reads function on the case
+    passes = case_pass_sequencing_qc_on_reads(case)
+
+    # THEN the case pass QC
+    assert passes
+
+
+def test_case_pass_sequencing_qc_on_reads_delivered_at_mixed_case_pass():
+    # GIVEN a sample with a delivered at data with less than enough amount of reads
+    past_date: datetime = datetime(2026, 2, 16, 0, 0, 0)
+    sample_1: Sample = create_autospec(
+        Sample,
+        delivered_at=past_date,
+        reads=10,
+        expected_reads_for_sample=20,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
+    )
+
+    # GIVEN a sample with no delivered_at date but enough of reads
+    sample_2: Sample = create_autospec(
+        Sample,
+        delivered_at=None,
+        reads=20,
+        expected_reads_for_sample=20,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
+    )
+
+    # GIVEN a case
+    case: Case = create_autospec(Case, samples=[sample_1, sample_2])
+
+    # WHEN calling the case_pass_sequencing_qc_on_reads function on the case
+    passes = case_pass_sequencing_qc_on_reads(case)
+
+    # THEN the case pass QC
+    assert passes
 
 
 @pytest.mark.parametrize(
@@ -297,9 +374,61 @@ def test_case_pass_sequencing_qc_on_hifi_yield_passes():
     assert passes
 
 
+def test_case_pass_sequencing_qc_on_hifi_yield_delivered_at_pass():
+    # GIVEN a sample with a delivered at data with less than enough amount of reads:
+    past_date: datetime = datetime(2026, 2, 16, 0, 0, 0)
+    sample: Sample = create_autospec(
+        Sample,
+        delivered_at=past_date,
+        hifi_yield=10,
+        expected_hifi_yield=20,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
+    )
+
+    # GIVEN a case
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN calling the case_pass_sequencing_qc_on_hifi_yield function on the case
+    passes = case_pass_sequencing_qc_on_hifi_yield(case)
+
+    # THEN the case passes QC
+    assert passes
+
+
+def test_case_pass_sequencing_qc_on_hifi_yield_delivered_at_mixed_case_pass():
+    # GIVEN a sample with a delivered at data with less than enough amount of reads:
+    past_date: datetime = datetime(2026, 2, 16, 0, 0, 0)
+    sample_1: Sample = create_autospec(
+        Sample,
+        delivered_at=past_date,
+        hifi_yield=10,
+        expected_hifi_yield=20,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
+    )
+    # GIVEN a sample with no delivered_at but enough HiFi yield
+    sample_2: Sample = create_autospec(
+        Sample,
+        delivered_at=None,
+        hifi_yield=20,
+        expected_hifi_yield=20,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
+    )
+
+    # GIVEN a case
+    case: Case = create_autospec(Case, samples=[sample_1, sample_2])
+
+    # WHEN calling the case_pass_sequencing_qc_on_hifi_yield function on the case
+    passes = case_pass_sequencing_qc_on_hifi_yield(case)
+
+    # THEN the case passes QC
+    assert passes
+
+
 def test_case_pass_sequencing_qc_on_hifi_yield_fails():
     # GIVEN a sample without enough yield
-    sample: Sample = create_autospec(Sample, expected_hifi_yield=45, hifi_yield=44)
+    sample: Sample = create_autospec(
+        Sample, delivered_at=None, expected_hifi_yield=45, hifi_yield=44
+    )
 
     # GIVEN a case
     case: Case = create_autospec(Case, samples=[sample])
@@ -313,9 +442,12 @@ def test_case_pass_sequencing_qc_on_hifi_yield_fails():
 
 def test_case_pass_sequencing_qc_on_hifi_yield_missing_hifi_yield():
     # GIVEN a case with two samples, where one is missing HiFi yield
-    sample_with_yield: Sample = create_autospec(Sample, hifi_yield=45, expected_hifi_yield=45)
+    sample_with_yield: Sample = create_autospec(
+        Sample, delivered_at=None, hifi_yield=45, expected_hifi_yield=45
+    )
     sample_without_yield: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         hifi_yield=None,
         expected_hifi_yield=45,
     )
@@ -364,6 +496,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_fails():
     # GIVEN a case with a PacBio application, express priority and less than half the target yield
     sample: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         hifi_yield=24,
         application_version=create_autospec(
             ApplicationVersion,
@@ -377,6 +510,28 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_fails():
 
     # THEN the case does not pass sequencing qc
     assert not passes
+
+
+def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_delivered_at_pass():
+    # GIVEN a case with a PacBio application, express priority and less than half the target yield
+    # GIVEN that the sample has a delivered at date
+    past_date: datetime = datetime(2026, 2, 16, 0, 0, 0)
+    sample: Sample = create_autospec(
+        Sample,
+        delivered_at=past_date,
+        hifi_yield=24,
+        application_version=create_autospec(
+            ApplicationVersion,
+            application=create_autospec(Application, expected_express_hifi_yield=25),
+        ),
+    )
+    case: Case = create_autospec(Case, samples=[sample], priority=Priority.express)
+
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
+    passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
+
+    # THEN the case does pass sequencing qc
+    assert passes
 
 
 def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_missing_hifi_yield():
@@ -411,6 +566,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_wrong_applicatio
     # because of a missing target_hifi_yield
     sample: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         hifi_yield=25,
         application_version=create_autospec(
             ApplicationVersion,
@@ -498,6 +654,7 @@ def test_raw_data_case_pass_qc_read_based_not_rml_fails():
     # GIVEN a raw-data non rml sample without enough reads
     sample: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         reads=10,
         expected_reads_for_sample=20,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
@@ -536,6 +693,7 @@ def test_raw_data_case_pass_qc_hifi_yield_based_fails():
     # GIVEN a raw-data yield based sample without enough HiFi yield
     sample: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         hifi_yield=10,
         expected_hifi_yield=20,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
@@ -591,12 +749,13 @@ def test_raw_data_read_based_case_pass_qc_second_sample_missing_sample_run_metri
     # GIVEN two raw-data samples, the second sample is missing sample_run_metrics
     sample_1: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         reads=10,
         expected_reads_for_sample=10,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
     )
     sample_2: Sample = create_autospec(
-        Sample, reads=0, expected_reads_for_sample=10, sample_run_metrics=[]
+        Sample, delivered_at=None, reads=0, expected_reads_for_sample=10, sample_run_metrics=[]
     )
 
     # GIVEN a case with the samples above

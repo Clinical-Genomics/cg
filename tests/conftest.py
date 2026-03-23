@@ -50,10 +50,10 @@ from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.meta.workflow.jasen import JasenAnalysisAPI
 from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.rnafusion_analysis_api import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
-from cg.models.cg_config import CGConfig, PDCArchivingDirectory
+from cg.models.cg_config import CGConfig, ChanjoConfig, PDCArchivingDirectory
 from cg.models.compression_data import CompressionData
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -424,9 +424,9 @@ def cg_config_object(base_config_dict: dict) -> CGConfig:
 
 
 @pytest.fixture
-def chanjo_config() -> dict[str, dict[str, str]]:
+def chanjo_config() -> ChanjoConfig:
     """Return Chanjo config."""
-    return {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
+    return ChanjoConfig(config_path="chanjo_config", binary_path="chanjo")
 
 
 @pytest.fixture
@@ -1989,6 +1989,7 @@ def context_config(
             "balsamic_cache": "hello",
             "bed_path": str(cg_dir),
             "binary_path": "echo",
+            "cache_version": "19.0.2",
             "cadd_path": str(cg_dir),
             "conda_binary": "a_conda_binary",
             "conda_env": "S_balsamic",
@@ -2027,7 +2028,8 @@ def context_config(
             "swegen_snv": str(cg_dir),
             "swegen_sv": str(cg_dir),
         },
-        "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
+        "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage-hg19.yaml"},
+        "chanjo_38": {"binary_path": "echo", "config_path": "chanjo-stage-hg38.yaml"},
         "chanjo2": {"host": "chanjo2_host"},
         "crunchy": {
             "conda_binary": "a_conda_binary",

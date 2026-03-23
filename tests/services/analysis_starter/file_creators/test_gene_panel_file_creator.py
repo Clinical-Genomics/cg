@@ -188,38 +188,6 @@ def test_get_aggregated_gene_panels(
 
 
 @pytest.mark.parametrize(
-    "panels, expected_panels",
-    [
-        ({"DSD", "CM"}, {"DSD", "DSD-S", "HYP", "POI", "CNM", "CM"}),
-        ({"CM"}, {"CNM", "CM"}),
-        ({"CM", "not_a_panel"}, {"CNM", "CM", "not_a_panel"}),
-        ({"not_a_panel"}, {"not_a_panel"}),
-        ({}, {}),
-    ],
-    ids=[
-        "two panels in combo",
-        "one panel in combo",
-        "one panel in combo and one not in combo",
-        "no panels in combo",
-        "no panels",
-    ],
-)
-def test_add_gene_panels_in_combo(
-    gene_panel_creator: GenePanelFileCreator,
-    panels: set[str],
-    expected_panels: set[str],
-):
-    """Test that the combo gene panels are added correctly to a panel set."""
-    # GIVEN a set of gene panels
-
-    # WHEN adding the gene panels in combo
-    updated_panels: set[str] = gene_panel_creator._add_gene_panels_in_combo(panels)
-
-    # THEN the updated panels contain the expected panels
-    assert updated_panels == expected_panels
-
-
-@pytest.mark.parametrize(
     "case_id, expected_genome_build",
     [
         (MIP_DNA_CASE_ID, GenePanelGenomeBuild.hg19),

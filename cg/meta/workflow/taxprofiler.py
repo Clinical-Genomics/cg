@@ -5,7 +5,7 @@ from pathlib import Path
 
 from cg.constants import Workflow
 from cg.constants.constants import GenomeVersion
-from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.workflow.nf_analysis import MultiQCSearchPattern, NfAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
@@ -51,12 +51,15 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         """Return Taxprofiler bundle filenames path."""
         return TAXPROFILER_BUNDLE_FILENAMES_PATH
 
-    def get_multiqc_search_patterns(self, case_id: str) -> dict:
+    def get_multiqc_search_patterns(self, case_id: str) -> list[MultiQCSearchPattern]:
         """Return search patterns for MultiQC for Taxprofiler."""
         samples: list[Sample] = self.status_db.get_samples_by_case_id(case_id=case_id)
-        search_patterns: dict[str, str] = {
-            f"{sample.name}_{sample.name}": sample.internal_id for sample in samples
-        }
+        search_patterns: list[MultiQCSearchPattern] = [
+            MultiQCSearchPattern(
+                pattern=f"{sample.name}_{sample.name}", sample_id=sample.internal_id
+            )
+            for sample in samples
+        ]
         return search_patterns
 
     def get_genome_build(self, case_id: str) -> str:

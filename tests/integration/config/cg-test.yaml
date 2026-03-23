@@ -34,6 +34,10 @@ chanjo:
   binary_path: "{test_root_dir}/chanjo_binary_path"
   config_path: "{test_root_dir}/chanjo_config_path"
 
+chanjo_38:
+  binary_path: "{test_root_dir}/chanjo_38_binary_path"
+  config_path: "{test_root_dir}/chanjo_38_config_path"
+
 chanjo2:
   host: "http://localhost/chanjo2"
 
@@ -42,6 +46,7 @@ balsamic:
   binary_path: "{test_root_dir}/balsamic_binary_path"
   balsamic_cache: "{test_root_dir}/balsamic_cache"
   bed_path: "{test_root_dir}/balsamic_bed_path"
+  cache_version: "0.0.1"
   cadd_path: "{test_root_dir}/balsamic_cadd_path"
   conda_env: "conda_env_balsamic"
   genome_interval_path: "{test_root_dir}/balsamic_genome_interval_path"

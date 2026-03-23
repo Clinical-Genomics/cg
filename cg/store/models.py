@@ -611,6 +611,7 @@ class CaseSample(Base):
 
     mother_id: Mapped[int | None] = mapped_column(ForeignKey("sample.id"))
     father_id: Mapped[int | None] = mapped_column(ForeignKey("sample.id"))
+    should_deliver_sample: Mapped[bool] = mapped_column(default=False)
 
     case: Mapped[Case] = orm.relationship(back_populates="links")
     sample: Mapped["Sample"] = orm.relationship(foreign_keys=[sample_id], back_populates="links")
@@ -831,6 +832,11 @@ class Sample(Base, PriorityMixin):
     @phenotype_terms.setter
     def phenotype_terms(self, phenotype_term_list: list[str]):
         self._phenotype_terms = ",".join(phenotype_term_list) if phenotype_term_list else None
+
+    @property
+    def application_tag(self) -> str:
+        """Return the application tag of the application related to the sample."""
+        return self.application_version.application.tag
 
     @property
     def prep_category(self) -> str:
