@@ -12,21 +12,24 @@ from cg.store.models import Sample as DbSample
 from cg.store.store import Store
 
 SampleType = TypeVar("SampleType", bound=Sample)
-NewSample = Annotated[SampleType, Tag("new")]
-ExistingSampleType = Annotated[ExistingSample, Tag("existing")]
 
 
 class Case(BaseModel, Generic[SampleType]):
     name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
     priority: PriorityTerms = PriorityTerms.STANDARD
-    samples: list[Annotated[NewSample | ExistingSampleType, Discriminator(has_internal_id)]]
+    samples: list[
+        Annotated[
+            Annotated[SampleType, Tag("new")] | Annotated[ExistingSample, Tag("existing")],
+            Discriminator(has_internal_id),
+        ]
+    ]
 
     @property
     def is_new(self) -> bool:
         return True
 
     @property
-    def enumerated_samples(self) -> enumerate[SampleType | ExistingSampleType]:
+    def enumerated_samples(self) -> enumerate[SampleType | ExistingSample]:
         return enumerate(self.samples)
 
     @property
