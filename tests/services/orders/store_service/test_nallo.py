@@ -33,7 +33,7 @@ def mock_file_creation(nallo_order: NalloOrder):
 def test_nallo_storing_service_success(
     nallo_order: NalloOrder, store_generic_order_service: StoreCaseOrderService
 ):
-    # GIVEN a valid Nallo order
+    # GIVEN a valid Nallo order with only new samples
 
     # WHEN storing the order
     store_generic_order_service.store_order(nallo_order)
@@ -48,6 +48,14 @@ def test_nallo_storing_service_success(
     assert case_names == [case.name for case in order.cases]
     sample_names = [sample.name for _, _, sample in nallo_order.enumerated_new_samples]
     assert sample_names == [sample.name for case in order.cases for sample in case.samples]
+
+    # THEN the new samples should be delivered by the newly created case_sample entries
+    for case in order.cases:
+        for case_sample in case.links:
+            assert case_sample.should_deliver_sample
+
+
+# TODO: Add test for an order with existing samples
 
 
 def test_source_override(store_generic_order_service: StoreCaseOrderService, mocker: MockerFixture):
