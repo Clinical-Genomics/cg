@@ -49,5 +49,10 @@ def test_store_metagenome_order_data_in_status_db(
     db_cases: list[Case] = store_to_submit_and_validate_orders._get_query(table=Case).all()
     assert len(db_samples) == len(db_cases)
 
+    # THEN each case should deliver its sample
+    for sample in db_samples:
+        assert len(sample.links) == 1
+        assert sample.links[0].should_deliver_sample
+
     # THEN the order should be stored
     assert store_to_submit_and_validate_orders.get_order_by_ticket_id(ticket_id_as_int)
