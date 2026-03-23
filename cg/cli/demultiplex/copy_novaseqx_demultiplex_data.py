@@ -17,11 +17,6 @@ LOG = logging.getLogger(__name__)
 NANOPORE_SEQUENCING_SUMMARY_PATTERN: str = r"final_summary_*.txt"
 
 
-def is_demultiplexing_copied(analysis_directory: Path) -> bool:
-    """Determine whether the demultiplexing has been copied for the latest analysis for a Novaseqx flow cell."""
-    return Path(analysis_directory, DemultiplexingDirsAndFiles.COPY_COMPLETE).exists()
-
-
 def is_flow_cell_demultiplexed(analysis_directory: Path) -> bool:
     """Determine whether the flow cell has been demultiplexed for the latest analysis for a Novaseqx flow cell."""
     return Path(
@@ -82,10 +77,9 @@ def is_ready_for_post_processing(flow_cell_dir: Path, demultiplexed_runs_dir: Pa
     """
     Determine whether the flow cell is ready for post processing.
     The flow cell is ready for post processing if:
-    - the demultiplexing has been copied
+    - the sync has been confirmed (CopyComplete.txt at flow cell root, created by confirm-sequencing-run-sync)
     - the flow cell has been demultiplexed
     - the flow cell is not in the demultiplexed runs directory
-    - the flow cell is not queued for post processing
     """
     analysis_path: Path = get_latest_analysis_path(flow_cell_dir)
 
@@ -95,8 +89,8 @@ def is_ready_for_post_processing(flow_cell_dir: Path, demultiplexed_runs_dir: Pa
 
     flow_cell_is_ready: bool = True
 
-    if not is_demultiplexing_copied(analysis_path):
-        LOG.debug(f"Demultiplexing has not been copied for flow cell {flow_cell_dir.name}.")
+    if not is_flow_cell_sync_confirmed(flow_cell_dir):
+        LOG.debug(f"Sync has not been confirmed for flow cell {flow_cell_dir.name}.")
         flow_cell_is_ready = False
     if not is_flow_cell_demultiplexed(analysis_path):
         LOG.debug(f"Flow cell {flow_cell_dir.name} has not been demultiplexed.")

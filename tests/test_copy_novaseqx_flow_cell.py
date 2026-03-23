@@ -9,7 +9,10 @@ def test_flow_cell_is_ready_for_post_processing(
     novaseqx_flow_cell_dir_with_analysis_data: Path,
     tmp_illumina_demultiplexed_runs_directory: Path,
 ):
-    # GIVEN a flow cell which is ready for post processing
+    # GIVEN a flow cell whose sync has been confirmed
+    Path(
+        novaseqx_flow_cell_dir_with_analysis_data, DemultiplexingDirsAndFiles.COPY_COMPLETE
+    ).touch()
 
     # WHEN checking if the flow cell is ready for post processing
     is_flow_cell_ready: bool = is_ready_for_post_processing(
@@ -23,7 +26,8 @@ def test_flow_cell_is_ready_for_post_processing(
 def test_flow_cell_is_not_ready_for_post_processing_without_analysis(
     novaseqx_flow_cell_analysis_incomplete: Path, tmp_illumina_demultiplexed_runs_directory: Path
 ):
-    # GIVEN a flow cell for which analysis is not completed
+    # GIVEN a flow cell whose sync has been confirmed but analysis is not completed
+    Path(novaseqx_flow_cell_analysis_incomplete, DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
 
     # WHEN checking if the flow cell is ready for post processing
     is_flow_cell_ready: bool = is_ready_for_post_processing(
@@ -53,10 +57,28 @@ def test_previously_copied_flow_cell_is_not_ready(
     novaseqx_flow_cell_dir_with_analysis_data: Path,
     tmp_illumina_demultiplexed_runs_directory: Path,
 ):
-    # GIVEN a flow cell which already exists in demultiplexed runs
+    # GIVEN a flow cell whose sync has been confirmed but which already exists in demultiplexed runs
+    Path(
+        novaseqx_flow_cell_dir_with_analysis_data, DemultiplexingDirsAndFiles.COPY_COMPLETE
+    ).touch()
     Path(
         tmp_illumina_demultiplexed_runs_directory, novaseqx_flow_cell_dir_with_analysis_data.name
     ).mkdir()
+
+    # WHEN checking if the flow cell is ready for post processing
+    is_flow_cell_ready: bool = is_ready_for_post_processing(
+        novaseqx_flow_cell_dir_with_analysis_data, tmp_illumina_demultiplexed_runs_directory
+    )
+
+    # THEN the flow cell is not ready for post processing
+    assert not is_flow_cell_ready
+
+
+def test_flow_cell_is_not_ready_when_sync_not_confirmed(
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
+    tmp_illumina_demultiplexed_runs_directory: Path,
+):
+    # GIVEN a flow cell with completed analysis but no sync confirmation at the root
 
     # WHEN checking if the flow cell is ready for post processing
     is_flow_cell_ready: bool = is_ready_for_post_processing(

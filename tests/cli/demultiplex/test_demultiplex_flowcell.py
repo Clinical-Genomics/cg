@@ -163,6 +163,11 @@ def test_copy_novaseqx_sequencing_runs_notifies_trailblazer(
     cg_context.run_instruments.illumina.sequencing_runs_dir = sequencing_runs_dir.as_posix()
     cg_context.run_instruments.illumina.demultiplexed_runs_dir = demultiplexed_runs_dir.as_posix()
 
+    # GIVEN the sync has been confirmed for the flow cell
+    Path(
+        novaseqx_flow_cell_dir_with_analysis_data, DemultiplexingDirsAndFiles.COPY_COMPLETE
+    ).touch()
+
     # GIVEN mocked file operations to avoid actual hardlinking
     mocker.patch(
         "cg.cli.demultiplex.copy_novaseqx_demultiplex_data.hardlink_flow_cell_analysis_data"
@@ -210,6 +215,11 @@ def test_copy_novaseqx_sequencing_runs_saves_sample_sheet_to_housekeeper(
     demultiplexed_runs_dir.mkdir()
     cg_context.run_instruments.illumina.sequencing_runs_dir = sequencing_runs_dir.as_posix()
     cg_context.run_instruments.illumina.demultiplexed_runs_dir = demultiplexed_runs_dir.as_posix()
+
+    # GIVEN the sync has been confirmed for the flow cell
+    Path(
+        novaseqx_flow_cell_dir_with_analysis_data, DemultiplexingDirsAndFiles.COPY_COMPLETE
+    ).touch()
 
     # GIVEN mocked file operations
     mocker.patch(
