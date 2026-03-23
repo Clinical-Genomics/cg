@@ -237,7 +237,7 @@ def copy_novaseqx_flow_cell(
     tb_api.add_pending_analysis(
         case_id=flow_cell_id,
         analysis_type=AnalysisType.OTHER,
-        config_path=None,
+        config_path="",
         out_dir=demultiplexed_runs_flow_cell_dir.as_posix(),
         priority=TrailblazerPriority.HIGH,
         workflow=Workflow.DEMULTIPLEX,
