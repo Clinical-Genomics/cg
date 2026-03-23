@@ -304,7 +304,12 @@ def add_case(
 @click.option("-m", "--mother-id", help="Sample ID for mother of sample")
 @click.option("-f", "--father-id", help="Sample ID for father of sample")
 @click.option("-s", "--status", type=EnumChoice(StatusOptions), required=True)
-# TODO: create a mandatory parameter for should_deliver_sample
+@click.option(
+    "--should-deliver-sample",
+    type=bool,
+    required=True,
+    help="Set the value for should_deliver_sample",
+)
 @click.argument("case-id")
 @click.argument("sample-id")
 @click.pass_obj
@@ -315,6 +320,7 @@ def link_sample_to_case(
     status: str,
     case_id: str,
     sample_id: str,
+    should_deliver_sample: bool,
 ):
     """Create a link between a case id and a sample id."""
     status_db: Store = context.status_db
@@ -351,7 +357,12 @@ def link_sample_to_case(
             raise click.Abort
 
     new_record: CaseSample = status_db.relate_sample(
-        case=case_obj, sample=sample, status=status, mother=mother, father=father
+        case=case_obj,
+        sample=sample,
+        status=status,
+        mother=mother,
+        father=father,
+        should_deliver_sample=should_deliver_sample,
     )
     status_db.session.add(new_record)
     status_db.session.commit()

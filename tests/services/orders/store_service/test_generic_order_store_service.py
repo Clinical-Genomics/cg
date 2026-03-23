@@ -4,11 +4,19 @@ The function store_order_data_in_status_db is never expected to fail, as its inp
 have always been validated before calling the function.
 """
 
+from unittest.mock import create_autospec
+
 from cg.constants import DataDelivery, Priority, Workflow
+from cg.models.orders.constants import OrderType
+from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.implementations.case_order_service import StoreCaseOrderService
+from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.order_types.mip_rna.models.order import MIPRNAOrder
+from cg.services.orders.validation.order_types.raredisease.constants import RarediseaseDeliveryType
+from cg.services.orders.validation.order_types.raredisease.models.case import RarediseaseCase
+from cg.services.orders.validation.order_types.raredisease.models.order import RarediseaseOrder
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.store.models import Case, Sample
@@ -169,3 +177,32 @@ def test_store_tomte_order(
     assert new_link.sample.name == "sample1"
     assert new_link.sample.application_version.application.tag == "RNAPOAR025"
     assert new_link.should_deliver_sample
+
+
+def test_existing_samples_should_not_be_delivered_again():
+    # GIVEN an order containing an existing sample
+    existing_sample = ExistingSample(internal_id="ACC123")
+    case = RarediseaseCase(name="raredisease-case", panels=["OMIM-AUTO"], samples=[existing_sample])
+    order = RarediseaseOrder(
+        cases=[case],
+        name="raredisease-order",
+        delivery_type=RarediseaseDeliveryType.ANALYSIS,
+        customer="cust000",
+        project_type=OrderType.RAREDISEASE,
+    )
+
+    # GIVEN a storing service
+    status_db: Store = create_autospec(Store)
+    # TODO: finish this
+    status_db.get_sample_by_internal_id()
+    store_service = StoreCaseOrderService(
+        status_db=status_db, lims_service=create_autospec(OrderLimsService)
+    )
+
+    # WHEN storing the order
+    cases: list[Case] = store_service.store_order_data_in_status_db(order)
+
+    # THEN the case-sample should have should_deliver_sample = False
+    assert len(cases) == 1
+    assert len(cases[0].links) == 1
+    assert cases[0].links[0].should_deliver_sample is False
