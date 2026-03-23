@@ -8,8 +8,6 @@ from unittest.mock import Mock, create_autospec
 
 from pytest_mock import MockerFixture
 
-import pytest
-
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.models.orders.constants import OrderType
 from cg.services.orders.lims_service.service import OrderLimsService
