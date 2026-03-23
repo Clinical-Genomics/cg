@@ -154,7 +154,7 @@ def test_cleaned_excluded(analysis_store: Store, helpers, timestamp_now: datetim
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     link: CaseSample = analysis_store.relate_sample(
-        case=analysis.case, sample=sample, status="unknown"
+        case=analysis.case, sample=sample, status="unknown", should_deliver_sample=True
     )
     analysis_store.session.add(link)
 

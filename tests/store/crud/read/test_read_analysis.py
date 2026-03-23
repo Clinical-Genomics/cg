@@ -105,7 +105,10 @@ def test_get_cases_with_extended_models(
 
     # GIVEN a database with a case with one of sequenced samples and completed analysis
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -148,7 +151,10 @@ def test_get_cases_with_samples_query(
 
     # GIVEN a database with a case with one of sequenced samples and completed analysis
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -234,12 +240,15 @@ def test_external_sample_to_re_analyse(
     )
     assert test_analysis.completed_at
 
-    # Given an action set to analyze
+    # GIVEN an action set to analyze
     test_analysis.case.action = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one not sequenced external sample
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=False,
     )
     base_store.session.add(link)
 
