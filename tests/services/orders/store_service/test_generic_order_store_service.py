@@ -4,13 +4,16 @@ The function store_order_data_in_status_db is never expected to fail, as its inp
 have always been validated before calling the function.
 """
 
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
+
+from pytest_mock import MockerFixture
 
 import pytest
 
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.models.orders.constants import OrderType
 from cg.services.orders.lims_service.service import OrderLimsService
+from cg.services.orders.storing.implementations import case_order_service
 from cg.services.orders.storing.implementations.case_order_service import StoreCaseOrderService
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
@@ -23,6 +26,7 @@ from cg.services.orders.validation.order_types.rna_fusion.models.order import RN
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.store.models import Case, Sample
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_store_mip_order(
@@ -181,8 +185,7 @@ def test_store_tomte_order(
     assert new_link.should_deliver_sample
 
 
-@pytest.mark.skip()
-def test_existing_samples_should_not_be_delivered_again():
+def test_existing_samples_should_not_be_delivered_again(mocker: MockerFixture):
     # GIVEN an order containing an existing sample
     existing_sample = ExistingSample(internal_id="ACC123")
     case = RarediseaseCase(name="raredisease-case", panels=["OMIM-AUTO"], samples=[existing_sample])
@@ -195,17 +198,28 @@ def test_existing_samples_should_not_be_delivered_again():
     )
 
     # GIVEN a storing service
-    status_db: Store = create_autospec(Store)
-    # TODO: finish this
-    status_db.get_sample_by_internal_id()
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+
+    # GIVEN that the store interactions succeed
+    db_sample = create_autospec(Sample)
+    status_db.as_type.get_sample_by_internal_id_strict = Mock(return_value=db_sample)
+    db_case = create_autospec(Case)
+    status_db.as_type.add_case = Mock(return_value=db_case)
+    mocker.patch.object(case_order_service, "DbOrder")
+
     store_service = StoreCaseOrderService(
-        status_db=status_db, lims_service=create_autospec(OrderLimsService)
+        status_db=status_db.as_type, lims_service=create_autospec(OrderLimsService)
     )
 
     # WHEN storing the order
-    cases: list[Case] = store_service.store_order_data_in_status_db(order)
+    store_service.store_order_data_in_status_db(order)
 
     # THEN the case-sample should have should_deliver_sample = False
-    assert len(cases) == 1
-    assert len(cases[0].links) == 1
-    assert cases[0].links[0].should_deliver_sample is False
+    status_db.as_mock.relate_sample.assert_called_once_with(
+        case=db_case,
+        sample=db_sample,
+        status=None,
+        father=None,
+        mother=None,
+        should_deliver_sample=False,
+    )

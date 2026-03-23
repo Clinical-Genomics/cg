@@ -195,7 +195,9 @@ class StoreCaseOrderService(StoreOrderService):
             if sample.is_new:
                 db_sample: DbSample = case_samples.get(sample.name)
             else:
-                db_sample: DbSample = self.status_db.get_sample_by_internal_id(sample.internal_id)
+                db_sample: DbSample = self.status_db.get_sample_by_internal_id_strict(
+                    sample.internal_id
+                )
             sample_mother_name: str | None = getattr(sample, Pedigree.MOTHER, None)
             db_sample_mother: DbSample | None = case_samples.get(sample_mother_name)
             sample_father_name: str = getattr(sample, Pedigree.FATHER, None)
@@ -228,6 +230,8 @@ class StoreCaseOrderService(StoreOrderService):
                         ticket=str(order._generated_ticket_id),
                     )
             else:
-                db_sample: DbSample = self.status_db.get_sample_by_internal_id(sample.internal_id)
+                db_sample: DbSample = self.status_db.get_sample_by_internal_id_strict(
+                    sample.internal_id
+                )
             case_samples[db_sample.name] = db_sample
         return case_samples
