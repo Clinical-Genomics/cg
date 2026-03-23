@@ -73,7 +73,7 @@ class StoreMicrobialOrderService(StoreOrderService):
                     ticket_id=order._generated_ticket_id,
                 )
                 link: CaseSample = self.status.relate_sample(
-                    case=db_case, sample=db_sample, status="unknown"
+                    case=db_case, sample=db_sample, status="unknown", should_deliver_sample=True
                 )
                 self.status.add_item_to_store(link)
                 new_samples.append(db_sample)
