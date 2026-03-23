@@ -863,6 +863,7 @@ class CaseSampleView(BaseView):
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["status"]
+    column_exclude_list = ["should_deliver_sample"]
     column_filters = ["status"]
     column_formatters = {
         "case": CaseView.view_case_link,
