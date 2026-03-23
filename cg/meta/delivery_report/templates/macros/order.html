@@ -2,17 +2,20 @@
 {% set customer_workflow = case.data_analysis.customer_workflow %}
   <div class="container mb-5">
     <h3 class="mb-4">Beställning</h3>
+    <div class="alert alert-info" role="alert">
+      (*) Information om prover som kommer från kund
+    </div>
     <table class="table w-auto text-center align-middle" aria-describedby="order-table">
       <thead class="table-secondary">
         <tr>
-          <th scope="col">Fall</th>
-          <th scope="col">Bioinformatisk analys</th>
-          <th scope="col">Prov</th>
-          <th scope="col">Beställt</th>
+          <th scope="col">Fall (*)</th>
+          <th scope="col">Bioinformatisk analys (*)</th>
+          <th scope="col">Prov (*)</th>
+          <th scope="col">Beställt (*)</th>
           <th scope="col">Ticket</th>
-          <th scope="col">Applikation</th>
-          <th scope="col">{% if customer_workflow != "taxprofiler" %} Kön {% endif %}</th>
-          <th scope="col">Provtyp</th>
+          <th scope="col">Applikation (*)</th>
+          <th scope="col">{% if customer_workflow != "taxprofiler" %} Kön (*) {% endif %}</th>
+          <th scope="col">Provtyp (*)</th>
           <!-- Sample status -->
           {{ sample_status(workflow=customer_workflow) }}
         </tr>
@@ -45,9 +48,9 @@
 
 {% macro sample_status(workflow) %}
   {% if "balsamic" in workflow or workflow == "rnafusion" %}
-    <th scope="col">Tumör</th>
+    <th scope="col">Tumör (*)</th>
   {% elif workflow in ("mip-dna", "nallo", "raredisease", "tomte") %}
-    <th scope="col">Status</th>
+    <th scope="col">Status (*)</th>
   {% endif %}
 {% endmacro %}
 
