@@ -12,7 +12,6 @@ from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import (
     Application,
-    ApplicationVersion,
     Case,
     CaseSample,
     Collaboration,
@@ -305,6 +304,7 @@ def add_case(
 @click.option("-m", "--mother-id", help="Sample ID for mother of sample")
 @click.option("-f", "--father-id", help="Sample ID for father of sample")
 @click.option("-s", "--status", type=EnumChoice(StatusOptions), required=True)
+# TODO: create a mandatory parameter for should_deliver_sample
 @click.argument("case-id")
 @click.argument("sample-id")
 @click.pass_obj
