@@ -43,9 +43,16 @@ def test_store_order_data_in_status_db(
     assert len(cases) == 3
     links: list[CaseSample] = store_to_submit_and_validate_orders._get_query(table=CaseSample).all()
     assert len(links) == 3
+
+    # THEN the MAF case should have Workflow MIP-DNA and not deliver the sample
     assert cases[0].data_analysis == Workflow.MIP_DNA
+    assert not cases[0].links[0].should_deliver_sample
+
+    # THEN each sample should have a raw data case that should deliver the sample
     assert cases[1].data_analysis == Workflow.RAW_DATA
+    assert cases[1].links[0].should_deliver_sample
     assert cases[2].data_analysis == Workflow.RAW_DATA
+    assert cases[2].links[0].should_deliver_sample
 
     # THEN the analysis case has allowed data deliveries
     assert cases[1].data_delivery in [DataDelivery.FASTQ, DataDelivery.NO_DELIVERY]

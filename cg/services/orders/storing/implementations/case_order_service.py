@@ -121,6 +121,7 @@ class StoreCaseOrderService(StoreOrderService):
             status=getattr(sample, "status", None),
             mother=mother,
             father=father,
+            should_deliver_sample=should_deliver_sample,
         )
 
     def _create_db_sample(

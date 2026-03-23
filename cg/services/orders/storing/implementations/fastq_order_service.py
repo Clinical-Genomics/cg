@@ -65,7 +65,10 @@ class StoreFastqOrderService(StoreOrderService):
                 )
                 self._create_maf_case(db_sample=db_sample, db_order=db_order, db_case=db_case)
                 case_sample: CaseSample = self.status_db.relate_sample(
-                    case=db_case, sample=db_sample, status=StatusEnum.unknown
+                    case=db_case,
+                    sample=db_sample,
+                    status=StatusEnum.unknown,
+                    should_deliver_sample=True,
                 )
                 self.status_db.add_multiple_items_to_store([db_sample, case_sample, db_case])
                 new_samples.append(db_sample)
@@ -149,7 +152,10 @@ class StoreFastqOrderService(StoreOrderService):
                 customer_internal_id=CustomerId.CG_INTERNAL_CUSTOMER
             )
             maf_case_sample: CaseSample = self.status_db.relate_sample(
-                case=maf_case, sample=db_sample, status=StatusEnum.unknown
+                case=maf_case,
+                sample=db_sample,
+                status=StatusEnum.unknown,
+                should_deliver_sample=False,
             )
             maf_order.cases.append(maf_case)
             self.status_db.add_multiple_items_to_store([maf_case, maf_case_sample])
