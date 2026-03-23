@@ -12,6 +12,7 @@ class MarkAsDeliveredService:
         self.trailblazer_api = trailblazer_api
 
     def mark_analyses(self, analyses: list[Analysis]):
+        """Mark samples as delivered in StatusDB and the analysis as delivered in Trailblazer.""" 
         for analysis in analyses:
             self._mark_samples_in_analysis(analysis)
         self.trailblazer_api.mark_analyses_as_delivered(

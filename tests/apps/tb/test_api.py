@@ -187,6 +187,7 @@ def test_mark_analyses_as_delivered_fails_with_http_error(
     # GIVEN a Trailblazer API
     tb_api = TrailblazerAPI(config=valid_trailblazer_config)
 
+    # GIVEN that the communication with Trailblazer fails
     mocker.patch.object(
         requests,
         "patch",

@@ -13,7 +13,11 @@ DELIVER_BLUEPRINT.before_request(before_request)
 
 @DELIVER_BLUEPRINT.route("/deliver", methods=["POST"])
 def deliver_analyses():
-    """..."""
+    """
+    Marks the analyses as delivered.
+    - Adds a date stamp to the 'delivered_at' field for the relevant samples.
+    - Calls Trailblazer to mark the Trailblazer analyses entries as delivered. 
+    """
     try:
         trailblazer_ids: list[int] = request.json["trailblazer_ids"]  # type: ignore None is handled
         analyses = []
