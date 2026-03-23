@@ -84,7 +84,7 @@ class DownsampleAPI(MetaAPI):
         sample_case_link: CaseSample = self.status_db.relate_sample(
             case=case,
             sample=sample,
-            status=downsample_data.get_sample_status(),
+            status=downsample_data.get_sample_status(),  # TODO: Add should_deliver_sample=False
         )
         if self.dry_run:
             return

@@ -53,6 +53,7 @@ def test_store_mip_order(
     assert set(new_link.sample.phenotype_groups) == {"Phenotype-group"}
     assert set(new_link.sample.phenotype_terms) == {"HP:0012747", "HP:0025049"}
     assert new_link.sample.subject_id == "Subject3"
+    assert new_link.should_deliver_sample
 
 
 def test_store_mip_rna_order(
@@ -79,6 +80,7 @@ def test_store_mip_rna_order(
     assert first_case.data_delivery == str(DataDelivery.ANALYSIS_SCOUT)
     assert new_link.sample.name == "MipRNASample1"
     assert new_link.sample.application_version.application.tag == rna_application_tag
+    assert new_link.should_deliver_sample
 
 
 def test_store_balsamic_order(
@@ -116,6 +118,7 @@ def test_store_balsamic_order(
     assert new_link.sample.application_version.application.tag == "PANKTTR100"
     assert new_link.sample.comment == "This is a sample comment"
     assert new_link.sample.is_tumour
+    assert new_link.should_deliver_sample
 
 
 def test_store_rna_fusion_order(
@@ -140,7 +143,7 @@ def test_store_rna_fusion_order(
     assert first_case.data_delivery == str(DataDelivery.FASTQ_ANALYSIS)
     assert new_link.sample.name == "sample1-rna-t1"
     assert new_link.sample.application_version.application.tag == "RNAPOAR025"
-    assert new_link
+    assert new_link.should_deliver_sample
 
 
 def test_store_tomte_order(
@@ -165,4 +168,4 @@ def test_store_tomte_order(
     assert first_case.data_delivery == str(DataDelivery.FASTQ_ANALYSIS)
     assert new_link.sample.name == "sample1"
     assert new_link.sample.application_version.application.tag == "RNAPOAR025"
-    assert new_link
+    assert new_link.should_deliver_sample

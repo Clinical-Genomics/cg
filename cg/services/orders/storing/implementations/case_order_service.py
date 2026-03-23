@@ -113,6 +113,7 @@ class StoreCaseOrderService(StoreOrderService):
         father: DbSample,
         mother: DbSample,
         sample: SampleInCase,
+        should_deliver_sample: bool,
     ) -> CaseSample:
         return self.status_db.relate_sample(
             case=case,
@@ -204,6 +205,7 @@ class StoreCaseOrderService(StoreOrderService):
                 father=db_sample_father,
                 mother=db_sample_mother,
                 sample=sample,
+                should_deliver_sample=sample.is_new,
             )
             self.status_db.add_item_to_store(case_sample)
 
