@@ -12,12 +12,12 @@ class MarkAsDeliveredService:
         self.trailblazer_api = trailblazer_api
 
     def mark_analyses(self, analyses: list[Analysis]):
-        """Mark samples as delivered in StatusDB and the analysis as delivered in Trailblazer.""" 
+        """Mark samples as delivered in StatusDB and the analysis as delivered in Trailblazer."""
+        trailblazer_ids = []
         for analysis in analyses:
             self._mark_samples_in_analysis(analysis)
-        self.trailblazer_api.mark_analyses_as_delivered(
-            trailblazer_ids=[analysis.trailblazer_id for analysis in analyses]
-        )
+            trailblazer_ids.append(analysis.trailblazer_id)
+        self.trailblazer_api.mark_analyses_as_delivered(trailblazer_ids)
 
     def _mark_samples_in_analysis(self, analysis: Analysis):
         case: Case = analysis.case

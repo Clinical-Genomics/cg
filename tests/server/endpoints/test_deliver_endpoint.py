@@ -26,7 +26,7 @@ def test_deliver_trailblazer_analyses(
     trailblazer_id_1 = 666666
     trailblazer_id_2 = 555555
 
-    # GIVEN an analysis linked to the trailblazer analysis
+    # GIVEN one analysis linked to each trailblazer id
     analysis_1: Analysis = create_autospec(Analysis, trailblazer_id=trailblazer_id_1)
     analysis_2: Analysis = create_autospec(Analysis, trailblazer_id=trailblazer_id_2)
     status_db.as_type.get_analysis_by_trailblazer_id = lambda trailblazer_id: (
