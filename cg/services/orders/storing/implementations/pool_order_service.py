@@ -66,7 +66,10 @@ class StorePoolOrderService(StoreOrderService):
                         application_version=db_pool.application_version,
                     )
                     case_sample: CaseSample = self.status_db.relate_sample(
-                        case=db_case, sample=db_sample, status=StatusEnum.unknown
+                        case=db_case,
+                        sample=db_sample,
+                        status=StatusEnum.unknown,
+                        should_deliver_sample=True,
                     )
                     self.status_db.add_multiple_items_to_store([db_sample, case_sample])
                 new_pools.append(db_pool)
