@@ -250,7 +250,7 @@ def test_filter_cases_with_loqusdb_supported_workflow(
         case=test_fluffy_case,
         sample=test_sample,
         status=PhenotypeStatus.UNKNOWN,
-        should_deliver_sample=True,
+        should_deliver_sample=False,
     )
     base_store.session.add_all([link_1, link_2])
 

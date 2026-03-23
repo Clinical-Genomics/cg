@@ -48,7 +48,7 @@ def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, lo
         case=case,
         sample=sample_not_uploaded,
         status=PhenotypeStatus.UNKNOWN,
-        should_deliver_sample=True,
+        should_deliver_sample=False,
     )
     sample_store.session.add_all([link_1, link_2])
 
