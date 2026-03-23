@@ -59,7 +59,10 @@ class StoreMetagenomeOrderService(StoreOrderService):
                     order=order, sample=sample, customer=customer
                 )
                 case_sample: CaseSample = self.status_db.relate_sample(
-                    case=db_case, sample=db_sample, status=StatusEnum.unknown
+                    case=db_case,
+                    sample=db_sample,
+                    status=StatusEnum.unknown,
+                    should_deliver_sample=True,
                 )
                 self.status_db.add_item_to_store(case_sample)
                 new_samples.append(db_sample)
