@@ -1,6 +1,8 @@
 import logging
 import subprocess
 
+from cg.constants import EXIT_SUCCESS
+from cg.exc import WorkflowVersionCommandFailedError
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.services.analysis_starter.submitters.submitter import Submitter
@@ -43,8 +45,14 @@ class SubprocessSubmitter(Submitter):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
+
+            if result.returncode != EXIT_SUCCESS:
+                stderr: str = result.stderr.decode("utf-8").rstrip()
+                raise WorkflowVersionCommandFailedError(f"Exit code {result.returncode}: {stderr}")
+
             stdout: str = result.stdout.decode("utf-8").rstrip()
             return stdout.split()[-1]
-        except Exception:
-            LOG.warning(f"Could not retrieve {case_config.workflow} workflow version!")
+
+        except Exception as e:
+            LOG.warning(f"Could not retrieve {case_config.workflow} workflow version: {e}")
             return "0.0.0"

@@ -5,8 +5,9 @@ from unittest.mock import MagicMock, create_autospec
 import pytest
 from pytest_mock import MockerFixture
 
-from cg.constants import Workflow
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.priority import SlurmQos
+from cg.exc import WorkflowVersionCommandFailedError
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
@@ -72,7 +73,7 @@ def test_subprocess_submitter_submit(case_config: SubprocessCaseConfig, mocker: 
     )
 
 
-def test_microsalt_get_workflow_version(mocker: MockerFixture):
+def test_get_workflow_version_returns_version(mocker: MockerFixture):
     # GIVEN a SubprocessSubmitter
     subprocess_submitter = SubprocessSubmitter()
 
@@ -91,7 +92,9 @@ def test_microsalt_get_workflow_version(mocker: MockerFixture):
         subprocess,
         "run",
         return_value=create_autospec(
-            subprocess.CompletedProcess, stdout=b"microSALT, version 4.2.2 \n"
+            subprocess.CompletedProcess,
+            stdout=b"microSALT, version 4.2.2 \n",
+            returncode=EXIT_SUCCESS,
         ),
     )
 
@@ -109,3 +112,127 @@ def test_microsalt_get_workflow_version(mocker: MockerFixture):
 
     # THEN the workflow version should have been returned
     assert workflow_version == "4.2.2"
+
+
+def test_get_workflow_version_raises_when_command_fails(mocker: MockerFixture):
+    # GIVEN a SubprocessSubmitter
+    subprocess_submitter = SubprocessSubmitter()
+
+    # GIVEN a microSALT case config
+    case_config = MicrosaltCaseConfig(
+        case_id="case_id",
+        binary="binary",
+        conda_binary="conda_binary",
+        config_file="microSALT.yml",
+        environment="S_microSALT",
+        fastq_directory="fastq/dir",
+    )
+
+    # GIVEN that running a subprocess does not work
+    mock_run = mocker.patch.object(
+        subprocess,
+        "run",
+        return_value=create_autospec(
+            subprocess.CompletedProcess,
+            stdout=b"Some microSALT error message",
+            stderr=b"Some error",
+            returncode=EXIT_FAIL,
+        ),
+    )
+
+    # GIVEN a spy that verifies the error raised
+    spy = mocker.spy(WorkflowVersionCommandFailedError, "__init__")
+
+    # WHEN getting the workflow version
+    workflow_version = subprocess_submitter.get_workflow_version(case_config)
+
+    # THEN WorkflowVersionNotFoundError should have been triggered
+    spy.assert_called_once_with(mocker.ANY, "Exit code 1: Some error")
+
+    # THEN the subprocess should have been called with the expected call
+    mock_run.assert_called_once_with(
+        args=f"{case_config.conda_binary} run {case_config.binary} --version",
+        shell=True,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    # THEN the fallback workflow version should have been returned
+    assert workflow_version == "0.0.0"
+
+
+def test_get_workflow_version_returns_fallback_when_stdout_is_empty(mocker: MockerFixture):
+    # GIVEN a SubprocessSubmitter
+    subprocess_submitter = SubprocessSubmitter()
+
+    # GIVEN a microSALT case config
+    case_config = MicrosaltCaseConfig(
+        case_id="case_id",
+        binary="binary",
+        conda_binary="conda_binary",
+        config_file="microSALT.yml",
+        environment="S_microSALT",
+        fastq_directory="fastq/dir",
+    )
+
+    # GIVEN that running a subprocess and the stdout is empty
+    mock_run = mocker.patch.object(
+        subprocess,
+        "run",
+        return_value=create_autospec(
+            subprocess.CompletedProcess, stdout=b"", stderr=b"Some error", returncode=EXIT_FAIL
+        ),
+    )
+
+    # WHEN getting the workflow version
+    workflow_version = subprocess_submitter.get_workflow_version(case_config)
+
+    # THEN the subprocess should have been called with the expected call
+    mock_run.assert_called_once_with(
+        args=f"{case_config.conda_binary} run {case_config.binary} --version",
+        shell=True,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    # THEN the fallback workflow version should have been returned
+    assert workflow_version == "0.0.0"
+
+
+def test_get_workflow_version_returns_fallback_when_binary_not_found(mocker: MockerFixture):
+    # GIVEN a SubprocessSubmitter
+    subprocess_submitter = SubprocessSubmitter()
+
+    # GIVEN a microSALT case config
+    case_config = MicrosaltCaseConfig(
+        case_id="case_id",
+        binary="binary",
+        conda_binary="conda_binary",
+        config_file="microSALT.yml",
+        environment="S_microSALT",
+        fastq_directory="fastq/dir",
+    )
+
+    # GIVEN that running a subprocess raises an OSError
+    mock_run = mocker.patch.object(
+        subprocess,
+        "run",
+        side_effect=OSError("Binary not found"),
+    )
+
+    # WHEN getting the workflow version
+    workflow_version = subprocess_submitter.get_workflow_version(case_config)
+
+    # THEN the subprocess should have been called with the expected call
+    mock_run.assert_called_once_with(
+        args=f"{case_config.conda_binary} run {case_config.binary} --version",
+        shell=True,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    # THEN the fallback workflow version should have been returned
+    assert workflow_version == "0.0.0"
