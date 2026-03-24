@@ -1,24 +1,44 @@
 """Module to parse the illumina demultiplexing log file."""
 
-from cg.io.json import read_json
 from pathlib import Path
-from pydantic import BaseModel, Field
+
+from pydantic import BaseModel
+
+from cg.io.json import read_json
 
 
 class DemuxSoftware(BaseModel):
-    software_version: str = Field(..., alias="dragen_version")
-    software: str = Field(default="dragen")
+    software_version: str
+    software: str
+
+
+def _parse_dragen_replay(content: dict) -> DemuxSoftware:
+    """Parse a dragen-replay.json file."""
+    system_info: dict = content["system"]
+    return DemuxSoftware(
+        software_version=system_info["dragen_version"],
+        software="dragen",
+    )
+
+
+def _parse_highlevel_summary(content: dict) -> DemuxSoftware:
+    """Parse a highlevel_summary.json file."""
+    return DemuxSoftware(
+        software_version=content["software_version"],
+        software="dragen",
+    )
 
 
 class IlluminaDemuxVersionService:
     @staticmethod
     def _parse_demux_version_file(demux_version_file: Path) -> DemuxSoftware:
         """Parse the demultiplexing log file."""
-        content = read_json(demux_version_file)
-        system_info: dict = content.get("system")
-        return DemuxSoftware(**system_info)
+        content: dict = read_json(demux_version_file)
+        if demux_version_file.name == "highlevel_summary.json":
+            return _parse_highlevel_summary(content)
+        return _parse_dragen_replay(content)
 
-    def get_demux_software(self, demux_version_file: Path):
+    def get_demux_software(self, demux_version_file: Path) -> str:
         """Get the demux software."""
         demux_software: DemuxSoftware = self._parse_demux_version_file(demux_version_file)
         return demux_software.software
