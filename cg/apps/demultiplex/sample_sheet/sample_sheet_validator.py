@@ -48,18 +48,10 @@ class SampleSheetValidator:
             SampleSheetFormatError if the sample sheet does not have all the sections.
         """
         LOG.debug("Validating that the sample sheet has all the necessary sections")
-        has_header: bool = any(
-            row and row[0] == SampleSheetBCLConvertSections.Header.HEADER for row in self.content
-        )
-        has_cycles: bool = any(
-            row and row[0] == SampleSheetBCLConvertSections.Reads.HEADER for row in self.content
-        )
-        has_settings: bool = any(
-            row and row[0] == SampleSheetBCLConvertSections.Settings.HEADER for row in self.content
-        )
-        has_data: bool = any(
-            row and row[0] == SampleSheetBCLConvertSections.Data.HEADER for row in self.content
-        )
+        has_header: bool = [SampleSheetBCLConvertSections.Header.HEADER] in self.content
+        has_cycles: bool = [SampleSheetBCLConvertSections.Reads.HEADER] in self.content
+        has_settings: bool = [SampleSheetBCLConvertSections.Settings.HEADER] in self.content
+        has_data: bool = [SampleSheetBCLConvertSections.Data.HEADER] in self.content
         if not all([has_header, has_cycles, has_settings, has_data]):
             message: str = "Sample sheet does not have all the necessary sections"
             LOG.error(message)
