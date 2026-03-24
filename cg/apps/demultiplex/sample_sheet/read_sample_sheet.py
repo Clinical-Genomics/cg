@@ -29,14 +29,31 @@ def validate_samples_unique_per_lane(samples: list[IlluminaSampleIndexSetting]) 
         validate_samples_are_unique(samples=lane_samples)
 
 
+DATA_SECTION_HEADERS: set[str] = {
+    SampleSheetBCLConvertSections.Data.HEADER,
+    SampleSheetBcl2FastqSections.Data.HEADER,
+}
+
+
+def _is_section_header(line: list[str]) -> bool:
+    """Return True if the line is a section header (e.g. [Header], [BCLConvert_Data])."""
+    return bool(line) and line[0].startswith("[") and line[0].endswith("]")
+
+
 def get_raw_samples_from_content(sample_sheet_content: list[list[str]]) -> list[dict[str, str]]:
     """Return the samples in a sample sheet as a list of dictionaries."""
     header: list[str] = []
     raw_samples: list[dict[str, str]] = []
+    in_data_section: bool = False
 
     for line in sample_sheet_content:
+        if _is_section_header(line):
+            in_data_section = line[0] in DATA_SECTION_HEADERS
+            continue
+        if not in_data_section:
+            continue
         # Skip lines that are too short to contain samples
-        if len(line) <= 4:
+        if len(line) < 4:
             continue
         if line[0] in [
             SampleSheetBcl2FastqSections.Data.FLOW_CELL_ID.value,
