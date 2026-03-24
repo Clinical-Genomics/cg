@@ -55,9 +55,6 @@ def test_nallo_storing_service_success(
             assert case_sample.should_deliver_sample
 
 
-# TODO: Add test for an order with existing samples
-
-
 def test_source_override(store_generic_order_service: StoreCaseOrderService, mocker: MockerFixture):
     # GIVEN a Nallo order with one of the samples having "other" as source
     lims_submit = mocker.patch.object(MockLimsAPI, "submit_project")

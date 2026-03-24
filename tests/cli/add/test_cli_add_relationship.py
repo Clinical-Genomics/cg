@@ -4,6 +4,7 @@ from click.testing import CliRunner
 
 from cg.cli.add import add
 from cg.constants import EXIT_FAIL
+from cg.constants.process import EXIT_PARSE_ERROR
 from cg.constants.subject import Sex
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, CaseSample, Sample
@@ -328,4 +329,23 @@ def test_add_relationship_father_not_male(
     assert disk_store._get_query(table=CaseSample).count() == 0
 
 
-# TODO: Add tests for --should-deliver-sample parameter
+def test_add_relationship_missing_should_deliver_sample(
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
+):
+    # GIVEN a database with a sample and a case
+    disk_store: Store = base_context.status_db
+    sample = helpers.add_sample(disk_store)
+    sample_id = sample.internal_id
+    case = helpers.add_case(disk_store)
+    case_id = case.internal_id
+    status = "affected"
+
+    # WHEN adding a relationship without a value for should_deliver_sample
+    result = cli_runner.invoke(
+        add,
+        ["relationship", case_id, sample_id, "-s", status],
+        obj=base_context,
+    )
+
+    # THEN assert that the command fails
+    assert result.exit_code == EXIT_PARSE_ERROR
