@@ -226,7 +226,7 @@ def test_copy_novaseqx_sequencing_runs_saves_sample_sheet_to_housekeeper(
         "cg.cli.demultiplex.copy_novaseqx_demultiplex_data.hardlink_flow_cell_analysis_data"
     )
     mocker.patch("cg.cli.demultiplex.copy_novaseqx_demultiplex_data.mark_as_demultiplexed")
-    mock_add_ss: MagicMock = mocker.patch(
+    mock_add_sample_sheet: MagicMock = mocker.patch(
         "cg.cli.demultiplex.copy_novaseqx_demultiplex_data.add_and_include_sample_sheet_path_to_housekeeper"
     )
     mock_tb_api: MagicMock = MagicMock()
@@ -242,6 +242,6 @@ def test_copy_novaseqx_sequencing_runs_saves_sample_sheet_to_housekeeper(
     assert result.exit_code == 0
 
     # THEN the sample sheet was saved to Housekeeper from the analysis Data directory
-    mock_add_ss.assert_called_once()
-    call_kwargs: dict = mock_add_ss.call_args.kwargs
+    mock_add_sample_sheet.assert_called_once()
+    call_kwargs: dict = mock_add_sample_sheet.call_args.kwargs
     assert DemultiplexingDirsAndFiles.DATA in call_kwargs["flow_cell_directory"].parts
