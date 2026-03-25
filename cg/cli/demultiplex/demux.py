@@ -13,7 +13,7 @@ from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
     create_manifest_file,
     is_flow_cell_sync_confirmed,
     is_manifest_file_required,
-    is_ready_for_post_processing,
+    is_ready_to_copy_to_demultiplexed_runs,
     is_syncing_complete,
 )
 from cg.constants.cli_options import DRY_RUN
@@ -136,7 +136,7 @@ def copy_novaseqx_sequencing_runs(context: CGConfig):
     demultiplexed_runs_dir: Path = Path(context.run_instruments.illumina.demultiplexed_runs_dir)
 
     for sequencing_run_dir in sequencing_runs_dir.iterdir():
-        if is_ready_for_post_processing(
+        if is_ready_to_copy_to_demultiplexed_runs(
             flow_cell_dir=sequencing_run_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
         ):
             LOG.info(f"Copying {sequencing_run_dir.name} to {demultiplexed_runs_dir}")

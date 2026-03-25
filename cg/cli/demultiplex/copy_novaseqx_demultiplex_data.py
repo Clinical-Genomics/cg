@@ -73,13 +73,15 @@ def hardlink_tree(src: Path, dst: Path) -> None:
     shutil.copytree(src=src, dst=dst, copy_function=os.link)
 
 
-def is_ready_for_post_processing(flow_cell_dir: Path, demultiplexed_runs_dir: Path) -> bool:
+def is_ready_to_copy_to_demultiplexed_runs(
+    flow_cell_dir: Path, demultiplexed_runs_dir: Path
+) -> bool:
     """
-    Determine whether the flow cell is ready for post processing.
-    The flow cell is ready for post processing if:
-    - the sync has been confirmed (CopyComplete.txt at flow cell root, created by confirm-sequencing-run-sync)
-    - the flow cell has been demultiplexed
-    - the flow cell is not in the demultiplexed runs directory
+    Determine whether a NovaSeqX flow cell is ready to be hard-linked into the demultiplexed-runs directory.
+    All three conditions must be met:
+    - Sync of data is confirmed (CopyComplete.txt at the flow cell root, written by confirm-sequencing-run-sync)
+    - on-instrument BCLConvert demultiplexing has completed
+    - the flow cell has not already been copied to demultiplexed-runs
     """
     analysis_path: Path = get_latest_analysis_path(flow_cell_dir)
 

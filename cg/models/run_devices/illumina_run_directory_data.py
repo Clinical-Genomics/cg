@@ -201,7 +201,7 @@ class IlluminaRunDirectoryData:
     @property
     def demultiplex_software_info_path(self) -> Path:
         """Return demultiplex software info path.
-        Tries dragen-replay.json first, then falls back to summary/<version>/highlevel_summary.json.
+        Tries summary/<version>/highlevel_summary.json first, then falls back to dragen-replay.json.
         """
         demux_run_dir = self.get_demultiplexed_runs_dir()
         summary_dir = Path(demux_run_dir, DemultiplexingDirsAndFiles.SUMMARY_DIR)

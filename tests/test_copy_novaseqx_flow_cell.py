@@ -1,11 +1,11 @@
 from pathlib import Path
 
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import get_latest_analysis_path
-from cg.cli.demultiplex.demux import is_ready_for_post_processing
+from cg.cli.demultiplex.demux import is_ready_to_copy_to_demultiplexed_runs
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 
 
-def test_flow_cell_is_ready_for_post_processing(
+def test_flow_cell_is_ready_to_copy_to_demultiplexed_runs(
     novaseqx_flow_cell_dir_with_analysis_data: Path,
     tmp_illumina_demultiplexed_runs_directory: Path,
 ):
@@ -14,46 +14,46 @@ def test_flow_cell_is_ready_for_post_processing(
         novaseqx_flow_cell_dir_with_analysis_data, DemultiplexingDirsAndFiles.COPY_COMPLETE
     ).touch()
 
-    # WHEN checking if the flow cell is ready for post processing
-    is_flow_cell_ready: bool = is_ready_for_post_processing(
+    # WHEN checking if the flow cell is ready to be copied to demultiplexed runs
+    is_flow_cell_ready: bool = is_ready_to_copy_to_demultiplexed_runs(
         novaseqx_flow_cell_dir_with_analysis_data, tmp_illumina_demultiplexed_runs_directory
     )
 
-    # THEN the flow cell is ready for post processing
+    # THEN the flow cell is ready
     assert is_flow_cell_ready
 
 
-def test_flow_cell_is_not_ready_for_post_processing_without_analysis(
+def test_flow_cell_is_not_ready_to_copy_without_analysis(
     novaseqx_flow_cell_analysis_incomplete: Path, tmp_illumina_demultiplexed_runs_directory: Path
 ):
     # GIVEN a flow cell whose sync has been confirmed but analysis is not completed
     Path(novaseqx_flow_cell_analysis_incomplete, DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
 
-    # WHEN checking if the flow cell is ready for post processing
-    is_flow_cell_ready: bool = is_ready_for_post_processing(
+    # WHEN checking if the flow cell is ready to be copied to demultiplexed runs
+    is_flow_cell_ready: bool = is_ready_to_copy_to_demultiplexed_runs(
         novaseqx_flow_cell_analysis_incomplete, tmp_illumina_demultiplexed_runs_directory
     )
 
-    # THEN the flow cell is not ready for post processing
+    # THEN the flow cell is not ready
     assert not is_flow_cell_ready
 
 
-def test_flow_cell_is_not_ready_for_post_processing_when_not_demultiplexed(
+def test_flow_cell_is_not_ready_to_copy_when_not_demultiplexed(
     demultiplex_not_complete_novaseqx_flow_cell: Path,
     tmp_illumina_demultiplexed_runs_directory: Path,
 ):
     # GIVEN a flow cell for which demultiplexing is not completed
 
-    # WHEN checking if the flow cell is ready for post processing
-    is_flow_cell_ready: bool = is_ready_for_post_processing(
+    # WHEN checking if the flow cell is ready to be copied to demultiplexed runs
+    is_flow_cell_ready: bool = is_ready_to_copy_to_demultiplexed_runs(
         demultiplex_not_complete_novaseqx_flow_cell, tmp_illumina_demultiplexed_runs_directory
     )
 
-    # THEN the flow cell is not ready for post processing
+    # THEN the flow cell is not ready
     assert not is_flow_cell_ready
 
 
-def test_previously_copied_flow_cell_is_not_ready(
+def test_previously_copied_flow_cell_is_not_ready_to_copy(
     novaseqx_flow_cell_dir_with_analysis_data: Path,
     tmp_illumina_demultiplexed_runs_directory: Path,
 ):
@@ -65,27 +65,27 @@ def test_previously_copied_flow_cell_is_not_ready(
         tmp_illumina_demultiplexed_runs_directory, novaseqx_flow_cell_dir_with_analysis_data.name
     ).mkdir()
 
-    # WHEN checking if the flow cell is ready for post processing
-    is_flow_cell_ready: bool = is_ready_for_post_processing(
+    # WHEN checking if the flow cell is ready to be copied to demultiplexed runs
+    is_flow_cell_ready: bool = is_ready_to_copy_to_demultiplexed_runs(
         novaseqx_flow_cell_dir_with_analysis_data, tmp_illumina_demultiplexed_runs_directory
     )
 
-    # THEN the flow cell is not ready for post processing
+    # THEN the flow cell is not ready
     assert not is_flow_cell_ready
 
 
-def test_flow_cell_is_not_ready_when_sync_not_confirmed(
+def test_flow_cell_is_not_ready_to_copy_when_sync_not_confirmed(
     novaseqx_flow_cell_dir_with_analysis_data: Path,
     tmp_illumina_demultiplexed_runs_directory: Path,
 ):
     # GIVEN a flow cell with completed analysis but no sync confirmation at the root
 
-    # WHEN checking if the flow cell is ready for post processing
-    is_flow_cell_ready: bool = is_ready_for_post_processing(
+    # WHEN checking if the flow cell is ready to be copied to demultiplexed runs
+    is_flow_cell_ready: bool = is_ready_to_copy_to_demultiplexed_runs(
         novaseqx_flow_cell_dir_with_analysis_data, tmp_illumina_demultiplexed_runs_directory
     )
 
-    # THEN the flow cell is not ready for post processing
+    # THEN the flow cell is not ready
     assert not is_flow_cell_ready
 
 
@@ -93,7 +93,7 @@ def test_get_latest_analysis_version_path(
     novaseqx_flow_cell_dir_with_analysis_data: Path,
     novaseqx_latest_analysis_version: str,
 ):
-    # GIVEN a flow cell which is ready to be post processed
+    # GIVEN a flow cell which is ready to be copied to demultiplexed runs
 
     # WHEN extracting the latest analysis version path
     analysis_path: Path = get_latest_analysis_path(novaseqx_flow_cell_dir_with_analysis_data)
