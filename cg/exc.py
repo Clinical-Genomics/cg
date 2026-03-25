@@ -363,7 +363,3 @@ class MultipleCaptureKitsError(CgError):
 
 class ApplicationDoesNotHaveHiFiYieldError(CgError):
     """Exception raised when application does not have HiFi yield set."""
-
-
-class WorkflowVersionCommandFailedError(CgError):
-    """Exception raised when a workflow version command fails and the workflow version cannot be retrieved."""
