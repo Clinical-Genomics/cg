@@ -45,7 +45,7 @@ def test_deliver_trailblazer_analyses(
     assert response.status_code == HTTPStatus.NO_CONTENT
 
     # THEN the analyses were marked as delivered
-    mark_analysis_mock.assert_called_once_with([analysis_1, analysis_2])
+    mark_analysis_mock.assert_called_once_with(analyses=[analysis_1, analysis_2], auth_token=None)
 
     # THEN these changes were committed to the database
     status_db.as_mock.commit_to_store.assert_called_once()

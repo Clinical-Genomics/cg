@@ -83,8 +83,11 @@ class TrailblazerAPI:
 
         return {"Authorization": f"Bearer {self._credentials.token}"}
 
-    def get_forwarded_authentication_headers(self, auth_token: str) -> dict[str, str]:
-        return self.auth_header | {"X-On-Behalf-Of": auth_token}
+    def get_forwarded_authentication_headers(self, auth_token: str | None) -> dict[str, str]:
+        if auth_token:
+            return self.auth_header | {"X-On-Behalf-Of": auth_token}
+        else:
+            return self.auth_header
 
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST
@@ -214,7 +217,9 @@ class TrailblazerAPI:
         response_data = SummariesResponse.model_validate(response)
         return response_data.summaries
 
-    def mark_analyses_as_delivered(self, trailblazer_ids: list[int], auth_token: str) -> None:
+    def mark_analyses_as_delivered(
+        self, trailblazer_ids: list[int], auth_token: str | None = None
+    ) -> None:
         analysis_dicts = []
         for trailblazer_id in trailblazer_ids:
             analysis_dict = {"id": trailblazer_id, "is_delivered": True}

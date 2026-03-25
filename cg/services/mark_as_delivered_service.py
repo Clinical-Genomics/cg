@@ -11,7 +11,7 @@ class MarkAsDeliveredService:
         self.status_db = status_db
         self.trailblazer_api = trailblazer_api
 
-    def mark_analyses(self, analyses: list[Analysis], auth_token: str) -> None:
+    def mark_analyses(self, analyses: list[Analysis], auth_token: str | None = None) -> None:
         """Mark samples as delivered in StatusDB and the analysis as delivered in Trailblazer."""
         trailblazer_ids = []
         for analysis in analyses:
