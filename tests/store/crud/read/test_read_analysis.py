@@ -225,7 +225,7 @@ def test_that_cases_can_have_many_samples(
 
 def test_external_sample_to_re_analyse(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
-):
+) -> None:
     """Test that a case marked for re-analysis with one sample external not sequenced in-house and
     with completed analysis show up among the cases to analyze."""
 
@@ -248,7 +248,7 @@ def test_external_sample_to_re_analyse(
         case=test_analysis.case,
         sample=test_sample,
         status=PhenotypeStatus.UNKNOWN,
-        should_deliver_sample=False,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -278,7 +278,7 @@ def test_new_external_case_not_in_result(base_store: Store, helpers: StoreHelper
         case=test_case,
         sample=test_sample,
         status=PhenotypeStatus.UNKNOWN,
-        should_deliver_sample=False,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
