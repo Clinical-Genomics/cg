@@ -7,7 +7,6 @@ from pytest_mock import MockerFixture
 
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.priority import SlurmQos
-from cg.exc import WorkflowVersionCommandFailedError
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
@@ -105,7 +104,7 @@ def test_get_workflow_version_returns_version(mocker: MockerFixture):
     mock_run.assert_called_once_with(
         args=f"{case_config.conda_binary} run {case_config.binary} --version",
         shell=True,
-        check=False,
+        check=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -128,32 +127,23 @@ def test_get_workflow_version_raises_when_command_fails(mocker: MockerFixture):
         fastq_directory="fastq/dir",
     )
 
-    # GIVEN that running a subprocess does not work
+    # GIVEN that running a subprocess fails and CalledProcessError is raised
     mock_run = mocker.patch.object(
         subprocess,
         "run",
-        return_value=create_autospec(
-            subprocess.CompletedProcess,
-            stdout=b"Some microSALT error message",
-            stderr=b"Some error",
-            returncode=EXIT_FAIL,
+        side_effect=subprocess.CalledProcessError(
+            returncode=EXIT_FAIL, stderr=b"some stderr", cmd="Some command"
         ),
     )
 
-    # GIVEN a spy that verifies the error raised
-    spy = mocker.spy(WorkflowVersionCommandFailedError, "__init__")
-
     # WHEN getting the workflow version
     workflow_version = subprocess_submitter.get_workflow_version(case_config)
-
-    # THEN WorkflowVersionNotFoundError should have been triggered
-    spy.assert_called_once_with(mocker.ANY, "Exit code 1: Some error")
 
     # THEN the subprocess should have been called with the expected call
     mock_run.assert_called_once_with(
         args=f"{case_config.conda_binary} run {case_config.binary} --version",
         shell=True,
-        check=False,
+        check=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -176,13 +166,12 @@ def test_get_workflow_version_returns_fallback_when_stdout_is_empty(mocker: Mock
         fastq_directory="fastq/dir",
     )
 
-    # GIVEN that running a subprocess and the stdout is empty
+    # GIVEN that stdout is none and IndexError is raised
     mock_run = mocker.patch.object(
         subprocess,
         "run",
-        return_value=create_autospec(
-            subprocess.CompletedProcess, stdout=b"", stderr=b"Some error", returncode=EXIT_FAIL
-        ),
+        return_value=create_autospec(subprocess.CompletedProcess, stdout=b""),
+        side_effect=IndexError(),
     )
 
     # WHEN getting the workflow version
@@ -192,7 +181,7 @@ def test_get_workflow_version_returns_fallback_when_stdout_is_empty(mocker: Mock
     mock_run.assert_called_once_with(
         args=f"{case_config.conda_binary} run {case_config.binary} --version",
         shell=True,
-        check=False,
+        check=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -229,7 +218,7 @@ def test_get_workflow_version_returns_fallback_when_binary_not_found(mocker: Moc
     mock_run.assert_called_once_with(
         args=f"{case_config.conda_binary} run {case_config.binary} --version",
         shell=True,
-        check=False,
+        check=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )

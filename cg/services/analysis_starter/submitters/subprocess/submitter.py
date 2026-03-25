@@ -48,9 +48,11 @@ class SubprocessSubmitter(Submitter):
             return stdout.split()[-1]
 
         except Exception as e:
+
             stderr = ""
             if isinstance(e, subprocess.CalledProcessError):
                 stderr = e.stderr.decode("utf-8").rstrip()
+
             LOG.warning(
                 f"Could not retrieve {case_config.workflow} workflow version: {e} : {stderr}"
             )
