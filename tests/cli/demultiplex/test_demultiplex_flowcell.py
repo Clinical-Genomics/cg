@@ -178,7 +178,7 @@ def test_copy_novaseqx_sequencing_runs_notifies_trailblazer(
     )
 
     # GIVEN a mock Trailblazer API
-    mock_tb_api = MagicMock()
+    mock_tb_api: MagicMock = MagicMock()
     cg_context.trailblazer_api_ = mock_tb_api
 
     # WHEN running the copy command
@@ -192,12 +192,12 @@ def test_copy_novaseqx_sequencing_runs_notifies_trailblazer(
 
     # THEN a pending analysis was added with the DEMULTIPLEX workflow
     mock_tb_api.add_pending_analysis.assert_called_once()
-    call_kwargs = mock_tb_api.add_pending_analysis.call_args.kwargs
+    call_kwargs: dict = mock_tb_api.add_pending_analysis.call_args.kwargs
     assert call_kwargs["workflow"] == Workflow.DEMULTIPLEX
 
     # THEN the analysis status was immediately set to COMPLETED
     mock_tb_api.set_analysis_status.assert_called_once()
-    status_kwargs = mock_tb_api.set_analysis_status.call_args.kwargs
+    status_kwargs: dict = mock_tb_api.set_analysis_status.call_args.kwargs
     assert status_kwargs["status"] == AnalysisStatus.COMPLETED
 
 
@@ -226,10 +226,10 @@ def test_copy_novaseqx_sequencing_runs_saves_sample_sheet_to_housekeeper(
         "cg.cli.demultiplex.copy_novaseqx_demultiplex_data.hardlink_flow_cell_analysis_data"
     )
     mocker.patch("cg.cli.demultiplex.copy_novaseqx_demultiplex_data.mark_as_demultiplexed")
-    mock_add_ss = mocker.patch(
+    mock_add_ss: MagicMock = mocker.patch(
         "cg.cli.demultiplex.copy_novaseqx_demultiplex_data.add_and_include_sample_sheet_path_to_housekeeper"
     )
-    mock_tb_api = MagicMock()
+    mock_tb_api: MagicMock = MagicMock()
     cg_context.trailblazer_api_ = mock_tb_api
 
     # WHEN running the copy command
@@ -243,5 +243,5 @@ def test_copy_novaseqx_sequencing_runs_saves_sample_sheet_to_housekeeper(
 
     # THEN the sample sheet was saved to Housekeeper from the analysis Data directory
     mock_add_ss.assert_called_once()
-    call_kwargs = mock_add_ss.call_args.kwargs
+    call_kwargs: dict = mock_add_ss.call_args.kwargs
     assert DemultiplexingDirsAndFiles.DATA in call_kwargs["flow_cell_directory"].parts

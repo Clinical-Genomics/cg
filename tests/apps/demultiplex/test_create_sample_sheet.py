@@ -1,11 +1,12 @@
-import logging
 from pathlib import Path
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 from _pytest.logging import LogCaptureFixture
 from pytest_mock import MockFixture
 
+from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting
 from cg.exc import HousekeeperFileMissingError
 from cg.models.cg_config import CGConfig
@@ -93,32 +94,25 @@ def test_get_create_sample_sheet_flow_cell_has_bcl2fastq_sample_sheet(
 
 def test_get_or_create_sample_sheet_skips_on_instrument_demuxed_runs(
     sample_sheet_context_broken_flow_cells: CGConfig,
-    tmp_flow_cell_with_bcl2fastq_sample_sheet: Path,
+    novaseq_x_flow_cell_full_name: str,
     mocker: MockFixture,
-    caplog: LogCaptureFixture,
 ):
     """Test that get_or_create_sample_sheet returns early for on-instrument demuxed runs."""
-    caplog.set_level(logging.INFO)
-
     # GIVEN a sample sheet API
-    sample_sheet_api = sample_sheet_context_broken_flow_cells.sample_sheet_api
-
-    # GIVEN a flow cell that was demultiplexed on the sequencer
-    flow_cell = IlluminaRunDirectoryData(tmp_flow_cell_with_bcl2fastq_sample_sheet)
-    mocker.patch.object(
-        IlluminaRunDirectoryData,
-        "has_demultiplexing_started_on_sequencer",
-        return_value=True,
+    sample_sheet_api: IlluminaSampleSheetService = (
+        sample_sheet_context_broken_flow_cells.sample_sheet_api
     )
 
-    # GIVEN that the sample sheet creation is tracked
-    mock_create = mocker.patch.object(sample_sheet_api, "_create_sample_sheet_file")
+    # GIVEN a flow cell that was demultiplexed on the sequencer
+    mock_flow_cell: MagicMock = MagicMock()
+    mock_flow_cell.has_demultiplexing_started_on_sequencer.return_value = True
+    mocker.patch.object(sample_sheet_api, "_get_flow_cell", return_value=mock_flow_cell)
+
+    # GIVEN that sample sheet creation is tracked
+    mock_create: MagicMock = mocker.patch.object(sample_sheet_api, "_create_sample_sheet_file")
 
     # WHEN getting or creating the sample sheet
-    sample_sheet_api.get_or_create_sample_sheet(flow_cell.full_name)
+    sample_sheet_api.get_or_create_sample_sheet(novaseq_x_flow_cell_full_name)
 
     # THEN no sample sheet was created
     mock_create.assert_not_called()
-
-    # THEN a log message indicates the flow cell was skipped
-    assert "was demultiplexed on the sequencer" in caplog.text

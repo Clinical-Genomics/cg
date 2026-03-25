@@ -142,8 +142,8 @@ def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
     if analysis_path:
         analysis_manifest: Path | None = get_existing_manifest_file(analysis_path)
         if analysis_manifest:
-            analysis_prefix = analysis_path.relative_to(source_directory)
-            analysis_files = parse_manifest_file(analysis_manifest)
+            analysis_prefix: Path = analysis_path.relative_to(source_directory)
+            analysis_files: list[Path] = parse_manifest_file(analysis_manifest)
             files_at_source.extend(Path(analysis_prefix, f) for f in analysis_files)
 
     return are_all_files_synced(files_at_source=files_at_source, target_directory=target_directory)
@@ -227,7 +227,7 @@ def copy_novaseqx_flow_cell(
     hardlink_flow_cell_analysis_data(
         flow_cell_dir=sequencing_run_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
     )
-    demultiplexed_runs_flow_cell_dir = Path(demultiplexed_runs_dir, sequencing_run_dir.name)
+    demultiplexed_runs_flow_cell_dir: Path = Path(demultiplexed_runs_dir, sequencing_run_dir.name)
     mark_as_demultiplexed(demultiplexed_runs_flow_cell_dir)
 
     analysis_path: Path = get_latest_analysis_path(sequencing_run_dir)
