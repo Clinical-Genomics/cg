@@ -83,8 +83,8 @@ class TrailblazerAPI:
 
         return {"Authorization": f"Bearer {self._credentials.token}"}
 
-    def get_forwarded_authentication_headers(self, token):
-        return self.auth_header | {"X-On-Behalf-Of": token}
+    def get_forwarded_authentication_headers(self, auth_token: str) -> dict[str, str]:
+        return self.auth_header | {"X-On-Behalf-Of": auth_token}
 
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST
@@ -221,7 +221,7 @@ class TrailblazerAPI:
             analysis_dicts.append(analysis_dict)
         response: Response = requests.patch(
             json={"analyses": analysis_dicts},
-            headers=self.get_forwarded_authentication_headers(token=auth_token),
+            headers=self.get_forwarded_authentication_headers(auth_token=auth_token),
             url=f"{self.host}/analyses",
         )
         if not response.ok:
