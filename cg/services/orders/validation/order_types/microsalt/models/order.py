@@ -3,10 +3,5 @@ from cg.services.orders.validation.order_types.microsalt.constants import Micros
 from cg.services.orders.validation.order_types.microsalt.models.sample import MicrosaltSample
 
 
-class MicrosaltOrder(OrderWithSamples):
+class MicrosaltOrder(OrderWithSamples[MicrosaltSample]):
     delivery_type: MicrosaltDeliveryType
-    samples: list[MicrosaltSample]
-
-    @property
-    def enumerated_samples(self) -> enumerate[MicrosaltSample]:
-        return enumerate(self.samples)
