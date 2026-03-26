@@ -892,13 +892,19 @@ class StoreHelpers:
         store: Store,
         sample: Sample,
         case: Case,
+        should_deliver_sample: bool = True,
         status: str = PhenotypeStatus.UNKNOWN,
         father: Sample = None,
         mother: Sample = None,
     ) -> CaseSample:
         """Utility function to link a sample to a case."""
         link = store.relate_sample(
-            sample=sample, case=case, status=status, father=father, mother=mother
+            sample=sample,
+            case=case,
+            status=status,
+            father=father,
+            mother=mother,
+            should_deliver_sample=should_deliver_sample,
         )
         store.session.add(link)
         store.session.commit()
@@ -961,12 +967,21 @@ class StoreHelpers:
         return sample_obj
 
     @classmethod
-    def relate_samples(cls, base_store: Store, case: Case, samples: list[Sample]):
+    def relate_samples(
+        cls,
+        base_store: Store,
+        case: Case,
+        samples: list[Sample],
+        should_deliver_sample: bool = True,
+    ):
         """Utility function to relate many samples to one case."""
 
         for sample in samples:
             link = base_store.relate_sample(
-                case=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+                case=case,
+                sample=sample,
+                status=PhenotypeStatus.UNKNOWN,
+                should_deliver_sample=should_deliver_sample,
             )
             base_store.session.add(link)
             base_store.session.commit()

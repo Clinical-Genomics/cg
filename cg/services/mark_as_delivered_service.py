@@ -2,7 +2,7 @@ from datetime import datetime
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.constants import Workflow
-from cg.store.models import Analysis, Case, CaseSample
+from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.store.store import Store
 
 
@@ -34,7 +34,12 @@ class MarkAsDeliveredService:
 
     @staticmethod
     def _passes_on_reads(case_sample: CaseSample) -> bool:
-        if case_sample.case.data_analysis in [Workflow.MICROSALT, Workflow.TAXPROFILER]:
-            return case_sample.sample.reads >= case_sample.sample.expected_reads_for_sample
+        case: Case = case_sample.case
+        sample: Sample = case_sample.sample
+        if (
+            case.data_analysis in [Workflow.MICROSALT, Workflow.TAXPROFILER]
+            and not sample.is_negative_control
+        ):
+            return sample.reads >= sample.expected_reads_for_sample  # type: ignore Illumina sample
         else:
             return True
