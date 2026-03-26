@@ -591,7 +591,7 @@ def validate_existing_samples_not_normal(
     return errors
 
 
-def reset_tumour_values_to_true(order: RNAFusionOrder):
+def reset_tumour_values_to_true(order: RNAFusionOrder, **kwargs):
     errors: list[TumourValueResetError] = []
     for case_index, sample_index, sample in order.enumerated_new_samples:
         if not sample.tumour:
