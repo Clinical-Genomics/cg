@@ -61,7 +61,10 @@ class StorePacBioOrderService(StoreOrderService):
                     ticket_id=str(status_db_order.ticket_id),
                 )
                 case_sample: CaseSample = self.status_db.relate_sample(
-                    case=case, sample=db_sample, status=StatusEnum.unknown
+                    case=case,
+                    sample=db_sample,
+                    status=StatusEnum.unknown,
+                    should_deliver_sample=True,
                 )
                 self.status_db.add_multiple_items_to_store([case, case_sample, db_sample])
                 status_db_order.cases.append(case)

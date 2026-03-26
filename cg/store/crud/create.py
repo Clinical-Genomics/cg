@@ -262,12 +262,15 @@ class CreateMixin(ReadHandler):
         case: Case,
         sample: Sample,
         status: str,
+        should_deliver_sample: bool,
         mother: Sample = None,
         father: Sample = None,
     ) -> CaseSample:
         """Relate a sample record to a family record."""
 
-        new_record: CaseSample = CaseSample(status=status)
+        new_record: CaseSample = CaseSample(
+            status=status, should_deliver_sample=should_deliver_sample
+        )
         new_record.case = case
         new_record.sample = sample
         new_record.mother = mother
