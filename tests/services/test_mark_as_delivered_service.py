@@ -3,7 +3,7 @@ from unittest.mock import Mock, create_autospec
 
 import pytest
 
-from cg.constants.constants import ControlOptions, Workflow
+from cg.constants.constants import Workflow
 from cg.exc import TrailblazerAPIHTTPError
 from cg.server.ext import AnalysisClient, FlaskStore
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
@@ -265,9 +265,9 @@ def test_mark_analyses_negative_control(
     # GIVEN a negative control sample with lower reads than what the apptag expects
     negative_control_sample: Sample = create_autospec(
         Sample,
-        control=ControlOptions.NEGATIVE,
         delivered_at=None,
         expected_reads_for_sample=1000,
+        is_negative_control=True,
         reads=9,
     )
 
