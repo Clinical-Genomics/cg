@@ -35,3 +35,8 @@ def test_store_samples(
     assert case_link.case in store.get_cases()
     assert case_link.case.data_analysis
     assert case_link.case.data_delivery == DataDelivery.FASTQ
+
+    # THEN there should be one relationship per sample which delivers it
+    for sample in new_samples:
+        assert len(sample.links) == 1
+        assert sample.links[0].should_deliver_sample
