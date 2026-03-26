@@ -254,8 +254,8 @@ def validate_samples_exist(
     errors: list[SampleDoesNotExistError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_existing_samples:
-            sample: DbSample | None = store.get_sample_by_internal_id(sample.internal_id)
-            if not sample:
+            db_sample: DbSample | None = store.get_sample_by_internal_id(sample.internal_id)
+            if not db_sample:
                 error = SampleDoesNotExistError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
@@ -286,7 +286,7 @@ def validate_sample_names_not_repeated(
     return [
         SampleNameRepeatedError(case_index=case_index, sample_index=sample_index)
         for case_index, sample_index, sample in new_samples
-        if sample_name_counter.get(sample.name) > 1 or sample.name in old_sample_names
+        if sample_name_counter.get(sample.name, 0) > 1 or sample.name in old_sample_names
     ]
 
 
