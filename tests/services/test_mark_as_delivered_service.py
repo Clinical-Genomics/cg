@@ -3,7 +3,7 @@ from unittest.mock import Mock, create_autospec
 
 import pytest
 
-from cg.constants.constants import Workflow
+from cg.constants.constants import ControlOptions, Workflow
 from cg.exc import TrailblazerAPIHTTPError
 from cg.server.ext import AnalysisClient, FlaskStore
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
@@ -257,3 +257,32 @@ def test_mark_analyses_trailblazer_error(
     # THEN an error is raised
     with pytest.raises(TrailblazerAPIHTTPError):
         mark_as_delivered_service.mark_analyses([analysis])
+
+
+def test_mark_analyses_negative_control(
+    status_db: FlaskStore, trailblazer_id: int, mark_as_delivered_service: MarkAsDeliveredService
+):
+    # GIVEN a negative control sample with lower reads than what the apptag expects
+    negative_control_sample: Sample = create_autospec(
+        Sample,
+        control=ControlOptions.NEGATIVE,
+        delivered_at=None,
+        expected_reads_for_sample=1000,
+        reads=9,
+    )
+
+    # GIVEN that its case-sample should deliver the sample
+    case: Case = create_autospec(Case, data_analysis=Workflow.MICROSALT)
+    case_sample_negative_control = create_autospec(
+        CaseSample, case=case, sample=negative_control_sample, should_deliver_sample=True
+    )
+    case.links = [case_sample_negative_control]
+
+    # GIVEN an analysis linked to the case
+    analysis: Analysis = create_autospec(Analysis, case=case, trailblazer_id=trailblazer_id)
+
+    # WHEN we call mark_analyses
+    mark_as_delivered_service.mark_analyses([analysis])
+
+    # THEN the sample should have a delivered_at set
+    assert negative_control_sample.delivered_at is not None
