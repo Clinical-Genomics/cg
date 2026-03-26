@@ -4061,7 +4061,7 @@ def store_with_case_and_sample_with_reads(
             reads=100_000_000,
         )
         sample: Sample = store.get_sample_by_internal_id(internal_id=sample_internal_id)
-        helpers.add_relationship(store=store, case=case, sample=sample)
+        helpers.add_relationship(store=store, case=case, sample=sample, should_deliver_sample=False)
 
     return store
 
