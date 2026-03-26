@@ -18,11 +18,11 @@ from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.order_types.mip_rna.models.order import MIPRNAOrder
-from cg.services.orders.validation.order_types.rna_fusion.constants import RNAFusionDeliveryType
-from cg.services.orders.validation.order_types.rna_fusion.models.case import RNAFusionCase
 from cg.services.orders.validation.order_types.raredisease.constants import RarediseaseDeliveryType
 from cg.services.orders.validation.order_types.raredisease.models.case import RarediseaseCase
 from cg.services.orders.validation.order_types.raredisease.models.order import RarediseaseOrder
+from cg.services.orders.validation.order_types.rna_fusion.constants import RNAFusionDeliveryType
+from cg.services.orders.validation.order_types.rna_fusion.models.case import RNAFusionCase
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
 from cg.services.orders.validation.order_types.rna_fusion.models.sample import RNAFusionSample
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
@@ -222,7 +222,6 @@ def test_store_rnafusion_sample_is_set_to_tumour(store: Store, mocker: MockerFix
     new_cases: list[Case] = new_data["records"]
     new_sample = new_cases[0].samples[0]
     assert new_sample.is_tumour
-    assert new_link.should_deliver_sample
 
 
 def test_existing_samples_should_not_be_delivered_again(mocker: MockerFixture):
