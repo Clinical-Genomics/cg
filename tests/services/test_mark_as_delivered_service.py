@@ -200,10 +200,10 @@ def test_mark_analyses_partial_delivery(
     """Test that delivering a case with a sample with not enough reads does not deliver that sample."""
     # GIVEN one delivered sample and one undelivered sample
     sample_enough_reads: Sample = create_autospec(
-        Sample, delivered_at=None, expected_reads_for_sample=10, reads=11
+        Sample, delivered_at=None, expected_reads_for_sample=10, reads=11, is_negative_control=False
     )
     sample_not_enough_reads: Sample = create_autospec(
-        Sample, delivered_at=None, expected_reads_for_sample=10, reads=9
+        Sample, delivered_at=None, expected_reads_for_sample=10, reads=9, is_negative_control=False
     )
 
     # GIVEN that the two samples originally belong to this given case
