@@ -28,6 +28,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     StatusUnknownError,
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
+    TumourValueResetError,
     VolumeRequiredError,
     WellFormatError,
     WellPositionMissingError,
@@ -39,11 +40,13 @@ from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDN
 from cg.services.orders.validation.order_types.rna_fusion.constants import RNAFusionDeliveryType
 from cg.services.orders.validation.order_types.rna_fusion.models.case import RNAFusionCase
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
+from cg.services.orders.validation.order_types.rna_fusion.models.sample import RNAFusionSample
 from cg.services.orders.validation.order_types.tomte.constants import TomteDeliveryType
 from cg.services.orders.validation.order_types.tomte.models.case import TomteCase
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
 from cg.services.orders.validation.rules.case_sample.rules import (
+    reset_tumour_values_to_true,
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,
@@ -760,3 +763,33 @@ def test_validate_existing_samples_not_normal():
 
     # THEN an error should be returned
     assert errors
+
+
+def test_tumour_value_reset():
+    # GIVEN an RNAFusion order containing an existing sample
+    rna_fusion_sample = RNAFusionSample(
+        application="rnatag",
+        container=ContainerEnum.tube,
+        name="rna-fusion-sample",
+        sex=SexEnum.female,
+        source="blood",
+        subject_id="rna-subject",
+        tumour=False,
+    )
+    rna_fusion_case = RNAFusionCase(name="rna-fusion-case", samples=[rna_fusion_sample])
+    rna_fusion_order = RNAFusionOrder(
+        cases=[rna_fusion_case],
+        customer="cust000",
+        project_type=OrderType.RNAFUSION,
+        name="rna-fusion-order",
+        delivery_type=RNAFusionDeliveryType.ANALYSIS_SCOUT,
+    )
+
+    # WHEN validating that the new samples are all tumour samples
+    errors: list[TumourValueResetError] = reset_tumour_values_to_true(order=rna_fusion_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the sample should have tumour status True
+    assert rna_fusion_sample.tumour

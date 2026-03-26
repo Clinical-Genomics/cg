@@ -22,9 +22,9 @@ class RNAFusionSample(Sample):
     source_comment: str | None = None
     subject_id: str = Field(pattern=NAME_PATTERN, min_length=1, max_length=128)
     tissue_block_size: TissueBlockEnum | None = None
-    _tumour: bool = True
+    tumour: bool = True  # Always set to True upon submission, but if False, we show a warning
 
     def model_dump(self, **kwargs) -> dict:
         data = super().model_dump(**kwargs)
-        data["tumour"] = self._tumour
+        data["tumour"] = True
         return data

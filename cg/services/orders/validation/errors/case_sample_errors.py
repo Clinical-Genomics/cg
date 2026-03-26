@@ -200,3 +200,8 @@ class MissingSourceCommentError(CaseSampleError):
 class NormalSampleNotAllowedError(CaseSampleError):
     field: str = "internal_id"
     message: str = "Existing samples must be tumour samples"
+
+
+class TumourValueResetError(CaseSampleError):
+    field: str = "warnings"
+    message: str = "The tumour status was overridden to True. Required for RNAFusion analysis."

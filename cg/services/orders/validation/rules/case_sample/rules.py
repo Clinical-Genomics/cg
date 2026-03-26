@@ -35,6 +35,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     StatusUnknownError,
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
+    TumourValueResetError,
     VolumeRequiredError,
     WellFormatError,
     WellPositionMissingError,
@@ -587,4 +588,14 @@ def validate_existing_samples_not_normal(
                     case_index=case_index, sample_index=sample_index
                 )
                 errors.append(error)
+    return errors
+
+
+def reset_tumour_values_to_true(order: RNAFusionOrder):
+    errors: list[TumourValueResetError] = []
+    for case_index, sample_index, sample in order.enumerated_new_samples:
+        if not sample.tumour:
+            sample.tumour = True
+            error = TumourValueResetError(case_index=case_index, sample_index=sample_index)
+            errors.append(error)
     return errors
