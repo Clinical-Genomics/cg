@@ -24,7 +24,7 @@ def deliver_analyses():
         for trailblazer_id in trailblazer_ids:
             analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
             analyses.append(analysis)
-        auth_token: str = request.headers.get("Authorization")
+        auth_token: str = request.headers["Authorization"]
         mark_as_delivered_service.mark_analyses(analyses=analyses, auth_token=auth_token)
     except (AnalysisDoesNotExistError, KeyError, TypeError):
         return Response(status=HTTPStatus.BAD_REQUEST)
