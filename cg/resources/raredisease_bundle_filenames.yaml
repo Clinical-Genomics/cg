@@ -275,19 +275,14 @@
   tag: call_snv_mt_index
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/call_sv/genome/CASEID_sv.vcf.gz
+  path: PATHTOCASE/call_sv/CASEID_sv.vcf.gz
   step: call_sv
   tag: call_sv
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/call_sv/genome/CASEID_sv.vcf.gz.tbi
+  path: PATHTOCASE/call_sv/CASEID_sv.vcf.gz.tbi
   step: call_sv
   tag: call_sv_index
-- format: vcf
-  id: CASEID
-  path: PATHTOCASE/call_snv/mitochondria/CASEID_mitochondria.vcf.gz
-  step: call_sv_mt
-  tag: call_sv_mt
 - format: vcf
   id: CASEID
   path: PATHTOCASE/call_snv/mitochondria/CASEID_mitochondria.vcf.gz.tbi
@@ -295,24 +290,19 @@
   tag: call_sv_mt_index
 - format: meta
   id: SAMPLEID
-  path: PATHTOCASE/call_sv/mitochondria/SAMPLEID_mitochondria_deletions.txt
+  path: PATHTOCASE/call_sv/SAMPLEID_mitochondria_deletions.txt
   step: call_sv_mt
   tag: call_sv_mt_del
 - format: csv
   id: SAMPLEID
-  path: PATHTOCASE/call_sv/mitochondria/eKLIPse_SAMPLEID_deletions.csv
+  path: PATHTOCASE/call_sv/SAMPLEID.saltshaker_classify.txt
   step: call_sv_mt
-  tag: eklipse_del
+  tag: saltshaker_classify
 - format: png
   id: SAMPLEID
-  path: PATHTOCASE/call_sv/mitochondria/eKLIPse_SAMPLEID.png
+  path: PATHTOCASE/call_sv/SAMPLEID.saltshaker.png
   step: call_sv_mt
-  tag: eklipse_png
-- format: csv
-  id: SAMPLEID
-  path: PATHTOCASE/call_sv/mitochondria/eKLIPse_SAMPLEID_genes.csv
-  step: call_sv_mt
-  tag: eklipse_genes
+  tag: saltshaker_png
 - format: vcf
   id: CASEID
   path: PATHTOCASE/annotate_sv/CASEID_svdbquery_vep.vcf.gz
