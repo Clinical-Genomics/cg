@@ -64,7 +64,7 @@ class SequencingPlatform(StrEnum):
     OXFORD_NANOPORE = "OXFORD_NANOPORE"
 
 
-class SeqLibraryPrepCategory(StrEnum):
+class SeqLibraryPrepCategory(StrEnum):  # TODO: should I add wgs-lr here?
     COVID = "cov"
     MICROBIAL = "mic"
     READY_MADE_LIBRARY = "rml"
@@ -79,3 +79,9 @@ DNA_PREP_CATEGORIES: list[SeqLibraryPrepCategory] = [
     SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
     SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
 ]
+
+
+class ReadType(StrEnum):
+    LONG_READ = "long-read"
+    SHORT_READ = "short-read"
+    OPTICAL_MAPPING = "optical-mapping"
