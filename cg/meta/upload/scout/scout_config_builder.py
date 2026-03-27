@@ -113,7 +113,7 @@ class ScoutConfigBuilder:
 
     def build_config_sample(self, case_sample: CaseSample, hk_version: Version) -> ScoutIndividual:
         """Build a sample with rnafusion specific information."""
-        workflow = case_sample.case.data_analysis
+        workflow = case_sample.case.data_analysis  # TODO: Why is not Balsamic included here?
         if workflow == Workflow.RAREDISEASE:
             config_sample = ScoutRarediseaseIndividual()
         elif workflow == Workflow.MIP_DNA:
@@ -132,7 +132,7 @@ class ScoutConfigBuilder:
         self, config_sample: ScoutIndividual, case_sample: CaseSample
     ) -> None:
         """Add the information to a sample that is common for different analysis types."""
-        sample_id: str = case_sample.sample.internal_id
+        sample_id: str = case_sample.sample.internal_id  # TODO: Add logic for lr here.
         LOG.info(f"Building sample {sample_id}")
         lims_sample: dict[str, Any] = self.lims_api.sample(sample_id)
         config_sample.sample_id = sample_id

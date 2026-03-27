@@ -57,7 +57,9 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self, case_sample: CaseSample, hk_version: Version
     ) -> ScoutCancerIndividual:
         """Build a sample with balsamic specific information."""
-        config_sample = ScoutCancerIndividual()
+        config_sample = (
+            ScoutCancerIndividual()
+        )  # TODO: Do I need to do something specific for Balsamic (if so why? Bad design?)
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
         self.add_common_sample_files(
             config_sample=config_sample, case_sample=case_sample, hk_version=hk_version
