@@ -40,6 +40,10 @@ def test_store_microsalt_order_data_in_status_db(
     db_case: Case = store_to_submit_and_validate_orders.get_cases()[0]
     assert db_case == case_from_sample
 
+    # THEN all case samples should be delivered
+    for case_sample in db_case.links:
+        assert case_sample.should_deliver_sample
+
     # THEN it should store the organisms
     assert store_to_submit_and_validate_orders.get_all_organisms().count() > 0
 
@@ -97,6 +101,10 @@ def test_store_mutant_order_data_control_has_stored_value(
     case_from_sample: Case = db_samples[0].links[0].case
     db_case: Case = store_to_submit_and_validate_orders.get_cases()[0]
     assert db_case == case_from_sample
+
+    # THEN all case samples should be delivered
+    for case_sample in db_case.links:
+        assert case_sample.should_deliver_sample
 
     # THEN the control samples should have the correct control value
     positive: Sample = store_to_submit_and_validate_orders.get_sample_by_name("control-positive")
