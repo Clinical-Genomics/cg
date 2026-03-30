@@ -308,7 +308,7 @@ def add_case(
     "--should-deliver-sample",
     type=bool,
     required=True,
-    help="Set the value for should_deliver_sample",
+    help="Set the value for should_deliver_sample. Can be True or False.",
 )
 @click.argument("case-id")
 @click.argument("sample-id")
