@@ -8,6 +8,7 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_one_sample_per_case,
 )
 from cg.services.orders.validation.rules.case_sample.rules import (
+    reset_tumour_values_to_true,
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,
@@ -43,6 +44,7 @@ RNAFUSION_CASE_RULES: list[Callable] = [
 ]
 
 RNAFUSION_CASE_SAMPLE_RULES: list[Callable] = [
+    reset_tumour_values_to_true,
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,
