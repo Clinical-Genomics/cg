@@ -56,11 +56,6 @@ class HousekeeperAPI:
         LOG.info(f"New bundle created with name {new_bundle.name}")
         return new_bundle
 
-    def set_to_archive(self, file: File, value: bool) -> None:
-        """Sets the 'to_archive' field of a file."""
-        file.to_archive = value
-        self.commit()
-
     def new_file(
         self, path: str, checksum: str = None, to_archive: bool = False, tags: list = None
     ) -> File:

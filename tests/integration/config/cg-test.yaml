@@ -34,6 +34,10 @@ chanjo:
   binary_path: "{test_root_dir}/chanjo_binary_path"
   config_path: "{test_root_dir}/chanjo_config_path"
 
+chanjo_38:
+  binary_path: "{test_root_dir}/chanjo_38_binary_path"
+  config_path: "{test_root_dir}/chanjo_38_config_path"
+
 chanjo2:
   host: "http://localhost/chanjo2"
 

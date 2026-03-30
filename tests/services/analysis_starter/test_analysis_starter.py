@@ -70,6 +70,13 @@ def analysis_starter_scenario(
             create_autospec(BalsamicTracker),
             create_autospec(BalsamicCaseConfig),
         ),
+        Workflow.BALSAMIC_UMI: (
+            create_autospec(BalsamicConfigurator),
+            create_autospec(BalsamicCaseConfig),
+            create_autospec(SubprocessSubmitter),
+            create_autospec(BalsamicTracker),
+            create_autospec(BalsamicCaseConfig),
+        ),
         Workflow.MICROSALT: (
             create_autospec(MicrosaltConfigurator),
             create_autospec(MicrosaltCaseConfig),
@@ -112,6 +119,7 @@ def analysis_starter_scenario(
     "workflow",
     [
         Workflow.BALSAMIC,
+        Workflow.BALSAMIC_UMI,
         Workflow.MICROSALT,
         Workflow.MIP_DNA,
         Workflow.RNAFUSION,
@@ -280,6 +288,7 @@ def test_rnafusion_start(
     "workflow",
     [
         Workflow.BALSAMIC,
+        Workflow.BALSAMIC_UMI,
         Workflow.MICROSALT,
         Workflow.MIP_DNA,
         Workflow.RNAFUSION,
@@ -368,6 +377,7 @@ def test_start_fails_workflow_mismatch():
     "workflow",
     [
         Workflow.BALSAMIC,
+        Workflow.BALSAMIC_UMI,
         Workflow.MICROSALT,
         Workflow.MIP_DNA,
     ],
@@ -453,6 +463,7 @@ def test_start_seqera_related_error_raised_in_run_and_track(error_type: type[Exc
     "workflow",
     [
         Workflow.BALSAMIC,
+        Workflow.BALSAMIC_UMI,
         Workflow.MICROSALT,
         Workflow.MIP_DNA,
         Workflow.RNAFUSION,

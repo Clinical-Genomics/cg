@@ -268,7 +268,9 @@ def archive_store(
         ticket="123",
         customer_id=customer_ddn.id,
     )
-    base_store.relate_sample(case=case, sample=new_samples[0], status="unknown")
+    base_store.relate_sample(
+        case=case, sample=new_samples[0], status="unknown", should_deliver_sample=True
+    )
     order = Order(
         customer_id=customer_ddn.id,
         ticket_id=new_samples[0].original_ticket,

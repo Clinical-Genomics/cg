@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
@@ -105,6 +106,7 @@ def test_balsamic_get_start_command_no_flags_set():
         head_job_partition="head_job_partition",
         sample_config=Path("/path/to/sample/config"),
         qos=SlurmQos.NORMAL,
+        workflow=Workflow.BALSAMIC,
     )
 
     # WHEN getting the start command
@@ -135,6 +137,7 @@ def test_balsamic_get_start_command_all_flags_set():
         head_job_partition="head_job_partition",
         sample_config=Path("/path/to/sample/config"),
         qos=SlurmQos.NORMAL,
+        workflow=Workflow.BALSAMIC,
         workflow_profile=Path("/path/to/workflow/profile"),
     )
 

@@ -113,6 +113,7 @@ class StoreCaseOrderService(StoreOrderService):
         father: DbSample,
         mother: DbSample,
         sample: SampleInCase,
+        should_deliver_sample: bool,
     ) -> CaseSample:
         return self.status_db.relate_sample(
             case=case,
@@ -120,6 +121,7 @@ class StoreCaseOrderService(StoreOrderService):
             status=getattr(sample, "status", None),
             mother=mother,
             father=father,
+            should_deliver_sample=should_deliver_sample,
         )
 
     def _create_db_sample(
@@ -193,7 +195,9 @@ class StoreCaseOrderService(StoreOrderService):
             if sample.is_new:
                 db_sample: DbSample = case_samples.get(sample.name)
             else:
-                db_sample: DbSample = self.status_db.get_sample_by_internal_id(sample.internal_id)
+                db_sample: DbSample = self.status_db.get_sample_by_internal_id_strict(
+                    sample.internal_id
+                )
             sample_mother_name: str | None = getattr(sample, Pedigree.MOTHER, None)
             db_sample_mother: DbSample | None = case_samples.get(sample_mother_name)
             sample_father_name: str = getattr(sample, Pedigree.FATHER, None)
@@ -204,6 +208,7 @@ class StoreCaseOrderService(StoreOrderService):
                 father=db_sample_father,
                 mother=db_sample_mother,
                 sample=sample,
+                should_deliver_sample=sample.is_new,
             )
             self.status_db.add_item_to_store(case_sample)
 
@@ -225,6 +230,8 @@ class StoreCaseOrderService(StoreOrderService):
                         ticket=str(order._generated_ticket_id),
                     )
             else:
-                db_sample: DbSample = self.status_db.get_sample_by_internal_id(sample.internal_id)
+                db_sample: DbSample = self.status_db.get_sample_by_internal_id_strict(
+                    sample.internal_id
+                )
             case_samples[db_sample.name] = db_sample
         return case_samples

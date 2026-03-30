@@ -50,9 +50,9 @@ class NalloSampleMetadataModel(SampleMetadataModel):
     Attributes:
         avg_sequence_length: average length of the sequenced reads; source: workflow
         coverage_bases: total number of bases aligned to the genome; source: workflow
-        mean_target_coverage: mean coverage of a target region; source: Chanjo2
+        mean_target_coverage: mean coverage of a target region; source: Chanjo
         median_coverage: median coverage of mapped sequence in bases; source: workflow
-        pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: Chanjo2
+        pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: Chanjo
         sex: sex predicted by the workflow; source: workflow
     """
 

@@ -143,25 +143,6 @@
             }
         },
         {
-            "ADM1": {
-                "total_reads": 582127482,
-                "mapped_reads": 582035646,
-                "general_error_rate": 0.41000000000000003,
-                "mean_coverage": 27.8391,
-                "percentage_aligned": 99.98422407413501
-            },
-            "ADM1_qualimap": {
-                "median_coverage": 28,
-                "median_insert_size": 328,
-                "avg_gc": 41.33062822983583,
-                "1_x_pc": 92.29551680782062,
-                "5_x_pc": 92.09514089830603,
-                "10_x_pc": 91.13522460463534,
-                "30_x_pc": 40.58657229836071,
-                "50_x_pc": 0.8020039799748427
-            }
-        },
-        {
             "ADM1_mosdepth": {
                 "1_x_pc": 92.0,
                 "5_x_pc": 92.0,
@@ -388,25 +369,6 @@
             }
         },
         {
-            "ADM2": {
-                "total_reads": 582127482,
-                "mapped_reads": 582035646,
-                "general_error_rate": 0.41000000000000003,
-                "mean_coverage": 27.8391,
-                "percentage_aligned": 99.98422407413501
-            },
-            "ADM2_qualimap": {
-                "median_coverage": 28,
-                "median_insert_size": 328,
-                "avg_gc": 41.33062822983583,
-                "1_x_pc": 92.29551680782062,
-                "5_x_pc": 92.09514089830603,
-                "10_x_pc": 91.13522460463534,
-                "30_x_pc": 40.58657229836071,
-                "50_x_pc": 0.8020039799748427
-            }
-        },
-        {
             "ADM2_mosdepth": {
                 "1_x_pc": 92.0,
                 "5_x_pc": 92.0,
@@ -491,7 +453,15 @@
             }
         }
     ],
-        "report_saved_raw_data": {
+    "report_saved_raw_data": {
+        "multiqc_picard_AlignmentSummaryMetrics": {
+            "ADM1": {
+                "PCT_PF_READS_ALIGNED": 0.999729
+            },
+            "ADM2": {
+                "PCT_PF_READS_ALIGNED": 0.9996
+            }
+        },
         "multiqc_peddy": {
             "ADM1-ADM2": {
                 "rel_ped_check": 0.4917,

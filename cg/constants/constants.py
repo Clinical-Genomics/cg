@@ -51,9 +51,9 @@ CONTAINER_OPTIONS = ("Tube", "96 well plate", "No container")
 
 
 class ControlOptions(StrEnum):
-    NEGATIVE: str = "negative"
-    POSITIVE: str = "positive"
-    EMPTY: str = ""
+    NEGATIVE = "negative"
+    POSITIVE = "positive"
+    EMPTY = ""
 
 
 DEFAULT_CAPTURE_KIT = "twistexomecomprehensive_10.2_hg19_design.bed"
@@ -161,11 +161,19 @@ class GenomeBuild(StrEnum):
     hg38 = "38"
 
 
+WORKFLOW_TO_GENOME_VERSION_MAP: dict[Workflow, GenomeBuild] = {
+    Workflow.BALSAMIC: GenomeBuild.hg19,
+    Workflow.BALSAMIC_UMI: GenomeBuild.hg19,
+    Workflow.MIP_DNA: GenomeBuild.hg19,
+    Workflow.RAREDISEASE: GenomeBuild.hg19,
+    Workflow.NALLO: GenomeBuild.hg38,
+}
+
+
 class GenomeVersion(StrEnum):
     GRCh37 = "GRCh37"
     GRCh38 = "GRCh38"
     T2T_CHM13 = "T2T-CHM13v2.0"
-    CANFAM3 = auto()
     HG19 = "hg19"
     HG38 = "hg38"
 
@@ -230,7 +238,6 @@ class FileExtensions(StrEnum):
     SPRING: str = ".spring"
     SH: str = ".sh"
     TAR: str = ".tar"
-    TMP: str = ".tmp"
     TSV: str = ".tsv"
     TXT: str = ".txt"
     VCF: str = ".vcf"

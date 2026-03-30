@@ -9,7 +9,6 @@ from housekeeper.store.models import File, Version
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sqlalchemy.orm import Query
 
-from cg.apps.coverage import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
@@ -49,7 +48,6 @@ class DeliveryReportAPI:
 
     def __init__(self, analysis_api: AnalysisAPI):
         self.analysis_api: AnalysisAPI = analysis_api
-        self.chanjo_api: ChanjoAPI = self.analysis_api.chanjo_api
         self.delivery_api: DeliveryAPI = self.analysis_api.delivery_api
         self.housekeeper_api: HousekeeperAPI = self.analysis_api.housekeeper_api
         self.lims_api: LimsAPI = self.analysis_api.lims_api
