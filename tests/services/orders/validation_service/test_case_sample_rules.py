@@ -766,7 +766,7 @@ def test_validate_existing_samples_not_normal():
 
 
 def test_tumour_value_reset():
-    # GIVEN an RNAFusion order containing an existing sample
+    # GIVEN an RNAFusion order containing a new normal sample
     rna_fusion_sample = RNAFusionSample(
         application="rnatag",
         container=ContainerEnum.tube,
