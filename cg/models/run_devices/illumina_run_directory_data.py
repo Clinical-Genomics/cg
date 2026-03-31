@@ -315,7 +315,23 @@ class IlluminaRunDirectoryData:
 
     @property
     def demultiplexing_started_at(self) -> datetime.datetime | None:
-        """Get the demultiplexing started time stamp from the sequencing run dir."""
+        """Get the demultiplexing started timestamp.
+        For on-instrument runs, uses the creation time of the BCLConvert directory.
+        For CG-demultiplexed runs, uses the creation time of demuxstarted.txt.
+        """
+        if self.has_demultiplexing_started_on_sequencer():
+            analysis_path: Path | None = get_latest_analysis_path(self.get_sequencing_runs_dir())
+            if not analysis_path:
+                return None
+            bcl_convert_dir: Path = Path(
+                analysis_path,
+                DemultiplexingDirsAndFiles.DATA,
+                DemultiplexingDirsAndFiles.BCL_CONVERT,
+            )
+            try:
+                return format_time_from_ctime(get_source_creation_time_stamp(bcl_convert_dir))
+            except FileNotFoundError:
+                return None
         try:
             time: float = get_source_creation_time_stamp(self.demultiplexing_started_path)
             return format_time_from_ctime(time)
@@ -325,7 +341,23 @@ class IlluminaRunDirectoryData:
 
     @property
     def demultiplexing_completed_at(self) -> datetime.datetime | None:
-        """Get the demultiplexing completed time stamp from the demultiplexed runs dir."""
+        """Get the demultiplexing completed timestamp.
+        For on-instrument runs, uses the creation time of Secondary_Analysis_Complete.txt.
+        For CG-demultiplexed runs, uses the creation time of demuxcomplete.txt.
+        """
+        if self.has_demultiplexing_started_on_sequencer():
+            analysis_path: Path | None = get_latest_analysis_path(self.get_sequencing_runs_dir())
+            if not analysis_path:
+                return None
+            completed_file: Path = Path(
+                analysis_path,
+                DemultiplexingDirsAndFiles.DATA,
+                DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED,
+            )
+            try:
+                return format_time_from_ctime(get_source_creation_time_stamp(completed_file))
+            except FileNotFoundError:
+                return None
         try:
             time: float = get_source_creation_time_stamp(self.demux_complete_path)
             return format_time_from_ctime(time)
