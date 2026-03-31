@@ -1,10 +1,11 @@
 import logging
-from unittest.mock import ANY
+from unittest.mock import ANY, create_autospec
 
 import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
+from pytest_mock import MockerFixture
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
@@ -13,8 +14,10 @@ from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.constants import CaseActions
 from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
+from cg.exc import MetricsQCError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.store.models import Case
 
 
 @pytest.mark.parametrize(
@@ -251,12 +254,16 @@ def test_store_available_fail(
     )
 
 
-def test_store_available_qc_fail_does_not_raise_error(cg_context: CGConfig):
+def test_store_available_qc_fail_does_not_raise_error(cg_context: CGConfig, mocker: MockerFixture):
     # GIVEN that an analysis fails its analysis QC
+    mocker.patch.object(NfAnalysisAPI, "get_cases_to_store", return_value=[create_autospec(Case)])
+    mocker.patch.object(NfAnalysisAPI, "store", side_effect=MetricsQCError)
 
     # WHEN storing available analyses
     cli_runner = CliRunner()
-    cli_runner.invoke(workflow_cli, [Workflow.RAREDISEASE, "store-available"], obj=cg_context)
-    # THEN the analysis is set to failed
+    result = cli_runner.invoke(
+        workflow_cli, [Workflow.RAREDISEASE, "store-available"], obj=cg_context
+    )
 
     # THEN no error is raised
+    assert result.exit_code == EXIT_SUCCESS
