@@ -216,14 +216,14 @@ def is_file_relevant_for_demultiplexing(file: Path) -> bool:
     return False
 
 
-def copy_novaseqx_flow_cell(
+def link_onboard_demultiplexed_flow_cell(
     sequencing_run_dir: Path,
     demultiplexed_runs_dir: Path,
     flow_cell_id: str,
     hk_api: HousekeeperAPI,
     tb_api: TrailblazerAPI,
 ) -> None:
-    """Copy a NovaSeqX sequencing run to demultiplexed runs and notify downstream systems."""
+    """Hard-link an on-instrument demultiplexed NovaSeqX flow cell into demultiplexed-runs and notify downstream systems."""
     hardlink_flow_cell_analysis_data(
         flow_cell_dir=sequencing_run_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
     )

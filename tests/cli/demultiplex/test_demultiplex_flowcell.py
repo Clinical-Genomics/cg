@@ -9,9 +9,9 @@ from click import testing
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.utils import add_and_include_sample_sheet_path_to_housekeeper
 from cg.cli.demultiplex.demux import (
-    copy_novaseqx_sequencing_runs,
     demultiplex_all,
     demultiplex_sequencing_run,
+    link_onboard_demultiplexed_flow_cells,
 )
 from cg.constants.constants import Workflow
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
@@ -149,7 +149,7 @@ def test_is_demultiplexing_not_complete(
     assert not hiseq_2500_dual_index_demux_runs_flow_cell.is_demultiplexing_complete
 
 
-def test_copy_novaseqx_sequencing_runs_notifies_trailblazer(
+def test_link_onboard_demultiplexed_flow_cells_notifies_trailblazer(
     cli_runner: testing.CliRunner,
     novaseqx_flow_cell_dir_with_analysis_data: Path,
     novaseq_x_flow_cell_id: str,
@@ -157,7 +157,7 @@ def test_copy_novaseqx_sequencing_runs_notifies_trailblazer(
     tmp_path: Path,
     mocker,
 ):
-    """Test that copy_novaseqx_sequencing_runs adds a Trailblazer analysis marked as completed."""
+    """Test that link_onboard_demultiplexed_flow_cells adds a Trailblazer analysis marked as completed."""
     # GIVEN a context with sequencing runs dir containing a ready NovaSeqX flow cell
     sequencing_runs_dir: Path = novaseqx_flow_cell_dir_with_analysis_data.parent
     demultiplexed_runs_dir: Path = Path(tmp_path, "demultiplexed-runs-out")
@@ -183,9 +183,9 @@ def test_copy_novaseqx_sequencing_runs_notifies_trailblazer(
     mock_tb_api: MagicMock = MagicMock()
     cg_context.trailblazer_api_ = mock_tb_api
 
-    # WHEN running the copy command
+    # WHEN running the link command
     result: testing.Result = cli_runner.invoke(
-        copy_novaseqx_sequencing_runs,
+        link_onboard_demultiplexed_flow_cells,
         obj=cg_context,
     )
 
@@ -210,14 +210,14 @@ def test_copy_novaseqx_sequencing_runs_notifies_trailblazer(
     assert status_kwargs["status"] == AnalysisStatus.COMPLETED
 
 
-def test_copy_novaseqx_sequencing_runs_saves_sample_sheet_to_housekeeper(
+def test_link_onboard_demultiplexed_flow_cells_saves_sample_sheet_to_housekeeper(
     cli_runner: testing.CliRunner,
     novaseqx_flow_cell_dir_with_analysis_data: Path,
     cg_context: CGConfig,
     tmp_path: Path,
     mocker,
 ):
-    """Test that copy_novaseqx_sequencing_runs saves the analysis sample sheet to Housekeeper."""
+    """Test that link_onboard_demultiplexed_flow_cells saves the analysis sample sheet to Housekeeper."""
     # GIVEN a context with sequencing runs dir containing a ready NovaSeqX flow cell
     sequencing_runs_dir: Path = novaseqx_flow_cell_dir_with_analysis_data.parent
     demultiplexed_runs_dir: Path = Path(tmp_path, "demultiplexed-runs-out")
@@ -241,9 +241,9 @@ def test_copy_novaseqx_sequencing_runs_saves_sample_sheet_to_housekeeper(
     mock_tb_api: MagicMock = MagicMock()
     cg_context.trailblazer_api_ = mock_tb_api
 
-    # WHEN running the copy command
+    # WHEN running the link command
     result: testing.Result = cli_runner.invoke(
-        copy_novaseqx_sequencing_runs,
+        link_onboard_demultiplexed_flow_cells,
         obj=cg_context,
     )
 

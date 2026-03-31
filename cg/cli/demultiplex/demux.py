@@ -9,12 +9,12 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
-    copy_novaseqx_flow_cell,
     create_manifest_file,
     is_flow_cell_sync_confirmed,
     is_manifest_file_required,
     is_ready_to_copy_to_demultiplexed_runs,
     is_syncing_complete,
+    link_onboard_demultiplexed_flow_cell,
 )
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
@@ -128,10 +128,10 @@ def demultiplex_sequencing_run(
     )
 
 
-@click.command(name="copy-completed-sequencing-runs")
+@click.command(name="link-onboard-demultiplexing")
 @click.pass_obj
-def copy_novaseqx_sequencing_runs(context: CGConfig):
-    """Copy NovaSeq X sequencing runs ready for post-processing to demultiplexed runs."""
+def link_onboard_demultiplexed_flow_cells(context: CGConfig):
+    """Hard-link on-instrument demultiplexed NovaSeqX flow cells into demultiplexed-runs."""
     sequencing_runs_dir: Path = Path(context.run_instruments.illumina.sequencing_runs_dir)
     demultiplexed_runs_dir: Path = Path(context.run_instruments.illumina.demultiplexed_runs_dir)
 
@@ -139,8 +139,8 @@ def copy_novaseqx_sequencing_runs(context: CGConfig):
         if is_ready_to_copy_to_demultiplexed_runs(
             flow_cell_dir=sequencing_run_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
         ):
-            LOG.info(f"Copying {sequencing_run_dir.name} to {demultiplexed_runs_dir}")
-            copy_novaseqx_flow_cell(
+            LOG.info(f"Linking {sequencing_run_dir.name} into {demultiplexed_runs_dir}")
+            link_onboard_demultiplexed_flow_cell(
                 sequencing_run_dir=sequencing_run_dir,
                 demultiplexed_runs_dir=demultiplexed_runs_dir,
                 flow_cell_id=IlluminaRunDirectoryData(sequencing_run_dir).id,
@@ -148,9 +148,7 @@ def copy_novaseqx_sequencing_runs(context: CGConfig):
                 tb_api=context.trailblazer_api,
             )
         else:
-            LOG.info(
-                f"Flow cell {sequencing_run_dir.name} is not ready for post processing, skipping."
-            )
+            LOG.info(f"Flow cell {sequencing_run_dir.name} is not ready for linking, skipping.")
 
 
 @click.command(name="confirm-sequencing-run-sync")
