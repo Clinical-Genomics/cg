@@ -216,6 +216,7 @@ class TrailblazerAPI:
         for trailblazer_id in trailblazer_ids:
             analysis_dict = {"id": trailblazer_id, "is_delivered": True}
             analysis_dicts.append(analysis_dict)
+        LOG.info(f"Setting analyses {trailblazer_ids} as delivered in Trailblazer")
         response: Response = requests.patch(
             json={"analyses": analysis_dicts}, headers=self.auth_header, url=f"{self.host}/analyses"
         )

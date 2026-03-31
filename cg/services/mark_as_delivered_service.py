@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from requests import Response
@@ -6,6 +7,8 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.constants import Workflow
 from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 class MarkAsDeliveredService:
@@ -21,8 +24,9 @@ class MarkAsDeliveredService:
             trailblazer_ids.append(analysis.trailblazer_id)
         return self.trailblazer_api.mark_analyses_as_delivered(trailblazer_ids)
 
-    def _mark_samples_in_analysis(self, analysis: Analysis):
+    def _mark_samples_in_analysis(self, analysis: Analysis) -> None:
         case: Case = analysis.case
+        LOG.info(f"Marking samples as delivered for case {case.internal_id}")
         for case_sample in case.links:
             if self._should_sample_be_delivered(case_sample):
                 case_sample.sample.delivered_at = datetime.now()
