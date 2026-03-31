@@ -30,7 +30,9 @@ def deliver_analyses():
             analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
             analyses.append(analysis)
         auth_token: str = request.headers["Authorization"]
-        analyses_response: requests.Response = mark_as_delivered_service.mark_analyses(analyses, auth_token=auth_token)
+        analyses_response: requests.Response = mark_as_delivered_service.mark_analyses(
+            analyses=analyses, auth_token=auth_token
+        )
     except AnalysisDoesNotExistError as error:
         LOG.error(str(error))
         return jsonify(message=str(error)), HTTPStatus.BAD_REQUEST

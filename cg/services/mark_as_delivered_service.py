@@ -22,7 +22,9 @@ class MarkAsDeliveredService:
         for analysis in analyses:
             self._mark_samples_in_analysis(analysis)
             trailblazer_ids.append(analysis.trailblazer_id)
-        return self.trailblazer_api.mark_analyses_as_delivered(trailblazer_ids=trailblazer_ids, auth_token=auth_token)
+        return self.trailblazer_api.mark_analyses_as_delivered(
+            trailblazer_ids=trailblazer_ids, auth_token=auth_token
+        )
 
     def _mark_samples_in_analysis(self, analysis: Analysis) -> None:
         case: Case = analysis.case
