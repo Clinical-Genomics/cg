@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from requests import Response
+
 from cg.apps.tb.api import TrailblazerAPI
 from cg.constants import Workflow
 from cg.store.models import Analysis, Case, CaseSample, Sample
@@ -11,7 +13,7 @@ class MarkAsDeliveredService:
         self.status_db = status_db
         self.trailblazer_api = trailblazer_api
 
-    def mark_analyses(self, analyses: list[Analysis]):
+    def mark_analyses(self, analyses: list[Analysis]) -> Response:
         """Mark samples as delivered in StatusDB and the analysis as delivered in Trailblazer."""
         trailblazer_ids = []
         for analysis in analyses:

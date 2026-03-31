@@ -1,6 +1,7 @@
 import logging
 from http import HTTPStatus
 
+import requests
 from flask import Blueprint, Response, jsonify, request
 
 from cg.exc import AnalysisDoesNotExistError, TrailblazerAPIHTTPError
@@ -27,7 +28,7 @@ def deliver_analyses():
         for trailblazer_id in trailblazer_ids:
             analysis: Analysis = db.get_analysis_by_trailblazer_id(trailblazer_id)
             analyses.append(analysis)
-        mark_as_delivered_service.mark_analyses(analyses)
+        analyses_response: requests.Response = mark_as_delivered_service.mark_analyses(analyses)
     except AnalysisDoesNotExistError as error:
         LOG.error(str(error))
         return jsonify(message=str(error)), HTTPStatus.BAD_REQUEST
@@ -39,4 +40,4 @@ def deliver_analyses():
         return jsonify(message="Error when calling Trailblazer"), HTTPStatus.BAD_GATEWAY
     finally:
         db.commit_to_store()
-    return Response(status=HTTPStatus.NO_CONTENT)
+    return jsonify(analyses_response), analyses_response.status_code
