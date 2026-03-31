@@ -1,8 +1,9 @@
 import logging
 from http import HTTPStatus
 
+import flask
 import requests
-from flask import Blueprint, Response, jsonify, request
+from flask import Blueprint, jsonify, request
 
 from cg.exc import AnalysisDoesNotExistError, TrailblazerAPIHTTPError
 from cg.server.endpoints.utils import before_request
@@ -33,11 +34,11 @@ def deliver_analyses():
         LOG.error(str(error))
         return jsonify(message=str(error)), HTTPStatus.BAD_REQUEST
     except (KeyError, TypeError):
-        return Response(status=HTTPStatus.BAD_REQUEST)
+        return flask.Response(status=HTTPStatus.BAD_REQUEST)
     except TrailblazerAPIHTTPError as error:
         LOG.error(f"Error in Trailblazer: {str(error)} - rolling back changes in StatusDB.")
         db.rollback()
         return jsonify(message="Error when calling Trailblazer"), HTTPStatus.BAD_GATEWAY
     finally:
         db.commit_to_store()
-    return Response(response=analyses_response.content, status=HTTPStatus.OK)
+    return flask.Response(response=analyses_response.content, status=HTTPStatus.OK)
