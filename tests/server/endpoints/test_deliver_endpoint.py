@@ -83,8 +83,9 @@ def test_deliver_trailblazer_analyses_client_error(client: FlaskClient, mocker: 
         json={"trailblazer_ids": [trailblazer_id]},
     )
 
-    # THEN the response should be bad gateway
+    # THEN the response should be bad gateway with a message
     assert response.status_code == HTTPStatus.BAD_GATEWAY
+    assert "Error when calling Trailblazer" in response.json["message"]
 
     # THEN the database changes were rolled back
     status_db.as_mock.rollback.assert_called_once()
