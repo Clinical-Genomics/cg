@@ -219,11 +219,12 @@ class TrailblazerAPI:
 
     def mark_analyses_as_delivered(
         self, trailblazer_ids: list[int], auth_token: str | None = None
-    ) -> None:
+    ) -> Response:
         analysis_dicts = []
         for trailblazer_id in trailblazer_ids:
             analysis_dict = {"id": trailblazer_id, "is_delivered": True}
             analysis_dicts.append(analysis_dict)
+        LOG.info(f"Setting analyses {trailblazer_ids} as delivered in Trailblazer")
         response: Response = requests.patch(
             json={"analyses": analysis_dicts},
             headers=self._get_auth_headers(auth_token=auth_token),
@@ -231,6 +232,7 @@ class TrailblazerAPI:
         )
         if not response.ok:
             raise TrailblazerAPIHTTPError(response.reason)
+        return response
 
     def get_analyses_to_deliver(self, order_id: int) -> list[TrailblazerAnalysis]:
         """Return the analyses in the order ready to be delivered."""
