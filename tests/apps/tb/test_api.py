@@ -1,8 +1,8 @@
+import json
 from datetime import datetime, timedelta, timezone
 from unittest.mock import create_autospec
 
 import pytest
-from flask import jsonify
 from google.oauth2.service_account import IDTokenCredentials
 from pytest_mock import MockerFixture
 from requests import Response
@@ -161,11 +161,11 @@ def test_mark_analyses_as_delivered_success(
 
     response = Response()
     response.status_code = 200
-    response._content = jsonify()
-    patch_call = mocker.patch.object(requests, "patch", return_value=)
+    response._content = json.dumps({"key": "value"}).encode("utf-8")
+    patch_call = mocker.patch.object(requests, "patch", return_value=response)
 
     # WHEN marking analyses as delivered
-    tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])
+    tb_response: Response = tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])
 
     # THEN the expected request should have been sent
     expected_request = {
@@ -181,6 +181,9 @@ def test_mark_analyses_as_delivered_success(
         headers={"Authorization": f"Bearer {valid_google_credentials.token}"},
         json=expected_request,
     )
+
+    # THEN the response should be returned
+    assert tb_response == response
 
 
 def test_mark_analyses_as_delivered_fails_with_http_error(
