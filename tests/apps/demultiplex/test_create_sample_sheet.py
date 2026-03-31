@@ -104,8 +104,8 @@ def test_get_or_create_sample_sheet_skips_on_instrument_demuxed_runs(
     )
 
     # GIVEN a flow cell that was demultiplexed on the sequencer
-    mock_flow_cell: MagicMock = MagicMock()
-    mock_flow_cell.has_demultiplexing_started_on_sequencer.return_value = True
+    mock_flow_cell: IlluminaRunDirectoryData = create_autospec(IlluminaRunDirectoryData)
+    mock_flow_cell.has_demultiplexing_started_on_sequencer = Mock(return_value=True)
     mocker.patch.object(sample_sheet_api, "_get_flow_cell", return_value=mock_flow_cell)
 
     # GIVEN that sample sheet creation is tracked
