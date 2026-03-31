@@ -89,10 +89,16 @@ def test_trailblazer_id_not_found_in_database(
     trailblazer_id = 666666
 
     # GIVEN that the trailblazer id has no matching analysis
-    status_db.as_type.get_analysis_by_trailblazer_id = Mock(side_effect=AnalysisDoesNotExistError)
+    error_message = f"Analysis with trailblazer_id {trailblazer_id} was not found in the database."
+    status_db.as_type.get_analysis_by_trailblazer_id = Mock(
+        side_effect=AnalysisDoesNotExistError(error_message)
+    )
 
     # WHEN calling the endpoint
     response = client.post(path="/api/v1/deliver", json={"trailblazer_ids": [trailblazer_id]})
 
     # THEN the response should be a bad request
     assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    # THEN the response should contain the error message
+    assert response.json["message"] == error_message
