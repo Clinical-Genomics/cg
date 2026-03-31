@@ -249,3 +249,14 @@ def test_store_available_fail(
     NfAnalysisAPI.update_analysis_as_completed_statusdb.assert_called_once_with(
         case_id=case_id, hk_version_id=ANY, comment=ANY, dry_run=False, force=False
     )
+
+
+def test_store_available_qc_fail_does_not_raise_error(cg_context: CGConfig):
+    # GIVEN that an analysis fails its analysis QC
+
+    # WHEN storing available analyses
+    cli_runner = CliRunner()
+    cli_runner.invoke(workflow_cli, [Workflow.RAREDISEASE, "store-available"], obj=cg_context)
+    # THEN the analysis is set to failed
+
+    # THEN no error is raised
