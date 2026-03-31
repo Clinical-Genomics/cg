@@ -39,7 +39,9 @@ def test_deliver_trailblazer_analyses_success(
     tb_response = Response()
     tb_response.status_code = 200
     tb_response._content = json.dumps({"analyses": "some_analyses"}).encode("utf-8")
-    mark_analysis_mock = mocker.patch.object(mark_as_delivered_service, "mark_analyses", return_value=tb_response)
+    mark_analysis_mock = mocker.patch.object(
+        mark_as_delivered_service, "mark_analyses", return_value=tb_response
+    )
 
     # WHEN calling the endpoint
     response = client.post(
@@ -48,7 +50,7 @@ def test_deliver_trailblazer_analyses_success(
 
     # THEN the response should be successful and contain the updated analyses
     assert response.status_code == HTTPStatus.OK
-    assert response.json == tb_response.history
+    assert response.data == tb_response.content
 
     # THEN the analyses were marked as delivered
     mark_analysis_mock.assert_called_once_with([analysis_1, analysis_2])

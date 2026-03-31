@@ -40,4 +40,4 @@ def deliver_analyses():
         return jsonify(message="Error when calling Trailblazer"), HTTPStatus.BAD_GATEWAY
     finally:
         db.commit_to_store()
-    return jsonify(analyses_response), analyses_response.status_code
+    return Response(response=analyses_response.content, status=HTTPStatus.OK)
