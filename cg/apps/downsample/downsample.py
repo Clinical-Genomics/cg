@@ -85,6 +85,7 @@ class DownsampleAPI(MetaAPI):
             case=case,
             sample=sample,
             status=downsample_data.get_sample_status(),
+            should_deliver_sample=False,
         )
         if self.dry_run:
             return

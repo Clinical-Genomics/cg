@@ -59,7 +59,10 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
                     customer=db_order.customer,
                 )
                 case_sample: CaseSample = self.status_db.relate_sample(
-                    case=case, sample=db_sample, status=StatusEnum.unknown
+                    case=case,
+                    sample=db_sample,
+                    status=StatusEnum.unknown,
+                    should_deliver_sample=True,
                 )
                 self.status_db.add_multiple_items_to_store([case, db_sample, case_sample])
                 db_order.cases.append(case)
