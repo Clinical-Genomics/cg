@@ -215,9 +215,7 @@ class ScoutConfigBuilder:
             LOG.debug(f"Adding cohorts {', '.join(cohorts)}")
             load_config.cohorts = cohorts
 
-    def include_cnv_report(
-        self, load_config: ScoutLoadConfig, hk_version: Version
-    ) -> None:  # TODO: make test
+    def include_cnv_report(self, load_config: ScoutLoadConfig, hk_version: Version) -> None:
         LOG.info("Include CNV report to case")
         if self.case_tags.cnv_report:
             cnv_report_tag_union_scout: set[str] = self.case_tags.cnv_report.union(
