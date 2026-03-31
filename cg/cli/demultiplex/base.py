@@ -4,16 +4,16 @@ import logging
 
 import rich_click as click
 
-from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.demultiplex.demux import (
     confirm_sequencing_run_sync,
-    copy_novaseqx_sequencing_runs,
     create_manifest_files,
     demultiplex_all,
     demultiplex_sequencing_run,
+    link_onboard_demultiplexed_flow_cells,
 )
 from cg.cli.demultiplex.finish import finish_group
 from cg.cli.demultiplex.sample_sheet import sample_sheet_commands
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 
 LOG = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ for sub_cmd in [
     demultiplex_sequencing_run,
     demultiplex_all,
     finish_group,
-    copy_novaseqx_sequencing_runs,
+    link_onboard_demultiplexed_flow_cells,
     sample_sheet_commands,
 ]:
     demultiplex_cmd_group.add_command(sub_cmd)
