@@ -73,8 +73,8 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             case_id=case_id, case_path=case_path
         )
         verifybamid_files: VerifybamidSvdFiles = self._get_verifybamid_files(prep_category)
-        skip_germlinecnvcaller, gcnvcaller_model, ploidy_model, readcount_intervals = (
-            self._get_gcnvcaller_args(prep_category=prep_category, target_bed=target_bed)
+        skip_tools, gcnvcaller_model, ploidy_model, readcount_intervals = self._get_gcnvcaller_args(
+            prep_category=prep_category, target_bed=target_bed
         )
         return RarediseaseParameters(
             analysis_type=prep_category,
@@ -85,7 +85,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             readcount_intervals=readcount_intervals,
             sample_id_map=sample_mapping_file,
             save_mapped_as_cram=True,
-            skip_germlinecnvcaller=skip_germlinecnvcaller,
+            skip_tools=skip_tools,
             target_bed=Path(self.references_directory, target_bed),
             vcfanno_extra_resources=f"{case_path}/{ScoutExportFileName.MANAGED_VARIANTS}",
             vep_filters_scout_fmt=f"{case_path}/{ScoutExportFileName.PANELS}",
@@ -97,9 +97,9 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
     def _get_gcnvcaller_args(self, prep_category: SeqLibraryPrepCategory, target_bed: str):
         if prep_category == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
             if files := self.gcnvcaller_files.get(target_bed):
-                return False, files.gcnvcaller_model, files.ploidy_model, files.readcount_intervals
+                return None, files.gcnvcaller_model, files.ploidy_model, files.readcount_intervals
 
-        return True, None, None, None
+        return "germlinecnvcaller", None, None, None
 
     def _get_verifybamid_files(self, analysis_type: SeqLibraryPrepCategory) -> VerifybamidSvdFiles:
         if analysis_type == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
