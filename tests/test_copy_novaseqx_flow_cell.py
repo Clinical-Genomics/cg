@@ -101,7 +101,7 @@ def test_get_latest_analysis_version_path(
     # THEN the latest analysis version path is returned
     latest_analysis_path: Path = Path(
         novaseqx_flow_cell_dir_with_analysis_data,
-        DemultiplexingDirsAndFiles.ANALYSIS,
+        DemultiplexingDirsAndFiles.ONBOARD_ANALYSIS,
         novaseqx_latest_analysis_version,
     )
     assert analysis_path == latest_analysis_path

@@ -99,7 +99,7 @@ def test_is_syncing_complete_includes_analysis_manifest(tmp_path: Path):
 
     _write_manifest(Path(source, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST), root_files)
 
-    analysis_dir = Path(source, DemultiplexingDirsAndFiles.ANALYSIS, "1")
+    analysis_dir = Path(source, DemultiplexingDirsAndFiles.ONBOARD_ANALYSIS, "1")
     analysis_dir.mkdir(parents=True)
     _write_manifest(
         Path(analysis_dir, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST), analysis_files
@@ -131,7 +131,7 @@ def test_is_syncing_complete_with_all_files_present(tmp_path: Path):
 
     _write_manifest(Path(source, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST), root_files)
 
-    analysis_dir = Path(source, DemultiplexingDirsAndFiles.ANALYSIS, "1")
+    analysis_dir = Path(source, DemultiplexingDirsAndFiles.ONBOARD_ANALYSIS, "1")
     analysis_dir.mkdir(parents=True)
     _write_manifest(
         Path(analysis_dir, DemultiplexingDirsAndFiles.ILLUMINA_FILE_MANIFEST), analysis_files
@@ -144,7 +144,7 @@ def test_is_syncing_complete_with_all_files_present(tmp_path: Path):
         target_file.touch()
 
     for file in analysis_files:
-        target_file = Path(target, DemultiplexingDirsAndFiles.ANALYSIS, "1", file)
+        target_file = Path(target, DemultiplexingDirsAndFiles.ONBOARD_ANALYSIS, "1", file)
         target_file.parent.mkdir(parents=True, exist_ok=True)
         target_file.touch()
 

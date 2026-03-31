@@ -330,7 +330,7 @@ def novaseqx_latest_analysis_version() -> str:
 def add_novaseqx_analysis_data(novaseqx_flow_cell_directory: Path, analysis_version: str):
     """Add NovaSeqX analysis data to a flow cell directory."""
     analysis_path: Path = Path(
-        novaseqx_flow_cell_directory, DemultiplexingDirsAndFiles.ANALYSIS, analysis_version
+        novaseqx_flow_cell_directory, DemultiplexingDirsAndFiles.ONBOARD_ANALYSIS, analysis_version
     )
     analysis_path.mkdir(parents=True)
     analysis_path.joinpath(DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
@@ -361,12 +361,12 @@ def novaseqx_flow_cell_analysis_incomplete(
     """
     Path(
         tmp_novaseqx_flow_cell_directory,
-        DemultiplexingDirsAndFiles.ANALYSIS,
+        DemultiplexingDirsAndFiles.ONBOARD_ANALYSIS,
         novaseqx_latest_analysis_version,
     ).mkdir(parents=True)
     Path(
         tmp_novaseqx_flow_cell_directory,
-        DemultiplexingDirsAndFiles.ANALYSIS,
+        DemultiplexingDirsAndFiles.ONBOARD_ANALYSIS,
         novaseqx_latest_analysis_version,
         DemultiplexingDirsAndFiles.COPY_COMPLETE,
     ).touch()

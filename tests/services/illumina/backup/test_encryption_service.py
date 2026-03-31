@@ -225,4 +225,4 @@ def test_copy_run_dir_to_tmp_excludes_analysis(
     command: str = illumina_run_encryption_service.copy_run_dir_to_tmp()
 
     # THEN the command should exclude the Analysis directory
-    assert f"--exclude={DemultiplexingDirsAndFiles.ANALYSIS}" in command
+    assert f"--exclude={DemultiplexingDirsAndFiles.ONBOARD_ANALYSIS}" in command

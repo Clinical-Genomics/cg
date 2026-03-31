@@ -36,7 +36,7 @@ def get_latest_analysis_path(flow_cell_dir: Path) -> Path | None:
     Get the latest analysis directory for a Novaseqx flow cell.
     The latest analysis directory is the one with the highest integer name.
     """
-    analysis_path: Path = Path(flow_cell_dir, DemultiplexingDirsAndFiles.ANALYSIS)
+    analysis_path: Path = Path(flow_cell_dir, DemultiplexingDirsAndFiles.ONBOARD_ANALYSIS)
     if not analysis_path.exists():
         return None
     analysis_versions: list[Path] = get_sorted_analysis_versions(analysis_path)

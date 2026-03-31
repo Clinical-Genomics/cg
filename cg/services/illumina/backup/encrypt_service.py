@@ -138,7 +138,7 @@ class IlluminaRunEncryptionService(EncryptionAPI):
 
     def copy_run_dir_to_tmp(self) -> str:
         return (
-            f"rsync -r --exclude={DemultiplexingDirsAndFiles.ANALYSIS}"
+            f"rsync -r --exclude={DemultiplexingDirsAndFiles.ONBOARD_ANALYSIS}"
             f" {self.run_dir_data.path} {self.run_encrypt_tmp_dir}"
         )
 

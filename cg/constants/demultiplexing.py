@@ -20,7 +20,7 @@ class DemultiplexingDirsAndFiles(StrEnum):
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
     ANALYSIS_COMPLETED: str = "Secondary_Analysis_Complete.txt"
-    ANALYSIS: str = "Analysis"
+    ONBOARD_ANALYSIS: str = "Analysis"
     DATA: str = "Data"
     BCL_CONVERT: str = "BCLConvert"
     SEQUENCING_RUNS_DIRECTORY_NAME: str = "sequencing-runs"
