@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import create_autospec
 
 import pytest
+from flask import jsonify
 from google.oauth2.service_account import IDTokenCredentials
 from pytest_mock import MockerFixture
 from requests import Response
@@ -150,7 +151,7 @@ def test_add_pending_analysis_fails(valid_trailblazer_config: dict, mocker):
         )
 
 
-def test_mark_analyses_as_delivered(
+def test_mark_analyses_as_delivered_success(
     valid_google_credentials: IDTokenCredentials,
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
@@ -158,7 +159,10 @@ def test_mark_analyses_as_delivered(
     # GIVEN a Trailblazer API
     tb_api = TrailblazerAPI(config=valid_trailblazer_config)
 
-    patch_call = mocker.patch.object(requests, "patch")
+    response = Response()
+    response.status_code = 200
+    response._content = jsonify()
+    patch_call = mocker.patch.object(requests, "patch", return_value=)
 
     # WHEN marking analyses as delivered
     tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])
