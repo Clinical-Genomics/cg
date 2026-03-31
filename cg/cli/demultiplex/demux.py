@@ -9,14 +9,12 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.demultiplex.copy_novaseqx_demultiplex_data import (
-    hardlink_flow_cell_analysis_data,
-    is_ready_for_post_processing,
-    mark_as_demultiplexed,
-    mark_flow_cell_as_queued_for_post_processing,
-    is_manifest_file_required,
     create_manifest_file,
-    is_syncing_complete,
     is_flow_cell_sync_confirmed,
+    is_manifest_file_required,
+    is_ready_to_copy_to_demultiplexed_runs,
+    is_syncing_complete,
+    link_onboard_demultiplexed_flow_cell,
 )
 from cg.constants.cli_options import DRY_RUN
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
@@ -130,30 +128,27 @@ def demultiplex_sequencing_run(
     )
 
 
-@click.command(name="copy-completed-sequencing-runs")
+@click.command(name="link-onboard-demultiplexing")
 @click.pass_obj
-def copy_novaseqx_sequencing_runs(context: CGConfig):
-    """Copy NovaSeq X sequencing runs ready for post-processing to demultiplexed runs."""
+def link_onboard_demultiplexed_flow_cells(context: CGConfig):
+    """Hard-link on-instrument demultiplexed NovaSeqX flow cells into demultiplexed-runs."""
     sequencing_runs_dir: Path = Path(context.run_instruments.illumina.sequencing_runs_dir)
     demultiplexed_runs_dir: Path = Path(context.run_instruments.illumina.demultiplexed_runs_dir)
 
     for sequencing_run_dir in sequencing_runs_dir.iterdir():
-        if is_ready_for_post_processing(
+        if is_ready_to_copy_to_demultiplexed_runs(
             flow_cell_dir=sequencing_run_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
         ):
-            LOG.info(f"Copying {sequencing_run_dir.name} to {demultiplexed_runs_dir}")
-            hardlink_flow_cell_analysis_data(
-                flow_cell_dir=sequencing_run_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
+            LOG.info(f"Linking {sequencing_run_dir.name} into {demultiplexed_runs_dir}")
+            link_onboard_demultiplexed_flow_cell(
+                sequencing_run_dir=sequencing_run_dir,
+                demultiplexed_runs_dir=demultiplexed_runs_dir,
+                flow_cell_id=IlluminaRunDirectoryData(sequencing_run_dir).id,
+                hk_api=context.housekeeper_api,
+                tb_api=context.trailblazer_api,
             )
-            demultiplexed_runs_flow_cell_dir: Path = Path(
-                demultiplexed_runs_dir, sequencing_run_dir.name
-            )
-            mark_as_demultiplexed(demultiplexed_runs_flow_cell_dir)
-            mark_flow_cell_as_queued_for_post_processing(sequencing_run_dir)
         else:
-            LOG.info(
-                f"Flow cell {sequencing_run_dir.name} is not ready for post processing, skipping."
-            )
+            LOG.info(f"Flow cell {sequencing_run_dir.name} is not ready for linking, skipping.")
 
 
 @click.command(name="confirm-sequencing-run-sync")
@@ -168,8 +163,8 @@ def confirm_sequencing_run_sync(context: CGConfig, source_directory: str):
     If so it creates a CopyComplete.txt file to show that that is the case."""
     target_sequencing_runs_directory = Path(context.run_instruments.illumina.sequencing_runs_dir)
     for source_sequencing_run in Path(source_directory).iterdir():
-        target_sequencig_run = Path(target_sequencing_runs_directory, source_sequencing_run.name)
-        if is_flow_cell_sync_confirmed(target_sequencig_run):
+        target_sequencing_run = Path(target_sequencing_runs_directory, source_sequencing_run.name)
+        if is_flow_cell_sync_confirmed(target_sequencing_run):
             LOG.debug(f"Flow cell {source_sequencing_run} has already been confirmed, skipping.")
             continue
         if is_syncing_complete(
