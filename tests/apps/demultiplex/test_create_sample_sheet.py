@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock, create_autospec
 
 import pytest
 from _pytest.logging import LogCaptureFixture

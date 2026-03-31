@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import ANY, MagicMock
 
 from click import testing
 
@@ -15,7 +15,8 @@ from cg.cli.demultiplex.demux import (
 )
 from cg.constants.constants import Workflow
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.constants.tb import AnalysisStatus
+from cg.constants.priority import TrailblazerPriority
+from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
@@ -151,6 +152,7 @@ def test_is_demultiplexing_not_complete(
 def test_copy_novaseqx_sequencing_runs_notifies_trailblazer(
     cli_runner: testing.CliRunner,
     novaseqx_flow_cell_dir_with_analysis_data: Path,
+    novaseq_x_flow_cell_id: str,
     cg_context: CGConfig,
     tmp_path: Path,
     mocker,
@@ -191,7 +193,14 @@ def test_copy_novaseqx_sequencing_runs_notifies_trailblazer(
     assert result.exit_code == 0
 
     # THEN a pending analysis was added with the DEMULTIPLEX workflow
-    mock_tb_api.add_pending_analysis.assert_called_once()
+    mock_tb_api.add_pending_analysis.assert_called_once_with(
+        case_id=novaseq_x_flow_cell_id,
+        analysis_type=AnalysisType.OTHER,
+        config_path="",
+        out_dir=ANY,
+        priority=TrailblazerPriority.HIGH,
+        workflow=Workflow.DEMULTIPLEX,
+    )
     call_kwargs: dict = mock_tb_api.add_pending_analysis.call_args.kwargs
     assert call_kwargs["workflow"] == Workflow.DEMULTIPLEX
 
