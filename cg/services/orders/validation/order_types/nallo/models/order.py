@@ -4,13 +4,5 @@ from cg.services.orders.validation.order_types.nallo.models.case import NalloCas
 from cg.services.orders.validation.order_types.nallo.models.sample import NalloSample
 
 
-class NalloOrder(OrderWithCases[NalloCase]):
+class NalloOrder(OrderWithCases[NalloCase, NalloSample]):
     delivery_type: NalloDeliveryType
-
-    @property
-    def enumerated_new_samples(self) -> list[tuple[int, int, NalloSample]]:
-        return [
-            (case_index, sample_index, sample)
-            for case_index, case in self.enumerated_new_cases
-            for sample_index, sample in case.enumerated_new_samples
-        ]
