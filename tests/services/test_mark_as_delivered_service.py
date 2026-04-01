@@ -79,7 +79,7 @@ def test_mark_analyses_success(
 
     # THEN endpoint in Trailblazer was called
     analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        [trailblazer_id, 555555]
+        trailblazer_ids=[trailblazer_id, 555555], auth_token=None
     )
 
     # THEN we should return the Trailblazer response
@@ -120,7 +120,7 @@ def test_mark_analyses_mix_original_non_original_samples(
 
     # THEN endpoint in Trailblazer was called
     analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id]
+        trailblazer_ids=[trailblazer_id], auth_token=None
     )
 
 
@@ -158,7 +158,7 @@ def test_mark_analyses_rerun_case(
 
     # THEN endpoint in Trailblazer was called
     analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id]
+        trailblazer_ids=[trailblazer_id], auth_token=None
     )
 
 
@@ -196,7 +196,7 @@ def test_mark_analyses_mixed_delivered_at_original_samples(
 
     # THEN endpoint in Trailblazer was called
     analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id]
+        trailblazer_ids=[trailblazer_id], auth_token=None
     )
 
 
@@ -239,7 +239,7 @@ def test_mark_analyses_partial_delivery(
 
     # THEN endpoint in Trailblazer was called
     analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id]
+        trailblazer_ids=[trailblazer_id], auth_token=None
     )
 
 

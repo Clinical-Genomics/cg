@@ -45,7 +45,9 @@ def test_deliver_trailblazer_analyses_success(
 
     # WHEN calling the endpoint
     response = client.post(
-        path="/api/v1/deliver", json={"trailblazer_ids": [trailblazer_id_1, trailblazer_id_2]}
+        path="/api/v1/deliver",
+        headers={"Authorization": "prod-user"},
+        json={"trailblazer_ids": [trailblazer_id_1, trailblazer_id_2]},
     )
 
     # THEN the response should be successful and contain the updated analyses
@@ -53,7 +55,9 @@ def test_deliver_trailblazer_analyses_success(
     assert response.data == tb_response.content
 
     # THEN the analyses were marked as delivered
-    mark_analysis_mock.assert_called_once_with([analysis_1, analysis_2])
+    mark_analysis_mock.assert_called_once_with(
+        analyses=[analysis_1, analysis_2], auth_token="prod-user"
+    )
 
     # THEN these changes were committed to the database
     status_db.as_mock.commit_to_store.assert_called_once()
@@ -73,10 +77,15 @@ def test_deliver_trailblazer_analyses_client_error(client: FlaskClient, mocker: 
     )
 
     # WHEN calling the endpoint
-    response = client.post(path="/api/v1/deliver", json={"trailblazer_ids": [trailblazer_id]})
+    response = client.post(
+        path="/api/v1/deliver",
+        headers={"Authorization": "prod-user"},
+        json={"trailblazer_ids": [trailblazer_id]},
+    )
 
-    # THEN the response should be bad gateway
+    # THEN the response should be bad gateway with a message
     assert response.status_code == HTTPStatus.BAD_GATEWAY
+    assert "Error when calling Trailblazer" in response.json["message"]
 
     # THEN the database changes were rolled back
     status_db.as_mock.rollback.assert_called_once()
