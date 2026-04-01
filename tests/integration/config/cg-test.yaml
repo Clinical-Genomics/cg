@@ -143,6 +143,7 @@ mutacc-auto:
   padding: 300
 
 nallo:
+  bundle_filenames: "bundle_filenames.yaml"
   compute_env: nallo_compute_env
   conda_env: nallo_conda_env
   config: {test_root_dir}/nallo_config.config
