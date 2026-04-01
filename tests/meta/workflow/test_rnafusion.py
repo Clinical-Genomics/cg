@@ -29,6 +29,7 @@ def config() -> CGConfig:
         tower_binary_path="/path/to/tower",
         rnafusion=RnafusionConfig(
             binary_path="/path/to/nextflow",
+            bundle_filenames="/path/to/bundle_filenames.yaml",
             conda_env="S_rnafusion",
             platform="slurm",
             params="/path/to/params.yaml",
