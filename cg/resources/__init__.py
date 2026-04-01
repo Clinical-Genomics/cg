@@ -5,6 +5,7 @@ from cg.utils.files import get_project_root_dir
 
 project_root_dir: Path = get_project_root_dir()
 
+# TODO: Delete this file and the bundle files
 NALLO_BUNDLE_FILENAMES: str = (
     Path("resources", "nallo_bundle_filenames").with_suffix(FileExtensions.YAML).as_posix()
 )
