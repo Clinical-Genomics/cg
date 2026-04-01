@@ -11,7 +11,6 @@ from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.tomte.tomte import TomteQCMetrics
-from cg.resources import TOMTE_BUNDLE_FILENAMES_PATH
 
 LOG = logging.getLogger(__name__)
 
@@ -25,25 +24,25 @@ class TomteAnalysisAPI(NfAnalysisAPI):
         workflow: Workflow = Workflow.TOMTE,
     ):
         super().__init__(config=config, workflow=workflow)
-        self.root_dir: str = config.tomte.root
-        self.workflow_bin_path: str = config.tomte.workflow_bin_path
-        self.profile: str = config.tomte.profile
-        self.conda_env: str = config.tomte.conda_env
+        self.account: str = config.tomte.slurm.account
+        self.bundle_filenames: str = config.tomte.bundle_filenames
         self.conda_binary: str = config.tomte.conda_binary
-        self.platform: str = config.tomte.platform
+        self.conda_env: str = config.tomte.conda_env
+        self.email: str = config.tomte.slurm.mail_user
         self.params: str = config.tomte.params
-        self.workflow_config_path: str = config.tomte.config
+        self.platform: str = config.tomte.platform
+        self.profile: str = config.tomte.profile
         self.resources: str = config.tomte.resources
+        self.revision: str = config.tomte.revision
+        self.root_dir: str = config.tomte.root
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.tomte.tower_workflow
-        self.account: str = config.tomte.slurm.account
-        self.email: str = config.tomte.slurm.mail_user
-        self.revision: str = config.tomte.revision
+        self.workflow_bin_path: str = config.tomte.workflow_bin_path
+        self.workflow_config_path: str = config.tomte.config
 
-    @staticmethod
-    def get_bundle_filenames_path() -> Path:
-        """Return path to bundle template."""
-        return TOMTE_BUNDLE_FILENAMES_PATH
+    @property
+    def bundle_filenames_path(self) -> Path:
+        return Path(self.bundle_filenames)
 
     def get_genome_build(self, case_id: str) -> str:
         return GenomeVersion.HG38

@@ -65,6 +65,10 @@ class NfAnalysisAPI(AnalysisAPI):
         If false, pattern must be present but does not need to be exact."""
         return False
 
+    @property
+    def bundle_filenames_path(self) -> Path:
+        raise NotImplementedError
+
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
         return Path(self.root_dir, case_id)
@@ -100,7 +104,7 @@ class NfAnalysisAPI(AnalysisAPI):
         LOG.debug("Getting deliverables file template content")
         return ReadFile.get_content_from_file(
             file_format=FileFormat.YAML,
-            file_path=self.get_bundle_filenames_path(),
+            file_path=self.bundle_filenames_path,
         )
 
     @staticmethod

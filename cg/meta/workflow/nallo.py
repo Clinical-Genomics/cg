@@ -22,7 +22,6 @@ from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.nallo.nallo import NalloQCMetrics
-from cg.resources import NALLO_BUNDLE_FILENAMES_PATH
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -38,32 +37,32 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         workflow: Workflow = Workflow.NALLO,
     ):
         super().__init__(config=config, workflow=workflow)
-        self.root_dir: str = config.nallo.root
-        self.workflow_bin_path: str = config.nallo.workflow_bin_path
-        self.profile: str = config.nallo.profile
-        self.conda_env: str = config.nallo.conda_env
-        self.conda_binary: str = config.nallo.conda_binary
-        self.platform: str = config.nallo.platform
-        self.params: str = config.nallo.params
-        self.workflow_config_path: str = config.nallo.config
-        self.resources: str = config.nallo.resources
-        self.tower_binary_path: str = config.tower_binary_path
-        self.tower_workflow: str = config.nallo.tower_workflow
         self.account: str = config.nallo.slurm.account
-        self.email: str = config.nallo.slurm.mail_user
-        self.revision: str = config.nallo.revision
+        self.bundle_filenames: str = config.nallo.bundle_filenames
         self.chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
             config=config, genome_build=WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.NALLO]
         )
+        self.conda_binary: str = config.nallo.conda_binary
+        self.conda_env: str = config.nallo.conda_env
+        self.email: str = config.nallo.slurm.mail_user
+        self.params: str = config.nallo.params
+        self.platform: str = config.nallo.platform
+        self.profile: str = config.nallo.profile
+        self.resources: str = config.nallo.resources
+        self.revision: str = config.nallo.revision
+        self.root_dir: str = config.nallo.root
+        self.tower_binary_path: str = config.tower_binary_path
+        self.tower_workflow: str = config.nallo.tower_workflow
+        self.workflow_bin_path: str = config.nallo.workflow_bin_path
+        self.workflow_config_path: str = config.nallo.config
+
+    @property
+    def bundle_filenames_path(self) -> Path:
+        return Path(self.bundle_filenames)
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a Nallo case. Currently fixed for hg38."""
         return GenomeVersion.HG38
-
-    @staticmethod
-    def get_bundle_filenames_path() -> Path:
-        """Return Nallo bundle filenames path."""
-        return NALLO_BUNDLE_FILENAMES_PATH
 
     def get_qc_conditions_for_workflow(self, sample_id: str) -> dict:
         """Return Nallo workflow metric conditions for a sample."""
