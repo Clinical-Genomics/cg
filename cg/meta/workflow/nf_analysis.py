@@ -108,11 +108,6 @@ class NfAnalysisAPI(AnalysisAPI):
         )
 
     @staticmethod
-    def get_bundle_filenames_path() -> Path:
-        """Return bundle filenames path."""
-        raise NotImplementedError
-
-    @staticmethod
     def get_formatted_file_deliverable(
         file_template: dict[str | None, str | None],
         case_id: str,
