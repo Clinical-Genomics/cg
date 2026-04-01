@@ -50,6 +50,7 @@ def test_upload_succeeds():
         delivery_service_factory=delivery_service_factory,
         nallo=create_autospec(
             NalloConfig,
+            bundle_filenames="nallo_bundle_filenames.yaml",
             conda_env="nallo_conda_env",
             conda_binary="nallo_conda_binary",
             config="nallo_config",
