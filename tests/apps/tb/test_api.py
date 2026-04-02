@@ -186,6 +186,38 @@ def test_mark_analyses_as_delivered_success(
     assert tb_response == response
 
 
+def test_mark_analyses_as_delivered_with_forward_token(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a Trailblazer API
+    tb_api = TrailblazerAPI(config=valid_trailblazer_config)
+
+    patch_call = mocker.patch.object(requests, "patch")
+
+    # WHEN marking analyses as delivered
+    tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3], auth_token="auth_token")
+
+    # THEN the expected request should have been sent
+    expected_request = {
+        "analyses": [
+            {"id": 1, "is_delivered": True},
+            {"id": 2, "is_delivered": True},
+            {"id": 3, "is_delivered": True},
+        ]
+    }
+
+    patch_call.assert_called_once_with(
+        url=f"{tb_api.host}/analyses",
+        headers={
+            "Authorization": f"Bearer {valid_google_credentials.token}",
+            "X-On-Behalf-Of": "auth_token",
+        },
+        json=expected_request,
+    )
+
+
 def test_mark_analyses_as_delivered_fails_with_http_error(
     valid_google_credentials: IDTokenCredentials,
     valid_trailblazer_config: dict,
