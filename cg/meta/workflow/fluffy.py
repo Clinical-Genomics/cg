@@ -244,7 +244,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
         dry_run: bool,
         workflow_config: str,
         batch_ref: bool,
-        use_bwa_mem: bool,
     ) -> None:
         """
         Call fluffy with the configured command-line arguments
@@ -257,7 +256,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
         if not workflow_config:
             workflow_config = self.fluffy_config.as_posix()
         batch_ref_flag = "--batch-ref" if batch_ref else ""
-        use_bwa_mem_flag = "--bwa-mem" if use_bwa_mem else ""
         command_args = [
             "--config",
             workflow_config,
@@ -269,7 +267,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
             self.get_output_path(case_id=case_id).as_posix(),
             "--analyse",
             batch_ref_flag,
-            use_bwa_mem_flag,
             "--slurm_params",
             self.get_slurm_param_qos(case_id=case_id),
         ]
