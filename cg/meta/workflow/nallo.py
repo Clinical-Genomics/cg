@@ -38,7 +38,6 @@ class NalloAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.account: str = config.nallo.slurm.account
-        self.bundle_filenames: str = config.nallo.bundle_filenames
         self.chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
             config=config, genome_build=WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.NALLO]
         )
@@ -46,6 +45,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         self.conda_env: str = config.nallo.conda_env
         self.email: str = config.nallo.slurm.mail_user
         self.params: str = config.nallo.params
+        self.pipeline_deliverables = Path(config.nallo.pipeline_deliverables)
         self.platform: str = config.nallo.platform
         self.profile: str = config.nallo.profile
         self.resources: str = config.nallo.resources
@@ -55,10 +55,6 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         self.tower_workflow: str = config.nallo.tower_workflow
         self.workflow_bin_path: str = config.nallo.workflow_bin_path
         self.workflow_config_path: str = config.nallo.config
-
-    @property
-    def bundle_filenames_path(self) -> Path:
-        return Path(self.bundle_filenames)
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a Nallo case. Currently fixed for hg38."""

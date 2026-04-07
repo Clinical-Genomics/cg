@@ -110,11 +110,11 @@ def test_get_qc_conditions_for_workflow():
             chanjo=create_autospec(ChanjoConfig, config_path="some/path", binary_path="some/path"),
             raredisease=create_autospec(
                 RarediseaseConfig,
-                bundle_filenames="bundle_filenames.yaml",
                 conda_binary="conda/bin",
                 conda_env="conda_env",
                 config="config.json",
                 params="params.yaml",
+                pipeline_deliverables="raredisease_deliverables.yaml",
                 platform="platform",
                 profile="profile",
                 resources="a tonne",

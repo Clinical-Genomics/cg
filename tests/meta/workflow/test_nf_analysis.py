@@ -168,7 +168,7 @@ def test_get_deliverables_for_case(
     )
 
     # THEN assert that the bundle_filenames file is read
-    mock_yaml_reader.assert_called_once_with(Path("path/to/bundle/filenames.yaml"))
+    mock_yaml_reader.assert_called_once_with(Path("path/to/pipeline_deliverables.yaml"))
 
     # THEN assert that the returned workflow deliverables object has three entries
     assert len(deliverables.files) == 3

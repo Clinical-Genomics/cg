@@ -32,11 +32,11 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.account: str = config.rnafusion.slurm.account
-        self.bundle_filenames: str = config.rnafusion.bundle_filenames
         self.conda_binary: str = config.rnafusion.conda_binary
         self.conda_env: str = config.rnafusion.conda_env
         self.email: str = config.rnafusion.slurm.mail_user
         self.params: str = config.rnafusion.params
+        self.pipeline_deliverables = Path(config.rnafusion.pipeline_deliverables)
         self.platform: str = config.rnafusion.platform
         self.profile: str = config.rnafusion.profile
         self.resources: str = config.rnafusion.resources
@@ -46,10 +46,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         self.tower_workflow: str = config.rnafusion.tower_workflow
         self.workflow_bin_path: str = config.rnafusion.workflow_bin_path
         self.workflow_config_path: str = config.rnafusion.config
-
-    @property
-    def bundle_filenames_path(self) -> Path:
-        return Path(self.bundle_filenames)
 
     @property
     def is_multiple_samples_allowed(self) -> bool:

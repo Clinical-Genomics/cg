@@ -38,7 +38,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.account: str = config.raredisease.slurm.account
-        self.bundle_filenames: str = config.raredisease.bundle_filenames
         self.chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
             config=config, genome_build=WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.RAREDISEASE]
         )
@@ -46,6 +45,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.conda_env: str = config.raredisease.conda_env
         self.email: str = config.raredisease.slurm.mail_user
         self.params: str = config.raredisease.params
+        self.pipeline_deliverables = Path(config.raredisease.pipeline_deliverables)
         self.platform: str = config.raredisease.platform
         self.profile: str = config.raredisease.profile
         self.resources: str = config.raredisease.resources
@@ -55,10 +55,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.tower_workflow: str = config.raredisease.tower_workflow
         self.workflow_bin_path: str = config.raredisease.workflow_bin_path
         self.workflow_config_path: str = config.raredisease.config
-
-    @property
-    def bundle_filenames_path(self) -> Path:
-        return Path(self.bundle_filenames)
 
     def get_qc_conditions_for_workflow(self, sample_id: str) -> dict:
         """Return Raredisease workflow metric conditions for a sample."""

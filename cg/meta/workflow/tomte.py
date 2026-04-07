@@ -25,11 +25,11 @@ class TomteAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.account: str = config.tomte.slurm.account
-        self.bundle_filenames: str = config.tomte.bundle_filenames
         self.conda_binary: str = config.tomte.conda_binary
         self.conda_env: str = config.tomte.conda_env
         self.email: str = config.tomte.slurm.mail_user
         self.params: str = config.tomte.params
+        self.pipeline_deliverables = Path(config.tomte.pipeline_deliverables)
         self.platform: str = config.tomte.platform
         self.profile: str = config.tomte.profile
         self.resources: str = config.tomte.resources
@@ -39,10 +39,6 @@ class TomteAnalysisAPI(NfAnalysisAPI):
         self.tower_workflow: str = config.tomte.tower_workflow
         self.workflow_bin_path: str = config.tomte.workflow_bin_path
         self.workflow_config_path: str = config.tomte.config
-
-    @property
-    def bundle_filenames_path(self) -> Path:
-        return Path(self.bundle_filenames)
 
     def get_genome_build(self, case_id: str) -> str:
         return GenomeVersion.HG38

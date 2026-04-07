@@ -26,11 +26,11 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
         self.account: str = config.taxprofiler.slurm.account
-        self.bundle_filenames: str = config.taxprofiler.bundle_filenames
         self.conda_binary: str = config.taxprofiler.conda_binary
         self.conda_env: str = config.taxprofiler.conda_env
         self.email: str = config.taxprofiler.slurm.mail_user
         self.params: str = config.taxprofiler.params
+        self.pipeline_deliverables = Path(config.taxprofiler.pipeline_deliverables)
         self.platform: str = config.taxprofiler.platform
         self.profile: str = config.taxprofiler.profile
         self.resources: str = config.taxprofiler.resources
@@ -40,10 +40,6 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         self.tower_workflow: str = config.taxprofiler.tower_workflow
         self.workflow_bin_path: str = config.taxprofiler.workflow_bin_path
         self.workflow_config_path: str = config.taxprofiler.config
-
-    @property
-    def bundle_filenames_path(self) -> Path:
-        return Path(self.bundle_filenames)
 
     @property
     def is_multiqc_pattern_search_exact(self) -> bool:

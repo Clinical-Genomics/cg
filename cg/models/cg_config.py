@@ -237,76 +237,76 @@ class MipConfig(BaseModel):
 
 class NalloConfig(CommonAppConfig):
     binary_path: str | None = None
-    bundle_filenames: str
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
     launch_directory: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class RarediseaseConfig(CommonAppConfig):
     binary_path: str | None = None
-    bundle_filenames: str
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
     launch_directory: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class TomteConfig(CommonAppConfig):
     binary_path: str | None = None
-    bundle_filenames: str
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class RnafusionConfig(CommonAppConfig):
     binary_path: str
-    bundle_filenames: str
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
     launch_directory: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
@@ -316,21 +316,21 @@ class RnafusionConfig(CommonAppConfig):
 
 class TaxprofilerConfig(CommonAppConfig):
     binary_path: str
-    bundle_filenames: str
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class MicrosaltConfig(BaseModel):

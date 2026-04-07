@@ -40,7 +40,7 @@ def get_nextflow_config_dict(
     def _make_dict(workflow: str) -> dict:
         return {
             "binary_path": nextflow_binary.as_posix(),
-            "bundle_filenames": "path/to/bundle/filenames.yaml",
+            "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": f"S_{workflow}",

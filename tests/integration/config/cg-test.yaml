@@ -143,12 +143,12 @@ mutacc-auto:
   padding: 300
 
 nallo:
-  bundle_filenames: "bundle_filenames.yaml"
   compute_env: nallo_compute_env
   conda_env: nallo_conda_env
   config: {test_root_dir}/nallo_config.config
   launch_directory: {test_root_dir}/nallo_launch_directory
   params: {test_root_dir}/nallo_params.yaml
+  pipeline_deliverables: "nallo_pipeline_deliverables.yaml"
   platform: {test_root_dir}/platform.config
   profile: nallo_profile
   resources: {test_root_dir}/nallo_resources.config

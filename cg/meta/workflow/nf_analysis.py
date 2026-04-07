@@ -39,22 +39,23 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def __init__(self, config: CGConfig, workflow: Workflow):
         super().__init__(workflow=workflow, config=config)
-        self.workflow: Workflow = workflow
-        self.root_dir: str | None = None
-        self.workflow_bin_path: str | None = None
-        self.references: str | None = None
-        self.profile: str | None = None
-        self.conda_env: str | None = None
+        self.account: str | None = None
         self.conda_binary: str | None = None
-        self.platform: str | None = None
+        self.conda_env: str | None = None
+        self.email: str | None = None
         self.params: str | None = None
-        self.workflow_config_path: str | None = None
+        self.pipeline_deliverables: Path | None = None
+        self.platform: str | None = None
+        self.profile: str | None = None
+        self.references: str | None = None
         self.resources: str | None = None
+        self.revision: str | None = None
+        self.root_dir: str | None = None
         self.tower_binary_path: str | None = None
         self.tower_workflow: str | None = None
-        self.account: str | None = None
-        self.email: str | None = None
-        self.revision: str | None = None
+        self.workflow: Workflow = workflow
+        self.workflow_bin_path: str | None = None
+        self.workflow_config_path: str | None = None
 
     @property
     def root(self) -> str:
@@ -65,10 +66,6 @@ class NfAnalysisAPI(AnalysisAPI):
         """Return True if only exact pattern search is allowed to collect metrics information from MultiQC file.
         If false, pattern must be present but does not need to be exact."""
         return False
-
-    @property
-    def bundle_filenames_path(self) -> Path:
-        raise NotImplementedError
 
     def get_case_path(self, case_id: str) -> Path:
         """Path to case working directory."""
@@ -103,7 +100,7 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_deliverables_template_content(self) -> list[dict[str, str]]:
         """Return deliverables file template content."""
         LOG.debug("Getting deliverables file template content")
-        return read_yaml(self.bundle_filenames_path)
+        return read_yaml(self.pipeline_deliverables)
 
     @staticmethod
     def get_formatted_file_deliverable(
