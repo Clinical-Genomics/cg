@@ -13,7 +13,6 @@ from cg.models.cg_config import CGConfig
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_BATCH_REF = click.option("-b", "--batch-ref", is_flag=True)
-OPTION_USE_BWA_MEM = click.option("-b", "--use-bwa-mem", is_flag=True)
 
 LOG = logging.getLogger(__name__)
 
@@ -52,7 +51,6 @@ def create_samplesheet(context: CGConfig, case_id: str, dry_run: bool):
 @DRY_RUN
 @click.option("-c", "--config", help="Path to fluffy config in .json format")
 @OPTION_BATCH_REF
-@OPTION_USE_BWA_MEM
 @click.pass_obj
 def run(
     context: CGConfig,
@@ -60,7 +58,6 @@ def run(
     dry_run: bool,
     config: str,
     batch_ref: bool,
-    use_bwa_mem: bool,
 ):
     """
     Run Fluffy analysis
@@ -72,7 +69,6 @@ def run(
         workflow_config=config,
         dry_run=dry_run,
         batch_ref=batch_ref,
-        use_bwa_mem=use_bwa_mem,
     )
     if dry_run:
         return
@@ -89,14 +85,12 @@ def run(
 @DRY_RUN
 @click.option("-c", "--config", help="Path to fluffy config in .json format")
 @OPTION_BATCH_REF
-@OPTION_USE_BWA_MEM
 @click.pass_context
 def start(
     context: click.Context,
     case_id: str,
     dry_run: bool,
     batch_ref: bool,
-    use_bwa_mem: bool,
     config: str = None,
 ):
     """
@@ -115,7 +109,6 @@ def start(
         config=config,
         dry_run=dry_run,
         batch_ref=batch_ref,
-        use_bwa_mem=use_bwa_mem,
     )
 
 

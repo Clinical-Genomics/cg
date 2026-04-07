@@ -31,7 +31,6 @@ def test_run_fluffy(cg_context: CGConfig, mocker: MockerFixture):
         dry_run=False,
         workflow_config="workflow_config",
         batch_ref=False,
-        use_bwa_mem=True,
     )
 
     # THEN the subprocess should have been called with the correct flags
@@ -47,7 +46,6 @@ def test_run_fluffy(cg_context: CGConfig, mocker: MockerFixture):
             f"{analysis_api.root_dir}/case_id/output",
             "--analyse",
             "",
-            "--bwa-mem",
             "--slurm_params",
             f"qos:{SlurmQos.NORMAL}",
         ],
@@ -78,7 +76,6 @@ def test_run_fluffy_with_batch_ref(cg_context: CGConfig, mocker: MockerFixture):
         dry_run=False,
         workflow_config="workflow_config",
         batch_ref=True,
-        use_bwa_mem=True,
     )
 
     # THEN the subprocess should have been called with the correct flags
@@ -94,7 +91,6 @@ def test_run_fluffy_with_batch_ref(cg_context: CGConfig, mocker: MockerFixture):
             f"{analysis_api.root_dir}/case_id/output",
             "--analyse",
             "--batch-ref",
-            "--bwa-mem",
             "--slurm_params",
             f"qos:{SlurmQos.NORMAL}",
         ],
