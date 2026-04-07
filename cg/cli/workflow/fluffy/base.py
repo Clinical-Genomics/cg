@@ -12,7 +12,7 @@ from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 ARGUMENT_CASE_ID = click.argument("case_id", required=True)
-OPTION_EXTERNAL_REF = click.option("-e", "--external-ref", is_flag=True)
+OPTION_BATCH_REF = click.option("-b", "--batch-ref", is_flag=True)
 OPTION_USE_BWA_MEM = click.option("-b", "--use-bwa-mem", is_flag=True)
 
 LOG = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ def create_samplesheet(context: CGConfig, case_id: str, dry_run: bool):
 @ARGUMENT_CASE_ID
 @DRY_RUN
 @click.option("-c", "--config", help="Path to fluffy config in .json format")
-@OPTION_EXTERNAL_REF
+@OPTION_BATCH_REF
 @OPTION_USE_BWA_MEM
 @click.pass_obj
 def run(
@@ -59,7 +59,7 @@ def run(
     case_id: str,
     dry_run: bool,
     config: str,
-    external_ref: bool,
+    batch_ref: bool,
     use_bwa_mem: bool,
 ):
     """
@@ -71,7 +71,7 @@ def run(
         case_id=case_id,
         workflow_config=config,
         dry_run=dry_run,
-        external_ref=external_ref,
+        batch_ref=batch_ref,
         use_bwa_mem=use_bwa_mem,
     )
     if dry_run:
@@ -88,14 +88,14 @@ def run(
 @ARGUMENT_CASE_ID
 @DRY_RUN
 @click.option("-c", "--config", help="Path to fluffy config in .json format")
-@OPTION_EXTERNAL_REF
+@OPTION_BATCH_REF
 @OPTION_USE_BWA_MEM
 @click.pass_context
 def start(
     context: click.Context,
     case_id: str,
     dry_run: bool,
-    external_ref: bool,
+    batch_ref: bool,
     use_bwa_mem: bool,
     config: str = None,
 ):
@@ -114,7 +114,7 @@ def start(
         case_id=case_id,
         config=config,
         dry_run=dry_run,
-        external_ref=external_ref,
+        batch_ref=batch_ref,
         use_bwa_mem=use_bwa_mem,
     )
 

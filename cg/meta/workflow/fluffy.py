@@ -243,7 +243,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         case_id: str,
         dry_run: bool,
         workflow_config: str,
-        external_ref: bool,
+        batch_ref: bool,
         use_bwa_mem: bool,
     ) -> None:
         """
@@ -256,7 +256,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
                 shutil.rmtree(output_path, ignore_errors=True)
         if not workflow_config:
             workflow_config = self.fluffy_config.as_posix()
-        batch_ref_flag = "" if external_ref else "--batch-ref"
+        batch_ref_flag = "--batch-ref" if batch_ref else ""
         use_bwa_mem_flag = "--bwa-mem" if use_bwa_mem else ""
         command_args = [
             "--config",
