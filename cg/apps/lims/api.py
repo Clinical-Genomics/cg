@@ -18,6 +18,7 @@ from cg.constants.lims import (
     LimsProcess,
 )
 from cg.constants.priority import Priority
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import LimsDataError
 
 from .order import OrderHandler
@@ -465,6 +466,23 @@ class LimsAPI(Lims, OrderHandler):
         except HTTPError as error:
             LOG.warning(f"Sample {sample_id} not found in LIMS: {error}")
         return input_amounts
+
+    def get_latest_input_amount(
+        self, sample_id: str, prep_category: SeqLibraryPrepCategory
+    ) -> float:
+        steps: dict = MASTER_STEPS_UDFS["input_amounts"][prep_category]
+        latest_date: date | None = None
+        latest_input_amount: float | None = None
+        for step, value in steps.items():
+            input_amount_artifact: Artifact = self.get_latest_artifact_for_sample(
+                sample_internal_id=sample_id, process_type=step
+            )
+            if not latest_date or input_amount_artifact.parent_process.date_run > latest_date:
+                latest_input_amount = input_amount_artifact.udf[value]
+                latest_date = input_amount_artifact.parent_process.date_run
+        if not latest_input_amount:
+            raise Exception
+        return latest_input_amount
 
     def _get_last_used_input_amount(
         self, input_amounts: list[tuple[datetime, float]]
