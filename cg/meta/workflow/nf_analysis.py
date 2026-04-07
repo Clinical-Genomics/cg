@@ -13,6 +13,7 @@ from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
+from cg.io.yaml import read_yaml
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
@@ -102,10 +103,7 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_deliverables_template_content(self) -> list[dict[str, str]]:
         """Return deliverables file template content."""
         LOG.debug("Getting deliverables file template content")
-        return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=self.bundle_filenames_path,
-        )
+        return read_yaml(self.bundle_filenames_path)
 
     @staticmethod
     def get_formatted_file_deliverable(
@@ -157,7 +155,7 @@ class NfAnalysisAPI(AnalysisAPI):
         files: list[FileDeliverable] = []
 
         for sample in samples:
-            bundles_per_sample = self.get_deliverables_for_sample(
+            bundles_per_sample: list[FileDeliverable] = self.get_deliverables_for_sample(
                 sample=sample, case_id=case_id, template=deliverable_template
             )
             files.extend(bundle for bundle in bundles_per_sample if bundle not in files)
