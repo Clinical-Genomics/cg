@@ -64,9 +64,10 @@ def test_store_pool_order_data_in_status_db(
     assert len(new_cases) == 4
     assert store_to_submit_and_validate_orders._get_query(table=CaseSample).count() == 4
 
-    # THEN the samples are not set for invoicing
+    # THEN the samples are not set for invoicing but should be delivered
     for sample in new_samples:
         assert sample.no_invoice
+        assert sample.links[0].should_deliver_sample
 
     # THEN the cases should have the correct data analysis
     for case in new_cases:

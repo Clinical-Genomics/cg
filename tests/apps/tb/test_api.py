@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timedelta, timezone
 from unittest.mock import create_autospec
 
@@ -150,7 +151,7 @@ def test_add_pending_analysis_fails(valid_trailblazer_config: dict, mocker):
         )
 
 
-def test_mark_analyses_as_delivered(
+def test_mark_analyses_as_delivered_success(
     valid_google_credentials: IDTokenCredentials,
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
@@ -158,10 +159,13 @@ def test_mark_analyses_as_delivered(
     # GIVEN a Trailblazer API
     tb_api = TrailblazerAPI(config=valid_trailblazer_config)
 
-    patch_call = mocker.patch.object(requests, "patch")
+    response = Response()
+    response.status_code = 200
+    response._content = json.dumps({"key": "value"}).encode("utf-8")
+    patch_call = mocker.patch.object(requests, "patch", return_value=response)
 
     # WHEN marking analyses as delivered
-    tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])
+    tb_response: Response = tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])
 
     # THEN the expected request should have been sent
     expected_request = {
@@ -175,6 +179,41 @@ def test_mark_analyses_as_delivered(
     patch_call.assert_called_once_with(
         url=f"{tb_api.host}/analyses",
         headers={"Authorization": f"Bearer {valid_google_credentials.token}"},
+        json=expected_request,
+    )
+
+    # THEN the response should be returned
+    assert tb_response == response
+
+
+def test_mark_analyses_as_delivered_with_forward_token(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a Trailblazer API
+    tb_api = TrailblazerAPI(config=valid_trailblazer_config)
+
+    patch_call = mocker.patch.object(requests, "patch")
+
+    # WHEN marking analyses as delivered
+    tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3], auth_token="auth_token")
+
+    # THEN the expected request should have been sent
+    expected_request = {
+        "analyses": [
+            {"id": 1, "is_delivered": True},
+            {"id": 2, "is_delivered": True},
+            {"id": 3, "is_delivered": True},
+        ]
+    }
+
+    patch_call.assert_called_once_with(
+        url=f"{tb_api.host}/analyses",
+        headers={
+            "Authorization": f"Bearer {valid_google_credentials.token}",
+            "X-On-Behalf-Of": "auth_token",
+        },
         json=expected_request,
     )
 

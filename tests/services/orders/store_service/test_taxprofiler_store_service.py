@@ -32,9 +32,11 @@ def test_store_taxprofiler_order_data_in_status_db(
     db_samples: list[Sample] = store_to_submit_and_validate_orders._get_query(table=Sample).all()
     assert set(new_samples) == set(db_samples)
 
-    # THEN the samples should have the correct application tag
+    # THEN the samples should have the correct application tag and should be set to deliver
     for sample in db_samples:
         assert sample.application_version.application.tag in ["METWPFR030"]
+        assert len(sample.links) == 1
+        assert sample.links[0].should_deliver_sample
 
     # THEN the order should be stored
     assert store_to_submit_and_validate_orders.get_order_by_ticket_id(ticket_id_as_int)

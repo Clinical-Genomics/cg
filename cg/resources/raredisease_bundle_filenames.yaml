@@ -270,7 +270,7 @@
   tag: call_snv_mt
 - format: vcf
   id: CASEID
-  path: PATHTOCASE/call_snv/mitochondria/CASEID_mitochondria.vcf.gz
+  path: PATHTOCASE/call_snv/mitochondria/CASEID_mitochondria.vcf.gz.tbi
   step: call_snv_mt
   tag: call_snv_mt_index
 - format: vcf

@@ -1,3 +1,5 @@
+from unittest.mock import Mock, create_autospec
+
 import pytest
 
 from cg.models.orders.constants import OrderType
@@ -15,6 +17,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     InvalidConcentrationIfSkipRCError,
     InvalidVolumeError,
     MissingSourceCommentError,
+    NormalSampleNotAllowedError,
     OccupiedWellError,
     SampleDoesNotExistError,
     SampleNameAlreadyExistsError,
@@ -25,6 +28,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     StatusUnknownError,
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
+    TumourValueResetError,
     VolumeRequiredError,
     WellFormatError,
     WellPositionMissingError,
@@ -33,11 +37,16 @@ from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
+from cg.services.orders.validation.order_types.rna_fusion.constants import RNAFusionDeliveryType
+from cg.services.orders.validation.order_types.rna_fusion.models.case import RNAFusionCase
+from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
+from cg.services.orders.validation.order_types.rna_fusion.models.sample import RNAFusionSample
 from cg.services.orders.validation.order_types.tomte.constants import TomteDeliveryType
 from cg.services.orders.validation.order_types.tomte.models.case import TomteCase
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
 from cg.services.orders.validation.rules.case_sample.rules import (
+    reset_tumour_values_to_true,
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,
@@ -48,6 +57,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_container_name_required,
     validate_existing_samples_belong_to_collaboration,
     validate_existing_samples_compatible_with_order_type,
+    validate_existing_samples_not_normal,
     validate_not_all_samples_unknown_in_case,
     validate_sample_names_available,
     validate_sample_names_different_from_case_names,
@@ -726,3 +736,60 @@ def test_validate_source_comment_required():
 
     # THEN the error should be the expected error
     assert errors[0] == MissingSourceCommentError(case_index=0, sample_index=0)
+
+
+def test_validate_existing_samples_not_normal():
+    # GIVEN an RNAFusion order containing an existing sample
+    rna_fusion_sample = ExistingSample(internal_id="rna-fusion-id")  # pyright: ignore
+    rna_fusion_case = RNAFusionCase(name="rna-fusion-case", samples=[rna_fusion_sample])
+    rna_fusion_order = RNAFusionOrder(
+        cases=[rna_fusion_case],
+        customer="cust000",
+        project_type=OrderType.RNAFUSION,
+        name="rna-fusion-order",
+        delivery_type=RNAFusionDeliveryType.ANALYSIS_SCOUT,
+    )
+
+    # GIVEN that the existing sample in the order is a normal sample in the database
+    status_db: Store = create_autospec(Store)
+    status_db.get_sample_by_internal_id = Mock(
+        return_value=create_autospec(Sample, is_tumour=False)
+    )
+
+    # WHEN validating that the order's existing samples are all tumour samples
+    errors: list[NormalSampleNotAllowedError] = validate_existing_samples_not_normal(
+        order=rna_fusion_order, store=status_db
+    )
+
+    # THEN an error should be returned
+    assert errors
+
+
+def test_tumour_value_reset():
+    # GIVEN an RNAFusion order containing a new normal sample
+    rna_fusion_sample = RNAFusionSample(
+        application="rnatag",
+        container=ContainerEnum.tube,
+        name="rna-fusion-sample",
+        sex=SexEnum.female,
+        source="blood",
+        subject_id="rna-subject",
+        tumour=False,
+    )
+    rna_fusion_case = RNAFusionCase(name="rna-fusion-case", samples=[rna_fusion_sample])
+    rna_fusion_order = RNAFusionOrder(
+        cases=[rna_fusion_case],
+        customer="cust000",
+        project_type=OrderType.RNAFUSION,
+        name="rna-fusion-order",
+        delivery_type=RNAFusionDeliveryType.ANALYSIS_SCOUT,
+    )
+
+    # WHEN validating that the new samples are all tumour samples
+    errors: list[TumourValueResetError] = reset_tumour_values_to_true(order=rna_fusion_order)
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the sample should have tumour status True
+    assert rna_fusion_sample.tumour

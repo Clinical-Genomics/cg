@@ -4,9 +4,10 @@ from click.testing import CliRunner
 
 from cg.cli.add import add
 from cg.constants import EXIT_FAIL
+from cg.constants.process import EXIT_PARSE_ERROR
 from cg.constants.subject import Sex
 from cg.models.cg_config import CGConfig
-from cg.store.models import CaseSample
+from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -23,7 +24,9 @@ def test_add_relationship_required(cli_runner: CliRunner, base_context: CGConfig
 
     # WHEN adding a relationship
     result = cli_runner.invoke(
-        add, ["relationship", case_id, sample_id, "-s", status], obj=base_context
+        add,
+        ["relationship", case_id, sample_id, "-s", status, "--should-deliver-sample", True],
+        obj=base_context,
     )
 
     # THEN it should be added
@@ -46,13 +49,7 @@ def test_add_relationship_bad_sample(cli_runner: CliRunner, base_context: CGConf
     status = "affected"
     result = cli_runner.invoke(
         add,
-        [
-            "relationship",
-            case_id,
-            sample_id,
-            "-s",
-            status,
-        ],
+        ["relationship", case_id, sample_id, "-s", status, "--should-deliver-sample", True],
         obj=base_context,
     )
 
@@ -73,13 +70,7 @@ def test_add_relationship_bad_family(cli_runner: CliRunner, base_context: CGConf
     status = "affected"
     result = cli_runner.invoke(
         add,
-        [
-            "relationship",
-            case_id,
-            sample_id,
-            "-s",
-            status,
-        ],
+        ["relationship", case_id, sample_id, "-s", status, "--should-deliver-sample", True],
         obj=base_context,
     )
 
@@ -102,13 +93,7 @@ def test_add_relationship_bad_status(cli_runner: CliRunner, base_context: CGConf
 
     result = cli_runner.invoke(
         add,
-        [
-            "relationship",
-            case_id,
-            sample_id,
-            "-s",
-            status,
-        ],
+        ["relationship", case_id, sample_id, "-s", status, "--should-deliver-sample", True],
         obj=base_context,
     )
 
@@ -142,6 +127,8 @@ def test_add_relationship_mother(
             status,
             "-m",
             mother_id,
+            "--should-deliver-sample",
+            False,
         ],
         obj=base_context,
     )
@@ -177,6 +164,8 @@ def test_add_relationship_bad_mother(
             status,
             "-m",
             mother_id,
+            "--should-deliver-sample",
+            False,
         ],
         obj=base_context,
     )
@@ -214,6 +203,8 @@ def test_add_relationship_father(
             status,
             "-f",
             father_id,
+            "--should-deliver-sample",
+            False,
         ],
         obj=base_context,
     )
@@ -251,6 +242,8 @@ def test_add_relationship_bad_father(
             status,
             "-f",
             father_id,
+            "--should-deliver-sample",
+            False,
         ],
         obj=base_context,
     )
@@ -287,6 +280,8 @@ def test_add_relationship_mother_not_female(
             status,
             "-m",
             male_mother_id,
+            "--should-deliver-sample",
+            False,
         ],
         obj=base_context,
     )
@@ -323,6 +318,8 @@ def test_add_relationship_father_not_male(
             status,
             "-f",
             female_father_id,
+            "--should-deliver-sample",
+            False,
         ],
         obj=base_context,
     )
@@ -330,3 +327,25 @@ def test_add_relationship_father_not_male(
     # THEN it should fail because the father is not male
     assert result.exit_code == EXIT_FAIL
     assert disk_store._get_query(table=CaseSample).count() == 0
+
+
+def test_add_relationship_missing_should_deliver_sample(
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
+):
+    # GIVEN a database with a sample and a case
+    disk_store: Store = base_context.status_db
+    sample = helpers.add_sample(disk_store)
+    sample_id = sample.internal_id
+    case = helpers.add_case(disk_store)
+    case_id = case.internal_id
+    status = "affected"
+
+    # WHEN adding a relationship without a value for should_deliver_sample
+    result = cli_runner.invoke(
+        add,
+        ["relationship", case_id, sample_id, "-s", status],
+        obj=base_context,
+    )
+
+    # THEN assert that the command fails
+    assert result.exit_code == EXIT_PARSE_ERROR

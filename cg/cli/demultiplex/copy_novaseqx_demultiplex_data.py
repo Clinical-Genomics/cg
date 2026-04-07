@@ -3,17 +3,18 @@ import os
 import shutil
 from pathlib import Path
 
+from cg.apps.demultiplex.sample_sheet.utils import add_and_include_sample_sheet_path_to_housekeeper
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.tb import TrailblazerAPI
+from cg.constants.constants import Workflow
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.priority import TrailblazerPriority
+from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.io.csv import read_csv, write_csv
 
 LOG = logging.getLogger(__name__)
 
 NANOPORE_SEQUENCING_SUMMARY_PATTERN: str = r"final_summary_*.txt"
-
-
-def is_demultiplexing_copied(analysis_directory: Path) -> bool:
-    """Determine whether the demultiplexing has been copied for the latest analysis for a Novaseqx flow cell."""
-    return Path(analysis_directory, DemultiplexingDirsAndFiles.COPY_COMPLETE).exists()
 
 
 def is_flow_cell_demultiplexed(analysis_directory: Path) -> bool:
@@ -35,7 +36,7 @@ def get_latest_analysis_path(flow_cell_dir: Path) -> Path | None:
     Get the latest analysis directory for a Novaseqx flow cell.
     The latest analysis directory is the one with the highest integer name.
     """
-    analysis_path: Path = Path(flow_cell_dir, DemultiplexingDirsAndFiles.ANALYSIS)
+    analysis_path: Path = Path(flow_cell_dir, DemultiplexingDirsAndFiles.ONBOARD_ANALYSIS)
     if not analysis_path.exists():
         return None
     analysis_versions: list[Path] = get_sorted_analysis_versions(analysis_path)
@@ -54,11 +55,6 @@ def get_sorted_analysis_versions(analysis_path: Path) -> list[Path]:
     return sorted(analysis_versions_paths, key=sort_by_name, reverse=True)
 
 
-def is_queued_for_post_processing(flow_cell_dir: Path) -> bool:
-    """Determine whether the flow cell is queued for post processing."""
-    return Path(flow_cell_dir, DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING).exists()
-
-
 def hardlink_flow_cell_analysis_data(flow_cell_dir: Path, demultiplexed_runs_dir: Path) -> None:
     """Create hardlinks to the latest version of the analysis data for a Novaseqx flow cell."""
     analysis_path: Path = get_latest_analysis_path(flow_cell_dir)
@@ -72,24 +68,20 @@ def mark_as_demultiplexed(flow_cell_dir: Path) -> None:
     Path(flow_cell_dir, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
 
 
-def mark_flow_cell_as_queued_for_post_processing(flow_cell_dir: Path) -> None:
-    """Create the queued_for_post_processing.txt file in the specified flow cell directory."""
-    Path(flow_cell_dir, DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING).touch()
-
-
 def hardlink_tree(src: Path, dst: Path) -> None:
     """Create hardlinks to the specified source directory in the specified destination directory."""
     shutil.copytree(src=src, dst=dst, copy_function=os.link)
 
 
-def is_ready_for_post_processing(flow_cell_dir: Path, demultiplexed_runs_dir: Path) -> bool:
+def is_ready_to_copy_to_demultiplexed_runs(
+    flow_cell_dir: Path, demultiplexed_runs_dir: Path
+) -> bool:
     """
-    Determine whether the flow cell is ready for post processing.
-    The flow cell is ready for post processing if:
-    - the demultiplexing has been copied
-    - the flow cell has been demultiplexed
-    - the flow cell is not in the demultiplexed runs directory
-    - the flow cell is not queued for post processing
+    Determine whether a NovaSeqX flow cell is ready to be hard-linked into the demultiplexed-runs directory.
+    All three conditions must be met:
+    - Sync of data is confirmed (CopyComplete.txt at the flow cell root, written by confirm-sequencing-run-sync)
+    - on-instrument BCLConvert demultiplexing has completed
+    - the flow cell has not already been copied to demultiplexed-runs
     """
     analysis_path: Path = get_latest_analysis_path(flow_cell_dir)
 
@@ -99,8 +91,8 @@ def is_ready_for_post_processing(flow_cell_dir: Path, demultiplexed_runs_dir: Pa
 
     flow_cell_is_ready: bool = True
 
-    if not is_demultiplexing_copied(analysis_path):
-        LOG.debug(f"Demultiplexing has not been copied for flow cell {flow_cell_dir.name}.")
+    if not is_flow_cell_sync_confirmed(flow_cell_dir):
+        LOG.debug(f"Sync has not been confirmed for flow cell {flow_cell_dir.name}.")
         flow_cell_is_ready = False
     if not is_flow_cell_demultiplexed(analysis_path):
         LOG.debug(f"Flow cell {flow_cell_dir.name} has not been demultiplexed.")
@@ -110,10 +102,6 @@ def is_ready_for_post_processing(flow_cell_dir: Path, demultiplexed_runs_dir: Pa
         flow_cell_name=flow_cell_dir.name, demultiplexed_runs=demultiplexed_runs_dir
     ):
         LOG.debug(f"Flow cell {flow_cell_dir.name} is already in the demultiplexed runs directory.")
-        flow_cell_is_ready = False
-
-    if is_queued_for_post_processing(flow_cell_dir):
-        LOG.debug(f"Flow cell {flow_cell_dir.name} is already queued for post processing.")
         flow_cell_is_ready = False
 
     return flow_cell_is_ready
@@ -149,6 +137,15 @@ def is_syncing_complete(source_directory: Path, target_directory: Path) -> bool:
         return False
 
     files_at_source: list[Path] = parse_manifest_file(existing_manifest_file)
+
+    analysis_path: Path | None = get_latest_analysis_path(source_directory)
+    if analysis_path:
+        analysis_manifest: Path | None = get_existing_manifest_file(analysis_path)
+        if analysis_manifest:
+            analysis_prefix: Path = analysis_path.relative_to(source_directory)
+            analysis_files: list[Path] = parse_manifest_file(analysis_manifest)
+            files_at_source.extend(Path(analysis_prefix, f) for f in analysis_files)
+
     return are_all_files_synced(files_at_source=files_at_source, target_directory=target_directory)
 
 
@@ -217,3 +214,34 @@ def is_file_relevant_for_demultiplexing(file: Path) -> bool:
         if relevant_directory in file.parts:
             return True
     return False
+
+
+def link_onboard_demultiplexed_flow_cell(
+    sequencing_run_dir: Path,
+    demultiplexed_runs_dir: Path,
+    flow_cell_id: str,
+    hk_api: HousekeeperAPI,
+    tb_api: TrailblazerAPI,
+) -> None:
+    """Hard-link an on-instrument demultiplexed NovaSeqX flow cell into demultiplexed-runs and notify downstream systems."""
+    hardlink_flow_cell_analysis_data(
+        flow_cell_dir=sequencing_run_dir, demultiplexed_runs_dir=demultiplexed_runs_dir
+    )
+    demultiplexed_runs_flow_cell_dir: Path = Path(demultiplexed_runs_dir, sequencing_run_dir.name)
+    mark_as_demultiplexed(demultiplexed_runs_flow_cell_dir)
+
+    analysis_path: Path = get_latest_analysis_path(sequencing_run_dir)
+    add_and_include_sample_sheet_path_to_housekeeper(
+        flow_cell_directory=Path(analysis_path, DemultiplexingDirsAndFiles.DATA),
+        flow_cell_name=flow_cell_id,
+        hk_api=hk_api,
+    )
+    tb_api.add_pending_analysis(
+        case_id=flow_cell_id,
+        analysis_type=AnalysisType.OTHER,
+        config_path="",
+        out_dir=demultiplexed_runs_flow_cell_dir.as_posix(),
+        priority=TrailblazerPriority.HIGH,
+        workflow=Workflow.DEMULTIPLEX,
+    )
+    tb_api.set_analysis_status(case_id=flow_cell_id, status=AnalysisStatus.COMPLETED)

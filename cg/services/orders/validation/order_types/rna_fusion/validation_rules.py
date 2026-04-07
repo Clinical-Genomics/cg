@@ -8,6 +8,7 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_one_sample_per_case,
 )
 from cg.services.orders.validation.rules.case_sample.rules import (
+    reset_tumour_values_to_true,
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,
@@ -18,6 +19,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_container_name_required,
     validate_existing_samples_belong_to_collaboration,
     validate_existing_samples_compatible_with_order_type,
+    validate_existing_samples_not_normal,
     validate_sample_names_different_from_case_names,
     validate_sample_names_not_repeated,
     validate_samples_exist,
@@ -42,6 +44,7 @@ RNAFUSION_CASE_RULES: list[Callable] = [
 ]
 
 RNAFUSION_CASE_SAMPLE_RULES: list[Callable] = [
+    reset_tumour_values_to_true,
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,
@@ -50,8 +53,9 @@ RNAFUSION_CASE_SAMPLE_RULES: list[Callable] = [
     validate_concentration_interval_if_skip_rc,
     validate_concentration_required_if_skip_rc,
     validate_container_name_required,
-    validate_existing_samples_compatible_with_order_type,
     validate_existing_samples_belong_to_collaboration,
+    validate_existing_samples_compatible_with_order_type,
+    validate_existing_samples_not_normal,
     validate_samples_exist,
     validate_sample_names_different_from_case_names,
     validate_sample_names_not_repeated,
