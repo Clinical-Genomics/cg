@@ -130,12 +130,13 @@ class TrailblazerConfig(BaseModel):
 
 
 class StatinaConfig(BaseModel):
-    host: str | None = None
-    user: str
-    key: str
     api_url: str
-    upload_path: str
     auth_path: str
+    default_data_set: str
+    host: str | None = None
+    key: str
+    upload_path: str
+    user: str
 
 
 class CommonAppConfig(BaseModel):

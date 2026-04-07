@@ -2273,6 +2273,7 @@ def context_config(
         "statina": {
             "api_url": "api_url",
             "auth_path": "auth_path",
+            "default_data_set": "novaseqx_data_set",
             "host": "http://localhost:28002",
             "key": "key",
             "upload_path": "upload_path",
