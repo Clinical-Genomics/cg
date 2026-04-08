@@ -44,6 +44,7 @@ def delivery_report_context(
     mocker.patch.object(LimsAPI, "get_sample_dv200", return_value=75.0)
     mocker.patch.object(LimsAPI, "get_latest_rna_input_amount", return_value=300.0)
     mocker.patch.object(LimsAPI, "get_sample_rin", return_value=10)
+    mocker.patch.object(LimsAPI, "get_latest_input_amount", return_value=10.0)
     return cg_context
 
 
