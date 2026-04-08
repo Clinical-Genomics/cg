@@ -443,7 +443,7 @@ class LimsAPI(Lims, OrderHandler):
         return initial_qc
 
     def _get_rna_input_amounts(self, sample_id: str) -> list[tuple[datetime, float]]:
-        """Return all prep input amounts used for an RNA sample in lims."""
+        """Return all prep input amounts used for an RNA sample in LIMS."""
         step_names_udfs: dict[str] = MASTER_STEPS_UDFS["rna_prep_step"]
         input_amounts: list[tuple[datetime, float]] = []
         try:
@@ -467,21 +467,14 @@ class LimsAPI(Lims, OrderHandler):
         return input_amounts
 
     def get_latest_input_amount(self, sample_id: str, sample_type: str) -> float:
-        steps: dict = MASTER_STEPS_UDFS["input_amounts"][sample_type]
-        latest_date: date | None = None
-        latest_input_amount: float | None = None
-        for step, udf_key in steps.items():
-            input_amount_artifact: Artifact = self.get_latest_artifact_for_sample(
-                sample_internal_id=sample_id, process_type=step
-            )
-            if not latest_date or input_amount_artifact.parent_process.date_run > latest_date:
-                latest_input_amount = input_amount_artifact.udf[udf_key]
-                latest_date = input_amount_artifact.parent_process.date_run
-                latest_step = step
+        """Return the latest input amount for a DNA sample in LIMS."""
+        step, udf_key = MASTER_STEPS_UDFS["input_amounts"][sample_type].items()
+        input_amount_artifact: Artifact = self.get_latest_artifact_for_sample(
+            sample_internal_id=sample_id, process_type=step
+        )
+        latest_input_amount: float | None = input_amount_artifact.udf[udf_key]
         if not latest_input_amount:
-            raise LimsDataError(
-                f"No input amount found for sample {sample_id} in step {latest_step}."
-            )
+            raise LimsDataError(f"No input amount found for sample {sample_id} in step {step}.")
         return latest_input_amount
 
     def _get_last_used_input_amount(
