@@ -54,6 +54,7 @@ class MipDNADeliveryReportAPI(DeliveryReportAPI):
             duplicates=parsed_metrics.duplicate_reads,
             sex=parsed_metrics.predicted_sex,
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
+            input_amount=self._get_input_amount(sample=sample),
             mapped_reads=parsed_metrics.mapped_reads,
             mean_target_coverage=sample_coverage.get("mean_coverage"),
             million_read_pairs=get_million_read_pairs(sample.reads),
@@ -157,3 +158,13 @@ class MipDNADeliveryReportAPI(DeliveryReportAPI):
             LOG.info(f"No files were found for the following Scout key: {scout_key}")
             return None
         return uploaded_files[0].full_path
+
+    def _get_input_amount(self, sample: Sample) -> float:
+        """Return the input amount based on the sample's prep category."""
+        if sample.prep_category == "wgs":
+            sample_type = "wgs"
+        else:
+            sample_type = "tgs"  # TGS and WES use same input amount field in LIMS
+        return self.lims_api.get_latest_input_amount(
+            sample_id=sample.internal_id, sample_type=sample_type
+        )

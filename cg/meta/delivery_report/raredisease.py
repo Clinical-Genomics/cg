@@ -48,6 +48,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
             bait_set=self.lims_api.capture_kit(sample.internal_id),
             duplicates=round(sample_metrics.percent_duplication * 100, 2),
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
+            input_amount=self._get_input_amount(sample=sample),
             mapped_reads=round((sample_metrics.picard_pct_pf_reads_aligned) * 100, 2),
             mean_target_coverage=coverage_metrics.mean_coverage if coverage_metrics else None,
             million_read_pairs=get_million_read_pairs(sample.reads),
@@ -122,3 +123,13 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
             ),
         )
         return report_required_fields.model_dump()
+
+    def _get_input_amount(self, sample: Sample) -> float:
+        """Return the input amount based on the sample's prep category."""
+        if sample.prep_category == "wgs":
+            sample_type = "wgs"
+        else:
+            sample_type = "tgs"  # TGS and WES use same input amount field in LIMS
+        return self.lims_api.get_latest_input_amount(
+            sample_id=sample.internal_id, sample_type=sample_type
+        )

@@ -19,11 +19,13 @@ class SampleMetadataModel(BaseModel):
         duplicates: fraction of mapped sequence that is marked as duplicate; source: workflow
         million_read_pairs: number of million read pairs obtained; source: StatusDB/sample/reads (/2*10^6)
         initial_qc: initial QC protocol flag; source: LIMS
+        input_amount: input amount in ng; source: LIMS
     """
 
     duplicates: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     million_read_pairs: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     initial_qc: Annotated[str, BeforeValidator(get_initial_qc_as_string)] = NA_FIELD
+    input_amount: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
 
 
 class MipDNASampleMetadataModel(SampleMetadataModel):
@@ -161,7 +163,7 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
 
     bias_5_3: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     dv200: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    input_amount: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    # input_amount: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     mrna_bases: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_adapter: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_surviving: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD

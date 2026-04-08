@@ -45,6 +45,9 @@ class NalloDeliveryReportAPI(DeliveryReportAPI):
         )
         return NalloSampleMetadataModel(
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
+            input_amount=self.lims_api.get_latest_input_amount(
+                sample_id=sample.internal_id, sample_type="revio"
+            ),
             avg_sequence_length=sample_metrics.avg_sequence_length,
             coverage_bases=sample_metrics.coverage_bases / 1_000_000_000,
             duplicates=sample_metrics.percent_duplicates,

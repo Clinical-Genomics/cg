@@ -73,10 +73,6 @@ MASTER_STEPS_UDFS = {
         },
         "tgs": {"Aliquot samples for enzymatic fragmentation TWIST v2": "Amount needed (ng)"},
         "wgs": {"Aliquot samples for WGS v1": "Amount needed (ng)"},
-        "wts": {
-            "Aliquot Samples for Fragmentation (RNA) v1": "Amount needed (ng)",
-            "Aliquot Samples for RNA Depletion v1": "Amount needed (ng)",
-        },
     },
     "prep_method_step": {
         "Library Preparation (Cov) v1": {

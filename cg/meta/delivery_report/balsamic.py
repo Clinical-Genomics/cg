@@ -54,12 +54,14 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
             return self.get_wgs_metadata(
                 million_read_pairs=million_read_pairs,
                 passed_initial_qc=passed_initial_qc,
+                sample_id=sample.internal_id,
                 sample_metrics=sample_metrics,
             )
         return self.get_panel_metadata(
             analysis_metadata=analysis_metadata,
             million_read_pairs=million_read_pairs,
             passed_initial_qc=passed_initial_qc,
+            sample_id=sample.internal_id,
             sample_metrics=sample_metrics,
         )
 
@@ -67,6 +69,7 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
         self,
         million_read_pairs: float,
         passed_initial_qc: bool | None,
+        sample_id: str,
         sample_metrics: BalsamicTargetedQCMetrics,
         analysis_metadata: BalsamicAnalysis,
     ) -> BalsamicTargetedSampleMetadataModel:
@@ -75,6 +78,9 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
             analysis_metadata.balsamic_config.panel.capture_kit
         )
         bed: Bed = self.status_db.get_bed_by_entry_id(bed_version.bed_id) if bed_version else None
+        input_amount: float = self.lims_api.get_latest_input_amount(
+            sample_id=sample_id, sample_type="tgs"
+        )
         return BalsamicTargetedSampleMetadataModel(
             bait_set=bed.name if bed else None,
             bait_set_version=analysis_metadata.balsamic_config.panel.capture_kit_version,
@@ -82,6 +88,7 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
             gc_dropout=sample_metrics.gc_dropout if sample_metrics else None,
             initial_qc=passed_initial_qc,
+            input_amount=input_amount,
             mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
             median_target_coverage=(
                 sample_metrics.median_target_coverage if sample_metrics else None
@@ -92,17 +99,22 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
             predicted_sex=sample_metrics.compare_predicted_to_given_sex if sample_metrics else None,
         )
 
-    @staticmethod
     def get_wgs_metadata(
+        self,
         million_read_pairs: float,
         passed_initial_qc: bool | None,
+        sample_id: str,
         sample_metrics: BalsamicWGSQCMetrics,
     ) -> BalsamicWGSSampleMetadataModel:
         """Return report metadata for Balsamic WHOLE_GENOME_SEQUENCING analysis."""
+        input_amount: float = self.lims_api.get_latest_input_amount(
+            sample_id=sample_id, sample_type="wgs"
+        )
         return BalsamicWGSSampleMetadataModel(
             duplicates=sample_metrics.percent_duplication if sample_metrics else None,
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
             initial_qc=passed_initial_qc,
+            input_amount=input_amount,
             mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
             median_coverage=sample_metrics.median_target_coverage if sample_metrics else None,
             million_read_pairs=million_read_pairs,
