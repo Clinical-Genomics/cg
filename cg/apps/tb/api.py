@@ -83,6 +83,12 @@ class TrailblazerAPI:
 
         return {"Authorization": f"Bearer {self._credentials.token}"}
 
+    def _get_auth_headers(self, auth_token: str | None) -> dict[str, str]:
+        if auth_token:
+            return self.auth_header | {"X-On-Behalf-Of": auth_token}
+        else:
+            return self.auth_header
+
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST
     ) -> Any:
@@ -211,14 +217,18 @@ class TrailblazerAPI:
         response_data = SummariesResponse.model_validate(response)
         return response_data.summaries
 
-    def mark_analyses_as_delivered(self, trailblazer_ids: list[int]) -> Response:
+    def mark_analyses_as_delivered(
+        self, trailblazer_ids: list[int], auth_token: str | None = None
+    ) -> Response:
         analysis_dicts = []
         for trailblazer_id in trailblazer_ids:
             analysis_dict = {"id": trailblazer_id, "is_delivered": True}
             analysis_dicts.append(analysis_dict)
         LOG.info(f"Setting analyses {trailblazer_ids} as delivered in Trailblazer")
         response: Response = requests.patch(
-            json={"analyses": analysis_dicts}, headers=self.auth_header, url=f"{self.host}/analyses"
+            json={"analyses": analysis_dicts},
+            headers=self._get_auth_headers(auth_token=auth_token),
+            url=f"{self.host}/analyses",
         )
         if not response.ok:
             raise TrailblazerAPIHTTPError(response.reason)
