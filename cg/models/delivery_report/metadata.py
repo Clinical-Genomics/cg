@@ -163,7 +163,6 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
 
     bias_5_3: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     dv200: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    # input_amount: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     mrna_bases: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_adapter: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_surviving: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
