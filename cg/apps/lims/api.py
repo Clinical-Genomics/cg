@@ -468,7 +468,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_latest_input_amount(self, sample_id: str, sample_type: str) -> float:
         """Return the latest input amount for a DNA sample in LIMS."""
-        step, udf_key = MASTER_STEPS_UDFS["input_amounts"][sample_type].items()
+        ((step, udf_key),) = MASTER_STEPS_UDFS["input_amounts"][sample_type].items()
         input_amount_artifact: Artifact = self.get_latest_artifact_for_sample(
             sample_internal_id=sample_id, process_type=step
         )
