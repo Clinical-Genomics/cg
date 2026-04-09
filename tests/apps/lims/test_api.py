@@ -199,6 +199,7 @@ def test_get_latest_artifact_from_list(minimal_lims_api: LimsAPI):
     ],
     ids=["WGS sample", "TGS sample", "Revio sample"],
 )
+# TODO: Update this test
 def test_get_latest_input_amount_success(
     minimal_lims_api: LimsAPI, sample_type: str, step_name: str, mocker: MockerFixture
 ):

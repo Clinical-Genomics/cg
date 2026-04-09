@@ -442,9 +442,10 @@ class LimsAPI(Lims, OrderHandler):
         initial_qc: bool | None = eval(initial_qc_udf) if initial_qc_udf else None
         return initial_qc
 
+    # TODO: deprecate this, use get_input_amount instead
     def _get_rna_input_amounts(self, sample_id: str) -> list[tuple[datetime, float]]:
         """Return all prep input amounts used for an RNA sample in LIMS."""
-        step_names_udfs: dict[str, str] = MASTER_STEPS_UDFS["rna_prep_step"]
+        step_names_udfs: dict[str, str] = MASTER_STEPS_UDFS["input_amounts"]["wts"]
         input_amounts: list[tuple[datetime, float]] = []
         try:
             for process_type in step_names_udfs:
@@ -457,15 +458,14 @@ class LimsAPI(Lims, OrderHandler):
                 udf_key: str = step_names_udfs[process_type]
                 for artifact in artifacts:
                     input_amounts.append(
-                        (
-                            artifact.parent_process.date_run,
-                            artifact.udf.get(udf_key),
-                        )
+                        artifact.parent_process.date_run,
+                        artifact.udf.get(udf_key),
                     )
         except HTTPError as error:
             LOG.warning(f"Sample {sample_id} not found in LIMS: {error}")
         return input_amounts
 
+    # TODO: Remove this method and replace its usages for get_input_amount
     def get_latest_input_amount(self, sample_id: str, sample_type: str) -> float:
         """Return the latest input amount for a DNA sample in LIMS."""
         ((step, udf_key),) = MASTER_STEPS_UDFS["input_amounts"][sample_type].items()
@@ -477,6 +477,38 @@ class LimsAPI(Lims, OrderHandler):
             raise LimsDataError(f"No input amount found for sample {sample_id} in step {step}.")
         return latest_input_amount
 
+    def _get_input_amounts_for_sample_and_type(
+        self, sample_id: str, sample_type: str
+    ) -> list[tuple[datetime, float]]:
+        """Return all input amounts for a given sample and sample type."""
+        step_names_udfs: dict[str, str] = MASTER_STEPS_UDFS["input_amounts"][sample_type]
+        input_amounts: list[tuple[datetime, float]] = []
+        for step_name, udf_key in step_names_udfs.items():
+            artifacts: list[Artifact] = self.get_artifacts(
+                samplelimsid=sample_id,
+                process_type=step_name,
+                type=LimsArtifactTypes.ANALYTE,
+            )
+            input_amounts.extend(
+                self._get_dated_input_amounts_from_artifacts(artifacts=artifacts, udf_key=udf_key)
+            )
+        return input_amounts
+
+    @staticmethod
+    def _get_dated_input_amounts_from_artifacts(
+        artifacts: list[Artifact], udf_key: str
+    ) -> list[tuple[datetime, float]]:
+        """Return a list of input amounts with their corresponding date from a list of artifacts."""
+        input_amounts: list[tuple[datetime, float]] = []
+        for artifact in artifacts:
+            input_amounts.append(
+                (
+                    artifact.parent_process.date_run,
+                    artifact.udf.get(udf_key),
+                )
+            )
+        return input_amounts
+
     def _get_last_used_input_amount(
         self, input_amounts: list[tuple[datetime, float]]
     ) -> float | None:
@@ -485,6 +517,21 @@ class LimsAPI(Lims, OrderHandler):
         if not sorted_input_amounts:
             return None
         return sorted_input_amounts[0][1]
+
+    # TODO: wrapp in HTTPError try/except
+    def get_input_amount(self, sample_id: str, sample_type: str) -> float | None:
+        """
+        Return the input amount used in the latest preparation of a sample.
+        Parameters:
+            sample_id: the internal ID of the sample in LIMS/StatusDB
+            sample_type: Possible valuers are "wgs", "tgs" (for both targeted and exome sequencing),
+            "revio" or "wts" (for any RNA prep).
+        """
+        input_amounts: list[tuple[datetime, float]] = self._get_input_amounts_for_sample_and_type(
+            sample_id=sample_id, sample_type=sample_type
+        )
+        input_amount: float | None = self._get_last_used_input_amount(input_amounts=input_amounts)
+        return input_amount
 
     def get_latest_rna_input_amount(self, sample_id: str) -> float | None:
         """Return the input amount used in the latest preparation of an RNA sample."""
