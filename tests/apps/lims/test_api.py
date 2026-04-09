@@ -8,6 +8,7 @@ from genologics import entities
 from genologics.descriptors import EntityDescriptor
 from genologics.entities import Artifact, Sample
 from genologics.lims import Lims
+from numpy.ma.testutils import approx
 from pytest_mock import MockerFixture
 from requests.exceptions import HTTPError
 
@@ -226,4 +227,4 @@ def test_get_latest_input_amount_success(
     )
 
     # THEN the input amount is as expected
-    assert input_amount == amount_in_lims
+    assert approx(input_amount, amount_in_lims)

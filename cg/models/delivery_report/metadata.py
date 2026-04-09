@@ -150,7 +150,6 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
     Attributes:
         bias_5_3: bias is the ratio between read counts; source: workflow
         dv200: percentage of RNA fragments > 200 nucleotides; source: LIMS
-        input_amount: input amount in ng; source: LIMS
         mrna_bases:  proportion of bases that originate from messenger RNA; source: workflow
         pct_adapter: proportion of reads that contain adapter sequences; source: workflow
         pct_surviving: percentage of reads that pass quality control filters; source: workflow
