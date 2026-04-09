@@ -444,7 +444,7 @@ class LimsAPI(Lims, OrderHandler):
 
     def _get_rna_input_amounts(self, sample_id: str) -> list[tuple[datetime, float]]:
         """Return all prep input amounts used for an RNA sample in LIMS."""
-        step_names_udfs: dict[str] = MASTER_STEPS_UDFS["rna_prep_step"]
+        step_names_udfs: dict[str, str] = MASTER_STEPS_UDFS["rna_prep_step"]
         input_amounts: list[tuple[datetime, float]] = []
         try:
             for process_type in step_names_udfs:

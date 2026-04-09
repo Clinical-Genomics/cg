@@ -176,6 +176,7 @@ REQUIRED_SAMPLE_TIMESTAMP_FIELDS: list[str] = [
 # Metadata required fields
 _REQUIRED_SAMPLE_METADATA_FIELDS: list[str] = [
     "duplicates",
+    # TODO: move input_amount here from WTS metadata?
     "initial_qc",
     "million_read_pairs",
 ]
