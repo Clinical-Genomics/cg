@@ -40,6 +40,7 @@ def get_nextflow_config_dict(
     def _make_dict(workflow: str) -> dict:
         return {
             "binary_path": nextflow_binary.as_posix(),
+            "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": f"S_{workflow}",
@@ -47,10 +48,10 @@ def get_nextflow_config_dict(
             "params": str(nf_analysis_pipeline_params_path),
             "config": str(nf_analysis_pipeline_config_path),
             "resources": str(nf_analysis_pipeline_resource_optimisation_path),
-            "launch_directory": Path("path", "to", "launchdir").as_posix(),
-            "workflow_bin_path": Path("workflow", "path").as_posix(),
+            "launch_directory": "path/to/launchdir",
+            "workflow_bin_path": "workflow/path",
             "profile": "myprofile",
-            "references": Path("path", "to", "references").as_posix(),
+            "references": "path/to/references",
             "repository": nextflow_repository,
             "revision": nextflow_pipeline_revision,
             "root": nextflow_root,

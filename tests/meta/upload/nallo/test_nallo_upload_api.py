@@ -54,6 +54,7 @@ def test_upload_succeeds():
             conda_binary="nallo_conda_binary",
             config="nallo_config",
             params="nallo_params",
+            pipeline_deliverables="nallo_deliverables.yaml",
             platform="nallo_platform",
             profile="nallo_profile",
             resources="nallo_resources",
