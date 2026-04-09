@@ -16,7 +16,6 @@ from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.rnafusion.rnafusion import RnafusionQCMetrics
-from cg.resources import RNAFUSION_BUNDLE_FILENAMES_PATH
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -32,20 +31,21 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
         workflow: Workflow = Workflow.RNAFUSION,
     ):
         super().__init__(config=config, workflow=workflow)
-        self.root_dir: str = config.rnafusion.root
-        self.workflow_bin_path: str = config.rnafusion.workflow_bin_path
-        self.profile: str = config.rnafusion.profile
-        self.conda_env: str = config.rnafusion.conda_env
+        self.account: str = config.rnafusion.slurm.account
         self.conda_binary: str = config.rnafusion.conda_binary
-        self.platform: str = config.rnafusion.platform
+        self.conda_env: str = config.rnafusion.conda_env
+        self.email: str = config.rnafusion.slurm.mail_user
         self.params: str = config.rnafusion.params
-        self.workflow_config_path: str = config.rnafusion.config
+        self.pipeline_deliverables = Path(config.rnafusion.pipeline_deliverables)
+        self.platform: str = config.rnafusion.platform
+        self.profile: str = config.rnafusion.profile
         self.resources: str = config.rnafusion.resources
+        self.revision: str = config.rnafusion.revision
+        self.root_dir: str = config.rnafusion.root
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.rnafusion.tower_workflow
-        self.account: str = config.rnafusion.slurm.account
-        self.email: str = config.rnafusion.slurm.mail_user
-        self.revision: str = config.rnafusion.revision
+        self.workflow_bin_path: str = config.rnafusion.workflow_bin_path
+        self.workflow_config_path: str = config.rnafusion.config
 
     @property
     def is_multiple_samples_allowed(self) -> bool:
@@ -55,11 +55,6 @@ class RnafusionAnalysisAPI(NfAnalysisAPI):
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a case. Currently fixed for hg38."""
         return GenomeVersion.HG38
-
-    @staticmethod
-    def get_bundle_filenames_path() -> Path:
-        """Return Rnafusion bundle filenames path."""
-        return RNAFUSION_BUNDLE_FILENAMES_PATH
 
     @staticmethod
     def ensure_mandatory_metrics_present(metrics: list[MetricsBase]) -> None:
