@@ -155,6 +155,9 @@ def test_store_available_success(
     # mock update_analysis_as_completed_statusdb so we can assert is was called
     mocker.patch.object(NfAnalysisAPI, "update_analysis_as_completed_statusdb")
 
+    # mock get_deliverables_template_content so that we don't need to parse a real file
+    mocker.patch.object(NfAnalysisAPI, "get_deliverables_template_content")
+
     # GIVEN that the Housekeeper store is empty
     context.housekeeper_api_ = real_housekeeper_api
     context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
@@ -219,6 +222,9 @@ def test_store_available_fail(
 
     # mock update_analysis_as_completed_statusdb so we can assert is was called
     mocker.patch.object(NfAnalysisAPI, "update_analysis_as_completed_statusdb")
+
+    # mock get_deliverables_template_content so that we don't need to parse a real file
+    mocker.patch.object(NfAnalysisAPI, "get_deliverables_template_content")
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")

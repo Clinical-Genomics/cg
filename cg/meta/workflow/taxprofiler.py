@@ -10,7 +10,6 @@ from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.models.taxprofiler.taxprofiler import TaxprofilerQCMetrics
-from cg.resources import TAXPROFILER_BUNDLE_FILENAMES_PATH
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -26,30 +25,26 @@ class TaxprofilerAnalysisAPI(NfAnalysisAPI):
         workflow: Workflow = Workflow.TAXPROFILER,
     ):
         super().__init__(config=config, workflow=workflow)
-        self.root_dir: str = config.taxprofiler.root
-        self.workflow_bin_path: str = config.taxprofiler.workflow_bin_path
-        self.profile: str = config.taxprofiler.profile
-        self.conda_env: str = config.taxprofiler.conda_env
+        self.account: str = config.taxprofiler.slurm.account
         self.conda_binary: str = config.taxprofiler.conda_binary
-        self.platform: str = config.taxprofiler.platform
+        self.conda_env: str = config.taxprofiler.conda_env
+        self.email: str = config.taxprofiler.slurm.mail_user
         self.params: str = config.taxprofiler.params
-        self.workflow_config_path: str = config.taxprofiler.config
+        self.pipeline_deliverables = Path(config.taxprofiler.pipeline_deliverables)
+        self.platform: str = config.taxprofiler.platform
+        self.profile: str = config.taxprofiler.profile
         self.resources: str = config.taxprofiler.resources
         self.revision: str = config.taxprofiler.revision
+        self.root_dir: str = config.taxprofiler.root
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.taxprofiler.tower_workflow
-        self.account: str = config.taxprofiler.slurm.account
-        self.email: str = config.taxprofiler.slurm.mail_user
+        self.workflow_bin_path: str = config.taxprofiler.workflow_bin_path
+        self.workflow_config_path: str = config.taxprofiler.config
 
     @property
     def is_multiqc_pattern_search_exact(self) -> bool:
         """Only exact pattern search is allowed to collect metrics information from multiqc file."""
         return True
-
-    @staticmethod
-    def get_bundle_filenames_path() -> Path:
-        """Return Taxprofiler bundle filenames path."""
-        return TAXPROFILER_BUNDLE_FILENAMES_PATH
 
     def get_multiqc_search_patterns(self, case_id: str) -> list[MultiQCSearchPattern]:
         """Return search patterns for MultiQC for Taxprofiler."""

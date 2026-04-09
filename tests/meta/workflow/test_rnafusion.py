@@ -35,6 +35,7 @@ def config() -> CGConfig:
             config="/path/to/nextflow.config",
             resources="/path/to/resources.yaml",
             launch_directory="/path/to/launch",
+            pipeline_deliverables="/path/to/pipeline_deliverables.yaml",
             profile="singularity",
             repository="https://repo",
             revision="3.0.1",
