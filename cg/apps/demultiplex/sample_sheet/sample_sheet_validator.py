@@ -7,8 +7,8 @@ from pydantic import ValidationError
 
 from cg.apps.demultiplex.sample_sheet.override_cycles_validator import OverrideCyclesValidator
 from cg.apps.demultiplex.sample_sheet.read_sample_sheet import (
-    get_samples_from_content,
     get_raw_samples_from_content,
+    get_samples_from_content,
     validate_samples_unique_per_lane,
 )
 from cg.apps.demultiplex.sample_sheet.sample_models import IlluminaSampleIndexSetting

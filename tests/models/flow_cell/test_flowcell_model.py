@@ -201,3 +201,66 @@ def test_has_demultiplexing_started_on_sequencer_false(
 
     # THEN the response should be False
     assert not has_demux_started
+
+
+def test_demultiplexing_started_at_on_instrument(
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
+):
+    """Test that demultiplexing_started_at reads the BCLConvert directory creation time for on-instrument runs."""
+    # GIVEN a flow cell with an on-instrument BCLConvert directory
+    flow_cell: IlluminaRunDirectoryData = IlluminaRunDirectoryData(
+        novaseqx_flow_cell_dir_with_analysis_data
+    )
+    analysis_path: Path = get_latest_analysis_path(novaseqx_flow_cell_dir_with_analysis_data)
+    bcl_convert_dir: Path = Path(
+        analysis_path, DemultiplexingDirsAndFiles.DATA, DemultiplexingDirsAndFiles.BCL_CONVERT
+    )
+    bcl_convert_dir.mkdir()
+
+    # WHEN getting the demultiplexing started timestamp
+    started_at = flow_cell.demultiplexing_started_at
+
+    # THEN a datetime is returned
+    assert started_at is not None
+
+
+def test_demultiplexing_started_at_on_instrument_missing_bcl_convert(
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
+):
+    """Test that demultiplexing_started_at returns None when BCLConvert directory is absent."""
+    # GIVEN a flow cell without a BCLConvert directory
+    flow_cell: IlluminaRunDirectoryData = IlluminaRunDirectoryData(
+        novaseqx_flow_cell_dir_with_analysis_data
+    )
+    analysis_path: Path = get_latest_analysis_path(novaseqx_flow_cell_dir_with_analysis_data)
+    assert not Path(
+        analysis_path, DemultiplexingDirsAndFiles.DATA, DemultiplexingDirsAndFiles.BCL_CONVERT
+    ).exists()
+
+    # WHEN getting the demultiplexing started timestamp
+    started_at = flow_cell.demultiplexing_started_at
+
+    # THEN None is returned (no demuxstarted.txt either)
+    assert started_at is None
+
+
+def test_demultiplexing_completed_at_on_instrument(
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
+):
+    """Test that demultiplexing_completed_at reads Secondary_Analysis_Complete.txt for on-instrument runs."""
+    # GIVEN a flow cell with an on-instrument BCLConvert directory and a completion marker
+    flow_cell: IlluminaRunDirectoryData = IlluminaRunDirectoryData(
+        novaseqx_flow_cell_dir_with_analysis_data
+    )
+    analysis_path: Path = get_latest_analysis_path(novaseqx_flow_cell_dir_with_analysis_data)
+    bcl_convert_dir: Path = Path(
+        analysis_path, DemultiplexingDirsAndFiles.DATA, DemultiplexingDirsAndFiles.BCL_CONVERT
+    )
+    bcl_convert_dir.mkdir()
+    # Secondary_Analysis_Complete.txt is already created by the fixture
+
+    # WHEN getting the demultiplexing completed timestamp
+    completed_at = flow_cell.demultiplexing_completed_at
+
+    # THEN a datetime is returned
+    assert completed_at is not None

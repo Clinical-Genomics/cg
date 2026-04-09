@@ -330,13 +330,14 @@ def novaseqx_latest_analysis_version() -> str:
 def add_novaseqx_analysis_data(novaseqx_flow_cell_directory: Path, analysis_version: str):
     """Add NovaSeqX analysis data to a flow cell directory."""
     analysis_path: Path = Path(
-        novaseqx_flow_cell_directory, DemultiplexingDirsAndFiles.ANALYSIS, analysis_version
+        novaseqx_flow_cell_directory, DemultiplexingDirsAndFiles.ONBOARD_ANALYSIS, analysis_version
     )
     analysis_path.mkdir(parents=True)
     analysis_path.joinpath(DemultiplexingDirsAndFiles.COPY_COMPLETE).touch()
     data = analysis_path.joinpath(DemultiplexingDirsAndFiles.DATA)
     data.mkdir()
     data.joinpath(DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED).touch()
+    data.joinpath(DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME).touch()
 
 
 @pytest.fixture(scope="function")
@@ -351,16 +352,6 @@ def novaseqx_flow_cell_dir_with_analysis_data(
 
 
 @pytest.fixture(scope="function")
-def post_processed_novaseqx_flow_cell(novaseqx_flow_cell_dir_with_analysis_data: Path) -> Path:
-    """Return the path to a NovaseqX flow cell that is post processed."""
-    Path(
-        novaseqx_flow_cell_dir_with_analysis_data,
-        DemultiplexingDirsAndFiles.QUEUED_FOR_POST_PROCESSING,
-    ).touch()
-    return novaseqx_flow_cell_dir_with_analysis_data
-
-
-@pytest.fixture(scope="function")
 def novaseqx_flow_cell_analysis_incomplete(
     tmp_novaseqx_flow_cell_directory: Path, novaseqx_latest_analysis_version: str
 ) -> Path:
@@ -370,12 +361,12 @@ def novaseqx_flow_cell_analysis_incomplete(
     """
     Path(
         tmp_novaseqx_flow_cell_directory,
-        DemultiplexingDirsAndFiles.ANALYSIS,
+        DemultiplexingDirsAndFiles.ONBOARD_ANALYSIS,
         novaseqx_latest_analysis_version,
     ).mkdir(parents=True)
     Path(
         tmp_novaseqx_flow_cell_directory,
-        DemultiplexingDirsAndFiles.ANALYSIS,
+        DemultiplexingDirsAndFiles.ONBOARD_ANALYSIS,
         novaseqx_latest_analysis_version,
         DemultiplexingDirsAndFiles.COPY_COMPLETE,
     ).touch()
