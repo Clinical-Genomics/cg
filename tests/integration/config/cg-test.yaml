@@ -113,6 +113,7 @@ raredisease:
       readcount_intervals: {test_root_dir}/richard/banankins
   launch_directory: {test_root_dir}/raredisease_launch_directory
   params: {test_root_dir}/raredisease_params.yaml
+  pipeline_deliverables: "raredisease_pipeline_deliverables.yaml"
   platform: {test_root_dir}/platform.config
   profile: raredisease_profile
   references_directory: {test_root_dir}/raredisease_references_directory
