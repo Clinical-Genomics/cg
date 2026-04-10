@@ -24,7 +24,6 @@ RAREDISEASE_METRIC_CONDITIONS_WES: dict[str, dict[str, Any]] = {
     "GC_DROPOUT": {"norm": "lt", "threshold": 10},
     RAREDISEASE_PREDICTED_SEX_METRIC: {"norm": "eq", "threshold": None},
     "gender": {"norm": "eq", "threshold": None},
-    "FREEMIX": {"norm": "lt", "threshold": 0.02},
 }
 
 RAREDISEASE_METRIC_CONDITIONS_WGS: dict[str, dict[str, Any]] = {

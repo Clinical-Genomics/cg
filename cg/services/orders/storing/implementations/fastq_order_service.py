@@ -59,7 +59,10 @@ class StoreFastqOrderService(StoreOrderService):
                     customer=db_order.customer,
                 )
                 case_sample: CaseSample = self.status_db.relate_sample(
-                    case=db_case, sample=db_sample, status=StatusEnum.unknown
+                    case=db_case,
+                    sample=db_sample,
+                    status=StatusEnum.unknown,
+                    should_deliver_sample=True,
                 )
                 self.status_db.add_multiple_items_to_store([db_sample, case_sample, db_case])
                 new_samples.append(db_sample)

@@ -105,7 +105,10 @@ def test_get_cases_with_extended_models(
 
     # GIVEN a database with a case with one of sequenced samples and completed analysis
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -148,7 +151,10 @@ def test_get_cases_with_samples_query(
 
     # GIVEN a database with a case with one of sequenced samples and completed analysis
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -199,7 +205,10 @@ def test_that_cases_can_have_many_samples(
 
     # GIVEN a database with a case with one sample sequenced sample
     link = base_store.relate_sample(
-        case=case_with_one, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=case_with_one,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -216,7 +225,7 @@ def test_that_cases_can_have_many_samples(
 
 def test_external_sample_to_re_analyse(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
-):
+) -> None:
     """Test that a case marked for re-analysis with one sample external not sequenced in-house and
     with completed analysis show up among the cases to analyze."""
 
@@ -231,12 +240,15 @@ def test_external_sample_to_re_analyse(
     )
     assert test_analysis.completed_at
 
-    # Given an action set to analyze
+    # GIVEN an action set to analyze
     test_analysis.case.action = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one not sequenced external sample
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -263,7 +275,10 @@ def test_new_external_case_not_in_result(base_store: Store, helpers: StoreHelper
 
     # GIVEN a database with a case with one externally sequenced sample for BALSAMIC analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -291,7 +306,10 @@ def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers, timestamp_
 
     # GIVEN a database with a case with one of the sequenced sample and completed analysis
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -322,7 +340,10 @@ def test_all_samples_and_analysis_completed(
 
     # GIVEN a database with a case with one of the sequenced sample and completed analysis
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -346,7 +367,10 @@ def test_specified_analysis_in_result(
 
     # GIVEN a database with a case with one sequenced sample for BALSAMIC analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -374,7 +398,10 @@ def test_exclude_other_workflow_analysis_from_result(
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
@@ -399,7 +426,10 @@ def test_one_of_one_sequenced_samples(
 
     # GIVEN a database with a case with a sequenced sample and no analysis
     link = base_store.relate_sample(
-        case=test_case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
     assert test_sample.last_sequenced_at is not None
@@ -559,12 +589,18 @@ def test_get_cases_for_analysis_filters_out_analysis_older_than_last_sequenced_s
 
     # GIVEN a database with a case with one sequenced sample for specified analysis
     link = base_store.relate_sample(
-        case=test_analysis.case, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_analysis.case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
     )
     base_store.session.add(link)
 
     link_2 = base_store.relate_sample(
-        case=test_case_to_be_analyzed, sample=test_sample, status=PhenotypeStatus.UNKNOWN
+        case=test_case_to_be_analyzed,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=False,
     )
     base_store.session.add(link_2)
 
@@ -652,3 +688,29 @@ def test_get_latest_completed_analysis_for_case_no_completed_analysis(
     with pytest.raises(AnalysisNotCompletedError):
         # THEN an AnalysisDoesNotExistError should be raised
         base_store.get_latest_completed_analysis_for_case(case_id=test_case.internal_id)
+
+
+def test_get_analysis_by_trailblazer_id(store: Store):
+    # GIVEN two analyses in the store with different trailblazer ids
+    analysis_to_fetch = store.add_analysis(
+        case_id=1, workflow=Workflow.NALLO, trailblazer_id=666666
+    )
+    analysis_not_to_fetch = store.add_analysis(
+        case_id=1, workflow=Workflow.NALLO, trailblazer_id=555555
+    )
+    store.add_multiple_items_to_store([analysis_to_fetch, analysis_not_to_fetch])
+    store.commit_to_store()
+
+    # WHEN getting one analysis by its trailblazer id
+    analysis = store.get_analysis_by_trailblazer_id(666666)
+
+    # THEN the analysis is returned
+    assert analysis.trailblazer_id == 666666
+
+
+def test_get_analysis_by_trailblazer_id_does_not_exist(store: Store):
+    # GIVEN an empty store
+    # WHEN getting an analysis by trailblazer
+    with pytest.raises(AnalysisDoesNotExistError):
+        # THEN an AnalysisDoesNotExistError is raised
+        store.get_analysis_by_trailblazer_id(666666)

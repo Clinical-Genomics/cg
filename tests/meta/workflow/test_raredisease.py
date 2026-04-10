@@ -21,6 +21,7 @@ from cg.models.cg_config import (
 )
 from cg.models.deliverables.metric_deliverables import MetricsBase
 from cg.store.models import Sample
+from cg.store.store import Store
 
 
 def test_parse_analysis(
@@ -128,3 +129,48 @@ def test_get_genome_build():
     # WHEN getting the genome build
     # THEN it is hg38
     assert analysis_api.get_genome_build(case_id="ChevyCase") == GenomeVersion.HG38
+    
+    
+def test_get_qc_conditions_for_workflow():
+    sample = create_autospec(Sample, internal_id="sample_id", sex=SexOptions.FEMALE)
+    status_db = create_autospec(Store)
+    status_db.get_sample_by_internal_id = Mock(return_value=sample)
+    # GIVEN Raredisease analysis API
+    analysis_api: RarediseaseAnalysisAPI = RarediseaseAnalysisAPI(
+        config=create_autospec(
+            CGConfig,
+            run_instruments=create_autospec(
+                RunInstruments,
+                illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some/path"),
+            ),
+            chanjo=create_autospec(ChanjoConfig, config_path="some/path", binary_path="some/path"),
+            raredisease=create_autospec(
+                RarediseaseConfig,
+                conda_binary="conda/bin",
+                conda_env="conda_env",
+                config="config.json",
+                params="params.yaml",
+                pipeline_deliverables="raredisease_deliverables.yaml",
+                platform="platform",
+                profile="profile",
+                resources="a tonne",
+                revision="0.0.0",
+                root="root",
+                slurm=create_autospec(SlurmConfig, account="account", mail_user="mail_user"),
+                tower_workflow="raredisease",
+                workflow_bin_path="workflow/bin",
+            ),
+            tower_binary_path="tower/bin",
+        ),
+    )
+    analysis_api.status_db = status_db
+    qc_conditions: dict = analysis_api.get_qc_conditions_for_workflow("sample_id")
+    assert qc_conditions == {
+        "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.20},
+        "PCT_PF_UQ_READS_ALIGNED": {"norm": "gt", "threshold": 0.95},
+        "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
+        "AT_DROPOUT": {"norm": "lt", "threshold": 10},
+        "GC_DROPOUT": {"norm": "lt", "threshold": 10},
+        "predicted_sex_sex_check": {"norm": "eq", "threshold": SexOptions.FEMALE},
+        "gender": {"norm": "eq", "threshold": SexOptions.FEMALE},
+    }

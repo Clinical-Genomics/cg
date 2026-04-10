@@ -4,7 +4,6 @@ from datetime import datetime
 from cg.constants import DataDelivery, Sex
 from cg.constants.constants import Workflow
 from cg.models.orders.sample_base import PriorityEnum, StatusEnum
-from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.service import StoreOrderService
 from cg.services.orders.validation.order_types.taxprofiler.models.order import TaxprofilerOrder
@@ -60,7 +59,10 @@ class StoreTaxprofilerOrderService(StoreOrderService):
                     order=order, sample=sample, customer=customer
                 )
                 new_relationship: CaseSample = self.status_db.relate_sample(
-                    case=db_case, sample=db_sample, status=StatusEnum.unknown
+                    case=db_case,
+                    sample=db_sample,
+                    status=StatusEnum.unknown,
+                    should_deliver_sample=True,
                 )
                 self.status_db.add_item_to_store(new_relationship)
                 new_samples.append(db_sample)

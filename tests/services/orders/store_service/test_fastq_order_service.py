@@ -35,13 +35,19 @@ def test_store_order_data_in_status_db(
     db_samples: list[Sample] = store_to_submit_and_validate_orders._get_query(table=Sample).all()
     assert set(new_samples) == set(db_samples)
 
-    # THEN it should create one case per sample and one MAF case
+    # THEN it should create one case per sample
     cases: list[Case] = store_to_submit_and_validate_orders._get_query(table=Case).all()
     assert len(cases) == 2
     links: list[CaseSample] = store_to_submit_and_validate_orders._get_query(table=CaseSample).all()
     assert len(links) == 2
     assert cases[0].data_analysis == Workflow.RAW_DATA
     assert cases[1].data_analysis == Workflow.RAW_DATA
+
+    # THEN each sample should have a raw data case that should deliver the sample
+    assert cases[1].data_analysis == Workflow.RAW_DATA
+    assert cases[1].links[0].should_deliver_sample
+    assert cases[2].data_analysis == Workflow.RAW_DATA
+    assert cases[2].links[0].should_deliver_sample
 
     # THEN the analysis case has allowed data deliveries
     assert cases[1].data_delivery in [DataDelivery.FASTQ, DataDelivery.NO_DELIVERY]

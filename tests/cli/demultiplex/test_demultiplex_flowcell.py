@@ -2,13 +2,21 @@
 
 import logging
 from pathlib import Path
+from unittest.mock import ANY, MagicMock
 
 from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.utils import add_and_include_sample_sheet_path_to_housekeeper
-from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_sequencing_run
+from cg.cli.demultiplex.demux import (
+    demultiplex_all,
+    demultiplex_sequencing_run,
+    link_onboard_demultiplexed_flow_cells,
+)
+from cg.constants.constants import Workflow
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.priority import TrailblazerPriority
+from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.models.cg_config import CGConfig
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 
@@ -139,3 +147,110 @@ def test_is_demultiplexing_not_complete(
 
     # THEN the property should return true
     assert not hiseq_2500_dual_index_demux_runs_flow_cell.is_demultiplexing_complete
+
+
+def test_link_onboard_demultiplexed_flow_cells_notifies_trailblazer(
+    cli_runner: testing.CliRunner,
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
+    novaseq_x_flow_cell_id: str,
+    cg_context: CGConfig,
+    tmp_path: Path,
+    mocker,
+):
+    """Test that link_onboard_demultiplexed_flow_cells adds a Trailblazer analysis marked as completed."""
+    # GIVEN a context with sequencing runs dir containing a ready NovaSeqX flow cell
+    sequencing_runs_dir: Path = novaseqx_flow_cell_dir_with_analysis_data.parent
+    demultiplexed_runs_dir: Path = Path(tmp_path, "demultiplexed-runs-out")
+    demultiplexed_runs_dir.mkdir()
+    cg_context.run_instruments.illumina.sequencing_runs_dir = sequencing_runs_dir.as_posix()
+    cg_context.run_instruments.illumina.demultiplexed_runs_dir = demultiplexed_runs_dir.as_posix()
+
+    # GIVEN the sync has been confirmed for the flow cell
+    Path(
+        novaseqx_flow_cell_dir_with_analysis_data, DemultiplexingDirsAndFiles.COPY_COMPLETE
+    ).touch()
+
+    # GIVEN mocked file operations to avoid actual hardlinking
+    mocker.patch(
+        "cg.cli.demultiplex.copy_novaseqx_demultiplex_data.hardlink_flow_cell_analysis_data"
+    )
+    mocker.patch("cg.cli.demultiplex.copy_novaseqx_demultiplex_data.mark_as_demultiplexed")
+    mocker.patch(
+        "cg.cli.demultiplex.copy_novaseqx_demultiplex_data.add_and_include_sample_sheet_path_to_housekeeper"
+    )
+
+    # GIVEN a mock Trailblazer API
+    mock_tb_api: MagicMock = MagicMock()
+    cg_context.trailblazer_api_ = mock_tb_api
+
+    # WHEN running the link command
+    result: testing.Result = cli_runner.invoke(
+        link_onboard_demultiplexed_flow_cells,
+        obj=cg_context,
+    )
+
+    # THEN the command exits without problems
+    assert result.exit_code == 0
+
+    # THEN a pending analysis was added with the DEMULTIPLEX workflow
+    mock_tb_api.add_pending_analysis.assert_called_once_with(
+        case_id=novaseq_x_flow_cell_id,
+        analysis_type=AnalysisType.OTHER,
+        config_path="",
+        out_dir=ANY,
+        priority=TrailblazerPriority.HIGH,
+        workflow=Workflow.DEMULTIPLEX,
+    )
+    call_kwargs: dict = mock_tb_api.add_pending_analysis.call_args.kwargs
+    assert call_kwargs["workflow"] == Workflow.DEMULTIPLEX
+
+    # THEN the analysis status was immediately set to COMPLETED
+    mock_tb_api.set_analysis_status.assert_called_once()
+    status_kwargs: dict = mock_tb_api.set_analysis_status.call_args.kwargs
+    assert status_kwargs["status"] == AnalysisStatus.COMPLETED
+
+
+def test_link_onboard_demultiplexed_flow_cells_saves_sample_sheet_to_housekeeper(
+    cli_runner: testing.CliRunner,
+    novaseqx_flow_cell_dir_with_analysis_data: Path,
+    cg_context: CGConfig,
+    tmp_path: Path,
+    mocker,
+):
+    """Test that link_onboard_demultiplexed_flow_cells saves the analysis sample sheet to Housekeeper."""
+    # GIVEN a context with sequencing runs dir containing a ready NovaSeqX flow cell
+    sequencing_runs_dir: Path = novaseqx_flow_cell_dir_with_analysis_data.parent
+    demultiplexed_runs_dir: Path = Path(tmp_path, "demultiplexed-runs-out")
+    demultiplexed_runs_dir.mkdir()
+    cg_context.run_instruments.illumina.sequencing_runs_dir = sequencing_runs_dir.as_posix()
+    cg_context.run_instruments.illumina.demultiplexed_runs_dir = demultiplexed_runs_dir.as_posix()
+
+    # GIVEN the sync has been confirmed for the flow cell
+    Path(
+        novaseqx_flow_cell_dir_with_analysis_data, DemultiplexingDirsAndFiles.COPY_COMPLETE
+    ).touch()
+
+    # GIVEN mocked file operations
+    mocker.patch(
+        "cg.cli.demultiplex.copy_novaseqx_demultiplex_data.hardlink_flow_cell_analysis_data"
+    )
+    mocker.patch("cg.cli.demultiplex.copy_novaseqx_demultiplex_data.mark_as_demultiplexed")
+    mock_add_sample_sheet: MagicMock = mocker.patch(
+        "cg.cli.demultiplex.copy_novaseqx_demultiplex_data.add_and_include_sample_sheet_path_to_housekeeper"
+    )
+    mock_tb_api: MagicMock = MagicMock()
+    cg_context.trailblazer_api_ = mock_tb_api
+
+    # WHEN running the link command
+    result: testing.Result = cli_runner.invoke(
+        link_onboard_demultiplexed_flow_cells,
+        obj=cg_context,
+    )
+
+    # THEN the command exits without problems
+    assert result.exit_code == 0
+
+    # THEN the sample sheet was saved to Housekeeper from the analysis Data directory
+    mock_add_sample_sheet.assert_called_once()
+    call_kwargs: dict = mock_add_sample_sheet.call_args.kwargs
+    assert DemultiplexingDirsAndFiles.DATA in call_kwargs["flow_cell_directory"].parts

@@ -22,7 +22,6 @@ from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.raredisease.raredisease import RarediseaseQCMetrics
-from cg.resources import RAREDISEASE_BUNDLE_FILENAMES_PATH
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -38,28 +37,24 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         workflow: Workflow = Workflow.RAREDISEASE,
     ):
         super().__init__(config=config, workflow=workflow)
+        self.account: str = config.raredisease.slurm.account
         self.chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
             config=config, genome_build=WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.RAREDISEASE]
         )
-        self.root_dir: str = config.raredisease.root
-        self.workflow_bin_path: str = config.raredisease.workflow_bin_path
-        self.profile: str = config.raredisease.profile
-        self.conda_env: str = config.raredisease.conda_env
         self.conda_binary: str = config.raredisease.conda_binary
-        self.platform: str = config.raredisease.platform
+        self.conda_env: str = config.raredisease.conda_env
+        self.email: str = config.raredisease.slurm.mail_user
         self.params: str = config.raredisease.params
-        self.workflow_config_path: str = config.raredisease.config
+        self.pipeline_deliverables = Path(config.raredisease.pipeline_deliverables)
+        self.platform: str = config.raredisease.platform
+        self.profile: str = config.raredisease.profile
         self.resources: str = config.raredisease.resources
+        self.revision: str = config.raredisease.revision
+        self.root_dir: str = config.raredisease.root
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.raredisease.tower_workflow
-        self.account: str = config.raredisease.slurm.account
-        self.email: str = config.raredisease.slurm.mail_user
-        self.revision: str = config.raredisease.revision
-
-    @staticmethod
-    def get_bundle_filenames_path() -> Path:
-        """Return Raredisease bundle filenames path."""
-        return RAREDISEASE_BUNDLE_FILENAMES_PATH
+        self.workflow_bin_path: str = config.raredisease.workflow_bin_path
+        self.workflow_config_path: str = config.raredisease.config
 
     def get_qc_conditions_for_workflow(self, sample_id: str) -> dict:
         """Return Raredisease workflow metric conditions for a sample."""
