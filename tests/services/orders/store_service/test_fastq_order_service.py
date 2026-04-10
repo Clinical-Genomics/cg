@@ -44,13 +44,13 @@ def test_store_order_data_in_status_db(
     assert cases[1].data_analysis == Workflow.RAW_DATA
 
     # THEN each sample should have a raw data case that should deliver the sample
+    assert cases[0].data_analysis == Workflow.RAW_DATA
+    assert cases[0].links[0].should_deliver_sample
     assert cases[1].data_analysis == Workflow.RAW_DATA
     assert cases[1].links[0].should_deliver_sample
-    assert cases[2].data_analysis == Workflow.RAW_DATA
-    assert cases[2].links[0].should_deliver_sample
 
     # THEN the analysis case has allowed data deliveries
-    assert cases[1].data_delivery in [DataDelivery.FASTQ, DataDelivery.NO_DELIVERY]
+    assert cases[0].data_delivery in [DataDelivery.FASTQ, DataDelivery.NO_DELIVERY]
 
     # THEN the sample sex should be stored
     assert db_samples[0].sex == "male"

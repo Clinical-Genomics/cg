@@ -105,6 +105,7 @@ def test_get_genome_build():
             conda_binary="conda/bin",
             conda_env="conda/env",
             config="here/is/my/config",
+            pipeline_deliverables="pipeline_deliverables.yaml",
             params="here/is/my/params/file",
             platform="platform",
             profile="profile",
@@ -143,7 +144,9 @@ def test_get_qc_conditions_for_workflow():
                 RunInstruments,
                 illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some/path"),
             ),
-            chanjo=create_autospec(ChanjoConfig, config_path="some/path", binary_path="some/path"),
+            chanjo_38=create_autospec(
+                ChanjoConfig, config_path="some/path", binary_path="some/path"
+            ),
             raredisease=create_autospec(
                 RarediseaseConfig,
                 conda_binary="conda/bin",
