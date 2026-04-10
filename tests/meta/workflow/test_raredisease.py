@@ -129,8 +129,8 @@ def test_get_genome_build():
     # WHEN getting the genome build
     # THEN it is hg38
     assert analysis_api.get_genome_build(case_id="ChevyCase") == GenomeVersion.HG38
-    
-    
+
+
 def test_get_qc_conditions_for_workflow():
     sample = create_autospec(Sample, internal_id="sample_id", sex=SexOptions.FEMALE)
     status_db = create_autospec(Store)
