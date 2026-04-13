@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 from click import Context
 from pytest_mock import MockerFixture
@@ -11,10 +11,15 @@ from cg.store.models import Analysis, Case
 from cg.store.store import Store
 
 
-def test_upload_delegates(mocker: MockerFixture):
-    # GIVEN a raw data case with analyses
-    analyses: list[Analysis] = [create_autospec(Analysis), create_autospec(Analysis)]
-    case: Case = create_autospec(Case, analyses=analyses)
+def test_upload_delegates_to_module(mocker: MockerFixture):
+    # GIVEN a connection to status db
+    status_db: Store = create_autospec(Store)
+
+    # GIVEN a raw data case with a completed analysis
+    analysis = create_autospec(Analysis)
+    case: Case = create_autospec(Case)
+
+    status_db.get_latest_completed_analysis_for_case = Mock(return_value=analysis)
 
     # GIVEN a module for delivering raw data
     deliver_raw_data_mock = mocker.patch.object(deliver_raw_data, "deliver_analyses")
@@ -22,7 +27,7 @@ def test_upload_delegates(mocker: MockerFixture):
     # GIVEN a RawDataUploadAPI instance
     config: CGConfig = create_autospec(
         CGConfig,
-        status_db=create_autospec(Store),
+        status_db=status_db,
         delivery_path="delivery_path",
         delivery_service_factory=create_autospec(DeliveryServiceFactory),
     )
@@ -33,9 +38,10 @@ def test_upload_delegates(mocker: MockerFixture):
 
     # THEN deliver_raw_data.deliver_analyses is called with the case analyses
     deliver_raw_data_mock.assert_called_once_with(
-        analyses=analyses,
-        status_db=raw_data_upload_api.status_db,
+        analyses=[analysis],
+        status_db=status_db,
         delivery_path=Path("delivery_path"),
         service_builder=raw_data_upload_api.delivery_service_factory,
         dry_run=False,
+        raise_on_fail=True,
     )

@@ -18,6 +18,7 @@ def deliver_analyses(
     delivery_path: Path,
     service_builder: DeliveryServiceFactory,
     dry_run: bool,
+    raise_on_fail: bool = False,
 ):
     """Deliver raw data for a list of analyses"""
     for analysis in analyses:
@@ -38,4 +39,7 @@ def deliver_analyses(
                 analysis_id=analysis.id, upload_started_at=None
             )
             LOG.error(f"Could not deliver files for analysis {analysis.id}: {error}")
-            continue
+            if raise_on_fail:
+                raise error
+            else:
+                continue

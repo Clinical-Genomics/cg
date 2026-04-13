@@ -46,6 +46,7 @@ def test_deliver_analyses_succeeds():
         delivery_path=delivery_path,
         service_builder=delivery_service_factory,
         dry_run=False,
+        raise_on_fail=True,
     )
 
     # THEN files are delivered for each case
@@ -68,7 +69,6 @@ def test_deliver_analyses_succeeds():
 def test_deliver_analyses_file_delivery_fails():
     # GIVEN a raw data case with a corresponding analysis
     raw_data_case: Case = create_autospec(Case, data_delivery=DataDelivery.RAW_DATA_SCOUT)
-
     analysis: Analysis = create_autospec(Analysis, id=1, case=raw_data_case)
 
     # GIVEN a deliver files service that raises an exception
@@ -83,9 +83,6 @@ def test_deliver_analyses_file_delivery_fails():
         return_value=deliver_files_service.as_type
     )
 
-    # GIVEN a delivery path
-    delivery_path = Path("delivery")
-
     # GIVEN a status_db
     status_db: TypedMock[Store] = create_typed_mock(Store)
 
@@ -93,7 +90,7 @@ def test_deliver_analyses_file_delivery_fails():
     deliver_raw_data.deliver_analyses(
         [analysis],
         status_db=status_db.as_type,
-        delivery_path=delivery_path,
+        delivery_path=Path("delivery"),
         service_builder=delivery_service_factory,
         dry_run=False,
     )
@@ -102,3 +99,33 @@ def test_deliver_analyses_file_delivery_fails():
     status_db.as_mock.update_analysis_upload_started_at.assert_called_with(
         analysis_id=1, upload_started_at=None
     )
+
+
+def test_deliver_analyses_file_delivery_fails_and_raises():
+    # GIVEN a raw data case with a corresponding analysis
+    raw_data_case: Case = create_autospec(Case, data_delivery=DataDelivery.RAW_DATA_SCOUT)
+    analysis: Analysis = create_autospec(Analysis, id=1, case=raw_data_case)
+
+    # GIVEN a deliver files service that raises an exception
+    deliver_files_service: TypedMock[DeliverFilesService] = create_typed_mock(DeliverFilesService)
+    deliver_files_service.as_type.deliver_files_for_case = Mock(
+        side_effect=Exception("Some random error")
+    )
+
+    # GIVEN a delivery service factory
+    delivery_service_factory = create_autospec(DeliveryServiceFactory)
+    delivery_service_factory.build_delivery_service = Mock(
+        return_value=deliver_files_service.as_type
+    )
+
+    # WHEN delivering analyses with raise_on_fail set to True
+    # THEN an error is raised
+    with pytest.raises(Exception):
+        deliver_raw_data.deliver_analyses(
+            [analysis],
+            status_db=create_autospec(Store),
+            delivery_path=Path("delivery"),
+            service_builder=delivery_service_factory,
+            dry_run=False,
+            raise_on_fail=True,
+        )

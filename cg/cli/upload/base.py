@@ -106,8 +106,6 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
 
         context.obj.meta_apis["upload_api"] = upload_api
         upload_api.upload(ctx=context, case=case, restart=restart)
-        # TODO: this will be printed even when an exception was raised in deliver_analyses for raw data
-        # handle this somehow
         click.echo(click.style(f"{case_id} analysis has been successfully uploaded", fg="green"))
     else:
         suggest_cases_to_upload(status_db=upload_api.status_db)
