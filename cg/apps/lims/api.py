@@ -442,6 +442,34 @@ class LimsAPI(Lims, OrderHandler):
         initial_qc: bool | None = eval(initial_qc_udf) if initial_qc_udf else None
         return initial_qc
 
+    def _get_last_used_input_amount(
+        self, input_amounts: list[tuple[datetime, float]]
+    ) -> float | None:
+        """Return the latest used input amount."""
+        sorted_input_amounts: list[tuple[datetime, float]] = self._sort_by_date_run(input_amounts)
+        if not sorted_input_amounts:
+            return None
+        return sorted_input_amounts[0][1]
+
+    def get_input_amount(self, sample_id: str, sample_type: str) -> float | None:
+        """
+        Return the input amount used in the latest preparation of a sample.
+        Parameters:
+            sample_id: the internal ID of the sample in LIMS/StatusDB
+            sample_type: Possible valuers are "wgs", "tgs" (for both targeted and exome sequencing),
+            "revio" or "wts" (for any RNA prep).
+        """
+        try:
+            input_amounts: list[tuple[datetime, float]] = (
+                self._get_input_amounts_for_sample_and_type(
+                    sample_id=sample_id, sample_type=sample_type
+                )
+            )
+        except HTTPError as error:
+            LOG.warning(f"Sample {sample_id} not found in LIMS: {error}")
+            return None
+        return self._get_last_used_input_amount(input_amounts=input_amounts)
+
     def _get_input_amounts_for_sample_and_type(
         self, sample_id: str, sample_type: str
     ) -> list[tuple[datetime, float]]:
@@ -473,34 +501,6 @@ class LimsAPI(Lims, OrderHandler):
                 )
             )
         return input_amounts
-
-    def _get_last_used_input_amount(
-        self, input_amounts: list[tuple[datetime, float]]
-    ) -> float | None:
-        """Return the latest used input amount."""
-        sorted_input_amounts: list[tuple[datetime, float]] = self._sort_by_date_run(input_amounts)
-        if not sorted_input_amounts:
-            return None
-        return sorted_input_amounts[0][1]
-
-    def get_input_amount(self, sample_id: str, sample_type: str) -> float | None:
-        """
-        Return the input amount used in the latest preparation of a sample.
-        Parameters:
-            sample_id: the internal ID of the sample in LIMS/StatusDB
-            sample_type: Possible valuers are "wgs", "tgs" (for both targeted and exome sequencing),
-            "revio" or "wts" (for any RNA prep).
-        """
-        try:
-            input_amounts: list[tuple[datetime, float]] = (
-                self._get_input_amounts_for_sample_and_type(
-                    sample_id=sample_id, sample_type=sample_type
-                )
-            )
-        except HTTPError as error:
-            LOG.warning(f"Sample {sample_id} not found in LIMS: {error}")
-            return None
-        return self._get_last_used_input_amount(input_amounts=input_amounts)
 
     def get_latest_artifact_for_sample(
         self,
@@ -538,7 +538,10 @@ class LimsAPI(Lims, OrderHandler):
     def get_internal_negative_control_id_from_sample_in_pool(
         self, sample_internal_id: str, pooling_step: LimsProcess
     ) -> str:
-        """Retrieve from LIMS the sample ID for the internal negative control sample present in the same pool as the given sample."""
+        """
+        Retrieve from LIMS the sample ID for the internal negative control sample
+        present in the same pool as the given sample.
+        """
         artifact: Artifact = self.get_latest_artifact_for_sample(
             process_type=pooling_step,
             sample_internal_id=sample_internal_id,
