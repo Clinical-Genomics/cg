@@ -16,9 +16,8 @@ def test_upload_delegates_to_module(mocker: MockerFixture):
     status_db: Store = create_autospec(Store)
 
     # GIVEN a raw data case with a completed analysis
-    analysis = create_autospec(Analysis)
+    analysis: Analysis = create_autospec(Analysis)
     case: Case = create_autospec(Case)
-
     status_db.get_latest_completed_analysis_for_case = Mock(return_value=analysis)
 
     # GIVEN a module for delivering raw data
