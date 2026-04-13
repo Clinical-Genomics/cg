@@ -442,41 +442,6 @@ class LimsAPI(Lims, OrderHandler):
         initial_qc: bool | None = eval(initial_qc_udf) if initial_qc_udf else None
         return initial_qc
 
-    # TODO: deprecate this, use get_input_amount instead
-    def _get_rna_input_amounts(self, sample_id: str) -> list[tuple[datetime, float]]:
-        """Return all prep input amounts used for an RNA sample in LIMS."""
-        step_names_udfs: dict[str, str] = MASTER_STEPS_UDFS["input_amounts"]["wts"]
-        input_amounts: list[tuple[datetime, float]] = []
-        try:
-            for process_type in step_names_udfs:
-                artifacts: list[Artifact] = self.get_artifacts(
-                    samplelimsid=sample_id,
-                    process_type=process_type,
-                    type=LimsArtifactTypes.ANALYTE,
-                )
-
-                udf_key: str = step_names_udfs[process_type]
-                for artifact in artifacts:
-                    input_amounts.append(
-                        artifact.parent_process.date_run,
-                        artifact.udf.get(udf_key),
-                    )
-        except HTTPError as error:
-            LOG.warning(f"Sample {sample_id} not found in LIMS: {error}")
-        return input_amounts
-
-    # TODO: Remove this method and replace its usages for get_input_amount
-    def get_latest_input_amount(self, sample_id: str, sample_type: str) -> float:
-        """Return the latest input amount for a DNA sample in LIMS."""
-        ((step, udf_key),) = MASTER_STEPS_UDFS["input_amounts"][sample_type].items()
-        input_amount_artifact: Artifact = self.get_latest_artifact_for_sample(
-            sample_internal_id=sample_id, process_type=step
-        )
-        latest_input_amount: float | None = input_amount_artifact.udf[udf_key]
-        if not latest_input_amount:
-            raise LimsDataError(f"No input amount found for sample {sample_id} in step {step}.")
-        return latest_input_amount
-
     def _get_input_amounts_for_sample_and_type(
         self, sample_id: str, sample_type: str
     ) -> list[tuple[datetime, float]]:
@@ -518,7 +483,6 @@ class LimsAPI(Lims, OrderHandler):
             return None
         return sorted_input_amounts[0][1]
 
-    # TODO: wrapp in HTTPError try/except
     def get_input_amount(self, sample_id: str, sample_type: str) -> float | None:
         """
         Return the input amount used in the latest preparation of a sample.
@@ -527,19 +491,16 @@ class LimsAPI(Lims, OrderHandler):
             sample_type: Possible valuers are "wgs", "tgs" (for both targeted and exome sequencing),
             "revio" or "wts" (for any RNA prep).
         """
-        input_amounts: list[tuple[datetime, float]] = self._get_input_amounts_for_sample_and_type(
-            sample_id=sample_id, sample_type=sample_type
-        )
-        input_amount: float | None = self._get_last_used_input_amount(input_amounts=input_amounts)
-        return input_amount
-
-    def get_latest_rna_input_amount(self, sample_id: str) -> float | None:
-        """Return the input amount used in the latest preparation of an RNA sample."""
-        input_amounts: list[tuple[datetime, float]] = self._get_rna_input_amounts(
-            sample_id=sample_id
-        )
-        input_amount: float | None = self._get_last_used_input_amount(input_amounts=input_amounts)
-        return input_amount
+        try:
+            input_amounts: list[tuple[datetime, float]] = (
+                self._get_input_amounts_for_sample_and_type(
+                    sample_id=sample_id, sample_type=sample_type
+                )
+            )
+        except HTTPError as error:
+            LOG.warning(f"Sample {sample_id} not found in LIMS: {error}")
+            return None
+        return self._get_last_used_input_amount(input_amounts=input_amounts)
 
     def get_latest_artifact_for_sample(
         self,

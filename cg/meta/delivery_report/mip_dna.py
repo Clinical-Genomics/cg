@@ -159,12 +159,10 @@ class MipDNADeliveryReportAPI(DeliveryReportAPI):
             return None
         return uploaded_files[0].full_path
 
-    def _get_input_amount(self, sample: Sample) -> float:
+    def _get_input_amount(self, sample: Sample) -> float | None:
         """Return the input amount based on the sample's prep category."""
         if sample.prep_category == "wgs":
             sample_type = "wgs"
         else:
             sample_type = "tgs"  # TGS and WES samples use the same input amount step in LIMS
-        return self.lims_api.get_latest_input_amount(
-            sample_id=sample.internal_id, sample_type=sample_type
-        )
+        return self.lims_api.get_input_amount(sample_id=sample.internal_id, sample_type=sample_type)

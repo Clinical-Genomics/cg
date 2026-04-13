@@ -177,7 +177,6 @@ REQUIRED_SAMPLE_TIMESTAMP_FIELDS: list[str] = [
 _REQUIRED_SAMPLE_METADATA_FIELDS: list[str] = [
     "duplicates",
     "initial_qc",
-    # TODO: move input_amount here from WTS metadata?
     "million_read_pairs",
 ]
 
@@ -250,6 +249,7 @@ _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS: list[str] = _REQUIRED_SAMPLE_METADA
 # WHOLE_TRANSCRIPTOME_SEQUENCING metadata required fields (OPTIONAL: "rin", "dv200")
 _REQUIRED_SAMPLE_METADATA_WTS_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_SEQUENCING_FIELDS + [
     "bias_5_3",
+    # TODO remove input amount as required
     "input_amount",
     "mrna_bases",
     "pct_adapter",

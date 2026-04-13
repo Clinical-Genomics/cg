@@ -78,7 +78,7 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
             analysis_metadata.balsamic_config.panel.capture_kit
         )
         bed: Bed = self.status_db.get_bed_by_entry_id(bed_version.bed_id) if bed_version else None
-        input_amount: float = self.lims_api.get_latest_input_amount(
+        input_amount: float | None = self.lims_api.get_input_amount(
             sample_id=sample_id, sample_type="tgs"
         )
         return BalsamicTargetedSampleMetadataModel(
@@ -108,7 +108,7 @@ class BalsamicDeliveryReportAPI(DeliveryReportAPI):
         sample_metrics: BalsamicWGSQCMetrics,
     ) -> BalsamicWGSSampleMetadataModel:
         """Return report metadata for Balsamic WHOLE_GENOME_SEQUENCING analysis."""
-        input_amount: float = self.lims_api.get_latest_input_amount(
+        input_amount: float | None = self.lims_api.get_input_amount(
             sample_id=sample_id, sample_type="wgs"
         )
         return BalsamicWGSSampleMetadataModel(
