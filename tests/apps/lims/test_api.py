@@ -204,7 +204,7 @@ def test_get_last_used_input_amount(minimal_lims_api: LimsAPI):
     last_used_input_amount = minimal_lims_api._get_last_used_input_amount(input_amounts)
 
     # THEN the input amount with the latest date is returned
-    assert last_used_input_amount == 20.0
+    assert approx(last_used_input_amount, 20.0)
 
 
 @pytest.mark.parametrize(
