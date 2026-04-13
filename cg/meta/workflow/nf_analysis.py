@@ -13,6 +13,7 @@ from cg.constants.tb import AnalysisStatus
 from cg.exc import CgError, HousekeeperStoreError, MetricsQCError
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
+from cg.io.yaml import read_yaml
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
@@ -38,22 +39,23 @@ class NfAnalysisAPI(AnalysisAPI):
 
     def __init__(self, config: CGConfig, workflow: Workflow):
         super().__init__(workflow=workflow, config=config)
-        self.workflow: Workflow = workflow
-        self.root_dir: str | None = None
-        self.workflow_bin_path: str | None = None
-        self.references: str | None = None
-        self.profile: str | None = None
-        self.conda_env: str | None = None
+        self.account: str | None = None
         self.conda_binary: str | None = None
-        self.platform: str | None = None
+        self.conda_env: str | None = None
+        self.email: str | None = None
         self.params: str | None = None
-        self.workflow_config_path: str | None = None
+        self.pipeline_deliverables: Path | None = None
+        self.platform: str | None = None
+        self.profile: str | None = None
+        self.references: str | None = None
         self.resources: str | None = None
+        self.revision: str | None = None
+        self.root_dir: str | None = None
         self.tower_binary_path: str | None = None
         self.tower_workflow: str | None = None
-        self.account: str | None = None
-        self.email: str | None = None
-        self.revision: str | None = None
+        self.workflow: Workflow = workflow
+        self.workflow_bin_path: str | None = None
+        self.workflow_config_path: str | None = None
 
     @property
     def root(self) -> str:
@@ -98,15 +100,7 @@ class NfAnalysisAPI(AnalysisAPI):
     def get_deliverables_template_content(self) -> list[dict[str, str]]:
         """Return deliverables file template content."""
         LOG.debug("Getting deliverables file template content")
-        return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML,
-            file_path=self.get_bundle_filenames_path(),
-        )
-
-    @staticmethod
-    def get_bundle_filenames_path() -> Path:
-        """Return bundle filenames path."""
-        raise NotImplementedError
+        return read_yaml(self.pipeline_deliverables)
 
     @staticmethod
     def get_formatted_file_deliverable(
@@ -158,7 +152,7 @@ class NfAnalysisAPI(AnalysisAPI):
         files: list[FileDeliverable] = []
 
         for sample in samples:
-            bundles_per_sample = self.get_deliverables_for_sample(
+            bundles_per_sample: list[FileDeliverable] = self.get_deliverables_for_sample(
                 sample=sample, case_id=case_id, template=deliverable_template
             )
             files.extend(bundle for bundle in bundles_per_sample if bundle not in files)
