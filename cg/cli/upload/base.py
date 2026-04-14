@@ -43,6 +43,7 @@ from cg.meta.upload.mutant.mutant import MutantUploadAPI
 from cg.meta.upload.nallo.nallo_upload_api import NalloUploadAPI
 from cg.meta.upload.nf_analysis import NfAnalysisUploadAPI
 from cg.meta.upload.raredisease.raredisease import RarediseaseUploadAPI
+from cg.meta.upload.raw_data.raw_data_upload_api import RawDataUploadAPI
 from cg.meta.upload.tomte.tomte import TomteUploadAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
@@ -100,6 +101,8 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
             upload_api = NfAnalysisUploadAPI(config_object, case.data_analysis)
         elif case.data_analysis == Workflow.MUTANT:
             upload_api = MutantUploadAPI(config_object)
+        elif case.data_analysis == Workflow.RAW_DATA:
+            upload_api = RawDataUploadAPI(config_object)
 
         context.obj.meta_apis["upload_api"] = upload_api
         upload_api.upload(ctx=context, case=case, restart=restart)
