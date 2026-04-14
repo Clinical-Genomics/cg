@@ -41,7 +41,7 @@ def test_deliver_analyses_succeeds():
 
     # WHEN delivering analyses
     deliver_raw_data.deliver_analyses(
-        [analysis_1, analysis_2],
+        analyses=[analysis_1, analysis_2],
         status_db=status_db.as_type,
         delivery_path=delivery_path,
         service_builder=delivery_service_factory,
@@ -88,7 +88,7 @@ def test_deliver_analyses_file_delivery_fails():
 
     # WHEN delivering analyses
     deliver_raw_data.deliver_analyses(
-        [analysis],
+        analyses=[analysis],
         status_db=status_db.as_type,
         delivery_path=Path("delivery"),
         service_builder=delivery_service_factory,
@@ -122,7 +122,7 @@ def test_deliver_analyses_file_delivery_fails_and_raises():
     # THEN an error is raised
     with pytest.raises(Exception):
         deliver_raw_data.deliver_analyses(
-            [analysis],
+            analyses=[analysis],
             status_db=create_autospec(Store),
             delivery_path=Path("delivery"),
             service_builder=delivery_service_factory,

@@ -21,7 +21,7 @@ def test_upload_delegates_to_module(mocker: MockerFixture):
     status_db.get_latest_completed_analysis_for_case = Mock(return_value=analysis)
 
     # GIVEN a module for delivering raw data
-    deliver_raw_data_mock = mocker.patch.object(deliver_raw_data, "deliver_analyses")
+    deliver_raw_data_mock = mocker.spy(deliver_raw_data, "deliver_analyses")
 
     # GIVEN a RawDataUploadAPI instance
     config: CGConfig = create_autospec(
