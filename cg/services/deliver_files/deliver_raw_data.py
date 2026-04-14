@@ -5,21 +5,20 @@ from pathlib import Path
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
-from cg.services.deliver_files.factory import (
-    DeliveryServiceFactory,
-)
+from cg.services.deliver_files.factory import DeliveryServiceFactory
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
 
-def deliver_raw_data_for_analyses(
+def deliver_analyses(
     analyses: list[Analysis],
     status_db: Store,
     delivery_path: Path,
     service_builder: DeliveryServiceFactory,
     dry_run: bool,
+    raise_on_fail: bool = False,
 ):
     """Deliver raw data for a list of analyses"""
     for analysis in analyses:
@@ -40,4 +39,7 @@ def deliver_raw_data_for_analyses(
                 analysis_id=analysis.id, upload_started_at=None
             )
             LOG.error(f"Could not deliver files for analysis {analysis.id}: {error}")
-            continue
+            if raise_on_fail:
+                raise error
+            else:
+                continue
