@@ -681,7 +681,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         gene_panels=[],
         default_gene_panels=[],
         cohorts=[],
-        human_genome_build="37",
+        human_genome_build="38",
         rank_model_version="1.38",
         rank_score_threshold=5,
         sv_rank_model_version="1.12",

@@ -12,7 +12,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import DELIVERY_REPORT_FILE_NAME
 from cg.constants.constants import FileFormat
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, HkMipAnalysisTag
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.io.controller import ReadFile
 from cg.meta.delivery_report.raredisease import RarediseaseDeliveryReportAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
@@ -30,43 +30,9 @@ LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def upload_genotypes_hk_bundle(
-    case_id: str, timestamp, case_qc_metrics_deliverables: Path, bcf_file: Path
-) -> dict:
-    """Returns a dictionary in hk format with files used in upload gt process"""
-    return {
-        "name": case_id,
-        "created": datetime.now(),
-        "expires": datetime.now(),
-        "files": [
-            {
-                "path": str(case_qc_metrics_deliverables),
-                "archive": False,
-                "tags": HkMipAnalysisTag.QC_METRICS,
-            },
-            {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf", "genotype"]},
-        ],
-    }
-
-
-@pytest.fixture
 def analysis(analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers) -> Analysis:
     """Return an analysis object with a trio"""
     return analysis_store_trio.get_case_by_internal_id(internal_id=case_id).analyses[0]
-
-
-@pytest.fixture
-def upload_genotypes_hk_api(
-    real_housekeeper_api: HousekeeperAPI,
-    upload_genotypes_hk_bundle: dict,
-    analysis: Analysis,
-    helpers,
-) -> HousekeeperAPI:
-    """Add and include files from upload genotypes hk bundle"""
-    helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle)
-    hk_version = real_housekeeper_api.last_version(analysis.case.internal_id)
-    real_housekeeper_api.include(hk_version)
-    return real_housekeeper_api
 
 
 @pytest.fixture

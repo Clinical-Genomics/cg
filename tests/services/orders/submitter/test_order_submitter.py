@@ -1,9 +1,7 @@
 import datetime as dt
-from typing import Any, Generator
-from unittest.mock import Mock, PropertyMock, create_autospec, patch
+from unittest.mock import PropertyMock, create_autospec, patch
 
 import pytest
-from pytest_mock import mocker
 
 from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.models import TicketResponse
@@ -13,7 +11,6 @@ from cg.meta.orders.utils import get_ticket_status, get_ticket_tags
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
-from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.services.orders.submitter.service import OrderSubmitter
 from cg.services.orders.validation.errors.validation_errors import ValidationErrors
 from cg.services.orders.validation.models.case import Case as ValidationCase
@@ -25,9 +22,7 @@ from cg.services.orders.validation.models.order_with_samples import OrderWithSam
 from cg.services.orders.validation.models.sample import Sample as ValidationSample
 from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
-from cg.store.models import Application, Case
-from cg.store.models import Order as DbOrder
-from cg.store.models import Pool, Sample, User
+from cg.store.models import Application, Case, Pool, Sample, User
 from cg.store.store import Store
 
 
@@ -225,11 +220,6 @@ def test_submit_order(
     assert not store_to_submit_and_validate_orders._get_query(table=Sample).first()
     assert not store_to_submit_and_validate_orders._get_query(table=Case).first()
     assert not store_to_submit_and_validate_orders._get_query(table=Pool).first()
-
-    # GIVEN that the only order in store is a MAF order
-    orders: list[DbOrder] = store_to_submit_and_validate_orders._get_query(table=DbOrder).all()
-    assert len(orders) == 1
-    assert orders[0].id == MAF_ORDER_ID
 
     # GIVEN a ticketing system that returns a ticket number
     with (

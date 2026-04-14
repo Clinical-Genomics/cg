@@ -21,7 +21,6 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.apps.downsample.downsample import DownsampleAPI
 from cg.apps.gens import GensAPI
-from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
@@ -60,7 +59,6 @@ from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirecto
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
-from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.store.database import create_all_tables, drop_all_tables, initialize_database
 from cg.store.models import (
     Application,
@@ -414,6 +412,16 @@ def base_config_dict() -> dict:
             "sender_password": "",
         },
         "sentieon_licence_server": "127.0.0.1:8080",
+        "mutacc_auto_hg19": {
+            "binary_path": "echo",
+            "config_path": "mutacc-auto-stage-hg19.yaml",
+            "padding": 300,
+        },
+        "mutacc_auto_hg38": {
+            "binary_path": "echo",
+            "config_path": "mutacc-auto-stage-hg38.yaml",
+            "padding": 300,
+        },
     }
 
 
@@ -544,18 +552,6 @@ def hk_config_dict(root_path: Path):
 
 
 @pytest.fixture
-def genotype_config() -> dict:
-    """Genotype config fixture."""
-    return {
-        "genotype": {
-            "database": "database",
-            "config_path": "config/path",
-            "binary_path": "gtdb",
-        }
-    }
-
-
-@pytest.fixture
 def gens_config() -> dict[str, dict[str, str]]:
     """Gens config fixture."""
     return {
@@ -645,14 +641,6 @@ def delivery_rsync_service(cg_context: CGConfig) -> DeliveryRsyncService:
 def external_data_api(analysis_store, cg_context: CGConfig) -> ExternalDataAPI:
     """ExternalDataAPI fixture."""
     return ExternalDataAPI(config=cg_context)
-
-
-@pytest.fixture
-def genotype_api(genotype_config: dict) -> GenotypeAPI:
-    """Genotype API fixture."""
-    _genotype_api = GenotypeAPI(genotype_config)
-    _genotype_api.set_dry_run(True)
-    return _genotype_api
 
 
 @pytest.fixture
@@ -1677,8 +1665,6 @@ def base_store(
     organism = store.add_organism("C. jejuni", "C. jejuni")
     store.session.add(organism)
 
-    order: Order = Order(customer_id=1, id=MAF_ORDER_ID, ticket_id="100000000")
-    store.add_multiple_items_to_store([order])
     store.session.commit()
 
     yield store
@@ -2083,10 +2069,6 @@ def context_config(
                 "port": 22,
             },
         },
-        "genotype": {
-            "binary_path": "echo",
-            "config_path": "genotype-stage.yaml",
-        },
         "gisaid": {
             "binary_path": "/path/to/gisaid_uploader.py",
             "log_dir": "/path/to/log",
@@ -2133,9 +2115,14 @@ def context_config(
             "root": str(mip_dir),
             "script": "mip",
         },
-        "mutacc-auto": {
+        "mutacc_auto_hg19": {
             "binary_path": "echo",
-            "config_path": "mutacc-auto-stage.yaml",
+            "config_path": "mutacc-auto-stage-hg19.yaml",
+            "padding": 300,
+        },
+        "mutacc_auto_hg38": {
+            "binary_path": "echo",
+            "config_path": "mutacc-auto-stage-hg38.yaml",
             "padding": 300,
         },
         "mutant": {
@@ -2169,6 +2156,7 @@ def context_config(
             "tower_workflow": "nallo",
         },
         "raredisease": {
+            "default_target_bed": "twistexomecomprehensive_10.2_hg38_design.bed",
             "binary_path": nextflow_binary.as_posix(),
             "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
@@ -2181,7 +2169,7 @@ def context_config(
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_bin_path": Path("workflow", "path").as_posix(),
             "profile": "myprofile",
-            "references": Path("path", "to", "references").as_posix(),
+            "references_directory": Path("path", "to", "references").as_posix(),
             "repository": "https://some_url",
             "revision": "2.2.0",
             "root": str(raredisease_dir),
@@ -2190,6 +2178,25 @@ def context_config(
                 "mail_user": email_address,
             },
             "tower_workflow": "raredisease",
+            "verifybamid_svd": {
+                "wes": {
+                    "bed": Path("path", "to", "sleeping_quarters.bed"),
+                    "mu": Path("path", "to", "cow.mu"),
+                    "ud": Path("path", "to", "department_of_external_affairs.UD"),
+                },
+                "wgs": {
+                    "bed": Path("path", "to", "sleeping_quarters.bed"),
+                    "mu": Path("path", "to", "cow.mu"),
+                    "ud": Path("path", "to", "department_of_external_affairs.UD"),
+                },
+            },
+            "gcnvcaller": {
+                "twistexomecomprehensive_10.2_hg38_design.bed": {
+                    "gcnvcaller_model": Path("path", "to", "gcnvcaller_model"),
+                    "ploidy_model": Path("path", "to", "ploidy_model_"),
+                    "readcount_intervals": Path("path", "to", "readcount.intervals"),
+                }
+            },
         },
         "tomte": {
             "binary_path": nextflow_binary.as_posix(),
@@ -2914,7 +2921,6 @@ def raredisease_context(
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
-        reference_genome=GenomeVersion.HG19,
     )
 
     another_sample_enough_reads: Sample = helpers.add_sample(
@@ -2924,7 +2930,6 @@ def raredisease_context(
         last_sequenced_at=datetime.now(),
         reads=total_sequenced_reads_pass,
         application_tag=wgs_application_tag,
-        reference_genome=GenomeVersion.HG19,
     )
 
     helpers.add_relationship(

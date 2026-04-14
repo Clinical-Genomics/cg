@@ -206,7 +206,7 @@ def test_case_needs_to_be_stored(
     mip_rna_context: CGConfig,
     case: Case,
 ):
-    """Test starting MIP when files are decompressed but not stored in housekeeper"""
+    """Test starting MIP when files are decompressed but not stored in housekeeper."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a case is available for analysis
@@ -228,7 +228,7 @@ def test_case_needs_to_be_stored(
 
     # GIVEN that, a panel is returned
     mocker.patch.object(
-        mip_rna_context.scout_api_37,
+        mip_rna_context.scout_api_38,
         "export_panels",
         return_value=["OMIM-AUTO"],
     )
