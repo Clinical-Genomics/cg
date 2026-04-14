@@ -84,7 +84,6 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             ploidy_model=ploidy_model,
             readcount_intervals=readcount_intervals,
             sample_id_map=sample_mapping_file,
-            save_mapped_as_cram=True,
             skip_tools=skip_tools,
             target_bed=Path(self.references_directory, target_bed),
             vcfanno_extra_resources=f"{case_path}/{ScoutExportFileName.MANAGED_VARIANTS}",
