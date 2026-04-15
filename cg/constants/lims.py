@@ -171,14 +171,21 @@ MASTER_STEPS_UDFS = {
 
 
 class DocumentationMethod(StrEnum):
-    ATLAS: str = "Atlas"
-    AM: str = "AM"
+    ATLAS = "Atlas"
+    AM = "AM"
 
 
 class LimsArtifactTypes(StrEnum):
-    ANALYTE: str = "Analyte"
-    RESULT_FILE: str = "ResultFile"
+    ANALYTE = "Analyte"
+    RESULT_FILE = "ResultFile"
 
 
 class LimsProcess(StrEnum):
-    COVID_POOLING_STEP: str = "Pooling and Clean-up (Cov) v1"
+    COVID_POOLING_STEP = "Pooling and Clean-up (Cov) v1"
+
+
+class LimsStatus(StrEnum):
+    DONE = "done"
+    PENDING = "pending"
+    RE_PREP = "re-prep"
+    TOP_UP = "top-up"
