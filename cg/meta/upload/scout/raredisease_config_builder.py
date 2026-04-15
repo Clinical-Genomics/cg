@@ -96,6 +96,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
     def extract_rank_model_from_manifest(
         self, hk_manifest_file: File, variant_type: Variants
     ) -> str:
+        # TODO: Remove controller
         content: dict[str, dict[str, str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=hk_manifest_file
         )
@@ -112,7 +113,11 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             ValueError if pattern not found ing process or clinical not found in script.
         """
         pattern: str = variant_type.upper() + ":GENMOD_SCORE"
-        for key, value in content["tasks"].items():
+        for pipeline_step in content["description_domain"]["pipeline_steps"]:
+            description = pipeline_step.get("description")
+            output_list = pipeline_step.get("output_list", [])
+            if pattern in description and AnalysisTag.CLINICAL in output_list:
+                continue
             process: str = value.get("process")
             script: str = value.get("script")
             if pattern in process and AnalysisTag.CLINICAL in script:

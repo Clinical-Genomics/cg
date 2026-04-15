@@ -1,0 +1,33 @@
+{
+    "pipeline": {
+        "name": "nf-core/raredisease",
+        "author": "Clinical Genomics Stockholm",
+        "homePage": "https://github.com/nf-core/raredisease",
+        "description": "call and score variants from WGS/WES of rare disease patients",
+        "mainScript": "main.nf",
+        "nextflowVersion": "!>=24.04.2",
+        "version": "2.3.0dev",
+        "doi": ""
+    },
+    "published": {},
+    "tasks": {
+        "522": {
+            "id": "522",
+            "name": "NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SNV:GENMOD_SCORE (cleanshrimp)",
+            "cached": false,
+            "process": "NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SNV:GENMOD_SCORE",
+            "script": "\n    genmod \\\n        score \\\n        --rank_results \\\n        --family_file cleanshrimp.ped \\\n        --score_config rank_model_-v1.38-.ini \\\n        --outfile cleanshrimp_snv_genmod_score_clinical_score.vcf \\\n        cleanshrimp_snv_genmod_models_clinical_models.vcf\n\n    cat <<-END_VERSIONS > versions.yml\n    \"NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SNV:GENMOD_SCORE\":\n        genmod: $(echo $(genmod --version 2>&1) | sed 's/^.*genmod version: //' )\n    END_VERSIONS\n    ",
+            "inputs": [{}],
+            "outputs": {}
+        },
+        "521": {
+            "id": "521",
+            "name": "NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SV:GENMOD_SCORE (cleanshrimp)",
+            "cached": false,
+            "process": "NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SV:GENMOD_SCORE",
+            "script": "\n    genmod \\\n        score \\\n        --rank_results \\\n        --family_file cleanshrimp.ped \\\n        --score_config svrank_model_-v1.12-.ini \\\n        --outfile cleanshrimp_sv_genmod_score_clinical_score.vcf \\\n        cleanshrimp_sv_genmod_models_clinical_models.vcf\n\n    cat <<-END_VERSIONS > versions.yml\n    \"NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SV:GENMOD_SCORE\":\n        genmod: $(echo $(genmod --version 2>&1) | sed 's/^.*genmod version: //' )\n    END_VERSIONS\n    ",
+            "inputs": [{}],
+            "output": {}
+        }
+    }
+}

@@ -1,33 +1,55 @@
 {
-    "pipeline": {
-        "name": "nf-core/raredisease",
-        "author": "Clinical Genomics Stockholm",
-        "homePage": "https://github.com/nf-core/raredisease",
-        "description": "call and score variants from WGS/WES of rare disease patients",
-        "mainScript": "main.nf",
-        "nextflowVersion": "!>=24.04.2",
-        "version": "2.3.0dev",
-        "doi": ""
-    },
-    "published": {},
-    "tasks": {
-        "522": {
-            "id": "522",
-            "name": "NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SNV:GENMOD_SCORE (cleanshrimp)",
-            "cached": false,
-            "process": "NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SNV:GENMOD_SCORE",
-            "script": "\n    genmod \\\n        score \\\n        --rank_results \\\n        --family_file cleanshrimp.ped \\\n        --score_config rank_model_-v1.38-.ini \\\n        --outfile cleanshrimp_snv_genmod_score_clinical_score.vcf \\\n        cleanshrimp_snv_genmod_models_clinical_models.vcf\n\n    cat <<-END_VERSIONS > versions.yml\n    \"NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SNV:GENMOD_SCORE\":\n        genmod: $(echo $(genmod --version 2>&1) | sed 's/^.*genmod version: //' )\n    END_VERSIONS\n    ",
-            "inputs": [{}],
-            "outputs": {}
-        },
-        "521": {
-            "id": "521",
-            "name": "NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SV:GENMOD_SCORE (cleanshrimp)",
-            "cached": false,
-            "process": "NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SV:GENMOD_SCORE",
-            "script": "\n    genmod \\\n        score \\\n        --rank_results \\\n        --family_file cleanshrimp.ped \\\n        --score_config svrank_model_-v1.12-.ini \\\n        --outfile cleanshrimp_sv_genmod_score_clinical_score.vcf \\\n        cleanshrimp_sv_genmod_models_clinical_models.vcf\n\n    cat <<-END_VERSIONS > versions.yml\n    \"NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SV:GENMOD_SCORE\":\n        genmod: $(echo $(genmod --version 2>&1) | sed 's/^.*genmod version: //' )\n    END_VERSIONS\n    ",
-            "inputs": [{}],
-            "output": {}
-        }
-    }
+  "description_domain": {
+    "keywords": [
+    ],
+    "xref": [
+    ],
+    "platform": [
+      "Nextflow"
+    ],
+    "pipeline_steps": [
+      {
+        "step_number": 117,
+        "name": "2c2b9de46addb9fba758b6c9115e4571",
+        "description": "NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SV:GENMOD_SCORE (yellowhog)",
+        "input_list": [
+          {
+            "uri": "work/71/9f407032d2a80367e3679e0dc68c03/yellowhog.ped"
+          },
+          {
+            "uri": "work/1a/b2dad17f40fb0914a7e321d83a9578/yellowhog_sv_genmod_models_research_models.vcf"
+          },
+          {
+            "uri": "file:///home/proj/stage/workflows/raredisease/references/gms_rd_3.0/grch38_sv_rank_model_-v0.1-.ini"
+          }
+        ],
+        "output_list": [
+          {
+            "uri": "work/2c/2b9de46addb9fba758b6c9115e4571/yellowhog_sv_genmod_score_research_score.vcf"
+          }
+        ]
+      },
+      {
+        "step_number": 326,
+        "name": "dd5be42675918c0016b53efd8338bfc8",
+        "description": "NFCORE_RAREDISEASE:RAREDISEASE:RANK_VARIANTS_SNV:GENMOD_SCORE (yellowhog)",
+        "input_list": [
+          {
+            "uri": "file:///home/proj/stage/workflows/raredisease/references/gms_rd_3.0/grch38_rank_model_-v0.3-.ini"
+          },
+          {
+            "uri": "work/71/9f407032d2a80367e3679e0dc68c03/yellowhog.ped"
+          },
+          {
+            "uri": "work/75/9220bf971d54c76ac3ff65ac525e7e/yellowhog_snv_genmod_models_research_models.vcf"
+          }
+        ],
+        "output_list": [
+          {
+            "uri": "work/dd/5be42675918c0016b53efd8338bfc8/yellowhog_snv_genmod_score_research_score.vcf"
+          }
+        ]
+      }
+    ]
+  }
 }
