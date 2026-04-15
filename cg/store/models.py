@@ -740,7 +740,7 @@ class Sample(Base, PriorityMixin):
     invoice_id: Mapped[int | None] = mapped_column(ForeignKey("invoice.id"))
     is_tumour: Mapped[bool | None] = mapped_column(default=False)
     lims_status: Mapped[str] = mapped_column(
-        sqlalchemy.Enum(*(status.value for status in LimsStatus)), default=LimsStatus.PENDING
+        types.Enum(*(status.value for status in LimsStatus)), default=LimsStatus.PENDING
     )
     loqusdb_id: Mapped[Str64 | None]
     name: Mapped[Str128]
