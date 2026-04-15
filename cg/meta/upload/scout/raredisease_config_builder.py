@@ -103,12 +103,12 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         else:
             return self._get_version_from_file_path(content.get("score_config_sv", ""))
 
-    def _get_version_from_file_path(self, script: str) -> str:
+    def _get_version_from_file_path(self, file_path: str) -> str:
         """
         Returns the rank model version in the format 'vX.X from the given file path.
         Raises a ValueError if no rank model version is found in the file path.
         """
-        if match := re.search(r"v(\d+\.\d+)", script):
+        if match := re.search(r"v(\d+\.\d+)", file_path):
             return match.group(1)
         raise ValueError("No rank model version found")
 
