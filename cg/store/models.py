@@ -739,7 +739,9 @@ class Sample(Base, PriorityMixin):
     internal_id: Mapped[UniqueStr]
     invoice_id: Mapped[int | None] = mapped_column(ForeignKey("invoice.id"))
     is_tumour: Mapped[bool | None] = mapped_column(default=False)
-    lims_status: Mapped[LimsStatus] = mapped_column(default=LimsStatus.PENDING)
+    lims_status: Mapped[str] = mapped_column(
+        types.Enum(*(status.value for status in LimsStatus)), default=LimsStatus.PENDING
+    )
     loqusdb_id: Mapped[Str64 | None]
     name: Mapped[Str128]
     no_invoice: Mapped[bool] = mapped_column(default=False)
