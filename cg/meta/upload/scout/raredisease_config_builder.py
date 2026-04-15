@@ -15,6 +15,7 @@ from cg.constants.scout import (
 )
 from cg.constants.sequencing import Variants
 from cg.io.controller import ReadFile
+from cg.io.yaml import read_yaml
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -84,25 +85,22 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         Raises:
             FileNotFoundError if no manifest file is found in housekeeper.
         """
-        hk_manifest_file: File = self.get_file_from_hk(
-            {NFAnalysisTags.MANIFEST}, hk_version=hk_version
+        hk_params_file: str | None = self.get_file_from_hk(
+            hk_tags={"nextflow-params"}, hk_version=hk_version
         )
-        if not hk_manifest_file:
-            raise FileNotFoundError("No manifest file found in Housekeeper.")
+        if not hk_params_file:
+            raise FileNotFoundError("No params file found in Housekeeper.")
         return self.extract_rank_model_from_manifest(
-            hk_manifest_file=hk_manifest_file, variant_type=variant_type
+            hk_params_file=hk_params_file, variant_type=variant_type
         )
 
-    def extract_rank_model_from_manifest(
-        self, hk_manifest_file: File, variant_type: Variants
-    ) -> str:
-        # TODO: Remove controller
-        content: dict[str, dict[str, str]] = ReadFile.get_content_from_file(
-            file_format=FileFormat.JSON, file_path=hk_manifest_file
-        )
-        return self.get_rank_model_version_from_manifest_content(
-            content=content, variant_type=variant_type
-        )
+    def extract_rank_model_from_manifest(self, hk_params_file: str, variant_type: Variants) -> str:
+        # TODO: make this return the version, not the file
+        content: dict[str, str] = read_yaml(hk_params_file)
+        if variant_type == Variants.SNV:
+            return content.get("score_config_snv")
+        else:
+            return content.get("score_config_sv")
 
     def get_rank_model_version_from_manifest_content(
         self, content: dict[str, dict[str, str]], variant_type: Variants
