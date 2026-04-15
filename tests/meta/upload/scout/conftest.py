@@ -9,7 +9,7 @@ import pytest
 
 from cg.constants import DataDelivery, Workflow
 from cg.constants.constants import FileFormat, GenomeVersion
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag, NFAnalysisTags
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag
 from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack
 from cg.constants.sequencing import SeqLibraryPrepCategory
@@ -642,9 +642,9 @@ def raredisease_analysis_hk_bundle_data(
                 "tags": ["multiqc-html", sample_id],
             },
             {
-                "path": Path(raredisease_analysis_dir, "manifest." + FileFormat.JSON).as_posix(),
+                "path": Path(raredisease_analysis_dir, "params." + FileFormat.YAML).as_posix(),
                 "archive": False,
-                "tags": [NFAnalysisTags.MANIFEST],
+                "tags": ["nextflow-params"],
             },
         ],
     }
