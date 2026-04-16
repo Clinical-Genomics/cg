@@ -333,10 +333,13 @@ def test_update_sample_lims_status(store: Store, helpers: StoreHelpers, mocker: 
     commit_spy = mocker.spy(store, "commit_to_store")
 
     # WHEN updating the LIMS status of the sample
-    store.update_sample_lims_status(internal_id=sample_1.internal_id, lims_status=LimsStatus.TOP_UP)
+    updated_sample: Sample = store.update_sample_lims_status(
+        internal_id=sample_1.internal_id, lims_status=LimsStatus.TOP_UP
+    )
 
     # THEN the sample should have been updated
     assert sample_1.lims_status == LimsStatus.TOP_UP
+    assert updated_sample.lims_status == LimsStatus.TOP_UP
 
     # THEN the commit should not have been called
     commit_spy.assert_not_called()

@@ -60,6 +60,7 @@ def get_samples():
 
 @SAMPLES_BLUEPRINT.route("/samples", methods=["PATCH"])
 def update_samples():
+    """Update the lims_status attribute of a list of samples."""
     try:
         samples_request = SamplesUpdateRequest.model_validate(request.json)
         for sample in samples_request.samples:

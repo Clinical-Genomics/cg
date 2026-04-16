@@ -145,6 +145,7 @@ class UpdateMixin(ReadHandler):
         sequencing_run.processed = processed
         self.commit_to_store()
 
-    def update_sample_lims_status(self, internal_id: str, lims_status: LimsStatus):
-        db_sample = self.get_sample_by_internal_id_strict(internal_id)
-        db_sample.lims_status = lims_status
+    def update_sample_lims_status(self, internal_id: str, lims_status: LimsStatus) -> Sample:
+        sample: Sample = self.get_sample_by_internal_id_strict(internal_id)
+        sample.lims_status = lims_status
+        return sample
