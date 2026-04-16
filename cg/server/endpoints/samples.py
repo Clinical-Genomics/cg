@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from flask import Blueprint, abort, g, jsonify, request
+from flask import Blueprint, Response, abort, g, jsonify, request
 
 from cg.exc import AuthorisationError
 from cg.server.dto.samples.requests import CollaboratorSamplesRequest, SamplesRequest
@@ -55,4 +55,8 @@ def get_samples():
 
 @SAMPLES_BLUEPRINT.route("/samples", methods=["PATCH"])
 def update_samples():
-    return "", HTTPStatus.OK
+    samples_request = request.json
+    for sample in samples_request["samples"]:
+        db_sample = db.get_sample_by_internal_id_strict(sample["internal_id"])
+        db_sample.lims_status = sample["lims_status"]
+    return Response(status=HTTPStatus.NO_CONTENT)

@@ -19,4 +19,4 @@ def test_update_samples(client: FlaskClient):
     )
 
     # THEN the samples were updated in the database
-    assert response.status_code == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.NO_CONTENT
