@@ -42,7 +42,7 @@ def parse_sample_in_collaboration(sample_id):
     return jsonify(**sample.to_dict(links=True))
 
 
-@SAMPLES_BLUEPRINT.route("/samples")
+@SAMPLES_BLUEPRINT.route("/samples", methods=["GET"])
 def get_samples():
     """Return samples."""
     samples_request = SamplesRequest.model_validate(request.args.to_dict())
@@ -51,3 +51,8 @@ def get_samples():
     except AuthorisationError:
         return abort(HTTPStatus.FORBIDDEN)
     return jsonify(samples=samples, total=total)
+
+
+@SAMPLES_BLUEPRINT.route("/samples", methods=["PATCH"])
+def update_samples():
+    return "", HTTPStatus.OK
