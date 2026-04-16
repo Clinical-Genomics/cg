@@ -1,4 +1,4 @@
-""" Module to decouple cg code from Housekeeper code """
+"""Module to decouple cg code from Housekeeper code"""
 
 import logging
 import os
@@ -55,11 +55,6 @@ class HousekeeperAPI:
         self.commit()
         LOG.info(f"New bundle created with name {new_bundle.name}")
         return new_bundle
-
-    def set_to_archive(self, file: File, value: bool) -> None:
-        """Sets the 'to_archive' field of a file."""
-        file.to_archive = value
-        self.commit()
 
     def new_file(
         self, path: str, checksum: str = None, to_archive: bool = False, tags: list = None
@@ -120,7 +115,7 @@ class HousekeeperAPI:
         *,
         bundle: str = None,
         tags: set[str] = None,
-        version: int = None,
+        version: int | None = None,
         path: str = None,
     ) -> Query:
         """Fetch files."""
@@ -180,6 +175,23 @@ class HousekeeperAPI:
         """Return latest file from Housekeeper, filtered by bundle and/or tags and/or version."""
         files: Query = self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
         return files.order_by(File.id.desc()).first()
+
+    def get_latest_file_strict(
+        self, bundle: str, tags: list | None = None, version: int | None = None
+    ) -> File:
+        """
+        Return latest file from Housekeeper, filtered by bundle and/or tags and/or version.
+        Raises:
+            HousekeeperFileMissingError if no file is found.
+        """
+        files: Query = self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
+        latest_file: File | None = files.order_by(File.id.desc()).first()
+        if not latest_file:
+            raise HousekeeperFileMissingError(
+                f"No file matching bundle {bundle}, version {version} with tags {tags}"
+            )
+        else:
+            return latest_file
 
     def check_bundle_files(
         self,

@@ -33,19 +33,21 @@ class FastqFetcher(InputFetcher):
 
     def ensure_files_are_ready(self, case_id: str) -> None:
         """
-        Ensures Fastq files are ready to be analysed. Executes the following processes if needed:
+        Ensures FASTQ files are ready to be analysed. Executes the following processes if needed:
         1. Retrieval of flow cells via PDC.
         2. Retrieval of Spring files via DDN.
         3. Decompression of Spring files.
-        4. Adds decompressed Fastq files to Housekeeper.
+        4. Adds decompressed FASTQ files to Housekeeper.
         Raises:
             AnalysisNotReadyError if the FASTQ files are not ready to be analysed.
         """
-        LOG.info("Ensuring Fastq files are ready for analysis")
         self._ensure_files_are_present(case_id)
         self._resolve_decompression(case_id)
         if not self._are_fastq_files_ready_for_analysis(case_id):
-            raise AnalysisNotReadyError("FASTQ files are not present for the analysis to start")
+            raise AnalysisNotReadyError(
+                f"FASTQ files needed to start case {case_id} are not present"
+            )
+        LOG.info(f"All FASTQ files are ready for analysing case {case_id}")
 
     def _ensure_files_are_present(self, case_id: str) -> None:
         """Checks if any Illumina runs need to be retrieved and queries PDC if that is the case.
@@ -94,7 +96,7 @@ class FastqFetcher(InputFetcher):
             else:
                 self._decompress_case(case_id)
         elif case_compression_data.is_spring_decompression_running():
-            self.status_db.set_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
+            self.status_db.update_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
             return
 
         self._add_decompressed_fastq_files_to_housekeeper(case_id)
@@ -107,7 +109,7 @@ class FastqFetcher(InputFetcher):
         except DecompressionCouldNotStartError:
             LOG.warning(f"Decompression failed to start for {case_id}")
             return
-        self.status_db.set_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
+        self.status_db.update_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
         LOG.info(f"Decompression started for {case_id}")
 
     def _are_fastq_files_ready_for_analysis(self, case_id: str) -> bool:
@@ -153,7 +155,7 @@ class FastqFetcher(InputFetcher):
             LOG.info(
                 f"Decompression is running for {case_id}, analysis will be started when decompression is done"
             )
-            self.status_db.set_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
+            self.status_db.update_case_action(case_internal_id=case_id, action=CaseActions.ANALYZE)
 
     @staticmethod
     def _should_skip_sample(case: Case, sample: Sample) -> bool:

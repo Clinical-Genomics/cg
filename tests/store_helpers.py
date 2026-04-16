@@ -40,6 +40,7 @@ from cg.store.models import (
     OrderTypeApplication,
     Organism,
     PacbioSequencingRun,
+    PacbioSMRTCellMetrics,
     Panel,
     Pool,
     RunDevice,
@@ -53,6 +54,20 @@ LOG = logging.getLogger(__name__)
 
 class StoreHelpers:
     """Class to hold helper functions that needs to be used all over."""
+
+    @staticmethod
+    def add_bed(name: str) -> Bed:
+        """Build a new bed record."""
+        return Bed(name=name)
+
+    @staticmethod
+    def add_bed_version(bed: Bed, version: int, filename: str, shortname: str) -> BedVersion:
+        """Build a new bed version record."""
+        bed_version: BedVersion = BedVersion(
+            version=version, filename=filename, shortname=shortname, genome_version="hg19"
+        )
+        bed_version.bed = bed
+        return bed_version
 
     @staticmethod
     def ensure_hk_bundle(store: HousekeeperAPI, bundle_data: dict, include: bool = False) -> Bundle:
@@ -290,15 +305,15 @@ class StoreHelpers:
         store.session.commit()
         return application_limitation
 
-    @staticmethod
-    def ensure_bed_version(store: Store, bed_name: str = "dummy_bed") -> BedVersion:
+    @classmethod
+    def ensure_bed_version(cls, store: Store, bed_name: str = "dummy_bed") -> BedVersion:
         """Return existing or create and return bed version for tests."""
         bed: Bed | None = store.get_bed_by_name(bed_name)
         if not bed:
-            bed: Bed = store.add_bed(name=bed_name)
+            bed: Bed = cls.add_bed(name=bed_name)
             store.session.add(bed)
 
-        bed_version: BedVersion = store.add_bed_version(
+        bed_version: BedVersion = cls.add_bed_version(
             bed=bed, version=1, filename="dummy_filename", shortname=bed_name
         )
         store.session.add(bed_version)
@@ -877,13 +892,19 @@ class StoreHelpers:
         store: Store,
         sample: Sample,
         case: Case,
+        should_deliver_sample: bool = True,
         status: str = PhenotypeStatus.UNKNOWN,
         father: Sample = None,
         mother: Sample = None,
     ) -> CaseSample:
         """Utility function to link a sample to a case."""
         link = store.relate_sample(
-            sample=sample, case=case, status=status, father=father, mother=mother
+            sample=sample,
+            case=case,
+            status=status,
+            father=father,
+            mother=mother,
+            should_deliver_sample=should_deliver_sample,
         )
         store.session.add(link)
         store.session.commit()
@@ -946,12 +967,21 @@ class StoreHelpers:
         return sample_obj
 
     @classmethod
-    def relate_samples(cls, base_store: Store, case: Case, samples: list[Sample]):
+    def relate_samples(
+        cls,
+        base_store: Store,
+        case: Case,
+        samples: list[Sample],
+        should_deliver_sample: bool = True,
+    ):
         """Utility function to relate many samples to one case."""
 
         for sample in samples:
             link = base_store.relate_sample(
-                case=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+                case=case,
+                sample=sample,
+                status=PhenotypeStatus.UNKNOWN,
+                should_deliver_sample=should_deliver_sample,
             )
             base_store.session.add(link)
             base_store.session.commit()
@@ -1133,49 +1163,49 @@ class StoreHelpers:
         return device
 
     @staticmethod
-    def add_pacbio_sequencing_run(
+    def add_pacbio_smrt_cell_metrics(
         store: Store,
         id: int,
         device_id: int,
-        run_name: str = "run_name",
-    ) -> PacbioSequencingRun:
-        run = PacbioSequencingRun(
-            barcoded_hifi_reads=123456700,
-            barcoded_hifi_yield=12345600,
-            barcoded_hifi_reads_percentage=99.9,
+        sequencing_run: PacbioSequencingRun,
+    ) -> PacbioSMRTCellMetrics:
+        run = PacbioSMRTCellMetrics(
             barcoded_hifi_mean_read_length=14789,
-            id=id,
-            well="A01",
-            plate=1,
-            run_name=run_name,
-            movie_name="movie_name",
-            started_at=datetime.now(),
-            hifi_reads=123456789,
-            hifi_yield=12345678,
+            barcoded_hifi_reads=123456700,
+            barcoded_hifi_reads_percentage=99.9,
+            barcoded_hifi_yield=12345600,
+            barcoded_hifi_yield_percentage=12.65,
+            completed_at=datetime.now(),
+            control_mean_read_concordance=0,
+            control_mean_read_length=0,
+            control_mode_read_concordance=0,
+            control_reads=0,
+            device_id=device_id,
+            failed_mean_read_length=0,
+            failed_reads=0,
+            failed_yield=0,
             hifi_mean_read_length=15000,
             hifi_median_read_quality="Q32",
-            percent_reads_passing_q30=92.3,
+            hifi_reads=123456789,
+            hifi_yield=12345678,
+            id=id,
+            movie_name="movie_name",
             p0_percent=79.1,
             p1_percent=13.1,
             p2_percent=0.1,
-            device_id=device_id,
-            completed_at=datetime.now(),
-            productive_zmws=123,
-            polymerase_mean_read_length=123,
-            polymerase_mean_longest_subread=123,
-            polymerase_read_length_n50=123,
+            percent_reads_passing_q30=92.3,
+            plate=1,
             polymerase_longest_subread_n50=123,
-            control_reads=0,
-            control_mean_read_length=0,
-            control_mean_read_concordance=0,
-            control_mode_read_concordance=0,
-            barcoded_hifi_yield_percentage=12.65,
-            failed_reads=0,
-            failed_mean_read_length=0,
-            failed_yield=0,
+            polymerase_mean_longest_subread=123,
+            polymerase_mean_read_length=123,
+            polymerase_read_length_n50=123,
+            productive_zmws=123,
+            sequencing_run=sequencing_run,
+            started_at=datetime.now(),
             unbarcoded_hifi_mean_read_length=0,
-            unbarcoded_hifi_yield=0,
             unbarcoded_hifi_reads=0,
+            unbarcoded_hifi_yield=0,
+            well="A01",
         )
         store.add_item_to_store(run)
         store.commit_to_store()

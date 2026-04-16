@@ -31,7 +31,7 @@ from cg.meta.archive.ddn.models import (
     RetrievalResponse,
     TransferPayload,
 )
-from cg.meta.archive.ddn.utils import get_metadata, get_request_log
+from cg.meta.archive.ddn.utils import get_request_log
 from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
 
@@ -103,17 +103,16 @@ class DDNDataFlowClient(ArchiveHandler):
             self._refresh_auth_token()
         return {"Authorization": f"Bearer {self.auth_token}"}
 
-    def archive_file(self, file_and_sample: FileAndSample) -> int:
+    def archive_files(self, files_and_samples: list[FileAndSample]) -> int:
         """Archives all files provided, to their corresponding destination, as given by sources
         and destination in TransferData. Returns the job ID of the archiving task."""
         miria_file_data: list[MiriaObject] = self.convert_into_transfer_data(
-            [file_and_sample], is_archiving=True
+            files_and_samples=files_and_samples, is_archiving=True
         )
-        metadata: list[dict] = get_metadata(file_and_sample.sample)
         archival_request: TransferPayload = self.create_transfer_request(
-            miria_file_data=miria_file_data, is_archiving_request=True, metadata=metadata
+            miria_file_data=miria_file_data, is_archiving_request=True
         )
-        archival_response: ArchivalResponse = self._archive_file(
+        archival_response: ArchivalResponse = self._archive_files(
             headers=dict(self.headers, **self.auth_header),
             body=archival_request,
         )
@@ -138,7 +137,6 @@ class DDNDataFlowClient(ArchiveHandler):
         self,
         miria_file_data: list[MiriaObject],
         is_archiving_request: bool,
-        metadata: list[dict] = [],
     ) -> TransferPayload:
         """Performs the necessary curation of paths for the request to be valid, depending on if
         it is an archiving or a retrieve request.
@@ -156,7 +154,6 @@ class DDNDataFlowClient(ArchiveHandler):
         transfer_request = TransferPayload(
             files_to_transfer=miria_file_data,
             createFolder=is_archiving_request,
-            metadataList=metadata,
         )
         transfer_request.trim_paths(attribute_to_trim=attribute)
         transfer_request.add_repositories(
@@ -214,7 +211,7 @@ class DDNDataFlowClient(ArchiveHandler):
                 f"Deletion failed with message {delete_file_response.message}"
             )
 
-    def _archive_file(self, body: BaseModel, headers: dict) -> ArchivalResponse:
+    def _archive_files(self, body: BaseModel, headers: dict) -> ArchivalResponse:
         """Archives a file via DDN and validates the response."""
         response: Response = self._post_request(
             body=body, endpoint=DataflowEndpoints.ARCHIVE_FILES, headers=headers

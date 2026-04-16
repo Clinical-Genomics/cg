@@ -10,7 +10,6 @@ from sqlalchemy.dialects import mysql
 
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision = "3a0250e5526d"
 down_revision = "6f368f57df4a"

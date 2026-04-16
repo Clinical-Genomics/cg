@@ -9,7 +9,6 @@ from housekeeper.store.models import File, Version
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from sqlalchemy.orm import Query
 
-from cg.apps.coverage import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
@@ -23,6 +22,7 @@ from cg.meta.delivery.delivery import DeliveryAPI
 from cg.meta.delivery_report.data_validators import get_empty_report_data, get_missing_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.analysis import AnalysisModel
+from cg.models.delivery.delivery import DeliveryFile
 from cg.models.delivery_report.metadata import SampleMetadataModel
 from cg.models.delivery_report.report import (
     CaseModel,
@@ -48,7 +48,6 @@ class DeliveryReportAPI:
 
     def __init__(self, analysis_api: AnalysisAPI):
         self.analysis_api: AnalysisAPI = analysis_api
-        self.chanjo_api: ChanjoAPI = self.analysis_api.chanjo_api
         self.delivery_api: DeliveryAPI = self.analysis_api.delivery_api
         self.housekeeper_api: HousekeeperAPI = self.analysis_api.housekeeper_api
         self.lims_api: LimsAPI = self.analysis_api.lims_api
@@ -250,14 +249,14 @@ class DeliveryReportAPI:
         for case_sample in case_samples:
             sample: Sample = case_sample.sample
             lims_sample: dict[str, Any] = self.lims_api.sample(sample.internal_id)
-            delivered_files: list[File] | None = (
+            delivered_files: list[DeliveryFile] | None = (
                 self.delivery_api.get_analysis_sample_delivery_files_by_sample(
                     case=case, sample=sample
                 )
                 if self.delivery_api.is_analysis_delivery(case.data_delivery)
                 else None
             )
-            delivered_fastq_files: list[File] | None = (
+            delivered_fastq_files: list[DeliveryFile] | None = (
                 self.delivery_api.get_fastq_delivery_files_by_sample(case=case, sample=sample)
                 if self.delivery_api.is_fastq_delivery(case.data_delivery)
                 else None
@@ -332,7 +331,7 @@ class DeliveryReportAPI:
 
     def get_case_analysis_data(self, case: Case, analysis: Analysis) -> DataAnalysisModel:
         """Return workflow attributes used for data analysis."""
-        delivered_files: list[File] | None = (
+        delivered_files: list[DeliveryFile] | None = (
             self.delivery_api.get_analysis_case_delivery_files(case)
             if self.delivery_api.is_analysis_delivery(case.data_delivery)
             else None

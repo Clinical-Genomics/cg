@@ -20,7 +20,18 @@ class PacBioRunFileManager(RunFileManager):
         """Get the file paths required by the PacBioMetricsParser."""
         run_path: Path = run_data.full_path
         validate_files_or_directories_exist([run_path])
-        return self._get_report_files(run_path)
+        unzipped_dir: Path = self._get_unzipped_reports_dir(run_path)
+        files_to_parse: list[Path] = [
+            Path(unzipped_dir, PacBioDirsAndFiles.BARCODES_REPORT),
+            Path(unzipped_dir, PacBioDirsAndFiles.CONTROL_REPORT),
+            Path(unzipped_dir, PacBioDirsAndFiles.LOADING_REPORT),
+            Path(unzipped_dir, PacBioDirsAndFiles.RAW_DATA_REPORT),
+            Path(unzipped_dir, PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT),
+            self._get_ccs_report_file(run_path),
+            self._get_metadata_file(run_path),
+        ]
+        validate_files_or_directories_exist(files_to_parse)
+        return files_to_parse
 
     @handle_post_processing_errors(
         to_except=(FileNotFoundError,), to_raise=PostProcessingRunFileManagerError
@@ -53,19 +64,16 @@ class PacBioRunFileManager(RunFileManager):
             raise FileNotFoundError(f"No CCS report file found in {statistics_dir}")
         return files[0]
 
-    def _get_report_files(self, run_path: Path) -> list[Path]:
-        """Return the paths to the report files."""
-        unzipped_dir: Path = self._get_unzipped_reports_dir(run_path)
-        report_files: list[Path] = [
-            Path(unzipped_dir, PacBioDirsAndFiles.BARCODES_REPORT),
-            Path(unzipped_dir, PacBioDirsAndFiles.CONTROL_REPORT),
-            Path(unzipped_dir, PacBioDirsAndFiles.LOADING_REPORT),
-            Path(unzipped_dir, PacBioDirsAndFiles.RAW_DATA_REPORT),
-            Path(unzipped_dir, PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT),
-            self._get_ccs_report_file(run_path),
-        ]
-        validate_files_or_directories_exist(report_files)
-        return report_files
+    @staticmethod
+    def _get_metadata_file(run_path: Path) -> Path:
+        """Return the path to the metadata file."""
+        metadata_dir: Path = Path(run_path, PacBioDirsAndFiles.METADATA_DIR)
+        files: list[Path] = get_files_matching_pattern(
+            directory=metadata_dir, pattern=f"*{PacBioDirsAndFiles.METADATA_FILE_SUFFIX}"
+        )
+        if not files:
+            raise FileNotFoundError(f"No metadata file found in {metadata_dir}")
+        return files[0]
 
     @staticmethod
     def _remove_unassigned_bam_file(bam_files: list[Path]) -> list[Path]:

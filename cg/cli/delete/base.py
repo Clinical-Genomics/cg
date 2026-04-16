@@ -1,4 +1,4 @@
-"""CLI for deleting records in statusDB """
+"""CLI for deleting records in statusDB"""
 
 import logging
 
@@ -7,10 +7,7 @@ import rich_click as click
 from cg.cli.delete.case import delete_case
 from cg.cli.delete.cases import delete_cases
 from cg.cli.delete.illumina_sequencing_run import delete_illumina_run
-from cg.cli.delete.observations import (
-    delete_available_observations,
-    delete_observations,
-)
+from cg.cli.delete.observations import delete_available_observations, delete_observations
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 
 LOG = logging.getLogger(__name__)

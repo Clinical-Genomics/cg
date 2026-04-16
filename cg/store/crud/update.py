@@ -13,6 +13,7 @@ from cg.store.models import (
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
     Order,
+    PacbioSequencingRun,
     Sample,
 )
 
@@ -78,10 +79,10 @@ class UpdateMixin(ReadHandler):
         sample.reads = total_reads_for_sample
         self.commit_to_store()
 
-    def update_sample_reads(self, internal_id: str, reads: int):
+    def update_sample_reads_pacbio(self, internal_id: str, reads: int):
         """Add reads to the current reads for a sample."""
-        sample: Sample = self.get_sample_by_internal_id(internal_id)
-        sample.reads += reads
+        sample: Sample = self.get_sample_by_internal_id_strict(internal_id)
+        sample.reads = reads
         self.commit_to_store()
 
     def update_sample_sequenced_at(self, internal_id: str, date: datetime):
@@ -131,4 +132,14 @@ class UpdateMixin(ReadHandler):
         """Update the delivery report created_at field of an analysis."""
         analysis: Analysis = self.get_analysis_by_entry_id(analysis_id)
         analysis.delivery_report_created_at = delivery_report_date
+        self.commit_to_store()
+
+    def update_pacbio_sequencing_run_comment(self, id: int, comment: str):
+        sequencing_run: PacbioSequencingRun = self.get_pacbio_sequencing_run_by_id(id)
+        sequencing_run.comment = comment
+        self.commit_to_store()
+
+    def update_pacbio_sequencing_run_processed(self, id: int, processed: bool):
+        sequencing_run: PacbioSequencingRun = self.get_pacbio_sequencing_run_by_id(id)
+        sequencing_run.processed = processed
         self.commit_to_store()

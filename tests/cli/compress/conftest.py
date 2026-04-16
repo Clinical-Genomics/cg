@@ -50,7 +50,7 @@ def compress_api() -> MockCompressAPI:
 
 @pytest.fixture
 def real_crunchy_api(
-    crunchy_config: dict[str, dict[str, Any]]
+    crunchy_config: dict[str, dict[str, Any]],
 ) -> Generator[CrunchyAPI, None, None]:
     """Return Crunchy API."""
     _api = CrunchyAPI(crunchy_config)

@@ -14,7 +14,7 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.nallo import NalloAnalysisAPI
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.rnafusion_analysis_api import RnafusionAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
@@ -93,5 +93,3 @@ def test_create_scout_load_config(
 
         # THEN assert that the code exits with success
         assert result.exit_code == EXIT_SUCCESS
-        # THEN assert that the root path is in the log
-        assert cg_context.meta_apis["upload_api"].analysis_api.root in caplog.text

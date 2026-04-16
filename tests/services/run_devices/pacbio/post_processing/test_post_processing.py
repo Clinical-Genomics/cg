@@ -22,8 +22,8 @@ from cg.services.run_devices.pacbio.post_processing_service import PacBioPostPro
 
 
 def test_pac_bio_post_processing_run_name_error(pac_bio_context):
-    # GIVEN a PacBioPostProcessingService and a wrong run name
-    run_name: str = "run_name"
+    # GIVEN a PacBioPostProcessingService and a wrong run full name
+    wrong_run_full_name: str = "r12345_1234_123"
     post_processing_service: PacBioPostProcessingService = (
         pac_bio_context.post_processing_services.pacbio
     )
@@ -32,11 +32,11 @@ def test_pac_bio_post_processing_run_name_error(pac_bio_context):
 
     # THEN a PostProcessingError is raised
     with pytest.raises(PostProcessingError):
-        post_processing_service.post_process(run_name=run_name)
+        post_processing_service.post_process(run_full_name=wrong_run_full_name)
 
 
 def test_pac_bio_post_processing_store_data_error(
-    pac_bio_context: CGConfig, pacbio_barcoded_sequencing_run_name: str
+    pac_bio_context: CGConfig, pacbio_barcoded_smrt_cell_full_name: str
 ):
     # GIVEN a PacBioPostProcessingService that raises an error when storing data in StatusDB
 
@@ -50,11 +50,11 @@ def test_pac_bio_post_processing_store_data_error(
     ):
         # THEN a PostProcessingError is raised
         with pytest.raises(PostProcessingError):
-            post_processing_service.post_process(run_name=pacbio_barcoded_sequencing_run_name)
+            post_processing_service.post_process(run_full_name=pacbio_barcoded_smrt_cell_full_name)
 
 
 def test_pac_bio_post_processing_store_files_error(
-    pac_bio_context: CGConfig, pacbio_barcoded_sequencing_run_name: str
+    pac_bio_context: CGConfig, pacbio_barcoded_smrt_cell_full_name: str
 ):
     # GIVEN a PacBioPostProcessingService that raises an error when storing files in Housekeeper
     post_processing_service: PacBioPostProcessingService = (
@@ -70,12 +70,12 @@ def test_pac_bio_post_processing_store_files_error(
     ):
         # THEN a PostProcessingError is raised
         with pytest.raises(PostProcessingError):
-            post_processing_service.post_process(run_name=pacbio_barcoded_sequencing_run_name)
+            post_processing_service.post_process(run_full_name=pacbio_barcoded_smrt_cell_full_name)
 
 
 def test_can_post_processing_start_true(
     pac_bio_post_processing_service: PacBioPostProcessingService,
-    pacbio_barcoded_sequencing_run_name,
+    pacbio_barcoded_smrt_cell_full_name: str,
 ):
     """Tests that the post-processing is deemed ready to start when SMRT cells are ready."""
     # GIVEN a parent folder with two SMRT-cells
@@ -86,7 +86,7 @@ def test_can_post_processing_start_true(
     )
     # WHEN checking if post-processing can start
     can_start: bool = pac_bio_post_processing_service.can_post_processing_start(
-        pacbio_barcoded_sequencing_run_name
+        pacbio_barcoded_smrt_cell_full_name
     )
 
     # THEN it should return True
@@ -95,7 +95,7 @@ def test_can_post_processing_start_true(
 
 def test_can_post_processing_start_false(
     pac_bio_post_processing_service: PacBioPostProcessingService,
-    pacbio_barcoded_sequencing_run_name,
+    pacbio_barcoded_smrt_cell_full_name: str,
 ):
     """Tests that the post-processing is not deemed ready to start when at least one SMRT cell is not are ready."""
     # GIVEN a parent folder with two SMRT-cells
@@ -105,14 +105,14 @@ def test_can_post_processing_start_false(
         side_effect=[
             None,
             PostProcessingRunFileManagerError(
-                f"No Manifest file found in {pacbio_barcoded_sequencing_run_name}"
+                f"No Manifest file found in {pacbio_barcoded_smrt_cell_full_name}"
             ),
         ]
     )
 
     # WHEN checking if post-processing can start
     can_start: bool = pac_bio_post_processing_service.can_post_processing_start(
-        pacbio_barcoded_sequencing_run_name
+        pacbio_barcoded_smrt_cell_full_name
     )
 
     # THEN it should return False

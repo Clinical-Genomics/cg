@@ -6,6 +6,7 @@ import logging
 import rich_click as click
 
 from cg.cli.generate.delivery_report.base import generate_delivery_report
+from cg.cli.upload.coverage import upload_coverage
 from cg.cli.upload.genotype import upload_genotypes
 from cg.cli.upload.gens import upload_to_gens
 from cg.cli.upload.observations import upload_observations_to_loqusdb
@@ -30,6 +31,8 @@ class RarediseaseUploadAPI(UploadAPI):
         """Uploads RAREDISEASE analysis data and files."""
         analysis: Analysis = self.status_db.get_latest_completed_analysis_for_case(case.internal_id)
         self.update_upload_started_at(analysis=analysis)
+
+        ctx.invoke(upload_coverage, family_id=case.internal_id)
 
         # Delivery report generation
         if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:

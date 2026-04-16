@@ -1,5 +1,5 @@
 """
-    Module to upload cases to mutacc
+Module to upload cases to mutacc
 """
 
 import logging

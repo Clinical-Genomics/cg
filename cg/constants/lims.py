@@ -65,6 +65,7 @@ MASTER_STEPS_UDFS = {
     },
     "rna_prep_step": {
         "Aliquot Samples for Fragmentation (RNA) v1": "Amount needed (ng)",
+        "Aliquot Samples for RNA Depletion v1": "Amount needed (ng)",
     },
     "prep_method_step": {
         "Library Preparation (Cov) v1": {
@@ -121,6 +122,10 @@ MASTER_STEPS_UDFS = {
             "atlas_document": "Library Preparation Method",
             "atlas_version": "Atlas Version",
         },
+        "FFPE Treatment & Library Prep (RNA Depletion) v1": {
+            "atlas_document": "Library Preparation Method",
+            "atlas_version": "Atlas Version",
+        },
     },
     "sequencing_method_step": {
         "CG002 - Cluster Generation (HiSeq X)": {
@@ -145,6 +150,10 @@ MASTER_STEPS_UDFS = {
             "atlas_document": "Sequencing Method",
             "atlas_version": "Atlas Version",
         },
+        "Set Up Sequencing Run (Revio) v2": {
+            "atlas_document": "Sequencing Method",
+            "atlas_version": "Atlas Version",
+        },
     },
     "delivery_method_step": {
         "CG002 - Delivery": {
@@ -162,14 +171,21 @@ MASTER_STEPS_UDFS = {
 
 
 class DocumentationMethod(StrEnum):
-    ATLAS: str = "Atlas"
-    AM: str = "AM"
+    ATLAS = "Atlas"
+    AM = "AM"
 
 
 class LimsArtifactTypes(StrEnum):
-    ANALYTE: str = "Analyte"
-    RESULT_FILE: str = "ResultFile"
+    ANALYTE = "Analyte"
+    RESULT_FILE = "ResultFile"
 
 
 class LimsProcess(StrEnum):
-    COVID_POOLING_STEP: str = "Pooling and Clean-up (Cov) v1"
+    COVID_POOLING_STEP = "Pooling and Clean-up (Cov) v1"
+
+
+class LimsStatus(StrEnum):
+    DONE = "done"
+    PENDING = "pending"
+    RE_PREP = "re-prep"
+    TOP_UP = "top-up"

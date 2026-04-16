@@ -1,10 +1,13 @@
+import json
+from datetime import datetime, timedelta, timezone
 from unittest.mock import create_autospec
 
 import pytest
 from google.oauth2.service_account import IDTokenCredentials
+from pytest_mock import MockerFixture
 from requests import Response
 
-from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.api import TrailblazerAPI, requests
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.constants import APIMethods, Workflow, WorkflowManager
 from cg.constants.priority import TrailblazerPriority
@@ -17,6 +20,7 @@ from cg.io.controller import APIRequest
 def valid_google_credentials(mocker) -> IDTokenCredentials:
     credentials: IDTokenCredentials = create_autospec(IDTokenCredentials)
     credentials.token = "some_token"
+    credentials.expiry = datetime.now(timezone.utc) + timedelta(minutes=5)
     mocker.patch.object(IDTokenCredentials, "from_service_account_file", return_value=credentials)
     return credentials
 
@@ -145,3 +149,93 @@ def test_add_pending_analysis_fails(valid_trailblazer_config: dict, mocker):
             ticket=ticket,
             tower_workflow_id=tower_workflow_id,
         )
+
+
+def test_mark_analyses_as_delivered_success(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a Trailblazer API
+    tb_api = TrailblazerAPI(config=valid_trailblazer_config)
+
+    response = Response()
+    response.status_code = 200
+    response._content = json.dumps({"key": "value"}).encode("utf-8")
+    patch_call = mocker.patch.object(requests, "patch", return_value=response)
+
+    # WHEN marking analyses as delivered
+    tb_response: Response = tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])
+
+    # THEN the expected request should have been sent
+    expected_request = {
+        "analyses": [
+            {"id": 1, "is_delivered": True},
+            {"id": 2, "is_delivered": True},
+            {"id": 3, "is_delivered": True},
+        ]
+    }
+
+    patch_call.assert_called_once_with(
+        url=f"{tb_api.host}/analyses",
+        headers={"Authorization": f"Bearer {valid_google_credentials.token}"},
+        json=expected_request,
+    )
+
+    # THEN the response should be returned
+    assert tb_response == response
+
+
+def test_mark_analyses_as_delivered_with_forward_token(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a Trailblazer API
+    tb_api = TrailblazerAPI(config=valid_trailblazer_config)
+
+    patch_call = mocker.patch.object(requests, "patch")
+
+    # WHEN marking analyses as delivered
+    tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3], auth_token="auth_token")
+
+    # THEN the expected request should have been sent
+    expected_request = {
+        "analyses": [
+            {"id": 1, "is_delivered": True},
+            {"id": 2, "is_delivered": True},
+            {"id": 3, "is_delivered": True},
+        ]
+    }
+
+    patch_call.assert_called_once_with(
+        url=f"{tb_api.host}/analyses",
+        headers={
+            "Authorization": f"Bearer {valid_google_credentials.token}",
+            "X-On-Behalf-Of": "auth_token",
+        },
+        json=expected_request,
+    )
+
+
+def test_mark_analyses_as_delivered_fails_with_http_error(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a Trailblazer API
+    tb_api = TrailblazerAPI(config=valid_trailblazer_config)
+
+    # GIVEN that the communication with Trailblazer fails
+    mocker.patch.object(
+        requests,
+        "patch",
+        return_value=create_autospec(
+            requests.Response, ok=False, reason="I did not feel like it :("
+        ),
+    )
+
+    # WHEN marking analyses as delivered
+    # THEN a TrailblazerAPIHTTPError is raised
+    with pytest.raises(TrailblazerAPIHTTPError):
+        tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])

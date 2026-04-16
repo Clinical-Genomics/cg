@@ -69,7 +69,7 @@ def test_archive_spring_files_success(
         return_value=ok_miria_response,
     )
     mocker.patch.object(
-        DDNDataFlowClient, "_archive_file", return_value=ArchivalResponse(jobId=archival_job_id)
+        DDNDataFlowClient, "_archive_files", return_value=ArchivalResponse(jobId=archival_job_id)
     )
     result = cli_runner.invoke(
         archive_spring_files,

@@ -1,5 +1,5 @@
 """
-    conftest for mutacc-auto api
+conftest for mutacc-auto api
 """
 
 import pytest

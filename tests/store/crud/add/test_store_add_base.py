@@ -2,17 +2,21 @@ from datetime import datetime as dt
 
 import pytest
 
+from cg.constants.devices import RevioNames
 from cg.constants.subject import Sex
+from cg.exc import PacbioSequencingRunAlreadyExistsError
 from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
-from cg.store.exc import EntryNotFoundError, EntryAlreadyExistsError
+from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioSequencingRunDTO
+from cg.store.exc import EntryAlreadyExistsError, EntryNotFoundError
 from cg.store.models import (
     ApplicationVersion,
     Collaboration,
     Customer,
+    IlluminaFlowCell,
     Organism,
+    PacbioSequencingRun,
     Sample,
     User,
-    IlluminaFlowCell,
 )
 from cg.store.store import Store
 
@@ -153,3 +157,50 @@ def test_add_illumina_flow_cell_already_exists(
     # THEN a EntryAlreadyExistsError should be raised
     with pytest.raises(EntryAlreadyExistsError):
         store.add_illumina_flow_cell(illumina_flow_cell_dto)
+
+
+def test_create_pacbio_sequencing_run(store: Store):
+    # GIVEN a Store without Pacbio sequencing runs
+    assert not store._get_query(table=PacbioSequencingRun).all()
+
+    # GIVEN a PacBioSequencingRunDTO
+    pacbio_sequencing_run_dto = PacBioSequencingRunDTO(
+        instrument_name=RevioNames.WILMA,
+        run_id="r123_123_123",
+        run_name="run-name",
+        unique_id="unique-id",
+    )
+
+    # WHEN creating a Pacbio sequencing run in Store
+    store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
+
+    # THEN the PacbioSequencingRun exists and has the correct attributes
+    pacbio_sequencing_run: PacbioSequencingRun = store._get_query(table=PacbioSequencingRun).one()
+    assert pacbio_sequencing_run.instrument_name == RevioNames.WILMA
+    assert pacbio_sequencing_run.run_id == "r123_123_123"
+
+
+def test_create_pacbio_sequencing_run_already_exists(store: Store):
+    # GIVEN a Store with a Pacbio sequencing run
+    pacbio_sequencing_run_dto = PacBioSequencingRunDTO(
+        instrument_name=RevioNames.WILMA,
+        run_id="r123_123_123",
+        run_name="run-name",
+        unique_id="unique-id",
+    )
+    store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
+    store.commit_to_store()
+    assert store._get_query(table=PacbioSequencingRun).one()
+
+    # GIVEN a PacBioSequencingRunDTO
+    pacbio_sequencing_run_dto = PacBioSequencingRunDTO(
+        instrument_name=RevioNames.WILMA,
+        run_id="r123_123_123",
+        run_name="run-name",
+        unique_id="unique-id",
+    )
+
+    # WHEN creating the same Pacbio sequencing run in Store
+    # THEN a PacbioSequencingRunAlreadyExistsError should be raised
+    with pytest.raises(PacbioSequencingRunAlreadyExistsError):
+        store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)

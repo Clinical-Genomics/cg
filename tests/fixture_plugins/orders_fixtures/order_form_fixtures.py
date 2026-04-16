@@ -141,7 +141,7 @@ def microsalt_orderform(orderforms: Path) -> str:
     """Orderform fixture for microbial samples."""
     return Path(
         orderforms,
-        f"{Orderform.MICROSALT}.{Orderform.get_current_orderform_version(Orderform.MICROSALT)}.microbial.xlsx",
+        f"{Orderform.MICROSALT}.{Orderform.get_current_orderform_version(Orderform.MICROSALT)}.xlsx",
     ).as_posix()
 
 

@@ -133,8 +133,8 @@ def test_get_config(mock_cg_config_mip: MipConfig, mock_status_db: Store, mocker
     assert case_config.case_id == "test_case"
     assert case_config.slurm_qos == SlurmQos.NORMAL
     assert case_config.email == "test@scilifelab.se"
-    assert case_config.start_after_recipe is None
-    assert case_config.start_with_recipe is None
+    assert case_config.start_after is None
+    assert case_config.start_with is None
 
 
 def test_get_config_all_flags_set(
@@ -161,16 +161,16 @@ def test_get_config_all_flags_set(
     # WHEN getting the case config
     case_config: MIPDNACaseConfig = configurator.get_config(
         case_id=case_id,
-        start_after_recipe="banana_bread",
-        start_with_recipe="short_bread",
+        start_after="banana_bread",
+        start_with="short_bread",
         use_bwa_mem=True,
     )
 
     # THEN we should run the analysis with bwa_mem instead of bwa_mem2
     assert case_config.use_bwa_mem
 
-    assert case_config.start_after_recipe == "banana_bread"
-    assert case_config.start_with_recipe == "short_bread"
+    assert case_config.start_after == "banana_bread"
+    assert case_config.start_with == "short_bread"
 
 
 def test_get_config_validation(mock_cg_config_mip: MipConfig, mock_status_db: Store):

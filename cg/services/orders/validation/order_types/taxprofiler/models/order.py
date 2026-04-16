@@ -3,10 +3,5 @@ from cg.services.orders.validation.order_types.taxprofiler.constants import Taxp
 from cg.services.orders.validation.order_types.taxprofiler.models.sample import TaxprofilerSample
 
 
-class TaxprofilerOrder(OrderWithSamples):
+class TaxprofilerOrder(OrderWithSamples[TaxprofilerSample]):
     delivery_type: TaxprofilerDeliveryType
-    samples: list[TaxprofilerSample]
-
-    @property
-    def enumerated_samples(self) -> enumerate[TaxprofilerSample]:
-        return enumerate(self.samples)

@@ -1,4 +1,4 @@
-""" Create a sample sheet for NovaSeq flow cells."""
+"""Create a sample sheet for NovaSeq flow cells."""
 
 import logging
 

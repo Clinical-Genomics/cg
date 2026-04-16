@@ -69,7 +69,7 @@ def test_instantiate_balsamic_input_files_missing_field(
 
 
 def test_instantiate_raredisease_input_files(
-    raredisease_observations_input_files_raw: dict[str, Path]
+    raredisease_observations_input_files_raw: dict[str, Path],
 ):
     """Tests input files against a pydantic RarediseaseObservationsInputFiles."""
 

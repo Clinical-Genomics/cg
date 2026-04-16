@@ -1,19 +1,22 @@
 from pathlib import Path
 
-from cg.exc import MissingConfigFilesError
+from cg.exc import AnalysisAlreadyCompletedError, MissingConfigFilesError
 from cg.models.cg_config import CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
-from cg.services.analysis_starter.configurator.extensions.abstract import PipelineExtension
+from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
+    PipelineExtension,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
-    NextflowSampleSheetCreator,
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.protocol import (
+    SampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
+from cg.store.models import Analysis
 from cg.store.store import Store
 
 
@@ -23,7 +26,7 @@ class NextflowConfigurator(Configurator):
         config_file_creator: NextflowConfigFileCreator,
         params_file_creator: ParamsFileCreator,
         pipeline_config: CommonAppConfig,
-        sample_sheet_creator: NextflowSampleSheetCreator,
+        sample_sheet_creator: SampleSheetCreator,
         store: Store,
         pipeline_extension: PipelineExtension = PipelineExtension(),
     ):
@@ -82,8 +85,22 @@ class NextflowConfigurator(Configurator):
             workflow=self.store.get_case_workflow(case_id),
         )
         config: NextflowCaseConfig = self._set_flags(config=config, **flags)
+        config = self._set_session_id(config)
         self._ensure_required_config_files_exist(config)
         return config
+
+    def _set_session_id(self, config: NextflowCaseConfig) -> NextflowCaseConfig:
+        new_config: NextflowCaseConfig = config.model_copy()
+        if config.resume:
+            analysis: Analysis = self.store.get_latest_started_analysis_for_case(
+                case_id=new_config.case_id
+            )
+            if analysis.completed_at:
+                raise AnalysisAlreadyCompletedError(
+                    "Resume not possible for an already completed analysis"
+                )
+            new_config.session_id = analysis.session_id
+        return new_config
 
     def _get_config_file_path(self, case_id: str) -> Path:
         """Return the path to the Nextflow config file."""

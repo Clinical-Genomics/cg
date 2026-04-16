@@ -1,4 +1,4 @@
-""" Start of CLI """
+"""Start of CLI"""
 
 import logging
 import sys
@@ -28,16 +28,10 @@ from cg.cli.transfer import transfer_group
 from cg.cli.upload.base import upload
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.base import workflow as workflow_cmd
-from cg.constants.cli_options import FORCE
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
-from cg.store.database import (
-    create_all_tables,
-    drop_all_tables,
-    get_scoped_session_registry,
-    get_tables,
-)
+from cg.store.database import get_scoped_session_registry
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -80,26 +74,6 @@ def base(
     )
     context.obj = CGConfig(**raw_config)
     context.call_on_close(teardown_session)
-
-
-@base.command()
-@click.option("--reset", is_flag=True, help="Reset database before setting up tables")
-@FORCE
-@click.pass_obj
-def init(context: CGConfig, reset: bool, force: bool):
-    """Setup the database."""
-    existing_tables: list[str] = get_tables()
-    if force or reset:
-        if existing_tables and not force:
-            message = f"Delete existing tables? [{', '.join(existing_tables)}]"
-            click.confirm(click.style(message, fg="yellow"), abort=True)
-        drop_all_tables()
-    elif existing_tables:
-        LOG.error("Database already exists, use '--reset'")
-        raise click.Abort
-
-    create_all_tables()
-    LOG.info(f"Success! New tables: {', '.join(get_tables())}")
 
 
 def find_commands(group, query: str) -> list[str]:

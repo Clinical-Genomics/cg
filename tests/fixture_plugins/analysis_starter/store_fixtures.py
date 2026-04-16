@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 from housekeeper.store.models import File
@@ -47,7 +47,10 @@ def microsalt_store(base_store: Store, helpers: StoreHelpers) -> Store:
     )
 
     base_store.relate_sample(
-        case=microsalt_case, sample=microsalt_sample, status=StatusEnum.unknown
+        case=microsalt_case,
+        sample=microsalt_sample,
+        status=StatusEnum.unknown,
+        should_deliver_sample=True,
     )
     order: Order = base_store.add_order(customer=customer, ticket_id=1)
     microsalt_case.orders.append(order)
@@ -80,6 +83,14 @@ def mock_housekeeper_for_nf_sample_sheet(fastq_path_1: Path, fastq_path_2: Path)
 
 
 @pytest.fixture
+def mock_store_for_nallo_file_creators() -> Store:
+    mock_store: Store = create_autospec(Store)
+    mock_store.get_case_workflow = Mock(return_value=Workflow.NALLO)
+    mock_store.get_case_priority = Mock(return_value=SlurmQos.NORMAL)
+    return mock_store
+
+
+@pytest.fixture
 def mock_store_for_raredisease_file_creators(
     nextflow_case_id: str, nextflow_sample_id: str
 ) -> Store:
@@ -106,7 +117,6 @@ def mock_store_for_raredisease_file_creators(
     store.get_sample_by_internal_id.return_value = sample
     bed_version: BedVersion = create_autospec(BedVersion)
     bed_version.filename = "bed_version_file.bed"
-    store.get_bed_version_by_short_name.return_value = bed_version
     return store
 
 
@@ -120,9 +130,9 @@ def mock_store_for_rnafusion_file_creators(nextflow_sample_id: str) -> Store:
     mock_case.data_analysis = Workflow.RNAFUSION
 
     mock_store: Store = create_autospec(Store)
-    mock_store.get_case_by_internal_id.return_value = mock_case
-    mock_store.get_case_workflow.return_value = Workflow.RNAFUSION
-    mock_store.get_case_priority.return_value = SlurmQos.NORMAL
+    mock_store.get_case_by_internal_id = Mock(return_value=mock_case)
+    mock_store.get_case_workflow = Mock(return_value=Workflow.RNAFUSION)
+    mock_store.get_case_priority = Mock(return_value=SlurmQos.NORMAL)
     return mock_store
 
 
@@ -136,17 +146,23 @@ def mock_store_for_taxprofiler_file_creators(nextflow_sample_id: str) -> Store:
     mock_case: Case = create_autospec(Case, samples=[mock_sample])
 
     mock_store: Store = create_autospec(Store)
-    mock_store.get_case_by_internal_id.return_value = mock_case
-    mock_store.get_case_workflow.return_value = Workflow.TAXPROFILER
-    mock_store.get_case_priority.return_value = SlurmQos.NORMAL
+    mock_store.get_case_by_internal_id = Mock(return_value=mock_case)
+    mock_store.get_case_workflow = Mock(return_value=Workflow.TAXPROFILER)
+    mock_store.get_case_priority = Mock(return_value=SlurmQos.NORMAL)
     return mock_store
 
 
 @pytest.fixture
-def mock_store_for_nextflow_gene_panel_file_creator() -> Store:
-    """Fixture to provide a mock store for the gene panel file creator."""
-    case: Case = create_autospec(Case)
-    case.customer.internal_id = "cust000"
-    store: Store = create_autospec(Store)
-    store.get_case_by_internal_id.return_value = case
-    return store
+def mock_store_for_tomte_file_creators(nextflow_sample_id: str) -> Store:
+    """Fixture to provide a mock store for the Tomte sample sheet creator."""
+    mock_sample: Sample = create_autospec(Sample)
+    mock_sample.internal_id = nextflow_sample_id
+    mock_sample.name = nextflow_sample_id
+
+    mock_case: Case = create_autospec(Case, samples=[mock_sample])
+
+    mock_store: Store = create_autospec(Store)
+    mock_store.get_case_by_internal_id = Mock(return_value=mock_case)
+    mock_store.get_case_workflow = Mock(return_value=Workflow.TOMTE)
+    mock_store.get_case_priority = Mock(return_value=SlurmQos.NORMAL)
+    return mock_store

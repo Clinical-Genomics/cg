@@ -4,6 +4,7 @@ from sqlalchemy.orm import Query
 
 from cg.constants.constants import Workflow
 from cg.store.filters.status_analysis_filters import (
+    filter_analyses_completed_before,
     filter_analyses_not_cleaned,
     filter_analyses_started_before,
     filter_analyses_with_delivery_report,
@@ -230,6 +231,34 @@ def test_order_analyses_by_uploaded_at_asc(
     # THEN the oldest analysis should be the first one in the list
     for index in range(0, analyses.count() - 1):
         assert analyses.all()[index].uploaded_at <= analyses.all()[index + 1].uploaded_at
+
+
+def test_filter_analyses_completed_before(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+):
+    """Test filtering of analyses completed before a given date."""
+
+    # GIVEN an old analysis
+    old_analysis: Analysis = helpers.add_analysis(
+        store=base_store, completed_at=timestamp_now - timedelta(days=1)
+    )
+
+    # GIVEN a new analysis with another case
+    case = helpers.add_case(store=base_store, name="case2")
+    new_analysis: Analysis = helpers.add_analysis(
+        store=base_store, case=case, completed_at=timestamp_now
+    )
+
+    # WHEN filtering the analyses by completed_at
+    analyses: Query = filter_analyses_completed_before(
+        analyses=base_store._get_query(table=Analysis), completed_at_date=timestamp_now
+    )
+
+    # THEN the old analysis should be returned
+    assert old_analysis in analyses.all()
+
+    # THEN the new analysis should not be returned
+    assert new_analysis not in analyses.all()
 
 
 def test_filter_analysis_started_before(

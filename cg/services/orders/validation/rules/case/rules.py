@@ -14,20 +14,25 @@ from cg.services.orders.validation.errors.case_errors import (
     NumberOfNormalSamplesError,
     RepeatedCaseNameError,
     RepeatedGenePanelsError,
+    SamplesNotRelatedError,
 )
-from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.order_types.balsamic_umi.models.order import BalsamicUmiOrder
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.order_types.nallo.models.order import NalloOrder
+from cg.services.orders.validation.order_types.raredisease.models.order import RarediseaseOrder
 from cg.services.orders.validation.rules.case.utils import (
     contains_duplicates,
+    does_case_exist,
     get_case_prep_categories,
+    get_sample_name,
     is_case_not_from_collaboration,
     is_double_normal,
     is_double_tumour,
     is_normal_only_wgs,
+    is_sample_related_in_case,
+    is_single_sample_case,
 )
 from cg.services.orders.validation.rules.case_sample.utils import get_repeated_case_name_errors
 from cg.store.models import Case as DbCase
@@ -64,8 +69,8 @@ def validate_case_internal_ids_exist(
 ) -> list[CaseDoesNotExistError]:
     errors: list[CaseDoesNotExistError] = []
     for case_index, case in order.enumerated_existing_cases:
-        case: Case | None = store.get_case_by_internal_id(case.internal_id)
-        if not case:
+        db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
+        if not db_case:
             error = CaseDoesNotExistError(case_index=case_index)
             errors.append(error)
     return errors
@@ -158,7 +163,9 @@ def validate_existing_cases_have_an_affected_sample(
 ) -> list[ExistingCaseWithoutAffectedSampleError]:
     errors: list[ExistingCaseWithoutAffectedSampleError] = []
     for case_index, case in order.enumerated_existing_cases:
-        db_case: DbCase = store.get_case_by_internal_id(case.internal_id)
+        db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
+        if not db_case:  # Error should be returned elsewhere
+            continue
         if all(link.status != StatusEnum.affected for link in db_case.links):
             error = ExistingCaseWithoutAffectedSampleError(case_index=case_index)
             errors.append(error)
@@ -173,5 +180,29 @@ def validate_samples_in_case_have_same_prep_category(
         prep_categories: set[str] = get_case_prep_categories(case=case, store=store)
         if len(prep_categories) > 1:
             error = MultiplePrepCategoriesError(case_index=case_index)
+            errors.append(error)
+    return errors
+
+
+def validate_case_contains_related_samples(
+    order: MIPDNAOrder | RarediseaseOrder, store: Store, **kwargs
+) -> list[SamplesNotRelatedError]:
+    errors: list[SamplesNotRelatedError] = []
+    for case_index, case in order.enumerated_new_cases:
+        if not does_case_exist(case=case, store=store):  # Error should be raised elsewhere
+            continue
+        if is_single_sample_case(case=case, store=store):  # This should always pass
+            continue
+        case_has_error = False
+        isolated_samples: list[str] = []
+        for _, sample in case.enumerated_samples:
+            if not is_sample_related_in_case(sample=sample, case=case, store=store):
+                case_has_error = True
+                isolated_samples.append(get_sample_name(sample=sample, store=store))
+        if case_has_error:
+            error = SamplesNotRelatedError(
+                case_index=case_index,
+                message=f"Samples {isolated_samples} are not related to other samples within the case.",
+            )
             errors.append(error)
     return errors

@@ -17,12 +17,11 @@ from cg.meta.delivery_report.rnafusion import RnafusionDeliveryReportAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.meta.workflow.rnafusion_analysis_api import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.delivery_report.report import ScoutVariantsFiles
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
-from tests.conftest import raredisease_case_id
 from tests.store_helpers import StoreHelpers
 
 

@@ -14,7 +14,7 @@ class RunDataGenerator(ABC):
     """Abstract class that holds functionality to create a run data object."""
 
     @abstractmethod
-    def get_run_data(self, run_name: str, sequencing_dir: str) -> RunData:
+    def get_run_data(self, run_full_name: str, sequencing_dir: str) -> RunData:
         """Get the run data for a sequencing run."""
         pass
 
@@ -87,17 +87,17 @@ class PostProcessingService(ABC):
     """Abstract class that encapsulates the logic required for post-processing a sequencing run."""
 
     @abstractmethod
-    def post_process(self, run_name: str, dry_run: bool = False):
+    def post_process(self, run_full_name: str, dry_run: bool = False):
         """Store sequencing metrics in StatusDB and relevant files in Housekeeper."""
         pass
 
     @abstractmethod
-    def is_run_processed(self, run_name: str) -> bool:
+    def is_run_processed(self, run_full_name: str) -> bool:
         """Check if a run has been post-processed."""
         pass
 
     @abstractmethod
-    def can_post_processing_start(self, run_name: str) -> bool:
+    def can_post_processing_start(self, run_full_name: str) -> bool:
         """Check if a run can be post processed."""
         pass
 

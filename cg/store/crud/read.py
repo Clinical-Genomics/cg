@@ -9,7 +9,12 @@ import sqlalchemy
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
-from cg.constants.constants import DNA_WORKFLOWS_WITH_SCOUT_UPLOAD, CustomerId, SampleType
+from cg.constants.constants import (
+    DNA_WORKFLOWS_WITH_SCOUT_UPLOAD,
+    BedVersionGenomeVersion,
+    CustomerId,
+    SampleType,
+)
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
@@ -20,6 +25,7 @@ from cg.exc import (
     CgDataError,
     CgError,
     OrderNotFoundError,
+    PacbioSequencingRunNotFoundError,
     SampleNotFoundError,
 )
 from cg.models.orders.constants import OrderType
@@ -97,6 +103,7 @@ from cg.store.models import (
     PacbioSampleSequencingMetrics,
     PacbioSequencingRun,
     PacbioSMRTCell,
+    PacbioSMRTCellMetrics,
     Panel,
     Pool,
     RunDevice,
@@ -201,6 +208,21 @@ class ReadHandler(BaseHandler):
             analyses=self._get_query(table=Analysis),
             entry_id=entry_id,
         ).first()
+
+    def get_analysis_by_trailblazer_id(self, trailblazer_id: int) -> Analysis:
+        """
+        Get analysis by trailblazer id.
+        Raises:
+            AnalysisDoesNotExistError: If no analysis is found with the given trailblazer id.
+            sqlalchemy.orm.exc.MultipleResultsFound: If multiple analyses are found with the same
+            trailblazer id. This should not happen due to database constraints.
+        """
+        try:
+            return self._get_query(table=Analysis).filter_by(trailblazer_id=trailblazer_id).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise AnalysisDoesNotExistError(
+                f"Analysis with trailblazer_id {trailblazer_id} was not found in the database."
+            )
 
     def get_cases_by_customer_and_case_name_search(
         self, customer: Customer, case_name_search: str
@@ -903,20 +925,19 @@ class ReadHandler(BaseHandler):
             valid_from=dt.datetime.now(),
         ).first()
 
-    def get_active_applications_by_prep_category(
+    def get_applications_by_prep_category(
         self, prep_category: SeqLibraryPrepCategory
     ) -> list[Application]:
-        """Return all active applications by prep category."""
+        """Return all applications by prep category."""
         return apply_application_filter(
             applications=self._get_query(table=Application),
             filter_functions=[
                 ApplicationFilter.BY_PREP_CATEGORIES,
-                ApplicationFilter.IS_NOT_ARCHIVED,
             ],
             prep_categories=[prep_category],
         ).all()
 
-    def get_bed_version_by_file_name(self, bed_version_file_name: str) -> BedVersion:
+    def get_bed_version_by_file_name(self, bed_version_file_name: str) -> BedVersion | None:
         """Return bed version with file name."""
         return apply_bed_version_filter(
             bed_versions=self._get_query(table=BedVersion),
@@ -924,31 +945,25 @@ class ReadHandler(BaseHandler):
             filter_functions=[BedVersionFilter.BY_FILE_NAME],
         ).first()
 
-    def get_bed_version_by_short_name(self, bed_version_short_name: str) -> BedVersion:
-        """Return bed version with short name."""
-        return apply_bed_version_filter(
-            bed_versions=self._get_query(table=BedVersion),
-            bed_version_short_name=bed_version_short_name,
-            filter_functions=[BedVersionFilter.BY_SHORT_NAME],
-        ).first()
-
-    def get_bed_version_by_short_name_strict(self, short_name: str) -> BedVersion:
+    def get_bed_version_by_short_name_and_genome_version_strict(
+        self, short_name: str, genome_version: BedVersionGenomeVersion
+    ) -> BedVersion:
         """
-        Return bed version with short name.
+        Get bed version by short name and genome version.
         Raises:
-            BedVersionNotFoundError: If no bed version is found with the given short name.
+            BedVersionNotFoundError: If no bed version was found with the given shortname and genome version.
             sqlalchemy.orm.exc.MultipleResultsFound: If multiple bed versions are found with the same
-            shortname.
+            shortname and genome version.
         """
         try:
-            return apply_bed_version_filter(
-                bed_versions=self._get_query(table=BedVersion),
-                bed_version_short_name=short_name,
-                filter_functions=[BedVersionFilter.BY_SHORT_NAME],
-            ).one()
+            return (
+                self._get_query(table=BedVersion)
+                .filter_by(shortname=short_name, genome_version=genome_version)
+                .one()
+            )
         except sqlalchemy.orm.exc.NoResultFound:
             raise BedVersionNotFoundError(
-                f"Bed version with short name {short_name} was not found in the database."
+                f"Bed version with short name {short_name} and genome version {genome_version} was not found in the database."
             )
 
     def get_bed_by_entry_id(self, bed_entry_id: int) -> Bed:
@@ -1113,7 +1128,9 @@ class ReadHandler(BaseHandler):
         """Return all cases in the database with samples."""
         return self._get_join_cases_with_samples_query()
 
-    def get_cases_to_analyze(self, workflow: Workflow = None, limit: int = None) -> list[Case]:
+    def get_cases_to_analyze(
+        self, workflow: Workflow = None, limit: int | None = None
+    ) -> list[Case]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed.
         1. Get cases to be analyzed using BE query
         2. Use the latest analysis for case to determine if the case is to be analyzed"""
@@ -1165,15 +1182,22 @@ class ReadHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
-    def get_samples_by_identifier(self, object_type: str, identifier: str) -> list[Sample]:
-        """Return all samples from a flow cell, case or sample id"""
-        object_to_filter: dict[str, Callable] = {
-            "sample": self.get_sample_by_internal_id,
-            "case": self.get_samples_by_case_id,
-            "flow_cell": self.get_samples_by_illumina_flow_cell,
-        }
-        samples: Sample | list[Sample] = object_to_filter[object_type](identifier)
-        return samples if isinstance(samples, list) else [samples]
+    def get_sample_by_internal_id_strict(self, internal_id: str) -> Sample:
+        """
+        Return a sample by lims id.
+        Raises:
+            SampleNotFoundError: If no sample is found with the given internal id.
+        """
+        try:
+            return apply_sample_filter(
+                filter_functions=[SampleFilter.BY_INTERNAL_ID],
+                samples=self._get_query(table=Sample),
+                internal_id=internal_id,
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise SampleNotFoundError(
+                f"Sample with internal id {internal_id} was not found in the database."
+            )
 
     def get_samples_by_internal_id(self, internal_id: str) -> list[Sample]:
         """Return all samples by lims id."""
@@ -1199,14 +1223,14 @@ class ReadHandler(BaseHandler):
         ).all()
 
     def get_analyses_to_clean(
-        self, before: datetime = datetime.now(), workflow: Workflow | None = None
+        self, before: datetime, workflow: Workflow | None = None
     ) -> list[Analysis]:
         """Return analyses that haven't been cleaned."""
         filter_functions: list[Callable] = [
             AnalysisFilter.COMPLETED,
             AnalysisFilter.IS_UPLOADED,
             AnalysisFilter.IS_NOT_CLEANED,
-            AnalysisFilter.STARTED_AT_BEFORE,
+            AnalysisFilter.COMPLETED_AT_BEFORE,
             AnalysisFilter.CASE_ACTION_IS_NONE,
         ]
         if workflow:
@@ -1215,7 +1239,7 @@ class ReadHandler(BaseHandler):
             filter_functions=filter_functions,
             analyses=self._get_latest_analyses_for_cases_query(),
             workflow=workflow,
-            started_at_date=before,
+            completed_at_date=before,
         ).all()
 
     def get_completed_analyses_for_workflow_started_at_before(
@@ -1788,17 +1812,32 @@ class ReadHandler(BaseHandler):
             sequencing_metrics = sequencing_metrics.filter(RunDevice.internal_id.in_(smrt_cell_ids))
         return sequencing_metrics.all()
 
-    def get_pacbio_sequencing_runs_by_run_name(self, run_name: str) -> list[PacbioSequencingRun]:
+    def get_pacbio_smrt_cell_metrics_by_run_id(self, run_id: str) -> list[PacbioSMRTCellMetrics]:
         """
-        Fetches data from PacbioSequencingRunDTO filtered on run name.
+        Fetches data from PacbioSMRTCellMetrics filtered on run ID.
         Raises:
-            EntryNotFoundError if no sequencing runs are found for the run name
+            EntryNotFoundError if no SMRT cell metrics are found for the run ID
         """
-        runs: Query = self._get_query(table=PacbioSequencingRun)
-        runs = runs.filter(PacbioSequencingRun.run_name == run_name)
-        if runs.count() == 0:
-            raise EntryNotFoundError(f"Could not find any sequencing runs for {run_name}")
-        return runs.all()
+        metrics: Query = (
+            self._get_query(table=PacbioSMRTCellMetrics)
+            .join(PacbioSMRTCellMetrics.sequencing_run)
+            .filter(PacbioSequencingRun.run_id == run_id)
+        )
+        if metrics.count() == 0:
+            raise EntryNotFoundError(f"Could not find any SMRT Cell metrics for run {run_id}")
+        return metrics.all()
+
+    def get_pacbio_sequencing_runs(
+        self, page: int = 0, page_size: int = 0
+    ) -> tuple[list[PacbioSequencingRun], int]:
+        query = self._get_query(PacbioSequencingRun).order_by(PacbioSequencingRun.id.desc())
+
+        if page and page_size:
+            query = query.limit(page_size).offset((page - 1) * page_size)
+
+        total_count: int = self._get_query(table=PacbioSequencingRun).count()
+
+        return query.all(), total_count
 
     def get_case_priority(self, case_id: str) -> SlurmQos:
         """Get case priority."""
@@ -1817,3 +1856,33 @@ class ReadHandler(BaseHandler):
         ):
             return True
         return False
+
+    def get_pacbio_sequencing_run_by_id(self, id: int):
+        """
+        Get Pacbio Sequencing run by database id.
+        Raises:
+            PacbioSequencingRunNotFoundError: If no Pacbio sequencing run is found with the given id.
+        """
+        try:
+            return (
+                self._get_query(table=PacbioSequencingRun)
+                .filter(PacbioSequencingRun.id == id)
+                .one()
+            )
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise PacbioSequencingRunNotFoundError(
+                f"Pacbio Sequencing run with id {id} was not found in the database."
+            )
+
+    def get_pacbio_sequencing_run_by_run_id(self, run_id: str) -> PacbioSequencingRun:
+        """
+        Raises:
+            PacbioSequencingRunNotFoundError: If no Pacbio sequencing run is found with the given
+            run ID.
+        """
+        try:
+            return self._get_query(table=PacbioSequencingRun).filter_by(run_id=run_id).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise PacbioSequencingRunNotFoundError(
+                f"Pacbio Sequencing run with ID {run_id} was not found in the database."
+            )

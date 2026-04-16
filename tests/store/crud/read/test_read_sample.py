@@ -3,10 +3,11 @@
 from typing import Any
 
 import pytest
-from _pytest.fixtures import FixtureRequest
 from sqlalchemy.orm import Query
 
+from cg.constants import SexOptions
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
+from cg.exc import SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.server.dto.samples.requests import CollaboratorSamplesRequest
 from cg.store.models import Customer, Invoice, OrderTypeApplication, Sample
@@ -361,34 +362,38 @@ def test_get_sample_by_internal_id(sample_store, internal_id="test_internal_id")
     assert sample.internal_id == internal_id
 
 
-@pytest.mark.parametrize(
-    "object_type, identifier_fixture",
-    [
-        ("sample", "sample_id_sequenced_on_multiple_flow_cells"),
-        ("flow_cell", "novaseq_x_flow_cell_id"),
-        ("case", "case_id_for_sample_on_multiple_flow_cells"),
-    ],
-    ids=["sample", "flow_cell", "case"],
-)
-def test_get_samples_by_identifier(
-    re_sequenced_sample_illumina_data_store: Store,
-    object_type: str,
-    identifier_fixture: str,
-    request: FixtureRequest,
-):
-    """Test that samples are returned for any instance of an identifier."""
-    # GIVEN a store with samples, an identifier and an object type
-    store: Store = re_sequenced_sample_illumina_data_store
-    identifier: str = request.getfixturevalue(identifier_fixture)
-
-    # WHEN fetching the samples by identifier
-    samples: list[Sample] = store.get_samples_by_identifier(
-        object_type=object_type, identifier=identifier
+def test_get_sample_by_internal_id_strict_success(store: Store):
+    """Test fetching a sample by internal id."""
+    # GIVEN a store with a sample
+    sample: Sample = store.add_sample(
+        application_version_id=1,
+        customer_id=1,
+        internal_id="internal_id",
+        name="sample_name",
+        sex=SexOptions.FEMALE,
     )
+    store.add_item_to_store(sample)
+    store.commit_to_store()
 
-    # THEN a list of samples should be returned
-    assert isinstance(samples, list)
-    assert isinstance(samples[0], Sample)
+    # WHEN finding a sample by internal id
+    sample: Sample = store.get_sample_by_internal_id_strict(internal_id="internal_id")
+
+    # THEN no error should be raised
+    # THEN a sample should be returned
+    assert isinstance(sample, Sample)
+
+    # THEN the sample should have a matching internal id
+    assert sample.internal_id == "internal_id"
+
+
+def test_get_sample_by_internal_id_strict_no_match(store: Store):
+    """Test fetching a sample by internal id."""
+    # GIVEN a store without a sample
+
+    # WHEN finding a sample by internal id
+    # THEN a NoResultFound should be raised
+    with pytest.raises(SampleNotFoundError):
+        store.get_sample_by_internal_id_strict(internal_id="internal_id")
 
 
 def test_get_samples_to_deliver(sample_store):

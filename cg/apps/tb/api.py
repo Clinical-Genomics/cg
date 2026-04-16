@@ -1,11 +1,13 @@
 """Trailblazer API for cg."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
+import requests
 from google.auth.transport.requests import Request
 from google.oauth2.service_account import IDTokenCredentials
+from requests import Response
 
 from cg.apps.tb.dto.create_job_request import CreateJobRequest
 from cg.apps.tb.dto.summary_response import AnalysisSummary, SummariesResponse
@@ -34,15 +36,58 @@ class TrailblazerAPI:
         self.service_account = config["trailblazer"]["service_account"]
         self.service_account_auth_file = config["trailblazer"]["service_account_auth_file"]
         self.host = config["trailblazer"]["host"]
+        self._credentials: IDTokenCredentials | None = None
 
-    @property
-    def auth_header(self) -> dict:
+    def _are_credentials_expired(self) -> bool:
+        """Return True when there are no cached credentials or the token has expired."""
+        if not self._credentials:
+            return True
+
+        expiry: datetime | None = getattr(self._credentials, "expiry", None)
+        if expiry is None:
+            return True
+
+        if expiry.tzinfo is None:
+            expiry = expiry.replace(tzinfo=timezone.utc)
+
+        return datetime.now(tz=timezone.utc) >= expiry
+
+    def _refresh_credentials(self) -> IDTokenCredentials:
+        """Refresh the Google OAuth token and cache the credential object."""
+        LOG.debug("Refreshing Google OAuth token for Trailblazer authentication")
         credentials: IDTokenCredentials = IDTokenCredentials.from_service_account_file(
             filename=self.service_account_auth_file,
             target_audience="trailblazer",
         )
         credentials.refresh(Request())
-        return {"Authorization": f"Bearer {credentials.token}"}
+
+        self._credentials = credentials
+        expiry: datetime | None = getattr(self._credentials, "expiry", None)
+        if expiry:
+            if expiry.tzinfo is None:
+                expiry = expiry.replace(tzinfo=timezone.utc)
+            LOG.debug(
+                "Token cached until %s (%s local)",
+                expiry,
+                expiry.astimezone().isoformat(),
+            )
+        else:
+            LOG.debug("Token refreshed without expiry timestamp")
+        return self._credentials
+
+    @property
+    def auth_header(self) -> dict:
+        """Get authorization header with cached token to prevent Google rate limiting."""
+        if not self._credentials or self._are_credentials_expired():
+            self._refresh_credentials()
+
+        return {"Authorization": f"Bearer {self._credentials.token}"}
+
+    def _get_auth_headers(self, auth_token: str | None) -> dict[str, str]:
+        if auth_token:
+            return self.auth_header | {"X-On-Behalf-Of": auth_token}
+        else:
+            return self.auth_header
 
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST
@@ -97,7 +142,7 @@ class TrailblazerAPI:
         self,
         case_id: str,
         analysis_type: str,
-        config_path: str,
+        config_path: str | None,
         out_dir: str,
         priority: TrailblazerPriority,
         workflow: Workflow,
@@ -171,6 +216,23 @@ class TrailblazerAPI:
         response = self.query_trailblazer(command=endpoint, request_body={}, method=APIMethods.GET)
         response_data = SummariesResponse.model_validate(response)
         return response_data.summaries
+
+    def mark_analyses_as_delivered(
+        self, trailblazer_ids: list[int], auth_token: str | None = None
+    ) -> Response:
+        analysis_dicts = []
+        for trailblazer_id in trailblazer_ids:
+            analysis_dict = {"id": trailblazer_id, "is_delivered": True}
+            analysis_dicts.append(analysis_dict)
+        LOG.info(f"Setting analyses {trailblazer_ids} as delivered in Trailblazer")
+        response: Response = requests.patch(
+            json={"analyses": analysis_dicts},
+            headers=self._get_auth_headers(auth_token=auth_token),
+            url=f"{self.host}/analyses",
+        )
+        if not response.ok:
+            raise TrailblazerAPIHTTPError(response.reason)
+        return response
 
     def get_analyses_to_deliver(self, order_id: int) -> list[TrailblazerAnalysis]:
         """Return the analyses in the order ready to be delivered."""

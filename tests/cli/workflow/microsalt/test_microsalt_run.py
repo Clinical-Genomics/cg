@@ -25,10 +25,10 @@ def test_run_raises_error_if_not_configured(
 
     # GIVEN that the case has a workflow and no ongoing analysis
     mocker.patch.object(Tracker, "ensure_analysis_not_ongoing", return_value=None)
-    mock_case = create_autospec(Case)
-    sample = create_autospec(Sample)
-    mock_case.samples = [sample]
+    sample: Sample = create_autospec(Sample)
+    mock_case: Case = create_autospec(Case, data_analysis=Workflow.MICROSALT, samples=[sample])
     mocker.patch.object(Store, "get_case_by_internal_id", return_value=mock_case)
+    mocker.patch.object(Store, "get_case_by_internal_id_strict", return_value=mock_case)
 
     # GIVEN that the config file does not exist
 
@@ -51,15 +51,9 @@ def test_run_tracks_case(cli_runner: CliRunner, cg_context: CGConfig, mocker: Mo
     mock_case.data_analysis = Workflow.MICROSALT
     mock_case.samples = [create_autospec(Sample), create_autospec(Sample)]
     mocker.patch.object(Store, "get_case_by_internal_id", return_value=mock_case)
+    mocker.patch.object(Store, "get_case_by_internal_id_strict", return_value=mock_case)
     mocker.patch.object(Tracker, "ensure_analysis_not_ongoing", return_value=None)
     mocker.patch.object(Path, "exists", return_value=True)
-    mocker.patch.object(SubprocessSubmitter, "submit", return_value=None)
-    track_mock = mocker.patch.object(Tracker, "track")
-
-    # WHEN running the case
-    cli_runner.invoke(run, [case_id], obj=cg_context)
-
-    # THEN the progress should be tracked
     microsalt_config = cg_context.microsalt
     expected_config_file = Path(microsalt_config.queries_path, case_id).with_suffix(".json")
     expected_fastq_dir = Path(microsalt_config.root, "fastq", case_id)
@@ -71,4 +65,11 @@ def test_run_tracks_case(cli_runner: CliRunner, cg_context: CGConfig, mocker: Mo
         environment=microsalt_config.conda_env,
         fastq_directory=expected_fastq_dir.as_posix(),
     )
-    track_mock.assert_called_once_with(case_config=expected_case_config, tower_workflow_id=None)
+    mocker.patch.object(SubprocessSubmitter, "submit", return_value=expected_case_config)
+    track_mock = mocker.patch.object(Tracker, "track")
+
+    # WHEN running the case
+    cli_runner.invoke(run, [case_id], obj=cg_context)
+
+    # THEN the progress should be tracked
+    track_mock.assert_called_once_with(case_config=expected_case_config)

@@ -5,7 +5,6 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from typing_extensions import Literal
 
-from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
@@ -22,7 +21,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.clients.arnold.api import ArnoldAPIClient
 from cg.clients.chanjo2.client import Chanjo2APIClient
 from cg.clients.janus.api import JanusAPIClient
-from cg.constants.observations import LoqusdbInstance
+from cg.constants.observations import BalsamicObservationPanel, LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.services.analysis_service.analysis_service import AnalysisService
@@ -145,6 +144,11 @@ class CommonAppConfig(BaseModel):
     container_mount_volume: str | None = None
 
 
+class ChanjoConfig(BaseModel):
+    binary_path: str
+    config_path: str
+
+
 class HermesConfig(CommonAppConfig):
     container_path: str
 
@@ -178,23 +182,43 @@ class MutaccAutoConfig(CommonAppConfig):
     padding: int = 300
 
 
+class LoqusDBDumpFiles(BaseModel):
+    artefact_sv: Path  # WGS
+    artefact_snv: Path
+    cancer_germline_snv: Path
+    cancer_somatic_snv: Path
+    cancer_somatic_sv: Path
+    clinical_snv: Path
+    clinical_sv: Path
+    cancer_somatic_snv_panels: dict[BalsamicObservationPanel, Path]  # Panel
+
+
 class BalsamicConfig(CommonAppConfig):
-    balsamic_cache: str
-    bed_path: str
-    binary_path: str
-    cadd_path: str
-    conda_binary: str
+    balsamic_cache: Path
+    bed_path: Path
+    binary_path: Path
+    cache_version: str
+    cadd_path: Path
+    cancer_genelist: Path
+    conda_binary: Path
     conda_env: str
-    genome_interval_path: str
-    gens_coverage_female_path: str
-    gens_coverage_male_path: str
-    gnomad_af5_path: str
-    loqusdb_path: str
-    pon_path: str
-    root: str
-    sentieon_licence_path: str
+    cosmic_path: Path
+    genome_interval_path: Path
+    gens_coverage_female_path: Path
+    gens_coverage_male_path: Path
+    gnomad_af5_path: Path
+    head_job_partition: str
+    loqusdb_path: Path
+    loqusdb_dump_files: LoqusDBDumpFiles
+    panel_of_normals: dict[str, Path]  # For TGS and Exome
+    pon_path: Path
+    root: Path
+    sentieon_licence_path: Path
+    sentieon_licence_server: str
     slurm: SlurmConfig
-    swegen_path: str
+    swegen_path: Path
+    swegen_snv: Path
+    swegen_sv: Path
 
 
 class MutantConfig(BaseModel):
@@ -215,76 +239,76 @@ class MipConfig(BaseModel):
 
 class NalloConfig(CommonAppConfig):
     binary_path: str | None = None
-    compute_env: str
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
     launch_directory: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class RarediseaseConfig(CommonAppConfig):
     binary_path: str | None = None
-    compute_env: str
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
     launch_directory: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class TomteConfig(CommonAppConfig):
     binary_path: str | None = None
-    compute_env: str
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class RnafusionConfig(CommonAppConfig):
     binary_path: str
-    compute_env: str
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
     launch_directory: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
@@ -296,19 +320,19 @@ class TaxprofilerConfig(CommonAppConfig):
     binary_path: str
     conda_binary: str | None = None
     conda_env: str
-    compute_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class MicrosaltConfig(BaseModel):
@@ -415,7 +439,6 @@ class CGConfig(BaseModel):
     max_flowcells: int | None = None
     nanopore_data_directory: str
     run_instruments: RunInstruments
-    sentieon_licence_server: str
     tower_binary_path: str
 
     # Base APIs that always should exist
@@ -427,8 +450,8 @@ class CGConfig(BaseModel):
     arnold: ArnoldConfig | None = None
     arnold_api_: ArnoldAPIClient | None = None
     illumina_backup_service: IlluminaBackupConfig | None = None
-    chanjo: CommonAppConfig = None
-    chanjo_api_: ChanjoAPI = None
+    chanjo: ChanjoConfig | None = None
+    chanjo_38: ChanjoConfig | None = None
     chanjo2: ClientConfig | None = None
     chanjo2_api_: Chanjo2APIClient | None = None
     crunchy: CrunchyConfig = None
@@ -458,6 +481,13 @@ class CGConfig(BaseModel):
     loqusdb_somatic: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC.value)
     loqusdb_tumor: CommonAppConfig = Field(None, alias=LoqusdbInstance.TUMOR.value)
     loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
+    loqusdb_somatic_lymphoid: CommonAppConfig = Field(
+        None, alias=LoqusdbInstance.SOMATIC_LYMPHOID.value
+    )
+    loqusdb_somatic_myeloid: CommonAppConfig = Field(
+        None, alias=LoqusdbInstance.SOMATIC_MYELOID.value
+    )
+    loqusdb_somatic_exome: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC_EXOME.value)
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
@@ -504,15 +534,6 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating arnold api")
             api = ArnoldAPIClient(config=self.dict())
             self.arnold_api_ = api
-        return api
-
-    @property
-    def chanjo_api(self) -> ChanjoAPI:
-        api = self.__dict__.get("chanjo_api_")
-        if api is None:
-            LOG.debug("Instantiating chanjo api")
-            api = ChanjoAPI(config=self.dict())
-            self.chanjo_api_ = api
         return api
 
     @property

@@ -18,8 +18,10 @@ class GenePanelMasterList(StrEnum):
     CARDIOLOGY = "Cardiology"
     CILM = "CILM"
     CH = "CH"
+    CHD = "CHD"
     CHILDHYPOTONIA = "CHILDHYPOTONIA"
     CTD = "CTD"
+    COMPD = "COMPD"
     DIAB = "DIAB"
     ENDO = "ENDO"
     EP = "EP"
@@ -35,6 +37,7 @@ class GenePanelMasterList(StrEnum):
     MTDNA = "mtDNA"
     NBS_M = "NBS-M"
     NEURODEG = "NEURODEG"
+    NOONAN = "NOONAN"
     NMD = "NMD"
     OMIM_AUTO = "OMIM-AUTO"
     OPTIC = "OPTIC"
@@ -42,16 +45,25 @@ class GenePanelMasterList(StrEnum):
     PEDHEP = "PEDHEP"
     PID = "PID"
     PIDCAD = "PIDCAD"
-    RETINA = "RETINA"
     SKD = "SKD"
     SOVM = "SOVM"
     STROKE = "STROKE"
     AID = "AID"
-    INHERITED_CANCER = "Inherited cancer"
+    IHC = "IHC"
     VEO_IBD = "VEO-IBD"
     KIDNEY = "Kidney"
     CAKUT = "CAKUT"
     NCRNA = "ncRNA"
+    # Disorders of Sex Development
+    DSD = "DSD"
+    DSD_S = "DSD-S"
+    POI = "POI"
+    # Ophthalmology
+    ALBINISM = "ALBINISM"
+    ANTE_ED = "ANTE-ED"
+    OPHTHALMO = "OPHTHALMO"
+    RETINA = "RETINA"
+    SED = "SED"
 
     @classmethod
     def get_panel_names(cls, panels=None) -> list[str]:
@@ -80,21 +92,3 @@ class GenePanelMasterList(StrEnum):
     @staticmethod
     def get_non_specific_gene_panels() -> set[str]:
         return {GenePanelMasterList.OMIM_AUTO, GenePanelMasterList.PANELAPP_GREEN}
-
-
-class GenePanelCombo:
-    COMBO_1: dict[str, set[str]] = {
-        "DSD": {"DSD", "DSD-S", "HYP", "POI"},
-        "CM": {"CNM", "CM"},
-        "Horsel": {"Horsel", "141217", "141201"},
-        "OPHTHALMO": {
-            "OPHTHALMO",
-            "ANTE-ED",
-            "CATARACT",
-            "CORNEA",
-            "GLAUCOMA",
-            "RETINA",
-            "SED",
-            "ALBINISM",
-        },
-    }

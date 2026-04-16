@@ -62,7 +62,7 @@ def test_create_wgs_bed_short_name_provided(
     case_id: str, expected_content_wgs: dict, wgs_mock_store: Store, mocker: MockerFixture
 ):
     # GIVEN a case id and a mock store that returns a valid bed version for a short name
-    wgs_mock_store.get_bed_version_by_short_name_strict = Mock(
+    wgs_mock_store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(BedVersion, filename="existing_bed_file.bed")
     )
 
@@ -85,7 +85,9 @@ def test_create_wgs_bed_short_name_provided(
 def test_wgs_fails_bed_name_not_in_store():
     # GIVEN a mock store
     store: Store = create_autospec(Store)
-    store.get_bed_version_by_short_name_strict = Mock(side_effect=BedVersionNotFoundError)
+    store.get_bed_version_by_short_name_and_genome_version_strict = Mock(
+        side_effect=BedVersionNotFoundError
+    )
 
     # GIVEN a config file creator
     file_creator = MIPDNAConfigFileCreator(lims_api=Mock(), root="", store=store)

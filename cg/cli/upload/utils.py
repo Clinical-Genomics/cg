@@ -24,6 +24,15 @@ def suggest_cases_to_upload(status_db: Store, workflow: Workflow | None = None) 
         click.echo(case_obj)
 
 
-def get_scout_api(cg_config: CGConfig, case_id: str) -> ScoutAPI:
+def get_scout_api_by_case(cg_config: CGConfig, case_id: str) -> ScoutAPI:
     workflow = cg_config.status_db.get_case_by_internal_id(case_id).data_analysis
     return cg_config.scout_api_38 if workflow == Workflow.NALLO else cg_config.scout_api_37
+
+
+def get_scout_api_by_genome_build(cg_config: CGConfig, genome_build: str) -> ScoutAPI:
+    """Return the appropriate ScoutAPI based on the genome build."""
+    if genome_build == "hg38":
+        return cg_config.scout_api_38
+    if genome_build == "hg19":
+        return cg_config.scout_api_37
+    raise ValueError(f"Unsupported genome build: {genome_build}")

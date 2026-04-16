@@ -17,6 +17,7 @@ METAGENOME_SOURCES = (
 ANALYSIS_SOURCES = (
     "blood",
     "buccal swab",
+    "buffer",
     "cell-free DNA",
     "cell line",
     "cytology (FFPE)",

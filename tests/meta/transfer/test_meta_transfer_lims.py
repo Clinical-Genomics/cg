@@ -1,10 +1,14 @@
 import datetime as dt
+from unittest.mock import Mock, create_autospec
+
+import pytest
 
 from cg.apps.lims import LimsAPI
 from cg.meta.transfer import TransferLims
 from cg.meta.transfer.lims import IncludeOptions, SampleState
 from cg.store.models import Sample
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def has_same_received_at(lims, sample_obj):
@@ -32,7 +36,9 @@ def test_transfer_samples_received_at_overwriteable(
     assert not has_same_received_at(lims_api, sample)
 
     # WHEN transfer_samples has been called
-    transfer_lims_api.transfer_samples(SampleState.RECEIVED, IncludeOptions.NOTINVOICED.value)
+    transfer_lims_api.transfer_samples(
+        status_type=SampleState.RECEIVED, include=IncludeOptions.NOTINVOICED.value
+    )
 
     # THEN the samples should have the same received_at as in lims
     assert has_same_received_at(lims_api, sample)
@@ -55,7 +61,9 @@ def test_transfer_samples_all(transfer_lims_api: TransferLims, timestamp_now: dt
     assert not has_same_received_at(lims_api, sample)
 
     # WHEN transfer_samples has been called
-    transfer_lims_api.transfer_samples(SampleState.RECEIVED, IncludeOptions.ALL.value)
+    transfer_lims_api.transfer_samples(
+        status_type=SampleState.RECEIVED, include=IncludeOptions.ALL.value
+    )
 
     # THEN the samples should have the same received_at as in lims
     assert has_same_received_at(lims_api, sample)
@@ -101,8 +109,57 @@ def test_transfer_samples_include_unset_received_at(transfer_lims_api: TransferL
     lims_api.set_samples(lims_samples)
 
     # WHEN calling transfer lims with include unset received_at
-    transfer_lims_api.transfer_samples(SampleState.RECEIVED, IncludeOptions.UNSET.value)
+    transfer_lims_api.transfer_samples(
+        status_type=SampleState.RECEIVED, include=IncludeOptions.UNSET.value
+    )
 
     # THEN the sample that was not set has been set and the other sample was not touched
     assert has_same_received_at(lims_api, untransfered_sample)
     assert not has_same_received_at(lims_api, transfered_sample)
+
+
+@pytest.mark.freeze_time
+def test_transfer_samples_include_unset_received_at_older_than_cutoff():
+    # GIVEN a time window
+    order_date_cutoff: dt.datetime = dt.datetime.today() - dt.timedelta(days=365 * 3)
+    order_too_late: dt.datetime = order_date_cutoff - dt.timedelta(days=1)
+    order_right_on_time: dt.datetime = order_date_cutoff + dt.timedelta(days=1)
+
+    # GIVEN a store
+    store: TypedMock[Store] = create_typed_mock(Store)
+
+    # GIVEN two samples
+    untransfered_sample: Sample = create_autospec(
+        Sample,
+        ordered_at=order_too_late,
+        received_at=None,
+    )
+    transfered_sample: Sample = create_autospec(
+        Sample,
+        ordered_at=order_right_on_time,
+        received_at=None,
+    )
+    store.as_type.get_samples_to_receive = Mock(
+        return_value=[untransfered_sample, transfered_sample]
+    )
+
+    # GIVEN a LimsAPI
+    lims_api: LimsAPI = create_autospec(LimsAPI)
+    lims_api.get_received_date = Mock(return_value=dt.datetime.today())
+
+    # GIVEN a TransferLIMS
+    transfer_lims_api: TransferLims = TransferLims(status=store.as_type, lims=lims_api)
+
+    # WHEN calling transfer lims with include unset received_at and order_date_cutoff
+    transfer_lims_api.transfer_samples(
+        status_type=SampleState.RECEIVED,
+        include=IncludeOptions.UNSET.value,
+        max_order_age=3,
+    )
+
+    # THEN only the sample ordered after cutoff should be updated
+    assert untransfered_sample.received_at is None
+    assert transfered_sample.received_at == dt.datetime.today()
+
+    # THEN changes should have been commited to the store
+    store.as_mock.commit_to_store.assert_called_once()

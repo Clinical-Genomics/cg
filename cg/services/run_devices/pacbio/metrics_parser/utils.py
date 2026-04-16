@@ -1,13 +1,17 @@
 from pathlib import Path
 from typing import Any, Type
+from xml.etree import ElementTree
+from xml.etree.ElementTree import Element
 
 from cg.constants.constants import FileFormat
 from cg.constants.pacbio import MetricsFileFields, PacBioDirsAndFiles
+from cg.exc import XMLError
 from cg.io.controller import ReadFile
 from cg.services.run_devices.pacbio.metrics_parser.models import (
     BarcodeMetrics,
     BaseMetrics,
     ControlMetrics,
+    MetadataMetrics,
     PolymeraseMetrics,
     ProductivityMetrics,
     ReadMetrics,
@@ -78,3 +82,24 @@ def get_parsed_sample_metrics(metrics_files: list[Path]) -> list[SampleMetrics]:
         MetricsFileFields.COLUMNS
     )
     return _parse_sample_data(sample_data)
+
+
+def get_parsed_metadata_file(metrics_files: list[Path]) -> MetadataMetrics:
+    namespaces: dict[str, str] = {
+        "pb": "http://pacificbiosciences.com/PacBioDataModel.xsd"  # NOSONAR
+    }
+    metadata_file: Path = get_file_with_pattern_from_list(
+        files=metrics_files, pattern=PacBioDirsAndFiles.METADATA_FILE_SUFFIX
+    )
+    root: Element = ElementTree.parse(metadata_file).getroot()
+    run: Element | None = root.find(".//pb:Run", namespaces=namespaces)
+    if run is not None:
+        run_name, unique_id = run.get("Name"), run.get("UniqueId")
+        if run_name and unique_id:
+            return MetadataMetrics(run_name=run_name, unique_id=unique_id)
+        else:
+            raise XMLError(
+                f"'Run' element is missing either 'Name' or 'UniqueId' in {metadata_file}"
+            )
+    else:
+        raise XMLError(f"No 'Run' element found in {metadata_file}")

@@ -20,7 +20,7 @@ class Configurator(ABC):
     @staticmethod
     def _set_flags(config: SpecificCaseConfig, **flags) -> SpecificCaseConfig:
         curated_flags: dict = {key: value for key, value in flags.items() if value is not None}
-        return config.model_copy(update=curated_flags)
+        return config.model_validate(config.model_dump(by_alias=True) | curated_flags)
 
     @abstractmethod
     def _ensure_required_config_files_exist(self, **kwargs) -> None:

@@ -15,3 +15,4 @@ class TaxprofilerSample(Sample):
     quantity: int | None = None
     require_qc_ok: bool = False
     source: str
+    source_comment: str | None = None

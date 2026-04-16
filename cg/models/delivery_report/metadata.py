@@ -50,9 +50,9 @@ class NalloSampleMetadataModel(SampleMetadataModel):
     Attributes:
         avg_sequence_length: average length of the sequenced reads; source: workflow
         coverage_bases: total number of bases aligned to the genome; source: workflow
-        mean_target_coverage: mean coverage of a target region; source: Chanjo2
+        mean_target_coverage: mean coverage of a target region; source: Chanjo
         median_coverage: median coverage of mapped sequence in bases; source: workflow
-        pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: Chanjo2
+        pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: Chanjo
         sex: sex predicted by the workflow; source: workflow
     """
 
@@ -92,6 +92,9 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
 
     mean_insert_size: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     fold_80: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    predicted_sex: str = NA_FIELD
+    at_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    gc_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
 
 
 class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
@@ -107,7 +110,6 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     bait_set_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    gc_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     median_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_250x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_500x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
@@ -166,7 +168,7 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
     pct_surviving: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     q20_rate: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
     q30_rate: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
-    ribosomal_bases: Annotated[str, BeforeValidator(get_float_as_percentage)] = NA_FIELD
+    ribosomal_bases: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     rin: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     uniquely_mapped_reads: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
 

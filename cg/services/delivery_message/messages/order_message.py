@@ -1,6 +1,9 @@
 from cg.constants import DataDelivery
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
-from cg.services.delivery_message.messages.utils import get_caesar_delivery_path
+from cg.services.delivery_message.messages.utils import (
+    REMINDER_TO_DOWNLOAD_MESSAGE,
+    get_caesar_delivery_path,
+)
 from cg.store.models import Case
 
 
@@ -18,4 +21,5 @@ class TaxprofilerDeliveryMessage(DeliveryMessage):
             f"Hello,\n\n"
             f"The {file_types} files for this order are currently being uploaded to your inbox on Caesar at:\n\n"
             f"{delivery_path} \n\n"
+            f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
         )

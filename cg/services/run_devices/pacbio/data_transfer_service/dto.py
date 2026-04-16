@@ -4,15 +4,15 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from cg.constants.devices import DeviceType
+from cg.constants.devices import DeviceType, RevioNames
 from cg.services.run_devices.abstract_models import PostProcessingDTOs
 
 
-class PacBioSequencingRunDTO(BaseModel):
+class PacBioSMRTCellMetricsDTO(BaseModel):
     type: DeviceType
     well: str
     plate: int
-    run_name: str
+    run_id: str
     movie_name: str
     started_at: datetime
     completed_at: datetime
@@ -62,7 +62,15 @@ class PacBioSampleSequencingMetricsDTO(BaseModel):
     polymerase_mean_read_length: int
 
 
+class PacBioSequencingRunDTO(BaseModel):
+    instrument_name: RevioNames
+    run_id: str
+    run_name: str
+    unique_id: str
+
+
 class PacBioDTOs(PostProcessingDTOs):
     run_device: PacBioSMRTCellDTO
-    sequencing_run: PacBioSequencingRunDTO
+    smrt_cell_metrics: PacBioSMRTCellMetricsDTO
     sample_sequencing_metrics: list[PacBioSampleSequencingMetricsDTO]
+    sequencing_run: PacBioSequencingRunDTO

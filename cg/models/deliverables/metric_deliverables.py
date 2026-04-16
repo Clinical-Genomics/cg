@@ -164,6 +164,6 @@ class MetricsDeliverablesCondition(BaseModel):
 class MultiqcDataJson(BaseModel):
     """Multiqc data json model."""
 
-    report_general_stats_data: list[dict] | None = None
+    report_general_stats_data: list[dict[str, Any]] | None = None
     report_data_sources: dict | None = None
     report_saved_raw_data: dict[str, dict] | None = None

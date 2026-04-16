@@ -1,16 +1,47 @@
 """Tests for the file handlers."""
 
 import logging
+from datetime import datetime
+from unittest.mock import Mock
 
-from housekeeper.store.models import Version
+import pytest
+from housekeeper.store.models import File, Version
+from mock import create_autospec
+from pytest_mock import MockerFixture
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.lims.api import LimsAPI
+from cg.apps.madeline.api import MadelineAPI
+from cg.constants import Priority, Workflow
+from cg.constants.constants import SexOptions
+from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.nallo_config_builder import NalloConfigBuilder
 from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
+from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
-from cg.store.models import Analysis
+from cg.models.orders.sample_base import StatusEnum
+from cg.models.scout.scout_load_config import (
+    ChromographImages,
+    NalloLoadConfig,
+    RarediseaseLoadConfig,
+    Reviewer,
+    ScoutNalloIndividual,
+    ScoutRarediseaseIndividual,
+)
+from cg.store.models import (
+    Analysis,
+    Application,
+    ApplicationVersion,
+    Case,
+    CaseSample,
+    Customer,
+    Sample,
+)
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
@@ -50,7 +81,7 @@ def test_balsamic_config_builder(
     assert isinstance(file_handler.case_tags, CaseTags)
 
 
-def test_raredisease_config_builder(
+def test_raredisease_config_builder_instantiation(
     lims_api: MockLimsAPI,
     raredisease_analysis_api: RarediseaseAnalysisAPI,
     madeline_api: MockMadelineAPI,
@@ -282,3 +313,443 @@ def test_remove_chromosome_substring(mip_config_builder: MipConfigBuilder):
     # THEN
     assert mip_config_builder.remove_chromosome_substring(file_path1) == generic_path
     assert mip_config_builder.remove_chromosome_substring(file_path2) == generic_path
+
+
+@pytest.mark.freeze_time
+def test_nallo_config_builder(mocker: MockerFixture):
+    lims_api = create_autospec(LimsAPI)
+    lims_api.sample = Mock(return_value={"tissue_type": "blood"})
+
+    # GIVEN a Nallo config builder
+    nallo_config_builder = NalloConfigBuilder(
+        nallo_analysis_api=create_autospec(NalloAnalysisAPI),
+        lims_api=lims_api,
+        madeline_api=create_autospec(MadelineAPI),
+    )
+
+    # Case Files
+    delivery_report: File = create_autospec(File, full_path="delivery_report.yaml")
+    multiqc: File = create_autospec(File, full_path="multiqc.html")
+    peddy_check: File = create_autospec(File, full_path="check.peddy")
+    peddy_ped: File = create_autospec(File, full_path="ped.peddy")
+    somalier_samples: File = create_autospec(File, full_path="somalier.samples")
+    vcf_snv: File = create_autospec(File, full_path="snv_clinical.vcf")
+    vcf_snv_research: File = create_autospec(File, full_path="snv_research.vcf")
+    vcf_snv_research: File = create_autospec(File, full_path="snv_research.vcf")
+    vcf_str: File = create_autospec(File, full_path="str.vcf")
+    vcf_sv: File = create_autospec(File, full_path="sv.vcf")
+    vcf_sv_research: File = create_autospec(File, full_path="sv_research.vcf")
+
+    # Sample files
+    alignment_path: File = create_autospec(File, full_path="haplo.bam")
+    d4_file: File = create_autospec(File, full_path="coverage.d4")
+    tiddit_coverage_wig: File = create_autospec(File, full_path="bigwig_hifi.cnv")
+    paraphase_alignment_path: File = create_autospec(File, full_path="paraphase.bam")
+    phase_blocks: File = create_autospec(File, full_path="phase_blocks.gtf")
+    minor_allele_frequency_wig: File = create_autospec(
+        File, full_path="minor_allele_frequency.bigwig"
+    )
+    chromograph_autozyg: File = create_autospec(File, full_path="chromograph_autozyg_chr9.png")
+    chromograph_coverage: File = create_autospec(File, full_path="chromograph_coverage_chr9.png")
+
+    # GIVEN files exist in Housekeeper for each set of NALLO_CASE_TAG and NALLO_SAMPLE_TAG
+    def mock_get_file_from_version(version: Version, tags: set[str]) -> File | None:
+        # Case tags
+        if tags == {"delivery-report"}:
+            return delivery_report
+        elif tags == {"multiqc-html"}:
+            return multiqc
+        elif tags == {"ped-check", "peddy"}:
+            return peddy_check
+        elif tags == {"ped", "peddy"}:
+            return peddy_ped
+        elif tags == {"relate-samples", "somalier"}:
+            return somalier_samples
+        elif tags == {"vcf-snv-research"}:
+            return vcf_snv_research
+        elif tags == {"vcf-snv-clinical"}:
+            return vcf_snv
+        elif tags == {"vcf-sv-research"}:
+            return vcf_sv_research
+        elif tags == {"vcf-sv-clinical"}:
+            return vcf_sv
+        elif tags == {"vcf-str"}:
+            return vcf_str
+        # Sample tags
+        elif tags == {AlignmentFileTag.BAM, "haplotags", "sample_id"}:
+            return alignment_path
+        elif tags == {"coverage", "d4", "sample_id"}:
+            return d4_file
+        elif tags == {"hificnv", "bigwig", "sample_id"}:
+            return tiddit_coverage_wig
+        elif tags == {AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE, "sample_id"}:
+            return paraphase_alignment_path
+        elif tags == {"whatshap", "gtf", "sample_id"}:
+            return phase_blocks
+        elif tags == {"repeats", "spanning", "bam", "sample_id"}:
+            return create_autospec(File, full_path="repeats_spanning.bam")
+        elif tags == {"repeats", "spanning", "bam-index", "sample_id"}:
+            return create_autospec(File, full_path="repeats_spanning.index")
+        elif tags == {"repeats", "sorted", "vcf", "sample_id"}:
+            return create_autospec(File, full_path="repeats_sorted.vcf")
+        elif tags == {"trgt", "variant-catalog"}:
+            return create_autospec(File, full_path="variant_catalog.trgt")
+        elif tags == {"hificnv", "bigwig", "maf", "sample_id"}:
+            return minor_allele_frequency_wig
+        elif tags == {"chromograph", "autozyg", "sample_id"}:
+            return chromograph_autozyg
+        elif tags == {"chromograph", "tcov", "sample_id"}:
+            return chromograph_coverage
+        raise Exception
+
+    mocker.patch.object(
+        HousekeeperAPI, "get_file_from_version", side_effect=mock_get_file_from_version
+    )
+    version = create_autospec(Version)
+
+    # GIVEN an analysis tied to a case which is in turn tied to a sample and a customer
+    application: Application = create_autospec(
+        Application, analysis_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
+    )
+    sample: Sample = create_autospec(
+        Sample,
+        application_version=create_autospec(ApplicationVersion, application=application),
+        internal_id="sample_id",
+        sex=SexOptions.FEMALE,
+        subject_id="sample_subject",
+    )
+    sample.name = "sample_name"
+    case_sample: CaseSample = create_autospec(
+        CaseSample, father=None, mother=None, sample=sample, status=StatusEnum.affected
+    )
+    customer: Customer = create_autospec(Customer, internal_id="cust000")
+    case: Case = create_autospec(
+        Case,
+        customer=customer,
+        data_analysis=Workflow.NALLO,
+        internal_id="case_id",
+        links=[case_sample],
+        priority=Priority.standard,
+        synopsis=None,
+    )
+    case_sample.case = case
+    case.name = "case_name"
+    analysis: Analysis = create_autospec(Analysis, case=case, completed_at=datetime.now())
+
+    # WHEN building the Nallo Scout load config
+    load_config: NalloLoadConfig = nallo_config_builder.build_load_config(
+        hk_version=version, analysis=analysis
+    )
+
+    expected_load_config = NalloLoadConfig(
+        owner=customer.internal_id,
+        family=case.internal_id,
+        family_name=case.name,
+        status=None,
+        synopsis=None,
+        phenotype_terms=None,
+        phenotype_groups=None,
+        gene_panels=[],
+        default_gene_panels=[],
+        cohorts=[],
+        human_genome_build="38",
+        rank_model_version="1.0",
+        rank_score_threshold=8,
+        sv_rank_model_version="1.0",
+        analysis_date=datetime.now(),
+        samples=[
+            ScoutNalloIndividual(
+                alignment_path=alignment_path.full_path,
+                rna_alignment_path=None,
+                analysis_type="wgs",
+                capture_kit=None,
+                chromograph_images=ChromographImages(
+                    autozygous="chromograph_autozyg_chr",
+                    coverage="chromograph_coverage_chr",
+                ),
+                confirmed_parent=None,
+                confirmed_sex=None,
+                father="0",
+                mother="0",
+                phenotype=case_sample.status,
+                sample_id=sample.internal_id,
+                sample_name=sample.name,
+                sex=sample.sex,
+                subject_id=sample.subject_id,
+                tissue_type="unknown",
+                assembly_alignment_path=None,
+                d4_file=d4_file.full_path,
+                minor_allele_frequency_wig=minor_allele_frequency_wig.full_path,
+                mt_bam=alignment_path.full_path,
+                paraphase_alignment_path=paraphase_alignment_path.full_path,
+                phase_blocks=phase_blocks.full_path,
+                reviewer=Reviewer(
+                    alignment="repeats_spanning.bam",
+                    alignment_index="repeats_spanning.index",
+                    vcf="repeats_sorted.vcf",
+                    catalog="variant_catalog.trgt",
+                    trgt=True,
+                ),
+                tiddit_coverage_wig=tiddit_coverage_wig.full_path,
+            )
+        ],
+        cnv_report=None,
+        coverage_qc_report=None,
+        customer_images=None,
+        delivery_report=delivery_report.full_path,
+        madeline=None,
+        multiqc=multiqc.full_path,
+        peddy_check=peddy_check.full_path,
+        peddy_ped=peddy_ped.full_path,
+        peddy_sex=None,
+        somalier_pairs=None,
+        somalier_samples=somalier_samples.full_path,
+        track="rare",
+        vcf_snv=vcf_snv.full_path,
+        vcf_snv_research=vcf_snv_research.full_path,
+        vcf_str=vcf_str.full_path,
+        vcf_sv=vcf_sv.full_path,
+        vcf_sv_research=vcf_sv_research.full_path,
+    )
+
+    assert load_config == expected_load_config
+
+
+@pytest.mark.freeze_time
+def test_raredisease_config_builder(mocker: MockerFixture):
+    lims_api = create_autospec(LimsAPI)
+    lims_api.sample = Mock(return_value={"tissue_type": "blood"})
+
+    # GIVEN a Raredisease config builder
+    raredisease_config_builder = RarediseaseConfigBuilder(
+        raredisease_analysis_api=create_autospec(RarediseaseAnalysisAPI),
+        lims_api=lims_api,
+        madeline_api=create_autospec(MadelineAPI),
+    )
+
+    # GIVEN case files
+    delivery_report: File = create_autospec(File, full_path="delivery_report.yaml")
+    multiqc: File = create_autospec(File, full_path="multiqc.html")
+    peddy_check: File = create_autospec(File, full_path="check.peddy")
+    peddy_ped: File = create_autospec(File, full_path="ped.peddy")
+    peddy_sex: File = create_autospec(File, full_path="ped_sex.peddy")
+    smn_tsv: File = create_autospec(File, full_path="smn_tsv.tsv")
+    vcf_mei: File = create_autospec(File, full_path="vcf_mei.vcf")
+    vcf_mei_research: File = create_autospec(File, full_path="vcf_mei_research.vcf")
+    vcf_snv: File = create_autospec(File, full_path="vcf_snv.snv")
+    vcf_snv_research: File = create_autospec(File, full_path="vcf_snv_research.vcf")
+    vcf_snv_mt: File = create_autospec(File, full_path="vcf_snv_mt.vcf")
+    vcf_snv_research_mt: File = create_autospec(File, full_path="vcf_snv_research_mt.vcf")
+    vcf_sv: File = create_autospec(File, full_path="vcf_sv.vcf")
+    vcf_sv_research: File = create_autospec(File, full_path="vcf_sv_research.vcf")
+    vcf_str: File = create_autospec(File, full_path="vcf_str.vcf")
+
+    # GIVEN sample files
+    alignment_path: File = create_autospec(File, full_path="sort_md.cram")
+    mt_bam: File = create_autospec(File, full_path="sort_md.cram")
+    upd_regions_bed: File = create_autospec(File, full_path="chromograph_regions.bed")
+    upd_sites_bed: File = create_autospec(File, full_path="chromograph_sites.bed")
+    vcf2cytosure: File = create_autospec(File, full_path="sample_id.cgh")
+    mitodel_file: File = create_autospec(File, full_path="mitodel.txt")
+
+    chromograph_autozyg: File = create_autospec(File, full_path="chromograph_autozyg_chr9.png")
+    chromograph_coverage: File = create_autospec(File, full_path="chromograph_coverage_chr9.png")
+    eklipse_path: File = create_autospec(File, full_path="eklipse.png")
+    chromograph_regions: File = create_autospec(File, full_path="chromograph_regions.bed")
+    chromograph_sites: File = create_autospec(File, full_path="chromograph_sites.bed")
+    reviewer_alignment: File = create_autospec(File, full_path="reviewer_alignment.vcf")
+    reviewer_alignment_index: File = create_autospec(File, full_path="reviewer_alignment_index.vcf")
+    reviewer_vcf: File = create_autospec(File, full_path="reviewer_vcf.vcf")
+    reviewer_catalog: File = create_autospec(File, full_path="reviewer_catalog.vcf")
+    manifest: File = create_autospec(
+        File, full_path="tests/fixtures/analysis/raredisease/manifest.json"
+    )
+
+    # GIVEN files exist in Housekeeper for each set of RAREDISEASE_CASE_TAGS and RAREDISEASE_SAMPLE_TAGS
+    def mock_get_file_from_version(version: Version, tags: set[str]) -> File | None:
+        # Case tags
+        if tags == {"delivery-report"}:
+            return delivery_report
+        if tags == {"multiqc-html"}:
+            return multiqc
+        if tags == {"ped-check", "peddy"}:
+            return peddy_check
+        if tags == {"ped", "peddy"}:
+            return peddy_ped
+        if tags == {"sex-check", "peddy"}:
+            return peddy_sex
+        if tags == {"smn-calling"}:
+            return smn_tsv
+        if tags == {"mobile-elements", "clinical", "vcf"}:
+            return vcf_mei
+        if tags == {"mobile-elements", "research", "vcf"}:
+            return vcf_mei_research
+        if tags == {"vcf-snv-research"}:
+            return vcf_snv_research
+        if tags == {"vcf-snv-clinical"}:
+            return vcf_snv
+        if tags == {"vcf-sv-research", "mitochondria"}:
+            return vcf_snv_research_mt
+        if tags == {"vcf-sv-clinical", "mitochondria"}:
+            return vcf_snv_mt
+        if tags == {"vcf-sv-research"}:
+            return vcf_sv_research
+        if tags == {"vcf-sv-clinical"}:
+            return vcf_sv
+        if tags == {"vcf-str"}:
+            return vcf_str
+
+        # Sample tags
+        if tags == {AlignmentFileTag.CRAM, "sample_id"}:
+            return alignment_path
+        if tags == {"vcf2cytosure", "sample_id"}:
+            return vcf2cytosure
+        if tags == {"bam-mt", "sample_id"}:
+            return mt_bam
+        if tags == {"eklipse-png"}:
+            return eklipse_path
+        if tags == {"chromograph", "autozyg", "sample_id"}:
+            return chromograph_autozyg
+        if tags == {"chromograph", "tcov", "sample_id"}:
+            return chromograph_coverage
+        if tags == {"chromograph", "regions", "sample_id"}:
+            return chromograph_regions
+        if tags == {"chromograph", "sites", "sample_id"}:
+            return chromograph_sites
+        if tags == {"expansionhunter", "bam", "sample_id"}:
+            return reviewer_alignment
+        if tags == {"expansionhunter", "bam-index", "sample_id"}:
+            return reviewer_alignment_index
+        if tags == {"expansionhunter", "vcf-str", "sample_id"}:
+            return reviewer_vcf
+        if tags == {"expansionhunter", "variant-catalog"}:
+            return reviewer_catalog
+        if tags == {"mitodel", "sample_id"}:
+            return mitodel_file
+        if tags == {"manifest"}:
+            return manifest
+        raise Exception
+
+    mocker.patch.object(
+        HousekeeperAPI, "get_file_from_version", side_effect=mock_get_file_from_version
+    )
+    version = create_autospec(Version)
+
+    # GIVEN an analysis tied to a case which is in turn tied to a sample and a customer
+    application: Application = create_autospec(
+        Application, analysis_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
+    )
+    sample: Sample = create_autospec(
+        Sample,
+        application_version=create_autospec(ApplicationVersion, application=application),
+        internal_id="sample_id",
+        sex=SexOptions.FEMALE,
+        subject_id="sample_subject",
+    )
+    sample.name = "sample_name"
+    case_sample: CaseSample = create_autospec(
+        CaseSample, father=None, mother=None, sample=sample, status=StatusEnum.affected
+    )
+    customer: Customer = create_autospec(Customer, internal_id="cust000")
+    case: Case = create_autospec(
+        Case,
+        customer=customer,
+        data_analysis=Workflow.RAREDISEASE,
+        internal_id="case_id",
+        links=[case_sample],
+        priority=Priority.standard,
+        synopsis=None,
+    )
+    case_sample.case = case
+    case.name = "case_name"
+    analysis: Analysis = create_autospec(Analysis, case=case, completed_at=datetime.now())
+
+    # WHEN building the Raredisease Scout load config
+    load_config: RarediseaseLoadConfig = raredisease_config_builder.build_load_config(
+        hk_version=version, analysis=analysis
+    )
+
+    expected_load_config = RarediseaseLoadConfig(
+        # ScoutLoadConfig
+        owner=customer.internal_id,
+        family=case.internal_id,
+        family_name=case.name,
+        status=None,
+        synopsis=None,
+        phenotype_terms=None,
+        phenotype_groups=None,
+        gene_panels=[],
+        default_gene_panels=[],
+        cohorts=[],
+        human_genome_build="37",
+        rank_model_version="1.38",
+        rank_score_threshold=5,
+        sv_rank_model_version="1.12",
+        analysis_date=datetime.now(),
+        samples=[
+            ScoutRarediseaseIndividual(
+                # ScoutIndividual
+                alignment_path=alignment_path.full_path,
+                rna_alignment_path=None,
+                analysis_type="wgs",
+                capture_kit=None,
+                confirmed_parent=None,
+                confirmed_sex=None,
+                father="0",
+                mother="0",
+                phenotype=case_sample.status,
+                sample_id=sample.internal_id,
+                sample_name=sample.name,
+                sex=sample.sex,
+                subject_id=sample.subject_id,
+                tissue_type="unknown",
+                # ScoutRarediseaseIndividual
+                mt_bam=mt_bam.full_path,
+                chromograph_images=ChromographImages(
+                    autozygous="chromograph_autozyg_chr",
+                    coverage="chromograph_coverage_chr",
+                    upd_regions=upd_regions_bed.full_path,
+                    upd_sites=upd_sites_bed.full_path,
+                ),
+                rhocall_bed=None,
+                rhocall_wig=None,
+                tiddit_coverage_wig=None,
+                upd_regions_bed=None,
+                upd_sites_bed=None,
+                vcf2cytosure=vcf2cytosure.full_path,
+                mitodel_file=mitodel_file.full_path,
+                reviewer=Reviewer(
+                    alignment="reviewer_alignment.vcf",
+                    alignment_index="reviewer_alignment_index.vcf",
+                    vcf="reviewer_vcf.vcf",
+                    catalog="reviewer_catalog.vcf",
+                    trgt=None,
+                ),
+                d4_file=None,
+            )
+        ],
+        customer_images=None,
+        delivery_report=delivery_report.full_path,
+        coverage_qc_report=None,
+        cnv_report=None,
+        multiqc=multiqc.full_path,
+        track="rare",
+        # RarediseaseLoadConfig
+        madeline=None,
+        peddy_check=peddy_check.full_path,
+        peddy_ped=peddy_ped.full_path,
+        peddy_sex=peddy_sex.full_path,
+        custom_images=None,
+        smn_tsv=smn_tsv.full_path,
+        vcf_mei=vcf_mei.full_path,
+        vcf_mei_research=vcf_mei_research.full_path,
+        vcf_snv=vcf_snv.full_path,
+        vcf_snv_research=vcf_snv_research.full_path,
+        vcf_snv_mt=vcf_snv_mt.full_path,
+        vcf_snv_research_mt=vcf_snv_research_mt.full_path,
+        vcf_sv=vcf_sv.full_path,
+        vcf_sv_research=vcf_sv_research.full_path,
+        vcf_str=vcf_str.full_path,
+    )
+
+    assert load_config == expected_load_config

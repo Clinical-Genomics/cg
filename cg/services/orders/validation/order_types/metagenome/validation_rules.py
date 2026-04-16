@@ -1,3 +1,5 @@
+from typing import Callable
+
 from cg.services.orders.validation.rules.sample.rules import (
     validate_application_compatibility,
     validate_application_exists,
@@ -5,6 +7,7 @@ from cg.services.orders.validation.rules.sample.rules import (
     validate_container_name_required,
     validate_non_control_sample_names_available,
     validate_sample_names_unique,
+    validate_source_comment_required,
     validate_tube_container_name_unique,
     validate_volume_interval,
     validate_volume_required,
@@ -13,13 +16,14 @@ from cg.services.orders.validation.rules.sample.rules import (
     validate_wells_contain_at_most_one_sample,
 )
 
-METAGENOME_SAMPLE_RULES: list[callable] = [
+METAGENOME_SAMPLE_RULES: list[Callable] = [
     validate_application_compatibility,
     validate_application_exists,
     validate_applications_not_archived,
     validate_container_name_required,
     validate_non_control_sample_names_available,
     validate_sample_names_unique,
+    validate_source_comment_required,
     validate_tube_container_name_unique,
     validate_volume_interval,
     validate_volume_required,

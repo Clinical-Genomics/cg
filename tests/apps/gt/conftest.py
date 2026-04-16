@@ -1,5 +1,5 @@
 """
-    conftest for genotype API
+conftest for genotype API
 """
 
 import pytest

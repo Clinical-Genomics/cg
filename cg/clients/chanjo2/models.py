@@ -27,6 +27,12 @@ class CoverageMetrics(BaseModel):
     mean_coverage: float
 
 
+class CoverageMetricsChanjo1(CoverageMetrics):
+    """Chanjo1 sample coverage metrics model."""
+
+    pass
+
+
 class CoveragePostResponse(RootModel):
     """Coverage sample data model returned from the POST request."""
 

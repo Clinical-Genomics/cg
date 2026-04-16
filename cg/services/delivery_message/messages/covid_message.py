@@ -1,5 +1,6 @@
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
 from cg.services.delivery_message.messages.utils import (
+    REMINDER_TO_DOWNLOAD_MESSAGE,
     get_caesar_delivery_path,
     get_pangolin_delivery_path,
 )
@@ -16,5 +17,6 @@ class CovidMessage(DeliveryMessage):
             f"The result files are being uploaded to Caesar at:\n\n"
             f"{delivery_path}\n\n"
             f"and the .csv files with pangolin-type have been sent to\n\n"
-            f"{pangolin_delivery_path}"
+            f"{pangolin_delivery_path} \n\n"
+            f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
         )

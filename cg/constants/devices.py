@@ -1,6 +1,6 @@
 """Enums for run_devices."""
 
-from enum import Enum, auto
+from enum import Enum, StrEnum, auto
 
 
 class DeviceType(Enum):
@@ -8,3 +8,8 @@ class DeviceType(Enum):
     BIONANO = auto()
     OXFORD_NANOPORE = auto()
     PACBIO = auto()
+
+
+class RevioNames(StrEnum):
+    BETTY = "Betty"
+    WILMA = "Wilma"

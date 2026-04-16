@@ -1,3 +1,5 @@
+from typing import Generic, TypeVar
+
 from pydantic import Discriminator, Tag
 from typing_extensions import Annotated
 
@@ -8,22 +10,27 @@ from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.sample import Sample
 
-NewCaseType = Annotated[Case, Tag("new")]
-ExistingCaseType = Annotated[ExistingCase, Tag("existing")]
+CaseType = TypeVar("CaseType", bound=Case)
+SampleType = TypeVar("SampleType", bound=Sample)
 
 
-class OrderWithCases(Order):
-    cases: list[Annotated[NewCaseType | ExistingCaseType, Discriminator(has_internal_id)]]
+class OrderWithCases(Order, Generic[CaseType, SampleType]):
+    cases: list[
+        Annotated[
+            Annotated[CaseType, Tag("new")] | Annotated[ExistingCase, Tag("existing")],
+            Discriminator(has_internal_id),
+        ]
+    ]
 
     @property
-    def enumerated_cases(self) -> enumerate[Case | ExistingCase]:
+    def enumerated_cases(self) -> enumerate[CaseType | ExistingCase]:
         return enumerate(self.cases)
 
     @property
-    def enumerated_new_cases(self) -> list[tuple[int, Case]]:
-        cases: list[tuple[int, Case]] = []
+    def enumerated_new_cases(self) -> list[tuple[int, CaseType]]:
+        cases: list[tuple[int, CaseType]] = []
         for case_index, case in self.enumerated_cases:
-            if case.is_new:
+            if not isinstance(case, ExistingCase):
                 cases.append((case_index, case))
         return cases
 
@@ -31,12 +38,12 @@ class OrderWithCases(Order):
     def enumerated_existing_cases(self) -> list[tuple[int, ExistingCase]]:
         cases: list[tuple[int, ExistingCase]] = []
         for case_index, case in self.enumerated_cases:
-            if not case.is_new:
+            if isinstance(case, ExistingCase):
                 cases.append((case_index, case))
         return cases
 
     @property
-    def enumerated_new_samples(self) -> list[tuple[int, int, Sample]]:
+    def enumerated_new_samples(self) -> list[tuple[int, int, SampleType]]:
         return [
             (case_index, sample_index, sample)
             for case_index, case in self.enumerated_new_cases

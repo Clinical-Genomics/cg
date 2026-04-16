@@ -1,14 +1,14 @@
 import logging
-from datetime import datetime
 
 import pytest
+from sqlalchemy.exc import MultipleResultsFound
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability
-from cg.constants.constants import CaseActions, MicrosaltAppTags, Workflow
+from cg.constants.constants import BedVersionGenomeVersion, CaseActions, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
-from cg.exc import CgError
+from cg.exc import BedVersionNotFoundError, CgError
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.models import (
     Analysis,
@@ -92,13 +92,13 @@ def test_get_active_beds_when_archived(base_store: Store):
     assert not list(active_beds)
 
 
-def test_get_active_applications_by_prep_category(microbial_store: Store):
-    """Test that non-archived and correct applications are returned for the given prep category."""
+def test_get_applications_by_prep_category(microbial_store: Store):
+    """Test that correct applications are returned for the given prep category."""
     # GIVEN a store with applications with a given prep category
     prep_category = SeqLibraryPrepCategory.MICROBIAL
 
-    # WHEN fetching the active applications for a given prep category
-    applications: list[Application] = microbial_store.get_active_applications_by_prep_category(
+    # WHEN fetching the applications for a given prep category
+    applications: list[Application] = microbial_store.get_applications_by_prep_category(
         prep_category=prep_category
     )
 
@@ -108,10 +108,9 @@ def test_get_active_applications_by_prep_category(microbial_store: Store):
     # THEN the applications should have the given prep category and not be archived
     for application in applications:
         assert application.prep_category == prep_category
-        assert not application.is_archived
 
 
-def test_get_application_by_tag(microbial_store: Store, tag: str = MicrosaltAppTags.MWRNXTR003):
+def test_get_application_by_tag(microbial_store: Store, tag: str = "MWRNXTR003"):
     """Test function to return the application by tag."""
 
     # GIVEN a store with application records
@@ -146,7 +145,9 @@ def test_case_in_uploaded_observations(helpers: StoreHelpers, sample_store: Stor
     analysis: Analysis = helpers.add_analysis(store=sample_store, workflow=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
-    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(
+        analysis.case, sample, PhenotypeStatus.UNKNOWN, should_deliver_sample=True
+    )
     sample_store.session.add(link)
     assert analysis.case.analyses
     for link in analysis.case.links:
@@ -166,7 +167,9 @@ def test_case_not_in_uploaded_observations(helpers: StoreHelpers, sample_store: 
     analysis: Analysis = helpers.add_analysis(store=sample_store, workflow=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store)
-    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(
+        analysis.case, sample, PhenotypeStatus.UNKNOWN, should_deliver_sample=True
+    )
     sample_store.session.add(link)
     assert analysis.case.analyses
     for link in analysis.case.links:
@@ -186,7 +189,9 @@ def test_case_in_observations_to_upload(helpers: StoreHelpers, sample_store: Sto
     analysis: Analysis = helpers.add_analysis(store=sample_store, workflow=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store)
-    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(
+        analysis.case, sample, PhenotypeStatus.UNKNOWN, should_deliver_sample=True
+    )
     sample_store.session.add(link)
     assert analysis.case.analyses
     for link in analysis.case.links:
@@ -208,7 +213,9 @@ def test_case_not_in_observations_to_upload(
     analysis: Analysis = helpers.add_analysis(store=sample_store, workflow=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
-    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(
+        analysis.case, sample, PhenotypeStatus.UNKNOWN, should_deliver_sample=True
+    )
     sample_store.session.add(link)
     assert analysis.case.analyses
     for link in analysis.case.links:
@@ -311,21 +318,6 @@ def test_analyses_to_upload_when_filtering_with_missing_workflow(helpers, sample
     assert len(records) == 0
 
 
-def test_set_case_action(analysis_store: Store, case_id):
-    """Tests if actions of cases are changed to analyze."""
-    # Given a store with a case with action None
-    action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
-
-    assert action is None
-
-    # When setting the case to "analyze"
-    analysis_store.update_case_action(case_internal_id=case_id, action="analyze")
-    new_action = analysis_store.get_case_by_internal_id(internal_id=case_id).action
-
-    # Then the action should be set to analyze
-    assert new_action == "analyze"
-
-
 def test_get_applications(microbial_store: Store, expected_number_of_applications):
     """Test function to return the applications."""
 
@@ -364,18 +356,75 @@ def test_get_bed_version_by_file_name(base_store: Store, bed_version_file_name: 
     assert bed_version.filename == bed_version_file_name
 
 
-def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name: str):
-    """Test function to return the bed version by short name."""
-
-    # GIVEN a store with bed versions records
-
-    # WHEN getting the query for the bed versions
-    bed_version: BedVersion = base_store.get_bed_version_by_short_name(
-        bed_version_short_name=bed_version_short_name
+def test_get_bed_version_by_short_name_and_genome_version_strict_success(
+    store: Store, helpers: StoreHelpers
+):
+    # GIVEN a store with three bed versions
+    bed_hg19: Bed = helpers.add_bed("bed_hg19")
+    bed_hg38: Bed = helpers.add_bed("bed_hg38")
+    bed_version_with_different_genome_version: BedVersion = helpers.add_bed_version(
+        bed=bed_hg19, version=1, filename="bed_hg19.bed", shortname="b"
+    )
+    bed_version_with_different_genome_version.genome_version = BedVersionGenomeVersion.HG19
+    bed_version_with_different_shortname: BedVersion = helpers.add_bed_version(
+        bed=bed_hg38, version=2, filename="bed_hg38.bed", shortname="a"
+    )
+    bed_version_with_different_shortname.genome_version = BedVersionGenomeVersion.HG38
+    bed_version_to_fetch: BedVersion = helpers.add_bed_version(
+        bed=bed_hg38, version=1, filename="bed_hg38.bed", shortname="b"
+    )
+    bed_version_to_fetch.genome_version = BedVersionGenomeVersion.HG38
+    store.add_multiple_items_to_store(
+        [
+            bed_version_with_different_genome_version,
+            bed_version_with_different_shortname,
+            bed_version_to_fetch,
+        ]
     )
 
-    # THEN return a bed version with the supplied bed version short name
-    assert bed_version.shortname == bed_version_short_name
+    # WHEN getting the bed version of hg38 genome version
+    bed_version = store.get_bed_version_by_short_name_and_genome_version_strict(
+        short_name="b", genome_version=BedVersionGenomeVersion.HG38
+    )
+
+    # THEN the expected bed version is returned
+    assert bed_version == bed_version_to_fetch
+
+
+def test_get_bed_version_by_short_name_and_genome_version_strict_no_result_found(store: Store):
+    # GIVEN a store without bed versions
+    assert store._get_query(table=BedVersion).count() == 0
+
+    # WHEN getting a bed version by a short name and a genome version
+    # THEN a BedVersionNotFoundError is raised
+    with pytest.raises(BedVersionNotFoundError):
+        store.get_bed_version_by_short_name_and_genome_version_strict(
+            short_name="short_name", genome_version=BedVersionGenomeVersion.HG19
+        )
+
+
+def test_get_bed_version_by_short_name_and_genome_version_strict_multiple_results_found(
+    store: Store,
+    helpers: StoreHelpers,
+):
+    # GIVEN a store with two bed versions with the same shortname and genome_version
+    bed_hg38: Bed = helpers.add_bed("bed_hg38")
+    bed_version_1: BedVersion = helpers.add_bed_version(
+        bed=bed_hg38, version=2, filename="bed_hg38.bed", shortname="b"
+    )
+    bed_version_1.genome_version = BedVersionGenomeVersion.HG38
+    bed_version_2: BedVersion = helpers.add_bed_version(
+        bed=bed_hg38, version=1, filename="bed_hg38.bed", shortname="b"
+    )
+    bed_version_2.genome_version = BedVersionGenomeVersion.HG38
+    store.add_multiple_items_to_store([bed_version_1, bed_version_2])
+
+    # WHEN getting a bed version by shortname and genome_version
+    # THEN a MultipleResultsFound error is raised
+    with pytest.raises(MultipleResultsFound):
+        store.get_bed_version_by_short_name_and_genome_version_strict(
+            short_name="b", genome_version=BedVersionGenomeVersion.HG38
+        )
 
 
 def test_get_customer_by_internal_id(base_store: Store, customer_id: str):

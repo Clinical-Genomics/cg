@@ -9,4 +9,5 @@ class PacbioSample(Sample):
     require_qc_ok: bool = False
     sex: SexEnum
     source: str
+    source_comment: str | None = None
     tumour: bool = False

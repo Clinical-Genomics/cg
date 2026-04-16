@@ -1,3 +1,5 @@
+from typing import Generic, TypeVar
+
 from pydantic import BaseModel, Discriminator, Field, Tag, model_validator
 from typing_extensions import Annotated
 
@@ -5,20 +7,19 @@ from cg.constants.priority import PriorityTerms
 from cg.models.orders.sample_base import NAME_PATTERN
 from cg.services.orders.validation.models.discriminators import has_internal_id
 from cg.services.orders.validation.models.existing_sample import ExistingSample
-from cg.services.orders.validation.models.sample_aliases import SampleInCase
+from cg.services.orders.validation.models.sample import Sample
 from cg.store.models import Sample as DbSample
 from cg.store.store import Store
 
-NewSample = Annotated[SampleInCase, Tag("new")]
-ExistingSampleType = Annotated[ExistingSample, Tag("existing")]
+SampleType = TypeVar("SampleType", bound=Sample)
 
 
-class Case(BaseModel):
+class Case(BaseModel, Generic[SampleType]):
     name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
     priority: PriorityTerms = PriorityTerms.STANDARD
     samples: list[
         Annotated[
-            NewSample | ExistingSampleType,
+            Annotated[SampleType, Tag("new")] | Annotated[ExistingSample, Tag("existing")],
             Discriminator(has_internal_id),
         ]
     ]
@@ -28,14 +29,14 @@ class Case(BaseModel):
         return True
 
     @property
-    def enumerated_samples(self) -> enumerate[NewSample | ExistingSampleType]:
+    def enumerated_samples(self) -> enumerate[SampleType | ExistingSample]:
         return enumerate(self.samples)
 
     @property
-    def enumerated_new_samples(self) -> list[tuple[int, SampleInCase]]:
-        samples: list[tuple[int, SampleInCase]] = []
+    def enumerated_new_samples(self) -> list[tuple[int, SampleType]]:
+        samples: list[tuple[int, SampleType]] = []
         for sample_index, sample in self.enumerated_samples:
-            if sample.is_new:
+            if not isinstance(sample, ExistingSample):
                 samples.append((sample_index, sample))
         return samples
 
@@ -43,11 +44,11 @@ class Case(BaseModel):
     def enumerated_existing_samples(self) -> list[tuple[int, ExistingSample]]:
         samples: list[tuple[int, ExistingSample]] = []
         for sample_index, sample in self.enumerated_samples:
-            if not sample.is_new:
+            if isinstance(sample, ExistingSample):
                 samples.append((sample_index, sample))
         return samples
 
-    def get_new_sample(self, sample_name: str) -> SampleInCase | None:
+    def get_new_sample(self, sample_name: str) -> SampleType | None:
         for _, sample in self.enumerated_new_samples:
             if sample.name == sample_name:
                 return sample

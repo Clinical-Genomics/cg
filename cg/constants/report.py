@@ -209,6 +209,9 @@ REQUIRED_SAMPLE_METADATA_NALLO_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIE
 _REQUIRED_SAMPLE_METADATA_BALSAMIC_FIELDS: list[str] = _REQUIRED_SAMPLE_METADATA_FIELDS + [
     "mean_insert_size",
     "fold_80",
+    "predicted_sex",
+    "at_dropout",
+    "gc_dropout",
 ]
 
 REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS: list[str] = (
@@ -219,7 +222,6 @@ REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS: list[str] = (
         "median_target_coverage",
         "pct_250x",
         "pct_500x",
-        "gc_dropout",
     ]
 )
 

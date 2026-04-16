@@ -1,4 +1,4 @@
-""" Module to group PDC related commands."""
+"""Module to group PDC related commands."""
 
 import logging
 from subprocess import CalledProcessError

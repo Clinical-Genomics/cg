@@ -19,5 +19,7 @@ class RNAFusionSample(Sample):
     require_qc_ok: bool = False
     sex: SexEnum
     source: str
+    source_comment: str | None = None
     subject_id: str = Field(pattern=NAME_PATTERN, min_length=1, max_length=128)
     tissue_block_size: TissueBlockEnum | None = None
+    tumour: bool = True  # Always set to True upon submission, but if False, we show a warning

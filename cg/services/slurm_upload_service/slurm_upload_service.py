@@ -1,4 +1,5 @@
 import logging
+
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.priority import SlurmQos
@@ -12,7 +13,6 @@ from cg.models.slurm.sbatch import Sbatch
 from cg.services.slurm_service.slurm_service import SlurmService
 from cg.services.slurm_upload_service.slurm_upload_config import SlurmUploadConfig
 from cg.services.slurm_upload_service.utils import get_quality_of_service
-
 
 LOG = logging.getLogger(__name__)
 

@@ -1,4 +1,8 @@
+from pathlib import Path
+
+from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
+from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 
@@ -14,7 +18,7 @@ def test_microsalt_get_start_command():
         fastq_directory="/path/to/microsalt_case/fastq",
     )
 
-    # WHEN getting the slurm command
+    # WHEN getting the start command
     start_command: str = microsalt_case_config.get_start_command()
 
     # THEN the command is as expected
@@ -44,7 +48,7 @@ def test_mip_dna_get_start_command_no_flags_set():
         use_bwa_mem=False,
     )
 
-    # WHEN getting the slurm command
+    # WHEN getting the start command
     start_command: str = mip_case_config.get_start_command()
 
     # THEN the command is as expected
@@ -75,7 +79,7 @@ def test_mip_dna_get_start_command_all_flags_set():
         use_bwa_mem=True,
     )
 
-    # WHEN getting the slurm command
+    # WHEN getting the start command
     start_command: str = mip_case_config.get_start_command()
 
     # THEN the command is as expected
@@ -83,9 +87,73 @@ def test_mip_dna_get_start_command_all_flags_set():
         f"{mip_case_config.conda_binary} run --name {mip_case_config.conda_environment} {mip_case_config.pipeline_binary} analyse rd_dna"
         f" --config {mip_case_config.pipeline_config_path} {case_id} --slurm_quality_of_service "
         f"{mip_case_config.slurm_qos} --email {mip_case_config.email} "
-        f"--start_after_recipe {mip_case_config.start_after_recipe} "
-        f"--start_with_recipe {mip_case_config.start_with_recipe} "
+        f"--start_after_recipe {mip_case_config.start_after} "
+        f"--start_with_recipe {mip_case_config.start_with} "
         f"--bwa_mem 1 "
         f"--bwa_mem2 0"
+    )
+    assert start_command == expected_command
+
+
+def test_balsamic_get_start_command_no_flags_set():
+    # GIVEN a Balsamic case config
+    balsamic_case_config = BalsamicCaseConfig(
+        account="balsamic_account",
+        binary=Path("/path/to/balsamic_binary"),
+        conda_binary=Path("/path/to/conda"),
+        case_id="case_id",
+        environment="balsamic_environment",
+        head_job_partition="head_job_partition",
+        sample_config=Path("/path/to/sample/config"),
+        qos=SlurmQos.NORMAL,
+        workflow=Workflow.BALSAMIC,
+    )
+
+    # WHEN getting the start command
+    start_command: str = balsamic_case_config.get_start_command()
+
+    # THEN the command is as expected
+    expected_command = (
+        "/path/to/conda run "
+        "--name balsamic_environment "
+        "/path/to/balsamic_binary run analysis "
+        "--account balsamic_account "
+        "--qos normal "
+        "--sample-config /path/to/sample/config "
+        "--headjob-partition head_job_partition "
+        "--run-analysis"
+    )
+    assert start_command == expected_command
+
+
+def test_balsamic_get_start_command_all_flags_set():
+    # GIVEN a Balsamic case config
+    balsamic_case_config = BalsamicCaseConfig(
+        account="balsamic_account",
+        binary=Path("/path/to/balsamic_binary"),
+        conda_binary=Path("/path/to/conda"),
+        case_id="case_id",
+        environment="balsamic_environment",
+        head_job_partition="head_job_partition",
+        sample_config=Path("/path/to/sample/config"),
+        qos=SlurmQos.NORMAL,
+        workflow=Workflow.BALSAMIC,
+        workflow_profile=Path("/path/to/workflow/profile"),
+    )
+
+    # WHEN getting the start command
+    start_command: str = balsamic_case_config.get_start_command()
+
+    # THEN the command is as expected
+    expected_command = (
+        "/path/to/conda run "
+        "--name balsamic_environment "
+        "/path/to/balsamic_binary run analysis "
+        "--account balsamic_account "
+        "--qos normal "
+        "--sample-config /path/to/sample/config "
+        "--headjob-partition head_job_partition "
+        "--run-analysis "
+        "--workflow-profile /path/to/workflow/profile"
     )
     assert start_command == expected_command

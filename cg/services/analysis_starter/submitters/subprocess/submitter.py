@@ -12,7 +12,7 @@ SubprocessCaseConfig = MicrosaltCaseConfig | MIPDNACaseConfig
 
 
 class SubprocessSubmitter(Submitter):
-    def submit(self, case_config: SubprocessCaseConfig) -> None:
+    def submit(self, case_config: SubprocessCaseConfig) -> SubprocessCaseConfig:
         command: str = case_config.get_start_command()
         LOG.info(f"Running: {command}")
         subprocess.run(
@@ -22,6 +22,7 @@ class SubprocessSubmitter(Submitter):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
+        return case_config
 
     @staticmethod
     def get_workflow_version(case_config: SubprocessCaseConfig) -> str:
