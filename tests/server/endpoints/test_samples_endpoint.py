@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from unittest.mock import Mock, create_autospec
+from unittest.mock import Mock, call
 
 from flask.testing import FlaskClient
 from pytest_mock import MockerFixture
@@ -7,7 +7,6 @@ from pytest_mock import MockerFixture
 from cg.constants.lims import LimsStatus
 from cg.exc import SampleNotFoundError
 from cg.server.endpoints import samples
-from cg.store.models import Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -15,11 +14,6 @@ from tests.typed_mock import TypedMock, create_typed_mock
 def test_update_samples(client: FlaskClient, mocker: MockerFixture):
     # GIVEN a store
     status_db: TypedMock[Store] = create_typed_mock(Store)
-    sample_1 = create_autospec(Sample, internal_id="sample_1", lims_status=LimsStatus.PENDING)
-    sample_2 = create_autospec(Sample, internal_id="sample_2", lims_status=LimsStatus.PENDING)
-    status_db.as_type.get_sample_by_internal_id_strict = lambda internal_id: (
-        sample_1 if internal_id == "sample_1" else sample_2
-    )
     mocker.patch.object(samples, "db", status_db.as_type)
 
     # GIVEN a request body with two sample internal ids and a lims status
@@ -40,15 +34,19 @@ def test_update_samples(client: FlaskClient, mocker: MockerFixture):
     assert response.status_code == HTTPStatus.NO_CONTENT
 
     # THEN the samples were updated in the database
-    assert sample_1.lims_status == LimsStatus.TOP_UP
-    assert sample_2.lims_status == LimsStatus.RE_PREP
+    status_db.as_mock.update_sample_lims_status.assert_has_calls(
+        [
+            call(internal_id="sample_1", lims_status=LimsStatus.TOP_UP),
+            call(internal_id="sample_2", lims_status=LimsStatus.RE_PREP),
+        ]
+    )
     status_db.as_mock.commit_to_store.assert_called_once()
 
 
 def test_update_samples_sample_not_found(client: FlaskClient, mocker: MockerFixture):
     # GIVEN a store that raises an error when trying to get a sample
     status_db: TypedMock[Store] = create_typed_mock(Store)
-    status_db.as_type.get_sample_by_internal_id_strict = Mock(side_effect=SampleNotFoundError())
+    status_db.as_type.update_sample_lims_status = Mock(side_effect=SampleNotFoundError())
     mocker.patch.object(samples, "db", status_db.as_type)
 
     # GIVEN a request body with a sample internal id and a lims status
