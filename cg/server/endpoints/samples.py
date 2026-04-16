@@ -58,6 +58,11 @@ def get_samples():
     return jsonify(samples=samples, total=total)
 
 
+@SAMPLES_BLUEPRINT.route("/unhandled_samples", methods=["GET"])
+def get_unhandled_samples():
+    return "", HTTPStatus.OK
+
+
 @SAMPLES_BLUEPRINT.route("/samples", methods=["PATCH"])
 def update_samples():
     """Update the lims_status attribute of a list of samples."""

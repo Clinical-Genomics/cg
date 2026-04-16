@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from unittest.mock import Mock, call
+from unittest.mock import Mock, call, create_autospec
 
 from flask.testing import FlaskClient
 from pytest_mock import MockerFixture
@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 from cg.constants.lims import LimsStatus
 from cg.exc import SampleNotFoundError
 from cg.server.endpoints import samples
+from cg.store.models import Customer, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -92,3 +93,24 @@ def test_update_sample_invalid_request_structure(client: FlaskClient, mocker: Mo
 
     # THEN the database was not updated
     status_db.as_mock.commit_to_store.assert_not_called()
+
+
+def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
+    # GIVEN a store with unhandled samples in top-up
+    status_db = create_autospec(Store)
+    sample_1 = create_autospec(
+        Sample, customer=create_autospec(Customer, interal_id="external_customer")
+    )
+    mocker.patch.object(samples, "db", status_db)
+
+    # GIVEN a request to get unhandled samples that are in top-up
+
+    # WHEN calling the endpoint to get unhandled samples
+    response = client.get(
+        path="/api/v1/unhandled_samples",
+    )
+
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.OK
+
+    # THEN samples should be returned
