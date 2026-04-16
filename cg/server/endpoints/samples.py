@@ -1,9 +1,14 @@
 from http import HTTPStatus
 
 from flask import Blueprint, Response, abort, g, jsonify, request
+from pydantic import ValidationError
 
 from cg.exc import AuthorisationError, SampleNotFoundError
-from cg.server.dto.samples.requests import CollaboratorSamplesRequest, SamplesRequest
+from cg.server.dto.samples.requests import (
+    CollaboratorSamplesRequest,
+    SamplesRequest,
+    SamplesUpdateRequest,
+)
 from cg.server.dto.samples.samples_response import SamplesResponse
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import db, sample_service
@@ -55,12 +60,13 @@ def get_samples():
 
 @SAMPLES_BLUEPRINT.route("/samples", methods=["PATCH"])
 def update_samples():
-    samples_request = request.json
     try:
-        for sample in samples_request["samples"]:
-            db_sample = db.get_sample_by_internal_id_strict(sample["internal_id"])
-            db_sample.lims_status = sample["lims_status"]
-    except SampleNotFoundError:
+        samples_request = SamplesUpdateRequest.model_validate(request.json)
+        for sample in samples_request.samples:
+            db.update_sample_lims_status(
+                internal_id=sample.internal_id, lims_status=sample.lims_status
+            )
+    except (SampleNotFoundError, ValidationError):
         return abort(HTTPStatus.BAD_REQUEST)
     db.commit_to_store()
     return Response(status=HTTPStatus.NO_CONTENT)
