@@ -338,7 +338,7 @@ def test_update_sample_lims_status(store: Store, helpers: StoreHelpers, mocker: 
     )
 
     # THEN the sample should have been updated
-    assert sample_1.lims_status == LimsStatus.TOP_UP
+    assert sample_1 == updated_sample
     assert updated_sample.lims_status == LimsStatus.TOP_UP
 
     # THEN the commit should not have been called
