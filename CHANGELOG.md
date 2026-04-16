@@ -23,7 +23,6 @@ __________ DO NOT TOUCH ___________ -->
 ### Added
 ### Changed
 ### Fixed
-- README badge for CI - tests and coverage
 
 ## [22.26.0]
 ### Added
