@@ -1,12 +1,13 @@
 import logging
 import re
+from pathlib import Path
 
-from housekeeper.store.models import File, Version
+from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.constants.constants import FileFormat, GenomeBuild
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag, NFAnalysisTags
+from cg.constants.constants import GenomeBuild
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import (
     RANK_MODEL_THRESHOLD,
     RAREDISEASE_CASE_TAGS,
@@ -14,7 +15,7 @@ from cg.constants.scout import (
     UploadTrack,
 )
 from cg.constants.sequencing import Variants
-from cg.io.controller import ReadFile
+from cg.io.yaml import read_yaml
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
@@ -80,53 +81,34 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
 
     def get_rank_model_version(self, variant_type: Variants, hk_version: Version) -> str:
         """
-        Returns the rank model version for a variant type from the manifest file.
+        Returns the rank model version for a variant type from the nextflow params file.
         Raises:
-            FileNotFoundError if no manifest file is found in housekeeper.
+            FileNotFoundError if no params file is found in housekeeper.
         """
-        hk_manifest_file: File = self.get_file_from_hk(
-            {NFAnalysisTags.MANIFEST}, hk_version=hk_version
+        hk_params_file: str | None = self.get_file_from_hk(
+            hk_tags={"nextflow-params"}, hk_version=hk_version
         )
-        if not hk_manifest_file:
-            raise FileNotFoundError("No manifest file found in Housekeeper.")
-        return self.extract_rank_model_from_manifest(
-            hk_manifest_file=hk_manifest_file, variant_type=variant_type
+        if not hk_params_file:
+            raise FileNotFoundError("No params file found in Housekeeper.")
+        return self.extract_rank_model_from_params_file(
+            hk_params_file=hk_params_file, variant_type=variant_type
         )
 
-    def extract_rank_model_from_manifest(
-        self, hk_manifest_file: File, variant_type: Variants
+    def extract_rank_model_from_params_file(
+        self, hk_params_file: str, variant_type: Variants
     ) -> str:
-        content: dict[str, dict[str, str]] = ReadFile.get_content_from_file(
-            file_format=FileFormat.JSON, file_path=hk_manifest_file
-        )
-        return self.get_rank_model_version_from_manifest_content(
-            content=content, variant_type=variant_type
-        )
+        content: dict[str, str] = read_yaml(Path(hk_params_file))
+        if variant_type == Variants.SNV:
+            return self._get_version_from_file_path(content.get("score_config_snv", ""))
+        else:
+            return self._get_version_from_file_path(content.get("score_config_sv", ""))
 
-    def get_rank_model_version_from_manifest_content(
-        self, content: dict[str, dict[str, str]], variant_type: Variants
-    ) -> str:
+    def _get_version_from_file_path(self, file_path: str) -> str:
         """
-        Return the rank model version from the manifest file content.
-        Raises:
-            ValueError if pattern not found ing process or clinical not found in script.
+        Returns the rank model version in the format 'vX.X from the given file path.
+        Raises a ValueError if no rank model version is found in the file path.
         """
-        pattern: str = variant_type.upper() + ":GENMOD_SCORE"
-        for key, value in content["tasks"].items():
-            process: str = value.get("process")
-            script: str = value.get("script")
-            if pattern in process and AnalysisTag.CLINICAL in script:
-                return self._get_version_from_manifest_script(script)
-        raise ValueError(
-            f"Either {pattern} not found in any process or {AnalysisTag.CLINICAL} not found in any script of the manifest file"
-        )
-
-    def _get_version_from_manifest_script(self, script: str) -> str:
-        """
-        Returns the rank model version in the format 'vX.X from the given script string.
-        Raises a ValueError if no rank model version is found in the script string.
-        """
-        if match := re.search(r"v(\d+\.\d+)", script):
+        if match := re.search(r"v(\d+\.\d+)", file_path):
             return match.group(1)
         raise ValueError("No rank model version found")
 
