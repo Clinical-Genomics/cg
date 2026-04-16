@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from flask import Blueprint, Response, abort, g, jsonify, request
 
-from cg.exc import AuthorisationError
+from cg.exc import AuthorisationError, SampleNotFoundError
 from cg.server.dto.samples.requests import CollaboratorSamplesRequest, SamplesRequest
 from cg.server.dto.samples.samples_response import SamplesResponse
 from cg.server.endpoints.utils import before_request
@@ -56,7 +56,11 @@ def get_samples():
 @SAMPLES_BLUEPRINT.route("/samples", methods=["PATCH"])
 def update_samples():
     samples_request = request.json
-    for sample in samples_request["samples"]:
-        db_sample = db.get_sample_by_internal_id_strict(sample["internal_id"])
-        db_sample.lims_status = sample["lims_status"]
+    try:
+        for sample in samples_request["samples"]:
+            db_sample = db.get_sample_by_internal_id_strict(sample["internal_id"])
+            db_sample.lims_status = sample["lims_status"]
+    except SampleNotFoundError:
+        return abort(HTTPStatus.BAD_REQUEST)
+    db.commit_to_store()
     return Response(status=HTTPStatus.NO_CONTENT)
