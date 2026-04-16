@@ -99,18 +99,37 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
     # GIVEN a store with unhandled samples in top-up
     status_db = create_autospec(Store)
     sample_1 = create_autospec(
-        Sample, customer=create_autospec(Customer, interal_id="external_customer")
+        Sample,
+        customer=create_autospec(Customer, interal_id="external_customer"),
+        delivered_at=None,
+        from_sample=None,
+        internal_id="sample_1",
+        is_cancelled=False,
+        lims_status=LimsStatus.TOP_UP,
     )
+
     mocker.patch.object(samples, "db", status_db)
 
     # GIVEN a request to get unhandled samples that are in top-up
 
     # WHEN calling the endpoint to get unhandled samples
     response = client.get(
-        path="/api/v1/unhandled_samples",
+        path="/api/v1/unhandled_samples?lims_status=top-up",
     )
 
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
 
     # THEN samples should be returned
+    assert response.json == {
+        "samples": [
+            {
+                "internal_id": "sample_1",
+                "last_sequenced_at": "2024-12-24 11:30",
+                "lims_status": "top-up",
+                "ticket": 1,
+                "workflow": "raredisease",
+            }
+        ],
+        "total": 1,
+    }

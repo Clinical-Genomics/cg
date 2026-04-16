@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+from cg.constants import Workflow
+from cg.constants.lims import LimsStatus
 from cg.constants.subject import Sex
 
 
@@ -97,3 +99,15 @@ class SampleDTO(BaseModel):
 class SamplesResponse(BaseModel):
     samples: list[SampleDTO]
     total: int
+
+
+class UnhandledSample(BaseModel):
+    internal_id: str
+    last_sequenced_at: datetime
+    lims_status: LimsStatus
+    ticket: int
+    workflow: Workflow
+
+
+class UnhandledSamplesResponse(BaseModel):
+    samples: list[UnhandledSample]

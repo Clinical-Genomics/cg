@@ -15,6 +15,7 @@ from cg.constants.constants import (
     CustomerId,
     SampleType,
 )
+from cg.constants.lims import LimsStatus
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
@@ -1886,3 +1887,6 @@ class ReadHandler(BaseHandler):
             raise PacbioSequencingRunNotFoundError(
                 f"Pacbio Sequencing run with ID {run_id} was not found in the database."
             )
+
+    def get_unhandled_samples(self, lims_status: LimsStatus):
+        pass

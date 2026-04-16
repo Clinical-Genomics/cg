@@ -9,7 +9,7 @@ from cg.server.dto.samples.requests import (
     SamplesRequest,
     SamplesUpdateRequest,
 )
-from cg.server.dto.samples.samples_response import SamplesResponse
+from cg.server.dto.samples.samples_response import SamplesResponse, UnhandledSamplesResponse
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import db, sample_service
 from cg.store.models import Customer, Sample
@@ -60,6 +60,9 @@ def get_samples():
 
 @SAMPLES_BLUEPRINT.route("/unhandled_samples", methods=["GET"])
 def get_unhandled_samples():
+    lims_status = request.args["lims_status"]
+    samples: list[Sample] = db.get_unhandled_samples(lims_status=lims_status)
+    response = UnhandledSamplesResponse(samples=[sample.to_dict() for sample in samples])
     return "", HTTPStatus.OK
 
 
