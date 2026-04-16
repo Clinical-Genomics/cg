@@ -1,10 +1,12 @@
 from datetime import datetime
 
 import pytest
+from pytest_mock import MockerFixture
 
 from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import CaseActions, ControlOptions
 from cg.constants.devices import RevioNames
+from cg.constants.lims import LimsStatus
 from cg.constants.sequencing import Sequencers
 from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioSequencingRunDTO
 from cg.store.models import Analysis, IlluminaSampleSequencingMetrics, IlluminaSequencingRun, Sample
@@ -321,3 +323,20 @@ def test_update_pacbio_sequencing_run_processed(store: Store):
     # THEN the processed field should have been updated
     updated_sequencing_run = store.get_pacbio_sequencing_run_by_id(sequencing_run.id)
     assert updated_sequencing_run.processed is True
+
+
+def test_update_sample_lims_status(store: Store, helpers: StoreHelpers, mocker: MockerFixture):
+    # GIVEN a store with a sample
+    sample_1 = helpers.add_sample(
+        store=store, internal_id="sample_1", lims_status=LimsStatus.PENDING
+    )
+    commit_spy = mocker.spy(store, "commit_to_store")
+
+    # WHEN updating the LIMS status of the sample
+    store.update_sample_lims_status(internal_id=sample_1.internal_id, lims_status=LimsStatus.TOP_UP)
+
+    # THEN the sample should have been updated
+    assert sample_1.lims_status == LimsStatus.TOP_UP
+
+    # THEN the commit should not have been called
+    commit_spy.assert_not_called()
