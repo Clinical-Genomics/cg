@@ -477,7 +477,7 @@ class LimsAPI(Lims, OrderHandler):
         step_names_udfs: dict[str, str] = MASTER_STEPS_UDFS["input_amounts"][sample_type]
         input_amounts: list[tuple[datetime, float]] = []
         for step_name, udf_key in step_names_udfs.items():
-            artifacts: list[Artifact] = self.get_artifacts(
+            artifacts = self.get_artifacts(
                 samplelimsid=sample_id,
                 process_type=step_name,
                 type=LimsArtifactTypes.ANALYTE,
@@ -496,8 +496,8 @@ class LimsAPI(Lims, OrderHandler):
         for artifact in artifacts:
             input_amounts.append(
                 (
-                    artifact.parent_process.date_run,
-                    artifact.udf.get(udf_key),
+                    artifact.parent_process.date_run,  # type: ignore
+                    artifact.udf.get(udf_key),  # type: ignore
                 )
             )
         return input_amounts
