@@ -18,14 +18,17 @@ class BalsamicConfigInput(BaseModel):
     balsamic_cache: Path
     cache_version: str
     cadd_annotations: Path
+    cancer_genelist: Path | None = None
     cancer_germline_snv_observations: Path
     cancer_somatic_snv_observations: Path
     cancer_somatic_sv_observations: Path
     case_id: str
+    case_name: str
     clinical_snv_observations: Path
     clinical_sv_observations: Path
     conda_binary: Path
     conda_env: str
+    cosmic_path: Path
     fastq_path: Path
     gender: SexOptions
     genome_version: GenomeVersion
@@ -74,6 +77,7 @@ class BalsamicConfigInputPanel(BalsamicConfigInput):
             "--balsamic-cache": self.balsamic_cache,
             "--cache-version": self.cache_version,
             "--cadd-annotations": self.cadd_annotations,
+            "--cancer-genelist": self.cancer_genelist,
             "--cancer-germline-snv-observations": self.cancer_germline_snv_observations,
             "--cancer-somatic-snv-observations": self.cancer_somatic_snv_observations,
             "--cancer-somatic-snv-panel-observations": self.cancer_somatic_snv_panel_observations,
@@ -81,6 +85,8 @@ class BalsamicConfigInputPanel(BalsamicConfigInput):
             "--case-id": self.case_id,
             "--clinical-snv-observations": self.clinical_snv_observations,
             "--clinical-sv-observations": self.clinical_sv_observations,
+            "--cosmic": self.cosmic_path,
+            "--cust-case-id": self.case_name,
             "--fastq-path": self.fastq_path,
             "--gender": self.gender,
             "--genome-version": self.genome_version,
@@ -118,6 +124,8 @@ class BalsamicConfigInputWGS(BalsamicConfigInput):
             "--case-id": self.case_id,
             "--clinical-snv-observations": self.clinical_snv_observations,
             "--clinical-sv-observations": self.clinical_sv_observations,
+            "--cosmic": self.cosmic_path,
+            "--cust-case-id": self.case_name,
             "--fastq-path": self.fastq_path,
             "--gender": self.gender,
             "--genome-interval": self.genome_interval,

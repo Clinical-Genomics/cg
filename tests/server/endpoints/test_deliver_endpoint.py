@@ -1,9 +1,11 @@
+import json
 from http import HTTPStatus
 from unittest.mock import Mock, create_autospec
 
 import pytest
 from flask.testing import FlaskClient
 from pytest_mock import MockerFixture
+from requests import Response
 
 from cg.exc import AnalysisDoesNotExistError, TrailblazerAPIHTTPError
 from cg.server.endpoints import deliver
@@ -19,7 +21,7 @@ def status_db(mocker: MockerFixture) -> TypedMock[FlaskStore]:
     return status_db
 
 
-def test_deliver_trailblazer_analyses(
+def test_deliver_trailblazer_analyses_success(
     client: FlaskClient, status_db: TypedMock[FlaskStore], mocker: MockerFixture
 ):
     # GIVEN two trailblazer analysis ids
@@ -34,18 +36,28 @@ def test_deliver_trailblazer_analyses(
     )
 
     # GIVEN a service to mark the analysis as delivered
-    mark_analysis_mock = mocker.patch.object(mark_as_delivered_service, "mark_analyses")
+    tb_response = Response()
+    tb_response.status_code = 200
+    tb_response._content = json.dumps({"analyses": "some_analyses"}).encode("utf-8")
+    mark_analysis_mock = mocker.patch.object(
+        mark_as_delivered_service, "mark_analyses", return_value=tb_response
+    )
 
     # WHEN calling the endpoint
     response = client.post(
-        path="/api/v1/deliver", json={"trailblazer_ids": [trailblazer_id_1, trailblazer_id_2]}
+        path="/api/v1/deliver",
+        headers={"Authorization": "prod-user"},
+        json={"trailblazer_ids": [trailblazer_id_1, trailblazer_id_2]},
     )
 
-    # THEN the response should be successful
-    assert response.status_code == HTTPStatus.NO_CONTENT
+    # THEN the response should be successful and contain the updated analyses
+    assert response.status_code == HTTPStatus.OK
+    assert response.data == tb_response.content
 
     # THEN the analyses were marked as delivered
-    mark_analysis_mock.assert_called_once_with([analysis_1, analysis_2])
+    mark_analysis_mock.assert_called_once_with(
+        analyses=[analysis_1, analysis_2], auth_token="prod-user"
+    )
 
     # THEN these changes were committed to the database
     status_db.as_mock.commit_to_store.assert_called_once()
@@ -65,10 +77,15 @@ def test_deliver_trailblazer_analyses_client_error(client: FlaskClient, mocker: 
     )
 
     # WHEN calling the endpoint
-    response = client.post(path="/api/v1/deliver", json={"trailblazer_ids": [trailblazer_id]})
+    response = client.post(
+        path="/api/v1/deliver",
+        headers={"Authorization": "prod-user"},
+        json={"trailblazer_ids": [trailblazer_id]},
+    )
 
-    # THEN the response should be bad gateway
+    # THEN the response should be bad gateway with a message
     assert response.status_code == HTTPStatus.BAD_GATEWAY
+    assert "Error when calling Trailblazer" in response.json["message"]
 
     # THEN the database changes were rolled back
     status_db.as_mock.rollback.assert_called_once()
@@ -89,10 +106,16 @@ def test_trailblazer_id_not_found_in_database(
     trailblazer_id = 666666
 
     # GIVEN that the trailblazer id has no matching analysis
-    status_db.as_type.get_analysis_by_trailblazer_id = Mock(side_effect=AnalysisDoesNotExistError)
+    error_message = f"Analysis with trailblazer_id {trailblazer_id} was not found in the database."
+    status_db.as_type.get_analysis_by_trailblazer_id = Mock(
+        side_effect=AnalysisDoesNotExistError(error_message)
+    )
 
     # WHEN calling the endpoint
     response = client.post(path="/api/v1/deliver", json={"trailblazer_ids": [trailblazer_id]})
 
     # THEN the response should be a bad request
     assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    # THEN the response should contain the error message
+    assert response.json["message"] == error_message

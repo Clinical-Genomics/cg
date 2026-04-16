@@ -2001,8 +2001,10 @@ def context_config(
             "binary_path": "echo",
             "cache_version": "19.0.2",
             "cadd_path": str(cg_dir),
+            "cancer_genelist": Path("gene_list"),
             "conda_binary": "a_conda_binary",
             "conda_env": "S_balsamic",
+            "cosmic_path": Path("cosmic_path"),
             "genome_interval_path": str(cg_dir),
             "gens_coverage_female_path": str(cg_dir),
             "gens_coverage_male_path": str(cg_dir),
@@ -2154,6 +2156,7 @@ def context_config(
         },
         "nallo": {
             "binary_path": nextflow_binary.as_posix(),
+            "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_nallo",
@@ -2177,6 +2180,7 @@ def context_config(
         },
         "raredisease": {
             "binary_path": nextflow_binary.as_posix(),
+            "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_raredisease",
@@ -2199,6 +2203,7 @@ def context_config(
         },
         "tomte": {
             "binary_path": nextflow_binary.as_posix(),
+            "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_tomte",
@@ -2221,6 +2226,7 @@ def context_config(
         },
         "rnafusion": {
             "binary_path": nextflow_binary.as_posix(),
+            "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_RNAFUSION",
@@ -2246,6 +2252,7 @@ def context_config(
         "pdc": {"binary_path": "/bin/dsmc"},
         "taxprofiler": {
             "binary_path": nextflow_binary.as_posix(),
+            "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
             "root": str(taxprofiler_dir),
             "conda_binary": conda_binary.as_posix(),

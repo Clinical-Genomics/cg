@@ -199,8 +199,10 @@ class BalsamicConfig(CommonAppConfig):
     binary_path: Path
     cache_version: str
     cadd_path: Path
+    cancer_genelist: Path
     conda_binary: Path
     conda_env: str
+    cosmic_path: Path
     genome_interval_path: Path
     gens_coverage_female_path: Path
     gens_coverage_male_path: Path
@@ -239,70 +241,74 @@ class NalloConfig(CommonAppConfig):
     binary_path: str | None = None
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
     launch_directory: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class RarediseaseConfig(CommonAppConfig):
     binary_path: str | None = None
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
     launch_directory: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class TomteConfig(CommonAppConfig):
     binary_path: str | None = None
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class RnafusionConfig(CommonAppConfig):
     binary_path: str
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
     launch_directory: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
@@ -314,18 +320,19 @@ class TaxprofilerConfig(CommonAppConfig):
     binary_path: str
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class MicrosaltConfig(BaseModel):

@@ -9,7 +9,7 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.constants import Priority
+from cg.constants import DataDelivery, Priority
 from cg.constants.constants import Workflow
 from cg.constants.subject import SCOUT_PRIORITIZED_STATUS, RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
@@ -217,9 +217,15 @@ class ScoutConfigBuilder:
 
     def include_cnv_report(self, load_config: ScoutLoadConfig, hk_version: Version) -> None:
         LOG.info("Include CNV report to case")
-        load_config.cnv_report = self.get_file_from_hk(
-            hk_tags=self.case_tags.cnv_report, hk_version=hk_version
-        )
+        if self.case_tags.cnv_report:
+            cnv_report_tag_union_scout: set[str] = self.case_tags.cnv_report.union(
+                {DataDelivery.SCOUT}
+            )
+            load_config.cnv_report = self.get_file_from_hk(
+                hk_tags=cnv_report_tag_union_scout, hk_version=hk_version
+            )
+        else:
+            LOG.info("No cnv_report tag found, skipping CNV report")
 
     def include_multiqc_report(self, load_config: ScoutLoadConfig, hk_version: Version) -> None:
         LOG.info("Include MultiQC report to case")
