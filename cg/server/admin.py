@@ -265,6 +265,7 @@ class ApplicationView(BaseView):
         "percent_hifi_yield_guaranteed",
         "comment",
         "prep_category",
+        "read_type",
         "sequencing_depth",
         "min_sequencing_depth",
         "is_external",

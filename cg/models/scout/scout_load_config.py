@@ -43,7 +43,7 @@ class Reviewer(BaseModel):
 class ScoutIndividual(BaseModel):
     alignment_path: str | None = None
     rna_alignment_path: str | None = None
-    analysis_type: Annotated[
+    analysis_type: Annotated[  # TODO: add panel-lr here.
         Literal[
             "external",
             "mixed",
@@ -52,6 +52,7 @@ class ScoutIndividual(BaseModel):
             "unknown",
             "wes",
             "wgs",
+            "wgs-lr",
             "wts",
         ],
         AfterValidator(field_not_none),

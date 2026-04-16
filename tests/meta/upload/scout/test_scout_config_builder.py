@@ -461,7 +461,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
             ScoutNalloIndividual(
                 alignment_path=alignment_path.full_path,
                 rna_alignment_path=None,
-                analysis_type="wgs",
+                analysis_type="wgs-lr",
                 capture_kit=None,
                 chromograph_images=ChromographImages(
                     autozygous="chromograph_autozyg_chr",

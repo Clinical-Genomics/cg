@@ -64,6 +64,7 @@ def archived_application(base_store: Store) -> Application:
         percent_kth=100,
         percent_reads_guaranteed=90,
         is_archived=True,
+        read_type="short-read",
     )
 
 

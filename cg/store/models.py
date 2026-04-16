@@ -32,7 +32,7 @@ from cg.constants.constants import (
 from cg.constants.devices import DeviceType, RevioNames
 from cg.constants.lims import LimsStatus
 from cg.constants.priority import SlurmQos
-from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
 from cg.models.orders.constants import OrderType
 
@@ -139,6 +139,7 @@ class Application(Base):
     prep_category: Mapped[str] = mapped_column(
         types.Enum(*(category.value for category in SeqLibraryPrepCategory))
     )
+    read_type: Mapped[str] = mapped_column(types.Enum(*(read_types for read_types in ReadType)))
     is_external: Mapped[bool] = mapped_column(default=False)
     description: Mapped[Str256]
     is_accredited: Mapped[bool]
@@ -213,6 +214,10 @@ class Application(Base):
     def analysis_type(self) -> str:
         if self.prep_category == SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
             return SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
+
+        if self.read_type==ReadType.LONG_READ.value:
+            return ReadType.LONG_READ.value.
+
 
         return (
             SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
