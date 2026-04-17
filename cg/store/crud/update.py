@@ -4,6 +4,7 @@ from datetime import datetime
 
 from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import CaseActions, SequencingQCStatus
+from cg.constants.lims import LimsStatus
 from cg.constants.sequencing import Sequencers
 from cg.services.illumina.post_processing.utils import get_q30_threshold
 from cg.store.crud.read import ReadHandler
@@ -143,3 +144,8 @@ class UpdateMixin(ReadHandler):
         sequencing_run: PacbioSequencingRun = self.get_pacbio_sequencing_run_by_id(id)
         sequencing_run.processed = processed
         self.commit_to_store()
+
+    def update_sample_lims_status(self, internal_id: str, lims_status: LimsStatus) -> Sample:
+        sample: Sample = self.get_sample_by_internal_id_strict(internal_id)
+        sample.lims_status = lims_status
+        return sample
