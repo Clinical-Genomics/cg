@@ -1,3 +1,4 @@
+from datetime import datetime
 from http import HTTPStatus
 from unittest.mock import Mock, call, create_autospec
 
@@ -98,6 +99,7 @@ def test_update_sample_invalid_request_structure(client: FlaskClient, mocker: Mo
 def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
     # GIVEN a store with unhandled samples in top-up
     status_db = create_autospec(Store)
+    date_time = datetime(2024, 12, 24, 11, 59)
     sample_1 = create_autospec(
         Sample,
         customer=create_autospec(Customer, interal_id="external_customer"),
@@ -105,6 +107,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         from_sample=None,
         internal_id="sample_1",
         is_cancelled=False,
+        last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
     )
     status_db.get_unhandled_samples = Mock(return_value=[sample_1])
@@ -125,11 +128,10 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         "samples": [
             {
                 "internal_id": "sample_1",
-                "last_sequenced_at": "2024-12-24 11:30",
+                "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
                 "lims_status": "top-up",
-                "ticket": 1,
-                "workflow": "raredisease",
+                "ticket": 123456,
+                "workflow": "balsamic",
             }
         ],
-        "total": 1,
     }
