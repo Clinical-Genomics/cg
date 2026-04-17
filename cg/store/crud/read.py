@@ -1889,4 +1889,11 @@ class ReadHandler(BaseHandler):
             )
 
     def get_unhandled_samples(self, lims_status: LimsStatus) -> list[Sample]:
-        return self._get_query(table=Sample).all()
+        return (
+            self._get_query(table=Sample)
+            .filter_by(
+                lims_status=lims_status, from_sample=None, is_cancelled=False, delivered_at=None
+            )
+            .filter(Sample.last_sequenced_at != None, Sample.customer.internal_id != "cust000")
+            .all()
+        )
