@@ -889,6 +889,14 @@ class Sample(Base, PriorityMixin):
             return None
 
     @property
+    def original_workflow(self) -> Workflow | None:
+        """Return the workflow of the original case if the case exists."""
+        if case := self.original_case:
+            return case.data_analysis
+        else:
+            return None
+
+    @property
     def ticket_id_from_original_order(self) -> int | None:
         """Return the original ticket id of the sample if it is linked to any ticket."""
         if original_case := self.original_case:

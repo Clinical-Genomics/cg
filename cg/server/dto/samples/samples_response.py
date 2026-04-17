@@ -116,17 +116,20 @@ class UnhandledSamplesResponse(BaseModel):
 
     @classmethod
     def from_samples(cls, samples: list[Sample]) -> "UnhandledSamplesResponse":
+        """
+        Creates an UnhandledSamplesResponse object from a list of database samples.
+        Raises:
+            ValidationError if any sample is not linked to a case or if it has not been sequenced.
+        """
         unhandled_samples = []
         for sample in samples:
             unhandled_samples.append(
                 UnhandledSample(
                     internal_id=sample.internal_id,
-                    # TODO: should we validate last_sequenced_at
-                    last_sequenced_at=sample.last_sequenced_at,
+                    last_sequenced_at=sample.last_sequenced_at,  # type: ignore
                     lims_status=sample.lims_status,
-                    # TODO: implement correctly the ticket and the workflow
-                    ticket=sample.ticket_id_from_original_order,
-                    workflow=Workflow.RAREDISEASE,
+                    ticket=sample.ticket_id_from_original_order,  # type: ignore
+                    workflow=sample.original_workflow,  # type: ignore
                 )
             )
         return cls(samples=unhandled_samples)

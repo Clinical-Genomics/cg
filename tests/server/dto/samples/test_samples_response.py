@@ -6,7 +6,7 @@ import pytest
 from cg.constants.constants import Workflow
 from cg.constants.lims import LimsStatus
 from cg.server.dto.samples.samples_response import UnhandledSample, UnhandledSamplesResponse
-from cg.store.models import Case, Sample
+from cg.store.models import Sample
 
 
 @pytest.mark.freeze_time
@@ -18,7 +18,7 @@ def test_unhandled_samples_response_from_samples():
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
         original_workflow=Workflow.RAREDISEASE,
-        ticket_from_original_order=123456,
+        ticket_id_from_original_order=123456,
     )
     sample_2 = create_autospec(
         Sample,
@@ -26,7 +26,7 @@ def test_unhandled_samples_response_from_samples():
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
         original_workflow=Workflow.RAREDISEASE,
-        ticket_from_original_order=123456,
+        ticket_id_from_original_order=123456,
     )
     # WHEN creating an UnhandledSampleResponse from samples
     response = UnhandledSamplesResponse.from_samples([sample_1, sample_2])
