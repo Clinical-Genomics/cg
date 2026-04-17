@@ -125,7 +125,7 @@ class UnhandledSamplesResponse(BaseModel):
                     last_sequenced_at=sample.last_sequenced_at,
                     lims_status=sample.lims_status,
                     # TODO: implement correctly the ticket and the workflow
-                    ticket=1234567,
+                    ticket=sample.ticket_id_from_original_order,
                     workflow=Workflow.RAREDISEASE,
                 )
             )

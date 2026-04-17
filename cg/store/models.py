@@ -521,6 +521,10 @@ class Case(Base, PriorityMixin):
         return self.tickets.split(sep=",")[-1] if self.tickets else None
 
     @property
+    def original_order(self) -> "Order":
+        return min(self.orders, key=lambda order: order.order_date)
+
+    @property
     def latest_order(self) -> "Order":
         """Returns the latest order this case was included in."""
         sorted_orders: list[Order] = sorted(
@@ -879,11 +883,18 @@ class Sample(Base, PriorityMixin):
     @property
     def original_case(self) -> Case | None:
         """Return the original case of the sample if it exists."""
+        if cases := [link.case for link in self.links]:
+            return min(cases, key=lambda case: case.created_at)
+        else:
+            return None
 
     @property
-    def ticket_from_original_order(self) -> int:
-        """"""
-        cases = [link.case for link in self.links]
+    def ticket_id_from_original_order(self) -> int | None:
+        """Return the original ticket id of the sample if it is linked to any ticket."""
+        if original_case := self.original_case:
+            return original_case.original_order.ticket_id
+        else:
+            return None
 
     def to_dict(self, links: bool = False) -> dict:
         """Represent as dictionary"""
