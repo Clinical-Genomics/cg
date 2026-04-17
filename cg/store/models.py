@@ -465,7 +465,7 @@ class Case(Base, PriorityMixin):
     )
     _cohorts: Mapped[Text | None]
     comment: Mapped[Text | None]
-    created_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now)
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id", ondelete="CASCADE"))
     customer: Mapped["Customer"] = orm.relationship(foreign_keys=[customer_id])
     data_analysis: Mapped[Workflow] = mapped_column(
