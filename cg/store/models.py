@@ -876,6 +876,15 @@ class Sample(Base, PriorityMixin):
             return self._sample_run_metrics[0].type
         return None
 
+    @property
+    def original_case(self) -> Case | None:
+        """Return the original case of the sample if it exists."""
+
+    @property
+    def ticket_from_original_order(self) -> int:
+        """"""
+        cases = [link.case for link in self.links]
+
     def to_dict(self, links: bool = False) -> dict:
         """Represent as dictionary"""
         data = to_dict(model_instance=self)
