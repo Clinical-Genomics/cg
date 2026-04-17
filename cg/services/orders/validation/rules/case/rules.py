@@ -22,6 +22,7 @@ from cg.services.orders.validation.order_types.balsamic_umi.models.order import 
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.order_types.nallo.models.order import NalloOrder
 from cg.services.orders.validation.order_types.raredisease.models.order import RarediseaseOrder
+from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.services.orders.validation.rules.case.utils import (
     contains_duplicates,
     does_case_exist,
@@ -206,3 +207,7 @@ def validate_case_contains_related_samples(
             )
             errors.append(error)
     return errors
+
+def validate_samples_have_same_source(
+    order: TomteOrder, store: Store,
+)
