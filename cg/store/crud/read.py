@@ -1889,7 +1889,15 @@ class ReadHandler(BaseHandler):
             )
 
     def get_unhandled_samples(self, lims_status: LimsStatus) -> list[Sample]:
-        # TODO add docstring
+        """
+        Return samples with the given lims_status that:
+        - Are not downsampled
+        - Are not cancelled
+        - Are not delivered
+        - Have been sequenced (last_sequenced_at is not null)
+        - Do not belong to the internal customers
+        - Ordered by last sequenced date, with the oldest first
+        """
         return (
             self._get_query(table=Sample)
             .filter_by(
