@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 
 class StatinaUploadFiles(BaseModel):
+    data_set: str
     result_file: str
     multiqc_report: str | None = None
     segmental_calls: str | None = None
