@@ -1888,5 +1888,5 @@ class ReadHandler(BaseHandler):
                 f"Pacbio Sequencing run with ID {run_id} was not found in the database."
             )
 
-    def get_unhandled_samples(self, lims_status: LimsStatus):
-        pass
+    def get_unhandled_samples(self, lims_status: LimsStatus) -> list[Sample]:
+        return self._get_query(table=Sample).all()

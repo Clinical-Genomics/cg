@@ -1,11 +1,14 @@
 """Tests the find business data part of the Cg store API related to sample model."""
 
+from datetime import datetime
 from typing import Any
+from unittest.mock import create_autospec
 
 import pytest
 from sqlalchemy.orm import Query
 
 from cg.constants import SexOptions
+from cg.constants.lims import LimsStatus
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import SampleNotFoundError
 from cg.models.orders.constants import OrderType
@@ -613,3 +616,43 @@ def test_get_collaborator_samples_filters_on_order_type(
 
     # THEN samples should be returned
     assert samples
+
+
+def test_get_unhandled_samples(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with some samples
+    unhandled_sample = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="perfect_unhandled_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    # WHEN getting the unhandled samples in top-up
+    unhandled_samples: list[Sample] = store.get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+
+    # THEN only correct samples are returned
+    assert unhandled_samples == [unhandled_sample]
+
+
+def test_get_unhandled_samples_filters_on_lims_status(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with a re-prep sample
+    unhandled_sample = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.RE_PREP,
+        internal_id="unperfect_unhandled_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    # WHEN getting the unhandled samples in top-up
+    unhandled_samples: list[Sample] = store.get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+
+    # THEN no sample is returned
+    assert unhandled_samples == []
