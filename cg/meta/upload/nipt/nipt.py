@@ -34,6 +34,7 @@ class NiptUploadAPI:
         self.statina_password: str = config.statina.key
         self.statina_auth_url: str = config.statina.api_url + config.statina.auth_path
         self.statina_upload_url: str = config.statina.api_url + config.statina.upload_path
+        self.statina_data_set: str = config.statina.data_set
         self.sftp_port = config.fluffy.sftp.port
         self.sftp_remote_path = config.fluffy.sftp.remote_path
         self.root_dir = Path(config.housekeeper.root)
@@ -169,6 +170,7 @@ class NiptUploadAPI:
         segmental_calls_file: Path = self.get_results_file_path(hk_segmental_calls_file)
 
         return StatinaUploadFiles(
+            data_set=self.statina_data_set,
             result_file=results_file.absolute().as_posix(),
             multiqc_report=multiqc_file.absolute().as_posix(),
             segmental_calls=segmental_calls_file.parent.as_posix(),

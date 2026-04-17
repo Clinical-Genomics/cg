@@ -9,13 +9,14 @@
           <th scope="col">Ankom</th>
           <th scope="col">Beredd</th>
           <th scope="col">Sekvenserad</th>
-          <th scope="col">Biblioteksberedning</th>
+          <th scope="col">Mottagningskvalitetskontroll</th>
+          <th scope="col">Ingångsmängd (ng)</th>
           <!-- Bait set column -->
           <th scope="col">
             {{ bait_set(workflow=workflow, analysis_type=case.data_analysis.type) }}
           </th>
+          <th scope="col">Biblioteksberedning</th>
           <th scope="col">Sekvensering</th>
-          <th scope="col">Mottagningskvalitetskontroll</th>
         </tr>
       </thead>
       <tbody>
@@ -25,13 +26,14 @@
           <td>{{ sample.timestamps.received_at }}</td>
           <td>{{ sample.timestamps.prepared_at }}</td>
           <td>{{ sample.timestamps.reads_updated_at }}</td>
-          <td>{{ sample.methods.library_prep }}</td>
+          <td>{{ sample.metadata.initial_qc }}</td>
+          <td>{{ sample.metadata.input_amount }}</td>
           <!-- Bait set value -->
           <td>
             {{ bait_set_value(workflow=workflow, analysis_type=case.data_analysis.type, sample=sample) }}
           </td>
+          <td>{{ sample.methods.library_prep }}</td>
           <td>{{ sample.methods.sequencing }}</td>
-          <td>{{ sample.metadata.initial_qc }}</td>
         </tr>
         {% endfor %}
       </tbody>
