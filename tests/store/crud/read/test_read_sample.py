@@ -1,11 +1,13 @@
 """Tests the find business data part of the Cg store API related to sample model."""
 
+from datetime import datetime, timedelta
 from typing import Any
 
 import pytest
 from sqlalchemy.orm import Query
 
 from cg.constants import SexOptions
+from cg.constants.lims import LimsStatus
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import SampleNotFoundError
 from cg.models.orders.constants import OrderType
@@ -613,3 +615,165 @@ def test_get_collaborator_samples_filters_on_order_type(
 
     # THEN samples should be returned
     assert samples
+
+
+def test_get_unhandled_samples(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with some samples
+    sample_new = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="perfect_unhandled_sample_1",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    sample_old = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="perfect_unhandled_sample_2",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now() - timedelta(days=1),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    # WHEN getting the unhandled samples in top-up
+    unhandled_samples: list[Sample] = store.get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+
+    # THEN only correct samples are returned
+    assert unhandled_samples == [sample_old, sample_new]
+
+
+def test_get_unhandled_samples_filters_on_lims_status(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with a re-prep sample
+    helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.RE_PREP,
+        internal_id="unperfect_unhandled_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    # WHEN getting the unhandled samples in top-up
+    unhandled_samples: list[Sample] = store.get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+
+    # THEN no sample is returned
+    assert unhandled_samples == []
+
+
+def test_get_unhandled_samples_filters_out_downsampled_samples(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with a downsampled sample
+    helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="unperfect_unhandled_sample",
+        is_cancelled=False,
+        from_sample="ACC123",
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    # WHEN getting the unhandled samples in top-up
+    unhandled_samples: list[Sample] = store.get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+
+    # THEN no sample is returned
+    assert unhandled_samples == []
+
+
+def test_get_unhandled_samples_filters_out_cancelled_samples(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with a cancelled sample
+    helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="unperfect_unhandled_sample",
+        is_cancelled=True,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    # WHEN getting the unhandled samples in top-up
+    unhandled_samples: list[Sample] = store.get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+
+    # THEN no sample is returned
+    assert unhandled_samples == []
+
+
+def test_get_unhandled_samples_filters_out_not_sequenced_samples(
+    store: Store, helpers: StoreHelpers
+):
+    # GIVEN a store with a sample not yet sequenced
+    helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="unperfect_unhandled_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=None,
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    # WHEN getting the unhandled samples in top-up
+    unhandled_samples: list[Sample] = store.get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+
+    # THEN no sample is returned
+    assert unhandled_samples == []
+
+
+def test_get_unhandled_samples_filters_out_delivered_samples(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with a sample that has been delivered
+    helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="unperfect_unhandled_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=datetime.now(),
+        customer_id="cust1337",
+    )
+
+    # WHEN getting the unhandled samples in top-up
+    unhandled_samples: list[Sample] = store.get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+
+    # THEN no sample is returned
+    assert unhandled_samples == []
+
+
+def test_get_unhandled_samples_filters_out_internal_samples(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with an internal sample
+    helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="unperfect_unhandled_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust000",
+    )
+    helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="unperfect_unhandled_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust966",
+    )
+
+    # WHEN getting the unhandled samples in top-up
+    unhandled_samples: list[Sample] = store.get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+
+    # THEN no sample is returned
+    assert unhandled_samples == []

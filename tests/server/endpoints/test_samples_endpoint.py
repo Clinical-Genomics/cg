@@ -1,12 +1,15 @@
+from datetime import datetime
 from http import HTTPStatus
-from unittest.mock import Mock, call
+from unittest.mock import Mock, call, create_autospec
 
 from flask.testing import FlaskClient
 from pytest_mock import MockerFixture
 
+from cg.constants import Workflow
 from cg.constants.lims import LimsStatus
 from cg.exc import SampleNotFoundError
 from cg.server.endpoints import samples
+from cg.store.models import Customer, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -92,3 +95,46 @@ def test_update_sample_invalid_request_structure(client: FlaskClient, mocker: Mo
 
     # THEN the database was not updated
     status_db.as_mock.commit_to_store.assert_not_called()
+
+
+def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
+    # GIVEN a store with unhandled samples in top-up
+    status_db = create_autospec(Store)
+    date_time = datetime(2024, 12, 24, 11, 59)
+    sample_1 = create_autospec(
+        Sample,
+        customer=create_autospec(Customer, interal_id="external_customer"),
+        delivered_at=None,
+        from_sample=None,
+        internal_id="sample_1",
+        is_cancelled=False,
+        last_sequenced_at=date_time,
+        lims_status=LimsStatus.TOP_UP,
+        original_workflow=Workflow.RAREDISEASE,
+        ticket_id_from_original_order=123456,
+    )
+    status_db.get_unhandled_samples = Mock(return_value=[sample_1])
+    mocker.patch.object(samples, "db", status_db)
+
+    # GIVEN a request to get unhandled samples that are in top-up
+
+    # WHEN calling the endpoint to get unhandled samples
+    response = client.get(
+        path="/api/v1/unhandled_samples?lims_status=top-up",
+    )
+
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.OK
+
+    # THEN samples should be returned
+    assert response.json == {
+        "samples": [
+            {
+                "internal_id": "sample_1",
+                "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
+                "lims_status": "top-up",
+                "ticket": 123456,
+                "workflow": "raredisease",
+            }
+        ],
+    }

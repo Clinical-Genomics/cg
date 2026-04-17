@@ -15,6 +15,7 @@ from cg.constants.constants import (
     CustomerId,
     SampleType,
 )
+from cg.constants.lims import LimsStatus
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
@@ -1886,3 +1887,27 @@ class ReadHandler(BaseHandler):
             raise PacbioSequencingRunNotFoundError(
                 f"Pacbio Sequencing run with ID {run_id} was not found in the database."
             )
+
+    def get_unhandled_samples(self, lims_status: LimsStatus) -> list[Sample]:
+        """
+        Return samples with the given lims_status that:
+        - Are not downsampled
+        - Are not cancelled
+        - Are not delivered
+        - Have been sequenced (last_sequenced_at is not null)
+        - Do not belong to the internal customers
+        - Ordered by last sequenced date, with the oldest first
+        """
+        return (
+            self._get_query(table=Sample)
+            .filter_by(
+                lims_status=lims_status, from_sample=None, is_cancelled=False, delivered_at=None
+            )
+            .filter(
+                Sample.last_sequenced_at.is_not(None),
+                Customer.internal_id.is_not("cust000"),
+                Customer.internal_id.not_like("cust9%"),
+            )
+            .order_by(Sample.last_sequenced_at.asc())
+            .all()
+        )
