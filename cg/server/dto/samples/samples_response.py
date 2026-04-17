@@ -114,19 +114,19 @@ class UnhandledSamplesResponse(BaseModel):
     samples: list[UnhandledSample]
     # TODO: implement total
 
-
-def translate_to_unhandled_samples(samples: list[Sample]) -> list[UnhandledSample]:
-    unhandles_samples = []
-    for sample in samples:
-        unhandles_samples.append(
-            UnhandledSample(
-                internal_id=sample.internal_id,
-                # TODO: should we validate last_sequenced_at
-                last_sequenced_at=sample.last_sequenced_at,
-                lims_status=sample.lims_status,
-                # TODO: implement correctly the ticket and the workflow
-                ticket=123456,
-                workflow=Workflow.BALSAMIC,
+    @classmethod
+    def from_samples(cls, samples: list[Sample]) -> "UnhandledSamplesResponse":
+        unhandled_samples = []
+        for sample in samples:
+            unhandled_samples.append(
+                UnhandledSample(
+                    internal_id=sample.internal_id,
+                    # TODO: should we validate last_sequenced_at
+                    last_sequenced_at=sample.last_sequenced_at,
+                    lims_status=sample.lims_status,
+                    # TODO: implement correctly the ticket and the workflow
+                    ticket=123456,
+                    workflow=Workflow.BALSAMIC,
+                )
             )
-        )
-    return unhandles_samples
+        return cls(samples=unhandled_samples)

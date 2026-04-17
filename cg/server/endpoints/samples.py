@@ -12,7 +12,6 @@ from cg.server.dto.samples.requests import (
 from cg.server.dto.samples.samples_response import (
     SamplesResponse,
     UnhandledSamplesResponse,
-    translate_to_unhandled_samples,
 )
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import db, sample_service
@@ -66,7 +65,7 @@ def get_samples():
 def get_unhandled_samples():
     lims_status = request.args["lims_status"]
     samples: list[Sample] = db.get_unhandled_samples(lims_status=lims_status)
-    response = UnhandledSamplesResponse(samples=translate_to_unhandled_samples(samples))
+    response = UnhandledSamplesResponse.from_samples(samples)
     return jsonify(response.model_dump()), HTTPStatus.OK
 
 
