@@ -1894,6 +1894,11 @@ class ReadHandler(BaseHandler):
             .filter_by(
                 lims_status=lims_status, from_sample=None, is_cancelled=False, delivered_at=None
             )
-            .filter(Sample.last_sequenced_at != None, Sample.customer.internal_id != "cust000")
+            .filter(
+                Sample.last_sequenced_at.is_not(None),
+                Customer.internal_id != "cust000",
+                Customer.internal_id.not_like("cust9%"),
+            )
+            .order_by(Sample.last_sequenced_at.asc())
             .all()
         )

@@ -5,6 +5,7 @@ from unittest.mock import Mock, call, create_autospec
 from flask.testing import FlaskClient
 from pytest_mock import MockerFixture
 
+from cg.constants import Workflow
 from cg.constants.lims import LimsStatus
 from cg.exc import SampleNotFoundError
 from cg.server.endpoints import samples
@@ -109,6 +110,8 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
+        original_workflow=Workflow.RAREDISEASE,
+        ticket_id_from_original_order=123456,
     )
     status_db.get_unhandled_samples = Mock(return_value=[sample_1])
     mocker.patch.object(samples, "db", status_db)
@@ -131,7 +134,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
                 "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
                 "lims_status": "top-up",
                 "ticket": 123456,
-                "workflow": "balsamic",
+                "workflow": "raredisease",
             }
         ],
     }

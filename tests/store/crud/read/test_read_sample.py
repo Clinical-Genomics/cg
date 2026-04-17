@@ -1,8 +1,7 @@
 """Tests the find business data part of the Cg store API related to sample model."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
-from unittest.mock import create_autospec
 
 import pytest
 from sqlalchemy.orm import Query
@@ -620,13 +619,23 @@ def test_get_collaborator_samples_filters_on_order_type(
 
 def test_get_unhandled_samples(store: Store, helpers: StoreHelpers):
     # GIVEN a store with some samples
-    unhandled_sample = helpers.add_sample(
+    sample_new = helpers.add_sample(
         store=store,
         lims_status=LimsStatus.TOP_UP,
-        internal_id="perfect_unhandled_sample",
+        internal_id="perfect_unhandled_sample_1",
         is_cancelled=False,
         from_sample=None,
         last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    sample_old = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="perfect_unhandled_sample_2",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now() - timedelta(days=1),
         delivered_at=None,
         customer_id="cust1337",
     )
@@ -635,7 +644,7 @@ def test_get_unhandled_samples(store: Store, helpers: StoreHelpers):
     unhandled_samples: list[Sample] = store.get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
 
     # THEN only correct samples are returned
-    assert unhandled_samples == [unhandled_sample]
+    assert unhandled_samples == [sample_old, sample_new]
 
 
 def test_get_unhandled_samples_filters_on_lims_status(store: Store, helpers: StoreHelpers):
@@ -751,6 +760,16 @@ def test_get_unhandled_samples_filters_out_internal_samples(store: Store, helper
         last_sequenced_at=datetime.now(),
         delivered_at=None,
         customer_id="cust000",
+    )
+    helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="unperfect_unhandled_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust966",
     )
 
     # WHEN getting the unhandled samples in top-up
