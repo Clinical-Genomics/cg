@@ -386,6 +386,7 @@ class Customer(Base):
     invoice_address: Mapped[Text]
     invoice_reference: Mapped[Str32]
     is_trusted: Mapped[bool] = mapped_column(default=False)
+    label: Mapped[Str64 | None]
     lab_contact_id: Mapped[int | None] = mapped_column(ForeignKey("user.id"))
     lab_contact: Mapped["User | None"] = orm.relationship(foreign_keys=[lab_contact_id])
     loqus_upload: Mapped[bool] = mapped_column(default=False)
