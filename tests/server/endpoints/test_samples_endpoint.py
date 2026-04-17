@@ -107,7 +107,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         is_cancelled=False,
         lims_status=LimsStatus.TOP_UP,
     )
-
+    status_db.get_unhandled_samples = Mock(return_value=[sample_1])
     mocker.patch.object(samples, "db", status_db)
 
     # GIVEN a request to get unhandled samples that are in top-up
