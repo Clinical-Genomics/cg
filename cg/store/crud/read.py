@@ -1889,6 +1889,7 @@ class ReadHandler(BaseHandler):
             )
 
     def get_unhandled_samples(self, lims_status: LimsStatus) -> list[Sample]:
+        # TODO add docstring
         return (
             self._get_query(table=Sample)
             .filter_by(
@@ -1896,7 +1897,7 @@ class ReadHandler(BaseHandler):
             )
             .filter(
                 Sample.last_sequenced_at.is_not(None),
-                Customer.internal_id != "cust000",
+                Customer.internal_id.is_not("cust000"),
                 Customer.internal_id.not_like("cust9%"),
             )
             .order_by(Sample.last_sequenced_at.asc())
