@@ -4,6 +4,8 @@ from cg.utils.changelog import cleanup_title
 from cg.utils.changelog import extract_release_entries
 from cg.utils.changelog import extract_entry_title
 from cg.utils.changelog import filter_releases
+from cg.utils.changelog import find_existing_changelog_boundary
+from cg.utils.changelog import merge_generated_releases_into_changelog
 from cg.utils.changelog import ReleaseEntry
 from cg.utils.changelog import render_changelog
 
@@ -208,3 +210,45 @@ def test_render_changelog_outputs_keep_a_changelog_style_sections():
     assert "## [85.6.1] - 2026-04-17" in changelog
     assert "### Fixed" in changelog
     assert "- Fix #5028 and a few similar ones by adding an extra trailing newline (#5029)" in changelog
+
+
+def test_find_existing_changelog_boundary_skips_placeholder_versions():
+    boundary = find_existing_changelog_boundary(
+        """# Change Log
+
+## [x.x.x]
+### Added
+
+## [22.26.0]
+### Added
+- Existing entry
+"""
+    )
+
+    assert boundary.version == "22.26.0"
+    assert boundary.index > 0
+
+
+def test_merge_generated_releases_into_changelog_inserts_above_existing_history():
+    existing_content = """# Change Log
+
+## [x.x.x]
+### Added
+
+## [22.26.0]
+### Added
+- Existing entry
+"""
+    generated_release_block = """## [85.6.1] - 2026-04-17
+### Fixed
+- Generated entry (#5029)
+"""
+
+    merged_content = merge_generated_releases_into_changelog(
+        existing_content=existing_content,
+        generated_release_block=generated_release_block,
+    )
+
+    assert "## [85.6.1] - 2026-04-17" in merged_content
+    assert merged_content.index("## [85.6.1] - 2026-04-17") < merged_content.index("## [22.26.0]")
+    assert "## [x.x.x]" in merged_content

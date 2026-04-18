@@ -5,6 +5,7 @@ import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+from typing import NamedTuple
 
 FIELD_SEPARATOR = "\x1f"
 RECORD_SEPARATOR = "\x1e"
@@ -24,6 +25,10 @@ MERGE_PULL_REQUEST_PATTERN = re.compile(
 SECTION_HEADING_PATTERN = re.compile(r"^#{2,6}\s*(Added|Changed|Fixed)\s*$", re.IGNORECASE)
 ANY_HEADING_PATTERN = re.compile(r"^#{1,6}\s+")
 LIST_ITEM_PATTERN = re.compile(r"^\s*[-*]\s+(?P<text>.+)$")
+CHANGELOG_VERSION_HEADING_PATTERN = re.compile(
+    r"^## \[(?P<version>[^\]]+)\](?:\s+-\s+(?P<date>\d{4}-\d{2}-\d{2}))?\s*$",
+    re.MULTILINE,
+)
 CONVENTIONAL_PREFIX_PATTERN = re.compile(
     r"^(?P<prefix>feat|fix|chore|docs|refactor|style|perf|test|ci|build)"
     r"(?:\([^)]+\))?:\s*",
@@ -62,6 +67,11 @@ class Release:
     entries: list[ReleaseEntry]
 
 
+class ExistingChangelogBoundary(NamedTuple):
+    version: str | None
+    index: int
+
+
 def build_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Generate a changelog from first-parent git history and bump-version commits."
@@ -85,6 +95,14 @@ def build_argument_parser() -> argparse.ArgumentParser:
         "--output",
         type=Path,
         help="Write the generated changelog to this path instead of stdout.",
+    )
+    parser.add_argument(
+        "--update-existing",
+        type=Path,
+        help=(
+            "Merge newly generated releases into an existing changelog file by inserting them "
+            "above the current newest real release heading."
+        ),
     )
     parser.add_argument(
         "--flat",
@@ -370,9 +388,55 @@ def render_release(release: Release, flat: bool = False) -> list[str]:
     return lines
 
 
+def find_existing_changelog_boundary(existing_content: str) -> ExistingChangelogBoundary:
+    for heading_match in CHANGELOG_VERSION_HEADING_PATTERN.finditer(existing_content):
+        version = heading_match.group("version")
+        if not is_real_release_version(version):
+            continue
+        return ExistingChangelogBoundary(version=version, index=heading_match.start())
+    return ExistingChangelogBoundary(version=None, index=len(existing_content))
+
+
+def is_real_release_version(version: str) -> bool:
+    return bool(re.fullmatch(r"\d+(?:\.\d+)*", version))
+
+
+def merge_generated_releases_into_changelog(
+    existing_content: str, generated_release_block: str
+) -> str:
+    if not generated_release_block.strip():
+        return existing_content
+
+    boundary = find_existing_changelog_boundary(existing_content)
+    prefix = existing_content[: boundary.index].rstrip()
+    suffix = existing_content[boundary.index:].lstrip()
+    merged_parts = [part for part in (prefix, generated_release_block.strip(), suffix) if part]
+    return "\n\n".join(merged_parts).rstrip() + "\n"
+
+
 def main() -> int:
     parser = build_argument_parser()
     arguments = parser.parse_args()
+
+    if arguments.update_existing:
+        existing_content = arguments.update_existing.read_text(encoding="utf-8")
+        boundary = find_existing_changelog_boundary(existing_content)
+        after_version = arguments.after_version or boundary.version
+        commits = get_git_commits(repo_path=arguments.repo, ref=arguments.ref)
+        releases = build_releases(commits=commits, include_unreleased=False)
+        filtered_releases = filter_releases(releases=releases, after_version=after_version)
+        generated_release_block = render_changelog(
+            releases=filtered_releases,
+            flat=arguments.flat,
+            include_header=False,
+        )
+        changelog = merge_generated_releases_into_changelog(
+            existing_content=existing_content,
+            generated_release_block=generated_release_block,
+        )
+        destination_path = arguments.output or arguments.update_existing
+        destination_path.write_text(changelog, encoding="utf-8")
+        return 0
 
     commits = get_git_commits(repo_path=arguments.repo, ref=arguments.ref)
     releases = build_releases(commits=commits, include_unreleased=not arguments.no_unreleased)
