@@ -13,7 +13,12 @@ DEFAULT_HEADER = """# Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-About changelog [here](https://keepachangelog.com/en/1.0.0/)
+About changelog [here](https://keepachangelog.com/en/1.1.0/)
+
+<!-- Add your changelog as commit messages when squash&merging to GitHub.
+Changelog entries can be generated from the git log into this file with 
+python -m cg.utils.changelog --update-existing CHANGELOG.md
+-->
 """
 
 BUMP_VERSION_PATTERN = re.compile(
