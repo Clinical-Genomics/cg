@@ -285,38 +285,66 @@ def extract_structured_body_entries(
         if not line:
             continue
 
-        if line.startswith("```"):
-            in_code_block = not in_code_block
+        in_code_block, is_code_fence = update_code_block_state(line, in_code_block)
+        if is_code_fence:
             continue
-        if in_code_block:
-            continue
-        if line == "---------" or line.lower().startswith("co-authored-by:"):
+        if should_skip_body_line(line, in_code_block):
             continue
 
-        section_heading = SECTION_HEADING_PATTERN.match(line)
-        if section_heading:
-            current_category = section_heading.group(1).capitalize()
-            continue
-        if ANY_HEADING_PATTERN.match(line):
-            current_category = None
+        current_category, consumed_heading = update_current_category(line, current_category)
+        if consumed_heading:
             continue
 
-        if not current_category:
-            continue
-
-        list_item_match = LIST_ITEM_PATTERN.match(line)
-        if not list_item_match:
-            continue
-
-        title = cleanup_title(
-            list_item_match.group("text"),
-            preserve_pull_request_reference=True,
+        entry = build_release_entry_from_body_line(
+            line=line,
+            current_category=current_category,
+            pull_request_reference=pull_request_reference,
         )
-        title = append_pull_request_reference(title, pull_request_reference)
-        if title:
-            entries.append(ReleaseEntry(title=title, category=current_category))
+        if entry:
+            entries.append(entry)
 
     return deduplicate_entries(entries)
+
+
+def update_code_block_state(line: str, in_code_block: bool) -> tuple[bool, bool]:
+    if line.startswith("```"):
+        return (not in_code_block, True)
+    return (in_code_block, False)
+
+
+def should_skip_body_line(line: str, in_code_block: bool) -> bool:
+    return in_code_block or line == "---------" or line.lower().startswith("co-authored-by:")
+
+
+def update_current_category(
+    line: str, current_category: str | None
+) -> tuple[str | None, bool]:
+    section_heading = SECTION_HEADING_PATTERN.match(line)
+    if section_heading:
+        return (section_heading.group(1).capitalize(), True)
+    if ANY_HEADING_PATTERN.match(line):
+        return (None, True)
+    return (current_category, False)
+
+
+def build_release_entry_from_body_line(
+    line: str, current_category: str | None, pull_request_reference: str | None
+) -> ReleaseEntry | None:
+    if not current_category:
+        return None
+
+    list_item_match = LIST_ITEM_PATTERN.match(line)
+    if not list_item_match:
+        return None
+
+    title = cleanup_title(
+        list_item_match.group("text"),
+        preserve_pull_request_reference=True,
+    )
+    title = append_pull_request_reference(title, pull_request_reference)
+    if not title:
+        return None
+    return ReleaseEntry(title=title, category=current_category)
 
 
 def deduplicate_entries(entries: list[ReleaseEntry]) -> list[ReleaseEntry]:
@@ -459,10 +487,7 @@ def merge_generated_releases_into_changelog(
     return "\n\n".join(merged_parts).rstrip() + "\n"
 
 
-def main() -> int:
-    parser = build_argument_parser()
-    arguments = parser.parse_args()
-
+def generate_updated_changelog(arguments: argparse.Namespace) -> str:
     if arguments.update_existing:
         existing_content = arguments.update_existing.read_text(encoding="utf-8")
         commits = get_git_commits(repo_path=arguments.repo, ref=arguments.ref)
@@ -485,25 +510,36 @@ def main() -> int:
             existing_content=existing_content,
             generated_release_block=generated_release_block,
         )
-        destination_path = arguments.output or arguments.update_existing
-        destination_path.write_text(changelog, encoding="utf-8")
-        return 0
+        return changelog
 
     commits = get_git_commits(repo_path=arguments.repo, ref=arguments.ref)
     releases = build_releases(commits=commits, include_unreleased=not arguments.no_unreleased)
     filtered_releases = filter_releases(releases=releases, after_version=arguments.after_version)
-    changelog = render_changelog(
+    return render_changelog(
         releases=filtered_releases,
         flat=arguments.flat,
         include_header=not arguments.skip_header,
     )
 
-    if arguments.output:
-        arguments.output.write_text(changelog, encoding="utf-8")
+
+def write_changelog_output(arguments: argparse.Namespace, changelog: str) -> None:
+    if arguments.update_existing:
+        destination_path = arguments.output or arguments.update_existing
     else:
-        print(changelog, end="")
-    return 0
+        destination_path = arguments.output
+
+    if destination_path:
+        destination_path.write_text(changelog, encoding="utf-8")
+        return
+    print(changelog, end="")
+
+
+def main() -> None:
+    parser = build_argument_parser()
+    arguments = parser.parse_args()
+    changelog = generate_updated_changelog(arguments)
+    write_changelog_output(arguments, changelog)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
