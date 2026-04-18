@@ -35,7 +35,7 @@ CHANGELOG_VERSION_HEADING_PATTERN = re.compile(
     re.MULTILINE,
 )
 CONVENTIONAL_PREFIX_PATTERN = re.compile(
-    r"^(?P<prefix>feat|fix|chore|docs|refactor|style|perf|test|ci|build)" r"(?:\([^)]+\))?:\s*",
+    r"^(?P<prefix>feat|fix|chore|docs|refactor|style|perf|test|ci|build)(?:\([^)]+\))?:\s*",
     re.IGNORECASE,
 )
 PULL_REQUEST_SUFFIX_PATTERN = re.compile(r"\s*\(#\d+\)")
