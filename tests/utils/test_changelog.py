@@ -1,13 +1,19 @@
-from cg.utils.changelog import GitCommit
-from cg.utils.changelog import build_releases
-from cg.utils.changelog import cleanup_title
-from cg.utils.changelog import extract_release_entries
-from cg.utils.changelog import extract_entry_title
-from cg.utils.changelog import filter_releases
-from cg.utils.changelog import find_existing_changelog_boundary
-from cg.utils.changelog import merge_generated_releases_into_changelog
-from cg.utils.changelog import ReleaseEntry
-from cg.utils.changelog import render_changelog
+from cg.utils.changelog import (
+    GitCommit,
+    ReleaseEntry,
+    build_releases,
+    cleanup_title,
+    extract_entry_title,
+    extract_existing_release_versions,
+    extract_release_entries,
+    filter_new_releases_for_existing_changelog,
+    filter_releases,
+    find_existing_changelog_boundary,
+    find_latest_existing_release_version,
+    merge_generated_releases_into_changelog,
+    parse_release_version,
+    render_changelog,
+)
 
 
 def test_cleanup_title_keeps_pull_request_number_when_requested():
@@ -209,12 +215,14 @@ def test_render_changelog_outputs_keep_a_changelog_style_sections():
 
     assert "## [85.6.1] - 2026-04-17" in changelog
     assert "### Fixed" in changelog
-    assert "- Fix #5028 and a few similar ones by adding an extra trailing newline (#5029)" in changelog
+    assert (
+        "- Fix #5028 and a few similar ones by adding an extra trailing newline (#5029)"
+        in changelog
+    )
 
 
 def test_find_existing_changelog_boundary_skips_placeholder_versions():
-    boundary = find_existing_changelog_boundary(
-        """# Change Log
+    boundary = find_existing_changelog_boundary("""# Change Log
 
 ## [x.x.x]
 ### Added
@@ -222,11 +230,93 @@ def test_find_existing_changelog_boundary_skips_placeholder_versions():
 ## [22.26.0]
 ### Added
 - Existing entry
-"""
-    )
+""")
 
     assert boundary.version == "22.26.0"
     assert boundary.index > 0
+
+
+def test_parse_release_version_supports_multi_part_numeric_versions():
+    assert parse_release_version("85.6.1") == (85, 6, 1)
+    assert parse_release_version("12") == (12,)
+
+
+def test_extract_existing_release_versions_skips_placeholder_versions():
+    versions = extract_existing_release_versions("""# Change Log
+
+## [x.x.x]
+## [85.6.1] - 2026-04-17
+## [22.26.0]
+""")
+
+    assert versions == {"85.6.1", "22.26.0"}
+
+
+def test_find_latest_existing_release_version_uses_highest_existing_release():
+    latest_version = find_latest_existing_release_version("""# Change Log
+
+## [22.26.0]
+## [85.6.0] - 2026-04-17
+## [85.6.1] - 2026-04-17
+""")
+
+    assert latest_version == "85.6.1"
+
+
+def test_filter_new_releases_for_existing_changelog_only_keeps_newer_missing_versions():
+    built_releases = build_releases(
+        [
+            GitCommit(
+                sha="1111111",
+                date="2026-04-16",
+                subject="Fix the tests and coverage badge (patch)",
+                body="",
+            ),
+            GitCommit(
+                sha="2222222",
+                date="2026-04-16",
+                subject="Bump version: 85.4.0 → 85.4.1 [skip ci]",
+                body="",
+            ),
+            GitCommit(
+                sha="3333333",
+                date="2026-04-17",
+                subject="Fix #5028 and a few similar ones by adding an extra trailing newline (#5029)",
+                body="",
+            ),
+            GitCommit(
+                sha="4444444",
+                date="2026-04-17",
+                subject="Bump version: 85.6.0 → 85.6.1 [skip ci]",
+                body="",
+            ),
+            GitCommit(
+                sha="5555555",
+                date="2026-04-18",
+                subject="Add another fix (#5035) (patch)",
+                body="",
+            ),
+            GitCommit(
+                sha="6666666",
+                date="2026-04-18",
+                subject="Bump version: 85.6.1 → 85.6.2 [skip ci]",
+                body="",
+            ),
+        ]
+    )
+
+    filtered_releases = filter_new_releases_for_existing_changelog(
+        releases=built_releases,
+        existing_content="""# Change Log
+
+## [x.x.x]
+## [85.6.1] - 2026-04-17
+## [85.4.1] - 2026-04-16
+## [22.26.0]
+""",
+    )
+
+    assert [release.version for release in filtered_releases] == ["85.6.2"]
 
 
 def test_merge_generated_releases_into_changelog_inserts_above_existing_history():

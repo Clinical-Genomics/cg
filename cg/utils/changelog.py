@@ -9,7 +9,7 @@ from typing import NamedTuple
 
 FIELD_SEPARATOR = "\x1f"
 RECORD_SEPARATOR = "\x1e"
-DEFAULT_HEADER = """# Change Log
+DEFAULT_HEADER = """# Changelog
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
@@ -35,8 +35,7 @@ CHANGELOG_VERSION_HEADING_PATTERN = re.compile(
     re.MULTILINE,
 )
 CONVENTIONAL_PREFIX_PATTERN = re.compile(
-    r"^(?P<prefix>feat|fix|chore|docs|refactor|style|perf|test|ci|build)"
-    r"(?:\([^)]+\))?:\s*",
+    r"^(?P<prefix>feat|fix|chore|docs|refactor|style|perf|test|ci|build)" r"(?:\([^)]+\))?:\s*",
     re.IGNORECASE,
 )
 PULL_REQUEST_SUFFIX_PATTERN = re.compile(r"\s*\(#\d+\)")
@@ -106,7 +105,8 @@ def build_argument_parser() -> argparse.ArgumentParser:
         type=Path,
         help=(
             "Merge newly generated releases into an existing changelog file by inserting them "
-            "above the current newest real release heading."
+            "above the current newest real release heading and only adding versions not already "
+            "documented there."
         ),
     )
     parser.add_argument(
@@ -358,7 +358,9 @@ def filter_releases(releases: list[Release], after_version: str | None) -> list[
     return releases
 
 
-def render_changelog(releases: list[Release], flat: bool = False, include_header: bool = True) -> str:
+def render_changelog(
+    releases: list[Release], flat: bool = False, include_header: bool = True
+) -> str:
     lines: list[str] = []
     if include_header:
         lines.append(DEFAULT_HEADER.strip())
@@ -393,6 +395,10 @@ def render_release(release: Release, flat: bool = False) -> list[str]:
     return lines
 
 
+def parse_release_version(version: str) -> tuple[int, ...]:
+    return tuple(int(part) for part in version.split("."))
+
+
 def find_existing_changelog_boundary(existing_content: str) -> ExistingChangelogBoundary:
     for heading_match in CHANGELOG_VERSION_HEADING_PATTERN.finditer(existing_content):
         version = heading_match.group("version")
@@ -406,6 +412,40 @@ def is_real_release_version(version: str) -> bool:
     return bool(re.fullmatch(r"\d+(?:\.\d+)*", version))
 
 
+def extract_existing_release_versions(existing_content: str) -> set[str]:
+    return {
+        heading_match.group("version")
+        for heading_match in CHANGELOG_VERSION_HEADING_PATTERN.finditer(existing_content)
+        if is_real_release_version(heading_match.group("version"))
+    }
+
+
+def find_latest_existing_release_version(existing_content: str) -> str | None:
+    existing_versions = extract_existing_release_versions(existing_content)
+    if not existing_versions:
+        return None
+    return max(existing_versions, key=parse_release_version)
+
+
+def filter_new_releases_for_existing_changelog(
+    releases: list[Release], existing_content: str
+) -> list[Release]:
+    existing_versions = extract_existing_release_versions(existing_content)
+    if not existing_versions:
+        return releases
+
+    latest_existing_version = find_latest_existing_release_version(existing_content)
+    assert latest_existing_version is not None
+    latest_existing_key = parse_release_version(latest_existing_version)
+    return [
+        release
+        for release in releases
+        if release.version not in existing_versions
+        and release.version != "Unreleased"
+        and parse_release_version(release.version) > latest_existing_key
+    ]
+
+
 def merge_generated_releases_into_changelog(
     existing_content: str, generated_release_block: str
 ) -> str:
@@ -414,7 +454,7 @@ def merge_generated_releases_into_changelog(
 
     boundary = find_existing_changelog_boundary(existing_content)
     prefix = existing_content[: boundary.index].rstrip()
-    suffix = existing_content[boundary.index:].lstrip()
+    suffix = existing_content[boundary.index :].lstrip()
     merged_parts = [part for part in (prefix, generated_release_block.strip(), suffix) if part]
     return "\n\n".join(merged_parts).rstrip() + "\n"
 
@@ -425,11 +465,17 @@ def main() -> int:
 
     if arguments.update_existing:
         existing_content = arguments.update_existing.read_text(encoding="utf-8")
-        boundary = find_existing_changelog_boundary(existing_content)
-        after_version = arguments.after_version or boundary.version
         commits = get_git_commits(repo_path=arguments.repo, ref=arguments.ref)
         releases = build_releases(commits=commits, include_unreleased=False)
-        filtered_releases = filter_releases(releases=releases, after_version=after_version)
+        if arguments.after_version:
+            filtered_releases = filter_releases(
+                releases=releases, after_version=arguments.after_version
+            )
+        else:
+            filtered_releases = filter_new_releases_for_existing_changelog(
+                releases=releases,
+                existing_content=existing_content,
+            )
         generated_release_block = render_changelog(
             releases=filtered_releases,
             flat=arguments.flat,
