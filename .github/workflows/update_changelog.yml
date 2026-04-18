@@ -26,9 +26,12 @@ jobs:
           python-version: "3.11"
 
       - name: Configure git author
+        env:
+          GIT_AUTHOR_NAME: ${{ secrets.BUMPVERSION_AUTHOR }}
+          GIT_AUTHOR_EMAIL: ${{ secrets.BUMPVERSION_EMAIL }}
         run: |
-          git config user.name "${{ secrets.BUMPVERSION_AUTHOR }}"
-          git config user.email "${{ secrets.BUMPVERSION_EMAIL }}"
+          git config user.name "${GIT_AUTHOR_NAME}"
+          git config user.email "${GIT_AUTHOR_EMAIL}"
 
       - name: Update changelog
         run: python -m cg.utils.changelog --update-existing CHANGELOG.md
