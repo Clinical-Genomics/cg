@@ -15,7 +15,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 About changelog [here](https://keepachangelog.com/en/1.1.0/)
 
-<!-- Add your changelog as commit messages when squash&merging to GitHub.
+<!-- Add your changelog as commit messages when squashing & merging to GitHub.
 Changelog entries can be generated from the git log into this file with 
 python -m cg.utils.changelog --update-existing CHANGELOG.md
 -->
@@ -316,9 +316,7 @@ def should_skip_body_line(line: str, in_code_block: bool) -> bool:
     return in_code_block or line == "---------" or line.lower().startswith("co-authored-by:")
 
 
-def update_current_category(
-    line: str, current_category: str | None
-) -> tuple[str | None, bool]:
+def update_current_category(line: str, current_category: str | None) -> tuple[str | None, bool]:
     section_heading = SECTION_HEADING_PATTERN.match(line)
     if section_heading:
         return (section_heading.group(1).capitalize(), True)

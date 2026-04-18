@@ -222,17 +222,17 @@ def test_render_changelog_outputs_keep_a_changelog_style_sections():
 
 
 def test_find_existing_changelog_boundary_skips_placeholder_versions():
-    boundary = find_existing_changelog_boundary("""# Change Log
+    boundary = find_existing_changelog_boundary("""# Changelog
 
 ## [x.x.x]
 ### Added
 
-## [22.26.0]
+## [1.2.3]
 ### Added
 - Existing entry
 """)
 
-    assert boundary.version == "22.26.0"
+    assert boundary.version == "1.2.3"
     assert boundary.index > 0
 
 
@@ -242,25 +242,25 @@ def test_parse_release_version_supports_multi_part_numeric_versions():
 
 
 def test_extract_existing_release_versions_skips_placeholder_versions():
-    versions = extract_existing_release_versions("""# Change Log
+    versions = extract_existing_release_versions("""# Changelog
 
 ## [x.x.x]
 ## [85.6.1] - 2026-04-17
-## [22.26.0]
+## [1.2.3]
 """)
 
-    assert versions == {"85.6.1", "22.26.0"}
+    assert versions == {"85.6.1", "1.2.3"}
 
 
 def test_find_latest_existing_release_version_uses_highest_existing_release():
-    latest_version = find_latest_existing_release_version("""# Change Log
+    latest_version = find_latest_existing_release_version("""# Changelog
 
-## [22.26.0]
-## [85.6.0] - 2026-04-17
-## [85.6.1] - 2026-04-17
+## [1.2.3]
+## [1.3.0] - 2026-04-17
+## [1.3.1] - 2026-04-17
 """)
 
-    assert latest_version == "85.6.1"
+    assert latest_version == "1.3.1"
 
 
 def test_filter_new_releases_for_existing_changelog_only_keeps_newer_missing_versions():
@@ -307,12 +307,12 @@ def test_filter_new_releases_for_existing_changelog_only_keeps_newer_missing_ver
 
     filtered_releases = filter_new_releases_for_existing_changelog(
         releases=built_releases,
-        existing_content="""# Change Log
+        existing_content="""# Changelog
 
 ## [x.x.x]
 ## [85.6.1] - 2026-04-17
 ## [85.4.1] - 2026-04-16
-## [22.26.0]
+## [1.2.3]
 """,
     )
 
@@ -320,12 +320,12 @@ def test_filter_new_releases_for_existing_changelog_only_keeps_newer_missing_ver
 
 
 def test_merge_generated_releases_into_changelog_inserts_above_existing_history():
-    existing_content = """# Change Log
+    existing_content = """# Changelog
 
 ## [x.x.x]
 ### Added
 
-## [22.26.0]
+## [1.2.3]
 ### Added
 - Existing entry
 """
@@ -340,5 +340,5 @@ def test_merge_generated_releases_into_changelog_inserts_above_existing_history(
     )
 
     assert "## [85.6.1] - 2026-04-17" in merged_content
-    assert merged_content.index("## [85.6.1] - 2026-04-17") < merged_content.index("## [22.26.0]")
+    assert merged_content.index("## [85.6.1] - 2026-04-17") < merged_content.index("## [1.2.3]")
     assert "## [x.x.x]" in merged_content
