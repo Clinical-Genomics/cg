@@ -207,7 +207,9 @@ def order_with_existing_case_and_external_sample(existing_case_id: str) -> Order
         (OrderType.TOMTE, "tomte_order"),
     ],
 )
-def test_submit_order(
+def
+    (''
+     'test_submit_order()
     store_to_submit_and_validate_orders: Store,
     monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,

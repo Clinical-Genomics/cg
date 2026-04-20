@@ -1,3 +1,4 @@
+from cg.apps.lims import LimsAPI
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.existing_case import ExistingCase
@@ -10,6 +11,7 @@ from cg.services.orders.validation.order_types.mip_dna.models.case import MIPDNA
 from cg.services.orders.validation.order_types.mip_dna.models.sample import MIPDNASample
 from cg.services.orders.validation.order_types.raredisease.models.case import RarediseaseCase
 from cg.services.orders.validation.order_types.raredisease.models.sample import RarediseaseSample
+from cg.services.orders.validation.order_types.tomte.models.case import TomteCase
 from cg.store.models import Application
 from cg.store.models import Case as DbCase
 from cg.store.models import Customer, Sample
@@ -129,3 +131,21 @@ def get_sample_name(sample: MIPDNASample | RarediseaseSample | ExistingSample, s
     else:
         sample_name: str = sample.name
     return sample_name
+
+
+def get_sample_sources(case: TomteCase | ExistingCase, lims_api: LimsAPI, store: Store) -> set:
+    sources = set()
+    if isinstance(case, ExistingCase):
+        db_case = store.get_case_by_internal_id(case.internal_id)
+        if not db_case:  # This should result in an error elsewhere
+            return set()
+        for sample in db_case.samples:
+            sources.add(lims_api.get_source(sample.internal_id))
+        return sources
+    else:
+        for sample in case.samples:
+            if isinstance(sample, ExistingSample):
+                sources.add(lims_api.get_source(sample.internal_id))
+            else:
+                sources.add(sample.source_comment if sample.source == "other" else sample.source)
+        return sources

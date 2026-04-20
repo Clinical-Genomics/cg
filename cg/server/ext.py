@@ -101,7 +101,7 @@ storing_service_registry: StoringServiceRegistry = setup_storing_service_registr
     status_db=db,
 )
 
-order_validation_service = OrderValidationService(store=db)
+order_validation_service = OrderValidationService(lims_api=lims, store=db)
 freshdesk_client = FreshdeskClient(
     base_url=app_config.freshdesk_url, api_key=app_config.freshdesk_api_key
 )
