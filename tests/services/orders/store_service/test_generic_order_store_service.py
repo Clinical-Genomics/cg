@@ -93,7 +93,7 @@ def test_store_mip_rna_order(
     assert len(first_case.links) == 2
     new_link = first_case.links[0]
     assert first_case.data_analysis == Workflow.MIP_RNA
-    assert first_case.data_delivery == str(DataDelivery.ANALYSIS_SCOUT)
+    assert first_case.data_delivery == str(DataDelivery.FASTQ_ANALYSIS)
     assert new_link.sample.name == "MipRNASample1"
     assert new_link.sample.application_version.application.tag == rna_application_tag
     assert new_link.should_deliver_sample
