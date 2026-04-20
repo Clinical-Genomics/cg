@@ -43,6 +43,7 @@ from cg.services.orders.validation.rules.case.rules import (
 )
 from cg.store.models import Application, Case, Sample
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_case_name_not_available(
@@ -343,12 +344,17 @@ def test_validate_samples_have_same_source():
         project_type=OrderType.TOMTE,
     )
     status_db: Store = create_autospec(Store)
-    lims_api: LimsAPI = create_autospec(LimsAPI)
-    lims_api.get_source = Mock(return_value="fibroblast")
+    lims_api: TypedMock[LimsAPI] = create_typed_mock(LimsAPI)
+    lims_api.as_type.get_source = Mock(return_value="fibroblast")
 
     # WHEN validating that all the samples have the same tissue type within each case of the order
-    errors = validate_samples_have_same_source(order=order, store=status_db, lims_api=lims_api)
+    errors = validate_samples_have_same_source(
+        order=order, store=status_db, lims_api=lims_api.as_type
+    )
 
     # THEN an error should be returned
     assert isinstance(errors[0], SampleSourceMismatchError)
     assert errors[0].case_index == 0
+
+    # THEN LIMS should have been called to fetch the existing sample's source
+    lims_api.as_mock.get_source.assert_called_once_with("existing_sample")
