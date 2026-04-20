@@ -1911,7 +1911,7 @@ class ReadHandler(BaseHandler):
             )
             .filter(
                 Sample.last_sequenced_at.is_not(None),
-                Customer.internal_id.is_not("cust000"),
+                Customer.internal_id != "cust000",
                 Customer.internal_id.not_like("cust9%"),
             )
             .order_by(Sample.last_sequenced_at.asc())
