@@ -134,18 +134,27 @@ def get_sample_name(sample: MIPDNASample | RarediseaseSample | ExistingSample, s
 
 
 def get_sample_sources(case: TomteCase | ExistingCase, lims_api: LimsAPI, store: Store) -> set:
-    sources = set()
     if isinstance(case, ExistingCase):
-        db_case = store.get_case_by_internal_id(case.internal_id)
-        if not db_case:  # This should result in an error elsewhere
-            return set()
-        for sample in db_case.samples:
-            sources.add(lims_api.get_source(sample.internal_id))
-        return sources
+        return _get_existing_case_sources(case=case, lims_api=lims_api, store=store)
     else:
-        for sample in case.samples:
-            if isinstance(sample, ExistingSample):
-                sources.add(lims_api.get_source(sample.internal_id))
-            else:
-                sources.add(sample.source_comment if sample.source == "other" else sample.source)
-        return sources
+        return _get_new_case_sources(case=case, lims_api=lims_api)
+
+
+def _get_new_case_sources(case: TomteCase, lims_api: LimsAPI) -> set:
+    sources = set()
+    for sample in case.samples:
+        if isinstance(sample, ExistingSample):
+            sources.add(lims_api.get_source(sample.internal_id))
+        else:
+            sources.add(sample.source_comment if sample.source == "other" else sample.source)
+    return sources
+
+
+def _get_existing_case_sources(case: ExistingCase, lims_api: LimsAPI, store: Store) -> set:
+    db_case = store.get_case_by_internal_id(case.internal_id)
+    if not db_case:  # This should result in an error elsewhere
+        return set()
+    sources = set()
+    for sample in db_case.samples:
+        sources.add(lims_api.get_source(sample.internal_id))
+    return sources
