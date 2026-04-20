@@ -144,3 +144,12 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
     status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
         lims_status=LimsStatus.TOP_UP, page=1, page_size=10
     )
+
+
+def test_get_unhandled_samples_invalid_input(client: FlaskClient):
+
+    response = client.get(
+        path="/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=sjutton",
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST

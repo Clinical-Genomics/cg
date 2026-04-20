@@ -29,7 +29,7 @@ def test_unhandled_samples_response_from_samples():
         ticket_id_from_original_order=123456,
     )
     # WHEN creating an UnhandledSampleResponse from samples
-    response = UnhandledSamplesResponse.from_samples([sample_1, sample_2])
+    response = UnhandledSamplesResponse.from_samples(samples=[sample_1, sample_2], total=15)
 
     # THEN the response is as expected
     assert response == UnhandledSamplesResponse(
@@ -48,5 +48,6 @@ def test_unhandled_samples_response_from_samples():
                 workflow=Workflow.RAREDISEASE,
                 ticket=123456,
             ),
-        ]
+        ],
+        total=15,
     )

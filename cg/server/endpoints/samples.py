@@ -61,12 +61,18 @@ def get_samples():
 
 @SAMPLES_BLUEPRINT.route("/unhandled_samples", methods=["GET"])
 def get_unhandled_samples():
-    req = UnhandledSamplesRequest.model_validate(request.args.to_dict())
-    samples, total = db.get_paginated_unhandled_samples(
-        lims_status=req.lims_status, page=req.page, page_size=req.page_size
-    )
-    response = UnhandledSamplesResponse.from_samples(samples=samples, total=total)
-    return jsonify(response.model_dump())
+    try:
+        req: UnhandledSamplesRequest = UnhandledSamplesRequest.model_validate(
+            request.args.to_dict()
+        )
+    except ValidationError:
+        return abort(code=HTTPStatus.BAD_REQUEST)
+    else:
+        samples, total = db.get_paginated_unhandled_samples(
+            lims_status=req.lims_status, page=req.page, page_size=req.page_size
+        )
+        response = UnhandledSamplesResponse.from_samples(samples=samples, total=total)
+        return jsonify(response.model_dump())
 
 
 @SAMPLES_BLUEPRINT.route("/samples", methods=["PATCH"])
