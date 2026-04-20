@@ -1890,7 +1890,7 @@ class ReadHandler(BaseHandler):
 
     def get_unhandled_samples(
         self, lims_status: LimsStatus, page: int, page_size: int
-    ) -> list[Sample]:
+    ) -> tuple[list[Sample], int]:
         """
         Return samples with the given lims_status that:
         - Are not downsampled
@@ -1912,5 +1912,14 @@ class ReadHandler(BaseHandler):
             )
             .order_by(Sample.last_sequenced_at.asc())
         )
+        return _paginate(query=unhandled_samples, page=page, page_size=page_size)
 
-        return unhandled_samples.all()
+    def get_paginated_unhandled_samples(
+        self, lims_status: LimsStatus, page: int, page_size: int
+    ) -> tuple[list[Sample], int]:
+        pass
+
+
+def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:
+    total: int = query.count()
+    return query.limit(page_size).offset(page_size * (page - 1)).all(), total

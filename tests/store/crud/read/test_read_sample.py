@@ -659,7 +659,7 @@ def test_get_unhandled_samples_paginated(store: Store, helpers: StoreHelpers):
         delivered_at=None,
         customer_id="cust1337",
     )
-    sample_old = helpers.add_sample(
+    helpers.add_sample(
         store=store,
         lims_status=LimsStatus.TOP_UP,
         internal_id="perfect_unhandled_sample_2",
@@ -669,12 +669,13 @@ def test_get_unhandled_samples_paginated(store: Store, helpers: StoreHelpers):
         delivered_at=None,
         customer_id="cust1337",
     )
-    # WHEN getting the unhandled samples in top-up using page and page_size = 1
-    unhandled_samples: list[Sample] = store.get_unhandled_samples(
-        lims_status=LimsStatus.TOP_UP, page=1, page_size=1
+    # WHEN getting the unhandled samples in top-up using page 2 and page_size = 1
+    unhandled_samples, total = store.get_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP, page=2, page_size=1
     )
-    # THEN only the older sample should be returned
-    assert unhandled_samples == [sample_old]
+    # THEN only the newer sample should be returned
+    assert unhandled_samples == [sample_new]
+    assert total == 2
 
 
 def test_get_unhandled_samples_filters_on_lims_status(store: Store, helpers: StoreHelpers):
