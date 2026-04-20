@@ -99,7 +99,7 @@ def test_update_sample_invalid_request_structure(client: FlaskClient, mocker: Mo
 
 def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
     # GIVEN a store with unhandled samples in top-up
-    status_db = create_autospec(Store)
+    status_db: TypedMock[Store] = create_typed_mock(Store)
     date_time = datetime(2024, 12, 24, 11, 59)
     sample_1 = create_autospec(
         Sample,
@@ -113,14 +113,14 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         original_workflow=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
     )
-    status_db.get_unhandled_samples = Mock(return_value=[sample_1])
-    mocker.patch.object(samples, "db", status_db)
+    status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([sample_1], 1))
+    mocker.patch.object(samples, "db", status_db.as_type)
 
     # GIVEN a request to get unhandled samples that are in top-up
 
     # WHEN calling the endpoint to get unhandled samples
     response = client.get(
-        path="/api/v1/unhandled_samples?lims_status=top-up",
+        path="/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=10",
     )
 
     # THEN the response should be successful
@@ -137,4 +137,10 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
                 "workflow": "raredisease",
             }
         ],
+        "total": 1,
     }
+
+    # THEN function has been called with the correct arguments
+    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
+        lims_status=LimsStatus.TOP_UP, page=1, page_size=10
+    )

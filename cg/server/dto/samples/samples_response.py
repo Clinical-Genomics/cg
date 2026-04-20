@@ -112,10 +112,10 @@ class UnhandledSample(BaseModel):
 
 class UnhandledSamplesResponse(BaseModel):
     samples: list[UnhandledSample]
-    # TODO: implement total
+    total: int
 
     @classmethod
-    def from_samples(cls, samples: list[Sample]) -> "UnhandledSamplesResponse":
+    def from_samples(cls, samples: list[Sample], total: int) -> "UnhandledSamplesResponse":
         """
         Creates an UnhandledSamplesResponse object from a list of database samples.
         Raises:
@@ -132,4 +132,4 @@ class UnhandledSamplesResponse(BaseModel):
                     workflow=sample.original_workflow,  # type: ignore
                 )
             )
-        return cls(samples=unhandled_samples)
+        return cls(samples=unhandled_samples, total=total)

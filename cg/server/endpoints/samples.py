@@ -8,6 +8,7 @@ from cg.server.dto.samples.requests import (
     CollaboratorSamplesRequest,
     SamplesRequest,
     SamplesUpdateRequest,
+    UnhandledSamplesRequest,
 )
 from cg.server.dto.samples.samples_response import SamplesResponse, UnhandledSamplesResponse
 from cg.server.endpoints.utils import before_request
@@ -60,10 +61,12 @@ def get_samples():
 
 @SAMPLES_BLUEPRINT.route("/unhandled_samples", methods=["GET"])
 def get_unhandled_samples():
-    lims_status = request.args["lims_status"]
-    samples: list[Sample] = db.get_paginated_unhandled_samples(lims_status=lims_status)
-    response = UnhandledSamplesResponse.from_samples(samples)
-    return jsonify(response.model_dump()), HTTPStatus.OK
+    req = UnhandledSamplesRequest.model_validate(request.args.to_dict())
+    samples, total = db.get_paginated_unhandled_samples(
+        lims_status=req.lims_status, page=req.page, page_size=req.page_size
+    )
+    response = UnhandledSamplesResponse.from_samples(samples=samples, total=total)
+    return jsonify(response.model_dump())
 
 
 @SAMPLES_BLUEPRINT.route("/samples", methods=["PATCH"])
