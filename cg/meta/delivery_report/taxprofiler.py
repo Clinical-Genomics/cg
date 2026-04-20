@@ -31,7 +31,10 @@ class TaxprofilerDeliveryReportAPI(DeliveryReportAPI):
     ) -> TaxprofilerSampleMetadataModel:
         """Return Taxprofiler sample metadata to include in the delivery report."""
         return TaxprofilerSampleMetadataModel(
-            initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id)
+            initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
+            input_amount=self.lims_api.get_input_amount(
+                sample_id=sample.internal_id, sample_type="wgs"
+            ),
         )
 
     def is_report_accredited(

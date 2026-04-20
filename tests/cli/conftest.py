@@ -1,6 +1,5 @@
 """Fixtures for CLI tests."""
 
-from pathlib import Path
 from typing import Any
 
 import pytest
@@ -190,7 +189,8 @@ def scout_export_manged_variants_output() -> str:
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
 1	48696925	.	G	C	.		END=48696925;TYPE=SNV
-14	76548781	.	CTGGACC	G	.		END=76548781;TYPE=INDEL"""
+14	76548781	.	CTGGACC	G	.		END=76548781;TYPE=INDEL
+"""
 
 
 @pytest.fixture
@@ -237,4 +237,5 @@ X       155110956       155173433       11486   VAMP7
 Y       6778727 6959724 18502   TBL1Y
 Y       14813160        14972764        12633   USP9Y
 MT      577     647     7481    MT-TF
-MT      648     1601    7470    MT-RNR1"""
+MT      648     1601    7470    MT-RNR1
+"""

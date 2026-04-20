@@ -1,19 +1,39 @@
 """Test the Lims api"""
 
 import datetime as dt
-from unittest.mock import create_autospec
+from unittest.mock import MagicMock, create_autospec
 
 import pytest
 from genologics import entities
-from genologics.entities import Sample
+from genologics.descriptors import EntityDescriptor
+from genologics.entities import Artifact, Sample
 from genologics.lims import Lims
+from numpy.ma.testutils import approx
 from pytest_mock import MockerFixture
 from requests.exceptions import HTTPError
 
 from cg.apps.lims import LimsAPI
-from cg.constants.lims import LimsProcess
+from cg.constants.lims import MASTER_STEPS_UDFS, LimsArtifactTypes, LimsProcess
 from cg.exc import LimsDataError
 from tests.mocks.limsmock import MockLimsAPI
+
+
+@pytest.fixture
+def config_for_lims_api() -> dict:
+    """Fixture to provide a config dict for the LimsAPI."""
+    return {
+        "lims": {
+            "host": "https://lims.scilifelab.se",
+            "username": "user",
+            "password": "password",
+        }
+    }
+
+
+@pytest.fixture
+def minimal_lims_api(config_for_lims_api: dict) -> LimsAPI:
+    """Fixture to provide a LimsAPI instance."""
+    return LimsAPI(config=config_for_lims_api)
 
 
 def test_get_received_date(lims_mock, mocker):
@@ -118,44 +138,24 @@ def test_get_internal_negative_control_id_from_sample_in_pool(
     assert internal_negative_control_id == "internal_negative_control"
 
 
-def test_get_capture_kit_strict(mocker: MockerFixture):
+def test_get_capture_kit_strict(minimal_lims_api: LimsAPI, mocker: MockerFixture):
     """Test to get the capture kit for a sample in LIMS."""
-    # GIVEN a cg config with LIMS information
-    config: dict = {
-        "lims": {
-            "host": "https://lims.scilifelab.se",
-            "password": "password",
-            "username": "user",
-        },
-    }
-
     # GIVEN a LIMS API
-    lims_api = LimsAPI(config=config)
 
     # GIVEN a sample with a capture kit in LIMS
     lims_sample = create_autospec(Sample, udf={"Bait Set": "valid_capture_kit"})
     mocker.patch.object(entities.Sample, "__new__", return_value=lims_sample)
 
     # WHEN getting the sample capture kit
-    capture_kit = lims_api.get_capture_kit_strict(lims_id="sample_id")
+    capture_kit = minimal_lims_api.get_capture_kit_strict(lims_id="sample_id")
 
     # THEN the capture kit is as expected
     assert capture_kit == "valid_capture_kit"
 
 
-def test_get_capture_kit_strict_no_capture_kit(mocker: MockerFixture):
+def test_get_capture_kit_strict_no_capture_kit(minimal_lims_api: LimsAPI, mocker: MockerFixture):
     """Test scenario when capture kit is not set for a sample."""
-    # GIVEN a cg config with LIMS information
-    config: dict = {
-        "lims": {
-            "host": "https://lims.scilifelab.se",
-            "password": "password",
-            "username": "user",
-        },
-    }
-
     # GIVEN a LIMS API
-    lims_api = LimsAPI(config=config)
 
     # GIVEN a sample with no capture kit in LIMS
     lims_sample = create_autospec(Sample, udf={"Bait Set": None})
@@ -165,4 +165,111 @@ def test_get_capture_kit_strict_no_capture_kit(mocker: MockerFixture):
     # WHEN getting the sample capture kit
     # THEN a LimsDataError is raised
     with pytest.raises(LimsDataError):
-        lims_api.get_capture_kit_strict(lims_id="sample_id")
+        minimal_lims_api.get_capture_kit_strict(lims_id="sample_id")
+
+
+def test_get_latest_artifact_from_list(minimal_lims_api: LimsAPI):
+    # GIVEN a LIMS API
+
+    # GIVEN a list of artifacts with different creation dates
+    artifact_1 = create_autospec(
+        Artifact, parent_process=create_autospec(EntityDescriptor, date_run=dt.datetime(2023, 4, 1))
+    )
+    artifact_2 = create_autospec(
+        Artifact, parent_process=create_autospec(EntityDescriptor, date_run=dt.datetime(2023, 5, 1))
+    )
+    artifact_3 = create_autospec(
+        Artifact, parent_process=create_autospec(EntityDescriptor, date_run=dt.datetime(2023, 3, 1))
+    )
+    artifacts = [artifact_1, artifact_2, artifact_3]
+
+    # WHEN getting the latest artifact from a list of artifacts with different creation dates
+    latest_artifact = minimal_lims_api._get_latest_artifact_from_list(artifact_list=artifacts)
+
+    # THEN the artifact with the latest creation date is returned
+    assert latest_artifact == artifact_2
+
+
+def test_get_last_used_input_amount(minimal_lims_api: LimsAPI):
+    # GIVEN a LIMS API
+
+    # GIVEN a list of input amounts and their dates coming from a list of Artifacts
+    input_amounts: list[tuple[dt.datetime, float]] = [
+        (dt.datetime(2023, 4, 1), 10.0),
+        (dt.datetime(2023, 5, 1), 20.0),
+        (dt.datetime(2023, 3, 1), 5.0),
+    ]
+
+    # WHEN getting the last used input amount from a list of input amounts and their dates
+    last_used_input_amount = minimal_lims_api._get_last_used_input_amount(input_amounts)
+
+    # THEN the input amount with the latest date is returned
+    assert approx(last_used_input_amount, 20.0)
+
+
+@pytest.mark.parametrize(
+    "sample_type, step_names",
+    [
+        ("wgs", MASTER_STEPS_UDFS["input_amounts"]["wgs"]),
+        ("tgs", MASTER_STEPS_UDFS["input_amounts"]["tgs"]),
+        ("revio", MASTER_STEPS_UDFS["input_amounts"]["revio"]),
+        ("wts", MASTER_STEPS_UDFS["input_amounts"]["wts"]),
+    ],
+    ids=["WGS", "TGS", "Revio", "WTS"],
+)
+def test_get_input_amount_success(
+    minimal_lims_api: LimsAPI,
+    sample_type: str,
+    step_names: list[str],
+    mocker: MockerFixture,
+):
+    # GIVEN a LIMS API
+
+    # GIVEN a sample_id and sample_type
+    sample_id: str = "sample_id"
+
+    # GIVEN an artifact in the LIMS database with the expected input amount for the sample
+    udf_key = "Amount needed (ng)"
+    amount_in_lims: float = 10.0
+    mocked_get_artifacts: MagicMock = mocker.patch.object(
+        Lims,
+        "get_artifacts",
+        return_value=[
+            create_autospec(
+                Artifact,
+                parent_process=create_autospec(EntityDescriptor, date_run=dt.datetime(2023, 5, 1)),
+                udf={udf_key: amount_in_lims},
+            )
+        ],
+    )
+
+    # WHEN getting the input amount for a sample
+    input_amount = minimal_lims_api.get_input_amount(sample_id=sample_id, sample_type=sample_type)
+
+    # THEN the LIMS API get_artifacts method is called once per step name corresponding to the sample type
+    for step_name in step_names:
+        mocked_get_artifacts.assert_any_call(
+            process_type=step_name,
+            type=LimsArtifactTypes.ANALYTE,
+            samplelimsid=sample_id,
+        )
+
+    # THEN the input amount is as expected
+    assert approx(input_amount, amount_in_lims)
+
+
+def test_get_input_amount_lost_connection_to_lims(minimal_lims_api: LimsAPI, mocker: MockerFixture):
+    # GIVEN a LIMS API
+
+    # GIVEN a sample_id and sample_type
+    sample_id: str = "sample_id"
+    sample_type: str = "wgs"
+
+    # GIVEN no artifacts in the LIMS database for the sample and step names corresponding to the sample type
+    mocker.patch.object(Lims, "get_artifacts", side_effect=HTTPError())
+
+    # WHEN getting the input amount for a sample
+    input_amount = minimal_lims_api.get_input_amount(sample_id=sample_id, sample_type=sample_type)
+
+    # THEN the input amount is None but no error is raised
+    assert input_amount is None
