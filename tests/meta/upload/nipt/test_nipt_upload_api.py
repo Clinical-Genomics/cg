@@ -1,5 +1,13 @@
+from pathlib import Path
+from unittest.mock import create_autospec
+
+from housekeeper.store.models import File
+from pytest_mock import MockerFixture
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.nipt import Q30_THRESHOLD
 from cg.meta.upload.nipt import NiptUploadAPI
+from cg.meta.upload.nipt.models import StatinaUploadFiles
 from cg.models.cg_config import CGConfig
 
 
@@ -33,3 +41,37 @@ def test_sequencing_run_failed_qc_value(
 
     # THEN the failed sequencing run should have not been passed
     assert not sequencing_run_qc_pass
+
+
+def test_get_statina_files(nipt_upload_api_context: CGConfig, mocker: MockerFixture):
+    # GIVEN a NiptUploadAPI
+    nipt_upload_api = NiptUploadAPI(nipt_upload_api_context)
+
+    # GIVEN that files exist in Housekeeper
+    housekeeper_api = create_autospec(HousekeeperAPI)
+
+    def mock_get_file(bundle_name: str, tags: list[str]):
+        if tags == ["nipt", "metrics"]:
+            return create_autospec(File, path="results/file")
+        elif tags == ["nipt", "multiqc-html"]:
+            return create_autospec(File, path="multiqc/file")
+        elif tags == ["nipt", "wisecondor"]:
+            return create_autospec(File, path="segmental_calls/file")
+        raise NotImplementedError
+
+    housekeeper_api.get_file_from_latest_version = mock_get_file
+    mocker.patch.object(Path, "exists", return_value=True)
+    nipt_upload_api.housekeeper_api = housekeeper_api
+
+    # WHEN getting the statina files
+    statina_files = nipt_upload_api.get_statina_files("case_id")
+
+    # THEN the response looks as expected
+    root_dir = nipt_upload_api_context.housekeeper.root
+    expected_response = StatinaUploadFiles(
+        data_set="novaseqx_data_set",
+        result_file=f"{root_dir}/results/file",
+        multiqc_report=f"{root_dir}/multiqc/file",
+        segmental_calls=f"{root_dir}/segmental_calls",
+    )
+    assert statina_files == expected_response

@@ -442,30 +442,6 @@ class LimsAPI(Lims, OrderHandler):
         initial_qc: bool | None = eval(initial_qc_udf) if initial_qc_udf else None
         return initial_qc
 
-    def _get_rna_input_amounts(self, sample_id: str) -> list[tuple[datetime, float]]:
-        """Return all prep input amounts used for an RNA sample in lims."""
-        step_names_udfs: dict[str] = MASTER_STEPS_UDFS["rna_prep_step"]
-        input_amounts: list[tuple[datetime, float]] = []
-        try:
-            for process_type in step_names_udfs:
-                artifacts: list[Artifact] = self.get_artifacts(
-                    samplelimsid=sample_id,
-                    process_type=process_type,
-                    type=LimsArtifactTypes.ANALYTE,
-                )
-
-                udf_key: str = step_names_udfs[process_type]
-                for artifact in artifacts:
-                    input_amounts.append(
-                        (
-                            artifact.parent_process.date_run,
-                            artifact.udf.get(udf_key),
-                        )
-                    )
-        except HTTPError as error:
-            LOG.warning(f"Sample {sample_id} not found in LIMS: {error}")
-        return input_amounts
-
     def _get_last_used_input_amount(
         self, input_amounts: list[tuple[datetime, float]]
     ) -> float | None:
@@ -475,13 +451,56 @@ class LimsAPI(Lims, OrderHandler):
             return None
         return sorted_input_amounts[0][1]
 
-    def get_latest_rna_input_amount(self, sample_id: str) -> float | None:
-        """Return the input amount used in the latest preparation of an RNA sample."""
-        input_amounts: list[tuple[datetime, float]] = self._get_rna_input_amounts(
-            sample_id=sample_id
-        )
-        input_amount: float | None = self._get_last_used_input_amount(input_amounts=input_amounts)
-        return input_amount
+    def get_input_amount(self, sample_id: str, sample_type: str) -> float | None:
+        """
+        Return the input amount used in the latest preparation of a sample.
+        Parameters:
+            sample_id: the internal ID of the sample in LIMS/StatusDB
+            sample_type: Possible valuers are "wgs", "tgs" (for both targeted and exome sequencing),
+            "revio" or "wts" (for any RNA prep).
+        """
+        try:
+            input_amounts: list[tuple[datetime, float]] = (
+                self._get_input_amounts_for_sample_and_type(
+                    sample_id=sample_id, sample_type=sample_type
+                )
+            )
+        except HTTPError as error:
+            LOG.warning(f"Sample {sample_id} not found in LIMS: {error}")
+            return None
+        return self._get_last_used_input_amount(input_amounts=input_amounts)
+
+    def _get_input_amounts_for_sample_and_type(
+        self, sample_id: str, sample_type: str
+    ) -> list[tuple[datetime, float]]:
+        """Return all input amounts for a given sample and sample type."""
+        step_names_udfs: dict[str, str] = MASTER_STEPS_UDFS["input_amounts"][sample_type]
+        input_amounts: list[tuple[datetime, float]] = []
+        for step_name, udf_key in step_names_udfs.items():
+            artifacts = self.get_artifacts(
+                samplelimsid=sample_id,
+                process_type=step_name,
+                type=LimsArtifactTypes.ANALYTE,
+            )
+            input_amounts.extend(
+                self._get_dated_input_amounts_from_artifacts(artifacts=artifacts, udf_key=udf_key)
+            )
+        return input_amounts
+
+    @staticmethod
+    def _get_dated_input_amounts_from_artifacts(
+        artifacts: list[Artifact], udf_key: str
+    ) -> list[tuple[datetime, float]]:
+        """Return a list of input amounts with their corresponding date from a list of artifacts."""
+        input_amounts: list[tuple[datetime, float]] = []
+        for artifact in artifacts:
+            input_amounts.append(
+                (
+                    artifact.parent_process.date_run,  # type: ignore
+                    artifact.udf.get(udf_key),  # type: ignore
+                )
+            )
+        return input_amounts
 
     def get_latest_artifact_for_sample(
         self,
@@ -513,13 +532,16 @@ class LimsAPI(Lims, OrderHandler):
             artifacts.append((date, artifact.id, artifact))
 
         artifacts.sort()
-        date, id, latest_artifact = artifacts[-1]
+        _, _, latest_artifact = artifacts[-1]
         return latest_artifact
 
     def get_internal_negative_control_id_from_sample_in_pool(
         self, sample_internal_id: str, pooling_step: LimsProcess
     ) -> str:
-        """Retrieve from LIMS the sample ID for the internal negative control sample present in the same pool as the given sample."""
+        """
+        Retrieve from LIMS the sample ID for the internal negative control sample
+        present in the same pool as the given sample.
+        """
         artifact: Artifact = self.get_latest_artifact_for_sample(
             process_type=pooling_step,
             sample_internal_id=sample_internal_id,

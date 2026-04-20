@@ -12,7 +12,7 @@ def test_statina_upload_files_required_field():
 
 
 def test_statina_upload_files_init():
-    upload_files = StatinaUploadFiles(result_file="result.txt")
+    upload_files = StatinaUploadFiles(data_set="data_set", result_file="result.txt")
     assert upload_files.result_file == "result.txt"
     assert upload_files.multiqc_report is None
     assert upload_files.segmental_calls is None
@@ -20,6 +20,7 @@ def test_statina_upload_files_init():
 
 def test_statina_upload_files_optional_fields():
     upload_files = StatinaUploadFiles(
+        data_set="data_set",
         result_file="result.txt",
         multiqc_report="multiqc.html",
         segmental_calls="segmental_calls.txt",
