@@ -1,5 +1,8 @@
+import pytest
+
 from cg.constants.constants import ControlOptions
 from cg.constants.priority import Priority
+from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.store.models import (
     Application,
     ApplicationVersion,
@@ -213,6 +216,112 @@ def test_application_expected_hifi_yield():
 
     # THEN the value should be calculated correctly
     assert expected_hifi_yield == 150
+
+
+@pytest.mark.parametrize(
+    "prep_category, read_type, expected_analysis_type",
+    [
+        (SeqLibraryPrepCategory.COVID.value, ReadType.SHORT_READ.value, "cov"),
+        (SeqLibraryPrepCategory.MICROBIAL.value, ReadType.SHORT_READ.value, "mic"),
+        (SeqLibraryPrepCategory.READY_MADE_LIBRARY.value, ReadType.SHORT_READ.value, "rml"),
+        (SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING.value, ReadType.SHORT_READ.value, "tgs"),
+        (SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value, ReadType.SHORT_READ.value, "wes"),
+        (SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value, ReadType.SHORT_READ.value, "wgs"),
+        (
+            SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value,
+            ReadType.SHORT_READ.value,
+            "wts",
+        ),
+    ],
+)
+def test_application_analysis_type_short_read(
+    prep_category: str, read_type: str, expected_analysis_type: str
+):
+    # GIVEN an application
+    application = Application(
+        prep_category=prep_category,
+        read_type=read_type,
+    )
+
+    # WHEN getting the analysis type
+    # THEN it returns the expected analysis type
+    assert application.analysis_type == expected_analysis_type
+
+
+@pytest.mark.parametrize(
+    "prep_category, read_type, expected_analysis_type",
+    [
+        (SeqLibraryPrepCategory.COVID.value, ReadType.LONG_READ.value, "cov-lr"),
+        (SeqLibraryPrepCategory.MICROBIAL.value, ReadType.LONG_READ.value, "mic-lr"),
+        (SeqLibraryPrepCategory.READY_MADE_LIBRARY.value, ReadType.LONG_READ.value, "rml-lr"),
+        (
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING.value,
+            ReadType.LONG_READ.value,
+            "tgs-lr",
+        ),
+        (SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value, ReadType.LONG_READ.value, "wes-lr"),
+        (SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value, ReadType.LONG_READ.value, "wgs-lr"),
+        (
+            SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value,
+            ReadType.LONG_READ.value,
+            "wts-lr",
+        ),
+    ],
+)
+def test_application_analysis_type_long_read(
+    prep_category: str, read_type: str, expected_analysis_type: str
+):
+    # GIVEN an application
+    application = Application(
+        prep_category=prep_category,
+        read_type=read_type,
+    )
+
+    # WHEN getting the analysis type
+    # THEN it returns the expected analysis type
+    assert application.analysis_type == expected_analysis_type
+
+
+@pytest.mark.parametrize(
+    "prep_category, read_type, expected_analysis_type",
+    [
+        (SeqLibraryPrepCategory.COVID.value, ReadType.OPTICAL_MAPPING.value, "cov-om"),
+        (SeqLibraryPrepCategory.MICROBIAL.value, ReadType.OPTICAL_MAPPING.value, "mic-om"),
+        (SeqLibraryPrepCategory.READY_MADE_LIBRARY.value, ReadType.OPTICAL_MAPPING.value, "rml-om"),
+        (
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING.value,
+            ReadType.OPTICAL_MAPPING.value,
+            "tgs-om",
+        ),
+        (
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value,
+            ReadType.OPTICAL_MAPPING.value,
+            "wes-om",
+        ),
+        (
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value,
+            ReadType.OPTICAL_MAPPING.value,
+            "wgs-om",
+        ),
+        (
+            SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value,
+            ReadType.OPTICAL_MAPPING.value,
+            "wts-om",
+        ),
+    ],
+)
+def test_application_analysis_type_optical_mapping(
+    prep_category: str, read_type: str, expected_analysis_type: str
+):
+    # GIVEN an application
+    application = Application(
+        prep_category=prep_category,
+        read_type=read_type,
+    )
+
+    # WHEN getting the analysis type
+    # THEN it returns the expected analysis type
+    assert application.analysis_type == expected_analysis_type
 
 
 def test_application_expected_hifi_yield_no_target_hifi_yield():

@@ -408,9 +408,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
     version = create_autospec(Version)
 
     # GIVEN an analysis tied to a case which is in turn tied to a sample and a customer
-    application: Application = create_autospec(
-        Application, analysis_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
-    )
+    application: Application = create_autospec(Application, analysis_type="wgs-lr")
     sample: Sample = create_autospec(
         Sample,
         application_version=create_autospec(ApplicationVersion, application=application),

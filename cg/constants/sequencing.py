@@ -64,7 +64,7 @@ class SequencingPlatform(StrEnum):
     OXFORD_NANOPORE = "OXFORD_NANOPORE"
 
 
-class SeqLibraryPrepCategory(StrEnum):  # TODO: should I add wgs-lr here?
+class SeqLibraryPrepCategory(StrEnum):
     COVID = "cov"
     MICROBIAL = "mic"
     READY_MADE_LIBRARY = "rml"

@@ -212,18 +212,16 @@ class Application(Base):
 
     @property
     def analysis_type(self) -> str:
-        if self.prep_category == SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
-            return SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
+        return f"{self.prep_category}{self._get_read_type_suffix(self.read_type)}"
 
-        if self.read_type==ReadType.LONG_READ.value:
-            return ReadType.LONG_READ.value.
-
-
-        return (
-            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
-            if self.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
-            else SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING.value
-        )
+    @staticmethod
+    def _get_read_type_suffix(read_type: str) -> str:
+        suffixes = {
+            ReadType.LONG_READ: "-lr",
+            ReadType.SHORT_READ: "",
+            ReadType.OPTICAL_MAPPING: "-om",
+        }
+        return suffixes[ReadType(read_type)]
 
     def to_dict(self):
         return to_dict(model_instance=self)
