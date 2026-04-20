@@ -1,9 +1,7 @@
 import datetime as dt
-from typing import Any, Generator
-from unittest.mock import Mock, PropertyMock, create_autospec, patch
+from unittest.mock import PropertyMock, create_autospec, patch
 
 import pytest
-from pytest_mock import mocker
 
 from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.models import TicketResponse
@@ -207,9 +205,7 @@ def order_with_existing_case_and_external_sample(existing_case_id: str) -> Order
         (OrderType.TOMTE, "tomte_order"),
     ],
 )
-def
-    (''
-     'test_submit_order()
+def test_submit_order(
     store_to_submit_and_validate_orders: Store,
     monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
