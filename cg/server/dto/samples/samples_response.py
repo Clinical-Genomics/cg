@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -106,8 +107,8 @@ class UnhandledSample(BaseModel):
     internal_id: str
     last_sequenced_at: datetime
     lims_status: LimsStatus
-    ticket: int
-    workflow: Workflow
+    ticket: int | Literal["unknown"]
+    workflow: Workflow | Literal["unknown"]
 
 
 class UnhandledSamplesResponse(BaseModel):
@@ -128,8 +129,8 @@ class UnhandledSamplesResponse(BaseModel):
                     internal_id=sample.internal_id,
                     last_sequenced_at=sample.last_sequenced_at,  # type: ignore
                     lims_status=sample.lims_status,
-                    ticket=sample.ticket_id_from_original_order,  # type: ignore
-                    workflow=sample.original_workflow,  # type: ignore
+                    ticket=sample.ticket_id_from_original_order or "unknown",
+                    workflow=sample.original_workflow or "unknown",
                 )
             )
         return cls(samples=unhandled_samples, total=total)

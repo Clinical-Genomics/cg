@@ -51,3 +51,33 @@ def test_unhandled_samples_response_from_samples():
         ],
         total=15,
     )
+
+
+@pytest.mark.freeze_time
+def test_unhandled_samples_response_from_samples_without_ticket_id_and_workflow():
+    # GIVEN a sample with no original workflow nor ticket id
+    sample_1 = create_autospec(
+        Sample,
+        internal_id="sample_1",
+        last_sequenced_at=datetime.now(),
+        lims_status=LimsStatus.TOP_UP,
+        original_workflow=None,
+        ticket_id_from_original_order=None,
+    )
+
+    # WHEN getting the unhandled samples response
+    unhandled_samples_response = UnhandledSamplesResponse.from_samples(samples=[sample_1], total=10)
+
+    # THEN the workflow and ticket should be "unknown"
+    assert unhandled_samples_response == UnhandledSamplesResponse(
+        samples=[
+            UnhandledSample(
+                internal_id="sample_1",
+                last_sequenced_at=datetime.now(),
+                lims_status=LimsStatus.TOP_UP,
+                workflow="unknown",
+                ticket="unknown",
+            ),
+        ],
+        total=10,
+    )

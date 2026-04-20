@@ -147,9 +147,11 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
 
 
 def test_get_unhandled_samples_invalid_input(client: FlaskClient):
-
+    # GIVEN an unparsable page_size
+    # WHEN querying the unhandles samples endpoint
     response = client.get(
         path="/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=sjutton",
     )
 
+    # THEN we should get a bad request response
     assert response.status_code == HTTPStatus.BAD_REQUEST
