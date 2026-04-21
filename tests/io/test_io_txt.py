@@ -80,7 +80,9 @@ def test_write_txt_with_newlines(mocker: MockerFixture):
     write_txt_with_newlines(content=strings, file_path=Path("file.txt"))
 
     # THEN we write the content of the file as expected
-    mock_file().write.assert_called_once_with("Line 1\nLine 2\nLine 3")
+    # Note the trailing newline, needed since this e.g. makes panel files that are processed
+    # by other applications downstream, not only read by humans.
+    mock_file().write.assert_called_once_with("Line 1\nLine 2\nLine 3\n")
 
 
 def test_concat_txt(txt_file_path: Path, txt_file_path_2: Path):
