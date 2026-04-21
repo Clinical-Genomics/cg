@@ -40,6 +40,7 @@ from cg.constants.constants import (
 )
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.lims import LimsStatus
 from cg.constants.priority import SlurmQos
 from cg.constants.subject import Sex
 from cg.io.controller import ReadFile, WriteFile
@@ -4067,6 +4068,7 @@ def store_with_case_and_sample_with_reads(
             customer_id=case.customer_id,
             internal_id=sample_internal_id,
             reads=100_000_000,
+            lims_status=LimsStatus.DONE,
         )
         sample: Sample = store.get_sample_by_internal_id(internal_id=sample_internal_id)
         helpers.add_relationship(store=store, case=case, sample=sample, should_deliver_sample=False)
