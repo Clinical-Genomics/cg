@@ -7,6 +7,7 @@ have always been validated before calling the function.
 from datetime import datetime
 from unittest.mock import Mock, create_autospec
 
+import pytest
 from pytest_mock import MockerFixture
 
 from cg.constants import DataDelivery, Priority, Workflow
@@ -266,10 +267,12 @@ def test_existing_samples_should_not_be_delivered_again(mocker: MockerFixture):
     )
 
 
-# TODO: Parametrise this test to check non-external applications give lims status prending
-def test_create_external_db_sample():
+@pytest.mark.parametrize(
+    "is_external, expected_lims_status", [(True, LimsStatus.DONE), (False, LimsStatus.PENDING)]
+)
+def test_create_external_db_sample(is_external: bool, expected_lims_status: LimsStatus):
     # GIVEN a store containing an external application
-    application: Application = create_autospec(Application, is_external=True)
+    application: Application = create_autospec(Application, is_external=is_external)
     application_version: ApplicationVersion = create_autospec(
         ApplicationVersion, application=application
     )
@@ -281,7 +284,7 @@ def test_create_external_db_sample():
 
     # GIVEN an order sample
     rna_fusion_sample = RNAFusionSample(
-        application="external_app",
+        application="app",
         container=ContainerEnum.tube,
         name="sample",
         sex=SexEnum.female,
@@ -308,4 +311,4 @@ def test_create_external_db_sample():
     )
 
     # THEN the lims status of the sample is done
-    assert status_db.as_mock.add_sample.call_args[1]["lims_status"] == LimsStatus.DONE
+    assert status_db.as_mock.add_sample.call_args[1]["lims_status"] == expected_lims_status
