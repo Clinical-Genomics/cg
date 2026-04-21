@@ -15,6 +15,7 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.constants import Priority, Workflow
 from cg.constants.constants import SexOptions
 from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
+from cg.constants.scout import ScoutAnalysisType
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
@@ -408,7 +409,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
     version = create_autospec(Version)
 
     # GIVEN an analysis tied to a case which is in turn tied to a sample and a customer
-    application: Application = create_autospec(Application, analysis_type="wgs-lr")
+    application: Application = create_autospec(Application, analysis_type=ScoutAnalysisType.WGS_LR)
     sample: Sample = create_autospec(
         Sample,
         application_version=create_autospec(ApplicationVersion, application=application),

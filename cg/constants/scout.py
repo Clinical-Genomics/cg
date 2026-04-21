@@ -191,3 +191,16 @@ RANK_MODEL_THRESHOLD = 5
 NALLO_RANK_MODEL_THRESHOLD = 8
 NALLO_RANK_MODEL_VERSION_SNV = "1.0"
 NALLO_RANK_MODEL_VERSION_SV = "1.0"
+
+
+class ScoutAnalysisType(StrEnum):
+    EXTERNAL = "external"
+    MIXED = "mixed"
+    PANEL = "panel"
+    PANEL_LR = "panel-lr"
+    PANEL_UMI = "panel-umi"
+    UNKNOWN = "unknown"
+    WES = "wes"
+    WGS = "wgs"
+    WGS_LR = "wgs-lr"
+    WTS = "wts"
