@@ -266,6 +266,7 @@ def test_existing_samples_should_not_be_delivered_again(mocker: MockerFixture):
     )
 
 
+# TODO: Parametrise this test to check non-external applications give lims status prending
 def test_create_external_db_sample():
     # GIVEN a store containing an external application
     application: Application = create_autospec(Application, is_external=True)
