@@ -4,15 +4,24 @@ The function store_order_data_in_status_db is never expected to fail, as its inp
 have always been validated before calling the function.
 """
 
+from unittest.mock import Mock, create_autospec
+
+import pytest
+from typed_mock import TypedMock, create_typed_mock
+
 from cg.constants import DataDelivery
 from cg.constants.constants import Workflow
-from cg.models.orders.sample_base import ControlEnum
+from cg.constants.lims import LimsStatus
+from cg.models.orders.sample_base import ContainerEnum, ControlEnum, PriorityEnum
+from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.implementations.microbial_order_service import (
     StoreMicrobialOrderService,
 )
+from cg.services.orders.validation.constants import ElutionBuffer
 from cg.services.orders.validation.order_types.microsalt.models.order import MicrosaltOrder
+from cg.services.orders.validation.order_types.microsalt.models.sample import MicrosaltSample
 from cg.services.orders.validation.order_types.mutant.models.order import MutantOrder
-from cg.store.models import Case, Organism, Sample
+from cg.store.models import Application, ApplicationVersion, Case, Customer, Organism, Sample
 from cg.store.store import Store
 
 
@@ -111,3 +120,47 @@ def test_store_mutant_order_data_control_has_stored_value(
     assert positive.control == ControlEnum.positive
     negative: Sample = store_to_submit_and_validate_orders.get_sample_by_name("control-negative")
     assert negative.control == ControlEnum.negative
+
+
+@pytest.mark.parametrize(
+    "is_external, expected_lims_status", [(True, LimsStatus.DONE), (False, LimsStatus.PENDING)]
+)
+def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_status: LimsStatus):
+    # GIVEN a store containing an external application
+    application: Application = create_autospec(Application, is_external=is_external)
+    application_version: ApplicationVersion = create_autospec(
+        ApplicationVersion, application=application
+    )
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_current_application_version_by_tag = Mock(
+        return_value=application_version
+    )
+    customer: Customer = create_autospec(Customer)
+
+    # GIVEN an order sample
+    fastq_sample = MicrosaltSample(
+        application="app",
+        container=ContainerEnum.tube,
+        elution_buffer=ElutionBuffer.OTHER,
+        organism="Escherichia coli",
+        priority=PriorityEnum.standard,
+        name="sample",
+        reference_genome="ref_genome",
+    )
+
+    # GIVEN a store case order service
+    store_order_service = StoreMicrobialOrderService(
+        status_db=status_db.as_type, lims_service=create_autospec(OrderLimsService)
+    )
+
+    # WHEN creating a db sample with the application
+    store_order_service._create_db_sample(
+        customer=customer,
+        order_name="order",
+        organism=create_autospec(Organism),
+        sample=fastq_sample,
+        ticket_id=1234567,
+    )
+
+    # THEN the sample should be created with LimsStatus DONE
+    assert status_db.as_mock.add_sample.call_args[1]["lims_status"] == expected_lims_status
