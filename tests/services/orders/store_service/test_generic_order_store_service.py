@@ -4,6 +4,7 @@ The function store_order_data_in_status_db is never expected to fail, as its inp
 have always been validated before calling the function.
 """
 
+from datetime import datetime
 from unittest.mock import Mock, create_autospec
 
 from pytest_mock import MockerFixture
@@ -26,7 +27,7 @@ from cg.services.orders.validation.order_types.rna_fusion.models.case import RNA
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
 from cg.services.orders.validation.order_types.rna_fusion.models.sample import RNAFusionSample
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
-from cg.store.models import Case, Sample
+from cg.store.models import Application, ApplicationVersion, Case, Customer, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -262,3 +263,47 @@ def test_existing_samples_should_not_be_delivered_again(mocker: MockerFixture):
         mother=None,
         should_deliver_sample=False,
     )
+
+
+def test_create_external_db_sample():
+    # GIVEN a store containing an external application
+    application: Application = create_autospec(Application, is_external=True)
+    application_version: ApplicationVersion = create_autospec(
+        ApplicationVersion, application=application
+    )
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_current_application_version_by_tag = Mock(
+        return_value=application_version
+    )
+    customer: Customer = create_autospec(Customer)
+
+    # GIVEN an order sample
+    rna_fusion_sample = RNAFusionSample(
+        application="external_app",
+        container=ContainerEnum.tube,
+        name="sample",
+        sex=SexEnum.female,
+        source="blood",
+        subject_id="father",
+    )
+
+    # GIVEN order case
+    case = create_autospec(RNAFusionCase, priority=Priority.standard)
+
+    # GIVEN a store case order service
+    store_order_service = StoreCaseOrderService(
+        status_db=status_db.as_type, lims_service=create_autospec(OrderLimsService)
+    )
+
+    # WHEN creating a database sample with an external application
+    store_order_service._create_db_sample(
+        case=case,
+        sample=rna_fusion_sample,
+        customer=customer,
+        order_name="any_old_string",
+        ordered=datetime.now(),
+        ticket="1234567",
+    )
+
+    # THEN the lims status of the sample is done
+    status_db.as_mock.add_sample.assert_called_once_with()
