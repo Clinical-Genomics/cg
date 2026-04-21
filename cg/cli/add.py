@@ -177,6 +177,7 @@ def add_user(context: CGConfig, admin: bool, customer_id: str, email: str, name:
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_obj
+# TODO: Add flag lims-status that defaults to done.
 def add_sample(
     context: CGConfig,
     lims_id: str | None,

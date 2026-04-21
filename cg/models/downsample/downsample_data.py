@@ -88,21 +88,23 @@ class DownsampleData:
         The new sample contains the original sample internal id and meta data.usDB
         """
         application_version: ApplicationVersion = self.get_application_version()
-        downsampled_sample: Sample = self.status_db.add_sample(
-            name=self.downsampled_sample_name,
-            internal_id=self.downsampled_sample_name,
-            sex=self.original_sample.sex,
-            order=self.original_sample.order,
-            reads=multiply_by_million(self.number_of_reads),
-            downsampled_to=multiply_by_million(self.number_of_reads),
-            from_sample=self.original_sample.internal_id,
-            tumour=self.original_sample.is_tumour,
-            priority=Priority.standard,
-            customer=self.original_sample.customer,
-            application_version=application_version,
-            received=self.original_sample.received_at,
-            prepared_at=self.original_sample.prepared_at,
-            last_sequenced_at=self.original_sample.last_sequenced_at,
+        downsampled_sample: Sample = (
+            self.status_db.add_sample(  # TODO: add same lims-status as the original sample has
+                name=self.downsampled_sample_name,
+                internal_id=self.downsampled_sample_name,
+                sex=self.original_sample.sex,
+                order=self.original_sample.order,
+                reads=multiply_by_million(self.number_of_reads),
+                downsampled_to=multiply_by_million(self.number_of_reads),
+                from_sample=self.original_sample.internal_id,
+                tumour=self.original_sample.is_tumour,
+                priority=Priority.standard,
+                customer=self.original_sample.customer,
+                application_version=application_version,
+                received=self.original_sample.received_at,
+                prepared_at=self.original_sample.prepared_at,
+                last_sequenced_at=self.original_sample.last_sequenced_at,
+            )
         )
         return downsampled_sample
 
