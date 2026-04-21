@@ -10,6 +10,7 @@ from unittest.mock import Mock, create_autospec
 from pytest_mock import MockerFixture
 
 from cg.constants import DataDelivery, Priority, Workflow
+from cg.constants.lims import LimsStatus
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum
 from cg.services.orders.lims_service.service import OrderLimsService
@@ -306,4 +307,4 @@ def test_create_external_db_sample():
     )
 
     # THEN the lims status of the sample is done
-    status_db.as_mock.add_sample.assert_called_once_with()
+    assert status_db.as_mock.add_sample.call_args[1]["lims_status"] == LimsStatus.DONE
