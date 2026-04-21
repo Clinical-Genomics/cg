@@ -1,7 +1,6 @@
 from unittest.mock import Mock, create_autospec
 
 import pytest
-from typed_mock import TypedMock, create_typed_mock
 
 from cg.constants import DataDelivery
 from cg.constants.lims import LimsStatus
@@ -19,6 +18,7 @@ from cg.services.orders.validation.order_types.microbial_fastq.models.sample imp
 )
 from cg.store.models import Application, ApplicationVersion, Case, Customer, Sample
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_store_samples(

@@ -1,7 +1,6 @@
 from unittest.mock import Mock, create_autospec
 
 import pytest
-from typed_mock import TypedMock, create_typed_mock
 
 from cg.constants import DataDelivery, Workflow
 from cg.constants.lims import LimsStatus
@@ -12,6 +11,7 @@ from cg.services.orders.validation.order_types.pacbio_long_read.models.order imp
 from cg.services.orders.validation.order_types.pacbio_long_read.models.sample import PacbioSample
 from cg.store.models import Application, ApplicationVersion, Case, Customer, Order, Sample
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_store_pacbio_order_data_in_status_db(

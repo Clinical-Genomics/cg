@@ -7,7 +7,6 @@ have always been validated before calling the function.
 from unittest.mock import Mock, create_autospec
 
 import pytest
-from typed_mock import TypedMock, create_typed_mock
 
 from cg.constants.lims import LimsStatus
 from cg.models.orders.sample_base import ContainerEnum, PriorityEnum
@@ -20,6 +19,7 @@ from cg.services.orders.validation.order_types.metagenome.models.order import Me
 from cg.services.orders.validation.order_types.metagenome.models.sample import MetagenomeSample
 from cg.store.models import Application, ApplicationVersion, Case, Customer, Sample
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_store_metagenome_order_data_in_status_db(

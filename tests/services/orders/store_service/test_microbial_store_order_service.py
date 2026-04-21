@@ -7,7 +7,6 @@ have always been validated before calling the function.
 from unittest.mock import Mock, create_autospec
 
 import pytest
-from typed_mock import TypedMock, create_typed_mock
 
 from cg.constants import DataDelivery
 from cg.constants.constants import Workflow
@@ -23,6 +22,7 @@ from cg.services.orders.validation.order_types.microsalt.models.sample import Mi
 from cg.services.orders.validation.order_types.mutant.models.order import MutantOrder
 from cg.store.models import Application, ApplicationVersion, Case, Customer, Organism, Sample
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_store_microsalt_order_data_in_status_db(

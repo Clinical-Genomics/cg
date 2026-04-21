@@ -7,7 +7,6 @@ have always been validated before calling the function.
 from unittest.mock import Mock, create_autospec
 
 import pytest
-from typed_mock import TypedMock, create_typed_mock
 
 from cg.constants import DataDelivery, Workflow
 from cg.constants.lims import LimsStatus
@@ -30,6 +29,7 @@ from cg.store.models import (
 )
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_store_order_data_in_status_db(
