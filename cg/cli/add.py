@@ -315,10 +315,12 @@ def add_case(
 @click.option("-f", "--father-id", help="Sample ID for father of sample")
 @click.option("-s", "--status", type=EnumChoice(StatusOptions), required=True)
 @click.option(
-    "--should-deliver-sample",
-    type=bool,
+    "-d/-nd",
+    "--delivery/--no-delivery",
+    "should_deliver_sample",
+    is_flag=True,
     required=True,
-    help="Set the value for should_deliver_sample. Can be True or False.",
+    help="Toggle whether case delivery should trigger sample delivery.",
 )
 @click.argument("case-id")
 @click.argument("sample-id")
