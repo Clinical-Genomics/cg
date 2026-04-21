@@ -4,12 +4,30 @@ The function store_order_data_in_status_db is never expected to fail, as its inp
 have always been validated before calling the function.
 """
 
+from unittest.mock import Mock, create_autospec
+
+import pytest
+from typed_mock import TypedMock, create_typed_mock
+
 from cg.constants import DataDelivery, Workflow
+from cg.constants.lims import LimsStatus
 from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.models.orders.sample_base import ContainerEnum, PriorityEnum, SexEnum
+from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.services.orders.storing.implementations.fastq_order_service import StoreFastqOrderService
+from cg.services.orders.validation.constants import ElutionBuffer
 from cg.services.orders.validation.order_types.fastq.models.order import FastqOrder
-from cg.store.models import Application, Case, CaseSample, Order, Sample
+from cg.services.orders.validation.order_types.fastq.models.sample import FastqSample
+from cg.store.models import (
+    Application,
+    ApplicationVersion,
+    Case,
+    CaseSample,
+    Customer,
+    Order,
+    Sample,
+)
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -152,3 +170,44 @@ def test_store_fastq_samples_non_wgs_no_maf_case(
 
     # THEN the data analysis for the case should be RAW_DATA
     assert new_samples[0].links[0].case.data_analysis == Workflow.RAW_DATA
+
+
+@pytest.mark.parametrize(
+    "is_external, expected_lims_status", [(True, LimsStatus.DONE), (False, LimsStatus.PENDING)]
+)
+def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_status: LimsStatus):
+    # GIVEN a store containing an external application
+    application: Application = create_autospec(Application, is_external=is_external)
+    application_version: ApplicationVersion = create_autospec(
+        ApplicationVersion, application=application
+    )
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_current_application_version_by_tag = Mock(
+        return_value=application_version
+    )
+    customer: Customer = create_autospec(Customer)
+
+    # GIVEN an order sample
+    fastq_sample = FastqSample(
+        application="app",
+        container=ContainerEnum.tube,
+        elution_buffer=ElutionBuffer.OTHER,
+        priority=PriorityEnum.standard,
+        name="sample",
+        sex=SexEnum.female,
+        source="blood",
+        subject_id="father",
+    )
+
+    # GIVEN a store case order service
+    store_order_service = StoreFastqOrderService(
+        status_db=status_db.as_type, lims_service=create_autospec(OrderLimsService)
+    )
+
+    # WHEN creating a db sample with the application
+    store_order_service._create_db_sample(
+        sample=fastq_sample, order_name="order", customer=customer, ticket_id="1234567"
+    )
+
+    # THEN the sample should be created with LimsStatus DONE
+    assert status_db.as_mock.add_sample.call_args[1]["lims_status"] == expected_lims_status

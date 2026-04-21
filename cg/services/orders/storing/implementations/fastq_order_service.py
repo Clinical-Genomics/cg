@@ -3,6 +3,7 @@ from datetime import datetime
 
 from cg.constants import DataDelivery, GenePanelMasterList, Priority, Workflow
 from cg.constants.constants import CustomerId
+from cg.constants.lims import LimsStatus
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
@@ -112,6 +113,9 @@ class StoreFastqOrderService(StoreOrderService):
         application_version: ApplicationVersion = (
             self.status_db.get_current_application_version_by_tag(tag=sample.application)
         )
+        lims_status: LimsStatus = (
+            LimsStatus.DONE if application_version.application.is_external else LimsStatus.PENDING
+        )
         return self.status_db.add_sample(
             name=sample.name,
             sex=sample.sex or SexEnum.unknown,
@@ -126,6 +130,7 @@ class StoreFastqOrderService(StoreOrderService):
             customer=customer,
             application_version=application_version,
             order=order_name,
+            lims_status=lims_status,
         )
 
     def _create_maf_case(self, db_sample: Sample, db_order: Order, db_case: Case) -> None:

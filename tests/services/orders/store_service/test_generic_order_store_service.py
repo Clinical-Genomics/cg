@@ -274,7 +274,7 @@ def test_existing_samples_should_not_be_delivered_again(mocker: MockerFixture):
 @pytest.mark.parametrize(
     "is_external, expected_lims_status", [(True, LimsStatus.DONE), (False, LimsStatus.PENDING)]
 )
-def test_create_external_db_sample(is_external: bool, expected_lims_status: LimsStatus):
+def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_status: LimsStatus):
     # GIVEN a store containing an external application
     application: Application = create_autospec(Application, is_external=is_external)
     application_version: ApplicationVersion = create_autospec(
