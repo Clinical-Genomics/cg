@@ -1906,11 +1906,13 @@ class ReadHandler(BaseHandler):
         """
         return (
             self._get_query(table=Sample)
-            .filter_by(
-                lims_status=lims_status, from_sample=None, is_cancelled=False, delivered_at=None
-            )
+            .join(Customer, Sample.customer_id == Customer.id)
             .filter(
-                Sample.last_sequenced_at.is_not(None),
+                Sample.delivered_at.is_(None),
+                Sample.from_sample.is_(None),
+                Sample.is_cancelled.is_(False),
+                Sample.last_sequenced_at.isnot(None),
+                Sample.lims_status == lims_status,
                 Customer.internal_id != "cust000",
                 Customer.internal_id.not_like("cust9%"),
             )
