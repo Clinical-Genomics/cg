@@ -211,6 +211,10 @@ def test_store_rnafusion_sample_is_set_to_tumour(store: Store, mocker: MockerFix
     )
 
     # GIVEN that persisting to StatusDB and LIMS is successful
+    application_version = ApplicationVersion(application=Application())
+    mocker.patch.object(
+        store, "get_current_application_version_by_tag", return_value=application_version
+    )
     mocker.patch.object(store, "commit_to_store")
     lims_service: OrderLimsService = create_autospec(OrderLimsService)
     lims_service.process_lims = Mock(

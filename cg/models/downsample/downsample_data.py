@@ -88,24 +88,22 @@ class DownsampleData:
         The new sample contains the original sample internal id and meta data.usDB
         """
         application_version: ApplicationVersion = self.get_application_version()
-        downsampled_sample: Sample = (
-            self.status_db.add_sample(  # TODO: add same lims-status as the original sample has
-                application_version=application_version,
-                customer=self.original_sample.customer,
-                downsampled_to=multiply_by_million(self.number_of_reads),
-                from_sample=self.original_sample.internal_id,
-                internal_id=self.downsampled_sample_name,
-                last_sequenced_at=self.original_sample.last_sequenced_at,
-                lims_status=self.original_sample.lims_status,
-                name=self.downsampled_sample_name,
-                order=self.original_sample.order,
-                prepared_at=self.original_sample.prepared_at,
-                priority=Priority.standard,
-                reads=multiply_by_million(self.number_of_reads),
-                received=self.original_sample.received_at,
-                sex=self.original_sample.sex,
-                tumour=self.original_sample.is_tumour,
-            )
+        downsampled_sample: Sample = self.status_db.add_sample(
+            application_version=application_version,
+            customer=self.original_sample.customer,
+            downsampled_to=multiply_by_million(self.number_of_reads),
+            from_sample=self.original_sample.internal_id,
+            internal_id=self.downsampled_sample_name,
+            last_sequenced_at=self.original_sample.last_sequenced_at,
+            lims_status=self.original_sample.lims_status,
+            name=self.downsampled_sample_name,
+            order=self.original_sample.order,
+            prepared_at=self.original_sample.prepared_at,
+            priority=Priority.standard,
+            reads=multiply_by_million(self.number_of_reads),
+            received=self.original_sample.received_at,
+            sex=self.original_sample.sex,
+            tumour=self.original_sample.is_tumour,
         )
         return downsampled_sample
 
