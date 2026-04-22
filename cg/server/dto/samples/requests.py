@@ -25,3 +25,9 @@ class SampleUpdate(BaseModel):
 
 class SamplesUpdateRequest(BaseModel):
     samples: list[SampleUpdate]
+
+
+class UnhandledSamplesRequest(BaseModel):
+    lims_status: LimsStatus
+    page: int
+    page_size: int
