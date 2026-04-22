@@ -140,7 +140,7 @@ class Application(Base):
         types.Enum(*(category.value for category in SeqLibraryPrepCategory))
     )
     read_type: Mapped[ReadType] = mapped_column(
-        types.Enum(*(read_types for read_types in ReadType))
+        types.Enum(*(read_types.value for read_types in ReadType))
     )
     is_external: Mapped[bool] = mapped_column(default=False)
     description: Mapped[Str256]

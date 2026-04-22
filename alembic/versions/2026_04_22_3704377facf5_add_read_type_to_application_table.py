@@ -1,8 +1,8 @@
-"""add_seq_technique_application_table
+"""add_read_type_to_application_table
 
-Revision ID: 2099ebbacdeb
-Revises: 2c9a49ce5512
-Create Date: 2026-03-20 14:39:55.100307
+Revision ID: 3704377facf5
+Revises: 96667267134e
+Create Date: 2026-04-22 20:54:29.709306
 
 """
 
@@ -11,8 +11,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "2099ebbacdeb"
-down_revision = "ea37e15dd9c6"
+revision = "3704377facf5"
+down_revision = "96667267134e"
 branch_labels = None
 depends_on = None
 
