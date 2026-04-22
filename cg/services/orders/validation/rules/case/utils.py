@@ -137,14 +137,19 @@ def get_sample_sources(case: TomteCase | ExistingCase, lims_api: LimsAPI, store:
     if isinstance(case, ExistingCase):
         return _get_existing_case_sources(case=case, lims_api=lims_api, store=store)
     else:
-        return _get_new_case_sources(case=case, lims_api=lims_api)
+        return _get_new_case_sources(case=case, lims_api=lims_api, store=store)
 
 
-def _get_new_case_sources(case: TomteCase, lims_api: LimsAPI) -> set:
+def _get_new_case_sources(case: TomteCase, lims_api: LimsAPI, store: Store) -> set:
     sources = set()
     for sample in case.samples:
         if isinstance(sample, ExistingSample):
-            sources.add(lims_api.get_source(sample.internal_id))
+            if db_sample := store.get_sample_by_internal_id(
+                sample.internal_id
+            ):  # If no sample is found, an error should be raised elsewhere
+                sources.add(
+                    lims_api.get_source(db_sample.from_sample or sample.internal_id)
+                )  # Downsampled samples are not in LIMS so we should get the source from the original sample
         else:
             sources.add(sample.source_comment if sample.source == "other" else sample.source)
     return sources
@@ -156,5 +161,5 @@ def _get_existing_case_sources(case: ExistingCase, lims_api: LimsAPI, store: Sto
         return set()
     sources = set()
     for sample in db_case.samples:
-        sources.add(lims_api.get_source(sample.internal_id))
+        sources.add(lims_api.get_source(sample.from_sample or sample.internal_id))
     return sources

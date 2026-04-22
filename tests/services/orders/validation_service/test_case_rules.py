@@ -344,6 +344,11 @@ def test_validate_samples_have_same_source():
         project_type=OrderType.TOMTE,
     )
     status_db: Store = create_autospec(Store)
+    status_db.get_sample_by_internal_id = Mock(
+        return_value=create_autospec(
+            Sample, internal_id=existing_sample.internal_id, from_sample=None
+        )
+    )
     lims_api: TypedMock[LimsAPI] = create_typed_mock(LimsAPI)
     lims_api.as_type.get_source = Mock(return_value="fibroblast")
 
@@ -358,3 +363,35 @@ def test_validate_samples_have_same_source():
 
     # THEN LIMS should have been called to fetch the existing sample's source
     lims_api.as_mock.get_source.assert_called_once_with("existing_sample")
+
+
+def test_validate_samples_have_same_source_downsampled_sample():
+    # GIVEN a Tomte order containing a case with an existing downsampled sample
+    existing_sample = ExistingSample(internal_id="existing_sample")
+    case = TomteCase(name="tomte-case", panels=["OMIM-AUTO"], samples=[existing_sample])
+    order = TomteOrder(
+        cases=[case],
+        customer="cust000",
+        delivery_type=TomteDeliveryType.ANALYSIS_SCOUT,
+        name="tomte-order",
+        project_type=OrderType.TOMTE,
+    )
+    status_db: Store = create_autospec(Store)
+    status_db.get_sample_by_internal_id = Mock(
+        return_value=create_autospec(
+            Sample, internal_id=existing_sample.internal_id, from_sample="original_sample"
+        )
+    )
+    lims_api: TypedMock[LimsAPI] = create_typed_mock(LimsAPI)
+    lims_api.as_type.get_source = Mock(return_value="fibroblast")
+
+    # WHEN validating that all the samples have the same tissue type within each case of the order
+    errors = validate_samples_have_same_source(
+        order=order, store=status_db, lims_api=lims_api.as_type
+    )
+
+    # THEN no error should be returned
+    assert not errors
+
+    # THEN LIMS should have been called to fetch the original sample's source
+    lims_api.as_mock.get_source.assert_called_once_with("original_sample")
