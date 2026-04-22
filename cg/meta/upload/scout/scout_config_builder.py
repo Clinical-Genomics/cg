@@ -11,6 +11,8 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.constants import DataDelivery, Priority
 from cg.constants.constants import Workflow
+from cg.constants.scout import ScoutAnalysisType
+from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.constants.subject import SCOUT_PRIORITIZED_STATUS, RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.models.scout.scout_load_config import (
@@ -20,7 +22,36 @@ from cg.models.scout.scout_load_config import (
     ScoutNalloIndividual,
     ScoutRarediseaseIndividual,
 )
-from cg.store.models import Analysis, Case, CaseSample, Sample
+from cg.store.models import Analysis, Application, Case, CaseSample, Sample
+
+MAPP_PREP_READ_TO_SCOUT_ANALYSIS_TYPE: dict[
+    tuple[SeqLibraryPrepCategory, ReadType], ScoutAnalysisType
+] = {
+    (
+        SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        ReadType.SHORT_READ,
+    ): ScoutAnalysisType.PANEL.value,
+    (
+        SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        ReadType.LONG_READ,
+    ): ScoutAnalysisType.PANEL_LR.value,
+    (
+        SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+        ReadType.SHORT_READ,
+    ): ScoutAnalysisType.WES.value,
+    (
+        SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        ReadType.SHORT_READ,
+    ): ScoutAnalysisType.WGS.value,
+    (
+        SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        ReadType.LONG_READ,
+    ): ScoutAnalysisType.WGS_LR.value,
+    (
+        SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
+        ReadType.SHORT_READ,
+    ): ScoutAnalysisType.WTS.value,
+}
 
 LOG = logging.getLogger(__name__)
 
@@ -135,11 +166,12 @@ class ScoutConfigBuilder:
         sample_id: str = case_sample.sample.internal_id  # TODO: Add logic for lr here.
         LOG.info(f"Building sample {sample_id}")
         lims_sample: dict[str, Any] = self.lims_api.sample(sample_id)
+        application: Application = case_sample.sample.application_version.application
         config_sample.sample_id = sample_id
         config_sample.sex = case_sample.sample.sex
         config_sample.phenotype = case_sample.status
-        config_sample.analysis_type = (
-            case_sample.sample.application_version.application.analysis_type
+        config_sample.analysis_type = self._get_scout_analysis_type(
+            read_type=application.read_type, prep_category=application.prep_category
         )
         config_sample.sample_name = case_sample.sample.name
         config_sample.tissue_type = lims_sample.get("source", "unknown")
@@ -154,6 +186,12 @@ class ScoutConfigBuilder:
             if case_sample.mother
             else RelationshipStatus.HAS_NO_PARENT
         )
+
+    @staticmethod
+    def _get_scout_analysis_type(
+        prep_category: SeqLibraryPrepCategory, read_type: ReadType
+    ) -> ScoutAnalysisType | None:
+        return MAPP_PREP_READ_TO_SCOUT_ANALYSIS_TYPE.get((prep_category, read_type))
 
     def add_common_sample_files(
         self,
