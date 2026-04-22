@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
 from pytest_mock import MockerFixture
@@ -5,8 +6,8 @@ from pytest_mock import MockerFixture
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.clients.chanjo2.models import CoverageMetricsChanjo1
-from cg.constants import SexOptions
-from cg.constants.constants import GenomeBuild
+from cg.constants import SexOptions, Workflow
+from cg.constants.constants import GenomeBuild, GenomeVersion
 from cg.meta.workflow import raredisease as raredisease_analysis_api
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
@@ -86,13 +87,49 @@ def test_get_sample_coverage(raredisease_context: CGConfig, mocker: MockerFixtur
 
     # THEN chanjo was configured with the correct config
     mock_chanjo_factory.assert_called_once_with(
-        config=raredisease_context, genome_build=GenomeBuild.hg19
+        config=raredisease_context, genome_build=GenomeBuild.hg38
     )
 
     # THEN the sample coverage should have been called with the right information
     get_sample_coverage_spy.assert_called_once_with(
         chanjo_api=chanjo_api, gene_ids=gene_ids, sample_id="internal_id"
     )
+
+
+def test_get_genome_build():
+    # GIVEN the RarediseaseAnalysisAPI
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        raredisease=create_autospec(
+            RarediseaseConfig,
+            conda_binary="conda/bin",
+            conda_env="conda/env",
+            config="here/is/my/config",
+            pipeline_deliverables="pipeline_deliverables.yaml",
+            params="here/is/my/params/file",
+            platform="platform",
+            profile="profile",
+            resources="resources",
+            revision="1.0.0",
+            root="/I/am/Root",
+            slurm=create_autospec(SlurmConfig, account="account", mail_user="user"),
+            tower_workflow=Workflow.RAREDISEASE,
+            workflow_bin_path=Path("I", "am", "workflow", "bin", "path"),
+        ),
+        chanjo_38=ChanjoConfig(binary_path="binary/path", config_path="config/path"),
+        data_flow=Mock(),
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+        ),
+        tower_binary_path="tower/path",
+    )
+
+    analysis_api = RarediseaseAnalysisAPI(config=cg_config)
+
+    # WHEN getting the genome build
+    # THEN it is hg38
+    assert analysis_api.get_genome_build(case_id="ChevyCase") == GenomeVersion.HG38
 
 
 def test_get_qc_conditions_for_workflow():
@@ -107,7 +144,9 @@ def test_get_qc_conditions_for_workflow():
                 RunInstruments,
                 illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some/path"),
             ),
-            chanjo=create_autospec(ChanjoConfig, config_path="some/path", binary_path="some/path"),
+            chanjo_38=create_autospec(
+                ChanjoConfig, config_path="some/path", binary_path="some/path"
+            ),
             raredisease=create_autospec(
                 RarediseaseConfig,
                 conda_binary="conda/bin",

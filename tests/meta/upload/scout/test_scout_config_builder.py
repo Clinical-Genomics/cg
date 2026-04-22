@@ -16,6 +16,7 @@ from cg.constants import Priority, Workflow
 from cg.constants.constants import SexOptions
 from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
 from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.meta.upload.scout import raredisease_config_builder as raredisease_config_builder_module
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
@@ -561,8 +562,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     reviewer_alignment_index: File = create_autospec(File, full_path="reviewer_alignment_index.vcf")
     reviewer_vcf: File = create_autospec(File, full_path="reviewer_vcf.vcf")
     reviewer_catalog: File = create_autospec(File, full_path="reviewer_catalog.vcf")
-    manifest: File = create_autospec(
-        File, full_path="tests/fixtures/analysis/raredisease/manifest.json"
+    params: File = create_autospec(
+        File, full_path="tests/fixtures/analysis/raredisease/params.yaml"
     )
 
     # GIVEN files exist in Housekeeper for each set of RAREDISEASE_CASE_TAGS and RAREDISEASE_SAMPLE_TAGS
@@ -626,8 +627,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return reviewer_catalog
         if tags == {"mitodel", "sample_id"}:
             return mitodel_file
-        if tags == {"manifest"}:
-            return manifest
+        if tags == {"nextflow-params"}:
+            return params
         raise Exception
 
     mocker.patch.object(
@@ -664,6 +665,16 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     case.name = "case_name"
     analysis: Analysis = create_autospec(Analysis, case=case, completed_at=datetime.now())
 
+    # GIVEN that the params file can be read
+    mocker.patch.object(
+        raredisease_config_builder_module,
+        "read_yaml",
+        return_value={
+            "score_config_snv": "/path/to/some/snv_file.-v1.0-.ini",
+            "score_config_sv": "/path/to/some/sv_file.-v2.0-.ini",
+        },
+    )
+
     # WHEN building the Raredisease Scout load config
     load_config: RarediseaseLoadConfig = raredisease_config_builder.build_load_config(
         hk_version=version, analysis=analysis
@@ -681,10 +692,10 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         gene_panels=[],
         default_gene_panels=[],
         cohorts=[],
-        human_genome_build="37",
-        rank_model_version="1.38",
+        human_genome_build="38",
+        rank_model_version="1.0",
         rank_score_threshold=5,
-        sv_rank_model_version="1.12",
+        sv_rank_model_version="2.0",
         analysis_date=datetime.now(),
         samples=[
             ScoutRarediseaseIndividual(

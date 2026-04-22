@@ -1,11 +1,12 @@
 from pathlib import Path
+from typing import cast
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
 from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler, MipFastqHandler
-from cg.models.cg_config import CGConfig, CommonAppConfig
+from cg.models.cg_config import CGConfig, CommonAppConfig, RarediseaseConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
@@ -35,7 +36,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.nallo import (
     NalloParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease_params_file_creator import (
     RarediseaseParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
@@ -75,7 +76,6 @@ from cg.store.store import Store
 
 
 class ConfiguratorFactory:
-
     def __init__(self, cg_config: CGConfig):
         self.cg_config = cg_config
         self.housekeeper_api: HousekeeperAPI = cg_config.housekeeper_api
@@ -133,8 +133,15 @@ class ConfiguratorFactory:
             case Workflow.NALLO:
                 return NalloParamsFileCreator(params)
             case Workflow.RAREDISEASE:
+                raredisease_config = cast(RarediseaseConfig, self.cg_config.raredisease)
                 return RarediseaseParamsFileCreator(
-                    lims=self.lims_api, params=params, store=self.store
+                    default_target_bed=raredisease_config.default_target_bed,
+                    gcnvcaller_files=raredisease_config.gcnvcaller,
+                    verifybamid_files_set=raredisease_config.verifybamid_svd,
+                    lims=self.lims_api,
+                    params=raredisease_config.params,
+                    references_directory=raredisease_config.references_directory,
+                    store=self.store,
                 )
             case Workflow.RNAFUSION:
                 return RNAFusionParamsFileCreator(params)
@@ -211,7 +218,7 @@ class ConfiguratorFactory:
     def _get_scout_api(self, workflow: Workflow) -> ScoutAPI:
         return (
             self.cg_config.scout_api_38
-            if workflow == Workflow.NALLO
+            if workflow in [Workflow.NALLO, Workflow.RAREDISEASE]
             else self.cg_config.scout_api_37
         )
 

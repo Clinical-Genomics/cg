@@ -13,7 +13,7 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import GenePanelMasterList, Priority, SequencingRunDataAvailability
 from cg.constants.archiving import ArchiveLocations
-from cg.constants.constants import CaseActions, ControlOptions, Workflow
+from cg.constants.constants import CaseActions, ControlOptions, GenomeBuild, Workflow
 from cg.constants.priority import SlurmQos, TrailblazerPriority
 from cg.exc import AnalysisAlreadyStoredError, AnalysisNotReadyError, CaseNotFoundError
 from cg.meta.archive.archive import SpringArchiveAPI
@@ -853,3 +853,35 @@ def test_update_analysis_as_completed_statusdb_succeeds(
 
     # THEN it updates the analysis comment
     status_db_mock.update_analysis_comment.assert_called_with(analysis_id=123456, comment=ANY)
+
+
+@pytest.mark.parametrize(
+    "workflow, genome_build",
+    [
+        (Workflow.BALSAMIC_UMI, GenomeBuild.hg19),
+        (Workflow.BALSAMIC, GenomeBuild.hg19),
+        (Workflow.MIP_DNA, GenomeBuild.hg19),
+        (Workflow.MIP_RNA, GenomeBuild.hg38),
+        (Workflow.NALLO, GenomeBuild.hg38),
+        (Workflow.RAREDISEASE, GenomeBuild.hg38),
+        (Workflow.RNAFUSION, GenomeBuild.hg19),
+        (Workflow.TOMTE, GenomeBuild.hg38),
+    ],
+)
+def test_setting_scout_api_in_init(
+    workflow: Workflow, genome_build: GenomeBuild, analysis_config: CGConfig
+):
+    scout_api_map = {
+        GenomeBuild.hg19: analysis_config.scout_api_37,
+        GenomeBuild.hg38: analysis_config.scout_api_38,
+    }
+
+    # GIVEN a CG config
+    # GIVEN a workflow
+    expected_scout_api = scout_api_map[genome_build]
+
+    # WHEN instantiating the analysis API
+    analysis_api = AnalysisAPI(workflow=workflow, config=analysis_config)
+
+    # THEN the scout API should match the workflow
+    assert analysis_api.scout_api is expected_scout_api

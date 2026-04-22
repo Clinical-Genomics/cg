@@ -9,7 +9,7 @@ import pytest
 
 from cg.constants import DataDelivery, Workflow
 from cg.constants.constants import FileFormat, GenomeVersion
-from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag, NFAnalysisTags
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG, AnalysisTag
 from cg.constants.pedigree import Pedigree
 from cg.constants.scout import UploadTrack
 from cg.constants.sequencing import SeqLibraryPrepCategory
@@ -184,14 +184,23 @@ def rna_store(
         link.sample.internal_id = link.sample.name
 
     # an existing DNA case with related sample
-    dna_case = helpers.ensure_case(
+    mip_dna_case = helpers.ensure_case(
         store=store,
         case_name="dna_case",
         customer=helpers.ensure_customer(store=store),
         data_analysis=Workflow.MIP_DNA,
         data_delivery=DataDelivery.SCOUT,
     )
-    dna_case.internal_id = dna_case_id
+    mip_dna_case.internal_id = dna_case_id
+
+    raredisease_dna_case = helpers.ensure_case(
+        store=store,
+        case_name="raredisease_dna_case",
+        customer=helpers.ensure_customer(store=store),
+        data_analysis=Workflow.RAREDISEASE,
+        data_delivery=DataDelivery.SCOUT,
+        case_id="raredisease_dna_case",
+    )
 
     dna_sample_son = helpers.add_sample(
         store=store,
@@ -224,7 +233,7 @@ def rna_store(
     helpers.add_relationship(
         store=store,
         sample=dna_sample_son,
-        case=dna_case,
+        case=mip_dna_case,
         mother=dna_sample_mother,
         father=dna_sample_father,
         status=PhenotypeStatus.AFFECTED,
@@ -232,22 +241,52 @@ def rna_store(
     helpers.add_relationship(
         store=store,
         sample=dna_sample_daughter,
-        case=dna_case,
+        case=mip_dna_case,
         mother=dna_sample_mother,
         father=dna_sample_father,
         status=PhenotypeStatus.UNAFFECTED,
     )
     helpers.add_relationship(
-        store=store, sample=dna_sample_mother, case=dna_case, status=PhenotypeStatus.UNAFFECTED
+        store=store, sample=dna_sample_mother, case=mip_dna_case, status=PhenotypeStatus.UNAFFECTED
     )
     helpers.add_relationship(
-        store=store, sample=dna_sample_father, case=dna_case, status=PhenotypeStatus.AFFECTED
+        store=store, sample=dna_sample_father, case=mip_dna_case, status=PhenotypeStatus.AFFECTED
     )
 
-    for link in dna_case.links:
+    helpers.add_relationship(
+        store=store,
+        sample=dna_sample_son,
+        case=raredisease_dna_case,
+        mother=dna_sample_mother,
+        father=dna_sample_father,
+        status=PhenotypeStatus.AFFECTED,
+    )
+    helpers.add_relationship(
+        store=store,
+        sample=dna_sample_daughter,
+        case=raredisease_dna_case,
+        mother=dna_sample_mother,
+        father=dna_sample_father,
+        status=PhenotypeStatus.UNAFFECTED,
+    )
+    helpers.add_relationship(
+        store=store,
+        sample=dna_sample_mother,
+        case=raredisease_dna_case,
+        status=PhenotypeStatus.UNAFFECTED,
+    )
+    helpers.add_relationship(
+        store=store,
+        sample=dna_sample_father,
+        case=raredisease_dna_case,
+        status=PhenotypeStatus.AFFECTED,
+    )
+
+    for link in mip_dna_case.links:
         link.sample.internal_id = link.sample.name
 
-    helpers.add_analysis(store=store, case=dna_case, uploaded_at=datetime.now())
+    helpers.add_analysis(store=store, case=mip_dna_case, uploaded_at=datetime.now())
+    helpers.add_analysis(store=store, case=raredisease_dna_case, uploaded_at=datetime.now())
 
     store.session.commit()
     return store
@@ -603,9 +642,9 @@ def raredisease_analysis_hk_bundle_data(
                 "tags": ["multiqc-html", sample_id],
             },
             {
-                "path": Path(raredisease_analysis_dir, "manifest." + FileFormat.JSON).as_posix(),
+                "path": Path(raredisease_analysis_dir, "params." + FileFormat.YAML).as_posix(),
                 "archive": False,
-                "tags": [NFAnalysisTags.MANIFEST],
+                "tags": ["nextflow-params"],
             },
         ],
     }

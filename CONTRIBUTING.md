@@ -225,11 +225,6 @@ Interface to Trailblazer.
 
 - Monitor analysis workflow status
 
-#### Genotype (gt)
-
-Interface to Genotype. For uploading results from the workflow about genotypes
-to compare and validate that we are clear of sample mix-ups.
-
 #### Housekeeper (hk)
 
 Interface to Housekeeper. For storing files from analysis runs and FASTQ files
@@ -356,16 +351,6 @@ related samples from `status`. It will get the Sambamba output from `hk` and
 use the `coverage` app interface to upload the data to Chanjo for each
 individual sample.
 
-##### Gt
-
-Includes: `status`, `hk`, `tb`, `gt`
-
-Given an analysis, the API will fetch information about the family. It will
-fetch the gBCF + qcmetrics files from `hk`. It will parse the qcmetrics file
-using `tb` to find out the predicted sex of each sample. It will then upload
-the results to Genotype. Subsequent upload of the same samples will overwrite
-existing information while logging the event.
-
 ##### Observations
 
 Includes: `status`, `hk`, `loqus`
@@ -434,7 +419,6 @@ across the package.
 - [trailblazer](https://github.com/Clinical-Genomics/trailblazer)
 - [trailblazer-ui](https://trailblazer.scilifelab.se/)
 - [housekeeper](https://github.com/Clinical-Genomics/housekeeper)
-- [genotype](https://github.com/Clinical-Genomics/genotype)
 - [chanjo](https://github.com/Clinical-Genomics/chanjo)
 - [scout](https://github.com/Clinical-Genomics/scout)
 - [mip](https://github.com/Clinical-Genomics/mip)

@@ -332,7 +332,11 @@ def related_dna_cases(store_with_rna_and_dna_samples_and_cases: Store) -> list[C
 def uploaded_related_dna_case(related_dna_cases: list[Case]) -> list[Case]:
     related_uploaded_dna_cases: list[Case] = []
     for case in related_dna_cases:
-        if case.analyses and case.analyses[0].uploaded_at:
+        if (
+            case.analyses
+            and case.analyses[0].uploaded_at
+            and case.data_analysis == Workflow.RAREDISEASE
+        ):
             related_uploaded_dna_cases.append(case)
     return related_uploaded_dna_cases
 

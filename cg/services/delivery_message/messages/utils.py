@@ -15,7 +15,7 @@ def get_scout_link(case: Case) -> str:
     case_name: str = case.name
     url: str = (
         "https://scout38.sys.scilifelab.se/"
-        if case.data_analysis == Workflow.NALLO
+        if case.data_analysis in [Workflow.NALLO, Workflow.RAREDISEASE]
         else "https://scout.scilifelab.se/"
     )
     return f"{url}{customer_id}/{case_name}"

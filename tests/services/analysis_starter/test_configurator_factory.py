@@ -30,8 +30,14 @@ from cg.services.analysis_starter.configurator.file_creators.mip_dna_config impo
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
     ParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease_params_file_creator import (
+    RarediseaseParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.protocol import (
     SampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease_sample_sheet_creator import (
+    RarediseaseSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
@@ -82,8 +88,6 @@ def test_get_microsalt_configurator(cg_context: CGConfig):
 @pytest.mark.parametrize(
     "workflow, pipeline_extension_class",
     [
-        (Workflow.NALLO, NalloExtension),
-        (Workflow.RAREDISEASE, RarediseaseExtension),
         (Workflow.RNAFUSION, PipelineExtension),
         (Workflow.TAXPROFILER, PipelineExtension),
         (Workflow.TOMTE, TomteExtension),
@@ -107,6 +111,50 @@ def test_nextflow_configurator_factory_success(
     assert isinstance(configurator.params_file_creator, ParamsFileCreator)
     assert isinstance(configurator.sample_sheet_creator, SampleSheetCreator)
     assert isinstance(configurator.pipeline_extension, pipeline_extension_class)
+
+
+def test_nextflow_configurator_factory_raredisease_success(
+    cg_context: CGConfig,
+):
+    # GIVEN a configurator factory
+    configurator_factory = ConfiguratorFactory(cg_config=cg_context)
+
+    # WHEN getting the configurator for the workflow
+    configurator = cast(
+        NextflowConfigurator, configurator_factory.get_configurator(Workflow.RAREDISEASE)
+    )
+
+    # THEN the configurator is of the expected type
+    assert isinstance(configurator, NextflowConfigurator)
+    assert isinstance(configurator.params_file_creator, RarediseaseParamsFileCreator)
+    assert isinstance(configurator.sample_sheet_creator, RarediseaseSampleSheetCreator)
+    assert isinstance(configurator.pipeline_extension, RarediseaseExtension)
+    assert (
+        configurator.pipeline_extension.gene_panel_file_creator.scout_api == cg_context.scout_api_38
+    )
+    assert (
+        configurator.pipeline_extension.managed_variants_file_creator.scout_api
+        == cg_context.scout_api_38
+    )
+
+
+def test_nextflow_configurator_factory_nallo_success(
+    cg_context: CGConfig,
+):
+    # GIVEN a configurator factory
+    configurator_factory = ConfiguratorFactory(cg_config=cg_context)
+
+    # WHEN getting the configurator for the workflow
+    configurator = cast(NextflowConfigurator, configurator_factory.get_configurator(Workflow.NALLO))
+
+    # THEN the configurator is of the expected type
+    assert isinstance(configurator, NextflowConfigurator)
+    assert isinstance(configurator.params_file_creator, ParamsFileCreator)
+    assert isinstance(configurator.sample_sheet_creator, SampleSheetCreator)
+    assert isinstance(configurator.pipeline_extension, NalloExtension)
+    assert (
+        configurator.pipeline_extension.gene_panel_file_creator.scout_api == cg_context.scout_api_38
+    )
 
 
 def test_get_mip_dna_configurator():
@@ -158,29 +206,24 @@ def test_configurator_factory_failure(cg_context: CGConfig):
         configurator_factory.get_configurator(workflow)
 
 
-def test_get_scout_api_38(cg_context: CGConfig):
+@pytest.mark.parametrize(
+    "workflow, scout_instance",
+    [
+        (Workflow.BALSAMIC, "scout_api_37"),
+        (Workflow.BALSAMIC_UMI, "scout_api_37"),
+        (Workflow.MIP_DNA, "scout_api_37"),
+        (Workflow.MIP_RNA, "scout_api_37"),
+        (Workflow.NALLO, "scout_api_38"),
+        (Workflow.RAREDISEASE, "scout_api_38"),
+        (Workflow.TOMTE, "scout_api_37"),
+    ],
+)
+def test_get_scout_api(workflow: Workflow, scout_instance: str, cg_context: CGConfig):
     # GIVEN a configurator factory
     configurator_factory = ConfiguratorFactory(cg_config=cg_context)
 
-    # GIVEN Nallo
-    workflow = Workflow.NALLO
-
-    # WHEN getting the scout api instance
+    # WHEN getting the scout api instance for a given workflow
     scout_api: ScoutAPI = configurator_factory._get_scout_api(workflow=workflow)
 
-    # THEN we should receive the HG38 instance
-    assert scout_api == cg_context.scout_api_38
-
-
-def test_get_scout_api_37(cg_context: CGConfig):
-    # GIVEN a configurator factory
-    configurator_factory = ConfiguratorFactory(cg_config=cg_context)
-
-    # GIVEN not Nallo
-    workflow = Workflow.MIP_DNA
-
-    # WHEN getting the scout api instance
-    scout_api: ScoutAPI = configurator_factory._get_scout_api(workflow=workflow)
-
-    # THEN we should receive the HG37 instance
-    assert scout_api == cg_context.scout_api_37
+    # THEN we should receive the correct scout instance
+    assert scout_api == getattr(cg_context, scout_instance)
