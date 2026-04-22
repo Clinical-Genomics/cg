@@ -15,6 +15,7 @@ from cg.constants.constants import (
     CustomerId,
     SampleType,
 )
+from cg.constants.lims import LimsStatus
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
@@ -1886,3 +1887,39 @@ class ReadHandler(BaseHandler):
             raise PacbioSequencingRunNotFoundError(
                 f"Pacbio Sequencing run with ID {run_id} was not found in the database."
             )
+
+    def get_paginated_unhandled_samples(
+        self, lims_status: LimsStatus, page: int, page_size: int
+    ) -> tuple[list[Sample], int]:
+        unhandled_samples: Query = self._get_unhandled_samples(lims_status)
+        return _paginate(query=unhandled_samples, page=page, page_size=page_size)
+
+    def _get_unhandled_samples(self, lims_status: LimsStatus) -> Query:
+        """
+        Return samples with the given lims_status that:
+        - Are not downsampled
+        - Are not cancelled
+        - Are not delivered
+        - Have been sequenced (last_sequenced_at is not null)
+        - Do not belong to the internal customers
+        - Ordered by last sequenced date, with the oldest first
+        """
+        return (
+            self._get_query(table=Sample)
+            .join(Customer, Sample.customer_id == Customer.id)
+            .filter(
+                Sample.delivered_at.is_(None),
+                Sample.from_sample.is_(None),
+                Sample.is_cancelled.is_(False),
+                Sample.last_sequenced_at.isnot(None),
+                Sample.lims_status == lims_status,
+                Customer.internal_id != "cust000",
+                Customer.internal_id.not_like("cust9%"),
+            )
+            .order_by(Sample.last_sequenced_at.asc())
+        )
+
+
+def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:
+    total: int = query.count()
+    return query.limit(page_size).offset(page_size * (page - 1)).all(), total
