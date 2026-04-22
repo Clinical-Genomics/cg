@@ -521,8 +521,11 @@ class Case(Base, PriorityMixin):
         return self.tickets.split(sep=",")[-1] if self.tickets else None
 
     @property
-    def original_order(self) -> "Order":
-        return min(self.orders, key=lambda order: order.order_date)
+    def original_order(self) -> "Order | None":
+        if not self.orders:
+            return None
+        else:
+            return min(self.orders, key=lambda order: order.order_date)
 
     @property
     def latest_order(self) -> "Order":
@@ -899,8 +902,8 @@ class Sample(Base, PriorityMixin):
     @property
     def ticket_id_from_original_order(self) -> int | None:
         """Return the original ticket id of the sample if it is linked to any ticket."""
-        if original_case := self.original_case:
-            return original_case.original_order.ticket_id
+        if self.original_case and self.original_case.original_order:
+            return self.original_case.original_order.ticket_id
         else:
             return None
 
