@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, field_serializer
+from pydantic import AfterValidator, BaseModel, ConfigDict
 from typing_extensions import Annotated, Literal
 
 from cg.constants.scout import ScoutAnalysisType, UploadTrack
@@ -56,10 +56,6 @@ class ScoutIndividual(BaseModel):
     subject_id: str | None = None
     tissue_type: str | None = None
     model_config = ConfigDict(validate_assignment=True)
-
-    @field_serializer("analysis_type")
-    def serialize_analysis_type(self, value: ScoutAnalysisType | None) -> str | None:
-        return value.value if value is not None else None
 
 
 class ScoutMipIndividual(ScoutIndividual):
