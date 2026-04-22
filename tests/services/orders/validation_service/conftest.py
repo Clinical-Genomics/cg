@@ -1,5 +1,8 @@
+from unittest.mock import create_autospec
+
 import pytest
 
+from cg.apps.lims import LimsAPI
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
@@ -273,7 +276,7 @@ def tomte_validation_service(
     base_store.session.add(user)
     base_store.session.add(application_with_concentration_interval)
     base_store.session.commit()
-    return OrderValidationService(base_store)
+    return OrderValidationService(lims_api=create_autospec(LimsAPI), store=base_store)
 
 
 @pytest.fixture
