@@ -71,39 +71,43 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         )
         load_config.human_genome_build = GenomeBuild.hg38
         load_config.rank_score_threshold = RANK_MODEL_THRESHOLD
-        load_config.rank_model_version = self.get_rank_model_version(
-            variant_type=Variants.SNV, hk_version=hk_version
+        load_config.rank_model_version = self._get_rank_model_version(
+            hk_version=hk_version,
+            variant_type=Variants.SNV,
         )
-        load_config.sv_rank_model_version = self.get_rank_model_version(
-            variant_type=Variants.SV, hk_version=hk_version
+        load_config.rank_model_path = self._get_rank_model_path(
+            hk_version=hk_version, variant_type=Variants.SNV
+        )
+        load_config.sv_rank_model_version = self._get_rank_model_version(
+            hk_version=hk_version, variant_type=Variants.SV
+        )
+        load_config.sv_rank_model_path = self._get_rank_model_path(
+            hk_version=hk_version, variant_type=Variants.SV
         )
         return load_config
 
-    def get_rank_model_version(self, variant_type: Variants, hk_version: Version) -> str:
-        """
-        Returns the rank model version for a variant type from the nextflow params file.
-        Raises:
-            FileNotFoundError if no params file is found in housekeeper.
-        """
+    def _get_params_file_path(self, hk_version: Version) -> str:
         hk_params_file: str | None = self.get_file_from_hk(
             hk_tags={"nextflow-params"}, hk_version=hk_version
         )
         if not hk_params_file:
             raise FileNotFoundError("No params file found in Housekeeper.")
-        return self.extract_rank_model_from_params_file(
-            hk_params_file=hk_params_file, variant_type=variant_type
-        )
+        return hk_params_file
 
-    def extract_rank_model_from_params_file(
-        self, hk_params_file: str, variant_type: Variants
-    ) -> str:
+    def _get_rank_model_path(self, hk_version: Version, variant_type: Variants) -> str:
+        hk_params_file: str = self._get_params_file_path(hk_version=hk_version)
         content: dict[str, str] = read_yaml(Path(hk_params_file))
         if variant_type == Variants.SNV:
-            return self._get_version_from_file_path(content.get("score_config_snv", ""))
+            return content.get("score_config_snv", "")
         else:
-            return self._get_version_from_file_path(content.get("score_config_sv", ""))
+            return content.get("score_config_sv", "")
 
-    def _get_version_from_file_path(self, file_path: str) -> str:
+    def _get_rank_model_version(self, hk_version: Version, variant_type: Variants) -> str:
+        file_path: str = self._get_rank_model_path(hk_version=hk_version, variant_type=variant_type)
+        return self._get_version_from_file_path(file_path)
+
+    @staticmethod
+    def _get_version_from_file_path(file_path: str) -> str:
         """
         Returns the rank model version in the format 'vX.X from the given file path.
         Raises a ValueError if no rank model version is found in the file path.

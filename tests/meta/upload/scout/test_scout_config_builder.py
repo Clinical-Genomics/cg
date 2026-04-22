@@ -666,12 +666,14 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     analysis: Analysis = create_autospec(Analysis, case=case, completed_at=datetime.now())
 
     # GIVEN that the params file can be read
+    rank_model_file = "/path/to/some/snv_file.-v1.0-.ini"
+    sv_rank_model_file = "/path/to/some/sv_file.-v2.0-.ini"
     mocker.patch.object(
         raredisease_config_builder_module,
         "read_yaml",
         return_value={
-            "score_config_snv": "/path/to/some/snv_file.-v1.0-.ini",
-            "score_config_sv": "/path/to/some/sv_file.-v2.0-.ini",
+            "score_config_snv": rank_model_file,
+            "score_config_sv": sv_rank_model_file,
         },
     )
 
@@ -695,7 +697,9 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         human_genome_build="38",
         rank_model_version="1.0",
         rank_score_threshold=5,
+        rank_model_path=rank_model_file,
         sv_rank_model_version="2.0",
+        sv_rank_model_path=sv_rank_model_file,
         analysis_date=datetime.now(),
         samples=[
             ScoutRarediseaseIndividual(
