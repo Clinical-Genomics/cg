@@ -1466,7 +1466,7 @@ def add_mysql_compat_guard(engine):
     @event.listens_for(engine, "before_cursor_execute")
     def check_sql(conn, cursor, statement, parameters, context, executemany):
         # IS NOT with a string, invalid MySQL but will be a false positive in Sqlite
-        if re.search(r"IS NOT '[^']*'", statement):
+        if re.search(r"IS NOT \?", statement):
             raise RuntimeError(
                 f"Not compatible with mysql: IS NOT/IS with string value.\n{statement}"
             )
