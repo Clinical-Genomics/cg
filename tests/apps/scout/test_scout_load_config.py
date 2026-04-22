@@ -7,7 +7,7 @@ import pytest
 from pydantic import ValidationError
 
 from cg.models.scout import scout_load_config
-from cg.models.scout.scout_load_config import MipLoadConfig, ScoutMipIndividual
+from cg.models.scout.scout_load_config import MipLoadConfig, ScoutIndividual, ScoutMipIndividual
 from tests.apps.scout.conftest import SCOUT_INDIVIDUAL
 
 
@@ -50,3 +50,13 @@ def test_set_mandatory_to_none(delivery_report_html: Path):
     with pytest.raises(ValidationError):
         # THEN a validation error should be raised
         config.vcf_snv = None
+
+
+def test_scout_individual_invalid_analysis_type():
+    # GIVEN a ScoutIndividual
+    scout_individual: ScoutIndividual = ScoutIndividual()
+
+    # WHEN setting the analysis_type
+    # THEN a ValidationError is raised
+    with pytest.raises(ValidationError):
+        scout_individual.analysis_type = "any_type_that_scout_does_support"
