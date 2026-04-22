@@ -31,6 +31,18 @@ def test_application_version_has_application(store: Store, helpers: StoreHelpers
     assert application_version.application == application
 
 
+def test_case_original_order_no_orders():
+    """Test that a case without orders returns None for original order."""
+    # GIVEN a case without orders
+    case = Case()
+
+    # WHEN getting the original order
+    original_order = case.original_order
+
+    # THEN the original order should be None
+    assert original_order is None
+
+
 def test_microbial_sample_to_dict(microbial_store: Store, helpers):
     # GIVEN a store with a Microbial sample
     sample_obj = helpers.add_microbial_sample(microbial_store)
@@ -127,6 +139,18 @@ def test_multiple_collaborations(base_store, customer_id):
         collaborator.internal_id in ["cust001", new_customer_id, "cust002", "cust003", customer_id]
         for collaborator in collaborators
     )
+
+
+def test_sample_ticket_id_from_original_order_no_order():
+    """Tests that a sample without an original order returns None for ticket id."""
+    # GIVEN a sample without an original order
+    sample = Sample(links=[CaseSample(case=Case())])
+
+    # WHEN getting the ticket id from the original order
+    ticket_id = sample.ticket_id_from_original_order
+
+    # THEN the ticket id should be None
+    assert ticket_id is None
 
 
 def test_case_samples_all_control(analysis_store: Store, case_id: str) -> None:

@@ -1,3 +1,4 @@
+from cg.apps.lims import LimsAPI
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
     CaseDoesNotExistError,
@@ -15,6 +16,7 @@ from cg.services.orders.validation.errors.case_errors import (
     RepeatedCaseNameError,
     RepeatedGenePanelsError,
     SamplesNotRelatedError,
+    SampleSourceMismatchError,
 )
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
@@ -22,11 +24,13 @@ from cg.services.orders.validation.order_types.balsamic_umi.models.order import 
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.order_types.nallo.models.order import NalloOrder
 from cg.services.orders.validation.order_types.raredisease.models.order import RarediseaseOrder
+from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.services.orders.validation.rules.case.utils import (
     contains_duplicates,
     does_case_exist,
     get_case_prep_categories,
     get_sample_name,
+    get_sample_sources,
     is_case_not_from_collaboration,
     is_double_normal,
     is_double_tumour,
@@ -203,6 +207,21 @@ def validate_case_contains_related_samples(
             error = SamplesNotRelatedError(
                 case_index=case_index,
                 message=f"Samples {isolated_samples} are not related to other samples within the case.",
+            )
+            errors.append(error)
+    return errors
+
+
+def validate_samples_have_same_source(
+    order: TomteOrder, store: Store, lims_api: LimsAPI, **kwargs
+) -> list[SampleSourceMismatchError]:
+    errors: list[SampleSourceMismatchError] = []
+    for case_index, case in order.enumerated_cases:
+        sample_sources: set = get_sample_sources(case=case, lims_api=lims_api, store=store)
+        if len(sample_sources) > 1:
+            error = SampleSourceMismatchError(
+                case_index=case_index,
+                message=f"Case contains samples of more than one source: {sample_sources}",
             )
             errors.append(error)
     return errors
