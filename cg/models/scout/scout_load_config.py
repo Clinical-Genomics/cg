@@ -130,7 +130,9 @@ class ScoutLoadConfig(BaseModel):
     human_genome_build: str = None
     rank_model_version: str | None = None
     rank_score_threshold: int = None
+    rank_model_path: str | None = None
     sv_rank_model_version: str | None = None
+    sv_rank_model_path: str | None = None
     analysis_date: datetime | None = None
     samples: list[ScoutIndividual] = []
     customer_images: CustomImages | None = None
