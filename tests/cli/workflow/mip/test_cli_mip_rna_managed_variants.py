@@ -58,4 +58,4 @@ def test_managed_variants_dry_run(
         result = cli_runner.invoke(managed_variants, [case_id, "--dry-run"], obj=mip_rna_context)
 
     # THEN the result should contain the output from Scout
-    assert result.stdout.strip() == scout_export_manged_variants_output
+    assert result.stdout == scout_export_manged_variants_output

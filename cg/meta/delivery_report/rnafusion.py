@@ -45,7 +45,9 @@ class RnafusionDeliveryReportAPI(DeliveryReportAPI):
             dv200=self.lims_api.get_sample_dv200(sample.internal_id),
             gc_content=sample_metrics.after_filtering_gc_content,
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
-            input_amount=self.lims_api.get_latest_rna_input_amount(sample.internal_id),
+            input_amount=self.lims_api.get_input_amount(
+                sample_id=sample.internal_id, sample_type="wts"
+            ),
             mapped_reads=get_mapped_reads_fraction(
                 mapped_reads=sample_metrics.read_pairs_examined * 2,
                 total_reads=sample_metrics.before_filtering_total_reads,

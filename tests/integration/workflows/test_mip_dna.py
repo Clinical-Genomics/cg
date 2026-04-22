@@ -233,9 +233,7 @@ samples:
     )
 
     # THEN the gene_panels file has been created with the correct contents
-    assert Path(
-        case_dir, "gene_panels.bed"
-    ).open().read() == scout_export_panel_stdout.decode().removesuffix("\n")
+    assert Path(case_dir, "gene_panels.bed").open().read() == scout_export_panel_stdout.decode()
 
 
 def _create_qc_file(test_root_dir: Path, case: Case) -> Path:

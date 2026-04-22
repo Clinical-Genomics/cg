@@ -685,7 +685,7 @@ class AnalysisAPI(MetaAPI):
         """Write the managed variants to case dir."""
         out_dir.mkdir(parents=True, exist_ok=True)
         WriteFile.write_file_from_content(
-            content="\n".join(content),
+            content="\n".join(content) + "\n",
             file_format=FileFormat.TXT,
             file_path=Path(out_dir, ScoutExportFileName.MANAGED_VARIANTS),
         )
@@ -695,7 +695,7 @@ class AnalysisAPI(MetaAPI):
         """Write the gene panel to case dir."""
         out_dir.mkdir(parents=True, exist_ok=True)
         WriteFile.write_file_from_content(
-            content="\n".join(content),
+            content="\n".join(content) + "\n",
             file_format=FileFormat.TXT,
             file_path=Path(out_dir, ScoutExportFileName.PANELS),
         )

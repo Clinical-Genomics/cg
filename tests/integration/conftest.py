@@ -98,7 +98,8 @@ def scout_export_manged_variants_stdout() -> bytes:
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
 1	48696925	.	G	C	.		END=48696925;TYPE=SNV
-14	76548781	.	CTGGACC	G	.		END=76548781;TYPE=INDEL"""
+14	76548781	.	CTGGACC	G	.		END=76548781;TYPE=INDEL
+"""
 
 
 @pytest.fixture
