@@ -139,7 +139,9 @@ class Application(Base):
     prep_category: Mapped[str] = mapped_column(
         types.Enum(*(category.value for category in SeqLibraryPrepCategory))
     )
-    read_type: Mapped[str] = mapped_column(types.Enum(*(read_types for read_types in ReadType)))
+    read_type: Mapped[ReadType] = mapped_column(
+        types.Enum(*(read_types for read_types in ReadType))
+    )
     is_external: Mapped[bool] = mapped_column(default=False)
     description: Mapped[Str256]
     is_accredited: Mapped[bool]

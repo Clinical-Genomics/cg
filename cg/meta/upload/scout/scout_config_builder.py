@@ -30,27 +30,27 @@ MAPP_PREP_READ_TO_SCOUT_ANALYSIS_TYPE: dict[
     (
         SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         ReadType.SHORT_READ,
-    ): ScoutAnalysisType.PANEL.value,
+    ): ScoutAnalysisType.PANEL,
     (
         SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         ReadType.LONG_READ,
-    ): ScoutAnalysisType.PANEL_LR.value,
+    ): ScoutAnalysisType.PANEL_LR,
     (
         SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
         ReadType.SHORT_READ,
-    ): ScoutAnalysisType.WES.value,
+    ): ScoutAnalysisType.WES,
     (
         SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         ReadType.SHORT_READ,
-    ): ScoutAnalysisType.WGS.value,
+    ): ScoutAnalysisType.WGS,
     (
         SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         ReadType.LONG_READ,
-    ): ScoutAnalysisType.WGS_LR.value,
+    ): ScoutAnalysisType.WGS_LR,
     (
         SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         ReadType.SHORT_READ,
-    ): ScoutAnalysisType.WTS.value,
+    ): ScoutAnalysisType.WTS,
 }
 
 LOG = logging.getLogger(__name__)
@@ -144,7 +144,7 @@ class ScoutConfigBuilder:
 
     def build_config_sample(self, case_sample: CaseSample, hk_version: Version) -> ScoutIndividual:
         """Build a sample with rnafusion specific information."""
-        workflow = case_sample.case.data_analysis  # TODO: Why is not Balsamic included here?
+        workflow = case_sample.case.data_analysis
         if workflow == Workflow.RAREDISEASE:
             config_sample = ScoutRarediseaseIndividual()
         elif workflow == Workflow.MIP_DNA:
@@ -163,7 +163,7 @@ class ScoutConfigBuilder:
         self, config_sample: ScoutIndividual, case_sample: CaseSample
     ) -> None:
         """Add the information to a sample that is common for different analysis types."""
-        sample_id: str = case_sample.sample.internal_id  # TODO: Add logic for lr here.
+        sample_id: str = case_sample.sample.internal_id
         LOG.info(f"Building sample {sample_id}")
         lims_sample: dict[str, Any] = self.lims_api.sample(sample_id)
         application: Application = case_sample.sample.application_version.application
@@ -171,7 +171,8 @@ class ScoutConfigBuilder:
         config_sample.sex = case_sample.sample.sex
         config_sample.phenotype = case_sample.status
         config_sample.analysis_type = self._get_scout_analysis_type(
-            read_type=application.read_type, prep_category=application.prep_category
+            read_type=application.read_type,
+            prep_category=application.prep_category,  # type: ignore
         )
         config_sample.sample_name = case_sample.sample.name
         config_sample.tissue_type = lims_sample.get("source", "unknown")
