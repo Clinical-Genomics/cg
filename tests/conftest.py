@@ -60,7 +60,6 @@ from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirecto
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
-from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.store.database import create_all_tables, drop_all_tables, get_engine, initialize_database
 from cg.store.models import (
     Application,
