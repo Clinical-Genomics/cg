@@ -780,9 +780,13 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         (
             SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
             ReadType.SHORT_READ,
+            ScoutAnalysisType.WGS,
+        ),
+        (
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+            ReadType.LONG_READ,
             ScoutAnalysisType.WGS_LR,
         ),
-        (SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING, ReadType.LONG_READ, ScoutAnalysisType.WGS),
         (
             SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
             ReadType.SHORT_READ,
