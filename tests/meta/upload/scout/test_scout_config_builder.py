@@ -7,6 +7,7 @@ from unittest.mock import Mock
 import pytest
 from housekeeper.store.models import File, Version
 from mock import create_autospec
+from pydantic import ValidationError
 from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -824,7 +825,6 @@ def test_add_common_sample_info_unsupported_combination():
     builder = ScoutConfigBuilder(lims_api=lims_api)
 
     # WHEN adding common sample info
-    builder.add_common_sample_info(config_sample=individual, case_sample=case_sample)
-
-    # THEN the analysis type is None
-    assert individual.analysis_type is None
+    # THEN a ValidationError is raised
+    with pytest.raises(ValidationError):
+        builder.add_common_sample_info(config_sample=individual, case_sample=case_sample)
