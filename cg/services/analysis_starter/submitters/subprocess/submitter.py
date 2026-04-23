@@ -39,12 +39,21 @@ class SubprocessSubmitter(Submitter):
             result: subprocess.CompletedProcess = subprocess.run(
                 args=command,
                 shell=True,
-                check=False,
+                check=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
+
             stdout: str = result.stdout.decode("utf-8").rstrip()
             return stdout.split()[-1]
-        except Exception:
-            LOG.warning(f"Could not retrieve {case_config.workflow} workflow version!")
+
+        except Exception as e:
+
+            stderr = ""
+            if isinstance(e, subprocess.CalledProcessError):
+                stderr = e.stderr.decode("utf-8").rstrip()
+
+            LOG.warning(
+                f"Could not retrieve {case_config.workflow} workflow version: {e} : {stderr}"
+            )
             return "0.0.0"
