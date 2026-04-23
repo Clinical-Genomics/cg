@@ -82,3 +82,8 @@ class MultiplePrepCategoriesError(CaseError):
 class SamplesNotRelatedError(CaseError):
     field: str = "sample_errors"
     message: str
+
+
+class SampleSourceMismatchError(CaseError):
+    field: str = "sample_errors"
+    message: str

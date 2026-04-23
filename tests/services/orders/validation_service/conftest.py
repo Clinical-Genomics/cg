@@ -1,6 +1,9 @@
+from unittest.mock import create_autospec
+
 import pytest
 
-from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.apps.lims import LimsAPI
+from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
 from cg.services.orders.validation.constants import MINIMUM_VOLUME
@@ -76,6 +79,7 @@ def archived_application(base_store: Store) -> Application:
         percent_kth=100,
         percent_reads_guaranteed=90,
         is_archived=True,
+        read_type=ReadType.SHORT_READ,
     )
 
 
@@ -228,6 +232,7 @@ def application_with_concentration_interval(base_store: Store) -> Application:
         percent_reads_guaranteed=90,
         sample_concentration_minimum=50,
         sample_concentration_maximum=250,
+        read_type=ReadType.SHORT_READ,
     )
     application.order_types = [OrderType.TOMTE]
     base_store.session.add(application)
@@ -273,7 +278,7 @@ def tomte_validation_service(
     base_store.session.add(user)
     base_store.session.add(application_with_concentration_interval)
     base_store.session.commit()
-    return OrderValidationService(base_store)
+    return OrderValidationService(lims_api=create_autospec(LimsAPI), store=base_store)
 
 
 @pytest.fixture
@@ -284,6 +289,7 @@ def application_tgs(base_store: Store) -> Application:
         description="Panel-based sequencing, 20 M read pairs.",
         percent_kth=59,
         percent_reads_guaranteed=75,
+        read_type=ReadType.SHORT_READ,
     )
     base_store.session.add(application)
     base_store.commit_to_store()

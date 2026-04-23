@@ -4,11 +4,14 @@ The function store_order_data_in_status_db is never expected to fail, as its inp
 have always been validated before calling the function.
 """
 
+from datetime import datetime
 from unittest.mock import Mock, create_autospec
 
+import pytest
 from pytest_mock import MockerFixture
 
 from cg.constants import DataDelivery, Priority, Workflow
+from cg.constants.lims import LimsStatus
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum
 from cg.services.orders.lims_service.service import OrderLimsService
@@ -26,7 +29,7 @@ from cg.services.orders.validation.order_types.rna_fusion.models.case import RNA
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
 from cg.services.orders.validation.order_types.rna_fusion.models.sample import RNAFusionSample
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
-from cg.store.models import Case, Sample
+from cg.store.models import Application, ApplicationVersion, Case, Customer, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -93,7 +96,7 @@ def test_store_mip_rna_order(
     assert len(first_case.links) == 2
     new_link = first_case.links[0]
     assert first_case.data_analysis == Workflow.MIP_RNA
-    assert first_case.data_delivery == str(DataDelivery.ANALYSIS_SCOUT)
+    assert first_case.data_delivery == str(DataDelivery.FASTQ_ANALYSIS)
     assert new_link.sample.name == "MipRNASample1"
     assert new_link.sample.application_version.application.tag == rna_application_tag
     assert new_link.should_deliver_sample
@@ -208,6 +211,10 @@ def test_store_rnafusion_sample_is_set_to_tumour(store: Store, mocker: MockerFix
     )
 
     # GIVEN that persisting to StatusDB and LIMS is successful
+    application_version = ApplicationVersion(application=Application())
+    mocker.patch.object(
+        store, "get_current_application_version_by_tag", return_value=application_version
+    )
     mocker.patch.object(store, "commit_to_store")
     lims_service: OrderLimsService = create_autospec(OrderLimsService)
     lims_service.process_lims = Mock(
@@ -262,3 +269,50 @@ def test_existing_samples_should_not_be_delivered_again(mocker: MockerFixture):
         mother=None,
         should_deliver_sample=False,
     )
+
+
+@pytest.mark.parametrize(
+    "is_external, expected_lims_status", [(True, LimsStatus.DONE), (False, LimsStatus.PENDING)]
+)
+def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_status: LimsStatus):
+    # GIVEN a store containing an external application
+    application: Application = create_autospec(Application, is_external=is_external)
+    application_version: ApplicationVersion = create_autospec(
+        ApplicationVersion, application=application
+    )
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_current_application_version_by_tag = Mock(
+        return_value=application_version
+    )
+    customer: Customer = create_autospec(Customer)
+
+    # GIVEN an order sample
+    rna_fusion_sample = RNAFusionSample(
+        application="app",
+        container=ContainerEnum.tube,
+        name="sample",
+        sex=SexEnum.female,
+        source="blood",
+        subject_id="father",
+    )
+
+    # GIVEN order case
+    case = create_autospec(RNAFusionCase, priority=Priority.standard)
+
+    # GIVEN a store case order service
+    store_order_service = StoreCaseOrderService(
+        status_db=status_db.as_type, lims_service=create_autospec(OrderLimsService)
+    )
+
+    # WHEN creating a database sample with an external application
+    store_order_service._create_db_sample(
+        case=case,
+        sample=rna_fusion_sample,
+        customer=customer,
+        order_name="any_old_string",
+        ordered=datetime.now(),
+        ticket="1234567",
+    )
+
+    # THEN the lims status of the sample is done
+    assert status_db.as_mock.add_sample.call_args[1]["lims_status"] == expected_lims_status

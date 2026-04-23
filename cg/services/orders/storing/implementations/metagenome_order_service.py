@@ -3,6 +3,7 @@ from datetime import datetime
 
 from cg.constants import DataDelivery, Sex
 from cg.constants.constants import Workflow
+from cg.constants.lims import LimsStatus
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.service import StoreOrderService
@@ -91,20 +92,24 @@ class StoreMetagenomeOrderService(StoreOrderService):
     def _create_db_sample(
         self, sample: MetagenomeSample, order: MetagenomeOrder, customer: Customer
     ) -> DbSample:
+        application_version: ApplicationVersion = (
+            self.status_db.get_current_application_version_by_tag(sample.application)
+        )
+        lims_status: LimsStatus = (
+            LimsStatus.DONE if application_version.application.is_external else LimsStatus.PENDING
+        )
         db_sample: DbSample = self.status_db.add_sample(
-            name=sample.name,
-            sex=Sex.UNKNOWN,
             comment=sample.comment,
             control=sample.control,
             internal_id=sample._generated_lims_id,
+            lims_status=lims_status,
+            name=sample.name,
             order=order.name,
             ordered=datetime.now(),
             original_ticket=order._generated_ticket_id,
             priority=sample.priority,
+            sex=Sex.UNKNOWN,
         )
         db_sample.customer = customer
-        application_version: ApplicationVersion = (
-            self.status_db.get_current_application_version_by_tag(sample.application)
-        )
         db_sample.application_version = application_version
         return db_sample
