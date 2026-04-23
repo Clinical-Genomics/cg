@@ -24,7 +24,7 @@ from cg.models.scout.scout_load_config import (
 )
 from cg.store.models import Analysis, Application, Case, CaseSample, Sample
 
-MAPP_PREP_READ_TO_SCOUT_ANALYSIS_TYPE: dict[
+MAP_PREP_READ_TO_SCOUT_ANALYSIS_TYPE: dict[
     tuple[SeqLibraryPrepCategory, ReadType], ScoutAnalysisType
 ] = {
     (
@@ -172,7 +172,7 @@ class ScoutConfigBuilder:
         config_sample.phenotype = case_sample.status
         config_sample.analysis_type = self._get_scout_analysis_type(
             read_type=application.read_type,
-            prep_category=application.prep_category,  # type: ignore
+            prep_category=application.prep_category,
         )
         config_sample.sample_name = case_sample.sample.name
         config_sample.tissue_type = lims_sample.get("source", "unknown")
@@ -192,7 +192,7 @@ class ScoutConfigBuilder:
     def _get_scout_analysis_type(
         prep_category: SeqLibraryPrepCategory, read_type: ReadType
     ) -> ScoutAnalysisType | None:
-        return MAPP_PREP_READ_TO_SCOUT_ANALYSIS_TYPE.get((prep_category, read_type))
+        return MAP_PREP_READ_TO_SCOUT_ANALYSIS_TYPE.get((prep_category, read_type))
 
     def add_common_sample_files(
         self,

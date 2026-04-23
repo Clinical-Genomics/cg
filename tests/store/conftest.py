@@ -11,6 +11,7 @@ from cg.constants import Workflow
 from cg.constants.constants import CaseActions
 from cg.constants.devices import DeviceType
 from cg.constants.priority import PriorityTerms
+from cg.constants.sequencing import ReadType
 from cg.constants.subject import PhenotypeStatus
 from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
 from cg.services.orders.storing.implementations.pool_order_service import StorePoolOrderService
@@ -367,7 +368,7 @@ def rml_pool_store(
         percent_reads_guaranteed=75,
         sequencing_depth=0,
         target_reads=800,
-        read_type="short-read",
+        read_type=ReadType.SHORT_READ,
     )
     store.session.add(application)
 

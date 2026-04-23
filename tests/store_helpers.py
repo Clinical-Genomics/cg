@@ -12,7 +12,7 @@ from cg.constants.constants import SequencingQCStatus
 from cg.constants.devices import DeviceType
 from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
-from cg.constants.sequencing import Sequencers
+from cg.constants.sequencing import ReadType, Sequencers
 from cg.constants.subject import PhenotypeStatus, Sex
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina.data_transfer.models import (
@@ -147,7 +147,7 @@ class StoreHelpers:
         is_accredited: bool = False,
         version: int = 1,
         valid_from: datetime = datetime.now(),
-        read_type: str = "short-read",
+        read_type: str = ReadType.SHORT_READ,
         **kwargs,
     ) -> ApplicationVersion:
         """Utility function to return existing or create application version for tests."""
@@ -218,7 +218,7 @@ class StoreHelpers:
         prep_category: str = "wgs",
         description: str = "dummy_description",
         is_archived: bool = False,
-        read_type: str = "short-read",
+        read_type: str = ReadType.SHORT_READ,
         **kwargs,
     ) -> Application:
         """Ensure that application exists in store."""
@@ -247,7 +247,7 @@ class StoreHelpers:
         is_accredited: bool = False,
         is_external: bool = False,
         min_sequencing_depth: int = 30,
-        read_type: str = "short-read",
+        read_type: str = ReadType.SHORT_READ,
         **kwargs,
     ) -> Application:
         """Utility function to add a application to a store."""

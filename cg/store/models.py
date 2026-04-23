@@ -136,7 +136,7 @@ class Application(Base):
     id: Mapped[PrimaryKeyInt]
 
     tag: Mapped[UniqueStr]
-    prep_category: Mapped[str] = mapped_column(
+    prep_category: Mapped[SeqLibraryPrepCategory] = mapped_column(
         types.Enum(*(category.value for category in SeqLibraryPrepCategory))
     )
     read_type: Mapped[ReadType] = mapped_column(

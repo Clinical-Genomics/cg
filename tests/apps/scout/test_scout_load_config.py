@@ -56,7 +56,7 @@ def test_scout_individual_invalid_analysis_type():
     # GIVEN a ScoutIndividual
     scout_individual: ScoutIndividual = ScoutIndividual()
 
-    # WHEN setting the analysis_type
+    # WHEN trying to set an invalid analysis type
     # THEN a ValidationError is raised
     with pytest.raises(ValidationError):
-        scout_individual.analysis_type = "any_type_that_scout_does_support"
+        scout_individual.analysis_type = "any_type_that_scout_does_not_support"

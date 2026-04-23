@@ -43,7 +43,7 @@ class Reviewer(BaseModel):
 class ScoutIndividual(BaseModel):
     alignment_path: str | None = None
     rna_alignment_path: str | None = None
-    analysis_type: ScoutAnalysisType | None = None
+    analysis_type: Annotated[ScoutAnalysisType | None, AfterValidator(field_not_none)] = None
     capture_kit: str | None = None
     confirmed_parent: bool | None = None
     confirmed_sex: bool | None = None
