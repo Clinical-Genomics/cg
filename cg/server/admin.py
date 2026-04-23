@@ -758,6 +758,7 @@ class SampleView(BaseView):
         "organism",
         "invoice",
         "is_cancelled",
+        "lims_status",
         "capture_kit",
         "comment",
         "control",
@@ -789,14 +790,16 @@ class SampleView(BaseView):
         "downsampled_to",
         "is_tumour",
         "last_sequenced_at",
+        "lims_status",
         "sex",
     ]
     column_filters = [
-        "customer.internal_id",
-        "priority",
-        "sex",
         "application_version.application",
         "capture_kit",
+        "customer.internal_id",
+        "lims_status",
+        "priority",
+        "sex",
     ]
     column_formatters = {
         "application_version": view_application_link_via_application_version,
@@ -862,9 +865,8 @@ class CaseSampleView(BaseView):
     """Admin view for Model.caseSample"""
 
     column_default_sort = ("created_at", True)
-    column_editable_list = ["status"]
-    column_exclude_list = ["should_deliver_sample"]
-    column_filters = ["status"]
+    column_editable_list = ["should_deliver_sample", "status"]
+    column_filters = ["should_deliver_sample", "status"]
     column_formatters = {
         "case": CaseView.view_case_link,
         "sample": SampleView.view_sample_link,
