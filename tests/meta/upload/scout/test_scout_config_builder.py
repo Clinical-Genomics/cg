@@ -763,15 +763,46 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     assert load_config == expected_load_config
 
 
-def test_add_common_sample_info():
+@pytest.mark.parametrize(
+    "prep_category,read_type,expected_scout_analysis_type",
+    [
+        (
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            ReadType.SHORT_READ,
+            ScoutAnalysisType.PANEL,
+        ),
+        (
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            ReadType.LONG_READ,
+            ScoutAnalysisType.PANEL_LR,
+        ),
+        (SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING, ReadType.SHORT_READ, ScoutAnalysisType.WES),
+        (
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+            ReadType.SHORT_READ,
+            ScoutAnalysisType.WGS_LR,
+        ),
+        (SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING, ReadType.LONG_READ, ScoutAnalysisType.WGS),
+        (
+            SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
+            ReadType.SHORT_READ,
+            ScoutAnalysisType.WTS,
+        ),
+    ],
+)
+def test_add_common_sample_info(
+    prep_category: SeqLibraryPrepCategory,
+    read_type: ReadType,
+    expected_scout_analysis_type: ScoutAnalysisType,
+):
     # GIVEN a ScoutIndividual
     individual = ScoutIndividual()
 
     # GIVEN a CaseSample with a WGS short-read application
     application: Application = create_autospec(
         Application,
-        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
-        read_type=ReadType.SHORT_READ,
+        prep_category=prep_category,
+        read_type=read_type,
     )
     sample: Sample = create_autospec(
         Sample,
@@ -794,7 +825,7 @@ def test_add_common_sample_info():
     builder.add_common_sample_info(config_sample=individual, case_sample=case_sample)
 
     # THEN the analysis type is set to WGS
-    assert individual.analysis_type == ScoutAnalysisType.WGS
+    assert individual.analysis_type == expected_scout_analysis_type
 
 
 def test_add_common_sample_info_unsupported_combination():
