@@ -4,6 +4,7 @@ import pytest
 
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import CAPTUREKIT_CANCER_OPTIONS, GenomeVersion
+from cg.constants.sequencing import ReadType
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, ControlEnum, SexEnum, StatusEnum
 from cg.services.orders.validation.constants import MINIMUM_VOLUME, ElutionBuffer
@@ -77,6 +78,7 @@ def balsamic_application(base_store: Store) -> Application:
         percent_reads_guaranteed=90,
         sample_concentration_minimum=50,
         sample_concentration_maximum=250,
+        read_type=ReadType.SHORT_READ,
     )
     application.order_types = [OrderType.BALSAMIC]
     base_store.session.add(application)

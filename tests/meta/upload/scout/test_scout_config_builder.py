@@ -7,6 +7,7 @@ from unittest.mock import Mock
 import pytest
 from housekeeper.store.models import File, Version
 from mock import create_autospec
+from pydantic import ValidationError
 from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -15,13 +16,15 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.constants import Priority, Workflow
 from cg.constants.constants import SexOptions
 from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
-from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.constants.scout import ScoutAnalysisType
+from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.nallo_config_builder import NalloConfigBuilder
 from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
+from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.orders.sample_base import StatusEnum
@@ -30,6 +33,7 @@ from cg.models.scout.scout_load_config import (
     NalloLoadConfig,
     RarediseaseLoadConfig,
     Reviewer,
+    ScoutIndividual,
     ScoutNalloIndividual,
     ScoutRarediseaseIndividual,
 )
@@ -409,7 +413,9 @@ def test_nallo_config_builder(mocker: MockerFixture):
 
     # GIVEN an analysis tied to a case which is in turn tied to a sample and a customer
     application: Application = create_autospec(
-        Application, analysis_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
+        Application,
+        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        read_type=ReadType.LONG_READ,
     )
     sample: Sample = create_autospec(
         Sample,
@@ -461,7 +467,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
             ScoutNalloIndividual(
                 alignment_path=alignment_path.full_path,
                 rna_alignment_path=None,
-                analysis_type="wgs",
+                analysis_type=ScoutAnalysisType.WGS_LR,
                 capture_kit=None,
                 chromograph_images=ChromographImages(
                     autozygous="chromograph_autozyg_chr",
@@ -637,7 +643,9 @@ def test_raredisease_config_builder(mocker: MockerFixture):
 
     # GIVEN an analysis tied to a case which is in turn tied to a sample and a customer
     application: Application = create_autospec(
-        Application, analysis_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING.value
+        Application,
+        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        read_type=ReadType.SHORT_READ,
     )
     sample: Sample = create_autospec(
         Sample,
@@ -753,3 +761,105 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     )
 
     assert load_config == expected_load_config
+
+
+@pytest.mark.parametrize(
+    "prep_category,read_type,expected_scout_analysis_type",
+    [
+        (
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            ReadType.SHORT_READ,
+            ScoutAnalysisType.PANEL,
+        ),
+        (
+            SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+            ReadType.LONG_READ,
+            ScoutAnalysisType.PANEL_LR,
+        ),
+        (SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING, ReadType.SHORT_READ, ScoutAnalysisType.WES),
+        (
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+            ReadType.SHORT_READ,
+            ScoutAnalysisType.WGS,
+        ),
+        (
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+            ReadType.LONG_READ,
+            ScoutAnalysisType.WGS_LR,
+        ),
+        (
+            SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
+            ReadType.SHORT_READ,
+            ScoutAnalysisType.WTS,
+        ),
+    ],
+)
+def test_add_common_sample_info(
+    prep_category: SeqLibraryPrepCategory,
+    read_type: ReadType,
+    expected_scout_analysis_type: ScoutAnalysisType,
+):
+    # GIVEN a ScoutIndividual
+    individual = ScoutIndividual()
+
+    # GIVEN a CaseSample with a WGS short-read application
+    application: Application = create_autospec(
+        Application,
+        prep_category=prep_category,
+        read_type=read_type,
+    )
+    sample: Sample = create_autospec(
+        Sample,
+        application_version=create_autospec(ApplicationVersion, application=application),
+        internal_id="sample_id",
+        sex=SexOptions.FEMALE,
+        subject_id="subject_id",
+    )
+    sample.name = "sample_name"
+    case_sample: CaseSample = create_autospec(
+        CaseSample, father=None, mother=None, sample=sample, status=StatusEnum.affected
+    )
+
+    # GIVEN a ScoutConfigBuilder with a mock lims_api
+    lims_api = create_autospec(LimsAPI)
+    lims_api.sample.return_value = {}
+    builder = ScoutConfigBuilder(lims_api=lims_api)
+
+    # WHEN adding common sample info
+    builder.add_common_sample_info(config_sample=individual, case_sample=case_sample)
+
+    # THEN the analysis type is set to WGS
+    assert individual.analysis_type == expected_scout_analysis_type
+
+
+def test_add_common_sample_info_unsupported_combination():
+    # GIVEN a ScoutIndividual
+    individual = ScoutIndividual()
+
+    # GIVEN a CaseSample with a prep_category and read_type combination not in the mapping
+    application: Application = create_autospec(
+        Application,
+        prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+        read_type=ReadType.LONG_READ,
+    )
+    sample: Sample = create_autospec(
+        Sample,
+        application_version=create_autospec(ApplicationVersion, application=application),
+        internal_id="sample_id",
+        sex=SexOptions.FEMALE,
+        subject_id="subject_id",
+    )
+    sample.name = "sample_name"
+    case_sample: CaseSample = create_autospec(
+        CaseSample, father=None, mother=None, sample=sample, status=StatusEnum.affected
+    )
+
+    # GIVEN a ScoutConfigBuilder with a mock lims_api
+    lims_api = create_autospec(LimsAPI)
+    lims_api.sample.return_value = {}
+    builder = ScoutConfigBuilder(lims_api=lims_api)
+
+    # WHEN adding common sample info
+    # THEN a ValidationError is raised
+    with pytest.raises(ValidationError):
+        builder.add_common_sample_info(config_sample=individual, case_sample=case_sample)

@@ -32,7 +32,7 @@ from cg.constants.constants import (
 from cg.constants.devices import DeviceType, RevioNames
 from cg.constants.lims import LimsStatus
 from cg.constants.priority import SlurmQos
-from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
 from cg.models.orders.constants import OrderType
 
@@ -136,8 +136,11 @@ class Application(Base):
     id: Mapped[PrimaryKeyInt]
 
     tag: Mapped[UniqueStr]
-    prep_category: Mapped[str] = mapped_column(
+    prep_category: Mapped[SeqLibraryPrepCategory] = mapped_column(
         types.Enum(*(category.value for category in SeqLibraryPrepCategory))
+    )
+    read_type: Mapped[ReadType] = mapped_column(
+        types.Enum(*(read_types.value for read_types in ReadType))
     )
     is_external: Mapped[bool] = mapped_column(default=False)
     description: Mapped[Str256]
