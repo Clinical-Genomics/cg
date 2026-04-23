@@ -16,8 +16,8 @@ class RawDataAnalysisService:
 
     def store_analysis(self, case_id: str) -> None:
         case: Case = self._get_case(case_id)
-        self._add_analysis_to_store(case)
         self._add_analysis_to_trailblazer(case)
+        self._add_analysis_to_store(case)
 
     def _get_case(self, case_id: str) -> Case:
         if case := self.store.get_case_by_internal_id(case_id):

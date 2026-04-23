@@ -1,24 +1,34 @@
+from unittest.mock import create_autospec
+
+from click.testing import CliRunner, Result
+from pytest_mock import MockerFixture
+
+from cg.cli.workflow.raw_data import base
 from cg.cli.workflow.raw_data.base import store_raw_data_analysis
-from cg.store.models import Analysis, Case
+from cg.cli.workflow.raw_data.raw_data_service import RawDataAnalysisService
+from cg.models.cg_config import CGConfig
 
 
-def test_store_raw_data_analysis(another_case_id: str, cli_runner, raw_data_fastq_context, helpers):
+def test_store_raw_data_analysis(
+    cli_runner: CliRunner,
+    mocker: MockerFixture,
+):
     """Test for CLI command creating an analysis object for a fastq case"""
 
     # GIVEN a raw data fastq context
-    helpers.ensure_case(raw_data_fastq_context.status_db, case_id=another_case_id)
-    case_obj: Case = raw_data_fastq_context.status_db.get_case_by_internal_id(another_case_id)
-    assert not case_obj.analyses
+    case_id = "fastq_raw_data_case"
+    context = create_autospec(CGConfig)
+    created_raw_data_analysis_service = create_autospec(RawDataAnalysisService)
 
-    # WHEN a command is run to create an analysis for the case
-    cli_runner.invoke(store_raw_data_analysis, [another_case_id], obj=raw_data_fastq_context)
-
-    # THEN the analysis is created
-    assert (
-        len(
-            raw_data_fastq_context.status_db._get_query(table=Analysis)
-            .filter(Analysis.case_id == case_obj.id)
-            .all()
-        )
-        > 0
+    # GIVEN a raw data analaysis service can be instantiated
+    raw_data_analysis_service_class = mocker.patch.object(
+        base, "RawDataAnalysisService", autospec=True
     )
+    raw_data_analysis_service_class.return_value = created_raw_data_analysis_service
+
+    # WHEN a command is run to create and store an analysis for the case
+    result: Result = cli_runner.invoke(store_raw_data_analysis, [case_id], obj=context)
+
+    # THEN the analysis is stored by the RawDataAnalysisService
+    assert not result.exception
+    created_raw_data_analysis_service.store_analysis.assert_called_once_with(case_id)
