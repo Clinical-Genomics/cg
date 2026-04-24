@@ -19,7 +19,6 @@ from cg.constants.constants import (
     CaseActions,
     CustomerId,
     FileFormat,
-    GenomeVersion,
     WorkflowManager,
 )
 from cg.constants.gene_panel import GenePanelMasterList
@@ -681,7 +680,7 @@ class AnalysisAPI(MetaAPI):
         """Write the managed variants to case dir."""
         out_dir.mkdir(parents=True, exist_ok=True)
         WriteFile.write_file_from_content(
-            content="\n".join(content),
+            content="\n".join(content) + "\n",
             file_format=FileFormat.TXT,
             file_path=Path(out_dir, ScoutExportFileName.MANAGED_VARIANTS),
         )
@@ -691,7 +690,7 @@ class AnalysisAPI(MetaAPI):
         """Write the gene panel to case dir."""
         out_dir.mkdir(parents=True, exist_ok=True)
         WriteFile.write_file_from_content(
-            content="\n".join(content),
+            content="\n".join(content) + "\n",
             file_format=FileFormat.TXT,
             file_path=Path(out_dir, ScoutExportFileName.PANELS),
         )
@@ -760,17 +759,6 @@ class AnalysisAPI(MetaAPI):
                 f"Case samples have different analysis types {', '.join(analysis_types)}"
             )
         return analysis_types.pop() if analysis_types else None
-
-    @staticmethod
-    def translate_genome_reference(genome_version: GenomeVersion) -> GenomeVersion:
-        """Translates a genome reference assembly to its corresponding alternate name."""
-        translation_map = {
-            GenomeVersion.GRCh37: GenomeVersion.HG19,
-            GenomeVersion.GRCh38: GenomeVersion.HG38,
-            GenomeVersion.HG19: GenomeVersion.GRCh37,
-            GenomeVersion.HG38: GenomeVersion.GRCh38,
-        }
-        return translation_map.get(genome_version, genome_version)
 
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]

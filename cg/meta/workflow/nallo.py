@@ -6,20 +6,10 @@ from itertools import permutations
 from pathlib import Path
 from typing import Any
 
-from click import File
-
-from cg.clients.chanjo2.models import (
-    CoverageMetrics,
-    CoveragePostRequest,
-    CoveragePostResponse,
-    CoverageSample,
-)
+from cg.apps.coverage import ChanjoAPI, chanjo_api_for_genome_build
 from cg.constants import Workflow
-from cg.constants.constants import GenomeVersion
+from cg.constants.constants import WORKFLOW_TO_GENOME_VERSION_MAP, GenomeVersion
 from cg.constants.nf_analysis import (
-    NALLO_COVERAGE_FILE_TAGS,
-    NALLO_COVERAGE_INTERVAL_TYPE,
-    NALLO_COVERAGE_THRESHOLD,
     NALLO_GENERAL_METRIC_CONDITIONS,
     NALLO_PARENT_PEDDY_METRIC_CONDITION,
     NALLO_RAW_METRIC_CONDITIONS,
@@ -27,11 +17,11 @@ from cg.constants.nf_analysis import (
 from cg.constants.scout import NALLO_CASE_TAGS
 from cg.constants.subject import PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.workflow.utils.chanjo1 import CoverageMetricsChanjo1, chanjo1_get_sample_coverage
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.nallo.nallo import NalloQCMetrics
-from cg.resources import NALLO_BUNDLE_FILENAMES_PATH
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -47,29 +37,28 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         workflow: Workflow = Workflow.NALLO,
     ):
         super().__init__(config=config, workflow=workflow)
-        self.root_dir: str = config.nallo.root
-        self.workflow_bin_path: str = config.nallo.workflow_bin_path
-        self.profile: str = config.nallo.profile
-        self.conda_env: str = config.nallo.conda_env
+        self.account: str = config.nallo.slurm.account
+        self.chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
+            config=config, genome_build=WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.NALLO]
+        )
         self.conda_binary: str = config.nallo.conda_binary
-        self.platform: str = config.nallo.platform
+        self.conda_env: str = config.nallo.conda_env
+        self.email: str = config.nallo.slurm.mail_user
         self.params: str = config.nallo.params
-        self.workflow_config_path: str = config.nallo.config
+        self.pipeline_deliverables = Path(config.nallo.pipeline_deliverables)
+        self.platform: str = config.nallo.platform
+        self.profile: str = config.nallo.profile
         self.resources: str = config.nallo.resources
+        self.revision: str = config.nallo.revision
+        self.root_dir: str = config.nallo.root
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.nallo.tower_workflow
-        self.account: str = config.nallo.slurm.account
-        self.email: str = config.nallo.slurm.mail_user
-        self.revision: str = config.nallo.revision
+        self.workflow_bin_path: str = config.nallo.workflow_bin_path
+        self.workflow_config_path: str = config.nallo.config
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
         """Return reference genome for a Nallo case. Currently fixed for hg38."""
         return GenomeVersion.HG38
-
-    @staticmethod
-    def get_bundle_filenames_path() -> Path:
-        """Return Nallo bundle filenames path."""
-        return NALLO_BUNDLE_FILENAMES_PATH
 
     def get_qc_conditions_for_workflow(self, sample_id: str) -> dict:
         """Return Nallo workflow metric conditions for a sample."""
@@ -168,40 +157,12 @@ class NalloAnalysisAPI(NfAnalysisAPI):
                 }[sample.sex]
             )
 
-    def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
-        """Return the Nallo d4 coverage file path."""
-        nallo_coverage_file_tags: list[str] = NALLO_COVERAGE_FILE_TAGS + [sample_id]
-        nallo_coverage_file: File | None = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=bundle_name, tags=nallo_coverage_file_tags
-        )
-        if nallo_coverage_file:
-            return nallo_coverage_file.full_path
-        LOG.warning(f"No Nallo coverage file found with the tags: {nallo_coverage_file_tags}")
-        return None
-
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
-    ) -> CoverageMetrics | None:
-        """Return sample coverage metrics from Chanjo2."""
-        nallo_genome_version: GenomeVersion = self.get_genome_build(case_id)
-        nallo_coverage_file_path: str | None = self.get_sample_coverage_file_path(
-            bundle_name=case_id, sample_id=sample_id
+    ) -> CoverageMetricsChanjo1 | None:
+        return chanjo1_get_sample_coverage(
+            chanjo_api=self.chanjo_api, sample_id=sample_id, gene_ids=gene_ids
         )
-        try:
-            post_request = CoveragePostRequest(
-                build=self.translate_genome_reference(nallo_genome_version),
-                coverage_threshold=NALLO_COVERAGE_THRESHOLD,
-                hgnc_gene_ids=gene_ids,
-                interval_type=NALLO_COVERAGE_INTERVAL_TYPE,
-                samples=[
-                    CoverageSample(coverage_file_path=nallo_coverage_file_path, name=sample_id)
-                ],
-            )
-            post_response: CoveragePostResponse = self.chanjo2_api.get_coverage(post_request)
-            return post_response.get_sample_coverage_metrics(sample_id)
-        except Exception as error:
-            LOG.error(f"Error getting coverage for sample '{sample_id}', error: {error}")
-            return None
 
     def get_scout_upload_case_tags(self) -> dict:
         """Return Nallo Scout upload case tags."""

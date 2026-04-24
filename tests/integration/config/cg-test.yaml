@@ -34,6 +34,10 @@ chanjo:
   binary_path: "{test_root_dir}/chanjo_binary_path"
   config_path: "{test_root_dir}/chanjo_config_path"
 
+chanjo_38:
+  binary_path: "{test_root_dir}/chanjo_38_binary_path"
+  config_path: "{test_root_dir}/chanjo_38_config_path"
+
 chanjo2:
   host: "http://localhost/chanjo2"
 
@@ -44,7 +48,9 @@ balsamic:
   bed_path: "{test_root_dir}/balsamic_bed_path"
   cache_version: "0.0.1"
   cadd_path: "{test_root_dir}/balsamic_cadd_path"
+  cancer_genelist: "{test_root_dir}/cancer_gene_list.tsv"
   conda_env: "conda_env_balsamic"
+  cosmic_path: "{test_root_dir}/cosmic_path.vcf.gz"
   genome_interval_path: "{test_root_dir}/balsamic_genome_interval_path"
   gens_coverage_female_path: "{test_root_dir}/balsamic_gens_coverage_female_path"
   gens_coverage_male_path: "{test_root_dir}/balsamic_gens_coverage_male_path"
@@ -144,6 +150,7 @@ nallo:
   config: {test_root_dir}/nallo_config.config
   launch_directory: {test_root_dir}/nallo_launch_directory
   params: {test_root_dir}/nallo_params.yaml
+  pipeline_deliverables: "nallo_pipeline_deliverables.yaml"
   platform: {test_root_dir}/platform.config
   profile: nallo_profile
   resources: {test_root_dir}/nallo_resources.config

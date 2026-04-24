@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 from cg.constants import DataDelivery, Workflow
+from cg.constants.lims import LimsStatus
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
@@ -61,7 +62,10 @@ class StorePacBioOrderService(StoreOrderService):
                     ticket_id=str(status_db_order.ticket_id),
                 )
                 case_sample: CaseSample = self.status_db.relate_sample(
-                    case=case, sample=db_sample, status=StatusEnum.unknown
+                    case=case,
+                    sample=db_sample,
+                    status=StatusEnum.unknown,
+                    should_deliver_sample=True,
                 )
                 self.status_db.add_multiple_items_to_store([case, case_sample, db_sample])
                 status_db_order.cases.append(case)
@@ -100,16 +104,20 @@ class StorePacBioOrderService(StoreOrderService):
         application_version: ApplicationVersion = (
             self.status_db.get_current_application_version_by_tag(tag=sample.application)
         )
+        lims_status: LimsStatus = (
+            LimsStatus.DONE if application_version.application.is_external else LimsStatus.PENDING
+        )
         return self.status_db.add_sample(
-            name=sample.name,
-            customer=customer,
             application_version=application_version,
-            sex=sample.sex,
             comment=sample.comment,
+            customer=customer,
             internal_id=sample._generated_lims_id,
+            lims_status=lims_status,
+            name=sample.name,
             order=order_name,
             ordered=datetime.now(),
             original_ticket=ticket_id,
             priority=sample.priority,
+            sex=sample.sex,
             tumour=sample.tumour,
         )

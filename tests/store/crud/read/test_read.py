@@ -145,7 +145,9 @@ def test_case_in_uploaded_observations(helpers: StoreHelpers, sample_store: Stor
     analysis: Analysis = helpers.add_analysis(store=sample_store, workflow=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
-    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(
+        analysis.case, sample, PhenotypeStatus.UNKNOWN, should_deliver_sample=True
+    )
     sample_store.session.add(link)
     assert analysis.case.analyses
     for link in analysis.case.links:
@@ -165,7 +167,9 @@ def test_case_not_in_uploaded_observations(helpers: StoreHelpers, sample_store: 
     analysis: Analysis = helpers.add_analysis(store=sample_store, workflow=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store)
-    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(
+        analysis.case, sample, PhenotypeStatus.UNKNOWN, should_deliver_sample=True
+    )
     sample_store.session.add(link)
     assert analysis.case.analyses
     for link in analysis.case.links:
@@ -185,7 +189,9 @@ def test_case_in_observations_to_upload(helpers: StoreHelpers, sample_store: Sto
     analysis: Analysis = helpers.add_analysis(store=sample_store, workflow=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store)
-    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(
+        analysis.case, sample, PhenotypeStatus.UNKNOWN, should_deliver_sample=True
+    )
     sample_store.session.add(link)
     assert analysis.case.analyses
     for link in analysis.case.links:
@@ -207,7 +213,9 @@ def test_case_not_in_observations_to_upload(
     analysis: Analysis = helpers.add_analysis(store=sample_store, workflow=Workflow.MIP_DNA)
     analysis.case.customer.loqus_upload = True
     sample: Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
-    link = sample_store.relate_sample(analysis.case, sample, PhenotypeStatus.UNKNOWN)
+    link = sample_store.relate_sample(
+        analysis.case, sample, PhenotypeStatus.UNKNOWN, should_deliver_sample=True
+    )
     sample_store.session.add(link)
     assert analysis.case.analyses
     for link in analysis.case.links:

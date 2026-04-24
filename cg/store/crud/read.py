@@ -15,6 +15,7 @@ from cg.constants.constants import (
     CustomerId,
     SampleType,
 )
+from cg.constants.lims import LimsStatus
 from cg.constants.priority import SlurmQos
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
@@ -208,6 +209,21 @@ class ReadHandler(BaseHandler):
             analyses=self._get_query(table=Analysis),
             entry_id=entry_id,
         ).first()
+
+    def get_analysis_by_trailblazer_id(self, trailblazer_id: int) -> Analysis:
+        """
+        Get analysis by trailblazer id.
+        Raises:
+            AnalysisDoesNotExistError: If no analysis is found with the given trailblazer id.
+            sqlalchemy.orm.exc.MultipleResultsFound: If multiple analyses are found with the same
+            trailblazer id. This should not happen due to database constraints.
+        """
+        try:
+            return self._get_query(table=Analysis).filter_by(trailblazer_id=trailblazer_id).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise AnalysisDoesNotExistError(
+                f"Analysis with trailblazer_id {trailblazer_id} was not found in the database."
+            )
 
     def get_cases_by_customer_and_case_name_search(
         self, customer: Customer, case_name_search: str
@@ -1184,16 +1200,6 @@ class ReadHandler(BaseHandler):
                 f"Sample with internal id {internal_id} was not found in the database."
             )
 
-    def get_samples_by_identifier(self, object_type: str, identifier: str) -> list[Sample]:
-        """Return all samples from a flow cell, case or sample id"""
-        object_to_filter: dict[str, Callable] = {
-            "sample": self.get_sample_by_internal_id,
-            "case": self.get_samples_by_case_id,
-            "flow_cell": self.get_samples_by_illumina_flow_cell,
-        }
-        samples: Sample | list[Sample] = object_to_filter[object_type](identifier)
-        return samples if isinstance(samples, list) else [samples]
-
     def get_samples_by_internal_id(self, internal_id: str) -> list[Sample]:
         """Return all samples by lims id."""
         return apply_sample_filter(
@@ -1881,3 +1887,39 @@ class ReadHandler(BaseHandler):
             raise PacbioSequencingRunNotFoundError(
                 f"Pacbio Sequencing run with ID {run_id} was not found in the database."
             )
+
+    def get_paginated_unhandled_samples(
+        self, lims_status: LimsStatus, page: int, page_size: int
+    ) -> tuple[list[Sample], int]:
+        unhandled_samples: Query = self._get_unhandled_samples(lims_status)
+        return _paginate(query=unhandled_samples, page=page, page_size=page_size)
+
+    def _get_unhandled_samples(self, lims_status: LimsStatus) -> Query:
+        """
+        Return samples with the given lims_status that:
+        - Are not downsampled
+        - Are not cancelled
+        - Are not delivered
+        - Have been sequenced (last_sequenced_at is not null)
+        - Do not belong to the internal customers
+        - Ordered by last sequenced date, with the oldest first
+        """
+        return (
+            self._get_query(table=Sample)
+            .join(Customer, Sample.customer_id == Customer.id)
+            .filter(
+                Sample.delivered_at.is_(None),
+                Sample.from_sample.is_(None),
+                Sample.is_cancelled.is_(False),
+                Sample.last_sequenced_at.isnot(None),
+                Sample.lims_status == lims_status,
+                Customer.internal_id != "cust000",
+                Customer.internal_id.not_like("cust9%"),
+            )
+            .order_by(Sample.last_sequenced_at.asc())
+        )
+
+
+def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:
+    total: int = query.count()
+    return query.limit(page_size).offset(page_size * (page - 1)).all(), total

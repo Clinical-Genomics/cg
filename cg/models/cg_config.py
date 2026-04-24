@@ -5,7 +5,6 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from typing_extensions import Literal
 
-from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
@@ -131,18 +130,24 @@ class TrailblazerConfig(BaseModel):
 
 
 class StatinaConfig(BaseModel):
-    host: str | None = None
-    user: str
-    key: str
     api_url: str
-    upload_path: str
     auth_path: str
+    data_set: str
+    host: str | None = None
+    key: str
+    upload_path: str
+    user: str
 
 
 class CommonAppConfig(BaseModel):
     binary_path: str | None = None
     config_path: str | None = None
     container_mount_volume: str | None = None
+
+
+class ChanjoConfig(BaseModel):
+    binary_path: str
+    config_path: str
 
 
 class HermesConfig(CommonAppConfig):
@@ -195,8 +200,10 @@ class BalsamicConfig(CommonAppConfig):
     binary_path: Path
     cache_version: str
     cadd_path: Path
+    cancer_genelist: Path
     conda_binary: Path
     conda_env: str
+    cosmic_path: Path
     genome_interval_path: Path
     gens_coverage_female_path: Path
     gens_coverage_male_path: Path
@@ -235,70 +242,74 @@ class NalloConfig(CommonAppConfig):
     binary_path: str | None = None
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
     launch_directory: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class RarediseaseConfig(CommonAppConfig):
     binary_path: str | None = None
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
     launch_directory: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class TomteConfig(CommonAppConfig):
     binary_path: str | None = None
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class RnafusionConfig(CommonAppConfig):
     binary_path: str
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
     launch_directory: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
@@ -310,18 +321,19 @@ class TaxprofilerConfig(CommonAppConfig):
     binary_path: str
     conda_binary: str | None = None
     conda_env: str
-    platform: str
-    params: str
     config: str
-    resources: str
-    workflow_bin_path: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
     pre_run_script: str = ""
     profile: str
     repository: str
+    resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    workflow_bin_path: str
 
 
 class MicrosaltConfig(BaseModel):
@@ -439,8 +451,8 @@ class CGConfig(BaseModel):
     arnold: ArnoldConfig | None = None
     arnold_api_: ArnoldAPIClient | None = None
     illumina_backup_service: IlluminaBackupConfig | None = None
-    chanjo: CommonAppConfig = None
-    chanjo_api_: ChanjoAPI = None
+    chanjo: ChanjoConfig | None = None
+    chanjo_38: ChanjoConfig | None = None
     chanjo2: ClientConfig | None = None
     chanjo2_api_: Chanjo2APIClient | None = None
     crunchy: CrunchyConfig = None
@@ -523,15 +535,6 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating arnold api")
             api = ArnoldAPIClient(config=self.dict())
             self.arnold_api_ = api
-        return api
-
-    @property
-    def chanjo_api(self) -> ChanjoAPI:
-        api = self.__dict__.get("chanjo_api_")
-        if api is None:
-            LOG.debug("Instantiating chanjo api")
-            api = ChanjoAPI(config=self.dict())
-            self.chanjo_api_ = api
         return api
 
     @property

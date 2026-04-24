@@ -240,6 +240,6 @@ def test_start_available_nallo(
         == expected_samplesheet_contents
     )
 
-    assert Path(
-        case_directory, "gene_panels.tsv"
-    ).open().read() == scout_export_panel_stdout.decode().removesuffix("\n")
+    assert (
+        Path(case_directory, "gene_panels.tsv").open().read() == scout_export_panel_stdout.decode()
+    )

@@ -19,11 +19,13 @@ class SampleMetadataModel(BaseModel):
         duplicates: fraction of mapped sequence that is marked as duplicate; source: workflow
         million_read_pairs: number of million read pairs obtained; source: StatusDB/sample/reads (/2*10^6)
         initial_qc: initial QC protocol flag; source: LIMS
+        input_amount: input amount in ng; source: LIMS
     """
 
     duplicates: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     million_read_pairs: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     initial_qc: Annotated[str, BeforeValidator(get_initial_qc_as_string)] = NA_FIELD
+    input_amount: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
 
 
 class MipDNASampleMetadataModel(SampleMetadataModel):
@@ -50,9 +52,9 @@ class NalloSampleMetadataModel(SampleMetadataModel):
     Attributes:
         avg_sequence_length: average length of the sequenced reads; source: workflow
         coverage_bases: total number of bases aligned to the genome; source: workflow
-        mean_target_coverage: mean coverage of a target region; source: Chanjo2
+        mean_target_coverage: mean coverage of a target region; source: Chanjo
         median_coverage: median coverage of mapped sequence in bases; source: workflow
-        pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: Chanjo2
+        pct_10x: percent of targeted bases that are covered to 10X coverage or more; source: Chanjo
         sex: sex predicted by the workflow; source: workflow
     """
 
@@ -93,6 +95,8 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
     mean_insert_size: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     fold_80: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     predicted_sex: str = NA_FIELD
+    at_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
+    gc_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
 
 
 class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
@@ -108,7 +112,6 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
 
     bait_set: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
     bait_set_version: Annotated[str, BeforeValidator(get_report_string)] = NA_FIELD
-    gc_dropout: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     median_target_coverage: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_250x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_500x: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
@@ -148,7 +151,6 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
     Attributes:
         bias_5_3: bias is the ratio between read counts; source: workflow
         dv200: percentage of RNA fragments > 200 nucleotides; source: LIMS
-        input_amount: input amount in ng; source: LIMS
         mrna_bases:  proportion of bases that originate from messenger RNA; source: workflow
         pct_adapter: proportion of reads that contain adapter sequences; source: workflow
         pct_surviving: percentage of reads that pass quality control filters; source: workflow
@@ -161,7 +163,6 @@ class WTSSampleMetadataModel(SequencingSampleMetadataModel):
 
     bias_5_3: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     dv200: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
-    input_amount: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     mrna_bases: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_adapter: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD
     pct_surviving: Annotated[str, BeforeValidator(get_number_as_string)] = NA_FIELD

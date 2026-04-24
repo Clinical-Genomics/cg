@@ -1,5 +1,6 @@
 from unittest.mock import Mock, create_autospec
 
+from cg.apps.lims import LimsAPI
 from cg.constants import GenePanelMasterList
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
@@ -13,6 +14,7 @@ from cg.services.orders.validation.errors.case_errors import (
     NewCaseWithoutAffectedSampleError,
     RepeatedCaseNameError,
     SamplesNotRelatedError,
+    SampleSourceMismatchError,
 )
 from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
@@ -23,6 +25,10 @@ from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDN
 from cg.services.orders.validation.order_types.mip_dna.models.sample import MIPDNASample
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
 from cg.services.orders.validation.order_types.rna_fusion.models.sample import RNAFusionSample
+from cg.services.orders.validation.order_types.tomte.constants import TomteDeliveryType
+from cg.services.orders.validation.order_types.tomte.models.case import TomteCase
+from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
+from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
 from cg.services.orders.validation.rules.case.rules import (
     validate_case_contains_related_samples,
     validate_case_internal_ids_exist,
@@ -32,10 +38,12 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_existing_cases_belong_to_collaboration,
     validate_existing_cases_have_an_affected_sample,
     validate_one_sample_per_case,
+    validate_samples_have_same_source,
     validate_samples_in_case_have_same_prep_category,
 )
 from cg.store.models import Application, Case, Sample
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_case_name_not_available(
@@ -313,3 +321,77 @@ def test_order_with_cases_with_relationships_passes():
 
     # THEN no error should be returned
     assert not errors
+
+
+def test_validate_samples_have_same_source():
+    # GIVEN a Tomte order containing a case containing samples with different tissue sources
+    sample = TomteSample(  # type: ignore
+        application="TGSTag",
+        container=ContainerEnum.tube,
+        name="sample1",
+        sex=SexEnum.female,
+        source="blood",
+        status=StatusEnum.affected,
+        subject_id="subject1",
+    )
+    existing_sample = ExistingSample(internal_id="existing_sample")
+    case = TomteCase(name="tomte-case", panels=["OMIM-AUTO"], samples=[sample, existing_sample])
+    order = TomteOrder(
+        cases=[case],
+        customer="cust000",
+        delivery_type=TomteDeliveryType.ANALYSIS_SCOUT,
+        name="tomte-order",
+        project_type=OrderType.TOMTE,
+    )
+    status_db: Store = create_autospec(Store)
+    status_db.get_sample_by_internal_id = Mock(
+        return_value=create_autospec(
+            Sample, internal_id=existing_sample.internal_id, from_sample=None
+        )
+    )
+    lims_api: TypedMock[LimsAPI] = create_typed_mock(LimsAPI)
+    lims_api.as_type.get_source = Mock(return_value="fibroblast")
+
+    # WHEN validating that all the samples have the same tissue type within each case of the order
+    errors = validate_samples_have_same_source(
+        order=order, store=status_db, lims_api=lims_api.as_type
+    )
+
+    # THEN an error should be returned
+    assert isinstance(errors[0], SampleSourceMismatchError)
+    assert errors[0].case_index == 0
+
+    # THEN LIMS should have been called to fetch the existing sample's source
+    lims_api.as_mock.get_source.assert_called_once_with("existing_sample")
+
+
+def test_validate_samples_have_same_source_downsampled_sample():
+    # GIVEN a Tomte order containing a case with an existing downsampled sample
+    existing_sample = ExistingSample(internal_id="existing_sample")
+    case = TomteCase(name="tomte-case", panels=["OMIM-AUTO"], samples=[existing_sample])
+    order = TomteOrder(
+        cases=[case],
+        customer="cust000",
+        delivery_type=TomteDeliveryType.ANALYSIS_SCOUT,
+        name="tomte-order",
+        project_type=OrderType.TOMTE,
+    )
+    status_db: Store = create_autospec(Store)
+    status_db.get_sample_by_internal_id = Mock(
+        return_value=create_autospec(
+            Sample, internal_id=existing_sample.internal_id, from_sample="original_sample"
+        )
+    )
+    lims_api: TypedMock[LimsAPI] = create_typed_mock(LimsAPI)
+    lims_api.as_type.get_source = Mock(return_value="fibroblast")
+
+    # WHEN validating that all the samples have the same tissue type within each case of the order
+    errors = validate_samples_have_same_source(
+        order=order, store=status_db, lims_api=lims_api.as_type
+    )
+
+    # THEN no error should be returned
+    assert not errors
+
+    # THEN LIMS should have been called to fetch the original sample's source
+    lims_api.as_mock.get_source.assert_called_once_with("original_sample")

@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 
+from cg.constants.lims import LimsStatus
 from cg.models.orders.sample_base import PriorityEnum, SexEnum, StatusEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
@@ -66,7 +67,10 @@ class StorePoolOrderService(StoreOrderService):
                         application_version=db_pool.application_version,
                     )
                     case_sample: CaseSample = self.status_db.relate_sample(
-                        case=db_case, sample=db_sample, status=StatusEnum.unknown
+                        case=db_case,
+                        sample=db_sample,
+                        status=StatusEnum.unknown,
+                        should_deliver_sample=True,
                     )
                     self.status_db.add_multiple_items_to_store([db_sample, case_sample])
                 new_pools.append(db_pool)
@@ -157,17 +161,21 @@ class StorePoolOrderService(StoreOrderService):
         application_version: ApplicationVersion,
     ) -> Sample:
         """Return a Sample database object."""
+        lims_status: LimsStatus = (
+            LimsStatus.DONE if application_version.application.is_external else LimsStatus.PENDING
+        )
         return self.status_db.add_sample(
-            name=sample.name,
-            customer=customer,
             application_version=application_version,
-            sex=SexEnum.unknown,
             comment=sample.comment,
             control=sample.control,
+            customer=customer,
             internal_id=sample._generated_lims_id,
+            lims_status=lims_status,
+            name=sample.name,
+            no_invoice=True,
             order=order_name,
             ordered=datetime.now(),
             original_ticket=ticket_id,
             priority=sample.priority,
-            no_invoice=True,
+            sex=SexEnum.unknown,
         )

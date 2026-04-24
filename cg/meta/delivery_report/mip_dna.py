@@ -1,8 +1,9 @@
 import logging
-from typing import Iterable
+from collections.abc import Iterable
 
 from housekeeper.store.models import File, Version
 
+from cg.apps.coverage import ChanjoAPI, chanjo_api_for_genome_build
 from cg.constants import (
     REQUIRED_APPLICATION_FIELDS,
     REQUIRED_CASE_FIELDS,
@@ -15,6 +16,7 @@ from cg.constants import (
     REQUIRED_SAMPLE_MIP_DNA_FIELDS,
     REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
 )
+from cg.constants.constants import WORKFLOW_TO_GENOME_VERSION_MAP, Workflow
 from cg.constants.scout import ScoutUploadKey
 from cg.meta.delivery_report.data_validators import get_million_read_pairs
 from cg.meta.delivery_report.delivery_report_api import DeliveryReportAPI
@@ -34,6 +36,10 @@ class MipDNADeliveryReportAPI(DeliveryReportAPI):
 
     def __init__(self, analysis_api: MipDNAAnalysisAPI):
         super().__init__(analysis_api=analysis_api)
+        self.chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
+            config=analysis_api.config,
+            genome_build=WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.MIP_DNA],
+        )
 
     def get_sample_metadata(
         self, case: Case, sample: Sample, analysis_metadata: MipAnalysis
@@ -48,6 +54,7 @@ class MipDNADeliveryReportAPI(DeliveryReportAPI):
             duplicates=parsed_metrics.duplicate_reads,
             sex=parsed_metrics.predicted_sex,
             initial_qc=self.lims_api.has_sample_passed_initial_qc(sample.internal_id),
+            input_amount=self._get_input_amount(sample=sample),
             mapped_reads=parsed_metrics.mapped_reads,
             mean_target_coverage=sample_coverage.get("mean_coverage"),
             million_read_pairs=get_million_read_pairs(sample.reads),
@@ -151,3 +158,11 @@ class MipDNADeliveryReportAPI(DeliveryReportAPI):
             LOG.info(f"No files were found for the following Scout key: {scout_key}")
             return None
         return uploaded_files[0].full_path
+
+    def _get_input_amount(self, sample: Sample) -> float | None:
+        """Return the input amount based on the sample's prep category."""
+        if sample.prep_category == "wgs":
+            sample_type = "wgs"
+        else:
+            sample_type = "tgs"  # TGS and WES samples use the same input amount step in LIMS
+        return self.lims_api.get_input_amount(sample_id=sample.internal_id, sample_type=sample_type)

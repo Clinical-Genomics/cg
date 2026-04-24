@@ -190,3 +190,18 @@ class ExistingSampleWrongTypeError(CaseSampleError):
 class SampleNameAlreadyExistsError(CaseSampleError):
     field: str = "name"
     message: str = "Sample name already exists in a previous order"
+
+
+class MissingSourceCommentError(CaseSampleError):
+    field: str = "source_comment"
+    message: str = "Other source must be filled in when source is 'other'"
+
+
+class NormalSampleNotAllowedError(CaseSampleError):
+    field: str = "internal_id"
+    message: str = "Existing samples must be tumour samples"
+
+
+class TumourValueResetError(CaseSampleError):
+    field: str = "warnings"
+    message: str = "The tumour status was overridden to True. Required for RNAFusion analysis."

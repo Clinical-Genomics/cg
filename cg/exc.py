@@ -96,12 +96,6 @@ class SampleNotFoundError(CgDataError):
     """
 
 
-class ChecksumFailedError(CgError):
-    """
-    Exception raised when the checksums of two files are not equal.
-    """
-
-
 class IlluminaCleanRunError(CgError):
     """
     Exception raised when the cleaning of an Illumina run failed.

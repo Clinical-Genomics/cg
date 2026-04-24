@@ -1,4 +1,5 @@
 # cg
+![Build Status - Github][gh-actions-badge]
 [![GitHub issues-closed][closed-issues-img]][closed-issues-url]
 [![Average time to resolve an issue][ismaintained-resolve-img]][ismaintained-resolve-url]
 [![Percentage of issues still open][ismaintained-open-rate-img]][ismaintained-open-rate-url]
@@ -51,7 +52,7 @@ For development, use `poetry install --all-extras` to install development depend
 [coveralls-url]: https://coveralls.io/github/Clinical-Genomics/cg
 [coveralls-image]: https://coveralls.io/repos/github/Clinical-Genomics/cg/badge.svg?branch=master
 
-[gh-actions-badge]: https://github.com/Clinical-Genomics/cg/workflows/Tests%20and%20coveralls/badge.svg
+[gh-actions-badge]: https://github.com/Clinical-Genomics/cg/workflows/CG%20CI/badge.svg
 [closed-issues-img]: https://img.shields.io/github/issues-closed/Clinical-Genomics/cg.svg
 [closed-issues-url]: https://GitHub.com/Clinical-Genomics/cg/issues?q=is%3Aissue+is%3Aclosed
 [ismaintained-resolve-img]: http://isitmaintained.com/badge/resolution/Clinical-Genomics/cg.svg

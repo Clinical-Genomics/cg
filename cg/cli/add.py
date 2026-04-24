@@ -7,12 +7,12 @@ from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.archiving import PDC_ARCHIVE_LOCATION
 from cg.constants.cli_options import DRY_RUN, FORCE
 from cg.constants.constants import StatusOptions
+from cg.constants.lims import LimsStatus
 from cg.constants.subject import Sex
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import (
     Application,
-    ApplicationVersion,
     Case,
     CaseSample,
     Collaboration,
@@ -175,20 +175,28 @@ def add_user(context: CGConfig, admin: bool, customer_id: str, email: str, name:
 @click.option(
     "-t", "--original-ticket", required=True, help="Original ticket this sample is associated to."
 )
+@click.option(
+    "-ls",
+    "--lims-status",
+    required=True,
+    type=EnumChoice(LimsStatus),
+    help="Lab status for the sample",
+)
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_obj
 def add_sample(
     context: CGConfig,
-    lims_id: str | None,
-    down_sampled: int | None,
-    sex: Sex,
-    order: str | None,
     application_tag: str,
-    priority: Priority,
     customer_id: str,
+    down_sampled: int | None,
+    lims_id: str | None,
+    lims_status: LimsStatus,
     name: str,
+    order: str | None,
     original_ticket: str,
+    priority: Priority,
+    sex: Sex,
 ):
     """Add a sample for CUSTOMER_ID with a NAME (display)."""
     status_db: Store = context.status_db
@@ -203,13 +211,14 @@ def add_sample(
         raise click.Abort
 
     new_record: Sample = status_db.add_sample(
-        name=name,
-        sex=sex,
         downsampled_to=down_sampled,
         internal_id=lims_id,
+        lims_status=lims_status,
+        name=name,
         order=order,
-        priority=priority,
         original_ticket=original_ticket,
+        priority=priority,
+        sex=sex,
     )
     new_record.application_version = status_db.get_current_application_version_by_tag(
         tag=application_tag
@@ -305,6 +314,14 @@ def add_case(
 @click.option("-m", "--mother-id", help="Sample ID for mother of sample")
 @click.option("-f", "--father-id", help="Sample ID for father of sample")
 @click.option("-s", "--status", type=EnumChoice(StatusOptions), required=True)
+@click.option(
+    "-d/-nd",
+    "--delivery/--no-delivery",
+    "should_deliver_sample",
+    is_flag=True,
+    required=True,
+    help="Toggle whether case delivery should trigger sample delivery.",
+)
 @click.argument("case-id")
 @click.argument("sample-id")
 @click.pass_obj
@@ -315,6 +332,7 @@ def link_sample_to_case(
     status: str,
     case_id: str,
     sample_id: str,
+    should_deliver_sample: bool,
 ):
     """Create a link between a case id and a sample id."""
     status_db: Store = context.status_db
@@ -351,7 +369,12 @@ def link_sample_to_case(
             raise click.Abort
 
     new_record: CaseSample = status_db.relate_sample(
-        case=case_obj, sample=sample, status=status, mother=mother, father=father
+        case=case_obj,
+        sample=sample,
+        status=status,
+        mother=mother,
+        father=father,
+        should_deliver_sample=should_deliver_sample,
     )
     status_db.session.add(new_record)
     status_db.session.commit()

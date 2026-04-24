@@ -11,6 +11,7 @@ from cg.constants import Workflow
 from cg.constants.constants import CaseActions
 from cg.constants.devices import DeviceType
 from cg.constants.priority import PriorityTerms
+from cg.constants.sequencing import ReadType
 from cg.constants.subject import PhenotypeStatus
 from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
 from cg.services.orders.storing.implementations.pool_order_service import StorePoolOrderService
@@ -331,7 +332,10 @@ def store_with_analyses_for_cases(
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: CaseSample = analysis_store.relate_sample(
-            case=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
+            case=oldest_analysis.case,
+            sample=sample,
+            status=PhenotypeStatus.UNKNOWN,
+            should_deliver_sample=True,
         )
         analysis_store.session.add(link)
     return analysis_store
@@ -364,6 +368,7 @@ def rml_pool_store(
         percent_reads_guaranteed=75,
         sequencing_depth=0,
         target_reads=800,
+        read_type=ReadType.SHORT_READ,
     )
     store.session.add(application)
 
@@ -446,7 +451,10 @@ def store_with_analyses_for_cases_not_uploaded_fluffy(
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         link: CaseSample = analysis_store.relate_sample(
-            case=oldest_analysis.case, sample=sample, status=PhenotypeStatus.UNKNOWN
+            case=oldest_analysis.case,
+            sample=sample,
+            status=PhenotypeStatus.UNKNOWN,
+            should_deliver_sample=True,
         )
         analysis_store.session.add(link)
     return analysis_store

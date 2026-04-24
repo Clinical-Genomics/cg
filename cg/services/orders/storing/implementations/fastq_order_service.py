@@ -3,6 +3,7 @@ from datetime import datetime
 
 from cg.constants import DataDelivery, GenePanelMasterList, Priority, Workflow
 from cg.constants.constants import CustomerId
+from cg.constants.lims import LimsStatus
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
@@ -65,7 +66,10 @@ class StoreFastqOrderService(StoreOrderService):
                 )
                 self._create_maf_case(db_sample=db_sample, db_order=db_order, db_case=db_case)
                 case_sample: CaseSample = self.status_db.relate_sample(
-                    case=db_case, sample=db_sample, status=StatusEnum.unknown
+                    case=db_case,
+                    sample=db_sample,
+                    status=StatusEnum.unknown,
+                    should_deliver_sample=True,
                 )
                 self.status_db.add_multiple_items_to_store([db_sample, case_sample, db_case])
                 new_samples.append(db_sample)
@@ -109,20 +113,24 @@ class StoreFastqOrderService(StoreOrderService):
         application_version: ApplicationVersion = (
             self.status_db.get_current_application_version_by_tag(tag=sample.application)
         )
+        lims_status: LimsStatus = (
+            LimsStatus.DONE if application_version.application.is_external else LimsStatus.PENDING
+        )
         return self.status_db.add_sample(
-            name=sample.name,
-            sex=sample.sex or SexEnum.unknown,
+            application_version=application_version,
+            capture_kit=sample.capture_kit,
             comment=sample.comment,
+            customer=customer,
             internal_id=sample._generated_lims_id,
+            lims_status=lims_status,
+            name=sample.name,
+            order=order_name,
             ordered=datetime.now(),
             original_ticket=ticket_id,
             priority=sample.priority,
-            tumour=sample.tumour,
-            capture_kit=sample.capture_kit,
+            sex=sample.sex or SexEnum.unknown,
             subject_id=sample.subject_id,
-            customer=customer,
-            application_version=application_version,
-            order=order_name,
+            tumour=sample.tumour,
         )
 
     def _create_maf_case(self, db_sample: Sample, db_order: Order, db_case: Case) -> None:
@@ -149,7 +157,10 @@ class StoreFastqOrderService(StoreOrderService):
                 customer_internal_id=CustomerId.CG_INTERNAL_CUSTOMER
             )
             maf_case_sample: CaseSample = self.status_db.relate_sample(
-                case=maf_case, sample=db_sample, status=StatusEnum.unknown
+                case=maf_case,
+                sample=db_sample,
+                status=StatusEnum.unknown,
+                should_deliver_sample=False,
             )
             maf_order.cases.append(maf_case)
             self.status_db.add_multiple_items_to_store([maf_case, maf_case_sample])

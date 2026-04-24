@@ -21,7 +21,9 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     InvalidFatherSexError,
     InvalidMotherSexError,
     InvalidVolumeError,
+    MissingSourceCommentError,
     MotherNotInCaseError,
+    NormalSampleNotAllowedError,
     OccupiedWellError,
     PedigreeError,
     SampleDoesNotExistError,
@@ -33,6 +35,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     StatusUnknownError,
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
+    TumourValueResetError,
     VolumeRequiredError,
     WellFormatError,
     WellPositionMissingError,
@@ -41,6 +44,11 @@ from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.sample_aliases import SampleInCase
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.order_types.balsamic_umi.models.order import BalsamicUmiOrder
+from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
+from cg.services.orders.validation.order_types.mip_rna.models.order import MIPRNAOrder
+from cg.services.orders.validation.order_types.nallo.models.order import NalloOrder
+from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
+from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.services.orders.validation.rules.case_sample.pedigree.validate_pedigree import (
     get_pedigree_errors,
 )
@@ -247,8 +255,8 @@ def validate_samples_exist(
     errors: list[SampleDoesNotExistError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_existing_samples:
-            sample: DbSample | None = store.get_sample_by_internal_id(sample.internal_id)
-            if not sample:
+            db_sample: DbSample | None = store.get_sample_by_internal_id(sample.internal_id)
+            if not db_sample:
                 error = SampleDoesNotExistError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
     return errors
@@ -279,7 +287,7 @@ def validate_sample_names_not_repeated(
     return [
         SampleNameRepeatedError(case_index=case_index, sample_index=sample_index)
         for case_index, sample_index, sample in new_samples
-        if sample_name_counter.get(sample.name) > 1 or sample.name in old_sample_names
+        if sample_name_counter.get(sample.name, 0) > 1 or sample.name in old_sample_names
     ]
 
 
@@ -542,5 +550,52 @@ def validate_sample_names_available(
     for case_index, sample_index, sample in order.enumerated_new_samples:
         if store.is_sample_name_used(sample=sample, customer_entry_id=customer_entry_id):
             error = SampleNameAlreadyExistsError(case_index=case_index, sample_index=sample_index)
+            errors.append(error)
+    return errors
+
+
+def validate_source_comment_required(
+    order: (
+        BalsamicOrder
+        | BalsamicUmiOrder
+        | MIPDNAOrder
+        | MIPRNAOrder
+        | NalloOrder
+        | RNAFusionOrder
+        | TomteOrder
+    ),
+    **kwargs,
+) -> list[MissingSourceCommentError]:
+    errors: list[MissingSourceCommentError] = []
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_new_samples:
+            if sample.source == "other" and not sample.source_comment:
+                error = MissingSourceCommentError(case_index=case_index, sample_index=sample_index)
+                errors.append(error)
+    return errors
+
+
+def validate_existing_samples_not_normal(
+    order: RNAFusionOrder, store: Store, **kwargs
+) -> list[NormalSampleNotAllowedError]:
+    errors: list[NormalSampleNotAllowedError] = []
+    for case_index, sample_index, sample in order.enumerated_existing_samples:
+        if db_sample := store.get_sample_by_internal_id(  # If it is not found in the database, the error should be raised elsewhere
+            sample.internal_id
+        ):
+            if not db_sample.is_tumour:
+                error = NormalSampleNotAllowedError(
+                    case_index=case_index, sample_index=sample_index
+                )
+                errors.append(error)
+    return errors
+
+
+def reset_tumour_values_to_true(order: RNAFusionOrder, **kwargs):
+    errors: list[TumourValueResetError] = []
+    for case_index, sample_index, sample in order.enumerated_new_samples:
+        if not sample.tumour:
+            sample.tumour = True
+            error = TumourValueResetError(case_index=case_index, sample_index=sample_index)
             errors.append(error)
     return errors

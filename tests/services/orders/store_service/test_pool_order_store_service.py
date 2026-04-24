@@ -4,13 +4,29 @@ The function store_order_data_in_status_db is never expected to fail, as its inp
 have always been validated before calling the function.
 """
 
+from unittest.mock import create_autospec
+
 import pytest
 
 from cg.constants import Workflow
+from cg.constants.lims import LimsStatus
+from cg.models.orders.sample_base import ContainerEnum, PriorityEnum
+from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.implementations.pool_order_service import StorePoolOrderService
+from cg.services.orders.validation.constants import IndexEnum
 from cg.services.orders.validation.models.order_aliases import OrderWithIndexedSamples
-from cg.store.models import Case, CaseSample, Pool, Sample
+from cg.services.orders.validation.order_types.rml.models.sample import RMLSample
+from cg.store.models import (
+    Application,
+    ApplicationVersion,
+    Case,
+    CaseSample,
+    Customer,
+    Pool,
+    Sample,
+)
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 @pytest.mark.parametrize(
@@ -64,10 +80,53 @@ def test_store_pool_order_data_in_status_db(
     assert len(new_cases) == 4
     assert store_to_submit_and_validate_orders._get_query(table=CaseSample).count() == 4
 
-    # THEN the samples are not set for invoicing
+    # THEN the samples are not set for invoicing but should be delivered
     for sample in new_samples:
         assert sample.no_invoice
+        assert sample.links[0].should_deliver_sample
 
     # THEN the cases should have the correct data analysis
     for case in new_cases:
         assert case.data_analysis == workflow
+
+
+@pytest.mark.parametrize(
+    "is_external, expected_lims_status", [(True, LimsStatus.DONE), (False, LimsStatus.PENDING)]
+)
+def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_status: LimsStatus):
+    # GIVEN a store containing an external application
+    application: Application = create_autospec(Application, is_external=is_external)
+    application_version: ApplicationVersion = create_autospec(
+        ApplicationVersion, application=application
+    )
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    customer: Customer = create_autospec(Customer)
+
+    # GIVEN an order sample
+    fastq_sample = RMLSample(
+        application="app",
+        concentration=10.0,
+        container=ContainerEnum.tube,
+        index=IndexEnum.TWIST_UDI_A,
+        name="sample",
+        pool="pool",
+        priority=PriorityEnum.standard,
+        volume=20,
+    )
+
+    # GIVEN a store case order service
+    store_order_service = StorePoolOrderService(
+        status_db=status_db.as_type, lims_service=create_autospec(OrderLimsService)
+    )
+
+    # WHEN creating a db sample with the application
+    store_order_service._create_db_sample(
+        application_version=application_version,
+        customer=customer,
+        order_name="order",
+        sample=fastq_sample,
+        ticket_id="1234567",
+    )
+
+    # THEN the sample should be created with LimsStatus DONE
+    assert status_db.as_mock.add_sample.call_args[1]["lims_status"] == expected_lims_status

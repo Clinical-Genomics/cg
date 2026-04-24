@@ -2,6 +2,7 @@ from click.testing import CliRunner
 
 from cg.cli.add import add
 from cg.constants import EXIT_SUCCESS, Priority
+from cg.constants.process import EXIT_PARSE_ERROR
 from cg.constants.subject import Sex
 from cg.models.cg_config import CGConfig
 from cg.store.models import Customer, Sample
@@ -29,6 +30,8 @@ def test_add_sample_missing_customer(cli_runner: CliRunner, base_context: CGConf
             application,
             "--original-ticket",
             original_ticket,
+            "--lims-status",
+            "pending",
             customer_id,
             name,
         ],
@@ -62,6 +65,8 @@ def test_add_sample_bad_application(
             application,
             "--original-ticket",
             original_ticket,
+            "-ls",
+            "pending",
             customer.internal_id,
             name,
         ],
@@ -94,6 +99,8 @@ def test_add_sample_required(cli_runner: CliRunner, base_context: CGConfig, help
             application_tag,
             "--original-ticket",
             original_ticket,
+            "--lims-status",
+            "top-up",
             customer.internal_id,
             name,
         ],
@@ -130,6 +137,8 @@ def test_add_sample_lims_id(cli_runner: CliRunner, base_context: CGConfig, helpe
             application_tag,
             "--original-ticket",
             original_ticket,
+            "--lims-status",
+            "pending",
             "--lims",
             lims_id,
             customer.internal_id,
@@ -171,6 +180,8 @@ def test_add_sample_order(
             application_tag,
             "--original-ticket",
             original_ticket,
+            "--lims-status",
+            "re-prep",
             "--order",
             order,
             customer.internal_id,
@@ -212,6 +223,8 @@ def test_add_sample_when_down_sampled(
             application_tag,
             "--original-ticket",
             original_ticket,
+            "--lims-status",
+            "done",
             "--down-sampled",
             down_sampled_to,
             customer.internal_id,
@@ -252,6 +265,8 @@ def test_add_sample_priority(
             application_tag,
             "--original-ticket",
             original_ticket,
+            "--lims-status",
+            "pending",
             "--priority",
             Priority.priority.name,
             customer.internal_id,
@@ -265,3 +280,42 @@ def test_add_sample_priority(
     sample_query = disk_store._get_query(table=Sample)
     assert sample_query.count() == 1
     assert sample_query.first().priority_human == Priority.priority.name
+
+
+def test_add_sample_invalid_lims_status(
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    disk_store: Store,
+    application_tag: str,
+    helpers: StoreHelpers,
+):
+    """Test adding a sample with invalid LIMS status crashes."""
+    # GIVEN a database with a customer and an application
+    helpers.ensure_application(store=disk_store, tag=application_tag)
+    helpers.ensure_application_version(store=disk_store, application_tag=application_tag)
+    customer: Customer = helpers.ensure_customer(store=disk_store)
+    name = "sample_name"
+    original_ticket = "dummy ticket"
+    # WHEN adding a sample
+    result = cli_runner.invoke(
+        add,
+        [
+            "sample",
+            "--sex",
+            Sex.MALE,
+            "--application-tag",
+            application_tag,
+            "--original-ticket",
+            original_ticket,
+            "--lims-status",
+            "stinky",
+            "--priority",
+            Priority.priority.name,
+            customer.internal_id,
+            name,
+        ],
+        obj=base_context,
+    )
+
+    # THEN it should fail
+    assert result.exit_code == EXIT_PARSE_ERROR

@@ -6,6 +6,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from cg.apps.lims import LimsAPI
+from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
 from cg.exc import CaseNotConfiguredError, MultipleCaptureKitsError
 from cg.meta.workflow.fastq import BalsamicFastqHandler
@@ -30,7 +31,10 @@ def case_with_sample() -> Case:
     return case_with_sample
 
 
-def test_get_config(balsamic_configurator: BalsamicConfigurator, case_id: str, tmp_path: Path):
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
+def test_get_config(
+    balsamic_configurator: BalsamicConfigurator, case_id: str, tmp_path: Path, workflow: Workflow
+):
     """Tests that the get_config method returns a BalsamicCaseConfig and that fields can be overridden with flags."""
     # GIVEN a Balsamic configurator with an existing config file
     balsamic_configurator.root_dir = tmp_path
@@ -44,6 +48,7 @@ def test_get_config(balsamic_configurator: BalsamicConfigurator, case_id: str, t
     balsamic_configurator.store.get_case_by_internal_id_strict = Mock(
         return_value=case_to_configure
     )
+    balsamic_configurator.store.get_case_workflow = Mock(return_value=workflow)
 
     # WHEN getting the config
     config: BalsamicCaseConfig = balsamic_configurator.get_config(
@@ -73,6 +78,7 @@ def test_get_config_missing_config_file(
     balsamic_configurator.store.get_case_by_internal_id_strict = Mock(
         return_value=case_to_configure
     )
+    balsamic_configurator.store.get_case_workflow = Mock(return_value=Workflow.BALSAMIC)
 
     # WHEN getting the config
     # THEN it should raise a CaseNotConfiguredError
@@ -80,7 +86,8 @@ def test_get_config_missing_config_file(
         balsamic_configurator.get_config(case_id=case_id)
 
 
-def test_configure(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
+def test_configure(cg_balsamic_config: BalsamicConfig, workflow: Workflow, mocker: MockerFixture):
     # GIVEN a fastq handler
     fastq_handler: BalsamicFastqHandler = create_autospec(BalsamicFastqHandler)
     fastq_handler.get_fastq_dir = Mock(return_value=Path("some/path"))
@@ -93,6 +100,7 @@ def test_configure(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
     store.get_case_by_internal_id_strict = Mock(
         return_value=create_autospec(Case, slurm_priority=SlurmQos.NORMAL)
     )
+    store.get_case_workflow = Mock(return_value=workflow)
 
     # GIVEN Balsamic configurator
     balsamic_configurator = BalsamicConfigurator(
@@ -127,10 +135,14 @@ def test_configure(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
         head_job_partition=cg_balsamic_config.head_job_partition,
         qos=SlurmQos.NORMAL,
         sample_config=Path(cg_balsamic_config.root, "case_id", "case_id.json"),
+        workflow=workflow,
     )
 
 
-def test_configure_with_flags(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
+def test_configure_with_flags(
+    cg_balsamic_config: BalsamicConfig, workflow: Workflow, mocker: MockerFixture
+):
     # GIVEN a fastq handler
     fastq_handler: BalsamicFastqHandler = create_autospec(BalsamicFastqHandler)
     fastq_handler.get_fastq_dir = Mock(return_value=Path("some/path"))
@@ -143,6 +155,7 @@ def test_configure_with_flags(cg_balsamic_config: BalsamicConfig, mocker: Mocker
     store.get_case_by_internal_id_strict = Mock(
         return_value=create_autospec(Case, slurm_priority=SlurmQos.NORMAL)
     )
+    store.get_case_workflow = Mock(return_value=workflow)
 
     # GIVEN a Balsamic configurator
     balsamic_configurator = BalsamicConfigurator(
@@ -185,11 +198,12 @@ def test_configure_with_flags(cg_balsamic_config: BalsamicConfig, mocker: Mocker
         head_job_partition=cg_balsamic_config.head_job_partition,
         qos=SlurmQos.NORMAL,
         sample_config=Path(cg_balsamic_config.root, "case_id", "case_id.json"),
+        workflow=workflow,
         workflow_profile=workflow_profile,
     )
 
 
-def test_configure_mixed_capture_kits(cg_balsamic_config: BalsamicConfig, mocker: MockerFixture):
+def test_configure_mixed_capture_kits(cg_balsamic_config: BalsamicConfig):
     # GIVEN a fastq handler
     fastq_handler: BalsamicFastqHandler = create_autospec(BalsamicFastqHandler)
     fastq_handler.get_fastq_dir = Mock(return_value=Path("some/path"))

@@ -12,7 +12,7 @@ from cg.constants.constants import SequencingQCStatus
 from cg.constants.devices import DeviceType
 from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
-from cg.constants.sequencing import Sequencers
+from cg.constants.sequencing import ReadType, Sequencers
 from cg.constants.subject import PhenotypeStatus, Sex
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.illumina.data_transfer.models import (
@@ -147,6 +147,7 @@ class StoreHelpers:
         is_accredited: bool = False,
         version: int = 1,
         valid_from: datetime = datetime.now(),
+        read_type: str = ReadType.SHORT_READ,
         **kwargs,
     ) -> ApplicationVersion:
         """Utility function to return existing or create application version for tests."""
@@ -164,6 +165,7 @@ class StoreHelpers:
                 description=description,
                 is_accredited=is_accredited,
                 sequencing_depth=sequencing_depth,
+                read_type=read_type,
                 **kwargs,
             )
 
@@ -216,6 +218,7 @@ class StoreHelpers:
         prep_category: str = "wgs",
         description: str = "dummy_description",
         is_archived: bool = False,
+        read_type: str = ReadType.SHORT_READ,
         **kwargs,
     ) -> Application:
         """Ensure that application exists in store."""
@@ -227,6 +230,7 @@ class StoreHelpers:
                 prep_category=prep_category,
                 description=description,
                 is_archived=is_archived,
+                read_type=read_type,
                 **kwargs,
             )
         return application
@@ -243,6 +247,7 @@ class StoreHelpers:
         is_accredited: bool = False,
         is_external: bool = False,
         min_sequencing_depth: int = 30,
+        read_type: str = ReadType.SHORT_READ,
         **kwargs,
     ) -> Application:
         """Utility function to add a application to a store."""
@@ -264,6 +269,7 @@ class StoreHelpers:
             limitations="A limitation",
             is_external=is_external,
             min_sequencing_depth=min_sequencing_depth,
+            read_type=read_type,
             **kwargs,
         )
         store.session.add(application)
@@ -892,13 +898,19 @@ class StoreHelpers:
         store: Store,
         sample: Sample,
         case: Case,
+        should_deliver_sample: bool = True,
         status: str = PhenotypeStatus.UNKNOWN,
         father: Sample = None,
         mother: Sample = None,
     ) -> CaseSample:
         """Utility function to link a sample to a case."""
         link = store.relate_sample(
-            sample=sample, case=case, status=status, father=father, mother=mother
+            sample=sample,
+            case=case,
+            status=status,
+            father=father,
+            mother=mother,
+            should_deliver_sample=should_deliver_sample,
         )
         store.session.add(link)
         store.session.commit()
@@ -961,12 +973,21 @@ class StoreHelpers:
         return sample_obj
 
     @classmethod
-    def relate_samples(cls, base_store: Store, case: Case, samples: list[Sample]):
+    def relate_samples(
+        cls,
+        base_store: Store,
+        case: Case,
+        samples: list[Sample],
+        should_deliver_sample: bool = True,
+    ):
         """Utility function to relate many samples to one case."""
 
         for sample in samples:
             link = base_store.relate_sample(
-                case=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+                case=case,
+                sample=sample,
+                status=PhenotypeStatus.UNKNOWN,
+                should_deliver_sample=should_deliver_sample,
             )
             base_store.session.add(link)
             base_store.session.commit()

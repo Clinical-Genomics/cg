@@ -4,8 +4,10 @@ import logging
 from datetime import datetime, timezone
 from typing import Any
 
+import requests
 from google.auth.transport.requests import Request
 from google.oauth2.service_account import IDTokenCredentials
+from requests import Response
 
 from cg.apps.tb.dto.create_job_request import CreateJobRequest
 from cg.apps.tb.dto.summary_response import AnalysisSummary, SummariesResponse
@@ -80,6 +82,12 @@ class TrailblazerAPI:
             self._refresh_credentials()
 
         return {"Authorization": f"Bearer {self._credentials.token}"}
+
+    def _get_auth_headers(self, auth_token: str | None) -> dict[str, str]:
+        if auth_token:
+            return self.auth_header | {"X-On-Behalf-Of": auth_token}
+        else:
+            return self.auth_header
 
     def query_trailblazer(
         self, command: str, request_body: dict, method: str = APIMethods.POST
@@ -208,6 +216,23 @@ class TrailblazerAPI:
         response = self.query_trailblazer(command=endpoint, request_body={}, method=APIMethods.GET)
         response_data = SummariesResponse.model_validate(response)
         return response_data.summaries
+
+    def mark_analyses_as_delivered(
+        self, trailblazer_ids: list[int], auth_token: str | None = None
+    ) -> Response:
+        analysis_dicts = []
+        for trailblazer_id in trailblazer_ids:
+            analysis_dict = {"id": trailblazer_id, "is_delivered": True}
+            analysis_dicts.append(analysis_dict)
+        LOG.info(f"Setting analyses {trailblazer_ids} as delivered in Trailblazer")
+        response: Response = requests.patch(
+            json={"analyses": analysis_dicts},
+            headers=self._get_auth_headers(auth_token=auth_token),
+            url=f"{self.host}/analyses",
+        )
+        if not response.ok:
+            raise TrailblazerAPIHTTPError(response.reason)
+        return response
 
     def get_analyses_to_deliver(self, order_id: int) -> list[TrailblazerAnalysis]:
         """Return the analyses in the order ready to be delivered."""

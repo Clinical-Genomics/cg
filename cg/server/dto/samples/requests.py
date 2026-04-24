@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+from cg.constants.lims import LimsStatus
 from cg.models.orders.constants import OrderType
 
 
@@ -15,3 +16,18 @@ class SamplesRequest(BaseModel):
     enquiry: str | None = None
     page: int = 1
     page_size: int | None = Field(50, alias="pageSize")
+
+
+class SampleUpdate(BaseModel):
+    internal_id: str
+    lims_status: LimsStatus
+
+
+class SamplesUpdateRequest(BaseModel):
+    samples: list[SampleUpdate]
+
+
+class UnhandledSamplesRequest(BaseModel):
+    lims_status: LimsStatus
+    page: int
+    page_size: int

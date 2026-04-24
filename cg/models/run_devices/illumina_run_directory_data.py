@@ -200,8 +200,16 @@ class IlluminaRunDirectoryData:
 
     @property
     def demultiplex_software_info_path(self) -> Path:
-        """Return demultiplex software info path."""
-        demux_run_dir = self.get_demultiplexed_runs_dir()
+        """Return demultiplex software info path.
+        Tries summary/<version>/highlevel_summary.json first, then falls back to dragen-replay.json.
+        """
+        demux_run_dir: Path = self.get_demultiplexed_runs_dir()
+        summary_dir: Path = Path(demux_run_dir, DemultiplexingDirsAndFiles.SUMMARY_DIR)
+        matches: list[Path] = list(
+            summary_dir.glob(f"*/{DemultiplexingDirsAndFiles.HIGHLEVEL_SUMMARY_FILE}")
+        )
+        if matches:
+            return matches[0]
         return Path(demux_run_dir, DemultiplexingDirsAndFiles.DEMUX_VERSION_FILE)
 
     @property
@@ -244,7 +252,7 @@ class IlluminaRunDirectoryData:
 
     def has_demultiplexing_started_on_sequencer(self) -> bool:
         """Check if demultiplexing has started on the NovaSeqX machine."""
-        latest_analysis: Path = get_latest_analysis_path(self.get_demultiplexed_runs_dir())
+        latest_analysis: Path = get_latest_analysis_path(self.get_sequencing_runs_dir())
         if not latest_analysis:
             return False
         return Path(
@@ -307,7 +315,23 @@ class IlluminaRunDirectoryData:
 
     @property
     def demultiplexing_started_at(self) -> datetime.datetime | None:
-        """Get the demultiplexing started time stamp from the sequencing run dir."""
+        """Get the demultiplexing started timestamp.
+        For on-instrument runs, uses the creation time of the BCLConvert directory.
+        For CG-demultiplexed runs, uses the creation time of demuxstarted.txt.
+        """
+        if self.has_demultiplexing_started_on_sequencer():
+            analysis_path: Path | None = get_latest_analysis_path(self.get_sequencing_runs_dir())
+            if not analysis_path:
+                return None
+            bcl_convert_dir: Path = Path(
+                analysis_path,
+                DemultiplexingDirsAndFiles.DATA,
+                DemultiplexingDirsAndFiles.BCL_CONVERT,
+            )
+            try:
+                return format_time_from_ctime(get_source_creation_time_stamp(bcl_convert_dir))
+            except FileNotFoundError:
+                return None
         try:
             time: float = get_source_creation_time_stamp(self.demultiplexing_started_path)
             return format_time_from_ctime(time)
@@ -317,7 +341,23 @@ class IlluminaRunDirectoryData:
 
     @property
     def demultiplexing_completed_at(self) -> datetime.datetime | None:
-        """Get the demultiplexing completed time stamp from the demultiplexed runs dir."""
+        """Get the demultiplexing completed timestamp.
+        For on-instrument runs, uses the creation time of Secondary_Analysis_Complete.txt.
+        For CG-demultiplexed runs, uses the creation time of demuxcomplete.txt.
+        """
+        if self.has_demultiplexing_started_on_sequencer():
+            analysis_path: Path | None = get_latest_analysis_path(self.get_sequencing_runs_dir())
+            if not analysis_path:
+                return None
+            completed_file: Path = Path(
+                analysis_path,
+                DemultiplexingDirsAndFiles.DATA,
+                DemultiplexingDirsAndFiles.ANALYSIS_COMPLETED,
+            )
+            try:
+                return format_time_from_ctime(get_source_creation_time_stamp(completed_file))
+            except FileNotFoundError:
+                return None
         try:
             time: float = get_source_creation_time_stamp(self.demux_complete_path)
             return format_time_from_ctime(time)

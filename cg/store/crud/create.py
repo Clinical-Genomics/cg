@@ -115,6 +115,7 @@ class CreateMixin(ReadHandler):
         description: str,
         percent_kth: int,
         percent_reads_guaranteed: int,
+        read_type: str,
         is_accredited: bool = False,
         min_sequencing_depth: int = 0,
         **kwargs,
@@ -129,6 +130,7 @@ class CreateMixin(ReadHandler):
             min_sequencing_depth=min_sequencing_depth,
             percent_kth=percent_kth,
             percent_reads_guaranteed=percent_reads_guaranteed,
+            read_type=read_type,
             **kwargs,
         )
 
@@ -260,12 +262,15 @@ class CreateMixin(ReadHandler):
         case: Case,
         sample: Sample,
         status: str,
+        should_deliver_sample: bool,
         mother: Sample = None,
         father: Sample = None,
     ) -> CaseSample:
         """Relate a sample record to a family record."""
 
-        new_record: CaseSample = CaseSample(status=status)
+        new_record: CaseSample = CaseSample(
+            status=status, should_deliver_sample=should_deliver_sample
+        )
         new_record.case = case
         new_record.sample = sample
         new_record.mother = mother

@@ -6,13 +6,10 @@ from itertools import permutations
 from pathlib import Path
 from typing import Any
 
-from housekeeper.store.models import File
-
-from cg.clients.chanjo2.models import CoverageMetricsChanjo1
+from cg.apps.coverage import ChanjoAPI, chanjo_api_for_genome_build
 from cg.constants import Workflow
-from cg.constants.constants import GenomeVersion
+from cg.constants.constants import WORKFLOW_TO_GENOME_VERSION_MAP, GenomeVersion
 from cg.constants.nf_analysis import (
-    RAREDISEASE_COVERAGE_FILE_TAGS,
     RAREDISEASE_METRIC_CONDITIONS_WES,
     RAREDISEASE_METRIC_CONDITIONS_WGS,
     RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION,
@@ -20,11 +17,11 @@ from cg.constants.nf_analysis import (
 from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
+from cg.meta.workflow.utils.chanjo1 import CoverageMetricsChanjo1, chanjo1_get_sample_coverage
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.raredisease.raredisease import RarediseaseQCMetrics
-from cg.resources import RAREDISEASE_BUNDLE_FILENAMES_PATH
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -40,25 +37,24 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         workflow: Workflow = Workflow.RAREDISEASE,
     ):
         super().__init__(config=config, workflow=workflow)
-        self.root_dir: str = config.raredisease.root
-        self.workflow_bin_path: str = config.raredisease.workflow_bin_path
-        self.profile: str = config.raredisease.profile
-        self.conda_env: str = config.raredisease.conda_env
+        self.account: str = config.raredisease.slurm.account
+        self.chanjo_api: ChanjoAPI = chanjo_api_for_genome_build(
+            config=config, genome_build=WORKFLOW_TO_GENOME_VERSION_MAP[Workflow.RAREDISEASE]
+        )
         self.conda_binary: str = config.raredisease.conda_binary
-        self.platform: str = config.raredisease.platform
+        self.conda_env: str = config.raredisease.conda_env
+        self.email: str = config.raredisease.slurm.mail_user
         self.params: str = config.raredisease.params
-        self.workflow_config_path: str = config.raredisease.config
+        self.pipeline_deliverables = Path(config.raredisease.pipeline_deliverables)
+        self.platform: str = config.raredisease.platform
+        self.profile: str = config.raredisease.profile
         self.resources: str = config.raredisease.resources
+        self.revision: str = config.raredisease.revision
+        self.root_dir: str = config.raredisease.root
         self.tower_binary_path: str = config.tower_binary_path
         self.tower_workflow: str = config.raredisease.tower_workflow
-        self.account: str = config.raredisease.slurm.account
-        self.email: str = config.raredisease.slurm.mail_user
-        self.revision: str = config.raredisease.revision
-
-    @staticmethod
-    def get_bundle_filenames_path() -> Path:
-        """Return Raredisease bundle filenames path."""
-        return RAREDISEASE_BUNDLE_FILENAMES_PATH
+        self.workflow_bin_path: str = config.raredisease.workflow_bin_path
+        self.workflow_config_path: str = config.raredisease.config
 
     def get_qc_conditions_for_workflow(self, sample_id: str) -> dict:
         """Return Raredisease workflow metric conditions for a sample."""
@@ -151,30 +147,12 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
         metric_conditions["gender"]["threshold"] = sample.sex
 
-    def get_sample_coverage_file_path(self, bundle_name: str, sample_id: str) -> str | None:
-        """Return the Raredisease d4 coverage file path."""
-        coverage_file_tags: list[str] = RAREDISEASE_COVERAGE_FILE_TAGS + [sample_id]
-        coverage_file: File | None = self.housekeeper_api.get_file_from_latest_version(
-            bundle_name=bundle_name, tags=coverage_file_tags
-        )
-        if coverage_file:
-            return coverage_file.full_path
-        LOG.warning(f"No coverage file found with the tags: {coverage_file_tags}")
-        return None
-
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
     ) -> CoverageMetricsChanjo1 | None:
-        sample_coverage: dict = self.chanjo_api.sample_coverage(
-            sample_id=sample_id, panel_genes=gene_ids
+        return chanjo1_get_sample_coverage(
+            chanjo_api=self.chanjo_api, sample_id=sample_id, gene_ids=gene_ids
         )
-        if sample_coverage:
-            return CoverageMetricsChanjo1(
-                coverage_completeness_percent=sample_coverage.get("mean_completeness"),
-                mean_coverage=sample_coverage.get("mean_coverage"),
-            )
-        LOG.warning(f"Could not calculate sample coverage for: {sample_id}")
-        return None
 
     def get_scout_upload_case_tags(self) -> dict:
         """Return Raredisease Scout upload case tags."""

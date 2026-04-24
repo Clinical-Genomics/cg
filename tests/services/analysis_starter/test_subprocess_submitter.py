@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, create_autospec
 import pytest
 from pytest_mock import MockerFixture
 
+from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
@@ -46,6 +47,7 @@ from cg.services.analysis_starter.submitters.subprocess.submitter import (
             head_job_partition="head_job_partition",
             qos=SlurmQos.LOW,
             sample_config=Path("sample_config"),
+            workflow=Workflow.BALSAMIC,
         ),
     ],
     ids=["microSALT", "MIP-DNA", "BALSAMIC"],

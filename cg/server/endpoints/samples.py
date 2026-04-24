@@ -1,10 +1,16 @@
 from http import HTTPStatus
 
-from flask import Blueprint, abort, g, jsonify, request
+from flask import Blueprint, Response, abort, g, jsonify, request
+from pydantic import ValidationError
 
-from cg.exc import AuthorisationError
-from cg.server.dto.samples.requests import CollaboratorSamplesRequest, SamplesRequest
-from cg.server.dto.samples.samples_response import SamplesResponse
+from cg.exc import AuthorisationError, SampleNotFoundError
+from cg.server.dto.samples.requests import (
+    CollaboratorSamplesRequest,
+    SamplesRequest,
+    SamplesUpdateRequest,
+    UnhandledSamplesRequest,
+)
+from cg.server.dto.samples.samples_response import SamplesResponse, UnhandledSamplesResponse
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import db, sample_service
 from cg.store.models import Customer, Sample
@@ -42,7 +48,7 @@ def parse_sample_in_collaboration(sample_id):
     return jsonify(**sample.to_dict(links=True))
 
 
-@SAMPLES_BLUEPRINT.route("/samples")
+@SAMPLES_BLUEPRINT.route("/samples", methods=["GET"])
 def get_samples():
     """Return samples."""
     samples_request = SamplesRequest.model_validate(request.args.to_dict())
@@ -51,3 +57,34 @@ def get_samples():
     except AuthorisationError:
         return abort(HTTPStatus.FORBIDDEN)
     return jsonify(samples=samples, total=total)
+
+
+@SAMPLES_BLUEPRINT.route("/unhandled_samples", methods=["GET"])
+def get_unhandled_samples():
+    try:
+        req: UnhandledSamplesRequest = UnhandledSamplesRequest.model_validate(
+            request.args.to_dict()
+        )
+    except ValidationError:
+        return abort(code=HTTPStatus.BAD_REQUEST)
+    else:
+        samples, total = db.get_paginated_unhandled_samples(
+            lims_status=req.lims_status, page=req.page, page_size=req.page_size
+        )
+        response = UnhandledSamplesResponse.from_samples(samples=samples, total=total)
+        return jsonify(response.model_dump())
+
+
+@SAMPLES_BLUEPRINT.route("/samples", methods=["PATCH"])
+def update_samples():
+    """Update the lims_status attribute of a list of samples."""
+    try:
+        samples_request = SamplesUpdateRequest.model_validate(request.json)
+        for sample in samples_request.samples:
+            db.update_sample_lims_status(
+                internal_id=sample.internal_id, lims_status=sample.lims_status
+            )
+    except (SampleNotFoundError, ValidationError):
+        return abort(HTTPStatus.BAD_REQUEST)
+    db.commit_to_store()
+    return Response(status=HTTPStatus.NO_CONTENT)

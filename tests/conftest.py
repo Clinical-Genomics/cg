@@ -15,6 +15,7 @@ import pytest
 from housekeeper.store.models import File, Version
 from pytest_mock import MockFixture
 from requests import Response
+from sqlalchemy import event
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -40,7 +41,9 @@ from cg.constants.constants import (
 )
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.lims import LimsStatus
 from cg.constants.priority import SlurmQos
+from cg.constants.sequencing import ReadType
 from cg.constants.subject import Sex
 from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json, write_json
@@ -53,7 +56,7 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion_analysis_api import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
-from cg.models.cg_config import CGConfig, PDCArchivingDirectory
+from cg.models.cg_config import CGConfig, ChanjoConfig, PDCArchivingDirectory
 from cg.models.compression_data import CompressionData
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -61,7 +64,7 @@ from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
 from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
 from cg.services.orders.storing.constants import MAF_ORDER_ID
-from cg.store.database import create_all_tables, drop_all_tables, initialize_database
+from cg.store.database import create_all_tables, drop_all_tables, get_engine, initialize_database
 from cg.store.models import (
     Application,
     ApplicationVersion,
@@ -424,9 +427,9 @@ def cg_config_object(base_config_dict: dict) -> CGConfig:
 
 
 @pytest.fixture
-def chanjo_config() -> dict[str, dict[str, str]]:
+def chanjo_config() -> ChanjoConfig:
     """Return Chanjo config."""
-    return {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
+    return ChanjoConfig(config_path="chanjo_config", binary_path="chanjo")
 
 
 @pytest.fixture
@@ -1460,11 +1463,20 @@ def wgs_long_read_application_tag() -> str:
     return "LWPBELB070"
 
 
+def add_mysql_compat_guard(engine):
+    @event.listens_for(engine, "before_cursor_execute")
+    def check_sql(conn, cursor, statement, parameters, context, executemany):
+        # IS NOT with a string, invalid MySQL but will be a false positive in Sqlite
+        if "IS NOT ?" in statement:
+            raise RuntimeError(f"Not compatible with mysql: IS NOT with string value.\n{statement}")
+
+
 @pytest.fixture
 def store() -> Generator[Store, None, None]:
     """Return a CG store."""
     initialize_database("sqlite:///")
     _store = Store()
+    add_mysql_compat_guard(get_engine())
     create_all_tables()
     yield _store
     drop_all_tables()
@@ -1560,6 +1572,7 @@ def base_store(
             percent_kth=80,
             percent_reads_guaranteed=75,
             target_reads=10,
+            read_type=ReadType.SHORT_READ,
         ),
         store.add_application(
             tag="EXXCUSR000",
@@ -1570,6 +1583,7 @@ def base_store(
             percent_kth=80,
             percent_reads_guaranteed=75,
             target_reads=10,
+            read_type=ReadType.SHORT_READ,
         ),
         store.add_application(
             tag="WGSPCFC060",
@@ -1580,6 +1594,7 @@ def base_store(
             percent_kth=80,
             percent_reads_guaranteed=75,
             target_reads=10,
+            read_type=ReadType.SHORT_READ,
         ),
         store.add_application(
             tag="RMLP05R800",
@@ -1589,6 +1604,7 @@ def base_store(
             percent_kth=80,
             percent_reads_guaranteed=75,
             target_reads=10,
+            read_type=ReadType.SHORT_READ,
         ),
         store.add_application(
             tag="WGSPCFC030",
@@ -1601,6 +1617,7 @@ def base_store(
             percent_kth=80,
             percent_reads_guaranteed=75,
             min_sequencing_depth=30,
+            read_type=ReadType.SHORT_READ,
         ),
         store.add_application(
             tag="METLIFR020",
@@ -1610,6 +1627,7 @@ def base_store(
             target_reads=400000,
             percent_kth=80,
             percent_reads_guaranteed=75,
+            read_type=ReadType.SHORT_READ,
         ),
         store.add_application(
             tag="METNXTR020",
@@ -1619,6 +1637,7 @@ def base_store(
             target_reads=200000,
             percent_kth=80,
             percent_reads_guaranteed=75,
+            read_type=ReadType.SHORT_READ,
         ),
         store.add_application(
             tag="MWRNXTR003",
@@ -1628,6 +1647,7 @@ def base_store(
             percent_kth=80,
             percent_reads_guaranteed=75,
             target_reads=10,
+            read_type=ReadType.SHORT_READ,
         ),
         store.add_application(
             tag=apptag_rna,
@@ -1639,6 +1659,7 @@ def base_store(
             is_accredited=True,
             target_reads=10,
             min_sequencing_depth=30,
+            read_type=ReadType.SHORT_READ,
         ),
         store.add_application(
             tag="VWGDPTR001",
@@ -1648,6 +1669,7 @@ def base_store(
             percent_kth=80,
             percent_reads_guaranteed=75,
             target_reads=10,
+            read_type=ReadType.SHORT_READ,
         ),
     ]
 
@@ -1991,8 +2013,10 @@ def context_config(
             "binary_path": "echo",
             "cache_version": "19.0.2",
             "cadd_path": str(cg_dir),
+            "cancer_genelist": Path("gene_list"),
             "conda_binary": "a_conda_binary",
             "conda_env": "S_balsamic",
+            "cosmic_path": Path("cosmic_path"),
             "genome_interval_path": str(cg_dir),
             "gens_coverage_female_path": str(cg_dir),
             "gens_coverage_male_path": str(cg_dir),
@@ -2028,7 +2052,8 @@ def context_config(
             "swegen_snv": str(cg_dir),
             "swegen_sv": str(cg_dir),
         },
-        "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
+        "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage-hg19.yaml"},
+        "chanjo_38": {"binary_path": "echo", "config_path": "chanjo-stage-hg38.yaml"},
         "chanjo2": {"host": "chanjo2_host"},
         "crunchy": {
             "conda_binary": "a_conda_binary",
@@ -2143,6 +2168,7 @@ def context_config(
         },
         "nallo": {
             "binary_path": nextflow_binary.as_posix(),
+            "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_nallo",
@@ -2166,6 +2192,7 @@ def context_config(
         },
         "raredisease": {
             "binary_path": nextflow_binary.as_posix(),
+            "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_raredisease",
@@ -2188,6 +2215,7 @@ def context_config(
         },
         "tomte": {
             "binary_path": nextflow_binary.as_posix(),
+            "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_tomte",
@@ -2210,6 +2238,7 @@ def context_config(
         },
         "rnafusion": {
             "binary_path": nextflow_binary.as_posix(),
+            "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary.as_posix(),
             "conda_env": "S_RNAFUSION",
@@ -2235,6 +2264,7 @@ def context_config(
         "pdc": {"binary_path": "/bin/dsmc"},
         "taxprofiler": {
             "binary_path": nextflow_binary.as_posix(),
+            "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
             "root": str(taxprofiler_dir),
             "conda_binary": conda_binary.as_posix(),
@@ -2272,6 +2302,7 @@ def context_config(
         "statina": {
             "api_url": "api_url",
             "auth_path": "auth_path",
+            "data_set": "novaseqx_data_set",
             "host": "http://localhost:28002",
             "key": "key",
             "upload_path": "upload_path",
@@ -4058,9 +4089,10 @@ def store_with_case_and_sample_with_reads(
             customer_id=case.customer_id,
             internal_id=sample_internal_id,
             reads=100_000_000,
+            lims_status=LimsStatus.DONE,
         )
         sample: Sample = store.get_sample_by_internal_id(internal_id=sample_internal_id)
-        helpers.add_relationship(store=store, case=case, sample=sample)
+        helpers.add_relationship(store=store, case=case, sample=sample, should_deliver_sample=False)
 
     return store
 

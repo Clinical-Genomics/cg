@@ -1,9 +1,12 @@
+from typing import Callable
+
 from cg.services.orders.validation.rules.case.rules import (
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
     validate_existing_cases_belong_to_collaboration,
     validate_gene_panels_unique,
+    validate_samples_have_same_source,
 )
 from cg.services.orders.validation.rules.case_sample.rules import (
     validate_application_compatibility,
@@ -25,6 +28,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_sample_names_different_from_case_names,
     validate_sample_names_not_repeated,
     validate_samples_exist,
+    validate_source_comment_required,
     validate_subject_ids_different_from_case_names,
     validate_subject_ids_different_from_sample_names,
     validate_subject_sex_consistency,
@@ -36,16 +40,17 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_wells_contain_at_most_one_sample,
 )
 
-TOMTE_CASE_RULES: list[callable] = [
+TOMTE_CASE_RULES: list[Callable] = [
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
     validate_existing_cases_belong_to_collaboration,
     validate_gene_panels_exist,
     validate_gene_panels_unique,
+    validate_samples_have_same_source,
 ]
 
-TOMTE_CASE_SAMPLE_RULES: list[callable] = [
+TOMTE_CASE_SAMPLE_RULES: list[Callable] = [
     validate_application_compatibility,
     validate_application_exists,
     validate_application_not_archived,
@@ -64,6 +69,7 @@ TOMTE_CASE_SAMPLE_RULES: list[callable] = [
     validate_samples_exist,
     validate_sample_names_different_from_case_names,
     validate_sample_names_not_repeated,
+    validate_source_comment_required,
     validate_subject_ids_different_from_case_names,
     validate_subject_ids_different_from_sample_names,
     validate_subject_sex_consistency,
