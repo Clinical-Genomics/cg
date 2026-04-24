@@ -259,9 +259,6 @@ def expect_lims_sample_request(lims_server: HTTPServer, sample: Sample, bed_name
     )
 
 
-_LIMS_BASE = "http://localhost:8888/lims"
-
-
 def expect_lims_sample_and_project(httpserver: HTTPServer, sample: Sample) -> None:
     """Register httpserver handlers for the LIMS sample and its project.
 
@@ -270,14 +267,16 @@ def expect_lims_sample_and_project(httpserver: HTTPServer, sample: Sample) -> No
     1. Return a sample XML where the project URI points back to the test httpserver.
     2. Register a minimal project handler so the lazy load succeeds.
     """
-    project_uri = f"{_LIMS_BASE}/api/v2/projects/ACC0001"
+    lims_base: str = f"http://{httpserver.host}:{httpserver.port}/lims"
 
-    sample_xml = f"""<smp:sample
+    project_uri: str = f"{lims_base}/api/v2/projects/ACC0001"
+
+    sample_xml: str = f"""<smp:sample
         xmlns:udf="http://genologics.com/ri/userdefined"
         xmlns:ri="http://genologics.com/ri"
         xmlns:file="http://genologics.com/ri/file"
         xmlns:smp="http://genologics.com/ri/sample"
-        uri="{_LIMS_BASE}/api/v2/samples/{sample.internal_id}"
+        uri="{lims_base}/api/v2/samples/{sample.internal_id}"
         limsid="{sample.internal_id}">
       <name>sample-name</name>
       <date-received>2017-05-20</date-received>
@@ -295,7 +294,7 @@ def expect_lims_sample_and_project(httpserver: HTTPServer, sample: Sample) -> No
       <udf:field type="String" name="Bait Set">NA</udf:field>
     </smp:sample>"""
 
-    project_xml = f"""<prj:project
+    project_xml: str = f"""<prj:project
         xmlns:prj="http://genologics.com/ri/project"
         limsid="ACC0001"
         uri="{project_uri}">
