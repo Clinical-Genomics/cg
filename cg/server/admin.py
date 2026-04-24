@@ -436,6 +436,7 @@ class CustomerView(BaseView):
     column_editable_list = [
         "collaborations",
         "comment",
+        "label",
         "loqus_upload",
         "priority",
         "return_samples",
@@ -448,6 +449,7 @@ class CustomerView(BaseView):
         "comment",
         "primary_contact",
         "delivery_contact",
+        "label",
         "lab_contact",
         "priority",
         "project_account_KI",
@@ -455,13 +457,13 @@ class CustomerView(BaseView):
         "return_samples",
         "scout_access",
     ]
-    column_filters = ["priority", "scout_access", "data_archive_location"]
+    column_filters = ["priority", "scout_access", "data_archive_location", "label"]
     column_formatters = {
         "delivery_contact": view_user_link,
         "lab_contact": view_user_link,
         "primary_contact": view_user_link,
     }
-    column_searchable_list = ["internal_id", "name"]
+    column_searchable_list = ["internal_id", "label", "name"]
     form_excluded_columns = ["families", "samples", "pools", "orders", "invoices"]
 
 
