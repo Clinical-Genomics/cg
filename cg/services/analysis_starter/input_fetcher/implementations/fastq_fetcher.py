@@ -119,7 +119,9 @@ class FastqFetcher(InputFetcher):
         case_compression_data: CaseCompressionData = self.compress_api.get_case_compression_data(
             case
         )
-        if self._does_any_file_need_to_be_retrieved(case_id):
+        if self._is_any_sample_missing_raw_data_altogether(
+            case
+        ) or self._does_any_file_need_to_be_retrieved(case_id):
             return False
         if (
             case_compression_data.is_spring_decompression_needed()
@@ -128,6 +130,27 @@ class FastqFetcher(InputFetcher):
             LOG.warning(f"Case {case_id} is not ready - not all files are decompressed.")
             return False
         return True
+
+    def _is_any_sample_missing_raw_data_altogether(self, case: Case) -> bool:
+        """
+        Returns True if any sample in the case has neither fastq files nor spring files in its
+        Housekeeper bundle.
+        """
+        is_missing_data = False
+        for sample in case.samples:
+            if not (
+                self.housekeeper_api.get_files_from_latest_version(
+                    bundle_name=sample.internal_id, tags=[SequencingFileTag.FASTQ]
+                )
+                or self.housekeeper_api.get_files_from_latest_version(
+                    bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING]
+                )
+            ):
+                LOG.error(
+                    f"Sample {sample.internal_id} has neither FASTQ nor Spring files in housekeeper."
+                )
+                is_missing_data = True
+        return is_missing_data
 
     def _does_any_file_need_to_be_retrieved(self, case_id: str) -> bool:
         """Checks whether we need to retrieve files from an external data location."""
