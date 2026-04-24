@@ -132,7 +132,7 @@ def test_create_nallo_scout_load_config_serializes_correctly(
     )
 
     # THEN the command exits successfully
-    assert result.exit_code == 0, result.output
+    assert result.exit_code == 0
 
     # THEN the scout_load.yaml file exists at the expected path
     scout_load_config_path = Path(case_dir, "scout_load.yaml")
