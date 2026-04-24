@@ -2,12 +2,12 @@ import logging
 
 from click.testing import CliRunner
 
-from cg.cli.store.store import (
-    store_case,
-    store_demultiplexed_illumina_run,
-    store_illumina_run,
-    store_sample,
-    store_ticket,
+from cg.cli.prepare.prepare import (
+    prepare_case,
+    prepare_demultiplexed_illumina_run,
+    prepare_illumina_run,
+    prepare_sample,
+    prepare_ticket,
 )
 from cg.constants import EXIT_SUCCESS
 from cg.meta.compress import CompressAPI
@@ -16,15 +16,15 @@ from cg.store.models import Sample
 from cg.store.store import Store
 
 
-def test_store_sample_when_no_samples(
+def test_prepare_sample_when_no_samples(
     caplog, cli_runner: CliRunner, compress_context: CGConfig, sample_id: str
 ):
-    """Test to run store samples command with a database without samples."""
+    """Test to run prepare samples command with a database without samples."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context without samples
 
-    # WHEN running the store sample command
-    res = cli_runner.invoke(store_sample, [sample_id], obj=compress_context)
+    # WHEN running the prepare sample command
+    res = cli_runner.invoke(prepare_sample, [sample_id], obj=compress_context)
 
     # THEN assert the command exits successfully
     assert res.exit_code == EXIT_SUCCESS
@@ -33,10 +33,10 @@ def test_store_sample_when_no_samples(
     assert f"Could not find {sample_id}" in caplog.text
 
 
-def test_store_sample_when_decompression_not_finished(
+def test_prepare_sample_when_decompression_not_finished(
     cli_runner: CliRunner, caplog, mocker, populated_compress_context: CGConfig, sample_id: str
 ):
-    """Test to run store samples command when decompression is not finished."""
+    """Test to run prepare samples command when decompression is not finished."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with a sample
 
@@ -44,8 +44,8 @@ def test_store_sample_when_decompression_not_finished(
     mocker.patch.object(CompressAPI, "add_decompressed_fastq")
     CompressAPI.add_decompressed_fastq.return_value = False
 
-    # WHEN running the store samples command
-    res = cli_runner.invoke(store_sample, [sample_id], obj=populated_compress_context)
+    # WHEN running the prepare samples command
+    res = cli_runner.invoke(prepare_sample, [sample_id], obj=populated_compress_context)
 
     # THEN assert that the command exits successfully
     assert res.exit_code == EXIT_SUCCESS
@@ -54,10 +54,10 @@ def test_store_sample_when_decompression_not_finished(
     assert f"Skipping sample {sample_id}" in caplog.text
 
 
-def test_store_sample_when_decompression_finished(
+def test_prepare_sample_when_decompression_finished(
     caplog, cli_runner: CliRunner, mocker, populated_compress_context: CGConfig, sample_id: str
 ):
-    """Test to run store samples command when decompression is finished."""
+    """Test to run prepare samples command when decompression is finished."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with a sample
 
@@ -65,25 +65,25 @@ def test_store_sample_when_decompression_finished(
     mocker.patch.object(CompressAPI, "add_decompressed_fastq")
     CompressAPI.add_decompressed_fastq.return_value = True
 
-    # WHEN running the store sample command
-    res = cli_runner.invoke(store_sample, [sample_id], obj=populated_compress_context)
+    # WHEN running the prepare sample command
+    res = cli_runner.invoke(prepare_sample, [sample_id], obj=populated_compress_context)
 
     # THEN assert that the command exits successfully
     assert res.exit_code == EXIT_SUCCESS
 
-    # THEN assert that we log that we stored FASTQ files
+    # THEN assert that we log that we prepared FASTQ files
     assert f"Stored fastq files for {sample_id}" in caplog.text
 
 
-def test_store_case_when_no_case(
+def test_prepare_case_when_no_case(
     caplog, case_id: str, cli_runner: CliRunner, compress_context: CGConfig
 ):
-    """Test to run store case command when no case in database."""
+    """Test to run prepare case command when no case in database."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with no case
 
-    # WHEN running the store case command
-    res = cli_runner.invoke(store_case, [case_id], obj=compress_context)
+    # WHEN running the prepare case command
+    res = cli_runner.invoke(prepare_case, [case_id], obj=compress_context)
 
     # THEN assert that the command exits successfully
     assert res.exit_code == EXIT_SUCCESS
@@ -92,7 +92,7 @@ def test_store_case_when_no_case(
     assert f"Could not find case {case_id}" in caplog.text
 
 
-def test_store_case(
+def test_prepare_case(
     caplog,
     cli_runner: CliRunner,
     case_id: str,
@@ -100,7 +100,7 @@ def test_store_case(
     populated_compress_context: CGConfig,
     sample_id: str,
 ):
-    """Test to run store case command."""
+    """Test to run prepare case command."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with a case and a sample
 
@@ -108,17 +108,17 @@ def test_store_case(
     mocker.patch.object(CompressAPI, "add_decompressed_fastq")
     CompressAPI.add_decompressed_fastq.return_value = True
 
-    # WHEN running the store case command
-    res = cli_runner.invoke(store_case, [case_id], obj=populated_compress_context)
+    # WHEN running the prepare case command
+    res = cli_runner.invoke(prepare_case, [case_id], obj=populated_compress_context)
 
     # THEN assert that the command exits successfully
     assert res.exit_code == EXIT_SUCCESS
 
-    # THEN assert that we log that we stored FASTQ files
+    # THEN assert that we log that we prepared FASTQ files
     assert f"Stored fastq files for {sample_id}" in caplog.text
 
 
-def test_store_flow_cell(
+def test_prepare_flow_cell(
     caplog,
     cli_runner: CliRunner,
     novaseq_6000_pre_1_5_kits_flow_cell_id: str,
@@ -126,7 +126,7 @@ def test_store_flow_cell(
     populated_compress_context: CGConfig,
     sample_id: str,
 ):
-    """Test to run store flow cell command."""
+    """Test to run prepare flow cell command."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with a sample
     sample: Sample = populated_compress_context.status_db.get_sample_by_internal_id(sample_id)
@@ -137,9 +137,9 @@ def test_store_flow_cell(
         mocker.patch.object(Store, "get_samples_by_illumina_flow_cell", return_value=[sample]),
         mocker.patch.object(CompressAPI, "add_decompressed_fastq", return_value=True),
     ):
-        # WHEN running the store flow cell command
+        # WHEN running the prepare flow cell command
         res = cli_runner.invoke(
-            store_illumina_run,
+            prepare_illumina_run,
             [novaseq_6000_pre_1_5_kits_flow_cell_id],
             obj=populated_compress_context,
         )
@@ -147,11 +147,11 @@ def test_store_flow_cell(
         # THEN assert that the command exits successfully
         assert res.exit_code == EXIT_SUCCESS
 
-        # THEN assert that we log that we stored FASTQ files
+        # THEN assert that we log that we prepared FASTQ files
         assert f"Stored fastq files for {sample_id}" in caplog.text
 
 
-def test_store_ticket(
+def test_prepare_ticket(
     caplog,
     cli_runner: CliRunner,
     mocker,
@@ -159,7 +159,7 @@ def test_store_ticket(
     sample_id: str,
     ticket_id: str,
 ):
-    """Test to run store ticket command."""
+    """Test to run prepare ticket command."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with a sample
 
@@ -167,17 +167,17 @@ def test_store_ticket(
     mocker.patch.object(CompressAPI, "add_decompressed_fastq")
     CompressAPI.add_decompressed_fastq.return_value = True
 
-    # WHEN running the store ticket command
-    res = cli_runner.invoke(store_ticket, [ticket_id], obj=populated_compress_context)
+    # WHEN running the prepare ticket command
+    res = cli_runner.invoke(prepare_ticket, [ticket_id], obj=populated_compress_context)
 
     # THEN assert that the command exits successfully
     assert res.exit_code == EXIT_SUCCESS
 
-    # THEN assert that we log that we stored FASTQ files
+    # THEN assert that we log that we prepared FASTQ files
     assert f"Stored fastq files for {sample_id}" in caplog.text
 
 
-def test_store_demultiplexed_flow_cell(
+def test_prepare_demultiplexed_flow_cell(
     caplog,
     cli_runner: CliRunner,
     novaseq_6000_pre_1_5_kits_flow_cell_id: str,
@@ -186,7 +186,7 @@ def test_store_demultiplexed_flow_cell(
     real_populated_compress_context: CGConfig,
     sample_id: str,
 ):
-    """Test to run store demultiplexed flow cell command."""
+    """Test to run prepare demultiplexed flow cell command."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with a sample
     sample: Sample = real_populated_compress_context.status_db.get_sample_by_internal_id(sample_id)
@@ -196,11 +196,11 @@ def test_store_demultiplexed_flow_cell(
     Store.get_samples_by_illumina_flow_cell.return_value = [sample]
 
     # GIVEN an updated metadata file
-    mocker.patch("cg.cli.store.store.update_metadata_paths", return_value=None)
+    mocker.patch("cg.cli.prepare.prepare.update_metadata_paths", return_value=None)
 
-    # WHEN running the store demultiplexed flow cell command
+    # WHEN running the prepare demultiplexed flow cell command
     res = cli_runner.invoke(
-        store_demultiplexed_illumina_run,
+        prepare_demultiplexed_illumina_run,
         [novaseq_6000_pre_1_5_kits_flow_cell_id],
         obj=real_populated_compress_context,
     )
