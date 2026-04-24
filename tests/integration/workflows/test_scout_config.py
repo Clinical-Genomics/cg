@@ -22,60 +22,12 @@ from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
-from tests.integration.utils import IntegrationTestPaths, create_empty_file
+from tests.integration.utils import (
+    IntegrationTestPaths,
+    create_empty_file,
+    expect_lims_sample_and_project,
+)
 from tests.store_helpers import StoreHelpers
-
-_LIMS_BASE = "http://localhost:8888/lims"
-
-
-def _expect_lims_sample_and_project(httpserver: HTTPServer, sample: Sample) -> None:
-    """Register httpserver handlers for the LIMS sample and its project.
-
-    The genologics library lazily fetches linked resources (the project) using the absolute
-    URI embedded in the sample XML. We therefore:
-    1. Return a sample XML where the project URI points back to the test httpserver.
-    2. Register a minimal project handler so the lazy load succeeds.
-    """
-    project_uri = f"{_LIMS_BASE}/api/v2/projects/ACC0001"
-
-    sample_xml = f"""<smp:sample
-        xmlns:udf="http://genologics.com/ri/userdefined"
-        xmlns:ri="http://genologics.com/ri"
-        xmlns:file="http://genologics.com/ri/file"
-        xmlns:smp="http://genologics.com/ri/sample"
-        uri="{_LIMS_BASE}/api/v2/samples/{sample.internal_id}"
-        limsid="{sample.internal_id}">
-      <name>sample-name</name>
-      <date-received>2017-05-20</date-received>
-      <project limsid="ACC0001" uri="{project_uri}"/>
-      <udf:field type="String" name="customer">cust000</udf:field>
-      <udf:field type="String" name="familyID">F0000001</udf:field>
-      <udf:field type="String" name="Gender">M</udf:field>
-      <udf:field type="String" name="priority">standard</udf:field>
-      <udf:field type="String" name="Source">blood</udf:field>
-      <udf:field type="String" name="Status">unaffected</udf:field>
-      <udf:field type="String" name="Gene List">OMIM-AUTO</udf:field>
-      <udf:field type="String" name="Data Analysis">scout</udf:field>
-      <udf:field type="String" name="Sequencing Analysis">EXXCUSR000</udf:field>
-      <udf:field type="String" name="Application Tag Version">1</udf:field>
-      <udf:field type="String" name="Bait Set">NA</udf:field>
-    </smp:sample>"""
-
-    project_xml = f"""<prj:project
-        xmlns:prj="http://genologics.com/ri/project"
-        limsid="ACC0001"
-        uri="{project_uri}">
-      <name>Test Project</name>
-      <open-date>2017-05-20</open-date>
-    </prj:project>"""
-
-    httpserver.expect_request(f"/lims/api/v2/samples/{sample.internal_id}").respond_with_data(
-        sample_xml, content_type="application/xml"
-    )
-
-    httpserver.expect_request("/lims/api/v2/projects/ACC0001").respond_with_data(
-        project_xml, content_type="application/xml"
-    )
 
 
 @pytest.fixture(autouse=True)
@@ -181,7 +133,7 @@ def test_create_nallo_scout_load_config_serializes_correctly(
     case_dir.mkdir(parents=True, exist_ok=True)
 
     # GIVEN the LIMS server handles the sample and project metadata requests
-    _expect_lims_sample_and_project(httpserver=httpserver, sample=nallo_sample)
+    expect_lims_sample_and_project(httpserver=httpserver, sample=nallo_sample)
 
     # WHEN generating the scout load config via the CLI
     result: Result = cli_runner.invoke(
@@ -239,6 +191,10 @@ def test_create_nallo_scout_load_config_serializes_correctly(
     assert sample_config["mother"] == "0", f"mother was {sample_config['mother']!r}, expected '0'"
 
     # THEN the VCF paths are plain strings (not wrapped objects)
+    assert isinstance(config["vcf_snv"], str)
+    assert isinstance(config["vcf_snv_research"], str)
+    assert isinstance(config["vcf_sv"], str)
+    assert isinstance(config["vcf_sv_research"], str)
     assert isinstance(config["vcf_snv"], str)
     assert isinstance(config["vcf_snv_research"], str)
     assert isinstance(config["vcf_sv"], str)
