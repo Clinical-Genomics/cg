@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 from cg.constants import DataDelivery, Sex
+from cg.constants.lims import LimsStatus
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.service import StoreOrderService
@@ -131,18 +132,22 @@ class StoreMicrobialOrderService(StoreOrderService):
         application_version: ApplicationVersion = (
             self.status.get_current_application_version_by_tag(tag=application_tag)
         )
+        lims_status: LimsStatus = (
+            LimsStatus.DONE if application_version.application.is_external else LimsStatus.PENDING
+        )
         return self.status.add_sample(
-            name=sample.name,
-            sex=Sex.UNKNOWN,
+            application_version=application_version,
             comment=sample.comment,
             control=sample.control,
+            customer=customer,
             internal_id=sample._generated_lims_id,
+            lims_status=lims_status,
+            name=sample.name,
             order=order_name,
             ordered=datetime.now(),
+            organism=organism,
             original_ticket=str(ticket_id),
             priority=sample.priority,
-            application_version=application_version,
-            customer=customer,
-            organism=organism,
             reference_genome=sample.reference_genome,
+            sex=Sex.UNKNOWN,
         )

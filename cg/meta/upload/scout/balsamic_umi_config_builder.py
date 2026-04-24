@@ -8,6 +8,7 @@ from cg.constants.scout import (
     BALSAMIC_UMI_CASE_TAGS,
     BALSAMIC_UMI_SAMPLE_TAGS,
     GenomeBuild,
+    ScoutAnalysisType,
     UploadTrack,
 )
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
@@ -56,4 +57,4 @@ class BalsamicUmiConfigBuilder(BalsamicConfigBuilder):
 
     def get_balsamic_analysis_type(self, sample: Sample) -> str:
         """Returns a formatted balsamic analysis type."""
-        return "panel-umi"
+        return ScoutAnalysisType.PANEL_UMI

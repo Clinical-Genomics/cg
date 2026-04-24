@@ -32,7 +32,7 @@ from cg.constants.constants import (
 from cg.constants.devices import DeviceType, RevioNames
 from cg.constants.lims import LimsStatus
 from cg.constants.priority import SlurmQos
-from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
 from cg.models.orders.constants import OrderType
 
@@ -136,8 +136,11 @@ class Application(Base):
     id: Mapped[PrimaryKeyInt]
 
     tag: Mapped[UniqueStr]
-    prep_category: Mapped[str] = mapped_column(
+    prep_category: Mapped[SeqLibraryPrepCategory] = mapped_column(
         types.Enum(*(category.value for category in SeqLibraryPrepCategory))
+    )
+    read_type: Mapped[ReadType] = mapped_column(
+        types.Enum(*(read_types.value for read_types in ReadType))
     )
     is_external: Mapped[bool] = mapped_column(default=False)
     description: Mapped[Str256]
@@ -521,6 +524,13 @@ class Case(Base, PriorityMixin):
         return self.tickets.split(sep=",")[-1] if self.tickets else None
 
     @property
+    def original_order(self) -> "Order | None":
+        if not self.orders:
+            return None
+        else:
+            return min(self.orders, key=lambda order: order.order_date)
+
+    @property
     def latest_order(self) -> "Order":
         """Returns the latest order this case was included in."""
         sorted_orders: list[Order] = sorted(
@@ -875,6 +885,30 @@ class Sample(Base, PriorityMixin):
         if self._sample_run_metrics:
             return self._sample_run_metrics[0].type
         return None
+
+    @property
+    def original_case(self) -> Case | None:
+        """Return the original case of the sample if it exists."""
+        if cases := [link.case for link in self.links]:
+            return min(cases, key=lambda case: case.created_at)
+        else:
+            return None
+
+    @property
+    def original_workflow(self) -> Workflow | None:
+        """Return the workflow of the original case if the case exists."""
+        if case := self.original_case:
+            return case.data_analysis
+        else:
+            return None
+
+    @property
+    def ticket_id_from_original_order(self) -> int | None:
+        """Return the original ticket id of the sample if it is linked to any ticket."""
+        if self.original_case and self.original_case.original_order:
+            return self.original_case.original_order.ticket_id
+        else:
+            return None
 
     def to_dict(self, links: bool = False) -> dict:
         """Represent as dictionary"""

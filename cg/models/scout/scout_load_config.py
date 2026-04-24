@@ -5,7 +5,7 @@ from datetime import datetime
 from pydantic import AfterValidator, BaseModel, ConfigDict
 from typing_extensions import Annotated, Literal
 
-from cg.constants.scout import UploadTrack
+from cg.constants.scout import ScoutAnalysisType, UploadTrack
 from cg.models.scout.validators import field_not_none
 
 
@@ -43,19 +43,7 @@ class Reviewer(BaseModel):
 class ScoutIndividual(BaseModel):
     alignment_path: str | None = None
     rna_alignment_path: str | None = None
-    analysis_type: Annotated[
-        Literal[
-            "external",
-            "mixed",
-            "panel",
-            "panel-umi",
-            "unknown",
-            "wes",
-            "wgs",
-            "wts",
-        ],
-        AfterValidator(field_not_none),
-    ] = None
+    analysis_type: Annotated[ScoutAnalysisType | None, AfterValidator(field_not_none)] = None
     capture_kit: str | None = None
     confirmed_parent: bool | None = None
     confirmed_sex: bool | None = None
