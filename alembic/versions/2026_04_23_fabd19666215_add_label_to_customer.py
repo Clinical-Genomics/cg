@@ -1,7 +1,7 @@
 """Add label to customer table
 
 Revision ID: fabd19666215
-Revises: 96667267134e
+Revises: 3704377facf5
 Create Date: 2026-04-16 15:20:35.802743
 
 """
