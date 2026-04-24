@@ -22,10 +22,7 @@ from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.store.models import Analysis, Case, Sample
 from cg.store.store import Store
-from tests.integration.utils import (
-    IntegrationTestPaths,
-    create_empty_file,
-)
+from tests.integration.utils import IntegrationTestPaths, create_empty_file
 from tests.store_helpers import StoreHelpers
 
 _LIMS_BASE = "http://localhost:8888/lims"
@@ -72,9 +69,9 @@ def _expect_lims_sample_and_project(httpserver: HTTPServer, sample: Sample) -> N
       <open-date>2017-05-20</open-date>
     </prj:project>"""
 
-    httpserver.expect_request(
-        f"/lims/api/v2/samples/{sample.internal_id}"
-    ).respond_with_data(sample_xml, content_type="application/xml")
+    httpserver.expect_request(f"/lims/api/v2/samples/{sample.internal_id}").respond_with_data(
+        sample_xml, content_type="application/xml"
+    )
 
     httpserver.expect_request("/lims/api/v2/projects/ACC0001").respond_with_data(
         project_xml, content_type="application/xml"
@@ -180,9 +177,7 @@ def test_create_nallo_scout_load_config_serializes_correctly(
     cli_runner = CliRunner()
 
     # GIVEN the case output directory exists (normally created by the workflow run)
-    case_dir = Path(
-        test_run_paths.test_root_dir, "nallo_root_path", nallo_case.internal_id
-    )
+    case_dir = Path(test_run_paths.test_root_dir, "nallo_root_path", nallo_case.internal_id)
     case_dir.mkdir(parents=True, exist_ok=True)
 
     # GIVEN the LIMS server handles the sample and project metadata requests
@@ -214,9 +209,9 @@ def test_create_nallo_scout_load_config_serializes_correctly(
 
     # THEN top-level enum-derived fields are plain strings, not Python object representations
     assert config["track"] == "rare", f"track was {config['track']!r}, expected 'rare'"
-    assert config["human_genome_build"] == "38", (
-        f"human_genome_build was {config['human_genome_build']!r}, expected '38'"
-    )
+    assert (
+        config["human_genome_build"] == "38"
+    ), f"human_genome_build was {config['human_genome_build']!r}, expected '38'"
 
     # THEN case identity fields are plain strings
     assert config["family"] == nallo_case.internal_id
@@ -240,12 +235,8 @@ def test_create_nallo_scout_load_config_serializes_correctly(
         f"(type {type(sample_config['phenotype']).__name__}), expected a plain str"
     )
     # father/mother derive from RelationshipStatus.HAS_NO_PARENT ("0") — must be a plain string
-    assert sample_config["father"] == "0", (
-        f"father was {sample_config['father']!r}, expected '0'"
-    )
-    assert sample_config["mother"] == "0", (
-        f"mother was {sample_config['mother']!r}, expected '0'"
-    )
+    assert sample_config["father"] == "0", f"father was {sample_config['father']!r}, expected '0'"
+    assert sample_config["mother"] == "0", f"mother was {sample_config['mother']!r}, expected '0'"
 
     # THEN the VCF paths are plain strings (not wrapped objects)
     assert isinstance(config["vcf_snv"], str)
