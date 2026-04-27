@@ -429,6 +429,12 @@ class PostProcessingServices(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
+class GENSConfig(BaseModel):
+    binary_path: str
+    config_path: str
+    config_shell_var: str
+
+
 class CGConfig(BaseModel):
     data_input: DataInput | None = None
     database: str
@@ -468,7 +474,7 @@ class CGConfig(BaseModel):
     external: ExternalConfig = None
     genotype: CommonAppConfig = None
     genotype_api_: GenotypeAPI = None
-    gens: CommonAppConfig = None
+    gens: GENSConfig = None
     gens_api_: GensAPI = None
     hermes: HermesConfig = None
     hermes_api_: HermesApi = None

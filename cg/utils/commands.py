@@ -85,6 +85,7 @@ class Process:
                 " ".join(command),
                 shell=True,
                 check=False,
+                env=self.shell_vars,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )

@@ -560,8 +560,9 @@ def gens_config() -> dict[str, dict[str, str]]:
     """Gens config fixture."""
     return {
         "gens": {
-            "config_path": Path("config", "path").as_posix(),
             "binary_path": "gens",
+            "config_path": Path("config", "path").as_posix(),
+            "config_shell_var": "CONFIG_FILE",
         }
     }
 
