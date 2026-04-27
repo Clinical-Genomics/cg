@@ -2939,7 +2939,7 @@ def raredisease_context(
     cg_context.housekeeper_api_ = nf_analysis_housekeeper
     cg_context.trailblazer_api_ = trailblazer_api
     cg_context.lims_api_ = MockLimsAPI()
-    cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(config=cg_context)
+    cg_context.meta_apis["analysis_api"] = RarediseaseAnalysisAPI(cg_context)
     status_db: Store = cg_context.status_db
 
     # NB: the order in which the cases are added matters for the tests of store_available

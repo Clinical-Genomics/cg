@@ -12,6 +12,7 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import RarediseaseLoadParameters
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import LoqusdbDuplicateRecordError
+from cg.meta.observations import raredisease_observations_api as raredisease
 from cg.meta.observations.raredisease_observations_api import RarediseaseObservationsAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.cg_config import CGConfig, CommonAppConfig, RarediseaseConfig, RunInstruments
@@ -151,8 +152,8 @@ def test_load_observations_success(
     analysis_api: RarediseaseAnalysisAPI = create_autospec(RarediseaseAnalysisAPI)
     analysis_api.get_data_analysis_type = Mock(return_value="wgs")
     mocker.patch.object(
-        RarediseaseAnalysisAPI,
-        "__new__",
+        raredisease,
+        "RarediseaseAnalysisAPI",
         return_value=analysis_api,
     )
 

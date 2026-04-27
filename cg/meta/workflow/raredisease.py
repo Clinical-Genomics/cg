@@ -28,8 +28,7 @@ LOG = logging.getLogger(__name__)
 
 
 class RarediseaseAnalysisAPI(NfAnalysisAPI):
-    """Handles communication between RAREDISEASE processes
-    and the rest of CG infrastructure."""
+    """Handles communication between RAREDISEASE processes and the rest of CG infrastructure."""
 
     def __init__(
         self,

@@ -10,25 +10,14 @@ import pytest
 
 from cg.constants import DataDelivery, Workflow
 from cg.constants.lims import LimsStatus
-from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.sample_base import ContainerEnum, PriorityEnum, SexEnum
 from cg.services.orders.lims_service.service import OrderLimsService
-from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.services.orders.storing.implementations.fastq_order_service import StoreFastqOrderService
 from cg.services.orders.validation.constants import ElutionBuffer
 from cg.services.orders.validation.order_types.fastq.models.order import FastqOrder
 from cg.services.orders.validation.order_types.fastq.models.sample import FastqSample
-from cg.store.models import (
-    Application,
-    ApplicationVersion,
-    Case,
-    CaseSample,
-    Customer,
-    Order,
-    Sample,
-)
+from cg.store.models import Application, ApplicationVersion, Case, CaseSample, Customer, Sample
 from cg.store.store import Store
-from tests.store_helpers import StoreHelpers
 from tests.typed_mock import TypedMock, create_typed_mock
 
 

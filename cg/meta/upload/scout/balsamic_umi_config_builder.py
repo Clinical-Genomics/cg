@@ -8,7 +8,6 @@ from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import (
     BALSAMIC_UMI_CASE_TAGS,
     BALSAMIC_UMI_SAMPLE_TAGS,
-    GenomeBuild,
     ScoutAnalysisType,
     UploadTrack,
 )
