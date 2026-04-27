@@ -1,6 +1,7 @@
 """Module for Gens API."""
 
 import logging
+from os import environ
 
 from cg.utils import Process
 from cg.utils.dict import get_list_from_dictionary
@@ -13,7 +14,10 @@ class GensAPI:
 
     def __init__(self, config: dict[str, dict[str, str]]):
         self.binary_path: str = config["gens"]["binary_path"]
-        self.process: Process = Process(binary=self.binary_path)
+        self.config_path: str = config["gens"]["config_path"]
+        shell_vars = environ.copy()
+        shell_vars.update({"CONFIG_FILE": self.config_path})
+        self.process: Process = Process(binary=self.binary_path, shell_vars=shell_vars)
         self.dry_run: bool = False
 
     def set_dry_run(self, dry_run: bool) -> None:

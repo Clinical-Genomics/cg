@@ -27,6 +27,7 @@ class Process:
         config_parameter: str = "--config",
         environment: str = None,
         launch_directory: str = None,
+        shell_vars: dict | None = None,
     ):
         """
         Args:
@@ -40,6 +41,7 @@ class Process:
         self.config: str = config
         self.environment: str = environment
         self.launch_directory: str = launch_directory
+        self.shell_vars: dict | None = shell_vars
         LOG.debug("Initialising Process with binary: %s", self.binary)
         self.base_call: list[str] = [self.binary]
 
@@ -88,7 +90,11 @@ class Process:
             )
         else:
             res = subprocess.run(
-                command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                command,
+                check=False,
+                env=self.shell_vars,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )
 
         self.stdout = res.stdout.decode("utf-8").rstrip()
