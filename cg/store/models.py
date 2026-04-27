@@ -32,7 +32,7 @@ from cg.constants.constants import (
 from cg.constants.devices import DeviceType, RevioNames
 from cg.constants.lims import LimsStatus
 from cg.constants.priority import SlurmQos
-from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
 from cg.models.orders.constants import OrderType
 
@@ -138,6 +138,9 @@ class Application(Base):
     tag: Mapped[UniqueStr]
     prep_category: Mapped[SeqLibraryPrepCategory] = mapped_column(
         types.Enum(*(category.value for category in SeqLibraryPrepCategory))
+    )
+    read_type: Mapped[ReadType] = mapped_column(
+        types.Enum(*(read_types.value for read_types in ReadType))
     )
     is_external: Mapped[bool] = mapped_column(default=False)
     description: Mapped[Str256]
@@ -521,8 +524,11 @@ class Case(Base, PriorityMixin):
         return self.tickets.split(sep=",")[-1] if self.tickets else None
 
     @property
-    def original_order(self) -> "Order":
-        return min(self.orders, key=lambda order: order.order_date)
+    def original_order(self) -> "Order | None":
+        if not self.orders:
+            return None
+        else:
+            return min(self.orders, key=lambda order: order.order_date)
 
     @property
     def latest_order(self) -> "Order":
@@ -899,8 +905,8 @@ class Sample(Base, PriorityMixin):
     @property
     def ticket_id_from_original_order(self) -> int | None:
         """Return the original ticket id of the sample if it is linked to any ticket."""
-        if original_case := self.original_case:
-            return original_case.original_order.ticket_id
+        if self.original_case and self.original_case.original_order:
+            return self.original_case.original_order.ticket_id
         else:
             return None
 

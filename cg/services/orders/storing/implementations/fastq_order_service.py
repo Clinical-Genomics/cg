@@ -1,7 +1,10 @@
 import logging
 from datetime import datetime
 
-from cg.constants import DataDelivery, Workflow
+from cg.constants import DataDelivery, GenePanelMasterList, Priority, Workflow
+from cg.constants.constants import CustomerId
+from cg.constants.lims import LimsStatus
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
@@ -106,18 +109,22 @@ class StoreFastqOrderService(StoreOrderService):
         application_version: ApplicationVersion = (
             self.status_db.get_current_application_version_by_tag(tag=sample.application)
         )
+        lims_status: LimsStatus = (
+            LimsStatus.DONE if application_version.application.is_external else LimsStatus.PENDING
+        )
         return self.status_db.add_sample(
-            name=sample.name,
-            sex=sample.sex or SexEnum.unknown,
+            application_version=application_version,
+            capture_kit=sample.capture_kit,
             comment=sample.comment,
+            customer=customer,
             internal_id=sample._generated_lims_id,
+            lims_status=lims_status,
+            name=sample.name,
+            order=order_name,
             ordered=datetime.now(),
             original_ticket=ticket_id,
             priority=sample.priority,
-            tumour=sample.tumour,
-            capture_kit=sample.capture_kit,
+            sex=sample.sex or SexEnum.unknown,
             subject_id=sample.subject_id,
-            customer=customer,
-            application_version=application_version,
-            order=order_name,
+            tumour=sample.tumour,
         )
