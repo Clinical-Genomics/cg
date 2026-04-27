@@ -8,8 +8,9 @@ from cg.server.dto.samples.requests import (
     CollaboratorSamplesRequest,
     SamplesRequest,
     SamplesUpdateRequest,
+    UnhandledSamplesRequest,
 )
-from cg.server.dto.samples.samples_response import SamplesResponse
+from cg.server.dto.samples.samples_response import SamplesResponse, UnhandledSamplesResponse
 from cg.server.endpoints.utils import before_request
 from cg.server.ext import db, sample_service
 from cg.store.models import Customer, Sample
@@ -56,6 +57,22 @@ def get_samples():
     except AuthorisationError:
         return abort(HTTPStatus.FORBIDDEN)
     return jsonify(samples=samples, total=total)
+
+
+@SAMPLES_BLUEPRINT.route("/unhandled_samples", methods=["GET"])
+def get_unhandled_samples():
+    try:
+        req: UnhandledSamplesRequest = UnhandledSamplesRequest.model_validate(
+            request.args.to_dict()
+        )
+    except ValidationError:
+        return abort(code=HTTPStatus.BAD_REQUEST)
+    else:
+        samples, total = db.get_paginated_unhandled_samples(
+            lims_status=req.lims_status, page=req.page, page_size=req.page_size
+        )
+        response = UnhandledSamplesResponse.from_samples(samples=samples, total=total)
+        return jsonify(response.model_dump())
 
 
 @SAMPLES_BLUEPRINT.route("/samples", methods=["PATCH"])

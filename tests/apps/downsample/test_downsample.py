@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from cg.apps.downsample.downsample import DownsampleAPI
+from cg.constants.lims import LimsStatus
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.models.downsample.downsample_data import DownsampleData
@@ -79,6 +80,9 @@ def test_add_sample_case_links(downsample_api: DownsampleAPI, downsample_data: D
         downsample_data.downsampled_sample.internal_id
     )
     assert sample.links
+
+    # THEN the downsampled sample has the same LIMS status as the original sample
+    assert sample.lims_status == downsample_data.original_sample.lims_status
 
 
 def test_downsample_api_adding_a_second_sample_to_case(
