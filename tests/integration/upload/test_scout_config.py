@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from pathlib import Path
 from typing import cast
@@ -20,6 +21,19 @@ from tests.integration.utils import (
     expect_lims_sample_and_project,
 )
 from tests.store_helpers import StoreHelpers
+
+_RAREDISEASE_MANIFEST_CONTENT = {
+    "tasks": {
+        "snv_score": {
+            "process": "SNV:GENMOD_SCORE",
+            "script": "clinical_genmod_v1.2.sh",
+        },
+        "sv_score": {
+            "process": "SV:GENMOD_SCORE",
+            "script": "clinical_genmod_v1.2.sh",
+        },
+    }
+}
 
 
 @pytest.fixture
@@ -101,6 +115,7 @@ def nallo_completed_analysis(
 
 @pytest.mark.xdist_group(name="integration")
 @pytest.mark.integration
+@pytest.mark.freeze_time("1337-11-11 13:37")
 def test_create_nallo_scout_load_config_serializes_correctly(
     httpserver: HTTPServer,
     nallo_case: Case,
@@ -142,4 +157,127 @@ def test_create_nallo_scout_load_config_serializes_correctly(
     with open(scout_load_config_path) as config_file_handle:
         config: dict = yaml.safe_load(config_file_handle)
         assert config["samples"][0]["analysis_type"] == "wgs"
-        assert config["analysis_date"] == "2026-04-27 11:28:34" # freeze time to this
+        assert config["analysis_date"] == "1337-11-11T13:37:00"
+
+
+@pytest.fixture
+def raredisease_case(helpers: StoreHelpers, status_db: Store) -> Case:
+    return helpers.add_case(store=status_db, data_analysis=Workflow.RAREDISEASE)
+
+
+@pytest.fixture
+def raredisease_sample(helpers: StoreHelpers, status_db: Store) -> Sample:
+    return helpers.add_sample(
+        application_type="wgs",
+        store=status_db,
+        last_sequenced_at=datetime.now(),
+    )
+
+
+@pytest.fixture
+def raredisease_hk_bundle(
+    raredisease_case: Case,
+    raredisease_sample: Sample,
+    housekeeper_db: HousekeeperStore,
+    test_run_paths: IntegrationTestPaths,
+) -> Version:
+    root = test_run_paths.test_root_dir
+    delivery_report = Path(root, "raredisease_delivery_report.html")
+    manifest_file = Path(root, "raredisease_manifest.json")
+    vcf_snv = Path(root, "raredisease_vcf_snv_clinical.vcf")
+    vcf_snv_research = Path(root, "raredisease_vcf_snv_research.vcf")
+    vcf_sv = Path(root, "raredisease_vcf_sv_clinical.vcf")
+    vcf_sv_research = Path(root, "raredisease_vcf_sv_research.vcf")
+
+    for path in [delivery_report, vcf_snv, vcf_snv_research, vcf_sv, vcf_sv_research]:
+        create_empty_file(path)
+    manifest_file.parent.mkdir(parents=True, exist_ok=True)
+    manifest_file.write_text(json.dumps(_RAREDISEASE_MANIFEST_CONTENT))
+
+    bundle_data = {
+        "name": raredisease_case.internal_id,
+        "created": datetime.now(),
+        "expires": datetime.now(),
+        "files": [
+            {"path": delivery_report.as_posix(), "tags": ["delivery-report"], "archive": False},
+            {"path": manifest_file.as_posix(), "tags": ["manifest"], "archive": False},
+            {"path": vcf_snv.as_posix(), "tags": ["vcf-snv-clinical"], "archive": False},
+            {"path": vcf_snv_research.as_posix(), "tags": ["vcf-snv-research"], "archive": False},
+            {"path": vcf_sv.as_posix(), "tags": ["vcf-sv-clinical"], "archive": False},
+            {"path": vcf_sv_research.as_posix(), "tags": ["vcf-sv-research"], "archive": False},
+        ],
+    }
+
+    bundle, version = cast(tuple[Bundle, Version], housekeeper_db.add_bundle(bundle_data))
+    housekeeper_db.session.add(bundle)
+    housekeeper_db.session.add(version)
+    housekeeper_db.session.commit()
+    return version
+
+
+@pytest.fixture
+def raredisease_completed_analysis(
+    helpers: StoreHelpers,
+    raredisease_case: Case,
+    raredisease_hk_bundle: Version,
+    raredisease_sample: Sample,
+    status_db: Store,
+) -> Analysis:
+    helpers.relate_samples(
+        base_store=status_db, case=raredisease_case, samples=[raredisease_sample]
+    )
+    return helpers.add_analysis(
+        store=status_db,
+        case=raredisease_case,
+        workflow=Workflow.RAREDISEASE,
+        completed_at=datetime.now(),
+    )
+
+
+@pytest.mark.xdist_group(name="integration")
+@pytest.mark.integration
+@pytest.mark.freeze_time("1337-11-11 13:37")
+def test_create_raredisease_scout_load_config_serializes_correctly(
+    httpserver: HTTPServer,
+    raredisease_case: Case,
+    raredisease_completed_analysis: Analysis,
+    raredisease_sample: Sample,
+    test_run_paths: IntegrationTestPaths,
+):
+    """Test that the generated scout_load.yaml contains correctly serialized values."""
+    cli_runner = CliRunner()
+
+    # GIVEN the case output directory exists
+    case_dir = Path(
+        test_run_paths.test_root_dir, "raredisease_root_path", raredisease_case.internal_id
+    )
+    case_dir.mkdir(parents=True, exist_ok=True)
+
+    # GIVEN the LIMS server handles the sample and project metadata requests
+    expect_lims_sample_and_project(httpserver=httpserver, sample=raredisease_sample)
+
+    # WHEN generating the scout load config via the CLI
+    result: Result = cli_runner.invoke(
+        base,
+        [
+            "--config",
+            test_run_paths.cg_config_file.as_posix(),
+            "upload",
+            "create-scout-load-config",
+            raredisease_case.internal_id,
+        ],
+        catch_exceptions=False,
+    )
+
+    # THEN the command exits successfully
+    assert result.exit_code == 0
+
+    # THEN the scout_load.yaml file exists at the expected path
+    scout_load_config_path = Path(case_dir, "scout_load.yaml")
+    assert scout_load_config_path.exists()
+
+    # THEN the YAML can be loaded into a dict without errors
+    with open(scout_load_config_path) as config_file_handle:
+        config: dict = yaml.safe_load(config_file_handle)
+        assert config["samples"][0]["analysis_type"] == "wgs"
+        assert config["analysis_date"] == "1337-11-11T13:37:00"
