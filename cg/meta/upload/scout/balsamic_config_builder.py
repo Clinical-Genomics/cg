@@ -71,9 +71,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
         return config_sample
 
-    def get_balsamic_analysis_type(
-        self, sample: Sample
-    ) -> str:  # TODO: Replace this function with the one from the parent _get_scout_analysis_type
+    def get_balsamic_analysis_type(self, sample: Sample) -> str:
         """Returns a formatted balsamic analysis type"""
 
         analysis_type: str = BalsamicAnalysisAPI.get_analysis_type(sample=sample)
