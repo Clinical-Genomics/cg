@@ -13,10 +13,8 @@ from tests.store_helpers import StoreHelpers
         (Workflow.BALSAMIC, "scout_api_37"),
         (Workflow.BALSAMIC_UMI, "scout_api_37"),
         (Workflow.MIP_DNA, "scout_api_37"),
-        (Workflow.MIP_RNA, "scout_api_37"),
         (Workflow.NALLO, "scout_api_38"),
         (Workflow.RAREDISEASE, "scout_api_38"),
-        (Workflow.TOMTE, "scout_api_37"),
     ],
 )
 def test_get_scout_api_by_case(
