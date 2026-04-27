@@ -2,11 +2,13 @@
 
 import logging
 import time
+from pathlib import Path
 
 import mock
 import pytest
 from _pytest.logging import LogCaptureFixture
 from housekeeper.store.models import File
+from mock import Mock, create_autospec
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
@@ -14,7 +16,9 @@ from cg.exc import HousekeeperFileMissingError, IlluminaCleanRunError
 from cg.services.illumina.cleaning.clean_runs_service import IlluminaCleanRunsService
 from cg.store.exc import EntryNotFoundError
 from cg.store.models import IlluminaSampleSequencingMetrics, IlluminaSequencingRun, Sample
+from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_get_sequencing_run_from_statusdb(
@@ -218,6 +222,56 @@ def test_get_files_for_samples_on_flow_cell_with_tag_missing_sample(
 
     # THEN a warning is logged
     assert f"Bundle: {first_sample.internal_id} not found in Housekeeper" in caplog.text
+
+
+@pytest.mark.parametrize(
+    "tag",
+    [SequencingFileTag.FASTQ, SequencingFileTag.SPRING, SequencingFileTag.SPRING_METADATA],
+    ids=["fastq", "spring", "spring_metadata"],
+)
+def test_get_files_for_samples_on_flow_cell_with_tag_missing_cancelled_sample(
+    tag: str, tmp_sequencing_run_to_clean_path: Path
+):
+
+    # GIVEN an Illumina run with one active sample and one cancelled sample that has no bundle in Housekeeper
+    status_db: Store = create_autospec(Store)
+    status_db.get_illumina_sequencing_run_by_device_internal_id = Mock(
+        return_value=create_autospec(
+            IlluminaSequencingRun,
+            sample_metrics=[
+                create_autospec(
+                    IlluminaSampleSequencingMetrics,
+                    sample=create_autospec(
+                        Sample, internal_id="cancelled_sample", is_cancelled=True
+                    ),
+                ),
+                create_autospec(
+                    IlluminaSampleSequencingMetrics,
+                    sample=create_autospec(
+                        Sample, internal_id="not_cancelled_sample", is_cancelled=False
+                    ),
+                ),
+            ],
+        )
+    )
+
+    housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
+
+    # GIVEN an IlluminaCleanRunsService
+    clean_service = IlluminaCleanRunsService(
+        status_db=status_db,
+        housekeeper_api=housekeeper_api.as_type,
+        sequencing_run_path=Path("test/path/121212_A00123_1234_AHK12HKHK1"),
+        dry_run=False,
+    )
+
+    # WHEN getting the files for the Illumina run
+    clean_service.get_files_for_samples_on_flow_cell_with_tag(tag=tag)
+
+    # THEN the files were only fetched for the sample which was not cancelled
+    housekeeper_api.as_mock.get_files_from_latest_version.assert_called_once_with(
+        bundle_name="not_cancelled_sample", tags=[tag, "HK12HKHK1"]
+    )
 
 
 def test_can_sequencing_run_be_deleted(

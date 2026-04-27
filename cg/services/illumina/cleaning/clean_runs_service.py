@@ -61,7 +61,7 @@ class IlluminaCleanRunsService:
             self.set_sample_sheet_path_from_housekeeper()
             if self.can_run_directory_be_deleted(day_threshold):
                 if self.dry_run:
-                    LOG.debug(f"Dry run: Would have removed: {self.sequencing_run_dir_data.path}")
+                    LOG.info(f"Dry run: Would have removed: {self.sequencing_run_dir_data.path}")
                     return
                 remove_directory_and_contents(self.sequencing_run_dir_data.path)
         except Exception as error:
@@ -175,8 +175,10 @@ class IlluminaCleanRunsService:
     def get_files_for_samples_on_flow_cell_with_tag(self, tag: str) -> list[File] | None:
         """Return the files with the specified tag for all samples on a sequencing run."""
         sequencing_run: IlluminaSequencingRun = self.get_sequencing_run_from_status_db()
-        bundle_names: list[str] = [
-            metrics.sample.internal_id for metrics in sequencing_run.sample_metrics
+        bundle_names: list[str] = [  # Some cancelled samples have had their bundle deleted
+            metrics.sample.internal_id
+            for metrics in sequencing_run.sample_metrics
+            if not metrics.sample.is_cancelled
         ]
         files: list[File] = []
         for bundle_name in bundle_names:
