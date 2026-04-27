@@ -1,7 +1,7 @@
 """make case created at non nullable
 
 Revision ID: 15d1eece1f2b
-Revises: 96667267134e
+Revises: fabd19666215
 Create Date: 2026-04-17 15:57:28.767193
 
 """
@@ -12,7 +12,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "15d1eece1f2b"
-down_revision = "96667267134e"
+down_revision = "fabd19666215"
 branch_labels = None
 depends_on = None
 
