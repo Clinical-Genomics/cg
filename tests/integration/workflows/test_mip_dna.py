@@ -151,7 +151,6 @@ def test_start_available_mip_dna(
             "37",
         ],
         check=False,
-        env=None,
         stdout=ANY,
         stderr=ANY,
     )
@@ -178,7 +177,6 @@ def test_start_available_mip_dna(
             "37",
         ],
         check=False,
-        env=None,
         stdout=ANY,
         stderr=ANY,
     )

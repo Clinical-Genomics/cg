@@ -432,7 +432,6 @@ class PostProcessingServices(BaseModel):
 class GENSConfig(BaseModel):
     binary_path: str
     config_path: str
-    config_shell_var: str
 
 
 class CGConfig(BaseModel):
@@ -588,7 +587,12 @@ class CGConfig(BaseModel):
         api = self.__dict__.get("gens_api_")
         if api is None:
             LOG.debug("Instantiating gens api")
-            api = GensAPI(config=self.dict())
+            api = GensAPI(
+                config=GENSConfig(
+                    binary_path=self.gens.binary_path,
+                    config_path=self.gens.config_path,
+                )
+            )
             self.gens_api_ = api
         return api
 

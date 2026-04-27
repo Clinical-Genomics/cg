@@ -4,10 +4,11 @@ from pathlib import Path
 
 from cg.apps.gens import GensAPI
 from cg.constants.gene_panel import GENOME_BUILD_37
+from cg.models.cg_config import GENSConfig
 from cg.utils.commands import Process
 
 
-def test_instantiate(gens_config: dict[str, dict[str, str]]):
+def test_instantiate(gens_config: GENSConfig):
     """Test to instantiate GensAPI."""
     # GIVEN a Gens API config dictionary
 
@@ -16,11 +17,8 @@ def test_instantiate(gens_config: dict[str, dict[str, str]]):
 
     # THEN assert that the object was properly instantiated
     assert gens_api.process.shell_vars
-    assert (
-        gens_api.process.shell_vars[gens_config["gens"]["config_shell_var"]]
-        == gens_config["gens"]["config_path"]
-    )
-    assert gens_api.process.binary == gens_config["gens"]["binary_path"]
+    assert gens_api.process.shell_vars["CONFIG_FILE"] == gens_config.config_path
+    assert gens_api.process.binary == gens_config.binary_path
 
 
 def test_gens_api_load(

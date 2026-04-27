@@ -12,17 +12,16 @@ LOG = logging.getLogger(__name__)
 class GensAPI:
     """API for Gens."""
 
-    def __init__(self, config: dict[str, dict[str, str]]):
-        self.binary_path: str = config["gens"]["binary_path"]
-        self.config_path: str = config["gens"]["config_path"]
-        self.config_shell_var: str = config["gens"]["config_shell_var"]
+    def __init__(self, config):
+        self.binary_path: str = config.binary_path
+        self.config_path: str = config.config_path
         shell_vars = self._get_shell_vars()
         self.process: Process = Process(binary=self.binary_path, shell_vars=shell_vars)
         self.dry_run: bool = False
 
     def _get_shell_vars(self):
         shell_vars = environ.copy()
-        shell_vars.update({self.config_shell_var: self.config_path})
+        shell_vars.update({"CONFIG_FILE": self.config_path})
         return shell_vars
 
     def set_dry_run(self, dry_run: bool) -> None:

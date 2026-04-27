@@ -56,7 +56,7 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion_analysis_api import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
-from cg.models.cg_config import CGConfig, ChanjoConfig, PDCArchivingDirectory
+from cg.models.cg_config import CGConfig, ChanjoConfig, GENSConfig, PDCArchivingDirectory
 from cg.models.compression_data import CompressionData
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -559,15 +559,12 @@ def genotype_config() -> dict:
 
 
 @pytest.fixture
-def gens_config() -> dict[str, dict[str, str]]:
+def gens_config() -> GENSConfig:
     """Gens config fixture."""
-    return {
-        "gens": {
-            "binary_path": "gens",
-            "config_path": Path("config", "path").as_posix(),
-            "config_shell_var": "CONFIG_FILE",
-        }
-    }
+    return GENSConfig(
+        binary_path="gens",
+        config_path=Path("config", "path").as_posix(),
+    )
 
 
 @pytest.fixture(name="sample_sheet_context")
