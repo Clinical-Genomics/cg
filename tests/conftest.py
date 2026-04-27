@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from subprocess import CompletedProcess
 from typing import Any, Generator
+from unittest.mock import create_autospec
 
 import pytest
 from housekeeper.store.models import File, Version
@@ -53,7 +54,13 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.meta.workflow.rnafusion_analysis_api import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
-from cg.models.cg_config import CGConfig, ChanjoConfig, PDCArchivingDirectory
+from cg.models.cg_config import (
+    CGConfig,
+    ChanjoConfig,
+    IlluminaConfig,
+    PDCArchivingDirectory,
+    RunInstruments,
+)
 from cg.models.compression_data import CompressionData
 from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -1908,6 +1915,17 @@ def cg_uri() -> str:
 def hk_uri() -> str:
     """Return a Housekeeper URI."""
     return "sqlite:///"
+
+
+@pytest.fixture
+def run_instruments_config() -> RunInstruments:
+    """Return a mock rtun instruments config."""
+    return create_autospec(
+        RunInstruments,
+        illumina=create_autospec(
+            IlluminaConfig, demultiplexed_runs_dir="/path/to/demultiplexed/runs"
+        ),
+    )
 
 
 @pytest.fixture
