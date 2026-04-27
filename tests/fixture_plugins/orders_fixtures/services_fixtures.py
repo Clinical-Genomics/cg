@@ -1,5 +1,8 @@
+from unittest.mock import create_autospec
+
 import pytest
 
+from cg.apps.lims.api import LimsAPI
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.services.orders.storing.service_registry import (
     StoringServiceRegistry,
@@ -25,7 +28,9 @@ def model_validator() -> ModelValidator:
 
 @pytest.fixture
 def order_validation_service(store_to_submit_and_validate_orders: Store) -> OrderValidationService:
-    return OrderValidationService(store_to_submit_and_validate_orders)
+    return OrderValidationService(
+        lims_api=create_autospec(LimsAPI), store=store_to_submit_and_validate_orders
+    )
 
 
 @pytest.fixture(scope="function")

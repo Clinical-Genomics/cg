@@ -1,9 +1,7 @@
 import datetime as dt
-from typing import Any, Generator
-from unittest.mock import Mock, PropertyMock, create_autospec, patch
+from unittest.mock import PropertyMock, create_autospec, patch
 
 import pytest
-from pytest_mock import mocker
 
 from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.models import TicketResponse

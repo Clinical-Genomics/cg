@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 from cg.constants.constants import CaseActions, DataDelivery, Workflow
+from cg.constants.lims import LimsStatus
 from cg.constants.pedigree import Pedigree
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
@@ -137,9 +138,13 @@ class StoreCaseOrderService(StoreOrderService):
         application_version: ApplicationVersion = (
             self.status_db.get_current_application_version_by_tag(tag=application_tag)
         )
+        lims_status: LimsStatus = (
+            LimsStatus.DONE if application_version.application.is_external else LimsStatus.PENDING
+        )
         db_sample: DbSample = self.status_db.add_sample(
             application_version=application_version,
             internal_id=sample._generated_lims_id,
+            lims_status=lims_status,
             order=order_name,
             ordered=ordered,
             original_ticket=ticket,

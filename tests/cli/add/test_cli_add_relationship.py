@@ -25,7 +25,7 @@ def test_add_relationship_required(cli_runner: CliRunner, base_context: CGConfig
     # WHEN adding a relationship
     result = cli_runner.invoke(
         add,
-        ["relationship", case_id, sample_id, "-s", status, "--should-deliver-sample", True],
+        ["relationship", case_id, sample_id, "-s", status, "-d"],
         obj=base_context,
     )
 
@@ -49,7 +49,7 @@ def test_add_relationship_bad_sample(cli_runner: CliRunner, base_context: CGConf
     status = "affected"
     result = cli_runner.invoke(
         add,
-        ["relationship", case_id, sample_id, "-s", status, "--should-deliver-sample", True],
+        ["relationship", case_id, sample_id, "-s", status, "-d"],
         obj=base_context,
     )
 
@@ -70,7 +70,7 @@ def test_add_relationship_bad_family(cli_runner: CliRunner, base_context: CGConf
     status = "affected"
     result = cli_runner.invoke(
         add,
-        ["relationship", case_id, sample_id, "-s", status, "--should-deliver-sample", True],
+        ["relationship", case_id, sample_id, "-s", status, "-d"],
         obj=base_context,
     )
 
@@ -93,7 +93,7 @@ def test_add_relationship_bad_status(cli_runner: CliRunner, base_context: CGConf
 
     result = cli_runner.invoke(
         add,
-        ["relationship", case_id, sample_id, "-s", status, "--should-deliver-sample", True],
+        ["relationship", case_id, sample_id, "-s", status, "-d"],
         obj=base_context,
     )
 
@@ -127,8 +127,7 @@ def test_add_relationship_mother(
             status,
             "-m",
             mother_id,
-            "--should-deliver-sample",
-            False,
+            "-nd",
         ],
         obj=base_context,
     )
@@ -164,8 +163,7 @@ def test_add_relationship_bad_mother(
             status,
             "-m",
             mother_id,
-            "--should-deliver-sample",
-            False,
+            "-nd",
         ],
         obj=base_context,
     )
@@ -203,8 +201,7 @@ def test_add_relationship_father(
             status,
             "-f",
             father_id,
-            "--should-deliver-sample",
-            False,
+            "-nd",
         ],
         obj=base_context,
     )
@@ -242,8 +239,7 @@ def test_add_relationship_bad_father(
             status,
             "-f",
             father_id,
-            "--should-deliver-sample",
-            False,
+            "-nd",
         ],
         obj=base_context,
     )
@@ -280,8 +276,7 @@ def test_add_relationship_mother_not_female(
             status,
             "-m",
             male_mother_id,
-            "--should-deliver-sample",
-            False,
+            "-nd",
         ],
         obj=base_context,
     )
@@ -318,8 +313,7 @@ def test_add_relationship_father_not_male(
             status,
             "-f",
             female_father_id,
-            "--should-deliver-sample",
-            False,
+            "-nd",
         ],
         obj=base_context,
     )
