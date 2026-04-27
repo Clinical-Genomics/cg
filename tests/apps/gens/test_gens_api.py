@@ -73,8 +73,7 @@ def test_gens_api_load(
         stderr=subprocess.PIPE,
     )
 
-    # THEN the subprocess.run() should have been invoked
-    # with a shell variable $CONFIG_FILE
+    # THEN the subprocess.run() should have been invoked with a shell variable $CONFIG_FILE
     assert "CONFIG_FILE" in mocked_subprocess_run.call_args[1]["env"].keys()
 
     # THEN that shell variable should be the config path
