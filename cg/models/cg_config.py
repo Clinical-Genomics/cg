@@ -501,6 +501,7 @@ class CGConfig(BaseModel):
     loqusdb_somatic: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC.value)
     loqusdb_tumor: CommonAppConfig = Field(None, alias=LoqusdbInstance.TUMOR.value)
     loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
+    loqusdb_wgs: CommonAppConfig = Field(None, alias=LoqusdbInstance.WGS38.value)
     loqusdb_somatic_lymphoid: CommonAppConfig = Field(
         None, alias=LoqusdbInstance.SOMATIC_LYMPHOID.value
     )

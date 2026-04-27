@@ -34,6 +34,7 @@ class ObservationsAPI:
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.analysis_api: AnalysisAPI = analysis_api
         self.loqusdb_config: CommonAppConfig = config.loqusdb
+        self.loqusdb_wgs_config: CommonAppConfig = config.loqusdb_wgs
         self.loqusdb_rd_lwp_config: CommonAppConfig = config.loqusdb_rd_lwp
         self.loqusdb_wes_config: CommonAppConfig = config.loqusdb_wes
         self.loqusdb_somatic_config: CommonAppConfig = config.loqusdb_somatic
@@ -78,6 +79,7 @@ class ObservationsAPI:
         loqusdb_config_map: dict = {
             LoqusdbInstance.LWP: self.loqusdb_rd_lwp_config,
             LoqusdbInstance.WGS: self.loqusdb_config,
+            LoqusdbInstance.WGS38: self.loqusdb_wgs_config,
             LoqusdbInstance.WES: self.loqusdb_wes_config,
             LoqusdbInstance.SOMATIC: self.loqusdb_somatic_config,
             LoqusdbInstance.TUMOR: self.loqusdb_tumor_config,

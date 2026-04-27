@@ -68,7 +68,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
             case_id
         )
         loqusdb_instances: dict[SeqLibraryPrepCategory, LoqusdbInstance] = {
-            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING: LoqusdbInstance.WGS,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING: LoqusdbInstance.WGS38,
             SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING: LoqusdbInstance.WES,
         }
         self.loqusdb_api = self.get_loqusdb_api(loqusdb_instances[sequencing_method])
