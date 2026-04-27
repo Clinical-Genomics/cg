@@ -141,4 +141,5 @@ def test_create_nallo_scout_load_config_serializes_correctly(
     # THEN the YAML can be loaded into a dict without errors
     with open(scout_load_config_path) as config_file_handle:
         config: dict = yaml.safe_load(config_file_handle)
-        assert isinstance(config, dict)
+        assert config["samples"][0]["analysis_type"] == "wgs"
+        assert config["analysis_date"] == "2026-04-27 11:28:34" # freeze time to this
