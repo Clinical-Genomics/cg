@@ -17,7 +17,8 @@ def test_instantiate(gens_config: dict[str, dict[str, str]]):
     # THEN assert that the object was properly instantiated
     assert gens_api.process.shell_vars
     assert (
-        gens_api.process.shell_vars[gens_api.config_shell_var] == gens_config["gens"]["config_path"]
+        gens_api.process.shell_vars[gens_config["gens"]["config_shell_var"]]
+        == gens_config["gens"]["config_path"]
     )
     assert gens_api.process.binary == gens_config["gens"]["binary_path"]
 
