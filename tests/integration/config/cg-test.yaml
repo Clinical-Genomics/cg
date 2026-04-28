@@ -200,6 +200,26 @@ nallo:
   tower_workflow: nallo_tower_workflow
   workflow_bin_path: {test_root_dir}/nallo_workflow_bin_path
 
+raredisease:
+  compute_env: raredisease_compute_env
+  conda_env: raredisease_conda_env
+  config: {test_root_dir}/raredisease_config.config
+  launch_directory: {test_root_dir}/raredisease_launch_directory
+  params: {test_root_dir}/raredisease_params.yaml
+  pipeline_deliverables: "raredisease_pipeline_deliverables.yaml"
+  platform: {test_root_dir}/platform.config
+  profile: raredisease_profile
+  resources: {test_root_dir}/raredisease_resources.config
+  repository: raredisease_repository
+  revision: raredisease_revision
+  root: {test_root_dir}/raredisease_root_path
+  slurm:
+    account: "raredisease_slurm_account"
+    mail_user: "raredisease_mail_user@scilifelab.se"
+    qos: "low"
+  tower_workflow: raredisease_tower_workflow
+  workflow_bin_path: {test_root_dir}/raredisease_workflow_bin_path
+
 encryption:
   encryption_dir: "{test_root_dir}/encryption_encryption_dir"
   binary_path: "{test_root_dir}/encryption_binary_path"
