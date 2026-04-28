@@ -6,7 +6,7 @@ import pytest
 from cg.constants.constants import Workflow
 from cg.constants.lims import LimsStatus
 from cg.server.dto.samples.samples_response import UnhandledSample, UnhandledSamplesResponse
-from cg.store.models import Sample
+from cg.store.models import Case, Sample
 
 
 @pytest.mark.freeze_time
@@ -14,6 +14,7 @@ def test_unhandled_samples_response_from_samples():
     # GIVEN a list of database samples
     sample_1 = create_autospec(
         Sample,
+        original_case=create_autospec(Case, internal_id="case_1"),
         internal_id="sample_1",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
@@ -22,6 +23,7 @@ def test_unhandled_samples_response_from_samples():
     )
     sample_2 = create_autospec(
         Sample,
+        original_case=create_autospec(Case, internal_id="case_2"),
         internal_id="sample_2",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
@@ -35,6 +37,7 @@ def test_unhandled_samples_response_from_samples():
     assert response == UnhandledSamplesResponse(
         samples=[
             UnhandledSample(
+                case_id="case_1",
                 sample_id="sample_1",
                 last_sequenced_at=datetime.now(),
                 lims_status=LimsStatus.TOP_UP,
@@ -42,6 +45,7 @@ def test_unhandled_samples_response_from_samples():
                 ticket=123456,
             ),
             UnhandledSample(
+                case_id="case_2",
                 sample_id="sample_2",
                 last_sequenced_at=datetime.now(),
                 lims_status=LimsStatus.TOP_UP,
@@ -58,6 +62,7 @@ def test_unhandled_samples_response_from_samples_without_ticket_id_and_workflow(
     # GIVEN a sample with no original workflow nor ticket id
     sample_1 = create_autospec(
         Sample,
+        original_case=create_autospec(Case, internal_id="case_1"),
         internal_id="sample_1",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
@@ -72,6 +77,7 @@ def test_unhandled_samples_response_from_samples_without_ticket_id_and_workflow(
     assert unhandled_samples_response == UnhandledSamplesResponse(
         samples=[
             UnhandledSample(
+                case_id="case_1",
                 sample_id="sample_1",
                 last_sequenced_at=datetime.now(),
                 lims_status=LimsStatus.TOP_UP,
