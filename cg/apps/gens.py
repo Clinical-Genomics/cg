@@ -37,7 +37,7 @@ class GensAPI:
         sample_id: str,
     ) -> int:
         """Load Gens sample file paths into database."""
-        args: list[str] = ["load", "sample", "--force"]
+        args: list[str] = [self.binary_path, "load", "sample", "--force"]
         kw_args: dict[str, str] = {
             "--sample-id": sample_id,
             "--genome-build": genome_build,

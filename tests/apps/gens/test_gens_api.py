@@ -53,6 +53,7 @@ def test_gens_api_load(
     # THEN the subprocess.run() should be called with
     mocked_subprocess_run.assert_called_once_with(
         args=[
+            api.binary_path,
             "load",
             "sample",
             "--force",
