@@ -47,21 +47,19 @@ class GensAPI:
         }
         command: list[str] = args + get_list_from_dictionary(kw_args)
 
+        LOG.info(f"Running command '{' '.join(command)}'")
+
         if self.dry_run:
-            LOG.info(f"Dry run: process call '{command}' will not be executed!!")
+            LOG.info("Dry run - will not be executed!!")
             return EXIT_SUCCESS
         else:
             res = subprocess.run(
                 args=command,
                 check=False,
                 env=self.shell_env,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
             )
             if res.returncode != EXIT_SUCCESS:
-                LOG.info(res.stdout.decode("utf-8").rstrip())
                 LOG.critical(f"Call '{command}' exit with a non zero exit code")
-                LOG.critical(res.stderr.decode("utf-8").rstrip())
                 raise subprocess.CalledProcessError(res.returncode, command)
 
             return res.returncode
