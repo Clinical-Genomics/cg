@@ -70,8 +70,6 @@ def test_gens_api_load(
         ],
         check=False,
         env=ANY,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
     )
 
     # THEN the subprocess.run() should have been invoked with a shell variable $CONFIG_FILE
