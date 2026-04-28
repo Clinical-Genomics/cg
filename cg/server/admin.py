@@ -265,6 +265,7 @@ class ApplicationView(BaseView):
         "percent_hifi_yield_guaranteed",
         "comment",
         "prep_category",
+        "read_type",
         "sequencing_depth",
         "min_sequencing_depth",
         "is_external",
@@ -295,7 +296,7 @@ class ApplicationView(BaseView):
         "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
         "sample_concentration_maximum_cfdna": view_sample_concentration_maximum_cfdna,
     }
-    column_filters = ["prep_category", "is_accredited", "is_archived"]
+    column_filters = ["prep_category", "is_accredited", "is_archived", "read_type"]
     column_searchable_list = ["tag", "prep_category"]
     form_excluded_columns = ["category", "versions", "order_type_applications"]
     form_extra_fields = {
@@ -435,6 +436,7 @@ class CustomerView(BaseView):
     column_editable_list = [
         "collaborations",
         "comment",
+        "label",
         "loqus_upload",
         "priority",
         "return_samples",
@@ -447,6 +449,7 @@ class CustomerView(BaseView):
         "comment",
         "primary_contact",
         "delivery_contact",
+        "label",
         "lab_contact",
         "priority",
         "project_account_KI",
@@ -454,13 +457,13 @@ class CustomerView(BaseView):
         "return_samples",
         "scout_access",
     ]
-    column_filters = ["priority", "scout_access", "data_archive_location"]
+    column_filters = ["priority", "scout_access", "data_archive_location", "label"]
     column_formatters = {
         "delivery_contact": view_user_link,
         "lab_contact": view_user_link,
         "primary_contact": view_user_link,
     }
-    column_searchable_list = ["internal_id", "name"]
+    column_searchable_list = ["internal_id", "label", "name"]
     form_excluded_columns = ["families", "samples", "pools", "orders", "invoices"]
 
 
