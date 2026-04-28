@@ -99,12 +99,15 @@ class ObservationsAPI:
         loqusdb_api: LoqusdbAPI,
         profile_vcf_path: Path | None = None,
         profile_threshold: float | None = None,
+        loqusdb_options: list[str] | None = None,
     ) -> bool:
         """Check if a case has already been uploaded to Loqusdb."""
         loqusdb_case: dict = loqusdb_api.get_case(case_id=case.internal_id)
         duplicate = (
             loqusdb_api.get_duplicate(
-                profile_vcf_path=profile_vcf_path, profile_threshold=profile_threshold
+                profile_vcf_path=profile_vcf_path,
+                profile_threshold=profile_threshold,
+                loqusdb_options=loqusdb_options,
             )
             if profile_vcf_path and profile_threshold
             else None

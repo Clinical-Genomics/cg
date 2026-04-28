@@ -86,6 +86,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
             loqusdb_api=self.loqusdb_api,
             profile_vcf_path=input_files.profile_vcf_path,
             profile_threshold=RarediseaseLoadParameters.PROFILE_THRESHOLD.value,
+            loqusdb_options=["--keep-chr-prefix", "--genome-build", "GRCh38"],
         ):
             LOG.error(
                 f"Case {case.internal_id} has already been uploaded to {repr(self.loqusdb_api)}"

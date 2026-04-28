@@ -141,6 +141,70 @@ def test_load_observations(
     assert f"Uploaded {number_of_loaded_variants} variants to Loqusdb" in caplog.text
 
 
+def test_is_duplicate(
+    raredisease_config_object: RarediseaseConfig,
+    run_instruments_config: RunInstruments,
+    mocker: MockFixture,
+):
+    # GIVEN a RarediseaseAnalysisAPI with a valid sequencing method for Loqusdb uploads
+    analysis_api: RarediseaseAnalysisAPI = create_autospec(RarediseaseAnalysisAPI)
+    analysis_api.get_data_analysis_type = Mock(return_value="wgs")
+    mocker.patch.object(
+        raredisease,
+        "RarediseaseAnalysisAPI",
+        return_value=analysis_api,
+    )
+
+    # GIVEN a CGConfig with the necessary fields to load observations for raredisease
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        loqusdb=create_autospec(
+            CommonAppConfig,
+            binary_path="path/to/loqusdb_binary",
+            config_path="path/to/loqusdb_config",
+        ),
+        loqusdb_rd_lwp=Mock(),
+        loqusdb_wes=Mock(),
+        loqusdb_wgs=Mock(),
+        loqusdb_somatic=Mock(),
+        loqusdb_tumor=Mock(),
+        loqusdb_somatic_lymphoid=Mock(),
+        loqusdb_somatic_myeloid=Mock(),
+        loqusdb_somatic_exome=Mock(),
+        raredisease=raredisease_config_object,
+        run_instruments=run_instruments_config,
+        tower_binary_path="path/to/tower_binary",
+    )
+
+    # GIVEN a raredisease observations API with a Loqusdb API and observations input files
+    observation_api = RarediseaseObservationsAPI(config=cg_config)
+
+    # GIVEN a case
+    case: Case = create_autospec(Case, internal_id="case_id", loqusdb_uploaded_samples=[])
+
+    # GIVEN a mock LoqusdbAPI
+    loqus_db_api: LoqusdbAPI = create_autospec(LoqusdbAPI)
+    loqus_db_api.get_case = Mock(return_value=None)
+    loqus_db_api.get_duplicate = Mock(return_value=None)
+
+    # WHEN checking for duplicates
+    observation_api.is_duplicate(
+        case=case,
+        loqusdb_api=loqus_db_api,
+        profile_vcf_path=Path("path/to/profile.vcf"),
+        profile_threshold=RarediseaseLoadParameters.PROFILE_THRESHOLD.value,
+        loqusdb_options=["--keep-chr-prefix", "--genome-build", "GRCh38"],
+    )
+
+    # THEN the LoqusDBAPI should have been called as expected
+    loqus_db_api.get_case.assert_called_once_with(case_id=case.internal_id)
+    loqus_db_api.get_duplicate.assert_called_once_with(
+        profile_vcf_path=Path("path/to/profile.vcf"),
+        profile_threshold=RarediseaseLoadParameters.PROFILE_THRESHOLD.value,
+        loqusdb_options=["--keep-chr-prefix", "--genome-build", "GRCh38"],
+    )
+
+
 def test_load_observations_success(
     raredisease_config_object: RarediseaseConfig,
     run_instruments_config: RunInstruments,
