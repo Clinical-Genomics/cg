@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import cast
+from typing import Callable, cast
 from unittest.mock import Mock, create_autospec
 
 import pytest
@@ -78,13 +78,13 @@ def test_get_config(
     workflow: Workflow,
     nextflow_case_id: str,
     nextflow_root: str,
-    configurator_scenario: dict,
+    configurator_scenario: Callable,
     mocker: MockerFixture,
 ):
     """Test creating the case config for all Nextflow pipelines."""
 
     # GIVEN a Nextflow configurator and an expected case config
-    configurator, expected_case_config = configurator_scenario[workflow]
+    configurator, expected_case_config = configurator_scenario(workflow)
 
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)
@@ -167,13 +167,13 @@ def test_get_case_config_flags(
     workflow: Workflow,
     nextflow_case_id: str,
     nextflow_root: str,
-    configurator_scenario: dict,
+    configurator_scenario: Callable,
     mocker: MockerFixture,
 ):
     """Test that using flags when configuring a case overrides the case config default values."""
 
     # GIVEN a Nextflow configurator
-    configurator, _ = configurator_scenario[workflow]
+    configurator, _ = configurator_scenario(workflow)
 
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)
@@ -273,13 +273,13 @@ def test_get_case_config_none_flags(
     workflow: Workflow,
     nextflow_case_id: str,
     nextflow_root: str,
-    configurator_scenario: dict,
+    configurator_scenario: Callable,
     mocker: MockerFixture,
 ):
     """Test that setting a flag to None does not override configurator fields with None."""
 
     # GIVEN a Nextflow configurator
-    configurator, _ = configurator_scenario[workflow]
+    configurator, _ = configurator_scenario(workflow)
 
     # GIVEN that all expected files are mocked to exist
     mocker.patch.object(Path, "exists", return_value=True)
