@@ -35,14 +35,14 @@ def test_unhandled_samples_response_from_samples():
     assert response == UnhandledSamplesResponse(
         samples=[
             UnhandledSample(
-                internal_id="sample_1",
+                sample_id="sample_1",
                 last_sequenced_at=datetime.now(),
                 lims_status=LimsStatus.TOP_UP,
                 workflow=Workflow.RAREDISEASE,
                 ticket=123456,
             ),
             UnhandledSample(
-                internal_id="sample_2",
+                sample_id="sample_2",
                 last_sequenced_at=datetime.now(),
                 lims_status=LimsStatus.TOP_UP,
                 workflow=Workflow.RAREDISEASE,
@@ -72,7 +72,7 @@ def test_unhandled_samples_response_from_samples_without_ticket_id_and_workflow(
     assert unhandled_samples_response == UnhandledSamplesResponse(
         samples=[
             UnhandledSample(
-                internal_id="sample_1",
+                sample_id="sample_1",
                 last_sequenced_at=datetime.now(),
                 lims_status=LimsStatus.TOP_UP,
                 workflow="unknown",

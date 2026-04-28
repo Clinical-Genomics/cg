@@ -104,7 +104,7 @@ class SamplesResponse(BaseModel):
 
 
 class UnhandledSample(BaseModel):
-    internal_id: str
+    sample_id: str
     last_sequenced_at: datetime
     lims_status: LimsStatus
     ticket: int | Literal["unknown"]
@@ -126,7 +126,7 @@ class UnhandledSamplesResponse(BaseModel):
         for sample in samples:
             unhandled_samples.append(
                 UnhandledSample(
-                    internal_id=sample.internal_id,
+                    sample_id=sample.internal_id,
                     last_sequenced_at=sample.last_sequenced_at,  # type: ignore
                     lims_status=sample.lims_status,
                     ticket=sample.ticket_id_from_original_order or "unknown",

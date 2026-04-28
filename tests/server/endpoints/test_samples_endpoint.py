@@ -130,7 +130,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
     assert response.json == {
         "samples": [
             {
-                "internal_id": "sample_1",
+                "sample_id": "sample_1",
                 "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
                 "lims_status": "top-up",
                 "ticket": 123456,
