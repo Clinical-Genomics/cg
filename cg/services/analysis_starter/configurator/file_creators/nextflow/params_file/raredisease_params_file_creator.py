@@ -93,7 +93,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             verifybamid_svd_ud=verifybamid_files.ud,
         )
 
-    def _get_gcnvcaller_args(self, prep_category: SeqLibraryPrepCategory, target_bed: str):
+    def _get_gcnvcaller_args(self, prep_category: SeqLibraryPrepCategory, target_bed: str) -> tuple:
         if prep_category == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
             if files := self.gcnvcaller_files.get(target_bed):
                 return None, files.gcnvcaller_model, files.ploidy_model, files.readcount_intervals
