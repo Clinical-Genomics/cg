@@ -73,8 +73,9 @@ def configurator_scenario(
     request: pytest.FixtureRequest,
     get_nextflow_case_config_dict: Callable,
     get_nextflow_config_dict: Callable,
-) -> Callable:
-    scenarios = {
+) -> Callable[[Workflow], tuple[NextflowConfigurator, NextflowCaseConfig]]:
+
+    scenarios: dict[Workflow, AnalysisStarterScenario] = {
         Workflow.NALLO: AnalysisStarterScenario(
             nextflow_config=NalloConfig,
             params_file_creator=NalloParamsFileCreator,
@@ -113,7 +114,7 @@ def configurator_scenario(
     }
 
     def configurator_and_expected_case_config(
-        workflow,
+        workflow: Workflow,
     ) -> tuple[NextflowConfigurator, NextflowCaseConfig]:
         scenario: AnalysisStarterScenario = scenarios[workflow]
         nextflow_config_dict: dict = get_nextflow_config_dict(workflow)
