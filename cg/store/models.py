@@ -13,11 +13,9 @@ from sqlalchemy import (
     Numeric,
     String,
     Table,
-    UniqueConstraint,
-    orm,
-    types,
 )
 from sqlalchemy import Text as SLQText
+from sqlalchemy import UniqueConstraint, orm, types
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
@@ -891,9 +889,13 @@ class Sample(Base, PriorityMixin):
 
     @property
     def case_that_delivers(self) -> Case | None:
-        """TODO"""
-        if self.links:
-            return [link for link in self.links if link.should_deliver_sample][0].case
+        """Returns the case that should deliver this sample."""
+        if case_samples_that_deliver := [link for link in self.links if link.should_deliver_sample]:
+            return min(
+                case_samples_that_deliver, key=lambda case_sample: case_sample.case.created_at
+            ).case
+        else:
+            return None
 
     @property
     def original_workflow(self) -> Workflow | None:
