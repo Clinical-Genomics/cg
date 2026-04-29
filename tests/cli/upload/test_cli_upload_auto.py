@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
@@ -62,7 +63,6 @@ def test_upload_auto_with_workflow_ignores_started_uploads(
     helpers: StoreHelpers,
     timestamp: datetime.datetime,
     upload_context: CGConfig,
-    caplog,
 ):
     # GIVEN a store with an analysis which has timestamps for completetion and upload start
     helpers.add_analysis(
@@ -75,8 +75,10 @@ def test_upload_auto_with_workflow_ignores_started_uploads(
     )
 
     # WHEN uploading the analysis
-    caplog.set_level(logging.INFO)
-    cli_runner.invoke(upload_all_completed_analyses, ["--workflow", workflow], obj=upload_context)
+    with patch("cg.cli.upload.base.upload") as mock_upload:
+        cli_runner.invoke(
+            upload_all_completed_analyses, ["--workflow", workflow], obj=upload_context
+        )
 
-    # THEN assert that the analysis was skipped
-    assert "Case upload has already started at " in caplog.text
+        # THEN assert that the upload function was not called
+        mock_upload.assert_not_called()
