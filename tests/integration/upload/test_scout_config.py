@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 from pathlib import Path
 from typing import cast
@@ -183,16 +182,18 @@ def raredisease_hk_bundle(
 ) -> Version:
     root = test_run_paths.test_root_dir
     delivery_report = Path(root, "raredisease_delivery_report.html")
-    manifest_file = Path(root, "raredisease_manifest.json")
+    params_file = Path(root, "raredisease_params_file.yaml")
     vcf_snv = Path(root, "raredisease_vcf_snv_clinical.vcf")
     vcf_snv_research = Path(root, "raredisease_vcf_snv_research.vcf")
     vcf_sv = Path(root, "raredisease_vcf_sv_clinical.vcf")
     vcf_sv_research = Path(root, "raredisease_vcf_sv_research.vcf")
 
-    for path in [delivery_report, vcf_snv, vcf_snv_research, vcf_sv, vcf_sv_research]:
+    for path in [delivery_report, params_file, vcf_snv, vcf_snv_research, vcf_sv, vcf_sv_research]:
         create_empty_file(path)
-    manifest_file.parent.mkdir(parents=True, exist_ok=True)
-    manifest_file.write_text(json.dumps(_RAREDISEASE_MANIFEST_CONTENT))
+
+    params_file.write_text(
+        "score_config_snv: /rank_model_-v1.39-.ini\n" "score_config_sv: /svrank_model_-v1.13-.ini"
+    )
 
     bundle_data = {
         "name": raredisease_case.internal_id,
@@ -200,7 +201,7 @@ def raredisease_hk_bundle(
         "expires": datetime.now(),
         "files": [
             {"path": delivery_report.as_posix(), "tags": ["delivery-report"], "archive": False},
-            {"path": manifest_file.as_posix(), "tags": ["manifest"], "archive": False},
+            {"path": params_file.as_posix(), "tags": ["nextflow-params"], "archive": False},
             {"path": vcf_snv.as_posix(), "tags": ["vcf-snv-clinical"], "archive": False},
             {"path": vcf_snv_research.as_posix(), "tags": ["vcf-snv-research"], "archive": False},
             {"path": vcf_sv.as_posix(), "tags": ["vcf-sv-clinical"], "archive": False},
