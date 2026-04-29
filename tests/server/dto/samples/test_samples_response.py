@@ -15,16 +15,13 @@ def test_unhandled_samples_response_from_samples():
     # GIVEN a list of database samples
     sample_1 = create_autospec(
         Sample,
-        internal_id="sample_1",
-        last_sequenced_at=datetime.now(),
-        lims_status=LimsStatus.TOP_UP,
-        priority_term=PriorityTerms.RESEARCH,
         case_that_delivers=create_autospec(Case, internal_id="case_1"),
         internal_id="sample_1",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
-        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
+        priority_term=PriorityTerms.RESEARCH,
         ticket_id_from_original_order=123456,
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
     )
     sample_2 = create_autospec(
         Sample,
@@ -32,9 +29,9 @@ def test_unhandled_samples_response_from_samples():
         internal_id="sample_2",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
-        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
-        ticket_id_from_original_order=123456,
         priority_term=PriorityTerms.EXPRESS,
+        ticket_id_from_original_order=123456,
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
     )
     # WHEN creating an UnhandledSampleResponse from samples
     response = UnhandledSamplesResponse.from_samples(samples=[sample_1, sample_2], total=15)
@@ -75,8 +72,8 @@ def test_unhandled_samples_response_from_samples_without_ticket_id_and_workflow(
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
         priority_term=PriorityTerms.STANDARD,
-        workflow_of_case_that_delivers=None,
         ticket_id_from_original_order=None,
+        workflow_of_case_that_delivers=None,
     )
 
     # WHEN getting the unhandled samples response

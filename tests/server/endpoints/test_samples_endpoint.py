@@ -104,6 +104,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
     date_time = datetime(2024, 12, 24, 11, 59)
     sample_1 = create_autospec(
         Sample,
+        case_that_delivers=create_autospec(Case, internal_id="case_1"),
         customer=create_autospec(Customer, interal_id="external_customer"),
         delivered_at=None,
         from_sample=None,
@@ -111,10 +112,9 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
-        case_that_delivers=create_autospec(Case, internal_id="case_1"),
-        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
-        ticket_id_from_original_order=123456,
         priority_term=PriorityTerms.CLINICAL_TRIALS,
+        ticket_id_from_original_order=123456,
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
     )
     status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([sample_1], 1))
     mocker.patch.object(samples, "db", status_db.as_type)
