@@ -906,7 +906,7 @@ class Sample(Base, PriorityMixin):
 
     @property
     def ticket_id_from_original_order(self) -> int | None:
-        """Return the original ticket id of the sample if it is linked to any ticket."""
+        """Return the original ticket id of the delivering case if it is linked to any ticket."""
         if self.case_that_delivers and self.case_that_delivers.original_order:
             return self.case_that_delivers.original_order.ticket_id
         else:

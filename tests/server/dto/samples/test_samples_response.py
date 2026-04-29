@@ -18,7 +18,7 @@ def test_unhandled_samples_response_from_samples():
         internal_id="sample_1",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
-        original_workflow=Workflow.RAREDISEASE,
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
     )
     sample_2 = create_autospec(
@@ -27,7 +27,7 @@ def test_unhandled_samples_response_from_samples():
         internal_id="sample_2",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
-        original_workflow=Workflow.RAREDISEASE,
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
     )
     # WHEN creating an UnhandledSampleResponse from samples
