@@ -839,8 +839,8 @@ def test_add_common_sample_info_unsupported_combination():
     # GIVEN a CaseSample with a prep_category and read_type combination not in the mapping
     application: Application = create_autospec(
         Application,
-        prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
-        read_type=ReadType.LONG_READ,
+        prep_category=SeqLibraryPrepCategory.COVID,
+        read_type=ReadType.OPTICAL_MAPPING,
     )
     sample: Sample = create_autospec(
         Sample,
