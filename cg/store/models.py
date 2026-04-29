@@ -897,7 +897,7 @@ class Sample(Base, PriorityMixin):
             return None
 
     @property
-    def original_workflow(self) -> Workflow | None:
+    def workflow_of_case_that_delivers(self) -> Workflow | None:
         """Return the workflow of the original case if the case exists."""
         if case := self.case_that_delivers:
             return case.data_analysis

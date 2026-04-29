@@ -136,7 +136,7 @@ class UnhandledSamplesResponse(BaseModel):
                     last_sequenced_at=sample.last_sequenced_at,  # type: ignore
                     lims_status=sample.lims_status,
                     ticket=sample.ticket_id_from_original_order or "unknown",
-                    workflow=sample.original_workflow or "unknown",
+                    workflow=sample.workflow_of_case_that_delivers or "unknown",
                 )
             )
         return cls(samples=unhandled_samples, total=total)

@@ -66,7 +66,7 @@ def test_unhandled_samples_response_from_samples_without_ticket_id_and_workflow(
         internal_id="sample_1",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
-        original_workflow=None,
+        workflow_of_case_that_delivers=None,
         ticket_id_from_original_order=None,
     )
 
