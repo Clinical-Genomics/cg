@@ -57,4 +57,4 @@ class BalsamicUmiConfigBuilder(BalsamicConfigBuilder):
 
     def get_balsamic_analysis_type(self, sample: Sample) -> str:
         """Returns a formatted balsamic analysis type."""
-        return ScoutAnalysisType.PANEL_UMI
+        return ScoutAnalysisType.PANEL_UMI.value
