@@ -14,7 +14,7 @@ def test_unhandled_samples_response_from_samples():
     # GIVEN a list of database samples
     sample_1 = create_autospec(
         Sample,
-        original_case=create_autospec(Case, internal_id="case_1"),
+        case_that_delivers=create_autospec(Case, internal_id="case_1"),
         internal_id="sample_1",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
@@ -23,7 +23,7 @@ def test_unhandled_samples_response_from_samples():
     )
     sample_2 = create_autospec(
         Sample,
-        original_case=create_autospec(Case, internal_id="case_2"),
+        case_that_delivers=create_autospec(Case, internal_id="case_2"),
         internal_id="sample_2",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
@@ -62,7 +62,7 @@ def test_unhandled_samples_response_from_samples_without_ticket_id_and_workflow(
     # GIVEN a sample with no original workflow nor ticket id
     sample_1 = create_autospec(
         Sample,
-        original_case=create_autospec(Case, internal_id="case_1"),
+        case_that_delivers=create_autospec(Case, internal_id="case_1"),
         internal_id="sample_1",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,

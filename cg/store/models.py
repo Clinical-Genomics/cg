@@ -891,9 +891,8 @@ class Sample(Base, PriorityMixin):
     def case_that_delivers(self) -> Case | None:
         """Returns the case that should deliver this sample."""
         if case_samples_that_deliver := [link for link in self.links if link.should_deliver_sample]:
-            return min(
-                case_samples_that_deliver, key=lambda case_sample: case_sample.case.created_at
-            ).case
+            # we only expect one of these
+            return case_samples_that_deliver[0].case
         else:
             return None
 

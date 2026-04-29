@@ -110,7 +110,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
-        original_case=create_autospec(Case, internal_id="case_1"),
+        case_that_delivers=create_autospec(Case, internal_id="case_1"),
         original_workflow=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
     )
