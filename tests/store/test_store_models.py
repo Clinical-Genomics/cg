@@ -138,6 +138,20 @@ def test_multiple_collaborations(base_store, customer_id):
     )
 
 
+def test_sample_case_that_delivers():
+    case_that_delivers = Case(created_at="1980-01-01")
+    case_that_does_not_deliver = Case(created_at="1970-01-01")
+    sample = Sample(
+        links=[
+            CaseSample(case=case_that_delivers, should_deliver_sample=True),
+            CaseSample(case=case_that_does_not_deliver, should_deliver_sample=False),
+        ]
+    )
+    case = sample.case_that_delivers
+
+    assert case == case_that_delivers
+
+
 def test_sample_ticket_id_from_original_order_no_order():
     """Tests that a sample without an original order returns None for ticket id."""
     # GIVEN a sample without an original order

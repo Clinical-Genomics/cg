@@ -13,9 +13,11 @@ from sqlalchemy import (
     Numeric,
     String,
     Table,
+    UniqueConstraint,
+    orm,
+    types,
 )
 from sqlalchemy import Text as SLQText
-from sqlalchemy import UniqueConstraint, orm, types
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
@@ -888,17 +890,15 @@ class Sample(Base, PriorityMixin):
         return None
 
     @property
-    def original_case(self) -> Case | None:
-        """Return the original case of the sample if it exists."""
-        if cases := [link.case for link in self.links]:
-            return min(cases, key=lambda case: case.created_at)
-        else:
-            return None
+    def case_that_delivers(self) -> Case | None:
+        """TODO"""
+        if self.links:
+            return [link for link in self.links if link.should_deliver_sample][0].case
 
     @property
     def original_workflow(self) -> Workflow | None:
         """Return the workflow of the original case if the case exists."""
-        if case := self.original_case:
+        if case := self.case_that_delivers:
             return case.data_analysis
         else:
             return None
@@ -906,8 +906,8 @@ class Sample(Base, PriorityMixin):
     @property
     def ticket_id_from_original_order(self) -> int | None:
         """Return the original ticket id of the sample if it is linked to any ticket."""
-        if self.original_case and self.original_case.original_order:
-            return self.original_case.original_order.ticket_id
+        if self.case_that_delivers and self.case_that_delivers.original_order:
+            return self.case_that_delivers.original_order.ticket_id
         else:
             return None
 
