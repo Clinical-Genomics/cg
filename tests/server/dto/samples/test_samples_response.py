@@ -6,7 +6,7 @@ import pytest
 from cg.constants.constants import Workflow
 from cg.constants.lims import LimsStatus
 from cg.server.dto.samples.samples_response import UnhandledSample, UnhandledSamplesResponse
-from cg.store.models import Sample
+from cg.store.models import Case, Sample
 
 
 @pytest.mark.freeze_time
@@ -14,18 +14,20 @@ def test_unhandled_samples_response_from_samples():
     # GIVEN a list of database samples
     sample_1 = create_autospec(
         Sample,
+        case_that_delivers=create_autospec(Case, internal_id="case_1"),
         internal_id="sample_1",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
-        original_workflow=Workflow.RAREDISEASE,
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
     )
     sample_2 = create_autospec(
         Sample,
+        case_that_delivers=create_autospec(Case, internal_id="case_2"),
         internal_id="sample_2",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
-        original_workflow=Workflow.RAREDISEASE,
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
     )
     # WHEN creating an UnhandledSampleResponse from samples
@@ -35,14 +37,16 @@ def test_unhandled_samples_response_from_samples():
     assert response == UnhandledSamplesResponse(
         samples=[
             UnhandledSample(
-                internal_id="sample_1",
+                case_id="case_1",
+                sample_id="sample_1",
                 last_sequenced_at=datetime.now(),
                 lims_status=LimsStatus.TOP_UP,
                 workflow=Workflow.RAREDISEASE,
                 ticket=123456,
             ),
             UnhandledSample(
-                internal_id="sample_2",
+                case_id="case_2",
+                sample_id="sample_2",
                 last_sequenced_at=datetime.now(),
                 lims_status=LimsStatus.TOP_UP,
                 workflow=Workflow.RAREDISEASE,
@@ -58,10 +62,11 @@ def test_unhandled_samples_response_from_samples_without_ticket_id_and_workflow(
     # GIVEN a sample with no original workflow nor ticket id
     sample_1 = create_autospec(
         Sample,
+        case_that_delivers=create_autospec(Case, internal_id="case_1"),
         internal_id="sample_1",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
-        original_workflow=None,
+        workflow_of_case_that_delivers=None,
         ticket_id_from_original_order=None,
     )
 
@@ -72,7 +77,8 @@ def test_unhandled_samples_response_from_samples_without_ticket_id_and_workflow(
     assert unhandled_samples_response == UnhandledSamplesResponse(
         samples=[
             UnhandledSample(
-                internal_id="sample_1",
+                case_id="case_1",
+                sample_id="sample_1",
                 last_sequenced_at=datetime.now(),
                 lims_status=LimsStatus.TOP_UP,
                 workflow="unknown",
