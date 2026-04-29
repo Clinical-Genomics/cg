@@ -357,7 +357,7 @@ def test_sample_to_dict_illumina_success():
 
 
 @pytest.mark.parametrize(
-    "priority_num, priority_term",
+    "priority_num, expected_priority_term",
     [
         (Priority.research, PriorityTerms.RESEARCH),
         (Priority.standard, PriorityTerms.STANDARD),
@@ -366,7 +366,7 @@ def test_sample_to_dict_illumina_success():
         (Priority.clinical_trials, PriorityTerms.CLINICAL_TRIALS),
     ],
 )
-def test_sample_priority_term(priority_num: Priority, priority_term: PriorityTerms):
+def test_sample_priority_term(priority_num: Priority, expected_priority_term: PriorityTerms):
     # GIVEN a sample with a priority
     sample = Sample(priority=priority_num)
 
@@ -374,4 +374,4 @@ def test_sample_priority_term(priority_num: Priority, priority_term: PriorityTer
     sample_priority_term = sample.priority_term
 
     # THEN the right priority term is given
-    assert sample_priority_term == priority_term
+    assert sample_priority_term == expected_priority_term
