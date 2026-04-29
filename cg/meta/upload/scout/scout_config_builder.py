@@ -24,31 +24,33 @@ from cg.models.scout.scout_load_config import (
 )
 from cg.store.models import Analysis, Application, Case, CaseSample, Sample
 
-MAP_PREP_READ_TO_SCOUT_ANALYSIS_TYPE: dict[tuple[SeqLibraryPrepCategory, ReadType], str] = {
+MAP_PREP_READ_TO_SCOUT_ANALYSIS_TYPE: dict[
+    tuple[SeqLibraryPrepCategory, ReadType], ScoutAnalysisType
+] = {
     (
         SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         ReadType.SHORT_READ,
-    ): ScoutAnalysisType.PANEL.value,
+    ): ScoutAnalysisType.PANEL,
     (
         SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
         ReadType.LONG_READ,
-    ): ScoutAnalysisType.PANEL_LR.value,
+    ): ScoutAnalysisType.PANEL_LR,
     (
         SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
         ReadType.SHORT_READ,
-    ): ScoutAnalysisType.WES.value,
+    ): ScoutAnalysisType.WES,
     (
         SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         ReadType.SHORT_READ,
-    ): ScoutAnalysisType.WGS.value,
+    ): ScoutAnalysisType.WGS,
     (
         SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         ReadType.LONG_READ,
-    ): ScoutAnalysisType.WGS_LR.value,
+    ): ScoutAnalysisType.WGS_LR,
     (
         SeqLibraryPrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING,
         ReadType.SHORT_READ,
-    ): ScoutAnalysisType.WTS.value,
+    ): ScoutAnalysisType.WTS,
 }
 
 LOG = logging.getLogger(__name__)
@@ -189,7 +191,7 @@ class ScoutConfigBuilder:
     @staticmethod
     def _get_scout_analysis_type(
         prep_category: SeqLibraryPrepCategory, read_type: ReadType
-    ) -> str | None:
+    ) -> ScoutAnalysisType | None:
         return MAP_PREP_READ_TO_SCOUT_ANALYSIS_TYPE.get((prep_category, read_type))
 
     def add_common_sample_files(
