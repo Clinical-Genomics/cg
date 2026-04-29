@@ -110,8 +110,8 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
-        original_case=create_autospec(Case, internal_id="case_1"),
-        original_workflow=Workflow.RAREDISEASE,
+        case_that_delivers=create_autospec(Case, internal_id="case_1"),
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
     )
     status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([sample_1], 1))
