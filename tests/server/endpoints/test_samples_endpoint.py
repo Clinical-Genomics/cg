@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
 from cg.constants.lims import LimsStatus
+from cg.constants.priority import PriorityTerms
 from cg.exc import SampleNotFoundError
 from cg.server.endpoints import samples
 from cg.store.models import Case, Customer, Sample
@@ -113,6 +114,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         original_case=create_autospec(Case, internal_id="case_1"),
         original_workflow=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
+        priority_term=PriorityTerms.CLINICAL_TRIALS,
     )
     status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([sample_1], 1))
     mocker.patch.object(samples, "db", status_db.as_type)
@@ -133,6 +135,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
             {
                 "case_id": "case_1",
                 "sample_id": "sample_1",
+                "sample_priority": "clinical_trials",
                 "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
                 "lims_status": "top-up",
                 "ticket": 123456,

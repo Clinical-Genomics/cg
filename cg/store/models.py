@@ -31,7 +31,7 @@ from cg.constants.constants import (
 )
 from cg.constants.devices import DeviceType, RevioNames
 from cg.constants.lims import LimsStatus
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import PriorityTerms, SlurmQos
 from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
 from cg.models.orders.constants import OrderType
@@ -857,6 +857,10 @@ class Sample(Base, PriorityMixin):
     def prep_category(self) -> str:
         """Return the preparation category of the sample."""
         return self.application_version.application.prep_category
+
+    @property
+    def priority_term(self) -> PriorityTerms:
+        return PriorityTerms(self.priority.name)
 
     @property
     def state(self) -> str:

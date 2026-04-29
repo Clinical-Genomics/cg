@@ -1,5 +1,7 @@
+import pytest
+
 from cg.constants.constants import ControlOptions
-from cg.constants.priority import Priority
+from cg.constants.priority import Priority, PriorityTerms
 from cg.store.models import (
     Application,
     ApplicationVersion,
@@ -307,3 +309,24 @@ def test_sample_to_dict_illumina_success():
     assert dict_sample["hifi_yield"] is None
     assert dict_sample["reads"] == 13
     assert dict_sample["uses_reads"]
+
+
+@pytest.mark.parametrize(
+    "priority_num, priority_term",
+    [
+        (Priority.research, PriorityTerms.RESEARCH),
+        (Priority.standard, PriorityTerms.STANDARD),
+        (Priority.priority, PriorityTerms.PRIORITY),
+        (Priority.express, PriorityTerms.EXPRESS),
+        (Priority.clinical_trials, PriorityTerms.CLINICAL_TRIALS),
+    ],
+)
+def test_sample_priority_term(priority_num: Priority, priority_term: PriorityTerms):
+    # GIVEN a sample with a priority
+    sample = Sample(priority=priority_num)
+
+    # WHEN getting the priority_term
+    sample_priority_term = sample.priority_term
+
+    # THEN the right priority term is given
+    assert sample_priority_term == priority_term
