@@ -48,5 +48,35 @@ def test_upload_auto_with_workflow(
     # WHEN uploading all analyses
     caplog.set_level(logging.INFO)
     cli_runner.invoke(upload_all_completed_analyses, ["--workflow", workflow], obj=upload_context)
-    # THEN assert that the MIP analysis was successfully uploaded
+    # THEN assert that the analysis was successfully uploaded
     assert "Uploading analysis for case" in caplog.text
+
+
+@pytest.mark.parametrize(
+    "workflow",
+    WORKFLOWS_TO_TEST,
+)
+def test_upload_auto_with_workflow_ignores_started_uploads(
+    cli_runner: CliRunner,
+    workflow: Workflow,
+    helpers: StoreHelpers,
+    timestamp: datetime.datetime,
+    upload_context: CGConfig,
+    caplog,
+):
+    # GIVEN a store with an analysis which has timestamps for completetion and upload start
+    helpers.add_analysis(
+        store=upload_context.status_db,
+        completed_at=timestamp,
+        uploading=True,
+        upload_started=timestamp,
+        workflow=workflow,
+        housekeeper_version_id=1234,
+    )
+
+    # WHEN uploading the analysis
+    caplog.set_level(logging.INFO)
+    cli_runner.invoke(upload_all_completed_analyses, ["--workflow", workflow], obj=upload_context)
+
+    # THEN assert that the analysis was skipped
+    assert "Case upload has already started at " in caplog.text
