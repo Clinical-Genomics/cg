@@ -140,6 +140,51 @@ def test_multiple_collaborations(base_store, customer_id):
     )
 
 
+def test_sample_case_that_delivers():
+    # GIVEN a sample with a relationship that delivers the sample
+    case_that_delivers = Case()
+    case_that_does_not_deliver = Case()
+    sample = Sample(
+        links=[
+            CaseSample(case=case_that_delivers, should_deliver_sample=True),
+            CaseSample(case=case_that_does_not_deliver, should_deliver_sample=False),
+        ]
+    )
+
+    # WHEN getting the case that delivers
+    case = sample.case_that_delivers
+
+    # THEN the result is the expected case
+    assert case == case_that_delivers
+
+
+def test_sample_case_that_delivers_no_links():
+    # GIVEN a sample without relationships
+    sample = Sample(links=[])
+
+    # WHEN getting the case that delivers
+    case = sample.case_that_delivers
+
+    # THEN the property returns None
+    assert case is None
+
+
+def test_sample_case_that_delivers_no_case_that_delivers():
+    # GIVEN a sample with only relationships having should_deliver_sample False
+    case = Case()
+    sample = Sample(
+        links=[
+            CaseSample(case=case, should_deliver_sample=False),
+        ]
+    )
+
+    # WHEN getting the case that delivers
+    case = sample.case_that_delivers
+
+    # THEN the property should return None
+    assert case is None
+
+
 def test_sample_ticket_id_from_original_order_no_order():
     """Tests that a sample without an original order returns None for ticket id."""
     # GIVEN a sample without an original order
