@@ -136,7 +136,7 @@ def upload_all_completed_analyses(context: click.Context, workflow: Workflow = N
         if latest_case_analysis.upload_started_at is not None:
             LOG.warning(
                 f"Skipping upload for case {analysis.case.internal_id}. "
-                f"Case upload has already started at {latest_case_analysis.uploaded_at}."
+                f"Case upload has already started at {latest_case_analysis.upload_started_at}."
             )
             continue
         case_id = analysis.case.internal_id

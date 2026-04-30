@@ -1,11 +1,13 @@
 """Test the cli for uploading using auto"""
 
 import datetime
-from unittest.mock import patch
+from unittest.mock import call
 
 import pytest
 from click.testing import CliRunner
+from pytest_mock import MockerFixture
 
+from cg.cli.upload import base as upload_cli
 from cg.cli.upload.base import upload_all_completed_analyses
 from cg.constants import Workflow
 from cg.models.cg_config import CGConfig
@@ -30,10 +32,11 @@ WORKFLOWS_TO_TEST: list = [
 )
 def test_upload_auto_with_workflow(
     cli_runner: CliRunner,
-    workflow: Workflow,
     helpers: StoreHelpers,
+    mocker: MockerFixture,
     timestamp: datetime.datetime,
     upload_context: CGConfig,
+    workflow: Workflow,
 ):
     """Test upload auto: get analyses to upload, test upload completed."""
     # GIVEN a store with an analysis which has timestamps for completion
@@ -45,16 +48,11 @@ def test_upload_auto_with_workflow(
     )
 
     # WHEN uploading all analyses
-    with patch("cg.cli.upload.base.upload") as mock_upload:
-        cli_runner.invoke(
-            upload_all_completed_analyses, ["--workflow", workflow], obj=upload_context
-        )
+    mock_upload = mocker.patch.object(upload_cli, "upload")
+    cli_runner.invoke(upload_all_completed_analyses, ["--workflow", workflow], obj=upload_context)
 
-        # THEN assert that the upload function was called for the case
-        assert any(
-            call[1].get("case_id") == analysis.case.internal_id
-            for call in mock_upload.call_args_list
-        )
+    # THEN assert that the upload function was called for the case
+    mock_upload.assert_any_call(case_id=analysis.case.internal_id)
 
 
 @pytest.mark.parametrize(
@@ -63,10 +61,11 @@ def test_upload_auto_with_workflow(
 )
 def test_upload_auto_with_workflow_ignores_started_uploads(
     cli_runner: CliRunner,
-    workflow: Workflow,
     helpers: StoreHelpers,
+    mocker: MockerFixture,
     timestamp: datetime.datetime,
     upload_context: CGConfig,
+    workflow: Workflow,
 ):
     # GIVEN a store with an analysis which has timestamps for completion and upload start
     analysis = helpers.add_analysis(
@@ -79,13 +78,8 @@ def test_upload_auto_with_workflow_ignores_started_uploads(
     )
 
     # WHEN uploading all analyses
-    with patch("cg.cli.upload.base.upload") as mock_upload:
-        cli_runner.invoke(
-            upload_all_completed_analyses, ["--workflow", workflow], obj=upload_context
-        )
+    mock_upload = mocker.patch.object(upload_cli, "upload")
+    cli_runner.invoke(upload_all_completed_analyses, ["--workflow", workflow], obj=upload_context)
 
-        # THEN assert that the upload function was not called for the case
-        assert not any(
-            call[1].get("case_id") == analysis.case.internal_id
-            for call in mock_upload.call_args_list
-        )
+    # THEN assert that the upload function was not called for the case
+    assert call(case_id=analysis.case.internal_id) not in mock_upload.call_args_list
