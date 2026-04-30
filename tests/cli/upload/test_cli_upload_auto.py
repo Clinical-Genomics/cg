@@ -1,6 +1,6 @@
 """Test the cli for uploading using auto"""
 
-import datetime
+from datetime import datetime
 from unittest.mock import call
 
 import pytest
@@ -34,7 +34,6 @@ def test_upload_auto_with_workflow(
     cli_runner: CliRunner,
     helpers: StoreHelpers,
     mocker: MockerFixture,
-    timestamp: datetime.datetime,
     upload_context: CGConfig,
     workflow: Workflow,
 ):
@@ -42,7 +41,7 @@ def test_upload_auto_with_workflow(
     # GIVEN a store with an analysis which has timestamps for completion
     analysis = helpers.add_analysis(
         store=upload_context.status_db,
-        completed_at=timestamp,
+        completed_at=datetime.now(),
         workflow=workflow,
         housekeeper_version_id=1234,
     )
@@ -63,16 +62,15 @@ def test_upload_auto_with_workflow_ignores_started_uploads(
     cli_runner: CliRunner,
     helpers: StoreHelpers,
     mocker: MockerFixture,
-    timestamp: datetime.datetime,
     upload_context: CGConfig,
     workflow: Workflow,
 ):
     # GIVEN a store with an analysis which has timestamps for completion and upload start
     analysis = helpers.add_analysis(
         store=upload_context.status_db,
-        completed_at=timestamp,
+        completed_at=datetime.now(),
         uploading=True,
-        upload_started=timestamp,
+        upload_started=datetime.now(),
         workflow=workflow,
         housekeeper_version_id=1234,
     )
