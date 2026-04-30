@@ -8,7 +8,6 @@ from cg.constants.constants import CustomerId, SampleType
 from cg.constants.observations import (
     LOQUSDB_ID,
     LOQUSDB_RARE_DISEASE_CUSTOMERS,
-    LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
     LoqusdbInstance,
     RarediseaseLoadParameters,
     RarediseaseObservationsAnalysisTag,
@@ -41,7 +40,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
     @property
     def loqusdb_sequencing_methods(self) -> list[str]:
         """Sequencing methods that are eligible for Loqusdb uploads."""
-        return LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS
+        return [SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING]
 
     @staticmethod
     def is_sample_type_eligible_for_observations_upload(case: Case) -> bool:
