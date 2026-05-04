@@ -33,5 +33,7 @@ class MicrosaltCaseConfig(CaseConfig):
     def get_start_command(self) -> str:
         return (
             "{conda_binary} run --name {environment} "
-            "{binary} analyse {config_file} --input {fastq_directory}".format(**self.model_dump())
+            "{binary} --config {config_file} analyse --input {fastq_directory}".format(
+                **self.model_dump()
+            )
         )

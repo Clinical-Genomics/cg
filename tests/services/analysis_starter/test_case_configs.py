@@ -24,7 +24,7 @@ def test_microsalt_get_start_command():
     # THEN the command is as expected
     expected_command = (
         f"{microsalt_case_config.conda_binary} run --name {microsalt_case_config.environment} "
-        f"{microsalt_case_config.binary} analyse {microsalt_case_config.config_file} "
+        f"{microsalt_case_config.binary} --config {microsalt_case_config.config_file} analyse "
         f"--input {microsalt_case_config.fastq_directory}"
     )
 
