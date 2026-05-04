@@ -9,7 +9,7 @@ from cg.constants import Workflow
 from cg.constants.lims import LimsStatus
 from cg.exc import SampleNotFoundError
 from cg.server.endpoints import samples
-from cg.store.models import Customer, Sample
+from cg.store.models import Case, Customer, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -110,7 +110,8 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
-        original_workflow=Workflow.RAREDISEASE,
+        case_that_delivers=create_autospec(Case, internal_id="case_1"),
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
     )
     status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([sample_1], 1))
@@ -130,7 +131,8 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
     assert response.json == {
         "samples": [
             {
-                "internal_id": "sample_1",
+                "case_id": "case_1",
+                "sample_id": "sample_1",
                 "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
                 "lims_status": "top-up",
                 "ticket": 123456,
