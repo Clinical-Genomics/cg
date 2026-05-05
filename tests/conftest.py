@@ -2136,6 +2136,7 @@ def context_config(
             "binary_path": "echo",
             "conda_binary": "a_conda_binary",
             "conda_env": "S_microSALT",
+            "config": "config.json",
             "queries_path": Path(microsalt_dir, "queries").as_posix(),
             "root": str(microsalt_dir),
         },

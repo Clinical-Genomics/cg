@@ -340,6 +340,7 @@ class MicrosaltConfig(BaseModel):
     binary_path: str
     conda_binary: str
     conda_env: str
+    config: str
     queries_path: str
     root: str
 
