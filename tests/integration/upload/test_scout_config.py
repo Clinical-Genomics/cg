@@ -192,7 +192,7 @@ def raredisease_hk_bundle(
         create_empty_file(path)
 
     params_file.write_text(
-        "score_config_snv: /rank_model_-v1.39-.ini\n" "score_config_sv: /svrank_model_-v1.13-.ini"
+        "score_config_snv: /rank_model_-v1.39-.ini\nscore_config_sv: /svrank_model_-v1.13-.ini"
     )
 
     bundle_data = {
