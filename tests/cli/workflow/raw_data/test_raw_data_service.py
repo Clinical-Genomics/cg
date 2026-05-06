@@ -41,6 +41,7 @@ def test_store_analysis():
         primary=True,
         started_at=datetime.now(),
         case_id=666,
+        trailblazer_id=67,
     )
 
     session.as_mock.add.assert_called_once()

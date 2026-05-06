@@ -1,6 +1,7 @@
 import datetime as dt
 
 from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.constants import Workflow
 from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.exc import CaseNotFoundError
@@ -16,27 +17,29 @@ class RawDataAnalysisService:
 
     def store_analysis(self, case_id: str) -> None:
         case: Case = self._get_case(case_id)
-        self._add_analysis_to_store(case)
-        self._add_analysis_to_trailblazer(case)
+        trailblazer_analysis = self._add_analysis_to_trailblazer(case)
+        self._add_analysis_to_store(case = case, trailblazer_id=trailblazer_analysis.id)
+        
 
     def _get_case(self, case_id: str) -> Case:
         if case := self.store.get_case_by_internal_id(case_id):
             return case
         raise CaseNotFoundError(f"Case {case_id} not found.")
 
-    def _add_analysis_to_store(self, case: Case) -> None:
+    def _add_analysis_to_store(self, case: Case, trailblazer_id: int) -> None:
         new_analysis: Analysis = self.store.add_analysis(
             workflow=Workflow.RAW_DATA,
             completed_at=dt.datetime.now(),
             primary=True,
             started_at=dt.datetime.now(),
             case_id=case.id,
+            trailblazer_id=trailblazer_id,
         )
         self.store.session.add(new_analysis)
         self.store.session.commit()
 
-    def _add_analysis_to_trailblazer(self, case: Case) -> None:
-        self.trailblazer_api.add_pending_analysis(
+    def _add_analysis_to_trailblazer(self, case: Case) -> TrailblazerAnalysis:
+        trailblazer_analysis: TrailblazerAnalysis = self.trailblazer_api.add_pending_analysis(
             case_id=case.internal_id,
             analysis_type=AnalysisType.OTHER,
             config_path="",
@@ -49,3 +52,4 @@ class RawDataAnalysisService:
         self.trailblazer_api.set_analysis_status(
             case_id=case.internal_id, status=AnalysisStatus.COMPLETED
         )
+        return trailblazer_analysis
