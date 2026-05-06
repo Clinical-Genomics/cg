@@ -64,6 +64,7 @@ RAREDISEASE_CASE_TAGS = dict(
 NALLO_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
     multiqc={"multiqc-html"},
+    paraphrase={"paraphrase"},
     peddy_check={"ped-check", "peddy"},
     peddy_ped={"ped", "peddy"},
     somalier_samples={"somalier", "relate-samples"},
