@@ -15,6 +15,7 @@ from cg.constants.constants import FileFormat
 from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.io.controller import WriteStream
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
+from cg.meta.upload.tomte.tomte import TomteUploadAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
@@ -206,7 +207,6 @@ def upload_tomte_to_scout(
     """Upload an Tomte RNA case's junction splice files and omics files for all samples connected via subject ID."""
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
-    # TODO: Provide the correct upload API
     context.invoke(validate_case_samples_are_rna, case_id=case_id)
     context.invoke(upload_rna_delivery_report_to_scout, case_id=case_id)
     context.invoke(upload_rna_alignment_file_to_scout, case_id=case_id, dry_run=dry_run)
@@ -222,8 +222,9 @@ def upload_tomte_to_scout(
 def upload_rna_alignment_file_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Upload RNA alignment file for a case to Scout."""
     LOG.info("----------------- UPLOAD RNA ALIGNMENT FILE TO SCOUT -----------------------")
-    # TODO: Provide the correct UploadAPI
-    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+    upload_api = TomteUploadAPI(context)
+    context.meta_apis["upload_api"] = upload_api
+    scout_upload_api: UploadScoutAPI = upload_api.scout_upload_api
     scout_upload_api.upload_rna_alignment_file(case_id=case_id, dry_run=dry_run)
 
 
