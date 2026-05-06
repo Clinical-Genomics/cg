@@ -239,8 +239,9 @@ def upload_rna_fusion_report_to_scout(
     """Upload fusion report file for a case to Scout."""
 
     LOG.info("----------------- UPLOAD RNA FUSION REPORT TO SCOUT -----------------------")
-    # TODO: This is not broken but it would be nice for this not to use the MipDNAUploadAPI
-    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+    upload_api = TomteUploadAPI(context)
+    context.meta_apis["upload_api"] = upload_api
+    scout_upload_api: UploadScoutAPI = upload_api.scout_upload_api
     scout_upload_api.upload_fusion_report_to_scout(
         dry_run=dry_run, research=research, case_id=case_id
     )
@@ -267,9 +268,9 @@ def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool
     """Upload RNA junctions splice files to Scout."""
     LOG.info("----------------- UPLOAD RNA JUNCTIONS TO SCOUT -----------------------")
 
-    # TODO: Provide the correct upload API
-    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
-
+    upload_api = TomteUploadAPI(context)
+    context.meta_apis["upload_api"] = upload_api
+    scout_upload_api: UploadScoutAPI = upload_api.scout_upload_api
     scout_upload_api.upload_rna_junctions_to_scout(dry_run=dry_run, case_id=case_id)
 
 
@@ -281,8 +282,9 @@ def upload_rna_omics_to_scout(context: CGConfig, case_id: str, dry_run: bool) ->
     """Upload RNA omics files to Scout."""
     LOG.info("----------------- UPLOAD RNA OMICS TO SCOUT -----------------------")
 
-    # TODO: Provide the correct upload API
-    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+    upload_api = TomteUploadAPI(context)
+    context.meta_apis["upload_api"] = upload_api
+    scout_upload_api: UploadScoutAPI = upload_api.scout_upload_api
     scout_upload_api.upload_rna_omics_to_scout(dry_run=dry_run, case_id=case_id)
 
 
@@ -294,8 +296,9 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
     """Upload multiqc report to Scout."""
     LOG.info("----------------- UPLOAD MULTIQC TO SCOUT -----------------------")
 
-    # TODO: Provide the correct UploadAPI
-    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+    upload_api = TomteUploadAPI(context)
+    context.meta_apis["upload_api"] = upload_api
+    scout_upload_api: UploadScoutAPI = upload_api.scout_upload_api
     status_db: Store = context.status_db
     case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
     scout_report_type, multiqc_report = scout_upload_api.get_multiqc_html_report(
