@@ -38,7 +38,7 @@ def get_nextflow_config_dict(
     """
 
     def _make_dict(workflow: str) -> dict:
-        return {
+        nextflow_core_config: dict = {
             "binary_path": nextflow_binary.as_posix(),
             "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
@@ -61,6 +61,33 @@ def get_nextflow_config_dict(
             },
             "tower_workflow": workflow,
         }
+
+        if workflow == Workflow.RAREDISEASE:
+            raredisease_config: dict = {
+                "default_target_bed": "default_target.bed",
+                "gcnvcaller": {
+                    "default_target.bed": {
+                        "gcnvcaller_model": "gcnvcaller_model",
+                        "ploidy_model": "ploidy_model",
+                        "readcount_intervals": "readcount_intervals",
+                    }
+                },
+                "references_directory": "path/to/references_dir",
+                "verifybamid_svd": {
+                    "wes": {
+                        "bed": "path/to/verifybamid/wes/bed",
+                        "mu": "path/to/verifybamid/wes/mu",
+                        "ud": "path/to/verifybamid/wes/ud",
+                    },
+                    "wgs": {
+                        "bed": "path/to/verifybamid/wgs/bed",
+                        "mu": "path/to/verifybamid/wgs/mu",
+                        "ud": "path/to/verifybamid/wgs/ud",
+                    },
+                },
+            }
+            nextflow_core_config.update(raredisease_config)
+        return nextflow_core_config
 
     return _make_dict
 
