@@ -6,7 +6,6 @@ from subprocess import CalledProcessError
 import rich_click as click
 
 from cg.cli.generate.delivery_report.base import generate_delivery_report
-from cg.cli.upload.scout import upload_tomte_to_scout
 from cg.constants import (
     REPORT_SUPPORTED_DATA_DELIVERY,
     REPORT_SUPPORTED_WORKFLOW,
@@ -42,6 +41,8 @@ class TomteUploadAPI(NfAnalysisUploadAPI):
 
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
+            from cg.cli.upload.scout import upload_tomte_to_scout
+
             try:
                 ctx.invoke(upload_tomte_to_scout, case_id=case.internal_id)
             except CalledProcessError as error:
