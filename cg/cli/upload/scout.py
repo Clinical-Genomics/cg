@@ -256,7 +256,9 @@ def upload_rna_delivery_report_to_scout(context: CGConfig, dry_run: bool, case_i
 
     LOG.info("----------------- UPLOAD RNA DELIVERY REPORT TO SCOUT -----------------------")
 
-    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+    upload_api = TomteUploadAPI(context)
+    context.meta_apis["upload_api"] = upload_api
+    scout_upload_api: UploadScoutAPI = upload_api.scout_upload_api
     scout_upload_api.upload_rna_delivery_report_to_scout(dry_run=dry_run, case_id=case_id)
 
 
