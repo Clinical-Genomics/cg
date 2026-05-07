@@ -5,6 +5,8 @@ from cg.store.models import Analysis, Case
 def test_store_raw_data_analysis(another_case_id: str, cli_runner, raw_data_fastq_context, helpers):
     """Test for CLI command creating an analysis object for a fastq case"""
 
+    raw_data_fastq_context.trailblazer_api_ = create_autospec(TrailblazerAPI)
+
     # GIVEN a raw data fastq context
     helpers.ensure_case(raw_data_fastq_context.status_db, case_id=another_case_id)
     case_obj: Case = raw_data_fastq_context.status_db.get_case_by_internal_id(another_case_id)
