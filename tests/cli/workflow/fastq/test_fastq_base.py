@@ -40,10 +40,7 @@ def test_store_raw_data_analysis(another_case_id: str, cli_runner, raw_data_fast
 
     # THEN the analysis is created
     assert (
-        len(
-            raw_data_fastq_context.status_db._get_query(table=Analysis)
-            .filter(Analysis.case_id == case_obj.id)
-            .all()
-        )
-        > 0
-    )
+        raw_data_fastq_context.status_db._get_query(table=Analysis)
+        .filter(Analysis.case_id == case_obj.id)
+        .count()
+    ) > 0
