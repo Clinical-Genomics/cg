@@ -3,7 +3,6 @@ from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
 import pytest
-from sqlalchemy.orm import Session
 
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
@@ -38,8 +37,7 @@ def test_store_analysis():
     )
 
     # GIVEN the case can be fetched from statusdb
-    session: TypedMock[Session] = create_typed_mock(Session)
-    store: TypedMock[Store] = create_typed_mock(Store, session=session.as_type)
+    store: TypedMock[Store] = create_typed_mock(Store)
     store.as_type.get_case_by_internal_id = Mock(return_value=case)
 
     # GIVEN a raw data analysis service
@@ -59,5 +57,5 @@ def test_store_analysis():
         case_id=666,
         trailblazer_id=67,
     )
-    session.as_mock.add.assert_called_once()
-    session.as_mock.commit.assert_called_once()
+    store.as_mock.add_item_to_store.assert_called_once()
+    store.as_mock.commit_to_store.assert_called_once()

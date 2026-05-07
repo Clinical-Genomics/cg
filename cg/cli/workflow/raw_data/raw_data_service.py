@@ -18,8 +18,7 @@ class RawDataAnalysisService:
     def store_analysis(self, case_id: str) -> None:
         case: Case = self._get_case(case_id)
         trailblazer_analysis = self._add_analysis_to_trailblazer(case)
-        self._add_analysis_to_store(case = case, trailblazer_id=trailblazer_analysis.id)
-        
+        self._add_analysis_to_store(case=case, trailblazer_id=trailblazer_analysis.id)
 
     def _get_case(self, case_id: str) -> Case:
         if case := self.store.get_case_by_internal_id(case_id):
@@ -35,8 +34,8 @@ class RawDataAnalysisService:
             case_id=case.id,
             trailblazer_id=trailblazer_id,
         )
-        self.store.session.add(new_analysis)
-        self.store.session.commit()
+        self.store.add_item_to_store(new_analysis)
+        self.store.commit_to_store()
 
     def _add_analysis_to_trailblazer(self, case: Case) -> TrailblazerAnalysis:
         trailblazer_analysis: TrailblazerAnalysis = self.trailblazer_api.add_pending_analysis(
