@@ -122,19 +122,21 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         """Build custom images config."""
         LOG.info("Adding custom images")
 
-        eklipse_images: list = []
+        eklipse_images: list = []  # TODO: rename
         for sample in analysis.case.samples:
             sample_id: str = sample.internal_id
             eklipse_image_path = self.get_file_from_hk(
-                hk_tags=set(self.sample_tags.eklipse_path).union({sample_id}),
+                hk_tags=set(self.sample_tags.eklipse_path).union(
+                    {sample_id}
+                ),  # TODO: Update to use saltshaker
                 hk_version=hk_version,
             )
             if eklipse_image_path:
-                eklipse_image = Eklipse(
+                eklipse_image = Eklipse(  # TODO: Rename to custom img
                     title=sample_id,
                     path=eklipse_image_path,
-                    description="eKLIPse MT images",
-                    width="800",
+                    description="eKLIPse MT images",  # TODO: update "SAltShaker MT images"
+                    width="800",  # TODO : should be 1000
                     height="800",
                 )
                 eklipse_images.append(eklipse_image)
