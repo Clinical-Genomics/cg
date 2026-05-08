@@ -20,6 +20,11 @@ class DeliverService:
 
     def deliver_case(self, case_id: str):
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
+        # Look at analysis of case
+        # ANy uploaded?
+        # For each analysis that was uploaded is it delivered in TB
+        # If more than one still in the list, raise an Error
+        # Deliver the singel analysis
 
     def _get_undelivered_analyses_from_trailblazer(self):
         return
