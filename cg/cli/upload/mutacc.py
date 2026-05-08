@@ -31,7 +31,7 @@ def mutacc():
 @click.option(
     "--genome-version",
     type=click.Choice(["hg19", "hg38"]),
-    help="Determines Scout and MutAcc instances.",
+    help="Determines Scout and mutacc instances.",
     required=True,
 )
 @DRY_RUN
@@ -92,7 +92,7 @@ def process_solved(
 @click.option(
     "--genome-version",
     type=click.Choice(["hg19", "hg38"]),
-    help="Determines MutAcc instance.",
+    help="Determines mutacc instance.",
     required=True,
 )
 @click.pass_obj
