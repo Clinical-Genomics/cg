@@ -22,8 +22,8 @@ from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.scout.scout_load_config import (
     CaseImages,
     CustomImages,
-    Eklipse,
     RarediseaseLoadConfig,
+    SaltshakerImage,
     ScoutRarediseaseIndividual,
 )
 from cg.store.models import Analysis
@@ -122,26 +122,26 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         """Build custom images config."""
         LOG.info("Adding custom images")
 
-        eklipse_images: list = []  # TODO: rename
+        saltshaker_images: list = []
         for sample in analysis.case.samples:
             sample_id: str = sample.internal_id
-            eklipse_image_path = self.get_file_from_hk(
-                hk_tags=set(self.sample_tags.eklipse_path).union(
+            saltshaker_image_path = self.get_file_from_hk(
+                hk_tags=set(self.sample_tags.saltshaker_path).union(
                     {sample_id}
                 ),  # TODO: Update to use saltshaker
                 hk_version=hk_version,
             )
-            if eklipse_image_path:
-                eklipse_image = Eklipse(  # TODO: Rename to custom img
+            if saltshaker_image_path:
+                saltshaker_image = SaltshakerImage(  # TODO: Rename to custom img
                     title=sample_id,
-                    path=eklipse_image_path,
-                    description="eKLIPse MT images",  # TODO: update "SAltShaker MT images"
-                    width="800",  # TODO : should be 1000
+                    path=saltshaker_image_path,
+                    description="SAltShaker MT images",
+                    width="1000",
                     height="800",
                 )
-                eklipse_images.append(eklipse_image)
-        if eklipse_images:
-            case_images = CaseImages(eKLIPse=eklipse_images)
+                saltshaker_images.append(saltshaker_image)
+        if saltshaker_images:
+            case_images = CaseImages(CustomSaltshakerImage=saltshaker_images)
             config_custom_images = CustomImages(case_images=case_images)
             load_config.custom_images = config_custom_images
 

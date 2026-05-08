@@ -16,7 +16,7 @@ class ChromographImages(BaseModel):
     upd_sites: str | None = None
 
 
-class Eklipse(BaseModel):  # TODO: rename
+class SaltshakerImage(BaseModel):  # TODO: Refactor
     title: str | None = None
     description: str | None = None
     width: str | None = None
@@ -24,8 +24,8 @@ class Eklipse(BaseModel):  # TODO: rename
     path: str | None = None
 
 
-class CaseImages(BaseModel):
-    eKLIPse: list[Eklipse] | None = None  # TODO: Rename
+class CaseImages(BaseModel):  # TODO: Refactor
+    CustomSaltshakerImage: list[SaltshakerImage] | None = None
 
 
 class CustomImages(BaseModel):

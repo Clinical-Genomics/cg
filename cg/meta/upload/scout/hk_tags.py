@@ -77,7 +77,7 @@ class SampleTags(BaseModel):
     assembly_alignment_path: set[str] | None = None
     d4_file: set[str] | None = None
     vcf2cytosure: set[str] | None = None
-    eklipse_path: set[str] | None = None  # TODO: Replace with SaltShaker
+    saltshaker_path: set[str] | None = None
     mt_bam: set[str] | None = None
     chromograph_autozyg: set[str] | None = None
     chromograph_coverage: set[str] | None = None
