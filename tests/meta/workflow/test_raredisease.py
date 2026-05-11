@@ -1,6 +1,8 @@
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock, create_autospec
 
+import pytest
 from pytest_mock import MockerFixture
 
 from cg.apps.coverage import ChanjoAPI
@@ -8,6 +10,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.clients.chanjo2.models import CoverageMetricsChanjo1
 from cg.constants import SexOptions, Workflow
 from cg.constants.constants import GenomeBuild, GenomeVersion
+from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.meta.workflow import raredisease as raredisease_analysis_api
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
@@ -20,8 +23,35 @@ from cg.models.cg_config import (
     SlurmConfig,
 )
 from cg.models.deliverables.metric_deliverables import MetricsBase
-from cg.store.models import Sample
+from cg.store.models import Application, ApplicationVersion, Sample
 from cg.store.store import Store
+
+
+@pytest.fixture
+def expected_wgs_qc_metrics() -> dict[str, dict[str, Any]]:
+    return {
+        "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.20},
+        "FREEMIX": {"norm": "lt", "threshold": 0.02},
+        "PCT_PF_UQ_READS_ALIGNED": {"norm": "gt", "threshold": 0.95},
+        "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
+        "AT_DROPOUT": {"norm": "lt", "threshold": 5},
+        "GC_DROPOUT": {"norm": "lt", "threshold": 5},
+        "MEDIAN_TARGET_COVERAGE": {"norm": "gt", "threshold": 25},
+        "predicted_sex_sex_check": {"norm": "eq", "threshold": SexOptions.FEMALE},
+        "gender": {"norm": "eq", "threshold": SexOptions.FEMALE},
+    }
+
+
+@pytest.fixture
+def expected_wes_qc_metrics() -> dict[str, dict[str, Any]]:
+    return {
+        "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.20},
+        "PCT_PF_UQ_READS_ALIGNED": {"norm": "gt", "threshold": 0.95},
+        "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
+        "AT_DROPOUT": {"norm": "lt", "threshold": 10},
+        "GC_DROPOUT": {"norm": "lt", "threshold": 10},
+        "predicted_sex_sex_check": {"norm": "eq", "threshold": SexOptions.FEMALE},
+    }
 
 
 def test_parse_analysis(
@@ -132,8 +162,27 @@ def test_get_genome_build():
     assert analysis_api.get_genome_build(case_id="ChevyCase") == GenomeVersion.HG38
 
 
-def test_get_qc_conditions_for_workflow():
-    sample = create_autospec(Sample, internal_id="sample_id", sex=SexOptions.FEMALE)
+@pytest.mark.parametrize(
+    "prep_category, expected_conditions_fixture",
+    [
+        (SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING, "expected_wgs_qc_metrics"),
+        (SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING, "expected_wes_qc_metrics"),
+    ],
+)
+def test_get_qc_conditions_for_workflow(
+    prep_category: SeqLibraryPrepCategory,
+    expected_conditions_fixture: str,
+    request: pytest.FixtureRequest,
+):
+    application_version: ApplicationVersion = create_autospec(
+        ApplicationVersion, application=create_autospec(Application, analysis_type=prep_category)
+    )
+    sample = create_autospec(
+        Sample,
+        internal_id="sample_id",
+        sex=SexOptions.FEMALE,
+        application_version=application_version,
+    )
     status_db = create_autospec(Store)
     status_db.get_sample_by_internal_id = Mock(return_value=sample)
     # GIVEN Raredisease analysis API
@@ -168,12 +217,5 @@ def test_get_qc_conditions_for_workflow():
     )
     analysis_api.status_db = status_db
     qc_conditions: dict = analysis_api.get_qc_conditions_for_workflow("sample_id")
-    assert qc_conditions == {
-        "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.20},
-        "PCT_PF_UQ_READS_ALIGNED": {"norm": "gt", "threshold": 0.95},
-        "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
-        "AT_DROPOUT": {"norm": "lt", "threshold": 10},
-        "GC_DROPOUT": {"norm": "lt", "threshold": 10},
-        "predicted_sex_sex_check": {"norm": "eq", "threshold": SexOptions.FEMALE},
-        "gender": {"norm": "eq", "threshold": SexOptions.FEMALE},
-    }
+    expected_conditions: dict = request.getfixturevalue(expected_conditions_fixture)
+    assert qc_conditions == expected_conditions
