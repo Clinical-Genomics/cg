@@ -75,13 +75,13 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             hk_version=hk_version,
             variant_type=Variants.SNV,
         )
-        load_config.rank_model_path = self._get_rank_model_path(
+        load_config.rank_model_url = self._get_rank_model_url(
             hk_version=hk_version, variant_type=Variants.SNV
         )
         load_config.sv_rank_model_version = self._get_rank_model_version(
             hk_version=hk_version, variant_type=Variants.SV
         )
-        load_config.sv_rank_model_path = self._get_rank_model_path(
+        load_config.sv_rank_model_url = self._get_rank_model_url(
             hk_version=hk_version, variant_type=Variants.SV
         )
         return load_config
@@ -94,7 +94,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             raise FileNotFoundError("No params file found in Housekeeper.")
         return hk_params_file
 
-    def _get_rank_model_path(self, hk_version: Version, variant_type: Variants) -> str:
+    def _get_rank_model_url(self, hk_version: Version, variant_type: Variants) -> str:
         hk_params_file: str = self._get_params_file_path(hk_version=hk_version)
         content: dict[str, str] = read_yaml(Path(hk_params_file))
         if variant_type == Variants.SNV:
@@ -103,7 +103,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             return content.get("score_config_sv", "")
 
     def _get_rank_model_version(self, hk_version: Version, variant_type: Variants) -> str:
-        file_path: str = self._get_rank_model_path(hk_version=hk_version, variant_type=variant_type)
+        file_path: str = self._get_rank_model_url(hk_version=hk_version, variant_type=variant_type)
         return self._get_version_from_file_path(file_path)
 
     @staticmethod

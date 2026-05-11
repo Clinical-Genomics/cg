@@ -16,9 +16,9 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.constants import Priority, Workflow
 from cg.constants.constants import SexOptions
 from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
-from cg.meta.upload.scout import raredisease_config_builder as raredisease_config_builder_module
 from cg.constants.scout import ScoutAnalysisType
 from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
+from cg.meta.upload.scout import raredisease_config_builder as raredisease_config_builder_module
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
@@ -705,9 +705,9 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         human_genome_build="38",
         rank_model_version="1.0",
         rank_score_threshold=5,
-        rank_model_path=rank_model_file,
+        rank_model_url=rank_model_file,
         sv_rank_model_version="2.0",
-        sv_rank_model_path=sv_rank_model_file,
+        sv_rank_model_url=sv_rank_model_file,
         analysis_date=datetime.now(),
         samples=[
             ScoutRarediseaseIndividual(
