@@ -18,7 +18,6 @@ from cg.constants.priority import TrailblazerPriority
 from cg.constants.tb import AnalysisStatus
 from cg.exc import AnalysisNotCompletedError, TrailblazerAnalysisNotFound, TrailblazerAPIHTTPError
 from cg.io.controller import APIRequest, ReadStream
-from cg.store.models import Analysis
 
 LOG = logging.getLogger(__name__)
 
@@ -251,5 +250,5 @@ class TrailblazerAPI:
         if not self.is_latest_analysis_completed(case_id) and not force:
             raise AnalysisNotCompletedError(f"The latest analysis for {case_id} has not completed.")
 
-    def are_analyses_delivered(self, analyses: list[Analysis]) -> list[tuple[Analysis, bool]]:
+    def are_analyses_delivered(self, analysis_ids: list[int]) -> list[tuple[int, bool]]:
         pass

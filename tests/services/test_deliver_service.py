@@ -43,8 +43,8 @@ def test_deliver_case(mocker: MockerFixture):
 def test_deliver_case_more_than_one_found():
     # GIVEN store with a case
     status_db = create_autospec(Store)
-    uploaded_analysis_one = create_autospec(Analysis, uploaded_at=datetime.now())
-    uploaded_analysis_two = create_autospec(Analysis, uploaded_at=datetime.now())
+    uploaded_analysis_one = create_autospec(Analysis, trailblazer_id=15, uploaded_at=datetime.now())
+    uploaded_analysis_two = create_autospec(Analysis, trailblazer_id=16, uploaded_at=datetime.now())
     case: Case = create_autospec(
         Case,
         analyses=[uploaded_analysis_one, uploaded_analysis_two],
@@ -53,9 +53,7 @@ def test_deliver_case_more_than_one_found():
 
     # GIVEN a Trailblazer API
     trailblazer_api = create_autospec(TrailblazerAPI)
-    trailblazer_api.are_analyses_delivered = Mock(
-        return_value=[(uploaded_analysis_one, False), (uploaded_analysis_two, False)]
-    )
+    trailblazer_api.are_analyses_delivered = Mock(return_value=[(15, False), (16, False)])
 
     # GIVEN a deliver service
     deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
@@ -74,7 +72,7 @@ def test_deliver_case_nothing_to_deliver(mocker: MockerFixture):
     not_uploaded_analysis = create_autospec(Analysis, uploaded_at=None)
 
     # GIVEN an analysis that has been uploaded and delivered
-    delivered_analysis = create_autospec(Analysis, uploaded_at=datetime.now())
+    delivered_analysis = create_autospec(Analysis, trailblazer_id=15, uploaded_at=datetime.now())
     case: Case = create_autospec(
         Case,
         analyses=[not_uploaded_analysis, delivered_analysis],
@@ -83,7 +81,7 @@ def test_deliver_case_nothing_to_deliver(mocker: MockerFixture):
 
     # GIVEN a Trailblazer API
     trailblazer_api = create_autospec(TrailblazerAPI)
-    trailblazer_api.are_analyses_delivered = Mock(return_value=[(delivered_analysis, True)])
+    trailblazer_api.are_analyses_delivered = Mock(return_value=[(15, True)])
 
     # GIVEN a deliver service
     deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)

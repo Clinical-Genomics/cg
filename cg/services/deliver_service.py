@@ -29,6 +29,16 @@ class DeliverService:
         uploaded_analyses: list[Analysis] = [
             analysis for analysis in case.analyses if analysis.uploaded_at
         ]
+        analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses(uploaded_analyses)
+        match len(analyses_to_deliver):
+            case 0:
+                LOG.warning(f"No analysis found to deliver for case {case_id}.")
+            case 1:
+                self.mark_as_delivered_service.mark_analyses(analyses=analyses_to_deliver)
+            case _:
+                raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
+
+    def _get_undelivered_analyses(self, uploaded_analyses: list[Analysis]) -> list[Analysis]:
         uploaded_trailblazer_ids: list[int] = [
             analysis.trailblazer_id for analysis in uploaded_analyses if analysis.trailblazer_id
         ]
@@ -44,16 +54,8 @@ class DeliverService:
         for analysis in uploaded_analyses:
             if analysis.trailblazer_id in undelivered_trailblazer_ids:
                 analyses_to_deliver.append(analysis)
-        match len(analyses_to_deliver):
-            case 0:
-                LOG.warning(f"No analysis found to deliver for case {case_id}.")
-            case 1:
-                self.mark_as_delivered_service.mark_analyses(analyses=analyses_to_deliver)
-            case _:
-                raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
 
-    def _get_undelivered_analyses_from_trailblazer(self):
-        return
+        return analyses_to_deliver
 
     def _get_uploaded_analyses(self):
         return

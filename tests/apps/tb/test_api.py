@@ -244,4 +244,4 @@ def test_mark_analyses_as_delivered_fails_with_http_error(
 def test_are_analyses_delivered(valid_trailblazer_config: dict):
     tb_api = TrailblazerAPI(valid_trailblazer_config)
 
-    tb_api.are_analyses_delivered()
+    tb_api.are_analyses_delivered([1, 2])
