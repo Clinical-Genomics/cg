@@ -143,7 +143,11 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     @staticmethod
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
-        metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
+        if (
+            sample.application_version.application.analysis_type
+            == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+        ):
+            metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
         metric_conditions["gender"]["threshold"] = sample.sex
 
     def get_sample_coverage(
