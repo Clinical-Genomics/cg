@@ -16,7 +16,7 @@ class ChromographImages(BaseModel):
     upd_sites: str | None = None
 
 
-class SaltshakerImage(BaseModel):  # TODO: Refactor
+class CustomImage(BaseModel):
     title: str | None = None
     description: str | None = None
     width: str | None = None
@@ -24,8 +24,8 @@ class SaltshakerImage(BaseModel):  # TODO: Refactor
     path: str | None = None
 
 
-class CaseImages(BaseModel):  # TODO: Refactor
-    CustomSaltshakerImage: list[SaltshakerImage] | None = None
+class CaseImages(BaseModel):
+    saltshaker: list[CustomImage] | None = None
 
 
 class CustomImages(BaseModel):

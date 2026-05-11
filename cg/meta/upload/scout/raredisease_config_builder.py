@@ -21,9 +21,9 @@ from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.scout.scout_load_config import (
     CaseImages,
+    CustomImage,
     CustomImages,
     RarediseaseLoadConfig,
-    SaltshakerImage,
     ScoutRarediseaseIndividual,
 )
 from cg.store.models import Analysis
@@ -126,13 +126,11 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         for sample in analysis.case.samples:
             sample_id: str = sample.internal_id
             saltshaker_image_path = self.get_file_from_hk(
-                hk_tags=set(self.sample_tags.saltshaker_path).union(
-                    {sample_id}
-                ),  # TODO: Update to use saltshaker
+                hk_tags=set(self.sample_tags.saltshaker_path).union({sample_id}),
                 hk_version=hk_version,
             )
             if saltshaker_image_path:
-                saltshaker_image = SaltshakerImage(  # TODO: Rename to custom img
+                saltshaker_image = CustomImage(
                     title=sample_id,
                     path=saltshaker_image_path,
                     description="SAltShaker MT images",
@@ -141,7 +139,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
                 )
                 saltshaker_images.append(saltshaker_image)
         if saltshaker_images:
-            case_images = CaseImages(CustomSaltshakerImage=saltshaker_images)
+            case_images = CaseImages(saltshaker=saltshaker_images)
             config_custom_images = CustomImages(case_images=case_images)
             load_config.custom_images = config_custom_images
 

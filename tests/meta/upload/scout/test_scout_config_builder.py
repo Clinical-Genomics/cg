@@ -30,7 +30,10 @@ from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.orders.sample_base import StatusEnum
 from cg.models.scout.scout_load_config import (
+    CaseImages,
     ChromographImages,
+    CustomImage,
+    CustomImages,
     NalloLoadConfig,
     RarediseaseLoadConfig,
     Reviewer,
@@ -613,7 +616,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return vcf2cytosure
         if tags == {"bam-mt", "sample_id"}:
             return mt_bam
-        if tags == {"saltshaker-png"}:
+        if tags == {"saltshaker-png", "sample_id"}:
             return saltshaker_path
         if tags == {"chromograph", "autozyg", "sample_id"}:
             return chromograph_autozyg
@@ -668,6 +671,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         links=[case_sample],
         priority=Priority.standard,
         synopsis=None,
+        samples=[sample],
     )
     case_sample.case = case
     case.name = "case_name"
@@ -762,7 +766,19 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         peddy_check=peddy_check.full_path,
         peddy_ped=peddy_ped.full_path,
         peddy_sex=peddy_sex.full_path,
-        custom_images=None,  # TODO: test will pass regardless of saltshaker being there or not
+        custom_images=CustomImages(
+            case_images=CaseImages(
+                saltshaker=[
+                    CustomImage(
+                        title="sample_id",
+                        path=saltshaker_path.full_path,
+                        description="SAltShaker MT images",
+                        width="1000",
+                        height="800",
+                    )
+                ]
+            )
+        ),
         smn_tsv=smn_tsv.full_path,
         vcf_mei=vcf_mei.full_path,
         vcf_mei_research=vcf_mei_research.full_path,
