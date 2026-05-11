@@ -5,6 +5,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
+from cg.exc import MultipleAnalysesToDeliverError
 from cg.services.deliver_service import DeliverService
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
@@ -60,6 +61,36 @@ def test_deliver_case_more_than_one_found():
     deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
 
     # WHEN delivering a case
-    # THEN an
-    with pytest.raises(Exception):
+    # THEN a MultipleAnalysesToDeliverError is raised
+    with pytest.raises(MultipleAnalysesToDeliverError):
         deliver_service.deliver_case("case_id")
+
+
+def test_deliver_case_nothing_to_deliver(mocker: MockerFixture):
+    # GIVEN store with a case
+    status_db = create_autospec(Store)
+
+    # GIVEN an analysis that has not been uploaded
+    not_uploaded_analysis = create_autospec(Analysis, uploaded_at=None)
+
+    # GIVEN an analysis that has been uploaded and delivered
+    delivered_analysis = create_autospec(Analysis, uploaded_at=datetime.now())
+    case: Case = create_autospec(
+        Case,
+        analyses=[not_uploaded_analysis, delivered_analysis],
+    )
+    status_db.get_case_by_internal_id_strict = Mock(return_value=case)
+
+    # GIVEN a Trailblazer API
+    trailblazer_api = create_autospec(TrailblazerAPI)
+    trailblazer_api.are_analyses_delivered = Mock(return_value=[(delivered_analysis, True)])
+
+    # GIVEN a deliver service
+    deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
+    mark_analyses_spy = mocker.spy(deliver_service.mark_as_delivered_service, "mark_analyses")
+
+    # WHEN delivering a case
+    deliver_service.deliver_case("case_id")
+
+    # THEN the MarkAsDeliver service is not called since there is nothing to deliver
+    mark_analyses_spy.assert_not_called()

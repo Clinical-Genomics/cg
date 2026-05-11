@@ -363,3 +363,7 @@ class MultipleCaptureKitsError(CgError):
 
 class ApplicationDoesNotHaveHiFiYieldError(CgError):
     """Exception raised when application does not have HiFi yield set."""
+
+
+class MultipleAnalysesToDeliverError(CgError):
+    """Exception raised when multiple analyses are ready for delivery for a case."""
