@@ -1,6 +1,7 @@
 from datetime import datetime
 from unittest.mock import Mock, create_autospec
 
+import pytest
 from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
@@ -10,6 +11,7 @@ from cg.store.store import Store
 
 
 def test_deliver_case(mocker: MockerFixture):
+    # GIVEN a case with two analyses
     status_db = create_autospec(Store)
     not_uploaded_analysis = create_autospec(Analysis, uploaded_at=None)
     uploaded_analysis = create_autospec(Analysis, uploaded_at=datetime.now())
@@ -19,7 +21,7 @@ def test_deliver_case(mocker: MockerFixture):
     )
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
-    #
+    # GIVEN a Trailblazer API
     trailblazer_api = create_autospec(TrailblazerAPI)
     trailblazer_api.are_analyses_delivered = Mock(return_value=[(uploaded_analysis, False)])
 
@@ -30,5 +32,34 @@ def test_deliver_case(mocker: MockerFixture):
     # WHEN delivering a case
     deliver_service.deliver_case("case_id")
 
+    # THEN analysis that were not uploaded is filtered out
+    trailblazer_api.are_analyses_delivered.assert_called_once_with([uploaded_analysis])
+
     # THEN the analysis of the case should be marked as delivered
     mark_analyses_spy.assert_called_once_with([uploaded_analysis])
+
+
+def test_deliver_case_more_than_one_found():
+    # GIVEN store with a case
+    status_db = create_autospec(Store)
+    uploaded_analysis_one = create_autospec(Analysis, uploaded_at=datetime.now())
+    uploaded_analysis_two = create_autospec(Analysis, uploaded_at=datetime.now())
+    case: Case = create_autospec(
+        Case,
+        analyses=[uploaded_analysis_one, uploaded_analysis_two],
+    )
+    status_db.get_case_by_internal_id_strict = Mock(return_value=case)
+
+    # GIVEN a Trailblazer API
+    trailblazer_api = create_autospec(TrailblazerAPI)
+    trailblazer_api.are_analyses_delivered = Mock(
+        return_value=[(uploaded_analysis_one, False), (uploaded_analysis_two, False)]
+    )
+
+    # GIVEN a deliver service
+    deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
+
+    # WHEN delivering a case
+    # THEN an
+    with pytest.raises(Exception):
+        deliver_service.deliver_case("case_id")
