@@ -1,8 +1,12 @@
+import logging
+
 from cg.apps.tb.api import TrailblazerAPI
 from cg.exc import MultipleAnalysesToDeliverError
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 class DeliverService:
@@ -31,10 +35,13 @@ class DeliverService:
         analyses_to_deliver: list[Analysis] = [
             analysis for analysis, is_delivered in analyses_with_status if not is_delivered
         ]
-        if len(analyses_to_deliver) > 1:
-            raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
-        if analyses_to_deliver:
-            self.mark_as_delivered_service.mark_analyses(analyses=analyses_to_deliver)
+        match len(analyses_to_deliver):
+            case 0:
+                LOG.warning(f"No analysis found to deliver for case {case_id}.")
+            case 1:
+                self.mark_as_delivered_service.mark_analyses(analyses=analyses_to_deliver)
+            case _:
+                raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
 
     def _get_undelivered_analyses_from_trailblazer(self):
         return
