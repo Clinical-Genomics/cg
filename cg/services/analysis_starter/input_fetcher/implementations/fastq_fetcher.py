@@ -138,6 +138,8 @@ class FastqFetcher(InputFetcher):
         """
         is_missing_data = False
         for sample in case.samples:
+            if self._should_skip_sample(case=case, sample=sample):
+                continue
             if not (
                 self.housekeeper_api.get_files_from_latest_version(
                     bundle_name=sample.internal_id, tags=[SequencingFileTag.FASTQ]
