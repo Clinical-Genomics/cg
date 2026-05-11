@@ -30,7 +30,10 @@ from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.orders.sample_base import StatusEnum
 from cg.models.scout.scout_load_config import (
+    CaseImages,
     ChromographImages,
+    CustomImage,
+    CustomImages,
     NalloLoadConfig,
     RarediseaseLoadConfig,
     Reviewer,
@@ -561,7 +564,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
 
     chromograph_autozyg: File = create_autospec(File, full_path="chromograph_autozyg_chr9.png")
     chromograph_coverage: File = create_autospec(File, full_path="chromograph_coverage_chr9.png")
-    eklipse_path: File = create_autospec(File, full_path="eklipse.png")
+    saltshaker_path: File = create_autospec(File, full_path="saltshaker.png")
     chromograph_regions: File = create_autospec(File, full_path="chromograph_regions.bed")
     chromograph_sites: File = create_autospec(File, full_path="chromograph_sites.bed")
     reviewer_alignment: File = create_autospec(File, full_path="reviewer_alignment.vcf")
@@ -613,8 +616,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return vcf2cytosure
         if tags == {"bam-mt", "sample_id"}:
             return mt_bam
-        if tags == {"eklipse-png"}:
-            return eklipse_path
+        if tags == {"saltshaker-png", "sample_id"}:
+            return saltshaker_path
         if tags == {"chromograph", "autozyg", "sample_id"}:
             return chromograph_autozyg
         if tags == {"chromograph", "tcov", "sample_id"}:
@@ -668,6 +671,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         links=[case_sample],
         priority=Priority.standard,
         synopsis=None,
+        samples=[sample],
     )
     case_sample.case = case
     case.name = "case_name"
@@ -762,7 +766,19 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         peddy_check=peddy_check.full_path,
         peddy_ped=peddy_ped.full_path,
         peddy_sex=peddy_sex.full_path,
-        custom_images=None,
+        custom_images=CustomImages(
+            case_images=CaseImages(
+                saltshaker=[
+                    CustomImage(
+                        title="sample_id",
+                        path=saltshaker_path.full_path,
+                        description="SAltShaker MT images",
+                        width="1000",
+                        height="800",
+                    )
+                ]
+            )
+        ),
         smn_tsv=smn_tsv.full_path,
         vcf_mei=vcf_mei.full_path,
         vcf_mei_research=vcf_mei_research.full_path,

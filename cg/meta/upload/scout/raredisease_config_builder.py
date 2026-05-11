@@ -21,8 +21,8 @@ from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.scout.scout_load_config import (
     CaseImages,
+    CustomImage,
     CustomImages,
-    Eklipse,
     RarediseaseLoadConfig,
     ScoutRarediseaseIndividual,
 )
@@ -122,24 +122,24 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         """Build custom images config."""
         LOG.info("Adding custom images")
 
-        eklipse_images: list = []
+        saltshaker_images: list = []
         for sample in analysis.case.samples:
             sample_id: str = sample.internal_id
-            eklipse_image_path = self.get_file_from_hk(
-                hk_tags=set(self.sample_tags.eklipse_path).union({sample_id}),
+            saltshaker_image_path = self.get_file_from_hk(
+                hk_tags=set(self.sample_tags.saltshaker_path).union({sample_id}),
                 hk_version=hk_version,
             )
-            if eklipse_image_path:
-                eklipse_image = Eklipse(
+            if saltshaker_image_path:
+                saltshaker_image = CustomImage(
                     title=sample_id,
-                    path=eklipse_image_path,
-                    description="eKLIPse MT images",
-                    width="800",
+                    path=saltshaker_image_path,
+                    description="SAltShaker MT images",
+                    width="1000",
                     height="800",
                 )
-                eklipse_images.append(eklipse_image)
-        if eklipse_images:
-            case_images = CaseImages(eKLIPse=eklipse_images)
+                saltshaker_images.append(saltshaker_image)
+        if saltshaker_images:
+            case_images = CaseImages(saltshaker=saltshaker_images)
             config_custom_images = CustomImages(case_images=case_images)
             load_config.custom_images = config_custom_images
 

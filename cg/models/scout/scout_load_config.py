@@ -16,7 +16,7 @@ class ChromographImages(BaseModel):
     upd_sites: str | None = None
 
 
-class Eklipse(BaseModel):
+class CustomImage(BaseModel):
     title: str | None = None
     description: str | None = None
     width: str | None = None
@@ -25,7 +25,7 @@ class Eklipse(BaseModel):
 
 
 class CaseImages(BaseModel):
-    eKLIPse: list[Eklipse] | None = None
+    saltshaker: list[CustomImage] | None = None
 
 
 class CustomImages(BaseModel):
