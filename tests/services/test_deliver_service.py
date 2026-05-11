@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest.mock import Mock, create_autospec
 
 from pytest_mock import MockerFixture
@@ -12,7 +13,8 @@ def test_deliver_case(mocker: MockerFixture):
 
     status_db = create_autospec(Store)
     case: Case = create_autospec(
-        Case, analyses=[create_autospec(Analysis), create_autospec(Analysis)]
+        Case,
+        analyses=[create_autospec(Analysis), create_autospec(Analysis, uploaded_at=datetime.now())],
     )
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
