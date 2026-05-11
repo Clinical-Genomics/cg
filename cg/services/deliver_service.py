@@ -1,6 +1,6 @@
 from cg.apps.tb.api import TrailblazerAPI
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
-from cg.store.models import Case
+from cg.store.models import Analysis, Case
 from cg.store.store import Store
 
 
@@ -22,7 +22,13 @@ class DeliverService:
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
         # Look at analysis of case
         # ANy uploaded?
+        uploaded_analyses: list[Analysis] = [
+            analysis for analysis in case.analyses if analysis.uploaded_at
+        ]
         # For each analysis that was uploaded is it delivered in TB
+        analyses_with_status: list[tuple[Analysis, str]] = self.trailblazer_api.get_delivery_status(
+            uploaded_analyses
+        )
         # If more than one still in the list, raise an Error
         # Deliver the singel analysis
 
