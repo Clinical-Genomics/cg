@@ -709,9 +709,9 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         human_genome_build="38",
         rank_model_version="1.0",
         rank_score_threshold=5,
-        rank_model_path=rank_model_file,
+        rank_model_url=rank_model_file,
         sv_rank_model_version="2.0",
-        sv_rank_model_path=sv_rank_model_file,
+        sv_rank_model_url=sv_rank_model_file,
         analysis_date=datetime.now(),
         samples=[
             ScoutRarediseaseIndividual(
