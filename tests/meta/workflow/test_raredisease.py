@@ -50,7 +50,7 @@ def expected_wes_qc_metrics() -> dict[str, dict[str, Any]]:
         "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
         "AT_DROPOUT": {"norm": "lt", "threshold": 10},
         "GC_DROPOUT": {"norm": "lt", "threshold": 10},
-        "gender": {"norm": "eq", "threshold": SexOptions.FEMALE},
+        "predicted_sex_sex_check": {"norm": "eq", "threshold": SexOptions.FEMALE},
     }
 
 

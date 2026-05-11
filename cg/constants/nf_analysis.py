@@ -22,7 +22,7 @@ RAREDISEASE_METRIC_CONDITIONS_WES: dict[str, dict[str, Any]] = {
     "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
     "AT_DROPOUT": {"norm": "lt", "threshold": 10},
     "GC_DROPOUT": {"norm": "lt", "threshold": 10},
-    "gender": {"norm": "eq", "threshold": None},
+    RAREDISEASE_PREDICTED_SEX_METRIC: {"norm": "eq", "threshold": None},
 }
 
 RAREDISEASE_METRIC_CONDITIONS_WGS: dict[str, dict[str, Any]] = {

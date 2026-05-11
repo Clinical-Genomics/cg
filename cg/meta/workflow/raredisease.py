@@ -147,8 +147,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             sample.application_version.application.analysis_type
             == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
         ):
-            metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
-        metric_conditions["gender"]["threshold"] = sample.sex
+            metric_conditions["gender"]["threshold"] = sample.sex
+        metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
 
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
