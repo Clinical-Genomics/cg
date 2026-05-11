@@ -10,16 +10,18 @@ from cg.store.store import Store
 
 
 def test_deliver_case(mocker: MockerFixture):
-
     status_db = create_autospec(Store)
+    not_uploaded_analysis = create_autospec(Analysis, uploaded_at=None)
+    uploaded_analysis = create_autospec(Analysis, uploaded_at=datetime.now())
     case: Case = create_autospec(
         Case,
-        analyses=[create_autospec(Analysis), create_autospec(Analysis, uploaded_at=datetime.now())],
+        analyses=[not_uploaded_analysis, uploaded_analysis],
     )
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
     #
     trailblazer_api = create_autospec(TrailblazerAPI)
+    trailblazer_api.are_analyses_delivered = Mock(return_value=[(uploaded_analysis, False)])
 
     # GIVEN a deliver service
     deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
@@ -29,4 +31,4 @@ def test_deliver_case(mocker: MockerFixture):
     deliver_service.deliver_case("case_id")
 
     # THEN the analysis of the case should be marked as delivered
-    mark_analyses_spy.assert_called_once_with([])
+    mark_analyses_spy.assert_called_once_with([uploaded_analysis])
