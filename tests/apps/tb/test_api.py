@@ -241,8 +241,53 @@ def test_mark_analyses_as_delivered_fails_with_http_error(
         tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])
 
 
-def test_are_analyses_delivered(valid_trailblazer_config: dict):
+def test_are_analyses_delivered(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
     tb_api = TrailblazerAPI(valid_trailblazer_config)
+
+    # GIVEN that the communication with Trailblazer
+    mocker.patch.object(
+        requests,
+        "get",
+        return_value=create_autospec(
+            requests.Response,
+            status_code=200,
+            ok=True,
+            text="{"
+            '"analyses": ['
+            "{"
+            '"case_id": "case_1",'
+            '"comment": null,'
+            '"completed_at": null,'
+            '"config_path": "/path/",'
+            '"delivered_by": null,'
+            '"delivered_date": null,'
+            '"failed_job": null,'
+            '"id": 1234,'
+            '"is_cancellable": false,'
+            '"is_delivered": false,'
+            '"is_visible": true,'
+            '"logged_at": "Sun, 10 May 2026 22:25:03 GMT",'
+            '"order_id": 12345,'
+            '"out_dir": "/some/path",'
+            '"priority": "high",'
+            '"progress": 0.0,'
+            '"started_at": "Sun, 10 May 2026 22:25:03 GMT",'
+            '"status": "pending",'
+            '"ticket_id": "1234",'
+            '"type": "other",'
+            '"uploaded_at": null,'
+            '"user_id": null,'
+            '"version": null,'
+            '"workflow": "RSYNC",'
+            '"workflow_manager": "slurm"'
+            "}"
+            "]}",
+        ),
+    )
 
     analyses = tb_api.get_analyses_to_deliver_for_case("case_1")
     assert analyses == [
