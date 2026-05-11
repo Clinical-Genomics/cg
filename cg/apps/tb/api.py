@@ -250,5 +250,5 @@ class TrailblazerAPI:
         if not self.is_latest_analysis_completed(case_id) and not force:
             raise AnalysisNotCompletedError(f"The latest analysis for {case_id} has not completed.")
 
-    def are_analyses_delivered(self, analysis_ids: list[int]) -> list[tuple[int, bool]]:
-        pass
+    def get_analyses_to_deliver_for_case(self, case_id: str) -> list[TrailblazerAnalysis]:
+        endpoint = f"analyses?caseId={case_id}&status[]={AnalysisStatus.COMPLETED}&delivered=false"
