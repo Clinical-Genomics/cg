@@ -8,7 +8,6 @@ from cg.constants.constants import CustomerId, SampleType
 from cg.constants.observations import (
     LOQUSDB_ID,
     LOQUSDB_RARE_DISEASE_CUSTOMERS,
-    LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS,
     LoqusdbInstance,
     RarediseaseLoadParameters,
     RarediseaseObservationsAnalysisTag,
@@ -41,7 +40,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
     @property
     def loqusdb_sequencing_methods(self) -> list[str]:
         """Sequencing methods that are eligible for Loqusdb uploads."""
-        return LOQUSDB_RARE_DISEASE_SEQUENCING_METHODS
+        return [SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING]
 
     @staticmethod
     def is_sample_type_eligible_for_observations_upload(case: Case) -> bool:
@@ -68,7 +67,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
             case_id
         )
         loqusdb_instances: dict[SeqLibraryPrepCategory, LoqusdbInstance] = {
-            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING: LoqusdbInstance.WGS,
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING: LoqusdbInstance.WGS38,
             SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING: LoqusdbInstance.WES,
         }
         self.loqusdb_api = self.get_loqusdb_api(loqusdb_instances[sequencing_method])
@@ -86,6 +85,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
             loqusdb_api=self.loqusdb_api,
             profile_vcf_path=input_files.profile_vcf_path,
             profile_threshold=RarediseaseLoadParameters.PROFILE_THRESHOLD.value,
+            loqusdb_options=["--keep-chr-prefix", "--genome-build", "GRCh38"],
         ):
             LOG.error(
                 f"Case {case.internal_id} has already been uploaded to {repr(self.loqusdb_api)}"
@@ -101,6 +101,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
             gq_threshold=RarediseaseLoadParameters.GQ_THRESHOLD.value,
             hard_threshold=RarediseaseLoadParameters.HARD_THRESHOLD.value,
             soft_threshold=RarediseaseLoadParameters.SOFT_THRESHOLD.value,
+            loqusdb_options=["--keep-chr-prefix", "--genome-build", "GRCh38"],
         )
         loqusdb_id = str(self.loqusdb_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)

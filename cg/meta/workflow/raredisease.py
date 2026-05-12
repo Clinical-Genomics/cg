@@ -28,8 +28,7 @@ LOG = logging.getLogger(__name__)
 
 
 class RarediseaseAnalysisAPI(NfAnalysisAPI):
-    """Handles communication between RAREDISEASE processes
-    and the rest of CG infrastructure."""
+    """Handles communication between RAREDISEASE processes and the rest of CG infrastructure."""
 
     def __init__(
         self,
@@ -144,8 +143,12 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     @staticmethod
     def set_order_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
+        if (
+            sample.application_version.application.analysis_type
+            == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
+        ):
+            metric_conditions["gender"]["threshold"] = sample.sex
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
-        metric_conditions["gender"]["threshold"] = sample.sex
 
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
@@ -159,8 +162,8 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         return RAREDISEASE_CASE_TAGS
 
     def get_genome_build(self, case_id: str) -> GenomeVersion:
-        """Return reference genome for a raredisease case. Currently fixed for hg19."""
-        return GenomeVersion.HG19
+        """Return reference genome for a raredisease case."""
+        return GenomeVersion.HG38
 
     def parse_analysis(self, qc_metrics_raw: list[MetricsBase], **kwargs) -> NextflowAnalysis:
         """Parse Nextflow output analysis files and return an analysis model."""

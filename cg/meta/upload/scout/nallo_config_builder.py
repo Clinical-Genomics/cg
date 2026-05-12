@@ -5,6 +5,7 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
+from cg.constants.constants import GenomeBuild
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import (
     NALLO_CASE_TAGS,
@@ -12,7 +13,6 @@ from cg.constants.scout import (
     NALLO_RANK_MODEL_VERSION_SNV,
     NALLO_RANK_MODEL_VERSION_SV,
     NALLO_SAMPLE_TAGS,
-    GenomeBuild,
     UploadTrack,
 )
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags

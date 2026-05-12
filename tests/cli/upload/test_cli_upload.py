@@ -72,7 +72,7 @@ def test_upload_raw_data_case(cli_runner: CliRunner, mocker: MockerFixture):
     # GIVEN a status_db with the case
     status_db: Store = create_autospec(Store)
     status_db.verify_case_exists = Mock(return_value=True)
-    status_db.get_case_by_internal_id = Mock(return_value=case)
+    status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
     # GIVEN a RawDataUploadAPI can be instantiated
     raw_data_upload_api: TypedMock[RawDataUploadAPI] = create_typed_mock(RawDataUploadAPI)

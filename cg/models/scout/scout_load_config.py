@@ -16,7 +16,7 @@ class ChromographImages(BaseModel):
     upd_sites: str | None = None
 
 
-class Eklipse(BaseModel):
+class CustomImage(BaseModel):
     title: str | None = None
     description: str | None = None
     width: str | None = None
@@ -25,7 +25,7 @@ class Eklipse(BaseModel):
 
 
 class CaseImages(BaseModel):
-    eKLIPse: list[Eklipse] | None = None
+    saltshaker: list[CustomImage] | None = None
 
 
 class CustomImages(BaseModel):
@@ -118,7 +118,9 @@ class ScoutLoadConfig(BaseModel):
     human_genome_build: str = None
     rank_model_version: str | None = None
     rank_score_threshold: int = None
+    rank_model_url: str | None = None
     sv_rank_model_version: str | None = None
+    sv_rank_model_url: str | None = None
     analysis_date: datetime | None = None
     samples: list[ScoutIndividual] = []
     customer_images: CustomImages | None = None

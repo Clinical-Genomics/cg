@@ -18,6 +18,7 @@ from cg.constants.constants import SexOptions
 from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
 from cg.constants.scout import ScoutAnalysisType
 from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
+from cg.meta.upload.scout import raredisease_config_builder as raredisease_config_builder_module
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
@@ -29,7 +30,10 @@ from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.orders.sample_base import StatusEnum
 from cg.models.scout.scout_load_config import (
+    CaseImages,
     ChromographImages,
+    CustomImage,
+    CustomImages,
     NalloLoadConfig,
     RarediseaseLoadConfig,
     Reviewer,
@@ -560,15 +564,15 @@ def test_raredisease_config_builder(mocker: MockerFixture):
 
     chromograph_autozyg: File = create_autospec(File, full_path="chromograph_autozyg_chr9.png")
     chromograph_coverage: File = create_autospec(File, full_path="chromograph_coverage_chr9.png")
-    eklipse_path: File = create_autospec(File, full_path="eklipse.png")
+    saltshaker_path: File = create_autospec(File, full_path="saltshaker.png")
     chromograph_regions: File = create_autospec(File, full_path="chromograph_regions.bed")
     chromograph_sites: File = create_autospec(File, full_path="chromograph_sites.bed")
     reviewer_alignment: File = create_autospec(File, full_path="reviewer_alignment.vcf")
     reviewer_alignment_index: File = create_autospec(File, full_path="reviewer_alignment_index.vcf")
     reviewer_vcf: File = create_autospec(File, full_path="reviewer_vcf.vcf")
     reviewer_catalog: File = create_autospec(File, full_path="reviewer_catalog.vcf")
-    manifest: File = create_autospec(
-        File, full_path="tests/fixtures/analysis/raredisease/manifest.json"
+    params: File = create_autospec(
+        File, full_path="tests/fixtures/analysis/raredisease/params.yaml"
     )
 
     # GIVEN files exist in Housekeeper for each set of RAREDISEASE_CASE_TAGS and RAREDISEASE_SAMPLE_TAGS
@@ -612,8 +616,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return vcf2cytosure
         if tags == {"bam-mt", "sample_id"}:
             return mt_bam
-        if tags == {"eklipse-png"}:
-            return eklipse_path
+        if tags == {"saltshaker-png", "sample_id"}:
+            return saltshaker_path
         if tags == {"chromograph", "autozyg", "sample_id"}:
             return chromograph_autozyg
         if tags == {"chromograph", "tcov", "sample_id"}:
@@ -632,8 +636,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return reviewer_catalog
         if tags == {"mitodel", "sample_id"}:
             return mitodel_file
-        if tags == {"manifest"}:
-            return manifest
+        if tags == {"nextflow-params"}:
+            return params
         raise Exception
 
     mocker.patch.object(
@@ -667,10 +671,23 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         links=[case_sample],
         priority=Priority.standard,
         synopsis=None,
+        samples=[sample],
     )
     case_sample.case = case
     case.name = "case_name"
     analysis: Analysis = create_autospec(Analysis, case=case, completed_at=datetime.now())
+
+    # GIVEN that the params file can be read
+    rank_model_file = "/path/to/some/snv_file.-v1.0-.ini"
+    sv_rank_model_file = "/path/to/some/sv_file.-v2.0-.ini"
+    mocker.patch.object(
+        raredisease_config_builder_module,
+        "read_yaml",
+        return_value={
+            "score_config_snv": rank_model_file,
+            "score_config_sv": sv_rank_model_file,
+        },
+    )
 
     # WHEN building the Raredisease Scout load config
     load_config: RarediseaseLoadConfig = raredisease_config_builder.build_load_config(
@@ -689,10 +706,12 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         gene_panels=[],
         default_gene_panels=[],
         cohorts=[],
-        human_genome_build="37",
-        rank_model_version="1.38",
+        human_genome_build="38",
+        rank_model_version="1.0",
         rank_score_threshold=5,
-        sv_rank_model_version="1.12",
+        rank_model_url=rank_model_file,
+        sv_rank_model_version="2.0",
+        sv_rank_model_url=sv_rank_model_file,
         analysis_date=datetime.now(),
         samples=[
             ScoutRarediseaseIndividual(
@@ -747,7 +766,19 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         peddy_check=peddy_check.full_path,
         peddy_ped=peddy_ped.full_path,
         peddy_sex=peddy_sex.full_path,
-        custom_images=None,
+        custom_images=CustomImages(
+            case_images=CaseImages(
+                saltshaker=[
+                    CustomImage(
+                        title="sample_id",
+                        path=saltshaker_path.full_path,
+                        description="SAltShaker MT images",
+                        width="1000",
+                        height="800",
+                    )
+                ]
+            )
+        ),
         smn_tsv=smn_tsv.full_path,
         vcf_mei=vcf_mei.full_path,
         vcf_mei_research=vcf_mei_research.full_path,

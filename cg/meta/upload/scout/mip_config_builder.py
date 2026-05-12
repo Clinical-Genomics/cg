@@ -4,14 +4,9 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
+from cg.constants.constants import GenomeBuild
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
-from cg.constants.scout import (
-    MIP_CASE_TAGS,
-    MIP_SAMPLE_TAGS,
-    RANK_MODEL_THRESHOLD,
-    GenomeBuild,
-    UploadTrack,
-)
+from cg.constants.scout import MIP_CASE_TAGS, MIP_SAMPLE_TAGS, RANK_MODEL_THRESHOLD, UploadTrack
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.mip import MipAnalysisAPI
