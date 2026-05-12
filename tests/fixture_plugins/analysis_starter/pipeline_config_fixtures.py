@@ -47,6 +47,7 @@ def get_nextflow_config_dict(
             "platform": str(nf_analysis_platform_config_path),
             "params": str(nf_analysis_pipeline_params_path),
             "config": str(nf_analysis_pipeline_config_path),
+            "reference": "reference.fasta",
             "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": "path/to/launchdir",
             "workflow_bin_path": "workflow/path",

@@ -210,3 +210,6 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             hk_tags=self.sample_tags.tiddit_coverage_wig, hk_version=hk_version, sample_id=sample_id
         )
         self.include_reviewer_files(config_sample=config_sample, hk_version=hk_version)
+
+    def _get_reviewer_reference_file(self) -> str:
+        return self.raredisease_analysis_api.reference

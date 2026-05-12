@@ -330,7 +330,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
 
     # GIVEN a Nallo config builder
     nallo_config_builder = NalloConfigBuilder(
-        nallo_analysis_api=create_autospec(NalloAnalysisAPI),
+        nallo_analysis_api=create_autospec(NalloAnalysisAPI, reference="reference.fasta"),
         lims_api=lims_api,
         madeline_api=create_autospec(MadelineAPI),
     )
@@ -499,6 +499,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
                     vcf="repeats_sorted.vcf",
                     catalog="variant_catalog.trgt",
                     trgt=True,
+                    reference="reference.fasta",
                 ),
                 tiddit_coverage_wig=tiddit_coverage_wig.full_path,
             )
@@ -532,7 +533,9 @@ def test_raredisease_config_builder(mocker: MockerFixture):
 
     # GIVEN a Raredisease config builder
     raredisease_config_builder = RarediseaseConfigBuilder(
-        raredisease_analysis_api=create_autospec(RarediseaseAnalysisAPI),
+        raredisease_analysis_api=create_autospec(
+            RarediseaseAnalysisAPI, reference="reference.fasta"
+        ),
         lims_api=lims_api,
         madeline_api=create_autospec(MadelineAPI),
     )
@@ -754,6 +757,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
                     vcf="reviewer_vcf.vcf",
                     catalog="reviewer_catalog.vcf",
                     trgt=None,
+                    reference="reference.fasta",
                 ),
                 d4_file=None,
             )

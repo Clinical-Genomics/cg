@@ -149,3 +149,6 @@ class NalloConfigBuilder(ScoutConfigBuilder):
             )
             else None
         )
+
+    def _get_reviewer_reference_file(self) -> str:
+        return self.nallo_analysis_api.reference

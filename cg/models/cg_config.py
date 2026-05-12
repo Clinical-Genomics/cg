@@ -233,6 +233,7 @@ class MipConfig(BaseModel):
     conda_binary: str | None = None
     conda_env: str
     mip_config: str
+    reference: str | None = None
     workflow: str
     root: str
     script: str
@@ -249,6 +250,7 @@ class NalloConfig(CommonAppConfig):
     platform: str
     pre_run_script: str = ""
     profile: str
+    reference: str
     repository: str
     resources: str
     revision: str
@@ -288,6 +290,7 @@ class RarediseaseConfig(CommonAppConfig):
     platform: str
     pre_run_script: str = ""
     profile: str
+    reference: str
     references_directory: Path
     repository: str
     resources: str
