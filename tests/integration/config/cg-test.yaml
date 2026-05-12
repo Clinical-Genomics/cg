@@ -130,6 +130,7 @@ mip-rd-dna:
   conda_binary: "{test_root_dir}/mip-dna/conda_bin"
   conda_env: S_mip12.1
   mip_config: "{test_root_dir}/mip-dna/config/mip12.1-dna-stage.yaml"
+  reference: "mip-dna-reference.fasta"
   workflow: "analyse rd_dna"
   root: "{test_root_dir}/mip-dna/cases"
   script: "{test_root_dir}/mip-dna/bin"
@@ -153,6 +154,7 @@ nallo:
   pipeline_deliverables: "nallo_pipeline_deliverables.yaml"
   platform: {test_root_dir}/platform.config
   profile: nallo_profile
+  reference: "nallo-reference.fasta"
   resources: {test_root_dir}/nallo_resources.config
   repository: nallo_repository
   revision: nallo_revision
@@ -179,6 +181,7 @@ raredisease:
   pipeline_deliverables: "raredisease_pipeline_deliverables.yaml"
   platform: {test_root_dir}/platform.config
   profile: raredisease_profile
+  reference: "raredisease-reference.fasta"
   references_directory: {test_root_dir}/raredisease_references_directory
   resources: {test_root_dir}/raredisease_resources.config
   repository: raredisease_repository
