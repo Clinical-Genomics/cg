@@ -112,6 +112,7 @@ def test_get_config_missing_required_files(mocker: MockerFixture):
     pipeline_config = create_autospec(
         RarediseaseConfig,
         root="/root",
+        reference="raredisease_reference.fasta",
         repository="https://repo.scilifelab.se",
         revision="rev123",
         profile="profile",

@@ -72,6 +72,7 @@ def get_nextflow_config_dict(
                         "readcount_intervals": "readcount_intervals",
                     }
                 },
+                "reference": "raredisease_reference.fasta",
                 "references_directory": "path/to/references_dir",
                 "verifybamid_svd": {
                     "wes": {

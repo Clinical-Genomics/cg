@@ -139,6 +139,7 @@ def test_get_genome_build():
             params="here/is/my/params/file",
             platform="platform",
             profile="profile",
+            reference="raredisease_reference.fasta",
             resources="resources",
             revision="1.0.0",
             root="/I/am/Root",

@@ -48,6 +48,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         self.pipeline_deliverables = Path(config.nallo.pipeline_deliverables)
         self.platform: str = config.nallo.platform
         self.profile: str = config.nallo.profile
+        self.reference: str = config.raredisease.reference
         self.resources: str = config.nallo.resources
         self.revision: str = config.nallo.revision
         self.root_dir: str = config.nallo.root

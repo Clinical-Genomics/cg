@@ -38,6 +38,7 @@ class Reviewer(BaseModel):
     vcf: str | None = None
     catalog: str | None = None
     trgt: bool | None = None
+    reference: str | None = None
 
 
 class ScoutIndividual(BaseModel):
