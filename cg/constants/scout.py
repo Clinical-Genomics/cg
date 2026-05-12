@@ -6,11 +6,6 @@ from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
 HGNC_ID = "hgnc_id"
 
 
-class GenomeBuild(StrEnum):
-    hg19: str = "37"
-    hg38: str = "38"
-
-
 class ScoutExportFileName(StrEnum):
     MANAGED_VARIANTS = f"managed_variants{FileExtensions.VCF}"
     PANELS = f"gene_panels{FileExtensions.BED}"
@@ -122,7 +117,7 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
     alignment_file={AlignmentFileTag.CRAM},
     vcf2cytosure={"vcf2cytosure"},
     mt_bam={"bam-mt"},
-    eklipse_path={"eklipse-png"},
+    saltshaker_path={"saltshaker-png"},
     chromograph_autozyg={"chromograph", "autozyg"},
     chromograph_coverage={"chromograph", "tcov"},
     chromograph_regions={"chromograph", "regions"},

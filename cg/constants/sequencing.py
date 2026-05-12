@@ -50,8 +50,8 @@ FLOWCELL_Q30_THRESHOLD = {
 class Variants(StrEnum):
     """Type of variants."""
 
-    SNV: str = "snv"
-    SV: str = "sv"
+    SNV = "snv"
+    SV = "sv"
 
 
 class RecordType(StrEnum):
