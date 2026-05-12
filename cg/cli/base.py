@@ -1,5 +1,6 @@
 """Start of CLI"""
 
+import asyncio
 import logging
 import sys
 from pathlib import Path
@@ -31,6 +32,7 @@ from cg.cli.workflow.base import workflow as workflow_cmd
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
+from cg.services.events.listen import EventListener
 from cg.store.database import get_scoped_session_registry
 
 LOG = logging.getLogger(__name__)
@@ -106,6 +108,13 @@ def search(query):
             click.echo(f"  {cmd}")
     else:
         click.echo("No matching commands found.")
+
+
+@base.command()
+def listen():
+    listener = EventListener(server="TODO", ca_cert_path="TODO")
+    listener.register("cg.upload.completed", lambda msg: click.echo(f"Received message: {msg}"))
+    asyncio.run(listener.listen())
 
 
 base.add_command(add_cmd)
