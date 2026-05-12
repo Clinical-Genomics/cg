@@ -206,6 +206,7 @@ def test_get_qc_conditions_for_workflow(
                 pipeline_deliverables="raredisease_deliverables.yaml",
                 platform="platform",
                 profile="profile",
+                reference="reference.fasta",
                 resources="a tonne",
                 revision="0.0.0",
                 root="root",

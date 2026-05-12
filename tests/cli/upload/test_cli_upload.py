@@ -11,7 +11,7 @@ from cg.cli.upload.base import upload
 from cg.constants.constants import DataDelivery, Workflow
 from cg.constants.process import EXIT_SUCCESS
 from cg.meta.upload.raw_data.raw_data_upload_api import RawDataUploadAPI
-from cg.models.cg_config import CGConfig, IlluminaConfig, RunInstruments
+from cg.models.cg_config import CGConfig, IlluminaConfig, MipConfig, RunInstruments
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -88,6 +88,7 @@ def test_upload_raw_data_case(cli_runner: CliRunner, mocker: MockerFixture):
             RunInstruments,
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
         ),
+        mip_rd_dna=create_autospec(MipConfig, reference="reference.fasta"),
     )
 
     # WHEN uploading the case
