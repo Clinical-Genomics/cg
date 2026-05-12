@@ -641,7 +641,9 @@ def test_get_unhandled_samples(store: Store, helpers: StoreHelpers):
     )
 
     # WHEN getting the unhandled samples in top-up
-    unhandled_samples: Query = store._get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+    unhandled_samples: Query = store._get_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP, search=None, workflow=None
+    )
 
     # THEN only correct samples are returned
     assert unhandled_samples.all() == [sample_old, sample_new]
@@ -661,7 +663,9 @@ def test_get_unhandled_samples_filters_on_lims_status(store: Store, helpers: Sto
     )
 
     # WHEN getting the unhandled samples in top-up
-    unhandled_samples: Query = store._get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+    unhandled_samples: Query = store._get_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP, search=None, workflow=None
+    )
 
     # THEN no sample is returned
     assert unhandled_samples.all() == []
@@ -681,7 +685,9 @@ def test_get_unhandled_samples_filters_out_downsampled_samples(store: Store, hel
     )
 
     # WHEN getting the unhandled samples in top-up
-    unhandled_samples: Query = store._get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+    unhandled_samples: Query = store._get_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP, search=None, workflow=None
+    )
 
     # THEN no sample is returned
     assert unhandled_samples.all() == []
@@ -701,7 +707,9 @@ def test_get_unhandled_samples_filters_out_cancelled_samples(store: Store, helpe
     )
 
     # WHEN getting the unhandled samples in top-up
-    unhandled_samples: Query = store._get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+    unhandled_samples: Query = store._get_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP, search=None, workflow=None
+    )
 
     # THEN no sample is returned
     assert unhandled_samples.all() == []
@@ -723,7 +731,9 @@ def test_get_unhandled_samples_filters_out_not_sequenced_samples(
     )
 
     # WHEN getting the unhandled samples in top-up
-    unhandled_samples: Query = store._get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+    unhandled_samples: Query = store._get_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP, search=None, workflow=None
+    )
 
     # THEN no sample is returned
     assert unhandled_samples.all() == []
@@ -743,7 +753,9 @@ def test_get_unhandled_samples_filters_out_delivered_samples(store: Store, helpe
     )
 
     # WHEN getting the unhandled samples in top-up
-    unhandled_samples: Query = store._get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+    unhandled_samples: Query = store._get_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP, search=None, workflow=None
+    )
 
     # THEN no sample is returned
     assert unhandled_samples.all() == []
@@ -784,7 +796,9 @@ def test_get_unhandled_samples_filters_out_internal_samples(store: Store, helper
     )
 
     # WHEN getting the unhandled samples in top-up
-    unhandled_samples: Query = store._get_unhandled_samples(lims_status=LimsStatus.TOP_UP)
+    unhandled_samples: Query = store._get_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP, search=None, workflow=None
+    )
 
     # THEN only the external sample is returned
     assert unhandled_samples.all() == [external_sample]
@@ -814,8 +828,47 @@ def test_get_paginated_unhandled_samples(store: Store, helpers: StoreHelpers):
     )
     # WHEN getting the unhandled samples in top-up using page 2 and page_size = 1
     unhandled_samples, total = store.get_paginated_unhandled_samples(
-        lims_status=LimsStatus.TOP_UP, page=2, page_size=1
+        lims_status=LimsStatus.TOP_UP, page=2, page_size=1, search=None, workflow=None
     )
     # THEN only the newer sample should be returned
     assert unhandled_samples == [sample_new]
     assert total == 2
+
+
+def test_get_paginated_unhandled_samples_search_sample(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with two unhandled samples
+    sample_searchable = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="perfect_searchable_unhandled_sample_1",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="perfect_unhandled_sample_2",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now() - timedelta(days=1),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    # GIVEN a searchable string
+    perfect_searchable_string = "searchable"
+
+    # WHEN getting the unhandled samples in top-up using page 2 and page_size = 1
+    unhandled_samples, total = store.get_paginated_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=2,
+        search=perfect_searchable_string,
+        workflow=None,
+    )
+
+    # THEN only the matching sample should be returned
+    assert unhandled_samples == [sample_searchable]
