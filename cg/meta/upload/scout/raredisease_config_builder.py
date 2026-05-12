@@ -206,4 +206,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             sample_id=sample_id,
             hk_version=hk_version,
         )
+        config_sample.tiddit_coverage_wig = self.get_sample_file(
+            hk_tags=self.sample_tags.tiddit_coverage_wig, hk_version=hk_version, sample_id=sample_id
+        )
         self.include_reviewer_files(config_sample=config_sample, hk_version=hk_version)

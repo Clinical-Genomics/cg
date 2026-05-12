@@ -574,6 +574,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     params: File = create_autospec(
         File, full_path="tests/fixtures/analysis/raredisease/params.yaml"
     )
+    tiddit_coverage: File = create_autospec(File, full_path="tiddit_coverage.bw")
 
     # GIVEN files exist in Housekeeper for each set of RAREDISEASE_CASE_TAGS and RAREDISEASE_SAMPLE_TAGS
     def mock_get_file_from_version(version: Version, tags: set[str]) -> File | None:
@@ -608,6 +609,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return vcf_sv
         if tags == {"vcf-str"}:
             return vcf_str
+        if tags == {"nextflow-params"}:
+            return params
 
         # Sample tags
         if tags == {AlignmentFileTag.CRAM, "sample_id"}:
@@ -636,8 +639,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return reviewer_catalog
         if tags == {"mitodel", "sample_id"}:
             return mitodel_file
-        if tags == {"nextflow-params"}:
-            return params
+        if tags == {"bigwig", "tiddit-coverage", "sample_id"}:
+            return tiddit_coverage
         raise Exception
 
     mocker.patch.object(
@@ -740,7 +743,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
                 ),
                 rhocall_bed=None,
                 rhocall_wig=None,
-                tiddit_coverage_wig=None,
+                tiddit_coverage_wig=tiddit_coverage.full_path,
                 upd_regions_bed=None,
                 upd_sites_bed=None,
                 vcf2cytosure=vcf2cytosure.full_path,
