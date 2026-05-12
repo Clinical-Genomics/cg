@@ -4,12 +4,12 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.constants.constants import GenomeBuild
+from cg.constants.constants import GenomeBuild, Workflow
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import MIP_CASE_TAGS, MIP_SAMPLE_TAGS, RANK_MODEL_THRESHOLD, UploadTrack
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.scout.scout_load_config import MipLoadConfig, ScoutMipIndividual
 from cg.store.models import Analysis, CaseSample
@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 class MipConfigBuilder(ScoutConfigBuilder):
     def __init__(
         self,
-        mip_analysis_api: MipDNAAnalysisAPI,
+        mip_analysis_api: MipAnalysisAPI,
         lims_api: LimsAPI,
         madeline_api: MadelineAPI,
     ):
@@ -29,7 +29,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         )
         self.case_tags: CaseTags = CaseTags(**MIP_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**MIP_SAMPLE_TAGS)
-        self.mip_analysis_api: MipDNAAnalysisAPI = mip_analysis_api
+        self.mip_analysis_api: MipAnalysisAPI = mip_analysis_api
         self.lims_api: LimsAPI = lims_api
         self.madeline_api: MadelineAPI = madeline_api
 
@@ -163,5 +163,8 @@ class MipConfigBuilder(ScoutConfigBuilder):
         )
         self.include_reviewer_files(config_sample=config_sample, hk_version=hk_version)
 
-    def _get_reviewer_reference_file(self) -> str:
-        return self.mip_analysis_api.reference
+    def _get_reviewer_reference_file(self) -> str | None:
+        if self.mip_analysis_api.workflow == Workflow.MIP_DNA:
+            return self.mip_analysis_api.reference
+        else:
+            return None
