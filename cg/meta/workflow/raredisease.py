@@ -47,6 +47,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.pipeline_deliverables = Path(config.raredisease.pipeline_deliverables)
         self.platform: str = config.raredisease.platform
         self.profile: str = config.raredisease.profile
+        self.reference: str = config.raredisease.reference
         self.resources: str = config.raredisease.resources
         self.revision: str = config.raredisease.revision
         self.root_dir: str = config.raredisease.root

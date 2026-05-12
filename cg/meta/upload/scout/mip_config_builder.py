@@ -4,7 +4,7 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.constants.constants import GenomeBuild
+from cg.constants.constants import GenomeBuild, Workflow
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import MIP_CASE_TAGS, MIP_SAMPLE_TAGS, RANK_MODEL_THRESHOLD, UploadTrack
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
@@ -162,3 +162,9 @@ class MipConfigBuilder(ScoutConfigBuilder):
             hk_tags=self.sample_tags.upd_sites_bed, hk_version=hk_version, sample_id=sample_id
         )
         self.include_reviewer_files(config_sample=config_sample, hk_version=hk_version)
+
+    def _get_reviewer_reference_file(self) -> str | None:
+        if self.mip_analysis_api.workflow == Workflow.MIP_DNA:
+            return self.mip_analysis_api.reference
+        else:
+            return None
