@@ -241,7 +241,7 @@ def test_mark_analyses_as_delivered_fails_with_http_error(
         tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])
 
 
-def test_are_analyses_delivered(
+def test_get_analyses_to_deliver_for_case(
     valid_google_credentials: IDTokenCredentials,
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
@@ -282,7 +282,7 @@ def test_are_analyses_delivered(
             '"uploaded_at": null,'
             '"user_id": null,'
             '"version": null,'
-            '"workflow": "RSYNC",'
+            '"workflow": "raredisease",'
             '"workflow_manager": "slurm"'
             "}"
             "]}",
@@ -292,19 +292,36 @@ def test_are_analyses_delivered(
     analyses = tb_api.get_analyses_to_deliver_for_case("case_1")
     assert analyses == [
         TrailblazerAnalysis(
-            id=1,
-            logged_at=None,
-            started_at=None,
+            case_id="case_1",
+            id=1234,
+            logged_at="Sun, 10 May 2026 22:25:03 GMT",
+            started_at="Sun, 10 May 2026 22:25:03 GMT",
             completed_at=None,
-            out_dir=None,
-            config_path=None,
-        ),
-        TrailblazerAnalysis(
-            id=2,
-            logged_at=None,
-            started_at=None,
-            completed_at=None,
-            out_dir=None,
-            config_path=None,
+            out_dir="/some/path",
+            config_path="/path/",
+            status="pending",
+            priority="high",
+            is_visible=True,
+            type="other",
+            workflow=Workflow.RAREDISEASE,
         ),
     ]
+
+
+def test_get_analyses_to_deliver_for_case_no_analysis(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    tb_api = TrailblazerAPI(valid_trailblazer_config)
+
+    mocker.patch.object(
+        requests,
+        "get",
+        return_value=create_autospec(
+            requests.Response, status_code=200, ok=True, text='{"analyses":[],"total_count":0}'
+        ),
+    )
+
+    analyses = tb_api.get_analyses_to_deliver_for_case("case_1")
+    assert analyses == []
