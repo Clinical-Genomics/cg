@@ -21,6 +21,7 @@ def trailblazer_id() -> int:
 @pytest.fixture
 def analysis_client() -> TypedMock[AnalysisClient]:
     """TrailblazerAPI for endpoints."""
+    # TODO: Make this a mock of TBAPI instead
     return create_typed_mock(AnalysisClient)
 
 
@@ -84,6 +85,16 @@ def test_mark_analyses_success(
 
     # THEN we should return the Trailblazer response
     assert response == tb_response
+
+
+def test_mark_analyses_with_email(
+    analysis_client: TypedMock[AnalysisClient],
+    mark_as_delivered_service: MarkAsDeliveredService,
+    status_db: FlaskStore,
+    trailblazer_id: int,
+):
+    # TODO: Fill this test
+    pass
 
 
 def test_mark_analyses_mix_original_non_original_samples(
