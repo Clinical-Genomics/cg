@@ -73,7 +73,6 @@ def get_unhandled_samples():
             search=req.search,
             page=req.page,
             page_size=req.page_size,
-            workflow=req.workflow,
         )
         response = UnhandledSamplesResponse.from_samples(samples=samples, total=total)
         return jsonify(response.model_dump())

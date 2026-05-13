@@ -144,7 +144,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
 
     # THEN function has been called with the correct arguments
     status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
-        lims_status=LimsStatus.TOP_UP, search=None, page=1, page_size=10, workflow=None
+        lims_status=LimsStatus.TOP_UP, search=None, page=1, page_size=10
     )
 
 
@@ -206,5 +206,5 @@ def test_get_unhandled_samples_sample_search(client: FlaskClient, mocker: Mocker
 
     # THEN function has been called with the correct arguments
     status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
-        lims_status=LimsStatus.TOP_UP, search="sample_1", page=1, page_size=10, workflow=None
+        lims_status=LimsStatus.TOP_UP, search="sample_1", page=1, page_size=10
     )

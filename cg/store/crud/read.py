@@ -1894,16 +1894,13 @@ class ReadHandler(BaseHandler):
         search: str | None,
         page: int,
         page_size: int,
-        workflow: Workflow | None,
     ) -> tuple[list[Sample], int]:
         unhandled_samples: Query = self._get_unhandled_samples(
-            lims_status=lims_status, search=search, workflow=workflow
+            lims_status=lims_status, search=search
         )
         return _paginate(query=unhandled_samples, page=page, page_size=page_size)
 
-    def _get_unhandled_samples(
-        self, lims_status: LimsStatus, search: str | None, workflow: Workflow | None
-    ) -> Query:
+    def _get_unhandled_samples(self, lims_status: LimsStatus, search: str | None) -> Query:
         """
         Return samples with the given lims_status that:
         - Are not downsampled
@@ -1912,6 +1909,7 @@ class ReadHandler(BaseHandler):
         - Have been sequenced (last_sequenced_at is not null)
         - Do not belong to the internal customers
         - Ordered by last sequenced date, with the oldest first
+        - Optional filtering by search string
         """
         query = (
             self._get_query(table=Sample)

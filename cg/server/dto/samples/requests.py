@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
 
-from cg.constants import Workflow
 from cg.constants.lims import LimsStatus
 from cg.models.orders.constants import OrderType
 
@@ -33,4 +32,3 @@ class UnhandledSamplesRequest(BaseModel):
     page: int
     page_size: int
     search: str | None = None
-    workflow: Workflow | None = None
