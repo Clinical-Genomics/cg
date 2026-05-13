@@ -2,8 +2,10 @@
 
 import pytest
 from housekeeper.store.models import Version
+from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
+from cg.meta.upload.scout import raredisease_config_builder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import (
@@ -99,11 +101,22 @@ def test_generate_mip_load_config(
 
 
 def test_generate_raredisease_load_config(
-    raredisease_analysis: Analysis, upload_raredisease_analysis_scout_api: UploadScoutAPI
+    raredisease_analysis: Analysis,
+    upload_raredisease_analysis_scout_api: UploadScoutAPI,
+    mocker: MockerFixture,
 ):
     """Test that a RAREDISEASE config is generated."""
     # GIVEN an analysis object that have been run with RAREDISEASE
     assert raredisease_analysis.workflow == Workflow.RAREDISEASE
+
+    mocker.patch.object(
+        raredisease_config_builder,
+        "read_yaml",
+        return_value={
+            "score_config_snv": "/path/to/some/snv_file.-v1.0-.ini",
+            "score_config_sv": "/path/to/some/sv_file.-v2.0-.ini",
+        },
+    )
 
     # GIVEN an upload scout api with some RAREDISEASE information
     # WHEN generating a load config
@@ -153,10 +166,21 @@ def test_generate_config_adds_meta_result_key_raredisease(
     result_key: str,
     raredisease_analysis: Analysis,
     upload_raredisease_analysis_scout_api: UploadScoutAPI,
+    mocker: MockerFixture,
 ):
     """Test that generate config adds the expected result keys"""
     # GIVEN a status db and hk with an analysis
     assert raredisease_analysis
+
+    # GIVEN that the params file can be read
+    mocker.patch.object(
+        raredisease_config_builder,
+        "read_yaml",
+        return_value={
+            "score_config_snv": "/path/to/some/snv_file.-v1.0-.ini",
+            "score_config_sv": "/path/to/some/sv_file.-v2.0-.ini",
+        },
+    )
 
     # WHEN generating the scout config for the analysis
     result_data: RarediseaseLoadConfig = upload_raredisease_analysis_scout_api.generate_config(
@@ -191,12 +215,23 @@ def test_generate_config_adds_sample_paths_raredisease(
     sample_id: str,
     raredisease_analysis: Analysis,
     upload_raredisease_analysis_scout_api: UploadScoutAPI,
+    mocker: MockerFixture,
 ):
     """Test that generate config adds vcf2cytosure file"""
     # GIVEN a status db and hk with an analysis
 
+    # GIVEN that the params file can be read
+    mocker.patch.object(
+        raredisease_config_builder,
+        "read_yaml",
+        return_value={
+            "score_config_snv": "/path/to/some/snv_file.-v1.0-.ini",
+            "score_config_sv": "/path/to/some/sv_file.-v2.0-.ini",
+        },
+    )
+
     # WHEN generating the scout config for the analysis
-    result_data: MipLoadConfig = upload_raredisease_analysis_scout_api.generate_config(
+    result_data: RarediseaseLoadConfig = upload_raredisease_analysis_scout_api.generate_config(
         analysis=raredisease_analysis
     )
 

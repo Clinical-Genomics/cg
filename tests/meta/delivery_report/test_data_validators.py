@@ -314,7 +314,7 @@ def test_get_delivery_report_html_raredisease(raredisease_analysis: NextflowAnal
     case: Case = create_autospec(
         Case,
         data_analysis=Workflow.RAREDISEASE,
-        data_delivery=DataDelivery.ANALYSIS_FILES,
+        data_delivery=DataDelivery.ANALYSIS_SCOUT,
         internal_id="case_id",
         sample=[sample],
         panels=["some_panel"],
@@ -370,6 +370,7 @@ def test_get_delivery_report_html_raredisease(raredisease_analysis: NextflowAnal
         force=False,
     )
     assert EXPECTED_RAREDISEASE_QC in delivery_report
+    assert "https://scout38.sys.scilifelab.se/" in delivery_report
 
 
 def test_get_missing_report_data(

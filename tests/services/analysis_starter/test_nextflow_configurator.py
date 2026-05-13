@@ -31,7 +31,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.nallo import (
     NalloParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease import (
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease_params_file_creator import (
     RarediseaseParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.rnafusion import (
@@ -112,6 +112,7 @@ def test_get_config_missing_required_files(mocker: MockerFixture):
     pipeline_config = create_autospec(
         RarediseaseConfig,
         root="/root",
+        reference="raredisease_reference.fasta",
         repository="https://repo.scilifelab.se",
         revision="rev123",
         profile="profile",

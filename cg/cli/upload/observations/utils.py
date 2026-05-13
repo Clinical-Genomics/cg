@@ -48,9 +48,9 @@ def get_observations_api(
     """Return an observations API given a specific case object."""
     case: Case = get_observations_verified_case(context=context, case_id=case_id, upload=upload)
     observations_apis = {
-        Workflow.BALSAMIC: BalsamicObservationsAPI(context),
-        Workflow.MIP_DNA: MipDNAObservationsAPI(context),
-        Workflow.NALLO: NalloObservationsAPI(context),
-        Workflow.RAREDISEASE: RarediseaseObservationsAPI(context),
+        Workflow.BALSAMIC: BalsamicObservationsAPI,
+        Workflow.MIP_DNA: MipDNAObservationsAPI,
+        Workflow.NALLO: NalloObservationsAPI,
+        Workflow.RAREDISEASE: RarediseaseObservationsAPI,
     }
-    return observations_apis[case.data_analysis]
+    return observations_apis[case.data_analysis](context)
