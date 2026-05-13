@@ -318,6 +318,10 @@ class ScoutConfigBuilder:
             hk_tags=self.sample_tags.reviewer_catalog,
             hk_version=hk_version,
         )
+        config_sample.reviewer.reference = self._get_reviewer_reference_file()
+
+    def _get_reviewer_reference_file(self):
+        raise NotImplementedError
 
     def get_sample_file(self, hk_tags: set[str], sample_id: str, hk_version: Version) -> str | None:
         """Return a file that is specific for an individual from Housekeeper."""

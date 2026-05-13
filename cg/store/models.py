@@ -854,7 +854,7 @@ class Sample(Base, PriorityMixin):
         return self.application_version.application.tag
 
     @property
-    def prep_category(self) -> str:
+    def prep_category(self) -> SeqLibraryPrepCategory:
         """Return the preparation category of the sample."""
         return self.application_version.application.prep_category
 

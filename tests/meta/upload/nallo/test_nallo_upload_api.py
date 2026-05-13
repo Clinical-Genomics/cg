@@ -57,6 +57,7 @@ def test_upload_succeeds():
             pipeline_deliverables="nallo_deliverables.yaml",
             platform="nallo_platform",
             profile="nallo_profile",
+            reference="nallo_reference",
             resources="nallo_resources",
             revision="nallo_revision",
             root="root/dir",
