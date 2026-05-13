@@ -127,6 +127,7 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
     reviewer_vcf={"expansionhunter", "vcf-str"},
     reviewer_catalog={"expansionhunter", "variant-catalog"},
     mitodel_file={"mitodel"},
+    tiddit_coverage_wig={"bigwig", "tiddit-coverage"},
 )
 
 NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
