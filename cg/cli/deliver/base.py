@@ -17,6 +17,7 @@ from cg.services.deliver_files.deliver_files_service.deliver_files_service impor
 )
 from cg.services.deliver_files.factory import DeliveryServiceFactory
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
+from cg.services.deliver_service import DeliverService
 from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
@@ -202,3 +203,13 @@ def deliver_auto_raw_data(context: CGConfig, dry_run: bool):
         service_builder=service_builder,
         dry_run=dry_run,
     )
+
+
+@deliver.command(name="dev-case-command", hidden=True)
+@click.argument("case_id", type=str, required=True)
+@click.pass_obj
+def deliver_dev_case_command(context: CGConfig, case_id: str):
+    deliver_service = DeliverService(
+        status_db=context.status_db, trailblazer_api=context.trailblazer_api
+    )
+    deliver_service.deliver_case(case_id)

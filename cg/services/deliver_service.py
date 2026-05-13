@@ -26,13 +26,8 @@ class DeliverService:
 
     def deliver_case(self, case_id: str):
         # TODO add user
-        case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
-        uploaded_analyses: list[Analysis] = [
-            analysis for analysis in case.analyses if analysis.uploaded_at
-        ]
-        analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses(
-            case_id=case_id, uploaded_analyses=uploaded_analyses
-        )
+
+        analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses(case_id)
         match len(analyses_to_deliver):
             case 0:
                 LOG.warning(f"No analysis found to deliver for case {case_id}.")
@@ -41,9 +36,11 @@ class DeliverService:
             case _:
                 raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
 
-    def _get_undelivered_analyses(
-        self, case_id: str, uploaded_analyses: list[Analysis]
-    ) -> list[Analysis]:
+    def _get_undelivered_analyses(self, case_id: str) -> list[Analysis]:
+        case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
+        uploaded_analyses: list[Analysis] = [
+            analysis for analysis in case.analyses if analysis.uploaded_at
+        ]
         undelivered_trailblazer_analyses: list[TrailblazerAnalysis] = (
             self.trailblazer_api.get_analyses_to_deliver_for_case(case_id)
         )
