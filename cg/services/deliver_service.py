@@ -1,6 +1,7 @@
 import logging
 
 from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.exc import MultipleAnalysesToDeliverError
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
 from cg.store.models import Analysis, Case
@@ -29,7 +30,9 @@ class DeliverService:
         uploaded_analyses: list[Analysis] = [
             analysis for analysis in case.analyses if analysis.uploaded_at
         ]
-        analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses(uploaded_analyses)
+        analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses(
+            case_id=case_id, uploaded_analyses=uploaded_analyses
+        )
         match len(analyses_to_deliver):
             case 0:
                 LOG.warning(f"No analysis found to deliver for case {case_id}.")
@@ -38,19 +41,14 @@ class DeliverService:
             case _:
                 raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
 
-    def _get_undelivered_analyses(self, uploaded_analyses: list[Analysis]) -> list[Analysis]:
-        uploaded_trailblazer_ids: list[int] = [
-            analysis.trailblazer_id for analysis in uploaded_analyses if analysis.trailblazer_id
-        ]
-        analyses_with_status: list[tuple[int, bool]] = self.trailblazer_api.are_analyses_delivered(
-            uploaded_trailblazer_ids
+    def _get_undelivered_analyses(
+        self, case_id: str, uploaded_analyses: list[Analysis]
+    ) -> list[Analysis]:
+        undelivered_trailblazer_analyses: list[TrailblazerAnalysis] = (
+            self.trailblazer_api.get_analyses_to_deliver_for_case(case_id)
         )
-        undelivered_trailblazer_ids = [
-            trailblazer_id
-            for trailblazer_id, is_delivered in analyses_with_status
-            if not is_delivered
-        ]
-        analyses_to_deliver = []
+        undelivered_trailblazer_ids = [analysis.id for analysis in undelivered_trailblazer_analyses]
+        analyses_to_deliver: list[Analysis] = []
         for analysis in uploaded_analyses:
             if analysis.trailblazer_id in undelivered_trailblazer_ids:
                 analyses_to_deliver.append(analysis)

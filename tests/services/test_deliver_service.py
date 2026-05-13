@@ -5,6 +5,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.exc import MultipleAnalysesToDeliverError
 from cg.services.deliver_service import DeliverService
 from cg.store.models import Analysis, Case
@@ -24,7 +25,9 @@ def test_deliver_case(mocker: MockerFixture):
 
     # GIVEN a Trailblazer API
     trailblazer_api = create_autospec(TrailblazerAPI)
-    trailblazer_api.are_analyses_delivered = Mock(return_value=[(2, False)])
+    trailblazer_api.get_analyses_to_deliver_for_case = Mock(
+        return_value=[create_autospec(TrailblazerAnalysis, id=2, delivered=False)]
+    )
 
     # GIVEN a deliver service
     deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
@@ -34,7 +37,7 @@ def test_deliver_case(mocker: MockerFixture):
     deliver_service.deliver_case("case_id")
 
     # THEN analysis that were not uploaded is filtered out
-    trailblazer_api.are_analyses_delivered.assert_called_once_with([2])
+    trailblazer_api.get_analyses_to_deliver_for_case.assert_called_once_with("case_id")
 
     # THEN the analysis of the case should be marked as delivered
     mark_analyses_spy.assert_called_once_with([uploaded_analysis])
@@ -53,7 +56,12 @@ def test_deliver_case_more_than_one_found():
 
     # GIVEN a Trailblazer API
     trailblazer_api = create_autospec(TrailblazerAPI)
-    trailblazer_api.are_analyses_delivered = Mock(return_value=[(15, False), (16, False)])
+    trailblazer_api.get_analyses_to_deliver_for_case = Mock(
+        return_value=[
+            create_autospec(TrailblazerAnalysis, id=15, delivered=False),
+            create_autospec(TrailblazerAnalysis, id=16, delivered=False),
+        ]
+    )
 
     # GIVEN a deliver service
     deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
@@ -81,7 +89,7 @@ def test_deliver_case_nothing_to_deliver(mocker: MockerFixture):
 
     # GIVEN a Trailblazer API
     trailblazer_api = create_autospec(TrailblazerAPI)
-    trailblazer_api.are_analyses_delivered = Mock(return_value=[(15, True)])
+    trailblazer_api.get_analyses_to_deliver_for_case = Mock(return_value=[])
 
     # GIVEN a deliver service
     deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
