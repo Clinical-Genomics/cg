@@ -241,7 +241,7 @@ class TicketCreationError(CgError):
 
 
 class TrailblazerAPIHTTPError(CgError):
-    """Raised when Trailblazer REST API response code is not 200."""
+    """Raised when Trailblazer REST API response code is not 2XX/3XX."""
 
 
 class TrailblazerAnalysisNotFound(CgError):

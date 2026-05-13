@@ -246,9 +246,10 @@ def test_get_analyses_to_deliver_for_case(
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
 ):
+    # GIVEN a TrailblazerAPI
     tb_api = TrailblazerAPI(valid_trailblazer_config)
 
-    # GIVEN that the communication with Trailblazer
+    # GIVEN that trailblazer returns an analysis
     mocker.patch.object(
         requests,
         "get",
@@ -289,16 +290,19 @@ def test_get_analyses_to_deliver_for_case(
         ),
     )
 
+    # WHEN getting analyses to deliver for case_1
     analyses = tb_api.get_analyses_to_deliver_for_case("case_1")
+
+    # THEN the analysis should be returned
     assert analyses == [
         TrailblazerAnalysis(
             case_id="case_1",
             id=1234,
-            logged_at="Sun, 10 May 2026 22:25:03 GMT",
-            started_at="Sun, 10 May 2026 22:25:03 GMT",
+            logged_at="Sun, 10 May 2026 22:25:03 GMT",  # type: ignore pydantic
+            started_at="Sun, 10 May 2026 22:25:03 GMT",  # type: ignore pydantic
             completed_at=None,
-            out_dir="/some/path",
-            config_path="/path/",
+            out_dir="/some/path",  # type: ignore pydantic
+            config_path="/path/",  # type: ignore pydantic
             status="pending",
             priority="high",
             is_visible=True,
@@ -313,8 +317,10 @@ def test_get_analyses_to_deliver_for_case_no_analysis(
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
 ):
+    # GIVEN a trailblazer api
     tb_api = TrailblazerAPI(valid_trailblazer_config)
 
+    # GIVEN that no analysis is to be delivered for a given case
     mocker.patch.object(
         requests,
         "get",
@@ -323,5 +329,33 @@ def test_get_analyses_to_deliver_for_case_no_analysis(
         ),
     )
 
+    # WHEN getting analyses to deliver
     analyses = tb_api.get_analyses_to_deliver_for_case("case_1")
+
+    # THEN an empty list should be returned
     assert analyses == []
+
+
+def test_get_analyses_to_deliver_for_case_improper_response(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a trailblazer api
+    tb_api = TrailblazerAPI(valid_trailblazer_config)
+
+    # GIVEN an erroneous http response
+    mocker.patch.object(
+        requests,
+        "get",
+        return_value=create_autospec(
+            requests.Response,
+            status_code=500,
+            ok=False,
+        ),
+    )
+
+    # WHEN getting analyses to deliver
+    # THEN a TrailblazerAPIHTTPError should be raised
+    with pytest.raises(TrailblazerAPIHTTPError):
+        tb_api.get_analyses_to_deliver_for_case("updog")
