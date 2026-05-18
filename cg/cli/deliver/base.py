@@ -215,3 +215,13 @@ def deliver_dev_case_command(context: CGConfig, case_id: str):
         status_db=context.status_db, trailblazer_api=context.trailblazer_api
     )
     deliver_service.deliver_case(case_id=case_id, email=email)
+
+
+@deliver.command(name="dev-all-available", hidden=True)
+@click.pass_obj
+def deliver_dev_all_cases(context: CGConfig):
+    email = environ_email()
+    deliver_service = DeliverService(
+        status_db=context.status_db, trailblazer_api=context.trailblazer_api
+    )
+    deliver_service.deliver_all_cases()
