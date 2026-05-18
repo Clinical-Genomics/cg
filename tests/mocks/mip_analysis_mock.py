@@ -19,6 +19,10 @@ def create_mip_metrics_deliverables():
 class MockMipAnalysis(MipAnalysisAPI):
     """Mock MIP analysis object."""
 
+    @property
+    def reference(self) -> str:
+        return "reference.fasta"
+
     @staticmethod
     def get_latest_metadata(family_id=None):
         """Mock get_latest_metadata."""
