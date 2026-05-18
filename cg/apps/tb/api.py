@@ -218,16 +218,15 @@ class TrailblazerAPI:
         return response_data.summaries
 
     def mark_analyses_as_delivered(
-        self, trailblazer_ids: list[int], auth_token: str | None = None
+        self, trailblazer_ids: list[int], signature: str | None, auth_token: str | None = None
     ) -> Response:
-        # TODO add signature
         analysis_dicts = []
         for trailblazer_id in trailblazer_ids:
             analysis_dict = {"id": trailblazer_id, "is_delivered": True}
             analysis_dicts.append(analysis_dict)
         LOG.info(f"Setting analyses {trailblazer_ids} as delivered in Trailblazer")
         response: Response = requests.patch(
-            json={"analyses": analysis_dicts},
+            json={"analyses": analysis_dicts, "signature": signature},
             headers=self._get_auth_headers(auth_token=auth_token),
             url=f"{self.host}/analyses",
         )

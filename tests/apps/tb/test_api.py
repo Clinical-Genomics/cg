@@ -165,7 +165,9 @@ def test_mark_analyses_as_delivered_success(
     patch_call = mocker.patch.object(requests, "patch", return_value=response)
 
     # WHEN marking analyses as delivered
-    tb_response: Response = tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])
+    tb_response: Response = tb_api.mark_analyses_as_delivered(
+        signature="CG", trailblazer_ids=[1, 2, 3]
+    )
 
     # THEN the expected request should have been sent
     expected_request = {
@@ -173,7 +175,8 @@ def test_mark_analyses_as_delivered_success(
             {"id": 1, "is_delivered": True},
             {"id": 2, "is_delivered": True},
             {"id": 3, "is_delivered": True},
-        ]
+        ],
+        "signature": "CG",
     }
 
     patch_call.assert_called_once_with(
@@ -197,7 +200,9 @@ def test_mark_analyses_as_delivered_with_forward_token(
     patch_call = mocker.patch.object(requests, "patch")
 
     # WHEN marking analyses as delivered
-    tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3], auth_token="auth_token")
+    tb_api.mark_analyses_as_delivered(
+        auth_token="auth_token", signature=None, trailblazer_ids=[1, 2, 3]
+    )
 
     # THEN the expected request should have been sent
     expected_request = {
@@ -205,7 +210,8 @@ def test_mark_analyses_as_delivered_with_forward_token(
             {"id": 1, "is_delivered": True},
             {"id": 2, "is_delivered": True},
             {"id": 3, "is_delivered": True},
-        ]
+        ],
+        "signature": None,
     }
 
     patch_call.assert_called_once_with(
@@ -238,7 +244,7 @@ def test_mark_analyses_as_delivered_fails_with_http_error(
     # WHEN marking analyses as delivered
     # THEN a TrailblazerAPIHTTPError is raised
     with pytest.raises(TrailblazerAPIHTTPError):
-        tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])
+        tb_api.mark_analyses_as_delivered(signature=None, trailblazer_ids=[1, 2, 3])
 
 
 def test_get_analyses_to_deliver_for_case(
