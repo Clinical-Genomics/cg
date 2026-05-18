@@ -1927,7 +1927,17 @@ class ReadHandler(BaseHandler):
         )
 
         if search:
-            query = query.filter(Sample.internal_id.ilike(f"%{search}%"))
+            query = (
+                query.join(CaseSample, CaseSample.sample_id == Sample.id)
+                .join(Case, Case.id == CaseSample.case_id)
+                .filter(
+                    CaseSample.should_deliver_sample.is_(True),
+                    sqlalchemy.or_(
+                        Case.internal_id.ilike(f"%{search}%"),
+                        Sample.internal_id.ilike(f"%{search}%"),
+                    ),
+                )
+            )
 
         return query
 

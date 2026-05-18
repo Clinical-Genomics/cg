@@ -872,3 +872,42 @@ def test_get_paginated_unhandled_samples_search_sample(store: Store, helpers: St
     # THEN only the matching sample should be returned
     assert unhandled_samples == [sample_searchable]
     assert total == 1
+
+
+def test_get_paginated_unhandled_samples_search_ticket(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with two unhandled samples
+    sample_searchable = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="perfect_searchable_unhandled_sample_1",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="perfect_unhandled_sample_2",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now() - timedelta(days=1),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    # GIVEN a searchable string
+    perfect_searchable_string = "searchable"
+
+    # WHEN getting the unhandled samples in top-up using page 2 and page_size = 1
+    unhandled_samples, total = store.get_paginated_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=2,
+        search=perfect_searchable_string,
+    )
+
+    # THEN only the matching sample should be returned
+    assert unhandled_samples == [sample_searchable]
+    assert total == 1
