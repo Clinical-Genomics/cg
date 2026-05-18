@@ -34,13 +34,13 @@ def test_deliver_case(mocker: MockerFixture):
     mark_analyses_spy = mocker.spy(deliver_service.mark_as_delivered_service, "mark_analyses")
 
     # WHEN delivering a case
-    deliver_service.deliver_case(case_id="case_id", email="email@cg.se")
+    deliver_service.deliver_case(case_id="case_id", signature="CG")
 
     # THEN analysis that were not uploaded is filtered out
     trailblazer_api.get_analyses_to_deliver_for_case.assert_called_once_with("case_id")
 
     # THEN the analysis of the case should be marked as delivered
-    mark_analyses_spy.assert_called_once_with(analyses=[uploaded_analysis], email="email@cg.se")
+    mark_analyses_spy.assert_called_once_with(analyses=[uploaded_analysis], signature="CG")
 
 
 def test_deliver_case_more_than_one_found():
@@ -69,7 +69,7 @@ def test_deliver_case_more_than_one_found():
     # WHEN delivering a case
     # THEN a MultipleAnalysesToDeliverError is raised
     with pytest.raises(MultipleAnalysesToDeliverError):
-        deliver_service.deliver_case(case_id="case_id", email="email@cg.se")
+        deliver_service.deliver_case(case_id="case_id", signature="email@cg.se")
 
 
 def test_deliver_case_nothing_to_deliver(mocker: MockerFixture):
@@ -96,7 +96,7 @@ def test_deliver_case_nothing_to_deliver(mocker: MockerFixture):
     mark_analyses_spy = mocker.spy(deliver_service.mark_as_delivered_service, "mark_analyses")
 
     # WHEN delivering a case
-    deliver_service.deliver_case(case_id="case_id", email="email@cg.se")
+    deliver_service.deliver_case(case_id="case_id", signature="email@cg.se")
 
     # THEN the MarkAsDeliver service is not called since there is nothing to deliver
     mark_analyses_spy.assert_not_called()

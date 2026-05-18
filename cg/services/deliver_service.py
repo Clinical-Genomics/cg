@@ -24,8 +24,7 @@ class DeliverService:
         # mark analyses as delivered
         pass
 
-    def deliver_case(self, case_id: str, email: str):
-        # TODO add user
+    def deliver_case(self, case_id: str, signature: str):
 
         analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses(case_id)
         match len(analyses_to_deliver):
@@ -33,7 +32,7 @@ class DeliverService:
                 LOG.warning(f"No analysis found to deliver for case {case_id}.")
             case 1:
                 self.mark_as_delivered_service.mark_analyses(
-                    analyses=analyses_to_deliver, email=email
+                    analyses=analyses_to_deliver, signature=signature
                 )
             case _:
                 raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")

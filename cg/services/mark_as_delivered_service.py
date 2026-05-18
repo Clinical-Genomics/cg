@@ -17,10 +17,10 @@ class MarkAsDeliveredService:
         self.trailblazer_api = trailblazer_api
 
     def mark_analyses(
-        self, analyses: list[Analysis], auth_token: str | None = None, email: str | None = None
+        self, analyses: list[Analysis], auth_token: str | None = None, signature: str | None = None
     ) -> Response:
         """Mark samples as delivered in StatusDB and the analysis as delivered in Trailblazer."""
-        # TODO add the email
+        # TODO implement signature
         trailblazer_ids = []
         for analysis in analyses:
             self._mark_samples_in_analysis(analysis)

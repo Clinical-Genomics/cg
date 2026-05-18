@@ -207,14 +207,21 @@ def deliver_auto_raw_data(context: CGConfig, dry_run: bool):
 
 
 @deliver.command(name="dev-case-command", hidden=True)
+@click.option(
+    "--signature",
+    "-s",
+    type=str,
+    required=True,
+    help="Signature (initials) of the user performing the delivery.",
+)
 @click.argument("case_id", type=str, required=True)
 @click.pass_obj
-def deliver_dev_case_command(context: CGConfig, case_id: str):
-    email = environ_email()
+def deliver_dev_case_command(context: CGConfig, case_id: str, signature: str):
+    # TODO add test for this command
     deliver_service = DeliverService(
         status_db=context.status_db, trailblazer_api=context.trailblazer_api
     )
-    deliver_service.deliver_case(case_id=case_id, email=email)
+    deliver_service.deliver_case(case_id=case_id, signature=signature)
 
 
 @deliver.command(name="dev-all-available", hidden=True)

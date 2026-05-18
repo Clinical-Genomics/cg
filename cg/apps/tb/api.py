@@ -220,6 +220,7 @@ class TrailblazerAPI:
     def mark_analyses_as_delivered(
         self, trailblazer_ids: list[int], auth_token: str | None = None
     ) -> Response:
+        # TODO add signature
         analysis_dicts = []
         for trailblazer_id in trailblazer_ids:
             analysis_dict = {"id": trailblazer_id, "is_delivered": True}
