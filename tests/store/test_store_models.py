@@ -424,3 +424,14 @@ def test_application_expected_express_hifi_yield_missing_yield():
 
     # THEN the expected express hifi yield should be None
     assert expected_express_hifi_yield is None
+
+
+def test_application_expected_express_hifi_yield_zero_yield():
+    # GIVEN an application with target_hifi_yield set to 0
+    application = Application(tag="PacbioTag", target_hifi_yield=0)
+
+    # WHEN calculating the expected express hifi yield
+    expected_express_hifi_yield: float | None = application.expected_express_hifi_yield
+
+    # THEN the expected express hifi yield should be 0
+    assert expected_express_hifi_yield == 0
