@@ -862,7 +862,7 @@ def test_get_paginated_unhandled_samples_search_sample(store: Store, helpers: St
     perfect_searchable_string = "searchable"
 
     # WHEN getting the unhandled samples in top-up using page 2 and page_size = 1
-    unhandled_samples, _ = store.get_paginated_unhandled_samples(
+    unhandled_samples, total = store.get_paginated_unhandled_samples(
         lims_status=LimsStatus.TOP_UP,
         page=1,
         page_size=2,
@@ -871,3 +871,4 @@ def test_get_paginated_unhandled_samples_search_sample(store: Store, helpers: St
 
     # THEN only the matching sample should be returned
     assert unhandled_samples == [sample_searchable]
+    assert total == 1
