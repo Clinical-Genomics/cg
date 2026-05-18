@@ -59,6 +59,7 @@ RAREDISEASE_CASE_TAGS = dict(
 NALLO_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
     multiqc={"multiqc-html"},
+    paraphrase={"paraphrase"},
     peddy_check={"ped-check", "peddy"},
     peddy_ped={"ped", "peddy"},
     somalier_samples={"somalier", "relate-samples"},
@@ -127,6 +128,7 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
     reviewer_vcf={"expansionhunter", "vcf-str"},
     reviewer_catalog={"expansionhunter", "variant-catalog"},
     mitodel_file={"mitodel"},
+    tiddit_coverage_wig={"bigwig", "tiddit-coverage"},
 )
 
 NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(

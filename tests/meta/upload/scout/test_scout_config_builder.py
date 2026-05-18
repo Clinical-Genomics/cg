@@ -338,6 +338,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
     # Case Files
     delivery_report: File = create_autospec(File, full_path="delivery_report.yaml")
     multiqc: File = create_autospec(File, full_path="multiqc.html")
+    paraphrase: File = create_autospec(File, full_path="paraphase_annotated.json")
     peddy_check: File = create_autospec(File, full_path="check.peddy")
     peddy_ped: File = create_autospec(File, full_path="ped.peddy")
     somalier_samples: File = create_autospec(File, full_path="somalier.samples")
@@ -367,6 +368,8 @@ def test_nallo_config_builder(mocker: MockerFixture):
             return delivery_report
         elif tags == {"multiqc-html"}:
             return multiqc
+        elif tags == {"paraphrase"}:
+            return paraphrase
         elif tags == {"ped-check", "peddy"}:
             return peddy_check
         elif tags == {"ped", "peddy"}:
@@ -510,6 +513,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
         delivery_report=delivery_report.full_path,
         madeline=None,
         multiqc=multiqc.full_path,
+        paraphrase=paraphrase.full_path,
         peddy_check=peddy_check.full_path,
         peddy_ped=peddy_ped.full_path,
         peddy_sex=None,
@@ -577,6 +581,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     params: File = create_autospec(
         File, full_path="tests/fixtures/analysis/raredisease/params.yaml"
     )
+    tiddit_coverage: File = create_autospec(File, full_path="tiddit_coverage.bw")
 
     # GIVEN files exist in Housekeeper for each set of RAREDISEASE_CASE_TAGS and RAREDISEASE_SAMPLE_TAGS
     def mock_get_file_from_version(version: Version, tags: set[str]) -> File | None:
@@ -611,6 +616,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return vcf_sv
         if tags == {"vcf-str"}:
             return vcf_str
+        if tags == {"nextflow-params"}:
+            return params
 
         # Sample tags
         if tags == {AlignmentFileTag.CRAM, "sample_id"}:
@@ -639,8 +646,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return reviewer_catalog
         if tags == {"mitodel", "sample_id"}:
             return mitodel_file
-        if tags == {"nextflow-params"}:
-            return params
+        if tags == {"bigwig", "tiddit-coverage", "sample_id"}:
+            return tiddit_coverage
         raise Exception
 
     mocker.patch.object(
@@ -743,7 +750,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
                 ),
                 rhocall_bed=None,
                 rhocall_wig=None,
-                tiddit_coverage_wig=None,
+                tiddit_coverage_wig=tiddit_coverage.full_path,
                 upd_regions_bed=None,
                 upd_sites_bed=None,
                 vcf2cytosure=vcf2cytosure.full_path,
