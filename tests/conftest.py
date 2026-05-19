@@ -406,6 +406,13 @@ def base_config_dict() -> dict:
                 "demultiplexed_runs_dir": "path/to/demultiplexed_flow_cells_dir",
             },
         },
+        "event_listener": {
+            "server": "https://nats.scilifelab.se",
+            "ca_cert_path": Path("ca_cert_path"),
+            "client_cert": Path("client_cert_path"),
+            "client_key": Path("client_key_path"),
+            "token": "event_listener_token",
+        },
         "downsample": {
             "downsample_dir": "path/to/downsample_dir",
             "downsample_script": "downsample.sh",
@@ -1986,6 +1993,13 @@ def context_config(
                 "sequencing_runs_dir": str(illumina_sequencing_runs_directory),
                 "demultiplexed_runs_dir": str(illumina_demultiplexed_runs_directory),
             },
+        },
+        "event_listener": {
+            "server": "https://nats.scilifelab.se",
+            "ca_cert_path": Path("ca_cert_path"),
+            "client_cert": Path("client_cert_path"),
+            "client_key": Path("client_key_path"),
+            "token": "event_listener_token",
         },
         "downsample": {
             "downsample_dir": str(downsample_dir),
