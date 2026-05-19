@@ -5,11 +5,12 @@ from unittest.mock import Mock, create_autospec
 import pytest
 from requests import Response
 
+from cg.apps.tb.api import TrailblazerAPI
 from cg.constants.constants import Workflow
 from cg.exc import TrailblazerAPIHTTPError
-from cg.server.ext import AnalysisClient, FlaskStore
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
 from cg.store.models import Analysis, Case, CaseSample, Sample
+from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
@@ -19,28 +20,27 @@ def trailblazer_id() -> int:
 
 
 @pytest.fixture
-def analysis_client() -> TypedMock[AnalysisClient]:
+def trailblazer_api() -> TypedMock[TrailblazerAPI]:
     """TrailblazerAPI for endpoints."""
-    return create_typed_mock(AnalysisClient)
+    return create_typed_mock(TrailblazerAPI)
 
 
 @pytest.fixture
-def status_db() -> FlaskStore:
+def status_db() -> Store:
     """Store for endpoints."""
-    return create_autospec(FlaskStore)
+    return create_autospec(Store)
 
 
 @pytest.fixture
 def mark_as_delivered_service(
-    analysis_client: TypedMock[AnalysisClient], status_db: FlaskStore
+    trailblazer_api: TypedMock[TrailblazerAPI], status_db: Store
 ) -> MarkAsDeliveredService:
-    return MarkAsDeliveredService(status_db=status_db, trailblazer_api=analysis_client.as_type)
+    return MarkAsDeliveredService(status_db=status_db, trailblazer_api=trailblazer_api.as_type)
 
 
 def test_mark_analyses_success(
-    analysis_client: TypedMock[AnalysisClient],
+    trailblazer_api: TypedMock[TrailblazerAPI],
     mark_as_delivered_service: MarkAsDeliveredService,
-    status_db: FlaskStore,
     trailblazer_id: int,
 ):
     # GIVEN samples that should be delivered
@@ -68,7 +68,7 @@ def test_mark_analyses_success(
     tb_response = Response()
     tb_response.status_code = 200
     tb_response._content = json.dumps({"key": "value"}).encode("utf-8")
-    analysis_client.as_type.mark_analyses_as_delivered = Mock(return_value=tb_response)
+    trailblazer_api.as_type.mark_analyses_as_delivered = Mock(return_value=tb_response)
 
     # WHEN we call mark_analyses
     response: Response = mark_as_delivered_service.mark_analyses([analysis_1, analysis_2])
@@ -78,7 +78,7 @@ def test_mark_analyses_success(
     assert sample_2.delivered_at is not None
 
     # THEN endpoint in Trailblazer was called
-    analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
+    trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
         trailblazer_ids=[trailblazer_id, 555555], auth_token=None
     )
 
@@ -87,9 +87,8 @@ def test_mark_analyses_success(
 
 
 def test_mark_analyses_mix_original_non_original_samples(
-    analysis_client: TypedMock[AnalysisClient],
+    trailblazer_api: TypedMock[TrailblazerAPI],
     mark_as_delivered_service: MarkAsDeliveredService,
-    status_db: FlaskStore,
     trailblazer_id: int,
 ):
     """Tests that delivering a case with a new sample and an existing sample will only deliver the new sample."""
@@ -119,15 +118,14 @@ def test_mark_analyses_mix_original_non_original_samples(
     assert sample_existing.delivered_at is None
 
     # THEN endpoint in Trailblazer was called
-    analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
+    trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
         trailblazer_ids=[trailblazer_id], auth_token=None
     )
 
 
 def test_mark_analyses_rerun_case(
-    analysis_client: TypedMock[AnalysisClient],
+    trailblazer_api: TypedMock[TrailblazerAPI],
     mark_as_delivered_service: MarkAsDeliveredService,
-    status_db: FlaskStore,
     trailblazer_id: int,
 ):
     """Tests that delivering a case with already delivered samples does not deliver them again."""
@@ -157,15 +155,14 @@ def test_mark_analyses_rerun_case(
     assert sample_2.delivered_at is yesterday
 
     # THEN endpoint in Trailblazer was called
-    analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
+    trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
         trailblazer_ids=[trailblazer_id], auth_token=None
     )
 
 
 def test_mark_analyses_mixed_delivered_at_original_samples(
-    analysis_client: TypedMock[AnalysisClient],
+    trailblazer_api: TypedMock[TrailblazerAPI],
     mark_as_delivered_service: MarkAsDeliveredService,
-    status_db: FlaskStore,
     trailblazer_id: int,
 ):
     """Tests that delivering a case with one already delivered original sample does not deliver that sample again."""
@@ -195,16 +192,15 @@ def test_mark_analyses_mixed_delivered_at_original_samples(
     assert sample_2.delivered_at is not None
 
     # THEN endpoint in Trailblazer was called
-    analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
+    trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
         trailblazer_ids=[trailblazer_id], auth_token=None
     )
 
 
 @pytest.mark.parametrize("workflow", [Workflow.MICROSALT, Workflow.TAXPROFILER])
 def test_mark_analyses_partial_delivery(
-    analysis_client: TypedMock[AnalysisClient],
+    trailblazer_api: TypedMock[TrailblazerAPI],
     mark_as_delivered_service: MarkAsDeliveredService,
-    status_db: FlaskStore,
     trailblazer_id: int,
     workflow: Workflow,
 ):
@@ -238,23 +234,23 @@ def test_mark_analyses_partial_delivery(
     assert sample_not_enough_reads.delivered_at is None
 
     # THEN endpoint in Trailblazer was called
-    analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
+    trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
         trailblazer_ids=[trailblazer_id], auth_token=None
     )
 
 
 def test_mark_analyses_trailblazer_error(
-    status_db: FlaskStore,
+    status_db: Store,
     trailblazer_id: int,
 ):
     """Test that a TrailblazerAPIHTTPError is propagated from the service."""
     # GIVEN a TrailblazerAPI that fails
-    analysis_client = create_autospec(AnalysisClient)
-    analysis_client.mark_analyses_as_delivered = Mock(side_effect=TrailblazerAPIHTTPError)
+    trailblazer_api = create_autospec(TrailblazerAPI)
+    trailblazer_api.mark_analyses_as_delivered = Mock(side_effect=TrailblazerAPIHTTPError)
 
     # GIVEN a service that marks the analysis as delivered
     mark_as_delivered_service = MarkAsDeliveredService(
-        status_db=status_db, trailblazer_api=analysis_client
+        status_db=status_db, trailblazer_api=trailblazer_api
     )
 
     # GIVEN a case to be delivered
@@ -271,7 +267,7 @@ def test_mark_analyses_trailblazer_error(
 
 
 def test_mark_analyses_negative_control(
-    status_db: FlaskStore, trailblazer_id: int, mark_as_delivered_service: MarkAsDeliveredService
+    trailblazer_id: int, mark_as_delivered_service: MarkAsDeliveredService
 ):
     # GIVEN a negative control sample with lower reads than what the apptag expects
     negative_control_sample: Sample = create_autospec(
