@@ -495,7 +495,7 @@ class CGConfig(BaseModel):
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
     external: ExternalConfig = None
-    gens: GENSConfig = None
+    gens: GENSConfig | None = None
     gens_api_: GensAPI = None
     hermes: HermesConfig = None
     hermes_api_: HermesApi = None
