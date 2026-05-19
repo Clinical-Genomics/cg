@@ -35,7 +35,7 @@ class GensAPI:
         coverage_path: str,
         genome_build: str,
         sample_id: str,
-    ) -> int:
+    ) -> None:
         """Load Gens sample file paths into database."""
         args: list[str] = [self.binary_path, "load", "sample", "--force"]
         kw_args: dict[str, str] = {
@@ -61,8 +61,6 @@ class GensAPI:
             if res.returncode != EXIT_SUCCESS:
                 LOG.critical(f"Call '{command}' exit with a non zero exit code")
                 raise subprocess.CalledProcessError(res.returncode, command)
-
-            return res.returncode
 
     def __str__(self):
         return f"GensAPI(dry_run: {self.dry_run})"
