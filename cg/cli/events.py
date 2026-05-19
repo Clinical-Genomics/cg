@@ -4,7 +4,7 @@ import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.models.cg_config import CGConfig
-from cg.services.events.listen import EventListener
+from cg.services.events.event_listener import EventListener
 
 
 @click.group(context_settings=CLICK_CONTEXT_SETTINGS)
