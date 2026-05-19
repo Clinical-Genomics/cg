@@ -257,3 +257,12 @@ class TrailblazerAPI:
         )
         validated_response = AnalysesResponse.model_validate(raw_response)
         return validated_response.analyses
+
+    def get_all_analyses_to_deliver(self):
+        endpoint = f"analyses?status[]={AnalysisStatus.COMPLETED}&delivered=false"
+
+        raw_response = self.query_trailblazer(
+            command=endpoint, request_body={}, method=APIMethods.GET
+        )
+        validated_response = AnalysesResponse.model_validate(raw_response)
+        return validated_response.analyses

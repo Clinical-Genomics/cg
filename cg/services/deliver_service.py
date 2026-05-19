@@ -25,8 +25,8 @@ class DeliverService:
         analyses_to_deliver: list[Analysis] = self.status_db.get_uploaded_analyses(
             trailblazer_ids=[analysis.id for analysis in undelivered_analyses]
         )
-        # mark analyses as delivered
-        pass
+
+        self.mark_as_delivered_service.mark_analyses(analyses=analyses_to_deliver)
 
     def deliver_case(self, case_id: str, signature: str):
 
