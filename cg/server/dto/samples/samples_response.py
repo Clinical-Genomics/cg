@@ -1,4 +1,5 @@
 from datetime import datetime
+from operator import attrgetter
 from typing import Literal
 
 from pydantic import BaseModel
@@ -6,6 +7,7 @@ from pydantic import BaseModel
 from cg.constants import Workflow
 from cg.constants.lims import LimsStatus
 from cg.constants.subject import Sex
+from cg.server.dto.samples.requests import SortDirection, UnhandledSamplesSortBy
 from cg.store.models import Sample
 
 
@@ -117,7 +119,13 @@ class UnhandledSamplesResponse(BaseModel):
     total: int
 
     @classmethod
-    def from_samples(cls, samples: list[Sample], total: int) -> "UnhandledSamplesResponse":
+    def from_samples(
+        cls,
+        samples: list[Sample],
+        total: int,
+        sort_by: UnhandledSamplesSortBy | None = None,
+        sort_order: SortDirection | None = None,
+    ) -> "UnhandledSamplesResponse":
         """
         Creates an UnhandledSamplesResponse object from a list of database samples.
         Raises:
@@ -139,4 +147,34 @@ class UnhandledSamplesResponse(BaseModel):
                     workflow=sample.workflow_of_case_that_delivers or "unknown",
                 )
             )
+
+        if sort_by:
+            unhandled_samples = cls._sort_unhandled_samples(
+                unhandled_samples=unhandled_samples,
+                sort_by=sort_by,
+                sort_order=sort_order,
+                unknown_value="unknown",
+            )
+
         return cls(samples=unhandled_samples, total=total)
+
+    @staticmethod
+    def _sort_unhandled_samples(
+        unhandled_samples: list[UnhandledSample],
+        sort_by: UnhandledSamplesSortBy,
+        sort_order: SortDirection | None,
+        unknown_value: str,
+    ) -> list[UnhandledSample]:
+        reverse = sort_order == SortDirection.DESCENDING
+        unknown_samples = [
+            sample for sample in unhandled_samples if getattr(sample, sort_by) == unknown_value
+        ]
+        known_samples = [
+            sample for sample in unhandled_samples if getattr(sample, sort_by) != unknown_value
+        ]
+        known_samples.sort(key=attrgetter(sort_by), reverse=reverse)
+        if reverse:
+            unhandled_samples = known_samples + unknown_samples
+        else:
+            unhandled_samples = unknown_samples + known_samples
+        return unhandled_samples
