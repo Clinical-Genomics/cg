@@ -217,7 +217,6 @@ def deliver_auto_raw_data(context: CGConfig, dry_run: bool):
 @click.argument("case_id", type=str, required=True)
 @click.pass_obj
 def deliver_dev_case_command(context: CGConfig, case_id: str, signature: str):
-    # TODO add test for this command
     deliver_service = DeliverService(
         status_db=context.status_db, trailblazer_api=context.trailblazer_api
     )
