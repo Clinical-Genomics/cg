@@ -384,3 +384,9 @@ def test_get_all_analyses_to_deliver_success(
             requests.Response, status_code=200, ok=True, text=raw_response
         ),
     )
+
+    # WHEN getting all analyses to deliver
+    analyses = tb_api.get_all_analyses_to_deliver()
+    # THEN the returned analyses have the expected values
+    assert len(analyses) == 1
+    assert analyses[0].workflow not in [Workflow.DEMULTIPLEX, Workflow.RSYNC]

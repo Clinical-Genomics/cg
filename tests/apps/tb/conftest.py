@@ -2,7 +2,7 @@ import pytest
 
 
 @pytest.fixture
-def raw_response():
+def raw_response() -> str:
     return (
         "{"
         '"analyses": ['
@@ -30,18 +30,18 @@ def raw_response():
         '"uploaded_at": null,'
         '"user_id": null,'
         '"version": null,'
-        '"workflow": "raredisease",'
+        '"workflow": "RAREDISEASE",'
         '"workflow_manager": "slurm"'
         "},"
         "{"
-        '"case_id": "case_1",'
+        '"case_id": "case_2",'
         '"comment": null,'
         '"completed_at": null,'
         '"config_path": "/path/",'
         '"delivered_by": null,'
         '"delivered_date": null,'
         '"failed_job": null,'
-        '"id": 1234,'
+        '"id": 5678,'
         '"is_cancellable": false,'
         '"is_delivered": false,'
         '"is_visible": true,'
@@ -57,7 +57,7 @@ def raw_response():
         '"uploaded_at": null,'
         '"user_id": null,'
         '"version": null,'
-        '"workflow": "raredisease",'
+        '"workflow": "RSYNC",'
         '"workflow_manager": "slurm"'
         "}"
         "]}"
