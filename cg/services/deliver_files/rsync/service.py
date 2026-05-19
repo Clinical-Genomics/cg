@@ -306,6 +306,9 @@ class DeliveryRsyncService:
             case=case,
         )
 
+        # TODO: add command that publishes nats event here?
+        # f"nats pub --server SERVER --tlsca CA --tlscert CLIENT_CRT --tlskey CLIENT_KEY --token TOKEN cg.upload.completed "{\"case\": \"{case.internal_id}\", \"completed_at\": \"$(date +%Y-%m-%dT%H:%M:%SZ)\"}"
+
         return self._generate_and_submit_sbatch(
             commands=command,
             dry_run=dry_run,
