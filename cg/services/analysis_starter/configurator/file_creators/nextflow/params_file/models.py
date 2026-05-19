@@ -19,14 +19,21 @@ class NalloParameters(WorkflowParameters):
 
 
 class RarediseaseParameters(WorkflowParameters):
-    """Model for Raredisease parameters."""
+    """Model for Raredisease parameters.
+    Make sure to exclude None when serializing to make it readable for raredisease"""
 
-    target_bed_file: str
     analysis_type: str
-    save_mapped_as_cram: bool
+    gcnvcaller_model: Path | None
+    ploidy_model: Path | None
+    readcount_intervals: Path | None
+    sample_id_map: Path
+    skip_tools: str | None
+    target_bed: Path
     vcfanno_extra_resources: str
     vep_filters_scout_fmt: str
-    sample_id_map: Path
+    verifybamid_svd_bed: Path
+    verifybamid_svd_mu: Path
+    verifybamid_svd_ud: Path
 
 
 class RNAFusionParameters(WorkflowParameters):

@@ -203,14 +203,14 @@ class Application(Base):
 
     @property
     def expected_hifi_yield(self) -> int | None:
-        if self.target_hifi_yield and self.percent_hifi_yield_guaranteed:
+        if self.target_hifi_yield is not None and self.percent_hifi_yield_guaranteed is not None:
             return round(self.target_hifi_yield * self.percent_hifi_yield_guaranteed / 100)
         else:
             return None
 
     @property
     def expected_express_hifi_yield(self) -> int | None:
-        return round(self.target_hifi_yield * 0.5) if self.target_hifi_yield else None
+        return round(self.target_hifi_yield * 0.5) if self.target_hifi_yield is not None else None
 
     @property
     def analysis_type(self) -> str:
@@ -854,7 +854,7 @@ class Sample(Base, PriorityMixin):
         return self.application_version.application.tag
 
     @property
-    def prep_category(self) -> str:
+    def prep_category(self) -> SeqLibraryPrepCategory:
         """Return the preparation category of the sample."""
         return self.application_version.application.prep_category
 
@@ -888,26 +888,27 @@ class Sample(Base, PriorityMixin):
         return None
 
     @property
-    def original_case(self) -> Case | None:
-        """Return the original case of the sample if it exists."""
-        if cases := [link.case for link in self.links]:
-            return min(cases, key=lambda case: case.created_at)
+    def case_that_delivers(self) -> Case | None:
+        """Returns the case that should deliver this sample."""
+        if case_samples_that_deliver := [link for link in self.links if link.should_deliver_sample]:
+            # we only expect one of these
+            return case_samples_that_deliver[0].case
         else:
             return None
 
     @property
-    def original_workflow(self) -> Workflow | None:
+    def workflow_of_case_that_delivers(self) -> Workflow | None:
         """Return the workflow of the original case if the case exists."""
-        if case := self.original_case:
+        if case := self.case_that_delivers:
             return case.data_analysis
         else:
             return None
 
     @property
     def ticket_id_from_original_order(self) -> int | None:
-        """Return the original ticket id of the sample if it is linked to any ticket."""
-        if self.original_case and self.original_case.original_order:
-            return self.original_case.original_order.ticket_id
+        """Return the original ticket id of the delivering case if it is linked to any ticket."""
+        if self.case_that_delivers and self.case_that_delivers.original_order:
+            return self.case_that_delivers.original_order.ticket_id
         else:
             return None
 

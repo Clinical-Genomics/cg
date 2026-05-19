@@ -3,11 +3,11 @@ import logging
 from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
+from cg.constants.constants import GenomeBuild
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import (
     BALSAMIC_UMI_CASE_TAGS,
     BALSAMIC_UMI_SAMPLE_TAGS,
-    GenomeBuild,
     ScoutAnalysisType,
     UploadTrack,
 )

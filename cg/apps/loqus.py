@@ -68,13 +68,20 @@ class LoqusdbAPI:
             file_format=FileFormat.JSON, stream=self.process.stdout
         )[0]
 
-    def get_duplicate(self, profile_vcf_path: Path, profile_threshold: float) -> dict | None:
+    def get_duplicate(
+        self,
+        profile_vcf_path: Path,
+        profile_threshold: float,
+        loqusdb_options: list[str] | None = None,
+    ) -> dict | None:
         """Find matching profiles in Loqusdb."""
         duplicates_params = {
             "--check-vcf": profile_vcf_path.as_posix(),
             "--profile-threshold": str(profile_threshold),
         }
-        duplicate_call_params: list = ["profile"] + get_list_from_dictionary(duplicates_params)
+        duplicate_call_params: list = (
+            (loqusdb_options or []) + ["profile"] + get_list_from_dictionary(duplicates_params)
+        )
 
         try:
             self.process.run_command(parameters=duplicate_call_params)
