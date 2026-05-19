@@ -836,7 +836,7 @@ def test_get_paginated_unhandled_samples(store: Store, helpers: StoreHelpers):
 
 
 def test_get_paginated_unhandled_samples_search_sample(store: Store, helpers: StoreHelpers):
-    # GIVEN a store with two unhandled samples
+    # GIVEN a store with a sample to be found
     sample_to_find = helpers.add_sample(
         store=store,
         lims_status=LimsStatus.TOP_UP,
@@ -847,7 +847,22 @@ def test_get_paginated_unhandled_samples_search_sample(store: Store, helpers: St
         delivered_at=None,
         customer_id="cust1337",
     )
-    helpers.add_sample(
+
+    # GIVEN a related case to the sample to be found, that should deliver sample
+    case_to_find: Case = helpers.add_case(
+        store=store,
+        name="case_1",
+        internal_id="case_to_find",
+    )
+    helpers.relate_samples(
+        base_store=store,
+        case=case_to_find,
+        samples=[sample_to_find],
+        should_deliver_sample=True,
+    )
+
+    # GIVEN a store with a sample related to a case to not find
+    sample_to_not_find = helpers.add_sample(
         store=store,
         lims_status=LimsStatus.TOP_UP,
         internal_id="perfect_unhandled_sample_2",
@@ -857,16 +872,15 @@ def test_get_paginated_unhandled_samples_search_sample(store: Store, helpers: St
         delivered_at=None,
         customer_id="cust1337",
     )
-
-    # GIVEN related case to the searchable sample and that this case should deliver sample
-    case_should_deliver: Case = helpers.add_case(
+    case_to_not_find: Case = helpers.add_case(
         store=store,
-        internal_id="case_with_hit",
+        name="case_2",
+        internal_id="case_not_to_find",
     )
     helpers.relate_samples(
         base_store=store,
-        case=case_should_deliver,
-        samples=[sample_to_find],
+        case=case_to_not_find,
+        samples=[sample_to_not_find],
         should_deliver_sample=True,
     )
 
