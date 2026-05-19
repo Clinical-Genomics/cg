@@ -148,6 +148,14 @@ class ChanjoConfig(BaseModel):
     config_path: str
 
 
+class EventListenerConfig(BaseModel):
+    server: str
+    ca_cert_path: Path
+    client_cert: Path
+    client_key: Path
+    token: str
+
+
 class HermesConfig(CommonAppConfig):
     container_path: str
 
@@ -489,6 +497,7 @@ class CGConfig(BaseModel):
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
+    event_listener: EventListenerConfig
     external: ExternalConfig = None
     gens: CommonAppConfig = None
     gens_api_: GensAPI = None

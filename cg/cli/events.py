@@ -1,0 +1,20 @@
+import asyncio
+
+import rich_click as click
+
+from cg.cli.utils import CLICK_CONTEXT_SETTINGS
+from cg.models.cg_config import CGConfig
+from cg.services.events.listen import EventListener
+
+
+@click.group(context_settings=CLICK_CONTEXT_SETTINGS)
+def events():
+    pass
+
+
+@events.command("listen", hidden=True)
+@click.pass_obj
+def listen(context: CGConfig):
+    listener = EventListener(context.event_listener)
+    listener.register("cg.upload.completed", lambda msg: click.echo(f"Received message: {msg}"))
+    asyncio.run(listener.listen())

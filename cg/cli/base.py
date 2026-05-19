@@ -1,6 +1,5 @@
 """Start of CLI"""
 
-import asyncio
 import logging
 import sys
 from pathlib import Path
@@ -19,6 +18,7 @@ from cg.cli.delete.base import delete
 from cg.cli.deliver.base import deliver as deliver_cmd
 from cg.cli.demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
 from cg.cli.downsample import downsample
+from cg.cli.events import listen
 from cg.cli.generate.base import generate as generate_cmd
 from cg.cli.get import get
 from cg.cli.post_process.post_process import post_process_group as post_processing
@@ -32,7 +32,6 @@ from cg.cli.workflow.base import workflow as workflow_cmd
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
-from cg.services.events.listen import EventListener
 from cg.store.database import get_scoped_session_registry
 
 LOG = logging.getLogger(__name__)
@@ -110,13 +109,6 @@ def search(query):
         click.echo("No matching commands found.")
 
 
-@base.command()
-def listen():
-    listener = EventListener(server="TODO", ca_cert_path="TODO")
-    listener.register("cg.upload.completed", lambda msg: click.echo(f"Received message: {msg}"))
-    asyncio.run(listener.listen())
-
-
 base.add_command(add_cmd)
 base.add_command(archive)
 base.add_command(backup)
@@ -124,6 +116,7 @@ base.add_command(clean)
 base.add_command(compress)
 base.add_command(decompress)
 base.add_command(delete)
+base.add_command(listen)
 base.add_command(get)
 base.add_command(set_cmd)
 base.add_command(transfer_group)
