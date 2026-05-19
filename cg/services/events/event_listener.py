@@ -4,7 +4,7 @@ import ssl
 from collections.abc import Callable
 from logging import Logger
 from pathlib import Path
-from ssl import SSLContext
+from ssl import Purpose, SSLContext, TLSVersion
 
 import nats
 from nats.aio.client import Client
@@ -29,7 +29,8 @@ class EventListener:
         self._handlers[subject] = handler
 
     def _tls_context(self) -> SSLContext:
-        ctx: SSLContext = ssl.create_default_context()
+        ctx: SSLContext = ssl.create_default_context(Purpose.SERVER_AUTH)
+        ctx.minimum_version = TLSVersion.TLSv1_2
         ctx.load_verify_locations(self.ca_cert_path)
         ctx.load_cert_chain(certfile=self.client_cert, keyfile=self.client_key)
         return ctx
