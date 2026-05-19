@@ -67,6 +67,7 @@ class CaseTags(BaseModel):
     vcf_mei_research: set[str] | None = Field(
         None, description="VCF with mobile element insertions, research"
     )
+    paraphrase: set[str] | None = Field(None, description="Paraphase annotated JSON file")
 
 
 class SampleTags(BaseModel):

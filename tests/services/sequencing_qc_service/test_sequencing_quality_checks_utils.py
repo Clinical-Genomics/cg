@@ -462,6 +462,25 @@ def test_case_pass_sequencing_qc_on_hifi_yield_missing_hifi_yield():
     assert not passes
 
 
+def test_case_pass_sequencing_qc_on_hifi_yield_zero_expected_yield_passes():
+    # GIVEN a case with two samples, where one is missing HiFi yield
+    allowed_sample_without_yield: Sample = create_autospec(
+        Sample,
+        delivered_at=None,
+        hifi_yield=0,
+        expected_hifi_yield=0,
+    )
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[allowed_sample_without_yield])
+
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
+    passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
+
+    # THEN the case passes sequencing qc
+    assert passes
+
+
 def test_case_pass_sequencing_qc_on_hifi_yield_wrong_application():
     # GIVEN a case with an application without target HiFi yield
     sample: Sample = create_autospec(Sample, hifi_yield=25, expected_hifi_yield=None)
@@ -559,6 +578,28 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_missing_hifi_yie
 
     # THEN the case does not pass sequencing qc
     assert not passes
+
+
+def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_zero_hifi_yield():
+    # GIVEN a PacBio sample with zero HiFi yield but no yield is expected (e.g. external)
+    application_version = create_autospec(
+        ApplicationVersion,
+        application=create_autospec(Application, expected_express_hifi_yield=0),
+    )
+    allowed_sample_with_yield: Sample = create_autospec(
+        Sample, hifi_yield=0, application_version=application_version
+    )
+
+    # GIVEN a case with a PacBio application express priority, with the sample above
+    case: Case = create_autospec(
+        Case, samples=[allowed_sample_with_yield], priority=Priority.express
+    )
+
+    # WHEN calling case_pass_sequencing_qc_on_hifi_yield on the case
+    passes: bool = case_pass_sequencing_qc_on_hifi_yield(case)
+
+    # THEN the case passes sequencing qc
+    assert passes
 
 
 def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_wrong_application():
