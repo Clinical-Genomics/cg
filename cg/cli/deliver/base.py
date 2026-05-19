@@ -5,7 +5,6 @@ from pathlib import Path
 
 import rich_click as click
 
-from cg.apps.environ import environ_email
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants import Workflow
@@ -226,7 +225,6 @@ def deliver_dev_case_command(context: CGConfig, case_id: str, signature: str):
 @deliver.command(name="dev-all-available", hidden=True)
 @click.pass_obj
 def deliver_dev_all_cases(context: CGConfig):
-    email = environ_email()
     deliver_service = DeliverService(
         status_db=context.status_db, trailblazer_api=context.trailblazer_api
     )

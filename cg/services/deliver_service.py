@@ -19,8 +19,9 @@ class DeliverService:
         )
 
     def deliver_all_cases(self):
-        # get all undelivered analyses from trailblazer
-        # get uploaded analyses
+        undelivered_analyses: list[TrailblazerAnalysis] = (
+            self.trailblazer_api.get_all_analyses_to_deliver()
+        )
         # mark analyses as delivered
         pass
 
