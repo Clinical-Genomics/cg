@@ -365,3 +365,22 @@ def test_get_analyses_to_deliver_for_case_improper_response(
     # THEN a TrailblazerAPIHTTPError should be raised
     with pytest.raises(TrailblazerAPIHTTPError):
         tb_api.get_analyses_to_deliver_for_case("updog")
+
+
+def test_get_all_analyses_to_deliver_success(
+    raw_response: str,
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a TrailblazerAPI
+    tb_api = TrailblazerAPI(valid_trailblazer_config)
+
+    # GIVEN that trailblazer returns an analysis
+    mocker.patch.object(
+        requests,
+        "get",
+        return_value=create_autospec(
+            requests.Response, status_code=200, ok=True, text=raw_response
+        ),
+    )

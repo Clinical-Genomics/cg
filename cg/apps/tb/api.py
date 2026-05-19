@@ -265,4 +265,8 @@ class TrailblazerAPI:
             command=endpoint, request_body={}, method=APIMethods.GET
         )
         validated_response = AnalysesResponse.model_validate(raw_response)
-        return validated_response.analyses
+        pipeline_analyses = []
+        for analysis in validated_response.analyses:
+            if analysis.workflow not in ["RSYNC", "DEMULTIPLEX"]:
+                pipeline_analyses.append(analysis)
+        return pipeline_analyses
