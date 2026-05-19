@@ -100,3 +100,34 @@ def test_deliver_case_nothing_to_deliver(mocker: MockerFixture):
 
     # THEN the MarkAsDeliver service is not called since there is nothing to deliver
     mark_analyses_spy.assert_not_called()
+
+
+def test_deliver_all_cases_success(mocker: MockerFixture):
+    # GIVEN a TrailblazerAPI and a store
+    status_db: Store = create_autospec(Store)
+    analysis_to_deliver = create_autospec(Analysis, trailblazer_id=1, uploaded_at=datetime.now())
+    status_db.get_uploaded_analyses = Mock(return_value=[analysis_to_deliver])
+    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
+    trailblazer_analyses = [
+        create_autospec(TrailblazerAnalysis, id=1),
+        create_autospec(TrailblazerAnalysis, id=2),
+    ]
+    trailblazer_api.get_all_analyses_to_deliver = Mock(return_value=trailblazer_analyses)
+
+    # GIVEN a Delivery Service
+    deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
+    mark_analyses_call = mocker.patch.object(
+        deliver_service.mark_as_delivered_service, "mark_analyses"
+    )
+
+    # WHEN delivering all cases
+    deliver_service.deliver_all_cases()
+
+    # THEN it should get all analyses to deliver from Trailblazer
+    trailblazer_api.get_all_analyses_to_deliver.assert_called_once()
+
+    # THEN uploaded analyses should have been fetched from StatusDB
+    status_db.get_uploaded_analyses.assert_called_once_with(trailblazer_ids=[1, 2])
+
+    # THEN the analyses should have been marked as delivered
+    mark_analyses_call.assert_called_once_with(analyses=[analysis_to_deliver], signature=None)
