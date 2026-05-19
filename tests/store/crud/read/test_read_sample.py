@@ -960,7 +960,7 @@ def test_get_paginated_unhandled_samples_search_no_hits(
     # GIVEN a searchable string
     imperfect_searchable_string = "string_with_no_hits"
 
-    # WHEN getting the unhandled samples in top-up using page 2 and page_size = 1
+    # WHEN getting the unhandled samples in top-up using page 1 and page_size = 2
     unhandled_samples, total = store.get_paginated_unhandled_samples(
         lims_status=LimsStatus.TOP_UP,
         page=1,
