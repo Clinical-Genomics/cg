@@ -12,7 +12,7 @@ from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.server.dto.samples.requests import CollaboratorSamplesRequest
-from cg.store.models import Customer, Invoice, OrderTypeApplication, Sample
+from cg.store.models import Case, Customer, Invoice, OrderTypeApplication, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -837,7 +837,7 @@ def test_get_paginated_unhandled_samples(store: Store, helpers: StoreHelpers):
 
 def test_get_paginated_unhandled_samples_search_sample(store: Store, helpers: StoreHelpers):
     # GIVEN a store with two unhandled samples
-    sample_searchable = helpers.add_sample(
+    sample_to_find = helpers.add_sample(
         store=store,
         lims_status=LimsStatus.TOP_UP,
         internal_id="perfect_searchable_unhandled_sample_1",
@@ -858,43 +858,16 @@ def test_get_paginated_unhandled_samples_search_sample(store: Store, helpers: St
         customer_id="cust1337",
     )
 
-    # GIVEN a searchable string
-    perfect_searchable_string = "searchable"
-
-    # WHEN getting the unhandled samples in top-up using page 2 and page_size = 1
-    unhandled_samples, total = store.get_paginated_unhandled_samples(
-        lims_status=LimsStatus.TOP_UP,
-        page=1,
-        page_size=2,
-        search=perfect_searchable_string,
-    )
-
-    # THEN only the matching sample should be returned
-    assert unhandled_samples == [sample_searchable]
-    assert total == 1
-
-
-def test_get_paginated_unhandled_samples_search_ticket(store: Store, helpers: StoreHelpers):
-    # GIVEN a store with two unhandled samples
-    sample_searchable = helpers.add_sample(
+    # GIVEN related case to the searchable sample and that this case should deliver sample
+    case_should_deliver: Case = helpers.add_case(
         store=store,
-        lims_status=LimsStatus.TOP_UP,
-        internal_id="perfect_searchable_unhandled_sample_1",
-        is_cancelled=False,
-        from_sample=None,
-        last_sequenced_at=datetime.now(),
-        delivered_at=None,
-        customer_id="cust1337",
+        internal_id="case_with_hit",
     )
-    helpers.add_sample(
-        store=store,
-        lims_status=LimsStatus.TOP_UP,
-        internal_id="perfect_unhandled_sample_2",
-        is_cancelled=False,
-        from_sample=None,
-        last_sequenced_at=datetime.now() - timedelta(days=1),
-        delivered_at=None,
-        customer_id="cust1337",
+    helpers.relate_samples(
+        base_store=store,
+        case=case_should_deliver,
+        samples=[sample_to_find],
+        should_deliver_sample=True,
     )
 
     # GIVEN a searchable string
@@ -909,5 +882,5 @@ def test_get_paginated_unhandled_samples_search_ticket(store: Store, helpers: St
     )
 
     # THEN only the matching sample should be returned
-    assert unhandled_samples == [sample_searchable]
+    assert unhandled_samples == [sample_to_find]
     assert total == 1
