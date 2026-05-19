@@ -2,7 +2,7 @@ import pytest
 
 
 @pytest.fixture
-def raw_response() -> str:
+def response_with_one_rd_analysis_and_one_rsync_analysis() -> str:
     return (
         "{"
         '"analyses": ['
