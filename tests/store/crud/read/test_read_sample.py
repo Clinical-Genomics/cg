@@ -971,3 +971,47 @@ def test_get_paginated_unhandled_samples_search_no_hits(
     # THEN no sample should be returned
     assert unhandled_samples == []
     assert total == 0
+
+
+def test_get_paginated_unhandled_samples_search_no_should_deliver_sample(
+    store: Store, helpers: StoreHelpers
+):
+    # GIVEN a store with a sample and a case that both have an id matching the search string
+    sample = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="matching_search_string",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    case: Case = helpers.add_case(
+        store=store,
+        name="case_1",
+        internal_id="matching_search_string",
+    )
+
+    # GIVEN a relationship between case and sample where the should_deliver_sample is False
+    helpers.relate_samples(
+        base_store=store,
+        case=case,
+        samples=[sample],
+        should_deliver_sample=False,
+    )
+
+    # GIVEN a searchable string
+    search_string = "matching_search_string"
+
+    # WHEN getting the unhandled samples in top-up using page 1 and page_size = 2
+    unhandled_samples, total = store.get_paginated_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=2,
+        search=search_string,
+    )
+
+    # THEN no sample should be returned
+    assert unhandled_samples == []
+    assert total == 0

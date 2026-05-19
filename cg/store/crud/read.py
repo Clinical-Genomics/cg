@@ -1923,7 +1923,6 @@ class ReadHandler(BaseHandler):
                 Customer.internal_id != "cust000",
                 Customer.internal_id.not_like("cust9%"),
             )
-            .order_by(Sample.last_sequenced_at.asc())
         )
 
         if search:
@@ -1939,7 +1938,7 @@ class ReadHandler(BaseHandler):
                 )
             )
 
-        return query
+        return query.order_by(Sample.last_sequenced_at.asc())
 
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:
