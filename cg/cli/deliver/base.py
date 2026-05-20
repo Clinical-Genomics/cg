@@ -215,22 +215,22 @@ def deliver_auto_raw_data(context: CGConfig, dry_run: bool):
 )
 @click.argument("case_id", type=str, required=True)
 @click.pass_obj
-def deliver_dev_case_command(context: CGConfig, case_id: str, signature: str):
+def deliver_dev_case_command(config: CGConfig, case_id: str, signature: str):
     deliver_service = DeliverService(
-        status_db=context.status_db, trailblazer_api=context.trailblazer_api
+        status_db=config.status_db, trailblazer_api=config.trailblazer_api
     )
     deliver_service.deliver_case(case_id=case_id, signature=signature)
-    context.status_db.commit_to_store()
+    config.status_db.commit_to_store()
 
 
 @deliver.command(name="dev-all-available", hidden=True)
 @click.pass_obj
-def deliver_dev_all_cases(context: CGConfig):
+def deliver_dev_all_cases(config: CGConfig):
     deliver_service = DeliverService(
-        status_db=context.status_db, trailblazer_api=context.trailblazer_api
+        status_db=config.status_db, trailblazer_api=config.trailblazer_api
     )
     deliver_service.deliver_all_cases()
-    context.status_db.commit_to_store()
+    config.status_db.commit_to_store()
 
 
 @deliver.command(name="dev-order", hidden=True)
@@ -242,5 +242,9 @@ def deliver_dev_all_cases(context: CGConfig):
     help="Freshdesk ticket id corresponding to the order",
 )
 @click.pass_obj
-def deliver_dev_order(context: CGConfig):
-    pass
+def deliver_dev_order(config: CGConfig, ticket_id: int):
+    deliver_service = DeliverService(
+        status_db=config.status_db, trailblazer_api=config.trailblazer_api
+    )
+    deliver_service.deliver_order(ticket_id)
+    config.status_db.commit_to_store()

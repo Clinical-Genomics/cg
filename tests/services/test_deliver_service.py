@@ -184,3 +184,7 @@ def test_deliver_all_cases_no_analyses_to_deliver(mocker: MockerFixture):
 
     # THEN no call should have been made
     mark_analyses_call.assert_not_called()
+
+
+def test_deliver_order_success():
+    status_db: Store = create_autospec(Store)

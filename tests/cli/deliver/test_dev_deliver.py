@@ -34,7 +34,7 @@ def test_deliver_dev_case_command_success(mocker: MockerFixture):
     # THEN the delivery service is called with the expected arguments
     deliver_case_command.assert_called_once_with(ANY, case_id="case_id", signature="CG")
 
-    # THEN the changes were persistent in the database
+    # THEN the changes were persisted in the database
     status_db.as_mock.commit_to_store.assert_called_once()
 
 
@@ -52,7 +52,7 @@ def test_deliver_dev_case_command_no_case_id():
     # THEN the command failed
     assert result.exit_code == EXIT_PARSE_ERROR
 
-    # THEN the changes were NOT persistent in the database
+    # THEN the changes were NOT persisted in the database
     status_db.as_mock.commit_to_store.assert_not_called()
 
 
@@ -131,7 +131,7 @@ def test_deliver_dev_all_available_service_raises_error(mocker: MockerFixture):
     # GIVEN that the deliver service raises an error
     mocker.patch.object(DeliverService, "deliver_all_cases", side_effect=Exception)
 
-    # WHEN calling the deliver case command without a case id
+    # WHEN calling the deliver all available cases command
     result = cli_runner.invoke(deliver_dev_all_cases, obj=cg_config)
 
     # THEN the command failed due to service error
@@ -162,3 +162,42 @@ def test_deliver_dev_order(mocker: MockerFixture):
 
     # THEN the changes were persistent in the database
     status_db.as_mock.commit_to_store.assert_called_once()
+
+
+def test_deliver_dev_order_no_ticket_id():
+    # GIVEN a store and a CG config
+    cli_runner = CliRunner()
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    cg_config = create_autospec(
+        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
+    )
+
+    # WHEN calling the deliver order command without a ticket id
+    result = cli_runner.invoke(deliver_dev_order, obj=cg_config)
+
+    # THEN the command failed
+    assert result.exit_code == EXIT_PARSE_ERROR
+
+    # THEN the changes were NOT persisted in the database
+    status_db.as_mock.commit_to_store.assert_not_called()
+
+
+def test_deliver_dev_order_service_raises_error(mocker: MockerFixture):
+    # GIVEN a store and a CG config
+    cli_runner = CliRunner()
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    cg_config = create_autospec(
+        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
+    )
+
+    # GIVEN that the deliver service raises an error
+    mocker.patch.object(DeliverService, "deliver_order", side_effect=Exception)
+
+    # WHEN calling the deliver order command
+    result = cli_runner.invoke(deliver_dev_order, ["--ticket-id", "743298"], obj=cg_config)
+
+    # THEN the command failed due to service error
+    assert result.exit_code == EXIT_FAIL
+
+    # THEN the changes were NOT persisted in the database
+    status_db.as_mock.commit_to_store.assert_not_called()
