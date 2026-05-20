@@ -338,6 +338,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
     # Case Files
     delivery_report: File = create_autospec(File, full_path="delivery_report.yaml")
     multiqc: File = create_autospec(File, full_path="multiqc.html")
+    paraphrase: File = create_autospec(File, full_path="paraphase_annotated.json")
     peddy_check: File = create_autospec(File, full_path="check.peddy")
     peddy_ped: File = create_autospec(File, full_path="ped.peddy")
     somalier_samples: File = create_autospec(File, full_path="somalier.samples")
@@ -367,6 +368,8 @@ def test_nallo_config_builder(mocker: MockerFixture):
             return delivery_report
         elif tags == {"multiqc-html"}:
             return multiqc
+        elif tags == {"paraphrase"}:
+            return paraphrase
         elif tags == {"ped-check", "peddy"}:
             return peddy_check
         elif tags == {"ped", "peddy"}:
@@ -510,6 +513,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
         delivery_report=delivery_report.full_path,
         madeline=None,
         multiqc=multiqc.full_path,
+        paraphrase=paraphrase.full_path,
         peddy_check=peddy_check.full_path,
         peddy_ped=peddy_ped.full_path,
         peddy_sex=None,

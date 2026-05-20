@@ -59,6 +59,7 @@ from cg.meta.workflow.tomte import TomteAnalysisAPI
 from cg.models.cg_config import (
     CGConfig,
     ChanjoConfig,
+    GENSConfig,
     IlluminaConfig,
     PDCArchivingDirectory,
     RunInstruments,
@@ -562,14 +563,12 @@ def hk_config_dict(root_path: Path):
 
 
 @pytest.fixture
-def gens_config() -> dict[str, dict[str, str]]:
+def gens_config() -> GENSConfig:
     """Gens config fixture."""
-    return {
-        "gens": {
-            "config_path": Path("config", "path").as_posix(),
-            "binary_path": "gens",
-        }
-    }
+    return GENSConfig(
+        binary_path="gens",
+        config_path=Path("config", "path").as_posix(),
+    )
 
 
 @pytest.fixture(name="sample_sheet_context")
