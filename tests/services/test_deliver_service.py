@@ -6,10 +6,11 @@ from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.exc import MultipleAnalysesToDeliverError
+from cg.exc import MultipleAnalysesToDeliverError, TrailblazerAPIHTTPError
 from cg.services.deliver_service import DeliverService
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_deliver_case(mocker: MockerFixture):
@@ -131,3 +132,59 @@ def test_deliver_all_cases_success(mocker: MockerFixture):
 
     # THEN the analyses should have been marked as delivered
     mark_analyses_call.assert_called_once_with(analyses=[analysis_to_deliver])
+
+
+def test_deliver_all_cases_trailblazer_error(mocker: MockerFixture):
+    # GIVEN a TrailblazerAPI and a store
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    analysis_to_deliver = create_autospec(Analysis, trailblazer_id=1, uploaded_at=datetime.now())
+    status_db.as_type.get_uploaded_analyses = Mock(return_value=[analysis_to_deliver])
+    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
+    trailblazer_analyses = [
+        create_autospec(TrailblazerAnalysis, id=1),
+    ]
+    trailblazer_api.get_all_analyses_to_deliver = Mock(return_value=trailblazer_analyses)
+
+    # GIVEN a Delivery Service
+    deliver_service = DeliverService(status_db=status_db.as_type, trailblazer_api=trailblazer_api)
+
+    # GIVEN the mark_analyses_call raises an TrailblazerAPIHTTPError
+    mocker.patch.object(
+        deliver_service.mark_as_delivered_service,
+        "mark_analyses",
+        side_effect=TrailblazerAPIHTTPError,
+    )
+
+    # WHEN delivering all analyses
+    # THEN a TrailblazerAPIHTTPError is raised
+    with pytest.raises(TrailblazerAPIHTTPError):
+        deliver_service.deliver_all_cases()
+
+    # THEN no database changes should have been performed
+    status_db.as_mock.rollback.assert_called_once()
+    status_db.as_mock.commit_to_store.assert_not_called()
+
+
+def test_deliver_all_cases_no_analyses_to_deliver(mocker: MockerFixture):
+    # GIVEN a TrailblazerAPI and a store without an analysis to deliver
+    status_db: Store = create_autospec(Store)
+    status_db.get_uploaded_analyses = Mock(return_value=[])
+    trailblazer_api: TypedMock[TrailblazerAPI] = create_typed_mock(TrailblazerAPI)
+
+    # GIVEN a Delivery Service
+    deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api.as_type)
+    mark_analyses_call = mocker.patch.object(
+        deliver_service.mark_as_delivered_service, "mark_analyses"
+    )
+
+    # WHEN delivering all cases
+    deliver_service.deliver_all_cases()
+
+    # THEN it should get all analyses to deliver from Trailblazer
+    trailblazer_api.as_mock.get_all_analyses_to_deliver.assert_called_once()
+
+    # THEN uploaded analyses should have been fetched from StatusDB
+    status_db.get_uploaded_analyses.assert_called_once()
+
+    # THEN no call should have been made
+    mark_analyses_call.assert_not_called()
