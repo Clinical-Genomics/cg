@@ -25,8 +25,10 @@ class DeliverService:
         analyses_to_deliver: list[Analysis] = self.status_db.get_uploaded_analyses(
             trailblazer_ids=[analysis.id for analysis in undelivered_analyses]
         )
-
-        self.mark_as_delivered_service.mark_analyses(analyses=analyses_to_deliver)
+        if analyses_to_deliver:
+            self.mark_as_delivered_service.mark_analyses(analyses=analyses_to_deliver)
+        else:
+            LOG.info("No analyses ready to be delivered")
 
     def deliver_case(self, case_id: str, signature: str):
 
@@ -56,6 +58,3 @@ class DeliverService:
                 analyses_to_deliver.append(analysis)
 
         return analyses_to_deliver
-
-    def _get_uploaded_analyses(self):
-        return

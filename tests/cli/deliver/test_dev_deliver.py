@@ -5,7 +5,7 @@ from mock import ANY
 from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
-from cg.cli.deliver.base import deliver_dev_case_command
+from cg.cli.deliver.base import deliver_dev_all_cases, deliver_dev_case_command
 from cg.constants.process import EXIT_PARSE_ERROR, EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.services.deliver_service import DeliverService
@@ -59,3 +59,22 @@ def test_deliver_dev_case_command_no_signature():
 
     # THEN the command failed
     assert result.exit_code == EXIT_PARSE_ERROR
+
+
+def test_deliver_dev_all_available_command_success(mocker: MockerFixture):
+    # GIVEN a CG config and a case ID
+    cli_runner = CliRunner()
+    cg_config = create_autospec(
+        CGConfig, status_db=create_autospec(Store), trailblazer_api=create_autospec(TrailblazerAPI)
+    )
+
+    deliver_all_command = mocker.spy(DeliverService, "deliver_all_cases")
+
+    # WHEN delivering all available cases
+    result = cli_runner.invoke(deliver_dev_all_cases, obj=cg_config)
+
+    # THEN the command should have exited successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN the delivery service is called with the expected arguments
+    deliver_all_command.assert_called_once_with(ANY)

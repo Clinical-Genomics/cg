@@ -44,6 +44,7 @@ class MarkAsDeliveredService:
 
     @staticmethod
     def _passes_on_reads(case_sample: CaseSample) -> bool:
+        # TODO: Explain in docstring
         case: Case = case_sample.case
         sample: Sample = case_sample.sample
         if (
