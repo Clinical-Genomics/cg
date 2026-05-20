@@ -4,7 +4,7 @@ import logging
 import shutil
 from pathlib import Path
 from typing import cast
-from unittest.mock import ANY, call, create_autospec
+from unittest.mock import call, create_autospec
 
 import pytest
 
@@ -13,7 +13,6 @@ from cg.constants import Workflow
 from cg.constants.priority import SlurmAccount, SlurmQos
 from cg.exc import CgError
 from cg.models.slurm.sbatch import Sbatch
-from cg.services.deliver_files.rsync.models import RsyncDeliveryConfig
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.models import Case, Customer
 from cg.store.store import Store
@@ -305,6 +304,8 @@ ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer.internal_id}/inbox
         )
         for type in ["case", "father", "mother", "child"]
     ]
+
+    expected_rsync_commands.append("nats pub xyz")
 
     for command in expected_rsync_commands:
         assert command in sbatch_second_job.commands

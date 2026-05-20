@@ -148,13 +148,18 @@ class ChanjoConfig(BaseModel):
     config_path: str
 
 
-class EventListenerConfig(BaseModel):
+class NatsAuthentication(BaseModel):
     ca_cert_path: Path
     client_cert_path: Path
     client_key_path: Path
     nats_binary_path: Path
-    server: str
     token_path: Path
+
+
+class NatsConfig(BaseModel):
+    server: str
+    listener: NatsAuthentication
+    publisher: NatsAuthentication
 
 
 class HermesConfig(CommonAppConfig):
@@ -498,7 +503,7 @@ class CGConfig(BaseModel):
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
-    event_listener: EventListenerConfig
+    nats: NatsConfig
     external: ExternalConfig = None
     gens: CommonAppConfig = None
     gens_api_: GensAPI = None

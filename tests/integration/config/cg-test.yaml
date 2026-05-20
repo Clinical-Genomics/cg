@@ -9,13 +9,20 @@ email_base_settings:
   sender_email: "integration-tests@scilifelab.se"
   smtp_server: "localhost"
 
-event_listener:
-  nats_binary_path: {test_root_dir}/nats_binary_path
+nats:
   server: nats://localhost/nats
-  ca_cert_path: {test_root_dir}/ca.crt
-  client_cert_path: {test_root_dir}/client.crt
-  client_key_path: {test_root_dir}/client.key
-  token_path: {test_root_dir}/token
+  listener:
+    ca_cert_path: {test_root_dir}/listener/ca.crt
+    client_cert_path: {test_root_dir}/listener/client.crt
+    client_key_path: {test_root_dir}/listener/client.key
+    token_path: {test_root_dir}/listener/token
+
+  publisher:
+    nats_binary_path: {test_root_dir}/publisher/nats_binary_path
+    ca_cert_path: {test_root_dir}/publisher/ca.crt
+    client_cert_path: {test_root_dir}/publisher/client.crt
+    client_key_path: {test_root_dir}/publisher/client.key
+    token_path: {test_root_dir}/publisher/token
 
 downsample:
   downsample_dir: "{test_root_dir}/downsample_dir"
