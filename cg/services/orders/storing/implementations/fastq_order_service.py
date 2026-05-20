@@ -8,7 +8,6 @@ from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
-from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.services.orders.storing.service import StoreOrderService
 from cg.services.orders.validation.order_types.fastq.models.order import FastqOrder
 from cg.services.orders.validation.order_types.fastq.models.sample import FastqSample
@@ -48,8 +47,6 @@ class StoreFastqOrderService(StoreOrderService):
         - Samples
         - One Case per sample
         - For each Sample, a relationship between the sample and its Case
-        - For each non-tumour WGS Sample, a MAF Case and a relationship between the Sample and the
-        MAF Case
         """
         db_order: Order = self._create_db_order(order=order)
         new_samples = []
@@ -64,7 +61,6 @@ class StoreFastqOrderService(StoreOrderService):
                     ticket_id=str(db_order.ticket_id),
                     customer=db_order.customer,
                 )
-                self._create_maf_case(db_sample=db_sample, db_order=db_order, db_case=db_case)
                 case_sample: CaseSample = self.status_db.relate_sample(
                     case=db_case,
                     sample=db_sample,
@@ -132,35 +128,3 @@ class StoreFastqOrderService(StoreOrderService):
             subject_id=sample.subject_id,
             tumour=sample.tumour,
         )
-
-    def _create_maf_case(self, db_sample: Sample, db_order: Order, db_case: Case) -> None:
-        """
-        Add a MAF case and a relationship with the given sample to the current Status database
-        transaction. This is done only if the given sample is non-tumour and  WGS.
-        This function does not commit to the database.
-        """
-        if (
-            not db_sample.is_tumour
-            and db_sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
-        ):
-            maf_order: Order = self.status_db.get_order_by_id(MAF_ORDER_ID)
-            maf_case: Case = self.status_db.add_case(
-                comment=f"MAF case for {db_case.internal_id} original order id {db_order.id}",
-                data_analysis=Workflow.MIP_DNA,
-                data_delivery=DataDelivery.NO_DELIVERY,
-                name="_".join([db_sample.name, "MAF"]),
-                panels=[GenePanelMasterList.OMIM_AUTO],
-                priority=Priority.research,
-                ticket=db_sample.original_ticket,
-            )
-            maf_case.customer = self.status_db.get_customer_by_internal_id(
-                customer_internal_id=CustomerId.CG_INTERNAL_CUSTOMER
-            )
-            maf_case_sample: CaseSample = self.status_db.relate_sample(
-                case=maf_case,
-                sample=db_sample,
-                status=StatusEnum.unknown,
-                should_deliver_sample=False,
-            )
-            maf_order.cases.append(maf_case)
-            self.status_db.add_multiple_items_to_store([maf_case, maf_case_sample])

@@ -41,8 +41,8 @@ class AnalysisStarter:
         for case in cases:
             try:
                 self.start(case.internal_id)
-            except AnalysisNotReadyError as error:
-                LOG.error(error)
+            except AnalysisNotReadyError as warning:
+                LOG.warning(warning)
             except Exception as error:
                 LOG.error(error)
                 succeeded = False
