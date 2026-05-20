@@ -241,7 +241,7 @@ class TicketCreationError(CgError):
 
 
 class TrailblazerAPIHTTPError(CgError):
-    """Raised when Trailblazer REST API response code is not 200."""
+    """Raised when Trailblazer REST API response code is not 2XX/3XX."""
 
 
 class TrailblazerAnalysisNotFound(CgError):
@@ -363,3 +363,7 @@ class MultipleCaptureKitsError(CgError):
 
 class ApplicationDoesNotHaveHiFiYieldError(CgError):
     """Exception raised when application does not have HiFi yield set."""
+
+
+class MultipleAnalysesToDeliverError(CgError):
+    """Exception raised when multiple analyses are ready for delivery for a case."""

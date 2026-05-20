@@ -24,7 +24,6 @@ def trailblazer_api() -> TypedMock[TrailblazerAPI]:
     """TrailblazerAPI for endpoints."""
     return create_typed_mock(TrailblazerAPI)
 
-
 @pytest.fixture
 def status_db() -> Store:
     """Store for endpoints."""
@@ -79,11 +78,29 @@ def test_mark_analyses_success(
 
     # THEN endpoint in Trailblazer was called
     trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id, 555555], auth_token=None
+        trailblazer_ids=[trailblazer_id, 555555], auth_token=None, signature=None
     )
 
     # THEN we should return the Trailblazer response
     assert response == tb_response
+
+
+def test_mark_analyses_with_signature(
+    analysis_client: TypedMock[AnalysisClient],
+    mark_as_delivered_service: MarkAsDeliveredService,
+    status_db: FlaskStore,
+    trailblazer_id: int,
+):
+    # GIVEN a signature and an analysis
+    analysis = create_autospec(Analysis, trailblazer_id=trailblazer_id)
+
+    # WHEN marking an analysis as delivered by a user
+    mark_as_delivered_service.mark_analyses(analyses=[analysis], signature="CG")
+
+    # THEN trailblazer should have been called with the user signature
+    analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
+        trailblazer_ids=[trailblazer_id], auth_token=None, signature="CG"
+    )
 
 
 def test_mark_analyses_mix_original_non_original_samples(
@@ -119,7 +136,7 @@ def test_mark_analyses_mix_original_non_original_samples(
 
     # THEN endpoint in Trailblazer was called
     trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id], auth_token=None
+        trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
     )
 
 
@@ -156,7 +173,7 @@ def test_mark_analyses_rerun_case(
 
     # THEN endpoint in Trailblazer was called
     trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id], auth_token=None
+        trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
     )
 
 
@@ -193,7 +210,7 @@ def test_mark_analyses_mixed_delivered_at_original_samples(
 
     # THEN endpoint in Trailblazer was called
     trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id], auth_token=None
+        trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
     )
 
 
@@ -235,7 +252,7 @@ def test_mark_analyses_partial_delivery(
 
     # THEN endpoint in Trailblazer was called
     trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id], auth_token=None
+        trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
     )
 
 

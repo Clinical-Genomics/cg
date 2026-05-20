@@ -165,7 +165,9 @@ def test_mark_analyses_as_delivered_success(
     patch_call = mocker.patch.object(requests, "patch", return_value=response)
 
     # WHEN marking analyses as delivered
-    tb_response: Response = tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])
+    tb_response: Response = tb_api.mark_analyses_as_delivered(
+        signature="CG", trailblazer_ids=[1, 2, 3]
+    )
 
     # THEN the expected request should have been sent
     expected_request = {
@@ -173,7 +175,8 @@ def test_mark_analyses_as_delivered_success(
             {"id": 1, "is_delivered": True},
             {"id": 2, "is_delivered": True},
             {"id": 3, "is_delivered": True},
-        ]
+        ],
+        "signature": "CG",
     }
 
     patch_call.assert_called_once_with(
@@ -197,7 +200,9 @@ def test_mark_analyses_as_delivered_with_forward_token(
     patch_call = mocker.patch.object(requests, "patch")
 
     # WHEN marking analyses as delivered
-    tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3], auth_token="auth_token")
+    tb_api.mark_analyses_as_delivered(
+        auth_token="auth_token", signature=None, trailblazer_ids=[1, 2, 3]
+    )
 
     # THEN the expected request should have been sent
     expected_request = {
@@ -205,7 +210,8 @@ def test_mark_analyses_as_delivered_with_forward_token(
             {"id": 1, "is_delivered": True},
             {"id": 2, "is_delivered": True},
             {"id": 3, "is_delivered": True},
-        ]
+        ],
+        "signature": None,
     }
 
     patch_call.assert_called_once_with(
@@ -238,4 +244,180 @@ def test_mark_analyses_as_delivered_fails_with_http_error(
     # WHEN marking analyses as delivered
     # THEN a TrailblazerAPIHTTPError is raised
     with pytest.raises(TrailblazerAPIHTTPError):
-        tb_api.mark_analyses_as_delivered(trailblazer_ids=[1, 2, 3])
+        tb_api.mark_analyses_as_delivered(signature=None, trailblazer_ids=[1, 2, 3])
+
+
+def test_get_analyses_to_deliver_for_case(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a TrailblazerAPI
+    tb_api = TrailblazerAPI(valid_trailblazer_config)
+
+    # GIVEN that trailblazer returns an analysis
+    mocker.patch.object(
+        requests,
+        "get",
+        return_value=create_autospec(
+            requests.Response,
+            status_code=200,
+            ok=True,
+            text="{"
+            '"analyses": ['
+            "{"
+            '"case_id": "case_1",'
+            '"comment": null,'
+            '"completed_at": null,'
+            '"config_path": "/path/",'
+            '"delivered_by": null,'
+            '"delivered_date": null,'
+            '"failed_job": null,'
+            '"id": 1234,'
+            '"is_cancellable": false,'
+            '"is_delivered": false,'
+            '"is_visible": true,'
+            '"logged_at": "Sun, 10 May 2026 22:25:03 GMT",'
+            '"order_id": 12345,'
+            '"out_dir": "/some/path",'
+            '"priority": "high",'
+            '"progress": 0.0,'
+            '"started_at": "Sun, 10 May 2026 22:25:03 GMT",'
+            '"status": "pending",'
+            '"ticket_id": "1234",'
+            '"type": "other",'
+            '"uploaded_at": null,'
+            '"user_id": null,'
+            '"version": null,'
+            '"workflow": "raredisease",'
+            '"workflow_manager": "slurm"'
+            "}"
+            "]}",
+        ),
+    )
+
+    # WHEN getting analyses to deliver for case_1
+    analyses = tb_api.get_analyses_to_deliver_for_case("case_1")
+
+    # THEN the analysis should be returned
+    assert analyses == [
+        TrailblazerAnalysis(
+            case_id="case_1",
+            id=1234,
+            logged_at="Sun, 10 May 2026 22:25:03 GMT",  # type: ignore pydantic
+            started_at="Sun, 10 May 2026 22:25:03 GMT",  # type: ignore pydantic
+            completed_at=None,
+            out_dir="/some/path",  # type: ignore pydantic
+            config_path="/path/",  # type: ignore pydantic
+            status="pending",
+            priority="high",
+            is_visible=True,
+            type="other",
+            workflow=Workflow.RAREDISEASE,
+        ),
+    ]
+
+
+def test_get_analyses_to_deliver_for_case_no_analysis(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a trailblazer api
+    tb_api = TrailblazerAPI(valid_trailblazer_config)
+
+    # GIVEN that no analysis is to be delivered for a given case
+    mocker.patch.object(
+        requests,
+        "get",
+        return_value=create_autospec(
+            requests.Response, status_code=200, ok=True, text='{"analyses":[],"total_count":0}'
+        ),
+    )
+
+    # WHEN getting analyses to deliver
+    analyses = tb_api.get_analyses_to_deliver_for_case("case_1")
+
+    # THEN an empty list should be returned
+    assert analyses == []
+
+
+def test_get_analyses_to_deliver_for_case_improper_response(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a trailblazer api
+    tb_api = TrailblazerAPI(valid_trailblazer_config)
+
+    # GIVEN an erroneous http response
+    mocker.patch.object(
+        requests,
+        "get",
+        return_value=create_autospec(
+            requests.Response,
+            status_code=500,
+            ok=False,
+        ),
+    )
+
+    # WHEN getting analyses to deliver
+    # THEN a TrailblazerAPIHTTPError should be raised
+    with pytest.raises(TrailblazerAPIHTTPError):
+        tb_api.get_analyses_to_deliver_for_case("updog")
+
+
+def test_get_all_analyses_to_deliver_success(
+    response_with_one_rd_analysis_and_one_rsync_analysis: str,
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a TrailblazerAPI
+    tb_api = TrailblazerAPI(valid_trailblazer_config)
+
+    # GIVEN that trailblazer returns two analyses, one of which is an RSYNC analysis
+    mocker.patch.object(
+        requests,
+        "get",
+        return_value=create_autospec(
+            requests.Response,
+            status_code=200,
+            ok=True,
+            text=response_with_one_rd_analysis_and_one_rsync_analysis,
+        ),
+    )
+
+    # WHEN getting all analyses to deliver
+    analyses = tb_api.get_all_analyses_to_deliver()
+
+    # THEN a list of one analysis is returned
+    assert len(analyses) == 1
+
+    # THEN the analysis' workflow is not DEMULTIPLEX nor RSYNC
+    assert analyses[0].workflow not in [Workflow.DEMULTIPLEX, Workflow.RSYNC]
+
+
+def test_get_all_analyses_to_deliver_improper_response(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a TrailblazerAPI
+    tb_api = TrailblazerAPI(valid_trailblazer_config)
+
+    # GIVEN an erroneous http response
+    mocker.patch.object(
+        requests,
+        "get",
+        return_value=create_autospec(
+            requests.Response,
+            status_code=500,
+            ok=False,
+        ),
+    )
+
+    # WHEN getting analyses to deliver
+    # THEN a TrailblazerAPIHTTPError should be raised
+    with pytest.raises(TrailblazerAPIHTTPError):
+        tb_api.get_all_analyses_to_deliver()

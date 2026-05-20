@@ -1509,6 +1509,10 @@ class ReadHandler(BaseHandler):
         )
         return orders.first()
 
+    def get_order_by_ticket_id_strict(self, ticket_id: int) -> Order:
+        # TODO: catch the order not found error, and raise
+        orders: Query = self._get_query(table=Order).filter_by(ticket_id=ticket_id)
+
     def get_case_not_received_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
         filters: list[CaseSampleFilter] = [
             CaseSampleFilter.BY_ORDER,
@@ -1925,20 +1929,15 @@ class ReadHandler(BaseHandler):
             )
         )
 
-        if search:
-            query = (
-                query.join(CaseSample, CaseSample.sample_id == Sample.id)
-                .join(Case, Case.id == CaseSample.case_id)
-                .filter(
-                    CaseSample.should_deliver_sample.is_(True),
-                    sqlalchemy.or_(
-                        Case.internal_id.ilike(f"%{search}%"),
-                        Sample.internal_id.ilike(f"%{search}%"),
-                    ),
-                )
+    def get_uploaded_analyses(self, trailblazer_ids: list[int]) -> list[Analysis]:
+        return (
+            self._get_query(table=Analysis)
+            .filter(
+                Analysis.trailblazer_id.in_(trailblazer_ids),
+                Analysis.uploaded_at.is_not(None),
             )
-
-        return query.order_by(Sample.last_sequenced_at.asc())
+            .all()
+        )
 
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:

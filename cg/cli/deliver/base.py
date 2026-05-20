@@ -17,6 +17,7 @@ from cg.services.deliver_files.deliver_files_service.deliver_files_service impor
 )
 from cg.services.deliver_files.factory import DeliveryServiceFactory
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
+from cg.services.deliver_service import DeliverService
 from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
@@ -202,3 +203,48 @@ def deliver_auto_raw_data(context: CGConfig, dry_run: bool):
         service_builder=service_builder,
         dry_run=dry_run,
     )
+
+
+@deliver.command(name="dev-case-command", hidden=True)
+@click.option(
+    "--signature",
+    "-s",
+    type=str,
+    required=True,
+    help="Signature (initials) of the user performing the delivery.",
+)
+@click.argument("case_id", type=str, required=True)
+@click.pass_obj
+def deliver_dev_case_command(config: CGConfig, case_id: str, signature: str):
+    deliver_service = DeliverService(
+        status_db=config.status_db, trailblazer_api=config.trailblazer_api
+    )
+    deliver_service.deliver_case(case_id=case_id, signature=signature)
+    config.status_db.commit_to_store()
+
+
+@deliver.command(name="dev-all-available", hidden=True)
+@click.pass_obj
+def deliver_dev_all_cases(config: CGConfig):
+    deliver_service = DeliverService(
+        status_db=config.status_db, trailblazer_api=config.trailblazer_api
+    )
+    deliver_service.deliver_all_cases()
+    config.status_db.commit_to_store()
+
+
+@deliver.command(name="dev-order", hidden=True)
+@click.option(
+    "--ticket-id",
+    "-t",
+    type=int,
+    required=True,
+    help="Freshdesk ticket id corresponding to the order",
+)
+@click.pass_obj
+def deliver_dev_order(config: CGConfig, ticket_id: int):
+    deliver_service = DeliverService(
+        status_db=config.status_db, trailblazer_api=config.trailblazer_api
+    )
+    deliver_service.deliver_order(ticket_id)
+    config.status_db.commit_to_store()

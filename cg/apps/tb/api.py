@@ -218,7 +218,7 @@ class TrailblazerAPI:
         return response_data.summaries
 
     def mark_analyses_as_delivered(
-        self, trailblazer_ids: list[int], auth_token: str | None = None
+        self, trailblazer_ids: list[int], signature: str | None, auth_token: str | None = None
     ) -> Response:
         analysis_dicts = []
         for trailblazer_id in trailblazer_ids:
@@ -226,7 +226,7 @@ class TrailblazerAPI:
             analysis_dicts.append(analysis_dict)
         LOG.info(f"Setting analyses {trailblazer_ids} as delivered in Trailblazer")
         response: Response = requests.patch(
-            json={"analyses": analysis_dicts},
+            json={"analyses": analysis_dicts, "signature": signature},
             headers=self._get_auth_headers(auth_token=auth_token),
             url=f"{self.host}/analyses",
         )
@@ -249,3 +249,26 @@ class TrailblazerAPI:
         """Raises an AnalysisNotCompletedError if the latest analysis for the case has not completed."""
         if not self.is_latest_analysis_completed(case_id) and not force:
             raise AnalysisNotCompletedError(f"The latest analysis for {case_id} has not completed.")
+
+    def get_analyses_to_deliver_for_case(self, case_id: str) -> list[TrailblazerAnalysis]:
+        # TODO: See if it is worth filtering by completed analyses
+        endpoint = f"analyses?case_id={case_id}&delivered=false"
+        raw_response = self.query_trailblazer(
+            command=endpoint, request_body={}, method=APIMethods.GET
+        )
+        validated_response = AnalysesResponse.model_validate(raw_response)
+        return validated_response.analyses
+
+    def get_all_analyses_to_deliver(self):
+        endpoint = f"analyses?status[]={AnalysisStatus.COMPLETED}&delivered=false"
+
+        raw_response = self.query_trailblazer(
+            command=endpoint, request_body={}, method=APIMethods.GET
+        )
+        validated_response = AnalysesResponse.model_validate(raw_response)
+        pipeline_analyses = []
+        # TODO: See if we can remove filtering out RSYNC and DEMULTIPLEX analyses since they are not in StatusDB
+        for analysis in validated_response.analyses:
+            if analysis.workflow not in ["RSYNC", "DEMULTIPLEX"]:
+                pipeline_analyses.append(analysis)
+        return pipeline_analyses
