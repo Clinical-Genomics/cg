@@ -251,6 +251,7 @@ class TrailblazerAPI:
             raise AnalysisNotCompletedError(f"The latest analysis for {case_id} has not completed.")
 
     def get_analyses_to_deliver_for_case(self, case_id: str) -> list[TrailblazerAnalysis]:
+        # TODO: See if it is worth filtering by completed analyses
         endpoint = f"analyses?case_id={case_id}&delivered=false"
         raw_response = self.query_trailblazer(
             command=endpoint, request_body={}, method=APIMethods.GET
@@ -266,6 +267,7 @@ class TrailblazerAPI:
         )
         validated_response = AnalysesResponse.model_validate(raw_response)
         pipeline_analyses = []
+        # TODO: See if we can remove filtering out RSYNC and DEMULTIPLEX analyses since they are not in StatusDB
         for analysis in validated_response.analyses:
             if analysis.workflow not in ["RSYNC", "DEMULTIPLEX"]:
                 pipeline_analyses.append(analysis)
