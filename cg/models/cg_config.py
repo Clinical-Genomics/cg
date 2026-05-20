@@ -453,6 +453,11 @@ class PostProcessingServices(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
+class GENSConfig(BaseModel):
+    binary_path: str
+    config_path: str
+
+
 class CGConfig(BaseModel):
     data_input: DataInput | None = None
     database: str
@@ -490,7 +495,7 @@ class CGConfig(BaseModel):
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
     external: ExternalConfig = None
-    gens: CommonAppConfig = None
+    gens: GENSConfig | None = None
     gens_api_: GensAPI = None
     hermes: HermesConfig = None
     hermes_api_: HermesApi = None
@@ -596,7 +601,12 @@ class CGConfig(BaseModel):
         api = self.__dict__.get("gens_api_")
         if api is None:
             LOG.debug("Instantiating gens api")
-            api = GensAPI(config=self.dict())
+            api = GensAPI(
+                config=GENSConfig(
+                    binary_path=self.gens.binary_path,
+                    config_path=self.gens.config_path,
+                )
+            )
             self.gens_api_ = api
         return api
 
