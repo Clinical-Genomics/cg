@@ -1928,6 +1928,19 @@ class ReadHandler(BaseHandler):
                 Customer.internal_id.not_like("cust9%"),
             )
         )
+        if search:
+            query = (
+                query.join(CaseSample, CaseSample.sample_id == Sample.id)
+                .join(Case, Case.id == CaseSample.case_id)
+                .filter(
+                    CaseSample.should_deliver_sample.is_(True),
+                    sqlalchemy.or_(
+                        Case.internal_id.ilike(f"%{search}%"),
+                        Sample.internal_id.ilike(f"%{search}%"),
+                    ),
+                )
+            )
+        return query.order_by(Sample.last_sequenced_at.asc())
 
     def get_uploaded_analyses(self, trailblazer_ids: list[int]) -> list[Analysis]:
         return (
