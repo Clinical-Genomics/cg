@@ -24,6 +24,7 @@ def trailblazer_api() -> TypedMock[TrailblazerAPI]:
     """TrailblazerAPI for endpoints."""
     return create_typed_mock(TrailblazerAPI)
 
+
 @pytest.fixture
 def status_db() -> Store:
     """Store for endpoints."""
@@ -86,9 +87,8 @@ def test_mark_analyses_success(
 
 
 def test_mark_analyses_with_signature(
-    analysis_client: TypedMock[AnalysisClient],
+    trailblazer_api: TypedMock[TrailblazerAPI],
     mark_as_delivered_service: MarkAsDeliveredService,
-    status_db: FlaskStore,
     trailblazer_id: int,
 ):
     # GIVEN a signature and an analysis
@@ -98,7 +98,7 @@ def test_mark_analyses_with_signature(
     mark_as_delivered_service.mark_analyses(analyses=[analysis], signature="CG")
 
     # THEN trailblazer should have been called with the user signature
-    analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
+    trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
         trailblazer_ids=[trailblazer_id], auth_token=None, signature="CG"
     )
 
