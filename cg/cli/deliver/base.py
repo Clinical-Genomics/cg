@@ -220,6 +220,7 @@ def deliver_dev_case_command(context: CGConfig, case_id: str, signature: str):
         status_db=context.status_db, trailblazer_api=context.trailblazer_api
     )
     deliver_service.deliver_case(case_id=case_id, signature=signature)
+    context.status_db.commit_to_store()
 
 
 @deliver.command(name="dev-all-available", hidden=True)

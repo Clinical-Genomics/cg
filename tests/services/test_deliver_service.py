@@ -15,14 +15,14 @@ from tests.typed_mock import TypedMock, create_typed_mock
 
 def test_deliver_case(mocker: MockerFixture):
     # GIVEN a case with two analyses
-    status_db = create_autospec(Store)
+    status_db: TypedMock[Store] = create_typed_mock(Store)
     not_uploaded_analysis = create_autospec(Analysis, trailblazer_id=1, uploaded_at=None)
     uploaded_analysis = create_autospec(Analysis, trailblazer_id=2, uploaded_at=datetime.now())
     case: Case = create_autospec(
         Case,
         analyses=[not_uploaded_analysis, uploaded_analysis],
     )
-    status_db.get_case_by_internal_id_strict = Mock(return_value=case)
+    status_db.as_type.get_case_by_internal_id_strict = Mock(return_value=case)
 
     # GIVEN a Trailblazer API
     trailblazer_api = create_autospec(TrailblazerAPI)
@@ -31,7 +31,7 @@ def test_deliver_case(mocker: MockerFixture):
     )
 
     # GIVEN a deliver service
-    deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
+    deliver_service = DeliverService(status_db=status_db.as_type, trailblazer_api=trailblazer_api)
     mark_analyses_spy = mocker.spy(deliver_service.mark_as_delivered_service, "mark_analyses")
 
     # WHEN delivering a case
@@ -42,6 +42,9 @@ def test_deliver_case(mocker: MockerFixture):
 
     # THEN the analysis of the case should be marked as delivered
     mark_analyses_spy.assert_called_once_with(analyses=[uploaded_analysis], signature="CG")
+
+    # THEN the changes were persisted to the database
+    status_db.as_mock.commit_to_store.assert_called_once()
 
 
 def test_deliver_case_more_than_one_found():
@@ -159,10 +162,6 @@ def test_deliver_all_cases_trailblazer_error(mocker: MockerFixture):
     # THEN a TrailblazerAPIHTTPError is raised
     with pytest.raises(TrailblazerAPIHTTPError):
         deliver_service.deliver_all_cases()
-
-    # THEN no database changes should have been performed
-    status_db.as_mock.rollback.assert_called_once()
-    status_db.as_mock.commit_to_store.assert_not_called()
 
 
 def test_deliver_all_cases_no_analyses_to_deliver(mocker: MockerFixture):

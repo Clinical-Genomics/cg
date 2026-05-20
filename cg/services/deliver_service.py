@@ -26,18 +26,11 @@ class DeliverService:
             trailblazer_ids=[analysis.id for analysis in undelivered_analyses]
         )
         if analyses_to_deliver:
-            try:
-                self.mark_as_delivered_service.mark_analyses(analyses=analyses_to_deliver)
-            except TrailblazerAPIHTTPError as error:
-                self.status_db.rollback()
-                raise error
-            else:
-                self.status_db.commit_to_store()
+            self.mark_as_delivered_service.mark_analyses(analyses=analyses_to_deliver)
         else:
             LOG.info("No analyses ready to be delivered")
 
     def deliver_case(self, case_id: str, signature: str):
-
         analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses(case_id)
         match len(analyses_to_deliver):
             case 0:
@@ -46,7 +39,7 @@ class DeliverService:
                 self.mark_as_delivered_service.mark_analyses(
                     analyses=analyses_to_deliver, signature=signature
                 )
-                # TODO: Commit to store
+                self.status_db.commit_to_store()
             case _:
                 raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
 
