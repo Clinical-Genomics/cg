@@ -230,3 +230,4 @@ def deliver_dev_all_cases(context: CGConfig):
         status_db=context.status_db, trailblazer_api=context.trailblazer_api
     )
     deliver_service.deliver_all_cases()
+    context.status_db.commit_to_store()

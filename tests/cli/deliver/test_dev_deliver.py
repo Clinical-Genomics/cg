@@ -2,21 +2,24 @@ from unittest.mock import create_autospec
 
 from click.testing import CliRunner
 from mock import ANY
+from more_itertools import side_effect
 from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.cli.deliver.base import deliver_dev_all_cases, deliver_dev_case_command
-from cg.constants.process import EXIT_PARSE_ERROR, EXIT_SUCCESS
+from cg.constants.process import EXIT_FAIL, EXIT_PARSE_ERROR, EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.services.deliver_service import DeliverService
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_deliver_dev_case_command_success(mocker: MockerFixture):
-    # GIVEN a CG config and a case ID
+    # GIVEN a store, a CG config and a case ID
     cli_runner = CliRunner()
+    status_db: TypedMock[Store] = create_typed_mock(Store)
     cg_config = create_autospec(
-        CGConfig, status_db=create_autospec(Store), trailblazer_api=create_autospec(TrailblazerAPI)
+        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
     )
 
     deliver_case_command = mocker.spy(DeliverService, "deliver_case")
@@ -32,12 +35,16 @@ def test_deliver_dev_case_command_success(mocker: MockerFixture):
     # THEN the delivery service is called with the expected arguments
     deliver_case_command.assert_called_once_with(ANY, case_id="case_id", signature="CG")
 
+    # THEN the changes were persistent in the database
+    status_db.as_mock.commit_to_store.assert_called_once()
+
 
 def test_deliver_dev_case_command_no_case_id():
-    # GIVEN a CG config
+    # GIVEN a store and a CG config
     cli_runner = CliRunner()
+    status_db: TypedMock[Store] = create_typed_mock(Store)
     cg_config = create_autospec(
-        CGConfig, status_db=create_autospec(Store), trailblazer_api=create_autospec(TrailblazerAPI)
+        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
     )
 
     # WHEN calling the deliver case command without a case id
@@ -46,12 +53,16 @@ def test_deliver_dev_case_command_no_case_id():
     # THEN the command failed
     assert result.exit_code == EXIT_PARSE_ERROR
 
+    # THEN the changes were NOT persistent in the database
+    status_db.as_mock.commit_to_store.assert_not_called()
+
 
 def test_deliver_dev_case_command_no_signature():
-    # GIVEN a CG config
+    # GIVEN a store and a CG config
     cli_runner = CliRunner()
+    status_db: TypedMock[Store] = create_typed_mock(Store)
     cg_config = create_autospec(
-        CGConfig, status_db=create_autospec(Store), trailblazer_api=create_autospec(TrailblazerAPI)
+        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
     )
 
     # WHEN calling the deliver case command without a signature
@@ -60,12 +71,39 @@ def test_deliver_dev_case_command_no_signature():
     # THEN the command failed
     assert result.exit_code == EXIT_PARSE_ERROR
 
+    # THEN the changes were NOT persistent in the database
+    status_db.as_mock.commit_to_store.assert_not_called()
+
+
+def test_deliver_dev_case_raises_error(mocker: MockerFixture):
+    # GIVEN a store and a CG config
+    cli_runner = CliRunner()
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    cg_config = create_autospec(
+        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
+    )
+
+    # GIVEN that the deliver service raises an error
+    mocker.patch.object(DeliverService, "deliver_case", side_effect=Exception)
+
+    # WHEN calling the deliver case command
+    result = cli_runner.invoke(
+        deliver_dev_case_command, ["--signature", "CG", "case_id"], obj=cg_config
+    )
+
+    # THEN the command failed due to service error
+    assert result.exit_code == EXIT_FAIL
+
+    # THEN the changes were NOT persistent in the database
+    status_db.as_mock.commit_to_store.assert_not_called()
+
 
 def test_deliver_dev_all_available_command_success(mocker: MockerFixture):
-    # GIVEN a CG config and a case ID
+    # GIVEN a store, a CG config and a case ID
     cli_runner = CliRunner()
+    status_db: TypedMock[Store] = create_typed_mock(Store)
     cg_config = create_autospec(
-        CGConfig, status_db=create_autospec(Store), trailblazer_api=create_autospec(TrailblazerAPI)
+        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
     )
 
     deliver_all_command = mocker.spy(DeliverService, "deliver_all_cases")
@@ -78,3 +116,27 @@ def test_deliver_dev_all_available_command_success(mocker: MockerFixture):
 
     # THEN the delivery service is called with the expected arguments
     deliver_all_command.assert_called_once_with(ANY)
+
+    # THEN the changes were persistent in the database
+    status_db.as_mock.commit_to_store.assert_called_once()
+
+
+def test_deliver_dev_all_available_service_raises_error(mocker: MockerFixture):
+    # GIVEN a store and a CG config
+    cli_runner = CliRunner()
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    cg_config = create_autospec(
+        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
+    )
+
+    # GIVEN that the deliver service raises an error
+    mocker.patch.object(DeliverService, "deliver_all_cases", side_effect=Exception)
+
+    # WHEN calling the deliver case command without a case id
+    result = cli_runner.invoke(deliver_dev_all_cases, obj=cg_config)
+
+    # THEN the command failed due to service error
+    assert result.exit_code == EXIT_FAIL
+
+    # THEN the changes were NOT persistent in the database
+    status_db.as_mock.commit_to_store.assert_not_called()

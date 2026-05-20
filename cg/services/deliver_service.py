@@ -39,7 +39,6 @@ class DeliverService:
                 self.mark_as_delivered_service.mark_analyses(
                     analyses=analyses_to_deliver, signature=signature
                 )
-                self.status_db.commit_to_store()
             case _:
                 raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
 
