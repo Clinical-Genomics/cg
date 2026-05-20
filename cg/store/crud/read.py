@@ -1509,6 +1509,10 @@ class ReadHandler(BaseHandler):
         )
         return orders.first()
 
+    def get_order_by_ticket_id_strict(self, ticket_id: int) -> Order:
+        # TODO: catch the order not found error, and raise
+        orders: Query = self._get_query(table=Order).filter_by(ticket_id=ticket_id)
+
     def get_case_not_received_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
         filters: list[CaseSampleFilter] = [
             CaseSampleFilter.BY_ORDER,

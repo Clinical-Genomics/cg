@@ -8,7 +8,7 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.exc import MultipleAnalysesToDeliverError, TrailblazerAPIHTTPError
 from cg.services.deliver_service import DeliverService
-from cg.store.models import Analysis, Case
+from cg.store.models import Analysis, Case, Order
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -186,5 +186,37 @@ def test_deliver_all_cases_no_analyses_to_deliver(mocker: MockerFixture):
     mark_analyses_call.assert_not_called()
 
 
-def test_deliver_order_success():
+def test_deliver_order_success(mocker: MockerFixture):
+    # GIVEN a store with an order
     status_db: Store = create_autospec(Store)
+    case_1: Case = create_autospec(
+        Case,
+        internal_id="case_1",
+        analyses=[
+            create_autospec(Analysis, uploaded_at=datetime.now()),
+        ],
+    )
+    case_2: Case = create_autospec(
+        Case,
+        internal_id="case_2",
+        analyses=[
+            create_autospec(Analysis, uploaded_at=datetime.now()),
+        ],
+    )
+    order: Order = create_autospec(Order, cases=[case_1, case_2])
+    status_db.get_order_by_ticket_id_strict = Mock(return_value=order)
+    status_db.get_case_by_internal_id_strict = lambda internal_id: (
+        case_1 if internal_id == "case_1" else case_2
+    )
+
+    # GIVEN
+    # TODO: mock get_analyses_to_deliver
+    trailblazer_api: TypedMock[TrailblazerAPI] = create_typed_mock(TrailblazerAPI)
+
+    # GIVEN a Delivery Service
+    deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api.as_type)
+    mark_analyses_call = mocker.patch.object(
+        deliver_service.mark_as_delivered_service, "mark_analyses"
+    )
+
+    # WHEN delivering the order

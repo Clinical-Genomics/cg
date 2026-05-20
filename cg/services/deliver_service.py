@@ -4,7 +4,7 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.exc import MultipleAnalysesToDeliverError
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
-from cg.store.models import Analysis, Case
+from cg.store.models import Analysis, Case, Order
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -42,8 +42,12 @@ class DeliverService:
             case _:
                 raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
 
-    def deliver_order(self, ticket_id: int):
+    def deliver_order(self, ticket_id: int, signature: str):
         # fetch order from db
+        order: Order = self.status_db.get_order_by_ticket_id_strict(ticket_id)
+
+        for case in order.cases:
+            self.deliver_case(case_id=case.internal_id, signature=signature)
         # loop through order.cases, call self.deliver_case
         # OR trailblazer.get_analysis_to_deliver(ticket_id)
         pass
