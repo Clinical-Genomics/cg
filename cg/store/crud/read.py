@@ -1919,6 +1919,16 @@ class ReadHandler(BaseHandler):
             .order_by(Sample.last_sequenced_at.asc())
         )
 
+    def get_uploaded_analyses(self, trailblazer_ids: list[int]) -> list[Analysis]:
+        return (
+            self._get_query(table=Analysis)
+            .filter(
+                Analysis.trailblazer_id.in_(trailblazer_ids),
+                Analysis.uploaded_at.is_not(None),
+            )
+            .all()
+        )
+
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:
     total: int = query.count()
