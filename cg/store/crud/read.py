@@ -1940,6 +1940,7 @@ class ReadHandler(BaseHandler):
                     ),
                 )
             )
+        return query.order_by(Sample.last_sequenced_at.asc())
 
     def get_uploaded_analyses(self, trailblazer_ids: list[int]) -> list[Analysis]:
         return (
