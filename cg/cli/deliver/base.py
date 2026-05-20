@@ -231,3 +231,16 @@ def deliver_dev_all_cases(context: CGConfig):
     )
     deliver_service.deliver_all_cases()
     context.status_db.commit_to_store()
+
+
+@deliver.command(name="dev-order", hidden=True)
+@click.option(
+    "--ticket-id",
+    "-t",
+    type=int,
+    required=True,
+    help="Freshdesk ticket id corresponding to the order",
+)
+@click.pass_obj
+def deliver_dev_order(context: CGConfig):
+    pass

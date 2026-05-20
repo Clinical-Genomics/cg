@@ -2,11 +2,10 @@ from unittest.mock import create_autospec
 
 from click.testing import CliRunner
 from mock import ANY
-from more_itertools import side_effect
 from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
-from cg.cli.deliver.base import deliver_dev_all_cases, deliver_dev_case_command
+from cg.cli.deliver.base import deliver_dev_all_cases, deliver_dev_case_command, deliver_dev_order
 from cg.constants.process import EXIT_FAIL, EXIT_PARSE_ERROR, EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.services.deliver_service import DeliverService
@@ -140,3 +139,26 @@ def test_deliver_dev_all_available_service_raises_error(mocker: MockerFixture):
 
     # THEN the changes were NOT persistent in the database
     status_db.as_mock.commit_to_store.assert_not_called()
+
+
+def test_deliver_dev_order(mocker: MockerFixture):
+    # GIVEN a store and a CG Config
+    cli_runner = CliRunner()
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    cg_config = create_autospec(
+        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
+    )
+
+    deliver_order = mocker.spy(DeliverService, "deliver_order")
+
+    # WHEN delivering a single order
+    result = cli_runner.invoke(deliver_dev_order, ["--ticket-id", "123"], obj=cg_config)
+
+    # THEN the command should have exited successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN the delivery service is called with the expected arguments
+    deliver_order.assert_called_once_with(ANY, ticket_id=123)
+
+    # THEN the changes were persistent in the database
+    status_db.as_mock.commit_to_store.assert_called_once()
