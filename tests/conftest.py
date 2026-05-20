@@ -407,11 +407,12 @@ def base_config_dict() -> dict:
             },
         },
         "event_listener": {
-            "server": "https://nats.scilifelab.se",
             "ca_cert_path": Path("ca_cert_path"),
-            "client_cert": Path("client_cert_path"),
-            "client_key": Path("client_key_path"),
-            "token": "event_listener_token",
+            "client_cert_path": Path("client_cert_path"),
+            "client_key_path": Path("client_key_path"),
+            "nats_binary_path": Path("nats_binary_path"),
+            "server": "https://nats.scilifelab.se",
+            "token_path": Path("event_listener_token"),
         },
         "downsample": {
             "downsample_dir": "path/to/downsample_dir",
@@ -1995,11 +1996,12 @@ def context_config(
             },
         },
         "event_listener": {
-            "server": "https://nats.scilifelab.se",
             "ca_cert_path": Path("ca_cert_path"),
-            "client_cert": Path("client_cert_path"),
-            "client_key": Path("client_key_path"),
-            "token": "event_listener_token",
+            "client_cert_path": Path("client_cert_path"),
+            "client_key_path": Path("client_key_path"),
+            "nats_binary_path": Path("nats_binary_path"),
+            "server": "https://nats.scilifelab.se",
+            "token_path": Path("event_listener_token"),
         },
         "downsample": {
             "downsample_dir": str(downsample_dir),

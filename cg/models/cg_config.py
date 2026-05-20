@@ -149,11 +149,12 @@ class ChanjoConfig(BaseModel):
 
 
 class EventListenerConfig(BaseModel):
-    server: str
     ca_cert_path: Path
-    client_cert: Path
-    client_key: Path
-    token: str
+    client_cert_path: Path
+    client_key_path: Path
+    nats_binary_path: Path
+    server: str
+    token_path: Path
 
 
 class HermesConfig(CommonAppConfig):

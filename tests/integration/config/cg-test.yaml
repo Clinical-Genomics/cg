@@ -10,12 +10,12 @@ email_base_settings:
   smtp_server: "localhost"
 
 event_listener:
+  nats_binary_path: {test_root_dir}/nats_binary_path
   server: nats://localhost/nats
-  # TODO - path or no path for all
   ca_cert_path: {test_root_dir}/ca.crt
-  client_cert: {test_root_dir}/client.crt
-  client_key: {test_root_dir}/client.key
-  token: event_listener_token
+  client_cert_path: {test_root_dir}/client.crt
+  client_key_path: {test_root_dir}/client.key
+  token_path: {test_root_dir}/token
 
 downsample:
   downsample_dir: "{test_root_dir}/downsample_dir"

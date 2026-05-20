@@ -19,9 +19,9 @@ class EventListener:
     def __init__(self, config: EventListenerConfig):
         self.server: str = config.server
         self.ca_cert_path: Path = config.ca_cert_path
-        self.client_cert: Path = config.client_cert
-        self.client_key: Path = config.client_key
-        self.token: str = config.token
+        self.client_cert: Path = config.client_cert_path
+        self.client_key: Path = config.client_key_path
+        self.token: str = config.token_path.read_text().strip()
 
         self._handlers: dict[str, Callable] = {}
 
