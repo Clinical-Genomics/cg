@@ -124,6 +124,7 @@ def test_deliver_all_cases_success(mocker: MockerFixture):
     mark_analyses_call = mocker.patch.object(
         deliver_service.mark_as_delivered_service, "mark_analyses"
     )
+    mark_order_call = mocker.patch.object(deliver_service.mark_as_delivered_service, "mark_order")
 
     # WHEN delivering all cases
     deliver_service.deliver_all_cases()
@@ -138,7 +139,7 @@ def test_deliver_all_cases_success(mocker: MockerFixture):
     mark_analyses_call.assert_called_once_with(analyses=[analysis_to_deliver])
 
     # THEN the order should have been closed
-    assert not order.is_open
+    mark_order_call.assert_called_once_with(order)
 
 
 def test_deliver_all_cases_trailblazer_error(mocker: MockerFixture):

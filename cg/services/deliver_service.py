@@ -29,7 +29,7 @@ class DeliverService:
             self.mark_as_delivered_service.mark_analyses(analyses=analyses_to_deliver)
             orders: set[Order] = set(analysis.order for analysis in analyses_to_deliver)
             for order in orders:
-                order.is_open = False
+                self.mark_as_delivered_service.mark_order(order)
         else:
             LOG.info("No analyses ready to be delivered")
 

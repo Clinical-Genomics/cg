@@ -245,6 +245,9 @@ class TrailblazerAPI:
         validated_response = AnalysesResponse.model_validate(raw_response)
         return validated_response.analyses
 
+    def get_delivered_analyses(self, order_id: int) -> list[TrailblazerAnalysis]:
+        pass
+
     def verify_latest_analysis_is_completed(self, case_id: str, force: bool = False) -> None:
         """Raises an AnalysisNotCompletedError if the latest analysis for the case has not completed."""
         if not self.is_latest_analysis_completed(case_id) and not force:

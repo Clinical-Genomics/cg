@@ -6,10 +6,11 @@ import pytest
 from requests import Response
 
 from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.constants import Workflow
 from cg.exc import TrailblazerAPIHTTPError
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
-from cg.store.models import Analysis, Case, CaseSample, Sample
+from cg.store.models import Analysis, Case, CaseSample, Order, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -310,3 +311,39 @@ def test_mark_analyses_negative_control(
 
     # THEN the sample should have a delivered_at set
     assert negative_control_sample.delivered_at is not None
+
+
+def test_mark_order_success():
+    # GIVEN an open order
+    order: Order = create_autospec(Order, is_open=True)
+
+    # GIVEN a MarkAsDeliveredService
+    mark_as_delivered_service = MarkAsDeliveredService(
+        status_db=create_autospec(Store), trailblazer_api=create_autospec(TrailblazerAPI)
+    )
+
+    # WHEN mark_order is called
+    mark_as_delivered_service.mark_order(order)
+
+    # THEN the order was closed
+    assert not order.is_open
+
+
+def test_mark_order_one_analysis_not_delivered():
+    # GIVEN an open order
+    order: Order = create_autospec(Order, is_open=True)
+
+    # GIVEN that this order has an analysis which was not delivered
+    undelivered_analysis: Analysis = create_autospec(Analysis, trailblazer_id=1)
+    delivered_analysis: Analysis = create_autospec(Analysis, trailblazer_id=2)
+    delivered_trailblazer_analysis: TrailblazerAnalysis = create_autospec(TrailblazerAnalysis, id=2)
+
+    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
+    trailblazer_api.get_delivered_analyses = Mock(return_value=[delivered_trailblazer_analysis])
+
+    # GIVEN a MarkAsDeliveredService
+    mark_as_delivered_service = MarkAsDeliveredService(
+        status_db=create_autospec(Store), trailblazer_api=create_autospec(TrailblazerAPI)
+    )
+
+    # WHEN mark_order is called

@@ -5,7 +5,7 @@ from requests import Response
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.constants import Workflow
-from cg.store.models import Analysis, Case, CaseSample, Sample
+from cg.store.models import Analysis, Case, CaseSample, Order, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -27,6 +27,9 @@ class MarkAsDeliveredService:
         return self.trailblazer_api.mark_analyses_as_delivered(
             auth_token=auth_token, signature=signature, trailblazer_ids=trailblazer_ids
         )
+
+    def mark_order(self, order: Order):
+        order.is_open = False
 
     def _mark_samples_in_analysis(self, analysis: Analysis) -> None:
         case: Case = analysis.case
