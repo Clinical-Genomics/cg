@@ -52,8 +52,8 @@ class DeliverService:
         )
         self.mark_as_delivered_service.mark_analyses(analyses=uploaded_analyses_to_deliver)
 
-        for case in order.cases:
-            self.deliver_case(case_id=case.internal_id, signature=signature)
+        # for case in order.cases:
+        #    self.deliver_case(case_id=case.internal_id, signature=signature)
         # loop through order.cases, call self.deliver_case
         # OR trailblazer.get_analysis_to_deliver(ticket_id)
 

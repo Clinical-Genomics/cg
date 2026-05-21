@@ -246,5 +246,5 @@ def deliver_dev_order(config: CGConfig, ticket_id: int):
     deliver_service = DeliverService(
         status_db=config.status_db, trailblazer_api=config.trailblazer_api
     )
-    deliver_service.deliver_order(ticket_id)
+    deliver_service.deliver_order(signature="TODO", ticket_id=ticket_id)
     config.status_db.commit_to_store()
