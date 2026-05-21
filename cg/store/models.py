@@ -15,7 +15,8 @@ from sqlalchemy import (
     Table,
 )
 from sqlalchemy import Text as SLQText
-from sqlalchemy import UniqueConstraint, orm, types
+from sqlalchemy import UniqueConstraint, orm, select, types
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
@@ -895,6 +896,26 @@ class Sample(Base, PriorityMixin):
             return case_samples_that_deliver[0].case
         else:
             return None
+
+    @hybrid_property
+    def delivering_case_internal_id(self) -> str | None:
+        if case := self.case_that_delivers:
+            return case.internal_id
+        return None
+
+    @classmethod  # type: ignore[override]
+    @delivering_case_internal_id.expression
+    def delivering_case_internal_id(cls):
+        return (
+            select(Case.internal_id)
+            .join(CaseSample, CaseSample.case_id == Case.id)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .limit(1)
+            .scalar_subquery()
+        )
 
     @property
     def workflow_of_case_that_delivers(self) -> Workflow | None:
