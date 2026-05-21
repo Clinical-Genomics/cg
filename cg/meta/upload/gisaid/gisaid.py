@@ -1,5 +1,6 @@
 """Interactions with the gisaid cli upload_results_to_gisaid"""
 
+import csv
 import logging
 import re
 import tempfile
@@ -64,6 +65,23 @@ class GisaidAPI:
         completion_df.drop_duplicates(inplace=True)
         completion_df = completion_df[completion_df["provnummer"].str.contains(SARS_COV_REGEX)]
         return completion_df
+
+    def get_completion_dict(self, completion_file: File):
+        with open(Path(completion_file.full_path), "r") as file:
+            csv_reader = csv.DictReader(file)
+            deduplicated_csv = {tuple(row.items()): row for row in csv_reader}.values()
+
+            completion_dict = {}
+
+            for i, row in enumerate(deduplicated_csv):
+                if not re.match(SARS_COV_REGEX, row["provnummer"]):
+                    continue
+                for key, value in row.items():
+                    if not completion_dict.get(key):
+                        completion_dict[key] = {}
+                    completion_dict[key][i] = value
+
+        return completion_dict
 
     def get_gisaid_sample_list(self, case_id: str) -> list[Sample]:
         """Get list of Sample objects eligeble for upload.
