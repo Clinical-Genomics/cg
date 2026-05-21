@@ -188,35 +188,51 @@ def test_deliver_all_cases_no_analyses_to_deliver(mocker: MockerFixture):
 
 def test_deliver_order_success(mocker: MockerFixture):
     # GIVEN a store with an order
-    status_db: Store = create_autospec(Store)
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    analysis_1 = create_autospec(Analysis, uploaded_at=datetime.now())
+    analysis_2 = create_autospec(Analysis, uploaded_at=datetime.now())
+
     case_1: Case = create_autospec(
         Case,
         internal_id="case_1",
-        analyses=[
-            create_autospec(Analysis, uploaded_at=datetime.now()),
-        ],
+        analyses=[analysis_1],
     )
     case_2: Case = create_autospec(
         Case,
         internal_id="case_2",
-        analyses=[
-            create_autospec(Analysis, uploaded_at=datetime.now()),
-        ],
+        analyses=[analysis_2],
     )
-    order: Order = create_autospec(Order, cases=[case_1, case_2])
-    status_db.get_order_by_ticket_id_strict = Mock(return_value=order)
-    status_db.get_case_by_internal_id_strict = lambda internal_id: (
-        case_1 if internal_id == "case_1" else case_2
-    )
-
-    # GIVEN
-    # TODO: mock get_analyses_to_deliver
+    order: Order = create_autospec(Order, cases=[case_1, case_2], id=1)
+    status_db.as_type.get_order_by_ticket_id_strict = Mock(return_value=order)
+    status_db.as_type.get_uploaded_analyses = Mock(return_value=[analysis_1, analysis_2])
+    # GIVEN a Trailblazer API with two analyses to deliver for the order
     trailblazer_api: TypedMock[TrailblazerAPI] = create_typed_mock(TrailblazerAPI)
+    trailblazer_api.as_mock.get_analyses_to_deliver = Mock(
+        return_value=[
+            create_autospec(TrailblazerAnalysis, id=1),
+            create_autospec(TrailblazerAnalysis, id=2),
+        ]
+    )
 
     # GIVEN a Delivery Service
-    deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api.as_type)
+    deliver_service = DeliverService(
+        status_db=status_db.as_type, trailblazer_api=trailblazer_api.as_type
+    )
     mark_analyses_call = mocker.patch.object(
         deliver_service.mark_as_delivered_service, "mark_analyses"
     )
 
     # WHEN delivering the order
+    deliver_service.deliver_order(ticket_id=123, signature="CG")
+
+    # THEN the uploded analyses should have been marked as delivered
+    mark_analyses_call.assert_called_once_with(analyses=[analysis_1, analysis_2])
+
+    # THEN the order should have been fetched from the database with the ticket id
+    status_db.as_mock.get_order_by_ticket_id_strict.assert_called_once_with(123)
+
+    # THEN uploaded analyses should have been fetched from the database with the trailblazer ids of the analyses to deliver
+    status_db.as_mock.get_uploaded_analyses.assert_called_once_with([1, 2])
+
+    # THEN the analyses to deliver should have been fetched from Trailblazer with the order id
+    trailblazer_api.as_mock.get_analyses_to_deliver.assert_called_once_with(1)
