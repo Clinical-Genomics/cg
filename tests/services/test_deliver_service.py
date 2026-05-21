@@ -2,7 +2,6 @@ from datetime import datetime
 from unittest.mock import Mock, create_autospec
 
 import pytest
-from oauthlib.oauth1.rfc5849 import signature
 from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
@@ -107,7 +106,11 @@ def test_deliver_case_nothing_to_deliver(mocker: MockerFixture):
 def test_deliver_all_cases_success(mocker: MockerFixture):
     # GIVEN a TrailblazerAPI and a store
     status_db: Store = create_autospec(Store)
-    analysis_to_deliver = create_autospec(Analysis, trailblazer_id=1, uploaded_at=datetime.now())
+    order: Order = create_autospec(Order, is_open=True)
+    analysis_to_deliver = create_autospec(
+        Analysis, order=order, trailblazer_id=1, uploaded_at=datetime.now()
+    )
+    order.analyses = [analysis_to_deliver]
     status_db.get_uploaded_analyses = Mock(return_value=[analysis_to_deliver])
     trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
     trailblazer_analyses = [
@@ -133,6 +136,9 @@ def test_deliver_all_cases_success(mocker: MockerFixture):
 
     # THEN the analyses should have been marked as delivered
     mark_analyses_call.assert_called_once_with(analyses=[analysis_to_deliver])
+
+    # THEN the order should have been closed
+    assert not order.is_open
 
 
 def test_deliver_all_cases_trailblazer_error(mocker: MockerFixture):
