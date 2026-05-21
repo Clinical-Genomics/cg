@@ -43,7 +43,6 @@ class DeliverService:
                 raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
 
     def deliver_order(self, ticket_id: int, signature: str):
-        # fetch order from db
         order: Order = self.status_db.get_order_by_ticket_id_strict(ticket_id)
 
         undelivered_trailblazer_analyses = self.trailblazer_api.get_analyses_to_deliver(order.id)
@@ -51,11 +50,6 @@ class DeliverService:
             [analysis.id for analysis in undelivered_trailblazer_analyses]
         )
         self.mark_as_delivered_service.mark_analyses(analyses=uploaded_analyses_to_deliver)
-
-        # for case in order.cases:
-        #    self.deliver_case(case_id=case.internal_id, signature=signature)
-        # loop through order.cases, call self.deliver_case
-        # OR trailblazer.get_analysis_to_deliver(ticket_id)
 
     def _get_undelivered_analyses(self, case_id: str) -> list[Analysis]:
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
