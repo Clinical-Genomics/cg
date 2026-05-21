@@ -898,13 +898,13 @@ class Sample(Base, PriorityMixin):
             return None
 
     @hybrid_property
-    def delivering_case_internal_id(self) -> str | None:
+    def delivering_case_internal_id(self) -> str | None:  # pyright: ignore [reportRedeclaration]
         if case := self.case_that_delivers:
             return case.internal_id
         return None
 
-    @classmethod  # type: ignore[override]
-    @delivering_case_internal_id.expression
+    @delivering_case_internal_id.expression  # type: ignore[override]
+    @classmethod
     def delivering_case_internal_id(cls):
         return (
             select(Case.internal_id)
