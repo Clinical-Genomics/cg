@@ -49,7 +49,10 @@ class DeliverService:
         uploaded_analyses_to_deliver = self.status_db.get_uploaded_analyses(
             [analysis.id for analysis in undelivered_trailblazer_analyses]
         )
-        self.mark_as_delivered_service.mark_analyses(analyses=uploaded_analyses_to_deliver)
+        if uploaded_analyses_to_deliver:
+            self.mark_as_delivered_service.mark_analyses(analyses=uploaded_analyses_to_deliver)
+        else:
+            LOG.warning("No analysis in the order ready to deliver")
 
     def _get_undelivered_analyses(self, case_id: str) -> list[Analysis]:
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)

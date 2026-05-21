@@ -6,7 +6,7 @@ from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.exc import MultipleAnalysesToDeliverError, TrailblazerAPIHTTPError
+from cg.exc import MultipleAnalysesToDeliverError, OrderNotFoundError, TrailblazerAPIHTTPError
 from cg.services.deliver_service import DeliverService
 from cg.store.models import Analysis, Case, Order
 from cg.store.store import Store
@@ -236,3 +236,40 @@ def test_deliver_order_success(mocker: MockerFixture):
 
     # THEN the analyses to deliver should have been fetched from Trailblazer with the order id
     trailblazer_api.as_mock.get_analyses_to_deliver.assert_called_once_with(1)
+
+
+def test_deliver_order_without_analyses(mocker: MockerFixture):
+    # GIVEN a store with an order
+    status_db: Store = create_autospec(Store)
+    status_db.get_uploaded_analyses = Mock(return_value=[])
+
+    # GIVEN a trailblazer api
+    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
+
+    # GIVEN a Delivery Service
+    deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
+    mark_analyses_call = mocker.patch.object(
+        deliver_service.mark_as_delivered_service, "mark_analyses"
+    )
+
+    # WHEN delivering an order
+    deliver_service.deliver_order(ticket_id=666666, signature="CG")
+
+    # THEN we should not have marked any analysis as delivered
+    mark_analyses_call.assert_not_called()
+
+
+def test_deliver_order_invalid_ticket_id():
+    # GIVEN an empty store
+    status_db: Store = create_autospec(Store)
+    status_db.get_order_by_ticket_id_strict = Mock(side_effect=OrderNotFoundError)
+
+    # GIVEN a Delivery Service
+    deliver_service = DeliverService(
+        status_db=status_db, trailblazer_api=create_autospec(TrailblazerAPI)
+    )
+
+    # WHEN delivering an order with a nonexisting ticket id
+    # THEN an OrderNotFoundError was raised
+    with pytest.raises(OrderNotFoundError):
+        deliver_service.deliver_order(ticket_id=666666, signature="CG")
