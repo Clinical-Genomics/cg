@@ -233,7 +233,15 @@ def deliver_dev_all_cases(config: CGConfig):
     config.status_db.commit_to_store()
 
 
+# TODO: Loose end: Make signature option a variable
 @deliver.command(name="dev-order", hidden=True)
+@click.option(
+    "--signature",
+    "-s",
+    type=str,
+    required=True,
+    help="Signature (initials) of the user performing the delivery.",
+)
 @click.option(
     "--ticket-id",
     "-t",
@@ -242,9 +250,9 @@ def deliver_dev_all_cases(config: CGConfig):
     help="Freshdesk ticket id corresponding to the order",
 )
 @click.pass_obj
-def deliver_dev_order(config: CGConfig, ticket_id: int):
+def deliver_dev_order(config: CGConfig, signature: str, ticket_id: int):
     deliver_service = DeliverService(
         status_db=config.status_db, trailblazer_api=config.trailblazer_api
     )
-    deliver_service.deliver_order(signature="TODO", ticket_id=ticket_id)
+    deliver_service.deliver_order(signature=signature, ticket_id=ticket_id)
     config.status_db.commit_to_store()

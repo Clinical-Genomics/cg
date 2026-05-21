@@ -152,18 +152,21 @@ def test_deliver_dev_order(mocker: MockerFixture):
     deliver_order = mocker.spy(DeliverService, "deliver_order")
 
     # WHEN delivering a single order
-    result = cli_runner.invoke(deliver_dev_order, ["--ticket-id", "123"], obj=cg_config)
+    result = cli_runner.invoke(
+        deliver_dev_order, ["--ticket-id", "123", "--signature", "CG"], obj=cg_config
+    )
 
     # THEN the command should have exited successfully
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN the delivery service is called with the expected arguments
-    deliver_order.assert_called_once_with(ANY, signature="TODO", ticket_id=123)
+    deliver_order.assert_called_once_with(ANY, signature="CG", ticket_id=123)
 
     # THEN the changes were persistent in the database
     status_db.as_mock.commit_to_store.assert_called_once()
 
 
+# TODO: Loose end: parametrise this for combinations of different parameters
 def test_deliver_dev_order_no_ticket_id():
     # GIVEN a store and a CG config
     cli_runner = CliRunner()
@@ -194,7 +197,9 @@ def test_deliver_dev_order_service_raises_error(mocker: MockerFixture):
     mocker.patch.object(DeliverService, "deliver_order", side_effect=Exception)
 
     # WHEN calling the deliver order command
-    result = cli_runner.invoke(deliver_dev_order, ["--ticket-id", "743298"], obj=cg_config)
+    result = cli_runner.invoke(
+        deliver_dev_order, ["--ticket-id", "743298", "--signature", "CG"], obj=cg_config
+    )
 
     # THEN the command failed due to service error
     assert result.exit_code == EXIT_FAIL

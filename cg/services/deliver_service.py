@@ -50,7 +50,9 @@ class DeliverService:
             [analysis.id for analysis in undelivered_trailblazer_analyses]
         )
         if uploaded_analyses_to_deliver:
-            self.mark_as_delivered_service.mark_analyses(analyses=uploaded_analyses_to_deliver)
+            self.mark_as_delivered_service.mark_analyses(
+                analyses=uploaded_analyses_to_deliver, signature=signature
+            )
         else:
             LOG.warning("No analysis in the order ready to deliver")
 

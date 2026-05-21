@@ -2,6 +2,7 @@ from datetime import datetime
 from unittest.mock import Mock, create_autospec
 
 import pytest
+from oauthlib.oauth1.rfc5849 import signature
 from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
@@ -226,7 +227,7 @@ def test_deliver_order_success(mocker: MockerFixture):
     deliver_service.deliver_order(ticket_id=123, signature="CG")
 
     # THEN the uploded analyses should have been marked as delivered
-    mark_analyses_call.assert_called_once_with(analyses=[analysis_1, analysis_2])
+    mark_analyses_call.assert_called_once_with(analyses=[analysis_1, analysis_2], signature="CG")
 
     # THEN the order should have been fetched from the database with the ticket id
     status_db.as_mock.get_order_by_ticket_id_strict.assert_called_once_with(123)
