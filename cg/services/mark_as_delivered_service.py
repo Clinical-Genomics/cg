@@ -44,7 +44,12 @@ class MarkAsDeliveredService:
 
     @staticmethod
     def _passes_on_reads(case_sample: CaseSample) -> bool:
-        # TODO: Explain in docstring
+        """
+        Return True if the sample associated with the case has enough reads to be delivered.
+        This check is only relevant for microSALT and Taxprofiler samples that are not negative
+        controls, as those pipelines are the only ones that allow partial delivery of samples.
+        For the rest of the pipelines, the samples will always have enough reads.
+        """
         case: Case = case_sample.case
         sample: Sample = case_sample.sample
         if (
