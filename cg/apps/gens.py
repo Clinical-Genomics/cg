@@ -32,6 +32,7 @@ class GensAPI:
         self,
         baf_path: str,
         case_id: str,
+        case_name: str,
         coverage_path: str,
         genome_build: str,
         sample_id: str,
@@ -44,6 +45,7 @@ class GensAPI:
             "--baf": baf_path,
             "--coverage": coverage_path,
             "--case-id": case_id,
+            "--display-case-id": case_name,
         }
         command: list[str] = args + get_list_from_dictionary(kw_args)
 
