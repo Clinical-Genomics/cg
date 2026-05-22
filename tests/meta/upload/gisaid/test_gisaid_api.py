@@ -1,8 +1,10 @@
+from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
 import pytest
 from housekeeper.store.models import File
 from pandas import DataFrame
+from sqlalchemy.orm import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.gisaid.gisaid import GisaidAPI
@@ -42,8 +44,17 @@ def cg_config(housekeeper_api: HousekeeperAPI, status_db: Store) -> CGConfig:
 
 
 @pytest.fixture
-def completion_file():
-    return create_autospec(File, full_path="tests/meta/upload/gisaid/fixtures/completion_file.csv")
+def completion_file(completion_file_original_contents, fs) -> File:
+    path = "/fake/completion_file.csv"
+    fs.create_file(path, contents=completion_file_original_contents)
+    return create_autospec(File, full_path=path)
+
+
+@pytest.fixture
+def gisaid_log(fs, gisaid_log_contents: str) -> File:
+    path = "/fake/gisad-log.log"
+    fs.create_file(path, contents=gisaid_log_contents)
+    return create_autospec(File, full_path=path)
 
 
 @pytest.fixture
@@ -71,6 +82,17 @@ def expected_completion_dataframe() -> dict[str, dict[int, str]]:
             4: "Allmän övervakning",
         },
     }
+
+
+@pytest.fixture
+def expected_updated_completion_file():
+    return """provnummer,urvalskriterium,GISAID_accession
+85CS900121,Allmän övervakning, EPI_ISL_20431427
+85CS900136,Allmän övervakning, EPI_ISL_20431428
+85CS900117,Allmän övervakning, EPI_ISL_20431429
+85CS900135,Allmän övervakning, EPI_ISL_20431430
+85CS900145,Allmän övervakning, EPI_ISL_20431431
+"""
 
 
 def test_get_completion_dataframe(
@@ -108,3 +130,23 @@ def test_get_gisaid_sample_list(
     assert ["85CS900121", "85CS900136", "85CS900117", "85CS900135", "85CS900145"] == [
         sample.name for sample in sample_list
     ]
+
+
+def test_update_completion_file(
+    cg_config: CGConfig,
+    completion_file: File,
+    expected_updated_completion_file: str,
+    gisaid_log: File,
+    housekeeper_api: HousekeeperAPI,
+):
+    housekeeper_api.get_file_from_latest_version = Mock(return_value=completion_file)
+
+    get_files_query = create_autospec(Query)
+    get_files_query.first = Mock(return_value=gisaid_log)
+    housekeeper_api.get_files = Mock(return_value=get_files_query)
+
+    gisaid_api = GisaidAPI(config=cg_config)
+
+    gisaid_api.update_completion_file("case_id")
+
+    assert Path(completion_file.full_path).read_text() == expected_updated_completion_file
