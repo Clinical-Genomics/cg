@@ -47,7 +47,10 @@ def test_upload_gens_genome_build(
     sample1: Sample = create_autospec(Sample, internal_id="sample_id1")
     sample2: Sample = create_autospec(Sample, internal_id="sample_id2")
 
-    case: Case = create_autospec(Case, data_analysis=workflow, samples=[sample1, sample2])
+    case: Case = create_autospec(
+        Case, data_analysis=workflow, samples=[sample1, sample2], name="case_name"
+    )
+    case.name = "case_name"
     upload_gens_context.status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
     # GIVEN a HousekeeperAPI
@@ -65,6 +68,7 @@ def test_upload_gens_genome_build(
             call(
                 baf_path=ANY,
                 case_id="some_case",
+                case_name="case_name",
                 coverage_path=ANY,
                 genome_build=genome_build,
                 sample_id="sample_id1",
@@ -72,6 +76,7 @@ def test_upload_gens_genome_build(
             call(
                 baf_path=ANY,
                 case_id="some_case",
+                case_name="case_name",
                 coverage_path=ANY,
                 genome_build=genome_build,
                 sample_id="sample_id2",
