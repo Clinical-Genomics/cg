@@ -363,7 +363,7 @@ def test_application_expected_hifi_yield_success():
     # WHEN calculating the expected hifi yield
     expected_hifi_yield: float | None = application.expected_hifi_yield
 
-    # THEN the expected hifi yield should be the product of the two
+    # THEN the expected hifi yield should be the product of percent and target
     assert expected_hifi_yield == 45
 
 
