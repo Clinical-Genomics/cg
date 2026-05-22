@@ -355,15 +355,23 @@ def test_close_order_one_analysis_not_delivered():
     # THEN the order was not closed
     assert order.is_open
 
+
 def test_close_order_partial_deliveries():
     # GIVEN an open order with a case that includes some samples that have no delivered_at
     sample: Sample = create_autospec(Sample, delivered_at=None)
-    case: Case = create_autospec(Case, samples=[Sample], internal_id="case_id")
+    case: Case = create_autospec(Case, samples=[sample], internal_id="case_id")
     order: Order = create_autospec(Order, cases=[case])
 
     # GIVEN that the case has a delivered analysis in Trailblazer (partial/express delivery)
-    analysis: TrailblazerAnalysis =
+    analysis: TrailblazerAnalysis = create_autospec(TrailblazerAnalysis, case_id="case_id")
+    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
+    trailblazer_api.get_delivered_analyses = Mock(return_value=[analysis])
 
     # WHEN calling close_order
+    mark_as_delivered_service = MarkAsDeliveredService(
+        status_db=create_autospec(Store), trailblazer_api=trailblazer_api
+    )
+    mark_as_delivered_service.close_order(order)
 
     # THEN the order should not be closed
+    assert order.is_open

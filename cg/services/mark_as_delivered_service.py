@@ -37,8 +37,10 @@ class MarkAsDeliveredService:
         )
         delivered_case_ids: set[str] = set(analysis.case_id for analysis in delivered_analyses)
         case_ids_on_order: set[str] = set(case.internal_id for case in order.cases)
-        any(not sample.delivered_at for sample in case.samples for case in order.cases)
-        if delivered_case_ids == case_ids_on_order:
+        are_all_samples_delivered = any(
+            sample.delivered_at for case in order.cases for sample in case.samples
+        )
+        if delivered_case_ids == case_ids_on_order and are_all_samples_delivered:
             order.is_open = False
             # TODO: Communicate with Freshdesk
 
