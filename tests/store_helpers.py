@@ -458,7 +458,6 @@ class StoreHelpers:
             internal_id=internal_id,
             subject_id=subject_id,
         )
-        # sample.delivering_case_internal_id = delivering_case_internal_id
         sample.application_version_id = application_version_id
         sample.customer = customer
         sample.ordered_at = datetime.now()
