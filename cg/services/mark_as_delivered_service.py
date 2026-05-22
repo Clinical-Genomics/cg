@@ -30,13 +30,17 @@ class MarkAsDeliveredService:
         )
 
     def close_order(self, order: Order):
-        delivered_analyses: list[TrailblazerAnalysis] = self.trailblazer_api.get_delivered_analyses(
-            order_id=order.id
+        delivered_analyses: list[TrailblazerAnalysis] = (
+            self.trailblazer_api.get_delivered_analyses(  # TODO: The partial deliveries and express deliveries screw this up since the analyses are delivered but the samples are not delivered
+                order_id=order.id
+            )
         )
         delivered_case_ids: set[str] = set(analysis.case_id for analysis in delivered_analyses)
-        all_case_ids: set[str] = set(case.internal_id for case in order.cases)
-        if delivered_case_ids == all_case_ids:
+        case_ids_on_order: set[str] = set(case.internal_id for case in order.cases)
+        any(not sample.delivered_at for sample in case.samples for case in order.cases)
+        if delivered_case_ids == case_ids_on_order:
             order.is_open = False
+            # TODO: Communicate with Freshdesk
 
     def _mark_samples_in_analysis(self, analysis: Analysis) -> None:
         case: Case = analysis.case
