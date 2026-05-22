@@ -1,11 +1,49 @@
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 from housekeeper.store.models import File
 from pandas import DataFrame
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.gisaid.gisaid import GisaidAPI
 from cg.models.cg_config import CGConfig, EmailBaseSettings, GisaidConfig, MutantConfig
+from cg.store.models import Sample
+from cg.store.store import Store
+
+
+@pytest.fixture
+def housekeeper_api() -> HousekeeperAPI:
+    return create_autospec(HousekeeperAPI)
+
+
+@pytest.fixture
+def status_db() -> Store:
+    return create_autospec(Store)
+
+
+@pytest.fixture
+def cg_config(housekeeper_api: HousekeeperAPI, status_db: Store) -> CGConfig:
+    return create_autospec(
+        CGConfig,
+        email_base_settings=EmailBaseSettings(
+            sender_email="sender@scilifelab.se", smtp_server="smtp_server"
+        ),
+        housekeeper_api=housekeeper_api,
+        gisaid=GisaidConfig(
+            submitter="submitter",
+            upload_password="upload_password",
+            upload_cid="upload_cid",
+            log_dir="log_dir",
+            logwatch_email="logwatch@scilifelab.se",
+        ),
+        mutant=MutantConfig(binary_path="binary_path", conda_env="conda_env", root="root"),
+        status_db=status_db,
+    )
+
+
+@pytest.fixture
+def completion_file():
+    return create_autospec(File, full_path="tests/meta/upload/gisaid/fixtures/completion_file.csv")
 
 
 @pytest.fixture
@@ -35,49 +73,38 @@ def expected_completion_dataframe() -> dict[str, dict[int, str]]:
     }
 
 
-def test_get_completion_dataframe(expected_completion_dataframe: dict[str, dict[int, str]]):
-    cg_config: CGConfig = create_autospec(
-        CGConfig,
-        email_base_settings=EmailBaseSettings(
-            sender_email="sender@scilifelab.se", smtp_server="smtp_server"
-        ),
-        gisaid=GisaidConfig(
-            submitter="submitter",
-            upload_password="upload_password",
-            upload_cid="upload_cid",
-            log_dir="log_dir",
-            logwatch_email="logwatch@scilifelab.se",
-        ),
-        mutant=MutantConfig(binary_path="binary_path", conda_env="conda_env", root="root"),
-    )
+def test_get_completion_dataframe(
+    cg_config: CGConfig,
+    completion_file: File,
+    expected_completion_dataframe: dict[str, dict[int, str]],
+):
     gisaid_api = GisaidAPI(config=cg_config)
-    file = create_autospec(File)
-    file.full_path = "tests/meta/upload/gisaid/fixtures/completion_file.csv"
 
-    data_frame: DataFrame = gisaid_api.get_completion_dataframe(completion_file=file)
+    data_frame: DataFrame = gisaid_api.get_completion_dataframe(completion_file=completion_file)
 
     assert data_frame.to_dict() == expected_completion_dataframe
 
 
-def test_get_completion_dict(expected_completion_dataframe: dict[str, dict[int, str]]):
-    cg_config: CGConfig = create_autospec(
-        CGConfig,
-        email_base_settings=EmailBaseSettings(
-            sender_email="sender@scilifelab.se", smtp_server="smtp_server"
-        ),
-        gisaid=GisaidConfig(
-            submitter="submitter",
-            upload_password="upload_password",
-            upload_cid="upload_cid",
-            log_dir="log_dir",
-            logwatch_email="logwatch@scilifelab.se",
-        ),
-        mutant=MutantConfig(binary_path="binary_path", conda_env="conda_env", root="root"),
-    )
+def test_get_completion_dict(
+    cg_config: CGConfig,
+    completion_file: File,
+    expected_completion_dataframe: dict[str, dict[int, str]],
+):
     gisaid_api = GisaidAPI(config=cg_config)
-    file = create_autospec(File)
-    file.full_path = "tests/meta/upload/gisaid/fixtures/completion_file.csv"
 
-    dict = gisaid_api.get_completion_dict(completion_file=file)
+    dict = gisaid_api.get_completion_dict(completion_file=completion_file)
 
     assert dict == expected_completion_dataframe
+
+
+def test_get_gisaid_sample_list(
+    cg_config: CGConfig, completion_file: File, housekeeper_api: HousekeeperAPI, status_db: Store
+):
+    housekeeper_api.get_file_from_latest_version = Mock(return_value=completion_file)
+    status_db.get_sample_by_name = lambda name: Sample(name=name)
+    gisaid_api = GisaidAPI(config=cg_config)
+
+    sample_list: list[Sample] = gisaid_api.get_gisaid_sample_list("case_id")
+    assert ["85CS900121", "85CS900136", "85CS900117", "85CS900135", "85CS900145"] == [
+        sample.name for sample in sample_list
+    ]

@@ -89,8 +89,8 @@ class GisaidAPI:
         The sample will be included in completion file."""
 
         completion_file = self.get_completion_file_from_hk(case_id=case_id)
-        completion_df = self.get_completion_dataframe(completion_file=completion_file)
-        sample_names = list(completion_df["provnummer"].unique())
+        completion_dict = self.get_completion_dict(completion_file=completion_file)
+        sample_names = completion_dict["provnummer"].values()
         return [self.status_db.get_sample_by_name(name=sample_name) for sample_name in sample_names]
 
     def get_gisaid_fasta_path(self, case_id: str) -> Path:
