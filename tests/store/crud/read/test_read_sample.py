@@ -976,17 +976,18 @@ def test_get_paginated_unhandled_samples_search_no_hits(
 def test_get_paginated_unhandled_samples_search_no_should_deliver_sample(
     store: Store, helpers: StoreHelpers
 ):
-    # GIVEN a store with a sample and a case that both have an id matching the search string
+    # GIVEN a store with a sample whose internal_id does NOT match the search string
     sample = helpers.add_sample(
         store=store,
         lims_status=LimsStatus.TOP_UP,
-        internal_id="matching_search_string",
+        internal_id="sample_not_hit",
         is_cancelled=False,
         from_sample=None,
         last_sequenced_at=datetime.now(),
         delivered_at=None,
         customer_id="cust1337",
     )
+    # GIVEN a case whose internal_id matches the search string
     case: Case = helpers.add_case(
         store=store,
         name="case_1",
@@ -1001,7 +1002,7 @@ def test_get_paginated_unhandled_samples_search_no_should_deliver_sample(
         should_deliver_sample=False,
     )
 
-    # GIVEN a searchable string
+    # GIVEN a searchable string that only matches the case, not the sample
     search_string = "matching_search_string"
 
     # WHEN getting the unhandled samples in top-up using page 1 and page_size = 2
@@ -1012,6 +1013,49 @@ def test_get_paginated_unhandled_samples_search_no_should_deliver_sample(
         search=search_string,
     )
 
-    # THEN no sample should be returned
+    # THEN no sample should be returned since the case has should_deliver_sample=False
     assert unhandled_samples == []
     assert total == 0
+
+
+def test_get_paginated_unhandled_samples_search_sample_no_delivering_case(
+    store: Store, helpers: StoreHelpers
+):
+    # GIVEN a sample whose internal_id matches the search string
+    sample = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="matching_search_string",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    # GIVEN a case linked to the sample with should_deliver_sample=False
+    case: Case = helpers.add_case(
+        store=store,
+        name="case_1",
+        internal_id="some_other_case_id",
+    )
+    helpers.relate_samples(
+        base_store=store,
+        case=case,
+        samples=[sample],
+        should_deliver_sample=False,
+    )
+
+    # GIVEN a searchable string that matches the sample's own internal_id
+    search_string = "matching_search_string"
+
+    # WHEN getting the unhandled samples in top-up using page 1 and page_size = 2
+    unhandled_samples, total = store.get_paginated_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=2,
+        search=search_string,
+    )
+
+    # THEN the sample should be returned since its own internal_id matches
+    assert unhandled_samples == [sample]
+    assert total == 1

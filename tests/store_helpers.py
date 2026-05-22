@@ -418,6 +418,7 @@ class StoreHelpers:
         application_type: str = "tgs",
         control: str = "",
         customer_id: str = None,
+        # delivering_case_internal_id: str | None = None,
         sex: str = Sex.FEMALE,
         last_sequenced_at: datetime = None,
         is_external: bool = False,
@@ -457,7 +458,7 @@ class StoreHelpers:
             internal_id=internal_id,
             subject_id=subject_id,
         )
-
+        # sample.delivering_case_internal_id = delivering_case_internal_id
         sample.application_version_id = application_version_id
         sample.customer = customer
         sample.ordered_at = datetime.now()

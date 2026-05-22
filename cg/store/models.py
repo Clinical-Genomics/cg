@@ -903,7 +903,7 @@ class Sample(Base, PriorityMixin):
             return case.internal_id
         return None
 
-    @delivering_case_internal_id.expression  # type: ignore[override]
+    @delivering_case_internal_id.expression
     @classmethod
     def delivering_case_internal_id(cls):
         return (

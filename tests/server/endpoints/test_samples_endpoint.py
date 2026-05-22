@@ -9,7 +9,7 @@ from cg.constants import Workflow
 from cg.constants.lims import LimsStatus
 from cg.exc import SampleNotFoundError
 from cg.server.endpoints import samples
-from cg.store.models import Case, Customer, Sample
+from cg.store.models import Customer, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -110,7 +110,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
-        case_that_delivers=create_autospec(Case, internal_id="case_1"),
+        delivering_case_internal_id="case_1",
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
     )
@@ -172,7 +172,7 @@ def test_get_unhandled_samples_sample_search(client: FlaskClient, mocker: Mocker
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
-        case_that_delivers=create_autospec(Case, internal_id="case_1"),
+        delivering_case_internal_id="case_1",
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
     )
@@ -223,7 +223,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
-        case_that_delivers=create_autospec(Case, internal_id="case_1"),
+        delivering_case_internal_id="case_1",
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=2,
     )
@@ -236,7 +236,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
-        case_that_delivers=create_autospec(Case, internal_id="case_2"),
+        delivering_case_internal_id="case_2",
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=1,
     )
@@ -249,7 +249,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
-        case_that_delivers=None,
+        delivering_case_internal_id=None,
         workflow_of_case_that_delivers=None,
         ticket_id_from_original_order=None,
     )
@@ -315,7 +315,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
-        case_that_delivers=create_autospec(Case, internal_id="case_1"),
+        delivering_case_internal_id="case_1",
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=2,
     )
@@ -328,7 +328,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
-        case_that_delivers=create_autospec(Case, internal_id="case_2"),
+        delivering_case_internal_id="case_2",
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=1,
     )
@@ -341,7 +341,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
-        case_that_delivers=None,
+        delivering_case_internal_id=None,
         workflow_of_case_that_delivers=None,
         ticket_id_from_original_order=None,
     )
