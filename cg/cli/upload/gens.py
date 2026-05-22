@@ -10,7 +10,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.constants.cli_options import DRY_RUN
-from cg.constants.constants import GenomeBuild, Workflow
+from cg.constants.constants import WORKFLOW_TO_GENOME_VERSION_MAP, GenomeBuild
 from cg.constants.housekeeper_tags import GensAnalysisTag
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
@@ -38,7 +38,8 @@ def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool):
         suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
 
-    case: Case = status_db.get_case_by_internal_id(internal_id=case_id)
+    case: Case = status_db.get_case_by_internal_id_strict(internal_id=case_id)
+    genome_build: GenomeBuild = WORKFLOW_TO_GENOME_VERSION_MAP[case.data_analysis]
 
     for sample in case.samples:
         hk_coverage: File = housekeeper_api.get_file_from_latest_version(
@@ -48,14 +49,11 @@ def upload_to_gens(context: CGConfig, case_id: str | None, dry_run: bool):
             bundle_name=case_id, tags=[sample.internal_id] + GensAnalysisTag.FRACSNP
         )
 
-        genome_build: GenomeBuild = (
-            GenomeBuild.hg38 if case.data_analysis == Workflow.NALLO else GenomeBuild.hg19
-        )
-
         if hk_fracsnp and hk_coverage:
             gens_api.load(
                 baf_path=hk_fracsnp.full_path,
                 case_id=case_id,
+                case_name=case.name,
                 coverage_path=hk_coverage.full_path,
                 genome_build=genome_build,
                 sample_id=sample.internal_id,

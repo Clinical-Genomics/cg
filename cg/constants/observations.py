@@ -72,6 +72,7 @@ class LoqusdbInstance(StrEnum):
 
     LWP = "loqusdb-lwp"
     WGS = "loqusdb"
+    WGS38 = "loqusdb-wgs"
     WES = "loqusdb-wes"
     SOMATIC = "loqusdb-somatic"
     TUMOR = "loqusdb-tumor"

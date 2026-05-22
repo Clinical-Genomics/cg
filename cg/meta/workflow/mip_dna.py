@@ -17,6 +17,7 @@ LOG = logging.getLogger(__name__)
 class MipDNAAnalysisAPI(MipAnalysisAPI):
     def __init__(self, config: CGConfig, workflow: Workflow = Workflow.MIP_DNA):
         super().__init__(config, workflow)
+        self.reference: str = config.mip_rd_dna.reference
 
     @property
     def root(self) -> str:

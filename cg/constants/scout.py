@@ -6,11 +6,6 @@ from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
 HGNC_ID = "hgnc_id"
 
 
-class GenomeBuild(StrEnum):
-    hg19: str = "37"
-    hg38: str = "38"
-
-
 class ScoutExportFileName(StrEnum):
     MANAGED_VARIANTS = f"managed_variants{FileExtensions.VCF}"
     PANELS = f"gene_panels{FileExtensions.BED}"
@@ -64,6 +59,7 @@ RAREDISEASE_CASE_TAGS = dict(
 NALLO_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
     multiqc={"multiqc-html"},
+    paraphrase={"paraphrase"},
     peddy_check={"ped-check", "peddy"},
     peddy_ped={"ped", "peddy"},
     somalier_samples={"somalier", "relate-samples"},
@@ -122,7 +118,7 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
     alignment_file={AlignmentFileTag.CRAM},
     vcf2cytosure={"vcf2cytosure"},
     mt_bam={"bam-mt"},
-    eklipse_path={"eklipse-png"},
+    saltshaker_path={"saltshaker-png"},
     chromograph_autozyg={"chromograph", "autozyg"},
     chromograph_coverage={"chromograph", "tcov"},
     chromograph_regions={"chromograph", "regions"},
@@ -132,6 +128,7 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
     reviewer_vcf={"expansionhunter", "vcf-str"},
     reviewer_catalog={"expansionhunter", "variant-catalog"},
     mitodel_file={"mitodel"},
+    tiddit_coverage_wig={"bigwig", "tiddit-coverage"},
 )
 
 NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(

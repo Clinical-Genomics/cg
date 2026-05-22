@@ -18,6 +18,7 @@ from cg.constants.constants import SexOptions
 from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
 from cg.constants.scout import ScoutAnalysisType
 from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
+from cg.meta.upload.scout import raredisease_config_builder as raredisease_config_builder_module
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
@@ -29,7 +30,10 @@ from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.orders.sample_base import StatusEnum
 from cg.models.scout.scout_load_config import (
+    CaseImages,
     ChromographImages,
+    CustomImage,
+    CustomImages,
     NalloLoadConfig,
     RarediseaseLoadConfig,
     Reviewer,
@@ -326,7 +330,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
 
     # GIVEN a Nallo config builder
     nallo_config_builder = NalloConfigBuilder(
-        nallo_analysis_api=create_autospec(NalloAnalysisAPI),
+        nallo_analysis_api=create_autospec(NalloAnalysisAPI, reference="reference.fasta"),
         lims_api=lims_api,
         madeline_api=create_autospec(MadelineAPI),
     )
@@ -334,6 +338,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
     # Case Files
     delivery_report: File = create_autospec(File, full_path="delivery_report.yaml")
     multiqc: File = create_autospec(File, full_path="multiqc.html")
+    paraphrase: File = create_autospec(File, full_path="paraphase_annotated.json")
     peddy_check: File = create_autospec(File, full_path="check.peddy")
     peddy_ped: File = create_autospec(File, full_path="ped.peddy")
     somalier_samples: File = create_autospec(File, full_path="somalier.samples")
@@ -363,6 +368,8 @@ def test_nallo_config_builder(mocker: MockerFixture):
             return delivery_report
         elif tags == {"multiqc-html"}:
             return multiqc
+        elif tags == {"paraphrase"}:
+            return paraphrase
         elif tags == {"ped-check", "peddy"}:
             return peddy_check
         elif tags == {"ped", "peddy"}:
@@ -495,6 +502,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
                     vcf="repeats_sorted.vcf",
                     catalog="variant_catalog.trgt",
                     trgt=True,
+                    reference="reference.fasta",
                 ),
                 tiddit_coverage_wig=tiddit_coverage_wig.full_path,
             )
@@ -505,6 +513,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
         delivery_report=delivery_report.full_path,
         madeline=None,
         multiqc=multiqc.full_path,
+        paraphrase=paraphrase.full_path,
         peddy_check=peddy_check.full_path,
         peddy_ped=peddy_ped.full_path,
         peddy_sex=None,
@@ -528,7 +537,9 @@ def test_raredisease_config_builder(mocker: MockerFixture):
 
     # GIVEN a Raredisease config builder
     raredisease_config_builder = RarediseaseConfigBuilder(
-        raredisease_analysis_api=create_autospec(RarediseaseAnalysisAPI),
+        raredisease_analysis_api=create_autospec(
+            RarediseaseAnalysisAPI, reference="reference.fasta"
+        ),
         lims_api=lims_api,
         madeline_api=create_autospec(MadelineAPI),
     )
@@ -560,16 +571,17 @@ def test_raredisease_config_builder(mocker: MockerFixture):
 
     chromograph_autozyg: File = create_autospec(File, full_path="chromograph_autozyg_chr9.png")
     chromograph_coverage: File = create_autospec(File, full_path="chromograph_coverage_chr9.png")
-    eklipse_path: File = create_autospec(File, full_path="eklipse.png")
+    saltshaker_path: File = create_autospec(File, full_path="saltshaker.png")
     chromograph_regions: File = create_autospec(File, full_path="chromograph_regions.bed")
     chromograph_sites: File = create_autospec(File, full_path="chromograph_sites.bed")
     reviewer_alignment: File = create_autospec(File, full_path="reviewer_alignment.vcf")
     reviewer_alignment_index: File = create_autospec(File, full_path="reviewer_alignment_index.vcf")
     reviewer_vcf: File = create_autospec(File, full_path="reviewer_vcf.vcf")
     reviewer_catalog: File = create_autospec(File, full_path="reviewer_catalog.vcf")
-    manifest: File = create_autospec(
-        File, full_path="tests/fixtures/analysis/raredisease/manifest.json"
+    params: File = create_autospec(
+        File, full_path="tests/fixtures/analysis/raredisease/params.yaml"
     )
+    tiddit_coverage: File = create_autospec(File, full_path="tiddit_coverage.bw")
 
     # GIVEN files exist in Housekeeper for each set of RAREDISEASE_CASE_TAGS and RAREDISEASE_SAMPLE_TAGS
     def mock_get_file_from_version(version: Version, tags: set[str]) -> File | None:
@@ -604,6 +616,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return vcf_sv
         if tags == {"vcf-str"}:
             return vcf_str
+        if tags == {"nextflow-params"}:
+            return params
 
         # Sample tags
         if tags == {AlignmentFileTag.CRAM, "sample_id"}:
@@ -612,8 +626,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return vcf2cytosure
         if tags == {"bam-mt", "sample_id"}:
             return mt_bam
-        if tags == {"eklipse-png"}:
-            return eklipse_path
+        if tags == {"saltshaker-png", "sample_id"}:
+            return saltshaker_path
         if tags == {"chromograph", "autozyg", "sample_id"}:
             return chromograph_autozyg
         if tags == {"chromograph", "tcov", "sample_id"}:
@@ -632,8 +646,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return reviewer_catalog
         if tags == {"mitodel", "sample_id"}:
             return mitodel_file
-        if tags == {"manifest"}:
-            return manifest
+        if tags == {"bigwig", "tiddit-coverage", "sample_id"}:
+            return tiddit_coverage
         raise Exception
 
     mocker.patch.object(
@@ -667,10 +681,23 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         links=[case_sample],
         priority=Priority.standard,
         synopsis=None,
+        samples=[sample],
     )
     case_sample.case = case
     case.name = "case_name"
     analysis: Analysis = create_autospec(Analysis, case=case, completed_at=datetime.now())
+
+    # GIVEN that the params file can be read
+    rank_model_file = "/path/to/some/snv_file.-v1.0-.ini"
+    sv_rank_model_file = "/path/to/some/sv_file.-v2.0-.ini"
+    mocker.patch.object(
+        raredisease_config_builder_module,
+        "read_yaml",
+        return_value={
+            "score_config_snv": rank_model_file,
+            "score_config_sv": sv_rank_model_file,
+        },
+    )
 
     # WHEN building the Raredisease Scout load config
     load_config: RarediseaseLoadConfig = raredisease_config_builder.build_load_config(
@@ -689,10 +716,12 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         gene_panels=[],
         default_gene_panels=[],
         cohorts=[],
-        human_genome_build="37",
-        rank_model_version="1.38",
+        human_genome_build="38",
+        rank_model_version="1.0",
         rank_score_threshold=5,
-        sv_rank_model_version="1.12",
+        rank_model_url=rank_model_file,
+        sv_rank_model_version="2.0",
+        sv_rank_model_url=sv_rank_model_file,
         analysis_date=datetime.now(),
         samples=[
             ScoutRarediseaseIndividual(
@@ -721,7 +750,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
                 ),
                 rhocall_bed=None,
                 rhocall_wig=None,
-                tiddit_coverage_wig=None,
+                tiddit_coverage_wig=tiddit_coverage.full_path,
                 upd_regions_bed=None,
                 upd_sites_bed=None,
                 vcf2cytosure=vcf2cytosure.full_path,
@@ -732,6 +761,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
                     vcf="reviewer_vcf.vcf",
                     catalog="reviewer_catalog.vcf",
                     trgt=None,
+                    reference="reference.fasta",
                 ),
                 d4_file=None,
             )
@@ -747,7 +777,19 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         peddy_check=peddy_check.full_path,
         peddy_ped=peddy_ped.full_path,
         peddy_sex=peddy_sex.full_path,
-        custom_images=None,
+        custom_images=CustomImages(
+            case_images=CaseImages(
+                saltshaker=[
+                    CustomImage(
+                        title="sample_id",
+                        path=saltshaker_path.full_path,
+                        description="SAltShaker MT images",
+                        width="1000",
+                        height="800",
+                    )
+                ]
+            )
+        ),
         smn_tsv=smn_tsv.full_path,
         vcf_mei=vcf_mei.full_path,
         vcf_mei_research=vcf_mei_research.full_path,
