@@ -49,7 +49,7 @@ class OrderHandler:
         return results
 
     def submit_project(self, project_name: str, samples: list[dict]):
-        """Parse Scout project."""
+        """Parse LIMS project."""
         containers = self.prepare(samples)
 
         lims_project = Project.create(self, researcher=self.user, name=project_name)
