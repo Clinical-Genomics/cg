@@ -313,7 +313,7 @@ def test_mark_analyses_negative_control(
     assert negative_control_sample.delivered_at is not None
 
 
-def test_mark_order_success():
+def test_close_order_success():
     # GIVEN an open order
     order: Order = create_autospec(Order, is_open=True)
 
@@ -323,20 +323,23 @@ def test_mark_order_success():
     )
 
     # WHEN mark_order is called
-    mark_as_delivered_service.mark_order(order)
+    mark_as_delivered_service.close_order(order)
 
     # THEN the order was closed
     assert not order.is_open
 
 
-def test_mark_order_one_analysis_not_delivered():
+def test_close_order_one_analysis_not_delivered():
     # GIVEN an open order
     order: Order = create_autospec(Order, is_open=True)
 
     # GIVEN that this order has an analysis which was not delivered
-    undelivered_analysis: Analysis = create_autospec(Analysis, trailblazer_id=1)
-    delivered_analysis: Analysis = create_autospec(Analysis, trailblazer_id=2)
-    delivered_trailblazer_analysis: TrailblazerAnalysis = create_autospec(TrailblazerAnalysis, id=2)
+    delivered_case = create_autospec(Case, internal_id="delivered_case")
+    undelivered_case = create_autospec(Case, internal_id="undelivered_case")
+    delivered_trailblazer_analysis: TrailblazerAnalysis = create_autospec(
+        TrailblazerAnalysis, id=2, case_id="delivered_case"
+    )
+    order.cases = [delivered_case, undelivered_case]
 
     trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
     trailblazer_api.get_delivered_analyses = Mock(return_value=[delivered_trailblazer_analysis])
@@ -346,4 +349,8 @@ def test_mark_order_one_analysis_not_delivered():
         status_db=create_autospec(Store), trailblazer_api=create_autospec(TrailblazerAPI)
     )
 
-    # WHEN mark_order is called
+    # WHEN close_order is called
+    mark_as_delivered_service.close_order(order=order)
+
+    # THEN the order was not closed
+    assert order.is_open

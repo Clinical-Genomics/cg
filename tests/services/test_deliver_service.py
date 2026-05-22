@@ -124,7 +124,7 @@ def test_deliver_all_cases_success(mocker: MockerFixture):
     mark_analyses_call = mocker.patch.object(
         deliver_service.mark_as_delivered_service, "mark_analyses"
     )
-    mark_order_call = mocker.patch.object(deliver_service.mark_as_delivered_service, "mark_order")
+    mark_order_call = mocker.patch.object(deliver_service.mark_as_delivered_service, "close_order")
 
     # WHEN delivering all cases
     deliver_service.deliver_all_cases()

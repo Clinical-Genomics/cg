@@ -4,6 +4,7 @@ from datetime import datetime
 from requests import Response
 
 from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.store.models import Analysis, Case, CaseSample, Order, Sample
 from cg.store.store import Store
@@ -28,8 +29,14 @@ class MarkAsDeliveredService:
             auth_token=auth_token, signature=signature, trailblazer_ids=trailblazer_ids
         )
 
-    def mark_order(self, order: Order):
-        order.is_open = False
+    def close_order(self, order: Order):
+        delivered_analyses: list[TrailblazerAnalysis] = self.trailblazer_api.get_delivered_analyses(
+            order_id=order.id
+        )
+        delivered_case_ids: set[str] = set(analysis.case_id for analysis in delivered_analyses)
+        all_case_ids: set[str] = set(case.internal_id for case in order.cases)
+        if delivered_case_ids == all_case_ids:
+            order.is_open = False
 
     def _mark_samples_in_analysis(self, analysis: Analysis) -> None:
         case: Case = analysis.case
