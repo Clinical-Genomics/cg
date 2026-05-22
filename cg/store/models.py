@@ -925,13 +925,28 @@ class Sample(Base, PriorityMixin):
         else:
             return None
 
-    @property
-    def ticket_id_from_original_order(self) -> int | None:
-        """Return the original ticket id of the delivering case if it is linked to any ticket."""
+    @hybrid_property
+    def ticket_id_from_original_order(self) -> int | None:  # pyright: ignore [reportRedeclaration]
         if self.case_that_delivers and self.case_that_delivers.original_order:
             return self.case_that_delivers.original_order.ticket_id
-        else:
-            return None
+        return None
+
+    @ticket_id_from_original_order.expression  # pyright: ignore
+    @classmethod
+    def ticket_id_from_original_order(cls):
+        return (
+            select(Order.ticket_id)
+            .join(order_case, order_case.c.order_id == Order.id)
+            .join(Case, Case.id == order_case.c.case_id)
+            .join(CaseSample, CaseSample.case_id == Case.id)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .order_by(Order.order_date.asc())
+            .limit(1)
+            .scalar_subquery()
+        )
 
     def to_dict(self, links: bool = False) -> dict:
         """Represent as dictionary"""

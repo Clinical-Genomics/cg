@@ -144,7 +144,12 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
 
     # THEN function has been called with the correct arguments
     status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
-        lims_status=LimsStatus.TOP_UP, search=None, page=1, page_size=10
+        lims_status=LimsStatus.TOP_UP,
+        search=None,
+        page=1,
+        page_size=10,
+        sort_by=None,
+        sort_order=None,
     )
 
 
@@ -206,7 +211,12 @@ def test_get_unhandled_samples_sample_search(client: FlaskClient, mocker: Mocker
 
     # THEN function has been called with the correct arguments
     status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
-        lims_status=LimsStatus.TOP_UP, search="sample_1", page=1, page_size=10
+        lims_status=LimsStatus.TOP_UP,
+        search="sample_1",
+        page=1,
+        page_size=10,
+        sort_by=None,
+        sort_order=None,
     )
 
 
@@ -255,7 +265,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
     )
     status_db.as_type.get_paginated_unhandled_samples = Mock(
         return_value=(
-            [sample_smaller_ticket_number, sample_larger_ticket_number, sample_case_unkown],
+            [sample_case_unkown, sample_smaller_ticket_number, sample_larger_ticket_number],
             3,
         )
     )
@@ -347,7 +357,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
     )
     status_db.as_type.get_paginated_unhandled_samples = Mock(
         return_value=(
-            [sample_smaller_ticket_number, sample_larger_ticket_number, sample_case_unkown],
+            [sample_larger_ticket_number, sample_smaller_ticket_number, sample_case_unkown],
             3,
         )
     )

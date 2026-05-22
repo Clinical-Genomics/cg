@@ -5,7 +5,6 @@ import pytest
 
 from cg.constants.constants import Workflow
 from cg.constants.lims import LimsStatus
-from cg.server.dto.samples.requests import SortDirection, UnhandledSamplesSortBy
 from cg.server.dto.samples.samples_response import UnhandledSample, UnhandledSamplesResponse
 from cg.store.models import Sample
 
@@ -115,8 +114,6 @@ def test_unhandled_samples_response_from_samples_sort_on_ticket():
     response = UnhandledSamplesResponse.from_samples(
         samples=[sample_1, sample_2],
         total=15,
-        sort_by=UnhandledSamplesSortBy.TICKET,
-        sort_order=SortDirection.ASCENDING,
     )
 
     # THEN the response is as expected
