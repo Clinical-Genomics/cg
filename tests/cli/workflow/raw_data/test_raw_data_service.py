@@ -27,6 +27,7 @@ def test_store_analysis():
     )
     trailblazer_api.add_pending_analysis = Mock(
         return_value=TrailblazerAnalysis(
+            case_id="the_best_case",
             id=67,
             logged_at="1992-12-13",  # type: ignore pydantic model
             started_at="1992-12-13",  # type: ignore pydantic model

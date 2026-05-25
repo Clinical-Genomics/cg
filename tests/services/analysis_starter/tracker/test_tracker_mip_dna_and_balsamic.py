@@ -149,7 +149,13 @@ def test_track(
     trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
     trailblazer_api.add_pending_analysis = Mock(
         return_value=TrailblazerAnalysis(
-            id=1, logged_at=None, started_at=None, completed_at=None, out_dir=None, config_path=None
+            case_id="case_id",
+            id=1,
+            logged_at=None,
+            started_at=None,
+            completed_at=None,
+            out_dir=None,
+            config_path=None,
         )
     )
 
