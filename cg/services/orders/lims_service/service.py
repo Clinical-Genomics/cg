@@ -63,6 +63,7 @@ class OrderLimsService:
         project_data = self.lims_api.submit_project(
             project_name, [lims_sample.dict() for lims_sample in samples_lims]
         )
+        # TODO method for workflow assignment here
         lims_map: dict[str, str] = self.lims_api.get_samples(
             projectlimsid=project_data["id"], map_ids=True
         )
