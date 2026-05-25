@@ -43,6 +43,7 @@ def cg_config(housekeeper_api: HousekeeperAPI, status_db: Store) -> CGConfig:
     )
 
 
+# TODO add pyfakefs to dependencies
 @pytest.fixture
 def completion_file(completion_file_original_contents, fs) -> File:
     path = "/fake/completion_file.csv"
