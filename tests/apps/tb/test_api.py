@@ -54,12 +54,16 @@ def test_add_pending_analysis_succeeds(
     successful_response: Response = create_autospec(
         Response,
         status_code=200,
-        text=(
-            '{"id":'
-            + str(id_created_by_trailblazer)
-            + ',"case_id": "case_id"'
-            + ',"logged_at":"2025-05-21","started_at":"2025-05-21",'
-            '"completed_at":"","out_dir":"/out/dir","config_path":"/config/path"}'
+        text=json.dumps(
+            {
+                "id": str(id_created_by_trailblazer),
+                "case_id": "case_id",
+                "logged_at": "2025-05-21",
+                "started_at": "2025-05-21",
+                "completed_at": "",
+                "out_dir": "/out/dir",
+                "config_path": "/config/path",
+            }
         ),
     )
 
