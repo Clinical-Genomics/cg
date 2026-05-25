@@ -64,6 +64,7 @@ class GenePanelMasterList(StrEnum):
     OPHTHALMO = "OPHTHALMO"
     RETINA = "RETINA"
     SED = "SED"
+    HYPOHYPO = "HYPOHYPO"
 
     @classmethod
     def get_panel_names(cls, panels=None) -> list[str]:
