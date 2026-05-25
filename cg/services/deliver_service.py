@@ -42,6 +42,8 @@ class DeliverService:
                 self.mark_as_delivered_service.mark_analyses(
                     analyses=analyses_to_deliver, signature=signature
                 )
+                order: Order = analyses_to_deliver[0].order
+                self.mark_as_delivered_service.close_order(order)
             case _:
                 raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
 

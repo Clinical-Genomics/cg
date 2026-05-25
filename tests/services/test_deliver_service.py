@@ -33,6 +33,7 @@ def test_deliver_case(mocker: MockerFixture):
     # GIVEN a deliver service
     deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
     mark_analyses_spy = mocker.spy(deliver_service.mark_as_delivered_service, "mark_analyses")
+    close_order_spy = mocker.spy(deliver_service.mark_as_delivered_service, "close_order")
 
     # WHEN delivering a case
     deliver_service.deliver_case(case_id="case_id", signature="CG")
@@ -42,6 +43,9 @@ def test_deliver_case(mocker: MockerFixture):
 
     # THEN the analysis of the case should be marked as delivered
     mark_analyses_spy.assert_called_once_with(analyses=[uploaded_analysis], signature="CG")
+
+    # THEN the order should have been closed
+    close_order_spy.assert_called_once_with(order=uploaded_analysis.order)
 
 
 def test_deliver_case_more_than_one_found():
