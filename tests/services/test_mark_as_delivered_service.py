@@ -358,8 +358,11 @@ def test_close_order_one_analysis_not_delivered():
 
 def test_close_order_partial_deliveries():
     # GIVEN an open order with a case that includes some samples that have no delivered_at
-    sample: Sample = create_autospec(Sample, delivered_at=None)
-    case: Case = create_autospec(Case, samples=[sample], internal_id="case_id")
+    sample_delivered: Sample = create_autospec(Sample, delivered_at=datetime.now())
+    sample_not_delivered: Sample = create_autospec(Sample, delivered_at=None)
+    case: Case = create_autospec(
+        Case, samples=[sample_delivered, sample_not_delivered], internal_id="case_id"
+    )
     order: Order = create_autospec(Order, cases=[case])
 
     # GIVEN that the case has a delivered analysis in Trailblazer (partial/express delivery)
