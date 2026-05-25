@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
@@ -52,12 +53,12 @@ def microsalt_tracker(
     )
 
 
+@pytest.mark.freeze_time
 def test_microsalt_tracker_successful(
     microsalt_tracker: MicrosaltTracker,
     microsalt_store: TypedMock[Store],
     trailblazer_api: TypedMock[TrailblazerAPI],
 ):
-    # TODO adress test coverage
     # GIVEN case and ticket IDs
     case_id: str = "microparakeet"
     ticket_id: str = "ticket_id123"
@@ -111,7 +112,15 @@ def test_microsalt_tracker_successful(
 
     # THEN an analysis should have been added to statusdb
     microsalt_store.as_mock.add_analysis.assert_called_once_with(
-        # TODO
+        case=case,
+        workflow=Workflow.MICROSALT,
+        version="0.0.0",
+        completed_at=None,
+        primary=True,
+        session_id=case_config.get_session_id(),
+        started_at=datetime.now(),
+        trailblazer_id=1,
+        order_id=case.latest_order.id,
     )
 
 
