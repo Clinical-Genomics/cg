@@ -319,12 +319,7 @@ class GisaidAPI:
         """Update completion file with accession numbers"""
         completion_file = self.get_completion_file_from_hk(case_id=case_id)
         accession_dict = self.get_accession_numbers(case_id=case_id)
-        completion_df = self.get_completion_dataframe(completion_file=completion_file)
         completion_dict = self.get_completion_dict(completion_file=completion_file)
-
-        completion_df["GISAID_accession"] = completion_df["provnummer"].apply(
-            lambda x: accession_dict[x]
-        )
 
         for index, completion_provnummer in completion_dict["provnummer"].items():
             for accession_provnummer, new_value in accession_dict.items():
@@ -334,6 +329,7 @@ class GisaidAPI:
         fieldnames = list(completion_dict.keys())
         indices = list(next(iter(completion_dict.values())).keys())
         rows = [{col: completion_dict[col][i] for col in fieldnames} for i in indices]
+
         with open(completion_file.full_path, "w", newline="") as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
             writer.writeheader()
