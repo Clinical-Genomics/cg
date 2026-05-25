@@ -993,6 +993,9 @@ class Order(Base):
     order_date: Mapped[datetime] = mapped_column(default=datetime.now)
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
     is_open: Mapped[bool] = mapped_column(default=True)
+    analyses: Mapped[list[Analysis]] = orm.relationship(
+        back_populates="order", order_by="Analysis.created_at"
+    )
 
     @property
     def workflow(self) -> Workflow:

@@ -57,6 +57,7 @@ def test_microsalt_tracker_successful(
     microsalt_store: Store,
     trailblazer_api: TypedMock[TrailblazerAPI],
 ):
+    # TODO adress test coverage
     # GIVEN case and ticket IDs
     case_id: str = "microparakeet"
     ticket_id: str = "ticket_id123"
