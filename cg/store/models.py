@@ -302,6 +302,8 @@ class Analysis(Base):
     trailblazer_id: Mapped[int | None]
     housekeeper_version_id: Mapped[int | None]
     session_id: Mapped[str | None]
+    order_id: Mapped[int | None] = mapped_column(ForeignKey("order.id"))
+    order: Mapped["Order"] = orm.relationship(back_populates="analyses")
 
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
