@@ -33,4 +33,7 @@ def upgrade():
 
 
 def downgrade():
+    op.drop_constraint(
+        constraint_name="analysis_order_fk", table_name="analysis", type_="foreignkey"
+    )
     op.drop_column(table_name="analysis", column_name="order_id")
