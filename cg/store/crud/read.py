@@ -1889,14 +1889,18 @@ class ReadHandler(BaseHandler):
             )
 
     def get_paginated_unhandled_samples(
-        self, lims_status: LimsStatus, page: int, page_size: int, workflow: Workflow | None = None
+        self,
+        lims_status: LimsStatus,
+        search: str | None,
+        page: int,
+        page_size: int,
     ) -> tuple[list[Sample], int]:
-        unhandled_samples: Query = self._get_unhandled_samples(lims_status)
+        unhandled_samples: Query = self._get_unhandled_samples(
+            lims_status=lims_status, search=search
+        )
         return _paginate(query=unhandled_samples, page=page, page_size=page_size)
 
-    def _get_unhandled_samples(
-        self, lims_status: LimsStatus, workflow: Workflow | None = None
-    ) -> Query:
+    def _get_unhandled_samples(self, lims_status: LimsStatus, search: str | None) -> Query:
         """
         Return samples with the given lims_status that:
         - Are not downsampled
@@ -1905,9 +1909,9 @@ class ReadHandler(BaseHandler):
         - Have been sequenced (last_sequenced_at is not null)
         - Do not belong to the internal customers
         - Ordered by last sequenced date, with the oldest first
-        - If a workflow is provided, only return samples belonging to cases with that workflow
+        - Optional filtering by search string
         """
-        query: Query = (
+        query = (
             self._get_query(table=Sample)
             .join(Customer, Sample.customer_id == Customer.id)
             .filter(
@@ -1919,15 +1923,22 @@ class ReadHandler(BaseHandler):
                 Customer.internal_id != "cust000",
                 Customer.internal_id.not_like("cust9%"),
             )
-            .order_by(Sample.last_sequenced_at.asc())
         )
-        if workflow:
+
+        if search:
             query = (
-                query.join(Sample.links)
-                .join(CaseSample.case)
-                .filter(Case.data_analysis == workflow.value)
+                query.join(CaseSample, CaseSample.sample_id == Sample.id)
+                .join(Case, Case.id == CaseSample.case_id)
+                .filter(
+                    CaseSample.should_deliver_sample.is_(True),
+                    sqlalchemy.or_(
+                        Case.internal_id.ilike(f"%{search}%"),
+                        Sample.internal_id.ilike(f"%{search}%"),
+                    ),
+                )
             )
-        return query
+
+        return query.order_by(Sample.last_sequenced_at.asc())
 
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:
