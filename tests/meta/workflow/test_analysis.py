@@ -8,7 +8,6 @@ from unittest.mock import ANY, Mock, create_autospec
 import mock
 import pytest
 from housekeeper.store.models import Version
-from typed_mock import TypedMock, create_typed_mock
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
@@ -27,6 +26,7 @@ from cg.models.fastq import FastqFileMeta
 from cg.store.models import Analysis, Case, CaseSample, IlluminaSequencingRun, Order, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 @pytest.mark.parametrize(
