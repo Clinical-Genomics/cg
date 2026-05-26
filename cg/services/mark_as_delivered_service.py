@@ -5,7 +5,6 @@ from requests import Response
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.cli import workflow
 from cg.constants import Workflow
 from cg.store.models import Analysis, Case, CaseSample, Order, Sample
 from cg.store.store import Store
@@ -48,7 +47,6 @@ class MarkAsDeliveredService:
         )
         if delivered_case_ids == case_ids_on_order and are_all_samples_delivered:
             order.is_open = False
-            # TODO: Communicate with Freshdesk
 
     def _mark_samples_in_analysis(self, analysis: Analysis) -> None:
         case: Case = analysis.case
