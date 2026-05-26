@@ -40,8 +40,8 @@ class MarkAsDeliveredService:
         delivered_analyses: list[TrailblazerAnalysis] = self.trailblazer_api.get_delivered_analyses(
             order_id=order.id
         )
-        delivered_case_ids: set[str] = set(analysis.case_id for analysis in delivered_analyses)
-        case_ids_on_order: set[str] = set(case.internal_id for case in order.cases)
+        delivered_case_ids: set[str] = {analysis.case_id for analysis in delivered_analyses}
+        case_ids_on_order: set[str] = {case.internal_id for case in order.cases}
         are_all_samples_delivered = all(
             sample.delivered_at for case in order.cases for sample in case.samples
         )
