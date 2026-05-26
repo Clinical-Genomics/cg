@@ -5,10 +5,11 @@ from datetime import date, datetime
 from typing import Any
 
 from dateutil.parser import parse as parse_date
+from genologics.config import BASEURI
 from genologics.entities import Artifact, Process, Researcher, Sample
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
-from genologics.config import BASEURI
+
 from cg.constants.constants import ControlOptions, CustomerId
 from cg.constants.lims import (
     MASTER_STEPS_UDFS,
@@ -591,6 +592,6 @@ class LimsAPI(Lims, OrderHandler):
         try:
             # TODO figure out stage_uri vs workflow_uri
             self.route_artifacts(artifact_list=artifact_list, stage_uri=stage_uri)
-        except:
-            raise LimsWorkflowError
+        except HTTPError:
+            raise LimsWorkflowError("Invalid workflow")
         pass

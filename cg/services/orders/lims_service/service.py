@@ -2,8 +2,10 @@ import logging
 
 from cg.apps.lims import LimsAPI
 from cg.constants import DataDelivery, Workflow
+from cg.exc import LimsWorkflowError
 from cg.models.lims.sample import LimsSample
 from cg.services.orders.validation.models.sample import Sample
+from cg.store.models import Application
 
 LOG = logging.getLogger(__name__)
 
@@ -63,7 +65,19 @@ class OrderLimsService:
         project_data = self.lims_api.submit_project(
             project_name, [lims_sample.dict() for lims_sample in samples_lims]
         )
-        # TODO method for workflow assignment here
+
+        lims_workflow_id: int | None = samples[
+            0
+        ].application.lims_workflow_id  # TODO this assumes all samples have the same application
+        try:
+            self.lims_api.assign_samples_to_workflow(
+                samples=samples_lims, lims_workflow_id=lims_workflow_id
+            )
+        except LimsWorkflowError:
+            LOG.error(
+                f"Failed to assign samples of order {order_name} to LIMS workflow with ID {lims_workflow_id}"
+            )
+
         lims_map: dict[str, str] = self.lims_api.get_samples(
             projectlimsid=project_data["id"], map_ids=True
         )
