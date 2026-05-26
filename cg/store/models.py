@@ -903,6 +903,7 @@ class Sample(Base, PriorityMixin):
             return case.internal_id
         return None
 
+    # noinspection PyNestedDecorators
     @delivering_case_internal_id.expression
     @classmethod
     def delivering_case_internal_id(cls):
@@ -931,7 +932,8 @@ class Sample(Base, PriorityMixin):
             return self.case_that_delivers.original_order.ticket_id
         return None
 
-    @ticket_id_from_original_order.expression  # pyright: ignore
+    # noinspection PyNestedDecorators
+    @ticket_id_from_original_order.expression
     @classmethod
     def ticket_id_from_original_order(cls):
         return (
