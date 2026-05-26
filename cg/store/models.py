@@ -181,6 +181,7 @@ class Application(Base):
         "OrderTypeApplication",
         back_populates="application",
     )
+    lims_workflow_id: Mapped[int | None]
 
     @property
     def order_types(self) -> list[OrderType]:
