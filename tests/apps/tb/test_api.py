@@ -488,3 +488,11 @@ def test_get_delivered_analyses_raises_error(
             reason="I did not feel like it :(",
         ),
     )
+
+    # GIVEN a Trailblazer API
+    trailblazer_api = TrailblazerAPI(valid_trailblazer_config)
+
+    # WHEN getting delivered analyses for an order
+    # THEN a TrailblazerAPIHTTPError should be raised
+    with pytest.raises(TrailblazerAPIHTTPError):
+        trailblazer_api.get_delivered_analyses(order_id=1)
