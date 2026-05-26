@@ -744,3 +744,13 @@ def test_get_uploaded_analyses(store: Store):
 
     # THEN only the requested uploaded analysis is returned
     assert uploaded_analyses == [uploaded_analysis]
+
+
+def test_get_uploaded_analyses_no_analyses_in_store(store: Store):
+    # GIVEN an empty store
+
+    # WHEN getting an uploaded analysis
+    uploaded_analyses: list[Analysis] = store.get_uploaded_analyses(trailblazer_ids=[1])
+
+    # THEN an empty list is returned
+    assert uploaded_analyses == []
