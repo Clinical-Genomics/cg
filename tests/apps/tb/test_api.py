@@ -261,7 +261,7 @@ def test_get_analyses_to_deliver_for_case(
     tb_api = TrailblazerAPI(valid_trailblazer_config)
 
     # GIVEN that trailblazer returns an analysis
-    mocker.patch.object(
+    request_mock = mocker.patch.object(
         requests,
         "get",
         return_value=create_autospec(
@@ -321,6 +321,14 @@ def test_get_analyses_to_deliver_for_case(
             workflow=Workflow.RAREDISEASE,
         ),
     ]
+
+    # THEN the trailblazer request should have been made with the expected parameters
+    request_mock.assert_called_once_with(
+        headers={"Authorization": "Bearer some_token"},
+        json={},
+        url="http://localhost/fake_trailblazer/analyses?case_id=case_1&status[]=completed&delivered=false",
+        verify=True,
+    )
 
 
 def test_get_analyses_to_deliver_for_case_no_analysis(

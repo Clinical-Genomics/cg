@@ -254,8 +254,7 @@ class TrailblazerAPI:
             raise AnalysisNotCompletedError(f"The latest analysis for {case_id} has not completed.")
 
     def get_analyses_to_deliver_for_case(self, case_id: str) -> list[TrailblazerAnalysis]:
-        # TODO: See if it is worth filtering by completed analyses
-        endpoint = f"analyses?case_id={case_id}&delivered=false"
+        endpoint = f"analyses?case_id={case_id}&status[]={AnalysisStatus.COMPLETED}&delivered=false"
         raw_response = self.query_trailblazer(
             command=endpoint, request_body={}, method=APIMethods.GET
         )
