@@ -59,7 +59,7 @@ class FastqFetcher(InputFetcher):
 
     def _ensure_illumina_run_on_disk(self, case_id: str) -> None:
         """Check if Illumina sequencing runs are on disk for given case. Downsampled and external
-        cases are disregarde."""
+        cases are disregarded."""
         if not self._is_illumina_run_check_applicable(case_id):
             LOG.info(
                 "Illumina run check is not applicable - "
