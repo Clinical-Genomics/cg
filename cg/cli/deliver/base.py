@@ -8,7 +8,7 @@ import rich_click as click
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants import Workflow
-from cg.constants.cli_options import DRY_RUN
+from cg.constants.cli_options import DRY_RUN, SIGNATURE
 from cg.constants.delivery import FileDeliveryOption
 from cg.models.cg_config import CGConfig
 from cg.services.deliver_files import deliver_raw_data
@@ -206,13 +206,7 @@ def deliver_auto_raw_data(context: CGConfig, dry_run: bool):
 
 
 @deliver.command(name="dev-case-command", hidden=True)
-@click.option(
-    "--signature",
-    "-s",
-    type=str,
-    required=True,
-    help="Signature (initials) of the user performing the delivery.",
-)
+@SIGNATURE
 @click.argument("case_id", type=str, required=True)
 @click.pass_obj
 def deliver_dev_case_command(config: CGConfig, case_id: str, signature: str):
@@ -233,15 +227,8 @@ def deliver_dev_all_cases(config: CGConfig):
     config.status_db.commit_to_store()
 
 
-# TODO: Loose end: Make signature option a variable
 @deliver.command(name="dev-order", hidden=True)
-@click.option(
-    "--signature",
-    "-s",
-    type=str,
-    required=True,
-    help="Signature (initials) of the user performing the delivery.",
-)
+@SIGNATURE
 @click.option(
     "--ticket-id",
     "-t",
