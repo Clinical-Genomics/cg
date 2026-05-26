@@ -246,6 +246,7 @@ class TrailblazerAPI:
         return validated_response.analyses
 
     def get_delivered_analyses(self, order_id: int) -> list[TrailblazerAnalysis]:
+        # TODO do
         pass
 
     def verify_latest_analysis_is_completed(self, case_id: str, force: bool = False) -> None:
