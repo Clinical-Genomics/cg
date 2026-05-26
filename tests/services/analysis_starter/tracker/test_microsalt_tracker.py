@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
@@ -22,12 +23,12 @@ from tests.typed_mock import TypedMock, create_typed_mock
 @pytest.fixture
 def case_id() -> str:
     return "microparakeet"
-
-
+  
+  
 @pytest.fixture
-def microsalt_store() -> Store:
-    return create_autospec(Store)
-
+def microsalt_store() -> TypedMock[Store]:
+    return create_typed_mock(Store)
+  
 
 @pytest.fixture
 def trailblazer_api(case_id: str) -> TypedMock[TrailblazerAPI]:
@@ -48,20 +49,21 @@ def trailblazer_api(case_id: str) -> TypedMock[TrailblazerAPI]:
 
 @pytest.fixture
 def microsalt_tracker(
-    microsalt_store: Store, trailblazer_api: TypedMock[TrailblazerAPI]
+    microsalt_store: TypedMock[Store], trailblazer_api: TypedMock[TrailblazerAPI]
 ) -> MicrosaltTracker:
     return MicrosaltTracker(
-        store=microsalt_store,
+        store=microsalt_store.as_type,
         subprocess_submitter=SubprocessSubmitter(),
         trailblazer_api=trailblazer_api.as_type,
         workflow_root="microsalt/workflow/root",
     )
 
 
+@pytest.mark.freeze_time
 def test_microsalt_tracker_successful(
     case_id: str,
     microsalt_tracker: MicrosaltTracker,
-    microsalt_store: Store,
+    microsalt_store: TypedMock[Store],
     trailblazer_api: TypedMock[TrailblazerAPI],
 ):
     # GIVEN case and ticket IDs
@@ -90,10 +92,10 @@ def test_microsalt_tracker_successful(
         samples=[sample],
     )
 
-    microsalt_store.get_case_by_internal_id_strict = Mock(return_value=case)
-    microsalt_store.get_case_by_internal_id = Mock(return_value=case)
-    microsalt_store.get_case_workflow = Mock(return_value=Workflow.MICROSALT)
-    microsalt_store.get_latest_ticket_from_case = Mock(return_value=ticket_id)
+    microsalt_store.as_type.get_case_by_internal_id_strict = Mock(return_value=case)
+    microsalt_store.as_type.get_case_by_internal_id = Mock(return_value=case)
+    microsalt_store.as_type.get_case_workflow = Mock(return_value=Workflow.MICROSALT)
+    microsalt_store.as_type.get_latest_ticket_from_case = Mock(return_value=ticket_id)
 
     # WHEN wanting to track the started microSALT analysis
     microsalt_tracker.track(case_config)
@@ -112,6 +114,19 @@ def test_microsalt_tracker_successful(
         workflow_manager=WorkflowManager.Slurm,
         tower_workflow_id=None,
         is_hidden=False,
+    )
+
+    # THEN an analysis should have been added to statusdb
+    microsalt_store.as_mock.add_analysis.assert_called_once_with(
+        case=case,
+        workflow=Workflow.MICROSALT,
+        version="0.0.0",
+        completed_at=None,
+        primary=True,
+        session_id=case_config.get_session_id(),
+        started_at=datetime.now(),
+        trailblazer_id=1,
+        order_id=case.latest_order.id,
     )
 
 

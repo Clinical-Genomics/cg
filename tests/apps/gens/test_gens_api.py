@@ -27,6 +27,7 @@ def test_instantiate(gens_config: GENSConfig):
 
 def test_gens_api_load(
     case_id: str,
+    case_name: str,
     gens_config: dict[str, dict[str, str]],
     gens_coverage_path: Path,
     gens_fracsnp_path: Path,
@@ -48,6 +49,7 @@ def test_gens_api_load(
         baf_path=gens_fracsnp_path.as_posix(),
         coverage_path=gens_coverage_path.as_posix(),
         case_id=case_id,
+        case_name=case_name,
     )
 
     # THEN the subprocess.run() should be called with
@@ -67,6 +69,8 @@ def test_gens_api_load(
             gens_coverage_path.as_posix(),
             "--case-id",
             case_id,
+            "--display-case-id",
+            case_name,
         ],
         check=False,
         env=ANY,
