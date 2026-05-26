@@ -23,12 +23,12 @@ from tests.typed_mock import TypedMock, create_typed_mock
 @pytest.fixture
 def case_id() -> str:
     return "microparakeet"
-  
-  
+
+
 @pytest.fixture
 def microsalt_store() -> TypedMock[Store]:
     return create_typed_mock(Store)
-  
+
 
 @pytest.fixture
 def trailblazer_api(case_id: str) -> TypedMock[TrailblazerAPI]:
