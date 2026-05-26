@@ -2,12 +2,12 @@
 
 import logging
 from datetime import date, datetime
-from typing import Any
+from typing import Any, cast
 
 from dateutil.parser import parse as parse_date
 from genologics.config import BASEURI
 from genologics.entities import Artifact, Process, Researcher, Sample
-from genologics.lims import Lims
+from genologics.lims import Lims, Project
 from requests.exceptions import HTTPError
 
 from cg.constants.constants import ControlOptions, CustomerId
@@ -20,7 +20,6 @@ from cg.constants.lims import (
 )
 from cg.constants.priority import Priority
 from cg.exc import LimsDataError, LimsWorkflowError
-from cg.models.lims.sample import LimsSample
 
 from .order import OrderHandler
 
@@ -585,13 +584,27 @@ class LimsAPI(Lims, OrderHandler):
         lab_code: str = self.get_sample_attribute(lims_id=sample_id, key="lab_code").split(" ")[0]
         return f"{region_code}_{lab_code}_"
 
-    def assign_samples_to_workflow(self, samples: list[LimsSample], lims_workflow_id: int):
-        stage_uri = f"{BASEURI}/api/v2/configuration/workflows/{lims_workflow_id}/stages/{stage_id}"
-        # TODO fix artifact list as input
-        artifact_list = []
+    def _get_samples_from_project_name(self, project_name: str) -> list[Sample]:
+        """From a project name matching a single LIMS project, return a list of associated samples."""
+        projects: list[Project] = self.get_projects(name=project_name)  # type: ignore
+        if len(set(projects)) != 1:
+            raise AssertionError(f"Found no single matching LIMS project for name {project_name}")
+        project_id = projects[0].id
+        project_samples: list[Sample] = cast(list[Sample], self.get_samples(project_id=project_id))
+        return project_samples
+
+    def assign_project_samples_to_workflow(self, project_name: str, workflow_id: int):
+        """From a project name and workflow ID, add the associated samples to the workflow."""
+        workflow_uri = f"{BASEURI}/api/v2/configuration/workflows/{workflow_id}"
+        lims_samples: list[Sample] = self._get_samples_from_project_name(project_name=project_name)
+        lims_artifacts = [s.artifact for s in lims_samples]  # type: ignore
         try:
-            # TODO figure out stage_uri vs workflow_uri
-            self.route_artifacts(artifact_list=artifact_list, stage_uri=stage_uri)
-        except HTTPError:
-            raise LimsWorkflowError("Invalid workflow")
-        pass
+            LOG.info(
+                f"LIMS project '{project_name}':"
+                + f" Routing {len(lims_artifacts)} artifacts to workflow {workflow_id}."
+            )
+            self.route_artifacts(artifact_list=lims_artifacts, workflow_uri=workflow_uri)
+        except HTTPError as e:
+            raise LimsWorkflowError(
+                f"Failed to add {len(lims_artifacts)} artifacts to workflow {workflow_id}. {e}"
+            )
