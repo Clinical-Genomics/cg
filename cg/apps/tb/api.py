@@ -246,8 +246,12 @@ class TrailblazerAPI:
         return validated_response.analyses
 
     def get_delivered_analyses(self, order_id: int) -> list[TrailblazerAnalysis]:
-        # TODO do
-        pass
+        url = f"{self.host}/analyses?order_id={order_id}&status[]=completed&delivered=true"
+        response = requests.get(url=url, headers=self.auth_header)
+        if not response.ok:
+            raise TrailblazerAPIHTTPError(response.reason)
+        validated_response = AnalysesResponse.model_validate(response.json())
+        return validated_response.analyses
 
     def verify_latest_analysis_is_completed(self, case_id: str, force: bool = False) -> None:
         """Raises an AnalysisNotCompletedError if the latest analysis for the case has not completed."""

@@ -431,3 +431,60 @@ def test_get_all_completed_undelivered_analyses_improper_response(
     # THEN a TrailblazerAPIHTTPError should be raised
     with pytest.raises(TrailblazerAPIHTTPError):
         tb_api.get_all_completed_undelivered_analyses()
+
+
+def test_get_delivered_analyses_success(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a Successful HTTP called
+    http_call = mocker.patch.object(
+        requests,
+        "get",
+        return_value=create_autospec(
+            requests.Response,
+            status_code=200,
+            ok=True,
+            json=lambda: {
+                "analyses": [
+                    {
+                        "id": 1,
+                        "case_id": "case_1",
+                        "logged_at": "2025-05-21",
+                        "started_at": "2025-05-21",
+                        "completed_at": None,
+                        "out_dir": "/path/to/out_dir",
+                        "config_path": "/path/to/config",
+                    }
+                ]
+            },
+        ),
+    )
+    # GIVEN a TrailblazerAPI
+    trailblazer_api = TrailblazerAPI(valid_trailblazer_config)
+    # WHEN getting delivered analyses for an order
+    trailblazer_api.get_delivered_analyses(order_id=12345)
+    # THEN Trailblazer have been called with the correct parameters
+    http_call.assert_called_once_with(
+        url=f"{trailblazer_api.host}/analyses?order_id=12345&status[]=completed&delivered=true",
+        headers=trailblazer_api.auth_header,
+    )
+
+
+def test_get_delivered_analyses_raises_error(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN an unsuccessful HTTP response
+    mocker.patch.object(
+        requests,
+        "get",
+        return_value=create_autospec(
+            requests.Response,
+            status_code=500,
+            ok=False,
+            reason="I did not feel like it :(",
+        ),
+    )
