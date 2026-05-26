@@ -20,7 +20,7 @@ class DeliverService:
 
     def deliver_all_cases(self):
         undelivered_analyses: list[TrailblazerAnalysis] = (
-            self.trailblazer_api.get_all_analyses_to_deliver()
+            self.trailblazer_api.get_all_completed_undelivered_analyses()
         )
         analyses_to_deliver: list[Analysis] = self.status_db.get_uploaded_analyses(
             trailblazer_ids=[analysis.id for analysis in undelivered_analyses]

@@ -261,12 +261,11 @@ class TrailblazerAPI:
         validated_response = AnalysesResponse.model_validate(raw_response)
         return validated_response.analyses
 
-    def get_all_analyses_to_deliver(self) -> list[TrailblazerAnalysis]:
+    def get_all_completed_undelivered_analyses(self) -> list[TrailblazerAnalysis]:
         endpoint = f"analyses?status[]={AnalysisStatus.COMPLETED}&delivered=false"
 
         raw_response = self.query_trailblazer(
             command=endpoint, request_body={}, method=APIMethods.GET
         )
         validated_response = AnalysesResponse.model_validate(raw_response)
-        # TODO: See if we can remove filtering out RSYNC and DEMULTIPLEX analyses since they are not in StatusDB
         return validated_response.analyses

@@ -380,8 +380,8 @@ def test_get_analyses_to_deliver_for_case_improper_response(
         tb_api.get_analyses_to_deliver_for_case("updog")
 
 
-def test_get_all_analyses_to_deliver_success(
-    response_with_one_rd_analysis_and_one_rsync_analysis: str,
+def test_get_all_completed_undelivered_analyses_success(
+    response_with_two_analyses: str,
     valid_google_credentials: IDTokenCredentials,
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
@@ -397,21 +397,18 @@ def test_get_all_analyses_to_deliver_success(
             requests.Response,
             status_code=200,
             ok=True,
-            text=response_with_one_rd_analysis_and_one_rsync_analysis,
+            text=response_with_two_analyses,
         ),
     )
 
     # WHEN getting all analyses to deliver
-    analyses = tb_api.get_all_analyses_to_deliver()
+    analyses = tb_api.get_all_completed_undelivered_analyses()
 
-    # THEN a list of one analysis is returned
-    assert len(analyses) == 1
-
-    # THEN the analysis' workflow is not DEMULTIPLEX nor RSYNC
-    assert analyses[0].workflow not in [Workflow.DEMULTIPLEX, Workflow.RSYNC]
+    # THEN a list of two analyses is returned
+    assert len(analyses) == 2
 
 
-def test_get_all_analyses_to_deliver_improper_response(
+def test_get_all_completed_undelivered_analyses_improper_response(
     valid_google_credentials: IDTokenCredentials,
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
@@ -433,4 +430,4 @@ def test_get_all_analyses_to_deliver_improper_response(
     # WHEN getting analyses to deliver
     # THEN a TrailblazerAPIHTTPError should be raised
     with pytest.raises(TrailblazerAPIHTTPError):
-        tb_api.get_all_analyses_to_deliver()
+        tb_api.get_all_completed_undelivered_analyses()

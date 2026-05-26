@@ -4,7 +4,7 @@ import pytest
 
 
 @pytest.fixture
-def response_with_one_rd_analysis_and_one_rsync_analysis() -> str:
+def response_with_two_analyses() -> str:
 
     response_dict = {
         "analyses": [
