@@ -23,7 +23,7 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.models.fastq import FastqFileMeta
-from cg.store.models import Analysis, Case, CaseSample, IlluminaSequencingRun, Sample
+from cg.store.models import Analysis, Case, CaseSample, IlluminaSequencingRun, Order, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -662,8 +662,8 @@ def patch_abstract_methods(mocker):
 def case_mock() -> Case:
     case_sample: CaseSample = create_autospec(CaseSample)
     case_sample.sample = create_autospec(Sample)
-
-    case: Case = create_autospec(Case)
+    order: Order = create_autospec(Order, id=1)
+    case: Case = create_autospec(Case, latest_order=order)
     case.internal_id = "some_case_id"
     case.links = [case_sample]
     case.priority = Priority.standard
@@ -750,6 +750,7 @@ def test_on_analysis_started_creates_an_analysis_in_status_db(
     # THEN it creates an Analysis row in status db connected with:
     #   - the trailblazer analysis id
     #   - the given case
+    #   - the latest order id for the case
     status_db_mock.add_analysis.assert_called_with(
         workflow=Workflow.BALSAMIC,
         trailblazer_id=new_trailblazer_analysis.id,
@@ -757,6 +758,7 @@ def test_on_analysis_started_creates_an_analysis_in_status_db(
         primary=True,
         started_at=datetime.now(),
         version=ANY,
+        order_id=case_mock.latest_order.id,
     )
     status_db_mock.add_item_to_store.assert_called_with(new_analysis)
     assert new_analysis.case == case_mock
