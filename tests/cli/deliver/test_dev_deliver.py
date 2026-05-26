@@ -1,5 +1,6 @@
 from unittest.mock import create_autospec
 
+import pytest
 from click.testing import CliRunner
 from mock import ANY
 from pytest_mock import MockerFixture
@@ -166,8 +167,20 @@ def test_deliver_dev_order(mocker: MockerFixture):
     status_db.as_mock.commit_to_store.assert_called_once()
 
 
-# TODO: Loose end: parametrise this for combinations of different parameters
-def test_deliver_dev_order_no_ticket_id():
+@pytest.mark.parametrize(
+    "args",
+    [
+        [],
+        ["--signature", "CG"],
+        ["--ticket-id", "1234567"],
+    ],
+    ids=[
+        "no parameters",
+        "missing ticket-id",
+        "missing signature",
+    ],
+)
+def test_deliver_dev_order_no_ticket_id(args: list[str]):
     # GIVEN a store and a CG config
     cli_runner = CliRunner()
     status_db: TypedMock[Store] = create_typed_mock(Store)
@@ -175,8 +188,8 @@ def test_deliver_dev_order_no_ticket_id():
         CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
     )
 
-    # WHEN calling the deliver order command without a ticket id
-    result = cli_runner.invoke(deliver_dev_order, obj=cg_config)
+    # WHEN calling the deliver order command with at least one missing parameter
+    result = cli_runner.invoke(deliver_dev_order, args=args, obj=cg_config)
 
     # THEN the command failed
     assert result.exit_code == EXIT_PARSE_ERROR
