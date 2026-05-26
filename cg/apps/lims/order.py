@@ -50,6 +50,7 @@ class OrderHandler:
 
     def submit_project(self, project_name: str, samples: list[dict]):
         """Parse LIMS project."""
+        # TODO set project state to open, at some point
         containers = self.prepare(samples)
 
         lims_project = Project.create(self, researcher=self.user, name=project_name)

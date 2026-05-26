@@ -186,6 +186,12 @@ class LimsDataError(CgError):
     """
 
 
+class LimsWorkflowError(CgError):
+    """
+    Error related to assigning samples to workflow in LIMS.
+    """
+
+
 class MissingAnalysisRunDirectory(CgError):
     """
     Error related to missing analysis.

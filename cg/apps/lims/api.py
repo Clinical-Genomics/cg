@@ -8,7 +8,7 @@ from dateutil.parser import parse as parse_date
 from genologics.entities import Artifact, Process, Researcher, Sample
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
-
+from genologics.config import BASEURI
 from cg.constants.constants import ControlOptions, CustomerId
 from cg.constants.lims import (
     MASTER_STEPS_UDFS,
@@ -18,7 +18,8 @@ from cg.constants.lims import (
     LimsProcess,
 )
 from cg.constants.priority import Priority
-from cg.exc import LimsDataError
+from cg.exc import LimsDataError, LimsWorkflowError
+from cg.models.lims.sample import LimsSample
 
 from .order import OrderHandler
 
@@ -582,3 +583,14 @@ class LimsAPI(Lims, OrderHandler):
         )[0]
         lab_code: str = self.get_sample_attribute(lims_id=sample_id, key="lab_code").split(" ")[0]
         return f"{region_code}_{lab_code}_"
+
+    def assign_samples_to_workflow(self, samples: list[LimsSample], lims_workflow_id: int):
+        stage_uri = f"{BASEURI}/api/v2/configuration/workflows/{lims_workflow_id}/stages/{stage_id}"
+        # TODO fix artifact list as input
+        artifact_list = []
+        try:
+            # TODO figure out stage_uri vs workflow_uri
+            self.route_artifacts(artifact_list=artifact_list, stage_uri=stage_uri)
+        except:
+            raise LimsWorkflowError
+        pass
