@@ -1,6 +1,6 @@
 import json
 from datetime import datetime, timedelta, timezone
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 from google.oauth2.service_account import IDTokenCredentials
@@ -438,33 +438,32 @@ def test_get_delivered_analyses_success(
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
 ):
-    # GIVEN a Successful HTTP called
-    http_call = mocker.patch.object(
-        requests,
-        "get",
-        return_value=create_autospec(
-            requests.Response,
-            status_code=200,
-            ok=True,
-            json=lambda: {
-                "analyses": [
-                    {
-                        "id": 1,
-                        "case_id": "case_1",
-                        "logged_at": "2025-05-21",
-                        "started_at": "2025-05-21",
-                        "completed_at": None,
-                        "out_dir": "/path/to/out_dir",
-                        "config_path": "/path/to/config",
-                    }
-                ]
-            },
-        ),
+    mocked_response = create_autospec(requests.Response, status_code=200, ok=True)
+    mocked_response.json = Mock(
+        return_value={
+            "analyses": [
+                {
+                    "id": 1,
+                    "case_id": "case_1",
+                    "logged_at": "2025-05-21",
+                    "started_at": "2025-05-21",
+                    "completed_at": None,
+                    "out_dir": "/path/to/out_dir",
+                    "config_path": "/path/to/config",
+                }
+            ]
+        }
     )
+
+    # GIVEN a Successful HTTP called
+    http_call = mocker.patch.object(requests, "get", return_value=mocked_response)
+
     # GIVEN a TrailblazerAPI
     trailblazer_api = TrailblazerAPI(valid_trailblazer_config)
+
     # WHEN getting delivered analyses for an order
     trailblazer_api.get_delivered_analyses(order_id=12345)
+
     # THEN Trailblazer have been called with the correct parameters
     http_call.assert_called_once_with(
         url=f"{trailblazer_api.host}/analyses?order_id=12345&status[]=completed&delivered=true",

@@ -6,6 +6,7 @@ import pytest
 @pytest.fixture
 def response_with_two_analyses() -> str:
 
+    timestamp = "Sun, 10 May 2026 22:25:03 GMT"
     response_dict = {
         "analyses": [
             {
@@ -20,12 +21,12 @@ def response_with_two_analyses() -> str:
                 "is_cancellable": False,
                 "is_delivered": False,
                 "is_visible": True,
-                "logged_at": "Sun, 10 May 2026 22:25:03 GMT",
+                "logged_at": timestamp,
                 "order_id": 12345,
                 "out_dir": "/some/path",
                 "priority": "high",
                 "progress": 0.0,
-                "started_at": "Sun, 10 May 2026 22:25:03 GMT",
+                "started_at": timestamp,
                 "status": "pending",
                 "ticket_id": "1234",
                 "type": "other",
@@ -47,12 +48,12 @@ def response_with_two_analyses() -> str:
                 "is_cancellable": False,
                 "is_delivered": False,
                 "is_visible": True,
-                "logged_at": "Sun, 10 May 2026 22:25:03 GMT",
+                "logged_at": timestamp,
                 "order_id": 12345,
                 "out_dir": "/some/path",
                 "priority": "high",
                 "progress": 0.0,
-                "started_at": "Sun, 10 May 2026 22:25:03 GMT",
+                "started_at": timestamp,
                 "status": "pending",
                 "ticket_id": "1234",
                 "type": "other",
