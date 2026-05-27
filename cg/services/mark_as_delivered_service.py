@@ -31,7 +31,7 @@ class MarkAsDeliveredService:
 
     def close_order(self, order: Order):
         """
-        Closes order IF
+        Closes order if
         - we have a delivered TB analysis for each case
         - each sample in the order has a "delivered_at" set
 
