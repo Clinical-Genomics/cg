@@ -29,6 +29,9 @@ class MarkAsDeliveredService:
             auth_token=auth_token, signature=signature, trailblazer_ids=trailblazer_ids
         )
 
+    def unmark_analyses(self, analyses: list[Analysis]):
+        pass
+
     def close_order(self, order: Order):
         """
         Closes order if

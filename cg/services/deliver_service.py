@@ -19,12 +19,6 @@ class DeliverService:
         )
 
     def deliver_all_cases(self):
-        undelivered_trailblazer_analyses: list[TrailblazerAnalysis] = (
-            self.trailblazer_api.get_all_analyses_to_deliver()
-        )
-        uploaded_analyses_to_deliver: list[Analysis] = self.status_db.get_uploaded_analyses(
-            trailblazer_ids=[analysis.id for analysis in undelivered_trailblazer_analyses]
-        )
 
         # Get orders to deliver
         # For each order -> get all analyses -> build order-analyses dict
@@ -32,20 +26,36 @@ class DeliverService:
         order_dict: dict[Order, list[Analysis]] = self._get_order_analyses_dictionary()
         for order, analyses in order_dict.items():
             self.mark_as_delivered_service.mark_analyses(analyses=analyses)
-            self.freshdesk_client.send_delivery_message(order=order, analyses=analyses)
+            try:
+                self.freshdesk_client.send_delivery_message(order=order, analyses=analyses)
+            except:
+                self.mark_as_delivered_service.rollback_mark_analyses()
             # TODO method to rollback analysis delivery
-            if self._is_order_closable(order):  # TODO create method, take logic from close_order()
-                self.mark_as_delivered_service.close_order(order)
-                self.freshdesk_client.close_ticket(order=order)
-                # TODO method to rollback
+            finally:
+                if self._is_order_closable(
+                    order
+                ):  # TODO create method, take logic from close_order()
+                    self.mark_as_delivered_service.close_order(order)
+                    if self.freshdesk_client.is_order_open(order):
+                        self.freshdesk_client.close_ticket(order=order)
+                    # TODO method to rollback
+                # TODO commit
 
-        if uploaded_analyses_to_deliver:
-            self.mark_as_delivered_service.mark_analyses(analyses=uploaded_analyses_to_deliver)
-            orders: set[Order] = {analysis.order for analysis in uploaded_analyses_to_deliver}
-            for order in orders:
-                self.mark_as_delivered_service.close_order(order)
-        else:
-            LOG.info("No analyses ready to be delivered")
+    def _get_order_analyses_dictionary(self) -> dict[Order, list[Analysis]]:
+        # TODO: add docstring
+        undelivered_trailblazer_analyses: list[TrailblazerAnalysis] = (
+            self.trailblazer_api.get_all_analyses_to_deliver()
+        )
+        uploaded_analyses_to_deliver: list[Analysis] = self.status_db.get_uploaded_analyses(
+            trailblazer_ids=[analysis.id for analysis in undelivered_trailblazer_analyses]
+        )
+        order_analyses = {}
+        for analysis in uploaded_analyses_to_deliver:
+            if analysis.order in order_analyses:
+                order_analyses[analysis.order].append(analysis)
+            else:
+                order_analyses[analysis.order] = [analysis]
+        return order_analyses
 
     def deliver_case(self, case_id: str, signature: str):
         analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses_for_case(case_id)
