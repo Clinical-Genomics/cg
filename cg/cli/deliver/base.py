@@ -210,6 +210,21 @@ def deliver_auto_raw_data(context: CGConfig, dry_run: bool):
 @click.argument("case_id", type=str, required=True)
 @click.pass_obj
 def deliver_dev_case_command(config: CGConfig, case_id: str, signature: str):
+    """
+    Deliver a case by case ID.
+
+    \b
+    Assumes:
+        - The case has analysis that is uploaded and ready to deliver in Trailblazer
+
+    \b
+    Performs:
+        - Sends delivery message to connected ticket in Freshdesk
+        - Marks case as delivered in Trailblazer
+        - If applicable marks sample as delivered
+        - If applicable closes order in statusdb
+        - If applicable closes ticket in Freshdesk
+    """
     deliver_service = DeliverService(
         status_db=config.status_db, trailblazer_api=config.trailblazer_api
     )
@@ -220,6 +235,17 @@ def deliver_dev_case_command(config: CGConfig, case_id: str, signature: str):
 @deliver.command(name="dev-all-available", hidden=True)
 @click.pass_obj
 def deliver_dev_all_cases(config: CGConfig):
+    """
+    Deliver cases that has an analysis ready to be delivered in trailblazer.
+
+    \b
+    Performs:
+        - Sends delivery message to connected ticket in Freshdesk
+        - Marks case as delivered in Trailblazer
+        - If applicable marks sample as delivered
+        - If applicable closes order in statusdb
+        - If applicable closes ticket in Freshdesk
+    """
     deliver_service = DeliverService(
         status_db=config.status_db, trailblazer_api=config.trailblazer_api
     )
@@ -238,6 +264,21 @@ def deliver_dev_all_cases(config: CGConfig):
 )
 @click.pass_obj
 def deliver_dev_order(config: CGConfig, signature: str, ticket_id: int):
+    """
+    Deliver order by ticket_id.
+
+    \b
+    Assumes:
+        - The order has analysis that is uploaded and ready to deliver in Trailblazer
+
+    \b
+    Performs:
+        - Sends delivery message to connected ticket in Freshdesk
+        - Marks case as delivered in Trailblazer
+        - If applicable marks sample as delivered
+        - If applicable closes order in statusdb
+        - If applicable closes ticket in Freshdesk
+    """
     deliver_service = DeliverService(
         status_db=config.status_db, trailblazer_api=config.trailblazer_api
     )
