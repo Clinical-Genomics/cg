@@ -402,7 +402,7 @@ def test_get_all_completed_undelivered_analyses_success(
     )
 
     # WHEN getting all analyses to deliver
-    analyses = tb_api.get_all_completed_undelivered_analyses()
+    analyses = tb_api.get_all_analyses_to_deliver()
 
     # THEN a list of two analyses is returned
     assert len(analyses) == 2
@@ -430,10 +430,10 @@ def test_get_all_completed_undelivered_analyses_improper_response(
     # WHEN getting analyses to deliver
     # THEN a TrailblazerAPIHTTPError should be raised
     with pytest.raises(TrailblazerAPIHTTPError):
-        tb_api.get_all_completed_undelivered_analyses()
+        tb_api.get_all_analyses_to_deliver()
 
 
-def test_get_delivered_analyses_success(
+def test_get_delivered_analyses_for_order_success(
     valid_google_credentials: IDTokenCredentials,
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
@@ -462,7 +462,7 @@ def test_get_delivered_analyses_success(
     trailblazer_api = TrailblazerAPI(valid_trailblazer_config)
 
     # WHEN getting delivered analyses for an order
-    trailblazer_api.get_delivered_analyses(order_id=12345)
+    trailblazer_api.get_delivered_analyses_for_order(order_id=12345)
 
     # THEN Trailblazer have been called with the correct parameters
     http_call.assert_called_once_with(
@@ -471,7 +471,7 @@ def test_get_delivered_analyses_success(
     )
 
 
-def test_get_delivered_analyses_raises_error(
+def test_get_delivered_analyses_for_order_raises_error(
     valid_google_credentials: IDTokenCredentials,
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
@@ -494,4 +494,4 @@ def test_get_delivered_analyses_raises_error(
     # WHEN getting delivered analyses for an order
     # THEN a TrailblazerAPIHTTPError should be raised
     with pytest.raises(TrailblazerAPIHTTPError):
-        trailblazer_api.get_delivered_analyses(order_id=1)
+        trailblazer_api.get_delivered_analyses_for_order(order_id=1)

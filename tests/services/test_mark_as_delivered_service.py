@@ -342,7 +342,9 @@ def test_close_order_one_analysis_not_delivered():
     order.cases = [delivered_case, undelivered_case]
 
     trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
-    trailblazer_api.get_delivered_analyses = Mock(return_value=[delivered_trailblazer_analysis])
+    trailblazer_api.get_delivered_analyses_for_order = Mock(
+        return_value=[delivered_trailblazer_analysis]
+    )
 
     # GIVEN a MarkAsDeliveredService
     mark_as_delivered_service = MarkAsDeliveredService(
@@ -368,7 +370,7 @@ def test_close_order_partial_deliveries():
     # GIVEN that the case has a delivered analysis in Trailblazer (partial/express delivery)
     analysis: TrailblazerAnalysis = create_autospec(TrailblazerAnalysis, case_id="case_id")
     trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
-    trailblazer_api.get_delivered_analyses = Mock(return_value=[analysis])
+    trailblazer_api.get_delivered_analyses_for_order = Mock(return_value=[analysis])
 
     # WHEN calling close_order
     mark_as_delivered_service = MarkAsDeliveredService(

@@ -121,7 +121,7 @@ def test_deliver_all_cases_success(mocker: MockerFixture):
         create_autospec(TrailblazerAnalysis, id=1),
         create_autospec(TrailblazerAnalysis, id=2),
     ]
-    trailblazer_api.get_all_completed_undelivered_analyses = Mock(return_value=trailblazer_analyses)
+    trailblazer_api.get_all_analyses_to_deliver = Mock(return_value=trailblazer_analyses)
 
     # GIVEN a Delivery Service
     deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
@@ -134,7 +134,7 @@ def test_deliver_all_cases_success(mocker: MockerFixture):
     deliver_service.deliver_all_cases()
 
     # THEN it should get all analyses to deliver from Trailblazer
-    trailblazer_api.get_all_completed_undelivered_analyses.assert_called_once()
+    trailblazer_api.get_all_analyses_to_deliver.assert_called_once()
 
     # THEN uploaded analyses should have been fetched from StatusDB
     status_db.get_uploaded_analyses.assert_called_once_with(trailblazer_ids=[1, 2])
@@ -155,7 +155,7 @@ def test_deliver_all_cases_trailblazer_error(mocker: MockerFixture):
     trailblazer_analyses = [
         create_autospec(TrailblazerAnalysis, id=1),
     ]
-    trailblazer_api.get_all_completed_undelivered_analyses = Mock(return_value=trailblazer_analyses)
+    trailblazer_api.get_all_analyses_to_deliver = Mock(return_value=trailblazer_analyses)
 
     # GIVEN a Delivery Service
     deliver_service = DeliverService(status_db=status_db.as_type, trailblazer_api=trailblazer_api)
@@ -189,7 +189,7 @@ def test_deliver_all_cases_no_analyses_to_deliver(mocker: MockerFixture):
     deliver_service.deliver_all_cases()
 
     # THEN it should get all analyses to deliver from Trailblazer
-    trailblazer_api.as_mock.get_all_completed_undelivered_analyses.assert_called_once()
+    trailblazer_api.as_mock.get_all_analyses_to_deliver.assert_called_once()
 
     # THEN uploaded analyses should have been fetched from StatusDB
     status_db.get_uploaded_analyses.assert_called_once()
@@ -233,6 +233,7 @@ def test_deliver_order_success(mocker: MockerFixture):
     mark_analyses_call = mocker.patch.object(
         deliver_service.mark_as_delivered_service, "mark_analyses"
     )
+    close_order_call = mocker.patch.object(deliver_service.mark_as_delivered_service, "close_order")
 
     # WHEN delivering the order
     deliver_service.deliver_order(ticket_id=123, signature="CG")
@@ -249,9 +250,12 @@ def test_deliver_order_success(mocker: MockerFixture):
     # THEN the analyses to deliver should have been fetched from Trailblazer with the order id
     trailblazer_api.as_mock.get_analyses_to_deliver.assert_called_once_with(1)
 
+    # THEN we call the close_order method from the mark_as_delivered_service
+    close_order_call.assert_called_once_with(order)
+
 
 def test_deliver_order_without_analyses(mocker: MockerFixture):
-    # GIVEN a store with an order
+    # GIVEN a store with an order without any analysis to deliver
     status_db: Store = create_autospec(Store)
     status_db.get_uploaded_analyses = Mock(return_value=[])
 
@@ -263,12 +267,16 @@ def test_deliver_order_without_analyses(mocker: MockerFixture):
     mark_analyses_call = mocker.patch.object(
         deliver_service.mark_as_delivered_service, "mark_analyses"
     )
+    close_order_call = mocker.patch.object(deliver_service.mark_as_delivered_service, "close_order")
 
     # WHEN delivering an order
     deliver_service.deliver_order(ticket_id=666666, signature="CG")
 
     # THEN we should not have marked any analysis as delivered
     mark_analyses_call.assert_not_called()
+
+    # THEN we don't call the close_order method from the mark_as_delivered_service
+    close_order_call.assert_not_called()
 
 
 def test_deliver_order_invalid_ticket_id():

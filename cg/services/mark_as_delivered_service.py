@@ -37,8 +37,8 @@ class MarkAsDeliveredService:
 
         Note, the second condition is only needed for partial deliveries in microSALT and taxprofiler.
         """
-        delivered_analyses: list[TrailblazerAnalysis] = self.trailblazer_api.get_delivered_analyses(
-            order_id=order.id
+        delivered_analyses: list[TrailblazerAnalysis] = (
+            self.trailblazer_api.get_delivered_analyses_for_order(order_id=order.id)
         )
         delivered_case_ids: set[str] = {analysis.case_id for analysis in delivered_analyses}
         case_ids_on_order: set[str] = {case.internal_id for case in order.cases}

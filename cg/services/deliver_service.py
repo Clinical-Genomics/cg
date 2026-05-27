@@ -19,22 +19,22 @@ class DeliverService:
         )
 
     def deliver_all_cases(self):
-        undelivered_analyses: list[TrailblazerAnalysis] = (
-            self.trailblazer_api.get_all_completed_undelivered_analyses()
+        undelivered_trailblazer_analyses: list[TrailblazerAnalysis] = (
+            self.trailblazer_api.get_all_analyses_to_deliver()
         )
-        analyses_to_deliver: list[Analysis] = self.status_db.get_uploaded_analyses(
-            trailblazer_ids=[analysis.id for analysis in undelivered_analyses]
+        uploaded_analyses_to_deliver: list[Analysis] = self.status_db.get_uploaded_analyses(
+            trailblazer_ids=[analysis.id for analysis in undelivered_trailblazer_analyses]
         )
-        if analyses_to_deliver:
-            self.mark_as_delivered_service.mark_analyses(analyses=analyses_to_deliver)
-            orders: set[Order] = {analysis.order for analysis in analyses_to_deliver}
+        if uploaded_analyses_to_deliver:
+            self.mark_as_delivered_service.mark_analyses(analyses=uploaded_analyses_to_deliver)
+            orders: set[Order] = {analysis.order for analysis in uploaded_analyses_to_deliver}
             for order in orders:
                 self.mark_as_delivered_service.close_order(order)
         else:
             LOG.info("No analyses ready to be delivered")
 
     def deliver_case(self, case_id: str, signature: str):
-        analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses(case_id)
+        analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses_for_case(case_id)
         match len(analyses_to_deliver):
             case 0:
                 LOG.warning(f"No analysis found to deliver for case {case_id}.")
@@ -58,10 +58,11 @@ class DeliverService:
             self.mark_as_delivered_service.mark_analyses(
                 analyses=uploaded_analyses_to_deliver, signature=signature
             )
+            self.mark_as_delivered_service.close_order(order)
         else:
             LOG.warning("No analysis in the order ready to deliver")
 
-    def _get_undelivered_analyses(self, case_id: str) -> list[Analysis]:
+    def _get_undelivered_analyses_for_case(self, case_id: str) -> list[Analysis]:
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
         uploaded_analyses: list[Analysis] = [
             analysis for analysis in case.analyses if analysis.uploaded_at
