@@ -29,17 +29,33 @@ class DeliverService:
             try:
                 self.freshdesk_client.send_delivery_message(order=order, analyses=analyses)
             except:
-                self.mark_as_delivered_service.rollback_mark_analyses()
-            # TODO method to rollback analysis delivery
+                self.mark_as_delivered_service.unmark_analyses(analyses)
             finally:
-                if self._is_order_closable(
-                    order
-                ):  # TODO create method, take logic from close_order()
-                    self.mark_as_delivered_service.close_order(order)
+                if self._is_order_closable(order):
+                    order.is_open = False
                     if self.freshdesk_client.is_order_open(order):
+                        # Discuss if the freshdesk is_order_open should be inside close_ticket
                         self.freshdesk_client.close_ticket(order=order)
                     # TODO method to rollback
                 # TODO commit
+
+    def _is_order_closable(self, order: Order) -> bool:
+        """
+        Return True only if
+        - we have a delivered TB analysis for each case and
+        - each sample in the order has a "delivered_at" set
+
+        Note, the second condition is only needed for partial deliveries in microSALT and taxprofiler.
+        """
+        delivered_analyses: list[TrailblazerAnalysis] = (
+            self.trailblazer_api.get_delivered_analyses_for_order(order_id=order.id)
+        )
+        delivered_case_ids: set[str] = {analysis.case_id for analysis in delivered_analyses}
+        case_ids_on_order: set[str] = {case.internal_id for case in order.cases}
+        are_all_samples_delivered = all(
+            sample.delivered_at for case in order.cases for sample in case.samples
+        )
+        return delivered_case_ids == case_ids_on_order and are_all_samples_delivered
 
     def _get_order_analyses_dictionary(self) -> dict[Order, list[Analysis]]:
         # TODO: add docstring

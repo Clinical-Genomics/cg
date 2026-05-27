@@ -30,7 +30,10 @@ class MarkAsDeliveredService:
         )
 
     def unmark_analyses(self, analyses: list[Analysis]):
-        pass
+        trailblazer_ids: list[int] = [analysis.trailblazer_id for analysis in analyses]
+        self.trailblazer_api.set_analyses_delivery_status(
+            trailblazer_ids=trailblazer_ids, is_deliver=False, signature=None, auth_token=None
+        )
 
     def close_order(self, order: Order):
         """

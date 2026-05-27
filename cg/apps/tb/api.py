@@ -234,6 +234,44 @@ class TrailblazerAPI:
             raise TrailblazerAPIHTTPError(response.reason)
         return response
 
+    def mark_analyses_as_undelivered(self, trailblazer_ids: list[int]) -> Response:
+        analysis_dicts = []
+        for trailblazer_id in trailblazer_ids:
+            analysis_dict = {"id": trailblazer_id, "is_delivered": False}
+            analysis_dicts.append(analysis_dict)
+        LOG.info(f"Setting analyses {trailblazer_ids} as delivered in Trailblazer")
+        response: Response = requests.patch(
+            json={"analyses": analysis_dicts},
+            headers=self._get_auth_headers(auth_token=None),
+            url=f"{self.host}/analyses",
+        )
+        if not response.ok:
+            raise TrailblazerAPIHTTPError(response.reason)
+        return response
+
+    def set_analyses_delivery_status(
+        self,
+        trailblazer_ids: list[int],
+        is_deliver: bool,
+        signature: str | None,
+        auth_token: str | None = None,
+    ) -> Response:
+        # TODO: Docstring
+        # TODO: Update tests (and create new)
+        analysis_dicts = []
+        for trailblazer_id in trailblazer_ids:
+            analysis_dict = {"id": trailblazer_id, "is_delivered": is_deliver}
+            analysis_dicts.append(analysis_dict)
+        LOG.info(f"Setting analyses {trailblazer_ids} as delivered in Trailblazer")
+        response: Response = requests.patch(
+            json={"analyses": analysis_dicts, "signature": signature},
+            headers=self._get_auth_headers(auth_token=auth_token),
+            url=f"{self.host}/analyses",
+        )
+        if not response.ok:
+            raise TrailblazerAPIHTTPError(response.reason)
+        return response
+
     def get_analyses_to_deliver(self, order_id: int) -> list[TrailblazerAnalysis]:
         """Return the analyses in the order ready to be delivered."""
         endpoint = (
