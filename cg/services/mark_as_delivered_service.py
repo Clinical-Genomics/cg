@@ -4,9 +4,8 @@ from datetime import datetime
 from requests import Response
 
 from cg.apps.tb.api import TrailblazerAPI
-from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Workflow
-from cg.store.models import Analysis, Case, CaseSample, Order, Sample
+from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -34,25 +33,6 @@ class MarkAsDeliveredService:
         self.trailblazer_api.set_analyses_delivery_status(
             trailblazer_ids=trailblazer_ids, is_deliver=False, signature=None, auth_token=None
         )
-
-    def close_order(self, order: Order):
-        """
-        Closes order if
-        - we have a delivered TB analysis for each case
-        - each sample in the order has a "delivered_at" set
-
-        Note, the second condition is only needed for partial deliveries in microSALT and taxprofiler.
-        """
-        delivered_analyses: list[TrailblazerAnalysis] = (
-            self.trailblazer_api.get_delivered_analyses_for_order(order_id=order.id)
-        )
-        delivered_case_ids: set[str] = {analysis.case_id for analysis in delivered_analyses}
-        case_ids_on_order: set[str] = {case.internal_id for case in order.cases}
-        are_all_samples_delivered = all(
-            sample.delivered_at for case in order.cases for sample in case.samples
-        )
-        if delivered_case_ids == case_ids_on_order and are_all_samples_delivered:
-            order.is_open = False
 
     def _mark_samples_in_analysis(self, analysis: Analysis) -> None:
         case: Case = analysis.case

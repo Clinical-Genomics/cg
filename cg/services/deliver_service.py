@@ -31,7 +31,7 @@ class DeliverService:
             except:
                 self.mark_as_delivered_service.unmark_analyses(analyses)
             finally:
-                if self._is_order_closable(order):
+                if self.is_order_closable(order):
                     order.is_open = False
                     if self.freshdesk_client.is_order_open(order):
                         # Discuss if the freshdesk is_order_open should be inside close_ticket
@@ -39,7 +39,7 @@ class DeliverService:
                     # TODO method to rollback
                 # TODO commit
 
-    def _is_order_closable(self, order: Order) -> bool:
+    def is_order_closable(self, order: Order) -> bool:
         """
         Return True only if
         - we have a delivered TB analysis for each case and
@@ -83,7 +83,8 @@ class DeliverService:
                     analyses=analyses_to_deliver, signature=signature
                 )
                 order: Order = analyses_to_deliver[0].order
-                self.mark_as_delivered_service.close_order(order)
+                if self.is_order_closable(order):
+                    order.is_open = False
             case _:
                 raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
 
@@ -98,7 +99,8 @@ class DeliverService:
             self.mark_as_delivered_service.mark_analyses(
                 analyses=uploaded_analyses_to_deliver, signature=signature
             )
-            self.mark_as_delivered_service.close_order(order)
+            if self.is_order_closable(order):
+                order.is_open = False
         else:
             LOG.warning("No analysis in the order ready to deliver")
 
