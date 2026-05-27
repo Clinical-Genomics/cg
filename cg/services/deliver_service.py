@@ -2,7 +2,10 @@ import logging
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
+from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
+from cg.clients.freshdesk.models import ReplyCreate
 from cg.exc import MultipleAnalysesToDeliverError
+from cg.services.delivery_message.utils import get_message
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
 from cg.store.models import Analysis, Case, Order
 from cg.store.store import Store
@@ -11,12 +14,15 @@ LOG = logging.getLogger(__name__)
 
 
 class DeliverService:
-    def __init__(self, status_db: Store, trailblazer_api: TrailblazerAPI) -> None:
+    def __init__(
+        self, status_db: Store, trailblazer_api: TrailblazerAPI, freshdesk_client: FreshdeskClient
+    ) -> None:
         self.status_db = status_db
         self.trailblazer_api = trailblazer_api
         self.mark_as_delivered_service = MarkAsDeliveredService(
             status_db=status_db, trailblazer_api=trailblazer_api
         )
+        self.freshdesk_client = freshdesk_client
 
     def deliver_all_cases(self):
 
@@ -27,7 +33,13 @@ class DeliverService:
         for order, analyses in order_dict.items():
             self.mark_as_delivered_service.mark_analyses(analyses=analyses)
             try:
-                self.freshdesk_client.send_delivery_message(order=order, analyses=analyses)
+                delivery_message = get_message(cases=order.cases, store=self.status_db)
+                delivery_message_html = delivery_message.replace(
+                    "\n", "<br>"
+                )  # Freshdesk takes HTML formatting
+                # TODO possible intervention to prevent hot messages during demo/testing here
+                reply = ReplyCreate(ticket_number=str(order.ticket_id), body=delivery_message_html)
+                self.freshdesk_client.reply_to_ticket(reply=reply)
             except:
                 self.mark_as_delivered_service.unmark_analyses(analyses)
             finally:

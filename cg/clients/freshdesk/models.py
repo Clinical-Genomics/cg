@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Tuple, Union
+from typing import Tuple
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -55,10 +55,3 @@ class ReplyCreate(BaseModel):
 
     ticket_number: str
     body: str
-
-    def to_multipart_data(self) -> list[Tuple[str, Union[str, int, bytes]]]:
-        """Custom converter to multipart form data."""
-        multipart_data = [
-            ("body", self.body),
-        ]
-        return multipart_data
