@@ -268,36 +268,39 @@ def test_get_analyses_to_deliver_for_case(
             requests.Response,
             status_code=200,
             ok=True,
-            text="{"
-            '"analyses": ['
-            "{"
-            '"case_id": "case_1",'
-            '"comment": null,'
-            '"completed_at": null,'
-            '"config_path": "/path/",'
-            '"delivered_by": null,'
-            '"delivered_date": null,'
-            '"failed_job": null,'
-            '"id": 1234,'
-            '"is_cancellable": false,'
-            '"is_delivered": false,'
-            '"is_visible": true,'
-            '"logged_at": "Sun, 10 May 2026 22:25:03 GMT",'
-            '"order_id": 12345,'
-            '"out_dir": "/some/path",'
-            '"priority": "high",'
-            '"progress": 0.0,'
-            '"started_at": "Sun, 10 May 2026 22:25:03 GMT",'
-            '"status": "pending",'
-            '"ticket_id": "1234",'
-            '"type": "other",'
-            '"uploaded_at": null,'
-            '"user_id": null,'
-            '"version": null,'
-            '"workflow": "raredisease",'
-            '"workflow_manager": "slurm"'
-            "}"
-            "]}",
+            text=json.dumps(
+                {
+                    "analyses": [
+                        {
+                            "case_id": "case_1",
+                            "comment": None,
+                            "completed_at": None,
+                            "config_path": "/path/",
+                            "delivered_by": None,
+                            "delivered_date": None,
+                            "failed_job": None,
+                            "id": 1234,
+                            "is_cancellable": False,
+                            "is_delivered": False,
+                            "is_visible": True,
+                            "logged_at": "Sun, 10 May 2026 22:25:03 GMT",
+                            "order_id": 12345,
+                            "out_dir": "/some/path",
+                            "priority": "high",
+                            "progress": 0.0,
+                            "started_at": "Sun, 10 May 2026 22:25:03 GMT",
+                            "status": "pending",
+                            "ticket_id": "1234",
+                            "type": "other",
+                            "uploaded_at": None,
+                            "user_id": None,
+                            "version": None,
+                            "workflow": "raredisease",
+                            "workflow_manager": "slurm",
+                        }
+                    ]
+                }
+            ),
         ),
     )
 
