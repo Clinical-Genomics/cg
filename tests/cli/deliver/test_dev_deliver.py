@@ -247,7 +247,7 @@ def test_send_delivery_message(mocker: MockerFixture):
     )
 
     # WHEN sending the delivery message for the order
-    deliver_service.send_delivery_message(order=order, analyses=analyses)
+    deliver_service.send_delivery_message(order=order, analyses=analyses, is_stage=False)
 
     # THEN the Freshdesk client method for replying to the ticket
     # should be invoked with the correct args

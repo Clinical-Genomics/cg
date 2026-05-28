@@ -24,15 +24,18 @@ class DeliverService:
         )
         self.freshdesk_client = freshdesk_client
 
-    def send_delivery_message(self, order: Order, analyses: list[Analysis]):
+    def send_delivery_message(self, order: Order, analyses: list[Analysis], is_stage: bool):
         cases: list[Case] = [analysis.case for analysis in analyses]
         delivery_message = get_message(cases=cases, store=self.status_db)
         delivery_message_html = delivery_message.replace(
             "\n", "<br>"
-        )  # Freshdesk takes HTML formatting
-        # TODO possible intervention to prevent hot messages during demo/testing here
+        )  # Freshdesk takes HTML formatting TODO check for standard library solution
         reply = ReplyCreate(ticket_number=str(order.ticket_id), body=delivery_message_html)
-        self.freshdesk_client.reply_to_ticket(reply=reply)
+        # TODO possible intervention to prevent hot messages during demo/testing here
+        if is_stage:
+            LOG.info(f"Would send {reply.body}")
+        else:
+            self.freshdesk_client.reply_to_ticket(reply=reply)
 
     def deliver_all_cases(self):
 
