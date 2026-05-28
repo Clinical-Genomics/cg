@@ -68,7 +68,7 @@ def test_mark_analyses_success(
     tb_response = Response()
     tb_response.status_code = 200
     tb_response._content = json.dumps({"key": "value"}).encode("utf-8")
-    trailblazer_api.as_type.mark_analyses_as_delivered = Mock(return_value=tb_response)
+    trailblazer_api.as_type.set_analyses_delivery_status = Mock(return_value=tb_response)
 
     # WHEN we call mark_analyses
     response: Response = mark_as_delivered_service.mark_analyses([analysis_1, analysis_2])
@@ -78,8 +78,8 @@ def test_mark_analyses_success(
     assert sample_2.delivered_at is not None
 
     # THEN endpoint in Trailblazer was called
-    trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id, 555555], auth_token=None, signature=None
+    trailblazer_api.as_mock.set_analyses_delivery_status.assert_called_once_with(
+        is_delivered=True, trailblazer_ids=[trailblazer_id, 555555], auth_token=None, signature=None
     )
 
     # THEN we should return the Trailblazer response
@@ -98,8 +98,8 @@ def test_mark_analyses_with_signature(
     mark_as_delivered_service.mark_analyses(analyses=[analysis], signature="CG")
 
     # THEN trailblazer should have been called with the user signature
-    trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id], auth_token=None, signature="CG"
+    trailblazer_api.as_mock.set_analyses_delivery_status.assert_called_once_with(
+        is_delivered=True, trailblazer_ids=[trailblazer_id], auth_token=None, signature="CG"
     )
 
 
@@ -135,8 +135,8 @@ def test_mark_analyses_mix_original_non_original_samples(
     assert sample_existing.delivered_at is None
 
     # THEN endpoint in Trailblazer was called
-    trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
+    trailblazer_api.as_mock.set_analyses_delivery_status.assert_called_once_with(
+        is_delivered=True, trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
     )
 
 
@@ -172,8 +172,8 @@ def test_mark_analyses_rerun_case(
     assert sample_2.delivered_at is yesterday
 
     # THEN endpoint in Trailblazer was called
-    trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
+    trailblazer_api.as_mock.set_analyses_delivery_status.assert_called_once_with(
+        is_delivered=True, trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
     )
 
 
@@ -209,8 +209,8 @@ def test_mark_analyses_mixed_delivered_at_original_samples(
     assert sample_2.delivered_at is not None
 
     # THEN endpoint in Trailblazer was called
-    trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
+    trailblazer_api.as_mock.set_analyses_delivery_status.assert_called_once_with(
+        is_delivered=True, trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
     )
 
 
@@ -251,8 +251,8 @@ def test_mark_analyses_partial_delivery(
     assert sample_not_enough_reads.delivered_at is None
 
     # THEN endpoint in Trailblazer was called
-    trailblazer_api.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
+    trailblazer_api.as_mock.set_analyses_delivery_status.assert_called_once_with(
+        is_delivered=True, trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
     )
 
 
@@ -263,7 +263,7 @@ def test_mark_analyses_trailblazer_error(
     """Test that a TrailblazerAPIHTTPError is propagated from the service."""
     # GIVEN a TrailblazerAPI that fails
     trailblazer_api = create_autospec(TrailblazerAPI)
-    trailblazer_api.mark_analyses_as_delivered = Mock(side_effect=TrailblazerAPIHTTPError)
+    trailblazer_api.set_analyses_delivery_status = Mock(side_effect=TrailblazerAPIHTTPError)
 
     # GIVEN a service that marks the analysis as delivered
     mark_as_delivered_service = MarkAsDeliveredService(

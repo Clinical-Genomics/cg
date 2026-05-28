@@ -24,14 +24,17 @@ class MarkAsDeliveredService:
         for analysis in analyses:
             self._mark_samples_in_analysis(analysis)
             trailblazer_ids.append(analysis.trailblazer_id)
-        return self.trailblazer_api.mark_analyses_as_delivered(
-            auth_token=auth_token, signature=signature, trailblazer_ids=trailblazer_ids
+        return self.trailblazer_api.set_analyses_delivery_status(
+            auth_token=auth_token,
+            is_delivered=True,
+            signature=signature,
+            trailblazer_ids=trailblazer_ids,
         )
 
     def unmark_analyses(self, analyses: list[Analysis]):
         trailblazer_ids: list[int] = [analysis.trailblazer_id for analysis in analyses]
         self.trailblazer_api.set_analyses_delivery_status(
-            trailblazer_ids=trailblazer_ids, is_deliver=False, signature=None, auth_token=None
+            trailblazer_ids=trailblazer_ids, is_delivered=False, signature=None, auth_token=None
         )
 
     def _mark_samples_in_analysis(self, analysis: Analysis) -> None:

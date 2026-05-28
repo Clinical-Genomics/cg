@@ -1,4 +1,5 @@
 import logging
+from http.client import HTTPException
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
@@ -19,25 +20,24 @@ class DeliverService:
         )
 
     def deliver_all_cases(self):
-
-        # Get orders to deliver
-        # For each order -> get all analyses -> build order-analyses dict
-        # Iterate over order-analyses
         order_dict: dict[Order, list[Analysis]] = self._get_order_analyses_dictionary()
         for order, analyses in order_dict.items():
             self.mark_as_delivered_service.mark_analyses(analyses=analyses)
             try:
                 self.freshdesk_client.send_delivery_message(order=order, analyses=analyses)
-            except:
+            except HTTPException:
                 self.mark_as_delivered_service.unmark_analyses(analyses)
+                # TODO: Add logs
+                self.status_db.rollback()
             finally:
                 if self._is_order_closable(order):
                     order.is_open = False
-                    if self.freshdesk_client.is_order_open(order):
-                        # Discuss if the freshdesk is_order_open should be inside close_ticket
-                        self.freshdesk_client.close_ticket(order=order)
-                    # TODO method to rollback
-                # TODO commit
+                    try:
+                        self.freshdesk_client.close_ticket_if_open(order=order)
+                    except HTTPException:
+                        LOG.error(f"Failed to close ticket for order {order.id}.")
+                        self.status_db.rollback()
+            # TODO commit
 
     def deliver_case(self, case_id: str, signature: str):
         analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses_for_case(case_id)
