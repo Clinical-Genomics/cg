@@ -156,7 +156,9 @@ def test_add_pending_analysis_fails(valid_trailblazer_config: dict, mocker):
         )
 
 
-def test_mark_analyses_as_delivered_success(
+@pytest.mark.parametrize("is_delivered", [True, False])
+def test_set_analyses_delivery_status_success(
+    is_delivered: bool,
     valid_google_credentials: IDTokenCredentials,
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
@@ -170,16 +172,16 @@ def test_mark_analyses_as_delivered_success(
     patch_call = mocker.patch.object(requests, "patch", return_value=response)
 
     # WHEN marking analyses as delivered
-    tb_response: Response = tb_api.mark_analyses_as_delivered(
-        signature="CG", trailblazer_ids=[1, 2, 3]
+    tb_response: Response = tb_api.set_analyses_delivery_status(
+        is_delivered=is_delivered, signature="CG", trailblazer_ids=[1, 2, 3]
     )
 
     # THEN the expected request should have been sent
     expected_request = {
         "analyses": [
-            {"id": 1, "is_delivered": True},
-            {"id": 2, "is_delivered": True},
-            {"id": 3, "is_delivered": True},
+            {"id": 1, "is_delivered": is_delivered},
+            {"id": 2, "is_delivered": is_delivered},
+            {"id": 3, "is_delivered": is_delivered},
         ],
         "signature": "CG",
     }
@@ -194,7 +196,7 @@ def test_mark_analyses_as_delivered_success(
     assert tb_response == response
 
 
-def test_mark_analyses_as_delivered_with_forward_token(
+def test_set_analyses_delivery_status_with_forward_token(
     valid_google_credentials: IDTokenCredentials,
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
@@ -205,8 +207,8 @@ def test_mark_analyses_as_delivered_with_forward_token(
     patch_call = mocker.patch.object(requests, "patch")
 
     # WHEN marking analyses as delivered
-    tb_api.mark_analyses_as_delivered(
-        auth_token="auth_token", signature=None, trailblazer_ids=[1, 2, 3]
+    tb_api.set_analyses_delivery_status(
+        auth_token="auth_token", signature=None, trailblazer_ids=[1, 2, 3], is_delivered=True
     )
 
     # THEN the expected request should have been sent
@@ -229,7 +231,7 @@ def test_mark_analyses_as_delivered_with_forward_token(
     )
 
 
-def test_mark_analyses_as_delivered_fails_with_http_error(
+def test_set_analyses_delivery_status_fails_with_http_error(
     valid_google_credentials: IDTokenCredentials,
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
@@ -249,7 +251,9 @@ def test_mark_analyses_as_delivered_fails_with_http_error(
     # WHEN marking analyses as delivered
     # THEN a TrailblazerAPIHTTPError is raised
     with pytest.raises(TrailblazerAPIHTTPError):
-        tb_api.mark_analyses_as_delivered(signature=None, trailblazer_ids=[1, 2, 3])
+        tb_api.set_analyses_delivery_status(
+            signature=None, trailblazer_ids=[1, 2, 3], is_delivered=True
+        )
 
 
 def test_get_analyses_to_deliver_for_case(
