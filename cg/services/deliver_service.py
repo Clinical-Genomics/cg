@@ -24,6 +24,16 @@ class DeliverService:
         )
         self.freshdesk_client = freshdesk_client
 
+    def send_delivery_message(self, order: Order, analyses: list[Analysis]):
+        cases: list[Case] = [analysis.case for analysis in analyses]
+        delivery_message = get_message(cases=cases, store=self.status_db)
+        delivery_message_html = delivery_message.replace(
+            "\n", "<br>"
+        )  # Freshdesk takes HTML formatting
+        # TODO possible intervention to prevent hot messages during demo/testing here
+        reply = ReplyCreate(ticket_number=str(order.ticket_id), body=delivery_message_html)
+        self.freshdesk_client.reply_to_ticket(reply=reply)
+
     def deliver_all_cases(self):
 
         # Get orders to deliver
@@ -33,13 +43,7 @@ class DeliverService:
         for order, analyses in order_dict.items():
             self.mark_as_delivered_service.mark_analyses(analyses=analyses)
             try:
-                delivery_message = get_message(cases=order.cases, store=self.status_db)
-                delivery_message_html = delivery_message.replace(
-                    "\n", "<br>"
-                )  # Freshdesk takes HTML formatting
-                # TODO possible intervention to prevent hot messages during demo/testing here
-                reply = ReplyCreate(ticket_number=str(order.ticket_id), body=delivery_message_html)
-                self.freshdesk_client.reply_to_ticket(reply=reply)
+                self.send_delivery_message(order=order, analyses=analyses)
             except:
                 self.mark_as_delivered_service.unmark_analyses(analyses)
             finally:

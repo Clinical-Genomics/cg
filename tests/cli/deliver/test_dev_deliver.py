@@ -2,14 +2,17 @@ from unittest.mock import create_autospec
 
 import pytest
 from click.testing import CliRunner
-from mock import ANY
+from mock import ANY, Mock
 from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.cli.deliver.base import deliver_dev_all_cases, deliver_dev_case_command, deliver_dev_order
+from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
+from cg.clients.freshdesk.models import ReplyCreate
 from cg.constants.process import EXIT_FAIL, EXIT_PARSE_ERROR, EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.services.deliver_service import DeliverService
+from cg.store.models import Analysis, Order
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -219,3 +222,38 @@ def test_deliver_dev_order_service_raises_error(mocker: MockerFixture):
 
     # THEN the changes were NOT persisted in the database
     status_db.as_mock.commit_to_store.assert_not_called()
+
+
+def test_send_delivery_message(mocker: MockerFixture):
+    # GIVEN an order and a bunch of analyses to deliver
+    order = create_autospec(Order)
+    order.ticket_id = "1234567"
+
+    analysis_1 = create_autospec(Analysis)
+    analysis_2 = create_autospec(Analysis)
+    analyses = [analysis_1, analysis_2]
+
+    # GIVEN a mocked delivery_message
+    dummy_delivery_message = "Dear customer, here are your cases: \n\ncase1\ncase2"
+    mocker.patch("cg.services.deliver_service.get_message", return_value=dummy_delivery_message)
+
+    # GIVEN a DeliverService
+    status_db = create_autospec(Store)
+    trailblazer_api = create_autospec(TrailblazerAPI)
+    freshdesk_client = create_autospec(FreshdeskClient)
+    freshdesk_client.reply_to_ticket = Mock()
+    deliver_service = DeliverService(
+        status_db=status_db, trailblazer_api=trailblazer_api, freshdesk_client=freshdesk_client
+    )
+
+    # WHEN sending the delivery message for the order
+    deliver_service.send_delivery_message(order=order, analyses=analyses)
+
+    # THEN the Freshdesk client method for replying to the ticket
+    # should be invoked with the correct args
+    freshdesk_client.reply_to_ticket.assert_called_once_with(
+        reply=ReplyCreate(
+            ticket_number=order.ticket_id,
+            body="Dear customer, here are your cases: <br><br>case1<br>case2",
+        )
+    )
