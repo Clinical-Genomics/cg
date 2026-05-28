@@ -1,4 +1,5 @@
 import logging
+from http.client import HTTPException
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
@@ -19,17 +20,14 @@ class DeliverService:
         )
 
     def deliver_all_cases(self):
-
-        # Get orders to deliver
-        # For each order -> get all analyses -> build order-analyses dict
-        # Iterate over order-analyses
         order_dict: dict[Order, list[Analysis]] = self._get_order_analyses_dictionary()
         for order, analyses in order_dict.items():
             self.mark_as_delivered_service.mark_analyses(analyses=analyses)
             try:
                 self.freshdesk_client.send_delivery_message(order=order, analyses=analyses)
-            except:
+            except HTTPException:
                 self.mark_as_delivered_service.unmark_analyses(analyses)
+                self.status_db.rollback()
             finally:
                 if self._is_order_closable(order):
                     order.is_open = False
