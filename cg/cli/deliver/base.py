@@ -269,7 +269,7 @@ def deliver_dev_order(config: CGConfig, signature: str, ticket_id: int):
 
     \b
     Assumes:
-        - The order has analysis that is uploaded and ready to deliver in Trailblazer
+        - The order has an analysis that is uploaded and is ready to be delivered in Trailblazer
 
     \b
     Performs:
