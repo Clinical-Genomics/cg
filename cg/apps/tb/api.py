@@ -224,11 +224,7 @@ class TrailblazerAPI:
         signature: str | None,
         auth_token: str | None = None,
     ) -> Response:
-        """
-        Sets the given analyses to delivered/undelivered.
-        """
-        # TODO: Docstring
-        # TODO: Update tests (and create new)
+        """Sets the given analyses to delivered/undelivered."""
         analysis_dicts = []
         for trailblazer_id in trailblazer_ids:
             analysis_dict = {"id": trailblazer_id, "is_delivered": is_delivered}
