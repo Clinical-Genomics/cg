@@ -3,7 +3,7 @@ from http.client import HTTPException
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.exc import MultipleAnalysesToDeliverError
+from cg.exc import MultipleAnalysesToDeliverError, TrailblazerAPIHTTPError
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
 from cg.store.models import Analysis, Case, Order
 from cg.store.store import Store
@@ -22,22 +22,48 @@ class DeliverService:
     def deliver_all_cases(self):
         order_dict: dict[Order, list[Analysis]] = self._get_order_analyses_dictionary()
         for order, analyses in order_dict.items():
-            self.mark_as_delivered_service.mark_analyses(analyses=analyses)
             try:
-                self.freshdesk_client.send_delivery_message(order=order, analyses=analyses)
+                self.mark_as_delivered_service.mark_analyses(analyses=analyses)
+                self._freshdesk_send_delivery_message(order=order, analyses=analyses)
+            except TrailblazerAPIHTTPError:
+                self.status_db.rollback()
+                LOG.error(
+                    f"Failed to deliver analyses in Trailblazer for order {order.id}. "
+                    "Aborting delivery message for this order."
+                )
             except HTTPException:
                 self.mark_as_delivered_service.unmark_analyses(analyses)
-                # TODO: Add logs
                 self.status_db.rollback()
+                LOG.error(
+                    f"Failed to send delivery message for order {order.id}. "
+                    "Rolling back delivery status in Trailblazer and StatusDB."
+                )
+            except Exception:
+                LOG.critical(
+                    f"Unexpected error while delivering order {order.id}. "
+                    "Check delivery status and ticket manually."
+                )
             finally:
-                if self._is_order_closable(order):
-                    order.is_open = False
-                    try:
-                        self.freshdesk_client.close_ticket_if_open(order=order)
-                    except HTTPException:
-                        LOG.error(f"Failed to close ticket for order {order.id}.")
-                        self.status_db.rollback()
-            # TODO commit
+                self.status_db.commit_to_store()  # commit after each order to not lose all progress if there is an error in one of the orders
+                try:
+                    if self._is_order_closable(order):
+                        order.is_open = False
+                    self._freshdesk_close_ticket_if_open(order=order)
+                except TrailblazerAPIHTTPError:
+                    LOG.error(f"Failed to close {order.id}. Aborting closing order in Freshdesk.")
+                except HTTPException:
+                    LOG.error(
+                        f"Failed to close ticket {order.ticket_id}. "
+                        "Rolling back closing order in StatusDB."
+                    )
+                    self.status_db.rollback()
+                except Exception:
+                    LOG.critical(
+                        f"Unexpected error while closing ticket {order.ticket_id}. "
+                        "Check order and ticket status manually."
+                    )
+                finally:
+                    self.status_db.commit_to_store()
 
     def deliver_case(self, case_id: str, signature: str):
         analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses_for_case(case_id)
@@ -119,3 +145,9 @@ class DeliverService:
             else:
                 order_analyses[analysis.order] = [analysis]
         return order_analyses
+
+    def _freshdesk_send_delivery_message(self, order: Order, analyses: list[Analysis]):
+        pass
+
+    def _freshdesk_close_ticket_if_open(self, order: Order):
+        pass
