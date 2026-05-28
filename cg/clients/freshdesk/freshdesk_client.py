@@ -55,12 +55,11 @@ class FreshdeskClient:
         session.mount("https://", adapter)
 
     @handle_client_errors
-    def reply_to_ticket(self, reply: ReplyCreate, attachments: list[Path] = None) -> None:
+    def reply_to_ticket(self, reply: ReplyCreate, attachments: list[Path] | None = None) -> None:
         """Send a reply to an existing ticket in Freshdesk."""
         url = f"{self.base_url}{EndPoints.TICKETS}/{reply.ticket_number}/reply"
 
         files = prepare_attachments(attachments) if attachments else None
-        multipart_data = reply.to_multipart_data()
 
-        response = self.session.post(url=url, data=multipart_data, files=files)
+        response = self.session.post(url=url, json={"body": reply.body}, files=files)
         response.raise_for_status()
