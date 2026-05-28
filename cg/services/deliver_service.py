@@ -27,15 +27,17 @@ class DeliverService:
                 self.freshdesk_client.send_delivery_message(order=order, analyses=analyses)
             except HTTPException:
                 self.mark_as_delivered_service.unmark_analyses(analyses)
+                # TODO: Add logs
                 self.status_db.rollback()
             finally:
                 if self._is_order_closable(order):
                     order.is_open = False
-                    if self.freshdesk_client.is_order_open(order):
-                        # Discuss if the freshdesk is_order_open should be inside close_ticket
-                        self.freshdesk_client.close_ticket(order=order)
-                    # TODO method to rollback
-                # TODO commit
+                    try:
+                        self.freshdesk_client.close_ticket_if_open(order=order)
+                    except HTTPException:
+                        LOG.error(f"Failed to close ticket for order {order.id}.")
+                        self.status_db.rollback()
+            # TODO commit
 
     def _is_order_closable(self, order: Order) -> bool:
         """
