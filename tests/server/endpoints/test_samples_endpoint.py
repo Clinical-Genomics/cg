@@ -147,7 +147,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
 
     # THEN function has been called with the correct arguments
     status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
-        lims_status=LimsStatus.TOP_UP, page=1, page_size=10
+        lims_status=LimsStatus.TOP_UP, search=None, page=1, page_size=10
     )
 
 
@@ -160,3 +160,54 @@ def test_get_unhandled_samples_invalid_input(client: FlaskClient):
 
     # THEN we should get a bad request response
     assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_get_unhandled_samples_sample_search(client: FlaskClient, mocker: MockerFixture):
+    # GIVEN a store with unhandled samples in top-up
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    date_time = datetime(2024, 12, 24, 11, 59)
+    sample_1 = create_autospec(
+        Sample,
+        customer=create_autospec(Customer, interal_id="external_customer"),
+        delivered_at=None,
+        from_sample=None,
+        internal_id="sample_1",
+        is_cancelled=False,
+        last_sequenced_at=date_time,
+        lims_status=LimsStatus.TOP_UP,
+        case_that_delivers=create_autospec(Case, internal_id="case_1"),
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
+        ticket_id_from_original_order=123456,
+    )
+    status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([sample_1], 1))
+    mocker.patch.object(samples, "db", status_db.as_type)
+
+    # GIVEN a request to get unhandled samples that are in top-up
+
+    # WHEN calling the endpoint to get unhandled samples
+    response = client.get(
+        path="/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=10&search=sample_1",
+    )
+
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.OK
+
+    # THEN samples should be returned
+    assert response.json == {
+        "samples": [
+            {
+                "case_id": "case_1",
+                "sample_id": "sample_1",
+                "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
+                "lims_status": "top-up",
+                "ticket": 123456,
+                "workflow": "raredisease",
+            }
+        ],
+        "total": 1,
+    }
+
+    # THEN function has been called with the correct arguments
+    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
+        lims_status=LimsStatus.TOP_UP, search="sample_1", page=1, page_size=10
+    )

@@ -203,14 +203,14 @@ class Application(Base):
 
     @property
     def expected_hifi_yield(self) -> int | None:
-        if self.target_hifi_yield and self.percent_hifi_yield_guaranteed:
+        if self.target_hifi_yield is not None and self.percent_hifi_yield_guaranteed is not None:
             return round(self.target_hifi_yield * self.percent_hifi_yield_guaranteed / 100)
         else:
             return None
 
     @property
     def expected_express_hifi_yield(self) -> int | None:
-        return round(self.target_hifi_yield * 0.5) if self.target_hifi_yield else None
+        return round(self.target_hifi_yield * 0.5) if self.target_hifi_yield is not None else None
 
     @property
     def analysis_type(self) -> str:
@@ -302,6 +302,8 @@ class Analysis(Base):
     trailblazer_id: Mapped[int | None]
     housekeeper_version_id: Mapped[int | None]
     session_id: Mapped[str | None]
+    order_id: Mapped[int | None] = mapped_column(ForeignKey("order.id"))
+    order: Mapped["Order"] = orm.relationship(back_populates="analyses")
 
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
@@ -995,6 +997,9 @@ class Order(Base):
     order_date: Mapped[datetime] = mapped_column(default=datetime.now)
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
     is_open: Mapped[bool] = mapped_column(default=True)
+    analyses: Mapped[list[Analysis]] = orm.relationship(
+        back_populates="order", order_by="Analysis.created_at"
+    )
 
     @property
     def workflow(self) -> Workflow:

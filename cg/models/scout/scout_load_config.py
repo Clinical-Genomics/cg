@@ -168,6 +168,7 @@ class MipLoadConfig(ScoutLoadConfig):
 
 class NalloLoadConfig(ScoutLoadConfig):
     madeline: str | None = None
+    paraphrase: str | None = None
     peddy_check: str | None = None
     peddy_ped: str | None = None
     peddy_sex: str | None = None
