@@ -13,21 +13,49 @@ from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
-def test_deliver_case(mocker: MockerFixture):
-    # GIVEN a case with two analyses
+def test_deliver_case_closes_order(mocker: MockerFixture):
+
+    # GIVEN a case with at least one uploaded analysis which is tied to an open order
     status_db: Store = create_autospec(Store)
-    not_uploaded_analysis = create_autospec(Analysis, trailblazer_id=1, uploaded_at=None)
-    uploaded_analysis = create_autospec(Analysis, trailblazer_id=2, uploaded_at=datetime.now())
+    order: Order = create_autospec(Order, id=1, is_open=True)
+    not_uploaded_analysis = create_autospec(
+        Analysis,
+        trailblazer_id=1,
+        uploaded_at=None,
+        order=order,
+    )
+    uploaded_analysis = create_autospec(
+        Analysis,
+        trailblazer_id=2,
+        uploaded_at=datetime.now(),
+        order=order,
+    )
     case: Case = create_autospec(
         Case,
         analyses=[not_uploaded_analysis, uploaded_analysis],
+        internal_id="case_id",
     )
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
+    order.cases = [case]
 
     # GIVEN a Trailblazer API
-    trailblazer_api = create_autospec(TrailblazerAPI)
+    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
+
+    # GIVEN that there is an analysis to deliver for the case above
     trailblazer_api.get_analyses_to_deliver_for_case = Mock(
         return_value=[create_autospec(TrailblazerAnalysis, id=2, delivered=False)]
+    )
+
+    # GIVEN that the TB analysis has been successfully delivered
+    trailblazer_api.get_delivered_analyses_for_order = Mock(
+        return_value=[
+            create_autospec(
+                TrailblazerAnalysis,
+                id=2,
+                delivered=True,
+                case_id="case_id",
+            )
+        ]
     )
 
     # GIVEN a deliver service
@@ -42,6 +70,9 @@ def test_deliver_case(mocker: MockerFixture):
 
     # THEN the analysis of the case should be marked as delivered
     mark_analyses_spy.assert_called_once_with(analyses=[uploaded_analysis], signature="CG")
+
+    # THEN the order should have been closed
+    assert not order.is_open
 
 
 def test_deliver_case_more_than_one_found():
@@ -104,6 +135,7 @@ def test_deliver_case_nothing_to_deliver(mocker: MockerFixture):
 
 
 def test_deliver_all_cases_success(mocker: MockerFixture):
+    # TODO handle closure
     # GIVEN a TrailblazerAPI and a store
     status_db: Store = create_autospec(Store)
     order: Order = create_autospec(Order, is_open=True)
@@ -191,6 +223,7 @@ def test_deliver_all_cases_no_analyses_to_deliver(mocker: MockerFixture):
 
 
 def test_deliver_order_success(mocker: MockerFixture):
+    # TODO handle closure
     # GIVEN a store with an order
     status_db: TypedMock[Store] = create_typed_mock(Store)
     analysis_1 = create_autospec(Analysis, uploaded_at=datetime.now())
@@ -244,6 +277,7 @@ def test_deliver_order_success(mocker: MockerFixture):
 
 
 def test_deliver_order_without_analyses(mocker: MockerFixture):
+    # TODO handle closure
     # GIVEN a store with an order without any analysis to deliver
     status_db: Store = create_autospec(Store)
     status_db.get_uploaded_analyses = Mock(return_value=[])
@@ -301,7 +335,7 @@ def test_is_order_closeable_true():
 
     # WHEN checking if the order can be closed
     # THEN it returns True
-    assert deliver_service.is_order_closable(order)
+    assert deliver_service._is_order_closable(order)
 
 
 def test_is_order_closeable_false_undelivered_samples():
@@ -325,7 +359,7 @@ def test_is_order_closeable_false_undelivered_samples():
 
     # WHEN checking if the order can be closed
     # THEN it returns False
-    assert not deliver_service.is_order_closable(order)
+    assert not deliver_service._is_order_closable(order)
 
 
 def test_is_order_closeable_false_undelivered_analysis():
@@ -348,4 +382,4 @@ def test_is_order_closeable_false_undelivered_analysis():
 
     # WHEN checking if the order can be closed
     # THEN it returns False
-    assert not deliver_service.is_order_closable(order)
+    assert not deliver_service._is_order_closable(order)
