@@ -19,6 +19,59 @@ class DeliverService:
             status_db=status_db, trailblazer_api=trailblazer_api
         )
 
+    def deliver_all_cases(self) -> None:
+        order_dict: dict[Order, list[Analysis]] = self._get_order_analyses_dictionary()
+        if len(order_dict) == 0:
+            LOG.warning("No analyses found to deliver.")
+            return
+        for order, analyses in order_dict.items():
+            self._deliver_order(order=order, analyses=analyses)
+
+    def deliver_case(self, case_id: str, signature: str):
+        analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses_for_case(case_id)
+        match len(analyses_to_deliver):
+            case 0:
+                LOG.warning(f"No analysis found to deliver for case {case_id}.")
+            case 1:
+                self.mark_as_delivered_service.mark_analyses(
+                    analyses=analyses_to_deliver, signature=signature
+                )
+                order: Order = analyses_to_deliver[0].order
+                if self._is_order_closable(order):
+                    order.is_open = False
+            case _:
+                raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
+
+    def deliver_order(self, ticket_id: int, signature: str):
+        # TODO update to reflect changes in deliver_all_cases
+        order: Order = self.status_db.get_order_by_ticket_id_strict(ticket_id)
+
+        undelivered_trailblazer_analyses = self.trailblazer_api.get_analyses_to_deliver(order.id)
+        uploaded_analyses_to_deliver = self.status_db.get_uploaded_analyses(
+            [analysis.id for analysis in undelivered_trailblazer_analyses]
+        )
+        if uploaded_analyses_to_deliver:
+            self.mark_as_delivered_service.mark_analyses(
+                analyses=uploaded_analyses_to_deliver, signature=signature
+            )
+            if self._is_order_closable(order):
+                order.is_open = False
+        else:
+            LOG.warning("No analysis in the order ready to deliver")
+
+    def _deliver_order(self, order: Order, analyses: list[Analysis]) -> None:
+        # TODO consider whether to keep double commit-rollbacks and separation from methods
+        if self._deliver_analyses_in_order(order=order, analyses=analyses):
+            self.status_db.commit_to_store()
+        else:
+            self.status_db.rollback()
+            return
+
+        if self._close_order_and_ticket_if_applicable(order=order):
+            self.status_db.commit_to_store()
+        else:
+            self.status_db.rollback()
+
     def _deliver_analyses_in_order(self, order: Order, analyses: list[Analysis]) -> bool:
         # TODO docstring
         success: bool = True
@@ -62,56 +115,6 @@ class DeliverService:
             # TODO failing to close freshdesk ticket does not necessarily mean order should be re-opened
             success = False
         return success
-
-    def deliver_all_cases(self) -> None:
-        order_dict: dict[Order, list[Analysis]] = self._get_order_analyses_dictionary()
-        if len(order_dict) == 0:
-            LOG.warning("No analyses found to deliver.")
-            return
-        for order, analyses in order_dict.items():
-            # TODO consider double commit-rollbacks and separation from methods
-            if self._deliver_analyses_in_order(order=order, analyses=analyses):
-                self.status_db.commit_to_store()
-            else:
-                self.status_db.rollback()
-                continue
-
-            if self._close_order_and_ticket_if_applicable(order=order):
-                self.status_db.commit_to_store()
-            else:
-                self.status_db.rollback()
-
-    def deliver_case(self, case_id: str, signature: str):
-        analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses_for_case(case_id)
-        match len(analyses_to_deliver):
-            case 0:
-                LOG.warning(f"No analysis found to deliver for case {case_id}.")
-            case 1:
-                self.mark_as_delivered_service.mark_analyses(
-                    analyses=analyses_to_deliver, signature=signature
-                )
-                order: Order = analyses_to_deliver[0].order
-                if self._is_order_closable(order):
-                    order.is_open = False
-            case _:
-                raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
-
-    def deliver_order(self, ticket_id: int, signature: str):
-        # TODO update to reflect changes in deliver_all_cases
-        order: Order = self.status_db.get_order_by_ticket_id_strict(ticket_id)
-
-        undelivered_trailblazer_analyses = self.trailblazer_api.get_analyses_to_deliver(order.id)
-        uploaded_analyses_to_deliver = self.status_db.get_uploaded_analyses(
-            [analysis.id for analysis in undelivered_trailblazer_analyses]
-        )
-        if uploaded_analyses_to_deliver:
-            self.mark_as_delivered_service.mark_analyses(
-                analyses=uploaded_analyses_to_deliver, signature=signature
-            )
-            if self._is_order_closable(order):
-                order.is_open = False
-        else:
-            LOG.warning("No analysis in the order ready to deliver")
 
     def _get_undelivered_analyses_for_case(self, case_id: str) -> list[Analysis]:
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
