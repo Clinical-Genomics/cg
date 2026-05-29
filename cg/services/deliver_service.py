@@ -62,7 +62,7 @@ class DeliverService:
                     LOG.error(f"Failed to close {order.id}. Aborting closing order in Freshdesk.")
                 except HTTPException:
                     LOG.error(
-                        f"Failed to close ticket {order.ticket_id}. "
+                        f"Failed to close ticket {order.ticket_id} in Freshdesk. "
                         "Rolling back closing order in StatusDB."
                     )
                     self.status_db.rollback()
