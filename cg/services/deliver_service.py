@@ -19,60 +19,67 @@ class DeliverService:
             status_db=status_db, trailblazer_api=trailblazer_api
         )
 
+    def _deliver_analyses_in_order(self, order: Order, analyses: list[Analysis]) -> bool:
+        # TODO docstring
+        success: bool = True
+        LOG.info(f"Delivering {len(analyses)} analyses of ticket {order.ticket_id}.")
+        try:
+            self.mark_as_delivered_service.mark_analyses(analyses=analyses)
+            self._freshdesk_send_delivery_message(order=order, analyses=analyses)
+        except TrailblazerAPIHTTPError:
+            LOG.error(
+                f"Failed to deliver analyses in Trailblazer for order {order.id}. "
+                f"Aborting delivery message for ticket {order.ticket_id}."
+            )
+            success = False
+        except HTTPException:
+            self.mark_as_delivered_service.unmark_analyses(analyses)
+            LOG.error(
+                f"Failed to send delivery message for ticket {order.ticket_id}. "
+                f"Rolling back delivery status in Trailblazer and StatusDB for order {order.id}."
+            )
+            success = False
+        return success
+
+    def _close_order_and_ticket_if_applicable(self, order: Order) -> bool:
+        # TODO docstring
+        success = True
+        try:
+            if self._is_order_closable(order):
+                LOG.info(f"Closing order {order.id} in StatusDB.")
+                order.is_open = False
+                self._freshdesk_close_ticket_if_open(order=order)
+        except TrailblazerAPIHTTPError:
+            LOG.error(
+                f"Failed to check whether order {order.id} could be closed. Will not close ticket {order.ticket_id} in Freshdesk."
+            )
+            success = False
+        except HTTPException:
+            LOG.error(
+                f"Failed to close ticket {order.ticket_id} in Freshdesk. "
+                f"Rolling back closing order {order.id} in StatusDB."
+            )
+            # TODO failing to close freshdesk ticket does not necessarily mean order should be re-opened
+            success = False
+        return success
+
     def deliver_all_cases(self) -> None:
         order_dict: dict[Order, list[Analysis]] = self._get_order_analyses_dictionary()
         if len(order_dict) == 0:
             LOG.warning("No analyses found to deliver.")
             return
         for order, analyses in order_dict.items():
-            LOG.info(f"Delivering {len(analyses)} analyses of ticket {order.ticket_id}.")
-            try:
-                self.mark_as_delivered_service.mark_analyses(analyses=analyses)
-                self._freshdesk_send_delivery_message(order=order, analyses=analyses)
-            except TrailblazerAPIHTTPError:
+            # TODO consider double commit-rollbacks and separation from methods
+            if self._deliver_analyses_in_order(order=order, analyses=analyses):
+                self.status_db.commit_to_store()
+            else:
                 self.status_db.rollback()
-                LOG.error(
-                    f"Failed to deliver analyses in Trailblazer for order {order.id}. "
-                    "Aborting delivery message for this order."
-                )
-            except HTTPException:
-                self.mark_as_delivered_service.unmark_analyses(analyses)
-                self.status_db.rollback()
-                LOG.error(
-                    f"Failed to send delivery message for order {order.id}. "
-                    "Rolling back delivery status in Trailblazer and StatusDB."
-                )
-            except Exception:
-                LOG.critical(
-                    f"Unexpected error while delivering order {order.id}. "
-                    "Check delivery status and ticket manually."
-                )
-            finally:
-                self.status_db.commit_to_store()  # commit after each order to not lose all progress if there is an error in one of the orders
+                continue
 
-                try:
-                    if self._is_order_closable(order):
-                        LOG.info(
-                            f"Closing order {order.id} in StatusDB "
-                            f"and ticket {order.ticket_id} in Freshdesk."
-                        )
-                        order.is_open = False
-                    self._freshdesk_close_ticket_if_open(order=order)
-                except TrailblazerAPIHTTPError:
-                    LOG.error(f"Failed to close {order.id}. Aborting closing order in Freshdesk.")
-                except HTTPException:
-                    LOG.error(
-                        f"Failed to close ticket {order.ticket_id} in Freshdesk. "
-                        "Rolling back closing order in StatusDB."
-                    )
-                    self.status_db.rollback()
-                except Exception:
-                    LOG.critical(
-                        f"Unexpected error while closing ticket {order.ticket_id}. "
-                        "Check order and ticket status manually."
-                    )
-                finally:
-                    self.status_db.commit_to_store()
+            if self._close_order_and_ticket_if_applicable(order=order):
+                self.status_db.commit_to_store()
+            else:
+                self.status_db.rollback()
 
     def deliver_case(self, case_id: str, signature: str):
         analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses_for_case(case_id)
@@ -90,6 +97,7 @@ class DeliverService:
                 raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
 
     def deliver_order(self, ticket_id: int, signature: str):
+        # TODO update to reflect changes in deliver_all_cases
         order: Order = self.status_db.get_order_by_ticket_id_strict(ticket_id)
 
         undelivered_trailblazer_analyses = self.trailblazer_api.get_analyses_to_deliver(order.id)
@@ -156,7 +164,10 @@ class DeliverService:
         return order_analyses
 
     def _freshdesk_send_delivery_message(self, order: Order, analyses: list[Analysis]):
+        # Implement in next iteration
         pass
 
     def _freshdesk_close_ticket_if_open(self, order: Order):
+        # Implement in next iteration
+        LOG.info(f"Checking whether whether ticket {order.ticket_id} can be closed.")
         pass
