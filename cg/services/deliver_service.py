@@ -49,8 +49,13 @@ class DeliverService:
                 )
             finally:
                 self.status_db.commit_to_store()  # commit after each order to not lose all progress if there is an error in one of the orders
+
                 try:
                     if self._is_order_closable(order):
+                        LOG.info(
+                            f"Closing order {order.id} in StatusDB "
+                            f"and ticket {order.ticket_id} in Freshdesk."
+                        )
                         order.is_open = False
                     self._freshdesk_close_ticket_if_open(order=order)
                 except TrailblazerAPIHTTPError:
