@@ -27,8 +27,8 @@ DRAGEN_SBATCH_HEADER_TEMPLATE = """#! /bin/bash -l
 #SBATCH --account={account}
 #SBATCH --exclusive
 #SBATCH --mem=0 # Allocates all memory on the node
-#SBATCH --error={log_dir}/{job_name}.stderr
-#SBATCH --output={log_dir}/{job_name}.stdout
+#SBATCH --error={log_dir}/{job_name}_%j.stderr
+#SBATCH --output={log_dir}/{job_name}_%j.stdout
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user={email}
 #SBATCH --time={hours}:{minutes}:00
