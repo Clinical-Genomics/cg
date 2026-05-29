@@ -19,9 +19,13 @@ class DeliverService:
             status_db=status_db, trailblazer_api=trailblazer_api
         )
 
-    def deliver_all_cases(self):
+    def deliver_all_cases(self) -> None:
         order_dict: dict[Order, list[Analysis]] = self._get_order_analyses_dictionary()
+        if len(order_dict) == 0:
+            LOG.warning("No analyses found to deliver.")
+            return
         for order, analyses in order_dict.items():
+            LOG.info(f"Delivering {len(analyses)} analyses of ticket {order.ticket_id}.")
             try:
                 self.mark_as_delivered_service.mark_analyses(analyses=analyses)
                 self._freshdesk_send_delivery_message(order=order, analyses=analyses)
