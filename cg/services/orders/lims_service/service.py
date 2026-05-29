@@ -52,7 +52,7 @@ class OrderLimsService:
         - Collect the appropriate LIMS workflow ID via the Application database table
 
         for each collected workflow ID:
-        - attempt to route all sample artifacts destined for that workflow via the LIMS API
+        - Attempt to route all sample artifacts destined for that workflow via the LIMS API
         """
 
         # Build dict mapping workflow ID to a list of LIMS artifacts to be routed
@@ -72,7 +72,7 @@ class OrderLimsService:
                 continue
             lims_art: Artifact = matching_lims_samples[0].artifact  # type: ignore
 
-            wf_id = 123  # TODO store method?
+            wf_id = 123  # TODO insert new store method here
             if not wf_id:
                 LOG.info(
                     f"Sample {lims_art.samples[0].id} has no LIMS workflow ID associated to it's application, skipping."
@@ -94,8 +94,8 @@ class OrderLimsService:
                     artifact_list=arts,
                     workflow_uri=f"{BASEURI}/api/v2/configuration/workflows/{wf_id}",
                 )
-            except HTTPError as e:
-                LOG.error(f"Failed to add {len(arts)} artifacts to workflow {wf_id}. {e}")
+            except HTTPError:
+                LOG.exception(f"Failed to add {len(arts)} artifacts to workflow {wf_id}.")
                 continue
 
     def process_lims(

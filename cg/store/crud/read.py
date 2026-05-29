@@ -868,6 +868,13 @@ class ReadHandler(BaseHandler):
             tag=tag,
         ).first()
 
+    def get_lims_workflow_id_by_application_tag(self, tag: str) -> int | None:
+        """Return the LIMS workflow ID for an application by tag."""
+        application = self.get_application_by_tag(tag=tag)
+        if not application:
+            return None
+        return application.lims_workflow_id
+
     def get_applications_is_not_archived(self) -> list[Application]:
         """Return applications that are not archived."""
         return (
