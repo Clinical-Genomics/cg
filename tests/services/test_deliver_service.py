@@ -212,7 +212,7 @@ def test_deliver_all_cases_success(mocker: MockerFixture):
     status_db.get_uploaded_analyses.assert_called_once_with(trailblazer_ids=[1, 2])
 
     # THEN the analyses should have been marked as delivered
-    mark_analyses_call.assert_called_once_with(analyses=[analysis_to_deliver])
+    mark_analyses_call.assert_called_once_with(analyses=[analysis_to_deliver], signature=None)
 
 
 def test_deliver_all_cases_trailblazer_error(mocker: MockerFixture):

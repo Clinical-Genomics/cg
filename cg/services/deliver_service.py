@@ -51,52 +51,50 @@ class DeliverService:
             [analysis.id for analysis in undelivered_trailblazer_analyses]
         )
         if uploaded_analyses_to_deliver:
-            self.mark_as_delivered_service.mark_analyses(
-                analyses=uploaded_analyses_to_deliver, signature=signature
+            self._deliver_order(
+                order=order, analyses=uploaded_analyses_to_deliver, signature=signature
             )
-            if self._is_order_closable(order):
-                order.is_open = False
         else:
             LOG.warning("No analysis in the order ready to deliver")
 
-    def _deliver_order(self, order: Order, analyses: list[Analysis]) -> None:
+    def _deliver_order(
+        self, order: Order, analyses: list[Analysis], signature: str | None = None
+    ) -> None:
         # TODO consider whether to keep double commit-rollbacks and separation from methods
-        if self._deliver_analyses_in_order(order=order, analyses=analyses):
-            self.status_db.commit_to_store()
+        if self._deliver_analyses_in_order(order=order, analyses=analyses, signature=signature):
+            self._close_order_and_ticket_if_applicable(order=order)
         else:
-            self.status_db.rollback()
-            return
+            LOG.error(f"Will not attempt to close order {order.id} and ticket {order.ticket_id}.")
 
-        if self._close_order_and_ticket_if_applicable(order=order):
-            self.status_db.commit_to_store()
-        else:
-            self.status_db.rollback()
-
-    def _deliver_analyses_in_order(self, order: Order, analyses: list[Analysis]) -> bool:
+    def _deliver_analyses_in_order(
+        self, order: Order, analyses: list[Analysis], signature: str | None = None
+    ) -> bool:
         # TODO docstring
-        success: bool = True
         LOG.info(f"Delivering {len(analyses)} analyses of ticket {order.ticket_id}.")
         try:
-            self.mark_as_delivered_service.mark_analyses(analyses=analyses)
+            self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
             self._freshdesk_send_delivery_message(order=order, analyses=analyses)
         except TrailblazerAPIHTTPError:
             LOG.error(
                 f"Failed to deliver analyses in Trailblazer for order {order.id}. "
                 f"Aborting delivery message for ticket {order.ticket_id}."
             )
-            success = False
+            self.status_db.rollback()
+            return False
         except HTTPException:
             self.mark_as_delivered_service.unmark_analyses(analyses)
             LOG.error(
                 f"Failed to send delivery message for ticket {order.ticket_id}. "
                 f"Rolling back delivery status in Trailblazer and StatusDB for order {order.id}."
             )
-            success = False
-        return success
+            self.status_db.rollback()
+            return False
+        else:
+            self.status_db.commit_to_store()
+            return True
 
-    def _close_order_and_ticket_if_applicable(self, order: Order) -> bool:
+    def _close_order_and_ticket_if_applicable(self, order: Order) -> None:
         # TODO docstring
-        success = True
         try:
             if self._is_order_closable(order):
                 LOG.info(f"Closing order {order.id} in StatusDB.")
@@ -104,17 +102,13 @@ class DeliverService:
                 self._freshdesk_close_ticket_if_open(order=order)
         except TrailblazerAPIHTTPError:
             LOG.error(
-                f"Failed to check whether order {order.id} could be closed. Will not close ticket {order.ticket_id} in Freshdesk."
+                f"Failed to check whether order {order.id} could be closed. "
+                f"Will not close ticket {order.ticket_id} in Freshdesk."
             )
-            success = False
         except HTTPException:
-            LOG.error(
-                f"Failed to close ticket {order.ticket_id} in Freshdesk. "
-                f"Rolling back closing order {order.id} in StatusDB."
-            )
-            # TODO failing to close freshdesk ticket does not necessarily mean order should be re-opened
-            success = False
-        return success
+            LOG.error(f"Failed to close ticket {order.ticket_id} in Freshdesk.")
+        else:
+            self.status_db.commit_to_store()
 
     def _get_undelivered_analyses_for_case(self, case_id: str) -> list[Analysis]:
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
