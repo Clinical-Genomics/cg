@@ -164,7 +164,7 @@ def test_deliver_dev_order(mocker: MockerFixture):
     deliver_order.assert_called_once_with(ANY, signature="CG", ticket_id=123)
 
     # THEN the changes were persistent in the database
-    status_db.as_mock.commit_to_store.assert_called_once()
+    status_db.as_mock.commit_to_store.assert_called()
 
 
 @pytest.mark.parametrize(

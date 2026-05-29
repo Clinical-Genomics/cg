@@ -166,5 +166,4 @@ class DeliverService:
 
     def _freshdesk_close_ticket_if_open(self, order: Order):
         # Implement in next iteration
-        LOG.info(f"Checking whether whether ticket {order.ticket_id} can be closed.")
         pass
