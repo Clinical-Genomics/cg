@@ -237,9 +237,10 @@ def test_deliver_all_cases_trailblazer_error(mocker: MockerFixture):
     )
 
     # WHEN delivering all analyses
-    # THEN a TrailblazerAPIHTTPError is raised
-    with pytest.raises(TrailblazerAPIHTTPError):
-        deliver_service.deliver_all_cases()
+    deliver_service.deliver_all_cases()
+
+    # THEN a rollback of statusdb is performed
+    status_db.as_mock.rollback.assert_called_once()
 
 
 def test_deliver_all_cases_no_analyses_to_deliver(mocker: MockerFixture):
