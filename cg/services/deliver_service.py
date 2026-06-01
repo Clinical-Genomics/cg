@@ -36,7 +36,11 @@ class DeliverService:
                 # Samples marked TB analysis marked nothing in FD
                 self.mark_as_delivered_service.unmark_analyses(analyses)
                 self.status_db.rollback()
-            except TrailblazerAPIHTTPError2:
+            except TrailblazerAPIHTTPError2 as error:
+                LOG.error(
+                    f"Not able to determine if the order {order.id} is closable. "
+                    f"Exception: {str(error)}"
+                )
                 self.status_db.commit_to_store()
                 # Samples marked TB analysis marked, delivery message sent in FD
             except HTTPException2:
