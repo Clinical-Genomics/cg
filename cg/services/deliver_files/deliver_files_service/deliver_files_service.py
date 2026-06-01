@@ -6,7 +6,6 @@ from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.tb import AnalysisType
 from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
-from cg.models.cg_config import NatsConfig
 from cg.services.analysis_service.analysis_service import AnalysisService
 from cg.services.deliver_files.deliver_files_service.error_handling import (
     handle_no_delivery_files_error,
@@ -48,7 +47,6 @@ class DeliverFilesService:
         tb_service: TrailblazerAPI,
         analysis_service: AnalysisService,
         status_db: Store,
-        nats_config: NatsConfig,
     ):
         self.file_manager = delivery_file_manager_service
         self.file_mover = move_file_service
@@ -57,7 +55,6 @@ class DeliverFilesService:
         self.rsync_service = rsync_service
         self.tb_service = tb_service
         self.analysis_service = analysis_service
-        self.nats_config = nats_config
 
     @handle_no_delivery_files_error
     def deliver_files_for_case(
