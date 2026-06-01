@@ -4,9 +4,10 @@ from datetime import datetime
 from requests import Response
 
 from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.exc import TrailblazerAnalysisDeliveryError, TrailblazerAPIHTTPError
-from cg.store.models import Analysis, Case, CaseSample, Sample
+from cg.store.models import Analysis, Case, CaseSample, Order, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -16,6 +17,11 @@ class MarkAsDeliveredService:
     def __init__(self, status_db: Store, trailblazer_api: TrailblazerAPI) -> None:
         self.status_db = status_db
         self.trailblazer_api = trailblazer_api
+
+    def close_order_in_status_db_if_closable(self, order: Order) -> None:
+        if self._is_order_closable(order):
+            order.is_open = False
+            LOG.info(f"Order {order.id} is now closed.")
 
     def mark_analyses(
         self, analyses: list[Analysis], auth_token: str | None = None, signature: str | None = None
@@ -41,6 +47,24 @@ class MarkAsDeliveredService:
         self.trailblazer_api.set_analyses_delivery_status(
             trailblazer_ids=trailblazer_ids, is_delivered=False, signature=None, auth_token=None
         )
+
+    def _is_order_closable(self, order: Order) -> bool:
+        """
+        Return True only if
+        - there is a delivered TB analysis for each case and
+        - each sample in the order has a "delivered_at" set
+
+        Note, the second condition is only needed for partial deliveries in microSALT and taxprofiler.
+        """
+        delivered_analyses: list[TrailblazerAnalysis] = (
+            self.trailblazer_api.get_delivered_analyses_for_order(order_id=order.id)
+        )
+        delivered_case_ids: set[str] = {analysis.case_id for analysis in delivered_analyses}
+        case_ids_on_order: set[str] = {case.internal_id for case in order.cases}
+        are_all_samples_delivered = all(
+            sample.delivered_at for case in order.cases for sample in case.samples
+        )
+        return delivered_case_ids == case_ids_on_order and are_all_samples_delivered
 
     def _mark_samples_in_analysis(self, analysis: Analysis) -> None:
         case: Case = analysis.case

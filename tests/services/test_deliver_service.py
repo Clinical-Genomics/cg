@@ -6,7 +6,14 @@ from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.exc import MultipleAnalysesToDeliverError, OrderNotFoundError, TrailblazerAPIHTTPError
+from cg.exc import (
+    FreshdeskClosingTicketError,
+    FreshdeskDeliveryMessageError,
+    MultipleAnalysesToDeliverError,
+    OrderNotFoundError,
+    TrailblazerAnalysisDeliveryError,
+    TrailblazerFailedToGetAnalysesError,
+)
 from cg.services.deliver_service import DeliverService
 from cg.store.models import Analysis, Case, Order, Sample
 from cg.store.store import Store
@@ -179,71 +186,74 @@ def test_deliver_case_nothing_to_deliver(mocker: MockerFixture):
     mark_analyses_spy.assert_not_called()
 
 
-def test_deliver_all_cases_success(mocker: MockerFixture):
-    # TODO handle closure
-    # GIVEN a TrailblazerAPI and a store
-    status_db: Store = create_autospec(Store)
-    order: Order = create_autospec(Order, is_open=True)
-    analysis_to_deliver = create_autospec(
-        Analysis, order=order, trailblazer_id=1, uploaded_at=datetime.now()
-    )
-    order.analyses = [analysis_to_deliver]
-    status_db.get_uploaded_analyses = Mock(return_value=[analysis_to_deliver])
-    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
-    trailblazer_analyses = [
-        create_autospec(TrailblazerAnalysis, id=1),
-        create_autospec(TrailblazerAnalysis, id=2),
-    ]
-    trailblazer_api.get_all_analyses_to_deliver = Mock(return_value=trailblazer_analyses)
+def test_deliver_all_available_success(mocker: MockerFixture):
+    """
+    Test that when delivering all available orders, it delivers the analyses
+    that are ready to be delivered and attempts to close the orders.
+    """
 
-    # GIVEN a Delivery Service
-    deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
+    # GIVEN one order in store with one analysis
+    order_1: Order = create_autospec(Order, is_open=True)
+    analysis_1 = create_autospec(
+        Analysis, order=order_1, trailblazer_id=1, uploaded_at=datetime.now()
+    )
+    order_1.analyses = [analysis_1]
+
+    # GIVEN another order in store with two analyses
+    order_2: Order = create_autospec(Order, is_open=True)
+    analysis_2 = create_autospec(
+        Analysis, order=order_2, trailblazer_id=2, uploaded_at=datetime.now()
+    )
+    analysis_3 = create_autospec(
+        Analysis, order=order_2, trailblazer_id=3, uploaded_at=datetime.now()
+    )
+    order_2.analyses = [analysis_2, analysis_3]
+
+    # GIVEN that the three analyses are ready to be delivered
+    status_db: Store = create_autospec(Store)
+    status_db.get_uploaded_analyses = Mock(return_value=[analysis_1, analysis_2, analysis_3])
+
+    # GIVEN a Trailblazer API
+    trailblazer_api: TypedMock[TrailblazerAPI] = create_typed_mock(TrailblazerAPI)
+
+    # GIVEN a Deliver Service
+    deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api.as_type)
     mark_analyses_call = mocker.patch.object(
         deliver_service.mark_as_delivered_service, "mark_analyses"
     )
+    close_order_call = mocker.patch.object(
+        deliver_service.mark_as_delivered_service, "close_order_in_status_db_if_closable"
+    )
+    delivery_message_spy = mocker.spy(deliver_service, "_freshdesk_send_delivery_message")
+    close_ticket_spy = mocker.spy(deliver_service, "_freshdesk_close_ticket_if_open")
 
     # WHEN delivering all cases
-    deliver_service.deliver_all_cases()
+    deliver_service.deliver_all_available()
 
     # THEN it should get all analyses to deliver from Trailblazer
-    trailblazer_api.get_all_analyses_to_deliver.assert_called_once()
+    trailblazer_api.as_mock.get_all_analyses_to_deliver.assert_called_once()
 
     # THEN uploaded analyses should have been fetched from StatusDB
-    status_db.get_uploaded_analyses.assert_called_once_with(trailblazer_ids=[1, 2])
+    status_db.get_uploaded_analyses.assert_called_once()
 
-    # THEN the analyses should have been marked as delivered
-    mark_analyses_call.assert_called_once_with(analyses=[analysis_to_deliver], signature=None)
+    # THEN the analyses of both orders should have been marked as delivered separately
+    mark_analyses_call.assert_any_call(analyses=[analysis_1], signature=None)
+    mark_analyses_call.assert_any_call(analyses=[analysis_2, analysis_3], signature=None)
 
+    # THEN both orders should have been checked if they can be closed separately
+    close_order_call.assert_any_call(order_1)
+    close_order_call.assert_any_call(order_2)
 
-def test_deliver_all_cases_trailblazer_error(mocker: MockerFixture):
-    # GIVEN a TrailblazerAPI and a store
-    status_db: TypedMock[Store] = create_typed_mock(Store)
-    analysis_to_deliver = create_autospec(Analysis, trailblazer_id=1, uploaded_at=datetime.now())
-    status_db.as_type.get_uploaded_analyses = Mock(return_value=[analysis_to_deliver])
-    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
-    trailblazer_analyses = [
-        create_autospec(TrailblazerAnalysis, id=1),
-    ]
-    trailblazer_api.get_all_analyses_to_deliver = Mock(return_value=trailblazer_analyses)
+    # THEN the delivery message should have been sent for both orders separately
+    delivery_message_spy.assert_any_call(order=order_1, analyses=[analysis_1])
+    delivery_message_spy.assert_any_call(order=order_2, analyses=[analysis_2, analysis_3])
 
-    # GIVEN a Delivery Service
-    deliver_service = DeliverService(status_db=status_db.as_type, trailblazer_api=trailblazer_api)
-
-    # GIVEN the mark_analyses_call raises an TrailblazerAPIHTTPError
-    mocker.patch.object(
-        deliver_service.mark_as_delivered_service,
-        "mark_analyses",
-        side_effect=TrailblazerAPIHTTPError,
-    )
-
-    # WHEN delivering all analyses
-    deliver_service.deliver_all_cases()
-
-    # THEN a rollback of statusdb is performed
-    status_db.as_mock.rollback.assert_called_once()
+    # THEN the ticket should have been closed for both orders separately
+    close_ticket_spy.assert_any_call(order_1)
+    close_ticket_spy.assert_any_call(order_2)
 
 
-def test_deliver_all_cases_no_analyses_to_deliver(mocker: MockerFixture):
+def test_deliver_all_available_no_analyses_to_deliver(mocker: MockerFixture):
     # GIVEN a TrailblazerAPI and a store without an analysis to deliver
     status_db: Store = create_autospec(Store)
     status_db.get_uploaded_analyses = Mock(return_value=[])
@@ -256,7 +266,7 @@ def test_deliver_all_cases_no_analyses_to_deliver(mocker: MockerFixture):
     )
 
     # WHEN delivering all cases
-    deliver_service.deliver_all_cases()
+    deliver_service.deliver_all_available()
 
     # THEN it should get all analyses to deliver from Trailblazer
     trailblazer_api.as_mock.get_all_analyses_to_deliver.assert_called_once()
@@ -266,6 +276,133 @@ def test_deliver_all_cases_no_analyses_to_deliver(mocker: MockerFixture):
 
     # THEN no call should have been made
     mark_analyses_call.assert_not_called()
+
+
+def test_deliver_all_available_trailblazer_analysis_delivery_error(mocker: MockerFixture):
+    # GIVEN a store with an analysis to deliver
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    analysis_to_deliver = create_autospec(
+        Analysis, order=create_autospec(Order), trailblazer_id=1, uploaded_at=datetime.now()
+    )
+    status_db.as_type.get_uploaded_analyses = Mock(return_value=[analysis_to_deliver])
+
+    # GIVEN a Trailblazer API
+    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
+
+    # GIVEN a Delivery Service
+    deliver_service = DeliverService(status_db=status_db.as_type, trailblazer_api=trailblazer_api)
+
+    # GIVEN the MarkAsDeliveredService raises a TrailblazerAnalysisDeliveryError
+    mocker.patch.object(
+        deliver_service.mark_as_delivered_service,
+        "mark_analyses",
+        side_effect=TrailblazerAnalysisDeliveryError,
+    )
+
+    # WHEN delivering all analyses
+    deliver_service.deliver_all_available()
+
+    # THEN a rollback of statusdb is performed
+    status_db.as_mock.rollback.assert_called_once()
+
+
+def test_deliver_all_available_trailblazer_failed_to_get_analyses_error(mocker: MockerFixture):
+    # GIVEN a store with an analysis to deliver
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    analysis_to_deliver = create_autospec(
+        Analysis, order=create_autospec(Order), trailblazer_id=1, uploaded_at=datetime.now()
+    )
+    status_db.as_type.get_uploaded_analyses = Mock(return_value=[analysis_to_deliver])
+
+    # GIVEN a Trailblazer API
+    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
+
+    # GIVEN a Delivery Service
+    deliver_service = DeliverService(status_db=status_db.as_type, trailblazer_api=trailblazer_api)
+
+    # GIVEN the MarkAsDeliveredService raises a TrailblazerFailedToGetAnalysesError
+    mocker.patch.object(
+        deliver_service.mark_as_delivered_service,
+        "_is_order_closable",
+        side_effect=TrailblazerFailedToGetAnalysesError,
+    )
+    unmark_analysis_call = mocker.patch.object(
+        deliver_service.mark_as_delivered_service, "unmark_analyses"
+    )
+
+    # WHEN delivering all analyses
+    deliver_service.deliver_all_available()
+
+    # THEN a rollback of statusdb is performed
+    status_db.as_mock.rollback.assert_called_once()
+
+    # THEN the analysis should have been unmarked in Trailblazer
+    unmark_analysis_call.assert_called_once_with([analysis_to_deliver])
+
+
+def test_deliver_all_available_freshdesk_delivery_message_error(mocker: MockerFixture):
+    # GIVEN a store with an analysis to deliver
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    analysis_to_deliver = create_autospec(
+        Analysis, order=create_autospec(Order), trailblazer_id=1, uploaded_at=datetime.now()
+    )
+    status_db.as_type.get_uploaded_analyses = Mock(return_value=[analysis_to_deliver])
+
+    # GIVEN a Trailblazer API
+    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
+
+    # GIVEN a Delivery Service
+    deliver_service = DeliverService(status_db=status_db.as_type, trailblazer_api=trailblazer_api)
+
+    # GIVEN the _freshdesk_send_delivery_message method raises a FreshdeskDeliveryMessageError
+    mocker.patch.object(
+        deliver_service,
+        "_freshdesk_send_delivery_message",
+        side_effect=FreshdeskDeliveryMessageError,
+    )
+    unmark_analysis_call = mocker.patch.object(
+        deliver_service.mark_as_delivered_service, "unmark_analyses"
+    )
+
+    # WHEN delivering all analyses
+    deliver_service.deliver_all_available()
+
+    # THEN a rollback of statusdb is performed
+    status_db.as_mock.rollback.assert_called_once()
+
+    # THEN the analysis should have been unmarked in Trailblazer
+    unmark_analysis_call.assert_called_once_with([analysis_to_deliver])
+
+
+def test_deliver_all_available_freshdesk_closing_ticket_error(mocker: MockerFixture):
+    # GIVEN a store with an analysis to deliver
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    analysis_to_deliver = create_autospec(
+        Analysis, order=create_autospec(Order), trailblazer_id=1, uploaded_at=datetime.now()
+    )
+    status_db.as_type.get_uploaded_analyses = Mock(return_value=[analysis_to_deliver])
+
+    # GIVEN a Trailblazer API
+    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
+
+    # GIVEN a Delivery Service
+    deliver_service = DeliverService(status_db=status_db.as_type, trailblazer_api=trailblazer_api)
+
+    # GIVEN the _freshdesk_send_delivery_message method raises a FreshdeskClosingTicketError
+    mocker.patch.object(
+        deliver_service,
+        "_freshdesk_close_ticket_if_open",
+        side_effect=FreshdeskClosingTicketError,
+    )
+
+    # WHEN delivering all analyses
+    deliver_service.deliver_all_available()
+
+    # THEN the order should have been reopened if ever closed
+    assert analysis_to_deliver.order.is_open
+
+    # THEN a commit to the store is performed
+    status_db.as_mock.commit_to_store.assert_called_once()
 
 
 def test_deliver_order_success(mocker: MockerFixture):
@@ -363,7 +500,8 @@ def test_deliver_order_invalid_ticket_id():
         deliver_service.deliver_order(ticket_id=666666, signature="CG")
 
 
-def test_is_order_closeable_true():
+# TODO: move tests to mark as delivered service
+def test_is_order_closable_true():
     # GIVEN an open order with a case that includes only delivered samples
     sample_delivered1: Sample = create_autospec(Sample, delivered_at=datetime.now())
     sample_delivered2: Sample = create_autospec(Sample, delivered_at=datetime.now())

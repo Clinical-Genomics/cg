@@ -219,12 +219,11 @@ def deliver_dev_case_command(config: CGConfig, case_id: str, signature: str):
 
 @deliver.command(name="dev-all-available", hidden=True)
 @click.pass_obj
-def deliver_dev_all_cases(config: CGConfig):
+def deliver_dev_all_available(config: CGConfig):
     deliver_service = DeliverService(
         status_db=config.status_db, trailblazer_api=config.trailblazer_api
     )
-    deliver_service.deliver_all_cases()
-    config.status_db.commit_to_store()
+    deliver_service.deliver_all_available()
 
 
 @deliver.command(name="dev-order", hidden=True)
@@ -242,3 +241,4 @@ def deliver_dev_order(config: CGConfig, signature: str, ticket_id: int):
         status_db=config.status_db, trailblazer_api=config.trailblazer_api
     )
     deliver_service.deliver_order(signature=signature, ticket_id=ticket_id)
+    config.status_db.commit_to_store()

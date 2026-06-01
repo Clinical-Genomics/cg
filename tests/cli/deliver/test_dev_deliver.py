@@ -6,7 +6,11 @@ from mock import ANY
 from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
-from cg.cli.deliver.base import deliver_dev_all_cases, deliver_dev_case_command, deliver_dev_order
+from cg.cli.deliver.base import (
+    deliver_dev_all_available,
+    deliver_dev_case_command,
+    deliver_dev_order,
+)
 from cg.constants.process import EXIT_FAIL, EXIT_PARSE_ERROR, EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.services.deliver_service import DeliverService
@@ -106,10 +110,10 @@ def test_deliver_dev_all_available_command_success(mocker: MockerFixture):
         CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
     )
 
-    deliver_all_command = mocker.spy(DeliverService, "deliver_all_cases")
+    deliver_all_command = mocker.spy(DeliverService, "deliver_all_available")
 
     # WHEN delivering all available cases
-    result = cli_runner.invoke(deliver_dev_all_cases, obj=cg_config)
+    result = cli_runner.invoke(deliver_dev_all_available, obj=cg_config)
 
     # THEN the command should have exited successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -130,10 +134,10 @@ def test_deliver_dev_all_available_service_raises_error(mocker: MockerFixture):
     )
 
     # GIVEN that the deliver service raises an error
-    mocker.patch.object(DeliverService, "deliver_all_cases", side_effect=Exception)
+    mocker.patch.object(DeliverService, "deliver_all_available", side_effect=Exception)
 
     # WHEN calling the deliver all available cases command
-    result = cli_runner.invoke(deliver_dev_all_cases, obj=cg_config)
+    result = cli_runner.invoke(deliver_dev_all_available, obj=cg_config)
 
     # THEN the command failed due to service error
     assert result.exit_code == EXIT_FAIL

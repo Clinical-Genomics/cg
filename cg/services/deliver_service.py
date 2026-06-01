@@ -24,7 +24,7 @@ class DeliverService:
             status_db=status_db, trailblazer_api=trailblazer_api
         )
 
-    def deliver_all_cases(self) -> None:
+    def deliver_all_available(self) -> None:
         order_dict: dict[Order, list[Analysis]] = self._get_order_analyses_dictionary()
         if len(order_dict) == 0:
             LOG.warning("No analyses found to deliver.")
@@ -35,12 +35,8 @@ class DeliverService:
             except TrailblazerAnalysisDeliveryError:
                 # Samples marked but nothing in TB nor FD
                 self.status_db.rollback()
-            except TrailblazerFailedToGetAnalysesError:
-                # Samples marked TB analysis marked
-                self.status_db.rollback()
-                self.mark_as_delivered_service.unmark_analyses(analyses)
-            except FreshdeskDeliveryMessageError:
-                # Samples marked TB analysis marked nothing in FD
+            except (TrailblazerFailedToGetAnalysesError, FreshdeskDeliveryMessageError):
+                # Samples marked TB analysis marked, no FD
                 self.status_db.rollback()
                 self.mark_as_delivered_service.unmark_analyses(analyses)
             except FreshdeskClosingTicketError:
@@ -60,8 +56,7 @@ class DeliverService:
                     analyses=analyses_to_deliver, signature=signature
                 )
                 order: Order = analyses_to_deliver[0].order
-                if self._is_order_closable(order):
-                    order.is_open = False
+                self.mark_as_delivered_service.close_order_in_status_db_if_closable(order)
             case _:
                 raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
 
@@ -84,8 +79,7 @@ class DeliverService:
     ) -> None:
         LOG.info(f"Delivering {len(analyses)} analyses of ticket {order.ticket_id}.")
         self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
-        if self._is_order_closable(order):
-            order.is_open = False
+        self.mark_as_delivered_service.close_order_in_status_db_if_closable(order)
         self._freshdesk_send_delivery_message(order=order, analyses=analyses)
         self._freshdesk_close_ticket_if_open(order=order)
 
@@ -124,7 +118,11 @@ class DeliverService:
         return delivered_case_ids == case_ids_on_order and are_all_samples_delivered
 
     def _get_order_analyses_dictionary(self) -> dict[Order, list[Analysis]]:
-        # TODO: add docstring
+        """
+        Returns a dictionary with orders as keys and lists of analyses as values. Only includes
+        analyses that are marked as uploaded in StatusDB and not yet marked as delivered in
+        Trailblazer.
+        """
         undelivered_trailblazer_analyses: list[TrailblazerAnalysis] = (
             self.trailblazer_api.get_all_analyses_to_deliver()
         )
