@@ -33,6 +33,7 @@ class RawDataAnalysisService:
             started_at=dt.datetime.now(),
             case_id=case.id,
             trailblazer_id=trailblazer_id,
+            order_id=case.latest_order.id,
         )
         self.store.add_item_to_store(new_analysis)
         self.store.commit_to_store()
