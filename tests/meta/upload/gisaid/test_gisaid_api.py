@@ -151,3 +151,10 @@ def test_update_completion_file(
     gisaid_api.update_completion_file("case_id")
 
     assert Path(completion_file.full_path).read_text() == expected_updated_completion_file
+
+
+def test_upload(cg_config: CGConfig, completion_file: File, housekeeper_api: HousekeeperAPI):
+    housekeeper_api.get_file_from_latest_version = Mock(return_value=completion_file)
+    gisaid_api = GisaidAPI(config=cg_config)
+
+    gisaid_api.upload("case_id")
