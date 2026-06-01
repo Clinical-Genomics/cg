@@ -37,6 +37,7 @@ class StorePoolOrderService(StoreOrderService):
             skip_reception_control=order.skip_reception_control,
         )
         self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
+        self._queue_samples_in_workflow(samples=order.samples)
         new_records: list[Pool] = self.store_order_data_in_status_db(order=order)
         return {"project": project_data, "records": new_records}
 

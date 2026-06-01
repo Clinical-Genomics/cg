@@ -57,6 +57,7 @@ class StoreCaseOrderService(StoreOrderService):
             )
         if lims_map:
             self._fill_in_sample_ids(samples=new_samples, lims_map=lims_map)
+            self._queue_samples_in_workflow(samples=new_samples)
 
         new_cases: list[DbCase] = self.store_order_data_in_status_db(order)
         return {"project": project_data, "records": new_cases}
