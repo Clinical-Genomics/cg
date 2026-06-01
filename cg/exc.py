@@ -375,3 +375,11 @@ class ApplicationDoesNotHaveHiFiYieldError(CgError):
 
 class MultipleAnalysesToDeliverError(CgError):
     """Exception raised when multiple analyses are ready for delivery for a case."""
+
+
+class FreshdeskDeliveryMessageError(CgError):
+    """Exception raised when sending the delivery message in Freshdesk fails."""
+
+
+class FreshdeskClosingTicketError(CgError):
+    """Exception raised when closing a ticket in Freshdesk fails."""

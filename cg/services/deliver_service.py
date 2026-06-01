@@ -1,13 +1,11 @@
 import logging
-from http.client import HTTPException
-
-from requests import HTTPError
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.exc import (
+    FreshdeskClosingTicketError,
+    FreshdeskDeliveryMessageError,
     MultipleAnalysesToDeliverError,
-    TrailblazerAPIHTTPError,
     TrailblazerAnalysisDeliveryError,
     TrailblazerFailedToGetAnalysesError,
 )
@@ -41,11 +39,11 @@ class DeliverService:
                 # Samples marked TB analysis marked
                 self.status_db.rollback()
                 self.mark_as_delivered_service.unmark_analyses(analyses)
-            except HTTPError:
+            except FreshdeskDeliveryMessageError:
                 # Samples marked TB analysis marked nothing in FD
-                self.mark_as_delivered_service.unmark_analyses(analyses)
                 self.status_db.rollback()
-            except HTTPException2:
+                self.mark_as_delivered_service.unmark_analyses(analyses)
+            except FreshdeskClosingTicketError:
                 # Samples marked TB analysis marked, delivery message sent in FD, potentially order closed in StatusDB
                 order.is_open = True
                 self.status_db.commit_to_store()
@@ -86,27 +84,10 @@ class DeliverService:
     ) -> None:
         LOG.info(f"Delivering {len(analyses)} analyses of ticket {order.ticket_id}.")
         self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
-        is_order_closable: bool = self._is_order_closable(order)
-        if is_order_closable:
-            order.is_open = False
-        self._freshdesk_send_delivery_message(order=order, analyses=analyses)
-        if is_order_closable:
-            self._freshdesk_close_ticket_if_open(order=order)
-
-    def _deliver_analyses_in_order(
-        self, order: Order, analyses: list[Analysis], signature: str | None = None
-    ) -> None:
-        # TODO docstring
-        LOG.info(f"Delivering {len(analyses)} analyses of ticket {order.ticket_id}.")
-        self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
-        self._freshdesk_send_delivery_message(order=order, analyses=analyses)
-
-    def _close_order_and_ticket_if_applicable(self, order: Order) -> None:
-        # TODO docstring
         if self._is_order_closable(order):
-            LOG.info(f"Closing order {order.id} in StatusDB.")
             order.is_open = False
-            self._freshdesk_close_ticket_if_open(order=order)
+        self._freshdesk_send_delivery_message(order=order, analyses=analyses)
+        self._freshdesk_close_ticket_if_open(order=order)
 
     def _get_undelivered_analyses_for_case(self, case_id: str) -> list[Analysis]:
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
