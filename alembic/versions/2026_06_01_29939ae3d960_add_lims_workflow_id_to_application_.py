@@ -1,7 +1,7 @@
 """Add lims_workflow_id to application table
 
 Revision ID: 29939ae3d960
-Revises: fabd19666215
+Revises: 8cd14469c35f
 Create Date: 2026-06-01 15:22:32.469192
 
 """
@@ -12,7 +12,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "29939ae3d960"
-down_revision = "fabd19666215"
+down_revision = "8cd14469c35f"
 branch_labels = None
 depends_on = None
 
