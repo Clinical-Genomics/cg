@@ -32,17 +32,17 @@ class DeliverService:
             except TrailblazerAPIHTTPError:
                 # Samples marked but nothing in TB nor FD
                 self.status_db.rollback()
-            except HTTPError:
-                # Samples marked TB analysis marked nothing in FD
-                self.mark_as_delivered_service.unmark_analyses(analyses)
-                self.status_db.rollback()
             except TrailblazerAPIHTTPError2 as error:
                 LOG.error(
                     f"Not able to determine if the order {order.id} is closable. "
                     f"Exception: {str(error)}"
                 )
                 self.status_db.commit_to_store()
-                # Samples marked TB analysis marked, delivery message sent in FD
+                # Samples marked TB analysis marked
+            except HTTPError:
+                # Samples marked TB analysis marked nothing in FD
+                self.mark_as_delivered_service.unmark_analyses(analyses)
+                self.status_db.rollback()
             except HTTPException2:
                 # Samples marked TB analysis marked, delivery message sent in FD, potentially order closed in StatusDB
                 order.is_open = True
@@ -83,8 +83,15 @@ class DeliverService:
         self, order: Order, analyses: list[Analysis], signature: str | None = None
     ) -> None:
         # TODO consider whether to keep double commit-rollbacks and separation from methods
-        self._deliver_analyses_in_order(order=order, analyses=analyses, signature=signature)
-        self._close_order_and_ticket_if_applicable(order=order)
+
+        LOG.info(f"Delivering {len(analyses)} analyses of ticket {order.ticket_id}.")
+        self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
+        is_order_closable: bool = self._is_order_closable(order)
+        if is_order_closable:
+            order.is_open = False
+        self._freshdesk_send_delivery_message(order=order, analyses=analyses)
+        if is_order_closable:
+            self._freshdesk_close_ticket_if_open(order=order)
 
     def _deliver_analyses_in_order(
         self, order: Order, analyses: list[Analysis], signature: str | None = None
