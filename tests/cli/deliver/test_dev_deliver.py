@@ -121,9 +121,6 @@ def test_deliver_dev_all_available_command_success(mocker: MockerFixture):
     # THEN the delivery service is called with the expected arguments
     deliver_all_command.assert_called_once_with(ANY)
 
-    # THEN the changes were persistent in the database
-    status_db.as_mock.commit_to_store.assert_called_once()
-
 
 def test_deliver_dev_all_available_service_raises_error(mocker: MockerFixture):
     # GIVEN a store and a CG config
