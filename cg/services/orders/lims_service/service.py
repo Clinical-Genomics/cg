@@ -1,6 +1,5 @@
 import logging
 
-from genologics.config import BASEURI
 from genologics.entities import Artifact
 from requests.exceptions import HTTPError
 
@@ -92,7 +91,7 @@ class OrderLimsService:
             try:
                 self.lims_api.route_artifacts(
                     artifact_list=arts,
-                    workflow_uri=f"{BASEURI}/api/v2/configuration/workflows/{wf_id}",
+                    workflow_uri=f"{self.lims_api.get_uri()}/configuration/workflows/{wf_id}",
                 )
             except HTTPError:
                 LOG.exception(f"Failed to add {len(arts)} artifacts to workflow {wf_id}.")
