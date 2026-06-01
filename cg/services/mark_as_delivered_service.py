@@ -5,6 +5,7 @@ from requests import Response
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.constants import Workflow
+from cg.exc import TrailblazerAnalysisDeliveryError, TrailblazerAPIHTTPError
 from cg.store.models import Analysis, Case, CaseSample, Sample
 from cg.store.store import Store
 
@@ -24,12 +25,16 @@ class MarkAsDeliveredService:
         for analysis in analyses:
             self._mark_samples_in_analysis(analysis)
             trailblazer_ids.append(analysis.trailblazer_id)
-        return self.trailblazer_api.set_analyses_delivery_status(
-            auth_token=auth_token,
-            is_delivered=True,
-            signature=signature,
-            trailblazer_ids=trailblazer_ids,
-        )
+        try:
+            response: Response = self.trailblazer_api.set_analyses_delivery_status(
+                auth_token=auth_token,
+                is_delivered=True,
+                signature=signature,
+                trailblazer_ids=trailblazer_ids,
+            )
+        except TrailblazerAPIHTTPError as error:
+            raise TrailblazerAnalysisDeliveryError from error
+        return response
 
     def unmark_analyses(self, analyses: list[Analysis]):
         trailblazer_ids: list[int] = [analysis.trailblazer_id for analysis in analyses]

@@ -5,7 +5,12 @@ from requests import HTTPError
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.exc import MultipleAnalysesToDeliverError, TrailblazerAPIHTTPError
+from cg.exc import (
+    MultipleAnalysesToDeliverError,
+    TrailblazerAPIHTTPError,
+    TrailblazerAnalysisDeliveryError,
+    TrailblazerFailedToGetAnalysesError,
+)
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
 from cg.store.models import Analysis, Case, Order
 from cg.store.store import Store
@@ -29,16 +34,13 @@ class DeliverService:
         for order, analyses in order_dict.items():
             try:
                 self._deliver_order(order=order, analyses=analyses)
-            except TrailblazerAPIHTTPError:
+            except TrailblazerAnalysisDeliveryError:
                 # Samples marked but nothing in TB nor FD
                 self.status_db.rollback()
-            except TrailblazerAPIHTTPError2 as error:
-                LOG.error(
-                    f"Not able to determine if the order {order.id} is closable. "
-                    f"Exception: {str(error)}"
-                )
-                self.status_db.commit_to_store()
+            except TrailblazerFailedToGetAnalysesError:
                 # Samples marked TB analysis marked
+                self.status_db.rollback()
+                self.mark_as_delivered_service.unmark_analyses(analyses)
             except HTTPError:
                 # Samples marked TB analysis marked nothing in FD
                 self.mark_as_delivered_service.unmark_analyses(analyses)
@@ -82,8 +84,6 @@ class DeliverService:
     def _deliver_order(
         self, order: Order, analyses: list[Analysis], signature: str | None = None
     ) -> None:
-        # TODO consider whether to keep double commit-rollbacks and separation from methods
-
         LOG.info(f"Delivering {len(analyses)} analyses of ticket {order.ticket_id}.")
         self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
         is_order_closable: bool = self._is_order_closable(order)

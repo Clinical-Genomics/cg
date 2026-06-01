@@ -16,7 +16,12 @@ from cg.constants import Workflow
 from cg.constants.constants import APIMethods, FileFormat, JobType, WorkflowManager
 from cg.constants.priority import TrailblazerPriority
 from cg.constants.tb import AnalysisStatus
-from cg.exc import AnalysisNotCompletedError, TrailblazerAnalysisNotFound, TrailblazerAPIHTTPError
+from cg.exc import (
+    AnalysisNotCompletedError,
+    TrailblazerAnalysisNotFound,
+    TrailblazerAPIHTTPError,
+    TrailblazerFailedToGetAnalysesError,
+)
 from cg.io.controller import APIRequest, ReadStream
 
 LOG = logging.getLogger(__name__)
@@ -254,7 +259,7 @@ class TrailblazerAPI:
         url = f"{self.host}/analyses?order_id={order_id}&status[]=completed&delivered=true"
         response = requests.get(url=url, headers=self.auth_header)
         if not response.ok:
-            raise TrailblazerAPIHTTPError(response.reason)
+            raise TrailblazerFailedToGetAnalysesError(response.reason)
         validated_response = AnalysesResponse.model_validate(response.json())
         return validated_response.analyses
 

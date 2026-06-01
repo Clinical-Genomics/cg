@@ -244,6 +244,14 @@ class TrailblazerAPIHTTPError(CgError):
     """Raised when Trailblazer REST API response code is not 2XX/3XX."""
 
 
+class TrailblazerAnalysisDeliveryError(TrailblazerAPIHTTPError):
+    """Raised when marking analyses as delivered in Trailblazer fails."""
+
+
+class TrailblazerFailedToGetAnalysesError(TrailblazerAPIHTTPError):
+    """Raised when Trailblazer API fails to get analyses."""
+
+
 class TrailblazerAnalysisNotFound(CgError):
     """Raised when a Trailblazer analysis is not found."""
 
