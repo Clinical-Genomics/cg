@@ -28,13 +28,6 @@ class EventListener:
     def register(self, subject: str, handler: Callable) -> None:
         self._handlers[subject] = handler
 
-    def _tls_context(self) -> SSLContext:
-        ctx: SSLContext = ssl.create_default_context(Purpose.SERVER_AUTH)
-        ctx.minimum_version = TLSVersion.TLSv1_2
-        ctx.load_verify_locations(self.ca_cert_path)
-        ctx.load_cert_chain(certfile=self.client_cert, keyfile=self.client_key)
-        return ctx
-
     async def listen(self) -> None:
         nc: Client = await nats.connect(
             servers=self.server, tls=self._tls_context(), token=self.token
@@ -55,3 +48,10 @@ class EventListener:
             else:
                 LOG.warning(f"No handler registered for {msg.subject}")
                 await msg.ack()
+
+    def _tls_context(self) -> SSLContext:
+        ctx: SSLContext = ssl.create_default_context(Purpose.SERVER_AUTH)
+        ctx.minimum_version = TLSVersion.TLSv1_2
+        ctx.load_verify_locations(self.ca_cert_path)
+        ctx.load_cert_chain(certfile=self.client_cert, keyfile=self.client_key)
+        return ctx

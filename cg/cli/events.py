@@ -8,7 +8,7 @@ from cg.services.events.event_listener import EventListener
 
 @click.command("listen", hidden=True)
 @click.pass_obj
-def listen(context: CGConfig):
-    listener = EventListener(context.event_listener)
+def listen(config: CGConfig):
+    listener = EventListener(config.nats)
     listener.register("cg.upload.completed", lambda msg: click.echo(f"Received message: {msg}"))
     asyncio.run(listener.listen())
