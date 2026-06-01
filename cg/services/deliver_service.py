@@ -1,6 +1,8 @@
 import logging
 from http.client import HTTPException
 
+from requests import HTTPError
+
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.exc import MultipleAnalysesToDeliverError, TrailblazerAPIHTTPError
@@ -25,7 +27,19 @@ class DeliverService:
             LOG.warning("No analyses found to deliver.")
             return
         for order, analyses in order_dict.items():
-            self._deliver_order(order=order, analyses=analyses)
+            try:
+                self._deliver_order(order=order, analyses=analyses)
+            except TrailblazerAPIHTTPError:
+                # Samples marked but nothing in TB nor FD
+                pass
+            except HTTPError:
+                # Samples marked TB analysis marked nothing in FD
+                pass
+            except TrailblazerAPIHTTPError2:
+                # Samples marked TB analysis marked, delivery message sent in FD
+                pass
+            except Exception:
+                pass
 
     def deliver_case(self, case_id: str, signature: str):
         analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses_for_case(case_id)
@@ -43,7 +57,6 @@ class DeliverService:
                 raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
 
     def deliver_order(self, ticket_id: int, signature: str):
-        # TODO update to reflect changes in deliver_all_cases
         order: Order = self.status_db.get_order_by_ticket_id_strict(ticket_id)
 
         undelivered_trailblazer_analyses = self.trailblazer_api.get_analyses_to_deliver(order.id)
@@ -61,37 +74,16 @@ class DeliverService:
         self, order: Order, analyses: list[Analysis], signature: str | None = None
     ) -> None:
         # TODO consider whether to keep double commit-rollbacks and separation from methods
-        if self._deliver_analyses_in_order(order=order, analyses=analyses, signature=signature):
-            self._close_order_and_ticket_if_applicable(order=order)
-        else:
-            LOG.error(f"Will not attempt to close order {order.id} and ticket {order.ticket_id}.")
+        self._deliver_analyses_in_order(order=order, analyses=analyses, signature=signature)
+        self._close_order_and_ticket_if_applicable(order=order)
 
     def _deliver_analyses_in_order(
         self, order: Order, analyses: list[Analysis], signature: str | None = None
-    ) -> bool:
+    ) -> None:
         # TODO docstring
         LOG.info(f"Delivering {len(analyses)} analyses of ticket {order.ticket_id}.")
-        try:
-            self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
-            self._freshdesk_send_delivery_message(order=order, analyses=analyses)
-        except TrailblazerAPIHTTPError:
-            LOG.error(
-                f"Failed to deliver analyses in Trailblazer for order {order.id}. "
-                f"Aborting delivery message for ticket {order.ticket_id}."
-            )
-            self.status_db.rollback()
-            return False
-        except HTTPException:
-            self.mark_as_delivered_service.unmark_analyses(analyses)
-            LOG.error(
-                f"Failed to send delivery message for ticket {order.ticket_id}. "
-                f"Rolling back delivery status in Trailblazer and StatusDB for order {order.id}."
-            )
-            self.status_db.rollback()
-            return False
-        else:
-            self.status_db.commit_to_store()
-            return True
+        self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
+        self._freshdesk_send_delivery_message(order=order, analyses=analyses)
 
     def _close_order_and_ticket_if_applicable(self, order: Order) -> None:
         # TODO docstring
