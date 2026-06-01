@@ -1,4 +1,5 @@
 from cg.models.orders.constants import OrderType
+from cg.models.orders.sample_base import SexEnum
 from cg.services.orders.validation.errors.sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
@@ -20,6 +21,7 @@ from cg.services.orders.validation.errors.sample_errors import (
     SampleError,
     SampleNameNotAvailableControlError,
     SampleNameRepeatedError,
+    SexUnknownWarning,
     VolumeRequiredError,
     WellFormatError,
     WellFormatRmlError,
@@ -402,3 +404,12 @@ def validate_source_comment_required(
             error = MissingSourceCommentError(sample_index=sample_index)
             errors.append(error)
     return errors
+
+
+def warn_if_sex_unknown(order: PacbioOrder, **kwargs) -> list[SexUnknownWarning]:
+    warnings: list[SexUnknownWarning] = []
+    for sample_index, sample in order.enumerated_samples:
+        if sample.sex == SexEnum.unknown:
+            warning = SexUnknownWarning(sample_index=sample_index)
+            warnings.append(warning)
+    return warnings
