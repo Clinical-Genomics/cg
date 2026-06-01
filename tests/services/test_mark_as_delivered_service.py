@@ -6,10 +6,11 @@ import pytest
 from requests import Response
 
 from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.constants import Workflow
 from cg.exc import TrailblazerAPIHTTPError
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
-from cg.store.models import Analysis, Case, CaseSample, Sample
+from cg.store.models import Analysis, Case, CaseSample, Order, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -310,3 +311,66 @@ def test_mark_analyses_negative_control(
 
     # THEN the sample should have a delivered_at set
     assert negative_control_sample.delivered_at is not None
+
+
+def test_is_order_closable_true(mark_as_delivered_service: MarkAsDeliveredService):
+    # GIVEN an open order with a case that includes only delivered samples
+    sample_delivered1: Sample = create_autospec(Sample, delivered_at=datetime.now())
+    sample_delivered2: Sample = create_autospec(Sample, delivered_at=datetime.now())
+    case: Case = create_autospec(
+        Case, samples=[sample_delivered1, sample_delivered2], internal_id="case_id"
+    )
+    order: Order = create_autospec(Order, cases=[case])
+
+    # GIVEN that the case has a delivered analysis in Trailblazer
+    analysis: TrailblazerAnalysis = create_autospec(TrailblazerAnalysis, case_id="case_id")
+    mark_as_delivered_service.trailblazer_api.get_delivered_analyses_for_order = Mock(
+        return_value=[analysis]
+    )
+
+    # WHEN checking if the order can be closed
+    # THEN it returns True
+    assert mark_as_delivered_service._is_order_closable(order)
+
+
+def test_is_order_closeable_false_undelivered_samples(
+    mark_as_delivered_service: MarkAsDeliveredService,
+):
+    # GIVEN an open order with a case that includes undelivered samples
+    sample_delivered1: Sample = create_autospec(Sample, delivered_at=datetime.now())
+    sample_delivered2: Sample = create_autospec(Sample, delivered_at=None)
+    case: Case = create_autospec(
+        Case, samples=[sample_delivered1, sample_delivered2], internal_id="case_id"
+    )
+    order: Order = create_autospec(Order, cases=[case])
+
+    # GIVEN that the case has a delivered analysis in Trailblazer
+    analysis: TrailblazerAnalysis = create_autospec(TrailblazerAnalysis, case_id="case_id")
+    mark_as_delivered_service.trailblazer_api.get_delivered_analyses_for_order = Mock(
+        return_value=[analysis]
+    )
+
+    # WHEN checking if the order can be closed
+    # THEN it returns False
+    assert not mark_as_delivered_service._is_order_closable(order)
+
+
+def test_is_order_closeable_false_undelivered_analysis(
+    mark_as_delivered_service: MarkAsDeliveredService,
+):
+    # GIVEN an open order with a case that includes only samples that have a delivered_at
+    sample_delivered1: Sample = create_autospec(Sample, delivered_at=datetime.now())
+    sample_delivered2: Sample = create_autospec(Sample, delivered_at=datetime.now())
+    case: Case = create_autospec(
+        Case, samples=[sample_delivered1, sample_delivered2], internal_id="case_id"
+    )
+    order: Order = create_autospec(Order, cases=[case])
+
+    # GIVEN that the case has no delivered analyses in Trailblazer
+    mark_as_delivered_service.trailblazer_api.get_delivered_analyses_for_order = Mock(
+        return_value=[]
+    )
+
+    # WHEN checking if the order can be closed
+    # THEN it returns False
+    assert not mark_as_delivered_service._is_order_closable(order)
