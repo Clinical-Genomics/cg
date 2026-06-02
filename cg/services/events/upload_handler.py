@@ -1,2 +1,3 @@
-def completed(message: str):
+def completed(message: dict):
+
     pass
