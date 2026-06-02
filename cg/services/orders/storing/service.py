@@ -41,7 +41,7 @@ class StoreOrderService(ABC):
         """Given a list of order samples, this method will
 
         for each sample:
-        - Find a unique matching LIMS sample by matching ID (relies on ´_fill_in_sample_ids´)
+        - Get the corresponding genologics sample object via the ID (relies on ´_fill_in_sample_ids´)
         - Collect the appropriate LIMS workflow ID via the Application database table
 
         for each collected workflow ID:
