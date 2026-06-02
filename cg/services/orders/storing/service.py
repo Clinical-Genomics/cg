@@ -4,6 +4,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import TypeVar
 
+from genologics.entities import Sample as LimsSample
 from genologics.lims import Artifact
 from requests import HTTPError
 
@@ -49,13 +50,13 @@ class StoreOrderService(ABC):
         # Build dict mapping workflow ID to a list of LIMS artifacts to be routed
         wf_id2arts: dict[str, list[Artifact]] = {}
         for sample in samples:
-            matching_lims_samples = self.lims.lims_api.get_samples(id=sample._generated_lims_id)
-            lims_art: Artifact = matching_lims_samples[0].artifact  # type: ignore
+            lims_sample = LimsSample(self.lims.lims_api, id=sample._generated_lims_id)
+            lims_art: Artifact = lims_sample.artifact  # type: ignore
 
             wf_id = self.status_db.get_lims_workflow_id_by_application_tag(sample.application)
             if not wf_id:
                 LOG.info(
-                    f"Sample {lims_art.samples[0].id} has no LIMS workflow ID associated to it's application, skipping."
+                    f"Sample {lims_sample.id} has no LIMS workflow ID associated to it's application, skipping."
                 )
                 continue
 
