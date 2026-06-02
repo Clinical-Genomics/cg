@@ -406,13 +406,22 @@ def base_config_dict() -> dict:
                 "demultiplexed_runs_dir": "path/to/demultiplexed_flow_cells_dir",
             },
         },
-        "event_listener": {
-            "ca_cert_path": Path("ca_cert_path"),
-            "client_cert_path": Path("client_cert_path"),
-            "client_key_path": Path("client_key_path"),
-            "nats_binary_path": Path("nats_binary_path"),
+        "nats": {
             "server": "https://nats.scilifelab.se",
-            "token_path": Path("event_listener_token"),
+            "listener": {
+                "ca_cert_path": Path("ca_cert_path"),
+                "client_cert_path": Path("client_cert_path"),
+                "client_key_path": Path("client_key_path"),
+                "nats_binary_path": Path("nats_binary_path"),
+                "token_path": Path("event_listener_token"),
+            },
+            "publisher": {
+                "ca_cert_path": Path("ca_cert_path"),
+                "client_cert_path": Path("client_cert_path"),
+                "client_key_path": Path("client_key_path"),
+                "nats_binary_path": Path("nats_binary_path"),
+                "token_path": Path("event_listener_token"),
+            },
         },
         "downsample": {
             "downsample_dir": "path/to/downsample_dir",
@@ -1995,13 +2004,22 @@ def context_config(
                 "demultiplexed_runs_dir": str(illumina_demultiplexed_runs_directory),
             },
         },
-        "event_listener": {
-            "ca_cert_path": Path("ca_cert_path"),
-            "client_cert_path": Path("client_cert_path"),
-            "client_key_path": Path("client_key_path"),
-            "nats_binary_path": Path("nats_binary_path"),
+        "nats": {
             "server": "https://nats.scilifelab.se",
-            "token_path": Path("event_listener_token"),
+            "publisher": {
+                "ca_cert_path": Path("ca_cert_path"),
+                "client_cert_path": Path("client_cert_path"),
+                "client_key_path": Path("client_key_path"),
+                "nats_binary_path": Path("nats_binary_path"),
+                "token_path": Path("event_listener_token"),
+            },
+            "listener": {
+                "ca_cert_path": Path("ca_cert_path"),
+                "client_cert_path": Path("client_cert_path"),
+                "client_key_path": Path("client_key_path"),
+                "nats_binary_path": Path("nats_binary_path"),
+                "token_path": Path("event_listener_token"),
+            },
         },
         "downsample": {
             "downsample_dir": str(downsample_dir),

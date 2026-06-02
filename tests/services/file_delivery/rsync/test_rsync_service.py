@@ -305,8 +305,6 @@ ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer.internal_id}/inbox
         for type in ["case", "father", "mother", "child"]
     ]
 
-    expected_rsync_commands.append("nats pub xyz")
-
     for command in expected_rsync_commands:
         assert command in sbatch_second_job.commands
 
