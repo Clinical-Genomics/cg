@@ -42,18 +42,20 @@ class DeliveryRsyncService:
     def __init__(
         self,
         delivery_path: str,
+        nats_config,
         rsync_config: RsyncDeliveryConfig,
         status_db: Store,
     ):
-        self.status_db = status_db
-        self.delivery_path: str = delivery_path
-        self.destination_path: str = rsync_config.destination_path
+        self.account: str = rsync_config.account
+        self.base_path: Path = Path(rsync_config.base_path)
         self.covid_destination_path: str = rsync_config.covid_destination_path
         self.covid_report_path: str = rsync_config.covid_report_path
-        self.base_path: Path = Path(rsync_config.base_path)
-        self.account: str = rsync_config.account
+        self.delivery_path: str = delivery_path
+        self.destination_path: str = rsync_config.destination_path
         self.log_dir: Path = Path(rsync_config.base_path)
         self.mail_user: str = rsync_config.mail_user
+        self.nats_config = nats_config
+        self.status_db = status_db
         self.workflow: str = Workflow.RSYNC
 
     @property
@@ -306,8 +308,11 @@ class DeliveryRsyncService:
             ticket=ticket,
             case=case,
         )
+        analysis_id: int = self.status_db.get_latest_completed_analysis_for_case(
+            case.internal_id
+        ).id
         data = {
-            "cg.analysis_id": case.latest_completed_analysis.id,
+            "cg.analysis_id": analysis_id,
             "uploaded_at": "$(date +%Y-%m-%dT%H:%M:%SZ)",
         }
         command += "\n" + publish_command(

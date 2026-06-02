@@ -832,6 +832,7 @@ class CGConfig(BaseModel):
             rsync_config = RsyncDeliveryConfig(**self.data_delivery.dict())
             service = DeliveryRsyncService(
                 delivery_path=self.delivery_path,
+                nats_config=self.nats,
                 rsync_config=rsync_config,
                 status_db=self.status_db,
             )
