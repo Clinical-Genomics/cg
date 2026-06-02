@@ -31,17 +31,12 @@ class OrderHandler:
             container_map[lims_container.name] = lims_container
         return container_map
 
-    def save_samples(self, sample_details: ObjectifiedElement, map_samples=False):
-        """Save a batch of samples."""
+    def save_samples(self, sample_details: ObjectifiedElement) -> list[Sample]:
+        """Save a batch of samples and return the corresponding genologics sample objects"""
         sample_uri = f"{self.get_uri()}/samples/batch/create"
         results = self.save_xml(sample_uri, sample_details)
-        if map_samples:
-            sample_map = {}
-            for link in results.findall("link"):
-                lims_sample = Sample(self, uri=link.attrib["uri"])
-                sample_map[lims_sample.name] = lims_sample
-            return sample_map
-        return results
+        lims_samples = [Sample(self, uri=link.attrib["uri"]) for link in results.findall("link")]
+        return lims_samples
 
     def update_artifacts(self, artifact_details: ObjectifiedElement):
         """Update/put a batch of artifacts."""
@@ -49,8 +44,12 @@ class OrderHandler:
         results = self.save_xml(artifact_uri, artifact_details)
         return results
 
-    def submit_project(self, project_name: str, samples: list[dict]):
-        """Parse LIMS project."""
+    def submit_project(
+        self, project_name: str, samples: list[dict]
+    ) -> tuple[dict[str, str], list[Sample]]:
+        """Create LIMS project and associated samples.
+        Return dict with project information and list of LIMS sample objects.
+        """
         containers = self.prepare(samples)
 
         lims_project = Project.create(
@@ -92,13 +91,13 @@ class OrderHandler:
                 )
                 samples_data.append(sample_data)
         sample_details = batch.build_sample_batch(samples_data)
-        process_reagentlabels = len(reagentlabel_samples) > 0
-        sample_map = self.save_samples(sample_details, map_samples=process_reagentlabels)
+        lims_samples: list[Sample] = self.save_samples(sample_details)
 
-        if process_reagentlabels:
+        if len(reagentlabel_samples) > 0:
+            name2sample = {s.name: s for s in lims_samples}
             artifacts_data = [
                 batch.build_artifact(
-                    artifact=sample_map[sample["name"]].artifact,
+                    artifact=name2sample[sample.name].artifact,  # type: ignore
                     reagent_label=sample["index_sequence"],
                 )
                 for sample in reagentlabel_samples
@@ -107,7 +106,7 @@ class OrderHandler:
             self.update_artifacts(artifact_details)
 
         lims_project_data = self._export_project(lims_project)
-        return lims_project_data
+        return lims_project_data, lims_samples
 
     @classmethod
     def prepare(cls, samples):

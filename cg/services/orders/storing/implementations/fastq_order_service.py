@@ -1,10 +1,8 @@
 import logging
 from datetime import datetime
 
-from cg.constants import DataDelivery, GenePanelMasterList, Priority, Workflow
-from cg.constants.constants import CustomerId
+from cg.constants import DataDelivery, Workflow
 from cg.constants.lims import LimsStatus
-from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
@@ -26,7 +24,7 @@ class StoreFastqOrderService(StoreOrderService):
 
     def store_order(self, order: FastqOrder) -> dict:
         """Submit a batch of samples for FASTQ delivery."""
-        project_data, lims_map = self.lims.process_lims(
+        project_data, lims_samples = self.lims.process_lims(
             samples=order.samples,
             ticket=order._generated_ticket_id,
             order_name=order.name,
@@ -35,8 +33,8 @@ class StoreFastqOrderService(StoreOrderService):
             delivery_type=DataDelivery(order.delivery_type),
             skip_reception_control=order.skip_reception_control,
         )
-        self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
-        self._queue_samples_in_workflow(samples=order.samples)
+        self._fill_in_sample_ids(samples=order.samples, lims_samples=lims_samples)
+        self._queue_samples_in_workflow(lims_samples=lims_samples)
         new_samples: list[Sample] = self.store_order_data_in_status_db(order=order)
         return {"records": new_samples, "project": project_data}
 

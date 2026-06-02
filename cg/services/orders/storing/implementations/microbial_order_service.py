@@ -10,11 +10,9 @@ from cg.services.orders.validation.order_types.microsalt.models.order import Mic
 from cg.services.orders.validation.order_types.microsalt.models.sample import MicrosaltSample
 from cg.services.orders.validation.order_types.mutant.models.order import MutantOrder
 from cg.services.orders.validation.order_types.mutant.models.sample import MutantSample
-from cg.store.models import ApplicationVersion
+from cg.store.models import ApplicationVersion, CaseSample, Customer, Organism
 from cg.store.models import Case as DbCase
-from cg.store.models import CaseSample, Customer
 from cg.store.models import Order as DbOrder
-from cg.store.models import Organism
 from cg.store.models import Sample as DbSample
 from cg.store.store import Store
 
@@ -38,7 +36,7 @@ class StoreMicrobialOrderService(StoreOrderService):
 
     def store_order(self, order: MicrobialOrder) -> dict:
         self._fill_in_sample_verified_organism(order.samples)
-        project_data, lims_map = self.lims.process_lims(
+        project_data, lims_samples = self.lims.process_lims(
             samples=order.samples,
             customer=order.customer,
             ticket=order._generated_ticket_id,
@@ -47,8 +45,8 @@ class StoreMicrobialOrderService(StoreOrderService):
             delivery_type=DataDelivery(order.delivery_type),
             skip_reception_control=order.skip_reception_control,
         )
-        self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
-        self._queue_samples_in_workflow(samples=order.samples)
+        self._fill_in_sample_ids(samples=order.samples, lims_samples=lims_samples)
+        self._queue_samples_in_workflow(lims_samples=lims_samples)
         samples = self.store_order_data_in_status_db(order)
         return {"project": project_data, "records": samples}
 

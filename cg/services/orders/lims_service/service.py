@@ -1,5 +1,7 @@
 import logging
 
+from genologics.entities import Sample as GenologicsSample
+
 from cg.apps.lims import LimsAPI
 from cg.constants import DataDelivery, Workflow
 from cg.models.lims.sample import LimsSample
@@ -49,8 +51,8 @@ class OrderLimsService:
         workflow: Workflow,
         delivery_type: DataDelivery,
         skip_reception_control: bool,
-    ) -> tuple[any, dict]:
-        """Process samples to add them to LIMS."""
+    ) -> tuple[dict[str, str], list[GenologicsSample]]:
+        """Create a project and associated samples in LIMS."""
         samples_lims: list[LimsSample] = self._build_lims_sample(
             customer=customer,
             samples=samples,
@@ -59,11 +61,9 @@ class OrderLimsService:
             skip_reception_control=skip_reception_control,
         )
         project_name: str = str(ticket) or order_name
-        # Create new lims project
-        project_data = self.lims_api.submit_project(
+
+        project_data, lims_samples = self.lims_api.submit_project(
             project_name, [lims_sample.dict() for lims_sample in samples_lims]
         )
-        lims_map: dict[str, str] = self.lims_api.get_samples(
-            projectlimsid=project_data["id"], map_ids=True
-        )
-        return project_data, lims_map
+
+        return project_data, lims_samples
