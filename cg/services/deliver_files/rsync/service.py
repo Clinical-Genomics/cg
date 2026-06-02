@@ -31,6 +31,7 @@ from cg.services.deliver_files.rsync.sbatch_commands import (
     ERROR_RSYNC_FUNCTION,
     RSYNC_COMMAND,
 )
+from cg.services.events.event_publisher import publish_command
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -305,7 +306,13 @@ class DeliveryRsyncService:
             ticket=ticket,
             case=case,
         )
-
+        data = {
+            "cg.analysis_id": case.latest_completed_analysis.id,
+            "uploaded_at": "$(date +%Y-%m-%dT%H:%M:%SZ)",
+        }
+        command += "\n" + publish_command(
+            nats_config=self.nats_config, subject="cg.upload.completed", data=data
+        )
         # TODO: add command that publishes nats event here?
         # f"nats pub --server SERVER --tlsca CA --tlscert CLIENT_CRT --tlskey CLIENT_KEY --token TOKEN cg.upload.completed "{\"case\": \"{case.internal_id}\", \"uploaded_at\": \"$(date +%Y-%m-%dT%H:%M:%SZ)\"}"
 
