@@ -55,8 +55,7 @@ class StoreOrderService(ABC):
             wf_id = self.status_db.get_lims_workflow_id_by_application_tag(sample.application)
             if not wf_id:
                 LOG.info(
-                    f"Sample {lims_art.samples[0].id} has no LIMS workflow ID associated"
-                    + " to it's application, skipping."
+                    f"Sample {lims_art.samples[0].id} has no LIMS workflow ID associated to it's application, skipping."
                 )
                 continue
 
