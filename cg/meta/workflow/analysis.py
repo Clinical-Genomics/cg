@@ -241,6 +241,7 @@ class AnalysisAPI(MetaAPI):
             primary=is_primary,
             started_at=analysis_start,
             trailblazer_id=trailblazer_id,
+            order_id=case.latest_order.id,
         )
         new_analysis.case = case
         self.status_db.add_item_to_store(new_analysis)

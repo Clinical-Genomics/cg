@@ -176,6 +176,7 @@ def test_track(
         trailblazer_id=1,
         version=pipeline_version,
         workflow=workflow,
+        order_id=case.latest_order.id,
     )
 
     # THEN the items are added to the database

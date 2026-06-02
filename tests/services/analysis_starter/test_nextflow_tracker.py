@@ -97,4 +97,5 @@ def test_nextflow_tracker():
         trailblazer_id=trailblazer_entry_id,
         version="1.0.0",
         workflow=Workflow.RAREDISEASE,
+        order_id=case.latest_order.id,
     )
