@@ -29,6 +29,6 @@ def test_listen(mocker: MockerFixture):
             ),
         ),
     )
+    # TODO: Finish this test
     cli_runner = CliRunner()
-    mocker.spy
     cli_runner.invoke(listen, obj=config)
