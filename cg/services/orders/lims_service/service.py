@@ -52,6 +52,7 @@ class OrderLimsService:
         delivery_type: DataDelivery,
         skip_reception_control: bool,
     ) -> tuple[dict[str, str], list[GenologicsSample]]:
+        # TODO bake into single dict?
         """Create a project and associated samples in LIMS."""
         samples_lims: list[LimsSample] = self._build_lims_sample(
             customer=customer,

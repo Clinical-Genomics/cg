@@ -363,3 +363,11 @@ class MultipleCaptureKitsError(CgError):
 
 class ApplicationDoesNotHaveHiFiYieldError(CgError):
     """Exception raised when application does not have HiFi yield set."""
+
+
+class MissingLimsUdfError(CgError):
+    """Exception raised when the UDF of a genologics LIMS object can not be read."""
+
+
+class LimsWorkflowRoutingError(CgError):
+    """Exception raised when failing to route LIMS artifacts to a specified workflow."""
