@@ -43,6 +43,11 @@ class MarkAsDeliveredService:
         return response
 
     def unmark_analyses(self, analyses: list[Analysis]):
+        """
+        Remove Trailblazer delivery entries for the provided analyses.
+        This operation is idempotent per analysis: if an analysis has no delivery entry,
+        no change is made and no error is raised.
+        """
         trailblazer_ids: list[int] = [analysis.trailblazer_id for analysis in analyses]
         self.trailblazer_api.set_analyses_delivery_status(
             trailblazer_ids=trailblazer_ids, is_delivered=False, signature=None, auth_token=None
