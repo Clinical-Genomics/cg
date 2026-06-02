@@ -21,6 +21,7 @@ from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
     AnalysisNotCompletedError,
+    ApplicationTagNotFoundError,
     BedVersionNotFoundError,
     CaseNotFoundError,
     CgDataError,
@@ -877,7 +878,7 @@ class ReadHandler(BaseHandler):
                 tag=tag,
             ).one()
         except sqlalchemy.orm.exc.NoResultFound:
-            raise BedVersionNotFoundError(
+            raise ApplicationTagNotFoundError(
                 f"Application with tag '{tag}' was not found in the database."
             )
 

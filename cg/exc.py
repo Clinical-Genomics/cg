@@ -371,3 +371,9 @@ class MissingLimsUdfError(CgError):
 
 class LimsWorkflowRoutingError(CgError):
     """Exception raised when failing to route LIMS artifacts to a specified workflow."""
+
+
+class ApplicationTagNotFoundError(CgError):
+    """
+    Exception raised when an application is not found.
+    """
