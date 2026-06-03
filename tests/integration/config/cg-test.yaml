@@ -11,6 +11,7 @@ email_base_settings:
 
 nats:
   server: nats://localhost/nats
+  subject: cg-test
   listener:
     ca_cert_path: {test_root_dir}/listener/ca.crt
     client_cert_path: {test_root_dir}/listener/client.crt

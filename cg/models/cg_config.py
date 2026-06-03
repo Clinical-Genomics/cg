@@ -158,6 +158,7 @@ class NatsAuthentication(BaseModel):
 
 class NatsConfig(BaseModel):
     server: str
+    subject: str
     listener: NatsAuthentication
     publisher: NatsAuthentication
 

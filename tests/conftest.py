@@ -2005,6 +2005,7 @@ def context_config(
         },
         "nats": {
             "server": "https://nats.scilifelab.se",
+            "subject": "cg-test",
             "publisher": {
                 "ca_cert_path": Path("ca_cert_path"),
                 "client_cert_path": Path("client_cert_path"),
