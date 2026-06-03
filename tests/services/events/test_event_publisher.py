@@ -30,7 +30,6 @@ def test_publish_command():
     command = event_publisher.publish_command(nats_config=nats_config, subject=subject, data=data)
 
     # THEN the generated command string matches the expected format
-    #fmt: off
     expected = (
         "nats_binary pub "
         "--server nats://server "
@@ -40,5 +39,4 @@ def test_publish_command():
         "--token $(cat /token/path) "
         r'cg.upload.completed "{\"analysis\": \"analysis_1\", \"uploaded_at\": \"$(date +%Y-%m-%dT%H:%M:%SZ)\"}"'
     )
-    #fmt: on
     assert command == expected
