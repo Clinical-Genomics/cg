@@ -2,18 +2,18 @@ from pathlib import Path
 from unittest.mock import create_autospec
 
 from click.testing import CliRunner
-from pytest_mock import MockerFixture
 
 from cg.cli.events import listen
 from cg.models.cg_config import CGConfig, NatsAuthentication, NatsConfig
 
 
-def test_listen(mocker: MockerFixture):
+def test_listen():
+    # GIVEN a CGConfig with NATS configuration
     config = create_autospec(
         CGConfig,
         nats=NatsConfig(
             server="nats://server",
-            subject="cg-test",
+            stream="cg-test",
             nats_binary_path=Path("nats/binary/path"),
             listener=NatsAuthentication(
                 ca_cert_path=Path("ca/cert/path"),
@@ -29,6 +29,9 @@ def test_listen(mocker: MockerFixture):
             ),
         ),
     )
-    # TODO: Finish this test
+
+    # WHEN the listen command is invoked with the CGConfig
     cli_runner = CliRunner()
     cli_runner.invoke(listen, obj=config)
+
+    # THEN the command exits without error

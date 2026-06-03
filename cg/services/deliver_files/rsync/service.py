@@ -316,7 +316,9 @@ class DeliveryRsyncService:
             "uploaded_at": "$(date +%Y-%m-%dT%H:%M:%SZ)",
         }
         command += "\n" + publish_command(
-            nats_config=self.nats_config, subject="cg.upload.completed", data=data
+            nats_config=self.nats_config,
+            subject=f"{self.nats_config.stream}.upload.completed",
+            data=data,
         )
         return self._generate_and_submit_sbatch(
             commands=command,

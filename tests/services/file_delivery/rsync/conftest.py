@@ -172,7 +172,7 @@ def rsync_service(
         nats_config=NatsConfig(
             nats_binary_path="path/to/nats_binary",
             server="nats://example.nats.server:4222",
-            subject="cg-test",
+            stream="cg-test",
             listener=NatsAuthentication(
                 ca_cert_path="path/to/ca_cert.pem",
                 client_cert_path="path/to/client_cert.pem",

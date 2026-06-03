@@ -409,7 +409,7 @@ def base_config_dict() -> dict:
         },
         "nats": {
             "server": "https://nats.scilifelab.se",
-            "subject": "cg-test",
+            "stream": "cg-test",
             "nats_binary_path": Path("nats_binary_path"),
             "listener": {
                 "ca_cert_path": Path("ca_cert_path"),
@@ -2005,7 +2005,7 @@ def context_config(
         },
         "nats": {
             "server": "https://nats.scilifelab.se",
-            "subject": "cg-test",
+            "stream": "cg-test",
             "nats_binary_path": Path("nats_binary_path"),
             "publisher": {
                 "ca_cert_path": Path("ca_cert_path"),

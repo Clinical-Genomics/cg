@@ -11,5 +11,7 @@ from cg.services.events.event_listener import EventListener
 @click.pass_obj
 def listen(config: CGConfig):
     listener = EventListener(config.nats)
-    listener.register("cg.upload.completed", upload_handler.completed(config.status_db))
+    listener.register(
+        f"{config.nats.stream}.upload.completed", upload_handler.completed(config.status_db)
+    )
     asyncio.run(listener.listen())

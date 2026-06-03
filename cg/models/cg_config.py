@@ -158,7 +158,7 @@ class NatsAuthentication(BaseModel):
 class NatsConfig(BaseModel):
     nats_binary_path: Path
     server: str
-    subject: str
+    stream: str
     listener: NatsAuthentication
     publisher: NatsAuthentication
 

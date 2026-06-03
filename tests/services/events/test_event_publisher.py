@@ -5,9 +5,10 @@ from cg.services.events import event_publisher
 
 
 def test_publish_command():
+    # GIVEN a NatsConfig with publisher authentication details, a subject, and data
     nats_config = NatsConfig(
         server="nats://server",
-        subject="cg-test",
+        stream="cg-test",
         nats_binary_path=Path("nats_binary"),
         publisher=NatsAuthentication(
             ca_cert_path=Path("ca_cert"),
@@ -25,7 +26,10 @@ def test_publish_command():
     subject = "cg.upload.completed"
     data = {"analysis": "analysis_1", "uploaded_at": "$(date +%Y-%m-%dT%H:%M:%SZ)"}
 
+    # WHEN the publish_command function is called with the NatsConfig, subject, and data
     command = event_publisher.publish_command(nats_config=nats_config, subject=subject, data=data)
+
+    # THEN the generated command string matches the expected format
     expected = (
         "nats_binary pub "
         "--server nats://server "
@@ -35,5 +39,4 @@ def test_publish_command():
         "--token $(cat /token/path) "
         'cg.upload.completed \'{"analysis": "analysis_1", "uploaded_at": "$(date +%Y-%m-%dT%H:%M:%SZ)"}\''
     )
-
     assert command == expected

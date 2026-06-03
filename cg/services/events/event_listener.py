@@ -17,10 +17,11 @@ LOG: Logger = logging.getLogger(__name__)
 
 class EventListener:
     def __init__(self, config: NatsConfig):
-        self.server: str = config.server
         self.ca_cert_path: Path = config.listener.ca_cert_path
         self.client_cert: Path = config.listener.client_cert_path
         self.client_key: Path = config.listener.client_key_path
+        self.server: str = config.server
+        self.stream = config.stream
         self.token: str = config.listener.token_path.read_text().strip()
 
         self._handlers: dict[str, Callable] = {}
@@ -33,7 +34,9 @@ class EventListener:
             servers=self.server, tls=self._tls_context(), token=self.token
         )
         js: JetStreamContext = nc.jetstream()
-        sub: JetStreamContext.PushSubscription = await js.subscribe("cg.>", durable="cg-consumer")
+        sub: JetStreamContext.PushSubscription = await js.subscribe(
+            f"{self.stream}.>", durable="cg-consumer"
+        )
         LOG.info("Listening for events")
         async for msg in sub.messages:
             LOG.info(f"Received message on subject: {msg.subject}, data: {msg.data.decode()}")
