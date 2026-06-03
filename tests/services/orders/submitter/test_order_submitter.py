@@ -203,6 +203,7 @@ def order_with_existing_case_and_external_sample(existing_case_id: str) -> Order
     ],
 )
 def test_submit_order(
+    mocker,
     store_to_submit_and_validate_orders: Store,
     monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
@@ -242,6 +243,13 @@ def test_submit_order(
         # GIVEN the dict representation of the order and a store without samples
         raw_order = order.model_dump(by_alias=True)
         assert not store_to_submit_and_validate_orders._get_query(table=Sample).first()
+
+        # GIVEN that samples can be successfully created and queued in LIMS
+        # TODO need better integration?
+        mocker.patch("cg.services.orders.storing.service.StoreOrderService._fill_in_sample_ids")
+        mocker.patch(
+            "cg.services.orders.storing.service.StoreOrderService._queue_samples_in_workflow"
+        )
 
         # WHEN submitting the order
         result = order_submitter.submit(order_type=order_type, raw_order=raw_order, user=user)
@@ -424,4 +432,5 @@ def test_get_ticket_status(
     status = get_ticket_status(order=order)
 
     # THEN the status should be correct
+    assert status == expected_status
     assert status == expected_status
