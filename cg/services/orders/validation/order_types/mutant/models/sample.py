@@ -26,7 +26,7 @@ class MutantSample(Sample):
     _lab_code: str = PrivateAttr(default="SE100 Karolinska")
     organism: str
     organism_other: str | None = None
-    original_lab: OriginalLab | None = None
+    original_lab: OriginalLab
     original_lab_address: str | None = None
     pre_processing_method: PreProcessingMethod
     primer: Primer
@@ -34,7 +34,7 @@ class MutantSample(Sample):
     quantity: int | None = None
     reference_genome: str
     region: Region
-    region_code: str
+    region_code: str | None = None
     selection_criteria: SelectionCriteria
     _verified_organism: bool | None = PrivateAttr(default=None)
 
