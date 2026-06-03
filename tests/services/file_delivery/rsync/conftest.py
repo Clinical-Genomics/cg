@@ -170,19 +170,19 @@ def rsync_service(
     return DeliveryRsyncService(
         delivery_path=rsync_delivery_path,
         nats_config=NatsConfig(
+            nats_binary_path="path/to/nats_binary",
             server="nats://example.nats.server:4222",
+            subject="cg-test",
             listener=NatsAuthentication(
                 ca_cert_path="path/to/ca_cert.pem",
                 client_cert_path="path/to/client_cert.pem",
                 client_key_path="path/to/client_key.pem",
-                nats_binary_path="path/to/nats_binary",
                 token_path="path/to/token",
             ),
             publisher=NatsAuthentication(
                 ca_cert_path="path/to/ca_cert.pem",
                 client_cert_path="path/to/client_cert.pem",
                 client_key_path="path/to/client_key.pem",
-                nats_binary_path="path/to/nats_binary",
                 token_path="path/to/token",
             ),
         ),

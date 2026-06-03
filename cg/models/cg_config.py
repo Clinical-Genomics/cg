@@ -152,11 +152,11 @@ class NatsAuthentication(BaseModel):
     ca_cert_path: Path
     client_cert_path: Path
     client_key_path: Path
-    nats_binary_path: Path
     token_path: Path
 
 
 class NatsConfig(BaseModel):
+    nats_binary_path: Path
     server: str
     subject: str
     listener: NatsAuthentication

@@ -13,18 +13,18 @@ def test_listen(mocker: MockerFixture):
         CGConfig,
         nats=NatsConfig(
             server="nats://server",
+            subject="cg-test",
+            nats_binary_path=Path("nats/binary/path"),
             listener=NatsAuthentication(
                 ca_cert_path=Path("ca/cert/path"),
                 client_cert_path=Path("client/cert/path"),
                 client_key_path=Path("client/key/path"),
-                nats_binary_path=Path("nats/binary/path"),
                 token_path=Path("token/path"),
             ),
             publisher=NatsAuthentication(
                 ca_cert_path=Path("ca/cert/path"),
                 client_cert_path=Path("client/cert/path"),
                 client_key_path=Path("client/key/path"),
-                nats_binary_path=Path("nats/binary/path"),
                 token_path=Path("token/path"),
             ),
         ),

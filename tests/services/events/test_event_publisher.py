@@ -7,18 +7,18 @@ from cg.services.events import event_publisher
 def test_publish_command():
     nats_config = NatsConfig(
         server="nats://server",
+        subject="cg-test",
+        nats_binary_path=Path("nats_binary"),
         publisher=NatsAuthentication(
             ca_cert_path=Path("ca_cert"),
             client_cert_path=Path("client_cert"),
             client_key_path=Path("client_key"),
-            nats_binary_path=Path("nats_binary"),
             token_path=Path("/token/path"),
         ),
         listener=NatsAuthentication(
             ca_cert_path=Path("ca_cert"),
             client_cert_path=Path("client_cert"),
             client_key_path=Path("client_key"),
-            nats_binary_path=Path("nats_binary"),
             token_path=Path("token/path"),
         ),
     )
