@@ -98,13 +98,18 @@ def test_queue_samples_in_workflow(
     sample_2.name = "sample_2"
     lims_samples = [sample_1, sample_2]
 
-    # GIVEN returns for get_lims_workflow_id_by_application_tag
-    mocker.patch.object(
+    # GIVEN that the sample apptags correspond to a LIMS workflow ID
+    mock_get_id = mocker.patch.object(
         storing_service.status_db, "get_lims_workflow_id_by_application_tag", return_value=1
     )
 
     # WHEN calling method to store samples in workflow
     storing_service._queue_samples_in_workflow(lims_samples=lims_samples)
+
+    # THEN the LIMS workflow ID is fetched for each apptag
+    mock_get_id.assert_any_call("apptag1")
+    mock_get_id.assert_any_call("apptag2")
+    assert mock_get_id.call_count == 2
 
     # THEN the workflow router should have been called appropriately
     mock_route_artifacts.assert_called_once_with(
