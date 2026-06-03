@@ -26,8 +26,8 @@ class MutantSample(Sample):
     _lab_code: str = PrivateAttr(default="SE100 Karolinska")
     organism: str
     organism_other: str | None = None
-    original_lab: OriginalLab
-    original_lab_address: str
+    original_lab: OriginalLab | None = None
+    original_lab_address: str | None = None
     pre_processing_method: PreProcessingMethod
     primer: Primer
     priority: PriorityEnum
