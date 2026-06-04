@@ -1,6 +1,8 @@
 from unittest import mock
 
 import pytest
+from genologics.lims import Sample
+from mock import create_autospec
 from pytest_mock import MockerFixture
 
 from cg.apps.lims import LimsAPI
@@ -57,7 +59,11 @@ def test_nallo_storing_service_success(
 
 def test_source_override(store_generic_order_service: StoreCaseOrderService, mocker: MockerFixture):
     # GIVEN a Nallo order with one of the samples having "other" as source
-    lims_submit = mocker.patch.object(MockLimsAPI, "submit_project")
+    lims_sample = create_autospec(Sample, id="ACC123", udf={"Sequencing Analysis": "LWPBELB070"})
+    lims_sample.name = "nallo-sample"
+    lims_submit = mocker.patch.object(
+        MockLimsAPI, "submit_project", return_value=({}, [lims_sample])
+    )
     mocker.patch.object(LimsAPI, "get_samples")
     mocker.patch.object(store_generic_order_service.status_db, "commit_to_store")
     sample = NalloSample(  # pyright: ignore [reportCallIssue]
