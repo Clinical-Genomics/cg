@@ -309,7 +309,7 @@ ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer.internal_id}/inbox
         for type in ["case", "father", "mother", "child"]
     ]
     expected_rsync_commands.append(
-        "path/to/nats_binary pub --server nats://example.nats.server:4222 --tlsca "
+        "path/to/nats_binary pub --jetstream --server nats://example.nats.server:4222 --tlsca "
         "path/to/ca_cert.pem --tlscert path/to/client_cert.pem --tlskey "
         "path/to/client_key.pem --token $(cat path/to/token) cg-test.upload.completed "
         r'"{\"cg.analysis_id\": 666, \"uploaded_at\": \"$(date +%Y-%m-%dT%H:%M:%SZ)\"}"'

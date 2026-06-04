@@ -14,7 +14,9 @@ from cg.store.store import Store
 @click.pass_obj
 def listen(config: CGConfig):
     listener = EventListener(config.nats)
+
     initialize_database(os.environ["CG_SQL_DATABASE_URI"])
     status_db = Store()
+
     listener.register(f"{config.nats.stream}.upload.completed", upload_handler.completed(status_db))
     asyncio.run(listener.listen())
