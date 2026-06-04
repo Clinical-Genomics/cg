@@ -43,7 +43,7 @@ class IndexEnum(StrEnum):
     IDT10_UDI_NIPT = "IDT10 UDI NIPT"
     KAPA_UDI_NIPT = "KAPA UDI NIPT"
     NEBNEXT_LV_Unique_Dual_2A = "NEBNext LV Unique Dual Index Primers Set 2A"
-    # NEB_E6440 = "NEB E6440"
+    NEB_E6440 = "NEB E6440"
     NEXTERA_XT = "Nextera XT Dual"
     NEXTFLEX_UDI_96 = "NEXTflex® Unique Dual Index Barcodes 1 - 96"
     NEXTFLEX_V2_UDI_96 = "NEXTflex® v2 UDI Barcodes 1 - 96"
