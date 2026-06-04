@@ -1263,6 +1263,16 @@ INDEX_SEQUENCES = {
         "UDI 95 (CTGCAACG-GACATTCG)",
         "UDI 96 (TACTGTTA-GCGAATAC)",
     ],
+    IndexEnum.BIOMODAL: [
+        "Biomodal UDI-1 (CTGATCGT-ATATGCGC)",
+        "Biomodal UDI-2 (ACTCTCGA-TGGTACAG)",
+        "Biomodal UDI-3 (TGAGCTAG-TAACCGGT)",
+        "Biomodal UDI-4 (GAGACGAT-AACCGTTC)",
+        "Biomodal UDI-5 (CTTGTCGA-GAACATCG)",
+        "Biomodal UDI-6 (TTCCAAGG-CCTTGTAG)",
+        "Biomodal UDI-7 (CGCATGAT-TCAGGCTT)",
+        "Biomodal UDI-8 (ACGGAACA-GTTCTCGT)",
+    ],
     IndexEnum.NO_INDEX: [],
     IndexEnum.TEN_X_TN_A: [
         "SI_TN_A1 (AGTATCTGCA-TCGCTAGCGA)",
