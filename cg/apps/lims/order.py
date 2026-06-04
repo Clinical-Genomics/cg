@@ -97,7 +97,7 @@ class OrderHandler:
             name2sample = {s.name: s for s in lims_samples}
             artifacts_data = [
                 batch.build_artifact(
-                    artifact=name2sample[sample.name].artifact,  # type: ignore
+                    artifact=name2sample[sample["name"]].artifact,  # type: ignore
                     reagent_label=sample["index_sequence"],
                 )
                 for sample in reagentlabel_samples
