@@ -26,7 +26,7 @@ def mock_file_creation(nallo_order: NalloOrder):
         sample_name: f"{sample_name}_internal_id" for sample_name in sample_names
     }
     with (
-        mock.patch.object(LimsAPI, "submit_project", return_value={"id": 1}),
+        mock.patch.object(LimsAPI, "submit_project", return_value=({}, [])),
         mock.patch.object(LimsAPI, "get_samples", return_value=name_to_id_map),
     ):
         yield
