@@ -6,6 +6,7 @@ def publish_command(nats_config, subject: str, data: dict) -> str:
     json_str: str = json.dumps(data).replace('"', '\\"')
     command: str = (
         f"{nats_config.nats_binary_path} pub "
+        "--jetstream "
         f"--server {nats_config.server} "
         f"--tlsca {config.ca_cert_path} "
         f"--tlscert {config.client_cert_path} "

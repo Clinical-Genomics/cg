@@ -32,6 +32,7 @@ def test_publish_command():
     # THEN the generated command string matches the expected format
     expected = (
         "nats_binary pub "
+        "--jetstream "
         "--server nats://server "
         "--tlsca ca_cert "
         "--tlscert client_cert "
