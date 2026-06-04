@@ -53,7 +53,7 @@ class IndexEnum(StrEnum):
     TWIST_UDI_B = "TWIST UDI Set B"
     TWIST_UDI_C = "TWIST UDI Set C"
     TRUSEQ_DNA_HT = "TruSeq DNA HT Dual-index (D7-D5)"
-    # WM_FLY_UDI = "WM FLY UDI"
+    WM_FLY_UDI = "WM FLY UDI"
     # WM_STUBBY_UDI = "WM stubby UDI"
     XGEN_UDI_10_1_4 = "xGen UDI 10nt Primer Plates 1-4"
     NO_INDEX = "NoIndex"
