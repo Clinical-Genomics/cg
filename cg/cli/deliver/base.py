@@ -241,7 +241,7 @@ def deliver_dev_all_cases(config: CGConfig):
     \b
     Performs:
         - Sends delivery message to connected ticket in Freshdesk
-        - Marks case as delivered in Trailblazer
+        - Marks analysis as delivered in Trailblazer
         - If applicable marks sample as delivered
         - If applicable closes order in statusdb
         - If applicable closes ticket in Freshdesk
