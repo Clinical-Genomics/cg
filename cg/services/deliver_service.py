@@ -65,7 +65,9 @@ class DeliverService:
     def deliver_order(self, ticket_id: int, signature: str):
         order: Order = self.status_db.get_order_by_ticket_id_strict(ticket_id)
 
-        undelivered_trailblazer_analyses = self.trailblazer_api.get_analyses_to_deliver(order.id)
+        undelivered_trailblazer_analyses = self.trailblazer_api.get_analyses_to_deliver_for_order(
+            order.id
+        )
         uploaded_analyses_to_deliver = self.status_db.get_uploaded_analyses(
             [analysis.id for analysis in undelivered_trailblazer_analyses]
         )

@@ -245,7 +245,8 @@ class TrailblazerAPI:
             raise TrailblazerAnalysisDeliveryError(response.reason)
         return response
 
-    def get_analyses_to_deliver(self, order_id: int) -> list[TrailblazerAnalysis]:
+    # TODO add tests for this
+    def get_analyses_to_deliver_for_order(self, order_id: int) -> list[TrailblazerAnalysis]:
         """Return the analyses in the order ready to be delivered."""
         endpoint = (
             f"analyses?orderId={order_id}&status[]={AnalysisStatus.COMPLETED}&delivered=false"
