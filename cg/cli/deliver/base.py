@@ -245,7 +245,8 @@ def deliver_dev_all_available(config: CGConfig):
     deliver_service = DeliverService(
         status_db=config.status_db, trailblazer_api=config.trailblazer_api
     )
-    deliver_service.deliver_all_available()
+    if not deliver_service.deliver_all_available():
+        raise click.Abort()
 
 
 @deliver.command(name="dev-order", hidden=True)

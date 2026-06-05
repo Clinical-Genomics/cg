@@ -229,7 +229,10 @@ def test_deliver_all_available_success(mocker: MockerFixture):
     close_ticket_spy = mocker.spy(deliver_service, "_freshdesk_close_ticket_if_open")
 
     # WHEN delivering all cases
-    deliver_service.deliver_all_available()
+    success: bool = deliver_service.deliver_all_available()
+
+    # THEN the delivery service does not fail
+    assert success
 
     # THEN it should get all analyses to deliver from Trailblazer
     trailblazer_api.as_mock.get_all_analyses_to_deliver.assert_called_once()
@@ -267,7 +270,10 @@ def test_deliver_all_available_no_analyses_to_deliver(mocker: MockerFixture):
     )
 
     # WHEN delivering all cases
-    deliver_service.deliver_all_available()
+    success: bool = deliver_service.deliver_all_available()
+
+    # THEN the delivery service does not fail
+    assert success
 
     # THEN it should get all analyses to deliver from Trailblazer
     trailblazer_api.as_mock.get_all_analyses_to_deliver.assert_called_once()
@@ -301,7 +307,10 @@ def test_deliver_all_available_trailblazer_analysis_delivery_error(mocker: Mocke
     )
 
     # WHEN delivering all analyses
-    deliver_service.deliver_all_available()
+    success: bool = deliver_service.deliver_all_available()
+
+    # THEN the delivery service fails
+    assert not success
 
     # THEN a rollback of statusdb is performed
     status_db.as_mock.rollback.assert_called_once()
@@ -332,7 +341,10 @@ def test_deliver_all_available_trailblazer_failed_to_get_analyses_error(mocker: 
     )
 
     # WHEN delivering all analyses
-    deliver_service.deliver_all_available()
+    success: bool = deliver_service.deliver_all_available()
+
+    # THEN the delivery service fails
+    assert not success
 
     # THEN a rollback of statusdb is performed
     status_db.as_mock.rollback.assert_called_once()
@@ -366,7 +378,10 @@ def test_deliver_all_available_freshdesk_delivery_message_error(mocker: MockerFi
     )
 
     # WHEN delivering all analyses
-    deliver_service.deliver_all_available()
+    success: bool = deliver_service.deliver_all_available()
+
+    # THEN the delivery service fails
+    assert not success
 
     # THEN a rollback of statusdb is performed
     status_db.as_mock.rollback.assert_called_once()
@@ -397,7 +412,10 @@ def test_deliver_all_available_freshdesk_closing_ticket_error(mocker: MockerFixt
     )
 
     # WHEN delivering all analyses
-    deliver_service.deliver_all_available()
+    success: bool = deliver_service.deliver_all_available()
+
+    # THEN the delivery service fails
+    assert not success
 
     # THEN the order should have been reopened if ever closed
     assert analysis_to_deliver.order.is_open

@@ -24,29 +24,36 @@ class DeliverService:
             status_db=status_db, trailblazer_api=trailblazer_api
         )
 
-    def deliver_all_available(self) -> None:
-        # TODO: Make the service fail if any exception is caught
-        # TODO: Discuss if this should be in the CLI layer
+    def deliver_all_available(self) -> bool:
+        success: bool = True
         order_dict: dict[Order, list[Analysis]] = self._get_order_analyses_dictionary()
         if len(order_dict) == 0:
             LOG.warning("No analyses found to deliver.")
-            return
+            return success
         for order, analyses in order_dict.items():
             try:
                 self._deliver_order(order=order, analyses=analyses)
-            except TrailblazerAnalysisDeliveryError:
-                # Samples marked but nothing in TB nor FD
+            except TrailblazerAnalysisDeliveryError as error:
                 self.status_db.rollback()
-            except (TrailblazerFailedToGetAnalysesError, FreshdeskDeliveryMessageError):
-                # Samples marked TB analysis marked, no FD
+                success = False
+                LOG.error(
+                    f"Failed to mark analyses as delivered in Trailblazer for order {order.id}: {str(error)}"
+                )
+            except (TrailblazerFailedToGetAnalysesError, FreshdeskDeliveryMessageError) as error:
                 self.status_db.rollback()
                 self.mark_as_delivered_service.unmark_analyses(analyses)
-            except FreshdeskClosingTicketError:
-                # Samples marked TB analysis marked, delivery message sent in FD, potentially order closed in StatusDB
+                success = False
+                LOG.error(
+                    f"Failed to send delivery message for ticket {order.ticket_id}: {str(error)}"
+                )
+            except FreshdeskClosingTicketError as error:
                 order.is_open = True
                 self.status_db.commit_to_store()
+                success = False
+                LOG.error(f"Failed to close ticket {order.ticket_id} in Freshdesk: {str(error)}")
             else:
                 self.status_db.commit_to_store()
+        return success
 
     def deliver_case(self, case_id: str, signature: str):
         analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses_for_case(case_id)
