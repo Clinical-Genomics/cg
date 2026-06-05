@@ -11,8 +11,9 @@ from cg.services.orders.validation.models.case import Case
 from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.sample_aliases import SampleInCase
-from cg.store.models import ApplicationVersion, CaseSample, Customer
+from cg.store.models import ApplicationVersion
 from cg.store.models import Case as DbCase
+from cg.store.models import CaseSample, Customer
 from cg.store.models import Order as DbOrder
 from cg.store.models import Sample as DbSample
 from cg.store.store import Store
@@ -43,7 +44,6 @@ class StoreCaseOrderService(StoreOrderService):
 
     def store_order(self, order: OrderWithCases) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        project_data = lims_samples = None
         if new_samples := [sample for _, _, sample in order.enumerated_new_samples]:
             project_data, lims_samples = self.lims.process_lims(
                 samples=new_samples,
@@ -54,9 +54,10 @@ class StoreCaseOrderService(StoreOrderService):
                 delivery_type=order.delivery_type,
                 skip_reception_control=order.skip_reception_control,
             )
-        if lims_samples:
             self._fill_in_sample_ids(samples=new_samples, lims_samples=lims_samples)
             self._queue_samples_in_workflow(lims_samples=lims_samples)
+        else:
+            project_data = None
 
         new_cases: list[DbCase] = self.store_order_data_in_status_db(order)
         return {"project": project_data, "records": new_cases}
