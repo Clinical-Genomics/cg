@@ -1,10 +1,13 @@
 from datetime import datetime
 from unittest.mock import Mock, create_autospec
 
+import pytest
+
 from cg.services.events.upload_handler import completed
 from cg.store.store import Store
 
 
+@pytest.mark.xfail(reason="DB updates are toggled off", strict=True)
 def test_completed_success():
     # GIVEN a message with an existing analysis id and a date
     message = {"cg.analysis_id": 1, "uploaded_at": "2026-06-02T11:14:52Z"}

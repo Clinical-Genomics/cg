@@ -13,9 +13,13 @@ def completed(store: Store):
         analysis_id = message["cg.analysis_id"]
         uploaded_at = message["uploaded_at"]
         try:
-            store.update_analysis_uploaded_at(
-                analysis_id=analysis_id,
-                uploaded_at=datetime.strptime(uploaded_at, "%Y-%m-%dT%H:%M:%SZ"),
+            # store.update_analysis_uploaded_at(
+            #     analysis_id=analysis_id,
+            #     uploaded_at=datetime.strptime(uploaded_at, "%Y-%m-%dT%H:%M:%SZ"),
+            # )
+            LOG.info("DB changes toggled off. Would process event by running:")
+            LOG.info(
+                f"store.update_analysis_uploaded_at(analysis_id={analysis_id}, uploaded_at={datetime.strptime(uploaded_at, '%Y-%m-%dT%H:%M:%SZ')})"
             )
         except Exception as error:
             LOG.error(f"Failed to update analysis uploaded_at for analysis with id {analysis_id}")
