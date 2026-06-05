@@ -884,7 +884,6 @@ class ReadHandler(BaseHandler):
 
     def get_lims_workflow_id_by_application_tag(self, tag: str) -> int | None:
         """Return the LIMS workflow ID for an application by tag."""
-        # TODO test
         application = self.get_application_by_tag_strict(tag=tag)
         return application.lims_workflow_id
 
