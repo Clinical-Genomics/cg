@@ -25,6 +25,8 @@ class DeliverService:
         )
 
     def deliver_all_available(self) -> None:
+        # TODO: Make the service fail if any exception is caught
+        # TODO: Discuss if this should be in the CLI layer
         order_dict: dict[Order, list[Analysis]] = self._get_order_analyses_dictionary()
         if len(order_dict) == 0:
             LOG.warning("No analyses found to deliver.")

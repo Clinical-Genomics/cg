@@ -48,10 +48,16 @@ class MarkAsDeliveredService:
         This operation is idempotent per analysis: if an analysis has no delivery entry,
         no change is made and no error is raised.
         """
-        trailblazer_ids: list[int] = [analysis.trailblazer_id for analysis in analyses]
-        self.trailblazer_api.set_analyses_delivery_status(
-            trailblazer_ids=trailblazer_ids, is_delivered=False, signature=None, auth_token=None
-        )
+        trailblazer_ids: list[int] = [
+            analysis.trailblazer_id for analysis in analyses if analysis.trailblazer_id
+        ]
+        try:
+            self.trailblazer_api.set_analyses_delivery_status(
+                trailblazer_ids=trailblazer_ids, is_delivered=False, signature=None, auth_token=None
+            )
+        except Exception as error:
+            LOG.error(f"Failed to unmark analyses {trailblazer_ids} in Trailblazer.")
+            LOG.exception(error)
 
     def _is_order_closable(self, order: Order) -> bool:
         """
