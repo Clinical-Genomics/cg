@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from genologics.entities import Sample as GenologicsSample
 from genologics.lims import Sample
 from mock import create_autospec
 from pytest_mock import MockerFixture
@@ -33,9 +34,23 @@ def mock_file_creation(nallo_order: NalloOrder):
 
 
 def test_nallo_storing_service_success(
-    nallo_order: NalloOrder, store_generic_order_service: StoreCaseOrderService
+    mocker: MockerFixture,
+    nallo_order: NalloOrder,
+    store_generic_order_service: StoreCaseOrderService,
 ):
     # GIVEN a valid Nallo order with only new samples
+
+    # GIVEN samples are successfully saved to LIMS and returned as objects
+    lims_samples = []
+    for i in range(0, 4):
+        lims_sample = create_autospec(GenologicsSample)
+        lims_sample.id = f"ACC{i+1}"
+        lims_sample.name = f"NalloSample{i+1}"
+        lims_sample.udf = {"Sequencing Analysis": "LWPBELB070"}
+        lims_samples.append(lims_sample)
+    mocker.patch.object(
+        store_generic_order_service.lims.lims_api, "submit_project", return_value=({}, lims_samples)
+    )
 
     # WHEN storing the order
     store_generic_order_service.store_order(nallo_order)
