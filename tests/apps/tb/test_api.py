@@ -41,6 +41,43 @@ def valid_trailblazer_config(fake_trailblazer_host):
     }
 
 
+@pytest.fixture
+def analysis_raw_response() -> str:
+    return json.dumps(
+        {
+            "analyses": [
+                {
+                    "case_id": "case_1",
+                    "comment": None,
+                    "completed_at": None,
+                    "config_path": "/path/",
+                    "delivered_by": None,
+                    "delivered_date": None,
+                    "failed_job": None,
+                    "id": 1234,
+                    "is_cancellable": False,
+                    "is_delivered": False,
+                    "is_visible": True,
+                    "logged_at": "Sun, 10 May 2026 22:25:03 GMT",
+                    "order_id": 12345,
+                    "out_dir": "/some/path",
+                    "priority": "high",
+                    "progress": 0.0,
+                    "started_at": "Sun, 10 May 2026 22:25:03 GMT",
+                    "status": "pending",
+                    "ticket_id": "1234",
+                    "type": "other",
+                    "uploaded_at": None,
+                    "user_id": None,
+                    "version": None,
+                    "workflow": "raredisease",
+                    "workflow_manager": "slurm",
+                }
+            ]
+        }
+    )
+
+
 def test_add_pending_analysis_succeeds(
     valid_google_credentials: IDTokenCredentials,
     valid_trailblazer_config: dict,
@@ -257,6 +294,7 @@ def test_set_analyses_delivery_status_fails_with_http_error(
 
 
 def test_get_analyses_to_deliver_for_case(
+    analysis_raw_response: str,
     valid_google_credentials: IDTokenCredentials,
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
@@ -272,39 +310,7 @@ def test_get_analyses_to_deliver_for_case(
             requests.Response,
             status_code=200,
             ok=True,
-            text=json.dumps(
-                {
-                    "analyses": [
-                        {
-                            "case_id": "case_1",
-                            "comment": None,
-                            "completed_at": None,
-                            "config_path": "/path/",
-                            "delivered_by": None,
-                            "delivered_date": None,
-                            "failed_job": None,
-                            "id": 1234,
-                            "is_cancellable": False,
-                            "is_delivered": False,
-                            "is_visible": True,
-                            "logged_at": "Sun, 10 May 2026 22:25:03 GMT",
-                            "order_id": 12345,
-                            "out_dir": "/some/path",
-                            "priority": "high",
-                            "progress": 0.0,
-                            "started_at": "Sun, 10 May 2026 22:25:03 GMT",
-                            "status": "pending",
-                            "ticket_id": "1234",
-                            "type": "other",
-                            "uploaded_at": None,
-                            "user_id": None,
-                            "version": None,
-                            "workflow": "raredisease",
-                            "workflow_manager": "slurm",
-                        }
-                    ]
-                }
-            ),
+            text=analysis_raw_response,
         ),
     )
 
@@ -355,7 +361,7 @@ def test_get_analyses_to_deliver_for_case_no_analysis(
         ),
     )
 
-    # WHEN getting analyses to deliver
+    # WHEN getting analyses to deliver for the given case
     analyses = tb_api.get_analyses_to_deliver_for_case("case_1")
 
     # THEN an empty list should be returned
@@ -385,6 +391,106 @@ def test_get_analyses_to_deliver_for_case_improper_response(
     # THEN a TrailblazerAPIHTTPError should be raised
     with pytest.raises(TrailblazerAPIHTTPError):
         tb_api.get_analyses_to_deliver_for_case("updog")
+
+
+def test_get_analyses_to_deliver_for_order(
+    analysis_raw_response: str,
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a TrailblazerAPI
+    tb_api = TrailblazerAPI(valid_trailblazer_config)
+
+    # GIVEN that Trailblazer returns an analysis
+    request_mock = mocker.patch.object(
+        requests,
+        "get",
+        return_value=create_autospec(
+            requests.Response,
+            status_code=200,
+            ok=True,
+            text=analysis_raw_response,
+        ),
+    )
+
+    # WHEN getting analyses to deliver for order 12345
+    analyses = tb_api.get_analyses_to_deliver_for_order(12345)
+
+    # THEN the analysis should be returned
+    assert analyses == [
+        TrailblazerAnalysis(
+            case_id="case_1",
+            id=1234,
+            logged_at="Sun, 10 May 2026 22:25:03 GMT",  # type: ignore pydantic
+            started_at="Sun, 10 May 2026 22:25:03 GMT",  # type: ignore pydantic
+            completed_at=None,
+            out_dir="/some/path",  # type: ignore pydantic
+            config_path="/path/",  # type: ignore pydantic
+            status="pending",
+            priority="high",
+            is_visible=True,
+            type="other",
+            workflow=Workflow.RAREDISEASE,
+        ),
+    ]
+
+    # THEN the Trailblazer request should have been made with the expected parameters
+    request_mock.assert_called_once_with(
+        headers={"Authorization": "Bearer some_token"},
+        json={},
+        url="http://localhost/fake_trailblazer/analyses?orderId=12345&status[]=completed&delivered=false",
+        verify=True,
+    )
+
+
+def test_get_analyses_to_deliver_for_order_no_analysis(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a TrailblazerAPI
+    tb_api = TrailblazerAPI(valid_trailblazer_config)
+
+    # GIVEN that no analysis is to be delivered for a given order
+    mocker.patch.object(
+        requests,
+        "get",
+        return_value=create_autospec(
+            requests.Response, status_code=200, ok=True, text='{"analyses":[],"total_count":0}'
+        ),
+    )
+
+    # WHEN getting analyses to deliver for the given order
+    analyses = tb_api.get_analyses_to_deliver_for_order(12345)
+
+    # THEN an empty list should be returned
+    assert analyses == []
+
+
+def test_get_analyses_to_deliver_for_order_improper_response(
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a TrailblazerAPI
+    tb_api = TrailblazerAPI(valid_trailblazer_config)
+
+    # GIVEN an erroneous http response
+    mocker.patch.object(
+        requests,
+        "get",
+        return_value=create_autospec(
+            requests.Response,
+            status_code=500,
+            ok=False,
+        ),
+    )
+
+    # WHEN getting analyses to deliver for teh order
+    # THEN a TrailblazerAPIHTTPError should be raised
+    with pytest.raises(TrailblazerAPIHTTPError):
+        tb_api.get_analyses_to_deliver_for_order(66666)
 
 
 def test_get_all_completed_undelivered_analyses_success(
