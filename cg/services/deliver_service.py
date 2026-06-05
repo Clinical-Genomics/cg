@@ -127,4 +127,8 @@ class DeliverService:
 
     def _freshdesk_close_ticket_if_open(self, order: Order):
         # Implement in next iteration
-        pass
+        if not order.is_open:
+            # call freshesk
+            pass
+        else:
+            return
