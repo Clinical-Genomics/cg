@@ -264,7 +264,7 @@ def test_get_analyses_to_deliver_for_case(
     # GIVEN a TrailblazerAPI
     tb_api = TrailblazerAPI(valid_trailblazer_config)
 
-    # GIVEN that trailblazer returns an analysis
+    # GIVEN that Trailblazer returns an analysis
     request_mock = mocker.patch.object(
         requests,
         "get",
@@ -329,7 +329,7 @@ def test_get_analyses_to_deliver_for_case(
         ),
     ]
 
-    # THEN the trailblazer request should have been made with the expected parameters
+    # THEN the Trailblazer request should have been made with the expected parameters
     request_mock.assert_called_once_with(
         headers={"Authorization": "Bearer some_token"},
         json={},
@@ -343,7 +343,7 @@ def test_get_analyses_to_deliver_for_case_no_analysis(
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
 ):
-    # GIVEN a trailblazer api
+    # GIVEN a TrailblazerAPI
     tb_api = TrailblazerAPI(valid_trailblazer_config)
 
     # GIVEN that no analysis is to be delivered for a given case
@@ -367,7 +367,7 @@ def test_get_analyses_to_deliver_for_case_improper_response(
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
 ):
-    # GIVEN a trailblazer api
+    # GIVEN a TrailblazerAPI
     tb_api = TrailblazerAPI(valid_trailblazer_config)
 
     # GIVEN an erroneous http response
@@ -396,7 +396,7 @@ def test_get_all_completed_undelivered_analyses_success(
     # GIVEN a TrailblazerAPI
     tb_api = TrailblazerAPI(valid_trailblazer_config)
 
-    # GIVEN that trailblazer returns two analyses, one of which is an RSYNC analysis
+    # GIVEN that Trailblazer returns two analyses, one of which is an RSYNC analysis
     mocker.patch.object(
         requests,
         "get",
@@ -423,7 +423,7 @@ def test_get_all_completed_undelivered_analyses_improper_response(
     # GIVEN a TrailblazerAPI
     tb_api = TrailblazerAPI(valid_trailblazer_config)
 
-    # GIVEN an erroneous http response
+    # GIVEN an erroneous HTTP response
     mocker.patch.object(
         requests,
         "get",
@@ -445,6 +445,7 @@ def test_get_delivered_analyses_for_order_success(
     valid_trailblazer_config: dict,
     mocker: MockerFixture,
 ):
+    # GIVEN a Successful HTTP called
     mocked_response = create_autospec(requests.Response, status_code=200, ok=True)
     mocked_response.json = Mock(
         return_value={
@@ -461,8 +462,6 @@ def test_get_delivered_analyses_for_order_success(
             ]
         }
     )
-
-    # GIVEN a Successful HTTP called
     http_call = mocker.patch.object(requests, "get", return_value=mocked_response)
 
     # GIVEN a TrailblazerAPI
