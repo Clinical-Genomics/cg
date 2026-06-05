@@ -5,6 +5,8 @@ from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
+ANALYSIS_UPLOADED_SUBJECT = "analysis.upload_completed"
+
 
 def completed(store: Store):
     def handler(message: dict):

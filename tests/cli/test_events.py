@@ -80,4 +80,6 @@ def test_listen(
     initialize_database.assert_called_once_with("sqlite:///test.db")
 
     # THEN the listener is registered with the upload.completed subject
-    event_listener.as_mock.register.assert_called_once_with("cg-test.upload.completed", handler)
+    event_listener.as_mock.register.assert_called_once_with(
+        "cg-test.analysis.upload_completed", handler
+    )
