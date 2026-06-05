@@ -18,6 +18,7 @@ from cg.constants.priority import TrailblazerPriority
 from cg.constants.tb import AnalysisStatus
 from cg.exc import (
     AnalysisNotCompletedError,
+    TrailblazerAnalysisDeliveryError,
     TrailblazerAnalysisNotFound,
     TrailblazerAPIHTTPError,
     TrailblazerFailedToGetAnalysesError,
@@ -241,7 +242,7 @@ class TrailblazerAPI:
             url=f"{self.host}/analyses",
         )
         if not response.ok:
-            raise TrailblazerAPIHTTPError(response.reason)
+            raise TrailblazerAnalysisDeliveryError(response.reason)
         return response
 
     def get_analyses_to_deliver(self, order_id: int) -> list[TrailblazerAnalysis]:

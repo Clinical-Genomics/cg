@@ -10,7 +10,7 @@ from cg.exc import (
     TrailblazerFailedToGetAnalysesError,
 )
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
-from cg.store.models import Analysis, Case, Order
+from cg.store.models import Analysis, Order
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -86,19 +86,13 @@ class DeliverService:
         self._freshdesk_close_ticket_if_open(order=order)
 
     def _get_undelivered_analyses_for_case(self, case_id: str) -> list[Analysis]:
-        case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
-        uploaded_analyses: list[Analysis] = [
-            analysis for analysis in case.analyses if analysis.uploaded_at
-        ]
         undelivered_trailblazer_analyses: list[TrailblazerAnalysis] = (
             self.trailblazer_api.get_analyses_to_deliver_for_case(case_id)
         )
         undelivered_trailblazer_ids = [analysis.id for analysis in undelivered_trailblazer_analyses]
-        analyses_to_deliver: list[Analysis] = []
-        for analysis in uploaded_analyses:
-            if analysis.trailblazer_id in undelivered_trailblazer_ids:
-                analyses_to_deliver.append(analysis)
-
+        analyses_to_deliver: list[Analysis] = self.status_db.get_uploaded_analyses(
+            undelivered_trailblazer_ids
+        )
         return analyses_to_deliver
 
     def _get_order_analyses_dictionary(self) -> dict[Order, list[Analysis]]:
