@@ -21,7 +21,6 @@ from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_deliver_case_closes_order(mocker: MockerFixture):
-    # TODO: fix these tests
     # GIVEN a case with one analysis ready to be delivered
     analysis = create_autospec(
         Analysis,
@@ -38,7 +37,7 @@ def test_deliver_case_closes_order(mocker: MockerFixture):
     order: Order = create_autospec(Order, id=1, is_open=True, cases=[case])
     analysis.order = order
     status_db: Store = create_autospec(Store)
-    status_db.get_case_by_internal_id_strict = Mock(return_value=case)
+    status_db.get_uploaded_analyses = Mock(return_value=[analysis])
 
     # GIVEN a Trailblazer API with the analysis ready to be delivered
     trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
@@ -99,7 +98,7 @@ def test_deliver_case_order_is_not_closed(mocker: MockerFixture):
 
     # GIVEN a store for delivering the case that is ready to be delivered
     status_db: Store = create_autospec(Store)
-    status_db.get_case_by_internal_id_strict = Mock(return_value=case_ready)
+    status_db.get_uploaded_analyses = Mock(return_value=[uploaded_analysis])
 
     # GIVEN a Trailblazer API with the analysis of the case that is ready to be delivered
     trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
@@ -129,17 +128,15 @@ def test_deliver_case_order_is_not_closed(mocker: MockerFixture):
 
 
 def test_deliver_case_more_than_one_found():
-    # GIVEN store with a case
+    # GIVEN store more than one uploaded analyses for a single case
     status_db = create_autospec(Store)
     uploaded_analysis_one = create_autospec(Analysis, trailblazer_id=15, uploaded_at=datetime.now())
     uploaded_analysis_two = create_autospec(Analysis, trailblazer_id=16, uploaded_at=datetime.now())
-    case: Case = create_autospec(
-        Case,
-        analyses=[uploaded_analysis_one, uploaded_analysis_two],
+    status_db.get_uploaded_analyses = Mock(
+        return_value=[uploaded_analysis_one, uploaded_analysis_two]
     )
-    status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
-    # GIVEN a Trailblazer API
+    # GIVEN a Trailblazer API that also have two analyses for the given case
     trailblazer_api = create_autospec(TrailblazerAPI)
     trailblazer_api.get_analyses_to_deliver_for_case = Mock(
         return_value=[
@@ -151,7 +148,7 @@ def test_deliver_case_more_than_one_found():
     # GIVEN a deliver service
     deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
 
-    # WHEN delivering a case
+    # WHEN delivering the case
     # THEN a MultipleAnalysesToDeliverError is raised
     with pytest.raises(MultipleAnalysesToDeliverError):
         deliver_service.deliver_case(case_id="case_id", signature="email@cg.se")
