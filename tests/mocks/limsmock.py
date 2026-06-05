@@ -1,11 +1,13 @@
+from datetime import datetime
 from typing import Any
 
+from genologics.entities import Sample
+from mock import create_autospec
 from pydantic.v1 import BaseModel
 from typing_extensions import Literal
 
 from cg.apps.lims import LimsAPI
-
-from cg.constants.lims import LimsArtifactTypes, LimsProcess
+from cg.constants.lims import PROP2UDF, LimsArtifactTypes, LimsProcess
 from cg.exc import LimsDataError
 
 
@@ -206,3 +208,21 @@ class MockLimsAPI(LimsAPI):
     def has_sample_passed_initial_qc(self, sample_id: str) -> bool:
         """Mock return of the sample initial QC flag."""
         return True
+
+    def submit_project(
+        self, project_name: str, samples: list[dict]
+    ) -> tuple[dict[str, str], list[Sample]]:
+        lims_samples = []
+        for i, sample in enumerate(samples):
+            udfs = {PROP2UDF[prop]: sample["udfs"][prop] for prop in sample["udfs"]}
+            lims_sample = create_autospec(Sample, id=f"ACC{i}", udf=udfs)
+            lims_sample.name = sample["name"]
+            lims_samples.append(lims_sample)
+
+        lims_project_dict = {
+            "id": "ACC1234",
+            "name": project_name,
+            "date": datetime.today().strftime("%Y-%m-%d"),
+        }
+
+        return (lims_project_dict, lims_samples)
