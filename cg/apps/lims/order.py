@@ -94,10 +94,10 @@ class OrderHandler:
         lims_samples: list[Sample] = self.save_samples(sample_details)
 
         if len(reagentlabel_samples) > 0:
-            name2sample = {s.name: s for s in lims_samples}
+            sample_by_name = {s.name: s for s in lims_samples}
             artifacts_data = [
                 batch.build_artifact(
-                    artifact=name2sample[sample["name"]].artifact,  # type: ignore
+                    artifact=sample_by_name[sample["name"]].artifact,  # type: ignore
                     reagent_label=sample["index_sequence"],
                 )
                 for sample in reagentlabel_samples
