@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
+from cg.clients.freshdesk.models import TicketResponse
 from cg.exc import (
     FreshdeskClosingTicketError,
     FreshdeskDeliveryMessageError,
@@ -438,7 +439,7 @@ def test_deliver_order_success(mocker: MockerFixture):
         internal_id="case_2",
         analyses=[analysis_2],
     )
-    order: Order = create_autospec(Order, cases=[case_1, case_2], id=1)
+    order: Order = create_autospec(Order, cases=[case_1, case_2], id=1, ticket_id=123)
     status_db.as_type.get_order_by_ticket_id_strict = Mock(return_value=order)
     status_db.as_type.get_uploaded_analyses = Mock(return_value=[analysis_1, analysis_2])
 
@@ -459,10 +460,16 @@ def test_deliver_order_success(mocker: MockerFixture):
 
     # GIVEN a Freshdesk client
     freshdesk_client: TypedMock[FreshdeskClient] = create_typed_mock(FreshdeskClient)
+    freshdesk_client.as_type.get_ticket = Mock(
+        return_value=create_autospec(TicketResponse, status=2)
+    )
+    freshdesk_client.as_type.update_ticket = Mock(return_value=None)
 
     # GIVEN a Delivery Service
     deliver_service = DeliverService(
-        status_db=status_db.as_type, trailblazer_api=trailblazer_api.as_type
+        freshdesk_client=freshdesk_client.as_type,
+        status_db=status_db.as_type,
+        trailblazer_api=trailblazer_api.as_type,
     )
     mark_analyses_call = mocker.patch.object(
         deliver_service.mark_as_delivered_service, "mark_analyses"
@@ -477,8 +484,11 @@ def test_deliver_order_success(mocker: MockerFixture):
     # THEN the order should have been closed
     assert not order.is_open
 
+    # THEN we should have checked the ticket status in Freshdesk
+    freshdesk_client.as_mock.get_ticket.assert_called_once_with(123)
+
     # THEN the Freshdesk ticket should have been closed
-    freshdesk_client.as_mock.close_ticket.assert_called_once_with(ticket_id=123)
+    freshdesk_client.as_mock.update_ticket.assert_called_once_with(ticket_id=123, status=5)
 
 
 def test_deliver_order_without_analyses(mocker: MockerFixture):
@@ -491,8 +501,15 @@ def test_deliver_order_without_analyses(mocker: MockerFixture):
     # GIVEN a Trailblazer API
     trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
 
+    # GIVEN a Freshdesk Client
+    freshdesk_client: TypedMock[FreshdeskClient] = create_typed_mock(FreshdeskClient)
+
     # GIVEN a Delivery Service
-    deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
+    deliver_service = DeliverService(
+        freshdesk_client=freshdesk_client.as_type,
+        status_db=status_db,
+        trailblazer_api=trailblazer_api,
+    )
     mark_analyses_call = mocker.patch.object(
         deliver_service.mark_as_delivered_service, "mark_analyses"
     )
@@ -502,6 +519,11 @@ def test_deliver_order_without_analyses(mocker: MockerFixture):
 
     # THEN we should not have marked any analysis as delivered
     mark_analyses_call.assert_not_called()
+
+    # TODO implement these
+    # THEN no delivery message should have been sent
+
+    # THEN the ticket in Freshdesk should not have been closed
 
     # THEN the order should have not been closed
     assert order.is_open

@@ -2,6 +2,7 @@ import logging
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
+from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.exc import (
     FreshdeskClosingTicketError,
     FreshdeskDeliveryMessageError,
@@ -17,13 +18,15 @@ LOG = logging.getLogger(__name__)
 
 
 class DeliverService:
-    def __init__(self, status_db: Store, trailblazer_api: TrailblazerAPI) -> None:
+    def __init__(
+        self, freshdesk_client: FreshdeskClient, status_db: Store, trailblazer_api: TrailblazerAPI
+    ) -> None:
         self.status_db = status_db
         self.trailblazer_api = trailblazer_api
         self.mark_as_delivered_service = MarkAsDeliveredService(
             status_db=status_db, trailblazer_api=trailblazer_api
         )
-        # TODO add freshdesk client as an attribute
+        self.freshdesk_client = freshdesk_client
 
     def deliver_all_available(self) -> bool:
         success: bool = True
@@ -137,6 +140,6 @@ class DeliverService:
         if not order.is_open:
             # TODO: Call Freshdesk client method to close the order
             if self.freshdesk_client.get_ticket(order.ticket_id).status == 2:
-                self.freshdesk_client.close_ticket(order.ticket_id)
+                self.freshdesk_client.update_ticket(ticket_id=order.ticket_id, status=5)
         else:
             return

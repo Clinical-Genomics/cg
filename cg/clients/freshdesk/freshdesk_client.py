@@ -60,6 +60,8 @@ class FreshdeskClient:
         return TicketResponse.model_validate(response.json())
 
     # TODO add method to change ticket status
+    def update_ticket(self):
+        pass
 
     # TODO adjust this method to be used in the deliver_service
     @handle_client_errors
