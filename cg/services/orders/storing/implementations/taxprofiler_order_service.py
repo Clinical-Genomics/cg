@@ -9,8 +9,9 @@ from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.service import StoreOrderService
 from cg.services.orders.validation.order_types.taxprofiler.models.order import TaxprofilerOrder
 from cg.services.orders.validation.order_types.taxprofiler.models.sample import TaxprofilerSample
-from cg.store.models import ApplicationVersion, CaseSample, Customer
+from cg.store.models import ApplicationVersion
 from cg.store.models import Case as DbCase
+from cg.store.models import CaseSample, Customer
 from cg.store.models import Order as DbOrder
 from cg.store.models import Sample as DbSample
 from cg.store.store import Store
@@ -37,7 +38,7 @@ class StoreTaxprofilerOrderService(StoreOrderService):
             skip_reception_control=order.skip_reception_control,
         )
         self._fill_in_sample_ids(samples=order.samples, lims_samples=lims_samples)
-        self._queue_samples_in_workflow(lims_samples=lims_samples)
+        self._queue_samples_in_workflow(lims_samples)
         new_samples = self.store_order_data_in_status_db(order)
         return {"project": project_data, "records": new_samples}
 

@@ -55,7 +55,7 @@ class StoreCaseOrderService(StoreOrderService):
                 skip_reception_control=order.skip_reception_control,
             )
             self._fill_in_sample_ids(samples=new_samples, lims_samples=lims_samples)
-            self._queue_samples_in_workflow(lims_samples=lims_samples)
+            self._queue_samples_in_workflow(lims_samples)
         else:
             project_data = None
 

@@ -104,7 +104,7 @@ def test_queue_samples_in_workflow(
     )
 
     # WHEN calling method to store samples in workflow
-    storing_service._queue_samples_in_workflow(lims_samples=lims_samples)
+    storing_service._queue_samples_in_workflow(lims_samples)
 
     # THEN the LIMS workflow ID is fetched for each apptag
     mock_get_id.assert_any_call("apptag1")

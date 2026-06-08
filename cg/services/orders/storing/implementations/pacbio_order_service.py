@@ -34,7 +34,7 @@ class StorePacBioOrderService(StoreOrderService):
             skip_reception_control=order.skip_reception_control,
         )
         self._fill_in_sample_ids(samples=order.samples, lims_samples=lims_samples)
-        self._queue_samples_in_workflow(lims_samples=lims_samples)
+        self._queue_samples_in_workflow(lims_samples)
         new_samples = self.store_order_data_in_status_db(order=order)
         return {"project": project_data, "records": new_samples}
 
