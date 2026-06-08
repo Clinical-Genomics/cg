@@ -23,6 +23,7 @@ class DeliverService:
         self.mark_as_delivered_service = MarkAsDeliveredService(
             status_db=status_db, trailblazer_api=trailblazer_api
         )
+        # TODO add freshdesk client as an attribute
 
     def deliver_all_available(self) -> bool:
         success: bool = True

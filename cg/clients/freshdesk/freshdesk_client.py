@@ -54,6 +54,11 @@ class FreshdeskClient:
         adapter = HTTPAdapter(max_retries=retry_strategy)
         session.mount("https://", adapter)
 
+    # TODO add method to check if a ticket is open
+
+    # TODO add method to change ticket status
+
+    # TODO adjust this method to be used in the deliver_service
     @handle_client_errors
     def reply_to_ticket(self, reply: ReplyCreate, attachments: list[Path] = None) -> None:
         """Send a reply to an existing ticket in Freshdesk."""
