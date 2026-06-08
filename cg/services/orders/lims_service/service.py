@@ -1,10 +1,10 @@
 import logging
 
-from genologics.entities import Sample as GenologicsSample
+from genologics.entities import Sample as LimsSample
 
 from cg.apps.lims import LimsAPI
 from cg.constants import DataDelivery, Workflow
-from cg.models.lims.sample import LimsSample
+from cg.models.lims.sample import LimsSample as LimsInputSample
 from cg.services.orders.validation.models.sample import Sample
 
 LOG = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ class OrderLimsService:
         workflow: Workflow,
         delivery_type: DataDelivery,
         skip_reception_control: bool,
-    ) -> list[LimsSample]:
+    ) -> list[LimsInputSample]:
         """Convert order input to LIMS interface input."""
         samples_lims = []
         for sample in samples:
@@ -38,7 +38,7 @@ class OrderLimsService:
                 dict_sample["skip_reception_control"] = True
             if dict_sample.get("source") and dict_sample["source"] == "other":
                 dict_sample["source"] = dict_sample.get("source_comment", "other")
-            lims_sample: LimsSample = LimsSample.parse_obj(dict_sample)
+            lims_sample: LimsInputSample = LimsInputSample.parse_obj(dict_sample)
             samples_lims.append(lims_sample)
         return samples_lims
 
@@ -51,9 +51,9 @@ class OrderLimsService:
         workflow: Workflow,
         delivery_type: DataDelivery,
         skip_reception_control: bool,
-    ) -> tuple[dict[str, str], list[GenologicsSample]]:
+    ) -> tuple[dict[str, str], list[LimsSample]]:
         """Create a project and associated samples in LIMS."""
-        samples_lims: list[LimsSample] = self._build_lims_sample(
+        samples_lims: list[LimsInputSample] = self._build_lims_sample(
             customer=customer,
             samples=samples,
             workflow=workflow,

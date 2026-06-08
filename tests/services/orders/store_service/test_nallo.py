@@ -1,8 +1,7 @@
 from unittest import mock
 
 import pytest
-from genologics.entities import Sample as GenologicsSample
-from genologics.lims import Sample
+from genologics.entities import Sample
 from mock import create_autospec
 from pytest_mock import MockerFixture
 

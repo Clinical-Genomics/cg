@@ -8,7 +8,7 @@ from datetime import datetime
 from unittest.mock import Mock, create_autospec
 
 import pytest
-from genologics.entities import Sample as GenologicsSample
+from genologics.entities import Sample as LimsSample
 from pytest_mock import MockerFixture
 
 from cg.apps.lims.api import LimsAPI
@@ -222,7 +222,7 @@ def test_store_rnafusion_sample_is_set_to_tumour(store: Store, mocker: MockerFix
     lims_service: OrderLimsService = create_autospec(
         OrderLimsService, lims_api=create_autospec(LimsAPI)
     )
-    lims_sample = create_autospec(GenologicsSample, id="rnafusion_sample_id")
+    lims_sample = create_autospec(LimsSample, id="rnafusion_sample_id")
     lims_sample.name = rna_fusion_sample.name
     lims_service.process_lims = Mock(return_value=("project_data", [lims_sample]))
 

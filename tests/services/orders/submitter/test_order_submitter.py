@@ -2,7 +2,7 @@ import datetime as dt
 from unittest.mock import PropertyMock, create_autospec, patch
 
 import pytest
-from genologics.entities import Sample as GenologicsSample
+from genologics.entities import Sample as LimsSample
 
 from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.models import TicketResponse
@@ -30,20 +30,20 @@ from cg.store.store import Store
 def monkeypatch_process_lims(monkeypatch: pytest.MonkeyPatch, order: Order) -> None:
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     if isinstance(order, OrderWithSamples):
-        lims_samples: list[GenologicsSample] = []
+        lims_samples: list[LimsSample] = []
         for index, sample in enumerate(order.samples):
-            lims_sample: GenologicsSample = create_autospec(
-                GenologicsSample,
+            lims_sample: LimsSample = create_autospec(
+                LimsSample,
                 id=f"ELH123A{index}",
                 udf={"Sequencing Analysis": "WGSWPFC030"},
             )
             lims_sample.name = sample.name
             lims_samples.append(lims_sample)
     elif isinstance(order, OrderWithCases):
-        lims_samples: list[GenologicsSample] = []
+        lims_samples: list[LimsSample] = []
         for case_index, sample_index, sample in order.enumerated_new_samples:
-            lims_sample: GenologicsSample = create_autospec(
-                GenologicsSample,
+            lims_sample: LimsSample = create_autospec(
+                LimsSample,
                 id=f"ELH123A{case_index}-{sample_index}",
                 udf={"Sequencing Analysis": "WGSWPFC030"},
             )
