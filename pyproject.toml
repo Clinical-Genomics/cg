@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "cg"
-version = "86.2.7"
+version = "86.3.0"
 description = "Clinical Genomics command center"
 readme = {file = "README.md", content-type = "text/markdown"}
 homepage = "https://github.com/Clinical-Genomics/cg"
@@ -61,6 +61,7 @@ dependencies = [
 "pydantic-settings>=2.3.3",
 "email-validator>=2.2.0",
 "rich-click>=1.8.4",
+"nats-py (>=2.14.0,<3.0.0)",
   ]
 [project.optional-dependencies]
 coveralls = ["coveralls"]
