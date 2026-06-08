@@ -123,6 +123,7 @@ microsalt:
   root: "{test_root_dir}/microsalt"
   conda_binary: "{test_root_dir}/microsalt/conda_bin"
   conda_env: "{test_root_dir}/microsalt/conda_env"
+  config: "{test_root_dir}/microsalt/config"
   binary_path: "{test_root_dir}/microsalt/bin"
   queries_path: "{test_root_dir}/microsalt/queries"
 

@@ -49,6 +49,7 @@ class MicrosaltConfigurator(Configurator):
             config_file=config_file_path.as_posix(),
             environment=self.config.conda_env,
             fastq_directory=fastq_directory.as_posix(),
+            pipeline_config_path=self.config.config,
         )
         config: MicrosaltCaseConfig = self._set_flags(config=config, **flags)
         self._ensure_required_config_files_exist(config)
