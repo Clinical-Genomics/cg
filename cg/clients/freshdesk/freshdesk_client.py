@@ -55,6 +55,8 @@ class FreshdeskClient:
         session.mount("https://", adapter)
 
     # TODO add method to check if a ticket is open
+    def get_ticket(self):
+        pass
 
     # TODO add method to change ticket status
 
