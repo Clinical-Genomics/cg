@@ -6,6 +6,7 @@ from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
+from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.exc import (
     FreshdeskClosingTicketError,
     FreshdeskDeliveryMessageError,
@@ -456,6 +457,9 @@ def test_deliver_order_success(mocker: MockerFixture):
         return_value=[tb_analysis_1, tb_analysis_2]
     )
 
+    # GIVEN a Freshdesk client
+    freshdesk_client: TypedMock[FreshdeskClient] = create_typed_mock(FreshdeskClient)
+
     # GIVEN a Delivery Service
     deliver_service = DeliverService(
         status_db=status_db.as_type, trailblazer_api=trailblazer_api.as_type
@@ -472,6 +476,9 @@ def test_deliver_order_success(mocker: MockerFixture):
 
     # THEN the order should have been closed
     assert not order.is_open
+
+    # THEN the Freshdesk ticket should have been closed
+    freshdesk_client.as_mock.close_ticket.assert_called_once_with(ticket_id=123)
 
 
 def test_deliver_order_without_analyses(mocker: MockerFixture):

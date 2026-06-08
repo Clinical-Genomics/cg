@@ -55,8 +55,9 @@ class FreshdeskClient:
         session.mount("https://", adapter)
 
     # TODO add method to check if a ticket is open
-    def get_ticket(self):
-        pass
+    def get_ticket(self, ticket_id: int) -> TicketResponse:
+        response = self.session.get(url=f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}")
+        return TicketResponse.model_validate(response.json())
 
     # TODO add method to change ticket status
 

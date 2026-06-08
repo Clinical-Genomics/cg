@@ -136,6 +136,7 @@ class DeliverService:
         # Implement in next iteration
         if not order.is_open:
             # TODO: Call Freshdesk client method to close the order
-            pass
+            if self.freshdesk_client.get_ticket(order.ticket_id).status == 2:
+                self.freshdesk_client.close_ticket(order.ticket_id)
         else:
             return

@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from pytest_mock import MockerFixture
 from requests import Response
@@ -52,11 +54,14 @@ def test_get_ticket_success(ticket_raw_response: dict, mocker: MockerFixture):
     )
     response = Response()
     response.status_code = 200
-    response._content = str.encode(str(ticket_raw_response))
+    response._content = str.encode(json.dumps(ticket_raw_response))
     mocker.patch.object(client.session, "get", return_value=response)
 
     # WHEN getting a ticket
-    ticket_response: TicketResponse = client.get_ticket(1)
+    ticket_response: TicketResponse = client.get_ticket(20)
 
     # THEN the response should be a TicketResponse object
-    assert isinstance(ticket_response, TicketResponse)
+    expected_ticket_response = TicketResponse(
+        id=20, description="<div>Not given.</div>", subject="", priority=1, status=2
+    )
+    assert ticket_response == expected_ticket_response
