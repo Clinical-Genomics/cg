@@ -37,20 +37,21 @@ class DeliverService:
                 self.status_db.rollback()
                 success = False
                 LOG.error(
-                    f"Failed to mark analyses as delivered in Trailblazer for order {order.id}: {str(error)}"
+                    f"Failed to mark analyses as delivered in Trailblazer for order {order.id}"
                 )
+                LOG.exception(error)
             except (TrailblazerFailedToGetAnalysesError, FreshdeskDeliveryMessageError) as error:
                 self.status_db.rollback()
                 self.mark_as_delivered_service.unmark_analyses(analyses)
                 success = False
-                LOG.error(
-                    f"Failed to send delivery message for ticket {order.ticket_id}: {str(error)}"
-                )
+                LOG.error(f"Failed to send delivery message for ticket {order.ticket_id}")
+                LOG.exception(error)
             except FreshdeskClosingTicketError as error:
                 order.is_open = True
                 self.status_db.commit_to_store()
                 success = False
-                LOG.error(f"Failed to close ticket {order.ticket_id} in Freshdesk: {str(error)}")
+                LOG.error(f"Failed to close ticket {order.ticket_id} in Freshdesk")
+                LOG.exception(error)
             else:
                 self.status_db.commit_to_store()
         return success
