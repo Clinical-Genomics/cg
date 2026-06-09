@@ -8,7 +8,7 @@ import rich_click as click
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.constants import Workflow
-from cg.constants.cli_options import DRY_RUN
+from cg.constants.cli_options import DRY_RUN, SIGNATURE
 from cg.constants.delivery import FileDeliveryOption
 from cg.models.cg_config import CGConfig
 from cg.services.deliver_files import deliver_raw_data
@@ -17,6 +17,7 @@ from cg.services.deliver_files.deliver_files_service.deliver_files_service impor
 )
 from cg.services.deliver_files.factory import DeliveryServiceFactory
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
+from cg.services.deliver_service import DeliverService
 from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
@@ -202,3 +203,76 @@ def deliver_auto_raw_data(context: CGConfig, dry_run: bool):
         service_builder=service_builder,
         dry_run=dry_run,
     )
+
+
+@deliver.command(name="dev-case-command", hidden=True)
+@SIGNATURE
+@click.argument("case_id", type=str, required=True)
+@click.pass_obj
+def deliver_dev_case_command(config: CGConfig, case_id: str, signature: str):
+    """
+    Deliver a case by case ID.
+
+    \b
+    Performs:
+        - Sends delivery message to connected ticket in Freshdesk
+        - Marks latest analysis as delivered in Trailblazer
+        - Marks sample as delivered if not delivered yet
+        - Closes order in statusdb if all analyses on the order are delivered and all samples are marked as delivered
+        - Closes ticket in Freshdesk if its status is open
+    """
+    deliver_service = DeliverService(
+        status_db=config.status_db, trailblazer_api=config.trailblazer_api
+    )
+    deliver_service.deliver_case(case_id=case_id, signature=signature)
+    config.status_db.commit_to_store()
+
+
+@deliver.command(name="dev-all-available", hidden=True)
+@click.pass_obj
+def deliver_dev_all_available(config: CGConfig):
+    """
+    Deliver all cases that have an analysis ready to be delivered in trailblazer.
+
+    \b
+    Performs:
+        - Sends delivery message to connected ticket in Freshdesk
+        - Marks analysis as delivered in Trailblazer
+        - Marks sample as delivered if not delivered yet
+        - Closes order in statusdb if all analyses on the order are delivered and all samples are marked as delivered
+        - Closes ticket in Freshdesk if its status is open
+    """
+    deliver_service = DeliverService(
+        status_db=config.status_db, trailblazer_api=config.trailblazer_api
+    )
+    if not deliver_service.deliver_all_available():
+        raise click.Abort()
+
+
+@deliver.command(name="dev-order", hidden=True)
+@SIGNATURE
+@click.option(
+    "--ticket-id",
+    "-t",
+    type=int,
+    required=True,
+    help="Freshdesk ticket id corresponding to the order",
+)
+@click.pass_obj
+def deliver_dev_order(config: CGConfig, signature: str, ticket_id: int):
+    """
+    Deliver all analysis ready to be delivered in an order by ticket_id.
+
+    \b
+    Performs:
+        - Sends delivery message to connected ticket in Freshdesk
+        - Marks analyses as delivered in Trailblazer
+        - If applicable marks sample as delivered
+        - If applicable closes order in statusdb
+        - If applicable closes ticket in Freshdesk
+    """
+    deliver_service = DeliverService(
+        status_db=config.status_db, trailblazer_api=config.trailblazer_api
+    )
+    deliver_service.deliver_order(signature=signature, ticket_id=ticket_id)
+    config.status_db.commit_to_store()
