@@ -14,8 +14,8 @@ from cg.cli.deliver.base import (
 )
 from cg.constants.process import EXIT_FAIL, EXIT_PARSE_ERROR, EXIT_SUCCESS
 from cg.exc import (
-    FreshdeskClosingTicketError,
     FreshdeskDeliveryMessageError,
+    FreshdeskUpdateTicketError,
     TrailblazerAnalysisDeliveryError,
     TrailblazerFailedToGetAnalysesError,
 )
@@ -136,7 +136,7 @@ def test_deliver_dev_all_available_command_success(mocker: MockerFixture):
         TrailblazerAnalysisDeliveryError,
         TrailblazerFailedToGetAnalysesError,
         FreshdeskDeliveryMessageError,
-        FreshdeskClosingTicketError,
+        FreshdeskUpdateTicketError,
     ],
 )
 def test_deliver_dev_all_available_service_caught_error(

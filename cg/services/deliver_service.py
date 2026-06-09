@@ -4,8 +4,9 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.exc import (
-    FreshdeskClosingTicketError,
     FreshdeskDeliveryMessageError,
+    FreshdeskGetTicketError,
+    FreshdeskUpdateTicketError,
     MultipleAnalysesToDeliverError,
     TrailblazerAnalysisDeliveryError,
     TrailblazerFailedToGetAnalysesError,
@@ -50,7 +51,7 @@ class DeliverService:
                 success = False
                 LOG.error(f"Failed to send delivery message for ticket {order.ticket_id}")
                 LOG.exception(error)
-            except FreshdeskClosingTicketError as error:
+            except (FreshdeskGetTicketError, FreshdeskUpdateTicketError) as error:
                 order.is_open = True
                 self.status_db.commit_to_store()
                 success = False

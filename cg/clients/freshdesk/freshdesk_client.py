@@ -1,13 +1,14 @@
 from http import HTTPStatus
 from pathlib import Path
 
-from requests import Session
+from requests import HTTPError, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 from cg.clients.freshdesk.constants import EndPoints
 from cg.clients.freshdesk.models import ReplyCreate, TicketCreate, TicketResponse
 from cg.clients.freshdesk.utils import handle_client_errors, prepare_attachments
+from cg.exc import FreshdeskGetTicketError
 
 
 class FreshdeskClient:
@@ -56,8 +57,11 @@ class FreshdeskClient:
 
     # TODO add method to check if a ticket is open
     def get_ticket(self, ticket_id: int) -> TicketResponse:
-        response = self.session.get(url=f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}")
-        return TicketResponse.model_validate(response.json())
+        try:
+            response = self.session.get(url=f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}")
+            return TicketResponse.model_validate(response.json())
+        except HTTPError as error:
+            raise FreshdeskGetTicketError from error
 
     # TODO add method to change ticket status
     def update_ticket(self, ticket_id: int, status: int) -> None:

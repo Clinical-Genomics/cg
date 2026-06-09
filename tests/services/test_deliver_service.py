@@ -9,8 +9,8 @@ from cg.apps.tb.models import TrailblazerAnalysis
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketResponse
 from cg.exc import (
-    FreshdeskClosingTicketError,
     FreshdeskDeliveryMessageError,
+    FreshdeskUpdateTicketError,
     MultipleAnalysesToDeliverError,
     OrderNotFoundError,
     TrailblazerAnalysisDeliveryError,
@@ -297,8 +297,15 @@ def test_deliver_all_available_no_analyses_to_deliver(mocker: MockerFixture):
     status_db.get_uploaded_analyses = Mock(return_value=[])
     trailblazer_api: TypedMock[TrailblazerAPI] = create_typed_mock(TrailblazerAPI)
 
+    # GIVEN a Freshdesk Client
+    freshdesk_client: FreshdeskClient = create_autospec(FreshdeskClient)
+
     # GIVEN a Delivery Service
-    deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api.as_type)
+    deliver_service = DeliverService(
+        freshdesk_client=freshdesk_client,
+        status_db=status_db,
+        trailblazer_api=trailblazer_api.as_type,
+    )
     mark_analyses_call = mocker.patch.object(
         deliver_service.mark_as_delivered_service, "mark_analyses"
     )
@@ -330,8 +337,15 @@ def test_deliver_all_available_trailblazer_analysis_delivery_error(mocker: Mocke
     # GIVEN a Trailblazer API
     trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
 
+    # GIVEN a Freshdesk client
+    freshdesk_client: FreshdeskClient = create_autospec(FreshdeskClient)
+
     # GIVEN a Delivery Service
-    deliver_service = DeliverService(status_db=status_db.as_type, trailblazer_api=trailblazer_api)
+    deliver_service = DeliverService(
+        freshdesk_client=freshdesk_client,
+        status_db=status_db.as_type,
+        trailblazer_api=trailblazer_api,
+    )
 
     # GIVEN the MarkAsDeliveredService raises a TrailblazerAnalysisDeliveryError
     mocker.patch.object(
@@ -361,8 +375,15 @@ def test_deliver_all_available_trailblazer_failed_to_get_analyses_error(mocker: 
     # GIVEN a Trailblazer API
     trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
 
+    # GIVEN a Freshdesk client
+    freshdesk_client: FreshdeskClient = create_autospec(FreshdeskClient)
+
     # GIVEN a Delivery Service
-    deliver_service = DeliverService(status_db=status_db.as_type, trailblazer_api=trailblazer_api)
+    deliver_service = DeliverService(
+        freshdesk_client=freshdesk_client,
+        status_db=status_db.as_type,
+        trailblazer_api=trailblazer_api,
+    )
 
     # GIVEN the MarkAsDeliveredService raises a TrailblazerFailedToGetAnalysesError
     mocker.patch.object(
@@ -398,10 +419,18 @@ def test_deliver_all_available_freshdesk_delivery_message_error(mocker: MockerFi
     # GIVEN a Trailblazer API
     trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
 
+    # GIVEN a Freshdesk client
+    freshdesk_client: TypedMock[FreshdeskClient] = create_typed_mock(FreshdeskClient)
+
     # GIVEN a Delivery Service
-    deliver_service = DeliverService(status_db=status_db.as_type, trailblazer_api=trailblazer_api)
+    deliver_service = DeliverService(
+        freshdesk_client=freshdesk_client.as_type,
+        status_db=status_db.as_type,
+        trailblazer_api=trailblazer_api,
+    )
 
     # GIVEN the _freshdesk_send_delivery_message method raises a FreshdeskDeliveryMessageError
+    # TODO: Make the client fail
     mocker.patch.object(
         deliver_service,
         "_freshdesk_send_delivery_message",
@@ -435,14 +464,22 @@ def test_deliver_all_available_freshdesk_closing_ticket_error(mocker: MockerFixt
     # GIVEN a Trailblazer API
     trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
 
-    # GIVEN a Delivery Service
-    deliver_service = DeliverService(status_db=status_db.as_type, trailblazer_api=trailblazer_api)
+    # GIVEN a Freshdesk client
+    freshdesk_client: TypedMock[FreshdeskClient] = create_typed_mock(FreshdeskClient)
 
-    # GIVEN the _freshdesk_send_delivery_message method raises a FreshdeskClosingTicketError
+    # GIVEN a Delivery Service
+    deliver_service = DeliverService(
+        freshdesk_client=freshdesk_client.as_type,
+        status_db=status_db.as_type,
+        trailblazer_api=trailblazer_api,
+    )
+
+    # GIVEN the _freshdesk_send_delivery_message method raises a FreshdeskUpdateTicketError
+    # TODO: Modify scenario so that client fails
     mocker.patch.object(
         deliver_service,
         "_freshdesk_close_ticket_if_open",
-        side_effect=FreshdeskClosingTicketError,
+        side_effect=FreshdeskUpdateTicketError,
     )
 
     # WHEN delivering all analyses
@@ -570,9 +607,14 @@ def test_deliver_order_invalid_ticket_id():
     status_db: Store = create_autospec(Store)
     status_db.get_order_by_ticket_id_strict = Mock(side_effect=OrderNotFoundError)
 
+    # GIVEN a Freshdesk Client
+    freshdesk_client: FreshdeskClient = create_autospec(FreshdeskClient)
+
     # GIVEN a Delivery Service
     deliver_service = DeliverService(
-        status_db=status_db, trailblazer_api=create_autospec(TrailblazerAPI)
+        freshdesk_client=freshdesk_client,
+        status_db=status_db,
+        trailblazer_api=create_autospec(TrailblazerAPI),
     )
 
     # WHEN delivering an order with a nonexisting ticket id
