@@ -133,11 +133,9 @@ class DeliverService:
         return order_analyses
 
     def _freshdesk_send_delivery_message(self, order: Order, analyses: list[Analysis]):
-        # TODO: Get delivery message as a string
         cases: list[Case] = [analysis.case for analysis in analyses]
         message: str = get_message(cases=cases, store=self.status_db)
         self.freshdesk_client.reply_to_ticket(ticket_id=order.ticket_id, message=message)
-        # TODO: Pass the string and the ticket_id from the order to the Freshdesk client and reply to the ticket
 
     def _freshdesk_close_ticket_if_open(self, order: Order):
         if not order.is_open:

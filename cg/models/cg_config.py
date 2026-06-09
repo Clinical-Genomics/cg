@@ -148,6 +148,21 @@ class ChanjoConfig(BaseModel):
     config_path: str
 
 
+class NatsAuthentication(BaseModel):
+    ca_cert_path: Path
+    client_cert_path: Path
+    client_key_path: Path
+    token_path: Path
+
+
+class NatsConfig(BaseModel):
+    nats_binary_path: Path
+    server: str
+    stream: str
+    listener: NatsAuthentication
+    publisher: NatsAuthentication
+
+
 class HermesConfig(CommonAppConfig):
     container_path: str
 
@@ -494,6 +509,7 @@ class CGConfig(BaseModel):
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
+    nats: NatsConfig
     external: ExternalConfig = None
     gens: GENSConfig | None = None
     gens_api_: GensAPI = None
@@ -827,6 +843,7 @@ class CGConfig(BaseModel):
             rsync_config = RsyncDeliveryConfig(**self.data_delivery.dict())
             service = DeliveryRsyncService(
                 delivery_path=self.delivery_path,
+                nats_config=self.nats,
                 rsync_config=rsync_config,
                 status_db=self.status_db,
             )
