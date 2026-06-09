@@ -12,7 +12,6 @@ from cg.clients.freshdesk.models import TicketResponse
 from cg.exc import (
     FreshdeskDeliveryMessageError,
     FreshdeskGetTicketError,
-    FreshdeskUpdateTicketError,
     MultipleAnalysesToDeliverError,
     OrderNotFoundError,
     TrailblazerAnalysisDeliveryError,
