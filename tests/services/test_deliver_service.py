@@ -10,6 +10,7 @@ from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketResponse
 from cg.exc import (
     FreshdeskDeliveryMessageError,
+    FreshdeskGetTicketError,
     FreshdeskUpdateTicketError,
     MultipleAnalysesToDeliverError,
     OrderNotFoundError,
@@ -474,19 +475,17 @@ def test_deliver_all_available_freshdesk_closing_ticket_error(mocker: MockerFixt
         trailblazer_api=trailblazer_api,
     )
 
-    # GIVEN the _freshdesk_send_delivery_message method raises a FreshdeskUpdateTicketError
-    # TODO: Modify scenario so that client fails
-    mocker.patch.object(
-        deliver_service,
-        "_freshdesk_close_ticket_if_open",
-        side_effect=FreshdeskUpdateTicketError,
-    )
+    # GIVEN that the Freshdesk client raises a FreshdeskGetTicketError
+    freshdesk_client.as_type.get_ticket = Mock(side_effect=FreshdeskGetTicketError)
 
     # WHEN delivering all analyses
     success: bool = deliver_service.deliver_all_available()
 
     # THEN the delivery service fails
     assert not success
+
+    # THEN the delivery message should have been sent
+    # TODO: implement this assertion
 
     # THEN the order should have been reopened if ever closed
     assert analysis_to_deliver.order.is_open

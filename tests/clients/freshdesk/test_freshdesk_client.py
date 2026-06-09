@@ -1,11 +1,14 @@
 import json
+from http import HTTPStatus
 
 import pytest
 from pytest_mock import MockerFixture
 from requests import Response
 
+from cg.clients.freshdesk import freshdesk_client
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketResponse
+from cg.exc import FreshdeskGetTicketError
 
 
 @pytest.fixture
@@ -63,5 +66,45 @@ def test_get_ticket_success(ticket_raw_response: dict, mocker: MockerFixture):
     # THEN the response should be a TicketResponse object
     expected_ticket_response = TicketResponse(
         id=20, description="<div>Not given.</div>", subject="", priority=1, status=2
+    )
+    assert ticket_response == expected_ticket_response
+
+
+def test_get_ticket_failure(mocker: MockerFixture):
+    # GIVEN a Freshdesk client
+    client = FreshdeskClient(
+        base_url="https://example.freshdesk.com/api/v2", api_key="test_api_key"
+    )
+
+    # GIVEN that the HTTP request returns an internal server error
+    response = Response()
+    response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+    mocker.patch.object(client.session, "get", return_value=response)
+
+    # WHEN getting a ticket
+    # THEN a FreshdeskGetTicketError should be raised
+    with pytest.raises(FreshdeskGetTicketError):
+        client.get_ticket(20)
+
+
+def test_update_ticket_success(ticket_raw_response: dict, mocker: MockerFixture):
+    # GIVEN a Freshdesk client
+    client = FreshdeskClient(
+        base_url="https://example.freshdesk.com/api/v2", api_key="test_api_key"
+    )
+
+    # GIVEN a successful HTTP response
+    response = Response()
+    response.status_code = 200
+    ticket_raw_response["status"] = 5
+    response._content = str.encode(json.dumps(ticket_raw_response))
+    mocker.patch.object(client.session, "put", return_value=response)
+
+    # WHEN updating the ticket with a status
+    ticket_response = freshdesk_client.update_ticket(ticket_id=20, status=5)
+
+    # THEN the response should be a TicketResponse object
+    expected_ticket_response = TicketResponse(
+        id=20, description="<div>Not given.</div>", subject="", priority=1, status=5
     )
     assert ticket_response == expected_ticket_response

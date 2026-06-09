@@ -55,10 +55,10 @@ class FreshdeskClient:
         adapter = HTTPAdapter(max_retries=retry_strategy)
         session.mount("https://", adapter)
 
-    # TODO add method to check if a ticket is open
     def get_ticket(self, ticket_id: int) -> TicketResponse:
         try:
             response = self.session.get(url=f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}")
+            response.raise_for_status()
             return TicketResponse.model_validate(response.json())
         except HTTPError as error:
             raise FreshdeskGetTicketError from error
