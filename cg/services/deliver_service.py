@@ -132,13 +132,11 @@ class DeliverService:
         return order_analyses
 
     def _freshdesk_send_delivery_message(self, order: Order, analyses: list[Analysis]):
-        # Implement in next iteration
         # TODO: Get delivery message as a string
         # TODO: Pass the string and the ticket_id from the order to the Freshdesk client and reply to the ticket
         pass
 
     def _freshdesk_close_ticket_if_open(self, order: Order):
-        # Implement in next iteration
         if not order.is_open:
             if self.freshdesk_client.get_ticket(order.ticket_id).status == Status.OPEN:
                 self.freshdesk_client.update_ticket(ticket_id=order.ticket_id, status=Status.CLOSED)

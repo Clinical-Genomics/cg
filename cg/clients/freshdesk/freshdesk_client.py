@@ -78,12 +78,11 @@ class FreshdeskClient:
         except HTTPError as error:
             raise FreshdeskUpdateTicketError from error
 
-    def reply_to_ticket(self, ticket_id: int, message: str) -> Response:
+    def reply_to_ticket(self, ticket_id: int, message: str) -> None:
         """Send a reply to an existing ticket in Freshdesk."""
         url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}/reply"
         try:
             response = self.session.post(url=url, data={"body": message})
             response.raise_for_status()
-            return response
         except HTTPError as error:
             raise FreshdeskDeliveryMessageError from error

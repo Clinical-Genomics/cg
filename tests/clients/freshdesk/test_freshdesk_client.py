@@ -151,10 +151,7 @@ def test_reply_to_ticket_success(mocker: MockerFixture):
     mocked_post = mocker.patch.object(client.session, "post", return_value=mocked_response)
 
     # WHEN replying to a ticket with a message
-    response = client.reply_to_ticket(ticket_id=123, message="Reply to ticket")
-
-    # THEN the response is successful
-    assert response == mocked_response
+    client.reply_to_ticket(ticket_id=123, message="Reply to ticket")
 
     # THEN a reply was sent to the ticket
     mocked_post.assert_called_once_with(
