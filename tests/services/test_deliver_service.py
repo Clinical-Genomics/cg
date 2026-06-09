@@ -9,6 +9,7 @@ from cg.apps.tb.models import TrailblazerAnalysis
 from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketResponse
+from cg.constants.constants import DataDelivery, Workflow
 from cg.exc import (
     FreshdeskDeliveryMessageError,
     FreshdeskGetTicketError,
@@ -17,8 +18,9 @@ from cg.exc import (
     TrailblazerAnalysisDeliveryError,
     TrailblazerFailedToGetAnalysesError,
 )
+from cg.services import deliver_service as deliver_service_module
 from cg.services.deliver_service import DeliverService
-from cg.store.models import Analysis, Case, Order
+from cg.store.models import Analysis, Case, Customer, Order
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -216,18 +218,42 @@ def test_deliver_all_available_success(mocker: MockerFixture):
 
     # GIVEN one order in store with one analysis
     order_1: Order = create_autospec(Order, is_open=True, ticket_id=1)
+    case_1: Case = create_autospec(
+        Case,
+        name="case_1",
+        customer=create_autospec(Customer),
+        latest_ticket=1,
+        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
+        data_analysis=Workflow.RAREDISEASE,
+    )
     analysis_1 = create_autospec(
-        Analysis, order=order_1, trailblazer_id=1, uploaded_at=datetime.now()
+        Analysis, order=order_1, trailblazer_id=1, uploaded_at=datetime.now(), case=case_1
     )
     order_1.analyses = [analysis_1]
 
     # GIVEN another order in store with two analyses
     order_2: Order = create_autospec(Order, is_open=True, ticket_id=2)
+    case_2: Case = create_autospec(
+        Case,
+        name="case_2",
+        customer=create_autospec(Customer),
+        latest_ticket=1,
+        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
+        data_analysis=Workflow.RAREDISEASE,
+    )
     analysis_2 = create_autospec(
-        Analysis, order=order_2, trailblazer_id=2, uploaded_at=datetime.now()
+        Analysis, order=order_2, trailblazer_id=2, uploaded_at=datetime.now(), case=case_2
+    )
+    case_3: Case = create_autospec(
+        Case,
+        name="case_3",
+        customer=create_autospec(Customer),
+        latest_ticket=1,
+        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
+        data_analysis=Workflow.RAREDISEASE,
     )
     analysis_3 = create_autospec(
-        Analysis, order=order_2, trailblazer_id=3, uploaded_at=datetime.now()
+        Analysis, order=order_2, trailblazer_id=3, uploaded_at=datetime.now(), case=case_3
     )
     order_2.analyses = [analysis_2, analysis_3]
 
@@ -244,6 +270,9 @@ def test_deliver_all_available_success(mocker: MockerFixture):
         TicketResponse, id=ticket_id, status=2
     )
 
+    # GIVEN a delivery message method
+    delivery_message_spy = mocker.spy(deliver_service_module, "get_message")
+
     # GIVEN a Deliver Service
     deliver_service = DeliverService(
         freshdesk_client=freshdesk_client.as_type,
@@ -256,7 +285,6 @@ def test_deliver_all_available_success(mocker: MockerFixture):
     close_order_call = mocker.spy(
         deliver_service.mark_as_delivered_service, "close_order_in_status_db_if_closable"
     )
-    delivery_message_spy = mocker.spy(deliver_service, "_freshdesk_send_delivery_message")
 
     # WHEN delivering all cases
     success: bool = deliver_service.deliver_all_available()
@@ -278,9 +306,15 @@ def test_deliver_all_available_success(mocker: MockerFixture):
     close_order_call.assert_any_call(order_1)
     close_order_call.assert_any_call(order_2)
 
-    # THEN the delivery message should have been sent for both orders separately
-    delivery_message_spy.assert_any_call(order=order_1, analyses=[analysis_1])
-    delivery_message_spy.assert_any_call(order=order_2, analyses=[analysis_2, analysis_3])
+    # THEN the delivery message should have been generated and sent for both orders separately
+    delivery_message_spy.assert_any_call(cases=[case_1], store=status_db)
+    delivery_message_spy.assert_any_call(cases=[case_2, case_3], store=status_db)
+    freshdesk_client.as_mock.reply_to_ticket.assert_any_call(
+        ticket_id=order_1.ticket_id, message="?"
+    )
+    freshdesk_client.as_mock.reply_to_ticket.assert_any_call(
+        ticket_id=order_2.ticket_id, message="?"
+    )
 
     # THEN both tickets were closes in freshdesk
     freshdesk_client.as_mock.update_ticket.assert_any_call(ticket_id=order_1.ticket_id, status=5)

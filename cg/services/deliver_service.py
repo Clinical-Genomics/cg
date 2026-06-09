@@ -12,8 +12,9 @@ from cg.exc import (
     TrailblazerAnalysisDeliveryError,
     TrailblazerFailedToGetAnalysesError,
 )
+from cg.services.delivery_message.utils import get_message
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
-from cg.store.models import Analysis, Order
+from cg.store.models import Analysis, Case, Order
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -133,8 +134,10 @@ class DeliverService:
 
     def _freshdesk_send_delivery_message(self, order: Order, analyses: list[Analysis]):
         # TODO: Get delivery message as a string
+        cases: list[Case] = [analysis.case for analysis in analyses]
+        message: str = get_message(cases=cases, store=self.status_db)
+        self.freshdesk_client.reply_to_ticket(ticket_id=order.ticket_id, message=message)
         # TODO: Pass the string and the ticket_id from the order to the Freshdesk client and reply to the ticket
-        pass
 
     def _freshdesk_close_ticket_if_open(self, order: Order):
         if not order.is_open:
