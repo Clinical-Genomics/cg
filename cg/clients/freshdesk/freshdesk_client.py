@@ -8,7 +8,7 @@ from urllib3 import Retry
 from cg.clients.freshdesk.constants import EndPoints
 from cg.clients.freshdesk.models import ReplyCreate, TicketCreate, TicketResponse
 from cg.clients.freshdesk.utils import handle_client_errors, prepare_attachments
-from cg.exc import FreshdeskGetTicketError
+from cg.exc import FreshdeskGetTicketError, FreshdeskUpdateTicketError
 
 
 class FreshdeskClient:
@@ -59,13 +59,20 @@ class FreshdeskClient:
         try:
             response = self.session.get(url=f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}")
             response.raise_for_status()
-            return TicketResponse.model_validate(response.json())
+            return TicketResponse.model_validate(response.json()["ticket"])
         except HTTPError as error:
             raise FreshdeskGetTicketError from error
 
-    # TODO add method to change ticket status
-    def update_ticket(self, ticket_id: int, status: int) -> None:
-        pass
+    def update_ticket(self, ticket_id: int, status: int) -> TicketResponse:
+        data = {"status": status}
+        try:
+            response = self.session.put(
+                url=f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}", data=data
+            )
+            response.raise_for_status()
+            return TicketResponse.model_validate(response.json()["ticket"])
+        except HTTPError as error:
+            raise FreshdeskUpdateTicketError from error
 
     # TODO adjust this method to be used in the deliver_service
     @handle_client_errors
