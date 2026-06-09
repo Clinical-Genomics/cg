@@ -140,7 +140,6 @@ class DeliverService:
     def _freshdesk_close_ticket_if_open(self, order: Order):
         # Implement in next iteration
         if not order.is_open:
-            # TODO: Call Freshdesk client method to close the order
             if self.freshdesk_client.get_ticket(order.ticket_id).status == Status.OPEN:
                 self.freshdesk_client.update_ticket(ticket_id=order.ticket_id, status=Status.CLOSED)
         else:

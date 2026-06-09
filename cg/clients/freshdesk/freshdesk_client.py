@@ -78,7 +78,6 @@ class FreshdeskClient:
         except HTTPError as error:
             raise FreshdeskUpdateTicketError from error
 
-    # TODO adjust this method to be used in the deliver_service
     def reply_to_ticket(self, ticket_id: int, message: str) -> Response:
         """Send a reply to an existing ticket in Freshdesk."""
         url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}/reply"
