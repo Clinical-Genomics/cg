@@ -406,7 +406,7 @@ def validate_source_comment_required(
     return errors
 
 
-def warn_if_sex_unknown(order: PacbioOrder, **kwargs) -> list[SexUnknownWarning]:
+def warn_if_sex_unknown(order: OrderWithSamples, **kwargs) -> list[SexUnknownWarning]:
     warnings: list[SexUnknownWarning] = []
     for sample_index, sample in order.enumerated_samples:
         if sample.sex == SexEnum.unknown:
