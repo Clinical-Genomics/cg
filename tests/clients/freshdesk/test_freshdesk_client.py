@@ -8,7 +8,11 @@ from requests import Response
 from cg.clients.freshdesk.constants import Priority, Status
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketResponse
-from cg.exc import FreshdeskGetTicketError, FreshdeskUpdateTicketError
+from cg.exc import (
+    FreshdeskDeliveryMessageError,
+    FreshdeskGetTicketError,
+    FreshdeskUpdateTicketError,
+)
 
 
 @pytest.fixture
@@ -120,7 +124,7 @@ def test_update_ticket_success(ticket_raw_response: dict, mocker: MockerFixture)
     assert ticket_response == expected_ticket_response
 
 
-def test_update_ticket_failure(ticket_raw_response: dict, mocker: MockerFixture):
+def test_update_ticket_failure(mocker: MockerFixture):
     # GIVEN a Freshdesk client
     client = FreshdeskClient(
         base_url="https://example.freshdesk.com/api/v2", api_key="test_api_key"
@@ -135,3 +139,40 @@ def test_update_ticket_failure(ticket_raw_response: dict, mocker: MockerFixture)
     # THEN a FreshdeskUpdateTicketError should be raised
     with pytest.raises(FreshdeskUpdateTicketError):
         client.update_ticket(ticket_id=20, status=Status.CLOSED)
+
+
+def test_reply_to_ticket_success(mocker: MockerFixture):
+    # GIVEN a Freshdesk client
+    client = FreshdeskClient(base_url="https://example.freshdesk.com", api_key="test_api_key")
+
+    # GIVEN a successful response
+    mocked_response = Response()
+    mocked_response.status_code = HTTPStatus.OK
+    mocked_post = mocker.patch.object(client.session, "post", return_value=mocked_response)
+
+    # WHEN replying to a ticket with a message
+    response = client.reply_to_ticket(ticket_id=123, message="Reply to ticket")
+
+    # THEN the response is successful
+    assert response == mocked_response
+
+    # THEN a reply was sent to the ticket
+    mocked_post.assert_called_once_with(
+        url="https://example.freshdesk.com/api/v2/tickets/123/reply",
+        data={"body": "Reply to ticket"},
+    )
+
+
+def test_reply_to_ticket_failure(mocker: MockerFixture):
+    # GIVEN a Freshdesk client
+    client = FreshdeskClient(base_url="https://example.freshdesk.com", api_key="test_api_key")
+
+    # GIVEN a failing HTTP response
+    response = Response()
+    response.status_code = HTTPStatus.BAD_REQUEST
+    mocker.patch.object(client.session, "post", return_value=response)
+
+    # WHEN replying to the ticket with a message
+    # THEN a FreshdeskDeliveryMessageError should be raised
+    with pytest.raises(FreshdeskDeliveryMessageError):
+        client.reply_to_ticket(ticket_id=20, message="")

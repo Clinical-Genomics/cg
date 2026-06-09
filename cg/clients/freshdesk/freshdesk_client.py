@@ -1,14 +1,18 @@
 from http import HTTPStatus
 from pathlib import Path
 
-from requests import HTTPError, Session
+from requests import HTTPError, Response, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 from cg.clients.freshdesk.constants import EndPoints
-from cg.clients.freshdesk.models import ReplyCreate, TicketCreate, TicketResponse
+from cg.clients.freshdesk.models import TicketCreate, TicketResponse
 from cg.clients.freshdesk.utils import handle_client_errors, prepare_attachments
-from cg.exc import FreshdeskGetTicketError, FreshdeskUpdateTicketError
+from cg.exc import (
+    FreshdeskDeliveryMessageError,
+    FreshdeskGetTicketError,
+    FreshdeskUpdateTicketError,
+)
 
 
 class FreshdeskClient:
@@ -75,13 +79,12 @@ class FreshdeskClient:
             raise FreshdeskUpdateTicketError from error
 
     # TODO adjust this method to be used in the deliver_service
-    @handle_client_errors
-    def reply_to_ticket(self, reply: ReplyCreate, attachments: list[Path] = None) -> None:
+    def reply_to_ticket(self, ticket_id: int, message: str) -> Response:
         """Send a reply to an existing ticket in Freshdesk."""
-        url = f"{self.base_url}{EndPoints.TICKETS}/{reply.ticket_number}/reply"
-
-        files = prepare_attachments(attachments) if attachments else None
-        multipart_data = reply.to_multipart_data()
-
-        response = self.session.post(url=url, data=multipart_data, files=files)
-        response.raise_for_status()
+        url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}/reply"
+        try:
+            response = self.session.post(url=url, data={"body": message})
+            response.raise_for_status()
+            return response
+        except HTTPError as error:
+            raise FreshdeskDeliveryMessageError from error
