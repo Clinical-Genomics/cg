@@ -2,6 +2,7 @@ import logging
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
+from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.exc import (
     FreshdeskDeliveryMessageError,
@@ -140,7 +141,7 @@ class DeliverService:
         # Implement in next iteration
         if not order.is_open:
             # TODO: Call Freshdesk client method to close the order
-            if self.freshdesk_client.get_ticket(order.ticket_id).status == 2:
-                self.freshdesk_client.update_ticket(ticket_id=order.ticket_id, status=5)
+            if self.freshdesk_client.get_ticket(order.ticket_id).status == Status.OPEN:
+                self.freshdesk_client.update_ticket(ticket_id=order.ticket_id, status=Status.CLOSED)
         else:
             return

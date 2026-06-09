@@ -5,6 +5,7 @@ import pytest
 from pytest_mock import MockerFixture
 from requests import Response
 
+from cg.clients.freshdesk.constants import Priority, Status
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketResponse
 from cg.exc import FreshdeskGetTicketError, FreshdeskUpdateTicketError
@@ -20,13 +21,13 @@ def ticket_raw_response() -> dict:
             "email_config_id": None,
             "fr_escalated": False,
             "group_id": None,
-            "priority": 1,
+            "priority": Priority.LOW,
             "requester_id": 1,
             "responder_id": None,
             "source": 2,
             "source_info": 1,
             "spam": False,
-            "status": 2,
+            "status": Status.OPEN,
             "subject": "",
             "company_id": 1,
             "id": 20,
@@ -57,7 +58,7 @@ def test_get_ticket_success(ticket_raw_response: dict, mocker: MockerFixture):
         base_url="https://example.freshdesk.com/api/v2", api_key="test_api_key"
     )
     response = Response()
-    response.status_code = 200
+    response.status_code = HTTPStatus.OK
     response._content = str.encode(json.dumps(ticket_raw_response))
     mocker.patch.object(client.session, "get", return_value=response)
 
@@ -66,7 +67,11 @@ def test_get_ticket_success(ticket_raw_response: dict, mocker: MockerFixture):
 
     # THEN the response should be a TicketResponse object
     expected_ticket_response = TicketResponse(
-        id=20, description="<div>Not given.</div>", subject="", priority=1, status=2
+        id=20,
+        description="<div>Not given.</div>",
+        subject="",
+        priority=Priority.LOW,
+        status=Status.OPEN,
     )
     assert ticket_response == expected_ticket_response
 
@@ -96,17 +101,21 @@ def test_update_ticket_success(ticket_raw_response: dict, mocker: MockerFixture)
 
     # GIVEN a successful HTTP response
     response = Response()
-    response.status_code = 200
+    response.status_code = HTTPStatus.OK
     ticket_raw_response["ticket"]["status"] = 5
     response._content = str.encode(json.dumps(ticket_raw_response))
     mocker.patch.object(client.session, "put", return_value=response)
 
     # WHEN updating the ticket with a status
-    ticket_response = client.update_ticket(ticket_id=20, status=5)
+    ticket_response = client.update_ticket(ticket_id=20, status=Status.CLOSED)
 
     # THEN the response should be a TicketResponse object
     expected_ticket_response = TicketResponse(
-        id=20, description="<div>Not given.</div>", subject="", priority=1, status=5
+        id=20,
+        description="<div>Not given.</div>",
+        subject="",
+        priority=Priority.LOW,
+        status=Status.CLOSED,
     )
     assert ticket_response == expected_ticket_response
 
@@ -125,4 +134,4 @@ def test_update_ticket_failure(ticket_raw_response: dict, mocker: MockerFixture)
     # WHEN updating the ticket with a status
     # THEN a FreshdeskUpdateTicketError should be raised
     with pytest.raises(FreshdeskUpdateTicketError):
-        client.update_ticket(ticket_id=20, status=5)
+        client.update_ticket(ticket_id=20, status=Status.CLOSED)

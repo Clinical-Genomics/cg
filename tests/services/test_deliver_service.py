@@ -6,6 +6,7 @@ from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
+from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.clients.freshdesk.models import TicketResponse
 from cg.exc import (
@@ -257,7 +258,6 @@ def test_deliver_all_available_success(mocker: MockerFixture):
         deliver_service.mark_as_delivered_service, "close_order_in_status_db_if_closable"
     )
     delivery_message_spy = mocker.spy(deliver_service, "_freshdesk_send_delivery_message")
-    close_ticket_spy = mocker.spy(deliver_service, "_freshdesk_close_ticket_if_open")
 
     # WHEN delivering all cases
     success: bool = deliver_service.deliver_all_available()
@@ -282,10 +282,6 @@ def test_deliver_all_available_success(mocker: MockerFixture):
     # THEN the delivery message should have been sent for both orders separately
     delivery_message_spy.assert_any_call(order=order_1, analyses=[analysis_1])
     delivery_message_spy.assert_any_call(order=order_2, analyses=[analysis_2, analysis_3])
-
-    # THEN the ticket should have been closed for both orders separately
-    close_ticket_spy.assert_any_call(order_1)
-    close_ticket_spy.assert_any_call(order_2)
 
     # THEN both tickets were closes in freshdesk
     freshdesk_client.as_mock.update_ticket.assert_any_call(ticket_id=order_1.ticket_id, status=5)
@@ -454,7 +450,7 @@ def test_deliver_all_available_freshdesk_delivery_message_error(mocker: MockerFi
     unmark_analysis_call.assert_called_once_with([analysis_to_deliver])
 
 
-def test_deliver_all_available_freshdesk_closing_ticket_error(mocker: MockerFixture):
+def test_deliver_all_available_freshdesk_closing_ticket_error():
     # GIVEN a store with an analysis to deliver
     status_db: TypedMock[Store] = create_typed_mock(Store)
     analysis_to_deliver = create_autospec(
@@ -559,7 +555,9 @@ def test_deliver_order_success(mocker: MockerFixture):
     freshdesk_client.as_mock.get_ticket.assert_called_once_with(123)
 
     # THEN the Freshdesk ticket should have been closed
-    freshdesk_client.as_mock.update_ticket.assert_called_once_with(ticket_id=123, status=5)
+    freshdesk_client.as_mock.update_ticket.assert_called_once_with(
+        ticket_id=123, status=Status.CLOSED
+    )
 
 
 def test_deliver_order_without_analyses(mocker: MockerFixture):
