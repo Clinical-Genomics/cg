@@ -69,11 +69,8 @@ class DeliverService:
             case 0:
                 LOG.warning(f"No analysis found to deliver for case {case_id}.")
             case 1:
-                self.mark_as_delivered_service.mark_analyses(
-                    analyses=analyses_to_deliver, signature=signature
-                )
                 order: Order = analyses_to_deliver[0].order
-                self.mark_as_delivered_service.close_order_in_status_db_if_closable(order)
+                self._deliver_order(order=order, analyses=analyses_to_deliver, signature=signature)
             case _:
                 raise MultipleAnalysesToDeliverError(f"Multiple analyses found for case {case_id}")
 
