@@ -25,7 +25,6 @@ from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
-@pytest.mark.xfail(reason="To be implemented with freshdesk")
 def test_deliver_case_closes_order(mocker: MockerFixture):
     # GIVEN a case with one analysis ready to be delivered
     analysis = create_autospec(
@@ -38,9 +37,10 @@ def test_deliver_case_closes_order(mocker: MockerFixture):
         analyses=[analysis],
         internal_id="case_id",
     )
+    analysis.case = case
 
     # GIVEN an open order with the case
-    order: Order = create_autospec(Order, id=1, is_open=True, cases=[case])
+    order: Order = create_autospec(Order, id=1, is_open=True, cases=[case], ticket_id=123)
     analysis.order = order
     status_db: Store = create_autospec(Store)
     status_db.get_uploaded_analyses = Mock(return_value=[analysis])
@@ -61,6 +61,11 @@ def test_deliver_case_closes_order(mocker: MockerFixture):
         return_value=create_autospec(TicketResponse, status=2)
     )
 
+    # GIVEN a delivery message method
+    delivery_message_mock = mocker.patch.object(
+        deliver_service_module, "get_message", return_value="delivery message"
+    )
+
     # GIVEN a deliver service
     deliver_service = DeliverService(
         freshdesk_client=freshdesk_client.as_type,
@@ -78,7 +83,13 @@ def test_deliver_case_closes_order(mocker: MockerFixture):
     # THEN the order should have been closed
     assert not order.is_open
 
-    # TODO: Assert that the delivery message method was called
+    # THEN the delivery message is generated
+    delivery_message_mock.assert_called_once_with(cases=[case], store=status_db)
+
+    # THEN the delivery message is sent
+    freshdesk_client.as_mock.reply_to_ticket.assert_called_once_with(
+        ticket_id=123, message="delivery message"
+    )
 
     # THEN we should have closed the ticket in Freshdesk
     freshdesk_client.as_mock.update_ticket.assert_called_once_with(
@@ -86,7 +97,6 @@ def test_deliver_case_closes_order(mocker: MockerFixture):
     )
 
 
-@pytest.mark.xfail(reason="To be implemented with freshdesk")
 def test_deliver_case_order_is_not_closed(mocker: MockerFixture):
     # GIVEN a case with an analysis ready to be delivered
     uploaded_analysis = create_autospec(
@@ -100,6 +110,7 @@ def test_deliver_case_order_is_not_closed(mocker: MockerFixture):
         analyses=[uploaded_analysis],
         internal_id="case_ready",
     )
+    uploaded_analysis.case = case_ready
 
     # GIVEN another case with an analysis that has not been uploaded and thus is not ready to be delivered
     not_uploaded_analysis = create_autospec(
@@ -115,7 +126,7 @@ def test_deliver_case_order_is_not_closed(mocker: MockerFixture):
     )
 
     # GIVEN an open order with the two cases
-    order: Order = create_autospec(Order, id=1, is_open=True)
+    order: Order = create_autospec(Order, id=1, is_open=True, ticket_id=123)
     order.cases = [case_not_ready, case_ready]
     not_uploaded_analysis.order = order
     uploaded_analysis.order = order
@@ -134,8 +145,23 @@ def test_deliver_case_order_is_not_closed(mocker: MockerFixture):
     # GIVEN that the TB analysis is successfully delivered when delivering the case
     trailblazer_api.get_delivered_analyses_for_order = Mock(return_value=[tb_uploaded_analysis])
 
+    # GIVEN a Freshdesk client
+    freshdesk_client: TypedMock[FreshdeskClient] = create_typed_mock(FreshdeskClient)
+    freshdesk_client.as_type.get_ticket = Mock(
+        return_value=create_autospec(TicketResponse, status=2)
+    )
+
+    # GIVEN a delivery message method
+    delivery_message_mock = mocker.patch.object(
+        deliver_service_module, "get_message", return_value="delivery message"
+    )
+
     # GIVEN a deliver service
-    deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
+    deliver_service = DeliverService(
+        freshdesk_client=freshdesk_client.as_type,
+        status_db=status_db,
+        trailblazer_api=trailblazer_api,
+    )
     mark_analyses_spy = mocker.spy(deliver_service.mark_as_delivered_service, "mark_analyses")
 
     # WHEN delivering the case that is ready to be delivered
@@ -150,8 +176,18 @@ def test_deliver_case_order_is_not_closed(mocker: MockerFixture):
     # THEN the order should have not been closed
     assert order.is_open
 
+    # THEN the delivery message is generated
+    delivery_message_mock.assert_called_once_with(cases=[case_ready], store=status_db)
 
-@pytest.mark.xfail(reason="To be implemented with freshdesk")
+    # THEN the delivery message is sent
+    freshdesk_client.as_mock.reply_to_ticket.assert_called_once_with(
+        ticket_id=123, message="delivery message"
+    )
+
+    # THEN the ticket is not closed in freshdesk
+    freshdesk_client.as_mock.update_ticket.assert_not_called()
+
+
 def test_deliver_case_more_than_one_found():
     # GIVEN store more than one uploaded analyses for a single case
     status_db = create_autospec(Store)
@@ -170,8 +206,13 @@ def test_deliver_case_more_than_one_found():
         ]
     )
 
+    # GIVEN a Freshdesk client
+    freshdesk_client: FreshdeskClient = create_autospec(FreshdeskClient)
+
     # GIVEN a deliver service
-    deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
+    deliver_service = DeliverService(
+        freshdesk_client=freshdesk_client, status_db=status_db, trailblazer_api=trailblazer_api
+    )
 
     # WHEN delivering the case
     # THEN a MultipleAnalysesToDeliverError is raised
@@ -179,7 +220,6 @@ def test_deliver_case_more_than_one_found():
         deliver_service.deliver_case(case_id="case_id", signature="email@cg.se")
 
 
-@pytest.mark.xfail(reason="To be implemented with freshdesk")
 def test_deliver_case_nothing_to_deliver(mocker: MockerFixture):
     # GIVEN store with a case
     status_db = create_autospec(Store)
@@ -199,8 +239,13 @@ def test_deliver_case_nothing_to_deliver(mocker: MockerFixture):
     trailblazer_api = create_autospec(TrailblazerAPI)
     trailblazer_api.get_analyses_to_deliver_for_case = Mock(return_value=[])
 
+    # GIVEN a Freshdesk client
+    freshdesk_client: FreshdeskClient = create_autospec(FreshdeskClient)
+
     # GIVEN a deliver service
-    deliver_service = DeliverService(status_db=status_db, trailblazer_api=trailblazer_api)
+    deliver_service = DeliverService(
+        freshdesk_client=freshdesk_client, status_db=status_db, trailblazer_api=trailblazer_api
+    )
     mark_analyses_spy = mocker.spy(deliver_service.mark_as_delivered_service, "mark_analyses")
 
     # WHEN delivering a case
