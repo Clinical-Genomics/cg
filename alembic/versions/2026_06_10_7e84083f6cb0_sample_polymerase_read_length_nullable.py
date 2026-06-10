@@ -42,8 +42,10 @@ def downgrade():
     # Set a default value so that the downgrade works
     bind: sa.Connection = op.get_bind()
     session: Session = Session(bind=bind)
-    for sample_metric in session.query(PacbioSampleSequencingMetrics).filter(
-        PacbioSampleSequencingMetrics.polymerase_mean_read_length.is_(None)
+    for sample_metric in (
+        session.query(PacbioSampleSequencingMetrics)
+        .filter(PacbioSampleSequencingMetrics.polymerase_mean_read_length.is_(None))
+        .all()
     ):
         sample_metric.polymerase_mean_read_length = BIGINT(1)
     session.commit()
