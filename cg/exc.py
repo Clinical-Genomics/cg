@@ -241,7 +241,15 @@ class TicketCreationError(CgError):
 
 
 class TrailblazerAPIHTTPError(CgError):
-    """Raised when Trailblazer REST API response code is not 200."""
+    """Raised when Trailblazer REST API response code is not 2XX/3XX."""
+
+
+class TrailblazerAnalysisDeliveryError(TrailblazerAPIHTTPError):
+    """Raised when marking analyses as delivered in Trailblazer fails."""
+
+
+class TrailblazerFailedToGetAnalysesError(TrailblazerAPIHTTPError):
+    """Raised when Trailblazer API fails to get analyses."""
 
 
 class TrailblazerAnalysisNotFound(CgError):
@@ -377,3 +385,14 @@ class ApplicationTagNotFoundError(CgError):
     """
     Exception raised when an application is not found.
     """
+
+class MultipleAnalysesToDeliverError(CgError):
+    """Exception raised when multiple analyses are ready for delivery for a case."""
+
+
+class FreshdeskDeliveryMessageError(CgError):
+    """Exception raised when sending the delivery message in Freshdesk fails."""
+
+
+class FreshdeskClosingTicketError(CgError):
+    """Exception raised when closing a ticket in Freshdesk fails."""

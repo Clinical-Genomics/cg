@@ -1528,6 +1528,18 @@ class ReadHandler(BaseHandler):
         )
         return orders.first()
 
+    def get_order_by_ticket_id_strict(self, ticket_id: int) -> Order:
+        """
+        Returns the entry in Order matching the given ticket id.
+        Raises:
+            OrderNotFoundError: If no order is found with the given ticket id.
+        """
+        orders: Query = self._get_query(table=Order).filter_by(ticket_id=ticket_id)
+        if order := orders.first():
+            return order
+        else:
+            raise OrderNotFoundError(f"Order with ticket ID {ticket_id} not found.")
+
     def get_case_not_received_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
         filters: list[CaseSampleFilter] = [
             CaseSampleFilter.BY_ORDER,
@@ -1943,7 +1955,6 @@ class ReadHandler(BaseHandler):
                 Customer.internal_id.not_like("cust9%"),
             )
         )
-
         if search:
             query = (
                 query.join(CaseSample, CaseSample.sample_id == Sample.id)
@@ -1956,8 +1967,17 @@ class ReadHandler(BaseHandler):
                     ),
                 )
             )
-
         return query.order_by(Sample.last_sequenced_at.asc())
+
+    def get_uploaded_analyses(self, trailblazer_ids: list[int]) -> list[Analysis]:
+        return (
+            self._get_query(table=Analysis)
+            .filter(
+                Analysis.trailblazer_id.in_(trailblazer_ids),
+                Analysis.uploaded_at.is_not(None),
+            )
+            .all()
+        )
 
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:

@@ -714,3 +714,43 @@ def test_get_analysis_by_trailblazer_id_does_not_exist(store: Store):
     with pytest.raises(AnalysisDoesNotExistError):
         # THEN an AnalysisDoesNotExistError is raised
         store.get_analysis_by_trailblazer_id(666666)
+
+
+def test_get_uploaded_analyses(store: Store):
+    # GIVEN a store with three analyses, one that is uploaded, one that isn't and one that we don't want
+    uploaded_analysis = store.add_analysis(
+        case_id=1,
+        workflow=Workflow.NALLO,
+        trailblazer_id=1,
+        uploaded=datetime.now(),
+    )
+    not_uploaded_analysis = store.add_analysis(
+        case_id=2,
+        workflow=Workflow.NALLO,
+        trailblazer_id=2,
+        uploaded=None,
+    )
+    unwanted_analysis = store.add_analysis(
+        case_id=3,
+        workflow=Workflow.NALLO,
+        trailblazer_id=3,
+        uploaded=datetime.now(),
+    )
+
+    store.add_multiple_items_to_store([uploaded_analysis, not_uploaded_analysis, unwanted_analysis])
+
+    # WHEN getting the uploaded analyses of TB IDs 1 and 2
+    uploaded_analyses: list[Analysis] = store.get_uploaded_analyses(trailblazer_ids=[1, 2])
+
+    # THEN only the requested uploaded analysis is returned
+    assert uploaded_analyses == [uploaded_analysis]
+
+
+def test_get_uploaded_analyses_no_analyses_in_store(store: Store):
+    # GIVEN an empty store
+
+    # WHEN getting an uploaded analysis
+    uploaded_analyses: list[Analysis] = store.get_uploaded_analyses(trailblazer_ids=[1])
+
+    # THEN an empty list is returned
+    assert uploaded_analyses == []
