@@ -405,6 +405,11 @@ class EmailBaseSettings(BaseModel):
     smtp_server: str
 
 
+class FreshdeskConfig(BaseModel):
+    api_key: str
+    base_url: str
+
+
 class FOHMConfig(BaseModel):
     host: str
     port: int
@@ -511,6 +516,7 @@ class CGConfig(BaseModel):
     encryption: Encryption | None = None
     nats: NatsConfig
     external: ExternalConfig = None
+    freshdesk_config: FreshdeskConfig
     gens: GENSConfig | None = None
     gens_api_: GensAPI = None
     hermes: HermesConfig = None

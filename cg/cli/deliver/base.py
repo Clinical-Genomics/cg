@@ -7,6 +7,7 @@ import rich_click as click
 
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
+from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
 from cg.constants import Workflow
 from cg.constants.cli_options import DRY_RUN, SIGNATURE
 from cg.constants.delivery import FileDeliveryOption
@@ -221,8 +222,13 @@ def deliver_dev_case_command(config: CGConfig, case_id: str, signature: str):
         - Closes order in statusdb if all analyses on the order are delivered and all samples are marked as delivered
         - Closes ticket in Freshdesk if its status is open
     """
+    freshdesk_client = FreshdeskClient(
+        base_url=config.freshdesk_config.base_url, api_key=config.freshdesk_config.api_key
+    )
     deliver_service = DeliverService(
-        status_db=config.status_db, trailblazer_api=config.trailblazer_api
+        freshdesk_client=freshdesk_client,
+        status_db=config.status_db,
+        trailblazer_api=config.trailblazer_api,
     )
     deliver_service.deliver_case(case_id=case_id, signature=signature)
     config.status_db.commit_to_store()
@@ -242,8 +248,13 @@ def deliver_dev_all_available(config: CGConfig):
         - Closes order in statusdb if all analyses on the order are delivered and all samples are marked as delivered
         - Closes ticket in Freshdesk if its status is open
     """
+    freshdesk_client = FreshdeskClient(
+        base_url=config.freshdesk_config.base_url, api_key=config.freshdesk_config.api_key
+    )
     deliver_service = DeliverService(
-        status_db=config.status_db, trailblazer_api=config.trailblazer_api
+        freshdesk_client=freshdesk_client,
+        status_db=config.status_db,
+        trailblazer_api=config.trailblazer_api,
     )
     if not deliver_service.deliver_all_available():
         raise click.Abort()
@@ -271,8 +282,13 @@ def deliver_dev_order(config: CGConfig, signature: str, ticket_id: int):
         - If applicable closes order in statusdb
         - If applicable closes ticket in Freshdesk
     """
+    freshdesk_client = FreshdeskClient(
+        base_url=config.freshdesk_config.base_url, api_key=config.freshdesk_config.api_key
+    )
     deliver_service = DeliverService(
-        status_db=config.status_db, trailblazer_api=config.trailblazer_api
+        freshdesk_client=freshdesk_client,
+        status_db=config.status_db,
+        trailblazer_api=config.trailblazer_api,
     )
     deliver_service.deliver_order(signature=signature, ticket_id=ticket_id)
     config.status_db.commit_to_store()
