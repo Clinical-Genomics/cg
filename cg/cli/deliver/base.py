@@ -223,7 +223,7 @@ def deliver_dev_case_command(config: CGConfig, case_id: str, signature: str):
         - Closes ticket in Freshdesk if its status is open
     """
     freshdesk_client = FreshdeskClient(
-        base_url=config.freshdesk_config.base_url, api_key=config.freshdesk_config.api_key
+        base_url=config.freshdesk.base_url, api_key=config.freshdesk.api_key
     )
     deliver_service = DeliverService(
         freshdesk_client=freshdesk_client,
@@ -249,7 +249,7 @@ def deliver_dev_all_available(config: CGConfig):
         - Closes ticket in Freshdesk if its status is open
     """
     freshdesk_client = FreshdeskClient(
-        base_url=config.freshdesk_config.base_url, api_key=config.freshdesk_config.api_key
+        base_url=config.freshdesk.base_url, api_key=config.freshdesk.api_key
     )
     deliver_service = DeliverService(
         freshdesk_client=freshdesk_client,
@@ -283,7 +283,7 @@ def deliver_dev_order(config: CGConfig, signature: str, ticket_id: int):
         - If applicable closes ticket in Freshdesk
     """
     freshdesk_client = FreshdeskClient(
-        base_url=config.freshdesk_config.base_url, api_key=config.freshdesk_config.api_key
+        base_url=config.freshdesk.base_url, api_key=config.freshdesk.api_key
     )
     deliver_service = DeliverService(
         freshdesk_client=freshdesk_client,

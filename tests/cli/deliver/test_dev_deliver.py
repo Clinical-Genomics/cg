@@ -19,7 +19,7 @@ from cg.exc import (
     TrailblazerAnalysisDeliveryError,
     TrailblazerFailedToGetAnalysesError,
 )
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, FreshdeskConfig
 from cg.services.deliver_service import DeliverService, MarkAsDeliveredService
 from cg.store.models import Order
 from cg.store.store import Store
@@ -30,8 +30,12 @@ def test_deliver_dev_case_command_success(mocker: MockerFixture):
     # GIVEN a store, a CG config and a case ID
     cli_runner = CliRunner()
     status_db: TypedMock[Store] = create_typed_mock(Store)
+    freshdesk_config = FreshdeskConfig(api_key="some_key", base_url="some_url")
     cg_config = create_autospec(
-        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
+        CGConfig,
+        freshdesk=freshdesk_config,
+        status_db=status_db.as_type,
+        trailblazer_api=create_autospec(TrailblazerAPI),
     )
 
     deliver_case_command = mocker.spy(DeliverService, "deliver_case")
@@ -55,8 +59,12 @@ def test_deliver_dev_case_command_no_case_id():
     # GIVEN a store and a CG config
     cli_runner = CliRunner()
     status_db: TypedMock[Store] = create_typed_mock(Store)
+    freshdesk_config = FreshdeskConfig(api_key="some_key", base_url="some_url")
     cg_config = create_autospec(
-        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
+        CGConfig,
+        freshdesk=freshdesk_config,
+        status_db=status_db.as_type,
+        trailblazer_api=create_autospec(TrailblazerAPI),
     )
 
     # WHEN calling the deliver case command without a case id
@@ -73,8 +81,12 @@ def test_deliver_dev_case_command_no_signature():
     # GIVEN a store and a CG config
     cli_runner = CliRunner()
     status_db: TypedMock[Store] = create_typed_mock(Store)
+    freshdesk_config = FreshdeskConfig(api_key="some_key", base_url="some_url")
     cg_config = create_autospec(
-        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
+        CGConfig,
+        freshdesk=freshdesk_config,
+        status_db=status_db.as_type,
+        trailblazer_api=create_autospec(TrailblazerAPI),
     )
 
     # WHEN calling the deliver case command without a signature
@@ -91,8 +103,12 @@ def test_deliver_dev_case_raises_error(mocker: MockerFixture):
     # GIVEN a store and a CG config
     cli_runner = CliRunner()
     status_db: TypedMock[Store] = create_typed_mock(Store)
+    freshdesk_config = FreshdeskConfig(api_key="some_key", base_url="some_url")
     cg_config = create_autospec(
-        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
+        CGConfig,
+        freshdesk=freshdesk_config,
+        status_db=status_db.as_type,
+        trailblazer_api=create_autospec(TrailblazerAPI),
     )
 
     # GIVEN that the deliver service raises an error
@@ -114,8 +130,12 @@ def test_deliver_dev_all_available_command_success(mocker: MockerFixture):
     # GIVEN a store, a CG config and a case ID
     cli_runner = CliRunner()
     status_db: TypedMock[Store] = create_typed_mock(Store)
+    freshdesk_config = FreshdeskConfig(api_key="some_key", base_url="some_url")
     cg_config = create_autospec(
-        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
+        CGConfig,
+        freshdesk=freshdesk_config,
+        status_db=status_db.as_type,
+        trailblazer_api=create_autospec(TrailblazerAPI),
     )
 
     deliver_all_command = mocker.spy(DeliverService, "deliver_all_available")
@@ -144,8 +164,12 @@ def test_deliver_dev_all_available_service_caught_error(
 ):
     # GIVEN a store and a CG config
     cli_runner = CliRunner()
+    freshdesk_config = FreshdeskConfig(api_key="some_key", base_url="some_url")
     cg_config = create_autospec(
-        CGConfig, status_db=create_autospec(Store), trailblazer_api=create_autospec(TrailblazerAPI)
+        CGConfig,
+        freshdesk=freshdesk_config,
+        status_db=create_autospec(Store),
+        trailblazer_api=create_autospec(TrailblazerAPI),
     )
 
     # GIVEN that the deliver service catches an error when trying to deliver an order
@@ -171,8 +195,12 @@ def test_deliver_dev_all_available_service_raises_unexpected_error(mocker: Mocke
     # GIVEN a store and a CG config
     cli_runner = CliRunner()
     status_db: TypedMock[Store] = create_typed_mock(Store)
+    freshdesk_config = FreshdeskConfig(api_key="some_key", base_url="some_url")
     cg_config = create_autospec(
-        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
+        CGConfig,
+        freshdesk=freshdesk_config,
+        status_db=status_db.as_type,
+        trailblazer_api=create_autospec(TrailblazerAPI),
     )
 
     # GIVEN that the deliver service raises an error
@@ -195,8 +223,12 @@ def test_deliver_dev_order(mocker: MockerFixture):
     # GIVEN a store and a CG Config
     cli_runner = CliRunner()
     status_db: TypedMock[Store] = create_typed_mock(Store)
+    freshdesk_config = FreshdeskConfig(api_key="some_key", base_url="some_url")
     cg_config = create_autospec(
-        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
+        CGConfig,
+        freshdesk=freshdesk_config,
+        status_db=status_db.as_type,
+        trailblazer_api=create_autospec(TrailblazerAPI),
     )
 
     deliver_order = mocker.spy(DeliverService, "deliver_order")
@@ -233,8 +265,12 @@ def test_deliver_dev_order_no_ticket_id(args: list[str]):
     # GIVEN a store and a CG config
     cli_runner = CliRunner()
     status_db: TypedMock[Store] = create_typed_mock(Store)
+    freshdesk_config = FreshdeskConfig(api_key="some_key", base_url="some_url")
     cg_config = create_autospec(
-        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
+        CGConfig,
+        freshdesk=freshdesk_config,
+        status_db=status_db.as_type,
+        trailblazer_api=create_autospec(TrailblazerAPI),
     )
 
     # WHEN calling the deliver order command with at least one missing parameter
@@ -251,8 +287,12 @@ def test_deliver_dev_order_service_raises_error(mocker: MockerFixture):
     # GIVEN a store and a CG config
     cli_runner = CliRunner()
     status_db: TypedMock[Store] = create_typed_mock(Store)
+    freshdesk_config = FreshdeskConfig(api_key="some_key", base_url="some_url")
     cg_config = create_autospec(
-        CGConfig, status_db=status_db.as_type, trailblazer_api=create_autospec(TrailblazerAPI)
+        CGConfig,
+        freshdesk=freshdesk_config,
+        status_db=status_db.as_type,
+        trailblazer_api=create_autospec(TrailblazerAPI),
     )
 
     # GIVEN that the deliver service raises an error

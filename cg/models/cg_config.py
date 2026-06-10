@@ -516,7 +516,7 @@ class CGConfig(BaseModel):
     encryption: Encryption | None = None
     nats: NatsConfig
     external: ExternalConfig = None
-    freshdesk_config: FreshdeskConfig
+    freshdesk: FreshdeskConfig
     gens: GENSConfig | None = None
     gens_api_: GensAPI = None
     hermes: HermesConfig = None

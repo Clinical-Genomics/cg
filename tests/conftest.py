@@ -407,6 +407,10 @@ def base_config_dict() -> dict:
                 "demultiplexed_runs_dir": "path/to/demultiplexed_flow_cells_dir",
             },
         },
+        "freshdesk": {
+            "api_key": "some_api_key",
+            "base_url": "freshdesk.com",
+        },
         "nats": {
             "server": "https://nats.scilifelab.se",
             "stream": "cg-test",
@@ -2002,6 +2006,10 @@ def context_config(
                 "sequencing_runs_dir": str(illumina_sequencing_runs_directory),
                 "demultiplexed_runs_dir": str(illumina_demultiplexed_runs_directory),
             },
+        },
+        "freshdesk": {
+            "api_key": "some_api_key",
+            "base_url": "freshdesk.com",
         },
         "nats": {
             "server": "https://nats.scilifelab.se",
