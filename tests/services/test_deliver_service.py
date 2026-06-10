@@ -271,7 +271,9 @@ def test_deliver_all_available_success(mocker: MockerFixture):
     )
 
     # GIVEN a delivery message method
-    delivery_message_spy = mocker.spy(deliver_service_module, "get_message")
+    delivery_message_mock = mocker.patch.object(
+        deliver_service_module, "get_message", return_value="delivery message"
+    )
 
     # GIVEN a Deliver Service
     deliver_service = DeliverService(
@@ -307,13 +309,13 @@ def test_deliver_all_available_success(mocker: MockerFixture):
     close_order_call.assert_any_call(order_2)
 
     # THEN the delivery message should have been generated and sent for both orders separately
-    delivery_message_spy.assert_any_call(cases=[case_1], store=status_db)
-    delivery_message_spy.assert_any_call(cases=[case_2, case_3], store=status_db)
+    delivery_message_mock.assert_any_call(cases=[case_1], store=status_db)
+    delivery_message_mock.assert_any_call(cases=[case_2, case_3], store=status_db)
     freshdesk_client.as_mock.reply_to_ticket.assert_any_call(
-        ticket_id=order_1.ticket_id, message="?"
+        ticket_id=order_1.ticket_id, message="delivery message"
     )
     freshdesk_client.as_mock.reply_to_ticket.assert_any_call(
-        ticket_id=order_2.ticket_id, message="?"
+        ticket_id=order_2.ticket_id, message="delivery message"
     )
 
     # THEN both tickets were closes in freshdesk
@@ -483,11 +485,16 @@ def test_deliver_all_available_freshdesk_delivery_message_error(mocker: MockerFi
     unmark_analysis_call.assert_called_once_with([analysis_to_deliver])
 
 
-def test_deliver_all_available_freshdesk_closing_ticket_error():
+def test_deliver_all_available_freshdesk_closing_ticket_error(mocker: MockerFixture):
     # GIVEN a store with an analysis to deliver
     status_db: TypedMock[Store] = create_typed_mock(Store)
+    case: Case = create_autospec(Case)
     analysis_to_deliver = create_autospec(
-        Analysis, order=create_autospec(Order), trailblazer_id=1, uploaded_at=datetime.now()
+        Analysis,
+        case=case,
+        order=create_autospec(Order, ticket_id=1),
+        trailblazer_id=1,
+        uploaded_at=datetime.now(),
     )
     status_db.as_type.get_uploaded_analyses = Mock(return_value=[analysis_to_deliver])
 
@@ -504,6 +511,11 @@ def test_deliver_all_available_freshdesk_closing_ticket_error():
         trailblazer_api=trailblazer_api,
     )
 
+    # GIVEN a delivery message
+    delivery_message_mock = mocker.patch.object(
+        deliver_service_module, "get_message", return_value="delivery message"
+    )
+
     # GIVEN that the Freshdesk client raises a FreshdeskGetTicketError
     freshdesk_client.as_type.get_ticket = Mock(side_effect=FreshdeskGetTicketError)
 
@@ -513,8 +525,13 @@ def test_deliver_all_available_freshdesk_closing_ticket_error():
     # THEN the delivery service fails
     assert not success
 
+    # THEN the delivery message is generated
+    delivery_message_mock.assert_called_once_with(cases=[case], store=status_db.as_type)
+
     # THEN the delivery message should have been sent
-    # TODO: implement this assertion
+    freshdesk_client.as_mock.reply_to_ticket.assert_called_once_with(
+        ticket_id=1, message="delivery message"
+    )
 
     # THEN the order should have been reopened if ever closed
     assert analysis_to_deliver.order.is_open
@@ -539,6 +556,8 @@ def test_deliver_order_success(mocker: MockerFixture):
         internal_id="case_2",
         analyses=[analysis_2],
     )
+    analysis_1.case = case_1
+    analysis_2.case = case_2
     order: Order = create_autospec(Order, cases=[case_1, case_2], id=1, ticket_id=123)
     status_db.as_type.get_order_by_ticket_id_strict = Mock(return_value=order)
     status_db.as_type.get_uploaded_analyses = Mock(return_value=[analysis_1, analysis_2])
@@ -575,11 +594,24 @@ def test_deliver_order_success(mocker: MockerFixture):
         deliver_service.mark_as_delivered_service, "mark_analyses"
     )
 
+    # GIVEN a delivery message
+    delivery_message_mock = mocker.patch.object(
+        deliver_service_module, "get_message", return_value="delivery message"
+    )
+
     # WHEN delivering the order
     deliver_service.deliver_order(ticket_id=123, signature="CG")
 
     # THEN the uploaded analyses should have been marked as delivered
     mark_analyses_call.assert_called_once_with(analyses=[analysis_1, analysis_2], signature="CG")
+
+    # THEN the delivery message should have been generated for the correct cases
+    delivery_message_mock.assert_called_once_with(cases=[case_1, case_2], store=status_db.as_type)
+
+    # THEN the delivery message should have been sent
+    freshdesk_client.as_mock.reply_to_ticket.assert_called_once_with(
+        ticket_id=123, message="delivery message"
+    )
 
     # THEN the order should have been closed
     assert not order.is_open
