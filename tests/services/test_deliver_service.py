@@ -451,8 +451,12 @@ def test_deliver_all_available_freshdesk_delivery_message_error(mocker: MockerFi
     # GIVEN a Trailblazer API
     trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
 
-    # GIVEN a Freshdesk client
+    # GIVEN a Freshdesk Client that raises a FreshdeskDeliveryMessageError
     freshdesk_client: TypedMock[FreshdeskClient] = create_typed_mock(FreshdeskClient)
+    freshdesk_client.as_type.reply_to_ticket = Mock(side_effect=FreshdeskDeliveryMessageError)
+
+    # GIVEN a delivery message
+    mocker.patch.object(deliver_service_module, "get_message")
 
     # GIVEN a Delivery Service
     deliver_service = DeliverService(
@@ -461,13 +465,6 @@ def test_deliver_all_available_freshdesk_delivery_message_error(mocker: MockerFi
         trailblazer_api=trailblazer_api,
     )
 
-    # GIVEN the _freshdesk_send_delivery_message method raises a FreshdeskDeliveryMessageError
-    # TODO: Make the client fail
-    mocker.patch.object(
-        deliver_service,
-        "_freshdesk_send_delivery_message",
-        side_effect=FreshdeskDeliveryMessageError,
-    )
     unmark_analysis_call = mocker.patch.object(
         deliver_service.mark_as_delivered_service, "unmark_analyses"
     )
@@ -654,8 +651,8 @@ def test_deliver_order_without_analyses(mocker: MockerFixture):
     # THEN we should not have marked any analysis as delivered
     mark_analyses_call.assert_not_called()
 
-    # TODO implement these
     # THEN no delivery message should have been sent
+    freshdesk_client.as_mock.reply_to_ticket.assert_not_called()
 
     # THEN the ticket in Freshdesk should not have been closed
     freshdesk_client.as_mock.update_ticket.assert_not_called()
