@@ -231,7 +231,7 @@ def test_deliver_dev_order(mocker: MockerFixture):
         trailblazer_api=create_autospec(TrailblazerAPI),
     )
 
-    deliver_order = mocker.spy(DeliverService, "deliver_order")
+    deliver_order = mocker.patch.object(DeliverService, "deliver_order")
 
     # WHEN delivering a single order
     result = cli_runner.invoke(
@@ -242,7 +242,7 @@ def test_deliver_dev_order(mocker: MockerFixture):
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN the delivery service is called with the expected arguments
-    deliver_order.assert_called_once_with(ANY, signature="CG", ticket_id=123)
+    deliver_order.assert_called_once_with(signature="CG", ticket_id=123)
 
     # THEN the changes were persistent in the database
     status_db.as_mock.commit_to_store.assert_called()
