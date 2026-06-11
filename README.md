@@ -33,7 +33,7 @@ git clone https://github.com/Clinical-Genomics/cg
 cd cg
 poetry install
 ```
-# Trigger sonarqubecloud
+
 For development, use `poetry install --all-extras` to install development dependencies.
 
 

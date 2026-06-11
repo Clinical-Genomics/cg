@@ -11,6 +11,7 @@ from sqlalchemy import (
     Column,
     ForeignKey,
     Numeric,
+    SQLColumnExpression,
     String,
     Table,
 )
@@ -908,7 +909,7 @@ class Sample(Base, PriorityMixin):
     # noinspection PyNestedDecorators
     @delivering_case_internal_id.expression
     @classmethod
-    def delivering_case_internal_id(cls):
+    def delivering_case_internal_id(cls) -> SQLColumnExpression[str]:
         return (
             select(Case.internal_id)
             .join(Case.links)
@@ -937,7 +938,7 @@ class Sample(Base, PriorityMixin):
     # noinspection PyNestedDecorators
     @ticket_id_from_original_order.expression
     @classmethod
-    def ticket_id_from_original_order(cls):
+    def ticket_id_from_original_order(cls) -> SQLColumnExpression[int]:
         return (
             select(Order.ticket_id)
             .join(Order.cases)
