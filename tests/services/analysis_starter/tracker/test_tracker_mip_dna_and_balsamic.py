@@ -149,7 +149,13 @@ def test_track(
     trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
     trailblazer_api.add_pending_analysis = Mock(
         return_value=TrailblazerAnalysis(
-            id=1, logged_at=None, started_at=None, completed_at=None, out_dir=None, config_path=None
+            case_id="case_id",
+            id=1,
+            logged_at=None,
+            started_at=None,
+            completed_at=None,
+            out_dir=None,
+            config_path=None,
         )
     )
 
@@ -176,6 +182,7 @@ def test_track(
         trailblazer_id=1,
         version=pipeline_version,
         workflow=workflow,
+        order_id=case.latest_order.id,
     )
 
     # THEN the items are added to the database

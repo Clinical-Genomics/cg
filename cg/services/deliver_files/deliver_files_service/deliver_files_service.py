@@ -3,7 +3,7 @@ from pathlib import Path
 
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
-from cg.constants import Priority, Workflow
+from cg.constants import Workflow
 from cg.constants.tb import AnalysisType
 from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.services.analysis_service.analysis_service import AnalysisService
