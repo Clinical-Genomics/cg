@@ -27,7 +27,7 @@ class StorePoolOrderService(StoreOrderService):
         self.lims = lims_service
 
     def store_order(self, order: OrderWithIndexedSamples) -> dict:
-        project_data, lims_map = self.lims.process_lims(
+        project_data, lims_samples = self.lims.process_lims(
             samples=order.samples,
             customer=order.customer,
             ticket=order._generated_ticket_id,
@@ -36,7 +36,8 @@ class StorePoolOrderService(StoreOrderService):
             delivery_type=order.delivery_type,
             skip_reception_control=order.skip_reception_control,
         )
-        self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
+        self._fill_in_sample_ids(samples=order.samples, lims_samples=lims_samples)
+        self._queue_samples_in_workflow(lims_samples)
         new_records: list[Pool] = self.store_order_data_in_status_db(order=order)
         return {"project": project_data, "records": new_records}
 
