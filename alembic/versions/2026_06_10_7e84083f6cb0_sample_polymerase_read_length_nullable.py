@@ -21,12 +21,20 @@ branch_labels = None
 depends_on = None
 
 BigInt = Annotated[int, None]
+PrimaryKeyInt = Annotated[int, mapped_column(primary_key=True)]
 
 
 class Base(DeclarativeBase):
     type_annotation_map = {
         BigInt: BigInteger,
     }
+
+
+class SampleRunMetrics(Base):
+    """Parent model for the different types of sample run metrics."""
+
+    __tablename__ = "sample_run_metrics"
+    id: Mapped[PrimaryKeyInt]
 
 
 class PacbioSampleSequencingMetrics(Base):
