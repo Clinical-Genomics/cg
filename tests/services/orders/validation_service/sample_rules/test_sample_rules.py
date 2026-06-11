@@ -1,6 +1,6 @@
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.constants import OrderType
-from cg.models.orders.sample_base import ContainerEnum, ControlEnum, PriorityEnum
+from cg.models.orders.sample_base import ContainerEnum, ControlEnum, PriorityEnum, SexEnum
 from cg.services.orders.validation.constants import ElutionBuffer, IndexEnum
 from cg.services.orders.validation.errors.sample_errors import (
     BufferInvalidError,
@@ -15,6 +15,7 @@ from cg.services.orders.validation.errors.sample_errors import (
     PoolPriorityError,
     SampleNameNotAvailableControlError,
     SampleNameNotAvailableError,
+    SexUnknownWarning,
     VolumeRequiredError,
     WellFormatError,
     WellFormatRmlError,
@@ -47,6 +48,7 @@ from cg.services.orders.validation.rules.sample.rules import (
     validate_volume_required,
     validate_well_position_format,
     validate_well_position_rml_format,
+    warn_if_sex_unknown,
 )
 from cg.store.models import Sample
 from cg.store.store import Store
@@ -484,3 +486,23 @@ def test_validate_source_comment_required():
 
     # THEN the error should be the expected error
     assert errors[0] == MissingSourceCommentError(sample_index=0)
+
+
+def test_warn_if_sex_unknown_returns_warning_in_pacbio_order(pacbio_order):
+    # GIVEN a sample with unknown sex
+    pacbio_order.samples[0].sex = SexEnum.unknown
+
+    # WHEN validating the sample sex
+    warnings = warn_if_sex_unknown(order=pacbio_order)
+
+    # THEN a warning is returned for that sample
+    assert len(warnings) == 1
+
+    # THEN the warning should be a sex unknown warning
+    assert isinstance(warnings[0], SexUnknownWarning)
+
+    # THEN the warning should point to the first sample
+    assert warnings[0].sample_index == 0
+
+    # THEN the warning should be attached to the warnings field
+    assert warnings[0].field == "warnings"
