@@ -21,6 +21,7 @@ from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
     AnalysisNotCompletedError,
+    ApplicationTagNotFoundError,
     BedVersionNotFoundError,
     CaseNotFoundError,
     CgDataError,
@@ -865,12 +866,30 @@ class ReadHandler(BaseHandler):
         return bool(self.get_sample_by_internal_id(sample_id))
 
     def get_application_by_tag(self, tag: str) -> Application | None:
-        """Return an application by tag."""
+        """Return an application by tag or None."""
         return apply_application_filter(
             applications=self._get_query(table=Application),
             filter_functions=[ApplicationFilter.BY_TAG],
             tag=tag,
         ).first()
+
+    def get_application_by_tag_strict(self, tag: str) -> Application:
+        """Return an application by tag."""
+        try:
+            return apply_application_filter(
+                applications=self._get_query(table=Application),
+                filter_functions=[ApplicationFilter.BY_TAG],
+                tag=tag,
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise ApplicationTagNotFoundError(
+                f"Application with tag '{tag}' was not found in the database."
+            )
+
+    def get_lims_workflow_id_by_application_tag(self, tag: str) -> int | None:
+        """Return the LIMS workflow ID for an application by tag."""
+        application = self.get_application_by_tag_strict(tag=tag)
+        return application.lims_workflow_id
 
     def get_applications_is_not_archived(self) -> list[Application]:
         """Return applications that are not archived."""

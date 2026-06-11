@@ -2,6 +2,7 @@ import datetime as dt
 from unittest.mock import PropertyMock, create_autospec, patch
 
 import pytest
+from genologics.entities import Sample as LimsSample
 
 from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.models import TicketResponse
@@ -29,15 +30,29 @@ from cg.store.store import Store
 def monkeypatch_process_lims(monkeypatch: pytest.MonkeyPatch, order: Order) -> None:
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     if isinstance(order, OrderWithSamples):
-        lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order.samples)}
+        lims_samples: list[LimsSample] = []
+        for index, sample in enumerate(order.samples):
+            lims_sample: LimsSample = create_autospec(
+                LimsSample,
+                id=f"ELH123A{index}",
+                udf={"Sequencing Analysis": "WGSWPFC030"},
+            )
+            lims_sample.name = sample.name
+            lims_samples.append(lims_sample)
     elif isinstance(order, OrderWithCases):
-        lims_map = {
-            sample.name: f"ELH123A{case_index}-{sample_index}"
-            for case_index, sample_index, sample in order.enumerated_new_samples
-        }
+        lims_samples: list[LimsSample] = []
+        for case_index, sample_index, sample in order.enumerated_new_samples:
+            lims_sample: LimsSample = create_autospec(
+                LimsSample,
+                id=f"ELH123A{case_index}-{sample_index}",
+                udf={"Sequencing Analysis": "WGSWPFC030"},
+            )
+            lims_sample.name = sample.name
+            lims_samples.append(lims_sample)
+
     monkeypatch.setattr(
         "cg.services.orders.lims_service.service.OrderLimsService.process_lims",
-        lambda *args, **kwargs: (lims_project_data, lims_map),
+        lambda *args, **kwargs: (lims_project_data, lims_samples),
     )
 
 
@@ -203,6 +218,7 @@ def order_with_existing_case_and_external_sample(existing_case_id: str) -> Order
     ],
 )
 def test_submit_order(
+    mocker,
     store_to_submit_and_validate_orders: Store,
     monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
@@ -424,4 +440,5 @@ def test_get_ticket_status(
     status = get_ticket_status(order=order)
 
     # THEN the status should be correct
+    assert status == expected_status
     assert status == expected_status
