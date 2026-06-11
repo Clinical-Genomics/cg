@@ -31,7 +31,11 @@ from cg.exc import (
 )
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import SexEnum
-from cg.server.dto.samples.requests import CollaboratorSamplesRequest
+from cg.server.dto.samples.requests import (
+    CollaboratorSamplesRequest,
+    SortDirection,
+    UnhandledSamplesSortBy,
+)
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.api.data_classes import RNADNACollection
 from cg.store.base import BaseHandler
@@ -1906,13 +1910,21 @@ class ReadHandler(BaseHandler):
         search: str | None,
         page: int,
         page_size: int,
+        sort_by: UnhandledSamplesSortBy | None = None,
+        sort_order: SortDirection | None = None,
     ) -> tuple[list[Sample], int]:
         unhandled_samples: Query = self._get_unhandled_samples(
-            lims_status=lims_status, search=search
+            lims_status=lims_status, search=search, sort_by=sort_by, sort_order=sort_order
         )
         return _paginate(query=unhandled_samples, page=page, page_size=page_size)
 
-    def _get_unhandled_samples(self, lims_status: LimsStatus, search: str | None) -> Query:
+    def _get_unhandled_samples(
+        self,
+        lims_status: LimsStatus,
+        search: str | None,
+        sort_by: UnhandledSamplesSortBy | None = None,
+        sort_order: SortDirection | None = None,
+    ) -> Query:
         """
         Return samples with the given lims_status that:
         - Are not downsampled
@@ -1936,19 +1948,23 @@ class ReadHandler(BaseHandler):
                 Customer.internal_id.not_like("cust9%"),
             )
         )
+
+        if sort_by == UnhandledSamplesSortBy.TICKET:
+            desc: bool = sort_order == SortDirection.DESCENDING
+            sort_column = Sample.ticket_id_from_original_order
+            query = query.order_by(sort_column.desc() if desc else sort_column.asc())
+        else:
+            query = query.order_by(Sample.last_sequenced_at.asc())
+
         if search:
-            query = (
-                query.join(CaseSample, CaseSample.sample_id == Sample.id)
-                .join(Case, Case.id == CaseSample.case_id)
-                .filter(
-                    CaseSample.should_deliver_sample.is_(True),
-                    sqlalchemy.or_(
-                        Case.internal_id.ilike(f"%{search}%"),
-                        Sample.internal_id.ilike(f"%{search}%"),
-                    ),
-                )
+            query = query.filter(
+                sqlalchemy.or_(
+                    Sample.delivering_case_internal_id.ilike(f"%{search}%"),
+                    Sample.internal_id.ilike(f"%{search}%"),
+                ),
             )
-        return query.order_by(Sample.last_sequenced_at.asc())
+
+        return query
 
     def get_uploaded_analyses(self, trailblazer_ids: list[int]) -> list[Analysis]:
         return (
