@@ -386,6 +386,7 @@ class ApplicationTagNotFoundError(CgError):
     Exception raised when an application is not found.
     """
 
+
 class MultipleAnalysesToDeliverError(CgError):
     """Exception raised when multiple analyses are ready for delivery for a case."""
 
