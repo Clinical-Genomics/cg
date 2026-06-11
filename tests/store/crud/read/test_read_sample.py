@@ -11,7 +11,11 @@ from cg.constants.lims import LimsStatus
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import SampleNotFoundError
 from cg.models.orders.constants import OrderType
-from cg.server.dto.samples.requests import CollaboratorSamplesRequest
+from cg.server.dto.samples.requests import (
+    CollaboratorSamplesRequest,
+    SortDirection,
+    UnhandledSamplesSortBy,
+)
 from cg.store.models import Case, Customer, Invoice, OrderTypeApplication, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -827,6 +831,76 @@ def test_get_unhandled_samples_filters_out_internal_samples(store: Store, helper
 
     # THEN only the external sample is returned
     assert unhandled_samples.all() == [external_sample]
+
+
+def test_get_paginated_unhandled_samples_sort_by_ticket(store: Store, helpers: StoreHelpers):
+    # GIVEN two unhandled samples whose delivering cases belong to orders with different tickets
+    sample_in_ticket_1 = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="unhandled_ticket_1_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    sample_in_ticket_2 = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="unhandled_ticket_2_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    case_in_ticket_1 = helpers.add_case(store=store, name="case_1", internal_id="case_1")
+    case_in_ticket_2 = helpers.add_case(store=store, name="case_2", internal_id="case_2")
+
+    helpers.add_relationship(
+        store=store, sample=sample_in_ticket_1, case=case_in_ticket_1, should_deliver_sample=True
+    )
+    helpers.add_relationship(
+        store=store, sample=sample_in_ticket_2, case=case_in_ticket_2, should_deliver_sample=True
+    )
+
+    order_in_ticket_1 = helpers.add_order(
+        store=store, customer_id=case_in_ticket_1.customer_id, ticket_id=1
+    )
+    order_in_ticket_2 = helpers.add_order(
+        store=store, customer_id=case_in_ticket_2.customer_id, ticket_id=2
+    )
+    case_in_ticket_1.orders.append(order_in_ticket_1)
+    case_in_ticket_2.orders.append(order_in_ticket_2)
+    store.session.commit()
+
+    # WHEN getting the unhandled samples sorted by ticket ascending
+    unhandled_samples_asc, _ = store.get_paginated_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP,
+        search=None,
+        page=1,
+        page_size=10,
+        sort_by=UnhandledSamplesSortBy.TICKET,
+        sort_order=SortDirection.ASCENDING,
+    )
+
+    # WHEN getting the unhandled samples sorted by ticket descending
+    unhandled_samples_desc, _ = store.get_paginated_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP,
+        search=None,
+        page=1,
+        page_size=10,
+        sort_by=UnhandledSamplesSortBy.TICKET,
+        sort_order=SortDirection.DESCENDING,
+    )
+
+    # THEN ascending list is as expected - lower ticket id comes first
+    assert unhandled_samples_asc == [sample_in_ticket_1, sample_in_ticket_2]
+
+    # THEN descending list is as expected - higher ticket id comes first
+    assert unhandled_samples_desc == [sample_in_ticket_2, sample_in_ticket_1]
 
 
 def test_get_paginated_unhandled_samples(store: Store, helpers: StoreHelpers):

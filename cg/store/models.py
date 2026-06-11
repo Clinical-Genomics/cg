@@ -911,13 +911,13 @@ class Sample(Base, PriorityMixin):
     def delivering_case_internal_id(cls):
         return (
             select(Case.internal_id)
-            .join(CaseSample, CaseSample.case_id == Case.id)
+            .join(Case.links)
             .where(
                 CaseSample.sample_id == cls.id,
                 CaseSample.should_deliver_sample.is_(True),
             )
             .limit(1)
-            .scalar_subquery()
+            .label("delivering_case_internal_id")
         )
 
     @property
@@ -940,8 +940,7 @@ class Sample(Base, PriorityMixin):
     def ticket_id_from_original_order(cls):
         return (
             select(Order.ticket_id)
-            .join(order_case, order_case.c.order_id == Order.id)
-            .join(Case, Case.id == order_case.c.case_id)
+            .join(Order.cases)
             .join(CaseSample, CaseSample.case_id == Case.id)
             .where(
                 CaseSample.sample_id == cls.id,
@@ -949,7 +948,7 @@ class Sample(Base, PriorityMixin):
             )
             .order_by(Order.order_date.asc())
             .limit(1)
-            .scalar_subquery()
+            .label("ticket_id_from_original_order")
         )
 
     def to_dict(self, links: bool = False) -> dict:

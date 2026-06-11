@@ -418,7 +418,6 @@ class StoreHelpers:
         application_type: str = "tgs",
         control: str = "",
         customer_id: str = None,
-        # delivering_case_internal_id: str | None = None,
         sex: str = Sex.FEMALE,
         last_sequenced_at: datetime = None,
         is_external: bool = False,
