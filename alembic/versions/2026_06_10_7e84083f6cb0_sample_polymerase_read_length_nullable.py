@@ -1,7 +1,7 @@
 """Sample polymerase read length nullable
 
 Revision ID: 7e84083f6cb0
-Revises: 8cd14469c35f
+Revises: 29939ae3d960
 Create Date: 2026-06-10 11:38:36.405971
 
 """
@@ -16,7 +16,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "7e84083f6cb0"
-down_revision = "8cd14469c35f"
+down_revision = "29939ae3d960"
 branch_labels = None
 depends_on = None
 
