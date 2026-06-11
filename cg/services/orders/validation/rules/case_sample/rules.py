@@ -1,6 +1,7 @@
 from collections import Counter
 
 from cg.models.orders.constants import OrderType
+from cg.models.orders.sample_base import SexEnum
 from cg.services.orders.validation.constants import ALLOWED_SKIP_RC_BUFFERS
 from cg.services.orders.validation.errors.case_errors import InvalidGenePanelsError
 from cg.services.orders.validation.errors.case_sample_errors import (
@@ -32,6 +33,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     SampleNameSameAsCaseNameError,
     SampleOutsideOfCollaborationError,
     SexSubjectIdError,
+    SexUnknownWarning,
     StatusUnknownError,
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
@@ -599,3 +601,14 @@ def reset_tumour_values_to_true(order: RNAFusionOrder, **kwargs):
             error = TumourValueResetError(case_index=case_index, sample_index=sample_index)
             errors.append(error)
     return errors
+
+
+def warn_if_sex_unknown(order: OrderWithCases, **kwargs) -> list[SexUnknownWarning]:
+    warnings: list[SexUnknownWarning] = []
+
+    for case_index, sample_index, sample in order.enumerated_new_samples:
+        if sample.sex == SexEnum.unknown:
+            warning = SexUnknownWarning(case_index=case_index, sample_index=sample_index)
+            warnings.append(warning)
+
+    return warnings

@@ -11,11 +11,13 @@ from sqlalchemy import (
     Column,
     ForeignKey,
     Numeric,
+    SQLColumnExpression,
     String,
     Table,
 )
 from sqlalchemy import Text as SLQText
-from sqlalchemy import UniqueConstraint, orm, types
+from sqlalchemy import UniqueConstraint, orm, select, types
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
@@ -899,6 +901,27 @@ class Sample(Base, PriorityMixin):
         else:
             return None
 
+    @hybrid_property
+    def delivering_case_internal_id(self) -> str | None:  # pyright: ignore [reportRedeclaration]
+        if case := self.case_that_delivers:
+            return case.internal_id
+        return None
+
+    # noinspection PyNestedDecorators
+    @delivering_case_internal_id.expression
+    @classmethod
+    def delivering_case_internal_id(cls) -> SQLColumnExpression[str]:
+        return (
+            select(Case.internal_id)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .limit(1)
+            .label("delivering_case_internal_id")
+        )
+
     @property
     def workflow_of_case_that_delivers(self) -> Workflow | None:
         """Return the workflow of the original case if the case exists."""
@@ -907,13 +930,28 @@ class Sample(Base, PriorityMixin):
         else:
             return None
 
-    @property
-    def ticket_id_from_original_order(self) -> int | None:
-        """Return the original ticket id of the delivering case if it is linked to any ticket."""
+    @hybrid_property
+    def ticket_id_from_original_order(self) -> int | None:  # pyright: ignore [reportRedeclaration]
         if self.case_that_delivers and self.case_that_delivers.original_order:
             return self.case_that_delivers.original_order.ticket_id
-        else:
-            return None
+        return None
+
+    # noinspection PyNestedDecorators
+    @ticket_id_from_original_order.expression
+    @classmethod
+    def ticket_id_from_original_order(cls) -> SQLColumnExpression[int]:
+        return (
+            select(Order.ticket_id)
+            .join(Order.cases)
+            .join(CaseSample, CaseSample.case_id == Case.id)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .order_by(Order.order_date.asc())
+            .limit(1)
+            .label("ticket_id_from_original_order")
+        )
 
     def to_dict(self, links: bool = False) -> dict:
         """Represent as dictionary"""
