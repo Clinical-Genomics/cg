@@ -8,6 +8,7 @@ from pytest_mock import MockerFixture
 from cg.constants import Workflow
 from cg.constants.lims import LimsStatus
 from cg.exc import SampleNotFoundError
+from cg.server.dto.samples.requests import SortDirection, UnhandledSamplesSortBy
 from cg.server.endpoints import samples
 from cg.store.models import Customer, Sample
 from cg.store.store import Store
@@ -250,12 +251,12 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=1,
     )
-    sample_case_unkown = create_autospec(
+    sample_case_unknown = create_autospec(
         Sample,
         customer=create_autospec(Customer, interal_id="external_customer"),
         delivered_at=None,
         from_sample=None,
-        internal_id="sample_case_unkown",
+        internal_id="sample_case_unknown",
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
@@ -265,7 +266,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
     )
     status_db.as_type.get_paginated_unhandled_samples = Mock(
         return_value=(
-            [sample_case_unkown, sample_smaller_ticket_number, sample_larger_ticket_number],
+            [sample_case_unknown, sample_smaller_ticket_number, sample_larger_ticket_number],
             3,
         )
     )
@@ -279,13 +280,12 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
 
-    # THEN the response should be ordered correctly
     # THEN samples should be returned
     assert response.json == {
         "samples": [
             {
                 "case_id": "unknown",
-                "sample_id": "sample_case_unkown",
+                "sample_id": "sample_case_unknown",
                 "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
                 "lims_status": "top-up",
                 "ticket": "unknown",
@@ -310,6 +310,16 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
         ],
         "total": 3,
     }
+
+    # THEN function has been called with the correct arguments
+    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=10,
+        search=None,
+        sort_by=UnhandledSamplesSortBy.TICKET,
+        sort_order=SortDirection.ASCENDING,
+    )
 
 
 def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocker: MockerFixture):
@@ -371,7 +381,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
 
-    # THEN samples should be returned in descending ticket order
+    # THEN samples should be returned
     assert response.json == {
         "samples": [
             {
@@ -401,3 +411,13 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
         ],
         "total": 3,
     }
+
+    # THEN function has been called with the correct arguments
+    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=10,
+        search=None,
+        sort_by=UnhandledSamplesSortBy.TICKET,
+        sort_order=SortDirection.DESCENDING,
+    )
