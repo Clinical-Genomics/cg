@@ -21,15 +21,21 @@ from tests.typed_mock import TypedMock, create_typed_mock
 
 
 @pytest.fixture
+def case_id() -> str:
+    return "microparakeet"
+
+
+@pytest.fixture
 def microsalt_store() -> TypedMock[Store]:
     return create_typed_mock(Store)
 
 
 @pytest.fixture
-def trailblazer_api() -> TypedMock[TrailblazerAPI]:
+def trailblazer_api(case_id: str) -> TypedMock[TrailblazerAPI]:
     trailblazer_api: TypedMock[TrailblazerAPI] = create_typed_mock(TrailblazerAPI)
     trailblazer_api.as_type.add_pending_analysis = Mock(
         return_value=TrailblazerAnalysis(
+            case_id=case_id,
             id=1,
             logged_at=None,
             started_at=None,
@@ -55,12 +61,12 @@ def microsalt_tracker(
 
 @pytest.mark.freeze_time
 def test_microsalt_tracker_successful(
+    case_id: str,
     microsalt_tracker: MicrosaltTracker,
     microsalt_store: TypedMock[Store],
     trailblazer_api: TypedMock[TrailblazerAPI],
 ):
     # GIVEN case and ticket IDs
-    case_id: str = "microparakeet"
     ticket_id: str = "ticket_id123"
 
     # GIVEN a microSALT case config
