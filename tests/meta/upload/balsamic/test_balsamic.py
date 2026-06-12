@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import cast
 from unittest.mock import Mock
 
 import click
@@ -67,7 +68,7 @@ def test_upload_with_case_uploading_to_customer_inbox(cg_config: CGConfig, mocke
     case: Case = create_autospec(Case, is_to_be_uploaded_to_customer_inbox=True)
     status_db: Store = create_autospec(Store, session=create_autospec(Session))
     status_db.get_latest_completed_analysis_for_case = Mock(return_value=analysis)
-    cg_config.status_db = status_db
+    cast(Mock, cg_config).status_db = status_db
     balsamic_upload_api = BalsamicUploadAPI(config=cg_config)
     balsamic_upload_api.upload_files_to_customer_inbox = Mock()
     update_uploaded_at_spy = mocker.spy(BalsamicUploadAPI, "update_uploaded_at")
@@ -90,7 +91,7 @@ def test_upload_with_case_not_uploading_to_customer_inbox(
     case: Case = create_autospec(Case, is_to_be_uploaded_to_customer_inbox=False)
     status_db: Store = create_autospec(Store, session=create_autospec(Session))
     status_db.get_latest_completed_analysis_for_case = Mock(return_value=analysis)
-    cg_config.status_db = status_db
+    cast(Mock, cg_config).status_db = status_db
     balsamic_upload_api = BalsamicUploadAPI(config=cg_config)
     balsamic_upload_api.upload_files_to_customer_inbox = Mock()
     update_uploaded_at_spy = mocker.spy(BalsamicUploadAPI, "update_uploaded_at")
