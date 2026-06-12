@@ -1926,33 +1926,40 @@ class ReadHandler(BaseHandler):
     def get_paginated_unhandled_samples(
         self,
         lims_status: LimsStatus,
-        search: str | None,
         page: int,
         page_size: int,
+        search: str | None = None,
         sort_by: UnhandledSamplesSortBy | None = None,
         sort_order: SortDirection | None = None,
+        workflow: Workflow | None = None,
     ) -> tuple[list[Sample], int]:
         unhandled_samples: Query = self._get_unhandled_samples(
-            lims_status=lims_status, search=search, sort_by=sort_by, sort_order=sort_order
+            lims_status=lims_status,
+            search=search,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            workflow=workflow,
         )
         return _paginate(query=unhandled_samples, page=page, page_size=page_size)
 
     def _get_unhandled_samples(
         self,
         lims_status: LimsStatus,
-        search: str | None,
+        search: str | None = None,
         sort_by: UnhandledSamplesSortBy | None = None,
         sort_order: SortDirection | None = None,
+        workflow: Workflow | None = None,
     ) -> Query:
         """
         Return samples with the given lims_status that:
-        - Are not downsampled
-        - Are not cancelled
-        - Are not delivered
-        - Have been sequenced (last_sequenced_at is not null)
-        - Do not belong to the internal customers
-        - Ordered by last sequenced date, with the oldest first
-        - Optional filtering by search string
+            - Are not downsampled
+            - Are not cancelled
+            - Are not delivered
+            - Have been sequenced (last_sequenced_at is not null)
+            - Do not belong to the internal customers
+            - Ordered by last sequenced date, with the oldest first
+            - Optional filtering by search string
+            - Optional filtering by workflow
         """
         query = (
             self._get_query(table=Sample)

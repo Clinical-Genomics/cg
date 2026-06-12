@@ -426,52 +426,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
 def test_get_unhandled_samples_filter_on_workflow(client: FlaskClient, mocker: MockerFixture):
     # GIVEN a store with unhandled samples in top-up
     status_db: TypedMock[Store] = create_typed_mock(Store)
-    date_time = datetime(2024, 12, 24, 11, 59)
-    sample_1_raredisease = create_autospec(
-        Sample,
-        customer=create_autospec(Customer, interal_id="external_customer"),
-        delivered_at=None,
-        from_sample=None,
-        internal_id="sample_1_raredisease",
-        is_cancelled=False,
-        last_sequenced_at=date_time,
-        lims_status=LimsStatus.TOP_UP,
-        delivering_case_internal_id="case_1",
-        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
-        ticket_id_from_original_order=2,
-    )
-    sample_2_raredisease = create_autospec(
-        Sample,
-        customer=create_autospec(Customer, interal_id="external_customer"),
-        delivered_at=None,
-        from_sample=None,
-        internal_id="sample_2_raredisease",
-        is_cancelled=False,
-        last_sequenced_at=date_time,
-        lims_status=LimsStatus.TOP_UP,
-        delivering_case_internal_id="case_2",
-        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
-        ticket_id_from_original_order=1,
-    )
-    sample_case_unkown = create_autospec(
-        Sample,
-        customer=create_autospec(Customer, interal_id="external_customer"),
-        delivered_at=None,
-        from_sample=None,
-        internal_id="sample_case_unkown",
-        is_cancelled=False,
-        last_sequenced_at=date_time,
-        lims_status=LimsStatus.TOP_UP,
-        delivering_case_internal_id=None,
-        workflow_of_case_that_delivers=None,
-        ticket_id_from_original_order=None,
-    )
-    status_db.as_type.get_paginated_unhandled_samples = Mock(
-        return_value=(
-            [sample_1_raredisease, sample_2_raredisease, sample_case_unkown],
-            3,
-        )
-    )
+    status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([], 0))
     mocker.patch.object(samples, "db", status_db.as_type)
 
     # WHEN querying the unhandled samples endpoint with workflow Raredisease
@@ -492,29 +447,6 @@ def test_get_unhandled_samples_filter_on_workflow(client: FlaskClient, mocker: M
         sort_order=None,
         workflow=Workflow.RAREDISEASE,
     )
-
-    # THEN only samples with workflow raredisease should be in the response
-    assert response.json == {
-        "samples": [
-            {
-                "case_id": "case_1",
-                "sample_id": "sample_1_raredisease",
-                "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
-                "lims_status": "top-up",
-                "ticket": 2,
-                "workflow": "raredisease",
-            },
-            {
-                "case_id": "case_2",
-                "sample_id": "sample_2_raredisease",
-                "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
-                "lims_status": "top-up",
-                "ticket": 1,
-                "workflow": "raredisease",
-            },
-        ],
-        "total": 2,
-    }
 
 
 def test_get_unhandled_samples_unknown_param(client: FlaskClient, mocker: MockerFixture):

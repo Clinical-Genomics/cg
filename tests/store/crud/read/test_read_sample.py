@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 from sqlalchemy.orm import Query
 
-from cg.constants import SexOptions
+from cg.constants import SexOptions, Workflow
 from cg.constants.lims import LimsStatus
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import SampleNotFoundError
@@ -831,6 +831,62 @@ def test_get_unhandled_samples_filters_out_internal_samples(store: Store, helper
 
     # THEN only the external sample is returned
     assert unhandled_samples.all() == [external_sample]
+
+
+def test_get_unhandled_samples_filters_on_workflow(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with one raredisease case and a non raredisease case
+    raredisease_sample = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="raredisease_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    non_raredisease_sample = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="non_raredisease_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    raredisease_case = helpers.add_case(
+        store=store,
+        internal_id="raredisease_case",
+        name="raredisease_case",
+        data_analysis=Workflow.RAREDISEASE,
+    )
+    non_raredisease_case = helpers.add_case(
+        store=store,
+        internal_id="non_raredisease_case",
+        name="non_raredisease_case",
+        data_analysis=Workflow.MIP_DNA,
+    )
+
+    helpers.add_relationship(
+        store=store, sample=raredisease_sample, case=raredisease_case, should_deliver_sample=True
+    )
+    helpers.add_relationship(
+        store=store,
+        sample=non_raredisease_sample,
+        case=non_raredisease_case,
+        should_deliver_sample=True,
+    )
+
+    # WHEN getting the unhandled samples in top-up and workflow raredisease
+    unhandled_samples: Query = store._get_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP,
+        workflow=Workflow.RAREDISEASE,
+    )
+
+    # THEN only the raredisease sample is returned
+    assert unhandled_samples.all() == [raredisease_sample]
 
 
 def test_get_paginated_unhandled_samples_sort_by_ticket(store: Store, helpers: StoreHelpers):
