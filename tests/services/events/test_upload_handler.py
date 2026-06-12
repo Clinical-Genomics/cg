@@ -49,7 +49,7 @@ def test_completed_missing_analysis():
     store.update_analysis_uploaded_at = Mock(side_effect=Exception)
 
     # WHEN a completed message is received
-    # THEN it let's the exception propagate
+    # THEN it lets the exception propagate
     completed_handler = completed(store=store, trailblazer_api=create_autospec(TrailblazerAPI))
     with pytest.raises(Exception):
         completed_handler(message)
