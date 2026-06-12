@@ -482,6 +482,17 @@ def test_get_unhandled_samples_filter_on_workflow(client: FlaskClient, mocker: M
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
 
+    # THEN function has been called with the correct arguments
+    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=10,
+        search=None,
+        sort_by=None,
+        sort_order=None,
+        workflow=Workflow.RAREDISEASE,
+    )
+
     # THEN only samples with workflow raredisease should be in the response
     assert response.json == {
         "samples": [
@@ -504,17 +515,6 @@ def test_get_unhandled_samples_filter_on_workflow(client: FlaskClient, mocker: M
         ],
         "total": 2,
     }
-
-    # THEN function has been called with the correct arguments
-    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
-        lims_status=LimsStatus.TOP_UP,
-        page=1,
-        page_size=10,
-        search=None,
-        sort_by=None,
-        sort_order=None,
-        workflow=Workflow.RAREDISEASE,
-    )
 
 
 def test_get_unhandled_samples_unknown_param(client: FlaskClient, mocker: MockerFixture):
