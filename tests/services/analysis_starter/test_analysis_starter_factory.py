@@ -22,7 +22,9 @@ from cg.models.cg_config import (
     TomteConfig,
 )
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
-from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
+from cg.services.analysis_starter.configurator.implementations.balsamic_configurator import (
+    BalsamicConfigurator,
+)
 from cg.services.analysis_starter.configurator.implementations.microsalt import (
     MicrosaltConfigurator,
 )
