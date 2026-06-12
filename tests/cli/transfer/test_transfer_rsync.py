@@ -2,7 +2,7 @@
 
 import logging
 
-from cg.cli.deliver.base import rsync
+from cg.cli.transfer import rsync
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
