@@ -60,6 +60,7 @@ def balsamic_case_config(case_id: str) -> BalsamicCaseConfig:
         qos=SlurmQos.NORMAL,
         sample_config=Path("tmp_path", case_id, f"{case_id}.json"),
         workflow=Workflow.BALSAMIC,
+        workflow_profile=Path("/path/to/balsamic"),
     )
 
 
