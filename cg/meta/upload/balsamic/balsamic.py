@@ -34,7 +34,8 @@ class BalsamicUploadAPI(UploadAPI):
         if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
             ctx.invoke(generate_delivery_report, case_id=case.internal_id)
 
-        self.upload_files_to_customer_inbox(case)
+        if case.is_to_be_uploaded_to_customer_inbox:
+            self.upload_files_to_customer_inbox(case)
 
         # Upload CNV and BAF profile to GENS
         ctx.invoke(upload_to_gens, case_id=case.internal_id)
@@ -53,5 +54,5 @@ class BalsamicUploadAPI(UploadAPI):
         LOG.info(
             f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
         )
-
-        self.update_uploaded_at(analysis=analysis)
+        if not case.is_to_be_uploaded_to_customer_inbox:
+            self.update_uploaded_at(analysis=analysis)

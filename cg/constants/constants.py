@@ -204,6 +204,15 @@ class DataDelivery(StrEnum):
     SCOUT = "scout"
     STATINA = "statina"
 
+    @property
+    def exclude_customer_inbox_delivery(self) -> bool:
+        return self in {
+            DataDelivery.NIPT_VIEWER,
+            DataDelivery.NO_DELIVERY,
+            DataDelivery.SCOUT,
+            DataDelivery.STATINA,
+        }
+
 
 class HastaSlurmPartitions(StrEnum):
     DRAGEN: str = "dragen"

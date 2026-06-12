@@ -4,9 +4,9 @@ from unittest.mock import Mock
 import click
 import pytest
 from mock import create_autospec
+from pytest_mock import MockerFixture
 from sqlalchemy.orm import Session
 
-from cg.constants import DataDelivery
 from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
 from cg.models.cg_config import (
     BalsamicConfig,
@@ -61,15 +61,16 @@ def cg_config() -> CGConfig:
     )
 
 
-def test_upload_with_case_uploading_to_customer_inbox(cg_config):
+def test_upload_with_case_uploading_to_customer_inbox(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a store with an analysis
     analysis: Analysis = create_autospec(Analysis)
-    case: Case = create_autospec(Case)
+    case: Case = create_autospec(Case, is_to_be_uploaded_to_customer_inbox=True)
     status_db: Store = create_autospec(Store, session=create_autospec(Session))
     status_db.get_latest_completed_analysis_for_case = Mock(return_value=analysis)
     cg_config.status_db = status_db
     balsamic_upload_api = BalsamicUploadAPI(config=cg_config)
     balsamic_upload_api.upload_files_to_customer_inbox = Mock()
+    update_uploaded_at_spy = mocker.spy(BalsamicUploadAPI, "update_uploaded_at")
 
     # WHEN uploading a case
     balsamic_upload_api.upload(ctx=create_autospec(click.Context), case=case, restart=False)
@@ -77,19 +78,28 @@ def test_upload_with_case_uploading_to_customer_inbox(cg_config):
     # THEN files should have been uploaded to the customer inbox
     balsamic_upload_api.upload_files_to_customer_inbox.assert_called_once_with(case)
 
+    # THEN the analysis uploaded_at is not set yet
+    update_uploaded_at_spy.assert_not_called()
 
-def test_upload_with_case_not_uploading_to_customer_inbox(cg_config):
+
+def test_upload_with_case_not_uploading_to_customer_inbox(
+    cg_config: CGConfig, mocker: MockerFixture
+):
     # GIVEN a store with an analysis
     analysis: Analysis = create_autospec(Analysis)
-    case: Case = create_autospec(Case, data_delivery=DataDelivery.SCOUT)
+    case: Case = create_autospec(Case, is_to_be_uploaded_to_customer_inbox=False)
     status_db: Store = create_autospec(Store, session=create_autospec(Session))
     status_db.get_latest_completed_analysis_for_case = Mock(return_value=analysis)
     cg_config.status_db = status_db
     balsamic_upload_api = BalsamicUploadAPI(config=cg_config)
     balsamic_upload_api.upload_files_to_customer_inbox = Mock()
+    update_uploaded_at_spy = mocker.spy(BalsamicUploadAPI, "update_uploaded_at")
 
     # WHEN uploading a case
     balsamic_upload_api.upload(ctx=create_autospec(click.Context), case=case, restart=False)
 
     # THEN files should have been uploaded to the customer inbox
     balsamic_upload_api.upload_files_to_customer_inbox.assert_not_called()
+
+    # THEN the analysis uploaded at is set
+    update_uploaded_at_spy.assert_called_once()
