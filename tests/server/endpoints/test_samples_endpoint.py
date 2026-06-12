@@ -151,6 +151,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         page_size=10,
         sort_by=None,
         sort_order=None,
+        workflow=None,
     )
 
 
@@ -218,6 +219,7 @@ def test_get_unhandled_samples_sample_search(client: FlaskClient, mocker: Mocker
         page_size=10,
         sort_by=None,
         sort_order=None,
+        workflow=None,
     )
 
 
@@ -319,6 +321,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
         search=None,
         sort_by=UnhandledSamplesSortBy.TICKET,
         sort_order=SortDirection.ASCENDING,
+        workflow=None,
     )
 
 
@@ -420,6 +423,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
         search=None,
         sort_by=UnhandledSamplesSortBy.TICKET,
         sort_order=SortDirection.DESCENDING,
+        workflow=None,
     )
 
 

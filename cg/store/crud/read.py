@@ -1990,6 +1990,9 @@ class ReadHandler(BaseHandler):
                 ),
             )
 
+        if workflow:
+            query = query.filter(Sample.workflow_of_case_that_delivers.is_(workflow))
+
         return query
 
     def get_uploaded_analyses(self, trailblazer_ids: list[int]) -> list[Analysis]:
