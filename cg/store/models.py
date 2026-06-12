@@ -923,7 +923,9 @@ class Sample(Base, PriorityMixin):
         )
 
     @hybrid_property
-    def workflow_of_case_that_delivers(self) -> Workflow | None:
+    def workflow_of_case_that_delivers(  # pyright: ignore [reportRedeclaration]
+        self,
+    ) -> Workflow | None:
         """Return the workflow of the original case if the case exists."""
         if case := self.case_that_delivers:
             return case.data_analysis
@@ -933,7 +935,7 @@ class Sample(Base, PriorityMixin):
     # noinspection PyNestedDecorators
     @workflow_of_case_that_delivers.expression
     @classmethod
-    def workflow_of_case_that_delivers(cls) -> SQLColumnExpression[str]:
+    def workflow_of_case_that_delivers(cls) -> SQLColumnExpression[Workflow]:
         return (
             select(Case.data_analysis)
             .join(Case.links)
