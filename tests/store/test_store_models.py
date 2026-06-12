@@ -1,4 +1,6 @@
-from cg.constants.constants import ControlOptions
+import pytest
+
+from cg.constants.constants import ControlOptions, DataDelivery
 from cg.constants.priority import Priority
 from cg.store.models import (
     Application,
@@ -38,6 +40,40 @@ def test_case_original_order_no_orders():
 
     # THEN the original order should be None
     assert original_order is None
+
+
+@pytest.mark.parametrize(
+    "data_delivery, is_to_be_uploaded",
+    [
+        (DataDelivery.ANALYSIS_FILES, True),
+        (DataDelivery.ANALYSIS_SCOUT, True),
+        (DataDelivery.BAM, True),
+        (DataDelivery.FASTQ, True),
+        (DataDelivery.FASTQ_SCOUT, True),
+        (DataDelivery.FASTQ_QC, True),
+        (DataDelivery.FASTQ_ANALYSIS, True),
+        (DataDelivery.FASTQ_QC_ANALYSIS, True),
+        (DataDelivery.FASTQ_ANALYSIS_SCOUT, True),
+        (DataDelivery.NIPT_VIEWER, False),
+        (DataDelivery.NO_DELIVERY, False),
+        (DataDelivery.RAW_DATA_ANALYSIS, True),
+        (DataDelivery.RAW_DATA_ANALYSIS_SCOUT, True),
+        (DataDelivery.RAW_DATA_SCOUT, True),
+        (DataDelivery.SCOUT, False),
+        (DataDelivery.STATINA, False),
+    ],
+)
+def test_case_is_to_be_uploaded_to_customer_inbox(
+    data_delivery: DataDelivery, is_to_be_uploaded: bool
+):
+    # GIVEN a case with a data delivery
+    case = Case(data_delivery=data_delivery)
+
+    # WHEN checking if files are to be uploaded to caesar
+    should_be_uploaded: bool = case.is_to_be_uploaded_to_customer_inbox
+
+    # THEN the value should be as expected
+    assert should_be_uploaded == is_to_be_uploaded
 
 
 def test_microbial_sample_to_dict(microbial_store: Store, helpers):

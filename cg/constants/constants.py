@@ -205,7 +205,7 @@ class DataDelivery(StrEnum):
     STATINA = "statina"
 
     @property
-    def exclude_customer_inbox_delivery(self) -> bool:
+    def excludes_customer_inbox_delivery(self) -> bool:
         return self in {
             DataDelivery.NIPT_VIEWER,
             DataDelivery.NO_DELIVERY,

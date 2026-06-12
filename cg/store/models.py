@@ -526,10 +526,9 @@ class Case(Base, PriorityMixin):
         """Returns the last ticket the family was ordered in"""
         return self.tickets.split(sep=",")[-1] if self.tickets else None
 
-    # TODO add test
     @property
     def is_to_be_uploaded_to_customer_inbox(self) -> bool:
-        return not DataDelivery(self.data_delivery).exclude_customer_inbox_delivery
+        return not DataDelivery(self.data_delivery).excludes_customer_inbox_delivery
 
     @property
     def original_order(self) -> "Order | None":
