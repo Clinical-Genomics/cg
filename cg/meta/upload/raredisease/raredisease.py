@@ -49,6 +49,7 @@ class RarediseaseUploadAPI(UploadAPI):
         ctx.invoke(upload_to_gens, case_id=case.internal_id)
 
         # Clinical delivery upload
-        self.upload_files_to_customer_inbox(case)
-
-        self.update_uploaded_at(analysis=analysis)
+        if case.is_to_be_uploaded_to_customer_inbox:
+            self.upload_files_to_customer_inbox(case)
+        else:
+            self.update_uploaded_at(analysis=analysis)
