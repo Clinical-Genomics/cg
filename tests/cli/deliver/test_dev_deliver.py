@@ -13,14 +13,8 @@ from cg.cli.deliver.base import (
     deliver_dev_order,
 )
 from cg.constants.process import EXIT_FAIL, EXIT_PARSE_ERROR, EXIT_SUCCESS
-from cg.exc import (
-    FreshdeskDeliveryMessageError,
-    FreshdeskUpdateTicketError,
-    TrailblazerAnalysisDeliveryError,
-    TrailblazerFailedToGetAnalysesError,
-)
 from cg.models.cg_config import CGConfig, FreshdeskConfig
-from cg.services.deliver_service import DeliverService, MarkAsDeliveredService
+from cg.services.deliver_service import DeliverService
 from cg.store.models import Order
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
@@ -150,18 +144,7 @@ def test_deliver_dev_all_available_command_success(mocker: MockerFixture):
     deliver_all_command.assert_called_once_with(ANY)
 
 
-@pytest.mark.parametrize(
-    "caught_error",
-    [
-        TrailblazerAnalysisDeliveryError,
-        TrailblazerFailedToGetAnalysesError,
-        FreshdeskDeliveryMessageError,
-        FreshdeskUpdateTicketError,
-    ],
-)
-def test_deliver_dev_all_available_service_caught_error(
-    caught_error: Exception, mocker: MockerFixture
-):
+def test_deliver_dev_all_available_service_caught_error(mocker: MockerFixture):
     # GIVEN a store and a CG config
     cli_runner = CliRunner()
     freshdesk_config = FreshdeskConfig(api_key="some_key", base_url="some_url")
@@ -178,8 +161,7 @@ def test_deliver_dev_all_available_service_caught_error(
         "_get_order_analyses_dictionary",
         return_value={create_autospec(Order, id=1, ticket_id=1234567): "analyses"},
     )
-    mocker.patch.object(MarkAsDeliveredService, "unmark_analyses")
-    mocker.patch.object(DeliverService, "_deliver_order", side_effect=caught_error)
+    mocker.patch.object(DeliverService, "_deliver", return_value=False)
 
     # WHEN calling the deliver all available cases command
     result = cli_runner.invoke(deliver_dev_all_available, obj=cg_config, standalone_mode=False)

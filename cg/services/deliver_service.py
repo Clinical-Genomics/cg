@@ -69,8 +69,12 @@ class DeliverService:
     def _deliver(
         self, order: Order, analyses: list[Analysis], signature: str | None = None
     ) -> bool:
+        LOG.info(f"Delivering {len(analyses)} analyses of ticket {order.ticket_id}.")
         try:
-            self._deliver_order(order=order, analyses=analyses, signature=signature)
+            self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
+            self.mark_as_delivered_service.close_order_in_status_db_if_closable(order)
+            self._freshdesk_send_delivery_message(order=order, analyses=analyses)
+            self._freshdesk_close_ticket_if_open(order=order)
         except TrailblazerAnalysisDeliveryError as error:
             self.status_db.rollback()
             LOG.error(f"Failed to mark analyses as delivered in Trailblazer for order {order.id}")
@@ -91,15 +95,6 @@ class DeliverService:
         else:
             self.status_db.commit_to_store()
             return True
-
-    def _deliver_order(
-        self, order: Order, analyses: list[Analysis], signature: str | None = None
-    ) -> None:
-        LOG.info(f"Delivering {len(analyses)} analyses of ticket {order.ticket_id}.")
-        self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
-        self.mark_as_delivered_service.close_order_in_status_db_if_closable(order)
-        self._freshdesk_send_delivery_message(order=order, analyses=analyses)
-        self._freshdesk_close_ticket_if_open(order=order)
 
     def _get_undelivered_analyses_for_case(self, case_id: str) -> list[Analysis]:
         undelivered_trailblazer_analyses: list[TrailblazerAnalysis] = (
