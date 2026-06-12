@@ -27,8 +27,6 @@ class MipRNAUploadAPI(UploadAPI):
         analysis: Analysis = self.status_db.get_latest_completed_analysis_for_case(case.internal_id)
         self.update_upload_started_at(analysis=analysis)
 
-        self.upload_files_to_customer_inbox(case=case)
-
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
             try:
@@ -36,4 +34,8 @@ class MipRNAUploadAPI(UploadAPI):
             except CalledProcessError as error:
                 LOG.error(error)
                 return
-        self.update_uploaded_at(analysis)
+
+        if case.is_to_be_uploaded_to_customer_inbox:
+            self.upload_files_to_customer_inbox(case=case)
+        else:
+            self.update_uploaded_at(analysis)
