@@ -30,6 +30,7 @@ def deliver():
     LOG.info("Running CG deliver")
 
 
+# TODO: remove the 'dev' from these commands
 @deliver.command(name="dev-case-command", hidden=True)
 @SIGNATURE
 @click.argument("case_id", type=str, required=True)
