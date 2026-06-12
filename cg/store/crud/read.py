@@ -1991,7 +1991,7 @@ class ReadHandler(BaseHandler):
             )
 
         if workflow:
-            query = query.filter(Sample.workflow_of_case_that_delivers.is_(workflow))
+            query = query.filter(Sample.workflow_of_case_that_delivers == workflow)
 
         return query
 
