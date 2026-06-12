@@ -24,7 +24,7 @@ def listen(config: CGConfig):
 
     listener.register(
         f"{config.nats.stream}.{ANALYSIS_UPLOADED_SUBJECT}",
-        upload_handler.completed(store=status_db, trailblazer_api=trailblazer_api),
+        upload_handler.completed(status_db=status_db, trailblazer_api=trailblazer_api),
     )
     asyncio.run(listener.listen())
 

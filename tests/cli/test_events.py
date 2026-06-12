@@ -109,7 +109,7 @@ def test_listen(
     )
 
     # THEN the handler was created with the correct dependencies
-    handler_creator.assert_called_once_with(store=status_db, trailblazer_api=trailblazer_api)
+    handler_creator.assert_called_once_with(status_db=status_db, trailblazer_api=trailblazer_api)
 
     # THEN the listener is registered with the upload.completed subject
     event_listener.as_mock.register.assert_called_once_with(

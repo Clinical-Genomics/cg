@@ -25,7 +25,7 @@ def test_completed_success():
     trailblazer_api = create_autospec(TrailblazerAPI)
 
     # WHEN a completed message is received
-    completed_handler = completed(store=store.as_type, trailblazer_api=trailblazer_api)
+    completed_handler = completed(status_db=store.as_type, trailblazer_api=trailblazer_api)
     completed_handler(message)
 
     # THEN the analysis uploaded_at should have been updated
@@ -50,6 +50,6 @@ def test_completed_missing_analysis():
 
     # WHEN a completed message is received
     # THEN it lets the exception propagate
-    completed_handler = completed(store=store, trailblazer_api=create_autospec(TrailblazerAPI))
+    completed_handler = completed(status_db=store, trailblazer_api=create_autospec(TrailblazerAPI))
     with pytest.raises(Exception):
         completed_handler(message)

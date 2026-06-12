@@ -9,17 +9,17 @@ LOG = logging.getLogger(__name__)
 ANALYSIS_UPLOADED_SUBJECT = "analysis.upload_completed"
 
 
-def completed(store: Store, trailblazer_api: TrailblazerAPI):
+def completed(status_db: Store, trailblazer_api: TrailblazerAPI):
     def handler(message: dict):
         analysis_id = message["cg.analysis_id"]
         uploaded_at = message["uploaded_at"]
         try:
             uploaded_at_datetime = datetime.strptime(uploaded_at, "%Y-%m-%dT%H:%M:%SZ")
-            store.update_analysis_uploaded_at(
+            status_db.update_analysis_uploaded_at(
                 analysis_id=analysis_id,
                 uploaded_at=uploaded_at_datetime,
             )
-            if analysis := store.get_analysis_by_entry_id(analysis_id):
+            if analysis := status_db.get_analysis_by_entry_id(analysis_id):
                 trailblazer_api.set_analysis_uploaded(
                     analysis.case.internal_id, uploaded_at=uploaded_at_datetime
                 )
