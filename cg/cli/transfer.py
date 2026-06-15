@@ -37,15 +37,24 @@ TICKET_ID_ARG = click.option("-t", "--ticket", type=str, required=True)
 
 @click.group(name="transfer", context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_obj
-# TODO: Make this a subgroup of transfer called transfer-lims
-def transfer_group(context: CGConfig):
+def transfer_group():
     """Transfer results to the status interface."""
+    LOG.debug("Running CG transfer")
+
+
+@click.group(name="lims", context_settings=CLICK_CONTEXT_SETTINGS)
+@click.pass_obj
+def lims(context: CGConfig):
+    """Transfer information about samples and pools from LIMS to the status interface."""
     lims_api: LimsAPI = context.lims_api
     status_db: Store = context.status_db
     context.meta_apis["transfer_lims_api"] = TransferLims(status=status_db, lims=lims_api)
 
 
-@transfer_group.command("lims")
+transfer_group.add_command(lims)
+
+
+@lims.command("samples")
 @click.option(
     "--max-order-age",
     type=click.IntRange(min=1),
@@ -73,7 +82,7 @@ def check_samples_in_lims(
     )
 
 
-@transfer_group.command("pools")
+@lims.command("pools")
 @click.option("-s", "--status", type=click.Choice(["received", "delivered"]), default="delivered")
 @click.pass_obj
 def set_dates_of_pools(context: CGConfig, status: str):
