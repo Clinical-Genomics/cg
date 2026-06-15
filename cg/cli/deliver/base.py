@@ -30,12 +30,11 @@ def deliver():
     LOG.info("Running CG deliver")
 
 
-# TODO: remove the 'dev' from these commands
-@deliver.command(name="dev-case-command", hidden=True)
+@deliver.command(name="case", hidden=True)
 @SIGNATURE
 @click.argument("case_id", type=str, required=True)
 @click.pass_obj
-def deliver_dev_case_command(config: CGConfig, case_id: str, signature: str):
+def deliver_case(config: CGConfig, case_id: str, signature: str):
     """
     Deliver a case by case ID.
 
@@ -59,33 +58,7 @@ def deliver_dev_case_command(config: CGConfig, case_id: str, signature: str):
     config.status_db.commit_to_store()
 
 
-@deliver.command(name="dev-all-available", hidden=True)
-@click.pass_obj
-def deliver_dev_all_available(config: CGConfig):
-    """
-    Deliver all cases that have an analysis ready to be delivered in trailblazer.
-
-    \b
-    Performs:
-        - Sends delivery message to connected ticket in Freshdesk
-        - Marks analysis as delivered in Trailblazer
-        - Marks sample as delivered if not delivered yet
-        - Closes order in statusdb if all analyses on the order are delivered and all samples are marked as delivered
-        - Closes ticket in Freshdesk if its status is open
-    """
-    freshdesk_client = FreshdeskClient(
-        base_url=config.freshdesk.base_url, api_key=config.freshdesk.api_key
-    )
-    deliver_service = DeliverService(
-        freshdesk_client=freshdesk_client,
-        status_db=config.status_db,
-        trailblazer_api=config.trailblazer_api,
-    )
-    if not deliver_service.deliver_all_available():
-        raise click.Abort()
-
-
-@deliver.command(name="dev-order", hidden=True)
+@deliver.command(name="order", hidden=True)
 @SIGNATURE
 @click.option(
     "--ticket-id",
@@ -95,7 +68,7 @@ def deliver_dev_all_available(config: CGConfig):
     help="Freshdesk ticket id corresponding to the order",
 )
 @click.pass_obj
-def deliver_dev_order(config: CGConfig, signature: str, ticket_id: int):
+def deliver_order(config: CGConfig, signature: str, ticket_id: int):
     """
     Deliver all analysis ready to be delivered in an order by ticket_id.
 
@@ -117,3 +90,29 @@ def deliver_dev_order(config: CGConfig, signature: str, ticket_id: int):
     )
     deliver_service.deliver_order(signature=signature, ticket_id=ticket_id)
     config.status_db.commit_to_store()
+
+
+@deliver.command(name="all-available", hidden=True)
+@click.pass_obj
+def deliver_all_available(config: CGConfig):
+    """
+    Deliver all cases that have an analysis ready to be delivered in trailblazer.
+
+    \b
+    Performs:
+        - Sends delivery message to connected ticket in Freshdesk
+        - Marks analysis as delivered in Trailblazer
+        - Marks sample as delivered if not delivered yet
+        - Closes order in statusdb if all analyses on the order are delivered and all samples are marked as delivered
+        - Closes ticket in Freshdesk if its status is open
+    """
+    freshdesk_client = FreshdeskClient(
+        base_url=config.freshdesk.base_url, api_key=config.freshdesk.api_key
+    )
+    deliver_service = DeliverService(
+        freshdesk_client=freshdesk_client,
+        status_db=config.status_db,
+        trailblazer_api=config.trailblazer_api,
+    )
+    if not deliver_service.deliver_all_available():
+        raise click.Abort()
