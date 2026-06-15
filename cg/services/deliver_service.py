@@ -35,7 +35,7 @@ class DeliverService:
     def deliver_all_available(self) -> bool:
         order_dict: dict[Order, list[Analysis]] = self._get_order_analyses_dictionary()
         if len(order_dict) == 0:
-            LOG.warning("No analyses found to deliver.")
+            LOG.info("No analyses found to deliver.")
             return True
         are_all_orders_delivered: list[bool] = []
         for order, analyses in order_dict.items():
@@ -56,11 +56,11 @@ class DeliverService:
 
     def deliver_order(self, ticket_id: int, signature: str):
         order: Order = self.status_db.get_order_by_ticket_id_strict(ticket_id)
-        analyses_to_deliver: list[Analysis] = self._get_analyses_to_deliver_for_order(order)
+        analyses_to_deliver: list[Analysis] = self._get_analyses_to_deliver_for_order(order.id)
         if analyses_to_deliver:
             self._deliver(order=order, analyses=analyses_to_deliver, signature=signature)
         else:
-            LOG.warning("No analysis in the order ready to deliver")
+            LOG.warning(f"No analysis found ready to deliver in the order with ticket {ticket_id}.")
 
     def _deliver(
         self, order: Order, analyses: list[Analysis], signature: str | None = None
@@ -103,9 +103,9 @@ class DeliverService:
         )
         return analyses_to_deliver
 
-    def _get_analyses_to_deliver_for_order(self, order: Order) -> list[Analysis]:
+    def _get_analyses_to_deliver_for_order(self, order_id: int) -> list[Analysis]:
         undelivered_trailblazer_analyses = self.trailblazer_api.get_analyses_to_deliver_for_order(
-            order.id
+            order_id
         )
         uploaded_analyses_to_deliver = self.status_db.get_uploaded_analyses(
             [analysis.id for analysis in undelivered_trailblazer_analyses]
