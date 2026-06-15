@@ -1,3 +1,6 @@
+import datetime as dt
+import logging
+
 from click import Context
 
 from cg.meta.upload.fohm.fohm import FOHMUploadAPI
@@ -6,6 +9,8 @@ from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Case
+
+LOG = logging.getLogger(__name__)
 
 
 class MutantUploadAPI(UploadAPI):
@@ -28,4 +33,7 @@ class MutantUploadAPI(UploadAPI):
         if case.is_to_be_uploaded_to_customer_inbox:
             self.upload_files_to_customer_inbox(case)
         else:
+            LOG.info(
+                f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
+            )
             self.update_uploaded_at(analysis)

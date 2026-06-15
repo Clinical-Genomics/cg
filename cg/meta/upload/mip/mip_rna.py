@@ -1,5 +1,6 @@
 """MIP-RNA upload API."""
 
+import datetime as dt
 import logging
 from subprocess import CalledProcessError
 
@@ -38,4 +39,7 @@ class MipRNAUploadAPI(UploadAPI):
         if case.is_to_be_uploaded_to_customer_inbox:
             self.upload_files_to_customer_inbox(case=case)
         else:
+            LOG.info(
+                f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
+            )
             self.update_uploaded_at(analysis)

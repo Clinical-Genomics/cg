@@ -1,3 +1,4 @@
+import datetime as dt
 import logging
 
 import rich_click as click
@@ -23,4 +24,7 @@ class MicrosaltUploadAPI(UploadAPI):
         if case.is_to_be_uploaded_to_customer_inbox:
             self.upload_files_to_customer_inbox(case)
         else:
+            LOG.info(
+                f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
+            )
             self.update_uploaded_at(analysis=analysis)
