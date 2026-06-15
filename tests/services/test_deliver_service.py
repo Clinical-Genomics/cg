@@ -588,10 +588,7 @@ def test_deliver_all_available_freshdesk_delivery_message_error(mocker: MockerFi
 def test_deliver_all_available_freshdesk_closing_ticket_error(mocker: MockerFixture):
     # GIVEN a store with an analysis to deliver
     status_db: TypedMock[Store] = create_typed_mock(Store)
-    case: Case = create_autospec(
-        Case,
-        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
-    )
+    case: Case = create_autospec(Case, data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT)
     analysis_to_deliver = create_autospec(
         Analysis,
         case=case,
