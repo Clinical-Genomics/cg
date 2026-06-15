@@ -8,6 +8,7 @@ from ssl import Purpose, SSLContext, TLSVersion
 
 import nats
 from nats.aio.client import Client
+from nats.aio.msg import Msg
 from nats.js import JetStreamContext
 
 from cg.models.cg_config import NatsConfig
@@ -46,8 +47,11 @@ class EventListener:
                     handler(json.loads(msg.data))
                     await msg.ack()
                 except Exception:
-                    LOG.exception(f"Failed to handle {msg.subject}")
-                    await msg.nak()
+                    delay: int = _exponential_backoff_delay(msg)
+                    LOG.exception(
+                        f"Failed to handle {msg.subject}, will retry in: {delay} seconds."
+                    )
+                    await msg.nak(delay=delay)
             else:
                 LOG.warning(f"No handler registered for {msg.subject}")
                 await msg.ack()
@@ -58,3 +62,14 @@ class EventListener:
         ctx.load_verify_locations(self.ca_cert_path)
         ctx.load_cert_chain(certfile=self.client_cert, keyfile=self.client_key)
         return ctx
+
+
+def _exponential_backoff_delay(msg: Msg) -> int:
+    """
+    Increase the delay for each attempt:
+    30s, 60s, 120s etc. until a maximum of 1hr
+    """
+    max_backoff_seconds: int = 3600
+    base_delay: int = 30
+    previous_attempts: int = msg.metadata.num_delivered - 1
+    return min(base_delay * (2**previous_attempts), max_backoff_seconds)
