@@ -30,7 +30,7 @@ def deliver():
     LOG.info("Running CG deliver")
 
 
-@deliver.command(name="case", hidden=True)
+@deliver.command(name="case")
 @SIGNATURE
 @click.argument("case_id", type=str, required=True)
 @click.pass_obj
@@ -58,7 +58,7 @@ def deliver_case(config: CGConfig, case_id: str, signature: str):
     config.status_db.commit_to_store()
 
 
-@deliver.command(name="order", hidden=True)
+@deliver.command(name="order")
 @SIGNATURE
 @click.option(
     "--ticket-id",
@@ -92,7 +92,7 @@ def deliver_order(config: CGConfig, signature: str, ticket_id: int):
     config.status_db.commit_to_store()
 
 
-@deliver.command(name="all-available", hidden=True)
+@deliver.command(name="all-available")
 @click.pass_obj
 def deliver_all_available(config: CGConfig):
     """
