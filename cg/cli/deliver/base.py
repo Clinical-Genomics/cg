@@ -231,7 +231,6 @@ def deliver_dev_case_command(config: CGConfig, case_id: str, signature: str):
         trailblazer_api=config.trailblazer_api,
     )
     deliver_service.deliver_case(case_id=case_id, signature=signature)
-    config.status_db.commit_to_store()
 
 
 @deliver.command(name="dev-all-available", hidden=True)
@@ -291,4 +290,3 @@ def deliver_dev_order(config: CGConfig, signature: str, ticket_id: int):
         trailblazer_api=config.trailblazer_api,
     )
     deliver_service.deliver_order(signature=signature, ticket_id=ticket_id)
-    config.status_db.commit_to_store()

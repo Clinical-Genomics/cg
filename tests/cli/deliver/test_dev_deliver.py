@@ -45,9 +45,6 @@ def test_deliver_dev_case_command_success(mocker: MockerFixture):
     # THEN the delivery service is called with the expected arguments
     deliver_case_command.assert_called_once_with(ANY, case_id="case_id", signature="CG")
 
-    # THEN the changes were persisted in the database
-    status_db.as_mock.commit_to_store.assert_called_once()
-
 
 def test_deliver_dev_case_command_no_case_id():
     # GIVEN a store and a CG config
@@ -67,9 +64,6 @@ def test_deliver_dev_case_command_no_case_id():
     # THEN the command failed
     assert result.exit_code == EXIT_PARSE_ERROR
 
-    # THEN the changes were NOT persisted in the database
-    status_db.as_mock.commit_to_store.assert_not_called()
-
 
 def test_deliver_dev_case_command_no_signature():
     # GIVEN a store and a CG config
@@ -88,9 +82,6 @@ def test_deliver_dev_case_command_no_signature():
 
     # THEN the command failed
     assert result.exit_code == EXIT_PARSE_ERROR
-
-    # THEN the changes were NOT persistent in the database
-    status_db.as_mock.commit_to_store.assert_not_called()
 
 
 def test_deliver_dev_case_raises_error(mocker: MockerFixture):
@@ -115,9 +106,6 @@ def test_deliver_dev_case_raises_error(mocker: MockerFixture):
 
     # THEN the command failed due to service error
     assert result.exit_code == EXIT_FAIL
-
-    # THEN the changes were NOT persistent in the database
-    status_db.as_mock.commit_to_store.assert_not_called()
 
 
 def test_deliver_dev_all_available_command_success(mocker: MockerFixture):
@@ -197,9 +185,6 @@ def test_deliver_dev_all_available_service_raises_unexpected_error(mocker: Mocke
     # THEN a click.Abort exception is not raised
     assert not isinstance(result.exception, click.exceptions.Abort)
 
-    # THEN the changes were NOT persistent in the database
-    status_db.as_mock.commit_to_store.assert_not_called()
-
 
 def test_deliver_dev_order(mocker: MockerFixture):
     # GIVEN a store and a CG Config
@@ -225,9 +210,6 @@ def test_deliver_dev_order(mocker: MockerFixture):
 
     # THEN the delivery service is called with the expected arguments
     deliver_order.assert_called_once_with(signature="CG", ticket_id=123)
-
-    # THEN the changes were persistent in the database
-    status_db.as_mock.commit_to_store.assert_called()
 
 
 @pytest.mark.parametrize(
@@ -261,9 +243,6 @@ def test_deliver_dev_order_no_ticket_id(args: list[str]):
     # THEN the command failed
     assert result.exit_code == EXIT_PARSE_ERROR
 
-    # THEN the changes were NOT persisted in the database
-    status_db.as_mock.commit_to_store.assert_not_called()
-
 
 def test_deliver_dev_order_service_raises_error(mocker: MockerFixture):
     # GIVEN a store and a CG config
@@ -287,6 +266,3 @@ def test_deliver_dev_order_service_raises_error(mocker: MockerFixture):
 
     # THEN the command failed due to service error
     assert result.exit_code == EXIT_FAIL
-
-    # THEN the changes were NOT persisted in the database
-    status_db.as_mock.commit_to_store.assert_not_called()
