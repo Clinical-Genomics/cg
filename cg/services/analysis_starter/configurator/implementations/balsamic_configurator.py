@@ -33,6 +33,7 @@ class BalsamicConfigurator(Configurator):
         self.head_job_partition: str = config.head_job_partition
         self.root_dir: Path = config.root
         self.slurm_account: str = config.slurm.account
+        self.workflow_profile = config.workflow_profile
 
         self.fastq_handler: BalsamicFastqHandler = fastq_handler
         self.config_file_creator: BalsamicConfigFileCreator = config_file_creator
@@ -57,6 +58,7 @@ class BalsamicConfigurator(Configurator):
             qos=self.store.get_case_by_internal_id_strict(case_id).slurm_priority,
             sample_config=self._get_sample_config_path(case_id),
             workflow=self.store.get_case_workflow(case_id),
+            workflow_profile=self.workflow_profile,
         )
         balsamic_config: BalsamicCaseConfig = self._set_flags(config=balsamic_config, **flags)
         self._ensure_required_config_files_exist(balsamic_config)

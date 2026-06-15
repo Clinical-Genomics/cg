@@ -105,6 +105,7 @@ balsamic:
     account: "balsamic_slurm_account"
     mail_user: "balsamic_mail_user@scilifelab.se"
     qos: "low"
+  workflow_profile: "{test_root_dir}/balsamic"
 crunchy:
   conda_binary: "{test_root_dir}/crunchy_conda_binary"
   cram_reference: "{test_root_dir}/crunchy_cram_reference"
