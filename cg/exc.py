@@ -373,6 +373,20 @@ class ApplicationDoesNotHaveHiFiYieldError(CgError):
     """Exception raised when application does not have HiFi yield set."""
 
 
+class MissingLimsUdfError(CgError):
+    """Exception raised when the UDF of a genologics LIMS object can not be read."""
+
+
+class LimsWorkflowRoutingError(CgError):
+    """Exception raised when failing to route LIMS artifacts to a specified workflow."""
+
+
+class ApplicationTagNotFoundError(CgError):
+    """
+    Exception raised when an application is not found.
+    """
+
+
 class MultipleAnalysesToDeliverError(CgError):
     """Exception raised when multiple analyses are ready for delivery for a case."""
 

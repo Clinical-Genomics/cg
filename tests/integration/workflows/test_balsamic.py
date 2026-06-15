@@ -257,7 +257,8 @@ def test_start_available_tgs_tumour_only(
         f"--qos normal "
         f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
         f"--headjob-partition head-jobs "
-        f"--run-analysis"
+        f"--run-analysis "
+        f"--workflow-profile {test_root_dir}/balsamic"
     )
     run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[0]
     assert run_analysis_call == call(
@@ -409,7 +410,8 @@ def test_start_available_wgs_paired(
         f"--qos normal "
         f"--sample-config {balsamic_root_dir}/{case_id}/{case_id}.json "
         f"--headjob-partition head-jobs "
-        f"--run-analysis"
+        f"--run-analysis "
+        f"--workflow-profile {test_root_dir}/balsamic"
     )
     run_analysis_call = run_analysis_subprocess_mock.run.mock_calls[0]
 

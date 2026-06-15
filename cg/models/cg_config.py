@@ -235,6 +235,7 @@ class BalsamicConfig(CommonAppConfig):
     swegen_path: Path
     swegen_snv: Path
     swegen_sv: Path
+    workflow_profile: Path
 
 
 class MutantConfig(BaseModel):

@@ -141,6 +141,7 @@ def cg_balsamic_config(tmp_path) -> BalsamicConfig:
         swegen_path="swegen",
         swegen_snv=tmp_path / "swegen_snv.vcf",
         swegen_sv=tmp_path / "swegen_sv.vcf",
+        workflow_profile=tmp_path / "workflow_profile_dir",
     )
 
 

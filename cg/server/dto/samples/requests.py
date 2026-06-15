@@ -1,7 +1,18 @@
+from enum import StrEnum
+
 from pydantic import BaseModel, Field
 
 from cg.constants.lims import LimsStatus
 from cg.models.orders.constants import OrderType
+
+
+class SortDirection(StrEnum):
+    ASCENDING = "asc"
+    DESCENDING = "desc"
+
+
+class UnhandledSamplesSortBy(StrEnum):
+    TICKET = "ticket"
 
 
 class CollaboratorSamplesRequest(BaseModel):
@@ -32,3 +43,5 @@ class UnhandledSamplesRequest(BaseModel):
     page: int
     page_size: int
     search: str | None = None
+    sort_by: UnhandledSamplesSortBy | None = None
+    sort_order: SortDirection | None = None
