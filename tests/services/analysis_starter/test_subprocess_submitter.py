@@ -48,6 +48,7 @@ from cg.services.analysis_starter.submitters.subprocess.submitter import (
             qos=SlurmQos.LOW,
             sample_config=Path("sample_config"),
             workflow=Workflow.BALSAMIC,
+            workflow_profile=Path("/path/to/balsamic"),
         ),
     ],
     ids=["microSALT", "MIP-DNA", "BALSAMIC"],

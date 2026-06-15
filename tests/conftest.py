@@ -2088,6 +2088,7 @@ def context_config(
             "swegen_path": str(cg_dir),
             "swegen_snv": str(cg_dir),
             "swegen_sv": str(cg_dir),
+            "workflow_profile": str(balsamic_dir),
         },
         "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage-hg19.yaml"},
         "chanjo_38": {"binary_path": "echo", "config_path": "chanjo-stage-hg38.yaml"},
