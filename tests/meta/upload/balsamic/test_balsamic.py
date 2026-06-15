@@ -69,6 +69,8 @@ def test_upload_with_case_uploading_to_customer_inbox(cg_config: CGConfig, mocke
     status_db: Store = create_autospec(Store, session=create_autospec(Session))
     status_db.get_latest_completed_analysis_for_case = Mock(return_value=analysis)
     cast(Mock, cg_config).status_db = status_db
+
+    # GIVEN a BalsamicUploadAPI
     balsamic_upload_api = BalsamicUploadAPI(config=cg_config)
     balsamic_upload_api.upload_files_to_customer_inbox = Mock()
     update_uploaded_at_spy = mocker.spy(BalsamicUploadAPI, "update_uploaded_at")
@@ -92,6 +94,8 @@ def test_upload_with_case_not_uploading_to_customer_inbox(
     status_db: Store = create_autospec(Store, session=create_autospec(Session))
     status_db.get_latest_completed_analysis_for_case = Mock(return_value=analysis)
     cast(Mock, cg_config).status_db = status_db
+
+    # GIVEN a BalsamicUploadAPI
     balsamic_upload_api = BalsamicUploadAPI(config=cg_config)
     balsamic_upload_api.upload_files_to_customer_inbox = Mock()
     update_uploaded_at_spy = mocker.spy(BalsamicUploadAPI, "update_uploaded_at")
