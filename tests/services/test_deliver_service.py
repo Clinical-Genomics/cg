@@ -36,6 +36,7 @@ def test_deliver_case_closes_order(mocker: MockerFixture):
         Case,
         analyses=[analysis],
         internal_id="case_id",
+        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
     )
     analysis.case = case
 
@@ -109,6 +110,7 @@ def test_deliver_case_order_is_not_closed(mocker: MockerFixture):
         Case,
         analyses=[uploaded_analysis],
         internal_id="case_ready",
+        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
     )
     uploaded_analysis.case = case_ready
 
@@ -123,6 +125,7 @@ def test_deliver_case_order_is_not_closed(mocker: MockerFixture):
         Case,
         analyses=[not_uploaded_analysis],
         internal_id="case_not_ready",
+        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
     )
 
     # GIVEN an open order with the two cases
@@ -186,6 +189,61 @@ def test_deliver_case_order_is_not_closed(mocker: MockerFixture):
 
     # THEN the ticket is not closed in freshdesk
     freshdesk_client.as_mock.update_ticket.assert_not_called()
+
+
+def test_deliver_case_no_delivery(mocker: MockerFixture):
+    # GIVEN a case with an analysis ready to be delivered but with NO_DELIVERY as data delivery type
+    analysis = create_autospec(
+        Analysis,
+        trailblazer_id=1,
+        uploaded_at=datetime.now(),
+    )
+    case: Case = create_autospec(
+        Case,
+        analyses=[analysis],
+        internal_id="case_id",
+        data_delivery=DataDelivery.NO_DELIVERY,
+    )
+    analysis.case = case
+
+    # GIVEN an open order with the case
+    order: Order = create_autospec(Order, id=1, is_open=True, cases=[case], ticket_id=123)
+    analysis.order = order
+    status_db: Store = create_autospec(Store)
+    status_db.get_uploaded_analyses = Mock(return_value=[analysis])
+
+    # GIVEN a Trailblazer API with the analysis ready to be delivered
+    trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
+    tb_analysis: TrailblazerAnalysis = create_autospec(
+        TrailblazerAnalysis, id=1, delivered=False, case_id="case_id"
+    )
+    trailblazer_api.get_analyses_to_deliver_for_case = Mock(return_value=[tb_analysis])
+
+    # GIVEN a Freshdesk client
+    freshdesk_client: TypedMock[FreshdeskClient] = create_typed_mock(FreshdeskClient)
+
+    # GIVEN a delivery message method
+    delivery_message_mock = mocker.patch.object(deliver_service_module, "get_message")
+
+    # GIVEN a deliver service
+    deliver_service = DeliverService(
+        freshdesk_client=freshdesk_client.as_type,
+        status_db=status_db,
+        trailblazer_api=trailblazer_api,
+    )
+    mark_analyses_spy = mocker.spy(deliver_service.mark_as_delivered_service, "mark_analyses")
+
+    # WHEN delivering the case
+    deliver_service.deliver_case(case_id="case_id", signature="CG")
+
+    # THEN the analysis of the case should be marked as delivered
+    mark_analyses_spy.assert_called_once_with(analyses=[analysis], signature="CG")
+
+    # THEN the delivery message is not generated
+    delivery_message_mock.assert_not_called()
+
+    # THEN the ticket in freshdesk is not closed
+    freshdesk_client.as_mock.get_ticket.assert_not_called()
 
 
 def test_deliver_case_more_than_one_found():
@@ -530,7 +588,10 @@ def test_deliver_all_available_freshdesk_delivery_message_error(mocker: MockerFi
 def test_deliver_all_available_freshdesk_closing_ticket_error(mocker: MockerFixture):
     # GIVEN a store with an analysis to deliver
     status_db: TypedMock[Store] = create_typed_mock(Store)
-    case: Case = create_autospec(Case)
+    case: Case = create_autospec(
+        Case,
+        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
+    )
     analysis_to_deliver = create_autospec(
         Analysis,
         case=case,
@@ -592,11 +653,13 @@ def test_deliver_order_success(mocker: MockerFixture):
         Case,
         internal_id="case_1",
         analyses=[analysis_1],
+        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
     )
     case_2: Case = create_autospec(
         Case,
         internal_id="case_2",
         analyses=[analysis_2],
+        data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT,
     )
     analysis_1.case = case_1
     analysis_2.case = case_2

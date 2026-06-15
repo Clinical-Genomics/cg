@@ -4,6 +4,7 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
+from cg.constants import DataDelivery
 from cg.exc import (
     FreshdeskDeliveryMessageError,
     FreshdeskGetTicketError,
@@ -43,7 +44,7 @@ class DeliverService:
         return all(are_all_orders_delivered)
 
     def deliver_case(self, case_id: str, signature: str):
-        analyses_to_deliver: list[Analysis] = self._get_undelivered_analyses_for_case(case_id)
+        analyses_to_deliver: list[Analysis] = self._get_analyses_to_deliver_for_case(case_id)
         match len(analyses_to_deliver):
             case 0:
                 LOG.warning(f"No analysis found to deliver for case {case_id}.")
@@ -55,14 +56,9 @@ class DeliverService:
 
     def deliver_order(self, ticket_id: int, signature: str):
         order: Order = self.status_db.get_order_by_ticket_id_strict(ticket_id)
-        undelivered_trailblazer_analyses = self.trailblazer_api.get_analyses_to_deliver_for_order(
-            order.id
-        )
-        uploaded_analyses_to_deliver = self.status_db.get_uploaded_analyses(
-            [analysis.id for analysis in undelivered_trailblazer_analyses]
-        )
-        if uploaded_analyses_to_deliver:
-            self._deliver(order=order, analyses=uploaded_analyses_to_deliver, signature=signature)
+        analyses_to_deliver: list[Analysis] = self._get_analyses_to_deliver_for_order(order)
+        if analyses_to_deliver:
+            self._deliver(order=order, analyses=analyses_to_deliver, signature=signature)
         else:
             LOG.warning("No analysis in the order ready to deliver")
 
@@ -73,8 +69,9 @@ class DeliverService:
         try:
             self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
             self.mark_as_delivered_service.close_order_in_status_db_if_closable(order)
-            self._freshdesk_send_delivery_message(order=order, analyses=analyses)
-            self._freshdesk_close_ticket_if_open(order=order)
+            if not self._is_order_no_delivery(order):
+                self._freshdesk_send_delivery_message(order=order, analyses=analyses)
+                self._freshdesk_close_ticket_if_open(order=order)
         except TrailblazerAnalysisDeliveryError as error:
             self.status_db.rollback()
             LOG.error(f"Failed to mark analyses as delivered in Trailblazer for order {order.id}")
@@ -96,7 +93,7 @@ class DeliverService:
             self.status_db.commit_to_store()
             return True
 
-    def _get_undelivered_analyses_for_case(self, case_id: str) -> list[Analysis]:
+    def _get_analyses_to_deliver_for_case(self, case_id: str) -> list[Analysis]:
         undelivered_trailblazer_analyses: list[TrailblazerAnalysis] = (
             self.trailblazer_api.get_analyses_to_deliver_for_case(case_id)
         )
@@ -105,6 +102,15 @@ class DeliverService:
             undelivered_trailblazer_ids
         )
         return analyses_to_deliver
+
+    def _get_analyses_to_deliver_for_order(self, order: Order) -> list[Analysis]:
+        undelivered_trailblazer_analyses = self.trailblazer_api.get_analyses_to_deliver_for_order(
+            order.id
+        )
+        uploaded_analyses_to_deliver = self.status_db.get_uploaded_analyses(
+            [analysis.id for analysis in undelivered_trailblazer_analyses]
+        )
+        return uploaded_analyses_to_deliver
 
     def _get_order_analyses_dictionary(self) -> dict[Order, list[Analysis]]:
         """
@@ -125,6 +131,10 @@ class DeliverService:
             else:
                 order_analyses[analysis.order] = [analysis]
         return order_analyses
+
+    @staticmethod
+    def _is_order_no_delivery(order: Order) -> bool:
+        return order.cases[0].data_delivery == DataDelivery.NO_DELIVERY
 
     def _freshdesk_send_delivery_message(self, order: Order, analyses: list[Analysis]):
         cases: list[Case] = [analysis.case for analysis in analyses]
