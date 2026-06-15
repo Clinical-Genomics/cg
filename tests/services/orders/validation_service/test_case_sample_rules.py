@@ -25,6 +25,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     SampleNameSameAsCaseNameError,
     SampleOutsideOfCollaborationError,
     SexSubjectIdError,
+    SexUnknownWarning,
     StatusUnknownError,
     SubjectIdSameAsCaseNameError,
     SubjectIdSameAsSampleNameError,
@@ -73,6 +74,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_well_position_format,
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
+    warn_if_sex_unknown,
 )
 from cg.store.models import Application, OrderTypeApplication, Sample
 from cg.store.store import Store
@@ -793,3 +795,26 @@ def test_tumour_value_reset():
 
     # THEN the sample should have tumour status True
     assert rna_fusion_sample.tumour
+
+
+def test_warn_if_sex_unknown_returns_warning_in_tomte_order(tomte_order):
+    # GIVEN a sample with unknown sex
+    tomte_order.cases[0].samples[0].sex = SexEnum.unknown
+
+    # WHEN validating the sample sex
+    warnings = warn_if_sex_unknown(order=tomte_order)
+
+    # THEN a warning is returned for that sample
+    assert len(warnings) == 1
+
+    # THEN the warning should be a sex unknown warning
+    assert isinstance(warnings[0], SexUnknownWarning)
+
+    # THEN the warning should point to the first case
+    assert warnings[0].case_index == 0
+
+    # THEN the warning should point to the first sample in the case
+    assert warnings[0].sample_index == 0
+
+    # THEN the warning should be attached to the warnings field
+    assert warnings[0].field == "warnings"

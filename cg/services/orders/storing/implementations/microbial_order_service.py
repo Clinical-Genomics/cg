@@ -33,12 +33,12 @@ class StoreMicrobialOrderService(StoreOrderService):
     """
 
     def __init__(self, status_db: Store, lims_service: OrderLimsService):
-        self.status = status_db
+        self.status_db = status_db
         self.lims = lims_service
 
     def store_order(self, order: MicrobialOrder) -> dict:
         self._fill_in_sample_verified_organism(order.samples)
-        project_data, lims_map = self.lims.process_lims(
+        project_data, lims_samples = self.lims.process_lims(
             samples=order.samples,
             customer=order.customer,
             ticket=order._generated_ticket_id,
@@ -47,23 +47,23 @@ class StoreMicrobialOrderService(StoreOrderService):
             delivery_type=DataDelivery(order.delivery_type),
             skip_reception_control=order.skip_reception_control,
         )
-        self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
-
+        self._fill_in_sample_ids(samples=order.samples, lims_samples=lims_samples)
+        self._queue_samples_in_workflow(lims_samples)
         samples = self.store_order_data_in_status_db(order)
         return {"project": project_data, "records": samples}
 
     def store_order_data_in_status_db(self, order: MicrobialOrder) -> list[DbSample]:
         """Store microbial samples in the status database."""
 
-        customer: Customer = self.status.get_customer_by_internal_id(order.customer)
+        customer: Customer = self.status_db.get_customer_by_internal_id(order.customer)
         new_samples = []
-        db_order: DbOrder = self.status.add_order(
+        db_order: DbOrder = self.status_db.add_order(
             customer=customer,
             ticket_id=order._generated_ticket_id,
         )
         db_case: DbCase = self._create_case(customer=customer, order=order)
 
-        with self.status.no_autoflush_context():
+        with self.status_db.no_autoflush_context():
             for sample in order.samples:
                 organism: Organism = self._ensure_organism(sample)
                 db_sample = self._create_db_sample(
@@ -73,31 +73,31 @@ class StoreMicrobialOrderService(StoreOrderService):
                     sample=sample,
                     ticket_id=order._generated_ticket_id,
                 )
-                link: CaseSample = self.status.relate_sample(
+                link: CaseSample = self.status_db.relate_sample(
                     case=db_case, sample=db_sample, status="unknown", should_deliver_sample=True
                 )
-                self.status.add_item_to_store(link)
+                self.status_db.add_item_to_store(link)
                 new_samples.append(db_sample)
             db_order.cases.append(db_case)
 
-        self.status.add_item_to_store(db_case)
-        self.status.add_item_to_store(db_order)
-        self.status.add_multiple_items_to_store(new_samples)
-        self.status.commit_to_store()
+        self.status_db.add_item_to_store(db_case)
+        self.status_db.add_item_to_store(db_order)
+        self.status_db.add_multiple_items_to_store(new_samples)
+        self.status_db.commit_to_store()
         return new_samples
 
     def _fill_in_sample_verified_organism(self, samples: list[MicrobialSample]):
         for sample in samples:
             organism_id = sample.organism
             reference_genome = sample.reference_genome
-            organism: Organism = self.status.get_organism_by_internal_id(internal_id=organism_id)
+            organism: Organism = self.status_db.get_organism_by_internal_id(internal_id=organism_id)
             is_verified: bool = (
                 organism and organism.reference_genome == reference_genome and organism.verified
             )
             sample._verified_organism = is_verified
 
     def _create_case(self, customer: Customer, order: MicrobialOrder) -> DbCase:
-        case: DbCase = self.status.add_case(
+        case: DbCase = self.status_db.add_case(
             data_analysis=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
             data_delivery=DataDelivery(order.delivery_type),
             name=str(order._generated_ticket_id),
@@ -109,15 +109,15 @@ class StoreMicrobialOrderService(StoreOrderService):
         return case
 
     def _ensure_organism(self, sample: MicrobialSample) -> Organism:
-        organism: Organism = self.status.get_organism_by_internal_id(sample.organism)
+        organism: Organism = self.status_db.get_organism_by_internal_id(sample.organism)
         if not organism:
-            organism: Organism = self.status.add_organism(
+            organism: Organism = self.status_db.add_organism(
                 internal_id=sample.organism,
                 name=sample.organism,
                 reference_genome=sample.reference_genome,
             )
-            self.status.add_item_to_store(organism)
-            self.status.commit_to_store()
+            self.status_db.add_item_to_store(organism)
+            self.status_db.commit_to_store()
         return organism
 
     def _create_db_sample(
@@ -130,12 +130,12 @@ class StoreMicrobialOrderService(StoreOrderService):
     ) -> DbSample:
         application_tag: str = sample.application
         application_version: ApplicationVersion = (
-            self.status.get_current_application_version_by_tag(tag=application_tag)
+            self.status_db.get_current_application_version_by_tag(tag=application_tag)
         )
         lims_status: LimsStatus = (
             LimsStatus.DONE if application_version.application.is_external else LimsStatus.PENDING
         )
-        return self.status.add_sample(
+        return self.status_db.add_sample(
             application_version=application_version,
             comment=sample.comment,
             control=sample.control,
