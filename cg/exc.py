@@ -230,6 +230,10 @@ class ScoutUploadError(CgError):
     """Raised when uploading to Scout fails."""
 
 
+class ScoutExportError(CgError):
+    """Raised when exporting from Scout fails."""
+
+
 class StatinaAPIHTTPError(CgError):
     """Raised when Statina REST API response code is not 200."""
 
