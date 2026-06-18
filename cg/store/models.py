@@ -530,6 +530,10 @@ class Case(Base, PriorityMixin):
         return self.tickets.split(sep=",")[-1] if self.tickets else None
 
     @property
+    def is_to_be_uploaded_to_customer_inbox(self) -> bool:
+        return not DataDelivery(self.data_delivery).excludes_customer_inbox_delivery
+
+    @property
     def original_order(self) -> "Order | None":
         if not self.orders:
             return None
