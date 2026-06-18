@@ -74,10 +74,10 @@ class FreshdeskClient:
 
     def update_ticket(self, ticket_id: int, status: int) -> TicketResponse:
         url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}"
-        data = {"status": status}
-        LOG.debug(f"URL={url}; JSON={data}")
+        json = {"status": status}
+        LOG.debug(f"URL={url}; JSON={json}")
         try:
-            response = self.session.put(url=url, data=data)
+            response = self.session.put(url=url, json=json)
             response.raise_for_status()
             return TicketResponse.model_validate(response.json()["ticket"])
         except HTTPError as error:
@@ -86,10 +86,10 @@ class FreshdeskClient:
     def reply_to_ticket(self, ticket_id: int, message: str) -> None:
         """Send a reply to an existing ticket in Freshdesk."""
         url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}/reply"
-        data = {"body": message}
-        LOG.debug(f"URL={url}; JSON={data}")
+        json = {"body": message}
+        LOG.debug(f"URL={url}; JSON={json}")
         try:
-            response = self.session.post(url=url, data=data)
+            response = self.session.post(url=url, json=json)
             response.raise_for_status()
         except HTTPError as error:
             raise FreshdeskDeliveryMessageError from error
