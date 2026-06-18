@@ -1,7 +1,8 @@
+from html import escape
 from http import HTTPStatus
 from pathlib import Path
 
-from requests import HTTPError, Response, Session
+from requests import HTTPError, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
@@ -81,8 +82,9 @@ class FreshdeskClient:
     def reply_to_ticket(self, ticket_id: int, message: str) -> None:
         """Send a reply to an existing ticket in Freshdesk."""
         url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}/reply"
+        html_body = escape(message).replace("\n", "<br>")
         try:
-            response = self.session.post(url=url, data={"body": message})
+            response = self.session.post(url=url, data={"body": html_body})
             response.raise_for_status()
         except HTTPError as error:
             raise FreshdeskDeliveryMessageError from error
