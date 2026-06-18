@@ -1,7 +1,8 @@
+import logging
 from http import HTTPStatus
 from pathlib import Path
 
-from requests import HTTPError, Response, Session
+from requests import HTTPError, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
@@ -13,6 +14,8 @@ from cg.exc import (
     FreshdeskGetTicketError,
     FreshdeskUpdateTicketError,
 )
+
+LOG = logging.getLogger(__name__)
 
 
 class FreshdeskClient:
@@ -60,19 +63,21 @@ class FreshdeskClient:
         session.mount("https://", adapter)
 
     def get_ticket(self, ticket_id: int) -> TicketResponse:
+        url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}"
+        LOG.debug(f"URL={url}")
         try:
-            response = self.session.get(url=f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}")
+            response = self.session.get(url=url)
             response.raise_for_status()
             return TicketResponse.model_validate(response.json()["ticket"])
         except HTTPError as error:
             raise FreshdeskGetTicketError from error
 
     def update_ticket(self, ticket_id: int, status: int) -> TicketResponse:
-        data = {"status": status}
+        url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}"
+        json = {"status": status}
+        LOG.debug(f"URL={url}; JSON={json}")
         try:
-            response = self.session.put(
-                url=f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}", data=data
-            )
+            response = self.session.put(url=url, json=json)
             response.raise_for_status()
             return TicketResponse.model_validate(response.json()["ticket"])
         except HTTPError as error:
@@ -81,8 +86,10 @@ class FreshdeskClient:
     def reply_to_ticket(self, ticket_id: int, message: str) -> None:
         """Send a reply to an existing ticket in Freshdesk."""
         url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}/reply"
+        json = {"body": message}
+        LOG.debug(f"URL={url}; JSON={json}")
         try:
-            response = self.session.post(url=url, data={"body": message})
+            response = self.session.post(url=url, json=json)
             response.raise_for_status()
         except HTTPError as error:
             raise FreshdeskDeliveryMessageError from error

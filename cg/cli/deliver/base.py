@@ -55,7 +55,6 @@ def deliver_case(config: CGConfig, case_id: str, signature: str):
         trailblazer_api=config.trailblazer_api,
     )
     deliver_service.deliver_case(case_id=case_id, signature=signature)
-    config.status_db.commit_to_store()
 
 
 @deliver.command(name="order")

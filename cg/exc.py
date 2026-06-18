@@ -230,6 +230,10 @@ class ScoutUploadError(CgError):
     """Raised when uploading to Scout fails."""
 
 
+class ScoutExportError(CgError):
+    """Raised when exporting from Scout fails."""
+
+
 class StatinaAPIHTTPError(CgError):
     """Raised when Statina REST API response code is not 200."""
 
@@ -371,6 +375,20 @@ class MultipleCaptureKitsError(CgError):
 
 class ApplicationDoesNotHaveHiFiYieldError(CgError):
     """Exception raised when application does not have HiFi yield set."""
+
+
+class MissingLimsUdfError(CgError):
+    """Exception raised when the UDF of a genologics LIMS object can not be read."""
+
+
+class LimsWorkflowRoutingError(CgError):
+    """Exception raised when failing to route LIMS artifacts to a specified workflow."""
+
+
+class ApplicationTagNotFoundError(CgError):
+    """
+    Exception raised when an application is not found.
+    """
 
 
 class MultipleAnalysesToDeliverError(CgError):

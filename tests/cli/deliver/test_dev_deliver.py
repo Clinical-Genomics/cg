@@ -39,9 +39,6 @@ def test_deliver_case_success(mocker: MockerFixture):
     # THEN the delivery service is called with the expected arguments
     deliver_case_command.assert_called_once_with(ANY, case_id="case_id", signature="CG")
 
-    # THEN the changes were persisted in the database
-    status_db.as_mock.commit_to_store.assert_called_once()
-
 
 def test_deliver_case_no_case_id():
     # GIVEN a store and a CG config
@@ -61,9 +58,6 @@ def test_deliver_case_no_case_id():
     # THEN the command failed
     assert result.exit_code == EXIT_PARSE_ERROR
 
-    # THEN the changes were NOT persisted in the database
-    status_db.as_mock.commit_to_store.assert_not_called()
-
 
 def test_deliver_case_no_signature():
     # GIVEN a store and a CG config
@@ -82,9 +76,6 @@ def test_deliver_case_no_signature():
 
     # THEN the command failed
     assert result.exit_code == EXIT_PARSE_ERROR
-
-    # THEN the changes were NOT persistent in the database
-    status_db.as_mock.commit_to_store.assert_not_called()
 
 
 def test_deliver_case_raises_error(mocker: MockerFixture):
@@ -107,9 +98,6 @@ def test_deliver_case_raises_error(mocker: MockerFixture):
 
     # THEN the command failed due to service error
     assert result.exit_code == EXIT_FAIL
-
-    # THEN the changes were NOT persistent in the database
-    status_db.as_mock.commit_to_store.assert_not_called()
 
 
 def test_deliver_order_success(mocker: MockerFixture):
