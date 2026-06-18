@@ -156,7 +156,7 @@ def test_reply_to_ticket_success(mocker: MockerFixture):
     # THEN a reply was sent to the ticket
     mocked_post.assert_called_once_with(
         url="https://example.freshdesk.com/api/v2/tickets/123/reply",
-        data={"body": "Reply to ticket"},
+        json={"body": "Reply to ticket"},
     )
 
 
