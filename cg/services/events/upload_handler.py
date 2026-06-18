@@ -27,6 +27,7 @@ def completed(status_db: Store, trailblazer_api: TrailblazerAPI):
             LOG.error(f"Failed to update analysis uploaded_at for analysis with id {analysis_id}")
             LOG.error(f"Failed to handle message {message}.")
             LOG.exception(error)
+            status_db.rollback()
             raise error
 
     return handler

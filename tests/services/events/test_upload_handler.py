@@ -49,7 +49,10 @@ def test_completed_missing_analysis():
     store.update_analysis_uploaded_at = Mock(side_effect=Exception)
 
     # WHEN a completed message is received
-    # THEN it lets the exception propagate
+    # THEN the exception is propagated
     completed_handler = completed(status_db=store, trailblazer_api=create_autospec(TrailblazerAPI))
     with pytest.raises(Exception):
         completed_handler(message)
+
+    # THEN any database changes are rolled back
+    store.rollback.assert_called_once()
