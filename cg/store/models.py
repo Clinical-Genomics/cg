@@ -11,11 +11,13 @@ from sqlalchemy import (
     Column,
     ForeignKey,
     Numeric,
+    SQLColumnExpression,
     String,
     Table,
 )
 from sqlalchemy import Text as SLQText
-from sqlalchemy import UniqueConstraint, orm, types
+from sqlalchemy import UniqueConstraint, orm, select, types
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
@@ -181,6 +183,7 @@ class Application(Base):
         "OrderTypeApplication",
         back_populates="application",
     )
+    lims_workflow_id: Mapped[int | None]
 
     @property
     def order_types(self) -> list[OrderType]:
@@ -525,6 +528,10 @@ class Case(Base, PriorityMixin):
     def latest_ticket(self) -> str | None:
         """Returns the last ticket the family was ordered in"""
         return self.tickets.split(sep=",")[-1] if self.tickets else None
+
+    @property
+    def is_to_be_uploaded_to_customer_inbox(self) -> bool:
+        return not DataDelivery(self.data_delivery).excludes_customer_inbox_delivery
 
     @property
     def original_order(self) -> "Order | None":
@@ -902,21 +909,74 @@ class Sample(Base, PriorityMixin):
         else:
             return None
 
-    @property
-    def workflow_of_case_that_delivers(self) -> Workflow | None:
+    @hybrid_property
+    def delivering_case_internal_id(self) -> str | None:  # pyright: ignore [reportRedeclaration]
+        if case := self.case_that_delivers:
+            return case.internal_id
+        return None
+
+    # noinspection PyNestedDecorators
+    @delivering_case_internal_id.expression
+    @classmethod
+    def delivering_case_internal_id(cls) -> SQLColumnExpression[str]:
+        return (
+            select(Case.internal_id)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .limit(1)
+            .label("delivering_case_internal_id")
+        )
+
+    @hybrid_property
+    def workflow_of_case_that_delivers(  # pyright: ignore [reportRedeclaration]
+        self,
+    ) -> Workflow | None:
         """Return the workflow of the original case if the case exists."""
         if case := self.case_that_delivers:
             return case.data_analysis
         else:
             return None
 
-    @property
-    def ticket_id_from_original_order(self) -> int | None:
-        """Return the original ticket id of the delivering case if it is linked to any ticket."""
+    # noinspection PyNestedDecorators
+    @workflow_of_case_that_delivers.expression
+    @classmethod
+    def workflow_of_case_that_delivers(cls) -> SQLColumnExpression[Workflow]:
+        return (
+            select(Case.data_analysis)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .limit(1)
+            .label("workflow_of_case_that_delivers")
+        )
+
+    @hybrid_property
+    def ticket_id_from_original_order(self) -> int | None:  # pyright: ignore [reportRedeclaration]
         if self.case_that_delivers and self.case_that_delivers.original_order:
             return self.case_that_delivers.original_order.ticket_id
-        else:
-            return None
+        return None
+
+    # noinspection PyNestedDecorators
+    @ticket_id_from_original_order.expression
+    @classmethod
+    def ticket_id_from_original_order(cls) -> SQLColumnExpression[int]:
+        return (
+            select(Order.ticket_id)
+            .join(Order.cases)
+            .join(CaseSample, CaseSample.case_id == Case.id)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .order_by(Order.order_date.asc())
+            .limit(1)
+            .label("ticket_id_from_original_order")
+        )
 
     def to_dict(self, links: bool = False) -> dict:
         """Represent as dictionary"""
@@ -1232,7 +1292,7 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
     hifi_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
     hifi_median_read_quality: Mapped[Str32]
-    polymerase_mean_read_length: Mapped[BigInt]
+    polymerase_mean_read_length: Mapped[BigInt | None]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
     instrument_run = orm.relationship(PacbioSMRTCellMetrics, back_populates="sample_metrics")

@@ -21,6 +21,7 @@ from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
     AnalysisNotCompletedError,
+    ApplicationTagNotFoundError,
     BedVersionNotFoundError,
     CaseNotFoundError,
     CgDataError,
@@ -31,7 +32,11 @@ from cg.exc import (
 )
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import SexEnum
-from cg.server.dto.samples.requests import CollaboratorSamplesRequest
+from cg.server.dto.samples.requests import (
+    CollaboratorSamplesRequest,
+    SortDirection,
+    UnhandledSamplesSortBy,
+)
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.api.data_classes import RNADNACollection
 from cg.store.base import BaseHandler
@@ -861,12 +866,30 @@ class ReadHandler(BaseHandler):
         return bool(self.get_sample_by_internal_id(sample_id))
 
     def get_application_by_tag(self, tag: str) -> Application | None:
-        """Return an application by tag."""
+        """Return an application by tag or None."""
         return apply_application_filter(
             applications=self._get_query(table=Application),
             filter_functions=[ApplicationFilter.BY_TAG],
             tag=tag,
         ).first()
+
+    def get_application_by_tag_strict(self, tag: str) -> Application:
+        """Return an application by tag."""
+        try:
+            return apply_application_filter(
+                applications=self._get_query(table=Application),
+                filter_functions=[ApplicationFilter.BY_TAG],
+                tag=tag,
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise ApplicationTagNotFoundError(
+                f"Application with tag '{tag}' was not found in the database."
+            )
+
+    def get_lims_workflow_id_by_application_tag(self, tag: str) -> int | None:
+        """Return the LIMS workflow ID for an application by tag."""
+        application = self.get_application_by_tag_strict(tag=tag)
+        return application.lims_workflow_id
 
     def get_applications_is_not_archived(self) -> list[Application]:
         """Return applications that are not archived."""
@@ -1509,6 +1532,18 @@ class ReadHandler(BaseHandler):
         )
         return orders.first()
 
+    def get_order_by_ticket_id_strict(self, ticket_id: int) -> Order:
+        """
+        Returns the entry in Order matching the given ticket id.
+        Raises:
+            OrderNotFoundError: If no order is found with the given ticket id.
+        """
+        orders: Query = self._get_query(table=Order).filter_by(ticket_id=ticket_id)
+        if order := orders.first():
+            return order
+        else:
+            raise OrderNotFoundError(f"Order with ticket ID {ticket_id} not found.")
+
     def get_case_not_received_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
         filters: list[CaseSampleFilter] = [
             CaseSampleFilter.BY_ORDER,
@@ -1891,25 +1926,40 @@ class ReadHandler(BaseHandler):
     def get_paginated_unhandled_samples(
         self,
         lims_status: LimsStatus,
-        search: str | None,
         page: int,
         page_size: int,
+        search: str | None = None,
+        sort_by: UnhandledSamplesSortBy | None = None,
+        sort_order: SortDirection | None = None,
+        workflow: Workflow | None = None,
     ) -> tuple[list[Sample], int]:
         unhandled_samples: Query = self._get_unhandled_samples(
-            lims_status=lims_status, search=search
+            lims_status=lims_status,
+            search=search,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            workflow=workflow,
         )
         return _paginate(query=unhandled_samples, page=page, page_size=page_size)
 
-    def _get_unhandled_samples(self, lims_status: LimsStatus, search: str | None) -> Query:
+    def _get_unhandled_samples(
+        self,
+        lims_status: LimsStatus,
+        search: str | None = None,
+        sort_by: UnhandledSamplesSortBy | None = None,
+        sort_order: SortDirection | None = None,
+        workflow: Workflow | None = None,
+    ) -> Query:
         """
         Return samples with the given lims_status that:
-        - Are not downsampled
-        - Are not cancelled
-        - Are not delivered
-        - Have been sequenced (last_sequenced_at is not null)
-        - Do not belong to the internal customers
-        - Ordered by last sequenced date, with the oldest first
-        - Optional filtering by search string
+            - Are not downsampled
+            - Are not cancelled
+            - Are not delivered
+            - Have been sequenced (last_sequenced_at is not null)
+            - Do not belong to the internal customers
+            - Ordered by last sequenced date, with the oldest first
+            - Optional filtering by search string
+            - Optional filtering by workflow
         """
         query = (
             self._get_query(table=Sample)
@@ -1925,20 +1975,35 @@ class ReadHandler(BaseHandler):
             )
         )
 
+        if sort_by == UnhandledSamplesSortBy.TICKET:
+            desc: bool = sort_order == SortDirection.DESCENDING
+            sort_column = Sample.ticket_id_from_original_order
+            query = query.order_by(sort_column.desc() if desc else sort_column.asc())
+        else:
+            query = query.order_by(Sample.last_sequenced_at.asc())
+
         if search:
-            query = (
-                query.join(CaseSample, CaseSample.sample_id == Sample.id)
-                .join(Case, Case.id == CaseSample.case_id)
-                .filter(
-                    CaseSample.should_deliver_sample.is_(True),
-                    sqlalchemy.or_(
-                        Case.internal_id.ilike(f"%{search}%"),
-                        Sample.internal_id.ilike(f"%{search}%"),
-                    ),
-                )
+            query = query.filter(
+                sqlalchemy.or_(
+                    Sample.delivering_case_internal_id.ilike(f"%{search}%"),
+                    Sample.internal_id.ilike(f"%{search}%"),
+                ),
             )
 
-        return query.order_by(Sample.last_sequenced_at.asc())
+        if workflow:
+            query = query.filter(Sample.workflow_of_case_that_delivers == workflow)
+
+        return query
+
+    def get_uploaded_analyses(self, trailblazer_ids: list[int]) -> list[Analysis]:
+        return (
+            self._get_query(table=Analysis)
+            .filter(
+                Analysis.trailblazer_id.in_(trailblazer_ids),
+                Analysis.uploaded_at.is_not(None),
+            )
+            .all()
+        )
 
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:

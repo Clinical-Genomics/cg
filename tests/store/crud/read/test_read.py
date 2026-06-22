@@ -8,7 +8,7 @@ from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import BedVersionGenomeVersion, CaseActions, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
-from cg.exc import BedVersionNotFoundError, CgError
+from cg.exc import ApplicationTagNotFoundError, BedVersionNotFoundError, CgError
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.models import (
     Analysis,
@@ -115,11 +115,22 @@ def test_get_application_by_tag(microbial_store: Store, tag: str = "MWRNXTR003")
 
     # GIVEN a store with application records
 
-    # WHEN getting the query for the flow cells
+    # WHEN getting an application by tag
     application: Application = microbial_store.get_application_by_tag(tag=tag)
 
-    # THEN return a application with the supplied application tag
+    # THEN return an application with the supplied application tag
     assert application.tag == tag
+
+
+def test_get_application_by_tag_strict_fails(microbial_store: Store, tag: str = "SILLYAPPTAG01"):
+    """Test function to return the application by tag, strict."""
+
+    # GIVEN a store with application records
+
+    # WHEN strictly getting an application by a tag with no application
+    with pytest.raises(ApplicationTagNotFoundError):
+        # THEN the correct error is raised
+        microbial_store.get_application_by_tag_strict(tag=tag)
 
 
 def test_get_applications_is_not_archived(

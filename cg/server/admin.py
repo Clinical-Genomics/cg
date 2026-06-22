@@ -277,6 +277,7 @@ class ApplicationView(BaseView):
         "sample_concentration_maximum_cfdna",
         "priority_processing",
         "is_archived",
+        "lims_workflow_id",
     ]
     column_exclude_list = [
         "minimum_order",

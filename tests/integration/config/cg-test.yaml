@@ -9,6 +9,21 @@ email_base_settings:
   sender_email: "integration-tests@scilifelab.se"
   smtp_server: "localhost"
 
+nats:
+  server: nats://localhost/nats
+  stream: cg-test
+  nats_binary_path: {test_root_dir}/publisher/nats_binary_path
+  listener:
+    ca_cert_path: {test_root_dir}/listener/ca.crt
+    client_cert_path: {test_root_dir}/listener/client.crt
+    client_key_path: {test_root_dir}/listener/client.key
+    token_path: {test_root_dir}/listener/token
+  publisher:
+    ca_cert_path: {test_root_dir}/publisher/ca.crt
+    client_cert_path: {test_root_dir}/publisher/client.crt
+    client_key_path: {test_root_dir}/publisher/client.key
+    token_path: {test_root_dir}/publisher/token
+
 downsample:
   downsample_dir: "{test_root_dir}/downsample_dir"
   downsample_script: "{test_root_dir}/downsample_script"
@@ -90,6 +105,7 @@ balsamic:
     account: "balsamic_slurm_account"
     mail_user: "balsamic_mail_user@scilifelab.se"
     qos: "low"
+  workflow_profile: "{test_root_dir}/balsamic"
 crunchy:
   conda_binary: "{test_root_dir}/crunchy_conda_binary"
   cram_reference: "{test_root_dir}/crunchy_cram_reference"

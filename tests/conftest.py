@@ -407,6 +407,23 @@ def base_config_dict() -> dict:
                 "demultiplexed_runs_dir": "path/to/demultiplexed_flow_cells_dir",
             },
         },
+        "nats": {
+            "server": "https://nats.scilifelab.se",
+            "stream": "cg-test",
+            "nats_binary_path": Path("nats_binary_path"),
+            "listener": {
+                "ca_cert_path": Path("ca_cert_path"),
+                "client_cert_path": Path("client_cert_path"),
+                "client_key_path": Path("client_key_path"),
+                "token_path": Path("event_listener_token"),
+            },
+            "publisher": {
+                "ca_cert_path": Path("ca_cert_path"),
+                "client_cert_path": Path("client_cert_path"),
+                "client_key_path": Path("client_key_path"),
+                "token_path": Path("event_listener_token"),
+            },
+        },
         "downsample": {
             "downsample_dir": "path/to/downsample_dir",
             "downsample_script": "downsample.sh",
@@ -1986,6 +2003,23 @@ def context_config(
                 "demultiplexed_runs_dir": str(illumina_demultiplexed_runs_directory),
             },
         },
+        "nats": {
+            "server": "https://nats.scilifelab.se",
+            "stream": "cg-test",
+            "nats_binary_path": Path("nats_binary_path"),
+            "publisher": {
+                "ca_cert_path": Path("ca_cert_path"),
+                "client_cert_path": Path("client_cert_path"),
+                "client_key_path": Path("client_key_path"),
+                "token_path": Path("event_listener_token"),
+            },
+            "listener": {
+                "ca_cert_path": Path("ca_cert_path"),
+                "client_cert_path": Path("client_cert_path"),
+                "client_key_path": Path("client_key_path"),
+                "token_path": Path("event_listener_token"),
+            },
+        },
         "downsample": {
             "downsample_dir": str(downsample_dir),
             "downsample_script": "downsample.sh",
@@ -2054,6 +2088,7 @@ def context_config(
             "swegen_path": str(cg_dir),
             "swegen_snv": str(cg_dir),
             "swegen_sv": str(cg_dir),
+            "workflow_profile": str(balsamic_dir),
         },
         "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage-hg19.yaml"},
         "chanjo_38": {"binary_path": "echo", "config_path": "chanjo-stage-hg38.yaml"},

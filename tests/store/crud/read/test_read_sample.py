@@ -6,12 +6,16 @@ from typing import Any
 import pytest
 from sqlalchemy.orm import Query
 
-from cg.constants import SexOptions
+from cg.constants import SexOptions, Workflow
 from cg.constants.lims import LimsStatus
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import SampleNotFoundError
 from cg.models.orders.constants import OrderType
-from cg.server.dto.samples.requests import CollaboratorSamplesRequest
+from cg.server.dto.samples.requests import (
+    CollaboratorSamplesRequest,
+    SortDirection,
+    UnhandledSamplesSortBy,
+)
 from cg.store.models import Case, Customer, Invoice, OrderTypeApplication, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -829,6 +833,132 @@ def test_get_unhandled_samples_filters_out_internal_samples(store: Store, helper
     assert unhandled_samples.all() == [external_sample]
 
 
+def test_get_unhandled_samples_filters_on_workflow(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with one raredisease case and a non raredisease case
+    raredisease_sample = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="raredisease_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    non_raredisease_sample = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="non_raredisease_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    raredisease_case = helpers.add_case(
+        store=store,
+        internal_id="raredisease_case",
+        name="raredisease_case",
+        data_analysis=Workflow.RAREDISEASE,
+    )
+    non_raredisease_case = helpers.add_case(
+        store=store,
+        internal_id="non_raredisease_case",
+        name="non_raredisease_case",
+        data_analysis=Workflow.MIP_DNA,
+    )
+
+    helpers.add_relationship(
+        store=store, sample=raredisease_sample, case=raredisease_case, should_deliver_sample=True
+    )
+    helpers.add_relationship(
+        store=store,
+        sample=non_raredisease_sample,
+        case=non_raredisease_case,
+        should_deliver_sample=True,
+    )
+
+    # WHEN getting the unhandled samples in top-up and workflow raredisease
+    unhandled_samples: Query = store._get_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP,
+        workflow=Workflow.RAREDISEASE,
+    )
+
+    # THEN only the raredisease sample is returned
+    assert unhandled_samples.all() == [raredisease_sample]
+
+
+def test_get_paginated_unhandled_samples_sort_by_ticket(store: Store, helpers: StoreHelpers):
+    # GIVEN two unhandled samples whose delivering cases belong to orders with different tickets
+    sample_in_ticket_1 = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="unhandled_ticket_1_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    sample_in_ticket_2 = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="unhandled_ticket_2_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    case_in_ticket_1 = helpers.add_case(store=store, name="case_1", internal_id="case_1")
+    case_in_ticket_2 = helpers.add_case(store=store, name="case_2", internal_id="case_2")
+
+    helpers.add_relationship(
+        store=store, sample=sample_in_ticket_1, case=case_in_ticket_1, should_deliver_sample=True
+    )
+    helpers.add_relationship(
+        store=store, sample=sample_in_ticket_2, case=case_in_ticket_2, should_deliver_sample=True
+    )
+
+    order_in_ticket_1 = helpers.add_order(
+        store=store, customer_id=case_in_ticket_1.customer_id, ticket_id=1
+    )
+    order_in_ticket_2 = helpers.add_order(
+        store=store, customer_id=case_in_ticket_2.customer_id, ticket_id=2
+    )
+    case_in_ticket_1.orders.append(order_in_ticket_1)
+    case_in_ticket_2.orders.append(order_in_ticket_2)
+    store.session.commit()
+
+    # WHEN getting the unhandled samples sorted by ticket ascending
+    unhandled_samples_asc, _ = store.get_paginated_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP,
+        search=None,
+        page=1,
+        page_size=10,
+        sort_by=UnhandledSamplesSortBy.TICKET,
+        sort_order=SortDirection.ASCENDING,
+    )
+
+    # WHEN getting the unhandled samples sorted by ticket descending
+    unhandled_samples_desc, _ = store.get_paginated_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP,
+        search=None,
+        page=1,
+        page_size=10,
+        sort_by=UnhandledSamplesSortBy.TICKET,
+        sort_order=SortDirection.DESCENDING,
+    )
+
+    # THEN ascending list is as expected - lower ticket id comes first
+    assert unhandled_samples_asc == [sample_in_ticket_1, sample_in_ticket_2]
+
+    # THEN descending list is as expected - higher ticket id comes first
+    assert unhandled_samples_desc == [sample_in_ticket_2, sample_in_ticket_1]
+
+
 def test_get_paginated_unhandled_samples(store: Store, helpers: StoreHelpers):
     # GIVEN a store with two unhandled samples
     sample_new = helpers.add_sample(
@@ -976,17 +1106,18 @@ def test_get_paginated_unhandled_samples_search_no_hits(
 def test_get_paginated_unhandled_samples_search_no_should_deliver_sample(
     store: Store, helpers: StoreHelpers
 ):
-    # GIVEN a store with a sample and a case that both have an id matching the search string
+    # GIVEN a store with a sample whose internal_id does NOT match the search string
     sample = helpers.add_sample(
         store=store,
         lims_status=LimsStatus.TOP_UP,
-        internal_id="matching_search_string",
+        internal_id="sample_not_hit",
         is_cancelled=False,
         from_sample=None,
         last_sequenced_at=datetime.now(),
         delivered_at=None,
         customer_id="cust1337",
     )
+    # GIVEN a case whose internal_id matches the search string
     case: Case = helpers.add_case(
         store=store,
         name="case_1",
@@ -1001,7 +1132,7 @@ def test_get_paginated_unhandled_samples_search_no_should_deliver_sample(
         should_deliver_sample=False,
     )
 
-    # GIVEN a searchable string
+    # GIVEN a searchable string that only matches the case, not the sample
     search_string = "matching_search_string"
 
     # WHEN getting the unhandled samples in top-up using page 1 and page_size = 2
@@ -1012,6 +1143,49 @@ def test_get_paginated_unhandled_samples_search_no_should_deliver_sample(
         search=search_string,
     )
 
-    # THEN no sample should be returned
+    # THEN no sample should be returned since the case has should_deliver_sample=False
     assert unhandled_samples == []
     assert total == 0
+
+
+def test_get_paginated_unhandled_samples_search_sample_no_delivering_case(
+    store: Store, helpers: StoreHelpers
+):
+    # GIVEN a sample whose internal_id matches the search string
+    sample = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="matching_search_string",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    # GIVEN a case linked to the sample with should_deliver_sample=False
+    case: Case = helpers.add_case(
+        store=store,
+        name="case_1",
+        internal_id="some_other_case_id",
+    )
+    helpers.relate_samples(
+        base_store=store,
+        case=case,
+        samples=[sample],
+        should_deliver_sample=False,
+    )
+
+    # GIVEN a searchable string that matches the sample's own internal_id
+    search_string = "matching_search_string"
+
+    # WHEN getting the unhandled samples in top-up using page 1 and page_size = 2
+    unhandled_samples, total = store.get_paginated_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=2,
+        search=search_string,
+    )
+
+    # THEN the sample should be returned since its own internal_id matches
+    assert unhandled_samples == [sample]
+    assert total == 1
