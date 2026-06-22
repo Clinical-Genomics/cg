@@ -37,6 +37,7 @@ class DeliverService:
         if len(order_dict) == 0:
             LOG.info("No analyses found to deliver.")
             return True
+        LOG.info(f"Found {len(order_dict)} orders with analyses to deliver.")
         are_all_orders_delivered: list[bool] = []
         for order, analyses in order_dict.items():
             order_successful: bool = self._deliver(order=order, analyses=analyses, signature=None)
