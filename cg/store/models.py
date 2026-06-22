@@ -926,13 +926,30 @@ class Sample(Base, PriorityMixin):
             .label("delivering_case_internal_id")
         )
 
-    @property
-    def workflow_of_case_that_delivers(self) -> Workflow | None:
+    @hybrid_property
+    def workflow_of_case_that_delivers(  # pyright: ignore [reportRedeclaration]
+        self,
+    ) -> Workflow | None:
         """Return the workflow of the original case if the case exists."""
         if case := self.case_that_delivers:
             return case.data_analysis
         else:
             return None
+
+    # noinspection PyNestedDecorators
+    @workflow_of_case_that_delivers.expression
+    @classmethod
+    def workflow_of_case_that_delivers(cls) -> SQLColumnExpression[Workflow]:
+        return (
+            select(Case.data_analysis)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .limit(1)
+            .label("workflow_of_case_that_delivers")
+        )
 
     @hybrid_property
     def ticket_id_from_original_order(self) -> int | None:  # pyright: ignore [reportRedeclaration]

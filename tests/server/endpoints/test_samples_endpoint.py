@@ -151,6 +151,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         page_size=10,
         sort_by=None,
         sort_order=None,
+        workflow=None,
     )
 
 
@@ -218,6 +219,7 @@ def test_get_unhandled_samples_sample_search(client: FlaskClient, mocker: Mocker
         page_size=10,
         sort_by=None,
         sort_order=None,
+        workflow=None,
     )
 
 
@@ -319,6 +321,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
         search=None,
         sort_by=UnhandledSamplesSortBy.TICKET,
         sort_order=SortDirection.ASCENDING,
+        workflow=None,
     )
 
 
@@ -420,4 +423,43 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
         search=None,
         sort_by=UnhandledSamplesSortBy.TICKET,
         sort_order=SortDirection.DESCENDING,
+        workflow=None,
     )
+
+
+def test_get_unhandled_samples_filter_on_workflow(client: FlaskClient, mocker: MockerFixture):
+    # GIVEN a store with unhandled samples in top-up
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([], 0))
+    mocker.patch.object(samples, "db", status_db.as_type)
+
+    # WHEN querying the unhandled samples endpoint with workflow Raredisease
+    response = client.get(
+        path=f"/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=10&workflow={Workflow.RAREDISEASE}",
+    )
+
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.OK
+
+    # THEN function has been called with the correct arguments
+    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=10,
+        search=None,
+        sort_by=None,
+        sort_order=None,
+        workflow=Workflow.RAREDISEASE,
+    )
+
+
+def test_get_unhandled_samples_unknown_param(client: FlaskClient, mocker: MockerFixture):
+    # GIVEN an unknown param in the request
+
+    # WHEN querying the unhandled samples endpoint with descending sort on ticket
+    response = client.get(
+        path="/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=10&search=whatIsThis?",
+    )
+
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.OK
