@@ -20,11 +20,12 @@ def analysis_scout_message(mip_case_id: str, customer_id: str, ticket_id: str) -
 def microsalt_message(customer_id: str, ticket_id: str) -> str:
     """Return the delivery message for a microSALT case."""
     return (
-        "Hello,\n\n"
-        "The analysis is now complete and the fastq files are being uploaded to:\n\n"
-        f"/home/{customer_id}/inbox/{ticket_id} \n\n"
-        "The QC and Typing reports can be found attached. \n\n"
+        "Hello,<br><br>"
+        "The analysis is now complete and the fastq files are being uploaded to:<br><br>"
+        f"/home/{customer_id}/inbox/{ticket_id} <br><br>"
+        "The QC and Typing reports can be found attached. <br><br>"
         f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
+        "<br><br>it<br><br>worked"
     )
 
 

@@ -15,5 +15,5 @@ class MicrosaltMessage(DeliveryMessage):
             f"{delivery_path} <br><br>"
             "The QC and Typing reports can be found attached. <br><br>"
             f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
-            f"<br><br>it<br><br>worked"
+            "<br><br>it<br><br>worked"
         )
