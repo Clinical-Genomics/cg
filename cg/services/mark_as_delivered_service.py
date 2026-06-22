@@ -21,6 +21,8 @@ class MarkAsDeliveredService:
         if self._is_order_closable(order):
             order.is_open = False
             LOG.info(f"Order {order.id} is now closed.")
+        else:
+            LOG.info(f"Order {order.id} is not ready to be closed yet.")
 
     def mark_analyses(
         self, analyses: list[Analysis], auth_token: str | None = None, signature: str | None = None
@@ -67,9 +69,9 @@ class MarkAsDeliveredService:
             self.trailblazer_api.get_delivered_analyses_for_order(order_id=order.id)
         )
         delivered_case_ids: set[str] = {analysis.case_id for analysis in delivered_analyses}
-        LOG.debug(f"Delivered case IDs for order {order.id}: {delivered_case_ids}")
+        LOG.debug(f"Delivered case IDs in Trailblazer for order {order.id}: {delivered_case_ids}")
         case_ids_on_order: set[str] = {case.internal_id for case in order.cases}
-        LOG.debug(f"Case IDs on order {order.id}: {case_ids_on_order}")
+        LOG.debug(f"Case IDs in StatusDB order {order.id}: {case_ids_on_order}")
         are_all_samples_delivered = all(
             sample.delivered_at for case in order.cases for sample in case.samples
         )
