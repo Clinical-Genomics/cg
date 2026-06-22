@@ -421,7 +421,7 @@ def test_deliver_all_available_success(mocker: MockerFixture):
         ticket_id=order_2.ticket_id, message="delivery message"
     )
 
-    # THEN both tickets were closes in freshdesk
+    # THEN both tickets were closed in freshdesk
     freshdesk_client.as_mock.update_ticket.assert_any_call(ticket_id=order_1.ticket_id, status=5)
     freshdesk_client.as_mock.update_ticket.assert_any_call(ticket_id=order_2.ticket_id, status=5)
 
