@@ -134,7 +134,6 @@ class UnhandledSamplesResponse(BaseModel):
             unhandled_samples.append(
                 UnhandledSample(
                     case_id=sample.delivering_case_internal_id or "unknown",
-                    sample_id=sample.internal_id,
                     last_sequenced_at=sample.last_sequenced_at,  # type: ignore
                     lims_status=sample.lims_status,
                     sample_id=sample.internal_id,

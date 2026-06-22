@@ -11,7 +11,7 @@ from cg.constants.priority import PriorityTerms
 from cg.exc import SampleNotFoundError
 from cg.server.dto.samples.requests import SortDirection, UnhandledSamplesSortBy
 from cg.server.endpoints import samples
-from cg.store.models import Customer, Sample
+from cg.store.models import Case, Customer, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -117,7 +117,6 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         delivering_case_internal_id="case_1",
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
-        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
     )
     status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([sample_1], 1))
     mocker.patch.object(samples, "db", status_db.as_type)
@@ -185,6 +184,7 @@ def test_get_unhandled_samples_sample_search(client: FlaskClient, mocker: Mocker
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
         delivering_case_internal_id="case_1",
+        priority_term=PriorityTerms.STANDARD,
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
     )
@@ -209,6 +209,7 @@ def test_get_unhandled_samples_sample_search(client: FlaskClient, mocker: Mocker
                 "sample_id": "sample_1",
                 "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
                 "lims_status": "top-up",
+                "sample_priority": "standard",
                 "ticket": 123456,
                 "workflow": "raredisease",
             }
@@ -244,6 +245,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
         delivering_case_internal_id="case_1",
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=2,
+        priority_term=PriorityTerms.STANDARD,
     )
     sample_smaller_ticket_number = create_autospec(
         Sample,
@@ -257,6 +259,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
         delivering_case_internal_id="case_2",
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=1,
+        priority_term=PriorityTerms.STANDARD,
     )
     sample_case_unknown = create_autospec(
         Sample,
@@ -270,6 +273,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
         delivering_case_internal_id=None,
         workflow_of_case_that_delivers=None,
         ticket_id_from_original_order=None,
+        priority_term=PriorityTerms.STANDARD,
     )
     status_db.as_type.get_paginated_unhandled_samples = Mock(
         return_value=(
@@ -295,6 +299,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
                 "sample_id": "sample_case_unknown",
                 "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
                 "lims_status": "top-up",
+                "sample_priority": "standard",
                 "ticket": "unknown",
                 "workflow": "unknown",
             },
@@ -303,6 +308,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
                 "sample_id": "sample_smaller_ticket_number",
                 "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
                 "lims_status": "top-up",
+                "sample_priority": "standard",
                 "ticket": 1,
                 "workflow": "raredisease",
             },
@@ -311,6 +317,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
                 "sample_id": "sample_larger_ticket_number",
                 "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
                 "lims_status": "top-up",
+                "sample_priority": "standard",
                 "ticket": 2,
                 "workflow": "raredisease",
             },
@@ -344,6 +351,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
         delivering_case_internal_id="case_1",
+        priority_term=PriorityTerms.STANDARD,
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=2,
     )
@@ -357,6 +365,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
         delivering_case_internal_id="case_2",
+        priority_term=PriorityTerms.STANDARD,
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=1,
     )
@@ -370,6 +379,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
         delivering_case_internal_id=None,
+        priority_term=PriorityTerms.STANDARD,
         workflow_of_case_that_delivers=None,
         ticket_id_from_original_order=None,
     )
@@ -397,6 +407,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
                 "sample_id": "sample_larger_ticket_number",
                 "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
                 "lims_status": "top-up",
+                "sample_priority": "standard",
                 "ticket": 2,
                 "workflow": "raredisease",
             },
@@ -405,6 +416,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
                 "sample_id": "sample_smaller_ticket_number",
                 "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
                 "lims_status": "top-up",
+                "sample_priority": "standard",
                 "ticket": 1,
                 "workflow": "raredisease",
             },
@@ -413,6 +425,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
                 "sample_id": "sample_case_unkown",
                 "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
                 "lims_status": "top-up",
+                "sample_priority": "standard",
                 "ticket": "unknown",
                 "workflow": "unknown",
             },

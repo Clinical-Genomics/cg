@@ -1,6 +1,5 @@
 import pytest
 
-
 from cg.constants.constants import ControlOptions, DataDelivery
 from cg.constants.priority import Priority, PriorityTerms
 from cg.store.models import (
@@ -410,7 +409,7 @@ def test_sample_priority_term(priority_num: Priority, expected_priority_term: Pr
 
     # THEN the right priority term is given
     assert sample_priority_term == expected_priority_term
-    
+
 
 def test_application_expected_hifi_yield_success():
     # GIVEN an application with target hifi yield and percent hifi yield guaranteed set
