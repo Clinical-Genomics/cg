@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Tuple, Union
+from typing import Tuple
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -48,17 +48,3 @@ class TicketResponse(BaseModel):
     to_emails: list[str] | None = None
     status: int
     priority: int
-
-
-class ReplyCreate(BaseModel):
-    """Reply to a ticket."""
-
-    ticket_number: str
-    body: str
-
-    def to_multipart_data(self) -> list[Tuple[str, Union[str, int, bytes]]]:
-        """Custom converter to multipart form data."""
-        multipart_data = [
-            ("body", self.body),
-        ]
-        return multipart_data
