@@ -42,7 +42,7 @@ def transfer_group():
     LOG.debug("Running CG transfer")
 
 
-@click.group(name="lims", context_settings=CLICK_CONTEXT_SETTINGS)
+@click.group(name="lims", context_settings=CLICK_CONTEXT_SETTINGS, hidden=True)
 @click.pass_obj
 def lims(context: CGConfig):
     """Transfer information about samples and pools from LIMS to the status interface."""
@@ -54,7 +54,7 @@ def lims(context: CGConfig):
 transfer_group.add_command(lims)
 
 
-@lims.command("samples")
+@lims.command("samples", hidden=True)
 @click.option(
     "--max-order-age",
     type=click.IntRange(min=1),
@@ -82,7 +82,7 @@ def check_samples_in_lims(
     )
 
 
-@lims.command("pools")
+@lims.command("pools", hidden=True)
 @click.option("-s", "--status", type=click.Choice(["received", "delivered"]), default="delivered")
 @click.pass_obj
 def set_dates_of_pools(context: CGConfig, status: str):
