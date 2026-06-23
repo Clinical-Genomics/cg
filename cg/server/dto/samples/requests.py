@@ -14,6 +14,7 @@ class SortDirection(StrEnum):
 
 class UnhandledSamplesSortBy(StrEnum):
     TICKET = "ticket"
+    PRIORITY = "priority"
 
 
 class CollaboratorSamplesRequest(BaseModel):

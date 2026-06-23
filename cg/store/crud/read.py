@@ -1975,12 +1975,19 @@ class ReadHandler(BaseHandler):
             )
         )
 
-        if sort_by == UnhandledSamplesSortBy.TICKET:
-            desc: bool = sort_order == SortDirection.DESCENDING
-            sort_column = Sample.ticket_id_from_original_order
-            query = query.order_by(sort_column.desc() if desc else sort_column.asc())
-        else:
-            query = query.order_by(Sample.last_sequenced_at.asc())
+        match sort_by:
+            case UnhandledSamplesSortBy.TICKET:
+                sort_column = Sample.ticket_id_from_original_order
+                desc: bool = sort_order == SortDirection.DESCENDING
+                query = query.order_by(sort_column.desc() if desc else sort_column.asc())
+
+            case UnhandledSamplesSortBy.PRIORITY:
+                sort_column = Sample.priority
+                desc: bool = sort_order == SortDirection.DESCENDING
+                query = query.order_by(sort_column.desc() if desc else sort_column.asc())
+
+            case _:
+                query = query.order_by(Sample.last_sequenced_at.asc())
 
         if search:
             query = query.filter(
