@@ -21,9 +21,9 @@ def microsalt_message(customer_id: str, ticket_id: str) -> str:
     """Return the delivery message for a microSALT case."""
     return (
         "Hello,\n\n"
-        "The analysis is now complete.\n\n"
-        " The fastq files and the QC and Typing reports have been uploaded to:\n\n"
+        "The analysis is now complete and the fastq files have been uploaded to:\n\n"
         f"/home/{customer_id}/inbox/{ticket_id} \n\n"
+        "The QC and Typing reports can be found attached. \n\n"
         f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
     )
 

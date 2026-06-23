@@ -11,8 +11,8 @@ class MicrosaltMessage(DeliveryMessage):
         delivery_path: str = get_caesar_delivery_path(cases[0])
         return (
             f"Hello,\n\n"
-            f"The analysis is now complete.\n\n"
-            f" The fastq files and the QC and Typing reports have been uploaded to:\n\n"
+            f"The analysis is now complete and the fastq files have been uploaded to:\n\n"
             f"{delivery_path} \n\n"
+            "The QC and Typing reports can be found attached. \n\n"
             f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
         )
