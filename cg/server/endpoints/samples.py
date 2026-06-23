@@ -75,6 +75,7 @@ def get_unhandled_samples():
             page_size=req.page_size,
             sort_by=req.sort_by,
             sort_order=req.sort_order,
+            workflow=req.workflow,
         )
         response = UnhandledSamplesResponse.from_samples(samples=samples, total=total)
         return jsonify(response.model_dump())

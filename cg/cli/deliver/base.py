@@ -6,6 +6,7 @@ import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
+from cg.constants import Workflow
 from cg.constants.cli_options import SIGNATURE
 from cg.constants.delivery import FileDeliveryOption
 from cg.models.cg_config import CGConfig

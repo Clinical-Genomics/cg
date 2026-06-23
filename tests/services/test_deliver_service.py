@@ -1,5 +1,5 @@
 from datetime import datetime
-from unittest.mock import Mock, create_autospec
+from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -401,7 +401,9 @@ def test_deliver_all_available_success(mocker: MockerFixture):
     trailblazer_api.as_mock.get_all_analyses_to_deliver.assert_called_once()
 
     # THEN uploaded analyses should have been fetched from StatusDB
-    status_db.get_uploaded_analyses.assert_called_once()
+    status_db.get_uploaded_analyses.assert_called_once_with(
+        trailblazer_ids=ANY, exclude_workflows=[Workflow.MICROSALT]
+    )
 
     # THEN the analyses of both orders should have been marked as delivered separately
     mark_analyses_call.assert_any_call(analyses=[analysis_1], signature=None)
@@ -421,7 +423,7 @@ def test_deliver_all_available_success(mocker: MockerFixture):
         ticket_id=order_2.ticket_id, message="delivery message"
     )
 
-    # THEN both tickets were closes in freshdesk
+    # THEN both tickets were closed in freshdesk
     freshdesk_client.as_mock.update_ticket.assert_any_call(ticket_id=order_1.ticket_id, status=5)
     freshdesk_client.as_mock.update_ticket.assert_any_call(ticket_id=order_2.ticket_id, status=5)
 
@@ -455,7 +457,9 @@ def test_deliver_all_available_no_analyses_to_deliver(mocker: MockerFixture):
     trailblazer_api.as_mock.get_all_analyses_to_deliver.assert_called_once()
 
     # THEN uploaded analyses should have been fetched from StatusDB
-    status_db.get_uploaded_analyses.assert_called_once()
+    status_db.get_uploaded_analyses.assert_called_once_with(
+        trailblazer_ids=ANY, exclude_workflows=[Workflow.MICROSALT]
+    )
 
     # THEN no call should have been made
     mark_analyses_call.assert_not_called()

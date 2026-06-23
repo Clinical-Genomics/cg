@@ -4,7 +4,7 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
-from cg.constants import DataDelivery
+from cg.constants import DataDelivery, Workflow
 from cg.exc import (
     FreshdeskDeliveryMessageError,
     FreshdeskGetTicketError,
@@ -37,6 +37,7 @@ class DeliverService:
         if len(order_dict) == 0:
             LOG.info("No analyses found to deliver.")
             return True
+        LOG.info(f"Found {len(order_dict)} orders with analyses to deliver.")
         are_all_orders_delivered: list[bool] = []
         for order, analyses in order_dict.items():
             order_successful: bool = self._deliver(order=order, analyses=analyses, signature=None)
@@ -75,18 +76,21 @@ class DeliverService:
         except TrailblazerAnalysisDeliveryError as error:
             self.status_db.rollback()
             LOG.error(f"Failed to mark analyses as delivered in Trailblazer for order {order.id}")
+            LOG.info("Rolling back delivery in StatusDB and Trailblazer.")
             LOG.exception(error)
             return False
         except (TrailblazerFailedToGetAnalysesError, FreshdeskDeliveryMessageError) as error:
             self.status_db.rollback()
             self.mark_as_delivered_service.unmark_analyses(analyses)
             LOG.error(f"Failed to send delivery message for ticket {order.ticket_id}")
+            LOG.info("Reopening order and rolling back delivery in StatusDB and Trailblazer.")
             LOG.exception(error)
             return False
         except (FreshdeskGetTicketError, FreshdeskUpdateTicketError) as error:
             order.is_open = True
             self.status_db.commit_to_store()
             LOG.error(f"Failed to close ticket {order.ticket_id} in Freshdesk")
+            LOG.info("Reopening order in StatusDB.")
             LOG.exception(error)
             return False
         else:
@@ -116,13 +120,14 @@ class DeliverService:
         """
         Returns a dictionary with orders as keys and lists of analyses as values. Only includes
         analyses that are marked as uploaded in StatusDB and not yet marked as delivered in
-        Trailblazer.
+        Trailblazer. We are currently excluding microSALT from automatic delivery.
         """
         undelivered_trailblazer_analyses: list[TrailblazerAnalysis] = (
             self.trailblazer_api.get_all_analyses_to_deliver()
         )
         uploaded_analyses_to_deliver: list[Analysis] = self.status_db.get_uploaded_analyses(
-            trailblazer_ids=[analysis.id for analysis in undelivered_trailblazer_analyses]
+            trailblazer_ids=[analysis.id for analysis in undelivered_trailblazer_analyses],
+            exclude_workflows=[Workflow.MICROSALT],
         )
         order_analyses = {}
         for analysis in uploaded_analyses_to_deliver:

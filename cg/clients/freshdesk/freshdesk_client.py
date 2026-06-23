@@ -1,4 +1,5 @@
 import logging
+from html import escape
 from http import HTTPStatus
 from pathlib import Path
 
@@ -86,7 +87,8 @@ class FreshdeskClient:
     def reply_to_ticket(self, ticket_id: int, message: str) -> None:
         """Send a reply to an existing ticket in Freshdesk."""
         url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}/reply"
-        json = {"body": message}
+        html_body = escape(message).replace("\n", "<br>")
+        json = {"body": html_body}
         LOG.debug(f"URL={url}; JSON={json}")
         try:
             response = self.session.post(url=url, json=json)

@@ -69,7 +69,7 @@ def test_get_ticket_success(ticket_raw_response: dict, mocker: MockerFixture):
     # WHEN getting a ticket
     ticket_response: TicketResponse = client.get_ticket(20)
 
-    # THEN the response should be a TicketResponse object
+    # THEN the response should be as expected
     expected_ticket_response = TicketResponse(
         id=20,
         description="<div>Not given.</div>",
@@ -113,7 +113,7 @@ def test_update_ticket_success(ticket_raw_response: dict, mocker: MockerFixture)
     # WHEN updating the ticket with a status
     ticket_response = client.update_ticket(ticket_id=20, status=Status.CLOSED)
 
-    # THEN the response should be a TicketResponse object
+    # THEN the response should be as expected
     expected_ticket_response = TicketResponse(
         id=20,
         description="<div>Not given.</div>",
