@@ -8,6 +8,9 @@ tower_binary_path: "{test_root_dir}/tower_binary_path"
 email_base_settings:
   sender_email: "integration-tests@scilifelab.se"
   smtp_server: "localhost"
+freshdesk:
+  api_key: "some_api_key"
+  base_url: "https://example.freshdesk.com"
 
 nats:
   server: nats://localhost/nats
