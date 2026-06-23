@@ -37,7 +37,7 @@ TICKET_ID_ARG = click.option("-t", "--ticket", type=str, required=True)
 
 @click.group(name="transfer", context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_obj
-def transfer_group():
+def transfer_group(context: CGConfig) -> None:
     """Transfer results to the status interface."""
     LOG.debug("Running CG transfer")
 
