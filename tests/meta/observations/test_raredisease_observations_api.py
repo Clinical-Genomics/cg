@@ -106,7 +106,12 @@ def test_is_case_not_eligible_for_observations_upload(
     assert not is_case_eligible_for_observations_upload
 
 
+@pytest.mark.parametrize(
+    "analysis_type",
+    [SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING, SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING],
+)
 def test_load_observations(
+    analysis_type: SeqLibraryPrepCategory,
     case_id: str,
     loqusdb_id: str,
     number_of_loaded_variants: int,
@@ -123,9 +128,7 @@ def test_load_observations(
     # GIVEN a RAREDISEASE case and a mocked scenario for uploads
     case: Case = raredisease_observations_api.store.get_case_by_internal_id(case_id)
     mocker.patch.object(
-        RarediseaseAnalysisAPI,
-        "get_data_analysis_type",
-        return_value=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        RarediseaseAnalysisAPI, "get_data_analysis_type", return_value=analysis_type
     )
     mocker.patch.object(
         RarediseaseObservationsAPI,
@@ -165,6 +168,7 @@ def test_is_duplicate(
         ),
         loqusdb_rd_lwp=Mock(),
         loqusdb_wes=Mock(),
+        loqusdb_wes_38=Mock(),
         loqusdb_wgs=Mock(),
         loqusdb_somatic=Mock(),
         loqusdb_tumor=Mock(),
@@ -231,6 +235,7 @@ def test_load_observations_success(
         ),
         loqusdb_rd_lwp=Mock(),
         loqusdb_wes=Mock(),
+        loqusdb_wes_38=Mock(),
         loqusdb_wgs=Mock(),
         loqusdb_somatic=Mock(),
         loqusdb_tumor=Mock(),
