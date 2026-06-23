@@ -395,9 +395,17 @@ class MultipleAnalysesToDeliverError(CgError):
     """Exception raised when multiple analyses are ready for delivery for a case."""
 
 
-class FreshdeskDeliveryMessageError(CgError):
+class FreshdeskError(CgError):
+    """General exception raised when something in Freshdesk fails."""
+
+
+class FreshdeskDeliveryMessageError(FreshdeskError):
     """Exception raised when sending the delivery message in Freshdesk fails."""
 
 
-class FreshdeskClosingTicketError(CgError):
-    """Exception raised when closing a ticket in Freshdesk fails."""
+class FreshdeskGetTicketError(FreshdeskError):
+    """Exception raised when something went wrong when getting a Freshdesk ticket."""
+
+
+class FreshdeskUpdateTicketError(FreshdeskError):
+    """Exception raised when updating a ticket in Freshdesk fails."""

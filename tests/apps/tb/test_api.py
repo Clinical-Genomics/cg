@@ -578,7 +578,7 @@ def test_get_delivered_analyses_for_order_success(
 
     # THEN Trailblazer have been called with the correct parameters
     http_call.assert_called_once_with(
-        url=f"{trailblazer_api.host}/analyses?order_id=12345&status[]=completed&delivered=true",
+        url=f"{trailblazer_api.host}/analyses?orderId=12345&status[]=completed&delivered=true",
         headers=trailblazer_api.auth_header,
     )
 
