@@ -5,7 +5,7 @@ import pytest
 
 from cg.constants.constants import Workflow
 from cg.constants.lims import LimsStatus
-from cg.constants.priority import PriorityTerms
+from cg.constants.priority import PriorityHumanReadable
 from cg.server.dto.samples.samples_response import UnhandledSample, UnhandledSamplesResponse
 from cg.store.models import Sample
 
@@ -19,7 +19,7 @@ def test_unhandled_samples_response_from_samples():
         internal_id="sample_1",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
-        priority_of_case_that_delivers=PriorityTerms.RESEARCH,
+        priority_of_case_that_delivers=PriorityHumanReadable.RESEARCH,
         ticket_id_from_original_order=123456,
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
     )
@@ -29,7 +29,7 @@ def test_unhandled_samples_response_from_samples():
         internal_id="sample_2",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
-        priority_of_case_that_delivers=PriorityTerms.EXPRESS,
+        priority_of_case_that_delivers=PriorityHumanReadable.EXPRESS,
         ticket_id_from_original_order=123456,
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
     )
@@ -44,7 +44,7 @@ def test_unhandled_samples_response_from_samples():
                 last_sequenced_at=datetime.now(),
                 lims_status=LimsStatus.TOP_UP,
                 sample_id="sample_1",
-                case_priority=PriorityTerms.RESEARCH,
+                case_priority=PriorityHumanReadable.RESEARCH,
                 ticket=123456,
                 workflow=Workflow.RAREDISEASE,
             ),
@@ -53,7 +53,7 @@ def test_unhandled_samples_response_from_samples():
                 last_sequenced_at=datetime.now(),
                 lims_status=LimsStatus.TOP_UP,
                 sample_id="sample_2",
-                case_priority=PriorityTerms.EXPRESS,
+                case_priority=PriorityHumanReadable.EXPRESS,
                 ticket=123456,
                 workflow=Workflow.RAREDISEASE,
             ),
@@ -71,7 +71,7 @@ def test_unhandled_samples_response_from_samples_without_ticket_id_and_workflow(
         internal_id="sample_1",
         last_sequenced_at=datetime.now(),
         lims_status=LimsStatus.TOP_UP,
-        priority_of_case_that_delivers=PriorityTerms.STANDARD,
+        priority_of_case_that_delivers=PriorityHumanReadable.STANDARD,
         ticket_id_from_original_order=None,
         workflow_of_case_that_delivers=None,
     )
@@ -87,7 +87,7 @@ def test_unhandled_samples_response_from_samples_without_ticket_id_and_workflow(
                 last_sequenced_at=datetime.now(),
                 lims_status=LimsStatus.TOP_UP,
                 sample_id="sample_1",
-                case_priority=PriorityTerms.STANDARD,
+                case_priority=PriorityHumanReadable.STANDARD,
                 ticket="unknown",
                 workflow="unknown",
             ),

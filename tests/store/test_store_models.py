@@ -1,7 +1,7 @@
 import pytest
 
 from cg.constants.constants import ControlOptions, DataDelivery
-from cg.constants.priority import Priority, PriorityTerms
+from cg.constants.priority import Priority, PriorityHumanReadable
 from cg.store.models import (
     Application,
     ApplicationVersion,
@@ -393,19 +393,21 @@ def test_sample_to_dict_illumina_success():
 @pytest.mark.parametrize(
     "priority_num, expected_priority_term",
     [
-        (Priority.research, PriorityTerms.RESEARCH),
-        (Priority.standard, PriorityTerms.STANDARD),
-        (Priority.priority, PriorityTerms.PRIORITY),
-        (Priority.express, PriorityTerms.EXPRESS),
-        (Priority.clinical_trials, PriorityTerms.CLINICAL_TRIALS),
+        (Priority.research, PriorityHumanReadable.RESEARCH),
+        (Priority.standard, PriorityHumanReadable.STANDARD),
+        (Priority.priority, PriorityHumanReadable.PRIORITY),
+        (Priority.express, PriorityHumanReadable.EXPRESS),
+        (Priority.clinical_trials, PriorityHumanReadable.CLINICAL_TRIALS),
     ],
 )
-def test_sample_priority_term(priority_num: Priority, expected_priority_term: PriorityTerms):
+def test_sample_priority_term(
+    priority_num: Priority, expected_priority_term: PriorityHumanReadable
+):
     # GIVEN a sample with a priority
     sample = Sample(priority=priority_num)
 
     # WHEN getting the priority_term
-    sample_priority_term = sample.priority_term
+    sample_priority_term = sample.priority_human
 
     # THEN the right priority term is given
     assert sample_priority_term == expected_priority_term

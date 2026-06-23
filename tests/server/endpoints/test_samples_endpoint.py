@@ -7,7 +7,7 @@ from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
 from cg.constants.lims import LimsStatus
-from cg.constants.priority import PriorityTerms
+from cg.constants.priority import PriorityHumanReadable
 from cg.exc import SampleNotFoundError
 from cg.server.dto.samples.requests import SortDirection, UnhandledSamplesSortBy
 from cg.server.endpoints import samples
@@ -113,7 +113,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
-        priority_of_case_that_delivers=PriorityTerms.CLINICAL_TRIALS,
+        priority_of_case_that_delivers=PriorityHumanReadable.CLINICAL_TRIALS,
         delivering_case_internal_id="case_1",
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
@@ -184,7 +184,7 @@ def test_get_unhandled_samples_sample_search(client: FlaskClient, mocker: Mocker
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
         delivering_case_internal_id="case_1",
-        priority_of_case_that_delivers=PriorityTerms.STANDARD,
+        priority_of_case_that_delivers=PriorityHumanReadable.STANDARD,
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
     )
@@ -245,7 +245,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
         delivering_case_internal_id="case_1",
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=2,
-        priority_of_case_that_delivers=PriorityTerms.STANDARD,
+        priority_of_case_that_delivers=PriorityHumanReadable.STANDARD,
     )
     sample_smaller_ticket_number = create_autospec(
         Sample,
@@ -259,7 +259,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
         delivering_case_internal_id="case_2",
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=1,
-        priority_of_case_that_delivers=PriorityTerms.STANDARD,
+        priority_of_case_that_delivers=PriorityHumanReadable.STANDARD,
     )
     sample_case_unknown = create_autospec(
         Sample,
@@ -273,7 +273,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
         delivering_case_internal_id=None,
         workflow_of_case_that_delivers=None,
         ticket_id_from_original_order=None,
-        priority_of_case_that_delivers=PriorityTerms.STANDARD,
+        priority_of_case_that_delivers=PriorityHumanReadable.STANDARD,
     )
     status_db.as_type.get_paginated_unhandled_samples = Mock(
         return_value=(
@@ -351,7 +351,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
         delivering_case_internal_id="case_1",
-        priority_of_case_that_delivers=PriorityTerms.STANDARD,
+        priority_of_case_that_delivers=PriorityHumanReadable.STANDARD,
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=2,
     )
@@ -365,7 +365,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
         delivering_case_internal_id="case_2",
-        priority_of_case_that_delivers=PriorityTerms.STANDARD,
+        priority_of_case_that_delivers=PriorityHumanReadable.STANDARD,
         workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=1,
     )
@@ -379,7 +379,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
         delivering_case_internal_id=None,
-        priority_of_case_that_delivers=PriorityTerms.STANDARD,
+        priority_of_case_that_delivers=PriorityHumanReadable.STANDARD,
         workflow_of_case_that_delivers=None,
         ticket_id_from_original_order=None,
     )

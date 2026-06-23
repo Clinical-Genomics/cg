@@ -5,14 +5,9 @@ from pydantic.v1 import ValidationError
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import CustomerId
 from cg.constants.invoice import CostCenters
-from cg.constants.priority import PriorityTerms
+from cg.constants.priority import PriorityHumanReadable
 from cg.constants.sequencing import RecordType
-from cg.models.invoice.invoice import (
-    InvoiceApplication,
-    InvoiceContact,
-    InvoiceInfo,
-    InvoiceReport,
-)
+from cg.models.invoice.invoice import InvoiceApplication, InvoiceContact, InvoiceInfo, InvoiceReport
 from cg.server.ext import FlaskLims
 from cg.server.ext import lims as genologics_lims
 from cg.store.models import Customer, Invoice, Pool, Sample, User
@@ -211,11 +206,11 @@ class InvoiceAPI:
     def get_priority(self, record: Sample or Pool, for_discount_price: bool = False) -> str:
         """Return the priority."""
         if self.customer_obj.internal_id == CustomerId.CUST032:
-            priority = PriorityTerms.STANDARD
+            priority = PriorityHumanReadable.STANDARD
         elif self.record_type == RecordType.Pool or (
             record.priority_human == "clinical trials" and for_discount_price
         ):
-            priority = PriorityTerms.RESEARCH
+            priority = PriorityHumanReadable.RESEARCH
         else:
             priority = record.priority_human
         return priority

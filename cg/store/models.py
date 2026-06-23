@@ -33,7 +33,7 @@ from cg.constants.constants import (
 )
 from cg.constants.devices import DeviceType, RevioNames
 from cg.constants.lims import LimsStatus
-from cg.constants.priority import PriorityTerms, SlurmQos
+from cg.constants.priority import PriorityHumanReadable, SlurmQos
 from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
 from cg.models.orders.constants import OrderType
@@ -114,9 +114,9 @@ order_case = Table(
 
 class PriorityMixin:
     @property
-    def priority_human(self) -> str:
+    def priority_human(self) -> PriorityHumanReadable:
         """Humanized priority for sample."""
-        return self.priority.name
+        return PriorityHumanReadable(self.priority.name)
 
     @priority_human.setter
     def priority_human(self, priority: str) -> None:
@@ -868,10 +868,6 @@ class Sample(Base, PriorityMixin):
         return self.application_version.application.prep_category
 
     @property
-    def priority_term(self) -> PriorityTerms:
-        return PriorityTerms(self.priority.name)
-
-    @property
     def state(self) -> str:
         """Get the current sample state."""
         if self.delivered_at:
@@ -910,7 +906,7 @@ class Sample(Base, PriorityMixin):
             return None
 
     @property
-    def priority_of_case_that_delivers(self) -> PriorityTerms | None:
+    def priority_of_case_that_delivers(self) -> PriorityHumanReadable | None:
         if case := self.case_that_delivers:
             return case.priority_human
         else:

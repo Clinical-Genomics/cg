@@ -11,7 +11,7 @@ from cg.constants import DataDelivery, SequencingRunDataAvailability, Workflow
 from cg.constants.constants import SequencingQCStatus
 from cg.constants.devices import DeviceType
 from cg.constants.pedigree import Pedigree
-from cg.constants.priority import PriorityTerms
+from cg.constants.priority import PriorityHumanReadable
 from cg.constants.sequencing import ReadType, Sequencers
 from cg.constants.subject import PhenotypeStatus, Sex
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
@@ -170,10 +170,10 @@ class StoreHelpers:
             )
 
         prices = {
-            PriorityTerms.STANDARD: 10,
-            PriorityTerms.PRIORITY: 20,
-            PriorityTerms.EXPRESS: 30,
-            PriorityTerms.RESEARCH: 5,
+            PriorityHumanReadable.STANDARD: 10,
+            PriorityHumanReadable.PRIORITY: 20,
+            PriorityHumanReadable.EXPRESS: 30,
+            PriorityHumanReadable.RESEARCH: 5,
         }
 
         application_version: ApplicationVersion = StoreHelpers.add_application_version(
@@ -501,7 +501,7 @@ class StoreHelpers:
         internal_id: str = None,
         customer_id: str = "cust000",
         panels: list[str] = [],
-        priority: str = PriorityTerms.STANDARD,
+        priority: str = PriorityHumanReadable.STANDARD,
         case_obj: Case = None,
         ticket: str = "123456",
         aggregated_sequencing_qc: SequencingQCStatus = SequencingQCStatus.PASSED,
@@ -692,7 +692,7 @@ class StoreHelpers:
     def add_microbial_sample(
         store: Store,
         sample_id: str = "microbial_sample_id",
-        priority: str = PriorityTerms.RESEARCH,
+        priority: str = PriorityHumanReadable.RESEARCH,
         name: str = "microbial_name_test",
         organism: Organism = None,
         comment: str = "comment",
