@@ -909,6 +909,13 @@ class Sample(Base, PriorityMixin):
         else:
             return None
 
+    @property
+    def priority_of_case_that_delivers(self) -> PriorityTerms | None:
+        if case := self.case_that_delivers:
+            return case.priority_human
+        else:
+            return None
+
     @hybrid_property
     def delivering_case_internal_id(self) -> str | None:  # pyright: ignore [reportRedeclaration]
         if case := self.case_that_delivers:
