@@ -119,6 +119,7 @@ class StoreFastqOrderService(StoreOrderService):
             internal_id=sample._generated_lims_id,
             lims_status=lims_status,
             name=sample.name,
+            no_invoice=application_version.application.is_external,
             order=order_name,
             ordered=datetime.now(),
             original_ticket=ticket_id,
