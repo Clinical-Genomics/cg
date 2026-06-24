@@ -104,9 +104,8 @@ def test_update_ticket_success(ticket_raw_response: dict, mocker: MockerFixture)
     # GIVEN a successful HTTP response
     response = Response()
     response.status_code = HTTPStatus.OK
-    update_response = {"ticket": ticket_raw_response}
-    update_response["ticket"]["status"] = 5
-    response._content = str.encode(json.dumps(update_response))
+    ticket_raw_response["status"] = 5
+    response._content = str.encode(json.dumps(ticket_raw_response))
     mocker.patch.object(client.session, "put", return_value=response)
 
     # WHEN updating the ticket with a status

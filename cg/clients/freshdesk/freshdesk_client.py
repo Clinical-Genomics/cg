@@ -80,7 +80,7 @@ class FreshdeskClient:
         try:
             response = self.session.put(url=url, json=json)
             response.raise_for_status()
-            return TicketResponse.model_validate(response.json()["ticket"])
+            return TicketResponse.model_validate(response.json())
         except HTTPError as error:
             raise FreshdeskUpdateTicketError from error
 
