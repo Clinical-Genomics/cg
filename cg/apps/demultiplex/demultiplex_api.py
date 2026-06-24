@@ -71,7 +71,10 @@ class DemultiplexingAPI:
         error_parameters: SbatchError = SbatchError(
             flow_cell_id=sequencing_run.id,
             email=email,
-            logfile=DemultiplexingAPI.get_stderr_logfile(sequencing_run=sequencing_run).as_posix(),
+            log_dir=DemultiplexingAPI.get_stderr_logfile(
+                sequencing_run=sequencing_run
+            ).parent.as_posix(),
+            run_name=DemultiplexingAPI.get_run_name(sequencing_run),
             demux_dir=demux_dir.as_posix(),
             demux_started=sequencing_run.demultiplexing_started_path.as_posix(),
         )

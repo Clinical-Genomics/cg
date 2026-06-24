@@ -15,9 +15,10 @@ touch {demux_completed_file}
 log "Dragen BCL Convert finished!"
 """
 
-# This needs flow cell id, email. logfile
+# This needs flow cell id, email, log_dir, run_name
 DEMULTIPLEX_ERROR = """
-mail -s 'ERROR demultiplexing of {flow_cell_id}' {email} < '{logfile}'
+LOGFILE="{log_dir}/{run_name}_$SLURM_JOB_ID.stderr"
+mail -s 'ERROR demultiplexing of {flow_cell_id}' {email} < "$LOGFILE"
 if [[ -e {demux_dir} ]]
 then
     rm -r {demux_dir}
