@@ -6,7 +6,6 @@ import rich_click as click
 
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
-from cg.constants import Workflow
 from cg.constants.cli_options import SIGNATURE
 from cg.constants.delivery import FileDeliveryOption
 from cg.models.cg_config import CGConfig
@@ -89,7 +88,6 @@ def deliver_order(config: CGConfig, signature: str, ticket_id: int):
         trailblazer_api=config.trailblazer_api,
     )
     deliver_service.deliver_order(signature=signature, ticket_id=ticket_id)
-    config.status_db.commit_to_store()
 
 
 @deliver.command(name="all-available")

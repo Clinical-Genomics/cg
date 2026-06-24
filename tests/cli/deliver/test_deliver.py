@@ -125,9 +125,6 @@ def test_deliver_order_success(mocker: MockerFixture):
     # THEN the delivery service is called with the expected arguments
     deliver_order_mock.assert_called_once_with(signature="CG", ticket_id=123)
 
-    # THEN the changes were persistent in the database
-    status_db.as_mock.commit_to_store.assert_called()
-
 
 @pytest.mark.parametrize(
     "args",
