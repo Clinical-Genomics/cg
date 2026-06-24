@@ -50,8 +50,8 @@ RAREDISEASE_CASE_TAGS = dict(
     vcf_snv_research={"vcf-snv-research"},
     vcf_snv={"vcf-snv-clinical"},
     vcf_snv_research_mt={"vcf-sv-research", "mitochondria"},
-    vcf_snv_mt={"vcf-sv-clinical", "mitochondria"},
-    vcf_sv_research={"vcf-sv-research"},
+    vcf_snv_mt={"vcf-snv-clinical", "mitochondria"},
+    vcf_sv_research={"vcf-snv-research"},
     vcf_sv={"vcf-sv-clinical"},
     vcf_str={"vcf-str"},
 )
