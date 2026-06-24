@@ -49,9 +49,9 @@ RAREDISEASE_CASE_TAGS = dict(
     vcf_mei_research={"mobile-elements", "research", "vcf"},
     vcf_snv_research={"vcf-snv-research"},
     vcf_snv={"vcf-snv-clinical"},
-    vcf_snv_research_mt={"vcf-sv-research", "mitochondria"},
+    vcf_snv_research_mt={"vcf-snv-research", "mitochondria"},
     vcf_snv_mt={"vcf-snv-clinical", "mitochondria"},
-    vcf_sv_research={"vcf-snv-research"},
+    vcf_sv_research={"vcf-sv-research"},
     vcf_sv={"vcf-sv-clinical"},
     vcf_str={"vcf-str"},
 )
