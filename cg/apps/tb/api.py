@@ -257,7 +257,7 @@ class TrailblazerAPI:
         return validated_response.analyses
 
     def get_delivered_analyses_for_order(self, order_id: int) -> list[TrailblazerAnalysis]:
-        url = f"{self.host}/analyses?orderId={order_id}&status[]=completed&delivered=true&holdDelivery=false"
+        url = f"{self.host}/analyses?orderId={order_id}&status[]={AnalysisStatus.COMPLETED}&delivered=true&holdDelivery=false"
         response = requests.get(url=url, headers=self.auth_header)
         if not response.ok:
             raise TrailblazerFailedToGetAnalysesError(response.reason)
@@ -281,7 +281,6 @@ class TrailblazerAPI:
         endpoint = (
             f"analyses?status[]={AnalysisStatus.COMPLETED}&delivered=false&holdDelivery=false"
         )
-
         raw_response = self.query_trailblazer(
             command=endpoint, request_body={}, method=APIMethods.GET
         )
