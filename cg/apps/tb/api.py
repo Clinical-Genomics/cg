@@ -278,7 +278,9 @@ class TrailblazerAPI:
         return validated_response.analyses
 
     def get_all_analyses_to_deliver(self) -> list[TrailblazerAnalysis]:
-        endpoint = f"analyses?status[]={AnalysisStatus.COMPLETED}&delivered=false"
+        endpoint = (
+            f"analyses?status[]={AnalysisStatus.COMPLETED}&delivered=false&holdDelivery=false"
+        )
 
         raw_response = self.query_trailblazer(
             command=endpoint, request_body={}, method=APIMethods.GET
