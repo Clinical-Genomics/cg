@@ -14,7 +14,6 @@ from cg.services.delivery_message.messages.analysis_message import AnalysisMessa
 from cg.services.delivery_message.messages.bam_message import BamMessage
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
 from cg.services.delivery_message.messages.fastq_analysis_message import FastqAnalysisMessage
-from cg.services.delivery_message.messages.order_message import TaxprofilerDeliveryMessage
 from cg.services.delivery_message.messages.raw_data_analysis_message import RawDataAnalysisMessage
 from cg.services.delivery_message.messages.raw_data_analysis_scout_message import (
     RawDataAnalysisScoutMessage,
@@ -28,6 +27,7 @@ from cg.services.delivery_message.messages.rna_delivery_message import (
     RNAScoutStrategy,
     RNAUploadMessageStrategy,
 )
+from cg.services.delivery_message.messages.taxprofiler_message import TaxprofilerDeliveryMessage
 from cg.store.models import Case
 from cg.store.store import Store
 
