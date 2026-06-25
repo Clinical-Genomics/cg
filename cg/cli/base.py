@@ -22,6 +22,7 @@ from cg.cli.events import listen
 from cg.cli.generate.base import generate as generate_cmd
 from cg.cli.get import get
 from cg.cli.post_process.post_process import post_process_group as post_processing
+from cg.cli.prepare.base import prepare
 from cg.cli.sequencing_qc.sequencing_qc import sequencing_qc
 from cg.cli.set.base import set_cmd
 from cg.cli.store.base import store as store_cmd
@@ -122,6 +123,7 @@ base.add_command(set_cmd)
 base.add_command(transfer_group)
 base.add_command(upload)
 base.add_command(workflow_cmd)
+base.add_command(prepare)
 base.add_command(store_cmd)
 base.add_command(deliver_cmd)
 base.add_command(demultiplex_cmd)
