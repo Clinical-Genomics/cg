@@ -33,7 +33,7 @@ from cg.constants.constants import (
 )
 from cg.constants.devices import DeviceType, RevioNames
 from cg.constants.lims import LimsStatus
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import PriorityTerms, SlurmQos
 from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
 from cg.models.orders.constants import OrderType
@@ -114,9 +114,9 @@ order_case = Table(
 
 class PriorityMixin:
     @property
-    def priority_human(self) -> str:
+    def priority_human(self) -> PriorityTerms:
         """Humanized priority for sample."""
-        return self.priority.name
+        return PriorityTerms(self.priority.name)
 
     @priority_human.setter
     def priority_human(self, priority: str) -> None:
@@ -902,6 +902,13 @@ class Sample(Base, PriorityMixin):
         if case_samples_that_deliver := [link for link in self.links if link.should_deliver_sample]:
             # we only expect one of these
             return case_samples_that_deliver[0].case
+        else:
+            return None
+
+    @property
+    def priority_of_case_that_delivers(self) -> PriorityTerms | None:
+        if case := self.case_that_delivers:
+            return case.priority_human
         else:
             return None
 
