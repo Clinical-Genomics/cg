@@ -19,7 +19,7 @@ class TaxprofilerDeliveryMessage(DeliveryMessage):
         file_types: str = self.FILE_TYPES_BY_DATA_DELIVERY_MAP[cases[0].data_delivery]
         return (
             f"Hello,\n\n"
-            f"The {file_types} files for this order are currently being uploaded to your inbox on Caesar at:\n\n"
+            f"The {file_types} files for this order have been uploaded to your inbox on Caesar at:\n\n"
             f"{delivery_path} \n\n"
             f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
         )

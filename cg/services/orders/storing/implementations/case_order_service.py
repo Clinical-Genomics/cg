@@ -146,6 +146,7 @@ class StoreCaseOrderService(StoreOrderService):
             application_version=application_version,
             internal_id=sample._generated_lims_id,
             lims_status=lims_status,
+            no_invoice=application_version.application.is_external,
             order=order_name,
             ordered=ordered,
             original_ticket=ticket,
