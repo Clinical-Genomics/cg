@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from cg.constants import Workflow
 from cg.constants.lims import LimsStatus
-from cg.constants.priority import PriorityHumanReadable
+from cg.constants.priority import PriorityTerms
 from cg.constants.subject import Sex
 from cg.store.models import Sample
 
@@ -109,7 +109,7 @@ class UnhandledSample(BaseModel):
     last_sequenced_at: datetime
     lims_status: LimsStatus
     sample_id: str
-    case_priority: PriorityHumanReadable | Literal["unknown"]
+    case_priority: PriorityTerms | Literal["unknown"]
     ticket: int | Literal["unknown"]
     workflow: Workflow | Literal["unknown"]
 

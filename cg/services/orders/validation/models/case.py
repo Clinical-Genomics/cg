@@ -3,7 +3,7 @@ from typing import Generic, TypeVar
 from pydantic import BaseModel, Discriminator, Field, Tag, model_validator
 from typing_extensions import Annotated
 
-from cg.constants.priority import PriorityHumanReadable
+from cg.constants.priority import PriorityTerms
 from cg.models.orders.sample_base import NAME_PATTERN
 from cg.services.orders.validation.models.discriminators import has_internal_id
 from cg.services.orders.validation.models.existing_sample import ExistingSample
@@ -16,7 +16,7 @@ SampleType = TypeVar("SampleType", bound=Sample)
 
 class Case(BaseModel, Generic[SampleType]):
     name: str = Field(pattern=NAME_PATTERN, min_length=2, max_length=128)
-    priority: PriorityHumanReadable = PriorityHumanReadable.STANDARD
+    priority: PriorityTerms = PriorityTerms.STANDARD
     samples: list[
         Annotated[
             Annotated[SampleType, Tag("new")] | Annotated[ExistingSample, Tag("existing")],

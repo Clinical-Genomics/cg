@@ -10,7 +10,7 @@ import pytest
 from cg.constants import Workflow
 from cg.constants.constants import CaseActions
 from cg.constants.devices import DeviceType
-from cg.constants.priority import PriorityHumanReadable
+from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import ReadType
 from cg.constants.subject import PhenotypeStatus
 from cg.services.illumina.data_transfer.models import IlluminaFlowCellDTO
@@ -377,10 +377,10 @@ def rml_pool_store(
         version=1,
         valid_from=timestamp_now,
         prices={
-            PriorityHumanReadable.STANDARD: 12,
-            PriorityHumanReadable.PRIORITY: 222,
-            PriorityHumanReadable.EXPRESS: 123,
-            PriorityHumanReadable.RESEARCH: 12,
+            PriorityTerms.STANDARD: 12,
+            PriorityTerms.PRIORITY: 222,
+            PriorityTerms.EXPRESS: 123,
+            PriorityTerms.RESEARCH: 12,
         },
     )
     store.session.add(app_version)

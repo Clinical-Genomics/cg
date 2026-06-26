@@ -4,7 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from cg.constants.priority import PriorityHumanReadable
+from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import RecordType
 
 
@@ -37,7 +37,7 @@ class InvoiceInfo(BaseModel):
     project: str
     date: Any | None = None
     price: int
-    priority: PriorityHumanReadable
+    priority: PriorityTerms
     price_kth: int | None = None
     total_price: int | None = None
 

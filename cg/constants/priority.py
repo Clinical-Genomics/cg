@@ -18,7 +18,7 @@ class TrailblazerPriority(StrEnum):
     EXPRESS = "express"
 
 
-class PriorityHumanReadable(StrEnum):
+class PriorityTerms(StrEnum):
     EXPRESS = "express"
     PRIORITY = "priority"
     RESEARCH = "research"

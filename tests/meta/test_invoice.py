@@ -1,7 +1,7 @@
 import mock
 
 from cg.constants.invoice import CostCenters
-from cg.constants.priority import PriorityHumanReadable
+from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import RecordType
 from cg.meta.invoice import InvoiceAPI
 from cg.models.invoice.invoice import InvoiceInfo
@@ -23,7 +23,7 @@ def test_assert_invoice_api(get_invoice_api_sample):
     api: InvoiceAPI = get_invoice_api_sample
     # THEN a report should be generated
     report = api.get_invoice_report(CostCenters.ki)
-    assert type(report) is dict
+    assert type(report) == dict
 
 
 def test_invoice_api_sample(get_invoice_api_sample, record_type: str = RecordType.Sample):
@@ -35,20 +35,20 @@ def test_invoice_api_sample(get_invoice_api_sample, record_type: str = RecordTyp
     assert api.record_type == record_type
     # THEN prepare_invoice_report should set priority to standard
     api.get_invoice_report(CostCenters.ki)
-    assert api.invoice_info.priority is PriorityHumanReadable.STANDARD
+    assert api.invoice_info.priority == PriorityTerms.STANDARD
 
     # THEN get_invoice_report returns a dictionary
     invoice_dict: dict = api.get_invoice_report(CostCenters.ki)
-    assert type(invoice_dict) is dict
+    assert type(invoice_dict) == dict
 
     # THEN prepare_invoice_report should set priority to standard
-    assert api.invoice_info.priority is PriorityHumanReadable.STANDARD
+    assert api.invoice_info.priority == PriorityTerms.STANDARD
 
     # THEN raw.records should contain a Pool
-    assert type(api.raw_records[0]) is Sample
+    assert type(api.raw_records[0]) == Sample
 
     # THEN api holds an InvoiceInfo class
-    assert type(api.invoice_info) is InvoiceInfo
+    assert type(api.invoice_info) == InvoiceInfo
 
 
 def test_invoice_api_nipt_customer(
@@ -63,16 +63,16 @@ def test_invoice_api_nipt_customer(
 
     # THEN get_invoice_report returns a dictionary
     invoice_dict = api.get_invoice_report(CostCenters.ki)
-    assert type(invoice_dict) is dict
+    assert type(invoice_dict) == dict
 
     # THEN prepare_invoice_report should set priority to standard
-    assert api.invoice_info.priority is PriorityHumanReadable.STANDARD
+    assert api.invoice_info.priority == PriorityTerms.STANDARD
 
     # THEN raw.records should contain a Pool
-    assert type(api.raw_records[0]) is Pool
+    assert type(api.raw_records[0]) == Pool
 
     # THEN api holds an InvoiceInfo class
-    assert type(api.invoice_info) is InvoiceInfo
+    assert type(api.invoice_info) == InvoiceInfo
 
 
 def test_invoice_pool_generic_customer(
@@ -86,4 +86,4 @@ def test_invoice_pool_generic_customer(
     assert api.record_type == record_type
     # THEN prepare_invoice_report should set priority to research
     api.get_invoice_report(CostCenters.ki)
-    assert api.invoice_info.priority == PriorityHumanReadable.RESEARCH
+    assert api.invoice_info.priority == PriorityTerms.RESEARCH
