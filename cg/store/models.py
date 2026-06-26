@@ -114,9 +114,9 @@ order_case = Table(
 
 class PriorityMixin:
     @property
-    def priority_human(self) -> str:
+    def priority_human(self) -> PriorityTerms:
         """Humanized priority for sample."""
-        return self.priority.name
+        return PriorityTerms(self.priority.name)
 
     @priority_human.setter
     def priority_human(self, priority: str) -> None:
@@ -866,10 +866,6 @@ class Sample(Base, PriorityMixin):
     def prep_category(self) -> SeqLibraryPrepCategory:
         """Return the preparation category of the sample."""
         return self.application_version.application.prep_category
-
-    @property
-    def priority_term(self) -> PriorityTerms:
-        return PriorityTerms(self.priority.name)
 
     @property
     def state(self) -> str:

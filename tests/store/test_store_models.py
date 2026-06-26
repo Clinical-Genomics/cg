@@ -405,7 +405,7 @@ def test_sample_priority_term(priority_num: Priority, expected_priority_term: Pr
     sample = Sample(priority=priority_num)
 
     # WHEN getting the priority_term
-    sample_priority_term = sample.priority_term
+    sample_priority_term = sample.priority_human
 
     # THEN the right priority term is given
     assert sample_priority_term == expected_priority_term
