@@ -566,6 +566,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         return config_data["analysis"]["BALSAMIC_version"]
 
+    # TODO: Remove this method
     def config_case(
         self,
         case_id: str,
@@ -628,6 +629,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
+    # TODO: Remove this method
     def run_analysis(
         self,
         case_id: str,
@@ -712,6 +714,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Return data analysis type carried out."""
         return self.get_bundle_deliverables_type(case_id)
 
+    # TODO: Remove this method
     def is_analysis_normal_only(self, case_id: str) -> bool:
         """Return whether the analysis is normal only."""
         case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
