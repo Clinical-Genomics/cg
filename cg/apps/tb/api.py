@@ -247,9 +247,7 @@ class TrailblazerAPI:
 
     def get_analyses_to_deliver_for_order(self, order_id: int) -> list[TrailblazerAnalysis]:
         """Return the analyses in the order ready to be delivered."""
-        endpoint = (
-            f"analyses?orderId={order_id}&status[]={AnalysisStatus.COMPLETED}&delivered=false"
-        )
+        endpoint = f"analyses?orderId={order_id}&status[]={AnalysisStatus.COMPLETED}&delivered=false&holdDelivery=false"
         raw_response = self.query_trailblazer(
             command=endpoint, request_body={}, method=APIMethods.GET
         )
@@ -270,7 +268,7 @@ class TrailblazerAPI:
             raise AnalysisNotCompletedError(f"The latest analysis for {case_id} has not completed.")
 
     def get_analyses_to_deliver_for_case(self, case_id: str) -> list[TrailblazerAnalysis]:
-        endpoint = f"analyses?case_id={case_id}&status[]={AnalysisStatus.COMPLETED}&delivered=false"
+        endpoint = f"analyses?case_id={case_id}&status[]={AnalysisStatus.COMPLETED}&delivered=false&holdDelivery=false"
         raw_response = self.query_trailblazer(
             command=endpoint, request_body={}, method=APIMethods.GET
         )
@@ -278,8 +276,9 @@ class TrailblazerAPI:
         return validated_response.analyses
 
     def get_all_analyses_to_deliver(self) -> list[TrailblazerAnalysis]:
-        endpoint = f"analyses?status[]={AnalysisStatus.COMPLETED}&delivered=false"
-
+        endpoint = (
+            f"analyses?status[]={AnalysisStatus.COMPLETED}&delivered=false&holdDelivery=false"
+        )
         raw_response = self.query_trailblazer(
             command=endpoint, request_body={}, method=APIMethods.GET
         )
