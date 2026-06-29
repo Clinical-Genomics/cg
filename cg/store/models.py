@@ -33,9 +33,10 @@ from cg.constants.constants import (
 )
 from cg.constants.devices import DeviceType, RevioNames
 from cg.constants.lims import LimsStatus
-from cg.constants.priority import PriorityTerms, SlurmQos
+from cg.constants.priority import PriorityTerms, SlurmQos, TrailblazerPriority
 from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
+from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.models.orders.constants import OrderType
 
 BigInt = Annotated[int, None]
@@ -906,9 +907,9 @@ class Sample(Base, PriorityMixin):
             return None
 
     @property
-    def priority_of_case_that_delivers(self) -> PriorityTerms | None:
+    def trailblazer_priority_of_case_that_delivers(self) -> TrailblazerPriority | None:
         if case := self.case_that_delivers:
-            return case.priority_human
+            return MAP_TO_TRAILBLAZER_PRIORITY[case.priority]
         else:
             return None
 
