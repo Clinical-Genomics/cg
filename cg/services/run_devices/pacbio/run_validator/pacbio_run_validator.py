@@ -84,4 +84,5 @@ class PacBioRunValidator(RunValidator):
         for file in files:
             if not file.exists():
                 return False
+        LOG.debug("All files are decompressed, no need to decompress again")
         return True
