@@ -72,16 +72,7 @@ class DeliverService:
             self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
             self.mark_as_delivered_service.close_order_in_status_db_if_closable(order)
             if not self._is_order_no_delivery(order):
-                freshdesk_ticket: TicketResponse = self.freshdesk_client.get_ticket(order.ticket_id)
-                self._freshdesk_send_delivery_message(
-                    order=order, analyses=analyses, cc_emails=freshdesk_ticket.cc_emails
-                )
-                if not order.is_open and freshdesk_ticket.status == Status.OPEN:
-                    self.freshdesk_client.update_ticket(
-                        ticket_id=order.ticket_id,
-                        status=Status.CLOSED,
-                        cc_emails=freshdesk_ticket.cc_emails,
-                    )
+                self._interact_with_freshdesk(analyses, order)
         except TrailblazerAnalysisDeliveryError as error:
             self.status_db.rollback()
             LOG.error(f"Failed to mark analyses as delivered in Trailblazer for order {order.id}")
@@ -149,6 +140,17 @@ class DeliverService:
     @staticmethod
     def _is_order_no_delivery(order: Order) -> bool:
         return order.cases[0].data_delivery == DataDelivery.NO_DELIVERY
+
+    def _interact_with_freshdesk(self, analyses: list[Analysis], order: Order):
+        freshdesk_ticket: TicketResponse = self.freshdesk_client.get_ticket(order.ticket_id)
+        self._freshdesk_send_delivery_message(
+            order=order, analyses=analyses, cc_emails=freshdesk_ticket.cc_emails
+        )
+        if not order.is_open and freshdesk_ticket.status == Status.OPEN:
+            self.freshdesk_client.update_ticket(
+                ticket_id=order.ticket_id,
+                status=Status.CLOSED,
+            )
 
     def _freshdesk_send_delivery_message(
         self, order: Order, analyses: list[Analysis], cc_emails: list[str]

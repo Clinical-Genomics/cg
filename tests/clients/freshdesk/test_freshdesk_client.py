@@ -110,9 +110,7 @@ def test_update_ticket_success(ticket_raw_response: dict, mocker: MockerFixture)
     mocker.patch.object(client.session, "put", return_value=response)
 
     # WHEN updating the ticket with a status
-    ticket_response = client.update_ticket(
-        ticket_id=20, status=Status.CLOSED, cc_emails=["email@to.cc"]
-    )
+    ticket_response = client.update_ticket(ticket_id=20, status=Status.CLOSED)
 
     # THEN the response should be as expected
     expected_ticket_response = TicketResponse(
@@ -140,7 +138,7 @@ def test_update_ticket_failure(mocker: MockerFixture):
     # WHEN updating the ticket with a status
     # THEN a FreshdeskUpdateTicketError should be raised
     with pytest.raises(FreshdeskUpdateTicketError):
-        client.update_ticket(ticket_id=20, status=Status.CLOSED, cc_emails=["email@to.cc"])
+        client.update_ticket(ticket_id=20, status=Status.CLOSED)
 
 
 def test_reply_to_ticket_success(mocker: MockerFixture):

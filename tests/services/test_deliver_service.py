@@ -94,7 +94,7 @@ def test_deliver_case_closes_order(mocker: MockerFixture):
 
     # THEN we should have closed the ticket in Freshdesk
     freshdesk_client.as_mock.update_ticket.assert_called_once_with(
-        ticket_id=order.ticket_id, status=5, cc_emails=["email@to.cc"]
+        ticket_id=order.ticket_id, status=5
     )
 
 
@@ -428,12 +428,8 @@ def test_deliver_all_available_success(mocker: MockerFixture):
     )
 
     # THEN both tickets were closed in freshdesk
-    freshdesk_client.as_mock.update_ticket.assert_any_call(
-        ticket_id=order_1.ticket_id, status=5, cc_emails=["email@to.cc"]
-    )
-    freshdesk_client.as_mock.update_ticket.assert_any_call(
-        ticket_id=order_2.ticket_id, status=5, cc_emails=["email@to.cc"]
-    )
+    freshdesk_client.as_mock.update_ticket.assert_any_call(ticket_id=order_1.ticket_id, status=5)
+    freshdesk_client.as_mock.update_ticket.assert_any_call(ticket_id=order_2.ticket_id, status=5)
 
 
 def test_deliver_all_available_no_analyses_to_deliver(mocker: MockerFixture):
@@ -747,7 +743,7 @@ def test_deliver_order_success(mocker: MockerFixture):
 
     # THEN the Freshdesk ticket should have been closed
     freshdesk_client.as_mock.update_ticket.assert_called_once_with(
-        ticket_id=123, status=Status.CLOSED, cc_emails=["email@to.cc"]
+        ticket_id=123, status=Status.CLOSED
     )
 
 
