@@ -14,7 +14,7 @@ def get_case_message(case: Case) -> str:
         "Hello,\n\n"
         "The analysis has been uploaded to Scout for the following case:\n\n"
         f"{scout_link}\n\n"
-        "The raw data files are currently being uploaded to your inbox on Caesar:\n\n"
+        "The raw data files have been uploaded to your inbox on Caesar:\n\n"
         f"{delivery_path} \n\n"
         f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
     )
@@ -28,7 +28,7 @@ def get_cases_message(cases: list[Case]) -> str:
         "Hello,\n\n "
         "The analyses have been uploaded to Scout for the following cases:\n\n"
         f"{scout_links_row_separated}\n\n"
-        "The raw data files are currently being uploaded to your inbox on Caesar:\n\n"
+        "The raw data files have been uploaded to your inbox on Caesar:\n\n"
         f"{delivery_path} \n\n"
         f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
     )
