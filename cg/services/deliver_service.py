@@ -72,7 +72,7 @@ class DeliverService:
             self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
             self.mark_as_delivered_service.close_order_in_status_db_if_closable(order)
             if not self._is_order_no_delivery(order):
-                self._interact_with_freshdesk(analyses, order)
+                self._interact_with_freshdesk(analyses=analyses, order=order)
         except TrailblazerAnalysisDeliveryError as error:
             self.status_db.rollback()
             LOG.error(f"Failed to mark analyses as delivered in Trailblazer for order {order.id}")
