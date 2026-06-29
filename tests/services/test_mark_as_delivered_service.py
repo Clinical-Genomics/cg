@@ -313,6 +313,35 @@ def test_mark_analyses_negative_control(
     assert negative_control_sample.delivered_at is not None
 
 
+def test_mark_analyses_two_cases_one_sample(mark_as_delivered_service: MarkAsDeliveredService):
+    # GIVEN that a customer orders a case with a sample
+    sample: Sample = create_autospec(
+        Sample, delivered_at=None, expected_reads_for_sample=1, reads=1
+    )
+    first_case: Case = create_autospec(Case)
+    first_case_sample: CaseSample = create_autospec(
+        CaseSample, case=first_case, sample=sample, should_deliver_sample=True
+    )
+    first_case.links = [first_case_sample]
+
+    # GIVEN that a customer orders a new case with the same sample (without the first case having been delivered)
+    second_case: Case = create_autospec(Case)
+    second_case_sample: CaseSample = create_autospec(
+        CaseSample, case=second_case, sample=sample, should_deliver_sample=False
+    )
+    second_case.links = [second_case_sample]
+    order_second_case: Order = create_autospec(Order, cases=[second_case], is_open=True)
+
+    # GIVEN that the second order finishes first
+    # Mock the trailblazer get_delivered_analyses_for_order
+
+    # WHEN delivering the second order
+    mark_as_delivered_service.close_order_in_status_db_if_closable(order_second_case)
+
+    # THEN the order will never be closed in StatusDB and the ticket will never be closed in Freshdesk(automatically)
+    assert order_second_case.is_open
+
+
 def test_is_order_closable_true(mark_as_delivered_service: MarkAsDeliveredService):
     # GIVEN an open order with a case that includes only delivered samples
     sample_delivered1: Sample = create_autospec(Sample, delivered_at=datetime.now())
