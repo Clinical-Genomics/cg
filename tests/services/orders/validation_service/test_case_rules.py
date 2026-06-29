@@ -68,6 +68,7 @@ def test_case_name_not_available(
     assert isinstance(errors[0], CaseNameNotAvailableError)
 
 
+# TODO: This test can go
 def test_case_internal_ids_does_not_exist(
     valid_order: OrderWithCases,
     store_with_multiple_cases_and_samples: Store,
@@ -130,6 +131,7 @@ def test_multiple_samples_in_case(rnafusion_order: RNAFusionOrder):
     assert errors[0].case_index == 0
 
 
+# TODO: This test can go
 def test_case_outside_of_collaboration(
     mip_dna_order: MIPDNAOrder, store_with_multiple_cases_and_samples: Store
 ):
@@ -182,6 +184,7 @@ def test_new_case_without_affected_samples(mip_dna_order: MIPDNAOrder):
     assert errors[0].case_index == 0
 
 
+# TODO: Remove this test
 def test_existing_case_without_affected_samples(
     mip_dna_order: MIPDNAOrder,
     store_with_multiple_cases_and_samples: Store,

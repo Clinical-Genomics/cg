@@ -66,6 +66,7 @@ def validate_case_names_available(
     return errors
 
 
+# TODO: Remove this validation
 def validate_case_internal_ids_exist(
     order: OrderWithCases,
     store: Store,
@@ -80,6 +81,7 @@ def validate_case_internal_ids_exist(
     return errors
 
 
+# TODO: Remove this validation
 def validate_existing_cases_belong_to_collaboration(
     order: OrderWithCases,
     store: Store,
@@ -162,6 +164,7 @@ def validate_each_new_case_has_an_affected_sample(
     return errors
 
 
+# TODO: Remove this validation
 def validate_existing_cases_have_an_affected_sample(
     order: MIPDNAOrder | NalloOrder, store: Store, **kwargs
 ) -> list[ExistingCaseWithoutAffectedSampleError]:
