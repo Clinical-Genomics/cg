@@ -4,6 +4,7 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
+from cg.clients.freshdesk.models import TicketResponse
 from cg.constants import DataDelivery, Workflow
 from cg.exc import (
     FreshdeskDeliveryMessageError,
@@ -71,8 +72,16 @@ class DeliverService:
             self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
             self.mark_as_delivered_service.close_order_in_status_db_if_closable(order)
             if not self._is_order_no_delivery(order):
-                self._freshdesk_send_delivery_message(order=order, analyses=analyses)
-                self._freshdesk_close_ticket_if_open(order=order)
+                freshdesk_ticket: TicketResponse = self.freshdesk_client.get_ticket(order.ticket_id)
+                self._freshdesk_send_delivery_message(
+                    order=order, analyses=analyses, cc_emails=freshdesk_ticket.cc_emails
+                )
+                if not order.is_open and freshdesk_ticket.status == Status.OPEN:
+                    self.freshdesk_client.update_ticket(
+                        ticket_id=order.ticket_id,
+                        status=Status.CLOSED,
+                        cc_emails=freshdesk_ticket.cc_emails,
+                    )
         except TrailblazerAnalysisDeliveryError as error:
             self.status_db.rollback()
             LOG.error(f"Failed to mark analyses as delivered in Trailblazer for order {order.id}")
@@ -141,14 +150,11 @@ class DeliverService:
     def _is_order_no_delivery(order: Order) -> bool:
         return order.cases[0].data_delivery == DataDelivery.NO_DELIVERY
 
-    def _freshdesk_send_delivery_message(self, order: Order, analyses: list[Analysis]):
+    def _freshdesk_send_delivery_message(
+        self, order: Order, analyses: list[Analysis], cc_emails: list[str]
+    ):
         cases: list[Case] = [analysis.case for analysis in analyses]
         message: str = get_message(cases=cases, store=self.status_db)
-        self.freshdesk_client.reply_to_ticket(ticket_id=order.ticket_id, message=message)
-
-    def _freshdesk_close_ticket_if_open(self, order: Order):
-        if not order.is_open:
-            if self.freshdesk_client.get_ticket(order.ticket_id).status == Status.OPEN:
-                self.freshdesk_client.update_ticket(ticket_id=order.ticket_id, status=Status.CLOSED)
-        else:
-            return
+        self.freshdesk_client.reply_to_ticket(
+            ticket_id=order.ticket_id, message=message, cc_emails=cc_emails
+        )

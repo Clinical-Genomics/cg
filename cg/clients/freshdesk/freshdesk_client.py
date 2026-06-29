@@ -73,9 +73,9 @@ class FreshdeskClient:
         except HTTPError as error:
             raise FreshdeskGetTicketError from error
 
-    def update_ticket(self, ticket_id: int, status: int) -> TicketResponse:
+    def update_ticket(self, ticket_id: int, status: int, cc_emails: list[str]) -> TicketResponse:
         url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}"
-        json = {"status": status}
+        json = {"status": status, "cc_emails": cc_emails}
         LOG.debug(f"URL={url}; JSON={json}")
         try:
             response = self.session.put(url=url, json=json)
@@ -84,11 +84,11 @@ class FreshdeskClient:
         except HTTPError as error:
             raise FreshdeskUpdateTicketError from error
 
-    def reply_to_ticket(self, ticket_id: int, message: str) -> None:
+    def reply_to_ticket(self, ticket_id: int, message: str, cc_emails: list[str]) -> None:
         """Send a reply to an existing ticket in Freshdesk."""
         url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}/reply"
         html_body = escape(message).replace("\n", "<br>")
-        json = {"body": html_body}
+        json = {"body": html_body, "cc_emails": cc_emails}
         LOG.debug(f"URL={url}; JSON={json}")
         try:
             response = self.session.post(url=url, json=json)

@@ -70,6 +70,7 @@ def test_get_ticket_success(ticket_raw_response: dict, mocker: MockerFixture):
     # THEN the response should be as expected
     expected_ticket_response = TicketResponse(
         id=20,
+        cc_emails=["user@cc.com"],
         description="<div>Not given.</div>",
         subject="",
         priority=Priority.LOW,
@@ -109,11 +110,14 @@ def test_update_ticket_success(ticket_raw_response: dict, mocker: MockerFixture)
     mocker.patch.object(client.session, "put", return_value=response)
 
     # WHEN updating the ticket with a status
-    ticket_response = client.update_ticket(ticket_id=20, status=Status.CLOSED)
+    ticket_response = client.update_ticket(
+        ticket_id=20, status=Status.CLOSED, cc_emails=["email@to.cc"]
+    )
 
     # THEN the response should be as expected
     expected_ticket_response = TicketResponse(
         id=20,
+        cc_emails=["user@cc.com"],
         description="<div>Not given.</div>",
         subject="",
         priority=Priority.LOW,
@@ -136,7 +140,7 @@ def test_update_ticket_failure(mocker: MockerFixture):
     # WHEN updating the ticket with a status
     # THEN a FreshdeskUpdateTicketError should be raised
     with pytest.raises(FreshdeskUpdateTicketError):
-        client.update_ticket(ticket_id=20, status=Status.CLOSED)
+        client.update_ticket(ticket_id=20, status=Status.CLOSED, cc_emails=["email@to.cc"])
 
 
 def test_reply_to_ticket_success(mocker: MockerFixture):
@@ -149,12 +153,12 @@ def test_reply_to_ticket_success(mocker: MockerFixture):
     mocked_post = mocker.patch.object(client.session, "post", return_value=mocked_response)
 
     # WHEN replying to a ticket with a message
-    client.reply_to_ticket(ticket_id=123, message="Reply to ticket")
+    client.reply_to_ticket(ticket_id=123, message="Reply to ticket", cc_emails=["email@to.cc"])
 
     # THEN a reply was sent to the ticket
     mocked_post.assert_called_once_with(
         url="https://example.freshdesk.com/api/v2/tickets/123/reply",
-        json={"body": "Reply to ticket"},
+        json={"body": "Reply to ticket", "cc_emails": ["email@to.cc"]},
     )
 
 
@@ -170,4 +174,4 @@ def test_reply_to_ticket_failure(mocker: MockerFixture):
     # WHEN replying to the ticket with a message
     # THEN a FreshdeskDeliveryMessageError should be raised
     with pytest.raises(FreshdeskDeliveryMessageError):
-        client.reply_to_ticket(ticket_id=20, message="")
+        client.reply_to_ticket(ticket_id=20, message="", cc_emails=[])

@@ -12,7 +12,7 @@ from cg.clients.freshdesk.models import TicketResponse
 from cg.constants.constants import DataDelivery, Workflow
 from cg.exc import (
     FreshdeskDeliveryMessageError,
-    FreshdeskGetTicketError,
+    FreshdeskUpdateTicketError,
     MultipleAnalysesToDeliverError,
     OrderNotFoundError,
     TrailblazerAnalysisDeliveryError,
@@ -59,7 +59,7 @@ def test_deliver_case_closes_order(mocker: MockerFixture):
     # GIVEN a Freshdesk client
     freshdesk_client: TypedMock[FreshdeskClient] = create_typed_mock(FreshdeskClient)
     freshdesk_client.as_type.get_ticket = Mock(
-        return_value=create_autospec(TicketResponse, status=2)
+        return_value=create_autospec(TicketResponse, status=2, cc_emails=["email@to.cc"])
     )
 
     # GIVEN a delivery message method
@@ -89,12 +89,12 @@ def test_deliver_case_closes_order(mocker: MockerFixture):
 
     # THEN the delivery message is sent
     freshdesk_client.as_mock.reply_to_ticket.assert_called_once_with(
-        ticket_id=123, message="delivery message"
+        ticket_id=123, message="delivery message", cc_emails=["email@to.cc"]
     )
 
     # THEN we should have closed the ticket in Freshdesk
     freshdesk_client.as_mock.update_ticket.assert_called_once_with(
-        ticket_id=order.ticket_id, status=5
+        ticket_id=order.ticket_id, status=5, cc_emails=["email@to.cc"]
     )
 
 
@@ -151,7 +151,7 @@ def test_deliver_case_order_is_not_closed(mocker: MockerFixture):
     # GIVEN a Freshdesk client
     freshdesk_client: TypedMock[FreshdeskClient] = create_typed_mock(FreshdeskClient)
     freshdesk_client.as_type.get_ticket = Mock(
-        return_value=create_autospec(TicketResponse, status=2)
+        return_value=create_autospec(TicketResponse, cc_emails=["email@to.cc"], status=2)
     )
 
     # GIVEN a delivery message method
@@ -184,7 +184,7 @@ def test_deliver_case_order_is_not_closed(mocker: MockerFixture):
 
     # THEN the delivery message is sent
     freshdesk_client.as_mock.reply_to_ticket.assert_called_once_with(
-        ticket_id=123, message="delivery message"
+        ticket_id=123, message="delivery message", cc_emails=["email@to.cc"]
     )
 
     # THEN the ticket is not closed in freshdesk
@@ -370,7 +370,7 @@ def test_deliver_all_available_success(mocker: MockerFixture):
     # GIVEN a Freshdesk Client
     freshdesk_client: TypedMock[FreshdeskClient] = create_typed_mock(FreshdeskClient)
     freshdesk_client.as_type.get_ticket = lambda ticket_id: create_autospec(
-        TicketResponse, id=ticket_id, status=2
+        TicketResponse, id=ticket_id, status=2, cc_emails=["email@to.cc"]
     )
 
     # GIVEN a delivery message method
@@ -417,15 +417,23 @@ def test_deliver_all_available_success(mocker: MockerFixture):
     delivery_message_mock.assert_any_call(cases=[case_1], store=status_db)
     delivery_message_mock.assert_any_call(cases=[case_2, case_3], store=status_db)
     freshdesk_client.as_mock.reply_to_ticket.assert_any_call(
-        ticket_id=order_1.ticket_id, message="delivery message"
+        ticket_id=order_1.ticket_id,
+        message="delivery message",
+        cc_emails=["email@to.cc"],
     )
     freshdesk_client.as_mock.reply_to_ticket.assert_any_call(
-        ticket_id=order_2.ticket_id, message="delivery message"
+        ticket_id=order_2.ticket_id,
+        message="delivery message",
+        cc_emails=["email@to.cc"],
     )
 
     # THEN both tickets were closed in freshdesk
-    freshdesk_client.as_mock.update_ticket.assert_any_call(ticket_id=order_1.ticket_id, status=5)
-    freshdesk_client.as_mock.update_ticket.assert_any_call(ticket_id=order_2.ticket_id, status=5)
+    freshdesk_client.as_mock.update_ticket.assert_any_call(
+        ticket_id=order_1.ticket_id, status=5, cc_emails=["email@to.cc"]
+    )
+    freshdesk_client.as_mock.update_ticket.assert_any_call(
+        ticket_id=order_2.ticket_id, status=5, cc_emails=["email@to.cc"]
+    )
 
 
 def test_deliver_all_available_no_analyses_to_deliver(mocker: MockerFixture):
@@ -607,6 +615,16 @@ def test_deliver_all_available_freshdesk_closing_ticket_error(mocker: MockerFixt
 
     # GIVEN a Freshdesk client
     freshdesk_client: TypedMock[FreshdeskClient] = create_typed_mock(FreshdeskClient)
+    freshdesk_client.as_type.get_ticket = Mock(
+        return_value=TicketResponse(
+            id=1,
+            cc_emails=["email@to.cc"],
+            description="A ticket",
+            subject="A subject",
+            status=Status.OPEN,
+            priority=1,
+        )
+    )
 
     # GIVEN a Delivery Service
     deliver_service = DeliverService(
@@ -620,8 +638,8 @@ def test_deliver_all_available_freshdesk_closing_ticket_error(mocker: MockerFixt
         deliver_service_module, "get_message", return_value="delivery message"
     )
 
-    # GIVEN that the Freshdesk client raises a FreshdeskGetTicketError
-    freshdesk_client.as_type.get_ticket = Mock(side_effect=FreshdeskGetTicketError)
+    # GIVEN that the Freshdesk client raises a FreshdeskUpdateTicketError
+    freshdesk_client.as_type.update_ticket = Mock(side_effect=FreshdeskUpdateTicketError)
 
     # WHEN delivering all analyses
     success: bool = deliver_service.deliver_all_available()
@@ -634,7 +652,9 @@ def test_deliver_all_available_freshdesk_closing_ticket_error(mocker: MockerFixt
 
     # THEN the delivery message should have been sent
     freshdesk_client.as_mock.reply_to_ticket.assert_called_once_with(
-        ticket_id=1, message="delivery message"
+        ticket_id=1,
+        message="delivery message",
+        cc_emails=["email@to.cc"],
     )
 
     # THEN the order should have been reopened if ever closed
@@ -686,7 +706,7 @@ def test_deliver_order_success(mocker: MockerFixture):
     # GIVEN a Freshdesk client
     freshdesk_client: TypedMock[FreshdeskClient] = create_typed_mock(FreshdeskClient)
     freshdesk_client.as_type.get_ticket = Mock(
-        return_value=create_autospec(TicketResponse, status=2)
+        return_value=create_autospec(TicketResponse, cc_emails=["email@to.cc"], status=2)
     )
     freshdesk_client.as_type.update_ticket = Mock(return_value=None)
 
@@ -716,7 +736,7 @@ def test_deliver_order_success(mocker: MockerFixture):
 
     # THEN the delivery message should have been sent
     freshdesk_client.as_mock.reply_to_ticket.assert_called_once_with(
-        ticket_id=123, message="delivery message"
+        ticket_id=123, message="delivery message", cc_emails=["email@to.cc"]
     )
 
     # THEN the order should have been closed
@@ -727,7 +747,7 @@ def test_deliver_order_success(mocker: MockerFixture):
 
     # THEN the Freshdesk ticket should have been closed
     freshdesk_client.as_mock.update_ticket.assert_called_once_with(
-        ticket_id=123, status=Status.CLOSED
+        ticket_id=123, status=Status.CLOSED, cc_emails=["email@to.cc"]
     )
 
 
