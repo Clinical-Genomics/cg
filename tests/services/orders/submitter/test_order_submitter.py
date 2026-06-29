@@ -1,5 +1,5 @@
 import datetime as dt
-from unittest.mock import PropertyMock, create_autospec, patch
+from unittest.mock import Mock, PropertyMock, create_autospec, patch
 
 import pytest
 from genologics.entities import Sample as LimsSample
@@ -56,10 +56,11 @@ def monkeypatch_process_lims(monkeypatch: pytest.MonkeyPatch, order: Order) -> N
     )
 
 
-def mock_freshdesk_ticket_creation(mock_create_ticket: callable, ticket_id: str):
+def mock_freshdesk_ticket_creation(mock_create_ticket: Mock, ticket_id: str):
     """Helper function to mock Freshdesk ticket creation."""
     mock_create_ticket.return_value = TicketResponse(
         id=int(ticket_id),
+        cc_emails=["email@to.cc"],
         description="This is a test description.",
         subject="Support needed..",
         status=2,
@@ -67,7 +68,7 @@ def mock_freshdesk_ticket_creation(mock_create_ticket: callable, ticket_id: str)
     )
 
 
-def mock_freshdesk_reply_to_ticket(mock_reply_to_ticket: callable):
+def mock_freshdesk_reply_to_ticket(mock_reply_to_ticket: Mock):
     """Helper function to mock Freshdesk reply to ticket."""
     mock_reply_to_ticket.return_value = None
 
