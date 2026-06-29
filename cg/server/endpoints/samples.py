@@ -73,6 +73,7 @@ def get_unhandled_samples():
             search=req.search,
             page=req.page,
             page_size=req.page_size,
+            priority=req.priority,
             sort_by=req.sort_by,
             sort_order=req.sort_order,
             workflow=req.workflow,

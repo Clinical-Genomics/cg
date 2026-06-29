@@ -471,6 +471,33 @@ def test_get_unhandled_samples_filter_on_workflow(client: FlaskClient, mocker: M
     )
 
 
+def test_get_unhandled_samples_filter_on_priority(client: FlaskClient, mocker: MockerFixture):
+    # GIVEN a store with unhandled samples in top-up
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([], 0))
+    mocker.patch.object(samples, "db", status_db.as_type)
+
+    # WHEN querying the unhandled samples endpoint with workflow Raredisease
+    response = client.get(
+        path=f"/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=10&priority={TrailblazerPriority.EXPRESS}",
+    )
+
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.OK
+
+    # THEN function has been called with the correct arguments
+    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=10,
+        priority=TrailblazerPriority.EXPRESS,
+        search=None,
+        sort_by=None,
+        sort_order=None,
+        workflow=None,
+    )
+
+
 def test_get_unhandled_samples_unknown_param(client: FlaskClient, mocker: MockerFixture):
     # GIVEN an unknown param in the request
 

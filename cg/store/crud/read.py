@@ -1925,6 +1925,7 @@ class ReadHandler(BaseHandler):
 
     def get_paginated_unhandled_samples(
         self,
+        # TODO Add priority here
         lims_status: LimsStatus,
         page: int,
         page_size: int,
@@ -1934,6 +1935,7 @@ class ReadHandler(BaseHandler):
         workflow: Workflow | None = None,
     ) -> tuple[list[Sample], int]:
         unhandled_samples: Query = self._get_unhandled_samples(
+            # TODO Add priority here
             lims_status=lims_status,
             search=search,
             sort_by=sort_by,
@@ -1944,12 +1946,14 @@ class ReadHandler(BaseHandler):
 
     def _get_unhandled_samples(
         self,
+        # TODO Add priority here
         lims_status: LimsStatus,
         search: str | None = None,
         sort_by: UnhandledSamplesSortBy | None = None,
         sort_order: SortDirection | None = None,
         workflow: Workflow | None = None,
     ) -> Query:
+        # TODO add prio filtering to doc string
         """
         Return samples with the given lims_status that:
             - Are not downsampled
@@ -1992,6 +1996,8 @@ class ReadHandler(BaseHandler):
 
         if workflow:
             query = query.filter(Sample.workflow_of_case_that_delivers == workflow)
+
+        # TODO Add filter with prio here
 
         return query
 
