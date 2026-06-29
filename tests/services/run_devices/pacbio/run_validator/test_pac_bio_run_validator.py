@@ -34,7 +34,7 @@ def run_data(tmp_path: Path) -> PacBioRunData:
     )
 
 
-def test_pacbio_run_validator(run_data: PacBioRunData, run_validator: PacBioRunValidator):
+def test_pacbio_run_validator_success(run_data: PacBioRunData, run_validator: PacBioRunValidator):
     """Test that the run validator flow works as expected."""
     # GIVEN PacBio run data and a PacBio run validator
 
@@ -75,16 +75,15 @@ def test_pacbio_run_validator_skip_if_validated(
     run_data: PacBioRunData, run_validator: PacBioRunValidator
 ):
     """Test that the run validator skips validation if the run is already validated."""
-    # GIVEN run data and a run validator
+    # GIVEN PacBio run data and a PacBio run validator
 
     # GIVEN that the run is already validated
-    run_validator._touch_is_validated(run_data.full_path)
+    Path(run_data.full_path, PacBioDirsAndFiles.RUN_IS_VALID).touch()
 
     # WHEN ensuring post-processing can start
     run_validator.ensure_post_processing_can_start(run_data)
 
     # THEN the validation flow is skipped as the run is already validated
-    assert Path(run_data.full_path, PacBioDirsAndFiles.RUN_IS_VALID).exists()
     run_validator.file_manager.get_run_validation_files.assert_not_called()
     run_validator.file_transfer_validator.validate_file_transfer.assert_not_called()
     run_validator.decompressor.decompress.assert_not_called()
@@ -93,7 +92,10 @@ def test_pacbio_run_validator_skip_if_validated(
 def test_pacbio_run_validator_skip_decompression(
     run_data: PacBioRunData, run_validator: PacBioRunValidator
 ):
-    # GIVEN that the files have already been decompressed
+    """Test that a run with already decompressed files is not unzipped again"""
+    # GIVEN PacBio run data and a PacBio run validator
+
+    # GIVEN that all files have already been decompressed
     file_manager: PacBioRunFileManager = create_autospec(PacBioRunFileManager)
     base_path = Path(
         run_data.full_path,

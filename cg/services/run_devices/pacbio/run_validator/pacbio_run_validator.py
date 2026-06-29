@@ -50,7 +50,7 @@ class PacBioRunValidator(RunValidator):
             source_dir=run_data.full_path,
             manifest_file_format=FileFormat.TXT,
         )
-        if not self._are_all_parsable_files_decompressed(run_data):
+        if not self._are_all_files_decompressed(run_data):
             self.decompressor.decompress(
                 source_path=paths_information.decompression_target,
                 destination_path=paths_information.decompression_destination,
@@ -79,7 +79,7 @@ class PacBioRunValidator(RunValidator):
     def _touch_is_validated(run_path: Path) -> None:
         Path(run_path, PacBioDirsAndFiles.RUN_IS_VALID).touch()
 
-    def _are_all_parsable_files_decompressed(self, run_data: PacBioRunData) -> bool:
+    def _are_all_files_decompressed(self, run_data: PacBioRunData) -> bool:
         files: list[Path] = self.file_manager.get_unzipped_files(run_data)
         for file in files:
             if not file.exists():
