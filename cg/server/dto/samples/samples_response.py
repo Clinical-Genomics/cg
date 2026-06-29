@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from cg.constants import Workflow
 from cg.constants.lims import LimsStatus
+from cg.constants.priority import TrailblazerPriority
 from cg.constants.subject import Sex
 from cg.store.models import Sample
 
@@ -105,9 +106,10 @@ class SamplesResponse(BaseModel):
 
 class UnhandledSample(BaseModel):
     case_id: str | Literal["unknown"]
-    sample_id: str
     last_sequenced_at: datetime
     lims_status: LimsStatus
+    sample_id: str
+    case_priority: TrailblazerPriority | Literal["unknown"]
     ticket: int | Literal["unknown"]
     workflow: Workflow | Literal["unknown"]
 
@@ -132,9 +134,10 @@ class UnhandledSamplesResponse(BaseModel):
             unhandled_samples.append(
                 UnhandledSample(
                     case_id=sample.delivering_case_internal_id or "unknown",
-                    sample_id=sample.internal_id,
                     last_sequenced_at=sample.last_sequenced_at,  # type: ignore
                     lims_status=sample.lims_status,
+                    sample_id=sample.internal_id,
+                    case_priority=sample.trailblazer_priority_of_case_that_delivers or "unknown",
                     ticket=sample.ticket_id_from_original_order or "unknown",
                     workflow=sample.workflow_of_case_that_delivers or "unknown",
                 )
