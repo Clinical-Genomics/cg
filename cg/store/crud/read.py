@@ -16,7 +16,7 @@ from cg.constants.constants import (
     SampleType,
 )
 from cg.constants.lims import LimsStatus
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import SlurmQos, TrailblazerPriority
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
@@ -30,6 +30,7 @@ from cg.exc import (
     PacbioSequencingRunNotFoundError,
     SampleNotFoundError,
 )
+from cg.meta.workflow.utils.utils import MAP_FROM_TRAILBLAZER_PRIORITY
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import SexEnum
 from cg.server.dto.samples.requests import (
@@ -1928,6 +1929,7 @@ class ReadHandler(BaseHandler):
         lims_status: LimsStatus,
         page: int,
         page_size: int,
+        priority: TrailblazerPriority | None = None,
         search: str | None = None,
         sort_by: UnhandledSamplesSortBy | None = None,
         sort_order: SortDirection | None = None,
@@ -1935,6 +1937,7 @@ class ReadHandler(BaseHandler):
     ) -> tuple[list[Sample], int]:
         unhandled_samples: Query = self._get_unhandled_samples(
             lims_status=lims_status,
+            priority=priority,
             search=search,
             sort_by=sort_by,
             sort_order=sort_order,
@@ -1945,11 +1948,13 @@ class ReadHandler(BaseHandler):
     def _get_unhandled_samples(
         self,
         lims_status: LimsStatus,
+        priority: TrailblazerPriority | None = None,
         search: str | None = None,
         sort_by: UnhandledSamplesSortBy | None = None,
         sort_order: SortDirection | None = None,
         workflow: Workflow | None = None,
     ) -> Query:
+        # TODO add prio filtering to doc string
         """
         Return samples with the given lims_status that:
             - Are not downsampled
@@ -1992,6 +1997,10 @@ class ReadHandler(BaseHandler):
 
         if workflow:
             query = query.filter(Sample.workflow_of_case_that_delivers == workflow)
+
+        if priority:
+            priorities = MAP_FROM_TRAILBLAZER_PRIORITY[priority]
+            query = query.filter(Sample.priority_of_case_that_delivers.in_(priorities))
 
         return query
 

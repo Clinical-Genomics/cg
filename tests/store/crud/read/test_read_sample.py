@@ -8,6 +8,7 @@ from sqlalchemy.orm import Query
 
 from cg.constants import SexOptions, Workflow
 from cg.constants.lims import LimsStatus
+from cg.constants.priority import PriorityTerms, TrailblazerPriority
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import SampleNotFoundError
 from cg.models.orders.constants import OrderType
@@ -1188,4 +1189,63 @@ def test_get_paginated_unhandled_samples_search_sample_no_delivering_case(
 
     # THEN the sample should be returned since its own internal_id matches
     assert unhandled_samples == [sample]
+    assert total == 1
+
+
+def test_get_paginated_unhandled_samples_priority(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with two unhandled samples
+    sample_normal_prio = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="matching_search_string",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    sample_low_prio = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="perfect_unhandled_sample_2",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now() - timedelta(days=1),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    # GIVEN a case linked to the sample with should_deliver_sample
+    case: Case = helpers.add_case(
+        store=store,
+        name="case_1",
+        internal_id="some_case_id",
+        priority=PriorityTerms.STANDARD,
+    )
+    helpers.relate_samples(
+        base_store=store,
+        case=case,
+        samples=[sample_normal_prio],
+        should_deliver_sample=True,
+    )
+
+    other_case: Case = helpers.add_case(
+        store=store,
+        name="case_other_1",
+        internal_id="some_other_case_id",
+        priority=PriorityTerms.RESEARCH,
+    )
+    helpers.relate_samples(
+        base_store=store,
+        case=other_case,
+        samples=[sample_low_prio],
+        should_deliver_sample=True,
+    )
+
+    # WHEN getting the unhandled samples in top-up using page 1 and page_size = 1
+    unhandled_samples, total = store.get_paginated_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP, page=1, page_size=1, priority=TrailblazerPriority.NORMAL
+    )
+    # THEN only the newer sample should be returned
+    assert unhandled_samples == [sample_normal_prio]
     assert total == 1

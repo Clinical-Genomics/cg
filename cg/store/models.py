@@ -906,6 +906,29 @@ class Sample(Base, PriorityMixin):
         else:
             return None
 
+    @hybrid_property
+    def priority_of_case_that_delivers(
+        self,
+    ) -> Priority | None:  # pyright: ignore [reportRedeclaration]
+        if case := self.case_that_delivers:
+            return case.priority
+        else:
+            return None
+
+    @priority_of_case_that_delivers.expression
+    @classmethod
+    def priority_of_case_that_delivers(cls) -> SQLColumnExpression[Priority]:
+        return (
+            select(Case.priority)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .limit(1)
+            .label("priority_of_case_that_delivers")
+        )
+
     @property
     def trailblazer_priority_of_case_that_delivers(self) -> TrailblazerPriority | None:
         if case := self.case_that_delivers:
