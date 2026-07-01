@@ -243,6 +243,7 @@ class NfAnalysisAPI(AnalysisAPI):
         return metrics
 
     def _get_list_of_metric_dicts(self, multiqc_json: MultiqcDataJson) -> list[dict[str, Any]]:
+        # TODO: Implement logic here that transforms the report_general_stats_data into the desired format
         if metric_dicts := multiqc_json.report_general_stats_data:
             return metric_dicts
         else:
