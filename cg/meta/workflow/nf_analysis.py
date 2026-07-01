@@ -243,10 +243,20 @@ class NfAnalysisAPI(AnalysisAPI):
         return metrics
 
     def _get_list_of_metric_dicts(self, multiqc_json: MultiqcDataJson) -> list[dict[str, Any]]:
-        if metric_dicts := multiqc_json.report_general_stats_data:
+        metric_dicts: Any = multiqc_json.report_general_stats_data
+        if isinstance(metric_dicts, dict):
+            return self._transform_multiqc_general_stats(metric_dicts)
+        if isinstance(metric_dicts, list):
             return metric_dicts
         else:
             raise ValueError("No report_general_stats_data found in MultiqcDataJson")
+
+    def _transform_multiqc_general_stats(
+        self, general_stats_data: dict[str, dict[str, dict[str, Any]]]
+    ) -> list[dict[str, Any]]:
+        """Transform the report_general_stats_data from MultiqcDataJson into a list of metric dictionaries."""
+        # TODO: implement this method
+        return []
 
     def get_multiqc_metric(
         self, metric_name: str, metric_value: str | int | float, sample_id: str
