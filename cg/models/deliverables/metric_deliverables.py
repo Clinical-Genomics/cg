@@ -170,7 +170,7 @@ class MultiqcDataJson(BaseModel):
 
     @field_validator("report_general_stats_data", mode="before")
     @classmethod
-    def transform_report_general_stats_data(cls, value: Any) -> list[dict[str, Any]] | None:
+    def transform_report_general_stats_data(cls, value: Any) -> list[dict[str, Any]]:
         """
         Transform the report_general_stats_data from MultiQC versions >1.28 into a
         backwards compatible format.
@@ -179,8 +179,6 @@ class MultiqcDataJson(BaseModel):
             return value
         elif isinstance(value, dict):
             return list(value.values())
-        elif value is None:
-            raise ValueError("No report_general_stats_data found in MultiqcDataJson")
         raise TypeError(
             "report_general_stats_data must be list\\[dict\\[str, Any\\]\\] or dict\\[str, dict\\[str, dict\\[str, Any\\]\\]\\]"
         )
