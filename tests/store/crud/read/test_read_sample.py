@@ -1274,6 +1274,7 @@ def test_get_paginated_unhandled_samples_priority(store: Store, helpers: StoreHe
         should_deliver_sample=True,
     )
 
+    # GIVEN an another case with a different prio than the one filtering for
     other_case: Case = helpers.add_case(
         store=store,
         name="case_other_1",
@@ -1291,7 +1292,7 @@ def test_get_paginated_unhandled_samples_priority(store: Store, helpers: StoreHe
     unhandled_samples, total = store.get_paginated_unhandled_samples(
         lims_status=LimsStatus.TOP_UP,
         page=1,
-        page_size=1,
+        page_size=10,
         trailblazer_priority=TrailblazerPriority.NORMAL,
     )
     # THEN only the newer sample should be returned
