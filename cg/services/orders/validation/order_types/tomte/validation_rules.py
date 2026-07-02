@@ -5,6 +5,7 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_case_names_available,
     validate_case_names_not_repeated,
     validate_existing_cases_belong_to_collaboration,
+    validate_gene_panels_exist,
     validate_gene_panels_unique,
     validate_samples_have_same_source,
 )
@@ -21,7 +22,6 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_existing_samples_compatible_with_order_type,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
-    validate_gene_panels_exist,
     validate_mothers_are_female,
     validate_mothers_in_same_case_as_children,
     validate_pedigree,
