@@ -16,7 +16,7 @@ from cg.constants.constants import (
     SampleType,
 )
 from cg.constants.lims import LimsStatus
-from cg.constants.priority import SlurmQos, TrailblazerPriority
+from cg.constants.priority import Priority, SlurmQos, TrailblazerPriority
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
@@ -1937,7 +1937,11 @@ class ReadHandler(BaseHandler):
     ) -> tuple[list[Sample], int]:
         unhandled_samples: Query = self._get_unhandled_samples(
             lims_status=lims_status,
-            priority=trailblazer_priority,
+            priorities=(
+                MAP_FROM_TRAILBLAZER_PRIORITY[trailblazer_priority]
+                if trailblazer_priority
+                else None
+            ),
             search=search,
             sort_by=sort_by,
             sort_order=sort_order,
@@ -1948,7 +1952,7 @@ class ReadHandler(BaseHandler):
     def _get_unhandled_samples(
         self,
         lims_status: LimsStatus,
-        priority: TrailblazerPriority | None = None,
+        priorities: list[Priority] | None = None,
         search: str | None = None,
         sort_by: UnhandledSamplesSortBy | None = None,
         sort_order: SortDirection | None = None,
@@ -2001,8 +2005,7 @@ class ReadHandler(BaseHandler):
             else:
                 query = query.filter(Sample.workflow_of_case_that_delivers == workflow)
 
-        if priority:
-            priorities = MAP_FROM_TRAILBLAZER_PRIORITY[priority]
+        if priorities:
             query = query.filter(Sample.priority_of_case_that_delivers.in_(priorities))
 
         return query
