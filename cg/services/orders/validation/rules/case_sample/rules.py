@@ -3,7 +3,6 @@ from collections import Counter
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import SexEnum
 from cg.services.orders.validation.constants import ALLOWED_SKIP_RC_BUFFERS
-from cg.services.orders.validation.errors.case_errors import InvalidGenePanelsError
 from cg.services.orders.validation.errors.case_sample_errors import (
     ApplicationArchivedError,
     ApplicationNotCompatibleError,
@@ -61,7 +60,6 @@ from cg.services.orders.validation.rules.case_sample.utils import (
     get_existing_sample_names,
     get_father_case_errors,
     get_father_sex_errors,
-    get_invalid_panels,
     get_mother_case_errors,
     get_mother_sex_errors,
     get_occupied_well_errors,
@@ -213,19 +211,6 @@ def validate_application_not_archived(
             if store.is_application_archived(sample.application):
                 error = ApplicationArchivedError(case_index=case_index, sample_index=sample_index)
                 errors.append(error)
-    return errors
-
-
-def validate_gene_panels_exist(
-    order: OrderWithCases,
-    store: Store,
-    **kwargs,
-) -> list[InvalidGenePanelsError]:
-    errors: list[InvalidGenePanelsError] = []
-    for case_index, case in order.enumerated_new_cases:
-        if invalid_panels := get_invalid_panels(panels=case.panels, store=store):
-            case_error = InvalidGenePanelsError(case_index=case_index, panels=invalid_panels)
-            errors.append(case_error)
     return errors
 
 
