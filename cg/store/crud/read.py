@@ -3,7 +3,7 @@
 import datetime as dt
 import logging
 from datetime import datetime
-from typing import Callable, Iterator
+from typing import Callable, Iterator, Literal
 
 import sqlalchemy
 from sqlalchemy.orm import Query
@@ -1931,7 +1931,7 @@ class ReadHandler(BaseHandler):
         search: str | None = None,
         sort_by: UnhandledSamplesSortBy | None = None,
         sort_order: SortDirection | None = None,
-        workflow: Workflow | None = None,
+        workflow: Workflow | Literal["unknown"] | None = None,
     ) -> tuple[list[Sample], int]:
         unhandled_samples: Query = self._get_unhandled_samples(
             lims_status=lims_status,
@@ -1948,7 +1948,7 @@ class ReadHandler(BaseHandler):
         search: str | None = None,
         sort_by: UnhandledSamplesSortBy | None = None,
         sort_order: SortDirection | None = None,
-        workflow: Workflow | None = None,
+        workflow: Workflow | Literal["unknown"] | None = None,
     ) -> Query:
         """
         Return samples with the given lims_status that:
@@ -1991,7 +1991,10 @@ class ReadHandler(BaseHandler):
             )
 
         if workflow:
-            query = query.filter(Sample.workflow_of_case_that_delivers == workflow)
+            if workflow == "unknown":
+                query = query.filter(Sample.workflow_of_case_that_delivers.is_(None))
+            else:
+                query = query.filter(Sample.workflow_of_case_that_delivers == workflow)
 
         return query
 

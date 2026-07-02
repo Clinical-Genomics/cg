@@ -889,6 +889,51 @@ def test_get_unhandled_samples_filters_on_workflow(store: Store, helpers: StoreH
     assert unhandled_samples.all() == [raredisease_sample]
 
 
+def test_get_unhandled_samples_filters_on_unknown_workflow(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with one sample without a delivering case and one with a workflow
+    unknown_workflow_sample = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="unknown_workflow_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    known_workflow_sample = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="known_workflow_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    known_workflow_case = helpers.add_case(
+        store=store,
+        internal_id="known_workflow_case",
+        name="known_workflow_case",
+        data_analysis=Workflow.RAREDISEASE,
+    )
+    helpers.add_relationship(
+        store=store,
+        sample=known_workflow_sample,
+        case=known_workflow_case,
+        should_deliver_sample=True,
+    )
+
+    # WHEN getting unhandled samples filtered by unknown workflow
+    unhandled_samples: Query = store._get_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP,
+        workflow="unknown",
+    )
+
+    # THEN only the sample without a delivering case is returned
+    assert unhandled_samples.all() == [unknown_workflow_sample]
+
+
 def test_get_paginated_unhandled_samples_sort_by_ticket(store: Store, helpers: StoreHelpers):
     # GIVEN two unhandled samples whose delivering cases belong to orders with different tickets
     sample_in_ticket_1 = helpers.add_sample(
