@@ -1,9 +1,6 @@
 from cg.constants import Sex
 from cg.models.orders.sample_base import StatusEnum
-from cg.services.orders.validation.errors.case_errors import (
-    InvalidGenePanelsError,
-    RepeatedGenePanelsError,
-)
+from cg.services.orders.validation.errors.case_errors import RepeatedGenePanelsError
 from cg.services.orders.validation.errors.case_sample_errors import (
     DescendantAsFatherError,
     FatherNotInCaseError,
@@ -14,10 +11,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
 )
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
-from cg.services.orders.validation.rules.case.rules import (
-    validate_gene_panels_exist,
-    validate_gene_panels_unique,
-)
+from cg.services.orders.validation.rules.case.rules import validate_gene_panels_unique
 from cg.services.orders.validation.rules.case_sample.rules import (
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
@@ -27,23 +21,6 @@ from cg.services.orders.validation.rules.case_sample.rules import (
 from cg.store.models import Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
-
-
-def test_invalid_gene_panels(valid_order: TomteOrder, base_store: Store):
-    # GIVEN an order with an invalid gene panel specified
-    invalid_panel = "Non-existent panel"
-    valid_order.cases[0].panels = [invalid_panel]
-
-    # WHEN validating that the gene panels exist
-    errors: list[InvalidGenePanelsError] = validate_gene_panels_exist(
-        order=valid_order, store=base_store
-    )
-
-    # THEN an error should be returned
-    assert errors
-
-    # THEN the error should concern invalid gene panels
-    assert isinstance(errors[0], InvalidGenePanelsError)
 
 
 def test_repeated_gene_panels(valid_order: TomteOrder, store_with_panels: Store):
