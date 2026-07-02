@@ -14,11 +14,13 @@ from cg.services.orders.validation.errors.case_sample_errors import (
 )
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
-from cg.services.orders.validation.rules.case.rules import validate_gene_panels_unique
+from cg.services.orders.validation.rules.case.rules import (
+    validate_gene_panels_exist,
+    validate_gene_panels_unique,
+)
 from cg.services.orders.validation.rules.case_sample.rules import (
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
-    validate_gene_panels_exist,
     validate_mothers_are_female,
     validate_pedigree,
 )
