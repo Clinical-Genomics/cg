@@ -180,7 +180,7 @@ class MultiqcDataJson(BaseModel):
         elif isinstance(value, list):
             return value
         elif isinstance(value, dict):
-            return [sample_dict for sample_dict in value.values()]
+            return list(value.values())
         raise TypeError(
             "report_general_stats_data must be list\\[dict\\[str, Any\\]\\], dict\\[str, dict\\[str, dict\\[str, Any\\]\\]\\], or None"
         )
