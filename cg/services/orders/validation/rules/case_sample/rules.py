@@ -1,5 +1,9 @@
+import logging
 from collections import Counter
+from typing import cast
 
+from cg.constants.constants import DataDelivery
+from cg.exc import CustomerNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import SexEnum
 from cg.services.orders.validation.constants import ALLOWED_SKIP_RC_BUFFERS
@@ -21,6 +25,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     InvalidFatherSexError,
     InvalidMotherSexError,
     InvalidVolumeError,
+    MissingDNASampleError,
     MissingSourceCommentError,
     MotherNotInCaseError,
     NormalSampleNotAllowedError,
@@ -41,6 +46,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     WellFormatError,
     WellPositionMissingError,
 )
+from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.sample_aliases import SampleInCase
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
@@ -86,6 +92,8 @@ from cg.services.orders.validation.rules.utils import (
 )
 from cg.store.models import Sample as DbSample
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 def validate_application_compatibility(
@@ -597,3 +605,39 @@ def warn_if_sex_unknown(order: OrderWithCases, **kwargs) -> list[SexUnknownWarni
             warnings.append(warning)
 
     return warnings
+
+
+def validate_non_tumour_rna_samples_have_matching_dna_sample(
+    order: TomteOrder, store: Store, **kwargs
+) -> list[MissingDNASampleError]:
+    """
+    Validates that each sample in the order has a matching non-tumour DNA sample in StatusDB.
+    RNA cases do not have their own entries in Scout, so for Scout uploads to go through,
+    matching DNA samples must be found.
+    """
+    if DataDelivery.SCOUT not in order.delivery_type:
+        return []
+    else:
+        errors: list[MissingDNASampleError] = []
+        for case_index, case in order.enumerated_new_cases:
+            for sample_index, sample in case.enumerated_samples:
+                if isinstance(sample, ExistingSample):
+                    db_sample: DbSample | None = store.get_sample_by_internal_id(sample.internal_id)
+                    if not db_sample:
+                        # This should raise an error in other parts of the validation
+                        continue
+                    subject_id = cast(str, db_sample.subject_id)
+                else:
+                    subject_id = sample.subject_id
+                try:
+                    if not store.has_related_dna_sample(
+                        customer_id=order.customer, is_tumour=False, subject_id=subject_id
+                    ):
+                        error = MissingDNASampleError(
+                            case_index=case_index, sample_index=sample_index
+                        )
+                        errors.append(error)
+                except CustomerNotFoundError:
+                    # This should raise an error in other parts of the validation
+                    LOG.warning(f"{order.customer} does not match a customer.")
+        return errors

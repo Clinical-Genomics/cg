@@ -10,7 +10,7 @@ from cg.constants import SexOptions, Workflow
 from cg.constants.lims import LimsStatus
 from cg.constants.priority import PriorityTerms, TrailblazerPriority
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
-from cg.exc import SampleNotFoundError
+from cg.exc import CustomerNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.server.dto.samples.requests import (
     CollaboratorSamplesRequest,
@@ -610,6 +610,113 @@ def test_get_related_samples(
 
     # THEN the correct set of samples is returned
     assert set(related_dna_samples) == set(fetched_related_dna_samples)
+
+
+def test_has_related_dna_sample_success(store: Store, helpers: StoreHelpers):
+    # GIVEN a database containing a non-tumour DNA sample
+    helpers.add_sample(
+        store=store,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        subject_id="subject-id",
+        is_tumour=False,
+        customer_id="cust000",
+    )
+
+    # GIVEN a customer which is in a collaboration with the customer who has placed the sample above
+    collaborator = helpers.ensure_customer(
+        customer_id="cust000-collaborator", customer_name="collaborator", store=store
+    )
+    dna_customer = store.get_customer_by_internal_id("cust000")
+    store.add_collaboration(
+        internal_id="test_collaboration",
+        name="test_collaboration",
+        customers=[dna_customer, collaborator],
+    )
+
+    # WHEN checking for the existence of a DNA sample with matching subject_id, tumour status which is within the collaboration
+    result = store.has_related_dna_sample(
+        customer_id="cust000-collaborator", is_tumour=False, subject_id="subject-id"
+    )
+
+    # THEN the result should be True
+    assert result
+
+
+def test_has_related_dna_sample_wrong_collaboration(store: Store, helpers: StoreHelpers):
+    # GIVEN a database containing a non-tumour DNA sample
+    helpers.add_sample(
+        store=store,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        subject_id="subject-id",
+        is_tumour=False,
+        customer_id="cust000",
+    )
+
+    # GIVEN a customer not belonging to the same collaboration
+    collaborator = store.add_customer(
+        internal_id="other_cust",
+        name="other customer",
+        invoice_address="invoice street 1",
+        invoice_reference="Invoicee Doe",
+    )
+    store.add_item_to_store(collaborator)
+
+    # WHEN checking for the existence of a DNA sample with matching subject_id and tumour status but for a different collaboration
+    result = store.has_related_dna_sample(
+        customer_id="other_cust", is_tumour=False, subject_id="subject-id"
+    )
+
+    # THEN the result should be False
+    assert not result
+
+
+def test_has_related_dna_sample_wrong_tumour_status(store: Store, helpers: StoreHelpers):
+    # GIVEN a database containing a non-tumour DNA sample
+    helpers.add_sample(
+        store=store,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        subject_id="subject-id",
+        is_tumour=False,
+        customer_id="cust000",
+    )
+
+    # WHEN checking for the existence of a DNA sample with matching subject_id and customer but different tumour status
+    result = store.has_related_dna_sample(
+        customer_id="cust000", is_tumour=True, subject_id="subject-id"
+    )
+
+    # THEN the result should be False
+    assert not result
+
+
+def test_has_related_dna_sample_wrong_subject_id(store: Store, helpers: StoreHelpers):
+    # GIVEN a database containing a non-tumour DNA sample
+    helpers.add_sample(
+        store=store,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        subject_id="subject-id",
+        is_tumour=False,
+        customer_id="cust000",
+    )
+
+    # WHEN checking for the existence of a DNA sample for the same customer and tumour status but with a different subject_id
+    result = store.has_related_dna_sample(
+        customer_id="cust000", is_tumour=False, subject_id="other-subject-id"
+    )
+
+    # THEN the result should be False
+    assert not result
+
+
+def test_has_related_dna_sample_wrong_raises_missing_customer_error(
+    store: Store, helpers: StoreHelpers
+):
+    # WHEN checking for the existence of a DNA sample for a customer which does not exist
+    # THEN a CustomerNotFoudnError should be raised
+    with pytest.raises(CustomerNotFoundError):
+        store.has_related_dna_sample(
+            customer_id="non-existent-customer", is_tumour=False, subject_id="other-subject-id"
+        )
 
 
 def test_get_collaborator_samples_filters_on_order_type(

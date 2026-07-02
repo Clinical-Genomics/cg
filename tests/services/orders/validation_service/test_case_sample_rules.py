@@ -1,4 +1,4 @@
-from unittest.mock import Mock, create_autospec
+from unittest.mock import Mock, call, create_autospec
 
 import pytest
 
@@ -59,6 +59,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_existing_samples_belong_to_collaboration,
     validate_existing_samples_compatible_with_order_type,
     validate_existing_samples_not_normal,
+    validate_non_tumour_rna_samples_have_matching_dna_sample,
     validate_not_all_samples_unknown_in_case,
     validate_sample_names_available,
     validate_sample_names_different_from_case_names,
@@ -79,6 +80,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
 from cg.store.models import Application, OrderTypeApplication, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_validate_well_position_format(valid_order: OrderWithCases):
@@ -818,3 +820,92 @@ def test_warn_if_sex_unknown_returns_warning_in_tomte_order(tomte_order):
 
     # THEN the warning should be attached to the warnings field
     assert warnings[0].field == "warnings"
+
+
+def test_validate_non_tumour_rna_samples_have_matching_dna_sample_success():
+    # GIVEN a Tomte order containing one new and one existing sample with delivery involving Scout
+    new_sample = TomteSample(  # type: ignore Pydantic
+        application="tomte_app_tag",
+        container=ContainerEnum.tube,
+        name="new-sample-name",
+        sex=SexEnum.female,
+        source="blood",
+        status=StatusEnum.affected,
+        subject_id="new-subject-id",
+    )
+    existing_sample = ExistingSample(internal_id="existing_tomte_sample")  # type: ignore Pydantic
+    tomte_case = TomteCase(
+        name="tomte-case", samples=[new_sample, existing_sample], panels=["tomte_panel"]
+    )
+    tomte_order = TomteOrder(
+        customer="tomte_customer",
+        project_type=OrderType.TOMTE,
+        cases=[tomte_case],
+        name="tomte-order",
+        delivery_type=TomteDeliveryType.SCOUT,
+    )
+
+    # GIVEN that there exist matching DNA samples for each RNA sample
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.has_related_dna_sample = Mock(return_value=True)
+    status_db.as_type.get_sample_by_internal_id = Mock(
+        return_value=create_autospec(Sample, subject_id="existing-subject-id")
+    )
+
+    # WHEN validating that the order's samples have associated DNA samples
+    errors = validate_non_tumour_rna_samples_have_matching_dna_sample(
+        order=tomte_order, store=status_db.as_type
+    )
+
+    # THEN no error was returned
+    assert not errors
+
+    # THEN the existing sample was fetched from StatusDB
+    status_db.as_mock.get_sample_by_internal_id.assert_called_once_with("existing_tomte_sample")
+
+    # THEN the method for fetching the matching DNA sample was called twice, once for each sample
+    status_db.as_mock.has_related_dna_sample.assert_has_calls(
+        [
+            call(customer_id="tomte_customer", is_tumour=False, subject_id="new-subject-id"),
+            call(customer_id="tomte_customer", is_tumour=False, subject_id="existing-subject-id"),
+        ]
+    )
+
+
+def test_validate_non_tumour_rna_samples_have_matching_dna_sample_returns_error():
+    # GIVEN a Tomte order containing one new and one existing sample with delivery involving Scout
+    new_sample = TomteSample(  # type: ignore Pydantic
+        application="tomte_app_tag",
+        container=ContainerEnum.tube,
+        name="new-sample-name",
+        sex=SexEnum.female,
+        source="blood",
+        status=StatusEnum.affected,
+        subject_id="new-subject-id",
+    )
+    existing_sample = ExistingSample(internal_id="existing_tomte_sample")  # type: ignore Pydantic
+    tomte_case = TomteCase(
+        name="tomte-case", samples=[new_sample, existing_sample], panels=["tomte_panel"]
+    )
+    tomte_order = TomteOrder(
+        customer="tomte_customer",
+        project_type=OrderType.TOMTE,
+        cases=[tomte_case],
+        name="tomte-order",
+        delivery_type=TomteDeliveryType.SCOUT,
+    )
+
+    # GIVEN that there does not exist a matching DNA sample for new RNA sample
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.has_related_dna_sample = Mock(side_effect=[False, True])
+
+    # WHEN validating that the order's samples have associated DNA samples
+    errors = validate_non_tumour_rna_samples_have_matching_dna_sample(
+        order=tomte_order, store=status_db.as_type
+    )
+
+    # THEN an error was returned
+    assert len(errors) == 1
+
+    # THEN the error should concern the new sample
+    assert errors[0].sample_index == 0

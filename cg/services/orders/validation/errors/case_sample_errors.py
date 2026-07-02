@@ -210,3 +210,8 @@ class NormalSampleNotAllowedError(CaseSampleError):
 class TumourValueResetError(CaseSampleError):
     field: str = "warnings"
     message: str = "The tumour status was overridden to True. Required for RNAFusion analysis."
+
+
+class MissingDNASampleError(CaseSampleError):
+    field: str = "subject_id"
+    message: str = "No matching DNA sample found for this subject ID with matching tumour status."
