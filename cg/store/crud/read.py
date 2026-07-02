@@ -1968,7 +1968,7 @@ class ReadHandler(BaseHandler):
             - Ordered by last sequenced date, with the oldest first
             - Optional filtering by search string
             - Optional filtering by workflow
-            - optional filtering by a list of priorities
+            - Optional filtering by a list of priorities
         """
         query = (
             self._get_query(table=Sample)
