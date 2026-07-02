@@ -1289,7 +1289,10 @@ def test_get_paginated_unhandled_samples_priority(store: Store, helpers: StoreHe
 
     # WHEN getting the unhandled samples in top-up using page 1 and page_size = 1
     unhandled_samples, total = store.get_paginated_unhandled_samples(
-        lims_status=LimsStatus.TOP_UP, page=1, page_size=1, priority=TrailblazerPriority.NORMAL
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=1,
+        trailblazer_priority=TrailblazerPriority.NORMAL,
     )
     # THEN only the newer sample should be returned
     assert unhandled_samples == [sample_normal_prio]

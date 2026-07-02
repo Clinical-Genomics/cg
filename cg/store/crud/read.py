@@ -1929,15 +1929,15 @@ class ReadHandler(BaseHandler):
         lims_status: LimsStatus,
         page: int,
         page_size: int,
-        priority: TrailblazerPriority | None = None,
         search: str | None = None,
         sort_by: UnhandledSamplesSortBy | None = None,
         sort_order: SortDirection | None = None,
+        trailblazer_priority: TrailblazerPriority | None = None,
         workflow: Workflow | Literal["unknown"] | None = None,
     ) -> tuple[list[Sample], int]:
         unhandled_samples: Query = self._get_unhandled_samples(
             lims_status=lims_status,
-            priority=priority,
+            priority=trailblazer_priority,
             search=search,
             sort_by=sort_by,
             sort_order=sort_order,
@@ -1954,7 +1954,6 @@ class ReadHandler(BaseHandler):
         sort_order: SortDirection | None = None,
         workflow: Workflow | Literal["unknown"] | None = None,
     ) -> Query:
-        # TODO add prio filtering to doc string
         """
         Return samples with the given lims_status that:
             - Are not downsampled
@@ -1965,6 +1964,7 @@ class ReadHandler(BaseHandler):
             - Ordered by last sequenced date, with the oldest first
             - Optional filtering by search string
             - Optional filtering by workflow
+            - optional filtering by a list of priorities
         """
         query = (
             self._get_query(table=Sample)
