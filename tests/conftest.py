@@ -2910,12 +2910,6 @@ def nallo_hermes_deliverables(nallo_deliverable_data: dict, nallo_case_id: str) 
     return hermes_output
 
 
-@pytest.fixture
-def nallo_multiqc_json_metrics_path(nallo_analysis_dir: Path) -> Path:
-    """Return Multiqc JSON file path for nallo."""
-    return Path(nallo_analysis_dir, multiqc_json_file)
-
-
 @pytest.fixture(scope="function")
 def nallo_multiqc_json_metrics(nallo_analysis_dir) -> dict:
     """Returns the content of a mock Multiqc JSON file."""
