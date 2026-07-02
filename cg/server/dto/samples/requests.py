@@ -1,4 +1,5 @@
 from enum import StrEnum
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -48,4 +49,4 @@ class UnhandledSamplesRequest(BaseModel):
     search: str | None = None
     sort_by: UnhandledSamplesSortBy | None = None
     sort_order: SortDirection | None = None
-    workflow: Workflow | None = None
+    workflow: Workflow | Literal["unknown"] | None = None

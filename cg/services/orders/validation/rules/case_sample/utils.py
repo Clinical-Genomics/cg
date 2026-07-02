@@ -53,13 +53,6 @@ def is_container_name_missing(sample: SampleWithRelatives) -> bool:
     return sample.container == ContainerEnum.plate and not sample.container_name
 
 
-def get_invalid_panels(panels: list[str], store: Store) -> list[str]:
-    invalid_panels: list[str] = [
-        panel for panel in panels if not store.does_gene_panel_exist(panel)
-    ]
-    return invalid_panels
-
-
 def is_volume_invalid(sample: Sample) -> bool:
     in_container: bool = is_in_container(sample.container)
     allowed_volume: bool = is_volume_within_allowed_interval(sample.volume)
