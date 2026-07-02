@@ -28,6 +28,7 @@ from cg.services.orders.validation.models.sample_aliases import (
     SampleInCase,
     SampleWithRelatives,
 )
+from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
 from cg.services.orders.validation.rules.case.utils import is_sample_in_case
 from cg.services.orders.validation.rules.utils import (
     get_concentration_interval,
@@ -315,3 +316,11 @@ def is_sample_compatible_with_order_type(
         return order_type in db_sample.application_version.application.order_types
     else:
         return True
+
+
+def get_subject_id(sample: TomteSample | ExistingSample, store: Store) -> str | None:
+    if isinstance(sample, ExistingSample):
+        db_sample: DbSample | None = store.get_sample_by_internal_id_strict(sample.internal_id)
+        return db_sample.subject_id
+    else:
+        return sample.subject_id

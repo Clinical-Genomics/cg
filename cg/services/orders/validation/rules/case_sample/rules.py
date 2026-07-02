@@ -1,9 +1,8 @@
 import logging
 from collections import Counter
-from typing import cast
 
 from cg.constants.constants import DataDelivery
-from cg.exc import CustomerNotFoundError
+from cg.exc import CustomerNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import SexEnum
 from cg.services.orders.validation.constants import ALLOWED_SKIP_RC_BUFFERS
@@ -46,7 +45,6 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     WellFormatError,
     WellPositionMissingError,
 )
-from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.sample_aliases import SampleInCase
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
@@ -69,6 +67,7 @@ from cg.services.orders.validation.rules.case_sample.utils import (
     get_mother_case_errors,
     get_mother_sex_errors,
     get_occupied_well_errors,
+    get_subject_id,
     get_well_sample_map,
     has_sex_and_subject,
     is_buffer_missing,
@@ -621,15 +620,8 @@ def validate_non_tumour_rna_samples_have_matching_dna_sample(
         errors: list[MissingDNASampleError] = []
         for case_index, case in order.enumerated_new_cases:
             for sample_index, sample in case.enumerated_samples:
-                if isinstance(sample, ExistingSample):
-                    db_sample: DbSample | None = store.get_sample_by_internal_id(sample.internal_id)
-                    if not db_sample:
-                        # This should raise an error in other parts of the validation
-                        continue
-                    subject_id = cast(str, db_sample.subject_id)
-                else:
-                    subject_id = sample.subject_id
                 try:
+                    subject_id: str | None = get_subject_id(sample=sample, store=store)
                     if not store.has_related_dna_sample(
                         customer_id=order.customer, is_tumour=False, subject_id=subject_id
                     ):
@@ -639,5 +631,8 @@ def validate_non_tumour_rna_samples_have_matching_dna_sample(
                         errors.append(error)
                 except CustomerNotFoundError:
                     # This should raise an error in other parts of the validation
-                    LOG.warning(f"{order.customer} does not match a customer.")
+                    LOG.warning(f"{order.customer} does not match a customer in StatusDB.")
+                except SampleNotFoundError:
+                    # This should raise an error in other parts of the validation
+                    LOG.warning(f"{sample.internal_id} does not match a sample in StatusDB.")
         return errors
