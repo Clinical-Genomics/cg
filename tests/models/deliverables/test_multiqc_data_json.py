@@ -18,7 +18,8 @@ def test_parse_multiqc_json_success(multiqc_file_name: str, nallo_analysis_dir: 
     multiqc_path = Path(nallo_analysis_dir, multiqc_file_name)
 
     # WHEN parsing the JSON file into the MultiQC model
-    multiqc = MultiqcDataJson(**read_json(file_path=multiqc_path))
+    json_content = read_json(file_path=multiqc_path)
+    multiqc = MultiqcDataJson(**json_content)
 
     # THEN the report_general_stats is a list
     assert isinstance(multiqc.report_general_stats_data, list)
@@ -37,5 +38,6 @@ def test_parse_multiqc_json_fail(multiqc_json_stream: str, exception: Type[BaseE
 
     # WHEN trying to parse the JSON file into the MultiQC model
     # THEN an error is raised
+    json_content = json.loads(multiqc_json_stream)
     with pytest.raises(exception):
-        MultiqcDataJson(**json.loads(multiqc_json_stream))
+        MultiqcDataJson(**json_content)
