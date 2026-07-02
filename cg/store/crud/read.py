@@ -16,7 +16,7 @@ from cg.constants.constants import (
     SampleType,
 )
 from cg.constants.lims import LimsStatus
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import Priority, SlurmQos, TrailblazerPriority
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
@@ -30,6 +30,7 @@ from cg.exc import (
     PacbioSequencingRunNotFoundError,
     SampleNotFoundError,
 )
+from cg.meta.workflow.utils.utils import MAP_FROM_TRAILBLAZER_PRIORITY
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import SexEnum
 from cg.server.dto.samples.requests import (
@@ -1931,10 +1932,16 @@ class ReadHandler(BaseHandler):
         search: str | None = None,
         sort_by: UnhandledSamplesSortBy | None = None,
         sort_order: SortDirection | None = None,
+        trailblazer_priority: TrailblazerPriority | None = None,
         workflow: Workflow | Literal["unknown"] | None = None,
     ) -> tuple[list[Sample], int]:
         unhandled_samples: Query = self._get_unhandled_samples(
             lims_status=lims_status,
+            priorities=(
+                MAP_FROM_TRAILBLAZER_PRIORITY[trailblazer_priority]
+                if trailblazer_priority
+                else None
+            ),
             search=search,
             sort_by=sort_by,
             sort_order=sort_order,
@@ -1945,6 +1952,7 @@ class ReadHandler(BaseHandler):
     def _get_unhandled_samples(
         self,
         lims_status: LimsStatus,
+        priorities: list[Priority] | None = None,
         search: str | None = None,
         sort_by: UnhandledSamplesSortBy | None = None,
         sort_order: SortDirection | None = None,
@@ -1960,6 +1968,7 @@ class ReadHandler(BaseHandler):
             - Ordered by last sequenced date, with the oldest first
             - Optional filtering by search string
             - Optional filtering by workflow
+            - Optional filtering by a list of priorities
         """
         query = (
             self._get_query(table=Sample)
@@ -1995,6 +2004,9 @@ class ReadHandler(BaseHandler):
                 query = query.filter(Sample.workflow_of_case_that_delivers.is_(None))
             else:
                 query = query.filter(Sample.workflow_of_case_that_delivers == workflow)
+
+        if priorities:
+            query = query.filter(Sample.priority_of_case_that_delivers.in_(priorities))
 
         return query
 
