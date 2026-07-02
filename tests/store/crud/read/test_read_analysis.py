@@ -747,7 +747,7 @@ def test_get_uploaded_analyses(store: Store):
 
 
 def test_get_uploaded_analyses_exclude_workflow(store: Store):
-    # GIVEN a store with two analyses, one with a workflow we want to exclude
+    # GIVEN a store with three analyses, one with a workflow we want to exclude
     desired_analysis = store.add_analysis(
         case_id=1,
         workflow=Workflow.NALLO,
