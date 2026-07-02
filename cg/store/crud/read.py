@@ -1691,7 +1691,7 @@ class ReadHandler(BaseHandler):
                 return True
         return False
 
-    def has_related_dna_sample(self, customer_id: str, is_tumour: bool, subject_id: str):
+    def has_related_dna_sample(self, customer_id: str, is_tumour: bool, subject_id: str) -> bool:
         """
         Returns True if the provided sample id matches a unique DNA sample with the same subject id,
         tumour status and belongs to the same collaboration as the provided customer.
