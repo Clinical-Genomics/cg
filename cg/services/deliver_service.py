@@ -120,14 +120,14 @@ class DeliverService:
         """
         Returns a dictionary with orders as keys and lists of analyses as values. Only includes
         analyses that are marked as uploaded in StatusDB and not yet marked as delivered in
-        Trailblazer. We are currently excluding microSALT from automatic delivery.
+        Trailblazer. We are currently excluding microSALT and Taxprofiler from automatic delivery.
         """
         undelivered_trailblazer_analyses: list[TrailblazerAnalysis] = (
             self.trailblazer_api.get_all_analyses_to_deliver()
         )
         uploaded_analyses_to_deliver: list[Analysis] = self.status_db.get_uploaded_analyses(
             trailblazer_ids=[analysis.id for analysis in undelivered_trailblazer_analyses],
-            exclude_workflows=[Workflow.MICROSALT],
+            exclude_workflows=[Workflow.MICROSALT, Workflow.TAXPROFILER],
         )
         order_analyses = {}
         for analysis in uploaded_analyses_to_deliver:
