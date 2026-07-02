@@ -1696,6 +1696,7 @@ class ReadHandler(BaseHandler):
         Returns True if the provided sample id matches a unique DNA sample with the same subject id,
         tumour status and belongs to the same collaboration as the provided customer.
         Raises:
+            CustomerNotFoundError if the customer_id does not match a customer
         """
         customer: Customer = self.get_customer_by_internal_id_strict(customer_id)
 
