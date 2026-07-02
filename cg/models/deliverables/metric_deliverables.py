@@ -162,10 +162,25 @@ class MetricsDeliverablesCondition(BaseModel):
 
 
 class MultiqcDataJson(BaseModel):
-    """Multiqc data json model."""
+    """MultiQC data JSON model."""
 
-    report_general_stats_data: (
-        list[dict[str, Any]] | dict[str, dict[str, dict[str, Any]]] | None
-    ) = None
+    report_general_stats_data: list[dict[str, Any]] | None = None
     report_data_sources: dict | None = None
     report_saved_raw_data: dict[str, dict] | None = None
+
+    @field_validator("report_general_stats_data", mode="before")
+    @classmethod
+    def transform_report_general_stats_data(cls, value: Any) -> list[dict[str, Any]] | None:
+        """
+        Transform the report_general_stats_data from MultiQC versions >1.28 into a
+        backwards compatible format.
+        """
+        if value is None:
+            return None
+        elif isinstance(value, list):
+            return value
+        elif isinstance(value, dict):
+            return [sample_dict for sample_dict in value.values()]
+        raise TypeError(
+            "report_general_stats_data must be list\\[dict\\[str, Any\\]\\], dict\\[str, dict\\[str, dict\\[str, Any\\]\\]\\], or None"
+        )
