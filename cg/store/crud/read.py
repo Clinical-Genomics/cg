@@ -676,16 +676,16 @@ class ReadHandler(BaseHandler):
         samples: Query = self._get_query(table=Sample)
         if customers:
             customer_ids: list[int] = [customer.id for customer in customers]
-            samples.filter(Sample.customer_id.in_(customer_ids))
+            samples = samples.filter(Sample.customer_id.in_(customer_ids))
         if pattern:
-            samples.filter(
+            samples = samples.filter(
                 or_(
                     Sample.name.contains(pattern),
                     Sample.internal_id.contains(pattern),
                     Sample.order.contains(pattern),
                 )
             )
-        samples.order_by(Sample.created_at.desc())
+        samples = samples.order_by(Sample.created_at.desc())
         total: int = samples.count()
         return samples.offset(offset).limit(limit).all(), total
 
