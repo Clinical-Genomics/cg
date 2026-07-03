@@ -848,7 +848,7 @@ def test_validate_non_tumour_rna_samples_have_matching_dna_sample_success():
     # GIVEN that there exist matching DNA samples for each RNA sample
     status_db: TypedMock[Store] = create_typed_mock(Store)
     status_db.as_type.has_related_dna_sample = Mock(return_value=True)
-    status_db.as_type.get_sample_by_internal_id = Mock(
+    status_db.as_type.get_sample_by_internal_id_strict = Mock(
         return_value=create_autospec(Sample, subject_id="existing-subject-id")
     )
 
@@ -861,7 +861,9 @@ def test_validate_non_tumour_rna_samples_have_matching_dna_sample_success():
     assert not errors
 
     # THEN the existing sample was fetched from StatusDB
-    status_db.as_mock.get_sample_by_internal_id.assert_called_once_with("existing_tomte_sample")
+    status_db.as_mock.get_sample_by_internal_id_strict.assert_called_once_with(
+        "existing_tomte_sample"
+    )
 
     # THEN the method for fetching the matching DNA sample was called twice, once for each sample
     status_db.as_mock.has_related_dna_sample.assert_has_calls(
