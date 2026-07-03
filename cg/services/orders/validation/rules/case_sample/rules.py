@@ -616,23 +616,20 @@ def validate_non_tumour_rna_samples_have_matching_dna_sample(
     """
     if DataDelivery.SCOUT not in order.delivery_type:
         return []
-    else:
-        errors: list[MissingDNASampleError] = []
-        for case_index, case in order.enumerated_new_cases:
-            for sample_index, sample in case.enumerated_samples:
-                try:
-                    subject_id: str | None = get_subject_id(sample=sample, store=store)
-                    if not store.has_related_dna_sample(
-                        customer_id=order.customer, is_tumour=False, subject_id=subject_id
-                    ):
-                        error = MissingDNASampleError(
-                            case_index=case_index, sample_index=sample_index
-                        )
-                        errors.append(error)
-                except CustomerNotFoundError:
-                    # This should raise an error in other parts of the validation
-                    LOG.warning(f"{order.customer} does not match a customer in StatusDB.")
-                except SampleNotFoundError:
-                    # This should raise an error in other parts of the validation
-                    LOG.warning(f"{sample.internal_id} does not match a sample in StatusDB.")
-        return errors
+    errors: list[MissingDNASampleError] = []
+    for case_index, case in order.enumerated_new_cases:
+        for sample_index, sample in case.enumerated_samples:
+            try:
+                subject_id: str | None = get_subject_id(sample=sample, store=store)
+                if not store.has_related_dna_sample(
+                    customer_id=order.customer, is_tumour=False, subject_id=subject_id
+                ):
+                    error = MissingDNASampleError(case_index=case_index, sample_index=sample_index)
+                    errors.append(error)
+            except CustomerNotFoundError:
+                # This should raise an error in other parts of the validation
+                LOG.warning(f"{order.customer} does not match a customer in StatusDB.")
+            except SampleNotFoundError:
+                # This should raise an error in other parts of the validation
+                LOG.warning(f"{sample.internal_id} does not match a sample in StatusDB.")
+    return errors
