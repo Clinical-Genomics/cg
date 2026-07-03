@@ -675,7 +675,8 @@ class ReadHandler(BaseHandler):
         """
         samples: Query = self._get_query(table=Sample)
         if customers:
-            samples.filter(Sample.customer.in_(customers))
+            customer_ids: list[int] = [customer.id for customer in customers]
+            samples.filter(Sample.customer_id.in_(customer_ids))
         if pattern:
             samples.filter(
                 or_(
