@@ -320,7 +320,7 @@ def is_sample_compatible_with_order_type(
 
 def get_subject_id(sample: TomteSample | ExistingSample, store: Store) -> str | None:
     if isinstance(sample, ExistingSample):
-        db_sample: DbSample | None = store.get_sample_by_internal_id_strict(sample.internal_id)
+        db_sample: DbSample = store.get_sample_by_internal_id_strict(sample.internal_id)
         return db_sample.subject_id
     else:
         return sample.subject_id
