@@ -747,7 +747,7 @@ def test_get_uploaded_analyses(store: Store):
 
 
 def test_get_uploaded_analyses_exclude_workflow(store: Store):
-    # GIVEN a store with two analyses, one with a workflow we want to exclude
+    # GIVEN a store with three analyses, one with a workflow we want to exclude
     desired_analysis = store.add_analysis(
         case_id=1,
         workflow=Workflow.NALLO,
@@ -760,12 +760,20 @@ def test_get_uploaded_analyses_exclude_workflow(store: Store):
         trailblazer_id=2,
         uploaded=datetime.now(),
     )
+    not_desired_analysis_two = store.add_analysis(
+        case_id=3,
+        workflow=Workflow.TAXPROFILER,
+        trailblazer_id=3,
+        uploaded=datetime.now(),
+    )
 
-    store.add_multiple_items_to_store([desired_analysis, not_desired_analysis])
+    store.add_multiple_items_to_store(
+        [desired_analysis, not_desired_analysis, not_desired_analysis_two]
+    )
 
     # WHEN getting the uploaded analyses excluding microSALT
     uploaded_analyses: list[Analysis] = store.get_uploaded_analyses(
-        trailblazer_ids=[1, 2], exclude_workflows=[Workflow.MICROSALT]
+        trailblazer_ids=[1, 2, 3], exclude_workflows=[Workflow.MICROSALT, Workflow.TAXPROFILER]
     )
 
     # THEN only the requested uploaded analysis is returned

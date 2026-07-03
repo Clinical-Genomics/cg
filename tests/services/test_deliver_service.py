@@ -402,7 +402,7 @@ def test_deliver_all_available_success(mocker: MockerFixture):
 
     # THEN uploaded analyses should have been fetched from StatusDB
     status_db.get_uploaded_analyses.assert_called_once_with(
-        trailblazer_ids=ANY, exclude_workflows=[Workflow.MICROSALT]
+        trailblazer_ids=ANY, exclude_workflows=[Workflow.MICROSALT, Workflow.TAXPROFILER]
     )
 
     # THEN the analyses of both orders should have been marked as delivered separately
@@ -462,7 +462,7 @@ def test_deliver_all_available_no_analyses_to_deliver(mocker: MockerFixture):
 
     # THEN uploaded analyses should have been fetched from StatusDB
     status_db.get_uploaded_analyses.assert_called_once_with(
-        trailblazer_ids=ANY, exclude_workflows=[Workflow.MICROSALT]
+        trailblazer_ids=ANY, exclude_workflows=[Workflow.MICROSALT, Workflow.TAXPROFILER]
     )
 
     # THEN no call should have been made
