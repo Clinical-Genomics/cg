@@ -265,7 +265,7 @@ class NalloConfig(CommonAppConfig):
     pipeline_deliverables: str
     platform: str
     pre_run_script: str = ""
-    profile: str
+    profile: str  # TODO add threshold here
     reference: str
     repository: str
     resources: str
