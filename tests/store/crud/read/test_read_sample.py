@@ -556,6 +556,36 @@ def test_get_samples_by_customer_id_and_pattern_with_collaboration(
     assert all("sample" in sample.name for sample in samples)
 
 
+def test_get_samples_by_customer_id_and_pattern_name(store: Store, helpers: StoreHelpers):
+    # GIVEN a store containing three samples all belonging to the same customer
+    sample_to_query_via_name: Sample = helpers.add_sample(
+        customer_id="cust000", name="name_to_search_for", store=store
+    )
+    sample_to_query_via_internal_id: Sample = helpers.add_sample(
+        customer_id="cust000", internal_id="internal_id_to_search_for", store=store
+    )
+    sample_to_query_via_order: Sample = helpers.add_sample(
+        customer_id="cust000", order="order_to_search_for", store=store
+    )
+    customer: Customer = sample_to_query_via_name.customer
+
+    # WHEN getting samples via customers and pattern
+    samples_matching_name, _ = store.get_samples_by_customers_and_pattern(
+        customers=[customer], pattern="name_to_search_for"
+    )
+    samples_matching_internal_id, _ = store.get_samples_by_customers_and_pattern(
+        customers=[customer], pattern="internal_id_to_search_for"
+    )
+    samples_matching_order, _ = store.get_samples_by_customers_and_pattern(
+        customers=[customer], pattern="order_to_search_for"
+    )
+
+    # THEN the returned samples should only contain the expected ones
+    assert samples_matching_name == [sample_to_query_via_name]
+    assert samples_matching_internal_id == [sample_to_query_via_internal_id]
+    assert samples_matching_order == [sample_to_query_via_order]
+
+
 def test_get_cases_by_customers_action_and_case_search(
     store_with_cases_with_customers_and_actions: Store,
     customer_id: str,
