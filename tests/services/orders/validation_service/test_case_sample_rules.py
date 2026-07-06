@@ -18,6 +18,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     InvalidVolumeError,
     MissingSourceCommentError,
     NormalSampleNotAllowedError,
+    NoSubjectIDError,
     OccupiedWellError,
     SampleDoesNotExistError,
     SampleNameAlreadyExistsError,
@@ -874,7 +875,7 @@ def test_validate_non_tumour_rna_samples_have_matching_dna_sample_success():
     )
 
 
-def test_validate_non_tumour_rna_samples_have_matching_dna_sample_returns_error():
+def test_validate_non_tumour_rna_samples_have_matching_dna_sample_not_matching_subject_id():
     # GIVEN a Tomte order containing one new and one existing sample with delivery involving Scout
     new_sample = TomteSample(  # type: ignore Pydantic
         application="tomte_app_tag",
@@ -911,3 +912,34 @@ def test_validate_non_tumour_rna_samples_have_matching_dna_sample_returns_error(
 
     # THEN the error should concern the new sample
     assert errors[0].sample_index == 0
+
+
+def test_validate_non_tumour_rna_samples_have_matching_dna_sample_no_subject_id():
+    # GIVEN a Tomte order containing one existing sample with delivery involving Scout
+    existing_sample = ExistingSample(internal_id="existing_tomte_sample")  # type: ignore Pydantic
+    tomte_case = TomteCase(name="tomte-case", samples=[existing_sample], panels=["tomte_panel"])
+    tomte_order = TomteOrder(
+        customer="tomte_customer",
+        project_type=OrderType.TOMTE,
+        cases=[tomte_case],
+        name="tomte-order",
+        delivery_type=TomteDeliveryType.SCOUT,
+    )
+
+    # GIVEN that the existing sample does not have a subject ID
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_sample_by_internal_id_strict = Mock(
+        return_value=create_autospec(Sample, subject_id=None)
+    )
+
+    # WHEN validating that the order's samples have associated DNA samples
+    errors = validate_non_tumour_rna_samples_have_matching_dna_sample(
+        order=tomte_order, store=status_db.as_type
+    )
+
+    # THEN an error was returned
+    assert len(errors) == 1
+
+    # THEN the error should concern the existing sample not having a subject id
+    assert errors[0].sample_index == 0
+    assert isinstance(errors[0], NoSubjectIDError)

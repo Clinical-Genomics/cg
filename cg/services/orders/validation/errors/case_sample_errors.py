@@ -215,3 +215,8 @@ class TumourValueResetError(CaseSampleError):
 class MissingDNASampleError(CaseSampleError):
     field: str = "subject_id"
     message: str = "No matching DNA sample found for this subject ID with matching tumour status."
+
+
+class NoSubjectIDError(CaseSampleError):
+    field: str = "subject_id"
+    message: str = "Chosen sample has no Subject ID and can't be linked to any DNA sample in Scout."

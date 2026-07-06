@@ -672,23 +672,6 @@ def test_has_related_dna_sample_success(store: Store, helpers: StoreHelpers):
     assert result
 
 
-def test_has_related_dna_sample_no_subject_id(store: Store, helpers: StoreHelpers):
-    # GIVEN a database containing a non-tumour DNA sample without subject id
-    helpers.add_sample(
-        store=store,
-        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
-        subject_id=None,
-        is_tumour=False,
-        customer_id="cust000",
-    )
-
-    # WHEN checking for the existence of a DNA sample using subject_id=None
-    result = store.has_related_dna_sample(customer_id="cust000", is_tumour=False, subject_id=None)
-
-    # THEN the result should be False
-    assert not result
-
-
 def test_has_related_dna_sample_wrong_collaboration(store: Store, helpers: StoreHelpers):
     # GIVEN a database containing a non-tumour DNA sample
     helpers.add_sample(

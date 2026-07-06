@@ -13,6 +13,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     BufferMissingError,
     CaptureKitMissingError,
     CaptureKitResetError,
+    CaseSampleError,
     ConcentrationRequiredIfSkipRCError,
     ContainerNameMissingError,
     ContainerNameRepeatedError,
@@ -28,6 +29,7 @@ from cg.services.orders.validation.errors.case_sample_errors import (
     MissingSourceCommentError,
     MotherNotInCaseError,
     NormalSampleNotAllowedError,
+    NoSubjectIDError,
     OccupiedWellError,
     PedigreeError,
     SampleDoesNotExistError,
@@ -608,7 +610,7 @@ def warn_if_sex_unknown(order: OrderWithCases, **kwargs) -> list[SexUnknownWarni
 
 def validate_non_tumour_rna_samples_have_matching_dna_sample(
     order: TomteOrder, store: Store, **kwargs
-) -> list[MissingDNASampleError]:
+) -> list[CaseSampleError]:
     """
     Validates that each sample in the order has a matching non-tumour DNA sample in StatusDB.
     RNA cases do not have their own entries in Scout, so for Scout uploads to go through,
@@ -616,11 +618,15 @@ def validate_non_tumour_rna_samples_have_matching_dna_sample(
     """
     if DataDelivery.SCOUT not in order.delivery_type:
         return []
-    errors: list[MissingDNASampleError] = []
+    errors: list[CaseSampleError] = []
     for case_index, case in order.enumerated_new_cases:
         for sample_index, sample in case.enumerated_samples:
             try:
                 subject_id: str | None = get_subject_id(sample=sample, store=store)
+                if not subject_id:
+                    error = NoSubjectIDError(case_index=case_index, sample_index=sample_index)
+                    errors.append(error)
+                    continue
                 if not store.has_related_dna_sample(
                     customer_id=order.customer, is_tumour=False, subject_id=subject_id
                 ):
