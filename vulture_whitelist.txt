@@ -1,4 +1,5 @@
 _.reference_path  # unused attribute (cg/apps/crunchy/crunchy.py:36)
+_.minimum_version  # unused attribute (cg/services/events/event_listener.py:61)
 algorithm  # unused variable (cg/apps/crunchy/models.py:11)
 override_cycles  # unused variable (cg/apps/demultiplex/sample_sheet/sample_models.py:27)
 barcode_mismatches_1  # unused variable (cg/apps/demultiplex/sample_sheet/sample_models.py:30)
