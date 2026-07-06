@@ -7,6 +7,7 @@ from cg.services.orders.validation.errors.case_errors import (
     DoubleNormalError,
     DoubleTumourError,
     ExistingCaseWithoutAffectedSampleError,
+    InvalidGenePanelsError,
     MoreThanTwoSamplesInCaseError,
     MultiplePrepCategoriesError,
     MultipleSamplesInCaseError,
@@ -29,6 +30,7 @@ from cg.services.orders.validation.rules.case.utils import (
     contains_duplicates,
     does_case_exist,
     get_case_prep_categories,
+    get_invalid_panels,
     get_sample_name,
     get_sample_sources,
     is_case_not_from_collaboration,
@@ -227,4 +229,17 @@ def validate_samples_have_same_source(
                 message=f"Case contains samples of more than one source: {sample_sources}",
             )
             errors.append(error)
+    return errors
+
+
+def validate_gene_panels_exist(
+    order: OrderWithCases,
+    store: Store,
+    **kwargs,
+) -> list[InvalidGenePanelsError]:
+    errors: list[InvalidGenePanelsError] = []
+    for case_index, case in order.enumerated_new_cases:
+        if invalid_panels := get_invalid_panels(panels=case.panels, store=store):
+            case_error = InvalidGenePanelsError(case_index=case_index, panels=invalid_panels)
+            errors.append(case_error)
     return errors

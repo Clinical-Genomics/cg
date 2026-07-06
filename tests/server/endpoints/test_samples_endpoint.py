@@ -153,6 +153,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         search=None,
         page=1,
         page_size=10,
+        trailblazer_priority=None,
         sort_by=None,
         sort_order=None,
         workflow=None,
@@ -223,6 +224,7 @@ def test_get_unhandled_samples_sample_search(client: FlaskClient, mocker: Mocker
         search="sample_1",
         page=1,
         page_size=10,
+        trailblazer_priority=None,
         sort_by=None,
         sort_order=None,
         workflow=None,
@@ -330,6 +332,7 @@ def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker
         lims_status=LimsStatus.TOP_UP,
         page=1,
         page_size=10,
+        trailblazer_priority=None,
         search=None,
         sort_by=UnhandledSamplesSortBy.TICKET,
         sort_order=SortDirection.ASCENDING,
@@ -438,6 +441,7 @@ def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocke
         lims_status=LimsStatus.TOP_UP,
         page=1,
         page_size=10,
+        trailblazer_priority=None,
         search=None,
         sort_by=UnhandledSamplesSortBy.TICKET,
         sort_order=SortDirection.DESCENDING,
@@ -464,10 +468,67 @@ def test_get_unhandled_samples_filter_on_workflow(client: FlaskClient, mocker: M
         lims_status=LimsStatus.TOP_UP,
         page=1,
         page_size=10,
+        trailblazer_priority=None,
         search=None,
         sort_by=None,
         sort_order=None,
         workflow=Workflow.RAREDISEASE,
+    )
+
+
+def test_get_unhandled_samples_filter_on_unknown_workflow(
+    client: FlaskClient, mocker: MockerFixture
+):
+    # GIVEN a store with unhandled samples in top-up
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([], 0))
+    mocker.patch.object(samples, "db", status_db.as_type)
+
+    # WHEN querying the unhandled samples endpoint with workflow Raredisease
+    response = client.get(
+        path="/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=10&workflow=unknown",
+    )
+
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.OK
+
+    # THEN function has been called with the correct arguments
+    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=10,
+        trailblazer_priority=None,
+        search=None,
+        sort_by=None,
+        sort_order=None,
+        workflow="unknown",
+    )
+
+
+def test_get_unhandled_samples_filter_on_priority(client: FlaskClient, mocker: MockerFixture):
+    # GIVEN a store with unhandled samples in top-up
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([], 0))
+    mocker.patch.object(samples, "db", status_db.as_type)
+
+    # WHEN querying the unhandled samples endpoint with workflow Raredisease
+    response = client.get(
+        path=f"/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=10&priority={TrailblazerPriority.EXPRESS}",
+    )
+
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.OK
+
+    # THEN function has been called with the correct arguments
+    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=10,
+        trailblazer_priority=TrailblazerPriority.EXPRESS,
+        search=None,
+        sort_by=None,
+        sort_order=None,
+        workflow=None,
     )
 
 

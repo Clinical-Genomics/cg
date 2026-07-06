@@ -132,8 +132,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         return metrics
 
     def _get_list_of_metric_dicts(self, multiqc_json: MultiqcDataJson) -> list[dict[str, Any]]:
-        metric_dicts: list[dict[str, Any]] = super()._get_list_of_metric_dicts(multiqc_json)
-
+        metric_dicts: list[dict[str, Any]] = multiqc_json.report_general_stats_data
         list_copy: list[dict[str, Any]] = copy.deepcopy(metric_dicts)
         list_copy.append(self._get_somalier_dict(multiqc_json))
 
