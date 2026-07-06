@@ -60,7 +60,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_existing_samples_belong_to_collaboration,
     validate_existing_samples_compatible_with_order_type,
     validate_existing_samples_not_normal,
-    validate_non_tumour_rna_samples_have_matching_dna_sample,
+    validate_matching_normal_dna_for_rna_samples,
     validate_not_all_samples_unknown_in_case,
     validate_sample_names_available,
     validate_sample_names_different_from_case_names,
@@ -823,7 +823,7 @@ def test_warn_if_sex_unknown_returns_warning_in_tomte_order(tomte_order):
     assert warnings[0].field == "warnings"
 
 
-def test_validate_non_tumour_rna_samples_have_matching_dna_sample_success():
+def test_validate_matching_normal_dna_for_rna_samples_success():
     # GIVEN a Tomte order containing one new and one existing sample with delivery involving Scout
     new_sample = TomteSample(  # type: ignore Pydantic
         application="tomte_app_tag",
@@ -854,7 +854,7 @@ def test_validate_non_tumour_rna_samples_have_matching_dna_sample_success():
     )
 
     # WHEN validating that the order's samples have associated DNA samples
-    errors = validate_non_tumour_rna_samples_have_matching_dna_sample(
+    errors = validate_matching_normal_dna_for_rna_samples(
         order=tomte_order, store=status_db.as_type
     )
 
@@ -875,7 +875,7 @@ def test_validate_non_tumour_rna_samples_have_matching_dna_sample_success():
     )
 
 
-def test_validate_non_tumour_rna_samples_have_matching_dna_sample_not_matching_subject_id():
+def test_validate_matching_normal_dna_for_rna_samples_not_matching_subject_id():
     # GIVEN a Tomte order containing one new and one existing sample with delivery involving Scout
     new_sample = TomteSample(  # type: ignore Pydantic
         application="tomte_app_tag",
@@ -903,7 +903,7 @@ def test_validate_non_tumour_rna_samples_have_matching_dna_sample_not_matching_s
     status_db.as_type.has_related_dna_sample = Mock(side_effect=[False, True])
 
     # WHEN validating that the order's samples have associated DNA samples
-    errors = validate_non_tumour_rna_samples_have_matching_dna_sample(
+    errors = validate_matching_normal_dna_for_rna_samples(
         order=tomte_order, store=status_db.as_type
     )
 
@@ -914,7 +914,7 @@ def test_validate_non_tumour_rna_samples_have_matching_dna_sample_not_matching_s
     assert errors[0].sample_index == 0
 
 
-def test_validate_non_tumour_rna_samples_have_matching_dna_sample_no_subject_id():
+def test_validate_matching_normal_dna_for_rna_samples_no_subject_id():
     # GIVEN a Tomte order containing one existing sample with delivery involving Scout
     existing_sample = ExistingSample(internal_id="existing_tomte_sample")  # type: ignore Pydantic
     tomte_case = TomteCase(name="tomte-case", samples=[existing_sample], panels=["tomte_panel"])
@@ -933,7 +933,7 @@ def test_validate_non_tumour_rna_samples_have_matching_dna_sample_no_subject_id(
     )
 
     # WHEN validating that the order's samples have associated DNA samples
-    errors = validate_non_tumour_rna_samples_have_matching_dna_sample(
+    errors = validate_matching_normal_dna_for_rna_samples(
         order=tomte_order, store=status_db.as_type
     )
 

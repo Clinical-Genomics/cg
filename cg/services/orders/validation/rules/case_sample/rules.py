@@ -608,7 +608,7 @@ def warn_if_sex_unknown(order: OrderWithCases, **kwargs) -> list[SexUnknownWarni
     return warnings
 
 
-def validate_non_tumour_rna_samples_have_matching_dna_sample(
+def validate_matching_normal_dna_for_rna_samples(
     order: TomteOrder, store: Store, **kwargs
 ) -> list[CaseSampleError]:
     """
