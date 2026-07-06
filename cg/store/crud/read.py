@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Callable, Iterator, Literal
 
 import sqlalchemy
+from sqlalchemy import or_
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
@@ -673,20 +674,18 @@ class ReadHandler(BaseHandler):
             int: The total number of samples returned before truncation.
         """
         samples: Query = self._get_query(table=Sample)
-        filter_functions: list[SampleFilter] = []
         if customers:
-            if not isinstance(customers, list):
-                customers = list(customers)
-            filter_functions.append(SampleFilter.BY_CUSTOMERS)
+            customer_ids: list[int] = [customer.id for customer in customers]
+            samples = samples.filter(Sample.customer_id.in_(customer_ids))
         if pattern:
-            filter_functions.extend([SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH])
-        filter_functions.append(SampleFilter.ORDER_BY_CREATED_AT_DESC)
-        samples: Query = apply_sample_filter(
-            samples=samples,
-            customers=customers,
-            search_pattern=pattern,
-            filter_functions=filter_functions,
-        )
+            samples = samples.filter(
+                or_(
+                    Sample.name.contains(pattern),
+                    Sample.internal_id.contains(pattern),
+                    Sample.order.contains(pattern),
+                )
+            )
+        samples = samples.order_by(Sample.created_at.desc())
         total: int = samples.count()
         return samples.offset(offset).limit(limit).all(), total
 

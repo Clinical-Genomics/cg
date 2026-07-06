@@ -13,11 +13,6 @@ def filter_samples_by_internal_id(internal_id: str, samples: Query, **kwargs) ->
     return samples.filter(Sample.internal_id == internal_id)
 
 
-def filter_samples_by_internal_ids(internal_ids: list[str], samples: Query, **kwargs) -> Query:
-    """Return sample by internal id."""
-    return samples.filter(Sample.internal_id.in_(internal_ids)) if internal_ids else samples
-
-
 def filter_samples_by_name(name: str, samples: Query, **kwargs) -> Query:
     """Return sample with sample name."""
     return samples.filter(Sample.name == name)
@@ -121,13 +116,6 @@ def filter_samples_on_tumour(samples: Query, is_tumour: bool, **kwargs) -> Query
     return samples.filter(Sample.is_tumour.is_(is_tumour))
 
 
-def filter_samples_by_internal_id_pattern(
-    samples: Query, internal_id_pattern: str, **kwargs
-) -> Query:
-    """Return samples matching the internal id pattern."""
-    return samples.filter(Sample.internal_id.contains(internal_id_pattern))
-
-
 def filter_samples_by_internal_id_or_name_search(
     samples: Query, search_pattern: str | None, **kwargs
 ) -> Query:
@@ -147,12 +135,6 @@ def filter_samples_by_customer(samples: Query, customer: Customer, **kwargs) -> 
     return samples.filter(Sample.customer == customer)
 
 
-def filter_samples_by_customers(samples: Query, customers: list[Customer], **kwargs) -> Query:
-    """Return samples by customers."""
-    customer_ids = [customer.id for customer in customers]
-    return samples.filter(Sample.customer_id.in_(customer_ids))
-
-
 def order_samples_by_created_at_desc(samples: Query, **kwargs) -> Query:
     """Return samples ordered by created_at descending."""
     return samples.order_by(Sample.created_at.desc())
@@ -169,29 +151,20 @@ def filter_out_cancelled_samples(samples: Query, **kwargs) -> Query:
     return samples.filter(Sample.is_cancelled.is_(False))
 
 
-def apply_limit(samples: Query, limit: int, **kwargs) -> Query:
-    return samples.limit(limit)
-
-
 def apply_sample_filter(
     filter_functions: list[Callable],
     samples: Query,
     entry_id: int | None = None,
     internal_id: str | None = None,
     tissue_type: SampleType | None = None,
-    data_analysis: str | None = None,
     invoice_id: int | None = None,
     customer_entry_ids: list[int] | None = None,
     subject_id: str | None = None,
     name: str | None = None,
     customer: Customer | None = None,
-    customers: list[Customer] | None = None,
-    name_pattern: str | None = None,
-    internal_id_pattern: str | None = None,
     search_pattern: str | None = None,
     identifier_name: str = None,
     identifier_value: Any = None,
-    limit: int | None = None,
     is_tumour: bool | None = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
@@ -202,19 +175,14 @@ def apply_sample_filter(
             entry_id=entry_id,
             internal_id=internal_id,
             tissue_type=tissue_type,
-            data_analysis=data_analysis,
             invoice_id=invoice_id,
             customer_entry_ids=customer_entry_ids,
             subject_id=subject_id,
             name=name,
             customer=customer,
-            customers=customers,
-            name_pattern=name_pattern,
-            internal_id_pattern=internal_id_pattern,
             search_pattern=search_pattern,
             identifier_name=identifier_name,
             identifier_value=identifier_value,
-            limit=limit,
             is_tumour=is_tumour,
         )
     return samples
@@ -224,14 +192,11 @@ class SampleFilter(Enum):
     """Define Sample filter functions."""
 
     BY_CUSTOMER: Callable = filter_samples_by_customer
-    BY_CUSTOMERS: Callable = filter_samples_by_customers
     BY_CUSTOMER_ENTRY_IDS: Callable = filter_samples_by_entry_customer_ids
     BY_ENTRY_ID: Callable = filter_samples_by_entry_id
     BY_IDENTIFIER_NAME_AND_VALUE: Callable = filter_samples_by_identifier_name_and_value
     BY_INTERNAL_ID: Callable = filter_samples_by_internal_id
-    BY_INTERNAL_IDS: Callable = filter_samples_by_internal_ids
     BY_INTERNAL_ID_OR_NAME_SEARCH: Callable = filter_samples_by_internal_id_or_name_search
-    BY_INTERNAL_ID_PATTERN: Callable = filter_samples_by_internal_id_pattern
     BY_INVOICE_ID: Callable = filter_samples_by_invoice_id
     BY_SAMPLE_NAME: Callable = filter_samples_by_name
     BY_SUBJECT_ID: Callable = filter_samples_by_subject_id
@@ -248,7 +213,6 @@ class SampleFilter(Enum):
     IS_NOT_RECEIVED: Callable = filter_samples_is_not_received
     IS_SEQUENCED: Callable = filter_samples_is_sequenced
     IS_NOT_SEQUENCED: Callable = filter_samples_is_not_sequenced
-    LIMIT: Callable = apply_limit
     WITH_LOQUSDB_ID: Callable = filter_samples_with_loqusdb_id
     WITHOUT_LOQUSDB_ID: Callable = filter_samples_without_loqusdb_id
     WITH_TYPE: Callable = filter_samples_with_type
