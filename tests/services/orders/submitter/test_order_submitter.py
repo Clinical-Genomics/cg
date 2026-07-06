@@ -186,6 +186,7 @@ def order_with_new_case_and_existing_external_samples(existing_sample_id: str) -
     )
 
 
+# TODO: Remove
 @pytest.fixture
 def order_with_existing_case_and_external_sample(existing_case_id: str) -> OrderWithCases:
     return OrderWithCases(
@@ -406,7 +407,9 @@ def test_get_ticket_tags_with_external_data_for_order_with_new_case_and_new_samp
 
 
 def test_get_ticket_tags_with_external_data_for_order_with_existing_case(
-    order_with_existing_case_and_external_sample: OrderWithCases, store_with_externals: Store
+    # TODO: Replace fixture with order with existing samples
+    order_with_existing_case_and_external_sample: OrderWithCases,
+    store_with_externals: Store,
 ):
 
     # GIVEN an existing case with an existing sample with external data

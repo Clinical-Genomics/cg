@@ -301,6 +301,7 @@ def is_sample_not_from_collaboration(
     return db_sample and customer and db_sample.customer not in customer.collaborators
 
 
+# TODO: Remove
 def get_existing_case_names(order: OrderWithCases, status_db: Store) -> set[str]:
     existing_case_names: set[str] = set()
     for _, case in order.enumerated_existing_cases:

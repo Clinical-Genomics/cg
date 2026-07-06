@@ -293,6 +293,7 @@ def validate_sample_names_different_from_case_names(
     """Return errors with the indexes of samples having the same name as any case in the order."""
     errors: list[SampleNameSameAsCaseNameError] = []
     new_case_names: set[str] = {case.name for _, case in order.enumerated_new_cases}
+    # TODO: Update logic
     existing_case_names: set[str] = get_existing_case_names(order=order, status_db=store)
     all_case_names = new_case_names.union(existing_case_names)
     for case_index, sample_index, sample in order.enumerated_new_samples:

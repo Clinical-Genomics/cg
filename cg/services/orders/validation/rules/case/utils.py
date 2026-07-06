@@ -63,6 +63,7 @@ def _is_sample_wgs_normal(
         )
 
 
+# TODO: Remove
 def is_case_not_from_collaboration(case: ExistingCase, customer_id: str, store: Store) -> bool:
     db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
     customer: Customer | None = store.get_customer_by_internal_id(customer_id)
@@ -103,6 +104,7 @@ def does_case_exist(case: MIPDNACase | RarediseaseCase | ExistingCase, store: St
 
 
 def is_single_sample_case(case: MIPDNACase | RarediseaseCase | ExistingCase, store: Store):
+    # TODO: Update logic
     if isinstance(case, ExistingCase):
         db_case: DbCase = store.get_case_by_internal_id_strict(case.internal_id)
         contains_one_sample = bool(len(db_case.samples) == 1)

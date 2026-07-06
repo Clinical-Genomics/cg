@@ -543,6 +543,7 @@ def test_validate_sample_names_different_from_existing_case_names(
 ):
     # GIVEN an order with a case holding samples with the same name as an existing case in the order
     case = store_with_multiple_cases_and_samples.get_cases()[0]
+    # TODO: Update logic
     existing_case = ExistingCase(internal_id=case.internal_id, panels=case.panels)
     valid_order.cases.append(existing_case)
     valid_order.cases[0].samples[0].name = case.name
