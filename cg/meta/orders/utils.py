@@ -4,7 +4,6 @@ from cg.clients.freshdesk.constants import Status
 from cg.constants.priority import Priority
 from cg.models.orders.constants import OrderType
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
-from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.order_with_samples import OrderWithSamples
@@ -23,6 +22,7 @@ DUE_TIME_BY_PRIORITY: dict[Priority, timedelta] = {
 
 def contains_existing_data(order: OrderWithCases) -> bool:
     """Check if the order contains any existing data"""
+    # TODO: Fix this method to remove is_new logic
     return any(not case.is_new or case.enumerated_existing_samples for case in order.cases)
 
 
@@ -84,6 +84,7 @@ def get_existing_samples(order: Order, status_db: Store) -> list[Sample]:
     existing_samples: list[Sample] = []
 
     if isinstance(order, OrderWithCases):
+        # TODO: Remove this logic concerning existing cases
         existing_samples.extend(
             [
                 sample

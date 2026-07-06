@@ -83,6 +83,7 @@ class StoreCaseOrderService(StoreOrderService):
                 self._create_links(case=case, db_case=db_case, case_samples=case_samples)
 
             else:
+                # TODO: Remove this logic
                 db_case: DbCase = self._update_existing_case(
                     existing_case=case, ticket_id=order._generated_ticket_id
                 )
@@ -184,6 +185,7 @@ class StoreCaseOrderService(StoreOrderService):
             ticket_id=order._generated_ticket_id,
         )
 
+    # TODO: Remove this method
     def _update_existing_case(self, existing_case: ExistingCase, ticket_id: int) -> DbCase:
         status_db_case = self.status_db.get_case_by_internal_id(existing_case.internal_id)
         self._append_ticket(ticket_id=str(ticket_id), case=status_db_case)

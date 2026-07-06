@@ -24,6 +24,7 @@ class Case(BaseModel, Generic[SampleType]):
         ]
     ]
 
+    # TODO: Property not needed anymore
     @property
     def is_new(self) -> bool:
         return True

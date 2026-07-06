@@ -95,6 +95,7 @@ def get_case_prep_categories(case: Case, store: Store) -> set[str]:
     return prep_categories
 
 
+# TODO: Remove
 def does_case_exist(case: MIPDNACase | RarediseaseCase | ExistingCase, store: Store):
     if isinstance(case, ExistingCase):
         return bool(store.get_case_by_internal_id(case.internal_id))
@@ -134,6 +135,7 @@ def get_sample_name(sample: MIPDNASample | RarediseaseSample | ExistingSample, s
 
 
 def get_sample_sources(case: TomteCase | ExistingCase, lims_api: LimsAPI, store: Store) -> set:
+    # TODO: Update logic
     if isinstance(case, ExistingCase):
         return _get_existing_case_sources(case=case, lims_api=lims_api, store=store)
     else:
@@ -155,6 +157,7 @@ def _get_new_case_sources(case: TomteCase, lims_api: LimsAPI, store: Store) -> s
     return sources
 
 
+# TODO: Remove method
 def _get_existing_case_sources(case: ExistingCase, lims_api: LimsAPI, store: Store) -> set:
     db_case = store.get_case_by_internal_id(case.internal_id)
     if not db_case:  # This should result in an error elsewhere

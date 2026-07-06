@@ -15,6 +15,7 @@ SampleType = TypeVar("SampleType", bound=Sample)
 
 
 class OrderWithCases(Order, Generic[CaseType, SampleType]):
+    # TODO: Remove logic concerning existing cases
     cases: list[
         Annotated[
             Annotated[CaseType, Tag("new")] | Annotated[ExistingCase, Tag("existing")],
@@ -26,6 +27,7 @@ class OrderWithCases(Order, Generic[CaseType, SampleType]):
     def enumerated_cases(self) -> enumerate[CaseType | ExistingCase]:
         return enumerate(self.cases)
 
+    # TODO: Remove this methods and replace usages with method above
     @property
     def enumerated_new_cases(self) -> list[tuple[int, CaseType]]:
         cases: list[tuple[int, CaseType]] = []
@@ -34,6 +36,7 @@ class OrderWithCases(Order, Generic[CaseType, SampleType]):
                 cases.append((case_index, case))
         return cases
 
+    # TODO: Remove this property
     @property
     def enumerated_existing_cases(self) -> list[tuple[int, ExistingCase]]:
         cases: list[tuple[int, ExistingCase]] = []

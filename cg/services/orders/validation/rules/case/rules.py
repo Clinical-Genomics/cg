@@ -198,6 +198,7 @@ def validate_case_contains_related_samples(
 ) -> list[SamplesNotRelatedError]:
     errors: list[SamplesNotRelatedError] = []
     for case_index, case in order.enumerated_new_cases:
+        # TODO: Update logic
         if not does_case_exist(case=case, store=store):  # Error should be raised elsewhere
             continue
         if is_single_sample_case(case=case, store=store):  # This should always pass
