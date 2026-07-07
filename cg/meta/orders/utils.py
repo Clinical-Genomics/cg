@@ -22,8 +22,7 @@ DUE_TIME_BY_PRIORITY: dict[Priority, timedelta] = {
 
 def contains_existing_data(order: OrderWithCases) -> bool:
     """Check if the order contains any existing data"""
-    # TODO: Fix this method to remove is_new logic
-    return any(not case.is_new or case.enumerated_existing_samples for case in order.cases)
+    return any(case.enumerated_existing_samples for case in order.cases)
 
 
 def contains_external_data(order: Order, status_db: Store) -> bool:

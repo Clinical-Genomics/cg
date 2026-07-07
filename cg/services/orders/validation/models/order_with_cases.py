@@ -1,10 +1,6 @@
 from typing import Generic, TypeVar
 
-from pydantic import Discriminator, Tag
-from typing_extensions import Annotated
-
 from cg.services.orders.validation.models.case import Case
-from cg.services.orders.validation.models.discriminators import has_internal_id
 from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order import Order
@@ -15,13 +11,7 @@ SampleType = TypeVar("SampleType", bound=Sample)
 
 
 class OrderWithCases(Order, Generic[CaseType, SampleType]):
-    # TODO: Remove logic concerning existing cases
-    cases: list[
-        Annotated[
-            Annotated[CaseType, Tag("new")] | Annotated[ExistingCase, Tag("existing")],
-            Discriminator(has_internal_id),
-        ]
-    ]
+    cases: list[CaseType]
 
     @property
     def enumerated_cases(self) -> enumerate[CaseType | ExistingCase]:
