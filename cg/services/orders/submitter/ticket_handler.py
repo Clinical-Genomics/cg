@@ -31,7 +31,7 @@ class TicketHandler:
 
     def create_ticket(
         self, order: Order, user_name: str, user_mail: str, order_type: OrderType
-    ) -> int | None:
+    ) -> int:
         """Create a ticket and return the ticket number"""
         message: str = self.create_new_ticket_header(
             message=self.create_xml_sample_list(order=order, user_name=user_name),
@@ -181,44 +181,32 @@ class TicketHandler:
         return obj
 
     def create_case_xml_sample_list(self, order: OrderWithCases, message: str) -> str:
-        # TODO: Remove logic for existing samples
         for case in order.cases:
-            if not case.is_new:
-                db_case = self.status_db.get_case_by_internal_id(case.internal_id)
-                for sample in db_case.samples:
+            for sample in case.samples:
+                if not sample.is_new:
                     message += self.NEW_LINE
                     message = self.add_existing_sample_info_to_message(
                         message=message,
-                        customer_id=sample.customer.internal_id,
+                        customer_id=order.customer,
                         internal_id=sample.internal_id,
-                        case_name=db_case.name,
+                        case_name=case.name,
                     )
-            else:
-                for sample in case.samples:
-                    if not sample.is_new:
-                        message += self.NEW_LINE
-                        message = self.add_existing_sample_info_to_message(
-                            message=message,
-                            customer_id=order.customer,
-                            internal_id=sample.internal_id,
-                            case_name=case.name,
-                        )
-                    else:
-                        message = self.add_sample_name_to_message(
-                            message=message, sample_name=sample.name
-                        )
-                        message = self.add_sample_apptag_to_message(
-                            message=message, application=sample.application
-                        )
-                        message = self.add_sample_case_name_to_message(
-                            message=message, case_name=case.name
-                        )
-                        message = self.add_sample_priority_to_message(
-                            message=message, priority=case.priority
-                        )
-                        message = self.add_sample_comment_to_message(
-                            message=message, comment=sample.comment
-                        )
+                else:
+                    message = self.add_sample_name_to_message(
+                        message=message, sample_name=sample.name
+                    )
+                    message = self.add_sample_apptag_to_message(
+                        message=message, application=sample.application
+                    )
+                    message = self.add_sample_case_name_to_message(
+                        message=message, case_name=case.name
+                    )
+                    message = self.add_sample_priority_to_message(
+                        message=message, priority=case.priority
+                    )
+                    message = self.add_sample_comment_to_message(
+                        message=message, comment=sample.comment
+                    )
         return message
 
     @staticmethod
