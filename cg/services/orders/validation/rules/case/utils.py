@@ -107,7 +107,6 @@ def is_sample_related_in_case(
 
 
 def get_sample_name(sample: MIPDNASample | RarediseaseSample | ExistingSample, store: Store) -> str:
-    # TODO: Update logic
     if isinstance(sample, ExistingSample):
         sample_name: str = store.get_sample_by_internal_id_strict(sample.internal_id).name
     else:
@@ -115,15 +114,8 @@ def get_sample_name(sample: MIPDNASample | RarediseaseSample | ExistingSample, s
     return sample_name
 
 
-def get_sample_sources(case: TomteCase | ExistingCase, lims_api: LimsAPI, store: Store) -> set:
-    # TODO: Update logic
-    if isinstance(case, ExistingCase):
-        return _get_existing_case_sources(case=case, lims_api=lims_api, store=store)
-    else:
-        return _get_new_case_sources(case=case, lims_api=lims_api, store=store)
-
-
-def _get_new_case_sources(case: TomteCase, lims_api: LimsAPI, store: Store) -> set:
+def get_sample_sources_from_case(case: TomteCase, lims_api: LimsAPI, store: Store) -> set:
+    """Return unique sources from the samples of the provided case fetched from LIMS."""
     sources = set()
     for sample in case.samples:
         if isinstance(sample, ExistingSample):
@@ -135,17 +127,6 @@ def _get_new_case_sources(case: TomteCase, lims_api: LimsAPI, store: Store) -> s
                 )  # Downsampled samples are not in LIMS so we should get the source from the original sample
         else:
             sources.add(sample.source_comment if sample.source == "other" else sample.source)
-    return sources
-
-
-# TODO: Remove method
-def _get_existing_case_sources(case: ExistingCase, lims_api: LimsAPI, store: Store) -> set:
-    db_case = store.get_case_by_internal_id(case.internal_id)
-    if not db_case:  # This should result in an error elsewhere
-        return set()
-    sources = set()
-    for sample in db_case.samples:
-        sources.add(lims_api.get_source(sample.from_sample or sample.internal_id))
     return sources
 
 

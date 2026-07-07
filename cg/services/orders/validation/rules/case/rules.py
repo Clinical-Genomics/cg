@@ -28,7 +28,7 @@ from cg.services.orders.validation.rules.case.utils import (
     get_case_prep_categories,
     get_invalid_panels,
     get_sample_name,
-    get_sample_sources,
+    get_sample_sources_from_case,
     is_double_normal,
     is_double_tumour,
     is_normal_only_wgs,
@@ -168,7 +168,9 @@ def validate_samples_have_same_source(
 ) -> list[SampleSourceMismatchError]:
     errors: list[SampleSourceMismatchError] = []
     for case_index, case in order.enumerated_cases:
-        sample_sources: set = get_sample_sources(case=case, lims_api=lims_api, store=store)
+        sample_sources: set = get_sample_sources_from_case(
+            case=case, lims_api=lims_api, store=store
+        )
         if len(sample_sources) > 1:
             error = SampleSourceMismatchError(
                 case_index=case_index,
