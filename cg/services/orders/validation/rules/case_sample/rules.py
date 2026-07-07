@@ -103,7 +103,7 @@ def validate_application_compatibility(
 ) -> list[ApplicationNotCompatibleError]:
     errors: list[ApplicationNotCompatibleError] = []
     order_type: OrderType = order.order_type
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if not is_application_compatible(
                 order_type=order_type,
@@ -127,7 +127,7 @@ def validate_buffer_skip_rc_condition(order: OrderWithCases, **kwargs) -> list[I
 
 def validate_buffers_are_allowed(order: OrderWithCases, **kwargs) -> list[InvalidBufferError]:
     errors: list[InvalidBufferError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if sample.elution_buffer not in ALLOWED_SKIP_RC_BUFFERS:
                 error = InvalidBufferError(case_index=case_index, sample_index=sample_index)
@@ -141,7 +141,7 @@ def validate_concentration_required_if_skip_rc(
     if not order.skip_reception_control:
         return []
     errors: list[ConcentrationRequiredIfSkipRCError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if is_concentration_missing(sample):
                 error = ConcentrationRequiredIfSkipRCError(
@@ -156,7 +156,7 @@ def validate_subject_ids_different_from_sample_names(
     order: OrderWithCases, **kwargs
 ) -> list[SubjectIdSameAsSampleNameError]:
     errors: list[SubjectIdSameAsSampleNameError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if sample.name == sample.subject_id:
                 error = SubjectIdSameAsSampleNameError(
@@ -171,7 +171,7 @@ def validate_well_positions_required(
     order: OrderWithCases, **kwargs
 ) -> list[WellPositionMissingError]:
     errors: list[WellPositionMissingError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if is_well_position_missing(sample):
                 error = WellPositionMissingError(case_index=case_index, sample_index=sample_index)
@@ -183,7 +183,7 @@ def validate_container_name_required(
     order: OrderWithCases, **kwargs
 ) -> list[ContainerNameMissingError]:
     errors: list[ContainerNameMissingError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if is_container_name_missing(sample):
                 error = ContainerNameMissingError(
@@ -200,7 +200,7 @@ def validate_application_exists(
     **kwargs,
 ) -> list[ApplicationNotValidError]:
     errors: list[ApplicationNotValidError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if not store.get_application_by_tag(sample.application):
                 error = ApplicationNotValidError(case_index=case_index, sample_index=sample_index)
@@ -214,7 +214,7 @@ def validate_application_not_archived(
     **kwargs,
 ) -> list[ApplicationArchivedError]:
     errors: list[ApplicationArchivedError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if store.is_application_archived(sample.application):
                 error = ApplicationArchivedError(case_index=case_index, sample_index=sample_index)
@@ -224,7 +224,7 @@ def validate_application_not_archived(
 
 def validate_volume_interval(order: OrderWithCases, **kwargs) -> list[InvalidVolumeError]:
     errors: list[InvalidVolumeError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if is_volume_invalid(sample):
                 error = InvalidVolumeError(case_index=case_index, sample_index=sample_index)
@@ -234,7 +234,7 @@ def validate_volume_interval(order: OrderWithCases, **kwargs) -> list[InvalidVol
 
 def validate_volume_required(order: OrderWithCases, **kwargs) -> list[VolumeRequiredError]:
     errors: list[VolumeRequiredError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if is_volume_missing(sample):
                 error = VolumeRequiredError(case_index=case_index, sample_index=sample_index)
@@ -248,7 +248,7 @@ def validate_samples_exist(
     **kwargs,
 ) -> list[SampleDoesNotExistError]:
     errors: list[SampleDoesNotExistError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_existing_samples:
             db_sample: DbSample | None = store.get_sample_by_internal_id(sample.internal_id)
             if not db_sample:
@@ -294,7 +294,7 @@ def validate_sample_names_different_from_case_names(
 ) -> list[SampleNameSameAsCaseNameError]:
     """Return errors with the indexes of samples having the same name as any case in the order."""
     errors: list[SampleNameSameAsCaseNameError] = []
-    case_names: set[str] = {case.name for _, case in order.enumerated_new_cases}
+    case_names: set[str] = {case.name for _, case in order.enumerated_cases}
     for case_index, sample_index, sample in order.enumerated_new_samples:
         if sample.name in case_names:
             error = SampleNameSameAsCaseNameError(
@@ -309,7 +309,7 @@ def validate_fathers_are_male(
     order: OrderWithCases, store: Store, **kwargs
 ) -> list[InvalidFatherSexError]:
     errors: list[InvalidFatherSexError] = []
-    for index, case in order.enumerated_new_cases:
+    for index, case in order.enumerated_cases:
         case_errors: list[InvalidFatherSexError] = get_father_sex_errors(
             case=case, case_index=index, store=store
         )
@@ -321,7 +321,7 @@ def validate_fathers_in_same_case_as_children(
     order: OrderWithCases, store: Store, **kwargs
 ) -> list[FatherNotInCaseError]:
     errors: list[FatherNotInCaseError] = []
-    for index, case in order.enumerated_new_cases:
+    for index, case in order.enumerated_cases:
         case_errors: list[FatherNotInCaseError] = get_father_case_errors(
             case=case, case_index=index, store=store
         )
@@ -333,7 +333,7 @@ def validate_mothers_are_female(
     order: OrderWithCases, store: Store, **kwargs
 ) -> list[InvalidMotherSexError]:
     errors: list[InvalidMotherSexError] = []
-    for index, case in order.enumerated_new_cases:
+    for index, case in order.enumerated_cases:
         case_errors: list[InvalidMotherSexError] = get_mother_sex_errors(
             case=case, case_index=index, store=store
         )
@@ -345,7 +345,7 @@ def validate_mothers_in_same_case_as_children(
     order: OrderWithCases, store: Store, **kwargs
 ) -> list[MotherNotInCaseError]:
     errors: list[MotherNotInCaseError] = []
-    for index, case in order.enumerated_new_cases:
+    for index, case in order.enumerated_cases:
         case_errors: list[MotherNotInCaseError] = get_mother_case_errors(
             case=case, case_index=index, store=store
         )
@@ -355,7 +355,7 @@ def validate_mothers_in_same_case_as_children(
 
 def validate_pedigree(order: OrderWithCases, store: Store, **kwargs) -> list[PedigreeError]:
     errors: list[PedigreeError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         case_errors: list[PedigreeError] = get_pedigree_errors(
             case=case, case_index=case_index, store=store
         )
@@ -389,7 +389,7 @@ def validate_subject_ids_different_from_case_names(
     order: OrderWithCases, **kwargs
 ) -> list[SubjectIdSameAsCaseNameError]:
     errors: list[SubjectIdSameAsCaseNameError] = []
-    for index, case in order.enumerated_new_cases:
+    for index, case in order.enumerated_cases:
         case_errors: list[SubjectIdSameAsCaseNameError] = validate_subject_ids_in_case(
             case=case,
             case_index=index,
@@ -404,7 +404,7 @@ def validate_concentration_interval_if_skip_rc(
     if not order.skip_reception_control:
         return []
     errors: list[InvalidConcentrationIfSkipRCError] = []
-    for index, case in order.enumerated_new_cases:
+    for index, case in order.enumerated_cases:
         case_errors: list[InvalidConcentrationIfSkipRCError] = validate_concentration_in_case(
             case=case,
             case_index=index,
@@ -416,7 +416,7 @@ def validate_concentration_interval_if_skip_rc(
 
 def validate_well_position_format(order: OrderWithCases, **kwargs) -> list[WellFormatError]:
     errors: list[WellFormatError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if is_invalid_plate_well_format(sample=sample):
                 error = WellFormatError(case_index=case_index, sample_index=sample_index)
@@ -431,7 +431,7 @@ def validate_tube_container_name_unique(
 
     container_name_counter: Counter = get_counter_container_names(order)
 
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if is_sample_tube_name_reused(sample=sample, counter=container_name_counter):
                 error = ContainerNameRepeatedError(case_index=case_index, sample_index=sample_index)
@@ -444,7 +444,7 @@ def validate_not_all_samples_unknown_in_case(
 ) -> list[StatusUnknownError]:
     errors: list[StatusUnknownError] = []
 
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if are_all_samples_unknown(case):
             for sample_index, _ in case.enumerated_samples:
                 error = StatusUnknownError(case_index=case_index, sample_index=sample_index)
@@ -471,7 +471,7 @@ def reset_optional_capture_kits(
     to be rendered as a warning for each such sample.
     """
     errors: list[CaptureKitResetError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if not does_sample_need_capture_kit(sample=sample, store=store) and sample.capture_kit:
                 sample.capture_kit = None
@@ -488,7 +488,7 @@ def validate_capture_kit_requirement(
     Applicable to Balsamic and Balsamic-UMI orders only.
     """
     errors: list[CaptureKitMissingError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if is_sample_missing_capture_kit(sample=sample, store=store):
                 error = CaptureKitMissingError(case_index=case_index, sample_index=sample_index)
@@ -512,7 +512,7 @@ def validate_existing_samples_belong_to_collaboration(
 ) -> list[SampleOutsideOfCollaborationError]:
     """Validates that existing samples belong to the same collaboration as the order's customer."""
     errors: list[SampleOutsideOfCollaborationError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_existing_samples:
             if is_sample_not_from_collaboration(
                 customer_id=order.customer, sample=sample, store=store
@@ -563,7 +563,7 @@ def validate_source_comment_required(
     **kwargs,
 ) -> list[MissingSourceCommentError]:
     errors: list[MissingSourceCommentError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if sample.source == "other" and not sample.source_comment:
                 error = MissingSourceCommentError(case_index=case_index, sample_index=sample_index)
@@ -619,7 +619,7 @@ def validate_matching_normal_dna_for_rna_samples(
     if DataDelivery.SCOUT not in order.delivery_type:
         return []
     errors: list[CaseSampleError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_samples:
             try:
                 subject_id: str | None = get_subject_id(sample=sample, store=store)

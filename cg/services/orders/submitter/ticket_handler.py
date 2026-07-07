@@ -215,7 +215,7 @@ class TicketHandler:
         priority_list: list[Priority] = []
 
         if isinstance(order, OrderWithCases):
-            for index, new_case in order.enumerated_new_cases:
+            for index, new_case in order.enumerated_cases:
                 priority_list.append(Priority[new_case.priority])
 
         if isinstance(order, OrderWithSamples):

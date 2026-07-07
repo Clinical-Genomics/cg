@@ -69,7 +69,7 @@ def get_well_sample_map(
     well_position, provided the sample is on a plate.
     """
     well_position_to_sample_map = {}
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if is_sample_on_plate(sample):
                 key: tuple[str, str] = (sample.container_name, sample.well_position)
@@ -89,10 +89,10 @@ def get_occupied_well_errors(colliding_samples: list[tuple[int, int]]) -> list[O
 
 
 def get_indices_for_repeated_case_names(order: OrderWithCases) -> list[int]:
-    counter = Counter([case.name for _, case in order.enumerated_new_cases])
+    counter = Counter([case.name for _, case in order.enumerated_cases])
     indices: list[int] = []
 
-    for index, case in order.enumerated_new_cases:
+    for index, case in order.enumerated_cases:
         if counter.get(case.name) > 1:
             indices.append(index)
 
@@ -260,7 +260,7 @@ def is_sample_tube_name_reused(sample: Sample, counter: Counter) -> bool:
 def get_counter_container_names(order: OrderWithCases) -> Counter:
     counter = Counter(
         sample.container_name
-        for case_index, case in order.enumerated_new_cases
+        for case_index, case in order.enumerated_cases
         for sample_index, sample in case.enumerated_new_samples
     )
     return counter

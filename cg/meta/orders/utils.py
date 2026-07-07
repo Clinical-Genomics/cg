@@ -86,7 +86,7 @@ def get_existing_samples(order: Order, status_db: Store) -> list[Sample]:
         existing_samples.extend(
             [
                 sample
-                for (_, case) in order.enumerated_new_cases
+                for (_, case) in order.enumerated_cases
                 for (_, existing_sample) in case.enumerated_existing_samples
                 if (sample := status_db.get_sample_by_internal_id(existing_sample.internal_id))
             ]

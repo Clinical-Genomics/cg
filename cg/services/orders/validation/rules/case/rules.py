@@ -41,7 +41,7 @@ from cg.store.store import Store
 
 def validate_gene_panels_unique(order: OrderWithCases, **kwargs) -> list[RepeatedGenePanelsError]:
     errors: list[RepeatedGenePanelsError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if contains_duplicates(case.panels):
             error = RepeatedGenePanelsError(case_index=case_index)
             errors.append(error)
@@ -55,7 +55,7 @@ def validate_case_names_available(
 ) -> list[CaseNameNotAvailableError]:
     errors: list[CaseNameNotAvailableError] = []
     customer = store.get_customer_by_internal_id(order.customer)
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if store.get_case_by_name_and_customer(case_name=case.name, customer=customer):
             error = CaseNameNotAvailableError(case_index=case_index)
             errors.append(error)
@@ -75,7 +75,7 @@ def validate_one_sample_per_case(
     """Validates that there is only one sample in each case.
     Only applicable to RNAFusion."""
     errors: list[MultipleSamplesInCaseError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if len(case.samples) > 1:
             error = MultipleSamplesInCaseError(case_index=case_index)
             errors.append(error)
@@ -88,7 +88,7 @@ def validate_at_most_two_samples_per_case(
     """Validates that there is at most two samples in each case.
     Only applicable to Balsamic and Balsamic-UMI."""
     errors: list[MoreThanTwoSamplesInCaseError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if len(case.samples) > 2:
             error = MoreThanTwoSamplesInCaseError(case_index=case_index)
             errors.append(error)
@@ -104,7 +104,7 @@ def validate_number_of_normal_samples(
     Only applicable to Balsamic and Balsamic-UMI.
     """
     errors: list[NumberOfNormalSamplesError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if is_double_normal(case=case, store=store):
             error = DoubleNormalError(case_index=case_index)
             errors.append(error)
@@ -122,7 +122,7 @@ def validate_each_new_case_has_an_affected_sample(
 ) -> list[NewCaseWithoutAffectedSampleError]:
     """Validates that each case in the order contains at least one sample with affected status."""
     errors: list[NewCaseWithoutAffectedSampleError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if all(sample.status != StatusEnum.affected for sample in case.samples):
             error = NewCaseWithoutAffectedSampleError(case_index=case_index)
             errors.append(error)
@@ -133,7 +133,7 @@ def validate_samples_in_case_have_same_prep_category(
     order: OrderWithCases, store: Store, **kwargs
 ) -> list[MultiplePrepCategoriesError]:
     errors: list[MultiplePrepCategoriesError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         prep_categories: set[str] = get_case_prep_categories(case=case, store=store)
         if len(prep_categories) > 1:
             error = MultiplePrepCategoriesError(case_index=case_index)
@@ -145,7 +145,7 @@ def validate_case_contains_related_samples(
     order: MIPDNAOrder | RarediseaseOrder, store: Store, **kwargs
 ) -> list[SamplesNotRelatedError]:
     errors: list[SamplesNotRelatedError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if is_single_sample_case(case=case, store=store):  # This should always pass
             continue
         case_has_error = False
@@ -186,7 +186,7 @@ def validate_gene_panels_exist(
     **kwargs,
 ) -> list[InvalidGenePanelsError]:
     errors: list[InvalidGenePanelsError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if invalid_panels := get_invalid_panels(panels=case.panels, store=store):
             case_error = InvalidGenePanelsError(case_index=case_index, panels=invalid_panels)
             errors.append(case_error)
