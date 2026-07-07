@@ -31,6 +31,7 @@ class MetaAPI:
                 hk_api=config.housekeeper_api,
                 crunchy_api=config.crunchy_api,
                 demux_root=config.run_instruments.illumina.demultiplexed_runs_dir,
+                status_db=config.status_db,
             ),
         )
         self.scout_api_37: ScoutAPI = config.scout_api_37

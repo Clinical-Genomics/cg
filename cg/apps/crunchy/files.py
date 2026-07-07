@@ -1,7 +1,8 @@
 import logging
-import tempfile
+import re
 from datetime import date, datetime, timedelta
 from json.decoder import JSONDecodeError
+from math import ceil
 from pathlib import Path
 
 from cg.apps.crunchy.models import CrunchyFile, CrunchyMetadata
@@ -31,14 +32,40 @@ def get_spring_to_fastq_sbatch_path(log_dir: Path, run_name: str = None) -> Path
     return Path(log_dir, "_".join([run_name, "decompress_spring.sh"]))
 
 
-def get_tmp_dir(prefix: str, suffix: str, base: str = None) -> str:
-    """Create a temporary directory and return the path to it"""
+def get_tmp_dir(base: str) -> str:
+    """Return a node-local temp dir path, unique per SLURM job.
 
-    with tempfile.TemporaryDirectory(prefix=prefix, suffix=suffix, dir=base) as dir_name:
-        tmp_dir_path = dir_name
+    The path is expanded by the shell at job runtime (mkdir -p happens inside the
+    generated sbatch script), so `base` never needs to exist on the submission host.
+    """
+    return f"{base.rstrip('/')}/${{SLURM_JOB_ID}}_spring"
 
-    LOG.info(f"Created temporary dir {tmp_dir_path}")
-    return tmp_dir_path
+
+FASTQ_RUN_NAME_PATTERN = re.compile(
+    r"^(?P<flow_cell>[^_]+)_(?P<sample>[^_]+)_[^_]+_L(?P<lane>\d+)$"
+)
+
+
+def parse_run_name(run_name: str) -> tuple[str, str, int] | None:
+    """Parse a FASTQ run stub into (flow_cell, sample_internal_id, lane).
+
+    Expects the format {flow_cell}_{sample_internal_id}_{meta}_L{lane}, e.g.
+    23MGTHLT4_AGG24568A8_S52_L004. Returns None if the run name doesn't match.
+    """
+    match: re.Match | None = FASTQ_RUN_NAME_PATTERN.match(run_name)
+    if not match:
+        return None
+    return match["flow_cell"], match["sample"], int(match["lane"])
+
+
+def scale_resource_by_reads(reads: int, reads_per_unit: int, floor: int, cap: int) -> int:
+    """Linearly scale a resource (e.g. GB or minutes) with reads, clamped to [floor, cap].
+
+    Callers must check reads is known before calling - "no reads known" is not this
+    function's concern, it always returns a concrete value.
+    """
+    resource: int = ceil(reads / reads_per_unit)
+    return min(max(resource, floor), cap)
 
 
 def get_crunchy_metadata(metadata_path: Path) -> CrunchyMetadata:

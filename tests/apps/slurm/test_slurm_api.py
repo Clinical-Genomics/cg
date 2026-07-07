@@ -33,13 +33,17 @@ def test_generate_sbatch_header_with_optional_headers(sbatch_parameters: Sbatch)
     # GIVEN a Sbatch object with empty exclude and dependency
     sbatch_parameters.exclude = "--exclude=stuff"
     sbatch_parameters.dependency = "--dependency=afterok:42"
+    sbatch_parameters.partition = "--partition=crunchy"
+    sbatch_parameters.chdir = "--chdir=/state/partition1"
 
     # WHEN building a sbatch header
     sbatch_header: str = SlurmAPI.generate_sbatch_header(sbatch_parameters)
 
-    # THEN both headers should be included
+    # THEN all optional headers should be included
     assert "#SBATCH --exclude=stuff\n" in sbatch_header
     assert "#SBATCH --dependency=afterok:42" in sbatch_header
+    assert "#SBATCH --partition=crunchy" in sbatch_header
+    assert "#SBATCH --chdir=/state/partition1" in sbatch_header
 
 
 def test_generate_sbatch_header_without_optional_headers(sbatch_parameters: Sbatch):
@@ -162,7 +166,7 @@ def test_submit_sbatch_script_invalid_sbatch_response(
     # GIVEN some sbatch content
     # GIVEN the path to a sbatch file
     # GIVEN that the slurm system responds with something unexpected
-    slurm_api.process.set_stdout(text=f"something went wrong")
+    slurm_api.process.set_stdout(text="something went wrong")
 
     # WHEN submitting the job
     job_number: int = slurm_api.submit_sbatch(

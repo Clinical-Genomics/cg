@@ -32,6 +32,7 @@ def compress(context: CGConfig):
         hk_api=hk_api,
         crunchy_api=crunchy_api,
         demux_root=context.run_instruments.illumina.demultiplexed_runs_dir,
+        status_db=context.status_db,
     )
     context.meta_apis["compress_api"] = compress_api
 
@@ -61,6 +62,7 @@ def decompress(context: CGConfig):
         hk_api=hk_api,
         crunchy_api=crunchy_api,
         demux_root=context.run_instruments.illumina.demultiplexed_runs_dir,
+        status_db=context.status_db,
     )
 
     context.meta_apis["compress_api"] = compress_api

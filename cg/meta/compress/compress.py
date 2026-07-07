@@ -9,14 +9,29 @@ from pathlib import Path
 from housekeeper.store.models import File, Version
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.crunchy.files import update_metadata_date
+from cg.apps.crunchy.files import scale_resource_by_reads, update_metadata_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
+from cg.constants.compression import (
+    COMPRESSION_MAX_MINUTES_PER_PROCESS,
+    COMPRESSION_MAX_READS_PER_MINUTE,
+    COMPRESSION_MIN_MINUTES_PER_PROCESS,
+    CRUNCHY_MIN_GB_PER_PROCESS,
+    DECOMPRESSION_MAX_GB_PER_PROCESS,
+    DECOMPRESSION_MAX_MINUTES_PER_PROCESS,
+    DECOMPRESSION_MAX_READS_PER_GB,
+    DECOMPRESSION_MAX_READS_PER_MINUTE,
+    DECOMPRESSION_MIN_GB_PER_PROCESS,
+    DECOMPRESSION_MIN_MINUTES_PER_PROCESS,
+    MAX_READS_PER_GB,
+)
 from cg.constants.constants import PIPELINES_USING_PARTIAL_ANALYSES
+from cg.constants.slurm import SlurmProcessing
 from cg.exc import DecompressionCouldNotStartError
 from cg.meta.compress import files
 from cg.models.compression_data import CaseCompressionData, CompressionData, SampleCompressionData
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -29,12 +44,37 @@ class CompressAPI:
         hk_api: HousekeeperAPI,
         demux_root: str,
         crunchy_api: CrunchyAPI,
+        status_db: Store,
         dry_run: bool = False,
     ):
         self.hk_api: HousekeeperAPI = hk_api
         self.crunchy_api: CrunchyAPI = crunchy_api
         self.demux_root: Path = Path(demux_root)
+        self.status_db: Store = status_db
         self.dry_run: bool = dry_run
+
+    def _get_resources_for_run(
+        self,
+        compression_obj: CompressionData,
+        reads_per_gb: int,
+        min_gb: int,
+        max_gb: int,
+        reads_per_minute: int,
+        min_minutes: int,
+        max_minutes: int,
+    ) -> tuple[int, int]:
+        """Return (memory, minutes) for this run.
+
+        Scales both from the run's read count when it can be found in
+        illumina_sample_sequencing_metrics; otherwise falls back to CrunchyAPI's configured
+        fallback_memory/fallback_minutes.
+        """
+        reads: int | None = files.get_reads_for_run(compression_obj, self.status_db)
+        if not reads:
+            return self.crunchy_api.fallback_memory, self.crunchy_api.fallback_minutes
+        memory: int = scale_resource_by_reads(reads, reads_per_gb, min_gb, max_gb)
+        minutes: int = scale_resource_by_reads(reads, reads_per_minute, min_minutes, max_minutes)
+        return memory, minutes
 
     def set_dry_run(self, dry_run: bool):
         """Update dry run."""
@@ -71,7 +111,18 @@ class CompressAPI:
             LOG.info(
                 f"Compressing {compression.fastq_first} and {compression.fastq_second} for sample {sample_id} into SPRING format"
             )
-            self.crunchy_api.fastq_to_spring(compression_obj=compression, sample_id=sample_id)
+            memory, minutes = self._get_resources_for_run(
+                compression,
+                reads_per_gb=MAX_READS_PER_GB,
+                min_gb=CRUNCHY_MIN_GB_PER_PROCESS,
+                max_gb=SlurmProcessing.MAX_NODE_MEMORY,
+                reads_per_minute=COMPRESSION_MAX_READS_PER_MINUTE,
+                min_minutes=COMPRESSION_MIN_MINUTES_PER_PROCESS,
+                max_minutes=COMPRESSION_MAX_MINUTES_PER_PROCESS,
+            )
+            self.crunchy_api.fastq_to_spring(
+                compression_obj=compression, sample_id=sample_id, memory=memory, minutes=minutes
+            )
         return all_ok
 
     def _is_fastq_compression_possible(self, compression: CompressionData, sample_id: str) -> bool:
@@ -127,7 +178,21 @@ class CompressAPI:
                 ):
                     return False
             else:
-                self.crunchy_api.spring_to_fastq(compression_obj=compression, sample_id=sample_id)
+                memory, minutes = self._get_resources_for_run(
+                    compression,
+                    reads_per_gb=DECOMPRESSION_MAX_READS_PER_GB,
+                    min_gb=DECOMPRESSION_MIN_GB_PER_PROCESS,
+                    max_gb=DECOMPRESSION_MAX_GB_PER_PROCESS,
+                    reads_per_minute=DECOMPRESSION_MAX_READS_PER_MINUTE,
+                    min_minutes=DECOMPRESSION_MIN_MINUTES_PER_PROCESS,
+                    max_minutes=DECOMPRESSION_MAX_MINUTES_PER_PROCESS,
+                )
+                self.crunchy_api.spring_to_fastq(
+                    compression_obj=compression,
+                    sample_id=sample_id,
+                    memory=memory,
+                    minutes=minutes,
+                )
                 update_metadata_date(spring_metadata_path=compression.spring_metadata_path)
 
         return True

@@ -189,6 +189,10 @@ class LimsConfig(BaseModel):
 class CrunchyConfig(BaseModel):
     conda_binary: str | None = None
     cram_reference: str
+    tmp_dir_base: str
+    slurm_partition: str
+    fallback_memory: int
+    fallback_minutes: int
     slurm: SlurmConfig
 
 

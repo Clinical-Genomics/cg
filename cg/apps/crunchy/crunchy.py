@@ -36,10 +36,13 @@ class CrunchyAPI:
         self.reference_path: str = config["crunchy"]["cram_reference"]
         self.slurm_api: SlurmAPI = SlurmAPI()
         self.slurm_account: str = config["crunchy"]["slurm"]["account"]
-        self.slurm_hours: int = config["crunchy"]["slurm"]["hours"]
         self.slurm_mail_user: str = config["crunchy"]["slurm"]["mail_user"]
-        self.slurm_memory: int = config["crunchy"]["slurm"]["memory"]
         self.slurm_number_tasks: int = config["crunchy"]["slurm"]["number_tasks"]
+        self.slurm_partition: str = config["crunchy"]["slurm_partition"]
+        self.tmp_dir_base: str = config["crunchy"]["tmp_dir_base"]
+        # Used only when a job's memory/time can't be scaled from its read count.
+        self.fallback_memory: int = config["crunchy"]["fallback_memory"]
+        self.fallback_minutes: int = config["crunchy"]["fallback_minutes"]
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run."""
@@ -55,8 +58,14 @@ class CrunchyAPI:
         pending_path.touch(exist_ok=False)
 
     # These are the compression/decompression methods
-    def fastq_to_spring(self, compression_obj: CompressionData, sample_id: str = "") -> int:
-        """Compress FASTQ files into SPRING by sending to sbatch SLURM."""
+    def fastq_to_spring(
+        self, compression_obj: CompressionData, memory: int, minutes: int, sample_id: str = ""
+    ) -> int:
+        """Compress FASTQ files into SPRING by sending to sbatch SLURM.
+
+        memory/minutes are resolved by the caller and used for this job only - they are not
+        stored on the instance, since a single CrunchyAPI is reused across many jobs.
+        """
         CrunchyAPI.create_pending_file(
             pending_path=compression_obj.pending_path, dry_run=self.dry_run
         )
@@ -73,23 +82,22 @@ class CrunchyAPI:
             fastq_second=compression_obj.fastq_second,
             pending_path=compression_obj.pending_path,
             spring_path=compression_obj.spring_path,
-            tmp_dir=files.get_tmp_dir(
-                prefix="spring_",
-                suffix="_compress",
-                base=compression_obj.analysis_dir.as_posix(),
-            ),
+            tmp_dir=files.get_tmp_dir(base=self.tmp_dir_base),
         )
         sbatch_parameters: Sbatch = Sbatch(
             account=self.slurm_account,
             commands=commands,
             email=self.slurm_mail_user,
             error=error_function,
-            hours=self.slurm_hours,
+            hours=minutes // 60,
+            minutes=f"{minutes % 60:02d}",
             job_name="_".join([sample_id, compression_obj.run_name, "fastq_to_spring"]),
             log_dir=log_dir.as_posix(),
-            memory=self.slurm_memory,
+            memory=memory,
             number_tasks=self.slurm_number_tasks,
             quality_of_service=SlurmQos.MAINTENANCE,
+            partition=f"--partition={self.slurm_partition}",
+            chdir=f"--chdir={self.tmp_dir_base}",
         )
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
             sbatch_parameters=sbatch_parameters
@@ -103,8 +111,14 @@ class CrunchyAPI:
         LOG.info(f"Fastq compression running as job {sbatch_number}")
         return sbatch_number
 
-    def spring_to_fastq(self, compression_obj: CompressionData, sample_id: str = "") -> int:
-        """Decompress SPRING into FASTQ by submitting sbatch script to SLURM."""
+    def spring_to_fastq(
+        self, compression_obj: CompressionData, memory: int, minutes: int, sample_id: str = ""
+    ) -> int:
+        """Decompress SPRING into FASTQ by submitting sbatch script to SLURM.
+
+        memory/minutes are resolved by the caller and used for this job only - they are not
+        stored on the instance, since a single CrunchyAPI is reused across many jobs.
+        """
         CrunchyAPI.create_pending_file(
             pending_path=compression_obj.pending_path, dry_run=self.dry_run
         )
@@ -122,11 +136,7 @@ class CrunchyAPI:
         )
         commands = SPRING_TO_FASTQ_COMMANDS.format(
             conda_run=f"{self.conda_binary} run --name {self.crunchy_env}",
-            tmp_dir=files.get_tmp_dir(
-                prefix="spring_",
-                suffix="_decompress",
-                base=compression_obj.analysis_dir.as_posix(),
-            ),
+            tmp_dir=files.get_tmp_dir(base=self.tmp_dir_base),
             fastq_first=compression_obj.fastq_first,
             fastq_second=compression_obj.fastq_second,
             spring_path=compression_obj.spring_path,
@@ -139,12 +149,15 @@ class CrunchyAPI:
             commands=commands,
             email=self.slurm_mail_user,
             error=error_function,
-            hours=self.slurm_hours,
+            hours=minutes // 60,
+            minutes=f"{minutes % 60:02d}",
             job_name="_".join([sample_id, compression_obj.run_name, "spring_to_fastq"]),
             log_dir=log_dir.as_posix(),
-            memory=self.slurm_memory,
+            memory=memory,
             number_tasks=self.slurm_number_tasks,
             quality_of_service=SlurmQos.HIGH,
+            partition=f"--partition={self.slurm_partition}",
+            chdir=f"--chdir={self.tmp_dir_base}",
         )
         sbatch_content: str = self.slurm_api.generate_sbatch_content(sbatch_parameters)
         sbatch_path = files.get_spring_to_fastq_sbatch_path(

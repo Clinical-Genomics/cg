@@ -48,7 +48,12 @@ class SlurmAPI:
     def generate_sbatch_header(sbatch_parameters: Sbatch) -> str:
         header_params: dict[str, Any] = sbatch_parameters.model_dump()
         optional_headers: str = _generate_optional_headers(
-            [sbatch_parameters.exclude, sbatch_parameters.dependency]
+            [
+                sbatch_parameters.exclude,
+                sbatch_parameters.dependency,
+                sbatch_parameters.partition,
+                sbatch_parameters.chdir,
+            ]
         )
 
         return SBATCH_HEADER_TEMPLATE.format(**header_params, optional_headers=optional_headers)
