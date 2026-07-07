@@ -12,9 +12,7 @@ from cg.services.orders.validation.order_types.mip_dna.models.sample import MIPD
 from cg.services.orders.validation.order_types.raredisease.models.case import RarediseaseCase
 from cg.services.orders.validation.order_types.raredisease.models.sample import RarediseaseSample
 from cg.services.orders.validation.order_types.tomte.models.case import TomteCase
-from cg.store.models import Application
-from cg.store.models import Case as DbCase
-from cg.store.models import Sample
+from cg.store.models import Application, Sample
 from cg.store.store import Store
 
 
@@ -90,13 +88,7 @@ def get_case_prep_categories(case: Case, store: Store) -> set[str]:
 
 
 def is_single_sample_case(case: MIPDNACase | RarediseaseCase | ExistingCase, store: Store):
-    # TODO: Update logic
-    if isinstance(case, ExistingCase):
-        db_case: DbCase = store.get_case_by_internal_id_strict(case.internal_id)
-        contains_one_sample = bool(len(db_case.samples) == 1)
-    else:
-        contains_one_sample = bool(len(case.samples) == 1)
-    return contains_one_sample
+    return len(case.samples) == 1
 
 
 def is_sample_related_in_case(
@@ -115,6 +107,7 @@ def is_sample_related_in_case(
 
 
 def get_sample_name(sample: MIPDNASample | RarediseaseSample | ExistingSample, store: Store) -> str:
+    # TODO: Update logic
     if isinstance(sample, ExistingSample):
         sample_name: str = store.get_sample_by_internal_id_strict(sample.internal_id).name
     else:
