@@ -1,7 +1,6 @@
 from cg.apps.lims import LimsAPI
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.orders.validation.models.case import Case
-from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.order_types.balsamic.models.case import BalsamicCase
 from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
@@ -85,10 +84,6 @@ def get_case_prep_categories(case: Case, store: Store) -> set[str]:
         if db_sample and db_sample.prep_category:
             prep_categories.add(db_sample.prep_category)
     return prep_categories
-
-
-def is_single_sample_case(case: MIPDNACase | RarediseaseCase | ExistingCase, store: Store):
-    return len(case.samples) == 1
 
 
 def is_sample_related_in_case(

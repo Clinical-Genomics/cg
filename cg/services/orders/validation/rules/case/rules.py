@@ -33,7 +33,6 @@ from cg.services.orders.validation.rules.case.utils import (
     is_double_tumour,
     is_normal_only_wgs,
     is_sample_related_in_case,
-    is_single_sample_case,
 )
 from cg.services.orders.validation.rules.case_sample.utils import get_repeated_case_name_errors
 from cg.store.store import Store
@@ -146,7 +145,7 @@ def validate_case_contains_related_samples(
 ) -> list[SamplesNotRelatedError]:
     errors: list[SamplesNotRelatedError] = []
     for case_index, case in order.enumerated_cases:
-        if is_single_sample_case(case=case, store=store):  # This should always pass
+        if len(case.samples) == 1:
             continue
         case_has_error = False
         isolated_samples: list[str] = []
