@@ -62,7 +62,6 @@ from cg.services.orders.validation.rules.case_sample.pedigree.validate_pedigree 
 from cg.services.orders.validation.rules.case_sample.utils import (
     are_all_samples_unknown,
     get_counter_container_names,
-    get_existing_case_names,
     get_existing_sample_names,
     get_father_case_errors,
     get_father_sex_errors,
@@ -287,17 +286,17 @@ def validate_sample_names_not_repeated(
     ]
 
 
+# TODO: Remove this store?
 def validate_sample_names_different_from_case_names(
-    order: OrderWithCases, store: Store, **kwargs
+    order: OrderWithCases,
+    store: Store,
+    **kwargs,
 ) -> list[SampleNameSameAsCaseNameError]:
     """Return errors with the indexes of samples having the same name as any case in the order."""
     errors: list[SampleNameSameAsCaseNameError] = []
-    new_case_names: set[str] = {case.name for _, case in order.enumerated_new_cases}
-    # TODO: Update logic
-    existing_case_names: set[str] = get_existing_case_names(order=order, status_db=store)
-    all_case_names = new_case_names.union(existing_case_names)
+    case_names: set[str] = {case.name for _, case in order.enumerated_new_cases}
     for case_index, sample_index, sample in order.enumerated_new_samples:
-        if sample.name in all_case_names:
+        if sample.name in case_names:
             error = SampleNameSameAsCaseNameError(
                 case_index=case_index,
                 sample_index=sample_index,

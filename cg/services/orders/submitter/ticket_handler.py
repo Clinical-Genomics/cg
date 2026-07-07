@@ -224,6 +224,7 @@ class TicketHandler:
     def _get_max_case_priority(self, order: Order) -> Priority:
         """Get max case priority for a given order."""
         priority_list: list[Priority] = []
+        # TODO: Update logic
 
         if isinstance(order, OrderWithCases):
             for index, new_case in order.enumerated_new_cases:

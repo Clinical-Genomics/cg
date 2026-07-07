@@ -14,7 +14,7 @@ class OrderWithCases(Order, Generic[CaseType, SampleType]):
     cases: list[CaseType]
 
     @property
-    def enumerated_cases(self) -> enumerate[CaseType | ExistingCase]:
+    def enumerated_cases(self) -> enumerate[CaseType]:
         return enumerate(self.cases)
 
     # TODO: Remove this methods and replace usages with method above

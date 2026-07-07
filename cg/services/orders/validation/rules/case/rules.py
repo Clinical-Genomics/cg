@@ -6,7 +6,6 @@ from cg.services.orders.validation.errors.case_errors import (
     CaseOutsideOfCollaborationError,
     DoubleNormalError,
     DoubleTumourError,
-    ExistingCaseWithoutAffectedSampleError,
     InvalidGenePanelsError,
     MoreThanTwoSamplesInCaseError,
     MultiplePrepCategoriesError,
@@ -162,21 +161,6 @@ def validate_each_new_case_has_an_affected_sample(
     for case_index, case in order.enumerated_new_cases:
         if all(sample.status != StatusEnum.affected for sample in case.samples):
             error = NewCaseWithoutAffectedSampleError(case_index=case_index)
-            errors.append(error)
-    return errors
-
-
-# TODO: Remove this validation
-def validate_existing_cases_have_an_affected_sample(
-    order: MIPDNAOrder | NalloOrder, store: Store, **kwargs
-) -> list[ExistingCaseWithoutAffectedSampleError]:
-    errors: list[ExistingCaseWithoutAffectedSampleError] = []
-    for case_index, case in order.enumerated_existing_cases:
-        db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
-        if not db_case:  # Error should be returned elsewhere
-            continue
-        if all(link.status != StatusEnum.affected for link in db_case.links):
-            error = ExistingCaseWithoutAffectedSampleError(case_index=case_index)
             errors.append(error)
     return errors
 
