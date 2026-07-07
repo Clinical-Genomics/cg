@@ -286,10 +286,8 @@ def validate_sample_names_not_repeated(
     ]
 
 
-# TODO: Remove this store?
 def validate_sample_names_different_from_case_names(
     order: OrderWithCases,
-    store: Store,
     **kwargs,
 ) -> list[SampleNameSameAsCaseNameError]:
     """Return errors with the indexes of samples having the same name as any case in the order."""
