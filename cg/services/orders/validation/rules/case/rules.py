@@ -25,7 +25,6 @@ from cg.services.orders.validation.order_types.raredisease.models.order import R
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.services.orders.validation.rules.case.utils import (
     contains_duplicates,
-    does_case_exist,
     get_case_prep_categories,
     get_invalid_panels,
     get_sample_name,
@@ -147,9 +146,6 @@ def validate_case_contains_related_samples(
 ) -> list[SamplesNotRelatedError]:
     errors: list[SamplesNotRelatedError] = []
     for case_index, case in order.enumerated_new_cases:
-        # TODO: Update logic
-        if not does_case_exist(case=case, store=store):  # Error should be raised elsewhere
-            continue
         if is_single_sample_case(case=case, store=store):  # This should always pass
             continue
         case_has_error = False

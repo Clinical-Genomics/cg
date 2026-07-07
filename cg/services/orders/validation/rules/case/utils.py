@@ -89,13 +89,6 @@ def get_case_prep_categories(case: Case, store: Store) -> set[str]:
     return prep_categories
 
 
-# TODO: Remove
-def does_case_exist(case: MIPDNACase | RarediseaseCase | ExistingCase, store: Store):
-    if isinstance(case, ExistingCase):
-        return bool(store.get_case_by_internal_id(case.internal_id))
-    return True
-
-
 def is_single_sample_case(case: MIPDNACase | RarediseaseCase | ExistingCase, store: Store):
     # TODO: Update logic
     if isinstance(case, ExistingCase):
