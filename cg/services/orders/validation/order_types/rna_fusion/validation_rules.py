@@ -1,7 +1,6 @@
 from typing import Callable
 
 from cg.services.orders.validation.rules.case.rules import (
-    validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
     validate_one_sample_per_case,
@@ -36,7 +35,6 @@ from cg.services.orders.validation.rules.case_sample.rules import (
 )
 
 RNAFUSION_CASE_RULES: list[Callable] = [
-    validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
     validate_one_sample_per_case,

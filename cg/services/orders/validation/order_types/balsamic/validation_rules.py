@@ -2,7 +2,6 @@ from typing import Callable
 
 from cg.services.orders.validation.rules.case.rules import (
     validate_at_most_two_samples_per_case,
-    validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
     validate_number_of_normal_samples,
@@ -39,7 +38,6 @@ from cg.services.orders.validation.rules.case_sample.rules import (
 
 BALSAMIC_CASE_RULES: list[Callable] = [
     validate_at_most_two_samples_per_case,
-    validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
     validate_number_of_normal_samples,

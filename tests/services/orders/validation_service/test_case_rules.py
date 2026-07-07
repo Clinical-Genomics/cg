@@ -1,11 +1,9 @@
 from unittest.mock import Mock, create_autospec
 
 from cg.apps.lims import LimsAPI
-from cg.constants import GenePanelMasterList
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
-    CaseDoesNotExistError,
     CaseNameNotAvailableError,
     InvalidGenePanelsError,
     MultiplePrepCategoriesError,
@@ -15,7 +13,6 @@ from cg.services.orders.validation.errors.case_errors import (
     SamplesNotRelatedError,
     SampleSourceMismatchError,
 )
-from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.order_types.mip_dna.constants import MIPDNADeliveryType
@@ -30,7 +27,6 @@ from cg.services.orders.validation.order_types.tomte.models.order import TomteOr
 from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
 from cg.services.orders.validation.rules.case.rules import (
     validate_case_contains_related_samples,
-    validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
     validate_each_new_case_has_an_affected_sample,
@@ -64,29 +60,6 @@ def test_case_name_not_available(
 
     # THEN the error should concern the case name
     assert isinstance(errors[0], CaseNameNotAvailableError)
-
-
-# TODO: This test can go
-def test_case_internal_ids_does_not_exist(
-    valid_order: OrderWithCases,
-    store_with_multiple_cases_and_samples: Store,
-):
-
-    # GIVEN an order with a case marked as existing but which does not exist in the database
-    existing_case = ExistingCase(internal_id="Non-existent case", panels=[GenePanelMasterList.AID])
-    valid_order.cases.append(existing_case)
-
-    # WHEN validating that the internal ids match existing cases
-    errors: list[CaseDoesNotExistError] = validate_case_internal_ids_exist(
-        order=valid_order,
-        store=store_with_multiple_cases_and_samples,
-    )
-
-    # THEN an error should be returned
-    assert errors
-
-    # THEN the error should concern the non-existent case
-    assert isinstance(errors[0], CaseDoesNotExistError)
 
 
 def test_repeated_case_names_not_allowed(order_with_repeated_case_names: OrderWithCases):

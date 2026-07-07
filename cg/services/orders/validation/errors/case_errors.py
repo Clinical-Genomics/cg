@@ -26,11 +26,6 @@ class CaseNameNotAvailableError(CaseError):
     message: str = "Case name already used in a previous order"
 
 
-class CaseDoesNotExistError(CaseError):
-    field: str = "internal_id"
-    message: str = "The case does not exist"
-
-
 class MultipleSamplesInCaseError(CaseError):
     field: str = "sample_errors"
     message: str = "Multiple samples in the same case not allowed"

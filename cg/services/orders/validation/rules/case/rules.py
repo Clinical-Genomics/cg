@@ -1,7 +1,6 @@
 from cg.apps.lims import LimsAPI
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
-    CaseDoesNotExistError,
     CaseNameNotAvailableError,
     DoubleNormalError,
     DoubleTumourError,
@@ -38,7 +37,6 @@ from cg.services.orders.validation.rules.case.utils import (
     is_single_sample_case,
 )
 from cg.services.orders.validation.rules.case_sample.utils import get_repeated_case_name_errors
-from cg.store.models import Case as DbCase
 from cg.store.store import Store
 
 
@@ -61,21 +59,6 @@ def validate_case_names_available(
     for case_index, case in order.enumerated_new_cases:
         if store.get_case_by_name_and_customer(case_name=case.name, customer=customer):
             error = CaseNameNotAvailableError(case_index=case_index)
-            errors.append(error)
-    return errors
-
-
-# TODO: Remove this validation
-def validate_case_internal_ids_exist(
-    order: OrderWithCases,
-    store: Store,
-    **kwargs,
-) -> list[CaseDoesNotExistError]:
-    errors: list[CaseDoesNotExistError] = []
-    for case_index, case in order.enumerated_existing_cases:
-        db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
-        if not db_case:
-            error = CaseDoesNotExistError(case_index=case_index)
             errors.append(error)
     return errors
 
