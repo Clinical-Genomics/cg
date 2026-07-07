@@ -26,15 +26,6 @@ class OrderWithCases(Order, Generic[CaseType, SampleType]):
                 cases.append((case_index, case))
         return cases
 
-    # TODO: Remove this property
-    @property
-    def enumerated_existing_cases(self) -> list[tuple[int, ExistingCase]]:
-        cases: list[tuple[int, ExistingCase]] = []
-        for case_index, case in self.enumerated_cases:
-            if isinstance(case, ExistingCase):
-                cases.append((case_index, case))
-        return cases
-
     @property
     def enumerated_new_samples(self) -> list[tuple[int, int, SampleType]]:
         return [

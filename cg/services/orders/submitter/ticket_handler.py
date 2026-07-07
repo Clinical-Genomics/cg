@@ -12,7 +12,7 @@ from cg.models.orders.constants import OrderType
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.order_with_samples import OrderWithSamples
-from cg.store.models import Case, Customer, Sample
+from cg.store.models import Customer, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -221,18 +221,14 @@ class TicketHandler:
                         )
         return message
 
-    def _get_max_case_priority(self, order: Order) -> Priority:
+    @staticmethod
+    def _get_max_case_priority(order: Order) -> Priority:
         """Get max case priority for a given order."""
         priority_list: list[Priority] = []
-        # TODO: Update logic
 
         if isinstance(order, OrderWithCases):
             for index, new_case in order.enumerated_new_cases:
                 priority_list.append(Priority[new_case.priority])
-
-            for index, case in order.enumerated_existing_cases:
-                case: Case = self.status_db.get_case_by_internal_id(case.internal_id)
-                priority_list.append(case.priority)
 
         if isinstance(order, OrderWithSamples):
             for sample in order.samples:

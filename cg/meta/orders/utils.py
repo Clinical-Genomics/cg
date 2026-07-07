@@ -83,15 +83,6 @@ def get_existing_samples(order: Order, status_db: Store) -> list[Sample]:
     existing_samples: list[Sample] = []
 
     if isinstance(order, OrderWithCases):
-        # TODO: Remove this logic concerning existing cases
-        existing_samples.extend(
-            [
-                sample
-                for (_, case) in order.enumerated_existing_cases
-                for sample in status_db.get_samples_by_case_id(case.internal_id)
-            ]
-        )
-
         existing_samples.extend(
             [
                 sample
