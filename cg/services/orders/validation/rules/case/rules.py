@@ -3,7 +3,6 @@ from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
     CaseDoesNotExistError,
     CaseNameNotAvailableError,
-    CaseOutsideOfCollaborationError,
     DoubleNormalError,
     DoubleTumourError,
     InvalidGenePanelsError,
@@ -32,7 +31,6 @@ from cg.services.orders.validation.rules.case.utils import (
     get_invalid_panels,
     get_sample_name,
     get_sample_sources,
-    is_case_not_from_collaboration,
     is_double_normal,
     is_double_tumour,
     is_normal_only_wgs,
@@ -78,22 +76,6 @@ def validate_case_internal_ids_exist(
         db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
         if not db_case:
             error = CaseDoesNotExistError(case_index=case_index)
-            errors.append(error)
-    return errors
-
-
-# TODO: Remove this validation
-def validate_existing_cases_belong_to_collaboration(
-    order: OrderWithCases,
-    store: Store,
-    **kwargs,
-) -> list[CaseOutsideOfCollaborationError]:
-    """Validates that all existing cases within the order belong to a customer
-    within the order's customer's collaboration."""
-    errors: list[CaseOutsideOfCollaborationError] = []
-    for case_index, case in order.enumerated_existing_cases:
-        if is_case_not_from_collaboration(case=case, customer_id=order.customer, store=store):
-            error = CaseOutsideOfCollaborationError(case_index=case_index)
             errors.append(error)
     return errors
 

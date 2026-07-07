@@ -14,7 +14,7 @@ from cg.services.orders.validation.order_types.raredisease.models.sample import 
 from cg.services.orders.validation.order_types.tomte.models.case import TomteCase
 from cg.store.models import Application
 from cg.store.models import Case as DbCase
-from cg.store.models import Customer, Sample
+from cg.store.models import Sample
 from cg.store.store import Store
 
 
@@ -61,13 +61,6 @@ def _is_sample_wgs_normal(
             db_sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
             and not db_sample.is_tumour
         )
-
-
-# TODO: Remove
-def is_case_not_from_collaboration(case: ExistingCase, customer_id: str, store: Store) -> bool:
-    db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
-    customer: Customer | None = store.get_customer_by_internal_id(customer_id)
-    return db_case and customer and db_case.customer not in customer.collaborators
 
 
 def is_sample_in_case(case: Case, sample_name: str, store: Store) -> bool:
