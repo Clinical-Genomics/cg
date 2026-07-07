@@ -2,15 +2,17 @@
 
 import logging
 from datetime import datetime
+from http import HTTPStatus
 from pathlib import Path
 from urllib.parse import urljoin
 
 from housekeeper.store.models import File
 from pydantic import BaseModel
-from requests import Response
+from requests import Response, Session
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
 
 from cg.exc import ArchiveJobFailedError, DdnDataflowAuthenticationError, DdnDataflowDeleteFileError
-from cg.io.api import get, post
 from cg.meta.archive.ddn.constants import (
     DELETE_FILE_SUCCESSFUL_MESSAGE,
     DESTINATION_ATTRIBUTE,
@@ -55,7 +57,30 @@ class DDNDataFlowClient(ArchiveHandler):
             "Content-Type": "application/json",
             "accept": "application/json",
         }
+        self.session = self._get_session()
         self._set_auth_tokens()
+
+    def _get_session(self) -> Session:
+        session = Session()
+        self._configure_retries(session)
+        return session
+
+    @staticmethod
+    def _configure_retries(session: Session) -> None:
+        """Configures retries for the session."""
+        retry_strategy = Retry(
+            total=5,
+            status_forcelist=[
+                HTTPStatus.TOO_MANY_REQUESTS,
+                HTTPStatus.INTERNAL_SERVER_ERROR,
+                HTTPStatus.BAD_GATEWAY,
+                HTTPStatus.SERVICE_UNAVAILABLE,
+                HTTPStatus.GATEWAY_TIMEOUT,
+            ],
+            backoff_factor=2,
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        session.mount("https://", adapter)
 
     def _set_auth_tokens(self) -> None:
         """Retrieves and sets auth and refresh token from the REST-API."""
@@ -66,7 +91,7 @@ class DDNDataFlowClient(ArchiveHandler):
 
     def _get_auth_token(self) -> AuthToken:
         """Retrieves auth and refresh token from the REST-API."""
-        response: Response = post(
+        response: Response = self.session.post(
             url=urljoin(base=self.url, url=DataflowEndpoints.GET_AUTH_TOKEN),
             headers=self.headers,
             json=AuthPayload(
@@ -87,7 +112,7 @@ class DDNDataFlowClient(ArchiveHandler):
         self.token_expiration: datetime = datetime.fromtimestamp(auth_token.expire)
 
     def _get_refreshed_auth_token(self) -> AuthToken:
-        response: Response = post(
+        response: Response = self.session.post(
             url=urljoin(base=self.url, url=DataflowEndpoints.REFRESH_AUTH_TOKEN),
             headers=self.headers,
             json=RefreshPayload(refresh=self.refresh_token).model_dump(),
@@ -230,7 +255,7 @@ class DDNDataFlowClient(ArchiveHandler):
     ) -> Response:
         """Posts a request with the provided body and headers to the given endpoint."""
         LOG.info(get_request_log(body=body.model_dump(by_alias=True)))
-        response: Response = post(
+        response: Response = self.session.post(
             url=urljoin(self.url, endpoint),
             headers=headers,
             json=body.model_dump(by_alias=True),
@@ -243,7 +268,7 @@ class DDNDataFlowClient(ArchiveHandler):
         """Gets the job status for the provided job_id."""
         LOG.info(f"Sending GET request for job {job_id}")
         url: str = urljoin(self.url, DataflowEndpoints.GET_JOB_STATUS + str(job_id))
-        response: Response = get(
+        response: Response = self.session.get(
             url=url,
             headers=headers,
             json={},
