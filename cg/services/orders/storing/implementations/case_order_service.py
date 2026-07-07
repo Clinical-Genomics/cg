@@ -1,14 +1,13 @@
 import logging
 from datetime import datetime
 
-from cg.constants.constants import CaseActions, DataDelivery, Workflow
+from cg.constants.constants import DataDelivery, Workflow
 from cg.constants.lims import LimsStatus
 from cg.constants.pedigree import Pedigree
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
 from cg.services.orders.storing.service import StoreOrderService
 from cg.services.orders.validation.models.case import Case
-from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.sample_aliases import SampleInCase
 from cg.store.models import ApplicationVersion
@@ -67,47 +66,29 @@ class StoreCaseOrderService(StoreOrderService):
         new_cases: list[DbCase] = []
         db_order = self._create_db_order(order)
         for case in order.cases:
-            if case.is_new:
-                db_case: DbCase = self._create_db_case(
-                    case=case,
-                    customer=db_order.customer,
-                    ticket=str(order._generated_ticket_id),
-                    workflow=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
-                    delivery_type=order.delivery_type,
-                )
-                new_cases.append(db_case)
-                self._update_case_panel(panels=getattr(case, "panels", []), case=db_case)
-                case_samples: dict[str, DbSample] = self._create_db_sample_dict(
-                    case=case, order=order, customer=db_order.customer
-                )
-                self._create_links(case=case, db_case=db_case, case_samples=case_samples)
-
-            else:
-                # TODO: Remove this logic
-                db_case: DbCase = self._update_existing_case(
-                    existing_case=case, ticket_id=order._generated_ticket_id
-                )
-
+            db_case: DbCase = self._create_db_case(
+                case=case,
+                customer=db_order.customer,
+                ticket=str(order._generated_ticket_id),
+                workflow=ORDER_TYPE_WORKFLOW_MAP[order.order_type],
+                delivery_type=order.delivery_type,
+            )
+            new_cases.append(db_case)
+            self._update_case_panel(panels=getattr(case, "panels", []), case=db_case)
+            case_samples: dict[str, DbSample] = self._create_db_sample_dict(
+                case=case, order=order, customer=db_order.customer
+            )
+            self._create_links(case=case, db_case=db_case, case_samples=case_samples)
             db_order.cases.append(db_case)
-            self.status_db.add_multiple_items_to_store(new_cases)
-            self.status_db.add_item_to_store(db_order)
-            self.status_db.commit_to_store()
+        self.status_db.add_multiple_items_to_store(new_cases)
+        self.status_db.add_item_to_store(db_order)
+        self.status_db.commit_to_store()
         return new_cases
 
     @staticmethod
     def _update_case_panel(panels: list[str], case: DbCase) -> None:
         """Update case panels."""
         case.panels = panels
-
-    @staticmethod
-    def _append_ticket(ticket_id: str, case: DbCase) -> None:
-        """Add a ticket to the case."""
-        case.tickets = f"{case.tickets},{ticket_id}"
-
-    @staticmethod
-    def _update_action(action: str, case: DbCase) -> None:
-        """Update action of a case."""
-        case.action = action
 
     def _create_link(
         self,
@@ -184,14 +165,6 @@ class StoreCaseOrderService(StoreOrderService):
             order_date=datetime.now(),
             ticket_id=order._generated_ticket_id,
         )
-
-    # TODO: Remove this method
-    def _update_existing_case(self, existing_case: ExistingCase, ticket_id: int) -> DbCase:
-        status_db_case = self.status_db.get_case_by_internal_id(existing_case.internal_id)
-        self._append_ticket(ticket_id=str(ticket_id), case=status_db_case)
-        self._update_action(action=CaseActions.ANALYZE, case=status_db_case)
-        self._update_case_panel(panels=getattr(existing_case, "panels", []), case=status_db_case)
-        return status_db_case
 
     def _create_links(self, case: Case, db_case: DbCase, case_samples: dict[str, DbSample]) -> None:
         """Creates entries in the CaseSample table.
