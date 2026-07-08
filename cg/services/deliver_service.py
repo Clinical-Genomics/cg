@@ -133,8 +133,7 @@ class DeliverService:
             )
         )
         uploaded_analyses_to_deliver: list[Analysis] = self.status_db.get_uploaded_analyses(
-            trailblazer_ids=[analysis.id for analysis in undelivered_trailblazer_analyses],
-            exclude_workflows=[Workflow.MICROSALT, Workflow.TAXPROFILER],
+            trailblazer_ids=[analysis.id for analysis in undelivered_trailblazer_analyses]
         )
         order_analyses = {}
         for analysis in uploaded_analyses_to_deliver:
