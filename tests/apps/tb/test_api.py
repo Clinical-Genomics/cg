@@ -587,7 +587,7 @@ def test_get_all_completed_undelivered_analyses_exclude_workflow(
     get_request.assert_called_once_with(
         headers={"Authorization": "Bearer some_token"},
         json={},
-        url=f"{tb_api.host}/analyses?status[]=completed&delivered=false&holdDelivery=false&workflowExclude[]=RSYNC&workflowExclude[]=MIP-DNA",
+        url=f"{tb_api.host}/analyses?status[]=completed&delivered=false&holdDelivery=false&excludeWorkflow[]=RSYNC&excludeWorkflow[]=MIP-DNA",
         verify=True,
     )
 
