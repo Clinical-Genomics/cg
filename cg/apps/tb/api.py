@@ -276,7 +276,7 @@ class TrailblazerAPI:
         return validated_response.analyses
 
     def get_all_analyses_to_deliver(self) -> list[TrailblazerAnalysis]:
-        exclude_workflows = f"excludeWorkflow={Workflow.RSYNC.upper()}&excludeWorkflow={Workflow.DEMULTIPLEX.upper()}"
+        exclude_workflows = f"excludeWorkflow[]={Workflow.RSYNC.upper()}&excludeWorkflow[]={Workflow.DEMULTIPLEX.upper()}"
         endpoint = f"analyses?status[]={AnalysisStatus.COMPLETED}&delivered=false&holdDelivery=false&{exclude_workflows}"
         raw_response = self.query_trailblazer(
             command=endpoint, request_body={}, method=APIMethods.GET
