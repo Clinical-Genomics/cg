@@ -278,8 +278,8 @@ class TrailblazerAPI:
     def get_all_analyses_to_deliver(
         self, exclude_workflows: list[Workflow] | None = None
     ) -> list[TrailblazerAnalysis]:
-        exclude: str = self._get_exclude_workflow_request_string(exclude_workflows)
-        endpoint = f"analyses?status[]={AnalysisStatus.COMPLETED}&delivered=false&holdDelivery=false{exclude}"
+        exclude_workflows_params: str = self._get_exclude_workflow_request_string(exclude_workflows)
+        endpoint = f"analyses?status[]={AnalysisStatus.COMPLETED}&delivered=false&holdDelivery=false{exclude_workflows_params}"
         raw_response = self.query_trailblazer(
             command=endpoint, request_body={}, method=APIMethods.GET
         )
