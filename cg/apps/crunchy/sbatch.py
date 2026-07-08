@@ -32,7 +32,7 @@ fi
 FASTQ_TO_SPRING_COMMANDS = """
 mkdir -p {tmp_dir}
 {conda_run} crunchy -t 12 --tmp-dir {tmp_dir} compress fastq -f {fastq_first} -s {fastq_second} \
--o {spring_path} --check-integrity --metadata-file
+-o {spring_path} --metadata-file
 rm {pending_path}
 rm -r {tmp_dir}
 """

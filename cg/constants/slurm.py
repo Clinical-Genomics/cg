@@ -1,12 +1,8 @@
-from enum import IntEnum, StrEnum
+from enum import StrEnum
 
 
 class Slurm(StrEnum):
     PARTITION: str = "partition"
-
-
-class SlurmProcessing(IntEnum):
-    MAX_NODE_MEMORY: int = 180
 
 
 SLURM_UPLOAD_MEMORY = 1

@@ -191,10 +191,12 @@ def test_get_resources_for_run_scales_with_reads(
     # WHEN getting resources for the run (100 reads recorded)
     memory, minutes = compress_api._get_resources_for_run(
         compression_obj,
-        reads_per_gb=10,
+        memory_slope=1 / 10,
+        memory_intercept=0,
         min_gb=1,
         max_gb=100,
-        reads_per_minute=20,
+        time_slope=1 / 20,
+        time_intercept=0,
         min_minutes=1,
         max_minutes=100,
     )
@@ -217,10 +219,12 @@ def test_get_resources_for_run_no_matching_metrics(compress_api: CompressAPI, ba
     # WHEN getting resources for the run
     memory, minutes = compress_api._get_resources_for_run(
         compression_obj,
-        reads_per_gb=10,
+        memory_slope=1 / 10,
+        memory_intercept=0,
         min_gb=1,
         max_gb=100,
-        reads_per_minute=20,
+        time_slope=1 / 20,
+        time_intercept=0,
         min_minutes=1,
         max_minutes=100,
     )

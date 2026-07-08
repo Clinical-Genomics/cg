@@ -66,17 +66,29 @@ def test_parse_run_name_rejects_other_conventions():
 
 def test_scale_resource_by_reads_floor():
     """Test that scaling is clamped to the floor for a small number of reads."""
-    assert scale_resource_by_reads(reads=1, reads_per_unit=100, floor=5, cap=10) == 5
+    assert scale_resource_by_reads(reads=1, slope=1 / 100, intercept=0, floor=5, cap=10) == 5
 
 
 def test_scale_resource_by_reads_cap():
     """Test that scaling is clamped to the cap for a huge number of reads."""
-    assert scale_resource_by_reads(reads=100**10, reads_per_unit=100, floor=1, cap=10) == 10
+    assert scale_resource_by_reads(reads=100**10, slope=1 / 100, intercept=0, floor=1, cap=10) == 10
 
 
 def test_scale_resource_by_reads_linear():
     """Test that scaling is linear with reads within the floor/cap range."""
-    assert scale_resource_by_reads(reads=500, reads_per_unit=100, floor=1, cap=10) == 5
+    assert scale_resource_by_reads(reads=500, slope=1 / 100, intercept=0, floor=1, cap=10) == 5
+
+
+def test_scale_resource_by_reads_intercept():
+    """Test that a non-zero intercept shifts the estimate before flooring/capping."""
+    # GIVEN a baseline intercept of 3 and a slope contributing 5 for 500 reads
+    assert scale_resource_by_reads(reads=500, slope=1 / 100, intercept=3, floor=1, cap=10) == 8
+
+
+def test_scale_resource_by_reads_rounds_up():
+    """Test that a non-integer estimate is rounded up (ceil), not truncated."""
+    # GIVEN an estimate of 5.5 (250 reads / 100 + 3)
+    assert scale_resource_by_reads(reads=250, slope=1 / 100, intercept=3, floor=1, cap=10) == 6
 
 
 def test_set_dry_run(crunchy_config: dict[str, dict[str, Any]]):

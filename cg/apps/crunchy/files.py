@@ -58,14 +58,15 @@ def parse_run_name(run_name: str) -> tuple[str, str, int] | None:
     return match["flow_cell"], match["sample"], int(match["lane"])
 
 
-def scale_resource_by_reads(reads: int, reads_per_unit: int, floor: int, cap: int) -> int:
-    """Linearly scale a resource (e.g. GB or minutes) with reads, clamped to [floor, cap].
+def scale_resource_by_reads(
+    reads: int, slope: float, intercept: float, floor: int, cap: int
+) -> int:
+    """Linearly estimate a resource (e.g. GB or minutes) from reads: estimate = slope * reads + intercept.
 
-    Callers must check reads is known before calling - "no reads known" is not this
-    function's concern, it always returns a concrete value.
+    The estimate is rounded up and clamped to [floor, cap].
     """
-    resource: int = ceil(reads / reads_per_unit)
-    return min(max(resource, floor), cap)
+    estimate: float = slope * reads + intercept
+    return min(max(ceil(estimate), floor), cap)
 
 
 def get_crunchy_metadata(metadata_path: Path) -> CrunchyMetadata:

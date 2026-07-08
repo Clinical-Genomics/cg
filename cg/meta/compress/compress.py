@@ -13,20 +13,20 @@ from cg.apps.crunchy.files import scale_resource_by_reads, update_metadata_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.constants.compression import (
-    COMPRESSION_MAX_MINUTES_PER_PROCESS,
-    COMPRESSION_MAX_READS_PER_MINUTE,
-    COMPRESSION_MIN_MINUTES_PER_PROCESS,
-    CRUNCHY_MIN_GB_PER_PROCESS,
-    DECOMPRESSION_MAX_GB_PER_PROCESS,
-    DECOMPRESSION_MAX_MINUTES_PER_PROCESS,
-    DECOMPRESSION_MAX_READS_PER_GB,
-    DECOMPRESSION_MAX_READS_PER_MINUTE,
-    DECOMPRESSION_MIN_GB_PER_PROCESS,
-    DECOMPRESSION_MIN_MINUTES_PER_PROCESS,
-    MAX_READS_PER_GB,
+    COMPRESSION_MEMORY_INTERCEPT,
+    COMPRESSION_MEMORY_PER_READ,
+    COMPRESSION_MINUTES_PER_READ,
+    COMPRESSION_TIME_INTERCEPT,
+    DECOMPRESSION_MEMORY_INTERCEPT,
+    DECOMPRESSION_MEMORY_SLOPE,
+    DECOMPRESSION_TIME_INTERCEPT,
+    DECOMPRESSION_TIME_SLOPE,
+    MEMORY_CEIL,
+    MEMORY_FLOOR,
+    MINUTES_CEIL,
+    MINUTES_FLOOR,
 )
 from cg.constants.constants import PIPELINES_USING_PARTIAL_ANALYSES
-from cg.constants.slurm import SlurmProcessing
 from cg.exc import DecompressionCouldNotStartError
 from cg.meta.compress import files
 from cg.models.compression_data import CaseCompressionData, CompressionData, SampleCompressionData
@@ -56,10 +56,12 @@ class CompressAPI:
     def _get_resources_for_run(
         self,
         compression_obj: CompressionData,
-        reads_per_gb: int,
+        memory_slope: float,
+        memory_intercept: float,
         min_gb: int,
         max_gb: int,
-        reads_per_minute: int,
+        time_slope: float,
+        time_intercept: float,
         min_minutes: int,
         max_minutes: int,
     ) -> tuple[int, int]:
@@ -72,8 +74,10 @@ class CompressAPI:
         reads: int | None = files.get_reads_for_run(compression_obj, self.status_db)
         if not reads:
             return self.crunchy_api.fallback_memory, self.crunchy_api.fallback_minutes
-        memory: int = scale_resource_by_reads(reads, reads_per_gb, min_gb, max_gb)
-        minutes: int = scale_resource_by_reads(reads, reads_per_minute, min_minutes, max_minutes)
+        memory: int = scale_resource_by_reads(reads, memory_slope, memory_intercept, min_gb, max_gb)
+        minutes: int = scale_resource_by_reads(
+            reads, time_slope, time_intercept, min_minutes, max_minutes
+        )
         return memory, minutes
 
     def set_dry_run(self, dry_run: bool):
@@ -113,12 +117,14 @@ class CompressAPI:
             )
             memory, minutes = self._get_resources_for_run(
                 compression,
-                reads_per_gb=MAX_READS_PER_GB,
-                min_gb=CRUNCHY_MIN_GB_PER_PROCESS,
-                max_gb=SlurmProcessing.MAX_NODE_MEMORY,
-                reads_per_minute=COMPRESSION_MAX_READS_PER_MINUTE,
-                min_minutes=COMPRESSION_MIN_MINUTES_PER_PROCESS,
-                max_minutes=COMPRESSION_MAX_MINUTES_PER_PROCESS,
+                memory_slope=COMPRESSION_MEMORY_PER_READ,
+                memory_intercept=COMPRESSION_MEMORY_INTERCEPT,
+                min_gb=MEMORY_FLOOR,
+                max_gb=MEMORY_CEIL,
+                time_slope=COMPRESSION_MINUTES_PER_READ,
+                time_intercept=COMPRESSION_TIME_INTERCEPT,
+                min_minutes=MINUTES_FLOOR,
+                max_minutes=MINUTES_CEIL,
             )
             self.crunchy_api.fastq_to_spring(
                 compression_obj=compression, sample_id=sample_id, memory=memory, minutes=minutes
@@ -180,12 +186,14 @@ class CompressAPI:
             else:
                 memory, minutes = self._get_resources_for_run(
                     compression,
-                    reads_per_gb=DECOMPRESSION_MAX_READS_PER_GB,
-                    min_gb=DECOMPRESSION_MIN_GB_PER_PROCESS,
-                    max_gb=DECOMPRESSION_MAX_GB_PER_PROCESS,
-                    reads_per_minute=DECOMPRESSION_MAX_READS_PER_MINUTE,
-                    min_minutes=DECOMPRESSION_MIN_MINUTES_PER_PROCESS,
-                    max_minutes=DECOMPRESSION_MAX_MINUTES_PER_PROCESS,
+                    memory_slope=DECOMPRESSION_MEMORY_SLOPE,
+                    memory_intercept=DECOMPRESSION_MEMORY_INTERCEPT,
+                    min_gb=MEMORY_FLOOR,
+                    max_gb=MEMORY_CEIL,
+                    time_slope=DECOMPRESSION_TIME_SLOPE,
+                    time_intercept=DECOMPRESSION_TIME_INTERCEPT,
+                    min_minutes=MINUTES_FLOOR,
+                    max_minutes=MINUTES_CEIL,
                 )
                 self.crunchy_api.spring_to_fastq(
                     compression_obj=compression,
