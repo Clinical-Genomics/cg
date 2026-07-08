@@ -128,7 +128,9 @@ class RarediseaseObservationsAPI(ObservationsAPI):
                 version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.FAMILY_PED]
             ).first(),
         }
-        return RarediseaseObservationsInputFiles(**get_full_path_dictionary(input_files))
+        file_paths: dict[str, str] = get_full_path_dictionary(input_files)
+        LOG.debug(f"Observations input files for case {case_id}: {file_paths}")
+        return RarediseaseObservationsInputFiles(**file_paths)
 
     def delete_case(self, case_id: str) -> None:
         """Delete RAREDISEASE case observations from Loqusdb."""
