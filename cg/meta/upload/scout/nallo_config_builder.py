@@ -124,7 +124,7 @@ class NalloConfigBuilder(ScoutConfigBuilder):
             sample_id=sample_id,
             hk_version=hk_version,
         )
-        alignment_and_mt_bam_path: str | None = self.get_sample_file(
+        alignment_and_mt_bam_path: str | None = self.get_sample_file(  # TODO: Rename to cram
             hk_tags=cast(set[str], self.sample_tags.alignment_path),
             sample_id=sample_id,
             hk_version=hk_version,
