@@ -2054,15 +2054,12 @@ class ReadHandler(BaseHandler):
 
         return query
 
-    def get_uploaded_analyses(
-        self, trailblazer_ids: list[int], exclude_workflows: list[Workflow] = []
-    ) -> list[Analysis]:
+    def get_uploaded_analyses(self, trailblazer_ids: list[int]) -> list[Analysis]:
         return (
             self._get_query(table=Analysis)
             .filter(
                 Analysis.trailblazer_id.in_(trailblazer_ids),
                 Analysis.uploaded_at.is_not(None),
-                Analysis.workflow.notin_(exclude_workflows),
             )
             .all()
         )
