@@ -27,6 +27,7 @@ from cg.exc import (
     CaseNotFoundError,
     CgDataError,
     CgError,
+    CustomerNotFoundError,
     OrderNotFoundError,
     PacbioSequencingRunNotFoundError,
     SampleNotFoundError,
@@ -1016,13 +1017,24 @@ class ReadHandler(BaseHandler):
             beds=self._get_query(table=Bed), filter_functions=bed_filter_functions
         )
 
-    def get_customer_by_internal_id(self, customer_internal_id: str) -> Customer:
+    def get_customer_by_internal_id(self, customer_internal_id: str) -> Customer | None:
         """Return customer with customer id."""
         return apply_customer_filter(
             filter_functions=[CustomerFilter.BY_INTERNAL_ID],
             customers=self._get_query(table=Customer),
             customer_internal_id=customer_internal_id,
         ).first()
+
+    def get_customer_by_internal_id_strict(self, internal_id: str) -> Customer:
+        """Return customer with customer id."""
+        if customer := apply_customer_filter(
+            filter_functions=[CustomerFilter.BY_INTERNAL_ID],
+            customers=self._get_query(table=Customer),
+            customer_internal_id=internal_id,
+        ).first():
+            return customer
+        else:
+            raise CustomerNotFoundError(f"Customer with internal id {internal_id}")
 
     def get_collaboration_by_internal_id(self, internal_id: str) -> Collaboration:
         """Fetch a customer group by internal id from the store."""
@@ -1678,6 +1690,35 @@ class ReadHandler(BaseHandler):
                 return True
         return False
 
+    def has_related_dna_sample(self, customer_id: str, is_tumour: bool, subject_id: str) -> bool:
+        """
+        Returns True if the provided subject id matches a unique DNA sample with the same subject id,
+        tumour status and belongs to the same collaboration as the provided customer.
+        Raises:
+            CustomerNotFoundError if the customer_id does not match a customer
+        """
+        customer: Customer = self.get_customer_by_internal_id_strict(customer_id)
+        sample_application_version_query: Query = self._get_join_sample_application_version_query()
+        sample_application_version_query: Query = apply_application_filter(
+            applications=sample_application_version_query,
+            prep_categories=DNA_PREP_CATEGORIES,
+            filter_functions=[ApplicationFilter.BY_PREP_CATEGORIES],
+        )
+
+        samples: Query = apply_sample_filter(
+            samples=sample_application_version_query,
+            subject_id=subject_id,
+            is_tumour=is_tumour,
+            customer_entry_ids=[customer.id for customer in customer.collaborators],
+            filter_functions=[
+                SampleFilter.BY_SUBJECT_ID,
+                SampleFilter.BY_TUMOUR,
+                SampleFilter.BY_CUSTOMER_ENTRY_IDS,
+            ],
+        )
+
+        return samples.count() == 1
+
     def _get_related_samples_query(
         self,
         sample: Sample,
@@ -2009,15 +2050,12 @@ class ReadHandler(BaseHandler):
 
         return query
 
-    def get_uploaded_analyses(
-        self, trailblazer_ids: list[int], exclude_workflows: list[Workflow] = []
-    ) -> list[Analysis]:
+    def get_uploaded_analyses(self, trailblazer_ids: list[int]) -> list[Analysis]:
         return (
             self._get_query(table=Analysis)
             .filter(
                 Analysis.trailblazer_id.in_(trailblazer_ids),
                 Analysis.uploaded_at.is_not(None),
-                Analysis.workflow.notin_(exclude_workflows),
             )
             .all()
         )

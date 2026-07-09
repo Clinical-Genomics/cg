@@ -409,3 +409,7 @@ class FreshdeskGetTicketError(FreshdeskError):
 
 class FreshdeskUpdateTicketError(FreshdeskError):
     """Exception raised when updating a ticket in Freshdesk fails."""
+
+
+class CustomerNotFoundError(CgError):
+    """Exception raised when a customer is not found in StatusDB"""
