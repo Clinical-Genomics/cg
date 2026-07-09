@@ -9,7 +9,6 @@ from cg.constants.constants import GenomeBuild
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import (
     NALLO_CASE_TAGS,
-    NALLO_RANK_MODEL_THRESHOLD,
     NALLO_RANK_MODEL_VERSION_SNV,
     NALLO_RANK_MODEL_VERSION_SV,
     NALLO_SAMPLE_TAGS,
