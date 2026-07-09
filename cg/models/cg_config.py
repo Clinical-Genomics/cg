@@ -265,7 +265,7 @@ class NalloConfig(CommonAppConfig):
     pipeline_deliverables: str
     platform: str
     pre_run_script: str = ""
-    profile: str  #
+    profile: str
     rank_model_threshold: int
     reference: str
     repository: str
