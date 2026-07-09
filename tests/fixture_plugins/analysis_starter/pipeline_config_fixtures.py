@@ -63,6 +63,10 @@ def get_nextflow_config_dict(
             "tower_workflow": workflow,
         }
 
+        if workflow == Workflow.NALLO:
+            nallo_config: dict = {"rank_model_threshold": 42}
+            nextflow_core_config.update(nallo_config)
+
         if workflow == Workflow.RAREDISEASE:
             raredisease_config: dict = {
                 "default_target_bed": "default_target.bed",
