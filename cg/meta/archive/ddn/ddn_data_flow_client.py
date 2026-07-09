@@ -58,6 +58,7 @@ class DDNDataFlowClient(ArchiveHandler):
             "accept": "application/json",
         }
         self.session = self._get_session()
+        self.no_retry_session = Session()
         self._set_auth_tokens()
 
     def _get_session(self) -> Session:
@@ -229,6 +230,7 @@ class DDNDataFlowClient(ArchiveHandler):
             endpoint=DataflowEndpoints.DELETE_FILE,
             headers=dict(self.headers, **self.auth_header),
             body=delete_file_payload,
+            session=self.no_retry_session,
         )
         delete_file_response = DeleteFileResponse.model_validate(response.json())
         if delete_file_response.message != DELETE_FILE_SUCCESSFUL_MESSAGE:
@@ -251,11 +253,15 @@ class DDNDataFlowClient(ArchiveHandler):
         return RetrievalResponse.model_validate(response.json())
 
     def _post_request(
-        self, body: BaseModel, endpoint: DataflowEndpoints, headers: dict
+        self,
+        body: BaseModel,
+        endpoint: DataflowEndpoints,
+        headers: dict,
+        session: Session | None = None,
     ) -> Response:
         """Posts a request with the provided body and headers to the given endpoint."""
         LOG.info(get_request_log(body=body.model_dump(by_alias=True)))
-        response: Response = self.session.post(
+        response: Response = (session or self.session).post(
             url=urljoin(self.url, endpoint),
             headers=headers,
             json=body.model_dump(by_alias=True),
