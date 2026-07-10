@@ -19,9 +19,9 @@ MINUTES_FLOOR: int = 1
 MINUTES_CEIL: int = 1440
 
 # Read-based memory/time scaling for decompression - independent, separately tunable from compression
-DECOMPRESSION_MEMORY_SLOPE: float = 0
+DECOMPRESSION_MEMORY_PER_READ: float = 0
 DECOMPRESSION_MEMORY_INTERCEPT: float = 8
-DECOMPRESSION_TIME_SLOPE: float = 1.0918e-07
+DECOMPRESSION_MINUTES_PER_READ: float = 1.0918e-07
 DECOMPRESSION_TIME_INTERCEPT: float = 5.51
 
 

@@ -61,11 +61,7 @@ class CrunchyAPI:
     def fastq_to_spring(
         self, compression_obj: CompressionData, memory: int, minutes: int, sample_id: str = ""
     ) -> int:
-        """Compress FASTQ files into SPRING by sending to sbatch SLURM.
-
-        memory/minutes are resolved by the caller and used for this job only - they are not
-        stored on the instance, since a single CrunchyAPI is reused across many jobs.
-        """
+        """Compress FASTQ files into SPRING by sending to sbatch SLURM."""
         CrunchyAPI.create_pending_file(
             pending_path=compression_obj.pending_path, dry_run=self.dry_run
         )
@@ -114,11 +110,7 @@ class CrunchyAPI:
     def spring_to_fastq(
         self, compression_obj: CompressionData, memory: int, minutes: int, sample_id: str = ""
     ) -> int:
-        """Decompress SPRING into FASTQ by submitting sbatch script to SLURM.
-
-        memory/minutes are resolved by the caller and used for this job only - they are not
-        stored on the instance, since a single CrunchyAPI is reused across many jobs.
-        """
+        """Decompress SPRING into FASTQ by submitting sbatch script to SLURM."""
         CrunchyAPI.create_pending_file(
             pending_path=compression_obj.pending_path, dry_run=self.dry_run
         )

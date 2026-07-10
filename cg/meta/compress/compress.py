@@ -18,9 +18,9 @@ from cg.constants.compression import (
     COMPRESSION_MINUTES_PER_READ,
     COMPRESSION_TIME_INTERCEPT,
     DECOMPRESSION_MEMORY_INTERCEPT,
-    DECOMPRESSION_MEMORY_SLOPE,
+    DECOMPRESSION_MEMORY_PER_READ,
+    DECOMPRESSION_MINUTES_PER_READ,
     DECOMPRESSION_TIME_INTERCEPT,
-    DECOMPRESSION_TIME_SLOPE,
     MEMORY_CEIL,
     MEMORY_FLOOR,
     MINUTES_CEIL,
@@ -65,7 +65,7 @@ class CompressAPI:
         min_minutes: int,
         max_minutes: int,
     ) -> tuple[int, int]:
-        """Return (memory, minutes) for this run.
+        """Return (memory, minutes) for this run estimated from a linear model resource=base+scalar*reads.
 
         Scales both from the run's read count when it can be found in
         illumina_sample_sequencing_metrics; otherwise falls back to CrunchyAPI's configured
@@ -186,11 +186,11 @@ class CompressAPI:
             else:
                 memory, minutes = self._get_resources_for_run(
                     compression,
-                    memory_slope=DECOMPRESSION_MEMORY_SLOPE,
+                    memory_slope=DECOMPRESSION_MEMORY_PER_READ,
                     memory_intercept=DECOMPRESSION_MEMORY_INTERCEPT,
                     min_gb=MEMORY_FLOOR,
                     max_gb=MEMORY_CEIL,
-                    time_slope=DECOMPRESSION_TIME_SLOPE,
+                    time_slope=DECOMPRESSION_MINUTES_PER_READ,
                     time_intercept=DECOMPRESSION_TIME_INTERCEPT,
                     min_minutes=MINUTES_FLOOR,
                     max_minutes=MINUTES_CEIL,
