@@ -3,9 +3,10 @@
 import datetime as dt
 import logging
 from datetime import datetime
-from typing import Callable, Iterator
+from typing import Callable, Iterator, Literal
 
 import sqlalchemy
+from sqlalchemy import or_
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
@@ -16,7 +17,7 @@ from cg.constants.constants import (
     SampleType,
 )
 from cg.constants.lims import LimsStatus
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import Priority, SlurmQos, TrailblazerPriority
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
@@ -26,10 +27,12 @@ from cg.exc import (
     CaseNotFoundError,
     CgDataError,
     CgError,
+    CustomerNotFoundError,
     OrderNotFoundError,
     PacbioSequencingRunNotFoundError,
     SampleNotFoundError,
 )
+from cg.meta.workflow.utils.utils import MAP_FROM_TRAILBLAZER_PRIORITY
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import SexEnum
 from cg.server.dto.samples.requests import (
@@ -672,20 +675,18 @@ class ReadHandler(BaseHandler):
             int: The total number of samples returned before truncation.
         """
         samples: Query = self._get_query(table=Sample)
-        filter_functions: list[SampleFilter] = []
         if customers:
-            if not isinstance(customers, list):
-                customers = list(customers)
-            filter_functions.append(SampleFilter.BY_CUSTOMERS)
+            customer_ids: list[int] = [customer.id for customer in customers]
+            samples = samples.filter(Sample.customer_id.in_(customer_ids))
         if pattern:
-            filter_functions.extend([SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH])
-        filter_functions.append(SampleFilter.ORDER_BY_CREATED_AT_DESC)
-        samples: Query = apply_sample_filter(
-            samples=samples,
-            customers=customers,
-            search_pattern=pattern,
-            filter_functions=filter_functions,
-        )
+            samples = samples.filter(
+                or_(
+                    Sample.name.contains(pattern),
+                    Sample.internal_id.contains(pattern),
+                    Sample.order.contains(pattern),
+                )
+            )
+        samples = samples.order_by(Sample.created_at.desc())
         total: int = samples.count()
         return samples.offset(offset).limit(limit).all(), total
 
@@ -1016,13 +1017,24 @@ class ReadHandler(BaseHandler):
             beds=self._get_query(table=Bed), filter_functions=bed_filter_functions
         )
 
-    def get_customer_by_internal_id(self, customer_internal_id: str) -> Customer:
+    def get_customer_by_internal_id(self, customer_internal_id: str) -> Customer | None:
         """Return customer with customer id."""
         return apply_customer_filter(
             filter_functions=[CustomerFilter.BY_INTERNAL_ID],
             customers=self._get_query(table=Customer),
             customer_internal_id=customer_internal_id,
         ).first()
+
+    def get_customer_by_internal_id_strict(self, internal_id: str) -> Customer:
+        """Return customer with customer id."""
+        if customer := apply_customer_filter(
+            filter_functions=[CustomerFilter.BY_INTERNAL_ID],
+            customers=self._get_query(table=Customer),
+            customer_internal_id=internal_id,
+        ).first():
+            return customer
+        else:
+            raise CustomerNotFoundError(f"Customer with internal id {internal_id}")
 
     def get_collaboration_by_internal_id(self, internal_id: str) -> Collaboration:
         """Fetch a customer group by internal id from the store."""
@@ -1678,6 +1690,35 @@ class ReadHandler(BaseHandler):
                 return True
         return False
 
+    def has_related_dna_sample(self, customer_id: str, is_tumour: bool, subject_id: str) -> bool:
+        """
+        Returns True if the provided subject id matches a unique DNA sample with the same subject id,
+        tumour status and belongs to the same collaboration as the provided customer.
+        Raises:
+            CustomerNotFoundError if the customer_id does not match a customer
+        """
+        customer: Customer = self.get_customer_by_internal_id_strict(customer_id)
+        sample_application_version_query: Query = self._get_join_sample_application_version_query()
+        sample_application_version_query: Query = apply_application_filter(
+            applications=sample_application_version_query,
+            prep_categories=DNA_PREP_CATEGORIES,
+            filter_functions=[ApplicationFilter.BY_PREP_CATEGORIES],
+        )
+
+        samples: Query = apply_sample_filter(
+            samples=sample_application_version_query,
+            subject_id=subject_id,
+            is_tumour=is_tumour,
+            customer_entry_ids=[customer.id for customer in customer.collaborators],
+            filter_functions=[
+                SampleFilter.BY_SUBJECT_ID,
+                SampleFilter.BY_TUMOUR,
+                SampleFilter.BY_CUSTOMER_ENTRY_IDS,
+            ],
+        )
+
+        return samples.count() == 1
+
     def _get_related_samples_query(
         self,
         sample: Sample,
@@ -1926,33 +1967,48 @@ class ReadHandler(BaseHandler):
     def get_paginated_unhandled_samples(
         self,
         lims_status: LimsStatus,
-        search: str | None,
         page: int,
         page_size: int,
+        search: str | None = None,
         sort_by: UnhandledSamplesSortBy | None = None,
         sort_order: SortDirection | None = None,
+        trailblazer_priority: TrailblazerPriority | None = None,
+        workflow: Workflow | Literal["unknown"] | None = None,
     ) -> tuple[list[Sample], int]:
         unhandled_samples: Query = self._get_unhandled_samples(
-            lims_status=lims_status, search=search, sort_by=sort_by, sort_order=sort_order
+            lims_status=lims_status,
+            priorities=(
+                MAP_FROM_TRAILBLAZER_PRIORITY[trailblazer_priority]
+                if trailblazer_priority
+                else None
+            ),
+            search=search,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            workflow=workflow,
         )
         return _paginate(query=unhandled_samples, page=page, page_size=page_size)
 
     def _get_unhandled_samples(
         self,
         lims_status: LimsStatus,
-        search: str | None,
+        priorities: list[Priority] | None = None,
+        search: str | None = None,
         sort_by: UnhandledSamplesSortBy | None = None,
         sort_order: SortDirection | None = None,
+        workflow: Workflow | Literal["unknown"] | None = None,
     ) -> Query:
         """
         Return samples with the given lims_status that:
-        - Are not downsampled
-        - Are not cancelled
-        - Are not delivered
-        - Have been sequenced (last_sequenced_at is not null)
-        - Do not belong to the internal customers
-        - Ordered by last sequenced date, with the oldest first
-        - Optional filtering by search string
+            - Are not downsampled
+            - Are not cancelled
+            - Are not delivered
+            - Have been sequenced (last_sequenced_at is not null)
+            - Do not belong to the internal customers
+            - Ordered by last sequenced date, with the oldest first
+            - Optional filtering by search string
+            - Optional filtering by workflow
+            - Optional filtering by a list of priorities
         """
         query = (
             self._get_query(table=Sample)
@@ -1982,6 +2038,15 @@ class ReadHandler(BaseHandler):
                     Sample.internal_id.ilike(f"%{search}%"),
                 ),
             )
+
+        if workflow:
+            if workflow == "unknown":
+                query = query.filter(Sample.workflow_of_case_that_delivers.is_(None))
+            else:
+                query = query.filter(Sample.workflow_of_case_that_delivers == workflow)
+
+        if priorities:
+            query = query.filter(Sample.priority_of_case_that_delivers.in_(priorities))
 
         return query
 

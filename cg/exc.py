@@ -230,6 +230,10 @@ class ScoutUploadError(CgError):
     """Raised when uploading to Scout fails."""
 
 
+class ScoutExportError(CgError):
+    """Raised when exporting from Scout fails."""
+
+
 class StatinaAPIHTTPError(CgError):
     """Raised when Statina REST API response code is not 200."""
 
@@ -391,9 +395,21 @@ class MultipleAnalysesToDeliverError(CgError):
     """Exception raised when multiple analyses are ready for delivery for a case."""
 
 
-class FreshdeskDeliveryMessageError(CgError):
+class FreshdeskError(CgError):
+    """General exception raised when something in Freshdesk fails."""
+
+
+class FreshdeskDeliveryMessageError(FreshdeskError):
     """Exception raised when sending the delivery message in Freshdesk fails."""
 
 
-class FreshdeskClosingTicketError(CgError):
-    """Exception raised when closing a ticket in Freshdesk fails."""
+class FreshdeskGetTicketError(FreshdeskError):
+    """Exception raised when something went wrong when getting a Freshdesk ticket."""
+
+
+class FreshdeskUpdateTicketError(FreshdeskError):
+    """Exception raised when updating a ticket in Freshdesk fails."""
+
+
+class CustomerNotFoundError(CgError):
+    """Exception raised when a customer is not found in StatusDB"""

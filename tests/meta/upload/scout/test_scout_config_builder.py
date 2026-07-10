@@ -330,7 +330,11 @@ def test_nallo_config_builder(mocker: MockerFixture):
 
     # GIVEN a Nallo config builder
     nallo_config_builder = NalloConfigBuilder(
-        nallo_analysis_api=create_autospec(NalloAnalysisAPI, reference="reference.fasta"),
+        nallo_analysis_api=create_autospec(
+            NalloAnalysisAPI,
+            reference="reference.fasta",
+            rank_model_threshold=8,
+        ),
         lims_api=lims_api,
         madeline_api=create_autospec(MadelineAPI),
     )
@@ -606,9 +610,9 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return vcf_snv_research
         if tags == {"vcf-snv-clinical"}:
             return vcf_snv
-        if tags == {"vcf-sv-research", "mitochondria"}:
+        if tags == {"vcf-snv-research", "mitochondria"}:
             return vcf_snv_research_mt
-        if tags == {"vcf-sv-clinical", "mitochondria"}:
+        if tags == {"vcf-snv-clinical", "mitochondria"}:
             return vcf_snv_mt
         if tags == {"vcf-sv-research"}:
             return vcf_sv_research

@@ -266,6 +266,7 @@ class NalloConfig(CommonAppConfig):
     platform: str
     pre_run_script: str = ""
     profile: str
+    rank_model_threshold: int
     reference: str
     repository: str
     resources: str
@@ -406,6 +407,11 @@ class EmailBaseSettings(BaseModel):
     smtp_server: str
 
 
+class FreshdeskConfig(BaseModel):
+    api_key: str
+    base_url: str
+
+
 class FOHMConfig(BaseModel):
     host: str
     port: int
@@ -512,6 +518,7 @@ class CGConfig(BaseModel):
     encryption: Encryption | None = None
     nats: NatsConfig
     external: ExternalConfig = None
+    freshdesk: FreshdeskConfig
     gens: GENSConfig | None = None
     gens_api_: GensAPI = None
     hermes: HermesConfig = None
@@ -526,6 +533,7 @@ class CGConfig(BaseModel):
     loqusdb_somatic: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC.value)
     loqusdb_tumor: CommonAppConfig = Field(None, alias=LoqusdbInstance.TUMOR.value)
     loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
+    loqusdb_wes_38: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES38.value)
     loqusdb_wgs: CommonAppConfig = Field(None, alias=LoqusdbInstance.WGS38.value)
     loqusdb_somatic_lymphoid: CommonAppConfig = Field(
         None, alias=LoqusdbInstance.SOMATIC_LYMPHOID.value

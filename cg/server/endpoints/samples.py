@@ -70,11 +70,13 @@ def get_unhandled_samples():
     else:
         samples, total = db.get_paginated_unhandled_samples(
             lims_status=req.lims_status,
-            search=req.search,
             page=req.page,
             page_size=req.page_size,
+            search=req.search,
             sort_by=req.sort_by,
             sort_order=req.sort_order,
+            trailblazer_priority=req.priority,
+            workflow=req.workflow,
         )
         response = UnhandledSamplesResponse.from_samples(samples=samples, total=total)
         return jsonify(response.model_dump())

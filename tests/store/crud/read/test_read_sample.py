@@ -6,10 +6,11 @@ from typing import Any
 import pytest
 from sqlalchemy.orm import Query
 
-from cg.constants import SexOptions
+from cg.constants import SexOptions, Workflow
 from cg.constants.lims import LimsStatus
+from cg.constants.priority import PriorityTerms, TrailblazerPriority
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
-from cg.exc import SampleNotFoundError
+from cg.exc import CustomerNotFoundError, SampleNotFoundError
 from cg.models.orders.constants import OrderType
 from cg.server.dto.samples.requests import (
     CollaboratorSamplesRequest,
@@ -555,6 +556,36 @@ def test_get_samples_by_customer_id_and_pattern_with_collaboration(
     assert all("sample" in sample.name for sample in samples)
 
 
+def test_get_samples_by_customer_id_and_pattern_name(store: Store, helpers: StoreHelpers):
+    # GIVEN a store containing three samples all belonging to the same customer
+    sample_to_query_via_name: Sample = helpers.add_sample(
+        customer_id="cust000", name="name_to_search_for", store=store
+    )
+    sample_to_query_via_internal_id: Sample = helpers.add_sample(
+        customer_id="cust000", internal_id="internal_id_to_search_for", store=store
+    )
+    sample_to_query_via_order: Sample = helpers.add_sample(
+        customer_id="cust000", order="order_to_search_for", store=store
+    )
+    customer: Customer = sample_to_query_via_name.customer
+
+    # WHEN getting samples via customers and pattern
+    samples_matching_name, _ = store.get_samples_by_customers_and_pattern(
+        customers=[customer], pattern="name_to_search_for"
+    )
+    samples_matching_internal_id, _ = store.get_samples_by_customers_and_pattern(
+        customers=[customer], pattern="internal_id_to_search_for"
+    )
+    samples_matching_order, _ = store.get_samples_by_customers_and_pattern(
+        customers=[customer], pattern="order_to_search_for"
+    )
+
+    # THEN the returned samples should only contain the expected ones
+    assert samples_matching_name == [sample_to_query_via_name]
+    assert samples_matching_internal_id == [sample_to_query_via_internal_id]
+    assert samples_matching_order == [sample_to_query_via_order]
+
+
 def test_get_cases_by_customers_action_and_case_search(
     store_with_cases_with_customers_and_actions: Store,
     customer_id: str,
@@ -609,6 +640,113 @@ def test_get_related_samples(
 
     # THEN the correct set of samples is returned
     assert set(related_dna_samples) == set(fetched_related_dna_samples)
+
+
+def test_has_related_dna_sample_success(store: Store, helpers: StoreHelpers):
+    # GIVEN a database containing a non-tumour DNA sample
+    helpers.add_sample(
+        store=store,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        subject_id="subject-id",
+        is_tumour=False,
+        customer_id="cust000",
+    )
+
+    # GIVEN a customer which is in a collaboration with the customer who has placed the sample above
+    collaborator = helpers.ensure_customer(
+        customer_id="cust000-collaborator", customer_name="collaborator", store=store
+    )
+    dna_customer = store.get_customer_by_internal_id("cust000")
+    store.add_collaboration(
+        internal_id="test_collaboration",
+        name="test_collaboration",
+        customers=[dna_customer, collaborator],
+    )
+
+    # WHEN checking for the existence of a DNA sample with matching subject_id, tumour status which is within the collaboration
+    result = store.has_related_dna_sample(
+        customer_id="cust000-collaborator", is_tumour=False, subject_id="subject-id"
+    )
+
+    # THEN the result should be True
+    assert result
+
+
+def test_has_related_dna_sample_wrong_collaboration(store: Store, helpers: StoreHelpers):
+    # GIVEN a database containing a non-tumour DNA sample
+    helpers.add_sample(
+        store=store,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        subject_id="subject-id",
+        is_tumour=False,
+        customer_id="cust000",
+    )
+
+    # GIVEN a customer not belonging to the same collaboration
+    collaborator = store.add_customer(
+        internal_id="other_cust",
+        name="other customer",
+        invoice_address="invoice street 1",
+        invoice_reference="Invoicee Doe",
+    )
+    store.add_item_to_store(collaborator)
+
+    # WHEN checking for the existence of a DNA sample with matching subject_id and tumour status but for a different collaboration
+    result = store.has_related_dna_sample(
+        customer_id="other_cust", is_tumour=False, subject_id="subject-id"
+    )
+
+    # THEN the result should be False
+    assert not result
+
+
+def test_has_related_dna_sample_wrong_tumour_status(store: Store, helpers: StoreHelpers):
+    # GIVEN a database containing a non-tumour DNA sample
+    helpers.add_sample(
+        store=store,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        subject_id="subject-id",
+        is_tumour=False,
+        customer_id="cust000",
+    )
+
+    # WHEN checking for the existence of a DNA sample with matching subject_id and customer but different tumour status
+    result = store.has_related_dna_sample(
+        customer_id="cust000", is_tumour=True, subject_id="subject-id"
+    )
+
+    # THEN the result should be False
+    assert not result
+
+
+def test_has_related_dna_sample_wrong_subject_id(store: Store, helpers: StoreHelpers):
+    # GIVEN a database containing a non-tumour DNA sample
+    helpers.add_sample(
+        store=store,
+        application_type=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+        subject_id="subject-id",
+        is_tumour=False,
+        customer_id="cust000",
+    )
+
+    # WHEN checking for the existence of a DNA sample for the same customer and tumour status but with a different subject_id
+    result = store.has_related_dna_sample(
+        customer_id="cust000", is_tumour=False, subject_id="other-subject-id"
+    )
+
+    # THEN the result should be False
+    assert not result
+
+
+def test_has_related_dna_sample_wrong_raises_missing_customer_error(
+    store: Store, helpers: StoreHelpers
+):
+    # WHEN checking for the existence of a DNA sample for a customer which does not exist
+    # THEN a CustomerNotFoudnError should be raised
+    with pytest.raises(CustomerNotFoundError):
+        store.has_related_dna_sample(
+            customer_id="non-existent-customer", is_tumour=False, subject_id="other-subject-id"
+        )
 
 
 def test_get_collaborator_samples_filters_on_order_type(
@@ -831,6 +969,107 @@ def test_get_unhandled_samples_filters_out_internal_samples(store: Store, helper
 
     # THEN only the external sample is returned
     assert unhandled_samples.all() == [external_sample]
+
+
+def test_get_unhandled_samples_filters_on_workflow(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with one raredisease case and a non raredisease case
+    raredisease_sample = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="raredisease_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    non_raredisease_sample = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="non_raredisease_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    raredisease_case = helpers.add_case(
+        store=store,
+        internal_id="raredisease_case",
+        name="raredisease_case",
+        data_analysis=Workflow.RAREDISEASE,
+    )
+    non_raredisease_case = helpers.add_case(
+        store=store,
+        internal_id="non_raredisease_case",
+        name="non_raredisease_case",
+        data_analysis=Workflow.MIP_DNA,
+    )
+
+    helpers.add_relationship(
+        store=store, sample=raredisease_sample, case=raredisease_case, should_deliver_sample=True
+    )
+    helpers.add_relationship(
+        store=store,
+        sample=non_raredisease_sample,
+        case=non_raredisease_case,
+        should_deliver_sample=True,
+    )
+
+    # WHEN getting the unhandled samples in top-up and workflow raredisease
+    unhandled_samples: Query = store._get_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP,
+        workflow=Workflow.RAREDISEASE,
+    )
+
+    # THEN only the raredisease sample is returned
+    assert unhandled_samples.all() == [raredisease_sample]
+
+
+def test_get_unhandled_samples_filters_on_unknown_workflow(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with one sample without a delivering case and one with a workflow
+    unknown_workflow_sample = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="unknown_workflow_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    known_workflow_sample = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="known_workflow_sample",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    known_workflow_case = helpers.add_case(
+        store=store,
+        internal_id="known_workflow_case",
+        name="known_workflow_case",
+        data_analysis=Workflow.RAREDISEASE,
+    )
+    helpers.add_relationship(
+        store=store,
+        sample=known_workflow_sample,
+        case=known_workflow_case,
+        should_deliver_sample=True,
+    )
+
+    # WHEN getting unhandled samples filtered by unknown workflow
+    unhandled_samples: Query = store._get_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP,
+        workflow="unknown",
+    )
+
+    # THEN only the sample without a delivering case is returned
+    assert unhandled_samples.all() == [unknown_workflow_sample]
 
 
 def test_get_paginated_unhandled_samples_sort_by_ticket(store: Store, helpers: StoreHelpers):
@@ -1132,4 +1371,67 @@ def test_get_paginated_unhandled_samples_search_sample_no_delivering_case(
 
     # THEN the sample should be returned since its own internal_id matches
     assert unhandled_samples == [sample]
+    assert total == 1
+
+
+def test_get_paginated_unhandled_samples_priority(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with two unhandled samples
+    sample_normal_prio = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="matching_search_string",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now(),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+    sample_low_prio = helpers.add_sample(
+        store=store,
+        lims_status=LimsStatus.TOP_UP,
+        internal_id="perfect_unhandled_sample_2",
+        is_cancelled=False,
+        from_sample=None,
+        last_sequenced_at=datetime.now() - timedelta(days=1),
+        delivered_at=None,
+        customer_id="cust1337",
+    )
+
+    # GIVEN a case linked to the sample with should_deliver_sample
+    case: Case = helpers.add_case(
+        store=store,
+        name="case_1",
+        internal_id="some_case_id",
+        priority=PriorityTerms.STANDARD,
+    )
+    helpers.relate_samples(
+        base_store=store,
+        case=case,
+        samples=[sample_normal_prio],
+        should_deliver_sample=True,
+    )
+
+    # GIVEN an another case with a different prio than the one filtering for
+    other_case: Case = helpers.add_case(
+        store=store,
+        name="case_other_1",
+        internal_id="some_other_case_id",
+        priority=PriorityTerms.RESEARCH,
+    )
+    helpers.relate_samples(
+        base_store=store,
+        case=other_case,
+        samples=[sample_low_prio],
+        should_deliver_sample=True,
+    )
+
+    # WHEN getting the unhandled samples in top-up using page 1 and page_size = 1
+    unhandled_samples, total = store.get_paginated_unhandled_samples(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=10,
+        trailblazer_priority=TrailblazerPriority.NORMAL,
+    )
+    # THEN only the newer sample should be returned
+    assert unhandled_samples == [sample_normal_prio]
     assert total == 1

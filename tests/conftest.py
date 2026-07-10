@@ -407,6 +407,10 @@ def base_config_dict() -> dict:
                 "demultiplexed_runs_dir": "path/to/demultiplexed_flow_cells_dir",
             },
         },
+        "freshdesk": {
+            "api_key": "some_api_key",
+            "base_url": "freshdesk.com",
+        },
         "nats": {
             "server": "https://nats.scilifelab.se",
             "stream": "cg-test",
@@ -2003,6 +2007,10 @@ def context_config(
                 "demultiplexed_runs_dir": str(illumina_demultiplexed_runs_directory),
             },
         },
+        "freshdesk": {
+            "api_key": "some_api_key",
+            "base_url": "freshdesk.com",
+        },
         "nats": {
             "server": "https://nats.scilifelab.se",
             "stream": "cg-test",
@@ -2161,6 +2169,7 @@ def context_config(
         "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb.yaml"},
         "loqusdb-lwp": {"binary_path": "loqusdb-rd-lwp", "config_path": "loqusdb-rd-lwp.yaml"},
         "loqusdb-wes": {"binary_path": "loqusdb-wes", "config_path": "loqusdb-wes.yaml"},
+        "loqusdb-wes-38": {"binary_path": "loqusdb-wes-38", "config_path": "loqusdb-wes-38.yaml"},
         "loqusdb-wgs": {"binary_path": "loqusdb-wes", "config_path": "loqusdb-wes.yaml"},
         "loqusdb-somatic": {
             "binary_path": "loqusdb-somatic",
@@ -2221,6 +2230,7 @@ def context_config(
             "workflow_bin_path": Path("workflow", "path").as_posix(),
             "pre_run_script": "",
             "profile": "myprofile",
+            "rank_model_threshold": 13,
             "reference": "nallo_reference.fasta",
             "repository": "https://some_url",
             "references": Path("path", "to", "references").as_posix(),
@@ -2899,12 +2909,6 @@ def nallo_hermes_deliverables(nallo_deliverable_data: dict, nallo_case_id: str) 
             tags.append("multiqc-html")
         hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
     return hermes_output
-
-
-@pytest.fixture
-def nallo_multiqc_json_metrics_path(nallo_analysis_dir: Path) -> Path:
-    """Return Multiqc JSON file path for nallo."""
-    return Path(nallo_analysis_dir, multiqc_json_file)
 
 
 @pytest.fixture(scope="function")

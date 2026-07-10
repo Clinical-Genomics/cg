@@ -8,6 +8,9 @@ tower_binary_path: "{test_root_dir}/tower_binary_path"
 email_base_settings:
   sender_email: "integration-tests@scilifelab.se"
   smtp_server: "localhost"
+freshdesk:
+  api_key: "some_api_key"
+  base_url: "https://example.freshdesk.com"
 
 nats:
   server: nats://localhost/nats
@@ -170,6 +173,7 @@ nallo:
   pipeline_deliverables: "nallo_pipeline_deliverables.yaml"
   platform: {test_root_dir}/platform.config
   profile: nallo_profile
+  rank_model_threshold: 8
   reference: "nallo-reference.fasta"
   resources: {test_root_dir}/nallo_resources.config
   repository: nallo_repository

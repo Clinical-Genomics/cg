@@ -279,8 +279,10 @@ def test_existing_samples_should_not_be_delivered_again(mocker: MockerFixture):
 @pytest.mark.parametrize(
     "is_external, expected_lims_status", [(True, LimsStatus.DONE), (False, LimsStatus.PENDING)]
 )
-def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_status: LimsStatus):
-    # GIVEN a store containing an external application
+def test_create_db_sample_with_lims_status_and_invoice(
+    is_external: bool, expected_lims_status: LimsStatus
+):
+    # GIVEN a store containing an application
     application: Application = create_autospec(Application, is_external=is_external)
     application_version: ApplicationVersion = create_autospec(
         ApplicationVersion, application=application
@@ -301,7 +303,7 @@ def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_stat
         subject_id="father",
     )
 
-    # GIVEN order case
+    # GIVEN a case
     case = create_autospec(RNAFusionCase, priority=Priority.standard)
 
     # GIVEN a store case order service
@@ -309,7 +311,7 @@ def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_stat
         status_db=status_db.as_type, lims_service=create_autospec(OrderLimsService)
     )
 
-    # WHEN creating a database sample with an external application
+    # WHEN creating a database sample
     store_order_service._create_db_sample(
         case=case,
         sample=rna_fusion_sample,
@@ -319,5 +321,8 @@ def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_stat
         ticket="1234567",
     )
 
-    # THEN the lims status of the sample is done
+    # THEN the lims status of the sample should be done if it is an external application
     assert status_db.as_mock.add_sample.call_args[1]["lims_status"] == expected_lims_status
+
+    # THEN the sample should be set to no_invoice if it is an external application
+    assert status_db.as_mock.add_sample.call_args[1]["no_invoice"] == is_external

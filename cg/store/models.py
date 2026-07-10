@@ -33,9 +33,10 @@ from cg.constants.constants import (
 )
 from cg.constants.devices import DeviceType, RevioNames
 from cg.constants.lims import LimsStatus
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import PriorityTerms, SlurmQos, TrailblazerPriority
 from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
+from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.models.orders.constants import OrderType
 
 BigInt = Annotated[int, None]
@@ -114,9 +115,9 @@ order_case = Table(
 
 class PriorityMixin:
     @property
-    def priority_human(self) -> str:
+    def priority_human(self) -> PriorityTerms:
         """Humanized priority for sample."""
-        return self.priority.name
+        return PriorityTerms(self.priority.name)
 
     @priority_human.setter
     def priority_human(self, priority: str) -> None:
@@ -906,6 +907,36 @@ class Sample(Base, PriorityMixin):
             return None
 
     @hybrid_property
+    def priority_of_case_that_delivers(
+        self,
+    ) -> Priority | None:  # pyright: ignore [reportRedeclaration]
+        if case := self.case_that_delivers:
+            return case.priority
+        else:
+            return None
+
+    @priority_of_case_that_delivers.expression
+    @classmethod
+    def priority_of_case_that_delivers(cls) -> SQLColumnExpression[Priority]:
+        return (
+            select(Case.priority)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .limit(1)
+            .label("priority_of_case_that_delivers")
+        )
+
+    @property
+    def trailblazer_priority_of_case_that_delivers(self) -> TrailblazerPriority | None:
+        if case := self.case_that_delivers:
+            return MAP_TO_TRAILBLAZER_PRIORITY[case.priority]
+        else:
+            return None
+
+    @hybrid_property
     def delivering_case_internal_id(self) -> str | None:  # pyright: ignore [reportRedeclaration]
         if case := self.case_that_delivers:
             return case.internal_id
@@ -926,13 +957,30 @@ class Sample(Base, PriorityMixin):
             .label("delivering_case_internal_id")
         )
 
-    @property
-    def workflow_of_case_that_delivers(self) -> Workflow | None:
+    @hybrid_property
+    def workflow_of_case_that_delivers(  # pyright: ignore [reportRedeclaration]
+        self,
+    ) -> Workflow | None:
         """Return the workflow of the original case if the case exists."""
         if case := self.case_that_delivers:
             return case.data_analysis
         else:
             return None
+
+    # noinspection PyNestedDecorators
+    @workflow_of_case_that_delivers.expression
+    @classmethod
+    def workflow_of_case_that_delivers(cls) -> SQLColumnExpression[Workflow]:
+        return (
+            select(Case.data_analysis)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .limit(1)
+            .label("workflow_of_case_that_delivers")
+        )
 
     @hybrid_property
     def ticket_id_from_original_order(self) -> int | None:  # pyright: ignore [reportRedeclaration]
