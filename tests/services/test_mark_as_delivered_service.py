@@ -318,28 +318,37 @@ def test_mark_analyses_two_cases_one_sample(mark_as_delivered_service: MarkAsDel
     sample: Sample = create_autospec(
         Sample, delivered_at=None, expected_reads_for_sample=1, reads=1
     )
-    first_case: Case = create_autospec(Case)
-    first_case_sample: CaseSample = create_autospec(
-        CaseSample, case=first_case, sample=sample, should_deliver_sample=True
+    case_1: Case = create_autospec(Case, internal_id="case_1", samples=[sample])
+    case_sample_1: CaseSample = create_autospec(
+        CaseSample, case=case_1, sample=sample, should_deliver_sample=True
     )
-    first_case.links = [first_case_sample]
+    case_1.links = [case_sample_1]
+    order_1: Order = create_autospec(Order, cases=[case_1], is_open=True)
 
     # GIVEN that a customer orders a new case with the same sample (without the first case having been delivered)
-    second_case: Case = create_autospec(Case)
-    second_case_sample: CaseSample = create_autospec(
-        CaseSample, case=second_case, sample=sample, should_deliver_sample=False
+    case_2: Case = create_autospec(Case, internal_id="case_2", samples=[sample])
+    case_sample_2: CaseSample = create_autospec(
+        CaseSample, case=case_2, sample=sample, should_deliver_sample=False
     )
-    second_case.links = [second_case_sample]
-    order_second_case: Order = create_autospec(Order, cases=[second_case], is_open=True)
+    case_2.links = [case_sample_2]
+    order_2: Order = create_autospec(Order, cases=[case_2], is_open=True)
+
+    # GIVEN that sample is connected to both cases
 
     # GIVEN that the second order finishes first
-    # Mock the trailblazer get_delivered_analyses_for_order
+    analysis: TrailblazerAnalysis = create_autospec(TrailblazerAnalysis, case_id="case_2")
+    mark_as_delivered_service.trailblazer_api.get_delivered_analyses_for_order = Mock(
+        return_value=[analysis]
+    )
 
     # WHEN delivering the second order
-    mark_as_delivered_service.close_order_in_status_db_if_closable(order_second_case)
+    mark_as_delivered_service.close_order_in_status_db_if_closable(order_2)
 
-    # THEN the order will never be closed in StatusDB and the ticket will never be closed in Freshdesk(automatically)
-    assert order_second_case.is_open
+    # THEN the first order should be open
+    assert order_1.is_open
+
+    # THEN the second order should be closed
+    assert not order_2.is_open
 
 
 def test_is_order_closable_true(mark_as_delivered_service: MarkAsDeliveredService):
