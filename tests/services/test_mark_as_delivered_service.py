@@ -356,6 +356,14 @@ def test_is_order_closable_true(mark_as_delivered_service: MarkAsDeliveredServic
     case: Case = create_autospec(
         Case, samples=[sample_delivered1, sample_delivered2], internal_id="case_id"
     )
+    case.links = [
+        create_autospec(
+            CaseSample, case=case, sample=sample_delivered1, should_deliver_sample=True
+        ),
+        create_autospec(
+            CaseSample, case=case, sample=sample_delivered2, should_deliver_sample=True
+        ),
+    ]
     order: Order = create_autospec(Order, cases=[case])
 
     # GIVEN that the case has a delivered analysis in Trailblazer
@@ -378,6 +386,14 @@ def test_is_order_closeable_false_undelivered_samples(
     case: Case = create_autospec(
         Case, samples=[sample_delivered1, sample_delivered2], internal_id="case_id"
     )
+    case.links = [
+        create_autospec(
+            CaseSample, case=case, sample=sample_delivered1, should_deliver_sample=True
+        ),
+        create_autospec(
+            CaseSample, case=case, sample=sample_delivered2, should_deliver_sample=True
+        ),
+    ]
     order: Order = create_autospec(Order, cases=[case])
 
     # GIVEN that the case has a delivered analysis in Trailblazer
