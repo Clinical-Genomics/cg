@@ -132,19 +132,16 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
 )
 
 NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
-    alignment_path={AlignmentFileTag.BAM, "haplotags"},  # TODO: Change to CRAM
-    assembly_alignment_path={AlignmentFileTag.BAM, "assembly"},  # TODO: Change to CRAM
+    alignment_path={AlignmentFileTag.CRAM, "haplotags"},
+    assembly_alignment_path={AlignmentFileTag.CRAM, "assembly"},
     chromograph_autozyg={"chromograph", "autozyg"},
     chromograph_coverage={"chromograph", "tcov"},
     d4_file={"coverage", "d4"},
     hificnv_coverage={"hificnv", "bigwig"},
-    paraphase_alignment_path={
-        AlignmentFileTag.BAM,
-        NalloAnalysisTag.PARAPHASE,
-    },  # TODO: Change to CRAM
+    paraphase_alignment_path={AlignmentFileTag.CRAM, NalloAnalysisTag.PARAPHASE},
     phase_blocks={"whatshap", "gtf"},
-    reviewer_alignment={"repeats", "spanning", "bam"},  # TODO: Change to cram
-    reviewer_alignment_index={"repeats", "spanning", "bam-index"},  # TODO: Change to cram_index
+    reviewer_alignment={"repeats", "spanning", AlignmentFileTag.CRAM},
+    reviewer_alignment_index={"repeats", "spanning", AlignmentFileTag.CRAM_INDEX},
     reviewer_vcf={"repeats", "sorted", "vcf"},
     reviewer_catalog={"trgt", "variant-catalog"},
     minor_allele_frequency_wig={"hificnv", "bigwig", "maf"},

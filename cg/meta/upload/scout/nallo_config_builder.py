@@ -123,13 +123,13 @@ class NalloConfigBuilder(ScoutConfigBuilder):
             sample_id=sample_id,
             hk_version=hk_version,
         )
-        alignment_and_mt_bam_path: str | None = self.get_sample_file(  # TODO: Rename to cram
+        alignment_cram_path: str | None = self.get_sample_file(
             hk_tags=cast(set[str], self.sample_tags.alignment_path),
             sample_id=sample_id,
             hk_version=hk_version,
         )
-        config_sample.alignment_path = alignment_and_mt_bam_path
-        config_sample.mt_bam = alignment_and_mt_bam_path
+        config_sample.alignment_path = alignment_cram_path
+        config_sample.mt_bam = alignment_cram_path
         config_sample.phase_blocks = self.get_sample_file(
             hk_tags=cast(set[str], self.sample_tags.phase_blocks),
             sample_id=sample_id,
