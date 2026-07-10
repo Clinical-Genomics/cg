@@ -333,8 +333,6 @@ def test_mark_analyses_two_cases_one_sample(mark_as_delivered_service: MarkAsDel
     case_2.links = [case_sample_2]
     order_2: Order = create_autospec(Order, cases=[case_2], is_open=True)
 
-    # GIVEN that sample is connected to both cases
-
     # GIVEN that the second order finishes first
     analysis: TrailblazerAnalysis = create_autospec(TrailblazerAnalysis, case_id="case_2")
     mark_as_delivered_service.trailblazer_api.get_delivered_analyses_for_order = Mock(
