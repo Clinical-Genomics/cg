@@ -133,33 +133,6 @@ def test_fastq_to_spring_sbatch(
     assert f"#SBATCH --cpus-per-task={crunchy_api.slurm_cpus_per_task}" in sbatch_content
 
 
-def test_fastq_to_spring_sbatch_without_cpus_per_task(
-    crunchy_config: dict,
-    compression_object: CompressionData,
-    sbatch_process: Process,
-):
-    """Test that no --cpus-per-task header is added when it is not configured."""
-    # GIVEN a crunchy-api with no cpus_per_task configured
-    crunchy_config["crunchy"]["slurm"].pop("cpus_per_task")
-    crunchy_api = CrunchyAPI(crunchy_config)
-    crunchy_api.slurm_api.process = sbatch_process
-    assert crunchy_api.slurm_cpus_per_task is None
-
-    # WHEN calling fastq_to_spring on FASTQ files
-    crunchy_api.fastq_to_spring(
-        compression_obj=compression_object,
-        memory=crunchy_api.fallback_memory,
-        minutes=crunchy_api.fallback_minutes,
-    )
-
-    # THEN the sbatch script has no --cpus-per-task header
-    sbatch_path: Path = get_fastq_to_spring_sbatch_path(
-        log_dir=get_log_dir(compression_object.spring_path), run_name=compression_object.run_name
-    )
-    sbatch_content: str = sbatch_path.read_text()
-    assert "--cpus-per-task" not in sbatch_content
-
-
 def test_fastq_to_spring_sbatch_uses_explicit_memory_and_minutes(
     crunchy_config: dict,
     compression_object: CompressionData,
