@@ -38,6 +38,7 @@ class CrunchyAPI:
         self.slurm_account: str = config["crunchy"]["slurm"]["account"]
         self.slurm_mail_user: str = config["crunchy"]["slurm"]["mail_user"]
         self.slurm_number_tasks: int = config["crunchy"]["slurm"]["number_tasks"]
+        self.slurm_cpus_per_task: int = config["crunchy"]["slurm"].get("cpus_per_task")
         self.slurm_partition: str = config["crunchy"]["slurm"]["partition"]
         self.tmp_dir_base: str = config["crunchy"]["tmp_dir_base"]
         # Used only when a job's memory/time can't be scaled from its read count.
@@ -94,6 +95,7 @@ class CrunchyAPI:
             quality_of_service=SlurmQos.MAINTENANCE,
             partition=f"--partition={self.slurm_partition}",
             chdir=f"--chdir={self.tmp_dir_base}",
+            cpus_per_task=f"--cpus-per-task={self.slurm_cpus_per_task}",
         )
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
             sbatch_parameters=sbatch_parameters
@@ -150,6 +152,7 @@ class CrunchyAPI:
             quality_of_service=SlurmQos.HIGH,
             partition=f"--partition={self.slurm_partition}",
             chdir=f"--chdir={self.tmp_dir_base}",
+            cpus_per_task=f"--cpus-per-task={self.slurm_cpus_per_task}",
         )
         sbatch_content: str = self.slurm_api.generate_sbatch_content(sbatch_parameters)
         sbatch_path = files.get_spring_to_fastq_sbatch_path(

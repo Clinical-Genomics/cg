@@ -35,6 +35,7 @@ def test_generate_sbatch_header_with_optional_headers(sbatch_parameters: Sbatch)
     sbatch_parameters.dependency = "--dependency=afterok:42"
     sbatch_parameters.partition = "--partition=crunchy"
     sbatch_parameters.chdir = "--chdir=/state/partition1"
+    sbatch_parameters.cpus_per_task = "--cpus-per-task=4"
 
     # WHEN building a sbatch header
     sbatch_header: str = SlurmAPI.generate_sbatch_header(sbatch_parameters)
@@ -44,6 +45,7 @@ def test_generate_sbatch_header_with_optional_headers(sbatch_parameters: Sbatch)
     assert "#SBATCH --dependency=afterok:42" in sbatch_header
     assert "#SBATCH --partition=crunchy" in sbatch_header
     assert "#SBATCH --chdir=/state/partition1" in sbatch_header
+    assert "#SBATCH --cpus-per-task=4" in sbatch_header
 
 
 def test_generate_sbatch_header_without_optional_headers(sbatch_parameters: Sbatch):

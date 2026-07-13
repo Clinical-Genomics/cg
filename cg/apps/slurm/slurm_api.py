@@ -53,6 +53,7 @@ class SlurmAPI:
                 sbatch_parameters.dependency,
                 sbatch_parameters.partition,
                 sbatch_parameters.chdir,
+                sbatch_parameters.cpus_per_task,
             ]
         )
 

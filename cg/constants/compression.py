@@ -10,7 +10,7 @@ PENDING_PATH_SUFFIX: str = ".crunchy.pending.txt"
 
 # Read-based memory/time scaling for compression: estimate = slope * reads + intercept
 COMPRESSION_MEMORY_PER_READ: float = 8.0330e-08  # GB per read
-COMPRESSION_MEMORY_INTERCEPT: float = 1.4746
+COMPRESSION_MEMORY_INTERCEPT: float = 5
 MEMORY_FLOOR: int = 1
 MEMORY_CEIL: int = 500
 COMPRESSION_MINUTES_PER_READ: float = 4.6394e-07

@@ -113,13 +113,14 @@ crunchy:
   conda_binary: "{test_root_dir}/crunchy_conda_binary"
   cram_reference: "{test_root_dir}/crunchy_cram_reference"
   tmp_dir_base: "/state/partition1"
-  slurm_partition: compress
   fallback_memory: 50
   fallback_minutes: 1440
   slurm:
     account: development
     mail_user: crunchy_slurm_mail_user@scilifelab.se
-    number_tasks: 12
+    number_tasks: 1
+    cpus_per_task: 8
+    partition: compress
     conda_env: crunchy_conda_env
 
 data-delivery:

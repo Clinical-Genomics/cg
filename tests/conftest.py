@@ -484,6 +484,7 @@ def crunchy_config() -> dict[str, dict[str, Any]]:
                 "conda_env": "mock_env",
                 "mail_user": "mock_mail",
                 "number_tasks": 1,
+                "cpus_per_task": 8,
                 "partition": "compress",
             },
         }
@@ -2107,7 +2108,6 @@ def context_config(
             "conda_binary": "a_conda_binary",
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
             "tmp_dir_base": "/state/partition1",
-            "slurm_partition": "compress",
             "fallback_memory": 1,
             "fallback_minutes": 60,
             "slurm": {
@@ -2115,6 +2115,8 @@ def context_config(
                 "conda_env": "S_crunchy",
                 "mail_user": email_address,
                 "number_tasks": 1,
+                "cpus_per_task": 4,
+                "partition": "compress",
             },
         },
         "data-delivery": {

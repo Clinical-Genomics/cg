@@ -21,6 +21,7 @@ class Sbatch(BaseModel):
     dependency: str | None = None
     partition: str | None = None
     chdir: str | None = None
+    cpus_per_task: str | None = None
 
 
 class SbatchDragen(Sbatch):

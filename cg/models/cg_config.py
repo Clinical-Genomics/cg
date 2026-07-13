@@ -78,6 +78,7 @@ class SlurmConfig(BaseModel):
     mail_user: EmailStr
     memory: int | None = None
     number_tasks: int | None = None
+    cpus_per_task: int | None = None
     conda_env: str | None = None
     qos: SlurmQos = SlurmQos.LOW
     partition: str | None = None
