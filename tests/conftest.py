@@ -477,7 +477,6 @@ def crunchy_config() -> dict[str, dict[str, Any]]:
             "conda_binary": "a conda binary",
             "cram_reference": "/path/to/fasta",
             "tmp_dir_base": "/state/partition1",
-            "slurm_partition": "compress",
             "fallback_memory": 1,
             "fallback_minutes": 60,
             "slurm": {
@@ -485,6 +484,7 @@ def crunchy_config() -> dict[str, dict[str, Any]]:
                 "conda_env": "mock_env",
                 "mail_user": "mock_mail",
                 "number_tasks": 1,
+                "partition": "compress",
             },
         }
     }

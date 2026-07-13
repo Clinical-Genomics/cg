@@ -38,7 +38,7 @@ class CrunchyAPI:
         self.slurm_account: str = config["crunchy"]["slurm"]["account"]
         self.slurm_mail_user: str = config["crunchy"]["slurm"]["mail_user"]
         self.slurm_number_tasks: int = config["crunchy"]["slurm"]["number_tasks"]
-        self.slurm_partition: str = config["crunchy"]["slurm_partition"]
+        self.slurm_partition: str = config["crunchy"]["slurm"]["partition"]
         self.tmp_dir_base: str = config["crunchy"]["tmp_dir_base"]
         # Used only when a job's memory/time can't be scaled from its read count.
         self.fallback_memory: int = config["crunchy"]["fallback_memory"]

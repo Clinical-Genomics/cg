@@ -80,6 +80,7 @@ class SlurmConfig(BaseModel):
     number_tasks: int | None = None
     conda_env: str | None = None
     qos: SlurmQos = SlurmQos.LOW
+    partition: str | None = None
 
 
 class Encryption(BaseModel):
@@ -190,7 +191,6 @@ class CrunchyConfig(BaseModel):
     conda_binary: str | None = None
     cram_reference: str
     tmp_dir_base: str
-    slurm_partition: str
     fallback_memory: int
     fallback_minutes: int
     slurm: SlurmConfig
