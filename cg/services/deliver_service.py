@@ -123,11 +123,17 @@ class DeliverService:
         Trailblazer. We are currently excluding microSALT and Taxprofiler from automatic delivery.
         """
         undelivered_trailblazer_analyses: list[TrailblazerAnalysis] = (
-            self.trailblazer_api.get_all_analyses_to_deliver()
+            self.trailblazer_api.get_all_analyses_to_deliver(
+                exclude_workflows=[
+                    Workflow.MICROSALT,
+                    Workflow.TAXPROFILER,
+                    Workflow.DEMULTIPLEX,
+                    Workflow.RSYNC,
+                ]
+            )
         )
         uploaded_analyses_to_deliver: list[Analysis] = self.status_db.get_uploaded_analyses(
-            trailblazer_ids=[analysis.id for analysis in undelivered_trailblazer_analyses],
-            exclude_workflows=[Workflow.MICROSALT, Workflow.TAXPROFILER],
+            trailblazer_ids=[analysis.id for analysis in undelivered_trailblazer_analyses]
         )
         order_analyses = {}
         for analysis in uploaded_analyses_to_deliver:

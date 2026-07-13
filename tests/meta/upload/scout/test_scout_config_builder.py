@@ -330,7 +330,11 @@ def test_nallo_config_builder(mocker: MockerFixture):
 
     # GIVEN a Nallo config builder
     nallo_config_builder = NalloConfigBuilder(
-        nallo_analysis_api=create_autospec(NalloAnalysisAPI, reference="reference.fasta"),
+        nallo_analysis_api=create_autospec(
+            NalloAnalysisAPI,
+            reference="reference.fasta",
+            rank_model_threshold=8,
+        ),
         lims_api=lims_api,
         madeline_api=create_autospec(MadelineAPI),
     )

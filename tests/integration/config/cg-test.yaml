@@ -176,6 +176,7 @@ nallo:
   pipeline_deliverables: "nallo_pipeline_deliverables.yaml"
   platform: {test_root_dir}/platform.config
   profile: nallo_profile
+  rank_model_threshold: 8
   reference: "nallo-reference.fasta"
   resources: {test_root_dir}/nallo_resources.config
   repository: nallo_repository

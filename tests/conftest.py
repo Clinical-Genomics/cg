@@ -2236,6 +2236,7 @@ def context_config(
             "workflow_bin_path": Path("workflow", "path").as_posix(),
             "pre_run_script": "",
             "profile": "myprofile",
+            "rank_model_threshold": 13,
             "reference": "nallo_reference.fasta",
             "repository": "https://some_url",
             "references": Path("path", "to", "references").as_posix(),
