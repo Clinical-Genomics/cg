@@ -54,7 +54,7 @@ class OrderValidationService:
         if not errors.is_empty:
             LOG.error(errors.get_error_message())
             raise OrderValidationError(
-                message=f"Order contained errors: {errors.get_error_message()}"
+                message=f"Order contained errors:\n{errors.get_error_message()}"
             )
         return parsed_order
 
