@@ -61,9 +61,11 @@ class MarkAsDeliveredService:
         """
         Return True only if
         - there is a delivered TB analysis for each case and
-        - each sample in the order has a "delivered_at" set
+        - each sample the order is responsible for delivering has a "delivered_at" set
 
         Note, the second condition is only needed for partial deliveries in microSALT and taxprofiler.
+        Samples with should_deliver_sample=False are owned by another case's delivery (e.g. a sample
+        reused from an earlier order) and must not block this order from closing.
         """
         delivered_analyses: list[TrailblazerAnalysis] = (
             self.trailblazer_api.get_delivered_analyses_for_order(order_id=order.id)
@@ -73,7 +75,10 @@ class MarkAsDeliveredService:
         case_ids_on_order: set[str] = {case.internal_id for case in order.cases}
         LOG.debug(f"Case IDs in StatusDB order {order.id}: {case_ids_on_order}")
         are_all_samples_delivered = all(
-            sample.delivered_at for case in order.cases for sample in case.samples
+            case_sample.sample.delivered_at
+            for case in order.cases
+            for case_sample in case.links
+            if case_sample.should_deliver_sample
         )
         return delivered_case_ids == case_ids_on_order and are_all_samples_delivered
 
