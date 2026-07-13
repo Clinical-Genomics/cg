@@ -183,7 +183,7 @@ def test_spring_to_fastq(
     assert not compression_object.pending_exists()
 
     with mock.patch.object(SlurmAPI, "submit_sbatch", return_value=123456) as submit_sbatch:
-        # WHEN calling bam_to_cram method on bam-path
+        # WHEN calling spring_to_fastq method on bam-path
         crunchy_api.spring_to_fastq(
             compression_obj=compression_object,
             memory=crunchy_api.fallback_memory,

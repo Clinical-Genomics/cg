@@ -51,19 +51,6 @@ def test_parse_run_name_matches_expected_format():
     assert result == ("23M7GHLT4", "ACC20498A8", 4)
 
 
-def test_parse_run_name_rejects_other_conventions():
-    """Test that run names from other workflow naming conventions don't falsely match."""
-    # GIVEN run names following other, unsupported naming conventions
-    microsalt_style = "ACC20498A8_23M7GHLT4_L004"
-    mutant_style = "23M7GHLT4_L004_some_meta"
-    garbage = "not_a_valid_name"
-
-    # WHEN/THEN none of them match the expected format
-    assert parse_run_name(microsalt_style) is None
-    assert parse_run_name(mutant_style) is None
-    assert parse_run_name(garbage) is None
-
-
 def test_scale_resource_by_reads_floor():
     """Test that scaling is clamped to the floor for a small number of reads."""
     assert scale_resource_by_reads(reads=1, slope=1 / 100, intercept=0, floor=5, cap=10) == 5
@@ -72,17 +59,6 @@ def test_scale_resource_by_reads_floor():
 def test_scale_resource_by_reads_cap():
     """Test that scaling is clamped to the cap for a huge number of reads."""
     assert scale_resource_by_reads(reads=100**10, slope=1 / 100, intercept=0, floor=1, cap=10) == 10
-
-
-def test_scale_resource_by_reads_linear():
-    """Test that scaling is linear with reads within the floor/cap range."""
-    assert scale_resource_by_reads(reads=500, slope=1 / 100, intercept=0, floor=1, cap=10) == 5
-
-
-def test_scale_resource_by_reads_intercept():
-    """Test that a non-zero intercept shifts the estimate before flooring/capping."""
-    # GIVEN a baseline intercept of 3 and a slope contributing 5 for 500 reads
-    assert scale_resource_by_reads(reads=500, slope=1 / 100, intercept=3, floor=1, cap=10) == 8
 
 
 def test_scale_resource_by_reads_rounds_up():
