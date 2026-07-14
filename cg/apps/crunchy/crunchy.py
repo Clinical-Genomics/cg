@@ -79,6 +79,7 @@ class CrunchyAPI:
             fastq_second=compression_obj.fastq_second,
             pending_path=compression_obj.pending_path,
             spring_path=compression_obj.spring_path,
+            threads=self.slurm_number_tasks,
             tmp_dir=files.get_tmp_dir(base=self.tmp_dir_base),
         )
         sbatch_parameters: Sbatch = Sbatch(
@@ -135,6 +136,7 @@ class CrunchyAPI:
             fastq_second=compression_obj.fastq_second,
             spring_path=compression_obj.spring_path,
             pending_path=compression_obj.pending_path,
+            threads=self.slurm_number_tasks,
             checksum_first=files_info["fastq_first"].checksum,
             checksum_second=files_info["fastq_second"].checksum,
         )

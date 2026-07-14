@@ -74,9 +74,15 @@ class CompressAPI:
         reads: int | None = files.get_reads_for_run(compression_obj, self.status_db)
         if not reads:
             return self.crunchy_api.fallback_memory, self.crunchy_api.fallback_minutes
-        memory: int = scale_resource_by_reads(reads, memory_slope, memory_intercept, min_gb, max_gb)
+        memory: int = scale_resource_by_reads(
+            reads=reads, slope=memory_slope, intercept=memory_intercept, floor=min_gb, cap=max_gb
+        )
         minutes: int = scale_resource_by_reads(
-            reads, time_slope, time_intercept, min_minutes, max_minutes
+            reads=reads,
+            slope=time_slope,
+            intercept=time_intercept,
+            floor=min_minutes,
+            cap=max_minutes,
         )
         return memory, minutes
 

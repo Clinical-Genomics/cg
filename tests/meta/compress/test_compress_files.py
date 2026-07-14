@@ -79,8 +79,9 @@ def test_get_reads_for_run_name_does_not_match(base_store: Store):
     compression_obj = CompressionData(Path("not_a_valid_name"))
 
     # WHEN looking up the reads for the run
+    reads: int | None = files.get_reads_for_run(compression_obj, base_store)
     # THEN None is returned
-    assert files.get_reads_for_run(compression_obj, base_store) is None
+    assert reads is None
 
 
 def test_get_reads_for_run_no_matching_metrics(base_store: Store):
@@ -89,5 +90,6 @@ def test_get_reads_for_run_no_matching_metrics(base_store: Store):
     compression_obj = CompressionData(Path("23M7GHLT4_UNKNOWNSAMPLE_S1_L001"))
 
     # WHEN looking up the reads for the run
+    reads: int | None = files.get_reads_for_run(compression_obj, base_store)
     # THEN None is returned
-    assert files.get_reads_for_run(compression_obj, base_store) is None
+    assert reads is None
