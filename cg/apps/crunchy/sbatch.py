@@ -31,16 +31,16 @@ fi
 
 FASTQ_TO_SPRING_COMMANDS = """
 mkdir -p {tmp_dir}
+trap 'rm -rf "{tmp_dir}"' EXIT
 {conda_run} crunchy -t {threads} --tmp-dir {tmp_dir} compress fastq -f {fastq_first} -s {fastq_second} \
 -o {spring_path} --metadata-file
 rm {pending_path}
-rm -r {tmp_dir}
 """
 
 SPRING_TO_FASTQ_COMMANDS = """
 mkdir -p {tmp_dir}
+trap 'rm -rf "{tmp_dir}"' EXIT
 {conda_run} crunchy -t {threads} --tmp-dir {tmp_dir} decompress spring {spring_path} -f {fastq_first} -s \
 {fastq_second} --first-checksum {checksum_first} --second-checksum {checksum_second}
 rm {pending_path}
-rm -r {tmp_dir}
 """
