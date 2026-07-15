@@ -78,8 +78,10 @@ class SlurmConfig(BaseModel):
     mail_user: EmailStr
     memory: int | None = None
     number_tasks: int | None = None
+    cpus_per_task: int | None = None
     conda_env: str | None = None
     qos: SlurmQos = SlurmQos.LOW
+    partition: str | None = None
 
 
 class Encryption(BaseModel):
@@ -189,6 +191,9 @@ class LimsConfig(BaseModel):
 class CrunchyConfig(BaseModel):
     conda_binary: str | None = None
     cram_reference: str
+    tmp_dir_base: str
+    fallback_memory: int
+    fallback_minutes: int
     slurm: SlurmConfig
 
 
