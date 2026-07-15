@@ -74,7 +74,7 @@ class CrunchyAPI:
         # Generate the commands
         sbatch_parameters: Sbatch
         commands = FASTQ_TO_SPRING_COMMANDS.format(
-            conda_run=f"{self.conda_binary} run --name {self.crunchy_env}",
+            conda_run=f"{self.conda_binary} run --no-capture-output --name {self.crunchy_env}",
             fastq_first=compression_obj.fastq_first,
             fastq_second=compression_obj.fastq_second,
             pending_path=compression_obj.pending_path,
@@ -130,7 +130,7 @@ class CrunchyAPI:
             pending_path=compression_obj.pending_path,
         )
         commands = SPRING_TO_FASTQ_COMMANDS.format(
-            conda_run=f"{self.conda_binary} run --name {self.crunchy_env}",
+            conda_run=f"{self.conda_binary} run --no-capture-output --name {self.crunchy_env}",
             tmp_dir=files.get_tmp_dir(base=self.tmp_dir_base),
             fastq_first=compression_obj.fastq_first,
             fastq_second=compression_obj.fastq_second,
