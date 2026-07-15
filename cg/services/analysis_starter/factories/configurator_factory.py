@@ -187,6 +187,7 @@ class ConfiguratorFactory:
 
     def _get_pipeline_extension(self, workflow: Workflow) -> PipelineExtension:
         match workflow:
+            # TODO: Add pipeline config to extension constructors
             case Workflow.NALLO:
                 gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(
                     workflow

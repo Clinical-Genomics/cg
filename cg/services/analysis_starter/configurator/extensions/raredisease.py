@@ -20,6 +20,7 @@ class RarediseaseExtension(PipelineExtension):
         self,
         gene_panel_file_creator: GenePanelFileCreator,
         managed_variants_file_creator: ManagedVariantsFileCreator,
+        # TODO: Add pipeline config to constructor
     ):
         self.gene_panel_file_creator = gene_panel_file_creator
         self.managed_variants_file_creator = managed_variants_file_creator
@@ -32,8 +33,10 @@ class RarediseaseExtension(PipelineExtension):
         self.managed_variants_file_creator.create(
             case_id=case_id, file_path=_get_managed_variants(case_run_directory)
         )
+        # TODO: copy rank model files to case directory
 
     def do_required_files_exist(self, case_run_directory: Path) -> bool:
+        # TODO: Add existence checks for case directory rank model files
         return isfile(_get_gene_panel_file_path(case_run_directory)) and isfile(
             _get_managed_variants(case_run_directory)
         )

@@ -8,6 +8,7 @@ from cg.services.analysis_starter.configurator.file_creators.gene_panel import G
 
 
 class NalloExtension(PipelineExtension):
+    # TODO: Add pipeline config to constructor
     def __init__(self, gene_panel_file_creator: GenePanelFileCreator):
         self.gene_panel_file_creator = gene_panel_file_creator
 
@@ -17,9 +18,11 @@ class NalloExtension(PipelineExtension):
             file_path=self._get_gene_panel_file_path(case_run_directory),
             double_hashtag_filtering=True,
         )
+        # TODO: copy rank model files to case directory
 
     def do_required_files_exist(self, case_run_directory: Path) -> bool:
         gene_panel_file_path: Path = self._get_gene_panel_file_path(case_run_directory)
+        # TODO: Add existence checks for case directory rank model files
         return gene_panel_file_path.is_file()
 
     @staticmethod
