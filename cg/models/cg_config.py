@@ -267,6 +267,8 @@ class NalloConfig(CommonAppConfig):
     pre_run_script: str = ""
     profile: str
     rank_model_threshold: int
+    rank_model_snv: str
+    rank_model_sv: str
     reference: str
     repository: str
     resources: str
@@ -307,6 +309,8 @@ class RarediseaseConfig(CommonAppConfig):
     platform: str
     pre_run_script: str = ""
     profile: str
+    rank_model_snv: str
+    rank_model_sv: str
     reference: str
     references_directory: Path
     repository: str
