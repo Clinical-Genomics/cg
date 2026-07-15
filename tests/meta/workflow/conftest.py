@@ -18,6 +18,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.compression_data import CompressionData
 from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
@@ -35,10 +36,14 @@ def compress_api(
     real_crunchy_api: CrunchyAPI,
     housekeeper_api: HousekeeperAPI,
     project_dir: Path,
+    base_store: Store,
 ) -> Generator[CompressAPI, None, None]:
     """Return Compress API."""
     yield CompressAPI(
-        crunchy_api=real_crunchy_api, hk_api=housekeeper_api, demux_root=project_dir.as_posix()
+        crunchy_api=real_crunchy_api,
+        hk_api=housekeeper_api,
+        demux_root=project_dir.as_posix(),
+        status_db=base_store,
     )
 
 

@@ -476,13 +476,16 @@ def crunchy_config() -> dict[str, dict[str, Any]]:
         "crunchy": {
             "conda_binary": "a conda binary",
             "cram_reference": "/path/to/fasta",
+            "tmp_dir_base": "/state/partition1",
+            "fallback_memory": 1,
+            "fallback_minutes": 60,
             "slurm": {
                 "account": "mock_account",
                 "conda_env": "mock_env",
-                "hours": 1,
                 "mail_user": "mock_mail",
-                "memory": 1,
                 "number_tasks": 1,
+                "cpus_per_task": 8,
+                "partition": "compress",
             },
         }
     }
@@ -2104,13 +2107,16 @@ def context_config(
         "crunchy": {
             "conda_binary": "a_conda_binary",
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
+            "tmp_dir_base": "/state/partition1",
+            "fallback_memory": 1,
+            "fallback_minutes": 60,
             "slurm": {
                 "account": "development",
                 "conda_env": "S_crunchy",
-                "hours": 1,
                 "mail_user": email_address,
-                "memory": 1,
                 "number_tasks": 1,
+                "cpus_per_task": 4,
+                "partition": "compress",
             },
         },
         "data-delivery": {
