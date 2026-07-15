@@ -177,6 +177,8 @@ nallo:
   platform: {test_root_dir}/platform.config
   profile: nallo_profile
   rank_model_threshold: 8
+  rank_model_snv: {test_root_dir}/ghxx_nallo_rank_model_snvs.ini
+  rank_model_sv: {test_root_dir}/ghxx_nallo_rank_model_svs.ini
   reference: "nallo-reference.fasta"
   resources: {test_root_dir}/nallo_resources.config
   repository: nallo_repository
@@ -204,6 +206,8 @@ raredisease:
   pipeline_deliverables: "raredisease_pipeline_deliverables.yaml"
   platform: {test_root_dir}/platform.config
   profile: raredisease_profile
+  rank_model_snv: {test_root_dir}/ghxx_rd_rank_model_snvs.ini
+  rank_model_sv: {test_root_dir}/ghxx_rd_rank_model_svs.ini
   reference: "raredisease-reference.fasta"
   references_directory: {test_root_dir}/raredisease_references_directory
   resources: {test_root_dir}/raredisease_resources.config
