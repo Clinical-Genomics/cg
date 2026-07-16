@@ -6,7 +6,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
 from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler, MipFastqHandler
-from cg.models.cg_config import CGConfig, CommonAppConfig, RarediseaseConfig
+from cg.models.cg_config import CGConfig, CommonAppConfig, NalloConfig, RarediseaseConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
@@ -195,10 +195,11 @@ class ConfiguratorFactory:
                 gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(
                     workflow
                 )
+                nallo_config = cast(NalloConfig, self.cg_config.nallo)
                 return NalloExtension(
                     gene_panel_file_creator=gene_panel_creator,
-                    rank_model_file_copier=RankModelFileCopier,
-                    nallo_config=self.cg_config.nallo,
+                    rank_model_file_copier=RankModelFileCopier(),
+                    nallo_config=nallo_config,
                 )
             case Workflow.RAREDISEASE:
                 gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(
