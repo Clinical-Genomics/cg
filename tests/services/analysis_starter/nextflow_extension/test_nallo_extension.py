@@ -49,9 +49,11 @@ def test_configure(nallo_config_object: NalloConfig):
 
 
 def test_do_required_files_exist_true(tmp_path: Path, nallo_config_object: NalloConfig):
-    # GIVEN that there is a gene panel tsv file
+    # GIVEN that there is a gene panel tsv file and rank model files
     scout_file = tmp_path / ScoutExportFileName.PANELS_TSV
     scout_file.touch()
+    (tmp_path / nallo_config_object.rank_model_snv.name).touch()
+    (tmp_path / nallo_config_object.rank_model_sv.name).touch()
 
     # GIVEN a Nallo extension
     nallo_extension = NalloExtension(

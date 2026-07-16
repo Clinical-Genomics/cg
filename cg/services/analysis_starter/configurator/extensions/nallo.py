@@ -36,9 +36,25 @@ class NalloExtension(PipelineExtension):
 
     def do_required_files_exist(self, case_run_directory: Path) -> bool:
         gene_panel_file_path: Path = self._get_gene_panel_file_path(case_run_directory)
-        # TODO: Add existence checks for case directory rank model files
-        return gene_panel_file_path.is_file()
+        rank_model_snv_file_path: Path = self._get_file_path(
+            case_run_directory=case_run_directory, file_name=self.nallo_config.rank_model_snv.name
+        )
+        rank_model_sv_file_path: Path = self._get_file_path(
+            case_run_directory=case_run_directory, file_name=self.nallo_config.rank_model_sv.name
+        )
+        return all(
+            [
+                gene_panel_file_path.is_file(),
+                rank_model_snv_file_path.is_file(),
+                rank_model_sv_file_path.is_file(),
+            ]
+        )
+
+    def _get_gene_panel_file_path(self, case_run_directory: Path) -> Path:
+        return self._get_file_path(
+            case_run_directory=case_run_directory, file_name=ScoutExportFileName.PANELS_TSV
+        )
 
     @staticmethod
-    def _get_gene_panel_file_path(case_run_directory: Path) -> Path:
-        return case_run_directory.joinpath(ScoutExportFileName.PANELS_TSV)
+    def _get_file_path(case_run_directory: Path, file_name: str) -> Path:
+        return case_run_directory.joinpath(file_name)
