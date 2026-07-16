@@ -44,7 +44,7 @@ def test_configure(nallo_config_object: NalloConfig):
     rank_model_file_copier.as_mock.copy.assert_called_once_with(
         source_snv_file=nallo_config_object.rank_model_snv,
         source_sv_file=nallo_config_object.rank_model_sv,
-        case_run_directory=case_run_directory,
+        target_directory=case_run_directory,
     )
 
 
