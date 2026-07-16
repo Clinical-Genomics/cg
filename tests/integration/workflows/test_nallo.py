@@ -151,6 +151,8 @@ def test_start_available_nallo(
     )
     create_empty_file(Path(test_root_dir, "nallo_config.config"))
     create_empty_file(Path(test_root_dir, "nallo_resources.config"))
+    create_empty_file(Path(test_root_dir, "ghxx_nallo_rank_model_snvs.ini"))
+    create_empty_file(Path(test_root_dir, "ghxx_nallo_rank_model_svs.ini"))
 
     # GIVEN an order associated with the case
     order: Order = helpers.add_order(
