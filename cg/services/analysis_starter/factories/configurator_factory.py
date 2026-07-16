@@ -66,6 +66,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
     TomteSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.rank_model_file_copier import (
+    RankModelFileCopier,
+)
 from cg.services.analysis_starter.configurator.implementations.balsamic_configurator import (
     BalsamicConfigurator,
 )
@@ -192,7 +195,11 @@ class ConfiguratorFactory:
                 gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(
                     workflow
                 )
-                return NalloExtension(gene_panel_file_creator=gene_panel_creator)
+                return NalloExtension(
+                    gene_panel_file_creator=gene_panel_creator,
+                    rank_model_file_copier=RankModelFileCopier,
+                    nallo_config=self.cg_config.nallo,
+                )
             case Workflow.RAREDISEASE:
                 gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(
                     workflow

@@ -272,8 +272,8 @@ class NalloConfig(CommonAppConfig):
     pre_run_script: str = ""
     profile: str
     rank_model_threshold: int
-    rank_model_snv: str
-    rank_model_sv: str
+    rank_model_snv: Path
+    rank_model_sv: Path
     reference: str
     repository: str
     resources: str
