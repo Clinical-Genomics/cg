@@ -31,7 +31,7 @@ class NalloExtension(PipelineExtension):
         self.rank_model_file_copier.copy(
             source_snv_file=self.nallo_config.rank_model_snv,
             source_sv_file=self.nallo_config.rank_model_sv,
-            case_run_directory=case_run_directory,
+            destination_directory=case_run_directory,
         )
 
     def do_required_files_exist(self, case_run_directory: Path) -> bool:
