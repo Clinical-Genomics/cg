@@ -245,3 +245,7 @@ def test_start_available_nallo(
     assert (
         Path(case_directory, "gene_panels.tsv").open().read() == scout_export_panel_stdout.decode()
     )
+
+    # THEN the rank model files have been copied into the case directory
+    assert Path(case_directory, "ghxx_nallo_rank_model_snvs.ini").is_file()
+    assert Path(case_directory, "ghxx_nallo_rank_model_svs.ini").is_file()

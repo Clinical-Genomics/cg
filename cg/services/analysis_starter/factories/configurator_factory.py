@@ -12,7 +12,9 @@ from cg.services.analysis_starter.configurator.extensions.nallo_extension import
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
     PipelineExtension,
 )
-from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
+from cg.services.analysis_starter.configurator.extensions.raredisease_extension import (
+    RarediseaseExtension,
+)
 from cg.services.analysis_starter.configurator.extensions.tomte_extension import TomteExtension
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
@@ -190,7 +192,6 @@ class ConfiguratorFactory:
 
     def _get_pipeline_extension(self, workflow: Workflow) -> PipelineExtension:
         match workflow:
-            # TODO: Add pipeline config to extension constructors
             case Workflow.NALLO:
                 gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(
                     workflow
@@ -208,9 +209,12 @@ class ConfiguratorFactory:
                 managed_variants_creator: ManagedVariantsFileCreator = (
                     self._get_managed_variants_file_creator(workflow)
                 )
+                raredisease_config = cast(RarediseaseConfig, self.cg_config.raredisease)
                 return RarediseaseExtension(
                     gene_panel_file_creator=gene_panel_creator,
                     managed_variants_file_creator=managed_variants_creator,
+                    rank_model_file_copier=RankModelFileCopier(),
+                    raredisease_config=raredisease_config,
                 )
             case Workflow.TOMTE:
                 gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(

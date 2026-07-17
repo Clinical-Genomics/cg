@@ -40,13 +40,13 @@ class NalloExtension(PipelineExtension):
             for file_name in self._get_required_file_names()
         )
 
-    @staticmethod
-    def _get_gene_panel_file_path(case_run_directory: Path) -> Path:
-        return case_run_directory.joinpath(ScoutExportFileName.PANELS_TSV)
-
     def _get_required_file_names(self) -> list[str]:
         return [
             ScoutExportFileName.PANELS_TSV,
             self.nallo_config.rank_model_snv.name,
             self.nallo_config.rank_model_sv.name,
         ]
+
+    @staticmethod
+    def _get_gene_panel_file_path(case_run_directory: Path) -> Path:
+        return case_run_directory.joinpath(ScoutExportFileName.PANELS_TSV)

@@ -12,7 +12,9 @@ from cg.services.analysis_starter.configurator.extensions.nallo_extension import
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
     PipelineExtension,
 )
-from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
+from cg.services.analysis_starter.configurator.extensions.raredisease_extension import (
+    RarediseaseExtension,
+)
 from cg.services.analysis_starter.configurator.extensions.tomte_extension import TomteExtension
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
