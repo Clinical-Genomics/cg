@@ -13,19 +13,22 @@ from cg.services.analysis_starter.configurator.file_creators.managed_variants im
     ManagedVariantsFileCreator,
 )
 
-# TODO: Add fixture for rd config
+
+@pytest.fixture
+def raredisease_config() -> RarediseaseConfig:
+    return create_autospec(
+        RarediseaseConfig,
+        rank_model_snv="path/to/snv_rank_model.ini",
+        rank_model_sv="path/to/sv_rank_model.ini",
+    )
 
 
-def test_configure_success(mocker: MockerFixture):
+def test_configure_success(raredisease_config: RarediseaseConfig, mocker: MockerFixture):
     # GIVEN a raredisease pipeline extension
     raredisease_extension = RarediseaseExtension(
         gene_panel_file_creator=create_autospec(GenePanelFileCreator),
         managed_variants_file_creator=create_autospec(ManagedVariantsFileCreator),
-        raredisease_config=create_autospec(
-            RarediseaseConfig,
-            rank_model_snv="path/to/snv_rank_model.ini",
-            rank_model_sv="path/to/sv_rank_model.ini",
-        ),
+        raredisease_config=raredisease_config,
     )
 
     # GIVEN a case run directory
@@ -52,7 +55,7 @@ def test_configure_success(mocker: MockerFixture):
     )
 
 
-def test_do_required_files_exist_true(tmp_path: Path):
+def test_do_required_files_exist_true(raredisease_config: RarediseaseConfig, tmp_path: Path):
     # GIVEN that there is a gene panels, managed variants, snv and sv rank model files
     gene_panels_file = tmp_path / ScoutExportFileName.PANELS
     gene_panels_file.touch()
@@ -67,11 +70,7 @@ def test_do_required_files_exist_true(tmp_path: Path):
     raredisease_extension = RarediseaseExtension(
         gene_panel_file_creator=Mock(),
         managed_variants_file_creator=Mock(),
-        raredisease_config=create_autospec(
-            RarediseaseConfig,
-            rank_model_snv="path/to/snv_rank_model.ini",
-            rank_model_sv="path/to/sv_rank_model.ini",
-        ),
+        raredisease_config=raredisease_config,
     )
 
     # WHEN checking that the required files exist
@@ -98,6 +97,7 @@ def test_do_required_files_exist_true(tmp_path: Path):
 )
 def test_do_required_files_exist(
     file_existence_array: list[bool],
+    raredisease_config: RarediseaseConfig,
     tmp_path: Path,
 ):
     # GIVEN a case run directory
@@ -118,11 +118,7 @@ def test_do_required_files_exist(
     raredisease_extension = RarediseaseExtension(
         gene_panel_file_creator=create_autospec(GenePanelFileCreator),
         managed_variants_file_creator=create_autospec(ManagedVariantsFileCreator),
-        raredisease_config=create_autospec(
-            RarediseaseConfig,
-            rank_model_snv="path/to/snv_rank_model.ini",
-            rank_model_sv="path/to/sv_rank_model.ini",
-        ),
+        raredisease_config=raredisease_config,
     )
 
     # WHEN calling do_required_files_exist
