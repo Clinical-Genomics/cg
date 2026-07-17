@@ -1,3 +1,4 @@
+import os
 from os.path import isfile
 from pathlib import Path
 
@@ -25,6 +26,7 @@ class RarediseaseExtension(PipelineExtension):
     ):
         self.gene_panel_file_creator = gene_panel_file_creator
         self.managed_variants_file_creator = managed_variants_file_creator
+        self.config = raredisease_config
 
     def configure(self, case_id: str, case_run_directory: Path) -> None:
         """Perform pipeline specific actions."""
@@ -34,13 +36,20 @@ class RarediseaseExtension(PipelineExtension):
         self.managed_variants_file_creator.create(
             case_id=case_id, file_path=_get_managed_variants(case_run_directory)
         )
-        # TODO: copy rank model files to case directory
+        self._copy_rank_model_files(case_run_directory)
 
     def do_required_files_exist(self, case_run_directory: Path) -> bool:
         # TODO: Add existence checks for case directory rank model files
         return isfile(_get_gene_panel_file_path(case_run_directory)) and isfile(
             _get_managed_variants(case_run_directory)
         )
+
+    def _copy_rank_model_files(self, case_run_directory: Path) -> None:
+        """Copy rank model files to the case run directory."""
+        snv_rank_model_file = Path(self.config.rank_model_snv)
+        sv_rank_model = Path(self.config.rank_model_sv)
+        os.link(snv_rank_model_file, case_run_directory / snv_rank_model_file.name)
+        os.link(sv_rank_model, case_run_directory / sv_rank_model.name)
 
 
 def _get_gene_panel_file_path(case_run_directory: Path) -> Path:

@@ -17,22 +17,39 @@ from cg.services.analysis_starter.configurator.file_creators.managed_variants im
 )
 
 
-def test_configure_success():
+def test_configure_success(mocker: MockerFixture):
     # GIVEN a raredisease pipeline extension
     raredisease_extension = RarediseaseExtension(
         gene_panel_file_creator=create_autospec(GenePanelFileCreator),
         managed_variants_file_creator=create_autospec(ManagedVariantsFileCreator),
-        raredisease_config=create_autospec(RarediseaseConfig),
+        raredisease_config=create_autospec(
+            RarediseaseConfig,
+            rank_model_snv="path/to/snv_rank_model.ini",
+            rank_model_sv="path/to/sv_rank_model.ini",
+        ),
     )
+
+    # GIVEN a case run directory
+    case_run_directory = Path("/path/to/dir")
+
     # WHEN calling configure
-    raredisease_extension.configure(case_id="case_id", case_run_directory=Path("/path/to/dir"))
+    link_mock = mocker.patch.object(raredisease.os, "link")
+    raredisease_extension.configure(case_id="case_id", case_run_directory=case_run_directory)
 
     # THEN the file creators should have been called
     raredisease_extension.gene_panel_file_creator.create.assert_called_once_with(
-        case_id="case_id", file_path=Path("/path/to/dir/", GENE_PANEL_FILE_NAME)
+        case_id="case_id", file_path=case_run_directory / GENE_PANEL_FILE_NAME
     )
     raredisease_extension.managed_variants_file_creator.create.assert_called_once_with(
-        case_id="case_id", file_path=Path("/path/to/dir/", MANAGED_VARIANTS_FILE_NAME)
+        case_id="case_id", file_path=case_run_directory / MANAGED_VARIANTS_FILE_NAME
+    )
+
+    # THEN the rank model files were copied to the case directory
+    link_mock.assert_any_call(
+        Path("path/to/snv_rank_model.ini"), case_run_directory / "snv_rank_model.ini"
+    )
+    link_mock.assert_any_call(
+        Path("path/to/sv_rank_model.ini"), case_run_directory / "sv_rank_model.ini"
     )
 
 
