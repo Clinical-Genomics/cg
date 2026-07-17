@@ -10,6 +10,8 @@ from cg.services.analysis_starter.configurator.extensions.nallo import NalloExte
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from tests.typed_mock import TypedMock, create_typed_mock
 
+# TODO: create fixture for nallo config
+
 
 def test_configure(mocker: MockerFixture):
     # GIVEN a gene panel file creator
@@ -51,13 +53,22 @@ def test_configure(mocker: MockerFixture):
 
 
 def test_do_required_files_exist_true(tmp_path: Path):
-    # GIVEN that there is a gene panel tsv file
-    scout_file = tmp_path / ScoutExportFileName.PANELS_TSV
-    scout_file.touch()
+    # GIVEN that there is a gene panel tsv, a snv and sv rank model files
+    gene_panels_file = tmp_path / ScoutExportFileName.PANELS_TSV
+    gene_panels_file.touch()
+    snv_rank_model_file = tmp_path / "snv_rank_model.ini"
+    snv_rank_model_file.touch()
+    sv_rank_model_file = tmp_path / "sv_rank_model.ini"
+    sv_rank_model_file.touch()
 
     # GIVEN a Nallo extension
     nallo_extension = NalloExtension(
-        gene_panel_file_creator=Mock(), nallo_config=create_autospec(NalloConfig)
+        gene_panel_file_creator=Mock(),
+        nallo_config=create_autospec(
+            NalloConfig,
+            rank_model_snv="path/to/snv_rank_model.ini",
+            rank_model_sv="path/to/sv_rank_model.ini",
+        ),
     )
 
     # WHEN checking that the required files exist
@@ -74,7 +85,12 @@ def test_do_required_files_exist_false(tmp_path: Path):
 
     # GIVEN a Nallo extension
     nallo_extension = NalloExtension(
-        gene_panel_file_creator=Mock(), nallo_config=create_autospec(NalloConfig)
+        gene_panel_file_creator=Mock(),
+        nallo_config=create_autospec(
+            NalloConfig,
+            rank_model_snv="path/to/snv_rank_model.ini",
+            rank_model_sv="path/to/sv_rank_model.ini",
+        ),
     )
 
     # WHEN checking that the required files exist
