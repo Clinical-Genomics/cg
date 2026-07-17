@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from cg.constants.scout import ScoutExportFileName
+from cg.models.cg_config import NalloConfig
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
     PipelineExtension,
 )
@@ -8,8 +9,7 @@ from cg.services.analysis_starter.configurator.file_creators.gene_panel import G
 
 
 class NalloExtension(PipelineExtension):
-    # TODO: Add pipeline config to constructor
-    def __init__(self, gene_panel_file_creator: GenePanelFileCreator):
+    def __init__(self, gene_panel_file_creator: GenePanelFileCreator, nallo_config: NalloConfig):
         self.gene_panel_file_creator = gene_panel_file_creator
 
     def configure(self, case_id: str, case_run_directory: Path) -> None:

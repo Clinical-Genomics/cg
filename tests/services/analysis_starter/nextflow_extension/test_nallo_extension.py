@@ -1,7 +1,8 @@
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, create_autospec
 
 from cg.constants.scout import ScoutExportFileName
+from cg.models.cg_config import NalloConfig
 from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from tests.typed_mock import TypedMock, create_typed_mock
@@ -14,7 +15,10 @@ def test_configure():
     )
 
     # GIVEN a Nallo extension
-    nallo_extension = NalloExtension(gene_panel_file_creator=gene_panel_file_creator.as_type)
+    nallo_extension = NalloExtension(
+        gene_panel_file_creator=gene_panel_file_creator.as_type,
+        nallo_config=create_autospec(NalloConfig),
+    )
 
     # GIVEN a case run directory
     case_run_directory = Path("case", "run", "directory")
@@ -36,7 +40,9 @@ def test_do_required_files_exist_true(tmp_path: Path):
     scout_file.touch()
 
     # GIVEN a Nallo extension
-    nallo_extension = NalloExtension(gene_panel_file_creator=Mock())
+    nallo_extension = NalloExtension(
+        gene_panel_file_creator=Mock(), nallo_config=create_autospec(NalloConfig)
+    )
 
     # WHEN checking that the required files exist
     does_exist: bool = nallo_extension.do_required_files_exist(case_run_directory=tmp_path)
@@ -51,7 +57,9 @@ def test_do_required_files_exist_false(tmp_path: Path):
     assert not scout_file.exists()
 
     # GIVEN a Nallo extension
-    nallo_extension = NalloExtension(gene_panel_file_creator=Mock())
+    nallo_extension = NalloExtension(
+        gene_panel_file_creator=Mock(), nallo_config=create_autospec(NalloConfig)
+    )
 
     # WHEN checking that the required files exist
     does_exist: bool = nallo_extension.do_required_files_exist(case_run_directory=tmp_path)

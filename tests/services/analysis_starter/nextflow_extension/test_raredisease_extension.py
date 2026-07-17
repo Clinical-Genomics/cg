@@ -4,6 +4,7 @@ from unittest.mock import create_autospec
 import pytest
 from pytest_mock import MockerFixture
 
+from cg.models.cg_config import RarediseaseConfig
 from cg.services.analysis_starter.configurator.extensions import raredisease
 from cg.services.analysis_starter.configurator.extensions.raredisease import (
     GENE_PANEL_FILE_NAME,
@@ -21,6 +22,7 @@ def test_configure_success():
     raredisease_extension = RarediseaseExtension(
         gene_panel_file_creator=create_autospec(GenePanelFileCreator),
         managed_variants_file_creator=create_autospec(ManagedVariantsFileCreator),
+        raredisease_config=create_autospec(RarediseaseConfig),
     )
     # WHEN calling configure
     raredisease_extension.configure(case_id="case_id", case_run_directory=Path("/path/to/dir"))
@@ -70,6 +72,7 @@ def test_do_required_files_exist(
     raredisease_extension = RarediseaseExtension(
         gene_panel_file_creator=create_autospec(GenePanelFileCreator),
         managed_variants_file_creator=create_autospec(ManagedVariantsFileCreator),
+        raredisease_config=create_autospec(RarediseaseConfig),
     )
 
     # WHEN calling do_required_files_exist

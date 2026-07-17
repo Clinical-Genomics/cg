@@ -1,6 +1,7 @@
 from os.path import isfile
 from pathlib import Path
 
+from cg.models.cg_config import RarediseaseConfig
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
     PipelineExtension,
 )
@@ -20,7 +21,7 @@ class RarediseaseExtension(PipelineExtension):
         self,
         gene_panel_file_creator: GenePanelFileCreator,
         managed_variants_file_creator: ManagedVariantsFileCreator,
-        # TODO: Add pipeline config to constructor
+        raredisease_config: RarediseaseConfig,
     ):
         self.gene_panel_file_creator = gene_panel_file_creator
         self.managed_variants_file_creator = managed_variants_file_creator
