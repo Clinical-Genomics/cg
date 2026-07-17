@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 from cg.constants.scout import ScoutExportFileName
 from cg.models.cg_config import NalloConfig
-from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
+from cg.services.analysis_starter.configurator.extensions.nallo_extension import NalloExtension
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.rank_model_file_copier import (
     RankModelFileCopier,

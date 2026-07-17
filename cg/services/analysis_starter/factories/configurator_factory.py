@@ -8,7 +8,7 @@ from cg.constants import Workflow
 from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler, MipFastqHandler
 from cg.models.cg_config import CGConfig, CommonAppConfig, NalloConfig, RarediseaseConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
-from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
+from cg.services.analysis_starter.configurator.extensions.nallo_extension import NalloExtension
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
     PipelineExtension,
 )
