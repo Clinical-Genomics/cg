@@ -17,5 +17,3 @@ class RankModelFileCopier:
 
         copy_file(from_path=source_sv_file, to_path=target_directory)
         LOG.info(f"Copied rank sv model file from {source_sv_file} into {target_directory}")
-
-        return None
