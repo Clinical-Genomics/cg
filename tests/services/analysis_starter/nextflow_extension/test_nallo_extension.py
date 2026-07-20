@@ -37,7 +37,7 @@ def test_configure(nallo_config: NalloConfig, mocker: MockerFixture):
     case_run_directory = Path("case", "run", "directory")
 
     # WHEN configuring a case
-    link_mock = mocker.patch.object(nallo.os, "link")
+    copy_mock = mocker.patch.object(nallo.shutil, "copy2")
     nallo_extension.configure(case_id="nallo_case", case_run_directory=case_run_directory)
 
     # THEN a gene panel file should have been created
@@ -48,10 +48,10 @@ def test_configure(nallo_config: NalloConfig, mocker: MockerFixture):
     )
 
     # THEN the rank model files were copied to the case directory
-    link_mock.assert_any_call(
+    copy_mock.assert_any_call(
         Path("path/to/snv_rank_model.ini"), case_run_directory / "snv_rank_model.ini"
     )
-    link_mock.assert_any_call(
+    copy_mock.assert_any_call(
         Path("path/to/sv_rank_model.ini"), case_run_directory / "sv_rank_model.ini"
     )
 

@@ -1,4 +1,4 @@
-import os
+import shutil
 from pathlib import Path
 
 from cg.constants.scout import ScoutExportFileName
@@ -52,11 +52,11 @@ class RarediseaseExtension(PipelineExtension):
 
     def _copy_rank_model_files(self, case_run_directory: Path) -> None:
         """Copy rank model files to the case run directory."""
-        os.link(
+        shutil.copy2(
             self.source_snv_rank_model_path,
             case_run_directory / self.source_snv_rank_model_path.name,
         )
-        os.link(
+        shutil.copy2(
             self.source_sv_rank_model_path, case_run_directory / self.source_sv_rank_model_path.name
         )
 

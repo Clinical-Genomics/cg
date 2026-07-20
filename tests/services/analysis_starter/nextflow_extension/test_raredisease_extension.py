@@ -35,7 +35,7 @@ def test_configure_success(raredisease_config: RarediseaseConfig, mocker: Mocker
     case_run_directory = Path("/path/to/dir")
 
     # WHEN calling configure
-    link_mock = mocker.patch.object(raredisease.os, "link")
+    copy_mock = mocker.patch.object(raredisease.shutil, "copy2")
     raredisease_extension.configure(case_id="case_id", case_run_directory=case_run_directory)
 
     # THEN the file creators should have been called
@@ -47,10 +47,10 @@ def test_configure_success(raredisease_config: RarediseaseConfig, mocker: Mocker
     )
 
     # THEN the rank model files were copied to the case directory
-    link_mock.assert_any_call(
+    copy_mock.assert_any_call(
         Path("path/to/snv_rank_model.ini"), case_run_directory / "snv_rank_model.ini"
     )
-    link_mock.assert_any_call(
+    copy_mock.assert_any_call(
         Path("path/to/sv_rank_model.ini"), case_run_directory / "sv_rank_model.ini"
     )
 
@@ -110,8 +110,8 @@ def test_do_required_files_exist(
     }
 
     # GIVEN that one required file does not exist
-    for file, exists in file_map.items():
-        if exists:
+    for file, should_exist in file_map.items():
+        if should_exist:
             file.touch()
 
     # GIVEN a raredisease extension
