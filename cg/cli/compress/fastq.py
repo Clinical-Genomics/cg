@@ -31,9 +31,6 @@ LOG = logging.getLogger(__name__)
     show_default=True,
     help="Threshold for how long ago was the case created",
 )
-@click.option("--hours", type=int, help="Hours to allocate for slurm job")
-@click.option("-m", "--mem", type=int, help="Memory for slurm job")
-@click.option("-t", "--ntasks", type=int, help="Number of tasks for slurm job")
 @click.option("-n", "--number-of-conversions", default=5, type=int, show_default=True)
 @DRY_RUN
 @click.pass_obj
@@ -41,10 +38,7 @@ def fastq_cmd(
     context: CGConfig,
     case_id: str | None,
     days_back: int,
-    hours: int | None,
     dry_run: bool,
-    mem: int | None,
-    ntasks: int | None,
     number_of_conversions: int,
 ):
     """Compress old FASTQ files into SPRING."""
@@ -60,9 +54,6 @@ def fastq_cmd(
         cases=cases,
         dry_run=dry_run,
         number_of_conversions=number_of_conversions,
-        hours=hours,
-        mem=mem,
-        ntasks=ntasks,
     )
 
 
