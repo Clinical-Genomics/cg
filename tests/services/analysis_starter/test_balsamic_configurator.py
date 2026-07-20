@@ -295,3 +295,57 @@ def test_configure_mixed_capture_kits(cg_balsamic_config: BalsamicConfig):
     # THEN an error should be raised due to the mixed capture kits
     with pytest.raises(MultipleCaptureKitsError):
         balsamic_configurator.configure(case_id="case_id")
+
+
+def test_configure_override_panel_skips_lims_check(
+    cg_balsamic_config: BalsamicConfig, mocker: MockerFixture
+):
+    """Test that when overriding the panel bed, the check for multiple panels is skipped."""
+    # GIVEN a store with a case
+    store: Store = create_autospec(Store)
+    store.get_case_workflow = Mock(return_value=Workflow.BALSAMIC)
+    store.get_case_by_internal_id_strict = Mock(
+        return_value=create_autospec(
+            Case,
+            # samples=[create_autospec(Sample), create_autospec(Sample)],
+            slurm_priority=SlurmQos.NORMAL,
+        )
+    )
+
+    # GIVEN a fastq handler
+    fastq_handler: BalsamicFastqHandler = create_autospec(BalsamicFastqHandler)
+    fastq_handler.get_fastq_dir = Mock(return_value=Path("some/path"))
+
+    # GIVEN a BalsamicConfigFileCreator
+    config_file_creator: BalsamicConfigFileCreator = create_autospec(BalsamicConfigFileCreator)
+
+    # GIVEN a LimsAPI
+    lims_api: TypedMock[LimsAPI] = create_typed_mock(LimsAPI)
+    # lims_api.as_type.capture_kit = Mock()
+
+    # GIVEN a Balsamic configurator
+    balsamic_configurator = BalsamicConfigurator(
+        config=cg_balsamic_config,
+        config_file_creator=config_file_creator,
+        fastq_handler=fastq_handler,
+        lims_api=lims_api.as_type,
+        store=store,
+    )
+
+    # GIVEN that all relevant paths exist
+    mocker.patch.object(Path, "exists", return_value=True)
+
+    # WHEN calling configure
+    balsamic_configurator.configure(case_id="case_id")
+
+    # THEN the fastq handler is called
+    fastq_handler.link_fastq_files.assert_called_once_with(case_id="case_id")
+    fastq_handler.get_fastq_dir.assert_called_once_with("case_id")
+
+    # THEN the config file creator is called
+    config_file_creator.create.assert_called_once_with(
+        case_id="case_id", fastq_path=Path("some/path")
+    )
+
+    # THEN the Lims check is not performed
+    lims_api.as_type.capture_kit.assert_not_called()
