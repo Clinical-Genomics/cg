@@ -76,7 +76,7 @@ def test_do_required_files_exist_true(raredisease_config: RarediseaseConfig, tmp
     # WHEN checking that the required files exist
     does_exist: bool = raredisease_extension.do_required_files_exist(case_run_directory=tmp_path)
 
-    # THEN the required file should exist
+    # THEN the required files should exist
     assert does_exist
 
 

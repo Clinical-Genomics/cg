@@ -71,7 +71,7 @@ def test_do_required_files_exist_true(nallo_config: NalloConfig, tmp_path: Path)
     # WHEN checking that the required files exist
     does_exist: bool = nallo_extension.do_required_files_exist(case_run_directory=tmp_path)
 
-    # THEN the required file should exist
+    # THEN the required files should exist
     assert does_exist
 
 
