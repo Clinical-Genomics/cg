@@ -1,3 +1,4 @@
+import logging
 import shutil
 from pathlib import Path
 
@@ -7,6 +8,8 @@ from cg.services.analysis_starter.configurator.extensions.pipeline_extension imp
     PipelineExtension,
 )
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
+
+LOG = logging.getLogger(__name__)
 
 
 class NalloExtension(PipelineExtension):
@@ -41,8 +44,16 @@ class NalloExtension(PipelineExtension):
             self.source_snv_rank_model_path,
             case_run_directory / self.source_snv_rank_model_path.name,
         )
+        LOG.debug(
+            f"Copied {self.source_snv_rank_model_path.name} to case directory "
+            f"for case {case_run_directory.name}"
+        )
         shutil.copy2(
             self.source_sv_rank_model_path, case_run_directory / self.source_sv_rank_model_path.name
+        )
+        LOG.debug(
+            f"Copied {self.source_sv_rank_model_path.name} to case directory "
+            f"for case {case_run_directory.name}"
         )
 
 
