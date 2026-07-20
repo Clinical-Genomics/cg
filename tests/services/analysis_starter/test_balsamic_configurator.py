@@ -301,33 +301,30 @@ def test_configure_override_panel_skips_lims_check(
     cg_balsamic_config: BalsamicConfig, mocker: MockerFixture
 ):
     """Test that when overriding the panel bed, the check for multiple panels is skipped."""
-    # GIVEN a store with a case
+    # GIVEN a store with a Balsamic case
     store: Store = create_autospec(Store)
     store.get_case_workflow = Mock(return_value=Workflow.BALSAMIC)
     store.get_case_by_internal_id_strict = Mock(
-        return_value=create_autospec(
-            Case,
-            # samples=[create_autospec(Sample), create_autospec(Sample)],
-            slurm_priority=SlurmQos.NORMAL,
-        )
+        return_value=create_autospec(Case, slurm_priority=SlurmQos.NORMAL)
     )
 
     # GIVEN a fastq handler
-    fastq_handler: BalsamicFastqHandler = create_autospec(BalsamicFastqHandler)
-    fastq_handler.get_fastq_dir = Mock(return_value=Path("some/path"))
+    fastq_handler: TypedMock[BalsamicFastqHandler] = create_typed_mock(BalsamicFastqHandler)
+    fastq_handler.as_type.get_fastq_dir = Mock(return_value=Path("some/path"))
 
     # GIVEN a BalsamicConfigFileCreator
-    config_file_creator: BalsamicConfigFileCreator = create_autospec(BalsamicConfigFileCreator)
+    config_file_creator: TypedMock[BalsamicConfigFileCreator] = create_typed_mock(
+        BalsamicConfigFileCreator
+    )
 
     # GIVEN a LimsAPI
     lims_api: TypedMock[LimsAPI] = create_typed_mock(LimsAPI)
-    # lims_api.as_type.capture_kit = Mock()
 
     # GIVEN a Balsamic configurator
     balsamic_configurator = BalsamicConfigurator(
         config=cg_balsamic_config,
-        config_file_creator=config_file_creator,
-        fastq_handler=fastq_handler,
+        config_file_creator=config_file_creator.as_type,
+        fastq_handler=fastq_handler.as_type,
         lims_api=lims_api.as_type,
         store=store,
     )
@@ -339,13 +336,13 @@ def test_configure_override_panel_skips_lims_check(
     balsamic_configurator.configure(case_id="case_id")
 
     # THEN the fastq handler is called
-    fastq_handler.link_fastq_files.assert_called_once_with(case_id="case_id")
-    fastq_handler.get_fastq_dir.assert_called_once_with("case_id")
+    fastq_handler.as_mock.link_fastq_files.assert_called_once_with(case_id="case_id")
+    fastq_handler.as_mock.get_fastq_dir.assert_called_once_with("case_id")
 
     # THEN the config file creator is called
-    config_file_creator.create.assert_called_once_with(
+    config_file_creator.as_mock.create.assert_called_once_with(
         case_id="case_id", fastq_path=Path("some/path")
     )
 
     # THEN the Lims check is not performed
-    lims_api.as_type.capture_kit.assert_not_called()
+    lims_api.as_mock.capture_kit.assert_not_called()
