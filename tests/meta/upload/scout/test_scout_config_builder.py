@@ -470,9 +470,9 @@ def test_nallo_config_builder(mocker: MockerFixture):
         default_gene_panels=[],
         cohorts=[],
         human_genome_build="38",
-        rank_model_version="1.0",
+        rank_model_version="1.1",
         rank_score_threshold=8,
-        sv_rank_model_version="1.0",
+        sv_rank_model_version="1.1",
         analysis_date=datetime.now(),
         samples=[
             ScoutNalloIndividual(

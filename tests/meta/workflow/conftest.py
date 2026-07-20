@@ -437,7 +437,7 @@ def nallo_metrics_deliverables(
                 "value": 2.0,
             },
             {
-                "condition": {"norm": "gt", "threshold": 20.0},
+                "condition": {"norm": "gt", "threshold": 23.0},
                 "header": None,
                 "id": "ADM1",
                 "input": "multiqc_data.json",
