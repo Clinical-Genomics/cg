@@ -191,7 +191,10 @@ class ConfiguratorFactory:
                 gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(
                     workflow
                 )
-                return NalloExtension(gene_panel_file_creator=gene_panel_creator)
+                return NalloExtension(
+                    gene_panel_file_creator=gene_panel_creator,
+                    nallo_config=self.cg_config.nallo,  # type: ignore
+                )
             case Workflow.RAREDISEASE:
                 gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(
                     workflow
@@ -202,6 +205,7 @@ class ConfiguratorFactory:
                 return RarediseaseExtension(
                     gene_panel_file_creator=gene_panel_creator,
                     managed_variants_file_creator=managed_variants_creator,
+                    raredisease_config=self.cg_config.raredisease,  # type: ignore
                 )
             case Workflow.TOMTE:
                 gene_panel_creator: GenePanelFileCreator = self._get_gene_panel_file_creator(

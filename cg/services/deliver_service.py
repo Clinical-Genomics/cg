@@ -162,7 +162,7 @@ class DeliverService:
         self, order: Order, analyses: list[Analysis], cc_emails: list[str]
     ):
         cases: list[Case] = [analysis.case for analysis in analyses]
-        message: str = get_message(cases=cases, store=self.status_db)
+        message: str = get_message(cases=cases, store=self.status_db, include_signature=True)
         self.freshdesk_client.reply_to_ticket(
             ticket_id=order.ticket_id, message=message, cc_emails=cc_emails
         )
