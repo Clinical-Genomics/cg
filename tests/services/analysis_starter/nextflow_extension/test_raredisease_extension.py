@@ -102,14 +102,14 @@ def test_do_required_files_exist(
 ):
     # GIVEN a case run directory
     case_run_directory = tmp_path
+
+    # GIVEN that one required file does not exist
     file_map: dict[Path, bool] = {
         Path(case_run_directory, ScoutExportFileName.PANELS): file_existence_array[0],
         Path(case_run_directory, ScoutExportFileName.MANAGED_VARIANTS): file_existence_array[1],
         Path(case_run_directory, "snv_rank_model.ini"): file_existence_array[2],
         Path(case_run_directory, "sv_rank_model.ini"): file_existence_array[3],
     }
-
-    # GIVEN that one required file does not exist
     for file, should_exist in file_map.items():
         if should_exist:
             file.touch()

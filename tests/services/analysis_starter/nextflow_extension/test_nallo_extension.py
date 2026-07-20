@@ -75,16 +75,44 @@ def test_do_required_files_exist_true(nallo_config: NalloConfig, tmp_path: Path)
     assert does_exist
 
 
-def test_do_required_files_exist_false(nallo_config: NalloConfig, tmp_path: Path):
+@pytest.mark.parametrize(
+    "file_existence_array",
+    [
+        [False, True, True],
+        [True, False, True],
+        [True, True, False],
+    ],
+    ids=[
+        "missing gene panel scenario",
+        "missing snv rank model scenario",
+        "missing sv rank model  scenario",
+    ],
+)
+def test_do_required_files_exist_false(
+    file_existence_array: list[bool], nallo_config: NalloConfig, tmp_path: Path
+):
     # GIVEN that there is no gene panel tsv file
     scout_file = tmp_path / ScoutExportFileName.PANELS_TSV
     assert not scout_file.exists()
 
+    # GIVEN a case run directory
+    case_run_directory = tmp_path
+
+    # GIVEN that one required file does not exist
+    file_map: dict[Path, bool] = {
+        Path(case_run_directory, ScoutExportFileName.PANELS): file_existence_array[0],
+        Path(case_run_directory, "snv_rank_model.ini"): file_existence_array[1],
+        Path(case_run_directory, "sv_rank_model.ini"): file_existence_array[2],
+    }
+    for file, should_exist in file_map.items():
+        if should_exist:
+            file.touch()
+
     # GIVEN a Nallo extension
     nallo_extension = NalloExtension(gene_panel_file_creator=Mock(), nallo_config=nallo_config)
 
-    # WHEN checking that the required files exist
-    does_exist: bool = nallo_extension.do_required_files_exist(case_run_directory=tmp_path)
+    # WHEN calling do_required_files_exist
+    does_exist: bool = nallo_extension.do_required_files_exist(case_run_directory)
 
-    # THEN the required file should not exist
+    # THEN one of the files is marked as missing
     assert not does_exist
