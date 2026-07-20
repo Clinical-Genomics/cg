@@ -91,10 +91,6 @@ def test_do_required_files_exist_true(nallo_config: NalloConfig, tmp_path: Path)
 def test_do_required_files_exist_false(
     file_existence_array: list[bool], nallo_config: NalloConfig, tmp_path: Path
 ):
-    # GIVEN that there is no gene panel tsv file
-    scout_file = tmp_path / ScoutExportFileName.PANELS_TSV
-    assert not scout_file.exists()
-
     # GIVEN a case run directory
     case_run_directory = tmp_path
 
