@@ -333,10 +333,9 @@ def test_create_mixed_capture_kits(
 
     # WHEN creating the config file
     # THEN an error should be raised due to the mixed capture kits
+    fastq_path = Path(f"{cg_balsamic_config.root}/case_1/fastq")
     with pytest.raises(MultipleCaptureKitsError):
-        config_file_creator.create(
-            case_id="case_1", fastq_path=Path(f"{cg_balsamic_config.root}/case_1/fastq")
-        )
+        config_file_creator.create(case_id="case_1", fastq_path=fastq_path)
 
 
 @pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
