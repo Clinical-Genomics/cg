@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from cg.apps.lims.api import LimsAPI
-from cg.exc import CaseNotConfiguredError, MultipleCaptureKitsError
+from cg.exc import CaseNotConfiguredError
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
@@ -10,7 +10,6 @@ from cg.services.analysis_starter.configurator.file_creators.balsamic_config imp
     BalsamicConfigFileCreator,
 )
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
-from cg.store.models import Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -41,8 +40,6 @@ class BalsamicConfigurator(Configurator):
 
     def configure(self, case_id: str, **flags) -> BalsamicCaseConfig:
         LOG.info(f"Configuring case {case_id}")
-        if flags.get("panel_bed") is None:
-            self._ensure_consistent_capture_kits(case_id)
         self.fastq_handler.link_fastq_files(case_id)
         fastq_path: Path = self.fastq_handler.get_fastq_dir(case_id)
         self.config_file_creator.create(case_id=case_id, fastq_path=fastq_path, **flags)
@@ -67,16 +64,6 @@ class BalsamicConfigurator(Configurator):
 
     def _get_sample_config_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id, f"{case_id}.json")
-
-    def _ensure_consistent_capture_kits(self, case_id):
-        case: Case = self.store.get_case_by_internal_id_strict(case_id)
-        capture_kits: set[str | None] = {
-            self.lims_api.capture_kit(sample.internal_id) for sample in case.samples
-        }
-        if len(capture_kits) > 1:
-            raise MultipleCaptureKitsError(
-                f"Multiple capture kits found for {case_id}: {capture_kits}"
-            )
 
     def _ensure_required_config_files_exist(self, config: BalsamicCaseConfig) -> None:
         if not config.sample_config.exists():
