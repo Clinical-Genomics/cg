@@ -23,12 +23,6 @@ def filter_samples_by_name(name: str, samples: Query, **kwargs) -> Query:
     return samples.filter(Sample.name == name)
 
 
-def filter_samples_with_type(samples: Query, tissue_type: SampleType, **kwargs) -> Query:
-    """Return samples with sample type."""
-    is_tumour: bool = tissue_type == SampleType.TUMOR
-    return samples.filter(Sample.is_tumour == is_tumour)
-
-
 def filter_samples_with_loqusdb_id(samples: Query, **kwargs) -> Query:
     """Return samples with a loqusdb ID."""
     return samples.filter(Sample.loqusdb_id.isnot(None))
@@ -121,13 +115,6 @@ def filter_samples_on_tumour(samples: Query, is_tumour: bool, **kwargs) -> Query
     return samples.filter(Sample.is_tumour.is_(is_tumour))
 
 
-def filter_samples_by_internal_id_pattern(
-    samples: Query, internal_id_pattern: str, **kwargs
-) -> Query:
-    """Return samples matching the internal id pattern."""
-    return samples.filter(Sample.internal_id.contains(internal_id_pattern))
-
-
 def filter_samples_by_internal_id_or_name_search(
     samples: Query, search_pattern: str | None, **kwargs
 ) -> Query:
@@ -167,10 +154,6 @@ def filter_samples_by_identifier_name_and_value(
 
 def filter_out_cancelled_samples(samples: Query, **kwargs) -> Query:
     return samples.filter(Sample.is_cancelled.is_(False))
-
-
-def apply_limit(samples: Query, limit: int, **kwargs) -> Query:
-    return samples.limit(limit)
 
 
 def apply_sample_filter(
@@ -231,7 +214,6 @@ class SampleFilter(Enum):
     BY_INTERNAL_ID: Callable = filter_samples_by_internal_id
     BY_INTERNAL_IDS: Callable = filter_samples_by_internal_ids
     BY_INTERNAL_ID_OR_NAME_SEARCH: Callable = filter_samples_by_internal_id_or_name_search
-    BY_INTERNAL_ID_PATTERN: Callable = filter_samples_by_internal_id_pattern
     BY_INVOICE_ID: Callable = filter_samples_by_invoice_id
     BY_SAMPLE_NAME: Callable = filter_samples_by_name
     BY_SUBJECT_ID: Callable = filter_samples_by_subject_id
@@ -248,8 +230,6 @@ class SampleFilter(Enum):
     IS_NOT_RECEIVED: Callable = filter_samples_is_not_received
     IS_SEQUENCED: Callable = filter_samples_is_sequenced
     IS_NOT_SEQUENCED: Callable = filter_samples_is_not_sequenced
-    LIMIT: Callable = apply_limit
     WITH_LOQUSDB_ID: Callable = filter_samples_with_loqusdb_id
     WITHOUT_LOQUSDB_ID: Callable = filter_samples_without_loqusdb_id
-    WITH_TYPE: Callable = filter_samples_with_type
     ORDER_BY_CREATED_AT_DESC: Callable = order_samples_by_created_at_desc

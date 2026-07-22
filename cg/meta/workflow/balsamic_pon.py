@@ -23,14 +23,12 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
     ):
         super().__init__(config=config, workflow=workflow)
 
+    # TODO: Remove this method
     def config_case(
         self,
         case_id: str,
-        gender: str,
         genome_version: str,
         panel_bed: str,
-        pon_cnn: str,
-        observations: list[str],
         cache_version: str,
         dry_run: bool = False,
     ) -> None:

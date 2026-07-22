@@ -946,7 +946,6 @@ NEW_BY_ORDER_DATE  # unused variable (cg/store/filters/status_case_filters.py:30
 CASES_WITH_SAMPLE_BY_INTERNAL_ID  # unused variable (cg/store/filters/status_case_sample_filters.py:112)
 EXCLUDE_INTERNAL_ID  # unused variable (cg/store/filters/status_customer_filters.py:27)
 BY_CUSTOMER_IDS  # unused variable (cg/store/filters/status_pool_filters.py:121)
-BY_INTERNAL_ID_PATTERN  # unused variable (cg/store/filters/status_sample_filters.py:234)
 type_annotation_map  # unused variable (cg/store/models.py:57)
 customer_collaboration  # unused variable (cg/store/models.py:96)
 pipeline_limitations  # unused variable (cg/store/models.py:177)
