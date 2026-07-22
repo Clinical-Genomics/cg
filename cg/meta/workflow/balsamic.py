@@ -8,11 +8,11 @@ from pydantic import EmailStr
 from pydantic.v1 import ValidationError
 
 from cg.constants import Workflow
-from cg.constants.constants import BedVersionGenomeVersion, FileFormat, GenomeVersion, SampleType
+from cg.constants.constants import FileFormat, GenomeVersion, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.priority import SlurmQos
 from cg.constants.scout import BALSAMIC_CASE_TAGS
-from cg.exc import BalsamicStartError, CgError
+from cg.exc import CgError
 from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
@@ -24,7 +24,7 @@ from cg.models.balsamic.metrics import (
     BalsamicWGSQCMetrics,
 )
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import Case, Sample
 from cg.utils import Process
 from cg.utils.utils import build_command_from_dict
 
@@ -33,9 +33,6 @@ LOG = logging.getLogger(__name__)
 
 class BalsamicAnalysisAPI(AnalysisAPI):
     """Handles communication between BALSAMIC processes and the rest of CG infrastructure."""
-
-    __BALSAMIC_APPLICATIONS = {"wgs", "wes", "tgs"}
-    __BALSAMIC_BED_APPLICATIONS = {"wes", "tgs"}
 
     def __init__(
         self,
@@ -79,12 +76,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 binary=self.binary_path, conda_binary=self.conda_binary, environment=self.conda_env
             )
         return self._process
-
-    @property
-    def PON_file_suffix(self) -> str:
-        """Panel of normals reference file suffix (<panel-bed>_<PON>_<version>.cnn)"""
-
-        return "CNVkit_PON_reference_v*.cnn"
 
     def get_case_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic case for the case_id should be located"""
@@ -151,77 +142,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if sample_obj.is_tumour:
             return SampleType.TUMOR
         return SampleType.NORMAL
-
-    def get_derived_bed(self, panel_bed: str) -> Path | None:
-        """Returns the verified capture kit path or the derived panel BED path."""
-        if not panel_bed:
-            return None
-        panel_bed: Path = Path(panel_bed)
-        if panel_bed.is_file():
-            return panel_bed
-        derived_panel_bed: Path = Path(
-            self.bed_path,
-            self.status_db.get_bed_version_by_short_name_and_genome_version_strict(
-                short_name=panel_bed.as_posix(), genome_version=BedVersionGenomeVersion.HG19
-            ).filename,
-        )
-        if not derived_panel_bed.is_file():
-            raise BalsamicStartError(
-                f"{panel_bed} or {derived_panel_bed} are not valid paths to a BED file. "
-                f"Please provide absolute path to desired BED file or a valid bed shortname!"
-            )
-        return derived_panel_bed
-
-    def get_verified_bed(self, panel_bed: str, sample_data: dict) -> str | None:
-        """Takes a dict with samples and attributes.
-        Retrieves unique attributes for application type and target_bed.
-        Verifies that those attributes are the same across multiple samples,
-        where applicable.
-        Verifies that the attributes are valid BALSAMIC attributes
-        If application type requires bed, returns path to bed.
-
-        Raises BalsamicStartError:
-        - When application type invalid for balsamic
-        - When multiple samples have different parameters
-        - When bed file required for analysis, but is not set or cannot be retrieved.
-        """
-
-        panel_bed: Path | None = self.get_derived_bed(panel_bed)
-        application_types = {v["application_type"].lower() for k, v in sample_data.items()}
-        target_beds: set = {v["target_bed"] for k, v in sample_data.items()}
-
-        if not application_types.issubset(self.__BALSAMIC_APPLICATIONS):
-            raise BalsamicStartError("Case application not compatible with BALSAMIC")
-        if len(application_types) != 1:
-            raise BalsamicStartError("Multiple application types found in LIMS")
-        if not application_types.issubset(self.__BALSAMIC_BED_APPLICATIONS):
-            if panel_bed:
-                raise BalsamicStartError("Cannot set panel_bed for WHOLE_GENOME_SEQUENCING sample!")
-            return None
-        if panel_bed:
-            return panel_bed.as_posix()
-        if len(target_beds) == 1:
-            target_bed = target_beds.pop()
-            if not target_bed:
-                raise BalsamicStartError(
-                    f"Application type {application_types.pop()} requires a bed file to be analyzed!"
-                )
-            return Path(self.bed_path, target_bed).as_posix()
-
-    def get_latest_pon_file(self, panel_bed: str) -> str | None:
-        """Returns the latest PON cnn file associated to a specific capture bed"""
-
-        if not panel_bed:
-            raise BalsamicStartError("BALSAMIC PON workflow requires a panel bed to be specified")
-
-        pon_list = Path(self.pon_path).glob(f"*{Path(panel_bed).stem}_{self.PON_file_suffix}")
-        sorted_pon_files = sorted(
-            pon_list,
-            key=lambda file: int(file.stem.split("_v")[-1]),
-            reverse=True,
-        )
-
-        return sorted_pon_files[0].as_posix() if sorted_pon_files else None
 
     def get_latest_raw_file_data(self, case_id: str, tags: list) -> dict | list:
         """Retrieves the data of the latest file associated to a specific case ID and a list of tags."""
@@ -299,51 +219,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 )
 
         return metrics
-
-    @staticmethod
-    def print_sample_params(case_id: str, sample_data: dict) -> None:
-        """Outputs a table of samples to be displayed in log"""
-
-        LOG.info(f"Case {case_id} has following BALSAMIC samples:")
-        LOG.info(
-            "{:<20} {:<20} {:<20} {:<20}".format(
-                "SAMPLE ID", "TISSUE TYPE", "APPLICATION", "BED VERSION"
-            )
-        )
-        for key in sample_data:
-            LOG.info(
-                "{:<20} {:<20} {:<20} {:<20}".format(
-                    key,
-                    str(sample_data[key]["tissue_type"]),
-                    str(sample_data[key]["application_type"]),
-                    str(sample_data[key]["target_bed"]),
-                )
-            )
-        LOG.info("")
-
-    def get_sample_params(self, case_id: str, panel_bed: str | None) -> dict:
-        """Returns a dictionary of attributes for each sample in given family,
-        where SAMPLE ID is used as key"""
-
-        sample_data = {
-            link_object.sample.internal_id: {
-                "sex": link_object.sample.sex,
-                "tissue_type": self.get_sample_type(link_object.sample).value,
-                "application_type": self.get_analysis_type(link_object.sample),
-                "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
-            }
-            for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
-        }
-
-        self.print_sample_params(case_id=case_id, sample_data=sample_data)
-        return sample_data
-
-    def resolve_target_bed(self, panel_bed: str | None, link_object: CaseSample) -> str | None:
-        if panel_bed:
-            return panel_bed
-        if self.get_analysis_type(link_object.sample) not in self.__BALSAMIC_BED_APPLICATIONS:
-            return None
-        return self.get_target_bed_from_lims(link_object.case.internal_id)
 
     def get_workflow_version(self, case_id: str) -> str:
         LOG.debug("Fetch workflow version")
