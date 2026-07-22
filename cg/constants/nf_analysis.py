@@ -3,7 +3,7 @@
 from typing import Any
 
 NALLO_GENERAL_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
-    "median_coverage": {"norm": "gt", "threshold": 20},
+    "median_coverage": {"norm": "gt", "threshold": 23},
 }
 
 NALLO_PARENT_PEDDY_METRIC_CONDITION: dict[str, dict[str, Any]] = {
