@@ -330,7 +330,11 @@ def test_nallo_config_builder(mocker: MockerFixture):
 
     # GIVEN a Nallo config builder
     nallo_config_builder = NalloConfigBuilder(
-        nallo_analysis_api=create_autospec(NalloAnalysisAPI, reference="reference.fasta"),
+        nallo_analysis_api=create_autospec(
+            NalloAnalysisAPI,
+            reference="reference.fasta",
+            rank_model_threshold=8,
+        ),
         lims_api=lims_api,
         madeline_api=create_autospec(MadelineAPI),
     )
@@ -387,20 +391,20 @@ def test_nallo_config_builder(mocker: MockerFixture):
         elif tags == {"vcf-str"}:
             return vcf_str
         # Sample tags
-        elif tags == {AlignmentFileTag.BAM, "haplotags", "sample_id"}:
+        elif tags == {AlignmentFileTag.CRAM, "haplotags", "sample_id"}:
             return alignment_path
         elif tags == {"coverage", "d4", "sample_id"}:
             return d4_file
         elif tags == {"hificnv", "bigwig", "sample_id"}:
             return tiddit_coverage_wig
-        elif tags == {AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE, "sample_id"}:
+        elif tags == {AlignmentFileTag.CRAM, NalloAnalysisTag.PARAPHASE, "sample_id"}:
             return paraphase_alignment_path
         elif tags == {"whatshap", "gtf", "sample_id"}:
             return phase_blocks
-        elif tags == {"repeats", "spanning", "bam", "sample_id"}:
-            return create_autospec(File, full_path="repeats_spanning.bam")
-        elif tags == {"repeats", "spanning", "bam-index", "sample_id"}:
-            return create_autospec(File, full_path="repeats_spanning.index")
+        elif tags == {"repeats", "spanning", "cram", "sample_id"}:
+            return create_autospec(File, full_path="repeats_spanning.cram")
+        elif tags == {"repeats", "spanning", "cram-index", "sample_id"}:
+            return create_autospec(File, full_path="repeats_spanning.crai")
         elif tags == {"repeats", "sorted", "vcf", "sample_id"}:
             return create_autospec(File, full_path="repeats_sorted.vcf")
         elif tags == {"trgt", "variant-catalog"}:
@@ -497,8 +501,8 @@ def test_nallo_config_builder(mocker: MockerFixture):
                 paraphase_alignment_path=paraphase_alignment_path.full_path,
                 phase_blocks=phase_blocks.full_path,
                 reviewer=Reviewer(
-                    alignment="repeats_spanning.bam",
-                    alignment_index="repeats_spanning.index",
+                    alignment="repeats_spanning.cram",
+                    alignment_index="repeats_spanning.crai",
                     vcf="repeats_sorted.vcf",
                     catalog="variant_catalog.trgt",
                     trgt=True,

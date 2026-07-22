@@ -339,7 +339,7 @@ def test_get_analyses_to_deliver_for_case(
     request_mock.assert_called_once_with(
         headers={"Authorization": "Bearer some_token"},
         json={},
-        url="http://localhost/fake_trailblazer/analyses?case_id=case_1&status[]=completed&delivered=false",
+        url="http://localhost/fake_trailblazer/analyses?case_id=case_1&status[]=completed&delivered=false&holdDelivery=false",
         verify=True,
     )
 
@@ -439,7 +439,7 @@ def test_get_analyses_to_deliver_for_order(
     request_mock.assert_called_once_with(
         headers={"Authorization": "Bearer some_token"},
         json={},
-        url="http://localhost/fake_trailblazer/analyses?orderId=12345&status[]=completed&delivered=false",
+        url="http://localhost/fake_trailblazer/analyses?orderId=12345&status[]=completed&delivered=false&holdDelivery=false",
         verify=True,
     )
 
@@ -503,7 +503,7 @@ def test_get_all_completed_undelivered_analyses_success(
     tb_api = TrailblazerAPI(valid_trailblazer_config)
 
     # GIVEN that Trailblazer returns two analyses, one of which is an RSYNC analysis
-    mocker.patch.object(
+    get_request = mocker.patch.object(
         requests,
         "get",
         return_value=create_autospec(
@@ -519,6 +519,14 @@ def test_get_all_completed_undelivered_analyses_success(
 
     # THEN a list of two analyses is returned
     assert len(analyses) == 2
+
+    # THEN the correct url is called
+    get_request.assert_called_once_with(
+        headers={"Authorization": "Bearer some_token"},
+        json={},
+        url=f"{tb_api.host}/analyses?status[]=completed&delivered=false&holdDelivery=false",
+        verify=True,
+    )
 
 
 def test_get_all_completed_undelivered_analyses_improper_response(
@@ -544,6 +552,44 @@ def test_get_all_completed_undelivered_analyses_improper_response(
     # THEN a TrailblazerAPIHTTPError should be raised
     with pytest.raises(TrailblazerAPIHTTPError):
         tb_api.get_all_analyses_to_deliver()
+
+
+def test_get_all_completed_undelivered_analyses_exclude_workflow(
+    response_with_two_analyses: str,
+    valid_google_credentials: IDTokenCredentials,
+    valid_trailblazer_config: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a TrailblazerAPI
+    tb_api = TrailblazerAPI(valid_trailblazer_config)
+
+    # GIVEN that Trailblazer returns two analyses, one of which is an RSYNC analysis
+    get_request = mocker.patch.object(
+        requests,
+        "get",
+        return_value=create_autospec(
+            requests.Response,
+            status_code=200,
+            ok=True,
+            text=response_with_two_analyses,
+        ),
+    )
+
+    # WHEN getting all analyses to deliver
+    analyses = tb_api.get_all_analyses_to_deliver(
+        exclude_workflows=[Workflow.RSYNC, Workflow.MIP_DNA]
+    )
+
+    # THEN a list of two analyses is returned
+    assert len(analyses) == 2
+
+    # THEN the correct url is called
+    get_request.assert_called_once_with(
+        headers={"Authorization": "Bearer some_token"},
+        json={},
+        url=f"{tb_api.host}/analyses?status[]=completed&delivered=false&holdDelivery=false&excludeWorkflow[]=RSYNC&excludeWorkflow[]=MIP-DNA",
+        verify=True,
+    )
 
 
 def test_get_delivered_analyses_for_order_success(

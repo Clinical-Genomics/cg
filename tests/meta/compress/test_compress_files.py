@@ -1,9 +1,13 @@
 """Tests for the compression files module"""
 
 import logging
+from pathlib import Path
 
 from cg.meta.compress import files
 from cg.models.compression_data import CompressionData
+from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun
+from cg.store.store import Store
+from tests.store_helpers import StoreHelpers
 
 
 def test_get_fastq_files(populated_compress_fastq_api, sample):
@@ -40,3 +44,52 @@ def test_get_fastq_files_no_files(compress_api, sample_hk_bundle_no_files, sampl
     assert fastq_dict is None
     # THEN assert that the correct information is returned
     assert f"Could not find FASTQ files for {sample}" in caplog.text
+
+
+def test_get_reads_for_run_found(base_store: Store, helpers: StoreHelpers):
+    """Test get_reads_for_run when a matching sequencing metrics row exists."""
+    # GIVEN a sample with sequencing metrics for a given flow cell and lane
+    flow_cell_id = "23M7GHLT4"
+    sample_id = "ACC20498A8"
+    lane = 4
+    flow_cell: IlluminaFlowCell = helpers.add_illumina_flow_cell(
+        store=base_store, flow_cell_id=flow_cell_id
+    )
+    sequencing_run: IlluminaSequencingRun = helpers.add_illumina_sequencing_run(
+        store=base_store, flow_cell=flow_cell
+    )
+    helpers.add_sample(store=base_store, internal_id=sample_id)
+    helpers.add_illumina_sample_sequencing_metrics_object(
+        store=base_store, sample_id=sample_id, sequencing_run=sequencing_run, lane=lane
+    )
+
+    # GIVEN a compression run whose name matches that flow cell/sample/lane
+    compression_obj = CompressionData(Path(f"{flow_cell_id}_{sample_id}_S52_L00{lane}"))
+
+    # WHEN looking up the reads for the run
+    reads: int | None = files.get_reads_for_run(compression_obj, base_store)
+
+    # THEN the total reads in the lane is returned
+    assert reads == 100
+
+
+def test_get_reads_for_run_name_does_not_match(base_store: Store):
+    """Test get_reads_for_run returns None when the run name can't be parsed."""
+    # GIVEN a compression run whose name doesn't follow the expected naming convention
+    compression_obj = CompressionData(Path("not_a_valid_name"))
+
+    # WHEN looking up the reads for the run
+    reads: int | None = files.get_reads_for_run(compression_obj, base_store)
+    # THEN None is returned
+    assert reads is None
+
+
+def test_get_reads_for_run_no_matching_metrics(base_store: Store):
+    """Test get_reads_for_run returns None when no metrics row matches."""
+    # GIVEN a compression run that parses fine but has no matching sequencing metrics row
+    compression_obj = CompressionData(Path("23M7GHLT4_UNKNOWNSAMPLE_S1_L001"))
+
+    # WHEN looking up the reads for the run
+    reads: int | None = files.get_reads_for_run(compression_obj, base_store)
+    # THEN None is returned
+    assert reads is None

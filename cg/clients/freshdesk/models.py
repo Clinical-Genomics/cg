@@ -42,6 +42,7 @@ class TicketCreate(BaseModel):
 class TicketResponse(BaseModel):
     """Response from Freshdesk"""
 
+    cc_emails: list[str]
     id: int
     description: str
     subject: str

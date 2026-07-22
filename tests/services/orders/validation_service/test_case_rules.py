@@ -9,6 +9,7 @@ from cg.services.orders.validation.errors.case_errors import (
     CaseNameNotAvailableError,
     CaseOutsideOfCollaborationError,
     ExistingCaseWithoutAffectedSampleError,
+    InvalidGenePanelsError,
     MultiplePrepCategoriesError,
     MultipleSamplesInCaseError,
     NewCaseWithoutAffectedSampleError,
@@ -37,6 +38,7 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_each_new_case_has_an_affected_sample,
     validate_existing_cases_belong_to_collaboration,
     validate_existing_cases_have_an_affected_sample,
+    validate_gene_panels_exist,
     validate_one_sample_per_case,
     validate_samples_have_same_source,
     validate_samples_in_case_have_same_prep_category,
@@ -395,3 +397,20 @@ def test_validate_samples_have_same_source_downsampled_sample():
 
     # THEN LIMS should have been called to fetch the original sample's source
     lims_api.as_mock.get_source.assert_called_once_with("original_sample")
+
+
+def test_invalid_gene_panels(valid_order: TomteOrder, base_store: Store):
+    # GIVEN an order with an invalid gene panel specified
+    invalid_panel = "Non-existent panel"
+    valid_order.cases[0].panels = [invalid_panel]
+
+    # WHEN validating that the gene panels exist
+    errors: list[InvalidGenePanelsError] = validate_gene_panels_exist(
+        order=valid_order, store=base_store
+    )
+
+    # THEN an error should be returned
+    assert errors
+
+    # THEN the error should concern invalid gene panels
+    assert isinstance(errors[0], InvalidGenePanelsError)

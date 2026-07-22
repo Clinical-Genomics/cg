@@ -4,6 +4,7 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
+from cg.clients.freshdesk.models import TicketResponse
 from cg.constants import DataDelivery, Workflow
 from cg.exc import (
     FreshdeskDeliveryMessageError,
@@ -71,8 +72,7 @@ class DeliverService:
             self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
             self.mark_as_delivered_service.close_order_in_status_db_if_closable(order)
             if not self._is_order_no_delivery(order):
-                self._freshdesk_send_delivery_message(order=order, analyses=analyses)
-                self._freshdesk_close_ticket_if_open(order=order)
+                self._interact_with_freshdesk(analyses=analyses, order=order)
         except TrailblazerAnalysisDeliveryError as error:
             self.status_db.rollback()
             LOG.error(f"Failed to mark analyses as delivered in Trailblazer for order {order.id}")
@@ -120,14 +120,20 @@ class DeliverService:
         """
         Returns a dictionary with orders as keys and lists of analyses as values. Only includes
         analyses that are marked as uploaded in StatusDB and not yet marked as delivered in
-        Trailblazer. We are currently excluding microSALT from automatic delivery.
+        Trailblazer. We are currently excluding microSALT and Taxprofiler from automatic delivery.
         """
         undelivered_trailblazer_analyses: list[TrailblazerAnalysis] = (
-            self.trailblazer_api.get_all_analyses_to_deliver()
+            self.trailblazer_api.get_all_analyses_to_deliver(
+                exclude_workflows=[
+                    Workflow.MICROSALT,
+                    Workflow.TAXPROFILER,
+                    Workflow.DEMULTIPLEX,
+                    Workflow.RSYNC,
+                ]
+            )
         )
         uploaded_analyses_to_deliver: list[Analysis] = self.status_db.get_uploaded_analyses(
-            trailblazer_ids=[analysis.id for analysis in undelivered_trailblazer_analyses],
-            exclude_workflows=[Workflow.MICROSALT],
+            trailblazer_ids=[analysis.id for analysis in undelivered_trailblazer_analyses]
         )
         order_analyses = {}
         for analysis in uploaded_analyses_to_deliver:
@@ -141,14 +147,22 @@ class DeliverService:
     def _is_order_no_delivery(order: Order) -> bool:
         return order.cases[0].data_delivery == DataDelivery.NO_DELIVERY
 
-    def _freshdesk_send_delivery_message(self, order: Order, analyses: list[Analysis]):
-        cases: list[Case] = [analysis.case for analysis in analyses]
-        message: str = get_message(cases=cases, store=self.status_db)
-        self.freshdesk_client.reply_to_ticket(ticket_id=order.ticket_id, message=message)
+    def _interact_with_freshdesk(self, analyses: list[Analysis], order: Order):
+        freshdesk_ticket: TicketResponse = self.freshdesk_client.get_ticket(order.ticket_id)
+        self._freshdesk_send_delivery_message(
+            order=order, analyses=analyses, cc_emails=freshdesk_ticket.cc_emails
+        )
+        if not order.is_open and freshdesk_ticket.status == Status.OPEN:
+            self.freshdesk_client.update_ticket(
+                ticket_id=order.ticket_id,
+                status=Status.CLOSED,
+            )
 
-    def _freshdesk_close_ticket_if_open(self, order: Order):
-        if not order.is_open:
-            if self.freshdesk_client.get_ticket(order.ticket_id).status == Status.OPEN:
-                self.freshdesk_client.update_ticket(ticket_id=order.ticket_id, status=Status.CLOSED)
-        else:
-            return
+    def _freshdesk_send_delivery_message(
+        self, order: Order, analyses: list[Analysis], cc_emails: list[str]
+    ):
+        cases: list[Case] = [analysis.case for analysis in analyses]
+        message: str = get_message(cases=cases, store=self.status_db, include_signature=True)
+        self.freshdesk_client.reply_to_ticket(
+            ticket_id=order.ticket_id, message=message, cc_emails=cc_emails
+        )

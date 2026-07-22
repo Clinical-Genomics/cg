@@ -56,14 +56,26 @@ class MockCrunchyAPI(CrunchyAPI):
         return self._nr_fastq_compressions
 
     # Mocked methods
-    def fastq_to_spring(self, compression_obj: CompressionData, sample_id: str = ""):
+    def fastq_to_spring(
+        self,
+        compression_obj: CompressionData,
+        memory: int = 0,
+        minutes: int = 0,
+        sample_id: str = "",
+    ):
         """
         Compress FASTQ files into SPRING by sending to sbatch SLURM
         """
         self._nr_fastq_compressions += 1
         self.set_compression_pending_all()
 
-    def spring_to_fastq(self, compression_obj: CompressionData, sample_id: str = ""):
+    def spring_to_fastq(
+        self,
+        compression_obj: CompressionData,
+        memory: int = 0,
+        minutes: int = 0,
+        sample_id: str = "",
+    ):
         """Mock method that compress spring to fastq"""
         self._nr_fastq_compressions += 1
         self.set_compression_pending_all()

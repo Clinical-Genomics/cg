@@ -476,13 +476,16 @@ def crunchy_config() -> dict[str, dict[str, Any]]:
         "crunchy": {
             "conda_binary": "a conda binary",
             "cram_reference": "/path/to/fasta",
+            "tmp_dir_base": "/state/partition1",
+            "fallback_memory": 1,
+            "fallback_minutes": 60,
             "slurm": {
                 "account": "mock_account",
                 "conda_env": "mock_env",
-                "hours": 1,
                 "mail_user": "mock_mail",
-                "memory": 1,
                 "number_tasks": 1,
+                "cpus_per_task": 8,
+                "partition": "compress",
             },
         }
     }
@@ -2104,13 +2107,16 @@ def context_config(
         "crunchy": {
             "conda_binary": "a_conda_binary",
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
+            "tmp_dir_base": "/state/partition1",
+            "fallback_memory": 1,
+            "fallback_minutes": 60,
             "slurm": {
                 "account": "development",
                 "conda_env": "S_crunchy",
-                "hours": 1,
                 "mail_user": email_address,
-                "memory": 1,
                 "number_tasks": 1,
+                "cpus_per_task": 4,
+                "partition": "compress",
             },
         },
         "data-delivery": {
@@ -2230,6 +2236,9 @@ def context_config(
             "workflow_bin_path": Path("workflow", "path").as_posix(),
             "pre_run_script": "",
             "profile": "myprofile",
+            "rank_model_threshold": 13,
+            "rank_model_snv": "path/to/ghxx_nallo_rank_model_snvs.ini",
+            "rank_model_sv": "path/to/ghxx_nallo_rank_model_svs.ini",
             "reference": "nallo_reference.fasta",
             "repository": "https://some_url",
             "references": Path("path", "to", "references").as_posix(),
@@ -2251,6 +2260,8 @@ def context_config(
             "platform": str(nf_analysis_platform_config_path),
             "params": str(nf_analysis_pipeline_params_path),
             "config": str(nf_analysis_pipeline_config_path),
+            "rank_model_snv": "path/to/ghxx_rd_rank_model_snvs.ini",
+            "rank_model_sv": "path/to/ghxx_rd_rank_model_svs.ini",
             "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_bin_path": Path("workflow", "path").as_posix(),
@@ -2908,12 +2919,6 @@ def nallo_hermes_deliverables(nallo_deliverable_data: dict, nallo_case_id: str) 
             tags.append("multiqc-html")
         hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
     return hermes_output
-
-
-@pytest.fixture
-def nallo_multiqc_json_metrics_path(nallo_analysis_dir: Path) -> Path:
-    """Return Multiqc JSON file path for nallo."""
-    return Path(nallo_analysis_dir, multiqc_json_file)
 
 
 @pytest.fixture(scope="function")

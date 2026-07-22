@@ -112,12 +112,15 @@ balsamic:
 crunchy:
   conda_binary: "{test_root_dir}/crunchy_conda_binary"
   cram_reference: "{test_root_dir}/crunchy_cram_reference"
+  tmp_dir_base: "/state/partition1"
+  fallback_memory: 50
+  fallback_minutes: 1440
   slurm:
     account: development
-    hours: 24
     mail_user: crunchy_slurm_mail_user@scilifelab.se
-    memory: 50
-    number_tasks: 12
+    number_tasks: 1
+    cpus_per_task: 8
+    partition: compress
     conda_env: crunchy_conda_env
 
 data-delivery:
@@ -173,6 +176,9 @@ nallo:
   pipeline_deliverables: "nallo_pipeline_deliverables.yaml"
   platform: {test_root_dir}/platform.config
   profile: nallo_profile
+  rank_model_threshold: 8
+  rank_model_snv: {test_root_dir}/ghxx_nallo_rank_model_snvs.ini
+  rank_model_sv: {test_root_dir}/ghxx_nallo_rank_model_svs.ini
   reference: "nallo-reference.fasta"
   resources: {test_root_dir}/nallo_resources.config
   repository: nallo_repository
@@ -200,6 +206,8 @@ raredisease:
   pipeline_deliverables: "raredisease_pipeline_deliverables.yaml"
   platform: {test_root_dir}/platform.config
   profile: raredisease_profile
+  rank_model_snv: {test_root_dir}/ghxx_rd_rank_model_snvs.ini
+  rank_model_sv: {test_root_dir}/ghxx_rd_rank_model_svs.ini
   reference: "raredisease-reference.fasta"
   references_directory: {test_root_dir}/raredisease_references_directory
   resources: {test_root_dir}/raredisease_resources.config
