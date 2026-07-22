@@ -69,7 +69,6 @@ from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
-from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
 from cg.store.database import create_all_tables, drop_all_tables, get_engine, initialize_database
 from cg.store.models import (
     Application,
@@ -85,7 +84,6 @@ from cg.store.models import (
 )
 from cg.store.store import Store
 from cg.utils import Process
-from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import LimsSample, LimsUDF, MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
@@ -181,18 +179,6 @@ def any_string() -> str:
 def slurm_account() -> str:
     """Return a SLURM account."""
     return "super_account"
-
-
-@pytest.fixture(scope="session")
-def user_name() -> str:
-    """Return a username."""
-    return "Paul Anderson"
-
-
-@pytest.fixture(scope="session")
-def user_mail() -> str:
-    """Return a user email."""
-    return "paul@magnolia.com"
 
 
 @pytest.fixture(scope="function")
@@ -1283,15 +1269,6 @@ def scout_api() -> MockScoutAPI:
     return MockScoutAPI()
 
 
-# Crunchy fixtures
-
-
-@pytest.fixture(name="crunchy_api")
-def crunchy_api():
-    """Setup Crunchy API."""
-    return MockCrunchyAPI()
-
-
 # Store fixtures
 
 
@@ -1443,12 +1420,6 @@ def raredisease_loqusdb_customer(collaboration_id: str, customer_id: str) -> Cus
         internal_id=CustomerId.CUST004,
         loqus_upload=True,
     )
-
-
-@pytest.fixture
-def external_wes_application_tag() -> str:
-    """Return the external whole exome sequencing application tag."""
-    return "EXXCUSR000"
 
 
 @pytest.fixture
@@ -1850,20 +1821,6 @@ def downsample_dir(tmp_path_factory) -> Path:
     return tmp_path_factory.mktemp("downsample", numbered=True)
 
 
-@pytest.fixture(name="swegen_dir")
-def swegen_dir(tmpdir_factory, tmp_path) -> Path:
-    """SweGen temporary directory containing mocked reference files."""
-    return tmpdir_factory.mktemp("swegen")
-
-
-@pytest.fixture(name="swegen_snv_reference")
-def swegen_snv_reference_path(swegen_dir: Path) -> Path:
-    """Return a temporary path to a SweGen SNV reference file."""
-    mock_file = Path(swegen_dir, "grch37_swegen_10k_snv_-20220101-.vcf.gz")
-    mock_file.touch(exist_ok=True)
-    return mock_file
-
-
 @pytest.fixture(name="observations_dir")
 def observations_dir(tmpdir_factory, tmp_path) -> Path:
     """Loqusdb temporary directory containing observations mock files."""
@@ -1884,28 +1841,6 @@ def observations_clinical_sv_file_path(observations_dir: Path) -> Path:
     mock_file = Path(observations_dir, "loqusdb_clinical_sv_export-20220101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
-
-
-@pytest.fixture(name="observations_somatic_snv_file_path")
-def observations_somatic_snv_file_path(observations_dir: Path) -> Path:
-    """Return a temporary path to a cancer somatic SNV file."""
-    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20220101-.vcf.gz")
-    mock_file.touch(exist_ok=True)
-    return mock_file
-
-
-@pytest.fixture(name="outdated_observations_somatic_snv_file_path")
-def outdated_observations_somatic_snv_file_path(observations_dir: Path) -> Path:
-    """Return a temporary path to an outdated cancer somatic SNV file."""
-    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20180101-.vcf.gz")
-    mock_file.touch(exist_ok=True)
-    return mock_file
-
-
-@pytest.fixture(name="custom_observations_clinical_snv_file_path")
-def custom_observations_clinical_snv_file_path(observations_dir: Path) -> Path:
-    """Return a custom path for the clinical SNV observations file."""
-    return Path(observations_dir, "clinical_snv_export-19990101-.vcf.gz")
 
 
 @pytest.fixture(scope="session")
@@ -3267,12 +3202,6 @@ def rnafusion_case_id() -> str:
     return "rnafusion_case_enough_reads"
 
 
-@pytest.fixture(scope="session")
-def strandedness_not_permitted() -> str:
-    """Return a not permitted strandedness."""
-    return "double_stranded"
-
-
 @pytest.fixture(scope="function")
 def rnafusion_hermes_deliverables(rnafusion_deliverable_data: dict, rnafusion_case_id: str) -> dict:
     hermes_output: dict = {"workflow": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
@@ -3385,12 +3314,6 @@ def nf_analysis_pipeline_resource_optimisation_path(nf_analysis_analysis_dir) ->
 def tower_id() -> int:
     """Returns a NF-Tower ID."""
     return 123456
-
-
-@pytest.fixture(scope="session")
-def existing_directory(tmpdir_factory) -> Path:
-    """Path to existing temporary directory."""
-    return tmpdir_factory.mktemp("any_directory")
 
 
 @pytest.fixture(scope="session")
@@ -4280,11 +4203,6 @@ def fastq_file_meta_raw(flow_cell_name: str) -> dict:
         "flow_cell_id": flow_cell_name,
         "undetermined": None,
     }
-
-
-@pytest.fixture()
-def illumina_metrics_service() -> IlluminaDataTransferService:
-    return IlluminaDataTransferService()
 
 
 @pytest.fixture
