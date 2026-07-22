@@ -25,7 +25,7 @@ def test_store_pacbio_order_data_in_status_db(
     # GIVEN a basic store with no samples, cases and only a MAF order
     assert not store_to_submit_and_validate_orders._get_query(table=Sample).first()
     assert store_to_submit_and_validate_orders._get_query(table=Case).count() == 0
-    assert store_to_submit_and_validate_orders._get_query(table=Order).count() == 1
+    assert store_to_submit_and_validate_orders._get_query(table=Order).count() == 0
 
     # WHEN storing the order
     new_samples: list[Sample] = store_pacbio_order_service.store_order_data_in_status_db(
@@ -33,7 +33,7 @@ def test_store_pacbio_order_data_in_status_db(
     )
 
     # THEN it should store the order
-    assert store_to_submit_and_validate_orders._get_query(table=Order).count() == 2
+    assert store_to_submit_and_validate_orders._get_query(table=Order).count() == 1
 
     # THEN it should store the samples and create a case for each sample
     assert len(new_samples) == 3
@@ -57,8 +57,10 @@ def test_store_pacbio_order_data_in_status_db(
 @pytest.mark.parametrize(
     "is_external, expected_lims_status", [(True, LimsStatus.DONE), (False, LimsStatus.PENDING)]
 )
-def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_status: LimsStatus):
-    # GIVEN a store containing an external application
+def test_create_db_sample_with_lims_status_and_invoice(
+    is_external: bool, expected_lims_status: LimsStatus
+):
+    # GIVEN a store containing an application
     application: Application = create_autospec(Application, is_external=is_external)
     application_version: ApplicationVersion = create_autospec(
         ApplicationVersion, application=application
@@ -89,5 +91,8 @@ def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_stat
         sample=fastq_sample, order_name="order", customer=customer, ticket_id="1234567"
     )
 
-    # THEN the sample should be created with LimsStatus DONE
+    # THEN the sample should be created with LimsStatus DONE if the application is external
     assert status_db.as_mock.add_sample.call_args[1]["lims_status"] == expected_lims_status
+
+    # THEN the sample should have been set to no_invoice if the application was external
+    assert status_db.as_mock.add_sample.call_args[1]["no_invoice"] == is_external

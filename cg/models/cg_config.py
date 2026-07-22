@@ -9,13 +9,11 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.api import IlluminaSampleSheetService
 from cg.apps.gens import GensAPI
-from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.apps.madeline.api import MadelineAPI
-from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.clients.arnold.api import ArnoldAPIClient
@@ -80,8 +78,10 @@ class SlurmConfig(BaseModel):
     mail_user: EmailStr
     memory: int | None = None
     number_tasks: int | None = None
+    cpus_per_task: int | None = None
     conda_env: str | None = None
     qos: SlurmQos = SlurmQos.LOW
+    partition: str | None = None
 
 
 class Encryption(BaseModel):
@@ -150,6 +150,21 @@ class ChanjoConfig(BaseModel):
     config_path: str
 
 
+class NatsAuthentication(BaseModel):
+    ca_cert_path: Path
+    client_cert_path: Path
+    client_key_path: Path
+    token_path: Path
+
+
+class NatsConfig(BaseModel):
+    nats_binary_path: Path
+    server: str
+    stream: str
+    listener: NatsAuthentication
+    publisher: NatsAuthentication
+
+
 class HermesConfig(CommonAppConfig):
     container_path: str
 
@@ -176,10 +191,15 @@ class LimsConfig(BaseModel):
 class CrunchyConfig(BaseModel):
     conda_binary: str | None = None
     cram_reference: str
+    tmp_dir_base: str
+    fallback_memory: int
+    fallback_minutes: int
     slurm: SlurmConfig
 
 
-class MutaccAutoConfig(CommonAppConfig):
+class MutaccAutoConfig(BaseModel):
+    binary_path: str
+    config_path: str
     padding: int = 300
 
 
@@ -220,6 +240,7 @@ class BalsamicConfig(CommonAppConfig):
     swegen_path: Path
     swegen_snv: Path
     swegen_sv: Path
+    workflow_profile: Path
 
 
 class MutantConfig(BaseModel):
@@ -233,6 +254,7 @@ class MipConfig(BaseModel):
     conda_binary: str | None = None
     conda_env: str
     mip_config: str
+    reference: str | None = None
     workflow: str
     root: str
     script: str
@@ -249,6 +271,10 @@ class NalloConfig(CommonAppConfig):
     platform: str
     pre_run_script: str = ""
     profile: str
+    rank_model_threshold: int
+    rank_model_snv: str
+    rank_model_sv: str
+    reference: str
     repository: str
     resources: str
     revision: str
@@ -258,23 +284,47 @@ class NalloConfig(CommonAppConfig):
     workflow_bin_path: str
 
 
+class VerifybamidSvdFiles(BaseModel):
+    bed: Path
+    mu: Path
+    ud: Path
+
+
+class VerifybamidSvdFilesSet(BaseModel):
+    wes: VerifybamidSvdFiles
+    wgs: VerifybamidSvdFiles
+
+
+class GCNVCallerFiles(BaseModel):
+    gcnvcaller_model: Path
+    ploidy_model: Path
+    readcount_intervals: Path
+
+
 class RarediseaseConfig(CommonAppConfig):
     binary_path: str | None = None
     conda_binary: str | None = None
     conda_env: str
     config: str
+    default_target_bed: str
+    gcnvcaller: dict[str, GCNVCallerFiles]
     launch_directory: str
     params: str
     pipeline_deliverables: str
     platform: str
     pre_run_script: str = ""
     profile: str
+    rank_model_snv: str
+    rank_model_sv: str
+    reference: str
+    references_directory: Path
     repository: str
     resources: str
     revision: str
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    verifybamid_svd: VerifybamidSvdFilesSet
     workflow_bin_path: str
 
 
@@ -366,6 +416,11 @@ class EmailBaseSettings(BaseModel):
     smtp_server: str
 
 
+class FreshdeskConfig(BaseModel):
+    api_key: str
+    base_url: str
+
+
 class FOHMConfig(BaseModel):
     host: str
     port: int
@@ -429,6 +484,11 @@ class PostProcessingServices(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
+class GENSConfig(BaseModel):
+    binary_path: str
+    config_path: str
+
+
 class CGConfig(BaseModel):
     data_input: DataInput | None = None
     database: str
@@ -465,10 +525,10 @@ class CGConfig(BaseModel):
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
+    nats: NatsConfig
     external: ExternalConfig = None
-    genotype: CommonAppConfig = None
-    genotype_api_: GenotypeAPI = None
-    gens: CommonAppConfig = None
+    freshdesk: FreshdeskConfig
+    gens: GENSConfig | None = None
     gens_api_: GensAPI = None
     hermes: HermesConfig = None
     hermes_api_: HermesApi = None
@@ -482,6 +542,8 @@ class CGConfig(BaseModel):
     loqusdb_somatic: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC.value)
     loqusdb_tumor: CommonAppConfig = Field(None, alias=LoqusdbInstance.TUMOR.value)
     loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
+    loqusdb_wes_38: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES38.value)
+    loqusdb_wgs: CommonAppConfig = Field(None, alias=LoqusdbInstance.WGS38.value)
     loqusdb_somatic_lymphoid: CommonAppConfig = Field(
         None, alias=LoqusdbInstance.SOMATIC_LYMPHOID.value
     )
@@ -490,8 +552,8 @@ class CGConfig(BaseModel):
     )
     loqusdb_somatic_exome: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC_EXOME.value)
     madeline_api_: MadelineAPI = None
-    mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
-    mutacc_auto_api_: MutaccAutoAPI = None
+    mutacc_auto_hg19: MutaccAutoConfig
+    mutacc_auto_hg38: MutaccAutoConfig
     pdc: CommonAppConfig | None = None
     pdc_service_: PdcService | None = None
     post_processing_services_: PostProcessingServices | None = None
@@ -568,21 +630,17 @@ class CGConfig(BaseModel):
         return demultiplex_api
 
     @property
-    def genotype_api(self) -> GenotypeAPI:
-        api = self.__dict__.get("genotype_api_")
-        if api is None:
-            LOG.debug("Instantiating genotype api")
-            api = GenotypeAPI(config=self.dict())
-            self.genotype_api_ = api
-        return api
-
-    @property
     def gens_api(self) -> GensAPI:
         """Returns Gens API after making sure it has been instantiated."""
         api = self.__dict__.get("gens_api_")
         if api is None:
             LOG.debug("Instantiating gens api")
-            api = GensAPI(config=self.dict())
+            api = GensAPI(
+                config=GENSConfig(
+                    binary_path=self.gens.binary_path,
+                    config_path=self.gens.config_path,
+                )
+            )
             self.gens_api_ = api
         return api
 
@@ -640,15 +698,6 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating madeline api")
             api = MadelineAPI(config=self.dict())
             self.madeline_api_ = api
-        return api
-
-    @property
-    def mutacc_auto_api(self) -> MutaccAutoAPI:
-        api = self.__dict__.get("mutacc_auto_api_")
-        if api is None:
-            LOG.debug("Instantiating mutacc_auto api")
-            api = MutaccAutoAPI(config=self.dict())
-            self.mutacc_auto_api_ = api
         return api
 
     @property
@@ -812,6 +861,7 @@ class CGConfig(BaseModel):
             rsync_config = RsyncDeliveryConfig(**self.data_delivery.dict())
             service = DeliveryRsyncService(
                 delivery_path=self.delivery_path,
+                nats_config=self.nats,
                 rsync_config=rsync_config,
                 status_db=self.status_db,
             )

@@ -24,7 +24,7 @@ class StorePacBioOrderService(StoreOrderService):
 
     def store_order(self, order: PacbioOrder) -> dict:
         """Store the order in the statusDB and LIMS, return the database samples and LIMS info."""
-        project_data, lims_map = self.lims.process_lims(
+        project_data, lims_samples = self.lims.process_lims(
             samples=order.samples,
             ticket=order._generated_ticket_id,
             order_name=order.name,
@@ -33,7 +33,8 @@ class StorePacBioOrderService(StoreOrderService):
             delivery_type=DataDelivery(order.delivery_type),
             skip_reception_control=order.skip_reception_control,
         )
-        self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
+        self._fill_in_sample_ids(samples=order.samples, lims_samples=lims_samples)
+        self._queue_samples_in_workflow(lims_samples)
         new_samples = self.store_order_data_in_status_db(order=order)
         return {"project": project_data, "records": new_samples}
 
@@ -114,6 +115,7 @@ class StorePacBioOrderService(StoreOrderService):
             internal_id=sample._generated_lims_id,
             lims_status=lims_status,
             name=sample.name,
+            no_invoice=application_version.application.is_external,
             order=order_name,
             ordered=datetime.now(),
             original_ticket=ticket_id,

@@ -28,7 +28,7 @@ class StoreMetagenomeOrderService(StoreOrderService):
 
     def store_order(self, order: MetagenomeOrder) -> dict:
         """Submit a batch of metagenome samples."""
-        project_data, lims_map = self.lims.process_lims(
+        project_data, lims_samples = self.lims.process_lims(
             samples=order.samples,
             customer=order.customer,
             ticket=order._generated_ticket_id,
@@ -37,7 +37,8 @@ class StoreMetagenomeOrderService(StoreOrderService):
             delivery_type=DataDelivery(order.delivery_type),
             skip_reception_control=order.skip_reception_control,
         )
-        self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
+        self._fill_in_sample_ids(samples=order.samples, lims_samples=lims_samples)
+        self._queue_samples_in_workflow(lims_samples)
         new_samples = self.store_order_data_in_status_db(order)
         return {"project": project_data, "records": new_samples}
 
@@ -104,6 +105,7 @@ class StoreMetagenomeOrderService(StoreOrderService):
             internal_id=sample._generated_lims_id,
             lims_status=lims_status,
             name=sample.name,
+            no_invoice=application_version.application.is_external,
             order=order.name,
             ordered=datetime.now(),
             original_ticket=order._generated_ticket_id,

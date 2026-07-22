@@ -6,7 +6,6 @@ import logging
 import rich_click as click
 
 from cg.cli.generate.delivery_report.base import generate_delivery_report
-from cg.cli.upload.scout import upload_to_scout
 from cg.constants import (
     REPORT_SUPPORTED_DATA_DELIVERY,
     REPORT_SUPPORTED_WORKFLOW,
@@ -40,13 +39,17 @@ class NfAnalysisUploadAPI(UploadAPI):
         ):
             ctx.invoke(generate_delivery_report, case_id=case.internal_id)
 
-        # Clinical delivery
-        self.upload_files_to_customer_inbox(case)
-
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
+            from cg.cli.upload.scout import upload_to_scout
+
             ctx.invoke(upload_to_scout, case_id=case.internal_id, re_upload=restart)
-        LOG.info(
-            f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
-        )
-        self.update_uploaded_at(analysis=analysis)
+
+        # Clinical delivery
+        if case.is_to_be_uploaded_to_customer_inbox:
+            self.upload_files_to_customer_inbox(case)
+        else:
+            LOG.info(
+                f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
+            )
+            self.update_uploaded_at(analysis=analysis)

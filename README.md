@@ -12,7 +12,7 @@
 In this context, `cg` provides the interface between these tools to facilitate automation and other necessary cross-talk. It also exposes some APIs:
 
 - HTTP REST for powering the web portal: [clinical.scilifelab.se][portal]
-- CLI for interactions on the command line
+- CLI for interactions on the command line.
 
 ### Contributing
 

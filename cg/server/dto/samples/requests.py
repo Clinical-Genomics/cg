@@ -1,7 +1,21 @@
+from enum import StrEnum
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
+from cg.constants import Workflow
 from cg.constants.lims import LimsStatus
+from cg.constants.priority import TrailblazerPriority
 from cg.models.orders.constants import OrderType
+
+
+class SortDirection(StrEnum):
+    ASCENDING = "asc"
+    DESCENDING = "desc"
+
+
+class UnhandledSamplesSortBy(StrEnum):
+    TICKET = "ticket"
 
 
 class CollaboratorSamplesRequest(BaseModel):
@@ -31,3 +45,8 @@ class UnhandledSamplesRequest(BaseModel):
     lims_status: LimsStatus
     page: int
     page_size: int
+    priority: TrailblazerPriority | None = None
+    search: str | None = None
+    sort_by: UnhandledSamplesSortBy | None = None
+    sort_order: SortDirection | None = None
+    workflow: Workflow | Literal["unknown"] | None = None

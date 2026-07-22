@@ -5,7 +5,7 @@ from datetime import datetime
 from pydantic import AfterValidator, BaseModel, ConfigDict
 from typing_extensions import Annotated, Literal
 
-from cg.constants.scout import UploadTrack
+from cg.constants.scout import ScoutAnalysisType, UploadTrack
 from cg.models.scout.validators import field_not_none
 
 
@@ -16,7 +16,7 @@ class ChromographImages(BaseModel):
     upd_sites: str | None = None
 
 
-class Eklipse(BaseModel):
+class CustomImage(BaseModel):
     title: str | None = None
     description: str | None = None
     width: str | None = None
@@ -25,7 +25,7 @@ class Eklipse(BaseModel):
 
 
 class CaseImages(BaseModel):
-    eKLIPse: list[Eklipse] | None = None
+    saltshaker: list[CustomImage] | None = None
 
 
 class CustomImages(BaseModel):
@@ -38,12 +38,13 @@ class Reviewer(BaseModel):
     vcf: str | None = None
     catalog: str | None = None
     trgt: bool | None = None
+    reference: str | None = None
 
 
 class ScoutIndividual(BaseModel):
     alignment_path: str | None = None
     rna_alignment_path: str | None = None
-    analysis_type: Annotated[str | None, AfterValidator(field_not_none)] = None
+    analysis_type: Annotated[ScoutAnalysisType | None, AfterValidator(field_not_none)] = None
     capture_kit: str | None = None
     confirmed_parent: bool | None = None
     confirmed_sex: bool | None = None
@@ -118,7 +119,9 @@ class ScoutLoadConfig(BaseModel):
     human_genome_build: str = None
     rank_model_version: str | None = None
     rank_score_threshold: int = None
+    rank_model_url: str | None = None
     sv_rank_model_version: str | None = None
+    sv_rank_model_url: str | None = None
     analysis_date: datetime | None = None
     samples: list[ScoutIndividual] = []
     customer_images: CustomImages | None = None
@@ -165,6 +168,7 @@ class MipLoadConfig(ScoutLoadConfig):
 
 class NalloLoadConfig(ScoutLoadConfig):
     madeline: str | None = None
+    paraphrase: str | None = None
     peddy_check: str | None = None
     peddy_ped: str | None = None
     peddy_sex: str | None = None

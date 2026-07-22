@@ -1,7 +1,8 @@
 import datetime as dt
-from unittest.mock import PropertyMock, create_autospec, patch
+from unittest.mock import Mock, PropertyMock, create_autospec, patch
 
 import pytest
+from genologics.entities import Sample as LimsSample
 
 from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.models import TicketResponse
@@ -11,7 +12,6 @@ from cg.meta.orders.utils import get_ticket_status, get_ticket_tags
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
-from cg.services.orders.storing.constants import MAF_ORDER_ID
 from cg.services.orders.submitter.service import OrderSubmitter
 from cg.services.orders.validation.errors.validation_errors import ValidationErrors
 from cg.services.orders.validation.models.case import Case as ValidationCase
@@ -23,31 +23,44 @@ from cg.services.orders.validation.models.order_with_samples import OrderWithSam
 from cg.services.orders.validation.models.sample import Sample as ValidationSample
 from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
-from cg.store.models import Application, Case
-from cg.store.models import Order as DbOrder
-from cg.store.models import Pool, Sample, User
+from cg.store.models import Application, Case, Pool, Sample, User
 from cg.store.store import Store
 
 
 def monkeypatch_process_lims(monkeypatch: pytest.MonkeyPatch, order: Order) -> None:
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     if isinstance(order, OrderWithSamples):
-        lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order.samples)}
+        lims_samples: list[LimsSample] = []
+        for index, sample in enumerate(order.samples):
+            lims_sample: LimsSample = create_autospec(
+                LimsSample,
+                id=f"ELH123A{index}",
+                udf={"Sequencing Analysis": "WGSWPFC030"},
+            )
+            lims_sample.name = sample.name
+            lims_samples.append(lims_sample)
     elif isinstance(order, OrderWithCases):
-        lims_map = {
-            sample.name: f"ELH123A{case_index}-{sample_index}"
-            for case_index, sample_index, sample in order.enumerated_new_samples
-        }
+        lims_samples: list[LimsSample] = []
+        for case_index, sample_index, sample in order.enumerated_new_samples:
+            lims_sample: LimsSample = create_autospec(
+                LimsSample,
+                id=f"ELH123A{case_index}-{sample_index}",
+                udf={"Sequencing Analysis": "WGSWPFC030"},
+            )
+            lims_sample.name = sample.name
+            lims_samples.append(lims_sample)
+
     monkeypatch.setattr(
         "cg.services.orders.lims_service.service.OrderLimsService.process_lims",
-        lambda *args, **kwargs: (lims_project_data, lims_map),
+        lambda *args, **kwargs: (lims_project_data, lims_samples),
     )
 
 
-def mock_freshdesk_ticket_creation(mock_create_ticket: callable, ticket_id: str):
+def mock_freshdesk_ticket_creation(mock_create_ticket: Mock, ticket_id: str):
     """Helper function to mock Freshdesk ticket creation."""
     mock_create_ticket.return_value = TicketResponse(
         id=int(ticket_id),
+        cc_emails=["email@to.cc"],
         description="This is a test description.",
         subject="Support needed..",
         status=2,
@@ -55,7 +68,7 @@ def mock_freshdesk_ticket_creation(mock_create_ticket: callable, ticket_id: str)
     )
 
 
-def mock_freshdesk_reply_to_ticket(mock_reply_to_ticket: callable):
+def mock_freshdesk_reply_to_ticket(mock_reply_to_ticket: Mock):
     """Helper function to mock Freshdesk reply to ticket."""
     mock_reply_to_ticket.return_value = None
 
@@ -206,6 +219,7 @@ def order_with_existing_case_and_external_sample(existing_case_id: str) -> Order
     ],
 )
 def test_submit_order(
+    mocker,
     store_to_submit_and_validate_orders: Store,
     monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
@@ -223,11 +237,6 @@ def test_submit_order(
     assert not store_to_submit_and_validate_orders._get_query(table=Sample).first()
     assert not store_to_submit_and_validate_orders._get_query(table=Case).first()
     assert not store_to_submit_and_validate_orders._get_query(table=Pool).first()
-
-    # GIVEN that the only order in store is a MAF order
-    orders: list[DbOrder] = store_to_submit_and_validate_orders._get_query(table=DbOrder).all()
-    assert len(orders) == 1
-    assert orders[0].id == MAF_ORDER_ID
 
     # GIVEN a ticketing system that returns a ticket number
     with (
@@ -432,4 +441,5 @@ def test_get_ticket_status(
     status = get_ticket_status(order=order)
 
     # THEN the status should be correct
+    assert status == expected_status
     assert status == expected_status

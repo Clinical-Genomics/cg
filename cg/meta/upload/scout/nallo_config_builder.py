@@ -5,14 +5,13 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
+from cg.constants.constants import GenomeBuild
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.constants.scout import (
     NALLO_CASE_TAGS,
-    NALLO_RANK_MODEL_THRESHOLD,
     NALLO_RANK_MODEL_VERSION_SNV,
     NALLO_RANK_MODEL_VERSION_SV,
     NALLO_SAMPLE_TAGS,
-    GenomeBuild,
     UploadTrack,
 )
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
@@ -61,7 +60,7 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         )
         self.include_pedigree_picture(load_config=load_config, analysis=analysis)
         load_config.human_genome_build = GenomeBuild.hg38
-        load_config.rank_score_threshold = NALLO_RANK_MODEL_THRESHOLD
+        load_config.rank_score_threshold = self.nallo_analysis_api.rank_model_threshold
         load_config.rank_model_version = NALLO_RANK_MODEL_VERSION_SNV
         load_config.sv_rank_model_version = NALLO_RANK_MODEL_VERSION_SV
         return load_config
@@ -124,13 +123,13 @@ class NalloConfigBuilder(ScoutConfigBuilder):
             sample_id=sample_id,
             hk_version=hk_version,
         )
-        alignment_and_mt_bam_path: str | None = self.get_sample_file(
+        alignment_cram_path: str | None = self.get_sample_file(
             hk_tags=cast(set[str], self.sample_tags.alignment_path),
             sample_id=sample_id,
             hk_version=hk_version,
         )
-        config_sample.alignment_path = alignment_and_mt_bam_path
-        config_sample.mt_bam = alignment_and_mt_bam_path
+        config_sample.alignment_path = alignment_cram_path
+        config_sample.mt_bam = alignment_cram_path
         config_sample.phase_blocks = self.get_sample_file(
             hk_tags=cast(set[str], self.sample_tags.phase_blocks),
             sample_id=sample_id,
@@ -149,3 +148,6 @@ class NalloConfigBuilder(ScoutConfigBuilder):
             )
             else None
         )
+
+    def _get_reviewer_reference_file(self) -> str:
+        return self.nallo_analysis_api.reference

@@ -5,11 +5,13 @@ from unittest.mock import Mock, create_autospec
 import pytest
 from requests import Response
 
+from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.constants import Workflow
 from cg.exc import TrailblazerAPIHTTPError
-from cg.server.ext import AnalysisClient, FlaskStore
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
-from cg.store.models import Analysis, Case, CaseSample, Sample
+from cg.store.models import Analysis, Case, CaseSample, Order, Sample
+from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
@@ -19,28 +21,27 @@ def trailblazer_id() -> int:
 
 
 @pytest.fixture
-def analysis_client() -> TypedMock[AnalysisClient]:
+def trailblazer_api() -> TypedMock[TrailblazerAPI]:
     """TrailblazerAPI for endpoints."""
-    return create_typed_mock(AnalysisClient)
+    return create_typed_mock(TrailblazerAPI)
 
 
 @pytest.fixture
-def status_db() -> FlaskStore:
+def status_db() -> Store:
     """Store for endpoints."""
-    return create_autospec(FlaskStore)
+    return create_autospec(Store)
 
 
 @pytest.fixture
 def mark_as_delivered_service(
-    analysis_client: TypedMock[AnalysisClient], status_db: FlaskStore
+    trailblazer_api: TypedMock[TrailblazerAPI], status_db: Store
 ) -> MarkAsDeliveredService:
-    return MarkAsDeliveredService(status_db=status_db, trailblazer_api=analysis_client.as_type)
+    return MarkAsDeliveredService(status_db=status_db, trailblazer_api=trailblazer_api.as_type)
 
 
 def test_mark_analyses_success(
-    analysis_client: TypedMock[AnalysisClient],
+    trailblazer_api: TypedMock[TrailblazerAPI],
     mark_as_delivered_service: MarkAsDeliveredService,
-    status_db: FlaskStore,
     trailblazer_id: int,
 ):
     # GIVEN samples that should be delivered
@@ -68,7 +69,7 @@ def test_mark_analyses_success(
     tb_response = Response()
     tb_response.status_code = 200
     tb_response._content = json.dumps({"key": "value"}).encode("utf-8")
-    analysis_client.as_type.mark_analyses_as_delivered = Mock(return_value=tb_response)
+    trailblazer_api.as_type.set_analyses_delivery_status = Mock(return_value=tb_response)
 
     # WHEN we call mark_analyses
     response: Response = mark_as_delivered_service.mark_analyses([analysis_1, analysis_2])
@@ -78,18 +79,34 @@ def test_mark_analyses_success(
     assert sample_2.delivered_at is not None
 
     # THEN endpoint in Trailblazer was called
-    analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id, 555555], auth_token=None
+    trailblazer_api.as_mock.set_analyses_delivery_status.assert_called_once_with(
+        is_delivered=True, trailblazer_ids=[trailblazer_id, 555555], auth_token=None, signature=None
     )
 
     # THEN we should return the Trailblazer response
     assert response == tb_response
 
 
-def test_mark_analyses_mix_original_non_original_samples(
-    analysis_client: TypedMock[AnalysisClient],
+def test_mark_analyses_with_signature(
+    trailblazer_api: TypedMock[TrailblazerAPI],
     mark_as_delivered_service: MarkAsDeliveredService,
-    status_db: FlaskStore,
+    trailblazer_id: int,
+):
+    # GIVEN a signature and an analysis
+    analysis = create_autospec(Analysis, trailblazer_id=trailblazer_id)
+
+    # WHEN marking an analysis as delivered by a user
+    mark_as_delivered_service.mark_analyses(analyses=[analysis], signature="CG")
+
+    # THEN trailblazer should have been called with the user signature
+    trailblazer_api.as_mock.set_analyses_delivery_status.assert_called_once_with(
+        is_delivered=True, trailblazer_ids=[trailblazer_id], auth_token=None, signature="CG"
+    )
+
+
+def test_mark_analyses_mix_original_non_original_samples(
+    trailblazer_api: TypedMock[TrailblazerAPI],
+    mark_as_delivered_service: MarkAsDeliveredService,
     trailblazer_id: int,
 ):
     """Tests that delivering a case with a new sample and an existing sample will only deliver the new sample."""
@@ -119,15 +136,14 @@ def test_mark_analyses_mix_original_non_original_samples(
     assert sample_existing.delivered_at is None
 
     # THEN endpoint in Trailblazer was called
-    analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id], auth_token=None
+    trailblazer_api.as_mock.set_analyses_delivery_status.assert_called_once_with(
+        is_delivered=True, trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
     )
 
 
 def test_mark_analyses_rerun_case(
-    analysis_client: TypedMock[AnalysisClient],
+    trailblazer_api: TypedMock[TrailblazerAPI],
     mark_as_delivered_service: MarkAsDeliveredService,
-    status_db: FlaskStore,
     trailblazer_id: int,
 ):
     """Tests that delivering a case with already delivered samples does not deliver them again."""
@@ -157,15 +173,14 @@ def test_mark_analyses_rerun_case(
     assert sample_2.delivered_at is yesterday
 
     # THEN endpoint in Trailblazer was called
-    analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id], auth_token=None
+    trailblazer_api.as_mock.set_analyses_delivery_status.assert_called_once_with(
+        is_delivered=True, trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
     )
 
 
 def test_mark_analyses_mixed_delivered_at_original_samples(
-    analysis_client: TypedMock[AnalysisClient],
+    trailblazer_api: TypedMock[TrailblazerAPI],
     mark_as_delivered_service: MarkAsDeliveredService,
-    status_db: FlaskStore,
     trailblazer_id: int,
 ):
     """Tests that delivering a case with one already delivered original sample does not deliver that sample again."""
@@ -195,16 +210,15 @@ def test_mark_analyses_mixed_delivered_at_original_samples(
     assert sample_2.delivered_at is not None
 
     # THEN endpoint in Trailblazer was called
-    analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id], auth_token=None
+    trailblazer_api.as_mock.set_analyses_delivery_status.assert_called_once_with(
+        is_delivered=True, trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
     )
 
 
 @pytest.mark.parametrize("workflow", [Workflow.MICROSALT, Workflow.TAXPROFILER])
 def test_mark_analyses_partial_delivery(
-    analysis_client: TypedMock[AnalysisClient],
+    trailblazer_api: TypedMock[TrailblazerAPI],
     mark_as_delivered_service: MarkAsDeliveredService,
-    status_db: FlaskStore,
     trailblazer_id: int,
     workflow: Workflow,
 ):
@@ -238,23 +252,23 @@ def test_mark_analyses_partial_delivery(
     assert sample_not_enough_reads.delivered_at is None
 
     # THEN endpoint in Trailblazer was called
-    analysis_client.as_mock.mark_analyses_as_delivered.assert_called_once_with(
-        trailblazer_ids=[trailblazer_id], auth_token=None
+    trailblazer_api.as_mock.set_analyses_delivery_status.assert_called_once_with(
+        is_delivered=True, trailblazer_ids=[trailblazer_id], auth_token=None, signature=None
     )
 
 
 def test_mark_analyses_trailblazer_error(
-    status_db: FlaskStore,
+    status_db: Store,
     trailblazer_id: int,
 ):
     """Test that a TrailblazerAPIHTTPError is propagated from the service."""
     # GIVEN a TrailblazerAPI that fails
-    analysis_client = create_autospec(AnalysisClient)
-    analysis_client.mark_analyses_as_delivered = Mock(side_effect=TrailblazerAPIHTTPError)
+    trailblazer_api = create_autospec(TrailblazerAPI)
+    trailblazer_api.set_analyses_delivery_status = Mock(side_effect=TrailblazerAPIHTTPError)
 
     # GIVEN a service that marks the analysis as delivered
     mark_as_delivered_service = MarkAsDeliveredService(
-        status_db=status_db, trailblazer_api=analysis_client
+        status_db=status_db, trailblazer_api=trailblazer_api
     )
 
     # GIVEN a case to be delivered
@@ -271,7 +285,7 @@ def test_mark_analyses_trailblazer_error(
 
 
 def test_mark_analyses_negative_control(
-    status_db: FlaskStore, trailblazer_id: int, mark_as_delivered_service: MarkAsDeliveredService
+    trailblazer_id: int, mark_as_delivered_service: MarkAsDeliveredService
 ):
     # GIVEN a negative control sample with lower reads than what the apptag expects
     negative_control_sample: Sample = create_autospec(
@@ -297,3 +311,118 @@ def test_mark_analyses_negative_control(
 
     # THEN the sample should have a delivered_at set
     assert negative_control_sample.delivered_at is not None
+
+
+def test_mark_analyses_two_cases_one_sample(mark_as_delivered_service: MarkAsDeliveredService):
+    # GIVEN that a customer orders a case with a sample
+    sample: Sample = create_autospec(
+        Sample, delivered_at=None, expected_reads_for_sample=1, reads=1
+    )
+    case_1: Case = create_autospec(Case, internal_id="case_1", samples=[sample])
+    case_sample_1: CaseSample = create_autospec(
+        CaseSample, case=case_1, sample=sample, should_deliver_sample=True
+    )
+    case_1.links = [case_sample_1]
+    order_1: Order = create_autospec(Order, cases=[case_1], is_open=True)
+
+    # GIVEN that a customer orders a new case with the same sample (without the first case having been delivered)
+    case_2: Case = create_autospec(Case, internal_id="case_2", samples=[sample])
+    case_sample_2: CaseSample = create_autospec(
+        CaseSample, case=case_2, sample=sample, should_deliver_sample=False
+    )
+    case_2.links = [case_sample_2]
+    order_2: Order = create_autospec(Order, cases=[case_2], is_open=True)
+
+    # GIVEN that the second order finishes first
+    analysis: TrailblazerAnalysis = create_autospec(TrailblazerAnalysis, case_id="case_2")
+    mark_as_delivered_service.trailblazer_api.get_delivered_analyses_for_order = Mock(
+        return_value=[analysis]
+    )
+
+    # WHEN delivering the second order
+    mark_as_delivered_service.close_order_in_status_db_if_closable(order_2)
+
+    # THEN the first order should be open
+    assert order_1.is_open
+
+    # THEN the second order should be closed
+    assert not order_2.is_open
+
+
+def test_is_order_closable_true(mark_as_delivered_service: MarkAsDeliveredService):
+    # GIVEN an open order with a case that includes only delivered samples
+    sample_delivered1: Sample = create_autospec(Sample, delivered_at=datetime.now())
+    sample_delivered2: Sample = create_autospec(Sample, delivered_at=datetime.now())
+    case: Case = create_autospec(
+        Case, samples=[sample_delivered1, sample_delivered2], internal_id="case_id"
+    )
+    case.links = [
+        create_autospec(
+            CaseSample, case=case, sample=sample_delivered1, should_deliver_sample=True
+        ),
+        create_autospec(
+            CaseSample, case=case, sample=sample_delivered2, should_deliver_sample=True
+        ),
+    ]
+    order: Order = create_autospec(Order, cases=[case])
+
+    # GIVEN that the case has a delivered analysis in Trailblazer
+    analysis: TrailblazerAnalysis = create_autospec(TrailblazerAnalysis, case_id="case_id")
+    mark_as_delivered_service.trailblazer_api.get_delivered_analyses_for_order = Mock(
+        return_value=[analysis]
+    )
+
+    # WHEN checking if the order can be closed
+    # THEN it returns True
+    assert mark_as_delivered_service._is_order_closable(order)
+
+
+def test_is_order_closeable_false_undelivered_samples(
+    mark_as_delivered_service: MarkAsDeliveredService,
+):
+    # GIVEN an open order with a case that includes undelivered samples
+    sample_delivered1: Sample = create_autospec(Sample, delivered_at=datetime.now())
+    sample_delivered2: Sample = create_autospec(Sample, delivered_at=None)
+    case: Case = create_autospec(
+        Case, samples=[sample_delivered1, sample_delivered2], internal_id="case_id"
+    )
+    case.links = [
+        create_autospec(
+            CaseSample, case=case, sample=sample_delivered1, should_deliver_sample=True
+        ),
+        create_autospec(
+            CaseSample, case=case, sample=sample_delivered2, should_deliver_sample=True
+        ),
+    ]
+    order: Order = create_autospec(Order, cases=[case])
+
+    # GIVEN that the case has a delivered analysis in Trailblazer
+    analysis: TrailblazerAnalysis = create_autospec(TrailblazerAnalysis, case_id="case_id")
+    mark_as_delivered_service.trailblazer_api.get_delivered_analyses_for_order = Mock(
+        return_value=[analysis]
+    )
+
+    # WHEN checking if the order can be closed
+    # THEN it returns False
+    assert not mark_as_delivered_service._is_order_closable(order)
+
+
+def test_is_order_closeable_false_undelivered_analysis(
+    mark_as_delivered_service: MarkAsDeliveredService,
+):
+    # GIVEN an open order with a case that includes only samples that have a delivered_at
+    sample_delivered1: Sample = create_autospec(Sample, delivered_at=datetime.now())
+    sample_delivered2: Sample = create_autospec(Sample, delivered_at=datetime.now())
+    case: Case = create_autospec(
+        Case, samples=[sample_delivered1, sample_delivered2], internal_id="case_id"
+    )
+    order: Order = create_autospec(Order, cases=[case])
+
+    # GIVEN that the case has no delivered analyses in Trailblazer
+    mark_as_delivered_service.trailblazer_api.get_delivered_analyses_for_order = Mock(
+        return_value=[]
+    )
+
+    # WHEN checking if the order can be closed
+    # THEN it returns False
+    assert not mark_as_delivered_service._is_order_closable(order)

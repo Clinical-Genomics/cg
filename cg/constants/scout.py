@@ -6,11 +6,6 @@ from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
 HGNC_ID = "hgnc_id"
 
 
-class GenomeBuild(StrEnum):
-    hg19: str = "37"
-    hg38: str = "38"
-
-
 class ScoutExportFileName(StrEnum):
     MANAGED_VARIANTS = f"managed_variants{FileExtensions.VCF}"
     PANELS = f"gene_panels{FileExtensions.BED}"
@@ -54,8 +49,8 @@ RAREDISEASE_CASE_TAGS = dict(
     vcf_mei_research={"mobile-elements", "research", "vcf"},
     vcf_snv_research={"vcf-snv-research"},
     vcf_snv={"vcf-snv-clinical"},
-    vcf_snv_research_mt={"vcf-sv-research", "mitochondria"},
-    vcf_snv_mt={"vcf-sv-clinical", "mitochondria"},
+    vcf_snv_research_mt={"vcf-snv-research", "mitochondria"},
+    vcf_snv_mt={"vcf-snv-clinical", "mitochondria"},
     vcf_sv_research={"vcf-sv-research"},
     vcf_sv={"vcf-sv-clinical"},
     vcf_str={"vcf-str"},
@@ -64,6 +59,7 @@ RAREDISEASE_CASE_TAGS = dict(
 NALLO_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
     multiqc={"multiqc-html"},
+    paraphrase={"paraphrase"},
     peddy_check={"ped-check", "peddy"},
     peddy_ped={"ped", "peddy"},
     somalier_samples={"somalier", "relate-samples"},
@@ -122,7 +118,7 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
     alignment_file={AlignmentFileTag.CRAM},
     vcf2cytosure={"vcf2cytosure"},
     mt_bam={"bam-mt"},
-    eklipse_path={"eklipse-png"},
+    saltshaker_path={"saltshaker-png"},
     chromograph_autozyg={"chromograph", "autozyg"},
     chromograph_coverage={"chromograph", "tcov"},
     chromograph_regions={"chromograph", "regions"},
@@ -132,19 +128,20 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
     reviewer_vcf={"expansionhunter", "vcf-str"},
     reviewer_catalog={"expansionhunter", "variant-catalog"},
     mitodel_file={"mitodel"},
+    tiddit_coverage_wig={"bigwig", "tiddit-coverage"},
 )
 
 NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
-    alignment_path={AlignmentFileTag.BAM, "haplotags"},
-    assembly_alignment_path={AlignmentFileTag.BAM, "assembly"},
+    alignment_path={AlignmentFileTag.CRAM, "haplotags"},
+    assembly_alignment_path={AlignmentFileTag.CRAM, "assembly"},
     chromograph_autozyg={"chromograph", "autozyg"},
     chromograph_coverage={"chromograph", "tcov"},
     d4_file={"coverage", "d4"},
     hificnv_coverage={"hificnv", "bigwig"},
-    paraphase_alignment_path={AlignmentFileTag.BAM, NalloAnalysisTag.PARAPHASE},
+    paraphase_alignment_path={AlignmentFileTag.CRAM, NalloAnalysisTag.PARAPHASE},
     phase_blocks={"whatshap", "gtf"},
-    reviewer_alignment={"repeats", "spanning", "bam"},
-    reviewer_alignment_index={"repeats", "spanning", "bam-index"},
+    reviewer_alignment={"repeats", "spanning", AlignmentFileTag.CRAM},
+    reviewer_alignment_index={"repeats", "spanning", AlignmentFileTag.CRAM_INDEX},
     reviewer_vcf={"repeats", "sorted", "vcf"},
     reviewer_catalog={"trgt", "variant-catalog"},
     minor_allele_frequency_wig={"hificnv", "bigwig", "maf"},
@@ -188,7 +185,6 @@ RNAFUSION_SAMPLE_TAGS = dict(
 
 RANK_MODEL_THRESHOLD = 5
 
-NALLO_RANK_MODEL_THRESHOLD = 8
 NALLO_RANK_MODEL_VERSION_SNV = "1.0"
 NALLO_RANK_MODEL_VERSION_SV = "1.0"
 

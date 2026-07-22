@@ -11,11 +11,13 @@ from sqlalchemy import (
     Column,
     ForeignKey,
     Numeric,
+    SQLColumnExpression,
     String,
     Table,
 )
 from sqlalchemy import Text as SLQText
-from sqlalchemy import UniqueConstraint, orm, types
+from sqlalchemy import UniqueConstraint, orm, select, types
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
@@ -31,9 +33,10 @@ from cg.constants.constants import (
 )
 from cg.constants.devices import DeviceType, RevioNames
 from cg.constants.lims import LimsStatus
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import PriorityTerms, SlurmQos, TrailblazerPriority
 from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
+from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.models.orders.constants import OrderType
 
 BigInt = Annotated[int, None]
@@ -112,9 +115,9 @@ order_case = Table(
 
 class PriorityMixin:
     @property
-    def priority_human(self) -> str:
+    def priority_human(self) -> PriorityTerms:
         """Humanized priority for sample."""
-        return self.priority.name
+        return PriorityTerms(self.priority.name)
 
     @priority_human.setter
     def priority_human(self, priority: str) -> None:
@@ -181,6 +184,7 @@ class Application(Base):
         "OrderTypeApplication",
         back_populates="application",
     )
+    lims_workflow_id: Mapped[int | None]
 
     @property
     def order_types(self) -> list[OrderType]:
@@ -203,14 +207,14 @@ class Application(Base):
 
     @property
     def expected_hifi_yield(self) -> int | None:
-        if self.target_hifi_yield and self.percent_hifi_yield_guaranteed:
+        if self.target_hifi_yield is not None and self.percent_hifi_yield_guaranteed is not None:
             return round(self.target_hifi_yield * self.percent_hifi_yield_guaranteed / 100)
         else:
             return None
 
     @property
     def expected_express_hifi_yield(self) -> int | None:
-        return round(self.target_hifi_yield * 0.5) if self.target_hifi_yield else None
+        return round(self.target_hifi_yield * 0.5) if self.target_hifi_yield is not None else None
 
     @property
     def analysis_type(self) -> str:
@@ -302,6 +306,8 @@ class Analysis(Base):
     trailblazer_id: Mapped[int | None]
     housekeeper_version_id: Mapped[int | None]
     session_id: Mapped[str | None]
+    order_id: Mapped[int | None] = mapped_column(ForeignKey("order.id"))
+    order: Mapped["Order"] = orm.relationship(back_populates="analyses")
 
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
@@ -523,6 +529,10 @@ class Case(Base, PriorityMixin):
     def latest_ticket(self) -> str | None:
         """Returns the last ticket the family was ordered in"""
         return self.tickets.split(sep=",")[-1] if self.tickets else None
+
+    @property
+    def is_to_be_uploaded_to_customer_inbox(self) -> bool:
+        return not DataDelivery(self.data_delivery).excludes_customer_inbox_delivery
 
     @property
     def original_order(self) -> "Order | None":
@@ -854,7 +864,7 @@ class Sample(Base, PriorityMixin):
         return self.application_version.application.tag
 
     @property
-    def prep_category(self) -> str:
+    def prep_category(self) -> SeqLibraryPrepCategory:
         """Return the preparation category of the sample."""
         return self.application_version.application.prep_category
 
@@ -888,28 +898,112 @@ class Sample(Base, PriorityMixin):
         return None
 
     @property
-    def original_case(self) -> Case | None:
-        """Return the original case of the sample if it exists."""
-        if cases := [link.case for link in self.links]:
-            return min(cases, key=lambda case: case.created_at)
+    def case_that_delivers(self) -> Case | None:
+        """Returns the case that should deliver this sample."""
+        if case_samples_that_deliver := [link for link in self.links if link.should_deliver_sample]:
+            # we only expect one of these
+            return case_samples_that_deliver[0].case
         else:
             return None
 
+    @hybrid_property
+    def priority_of_case_that_delivers(
+        self,
+    ) -> Priority | None:  # pyright: ignore [reportRedeclaration]
+        if case := self.case_that_delivers:
+            return case.priority
+        else:
+            return None
+
+    @priority_of_case_that_delivers.expression
+    @classmethod
+    def priority_of_case_that_delivers(cls) -> SQLColumnExpression[Priority]:
+        return (
+            select(Case.priority)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .limit(1)
+            .label("priority_of_case_that_delivers")
+        )
+
     @property
-    def original_workflow(self) -> Workflow | None:
+    def trailblazer_priority_of_case_that_delivers(self) -> TrailblazerPriority | None:
+        if case := self.case_that_delivers:
+            return MAP_TO_TRAILBLAZER_PRIORITY[case.priority]
+        else:
+            return None
+
+    @hybrid_property
+    def delivering_case_internal_id(self) -> str | None:  # pyright: ignore [reportRedeclaration]
+        if case := self.case_that_delivers:
+            return case.internal_id
+        return None
+
+    # noinspection PyNestedDecorators
+    @delivering_case_internal_id.expression
+    @classmethod
+    def delivering_case_internal_id(cls) -> SQLColumnExpression[str]:
+        return (
+            select(Case.internal_id)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .limit(1)
+            .label("delivering_case_internal_id")
+        )
+
+    @hybrid_property
+    def workflow_of_case_that_delivers(  # pyright: ignore [reportRedeclaration]
+        self,
+    ) -> Workflow | None:
         """Return the workflow of the original case if the case exists."""
-        if case := self.original_case:
+        if case := self.case_that_delivers:
             return case.data_analysis
         else:
             return None
 
-    @property
-    def ticket_id_from_original_order(self) -> int | None:
-        """Return the original ticket id of the sample if it is linked to any ticket."""
-        if self.original_case and self.original_case.original_order:
-            return self.original_case.original_order.ticket_id
-        else:
-            return None
+    # noinspection PyNestedDecorators
+    @workflow_of_case_that_delivers.expression
+    @classmethod
+    def workflow_of_case_that_delivers(cls) -> SQLColumnExpression[Workflow]:
+        return (
+            select(Case.data_analysis)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .limit(1)
+            .label("workflow_of_case_that_delivers")
+        )
+
+    @hybrid_property
+    def ticket_id_from_original_order(self) -> int | None:  # pyright: ignore [reportRedeclaration]
+        if self.case_that_delivers and self.case_that_delivers.original_order:
+            return self.case_that_delivers.original_order.ticket_id
+        return None
+
+    # noinspection PyNestedDecorators
+    @ticket_id_from_original_order.expression
+    @classmethod
+    def ticket_id_from_original_order(cls) -> SQLColumnExpression[int]:
+        return (
+            select(Order.ticket_id)
+            .join(Order.cases)
+            .join(CaseSample, CaseSample.case_id == Case.id)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .order_by(Order.order_date.asc())
+            .limit(1)
+            .label("ticket_id_from_original_order")
+        )
 
     def to_dict(self, links: bool = False) -> dict:
         """Represent as dictionary"""
@@ -990,6 +1084,9 @@ class Order(Base):
     order_date: Mapped[datetime] = mapped_column(default=datetime.now)
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
     is_open: Mapped[bool] = mapped_column(default=True)
+    analyses: Mapped[list[Analysis]] = orm.relationship(
+        back_populates="order", order_by="Analysis.created_at"
+    )
 
     @property
     def workflow(self) -> Workflow:
@@ -1222,7 +1319,7 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
     hifi_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
     hifi_median_read_quality: Mapped[Str32]
-    polymerase_mean_read_length: Mapped[BigInt]
+    polymerase_mean_read_length: Mapped[BigInt | None]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
     instrument_run = orm.relationship(PacbioSMRTCellMetrics, back_populates="sample_metrics")

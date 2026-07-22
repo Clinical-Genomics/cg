@@ -93,10 +93,6 @@ class HkMipAnalysisTag:
     SAMPLE_INFO: list[str] = ["sample-info"]
 
 
-class NFAnalysisTags:
-    MANIFEST: str = "manifest"
-
-
 class BalsamicAnalysisTag:
     CONFIG: list[str] = ["balsamic-config"]
     QC_METRICS: list[str] = ["qc-metrics", "deliverable"]
@@ -107,17 +103,9 @@ class NalloAnalysisTag:
     PARAPHASE: str = "paraphase"
 
 
-class HkAnalysisMetricsTag:
-    QC_METRICS: set[str] = {"qc-metrics", "deliverable"}
-
-
 class GensAnalysisTag:
     COVERAGE: list[str] = ["gens", "coverage", "bed"]
     FRACSNP: list[str] = ["gens", "fracsnp", "bed"]
-
-
-class GenotypeAnalysisTag:
-    GENOTYPE: str = "genotype"
 
 
 class BalsamicProtectedTags:
@@ -226,6 +214,9 @@ WORKFLOW_PROTECTED_TAGS = {
         ["multiqc-json"],
         ["gisaid-log"],
         ["gisaid-csv"],
+    ],
+    Workflow.NALLO: [
+        [HermesFileTag.LONG_TERM_STORAGE],
     ],
     Workflow.RAREDISEASE: [
         [HermesFileTag.LONG_TERM_STORAGE],

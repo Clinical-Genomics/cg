@@ -7,9 +7,11 @@ from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
 from cg.constants.lims import LimsStatus
+from cg.constants.priority import TrailblazerPriority
 from cg.exc import SampleNotFoundError
+from cg.server.dto.samples.requests import SortDirection, UnhandledSamplesSortBy
 from cg.server.endpoints import samples
-from cg.store.models import Customer, Sample
+from cg.store.models import Case, Customer, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -103,6 +105,7 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
     date_time = datetime(2024, 12, 24, 11, 59)
     sample_1 = create_autospec(
         Sample,
+        case_that_delivers=create_autospec(Case, internal_id="case_1"),
         customer=create_autospec(Customer, interal_id="external_customer"),
         delivered_at=None,
         from_sample=None,
@@ -110,7 +113,9 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
         is_cancelled=False,
         last_sequenced_at=date_time,
         lims_status=LimsStatus.TOP_UP,
-        original_workflow=Workflow.RAREDISEASE,
+        trailblazer_priority_of_case_that_delivers=TrailblazerPriority.NORMAL,
+        delivering_case_internal_id="case_1",
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
         ticket_id_from_original_order=123456,
     )
     status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([sample_1], 1))
@@ -130,7 +135,9 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
     assert response.json == {
         "samples": [
             {
-                "internal_id": "sample_1",
+                "case_id": "case_1",
+                "sample_id": "sample_1",
+                "case_priority": "normal",
                 "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
                 "lims_status": "top-up",
                 "ticket": 123456,
@@ -142,7 +149,14 @@ def test_get_unhandled_samples(client: FlaskClient, mocker: MockerFixture):
 
     # THEN function has been called with the correct arguments
     status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
-        lims_status=LimsStatus.TOP_UP, page=1, page_size=10
+        lims_status=LimsStatus.TOP_UP,
+        search=None,
+        page=1,
+        page_size=10,
+        trailblazer_priority=None,
+        sort_by=None,
+        sort_order=None,
+        workflow=None,
     )
 
 
@@ -155,3 +169,376 @@ def test_get_unhandled_samples_invalid_input(client: FlaskClient):
 
     # THEN we should get a bad request response
     assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_get_unhandled_samples_sample_search(client: FlaskClient, mocker: MockerFixture):
+    # GIVEN a store with unhandled samples in top-up
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    date_time = datetime(2024, 12, 24, 11, 59)
+    sample_1 = create_autospec(
+        Sample,
+        customer=create_autospec(Customer, interal_id="external_customer"),
+        delivered_at=None,
+        from_sample=None,
+        internal_id="sample_1",
+        is_cancelled=False,
+        last_sequenced_at=date_time,
+        lims_status=LimsStatus.TOP_UP,
+        delivering_case_internal_id="case_1",
+        trailblazer_priority_of_case_that_delivers=TrailblazerPriority.NORMAL,
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
+        ticket_id_from_original_order=123456,
+    )
+    status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([sample_1], 1))
+    mocker.patch.object(samples, "db", status_db.as_type)
+
+    # GIVEN a request to get unhandled samples that are in top-up
+
+    # WHEN calling the endpoint to get unhandled samples
+    response = client.get(
+        path="/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=10&search=sample_1",
+    )
+
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.OK
+
+    # THEN samples should be returned
+    assert response.json == {
+        "samples": [
+            {
+                "case_id": "case_1",
+                "sample_id": "sample_1",
+                "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
+                "lims_status": "top-up",
+                "case_priority": "normal",
+                "ticket": 123456,
+                "workflow": "raredisease",
+            }
+        ],
+        "total": 1,
+    }
+
+    # THEN function has been called with the correct arguments
+    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
+        lims_status=LimsStatus.TOP_UP,
+        search="sample_1",
+        page=1,
+        page_size=10,
+        trailblazer_priority=None,
+        sort_by=None,
+        sort_order=None,
+        workflow=None,
+    )
+
+
+def test_get_unhandled_samples_sort_ticket_ascending(client: FlaskClient, mocker: MockerFixture):
+    # GIVEN a store with unhandled samples in top-up
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    date_time = datetime(2024, 12, 24, 11, 59)
+    sample_larger_ticket_number = create_autospec(
+        Sample,
+        customer=create_autospec(Customer, interal_id="external_customer"),
+        delivered_at=None,
+        from_sample=None,
+        internal_id="sample_larger_ticket_number",
+        is_cancelled=False,
+        last_sequenced_at=date_time,
+        lims_status=LimsStatus.TOP_UP,
+        delivering_case_internal_id="case_1",
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
+        ticket_id_from_original_order=2,
+        trailblazer_priority_of_case_that_delivers=TrailblazerPriority.NORMAL,
+    )
+    sample_smaller_ticket_number = create_autospec(
+        Sample,
+        customer=create_autospec(Customer, interal_id="external_customer"),
+        delivered_at=None,
+        from_sample=None,
+        internal_id="sample_smaller_ticket_number",
+        is_cancelled=False,
+        last_sequenced_at=date_time,
+        lims_status=LimsStatus.TOP_UP,
+        delivering_case_internal_id="case_2",
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
+        ticket_id_from_original_order=1,
+        trailblazer_priority_of_case_that_delivers=TrailblazerPriority.NORMAL,
+    )
+    sample_case_unknown = create_autospec(
+        Sample,
+        customer=create_autospec(Customer, interal_id="external_customer"),
+        delivered_at=None,
+        from_sample=None,
+        internal_id="sample_case_unknown",
+        is_cancelled=False,
+        last_sequenced_at=date_time,
+        lims_status=LimsStatus.TOP_UP,
+        delivering_case_internal_id=None,
+        workflow_of_case_that_delivers=None,
+        ticket_id_from_original_order=None,
+        trailblazer_priority_of_case_that_delivers=TrailblazerPriority.NORMAL,
+    )
+    status_db.as_type.get_paginated_unhandled_samples = Mock(
+        return_value=(
+            [sample_case_unknown, sample_smaller_ticket_number, sample_larger_ticket_number],
+            3,
+        )
+    )
+    mocker.patch.object(samples, "db", status_db.as_type)
+
+    # WHEN querying the unhandles samples endpoint with sorting on ticket
+    response = client.get(
+        path="/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=10&sort_by=ticket&sort_order=asc",
+    )
+
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.OK
+
+    # THEN samples should be returned
+    assert response.json == {
+        "samples": [
+            {
+                "case_id": "unknown",
+                "sample_id": "sample_case_unknown",
+                "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
+                "lims_status": "top-up",
+                "case_priority": "normal",
+                "ticket": "unknown",
+                "workflow": "unknown",
+            },
+            {
+                "case_id": "case_2",
+                "sample_id": "sample_smaller_ticket_number",
+                "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
+                "lims_status": "top-up",
+                "case_priority": "normal",
+                "ticket": 1,
+                "workflow": "raredisease",
+            },
+            {
+                "case_id": "case_1",
+                "sample_id": "sample_larger_ticket_number",
+                "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
+                "lims_status": "top-up",
+                "case_priority": "normal",
+                "ticket": 2,
+                "workflow": "raredisease",
+            },
+        ],
+        "total": 3,
+    }
+
+    # THEN function has been called with the correct arguments
+    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=10,
+        trailblazer_priority=None,
+        search=None,
+        sort_by=UnhandledSamplesSortBy.TICKET,
+        sort_order=SortDirection.ASCENDING,
+        workflow=None,
+    )
+
+
+def test_get_unhandled_samples_sort_ticket_descending(client: FlaskClient, mocker: MockerFixture):
+    # GIVEN a store with unhandled samples in top-up
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    date_time = datetime(2024, 12, 24, 11, 59)
+    sample_larger_ticket_number = create_autospec(
+        Sample,
+        customer=create_autospec(Customer, interal_id="external_customer"),
+        delivered_at=None,
+        from_sample=None,
+        internal_id="sample_larger_ticket_number",
+        is_cancelled=False,
+        last_sequenced_at=date_time,
+        lims_status=LimsStatus.TOP_UP,
+        delivering_case_internal_id="case_1",
+        trailblazer_priority_of_case_that_delivers=TrailblazerPriority.NORMAL,
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
+        ticket_id_from_original_order=2,
+    )
+    sample_smaller_ticket_number = create_autospec(
+        Sample,
+        customer=create_autospec(Customer, interal_id="external_customer"),
+        delivered_at=None,
+        from_sample=None,
+        internal_id="sample_smaller_ticket_number",
+        is_cancelled=False,
+        last_sequenced_at=date_time,
+        lims_status=LimsStatus.TOP_UP,
+        delivering_case_internal_id="case_2",
+        trailblazer_priority_of_case_that_delivers=TrailblazerPriority.NORMAL,
+        workflow_of_case_that_delivers=Workflow.RAREDISEASE,
+        ticket_id_from_original_order=1,
+    )
+    sample_case_unkown = create_autospec(
+        Sample,
+        customer=create_autospec(Customer, interal_id="external_customer"),
+        delivered_at=None,
+        from_sample=None,
+        internal_id="sample_case_unkown",
+        is_cancelled=False,
+        last_sequenced_at=date_time,
+        lims_status=LimsStatus.TOP_UP,
+        delivering_case_internal_id=None,
+        trailblazer_priority_of_case_that_delivers=TrailblazerPriority.NORMAL,
+        workflow_of_case_that_delivers=None,
+        ticket_id_from_original_order=None,
+    )
+    status_db.as_type.get_paginated_unhandled_samples = Mock(
+        return_value=(
+            [sample_larger_ticket_number, sample_smaller_ticket_number, sample_case_unkown],
+            3,
+        )
+    )
+    mocker.patch.object(samples, "db", status_db.as_type)
+
+    # WHEN querying the unhandled samples endpoint with descending sort on ticket
+    response = client.get(
+        path="/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=10&sort_by=ticket&sort_order=desc",
+    )
+
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.OK
+
+    # THEN samples should be returned
+    assert response.json == {
+        "samples": [
+            {
+                "case_id": "case_1",
+                "sample_id": "sample_larger_ticket_number",
+                "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
+                "lims_status": "top-up",
+                "case_priority": "normal",
+                "ticket": 2,
+                "workflow": "raredisease",
+            },
+            {
+                "case_id": "case_2",
+                "sample_id": "sample_smaller_ticket_number",
+                "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
+                "lims_status": "top-up",
+                "case_priority": "normal",
+                "ticket": 1,
+                "workflow": "raredisease",
+            },
+            {
+                "case_id": "unknown",
+                "sample_id": "sample_case_unkown",
+                "last_sequenced_at": "Tue, 24 Dec 2024 11:59:00 GMT",
+                "lims_status": "top-up",
+                "case_priority": "normal",
+                "ticket": "unknown",
+                "workflow": "unknown",
+            },
+        ],
+        "total": 3,
+    }
+
+    # THEN function has been called with the correct arguments
+    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=10,
+        trailblazer_priority=None,
+        search=None,
+        sort_by=UnhandledSamplesSortBy.TICKET,
+        sort_order=SortDirection.DESCENDING,
+        workflow=None,
+    )
+
+
+def test_get_unhandled_samples_filter_on_workflow(client: FlaskClient, mocker: MockerFixture):
+    # GIVEN a store with unhandled samples in top-up
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([], 0))
+    mocker.patch.object(samples, "db", status_db.as_type)
+
+    # WHEN querying the unhandled samples endpoint with workflow Raredisease
+    response = client.get(
+        path=f"/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=10&workflow={Workflow.RAREDISEASE}",
+    )
+
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.OK
+
+    # THEN function has been called with the correct arguments
+    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=10,
+        trailblazer_priority=None,
+        search=None,
+        sort_by=None,
+        sort_order=None,
+        workflow=Workflow.RAREDISEASE,
+    )
+
+
+def test_get_unhandled_samples_filter_on_unknown_workflow(
+    client: FlaskClient, mocker: MockerFixture
+):
+    # GIVEN a store with unhandled samples in top-up
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([], 0))
+    mocker.patch.object(samples, "db", status_db.as_type)
+
+    # WHEN querying the unhandled samples endpoint with workflow Raredisease
+    response = client.get(
+        path="/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=10&workflow=unknown",
+    )
+
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.OK
+
+    # THEN function has been called with the correct arguments
+    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=10,
+        trailblazer_priority=None,
+        search=None,
+        sort_by=None,
+        sort_order=None,
+        workflow="unknown",
+    )
+
+
+def test_get_unhandled_samples_filter_on_priority(client: FlaskClient, mocker: MockerFixture):
+    # GIVEN a store with unhandled samples in top-up
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_paginated_unhandled_samples = Mock(return_value=([], 0))
+    mocker.patch.object(samples, "db", status_db.as_type)
+
+    # WHEN querying the unhandled samples endpoint with workflow Raredisease
+    response = client.get(
+        path=f"/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=10&priority={TrailblazerPriority.EXPRESS}",
+    )
+
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.OK
+
+    # THEN function has been called with the correct arguments
+    status_db.as_mock.get_paginated_unhandled_samples.assert_called_once_with(
+        lims_status=LimsStatus.TOP_UP,
+        page=1,
+        page_size=10,
+        trailblazer_priority=TrailblazerPriority.EXPRESS,
+        search=None,
+        sort_by=None,
+        sort_order=None,
+        workflow=None,
+    )
+
+
+def test_get_unhandled_samples_unknown_param(client: FlaskClient, mocker: MockerFixture):
+    # GIVEN an unknown param in the request
+
+    # WHEN querying the unhandled samples endpoint with descending sort on ticket
+    response = client.get(
+        path="/api/v1/unhandled_samples?lims_status=top-up&page=1&page_size=10&search=whatIsThis?",
+    )
+
+    # THEN the response should be successful
+    assert response.status_code == HTTPStatus.OK

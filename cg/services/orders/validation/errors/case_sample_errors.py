@@ -142,6 +142,11 @@ class SexSubjectIdError(CaseSampleError):
     message: str = "Another sample with the same subject id has a different sex"
 
 
+class SexUnknownWarning(CaseSampleError):
+    field: str = "warnings"
+    message: str = "This sample has unknown sex. This may delay delivery and affect the results"
+
+
 class CaptureKitResetError(CaseSampleError):
     field: str = "warnings"
     message: str = "No bait set will be used, since it is not required for this application."
@@ -205,3 +210,13 @@ class NormalSampleNotAllowedError(CaseSampleError):
 class TumourValueResetError(CaseSampleError):
     field: str = "warnings"
     message: str = "The tumour status was overridden to True. Required for RNAFusion analysis."
+
+
+class MissingDNASampleError(CaseSampleError):
+    field: str = "subject_id"
+    message: str = "No matching DNA sample found for this subject ID with matching tumour status."
+
+
+class NoSubjectIDError(CaseSampleError):
+    field: str = "subject_id"
+    message: str = "Chosen sample has no Subject ID and can't be linked to any DNA sample in Scout."

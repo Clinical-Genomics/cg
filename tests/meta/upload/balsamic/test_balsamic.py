@@ -1,59 +1,110 @@
-"""Tests API upload methods for balsamic cases"""
+from pathlib import Path
+from typing import cast
+from unittest.mock import Mock
 
-from cg.meta.upload.gt import UploadGenotypesAPI
-from cg.models.cg_config import CGConfig
-from cg.store.models import Case
-from tests.cli.workflow.balsamic.conftest import (
-    balsamic_context,
-    balsamic_housekeeper,
-    balsamic_housekeeper_dir,
-    balsamic_lims,
-    balsamic_mock_fastq_files,
-    fastq_file_l_1_r_1,
-    fastq_file_l_1_r_2,
-    fastq_file_l_2_r_1,
-    fastq_file_l_2_r_2,
-    fastq_file_l_3_r_1,
-    fastq_file_l_3_r_2,
-    fastq_file_l_4_r_1,
-    fastq_file_l_4_r_2,
+import click
+import pytest
+from mock import create_autospec
+from pytest_mock import MockerFixture
+from sqlalchemy.orm import Session
+
+from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
+from cg.models.cg_config import (
+    BalsamicConfig,
+    CGConfig,
+    IlluminaConfig,
+    RunInstruments,
+    SlurmConfig,
 )
+from cg.store.models import Analysis, Case
+from cg.store.store import Store
 
 
-def test_genotype_check_wgs_normal(balsamic_context: CGConfig):
-    """Test a cancer case with WHOLE_GENOME_SEQUENCING and normal sample that is Genotype compatible."""
-    # GIVEN a balsamic case with WHOLE_GENOME_SEQUENCING tag and a normal sample
-    internal_id = "balsamic_case_wgs_paired_enough_reads"
-    case: Case = balsamic_context.status_db.get_case_by_internal_id(internal_id=internal_id)
+@pytest.fixture
+def cg_config() -> CGConfig:
+    return create_autospec(
+        CGConfig,
+        balsamic=create_autospec(
+            BalsamicConfig,
+            balsamic_cache=Path("balsamic_cache"),
+            bed_path=Path("bed_path"),
+            binary_path="balsamic_binary",
+            cache_version="autospec_data",
+            cadd_path="autospec_data",
+            cancer_genelist="autospec_data",
+            conda_binary="autospec_data",
+            conda_env="autospec_data",
+            cosmic_path="autospec_data",
+            genome_interval_path="autospec_data",
+            gens_coverage_female_path="autospec_data",
+            gens_coverage_male_path="autospec_data",
+            gnomad_af5_path="autospec_data",
+            head_job_partition="autospec_data",
+            loqusdb_path="autospec_data",
+            pon_path="pon_path",
+            slurm=create_autospec(
+                SlurmConfig,
+                account="account",
+                mail_user="mail@clinicalgenomics.se",
+                qos="high",
+            ),
+            root="root",
+            sentieon_licence_path="autospec_data",
+            sentieon_licence_server="autospec_data",
+            swegen_path="autospec_drata",
+            swegen_snv="rautospec_data",
+            swegen_sv="rautospec_data",
+        ),
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+        ),
+    )
 
-    # WHEN checking if the case is Genotype upload compatible
-    passed_check = UploadGenotypesAPI.is_suitable_for_genotype_upload(case)
 
-    # THEN it should return True
-    assert passed_check
+def test_upload_with_case_uploading_to_customer_inbox(cg_config: CGConfig, mocker: MockerFixture):
+    # GIVEN a store with an analysis
+    analysis: Analysis = create_autospec(Analysis)
+    case: Case = create_autospec(Case, is_to_be_uploaded_to_customer_inbox=True)
+    status_db: Store = create_autospec(Store, session=create_autospec(Session))
+    status_db.get_latest_completed_analysis_for_case = Mock(return_value=analysis)
+    cast(Mock, cg_config).status_db = status_db
+
+    # GIVEN a BalsamicUploadAPI
+    balsamic_upload_api = BalsamicUploadAPI(config=cg_config)
+    balsamic_upload_api.upload_files_to_customer_inbox = Mock()
+    update_uploaded_at_spy = mocker.spy(BalsamicUploadAPI, "update_uploaded_at")
+
+    # WHEN uploading a case
+    balsamic_upload_api.upload(ctx=create_autospec(click.Context), case=case, restart=False)
+
+    # THEN files should have been uploaded to the customer inbox
+    balsamic_upload_api.upload_files_to_customer_inbox.assert_called_once_with(case)
+
+    # THEN the analysis uploaded_at is not set yet
+    update_uploaded_at_spy.assert_not_called()
 
 
-def test_genotype_check_non_wgs_normal(balsamic_context: CGConfig):
-    """Test a cancer case with no WHOLE_GENOME_SEQUENCING sample that is not Genotype compatible."""
-    # GIVEN a balsamic case with a normal sample, but no WHOLE_GENOME_SEQUENCING tag
-    internal_id = "balsamic_case_tgs_paired"
-    case: Case = balsamic_context.status_db.get_case_by_internal_id(internal_id=internal_id)
+def test_upload_with_case_not_uploading_to_customer_inbox(
+    cg_config: CGConfig, mocker: MockerFixture
+):
+    # GIVEN a store with an analysis
+    analysis: Analysis = create_autospec(Analysis)
+    case: Case = create_autospec(Case, is_to_be_uploaded_to_customer_inbox=False)
+    status_db: Store = create_autospec(Store, session=create_autospec(Session))
+    status_db.get_latest_completed_analysis_for_case = Mock(return_value=analysis)
+    cast(Mock, cg_config).status_db = status_db
 
-    # WHEN checking if the case is Genotype upload compatible
-    passed_check = UploadGenotypesAPI.is_suitable_for_genotype_upload(case)
+    # GIVEN a BalsamicUploadAPI
+    balsamic_upload_api = BalsamicUploadAPI(config=cg_config)
+    balsamic_upload_api.upload_files_to_customer_inbox = Mock()
+    update_uploaded_at_spy = mocker.spy(BalsamicUploadAPI, "update_uploaded_at")
 
-    # THEN it should return False
-    assert not passed_check
+    # WHEN uploading a case
+    balsamic_upload_api.upload(ctx=create_autospec(click.Context), case=case, restart=False)
 
+    # THEN files should have been uploaded to the customer inbox
+    balsamic_upload_api.upload_files_to_customer_inbox.assert_not_called()
 
-def test_genotype_check_only_tumour(balsamic_context: CGConfig):
-    """Test a cancer case with only a tumour sample that is not Genotype compatible."""
-    # GIVEN a balsamic case with only tumour sample
-    internal_id = "balsamic_case_wgs_single"
-    case: Case = balsamic_context.status_db.get_case_by_internal_id(internal_id=internal_id)
-
-    # WHEN checking if the case is Genotype upload compatible
-    passed_check = UploadGenotypesAPI.is_suitable_for_genotype_upload(case)
-
-    # THEN it should return False
-    assert not passed_check
+    # THEN the analysis uploaded at is set
+    update_uploaded_at_spy.assert_called_once()

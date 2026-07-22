@@ -56,7 +56,12 @@ class AnalysisAPI(MetaAPI):
     def __init__(self, workflow: Workflow, config: CGConfig):
         super().__init__(config=config)
         self.workflow = workflow
-        if self.workflow == Workflow.NALLO:
+        if self.workflow in [
+            Workflow.MIP_RNA,
+            Workflow.NALLO,
+            Workflow.RAREDISEASE,
+            Workflow.TOMTE,
+        ]:
             self.scout_api: ScoutAPI = self.scout_api_38
         else:
             self.scout_api: ScoutAPI = self.scout_api_37
@@ -236,6 +241,7 @@ class AnalysisAPI(MetaAPI):
             primary=is_primary,
             started_at=analysis_start,
             trailblazer_id=trailblazer_id,
+            order_id=case.latest_order.id,
         )
         new_analysis.case = case
         self.status_db.add_item_to_store(new_analysis)

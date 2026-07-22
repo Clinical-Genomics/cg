@@ -52,7 +52,6 @@ def test_set_mandatory_to_none(delivery_report_html: Path):
         config.vcf_snv = None
 
 
-@pytest.mark.xfail(reason="Validation not in place")
 def test_scout_individual_invalid_analysis_type():
     # GIVEN a ScoutIndividual
     scout_individual: ScoutIndividual = ScoutIndividual()
@@ -60,4 +59,4 @@ def test_scout_individual_invalid_analysis_type():
     # WHEN trying to set an invalid analysis type
     # THEN a ValidationError is raised
     with pytest.raises(ValidationError):
-        scout_individual.analysis_type = "any_type_that_scout_does_not_support"
+        scout_individual.analysis_type = "any_type_that_scout_does_not_support"  # type: ignore
