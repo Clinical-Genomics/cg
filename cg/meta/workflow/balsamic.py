@@ -8,14 +8,11 @@ from pydantic import EmailStr
 from pydantic.v1 import ValidationError
 
 from cg.constants import Workflow
-from cg.constants.constants import BedVersionGenomeVersion, FileFormat, GenomeVersion, SampleType
+from cg.constants.constants import FileFormat, GenomeVersion, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
-from cg.constants.observations import BalsamicObservationPanel, ObservationsFileWildcards
 from cg.constants.priority import SlurmQos
 from cg.constants.scout import BALSAMIC_CASE_TAGS
-from cg.constants.sequencing import SeqLibraryPrepCategory, Variants
-from cg.constants.subject import Sex
-from cg.exc import BalsamicStartError, CgError
+from cg.exc import CgError
 from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
@@ -27,27 +24,15 @@ from cg.models.balsamic.metrics import (
     BalsamicWGSQCMetrics,
 )
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import Case, Sample
 from cg.utils import Process
-from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
+from cg.utils.utils import build_command_from_dict
 
 LOG = logging.getLogger(__name__)
 
 
-PANELS_WITH_LOQUSDB_DUMP_FILES_MAP: dict[str, str] = {
-    BalsamicObservationPanel.MYELOID: "loqusdb_cancer_somatic_myeloid_snv_variants_export-20250920-.vcf.gz",
-    BalsamicObservationPanel.LYMPHOID: "loqusdb_cancer_somatic_lymphoid_snv_variants_export-20250920-.vcf.gz",
-    BalsamicObservationPanel.EXOME: "loqusdb_cancer_somatic_exome_snv_variants_export-20250920-.vcf.gz",
-}
-
-LOQUSDB_WGS_DUMP_FILE = "loqusdb_artefact_somatic_sv_variants_export-20250920-.vcf.gz"
-
-
 class BalsamicAnalysisAPI(AnalysisAPI):
     """Handles communication between BALSAMIC processes and the rest of CG infrastructure."""
-
-    __BALSAMIC_APPLICATIONS = {"wgs", "wes", "tgs"}
-    __BALSAMIC_BED_APPLICATIONS = {"wes", "tgs"}
 
     def __init__(
         self,
@@ -91,12 +76,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 binary=self.binary_path, conda_binary=self.conda_binary, environment=self.conda_env
             )
         return self._process
-
-    @property
-    def PON_file_suffix(self) -> str:
-        """Panel of normals reference file suffix (<panel-bed>_<PON>_<version>.cnn)"""
-
-        return "CNVkit_PON_reference_v*.cnn"
 
     def get_case_path(self, case_id: str) -> Path:
         """Returns a path where the Balsamic case for the case_id should be located"""
@@ -163,138 +142,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if sample_obj.is_tumour:
             return SampleType.TUMOR
         return SampleType.NORMAL
-
-    def get_derived_bed(self, panel_bed: str) -> Path | None:
-        """Returns the verified capture kit path or the derived panel BED path."""
-        if not panel_bed:
-            return None
-        panel_bed: Path = Path(panel_bed)
-        if panel_bed.is_file():
-            return panel_bed
-        derived_panel_bed: Path = Path(
-            self.bed_path,
-            self.status_db.get_bed_version_by_short_name_and_genome_version_strict(
-                short_name=panel_bed.as_posix(), genome_version=BedVersionGenomeVersion.HG19
-            ).filename,
-        )
-        if not derived_panel_bed.is_file():
-            raise BalsamicStartError(
-                f"{panel_bed} or {derived_panel_bed} are not valid paths to a BED file. "
-                f"Please provide absolute path to desired BED file or a valid bed shortname!"
-            )
-        return derived_panel_bed
-
-    def get_verified_bed(self, panel_bed: str, sample_data: dict) -> str | None:
-        """Takes a dict with samples and attributes.
-        Retrieves unique attributes for application type and target_bed.
-        Verifies that those attributes are the same across multiple samples,
-        where applicable.
-        Verifies that the attributes are valid BALSAMIC attributes
-        If application type requires bed, returns path to bed.
-
-        Raises BalsamicStartError:
-        - When application type invalid for balsamic
-        - When multiple samples have different parameters
-        - When bed file required for analysis, but is not set or cannot be retrieved.
-        """
-
-        panel_bed: Path | None = self.get_derived_bed(panel_bed)
-        application_types = {v["application_type"].lower() for k, v in sample_data.items()}
-        target_beds: set = {v["target_bed"] for k, v in sample_data.items()}
-
-        if not application_types.issubset(self.__BALSAMIC_APPLICATIONS):
-            raise BalsamicStartError("Case application not compatible with BALSAMIC")
-        if len(application_types) != 1:
-            raise BalsamicStartError("Multiple application types found in LIMS")
-        if not application_types.issubset(self.__BALSAMIC_BED_APPLICATIONS):
-            if panel_bed:
-                raise BalsamicStartError("Cannot set panel_bed for WHOLE_GENOME_SEQUENCING sample!")
-            return None
-        if panel_bed:
-            return panel_bed.as_posix()
-        if len(target_beds) == 1:
-            target_bed = target_beds.pop()
-            if not target_bed:
-                raise BalsamicStartError(
-                    f"Application type {application_types.pop()} requires a bed file to be analyzed!"
-                )
-            return Path(self.bed_path, target_bed).as_posix()
-
-    def get_verified_pon(self, panel_bed: str, pon_cnn: str) -> str | None:
-        """Returns the validated PON or extracts the latest one available if it is not provided
-
-        Raises BalsamicStartError:
-            When there is a missmatch between the PON and the panel bed file names
-        """
-
-        if pon_cnn:
-            latest_pon = pon_cnn
-            if Path(panel_bed).stem not in Path(latest_pon).stem:
-                raise BalsamicStartError(
-                    f"The specified PON reference file {latest_pon} does not match the panel bed {panel_bed}"
-                )
-        else:
-            latest_pon = self.get_latest_pon_file(panel_bed)
-            if latest_pon:
-                LOG.info(
-                    f"The following PON reference file will be used for the analysis: {latest_pon}"
-                )
-
-        return latest_pon
-
-    def get_latest_pon_file(self, panel_bed: str) -> str | None:
-        """Returns the latest PON cnn file associated to a specific capture bed"""
-
-        if not panel_bed:
-            raise BalsamicStartError("BALSAMIC PON workflow requires a panel bed to be specified")
-
-        pon_list = Path(self.pon_path).glob(f"*{Path(panel_bed).stem}_{self.PON_file_suffix}")
-        sorted_pon_files = sorted(
-            pon_list,
-            key=lambda file: int(file.stem.split("_v")[-1]),
-            reverse=True,
-        )
-
-        return sorted_pon_files[0].as_posix() if sorted_pon_files else None
-
-    @staticmethod
-    def get_verified_sex(sample_data: dict) -> Sex:
-        """Takes a dict with samples and attributes, and returns a verified case sex provided by the customer."""
-        sex: Sex = next(iter(sample_data.values()))["sex"]
-        if all(val["sex"] == sex for val in sample_data.values()) and sex in set(
-            value for value in Sex
-        ):
-            return sex
-        else:
-            LOG.error(f"Unable to retrieve a valid sex from samples: {sample_data.keys()}")
-            raise BalsamicStartError
-
-    def get_verified_samples(self, case_id: str) -> dict[str, str]:
-        """Return a verified tumor and normal sample dictionary."""
-        tumor_samples: list[Sample] = self.status_db.get_samples_by_type(
-            case_id=case_id, sample_type=SampleType.TUMOR
-        )
-        normal_samples: list[Sample] = self.status_db.get_samples_by_type(
-            case_id=case_id, sample_type=SampleType.NORMAL
-        )
-        if (
-            not tumor_samples
-            and not normal_samples
-            or len(tumor_samples) > 1
-            or len(normal_samples) > 1
-        ):
-            LOG.error(f"Case {case_id} has an invalid number of samples")
-            raise BalsamicStartError
-
-        tumor_sample_id: str = tumor_samples[0].internal_id if tumor_samples else None
-        normal_sample_id: str = normal_samples[0].internal_id if normal_samples else None
-        if normal_sample_id and not tumor_sample_id:
-            LOG.warning(
-                f"Only a normal sample was found for case {case_id}. "
-                f"Balsamic analysis will treat it as a tumor sample."
-            )
-            tumor_sample_id, normal_sample_id = normal_sample_id, None
-        return {"tumor_sample_name": tumor_sample_id, "normal_sample_name": normal_sample_id}
 
     def get_latest_raw_file_data(self, case_id: str, tags: list) -> dict | list:
         """Retrieves the data of the latest file associated to a specific case ID and a list of tags."""
@@ -373,283 +220,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return metrics
 
-    @staticmethod
-    def get_latest_file_by_pattern(directory: Path, pattern: str) -> str | None:
-        """Returns the latest file (<file_name>-<date>-.vcf.gz) matching a pattern from a specific directory."""
-        available_files: iter = sorted(
-            Path(directory).glob(f"*{pattern}*.vcf.gz"),
-            key=lambda file: file.stem.split("-"),
-            reverse=True,
-        )
-        return str(available_files[0]) if available_files else None
-
-    def get_parsed_observation_file_paths(self, observations: list[str]) -> dict:
-        """Returns a verified {option: path} observations dictionary."""
-        verified_observations: dict[str, str] = {}
-        for wildcard in list(ObservationsFileWildcards):
-            file_path: str = get_string_from_list_by_pattern(observations, wildcard)
-            verified_observations.update(
-                {
-                    wildcard: (
-                        file_path
-                        if file_path
-                        else self.get_latest_file_by_pattern(
-                            directory=self.loqusdb_path, pattern=wildcard
-                        )
-                    )
-                }
-            )
-
-        return verified_observations
-
-    def get_verified_gens_file_paths(self, sex: Sex, panel_bed: str) -> dict[str, str]:
-        """Return a list of file path arguments for Gens."""
-        if panel_bed:
-            return {
-                "gnomad_min_af5": self.gnomad_af5_path,
-            }
-        return {
-            "genome_interval": self.genome_interval_path,
-            "gnomad_min_af5": self.gnomad_af5_path,
-            "gens_coverage_pon": (
-                self.gens_coverage_male_path if sex == Sex.MALE else self.gens_coverage_female_path
-            ),
-        }
-
-    def get_swegen_verified_path(self, variants: Variants) -> str | None:
-        """Return verified SweGen path."""
-        swegen_file: str = self.get_latest_file_by_pattern(
-            directory=self.swegen_path, pattern=variants
-        )
-        return swegen_file
-
-    def should_soft_filter_normal(
-        self, config_case: dict, verified_panel_bed: str | None
-    ) -> dict[str, bool]:
-        """Sets soft_filter_normal to True for all TGA tumor normal paired analyses."""
-        return {
-            "soft_filter_normal": bool(
-                config_case["tumor_sample_name"]
-                and config_case["normal_sample_name"]
-                and verified_panel_bed
-            )
-        }
-
-    def get_verified_config_case_arguments(
-        self,
-        case_id: str,
-        genome_version: str,
-        panel_bed: str,
-        pon_cnn: str,
-        observations: list[str] = None,
-        sex: str | None = None,
-    ) -> dict:
-        """Takes a dictionary with per-sample parameters,
-        validates them, and transforms into command line arguments
-        Raises BalsamicStartError:
-            When no samples associated with case are marked for BALSAMIC analysis
-        """
-        sample_data = self.get_sample_params(case_id=case_id, panel_bed=panel_bed)
-        if len(sample_data) == 0:
-            raise BalsamicStartError(f"{case_id} has no samples tagged for BALSAMIC analysis!")
-
-        verified_panel_bed = self.get_verified_bed(panel_bed=panel_bed, sample_data=sample_data)
-        loqusdb_panel_dump_file: str | None = self.get_panel_loqusdb_dump(verified_panel_bed)
-        verified_pon = (
-            self.get_verified_pon(pon_cnn=pon_cnn, panel_bed=verified_panel_bed)
-            if verified_panel_bed
-            else None
-        )
-        verified_sex: Sex = sex or self.get_verified_sex(sample_data=sample_data)
-
-        verified_exome_argument: bool = self.has_case_only_exome_samples(case_id=case_id)
-
-        is_wgs_case: bool = self.has_case_only_wgs_samples(case_id=case_id)
-
-        config_case: dict[str, str] = {
-            "case_id": case_id,
-            "analysis_workflow": self.workflow,
-            "genome_version": genome_version,
-            "loqusdb_panel_dump_file": loqusdb_panel_dump_file,
-            "loqusdb_wgs_dump_file": (
-                f"{self.loqusdb_path}/{LOQUSDB_WGS_DUMP_FILE}" if is_wgs_case else None
-            ),
-            "sex": verified_sex,
-            "panel_bed": verified_panel_bed,
-            "pon_cnn": verified_pon,
-            "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
-            "swegen_sv": self.get_swegen_verified_path(Variants.SV),
-            "exome": verified_exome_argument,
-        }
-
-        config_case.update(self.get_verified_samples(case_id=case_id))
-
-        config_case.update(
-            self.should_soft_filter_normal(
-                config_case=config_case, verified_panel_bed=verified_panel_bed
-            )
-        )
-
-        config_case.update(self.get_parsed_observation_file_paths(observations))
-        if genome_version == GenomeVersion.HG19:
-            config_case.update(
-                self.get_verified_gens_file_paths(sex=verified_sex, panel_bed=verified_panel_bed)
-            )
-
-        return config_case
-
-    def has_case_only_wgs_samples(self, case_id: str) -> bool:
-        case: Case = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        return all(
-            sample.prep_category == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
-            for sample in case.samples
-        )
-
-    def get_panel_loqusdb_dump(self, bed_file: str | None) -> str | None:
-        if not bed_file:
-            return None
-        bed_file_name: str = Path(bed_file).name
-        bed_name: str = self.status_db.get_bed_version_by_file_name(bed_file_name).bed.name
-
-        if file_name := PANELS_WITH_LOQUSDB_DUMP_FILES_MAP.get(bed_name):
-            return f"{self.loqusdb_path}/{file_name}"
-
-    @staticmethod
-    def print_sample_params(case_id: str, sample_data: dict) -> None:
-        """Outputs a table of samples to be displayed in log"""
-
-        LOG.info(f"Case {case_id} has following BALSAMIC samples:")
-        LOG.info(
-            "{:<20} {:<20} {:<20} {:<20}".format(
-                "SAMPLE ID", "TISSUE TYPE", "APPLICATION", "BED VERSION"
-            )
-        )
-        for key in sample_data:
-            LOG.info(
-                "{:<20} {:<20} {:<20} {:<20}".format(
-                    key,
-                    str(sample_data[key]["tissue_type"]),
-                    str(sample_data[key]["application_type"]),
-                    str(sample_data[key]["target_bed"]),
-                )
-            )
-        LOG.info("")
-
-    def get_sample_params(self, case_id: str, panel_bed: str | None) -> dict:
-        """Returns a dictionary of attributes for each sample in given family,
-        where SAMPLE ID is used as key"""
-
-        sample_data = {
-            link_object.sample.internal_id: {
-                "sex": link_object.sample.sex,
-                "tissue_type": self.get_sample_type(link_object.sample).value,
-                "application_type": self.get_analysis_type(link_object.sample),
-                "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
-            }
-            for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
-        }
-
-        self.print_sample_params(case_id=case_id, sample_data=sample_data)
-        return sample_data
-
-    def resolve_target_bed(self, panel_bed: str | None, link_object: CaseSample) -> str | None:
-        if panel_bed:
-            return panel_bed
-        if self.get_analysis_type(link_object.sample) not in self.__BALSAMIC_BED_APPLICATIONS:
-            return None
-        return self.get_target_bed_from_lims(link_object.case.internal_id)
-
     def get_workflow_version(self, case_id: str) -> str:
         LOG.debug("Fetch workflow version")
         config_data: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=self.get_case_config_path(case_id=case_id)
         )
         return config_data["analysis"]["BALSAMIC_version"]
-
-    def config_case(
-        self,
-        case_id: str,
-        gender: str,
-        genome_version: str,
-        panel_bed: str,
-        pon_cnn: str,
-        observations: list[str],
-        cache_version: str,
-        dry_run: bool = False,
-    ) -> None:
-        """Create config file for BALSAMIC analysis"""
-        arguments = self.get_verified_config_case_arguments(
-            case_id=case_id,
-            sex=gender,
-            genome_version=genome_version,
-            panel_bed=panel_bed,
-            pon_cnn=pon_cnn,
-            observations=observations,
-        )
-        command = ["config", "case"]
-        options = build_command_from_dict(
-            {
-                "--analysis-dir": self.root_dir,
-                "--analysis-workflow": arguments.get("analysis_workflow"),
-                "--artefact-snv-observations": arguments.get("artefact_somatic_snv"),
-                "--artefact-sv-observations": arguments.get("loqusdb_wgs_dump_file"),
-                "--balsamic-cache": self.balsamic_cache,
-                "--cache-version": cache_version,
-                "--cadd-annotations": self.cadd_path,
-                "--cancer-germline-snv-observations": arguments.get("cancer_germline_snv"),
-                "--cancer-germline-sv-observations": arguments.get("cancer_germline_sv"),
-                "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
-                "--cancer-somatic-snv-panel-observations": arguments.get("loqusdb_panel_dump_file"),
-                "--cancer-somatic-sv-observations": arguments.get("cancer_somatic_sv"),
-                "--case-id": arguments.get("case_id"),
-                "--clinical-snv-observations": arguments.get("clinical_snv"),
-                "--clinical-sv-observations": arguments.get("clinical_sv"),
-                "--fastq-path": self.get_sample_fastq_destination_dir(
-                    self.status_db.get_case_by_internal_id(case_id)
-                ),
-                "--gender": arguments.get("sex"),
-                "--genome-interval": arguments.get("genome_interval"),
-                "--genome-version": arguments.get("genome_version"),
-                "--gens-coverage-pon": arguments.get("gens_coverage_pon"),
-                "--gnomad-min-af5": arguments.get("gnomad_min_af5"),
-                "--normal-sample-name": arguments.get("normal_sample_name"),
-                "--panel-bed": arguments.get("panel_bed"),
-                "--exome": arguments.get("exome"),  # MUST be after panel bed
-                "--pon-cnn": arguments.get("pon_cnn"),
-                "--sentieon-install-dir": self.sentieon_licence_path,
-                "--sentieon-license": self.sentieon_licence_server,
-                "--soft-filter-normal": arguments.get("soft_filter_normal"),
-                "--swegen-snv": arguments.get("swegen_snv"),
-                "--swegen-sv": arguments.get("swegen_sv"),
-                "--tumor-sample-name": arguments.get("tumor_sample_name"),
-            },
-            exclude_true=True,
-        )
-        parameters = command + options
-        self.process.run_command(parameters=parameters, dry_run=dry_run)
-
-    def run_analysis(
-        self,
-        case_id: str,
-        workflow_profile: Path | None = None,
-        slurm_quality_of_service: str | None = None,
-        dry_run: bool = False,
-    ) -> None:
-        """Execute BALSAMIC run analysis with given options"""
-
-        command = ["run", "analysis"]
-        run_analysis = ["--run-analysis"] if not dry_run else []
-        options = build_command_from_dict(
-            {
-                "--account": self.account,
-                "--qos": slurm_quality_of_service or self.get_slurm_qos_for_case(case_id=case_id),
-                "--sample-config": self.get_case_config_path(case_id=case_id),
-                "--workflow-profile": workflow_profile,
-                "--headjob-partition": self.head_job_partition,
-            }
-        )
-        parameters = command + options + run_analysis
-        self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def report_deliver(self, case_id: str, dry_run: bool = False) -> None:
         """Execute BALSAMIC report deliver with given options"""

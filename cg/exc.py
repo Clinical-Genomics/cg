@@ -60,12 +60,6 @@ class AnalysisRunningError(CgError):
     """
 
 
-class BalsamicStartError(CgError):
-    """
-    Exception raised when Balsamic fails to start.
-    """
-
-
 class BedVersionNotFoundError(CgError):
     """
     Exception raised when a bed version is not found.

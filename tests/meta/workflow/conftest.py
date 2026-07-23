@@ -329,17 +329,6 @@ def fixture_mip_analysis_api(
     return analysis_api
 
 
-@pytest.fixture
-def taxprofiler_metrics() -> dict[str, float]:
-    """Return Taxprofiler raw analysis metrics dictionary."""
-    return {
-        "filtering_result_passed_filter_reads": 24810472.0,
-        "reads_mapped": 19014950.0,
-        "total_reads": 12400055,
-        "paired_aligned_none": 1409340,
-    }
-
-
 @pytest.fixture(scope="function")
 def nallo_metrics_deliverables(
     nallo_analysis_dir: Path,
