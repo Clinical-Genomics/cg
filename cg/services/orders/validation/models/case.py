@@ -25,10 +25,6 @@ class Case(BaseModel, Generic[SampleType]):
     ]
 
     @property
-    def is_new(self) -> bool:
-        return True
-
-    @property
     def enumerated_samples(self) -> enumerate[SampleType | ExistingSample]:
         return enumerate(self.samples)
 

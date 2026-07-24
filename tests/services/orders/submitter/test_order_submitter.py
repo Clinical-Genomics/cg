@@ -15,7 +15,6 @@ from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.submitter.service import OrderSubmitter
 from cg.services.orders.validation.errors.validation_errors import ValidationErrors
 from cg.services.orders.validation.models.case import Case as ValidationCase
-from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
@@ -186,17 +185,6 @@ def order_with_new_case_and_existing_external_samples(existing_sample_id: str) -
     )
 
 
-@pytest.fixture
-def order_with_existing_case_and_external_sample(existing_case_id: str) -> OrderWithCases:
-    return OrderWithCases(
-        delivery_type=DataDelivery.ANALYSIS_FILES,
-        cases=[ExistingCase(internal_id=existing_case_id)],
-        customer="test_customer",
-        project_type=OrderType.BALSAMIC_UMI,
-        name="order with existing case and external sample data",
-    )
-
-
 @pytest.mark.parametrize(
     "order_type, order_fixture",
     [
@@ -342,7 +330,7 @@ def test_get_ticket_tags(
 ):
     """Test that the correct tags are generated based on the order and order type."""
 
-    # GIVEN an order with existing data and no external samples
+    # GIVEN an order without external samples
     order: OrderWithCases = request.getfixturevalue(order_fixture)
 
     # WHEN getting the ticket tags
@@ -395,22 +383,6 @@ def test_get_ticket_tags_with_external_data_for_order_with_new_case_and_new_samp
 
     # GIVEN an order with a new case and a new sample with external data
     order: OrderWithCases = order_with_new_case_and_new_external_sample
-
-    # WHEN getting the ticket tags
-    tags: list[str] = get_ticket_tags(
-        order=order, order_type=order.order_type, status_db=store_with_externals
-    )
-
-    # THEN the tags should include external data
-    assert "external-data" in tags
-
-
-def test_get_ticket_tags_with_external_data_for_order_with_existing_case(
-    order_with_existing_case_and_external_sample: OrderWithCases, store_with_externals: Store
-):
-
-    # GIVEN an existing case with an existing sample with external data
-    order: OrderWithCases = order_with_existing_case_and_external_sample
 
     # WHEN getting the ticket tags
     tags: list[str] = get_ticket_tags(
