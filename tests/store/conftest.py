@@ -40,7 +40,7 @@ class StoreConstants(enum.Enum):
     ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES: str = "ticket"
     FROM_SAMPLE_SAMPLE_WITH_ATTRIBUTES: str = "sample_1"
     SEX_SAMPLE_WITH_ATTRIBUTES: str = "male"
-    ENTRY_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
+
     INVOICE_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
     INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES: str = "sample_without_attributes"
     NAME_SAMPLE_WITHOUT_ATTRIBUTES: str = "sample_without_attributes"

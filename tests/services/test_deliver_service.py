@@ -85,7 +85,9 @@ def test_deliver_case_closes_order(mocker: MockerFixture):
     assert not order.is_open
 
     # THEN the delivery message is generated
-    delivery_message_mock.assert_called_once_with(cases=[case], store=status_db)
+    delivery_message_mock.assert_called_once_with(
+        cases=[case], store=status_db, include_signature=True
+    )
 
     # THEN the delivery message is sent
     freshdesk_client.as_mock.reply_to_ticket.assert_called_once_with(
@@ -180,7 +182,9 @@ def test_deliver_case_order_is_not_closed(mocker: MockerFixture):
     assert order.is_open
 
     # THEN the delivery message is generated
-    delivery_message_mock.assert_called_once_with(cases=[case_ready], store=status_db)
+    delivery_message_mock.assert_called_once_with(
+        cases=[case_ready], store=status_db, include_signature=True
+    )
 
     # THEN the delivery message is sent
     freshdesk_client.as_mock.reply_to_ticket.assert_called_once_with(
@@ -412,8 +416,10 @@ def test_deliver_all_available_success(mocker: MockerFixture):
     close_order_call.assert_any_call(order_2)
 
     # THEN the delivery message should have been generated and sent for both orders separately
-    delivery_message_mock.assert_any_call(cases=[case_1], store=status_db)
-    delivery_message_mock.assert_any_call(cases=[case_2, case_3], store=status_db)
+    delivery_message_mock.assert_any_call(cases=[case_1], store=status_db, include_signature=True)
+    delivery_message_mock.assert_any_call(
+        cases=[case_2, case_3], store=status_db, include_signature=True
+    )
     freshdesk_client.as_mock.reply_to_ticket.assert_any_call(
         ticket_id=order_1.ticket_id,
         message="delivery message",
@@ -640,7 +646,9 @@ def test_deliver_all_available_freshdesk_closing_ticket_error(mocker: MockerFixt
     assert not success
 
     # THEN the delivery message is generated
-    delivery_message_mock.assert_called_once_with(cases=[case], store=status_db.as_type)
+    delivery_message_mock.assert_called_once_with(
+        cases=[case], store=status_db.as_type, include_signature=True
+    )
 
     # THEN the delivery message should have been sent
     freshdesk_client.as_mock.reply_to_ticket.assert_called_once_with(
@@ -724,7 +732,9 @@ def test_deliver_order_success(mocker: MockerFixture):
     mark_analyses_call.assert_called_once_with(analyses=[analysis_1, analysis_2], signature="CG")
 
     # THEN the delivery message should have been generated for the correct cases
-    delivery_message_mock.assert_called_once_with(cases=[case_1, case_2], store=status_db.as_type)
+    delivery_message_mock.assert_called_once_with(
+        cases=[case_1, case_2], store=status_db.as_type, include_signature=True
+    )
 
     # THEN the delivery message should have been sent
     freshdesk_client.as_mock.reply_to_ticket.assert_called_once_with(
