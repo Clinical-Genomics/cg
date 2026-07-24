@@ -206,7 +206,7 @@ def upload_tomte_to_scout(
 ) -> None:
     """Upload an Tomte RNA case's junction splice files and omics files for all samples connected via subject ID."""
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
-
+    # TODO -1
     context.invoke(validate_case_samples_are_rna, case_id=case_id)
     context.invoke(upload_rna_delivery_report_to_scout, case_id=case_id)
     context.invoke(upload_rna_alignment_file_to_scout, case_id=case_id, dry_run=dry_run)

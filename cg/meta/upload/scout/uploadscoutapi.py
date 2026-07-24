@@ -649,6 +649,7 @@ class UploadScoutAPI:
 
     def get_related_uploaded_dna_cases(self, rna_case_id: str) -> set[str]:
         """Returns all uploaded DNA cases related to the specified RNA case."""
+        # TODO 0
         rna_case: Case = self.status_db.get_case_by_internal_id(rna_case_id)
         dna_cases: list[Case] = self.status_db.get_uploaded_related_dna_cases(rna_case)
         return {dna_case.internal_id for dna_case in dna_cases}

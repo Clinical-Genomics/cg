@@ -11,7 +11,7 @@ from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import (
-    DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD,
+    DNA_WORKFLOWS_WITH_RNA_UPLOAD,
     BedVersionGenomeVersion,
     CustomerId,
 )
@@ -1758,7 +1758,7 @@ class ReadHandler(BaseHandler):
         Raises:
             CgDataError if no related DNA cases are found
         """
-
+        # TODO 1
         related_dna_cases: list[Case] = []
         collaborators: set[Customer] = rna_case.customer.collaborators
         for rna_sample in rna_case.samples:
@@ -1778,6 +1778,7 @@ class ReadHandler(BaseHandler):
     def _get_related_uploaded_cases_for_rna_sample(
         self, rna_sample: Sample, collaborators: set[Customer]
     ) -> list[Case]:
+        # TODO 2
         if not rna_sample.subject_id:
             raise CgDataError(
                 f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
@@ -1789,19 +1790,22 @@ class ReadHandler(BaseHandler):
             collaborators=collaborators,
         )
         customer_ids: list[int] = [customer.id for customer in collaborators]
-        return self._get_uploaded_dna_cases(
+        return self._get_dna_cases_eligible_for_rna_upload(
             sample_query=related_dna_samples_query, customer_ids=customer_ids
         )
 
-    def _get_uploaded_dna_cases(self, sample_query: Query, customer_ids: list[int]) -> list[Case]:
+    def _get_dna_cases_eligible_for_rna_upload(
+        self, sample_query: Query, customer_ids: list[int]
+    ) -> list[Case]:
         """Filters the provided sample_query on the customer_ids, DNA workflows supporting
-        Scout uploads and on cases having an uploaded analysis. Returns the matching cases."""
+        Scout RNA uploads and on cases having an uploaded analysis. Returns the matching cases."""
+        # TODO 3
         dna_samples_cases_analysis_query: Query = (
             sample_query.join(Sample.links).join(CaseSample.case).join(Analysis)
         )
         dna_samples_cases_analysis_query: Query = apply_case_filter(
             cases=dna_samples_cases_analysis_query,
-            workflows=DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD,
+            workflows=DNA_WORKFLOWS_WITH_RNA_UPLOAD,
             customer_entry_ids=customer_ids,
             filter_functions=[
                 CaseFilter.BY_WORKFLOWS,
@@ -1844,7 +1848,7 @@ class ReadHandler(BaseHandler):
                 sample=sample, prep_categories=DNA_PREP_CATEGORIES, collaborators=collaborators
             )
             dna_sample_name: str = related_dna_samples.first().name
-            dna_cases: list[Case] = self._get_uploaded_dna_cases(
+            dna_cases: list[Case] = self._get_dna_cases_eligible_for_rna_upload(
                 sample_query=related_dna_samples, customer_ids=collaborator_ids
             )
             dna_case_ids: list[str] = [case.internal_id for case in dna_cases]
