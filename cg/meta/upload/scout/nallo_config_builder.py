@@ -7,14 +7,10 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.constants import GenomeBuild
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
-from cg.constants.scout import (
-    NALLO_CASE_TAGS,
-    NALLO_RANK_MODEL_VERSION_SNV,
-    NALLO_RANK_MODEL_VERSION_SV,
-    NALLO_SAMPLE_TAGS,
-    UploadTrack,
-)
+from cg.constants.scout import NALLO_CASE_TAGS, NALLO_SAMPLE_TAGS, UploadTrack
+from cg.constants.sequencing import Variants
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
+from cg.meta.upload.scout.rank_model import RankModel, parse_rank_model_file
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.models.scout.scout_load_config import NalloLoadConfig, ScoutNalloIndividual
@@ -61,11 +57,27 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         self.include_pedigree_picture(load_config=load_config, analysis=analysis)
         load_config.human_genome_build = GenomeBuild.hg38
         load_config.rank_score_threshold = self.nallo_analysis_api.rank_model_threshold
-        # TODO: Define a _get_rank_model method and call it here
-        load_config.rank_model_version = NALLO_RANK_MODEL_VERSION_SNV
-        # TODO: Define a _get_rank_model_version method and call it here
-        load_config.sv_rank_model_version = NALLO_RANK_MODEL_VERSION_SV
+        snv_rank_model: RankModel = self._get_rank_model(
+            hk_version=hk_version, variant_type=Variants.SNV
+        )
+        load_config.rank_model_url = snv_rank_model.path
+        load_config.rank_model_version = snv_rank_model.version
+        sv_rank_model: RankModel = self._get_rank_model(
+            hk_version=hk_version, variant_type=Variants.SV
+        )
+        load_config.sv_rank_model_url = sv_rank_model.path
+        load_config.sv_rank_model_version = sv_rank_model.version
         return load_config
+
+    def _get_rank_model(self, hk_version: Version, variant_type: Variants) -> RankModel:
+        if variant_type == Variants.SNV:
+            tags = {"rank-model-snv"}
+        else:
+            tags = {"rank-model-sv"}
+        file_path: str | None = self.get_file_from_hk(hk_tags=tags, hk_version=hk_version)
+        if not file_path:
+            raise FileNotFoundError(f"No {variant_type} rank model file found in Housekeeper.")
+        return parse_rank_model_file(file_path)
 
     def include_case_files(self, load_config: NalloLoadConfig, hk_version: Version = None) -> None:
         """Include case level files for NALLO case."""
