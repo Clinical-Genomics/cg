@@ -23,6 +23,7 @@ from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.nallo_config_builder import NalloConfigBuilder
+from cg.meta.upload.scout.rank_model import RankModel
 from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
@@ -564,6 +565,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     vcf_sv: File = create_autospec(File, full_path="vcf_sv.vcf")
     vcf_sv_research: File = create_autospec(File, full_path="vcf_sv_research.vcf")
     vcf_str: File = create_autospec(File, full_path="vcf_str.vcf")
+    snv_rank_model: File = create_autospec(File, full_path="/path/to/some/snv_file.-v1.0-.ini")
+    sv_rank_model: File = create_autospec(File, full_path="/path/to/some/sv_file.-v2.0-.ini")
 
     # GIVEN sample files
     alignment_path: File = create_autospec(File, full_path="sort_md.cram")
@@ -622,6 +625,10 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return vcf_str
         if tags == {"nextflow-params"}:
             return params
+        if tags == {"rank-model-snv"}:
+            return snv_rank_model
+        if tags == {"rank-model-sv"}:
+            return sv_rank_model
 
         # Sample tags
         if tags == {AlignmentFileTag.CRAM, "sample_id"}:
@@ -691,16 +698,13 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     case.name = "case_name"
     analysis: Analysis = create_autospec(Analysis, case=case, completed_at=datetime.now())
 
-    # GIVEN that the params file can be read
-    rank_model_file = "/path/to/some/snv_file.-v1.0-.ini"
-    sv_rank_model_file = "/path/to/some/sv_file.-v2.0-.ini"
+    # GIVEN a rank model parser that returns objects for SNV and SV files
     mocker.patch.object(
         raredisease_config_builder_module,
-        "read_yaml",
-        return_value={
-            "score_config_snv": rank_model_file,
-            "score_config_sv": sv_rank_model_file,
-        },
+        "parse_rank_model_file",
+        side_effect=lambda file: RankModel(
+            path=file, version="1.0" if file == snv_rank_model.full_path else "2.0"
+        ),
     )
 
     # WHEN building the Raredisease Scout load config
@@ -723,9 +727,9 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         human_genome_build="38",
         rank_model_version="1.0",
         rank_score_threshold=5,
-        rank_model_url=rank_model_file,
+        rank_model_url=snv_rank_model.full_path,
         sv_rank_model_version="2.0",
-        sv_rank_model_url=sv_rank_model_file,
+        sv_rank_model_url=sv_rank_model.full_path,
         analysis_date=datetime.now(),
         samples=[
             ScoutRarediseaseIndividual(
