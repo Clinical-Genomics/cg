@@ -1,22 +1,23 @@
 import configparser
-from pathlib import Path
 
 from pydantic import BaseModel
 
 
 class RankModel(BaseModel):
-    path: Path
+    path: str
     version: str
 
 
-def parse_rank_model_file(file: Path) -> RankModel:
+def parse_rank_model_file(file: str) -> RankModel:
     """
-    Parses a SNV or SV rank model file to extract its version given its path returning file path
-    and version in a RankModel Pydantic object.
+    Parses a SNV or SV rank model file to extract its version given its path and returns the file
+    path and version in a RankModel Pydantic object.
     It assumes that the rank model file is an INI file with a [Version] section and a version key.
+    Raises:
+        pydantic.ValidationError if the version is not found in the file
     """
     config = configparser.ConfigParser()
     config.read(file)
     version: str | None = config.get("Version", "version", fallback=None)
-    rank_model = RankModel(path=file, version=version)
+    rank_model = RankModel(path=file, version=version)  # type: ignore
     return rank_model

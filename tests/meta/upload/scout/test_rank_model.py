@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 from pydantic import ValidationError
 
@@ -8,7 +6,7 @@ from cg.meta.upload.scout.rank_model import RankModel, parse_rank_model_file
 
 def test_parse_rank_model_success():
     # GIVEN a valid rank model file
-    file = Path("tests", "fixtures", "meta", "rank_model", "correct_rank_model.ini")
+    file = "tests/fixtures/meta/rank_model/correct_rank_model.ini"
 
     # WHEN parsing the rank model file
     rank_model = parse_rank_model_file(file)
@@ -20,12 +18,12 @@ def test_parse_rank_model_success():
 @pytest.mark.parametrize(
     "file",
     [
-        Path("tests", "fixtures", "meta", "rank_model", "rank_model_no_version_section.ini"),
-        Path("tests", "fixtures", "meta", "rank_model", "rank_model_no_version_key.ini"),
+        "tests/fixtures/meta/rank_model/rank_model_no_version_section.ini",
+        "tests/fixtures/meta/rank_model/rank_model_no_version_key.ini",
     ],
     ids=["no_version_section", "no_version_key"],
 )
-def test_parse_rank_model_file_wrong_format(file: Path):
+def test_parse_rank_model_file_wrong_format(file: str):
     # GIVEN a rank model file that is ill-formatted
 
     # WHEN parsing the rank model file
