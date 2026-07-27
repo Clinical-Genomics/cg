@@ -61,7 +61,9 @@ class NalloConfigBuilder(ScoutConfigBuilder):
         self.include_pedigree_picture(load_config=load_config, analysis=analysis)
         load_config.human_genome_build = GenomeBuild.hg38
         load_config.rank_score_threshold = self.nallo_analysis_api.rank_model_threshold
+        # TODO: Define a _get_rank_model method and call it here
         load_config.rank_model_version = NALLO_RANK_MODEL_VERSION_SNV
+        # TODO: Define a _get_rank_model_version method and call it here
         load_config.sv_rank_model_version = NALLO_RANK_MODEL_VERSION_SV
         return load_config
 

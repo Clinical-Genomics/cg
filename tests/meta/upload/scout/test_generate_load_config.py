@@ -125,6 +125,12 @@ def test_generate_raredisease_load_config(
     # THEN assert that the config is a balsamic config
     assert isinstance(config, RarediseaseLoadConfig)
 
+    # THEN the config has correct rank model attributes set
+    assert config.rank_model_url == "/path/to/some/snv_file.-v1.0-.ini"
+    assert config.rank_model_version == "1.0"
+    assert config.sv_rank_model_url == "/path/to/some/sv_file.-v2.0-.ini"
+    assert config.sv_rank_model_version == "2.0"
+
 
 def test_generate_rnafusion_load_config(
     rnafusion_analysis: Analysis, upload_rnafusion_analysis_scout_api: UploadScoutAPI

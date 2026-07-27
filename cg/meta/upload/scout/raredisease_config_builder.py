@@ -95,6 +95,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         return hk_params_file
 
     def _get_rank_model_url(self, hk_version: Version, variant_type: Variants) -> str:
+        # TODO: Get file from housekeeper instead
         hk_params_file: str = self._get_params_file_path(hk_version=hk_version)
         content: dict[str, str] = read_yaml(Path(hk_params_file))
         if variant_type == Variants.SNV:
@@ -103,9 +104,11 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             return content.get("score_config_sv", "")
 
     def _get_rank_model_version(self, hk_version: Version, variant_type: Variants) -> str:
+        # TODO: Implement a rank model parser and extract the version
         file_path: str = self._get_rank_model_url(hk_version=hk_version, variant_type=variant_type)
         return self._get_version_from_file_path(file_path)
 
+    # TODO: Remove this method
     @staticmethod
     def _get_version_from_file_path(file_path: str) -> str:
         """
