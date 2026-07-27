@@ -325,7 +325,6 @@ def test_remove_chromosome_substring(mip_config_builder: MipConfigBuilder):
     assert mip_config_builder.remove_chromosome_substring(file_path2) == generic_path
 
 
-# TODO: Update this test
 @pytest.mark.freeze_time
 def test_nallo_config_builder(mocker: MockerFixture):
     lims_api = create_autospec(LimsAPI)
