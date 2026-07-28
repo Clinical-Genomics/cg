@@ -13,6 +13,7 @@ def parse_rank_model_file(file: str) -> RankModel:
     Parses a SNV or SV rank model file to extract its version given its path and returns the file
     path and version in a RankModel Pydantic object.
     It assumes that the rank model file is an INI file with a [Version] section and a version key.
+    Other sections are irrelevant and could be duplicated.
     Raises:
         pydantic.ValidationError if the version is not found in the file
     """
