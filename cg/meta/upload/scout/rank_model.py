@@ -16,7 +16,7 @@ def parse_rank_model_file(file: str) -> RankModel:
     Raises:
         pydantic.ValidationError if the version is not found in the file
     """
-    config = configparser.ConfigParser()
+    config = configparser.ConfigParser(strict=False)  # not strict to parse duplicated sections
     config.read(file)
     version: str | None = config.get("Version", "version", fallback=None)
     rank_model = RankModel(path=file, version=version)  # type: ignore
