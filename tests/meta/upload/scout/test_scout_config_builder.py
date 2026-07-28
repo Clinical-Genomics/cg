@@ -18,11 +18,13 @@ from cg.constants.constants import SexOptions
 from cg.constants.housekeeper_tags import AlignmentFileTag, NalloAnalysisTag
 from cg.constants.scout import ScoutAnalysisType
 from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
+from cg.meta.upload.scout import nallo_config_builder as nallo_config_builder_module
 from cg.meta.upload.scout import raredisease_config_builder as raredisease_config_builder_module
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.nallo_config_builder import NalloConfigBuilder
+from cg.meta.upload.scout.rank_model import RankModel
 from cg.meta.upload.scout.raredisease_config_builder import RarediseaseConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
@@ -346,6 +348,8 @@ def test_nallo_config_builder(mocker: MockerFixture):
     peddy_check: File = create_autospec(File, full_path="check.peddy")
     peddy_ped: File = create_autospec(File, full_path="ped.peddy")
     somalier_samples: File = create_autospec(File, full_path="somalier.samples")
+    snv_rank_model: File = create_autospec(File, full_path="/path/to/some/snv_file.-v1.0-.ini")
+    sv_rank_model: File = create_autospec(File, full_path="/path/to/some/sv_file.-v2.0-.ini")
     vcf_snv: File = create_autospec(File, full_path="snv_clinical.vcf")
     vcf_snv_research: File = create_autospec(File, full_path="snv_research.vcf")
     vcf_snv_research: File = create_autospec(File, full_path="snv_research.vcf")
@@ -380,6 +384,10 @@ def test_nallo_config_builder(mocker: MockerFixture):
             return peddy_ped
         elif tags == {"relate-samples", "somalier"}:
             return somalier_samples
+        elif tags == {"rank-model-snv"}:
+            return snv_rank_model
+        elif tags == {"rank-model-sv"}:
+            return sv_rank_model
         elif tags == {"vcf-snv-research"}:
             return vcf_snv_research
         elif tags == {"vcf-snv-clinical"}:
@@ -390,6 +398,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
             return vcf_sv
         elif tags == {"vcf-str"}:
             return vcf_str
+
         # Sample tags
         elif tags == {AlignmentFileTag.BAM, "haplotags", "sample_id"}:
             return alignment_path
@@ -453,6 +462,15 @@ def test_nallo_config_builder(mocker: MockerFixture):
     case.name = "case_name"
     analysis: Analysis = create_autospec(Analysis, case=case, completed_at=datetime.now())
 
+    # GIVEN a rank model parser that returns objects for SNV and SV files
+    mocker.patch.object(
+        nallo_config_builder_module,
+        "parse_rank_model_file",
+        side_effect=lambda file: RankModel(
+            path=file, version="1.0" if file == snv_rank_model.full_path else "2.0"
+        ),
+    )
+
     # WHEN building the Nallo Scout load config
     load_config: NalloLoadConfig = nallo_config_builder.build_load_config(
         hk_version=version, analysis=analysis
@@ -472,7 +490,9 @@ def test_nallo_config_builder(mocker: MockerFixture):
         human_genome_build="38",
         rank_model_version="1.0",
         rank_score_threshold=8,
-        sv_rank_model_version="1.0",
+        rank_model_url=snv_rank_model.full_path,
+        sv_rank_model_version="2.0",
+        sv_rank_model_url=sv_rank_model.full_path,
         analysis_date=datetime.now(),
         samples=[
             ScoutNalloIndividual(
@@ -555,6 +575,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     peddy_ped: File = create_autospec(File, full_path="ped.peddy")
     peddy_sex: File = create_autospec(File, full_path="ped_sex.peddy")
     smn_tsv: File = create_autospec(File, full_path="smn_tsv.tsv")
+    snv_rank_model: File = create_autospec(File, full_path="/path/to/some/snv_file.-v1.0-.ini")
+    sv_rank_model: File = create_autospec(File, full_path="/path/to/some/sv_file.-v2.0-.ini")
     vcf_mei: File = create_autospec(File, full_path="vcf_mei.vcf")
     vcf_mei_research: File = create_autospec(File, full_path="vcf_mei_research.vcf")
     vcf_snv: File = create_autospec(File, full_path="vcf_snv.snv")
@@ -602,6 +624,10 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return peddy_sex
         if tags == {"smn-calling"}:
             return smn_tsv
+        if tags == {"rank-model-snv"}:
+            return snv_rank_model
+        if tags == {"rank-model-sv"}:
+            return sv_rank_model
         if tags == {"mobile-elements", "clinical", "vcf"}:
             return vcf_mei
         if tags == {"mobile-elements", "research", "vcf"}:
@@ -691,16 +717,13 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     case.name = "case_name"
     analysis: Analysis = create_autospec(Analysis, case=case, completed_at=datetime.now())
 
-    # GIVEN that the params file can be read
-    rank_model_file = "/path/to/some/snv_file.-v1.0-.ini"
-    sv_rank_model_file = "/path/to/some/sv_file.-v2.0-.ini"
+    # GIVEN a rank model parser that returns objects for SNV and SV files
     mocker.patch.object(
         raredisease_config_builder_module,
-        "read_yaml",
-        return_value={
-            "score_config_snv": rank_model_file,
-            "score_config_sv": sv_rank_model_file,
-        },
+        "parse_rank_model_file",
+        side_effect=lambda file: RankModel(
+            path=file, version="1.0" if file == snv_rank_model.full_path else "2.0"
+        ),
     )
 
     # WHEN building the Raredisease Scout load config
@@ -723,9 +746,9 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         human_genome_build="38",
         rank_model_version="1.0",
         rank_score_threshold=5,
-        rank_model_url=rank_model_file,
+        rank_model_url=snv_rank_model.full_path,
         sv_rank_model_version="2.0",
-        sv_rank_model_url=sv_rank_model_file,
+        sv_rank_model_url=sv_rank_model.full_path,
         analysis_date=datetime.now(),
         samples=[
             ScoutRarediseaseIndividual(
