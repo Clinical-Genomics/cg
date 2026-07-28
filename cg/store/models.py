@@ -712,6 +712,7 @@ class Panel(Base):
 class Pool(Base):
     __tablename__ = "pool"
     __table_args__ = (UniqueConstraint("order", "name", name="_order_name_uc"),)
+    __table_args__ = (UniqueConstraint("order", "name", name="_order_name_uc"),)
 
     application_version_id: Mapped[int] = mapped_column(ForeignKey("application_version.id"))
     application_version: Mapped["ApplicationVersion"] = orm.relationship(

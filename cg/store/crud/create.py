@@ -324,7 +324,7 @@ class CreateMixin(ReadHandler):
         order: str,
         ordered: datetime,
         application_version: ApplicationVersion,
-        ticket: str = None,
+        ticket: str | None = None,
         comment: str = None,
         received_at: datetime = None,
         invoice_id: int = None,

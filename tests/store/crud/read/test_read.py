@@ -988,6 +988,19 @@ def test_get_pools(store_with_multiple_pools_for_customer: Store):
     assert len(pools) == 2
 
 
+def test_get_pools_by_ticket(store: Store, helpers: StoreHelpers):
+    # GIVEN a database containing multiple pools
+    pool_1: Pool = helpers.ensure_pool(store=store, ticket="1", order="order1", name="pool1")
+    pool_2: Pool = helpers.ensure_pool(store=store, ticket="1", order="order1", name="pool2")
+    pool_3: Pool = helpers.ensure_pool(store=store, ticket="2", order="order2", name="pool3")
+
+    # WHEN getting all the pools belonging to ticket 1
+    pools: list[Pool] = store.get_pools_by_ticket("1")
+
+    # THEN only the pools belonging to that ticket should be returned
+    assert pools == [pool_1, pool_2]
+
+
 def test_get_pools_by_customer_id(store_with_multiple_pools_for_customer: Store):
     """Test that pools can be fetched from the store by customer id."""
     # GIVEN a database with two pools

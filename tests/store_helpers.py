@@ -1037,6 +1037,7 @@ class StoreHelpers:
         received_at: datetime = None,
         no_invoice: bool = None,
         invoice_id: int = None,
+        ticket: str | None = None,
     ) -> Pool:
         """Utility function to add a pool that can be used in tests."""
         customer_id = customer_id or "cust000"
@@ -1062,6 +1063,7 @@ class StoreHelpers:
             received_at=received_at,
             no_invoice=no_invoice,
             invoice_id=invoice_id,
+            ticket=ticket,
         )
         store.session.add(pool)
         store.session.commit()

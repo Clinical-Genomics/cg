@@ -20,7 +20,7 @@ from cg.exc import (
 )
 from cg.services import deliver_service as deliver_service_module
 from cg.services.deliver_service import DeliverService
-from cg.store.models import Analysis, Case, Customer, Order
+from cg.store.models import Analysis, Case, Customer, Order, Pool
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -685,8 +685,10 @@ def test_deliver_order_success(mocker: MockerFixture):
     analysis_1.case = case_1
     analysis_2.case = case_2
     order: Order = create_autospec(Order, cases=[case_1, case_2], id=1, ticket_id=123)
+    pool: Pool = create_autospec(Pool, delivered_at=None, ticket=123)
     status_db.as_type.get_order_by_ticket_id_strict = Mock(return_value=order)
     status_db.as_type.get_uploaded_analyses = Mock(return_value=[analysis_1, analysis_2])
+    status_db.as_type.get_pools_by_ticket = Mock(return_value=[pool])
 
     # GIVEN a Trailblazer API with two analyses to deliver for the order
     trailblazer_api: TypedMock[TrailblazerAPI] = create_typed_mock(TrailblazerAPI)
@@ -743,6 +745,9 @@ def test_deliver_order_success(mocker: MockerFixture):
 
     # THEN the order should have been closed
     assert not order.is_open
+
+    # THEN the associated pool should have been closed
+    assert pool.delivered_at
 
     # THEN we should have checked the ticket status in Freshdesk
     freshdesk_client.as_mock.get_ticket.assert_called_once_with(123)
