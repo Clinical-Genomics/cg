@@ -609,9 +609,6 @@ class ReadHandler(BaseHandler):
         """Return all the pools."""
         return self._get_query(table=Pool).all()
 
-    def get_pools_by_ticket(self, ticket_id: str) -> list[Pool]:
-        return self._get_query(table=Pool).filter_by(ticket=ticket_id).all()
-
     def get_pools_by_order_enquiry(self, *, order_enquiry: str = None) -> list[Pool]:
         """Return all the pools with an order fitting the enquiry."""
         return apply_pool_filter(
