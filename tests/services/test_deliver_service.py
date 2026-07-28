@@ -665,7 +665,7 @@ def test_deliver_all_available_freshdesk_closing_ticket_error(mocker: MockerFixt
 
 
 def test_deliver_order_success(mocker: MockerFixture):
-    # GIVEN a store with an order
+    # GIVEN a store with an order tied to a pool
     status_db: TypedMock[Store] = create_typed_mock(Store)
     analysis_1 = create_autospec(Analysis, uploaded_at=datetime.now())
     analysis_2 = create_autospec(Analysis, uploaded_at=datetime.now())
@@ -684,11 +684,10 @@ def test_deliver_order_success(mocker: MockerFixture):
     )
     analysis_1.case = case_1
     analysis_2.case = case_2
-    order: Order = create_autospec(Order, cases=[case_1, case_2], id=1, ticket_id=123)
-    pool: Pool = create_autospec(Pool, delivered_at=None, ticket=123)
+    pool: Pool = create_autospec(Pool, delivered_at=None)
+    order: Order = create_autospec(Order, cases=[case_1, case_2], pools=[pool], id=1, ticket_id=123)
     status_db.as_type.get_order_by_ticket_id_strict = Mock(return_value=order)
     status_db.as_type.get_uploaded_analyses = Mock(return_value=[analysis_1, analysis_2])
-    status_db.as_type.get_pools_by_ticket = Mock(return_value=[pool])
 
     # GIVEN a Trailblazer API with two analyses to deliver for the order
     trailblazer_api: TypedMock[TrailblazerAPI] = create_typed_mock(TrailblazerAPI)

@@ -727,7 +727,7 @@ class Pool(Base):
     name: Mapped[Str32]
     no_invoice: Mapped[bool | None] = mapped_column(default=False)
     order: Mapped[Str64]
-    order_id: Mapped[int] = mapped_column(ForeignKey("order.id"))
+    order_id: Mapped[int | None] = mapped_column(ForeignKey("order.id"))
     db_order: Mapped["Order"] = orm.relationship(foreign_keys=[order_id])
     ordered_at: Mapped[datetime]
     received_at: Mapped[datetime | None]
@@ -1089,7 +1089,9 @@ class Order(Base):
     analyses: Mapped[list[Analysis]] = orm.relationship(
         back_populates="order", order_by="Analysis.created_at"
     )
-    pools: Mapped[list[Pool]] = orm.relationship(back_populates="order", order_by="Pool.ordered_at")
+    pools: Mapped[list[Pool]] = orm.relationship(
+        back_populates="db_order", order_by="Pool.ordered_at"
+    )
 
     @property
     def workflow(self) -> Workflow:
