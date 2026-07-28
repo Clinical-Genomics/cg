@@ -7,6 +7,8 @@ from pytest_mock import MockerFixture
 from cg.constants import Workflow
 from cg.meta.upload.scout import raredisease_config_builder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.rank_model import RankModel
+from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import (
     BalsamicLoadConfig,
@@ -109,21 +111,30 @@ def test_generate_raredisease_load_config(
     # GIVEN an analysis object that have been run with RAREDISEASE
     assert raredisease_analysis.workflow == Workflow.RAREDISEASE
 
+    # GIVEN that the rank model files are in Housekeeper
     mocker.patch.object(
-        raredisease_config_builder,
-        "read_yaml",
-        return_value={
-            "score_config_snv": "/path/to/some/snv_file.-v1.0-.ini",
-            "score_config_sv": "/path/to/some/sv_file.-v2.0-.ini",
-        },
+        ScoutConfigBuilder,
+        "get_file_from_hk",
+        side_effect=lambda hk_tags, *args, **kwargs: next(iter(hk_tags)) + ".ini",
     )
 
-    # GIVEN an upload scout api with some RAREDISEASE information
+    # GIVEN a rank model parser that returns objects for SNV and SV files
+    mocker.patch.object(
+        raredisease_config_builder,
+        "parse_rank_model_file",
+        side_effect=lambda file: RankModel(
+            path=file, version="1.0" if file == "rank-model-snv.ini" else "2.0"
+        ),
+    )
+
     # WHEN generating a load config
     config = upload_raredisease_analysis_scout_api.generate_config(analysis=raredisease_analysis)
 
-    # THEN assert that the config is a balsamic config
-    assert isinstance(config, RarediseaseLoadConfig)
+    # THEN the config has correct rank model attributes set
+    assert config.rank_model_url == "rank-model-snv.ini"
+    assert config.rank_model_version == "1.0"
+    assert config.sv_rank_model_url == "rank-model-sv.ini"
+    assert config.sv_rank_model_version == "2.0"
 
 
 def test_generate_rnafusion_load_config(
@@ -172,14 +183,20 @@ def test_generate_config_adds_meta_result_key_raredisease(
     # GIVEN a status db and hk with an analysis
     assert raredisease_analysis
 
-    # GIVEN that the params file can be read
+    # GIVEN that the rank model files are in Housekeeper
+    mocker.patch.object(
+        ScoutConfigBuilder,
+        "get_file_from_hk",
+        side_effect=lambda hk_tags, *args, **kwargs: next(iter(hk_tags)) + ".ini",
+    )
+
+    # GIVEN a rank model parser that returns objects for SNV and SV files
     mocker.patch.object(
         raredisease_config_builder,
-        "read_yaml",
-        return_value={
-            "score_config_snv": "/path/to/some/snv_file.-v1.0-.ini",
-            "score_config_sv": "/path/to/some/sv_file.-v2.0-.ini",
-        },
+        "parse_rank_model_file",
+        side_effect=lambda file: RankModel(
+            path=file, version="1.0" if file == "rank-model-snv.ini" else "2.0"
+        ),
     )
 
     # WHEN generating the scout config for the analysis
@@ -220,14 +237,20 @@ def test_generate_config_adds_sample_paths_raredisease(
     """Test that generate config adds vcf2cytosure file"""
     # GIVEN a status db and hk with an analysis
 
-    # GIVEN that the params file can be read
+    # GIVEN that the rank model files are in Housekeeper
+    mocker.patch.object(
+        ScoutConfigBuilder,
+        "get_file_from_hk",
+        side_effect=lambda hk_tags, *args, **kwargs: next(iter(hk_tags)) + ".ini",
+    )
+
+    # GIVEN a rank model parser that returns objects for SNV and SV files
     mocker.patch.object(
         raredisease_config_builder,
-        "read_yaml",
-        return_value={
-            "score_config_snv": "/path/to/some/snv_file.-v1.0-.ini",
-            "score_config_sv": "/path/to/some/sv_file.-v2.0-.ini",
-        },
+        "parse_rank_model_file",
+        side_effect=lambda file: RankModel(
+            path=file, version="1.0" if file == "rank-model-snv.ini" else "2.0"
+        ),
     )
 
     # WHEN generating the scout config for the analysis

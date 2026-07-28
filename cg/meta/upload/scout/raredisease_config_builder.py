@@ -1,6 +1,4 @@
 import logging
-import re
-from pathlib import Path
 
 from housekeeper.store.models import Version
 
@@ -15,8 +13,8 @@ from cg.constants.scout import (
     UploadTrack,
 )
 from cg.constants.sequencing import Variants
-from cg.io.yaml import read_yaml
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
+from cg.meta.upload.scout.rank_model import RankModel, parse_rank_model_file
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.scout.scout_load_config import (
@@ -71,50 +69,27 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         )
         load_config.human_genome_build = GenomeBuild.hg38
         load_config.rank_score_threshold = RANK_MODEL_THRESHOLD
-        load_config.rank_model_version = self._get_rank_model_version(
-            hk_version=hk_version,
-            variant_type=Variants.SNV,
-        )
-        load_config.rank_model_url = self._get_rank_model_url(
+        snv_rank_model: RankModel = self._get_rank_model(
             hk_version=hk_version, variant_type=Variants.SNV
         )
-        load_config.sv_rank_model_version = self._get_rank_model_version(
+        load_config.rank_model_url = snv_rank_model.path
+        load_config.rank_model_version = snv_rank_model.version
+        sv_rank_model: RankModel = self._get_rank_model(
             hk_version=hk_version, variant_type=Variants.SV
         )
-        load_config.sv_rank_model_url = self._get_rank_model_url(
-            hk_version=hk_version, variant_type=Variants.SV
-        )
+        load_config.sv_rank_model_url = sv_rank_model.path
+        load_config.sv_rank_model_version = sv_rank_model.version
         return load_config
 
-    def _get_params_file_path(self, hk_version: Version) -> str:
-        hk_params_file: str | None = self.get_file_from_hk(
-            hk_tags={"nextflow-params"}, hk_version=hk_version
-        )
-        if not hk_params_file:
-            raise FileNotFoundError("No params file found in Housekeeper.")
-        return hk_params_file
-
-    def _get_rank_model_url(self, hk_version: Version, variant_type: Variants) -> str:
-        hk_params_file: str = self._get_params_file_path(hk_version=hk_version)
-        content: dict[str, str] = read_yaml(Path(hk_params_file))
+    def _get_rank_model(self, hk_version: Version, variant_type: Variants) -> RankModel:
         if variant_type == Variants.SNV:
-            return content.get("score_config_snv", "")
+            tags = {"rank-model-snv"}
         else:
-            return content.get("score_config_sv", "")
-
-    def _get_rank_model_version(self, hk_version: Version, variant_type: Variants) -> str:
-        file_path: str = self._get_rank_model_url(hk_version=hk_version, variant_type=variant_type)
-        return self._get_version_from_file_path(file_path)
-
-    @staticmethod
-    def _get_version_from_file_path(file_path: str) -> str:
-        """
-        Returns the rank model version in the format 'vX.X from the given file path.
-        Raises a ValueError if no rank model version is found in the file path.
-        """
-        if match := re.search(r"v(\d+\.\d+)", file_path):
-            return match.group(1)
-        raise ValueError("No rank model version found")
+            tags = {"rank-model-sv"}
+        file_path: str | None = self.get_file_from_hk(hk_tags=tags, hk_version=hk_version)
+        if not file_path:
+            raise FileNotFoundError(f"No {variant_type} rank model file found in Housekeeper.")
+        return parse_rank_model_file(file_path)
 
     def load_custom_image_sample(
         self, load_config: RarediseaseLoadConfig, analysis: Analysis, hk_version: Version
