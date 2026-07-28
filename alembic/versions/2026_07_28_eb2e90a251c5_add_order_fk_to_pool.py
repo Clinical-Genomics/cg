@@ -61,6 +61,10 @@ class Pool(Base):
 
 
 def upgrade():
+    """
+    Adds a relationship between the Pool and the order table and uses the ticket column to link the two,
+    before dropping the (now obsolete) ticket column.
+    """
     bind: sa.Connection = op.get_bind()
     session = Session(bind=bind)
     op.add_column(

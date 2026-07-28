@@ -731,12 +731,15 @@ class Pool(Base):
     db_order: Mapped["Order"] = orm.relationship(foreign_keys=[order_id])
     ordered_at: Mapped[datetime]
     received_at: Mapped[datetime | None]
-    ticket: Mapped[Str32 | None]
 
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="pools")
 
     def to_dict(self):
         return to_dict(model_instance=self)
+
+    @property
+    def ticket(self) -> int:
+        return self.db_order.ticket_id
 
 
 class Sample(Base, PriorityMixin):
