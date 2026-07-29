@@ -57,7 +57,6 @@ class StorePoolOrderService(StoreOrderService):
                     db_order=db_order,
                     pool=pool,
                     order_name=order.name,
-                    ticket_id=str(db_order.ticket_id),
                     customer=db_order.customer,
                 )
                 for sample in pool[1]:
@@ -139,7 +138,6 @@ class StorePoolOrderService(StoreOrderService):
         pool: tuple[str, list[IndexedSample]],
         db_order: Order,
         order_name: str,
-        ticket_id: str,
         customer: Customer,
     ) -> Pool:
         """Return a Pool database object."""
