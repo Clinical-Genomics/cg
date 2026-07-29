@@ -196,6 +196,7 @@ class CreateMixin(ReadHandler):
         last_sequenced_at: datetime = None,
         order: str = None,
         ordered: datetime = None,
+        pool: Pool | None = None,
         prepared_at: datetime = None,
         priority: Priority = None,
         received: datetime = None,
@@ -219,6 +220,7 @@ class CreateMixin(ReadHandler):
             order=order,
             ordered_at=ordered or datetime.now(),
             original_ticket=original_ticket,
+            pool=pool,
             prepared_at=prepared_at,
             priority=priority,
             received_at=received,
@@ -330,6 +332,7 @@ class CreateMixin(ReadHandler):
         no_invoice: bool = None,
         delivered_at: datetime = None,
         db_order: Order | None = None,
+        samples: list[Sample] | None = None,
     ) -> Pool:
         """Build a new Pool record."""
 
@@ -343,6 +346,7 @@ class CreateMixin(ReadHandler):
             delivered_at=delivered_at,
             invoice_id=invoice_id,
             no_invoice=no_invoice,
+            samples=samples or [],
         )
         new_record.customer = customer
         new_record.application_version = application_version

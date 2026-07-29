@@ -126,6 +126,7 @@ def test_create_db_sample_with_lims_status_and_invoice(
         application_version=application_version,
         customer=customer,
         order_name="order",
+        pool=create_autospec(Pool),
         sample=fastq_sample,
         ticket_id="1234567",
     )

@@ -2,6 +2,7 @@ from datetime import datetime as dt
 
 import pytest
 
+from cg.constants import Priority
 from cg.constants.devices import RevioNames
 from cg.constants.subject import Sex
 from cg.exc import PacbioSequencingRunAlreadyExistsError
@@ -15,6 +16,7 @@ from cg.store.models import (
     IlluminaFlowCell,
     Organism,
     PacbioSequencingRun,
+    Pool,
     Sample,
     User,
 )
@@ -96,6 +98,23 @@ def test_add_microbial_sample(base_store: Store, helpers):
     assert stored_microbial_sample.application_version == application_version
     assert stored_microbial_sample.priority_human == priority
     assert stored_microbial_sample.organism == organism
+
+
+def test_add_sample_connected_to_pool(store: Store):
+    # GIVEN a pool
+    pool = Pool(id=1)
+
+    # WHEN adding a sample
+    sample = store.add_sample(
+        name="sample-name",
+        sex=Sex.FEMALE,
+        internal_id="sample_name",
+        priority=Priority.standard,
+        pool=pool,
+    )
+
+    # THEN the sample should be connected to the pool
+    assert sample.pool == pool
 
 
 def test_add_pool(rml_pool_store: Store):
