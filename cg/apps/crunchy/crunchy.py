@@ -92,7 +92,7 @@ class CrunchyAPI:
             job_name="_".join([sample_id, compression_obj.run_name, "fastq_to_spring"]),
             log_dir=log_dir.as_posix(),
             memory=memory,
-            number_tasks=self.slurm_cpus_per_task,
+            number_tasks=self.slurm_number_tasks,
             quality_of_service=SlurmQos.MAINTENANCE,
             partition=f"--partition={self.slurm_partition}",
             chdir=f"--chdir={self.tmp_dir_base}",
@@ -136,7 +136,7 @@ class CrunchyAPI:
             fastq_second=compression_obj.fastq_second,
             spring_path=compression_obj.spring_path,
             pending_path=compression_obj.pending_path,
-            threads=self.slurm_number_tasks,
+            threads=self.slurm_cpus_per_task,
             checksum_first=files_info["fastq_first"].checksum,
             checksum_second=files_info["fastq_second"].checksum,
         )
