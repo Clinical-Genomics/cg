@@ -748,8 +748,22 @@ class PoolView(BaseView):
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
         "invoice": InvoiceView.view_invoice_link,
-        "ticket": "db_order.ticket_id",
     }
+    column_list = [
+        "application_version",
+        "customer",
+        "invoice",
+        "comment",
+        "created_at",
+        "delivered_at",
+        "name",
+        "no_invoice",
+        "order",
+        "ordered_at",
+        "received_at",
+        "db_order.ticket_id",
+    ]
+    column_labels = {"db_order.ticket_id": "Ticket"}
     column_searchable_list = ["name", "order", "customer.internal_id"]
 
 
