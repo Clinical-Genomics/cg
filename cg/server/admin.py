@@ -743,14 +743,14 @@ class PoolView(BaseView):
     """Admin view for Model.Pool"""
 
     column_default_sort = ("created_at", True)
-    column_editable_list = ["ticket"]
     column_filters = ["customer.internal_id", "application_version.application"]
     column_formatters = {
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
         "invoice": InvoiceView.view_invoice_link,
+        "ticket": "db_order.ticket_id",
     }
-    column_searchable_list = ["name", "order", "ticket", "customer.internal_id"]
+    column_searchable_list = ["name", "order", "customer.internal_id"]
 
 
 class SampleView(BaseView):

@@ -54,6 +54,7 @@ class StorePoolOrderService(StoreOrderService):
                     ticket_id=str(db_order.ticket_id),
                 )
                 db_pool: Pool = self._create_db_pool(
+                    db_order=db_order,
                     pool=pool,
                     order_name=order.name,
                     ticket_id=str(db_order.ticket_id),
@@ -136,6 +137,7 @@ class StorePoolOrderService(StoreOrderService):
     def _create_db_pool(
         self,
         pool: tuple[str, list[IndexedSample]],
+        db_order: Order,
         order_name: str,
         ticket_id: str,
         customer: Customer,
@@ -150,7 +152,7 @@ class StorePoolOrderService(StoreOrderService):
             name=pool[0],
             order=order_name,
             ordered=datetime.now(),
-            ticket=ticket_id,
+            db_order=db_order,
         )
 
     def _create_db_sample(

@@ -1052,6 +1052,9 @@ class StoreHelpers:
             is_external=is_external,
             is_rna=is_rna,
         )
+        db_order: Order | None = store.get_order_by_ticket_id(ticket)
+        if ticket and not db_order:
+            db_order = store.add_order(customer=customer, ticket_id=int(ticket))
 
         pool = store.add_pool(
             name=name,
@@ -1063,10 +1066,10 @@ class StoreHelpers:
             received_at=received_at,
             no_invoice=no_invoice,
             invoice_id=invoice_id,
-            ticket=ticket,
+            db_order=db_order,
         )
-        store.session.add(pool)
-        store.session.commit()
+        store.add_item_to_store(pool)
+        store.commit_to_store()
         return pool
 
     @classmethod

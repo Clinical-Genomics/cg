@@ -738,8 +738,8 @@ class Pool(Base):
         return to_dict(model_instance=self)
 
     @property
-    def ticket(self) -> int:
-        return self.db_order.ticket_id
+    def ticket(self) -> int | None:
+        return self.db_order.ticket_id if self.db_order else None
 
 
 class Sample(Base, PriorityMixin):
