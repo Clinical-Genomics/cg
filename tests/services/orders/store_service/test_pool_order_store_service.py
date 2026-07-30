@@ -68,7 +68,7 @@ def test_store_pool_order_data_in_status_db(
     for pool in db_pools:
         assert not pool.no_invoice
         assert pool.application_version.application.tag.startswith("RML")
-        assert pool.ticket == order._generated_ticket_id
+        assert pool.ticket == ticket_id
 
     # THEN the order should be stored, have the correct ticket id
     assert store_to_submit_and_validate_orders.get_order_by_ticket_id(int(ticket_id))
