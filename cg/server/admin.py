@@ -222,12 +222,18 @@ def view_ticket_link(unused1, unused2, model, attribute_name):
     ticket_str = str(ticket_attr).strip()
 
     # Freshdesk ticket IDs have >=7 digits
-    if len(ticket_str) >= 7:
-        ticket_link = f"{app_config.freshdesk_url}/a/tickets/{ticket_str}"
-        ticket_markup = Markup(f"<a href='{ticket_link}'>{ticket_str}</a>")
-        return ticket_markup
-    else:
-        return ticket_str
+    return _get_ticket_markups(ticket_str)
+
+
+def view_ticket_link_via_order(_view, _context, model, attribute):
+    """
+    Column formatter used to add hyperlink to the ticketing system, where the model has a
+    relationship to the Order table.
+    """
+    order_attr, ticket_attr = attribute.split(".")
+    order = getattr(model, order_attr)
+    ticket_str = str(getattr(order, ticket_attr))
+    return _get_ticket_markups(ticket_str)
 
 
 def view_tickets_links(unused1, unused2, model, unused3):
@@ -241,14 +247,19 @@ def view_tickets_links(unused1, unused2, model, unused3):
         ticket_str = str(ticket).strip()
 
         # Freshdesk ticket IDs have >=7 digits
-        if len(ticket_str) >= 7:
-            ticket_link = f"{app_config.freshdesk_url}/a/tickets/{ticket_str}"
-            ticket_markup = Markup(f"<a href='{ticket_link}'>{ticket_str}</a>")
-            tickets_markups.append(ticket_markup)
-        else:
-            tickets_markups.append(ticket_str)
+        tickets_markups.append(_get_ticket_markups(ticket_str))
 
     return Markup(", ".join(tickets_markups))
+
+
+def _get_ticket_markups(ticket_str: str) -> str:
+    # Freshdesk tickets are 7 digits
+    if len(ticket_str) >= 7:
+        ticket_link = f"{app_config.freshdesk_url}/a/tickets/{ticket_str}"
+        ticket_markup = Markup(f"<a href='{ticket_link}'>{ticket_str}</a>")
+        return ticket_markup
+    else:
+        return ticket_str
 
 
 class ApplicationView(BaseView):
@@ -748,6 +759,7 @@ class PoolView(BaseView):
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
         "invoice": InvoiceView.view_invoice_link,
+        "db_order.ticket_id": view_ticket_link_via_order,
     }
     column_list = [
         "application_version",
