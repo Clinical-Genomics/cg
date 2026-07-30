@@ -71,6 +71,7 @@ class DeliverService:
         try:
             self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
             self.mark_as_delivered_service.close_order_in_status_db_if_closable(order)
+            self.mark_as_delivered_service.mark_pools(order)
             if not self._is_order_no_delivery(order):
                 self._interact_with_freshdesk(analyses=analyses, order=order)
         except TrailblazerAnalysisDeliveryError as error:

@@ -57,6 +57,13 @@ class MarkAsDeliveredService:
             LOG.error(f"Failed to unmark analyses {trailblazer_ids} in Trailblazer.")
             LOG.exception(error)
 
+    @staticmethod
+    def mark_pools(order: Order):
+        if not order.is_open:
+            for pool in order.pools:
+                LOG.info(f"Setting pool {pool.name} as delivered.")
+                pool.delivered_at = datetime.now()
+
     def _is_order_closable(self, order: Order) -> bool:
         """
         Return True only if

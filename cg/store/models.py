@@ -727,14 +727,19 @@ class Pool(Base):
     name: Mapped[Str32]
     no_invoice: Mapped[bool | None] = mapped_column(default=False)
     order: Mapped[Str64]
+    order_id: Mapped[int | None] = mapped_column(ForeignKey("order.id"))
+    db_order: Mapped["Order"] = orm.relationship(foreign_keys=[order_id])
     ordered_at: Mapped[datetime]
     received_at: Mapped[datetime | None]
-    ticket: Mapped[Str32 | None]
 
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="pools")
 
     def to_dict(self):
         return to_dict(model_instance=self)
+
+    @property
+    def ticket(self) -> str | None:
+        return str(self.db_order.ticket_id) if self.db_order else None
 
 
 class Sample(Base, PriorityMixin):
@@ -1086,6 +1091,9 @@ class Order(Base):
     is_open: Mapped[bool] = mapped_column(default=True)
     analyses: Mapped[list[Analysis]] = orm.relationship(
         back_populates="order", order_by="Analysis.created_at"
+    )
+    pools: Mapped[list[Pool]] = orm.relationship(
+        back_populates="db_order", order_by="Pool.ordered_at"
     )
 
     @property
