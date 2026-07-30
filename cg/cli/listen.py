@@ -6,6 +6,7 @@ import sys
 import coloredlogs
 import rich_click as click
 
+from cg.apps.tb import TrailblazerAPI
 from cg.cli.utils import LOG_LEVELS
 from cg.server.app_config import AppConfig
 
@@ -30,7 +31,6 @@ def listen(app_config: AppConfig, log_level: str, verbose: bool):
         log_format = "%(asctime)s %(name)s[%(process)d] %(levelname)s %(message)s"
     else:
         log_format = "%(message)s" if sys.stdout.isatty() else None
-
     coloredlogs.install(level=log_level, fmt=log_format)
 
     LOG.info("These are the NATS configuration variables:\n")
@@ -41,6 +41,15 @@ def listen(app_config: AppConfig, log_level: str, verbose: bool):
     LOG.info(f"{app_config.listener_client_key_path}")
     LOG.info(f"{app_config.listener_ca_cert_path}")
     LOG.debug(f"{app_config.listener_token_path}")
-    LOG.debug(f"{app_config.trailblazer_host}")
-    LOG.info(f"{app_config.trailblazer_service_account}")
-    LOG.debug(f"{app_config.trailblazer_service_account_auth_file}")
+    _ = TrailblazerAPI(config=_trailblazer_config_from_config(app_config))
+    LOG.debug(f"{_trailblazer_config_from_config(app_config)}")
+
+
+def _trailblazer_config_from_config(app_config: AppConfig) -> dict[str, dict[str, str]]:
+    return {
+        "trailblazer": {
+            "host": app_config.trailblazer_host,
+            "service_account": app_config.trailblazer_service_account,
+            "service_account_auth_file": app_config.trailblazer_service_account_auth_file,
+        }
+    }
