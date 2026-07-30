@@ -33,7 +33,14 @@ def listen(app_config: AppConfig, log_level: str, verbose: bool):
 
     coloredlogs.install(level=log_level, fmt=log_format)
 
-    LOG.info("These are the configuration variables:\n")
-    LOG.info(f"{app_config.freshdesk_url}")
-    LOG.info(f"{app_config.freshdesk_environment}")
+    LOG.info("These are the NATS configuration variables:\n")
+    LOG.info(f"{app_config.nats_server}")
+    LOG.info(f"{app_config.nats_binary_path}")
+    LOG.warning(f"{app_config.nats_stream}")
+    LOG.info(f"{app_config.listener_client_cert_path}")
+    LOG.info(f"{app_config.listener_client_key_path}")
+    LOG.info(f"{app_config.listener_ca_cert_path}")
+    LOG.debug(f"{app_config.listener_token_path}")
     LOG.debug(f"{app_config.trailblazer_host}")
+    LOG.info(f"{app_config.trailblazer_service_account}")
+    LOG.debug(f"{app_config.trailblazer_service_account_auth_file}")
