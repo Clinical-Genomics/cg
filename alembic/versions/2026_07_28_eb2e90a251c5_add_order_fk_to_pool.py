@@ -93,7 +93,7 @@ def upgrade():
     for pool in session.query(Pool).all():
         if pool.ticket:
             order: Order | None = session.query(Order).filter_by(ticket_id=int(pool.ticket)).first()
-            if pool.ticket and not order:
+            if not order:
                 LOG.info(f"Creating order with ticket_id {pool.ticket}")
                 order = Order(
                     customer_id=pool.customer_id,
@@ -102,10 +102,12 @@ def upgrade():
                     ticket_id=int(pool.ticket),
                 )
                 session.add(order)
-            if order:
-                pool.db_order = order
+            pool.db_order = order
             session.add(pool)
     session.commit()
+    op.alter_column(
+        table_name="pool", column_name="order_id", nullable=False, existing_type=sa.Integer
+    )
     op.drop_column(table_name="pool", column_name="ticket")
 
 
