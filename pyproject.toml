@@ -86,6 +86,7 @@ addopts = [
 
 [project.scripts]
 cg = "cg.cli.base:base"
+listen = "cg.cli.listen:listen"
 
 
 # Configurations
