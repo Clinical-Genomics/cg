@@ -16,5 +16,6 @@ LOG = logging.getLogger(__name__)
 def listen(app_config: AppConfig):
     """Listen for incoming event messages."""
     # Placeholder while AppConfig-driven listen behavior is implemented.
+    LOG.info("These are the configuration variables:\n")
     LOG.info(f"{app_config.freshdesk_url}")
     LOG.info(f"{app_config.freshdesk_environment}")
