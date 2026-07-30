@@ -84,6 +84,8 @@ def test_store_pool_order_data_in_status_db(
     for sample in new_samples:
         assert sample.no_invoice
         assert sample.links[0].should_deliver_sample
+        # THEN the samples should be linked to their pool
+        assert sample.pool
 
     # THEN the cases should have the correct data analysis
     for case in new_cases:
