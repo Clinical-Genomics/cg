@@ -273,7 +273,7 @@ def test_submit_order(
         for record in result["records"]:
             assert record.customer.internal_id == customer_id
             if isinstance(record, Pool):
-                assert record.ticket == ticket_id_as_int
+                assert record.ticket == str(ticket_id_as_int)
                 is_pool_order = True
             elif isinstance(record, Sample):
                 assert record.original_ticket == str(ticket_id_as_int)
