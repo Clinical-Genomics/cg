@@ -9,6 +9,9 @@ import rich_click as click
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.utils import LOG_LEVELS
 from cg.server.app_config import AppConfig
+from cg.services.events.event_listener import EventListener
+from cg.store.database import initialize_database
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -33,16 +36,30 @@ def listen(app_config: AppConfig, log_level: str, verbose: bool):
         log_format = "%(message)s" if sys.stdout.isatty() else None
     coloredlogs.install(level=log_level, fmt=log_format)
 
-    LOG.info("These are the NATS configuration variables:\n")
-    LOG.info(f"{app_config.nats_server}")
-    LOG.info(f"{app_config.nats_binary_path}")
-    LOG.warning(f"{app_config.nats_stream}")
-    LOG.info(f"{app_config.listener_client_cert_path}")
-    LOG.info(f"{app_config.listener_client_key_path}")
-    LOG.info(f"{app_config.listener_ca_cert_path}")
-    LOG.debug(f"{app_config.listener_token_path}")
     _ = TrailblazerAPI(config=_trailblazer_config_from_config(app_config))
     LOG.debug(f"{_trailblazer_config_from_config(app_config)}")
+
+    listener = EventListener(
+        nats_server=app_config.nats_server,
+        nats_stream=app_config.nats_stream,
+        listener_ca_cert_path=app_config.listener_ca_cert_path,
+        listener_client_cert_path=app_config.listener_client_cert_path,
+        listener_client_key_path=app_config.listener_client_key_path,
+        listener_token_path=app_config.listener_token_path,
+    )
+    LOG.info("EventListener initialized with server")
+    LOG.info("These are the NATS configuration variables:\n")
+    LOG.info(f"{listener.server}")
+    LOG.info(f"{listener.stream}")
+    LOG.info(f"{listener.ca_cert_path}")
+    LOG.info(f"{listener.client_cert}")
+    LOG.info(f"{listener.client_key}")
+    LOG.debug(f"{listener.token}")
+
+    initialize_database(app_config.cg_sql_database_uri)
+    status_db = Store()
+    LOG.info(f"Database initialized with URI: {app_config.cg_sql_database_uri}")
+    LOG.debug(f"{status_db.__repr__()}")
 
 
 def _trailblazer_config_from_config(app_config: AppConfig) -> dict[str, dict[str, str]]:

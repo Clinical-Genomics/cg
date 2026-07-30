@@ -15,7 +15,14 @@ from cg.store.store import Store
 @click.command("listen", hidden=True)
 @click.pass_obj
 def listen(config: CGConfig):
-    listener = EventListener(config.nats)
+    listener = EventListener(
+        nats_server=config.nats.server,
+        nats_stream=config.nats.stream,
+        listener_ca_cert_path=config.nats.listener.ca_cert_path.as_posix(),
+        listener_client_cert_path=config.nats.listener.client_cert_path.as_posix(),
+        listener_client_key_path=config.nats.listener.client_key_path.as_posix(),
+        listener_token_path=config.nats.listener.token_path.as_posix(),
+    )
 
     initialize_database(os.environ["CG_SQL_DATABASE_URI"])
     status_db = Store()
