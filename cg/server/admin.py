@@ -764,7 +764,7 @@ class PoolView(BaseView):
         "db_order.ticket_id",
     ]
     column_labels = {"db_order.ticket_id": "Ticket"}
-    column_searchable_list = ["name", "order", "customer.internal_id"]
+    column_searchable_list = ["name", "order", "db_order.ticket_id", "customer.internal_id"]
 
 
 class SampleView(BaseView):
