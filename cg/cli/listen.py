@@ -1,5 +1,6 @@
 """Standalone listen command."""
 
+import asyncio
 import logging
 import sys
 
@@ -9,7 +10,9 @@ import rich_click as click
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.utils import LOG_LEVELS
 from cg.server.app_config import AppConfig
+from cg.services.events import upload_handler
 from cg.services.events.event_listener import EventListener
+from cg.services.events.upload_handler import ANALYSIS_UPLOADED_SUBJECT
 from cg.store.database import initialize_database
 from cg.store.store import Store
 
@@ -36,7 +39,7 @@ def listen(app_config: AppConfig, log_level: str, verbose: bool):
         log_format = "%(message)s" if sys.stdout.isatty() else None
     coloredlogs.install(level=log_level, fmt=log_format)
 
-    _ = TrailblazerAPI(config=_trailblazer_config_from_config(app_config))
+    trailblazer_api = TrailblazerAPI(config=_trailblazer_config_from_config(app_config))
     LOG.debug(f"{_trailblazer_config_from_config(app_config)}")
 
     listener = EventListener(
@@ -60,6 +63,13 @@ def listen(app_config: AppConfig, log_level: str, verbose: bool):
     status_db = Store()
     LOG.info(f"Database initialized with URI: {app_config.cg_sql_database_uri}")
     LOG.debug(f"{status_db.__repr__()}")
+
+    # TODO: register the stream and run the listener
+    # listener.register(
+    #     f"{app_config.nats_stream}.{ANALYSIS_UPLOADED_SUBJECT}",
+    #     upload_handler.completed(status_db=status_db, trailblazer_api=trailblazer_api),
+    # )
+    # asyncio.run(listener.listen())
 
 
 def _trailblazer_config_from_config(app_config: AppConfig) -> dict[str, dict[str, str]]:
