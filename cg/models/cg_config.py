@@ -161,7 +161,7 @@ class NatsConfig(BaseModel):
     nats_binary_path: Path
     server: str
     stream: str
-    # TODO: Remove listener config
+    # TIDI: Remove listener config
     listener: NatsAuthentication
     publisher: NatsAuthentication
 

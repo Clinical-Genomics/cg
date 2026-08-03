@@ -8,7 +8,7 @@ from cg.cli.listen import listen
 from cg.server.app_config import AppConfig
 
 
-# TODO: fix this test when implementation is complete
+# TIDI: fix this test when implementation is complete
 @pytest.mark.xfail(reason="Standalone listen command is not fully implemented yet")
 def test_standalone_listen_uses_app_config():
     # WHEN invoking the standalone listen command
