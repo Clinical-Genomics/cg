@@ -39,9 +39,11 @@ def listen(log_level: str, verbose: bool):
     trailblazer_api = TrailblazerAPI(config=_trailblazer_config_from_env())
     LOG.debug(f"{_trailblazer_config_from_env()}")
 
+    nats_stream: str = os.environ["NATS_STREAM"]
+
     listener = EventListener(
         nats_server=os.environ["NATS_SERVER"],
-        nats_stream=os.environ["NATS_STREAM"],
+        nats_stream=nats_stream,
         listener_ca_cert_path=os.environ["LISTENER_CA_CERT_PATH"],
         listener_client_cert_path=os.environ["LISTENER_CLIENT_CERT_PATH"],
         listener_client_key_path=os.environ["LISTENER_CLIENT_KEY_PATH"],
@@ -61,12 +63,11 @@ def listen(log_level: str, verbose: bool):
     LOG.info(f"Database initialized with URI: {os.environ['CG_SQL_DATABASE_URI']}")
     LOG.debug(f"{status_db.__repr__()}")
 
-    # TODO: register the stream and run the listener
-    # listener.register(
-    #     f"{app_config.nats_stream}.{ANALYSIS_UPLOADED_SUBJECT}",
-    #     upload_handler.completed(status_db=status_db, trailblazer_api=trailblazer_api),
-    # )
-    # asyncio.run(listener.listen())
+    listener.register(
+        f"{nats_stream}.{ANALYSIS_UPLOADED_SUBJECT}",
+        upload_handler.completed(status_db=status_db, trailblazer_api=trailblazer_api),
+    )
+    asyncio.run(listener.listen())
 
 
 def _trailblazer_config_from_env() -> dict[str, dict[str, str]]:
