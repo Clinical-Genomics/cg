@@ -44,14 +44,5 @@ class AppConfig(BaseSettings):
     freshdesk_order_email_id: int = 10
     freshdesk_environment: str = "Stage"
 
-    # NATS configurations
-    nats_server: str = "nats_server"
-    nats_binary_path: str = "path/to/nats"
-    nats_stream: str = "cg-stage"
-    listener_ca_cert_path: str = "/certificates/ca.crt"
-    listener_client_cert_path: str = "/certificates/client.crt"
-    listener_client_key_path: str = "/keys/client.key"
-    listener_token_path: str = "tokens/token"
-
 
 app_config = AppConfig()
