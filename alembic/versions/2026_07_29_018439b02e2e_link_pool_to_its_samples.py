@@ -10,7 +10,16 @@ from datetime import datetime
 from typing import Annotated
 
 import sqlalchemy as sa
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import update
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    Session,
+    joinedload,
+    mapped_column,
+    relationship,
+    selectinload,
+)
 
 from alembic import op
 
@@ -46,6 +55,7 @@ class Case(Base):
     __tablename__ = "case"
     id: Mapped[PrimaryKeyInt]
     links: Mapped[list["CaseSample"]] = relationship(back_populates="case")
+    orders: Mapped[list["Order"]] = relationship(secondary=order_case, back_populates="cases")
 
     @property
     def samples(self) -> list["Sample"]:
@@ -72,7 +82,6 @@ class Order(Base):
     __tablename__ = "order"
 
     id: Mapped[PrimaryKeyInt]
-    customer_id: Mapped[int] = mapped_column(sa.ForeignKey("customer.id"))
     order_date: Mapped[datetime] = mapped_column(default=datetime.now)
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
     is_open: Mapped[bool] = mapped_column(default=True)
@@ -89,19 +98,22 @@ class Pool(Base):
     id: Mapped[PrimaryKeyInt]
     order_id: Mapped[int] = mapped_column(sa.ForeignKey("order.id"))
     db_order: Mapped[Order] = relationship(back_populates="pools", foreign_keys=[order_id])
-    samples = relationship(back_populates="pool")
+    ordered_at: Mapped[datetime]
+    samples: Mapped[list["Sample"]] = relationship(back_populates="pool")
 
 
 class Sample(Base):
     __tablename__ = "sample"
     id: Mapped[PrimaryKeyInt]
+    internal_id: Mapped[str]
+    links: Mapped[list[CaseSample]] = relationship(back_populates="sample")
     pool_id: Mapped[int | None] = mapped_column(sa.ForeignKey("pool.id"))
     pool: Mapped[Pool] = relationship(back_populates="samples", foreign_keys=[pool_id])
 
 
 def upgrade():
     bind: sa.Connection = op.get_bind()
-    session = sa.Session(bind=bind)
+    session = Session(bind=bind)
     op.add_column(
         table_name="sample",
         column=sa.Column(
@@ -114,13 +126,22 @@ def upgrade():
             nullable=True,
         ),
     )
-    for pool in session.query(Pool).all():
+    pools = session.query(Pool).options(
+        selectinload(Pool.samples),
+        joinedload(Pool.db_order).selectinload(Order.pools),
+        joinedload(Pool.db_order)
+        .selectinload(Order.cases)
+        .selectinload(Case.links)
+        .selectinload(CaseSample.sample),
+    )
+    mappings = []
+    for pool in pools.all():
         db_order: Order = pool.db_order
         if db_order.pools == [pool]:
             cases: list[Case] = db_order.cases
             samples: list[Sample] = [sample for case in cases for sample in case.samples]
-            pool.samples = samples
-            session.add(pool)
+            mappings.extend({"id": sample.id, "pool_id": pool.id} for sample in samples)
+    session.execute(update(Sample), mappings)
     session.commit()
 
 
