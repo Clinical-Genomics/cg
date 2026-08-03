@@ -14,6 +14,7 @@ from cg.store.models import (
     Collaboration,
     Customer,
     IlluminaFlowCell,
+    Order,
     Organism,
     PacbioSequencingRun,
     Pool,
@@ -127,7 +128,7 @@ def test_add_pool(rml_pool_store: Store):
         .filter(ApplicationVersion.application_id == application.id)
         .first()
     )
-    db_order = rml_pool_store.add_order(customer=customer, ticket_id=123456)
+    db_order: Order = rml_pool_store.add_order(customer=customer, ticket_id=123456)
 
     # WHEN adding a new pool
     new_pool = rml_pool_store.add_pool(
