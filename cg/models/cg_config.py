@@ -150,20 +150,14 @@ class ChanjoConfig(BaseModel):
     config_path: str
 
 
-class NatsAuthentication(BaseModel):
-    ca_cert_path: Path
-    client_cert_path: Path
-    client_key_path: Path
-    token_path: Path
-
-
 class NatsConfig(BaseModel):
     nats_binary_path: Path
     server: str
     stream: str
-    # TIDI: Remove listener config
-    listener: NatsAuthentication
-    publisher: NatsAuthentication
+    ca_cert_path: Path
+    client_cert_path: Path
+    client_key_path: Path
+    token_path: Path
 
 
 class HermesConfig(CommonAppConfig):
