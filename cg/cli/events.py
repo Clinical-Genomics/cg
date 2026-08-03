@@ -11,7 +11,7 @@ from cg.services.events.upload_handler import ANALYSIS_UPLOADED_SUBJECT
 from cg.store.database import initialize_database
 from cg.store.store import Store
 
-# TIDI: Eventually remove this file
+# TODO: Eventually remove this file
 
 
 @click.command("listen", hidden=True)
