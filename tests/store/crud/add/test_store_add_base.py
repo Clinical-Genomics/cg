@@ -119,7 +119,7 @@ def test_add_sample_connected_to_pool(store: Store):
 
 def test_add_pool(rml_pool_store: Store):
     """Tests whether new pools are invoiced as default."""
-    # GIVEN a valid customer and a valid application_version
+    # GIVEN a customer, an application_version and an order
     customer: Customer = rml_pool_store.get_customers()[0]
     application = rml_pool_store.get_application_by_tag(tag="RMLP05R800")
     app_version = (
@@ -127,6 +127,7 @@ def test_add_pool(rml_pool_store: Store):
         .filter(ApplicationVersion.application_id == application.id)
         .first()
     )
+    db_order = rml_pool_store.add_order(customer=customer, ticket_id=123456)
 
     # WHEN adding a new pool
     new_pool = rml_pool_store.add_pool(
@@ -135,6 +136,7 @@ def test_add_pool(rml_pool_store: Store):
         order="123456",
         ordered=dt.now(),
         application_version=app_version,
+        db_order=db_order,
     )
 
     rml_pool_store.session.add(new_pool)

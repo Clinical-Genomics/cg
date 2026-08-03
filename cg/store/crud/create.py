@@ -326,12 +326,12 @@ class CreateMixin(ReadHandler):
         order: str,
         ordered: datetime,
         application_version: ApplicationVersion,
+        db_order: Order,
         comment: str = None,
         received_at: datetime = None,
         invoice_id: int = None,
         no_invoice: bool = None,
         delivered_at: datetime = None,
-        db_order: Order | None = None,
         samples: list[Sample] | None = None,
     ) -> Pool:
         """Build a new Pool record."""
