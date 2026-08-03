@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import os
 import sys
 
 import coloredlogs
@@ -9,7 +10,6 @@ import rich_click as click
 
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.utils import LOG_LEVELS
-from cg.server.app_config import AppConfig
 from cg.services.events import upload_handler
 from cg.services.events.event_listener import EventListener
 from cg.services.events.upload_handler import ANALYSIS_UPLOADED_SUBJECT
@@ -17,8 +17,6 @@ from cg.store.database import initialize_database
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
-
-pass_app_config = click.make_pass_decorator(AppConfig, ensure=True)
 
 
 @click.command("listen")
@@ -30,8 +28,7 @@ pass_app_config = click.make_pass_decorator(AppConfig, ensure=True)
     help="lowest level to log at",
 )
 @click.option("--verbose", is_flag=True, help="Show full log information, time stamp etc")
-@pass_app_config
-def listen(app_config: AppConfig, log_level: str, verbose: bool):
+def listen(log_level: str, verbose: bool):
     """Listen for incoming event messages."""
     if verbose:
         log_format = "%(asctime)s %(name)s[%(process)d] %(levelname)s %(message)s"
@@ -39,16 +36,16 @@ def listen(app_config: AppConfig, log_level: str, verbose: bool):
         log_format = "%(message)s" if sys.stdout.isatty() else None
     coloredlogs.install(level=log_level, fmt=log_format)
 
-    trailblazer_api = TrailblazerAPI(config=_trailblazer_config_from_config(app_config))
-    LOG.debug(f"{_trailblazer_config_from_config(app_config)}")
+    trailblazer_api = TrailblazerAPI(config=_trailblazer_config_from_env())
+    LOG.debug(f"{_trailblazer_config_from_env()}")
 
     listener = EventListener(
-        nats_server=app_config.nats_server,
-        nats_stream=app_config.nats_stream,
-        listener_ca_cert_path=app_config.listener_ca_cert_path,
-        listener_client_cert_path=app_config.listener_client_cert_path,
-        listener_client_key_path=app_config.listener_client_key_path,
-        listener_token_path=app_config.listener_token_path,
+        nats_server=os.environ["NATS_SERVER"],
+        nats_stream=os.environ["NATS_STREAM"],
+        listener_ca_cert_path=os.environ["LISTENER_CA_CERT_PATH"],
+        listener_client_cert_path=os.environ["LISTENER_CLIENT_CERT_PATH"],
+        listener_client_key_path=os.environ["LISTENER_CLIENT_KEY_PATH"],
+        listener_token_path=os.environ["LISTENER_TOKEN_PATH"],
     )
     LOG.info("EventListener initialized with server")
     LOG.info("These are the NATS configuration variables:\n")
@@ -59,9 +56,9 @@ def listen(app_config: AppConfig, log_level: str, verbose: bool):
     LOG.info(f"{listener.client_key}")
     LOG.debug(f"{listener.token}")
 
-    initialize_database(app_config.cg_sql_database_uri)
+    initialize_database(os.environ["CG_SQL_DATABASE_URI"])
     status_db = Store()
-    LOG.info(f"Database initialized with URI: {app_config.cg_sql_database_uri}")
+    LOG.info(f"Database initialized with URI: {os.environ['CG_SQL_DATABASE_URI']}")
     LOG.debug(f"{status_db.__repr__()}")
 
     # TODO: register the stream and run the listener
@@ -72,11 +69,11 @@ def listen(app_config: AppConfig, log_level: str, verbose: bool):
     # asyncio.run(listener.listen())
 
 
-def _trailblazer_config_from_config(app_config: AppConfig) -> dict[str, dict[str, str]]:
+def _trailblazer_config_from_env() -> dict[str, dict[str, str]]:
     return {
         "trailblazer": {
-            "host": app_config.trailblazer_host,
-            "service_account": app_config.trailblazer_service_account,
-            "service_account_auth_file": app_config.trailblazer_service_account_auth_file,
+            "host": os.environ["TRAILBLAZER_HOST"],
+            "service_account": os.environ["TRAILBLAZER_SERVICE_ACCOUNT"],
+            "service_account_auth_file": os.environ["TRAILBLAZER_SERVICE_ACCOUNT_AUTH_FILE"],
         }
     }
