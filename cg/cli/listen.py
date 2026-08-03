@@ -37,7 +37,6 @@ def listen(log_level: str, verbose: bool):
     coloredlogs.install(level=log_level, fmt=log_format)
 
     trailblazer_api = TrailblazerAPI(config=_trailblazer_config_from_env())
-    LOG.debug(f"{_trailblazer_config_from_env()}")
 
     nats_stream: str = os.environ["NATS_STREAM"]
 
@@ -49,19 +48,9 @@ def listen(log_level: str, verbose: bool):
         listener_client_key_path=os.environ["LISTENER_CLIENT_KEY_PATH"],
         listener_token_path=os.environ["LISTENER_TOKEN_PATH"],
     )
-    LOG.info("EventListener initialized with server")
-    LOG.info("These are the NATS configuration variables:\n")
-    LOG.info(f"{listener.server}")
-    LOG.info(f"{listener.stream}")
-    LOG.info(f"{listener.ca_cert_path}")
-    LOG.info(f"{listener.client_cert}")
-    LOG.info(f"{listener.client_key}")
-    LOG.debug(f"{listener.token}")
 
     initialize_database(os.environ["CG_SQL_DATABASE_URI"])
     status_db = Store()
-    LOG.info(f"Database initialized with URI: {os.environ['CG_SQL_DATABASE_URI']}")
-    LOG.debug(f"{status_db.__repr__()}")
 
     listener.register(
         f"{nats_stream}.{ANALYSIS_UPLOADED_SUBJECT}",
