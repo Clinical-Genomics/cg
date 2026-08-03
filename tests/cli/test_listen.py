@@ -27,8 +27,7 @@ def cli_runner() -> CliRunner:
 
 
 @pytest.fixture(autouse=True)
-def mock_store_and_db(mocker: MockerFixture):
-    mocker.patch.object(listen_cli, "Store")
+def mock_db_config(mocker: MockerFixture):
     mocker.patch.dict(os.environ, {"CG_SQL_DATABASE_URI": "sqlite:///test.db"})
 
 
@@ -50,9 +49,9 @@ def mock_nats_config(mocker: MockerFixture):
 
 
 def test_listen(
-    mocker: MockerFixture,
     cli_runner: CliRunner,
     event_listener: TypedMock[EventListener],
+    mocker: MockerFixture,
 ):
     # GIVEN a configured listener, store, and database URI in the environment
     initialize_database: Mock = mocker.patch.object(listen_cli, "initialize_database")

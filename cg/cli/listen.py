@@ -19,7 +19,7 @@ from cg.store.store import Store
 LOG = logging.getLogger(__name__)
 
 
-@click.command("listen")
+@click.command("listen", hidden=True)
 @click.option(
     "-l",
     "--log-level",
