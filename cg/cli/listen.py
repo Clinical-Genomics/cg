@@ -48,6 +48,7 @@ def listen(log_level: str, verbose: bool):
         listener_client_key_path=os.environ["LISTENER_CLIENT_KEY_PATH"],
         listener_token_path=os.environ["LISTENER_TOKEN_PATH"],
     )
+    LOG.info("Event listener initialized")
 
     initialize_database(os.environ["CG_SQL_DATABASE_URI"])
     status_db = Store()
@@ -56,6 +57,7 @@ def listen(log_level: str, verbose: bool):
         f"{nats_stream}.{ANALYSIS_UPLOADED_SUBJECT}",
         upload_handler.completed(status_db=status_db, trailblazer_api=trailblazer_api),
     )
+    LOG.info(f"Registered handler for subject: {nats_stream}.{ANALYSIS_UPLOADED_SUBJECT}")
     asyncio.run(listener.listen())
 
 
