@@ -384,13 +384,14 @@ def rml_pool_store(
         },
     )
     store.session.add(app_version)
-
+    test_order = store.add_order(customer=new_customer, ticket_id=int(ticket_id))
     new_pool = store.add_pool(
         customer=new_customer,
         name="Test",
         order="Test",
         ordered=dt.datetime.now(),
         application_version=app_version,
+        db_order=test_order,
     )
     store.session.add(new_pool)
     new_case = helpers.add_case(

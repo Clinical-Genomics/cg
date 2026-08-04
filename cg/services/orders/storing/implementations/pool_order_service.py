@@ -66,6 +66,7 @@ class StorePoolOrderService(StoreOrderService):
                         ticket_id=str(db_order.ticket_id),
                         customer=db_order.customer,
                         application_version=db_pool.application_version,
+                        pool=db_pool,
                     )
                     case_sample: CaseSample = self.status_db.relate_sample(
                         case=db_case,
@@ -160,6 +161,7 @@ class StorePoolOrderService(StoreOrderService):
         ticket_id: str,
         customer: Customer,
         application_version: ApplicationVersion,
+        pool: Pool,
     ) -> Sample:
         """Return a Sample database object."""
         lims_status: LimsStatus = (
@@ -177,6 +179,7 @@ class StorePoolOrderService(StoreOrderService):
             order=order_name,
             ordered=datetime.now(),
             original_ticket=ticket_id,
+            pool=pool,
             priority=sample.priority,
             sex=SexEnum.unknown,
         )
