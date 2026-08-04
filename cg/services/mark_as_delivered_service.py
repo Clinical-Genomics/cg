@@ -59,8 +59,8 @@ class MarkAsDeliveredService:
 
     @staticmethod
     def mark_pools(order: Order):
-        if not order.is_open:
-            for pool in order.pools:
+        for pool in order.pools:
+            if all(sample.delivered_at for sample in pool.samples):
                 LOG.info(f"Setting pool {pool.name} as delivered.")
                 pool.delivered_at = datetime.now()
 

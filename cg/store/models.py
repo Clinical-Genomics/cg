@@ -727,12 +727,13 @@ class Pool(Base):
     name: Mapped[Str32]
     no_invoice: Mapped[bool | None] = mapped_column(default=False)
     order: Mapped[Str64]
-    order_id: Mapped[int | None] = mapped_column(ForeignKey("order.id"))
+    order_id: Mapped[int] = mapped_column(ForeignKey("order.id"))
     db_order: Mapped["Order"] = orm.relationship(foreign_keys=[order_id])
     ordered_at: Mapped[datetime]
     received_at: Mapped[datetime | None]
 
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="pools")
+    samples: Mapped[list["Sample"]] = orm.relationship(back_populates="pool")
 
     def to_dict(self):
         return to_dict(model_instance=self)
@@ -779,7 +780,7 @@ class Sample(Base, PriorityMixin):
     _phenotype_groups: Mapped[str | None] = mapped_column(types.Text)
     _phenotype_terms: Mapped[str | None] = mapped_column(types.Text)
     prepared_at: Mapped[datetime | None]
-
+    pool_id: Mapped[int | None] = mapped_column(ForeignKey("pool.id"))
     priority: Mapped[Priority] = mapped_column(default=Priority.standard)
     reads: Mapped[BigInt] = mapped_column(default=0)
     last_sequenced_at: Mapped[datetime | None]
@@ -798,6 +799,7 @@ class Sample(Base, PriorityMixin):
         foreign_keys=[CaseSample.father_id], back_populates="father"
     )
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="samples")
+    pool: Mapped[Pool] = orm.relationship(foreign_keys=[pool_id], back_populates="samples")
 
     _sample_run_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(
         back_populates="sample", cascade="all, delete"

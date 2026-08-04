@@ -10,7 +10,7 @@ from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.constants import Workflow
 from cg.exc import TrailblazerAPIHTTPError
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
-from cg.store.models import Analysis, Case, CaseSample, Order, Sample
+from cg.store.models import Analysis, Case, CaseSample, Order, Pool, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -426,3 +426,27 @@ def test_is_order_closeable_false_undelivered_analysis(
     # WHEN checking if the order can be closed
     # THEN it returns False
     assert not mark_as_delivered_service._is_order_closable(order)
+
+
+def test_mark_pools(mark_as_delivered_service: MarkAsDeliveredService):
+    # GIVEN an order with two pools, one containing delivered samples and one which does not
+    delivered_sample: Sample = create_autospec(Sample, delivered_at=datetime.now())
+    undelivered_sample: Sample = create_autospec(Sample, delivered_at=None)
+    pool_that_should_be_delivered: Pool = create_autospec(
+        Pool, delivered_at=None, samples=[delivered_sample]
+    )
+    pool_that_should_not_be_delivered: Pool = create_autospec(
+        Pool, delivered_at=None, samples=[undelivered_sample]
+    )
+    order: Order = create_autospec(
+        Order, pools=[pool_that_should_be_delivered, pool_that_should_not_be_delivered]
+    )
+
+    # WHEN marking the pools in the order
+    mark_as_delivered_service.mark_pools(order)
+
+    # THEN the pool that should be delivered should have its delivered_at set
+    assert pool_that_should_be_delivered.delivered_at
+
+    # THEN the pool that should not be delivered should not have its delivered_at set
+    assert pool_that_should_not_be_delivered.delivered_at is None
