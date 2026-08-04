@@ -656,3 +656,5 @@ class HousekeeperAPI:
                 files=filtered_files, excluded_tags=excluded_tags
             )
         return filtered_files
+
+    # TODO: Implement new function that can return the sample that have fastq files associated to them (or should this function be elsewhere).

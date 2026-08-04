@@ -26,6 +26,7 @@ def get_cases_to_process(
     if case_id:
         case: Case = store.get_case_by_internal_id(case_id)
         if not case:
+            # TODO: Is this code dead? Will we ever reach this point?
             LOG.warning(f"Could not find case {case_id}")
             return
         if case.is_compressible:
@@ -33,6 +34,12 @@ def get_cases_to_process(
     else:
         date_threshold: dt.datetime = get_date_days_ago(days_ago=days_back)
         cases: list[Case] = store.get_cases_to_compress(date_threshold=date_threshold)
+        # TODO: Implement the new logic here.
+        #  Step 1 - New method housekeeper.get_sample_with_fastq_files(). Returns a set of samples.
+        #  Step 2 - Clean off any sample that is associated with a case that does not reach the required criteria already implemented.
+        #  Step 2.1 - Make a test for this function. Where should it be? How owns this functionality?
+        #  Step 3 - Translate the sample to cases (or keep working with samples, unsure).
+
     return cases
 
 

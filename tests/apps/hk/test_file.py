@@ -1,6 +1,5 @@
 """Test how the api handles files."""
 
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -543,3 +542,7 @@ def test_get_files_from_latest_version_containing_tags_and_excluded_tags(
     filtered_files_names: list[str] = [Path(file.full_path).name for file in filtered_files]
     assert spring_file.name in filtered_files_names
     assert fastq_file.name not in filtered_files_names
+
+
+# TODO: add a new test for the function that returns the sample with fastq files.
+#  It should probably not be here in this file, indicating that this functionality should probably not be here.
