@@ -107,6 +107,7 @@ def test_balsamic_get_start_command_no_flags_set():
         sample_config=Path("/path/to/sample/config"),
         qos=SlurmQos.NORMAL,
         workflow=Workflow.BALSAMIC,
+        workflow_profile=Path("/path/to/balsamic"),
     )
 
     # WHEN getting the start command
@@ -121,7 +122,8 @@ def test_balsamic_get_start_command_no_flags_set():
         "--qos normal "
         "--sample-config /path/to/sample/config "
         "--headjob-partition head_job_partition "
-        "--run-analysis"
+        "--run-analysis "
+        "--workflow-profile /path/to/balsamic"
     )
     assert start_command == expected_command
 

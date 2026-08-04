@@ -9,16 +9,17 @@ from cg.apps.tb.models import TrailblazerAnalysis
 from cg.cli.workflow.raw_data.raw_data_service import RawDataAnalysisService
 from cg.constants import Priority
 from cg.constants.constants import Workflow
-from cg.store.models import Case
+from cg.store.models import Case, Order
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
 @pytest.mark.freeze_time
 def test_store_analysis():
-    # GIVEN a raw data case
+    # GIVEN a raw data case linked to an order
+    order: Order = create_autospec(Order, id=42)
     case: Case = create_autospec(
-        Case, id=666, priority=Priority.express, internal_id="the_best_case"
+        Case, id=666, priority=Priority.express, internal_id="the_best_case", latest_order=order
     )
 
     # GIVEN that a pending analysis can be created in trailblazer
@@ -27,6 +28,7 @@ def test_store_analysis():
     )
     trailblazer_api.add_pending_analysis = Mock(
         return_value=TrailblazerAnalysis(
+            case_id="the_best_case",
             id=67,
             logged_at="1992-12-13",  # type: ignore pydantic model
             started_at="1992-12-13",  # type: ignore pydantic model
@@ -56,6 +58,7 @@ def test_store_analysis():
         started_at=datetime.now(),
         case_id=666,
         trailblazer_id=67,
+        order_id=case.latest_order.id,
     )
     store.as_mock.add_item_to_store.assert_called_once()
     store.as_mock.commit_to_store.assert_called_once()

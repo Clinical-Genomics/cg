@@ -324,12 +324,12 @@ class CreateMixin(ReadHandler):
         order: str,
         ordered: datetime,
         application_version: ApplicationVersion,
-        ticket: str = None,
         comment: str = None,
         received_at: datetime = None,
         invoice_id: int = None,
         no_invoice: bool = None,
         delivered_at: datetime = None,
+        db_order: Order | None = None,
     ) -> Pool:
         """Build a new Pool record."""
 
@@ -337,7 +337,7 @@ class CreateMixin(ReadHandler):
             name=name,
             ordered_at=ordered or datetime.now(),
             order=order,
-            ticket=ticket,
+            db_order=db_order,
             received_at=received_at,
             comment=comment,
             delivered_at=delivered_at,

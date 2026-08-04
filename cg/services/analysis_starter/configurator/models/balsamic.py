@@ -150,14 +150,12 @@ class BalsamicCaseConfig(CaseConfig):
     qos: SlurmQos
     sample_config: Path
     workflow: Workflow
-    workflow_profile: Path | None = None
+    workflow_profile: Path
 
     def get_start_command(self) -> str:
         command = (
             "{conda_binary} run --name {environment} {binary} run analysis --account {account} "
             "--qos {qos} --sample-config {sample_config} --headjob-partition {head_job_partition} "
-            "--run-analysis".format(**self.model_dump())
+            "--run-analysis --workflow-profile {workflow_profile}".format(**self.model_dump())
         )
-        if self.workflow_profile:
-            command += f" --workflow-profile {self.workflow_profile}"
         return command

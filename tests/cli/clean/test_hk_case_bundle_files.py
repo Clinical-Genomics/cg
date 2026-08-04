@@ -1,6 +1,7 @@
 import datetime as dt
 import logging
 
+import pytest
 from click.testing import CliRunner
 
 from cg.cli.clean import hk_case_bundle_files
@@ -103,6 +104,7 @@ def test_clean_hk_case_files_single_analysis(
     assert "found on disk" in caplog.text
 
 
+@pytest.mark.parametrize("workflow", [Workflow.MIP_DNA, Workflow.NALLO, Workflow.RAREDISEASE])
 def test_clean_hk_case_files_analysis_with_protected_tag(
     caplog,
     cg_context: CGConfig,
@@ -110,13 +112,13 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     helpers: StoreHelpers,
     hk_bundle_data: dict,
     timestamp: dt.datetime,
+    workflow: Workflow,
 ):
     # GIVEN we have some analyses to clean
     context: CGConfig = cg_context
     store: Store = context.status_db
     days_ago: int = 1
     date_days_ago: dt.datetime = get_date_days_ago(days_ago)
-    workflow: Workflow = Workflow.MIP_DNA
 
     analysis: Analysis = helpers.add_analysis(
         store=store,
@@ -148,3 +150,6 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     assert "Version with id" in caplog.text
     assert "has the tags" in caplog.text
     assert "has the protected tag(s)" in caplog.text
+
+    # THEN protected tags should be present
+    assert f"No protected tags defined for {workflow}" not in caplog.text

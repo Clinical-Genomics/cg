@@ -1,13 +1,22 @@
+import logging
+from html import escape
 from http import HTTPStatus
 from pathlib import Path
 
-from requests import Session
+from requests import HTTPError, Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 from cg.clients.freshdesk.constants import EndPoints
-from cg.clients.freshdesk.models import ReplyCreate, TicketCreate, TicketResponse
+from cg.clients.freshdesk.models import TicketCreate, TicketResponse
 from cg.clients.freshdesk.utils import handle_client_errors, prepare_attachments
+from cg.exc import (
+    FreshdeskDeliveryMessageError,
+    FreshdeskGetTicketError,
+    FreshdeskUpdateTicketError,
+)
+
+LOG = logging.getLogger(__name__)
 
 
 class FreshdeskClient:
@@ -54,13 +63,35 @@ class FreshdeskClient:
         adapter = HTTPAdapter(max_retries=retry_strategy)
         session.mount("https://", adapter)
 
-    @handle_client_errors
-    def reply_to_ticket(self, reply: ReplyCreate, attachments: list[Path] = None) -> None:
+    def get_ticket(self, ticket_id: int) -> TicketResponse:
+        url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}"
+        LOG.debug(f"URL={url}")
+        try:
+            response = self.session.get(url=url)
+            response.raise_for_status()
+            return TicketResponse.model_validate(response.json())
+        except HTTPError as error:
+            raise FreshdeskGetTicketError from error
+
+    def update_ticket(self, ticket_id: int, status: int) -> TicketResponse:
+        url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}"
+        json = {"status": status}
+        LOG.debug(f"URL={url}; JSON={json}")
+        try:
+            response = self.session.put(url=url, json=json)
+            response.raise_for_status()
+            return TicketResponse.model_validate(response.json())
+        except HTTPError as error:
+            raise FreshdeskUpdateTicketError from error
+
+    def reply_to_ticket(self, ticket_id: int, message: str, cc_emails: list[str]) -> None:
         """Send a reply to an existing ticket in Freshdesk."""
-        url = f"{self.base_url}{EndPoints.TICKETS}/{reply.ticket_number}/reply"
-
-        files = prepare_attachments(attachments) if attachments else None
-        multipart_data = reply.to_multipart_data()
-
-        response = self.session.post(url=url, data=multipart_data, files=files)
-        response.raise_for_status()
+        url = f"{self.base_url}{EndPoints.TICKETS}/{ticket_id}/reply"
+        html_body = escape(message).replace("\n", "<br>")
+        json = {"body": html_body, "cc_emails": cc_emails}
+        LOG.debug(f"URL={url}; JSON={json}")
+        try:
+            response = self.session.post(url=url, json=json)
+            response.raise_for_status()
+        except HTTPError as error:
+            raise FreshdeskDeliveryMessageError from error

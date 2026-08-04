@@ -37,6 +37,7 @@ class ObservationsAPI:
         self.loqusdb_wgs_config: CommonAppConfig = config.loqusdb_wgs
         self.loqusdb_rd_lwp_config: CommonAppConfig = config.loqusdb_rd_lwp
         self.loqusdb_wes_config: CommonAppConfig = config.loqusdb_wes
+        self.loqusdb_wes_38_config: CommonAppConfig = config.loqusdb_wes_38
         self.loqusdb_somatic_config: CommonAppConfig = config.loqusdb_somatic
         self.loqusdb_tumor_config: CommonAppConfig = config.loqusdb_tumor
         self.loqusdb_somatic_lymphoid_config: CommonAppConfig = config.loqusdb_somatic_lymphoid
@@ -81,6 +82,7 @@ class ObservationsAPI:
             LoqusdbInstance.WGS: self.loqusdb_config,
             LoqusdbInstance.WGS38: self.loqusdb_wgs_config,
             LoqusdbInstance.WES: self.loqusdb_wes_config,
+            LoqusdbInstance.WES38: self.loqusdb_wes_38_config,
             LoqusdbInstance.SOMATIC: self.loqusdb_somatic_config,
             LoqusdbInstance.TUMOR: self.loqusdb_tumor_config,
             LoqusdbInstance.SOMATIC_LYMPHOID: self.loqusdb_somatic_lymphoid_config,

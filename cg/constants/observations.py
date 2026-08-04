@@ -74,6 +74,7 @@ class LoqusdbInstance(StrEnum):
     WGS = "loqusdb"
     WGS38 = "loqusdb-wgs"
     WES = "loqusdb-wes"
+    WES38 = "loqusdb-wes-38"
     SOMATIC = "loqusdb-somatic"
     TUMOR = "loqusdb-tumor"
     SOMATIC_LYMPHOID = "loqusdb-somatic-lymphoid"
@@ -115,18 +116,6 @@ class NalloLoadParameters(Enum):
     HARD_THRESHOLD = 0.95
     SOFT_THRESHOLD = 0.90
     SNV_GQ_ONLY = True
-
-
-class ObservationsFileWildcards(StrEnum):
-    """File patterns regarding dump Loqusdb files."""
-
-    ARTEFACT_SNV: str = "artefact_somatic_snv"
-    CLINICAL_SNV: str = "clinical_snv"
-    CLINICAL_SV: str = "clinical_sv"
-    CANCER_GERMLINE_SNV: str = "cancer_germline_snv"
-    CANCER_GERMLINE_SV: str = "cancer_germline_sv"
-    CANCER_SOMATIC_SNV: str = "cancer_somatic_snv"
-    CANCER_SOMATIC_SV: str = "cancer_somatic_sv"
 
 
 class RarediseaseObservationsAnalysisTag(StrEnum):

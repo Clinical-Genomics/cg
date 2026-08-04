@@ -152,7 +152,9 @@ class SampleMetrics(RunMetrics):
     hifi_median_read_quality: str = Field(..., alias=SampleMetricsAliases.HIFI_READ_QUALITY)
     hifi_reads: int = Field(..., alias=SampleMetricsAliases.HIFI_READS)
     hifi_yield: int = Field(..., alias=SampleMetricsAliases.HIFI_YIELD)
-    polymerase_read_length: int = Field(..., alias=SampleMetricsAliases.POLYMERASE_READ_LENGTH)
+    polymerase_read_length: int | None = Field(
+        None, alias=SampleMetricsAliases.POLYMERASE_READ_LENGTH
+    )  # Not generated for re-demultiplexed fields
     sample_internal_id: str = Field(..., alias=SampleMetricsAliases.SAMPLE_INTERNAL_ID)
 
 

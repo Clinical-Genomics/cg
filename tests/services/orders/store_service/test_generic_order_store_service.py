@@ -8,8 +8,10 @@ from datetime import datetime
 from unittest.mock import Mock, create_autospec
 
 import pytest
+from genologics.entities import Sample as LimsSample
 from pytest_mock import MockerFixture
 
+from cg.apps.lims.api import LimsAPI
 from cg.constants import DataDelivery, Priority, Workflow
 from cg.constants.lims import LimsStatus
 from cg.models.orders.constants import OrderType
@@ -215,11 +217,14 @@ def test_store_rnafusion_sample_is_set_to_tumour(store: Store, mocker: MockerFix
     mocker.patch.object(
         store, "get_current_application_version_by_tag", return_value=application_version
     )
+    mocker.patch.object(store, "get_lims_workflow_id_by_application_tag")
     mocker.patch.object(store, "commit_to_store")
-    lims_service: OrderLimsService = create_autospec(OrderLimsService)
-    lims_service.process_lims = Mock(
-        return_value=("project_data", {rna_fusion_sample.name: "rnafusion_sample_id"})
+    lims_service: OrderLimsService = create_autospec(
+        OrderLimsService, lims_api=create_autospec(LimsAPI)
     )
+    lims_sample = create_autospec(LimsSample, id="rnafusion_sample_id")
+    lims_sample.name = rna_fusion_sample.name
+    lims_service.process_lims = Mock(return_value=("project_data", [lims_sample]))
 
     # WHEN persisting the order data
     storing_service = StoreCaseOrderService(status_db=store, lims_service=lims_service)
@@ -274,8 +279,10 @@ def test_existing_samples_should_not_be_delivered_again(mocker: MockerFixture):
 @pytest.mark.parametrize(
     "is_external, expected_lims_status", [(True, LimsStatus.DONE), (False, LimsStatus.PENDING)]
 )
-def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_status: LimsStatus):
-    # GIVEN a store containing an external application
+def test_create_db_sample_with_lims_status_and_invoice(
+    is_external: bool, expected_lims_status: LimsStatus
+):
+    # GIVEN a store containing an application
     application: Application = create_autospec(Application, is_external=is_external)
     application_version: ApplicationVersion = create_autospec(
         ApplicationVersion, application=application
@@ -296,7 +303,7 @@ def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_stat
         subject_id="father",
     )
 
-    # GIVEN order case
+    # GIVEN a case
     case = create_autospec(RNAFusionCase, priority=Priority.standard)
 
     # GIVEN a store case order service
@@ -304,7 +311,7 @@ def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_stat
         status_db=status_db.as_type, lims_service=create_autospec(OrderLimsService)
     )
 
-    # WHEN creating a database sample with an external application
+    # WHEN creating a database sample
     store_order_service._create_db_sample(
         case=case,
         sample=rna_fusion_sample,
@@ -314,5 +321,8 @@ def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_stat
         ticket="1234567",
     )
 
-    # THEN the lims status of the sample is done
+    # THEN the lims status of the sample should be done if it is an external application
     assert status_db.as_mock.add_sample.call_args[1]["lims_status"] == expected_lims_status
+
+    # THEN the sample should be set to no_invoice if it is an external application
+    assert status_db.as_mock.add_sample.call_args[1]["no_invoice"] == is_external

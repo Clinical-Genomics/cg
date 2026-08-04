@@ -172,10 +172,9 @@ class GisaidAPI:
 
     def create_gisaid_csv(self, gisaid_samples: list[GisaidSample], case_id: str) -> None:
         """Create csv file for gisaid upload"""
-        samples_df = pd.DataFrame(
-            data=[gisaid_sample.model_dump() for gisaid_sample in gisaid_samples],
-            columns=HEADERS,
-        )
+        sample_dicts: list[dict] = [
+            sample.model_dump(include=set(HEADERS)) for sample in gisaid_samples
+        ]
 
         gisaid_csv_file = self.housekeeper_api.get_file_from_latest_version(
             bundle_name=case_id, tags=["gisaid-csv", case_id]
@@ -185,7 +184,11 @@ class GisaidAPI:
             gisaid_csv_path = gisaid_csv_file.full_path
         else:
             gisaid_csv_path = self.get_gisaid_csv_path(case_id=case_id)
-        samples_df.to_csv(gisaid_csv_path, sep=",", index=False)
+
+        with open(Path(gisaid_csv_path), "w", newline="") as csv_file:
+            writer: csv.DictWriter = csv.DictWriter(csv_file, fieldnames=HEADERS)
+            writer.writeheader()
+            writer.writerows(sample_dicts)
 
         if gisaid_csv_file:
             return

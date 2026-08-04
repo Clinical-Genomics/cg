@@ -163,3 +163,10 @@ def _get_existing_case_sources(case: ExistingCase, lims_api: LimsAPI, store: Sto
     for sample in db_case.samples:
         sources.add(lims_api.get_source(sample.from_sample or sample.internal_id))
     return sources
+
+
+def get_invalid_panels(panels: list[str], store: Store) -> list[str]:
+    invalid_panels: list[str] = [
+        panel for panel in panels if not store.does_gene_panel_exist(panel)
+    ]
+    return invalid_panels

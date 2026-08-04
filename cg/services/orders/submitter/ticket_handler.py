@@ -98,7 +98,6 @@ class TicketHandler:
                 )
 
         message += self.NEW_LINE
-        message = self.add_order_comment_to_message(message=message, comment=order.comment)
         message = self.add_user_name_to_message(message=message, name=user_name)
         message = self.add_customer_to_message(message=message, customer_id=order.customer)
 
@@ -150,11 +149,6 @@ class TicketHandler:
     def add_sample_comment_to_message(message: str, comment: str | None) -> str:
         if comment:
             message += f", {comment}"
-        return message
-
-    def add_order_comment_to_message(self, message: str, comment: str | None) -> str:
-        if comment:
-            message += f"{self.NEW_LINE}{comment}."
         return message
 
     def add_user_name_to_message(self, message: str, name: str | None) -> str:

@@ -35,6 +35,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_well_position_format,
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
+    warn_if_sex_unknown,
 )
 
 BALSAMIC_CASE_RULES: list[Callable] = [
@@ -73,4 +74,5 @@ BALSAMIC_CASE_SAMPLE_RULES: list[Callable] = [
     validate_well_position_format,
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
+    warn_if_sex_unknown,
 ]

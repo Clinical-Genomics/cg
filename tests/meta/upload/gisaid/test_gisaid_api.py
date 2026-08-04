@@ -4,10 +4,12 @@ from unittest.mock import Mock, create_autospec
 import pytest
 from housekeeper.store.models import File
 from pandas import DataFrame
+from pyfakefs.fake_filesystem import FakeFilesystem
 from sqlalchemy.orm import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.upload.gisaid.gisaid import GisaidAPI
+from cg.meta.upload.gisaid.models import GisaidSample
 from cg.models.cg_config import CGConfig, EmailBaseSettings, GisaidConfig, MutantConfig
 from cg.store.models import Sample
 from cg.store.store import Store
@@ -153,8 +155,52 @@ def test_update_completion_file(
     assert Path(completion_file.full_path).read_text() == expected_updated_completion_file
 
 
+def test_create_gisaid_csv(
+    cg_config: CGConfig, housekeeper_api: HousekeeperAPI, fs: FakeFilesystem
+):
+    housekeeper_api.get_file_from_latest_version = Mock(return_value=None)
+    fs.create_dir("root/case_id/results")
+    samples: list[GisaidSample] = [
+        GisaidSample(
+            case_id="case_id",
+            cg_lims_id="cg_lims_id",
+            submitter="submitter",
+            region="region",
+            region_code="region_code",
+            fn="fn",
+            covv_collection_date="2026-08-04",
+            covv_subm_sample_id="covv_subm_sample_id",
+        )
+    ]
+
+    gisaid_api = GisaidAPI(config=cg_config)
+    gisaid_api.create_gisaid_csv(gisaid_samples=samples, case_id="case_id")
+
+    assert (
+        Path("root/case_id/results/case_id.csv").read_text()
+        == "submitter,fn,covv_virus_name,covv_type,covv_passage,covv_collection_date,covv_location,"
+        "covv_host,covv_gender,covv_patient_age,covv_patient_status,covv_seq_technology,"
+        "covv_orig_lab,covv_orig_lab_addr,covv_subm_sample_id,covv_subm_lab,covv_subm_lab_addr,"
+        "covv_authors,covv_specimen,covv_outbreak,covv_add_host_info,covv_add_location,"
+        "covv_provider_sample_id,covv_last_vaccinated,covv_treatment,covv_assembly_method,"
+        "covv_coverage\nsubmitter,fn,hCoV-19/Sweden/region_code_SE100_covv_subm_sample_id/2026,"
+        "betacoronavirus,Original,2026-08-04,Europe/Sweden/region,Human,unknown,unknown,unknown,"
+        "Illumina NovaSeq,,,region_code_SE100_covv_subm_sample_id,Karolinska University Hospital,"
+        '"171 76 Stockholm, Sweden","Jan Albert ,Tobias Allander ,Sandra Broddesson ,'
+        "Robert Dyrdak ,Martin Ekman ,Lynda Eneh ,Shambhu Ganeshappa Aralaguppe ,"
+        "Natalija Gerasimcik ,Karina Hentrich ,Annika Tiveljung Lindell ,Valtteri Wirta ,"
+        'Zhibing Yun",,,,,,,,,\n'
+    )
+
+
+# TODO
 def test_upload(cg_config: CGConfig, completion_file: File, housekeeper_api: HousekeeperAPI):
     housekeeper_api.get_file_from_latest_version = Mock(return_value=completion_file)
     gisaid_api = GisaidAPI(config=cg_config)
 
     gisaid_api.upload("case_id")
+
+    # assert gisaid files created in Housekeeper (csv, fasta, log file)
+
+    # assert results uploaded to gisaid, authenticate, run command
+    # assert completion file updated (full test above, check for call sufficient)

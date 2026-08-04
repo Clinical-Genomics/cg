@@ -208,6 +208,7 @@ def expect_to_add_pending_analysis_to_trailblazer(
     ).respond_with_json(
         {
             "id": "1",
+            "case_id": "case_id",
             "logged_at": "",
             "started_at": "",
             "completed_at": "",

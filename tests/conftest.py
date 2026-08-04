@@ -69,7 +69,6 @@ from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
-from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
 from cg.store.database import create_all_tables, drop_all_tables, get_engine, initialize_database
 from cg.store.models import (
     Application,
@@ -85,7 +84,6 @@ from cg.store.models import (
 )
 from cg.store.store import Store
 from cg.utils import Process
-from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import LimsSample, LimsUDF, MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
@@ -181,18 +179,6 @@ def any_string() -> str:
 def slurm_account() -> str:
     """Return a SLURM account."""
     return "super_account"
-
-
-@pytest.fixture(scope="session")
-def user_name() -> str:
-    """Return a username."""
-    return "Paul Anderson"
-
-
-@pytest.fixture(scope="session")
-def user_mail() -> str:
-    """Return a user email."""
-    return "paul@magnolia.com"
 
 
 @pytest.fixture(scope="function")
@@ -407,6 +393,27 @@ def base_config_dict() -> dict:
                 "demultiplexed_runs_dir": "path/to/demultiplexed_flow_cells_dir",
             },
         },
+        "freshdesk": {
+            "api_key": "some_api_key",
+            "base_url": "freshdesk.com",
+        },
+        "nats": {
+            "server": "https://nats.scilifelab.se",
+            "stream": "cg-test",
+            "nats_binary_path": Path("nats_binary_path"),
+            "listener": {
+                "ca_cert_path": Path("ca_cert_path"),
+                "client_cert_path": Path("client_cert_path"),
+                "client_key_path": Path("client_key_path"),
+                "token_path": Path("event_listener_token"),
+            },
+            "publisher": {
+                "ca_cert_path": Path("ca_cert_path"),
+                "client_cert_path": Path("client_cert_path"),
+                "client_key_path": Path("client_key_path"),
+                "token_path": Path("event_listener_token"),
+            },
+        },
         "downsample": {
             "downsample_dir": "path/to/downsample_dir",
             "downsample_script": "downsample.sh",
@@ -455,13 +462,16 @@ def crunchy_config() -> dict[str, dict[str, Any]]:
         "crunchy": {
             "conda_binary": "a conda binary",
             "cram_reference": "/path/to/fasta",
+            "tmp_dir_base": "/state/partition1",
+            "fallback_memory": 1,
+            "fallback_minutes": 60,
             "slurm": {
                 "account": "mock_account",
                 "conda_env": "mock_env",
-                "hours": 1,
                 "mail_user": "mock_mail",
-                "memory": 1,
                 "number_tasks": 1,
+                "cpus_per_task": 8,
+                "partition": "compress",
             },
         }
     }
@@ -1259,15 +1269,6 @@ def scout_api() -> MockScoutAPI:
     return MockScoutAPI()
 
 
-# Crunchy fixtures
-
-
-@pytest.fixture(name="crunchy_api")
-def crunchy_api():
-    """Setup Crunchy API."""
-    return MockCrunchyAPI()
-
-
 # Store fixtures
 
 
@@ -1419,12 +1420,6 @@ def raredisease_loqusdb_customer(collaboration_id: str, customer_id: str) -> Cus
         internal_id=CustomerId.CUST004,
         loqus_upload=True,
     )
-
-
-@pytest.fixture
-def external_wes_application_tag() -> str:
-    """Return the external whole exome sequencing application tag."""
-    return "EXXCUSR000"
 
 
 @pytest.fixture
@@ -1826,20 +1821,6 @@ def downsample_dir(tmp_path_factory) -> Path:
     return tmp_path_factory.mktemp("downsample", numbered=True)
 
 
-@pytest.fixture(name="swegen_dir")
-def swegen_dir(tmpdir_factory, tmp_path) -> Path:
-    """SweGen temporary directory containing mocked reference files."""
-    return tmpdir_factory.mktemp("swegen")
-
-
-@pytest.fixture(name="swegen_snv_reference")
-def swegen_snv_reference_path(swegen_dir: Path) -> Path:
-    """Return a temporary path to a SweGen SNV reference file."""
-    mock_file = Path(swegen_dir, "grch37_swegen_10k_snv_-20220101-.vcf.gz")
-    mock_file.touch(exist_ok=True)
-    return mock_file
-
-
 @pytest.fixture(name="observations_dir")
 def observations_dir(tmpdir_factory, tmp_path) -> Path:
     """Loqusdb temporary directory containing observations mock files."""
@@ -1860,28 +1841,6 @@ def observations_clinical_sv_file_path(observations_dir: Path) -> Path:
     mock_file = Path(observations_dir, "loqusdb_clinical_sv_export-20220101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
-
-
-@pytest.fixture(name="observations_somatic_snv_file_path")
-def observations_somatic_snv_file_path(observations_dir: Path) -> Path:
-    """Return a temporary path to a cancer somatic SNV file."""
-    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20220101-.vcf.gz")
-    mock_file.touch(exist_ok=True)
-    return mock_file
-
-
-@pytest.fixture(name="outdated_observations_somatic_snv_file_path")
-def outdated_observations_somatic_snv_file_path(observations_dir: Path) -> Path:
-    """Return a temporary path to an outdated cancer somatic SNV file."""
-    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20180101-.vcf.gz")
-    mock_file.touch(exist_ok=True)
-    return mock_file
-
-
-@pytest.fixture(name="custom_observations_clinical_snv_file_path")
-def custom_observations_clinical_snv_file_path(observations_dir: Path) -> Path:
-    """Return a custom path for the clinical SNV observations file."""
-    return Path(observations_dir, "clinical_snv_export-19990101-.vcf.gz")
 
 
 @pytest.fixture(scope="session")
@@ -1986,6 +1945,27 @@ def context_config(
                 "demultiplexed_runs_dir": str(illumina_demultiplexed_runs_directory),
             },
         },
+        "freshdesk": {
+            "api_key": "some_api_key",
+            "base_url": "freshdesk.com",
+        },
+        "nats": {
+            "server": "https://nats.scilifelab.se",
+            "stream": "cg-test",
+            "nats_binary_path": Path("nats_binary_path"),
+            "publisher": {
+                "ca_cert_path": Path("ca_cert_path"),
+                "client_cert_path": Path("client_cert_path"),
+                "client_key_path": Path("client_key_path"),
+                "token_path": Path("event_listener_token"),
+            },
+            "listener": {
+                "ca_cert_path": Path("ca_cert_path"),
+                "client_cert_path": Path("client_cert_path"),
+                "client_key_path": Path("client_key_path"),
+                "token_path": Path("event_listener_token"),
+            },
+        },
         "downsample": {
             "downsample_dir": str(downsample_dir),
             "downsample_script": "downsample.sh",
@@ -2054,6 +2034,7 @@ def context_config(
             "swegen_path": str(cg_dir),
             "swegen_snv": str(cg_dir),
             "swegen_sv": str(cg_dir),
+            "workflow_profile": str(balsamic_dir),
         },
         "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage-hg19.yaml"},
         "chanjo_38": {"binary_path": "echo", "config_path": "chanjo-stage-hg38.yaml"},
@@ -2061,13 +2042,16 @@ def context_config(
         "crunchy": {
             "conda_binary": "a_conda_binary",
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
+            "tmp_dir_base": "/state/partition1",
+            "fallback_memory": 1,
+            "fallback_minutes": 60,
             "slurm": {
                 "account": "development",
                 "conda_env": "S_crunchy",
-                "hours": 1,
                 "mail_user": email_address,
-                "memory": 1,
                 "number_tasks": 1,
+                "cpus_per_task": 4,
+                "partition": "compress",
             },
         },
         "data-delivery": {
@@ -2126,6 +2110,7 @@ def context_config(
         "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb.yaml"},
         "loqusdb-lwp": {"binary_path": "loqusdb-rd-lwp", "config_path": "loqusdb-rd-lwp.yaml"},
         "loqusdb-wes": {"binary_path": "loqusdb-wes", "config_path": "loqusdb-wes.yaml"},
+        "loqusdb-wes-38": {"binary_path": "loqusdb-wes-38", "config_path": "loqusdb-wes-38.yaml"},
         "loqusdb-wgs": {"binary_path": "loqusdb-wes", "config_path": "loqusdb-wes.yaml"},
         "loqusdb-somatic": {
             "binary_path": "loqusdb-somatic",
@@ -2186,6 +2171,9 @@ def context_config(
             "workflow_bin_path": Path("workflow", "path").as_posix(),
             "pre_run_script": "",
             "profile": "myprofile",
+            "rank_model_threshold": 13,
+            "rank_model_snv": "path/to/ghxx_nallo_rank_model_snvs.ini",
+            "rank_model_sv": "path/to/ghxx_nallo_rank_model_svs.ini",
             "reference": "nallo_reference.fasta",
             "repository": "https://some_url",
             "references": Path("path", "to", "references").as_posix(),
@@ -2207,6 +2195,8 @@ def context_config(
             "platform": str(nf_analysis_platform_config_path),
             "params": str(nf_analysis_pipeline_params_path),
             "config": str(nf_analysis_pipeline_config_path),
+            "rank_model_snv": "path/to/ghxx_rd_rank_model_snvs.ini",
+            "rank_model_sv": "path/to/ghxx_rd_rank_model_svs.ini",
             "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_bin_path": Path("workflow", "path").as_posix(),
@@ -2866,12 +2856,6 @@ def nallo_hermes_deliverables(nallo_deliverable_data: dict, nallo_case_id: str) 
     return hermes_output
 
 
-@pytest.fixture
-def nallo_multiqc_json_metrics_path(nallo_analysis_dir: Path) -> Path:
-    """Return Multiqc JSON file path for nallo."""
-    return Path(nallo_analysis_dir, multiqc_json_file)
-
-
 @pytest.fixture(scope="function")
 def nallo_multiqc_json_metrics(nallo_analysis_dir) -> dict:
     """Returns the content of a mock Multiqc JSON file."""
@@ -3218,12 +3202,6 @@ def rnafusion_case_id() -> str:
     return "rnafusion_case_enough_reads"
 
 
-@pytest.fixture(scope="session")
-def strandedness_not_permitted() -> str:
-    """Return a not permitted strandedness."""
-    return "double_stranded"
-
-
 @pytest.fixture(scope="function")
 def rnafusion_hermes_deliverables(rnafusion_deliverable_data: dict, rnafusion_case_id: str) -> dict:
     hermes_output: dict = {"workflow": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
@@ -3336,12 +3314,6 @@ def nf_analysis_pipeline_resource_optimisation_path(nf_analysis_analysis_dir) ->
 def tower_id() -> int:
     """Returns a NF-Tower ID."""
     return 123456
-
-
-@pytest.fixture(scope="session")
-def existing_directory(tmpdir_factory) -> Path:
-    """Path to existing temporary directory."""
-    return tmpdir_factory.mktemp("any_directory")
 
 
 @pytest.fixture(scope="session")
@@ -4231,11 +4203,6 @@ def fastq_file_meta_raw(flow_cell_name: str) -> dict:
         "flow_cell_id": flow_cell_name,
         "undetermined": None,
     }
-
-
-@pytest.fixture()
-def illumina_metrics_service() -> IlluminaDataTransferService:
-    return IlluminaDataTransferService()
 
 
 @pytest.fixture

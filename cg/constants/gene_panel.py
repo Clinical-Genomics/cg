@@ -27,6 +27,7 @@ class GenePanelMasterList(StrEnum):
     EP = "EP"
     HEARING = "HEARING"
     HYDRO = "HYDRO"
+    HYPOHYPO = "HYPOHYPO"
     IBMFS = "IBMFS"
     IEM = "IEM"
     IF = "IF"
