@@ -1037,7 +1037,7 @@ class StoreHelpers:
         received_at: datetime = None,
         no_invoice: bool = None,
         invoice_id: int = None,
-        ticket: str | None = None,
+        ticket: str = "123456",
     ) -> Pool:
         """Utility function to add a pool that can be used in tests."""
         customer_id = customer_id or "cust000"

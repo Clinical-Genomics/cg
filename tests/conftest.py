@@ -1853,18 +1853,10 @@ def context_config(
             "server": "https://nats.scilifelab.se",
             "stream": "cg-test",
             "nats_binary_path": Path("nats_binary_path"),
-            "publisher": {
-                "ca_cert_path": Path("ca_cert_path"),
-                "client_cert_path": Path("client_cert_path"),
-                "client_key_path": Path("client_key_path"),
-                "token_path": Path("event_listener_token"),
-            },
-            "listener": {
-                "ca_cert_path": Path("ca_cert_path"),
-                "client_cert_path": Path("client_cert_path"),
-                "client_key_path": Path("client_key_path"),
-                "token_path": Path("event_listener_token"),
-            },
+            "ca_cert_path": Path("ca_cert_path"),
+            "client_cert_path": Path("client_cert_path"),
+            "client_key_path": Path("client_key_path"),
+            "token_path": Path("event_listener_token"),
         },
         "downsample": {
             "downsample_dir": str(downsample_dir),

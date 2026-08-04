@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cg.models.cg_config import NatsAuthentication, NatsConfig
+from cg.models.cg_config import NatsConfig
 from cg.services.events import event_publisher
 
 
@@ -10,18 +10,10 @@ def test_publish_command():
         server="nats://server",
         stream="cg-test",
         nats_binary_path=Path("nats_binary"),
-        publisher=NatsAuthentication(
-            ca_cert_path=Path("ca_cert"),
-            client_cert_path=Path("client_cert"),
-            client_key_path=Path("client_key"),
-            token_path=Path("/token/path"),
-        ),
-        listener=NatsAuthentication(
-            ca_cert_path=Path("ca_cert"),
-            client_cert_path=Path("client_cert"),
-            client_key_path=Path("client_key"),
-            token_path=Path("token/path"),
-        ),
+        ca_cert_path=Path("ca_cert"),
+        client_cert_path=Path("client_cert"),
+        client_key_path=Path("client_key"),
+        token_path=Path("/token/path"),
     )
     subject = "cg.upload.completed"
     data = {"analysis": "analysis_1", "uploaded_at": "$(date +%Y-%m-%dT%H:%M:%SZ)"}
