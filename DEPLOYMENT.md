@@ -1,53 +1,25 @@
-# Steps
+## Deploying a new release to production
+Before deploying, ensure that all GitHub actions related to the merge have finished, eg. bump version, create release, publish to Dockerhub and PyPi.
 
-When all tests done and successful and PR is approved by codeowners, follow these steps:
-
-1. Select "Squash and merge" to merge branch into default branch (master/main).
-
-
-2. A prompt for writing merge commit message will pop up.
-
-
-3. Find the title of the pull request already pre-filled in the merge commit title, or copy and paste 
-the title if not.
-
-
-4. Append version increment value `( major | minor | patch )` to specify what kind of release is to be created.
+### Deploy CLI
+1. ssh to the login-node
+2. Install the master branch
+```shell
+    bash /home/proj/production/servers/resources/hasta.scilifelab.se/update-tool-prod.sh -e P_cg -t cg -b master -a
+```
+### Deploy APP
+1. Use the action **[Deploy release to production environment](https://github.com/Clinical-Genomics/cg/actions/workflows/deploy_prod.yml)** to deploy your branch. Make sure to provide the **release-tag** and NOT master to the action.
+2. Check [the production deployment page](https://github.com/Clinical-Genomics/cg/deployments/production) to ensure the deployment was successful.
 
 
-5. Fill in markdown formatted changelog in merge commit comment details:
-
-` ### Added `
-
-` ### Changed `
-
-` ### Fixed `
-
-6. Review the details once again and merge the branch into master.
-
-
-7. Wait for GitHub actions to process the event, bump version, create release, publish to Dockerhub and PyPi.
-
-
-8. Deploy master to stage:
-    1. Log in to appropriate server `ssh <server.scilifelab.se>`
-    2. `us`
-    3. Request stage environment `paxa` and follow instructions
-    4. ```shell
-       bash /home/proj/production/servers/resources/hasta.scilifelab.se/update-tool-stage.sh -e S_cg -t cg -b master -a
-       ```
-    5. Make sure that installation was successful
-   
-
-9. Deploy master to production
-     1. Log in to appropriate server `ssh <server.scilifelab.se>`
-     2. `up`
-     3. Make sure the action publishing the most recent version to PyPi is finished.
-     4. ```shell
-        bash /home/proj/production/servers/resources/hasta.scilifelab.se/update-tool-prod.sh -e P_cg -t cg -b master -a
-        ```
-     5. Make sure that installation was successful
-
-
-11. Take a screenshot or copy log text and post as a comment on the PR. Screenshot should include environment and that it succeeded.
-
+## Deploying a branch to stage
+Before deploying, ensure that all GitHub actions related to the last push have finished.
+### Deploy CLI
+1. ssh to the login-node
+2. Install your branch
+```shell
+    bash /home/proj/production/servers/resources/hasta.scilifelab.se/update-tool-stage.sh -e S_cg -t cg -b [YOUR-BRANCH-NAME] -a
+```
+### Deploy APP
+1. Use the action **[Deploy branch to staging environment](https://github.com/Clinical-Genomics/cg/actions/workflows/deploy_stage.yml)** to deploy your branch.
+2. Check [the stage deployment page](https://github.com/Clinical-Genomics/cg/deployments/stage) to ensure the deployment was successful.
