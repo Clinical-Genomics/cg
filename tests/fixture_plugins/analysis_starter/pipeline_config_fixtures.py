@@ -19,9 +19,7 @@ from cg.models.cg_config import (
 
 @pytest.fixture
 def get_nextflow_config_dict(
-    nextflow_binary: Path,
     nextflow_root: str,
-    conda_binary: Path,
     nf_analysis_platform_config_path: Path,
     nf_analysis_pipeline_config_path: Path,
     nf_analysis_pipeline_params_path: Path,
@@ -39,10 +37,10 @@ def get_nextflow_config_dict(
 
     def _make_dict(workflow: str) -> dict:
         nextflow_core_config: dict = {
-            "binary_path": nextflow_binary.as_posix(),
+            "binary_path": "path/to/bin/nextflow/",
             "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
-            "conda_binary": conda_binary.as_posix(),
+            "conda_binary": "path/to/bin/conda",
             "conda_env": f"S_{workflow}",
             "platform": str(nf_analysis_platform_config_path),
             "params": str(nf_analysis_pipeline_params_path),
