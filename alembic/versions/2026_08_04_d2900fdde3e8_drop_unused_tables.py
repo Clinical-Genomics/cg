@@ -20,8 +20,8 @@ depends_on = None
 
 def upgrade():
     op.drop_table(table_name="sample_lane_sequencing_metrics")
-    op.drop_table(table_name="flowcell")
     op.drop_table(table_name="flowcell_sample")
+    op.drop_table(table_name="flowcell")
     op.drop_table(table_name="sample_info")
 
 
@@ -30,23 +30,22 @@ def downgrade():
         "sample_info",
         sa.Column(
             "internal_id",
-            mysql.VARCHAR(32, collation="latin1_swedish_ci"),
+            mysql.VARCHAR(32, charset="latin1"),
             nullable=False,
-            primary_key=True,
         ),
         sa.Column(
             "name",
-            mysql.VARCHAR(128, collation="latin1_swedish_ci"),
+            mysql.VARCHAR(128, charset="latin1"),
             nullable=False,
         ),
         sa.Column(
             "order",
-            mysql.VARCHAR(64, collation="latin1_swedish_ci"),
+            mysql.VARCHAR(64, charset="latin1"),
             nullable=True,
         ),
         sa.Column(
             "original_ticket",
-            mysql.VARCHAR(32, collation="latin1_swedish_ci"),
+            mysql.VARCHAR(32, charset="latin1"),
             nullable=True,
         ),
         sa.Column("reads", sa.BigInteger(), nullable=True),
@@ -65,33 +64,16 @@ def downgrade():
                 "priority",
                 "express",
                 "clinical_trials",
+                charset="latin1",
             ),
             nullable=False,
         ),
     )
 
     op.create_table(
-        "flowcell_sample",
-        sa.Column(
-            sa.ForeignKey("flowcell.id", name="flowcell_sample_ibfk_1"),
-            name="flowcell_id",
-            type_=sa.Integer(),
-            nullable=False,
-        ),
-        sa.Column(
-            sa.ForeignKey("sample.id", name="flowcell_sample_ibfk_2"),
-            name="sample_id",
-            type_=sa.Integer(),
-            index=True,
-            nullable=False,
-        ),
-        sa.UniqueConstraint("flowcell_id", "sample_id", name="_flowcell_sample_uc"),
-    )
-
-    op.create_table(
         "flowcell",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False, primary_key=True),
-        sa.Column("name", sa.String(32), unique=True, nullable=False),
+        sa.Column("name", mysql.VARCHAR(32), unique=True, nullable=False),
         sa.Column(
             "sequencer_type",
             sa.Enum(
@@ -120,6 +102,26 @@ def downgrade():
         ),
         sa.Column("updated_at", sa.DateTime(), nullable=True),
         sa.Column("has_backup", sa.Boolean(), nullable=False),
+        mysql_charset="latin1",  # I dropped a constraint that was here before that checked if the has_backup was set to 0 or 1. Given that the type is boolean it seemed unnecessary.
+    )
+
+    op.create_table(
+        "flowcell_sample",
+        sa.Column(
+            sa.ForeignKey("flowcell.id", name="flowcell_sample_ibfk_1"),
+            name="flowcell_id",
+            type_=sa.Integer(),
+            nullable=False,
+        ),
+        sa.Column(
+            sa.ForeignKey("sample.id", name="flowcell_sample_ibfk_2"),
+            name="sample_id",
+            type_=sa.Integer(),
+            index=True,  # index here has changed name to the default instead of "sample_id"
+            nullable=False,
+        ),
+        sa.UniqueConstraint("flowcell_id", "sample_id", name="_flowcell_sample_uc"),
+        mysql_charset="latin1",
     )
 
     op.create_table(
@@ -128,7 +130,7 @@ def downgrade():
         sa.Column(
             sa.ForeignKey("flowcell.name", name="fk_sample_lane_sequencing_metrics_flowcell"),
             name="flow_cell_name",
-            type_=mysql.VARCHAR(32, collation="latin1_swedish_ci"),
+            type_=mysql.VARCHAR(32, collate="latin1_swedish_ci"),
             nullable=False,
         ),
         sa.Column("flow_cell_lane_number", sa.Integer(), nullable=True),
@@ -136,7 +138,7 @@ def downgrade():
             sa.ForeignKey("sample.internal_id", name="fk_sample_lane_sequencing_metrics_sample"),
             name="sample_internal_id",
             type_=mysql.VARCHAR(32, collation="latin1_swedish_ci"),
-            index=True,
+            index=True,  # this index changes name from fk_sample_lane_sequencing_metrics_sample to ix_sample_lane_sequencing_metrics_sample_internal_id although I see it as an improvement seeing it is no foreign key
             nullable=False,
         ),
         sa.Column("sample_total_reads_in_lane", sa.BigInteger(), nullable=True),
