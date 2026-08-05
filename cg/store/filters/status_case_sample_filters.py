@@ -38,6 +38,11 @@ def get_received_cases(case_samples: Query, **kwargs) -> Query:
     )
 
 
+# TODO: Implement filter that get samples without ongoing analysis
+
+# TODO: Implement filter for getting samples without incompressible
+
+
 def get_not_prepared_cases(case_samples: Query, **kwargs) -> Query:
     return case_samples.filter(Sample.prepared_at == None).distinct()
 

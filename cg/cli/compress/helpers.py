@@ -18,6 +18,7 @@ from cg.utils.date import get_date_days_ago
 LOG = logging.getLogger(__name__)
 
 
+# TODO: if sample centered change name to get_sample_to_process.
 def get_cases_to_process(
     days_back: int, store: Store, case_id: str | None = None
 ) -> list[Case] | None:
@@ -30,6 +31,7 @@ def get_cases_to_process(
             LOG.warning(f"Could not find case {case_id}")
             return
         if case.is_compressible:
+            # TODO should return samples
             cases.append(case)
     else:
         date_threshold: dt.datetime = get_date_days_ago(days_ago=days_back)
