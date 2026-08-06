@@ -331,7 +331,6 @@ class GisaidAPI:
             writer.writeheader()
             writer.writerows(rows)
 
-    # only method used publicly
     def upload(self, case_id: str) -> None:
         """Uploading results to gisaid and saving the accession numbers in completion file"""
 
