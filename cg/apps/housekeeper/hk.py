@@ -668,4 +668,6 @@ class HousekeeperAPI:
             .with_entities(Bundle.name)
             .distinct()
         )
-        return {name for (name,) in bundle_names}
+        return {
+            name for (name,) in bundle_names
+        }  # TODO see if I can use scalars here to remove this list comprehension
