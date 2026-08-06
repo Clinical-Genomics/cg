@@ -101,20 +101,6 @@ def expected_updated_completion_file():
 """
 
 
-# def test_get_completion_dataframe(
-#     cg_config: CGConfig,
-#     completion_file_original_contents: str,
-#     expected_completion_dataframe: dict[str, dict[int, str]],
-#     fs,
-# ):
-#     completion_file = mock_completion_file(completion_file_original_contents, fs=fs)
-#     gisaid_api = GisaidAPI(config=cg_config)
-
-#     data_frame: DataFrame = gisaid_api.get_completion_dataframe(completion_file=completion_file)
-
-#     assert data_frame.to_dict() == expected_completion_dataframe
-
-
 def test_get_completion_dict(
     cg_config: CGConfig,
     completion_file_original_contents: str,

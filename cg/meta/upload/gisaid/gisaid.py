@@ -6,7 +6,6 @@ import re
 import tempfile
 from pathlib import Path
 
-import pandas as pd
 from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -58,13 +57,6 @@ class GisaidAPI:
             msg = f"Completion file missing for bundle {case_id}"
             raise HousekeeperFileMissingError(message=msg)
         return completion_file
-
-    def get_completion_dataframe(self, completion_file: File) -> pd.DataFrame:
-        """Read completion file in to dataframe, drop duplicates, and return the dataframe"""
-        completion_df = pd.read_csv(completion_file.full_path, index_col=None, header=0)
-        completion_df.drop_duplicates(inplace=True)
-        completion_df = completion_df[completion_df["provnummer"].str.contains(SARS_COV_REGEX)]
-        return completion_df
 
     def get_completion_dict(self, completion_file: File):
         """Read completion file in to dictionary similar to a pandas dataframe and drop duplicates"""
