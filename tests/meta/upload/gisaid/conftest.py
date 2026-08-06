@@ -3,7 +3,7 @@ import pytest
 
 # TODO should the leading blank space in the last column be there?
 @pytest.fixture
-def completion_file_original_contents():
+def completion_file_contents():
     return """provnummer,urvalskriterium,GISAID_accession
 85CS900121,Allmän övervakning, EPI_ISL_75698657
 85CS900121,Stickprov, EPI_ISL_75698657
@@ -18,7 +18,7 @@ def completion_file_original_contents():
 
 
 @pytest.fixture
-def completion_file_accession_not_in_log():
+def completion_file_sample_not_in_log():
     return """provnummer,urvalskriterium,GISAID_accession
 85CS999999,Allmän övervakning, EPI_ISL_12345
 
@@ -26,7 +26,7 @@ def completion_file_accession_not_in_log():
 
 
 @pytest.fixture
-def completion_file_original_contents_all_uploaded():
+def completion_file_all_sars_uploaded():
     return """provnummer,urvalskriterium,GISAID_accession
 85CS900121,Allmän övervakning, EPI_ISL_75698657
 85CS900136,Allmän övervakning, EPI_ISL_75698658
@@ -39,11 +39,11 @@ def completion_file_original_contents_all_uploaded():
 
 
 @pytest.fixture
-def completion_file_original_contents_not_all_uploaded():
+def completion_file_not_all_sars_uploaded():
     return """provnummer,urvalskriterium,GISAID_accession
-85CS900121,Allmän övervakning,EPI_ISL_75698657
+85CS900121,Allmän övervakning, EPI_ISL_75698657
 85CS900136,Allmän övervakning,
-85CS900117,Allmän övervakning,EPI_ISL_75698659
+85CS900117,Allmän övervakning, EPI_ISL_75698659
 85AB900145,Allmän övervakning,
 
 """
@@ -52,9 +52,9 @@ def completion_file_original_contents_not_all_uploaded():
 @pytest.fixture
 def completion_file_no_sars():
     return """provnummer,urvalskriterium,GISAID_accession
-85XY900121,Allmän övervakning,EPI_ISL_75698657
+85XY900121,Allmän övervakning, EPI_ISL_75698657
 85LM900136,Allmän övervakning,
-85PA900117,Allmän övervakning,EPI_ISL_75698659
+85PA900117,Allmän övervakning, EPI_ISL_75698659
 85AB900145,Allmän övervakning,
 
 """
