@@ -6,6 +6,7 @@ Create Date: 2026-08-06 11:11:15.435937
 
 """
 
+from datetime import datetime
 from typing import Annotated
 
 import sqlalchemy as sa
@@ -58,6 +59,9 @@ class Order(Base):
     cases: Mapped[list["Case"]] = relationship(secondary=order_case, back_populates="orders")
     name: Mapped[str | None]
     ticket_id: Mapped[int]
+    pools: Mapped[list["Pool"]] = relationship(
+        back_populates="db_order", order_by="Pool.ordered_at"
+    )
 
 
 class Case(Base):
@@ -94,15 +98,21 @@ class Sample(Base):
     original_ticket: Mapped[str | None]
 
 
+class Pool(Base):
+    __tablename__ = "pool"
+    id: Mapped[PrimaryKeyInt]
+    order: Mapped[str]
+    order_id: Mapped[int] = mapped_column(sa.ForeignKey("order.id"))
+    db_order: Mapped[Order] = relationship(back_populates="pools", foreign_keys=[order_id])
+    ordered_at: Mapped[datetime]
+
+
 def upgrade():
     bind: sa.Connection = op.get_bind()
     session = Session(bind=bind)
     op.add_column(
         table_name="order",
-        column=sa.Column(
-            name="name",
-            type_=mysql.VARCHAR(64),
-        ),
+        column=sa.Column(name="name", type_=mysql.VARCHAR(64), nullable=True, index=True),
     )
     orders = session.query(Order).options(
         selectinload(Order.cases).selectinload(Case.links).selectinload(CaseSample.sample)
@@ -111,11 +121,67 @@ def upgrade():
     for order in orders.all():
         for case in order.cases:
             for sample in case.samples:
-                if sample.original_ticket == str(order.ticket_id):
+                if not sample.order:
+                    continue
+                elif sample.original_ticket == str(order.ticket_id):
                     order.name = sample.order
                     session.add(order)
                     break
+                # If unable to match on original ticket, check if it is the only order the sample has been in
+                elif len(sample.links) == 1:
+                    if len(sample.links[0].case.orders) == 1:
+                        order.name = sample.order
+                        session.add(order)
+                        break
+    session.commit()
+    op.drop_column(table_name="sample", column_name="order")
+    op.drop_column(table_name="pool", column_name="order")
 
 
 def downgrade():
-    pass
+    bind: sa.Connection = op.get_bind()
+    session = Session(bind=bind)
+    op.add_column(
+        table_name="pool",
+        column=sa.Column(name="order", type_=mysql.VARCHAR(64, charset="latin1"), nullable=True),
+    )
+    op.create_unique_constraint(
+        constraint_name="order_name_uc", table_name="pool", columns=["order", "name"]
+    )
+    op.add_column(
+        table_name="sample",
+        column=sa.Column(name="order", type_=mysql.VARCHAR(64, charset="latin1"), nullable=True),
+    )
+    orders = session.query(Order).options(
+        selectinload(Order.pools),
+        selectinload(Order.cases).selectinload(Case.links).selectinload(CaseSample.sample),
+    )
+
+    for order in orders.all():
+        for case in order.cases:
+            for sample in case.samples:
+                if sample.order:
+                    continue
+                elif sample.original_ticket == str(order.ticket_id):
+                    sample.order = order.name
+                    session.add(sample)
+                    break
+                # If unable to match on original ticket, check if it is the only order the sample has been in
+                elif len(sample.links) == 1:
+                    if len(sample.links[0].case.orders) == 1:
+                        sample.order = order.name
+                        session.add(sample)
+                        break
+        for pool in order.pools:
+            if pool.order:
+                continue
+            else:
+                pool.order = order.name
+                session.add(pool)
+    session.commit()
+    op.alter_column(
+        table_name="pool",
+        column_name="order",
+        existing_type=mysql.VARCHAR(64, charset="latin1"),
+        nullable=False,
+    )
