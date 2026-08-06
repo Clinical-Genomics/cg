@@ -55,10 +55,10 @@ def monkeypatch_process_lims(monkeypatch: pytest.MonkeyPatch, order: Order) -> N
     )
 
 
-def mock_freshdesk_ticket_creation(mock_create_ticket: Mock, ticket_id: str):
+def mock_freshdesk_ticket_creation(mock_create_ticket: Mock, ticket_id: int):
     """Helper function to mock Freshdesk ticket creation."""
     mock_create_ticket.return_value = TicketResponse(
-        id=int(ticket_id),
+        id=ticket_id,
         cc_emails=["email@to.cc"],
         description="This is a test description.",
         subject="Support needed..",
@@ -213,7 +213,7 @@ def test_submit_order(
     order_type: OrderType,
     order_fixture: str,
     order_submitter: OrderSubmitter,
-    ticket_id: str,
+    ticket_id_as_int: int,
     customer_id: str,
     request: pytest.FixtureRequest,
 ):
@@ -235,7 +235,9 @@ def test_submit_order(
             "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
         ) as mock_reply_to_ticket,
     ):
-        mock_freshdesk_ticket_creation(mock_create_ticket=mock_create_ticket, ticket_id=ticket_id)
+        mock_freshdesk_ticket_creation(
+            mock_create_ticket=mock_create_ticket, ticket_id=ticket_id_as_int
+        )
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
 
         # GIVEN a mock LIMS that returns project data and sample name mapping
@@ -259,17 +261,19 @@ def test_submit_order(
         for record in result["records"]:
             assert record.customer.internal_id == customer_id
             if isinstance(record, Pool):
-                assert record.ticket == ticket_id
+                assert record.ticket == str(ticket_id_as_int)
                 is_pool_order = True
             elif isinstance(record, Sample):
-                assert record.original_ticket == ticket_id
+                assert record.original_ticket == str(ticket_id_as_int)
             elif isinstance(record, Case):
                 assert record.data_analysis == ORDER_TYPE_WORKFLOW_MAP[order_type]
                 for link_obj in record.links:
-                    assert link_obj.sample.original_ticket == ticket_id
+                    assert link_obj.sample.original_ticket == str(ticket_id_as_int)
 
         # THEN the order should be stored in the database
-        assert store_to_submit_and_validate_orders.get_order_by_ticket_id(ticket_id=int(ticket_id))
+        assert store_to_submit_and_validate_orders.get_order_by_ticket_id(
+            ticket_id=ticket_id_as_int
+        )
 
         # THEN the samples should be stored in the database
         assert store_to_submit_and_validate_orders._get_query(table=Sample).first()

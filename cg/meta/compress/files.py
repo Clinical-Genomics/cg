@@ -6,6 +6,7 @@ from pathlib import Path
 
 from housekeeper.store.models import File, Version
 
+from cg.apps.crunchy.files import parse_run_name
 from cg.constants import HK_FASTQ_TAGS, SequencingFileTag
 from cg.constants.compression import (
     FASTQ_DATETIME_DELTA,
@@ -13,6 +14,8 @@ from cg.constants.compression import (
     FASTQ_SECOND_READ_SUFFIX,
 )
 from cg.models.compression_data import CompressionData
+from cg.store.models import IlluminaSampleSequencingMetrics
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -88,6 +91,28 @@ def get_compression_data(fastq_files: list[Path]) -> list[CompressionData]:
             fastq_runs.add(run_name)
             compressions.append(CompressionData(file_prefix))
     return compressions
+
+
+def get_reads_for_run(compression_obj: CompressionData, status_db: Store) -> int | None:
+    """Look up the total reads in the lane for a compression run, or None if unknown.
+
+    Returns None both when the run name doesn't match the expected FASTQ naming
+    convention and when no matching sequencing metrics row is found.
+    """
+    parsed: tuple[str, str, int] | None = parse_run_name(compression_obj.run_name)
+    if parsed is None:
+        LOG.debug(f"Could not parse flow cell/sample/lane from run name {compression_obj.run_name}")
+        return None
+    flow_cell, sample_internal_id, lane = parsed
+    metrics: IlluminaSampleSequencingMetrics = (
+        status_db.get_illumina_metrics_entry_by_device_sample_and_lane(
+            device_internal_id=flow_cell, sample_internal_id=sample_internal_id, lane=lane
+        )
+    )
+    if metrics is None:
+        LOG.debug(f"No sequencing metrics found for {flow_cell}/{sample_internal_id}/lane {lane}")
+        return None
+    return metrics.total_reads_in_lane
 
 
 def get_fastq_files(sample_id: str, version_obj: Version) -> dict[str, dict]:

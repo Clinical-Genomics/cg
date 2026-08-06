@@ -40,7 +40,7 @@ class StoreConstants(enum.Enum):
     ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES: str = "ticket"
     FROM_SAMPLE_SAMPLE_WITH_ATTRIBUTES: str = "sample_1"
     SEX_SAMPLE_WITH_ATTRIBUTES: str = "male"
-    ENTRY_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
+
     INVOICE_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
     INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES: str = "sample_without_attributes"
     NAME_SAMPLE_WITHOUT_ATTRIBUTES: str = "sample_without_attributes"
@@ -384,13 +384,14 @@ def rml_pool_store(
         },
     )
     store.session.add(app_version)
-
+    test_order = store.add_order(customer=new_customer, ticket_id=int(ticket_id))
     new_pool = store.add_pool(
         customer=new_customer,
         name="Test",
         order="Test",
         ordered=dt.datetime.now(),
         application_version=app_version,
+        db_order=test_order,
     )
     store.session.add(new_pool)
     new_case = helpers.add_case(

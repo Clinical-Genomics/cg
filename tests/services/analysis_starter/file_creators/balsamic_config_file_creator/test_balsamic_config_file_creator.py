@@ -12,7 +12,7 @@ from cg.constants.constants import BedVersionGenomeVersion, Workflow
 from cg.constants.observations import BalsamicObservationPanel
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.exc import CaseNotFoundError, LimsDataError
+from cg.exc import CaseNotFoundError, LimsDataError, MultipleCaptureKitsError
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
@@ -20,6 +20,7 @@ from cg.services.analysis_starter.configurator.file_creators.balsamic_config imp
 )
 from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 @pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
@@ -254,9 +255,12 @@ def test_create_override_panel_bed(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
     )
 
+    # GIVEN a LIMS API
+    lims_mock: TypedMock[LimsAPI] = create_typed_mock(LimsAPI)
+
     # GIVEN a BalsamicConfigFileCreator
     config_file_creator = BalsamicConfigFileCreator(
-        status_db=store, lims_api=Mock(), cg_balsamic_config=cg_balsamic_config
+        status_db=store, lims_api=lims_mock.as_type, cg_balsamic_config=cg_balsamic_config
     )
 
     # GIVEN that the subprocess exits successfully
@@ -285,6 +289,53 @@ def test_create_override_panel_bed(
         short_name="override_panel_bed",
         genome_version=BedVersionGenomeVersion.HG19,
     )
+
+    # THEN Lims was not called
+    lims_mock.as_mock.get_capture_kit_strict.assert_not_called()
+
+
+@pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
+def test_create_mixed_capture_kits(
+    cg_balsamic_config: BalsamicConfig,
+    expected_tgs_tumour_only_command: str,
+    workflow: Workflow,
+):
+    # GIVEN a store with a TGS paired case
+    tumour_sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_tumour",
+        is_tumour=True,
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        sex=SexOptions.MALE,
+    )
+    normal_sample: Sample = create_autospec(
+        Sample,
+        internal_id="sample_normal",
+        is_tumour=False,
+        prep_category=SeqLibraryPrepCategory.TARGETED_GENOME_SEQUENCING,
+        sex=SexOptions.MALE,
+    )
+    tgs_paired_case: Case = create_autospec(
+        Case, data_analysis=workflow, internal_id="case_1", samples=[tumour_sample, normal_sample]
+    )
+    tgs_paired_case.name = "cust_case_name"
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id_strict = Mock(return_value=tgs_paired_case)
+
+    # GIVEN a LimsAPI which returns two different capture kits for the two samples
+    lims_api: TypedMock[LimsAPI] = create_typed_mock(LimsAPI)
+    lims_api.as_type.get_capture_kit_strict = Mock(side_effect=["capture_kit_1", "capture_kit_2"])
+
+    # GIVEN a BalsamicConfigFileCreator
+    config_file_creator = BalsamicConfigFileCreator(
+        status_db=store, lims_api=lims_api.as_type, cg_balsamic_config=cg_balsamic_config
+    )
+
+    # WHEN creating the config file
+    # THEN an error should be raised due to the mixed capture kits
+    fastq_path = Path(f"{cg_balsamic_config.root}/case_1/fastq")
+    with pytest.raises(MultipleCaptureKitsError):
+        config_file_creator.create(case_id="case_1", fastq_path=fastq_path)
 
 
 @pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])

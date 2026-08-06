@@ -114,7 +114,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
         self, hk_version: Version, case_id: str
     ) -> RarediseaseObservationsInputFiles:
         """Return observations files given a Housekeeper version for RAREDISEASE."""
-        input_files: dict[str, File] = {
+        input_files: dict[str, File | None] = {
             "snv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.SNV_VCF]
             ).first(),

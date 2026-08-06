@@ -14,7 +14,6 @@ from cg.constants.constants import (
     DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD,
     BedVersionGenomeVersion,
     CustomerId,
-    SampleType,
 )
 from cg.constants.lims import LimsStatus
 from cg.constants.priority import Priority, SlurmQos, TrailblazerPriority
@@ -757,20 +756,6 @@ class ReadHandler(BaseHandler):
         return apply_sample_filter(
             samples=samples, filter_functions=[SampleFilter.BY_SAMPLE_NAME], name=name
         ).first()
-
-    def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> list[Sample] | None:
-        """Get samples given a tissue type."""
-        samples: Query = apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.SAMPLES_IN_CASE_BY_INTERNAL_ID],
-            case_samples=self._get_join_sample_family_query(),
-            case_internal_id=case_id,
-        )
-        samples: Query = apply_sample_filter(
-            filter_functions=[SampleFilter.WITH_TYPE],
-            samples=samples,
-            tissue_type=sample_type,
-        )
-        return samples.all() if samples else None
 
     def is_case_down_sampled(self, case_id: str) -> bool:
         """Returns True if all samples in a case are down sampled from another sample."""
@@ -2050,15 +2035,12 @@ class ReadHandler(BaseHandler):
 
         return query
 
-    def get_uploaded_analyses(
-        self, trailblazer_ids: list[int], exclude_workflows: list[Workflow] = []
-    ) -> list[Analysis]:
+    def get_uploaded_analyses(self, trailblazer_ids: list[int]) -> list[Analysis]:
         return (
             self._get_query(table=Analysis)
             .filter(
                 Analysis.trailblazer_id.in_(trailblazer_ids),
                 Analysis.uploaded_at.is_not(None),
-                Analysis.workflow.notin_(exclude_workflows),
             )
             .all()
         )

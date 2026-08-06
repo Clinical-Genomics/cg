@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Iterator
 
-from housekeeper.store.models import File, Version
+from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import Workflow

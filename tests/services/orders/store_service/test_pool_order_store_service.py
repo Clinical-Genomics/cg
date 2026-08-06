@@ -84,6 +84,8 @@ def test_store_pool_order_data_in_status_db(
     for sample in new_samples:
         assert sample.no_invoice
         assert sample.links[0].should_deliver_sample
+        # THEN the samples should be linked to their pool
+        assert sample.pool
 
     # THEN the cases should have the correct data analysis
     for case in new_cases:
@@ -126,6 +128,7 @@ def test_create_db_sample_with_lims_status_and_invoice(
         application_version=application_version,
         customer=customer,
         order_name="order",
+        pool=create_autospec(Pool),
         sample=fastq_sample,
         ticket_id="1234567",
     )

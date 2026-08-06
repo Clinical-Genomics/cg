@@ -71,6 +71,7 @@ class DeliverService:
         try:
             self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
             self.mark_as_delivered_service.close_order_in_status_db_if_closable(order)
+            self.mark_as_delivered_service.mark_pools(order)
             if not self._is_order_no_delivery(order):
                 self._interact_with_freshdesk(analyses=analyses, order=order)
         except TrailblazerAnalysisDeliveryError as error:
@@ -123,11 +124,17 @@ class DeliverService:
         Trailblazer. We are currently excluding microSALT and Taxprofiler from automatic delivery.
         """
         undelivered_trailblazer_analyses: list[TrailblazerAnalysis] = (
-            self.trailblazer_api.get_all_analyses_to_deliver()
+            self.trailblazer_api.get_all_analyses_to_deliver(
+                exclude_workflows=[
+                    Workflow.MICROSALT,
+                    Workflow.TAXPROFILER,
+                    Workflow.DEMULTIPLEX,
+                    Workflow.RSYNC,
+                ]
+            )
         )
         uploaded_analyses_to_deliver: list[Analysis] = self.status_db.get_uploaded_analyses(
-            trailblazer_ids=[analysis.id for analysis in undelivered_trailblazer_analyses],
-            exclude_workflows=[Workflow.MICROSALT, Workflow.TAXPROFILER],
+            trailblazer_ids=[analysis.id for analysis in undelivered_trailblazer_analyses]
         )
         order_analyses = {}
         for analysis in uploaded_analyses_to_deliver:
@@ -156,7 +163,7 @@ class DeliverService:
         self, order: Order, analyses: list[Analysis], cc_emails: list[str]
     ):
         cases: list[Case] = [analysis.case for analysis in analyses]
-        message: str = get_message(cases=cases, store=self.status_db)
+        message: str = get_message(cases=cases, store=self.status_db, include_signature=True)
         self.freshdesk_client.reply_to_ticket(
             ticket_id=order.ticket_id, message=message, cc_emails=cc_emails
         )

@@ -151,6 +151,8 @@ def test_start_available_nallo(
     )
     create_empty_file(Path(test_root_dir, "nallo_config.config"))
     create_empty_file(Path(test_root_dir, "nallo_resources.config"))
+    create_empty_file(Path(test_root_dir, "ghxx_nallo_rank_model_snvs.ini"))
+    create_empty_file(Path(test_root_dir, "ghxx_nallo_rank_model_svs.ini"))
 
     # GIVEN an order associated with the case
     order: Order = helpers.add_order(
@@ -243,3 +245,7 @@ def test_start_available_nallo(
     assert (
         Path(case_directory, "gene_panels.tsv").open().read() == scout_export_panel_stdout.decode()
     )
+
+    # THEN the rank model files have been copied into the case directory
+    assert Path(case_directory, "ghxx_nallo_rank_model_snvs.ini").is_file()
+    assert Path(case_directory, "ghxx_nallo_rank_model_svs.ini").is_file()

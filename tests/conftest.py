@@ -69,7 +69,6 @@ from cg.models.downsample.downsample_data import DownsampleData
 from cg.models.run_devices.illumina_run_directory_data import IlluminaRunDirectoryData
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.illumina.backup.encrypt_service import IlluminaRunEncryptionService
-from cg.services.illumina.data_transfer.data_transfer_service import IlluminaDataTransferService
 from cg.store.database import create_all_tables, drop_all_tables, get_engine, initialize_database
 from cg.store.models import (
     Application,
@@ -85,7 +84,6 @@ from cg.store.models import (
 )
 from cg.store.store import Store
 from cg.utils import Process
-from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import LimsSample, LimsUDF, MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
@@ -181,18 +179,6 @@ def any_string() -> str:
 def slurm_account() -> str:
     """Return a SLURM account."""
     return "super_account"
-
-
-@pytest.fixture(scope="session")
-def user_name() -> str:
-    """Return a username."""
-    return "Paul Anderson"
-
-
-@pytest.fixture(scope="session")
-def user_mail() -> str:
-    """Return a user email."""
-    return "paul@magnolia.com"
 
 
 @pytest.fixture(scope="function")
@@ -385,82 +371,9 @@ def analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: s
 
 
 @pytest.fixture
-def base_config_dict() -> dict:
-    """Returns the basic configs necessary for running CG."""
-    return {
-        "database": "sqlite:///",
-        "madeline_exe": "path/to/madeline",
-        "tower_binary_path": "path/to/tower",
-        "delivery_path": "path/to/delivery",
-        "nanopore_data_directory": "path/to/nanopore_data_directory",
-        "run_instruments": {
-            "pacbio": {
-                "data_dir": "path/to/data_directory",
-                "systemd_trigger_dir": "path/to/trigger_directory",
-            },
-            "nanopore": {
-                "data_dir": "path/to/data_directory",
-                "systemd_trigger_dir": "path/to/ptrigger_directory",
-            },
-            "illumina": {
-                "sequencing_runs_dir": "path/to/sequencing-runs",
-                "demultiplexed_runs_dir": "path/to/demultiplexed_flow_cells_dir",
-            },
-        },
-        "freshdesk": {
-            "api_key": "some_api_key",
-            "base_url": "freshdesk.com",
-        },
-        "nats": {
-            "server": "https://nats.scilifelab.se",
-            "stream": "cg-test",
-            "nats_binary_path": Path("nats_binary_path"),
-            "listener": {
-                "ca_cert_path": Path("ca_cert_path"),
-                "client_cert_path": Path("client_cert_path"),
-                "client_key_path": Path("client_key_path"),
-                "token_path": Path("event_listener_token"),
-            },
-            "publisher": {
-                "ca_cert_path": Path("ca_cert_path"),
-                "client_cert_path": Path("client_cert_path"),
-                "client_key_path": Path("client_key_path"),
-                "token_path": Path("event_listener_token"),
-            },
-        },
-        "downsample": {
-            "downsample_dir": "path/to/downsample_dir",
-            "downsample_script": "downsample.sh",
-            "account": "development",
-        },
-        "housekeeper": {
-            "database": "sqlite:///",
-            "root": "path/to/root",
-        },
-        "email_base_settings": {
-            "sll_port": 465,
-            "smtp_server": "smtp.gmail.com",
-            "sender_email": "test@gmail.com",
-            "sender_password": "",
-        },
-        "sentieon_licence_server": "127.0.0.1:8080",
-        "mutacc_auto_hg19": {
-            "binary_path": "echo",
-            "config_path": "mutacc-auto-stage-hg19.yaml",
-            "padding": 300,
-        },
-        "mutacc_auto_hg38": {
-            "binary_path": "echo",
-            "config_path": "mutacc-auto-stage-hg38.yaml",
-            "padding": 300,
-        },
-    }
-
-
-@pytest.fixture
-def cg_config_object(base_config_dict: dict) -> CGConfig:
+def cg_config_object(context_config: dict) -> CGConfig:
     """Return a CG config."""
-    return CGConfig(**base_config_dict)
+    return CGConfig(**context_config)
 
 
 @pytest.fixture
@@ -476,13 +389,16 @@ def crunchy_config() -> dict[str, dict[str, Any]]:
         "crunchy": {
             "conda_binary": "a conda binary",
             "cram_reference": "/path/to/fasta",
+            "tmp_dir_base": "/state/partition1",
+            "fallback_memory": 1,
+            "fallback_minutes": 60,
             "slurm": {
                 "account": "mock_account",
                 "conda_env": "mock_env",
-                "hours": 1,
                 "mail_user": "mock_mail",
-                "memory": 1,
                 "number_tasks": 1,
+                "cpus_per_task": 8,
+                "partition": "compress",
             },
         }
     }
@@ -1280,15 +1196,6 @@ def scout_api() -> MockScoutAPI:
     return MockScoutAPI()
 
 
-# Crunchy fixtures
-
-
-@pytest.fixture(name="crunchy_api")
-def crunchy_api():
-    """Setup Crunchy API."""
-    return MockCrunchyAPI()
-
-
 # Store fixtures
 
 
@@ -1440,12 +1347,6 @@ def raredisease_loqusdb_customer(collaboration_id: str, customer_id: str) -> Cus
         internal_id=CustomerId.CUST004,
         loqus_upload=True,
     )
-
-
-@pytest.fixture
-def external_wes_application_tag() -> str:
-    """Return the external whole exome sequencing application tag."""
-    return "EXXCUSR000"
 
 
 @pytest.fixture
@@ -1847,20 +1748,6 @@ def downsample_dir(tmp_path_factory) -> Path:
     return tmp_path_factory.mktemp("downsample", numbered=True)
 
 
-@pytest.fixture(name="swegen_dir")
-def swegen_dir(tmpdir_factory, tmp_path) -> Path:
-    """SweGen temporary directory containing mocked reference files."""
-    return tmpdir_factory.mktemp("swegen")
-
-
-@pytest.fixture(name="swegen_snv_reference")
-def swegen_snv_reference_path(swegen_dir: Path) -> Path:
-    """Return a temporary path to a SweGen SNV reference file."""
-    mock_file = Path(swegen_dir, "grch37_swegen_10k_snv_-20220101-.vcf.gz")
-    mock_file.touch(exist_ok=True)
-    return mock_file
-
-
 @pytest.fixture(name="observations_dir")
 def observations_dir(tmpdir_factory, tmp_path) -> Path:
     """Loqusdb temporary directory containing observations mock files."""
@@ -1883,28 +1770,6 @@ def observations_clinical_sv_file_path(observations_dir: Path) -> Path:
     return mock_file
 
 
-@pytest.fixture(name="observations_somatic_snv_file_path")
-def observations_somatic_snv_file_path(observations_dir: Path) -> Path:
-    """Return a temporary path to a cancer somatic SNV file."""
-    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20220101-.vcf.gz")
-    mock_file.touch(exist_ok=True)
-    return mock_file
-
-
-@pytest.fixture(name="outdated_observations_somatic_snv_file_path")
-def outdated_observations_somatic_snv_file_path(observations_dir: Path) -> Path:
-    """Return a temporary path to an outdated cancer somatic SNV file."""
-    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20180101-.vcf.gz")
-    mock_file.touch(exist_ok=True)
-    return mock_file
-
-
-@pytest.fixture(name="custom_observations_clinical_snv_file_path")
-def custom_observations_clinical_snv_file_path(observations_dir: Path) -> Path:
-    """Return a custom path for the clinical SNV observations file."""
-    return Path(observations_dir, "clinical_snv_export-19990101-.vcf.gz")
-
-
 @pytest.fixture(scope="session")
 def microsalt_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Microsalt testing."""
@@ -1925,30 +1790,6 @@ def pdc_archiving_directory(pdc_archiving_dir: Path) -> PDCArchivingDirectory:
     )
 
 
-@pytest.fixture(scope="function")
-def nextflow_binary() -> Path:
-    """Return the path to the nextflow binary."""
-    return Path("path", "to", "bin", "nextflow")
-
-
-@pytest.fixture(scope="function")
-def conda_binary() -> Path:
-    """Return the path to the conda binary."""
-    return Path("path", "to", "bin", "conda")
-
-
-@pytest.fixture(name="cg_uri")
-def cg_uri() -> str:
-    """Return a cg URI."""
-    return "sqlite:///"
-
-
-@pytest.fixture(name="hk_uri")
-def hk_uri() -> str:
-    """Return a Housekeeper URI."""
-    return "sqlite:///"
-
-
 @pytest.fixture
 def run_instruments_config() -> RunInstruments:
     """Return a mock rtun instruments config."""
@@ -1962,15 +1803,11 @@ def run_instruments_config() -> RunInstruments:
 
 @pytest.fixture
 def context_config(
-    cg_uri: str,
-    hk_uri: str,
     email_address: str,
     fluffy_dir: Path,
     housekeeper_dir: Path,
-    head_job_partition: str,
     mip_dir: Path,
     cg_dir: Path,
-    conda_binary: Path,
     balsamic_dir: Path,
     microsalt_dir: Path,
     nallo_dir: Path,
@@ -1982,15 +1819,16 @@ def context_config(
     illumina_demultiplexed_runs_directory: Path,
     downsample_dir: Path,
     pdc_archiving_directory: PDCArchivingDirectory,
-    nextflow_binary: Path,
     nf_analysis_platform_config_path: Path,
     nf_analysis_pipeline_params_path: Path,
     nf_analysis_pipeline_config_path: Path,
     nf_analysis_pipeline_resource_optimisation_path: Path,
 ) -> dict:
     """Return a context config."""
+    conda_binary = "path/to/bin/conda"
+    nextflow_binary = "path/to/bin/nextflow"
     return {
-        "database": cg_uri,
+        "database": "sqlite:///",
         "delivery_path": str(cg_dir),
         "nanopore_data_directory": "path/to/nanopore_data_directory",
         "run_instruments": {
@@ -2015,18 +1853,10 @@ def context_config(
             "server": "https://nats.scilifelab.se",
             "stream": "cg-test",
             "nats_binary_path": Path("nats_binary_path"),
-            "publisher": {
-                "ca_cert_path": Path("ca_cert_path"),
-                "client_cert_path": Path("client_cert_path"),
-                "client_key_path": Path("client_key_path"),
-                "token_path": Path("event_listener_token"),
-            },
-            "listener": {
-                "ca_cert_path": Path("ca_cert_path"),
-                "client_cert_path": Path("client_cert_path"),
-                "client_key_path": Path("client_key_path"),
-                "token_path": Path("event_listener_token"),
-            },
+            "ca_cert_path": Path("ca_cert_path"),
+            "client_cert_path": Path("client_cert_path"),
+            "client_key_path": Path("client_key_path"),
+            "token_path": Path("event_listener_token"),
         },
         "downsample": {
             "downsample_dir": str(downsample_dir),
@@ -2059,14 +1889,14 @@ def context_config(
             "cache_version": "19.0.2",
             "cadd_path": str(cg_dir),
             "cancer_genelist": Path("gene_list"),
-            "conda_binary": "a_conda_binary",
+            "conda_binary": conda_binary,
             "conda_env": "S_balsamic",
             "cosmic_path": Path("cosmic_path"),
             "genome_interval_path": str(cg_dir),
             "gens_coverage_female_path": str(cg_dir),
             "gens_coverage_male_path": str(cg_dir),
             "gnomad_af5_path": str(cg_dir),
-            "head_job_partition": head_job_partition,
+            "head_job_partition": "head-job",
             "loqusdb_path": str(cg_dir),
             "loqusdb_dump_files": {
                 "artefact_sv": Path("bogus/artefact_sv_observations.txt"),
@@ -2104,13 +1934,16 @@ def context_config(
         "crunchy": {
             "conda_binary": "a_conda_binary",
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
+            "tmp_dir_base": "/state/partition1",
+            "fallback_memory": 1,
+            "fallback_minutes": 60,
             "slurm": {
                 "account": "development",
                 "conda_env": "S_crunchy",
-                "hours": 1,
                 "mail_user": email_address,
-                "memory": 1,
                 "number_tasks": 1,
+                "cpus_per_task": 4,
+                "partition": "compress",
             },
         },
         "data-delivery": {
@@ -2160,7 +1993,7 @@ def context_config(
             "submitter": "s.submitter",
         },
         "hermes": {"binary_path": "hermes", "container_path": "/singularity_cache"},
-        "housekeeper": {"database": hk_uri, "root": str(housekeeper_dir)},
+        "housekeeper": {"database": "sqlite:///", "root": str(housekeeper_dir)},
         "lims": {
             "host": "https://lims.scilifelab.se",
             "password": "password",
@@ -2178,13 +2011,13 @@ def context_config(
         "loqusdb-tumor": {"binary_path": "loqusdb-tumor", "config_path": "loqusdb-tumor.yaml"},
         "microsalt": {
             "binary_path": "echo",
-            "conda_binary": "a_conda_binary",
+            "conda_binary": conda_binary,
             "conda_env": "S_microSALT",
             "queries_path": Path(microsalt_dir, "queries").as_posix(),
             "root": str(microsalt_dir),
         },
         "mip-rd-dna": {
-            "conda_binary": "a_conda_binary",
+            "conda_binary": conda_binary,
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-dna-stage.yaml",
             "reference": "mip-dna-reference.fasta",
@@ -2193,7 +2026,7 @@ def context_config(
             "script": "mip",
         },
         "mip-rd-rna": {
-            "conda_binary": "a_conda_binary",
+            "conda_binary": conda_binary,
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-rna-stage.yaml",
             "workflow": "analyse rd_rna",
@@ -2212,15 +2045,15 @@ def context_config(
         },
         "mutant": {
             "binary_path": "echo",
-            "conda_binary": "a_conda_binary",
+            "conda_binary": conda_binary,
             "conda_env": "S_mutant",
             "root": str(mip_dir),
         },
         "nallo": {
-            "binary_path": nextflow_binary.as_posix(),
+            "binary_path": nextflow_binary,
             "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
-            "conda_binary": conda_binary.as_posix(),
+            "conda_binary": conda_binary,
             "conda_env": "S_nallo",
             "platform": str(nf_analysis_platform_config_path),
             "params": str(nf_analysis_pipeline_params_path),
@@ -2230,6 +2063,9 @@ def context_config(
             "workflow_bin_path": Path("workflow", "path").as_posix(),
             "pre_run_script": "",
             "profile": "myprofile",
+            "rank_model_threshold": 13,
+            "rank_model_snv": "path/to/ghxx_nallo_rank_model_snvs.ini",
+            "rank_model_sv": "path/to/ghxx_nallo_rank_model_svs.ini",
             "reference": "nallo_reference.fasta",
             "repository": "https://some_url",
             "references": Path("path", "to", "references").as_posix(),
@@ -2243,14 +2079,16 @@ def context_config(
         },
         "raredisease": {
             "default_target_bed": "twistexomecomprehensive_10.2_hg38_design.bed",
-            "binary_path": nextflow_binary.as_posix(),
+            "binary_path": nextflow_binary,
             "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
-            "conda_binary": conda_binary.as_posix(),
+            "conda_binary": conda_binary,
             "conda_env": "S_raredisease",
             "platform": str(nf_analysis_platform_config_path),
             "params": str(nf_analysis_pipeline_params_path),
             "config": str(nf_analysis_pipeline_config_path),
+            "rank_model_snv": "path/to/ghxx_rd_rank_model_snvs.ini",
+            "rank_model_sv": "path/to/ghxx_rd_rank_model_svs.ini",
             "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "workflow_bin_path": Path("workflow", "path").as_posix(),
@@ -2286,10 +2124,10 @@ def context_config(
             },
         },
         "tomte": {
-            "binary_path": nextflow_binary.as_posix(),
+            "binary_path": nextflow_binary,
             "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
-            "conda_binary": conda_binary.as_posix(),
+            "conda_binary": conda_binary,
             "conda_env": "S_tomte",
             "platform": str(nf_analysis_platform_config_path),
             "params": str(nf_analysis_pipeline_params_path),
@@ -2309,10 +2147,10 @@ def context_config(
             "tower_workflow": "tomte",
         },
         "rnafusion": {
-            "binary_path": nextflow_binary.as_posix(),
+            "binary_path": nextflow_binary,
             "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
-            "conda_binary": conda_binary.as_posix(),
+            "conda_binary": conda_binary,
             "conda_env": "S_RNAFUSION",
             "platform": str(nf_analysis_platform_config_path),
             "params": str(nf_analysis_pipeline_params_path),
@@ -2335,11 +2173,11 @@ def context_config(
         "pigz": {"binary_path": "/bin/pigz"},
         "pdc": {"binary_path": "/bin/dsmc"},
         "taxprofiler": {
-            "binary_path": nextflow_binary.as_posix(),
+            "binary_path": nextflow_binary,
             "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
             "root": str(taxprofiler_dir),
-            "conda_binary": conda_binary.as_posix(),
+            "conda_binary": conda_binary,
             "conda_env": "S_taxprofiler",
             "platform": str(nf_analysis_platform_config_path),
             "params": str(nf_analysis_pipeline_params_path),
@@ -3256,12 +3094,6 @@ def rnafusion_case_id() -> str:
     return "rnafusion_case_enough_reads"
 
 
-@pytest.fixture(scope="session")
-def strandedness_not_permitted() -> str:
-    """Return a not permitted strandedness."""
-    return "double_stranded"
-
-
 @pytest.fixture(scope="function")
 def rnafusion_hermes_deliverables(rnafusion_deliverable_data: dict, rnafusion_case_id: str) -> dict:
     hermes_output: dict = {"workflow": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
@@ -3374,12 +3206,6 @@ def nf_analysis_pipeline_resource_optimisation_path(nf_analysis_analysis_dir) ->
 def tower_id() -> int:
     """Returns a NF-Tower ID."""
     return 123456
-
-
-@pytest.fixture(scope="session")
-def existing_directory(tmpdir_factory) -> Path:
-    """Path to existing temporary directory."""
-    return tmpdir_factory.mktemp("any_directory")
 
 
 @pytest.fixture(scope="session")
@@ -4271,11 +4097,6 @@ def fastq_file_meta_raw(flow_cell_name: str) -> dict:
     }
 
 
-@pytest.fixture()
-def illumina_metrics_service() -> IlluminaDataTransferService:
-    return IlluminaDataTransferService()
-
-
 @pytest.fixture
 def completed_status_summary():
     return StatusSummary(count=1, case_ids=["completed_case_id"])
@@ -4346,9 +4167,3 @@ def capture_kit() -> str:
 def case(analysis_store: Store) -> Case:
     """Return a case models object."""
     return analysis_store.get_cases()[0]
-
-
-@pytest.fixture(scope="function")
-def head_job_partition() -> str:
-    """Return the name of the head job partition."""
-    return "head-job"

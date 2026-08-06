@@ -7,7 +7,7 @@ from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import Workflow
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.priority import SlurmAccount
-from cg.models.cg_config import CGConfig, NatsAuthentication, NatsConfig
+from cg.models.cg_config import CGConfig, NatsConfig
 from cg.services.deliver_files.rsync.models import RsyncDeliveryConfig
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.models import Case, Customer
@@ -173,18 +173,10 @@ def rsync_service(
             nats_binary_path="path/to/nats_binary",
             server="nats://example.nats.server:4222",
             stream="cg-test",
-            listener=NatsAuthentication(
-                ca_cert_path="path/to/ca_cert.pem",
-                client_cert_path="path/to/client_cert.pem",
-                client_key_path="path/to/client_key.pem",
-                token_path="path/to/token",
-            ),
-            publisher=NatsAuthentication(
-                ca_cert_path="path/to/ca_cert.pem",
-                client_cert_path="path/to/client_cert.pem",
-                client_key_path="path/to/client_key.pem",
-                token_path="path/to/token",
-            ),
+            ca_cert_path="path/to/ca_cert.pem",
+            client_cert_path="path/to/client_cert.pem",
+            client_key_path="path/to/client_key.pem",
+            token_path="path/to/token",
         ),
         rsync_config=RsyncDeliveryConfig(
             account=rsync_account,

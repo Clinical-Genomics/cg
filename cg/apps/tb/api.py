@@ -275,12 +275,19 @@ class TrailblazerAPI:
         validated_response = AnalysesResponse.model_validate(raw_response)
         return validated_response.analyses
 
-    def get_all_analyses_to_deliver(self) -> list[TrailblazerAnalysis]:
-        endpoint = (
-            f"analyses?status[]={AnalysisStatus.COMPLETED}&delivered=false&holdDelivery=false"
-        )
+    def get_all_analyses_to_deliver(
+        self, exclude_workflows: list[Workflow] | None = None
+    ) -> list[TrailblazerAnalysis]:
+        exclude_workflows_query: str = self._generate_exclude_workflow_query(exclude_workflows)
+        endpoint = f"analyses?status[]={AnalysisStatus.COMPLETED}&delivered=false&holdDelivery=false{exclude_workflows_query}"
         raw_response = self.query_trailblazer(
             command=endpoint, request_body={}, method=APIMethods.GET
         )
         validated_response = AnalysesResponse.model_validate(raw_response)
         return validated_response.analyses
+
+    @staticmethod
+    def _generate_exclude_workflow_query(workflows: list[Workflow] | None) -> str:
+        if not workflows:
+            return ""
+        return "".join(f"&excludeWorkflow[]={workflow.upper()}" for workflow in workflows)
