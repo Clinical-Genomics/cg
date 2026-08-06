@@ -5,7 +5,8 @@ from typing_extensions import Literal
 class SbatchError(BaseModel):
     flow_cell_id: str
     email: str
-    logfile: str
+    log_dir: str
+    run_name: str
     demux_dir: str
     demux_started: str
 
