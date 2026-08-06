@@ -80,7 +80,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         load_config.sv_rank_model_url = sv_rank_model.path
         load_config.sv_rank_model_version = sv_rank_model.version
         load_config.saltshaker_report = self.get_file_from_hk(
-            hk_tags={"saltshaker-report"}, hk_version=hk_version
+            hk_tags={"saltshaker-classify"}, hk_version=hk_version
         )
         return load_config
 

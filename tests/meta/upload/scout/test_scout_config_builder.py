@@ -621,7 +621,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return peddy_check
         if tags == {"ped", "peddy"}:
             return peddy_ped
-        if tags == {"saltshaker-report"}:
+        if tags == {"saltshaker-classify"}:
             return saltshaker_report
         if tags == {"sex-check", "peddy"}:
             return peddy_sex
