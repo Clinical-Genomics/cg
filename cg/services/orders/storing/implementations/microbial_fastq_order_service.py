@@ -114,6 +114,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         return self.status_db.add_sample(
             application_version=application_version,
             comment=sample.comment,
+            control=sample.control,
             customer=customer,
             internal_id=sample._generated_lims_id,
             lims_status=lims_status,
