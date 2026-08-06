@@ -49,6 +49,8 @@ def fastq_cmd(
     if not cases:
         LOG.info("No cases to compress")
         return None
+
+    # TODO: if switching to sample centered approach then this needs to be changed
     compress_sample_fastqs_in_cases(
         compress_api=compress_api,
         cases=cases,

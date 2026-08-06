@@ -1,9 +1,10 @@
 from enum import Enum
 from typing import Callable
 
+from sqlalchemy import distinct
 from sqlalchemy.orm import Query
 
-from cg.constants.constants import SequencingQCStatus
+from cg.constants.constants import CASE_ACTIVE_ACTIONS, SequencingQCStatus
 from cg.store.models import Case, CaseSample, Order, Sample
 
 
@@ -36,6 +37,21 @@ def get_received_cases(case_samples: Query, **kwargs) -> Query:
         .filter(not_received.c.case_id == None)
         .distinct()
     )
+
+
+def filter_samples_with_inactive_cases(case_samples: Query, **kwargs) -> Query:
+    """Return samples linked to inactive cases."""
+    return case_samples.filter(Case.action.not_in(CASE_ACTIVE_ACTIONS)).distinct()
+
+
+def filter_samples_with_compressible_cases(case_samples: Query, **kwargs) -> Query:
+    """Return samples linked to compressible cases."""
+    return case_samples.filter(Case.is_compressible == True).distinct()
+
+
+def filter_samples_with_incompressible_cases(case_samples: Query, **kwargs) -> Query:
+    """Return samples linked to incompressible cases."""
+    return case_samples.filter(Case.is_compressible == False).distinct()
 
 
 def get_not_prepared_cases(case_samples: Query, **kwargs) -> Query:
@@ -109,6 +125,8 @@ class CaseSampleFilter(Enum):
     """Define CaseSample filter functions."""
 
     SAMPLES_IN_CASE_BY_INTERNAL_ID: Callable = filter_samples_in_case_by_internal_id
+    SAMPLES_WITH_COMPRESSIBLE_CASES: Callable = filter_samples_with_compressible_cases
+    SAMPLES_WITH_INACTIVE_CASES: Callable = filter_samples_with_inactive_cases
     CASES_WITH_SAMPLE_BY_INTERNAL_ID: Callable = filter_cases_with_sample_by_internal_id
     CASES_WITH_SAMPLES_NOT_RECEIVED: Callable = get_not_received_cases
     CASES_WITH_ALL_SAMPLES_RECEIVED: Callable = get_received_cases

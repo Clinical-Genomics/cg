@@ -204,3 +204,9 @@ def test_compress_fastq_cli_multiple_set_limit(
     assert res.exit_code == 0
     # THEN assert it was communicated no more than the limited number of cases was compressed
     assert f"individuals in {limit} (completed) cases where compressed" in caplog.text
+
+
+# TODO: New test for new logic.
+#   Aim make sure that the right commands are called (i.e. the new commands).
+
+# TODO: Make a test for sample with two cases one compressible, the other not. (result should not be compressed.)
