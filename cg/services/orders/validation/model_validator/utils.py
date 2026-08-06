@@ -1,4 +1,5 @@
-from pydantic_core import ErrorDetails, ValidationError
+from pydantic import ValidationError
+from pydantic_core import ErrorDetails
 
 from cg.services.orders.validation.errors.case_errors import CaseError
 from cg.services.orders.validation.errors.case_sample_errors import CaseSampleError
@@ -10,11 +11,9 @@ from cg.services.orders.validation.errors.validation_errors import ValidationErr
 def convert_errors(pydantic_errors: ValidationError) -> ValidationErrors:
     error_details: list[ErrorDetails] = pydantic_errors.errors()
     order_errors: list[OrderError] = convert_order_errors(error_details)
-    case_errors: list[CaseError] = convert_case_errors(error_details=error_details)
-    case_sample_errors: list[CaseSampleError] = convert_case_sample_errors(
-        error_details=error_details
-    )
-    sample_errors: list[SampleError] = convert_sample_errors(error_details=error_details)
+    case_errors: list[CaseError] = convert_case_errors(error_details)
+    case_sample_errors: list[CaseSampleError] = convert_case_sample_errors(error_details)
+    sample_errors: list[SampleError] = convert_sample_errors(error_details)
     return ValidationErrors(
         order_errors=order_errors,
         case_errors=case_errors,
@@ -97,18 +96,18 @@ def create_case_sample_error(error: ErrorDetails) -> CaseSampleError:
 
 
 """
-What follows below are ways of extracting data from a Pydantic ErrorDetails object. The aim is to find out
-where the error occurred, for which the 'loc' value (which is a tuple) can be used. It is generally structured in 
-alternating strings and ints, specifying field names and list indices. An example:
-if loc = ('samples', 2, 'well_position'), that means that the error stems from the well_position of the
-third sample in the order.
+What follows below are ways of extracting data from a Pydantic ErrorDetails object. The aim is to 
+find out where the error occurred, for which the 'loc' value (which is a tuple) can be used. It is 
+generally structured in alternating strings and ints, specifying field names and list indices. 
+An example:
+    if loc = ('samples', 2, 'well_position'),
+that means that the error stems from the well_position of the third sample in the order.
 
 As an additional point of complexity, the discriminator is also added to the loc, specifically in 
-OrdersWithCases which have a discriminator for both cases and samples specifying if it is a new 
-or existing case/sample. So
-    loc = ('cases', 0, 'new', 'priority')
-means that the error concerns the first case in the order, which is a new case, and it concerns the field
-'priority'.
+Case which have a discriminator for case samples specifying if it is a new or existing sample. So
+    loc = ('samples', 0, 'new', 'volume')
+means that the error concerns the first sample in the case, which is a new sample, and it concerns 
+the field 'volume'.
 """
 
 
@@ -154,7 +153,7 @@ def get_sample_field_name(error: ErrorDetails) -> str:
 
 
 def get_case_field_name(error: ErrorDetails) -> str:
-    index_for_field_name: int = error["loc"].index("cases") + 3
+    index_for_field_name: int = error["loc"].index("cases") + 2
     return error["loc"][index_for_field_name]
 
 
