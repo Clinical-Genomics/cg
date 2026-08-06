@@ -53,6 +53,7 @@ def test_store_samples(
         assert len(sample.links) == 1
         assert sample.links[0].should_deliver_sample
 
+        # THEN the samples should have gotten the correct control values set
         order_sample = [
             order_sample
             for order_sample in microbial_fastq_order.samples
