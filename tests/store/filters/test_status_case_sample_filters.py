@@ -4,6 +4,7 @@ from cg.constants.constants import CaseActions
 from cg.store.filters.status_case_sample_filters import (
     filter_cases_with_sample_by_internal_id,
     filter_samples_in_case_by_internal_id,
+    filter_samples_with_compressible_cases,
     filter_samples_with_inactive_cases,
 )
 from cg.store.models import Case, CaseSample, Sample
@@ -85,7 +86,7 @@ def test_get_cases_with_sample_by_internal_id_invalid_id(
     assert filtered_query.count() == 0
 
 
-def test_get_samples_without_active_analysis(store: Store, helpers: StoreHelpers):
+def test_filter_samples_with_inactive_cases(store: Store, helpers: StoreHelpers):
     # GIVEN a store with two cases, one running and one finished
     running_case: Case = helpers.add_case(
         store=store, name="running_case", internal_id="running_case", action=CaseActions.RUNNING
@@ -110,8 +111,42 @@ def test_get_samples_without_active_analysis(store: Store, helpers: StoreHelpers
     # WHEN filtering
     filtered_query: Query = filter_samples_with_inactive_cases(case_samples=case_sample_query)
 
-    # THEN only the sample with an inactive case should be returned
+    # THEN only the case sample with an inactive case should be returned
     case_samples: list[CaseSample] = [case_sample for case_sample in filtered_query.all()]
     assert len(case_samples) == 1
     assert finished_case_sample in case_samples
     assert running_case_sample not in case_samples
+
+
+def test_filter_samples_with_compressible_cases(store: Store, helpers: StoreHelpers):
+    # GIVEN a store with two cases, one compressible and the other not
+    compressible_case: Case = helpers.add_case(
+        store=store, name="running_case", internal_id="running_case", is_compressible=True
+    )
+    incompressible_case: Case = helpers.add_case(
+        store=store, name="finished_case", internal_id="finished_case", is_compressible=False
+    )
+
+    # GIVEN two sample, each connected to one of the cases
+    compressible_sample: Sample = helpers.add_sample(store=store, internal_id="compressible_sample")
+    incompressible_sample: Sample = helpers.add_sample(
+        store=store, internal_id="incompressible_sample"
+    )
+    compressible_case_sample: CaseSample = helpers.add_relationship(
+        store=store, sample=compressible_sample, case=compressible_case
+    )
+    incompressible_case_sample: CaseSample = helpers.add_relationship(
+        store=store, sample=incompressible_sample, case=incompressible_case
+    )
+
+    # GIVEN a case sample query
+    case_sample_query: Query = store._get_join_case_sample_query()
+
+    # WHEN filtering
+    filtered_query: Query = filter_samples_with_compressible_cases(case_samples=case_sample_query)
+
+    # THEN only the case sample with a compressible case should be returned
+    case_samples: list[CaseSample] = [case_sample for case_sample in filtered_query.all()]
+    assert len(case_samples) == 1
+    assert compressible_case_sample in case_samples
+    assert incompressible_case_sample not in case_samples

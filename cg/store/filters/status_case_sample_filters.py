@@ -43,7 +43,9 @@ def filter_samples_with_inactive_cases(case_samples: Query, **kwargs) -> Query:
     return case_samples.filter(Case.action.not_in(CASE_ACTIVE_ACTIONS)).distinct()
 
 
-# TODO: Implement filter for getting samples without incompressible
+def filter_samples_with_compressible_cases(case_samples: Query, **kwargs) -> Query:
+    """Return samples linked to compressible cases."""
+    return case_samples.filter(Case.is_compressible == True).distinct()
 
 
 def get_not_prepared_cases(case_samples: Query, **kwargs) -> Query:
@@ -117,6 +119,7 @@ class CaseSampleFilter(Enum):
     """Define CaseSample filter functions."""
 
     SAMPLES_IN_CASE_BY_INTERNAL_ID: Callable = filter_samples_in_case_by_internal_id
+    SAMPLES_WITH_COMPRESSIBLE_CASES: Callable = filter_samples_with_compressible_cases
     SAMPLES_WITH_INACTIVE_CASES: Callable = filter_samples_with_inactive_cases
     CASES_WITH_SAMPLE_BY_INTERNAL_ID: Callable = filter_cases_with_sample_by_internal_id
     CASES_WITH_SAMPLES_NOT_RECEIVED: Callable = get_not_received_cases

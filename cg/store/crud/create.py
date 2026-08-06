@@ -241,6 +241,7 @@ class CreateMixin(ReadHandler):
         synopsis: str | None = None,
         customer_id: int | None = None,
         comment: str | None = None,
+        is_compressible: bool = True,
     ) -> Case:
         """Build a new Case record."""
 
@@ -257,6 +258,7 @@ class CreateMixin(ReadHandler):
             synopsis=synopsis,
             tickets=ticket,
             customer_id=customer_id,
+            is_compressible=is_compressible,
         )
 
     def relate_sample(
