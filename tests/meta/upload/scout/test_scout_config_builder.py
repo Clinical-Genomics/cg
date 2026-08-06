@@ -598,6 +598,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     chromograph_autozyg: File = create_autospec(File, full_path="chromograph_autozyg_chr9.png")
     chromograph_coverage: File = create_autospec(File, full_path="chromograph_coverage_chr9.png")
     saltshaker_path: File = create_autospec(File, full_path="saltshaker.png")
+    saltshaker_report: File = create_autospec(File, full_path="saltshaker_report.html")
     chromograph_regions: File = create_autospec(File, full_path="chromograph_regions.bed")
     chromograph_sites: File = create_autospec(File, full_path="chromograph_sites.bed")
     reviewer_alignment: File = create_autospec(File, full_path="reviewer_alignment.vcf")
@@ -620,6 +621,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return peddy_check
         if tags == {"ped", "peddy"}:
             return peddy_ped
+        if tags == {"saltshaker-report"}:
+            return saltshaker_report
         if tags == {"sex-check", "peddy"}:
             return peddy_sex
         if tags == {"smn-calling"}:
@@ -749,6 +752,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         rank_model_url=snv_rank_model.full_path,
         sv_rank_model_version="2.0",
         sv_rank_model_url=sv_rank_model.full_path,
+        saltshaker_report=saltshaker_report.full_path,
         analysis_date=datetime.now(),
         samples=[
             ScoutRarediseaseIndividual(
