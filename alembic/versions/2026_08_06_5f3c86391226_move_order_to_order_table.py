@@ -135,6 +135,10 @@ def upgrade():
                         break
     session.commit()
     op.drop_column(table_name="sample", column_name="order")
+    op.drop_constraint(constraint_name="_order_name_uc", table_name="pool", type_="unique")
+    op.create_unique_constraint(
+        constraint_name="_order_name_uc", table_name="pool", columns=["order_id", "name"]
+    )
     op.drop_column(table_name="pool", column_name="order")
 
 

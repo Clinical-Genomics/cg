@@ -711,7 +711,7 @@ class Panel(Base):
 
 class Pool(Base):
     __tablename__ = "pool"
-    __table_args__ = (UniqueConstraint("order", "name", name="_order_name_uc"),)
+    __table_args__ = (UniqueConstraint("order_id", "name", name="_order_name_uc"),)
 
     application_version_id: Mapped[int] = mapped_column(ForeignKey("application_version.id"))
     application_version: Mapped["ApplicationVersion"] = orm.relationship(
@@ -1016,12 +1016,28 @@ class Sample(Base, PriorityMixin):
             .label("ticket_id_from_original_order")
         )
 
-    @property
-    def order(self):
+    @hybrid_property
+    def order(self) -> str | None:
         if case := self.case_that_delivers:
             if order := case.original_order:
                 return order.name
         return None
+
+    @order.expression
+    @classmethod
+    def order(cls) -> SQLColumnExpression[int]:
+        return (
+            select(Order.name)
+            .join(Order.cases)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .order_by(Order.order_date.asc())
+            .limit(1)
+            .label("order")
+        )
 
     def to_dict(self, links: bool = False) -> dict:
         """Represent as dictionary"""
