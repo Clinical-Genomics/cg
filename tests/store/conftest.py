@@ -124,7 +124,6 @@ def store_with_a_sample_that_has_many_attributes_and_one_without(
         capture_kit=StoreConstants.CAPTURE_KIT_SAMPLE_WITH_ATTRIBUTES.value,
         comment=StoreConstants.COMMENT_SAMPLE_WITH_ATTRIBUTES.value,
         from_sample=StoreConstants.FROM_SAMPLE_SAMPLE_WITH_ATTRIBUTES.value,
-        order=StoreConstants.ORDER_SAMPLE_WITH_ATTRIBUTES.value,
         priority=StoreConstants.PRIORITY_SAMPLE_WITH_ATTRIBUTES.value,
         reference_genome=StoreConstants.REFERENCE_GENOME_SAMPLE_WITH_ATTRIBUTES.value,
         sex=StoreConstants.SEX_SAMPLE_WITH_ATTRIBUTES.value,
@@ -163,7 +162,6 @@ def store_with_a_pool_with_and_without_attributes(
         invoice_id=StoreConstants.INVOICE_ID_POOL_WITH_ATTRIBUTES.value,
         no_invoice=False,
         name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
-        order=StoreConstants.ORDER_POOL_WITH_ATTRIBUTES.value,
     )
 
     helpers.ensure_pool(
@@ -384,11 +382,10 @@ def rml_pool_store(
         },
     )
     store.session.add(app_version)
-    test_order = store.add_order(customer=new_customer, ticket_id=int(ticket_id))
+    test_order = store.add_order(customer=new_customer, name="order_name", ticket_id=int(ticket_id))
     new_pool = store.add_pool(
         customer=new_customer,
         name="Test",
-        order="Test",
         ordered=dt.datetime.now(),
         application_version=app_version,
         db_order=test_order,

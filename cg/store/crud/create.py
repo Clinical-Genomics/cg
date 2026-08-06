@@ -194,7 +194,6 @@ class CreateMixin(ReadHandler):
         downsampled_to: int = None,
         internal_id: str = None,
         last_sequenced_at: datetime = None,
-        order: str = None,
         ordered: datetime = None,
         pool: Pool | None = None,
         prepared_at: datetime = None,
@@ -217,7 +216,6 @@ class CreateMixin(ReadHandler):
             is_tumour=tumour,
             last_sequenced_at=last_sequenced_at,
             name=name,
-            order=order,
             ordered_at=ordered or datetime.now(),
             original_ticket=original_ticket,
             pool=pool,
@@ -323,7 +321,6 @@ class CreateMixin(ReadHandler):
         self,
         customer: Customer,
         name: str,
-        order: str,
         ordered: datetime,
         application_version: ApplicationVersion,
         db_order: Order,
@@ -339,7 +336,6 @@ class CreateMixin(ReadHandler):
         new_record: Pool = Pool(
             name=name,
             ordered_at=ordered or datetime.now(),
-            order=order,
             db_order=db_order,
             received_at=received_at,
             comment=comment,
@@ -399,10 +395,11 @@ class CreateMixin(ReadHandler):
             **kwargs,
         )
 
-    def add_order(self, customer: Customer, ticket_id: int, **kwargs) -> Order:
+    def add_order(self, customer: Customer, name: str, ticket_id: int, **kwargs) -> Order:
         """Build a new Order record."""
         order = Order(
             customer=customer,
+            name=name,
             order_date=datetime.now(),
             ticket_id=ticket_id,
             **kwargs,
