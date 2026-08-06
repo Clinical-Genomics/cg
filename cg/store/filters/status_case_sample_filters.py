@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Callable
 
+from sqlalchemy import distinct
 from sqlalchemy.orm import Query
 
 from cg.constants.constants import CASE_ACTIVE_ACTIONS, SequencingQCStatus
@@ -46,6 +47,11 @@ def filter_samples_with_inactive_cases(case_samples: Query, **kwargs) -> Query:
 def filter_samples_with_compressible_cases(case_samples: Query, **kwargs) -> Query:
     """Return samples linked to compressible cases."""
     return case_samples.filter(Case.is_compressible == True).distinct()
+
+
+def filter_samples_with_incompressible_cases(case_samples: Query, **kwargs) -> Query:
+    """Return samples linked to incompressible cases."""
+    return case_samples.filter(Case.is_compressible == False).distinct()
 
 
 def get_not_prepared_cases(case_samples: Query, **kwargs) -> Query:
