@@ -1,16 +1,42 @@
 import pytest
 
 
+# TODO should the leading blank space in the last column be there?
 @pytest.fixture
 def completion_file_original_contents():
     return """provnummer,urvalskriterium,GISAID_accession
 85CS900121,Allmän övervakning, EPI_ISL_75698657
+85CS900121,Stickprov, EPI_ISL_75698657
 85CS900136,Allmän övervakning, EPI_ISL_75698658
 85CS900117,Allmän övervakning, EPI_ISL_75698659
 85CS900135,Allmän övervakning, EPI_ISL_75698660
 85CS900145,Allmän övervakning, EPI_ISL_75698661
 85CS900145,Allmän övervakning, EPI_ISL_75698661
 85AB900145,Allmän övervakning, EPI_ISL_75698669
+
+"""
+
+
+@pytest.fixture
+def completion_file_original_contents_all_uploaded():
+    return """provnummer,urvalskriterium,GISAID_accession
+85CS900121,Allmän övervakning, EPI_ISL_75698657
+85CS900136,Allmän övervakning, EPI_ISL_75698658
+85CS900117,Allmän övervakning, EPI_ISL_75698659
+85CS900135,Allmän övervakning, EPI_ISL_75698660
+85CS900145,Allmän övervakning, EPI_ISL_75698661
+85AB900145,Allmän övervakning,
+
+"""
+
+
+@pytest.fixture
+def completion_file_original_contents_not_all_uploaded():
+    return """provnummer,urvalskriterium,GISAID_accession
+85CS900121,Allmän övervakning,EPI_ISL_75698657
+85CS900136,Allmän övervakning,
+85CS900117,Allmän övervakning,EPI_ISL_75698659
+85AB900145,Allmän övervakning,
 
 """
 

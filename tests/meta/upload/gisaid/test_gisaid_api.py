@@ -5,6 +5,7 @@ import pytest
 from housekeeper.store.models import File
 from pandas import DataFrame
 from pyfakefs.fake_filesystem import FakeFilesystem
+from pytest_mock import MockerFixture
 from sqlalchemy.orm import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -54,6 +55,22 @@ def completion_file(completion_file_original_contents, fs) -> File:
 
 
 @pytest.fixture
+def completion_file_all_uploaded(completion_file_original_contents_all_uploaded: str, fs) -> File:
+    path = "/fake/completion_file.csv"
+    fs.create_file(path, contents=completion_file_original_contents_all_uploaded)
+    return create_autospec(File, full_path=path)
+
+
+@pytest.fixture
+def completion_file_not_all_uploaded(
+    completion_file_original_contents_not_all_uploaded: str, fs
+) -> File:
+    path = "/fake/completion_file.csv"
+    fs.create_file(path, contents=completion_file_original_contents_not_all_uploaded)
+    return create_autospec(File, full_path=path)
+
+
+@pytest.fixture
 def gisaid_log(fs, gisaid_log_contents: str) -> File:
     path = "/fake/gisad-log.log"
     fs.create_file(path, contents=gisaid_log_contents)
@@ -65,24 +82,27 @@ def expected_completion_dataframe() -> dict[str, dict[int, str]]:
     return {
         "GISAID_accession": {
             0: " EPI_ISL_75698657",
-            1: " EPI_ISL_75698658",
-            2: " EPI_ISL_75698659",
-            3: " EPI_ISL_75698660",
-            4: " EPI_ISL_75698661",
+            1: " EPI_ISL_75698657",
+            2: " EPI_ISL_75698658",
+            3: " EPI_ISL_75698659",
+            4: " EPI_ISL_75698660",
+            5: " EPI_ISL_75698661",
         },
         "provnummer": {
             0: "85CS900121",
-            1: "85CS900136",
-            2: "85CS900117",
-            3: "85CS900135",
-            4: "85CS900145",
+            1: "85CS900121",
+            2: "85CS900136",
+            3: "85CS900117",
+            4: "85CS900135",
+            5: "85CS900145",
         },
         "urvalskriterium": {
             0: "Allmän övervakning",
-            1: "Allmän övervakning",
+            1: "Stickprov",
             2: "Allmän övervakning",
             3: "Allmän övervakning",
             4: "Allmän övervakning",
+            5: "Allmän övervakning",
         },
     }
 
@@ -91,6 +111,7 @@ def expected_completion_dataframe() -> dict[str, dict[int, str]]:
 def expected_updated_completion_file():
     return """provnummer,urvalskriterium,GISAID_accession
 85CS900121,Allmän övervakning, EPI_ISL_20431427
+85CS900121,Stickprov, EPI_ISL_20431427
 85CS900136,Allmän övervakning, EPI_ISL_20431428
 85CS900117,Allmän övervakning, EPI_ISL_20431429
 85CS900135,Allmän övervakning, EPI_ISL_20431430
@@ -194,13 +215,43 @@ def test_create_gisaid_csv(
 
 
 # TODO
-def test_upload(cg_config: CGConfig, completion_file: File, housekeeper_api: HousekeeperAPI):
-    housekeeper_api.get_file_from_latest_version = Mock(return_value=completion_file)
+def test_upload_all_samples_already_uploaded(
+    cg_config: CGConfig,
+    completion_file_all_uploaded: File,
+    housekeeper_api: HousekeeperAPI,
+    mocker: MockerFixture,
+):
+    # GIVEN a completion file where all the samples have been uploaded
+    housekeeper_api.get_file_from_latest_version = Mock(return_value=completion_file_all_uploaded)
     gisaid_api = GisaidAPI(config=cg_config)
+    create_spy = mocker.spy(gisaid_api, "create_gisaid_files_in_housekeeper")
+    upload_spy = mocker.spy(gisaid_api, "upload_results_to_gisaid")
+    update_spy = mocker.spy(gisaid_api, "update_completion_file")
 
     gisaid_api.upload("case_id")
 
-    # assert gisaid files created in Housekeeper (csv, fasta, log file)
+    create_spy.assert_not_called()
+    upload_spy.assert_not_called()
+    update_spy.assert_not_called()
 
-    # assert results uploaded to gisaid, authenticate, run command
-    # assert completion file updated (full test above, check for call sufficient)
+
+def test_upload_all_samples_not_already_uploaded(
+    cg_config: CGConfig,
+    completion_file_not_all_uploaded: File,
+    housekeeper_api: HousekeeperAPI,
+    mocker: MockerFixture,
+):
+    # GIVEN a completion file where all the samples have been uploaded
+    housekeeper_api.get_file_from_latest_version = Mock(
+        return_value=completion_file_not_all_uploaded
+    )
+    gisaid_api = GisaidAPI(config=cg_config)
+    create_mock = mocker.patch.object(gisaid_api, "create_gisaid_files_in_housekeeper")
+    upload_mock = mocker.patch.object(gisaid_api, "upload_results_to_gisaid")
+    update_mock = mocker.patch.object(gisaid_api, "update_completion_file")
+
+    gisaid_api.upload("case_id")
+
+    create_mock.assert_called_once_with(case_id="case_id")
+    upload_mock.assert_called_once_with(case_id="case_id")
+    update_mock.assert_called_once_with(case_id="case_id")
