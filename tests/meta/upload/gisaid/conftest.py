@@ -9,10 +9,18 @@ def completion_file_original_contents():
 85CS900121,Stickprov, EPI_ISL_75698657
 85CS900136,Allmän övervakning, EPI_ISL_75698658
 85CS900117,Allmän övervakning, EPI_ISL_75698659
-85CS900135,Allmän övervakning, EPI_ISL_75698660
+85CS900135,Allmän övervakning,
 85CS900145,Allmän övervakning, EPI_ISL_75698661
 85CS900145,Allmän övervakning, EPI_ISL_75698661
 85AB900145,Allmän övervakning, EPI_ISL_75698669
+
+"""
+
+
+@pytest.fixture
+def completion_file_accession_not_in_log():
+    return """provnummer,urvalskriterium,GISAID_accession
+85CS999999,Allmän övervakning, EPI_ISL_12345
 
 """
 
@@ -36,6 +44,17 @@ def completion_file_original_contents_not_all_uploaded():
 85CS900121,Allmän övervakning,EPI_ISL_75698657
 85CS900136,Allmän övervakning,
 85CS900117,Allmän övervakning,EPI_ISL_75698659
+85AB900145,Allmän övervakning,
+
+"""
+
+
+@pytest.fixture
+def completion_file_no_sars():
+    return """provnummer,urvalskriterium,GISAID_accession
+85XY900121,Allmän övervakning,EPI_ISL_75698657
+85LM900136,Allmän övervakning,
+85PA900117,Allmän övervakning,EPI_ISL_75698659
 85AB900145,Allmän övervakning,
 
 """

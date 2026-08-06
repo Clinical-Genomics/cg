@@ -71,6 +71,20 @@ def completion_file_not_all_uploaded(
 
 
 @pytest.fixture
+def completion_file_no_sars_samples(completion_file_no_sars: str, fs) -> File:
+    path = "/fake/completion_file.csv"
+    fs.create_file(path, contents=completion_file_no_sars)
+    return create_autospec(File, full_path=path)
+
+
+@pytest.fixture
+def completion_file_accession_not_in_log(completion_file_accession_not_in_log: str, fs) -> File:
+    path = "/fake/completion_file.csv"
+    fs.create_file(path, contents=completion_file_accession_not_in_log)
+    return create_autospec(File, full_path=path)
+
+
+@pytest.fixture
 def gisaid_log(fs, gisaid_log_contents: str) -> File:
     path = "/fake/gisad-log.log"
     fs.create_file(path, contents=gisaid_log_contents)
@@ -85,7 +99,7 @@ def expected_completion_dataframe() -> dict[str, dict[int, str]]:
             1: " EPI_ISL_75698657",
             2: " EPI_ISL_75698658",
             3: " EPI_ISL_75698659",
-            4: " EPI_ISL_75698660",
+            4: "",
             5: " EPI_ISL_75698661",
         },
         "provnummer": {
@@ -151,8 +165,12 @@ def test_get_gisaid_sample_list(
     gisaid_api = GisaidAPI(config=cg_config)
 
     sample_list: list[Sample] = gisaid_api.get_gisaid_sample_list("case_id")
-    assert ["85CS900121", "85CS900136", "85CS900117", "85CS900135", "85CS900145"] == [
-        sample.name for sample in sample_list
+    assert [sample.name for sample in sample_list] == [
+        "85CS900121",
+        "85CS900136",
+        "85CS900117",
+        "85CS900135",
+        "85CS900145",
     ]
 
 
@@ -174,6 +192,26 @@ def test_update_completion_file(
     gisaid_api.update_completion_file("case_id")
 
     assert Path(completion_file.full_path).read_text() == expected_updated_completion_file
+
+
+def test_update_completion_file_sample_not_in_gisaid_log(
+    cg_config: CGConfig,
+    completion_file_accession_not_in_log: File,
+    gisaid_log: File,
+    housekeeper_api: HousekeeperAPI,
+):
+    housekeeper_api.get_file_from_latest_version = Mock(
+        return_value=completion_file_accession_not_in_log
+    )
+
+    get_files_query = create_autospec(Query)
+    get_files_query.first = Mock(return_value=gisaid_log)
+    housekeeper_api.get_files = Mock(return_value=get_files_query)
+
+    gisaid_api = GisaidAPI(config=cg_config)
+
+    with pytest.raises(KeyError):
+        gisaid_api.update_completion_file("case_id")
 
 
 def test_create_gisaid_csv(
@@ -214,7 +252,6 @@ def test_create_gisaid_csv(
     )
 
 
-# TODO
 def test_upload_all_samples_already_uploaded(
     cg_config: CGConfig,
     completion_file_all_uploaded: File,
@@ -255,3 +292,24 @@ def test_upload_all_samples_not_already_uploaded(
     create_mock.assert_called_once_with(case_id="case_id")
     upload_mock.assert_called_once_with(case_id="case_id")
     update_mock.assert_called_once_with(case_id="case_id")
+
+
+def test_upload_all_no_sars_samples(
+    cg_config: CGConfig,
+    completion_file_no_sars_samples: File,
+    housekeeper_api: HousekeeperAPI,
+    mocker: MockerFixture,
+):
+    housekeeper_api.get_file_from_latest_version = Mock(
+        return_value=completion_file_no_sars_samples
+    )
+    gisaid_api = GisaidAPI(config=cg_config)
+    create_spy = mocker.spy(gisaid_api, "create_gisaid_files_in_housekeeper")
+    upload_spy = mocker.spy(gisaid_api, "upload_results_to_gisaid")
+    update_spy = mocker.spy(gisaid_api, "update_completion_file")
+
+    gisaid_api.upload("case_id")
+
+    create_spy.assert_not_called()
+    upload_spy.assert_not_called()
+    update_spy.assert_not_called()

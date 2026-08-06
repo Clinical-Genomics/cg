@@ -327,9 +327,8 @@ class GisaidAPI:
         completion_dict = self.get_completion_dict(completion_file=completion_file)
 
         for index, completion_provnummer in completion_dict["provnummer"].items():
-            for accession_provnummer, new_value in accession_dict.items():
-                if completion_provnummer == accession_provnummer:
-                    completion_dict["GISAID_accession"][index] = new_value
+            new_value = accession_dict[completion_provnummer]
+            completion_dict["GISAID_accession"][index] = new_value
 
         fieldnames = list(completion_dict.keys())
         indices = list(next(iter(completion_dict.values())).keys())
@@ -355,7 +354,10 @@ class GisaidAPI:
         self.update_completion_file(case_id=case_id)
 
     def _all_samples_uploaded_dict(self, completion_dict: dict) -> bool:
-        accession_values = [
-            value for value in completion_dict["GISAID_accession"].values() if value
-        ]
-        return len(accession_values) == len(completion_dict["provnummer"])
+        if len(completion_dict) == 0:
+            return True
+        else:
+            accession_values = [
+                value for value in completion_dict["GISAID_accession"].values() if value
+            ]
+            return len(accession_values) == len(completion_dict["provnummer"])
