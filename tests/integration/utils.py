@@ -10,7 +10,7 @@ from pytest_httpserver import HTTPServer
 from cg.apps.environ import environ_email
 from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, SequencingFileTag
-from cg.constants.tb import AnalysisType
+from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
@@ -214,6 +214,42 @@ def expect_to_add_pending_analysis_to_trailblazer(
             "completed_at": "",
             "out_dir": "out/dir",
             "config_path": "config/path",
+        }
+    )
+
+
+def expect_to_get_all_analyses_to_deliver_from_trailblazer(
+    trailblazer_server: HTTPServer, exclude_workflows: list[Workflow] | None = None
+):
+    trailblazer_server.expect_request(
+        "/trailblazer/analyses",
+        method="GET",
+    ).respond_with_json(
+        {
+            "analyses": [
+                {
+                    "id": 101,
+                    "case_id": "case_1",
+                    "logged_at": None,
+                    "started_at": None,
+                    "completed_at": None,
+                    "status": AnalysisStatus.COMPLETED,
+                    "out_dir": "/tmp/out/case_1",
+                    "config_path": "/tmp/config/case_1.yaml",
+                    "workflow": "RAREDISEASE",
+                },
+                {
+                    "id": 102,
+                    "case_id": "case_2",
+                    "logged_at": None,
+                    "started_at": None,
+                    "completed_at": None,
+                    "status": AnalysisStatus.COMPLETED,
+                    "out_dir": "/tmp/out/case_2",
+                    "config_path": "/tmp/config/case_2.yaml",
+                    "workflow": "BALSAMIC",
+                },
+            ]
         }
     )
 
