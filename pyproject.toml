@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "cg"
-version = "87.10.2"
+version = "88.0.3"
 description = "Clinical Genomics command center"
 readme = {file = "README.md", content-type = "text/markdown"}
 homepage = "https://github.com/Clinical-Genomics/cg"
@@ -86,6 +86,7 @@ addopts = [
 
 [project.scripts]
 cg = "cg.cli.base:base"
+listen = "cg.cli.listen:listen"
 
 
 # Configurations
