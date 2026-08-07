@@ -41,10 +41,10 @@ def test_deliver_all_available(
     analysis_2 = helpers.add_analysis(
         store=status_db, case=case_2, trailblazer_id=102, uploaded_at=datetime.now()
     )
-    cust2 = case_2.customer
     analysis_2.order = helpers.add_order(
         store=status_db, ticket_id=67890, customer_id=case_2.customer.id
     )
+    status_db.commit_to_store()
 
     # GIVEN that Trailblazer has analyses ready for delivery
     expect_to_get_all_analyses_to_deliver_from_trailblazer(
