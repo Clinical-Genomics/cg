@@ -46,7 +46,6 @@ dependencies = [
 "MarkupSafe",
 "openpyxl",
 "packaging",
-"pandas",
 "paramiko",
 "petname",
 "psutil",
