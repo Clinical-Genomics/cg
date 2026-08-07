@@ -118,6 +118,27 @@ def test_get_completion_dict(
     assert dict == expected_completion_dict
 
 
+def test_get_completion_dict_no_rows(
+    cg_config: CGConfig,
+    completion_file_no_sars: str,
+    fs: FakeFilesystem,
+):
+    # GIVEN a completion CSV containing no rows that match the SARS-CoV-2 sample id pattern
+    # GIVEN a configured GISAID API instance that parses completion files
+    completion_file = mock_completion_file(completion_file_no_sars, fs=fs)
+    gisaid_api = GisaidAPI(config=cg_config)
+
+    # WHEN the completion file is converted into the internal dictionary representation
+    dict = gisaid_api.get_completion_dict(completion_file=completion_file)
+
+    # THEN the dictionary should retain all column keys with empty values, matching pandas' behavior
+    assert dict == {
+        "provnummer": {},
+        "urvalskriterium": {},
+        "GISAID_accession": {},
+    }
+
+
 def test_get_gisaid_sample_list(
     cg_config: CGConfig,
     completion_file_contents: str,

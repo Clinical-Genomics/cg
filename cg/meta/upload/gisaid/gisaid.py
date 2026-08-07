@@ -12,7 +12,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import SARS_COV_REGEX, FileFormat
 from cg.constants.housekeeper_tags import FohmTag
-from cg.exc import HousekeeperFileMissingError
+from cg.exc import CgError, HousekeeperFileMissingError
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.cg_config import CGConfig
 from cg.store.models import Sample
@@ -62,16 +62,16 @@ class GisaidAPI:
         """Read completion file in to dictionary similar to a pandas dataframe and drop duplicates"""
         with open(Path(completion_file.full_path), "r") as file:
             csv_reader: csv.DictReader = csv.DictReader(file)
-            deduplicated_csv = {tuple(row.items()): row for row in csv_reader}.values()
+            if not csv_reader.fieldnames:
+                raise CgError(f"{completion_file.full_path} is malformed.")
 
-            completion_dict: dict = {}
+            deduplicated_csv = {tuple(row.items()): row for row in csv_reader}.values()
+            completion_dict: dict = {field: {} for field in csv_reader.fieldnames}
 
             for i, row in enumerate(deduplicated_csv):
                 if not re.match(SARS_COV_REGEX, row["provnummer"]):
                     continue
                 for key, value in row.items():
-                    if not completion_dict.get(key):
-                        completion_dict[key] = {}
                     completion_dict[key][i] = value
 
         return completion_dict
@@ -345,10 +345,10 @@ class GisaidAPI:
         self.update_completion_file(case_id=case_id)
 
     def _all_samples_uploaded_dict(self, completion_dict: dict) -> bool:
-        if len(completion_dict) == 0:
+        if not completion_dict["provnummer"]:
             return True
-        else:
-            accession_values = [
-                value for value in completion_dict["GISAID_accession"].values() if value
-            ]
-            return len(accession_values) == len(completion_dict["provnummer"])
+
+        accession_values = [
+            value for value in completion_dict["GISAID_accession"].values() if value
+        ]
+        return len(accession_values) == len(completion_dict["provnummer"])
