@@ -20,7 +20,7 @@ def test_deliver_all_available(httpserver: HTTPServer, test_run_paths: Integrati
     # GIVEN a config file with valid database URIs and directories
     config_path: Path = test_run_paths.cg_config_file
 
-    # GIVEN a database with orders ready for delivery
+    # GIVEN that Trailblazer has analyses ready for delivery
     expect_to_get_all_analyses_to_deliver_from_trailblazer(
         trailblazer_server=httpserver,
         exclude_workflows=[
