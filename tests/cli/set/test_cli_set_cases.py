@@ -26,7 +26,6 @@ def test_set_cases_by_sample_identifiers(
     base_store: Store = base_context.status_db
     new_sample: Sample = helpers.add_sample(base_store)
     new_sample.original_ticket: str = ticket_id
-    new_sample.order: str = "An order"
     case: Case = helpers.add_case(base_store)
     helpers.add_relationship(base_store, sample=new_sample, case=case)
     identifier_value = getattr(new_sample, identifier_key)

@@ -56,7 +56,6 @@ class StorePoolOrderService(StoreOrderService):
                 db_pool: Pool = self._create_db_pool(
                     db_order=db_order,
                     pool=pool,
-                    order_name=order.name,
                     customer=db_order.customer,
                 )
                 for sample in pool[1]:
@@ -110,10 +109,8 @@ class StorePoolOrderService(StoreOrderService):
     def _create_db_order(self, order: OrderWithIndexedSamples) -> Order:
         """Return an Order database object."""
         ticket_id: int = order._generated_ticket_id
-        customer: Customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=order.customer
-        )
-        return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
+        customer: Customer = self.status_db.get_customer_by_internal_id_strict(order.customer)
+        return self.status_db.add_order(customer=customer, name=order.name, ticket_id=ticket_id)
 
     def _create_db_case_for_pool(
         self,
@@ -138,7 +135,6 @@ class StorePoolOrderService(StoreOrderService):
         self,
         pool: tuple[str, list[IndexedSample]],
         db_order: Order,
-        order_name: str,
         customer: Customer,
     ) -> Pool:
         """Return a Pool database object."""
@@ -149,7 +145,6 @@ class StorePoolOrderService(StoreOrderService):
             application_version=application_version,
             customer=customer,
             name=pool[0],
-            order=order_name,
             ordered=datetime.now(),
             db_order=db_order,
         )
@@ -176,7 +171,6 @@ class StorePoolOrderService(StoreOrderService):
             lims_status=lims_status,
             name=sample.name,
             no_invoice=True,
-            order=order_name,
             ordered=datetime.now(),
             original_ticket=ticket_id,
             pool=pool,

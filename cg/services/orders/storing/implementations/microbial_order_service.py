@@ -59,6 +59,7 @@ class StoreMicrobialOrderService(StoreOrderService):
         new_samples = []
         db_order: DbOrder = self.status_db.add_order(
             customer=customer,
+            name=order.name,
             ticket_id=order._generated_ticket_id,
         )
         db_case: DbCase = self._create_case(customer=customer, order=order)
@@ -144,7 +145,6 @@ class StoreMicrobialOrderService(StoreOrderService):
             lims_status=lims_status,
             name=sample.name,
             no_invoice=application_version.application.is_external,
-            order=order_name,
             ordered=datetime.now(),
             organism=organism,
             original_ticket=str(ticket_id),

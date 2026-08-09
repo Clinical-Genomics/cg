@@ -9,7 +9,7 @@ from cg.constants import SequencingFileTag, Workflow
 from cg.constants.constants import CaseActions
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, Sample
+from cg.store.models import Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -52,11 +52,14 @@ def bcl_convert_samplesheet_path() -> Path:
 
 @pytest.fixture
 def sample() -> Sample:
+    order = Order(customer=Customer(), name="order-name", ticket_id=123)
+    case = Case(internal_id="case_id", orders=[order])
+    case_sample = CaseSample(case=case, should_deliver_sample=True)
     return Sample(
         name="sample_name",
-        order="sample_project",
         control="positive",
         last_sequenced_at=dt.datetime.now(),
+        links=[case_sample],
     )
 
 

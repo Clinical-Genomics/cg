@@ -48,9 +48,9 @@ class StoreTaxprofilerOrderService(StoreOrderService):
     ) -> list[DbSample]:
         """Store samples in the StatusDB database."""
         new_samples = []
-        customer: Customer = self.status_db.get_customer_by_internal_id(order.customer)
+        customer: Customer = self.status_db.get_customer_by_internal_id_strict(order.customer)
         db_order: DbOrder = self.status_db.add_order(
-            customer=customer, ticket_id=order._generated_ticket_id
+            customer=customer, name=order.name, ticket_id=order._generated_ticket_id
         )
         priority: PriorityEnum = order.samples[0].priority
         db_case: DbCase = self._create_db_case(order=order, customer=customer, priority=priority)
@@ -103,7 +103,6 @@ class StoreTaxprofilerOrderService(StoreOrderService):
             lims_status=lims_status,
             name=sample.name,
             no_invoice=application_version.application.is_external,
-            order=order.name,
             ordered=datetime.now(),
             original_ticket=order._generated_ticket_id,
             priority=sample.priority,
