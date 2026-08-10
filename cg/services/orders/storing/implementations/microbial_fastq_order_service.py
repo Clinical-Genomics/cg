@@ -56,7 +56,6 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
                 )
                 db_sample: Sample = self._create_db_sample(
                     sample=sample,
-                    order_name=order.name,
                     ticket_id=str(db_order.ticket_id),
                     customer=db_order.customer,
                 )
@@ -100,7 +99,6 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
     def _create_db_sample(
         self,
         sample: MicrobialFastqSample,
-        order_name: str,
         ticket_id: str,
         customer: Customer,
     ) -> Sample:

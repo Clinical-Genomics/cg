@@ -69,7 +69,6 @@ class StoreMicrobialOrderService(StoreOrderService):
                 organism: Organism = self._ensure_organism(sample)
                 db_sample = self._create_db_sample(
                     customer=customer,
-                    order_name=order.name,
                     organism=organism,
                     sample=sample,
                     ticket_id=order._generated_ticket_id,
@@ -124,7 +123,6 @@ class StoreMicrobialOrderService(StoreOrderService):
     def _create_db_sample(
         self,
         customer: Customer,
-        order_name: str,
         organism: Organism,
         sample: MicrobialSample,
         ticket_id: int,

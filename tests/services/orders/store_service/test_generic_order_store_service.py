@@ -321,7 +321,6 @@ def test_create_db_sample_with_lims_status_and_invoice(
         case=case,
         sample=rna_fusion_sample,
         customer=customer,
-        order_name="any_old_string",
         ordered=datetime.now(),
         ticket="1234567",
     )

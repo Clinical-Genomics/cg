@@ -61,7 +61,6 @@ class StorePoolOrderService(StoreOrderService):
                 for sample in pool[1]:
                     db_sample: Sample = self._create_db_sample(
                         sample=sample,
-                        order_name=order.name,
                         ticket_id=str(db_order.ticket_id),
                         customer=db_order.customer,
                         application_version=db_pool.application_version,
@@ -152,7 +151,6 @@ class StorePoolOrderService(StoreOrderService):
     def _create_db_sample(
         self,
         sample: IndexedSample,
-        order_name: str,
         ticket_id: str,
         customer: Customer,
         application_version: ApplicationVersion,

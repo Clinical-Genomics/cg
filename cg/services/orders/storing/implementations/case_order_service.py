@@ -130,7 +130,6 @@ class StoreCaseOrderService(StoreOrderService):
         self,
         case: Case,
         customer: Customer,
-        order_name: str,
         ordered: datetime,
         sample: SampleInCase,
         ticket: str,
@@ -229,7 +228,6 @@ class StoreCaseOrderService(StoreOrderService):
                     db_sample: DbSample = self._create_db_sample(
                         case=case,
                         customer=customer,
-                        order_name=order.name,
                         ordered=datetime.now(),
                         sample=sample,
                         ticket=str(order._generated_ticket_id),

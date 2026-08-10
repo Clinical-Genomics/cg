@@ -56,7 +56,6 @@ class StoreFastqOrderService(StoreOrderService):
                 )
                 db_sample: Sample = self._create_db_sample(
                     sample=sample,
-                    order_name=order.name,
                     ticket_id=str(db_order.ticket_id),
                     customer=db_order.customer,
                 )
@@ -101,9 +100,7 @@ class StoreFastqOrderService(StoreOrderService):
         case.customer = customer
         return case
 
-    def _create_db_sample(
-        self, sample: FastqSample, order_name: str, customer: Customer, ticket_id: str
-    ) -> Sample:
+    def _create_db_sample(self, sample: FastqSample, customer: Customer, ticket_id: str) -> Sample:
         """Return a Sample database object."""
         application_version: ApplicationVersion = (
             self.status_db.get_current_application_version_by_tag(tag=sample.application)

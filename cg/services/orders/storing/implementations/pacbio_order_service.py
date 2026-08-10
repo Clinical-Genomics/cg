@@ -58,7 +58,6 @@ class StorePacBioOrderService(StoreOrderService):
                 )
                 db_sample: Sample = self._create_db_sample(
                     sample=sample,
-                    order_name=order.name,
                     customer=status_db_order.customer,
                     ticket_id=str(status_db_order.ticket_id),
                 )
@@ -96,9 +95,7 @@ class StorePacBioOrderService(StoreOrderService):
         case.customer = customer
         return case
 
-    def _create_db_sample(
-        self, sample: PacbioSample, order_name: str, customer: Customer, ticket_id: str
-    ) -> Sample:
+    def _create_db_sample(self, sample: PacbioSample, customer: Customer, ticket_id: str) -> Sample:
         """Return a Sample database object."""
         application_version: ApplicationVersion = (
             self.status_db.get_current_application_version_by_tag(tag=sample.application)
