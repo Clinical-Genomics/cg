@@ -32,7 +32,3 @@ def create_typed_mock(klass: type[T], **kwargs) -> TypedMock[T]:
     """
     instance = create_autospec(klass, instance=True, **kwargs)
     return TypedMock(as_mock=instance, as_type=cast(T, instance))
-
-
-def as_mock(instance: type[T]) -> Mock:
-    return cast(Mock, instance)
