@@ -109,6 +109,9 @@ class Pool(Base):
 def upgrade():
     bind: sa.Connection = op.get_bind()
     session = Session(bind=bind)
+    op.create_index(
+        index_name="pool_order_id_ix", table_name="pool", columns=["order_id"]
+    )  # This was missing
     op.add_column(
         table_name="order",
         column=sa.Column(name="name", type_=mysql.VARCHAR(64), nullable=True, index=True),
@@ -132,6 +135,10 @@ def upgrade():
                         order.name = sample.order
                         session.add(order)
                         break
+        if not order.name:
+            for pool in order.pools:
+                if pool.order:
+                    order.name = pool.order
     session.commit()
     op.drop_column(table_name="sample", column_name="order")
     op.drop_constraint(constraint_name="_order_name_uc", table_name="pool", type_="unique")
@@ -190,3 +197,4 @@ def downgrade():
         nullable=False,
     )
     op.drop_column(table_name="order", column_name="name")
+    op.drop_index(table_name="pool", index_name="pool_order_id_ix")
