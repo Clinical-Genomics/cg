@@ -272,7 +272,9 @@ def archive_store(
         case=case, sample=new_samples[0], status="unknown", should_deliver_sample=True
     )
     order = Order(
-        customer_id=customer_ddn.id, ticket_id=new_samples[0].original_ticket, name="order_name"
+        customer_id=customer_ddn.id,
+        name="order_name",
+        ticket_id=new_samples[0].original_ticket,
     )
     base_store.session.add(order)
     base_store.session.add(case)

@@ -1045,19 +1045,17 @@ def test_get_pools_to_render_with(
     assert len(pools) == 2
 
 
-def test_get_pools_to_render_with_customer(
-    store_with_multiple_pools_for_customer: Store,
-):
+def test_get_pools_to_render_with_customer(store: Store, helpers: StoreHelpers):
     """Test that pools can be fetched from the store by customer id."""
-    # GIVEN a database with two pools
+    # GIVEN a database with two pools tied to different customers
+    pool_1: Pool = helpers.ensure_pool(store=store, customer_id="cust_to_fetch", name="pool_1")
+    helpers.ensure_pool(store=store, customer_id="cust_to_not_fetch", name="pool_2")
 
-    # WHEN getting pools by customer id
-    pools: list[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
-        customers=store_with_multiple_pools_for_customer.get_customers()
-    )
+    # WHEN getting pools using the customer id of the first pool
+    pools: list[Pool] = store.get_pools_to_render(customers=[pool_1.customer])
 
-    # THEN two pools should be returned
-    assert len(pools) == 2
+    # THEN only the first pool should be returned
+    assert pools == [pool_1]
 
 
 def test_get_pools_to_render_with_customer_and_name_enquiry(
@@ -1079,19 +1077,22 @@ def test_get_pools_to_render_with_customer_and_name_enquiry(
 def test_get_pools_to_render_with_customer_and_order_enquiry(store: Store, helpers: StoreHelpers):
     """Test that pools can be fetched from the store by customer id."""
     # GIVEN a database with two pools belonging to different orders
-    customer = helpers.ensure_customer(store=store)
-    order_1 = store.add_order(customer=customer, name="order_1", ticket_id=1)
-    order_2 = store.add_order(customer=customer, name="order_2", ticket_id=2)
-    store.add_multiple_items_to_store([order_1, order_2])
+    customer_1 = helpers.ensure_customer(
+        store=store, customer_id="customer_id_1", customer_name="customer name 1"
+    )
+    customer_2 = helpers.ensure_customer(
+        store=store, customer_id="customer_id_2", customer_name="customer name 2"
+    )
+    order_1 = store.add_order(customer=customer_1, name="order_1", ticket_id=1)
+    order_2 = store.add_order(customer=customer_2, name="order_2", ticket_id=2)
+    store.add_multiple_items_to_store([customer_1, customer_2, order_1, order_2])
     store.commit_to_store()
 
     pool_1 = helpers.ensure_pool(store=store, ticket=1)
     helpers.ensure_pool(store=store, ticket=2)
 
-    # WHEN fetching pools by customer id and order enquiry
-    pools: list[Pool] = store.get_pools_to_render(
-        customers=store.get_customers(), enquiry="order_1"
-    )
+    # WHEN fetching pools by order enquiry
+    pools: list[Pool] = store.get_pools_to_render(enquiry="order_1")
 
     # THEN only the first pool should be returned
     assert pools == [pool_1]

@@ -1053,7 +1053,7 @@ class StoreHelpers:
         )
         db_order: Order | None = store.get_order_by_ticket_id(ticket)
         if ticket and not db_order:
-            db_order = store.add_order(customer=customer, name="order_name", ticket_id=int(ticket))
+            db_order = store.add_order(customer=customer, name="order_name", ticket_id=ticket)
 
         pool = store.add_pool(
             name=name,
