@@ -1,7 +1,8 @@
 import pytest
 
 
-# TODO should the leading blank space in the last column be there?
+# Note: leading blank space in the GISAID_acession column is intentional,
+# currently the files are written like this
 @pytest.fixture
 def completion_file_contents():
     return """provnummer,urvalskriterium,GISAID_accession
