@@ -55,7 +55,6 @@ class Order(Base):
     __tablename__ = "order"
 
     id: Mapped[PrimaryKeyInt]
-    order: Mapped[str | None]
     cases: Mapped[list["Case"]] = relationship(secondary=order_case, back_populates="orders")
     name: Mapped[str | None]
     ticket_id: Mapped[int]
@@ -149,6 +148,7 @@ def downgrade():
         table_name="pool",
         column=sa.Column(name="order", type_=mysql.VARCHAR(64, charset="latin1"), nullable=True),
     )
+    op.drop_constraint(constraint_name="_order_name_uc", table_name="pool", type_="unique")
     op.create_unique_constraint(
         constraint_name="order_name_uc", table_name="pool", columns=["order", "name"]
     )
@@ -189,3 +189,4 @@ def downgrade():
         existing_type=mysql.VARCHAR(64, charset="latin1"),
         nullable=False,
     )
+    op.drop_column(table_name="order", column_name="name")
