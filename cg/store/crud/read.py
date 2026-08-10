@@ -2046,7 +2046,9 @@ class ReadHandler(BaseHandler):
             .all()
         )
 
-    def get_compressible_samples(self) -> list[Sample]:
+    def get_compressible_samples_by_internal_ids(
+        self, internal_ids: list[str]
+    ) -> list[Sample] | None:
         incompressible_case_samples_subquery: ScalarSelect = (
             select(CaseSample.sample_id)
             .join(Case, Case.id == CaseSample.case_id)
@@ -2054,7 +2056,12 @@ class ReadHandler(BaseHandler):
         ).scalar_subquery()
 
         query: Select[tuple[Sample]] = (
-            select(Sample).where(Sample.id.not_in(incompressible_case_samples_subquery)).distinct()
+            select(Sample)
+            .where(
+                Sample.id.not_in(incompressible_case_samples_subquery),
+                Sample.internal_id.in_(internal_ids),
+            )
+            .distinct()
         )
 
         return list(self.session.scalars(query).all())

@@ -1476,7 +1476,13 @@ def test_get_compressible_samples(store: Store, helpers: StoreHelpers):
     helpers.add_relationship(store=store, case=running_case, sample=running_sample)
 
     # WHEN getting the samples to be compressed
-    compressible_samples: list[Sample] = store.get_compressible_samples()
+    compressible_samples: list[Sample] = store.get_compressible_samples_by_internal_ids(
+        internal_ids=[
+            squeezable_sample.internal_id,
+            compact_sample.internal_id,
+            running_sample.internal_id,
+        ]
+    )
 
     # THEN only the compressible sample is returned
     assert compressible_samples == [squeezable_sample]
@@ -1519,7 +1525,9 @@ def test_get_compressible_samples_one_sample_two_cases(store: Store, helpers: St
     helpers.add_relationship(store=store, case=running_case, sample=sample)
 
     # WHEN getting compressible samples
-    compressible_samples: list[Sample] = store.get_compressible_samples()
+    compressible_samples: list[Sample] = store.get_compressible_samples_by_internal_ids(
+        internal_ids=[sample.internal_id]
+    )
 
     # THEN no sample should have been returned
     assert compressible_samples == []

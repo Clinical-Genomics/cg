@@ -659,7 +659,7 @@ class HousekeeperAPI:
             )
         return filtered_files
 
-    def get_bundle_names_with_fastq_files(self) -> set[str]:
+    def get_bundle_names_with_fastq_files(self) -> list[str]:
         """Return the names of all bundles that currently have a fastq-tagged file"""
         fastq_files: Query = self.get_files(bundle=None, tags=[SequencingFileTag.FASTQ])
         bundle_names: Query = (
@@ -668,6 +668,4 @@ class HousekeeperAPI:
             .with_entities(Bundle.name)
             .distinct()
         )
-        return {
-            name for (name,) in bundle_names
-        }  # TODO see if I can use scalars here to remove this list comprehension
+        return [name for (name,) in bundle_names]
