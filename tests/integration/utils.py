@@ -231,8 +231,8 @@ def expect_to_get_all_analyses_to_deliver_from_trailblazer(
                     "id": 101,
                     "case_id": "case_1",
                     "logged_at": None,
-                    "started_at": None,
-                    "completed_at": None,
+                    "started_at": datetime.now().isoformat(),
+                    "completed_at": datetime.now().isoformat(),
                     "status": AnalysisStatus.COMPLETED,
                     "out_dir": "/tmp/out/case_1",
                     "config_path": "/tmp/config/case_1.yaml",
@@ -242,8 +242,8 @@ def expect_to_get_all_analyses_to_deliver_from_trailblazer(
                     "id": 102,
                     "case_id": "case_2",
                     "logged_at": None,
-                    "started_at": None,
-                    "completed_at": None,
+                    "started_at": datetime.now().isoformat(),
+                    "completed_at": datetime.now().isoformat(),
                     "status": AnalysisStatus.COMPLETED,
                     "out_dir": "/tmp/out/case_2",
                     "config_path": "/tmp/config/case_2.yaml",
@@ -252,6 +252,30 @@ def expect_to_get_all_analyses_to_deliver_from_trailblazer(
             ]
         }
     )
+
+
+def expect_to_set_analyses_as_delivered(
+    trailblazer_server: HTTPServer,
+    analysis_ids: list[int],
+    is_delivered: bool = True,
+    signature: str | None = None,
+):
+    """Mock the response from Trailblazer for TrailblazerAPI.set_analyses_delivery_status.
+
+    This mirrors the request made in cg.apps.tb.api.TrailblazerAPI.set_analyses_delivery_status,
+    which issues a PATCH to "{host}/analyses" with a JSON body of the form:
+    {"analyses": [{"id": <id>, "is_delivered": <bool>}, ...], "signature": <signature>}
+    """
+    trailblazer_server.expect_request(
+        "/trailblazer/analyses",
+        json={
+            "analyses": [
+                {"id": analysis_id, "is_delivered": is_delivered} for analysis_id in analysis_ids
+            ],
+            "signature": signature,
+        },
+        method="PATCH",
+    ).respond_with_json({"key": "value"})
 
 
 def _quoted_string_or_null(value: str | Path | None) -> bytes:

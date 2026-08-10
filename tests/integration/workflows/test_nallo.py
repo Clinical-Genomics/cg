@@ -137,7 +137,7 @@ def test_start_available_nallo(
     # GIVEN a case
     # GIVEN a sample
     # GIVEN a config file with valid database URIs and directories
-    config_path: Path = test_run_paths.cg_config_file
+    cg_config_path: Path = test_run_paths.cg_config_file
 
     # GIVEN the necessary configuration files exist on disk
     test_root_dir: Path = test_run_paths.test_root_dir
@@ -200,7 +200,7 @@ def test_start_available_nallo(
         base,
         [
             "--config",
-            config_path.as_posix(),
+            cg_config_path.as_posix(),
             "workflow",
             "nallo",
             "start-available",
