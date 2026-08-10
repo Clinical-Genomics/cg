@@ -2046,26 +2046,20 @@ class ReadHandler(BaseHandler):
             .all()
         )
 
-# TODO: make a test, test two cases one sample
     def get_compressible_samples(self) -> list[Sample]:
         incompressible_case_samples_subquery: ScalarSelect = (
             select(CaseSample.sample_id)
             .join(Case, Case.id == CaseSample.case_id)
-            .where(or_(
-                Case.is_compressible == False,
-                Case.action.in_(CASE_ACTIVE_ACTIONS)
-            ))
+            .where(or_(Case.is_compressible.is_(False), Case.action.in_(CASE_ACTIVE_ACTIONS)))
         ).scalar_subquery()
 
         query: Select[tuple[Sample]] = (
-            select(Sample)
-            .where(Sample.id.not_in(incompressible_case_samples_subquery))
-            .distinct()
+            select(Sample).where(Sample.id.not_in(incompressible_case_samples_subquery)).distinct()
         )
 
         return list(self.session.scalars(query).all())
 
+
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:
     total: int = query.count()
     return query.limit(page_size).offset(page_size * (page - 1)).all(), total
-

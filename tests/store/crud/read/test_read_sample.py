@@ -7,6 +7,7 @@ import pytest
 from sqlalchemy.orm import Query
 
 from cg.constants import SexOptions, Workflow
+from cg.constants.constants import CaseActions
 from cg.constants.lims import LimsStatus
 from cg.constants.priority import PriorityTerms, TrailblazerPriority
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
@@ -1435,3 +1436,90 @@ def test_get_paginated_unhandled_samples_priority(store: Store, helpers: StoreHe
     # THEN only the newer sample should be returned
     assert unhandled_samples == [sample_normal_prio]
     assert total == 1
+
+
+def test_get_compressible_samples(store: Store, helpers: StoreHelpers):
+    # GIVEN compressible samples in cases that allow for compression
+    squeezable_sample: Sample = helpers.add_sample(store=store, internal_id="squeezable_sample")
+    squeezable_case: Case = helpers.add_case(
+        store=store,
+        internal_id="squeezable_case",
+        is_compressible=True,
+        action=CaseActions.HOLD,
+        name="squeezable_case",
+        customer_id="squeezable_customer",
+    )
+    helpers.add_relationship(store=store, case=squeezable_case, sample=squeezable_sample)
+
+    # GIVEN a sample in a case that is not compressible
+    compact_sample: Sample = helpers.add_sample(store=store, internal_id="compact_sample")
+    compact_case: Case = helpers.add_case(
+        store=store,
+        internal_id="compact_case",
+        is_compressible=False,
+        action=CaseActions.HOLD,
+        name="compact_case",
+        customer_id="compact_customer",
+    )
+    helpers.add_relationship(store=store, case=compact_case, sample=compact_sample)
+
+    # GIVEN a sample in a running case
+    running_sample: Sample = helpers.add_sample(store=store, internal_id="running_sample")
+    running_case: Case = helpers.add_case(
+        store=store,
+        internal_id="running_case",
+        is_compressible=True,
+        action=CaseActions.RUNNING,
+        name="running_case",
+        customer_id="running_customer",
+    )
+    helpers.add_relationship(store=store, case=running_case, sample=running_sample)
+
+    # WHEN getting the samples to be compressed
+    compressible_samples: list[Sample] = store.get_compressible_samples()
+
+    # THEN only the compressible sample is returned
+    assert compressible_samples == [squeezable_sample]
+    assert compact_sample not in compressible_samples
+
+
+def test_get_compressible_samples_one_sample_two_cases(store: Store, helpers: StoreHelpers):
+    # GIVEN one sample
+    sample: Sample = helpers.add_sample(store=store, internal_id="squeezable_sample")
+
+    # GIVEN to cases, one compressible the others not
+    squeezable_case: Case = helpers.add_case(
+        store=store,
+        internal_id="squeezable_case",
+        is_compressible=True,
+        action=CaseActions.HOLD,
+        name="squeezable_case",
+        customer_id="squeezable_customer",
+    )
+    compact_case: Case = helpers.add_case(
+        store=store,
+        internal_id="compact_case",
+        is_compressible=False,
+        action=CaseActions.HOLD,
+        name="compact_case",
+        customer_id="compact_customer",
+    )
+    running_case: Case = helpers.add_case(
+        store=store,
+        internal_id="running_case",
+        is_compressible=False,
+        action=CaseActions.RUNNING,
+        name="running_case",
+        customer_id="running_customer",
+    )
+
+    # GIVEN that the one sample is linked to all cases
+    helpers.add_relationship(store=store, case=squeezable_case, sample=sample)
+    helpers.add_relationship(store=store, case=compact_case, sample=sample)
+    helpers.add_relationship(store=store, case=running_case, sample=sample)
+
+    # WHEN getting compressible samples
+    compressible_samples: list[Sample] = store.get_compressible_samples()
+
+    # THEN no sample should have been returned
+    assert compressible_samples == []
