@@ -100,8 +100,8 @@ def expect_to_get_all_analyses_to_deliver(
                     "started_at": datetime.now().isoformat(),
                     "completed_at": datetime.now().isoformat(),
                     "status": AnalysisStatus.COMPLETED,
-                    "out_dir": "/tmp/out/case_1",
-                    "config_path": "/tmp/config/case_1.yaml",
+                    "out_dir": "/out/dir/case_1",
+                    "config_path": "/config/case_1.yaml",
                     "workflow": Workflow.RAREDISEASE,
                 },
                 {
@@ -111,8 +111,8 @@ def expect_to_get_all_analyses_to_deliver(
                     "started_at": datetime.now().isoformat(),
                     "completed_at": datetime.now().isoformat(),
                     "status": AnalysisStatus.COMPLETED,
-                    "out_dir": "/tmp/out/case_2",
-                    "config_path": "/tmp/config/case_2.yaml",
+                    "out_dir": "/out/dir/case_2",
+                    "config_path": "/config/case_2.yaml",
                     "workflow": Workflow.RAREDISEASE,
                 },
             ]
@@ -148,8 +148,8 @@ def expect_to_get_delivered_analyses_for_order(
                     "started_at": datetime.now().isoformat(),
                     "completed_at": datetime.now().isoformat(),
                     "status": AnalysisStatus.COMPLETED,
-                    "out_dir": f"/tmp/out/{case_id}",
-                    "config_path": f"/tmp/config/{case_id}.yaml",
+                    "out_dir": f"/out/dir/{case_id}",
+                    "config_path": f"/config/{case_id}.yaml",
                     "workflow": Workflow.RAREDISEASE,
                 }
                 for index, case_id in enumerate(case_ids)
