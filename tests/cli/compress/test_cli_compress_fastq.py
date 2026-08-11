@@ -2,16 +2,20 @@
 
 import datetime as dt
 import logging
-from unittest.mock import Mock, create_autospec
+from unittest.mock import Mock, call, create_autospec
 
 from click.testing import CliRunner
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress.fastq import fastq_cmd, get_cases_to_process
-from cg.cli.compress.helpers import get_samples_available_for_compression
+from cg.cli.compress.helpers import (
+    compress_fastq_to_spring_for_samples,
+    get_samples_available_for_compression,
+)
 from cg.constants import Workflow
+from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 from tests.typed_mock import TypedMock, create_typed_mock
@@ -288,3 +292,46 @@ def test_get_samples_available_for_compression_input_case_missing_samples():
 
     # THEN the correct calls was made
     store.as_mock.get_compressible_samples_by_internal_ids.assert_not_called()
+
+
+def test_compress_fastq_to_spring_for_samples():
+    # GIVEN compress api
+    compress_api: TypedMock[CompressAPI] = create_typed_mock(CompressAPI)
+
+    # GIVEN a list of samples
+    sample1: Sample = create_autospec(Sample, internal_id="sample1")
+    sample2: Sample = create_autospec(Sample, internal_id="sample2")
+    samples: list[Sample] = [sample1, sample2]
+
+    # WHEN compressing samples
+    compress_fastq_to_spring_for_samples(
+        compress_api=compress_api.as_type,
+        samples=samples,
+        sample_limit=None,
+    )
+
+    # THEN correct method calls were made
+    assert compress_api.as_mock.compress_fastq.call_args_list == [
+        call(sample_id=sample1.internal_id),
+        call(sample_id=sample2.internal_id),
+    ]
+
+
+def test_compress_fastq_to_spring_for_samples_with_limit():
+    # GIVEN compress api
+    compress_api: TypedMock[CompressAPI] = create_typed_mock(CompressAPI)
+
+    # GIVEN a list of samples
+    sample1: Sample = create_autospec(Sample, internal_id="sample1")
+    sample2: Sample = create_autospec(Sample, internal_id="sample2")
+    samples: list[Sample] = [sample1, sample2]
+
+    # WHEN compressing samples with a sample limit of one
+    compress_fastq_to_spring_for_samples(
+        compress_api=compress_api.as_type,
+        samples=samples,
+        sample_limit=1,
+    )
+
+    # THEN only one call was made
+    compress_api.as_mock.compress_fastq.assert_called_once_with(sample_id=sample1.internal_id)

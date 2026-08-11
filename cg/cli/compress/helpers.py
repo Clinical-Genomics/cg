@@ -19,7 +19,6 @@ from cg.utils.date import get_date_days_ago
 LOG = logging.getLogger(__name__)
 
 
-# TODO: Remove function
 def get_cases_to_process(
     days_back: int, store: Store, case_id: str | None = None
 ) -> list[Case] | None:
@@ -135,6 +134,20 @@ def compress_sample_fastqs_in_cases(
     LOG.info(
         f"{individuals_conversion_count} individuals in {case_conversion_count} (completed) cases where compressed"
     )
+
+
+def compress_fastq_to_spring_for_samples(
+    compress_api: CompressAPI,
+    samples: list[Sample],
+    sample_limit: int | None,
+) -> None:
+    """Compress the fastq files to spring for a list of samples."""
+    if sample_limit is not None:
+        samples = samples[:sample_limit]
+    for sample in samples:
+        is_sample_submitted: bool = compress_api.compress_fastq(sample_id=sample.internal_id)
+        if not is_sample_submitted:
+            LOG.debug(f"Sample {sample.internal_id} not submitted for compression")
 
 
 def correct_spring_paths(
