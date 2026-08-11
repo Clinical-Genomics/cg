@@ -375,6 +375,7 @@ class StoreHelpers:
         uploading: bool = False,
         config_path: str = None,
         housekeeper_version_id: int | None = None,
+        trailblazer_id: int | None = None,
     ) -> Analysis:
         """Utility function to add an analysis for tests."""
 
@@ -404,6 +405,8 @@ class StoreHelpers:
             analysis.workflow = str(workflow)
         if housekeeper_version_id:
             analysis.housekeeper_version_id = housekeeper_version_id
+        if trailblazer_id:
+            analysis.trailblazer_id = trailblazer_id
 
         analysis.limitations = "A limitation"
         analysis.case = case
