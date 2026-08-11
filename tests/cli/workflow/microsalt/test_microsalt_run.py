@@ -64,6 +64,7 @@ def test_run_tracks_case(cli_runner: CliRunner, cg_context: CGConfig, mocker: Mo
         config_file=expected_config_file.as_posix(),
         environment=microsalt_config.conda_env,
         fastq_directory=expected_fastq_dir.as_posix(),
+        pipeline_config_path=microsalt_config.config,
     )
     mocker.patch.object(SubprocessSubmitter, "submit", return_value=expected_case_config)
     track_mock = mocker.patch.object(Tracker, "track")
