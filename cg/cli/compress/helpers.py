@@ -102,40 +102,6 @@ def get_true_dir(dir_path: Path) -> Path | None:
     return None
 
 
-def compress_sample_fastqs_in_cases(
-    compress_api: CompressAPI,
-    cases: list[Case],
-    dry_run: bool,
-    number_of_conversions: int,
-) -> None:
-    """Compress sample FASTQs for samples in cases."""
-    update_compress_api(compress_api=compress_api, dry_run=dry_run)
-    case_conversion_count: int = 0
-    individuals_conversion_count: int = 0
-    for case in cases:
-        case_converted = True
-        if case_conversion_count >= number_of_conversions:
-            break
-
-        LOG.debug(f"Searching for FASTQ files in case {case.internal_id}")
-        if not case.links:
-            continue
-        for case_link in case.links:
-            case_converted: bool = compress_api.compress_fastq(
-                sample_id=case_link.sample.internal_id
-            )
-            if not case_converted:
-                LOG.debug(f"skipping individual {case_link.sample.internal_id}")
-                continue
-            individuals_conversion_count += 1
-        if case_converted:
-            case_conversion_count += 1
-            LOG.info(f"Considering case {case.internal_id} converted")
-    LOG.info(
-        f"{individuals_conversion_count} individuals in {case_conversion_count} (completed) cases where compressed"
-    )
-
-
 def compress_fastq_to_spring_for_samples(
     compress_api: CompressAPI,
     samples: list[Sample],

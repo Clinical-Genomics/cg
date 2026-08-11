@@ -4,9 +4,11 @@ import datetime as dt
 import logging
 from unittest.mock import Mock, call, create_autospec
 
-from click.testing import CliRunner
+from click.testing import CliRunner, Result
+from pytest_mock import MockFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.cli.compress import fastq as fastq_module
 from cg.cli.compress.fastq import fastq_cmd, get_cases_to_process
 from cg.cli.compress.helpers import (
     compress_fastq_to_spring_for_samples,
@@ -97,121 +99,174 @@ def test_incompressible_cases_are_not_processable(
     assert incompressible_case not in processable_cases
 
 
-def test_compress_fastq_cli_no_family(compress_context: CGConfig, cli_runner: CliRunner, caplog):
-    """Test to run the compress command with a database without samples,"""
-    caplog.set_level(logging.DEBUG)
-    # GIVEN a context without families
+def test_compress_fastq_cli(cli_runner: CliRunner, cg_context: CGConfig, mocker: MockFixture):
+    # GIVEN a store, housekeeper api and compress api on the context
+    store: Store = create_autospec(Store)
+    housekeeper: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    compress_api: CompressAPI = create_autospec(CompressAPI)
+    cg_context.status_db_ = store
+    cg_context.housekeeper_api_ = housekeeper
+    cg_context.meta_apis["compress_api"] = compress_api
 
-    # WHEN running the compress command
-    res = cli_runner.invoke(fastq_cmd, [], obj=compress_context)
+    # GIVEN samples available for compression
+    sample1: Sample = create_autospec(Sample, internal_id="sample1")
+    sample2: Sample = create_autospec(Sample, internal_id="sample2")
+    samples: list[Sample] = [sample1, sample2]
+    get_samples_mock = mocker.patch.object(
+        fastq_module, "get_samples_available_for_compression", return_value=samples
+    )
+    compress_samples_mock = mocker.patch.object(
+        fastq_module, "compress_fastq_to_spring_for_samples"
+    )
 
-    # THEN assert the program exits since no cases where found
-    assert res.exit_code == 0
+    # WHEN running the compress fastq command
+    result: Result = cli_runner.invoke(fastq_cmd, [], obj=cg_context)
 
-    # THEN assert it was communicated that no families where found
-    assert "No cases to compress" in caplog.text
+    # THEN the command exits successfully
+    assert result.exit_code == 0
+
+    # THEN samples were fetched using the context's store and housekeeper api
+    get_samples_mock.assert_called_once_with(store=store, housekeeper=housekeeper, case_id=None)
+
+    # THEN the samples were sent for compression using the default limit
+    compress_samples_mock.assert_called_once_with(
+        compress_api=compress_api, samples=samples, sample_limit=5
+    )
 
 
-def test_compress_fastq_cli_case_id_no_family(
-    case_id_does_not_exist: str, compress_context: CGConfig, cli_runner: CliRunner, caplog
+def test_compress_fastq_cli_no_samples(
+    cli_runner: CliRunner, cg_context: CGConfig, mocker: MockFixture
 ):
-    """Test to run the compress command when no families are found."""
-    caplog.set_level(logging.DEBUG)
-    # GIVEN a context without families
+    # GIVEN a store, housekeeper api and compress api on the context
+    store: Store = create_autospec(Store)
+    housekeeper: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    compress_api: CompressAPI = create_autospec(CompressAPI)
+    cg_context.status_db_ = store
+    cg_context.housekeeper_api_ = housekeeper
+    cg_context.meta_apis["compress_api"] = compress_api
 
-    # WHEN running the compress command
-    res = cli_runner.invoke(fastq_cmd, ["--case-id", case_id_does_not_exist], obj=compress_context)
+    # GIVEN no samples available for compression
+    get_samples_mock = mocker.patch.object(
+        fastq_module, "get_samples_available_for_compression", return_value=[]
+    )
+    compress_samples_mock = mocker.patch.object(
+        fastq_module, "compress_fastq_to_spring_for_samples"
+    )
 
-    # THEN assert the program exits since no cases where found
-    assert res.exit_code == 0
+    # WHEN running the compress fastq command
+    result: Result = cli_runner.invoke(fastq_cmd, [], obj=cg_context)
 
-    # THEN assert it was communicated that no families where found
-    assert f"Could not find case {case_id_does_not_exist}" in caplog.text
+    # THEN the command exits successfully
+    assert result.exit_code == 0
+
+    # THEN samples were fetched using the context's store and housekeeper api
+    get_samples_mock.assert_called_once_with(store=store, housekeeper=housekeeper, case_id=None)
+
+    # THEN no samples were sent for compression
+    compress_samples_mock.assert_not_called()
 
 
 def test_compress_fastq_cli_case_id(
-    case_id: str,
-    caplog,
-    cli_runner: CliRunner,
-    helpers: StoreHelpers,
-    populated_compress_context: CGConfig,
+    cli_runner: CliRunner, cg_context: CGConfig, mocker: MockFixture
 ):
-    """Test to run the compress command with a specified case id."""
-    caplog.set_level(logging.DEBUG)
-    status_db: Store = populated_compress_context.status_db
+    # GIVEN a store, housekeeper api and compress api on the context
+    store: Store = create_autospec(Store)
+    housekeeper: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    compress_api: CompressAPI = create_autospec(CompressAPI)
+    cg_context.status_db_ = store
+    cg_context.housekeeper_api_ = housekeeper
+    cg_context.meta_apis["compress_api"] = compress_api
 
-    # GIVEN a context with a case that can be compressed
-
-    valid_compressable_case: Case = helpers.add_case(
-        store=status_db,
-        name=case_id,
-        internal_id=case_id,
-        data_analysis=Workflow.MIP_DNA,
-        action=None,
+    # GIVEN samples available for compression
+    sample1: Sample = create_autospec(Sample, internal_id="sample1")
+    samples: list[Sample] = [sample1]
+    get_samples_mock = mocker.patch.object(
+        fastq_module, "get_samples_available_for_compression", return_value=samples
     )
-    valid_compressable_case.created_at = dt.datetime.now() - dt.timedelta(days=1000)
-    sample1 = helpers.add_sample(store=status_db, internal_id="ACCR9000")
-    sample2 = helpers.add_sample(store=status_db, internal_id="ACCR9001")
-    helpers.add_relationship(
-        store=status_db,
-        sample=sample1,
-        case=valid_compressable_case,
+    compress_samples_mock = mocker.patch.object(
+        fastq_module, "compress_fastq_to_spring_for_samples"
     )
-    helpers.add_relationship(
-        store=status_db,
-        sample=sample2,
-        case=valid_compressable_case,
+
+    # WHEN running the compress fastq command with a case id
+    result: Result = cli_runner.invoke(fastq_cmd, ["--case-id", "case_id"], obj=cg_context)
+
+    # THEN the command exits successfully
+    assert result.exit_code == 0
+
+    # THEN samples were fetched using the given case id
+    get_samples_mock.assert_called_once_with(
+        store=store, housekeeper=housekeeper, case_id="case_id"
     )
-    status_db.session.commit()
 
-    # WHEN running the compress command
-    res = cli_runner.invoke(fastq_cmd, ["--case-id", case_id], obj=populated_compress_context)
-
-    # THEN assert the program exits since no cases where found
-    assert res.exit_code == 0
-
-    # THEN assert it was communicated that no families where found
-    assert "individuals in 1 (completed) cases where compressed" in caplog.text
+    # THEN the samples were sent for compression using the default limit
+    compress_samples_mock.assert_called_once_with(
+        compress_api=compress_api, samples=samples, sample_limit=5
+    )
 
 
-def test_compress_fastq_cli_multiple_family(
-    caplog, cli_runner: CliRunner, populated_multiple_compress_context: CGConfig
+def test_compress_fastq_cli_case_id_no_samples(
+    cli_runner: CliRunner, cg_context: CGConfig, mocker: MockFixture
 ):
-    """Test to run the compress command with multiple families."""
-    caplog.set_level(logging.DEBUG)
-    # GIVEN a database with multiple families
-    nr_cases = populated_multiple_compress_context.status_db._get_query(table=Case).count()
-    assert nr_cases > 1
+    # GIVEN a store, housekeeper api and compress api on the context
+    store: Store = create_autospec(Store)
+    housekeeper: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    compress_api: CompressAPI = create_autospec(CompressAPI)
+    cg_context.status_db_ = store
+    cg_context.housekeeper_api_ = housekeeper
+    cg_context.meta_apis["compress_api"] = compress_api
 
-    # WHEN running the compress command
-    res = cli_runner.invoke(
-        fastq_cmd, ["--number-of-conversions", nr_cases], obj=populated_multiple_compress_context
+    # GIVEN no samples available for compression for the given case id
+    get_samples_mock = mocker.patch.object(
+        fastq_module, "get_samples_available_for_compression", return_value=[]
+    )
+    compress_samples_mock = mocker.patch.object(
+        fastq_module, "compress_fastq_to_spring_for_samples"
     )
 
-    # THEN assert the program exits since no cases where found
-    assert res.exit_code == 0
-    # THEN assert it was communicated that no families where found
-    assert f"individuals in {nr_cases} (completed) cases where compressed" in caplog.text
+    # WHEN running the compress fastq command with a case id
+    result: Result = cli_runner.invoke(fastq_cmd, ["--case-id", "case_id"], obj=cg_context)
+
+    # THEN the command exits successfully
+    assert result.exit_code == 0
+
+    # THEN samples were fetched using the given case id
+    get_samples_mock.assert_called_once_with(
+        store=store, housekeeper=housekeeper, case_id="case_id"
+    )
+
+    # THEN no samples were sent for compression
+    compress_samples_mock.assert_not_called()
 
 
-def test_compress_fastq_cli_multiple_set_limit(
-    caplog, cli_runner: CliRunner, populated_multiple_compress_context: CGConfig
+def test_compress_fastq_cli_sample_limit(
+    cli_runner: CliRunner, cg_context: CGConfig, mocker: MockFixture
 ):
-    """Test to run the compress command with multiple families and use a limit."""
-    compress_context = populated_multiple_compress_context
-    caplog.set_level(logging.DEBUG)
-    # GIVEN a context with more families than the limit
-    nr_cases = compress_context.status_db._get_query(table=Case).count()
-    limit = 5
-    assert nr_cases > limit
+    # GIVEN a store, housekeeper api and compress api on the context
+    store: Store = create_autospec(Store)
+    housekeeper: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    compress_api: CompressAPI = create_autospec(CompressAPI)
+    cg_context.status_db_ = store
+    cg_context.housekeeper_api_ = housekeeper
+    cg_context.meta_apis["compress_api"] = compress_api
 
-    # WHEN running the compress command
-    res = cli_runner.invoke(fastq_cmd, ["--number-of-conversions", limit], obj=compress_context)
+    # GIVEN more samples available for compression than the given limit
+    sample1: Sample = create_autospec(Sample, internal_id="sample1")
+    sample2: Sample = create_autospec(Sample, internal_id="sample2")
+    sample3: Sample = create_autospec(Sample, internal_id="sample3")
+    samples: list[Sample] = [sample1, sample2, sample3]
+    mocker.patch.object(fastq_module, "get_samples_available_for_compression", return_value=samples)
 
-    # THEN assert the program exits since no cases where found
-    assert res.exit_code == 0
-    # THEN assert it was communicated no more than the limited number of cases was compressed
-    assert f"individuals in {limit} (completed) cases where compressed" in caplog.text
+    # WHEN running the compress fastq command with a sample limit of two
+    result: Result = cli_runner.invoke(fastq_cmd, ["--number-of-samples", "2"], obj=cg_context)
+
+    # THEN the command exits successfully
+    assert result.exit_code == 0
+
+    # THEN only the first two samples, within the limit, were sent for compression
+    assert compress_api.compress_fastq.call_args_list == [
+        call(sample_id=sample1.internal_id),
+        call(sample_id=sample2.internal_id),
+    ]
 
 
 def test_get_samples_available_for_compression():

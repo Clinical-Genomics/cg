@@ -7,9 +7,10 @@ import rich_click as click
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress.helpers import (
-    compress_sample_fastqs_in_cases,
+    compress_fastq_to_spring_for_samples,
     correct_spring_paths,
     get_cases_to_process,
+    get_samples_available_for_compression,
     update_compress_api,
 )
 from cg.constants.cli_options import DRY_RUN
@@ -31,32 +32,30 @@ LOG = logging.getLogger(__name__)
     show_default=True,
     help="Threshold for how long ago was the case created",
 )
-@click.option("-n", "--number-of-conversions", default=5, type=int, show_default=True)
+@click.option("-n", "--number-of-samples", default=5, type=int, show_default=True)
 @DRY_RUN
 @click.pass_obj
 def fastq_cmd(
     context: CGConfig,
     case_id: str | None,
-    days_back: int,
-    dry_run: bool,
-    number_of_conversions: int,
+    days_back: int,  # TODO add day limit
+    dry_run: bool,  # TODO introduce dry_run for testing
+    number_of_samples: int,
 ):
     """Compress old FASTQ files into SPRING."""
     LOG.info("Running compress FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
-    cases: list[Case] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
-    if not cases:
-        LOG.info("No cases to compress")
-        return None
-
-    # TODO: if switching to sample centered approach then this needs to be changed
-    compress_sample_fastqs_in_cases(
-        compress_api=compress_api,
-        cases=cases,
-        dry_run=dry_run,
-        number_of_conversions=number_of_conversions,
+    housekeeper: HousekeeperAPI = context.housekeeper_api
+    samples: list[Sample] | None = get_samples_available_for_compression(
+        store=store, housekeeper=housekeeper, case_id=case_id
     )
+    if samples:
+        compress_fastq_to_spring_for_samples(
+            compress_api=compress_api, samples=samples, sample_limit=number_of_samples
+        )
+    else:
+        LOG.info("No samples available for compression")
 
 
 @click.command("fastq")
