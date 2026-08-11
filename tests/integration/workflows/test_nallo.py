@@ -14,13 +14,15 @@ from cg.constants.tb import AnalysisType
 from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
 from cg.utils import commands
+from tests.integration.trailblazer_utils import (
+    expect_to_add_pending_analysis,
+    expect_to_get_latest_analysis_with_empty_response,
+)
 from tests.integration.utils import (
     IntegrationTestPaths,
     copy_integration_test_file,
     create_empty_file,
     create_integration_test_sample_bam_files,
-    expect_to_add_pending_analysis_to_trailblazer,
-    expect_to_get_latest_analysis_with_empty_response_from_trailblazer,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -171,12 +173,12 @@ def test_start_available_nallo(
     subprocess_mock.run = Mock(side_effect=mock_run_commands)
 
     # GIVEN the Trailblazer API returns no ongoing analysis for the case
-    expect_to_get_latest_analysis_with_empty_response_from_trailblazer(
+    expect_to_get_latest_analysis_with_empty_response(
         trailblazer_server=httpserver, case_id=nallo_case.internal_id
     )
 
     # GIVEN a new pending analysis can be added to the Trailblazer API
-    expect_to_add_pending_analysis_to_trailblazer(
+    expect_to_add_pending_analysis(
         analysis_type=AnalysisType.WGS,
         out_dir=Path(test_root_dir, "nallo_root_path", nallo_case.internal_id),
         case=nallo_case,

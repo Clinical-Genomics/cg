@@ -18,12 +18,12 @@ from cg.services.analysis_starter.submitters.subprocess import submitter
 from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
 from tests.integration.conftest import IntegrationTestPaths
+from tests.integration.trailblazer_utils import expect_to_add_pending_analysis
 from tests.integration.utils import (
     copy_integration_test_file,
     create_empty_file,
     create_integration_test_sample_fastq_files,
     expect_lims_sample_request,
-    expect_to_add_pending_analysis_to_trailblazer,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -182,7 +182,7 @@ def test_start_available_tgs_tumour_only(
 
     # GIVEN a new pending analysis can be added to the Trailblazer API
     case_path = Path(test_root_dir, "balsamic_root_path", case_id)
-    expect_to_add_pending_analysis_to_trailblazer(
+    expect_to_add_pending_analysis(
         trailblazer_server=httpserver,
         case=case_tgs_tumour_only,
         ticket_id=ticket_id,
@@ -335,7 +335,7 @@ def test_start_available_wgs_paired(
 
     # GIVEN a new pending analysis can be added to the Trailblazer API
     case_path = Path(test_root_dir, "balsamic_root_path", case_id)
-    expect_to_add_pending_analysis_to_trailblazer(
+    expect_to_add_pending_analysis(
         trailblazer_server=httpserver,
         case=case_wgs_paired,
         ticket_id=ticket_id,
