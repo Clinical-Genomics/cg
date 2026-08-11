@@ -575,8 +575,7 @@ def test_get_bundle_names_with_fastq_files(
     )
 
     # WHEN getting bundle names with fastq files
-    bundle_names: set[str] = populated_housekeeper_api.get_bundle_names_with_fastq_files()
+    bundle_names: list[str] = populated_housekeeper_api.get_bundle_names_with_fastq_files()
 
     # THEN only the bundles with fastq should be in the list
-    assert sample_id in bundle_names and father_sample_id in bundle_names
-    assert compressed_sample not in bundle_names
+    assert bundle_names == [sample_id, father_sample_id]
