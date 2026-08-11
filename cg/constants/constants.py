@@ -138,7 +138,6 @@ class Workflow(StrEnum):
 
 
 DNA_WORKFLOWS_WITH_RNA_UPLOAD: list[Workflow] = [
-    # TODO 4
     Workflow.RAREDISEASE,
     Workflow.NALLO,
 ]

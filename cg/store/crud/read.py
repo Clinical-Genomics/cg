@@ -1758,7 +1758,6 @@ class ReadHandler(BaseHandler):
         Raises:
             CgDataError if no related DNA cases are found
         """
-        # TODO 1
         related_dna_cases: list[Case] = []
         collaborators: set[Customer] = rna_case.customer.collaborators
         for rna_sample in rna_case.samples:
@@ -1778,7 +1777,6 @@ class ReadHandler(BaseHandler):
     def _get_related_uploaded_cases_for_rna_sample(
         self, rna_sample: Sample, collaborators: set[Customer]
     ) -> list[Case]:
-        # TODO 2
         if not rna_sample.subject_id:
             raise CgDataError(
                 f"Failed to link RNA sample {rna_sample.internal_id} to DNA samples - subject_id field is empty."
@@ -1799,7 +1797,6 @@ class ReadHandler(BaseHandler):
     ) -> list[Case]:
         """Filters the provided sample_query on the customer_ids, DNA workflows supporting
         Scout RNA uploads and on cases having an uploaded analysis. Returns the matching cases."""
-        # TODO 3
         dna_samples_cases_analysis_query: Query = (
             sample_query.join(Sample.links).join(CaseSample.case).join(Analysis)
         )
