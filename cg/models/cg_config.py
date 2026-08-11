@@ -78,8 +78,10 @@ class SlurmConfig(BaseModel):
     mail_user: EmailStr
     memory: int | None = None
     number_tasks: int | None = None
+    cpus_per_task: int | None = None
     conda_env: str | None = None
     qos: SlurmQos = SlurmQos.LOW
+    partition: str | None = None
 
 
 class Encryption(BaseModel):
@@ -148,6 +150,16 @@ class ChanjoConfig(BaseModel):
     config_path: str
 
 
+class NatsConfig(BaseModel):
+    nats_binary_path: Path
+    server: str
+    stream: str
+    ca_cert_path: Path
+    client_cert_path: Path
+    client_key_path: Path
+    token_path: Path
+
+
 class HermesConfig(CommonAppConfig):
     container_path: str
 
@@ -174,6 +186,9 @@ class LimsConfig(BaseModel):
 class CrunchyConfig(BaseModel):
     conda_binary: str | None = None
     cram_reference: str
+    tmp_dir_base: str
+    fallback_memory: int
+    fallback_minutes: int
     slurm: SlurmConfig
 
 
@@ -220,6 +235,7 @@ class BalsamicConfig(CommonAppConfig):
     swegen_path: Path
     swegen_snv: Path
     swegen_sv: Path
+    workflow_profile: Path
 
 
 class MutantConfig(BaseModel):
@@ -250,6 +266,9 @@ class NalloConfig(CommonAppConfig):
     platform: str
     pre_run_script: str = ""
     profile: str
+    rank_model_threshold: int
+    rank_model_snv: str
+    rank_model_sv: str
     reference: str
     repository: str
     resources: str
@@ -290,6 +309,8 @@ class RarediseaseConfig(CommonAppConfig):
     platform: str
     pre_run_script: str = ""
     profile: str
+    rank_model_snv: str
+    rank_model_sv: str
     reference: str
     references_directory: Path
     repository: str
@@ -389,6 +410,11 @@ class DataDeliveryConfig(BaseModel):
 class EmailBaseSettings(BaseModel):
     sender_email: EmailStr
     smtp_server: str
+
+
+class FreshdeskConfig(BaseModel):
+    api_key: str
+    base_url: str
 
 
 class FOHMConfig(BaseModel):
@@ -495,7 +521,9 @@ class CGConfig(BaseModel):
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Encryption | None = None
+    nats: NatsConfig
     external: ExternalConfig = None
+    freshdesk: FreshdeskConfig
     gens: GENSConfig | None = None
     gens_api_: GensAPI = None
     hermes: HermesConfig = None
@@ -510,6 +538,7 @@ class CGConfig(BaseModel):
     loqusdb_somatic: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC.value)
     loqusdb_tumor: CommonAppConfig = Field(None, alias=LoqusdbInstance.TUMOR.value)
     loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
+    loqusdb_wes_38: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES38.value)
     loqusdb_wgs: CommonAppConfig = Field(None, alias=LoqusdbInstance.WGS38.value)
     loqusdb_somatic_lymphoid: CommonAppConfig = Field(
         None, alias=LoqusdbInstance.SOMATIC_LYMPHOID.value
@@ -828,6 +857,7 @@ class CGConfig(BaseModel):
             rsync_config = RsyncDeliveryConfig(**self.data_delivery.dict())
             service = DeliveryRsyncService(
                 delivery_path=self.delivery_path,
+                nats_config=self.nats,
                 rsync_config=rsync_config,
                 status_db=self.status_db,
             )

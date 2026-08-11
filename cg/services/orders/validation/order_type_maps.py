@@ -1,3 +1,5 @@
+from typing import Callable
+
 from pydantic import BaseModel, ConfigDict
 
 from cg.models.orders.constants import OrderType
@@ -76,10 +78,10 @@ from cg.services.orders.validation.order_types.tomte.validation_rules import (
 
 
 class RuleSet(BaseModel):
-    case_rules: list[callable] = []
-    case_sample_rules: list[callable] = []
-    order_rules: list[callable] = ORDER_RULES
-    sample_rules: list[callable] = []
+    case_rules: list[Callable] = []
+    case_sample_rules: list[Callable] = []
+    order_rules: list[Callable] = ORDER_RULES
+    sample_rules: list[Callable] = []
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 

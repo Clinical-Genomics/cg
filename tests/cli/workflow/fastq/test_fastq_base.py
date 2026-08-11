@@ -12,6 +12,7 @@ def test_store_raw_data_analysis(another_case_id: str, cli_runner, raw_data_fast
     trailblazer_api: TrailblazerAPI = create_autospec(TrailblazerAPI)
     trailblazer_api.add_pending_analysis = Mock(
         return_value=TrailblazerAnalysis(
+            case_id=another_case_id,
             id=67,
             logged_at="1992-12-13",  # type: ignore pydantic model
             started_at="1992-12-13",  # type: ignore pydantic model

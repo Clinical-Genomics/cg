@@ -44,9 +44,8 @@ class StoreCaseOrderService(StoreOrderService):
 
     def store_order(self, order: OrderWithCases) -> dict:
         """Submit a batch of samples for sequencing and analysis."""
-        project_data = lims_map = None
         if new_samples := [sample for _, _, sample in order.enumerated_new_samples]:
-            project_data, lims_map = self.lims.process_lims(
+            project_data, lims_samples = self.lims.process_lims(
                 samples=new_samples,
                 customer=order.customer,
                 ticket=order._generated_ticket_id,
@@ -55,8 +54,10 @@ class StoreCaseOrderService(StoreOrderService):
                 delivery_type=order.delivery_type,
                 skip_reception_control=order.skip_reception_control,
             )
-        if lims_map:
-            self._fill_in_sample_ids(samples=new_samples, lims_map=lims_map)
+            self._fill_in_sample_ids(samples=new_samples, lims_samples=lims_samples)
+            self._queue_samples_in_workflow(lims_samples)
+        else:
+            project_data = None
 
         new_cases: list[DbCase] = self.store_order_data_in_status_db(order)
         return {"project": project_data, "records": new_cases}
@@ -145,6 +146,7 @@ class StoreCaseOrderService(StoreOrderService):
             application_version=application_version,
             internal_id=sample._generated_lims_id,
             lims_status=lims_status,
+            no_invoice=application_version.application.is_external,
             order=order_name,
             ordered=ordered,
             original_ticket=ticket,

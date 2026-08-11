@@ -1,5 +1,7 @@
-from cg.constants.constants import ControlOptions
-from cg.constants.priority import Priority
+import pytest
+
+from cg.constants.constants import ControlOptions, DataDelivery
+from cg.constants.priority import Priority, PriorityTerms
 from cg.store.models import (
     Application,
     ApplicationVersion,
@@ -38,6 +40,40 @@ def test_case_original_order_no_orders():
 
     # THEN the original order should be None
     assert original_order is None
+
+
+@pytest.mark.parametrize(
+    "data_delivery, is_to_be_uploaded",
+    [
+        (DataDelivery.ANALYSIS_FILES, True),
+        (DataDelivery.ANALYSIS_SCOUT, True),
+        (DataDelivery.BAM, True),
+        (DataDelivery.FASTQ, True),
+        (DataDelivery.FASTQ_SCOUT, True),
+        (DataDelivery.FASTQ_QC, True),
+        (DataDelivery.FASTQ_ANALYSIS, True),
+        (DataDelivery.FASTQ_QC_ANALYSIS, True),
+        (DataDelivery.FASTQ_ANALYSIS_SCOUT, True),
+        (DataDelivery.NIPT_VIEWER, False),
+        (DataDelivery.NO_DELIVERY, False),
+        (DataDelivery.RAW_DATA_ANALYSIS, True),
+        (DataDelivery.RAW_DATA_ANALYSIS_SCOUT, True),
+        (DataDelivery.RAW_DATA_SCOUT, True),
+        (DataDelivery.SCOUT, False),
+        (DataDelivery.STATINA, False),
+    ],
+)
+def test_case_is_to_be_uploaded_to_customer_inbox(
+    data_delivery: DataDelivery, is_to_be_uploaded: bool
+):
+    # GIVEN a case with a data delivery
+    case = Case(data_delivery=data_delivery)
+
+    # WHEN checking if files are to be uploaded to caesar
+    should_be_uploaded: bool = case.is_to_be_uploaded_to_customer_inbox
+
+    # THEN the value should be as expected
+    assert should_be_uploaded == is_to_be_uploaded
 
 
 def test_microbial_sample_to_dict(microbial_store: Store, helpers):
@@ -352,6 +388,27 @@ def test_sample_to_dict_illumina_success():
     assert dict_sample["hifi_yield"] is None
     assert dict_sample["reads"] == 13
     assert dict_sample["uses_reads"]
+
+
+@pytest.mark.parametrize(
+    "priority_num, expected_priority_term",
+    [
+        (Priority.research, PriorityTerms.RESEARCH),
+        (Priority.standard, PriorityTerms.STANDARD),
+        (Priority.priority, PriorityTerms.PRIORITY),
+        (Priority.express, PriorityTerms.EXPRESS),
+        (Priority.clinical_trials, PriorityTerms.CLINICAL_TRIALS),
+    ],
+)
+def test_sample_priority_term(priority_num: Priority, expected_priority_term: PriorityTerms):
+    # GIVEN a sample with a priority
+    sample = Sample(priority=priority_num)
+
+    # WHEN getting the priority_term
+    sample_priority_term = sample.priority_human
+
+    # THEN the right priority term is given
+    assert sample_priority_term == expected_priority_term
 
 
 def test_application_expected_hifi_yield_success():

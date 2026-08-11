@@ -7,7 +7,6 @@ from cg.services.orders.validation.models.utils import set_null_to_false
 
 
 class Order(BaseModel):
-    comment: str | None = None
     customer: str = Field(min_length=1)
     delivery_type: DataDelivery
     order_type: OrderType = Field(alias="project_type")

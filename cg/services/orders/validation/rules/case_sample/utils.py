@@ -28,6 +28,7 @@ from cg.services.orders.validation.models.sample_aliases import (
     SampleInCase,
     SampleWithRelatives,
 )
+from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
 from cg.services.orders.validation.rules.case.utils import is_sample_in_case
 from cg.services.orders.validation.rules.utils import (
     get_concentration_interval,
@@ -51,13 +52,6 @@ def is_well_position_missing(sample: SampleWithRelatives) -> bool:
 
 def is_container_name_missing(sample: SampleWithRelatives) -> bool:
     return sample.container == ContainerEnum.plate and not sample.container_name
-
-
-def get_invalid_panels(panels: list[str], store: Store) -> list[str]:
-    invalid_panels: list[str] = [
-        panel for panel in panels if not store.does_gene_panel_exist(panel)
-    ]
-    return invalid_panels
 
 
 def is_volume_invalid(sample: Sample) -> bool:
@@ -322,3 +316,11 @@ def is_sample_compatible_with_order_type(
         return order_type in db_sample.application_version.application.order_types
     else:
         return True
+
+
+def get_subject_id(sample: TomteSample | ExistingSample, store: Store) -> str | None:
+    if isinstance(sample, ExistingSample):
+        db_sample: DbSample = store.get_sample_by_internal_id_strict(sample.internal_id)
+        return db_sample.subject_id
+    else:
+        return sample.subject_id

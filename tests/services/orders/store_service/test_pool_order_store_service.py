@@ -84,6 +84,8 @@ def test_store_pool_order_data_in_status_db(
     for sample in new_samples:
         assert sample.no_invoice
         assert sample.links[0].should_deliver_sample
+        # THEN the samples should be linked to their pool
+        assert sample.pool
 
     # THEN the cases should have the correct data analysis
     for case in new_cases:
@@ -93,8 +95,10 @@ def test_store_pool_order_data_in_status_db(
 @pytest.mark.parametrize(
     "is_external, expected_lims_status", [(True, LimsStatus.DONE), (False, LimsStatus.PENDING)]
 )
-def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_status: LimsStatus):
-    # GIVEN a store containing an external application
+def test_create_db_sample_with_lims_status_and_invoice(
+    is_external: bool, expected_lims_status: LimsStatus
+):
+    # GIVEN a store containing an application
     application: Application = create_autospec(Application, is_external=is_external)
     application_version: ApplicationVersion = create_autospec(
         ApplicationVersion, application=application
@@ -124,9 +128,10 @@ def test_create_db_sample_with_lims_status(is_external: bool, expected_lims_stat
         application_version=application_version,
         customer=customer,
         order_name="order",
+        pool=create_autospec(Pool),
         sample=fastq_sample,
         ticket_id="1234567",
     )
 
-    # THEN the sample should be created with LimsStatus DONE
+    # THEN the sample should be created with LimsStatus DONE if the application is external
     assert status_db.as_mock.add_sample.call_args[1]["lims_status"] == expected_lims_status

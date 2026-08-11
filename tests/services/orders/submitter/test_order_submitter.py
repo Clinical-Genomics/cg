@@ -1,7 +1,8 @@
 import datetime as dt
-from unittest.mock import PropertyMock, create_autospec, patch
+from unittest.mock import Mock, PropertyMock, create_autospec, patch
 
 import pytest
+from genologics.entities import Sample as LimsSample
 
 from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.models import TicketResponse
@@ -29,22 +30,37 @@ from cg.store.store import Store
 def monkeypatch_process_lims(monkeypatch: pytest.MonkeyPatch, order: Order) -> None:
     lims_project_data = {"id": "ADM1234", "date": dt.datetime.now()}
     if isinstance(order, OrderWithSamples):
-        lims_map = {sample.name: f"ELH123A{index}" for index, sample in enumerate(order.samples)}
+        lims_samples: list[LimsSample] = []
+        for index, sample in enumerate(order.samples):
+            lims_sample: LimsSample = create_autospec(
+                LimsSample,
+                id=f"ELH123A{index}",
+                udf={"Sequencing Analysis": "WGSWPFC030"},
+            )
+            lims_sample.name = sample.name
+            lims_samples.append(lims_sample)
     elif isinstance(order, OrderWithCases):
-        lims_map = {
-            sample.name: f"ELH123A{case_index}-{sample_index}"
-            for case_index, sample_index, sample in order.enumerated_new_samples
-        }
+        lims_samples: list[LimsSample] = []
+        for case_index, sample_index, sample in order.enumerated_new_samples:
+            lims_sample: LimsSample = create_autospec(
+                LimsSample,
+                id=f"ELH123A{case_index}-{sample_index}",
+                udf={"Sequencing Analysis": "WGSWPFC030"},
+            )
+            lims_sample.name = sample.name
+            lims_samples.append(lims_sample)
+
     monkeypatch.setattr(
         "cg.services.orders.lims_service.service.OrderLimsService.process_lims",
-        lambda *args, **kwargs: (lims_project_data, lims_map),
+        lambda *args, **kwargs: (lims_project_data, lims_samples),
     )
 
 
-def mock_freshdesk_ticket_creation(mock_create_ticket: callable, ticket_id: str):
+def mock_freshdesk_ticket_creation(mock_create_ticket: Mock, ticket_id: int):
     """Helper function to mock Freshdesk ticket creation."""
     mock_create_ticket.return_value = TicketResponse(
-        id=int(ticket_id),
+        id=ticket_id,
+        cc_emails=["email@to.cc"],
         description="This is a test description.",
         subject="Support needed..",
         status=2,
@@ -52,7 +68,7 @@ def mock_freshdesk_ticket_creation(mock_create_ticket: callable, ticket_id: str)
     )
 
 
-def mock_freshdesk_reply_to_ticket(mock_reply_to_ticket: callable):
+def mock_freshdesk_reply_to_ticket(mock_reply_to_ticket: Mock):
     """Helper function to mock Freshdesk reply to ticket."""
     mock_reply_to_ticket.return_value = None
 
@@ -203,12 +219,13 @@ def order_with_existing_case_and_external_sample(existing_case_id: str) -> Order
     ],
 )
 def test_submit_order(
+    mocker,
     store_to_submit_and_validate_orders: Store,
     monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
     order_fixture: str,
     order_submitter: OrderSubmitter,
-    ticket_id: str,
+    ticket_id_as_int: int,
     customer_id: str,
     request: pytest.FixtureRequest,
 ):
@@ -230,7 +247,9 @@ def test_submit_order(
             "cg.clients.freshdesk.freshdesk_client.FreshdeskClient.reply_to_ticket"
         ) as mock_reply_to_ticket,
     ):
-        mock_freshdesk_ticket_creation(mock_create_ticket=mock_create_ticket, ticket_id=ticket_id)
+        mock_freshdesk_ticket_creation(
+            mock_create_ticket=mock_create_ticket, ticket_id=ticket_id_as_int
+        )
         mock_freshdesk_reply_to_ticket(mock_reply_to_ticket)
 
         # GIVEN a mock LIMS that returns project data and sample name mapping
@@ -254,17 +273,19 @@ def test_submit_order(
         for record in result["records"]:
             assert record.customer.internal_id == customer_id
             if isinstance(record, Pool):
-                assert record.ticket == ticket_id
+                assert record.ticket == str(ticket_id_as_int)
                 is_pool_order = True
             elif isinstance(record, Sample):
-                assert record.original_ticket == ticket_id
+                assert record.original_ticket == str(ticket_id_as_int)
             elif isinstance(record, Case):
                 assert record.data_analysis == ORDER_TYPE_WORKFLOW_MAP[order_type]
                 for link_obj in record.links:
-                    assert link_obj.sample.original_ticket == ticket_id
+                    assert link_obj.sample.original_ticket == str(ticket_id_as_int)
 
         # THEN the order should be stored in the database
-        assert store_to_submit_and_validate_orders.get_order_by_ticket_id(ticket_id=int(ticket_id))
+        assert store_to_submit_and_validate_orders.get_order_by_ticket_id(
+            ticket_id=ticket_id_as_int
+        )
 
         # THEN the samples should be stored in the database
         assert store_to_submit_and_validate_orders._get_query(table=Sample).first()
@@ -424,4 +445,5 @@ def test_get_ticket_status(
     status = get_ticket_status(order=order)
 
     # THEN the status should be correct
+    assert status == expected_status
     assert status == expected_status

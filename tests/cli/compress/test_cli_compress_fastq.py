@@ -12,8 +12,6 @@ from cg.store.models import Case
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
-MOCK_SET_MEM_ACCORDING_TO_READS_PATH: str = "cg.cli.compress.helpers.set_memory_according_to_reads"
-
 
 def test_get_cases_to_process(
     case_id: str,
@@ -128,7 +126,6 @@ def test_compress_fastq_cli_case_id(
     caplog,
     cli_runner: CliRunner,
     helpers: StoreHelpers,
-    mocker,
     populated_compress_context: CGConfig,
 ):
     """Test to run the compress command with a specified case id."""
@@ -159,9 +156,6 @@ def test_compress_fastq_cli_case_id(
     )
     status_db.session.commit()
 
-    # GIVEN no adjusting according to readsa
-    mocker.patch(MOCK_SET_MEM_ACCORDING_TO_READS_PATH, return_value=None)
-
     # WHEN running the compress command
     res = cli_runner.invoke(fastq_cmd, ["--case-id", case_id], obj=populated_compress_context)
 
@@ -173,16 +167,13 @@ def test_compress_fastq_cli_case_id(
 
 
 def test_compress_fastq_cli_multiple_family(
-    caplog, cli_runner: CliRunner, mocker, populated_multiple_compress_context: CGConfig
+    caplog, cli_runner: CliRunner, populated_multiple_compress_context: CGConfig
 ):
     """Test to run the compress command with multiple families."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a database with multiple families
     nr_cases = populated_multiple_compress_context.status_db._get_query(table=Case).count()
     assert nr_cases > 1
-
-    # GIVEN no adjusting according to readsa
-    mocker.patch(MOCK_SET_MEM_ACCORDING_TO_READS_PATH, return_value=None)
 
     # WHEN running the compress command
     res = cli_runner.invoke(
@@ -196,7 +187,7 @@ def test_compress_fastq_cli_multiple_family(
 
 
 def test_compress_fastq_cli_multiple_set_limit(
-    caplog, cli_runner: CliRunner, mocker, populated_multiple_compress_context: CGConfig
+    caplog, cli_runner: CliRunner, populated_multiple_compress_context: CGConfig
 ):
     """Test to run the compress command with multiple families and use a limit."""
     compress_context = populated_multiple_compress_context
@@ -205,9 +196,6 @@ def test_compress_fastq_cli_multiple_set_limit(
     nr_cases = compress_context.status_db._get_query(table=Case).count()
     limit = 5
     assert nr_cases > limit
-
-    # GIVEN no adjusting according to readsa
-    mocker.patch(MOCK_SET_MEM_ACCORDING_TO_READS_PATH, return_value=None)
 
     # WHEN running the compress command
     res = cli_runner.invoke(fastq_cmd, ["--number-of-conversions", limit], obj=compress_context)

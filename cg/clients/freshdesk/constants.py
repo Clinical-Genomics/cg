@@ -1,8 +1,11 @@
+from enum import IntEnum
+
+
 class EndPoints:
     TICKETS = "/api/v2/tickets"
 
 
-class Status:
+class Status(IntEnum):
     OPEN = 2
     PENDING = 3
     RESOLVED = 4
@@ -14,7 +17,7 @@ class Source:
     PORTAL = 2
 
 
-class Priority:
+class Priority(IntEnum):
     LOW = 1
     MEDIUM = 2
     HIGH = 3

@@ -4,7 +4,7 @@ import logging
 import shutil
 from pathlib import Path
 from typing import cast
-from unittest.mock import ANY, call, create_autospec
+from unittest.mock import Mock, call, create_autospec
 
 import pytest
 
@@ -13,9 +13,8 @@ from cg.constants import Workflow
 from cg.constants.priority import SlurmAccount, SlurmQos
 from cg.exc import CgError
 from cg.models.slurm.sbatch import Sbatch
-from cg.services.deliver_files.rsync.models import RsyncDeliveryConfig
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
-from cg.store.models import Case, Customer
+from cg.store.models import Analysis, Case, Customer
 from cg.store.store import Store
 
 
@@ -264,6 +263,10 @@ def test_slurm_rsync_single_case(
     customer: Customer = case_mock.customer
     ticket: str = cast(str, case_mock.latest_ticket)
 
+    rsync_service.status_db.get_latest_completed_analysis_for_case = Mock(
+        return_value=create_autospec(Analysis, id=666)
+    )
+
     # WHEN run_rsync_for_case is run
     sbatch_number: int = rsync_service.run_rsync_for_case(
         case=case_mock,
@@ -305,6 +308,12 @@ ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer.internal_id}/inbox
         )
         for type in ["case", "father", "mother", "child"]
     ]
+    expected_rsync_commands.append(
+        "path/to/nats_binary pub --jetstream --server nats://example.nats.server:4222 --tlsca "
+        "path/to/ca_cert.pem --tlscert path/to/client_cert.pem --tlskey "
+        "path/to/client_key.pem --token $(cat path/to/token) cg-test.analysis.upload_completed "
+        r'"{\"cg.analysis_id\": 666, \"uploaded_at\": \"$(date +%Y-%m-%dT%H:%M:%SZ)\"}"'
+    )
 
     for command in expected_rsync_commands:
         assert command in sbatch_second_job.commands

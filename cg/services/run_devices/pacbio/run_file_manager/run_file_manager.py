@@ -20,13 +20,7 @@ class PacBioRunFileManager(RunFileManager):
         """Get the file paths required by the PacBioMetricsParser."""
         run_path: Path = run_data.full_path
         validate_files_or_directories_exist([run_path])
-        unzipped_dir: Path = self._get_unzipped_reports_dir(run_path)
-        files_to_parse: list[Path] = [
-            Path(unzipped_dir, PacBioDirsAndFiles.BARCODES_REPORT),
-            Path(unzipped_dir, PacBioDirsAndFiles.CONTROL_REPORT),
-            Path(unzipped_dir, PacBioDirsAndFiles.LOADING_REPORT),
-            Path(unzipped_dir, PacBioDirsAndFiles.RAW_DATA_REPORT),
-            Path(unzipped_dir, PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT),
+        files_to_parse: list[Path] = self.get_unzipped_files(run_data) + [
             self._get_ccs_report_file(run_path),
             self._get_metadata_file(run_path),
         ]
@@ -53,6 +47,16 @@ class PacBioRunFileManager(RunFileManager):
             decompression_target=decompression_target,
             decompression_destination=decompression_destination,
         )
+
+    def get_unzipped_files(self, run_data: PacBioRunData) -> list[Path]:
+        unzipped_dir: Path = self._get_unzipped_reports_dir(run_data.full_path)
+        return [
+            Path(unzipped_dir, PacBioDirsAndFiles.BARCODES_REPORT),
+            Path(unzipped_dir, PacBioDirsAndFiles.CONTROL_REPORT),
+            Path(unzipped_dir, PacBioDirsAndFiles.LOADING_REPORT),
+            Path(unzipped_dir, PacBioDirsAndFiles.RAW_DATA_REPORT),
+            Path(unzipped_dir, PacBioDirsAndFiles.SMRTLINK_DATASETS_REPORT),
+        ]
 
     def _get_ccs_report_file(self, run_path: Path) -> Path:
         """Return the path to the CCS report file."""

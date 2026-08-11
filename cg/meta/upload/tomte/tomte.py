@@ -1,5 +1,6 @@
 """TOMTE upload API."""
 
+import datetime as dt
 import logging
 from subprocess import CalledProcessError
 
@@ -37,8 +38,6 @@ class TomteUploadAPI(NfAnalysisUploadAPI):
         ):
             ctx.invoke(generate_delivery_report, case_id=case.internal_id)
 
-        self.upload_files_to_customer_inbox(case=case)
-
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
             from cg.cli.upload.scout import upload_tomte_to_scout
@@ -48,4 +47,11 @@ class TomteUploadAPI(NfAnalysisUploadAPI):
             except CalledProcessError as error:
                 LOG.error(error)
                 return
-        self.update_uploaded_at(analysis)
+
+        if case.is_to_be_uploaded_to_customer_inbox:
+            self.upload_files_to_customer_inbox(case=case)
+        else:
+            LOG.info(
+                f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
+            )
+            self.update_uploaded_at(analysis)

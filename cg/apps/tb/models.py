@@ -9,7 +9,7 @@ from cg.apps.tb.validators import parse_str_to_datetime, parse_str_to_path
 
 class TrailblazerAnalysis(BaseModel):
     id: int
-    case_id: str | None = None
+    case_id: str
     version: str | None = None
     logged_at: Annotated[dt.datetime | None, BeforeValidator(parse_str_to_datetime)]
     started_at: Annotated[dt.datetime | None, BeforeValidator(parse_str_to_datetime)]
