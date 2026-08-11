@@ -2,6 +2,7 @@ from datetime import datetime as dt
 
 import pytest
 
+from cg.constants import Priority
 from cg.constants.devices import RevioNames
 from cg.constants.subject import Sex
 from cg.exc import PacbioSequencingRunAlreadyExistsError
@@ -13,8 +14,10 @@ from cg.store.models import (
     Collaboration,
     Customer,
     IlluminaFlowCell,
+    Order,
     Organism,
     PacbioSequencingRun,
+    Pool,
     Sample,
     User,
 )
@@ -98,9 +101,26 @@ def test_add_microbial_sample(base_store: Store, helpers):
     assert stored_microbial_sample.organism == organism
 
 
+def test_add_sample_connected_to_pool(store: Store):
+    # GIVEN a pool
+    pool = Pool(id=1)
+
+    # WHEN adding a sample
+    sample = store.add_sample(
+        name="sample-name",
+        sex=Sex.FEMALE,
+        internal_id="sample_name",
+        priority=Priority.standard,
+        pool=pool,
+    )
+
+    # THEN the sample should be connected to the pool
+    assert sample.pool == pool
+
+
 def test_add_pool(rml_pool_store: Store):
     """Tests whether new pools are invoiced as default."""
-    # GIVEN a valid customer and a valid application_version
+    # GIVEN a customer, an application_version and an order
     customer: Customer = rml_pool_store.get_customers()[0]
     application = rml_pool_store.get_application_by_tag(tag="RMLP05R800")
     app_version = (
@@ -108,6 +128,7 @@ def test_add_pool(rml_pool_store: Store):
         .filter(ApplicationVersion.application_id == application.id)
         .first()
     )
+    db_order: Order = rml_pool_store.get_order_by_ticket_id(123456)
 
     # WHEN adding a new pool
     new_pool = rml_pool_store.add_pool(
@@ -116,6 +137,7 @@ def test_add_pool(rml_pool_store: Store):
         order="123456",
         ordered=dt.now(),
         application_version=app_version,
+        db_order=db_order,
     )
 
     rml_pool_store.session.add(new_pool)

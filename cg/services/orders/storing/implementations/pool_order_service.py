@@ -54,9 +54,9 @@ class StorePoolOrderService(StoreOrderService):
                     ticket_id=str(db_order.ticket_id),
                 )
                 db_pool: Pool = self._create_db_pool(
+                    db_order=db_order,
                     pool=pool,
                     order_name=order.name,
-                    ticket_id=str(db_order.ticket_id),
                     customer=db_order.customer,
                 )
                 for sample in pool[1]:
@@ -66,6 +66,7 @@ class StorePoolOrderService(StoreOrderService):
                         ticket_id=str(db_order.ticket_id),
                         customer=db_order.customer,
                         application_version=db_pool.application_version,
+                        pool=db_pool,
                     )
                     case_sample: CaseSample = self.status_db.relate_sample(
                         case=db_case,
@@ -136,8 +137,8 @@ class StorePoolOrderService(StoreOrderService):
     def _create_db_pool(
         self,
         pool: tuple[str, list[IndexedSample]],
+        db_order: Order,
         order_name: str,
-        ticket_id: str,
         customer: Customer,
     ) -> Pool:
         """Return a Pool database object."""
@@ -150,7 +151,7 @@ class StorePoolOrderService(StoreOrderService):
             name=pool[0],
             order=order_name,
             ordered=datetime.now(),
-            ticket=ticket_id,
+            db_order=db_order,
         )
 
     def _create_db_sample(
@@ -160,6 +161,7 @@ class StorePoolOrderService(StoreOrderService):
         ticket_id: str,
         customer: Customer,
         application_version: ApplicationVersion,
+        pool: Pool,
     ) -> Sample:
         """Return a Sample database object."""
         lims_status: LimsStatus = (
@@ -177,6 +179,7 @@ class StorePoolOrderService(StoreOrderService):
             order=order_name,
             ordered=datetime.now(),
             original_ticket=ticket_id,
+            pool=pool,
             priority=sample.priority,
             sex=SexEnum.unknown,
         )

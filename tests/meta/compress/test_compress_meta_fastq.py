@@ -1,6 +1,7 @@
 """Tests for FASTQ part of meta compress api"""
 
 import logging
+from pathlib import Path
 from unittest import mock
 from unittest.mock import Mock, create_autospec
 
@@ -9,8 +10,10 @@ from pytest_mock import MockerFixture
 
 from cg.constants import Workflow
 from cg.meta.compress import CompressAPI
-from cg.models.compression_data import CaseCompressionData, SampleCompressionData
-from cg.store.models import Case, Sample
+from cg.models.compression_data import CaseCompressionData, CompressionData, SampleCompressionData
+from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Sample
+from cg.store.store import Store
+from tests.store_helpers import StoreHelpers
 
 
 def test_compress_case_fastq_one_sample(populated_compress_fastq_api, sample, caplog):
@@ -158,3 +161,75 @@ def test_should_skip_sample(
 
     # THEN assert that the result is as expected
     assert result == expected
+
+
+def _add_matching_sequencing_metrics(
+    store: Store, helpers: StoreHelpers, flow_cell_id: str, sample_id: str, lane: int
+) -> None:
+    flow_cell: IlluminaFlowCell = helpers.add_illumina_flow_cell(
+        store=store, flow_cell_id=flow_cell_id
+    )
+    sequencing_run: IlluminaSequencingRun = helpers.add_illumina_sequencing_run(
+        store=store, flow_cell=flow_cell
+    )
+    helpers.add_sample(store=store, internal_id=sample_id)
+    helpers.add_illumina_sample_sequencing_metrics_object(
+        store=store, sample_id=sample_id, sequencing_run=sequencing_run, lane=lane
+    )
+
+
+def test_get_resources_for_run_scales_with_reads(
+    compress_api: CompressAPI, base_store: Store, helpers: StoreHelpers
+):
+    """Test that a matching sequencing metrics row yields scaled memory/minutes."""
+    # GIVEN a compress API pointed at a store with matching sequencing metrics for a run
+    compress_api.status_db = base_store
+    flow_cell_id, sample_id, lane = "23M7GHLT4", "ACC20498A8", 4
+    _add_matching_sequencing_metrics(base_store, helpers, flow_cell_id, sample_id, lane)
+    compression_obj = CompressionData(Path(f"{flow_cell_id}_{sample_id}_S52_L00{lane}"))
+
+    # WHEN getting resources for the run (100 reads recorded)
+    memory, minutes = compress_api._get_resources_for_run(
+        compression_obj,
+        memory_slope=1 / 10,
+        memory_intercept=0,
+        min_gb=1,
+        max_gb=100,
+        time_slope=1 / 20,
+        time_intercept=0,
+        min_minutes=1,
+        max_minutes=100,
+    )
+
+    # THEN memory and minutes are scaled according to the read count
+    assert memory == 10
+    assert minutes == 5
+
+    # THEN crunchy_api's own config values are left untouched - it is shared across all runs
+    assert compress_api.crunchy_api.fallback_memory != 10
+    assert compress_api.crunchy_api.fallback_minutes != 5
+
+
+def test_get_resources_for_run_no_matching_metrics(compress_api: CompressAPI, base_store: Store):
+    """Test that a run with no matching sequencing metrics falls back to crunchy_api's config."""
+    # GIVEN a compress API pointed at a store with no matching sequencing metrics
+    compress_api.status_db = base_store
+    compression_obj = CompressionData(Path("not_a_valid_name"))
+
+    # WHEN getting resources for the run
+    memory, minutes = compress_api._get_resources_for_run(
+        compression_obj,
+        memory_slope=1 / 10,
+        memory_intercept=0,
+        min_gb=1,
+        max_gb=100,
+        time_slope=1 / 20,
+        time_intercept=0,
+        min_minutes=1,
+        max_minutes=100,
+    )
+
+    # THEN both memory and minutes fall back to crunchy_api's configured fallback values - the
+    # caller never has to handle a missing value itself
+    assert memory == compress_api.crunchy_api.fallback_memory
+    assert minutes == compress_api.crunchy_api.fallback_minutes

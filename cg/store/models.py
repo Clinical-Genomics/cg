@@ -727,14 +727,20 @@ class Pool(Base):
     name: Mapped[Str32]
     no_invoice: Mapped[bool | None] = mapped_column(default=False)
     order: Mapped[Str64]
+    order_id: Mapped[int] = mapped_column(ForeignKey("order.id"))
+    db_order: Mapped["Order"] = orm.relationship(foreign_keys=[order_id])
     ordered_at: Mapped[datetime]
     received_at: Mapped[datetime | None]
-    ticket: Mapped[Str32 | None]
 
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="pools")
+    samples: Mapped[list["Sample"]] = orm.relationship(back_populates="pool")
 
     def to_dict(self):
         return to_dict(model_instance=self)
+
+    @property
+    def ticket(self) -> str | None:
+        return str(self.db_order.ticket_id) if self.db_order else None
 
 
 class Sample(Base, PriorityMixin):
@@ -774,7 +780,7 @@ class Sample(Base, PriorityMixin):
     _phenotype_groups: Mapped[str | None] = mapped_column(types.Text)
     _phenotype_terms: Mapped[str | None] = mapped_column(types.Text)
     prepared_at: Mapped[datetime | None]
-
+    pool_id: Mapped[int | None] = mapped_column(ForeignKey("pool.id"))
     priority: Mapped[Priority] = mapped_column(default=Priority.standard)
     reads: Mapped[BigInt] = mapped_column(default=0)
     last_sequenced_at: Mapped[datetime | None]
@@ -793,6 +799,7 @@ class Sample(Base, PriorityMixin):
         foreign_keys=[CaseSample.father_id], back_populates="father"
     )
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="samples")
+    pool: Mapped[Pool] = orm.relationship(foreign_keys=[pool_id], back_populates="samples")
 
     _sample_run_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(
         back_populates="sample", cascade="all, delete"
@@ -1086,6 +1093,9 @@ class Order(Base):
     is_open: Mapped[bool] = mapped_column(default=True)
     analyses: Mapped[list[Analysis]] = orm.relationship(
         back_populates="order", order_by="Analysis.created_at"
+    )
+    pools: Mapped[list[Pool]] = orm.relationship(
+        back_populates="db_order", order_by="Pool.ordered_at"
     )
 
     @property

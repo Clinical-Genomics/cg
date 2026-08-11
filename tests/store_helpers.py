@@ -1037,6 +1037,7 @@ class StoreHelpers:
         received_at: datetime = None,
         no_invoice: bool = None,
         invoice_id: int = None,
+        ticket: str = "123456",
     ) -> Pool:
         """Utility function to add a pool that can be used in tests."""
         customer_id = customer_id or "cust000"
@@ -1051,6 +1052,9 @@ class StoreHelpers:
             is_external=is_external,
             is_rna=is_rna,
         )
+        db_order: Order | None = store.get_order_by_ticket_id(ticket)
+        if ticket and not db_order:
+            db_order = store.add_order(customer=customer, ticket_id=int(ticket))
 
         pool = store.add_pool(
             name=name,
@@ -1062,9 +1066,10 @@ class StoreHelpers:
             received_at=received_at,
             no_invoice=no_invoice,
             invoice_id=invoice_id,
+            db_order=db_order,
         )
-        store.session.add(pool)
-        store.session.commit()
+        store.add_item_to_store(pool)
+        store.commit_to_store()
         return pool
 
     @classmethod

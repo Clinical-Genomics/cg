@@ -8,7 +8,7 @@ from pytest_mock import MockerFixture
 from cg.apps.lims import LimsAPI
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
-from cg.exc import CaseNotConfiguredError, MultipleCaptureKitsError
+from cg.exc import CaseNotConfiguredError
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
@@ -20,7 +20,6 @@ from cg.services.analysis_starter.configurator.implementations.balsamic_configur
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.store.models import Case, Sample
 from cg.store.store import Store
-from tests.typed_mock import TypedMock, create_typed_mock
 
 PANEL_ONLY_FIELDS = ["soft_filter_normal", "panel_bed", "pon_cnn", "exome"]
 WGS_ONLY_FIELDS = ["genome_interval", "gens_coverage_pon"]
@@ -259,39 +258,3 @@ def test_configure_with_flags(
         workflow=workflow,
         workflow_profile=workflow_profile,
     )
-
-
-def test_configure_mixed_capture_kits(cg_balsamic_config: BalsamicConfig):
-    # GIVEN a fastq handler
-    fastq_handler: BalsamicFastqHandler = create_autospec(BalsamicFastqHandler)
-    fastq_handler.get_fastq_dir = Mock(return_value=Path("some/path"))
-
-    # GIVEN a BalsamicConfigFileCreator
-    config_file_creator: BalsamicConfigFileCreator = create_autospec(BalsamicConfigFileCreator)
-
-    # GIVEN a store containing a case with two samples
-    store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(
-        return_value=create_autospec(
-            Case,
-            samples=[create_autospec(Sample), create_autospec(Sample)],
-            slurm_priority=SlurmQos.NORMAL,
-        )
-    )
-
-    # GIVEN a LimsAPI which returns two different capture kits for the two samples
-    lims_api: TypedMock[LimsAPI] = create_typed_mock(LimsAPI)
-    lims_api.as_type.capture_kit = Mock(side_effect=["capture_kit_1", "capture_kit_2"])
-
-    # GIVEN a Balsamic configurator
-    balsamic_configurator = BalsamicConfigurator(
-        config=cg_balsamic_config,
-        config_file_creator=config_file_creator,
-        fastq_handler=fastq_handler,
-        lims_api=lims_api.as_type,
-        store=store,
-    )
-    # WHEN calling configure
-    # THEN an error should be raised due to the mixed capture kits
-    with pytest.raises(MultipleCaptureKitsError):
-        balsamic_configurator.configure(case_id="case_id")

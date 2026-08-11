@@ -78,8 +78,10 @@ class SlurmConfig(BaseModel):
     mail_user: EmailStr
     memory: int | None = None
     number_tasks: int | None = None
+    cpus_per_task: int | None = None
     conda_env: str | None = None
     qos: SlurmQos = SlurmQos.LOW
+    partition: str | None = None
 
 
 class Encryption(BaseModel):
@@ -148,19 +150,14 @@ class ChanjoConfig(BaseModel):
     config_path: str
 
 
-class NatsAuthentication(BaseModel):
-    ca_cert_path: Path
-    client_cert_path: Path
-    client_key_path: Path
-    token_path: Path
-
-
 class NatsConfig(BaseModel):
     nats_binary_path: Path
     server: str
     stream: str
-    listener: NatsAuthentication
-    publisher: NatsAuthentication
+    ca_cert_path: Path
+    client_cert_path: Path
+    client_key_path: Path
+    token_path: Path
 
 
 class HermesConfig(CommonAppConfig):
@@ -189,6 +186,9 @@ class LimsConfig(BaseModel):
 class CrunchyConfig(BaseModel):
     conda_binary: str | None = None
     cram_reference: str
+    tmp_dir_base: str
+    fallback_memory: int
+    fallback_minutes: int
     slurm: SlurmConfig
 
 
@@ -266,6 +266,9 @@ class NalloConfig(CommonAppConfig):
     platform: str
     pre_run_script: str = ""
     profile: str
+    rank_model_threshold: int
+    rank_model_snv: str
+    rank_model_sv: str
     reference: str
     repository: str
     resources: str
@@ -306,6 +309,8 @@ class RarediseaseConfig(CommonAppConfig):
     platform: str
     pre_run_script: str = ""
     profile: str
+    rank_model_snv: str
+    rank_model_sv: str
     reference: str
     references_directory: Path
     repository: str
@@ -380,6 +385,7 @@ class MicrosaltConfig(BaseModel):
     binary_path: str
     conda_binary: str
     conda_env: str
+    config: str
     queries_path: str
     root: str
 

@@ -3,15 +3,12 @@
 import datetime as dt
 import logging
 import os
-from math import ceil
 from pathlib import Path
 from typing import Iterator
 
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.compression import CRUNCHY_MIN_GB_PER_PROCESS, MAX_READS_PER_GB
-from cg.constants.slurm import SlurmProcessing
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
 from cg.store.models import Case
@@ -39,38 +36,9 @@ def get_cases_to_process(
     return cases
 
 
-def set_memory_according_to_reads(
-    sample_id: str, sample_reads: int | None = None, sample_process_mem: int | None = None
-) -> int | None:
-    """Set SLURM sample process memory depending on the number of sample reads if sample_process_mem is not set."""
-    if sample_process_mem:
-        return sample_process_mem
-    if not sample_reads:
-        LOG.debug(f"No reads recorded for sample: {sample_id}")
-        return
-    sample_process_mem: int = ceil((sample_reads / MAX_READS_PER_GB))
-    if sample_process_mem < CRUNCHY_MIN_GB_PER_PROCESS:
-        return CRUNCHY_MIN_GB_PER_PROCESS
-    if CRUNCHY_MIN_GB_PER_PROCESS <= sample_process_mem < SlurmProcessing.MAX_NODE_MEMORY:
-        return sample_process_mem
-    return SlurmProcessing.MAX_NODE_MEMORY
-
-
-def update_compress_api(
-    compress_api: CompressAPI, dry_run: bool, hours: int = None, mem: int = None, ntasks: int = None
-) -> None:
+def update_compress_api(compress_api: CompressAPI, dry_run: bool) -> None:
     """Update parameters in Compress API."""
-
     compress_api.set_dry_run(dry_run=dry_run)
-    if mem:
-        LOG.debug(f"Set Crunchy API SLURM mem to {mem}")
-        compress_api.crunchy_api.slurm_memory = mem
-    if hours:
-        LOG.debug(f"Set Crunchy API SLURM hours to {hours}")
-        compress_api.crunchy_api.slurm_hours = hours
-    if ntasks:
-        LOG.debug(f"Set Crunchy API SLURM number of tasks to {ntasks}")
-        compress_api.crunchy_api.slurm_number_tasks = ntasks
 
 
 # Functions to fix problematic spring files
@@ -117,11 +85,9 @@ def compress_sample_fastqs_in_cases(
     cases: list[Case],
     dry_run: bool,
     number_of_conversions: int,
-    hours: int = None,
-    mem: int = None,
-    ntasks: int = None,
 ) -> None:
     """Compress sample FASTQs for samples in cases."""
+    update_compress_api(compress_api=compress_api, dry_run=dry_run)
     case_conversion_count: int = 0
     individuals_conversion_count: int = 0
     for case in cases:
@@ -133,18 +99,6 @@ def compress_sample_fastqs_in_cases(
         if not case.links:
             continue
         for case_link in case.links:
-            sample_process_mem: int | None = set_memory_according_to_reads(
-                sample_process_mem=mem,
-                sample_id=case_link.sample.internal_id,
-                sample_reads=case_link.sample.reads,
-            )
-            update_compress_api(
-                compress_api=compress_api,
-                dry_run=dry_run,
-                hours=hours,
-                mem=sample_process_mem,
-                ntasks=ntasks,
-            )
             case_converted: bool = compress_api.compress_fastq(
                 sample_id=case_link.sample.internal_id
             )

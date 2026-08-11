@@ -71,6 +71,7 @@ class DeliverService:
         try:
             self.mark_as_delivered_service.mark_analyses(analyses=analyses, signature=signature)
             self.mark_as_delivered_service.close_order_in_status_db_if_closable(order)
+            self.mark_as_delivered_service.mark_pools(order)
             if not self._is_order_no_delivery(order):
                 self._interact_with_freshdesk(analyses=analyses, order=order)
         except TrailblazerAnalysisDeliveryError as error:
@@ -162,7 +163,7 @@ class DeliverService:
         self, order: Order, analyses: list[Analysis], cc_emails: list[str]
     ):
         cases: list[Case] = [analysis.case for analysis in analyses]
-        message: str = get_message(cases=cases, store=self.status_db)
+        message: str = get_message(cases=cases, store=self.status_db, include_signature=True)
         self.freshdesk_client.reply_to_ticket(
             ticket_id=order.ticket_id, message=message, cc_emails=cc_emails
         )

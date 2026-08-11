@@ -10,7 +10,7 @@ from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.constants import Workflow
 from cg.exc import TrailblazerAPIHTTPError
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
-from cg.store.models import Analysis, Case, CaseSample, Order, Sample
+from cg.store.models import Analysis, Case, CaseSample, Order, Pool, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -313,6 +313,42 @@ def test_mark_analyses_negative_control(
     assert negative_control_sample.delivered_at is not None
 
 
+def test_mark_analyses_two_cases_one_sample(mark_as_delivered_service: MarkAsDeliveredService):
+    # GIVEN that a customer orders a case with a sample
+    sample: Sample = create_autospec(
+        Sample, delivered_at=None, expected_reads_for_sample=1, reads=1
+    )
+    case_1: Case = create_autospec(Case, internal_id="case_1", samples=[sample])
+    case_sample_1: CaseSample = create_autospec(
+        CaseSample, case=case_1, sample=sample, should_deliver_sample=True
+    )
+    case_1.links = [case_sample_1]
+    order_1: Order = create_autospec(Order, cases=[case_1], is_open=True)
+
+    # GIVEN that a customer orders a new case with the same sample (without the first case having been delivered)
+    case_2: Case = create_autospec(Case, internal_id="case_2", samples=[sample])
+    case_sample_2: CaseSample = create_autospec(
+        CaseSample, case=case_2, sample=sample, should_deliver_sample=False
+    )
+    case_2.links = [case_sample_2]
+    order_2: Order = create_autospec(Order, cases=[case_2], is_open=True)
+
+    # GIVEN that the second order finishes first
+    analysis: TrailblazerAnalysis = create_autospec(TrailblazerAnalysis, case_id="case_2")
+    mark_as_delivered_service.trailblazer_api.get_delivered_analyses_for_order = Mock(
+        return_value=[analysis]
+    )
+
+    # WHEN delivering the second order
+    mark_as_delivered_service.close_order_in_status_db_if_closable(order_2)
+
+    # THEN the first order should be open
+    assert order_1.is_open
+
+    # THEN the second order should be closed
+    assert not order_2.is_open
+
+
 def test_is_order_closable_true(mark_as_delivered_service: MarkAsDeliveredService):
     # GIVEN an open order with a case that includes only delivered samples
     sample_delivered1: Sample = create_autospec(Sample, delivered_at=datetime.now())
@@ -320,6 +356,14 @@ def test_is_order_closable_true(mark_as_delivered_service: MarkAsDeliveredServic
     case: Case = create_autospec(
         Case, samples=[sample_delivered1, sample_delivered2], internal_id="case_id"
     )
+    case.links = [
+        create_autospec(
+            CaseSample, case=case, sample=sample_delivered1, should_deliver_sample=True
+        ),
+        create_autospec(
+            CaseSample, case=case, sample=sample_delivered2, should_deliver_sample=True
+        ),
+    ]
     order: Order = create_autospec(Order, cases=[case])
 
     # GIVEN that the case has a delivered analysis in Trailblazer
@@ -342,6 +386,14 @@ def test_is_order_closeable_false_undelivered_samples(
     case: Case = create_autospec(
         Case, samples=[sample_delivered1, sample_delivered2], internal_id="case_id"
     )
+    case.links = [
+        create_autospec(
+            CaseSample, case=case, sample=sample_delivered1, should_deliver_sample=True
+        ),
+        create_autospec(
+            CaseSample, case=case, sample=sample_delivered2, should_deliver_sample=True
+        ),
+    ]
     order: Order = create_autospec(Order, cases=[case])
 
     # GIVEN that the case has a delivered analysis in Trailblazer
@@ -374,3 +426,27 @@ def test_is_order_closeable_false_undelivered_analysis(
     # WHEN checking if the order can be closed
     # THEN it returns False
     assert not mark_as_delivered_service._is_order_closable(order)
+
+
+def test_mark_pools(mark_as_delivered_service: MarkAsDeliveredService):
+    # GIVEN an order with two pools, one containing delivered samples and one which does not
+    delivered_sample: Sample = create_autospec(Sample, delivered_at=datetime.now())
+    undelivered_sample: Sample = create_autospec(Sample, delivered_at=None)
+    pool_that_should_be_delivered: Pool = create_autospec(
+        Pool, delivered_at=None, samples=[delivered_sample]
+    )
+    pool_that_should_not_be_delivered: Pool = create_autospec(
+        Pool, delivered_at=None, samples=[undelivered_sample]
+    )
+    order: Order = create_autospec(
+        Order, pools=[pool_that_should_be_delivered, pool_that_should_not_be_delivered]
+    )
+
+    # WHEN marking the pools in the order
+    mark_as_delivered_service.mark_pools(order)
+
+    # THEN the pool that should be delivered should have its delivered_at set
+    assert pool_that_should_be_delivered.delivered_at
+
+    # THEN the pool that should not be delivered should not have its delivered_at set
+    assert pool_that_should_not_be_delivered.delivered_at is None

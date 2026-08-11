@@ -5,26 +5,66 @@ from pathlib import Path
 from typing import Any
 
 from cg.apps.crunchy import CrunchyAPI
-from cg.apps.crunchy.files import get_tmp_dir, update_metadata_date
+from cg.apps.crunchy.files import (
+    get_tmp_dir,
+    parse_run_name,
+    scale_resource_by_reads,
+    update_metadata_date,
+)
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.compression_data import CompressionData
 
 
-def test_get_tmp_path_correct_place(project_dir: Path):
-    """Test to get the path to a temporary directory"""
-    # GIVEN a crunchy API
-    prefix = "spring_"
-    suffix = "fastq_"
+def test_get_tmp_dir_is_node_local_and_unresolved(project_dir: Path):
+    """Test that the tmp dir is a lazily-built, node-local path keyed by the SLURM job id."""
+    # GIVEN a node-local base directory
+    base: str = str(project_dir)
 
-    # WHEN creating a tmpdir path
-    tmp_dir = get_tmp_dir(prefix=prefix, suffix=suffix, base=str(project_dir))
+    # WHEN building the tmp dir path
+    tmp_dir: str = get_tmp_dir(base=base)
 
-    # THEN assert that the path is correct
-    assert isinstance(tmp_dir, str)
-    tmp_dir_path = Path(tmp_dir)
-    # THEN assert the dir is in the correct place
-    assert tmp_dir_path.parent == project_dir
+    # THEN it is rooted under the given base
+    assert tmp_dir.startswith(f"{base}/")
+    # THEN the SLURM job id placeholder is left unexpanded, to be resolved at job runtime
+    assert tmp_dir == f"{base}/${{SLURM_JOB_ID}}_spring"
+
+
+def test_get_tmp_dir_strips_trailing_slash():
+    """Test that a trailing slash on the base dir doesn't produce a double slash."""
+    # WHEN the base dir has a trailing slash
+    tmp_dir: str = get_tmp_dir(base="/state/partition1/")
+
+    # THEN there should be no double slash before the job id placeholder
+    assert tmp_dir == "/state/partition1/${SLURM_JOB_ID}_spring"
+
+
+def test_parse_run_name_matches_expected_format():
+    """Test that a run name in the expected {flow_cell}_{sample}_{meta}_L{lane} format parses."""
+    # GIVEN a run name following the expected naming convention
+    run_name = "23M7GHLT4_ACC20498A8_S52_L004"
+
+    # WHEN parsing the run name
+    result = parse_run_name(run_name)
+
+    # THEN the flow cell, sample and lane are extracted correctly
+    assert result == ("23M7GHLT4", "ACC20498A8", 4)
+
+
+def test_scale_resource_by_reads_floor():
+    """Test that scaling is clamped to the floor for a small number of reads."""
+    assert scale_resource_by_reads(reads=1, slope=1 / 100, intercept=0, floor=5, cap=10) == 5
+
+
+def test_scale_resource_by_reads_cap():
+    """Test that scaling is clamped to the cap for a huge number of reads."""
+    assert scale_resource_by_reads(reads=100**10, slope=1 / 100, intercept=0, floor=1, cap=10) == 10
+
+
+def test_scale_resource_by_reads_rounds_up():
+    """Test that a non-integer estimate is rounded up (ceil), not truncated."""
+    # GIVEN an estimate of 5.5 (250 reads / 100 + 3)
+    assert scale_resource_by_reads(reads=250, slope=1 / 100, intercept=3, floor=1, cap=10) == 6
 
 
 def test_set_dry_run(crunchy_config: dict[str, dict[str, Any]]):
