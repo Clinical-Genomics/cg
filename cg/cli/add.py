@@ -299,15 +299,16 @@ def add_case(
     if not order:
         LOG.warning(f"No order found with ticket_id {ticket}")
         click.confirm("No order found for the given ticket, proceed?", default=False, abort=True)
+        order_name: str = click.prompt("What should the new order's name be?")
         order = Order(
             customer_id=customer.id,
-            name=f"OrderFor{new_case.internal_id}",
+            name=order_name,
             ticket_id=int(ticket),
         )
         LOG.info(f"Created order with name OrderFor{new_case.internal_id}")
     new_case.orders.append(order)
 
-    new_case.customer: Customer = customer
+    new_case.customer = customer
     status_db.session.add(new_case)
     status_db.session.commit()
     LOG.info(f"{new_case.internal_id}: new case added")

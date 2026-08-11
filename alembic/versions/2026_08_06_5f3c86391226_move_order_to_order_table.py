@@ -123,7 +123,7 @@ def upgrade():
     for order in orders.all():
         for case in order.cases:
             for sample in case.samples:
-                if not sample.order:
+                if order.name or not sample.order:
                     continue
                 elif sample.original_ticket == str(order.ticket_id):
                     order.name = sample.order
@@ -176,13 +176,13 @@ def downgrade():
                 elif sample.original_ticket == str(order.ticket_id):
                     sample.order = order.name
                     session.add(sample)
-                    break
+                    continue
                 # If unable to match on original ticket, check if it is the only order the sample has been in
                 elif len(sample.links) == 1:
                     if len(sample.links[0].case.orders) == 1:
                         sample.order = order.name
                         session.add(sample)
-                        break
+                        continue
         for pool in order.pools:
             if pool.order:
                 continue
