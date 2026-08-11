@@ -2,15 +2,19 @@
 
 import datetime as dt
 import logging
+from unittest.mock import Mock, create_autospec
 
 from click.testing import CliRunner
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress.fastq import fastq_cmd, get_cases_to_process
+from cg.cli.compress.helpers import get_samples_available_for_compression
 from cg.constants import Workflow
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_get_cases_to_process(
@@ -206,7 +210,81 @@ def test_compress_fastq_cli_multiple_set_limit(
     assert f"individuals in {limit} (completed) cases where compressed" in caplog.text
 
 
-# TODO: New test for new logic.
-#   Aim make sure that the right commands are called (i.e. the new commands).
+def test_get_samples_available_for_compression():
+    # GIVEN list of sample ids
+    samples: list[str] = ["sample1", "sample2"]
 
-# TODO: Make a test for sample with two cases one compressible, the other not. (result should not be compressed.)
+    # GIVEN a mocked housekeeper api
+    housekeeper: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
+
+    # GIVEN a housekeeper bundle with a file tagged with FASTQ
+    housekeeper.as_type.get_bundle_names_with_fastq_files = Mock(return_value=samples)
+
+    # GIVEN a store
+    store: TypedMock[Store] = create_typed_mock(Store)
+
+    # WHEN getting samples available for compression
+    get_samples_available_for_compression(store=store.as_type, housekeeper=housekeeper.as_type)
+
+    # THEN the correct calls was made
+    housekeeper.as_mock.get_bundle_names_with_fastq_files.assert_called_once()
+    store.as_mock.get_compressible_samples_by_internal_ids.assert_called_once_with(samples)
+
+
+def test_get_samples_available_for_compression_input_case():
+    # GIVEN list of sample ids
+    samples: list[str] = ["sample1", "sample2"]
+
+    # GIVEN a mocked housekeeper api
+    housekeeper: HousekeeperAPI = create_autospec(HousekeeperAPI)
+
+    # GIVEN a store
+    store: TypedMock[Store] = create_typed_mock(Store)
+
+    # GIVEN that a samples is linked to the input case
+    store.as_type.get_sample_ids_by_case_id = Mock(return_value=samples)
+
+    # WHEN getting samples available for compression with a case id
+    get_samples_available_for_compression(
+        store=store.as_type, housekeeper=housekeeper, case_id="case_id"
+    )
+
+    # THEN the correct calls was made
+    store.as_mock.get_compressible_samples_by_internal_ids.assert_called_once_with(samples)
+
+
+def test_get_samples_available_for_compression_missing_samples():
+    # GIVEN a mocked housekeeper api
+    housekeeper: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
+
+    # GIVEN a housekeeper bundle with a file tagged with FASTQ
+    housekeeper.as_type.get_bundle_names_with_fastq_files = Mock(return_value=[])
+
+    # GIVEN a store
+    store: TypedMock[Store] = create_typed_mock(Store)
+
+    # WHEN getting samples available for compression
+    get_samples_available_for_compression(store=store.as_type, housekeeper=housekeeper.as_type)
+
+    # THEN the correct calls was made
+    housekeeper.as_mock.get_bundle_names_with_fastq_files.assert_called_once()
+    store.as_mock.get_compressible_samples_by_internal_ids.assert_not_called()
+
+
+def test_get_samples_available_for_compression_input_case_missing_samples():
+    # GIVEN a mocked housekeeper api
+    housekeeper: HousekeeperAPI = create_autospec(HousekeeperAPI)
+
+    # GIVEN a store
+    store: TypedMock[Store] = create_typed_mock(Store)
+
+    # GIVEN that no samples is linked to the input case
+    store.as_type.get_sample_ids_by_case_id = Mock(return_value=[])
+
+    # WHEN getting samples available for compression with a case id
+    get_samples_available_for_compression(
+        store=store.as_type, housekeeper=housekeeper, case_id="case_id"
+    )
+
+    # THEN the correct calls was made
+    store.as_mock.get_compressible_samples_by_internal_ids.assert_not_called()

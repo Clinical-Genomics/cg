@@ -43,11 +43,6 @@ def get_samples_available_for_compression(
     store: Store, housekeeper: HousekeeperAPI, case_id: str | None = None
 ) -> list[Sample] | None:
     """Return samples available for compression."""
-    # TODO: Implement the new logic here.
-    #  Step 1 - New method housekeeper.get_sample_with_fastq_files(). Returns a set of samples. DONE
-    #  Step 2 - Clean off any sample that is associated with a case that does not reach the required criteria already implemented. DONE
-    #  Step 2.1 - Make a test for this function. Where should it be? How owns this functionality?
-    #  Step 3 - Translate the sample to cases (or keep working with samples, unsure). NOT implementing
 
     if case_id:
         sample_ids: list[str] = store.get_sample_ids_by_case_id(case_id)
@@ -58,7 +53,7 @@ def get_samples_available_for_compression(
     else:
         sample_ids: list[str] = housekeeper.get_bundle_names_with_fastq_files()
         if not sample_ids:
-            LOG.debug(f"No bundles in Housekeeper with files tagged with {SequencingFileTag.FASTQ}")
+            LOG.info(f"No bundles in Housekeeper with files tagged with {SequencingFileTag.FASTQ}")
             return None
 
     return store.get_compressible_samples_by_internal_ids(internal_ids=sample_ids)
