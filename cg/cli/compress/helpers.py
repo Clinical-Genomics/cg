@@ -117,7 +117,7 @@ def compress_fastq_to_spring_for_samples(
         LOG.info("Dry-run activated - no samples will be submitted for compression")
 
     if sample_limit is not None:
-        samples = samples[:sample_limit]  # TODO could be improved
+        samples = samples[:sample_limit]
     for sample in samples:
         is_sample_submitted: bool = compress_api.compress_fastq(sample_id=sample.internal_id)
         if not is_sample_submitted:
