@@ -4,6 +4,7 @@ import datetime as dt
 import logging
 from unittest.mock import Mock, call, create_autospec
 
+import pytest
 from click.testing import CliRunner, Result
 from pytest_mock import MockFixture
 
@@ -267,7 +268,9 @@ def test_compress_fastq_cli_sample_all_flags(
 
     # WHEN running the compress fastq command with all custom settings
     result: Result = cli_runner.invoke(
-        fastq_cmd, ["--number-of-samples", "2", "--dry-run", "--days-back", "1337"], obj=cg_context
+        fastq_cmd,
+        ["--number-of-samples", "2", "--dry-run", "--days-back", "1337", "--case-id", "case_id"],
+        obj=cg_context,
     )
 
     # THEN samples were fetched using the right settings
@@ -284,18 +287,22 @@ def test_compress_fastq_cli_sample_all_flags(
     )
 
 
+@pytest.mark.freeze_time()
 def test_get_samples_available_for_compression():
     # GIVEN list of sample ids
-    samples: list[str] = ["sample1", "sample2"]
+    internal_ids: list[str] = ["sample1", "sample2"]
 
     # GIVEN a mocked housekeeper api
     housekeeper: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
 
     # GIVEN a housekeeper bundle with a file tagged with FASTQ
-    housekeeper.as_type.get_bundle_names_with_fastq_files = Mock(return_value=samples)
+    housekeeper.as_type.get_bundle_names_with_fastq_files = Mock(return_value=internal_ids)
 
     # GIVEN a store
     store: TypedMock[Store] = create_typed_mock(Store)
+
+    # GIVEN a expected cut-off date, 60 days ago
+    expected_date = dt.datetime.now() - dt.timedelta(days=60)
 
     # WHEN getting samples available for compression
     get_samples_available_for_compression(
@@ -304,12 +311,15 @@ def test_get_samples_available_for_compression():
 
     # THEN the correct calls was made
     housekeeper.as_mock.get_bundle_names_with_fastq_files.assert_called_once()
-    store.as_mock.get_compressible_samples_by_internal_ids.assert_called_once_with(samples)
+    store.as_mock.get_compressible_samples_by_internal_ids.assert_called_once_with(
+        internal_ids=internal_ids, case_created_before_date=expected_date
+    )
 
 
-def test_get_samples_available_for_compression_input_case():
+@pytest.mark.freeze_time("1822-09-18 13:37")
+def test_get_samples_available_for_compression_input_case(mocker: MockFixture):
     # GIVEN list of sample ids
-    samples: list[str] = ["sample1", "sample2"]
+    internal_ids: list[str] = ["sample1", "sample2"]
 
     # GIVEN a mocked housekeeper api
     housekeeper: HousekeeperAPI = create_autospec(HousekeeperAPI)
@@ -318,15 +328,23 @@ def test_get_samples_available_for_compression_input_case():
     store: TypedMock[Store] = create_typed_mock(Store)
 
     # GIVEN that a samples is linked to the input case
-    store.as_type.get_sample_ids_by_case_id = Mock(return_value=samples)
+    store.as_type.get_sample_ids_by_case_id = Mock(return_value=internal_ids)
+
+    # GIVEN a date 60 days ago
+    expected_date = dt.datetime(1822, 7, 20, 13, 37)
 
     # WHEN getting samples available for compression with a case id
     get_samples_available_for_compression(
-        store=store.as_type, housekeeper=housekeeper, age_limit_days=60, case_id="case_id"
+        store=store.as_type,
+        housekeeper=housekeeper,
+        age_limit_days=60,
+        case_id="case_id",
     )
 
     # THEN the correct calls was made
-    store.as_mock.get_compressible_samples_by_internal_ids.assert_called_once_with(samples)
+    store.as_mock.get_compressible_samples_by_internal_ids.assert_called_once_with(
+        internal_ids=internal_ids, case_created_before_date=expected_date
+    )
 
 
 def test_get_samples_available_for_compression_missing_samples():

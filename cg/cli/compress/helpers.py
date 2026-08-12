@@ -57,7 +57,9 @@ def get_samples_available_for_compression(
             LOG.info(f"No bundles in Housekeeper with files tagged with {SequencingFileTag.FASTQ}")
             return None
 
-    return store.get_compressible_samples_by_internal_ids(internal_ids=sample_ids)
+    return store.get_compressible_samples_by_internal_ids(
+        internal_ids=sample_ids, case_created_before_date=get_date_days_ago(age_limit_days)
+    )
 
 
 def update_compress_api(compress_api: CompressAPI, dry_run: bool) -> None:
