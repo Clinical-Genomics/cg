@@ -157,7 +157,7 @@ def downgrade():
     )
     op.drop_constraint(constraint_name="_order_name_uc", table_name="pool", type_="unique")
     op.create_unique_constraint(
-        constraint_name="order_name_uc", table_name="pool", columns=["order", "name"]
+        constraint_name="_order_name_uc", table_name="pool", columns=["order", "name"]
     )
     op.add_column(
         table_name="sample",
