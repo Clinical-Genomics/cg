@@ -177,6 +177,7 @@ def is_first_sample_yield_based_and_processed(case: Case) -> bool:
 
 def is_first_sample_reads_based_and_processed(case: Case) -> bool:
     sample: Sample = case.samples[0]
+    # Then we can assume all entries have sample run metrics?
     if metrics := sample.sample_run_metrics:
         return metrics[0].type == DeviceType.ILLUMINA
     return False

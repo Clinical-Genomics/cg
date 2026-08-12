@@ -124,8 +124,13 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
 
 
 def filter_cases_has_sequence(cases: Query, **kwargs) -> Query:
-    """Filter cases that are not sequenced according to record in StatusDB."""
-    return cases.filter(or_(Application.is_external, Sample.last_sequenced_at.isnot(None)))
+    """Filter cases that have sequencing data."""
+    return cases.filter(
+        or_(
+            Application.is_external,
+            and_(Sample.last_sequenced_at.isnot(None), Sample._sample_run_metrics.any()),
+        )
+    )
 
 
 def filter_cases_not_analysed(cases: Query, **kwargs) -> Query:
