@@ -56,7 +56,6 @@ class StoreFastqOrderService(StoreOrderService):
                 )
                 db_sample: Sample = self._create_db_sample(
                     sample=sample,
-                    order_name=order.name,
                     ticket_id=str(db_order.ticket_id),
                     customer=db_order.customer,
                 )
@@ -79,7 +78,7 @@ class StoreFastqOrderService(StoreOrderService):
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=order.customer
         )
-        return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
+        return self.status_db.add_order(customer=customer, name=order.name, ticket_id=ticket_id)
 
     def _create_db_case_for_sample(
         self,
@@ -101,9 +100,7 @@ class StoreFastqOrderService(StoreOrderService):
         case.customer = customer
         return case
 
-    def _create_db_sample(
-        self, sample: FastqSample, order_name: str, customer: Customer, ticket_id: str
-    ) -> Sample:
+    def _create_db_sample(self, sample: FastqSample, customer: Customer, ticket_id: str) -> Sample:
         """Return a Sample database object."""
         application_version: ApplicationVersion = (
             self.status_db.get_current_application_version_by_tag(tag=sample.application)
@@ -120,7 +117,6 @@ class StoreFastqOrderService(StoreOrderService):
             lims_status=lims_status,
             name=sample.name,
             no_invoice=application_version.application.is_external,
-            order=order_name,
             ordered=datetime.now(),
             original_ticket=ticket_id,
             priority=sample.priority,
