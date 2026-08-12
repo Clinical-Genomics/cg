@@ -1475,13 +1475,17 @@ def test_get_compressible_samples(store: Store, helpers: StoreHelpers):
     )
     helpers.add_relationship(store=store, case=running_case, sample=running_sample)
 
+    # GIVEN a date that should not exclude cases
+    cut_off_date = datetime.now() + timedelta(1)
+
     # WHEN getting the samples to be compressed
     compressible_samples: list[Sample] = store.get_compressible_samples_by_internal_ids(
         internal_ids=[
             squeezable_sample.internal_id,
             compact_sample.internal_id,
             running_sample.internal_id,
-        ]
+        ],
+        case_created_before_date=cut_off_date,
     )
 
     # THEN only the compressible sample is returned
@@ -1524,10 +1528,41 @@ def test_get_compressible_samples_one_sample_two_cases(store: Store, helpers: St
     helpers.add_relationship(store=store, case=compact_case, sample=sample)
     helpers.add_relationship(store=store, case=running_case, sample=sample)
 
+    # GIVEN a date that should not exclude cases
+    cut_off_date = datetime.now() + timedelta(1)
+
     # WHEN getting compressible samples
     compressible_samples: list[Sample] = store.get_compressible_samples_by_internal_ids(
-        internal_ids=[sample.internal_id]
+        internal_ids=[sample.internal_id], case_created_before_date=cut_off_date
     )
 
     # THEN no sample should have been returned
+    assert compressible_samples == []
+
+
+def test_get_compressible_samples_one_sample_only_young_cases(store: Store, helpers: StoreHelpers):
+    # GIVEN compressible samples in cases that allow for compression
+    squeezable_sample: Sample = helpers.add_sample(store=store, internal_id="squeezable_sample")
+    squeezable_case: Case = helpers.add_case(
+        store=store,
+        internal_id="squeezable_case",
+        is_compressible=True,
+        action=CaseActions.HOLD,
+        name="squeezable_case",
+        customer_id="squeezable_customer",
+    )
+    helpers.add_relationship(store=store, case=squeezable_case, sample=squeezable_sample)
+
+    # GIVEN a date that should exclude cases
+    cut_off_date = datetime.now() - timedelta(1)
+
+    # WHEN getting the samples to be compressed
+    compressible_samples: list[Sample] = store.get_compressible_samples_by_internal_ids(
+        internal_ids=[
+            squeezable_sample.internal_id,
+        ],
+        case_created_before_date=cut_off_date,
+    )
+
+    # THEN only the compressible sample is returned
     assert compressible_samples == []

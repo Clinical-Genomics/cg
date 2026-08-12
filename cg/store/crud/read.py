@@ -2052,7 +2052,13 @@ class ReadHandler(BaseHandler):
         incompressible_case_samples_subquery: ScalarSelect = (
             select(CaseSample.sample_id)
             .join(Case, Case.id == CaseSample.case_id)
-            .where(or_(Case.is_compressible.is_(False), Case.action.in_(CASE_ACTIVE_ACTIONS)))
+            .where(
+                or_(
+                    Case.is_compressible.is_(False),
+                    Case.action.in_(CASE_ACTIVE_ACTIONS),
+                    Case.created_at >= case_created_before_date,
+                )
+            )
         ).scalar_subquery()
 
         query: Select[tuple[Sample]] = (
