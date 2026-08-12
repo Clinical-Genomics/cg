@@ -130,7 +130,6 @@ class StoreCaseOrderService(StoreOrderService):
         self,
         case: Case,
         customer: Customer,
-        order_name: str,
         ordered: datetime,
         sample: SampleInCase,
         ticket: str,
@@ -147,7 +146,6 @@ class StoreCaseOrderService(StoreOrderService):
             internal_id=sample._generated_lims_id,
             lims_status=lims_status,
             no_invoice=application_version.application.is_external,
-            order=order_name,
             ordered=ordered,
             original_ticket=ticket,
             priority=case.priority,
@@ -175,11 +173,10 @@ class StoreCaseOrderService(StoreOrderService):
         return db_case
 
     def _create_db_order(self, order: OrderWithCases) -> DbOrder:
-        customer: Customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=order.customer
-        )
+        customer: Customer = self.status_db.get_customer_by_internal_id_strict(order.customer)
         return DbOrder(
             customer=customer,
+            name=order.name,
             order_date=datetime.now(),
             ticket_id=order._generated_ticket_id,
         )
@@ -231,7 +228,6 @@ class StoreCaseOrderService(StoreOrderService):
                     db_sample: DbSample = self._create_db_sample(
                         case=case,
                         customer=customer,
-                        order_name=order.name,
                         ordered=datetime.now(),
                         sample=sample,
                         ticket=str(order._generated_ticket_id),

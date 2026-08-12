@@ -96,8 +96,7 @@ class DownsampleData:
             internal_id=self.downsampled_sample_name,
             last_sequenced_at=self.original_sample.last_sequenced_at,
             lims_status=self.original_sample.lims_status,
-            name=self.downsampled_sample_name,
-            order=self.original_sample.order,
+            name=self.downsampled_sample_name,  # How important is it to have the old order name?
             prepared_at=self.original_sample.prepared_at,
             priority=Priority.standard,
             reads=multiply_by_million(self.number_of_reads),

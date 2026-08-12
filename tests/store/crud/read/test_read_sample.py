@@ -18,7 +18,7 @@ from cg.server.dto.samples.requests import (
     SortDirection,
     UnhandledSamplesSortBy,
 )
-from cg.store.models import Case, Customer, Invoice, OrderTypeApplication, Sample
+from cg.store.models import Case, CaseSample, Customer, Invoice, OrderTypeApplication, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -565,10 +565,17 @@ def test_get_samples_by_customer_id_and_pattern_name(store: Store, helpers: Stor
     sample_to_query_via_internal_id: Sample = helpers.add_sample(
         customer_id="cust000", internal_id="internal_id_to_search_for", store=store
     )
-    sample_to_query_via_order: Sample = helpers.add_sample(
-        customer_id="cust000", order="order_to_search_for", store=store
-    )
+    sample_to_query_via_order: Sample = helpers.add_sample(customer_id="cust000", store=store)
     customer: Customer = sample_to_query_via_name.customer
+    order = store.add_order(customer=customer, name="order_to_search_for", ticket_id=123)
+    store.add_item_to_store(order)
+    store.commit_to_store()
+    case = helpers.ensure_case(store=store, order=order)
+    case_sample: CaseSample = store.relate_sample(
+        case=case, sample=sample_to_query_via_order, status="affected", should_deliver_sample=True
+    )
+    store.add_item_to_store(case_sample)
+    store.commit_to_store()
 
     # WHEN getting samples via customers and pattern
     samples_matching_name, _ = store.get_samples_by_customers_and_pattern(

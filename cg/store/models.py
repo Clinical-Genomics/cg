@@ -711,7 +711,7 @@ class Panel(Base):
 
 class Pool(Base):
     __tablename__ = "pool"
-    __table_args__ = (UniqueConstraint("order", "name", name="_order_name_uc"),)
+    __table_args__ = (UniqueConstraint("order_id", "name", name="_order_name_uc"),)
 
     application_version_id: Mapped[int] = mapped_column(ForeignKey("application_version.id"))
     application_version: Mapped["ApplicationVersion"] = orm.relationship(
@@ -726,7 +726,6 @@ class Pool(Base):
     invoice_id: Mapped[int | None] = mapped_column(ForeignKey("invoice.id"))
     name: Mapped[Str32]
     no_invoice: Mapped[bool | None] = mapped_column(default=False)
-    order: Mapped[Str64]
     order_id: Mapped[int] = mapped_column(ForeignKey("order.id"))
     db_order: Mapped["Order"] = orm.relationship(foreign_keys=[order_id])
     ordered_at: Mapped[datetime]
@@ -735,12 +734,18 @@ class Pool(Base):
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="pools")
     samples: Mapped[list["Sample"]] = orm.relationship(back_populates="pool")
 
-    def to_dict(self):
-        return to_dict(model_instance=self)
+    @property
+    def order(self):
+        return self.db_order.name
 
     @property
     def ticket(self) -> str | None:
         return str(self.db_order.ticket_id) if self.db_order else None
+
+    def to_dict(self):
+        pool_dict = to_dict(model_instance=self)
+        pool_dict["order"] = self.order
+        return pool_dict
 
 
 class Sample(Base, PriorityMixin):
@@ -772,7 +777,6 @@ class Sample(Base, PriorityMixin):
     loqusdb_id: Mapped[Str64 | None]
     name: Mapped[Str128]
     no_invoice: Mapped[bool] = mapped_column(default=False)
-    order: Mapped[Str64 | None]
     ordered_at: Mapped[datetime]
     organism_id: Mapped[int | None] = mapped_column(ForeignKey("organism.id"))
     organism: Mapped["Organism | None"] = orm.relationship(foreign_keys=[organism_id])
@@ -1012,6 +1016,29 @@ class Sample(Base, PriorityMixin):
             .label("ticket_id_from_original_order")
         )
 
+    @hybrid_property
+    def order(self) -> str | None:
+        if case := self.case_that_delivers:
+            if order := case.original_order:
+                return order.name
+        return None
+
+    @order.expression
+    @classmethod
+    def order(cls) -> SQLColumnExpression[int]:
+        return (
+            select(Order.name)
+            .join(Order.cases)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .order_by(Order.order_date.asc())
+            .limit(1)
+            .label("order")
+        )
+
     def to_dict(self, links: bool = False) -> dict:
         """Represent as dictionary"""
         data = to_dict(model_instance=self)
@@ -1021,6 +1048,7 @@ class Sample(Base, PriorityMixin):
         data["application"] = self.application_version.application.to_dict()
         data["hifi_yield"] = self.hifi_yield
         data["uses_reads"] = True
+        data["order"] = self.order
         if self.device_type == DeviceType.PACBIO:
             data["uses_reads"] = False
         if links:
@@ -1088,6 +1116,7 @@ class Order(Base):
     cases: Mapped[list[Case]] = orm.relationship(secondary=order_case, back_populates="orders")
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
+    name: Mapped[str]
     order_date: Mapped[datetime] = mapped_column(default=datetime.now)
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
     is_open: Mapped[bool] = mapped_column(default=True)
