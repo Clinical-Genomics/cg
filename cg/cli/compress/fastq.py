@@ -38,7 +38,7 @@ LOG = logging.getLogger(__name__)
 def fastq_cmd(
     context: CGConfig,
     case_id: str | None,
-    days_back: int,  # TODO add day limit
+    days_back: int,
     dry_run: bool,
     number_of_samples: int,
 ):

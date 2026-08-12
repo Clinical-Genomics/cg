@@ -287,7 +287,7 @@ def test_compress_fastq_cli_sample_all_flags(
     )
 
 
-@pytest.mark.freeze_time()
+@pytest.mark.freeze_time
 def test_get_samples_available_for_compression():
     # GIVEN list of sample ids
     internal_ids: list[str] = ["sample1", "sample2"]
