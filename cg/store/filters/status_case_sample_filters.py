@@ -1,10 +1,9 @@
 from enum import Enum
 from typing import Callable
 
-from sqlalchemy import distinct
 from sqlalchemy.orm import Query
 
-from cg.constants.constants import CASE_ACTIVE_ACTIONS, SequencingQCStatus
+from cg.constants.constants import SequencingQCStatus
 from cg.store.models import Case, CaseSample, Order, Sample
 
 
