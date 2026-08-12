@@ -158,7 +158,6 @@ def test_create_db_sample_with_lims_status_and_invoice(
     # WHEN creating a db sample with the application
     store_order_service._create_db_sample(
         customer=customer,
-        order_name="order",
         organism=create_autospec(Organism),
         sample=fastq_sample,
         ticket_id=1234567,
