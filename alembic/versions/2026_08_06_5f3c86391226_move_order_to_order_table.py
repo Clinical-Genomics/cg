@@ -176,13 +176,11 @@ def downgrade():
                 elif sample.original_ticket == str(order.ticket_id):
                     sample.order = order.name
                     session.add(sample)
-                    continue
                 # If unable to match on original ticket, check if it is the only order the sample has been in
                 elif len(sample.links) == 1:
                     if len(sample.links[0].case.orders) == 1:
                         sample.order = order.name
                         session.add(sample)
-                        continue
         for pool in order.pools:
             if pool.order:
                 continue
