@@ -52,7 +52,10 @@ def fastq_cmd(
     )
     if samples:
         compress_fastq_to_spring_for_samples(
-            compress_api=compress_api, samples=samples, sample_limit=number_of_samples
+            compress_api=compress_api,
+            samples=samples,
+            sample_limit=number_of_samples,
+            dry_run=dry_run,
         )
     else:
         LOG.info("No samples available for compression")

@@ -106,8 +106,13 @@ def compress_fastq_to_spring_for_samples(
     compress_api: CompressAPI,
     samples: list[Sample],
     sample_limit: int | None,
+    dry_run: bool = False,
 ) -> None:
     """Compress the fastq files to spring for a list of samples."""
+    if dry_run:
+        update_compress_api(compress_api=compress_api, dry_run=dry_run)
+        LOG.info("Dry-run activated - no samples will be submitted for compression")
+
     if sample_limit is not None:
         samples = samples[:sample_limit]
     for sample in samples:

@@ -130,7 +130,7 @@ def test_compress_fastq_cli(cli_runner: CliRunner, cg_context: CGConfig, mocker:
 
     # THEN the samples were sent for compression using the default limit
     compress_samples_mock.assert_called_once_with(
-        compress_api=compress_api, samples=samples, sample_limit=5
+        compress_api=compress_api, samples=samples, sample_limit=5, dry_run=False
     )
 
 
@@ -200,7 +200,7 @@ def test_compress_fastq_cli_case_id(
 
     # THEN the samples were sent for compression using the default limit
     compress_samples_mock.assert_called_once_with(
-        compress_api=compress_api, samples=samples, sample_limit=5
+        compress_api=compress_api, samples=samples, sample_limit=5, dry_run=False
     )
 
 
@@ -238,7 +238,7 @@ def test_compress_fastq_cli_case_id_no_samples(
     compress_samples_mock.assert_not_called()
 
 
-def test_compress_fastq_cli_sample_limit(
+def test_compress_fastq_cli_sample_all_flags(
     cli_runner: CliRunner, cg_context: CGConfig, mocker: MockFixture
 ):
     # GIVEN a store, housekeeper api and compress api on the context
@@ -255,18 +255,22 @@ def test_compress_fastq_cli_sample_limit(
     sample3: Sample = create_autospec(Sample, internal_id="sample3")
     samples: list[Sample] = [sample1, sample2, sample3]
     mocker.patch.object(fastq_module, "get_samples_available_for_compression", return_value=samples)
+    compress_samples_mock = mocker.patch.object(
+        fastq_module, "compress_fastq_to_spring_for_samples"
+    )
 
     # WHEN running the compress fastq command with a sample limit of two
-    result: Result = cli_runner.invoke(fastq_cmd, ["--number-of-samples", "2"], obj=cg_context)
+    result: Result = cli_runner.invoke(
+        fastq_cmd, ["--number-of-samples", "2", "--dry-run"], obj=cg_context
+    )
 
     # THEN the command exits successfully
     assert result.exit_code == 0
 
-    # THEN only the first two samples, within the limit, were sent for compression
-    assert compress_api.compress_fastq.call_args_list == [
-        call(sample_id=sample1.internal_id),
-        call(sample_id=sample2.internal_id),
-    ]
+    # THEN the samples were sent for compression using the default limit
+    compress_samples_mock.assert_called_once_with(
+        compress_api=compress_api, samples=samples, sample_limit=2, dry_run=True
+    )
 
 
 def test_get_samples_available_for_compression():
@@ -390,3 +394,26 @@ def test_compress_fastq_to_spring_for_samples_with_limit():
 
     # THEN only one call was made
     compress_api.as_mock.compress_fastq.assert_called_once_with(sample_id=sample1.internal_id)
+
+
+def test_compress_fastq_to_spring_for_samples_with_dry_run():
+    # GIVEN compress api
+    compress_api: TypedMock[CompressAPI] = create_typed_mock(CompressAPI)
+
+    # GIVEN a sample
+    sample1: Sample = create_autospec(Sample, internal_id="sample1")
+    samples: list[Sample] = [sample1]
+
+    # WHEN compressing samples with a sample limit of one
+    compress_fastq_to_spring_for_samples(
+        compress_api=compress_api.as_type,
+        samples=samples,
+        sample_limit=1,
+        dry_run=True,
+    )
+
+    # THEN compression was called
+    compress_api.as_mock.compress_fastq.assert_called_once_with(sample_id=sample1.internal_id)
+
+    # THEN dry-run was enforced
+    compress_api.as_mock.set_dry_run.assert_called_once_with(dry_run=True)
