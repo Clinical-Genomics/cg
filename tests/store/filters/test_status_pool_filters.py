@@ -4,7 +4,6 @@ from cg.store.filters.status_pool_filters import (
     filter_pools_by_customer_ids,
     filter_pools_by_invoice_id,
     filter_pools_by_name_enquiry,
-    filter_pools_by_order_enquiry,
     filter_pools_do_invoice,
     filter_pools_is_delivered,
     filter_pools_is_not_delivered,
@@ -213,33 +212,6 @@ def test_filter_pools_by_name_enquiry(
     pools: Query = filter_pools_by_name_enquiry(
         pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool),
         name_enquiry=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
-    )
-
-    # THEN a Query is returned
-    assert isinstance(pools, Query)
-
-    # THEN pools should contain the test pool
-    assert pools.all()
-
-    # THEN only one pool should be returned
-    assert len(pools.all()) == 1
-
-    # THEN the pool should have the expected name
-    assert pools.all()[0].name == name
-
-
-def test_filter_pools_by_order_enquiry(
-    store_with_a_pool_with_and_without_attributes: Store,
-    name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
-):
-    """Test that a pool is returned when there is a pool with a specific order enquiry."""
-
-    # GIVEN a store with two pools of which one has an order enquiry
-
-    # WHEN getting pools with order enquiry
-    pools: Query = filter_pools_by_order_enquiry(
-        pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool),
-        order_enquiry=StoreConstants.ORDER_POOL_WITH_ATTRIBUTES.value,
     )
 
     # THEN a Query is returned
