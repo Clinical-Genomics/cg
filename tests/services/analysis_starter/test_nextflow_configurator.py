@@ -422,3 +422,77 @@ def test_configure(
     pipeline_extension.configure.assert_called_once_with(
         case_id=case_id, case_run_directory=case_run_directory
     )
+
+
+def test_configure_with_separate_case_and_work_roots(
+    get_nextflow_config_dict: Callable,
+    mock_store_for_raredisease_file_creators: Store,
+    mocker: MockerFixture,
+):
+    # GIVEN a pipeline config with separate run and work roots
+    config_dict: dict = get_nextflow_config_dict(Workflow.RAREDISEASE)
+    config_dict["case_run_directory"] = "/launch/root"
+    config_dict["work_dir"] = "/work/root"
+    pipeline_config = RarediseaseConfig(**config_dict)
+
+    # GIVEN a several file creators
+    sample_sheet_creator = create_autospec(RarediseaseSampleSheetCreator)
+    params_file_creator = create_autospec(RarediseaseParamsFileCreator)
+    config_file_creator = create_autospec(NextflowConfigFileCreator)
+
+    # GIVEN a pipeline extension
+    pipeline_extension = create_autospec(PipelineExtension)
+
+    # GIVEN a nextflow configurator
+    configurator = NextflowConfigurator(
+        config_file_creator=config_file_creator,
+        params_file_creator=params_file_creator,
+        pipeline_config=pipeline_config,
+        sample_sheet_creator=sample_sheet_creator,
+        store=mock_store_for_raredisease_file_creators,
+        pipeline_extension=pipeline_extension,
+    )
+
+    # GIVEN that the case run directory is correctly created
+    mkdir_mock = mocker.patch.object(Path, "mkdir")
+
+    # GIVEN that all expected files are mocked to exist
+    mocker.patch.object(Path, "exists", return_value=True)
+
+    # GIVEN a case ID
+    case_id = "case123"
+
+    # WHEN we configure the case
+    config: NextflowCaseConfig = configurator.configure(case_id=case_id)
+
+    # THEN case files should be written under the case run directory
+    case_run_directory = Path("/launch/root", case_id)
+    assert config.nextflow_config_file == Path(
+        case_run_directory, f"{case_id}_nextflow_config.json"
+    ).as_posix()
+    assert config.params_file == Path(case_run_directory, f"{case_id}_params_file.yaml").as_posix()
+
+    # THEN the Nextflow work directory should use the separate work root
+    assert config.work_dir == Path("/work/root", case_id).as_posix()
+
+    # THEN the case run directory should have been created
+    mkdir_mock.assert_called_once_with(parents=True, exist_ok=True)
+
+    # THEN the file creators should have been called using the case run directory
+    sample_sheet_path = Path(case_run_directory, f"{case_id}_samplesheet.csv")
+    sample_sheet_creator.create.assert_called_once_with(
+        case_id=case_id, file_path=sample_sheet_path
+    )
+    params_file_creator.create.assert_called_once_with(
+        case_id=case_id,
+        file_path=Path(case_run_directory, f"{case_id}_params_file.yaml"),
+        sample_sheet_path=sample_sheet_path,
+    )
+    config_file_creator.create.assert_called_once_with(
+        case_id=case_id, file_path=Path(case_run_directory, f"{case_id}_nextflow_config.json")
+    )
+
+    # THEN the pipeline extension should have been configured with the case run directory
+    pipeline_extension.configure.assert_called_once_with(
+        case_id=case_id, case_run_directory=case_run_directory
+    )

@@ -31,10 +31,12 @@ class NextflowConfigurator(Configurator):
         pipeline_extension: PipelineExtension = PipelineExtension(),
     ):
         self.root_dir: str = pipeline_config.root
+        self.case_run_directory: str | None = getattr(pipeline_config, "case_run_directory", None)
         self.pipeline_repository = pipeline_config.repository
         self.pipeline_revision = pipeline_config.revision
         self.config_profiles = [pipeline_config.profile]
         self.pre_run_script = pipeline_config.pre_run_script
+        self.work_dir: str | None = getattr(pipeline_config, "work_dir", None)
         self.store: Store = store
         self.config_file_creator = config_file_creator
         self.pipeline_extension = pipeline_extension
@@ -115,6 +117,8 @@ class NextflowConfigurator(Configurator):
 
     def _get_case_run_directory(self, case_id: str) -> Path:
         """Path to case working directory."""
+        if self.case_run_directory:
+            return Path(self.case_run_directory, case_id)
         return Path(self.root_dir, case_id)
 
     def _create_case_directory(self, case_id: str) -> None:
@@ -123,6 +127,8 @@ class NextflowConfigurator(Configurator):
         case_path.mkdir(parents=True, exist_ok=True)
 
     def _get_work_dir(self, case_id: str) -> Path:
+        if self.work_dir:
+            return Path(self.work_dir, case_id)
         return Path(self.root_dir, case_id, "work")
 
     def _ensure_required_config_files_exist(self, config: NextflowCaseConfig) -> None:
