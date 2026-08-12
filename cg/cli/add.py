@@ -305,7 +305,6 @@ def add_case(
             name=order_name,
             ticket_id=int(ticket),
         )
-        LOG.info(f"Created order with name OrderFor{new_case.internal_id}")
     new_case.orders.append(order)
 
     new_case.customer = customer
