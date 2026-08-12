@@ -471,7 +471,6 @@ def store_with_multiple_pools_for_customer(
             store=store,
             customer_id=customer_id,
             name="_".join(["pool", str(number)]),
-            order="_".join(["pool", "order", str(number)]),
         )
     yield store
 
