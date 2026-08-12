@@ -125,10 +125,12 @@ def test_compress_fastq_cli(cli_runner: CliRunner, cg_context: CGConfig, mocker:
     # THEN the command exits successfully
     assert result.exit_code == 0
 
-    # THEN samples were fetched using the context's store and housekeeper api
-    get_samples_mock.assert_called_once_with(store=store, housekeeper=housekeeper, case_id=None)
+    # THEN samples were fetched using the right settings
+    get_samples_mock.assert_called_once_with(
+        store=store, housekeeper=housekeeper, age_limit_days=60, case_id=None
+    )
 
-    # THEN the samples were sent for compression using the default limit
+    # THEN the samples were sent for compression using the default settings
     compress_samples_mock.assert_called_once_with(
         compress_api=compress_api, samples=samples, sample_limit=5, dry_run=False
     )
@@ -159,8 +161,10 @@ def test_compress_fastq_cli_no_samples(
     # THEN the command exits successfully
     assert result.exit_code == 0
 
-    # THEN samples were fetched using the context's store and housekeeper api
-    get_samples_mock.assert_called_once_with(store=store, housekeeper=housekeeper, case_id=None)
+    # THEN samples were fetched using the right settings
+    get_samples_mock.assert_called_once_with(
+        store=store, housekeeper=housekeeper, age_limit_days=60, case_id=None
+    )
 
     # THEN no samples were sent for compression
     compress_samples_mock.assert_not_called()
@@ -193,9 +197,9 @@ def test_compress_fastq_cli_case_id(
     # THEN the command exits successfully
     assert result.exit_code == 0
 
-    # THEN samples were fetched using the given case id
+    # THEN samples were fetched using the right settings
     get_samples_mock.assert_called_once_with(
-        store=store, housekeeper=housekeeper, case_id="case_id"
+        store=store, housekeeper=housekeeper, age_limit_days=60, case_id="case_id"
     )
 
     # THEN the samples were sent for compression using the default limit
@@ -229,9 +233,9 @@ def test_compress_fastq_cli_case_id_no_samples(
     # THEN the command exits successfully
     assert result.exit_code == 0
 
-    # THEN samples were fetched using the given case id
+    # THEN samples were fetched using the right settings
     get_samples_mock.assert_called_once_with(
-        store=store, housekeeper=housekeeper, case_id="case_id"
+        store=store, housekeeper=housekeeper, age_limit_days=60, case_id="case_id"
     )
 
     # THEN no samples were sent for compression
@@ -254,14 +258,21 @@ def test_compress_fastq_cli_sample_all_flags(
     sample2: Sample = create_autospec(Sample, internal_id="sample2")
     sample3: Sample = create_autospec(Sample, internal_id="sample3")
     samples: list[Sample] = [sample1, sample2, sample3]
-    mocker.patch.object(fastq_module, "get_samples_available_for_compression", return_value=samples)
+    get_samples_mock = mocker.patch.object(
+        fastq_module, "get_samples_available_for_compression", return_value=samples
+    )
     compress_samples_mock = mocker.patch.object(
         fastq_module, "compress_fastq_to_spring_for_samples"
     )
 
-    # WHEN running the compress fastq command with a sample limit of two
+    # WHEN running the compress fastq command with all custom settings
     result: Result = cli_runner.invoke(
-        fastq_cmd, ["--number-of-samples", "2", "--dry-run"], obj=cg_context
+        fastq_cmd, ["--number-of-samples", "2", "--dry-run", "--days-back", "1337"], obj=cg_context
+    )
+
+    # THEN samples were fetched using the right settings
+    get_samples_mock.assert_called_once_with(
+        store=store, housekeeper=housekeeper, age_limit_days=1337, case_id="case_id"
     )
 
     # THEN the command exits successfully
@@ -287,7 +298,9 @@ def test_get_samples_available_for_compression():
     store: TypedMock[Store] = create_typed_mock(Store)
 
     # WHEN getting samples available for compression
-    get_samples_available_for_compression(store=store.as_type, housekeeper=housekeeper.as_type)
+    get_samples_available_for_compression(
+        store=store.as_type, housekeeper=housekeeper.as_type, age_limit_days=60
+    )
 
     # THEN the correct calls was made
     housekeeper.as_mock.get_bundle_names_with_fastq_files.assert_called_once()
@@ -309,7 +322,7 @@ def test_get_samples_available_for_compression_input_case():
 
     # WHEN getting samples available for compression with a case id
     get_samples_available_for_compression(
-        store=store.as_type, housekeeper=housekeeper, case_id="case_id"
+        store=store.as_type, housekeeper=housekeeper, age_limit_days=60, case_id="case_id"
     )
 
     # THEN the correct calls was made
@@ -327,7 +340,9 @@ def test_get_samples_available_for_compression_missing_samples():
     store: TypedMock[Store] = create_typed_mock(Store)
 
     # WHEN getting samples available for compression
-    get_samples_available_for_compression(store=store.as_type, housekeeper=housekeeper.as_type)
+    get_samples_available_for_compression(
+        store=store.as_type, housekeeper=housekeeper.as_type, age_limit_days=60
+    )
 
     # THEN the correct calls was made
     housekeeper.as_mock.get_bundle_names_with_fastq_files.assert_called_once()
@@ -346,7 +361,7 @@ def test_get_samples_available_for_compression_input_case_missing_samples():
 
     # WHEN getting samples available for compression with a case id
     get_samples_available_for_compression(
-        store=store.as_type, housekeeper=housekeeper, case_id="case_id"
+        store=store.as_type, housekeeper=housekeeper, age_limit_days=60, case_id="case_id"
     )
 
     # THEN the correct calls was made

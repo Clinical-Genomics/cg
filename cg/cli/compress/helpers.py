@@ -39,12 +39,14 @@ def get_cases_to_process(
 
 
 def get_samples_available_for_compression(
-    store: Store, housekeeper: HousekeeperAPI, case_id: str | None = None
+    store: Store, housekeeper: HousekeeperAPI, age_limit_days: int, case_id: str | None = None
 ) -> list[Sample] | None:
     """Return samples available for compression."""
 
     if case_id:
-        sample_ids: list[str] = store.get_sample_ids_by_case_id(case_id)
+        sample_ids: list[str] = store.get_sample_ids_by_case_id(
+            case_id
+        )  # TODO is there a better option for this one?
         if not sample_ids:
             LOG.warning(f"No case or samples found for {case_id}")
             return None

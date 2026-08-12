@@ -30,7 +30,7 @@ LOG = logging.getLogger(__name__)
     "--days-back",
     default=60,
     show_default=True,
-    help="Threshold for how long ago was the case created",
+    help="Only cases older than this many days are eligible for compression",
 )
 @click.option("-n", "--number-of-samples", default=5, type=int, show_default=True)
 @DRY_RUN
@@ -39,7 +39,7 @@ def fastq_cmd(
     context: CGConfig,
     case_id: str | None,
     days_back: int,  # TODO add day limit
-    dry_run: bool,  # TODO introduce dry_run for testing
+    dry_run: bool,
     number_of_samples: int,
 ):
     """Compress old FASTQ files into SPRING."""
@@ -48,7 +48,7 @@ def fastq_cmd(
     store: Store = context.status_db
     housekeeper: HousekeeperAPI = context.housekeeper_api
     samples: list[Sample] | None = get_samples_available_for_compression(
-        store=store, housekeeper=housekeeper, case_id=case_id
+        store=store, housekeeper=housekeeper, age_limit_days=days_back, case_id=case_id
     )
     if samples:
         compress_fastq_to_spring_for_samples(
