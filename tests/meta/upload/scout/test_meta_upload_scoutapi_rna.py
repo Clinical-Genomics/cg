@@ -9,6 +9,7 @@ from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import HK_MULTIQC_HTML_TAG, Workflow
+from cg.constants.constants import DNA_WORKFLOWS_WITH_RNA_UPLOAD
 from cg.constants.scout import ScoutCustomCaseReportTags
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CgDataError
@@ -552,7 +553,7 @@ def test_create_rna_dna_collections(
     assert len(found_dna_case_ids) == 1
     dna_case_id: str = found_dna_case_ids[0]
     dna_case: Case = rna_store.get_case_by_internal_id_strict(dna_case_id)
-    assert dna_case.data_analysis == Workflow.RAREDISEASE
+    assert dna_case.data_analysis in DNA_WORKFLOWS_WITH_RNA_UPLOAD
 
 
 def test_add_rna_sample(
