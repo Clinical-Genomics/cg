@@ -530,7 +530,8 @@ def test_create_rna_dna_collections(
 ):
     """Test that the create_rna_dna_collections returns a list of RNADNACollections."""
 
-    # GIVEN an RNA case with RNA samples that are connected by subject ID to DNA samples in a DNA case
+    # GIVEN an RNA case with RNA samples that are connected by subject ID to DNA samples
+    # GIVEN the connected DNA samples are connected to cases in workflows MIP-DNA, raredisease and nallo
     rna_case: Case = rna_store.get_case_by_internal_id_strict(rna_case_id)
 
     # WHEN running the method to create a list of RNADNACollections
@@ -545,15 +546,18 @@ def test_create_rna_dna_collections(
         for rna_dna_collection in rna_dna_collections
     )
 
-    # THEN each sample should have a collection
+    # THEN each sample should have one collection
     assert len(rna_dna_collections) == 4
 
-    # THEN each sample should only be matched with cases with valid workflows
-    found_dna_case_ids = rna_dna_collections[0].dna_case_ids
-    assert len(found_dna_case_ids) == 1
-    dna_case_id: str = found_dna_case_ids[0]
-    dna_case: Case = rna_store.get_case_by_internal_id_strict(dna_case_id)
-    assert dna_case.data_analysis in DNA_WORKFLOWS_WITH_RNA_UPLOAD
+    # THEN each collection should refer to two DNA cases
+    for rna_dna_collection in rna_dna_collections:
+        found_dna_case_ids = rna_dna_collection.dna_case_ids
+        assert len(found_dna_case_ids) == 2
+
+        # THEN each such DNA case should be for a DNA workflow with RNA upload enabled
+        for found_dna_case_id in found_dna_case_ids:
+            dna_case: Case = rna_store.get_case_by_internal_id_strict(found_dna_case_id)
+            assert dna_case.data_analysis in DNA_WORKFLOWS_WITH_RNA_UPLOAD
 
 
 def test_add_rna_sample(
@@ -879,12 +883,13 @@ def test_upload_rna_report_to_not_yet_uploaded_dna_case_in_scout(
         bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
     )[0]
 
-    # WHEN finding the related DNA case with no successful upload
+    # GIVEN no related DNA case has been uploaded
     dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_related_uploaded_dna_cases(
         rna_case_id
     )
-    dna_case: Case = rna_store.get_case_by_internal_id(internal_id=list(dna_case_ids)[0])
-    dna_case.analyses[0].uploaded_at = None
+    for dna_case_id in dna_case_ids:
+        dna_case: Case = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
+        dna_case.analyses[0].uploaded_at = None
 
     # WHEN trying to upload the report
     # THEN a CgDataError should be raised
