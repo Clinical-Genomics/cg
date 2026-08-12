@@ -10,7 +10,7 @@ email_base_settings:
   smtp_server: "localhost"
 freshdesk:
   api_key: "some_api_key"
-  base_url: "https://example.freshdesk.com"
+  base_url: "http://localhost:8888/freshdesk"
 
 nats:
   server: nats://localhost/nats
