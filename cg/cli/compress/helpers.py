@@ -44,9 +44,8 @@ def get_samples_available_for_compression(
     """Return samples available for compression."""
 
     if case_id:
-        sample_ids: list[str] = store.get_sample_ids_by_case_id(
-            case_id
-        )  # TODO is there a better option for this one?
+        case: Case = store.get_case_by_internal_id_strict(case_id)
+        sample_ids: list[str] = [link.sample.internal_id for link in case.links]
         if not sample_ids:
             LOG.warning(f"No case or samples found for {case_id}")
             return None
@@ -118,7 +117,7 @@ def compress_fastq_to_spring_for_samples(
         LOG.info("Dry-run activated - no samples will be submitted for compression")
 
     if sample_limit is not None:
-        samples = samples[:sample_limit]
+        samples = samples[:sample_limit]  # TODO could be improved
     for sample in samples:
         is_sample_submitted: bool = compress_api.compress_fastq(sample_id=sample.internal_id)
         if not is_sample_submitted:
