@@ -611,11 +611,12 @@ class ReadHandler(BaseHandler):
 
     def get_pools_by_order_enquiry(self, *, order_enquiry: str = None) -> list[Pool]:
         """Return all the pools with an order fitting the enquiry."""
-        return apply_pool_filter(
-            pools=self._get_query(table=Pool),
-            order_enquiry=order_enquiry,
-            filter_functions=[PoolFilter.BY_ORDER_ENQUIRY],
-        ).all()
+        return (
+            self._get_query(table=Pool)
+            .join(Pool.db_order)
+            .filter(Order.name.contains(order_enquiry))
+            .all()
+        )
 
     def get_pool_by_entry_id(self, entry_id: int) -> Pool:
         """Return a pool by entry id."""

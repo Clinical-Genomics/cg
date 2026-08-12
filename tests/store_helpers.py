@@ -551,11 +551,10 @@ class StoreHelpers:
         customer_id: int,
         ticket_id: int,
         order_date: datetime = datetime(year=2023, month=12, day=24),
+        name: str = "order_name",
     ) -> Order:
         order = Order(
-            customer_id=customer_id,
-            ticket_id=ticket_id,
-            order_date=order_date,
+            customer_id=customer_id, ticket_id=ticket_id, order_date=order_date, name=name
         )
         store.session.add(order)
         store.session.commit()
@@ -607,8 +606,7 @@ class StoreHelpers:
         """Load a case with samples and link relations from a dictionary."""
         customer_obj = StoreHelpers.ensure_customer(store)
         order = store.get_order_by_ticket_id(ticket_id=int(case_info["tickets"])) or Order(
-            ticket_id=int(case_info["tickets"]),
-            customer_id=customer_obj.id,
+            ticket_id=int(case_info["tickets"]), customer_id=customer_obj.id, name="order_name"
         )
         case = Case(
             name=case_info["name"],
@@ -1031,7 +1029,6 @@ class StoreHelpers:
         store: Store,
         customer_id: str = "cust000",
         name: str = "test_pool",
-        order: str = "test_order",
         application_tag: str = "dummy_tag",
         application_type: str = "tgs",
         is_external: bool = False,
@@ -1040,11 +1037,13 @@ class StoreHelpers:
         received_at: datetime = None,
         no_invoice: bool = None,
         invoice_id: int = None,
-        ticket: str = "123456",
+        ticket: int = 123456,
     ) -> Pool:
         """Utility function to add a pool that can be used in tests."""
         customer_id = customer_id or "cust000"
-        customer: Customer = store.get_customer_by_internal_id(customer_internal_id=customer_id)
+        customer: Customer | None = store.get_customer_by_internal_id(
+            customer_internal_id=customer_id
+        )
         if not customer:
             customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
 
@@ -1057,14 +1056,13 @@ class StoreHelpers:
         )
         db_order: Order | None = store.get_order_by_ticket_id(ticket)
         if ticket and not db_order:
-            db_order = store.add_order(customer=customer, ticket_id=int(ticket))
+            db_order = store.add_order(customer=customer, name="order_name", ticket_id=ticket)
 
         pool = store.add_pool(
             name=name,
             ordered=datetime.now(),
             application_version=application_version,
             customer=customer,
-            order=order,
             delivered_at=delivered_at,
             received_at=received_at,
             no_invoice=no_invoice,
