@@ -1497,7 +1497,6 @@ def test_get_compressible_samples(store: Store, helpers: StoreHelpers):
 
     # THEN only the compressible sample is returned
     assert compressible_samples == [squeezable_sample]
-    assert compact_sample not in compressible_samples
 
 
 def test_get_compressible_samples_one_sample_two_cases(store: Store, helpers: StoreHelpers):
