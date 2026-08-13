@@ -404,7 +404,7 @@ def test_compress_fastq_to_spring_for_samples():
     compress_fastq_to_spring_for_samples(
         compress_api=compress_api.as_type,
         samples=samples,
-        sample_limit=None,
+        sample_limit=2,
     )
 
     # THEN correct method calls were made
