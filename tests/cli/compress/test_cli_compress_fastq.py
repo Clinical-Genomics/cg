@@ -18,7 +18,7 @@ from cg.cli.compress.helpers import (
 from cg.constants import Workflow
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, CaseSample, Sample
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 from tests.typed_mock import TypedMock, create_typed_mock
@@ -317,7 +317,7 @@ def test_get_samples_available_for_compression():
 
 
 @pytest.mark.freeze_time("1822-09-18 13:37")
-def test_get_samples_available_for_compression_input_case(mocker: MockFixture):
+def test_get_samples_available_for_compression_input_case():
     # GIVEN list of sample ids
     internal_ids: list[str] = ["sample1", "sample2"]
 
@@ -330,9 +330,7 @@ def test_get_samples_available_for_compression_input_case(mocker: MockFixture):
     # GIVEN a case linked to two samples
     sample1: Sample = create_autospec(Sample, internal_id="sample1")
     sample2: Sample = create_autospec(Sample, internal_id="sample2")
-    link1: CaseSample = create_autospec(CaseSample, sample=sample1)
-    link2: CaseSample = create_autospec(CaseSample, sample=sample2)
-    case: Case = create_autospec(Case, internal_id="case_id", links=[link1, link2])
+    case: Case = create_autospec(Case, internal_id="case_id", samples=[sample1, sample2])
 
     # GIVEN that the case can be found
     store.as_type.get_case_by_internal_id_strict = Mock(return_value=case)
