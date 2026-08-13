@@ -201,6 +201,7 @@ raredisease:
   pipeline_deliverables: "raredisease_pipeline_deliverables.yaml"
   platform: {test_root_dir}/platform.config
   profile: raredisease_profile
+  rank_model_threshold: 5
   rank_model_snv: {test_root_dir}/ghxx_rd_rank_model_snvs.ini
   rank_model_sv: {test_root_dir}/ghxx_rd_rank_model_svs.ini
   reference: "raredisease-reference.fasta"
