@@ -8,7 +8,6 @@ from genologics import entities
 from genologics.descriptors import EntityDescriptor
 from genologics.entities import Artifact, Sample
 from genologics.lims import Lims
-from numpy.ma.testutils import approx
 from pytest_mock import MockerFixture
 from requests.exceptions import HTTPError
 
@@ -204,7 +203,7 @@ def test_get_last_used_input_amount(minimal_lims_api: LimsAPI):
     last_used_input_amount = minimal_lims_api._get_last_used_input_amount(input_amounts)
 
     # THEN the input amount with the latest date is returned
-    assert approx(last_used_input_amount, 20.0)
+    assert last_used_input_amount == pytest.approx(20.0)
 
 
 @pytest.mark.parametrize(
@@ -255,7 +254,7 @@ def test_get_input_amount_success(
         )
 
     # THEN the input amount is as expected
-    assert approx(input_amount, amount_in_lims)
+    assert input_amount == pytest.approx(amount_in_lims)
 
 
 def test_get_input_amount_lost_connection_to_lims(minimal_lims_api: LimsAPI, mocker: MockerFixture):
