@@ -52,7 +52,7 @@ def microsalt_store(base_store: Store, helpers: StoreHelpers) -> Store:
         status=StatusEnum.unknown,
         should_deliver_sample=True,
     )
-    order: Order = base_store.add_order(customer=customer, ticket_id=1)
+    order: Order = base_store.add_order(customer=customer, name="order_name", ticket_id=1)
     microsalt_case.orders.append(order)
     base_store.add_item_to_store(microsalt_case)
     base_store.add_item_to_store(microsalt_sample)

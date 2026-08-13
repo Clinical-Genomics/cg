@@ -2,17 +2,23 @@
 
 import logging
 from pathlib import Path
+from unittest.mock import create_autospec
 
 from _pytest.logging import LogCaptureFixture
 from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import Workflow
 from cg.constants.delivery import INBOX_NAME
 from cg.meta.delivery.delivery import DeliveryAPI
 from cg.models.cg_config import CGConfig
 from cg.models.delivery.delivery import DeliveryFile
+from cg.services.fastq_concatenation_service.fastq_concatenation_service import (
+    FastqConcatenationService,
+)
 from cg.store.models import Case, Sample
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_is_sample_deliverable(delivery_context_microsalt: CGConfig, sample_id: str):
@@ -289,3 +295,50 @@ def test_get_analysis_case_delivery_files(
             delivery_cram_file.name,
             delivery_another_cram_file.name,
         ]
+
+
+def test_get_analysis_case_delivery_files_balsamic_tags():
+    # GIVEN a Balsamic case
+    case: Case = create_autospec(
+        Case, data_analysis=Workflow.BALSAMIC, internal_id="case_id", sample_ids=["sample_id"]
+    )
+
+    # GIVEN a HousekeeperAPI
+    housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
+
+    # GIVEN a DeliveryAPI
+    delivery_api = DeliveryAPI(
+        delivery_path=Path("delivery/path"),
+        fastq_concatenation_service=create_autospec(FastqConcatenationService),
+        housekeeper_api=housekeeper_api.as_type,
+        store=create_autospec(Store),
+    )
+
+    # WHEN getting the case delivery files
+    delivery_api.get_analysis_case_delivery_files(case)
+
+    # THEN they should have been fetched with the tags associated with the case's workflow
+    balsamic_case_tags = [
+        {"delivery-report"},
+        {"multiqc-html"},
+        {"metrics"},
+        {"cnv-report"},
+        {"coverage"},
+        {"germline"},
+        {"vcf-sv"},
+        {"vcf-sv-index"},
+        {"vcf-sv-research"},
+        {"vcf-sv-research-index"},
+        {"vcf-sv-clinical"},
+        {"vcf-sv-clinical-index"},
+        {"vcf-snv"},
+        {"vcf-snv-index"},
+        {"vcf-snv-research-unfiltered"},
+        {"vcf-snv-research-unfiltered-index"},
+        {"vcf-snv-clinical"},
+        {"vcf-snv-clinical-index"},
+        {"vcf2cytosure"},
+    ]
+    housekeeper_api.as_mock.get_files_from_latest_version_containing_tags.assert_called_once_with(
+        bundle_name="case_id", tags=balsamic_case_tags, excluded_tags=["sample_id"]
+    )
