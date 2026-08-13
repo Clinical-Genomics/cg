@@ -59,6 +59,7 @@ class StoreMicrobialOrderService(StoreOrderService):
         new_samples = []
         db_order: DbOrder = self.status_db.add_order(
             customer=customer,
+            name=order.name,
             ticket_id=order._generated_ticket_id,
         )
         db_case: DbCase = self._create_case(customer=customer, order=order)
@@ -68,7 +69,6 @@ class StoreMicrobialOrderService(StoreOrderService):
                 organism: Organism = self._ensure_organism(sample)
                 db_sample = self._create_db_sample(
                     customer=customer,
-                    order_name=order.name,
                     organism=organism,
                     sample=sample,
                     ticket_id=order._generated_ticket_id,
@@ -123,7 +123,6 @@ class StoreMicrobialOrderService(StoreOrderService):
     def _create_db_sample(
         self,
         customer: Customer,
-        order_name: str,
         organism: Organism,
         sample: MicrobialSample,
         ticket_id: int,
@@ -144,7 +143,6 @@ class StoreMicrobialOrderService(StoreOrderService):
             lims_status=lims_status,
             name=sample.name,
             no_invoice=application_version.application.is_external,
-            order=order_name,
             ordered=datetime.now(),
             organism=organism,
             original_ticket=str(ticket_id),

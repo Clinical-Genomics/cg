@@ -56,7 +56,6 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
                 )
                 db_sample: Sample = self._create_db_sample(
                     sample=sample,
-                    order_name=order.name,
                     ticket_id=str(db_order.ticket_id),
                     customer=db_order.customer,
                 )
@@ -79,7 +78,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=order.customer
         )
-        return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
+        return self.status_db.add_order(customer=customer, name=order.name, ticket_id=ticket_id)
 
     def _create_db_case_for_sample(
         self, sample: MicrobialFastqSample, customer: Customer, order: MicrobialFastqOrder
@@ -100,7 +99,6 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
     def _create_db_sample(
         self,
         sample: MicrobialFastqSample,
-        order_name: str,
         ticket_id: str,
         customer: Customer,
     ) -> Sample:
@@ -120,7 +118,6 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
             lims_status=lims_status,
             name=sample.name,
             no_invoice=application_version.application.is_external,
-            order=order_name,
             ordered=datetime.now(),
             original_ticket=ticket_id,
             priority=sample.priority,
