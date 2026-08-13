@@ -128,13 +128,12 @@ def test_add_pool(rml_pool_store: Store):
         .filter(ApplicationVersion.application_id == application.id)
         .first()
     )
-    db_order: Order = rml_pool_store.get_order_by_ticket_id(123456)
+    db_order: Order = rml_pool_store.get_order_by_ticket_id_strict(123456)
 
     # WHEN adding a new pool
     new_pool = rml_pool_store.add_pool(
         customer=customer,
         name="pool2",
-        order="123456",
         ordered=dt.now(),
         application_version=app_version,
         db_order=db_order,

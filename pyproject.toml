@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "cg"
-version = "88.1.1"
+version = "88.2.1"
 description = "Clinical Genomics command center"
 readme = {file = "README.md", content-type = "text/markdown"}
 homepage = "https://github.com/Clinical-Genomics/cg"
@@ -46,7 +46,6 @@ dependencies = [
 "MarkupSafe",
 "openpyxl",
 "packaging",
-"pandas",
 "paramiko",
 "petname",
 "psutil",
@@ -67,6 +66,7 @@ dependencies = [
 coveralls = ["coveralls"]
 mock = ["mock"]
 pre-commit = ["pre-commit"]
+pyfakefs = ["pyfakefs"]
 pytest-cov = ["pytest-cov"]
 pytest-mock = ["pytest-mock"]
 pytest-freezegun = ["pytest-freezegun"]

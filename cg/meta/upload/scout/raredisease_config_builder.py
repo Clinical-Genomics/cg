@@ -6,12 +6,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.constants import GenomeBuild
 from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
-from cg.constants.scout import (
-    RANK_MODEL_THRESHOLD,
-    RAREDISEASE_CASE_TAGS,
-    RAREDISEASE_SAMPLE_TAGS,
-    UploadTrack,
-)
+from cg.constants.scout import RAREDISEASE_CASE_TAGS, RAREDISEASE_SAMPLE_TAGS, UploadTrack
 from cg.constants.sequencing import Variants
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.rank_model import RankModel, parse_rank_model_file
@@ -68,7 +63,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
             load_config=load_config, analysis=analysis, hk_version=hk_version
         )
         load_config.human_genome_build = GenomeBuild.hg38
-        load_config.rank_score_threshold = RANK_MODEL_THRESHOLD
+        load_config.rank_score_threshold = self.raredisease_analysis_api.rank_model_threshold
         snv_rank_model: RankModel = self._get_rank_model(
             hk_version=hk_version, variant_type=Variants.SNV
         )
