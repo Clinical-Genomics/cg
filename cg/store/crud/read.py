@@ -2069,6 +2069,7 @@ class ReadHandler(BaseHandler):
                 Sample.internal_id.in_(internal_ids),
             )
             .distinct()
+            .order_by(Sample.created_at.asc())
         )
 
         return list(self.session.scalars(query).all())

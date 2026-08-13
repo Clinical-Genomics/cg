@@ -1546,7 +1546,7 @@ def test_get_compressible_samples_one_sample_three_cases(store: Store, helpers: 
     assert compressible_samples == []
 
 
-def test_get_compressible_samples_one_sample_only_young_cases(store: Store, helpers: StoreHelpers):
+def test_get_compressible_samples_one_sample_only_old_cases(store: Store, helpers: StoreHelpers):
     # GIVEN compressible samples in cases that allow for compression
     squeezable_sample: Sample = helpers.add_sample(store=store, internal_id="squeezable_sample")
     squeezable_case: Case = helpers.add_case(
@@ -1572,3 +1572,46 @@ def test_get_compressible_samples_one_sample_only_young_cases(store: Store, help
 
     # THEN no samples are returned
     assert compressible_samples == []
+
+
+def test_get_compressible_samples_ensure_right_order(store: Store, helpers: StoreHelpers):
+    # GIVEN an old compressible samples in cases that allow for compression
+    old_sample: Sample = helpers.add_sample(store=store, internal_id="old_sample")
+    old_sample.created_at = datetime(year=1920, month=7, day=25)
+    old_case: Case = helpers.add_case(
+        store=store,
+        internal_id="old_case",
+        is_compressible=True,
+        action=CaseActions.HOLD,
+        name="old_case",
+        customer_id="old_customer",
+    )
+    helpers.add_relationship(store=store, case=old_case, sample=old_sample)
+
+    # GIVEN a new compressible samples in cases that allow for compression
+    new_sample: Sample = helpers.add_sample(store=store, internal_id="new_sample")
+    new_sample.created_at = datetime.now()
+    new_case: Case = helpers.add_case(
+        store=store,
+        internal_id="new_case",
+        is_compressible=True,
+        action=CaseActions.HOLD,
+        name="new_case",
+        customer_id="new_customer",
+    )
+    helpers.add_relationship(store=store, case=new_case, sample=new_sample)
+
+    # GIVEN a date that should not exclude cases
+    cut_off_date = datetime.now() + timedelta(1)
+
+    # WHEN getting the samples to be compressed
+    compressible_samples: list[Sample] = store.get_compressible_samples_by_internal_ids(
+        internal_ids=[
+            old_sample.internal_id,
+            new_sample.internal_id,
+        ],
+        case_created_before_date=cut_off_date,
+    )
+
+    # THEN the oldest sample is in the beginning of the list
+    assert compressible_samples == [old_sample, new_sample]
