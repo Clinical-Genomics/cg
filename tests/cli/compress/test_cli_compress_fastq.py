@@ -375,7 +375,7 @@ def test_get_samples_available_for_compression_missing_samples():
 
 
 def test_get_samples_available_for_compression_input_case_missing_samples():
-    # GIVEN a mocked housekeeper api
+    # GIVEN a housekeeper api
     housekeeper: HousekeeperAPI = create_autospec(HousekeeperAPI)
 
     # GIVEN a store
