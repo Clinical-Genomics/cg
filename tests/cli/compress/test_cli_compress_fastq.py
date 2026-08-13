@@ -321,7 +321,7 @@ def test_get_samples_available_for_compression_input_case(mocker: MockFixture):
     # GIVEN list of sample ids
     internal_ids: list[str] = ["sample1", "sample2"]
 
-    # GIVEN a mocked housekeeper api
+    # GIVEN a housekeeper api
     housekeeper: HousekeeperAPI = create_autospec(HousekeeperAPI)
 
     # GIVEN a store
