@@ -1624,7 +1624,7 @@ class ReadHandler(BaseHandler):
         Excludes from the query:
         - Cases that passed sequencing QC
         - Cases with downsampled samples
-        - Cases with internal samples that have not been post-processed yet
+        - Cases with not external samples that have not been post-processed yet
         """
         query = (
             (
