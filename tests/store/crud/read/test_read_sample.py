@@ -1499,7 +1499,7 @@ def test_get_compressible_samples(store: Store, helpers: StoreHelpers):
     assert compressible_samples == [squeezable_sample]
 
 
-def test_get_compressible_samples_one_sample_two_cases(store: Store, helpers: StoreHelpers):
+def test_get_compressible_samples_one_sample_three_cases(store: Store, helpers: StoreHelpers):
     # GIVEN one sample
     sample: Sample = helpers.add_sample(store=store, internal_id="squeezable_sample")
 
