@@ -50,12 +50,13 @@ class NextflowConfigurator(Configurator):
         3. Creating a parameters file.
         4. Creating a configuration file.
         5. Creating any pipeline specific files."""
-        case_run_directory: Path = self._get_case_run_directory(case_id)
-        sample_sheet_path: Path = self._get_sample_sheet_path(case_id)
-        params_file_path: Path = self._get_params_file_path(case_id)
-        config_file_path: Path = self._get_config_file_path(case_id)
+        run_id: str | None = flags.get("run_id")
+        case_run_directory: Path = self._get_case_run_directory(case_id=case_id, run_id=run_id)
+        sample_sheet_path: Path = self._get_sample_sheet_path(case_id=case_id, run_id=run_id)
+        params_file_path: Path = self._get_params_file_path(case_id=case_id, run_id=run_id)
+        config_file_path: Path = self._get_config_file_path(case_id=case_id, run_id=run_id)
 
-        self._create_case_directory(case_id)
+        self._create_case_directory(case_id=case_id, run_id=run_id)
         self.sample_sheet_creator.create(case_id=case_id, file_path=sample_sheet_path)
         self.params_file_creator.create(
             case_id=case_id,
@@ -72,8 +73,9 @@ class NextflowConfigurator(Configurator):
         Raises:
             CaseNotConfiguredError if the params file or config file does not exist.
         """
-        params_file_path: Path = self._get_params_file_path(case_id=case_id)
-        config_file_path: Path = self._get_config_file_path(case_id=case_id)
+        run_id: str | None = flags.get("run_id")
+        params_file_path: Path = self._get_params_file_path(case_id=case_id, run_id=run_id)
+        config_file_path: Path = self._get_config_file_path(case_id=case_id, run_id=run_id)
         config = NextflowCaseConfig(
             case_id=case_id,
             case_priority=self.store.get_case_priority(case_id),
@@ -83,7 +85,8 @@ class NextflowConfigurator(Configurator):
             pipeline_repository=self.pipeline_repository,
             pre_run_script=self.pre_run_script,
             revision=self.pipeline_revision,
-            work_dir=self._get_work_dir(case_id).as_posix(),
+            run_id=run_id,
+            work_dir=self._get_work_dir(case_id=case_id, run_id=run_id).as_posix(),
             workflow=self.store.get_case_workflow(case_id),
         )
         config: NextflowCaseConfig = self._set_flags(config=config, **flags)
@@ -104,30 +107,43 @@ class NextflowConfigurator(Configurator):
             new_config.session_id = analysis.session_id
         return new_config
 
-    def _get_config_file_path(self, case_id: str) -> Path:
+    def _get_config_file_path(self, case_id: str, run_id: str | None = None) -> Path:
         """Return the path to the Nextflow config file."""
-        return Path(self._get_case_run_directory(case_id), f"{case_id}_nextflow_config.json")
+        return Path(
+            self._get_case_run_directory(case_id=case_id, run_id=run_id),
+            f"{case_id}_nextflow_config.json",
+        )
 
-    def _get_params_file_path(self, case_id: str) -> Path:
+    def _get_params_file_path(self, case_id: str, run_id: str | None = None) -> Path:
         """Return the path to the params file for a case."""
-        return Path(self._get_case_run_directory(case_id), f"{case_id}_params_file.yaml")
+        return Path(
+            self._get_case_run_directory(case_id=case_id, run_id=run_id),
+            f"{case_id}_params_file.yaml",
+        )
 
-    def _get_sample_sheet_path(self, case_id: str) -> Path:
-        return Path(self._get_case_run_directory(case_id), f"{case_id}_samplesheet.csv")
+    def _get_sample_sheet_path(self, case_id: str, run_id: str | None = None) -> Path:
+        return Path(
+            self._get_case_run_directory(case_id=case_id, run_id=run_id),
+            f"{case_id}_samplesheet.csv",
+        )
 
-    def _get_case_run_directory(self, case_id: str) -> Path:
+    def _get_case_run_directory(self, case_id: str, run_id: str | None = None) -> Path:
         """Path to case working directory."""
         if self.case_run_directory:
+            if run_id:
+                return Path(self.case_run_directory, case_id, run_id)
             return Path(self.case_run_directory, case_id)
         return Path(self.root_dir, case_id)
 
-    def _create_case_directory(self, case_id: str) -> None:
+    def _create_case_directory(self, case_id: str, run_id: str | None = None) -> None:
         """Create case working directory."""
-        case_path: Path = self._get_case_run_directory(case_id=case_id)
+        case_path: Path = self._get_case_run_directory(case_id=case_id, run_id=run_id)
         case_path.mkdir(parents=True, exist_ok=True)
 
-    def _get_work_dir(self, case_id: str) -> Path:
+    def _get_work_dir(self, case_id: str, run_id: str | None = None) -> Path:
         if self.work_dir:
+            if run_id:
+                return Path(self.work_dir, case_id, run_id)
             return Path(self.work_dir, case_id)
         return Path(self.root_dir, case_id, "work")
 
@@ -139,10 +155,14 @@ class NextflowConfigurator(Configurator):
         """
         params_file_path = Path(config.params_file)
         config_file_path = Path(config.nextflow_config_file)
-        samplesheet_file_path: Path = self._get_sample_sheet_path(config.case_id)
+        samplesheet_file_path: Path = self._get_sample_sheet_path(
+            case_id=config.case_id, run_id=config.run_id
+        )
         if not (
             self.pipeline_extension.do_required_files_exist(
-                case_run_directory=self._get_case_run_directory(config.case_id)
+                case_run_directory=self._get_case_run_directory(
+                    case_id=config.case_id, run_id=config.run_id
+                )
             )
             and params_file_path.exists()
             and config_file_path.exists()

@@ -59,15 +59,20 @@ class SeqeraPlatformSubmitter(Submitter):
             preRunScript=case_config.pre_run_script,
             resume=case_config.resume,
             revision=case_config.revision,
-            runName=self._create_run_name(case_id=case_config.case_id, resume=case_config.resume),
+            runName=self._create_run_name(
+                case_id=case_config.case_id,
+                resume=case_config.resume,
+                run_id=case_config.run_id,
+            ),
             sessionId=case_config.session_id,
             workDir=case_config.work_dir,
         )
         return WorkflowLaunchRequest(launch=launch_request)
 
     @staticmethod
-    def _create_run_name(case_id: str, resume: bool) -> str:
+    def _create_run_name(case_id: str, resume: bool, run_id: str | None = None) -> str:
+        base_name = f"{case_id}_{run_id}" if run_id else case_id
         if resume:
-            return f"{case_id}_resumed_{datetime.now().strftime('%Y-%m-%d_%H-%M')}"
+            return f"{base_name}_resumed_{datetime.now().strftime('%Y-%m-%d_%H-%M')}"
         else:
-            return case_id
+            return base_name

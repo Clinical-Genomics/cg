@@ -1,10 +1,12 @@
 import logging
+from datetime import datetime, timezone
 from subprocess import CalledProcessError
 
 from requests import HTTPError
 
 from cg.constants import Workflow
 from cg.exc import AnalysisNotReadyError, CaseWorkflowMismatchError, SeqeraError
+from cg.services.analysis_starter.constants import NEXTFLOW_WORKFLOWS
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.input_fetcher.input_fetcher import InputFetcher
@@ -54,7 +56,9 @@ class AnalysisStarter:
         self._ensure_case_matches_workflow(case_id)
         self.tracker.ensure_analysis_not_ongoing(case_id)
         self.input_fetcher.ensure_files_are_ready(case_id)
-        case_config: CaseConfig = self.configurator.configure(case_id=case_id, **flags)
+        case_config: CaseConfig = self.configurator.configure(
+            case_id=case_id, **self._set_run_id(flags)
+        )
         self._run_and_track(case_id=case_id, case_config=case_config)
 
     def run(self, case_id: str, **flags) -> None:
@@ -80,3 +84,12 @@ class AnalysisStarter:
                 f"Case {case_id} is assigned to workflow {case.data_analysis}, "
                 f"not {self.workflow}."
             )
+
+    def _set_run_id(self, flags: dict) -> dict:
+        if self.workflow not in NEXTFLOW_WORKFLOWS or flags.get("run_id"):
+            return flags
+        return flags | {"run_id": self._create_run_id()}
+
+    @staticmethod
+    def _create_run_id() -> str:
+        return datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")

@@ -11,6 +11,7 @@ class NextflowCaseConfig(CaseConfig):
     pre_run_script: str
     resume: bool = False
     revision: str
+    run_id: str | None = None
     session_id: str | None = None
     work_dir: str
     workflow_id: str | None = None

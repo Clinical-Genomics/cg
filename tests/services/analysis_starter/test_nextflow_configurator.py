@@ -462,11 +462,15 @@ def test_configure_with_separate_case_and_work_roots(
     # GIVEN a case ID
     case_id = "case123"
 
+    # GIVEN a run ID
+    run_id = "run123"
+
     # WHEN we configure the case
-    config: NextflowCaseConfig = configurator.configure(case_id=case_id)
+    config: NextflowCaseConfig = configurator.configure(case_id=case_id, run_id=run_id)
 
     # THEN case files should be written under the case run directory
-    case_run_directory = Path("/launch/root", case_id)
+    case_run_directory = Path("/launch/root", case_id, run_id)
+    assert config.run_id == run_id
     assert (
         config.nextflow_config_file
         == Path(case_run_directory, f"{case_id}_nextflow_config.json").as_posix()
@@ -474,7 +478,7 @@ def test_configure_with_separate_case_and_work_roots(
     assert config.params_file == Path(case_run_directory, f"{case_id}_params_file.yaml").as_posix()
 
     # THEN the Nextflow work directory should use the separate work root
-    assert config.work_dir == Path("/work/root", case_id).as_posix()
+    assert config.work_dir == Path("/work/root", case_id, run_id).as_posix()
 
     # THEN the case run directory should have been created
     mkdir_mock.assert_called_once_with(parents=True, exist_ok=True)

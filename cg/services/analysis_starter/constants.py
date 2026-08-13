@@ -12,3 +12,11 @@ IMPLEMENTED_FASTQ_WORKFLOWS = [
 ]
 
 BAM_WORKFLOWS = [Workflow.NALLO]
+
+NEXTFLOW_WORKFLOWS = [
+    Workflow.NALLO,
+    Workflow.RAREDISEASE,
+    Workflow.RNAFUSION,
+    Workflow.TAXPROFILER,
+    Workflow.TOMTE,
+]
