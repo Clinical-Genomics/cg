@@ -467,9 +467,10 @@ def test_configure_with_separate_case_and_work_roots(
 
     # THEN case files should be written under the case run directory
     case_run_directory = Path("/launch/root", case_id)
-    assert config.nextflow_config_file == Path(
-        case_run_directory, f"{case_id}_nextflow_config.json"
-    ).as_posix()
+    assert (
+        config.nextflow_config_file
+        == Path(case_run_directory, f"{case_id}_nextflow_config.json").as_posix()
+    )
     assert config.params_file == Path(case_run_directory, f"{case_id}_params_file.yaml").as_posix()
 
     # THEN the Nextflow work directory should use the separate work root
