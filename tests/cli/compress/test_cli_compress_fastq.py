@@ -281,7 +281,7 @@ def test_compress_fastq_cli_sample_all_flags(
     # THEN the command exits successfully
     assert result.exit_code == 0
 
-    # THEN the samples were sent for compression using the default limit
+    # THEN the samples were sent for compression using the special limit
     compress_samples_mock.assert_called_once_with(
         compress_api=compress_api, samples=samples, sample_limit=2, dry_run=True
     )
