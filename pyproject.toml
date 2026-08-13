@@ -46,7 +46,6 @@ dependencies = [
 "MarkupSafe",
 "openpyxl",
 "packaging",
-"pandas",
 "paramiko",
 "petname",
 "psutil",
@@ -67,6 +66,7 @@ dependencies = [
 coveralls = ["coveralls"]
 mock = ["mock"]
 pre-commit = ["pre-commit"]
+pyfakefs = ["pyfakefs"]
 pytest-cov = ["pytest-cov"]
 pytest-mock = ["pytest-mock"]
 pytest-freezegun = ["pytest-freezegun"]
