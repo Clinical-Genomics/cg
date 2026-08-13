@@ -301,7 +301,7 @@ def test_get_samples_available_for_compression():
     # GIVEN a store
     store: TypedMock[Store] = create_typed_mock(Store)
 
-    # GIVEN a expected cut-off date, 60 days ago
+    # GIVEN an expected cut-off date, 60 days ago
     expected_date = dt.datetime.now() - dt.timedelta(days=60)
 
     # WHEN getting samples available for compression
