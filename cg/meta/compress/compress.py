@@ -107,6 +107,7 @@ class CompressAPI:
 
         all_ok: bool = True
         for run_name in sample_fastq:
+            # TODO: reduce logging
             LOG.info(f"Check if compression possible for run {run_name}")
             compression: CompressionData = sample_fastq[run_name]["compression_data"]
             is_compression_possible: bool = self._is_fastq_compression_possible(

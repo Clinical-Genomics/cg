@@ -116,12 +116,22 @@ def compress_fastq_to_spring_for_samples(
         update_compress_api(compress_api=compress_api, dry_run=dry_run)
         LOG.info("Dry-run activated - no samples will be submitted for compression")
 
-    if sample_limit is not None:
-        samples = samples[:sample_limit]
+    successful_submissions = 0
     for sample in samples:
         is_sample_submitted: bool = compress_api.compress_fastq(sample_id=sample.internal_id)
         if not is_sample_submitted:
             LOG.debug(f"Sample {sample.internal_id} not submitted for compression")
+        else:
+            successful_submissions += 1
+            if has_reached_sample_limit(limit=sample_limit, submitted_count=successful_submissions):
+                break
+
+    LOG.debug(f"Submitted a total of {successful_submissions} samples to compression")
+
+
+def has_reached_sample_limit(limit: int | None, submitted_count: int) -> bool:
+    """Return True if sample limit is set and has been reached"""
+    return limit is not None and submitted_count >= limit
 
 
 def correct_spring_paths(
