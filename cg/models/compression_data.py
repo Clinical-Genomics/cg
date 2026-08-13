@@ -79,7 +79,7 @@ class CompressionData:
         """Check if file exists and is accesible"""
         try:
             if not file_path.exists():
-                LOG.info("%s does not exist", file_path)
+                LOG.debug("%s does not exist", file_path)
                 return False
         except PermissionError:
             LOG.warning("Not permitted to access %s. Skipping", file_path)
@@ -96,12 +96,12 @@ class CompressionData:
     def get_change_date(file_path: Path) -> datetime:
         """Return the time when this file was changed"""
         changed_date = datetime.fromtimestamp(file_path.stat().st_mtime)
-        LOG.info("File %s was changed %s", file_path, changed_date)
+        LOG.debug("File %s was changed %s", file_path, changed_date)
         return changed_date
 
     def spring_exists(self) -> bool:
         """Check if the SPRING file exists"""
-        LOG.info("Check if SPRING archive file exists")
+        LOG.debug("Check if SPRING archive file exists")
         return self.file_exists_and_is_accessible(self.spring_path)
 
     def metadata_exists(self) -> bool:
@@ -111,7 +111,7 @@ class CompressionData:
 
     def pending_exists(self) -> bool:
         """Check if the SPRING pending flag file exists"""
-        LOG.info("Check if pending compression file exists")
+        LOG.debug("Check if pending compression file exists")
         return self.file_exists_and_is_accessible(self.pending_path)
 
     @property
@@ -120,7 +120,7 @@ class CompressionData:
         if self.pending_exists():
             LOG.info(f"Compression/decompression is pending for {self.run_name}")
             return True
-        LOG.info("Compression/decompression is not running")
+        LOG.debug("Compression/decompression is not running")
         return False
 
     @property
