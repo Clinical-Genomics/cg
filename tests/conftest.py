@@ -2088,6 +2088,7 @@ def context_config(
             "platform": str(nf_analysis_platform_config_path),
             "params": str(nf_analysis_pipeline_params_path),
             "config": str(nf_analysis_pipeline_config_path),
+            "rank_model_threshold": 5,
             "rank_model_snv": "path/to/ghxx_rd_rank_model_snvs.ini",
             "rank_model_sv": "path/to/ghxx_rd_rank_model_svs.ini",
             "resources": str(nf_analysis_pipeline_resource_optimisation_path),
