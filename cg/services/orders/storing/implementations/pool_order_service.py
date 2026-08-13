@@ -145,7 +145,7 @@ class StorePoolOrderService(StoreOrderService):
             customer=customer,
             name=pool[0],
             ordered=datetime.now(),
-            db_order=db_order,
+            order=db_order,
         )
 
     def _create_db_sample(
