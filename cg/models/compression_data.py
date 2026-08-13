@@ -61,7 +61,7 @@ class CompressionData:
 
     def pair_exists(self) -> bool:
         """Check that both files in FASTQ pair exists"""
-        LOG.info("Check if FASTQ pair exists")
+        LOG.debug("Check if FASTQ pair exists")
         if not self.file_exists_and_is_accessible(self.fastq_first):
             return False
         return bool(self.file_exists_and_is_accessible(self.fastq_second))
