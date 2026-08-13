@@ -12,7 +12,6 @@ from sqlalchemy.orm import Query
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import (
     CASE_ACTIVE_ACTIONS,
-    DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD,
     DNA_WORKFLOWS_WITH_RNA_UPLOAD,
     BedVersionGenomeVersion,
     CustomerId,
