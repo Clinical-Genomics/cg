@@ -4,6 +4,7 @@ import csv
 import logging
 import re
 import tempfile
+from collections.abc import ValuesView
 from pathlib import Path
 
 from housekeeper.store.models import File
@@ -14,13 +15,12 @@ from cg.constants.constants import SARS_COV_REGEX, FileFormat
 from cg.constants.housekeeper_tags import FohmTag
 from cg.exc import CgError, HousekeeperFileMissingError
 from cg.io.controller import ReadFile, WriteFile
+from cg.meta.upload.gisaid.constants import HEADERS
+from cg.meta.upload.gisaid.models import GisaidAccession, GisaidSample
 from cg.models.cg_config import CGConfig
 from cg.store.models import Sample
 from cg.store.store import Store
 from cg.utils import Process
-
-from .constants import HEADERS
-from .models import GisaidAccession, GisaidSample
 
 LOG = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ class GisaidAPI:
             if not csv_reader.fieldnames:
                 raise CgError(f"{completion_file.full_path} is malformed.")
 
-            deduplicated_csv = {tuple(row.items()): row for row in csv_reader}.values()
+            deduplicated_csv: ValuesView = {tuple(row.items()): row for row in csv_reader}.values()
             completion_dict: dict = {field: {} for field in csv_reader.fieldnames}
 
             for i, row in enumerate(deduplicated_csv):

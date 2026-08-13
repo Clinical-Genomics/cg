@@ -112,10 +112,10 @@ def test_get_completion_dict(
     gisaid_api = GisaidAPI(config=cg_config)
 
     # WHEN the completion file is converted into the internal dictionary representation
-    dict = gisaid_api.get_completion_dict(completion_file=completion_file)
+    completion_dict = gisaid_api.get_completion_dict(completion_file=completion_file)
 
     # THEN all rows should be preserved in the expected structure, including duplicates and empty values
-    assert dict == expected_completion_dict
+    assert completion_dict == expected_completion_dict
 
 
 def test_get_completion_dict_no_rows(
