@@ -124,13 +124,8 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
 
 
 def filter_cases_has_sequence(cases: Query, **kwargs) -> Query:
-    """Filter cases that have sequencing data."""
-    return cases.filter(
-        or_(
-            Application.is_external,
-            and_(Sample.last_sequenced_at.isnot(None), Sample._sample_run_metrics.any()),
-        )
-    )
+    """Filter cases that are not sequenced according to record in StatusDB."""
+    return cases.filter(or_(Application.is_external, Sample.last_sequenced_at.isnot(None)))
 
 
 def filter_cases_not_analysed(cases: Query, **kwargs) -> Query:
@@ -220,16 +215,6 @@ def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
     return cases.order_by(Case.created_at.desc())
 
 
-def filter_cases_pending_or_failed_sequencing_qc(cases: Query, **kwargs) -> Query:
-    """Filter cases with pending or failed sequencing QC."""
-    return cases.filter(
-        or_(
-            Case.aggregated_sequencing_qc == SequencingQCStatus.PENDING,
-            Case.aggregated_sequencing_qc == SequencingQCStatus.FAILED,
-        )
-    )
-
-
 def filter_cases_passing_sequencing_qc(cases: Query, **kwargs) -> Query:
     """Filter cases with passing sequencing QC."""
     return cases.filter(Case.aggregated_sequencing_qc == SequencingQCStatus.PASSED)
@@ -315,5 +300,4 @@ class CaseFilter(Enum):
     WITH_WORKFLOW: Callable = filter_cases_with_workflow
     WITH_SCOUT_DELIVERY: Callable = filter_cases_with_scout_data_delivery
     ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at
-    PENDING_OR_FAILED_SEQUENCING_QC: Callable = filter_cases_pending_or_failed_sequencing_qc
     PASSING_SEQUENCING_QC: Callable = filter_cases_passing_sequencing_qc

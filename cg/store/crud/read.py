@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Callable, Iterator, Literal
 
 import sqlalchemy
-from sqlalchemy import or_
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
@@ -14,6 +14,7 @@ from cg.constants.constants import (
     DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD,
     BedVersionGenomeVersion,
     CustomerId,
+    SequencingQCStatus,
 )
 from cg.constants.lims import LimsStatus
 from cg.constants.priority import Priority, SlurmQos, TrailblazerPriority
@@ -1618,21 +1619,36 @@ class ReadHandler(BaseHandler):
         return flow_cell
 
     def get_cases_for_sequencing_qc(self) -> list[Case]:
-        """Return all cases that are ready for sequencing QC."""
+        """
+        Return all cases that have pending or failed sequencing qc with production sequencing data.
+        Excludes from the query:
+        - Cases that passed sequencing QC
+        - Cases with downsampled samples
+        - Cases with internal samples that have not been post-processed yet
+        """
         query = (
-            self._get_query(table=Case)
-            .join(Case.links)
-            .join(CaseSample.sample)
-            .join(ApplicationVersion)
-            .join(Application)
+            (
+                self._get_query(table=Case)
+                .join(Case.links)
+                .join(CaseSample.sample)
+                .join(ApplicationVersion)
+                .join(Application)
+            )
+            .filter(
+                Case.aggregated_sequencing_qc.in_(
+                    [SequencingQCStatus.PENDING, SequencingQCStatus.FAILED]
+                )
+            )
+            .filter(Sample.downsampled_to.is_(None))
+            .filter(
+                or_(
+                    Application.is_external,
+                    and_(Sample.last_sequenced_at.isnot(None), Sample._sample_run_metrics.any()),
+                )
+            )
         )
-        return apply_case_filter(
-            cases=query,
-            filter_functions=[
-                CaseFilter.PENDING_OR_FAILED_SEQUENCING_QC,
-                CaseFilter.HAS_SEQUENCE,
-            ],
-        ).all()
+
+        return query.all()
 
     def is_application_archived(self, application_tag: str) -> bool:
         application: Application | None = self.get_application_by_tag(application_tag)
