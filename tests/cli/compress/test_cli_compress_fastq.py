@@ -381,7 +381,6 @@ def test_get_samples_available_for_compression_input_case_missing_samples():
 
     # GIVEN that no samples is linked to the input case
     case: Case = create_autospec(Case, internal_id="case_id", links=[])
-    store.as_type.get_sample_ids_by_case_id = Mock(return_value=[])
 
     # WHEN getting samples available for compression with a case id
     get_samples_available_for_compression(
