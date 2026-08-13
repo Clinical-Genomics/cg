@@ -355,7 +355,7 @@ def test_get_samples_available_for_compression_input_case(mocker: MockFixture):
 
 
 def test_get_samples_available_for_compression_missing_samples():
-    # GIVEN a mocked housekeeper api
+    # GIVEN a housekeeper api
     housekeeper: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
 
     # GIVEN a housekeeper bundle with a file tagged with FASTQ
