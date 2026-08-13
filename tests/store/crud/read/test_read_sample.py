@@ -1570,5 +1570,5 @@ def test_get_compressible_samples_one_sample_only_young_cases(store: Store, help
         case_created_before_date=cut_off_date,
     )
 
-    # THEN only the compressible sample is returned
+    # THEN no samples are returned
     assert compressible_samples == []
