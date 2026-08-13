@@ -45,7 +45,7 @@ def get_samples_available_for_compression(
 
     if case_id:
         case: Case = store.get_case_by_internal_id_strict(case_id)
-        sample_ids: list[str] = [link.sample.internal_id for link in case.links]
+        sample_ids: list[str] = [sample.internal_id for sample in case.samples]
         if not sample_ids:
             LOG.warning(f"No case or samples found for {case_id}")
             return None
