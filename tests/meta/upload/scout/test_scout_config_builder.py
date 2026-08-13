@@ -562,7 +562,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     # GIVEN a Raredisease config builder
     raredisease_config_builder = RarediseaseConfigBuilder(
         raredisease_analysis_api=create_autospec(
-            RarediseaseAnalysisAPI, reference="reference.fasta"
+            RarediseaseAnalysisAPI, rank_model_threshold=5, reference="reference.fasta"
         ),
         lims_api=lims_api,
         madeline_api=create_autospec(MadelineAPI),
