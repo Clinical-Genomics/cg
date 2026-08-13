@@ -295,7 +295,7 @@ def test_get_samples_available_for_compression():
     # GIVEN a mocked housekeeper api
     housekeeper: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
 
-    # GIVEN a housekeeper bundle with a file tagged with FASTQ
+    # GIVEN that the housekeeper bundles for the samples above contain fastq files
     housekeeper.as_type.get_bundle_names_with_fastq_files = Mock(return_value=internal_ids)
 
     # GIVEN a store
