@@ -202,6 +202,15 @@ def rna_store(
         case_id="raredisease_dna_case",
     )
 
+    nallo_dna_case = helpers.ensure_case(
+        store=store,
+        case_name="nallo_dna_case",
+        customer=helpers.ensure_customer(store=store),
+        data_analysis=Workflow.NALLO,
+        data_delivery=DataDelivery.SCOUT,
+        case_id="nallo_dna_case",
+    )
+
     dna_sample_son = helpers.add_sample(
         store=store,
         application_tag=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
@@ -282,11 +291,41 @@ def rna_store(
         status=PhenotypeStatus.AFFECTED,
     )
 
+    helpers.add_relationship(
+        store=store,
+        sample=dna_sample_son,
+        case=nallo_dna_case,
+        mother=dna_sample_mother,
+        father=dna_sample_father,
+        status=PhenotypeStatus.AFFECTED,
+    )
+    helpers.add_relationship(
+        store=store,
+        sample=dna_sample_daughter,
+        case=nallo_dna_case,
+        mother=dna_sample_mother,
+        father=dna_sample_father,
+        status=PhenotypeStatus.UNAFFECTED,
+    )
+    helpers.add_relationship(
+        store=store,
+        sample=dna_sample_mother,
+        case=nallo_dna_case,
+        status=PhenotypeStatus.UNAFFECTED,
+    )
+    helpers.add_relationship(
+        store=store,
+        sample=dna_sample_father,
+        case=nallo_dna_case,
+        status=PhenotypeStatus.AFFECTED,
+    )
+
     for link in mip_dna_case.links:
         link.sample.internal_id = link.sample.name
 
     helpers.add_analysis(store=store, case=mip_dna_case, uploaded_at=datetime.now())
     helpers.add_analysis(store=store, case=raredisease_dna_case, uploaded_at=datetime.now())
+    helpers.add_analysis(store=store, case=nallo_dna_case, uploaded_at=datetime.now())
 
     store.session.commit()
     return store
