@@ -86,7 +86,7 @@ def _add_case_for_sequencing_qc(
         name=case_id,
         aggregated_sequencing_qc=aggregated_sequencing_qc,
     )
-    sample = helpers.add_sample(
+    sample: Sample = helpers.add_sample(
         store=store,
         internal_id=f"{case_id}_sample",
         name=f"{case_id}_sample",
