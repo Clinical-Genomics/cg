@@ -257,6 +257,7 @@ class MipConfig(BaseModel):
 
 class NalloConfig(CommonAppConfig):
     binary_path: str | None = None
+    case_run_directory: str | None = None
     conda_binary: str | None = None
     conda_env: str
     config: str
@@ -276,6 +277,7 @@ class NalloConfig(CommonAppConfig):
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    work_dir: str | None = None
     workflow_bin_path: str
 
 
@@ -298,6 +300,7 @@ class GCNVCallerFiles(BaseModel):
 
 class RarediseaseConfig(CommonAppConfig):
     binary_path: str | None = None
+    case_run_directory: str | None = None
     conda_binary: str | None = None
     conda_env: str
     config: str
@@ -321,11 +324,13 @@ class RarediseaseConfig(CommonAppConfig):
     slurm: SlurmConfig
     tower_workflow: str
     verifybamid_svd: VerifybamidSvdFilesSet
+    work_dir: str | None = None
     workflow_bin_path: str
 
 
 class TomteConfig(CommonAppConfig):
     binary_path: str | None = None
+    case_run_directory: str | None = None
     conda_binary: str | None = None
     conda_env: str
     config: str
@@ -340,11 +345,13 @@ class TomteConfig(CommonAppConfig):
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    work_dir: str | None = None
     workflow_bin_path: str
 
 
 class RnafusionConfig(CommonAppConfig):
     binary_path: str
+    case_run_directory: str | None = None
     conda_binary: str | None = None
     conda_env: str
     config: str
@@ -360,11 +367,13 @@ class RnafusionConfig(CommonAppConfig):
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    work_dir: str | None = None
     workflow_bin_path: str
 
 
 class TaxprofilerConfig(CommonAppConfig):
     binary_path: str
+    case_run_directory: str | None = None
     conda_binary: str | None = None
     conda_env: str
     config: str
@@ -379,6 +388,7 @@ class TaxprofilerConfig(CommonAppConfig):
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    work_dir: str | None = None
     workflow_bin_path: str
 
 

@@ -67,6 +67,29 @@ def test_create_launch_request(
     assert workflow_launch_request == expected_workflow_launch_request
 
 
+def test_create_launch_request_with_run_id(
+    seqera_platform_submitter: SeqeraPlatformSubmitter,
+    raredisease_case_config: NextflowCaseConfig,
+    expected_raredisease_workflow_params_content: dict,
+    mocker: MockerFixture,
+):
+    # GIVEN a Seqera platform submitter and a case config with a run ID
+    raredisease_case_config.run_id = "run123"
+
+    # GIVEN that the read_yaml method returns the expected parameters content
+    mocker.patch.object(
+        submitter, "read_yaml", return_value=expected_raredisease_workflow_params_content
+    )
+
+    # WHEN creating a workflow launch request
+    workflow_launch_request: WorkflowLaunchRequest = (
+        seqera_platform_submitter._create_launch_request(case_config=raredisease_case_config)
+    )
+
+    # THEN the Seqera run name should include the run ID
+    assert workflow_launch_request.launch.runName == f"{raredisease_case_config.case_id}_run123"
+
+
 @pytest.mark.freeze_time("2025-11-20 13:37")
 def test_submit_with_resume(
     expected_workflow_launch_request_with_resume: WorkflowLaunchRequest,

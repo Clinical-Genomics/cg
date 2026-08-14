@@ -14,6 +14,7 @@ from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.priority import Priority, SlurmQos
 from cg.exc import AnalysisNotReadyError, CaseWorkflowMismatchError, SeqeraError
+from cg.services.analysis_starter.constants import NEXTFLOW_WORKFLOWS
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import creator
@@ -301,6 +302,7 @@ def test_rnafusion_start(
 def test_start(
     workflow: Workflow,
     analysis_starter_scenario: dict,
+    mocker: MockerFixture,
 ):
     """Test that a case can be started successfully for all pipelines."""
     # GIVEN a case_id
@@ -308,6 +310,8 @@ def test_start(
 
     # GIVEN a set of flags
     flags: dict[str, str] = {"flag1": "value1", "flag2": "value2"}
+    expected_flags = flags | {"run_id": "run123"} if workflow in NEXTFLOW_WORKFLOWS else flags
+    mocker.patch.object(AnalysisStarter, "_create_run_id", return_value="run123")
 
     # GIVEN a mock configurator, case config, submitter, tracker, and tower_id
     mock_configurator, mock_case_config, mock_submitter, mock_tracker, submit_result = (
@@ -344,7 +348,7 @@ def test_start(
     # THEN the analysis should be started successfully
     mock_tracker.ensure_analysis_not_ongoing.assert_called_once_with(case_id)
     input_fetcher.as_mock.ensure_files_are_ready.assert_called_once_with(case_id)
-    mock_configurator.configure.assert_called_once_with(case_id=case_id, **flags)
+    mock_configurator.configure.assert_called_once_with(case_id=case_id, **expected_flags)
     mock_tracker.set_case_as_running.assert_called_once_with(case_id)
     mock_submitter.submit.assert_called_once_with(mock_case_config)
     mock_tracker.track.assert_called_once_with(case_config=submit_result)
