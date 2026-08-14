@@ -1620,11 +1620,26 @@ class ReadHandler(BaseHandler):
 
     def get_cases_for_sequencing_qc(self) -> list[Case]:
         """
-        Return all cases that have pending or failed sequencing qc with production sequencing data.
-        Excludes from the query:
-        - Cases that passed sequencing QC
-        - Cases with downsampled samples
-        - Cases with not external samples that have not been post-processed yet
+        Return cases that should be evaluated in sequencing QC.
+
+        A case is included only if all of the following are true:
+
+        1. The case sequencing QC status is either:
+           - `SequencingQCStatus.PENDING`
+           - `SequencingQCStatus.FAILED`
+
+        2. The case has at least one linked sample that is not downsampled:
+           - `Sample.downsampled_to is None`
+           NOTE: It is expected that either all or none of the samples of a case are downsampled
+
+        3. For those linked non-downsampled samples, at least one of these is true:
+           - The sample belongs to an external application (`Application.is_external`)
+           - The sample is non-external and has sequencing evidence:
+             - `Sample.last_sequenced_at` is set
+             - `Sample._sample_run_metrics.any()` is true
+
+        The query is built with joins from `Case` to sample and application tables, and
+        returns all matching `Case` objects.
         """
         query = (
             (
@@ -1634,12 +1649,15 @@ class ReadHandler(BaseHandler):
                 .join(ApplicationVersion)
                 .join(Application)
             )
+            # Select cases with pending or failed sequencing QC
             .filter(
                 Case.aggregated_sequencing_qc.in_(
                     [SequencingQCStatus.PENDING, SequencingQCStatus.FAILED]
                 )
             )
+            # Select samples that are not downsampled
             .filter(Sample.downsampled_to.is_(None))
+            # Include all samples externally sequenced and non-external samples with sequencing data
             .filter(
                 or_(
                     Application.is_external,
