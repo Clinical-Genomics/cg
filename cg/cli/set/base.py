@@ -73,8 +73,8 @@ def set_cmd():
 @click.pass_context
 def samples(
     context: click.Context,
-    identifiers: click.Tuple([str, str]),
-    kwargs: click.Tuple([str, str]),
+    identifiers: list[tuple[str, str]],
+    kwargs: list[tuple[str, str]],
     skip_lims: bool,
     skip_confirmation: bool,
     case_id: str,
@@ -105,7 +105,7 @@ def samples(
         )
 
 
-def _get_samples(case_id: str, identifiers: click.Tuple([str, str]), store: Store) -> list[Sample]:
+def _get_samples(case_id: str, identifiers: list[tuple[str, str]], store: Store) -> list[Sample]:
     """Get samples that match both case_id and identifiers if given."""
     samples_by_case_id = None
     samples_by_id = None
@@ -117,20 +117,20 @@ def _get_samples(case_id: str, identifiers: click.Tuple([str, str]), store: Stor
         samples_by_id: list[Sample] = _get_samples_by_identifiers(identifiers, store)
 
     if case_id and identifiers:
-        sample_objs = set(set(samples_by_case_id) & set(samples_by_id))
+        sample_objs = list(set(samples_by_case_id) & set(samples_by_id))
     else:
         sample_objs = samples_by_case_id or samples_by_id
 
     return sample_objs
 
 
-def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Store) -> list[Sample]:
+def _get_samples_by_identifiers(identifiers: list[tuple[str, str]], store: Store) -> list[Sample]:
     """Get samples matched by given set of identifiers."""
     identifier_args = {
         identifier_name: identifier_value for identifier_name, identifier_value in identifiers
     }
 
-    return list(store.get_samples_by_any_id(**identifier_args))
+    return list(store.get_samples_by_any_id(identifier_args))
 
 
 def is_locked_attribute_on_sample(key: str, skip_attributes: list[str]) -> bool:
