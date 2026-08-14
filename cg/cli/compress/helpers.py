@@ -118,7 +118,7 @@ def compress_fastq_to_spring_for_samples(
 
     successful_submissions = 0
     for sample in samples:
-        if sample_limit == successful_submissions:
+        if sample_limit <= successful_submissions:
             break
 
         is_sample_submitted: bool = compress_api.compress_fastq(sample_id=sample.internal_id)
