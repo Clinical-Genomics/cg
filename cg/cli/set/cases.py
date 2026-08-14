@@ -26,13 +26,14 @@ def _get_cases(
     case_ids: tuple[str], sample_identifiers: list[tuple[str, str]], store: Store
 ) -> set[Case]:
     """Get cases that have samples that match identifiers if given"""
-    samples_by_id: list[Sample] = _get_samples_by_identifiers(
-        sample_identifiers=sample_identifiers, store=store
-    )
     cases: set[Case] = set()
-    for sample in samples_by_id:
-        for link in sample.links:
-            cases.add(link.case)
+    if sample_identifiers:
+        samples_by_id: list[Sample] = _get_samples_by_identifiers(
+            sample_identifiers=sample_identifiers, store=store
+        )
+        for sample in samples_by_id:
+            for link in sample.links:
+                cases.add(link.case)
     cases = cases.union(set(store.get_cases_by_internal_ids(list(case_ids))))
     return cases
 
