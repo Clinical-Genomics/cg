@@ -96,4 +96,5 @@ def test_upload_raw_data_case(cli_runner: CliRunner, mocker: MockerFixture):
 
     # THEN the upload succeeds and RawDataUploadAPI.upload is called
     assert result.exit_code == EXIT_SUCCESS
+    assert f"{case.internal_id} analysis has been successfully uploaded" not in result.output
     raw_data_upload_api.as_mock.upload.assert_called_once_with(ctx=ANY, case=case, restart=False)

@@ -105,7 +105,6 @@ def upload(context: click.Context, case_id: str | None, restart: bool):
 
         context.obj.meta_apis["upload_api"] = upload_api
         upload_api.upload(ctx=context, case=case, restart=restart)
-        click.echo(click.style(f"{case_id} analysis has been successfully uploaded", fg="green"))
     else:
         suggest_cases_to_upload(status_db=upload_api.status_db)
         raise click.Abort()
