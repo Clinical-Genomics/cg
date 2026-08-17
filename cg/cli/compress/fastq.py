@@ -57,7 +57,7 @@ def fastq_cmd(
             dry_run=dry_run,
         )
     else:
-        LOG.info("No samples available for compression")
+        LOG.info(f"No samples older than {days_back} days available to compress.")
 
 
 @click.command("fastq")
@@ -89,7 +89,7 @@ def clean_fastq(context: CGConfig, case_id: str | None, days_back: int, dry_run:
     if samples:
         compress_api.clean_fastq_files_for_samples(samples=samples, days_back=days_back)
     else:
-        LOG.info("Did not find any FASTQ files to clean. Closing")
+        LOG.info(f"No samples older than {days_back} days available to clean.")
 
 
 @click.command("fix-spring")
