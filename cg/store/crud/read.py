@@ -1172,19 +1172,6 @@ class ReadHandler(BaseHandler):
         sorted_and_truncated: Query = cases.order_by(Case.ordered_at).limit(limit)
         return sorted_and_truncated.all()
 
-    def get_cases_to_compress(self, date_threshold: datetime) -> list[Case]:
-        """Return all cases that are ready to be compressed by SPRING."""
-        case_filter_functions: list[CaseFilter] = [
-            CaseFilter.HAS_INACTIVE_ANALYSIS,
-            CaseFilter.OLD_BY_CREATION_DATE,
-            CaseFilter.IS_COMPRESSIBLE,
-        ]
-        return apply_case_filter(
-            cases=self._get_query(table=Case),
-            filter_functions=case_filter_functions,
-            creation_date=date_threshold,
-        ).all()
-
     def get_sample_by_entry_id(self, entry_id: int) -> Sample:
         """Return a sample by entry id."""
         sample: Sample | None = apply_sample_filter(
