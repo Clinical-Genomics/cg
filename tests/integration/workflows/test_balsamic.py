@@ -440,6 +440,7 @@ def _create_files_for_flags(test_root_dir: Path):
     create_empty_file(Path(test_root_dir, "loqusdb", "clinical_sv.vcf.gz"))
     create_empty_file(Path(test_root_dir, "swegen", "swegen_snv.vcf.gz"))
     create_empty_file(Path(test_root_dir, "swegen", "swegen_sv.vcf.gz"))
+    create_empty_file(Path(test_root_dir, "balsamic", "config.yaml"))
 
 
 def _create_tga_config_file(test_root_dir: Path, case: Case) -> Path:
