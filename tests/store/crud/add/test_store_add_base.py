@@ -13,7 +13,6 @@ from cg.store.models import (
     ApplicationVersion,
     Collaboration,
     Customer,
-    IlluminaFlowCell,
     Order,
     Organism,
     PacbioSequencingRun,
@@ -91,8 +90,8 @@ def test_add_microbial_sample(base_store: Store, helpers):
     base_store.session.commit()
 
     # THEN it should be stored in the database
-    assert sample_query.first() == new_sample
-    stored_microbial_sample = sample_query.first()
+    assert sample_query.one() == new_sample
+    stored_microbial_sample = sample_query.one()
     assert stored_microbial_sample.name == name
     assert stored_microbial_sample.internal_id == internal_id
     assert stored_microbial_sample.reference_genome == reference_genome
@@ -128,7 +127,7 @@ def test_add_pool(rml_pool_store: Store):
         .filter(ApplicationVersion.application_id == application.id)
         .first()
     )
-    db_order: Order = rml_pool_store.get_order_by_ticket_id_strict(123456)
+    order: Order = rml_pool_store.get_order_by_ticket_id_strict(123456)
 
     # WHEN adding a new pool
     new_pool = rml_pool_store.add_pool(
@@ -136,7 +135,7 @@ def test_add_pool(rml_pool_store: Store):
         name="pool2",
         ordered=dt.now(),
         application_version=app_version,
-        db_order=db_order,
+        order=order,
     )
 
     rml_pool_store.session.add(new_pool)
@@ -148,7 +147,6 @@ def test_add_pool(rml_pool_store: Store):
 
 def test_add_illumina_flow_cell(
     illumina_flow_cell_dto: IlluminaFlowCellDTO,
-    illumina_flow_cell: IlluminaFlowCell,
     illumina_flow_cell_internal_id: str,
     store: Store,
 ):
