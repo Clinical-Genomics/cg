@@ -184,6 +184,7 @@ nallo:
     mail_user: "nallo_mail_user@scilifelab.se"
     qos: "low"
   tower_workflow: nallo_tower_workflow
+  variant_catalogue: {test_root_dir}/variant_catalogue.json,
   workflow_bin_path: {test_root_dir}/nallo_workflow_bin_path
 
 raredisease:
@@ -215,6 +216,7 @@ raredisease:
     mail_user: "raredisease_mail_user@scilifelab.se"
     qos: "low"
   tower_workflow: raredisease_tower_workflow
+  variant_catalogue: {test_root_dir}/variant_catalogue.json,
   verifybamid_svd:
     wes:
       bed: {test_root_dir}/raredisease/wes/file.bed

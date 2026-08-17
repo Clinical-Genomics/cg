@@ -66,6 +66,7 @@ def get_nextflow_config_dict(
                 "rank_model_threshold": 42,
                 "rank_model_snv": "path/to/ghxx_nallo_rank_model_snvs.ini",
                 "rank_model_sv": "path/to/ghxx_nallo_rank_model_svs.ini",
+                "variant_catalogue": "path/to/variant/catalogue.json",
             }
             nextflow_core_config.update(nallo_config)
 
@@ -83,6 +84,7 @@ def get_nextflow_config_dict(
                 "rank_model_snv": "path/to/ghxx_rd_rank_model_snvs.ini",
                 "rank_model_sv": "path/to/ghxx_rd_rank_model_svs.ini",
                 "references_directory": "path/to/references_dir",
+                "variant_catalogue": "path/to/variant/catalogue.json",
                 "verifybamid_svd": {
                     "wes": {
                         "bed": "path/to/verifybamid/wes/bed",

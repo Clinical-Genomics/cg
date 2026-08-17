@@ -2077,6 +2077,7 @@ def context_config(
                 "mail_user": email_address,
             },
             "tower_workflow": "nallo",
+            "variant_catalogue": "path/to/variant/catalogue.json",
         },
         "raredisease": {
             "default_target_bed": "twistexomecomprehensive_10.2_hg38_design.bed",
@@ -2105,6 +2106,7 @@ def context_config(
                 "mail_user": email_address,
             },
             "tower_workflow": "raredisease",
+            "variant_catalogue": "path/to/variant/catalogue.json",
             "verifybamid_svd": {
                 "wes": {
                     "bed": Path("path", "to", "sleeping_quarters.bed"),
