@@ -2,6 +2,7 @@
 
 import logging
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 from typing_extensions import Literal
@@ -114,7 +115,10 @@ class DemultiplexingAPI:
     @staticmethod
     def get_stderr_logfile(sequencing_run: IlluminaRunDirectoryData) -> Path:
         """Create the path to the stderr logfile."""
-        return Path(sequencing_run.path, f"{DemultiplexingAPI.get_run_name(sequencing_run)}.stderr")
+        return Path(
+            sequencing_run.path,
+            f"{DemultiplexingAPI.get_run_name(sequencing_run)}_{datetime.now().strftime('%Y_%m_%d_%H%M%S')}.stderr",
+        )
 
     def demultiplexed_run_dir_path(self, sequencing_run: IlluminaRunDirectoryData) -> Path:
         """Create the path to where the demultiplexed result should be produced."""

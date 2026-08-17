@@ -1,5 +1,6 @@
 """Tests for functions of DemultiplexAPI."""
 
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -204,3 +205,16 @@ def test_remove_demultiplexing_output_directory(
     assert not demultiplexing_api.demultiplexed_run_dir_path(
         novaseq_6000_post_1_5_kits_flow_cell
     ).exists()
+
+
+@pytest.mark.freeze_time
+def test_get_stderr_file_path(tmp_bcl_convert_flow_cell: IlluminaRunDirectoryData):
+    # GIVEN a flow cell dir
+
+    # WHEN getting the path for the stderr log
+    stderr_path = DemultiplexingAPI.get_stderr_logfile(sequencing_run=tmp_bcl_convert_flow_cell)
+
+    # THEN the path should look as expected
+    assert stderr_path == Path(
+        f"{tmp_bcl_convert_flow_cell.path}/{tmp_bcl_convert_flow_cell.id}_demultiplex_{datetime.now().strftime('%Y_%m_%d_%H%M%S')}.stderr"
+    )
