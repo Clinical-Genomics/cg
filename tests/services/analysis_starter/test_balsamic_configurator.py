@@ -46,6 +46,10 @@ def test_get_config(
     Path(balsamic_configurator.root_dir, case_id).mkdir()
     Path(balsamic_configurator.root_dir, case_id, f"{case_id}.json").touch()
 
+    # GIVEN that the workflow profile contains a config.yaml
+    Path(balsamic_configurator.workflow_profile).mkdir()
+    Path(balsamic_configurator.workflow_profile, "config.yaml").touch()
+
     # GIVEN that the database returns a case with the provided case_id
     case_to_configure: Case = create_autospec(
         Case, internal_id=case_id, slurm_priority=SlurmQos.NORMAL
@@ -87,6 +91,10 @@ def test_get_config_with_flag(
     balsamic_configurator.root_dir = tmp_path
     Path(balsamic_configurator.root_dir, case_id).mkdir()
     Path(balsamic_configurator.root_dir, case_id, f"{case_id}.json").touch()
+
+    # GIVEN that the workflow profile contains a config.yaml
+    Path(balsamic_configurator.workflow_profile).mkdir()
+    Path(balsamic_configurator.workflow_profile, "config.yaml").touch()
 
     # GIVEN that the database returns a case with the provided case_id
     case_to_configure: Case = create_autospec(
@@ -140,6 +148,34 @@ def test_get_config_missing_config_file(
     # THEN it should raise a CaseNotConfiguredError
     with pytest.raises(CaseNotConfiguredError):
         balsamic_configurator.get_config(case_id=case_id)
+
+
+def test_get_config_faulty_workflow_profile(
+    balsamic_configurator: BalsamicConfigurator, case_id: str, tmp_path: Path
+):
+    """Tests that the get_config method raises an error if the workflow_profile flag does not point
+    to a directory containing a config.yaml file."""
+
+    # GIVEN a Balsamic configurator with an existing config file
+    balsamic_configurator.root_dir = tmp_path
+    Path(balsamic_configurator.root_dir, case_id).mkdir()
+    Path(balsamic_configurator.root_dir, case_id, f"{case_id}.json").touch()
+
+    # GIVEN that the database returns a case with the provided case_id
+    case_to_configure: Case = create_autospec(
+        Case, internal_id=case_id, slurm_priority=SlurmQos.NORMAL
+    )
+    balsamic_configurator.store.get_case_by_internal_id_strict = Mock(
+        return_value=case_to_configure
+    )
+    balsamic_configurator.store.get_case_workflow = Mock(return_value=Workflow.BALSAMIC)
+
+    # WHEN getting the config using a workflow_profile which does not contain a config.yaml
+    # THEN it should raise a CaseNotConfiguredError
+    with pytest.raises(CaseNotConfiguredError):
+        balsamic_configurator.get_config(
+            case_id=case_id, workflow_profile=Path("path/that/leads/nowhere")
+        )
 
 
 @pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])

@@ -227,7 +227,7 @@ def test_get_samples_by_any_id_not_an_attribute_fails(
     # WHEN trying to filter using an attribute not of Sample
     with pytest.raises(AttributeError) as exc_info:
         store_with_a_sample_that_has_many_attributes_and_one_without.get_samples_by_any_id(
-            **identifiers
+            identifiers
         )
 
     # THEN the error message should contain the non-existent-attribute
@@ -257,7 +257,7 @@ def test_get_samples_by_any_id_exclusive_filtering_gives_empty_query(
     }
     filtered_query: Query = (
         store_with_a_sample_that_has_many_attributes_and_one_without.get_samples_by_any_id(
-            **identifiers
+            identifiers
         )
     )
 
