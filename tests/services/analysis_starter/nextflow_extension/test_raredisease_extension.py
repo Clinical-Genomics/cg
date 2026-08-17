@@ -6,7 +6,7 @@ from pytest_mock import MockerFixture
 
 from cg.constants.scout import ScoutExportFileName
 from cg.models.cg_config import RarediseaseConfig
-from cg.services.analysis_starter.configurator.extensions import raredisease
+from cg.services.analysis_starter.configurator.extensions import pipeline_extension as extension
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from cg.services.analysis_starter.configurator.file_creators.managed_variants import (
@@ -20,6 +20,7 @@ def raredisease_config() -> RarediseaseConfig:
         RarediseaseConfig,
         rank_model_snv="path/to/snv_rank_model.ini",
         rank_model_sv="path/to/sv_rank_model.ini",
+        variant_catalog="path/to/variant_catalog.json",
     )
 
 
@@ -35,7 +36,7 @@ def test_configure_success(raredisease_config: RarediseaseConfig, mocker: Mocker
     case_run_directory = Path("/path/to/dir")
 
     # WHEN calling configure
-    copy_mock = mocker.patch.object(raredisease.shutil, "copy2")
+    copy_mock = mocker.patch.object(extension.shutil, "copy2")
     raredisease_extension.configure(case_id="case_id", case_run_directory=case_run_directory)
 
     # THEN the file creators should have been called
@@ -65,6 +66,8 @@ def test_do_required_files_exist_true(raredisease_config: RarediseaseConfig, tmp
     snv_rank_model_file.touch()
     sv_rank_model_file = tmp_path / "sv_rank_model.ini"
     sv_rank_model_file.touch()
+    variant_catalog_file = tmp_path / "variant_catalog.json"
+    variant_catalog_file.touch()
 
     # GIVEN a Nallo extension
     raredisease_extension = RarediseaseExtension(
@@ -83,16 +86,18 @@ def test_do_required_files_exist_true(raredisease_config: RarediseaseConfig, tmp
 @pytest.mark.parametrize(
     "file_existence_array",
     [
-        [False, True, True, True],
-        [True, False, True, True],
-        [True, True, False, True],
-        [True, True, True, False],
+        [False, True, True, True, True],
+        [True, False, True, True, True],
+        [True, True, False, True, True],
+        [True, True, True, False, True],
+        [True, True, True, True, False],
     ],
     ids=[
         "missing gene panel scenario",
         "missing managed variants scenario",
         "missing snv rank model scenario",
-        "missing sv rank model  scenario",
+        "missing sv rank model scenario",
+        "missing variant catalog scenario",
     ],
 )
 def test_do_required_files_exist(
@@ -109,6 +114,7 @@ def test_do_required_files_exist(
         Path(case_run_directory, ScoutExportFileName.MANAGED_VARIANTS): file_existence_array[1],
         Path(case_run_directory, "snv_rank_model.ini"): file_existence_array[2],
         Path(case_run_directory, "sv_rank_model.ini"): file_existence_array[3],
+        Path(case_run_directory, "variant_catalog.json"): file_existence_array[4],
     }
     for file, should_exist in file_map.items():
         if should_exist:

@@ -276,7 +276,7 @@ class NalloConfig(CommonAppConfig):
     root: str
     slurm: SlurmConfig
     tower_workflow: str
-    variant_catalogue: str
+    variant_catalog: str
     workflow_bin_path: str
 
 
@@ -321,7 +321,7 @@ class RarediseaseConfig(CommonAppConfig):
     root: str
     slurm: SlurmConfig
     tower_workflow: str
-    variant_catalogue: str
+    variant_catalog: str
     verifybamid_svd: VerifybamidSvdFilesSet
     workflow_bin_path: str
 
