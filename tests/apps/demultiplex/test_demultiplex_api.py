@@ -214,7 +214,7 @@ def test_get_stderr_file_path(tmp_bcl_convert_flow_cell: IlluminaRunDirectoryDat
     # WHEN getting the path for the stderr log
     stderr_path = DemultiplexingAPI.get_stderr_logfile(sequencing_run=tmp_bcl_convert_flow_cell)
 
-    # THEN the path should look as expected
+    # THEN the stderr path should look as expected
     assert stderr_path == Path(
         f"{tmp_bcl_convert_flow_cell.path}/{tmp_bcl_convert_flow_cell.id}_demultiplex_{datetime.now().strftime('%Y_%m_%d_%H%M%S')}.stderr"
     )

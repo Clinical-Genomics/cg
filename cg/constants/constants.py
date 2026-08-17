@@ -216,7 +216,7 @@ class DataDelivery(StrEnum):
 
 
 class HastaSlurmPartitions(StrEnum):
-    DRAGEN: str = "dragen"
+    DRAGEN = "dragen"
 
 
 class FileExtensions(StrEnum):

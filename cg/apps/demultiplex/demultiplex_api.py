@@ -110,14 +110,14 @@ class DemultiplexingAPI:
     @staticmethod
     def get_run_name(sequencing_run: IlluminaRunDirectoryData) -> str:
         """Create the run name for the sbatch job."""
-        return f"{sequencing_run.id}_demultiplex"
+        return f"{sequencing_run.id}_demultiplex_{datetime.now().strftime('%Y_%m_%d_%H%M%S')}"
 
     @staticmethod
     def get_stderr_logfile(sequencing_run: IlluminaRunDirectoryData) -> Path:
         """Create the path to the stderr logfile."""
         return Path(
             sequencing_run.path,
-            f"{DemultiplexingAPI.get_run_name(sequencing_run)}_{datetime.now().strftime('%Y_%m_%d_%H%M%S')}.stderr",
+            f"{DemultiplexingAPI.get_run_name(sequencing_run)}.stderr",
         )
 
     def demultiplexed_run_dir_path(self, sequencing_run: IlluminaRunDirectoryData) -> Path:
