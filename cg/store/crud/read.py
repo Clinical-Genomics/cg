@@ -740,7 +740,7 @@ class ReadHandler(BaseHandler):
             customer_internal_id=customer_internal_id, subject_id=subject_id
         ).all()
 
-    def get_samples_by_any_id(self, **identifiers: dict) -> Query:
+    def get_samples_by_any_id(self, identifiers: dict) -> Query:
         """Return a sample query filtered by the given names and values of Sample attributes."""
         samples: Query = self._get_query(table=Sample).order_by(Sample.internal_id.desc())
         for identifier_name, identifier_value in identifiers.items():
