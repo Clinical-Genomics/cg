@@ -614,7 +614,7 @@ class ReadHandler(BaseHandler):
         """Return all the pools with an order fitting the enquiry."""
         return (
             self._get_query(table=Pool)
-            .join(Pool.db_order)
+            .join(Pool.order)
             .filter(Order.name.contains(order_enquiry))
             .all()
         )
