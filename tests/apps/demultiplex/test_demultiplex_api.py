@@ -208,13 +208,14 @@ def test_remove_demultiplexing_output_directory(
 
 
 @pytest.mark.freeze_time
-def test_get_stderr_file_path(tmp_bcl_convert_flow_cell: IlluminaRunDirectoryData):
+def test_get_run_name(tmp_bcl_convert_flow_cell: IlluminaRunDirectoryData):
     # GIVEN a flow cell dir
 
-    # WHEN getting the path for the stderr log
-    stderr_path = DemultiplexingAPI.get_stderr_logfile(sequencing_run=tmp_bcl_convert_flow_cell)
+    # WHEN getting the run name
+    run_name: str = DemultiplexingAPI.get_run_name(tmp_bcl_convert_flow_cell)
 
-    # THEN the stderr path should look as expected
-    assert stderr_path == Path(
-        f"{tmp_bcl_convert_flow_cell.path}/{tmp_bcl_convert_flow_cell.id}_demultiplex_{datetime.now().strftime('%Y_%m_%d_%H%M%S')}.stderr"
+    # THEN the run_name should look as expected
+    assert (
+        run_name
+        == f"{tmp_bcl_convert_flow_cell.id}_demultiplex_{datetime.now().strftime('%Y_%m_%d_%H%M%S')}"
     )
