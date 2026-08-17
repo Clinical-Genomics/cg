@@ -45,7 +45,7 @@ def transfer_group(context: CGConfig) -> None:
 @click.group(name="lims", context_settings=CLICK_CONTEXT_SETTINGS, hidden=True)
 @click.pass_obj
 def lims(context: CGConfig):
-    """Transfer information about samples and pools from LIMS to Status DB."""
+    """Transfer information about samples and pools from LIMS to StatusDB."""
     lims_api: LimsAPI = context.lims_api
     status_db: Store = context.status_db
     context.meta_apis["transfer_lims_api"] = TransferLims(status=status_db, lims=lims_api)
@@ -96,7 +96,7 @@ def set_dates_of_pools(context: CGConfig, status: str):
 
 @transfer_group.command(
     name="rsync",
-    help="Start an Rsync job to transfer the contents of a customers ticket inbox on the HPC"
+    help="Start an Rsync job to transfer the contents of a customer's ticket inbox on the HPC"
     " to clinical-delivery ",
 )
 @click.pass_obj
