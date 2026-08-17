@@ -1,6 +1,5 @@
 """Helper functions for compress cli."""
 
-import datetime as dt
 import logging
 import os
 from pathlib import Path
@@ -17,25 +16,6 @@ from cg.store.store import Store
 from cg.utils.date import get_date_days_ago
 
 LOG = logging.getLogger(__name__)
-
-
-def get_cases_to_process(
-    days_back: int, store: Store, case_id: str | None = None
-) -> list[Case] | None:
-    """Return cases to process."""
-    cases: list[Case] = []
-    if case_id:
-        case: Case = store.get_case_by_internal_id(case_id)
-        if not case:
-            LOG.warning(f"Could not find case {case_id}")
-            return
-        if case.is_compressible:
-            cases.append(case)
-    else:
-        date_threshold: dt.datetime = get_date_days_ago(days_ago=days_back)
-        cases: list[Case] = store.get_cases_to_compress(date_threshold=date_threshold)
-
-    return cases
 
 
 def get_samples_available_for_compression(

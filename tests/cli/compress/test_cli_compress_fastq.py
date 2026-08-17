@@ -1,7 +1,6 @@
 """Tests for the compress fastq cli."""
 
 import datetime as dt
-import logging
 from unittest.mock import Mock, call, create_autospec
 
 import pytest
@@ -10,94 +9,16 @@ from pytest_mock import MockFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress import fastq as fastq_module
-from cg.cli.compress.fastq import clean_fastq, fastq_cmd, get_cases_to_process
+from cg.cli.compress.fastq import clean_fastq, fastq_cmd
 from cg.cli.compress.helpers import (
     compress_fastq_to_spring_for_samples,
     get_samples_available_for_compression,
 )
-from cg.constants import Workflow
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Sample
 from cg.store.store import Store
-from tests.store_helpers import StoreHelpers
 from tests.typed_mock import TypedMock, create_typed_mock
-
-
-def test_get_cases_to_process(
-    case_id: str,
-    cli_runner: CliRunner,
-    helpers: StoreHelpers,
-    populated_compress_context: CGConfig,
-):
-    """Test get cases to process."""
-
-    # GIVEN a populated store
-    status_db: Store = populated_compress_context.status_db
-
-    # GIVEN a context with a case that can be compressed
-
-    valid_compressable_case: Case = helpers.add_case(
-        store=status_db,
-        name=case_id,
-        internal_id=case_id,
-        data_analysis=Workflow.MIP_DNA,
-        action=None,
-    )
-    valid_compressable_case.created_at = dt.datetime.now() - dt.timedelta(days=1000)
-    status_db.session.commit()
-
-    # WHEN running the compress command
-    cases: list[Case] = get_cases_to_process(days_back=1, store=status_db)
-
-    # THEN assert cases are returned
-    assert cases
-
-    # THEN assert correct case was returned
-    assert cases[0].internal_id == case_id
-
-
-def test_get_cases_to_process_when_no_case(
-    case_id_does_not_exist: str,
-    caplog,
-    cli_runner: CliRunner,
-    helpers: StoreHelpers,
-    populated_compress_context: CGConfig,
-):
-    """Test get cases to proces when there are no cases to compress."""
-    caplog.set_level(logging.DEBUG)
-    status_db: Store = populated_compress_context.status_db
-
-    # WHEN running the compress command
-    cases: list[Case] = get_cases_to_process(
-        case_id=case_id_does_not_exist, days_back=1, store=status_db
-    )
-
-    # THEN assert no cases where found
-    assert not cases
-
-    # THEN assert we log no cases where found
-    assert f"Could not find case {case_id_does_not_exist}" in caplog.text
-
-
-def test_incompressible_cases_are_not_processable(
-    helpers: StoreHelpers,
-    populated_compress_context: CGConfig,
-):
-    """Test that cases that are marked as incompressible are not processable."""
-
-    # GIVEN a store with a case that is marked as incompressible
-    status_db: Store = populated_compress_context.status_db
-
-    incompressible_case: Case = helpers.add_case(store=status_db, internal_id="incompressible")
-    incompressible_case.created_at = dt.datetime.now() - dt.timedelta(days=1000)
-    incompressible_case.is_compressible = False
-
-    # WHEN retrieving the processable cases
-    processable_cases: list[Case] = get_cases_to_process(days_back=1, store=status_db)
-
-    # THEN assert that the incompressible case is not processable
-    assert incompressible_case not in processable_cases
 
 
 def test_compress_fastq_cli(cli_runner: CliRunner, cg_context: CGConfig, mocker: MockFixture):
@@ -460,9 +381,11 @@ def test_compress_fastq_to_spring_for_samples_with_dry_run():
 def test_compress_clean_cli(cli_runner: CliRunner, cg_context: CGConfig, mocker: MockFixture):
     # GIVEN a store, housekeeper api and compress api on the context
     store: TypedMock[Store] = create_typed_mock(Store)
+    housekeeper: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
     compress_api: TypedMock[CompressAPI] = create_typed_mock(CompressAPI)
 
     cg_context.status_db_ = store.as_type
+    cg_context.housekeeper_api_ = housekeeper.as_type
     cg_context.meta_apis["compress_api"] = compress_api.as_type
 
     # GIVEN samples available for compression
@@ -470,19 +393,100 @@ def test_compress_clean_cli(cli_runner: CliRunner, cg_context: CGConfig, mocker:
     sample2: Sample = create_autospec(Sample, internal_id="sample2")
     samples: list[Sample] = [sample1, sample2]
 
-    # GIVEN a case to clean with those samples
-    case: Case = create_autospec(Case, samples=samples)
-    store.as_mock.get_cases_to_compress.return_value = [case]
+    get_samples_mock = mocker.patch.object(
+        fastq_module, "get_samples_available_for_compression", return_value=samples
+    )
 
-    compress_api.as_mock.clean_fastq_files_for_samples.return_value = True
-
-    # WHEN running the compress fastq command
+    # WHEN running the clean fastq command
     result: Result = cli_runner.invoke(clean_fastq, [], obj=cg_context)
 
     # THEN the command exits successfully
     assert result.exit_code == 0
 
-    # THEN the samples were sent for compression using the default settings
+    # THEN function getting the samples is called with the right settings
+    get_samples_mock.assert_called_once_with(
+        store=store.as_type, housekeeper=housekeeper.as_type, age_limit_days=60, case_id=None
+    )
+
+    # THEN the samples fastq files where cleaned using the default settings
+    compress_api.as_mock.clean_fastq_files_for_samples.assert_called_once_with(
+        samples=samples, days_back=60
+    )
+
+
+def test_compress_clean_cli_case(cli_runner: CliRunner, cg_context: CGConfig, mocker: MockFixture):
+    # GIVEN a store, housekeeper api and compress api on the context
+    store: TypedMock[Store] = create_typed_mock(Store)
+    housekeeper: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
+    compress_api: TypedMock[CompressAPI] = create_typed_mock(CompressAPI)
+
+    cg_context.status_db_ = store.as_type
+    cg_context.housekeeper_api_ = housekeeper.as_type
+    cg_context.meta_apis["compress_api"] = compress_api.as_type
+
+    # GIVEN samples available for compression
+    sample1: Sample = create_autospec(Sample, internal_id="sample1")
+    sample2: Sample = create_autospec(Sample, internal_id="sample2")
+    samples: list[Sample] = [sample1, sample2]
+
+    get_samples_mock = mocker.patch.object(
+        fastq_module, "get_samples_available_for_compression", return_value=samples
+    )
+
+    # WHEN running the clean fastq command
+    result: Result = cli_runner.invoke(clean_fastq, ["--case-id", "case_id"], obj=cg_context)
+
+    # THEN the command exits successfully
+    assert result.exit_code == 0
+
+    # THEN function getting the samples is called with the right settings
+    get_samples_mock.assert_called_once_with(
+        store=store.as_type, housekeeper=housekeeper.as_type, age_limit_days=60, case_id="case_id"
+    )
+
+    # THEN the samples fastq files were cleand using the default settings
+    compress_api.as_mock.clean_fastq_files_for_samples.assert_called_once_with(
+        samples=samples, days_back=60
+    )
+
+
+def test_compress_clean_cli_dry_run(
+    cli_runner: CliRunner, cg_context: CGConfig, mocker: MockFixture
+):
+    # GIVEN a store, housekeeper api and compress api on the context
+    store: TypedMock[Store] = create_typed_mock(Store)
+    housekeeper: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
+    compress_api: TypedMock[CompressAPI] = create_typed_mock(CompressAPI)
+
+    cg_context.status_db_ = store.as_type
+    cg_context.housekeeper_api_ = housekeeper.as_type
+    cg_context.meta_apis["compress_api"] = compress_api.as_type
+
+    # GIVEN samples available for compression
+    sample1: Sample = create_autospec(Sample, internal_id="sample1")
+    sample2: Sample = create_autospec(Sample, internal_id="sample2")
+    samples: list[Sample] = [sample1, sample2]
+
+    get_samples_mock = mocker.patch.object(
+        fastq_module, "get_samples_available_for_compression", return_value=samples
+    )
+    update_compress_api_mock = mocker.patch.object(fastq_module, "update_compress_api")
+
+    # WHEN running the clean fastq command
+    result: Result = cli_runner.invoke(clean_fastq, ["--dry-run"], obj=cg_context)
+
+    # THEN the command exits successfully
+    assert result.exit_code == 0
+
+    # THEN update compress api is called with the right settings
+    update_compress_api_mock.assert_called_once_with(compress_api.as_type, dry_run=True)
+
+    # THEN function getting the samples is called with the right settings
+    get_samples_mock.assert_called_once_with(
+        store=store.as_type, housekeeper=housekeeper.as_type, age_limit_days=60, case_id=None
+    )
+
+    # THEN the samples fastq files were cleand using the default settings
     compress_api.as_mock.clean_fastq_files_for_samples.assert_called_once_with(
         samples=samples, days_back=60
     )
