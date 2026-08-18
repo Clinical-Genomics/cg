@@ -16,7 +16,7 @@ from cg.store.store import Store
 
 
 @pytest.fixture
-def fluffy_cg_config() -> CGConfig:
+def cg_config() -> CGConfig:
     return create_autospec(
         CGConfig,
         fluffy=FluffyConfig(
@@ -38,9 +38,9 @@ def fluffy_cg_config() -> CGConfig:
     )
 
 
-def test_run_fluffy(fluffy_cg_config: CGConfig, mocker: MockerFixture):
+def test_run_fluffy(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a FluffyAnalysisAPI
-    analysis_api = FluffyAnalysisAPI(fluffy_cg_config)
+    analysis_api = FluffyAnalysisAPI(cg_config)
 
     status_db = create_autospec(Store)
     status_db.get_case_by_internal_id = Mock(
@@ -83,9 +83,9 @@ def test_run_fluffy(fluffy_cg_config: CGConfig, mocker: MockerFixture):
     )
 
 
-def test_run_fluffy_with_batch_ref(fluffy_cg_config: CGConfig, mocker: MockerFixture):
+def test_run_fluffy_with_batch_ref(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a FluffyAnalysisAPI
-    analysis_api = FluffyAnalysisAPI(fluffy_cg_config)
+    analysis_api = FluffyAnalysisAPI(cg_config)
 
     status_db = create_autospec(Store)
     status_db.get_case_by_internal_id = Mock(
