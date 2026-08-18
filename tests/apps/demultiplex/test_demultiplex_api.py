@@ -207,15 +207,16 @@ def test_remove_demultiplexing_output_directory(
     ).exists()
 
 
-@pytest.mark.freeze_time
 def test_get_run_name(tmp_bcl_convert_flow_cell: IlluminaRunDirectoryData):
     # GIVEN a flow cell dir
 
+    # GIVEN a timestamp
+    timestamp: str = datetime.now().strftime("%Y_%m_%d_%H%M%S")
+
     # WHEN getting the run name
-    run_name: str = DemultiplexingAPI.get_run_name(tmp_bcl_convert_flow_cell)
+    run_name: str = DemultiplexingAPI.get_run_name(
+        sequencing_run=tmp_bcl_convert_flow_cell, timestamp=timestamp
+    )
 
     # THEN the run_name should look as expected
-    assert (
-        run_name
-        == f"{tmp_bcl_convert_flow_cell.id}_demultiplex_{datetime.now().strftime('%Y_%m_%d_%H%M%S')}"
-    )
+    assert run_name == f"{tmp_bcl_convert_flow_cell.id}_demultiplex_{timestamp}"
