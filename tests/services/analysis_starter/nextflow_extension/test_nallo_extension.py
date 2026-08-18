@@ -18,7 +18,7 @@ def nallo_config() -> NalloConfig:
         NalloConfig,
         rank_model_snv="path/to/snv_rank_model.ini",
         rank_model_sv="path/to/sv_rank_model.ini",
-        variant_catalog="path/to/variant_catalog.bed",
+        variant_catalog=Path("path/to/variant_catalog.bed"),
     )
 
 
