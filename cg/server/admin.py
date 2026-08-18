@@ -759,7 +759,7 @@ class PoolView(BaseView):
         "application_version": view_application_link_via_application_version,
         "customer": view_customer_link,
         "invoice": InvoiceView.view_invoice_link,
-        "db_order.ticket_id": view_ticket_link_via_order,
+        "order.ticket_id": view_ticket_link_via_order,
     }
     column_list = [
         "application_version",
@@ -770,13 +770,13 @@ class PoolView(BaseView):
         "delivered_at",
         "name",
         "no_invoice",
-        "db_order.name",
+        "order.name",
         "ordered_at",
         "received_at",
-        "db_order.ticket_id",
+        "order.ticket_id",
     ]
-    column_labels = {"db_order.ticket_id": "Ticket", "db_order.name": "Order"}
-    column_searchable_list = ["name", "db_order.name", "db_order.ticket_id", "customer.internal_id"]
+    column_labels = {"order.ticket_id": "Ticket", "order.name": "Order"}
+    column_searchable_list = ["name", "order.name", "order.ticket_id", "customer.internal_id"]
 
 
 class SampleView(BaseView):

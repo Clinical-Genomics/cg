@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Callable, Iterator, Literal
 
 import sqlalchemy
-from sqlalchemy import or_
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
@@ -14,6 +14,7 @@ from cg.constants.constants import (
     DNA_WORKFLOWS_WITH_RNA_UPLOAD,
     BedVersionGenomeVersion,
     CustomerId,
+    SequencingQCStatus,
 )
 from cg.constants.lims import LimsStatus
 from cg.constants.priority import Priority, SlurmQos, TrailblazerPriority
@@ -613,7 +614,7 @@ class ReadHandler(BaseHandler):
         """Return all the pools with an order fitting the enquiry."""
         return (
             self._get_query(table=Pool)
-            .join(Pool.db_order)
+            .join(Pool.order)
             .filter(Order.name.contains(order_enquiry))
             .all()
         )
@@ -739,7 +740,7 @@ class ReadHandler(BaseHandler):
             customer_internal_id=customer_internal_id, subject_id=subject_id
         ).all()
 
-    def get_samples_by_any_id(self, **identifiers: dict) -> Query:
+    def get_samples_by_any_id(self, identifiers: dict) -> Query:
         """Return a sample query filtered by the given names and values of Sample attributes."""
         samples: Query = self._get_query(table=Sample).order_by(Sample.internal_id.desc())
         for identifier_name, identifier_value in identifiers.items():
@@ -1618,21 +1619,54 @@ class ReadHandler(BaseHandler):
         return flow_cell
 
     def get_cases_for_sequencing_qc(self) -> list[Case]:
-        """Return all cases that are ready for sequencing QC."""
+        """
+        Return cases that should be evaluated in sequencing QC.
+
+        A case is included only if all of the following are true:
+
+        1. The case sequencing QC status is either:
+           - `SequencingQCStatus.PENDING`
+           - `SequencingQCStatus.FAILED`
+
+        2. The case has at least one linked sample that is not downsampled:
+           - `Sample.downsampled_to is None`
+           NOTE: It is expected that either all or none of the samples of a case are downsampled
+
+        3. For those linked non-downsampled samples, at least one of these is true:
+           - The sample belongs to an external application (`Application.is_external`)
+           - The sample is non-external and has sequencing evidence:
+             - `Sample.last_sequenced_at` is set
+             - `Sample._sample_run_metrics.any()` is true
+
+        The query is built with joins from `Case` to sample and application tables, and
+        returns all matching `Case` objects.
+        """
         query = (
-            self._get_query(table=Case)
-            .join(Case.links)
-            .join(CaseSample.sample)
-            .join(ApplicationVersion)
-            .join(Application)
+            (
+                self._get_query(table=Case)
+                .join(Case.links)
+                .join(CaseSample.sample)
+                .join(ApplicationVersion)
+                .join(Application)
+            )
+            # Select cases with pending or failed sequencing QC
+            .filter(
+                Case.aggregated_sequencing_qc.in_(
+                    [SequencingQCStatus.PENDING, SequencingQCStatus.FAILED]
+                )
+            )
+            # Select samples that are not downsampled
+            .filter(Sample.downsampled_to.is_(None))
+            # Include all samples externally sequenced and non-external samples with sequencing data
+            .filter(
+                or_(
+                    Application.is_external,
+                    and_(Sample.last_sequenced_at.isnot(None), Sample._sample_run_metrics.any()),
+                )
+            )
         )
-        return apply_case_filter(
-            cases=query,
-            filter_functions=[
-                CaseFilter.PENDING_OR_FAILED_SEQUENCING_QC,
-                CaseFilter.HAS_SEQUENCE,
-            ],
-        ).all()
+
+        return query.all()
 
     def is_application_archived(self, application_tag: str) -> bool:
         application: Application | None = self.get_application_by_tag(application_tag)

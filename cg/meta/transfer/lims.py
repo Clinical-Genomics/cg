@@ -152,7 +152,7 @@ class TransferLims(object):
         """Checks if a pool object can be transferred. A pool needs to have a ticket number and at least one sample"""
 
         if ticket is None:
-            LOG.warning(f"No ticket number found for pool with order number {pool_obj.order}.")
+            LOG.warning(f"No ticket number found for pool with order number {pool_obj.order_name}.")
             return False
         if number_of_samples == 0:
             LOG.warning(f"No samples found for pool with ticket number {ticket}.")
