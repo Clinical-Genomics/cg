@@ -96,7 +96,7 @@ class CompressionData:
     def get_change_date(file_path: Path) -> datetime:
         """Return the time when this file was changed"""
         changed_date = datetime.fromtimestamp(file_path.stat().st_mtime)
-        LOG.debug("File %s was changed %s", file_path, changed_date)
+        LOG.debug(f"File {file_path} was changed {changed_date}")
         return changed_date
 
     def spring_exists(self) -> bool:
