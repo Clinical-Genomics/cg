@@ -2072,6 +2072,14 @@ class ReadHandler(BaseHandler):
     def get_compressible_samples_by_internal_ids(
         self, internal_ids: list[str], case_created_before_date: datetime
     ) -> list[Sample]:
+        """
+        Return samples, restricted to the given internal ids, that are compressible:
+            - Excludes samples belonging to any case that:
+                - Is marked as not compressible
+                - Has an active action
+                - Was created on or after case_created_before_date
+            - Ordered by created date, with the oldest first
+        """
         incompressible_case_samples_subquery: ScalarSelect = (
             select(CaseSample.sample_id)
             .join(Case, Case.id == CaseSample.case_id)
