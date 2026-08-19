@@ -79,7 +79,7 @@ class CompressionData:
         """Check if file exists and is accesible"""
         try:
             if not file_path.exists():
-                LOG.debug("%s does not exist", file_path)
+                LOG.debug(f"{file_path} does not exist")
                 return False
         except PermissionError:
             LOG.warning("Not permitted to access %s. Skipping", file_path)
