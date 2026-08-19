@@ -2,6 +2,7 @@
 
 import logging
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 from typing_extensions import Literal
@@ -62,16 +63,14 @@ class DemultiplexingAPI:
 
     @staticmethod
     def get_sbatch_error(
-        sequencing_run: IlluminaRunDirectoryData,
-        email: str,
-        demux_dir: Path,
+        sequencing_run: IlluminaRunDirectoryData, email: str, demux_dir: Path, log_path: Path
     ) -> str:
         """Create the sbatch error string."""
         LOG.debug("Creating the sbatch error string")
         error_parameters: SbatchError = SbatchError(
             flow_cell_id=sequencing_run.id,
             email=email,
-            logfile=DemultiplexingAPI.get_stderr_logfile(sequencing_run=sequencing_run).as_posix(),
+            logfile=log_path.as_posix(),
             demux_dir=demux_dir.as_posix(),
             demux_started=sequencing_run.demultiplexing_started_path.as_posix(),
         )
@@ -107,14 +106,17 @@ class DemultiplexingAPI:
         return Path(sequencing_run.path, "demux-novaseq.sh")
 
     @staticmethod
-    def get_run_name(sequencing_run: IlluminaRunDirectoryData) -> str:
+    def get_run_name(sequencing_run: IlluminaRunDirectoryData, timestamp: str) -> str:
         """Create the run name for the sbatch job."""
-        return f"{sequencing_run.id}_demultiplex"
+        return f"{sequencing_run.id}_demultiplex_{timestamp}"
 
     @staticmethod
-    def get_stderr_logfile(sequencing_run: IlluminaRunDirectoryData) -> Path:
+    def get_stderr_logfile(sequencing_run: IlluminaRunDirectoryData, run_name: str) -> Path:
         """Create the path to the stderr logfile."""
-        return Path(sequencing_run.path, f"{DemultiplexingAPI.get_run_name(sequencing_run)}.stderr")
+        return Path(
+            sequencing_run.path,
+            f"{run_name}.stderr",
+        )
 
     def demultiplexed_run_dir_path(self, sequencing_run: IlluminaRunDirectoryData) -> Path:
         """Create the path to where the demultiplexed result should be produced."""
@@ -221,11 +223,14 @@ class DemultiplexingAPI:
     def start_demultiplexing(self, sequencing_run: IlluminaRunDirectoryData):
         """Start demultiplexing for a sequencing run."""
         self.create_demultiplexing_started_file(sequencing_run.demultiplexing_started_path)
-        log_path: Path = self.get_stderr_logfile(sequencing_run=sequencing_run)
+        timestamp: str = datetime.now().strftime("%Y_%m_%d_%H%M%S")
+        run_name: str = self.get_run_name(sequencing_run=sequencing_run, timestamp=timestamp)
+        log_path: Path = self.get_stderr_logfile(sequencing_run=sequencing_run, run_name=run_name)
         error_function: str = self.get_sbatch_error(
             sequencing_run=sequencing_run,
             email=self.mail,
             demux_dir=self.demultiplexed_run_dir_path(sequencing_run),
+            log_path=log_path,
         )
         commands: str = self.get_sbatch_command(
             run_dir=sequencing_run.path,
@@ -240,7 +245,7 @@ class DemultiplexingAPI:
             email=self.mail,
             error=error_function,
             hours=36,
-            job_name=self.get_run_name(sequencing_run),
+            job_name=run_name,
             log_dir=log_path.parent.as_posix(),
             quality_of_service=self.slurm_quality_of_service,
         )
