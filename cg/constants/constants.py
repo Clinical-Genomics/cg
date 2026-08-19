@@ -47,6 +47,12 @@ class CaseActions(StrEnum):
         return list(map(lambda action: action.value, cls))
 
 
+CASE_ACTIVE_ACTIONS = [
+    CaseActions.ANALYZE,
+    CaseActions.RUNNING,
+    CaseActions.TOP_UP,
+]
+
 CONTAINER_OPTIONS = ("Tube", "96 well plate", "No container")
 
 
