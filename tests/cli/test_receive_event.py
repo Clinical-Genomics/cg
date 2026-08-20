@@ -1,6 +1,7 @@
 from json import JSONDecodeError
 from unittest.mock import create_autospec
 
+import pytest
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
@@ -59,36 +60,28 @@ def test_receive_event_json_parsing_fails(mocker: MockerFixture):
     assert isinstance(result.exception, JSONDecodeError)
 
 
-def test_receive_event_no_data_flag(mocker: MockerFixture):
+@pytest.mark.parametrize(
+    "additional_args",
+    [
+        [],
+        ["--data", ""],
+    ],
+    ids=["no_data_argument", "empty_data_argument"],
+)
+def test_receive_event_no_data_variants(mocker: MockerFixture, additional_args: list[str]):
     # GIVEN the cli runner
     cli_runner = CliRunner()
 
     handle_spy = mocker.spy(event_handler, "handle")
+
     # WHEN calling the receive event command with no data
     result = cli_runner.invoke(
         receive_event,
-        args=["cg-test.something-happened"],
+        args=["cg-test.something-happened"] + additional_args,
         obj=create_autospec(CGConfig),
     )
 
-    handle_spy.assert_not_called()
-
-    # THEN the result exits successfully
-    assert result.exit_code == 0
-
-
-def test_receive_event_no_data(mocker: MockerFixture):
-    # GIVEN the cli runner
-    cli_runner = CliRunner()
-
-    handle_spy = mocker.spy(event_handler, "handle")
-    # WHEN calling the receive event command with no data
-    result = cli_runner.invoke(
-        receive_event,
-        args=["cg-test.something-happened", "--data", ""],
-        obj=create_autospec(CGConfig),
-    )
-
+    # THEN it should not call the event handler
     handle_spy.assert_not_called()
 
     # THEN the result exits successfully
