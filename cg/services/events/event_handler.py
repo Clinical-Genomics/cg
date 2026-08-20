@@ -1,2 +1,17 @@
-def handle(config=config, event_name=event_name, data=parsed_data):
+from typing import Callable
+
+from cg.models.cg_config import CGConfig
+
+
+def handle(config: CGConfig, event_name: str, data: dict):
+    # 1. Look if there is a registered handler for teh event name
+    # 2. If there is, call the handler with the config and data
+    # 3. Otherwise, log
+
+    event_handlers: dict[str, Callable] = {"existing_event": _existing_event_handler}
+    handler: Callable = event_handlers.get(event_name)
+    handler(config=config, data=data)
+
+
+def _existing_event_handler(config: CGConfig, data: dict):
     pass

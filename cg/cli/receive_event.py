@@ -3,6 +3,7 @@ import json
 import click
 
 from cg.models.cg_config import CGConfig
+from cg.services.events import event_handler
 
 
 @click.command("receive-event", hidden=True)
