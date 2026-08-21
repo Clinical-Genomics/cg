@@ -4,6 +4,7 @@ from pytest_mock import MockerFixture
 
 from cg.models.cg_config import CGConfig
 from cg.services.events import event_handler
+from cg.services.events.event_handler import EVENT_HANDLERS
 from cg.services.events.event_handlers import external_sample_uploaded_handler
 
 
@@ -47,15 +48,22 @@ def test_handle_no_handler(mocker: MockerFixture):
 
 
 def test_handle_sample_uploaded(mocker: MockerFixture):
+    # GIVEN a CGConfig
     cg_config: CGConfig = create_autospec(CGConfig)
     data = {"key": "value"}
 
     handle_spy = mocker.spy(external_sample_uploaded_handler, "handle")
+    mocker.patch.dict(
+        EVENT_HANDLERS,
+        {"external.customer_uploaded_sample": handle_spy},
+    )
 
+    # WHEN calling the event handler with an event for external_sample_uploaded_handler
     event_handler.handle(
         config=cg_config,
         event_name="external.customer_uploaded_sample",
         data=data,
     )
 
+    # THEN the correct handler should have been called
     handle_spy.assert_called_once_with(config=cg_config, data=data)
