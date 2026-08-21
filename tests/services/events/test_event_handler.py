@@ -1,4 +1,4 @@
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 from pytest_mock import MockerFixture
 
@@ -15,13 +15,17 @@ def test_handle_existing_handler(mocker: MockerFixture):
     # GIVEN an event data dictionary
     data = {"key": "value"}
 
-    event_handler_spy = mocker.spy(event_handler, "_existing_event_handler")
+    # GIVEN a dict of event handlers
+    registered_event_handler = Mock()
+    event_handlers: dict = {"existing_event": registered_event_handler}
 
     # WHEN calling handle
-    event_handler.handle(config=cg_config, event_name="existing_event", data=data)
+    event_handler.handle(
+        config=cg_config, event_name="existing_event", data=data, event_handlers=event_handlers
+    )
 
     # THEN the correct handler was called
-    event_handler_spy.assert_called_once_with(config=cg_config, data=data)
+    registered_event_handler.assert_called_once_with(config=cg_config, data=data)
 
 
 def test_handle_no_handler(mocker: MockerFixture):
@@ -38,4 +42,4 @@ def test_handle_no_handler(mocker: MockerFixture):
 
     # WHEN calling handle
     # THEN it doesn't raise
-    event_handler.handle(config=cg_config, event_name=event_name, data=data)
+    event_handler.handle(config=cg_config, event_name=event_name, data=data, event_handlers={})
