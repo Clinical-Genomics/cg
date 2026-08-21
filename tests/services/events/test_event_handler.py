@@ -4,7 +4,7 @@ from pytest_mock import MockerFixture
 
 from cg.models.cg_config import CGConfig
 from cg.services.events import event_handler
-from cg.services.events.event_handler import sample_uploaded_handler
+from cg.services.events.event_handler import external_sample_uploaded_handler
 
 
 def test_handle_existing_handler(mocker: MockerFixture):
@@ -50,8 +50,10 @@ def test_handle_sample_uploaded(mocker: MockerFixture):
     cg_config: CGConfig = create_autospec(CGConfig)
     data = {"key": "value"}
 
-    handle_spy = mocker.spy(sample_uploaded_handler, "handle")
+    handle_spy = mocker.spy(external_sample_uploaded_handler, "handle")
 
-    event_handler.handle(config=cg_config, event_name="sample_uploaded", data=data)
+    event_handler.handle(
+        config=cg_config, event_name="external.customer_uploaded_sample", data=data
+    )
 
     handle_spy.assert_called_once_with(config=cg_config, data=data)
