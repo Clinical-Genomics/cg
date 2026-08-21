@@ -14,5 +14,4 @@ def receive_event(config: CGConfig, event_name: str, data: str | None):
     if not data:
         return
     parsed_data: dict = json.loads(data)
-    # TODO makesure that the event name does not contain the stream (AKA cg in the cg.xyz)
     event_handler.handle(config=config, event_name=event_name, data=parsed_data)

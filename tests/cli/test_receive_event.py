@@ -21,13 +21,13 @@ def test_receive_event_success(mocker: MockerFixture):
     # WHEN calling the receive event command
     result = cli_runner.invoke(
         receive_event,
-        args=["cg-test.something-happened", "--data", '{"key": "value"}'],
+        args=["something-happened", "--data", '{"key": "value"}'],
         obj=cg_config,
     )
 
     # THEN it calls the event handler
     handle_spy.assert_called_once_with(
-        config=cg_config, event_name="cg-test.something-happened", data={"key": "value"}
+        config=cg_config, event_name="something-happened", data={"key": "value"}
     )
 
     # THEN the result exits successfully
@@ -46,7 +46,7 @@ def test_receive_event_json_parsing_fails(mocker: MockerFixture):
     # WHEN calling the receive event command with a malformed json
     result = cli_runner.invoke(
         receive_event,
-        args=["cg-test.something-happened", "--data", "this is a string"],
+        args=["something-happened", "--data", "this is a string"],
         obj=cg_config,
     )
 
@@ -77,7 +77,7 @@ def test_receive_event_no_data_variants(mocker: MockerFixture, additional_args: 
     # WHEN calling the receive event command with no data
     result = cli_runner.invoke(
         receive_event,
-        args=["cg-test.something-happened"] + additional_args,
+        args=["something-happened"] + additional_args,
         obj=create_autospec(CGConfig),
     )
 
