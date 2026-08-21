@@ -2,11 +2,12 @@ import logging
 from typing import Callable
 
 from cg.models.cg_config import CGConfig
+from cg.services.events.event_handlers import sample_uploaded_handler
 
 LOG = logging.getLogger(__name__)
 
 
-EVENT_HANDLERS: dict = {}
+EVENT_HANDLERS: dict = {"sample_uploaded": sample_uploaded_handler.handle}
 
 
 def handle(config: CGConfig, event_name: str, data: dict, event_handlers: dict = EVENT_HANDLERS):
