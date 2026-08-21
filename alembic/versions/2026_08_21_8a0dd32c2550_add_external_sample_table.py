@@ -25,7 +25,6 @@ def upgrade():
         sa.Column("customer_id", sa.Integer, sa.ForeignKey("customer.id"), nullable=False),
         sa.Column("customer_uploaded_at", sa.DateTime, nullable=False),
         sa.Column("transferred_at", sa.DateTime, server_default=None, nullable=True, index=True),
-        sa.Index("ix_sample_name_customer_id", "sample_name", "customer_id"),
         sa.UniqueConstraint("sample_name", "customer_id", name="uq_sample_name_customer_id"),
     )
 
