@@ -13,7 +13,7 @@ from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
-def test_handle_triggers_download_success(mocker: MockerFixture):
+def test_handle_triggers_transfer(mocker: MockerFixture):
     # GIVEN a store with a customer
     status_db: TypedMock[Store] = create_typed_mock(Store)
     status_db.as_type.get_customer_by_internal_id_strict = Mock(
@@ -29,7 +29,7 @@ def test_handle_triggers_download_success(mocker: MockerFixture):
         "customer_uploaded_at": "2026-06-02T11:14:52Z",
     }
 
-    # GIVEN that the sample should be downloaded
+    # GIVEN that the sample should be transferred
     status_db.as_type.get_sample_by_customer_and_name = Mock(return_value=create_autospec(Sample))
 
     # GIVEN a transfer servicer
@@ -45,13 +45,13 @@ def test_handle_triggers_download_success(mocker: MockerFixture):
         customer_uploaded_at=datetime(year=2026, month=6, day=2, hour=11, minute=14, second=52),
     )
 
-    # THEN the sample should be downloaded
+    # THEN the sample should be transferred
     transfer_sample_spy.assert_called_once_with(
         customer_internal_id="cust000", sample_name="sample_name"
     )
 
 
-def test_handle_not_trigger_download(mocker: MockerFixture):
+def test_handle_not_trigger_transfer(mocker: MockerFixture):
     # GIVEN a store with a customer
     status_db: TypedMock[Store] = create_typed_mock(Store)
     status_db.as_type.get_customer_by_internal_id_strict = Mock(
@@ -66,6 +66,9 @@ def test_handle_not_trigger_download(mocker: MockerFixture):
         "sample_name": "sample_name",
         "customer_uploaded_at": "2026-06-02T11:14:52Z",
     }
+
+    # GIVEN that the sample should NOT be transferred
+    status_db.as_type.get_sample_by_customer_and_name = Mock(return_value=None)
 
     # GIVEN a transfer servicer
     transfer_sample_spy = mocker.spy(transfer_to_cluster_service, "transfer_sample")
