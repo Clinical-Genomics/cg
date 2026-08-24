@@ -255,6 +255,19 @@ class ApplicationVersion(Base):
     def __str__(self) -> str:
         return f"{self.application.tag} ({self.version})"
 
+    @hybrid_property
+    def application_tag(self):
+        return self.application.tag
+
+    @application_tag.expression
+    @classmethod
+    def application_tag(cls):
+        return (
+            select(Application.tag)
+            .where(Application.id == cls.application_id)
+            .label("application_tag")
+        )
+
     def to_dict(self, application: bool = True):
         """Represent as dictionary"""
         data = to_dict(model_instance=self)
@@ -308,6 +321,15 @@ class Analysis(Base):
     session_id: Mapped[str | None]
     order_id: Mapped[int | None] = mapped_column(ForeignKey("order.id"))
     order: Mapped["Order"] = orm.relationship(back_populates="analyses")
+
+    @hybrid_property
+    def case_internal_id(self) -> str:
+        return self.case.internal_id
+
+    @case_internal_id.expression
+    @classmethod
+    def case_internal_id(cls):
+        return select(Case.internal_id).where(Case.id == cls.case_id).label("case_internal_id")
 
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
@@ -712,6 +734,9 @@ class Panel(Base):
 class Pool(Base):
     __tablename__ = "pool"
     __table_args__ = (UniqueConstraint("order_id", "name", name="_order_name_uc"),)
+
+    def __str__(self):
+        return self.name
 
     application_version_id: Mapped[int] = mapped_column(ForeignKey("application_version.id"))
     application_version: Mapped["ApplicationVersion"] = orm.relationship(
