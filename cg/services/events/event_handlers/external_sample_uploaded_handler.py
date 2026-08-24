@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from cg.models.cg_config import CGConfig
-from cg.services import transfer_service
+from cg.services import transfer_to_cluster_service
 from cg.store.models import Customer
 from cg.store.store import Store
 
@@ -19,6 +19,6 @@ def handle(config: CGConfig, data: dict):
     if status_db.get_sample_by_customer_and_name(
         customer_entry_id=[customer.id], sample_name=sample_name
     ):
-        transfer_service.transfer_sample(
+        transfer_to_cluster_service.transfer_sample(
             customer_internal_id=customer.internal_id, sample_name=sample_name
         )
