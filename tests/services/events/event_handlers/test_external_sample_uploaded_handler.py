@@ -85,3 +85,13 @@ def test_handle_not_trigger_transfer(mocker: MockerFixture):
 
     # THEN sample is not transferred
     transfer_sample_spy.assert_not_called()
+
+
+def test_handle_invalid_sample_name():
+    # TODO
+    invalid_sample_name = "sample_name"
+
+
+def test_handle_invalid_date_format():
+    # TODO
+    pass
