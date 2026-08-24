@@ -599,4 +599,5 @@ class CreateMixin(ReadHandler):
         self, customer_id: int, sample_name: str, customer_uploaded_at: datetime
     ):
         # TODO create and add ExternalSample to database
+        # TODO Add to session?
         pass

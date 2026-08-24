@@ -7,15 +7,12 @@ from cg.store.store import Store
 
 def handle(config: CGConfig, data: dict):
     status_db: Store = config.status_db
-    # TODO add entry to external sample table
     customer: Customer = status_db.get_customer_by_internal_id_strict(data["customer"])
-    customer_uploaded_at = datetime.strptime(
-        date_string=data["customer_uploaded_at"], format="%YYYY-%mm-%dd"
-    )
+    customer_uploaded_at = datetime.strptime(data["customer_uploaded_at"], "%Y-%m-%dT%H:%M:%SZ")
     status_db.add_external_sample(
         customer_id=customer.id,
         sample_name=data["sample_name"],
-        customer_uploaded_at=data["customer_uploaded_at"],
+        customer_uploaded_at=customer_uploaded_at,
     )
     # TODO check if sample or order exist if so trigger download
     # TODO raise or return success

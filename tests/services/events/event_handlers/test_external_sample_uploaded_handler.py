@@ -3,7 +3,7 @@ from unittest.mock import Mock, create_autospec
 
 from cg.models.cg_config import CGConfig
 from cg.services.events.event_handlers import external_sample_uploaded_handler
-from cg.store.models import Customer
+from cg.store.models import Customer, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -25,8 +25,8 @@ def test_handle_triggers_download_success():
     }
 
     # GIVEN that the sample should be downloaded
-    # TODO: Set this up
-
+    status_db.as_type.get_sample_by_customer_and_name = Mock(return_value=create_autospec(Sample))
+    # GIVEN a transfer service
     # WHEN calling handle with a CGConfig and some data
     external_sample_uploaded_handler.handle(config=cg_config, data=data)
 
