@@ -502,6 +502,7 @@ class StoreHelpers:
         data_delivery: DataDelivery = DataDelivery.SCOUT,
         action: str = None,
         internal_id: str = None,
+        is_compressible: bool = True,
         customer_id: str = "cust000",
         panels: list[str] = [],
         priority: str = PriorityTerms.STANDARD,
@@ -533,6 +534,7 @@ class StoreHelpers:
                 panels=panels,
                 ticket=ticket,
                 priority=priority,
+                is_compressible=is_compressible,
             )
         if action:
             case_obj.action = action

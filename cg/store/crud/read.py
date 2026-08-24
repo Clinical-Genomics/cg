@@ -6,11 +6,12 @@ from datetime import datetime
 from typing import Callable, Iterator, Literal
 
 import sqlalchemy
-from sqlalchemy import and_, or_
+from sqlalchemy import ScalarSelect, Select, and_, or_, select
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import (
+    CASE_ACTIVE_ACTIONS,
     DNA_WORKFLOWS_WITH_RNA_UPLOAD,
     BedVersionGenomeVersion,
     CustomerId,
@@ -1171,19 +1172,6 @@ class ReadHandler(BaseHandler):
         sorted_and_truncated: Query = cases.order_by(Case.ordered_at).limit(limit)
         return sorted_and_truncated.all()
 
-    def get_cases_to_compress(self, date_threshold: datetime) -> list[Case]:
-        """Return all cases that are ready to be compressed by SPRING."""
-        case_filter_functions: list[CaseFilter] = [
-            CaseFilter.HAS_INACTIVE_ANALYSIS,
-            CaseFilter.OLD_BY_CREATION_DATE,
-            CaseFilter.IS_COMPRESSIBLE,
-        ]
-        return apply_case_filter(
-            cases=self._get_query(table=Case),
-            filter_functions=case_filter_functions,
-            creation_date=date_threshold,
-        ).all()
-
     def get_sample_by_entry_id(self, entry_id: int) -> Sample:
         """Return a sample by entry id."""
         sample: Sample | None = apply_sample_filter(
@@ -2080,6 +2068,41 @@ class ReadHandler(BaseHandler):
             )
             .all()
         )
+
+    def get_compressible_samples_by_internal_ids(
+        self, internal_ids: list[str], case_created_before_date: datetime
+    ) -> list[Sample]:
+        """
+        Return samples, restricted to the given internal ids, that are compressible:
+            - Excludes samples belonging to any case that:
+                - Is marked as not compressible
+                - Has an active action
+                - Was created on or after case_created_before_date
+            - Ordered by created date, with the oldest first
+        """
+        incompressible_case_samples_subquery: ScalarSelect = (
+            select(CaseSample.sample_id)
+            .join(Case, Case.id == CaseSample.case_id)
+            .where(
+                or_(
+                    Case.is_compressible.is_(False),
+                    Case.action.in_(CASE_ACTIVE_ACTIONS),
+                    Case.created_at >= case_created_before_date,
+                )
+            )
+        ).scalar_subquery()
+
+        query: Select[tuple[Sample]] = (
+            select(Sample)
+            .where(
+                Sample.id.not_in(incompressible_case_samples_subquery),
+                Sample.internal_id.in_(internal_ids),
+            )
+            .distinct()
+            .order_by(Sample.created_at.asc())
+        )
+
+        return list(self.session.scalars(query).all())
 
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:

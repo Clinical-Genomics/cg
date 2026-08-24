@@ -163,7 +163,9 @@ class HousekeeperAPI:
         """Wrap method in Housekeeper Store."""
         return self._store.session.rollback()
 
-    def get_files(self, bundle: str, tags: list | None = None, version: int | None = None) -> Query:
+    def get_files(
+        self, bundle: str | None, tags: list | None = None, version: int | None = None
+    ) -> Query:
         """Get all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version.
         """
@@ -656,3 +658,14 @@ class HousekeeperAPI:
                 files=filtered_files, excluded_tags=excluded_tags
             )
         return filtered_files
+
+    def get_bundle_names_with_fastq_files(self) -> list[str]:
+        """Return the names of all bundles that currently have a fastq-tagged file"""
+        fastq_files: Query = self.get_files(bundle=None, tags=[SequencingFileTag.FASTQ])
+        bundle_names: Query = (
+            fastq_files.join(File.version)
+            .join(Version.bundle)
+            .with_entities(Bundle.name)
+            .distinct()
+        )
+        return [name for (name,) in bundle_names]
