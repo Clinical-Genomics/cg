@@ -594,3 +594,9 @@ class CreateMixin(ReadHandler):
         )
         self.add_item_to_store(new_sample_sequencing_run)
         return new_sample_sequencing_run
+
+    def add_external_sample(
+        self, customer_id: int, sample_name: str, customer_uploaded_at: datetime
+    ):
+        # TODO create and add ExternalSample to database
+        pass
