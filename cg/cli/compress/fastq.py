@@ -7,16 +7,16 @@ import rich_click as click
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress.helpers import (
-    compress_sample_fastqs_in_cases,
+    compress_fastq_to_spring_for_samples,
     correct_spring_paths,
-    get_cases_to_process,
+    get_samples_available_for_compression,
     update_compress_api,
 )
 from cg.constants.cli_options import DRY_RUN
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, Sample
+from cg.store.models import Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -29,9 +29,9 @@ LOG = logging.getLogger(__name__)
     "--days-back",
     default=60,
     show_default=True,
-    help="Threshold for how long ago was the case created",
+    help="Only cases older than this many days are eligible for compression",
 )
-@click.option("-n", "--number-of-conversions", default=5, type=int, show_default=True)
+@click.option("-n", "--number-of-samples", default=5, type=int, show_default=True)
 @DRY_RUN
 @click.pass_obj
 def fastq_cmd(
@@ -39,22 +39,25 @@ def fastq_cmd(
     case_id: str | None,
     days_back: int,
     dry_run: bool,
-    number_of_conversions: int,
+    number_of_samples: int,
 ):
     """Compress old FASTQ files into SPRING."""
     LOG.info("Running compress FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
-    cases: list[Case] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
-    if not cases:
-        LOG.info("No cases to compress")
-        return None
-    compress_sample_fastqs_in_cases(
-        compress_api=compress_api,
-        cases=cases,
-        dry_run=dry_run,
-        number_of_conversions=number_of_conversions,
+    housekeeper: HousekeeperAPI = context.housekeeper_api
+    samples: list[Sample] | None = get_samples_available_for_compression(
+        store=store, housekeeper=housekeeper, age_limit_days=days_back, case_id=case_id
     )
+    if samples:
+        compress_fastq_to_spring_for_samples(
+            compress_api=compress_api,
+            samples=samples,
+            sample_limit=number_of_samples,
+            dry_run=dry_run,
+        )
+    else:
+        LOG.info(f"No samples older than {days_back} days available to compress.")
 
 
 @click.command("fastq")
@@ -64,7 +67,7 @@ def fastq_cmd(
     "--days-back",
     default=60,
     show_default=True,
-    help="Threshold for how long ago was the case created",
+    help="Only cases older than this many days are eligible for compression",
 )
 @DRY_RUN
 @click.pass_obj
@@ -73,21 +76,20 @@ def clean_fastq(context: CGConfig, case_id: str | None, days_back: int, dry_run:
     LOG.info("Running compress clean FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
+    housekeeper: HousekeeperAPI = context.housekeeper_api
     update_compress_api(compress_api, dry_run=dry_run)
 
-    cases: list[Case] | None = get_cases_to_process(
-        case_id=case_id, days_back=days_back, store=store
+    samples: list[Sample] | None = get_samples_available_for_compression(
+        store=store,
+        housekeeper=housekeeper,
+        age_limit_days=days_back,
+        case_id=case_id,
     )
-    if not cases:
-        LOG.info("Did not find any FASTQ files to clean. Closing")
-        return
-    is_successful: bool = True
-    for case in cases:
-        samples: list[Sample] = case.samples
-        if not compress_api.clean_fastq_files_for_samples(samples=samples, days_back=days_back):
-            is_successful: bool = False
-    if not is_successful:
-        click.Abort("Failed to clean FASTQ files. Aborting")
+
+    if samples:
+        compress_api.clean_fastq_files_for_samples(samples=samples, days_back=days_back)
+    else:
+        LOG.info(f"No samples older than {days_back} days available to clean.")
 
 
 @click.command("fix-spring")

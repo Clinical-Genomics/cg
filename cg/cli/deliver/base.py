@@ -26,7 +26,7 @@ TICKET_ID_ARG = click.option("-t", "--ticket", type=str, required=True)
 
 @click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def deliver():
-    """Deliver files with CG."""
+    """Deliver to customers"""
     LOG.info("Running CG deliver")
 
 
@@ -69,7 +69,7 @@ def deliver_case(config: CGConfig, case_id: str, signature: str):
 @click.pass_obj
 def deliver_order(config: CGConfig, signature: str, ticket_id: int):
     """
-    Deliver all analysis ready to be delivered in an order by ticket_id.
+    Deliver all analyses ready to be delivered in an order by ticket_id.
 
     \b
     Performs:
