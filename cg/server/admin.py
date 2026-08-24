@@ -265,7 +265,9 @@ def _get_ticket_markups(ticket_str: str) -> str:
 class ApplicationView(BaseView):
     """Admin view for Model.Application"""
 
-    column_list = list(inspect(Application).columns) + ["order_types"]
+    page_size = 100
+
+    column_list = [column.name for column in inspect(Application).columns] + ["order_types"]
 
     column_editable_list = [
         "description",
@@ -291,14 +293,19 @@ class ApplicationView(BaseView):
         "lims_workflow_id",
     ]
     column_exclude_list = [
-        "minimum_order",
-        "sample_amount",
-        "sample_volume",
-        "details",
-        "limitations",
-        "created_at",
-        "updated_at",
         "category",
+        "created_at",
+        "limitations",
+        "minimum_order",
+        "percent_kth",
+        "sample_amount",
+        "sample_concentration",
+        "sample_concentration_maximum",
+        "sample_concentration_maximum_cfdna",
+        "sample_concentration_minimum",
+        "sample_concentration_minimum_cfdna",
+        "sample_volume",
+        "updated_at",
     ]
     column_formatters = {
         "tag": view_application_version_link,
@@ -308,8 +315,8 @@ class ApplicationView(BaseView):
         "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
         "sample_concentration_maximum_cfdna": view_sample_concentration_maximum_cfdna,
     }
-    column_filters = ["prep_category", "is_accredited", "is_archived", "read_type"]
-    column_searchable_list = ["tag", "prep_category"]
+    column_filters = ["prep_category", "is_accredited", "is_archived", "read_type", "is_external"]
+    column_searchable_list = ["tag", "prep_category", "description", "details"]
     form_excluded_columns = ["category", "versions", "order_type_applications"]
     form_extra_fields = {
         "suitable_order_types": MultiCheckboxField(
