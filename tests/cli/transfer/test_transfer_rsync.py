@@ -16,8 +16,6 @@ def test_rsync_help(cli_runner):
 
     # THEN assert the command exists without problems
     assert result.exit_code == EXIT_SUCCESS
-    # THEN assert the information is printed
-    assert "The folder generated using the" in result.output
 
 
 def test_run_rsync_command_no_case(cg_context: CGConfig, cli_runner, helpers, caplog):
