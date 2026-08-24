@@ -1,6 +1,5 @@
 """Helper functions for compress cli."""
 
-import datetime as dt
 import logging
 import os
 from pathlib import Path
@@ -9,31 +8,37 @@ from typing import Iterator
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import SequencingFileTag
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 from cg.utils.date import get_date_days_ago
 
 LOG = logging.getLogger(__name__)
 
 
-def get_cases_to_process(
-    days_back: int, store: Store, case_id: str | None = None
-) -> list[Case] | None:
-    """Return cases to process."""
-    cases: list[Case] = []
+def get_samples_available_for_compression(
+    store: Store, housekeeper: HousekeeperAPI, age_limit_days: int, case_id: str | None = None
+) -> list[Sample] | None:
+    """Return samples available for compression."""
+
     if case_id:
-        case: Case = store.get_case_by_internal_id(case_id)
-        if not case:
-            LOG.warning(f"Could not find case {case_id}")
-            return
-        if case.is_compressible:
-            cases.append(case)
+        case: Case = store.get_case_by_internal_id_strict(case_id)
+        sample_ids: list[str] = [sample.internal_id for sample in case.samples]
+        if not sample_ids:
+            LOG.warning(f"No samples found for {case_id}")
+            return None
+
     else:
-        date_threshold: dt.datetime = get_date_days_ago(days_ago=days_back)
-        cases: list[Case] = store.get_cases_to_compress(date_threshold=date_threshold)
-    return cases
+        sample_ids: list[str] = housekeeper.get_bundle_names_with_fastq_files()
+        if not sample_ids:
+            LOG.info(f"No bundles in Housekeeper with files tagged with {SequencingFileTag.FASTQ}")
+            return None
+
+    return store.get_compressible_samples_by_internal_ids(
+        internal_ids=sample_ids, case_created_before_date=get_date_days_ago(age_limit_days)
+    )
 
 
 def update_compress_api(compress_api: CompressAPI, dry_run: bool) -> None:
@@ -80,38 +85,29 @@ def get_true_dir(dir_path: Path) -> Path | None:
     return None
 
 
-def compress_sample_fastqs_in_cases(
+def compress_fastq_to_spring_for_samples(
     compress_api: CompressAPI,
-    cases: list[Case],
-    dry_run: bool,
-    number_of_conversions: int,
+    samples: list[Sample],
+    sample_limit: int,
+    dry_run: bool = False,
 ) -> None:
-    """Compress sample FASTQs for samples in cases."""
-    update_compress_api(compress_api=compress_api, dry_run=dry_run)
-    case_conversion_count: int = 0
-    individuals_conversion_count: int = 0
-    for case in cases:
-        case_converted = True
-        if case_conversion_count >= number_of_conversions:
+    """Compress the fastq files to spring for a list of samples."""
+    if dry_run:
+        update_compress_api(compress_api=compress_api, dry_run=dry_run)
+        LOG.info("Dry-run activated - no samples will be submitted for compression")
+
+    successful_submissions = 0
+    for sample in samples:
+        if sample_limit <= successful_submissions:
             break
 
-        LOG.debug(f"Searching for FASTQ files in case {case.internal_id}")
-        if not case.links:
-            continue
-        for case_link in case.links:
-            case_converted: bool = compress_api.compress_fastq(
-                sample_id=case_link.sample.internal_id
-            )
-            if not case_converted:
-                LOG.debug(f"skipping individual {case_link.sample.internal_id}")
-                continue
-            individuals_conversion_count += 1
-        if case_converted:
-            case_conversion_count += 1
-            LOG.info(f"Considering case {case.internal_id} converted")
-    LOG.info(
-        f"{individuals_conversion_count} individuals in {case_conversion_count} (completed) cases where compressed"
-    )
+        is_sample_submitted: bool = compress_api.compress_fastq(sample_id=sample.internal_id)
+        if not is_sample_submitted:
+            LOG.debug(f"Sample {sample.internal_id} not submitted for compression")
+        else:
+            successful_submissions += 1
+
+    LOG.debug(f"Submitted a total of {successful_submissions} samples to compression")
 
 
 def correct_spring_paths(
