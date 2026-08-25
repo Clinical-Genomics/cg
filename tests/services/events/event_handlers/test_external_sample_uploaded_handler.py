@@ -101,7 +101,7 @@ def test_handle_invalid_sample_name():
     # GIVEN a CGConfig
     cg_config: CGConfig = create_autospec(CGConfig)
 
-    # GIVEN some data
+    # GIVEN some data where the sample name contains illegal letters
     data = {
         "customer": "cust000",
         "sample_name": "invalid_sample_name",
@@ -109,11 +109,23 @@ def test_handle_invalid_sample_name():
     }
 
     # WHEN calling handle with a CGConfig and some data
-    # THEN TODO error is raised
+    # THEN a ValidationError should be raised
     with pytest.raises(ValidationError):
         external_sample_uploaded_handler.handle(config=cg_config, data=data)
 
 
 def test_handle_invalid_date_format():
-    # TODO
-    pass
+    # GIVEN a CGConfig
+    cg_config: CGConfig = create_autospec(CGConfig)
+
+    # GIVEN some data where the uploaded at is malformed
+    data = {
+        "customer": "cust000",
+        "sample_name": "sample-name",
+        "customer_uploaded_at": "2026-06-02T11:14.52",
+    }
+
+    # WHEN calling handle with a CGConfig and some data
+    # THEN a ValidationError should be raised
+    with pytest.raises(ValidationError):
+        external_sample_uploaded_handler.handle(config=cg_config, data=data)
