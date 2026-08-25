@@ -1,23 +1,32 @@
 from datetime import datetime
 
+from pydantic import BaseModel, Field
+
 from cg.models.cg_config import CGConfig
 from cg.services import transfer_to_cluster_service
-from cg.store.models import Customer
+from cg.store.models import (
+    SAMPLE_NAME_MAXIMUM_LENGTH,
+    SAMPLE_NAME_MINIMUM_LENGTH,
+    SAMPLE_NAME_PATTERN,
+    Customer,
+)
 from cg.store.store import Store
-from pydantic import BaseModel
 
 
 class ExternalSampleUploadedEvent(BaseModel):
     customer: str
     customer_uploaded_at: datetime
-    sample_name: str
+    sample_name: str = Field(
+        pattern=SAMPLE_NAME_PATTERN,
+        min_length=SAMPLE_NAME_MINIMUM_LENGTH,
+        max_length=SAMPLE_NAME_MAXIMUM_LENGTH,
+    )
 
 
 def handle(config: CGConfig, data: dict):
     event = ExternalSampleUploadedEvent.model_validate(data)
     status_db: Store = config.status_db
     customer: Customer = status_db.get_customer_by_internal_id_strict(event.customer)
-    # customer_uploaded_at = datetime.strptime(data["customer_uploaded_at"], "%Y-%m-%dT%H:%M:%SZ")
     status_db.add_external_sample(
         customer_id=customer.id,
         sample_name=event.sample_name,
