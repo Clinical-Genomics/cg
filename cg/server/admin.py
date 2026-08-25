@@ -133,6 +133,17 @@ def view_pacbio_sample_sequencing_metrics_link(unused1, unused2, model, unused3)
     )
 
 
+def view_application_text_column(unused1, unused2, model, attribute_name):
+    """Column formatter to widen long text columns."""
+    del unused1, unused2
+    text = getattr(model, attribute_name)
+    return (
+        Markup(f"<div style='display: inline-block; min-width: 300px;'>{text}</div>")
+        if text
+        else ""
+    )
+
+
 def view_order_types(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
     order_type_list = "<br>".join(model.order_types)
@@ -313,6 +324,9 @@ class ApplicationView(BaseView):
         "sample_concentration_maximum": view_sample_concentration_maximum,
         "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
         "sample_concentration_maximum_cfdna": view_sample_concentration_maximum_cfdna,
+        "limitations": view_application_text_column,
+        "comment": view_application_text_column,
+        "details": view_application_text_column,
     }
     column_filters = ["prep_category", "is_accredited", "is_archived", "read_type", "is_external"]
     column_searchable_list = ["tag", "prep_category", "description", "details"]
