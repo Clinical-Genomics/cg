@@ -1056,6 +1056,17 @@ class Sample(Base, PriorityMixin):
         return data
 
 
+class ExternalSample(Base):
+    __tablename__ = "external_sample"
+    id: Mapped[PrimaryKeyInt]
+    customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"))
+    sample_name: Mapped[Str128]
+    customer_uploaded_at: Mapped[datetime]
+    transferred_at: Mapped[datetime | None] = mapped_column(default=None)
+
+    customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
+
+
 class Invoice(Base):
     __tablename__ = "invoice"
     id: Mapped[PrimaryKeyInt]
