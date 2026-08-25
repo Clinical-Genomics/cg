@@ -15,4 +15,3 @@ def receive_event(config: CGConfig, event_name: str, data: str | None):
         return
     parsed_data: dict = json.loads(data)
     event_handler.handle(config=config, event_name=event_name, data=parsed_data)
-    # TODO return a success (=0 i.e ak) or fail (!=0 i.e nak).
