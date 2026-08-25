@@ -295,7 +295,6 @@ class ApplicationView(BaseView):
     column_exclude_list = [
         "category",
         "created_at",
-        "limitations",
         "minimum_order",
         "percent_kth",
         "sample_amount",
