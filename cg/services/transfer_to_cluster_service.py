@@ -2,6 +2,11 @@ from pathlib import Path
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.models.cg_config import CGConfig
+from cg.models.slurm.sbatch import Sbatch
+from cg.services.deliver_files.rsync.sbatch_commands import (
+    ERROR_RSYNC_FUNCTION,
+    RSYNC_CONTENTS_COMMAND,
+)
 
 
 def transfer_sample(cg_config: CGConfig, customer_internal_id: str, sample_name: str):
@@ -9,6 +14,23 @@ def transfer_sample(cg_config: CGConfig, customer_internal_id: str, sample_name:
     slurm_api = SlurmAPI()
     sbatch_path = Path(cg_config.data_delivery.base_path, f"{customer_internal_id}_{sample_name}")
     sbatch_content = ""
+    command: str = RSYNC_CONTENTS_COMMAND.format(
+        source_path=Path(cg_config.external.caesar % customer_internal_id, sample_name),
+        destination_path=Path(cg_config.external.hasta % customer_internal_id, sample_name),
+    )
+    sbatch_parameters = Sbatch(
+        job_name=f"{customer_internal_id}_{sample_name}_rsync_external_data",
+        account=cg_config.data_delivery.account,
+        number_tasks=1,
+        memory=1,
+        log_dir=sbatch_path.as_posix(),
+        email=cg_config.data_delivery.mail_user,
+        hours=24,
+        commands=command,
+        error=ERROR_RSYNC_FUNCTION.format(),
+    )
+    self.slurm_api.set_dry_run(dry_run=dry_run)
+    sbatch_content: str = self.slurm_api.generate_sbatch_content(sbatch_parameters)
     slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
     # TODO publish an event when successful
     pass
