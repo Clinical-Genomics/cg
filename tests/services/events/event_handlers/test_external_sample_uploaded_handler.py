@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone, tzinfo
 from unittest.mock import Mock, create_autospec
 
 from pytest_mock import MockerFixture
@@ -11,6 +11,7 @@ from cg.services.events.event_handlers.external_sample_uploaded_handler import (
 from cg.store.models import Customer, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
+import pytest
 
 
 def test_handle_triggers_transfer(mocker: MockerFixture):
@@ -42,7 +43,15 @@ def test_handle_triggers_transfer(mocker: MockerFixture):
     status_db.as_mock.add_external_sample.assert_called_once_with(
         customer_id=1,
         sample_name="sample_name",
-        customer_uploaded_at=datetime(year=2026, month=6, day=2, hour=11, minute=14, second=52),
+        customer_uploaded_at=datetime(
+            year=2026,
+            month=6,
+            day=2,
+            hour=11,
+            minute=14,
+            second=52,
+            tzinfo=timezone.utc,
+        ),
     )
 
     # THEN the sample should be transferred
@@ -88,8 +97,20 @@ def test_handle_not_trigger_transfer(mocker: MockerFixture):
 
 
 def test_handle_invalid_sample_name():
-    # TODO
-    invalid_sample_name = "sample_name"
+
+    # GIVEN a CGConfig
+    cg_config: CGConfig = create_autospec(CGConfig)
+
+    # GIVEN some data
+    data = {
+        "customer": "cust000",
+        "sample_name": "invalid_sample_name",
+        "customer_uploaded_at": "2026-06-02T11:14:52Z",
+    }
+
+    # WHEN calling handle with a CGConfig and some data
+    # THEN TODO error is raised
+    external_sample_uploaded_handler.handle(config=cg_config, data=data)
 
 
 def test_handle_invalid_date_format():
