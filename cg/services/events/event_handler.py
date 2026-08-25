@@ -13,6 +13,7 @@ EVENT_HANDLERS: dict = {
 
 
 def handle(config: CGConfig, event_name: str, data: dict, event_handlers: dict = EVENT_HANDLERS):
+    """Select the appropriate handler for the given event name and call it with the provided data."""
     handler: Callable | None = event_handlers.get(event_name)
     if handler:
         handler(config=config, data=data)
