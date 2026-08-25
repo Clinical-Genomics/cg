@@ -13,6 +13,7 @@ from cg.store.models import (
     ApplicationVersion,
     Collaboration,
     Customer,
+    ExternalSample,
     Order,
     Organism,
     PacbioSequencingRun,
@@ -234,9 +235,14 @@ def test_add_external_sample(store: Store):
     customer_id, sample_name, customer_uploaded_at = 1, "sample-name", dt.now()
 
     # WHEN calling add_external_sample
-    external_sample = store.add_external_sample(
+    external_sample: ExternalSample = store.add_external_sample(
         customer_id=customer_id, sample_name=sample_name, customer_uploaded_at=customer_uploaded_at
     )
 
     # THEN the external sample will have the correct fields
+    assert external_sample.customer_id == customer.id
+    assert external_sample.sample_name == sample_name
+    assert external_sample.customer_uploaded_at == customer_uploaded_at
+
     # THEN an external sample should have been added to the session
+    assert external_sample in store.session
