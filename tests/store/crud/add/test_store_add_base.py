@@ -223,3 +223,20 @@ def test_create_pacbio_sequencing_run_already_exists(store: Store):
     # THEN a PacbioSequencingRunAlreadyExistsError should be raised
     with pytest.raises(PacbioSequencingRunAlreadyExistsError):
         store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
+
+
+def test_add_external_sample(store: Store):
+    # GIVEN a store with a customer
+    customer: Customer = Customer(id=1)
+    store.add_item_to_store(customer)
+
+    # GIVEN customer_id, sample_name and customer_uploaded_at
+    customer_id, sample_name, customer_uploaded_at = 1, "sample-name", dt.now()
+
+    # WHEN calling add_external_sample
+    external_sample = store.add_external_sample(
+        customer_id=customer_id, sample_name=sample_name, customer_uploaded_at=customer_uploaded_at
+    )
+
+    # THEN the external sample will have the correct fields
+    # THEN an external sample should have been added to the session
