@@ -11,8 +11,7 @@ from cg.services import transfer_to_cluster_service
 
 @pytest.fixture
 def expected_sbatch_content() -> str:
-    return """#! /bin/bash
-#SBATCH --job-name=cust000_sample-name_rsync_external_data
+    return """#! /bin/bash \n#SBATCH --job-name=cust000_sample-name_rsync_external_data
 #SBATCH --account=account
 #SBATCH --ntasks=1
 #SBATCH --mem=1G
@@ -35,8 +34,7 @@ log "Running on: $(hostname)"
 
 
 error() {
-
-echo "Rsync failed"
+    \necho "Rsync failed"
 
     exit 1
 }
