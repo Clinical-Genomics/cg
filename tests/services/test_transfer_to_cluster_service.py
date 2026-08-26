@@ -50,6 +50,7 @@ rsync -rvL /path/to/rome/cust000/sample-name/ /path/to/hasta/cust000/sample-name
 """
 
 
+@pytest.mark.freeze_time
 def test_transfer_sample(mocker: MockerFixture, expected_sbatch_content):
     # GIVEN a sample and customer
     customer = create_autospec(Customer, internal_id="cust000")

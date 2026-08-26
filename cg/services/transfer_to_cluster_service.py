@@ -1,8 +1,9 @@
+from datetime import datetime
 from pathlib import Path
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.priority import SlurmQos
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, NatsConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.services.deliver_files.rsync.sbatch_commands import (
     ERROR_RSYNC_FUNCTION,
@@ -18,7 +19,11 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
     slurm_api = SlurmAPI()
     customer_internal_id: str = sample.customer.internal_id
     sample_name: str = sample.name
-    sbatch_path = Path(cg_config.data_delivery.base_path, f"{customer_internal_id}_{sample_name}")
+    timestamp: str = datetime.now().strftime("%y%m%d_%H_%M_%S_%f")
+    sbatch_path = Path(
+        cg_config.data_delivery.base_path, f"{customer_internal_id}_{sample_name}_{timestamp}"
+    )
+    source_path = Path(cg_config.external.caesar % customer_internal_id, sample_name)
     destination_path = Path(cg_config.external.hasta % customer_internal_id, sample_name)
     data = {
         "cg.sample_internal_id": sample.internal_id,
@@ -26,8 +31,11 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
         "cluster_location": destination_path.as_posix(),
     }
 
-    command: str = _get_rsync_command(
-        cg_config, customer_internal_id, sample_name, destination_path, data
+    command: str = _get_sbatch_command(
+        nats_config=cg_config.nats,
+        source_path=source_path,
+        destination_path=destination_path,
+        data=data,
     )
 
     sbatch_parameters = Sbatch(
@@ -46,16 +54,18 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
     slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
 
 
-def _get_rsync_command(cg_config, customer_internal_id, sample_name, destination_path, data) -> str:
+def _get_sbatch_command(
+    nats_config: NatsConfig, source_path: Path, destination_path: Path, data: dict
+) -> str:
     command: str = (
         RSYNC_CONTENTS_COMMAND.format(
-            source_path=Path(cg_config.external.caesar % customer_internal_id, sample_name),
+            source_path=source_path,
             destination_path=destination_path,
         )
         + "\n"
         + event_publisher.publish_command(
-            nats_config=cg_config.nats,
-            subject=f"{cg_config.nats.stream}.{EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT}",
+            nats_config=nats_config,
+            subject=f"{nats_config.stream}.{EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT}",
             data=data,
         )
     )
