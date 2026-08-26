@@ -5,9 +5,9 @@ import pytest
 from pytest_mock import MockerFixture
 
 from cg.apps.slurm.slurm_api import SlurmAPI
-from cg.models.cg_config import CGConfig, DataDeliveryConfig, ExternalConfig
+from cg.models.cg_config import CGConfig, DataDeliveryConfig, ExternalConfig, NatsConfig
 from cg.services import transfer_to_cluster_service
-from cg.store.models import Sample, Customer
+from cg.store.models import Customer, Sample
 
 
 @pytest.fixture
@@ -45,6 +45,7 @@ trap error ERR
 
 rsync -rvL /path/to/rome/cust000/sample-name/ /path/to/hasta/cust000/sample-name
 
+/nats/binary pub --jetstream --server nats://server --tlsca /ca/cert --tlscert /client/cert --tlskey /client/key --token $(cat /token) cg-test.external_sample.transfer_completed "{\\"cg.sample_internal_id\\": \\"ACC1\\", \\"transfer_completed_at\\": \\"$(date +%Y-%m-%dT%H:%M:%S)\\", \\"cluster_location\\": \\"/path/to/hasta/cust000/sample-name\\"}"
 
 """
 
@@ -52,7 +53,8 @@ rsync -rvL /path/to/rome/cust000/sample-name/ /path/to/hasta/cust000/sample-name
 def test_transfer_sample(mocker: MockerFixture, expected_sbatch_content):
     # GIVEN a sample and customer
     customer = create_autospec(Customer, internal_id="cust000")
-    sample = create_autospec(Sample, name="sample-name", internal_id="ACC1", customer=customer)
+    sample = create_autospec(Sample, internal_id="ACC1", customer=customer)
+    sample.name = "sample-name"
 
     # GIVEN a CGConfig
     cg_config: CGConfig = create_autospec(
@@ -66,6 +68,15 @@ def test_transfer_sample(mocker: MockerFixture, expected_sbatch_content):
             mail_user="mail@scilifelab.se",
         ),
         external=ExternalConfig(hasta="/path/to/hasta/%s", caesar="/path/to/rome/%s"),
+        nats=NatsConfig(
+            nats_binary_path=Path("/nats/binary"),
+            server="nats://server",
+            stream="cg-test",
+            ca_cert_path=Path("/ca/cert"),
+            client_cert_path=Path("/client/cert"),
+            client_key_path=Path("/client/key"),
+            token_path=Path("/token"),
+        ),
     )
 
     submit_sbatch_mock = mocker.patch.object(SlurmAPI, "submit_sbatch")

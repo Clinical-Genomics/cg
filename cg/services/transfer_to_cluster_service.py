@@ -20,7 +20,7 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
     customer_internal_id: str = sample.customer.internal_id
     sample_name: str = sample.name
     sbatch_path = Path(cg_config.data_delivery.base_path, f"{customer_internal_id}_{sample_name}")
-    destination_path = (Path(cg_config.external.hasta % customer_internal_id, sample_name),)
+    destination_path = Path(cg_config.external.hasta % customer_internal_id, sample_name)
     command: str = RSYNC_CONTENTS_COMMAND.format(
         source_path=Path(cg_config.external.caesar % customer_internal_id, sample_name),
         destination_path=destination_path,
@@ -29,7 +29,7 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
     data = {
         "cg.sample_internal_id": sample.internal_id,
         "transfer_completed_at": "$(date +%Y-%m-%dT%H:%M:%S)",
-        "cluster_location": destination_path,
+        "cluster_location": destination_path.as_posix(),
     }
 
     command += "\n" + event_publisher.publish_command(
