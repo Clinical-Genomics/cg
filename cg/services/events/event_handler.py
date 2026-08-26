@@ -2,14 +2,17 @@ import logging
 from typing import Callable
 
 from cg.models.cg_config import CGConfig
-from cg.services.events.event_handlers import external_sample_uploaded_handler
+from cg.services.events.event_handlers import (
+    external_sample_uploaded_handler,
+    external_samples_ordered_handler,
+)
 
 LOG = logging.getLogger(__name__)
 
 
 EVENT_HANDLERS: dict = {
     "external.customer_uploaded_sample": external_sample_uploaded_handler.handle,
-    "external.order_placed": external_order_placed_handler.handle,
+    "external.samples_ordered": external_samples_ordered_handler.handle,
 }
 
 

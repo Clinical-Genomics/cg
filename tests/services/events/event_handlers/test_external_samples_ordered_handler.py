@@ -3,8 +3,8 @@ from unittest.mock import call, create_autospec
 from pytest_mock import MockerFixture
 
 from cg.models.cg_config import CGConfig
-from cg.services.events.event_handlers import external_order_placed_handler
-from cg.services.events.event_handlers.external_order_placed_handler import (
+from cg.services.events.event_handlers import external_samples_ordered_handler
+from cg.services.events.event_handlers.external_samples_ordered_handler import (
     transfer_to_cluster_service,
 )
 from cg.store.models import ExternalSample
@@ -35,7 +35,7 @@ def test_handle_trigger_transfer(mocker: MockerFixture):
     transfer_sample_mock = mocker.patch.object(transfer_to_cluster_service, "transfer_sample")
 
     # WHEN handling the event
-    external_order_placed_handler.handle()
+    external_samples_ordered_handler.handle()
 
     # THEN the transfer for the two samples in the ExternalSample table has been triggered
     call()
