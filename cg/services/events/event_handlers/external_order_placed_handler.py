@@ -1,4 +1,5 @@
 from cg.models.cg_config import CGConfig
+from cg.services import transfer_to_cluster_service
 
 
 def handle(config: CGConfig, data: dict):
