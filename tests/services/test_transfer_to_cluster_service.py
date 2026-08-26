@@ -16,8 +16,8 @@ def expected_sbatch_content() -> str:
 #SBATCH --account=account
 #SBATCH --ntasks=1
 #SBATCH --mem=1G
-#SBATCH --error=/base/path/cust000_sample-name/cust000_sample-name_rsync_external_data.stderr
-#SBATCH --output=/base/path/cust000_sample-name/cust000_sample-name_rsync_external_data.stdout
+#SBATCH --error=/base/path/cust000_sample-name_080910_10_28_00_000000/cust000_sample-name_rsync_external_data.stderr
+#SBATCH --output=/base/path/cust000_sample-name_080910_10_28_00_000000/cust000_sample-name_rsync_external_data.stdout
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=mail@scilifelab.se
 #SBATCH --time=24:00:00
@@ -50,7 +50,7 @@ rsync -rvL /path/to/rome/cust000/sample-name/ /path/to/hasta/cust000/sample-name
 """
 
 
-@pytest.mark.freeze_time
+@pytest.mark.freeze_time("2008-09-10 10:28:00.00")
 def test_transfer_sample(mocker: MockerFixture, expected_sbatch_content):
     # GIVEN a sample and customer
     customer = create_autospec(Customer, internal_id="cust000")
@@ -87,6 +87,6 @@ def test_transfer_sample(mocker: MockerFixture, expected_sbatch_content):
 
     # THEN the Slurm API should have been called with an SBATCH with the correct content
     submit_sbatch_mock.assert_called_once_with(
-        sbatch_path=Path("/base", "path", "cust000_sample-name"),
+        sbatch_path=Path("/base", "path", "cust000_sample-name_080910_10_28_00_000000"),
         sbatch_content=expected_sbatch_content,
     )
