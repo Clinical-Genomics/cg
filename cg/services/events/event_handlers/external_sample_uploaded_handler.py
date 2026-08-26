@@ -32,10 +32,7 @@ def handle(config: CGConfig, data: dict):
         sample_name=event.sample_name,
         customer_uploaded_at=event.customer_uploaded_at,
     )
-    if status_db.get_sample_by_customer_and_name(
+    if sample := status_db.get_sample_by_customer_and_name(
         customer_entry_id=[customer.id], sample_name=event.sample_name
     ):
-        # TODO: Send in the cg config
-        transfer_to_cluster_service.transfer_sample(
-            customer_internal_id=customer.internal_id, sample_name=event.sample_name
-        )
+        transfer_to_cluster_service.transfer_sample(cg_config=config, sample=sample)

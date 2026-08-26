@@ -22,7 +22,10 @@ def test_handle_triggers_transfer(mocker: MockerFixture):
         return_value=create_autospec(Customer, internal_id="cust000", id=1)
     )
     # GIVEN a CGConfig
-    cg_config: CGConfig = create_autospec(CGConfig, status_db=status_db.as_type)
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        status_db=status_db.as_type,
+    )
 
     # GIVEN some data
     data = {
@@ -32,10 +35,11 @@ def test_handle_triggers_transfer(mocker: MockerFixture):
     }
 
     # GIVEN that the sample should be transferred
-    status_db.as_type.get_sample_by_customer_and_name = Mock(return_value=create_autospec(Sample))
+    sample = create_autospec(Sample)
+    status_db.as_type.get_sample_by_customer_and_name = Mock(return_value=sample)
 
     # GIVEN a transfer servicer
-    transfer_sample_spy = mocker.spy(transfer_to_cluster_service, "transfer_sample")
+    transfer_sample_mock = mocker.patch.object(transfer_to_cluster_service, "transfer_sample")
 
     # WHEN calling handle with a CGConfig and some data
     external_sample_uploaded_handler.handle(config=cg_config, data=data)
@@ -55,9 +59,7 @@ def test_handle_triggers_transfer(mocker: MockerFixture):
     )
 
     # THEN the sample should be transferred
-    transfer_sample_spy.assert_called_once_with(
-        customer_internal_id="cust000", sample_name="sample-name"
-    )
+    transfer_sample_mock.assert_called_once_with(cg_config=cg_config, sample=sample)
 
 
 def test_handle_not_trigger_transfer(mocker: MockerFixture):
