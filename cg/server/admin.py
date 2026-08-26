@@ -453,7 +453,6 @@ class CustomerView(BaseView):
         "internal_id",
         "name",
         "data_archive_location",
-        "comment",
         "primary_contact",
         "delivery_contact",
         "label",
@@ -463,6 +462,7 @@ class CustomerView(BaseView):
         "project_account_kth",
         "return_samples",
         "scout_access",
+        "comment",
     ]
     column_filters = ["priority", "scout_access", "data_archive_location", "label"]
     column_formatters = {
