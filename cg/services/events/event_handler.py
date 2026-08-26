@@ -8,7 +8,8 @@ LOG = logging.getLogger(__name__)
 
 
 EVENT_HANDLERS: dict = {
-    "external.customer_uploaded_sample": external_sample_uploaded_handler.handle
+    "external.customer_uploaded_sample": external_sample_uploaded_handler.handle,
+    "external.order_placed": external_order_placed_handler.handle,
 }
 
 
