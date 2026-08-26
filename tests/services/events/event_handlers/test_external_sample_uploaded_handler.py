@@ -29,8 +29,8 @@ def test_handle_triggers_transfer(mocker: MockerFixture):
 
     # GIVEN some data
     data = {
-        "customer": "cust000",  # TODO rename to cg.customer, same for others
-        "sample_name": "sample-name",  # TODO rename to cg.sample, same for others
+        "cg.customer": "cust000",
+        "cg.sample_name": "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
     }
 
@@ -73,8 +73,8 @@ def test_handle_not_trigger_transfer(mocker: MockerFixture):
 
     # GIVEN some data
     data = {
-        "customer": "cust000",
-        "sample_name": "sample-name",
+        "cg.customer": "cust000",
+        "cg.sample_name": "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
     }
 
@@ -105,8 +105,8 @@ def test_handle_invalid_sample_name():
 
     # GIVEN some data where the sample name contains illegal letters
     data = {
-        "customer": "cust000",
-        "sample_name": "invalid_sample_name",
+        "cg.customer": "cust000",
+        "cg.sample_name": "invalid_sample_name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
     }
 
@@ -122,8 +122,8 @@ def test_handle_invalid_date_format():
 
     # GIVEN some data where the uploaded at is malformed
     data = {
-        "customer": "cust000",
-        "sample_name": "sample-name",
+        "cg.customer": "cust000",
+        "cg.sample_name": "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14.52",
     }
 
