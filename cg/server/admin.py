@@ -452,16 +452,16 @@ class CustomerView(BaseView):
     column_list = [
         "internal_id",
         "name",
-        "label",
+        "data_archive_location",
         "primary_contact",
         "delivery_contact",
+        "label",
         "lab_contact",
         "priority",
-        "agreement_registration",
-        "invoice_reference",
+        "project_account_KI",
+        "project_account_kth",
         "return_samples",
         "scout_access",
-        "data_archive_location",
         "comment",
     ]
     column_filters = ["priority", "scout_access", "data_archive_location", "label"]
