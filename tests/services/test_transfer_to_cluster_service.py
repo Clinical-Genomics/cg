@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.models.cg_config import CGConfig, DataDeliveryConfig, ExternalConfig
 from cg.services import transfer_to_cluster_service
+from cg.store.models import Sample, Customer
 
 
 @pytest.fixture
@@ -49,9 +50,9 @@ rsync -rvL /path/to/rome/cust000/sample-name/ /path/to/hasta/cust000/sample-name
 
 
 def test_transfer_sample(mocker: MockerFixture, expected_sbatch_content):
-    # GIVEN a customer internal id and a sample name
-    customer_internal_id = "cust000"
-    sample_name = "sample-name"
+    # GIVEN a sample and customer
+    customer = create_autospec(Customer, internal_id="cust000")
+    sample = create_autospec(Sample, name="sample-name", internal_id="ACC1", customer=customer)
 
     # GIVEN a CGConfig
     cg_config: CGConfig = create_autospec(
@@ -70,9 +71,7 @@ def test_transfer_sample(mocker: MockerFixture, expected_sbatch_content):
     submit_sbatch_mock = mocker.patch.object(SlurmAPI, "submit_sbatch")
 
     # WHEN transfer_sample is called
-    transfer_to_cluster_service.transfer_sample(
-        cg_config=cg_config, customer_internal_id=customer_internal_id, sample_name=sample_name
-    )
+    transfer_to_cluster_service.transfer_sample(cg_config=cg_config, sample=sample)
 
     # THEN the Slurm API should have been called with an SBATCH with the correct content
     submit_sbatch_mock.assert_called_once_with(

@@ -8,8 +8,10 @@ from cg.services.deliver_files.rsync.sbatch_commands import (
     ERROR_RSYNC_FUNCTION,
     RSYNC_CONTENTS_COMMAND,
 )
-from cg.services.events.event_publisher import publish_command
+from cg.services.events import event_publisher
 from cg.store.models import Sample
+
+EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT = "external_sample.transfer_completed"
 
 
 def transfer_sample(cg_config: CGConfig, sample: Sample):
@@ -18,18 +20,21 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
     customer_internal_id: str = sample.customer.internal_id
     sample_name: str = sample.name
     sbatch_path = Path(cg_config.data_delivery.base_path, f"{customer_internal_id}_{sample_name}")
+    destination_path = (Path(cg_config.external.hasta % customer_internal_id, sample_name),)
     command: str = RSYNC_CONTENTS_COMMAND.format(
         source_path=Path(cg_config.external.caesar % customer_internal_id, sample_name),
-        destination_path=Path(cg_config.external.hasta % customer_internal_id, sample_name),
+        destination_path=destination_path,
     )
 
     data = {
-        "cg.analysis_id": analysis_id,
-        "uploaded_at": "$(date +%Y-%m-%dT%H:%M:%SZ)",
+        "cg.sample_internal_id": sample.internal_id,
+        "transfer_completed_at": "$(date +%Y-%m-%dT%H:%M:%S)",
+        "cluster_location": destination_path,
     }
-    command += "\n" + publish_command(
+
+    command += "\n" + event_publisher.publish_command(
         nats_config=cg_config.nats,
-        subject=f"{cg_config.nats.stream}.{ANALYSIS_UPLOADED_SUBJECT}",
+        subject=f"{cg_config.nats.stream}.{EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT}",
         data=data,
     )
 
