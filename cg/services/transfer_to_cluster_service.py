@@ -15,30 +15,21 @@ EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT = "external_sample.transfer_completed"
 
 
 def transfer_sample(cg_config: CGConfig, sample: Sample):
-    # TODO submit a slurm job that calls rsync to transfer sample data from customer inbox to hasta
     slurm_api = SlurmAPI()
     customer_internal_id: str = sample.customer.internal_id
     sample_name: str = sample.name
     sbatch_path = Path(cg_config.data_delivery.base_path, f"{customer_internal_id}_{sample_name}")
     destination_path = Path(cg_config.external.hasta % customer_internal_id, sample_name)
-    command: str = RSYNC_CONTENTS_COMMAND.format(
-        source_path=Path(cg_config.external.caesar % customer_internal_id, sample_name),
-        destination_path=destination_path,
-    )
-
     data = {
         "cg.sample_internal_id": sample.internal_id,
         "transfer_completed_at": "$(date +%Y-%m-%dT%H:%M:%S)",
         "cluster_location": destination_path.as_posix(),
     }
 
-    command += "\n" + event_publisher.publish_command(
-        nats_config=cg_config.nats,
-        subject=f"{cg_config.nats.stream}.{EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT}",
-        data=data,
+    command: str = _get_rsync_command(
+        cg_config, customer_internal_id, sample_name, destination_path, data
     )
 
-    # TODO add a publisher to the slurm job
     sbatch_parameters = Sbatch(
         job_name=f"{customer_internal_id}_{sample_name}_rsync_external_data",
         account=cg_config.data_delivery.account,
@@ -53,5 +44,19 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
     )
     sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters)
     slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
-    # TODO publish an event when successful
-    pass
+
+
+def _get_rsync_command(cg_config, customer_internal_id, sample_name, destination_path, data) -> str:
+    command: str = (
+        RSYNC_CONTENTS_COMMAND.format(
+            source_path=Path(cg_config.external.caesar % customer_internal_id, sample_name),
+            destination_path=destination_path,
+        )
+        + "\n"
+        + event_publisher.publish_command(
+            nats_config=cg_config.nats,
+            subject=f"{cg_config.nats.stream}.{EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT}",
+            data=data,
+        )
+    )
+    return command
