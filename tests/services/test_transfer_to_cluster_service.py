@@ -87,6 +87,8 @@ def test_transfer_sample(mocker: MockerFixture, expected_sbatch_content):
 
     # THEN the Slurm API should have been called with an SBATCH with the correct content
     submit_sbatch_mock.assert_called_once_with(
-        sbatch_path=Path("/base", "path", "cust000_sample-name_080910_10_28_00_000000"),
+        sbatch_path=Path(
+            "/base", "path", "cust000_sample-name_080910_10_28_00_000000", "transfer_sample.sh"
+        ),
         sbatch_content=expected_sbatch_content,
     )

@@ -6,9 +6,8 @@ from cg.services.events.event_handlers import external_sample_uploaded_handler
 
 LOG = logging.getLogger(__name__)
 
-EventHandler = Callable[[CGConfig, dict], None]
 
-EVENT_HANDLERS: dict[str, EventHandler] = {
+EVENT_HANDLERS: dict[str, Callable] = {
     "external.customer_uploaded_sample": external_sample_uploaded_handler.handle
 }
 

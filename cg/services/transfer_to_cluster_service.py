@@ -21,7 +21,9 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
     sample_name: str = sample.name
     timestamp: str = datetime.now().strftime("%y%m%d_%H_%M_%S_%f")
     sbatch_path = Path(
-        cg_config.data_delivery.base_path, f"{customer_internal_id}_{sample_name}_{timestamp}"
+        cg_config.data_delivery.base_path,
+        f"{customer_internal_id}_{sample_name}_{timestamp}",
+        "transfer_sample.sh",
     )
     source_path = Path(cg_config.external.caesar % customer_internal_id, sample_name)
     destination_path = Path(cg_config.external.hasta % customer_internal_id, sample_name)
@@ -43,7 +45,7 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
         account=cg_config.data_delivery.account,
         number_tasks=1,
         memory=1,
-        log_dir=sbatch_path.as_posix(),
+        log_dir=sbatch_path.parent.as_posix(),
         email=cg_config.data_delivery.mail_user,
         hours=24,
         commands=command,
