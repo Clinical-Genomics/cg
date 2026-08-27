@@ -28,7 +28,7 @@ def test_receive_event_success(mocker: MockerFixture):
         obj=cg_config,
     )
 
-    # THEN it calls the event handler
+    # THEN it calls the dispatch function
     dispatch_spy.assert_called_once_with(
         config=cg_config, event_name="something-happened", event_payload={"key": "value"}
     )
@@ -57,7 +57,7 @@ def test_receive_event_json_parsing_fails(mocker: MockerFixture):
         obj=cg_config,
     )
 
-    # THEN it should not call the event handler
+    # THEN it should not call the dispatch function
     dispatch_spy.assert_not_called()
 
     # THEN the result exits unsuccessfully
@@ -88,14 +88,14 @@ def test_receive_event_no_data_variants(mocker: MockerFixture, additional_args: 
 
     dispatch_spy = mocker.spy(event_dispatching, "dispatch")
 
-    # WHEN calling the receive event command with no data
+    # WHEN calling the receive event command with no payload
     result = cli_runner.invoke(
         receive_event,
         args=["something-happened"] + additional_args,
         obj=cg_config,
     )
 
-    # THEN it should not call the event handler
+    # THEN it should not call the dispatch function
     dispatch_spy.assert_not_called()
 
     # THEN the result exits successfully
@@ -116,7 +116,7 @@ def test_receive_event_event_handler_raises(mocker: MockerFixture):
     status_db: TypedMock[Store] = create_typed_mock(Store)
     cg_config = create_autospec(CGConfig, status_db=status_db.as_type)
 
-    # GIVEN that event handler raises an error
+    # GIVEN that dispatch function raises an error
     mocker.patch.object(event_dispatching, "dispatch", side_effect=Exception)
 
     # WHEN calling the receive event command
