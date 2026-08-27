@@ -38,7 +38,7 @@ def test_handle_triggers_transfer(mocker: MockerFixture):
     sample = create_autospec(Sample)
     status_db.as_type.get_sample_by_customer_and_name = Mock(return_value=sample)
 
-    # GIVEN a transfer servicer
+    # GIVEN a transfer service
     transfer_sample_mock = mocker.patch.object(transfer_to_cluster_service, "transfer_sample")
 
     # WHEN calling handle with a CGConfig and the event payload
@@ -81,7 +81,7 @@ def test_handle_not_trigger_transfer(mocker: MockerFixture):
     # GIVEN that the sample should NOT be transferred
     status_db.as_type.get_sample_by_customer_and_name = Mock(return_value=None)
 
-    # GIVEN a transfer servicer
+    # GIVEN a transfer service
     transfer_sample_spy = mocker.spy(transfer_to_cluster_service, "transfer_sample")
 
     # WHEN calling handle with a CGConfig and some data
