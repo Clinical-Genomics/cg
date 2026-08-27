@@ -80,6 +80,7 @@ def test_transfer_sample(mocker: MockerFixture, expected_sbatch_content):
         ),
     )
 
+    # GIVEN a SlurmAPI
     submit_sbatch_mock = mocker.patch.object(SlurmAPI, "submit_sbatch")
 
     # WHEN transfer_sample is called
