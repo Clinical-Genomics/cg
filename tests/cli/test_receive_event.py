@@ -78,7 +78,7 @@ def test_receive_event_json_parsing_fails(mocker: MockerFixture):
     ],
     ids=["no_data_argument", "empty_data_argument"],
 )
-def test_receive_event_no_data_variants(mocker: MockerFixture, additional_args: list[str]):
+def test_receive_event_no_payload(mocker: MockerFixture, additional_args: list[str]):
     # GIVEN the cli runner
     cli_runner = CliRunner()
 
@@ -105,7 +105,7 @@ def test_receive_event_no_data_variants(mocker: MockerFixture, additional_args: 
     status_db.as_mock.commit_to_store.assert_not_called()
 
 
-def test_receive_event_event_handler_raises(mocker: MockerFixture):
+def test_receive_event_dispatch_raises(mocker: MockerFixture):
     # GIVEN the cli runner
     cli_runner = CliRunner()
 

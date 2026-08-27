@@ -15,7 +15,9 @@ EVENT_HANDLERS: dict[str, Callable] = {
 def dispatch(
     config: CGConfig, event_name: str, event_payload: dict, event_handlers: dict = EVENT_HANDLERS
 ):
-    """Select the appropriate handler for the given event name and call it with the provided data."""
+    """
+    Select the appropriate handler for the given event name and call it with the provided payload.
+    """
     handle_function: Callable | None = event_handlers.get(event_name)
     if handle_function:
         handle_function(config=config, event_payload=event_payload)
