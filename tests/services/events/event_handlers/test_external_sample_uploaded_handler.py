@@ -84,7 +84,7 @@ def test_handle_not_trigger_transfer(mocker: MockerFixture):
     # GIVEN a transfer service
     transfer_sample_spy = mocker.spy(transfer_to_cluster_service, "transfer_sample")
 
-    # WHEN calling handle with a CGConfig and some data
+    # WHEN calling handle with a CGConfig and the event payload
     external_sample_uploaded_handler.handle(config=cg_config, event_payload=event_payload)
 
     # THEN the provided external sample should have been added to the database
