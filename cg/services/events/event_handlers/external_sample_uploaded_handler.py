@@ -24,8 +24,8 @@ class ExternalSampleUploadedEvent(BaseModel):
     )
 
 
-def handle(config: CGConfig, data: dict):
-    event = ExternalSampleUploadedEvent.model_validate(data)
+def handle(config: CGConfig, event_payload: dict):
+    event = ExternalSampleUploadedEvent.model_validate(event_payload)
     status_db: Store = config.status_db
     customer: Customer = status_db.get_customer_by_internal_id_strict(event.customer)
     status_db.add_external_sample(

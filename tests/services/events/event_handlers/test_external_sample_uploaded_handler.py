@@ -42,7 +42,7 @@ def test_handle_triggers_transfer(mocker: MockerFixture):
     transfer_sample_mock = mocker.patch.object(transfer_to_cluster_service, "transfer_sample")
 
     # WHEN calling handle with a CGConfig and some data
-    external_sample_uploaded_handler.handle(config=cg_config, data=data)
+    external_sample_uploaded_handler.handle(config=cg_config, event_payload=data)
 
     # THEN the provided data should have been added to the database
     status_db.as_mock.add_external_sample.assert_called_once_with(
@@ -85,7 +85,7 @@ def test_handle_not_trigger_transfer(mocker: MockerFixture):
     transfer_sample_spy = mocker.spy(transfer_to_cluster_service, "transfer_sample")
 
     # WHEN calling handle with a CGConfig and some data
-    external_sample_uploaded_handler.handle(config=cg_config, data=data)
+    external_sample_uploaded_handler.handle(config=cg_config, event_payload=data)
 
     # THEN the provided data should have been added to the database
     status_db.as_mock.add_external_sample.assert_called_once_with(
@@ -113,7 +113,7 @@ def test_handle_invalid_sample_name():
     # WHEN calling handle with a CGConfig and some data
     # THEN a ValidationError should be raised
     with pytest.raises(ValidationError):
-        external_sample_uploaded_handler.handle(config=cg_config, data=data)
+        external_sample_uploaded_handler.handle(config=cg_config, event_payload=data)
 
 
 def test_handle_invalid_date_format():
@@ -130,4 +130,4 @@ def test_handle_invalid_date_format():
     # WHEN calling handle with a CGConfig and some data
     # THEN a ValidationError should be raised
     with pytest.raises(ValidationError):
-        external_sample_uploaded_handler.handle(config=cg_config, data=data)
+        external_sample_uploaded_handler.handle(config=cg_config, event_payload=data)

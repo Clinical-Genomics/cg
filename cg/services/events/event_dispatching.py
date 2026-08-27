@@ -6,16 +6,19 @@ from cg.services.events.event_handlers import external_sample_uploaded_handler
 
 LOG = logging.getLogger(__name__)
 
+EventHandler = Callable[[CGConfig, dict], None]
 
-EVENT_HANDLERS: dict = {
+EVENT_HANDLERS: dict[str, EventHandler] = {
     "external.customer_uploaded_sample": external_sample_uploaded_handler.handle
 }
 
 
-def handle(config: CGConfig, event_name: str, data: dict, event_handlers: dict = EVENT_HANDLERS):
+def dispatch(
+    config: CGConfig, event_name: str, event_payload: dict, event_handlers: dict = EVENT_HANDLERS
+):
     """Select the appropriate handler for the given event name and call it with the provided data."""
     handle_function: Callable | None = event_handlers.get(event_name)
     if handle_function:
-        handle_function(config=config, data=data)
+        handle_function(config=config, data=event_payload)
     else:
         LOG.info(f"No handler for event {event_name}")

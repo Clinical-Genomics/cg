@@ -3,7 +3,7 @@ from unittest.mock import Mock, create_autospec
 from pytest_mock import MockerFixture
 
 from cg.models.cg_config import CGConfig
-from cg.services.events import event_handler
+from cg.services.events import event_dispatching
 
 
 def test_handle_existing_handler():
@@ -20,8 +20,11 @@ def test_handle_existing_handler():
     event_handlers: dict = {"existing_event": registered_event_handler}
 
     # WHEN calling handle
-    event_handler.handle(
-        config=cg_config, event_name="existing_event", data=data, event_handlers=event_handlers
+    event_dispatching.dispatch(
+        config=cg_config,
+        event_name="existing_event",
+        event_payload=data,
+        event_handlers=event_handlers,
     )
 
     # THEN the correct handler was called
@@ -42,4 +45,6 @@ def test_handle_no_handler(mocker: MockerFixture):
 
     # WHEN calling handle
     # THEN it doesn't raise
-    event_handler.handle(config=cg_config, event_name=event_name, data=data, event_handlers={})
+    event_dispatching.dispatch(
+        config=cg_config, event_name=event_name, event_payload=data, event_handlers={}
+    )

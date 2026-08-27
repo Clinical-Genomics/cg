@@ -25,7 +25,7 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
     )
     source_path = Path(cg_config.external.caesar % customer_internal_id, sample_name)
     destination_path = Path(cg_config.external.hasta % customer_internal_id, sample_name)
-    data = {
+    event_payload = {
         "cg.sample_internal_id": sample.internal_id,
         "transfer_completed_at": "$(date +%Y-%m-%dT%H:%M:%S)",
         "cluster_location": destination_path.as_posix(),
@@ -35,7 +35,7 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
         nats_config=cg_config.nats,
         source_path=source_path,
         destination_path=destination_path,
-        data=data,
+        event_payload=event_payload,
     )
 
     sbatch_parameters = Sbatch(
@@ -55,7 +55,7 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
 
 
 def _get_sbatch_command(
-    nats_config: NatsConfig, source_path: Path, destination_path: Path, data: dict
+    nats_config: NatsConfig, source_path: Path, destination_path: Path, event_payload: dict
 ) -> str:
     command: str = (
         RSYNC_CONTENTS_COMMAND.format(
@@ -66,7 +66,7 @@ def _get_sbatch_command(
         + event_publisher.publish_command(
             nats_config=nats_config,
             subject=f"{nats_config.stream}.{EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT}",
-            data=data,
+            data=event_payload,
         )
     )
     return command

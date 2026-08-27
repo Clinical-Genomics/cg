@@ -5,7 +5,7 @@ import pytest
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
-from cg.cli.receive_event import event_handler, receive_event
+from cg.cli.receive_event import event_dispatching, receive_event
 from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
@@ -15,7 +15,7 @@ def test_receive_event_success(mocker: MockerFixture):
     # GIVEN a CliRunner
     cli_runner = CliRunner()
 
-    handle_spy = mocker.spy(event_handler, "handle")
+    handle_spy = mocker.spy(event_dispatching, "handle")
 
     # GIVEN a CGConfig
     status_db: TypedMock[Store] = create_typed_mock(Store)
@@ -44,7 +44,7 @@ def test_receive_event_json_parsing_fails(mocker: MockerFixture):
     # GIVEN a CliRunner
     cli_runner = CliRunner()
 
-    handle_spy = mocker.spy(event_handler, "handle")
+    handle_spy = mocker.spy(event_dispatching, "handle")
 
     # GIVEN a CGConfig
     status_db: TypedMock[Store] = create_typed_mock(Store)
@@ -82,7 +82,7 @@ def test_receive_event_no_data_variants(mocker: MockerFixture, additional_args: 
     # GIVEN the cli runner
     cli_runner = CliRunner()
 
-    handle_spy = mocker.spy(event_handler, "handle")
+    handle_spy = mocker.spy(event_dispatching, "handle")
 
     # WHEN calling the receive event command with no data
     result = cli_runner.invoke(
@@ -110,7 +110,7 @@ def test_receive_event_event_handler_raises(mocker: MockerFixture):
     cg_config = create_autospec(CGConfig, status_db=status_db.as_type)
 
     # GIVEN that event handler raises an error
-    mocker.patch.object(event_handler, "handle", side_effect=Exception)
+    mocker.patch.object(event_dispatching, "handle", side_effect=Exception)
 
     # WHEN calling the receive event command
     result = cli_runner.invoke(
