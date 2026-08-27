@@ -19,7 +19,9 @@ RSYNC_SBATCH_SCRIPT: str = "transfer_sample.sh"
 def transfer_sample(cg_config: CGConfig, sample: Sample):
     """Submit an sbatch job that rsyncs one external sample to the destination cluster."""
     slurm_api = SlurmAPI()
-    sbatch_path = _get_sbatch_path(sample=sample, rsync_path=cg_config.data_delivery.base_path)
+    sbatch_path: Path = _get_sbatch_path(
+        sample=sample, rsync_path=cg_config.data_delivery.base_path
+    )
     sbatch_command: str = _get_sbatch_command(cg_config=cg_config, sample=sample)
     sbatch_parameters: Sbatch = _get_sbatch_parameters(
         command=sbatch_command,
