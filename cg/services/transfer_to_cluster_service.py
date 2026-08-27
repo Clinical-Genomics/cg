@@ -3,7 +3,7 @@ from pathlib import Path
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.priority import SlurmQos
-from cg.models.cg_config import CGConfig, NatsConfig
+from cg.models.cg_config import CGConfig, DataDeliveryConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.services.deliver_files.rsync.sbatch_commands import (
     ERROR_RSYNC_FUNCTION,
@@ -13,52 +13,41 @@ from cg.services.events import event_publisher
 from cg.store.models import Sample
 
 EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT = "external_sample.transfer_completed"
+RSYNC_SBATCH_SCRIPT: str = "transfer_sample.sh"
 
 
 def transfer_sample(cg_config: CGConfig, sample: Sample):
     slurm_api = SlurmAPI()
-    customer_internal_id: str = sample.customer.internal_id
-    sample_name: str = sample.name
-    timestamp: str = datetime.now().strftime("%y%m%d_%H_%M_%S_%f")
-    sbatch_path = Path(
-        cg_config.data_delivery.base_path,
-        f"{customer_internal_id}_{sample_name}_{timestamp}",
-        "transfer_sample.sh",
-    )
-    source_path = Path(cg_config.external.caesar % customer_internal_id, sample_name)
-    destination_path = Path(cg_config.external.hasta % customer_internal_id, sample_name)
-    event_payload = {
-        "cg.sample_internal_id": sample.internal_id,
-        "transfer_completed_at": "$(date +%Y-%m-%dT%H:%M:%S)",
-        "cluster_location": destination_path.as_posix(),
-    }
-
-    command: str = _get_sbatch_command(
-        nats_config=cg_config.nats,
-        source_path=source_path,
-        destination_path=destination_path,
-        event_payload=event_payload,
-    )
-
-    sbatch_parameters = Sbatch(
-        job_name=f"{customer_internal_id}_{sample_name}_rsync_external_data",
-        account=cg_config.data_delivery.account,
-        number_tasks=1,
-        memory=1,
-        log_dir=sbatch_path.parent.as_posix(),
-        email=cg_config.data_delivery.mail_user,
-        hours=24,
-        commands=command,
-        error=ERROR_RSYNC_FUNCTION,
-        quality_of_service=SlurmQos.NORMAL,
+    sbatch_path = _get_sbatch_path(sample=sample, rsync_path=cg_config.data_delivery.base_path)
+    sbatch_command: str = _get_sbatch_command(cg_config=cg_config, sample=sample)
+    sbatch_parameters: Sbatch = _get_sbatch_parameters(
+        command=sbatch_command,
+        data_delivery_config=cg_config.data_delivery,
+        sample=sample,
+        sbatch_path=sbatch_path,
     )
     sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters)
     slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
 
 
-def _get_sbatch_command(
-    nats_config: NatsConfig, source_path: Path, destination_path: Path, event_payload: dict
-) -> str:
+def _get_sbatch_path(sample: Sample, rsync_path: str) -> Path:
+    timestamp: str = datetime.now().strftime("%y%m%d_%H_%M_%S_%f")
+    sbatch_path = Path(
+        rsync_path,
+        f"{sample.customer.internal_id}_{sample.name}_{timestamp}",
+        RSYNC_SBATCH_SCRIPT,
+    )
+    return sbatch_path
+
+
+def _get_sbatch_command(cg_config: CGConfig, sample: Sample) -> str:
+    source_path = Path(cg_config.external.caesar % sample.customer.internal_id, sample.name)
+    destination_path = Path(cg_config.external.hasta % sample.customer.internal_id, sample.name)
+    event_payload = {
+        "cg.sample_internal_id": sample.internal_id,
+        "transfer_completed_at": "$(date +%Y-%m-%dT%H:%M:%S)",
+        "cluster_location": destination_path.as_posix(),
+    }
     command: str = (
         RSYNC_CONTENTS_COMMAND.format(
             source_path=source_path,
@@ -66,9 +55,27 @@ def _get_sbatch_command(
         )
         + "\n"
         + event_publisher.publish_command(
-            nats_config=nats_config,
-            subject=f"{nats_config.stream}.{EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT}",
+            nats_config=cg_config.nats,
+            subject=f"{cg_config.nats.stream}.{EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT}",
             data=event_payload,
         )
     )
     return command
+
+
+def _get_sbatch_parameters(
+    command: str, data_delivery_config: DataDeliveryConfig, sample: Sample, sbatch_path: Path
+) -> Sbatch:
+    sbatch_parameters = Sbatch(
+        job_name=f"{sample.customer.internal_id}_{sample.name}_rsync_external_data",
+        account=data_delivery_config.account,
+        number_tasks=1,
+        memory=1,
+        log_dir=sbatch_path.parent.as_posix(),
+        email=data_delivery_config.mail_user,
+        hours=24,
+        commands=command,
+        error=ERROR_RSYNC_FUNCTION,
+        quality_of_service=SlurmQos.NORMAL,
+    )
+    return sbatch_parameters
