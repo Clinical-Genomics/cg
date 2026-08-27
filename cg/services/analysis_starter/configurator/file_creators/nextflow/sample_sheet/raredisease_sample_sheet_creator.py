@@ -1,7 +1,6 @@
 from typing import Iterator
 
 from cg.constants.subject import PlinkPhenotypeStatus, PlinkSex
-from cg.exc import SampleSheetContentError
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowFastqSampleSheetCreator,
 )
@@ -29,8 +28,6 @@ class RarediseaseSampleSheetCreator(NextflowFastqSampleSheetCreator):
         sample_sheet_content: list[list[str]] = [HEADERS]
         for link in case.links:
             sample_sheet_content.extend(self._get_sample_sheet_content_per_sample(case_sample=link))
-        if sample_sheet_content == [HEADERS]:
-            raise SampleSheetContentError(f"Sample sheet for case {case_id} is empty.")
         return sample_sheet_content
 
     def _get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:

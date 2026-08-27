@@ -1,6 +1,5 @@
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, create_autospec
-
 import pytest
 from housekeeper.store.models import File
 from pytest_mock import MockerFixture
@@ -8,6 +7,7 @@ from sqlalchemy import Case
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
+from cg.exc import SampleSheetContentError
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
     creator as samplesheet_creator,
 )
@@ -110,3 +110,35 @@ def test_parse_fastq_header_raises_error():
         # WHEN parsing the header
         # THEN the correct error is raised
         NextflowFastqSampleSheetCreator._parse_fastq_header(line="Not a Fastq header")
+
+
+@pytest.fixture
+def samplesheet_fixture(request: pytest.FixtureRequest) -> NextflowFastqSampleSheetCreator:
+    return request.getfixturevalue(request.param)
+
+
+@pytest.mark.parametrize(
+    "samplesheet_fixture",
+    [
+        "raredisease_sample_sheet_creator",
+        "rnafusion_sample_sheet_creator",
+        "taxprofiler_sample_sheet_creator",
+        "tomte_sample_sheet_creator",
+    ],
+    indirect=True,
+)
+def test_create_empty_raises_error(
+    mocker: MockerFixture, samplesheet_fixture: NextflowFastqSampleSheetCreator
+):
+    # GIVEN a case id and file path
+    case_id = "case_id"
+    file_path = Path("/file/path")
+
+    # GIVEN less than two lines of samplesheet content is provided
+    content: list[list[str]] = [["this", "is", "a", "header"]]
+    mocker.patch.object(samplesheet_fixture, "_get_content", return_value=content)
+
+    # WHEN the samplesheet is called to be created
+    # THEN the appropriate error is raised
+    with pytest.raises(SampleSheetContentError):
+        samplesheet_fixture.create(case_id=case_id, file_path=file_path)

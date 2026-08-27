@@ -233,7 +233,9 @@ def test_rnafusion_start(
 
     # GIVEN that the sample sheet content is created
     mocker.patch.object(
-        RNAFusionSampleSheetCreator, "_get_sample_sheet_content_per_sample", return_value=[[""]]
+        RNAFusionSampleSheetCreator,
+        "_get_content",
+        return_value=[["this", "is", "a", "header"], ["this", "is", "a", "row"]],
     )
 
     # GIVEN that the fastq files exist
