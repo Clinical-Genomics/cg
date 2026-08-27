@@ -11,6 +11,7 @@ from cg.services.events import event_dispatching
 @click.option("--event-payload")
 @click.pass_obj
 def receive_event(config: CGConfig, event_name: str, event_payload: str | None):
+    """Receive an event and dispatch it to the appropriate handler."""
     if not event_payload:
         return
     parsed_payload: dict = json.loads(event_payload)

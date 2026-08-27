@@ -26,7 +26,7 @@ def test_dispatch_existing_handler():
     )
 
     # THEN the correct handler was called
-    registered_event_handler.assert_called_once_with(config=cg_config, data=event_payload)
+    registered_event_handler.assert_called_once_with(config=cg_config, event_payload=event_payload)
 
 
 def test_dispatch_no_handler():
