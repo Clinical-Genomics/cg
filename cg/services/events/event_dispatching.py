@@ -18,6 +18,6 @@ def dispatch(
     """Select the appropriate handler for the given event name and call it with the provided data."""
     handle_function: Callable | None = event_handlers.get(event_name)
     if handle_function:
-        handle_function(config=config, data=event_payload)
+        handle_function(config=config, event_payload=event_payload)
     else:
         LOG.info(f"No handler for event {event_name}")

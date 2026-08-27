@@ -15,7 +15,7 @@ def test_receive_event_success(mocker: MockerFixture):
     # GIVEN a CliRunner
     cli_runner = CliRunner()
 
-    handle_spy = mocker.spy(event_dispatching, "handle")
+    dispatch_spy = mocker.spy(event_dispatching, "dispatch")
 
     # GIVEN a CGConfig
     status_db: TypedMock[Store] = create_typed_mock(Store)
@@ -24,13 +24,13 @@ def test_receive_event_success(mocker: MockerFixture):
     # WHEN calling the receive event command
     result = cli_runner.invoke(
         receive_event,
-        args=["something-happened", "--data", '{"key": "value"}'],
+        args=["something-happened", "--event-payload", '{"key": "value"}'],
         obj=cg_config,
     )
 
     # THEN it calls the event handler
-    handle_spy.assert_called_once_with(
-        config=cg_config, event_name="something-happened", data={"key": "value"}
+    dispatch_spy.assert_called_once_with(
+        config=cg_config, event_name="something-happened", event_payload={"key": "value"}
     )
 
     # THEN the result exits successfully
@@ -44,7 +44,7 @@ def test_receive_event_json_parsing_fails(mocker: MockerFixture):
     # GIVEN a CliRunner
     cli_runner = CliRunner()
 
-    handle_spy = mocker.spy(event_dispatching, "handle")
+    dispatch_spy = mocker.spy(event_dispatching, "dispatch")
 
     # GIVEN a CGConfig
     status_db: TypedMock[Store] = create_typed_mock(Store)
@@ -53,12 +53,12 @@ def test_receive_event_json_parsing_fails(mocker: MockerFixture):
     # WHEN calling the receive event command with a malformed json
     result = cli_runner.invoke(
         receive_event,
-        args=["something-happened", "--data", "this is a string"],
+        args=["something-happened", "--event-payload", "this is a string"],
         obj=cg_config,
     )
 
     # THEN it should not call the event handler
-    handle_spy.assert_not_called()
+    dispatch_spy.assert_not_called()
 
     # THEN the result exits unsuccessfully
     assert result.exit_code != 0
@@ -74,7 +74,7 @@ def test_receive_event_json_parsing_fails(mocker: MockerFixture):
     "additional_args",
     [
         [],
-        ["--data", ""],
+        ["--event-payload", ""],
     ],
     ids=["no_data_argument", "empty_data_argument"],
 )
@@ -82,20 +82,27 @@ def test_receive_event_no_data_variants(mocker: MockerFixture, additional_args: 
     # GIVEN the cli runner
     cli_runner = CliRunner()
 
-    handle_spy = mocker.spy(event_dispatching, "handle")
+    # GIVEN a CGConfig with a store
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    cg_config: CGConfig = create_autospec(CGConfig, status_db=status_db.as_type)
+
+    dispatch_spy = mocker.spy(event_dispatching, "dispatch")
 
     # WHEN calling the receive event command with no data
     result = cli_runner.invoke(
         receive_event,
         args=["something-happened"] + additional_args,
-        obj=create_autospec(CGConfig),
+        obj=cg_config,
     )
 
     # THEN it should not call the event handler
-    handle_spy.assert_not_called()
+    dispatch_spy.assert_not_called()
 
     # THEN the result exits successfully
     assert result.exit_code == 0
+
+    # THEN the database changes should NOT have been committed
+    status_db.as_mock.commit_to_store.assert_not_called()
 
 
 def test_receive_event_event_handler_raises(mocker: MockerFixture):
@@ -110,7 +117,7 @@ def test_receive_event_event_handler_raises(mocker: MockerFixture):
     cg_config = create_autospec(CGConfig, status_db=status_db.as_type)
 
     # GIVEN that event handler raises an error
-    mocker.patch.object(event_dispatching, "handle", side_effect=Exception)
+    mocker.patch.object(event_dispatching, "dispatch", side_effect=Exception)
 
     # WHEN calling the receive event command
     result = cli_runner.invoke(
