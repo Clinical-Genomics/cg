@@ -109,8 +109,8 @@ def test_receive_event_dispatch_raises(mocker: MockerFixture):
     # GIVEN the cli runner
     cli_runner = CliRunner()
 
-    # GIVEN some JSON-formatted data
-    data = "{}"
+    # GIVEN some JSON-formatted payload
+    event_payload = "{}"
 
     # GIVEN a CG config
     status_db: TypedMock[Store] = create_typed_mock(Store)
@@ -122,7 +122,7 @@ def test_receive_event_dispatch_raises(mocker: MockerFixture):
     # WHEN calling the receive event command
     result = cli_runner.invoke(
         receive_event,
-        args=["something-happened", "--data", data],
+        args=["something-happened", "--event-payload", event_payload],
         obj=cg_config,
     )
 
