@@ -239,6 +239,7 @@ class CreateMixin(ReadHandler):
         synopsis: str | None = None,
         customer_id: int | None = None,
         comment: str | None = None,
+        is_compressible: bool = True,
     ) -> Case:
         """Build a new Case record."""
 
@@ -255,6 +256,7 @@ class CreateMixin(ReadHandler):
             synopsis=synopsis,
             tickets=ticket,
             customer_id=customer_id,
+            is_compressible=is_compressible,
         )
 
     def relate_sample(
@@ -323,7 +325,7 @@ class CreateMixin(ReadHandler):
         name: str,
         ordered: datetime,
         application_version: ApplicationVersion,
-        db_order: Order,
+        order: Order,
         comment: str = None,
         received_at: datetime = None,
         invoice_id: int = None,
@@ -336,7 +338,7 @@ class CreateMixin(ReadHandler):
         new_record: Pool = Pool(
             name=name,
             ordered_at=ordered or datetime.now(),
-            db_order=db_order,
+            order=order,
             received_at=received_at,
             comment=comment,
             delivered_at=delivered_at,

@@ -107,14 +107,14 @@ class CompressAPI:
 
         all_ok: bool = True
         for run_name in sample_fastq:
-            LOG.info(f"Check if compression possible for run {run_name}")
+            LOG.debug(f"Check if compression possible for run {run_name}")
             compression: CompressionData = sample_fastq[run_name]["compression_data"]
             is_compression_possible: bool = self._is_fastq_compression_possible(
                 compression=compression,
                 sample_id=sample_id,
             )
             if not is_compression_possible:
-                LOG.warning(f"FASTQ to SPRING not possible for {sample_id}, run {run_name}")
+                LOG.info(f"FASTQ to SPRING not possible for {sample_id}, run {run_name}")
                 all_ok = False
                 continue
 
