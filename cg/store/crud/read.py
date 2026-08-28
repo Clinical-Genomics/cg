@@ -2116,7 +2116,14 @@ class ReadHandler(BaseHandler):
         return list(self.session.scalars(query).all())
 
     def get_external_sample(self, customer_id: int, sample_name: str) -> ExternalSample | None:
-        pass
+        return self.session.execute(
+            select(ExternalSample).where(
+                and_(
+                    ExternalSample.customer_id == customer_id,
+                    ExternalSample.sample_name == sample_name,
+                )
+            )
+        ).first()
 
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:

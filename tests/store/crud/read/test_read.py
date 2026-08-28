@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 import pytest
 from sqlalchemy.exc import MultipleResultsFound
@@ -21,6 +22,7 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
+    ExternalSample,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
     Invoice,
@@ -1326,3 +1328,21 @@ def test_get_orders_mip_dna_and_limit_filter(
 
     # THEN we should get the expected number of orders returned
     assert len(orders) == expected_returned
+
+
+def test_get_external_sample_finds_match(store: Store, helpers: StoreHelpers):
+    # GIVEN a store containing an external sample
+    customer = helpers.ensure_customer(store=store, customer_id="cust000")
+    external_sample = ExternalSample(
+        customer_id=customer.id, sample_name="sample-name-1", customer_uploaded_at=datetime.now()
+    )
+    store.add_item_to_store(external_sample)
+
+    # WHEN fetching the external sample by customer and sample name
+    external_sample: ExternalSample | None = store.get_external_sample(
+        customer_id=1,
+        sample_name="sample-name-1",
+    )
+
+    # THEN that sample must be returned
+    assert external_sample
