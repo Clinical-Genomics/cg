@@ -1,4 +1,4 @@
-from unittest.mock import Mock, call, create_autospec
+from unittest.mock import ANY, Mock, create_autospec
 
 from pytest_mock import MockerFixture
 
@@ -15,20 +15,16 @@ def test_handle_trigger_transfer(mocker: MockerFixture):
 
     # GIVEN that the order has two external samples
     event_payload = {
-        "cg.customer": "cust000",
-        "cg.sample_names": ["sample-name-1", "sample-name-2"],
+        "status_db.customer": "cust000",
+        "status_db.sample_names": ["sample-name-1", "sample-name-2"],
     }
 
     # GIVEN that one of the samples are in the ExternalSample table
     status_db: Store = create_autospec(Store)
 
-    def mock_get_external_sample(customer_id: int, sample_name: str):
-        if sample_name == "sample-name-1":
-            return create_autospec(ExternalSample)
-        else:
-            return None
-
-    status_db.get_external_sample = mock_get_external_sample
+    status_db.get_external_sample = lambda customer_id, sample_name: (
+        create_autospec(ExternalSample) if sample_name == "sample-name-1" else None
+    )
     sample: Sample = create_autospec(Sample)
     status_db.get_sample_by_customer_and_name = Mock(return_value=sample)
 
@@ -39,7 +35,12 @@ def test_handle_trigger_transfer(mocker: MockerFixture):
     transfer_sample_mock = mocker.patch.object(transfer_to_cluster_service, "transfer_sample")
 
     # WHEN handling the event
-    external_samples_ordered_handler.handle()
+    external_samples_ordered_handler.handle(config=cg_config, event_payload=event_payload)
 
-    # THEN the transfer for the two samples in the ExternalSample table has been triggered
-    call()
+    # THEN only the sample in the ExternalSample table is fetched
+    status_db.get_sample_by_customer_and_name.assert_called_once_with(
+        customer_entry_id=ANY, sample_name="sample-name-1"
+    )
+
+    # THEN the transfer for the sample in the ExternalSample table has been triggered
+    transfer_sample_mock.assert_called_once_with(cg_config=cg_config, sample=sample)

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from cg.models.cg_config import CGConfig
 from cg.services import transfer_to_cluster_service
@@ -7,8 +7,8 @@ from cg.store.store import Store
 
 
 class ExternalSamplesOrderedEvent(BaseModel):
-    customer: str
-    sample_names: list[str]
+    customer: str = Field(alias="status_db.customer")
+    sample_names: list[str] = Field(alias="status_db.sample_names")
 
 
 def handle(config: CGConfig, event_payload: dict):
