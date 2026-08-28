@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from pathlib import Path
 
@@ -12,12 +13,16 @@ from cg.services.deliver_files.rsync.sbatch_commands import (
 from cg.services.events import event_publisher
 from cg.store.models import Sample
 
+LOG = logging.getLogger(__name__)
 EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT = "external_sample.transfer_completed"
 RSYNC_SBATCH_SCRIPT: str = "transfer_sample.sh"
 
 
 def transfer_sample(cg_config: CGConfig, sample: Sample):
     """Submit an sbatch job that rsyncs one external sample to the destination cluster."""
+    LOG.info(
+        f"Preparing to transfer sample {sample.name} for customer {sample.customer.internal_id}"
+    )
     slurm_api = SlurmAPI()
     sbatch_script: Path = _get_sbatch_script(
         sample=sample, rsync_path=cg_config.data_delivery.base_path
@@ -37,14 +42,17 @@ def _get_sbatch_script(sample: Sample, rsync_path: str) -> Path:
     timestamp: str = datetime.now().strftime("%y%m%d_%H_%M_%S_%f")
     log_dir = Path(rsync_path, f"{sample.customer.internal_id}_{sample.name}_{timestamp}")
     log_dir.mkdir(parents=True, exist_ok=False)
+    LOG.debug(f"Ensured existence of log directory for sample transfer: {log_dir}")
     sbatch_script = Path(log_dir, RSYNC_SBATCH_SCRIPT)
     return sbatch_script
 
 
 def _get_sbatch_command(cg_config: CGConfig, sample: Sample) -> str:
     source_path = Path(cg_config.external.caesar % sample.customer.internal_id, sample.name)
+    LOG.debug(f"Source directory: {source_path}")
     destination_path = Path(cg_config.external.hasta % sample.customer.internal_id, sample.name)
     destination_path.mkdir(parents=True, exist_ok=True)
+    LOG.debug(f"Destination directory: {destination_path}")
     event_payload = {
         "cg.sample_internal_id": sample.internal_id,
         "transfer_completed_at": "$(date +%Y-%m-%dT%H:%M:%S)",

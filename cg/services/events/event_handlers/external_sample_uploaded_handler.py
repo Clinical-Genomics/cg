@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import LOG, CGConfig
 from cg.services import transfer_to_cluster_service
 from cg.store.models import (
     SAMPLE_NAME_MAXIMUM_LENGTH,
@@ -38,7 +38,11 @@ def handle(config: CGConfig, event_payload: dict) -> None:
         sample_name=event.sample_name,
         customer_uploaded_at=event.customer_uploaded_at,
     )
+    LOG.info(
+        f"Added external sample {event.sample_name} for customer {event.customer} to the database."
+    )
     if sample := status_db.get_sample_by_customer_and_name(
         customer_entry_id=[customer.id], sample_name=event.sample_name
     ):
         transfer_to_cluster_service.transfer_sample(cg_config=config, sample=sample)
+        LOG.info(f"Transfer of sample {event.customer}/{event.sample_name} successfully started.")

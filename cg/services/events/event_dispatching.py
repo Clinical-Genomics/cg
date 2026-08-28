@@ -20,6 +20,7 @@ def dispatch(
     """
     handler_function: Callable | None = event_handlers.get(event_name)
     if handler_function:
+        LOG.debug(f"Dispatching event {event_name} to handler {handler_function.__name__}")
         handler_function(config=config, event_payload=event_payload)
     else:
         LOG.info(f"No handler for event {event_name}")
