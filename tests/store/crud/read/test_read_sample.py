@@ -5,7 +5,7 @@ from typing import Any
 
 import pytest
 from sqlalchemy.orm import Query
-
+from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 from cg.constants import SexOptions, Workflow
 from cg.constants.constants import CaseActions
 from cg.constants.lims import LimsStatus
@@ -208,6 +208,50 @@ def test_get_samples_by_customer_and_name_invalid_customer(
 
     # THEN one sample should be returned
     assert not sample
+
+
+def test_get_samples_by_customer_and_name_strict(store: Store, helpers: StoreHelpers):
+    # GIVEN a database with a sample whose name is unique within a customer
+    customer_0: Customer = helpers.ensure_customer(store, customer_id="cust000")
+    customer_1: Customer = helpers.ensure_customer(store, customer_id="cust001")
+    sample: Sample = helpers.add_sample(store=store, customer=customer_0, name="sample-1")
+    helpers.add_sample(store=store, customer=customer_1, name="sample-1")
+    helpers.add_sample(store=store, customer=customer_0, name="sample-2")
+
+    # WHEN getting sample by customer and name
+    result = store.get_sample_by_customer_and_name_strict(
+        customer_entry_id=sample.customer.id, sample_name=sample.name
+    )
+
+    # THEN the correct sample was returned
+    assert result == sample
+
+
+def test_get_samples_by_customer_and_name_strict_raises_on_non_unique(
+    store: Store, helpers: StoreHelpers
+):
+    # GIVEN a database with multiple samples sharing the same customer and name
+    customer_0: Customer = helpers.ensure_customer(store, customer_id="cust000")
+    sample = helpers.add_sample(store=store, customer=customer_0, name="sample-1")
+    helpers.add_sample(store=store, customer=customer_0, name="sample-1")
+
+    # WHEN strictly getting a sample by that cust and name
+    # THEN the appropriate error is raised
+    with pytest.raises(MultipleResultsFound):
+        store.get_sample_by_customer_and_name_strict(
+            customer_entry_id=sample.customer.id, sample_name=sample.name
+        )
+
+
+def test_get_samples_by_customer_and_name_strict_raises_on_no_hits(
+    store: Store, helpers: StoreHelpers
+):
+    # GIVEN a database without a certain sample and cust
+
+    # WHEN strictly getting a sample by that cust and name
+    # THEN the appropriate error is raised
+    with pytest.raises(NoResultFound):
+        store.get_sample_by_customer_and_name_strict(customer_entry_id=0, sample_name="sample-1")
 
 
 def test_get_samples_by_any_id_not_an_attribute_fails(
