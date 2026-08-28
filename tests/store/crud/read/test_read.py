@@ -1339,10 +1339,23 @@ def test_get_external_sample_finds_match(store: Store, helpers: StoreHelpers):
     store.add_item_to_store(external_sample)
 
     # WHEN fetching the external sample by customer and sample name
-    external_sample: ExternalSample | None = store.get_external_sample(
+    fetched_external_sample: ExternalSample | None = store.get_external_sample(
         customer_id=1,
         sample_name="sample-name-1",
     )
 
     # THEN that sample must be returned
-    assert external_sample
+    assert fetched_external_sample == external_sample
+
+
+def test_get_external_sample_no_match(store: Store):
+    # GIVEN an empty store
+
+    # WHEN fetching an external sample by customer and sample name
+    fetched_external_sample: ExternalSample | None = store.get_external_sample(
+        customer_id=1,
+        sample_name="sample-name-1",
+    )
+
+    # THEN None should be returned
+    assert fetched_external_sample is None

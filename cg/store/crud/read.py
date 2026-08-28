@@ -2116,7 +2116,7 @@ class ReadHandler(BaseHandler):
         return list(self.session.scalars(query).all())
 
     def get_external_sample(self, customer_id: int, sample_name: str) -> ExternalSample | None:
-        return self.session.execute(
+        return self.session.scalars(
             select(ExternalSample).where(
                 and_(
                     ExternalSample.customer_id == customer_id,
