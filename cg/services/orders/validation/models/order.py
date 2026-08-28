@@ -4,6 +4,7 @@ from typing_extensions import Annotated
 from cg.constants import DataDelivery
 from cg.models.orders.constants import OrderType
 from cg.services.orders.validation.models.utils import set_null_to_false
+from cg.store.store import Store
 
 
 class Order(BaseModel):
@@ -15,8 +16,7 @@ class Order(BaseModel):
     _generated_ticket_id: int | None = PrivateAttr(default=None)
     _user_id: int = PrivateAttr(default=None)
 
-    @property
-    def external_samples(self):  # TODO: Fix return type
+    def external_samples(self, status_db: Store):  # TODO: Fix return type
         raise NotImplementedError
 
     @model_validator(mode="before")
