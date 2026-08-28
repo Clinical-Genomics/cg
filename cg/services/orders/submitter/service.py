@@ -43,4 +43,6 @@ class OrderSubmitter:
             order=order, user_name=user.name, user_mail=user.email, order_type=order_type
         )
         order._generated_ticket_id = ticket_number
-        return storing_service.store_order(order)
+        serialized_order: dict = storing_service.store_order(order)
+        # TODO if external samples then trigger event
+        return serialized_order
