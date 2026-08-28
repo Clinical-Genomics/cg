@@ -76,7 +76,7 @@ def test_receive_event_json_parsing_fails(mocker: MockerFixture):
         [],
         ["--event-payload", ""],
     ],
-    ids=["no_data_argument", "empty_data_argument"],
+    ids=["no_event_payload_argument", "empty_event_payload_argument"],
 )
 def test_receive_event_no_payload(mocker: MockerFixture, additional_args: list[str]):
     # GIVEN the cli runner
