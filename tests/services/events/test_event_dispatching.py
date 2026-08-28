@@ -14,7 +14,7 @@ def test_dispatch_existing_handler():
     event_payload = {"key": "value"}
 
     # GIVEN a dict of event handlers
-    registered_event_handler = Mock()
+    registered_event_handler = Mock(__name__="registered_event_handler")
     event_handlers: dict = {"existing_event": registered_event_handler}
 
     # WHEN calling dispatch
