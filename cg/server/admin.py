@@ -133,6 +133,17 @@ def view_pacbio_sample_sequencing_metrics_link(unused1, unused2, model, unused3)
     )
 
 
+def view_application_text_column(unused1, unused2, model, attribute_name):
+    """Column formatter to widen long text columns."""
+    del unused1, unused2
+    text = getattr(model, attribute_name)
+    return (
+        Markup(f"<div style='display: inline-block; min-width: 300px;'>{text}</div>")
+        if text
+        else ""
+    )
+
+
 def view_order_types(unused1, unused2, model, unused3):
     del unused1, unused2, unused3
     order_type_list = "<br>".join(model.order_types)
@@ -265,7 +276,9 @@ def _get_ticket_markups(ticket_str: str) -> str:
 class ApplicationView(BaseView):
     """Admin view for Model.Application"""
 
-    column_list = list(inspect(Application).columns) + ["order_types"]
+    page_size = 100
+
+    column_list = [column.name for column in inspect(Application).columns] + ["order_types"]
 
     column_editable_list = [
         "description",
@@ -291,14 +304,18 @@ class ApplicationView(BaseView):
         "lims_workflow_id",
     ]
     column_exclude_list = [
-        "minimum_order",
-        "sample_amount",
-        "sample_volume",
-        "details",
-        "limitations",
-        "created_at",
-        "updated_at",
         "category",
+        "created_at",
+        "minimum_order",
+        "percent_kth",
+        "sample_amount",
+        "sample_concentration",
+        "sample_concentration_maximum",
+        "sample_concentration_maximum_cfdna",
+        "sample_concentration_minimum",
+        "sample_concentration_minimum_cfdna",
+        "sample_volume",
+        "updated_at",
     ]
     column_formatters = {
         "tag": view_application_version_link,
@@ -307,9 +324,12 @@ class ApplicationView(BaseView):
         "sample_concentration_maximum": view_sample_concentration_maximum,
         "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
         "sample_concentration_maximum_cfdna": view_sample_concentration_maximum_cfdna,
+        "limitations": view_application_text_column,
+        "comment": view_application_text_column,
+        "details": view_application_text_column,
     }
-    column_filters = ["prep_category", "is_accredited", "is_archived", "read_type"]
-    column_searchable_list = ["tag", "prep_category"]
+    column_filters = ["prep_category", "is_accredited", "is_archived", "read_type", "is_external"]
+    column_searchable_list = ["tag", "prep_category", "description", "details"]
     form_excluded_columns = ["category", "versions", "order_type_applications"]
     form_extra_fields = {
         "suitable_order_types": MultiCheckboxField(
@@ -457,17 +477,17 @@ class CustomerView(BaseView):
     column_list = [
         "internal_id",
         "name",
-        "data_archive_location",
-        "comment",
+        "label",
         "primary_contact",
         "delivery_contact",
-        "label",
         "lab_contact",
         "priority",
-        "project_account_KI",
-        "project_account_kth",
+        "agreement_registration",
+        "invoice_reference",
         "return_samples",
         "scout_access",
+        "data_archive_location",
+        "comment",
     ]
     column_filters = ["priority", "scout_access", "data_archive_location", "label"]
     column_formatters = {
@@ -732,10 +752,19 @@ class OrderView(BaseView):
     create_modal = True
     edit_modal = True
     form_ajax_refs = {
+        "analyses": {
+            "fields": ["case_internal_id"],
+            "page_size": 20,
+        },
         "cases": {
             "fields": ["internal_id", "name"],
             "page_size": 20,
-        }
+        },
+        "customer": {
+            "fields": ["internal_id"],
+            "page_size": 20,
+        },
+        "pools": {"fields": ["name"], "page_size": 20},
     }
 
 
@@ -777,6 +806,19 @@ class PoolView(BaseView):
     ]
     column_labels = {"order.ticket_id": "Ticket", "order.name": "Order"}
     column_searchable_list = ["name", "order.name", "order.ticket_id", "customer.internal_id"]
+
+    form_ajax_refs = {
+        "customer": {
+            "fields": ["internal_id"],
+            "page_size": 20,
+        },
+        "invoice": {"fields": ["invoiced_at"], "page_size": 20},
+        "order": {"fields": ["id", "ticket_id"], "page_size": 20},
+        "samples": {
+            "fields": ["name", "internal_id"],
+            "page_size": 20,
+        },
+    }
 
 
 class SampleView(BaseView):
@@ -860,6 +902,15 @@ class SampleView(BaseView):
         "mother_links",
         "sequencing_metrics",
     ]
+    form_ajax_refs = {
+        "application_version": {"fields": ["application_tag"], "page_size": 20},
+        "customer": {
+            "fields": ["internal_id"],
+            "page_size": 20,
+        },
+        "organism": {"fields": ["internal_id", "name"], "page_size": 20},
+        "pool": {"fields": ["name"], "page_size": 20},
+    }
 
     @staticmethod
     def view_sample_link(unused1, unused2, model, unused3):
