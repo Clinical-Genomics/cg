@@ -102,6 +102,7 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
+    ExternalSample,
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
@@ -2103,6 +2104,9 @@ class ReadHandler(BaseHandler):
         )
 
         return list(self.session.scalars(query).all())
+
+    def get_external_sample(self, customer_id: int, sample_name: str) -> ExternalSample | None:
+        pass
 
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:
