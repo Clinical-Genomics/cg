@@ -1331,21 +1331,28 @@ def test_get_orders_mip_dna_and_limit_filter(
 
 
 def test_get_external_sample_finds_match(store: Store, helpers: StoreHelpers):
-    # GIVEN a store containing an external sample
-    customer = helpers.ensure_customer(store=store, customer_id="cust000")
-    external_sample = ExternalSample(
-        customer_id=customer.id, sample_name="sample-name-1", customer_uploaded_at=datetime.now()
+    # GIVEN a store containing external samples and customers
+    customer_0 = helpers.ensure_customer(store=store, customer_id="cust000")
+    customer_1 = helpers.ensure_customer(store=store, customer_id="cust001")
+    external_sample_1 = ExternalSample(
+        customer_id=customer_0.id, sample_name="sample-name-1", customer_uploaded_at=datetime.now()
     )
-    store.add_item_to_store(external_sample)
+    external_sample_2 = ExternalSample(
+        customer_id=customer_0.id, sample_name="sample-name-2", customer_uploaded_at=datetime.now()
+    )
+    external_sample_3 = ExternalSample(
+        customer_id=customer_1.id, sample_name="sample-name-1", customer_uploaded_at=datetime.now()
+    )
+    store.add_multiple_items_to_store([external_sample_1, external_sample_2, external_sample_3])
 
     # WHEN fetching the external sample by customer and sample name
     fetched_external_sample: ExternalSample | None = store.get_external_sample(
-        customer_id=1,
+        customer_id=customer_0.id,
         sample_name="sample-name-1",
     )
 
     # THEN that sample must be returned
-    assert fetched_external_sample == external_sample
+    assert fetched_external_sample == external_sample_1
 
 
 def test_get_external_sample_no_match(store: Store):
