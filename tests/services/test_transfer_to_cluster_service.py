@@ -4,7 +4,6 @@ from unittest.mock import create_autospec
 import pytest
 from pytest_mock import MockerFixture
 
-from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.models.cg_config import CGConfig, DataDeliveryConfig, ExternalConfig, NatsConfig
 from cg.services import transfer_to_cluster_service
 from cg.store.models import Customer, Sample
@@ -80,8 +79,11 @@ def test_transfer_sample(mocker: MockerFixture, expected_sbatch_content):
         ),
     )
 
+    # GIVEN that paths are created
+    mocker.patch.object(transfer_to_cluster_service.Path, "mkdir")
+
     # GIVEN a SlurmAPI
-    submit_sbatch_mock = mocker.patch.object(SlurmAPI, "submit_sbatch")
+    submit_sbatch_mock = mocker.patch.object(transfer_to_cluster_service.SlurmAPI, "submit_sbatch")
 
     # WHEN transfer_sample is called
     transfer_to_cluster_service.transfer_sample(cg_config=cg_config, sample=sample)

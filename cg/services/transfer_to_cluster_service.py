@@ -19,7 +19,7 @@ RSYNC_SBATCH_SCRIPT: str = "transfer_sample.sh"
 def transfer_sample(cg_config: CGConfig, sample: Sample):
     """Submit an sbatch job that rsyncs one external sample to the destination cluster."""
     slurm_api = SlurmAPI()
-    sbatch_path: Path = _get_sbatch_path(
+    sbatch_script: Path = _get_sbatch_script(
         sample=sample, rsync_path=cg_config.data_delivery.base_path
     )
     sbatch_command: str = _get_sbatch_command(cg_config=cg_config, sample=sample)
@@ -27,25 +27,24 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
         command=sbatch_command,
         data_delivery_config=cg_config.data_delivery,
         sample=sample,
-        sbatch_path=sbatch_path,
+        sbatch_path=sbatch_script,
     )
     sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters)
-    slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_path)
+    slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_script)
 
 
-def _get_sbatch_path(sample: Sample, rsync_path: str) -> Path:
+def _get_sbatch_script(sample: Sample, rsync_path: str) -> Path:
     timestamp: str = datetime.now().strftime("%y%m%d_%H_%M_%S_%f")
-    sbatch_path = Path(
-        rsync_path,
-        f"{sample.customer.internal_id}_{sample.name}_{timestamp}",
-        RSYNC_SBATCH_SCRIPT,
-    )
-    return sbatch_path
+    log_dir = Path(rsync_path, f"{sample.customer.internal_id}_{sample.name}_{timestamp}")
+    log_dir.mkdir(parents=True, exist_ok=False)
+    sbatch_script = Path(log_dir, RSYNC_SBATCH_SCRIPT)
+    return sbatch_script
 
 
 def _get_sbatch_command(cg_config: CGConfig, sample: Sample) -> str:
     source_path = Path(cg_config.external.caesar % sample.customer.internal_id, sample.name)
     destination_path = Path(cg_config.external.hasta % sample.customer.internal_id, sample.name)
+    destination_path.mkdir(parents=True, exist_ok=True)
     event_payload = {
         "cg.sample_internal_id": sample.internal_id,
         "transfer_completed_at": "$(date +%Y-%m-%dT%H:%M:%S)",
