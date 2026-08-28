@@ -27,8 +27,8 @@ def test_handle_triggers_transfer(mocker: MockerFixture):
         status_db=status_db.as_type,
     )
 
-    # GIVEN some data
-    data = {
+    # GIVEN some payload for an external sample upload event
+    event_payload = {
         "cg.customer": "cust000",
         "cg.sample_name": "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
@@ -38,13 +38,13 @@ def test_handle_triggers_transfer(mocker: MockerFixture):
     sample = create_autospec(Sample)
     status_db.as_type.get_sample_by_customer_and_name = Mock(return_value=sample)
 
-    # GIVEN a transfer servicer
+    # GIVEN a transfer service
     transfer_sample_mock = mocker.patch.object(transfer_to_cluster_service, "transfer_sample")
 
-    # WHEN calling handle with a CGConfig and some data
-    external_sample_uploaded_handler.handle(config=cg_config, data=data)
+    # WHEN calling handle with a CGConfig and the event payload
+    external_sample_uploaded_handler.handle(config=cg_config, event_payload=event_payload)
 
-    # THEN the provided data should have been added to the database
+    # THEN the provided external sample should have been added to the database
     status_db.as_mock.add_external_sample.assert_called_once_with(
         customer_id=1,
         sample_name="sample-name",
@@ -71,8 +71,8 @@ def test_handle_not_trigger_transfer(mocker: MockerFixture):
     # GIVEN a CGConfig
     cg_config: CGConfig = create_autospec(CGConfig, status_db=status_db.as_type)
 
-    # GIVEN some data
-    data = {
+    # GIVEN some payload for an external sample upload event
+    event_payload = {
         "cg.customer": "cust000",
         "cg.sample_name": "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
@@ -81,13 +81,13 @@ def test_handle_not_trigger_transfer(mocker: MockerFixture):
     # GIVEN that the sample should NOT be transferred
     status_db.as_type.get_sample_by_customer_and_name = Mock(return_value=None)
 
-    # GIVEN a transfer servicer
+    # GIVEN a transfer service
     transfer_sample_spy = mocker.spy(transfer_to_cluster_service, "transfer_sample")
 
-    # WHEN calling handle with a CGConfig and some data
-    external_sample_uploaded_handler.handle(config=cg_config, data=data)
+    # WHEN calling handle with a CGConfig and the event payload
+    external_sample_uploaded_handler.handle(config=cg_config, event_payload=event_payload)
 
-    # THEN the provided data should have been added to the database
+    # THEN the provided external sample should have been added to the database
     status_db.as_mock.add_external_sample.assert_called_once_with(
         customer_id=1,
         sample_name="sample-name",
@@ -99,35 +99,34 @@ def test_handle_not_trigger_transfer(mocker: MockerFixture):
 
 
 def test_handle_invalid_sample_name():
-
     # GIVEN a CGConfig
     cg_config: CGConfig = create_autospec(CGConfig)
 
-    # GIVEN some data where the sample name contains illegal letters
-    data = {
+    # GIVEN some event payload where the sample name contains illegal letters
+    event_payload = {
         "cg.customer": "cust000",
         "cg.sample_name": "invalid_sample_name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
     }
 
-    # WHEN calling handle with a CGConfig and some data
+    # WHEN calling handle with a CGConfig and the event payload
     # THEN a ValidationError should be raised
     with pytest.raises(ValidationError):
-        external_sample_uploaded_handler.handle(config=cg_config, data=data)
+        external_sample_uploaded_handler.handle(config=cg_config, event_payload=event_payload)
 
 
 def test_handle_invalid_date_format():
     # GIVEN a CGConfig
     cg_config: CGConfig = create_autospec(CGConfig)
 
-    # GIVEN some data where the uploaded at is malformed
-    data = {
+    # GIVEN some event payload where the uploaded at is malformed
+    event_payload = {
         "cg.customer": "cust000",
         "cg.sample_name": "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14.52",
     }
 
-    # WHEN calling handle with a CGConfig and some data
+    # WHEN calling handle with a CGConfig and the event payload
     # THEN a ValidationError should be raised
     with pytest.raises(ValidationError):
-        external_sample_uploaded_handler.handle(config=cg_config, data=data)
+        external_sample_uploaded_handler.handle(config=cg_config, event_payload=event_payload)
