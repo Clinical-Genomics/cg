@@ -422,8 +422,8 @@ class ReadHandler(BaseHandler):
 
     def get_sample_by_customer_and_name(
         self, customer_entry_id: list[int], sample_name: str
-    ) -> Sample:
-        """Get samples within a customer."""
+    ) -> Sample | None:
+        """Get a sample within a customer."""
         filter_functions = [
             SampleFilter.BY_CUSTOMER_ENTRY_IDS,
             SampleFilter.BY_SAMPLE_NAME,
@@ -435,6 +435,16 @@ class ReadHandler(BaseHandler):
             customer_entry_ids=customer_entry_id,
             name=sample_name,
         ).first()
+
+    def get_sample_by_customer_and_name_strict(
+        self, customer_entry_id: int, sample_name: str
+    ) -> Sample:
+        return (
+            self._get_query(table=Sample)
+            .join(Sample.customer)
+            .filter(Customer.id == customer_entry_id, Sample.name == sample_name)
+            .one()
+        )
 
     def get_illumina_metrics_entry_by_device_sample_and_lane(
         self, device_internal_id: str, sample_internal_id: str, lane: int

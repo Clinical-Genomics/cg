@@ -1,4 +1,4 @@
-from unittest.mock import ANY, Mock, create_autospec
+from unittest.mock import create_autospec
 
 from pytest_mock import MockerFixture
 
@@ -11,7 +11,7 @@ from cg.store.models import ExternalSample, Sample
 from cg.store.store import Store
 
 
-def test_handle_trigger_transfer(mocker: MockerFixture):
+def test_handle_trigger_transfer_only_for_stored_sample(mocker: MockerFixture):
 
     # GIVEN that the order has two external samples
     event_payload = {
@@ -26,7 +26,10 @@ def test_handle_trigger_transfer(mocker: MockerFixture):
         create_autospec(ExternalSample) if sample_name == "sample-name-1" else None
     )
     sample: Sample = create_autospec(Sample)
-    status_db.get_sample_by_customer_and_name = Mock(return_value=sample)
+    sample.name = "sample-name-1"
+    status_db.get_sample_by_customer_and_name = lambda customer_entry_id, sample_name: (
+        sample if sample_name == "sample-name-1" else create_autospec(Sample)
+    )
 
     # GIVEN a CGConfig
     cg_config = create_autospec(CGConfig, status_db=status_db)
@@ -37,10 +40,6 @@ def test_handle_trigger_transfer(mocker: MockerFixture):
     # WHEN handling the event
     external_samples_ordered_handler.handle(config=cg_config, event_payload=event_payload)
 
-    # THEN only the sample in the ExternalSample table is fetched
-    status_db.get_sample_by_customer_and_name.assert_called_once_with(
-        customer_entry_id=ANY, sample_name="sample-name-1"
-    )
-
-    # THEN the transfer for the sample in the ExternalSample table has been triggered
+    # THEN the transfer for the sample in the ExternalSample table has been triggered once
     transfer_sample_mock.assert_called_once_with(cg_config=cg_config, sample=sample)
+    assert transfer_sample_mock.call_count == 1

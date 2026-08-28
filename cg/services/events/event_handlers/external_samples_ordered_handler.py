@@ -21,7 +21,3 @@ def handle(config: CGConfig, event_payload: dict):
                 customer_entry_id=[customer.id], sample_name=sample_name
             )
             transfer_to_cluster_service.transfer_sample(cg_config=config, sample=sample)
-    # TODO: If the sample is in the ExternalSample table
-    # TODO: Trigger transfer (reuse previous code)
-
-    pass
