@@ -10,6 +10,7 @@ SampleType = TypeVar("SampleType", bound=Sample)
 class OrderWithSamples(Order, Generic[SampleType]):
     samples: list[SampleType]
 
+    # TODO add tests
     def external_samples(self, status_db: Store) -> list[SampleType]:
         """Expects a validated order."""
         external_samples: list[SampleType] = []
