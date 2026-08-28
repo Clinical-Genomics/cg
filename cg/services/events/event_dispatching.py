@@ -1,5 +1,5 @@
 import logging
-from typing import Callable
+from typing import Protocol
 
 from cg.models.cg_config import CGConfig
 from cg.services.events.event_handlers import (
@@ -10,7 +10,11 @@ from cg.services.events.event_handlers import (
 LOG = logging.getLogger(__name__)
 
 
-EVENT_HANDLERS: dict[str, Callable] = {
+class EventHandler(Protocol):
+    def __call__(self, config: CGConfig, event_payload: dict) -> None: ...
+
+
+EVENT_HANDLERS: dict[str, EventHandler] = {
     "external.customer_uploaded_sample": external_sample_uploaded_handler.handle,
     "external.samples_ordered": external_samples_ordered_handler.handle,
 }
@@ -22,7 +26,7 @@ def dispatch(
     """
     Select the appropriate handler for the given event name and call it with the provided payload.
     """
-    handler_function: Callable | None = event_handlers.get(event_name)
+    handler_function: EventHandler | None = event_handlers.get(event_name)
     if handler_function:
         LOG.debug(f"Dispatching event {event_name} to handler {handler_function.__name__}")
         handler_function(config=config, event_payload=event_payload)

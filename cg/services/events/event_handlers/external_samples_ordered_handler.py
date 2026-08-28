@@ -11,8 +11,8 @@ class ExternalSamplesOrderedEvent(BaseModel):
     sample_names: list[str]
 
 
-def handle(config: CGConfig, data: dict):
-    event = ExternalSamplesOrderedEvent.model_validate(data)
+def handle(config: CGConfig, event_payload: dict):
+    event = ExternalSamplesOrderedEvent.model_validate(event_payload)
     status_db: Store = config.status_db
     customer: Customer = status_db.get_customer_by_internal_id_strict(internal_id=event.customer)
     # TODO: Loop over the samples in data
