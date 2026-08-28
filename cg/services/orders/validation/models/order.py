@@ -15,6 +15,10 @@ class Order(BaseModel):
     _generated_ticket_id: int | None = PrivateAttr(default=None)
     _user_id: int = PrivateAttr(default=None)
 
+    @property
+    def external_samples(self):  # TODO: Fix return type
+        raise NotImplementedError
+
     @model_validator(mode="before")
     def convert_empty_strings_to_none(cls, data):
         if isinstance(data, dict):

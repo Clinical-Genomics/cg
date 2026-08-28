@@ -44,5 +44,8 @@ class OrderSubmitter:
         )
         order._generated_ticket_id = ticket_number
         serialized_order: dict = storing_service.store_order(order)
-        # TODO if external samples then trigger event
+        # TODO Get external samples and customer from order
+        if external_samples := order.external_samples:
+            sample_names = [sample.name for sample in external_samples]
+            # TODO: Publish event
         return serialized_order

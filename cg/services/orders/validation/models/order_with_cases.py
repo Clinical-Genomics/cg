@@ -23,6 +23,11 @@ class OrderWithCases(Order, Generic[CaseType, SampleType]):
     ]
 
     @property
+    def external_samples(self) -> list[SampleType]:
+        # TODO: Implement
+        pass
+
+    @property
     def enumerated_cases(self) -> enumerate[CaseType | ExistingCase]:
         return enumerate(self.cases)
 

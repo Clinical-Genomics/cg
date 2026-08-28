@@ -10,5 +10,10 @@ class OrderWithSamples(Order, Generic[SampleType]):
     samples: list[SampleType]
 
     @property
+    def external_samples(self) -> list[SampleType]:
+        # TODO: Implement
+        pass
+
+    @property
     def enumerated_samples(self) -> enumerate[SampleType]:
         return enumerate(self.samples)

@@ -14,3 +14,6 @@ def publish_command(nats_config, subject: str, data: dict) -> str:
         f'{subject} "{json_str}"'  # double quotes around json to allow bash expansion
     )
     return command
+
+
+# TODO: Add method to publish event using nats-py
