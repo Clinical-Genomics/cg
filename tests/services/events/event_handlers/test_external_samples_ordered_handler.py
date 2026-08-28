@@ -27,7 +27,7 @@ def test_handle_trigger_transfer_only_for_stored_sample(mocker: MockerFixture):
     )
     sample: Sample = create_autospec(Sample)
     sample.name = "sample-name-1"
-    status_db.get_sample_by_customer_and_name = lambda customer_entry_id, sample_name: (
+    status_db.get_sample_by_customer_and_name_strict = lambda customer_entry_id, sample_name: (
         sample if sample_name == "sample-name-1" else create_autospec(Sample)
     )
 

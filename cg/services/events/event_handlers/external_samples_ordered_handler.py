@@ -17,7 +17,7 @@ def handle(config: CGConfig, event_payload: dict):
     customer: Customer = status_db.get_customer_by_internal_id_strict(internal_id=event.customer)
     for sample_name in event.sample_names:
         if status_db.get_external_sample(sample_name=sample_name, customer_id=customer.id):
-            sample: Sample = status_db.get_sample_by_customer_and_name(
-                customer_entry_id=[customer.id], sample_name=sample_name
+            sample: Sample = status_db.get_sample_by_customer_and_name_strict(
+                customer_entry_id=customer.id, sample_name=sample_name
             )
             transfer_to_cluster_service.transfer_sample(cg_config=config, sample=sample)
