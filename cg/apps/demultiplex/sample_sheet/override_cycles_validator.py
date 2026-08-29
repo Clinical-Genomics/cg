@@ -43,7 +43,7 @@ class OverrideCyclesValidator:
     ) -> bool:
         """
         Returns whether an index cycle string is following a valid cycle regex pattern and has
-        consistent values. Valid patterns are 'I(\d+)N(\d+)' and 'N(\d+)I(\d+)'. Having consistent
+        consistent values. Valid patterns are 'I(\\d+)N(\\d+)' and 'N(\\d+)I(\\d+)'. Having consistent
         values means that the sum of the number of index characters (I) and the number of ignored
         characters (N) specified in the index cycle string is equal to the number of run cycles
         and the length of the index sequence is equal to the number of index characters (I).
