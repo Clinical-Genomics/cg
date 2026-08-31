@@ -4,6 +4,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
+from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
@@ -17,7 +18,12 @@ class ExternalSampleTransferredEvent(BaseModel):
 
 def handle(config: CGConfig, event_payload: dict) -> None:
     event = ExternalSampleTransferredEvent.model_validate(event_payload)
-    # TODO: Get bundle name and tags
+
+    if not any(event.cluster_location.iterdir()):
+        raise CgError(f"Directory {event.cluster_location} is empty.")
+
+    config.housekeeper_api.create_new_bundle_and_version(event.sample_internal_id)
+
     for file in event.cluster_location.glob("*"):
         tags = [event.sample_internal_id]
         if file.as_posix().endswith(".fastq.gz"):
@@ -27,6 +33,10 @@ def handle(config: CGConfig, event_payload: dict) -> None:
         else:
             LOG.warning(f"File {file} has an unrecognized extension, skipping.")
 
-    # TODO: Call Housekeeper API to add file
+        config.housekeeper_api.add_and_include_file_to_latest_version(
+            bundle_name=event.sample_internal_id,
+            file=file,
+            tags=tags,
+        )
 
     # TODO: Publish event that storing is complete
