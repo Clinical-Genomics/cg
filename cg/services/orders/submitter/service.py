@@ -8,6 +8,7 @@ be validated and if passing all checks be accepted as new samples.
 """
 
 from cg.models.orders.constants import OrderType
+from cg.services.events import event_publisher
 from cg.services.orders.storing.service import StoreOrderService
 from cg.services.orders.storing.service_registry import StoringServiceRegistry
 from cg.services.orders.submitter.ticket_handler import TicketHandler
@@ -50,5 +51,5 @@ class OrderSubmitter:
         # TODO Get external samples and customer from order
         if external_samples := order.external_samples(self.status_db):
             sample_names = [sample.name for sample in external_samples]
-            # TODO: Publish event
+            event_publisher.publish_external_order()
         return serialized_order
