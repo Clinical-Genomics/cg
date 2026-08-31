@@ -1051,6 +1051,17 @@ class PacbioSmrtCellMetricsView(BaseView):
         "completed_at",
     ]
 
+    def delete_model(self, model):
+        try:
+            # your custom logic — e.g. soft delete, cascade, logging
+            model.device_run = True
+            self.session.commit()
+            return True
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                raise
+            return False
+
     @staticmethod
     def view_smrt_cell_link(unused1, unused2, model, unused3):
         """column formatter to open this view"""
