@@ -3,9 +3,11 @@ from typing import Protocol
 
 from cg.models.cg_config import CGConfig
 from cg.services.events.event_handlers import (
+    external_sample_transferred_handler,
     external_sample_uploaded_handler,
     external_samples_ordered_handler,
 )
+from cg.services.transfer_to_cluster_service import EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT
 
 LOG = logging.getLogger(__name__)
 
@@ -17,7 +19,7 @@ class EventHandler(Protocol):
 EVENT_HANDLERS: dict[str, EventHandler] = {
     "external.customer_uploaded_sample": external_sample_uploaded_handler.handle,
     "external.samples_ordered": external_samples_ordered_handler.handle,
-    # TODO: Add sample transferred handler
+    EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT: external_sample_transferred_handler.handle,
 }
 
 
