@@ -8,6 +8,7 @@ def test_handle():
     config: CGConfig = create_autospec(CGConfig)
 
     # GIVEN a valid event payload
+    # TODO cg -> statusdb
     event_payload = {
         "cg.sample_internal_id": "ACC123",
         "cluster_location": "/path/to/home",

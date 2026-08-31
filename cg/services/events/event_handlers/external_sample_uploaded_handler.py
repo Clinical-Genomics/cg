@@ -14,12 +14,14 @@ from cg.store.store import Store
 
 
 class ExternalSampleUploadedEvent(BaseModel):
+    # TODO cg.customer -> status_db.customer
     customer: str = Field(alias="cg.customer")
     customer_uploaded_at: datetime
     sample_name: str = Field(
         pattern=SAMPLE_NAME_PATTERN,
         min_length=SAMPLE_NAME_MINIMUM_LENGTH,
         max_length=SAMPLE_NAME_MAXIMUM_LENGTH,
+        # TODO cg.sample_name -> status_db.sample_name
         alias="cg.sample_name",
     )
 

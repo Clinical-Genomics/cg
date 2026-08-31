@@ -29,6 +29,7 @@ def test_handle_triggers_transfer(mocker: MockerFixture):
 
     # GIVEN some payload for an external sample upload event
     event_payload = {
+        # TODO cg -> statusdb
         "cg.customer": "cust000",
         "cg.sample_name": "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
@@ -72,6 +73,7 @@ def test_handle_not_trigger_transfer(mocker: MockerFixture):
     cg_config: CGConfig = create_autospec(CGConfig, status_db=status_db.as_type)
 
     # GIVEN some payload for an external sample upload event
+    # TODO cg -> statusdb
     event_payload = {
         "cg.customer": "cust000",
         "cg.sample_name": "sample-name",
@@ -103,6 +105,7 @@ def test_handle_invalid_sample_name():
     cg_config: CGConfig = create_autospec(CGConfig)
 
     # GIVEN some event payload where the sample name contains illegal letters
+    # TODO cg -> statusdb
     event_payload = {
         "cg.customer": "cust000",
         "cg.sample_name": "invalid_sample_name",
@@ -120,6 +123,7 @@ def test_handle_invalid_date_format():
     cg_config: CGConfig = create_autospec(CGConfig)
 
     # GIVEN some event payload where the uploaded at is malformed
+    # TODO cg -> statusdb
     event_payload = {
         "cg.customer": "cust000",
         "cg.sample_name": "sample-name",

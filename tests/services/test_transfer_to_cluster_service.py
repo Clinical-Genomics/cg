@@ -49,6 +49,9 @@ rsync -rvL /path/to/rome/cust000/sample-name/ /path/to/hasta/cust000/sample-name
 """
 
 
+# TODO cg -> statusdb
+
+
 @pytest.mark.freeze_time("2008-09-10 10:28:00.00")
 def test_transfer_sample(mocker: MockerFixture, expected_sbatch_content):
     # GIVEN a sample and customer
