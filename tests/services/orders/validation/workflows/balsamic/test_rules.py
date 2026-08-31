@@ -26,10 +26,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
 )
 from cg.store.models import Application
 from cg.store.store import Store
-from tests.services.orders.validation_service.workflows.balsamic.conftest import (
-    create_case,
-    create_order,
-)
+from tests.services.orders.validation.workflows.balsamic.conftest import create_case, create_order
 from tests.store_helpers import StoreHelpers
 
 
