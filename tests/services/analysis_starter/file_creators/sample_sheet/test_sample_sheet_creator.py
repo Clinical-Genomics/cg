@@ -112,34 +112,41 @@ def test_parse_fastq_header_raises_error():
         NextflowFastqSampleSheetCreator._parse_fastq_header(line="Not a Fastq header")
 
 
-@pytest.fixture
-def samplesheet_fixture(request: pytest.FixtureRequest) -> NextflowFastqSampleSheetCreator:
-    return request.getfixturevalue(request.param)
-
-
-# TODO revise
 @pytest.mark.parametrize(
-    "samplesheet_fixture",
-    [
-        "raredisease_sample_sheet_creator",
-        "rnafusion_sample_sheet_creator",
-        "taxprofiler_sample_sheet_creator",
-        "tomte_sample_sheet_creator",
-    ],
-    indirect=True,
+    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE]
 )
-def test_create_empty_raises_error(
-    mocker: MockerFixture, samplesheet_fixture: NextflowFastqSampleSheetCreator
+def test_get_content_no_rows_raises(
+    workflow: Workflow,
+    sample_sheet_scenario: dict[Workflow, tuple],
+    nextflow_case_id: str,
+    nextflow_case_path: Path,
+    mocker: MockerFixture,
 ):
-    # GIVEN a case id and file path
-    case_id = "case_id"
-    file_path = Path("/file/path")
+    # GIVEN a sample sheet creator, an expected output and a mocked file writer
+    sample_sheet_creator, _expected_content = sample_sheet_scenario[workflow]
 
-    # GIVEN less than two lines of samplesheet content is provided
-    content: list[list[str]] = [["this", "is", "a", "header"]]
-    mocker.patch.object(samplesheet_fixture, "_get_content", return_value=content)
+    # GIVEN a pair of Fastq files that have a header
+    mocker.patch.object(
+        samplesheet_creator,
+        "read_gzip_first_line",
+        side_effect=[
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/2",
+        ],
+    )
 
-    # WHEN the samplesheet is called to be created
+    # GIVEN that the files exist
+    mocker.patch.object(Path, "is_file", return_value=True)
+
+    # GIVEN that there is no sample content
+    mocker.patch.object(
+        sample_sheet_creator, "_get_sample_sheet_content_per_sample", return_value=[]
+    )
+
+    # WHEN creating the sample sheet
     # THEN the appropriate error is raised
     with pytest.raises(SampleSheetContentError):
-        samplesheet_fixture.create(case_id=case_id, file_path=file_path)
+        sample_sheet_creator.create(
+            case_id=nextflow_case_id,
+            file_path=Path(nextflow_case_path, f"{nextflow_case_id}_samplesheet.csv"),
+        )
