@@ -15,7 +15,7 @@ CaseType = TypeVar("CaseType", bound=Case)
 SampleType = TypeVar("SampleType", bound=Sample)
 
 
-class OrderWithCases(Order, Generic[CaseType, SampleType]):
+class OrderWithCases(Order[SampleType], Generic[CaseType, SampleType]):
     cases: list[
         Annotated[
             Annotated[CaseType, Tag("new")] | Annotated[ExistingCase, Tag("existing")],
