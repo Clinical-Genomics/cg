@@ -40,8 +40,9 @@ def order_submitter(
     order_validation_service: OrderValidationService,
 ) -> OrderSubmitter:
     return OrderSubmitter(
-        ticket_handler=ticket_handler,
+        status_db=create_autospec(Store),
         storing_registry=storing_service_registry,
+        ticket_handler=ticket_handler,
         validation_service=order_validation_service,
     )
 

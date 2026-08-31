@@ -14,6 +14,7 @@ from cg.services.orders.submitter.ticket_handler import TicketHandler
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.service import OrderValidationService
 from cg.store.models import User
+from cg.store.store import Store
 
 
 class OrderSubmitter:
@@ -21,13 +22,15 @@ class OrderSubmitter:
 
     def __init__(
         self,
-        ticket_handler: TicketHandler,
+        status_db: Store,
         storing_registry: StoringServiceRegistry,
+        ticket_handler: TicketHandler,
         validation_service: OrderValidationService,
     ):
         super().__init__()
-        self.ticket_handler = ticket_handler
+        self.status_db = status_db
         self.storing_registry = storing_registry
+        self.ticket_handler = ticket_handler
         self.validation_service = validation_service
 
     def submit(self, order_type: OrderType, raw_order: dict, user: User) -> dict:
@@ -45,7 +48,7 @@ class OrderSubmitter:
         order._generated_ticket_id = ticket_number
         serialized_order: dict = storing_service.store_order(order)
         # TODO Get external samples and customer from order
-        if external_samples := order.external_samples():
+        if external_samples := order.external_samples(self.status_db):
             sample_names = [sample.name for sample in external_samples]
             # TODO: Publish event
         return serialized_order
