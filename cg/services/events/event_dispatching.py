@@ -17,6 +17,7 @@ class EventHandler(Protocol):
 EVENT_HANDLERS: dict[str, EventHandler] = {
     "external.customer_uploaded_sample": external_sample_uploaded_handler.handle,
     "external.samples_ordered": external_samples_ordered_handler.handle,
+    # TODO: Add sample transferred handler
 }
 
 
