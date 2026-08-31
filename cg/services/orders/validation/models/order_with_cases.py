@@ -23,7 +23,6 @@ class OrderWithCases(Order, Generic[CaseType, SampleType]):
         ]
     ]
 
-    # TODO add tests
     def external_samples(self, status_db: Store) -> list[SampleType]:
         external_samples: list[SampleType] = []
         for _, _, sample in self.enumerated_new_samples:
