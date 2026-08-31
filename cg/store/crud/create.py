@@ -34,6 +34,7 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
+    ExternalSample,
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
@@ -594,3 +595,16 @@ class CreateMixin(ReadHandler):
         )
         self.add_item_to_store(new_sample_sequencing_run)
         return new_sample_sequencing_run
+
+    def add_external_sample(
+        self, customer_id: int, sample_name: str, customer_uploaded_at: datetime
+    ) -> ExternalSample:
+
+        external_sample = ExternalSample(
+            customer_id=customer_id,
+            sample_name=sample_name,
+            customer_uploaded_at=customer_uploaded_at,
+        )
+
+        self.add_item_to_store(external_sample)
+        return external_sample
