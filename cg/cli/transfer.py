@@ -38,14 +38,14 @@ TICKET_ID_ARG = click.option("-t", "--ticket", type=str, required=True)
 @click.group(name="transfer", context_settings=CLICK_CONTEXT_SETTINGS)
 @click.pass_obj
 def transfer_group(context: CGConfig) -> None:
-    """Transfer results to the status interface."""
+    """Transfer files and data."""
     LOG.debug("Running CG transfer")
 
 
 @click.group(name="lims", context_settings=CLICK_CONTEXT_SETTINGS, hidden=True)
 @click.pass_obj
 def lims(context: CGConfig):
-    """Transfer information about samples and pools from LIMS to the status interface."""
+    """Transfer information about samples and pools from LIMS to StatusDB."""
     lims_api: LimsAPI = context.lims_api
     status_db: Store = context.status_db
     context.meta_apis["transfer_lims_api"] = TransferLims(status=status_db, lims=lims_api)
@@ -94,17 +94,18 @@ def set_dates_of_pools(context: CGConfig, status: str):
     transfer_api.transfer_pools(status_type=PoolState[status.upper()])
 
 
-@transfer_group.command(name="rsync")
+@transfer_group.command(
+    name="rsync",
+    help="Start an Rsync job to transfer the contents of a customer's ticket inbox on the HPC"
+    " to clinical-delivery ",
+)
 @click.pass_obj
 @TICKET_ID_ARG
 @DRY_RUN
 def rsync(context: CGConfig, ticket: str, dry_run: bool):
-    """The folder generated using the "cg transfer analysis" command will be
-    rsynced with this function to the customers inbox on the delivery server
-    """
     tb_api: TrailblazerAPI = context.trailblazer_api
     rsync_api: DeliveryRsyncService = context.delivery_rsync_service
-    slurm_id = rsync_api.run_rsync_for_ticket(ticket=ticket, dry_run=dry_run)
+    slurm_id: int = rsync_api.run_rsync_for_ticket(ticket=ticket, dry_run=dry_run)
     LOG.info(f"Rsync to the delivery server running as job {slurm_id}")
     rsync_api.add_to_trailblazer_api(
         tb_api=tb_api, slurm_job_id=slurm_id, ticket=ticket, dry_run=dry_run
@@ -152,7 +153,7 @@ def transfer_case(
 
 @transfer_group.command(
     name="ticket",
-    help="Transfer all case files for cases in a ticket based on delivery type to the customer"
+    help="Transfer all case files for cases in a ticket based on delivery type to the customer "
     "inbox on the HPC and start an Rsync job to clinical-delivery. "
     "NOTE: the dry-run flag will copy files to the customer inbox on Hasta, "
     "but will not perform the Rsync job.",
@@ -232,12 +233,16 @@ def transfer_sample_raw_data(
     )
 
 
-@transfer_group.command(name="auto-raw-data")
+@transfer_group.command(
+    name="auto-raw-data",
+    help="Transfer all case files for the raw data workflow to the customer inbox on the HPC and "
+    "start a Rsync job to clinical-delivery.",
+)
 @click.pass_obj
 @DRY_RUN
 def transfer_auto_raw_data(context: CGConfig, dry_run: bool):
     """
-    Transfer all case files for the raw data workflow to the customer inbox on the HPC and start a
+    Transfer all case files for the raw data workflow to the customer inbox on the HPC and start an
     Rsync job.
     1. get all cases with analysis type fastq that need to be delivered
     2. check if their upload has started
