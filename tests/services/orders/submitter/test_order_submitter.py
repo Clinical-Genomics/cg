@@ -3,6 +3,7 @@ from unittest.mock import Mock, PropertyMock, create_autospec, patch
 
 import pytest
 from genologics.entities import Sample as LimsSample
+from pytest_mock import MockerFixture
 
 from cg.clients.freshdesk.constants import Status
 from cg.clients.freshdesk.models import TicketResponse
@@ -12,7 +13,9 @@ from cg.meta.orders.utils import get_ticket_status, get_ticket_tags
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
-from cg.services.orders.submitter.service import OrderSubmitter
+from cg.services.orders.storing.service_registry import StoringServiceRegistry
+from cg.services.orders.submitter.service import OrderSubmitter, event_publisher
+from cg.services.orders.submitter.ticket_handler import TicketHandler
 from cg.services.orders.validation.errors.validation_errors import ValidationErrors
 from cg.services.orders.validation.models.case import Case as ValidationCase
 from cg.services.orders.validation.models.existing_case import ExistingCase
@@ -23,6 +26,8 @@ from cg.services.orders.validation.models.order_with_samples import OrderWithSam
 from cg.services.orders.validation.models.sample import Sample as ValidationSample
 from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
+from cg.services.orders.validation.order_types.raredisease.models.order import RarediseaseOrder
+from cg.services.orders.validation.service import OrderValidationService
 from cg.store.models import Application, Case, Pool, Sample, User
 from cg.store.store import Store
 
@@ -298,13 +303,23 @@ def test_submit_order(
 
 
 def test_submit_order_with_external_samples(
-    raredisease_order_to_submit: dict, order_submitter: OrderSubmitter
+    raredisease_order_to_submit: dict, raredisease_order: RarediseaseOrder, mocker: MockerFixture
 ):
     # GIVEN an order with external samples
     status_db: Store = create_autospec(Store)
     external_application: Application = create_autospec(Application, is_external=True)
     status_db.get_application_by_tag_strict = Mock(return_value=external_application)
-    order_submitter.status_db = status_db
+    validation_service: OrderValidationService = create_autospec(OrderValidationService)
+    validation_service.parse_and_validate = Mock(return_value=raredisease_order)
+    order_submitter = OrderSubmitter(
+        status_db=status_db,
+        storing_registry=create_autospec(StoringServiceRegistry),
+        ticket_handler=create_autospec(TicketHandler),
+        validation_service=validation_service,
+    )
+
+    # GIVEN an event publisher
+    mock_publish_external_order = mocker.patch.object(event_publisher, "publish_external_order")
 
     # WHEN submitting the order
     order_submitter.submit(
@@ -314,6 +329,11 @@ def test_submit_order_with_external_samples(
     )
 
     # THEN an event was published with the expected payload
+    expected_payload = {
+        "status_db.customer": "cust000",
+        "status_db.sample_names": ["RDSample1", "RDSample2", "RDSample3", "RDSample4"],
+    }
+    mock_publish_external_order.assert_called_once_with(payload=expected_payload)
 
 
 def test_submit_ticketexception(
