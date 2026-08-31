@@ -6,7 +6,6 @@ from typing import Iterator
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.exc import SampleSheetContentError
 from cg.io.csv import write_csv
 from cg.io.gzip import read_gzip_first_line
 from cg.meta.workflow.fastq import is_undetermined_in_path
@@ -26,8 +25,6 @@ class NextflowFastqSampleSheetCreator(ABC):
     def create(self, case_id: str, file_path: Path) -> None:
         LOG.debug(f"Creating sample sheet for case {case_id}")
         content: list[list[str]] = self._get_content(case_id)
-        if len(content) < 2:
-            raise SampleSheetContentError(f"Cannot create empty sample sheet for case {case_id}.")
         write_csv(file_path=file_path, content=content)
 
     @abstractmethod

@@ -237,6 +237,7 @@ def test_rnafusion_start(
         "_get_content",
         return_value=[["this", "is", "a", "header"], ["this", "is", "a", "row"]],
     )
+    # TODO revise
 
     # GIVEN that the fastq files exist
     mocker.patch.object(Path, "is_file", return_value=True)
