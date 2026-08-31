@@ -17,6 +17,7 @@ from cg.services.orders.storing.service_registry import (
     StoringServiceRegistry,
     setup_storing_service_registry,
 )
+from cg.services.orders.submitter.service import OrderSubmitter
 from cg.services.orders.submitter.ticket_handler import TicketHandler
 from cg.services.orders.validation.service import OrderValidationService
 from cg.services.run_devices.pacbio.sequencing_runs_service import PacbioSequencingRunsService
@@ -110,4 +111,9 @@ ticket_handler = TicketHandler(
     client=freshdesk_client,
     system_email_id=app_config.freshdesk_order_email_id,
     env=app_config.freshdesk_environment,
+)
+order_submitter = OrderSubmitter(
+    ticket_handler=ticket_handler,
+    storing_registry=storing_service_registry,
+    validation_service=order_validation_service,
 )

@@ -35,11 +35,9 @@ from cg.server.ext import (
     db,
     delivery_message_service,
     order_service,
+    order_submitter,
     order_validation_service,
-    storing_service_registry,
-    ticket_handler,
 )
-from cg.services.orders.submitter.service import OrderSubmitter
 from cg.store.models import Application, Customer
 
 ORDERS_BLUEPRINT = Blueprint("orders", __name__, url_prefix="/api/v1")
@@ -150,11 +148,6 @@ def create_order_from_form():
 @ORDERS_BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
 def submit_order(order_type: OrderType):
     """Submit an order for samples."""
-    submitter = OrderSubmitter(
-        ticket_handler=ticket_handler,
-        storing_registry=storing_service_registry,
-        validation_service=order_validation_service,
-    )
     error_message: str
     try:
         request_json = request.get_json()
@@ -165,7 +158,7 @@ def submit_order(order_type: OrderType):
             ),
         )
 
-        result: dict = submitter.submit(
+        result: dict = order_submitter.submit(
             raw_order=request_json,
             order_type=order_type,
             user=g.current_user,
