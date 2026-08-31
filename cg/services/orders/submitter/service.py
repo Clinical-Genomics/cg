@@ -48,8 +48,15 @@ class OrderSubmitter:
         )
         order._generated_ticket_id = ticket_number
         serialized_order: dict = storing_service.store_order(order)
-        # TODO Get external samples and customer from order
         if external_samples := order.external_samples(self.status_db):
             sample_names = [sample.name for sample in external_samples]
-            event_publisher.publish_external_order()
+            customer_internal_id: str = order.customer
+            payload: dict = _get_payload_for_external_samples(
+                customer_internal_id=customer_internal_id, sample_names=sample_names
+            )
+            event_publisher.publish_external_order(payload)
         return serialized_order
+
+
+def _get_payload_for_external_samples(customer_internal_id: str, sample_names: list[str]) -> dict:
+    return {"status_db.customer": customer_internal_id, "status_db.sample_names": sample_names}

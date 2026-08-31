@@ -18,5 +18,5 @@ def publish_command(nats_config, subject: str, data: dict) -> str:
 
 # TODO: Add method to publish event using nats-py
 # TODO: rename
-def publish_external_order():
+def publish_external_order(payload: dict):
     pass

@@ -219,7 +219,6 @@ def order_with_existing_case_and_external_sample(existing_case_id: str) -> Order
     ],
 )
 def test_submit_order(
-    mocker,
     store_to_submit_and_validate_orders: Store,
     monkeypatch: pytest.MonkeyPatch,
     order_type: OrderType,
@@ -296,6 +295,25 @@ def test_submit_order(
         # THEN the pools should be stored in the database if applicable
         if is_pool_order:
             assert store_to_submit_and_validate_orders._get_query(table=Pool).first()
+
+
+def test_submit_order_with_external_samples(
+    raredisease_order_to_submit: dict, order_submitter: OrderSubmitter
+):
+    # GIVEN an order with external samples
+    status_db: Store = create_autospec(Store)
+    external_application: Application = create_autospec(Application, is_external=True)
+    status_db.get_application_by_tag_strict = Mock(return_value=external_application)
+    order_submitter.status_db = status_db
+
+    # WHEN submitting the order
+    order_submitter.submit(
+        order_type=OrderType.RAREDISEASE,
+        raw_order=raredisease_order_to_submit,
+        user=create_autospec(User),
+    )
+
+    # THEN an event was published with the expected payload
 
 
 def test_submit_ticketexception(
