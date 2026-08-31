@@ -35,12 +35,13 @@ def order_validation_service(store_to_submit_and_validate_orders: Store) -> Orde
 
 @pytest.fixture(scope="function")
 def order_submitter(
-    ticket_handler: TicketHandler,
-    storing_service_registry: StoringServiceRegistry,
     order_validation_service: OrderValidationService,
+    store_to_submit_and_validate_orders: Store,
+    storing_service_registry: StoringServiceRegistry,
+    ticket_handler: TicketHandler,
 ) -> OrderSubmitter:
     return OrderSubmitter(
-        status_db=create_autospec(Store),
+        status_db=store_to_submit_and_validate_orders,
         storing_registry=storing_service_registry,
         ticket_handler=ticket_handler,
         validation_service=order_validation_service,

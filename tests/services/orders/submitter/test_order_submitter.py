@@ -232,6 +232,7 @@ def test_submit_order(
     ticket_id_as_int: int,
     customer_id: str,
     request: pytest.FixtureRequest,
+    mocker: MockerFixture,
 ):
     """Test submitting a valid order of each ordertype."""
     # GIVEN an order
@@ -265,6 +266,9 @@ def test_submit_order(
         # GIVEN the dict representation of the order and a store without samples
         raw_order = order.model_dump(by_alias=True)
         assert not store_to_submit_and_validate_orders._get_query(table=Sample).first()
+
+        # GIVEN an event publisher
+        event_publisher_spy = mocker.spy(event_publisher, "publish_external_order")
 
         # WHEN submitting the order
         result = order_submitter.submit(order_type=order_type, raw_order=raw_order, user=user)
@@ -301,6 +305,9 @@ def test_submit_order(
         if is_pool_order:
             assert store_to_submit_and_validate_orders._get_query(table=Pool).first()
 
+        # THEN no event for external samples was published
+        event_publisher_spy.assert_not_called()
+
 
 def test_submit_order_with_external_samples(
     raredisease_order_to_submit: dict, raredisease_order: RarediseaseOrder, mocker: MockerFixture
@@ -333,7 +340,7 @@ def test_submit_order_with_external_samples(
         "status_db.customer": "cust000",
         "status_db.sample_names": ["RDSample1", "RDSample2", "RDSample3", "RDSample4"],
     }
-    mock_publish_external_order.assert_called_once_with(payload=expected_payload)
+    mock_publish_external_order.assert_called_once_with(expected_payload)
 
 
 def test_submit_ticketexception(
