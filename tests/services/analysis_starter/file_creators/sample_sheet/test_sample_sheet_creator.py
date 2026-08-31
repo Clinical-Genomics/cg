@@ -122,28 +122,15 @@ def test_get_content_no_rows_raises(
     nextflow_case_path: Path,
     mocker: MockerFixture,
 ):
-    # GIVEN a sample sheet creator, an expected output and a mocked file writer
+    # GIVEN a sample sheet creator
     sample_sheet_creator, _expected_content = sample_sheet_scenario[workflow]
-
-    # GIVEN a pair of Fastq files that have a header
-    mocker.patch.object(
-        samplesheet_creator,
-        "read_gzip_first_line",
-        side_effect=[
-            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
-            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/2",
-        ],
-    )
-
-    # GIVEN that the files exist
-    mocker.patch.object(Path, "is_file", return_value=True)
 
     # GIVEN that there is no sample content
     mocker.patch.object(
         sample_sheet_creator, "_get_sample_sheet_content_per_sample", return_value=[]
     )
 
-    # WHEN creating the sample sheet
+    # WHEN attempting to create a samplesheet
     # THEN the appropriate error is raised
     with pytest.raises(SampleSheetContentError):
         sample_sheet_creator.create(

@@ -30,7 +30,7 @@ class RarediseaseSampleSheetCreator(NextflowFastqSampleSheetCreator):
         for link in case.links:
             sample_sheet_content.extend(self._get_sample_sheet_content_per_sample(case_sample=link))
         if sample_sheet_content == [HEADERS]:
-            raise SampleSheetContentError(f"Sample sheet for case {case.internal_id} is empty.")
+            raise SampleSheetContentError(f"Sample sheet for case {case_id} is empty.")
         return sample_sheet_content
 
     def _get_sample_sheet_content_per_sample(self, case_sample: CaseSample) -> list[list[str]]:
