@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.sample import Sample
@@ -7,7 +7,7 @@ from cg.store.store import Store
 SampleType = TypeVar("SampleType", bound=Sample)
 
 
-class OrderWithSamples(Order, Generic[SampleType]):
+class OrderWithSamples(Order[SampleType]):
     samples: list[SampleType]
 
     def external_samples(self, status_db: Store) -> list[SampleType]:
