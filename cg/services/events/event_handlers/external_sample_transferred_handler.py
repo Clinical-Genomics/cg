@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from housekeeper.store.models import Bundle
+from housekeeper.store.models import Bundle, File, Version
 from pydantic import BaseModel, Field
 
 from cg.exc import CgError
@@ -33,19 +33,24 @@ def handle(config: CGConfig, event_payload: dict) -> None:
     )
 
     bundle: Bundle = config.housekeeper_api.add_new_bundle_and_version(event.sample_internal_id)
+    version: Version = bundle.versions[0]
 
-    for file in event.cluster_location.glob("*"):
+    files: list[File] = []
+    for file_path in event.cluster_location.glob("*"):
         tags = [event.sample_internal_id]
-        if file.as_posix().endswith(".fastq.gz"):
+        if file_path.as_posix().endswith(".fastq.gz"):
             tags.append("fastq")
-        elif file.as_posix().endswith(".bam"):
+        elif file_path.as_posix().endswith(".bam"):
             tags.append("bam")
         else:
             # TODO: Address whether it should be a warning
-            LOG.warning(f"File {file} has an unrecognized extension, skipping.")
+            LOG.warning(f"File {file_path} has an unrecognized extension, skipping.")
             continue
-        config.housekeeper_api.add_file(
-            path=str(file.absolute()), version_obj=bundle.versions[0], tags=tags
+        file: File = config.housekeeper_api.add_file(
+            path=str(file_path.absolute()), version_obj=version, tags=tags
         )
-    config.housekeeper_api.finalize_file_transactions()
+        files.append(file)
+    config.housekeeper_api.finalize_file_transactions(files=files, version=version)
+    config.status_db.commit_to_store()
+
     # TODO: Publish event that storing is complete
