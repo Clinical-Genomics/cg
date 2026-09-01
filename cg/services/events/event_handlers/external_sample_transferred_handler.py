@@ -18,9 +18,10 @@ class ExternalSampleTransferredEvent(BaseModel):
 
 def handle(config: CGConfig, event_payload: dict) -> None:
     event = ExternalSampleTransferredEvent.model_validate(event_payload)
+    # TODO: Take the CopyComplete into account
 
-    if not any(event.cluster_location.iterdir()):  # TODO: Take the CopyComplete into account
-        raise CgError(f"Directory {event.cluster_location} is empty.")
+    if not (event.cluster_location.glob("*.bam") or event.cluster_location.glob("*fastq.gz")):
+        raise CgError(f"No sequencing files found in directory {event.cluster_location}")
 
     # TODO: Update ExternalSample table
 
