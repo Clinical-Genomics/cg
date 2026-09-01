@@ -4,7 +4,9 @@ from datetime import datetime
 from typing import Any
 
 from housekeeper.store.models import Bundle
+from pytest_mock import MockerFixture
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.small_helpers import SmallHelpers
 
@@ -99,3 +101,20 @@ def test_create_bundle_and_version(
     assert bundle_obj.name == case_id
     assert bundle_obj.versions is not None
     assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 1
+
+
+def test_add_new_bundle_and_version(housekeeper_api: HousekeeperAPI, mocker: MockerFixture):
+    # GIVEN a HousekeeperAPI
+    commit_spy = mocker.spy(housekeeper_api._store.session, "commit")
+
+    # GIVEN a bundle name which is not present in the database
+
+    # WHEN adding a new bundle and a version with that name
+    housekeeper_api.add_new_bundle_and_version(name="bundle_name")
+
+    # THEN a bundle and a version are created
+    bundle = housekeeper_api.bundle(name="bundle_name")
+    assert bundle.name == "bundle_name"
+
+    # THEN the changes are not commited
+    commit_spy.assert_not_called()

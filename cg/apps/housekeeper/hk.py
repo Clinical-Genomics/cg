@@ -61,8 +61,9 @@ class HousekeeperAPI:
     def add_new_bundle_and_version(self, name: str) -> Bundle:
         if self.bundle(name):
             raise BundleAlreadyAddedError(f"Bundle {name} already exists.")
-        new_bundle: Bundle = self.new_bundle(name=name)
-        new_version: Version = self.new_version(created_at=new_bundle.created_at)
+        created_at = datetime.now()
+        new_bundle: Bundle = self.new_bundle(name=name, created_at=created_at)
+        new_version: Version = self.new_version(created_at=created_at)
         new_bundle.versions.append(new_version)
         self._store.session.add(new_bundle)
         self._store.session.add(new_version)
