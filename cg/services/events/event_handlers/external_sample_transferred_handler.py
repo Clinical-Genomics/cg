@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
+from housekeeper.store.models import Bundle
 from pydantic import BaseModel, Field
 
 from cg.exc import CgError
@@ -31,8 +32,7 @@ def handle(config: CGConfig, event_payload: dict) -> None:
         transferred_at=event.transfer_completed_at,
     )
 
-    # TODO: Invoke new housekeeper method to create bundle and version that does not commit
-    config.housekeeper_api.create_new_bundle_and_version(event.sample_internal_id)
+    bundle: Bundle = config.housekeeper_api.add_new_bundle_and_version(event.sample_internal_id)
 
     for file in event.cluster_location.glob("*"):
         tags = [event.sample_internal_id]
@@ -41,14 +41,11 @@ def handle(config: CGConfig, event_payload: dict) -> None:
         elif file.as_posix().endswith(".bam"):
             tags.append("bam")
         else:
-            # TODO: Adress whether it should be a warning
+            # TODO: Address whether it should be a warning
             LOG.warning(f"File {file} has an unrecognized extension, skipping.")
             continue
-
-        config.housekeeper_api.add_and_include_file_to_latest_version(
-            bundle_name=event.sample_internal_id,
-            file=file,
-            tags=tags,
+        config.housekeeper_api.add_file(
+            path=str(file.absolute()), version_obj=bundle.versions[0], tags=tags
         )
-
+    config.housekeeper_api.finalize_file_transactions()
     # TODO: Publish event that storing is complete

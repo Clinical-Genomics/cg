@@ -57,6 +57,7 @@ class HousekeeperAPI:
         LOG.info(f"New bundle created with name {new_bundle.name}")
         return new_bundle
 
+    # TODO: Add test
     def add_new_bundle_and_version(self, name: str) -> Bundle:
         if self.bundle(name):
             raise BundleAlreadyAddedError(f"Bundle {name} already exists.")
@@ -254,6 +255,12 @@ class HousekeeperAPI:
         LOG.info(f"Linked file: {file_obj.path} -> {new_path}")
         file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
         return file_obj
+
+    # TODO: Add test
+    def finalize_file_transactions(self, files: list[File], version: Version) -> None:
+        for file in files:
+            self.include_file(file_obj=file, version_obj=version)
+        self.commit()
 
     def new_version(self, created_at: datetime, expires_at: datetime = None) -> Version:
         """Create a new bundle version."""
