@@ -1,8 +1,8 @@
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import Mock, create_autospec
+from unittest.mock import Mock, call, create_autospec
 
-from housekeeper.store.models import Bundle
+from housekeeper.store.models import Bundle, Version
 from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -22,9 +22,9 @@ def test_handle_success(mocker: MockerFixture):
 
     # GIVEN a HousekeeperAPI
     housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
-    bundle = "?"
-    version = "?"
-    housekeeper_api.as_type.add_new_bundle_and_version = Mock(return_value=create_autospec(Bundle))
+    version = create_autospec(Version)
+    bundle = create_autospec(Bundle, versions=[version])
+    housekeeper_api.as_type.add_new_bundle_and_version = Mock(return_value=bundle)
 
     # GIVEN a CG config
     config: CGConfig = create_autospec(
@@ -41,9 +41,7 @@ def test_handle_success(mocker: MockerFixture):
     # GIVEN that two files have been transferred for the given sample
     path_r1 = Path("file_R1.fastq.gz")
     path_r2 = Path("file_R2.fastq.gz")
-    mocker.patch.object(
-        Path, "glob", return_value=[path_r1, path_r2]
-    )
+    mocker.patch.object(Path, "glob", return_value=[path_r1, path_r2])
 
     # WHEN calling handle
     external_sample_transferred_handler.handle(config=config, event_payload=event_payload)
@@ -58,6 +56,11 @@ def test_handle_success(mocker: MockerFixture):
     housekeeper_api.as_mock.add_new_bundle_and_version.assert_called_once_with("ACC123")
 
     # THEN all sequencing files were added to the bundle
-    housekeeper_api.as_mock.add_file.assert_called_with(path=str(path_r1.absolute()), version_obj=)
+    r1_call = call(path=str(path_r1.absolute()), version_obj=version, tags=["ACC123", "fastq"])
+    r2_call = call(path=str(path_r2.absolute()), version_obj=version, tags=["ACC123", "fastq"])
+    function_calls: list = housekeeper_api.as_mock.add_file.call_args_list
+    assert r1_call in function_calls
+    assert r2_call in function_calls
+    assert len(function_calls) == 2
 
     # THEN an event was published saying the sample was stored
