@@ -19,8 +19,10 @@ class ExternalSampleTransferredEvent(BaseModel):
 def handle(config: CGConfig, event_payload: dict) -> None:
     event = ExternalSampleTransferredEvent.model_validate(event_payload)
 
-    if not any(event.cluster_location.iterdir()):
+    if not any(event.cluster_location.iterdir()):  # TODO: Take the CopyComplete into account
         raise CgError(f"Directory {event.cluster_location} is empty.")
+
+    # TODO: Update ExternalSample table
 
     config.housekeeper_api.create_new_bundle_and_version(event.sample_internal_id)
 
