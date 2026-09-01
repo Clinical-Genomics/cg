@@ -7,9 +7,11 @@ from pydantic import BaseModel, Field
 
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
+from cg.services.events import event_publisher
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
+EXTERNAL_SAMPLE_STORED_SUBJECT = "external_sample.storage_completed"
 
 
 class ExternalSampleTransferredEvent(BaseModel):
@@ -52,5 +54,8 @@ def handle(config: CGConfig, event_payload: dict) -> None:
         files.append(file)
     config.housekeeper_api.finalize_file_transactions(files=files, version=version)
     config.status_db.commit_to_store()
-
-    # TODO: Publish event that storing is complete
+    event_publisher.publish(
+        nats_config=config.nats,
+        subject=f"{config.nats.stream}.{EXTERNAL_SAMPLE_STORED_SUBJECT}",
+        data={"statusdb.sample_internal_id": event.sample_internal_id},
+    )

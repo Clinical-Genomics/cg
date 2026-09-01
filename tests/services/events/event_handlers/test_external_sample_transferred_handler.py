@@ -26,9 +26,20 @@ def test_handle_success(mocker: MockerFixture):
     bundle = create_autospec(Bundle, versions=[version])
     housekeeper_api.as_type.add_new_bundle_and_version = Mock(return_value=bundle)
 
+    # GIVEN NATS configuration
+    nats_config = Mock(stream="CG")
+
     # GIVEN a CG config
     config: CGConfig = create_autospec(
-        CGConfig, status_db=status_db.as_type, housekeeper_api=housekeeper_api.as_type
+        CGConfig,
+        status_db=status_db.as_type,
+        housekeeper_api=housekeeper_api.as_type,
+        nats=nats_config,
+    )
+
+    # GIVEN a publisher for completion events
+    publish_mock = mocker.patch.object(
+        external_sample_transferred_handler.event_publisher, "publish"
     )
 
     # GIVEN a valid event payload
@@ -64,3 +75,8 @@ def test_handle_success(mocker: MockerFixture):
     assert len(function_calls) == 2
 
     # THEN an event was published saying the sample was stored
+    publish_mock.assert_called_once_with(
+        nats_config=nats_config,
+        subject="CG.external_sample.storage_completed",
+        data={"statusdb.sample_internal_id": "ACC123"},
+    )
