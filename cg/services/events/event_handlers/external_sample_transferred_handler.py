@@ -31,6 +31,7 @@ def handle(config: CGConfig, event_payload: dict) -> None:
         transferred_at=event.transfer_completed_at,
     )
 
+    # TODO: Invoke new housekeeper method to create bundle and version that does not commit
     config.housekeeper_api.create_new_bundle_and_version(event.sample_internal_id)
 
     for file in event.cluster_location.glob("*"):
