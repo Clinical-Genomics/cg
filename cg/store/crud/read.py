@@ -2125,6 +2125,18 @@ class ReadHandler(BaseHandler):
             )
         ).first()
 
+    def get_external_sample_strict(self, customer_id: int, sample_name: str) -> ExternalSample:
+        # TODO test this
+        # TODO re-think the error handling
+        return self.session.scalars(
+            select(ExternalSample).where(
+                and_(
+                    ExternalSample.customer_id == customer_id,
+                    ExternalSample.sample_name == sample_name,
+                )
+            )
+        ).one()
+
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:
     total: int = query.count()
