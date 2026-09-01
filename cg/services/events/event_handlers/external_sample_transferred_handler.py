@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 
 
 class ExternalSampleTransferredEvent(BaseModel):
-    sample_internal_id: str = Field(alias="cg.sample_internal_id")
+    sample_internal_id: str = Field(alias="statusdb.sample_internal_id")
     cluster_location: Path
     transfer_completed_at: datetime
 

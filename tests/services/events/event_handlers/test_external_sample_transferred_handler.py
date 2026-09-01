@@ -9,7 +9,7 @@ def test_handle():
 
     # GIVEN a valid event payload
     event_payload = {
-        "cg.sample_internal_id": "ACC123",
+        "statusdb.sample_internal_id": "ACC123",
         "cluster_location": "/path/to/home",
         "transfer_completed_at": "2026-08-31T14:41:00",
     }
