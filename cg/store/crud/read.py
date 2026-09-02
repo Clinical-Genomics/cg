@@ -29,6 +29,7 @@ from cg.exc import (
     CgDataError,
     CgError,
     CustomerNotFoundError,
+    ExternalSampleNotFoundError,
     OrderNotFoundError,
     PacbioSequencingRunNotFoundError,
     SampleNotFoundError,
@@ -2131,16 +2132,20 @@ class ReadHandler(BaseHandler):
         ).first()
 
     def get_external_sample_strict(self, customer_id: int, sample_name: str) -> ExternalSample:
-        # TODO test this
-        # TODO re-think the error handling
-        return self.session.scalars(
+        external_samples: Query = self.session.scalars(
             select(ExternalSample).where(
                 and_(
                     ExternalSample.customer_id == customer_id,
                     ExternalSample.sample_name == sample_name,
                 )
             )
-        ).one()
+        )
+        if external_sample := external_samples.first():
+            return external_sample
+        else:
+            raise ExternalSampleNotFoundError(
+                f"Could not find external sample with name {sample_name} for customer {customer_id}"
+            )
 
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:
