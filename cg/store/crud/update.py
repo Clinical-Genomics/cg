@@ -154,7 +154,6 @@ class UpdateMixin(ReadHandler):
     def update_external_sample(
         self, customer_id: int, sample_name: str, transferred_at: datetime
     ) -> ExternalSample:
-        # TODO test this
         external_sample: ExternalSample = self.get_external_sample_strict(
             customer_id=customer_id, sample_name=sample_name
         )
