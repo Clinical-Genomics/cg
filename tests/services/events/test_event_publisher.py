@@ -71,7 +71,7 @@ def test_publish(mocker):
     mocker.patch.object(event_publisher, "_tls_context", return_value=tls_context)
 
     # WHEN publishing synchronously
-    event_publisher.publish(nats_config=nats_config, subject=subject, data=data)
+    event_publisher.publish(nats_config=nats_config, subject=subject, event_payload=data)
 
     # THEN the event is sent via JetStream
     connect_mock.assert_awaited_once_with(

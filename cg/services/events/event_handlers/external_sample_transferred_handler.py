@@ -57,5 +57,5 @@ def handle(config: CGConfig, event_payload: dict) -> None:
     event_publisher.publish(
         nats_config=config.nats,
         subject=f"{config.nats.stream}.{EXTERNAL_SAMPLE_STORED_SUBJECT}",
-        data={"statusdb.sample_internal_id": event.sample_internal_id},
+        event_payload={"statusdb.sample_internal_id": event.sample_internal_id},
     )
