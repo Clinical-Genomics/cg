@@ -1,9 +1,11 @@
 from unittest.mock import Mock, call, create_autospec
 
 from housekeeper.store.models import Bundle
+import pytest
 from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.exc import CaseNotFoundError
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
@@ -58,7 +60,25 @@ def test_handle_starts_case(mocker: MockerFixture):
     analysis_starter.as_mock.start.assert_called_once_with(case.internal_id)
 
 
-# TODO: Test for sample with no case that deliver
+def test_handle_fails_with_no_case(mocker: MockerFixture):
+    # GIVEN a valid event payload
+    event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
+
+    # GIVEN that the sample does not have a linked case that should deliver it
+    status_db: Store = create_autospec(Store)
+    sample: Sample = create_autospec(
+        Sample, case_that_delivers=None, internal_id="ACC123", is_external=True
+    )
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=sample)
+
+    # GIVEN a CG config
+    cg_config: CGConfig = create_autospec(CGConfig, status_db=status_db)
+
+    # WHEN handling the event
+    # THEN the appropraite error is raised
+    with pytest.raises(CaseNotFoundError):
+        external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
+
 
 # TODO: Not all samples external
 
