@@ -27,7 +27,7 @@ def test_handle_success(mocker: MockerFixture):
     housekeeper_api.as_type.add_new_bundle_and_version = Mock(return_value=bundle)
 
     # GIVEN a NATS configuration
-    nats_config: NatsConfig = create_autospec(NatsConfig, stream="cg_tests")
+    nats_config: NatsConfig = create_autospec(NatsConfig, stream="cg-test")
 
     # GIVEN a CG config
     config: CGConfig = create_autospec(
@@ -77,6 +77,6 @@ def test_handle_success(mocker: MockerFixture):
     # THEN an event was published saying the sample was stored
     publish_mock.assert_called_once_with(
         nats_config=nats_config,
-        subject="cg_tests.external_sample.storage_completed",
+        subject="cg-test.external_sample.storage_completed",
         event_payload={"statusdb.sample_internal_id": "ACC123"},
     )

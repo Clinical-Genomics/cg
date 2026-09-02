@@ -26,10 +26,10 @@ def publish_command(nats_config, subject: str, data: dict) -> str:
 
 def publish(nats_config, subject: str, event_payload: dict) -> None:
     """Publish an event to NATS JetStream from synchronous code."""
-    asyncio.run(publish_async(nats_config=nats_config, subject=subject, data=event_payload))
+    asyncio.run(_publish_async(nats_config=nats_config, subject=subject, data=event_payload))
 
 
-async def publish_async(nats_config, subject: str, data: dict) -> None:
+async def _publish_async(nats_config, subject: str, data: dict) -> None:
     nc: Client = await nats.connect(
         servers=nats_config.server,
         tls=_tls_context(nats_config=nats_config),
