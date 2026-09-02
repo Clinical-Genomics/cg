@@ -1,15 +1,15 @@
 from unittest.mock import Mock, call, create_autospec
 
+from housekeeper.store.models import Bundle
 from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
+from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.events.event_handlers import external_sample_stored_handler
 from cg.store.models import Case, Sample
 from cg.store.store import Store
-from housekeeper.store.models import Bundle
-
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
@@ -23,7 +23,9 @@ def test_handle_starts_case(mocker: MockerFixture):
     stored_sample: Sample = create_autospec(
         Sample, case_that_delivers=case, internal_id="ACC123", is_external=True
     )
-    other_sample: Sample = create_autospec(Sample, case_that_delivers=case, internal_id="ACC234" is_external=True)
+    other_sample: Sample = create_autospec(
+        Sample, case_that_delivers=case, internal_id="ACC234", is_external=True
+    )
     case.samples = [stored_sample, other_sample]  # type: ignore
 
     # GIVEN that all samples in the case are stored
@@ -31,9 +33,16 @@ def test_handle_starts_case(mocker: MockerFixture):
     housekeeper_api.as_type.bundle = Mock(return_value=create_autospec(Bundle))
 
     # GIVEN a CG config
-    cg_config: CGConfig = create_autospec(CGConfig, housekeeper_api=housekeeper_api, status_db=status_db)
+    cg_config: CGConfig = create_autospec(
+        CGConfig, housekeeper_api=housekeeper_api, status_db=status_db
+    )
 
-    mock_start = mocker.patch.object(AnalysisStarter, "start")
+    analysis_starter: TypedMock[AnalysisStarter] = create_typed_mock(AnalysisStarter)
+    mocker.patch.object(
+        AnalysisStarterFactory,
+        "get_analysis_starter_for_case",
+        return_value=analysis_starter.as_type,
+    )
 
     # WHEN handling the event
     external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
@@ -45,4 +54,4 @@ def test_handle_starts_case(mocker: MockerFixture):
     assert other_sample_call in housekeeper_api.as_mock.bundle.call_args_list
 
     # THEN the case was started
-    mock_start.assert_called_once()
+    analysis_starter.as_mock.start.assert_called_once_with(case.internal_id)
