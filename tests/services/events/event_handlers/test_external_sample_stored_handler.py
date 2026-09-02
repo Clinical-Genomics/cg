@@ -56,3 +56,12 @@ def test_handle_starts_case(mocker: MockerFixture):
 
     # THEN the case was started
     analysis_starter.as_mock.start.assert_called_once_with(case.internal_id)
+
+
+# TODO: Test for sample with no case that deliver
+
+# TODO: Not all samples external
+
+# TODO: Not all samples stored
+
+# TODO: Not all samples deliverable for case

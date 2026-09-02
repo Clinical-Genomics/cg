@@ -1,8 +1,7 @@
-from typing import cast
-
 from pydantic import BaseModel, Field
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.exc import CaseNotFoundError
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
@@ -29,7 +28,9 @@ def handle(config: CGConfig, event_payload: dict) -> None:
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
 
     sample: Sample = status_db.get_sample_by_internal_id_strict(event.sample_internal_id)
-    case: Case = cast(Case, sample.case_that_delivers)
+    case: Case | None = sample.case_that_delivers
+    if not case:
+        raise CaseNotFoundError(f"No case found to deliver sample {sample.internal_id}")
     if _are_all_samples_external_and_stored(case=case, housekeeper_api=housekeeper_api):
         analysis_starter_factory = AnalysisStarterFactory(config)
         analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case(
