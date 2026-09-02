@@ -57,7 +57,6 @@ class HousekeeperAPI:
         LOG.info(f"New bundle created with name {new_bundle.name}")
         return new_bundle
 
-    # TODO: Add test
     def add_new_bundle_and_version(self, name: str) -> Bundle:
         if self.bundle(name):
             raise BundleAlreadyAddedError(f"Bundle {name} already exists.")

@@ -113,8 +113,12 @@ def test_add_new_bundle_and_version(housekeeper_api: HousekeeperAPI, mocker: Moc
     housekeeper_api.add_new_bundle_and_version(name="bundle_name")
 
     # THEN a bundle and a version are created
-    bundle = housekeeper_api.bundle(name="bundle_name")
-    assert bundle.name == "bundle_name"
+    bundle: Bundle | None = housekeeper_api.bundle(name="bundle_name")
+    assert bundle and bundle.name == "bundle_name"
+    assert bundle.versions[0]
 
     # THEN the changes are not commited
     commit_spy.assert_not_called()
+
+
+# TODO and not happy path test for add_new_bundle_and_version
