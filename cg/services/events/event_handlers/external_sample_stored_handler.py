@@ -16,6 +16,12 @@ class ExternalSampleStoredEvent(BaseModel):
 """
 
 
+"""
+If purely external and everything -> start (do we need to set case to hold if purely external?)
+Else: AK
+"""
+
+
 def handle(config: CGConfig, event_payload: dict) -> None:
     event = ExternalSampleStoredEvent.model_validate(event_payload)
     status_db: Store = config.status_db
