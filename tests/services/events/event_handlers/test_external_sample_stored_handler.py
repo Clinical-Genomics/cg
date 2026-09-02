@@ -80,7 +80,7 @@ def test_handle_fails_with_no_case(mocker: MockerFixture):
         external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
 
 
-def test_handle_not_fully_external_case(mocker: MockerFixture):
+def test_handle_ignores_case_with_internal_samples(mocker: MockerFixture):
     # GIVEN a valid event payload
     event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
 
@@ -119,7 +119,7 @@ def test_handle_not_fully_external_case(mocker: MockerFixture):
     analysis_starter.as_mock.start.assert_not_called()
 
 
-def test_handle_not_all_samples_stored(mocker: MockerFixture):
+def test_handle_ignores_case_with_unstored_samples(mocker: MockerFixture):
     # GIVEN a valid event payload
     event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
 
@@ -162,4 +162,41 @@ def test_handle_not_all_samples_stored(mocker: MockerFixture):
     analysis_starter.as_mock.start.assert_not_called()
 
 
-# TODO: Not all samples deliverable for case
+def test_handle_ignores_case_with_undeliverable_samples(mocker: MockerFixture):
+    # GIVEN a valid event payload
+    event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
+
+    # GIVEN that the sample belongs to a case that does not deliver all of its samples
+    status_db: Store = create_autospec(Store)
+    case1: Case = create_autospec(Case, internal_id="case1")
+    case2: Case = create_autospec(Case, internal_id="case2")
+    sample1: Sample = create_autospec(
+        Sample, case_that_delivers=case1, internal_id="ACC123", is_external=True
+    )
+    sample2: Sample = create_autospec(
+        Sample, case_that_delivers=case2, internal_id="ACC234", is_external=True
+    )
+    case1.samples = [sample1, sample2]  # type: ignore
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=sample1)
+
+    # GIVEN that all samples in the case are stored
+    housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
+    housekeeper_api.as_type.bundle = Mock(return_value=create_autospec(Bundle))
+
+    # GIVEN a CG config
+    cg_config: CGConfig = create_autospec(
+        CGConfig, housekeeper_api=housekeeper_api.as_type, status_db=status_db
+    )
+
+    analysis_starter: TypedMock[AnalysisStarter] = create_typed_mock(AnalysisStarter)
+    mocker.patch.object(
+        AnalysisStarterFactory,
+        "get_analysis_starter_for_case",
+        return_value=analysis_starter.as_type,
+    )
+
+    # WHEN handling the event
+    external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
+
+    # THEN the analysis was not started
+    analysis_starter.as_mock.start.assert_not_called()
