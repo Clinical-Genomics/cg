@@ -27,6 +27,7 @@ def test_handle_starts_case(mocker: MockerFixture):
         Sample, case_that_delivers=case, internal_id="ACC234", is_external=True
     )
     case.samples = [stored_sample, other_sample]  # type: ignore
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=stored_sample)
 
     # GIVEN that all samples in the case are stored
     housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
@@ -34,7 +35,7 @@ def test_handle_starts_case(mocker: MockerFixture):
 
     # GIVEN a CG config
     cg_config: CGConfig = create_autospec(
-        CGConfig, housekeeper_api=housekeeper_api, status_db=status_db
+        CGConfig, housekeeper_api=housekeeper_api.as_type, status_db=status_db
     )
 
     analysis_starter: TypedMock[AnalysisStarter] = create_typed_mock(AnalysisStarter)
@@ -48,8 +49,8 @@ def test_handle_starts_case(mocker: MockerFixture):
     external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
 
     # THEN we should have checked that all samples were indeed stored
-    stored_sample_call = call(name="ACC123")
-    other_sample_call = call(name="ACC234")
+    stored_sample_call = call("ACC123")
+    other_sample_call = call("ACC234")
     assert stored_sample_call in housekeeper_api.as_mock.bundle.call_args_list
     assert other_sample_call in housekeeper_api.as_mock.bundle.call_args_list
 
