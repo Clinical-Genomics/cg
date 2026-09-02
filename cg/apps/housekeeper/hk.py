@@ -256,11 +256,10 @@ class HousekeeperAPI:
         file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
         return file_obj
 
-    # TODO: Add test
     def finalize_file_transactions(self, files: list[File], version: Version) -> None:
         for file in files:
             self.include_file(file_obj=file, version_obj=version)
-        self.commit()
+        self.commit() if files else None
 
     def new_version(self, created_at: datetime, expires_at: datetime = None) -> Version:
         """Create a new bundle version."""

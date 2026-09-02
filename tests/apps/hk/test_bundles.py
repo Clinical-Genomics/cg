@@ -2,11 +2,14 @@
 
 from datetime import datetime
 from typing import Any
+from unittest.mock import Mock
 
+import pytest
 from housekeeper.store.models import Bundle
 from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.exc import BundleAlreadyAddedError
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.small_helpers import SmallHelpers
 
@@ -121,4 +124,19 @@ def test_add_new_bundle_and_version(housekeeper_api: HousekeeperAPI, mocker: Moc
     commit_spy.assert_not_called()
 
 
-# TODO and not happy path test for add_new_bundle_and_version
+def test_add_new_bundle_and_version_raises_if_bundle_exists(
+    housekeeper_api: HousekeeperAPI, mocker: MockerFixture
+):
+    """Test that adding a new bundle and version fails if bundle already exists."""
+    # GIVEN a HousekeeperAPI
+    add_spy = mocker.spy(housekeeper_api._store.session, "add")
+
+    # GIVEN an existing bundle in the database
+    housekeeper_api.bundle = Mock(return_value=Bundle(name="bundle_name"))
+
+    # WHEN adding a bundle and version with an existing bundle name
+    with pytest.raises(BundleAlreadyAddedError, match="Bundle bundle_name already exists."):
+        housekeeper_api.add_new_bundle_and_version(name="bundle_name")
+
+    # THEN nothing was added to teh database
+    add_spy.assert_not_called()
