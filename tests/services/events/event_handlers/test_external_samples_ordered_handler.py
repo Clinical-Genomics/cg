@@ -12,8 +12,7 @@ from cg.store.store import Store
 
 
 def test_handle_trigger_transfer_only_for_stored_sample(mocker: MockerFixture):
-
-    # GIVEN that the order has two external samples
+    # GIVEN a payload for an order with two external samples
     event_payload = {
         "status_db.customer": "cust000",
         "status_db.sample_names": ["sample-name-1", "sample-name-2"],
@@ -21,7 +20,6 @@ def test_handle_trigger_transfer_only_for_stored_sample(mocker: MockerFixture):
 
     # GIVEN that one of the samples is in the ExternalSample table
     status_db: Store = create_autospec(Store)
-
     status_db.get_external_sample = lambda customer_id, sample_name: (
         create_autospec(ExternalSample) if sample_name == "sample-name-1" else None
     )
@@ -34,7 +32,7 @@ def test_handle_trigger_transfer_only_for_stored_sample(mocker: MockerFixture):
     # GIVEN a CGConfig
     cg_config = create_autospec(CGConfig, status_db=status_db)
 
-    # GIVEN a transfer servicer
+    # GIVEN a transfer service
     transfer_sample_mock = mocker.patch.object(transfer_to_cluster_service, "transfer_sample")
 
     # WHEN handling the event
