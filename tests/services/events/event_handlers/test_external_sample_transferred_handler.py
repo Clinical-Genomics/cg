@@ -6,7 +6,7 @@ from housekeeper.store.models import Bundle, Version
 from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, NatsConfig
 from cg.services.events.event_handlers import external_sample_transferred_handler
 from cg.store.models import Sample
 from cg.store.store import Store
@@ -26,8 +26,8 @@ def test_handle_success(mocker: MockerFixture):
     bundle = create_autospec(Bundle, versions=[version])
     housekeeper_api.as_type.add_new_bundle_and_version = Mock(return_value=bundle)
 
-    # GIVEN NATS configuration
-    nats_config = Mock(stream="CG")
+    # GIVEN a NATS configuration
+    nats_config: NatsConfig = create_autospec(NatsConfig, stream="cg_tests")
 
     # GIVEN a CG config
     config: CGConfig = create_autospec(
@@ -77,6 +77,6 @@ def test_handle_success(mocker: MockerFixture):
     # THEN an event was published saying the sample was stored
     publish_mock.assert_called_once_with(
         nats_config=nats_config,
-        subject="CG.external_sample.storage_completed",
+        subject="cg_tests.external_sample.storage_completed",
         event_payload={"statusdb.sample_internal_id": "ACC123"},
     )
