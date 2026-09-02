@@ -22,7 +22,6 @@ class ExternalSampleTransferredEvent(BaseModel):
 
 def handle(config: CGConfig, event_payload: dict) -> None:
     event = ExternalSampleTransferredEvent.model_validate(event_payload)
-    # TODO: Take the CopyComplete into account
 
     if not (event.cluster_location.glob("*.bam") or event.cluster_location.glob("*fastq.gz")):
         raise CgError(f"No sequencing files found in directory {event.cluster_location}")
@@ -45,8 +44,7 @@ def handle(config: CGConfig, event_payload: dict) -> None:
         elif file_path.as_posix().endswith(".bam"):
             tags.append("bam")
         else:
-            # TODO: Address whether it should be a warning
-            LOG.warning(f"File {file_path} has an unrecognized extension, skipping.")
+            LOG.info(f"Omitting storing for non-sequencing file {file_path}.")
             continue
         file: File = config.housekeeper_api.add_file(
             path=str(file_path.absolute()), version_obj=version, tags=tags
