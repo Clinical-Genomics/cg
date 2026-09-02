@@ -19,7 +19,7 @@ def test_handle_trigger_transfer_only_for_stored_sample(mocker: MockerFixture):
         "status_db.sample_names": ["sample-name-1", "sample-name-2"],
     }
 
-    # GIVEN that one of the samples are in the ExternalSample table
+    # GIVEN that one of the samples is in the ExternalSample table
     status_db: Store = create_autospec(Store)
 
     status_db.get_external_sample = lambda customer_id, sample_name: (
