@@ -78,5 +78,5 @@ def test_handle_success(mocker: MockerFixture):
     publish_mock.assert_called_once_with(
         nats_config=nats_config,
         subject="CG.external_sample.storage_completed",
-        data={"statusdb.sample_internal_id": "ACC123"},
+        event_payload={"statusdb.sample_internal_id": "ACC123"},
     )
