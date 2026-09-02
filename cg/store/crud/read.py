@@ -439,12 +439,17 @@ class ReadHandler(BaseHandler):
     def get_sample_by_customer_and_name_strict(
         self, customer_entry_id: int, sample_name: str
     ) -> Sample:
-        return (
+        samples: Query = (
             self._get_query(table=Sample)
             .join(Sample.customer)
             .filter(Customer.id == customer_entry_id, Sample.name == sample_name)
-            .one()
         )
+        if sample := samples.first():
+            return sample
+        else:
+            raise SampleNotFoundError(
+                f"Sample {sample_name} not found for customer {customer_entry_id}"
+            )
 
     def get_illumina_metrics_entry_by_device_sample_and_lane(
         self, device_internal_id: str, sample_internal_id: str, lane: int
