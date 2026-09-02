@@ -263,8 +263,6 @@ class HousekeeperAPI:
             .first()
         )
 
-    # TODO: Some random change
-
     def get_non_archived_spring_files(
         self, tags: list[str] | None = None, limit: int = None
     ) -> list[File]:
