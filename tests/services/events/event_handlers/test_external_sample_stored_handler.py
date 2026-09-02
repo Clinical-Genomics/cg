@@ -75,7 +75,7 @@ def test_handle_fails_with_no_case(mocker: MockerFixture):
     cg_config: CGConfig = create_autospec(CGConfig, status_db=status_db)
 
     # WHEN handling the event
-    # THEN the appropraite error is raised
+    # THEN the appropriate error is raised
     with pytest.raises(CaseNotFoundError):
         external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
 
@@ -84,7 +84,7 @@ def test_handle_ignores_case_with_internal_samples(mocker: MockerFixture):
     # GIVEN a valid event payload
     event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
 
-    # GIVEN that the sample belongs to a case with both external and non-external samples
+    # GIVEN that the sample belongs to a case with both external and internal samples
     status_db: Store = create_autospec(Store)
     case: Case = create_autospec(Case)
     external_sample: Sample = create_autospec(
