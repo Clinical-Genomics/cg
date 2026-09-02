@@ -1,29 +1,48 @@
-from unittest.mock import create_autospec
+from unittest.mock import Mock, call, create_autospec
+
+from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.analysis_starter import AnalysisStarter
+from cg.services.events.event_handlers import external_sample_stored_handler
 from cg.store.models import Case, Sample
 from cg.store.store import Store
+from housekeeper.store.models import Bundle
+
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
-def test_handle_starts_case():
+def test_handle_starts_case(mocker: MockerFixture):
     # GIVEN a valid event payload
     event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
 
     # GIVEN that the sample belongs to a purely external case
     status_db: Store = create_autospec(Store)
     case: Case = create_autospec(Case)
-    sample: Sample = create_autospec(Sample, case_that_delivers=case, is_external=True)
-    case.samples = [sample]
+    stored_sample: Sample = create_autospec(
+        Sample, case_that_delivers=case, internal_id="ACC123", is_external=True
+    )
+    other_sample: Sample = create_autospec(Sample, case_that_delivers=case, internal_id="ACC234" is_external=True)
+    case.samples = [stored_sample, other_sample]  # type: ignore
 
     # GIVEN that all samples in the case are stored
-    hk_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
+    housekeeper_api.as_type.bundle = Mock(return_value=create_autospec(Bundle))
 
-    # GIVEN that starting the case goes well
+    # GIVEN a CG config
+    cg_config: CGConfig = create_autospec(CGConfig, housekeeper_api=housekeeper_api, status_db=status_db)
+
+    mock_start = mocker.patch.object(AnalysisStarter, "start")
 
     # WHEN handling the event
+    external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
 
     # THEN we should have checked that all samples were indeed stored
+    stored_sample_call = call(name="ACC123")
+    other_sample_call = call(name="ACC234")
+    assert stored_sample_call in housekeeper_api.as_mock.bundle.call_args_list
+    assert other_sample_call in housekeeper_api.as_mock.bundle.call_args_list
 
     # THEN the case was started
-
-    pass
+    mock_start.assert_called_once()

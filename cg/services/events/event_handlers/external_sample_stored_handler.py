@@ -30,7 +30,6 @@ def handle(config: CGConfig, event_payload: dict) -> None:
     event = ExternalSampleStoredEvent.model_validate(event_payload)
     status_db: Store = config.status_db
 
-    # TODO: Check if all external samples in the case are stored
     sample: Sample = status_db.get_sample_by_internal_id_strict(event.sample_internal_id)
     case: Case = cast(Case, sample.case_that_delivers)
     if all(sample.is_external and sample.case_that_delivers == case for sample in case.samples):
