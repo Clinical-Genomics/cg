@@ -35,6 +35,7 @@ class ScoutUploadKey(StrEnum):
     VCF_STR = auto()
     VCF_FUSION = auto()
     VCF_SNV = auto()
+    VCF_SNV_RESEARCH = auto()
     VCF_SV = auto()
 
 
