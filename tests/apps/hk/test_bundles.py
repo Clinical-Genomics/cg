@@ -117,7 +117,8 @@ def test_add_new_bundle_and_version(housekeeper_api: HousekeeperAPI, mocker: Moc
 
     # THEN a bundle and a version are created
     bundle: Bundle | None = housekeeper_api.bundle(name="bundle_name")
-    assert bundle and bundle.name == "bundle_name"
+    assert bundle
+    assert bundle.name == "bundle_name"
     assert bundle.versions[0]
 
     # THEN the changes are not commited
