@@ -14,6 +14,7 @@ from sqlalchemy.orm import Query
 
 from cg.constants import SequencingFileTag
 from cg.exc import (
+    BundleAlreadyAddedError,
     HousekeeperArchiveMissingError,
     HousekeeperBundleVersionMissingError,
     HousekeeperFileMissingError,
@@ -38,7 +39,7 @@ class HousekeeperAPI:
         """Build a new bundle version of files."""
         return self._store.add_bundle(bundle_data)
 
-    def bundle(self, name: str) -> Bundle:
+    def bundle(self, name: str) -> Bundle | None:
         """Fetch a bundle."""
         return self._store.get_bundle_by_name(bundle_name=name)
 
@@ -54,6 +55,17 @@ class HousekeeperAPI:
         new_bundle.versions.append(new_version)
         self.commit()
         LOG.info(f"New bundle created with name {new_bundle.name}")
+        return new_bundle
+
+    def add_new_bundle_and_version(self, name: str) -> Bundle:
+        if self.bundle(name):
+            raise BundleAlreadyAddedError(f"Bundle {name} already exists.")
+        created_at = datetime.now()
+        new_bundle: Bundle = self.new_bundle(name=name, created_at=created_at)
+        new_version: Version = self.new_version(created_at=created_at)
+        new_bundle.versions.append(new_version)
+        self._store.session.add(new_bundle)
+        self._store.session.add(new_version)
         return new_bundle
 
     def new_file(
@@ -243,6 +255,11 @@ class HousekeeperAPI:
         LOG.info(f"Linked file: {file_obj.path} -> {new_path}")
         file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
         return file_obj
+
+    def finalize_file_transactions(self, files: list[File], version: Version) -> None:
+        for file in files:
+            self.include_file(file_obj=file, version_obj=version)
+        self.commit() if files else None
 
     def new_version(self, created_at: datetime, expires_at: datetime = None) -> Version:
         """Create a new bundle version."""
