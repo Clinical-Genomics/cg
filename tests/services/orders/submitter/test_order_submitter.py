@@ -268,7 +268,7 @@ def test_submit_order(
         assert not store_to_submit_and_validate_orders._get_query(table=Sample).first()
 
         # GIVEN an event publisher
-        event_publisher_spy = mocker.spy(event_publisher, "publish_external_order")
+        event_publisher_spy = mocker.spy(event_publisher, "publish")
 
         # WHEN submitting the order
         result = order_submitter.submit(order_type=order_type, raw_order=raw_order, user=user)
@@ -326,7 +326,7 @@ def test_submit_order_with_external_samples(
     )
 
     # GIVEN an event publisher
-    mock_publish_external_order = mocker.patch.object(event_publisher, "publish_external_order")
+    mock_publish_external_order = mocker.patch.object(event_publisher, "publish")
 
     # WHEN submitting the order
     order_submitter.submit(

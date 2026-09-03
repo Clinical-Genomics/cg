@@ -35,7 +35,7 @@ class OrderSubmitter:
         self.validation_service = validation_service
 
     def submit(self, order_type: OrderType, raw_order: dict, user: User) -> dict:
-        """Submit a batch of samples.
+        """Submit a batch of samples. Publishes event if there are external samples.
 
         Main entry point for the class towards interfaces that implements it.
         """
@@ -54,7 +54,7 @@ class OrderSubmitter:
             payload: dict = _get_payload_for_external_samples(
                 customer_internal_id=customer_internal_id, sample_names=sample_names
             )
-            event_publisher.publish_external_order(payload)
+            event_publisher.publish(payload)
         return serialized_order
 
 
