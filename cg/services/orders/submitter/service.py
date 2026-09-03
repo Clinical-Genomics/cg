@@ -7,6 +7,7 @@ document with all information about samples in the submission. The input will
 be validated and if passing all checks be accepted as new samples.
 """
 
+from cg.models.cg_config import NatsConfig
 from cg.models.orders.constants import OrderType
 from cg.services.events import event_publisher
 from cg.services.orders.storing.service import StoreOrderService
@@ -27,12 +28,14 @@ class OrderSubmitter:
         storing_registry: StoringServiceRegistry,
         ticket_handler: TicketHandler,
         validation_service: OrderValidationService,
+        nats_config: NatsConfig,
     ):
         super().__init__()
         self.status_db = status_db
         self.storing_registry = storing_registry
         self.ticket_handler = ticket_handler
         self.validation_service = validation_service
+        self.nats_config = nats_config
 
     def submit(self, order_type: OrderType, raw_order: dict, user: User) -> dict:
         """Submit a batch of samples. Publishes event if there are external samples.
@@ -54,7 +57,11 @@ class OrderSubmitter:
             payload: dict = _get_payload_for_external_samples(
                 customer_internal_id=customer_internal_id, sample_names=sample_names
             )
-            event_publisher.publish(payload)
+            event_publisher.publish(
+                nats_config=self.nats_config,
+                subject="external.samples_ordered",
+                event_payload=payload,
+            )
         return serialized_order
 
 

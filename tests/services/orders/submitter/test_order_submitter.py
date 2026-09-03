@@ -10,6 +10,7 @@ from cg.clients.freshdesk.models import TicketResponse
 from cg.constants.constants import DataDelivery
 from cg.exc import TicketCreationError
 from cg.meta.orders.utils import get_ticket_status, get_ticket_tags
+from cg.models.cg_config import NatsConfig
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
@@ -318,7 +319,9 @@ def test_submit_order_with_external_samples(
     status_db.get_application_by_tag_strict = Mock(return_value=external_application)
     validation_service: OrderValidationService = create_autospec(OrderValidationService)
     validation_service.parse_and_validate = Mock(return_value=raredisease_order)
+    nats_config = create_autospec(NatsConfig)
     order_submitter = OrderSubmitter(
+        nats_config=nats_config,
         status_db=status_db,
         storing_registry=create_autospec(StoringServiceRegistry),
         ticket_handler=create_autospec(TicketHandler),
@@ -340,7 +343,9 @@ def test_submit_order_with_external_samples(
         "status_db.customer": "cust000",
         "status_db.sample_names": ["RDSample1", "RDSample2", "RDSample3", "RDSample4"],
     }
-    mock_publish_external_order.assert_called_once_with(expected_payload)
+    mock_publish_external_order.assert_called_once_with(
+        nats_config=nats_config, subject="external.samples_ordered", event_payload=expected_payload
+    )
 
 
 def test_submit_ticketexception(

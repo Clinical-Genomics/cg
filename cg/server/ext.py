@@ -1,5 +1,6 @@
 from decimal import Decimal
 from json import JSONEncoder
+from pathlib import Path
 
 from flask_admin import Admin
 from flask_cors import CORS
@@ -8,6 +9,7 @@ from flask_wtf.csrf import CSRFProtect
 from cg.apps.lims import LimsAPI
 from cg.apps.tb.api import TrailblazerAPI
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
+from cg.models.cg_config import NatsConfig
 from cg.server.app_config import app_config
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
 from cg.services.mark_as_delivered_service import MarkAsDeliveredService
@@ -79,6 +81,16 @@ class AnalysisClient(TrailblazerAPI):
         }
         super(AnalysisClient, self).__init__(config)
 
+
+nats_config = NatsConfig(
+    ca_cert_path=app_config.listener_ca_cert_path,
+    client_cert_path=app_config.listener_client_cert_path,
+    client_key_path=app_config.listener_client_key_path,
+    nats_binary_path=Path(""),
+    server=app_config.nats_server,
+    stream=app_config.nats_stream,
+    token_path=app_config.listener_token_path,
+)
 
 cors = CORS(resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 csrf = CSRFProtect()

@@ -4,6 +4,7 @@ import pytest
 
 from cg.apps.lims.api import LimsAPI
 from cg.clients.freshdesk.freshdesk_client import FreshdeskClient
+from cg.models.cg_config import NatsConfig
 from cg.services.orders.storing.service_registry import (
     StoringServiceRegistry,
     setup_storing_service_registry,
@@ -41,6 +42,7 @@ def order_submitter(
     ticket_handler: TicketHandler,
 ) -> OrderSubmitter:
     return OrderSubmitter(
+        nats_config=create_autospec(NatsConfig),
         status_db=store_to_submit_and_validate_orders,
         storing_registry=storing_service_registry,
         ticket_handler=ticket_handler,

@@ -45,12 +45,12 @@ class AppConfig(BaseSettings):
     freshdesk_environment: str = "Stage"
 
     # NATS settings
-    nats_server: str = "nats://my.server.se:port"
-    nats_stream: str = "bingus"
     listener_ca_cert_path: str = "/my/path"
     listener_client_cert_path: str = "/my/ca.crt"
     listener_client_key_path: str = "/my/client.key"
     listener_token_path: str = "/my/token"
+    nats_server: str = "nats://my.server.se:port"
+    nats_stream: str = "bingus"
 
 
 app_config = AppConfig()
