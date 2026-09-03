@@ -55,6 +55,11 @@ def handle(config: CGConfig, event_payload: dict) -> None:
 def _add_sample_files_to_housekeeper(
     housekeeper_api: HousekeeperAPI, event: ExternalSampleTransferredEvent
 ):
+    """
+    Creates a bundle and version for the given sample and adds the new files to it.
+    Raises:
+        BundleAlreadyAddedError: If a bundle for the sample already exists in Housekeeper.
+    """
     bundle: Bundle = housekeeper_api.add_new_bundle_and_version(event.sample_internal_id)
     version: Version = bundle.versions[0]
 
