@@ -27,7 +27,7 @@ class StoreOrderService(ABC):
         self.lims = lims_service
 
     @abstractmethod
-    def store_order(self, order: Order):
+    def store_order(self, order: Order) -> dict:
         pass
 
     @staticmethod

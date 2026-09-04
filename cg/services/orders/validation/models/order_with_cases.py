@@ -9,18 +9,26 @@ from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.sample import Sample
+from cg.store.store import Store
 
 CaseType = TypeVar("CaseType", bound=Case)
 SampleType = TypeVar("SampleType", bound=Sample)
 
 
-class OrderWithCases(Order, Generic[CaseType, SampleType]):
+class OrderWithCases(Order[SampleType], Generic[CaseType, SampleType]):
     cases: list[
         Annotated[
             Annotated[CaseType, Tag("new")] | Annotated[ExistingCase, Tag("existing")],
             Discriminator(has_internal_id),
         ]
     ]
+
+    def external_samples(self, status_db: Store) -> list[SampleType]:
+        external_samples: list[SampleType] = []
+        for _, _, sample in self.enumerated_new_samples:
+            if status_db.get_application_by_tag_strict(sample.application).is_external:
+                external_samples.append(sample)
+        return external_samples
 
     @property
     def enumerated_cases(self) -> enumerate[CaseType | ExistingCase]:

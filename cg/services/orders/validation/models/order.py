@@ -1,12 +1,18 @@
+from typing import Generic, TypeVar
+
 from pydantic import BaseModel, BeforeValidator, Field, PrivateAttr, model_validator
 from typing_extensions import Annotated
 
 from cg.constants import DataDelivery
 from cg.models.orders.constants import OrderType
+from cg.services.orders.validation.models.sample import Sample
 from cg.services.orders.validation.models.utils import set_null_to_false
+from cg.store.store import Store
+
+SampleType = TypeVar("SampleType", bound=Sample)
 
 
-class Order(BaseModel):
+class Order(BaseModel, Generic[SampleType]):
     customer: str = Field(min_length=1)
     delivery_type: DataDelivery
     order_type: OrderType = Field(alias="project_type")
@@ -14,6 +20,9 @@ class Order(BaseModel):
     skip_reception_control: Annotated[bool, BeforeValidator(set_null_to_false)] = False
     _generated_ticket_id: int | None = PrivateAttr(default=None)
     _user_id: int = PrivateAttr(default=None)
+
+    def external_samples(self, status_db: Store) -> list[SampleType]:
+        raise NotImplementedError
 
     @model_validator(mode="before")
     def convert_empty_strings_to_none(cls, data):
