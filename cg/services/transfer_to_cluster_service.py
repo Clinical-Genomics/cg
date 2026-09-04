@@ -54,7 +54,7 @@ def _get_sbatch_command(cg_config: CGConfig, sample: Sample) -> str:
     destination_path.mkdir(parents=True, exist_ok=True)
     LOG.debug(f"Destination directory: {destination_path}")
     event_payload = {
-        "cg.sample_internal_id": sample.internal_id,
+        "statusdb.sample_internal_id": sample.internal_id,
         "transfer_completed_at": "$(date +%Y-%m-%dT%H:%M:%S)",
         "cluster_location": destination_path.as_posix(),
     }

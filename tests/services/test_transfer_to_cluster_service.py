@@ -44,7 +44,7 @@ trap error ERR
 
 rsync -rvL /path/to/rome/cust000/sample-name/ /path/to/hasta/cust000/sample-name
 
-/nats/binary pub --jetstream --server nats://server --tlsca /ca/cert --tlscert /client/cert --tlskey /client/key --token $(cat /token) cg-test.external_sample.transfer_completed "{\\"cg.sample_internal_id\\": \\"ACC1\\", \\"transfer_completed_at\\": \\"$(date +%Y-%m-%dT%H:%M:%S)\\", \\"cluster_location\\": \\"/path/to/hasta/cust000/sample-name\\"}"
+/nats/binary pub --jetstream --server nats://server --tlsca /ca/cert --tlscert /client/cert --tlskey /client/key --token $(cat /token) cg-test.external_sample.transfer_completed "{\\"statusdb.sample_internal_id\\": \\"ACC1\\", \\"transfer_completed_at\\": \\"$(date +%Y-%m-%dT%H:%M:%S)\\", \\"cluster_location\\": \\"/path/to/hasta/cust000/sample-name\\"}"
 
 """
 

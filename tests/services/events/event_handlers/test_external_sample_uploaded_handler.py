@@ -29,8 +29,8 @@ def test_handle_triggers_transfer(mocker: MockerFixture):
 
     # GIVEN some payload for an external sample upload event
     event_payload = {
-        "cg.customer": "cust000",
-        "cg.sample_name": "sample-name",
+        "statusdb.customer": "cust000",
+        "statusdb.sample_name": "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
     }
 
@@ -73,8 +73,8 @@ def test_handle_not_trigger_transfer(mocker: MockerFixture):
 
     # GIVEN some payload for an external sample upload event
     event_payload = {
-        "cg.customer": "cust000",
-        "cg.sample_name": "sample-name",
+        "statusdb.customer": "cust000",
+        "statusdb.sample_name": "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
     }
 
@@ -104,8 +104,8 @@ def test_handle_invalid_sample_name():
 
     # GIVEN some event payload where the sample name contains illegal letters
     event_payload = {
-        "cg.customer": "cust000",
-        "cg.sample_name": "invalid_sample_name",
+        "statusdb.customer": "cust000",
+        "statusdb.sample_name": "invalid_sample_name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
     }
 
@@ -121,8 +121,8 @@ def test_handle_invalid_date_format():
 
     # GIVEN some event payload where the uploaded at is malformed
     event_payload = {
-        "cg.customer": "cust000",
-        "cg.sample_name": "sample-name",
+        "statusdb.customer": "cust000",
+        "statusdb.sample_name": "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14.52",
     }
 
