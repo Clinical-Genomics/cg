@@ -1,6 +1,6 @@
 from typing import TypeVar
 
-from pydantic_core import ValidationError
+from pydantic import ValidationError
 
 from cg.services.orders.validation.errors.validation_errors import ValidationErrors
 from cg.services.orders.validation.model_validator.utils import convert_errors
