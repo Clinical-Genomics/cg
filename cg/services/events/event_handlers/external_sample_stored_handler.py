@@ -48,25 +48,20 @@ def _are_all_samples_new_external_and_stored(case: Case, housekeeper_api: Housek
     for sample in case.samples:
         if not sample.is_external:
             not_external.append(sample.internal_id)
+        # Ensure sample was originally ordered in this case
         if not sample.case_that_delivers == case:
             not_new.append(sample.internal_id)
+        # Ensure it has been stored
         if not housekeeper_api.bundle(sample.internal_id):
             not_stored.append(sample.internal_id)
     if any([not_external, not_new, not_stored]):
-        LOG.info(
-            f"Could not start analysis because of the following samples:\n"
-            + f"Not external: {not_external}\n"
-            if not_external
-            else (
-                "" + f"Not new: {not_new}\n"
-                if not_new
-                else "" + f"Not stored: {not_stored}" if not_stored else ""
-            )
-        )
-
-    """return all(
-        sample.is_external
-        and sample.case_that_delivers == case  # Ensures sample was originally ordered in this case
-        and housekeeper_api.bundle(sample.internal_id)  # Ensures it has been stored
-        for sample in case.samples
-    )"""
+        message = [
+            f"Could not start case {case.internal_id} because of the following samples:\n",
+            f"Not external: {not_external}\n" if not_external else "",
+            f"Not new: {not_new}\n" if not_new else "",
+            f"Not stored: {not_stored}" if not_stored else "",
+        ]
+        LOG.info("".join(message))
+        return False
+    else:
+        return True
