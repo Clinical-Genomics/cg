@@ -41,7 +41,7 @@ class OverrideCyclesValidator:
     def _is_index_cycle_value_following_pattern(
         pattern: str, index_cycle: str, run_cycles: int, index_sequence: str
     ) -> bool:
-        """
+        r"""
         Returns whether an index cycle string is following a valid cycle regex pattern and has
         consistent values. Valid patterns are 'I(\d+)N(\d+)' and 'N(\d+)I(\d+)'. Having consistent
         values means that the sum of the number of index characters (I) and the number of ignored
