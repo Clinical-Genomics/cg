@@ -39,8 +39,6 @@ def handle(config: CGConfig, event_payload: dict) -> None:
             case.internal_id
         )
         analysis_starter.start(case.internal_id)
-    else:
-        LOG.info(f"Case {case.internal_id} is not ready to be started.")
 
 
 def _are_all_samples_new_external_and_stored(case: Case, housekeeper_api: HousekeeperAPI) -> bool:
