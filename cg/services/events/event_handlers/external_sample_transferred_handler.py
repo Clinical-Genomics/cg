@@ -9,6 +9,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.services.events import event_publisher
+from cg.services.events.constants import SAMPLE_INTERNAL_ID_FIELD
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -16,7 +17,7 @@ EXTERNAL_SAMPLE_STORED_SUBJECT = "external_sample.storage_completed"
 
 
 class ExternalSampleTransferredEvent(BaseModel):
-    sample_internal_id: str = Field(alias="statusdb.sample_internal_id")
+    sample_internal_id: str = Field(alias=SAMPLE_INTERNAL_ID_FIELD)
     cluster_location: Path
     transfer_completed_at: datetime
 
@@ -48,7 +49,7 @@ def handle(config: CGConfig, event_payload: dict) -> None:
     event_publisher.publish(
         nats_config=config.nats,
         subject=f"{config.nats.stream}.{EXTERNAL_SAMPLE_STORED_SUBJECT}",
-        event_payload={"statusdb.sample_internal_id": event.sample_internal_id},
+        event_payload={SAMPLE_INTERNAL_ID_FIELD: event.sample_internal_id},
     )
 
 

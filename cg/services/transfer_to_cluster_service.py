@@ -11,6 +11,7 @@ from cg.services.deliver_files.rsync.sbatch_commands import (
     RSYNC_CONTENTS_COMMAND,
 )
 from cg.services.events import event_publisher
+from cg.services.events.constants import SAMPLE_INTERNAL_ID_FIELD
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -54,7 +55,7 @@ def _get_sbatch_command(cg_config: CGConfig, sample: Sample) -> str:
     destination_path.mkdir(parents=True, exist_ok=True)
     LOG.debug(f"Destination directory: {destination_path}")
     event_payload = {
-        "statusdb.sample_internal_id": sample.internal_id,
+        SAMPLE_INTERNAL_ID_FIELD: sample.internal_id,
         "transfer_completed_at": "$(date +%Y-%m-%dT%H:%M:%S)",
         "cluster_location": destination_path.as_posix(),
     }
