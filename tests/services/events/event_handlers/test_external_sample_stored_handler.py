@@ -1,7 +1,7 @@
 from unittest.mock import Mock, call, create_autospec
 
-from housekeeper.store.models import Bundle
 import pytest
+from housekeeper.store.models import Bundle
 from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -16,7 +16,7 @@ from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_handle_starts_case(mocker: MockerFixture):
-    # GIVEN a valid event payload
+    # GIVEN a valid event payload with a sample id
     event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
 
     # GIVEN that the sample belongs to a purely external case
@@ -25,13 +25,15 @@ def test_handle_starts_case(mocker: MockerFixture):
     stored_sample: Sample = create_autospec(
         Sample, case_that_delivers=case, internal_id="ACC123", is_external=True
     )
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=stored_sample)
+
+    # GIVEN that the case has another sample that has been also stored
     other_sample: Sample = create_autospec(
         Sample, case_that_delivers=case, internal_id="ACC234", is_external=True
     )
     case.samples = [stored_sample, other_sample]  # type: ignore
-    status_db.get_sample_by_internal_id_strict = Mock(return_value=stored_sample)
 
-    # GIVEN that all samples in the case are stored
+    # GIVEN a Housekeeper API
     housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
     housekeeper_api.as_type.bundle = Mock(return_value=create_autospec(Bundle))
 
@@ -40,6 +42,7 @@ def test_handle_starts_case(mocker: MockerFixture):
         CGConfig, housekeeper_api=housekeeper_api.as_type, status_db=status_db
     )
 
+    # GIVEN an analysis starter
     analysis_starter: TypedMock[AnalysisStarter] = create_typed_mock(AnalysisStarter)
     mocker.patch.object(
         AnalysisStarterFactory,
@@ -60,8 +63,8 @@ def test_handle_starts_case(mocker: MockerFixture):
     analysis_starter.as_mock.start.assert_called_once_with(case.internal_id)
 
 
-def test_handle_fails_with_no_case(mocker: MockerFixture):
-    # GIVEN a valid event payload
+def test_handle_fails_with_no_case():
+    # GIVEN a valid event payload with a sample id
     event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
 
     # GIVEN that the sample does not have a linked case that should deliver it
@@ -76,27 +79,29 @@ def test_handle_fails_with_no_case(mocker: MockerFixture):
 
     # WHEN handling the event
     # THEN the appropriate error is raised
-    with pytest.raises(CaseNotFoundError):
+    with pytest.raises(CaseNotFoundError, match="No case found to deliver sample ACC123"):
         external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
 
 
 def test_handle_ignores_case_with_internal_samples(mocker: MockerFixture):
-    # GIVEN a valid event payload
+    # GIVEN a valid event payload with a sample id
     event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
 
-    # GIVEN that the sample belongs to a case with both external and internal samples
+    # GIVEN that the sample belongs to a case that delivers the sample
     status_db: Store = create_autospec(Store)
     case: Case = create_autospec(Case)
     external_sample: Sample = create_autospec(
         Sample, case_that_delivers=case, internal_id="ACC123", is_external=True
     )
+
+    # GIVEN that the case has another sample that is not external
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=external_sample)
     internal_sample: Sample = create_autospec(
         Sample, case_that_delivers=case, internal_id="ACC234", is_external=False
     )
     case.samples = [external_sample, internal_sample]  # type: ignore
-    status_db.get_sample_by_internal_id_strict = Mock(return_value=external_sample)
 
-    # GIVEN that all samples in the case are stored
+    # GIVEN a Housekeeper API
     housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
     housekeeper_api.as_type.bundle = Mock(return_value=create_autospec(Bundle))
 
@@ -105,6 +110,7 @@ def test_handle_ignores_case_with_internal_samples(mocker: MockerFixture):
         CGConfig, housekeeper_api=housekeeper_api.as_type, status_db=status_db
     )
 
+    # GIVEN an analysis starter
     analysis_starter: TypedMock[AnalysisStarter] = create_typed_mock(AnalysisStarter)
     mocker.patch.object(
         AnalysisStarterFactory,
@@ -120,7 +126,7 @@ def test_handle_ignores_case_with_internal_samples(mocker: MockerFixture):
 
 
 def test_handle_ignores_case_with_unstored_samples(mocker: MockerFixture):
-    # GIVEN a valid event payload
+    # GIVEN a valid event payload with a sample id
     event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
 
     # GIVEN that the sample belongs to a purely external case
@@ -129,13 +135,15 @@ def test_handle_ignores_case_with_unstored_samples(mocker: MockerFixture):
     stored_sample: Sample = create_autospec(
         Sample, case_that_delivers=case, internal_id="ACC123", is_external=True
     )
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=stored_sample)
+
+    # GIVEN that the case has another sample that has not been stored
     not_stored_sample: Sample = create_autospec(
         Sample, case_that_delivers=case, internal_id="ACC234", is_external=True
     )
     case.samples = [stored_sample, not_stored_sample]  # type: ignore
-    status_db.get_sample_by_internal_id_strict = Mock(return_value=stored_sample)
 
-    # GIVEN that NOT all samples in the case are stored
+    # GIVEN a Housekeeper bundle
     housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
     housekeeper_api.as_type.bundle = Mock(
         side_effect=lambda sample_id: (
@@ -148,6 +156,7 @@ def test_handle_ignores_case_with_unstored_samples(mocker: MockerFixture):
         CGConfig, housekeeper_api=housekeeper_api.as_type, status_db=status_db
     )
 
+    # GIVEN an analysis starter
     analysis_starter: TypedMock[AnalysisStarter] = create_typed_mock(AnalysisStarter)
     mocker.patch.object(
         AnalysisStarterFactory,
@@ -163,23 +172,25 @@ def test_handle_ignores_case_with_unstored_samples(mocker: MockerFixture):
 
 
 def test_handle_ignores_case_with_undeliverable_samples(mocker: MockerFixture):
-    # GIVEN a valid event payload
+    # GIVEN a valid event payload with a sample id
     event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
 
     # GIVEN that the sample belongs to a case that does not deliver all of its samples
     status_db: Store = create_autospec(Store)
-    case1: Case = create_autospec(Case, internal_id="case1")
-    case2: Case = create_autospec(Case, internal_id="case2")
-    sample1: Sample = create_autospec(
-        Sample, case_that_delivers=case1, internal_id="ACC123", is_external=True
+    case: Case = create_autospec(Case, internal_id="case1")
+    sample_from_case_that_delivers: Sample = create_autospec(
+        Sample, case_that_delivers=case, internal_id="ACC123", is_external=True
     )
-    sample2: Sample = create_autospec(
-        Sample, case_that_delivers=case2, internal_id="ACC234", is_external=True
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=sample_from_case_that_delivers)
+    sample_from_another_case: Sample = create_autospec(
+        Sample,
+        case_that_delivers=create_autospec(Case, internal_id="case2"),
+        internal_id="ACC234",
+        is_external=True,
     )
-    case1.samples = [sample1, sample2]  # type: ignore
-    status_db.get_sample_by_internal_id_strict = Mock(return_value=sample1)
+    case.samples = [sample_from_case_that_delivers, sample_from_another_case]  # type: ignore
 
-    # GIVEN that all samples in the case are stored
+    # GIVEN a Housekeeper API
     housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
     housekeeper_api.as_type.bundle = Mock(return_value=create_autospec(Bundle))
 
@@ -188,6 +199,7 @@ def test_handle_ignores_case_with_undeliverable_samples(mocker: MockerFixture):
         CGConfig, housekeeper_api=housekeeper_api.as_type, status_db=status_db
     )
 
+    # GIVEN an analysis starter
     analysis_starter: TypedMock[AnalysisStarter] = create_typed_mock(AnalysisStarter)
     mocker.patch.object(
         AnalysisStarterFactory,
