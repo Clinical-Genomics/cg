@@ -49,7 +49,7 @@ def _are_all_samples_new_external_and_stored(case: Case, housekeeper_api: Housek
         if not sample.is_external:
             not_external.append(sample.internal_id)
         # Ensure sample was originally ordered in this case
-        if not sample.case_that_delivers == case:
+        if sample.case_that_delivers != case:
             not_new.append(sample.internal_id)
         # Ensure it has been stored
         if not housekeeper_api.bundle(sample.internal_id):
