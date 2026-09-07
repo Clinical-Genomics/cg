@@ -18,6 +18,12 @@ class ExternalSampleStoredEvent(BaseModel):
 
 
 def handle(config: CGConfig, event_payload: dict) -> None:
+    """
+    Start the analysis of a sample's case if all of its samples are external and stored in
+    Housekeeper.
+    Raises:
+        CaseNotFoundError: If the sample provided in the payload doesn't belong to any new case.
+    """
     event = ExternalSampleStoredEvent.model_validate(event_payload)
     status_db: Store = config.status_db
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
