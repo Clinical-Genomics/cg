@@ -3,6 +3,7 @@ from typing import Protocol
 
 from cg.models.cg_config import CGConfig
 from cg.services.events.event_handlers import (
+    external_sample_stored_handler,
     external_sample_uploaded_handler,
     external_samples_ordered_handler,
 )
@@ -16,6 +17,7 @@ class EventHandler(Protocol):
 
 EVENT_HANDLERS: dict[str, EventHandler] = {
     "external.customer_uploaded_sample": external_sample_uploaded_handler.handle,
+    "external.sample_stored": external_sample_stored_handler.handle,
     "external.samples_ordered": external_samples_ordered_handler.handle,
 }
 
