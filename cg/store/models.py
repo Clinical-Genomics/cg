@@ -773,6 +773,11 @@ class Pool(Base):
         return pool_dict
 
 
+SAMPLE_NAME_PATTERN = r"^[A-Za-z0-9-]*$"
+SAMPLE_NAME_MINIMUM_LENGTH = 2
+SAMPLE_NAME_MAXIMUM_LENGTH = 128
+
+
 class Sample(Base, PriorityMixin):
     __tablename__ = "sample"
     age_at_sampling: Mapped[float | None]

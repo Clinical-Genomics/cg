@@ -280,6 +280,7 @@ def test_load_observations_success(
         gq_threshold=RarediseaseLoadParameters.GQ_THRESHOLD.value,
         hard_threshold=RarediseaseLoadParameters.HARD_THRESHOLD.value,
         soft_threshold=RarediseaseLoadParameters.SOFT_THRESHOLD.value,
+        ignore_gq_if_unset=RarediseaseLoadParameters.IGNORE_GQ_IF_UNSET.value,
         loqusdb_options=["--keep-chr-prefix", "--genome-build", "GRCh38"],
     )
 

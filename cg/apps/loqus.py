@@ -34,6 +34,7 @@ class LoqusdbAPI:
         hard_threshold: float | None = None,
         soft_threshold: float | None = None,
         snv_gq_only: bool | None = False,
+        ignore_gq_if_unset: bool | None = False,
         loqusdb_options: list[str] | None = None,
     ) -> dict[str, int]:
         """Add observations to Loqusdb from VCF files."""
@@ -53,6 +54,7 @@ class LoqusdbAPI:
         )
         load_call_params.append("--qual-gq") if qual_gq else None
         load_call_params.append("--snv-gq-only") if snv_gq_only else None
+        load_call_params.append("--ignore-gq-if-unset") if ignore_gq_if_unset else None
         self.process.run_command(parameters=load_call_params)
         return self.get_nr_of_variants_in_file()
 
