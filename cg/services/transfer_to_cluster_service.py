@@ -11,11 +11,13 @@ from cg.services.deliver_files.rsync.sbatch_commands import (
     RSYNC_CONTENTS_COMMAND,
 )
 from cg.services.events import event_publisher
-from cg.services.events.constants import SAMPLE_INTERNAL_ID_FIELD
+from cg.services.events.constants import (
+    EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT,
+    SAMPLE_INTERNAL_ID_FIELD,
+)
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
-EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT = "external_sample.transfer_completed"
 RSYNC_SBATCH_SCRIPT: str = "transfer_sample.sh"
 
 

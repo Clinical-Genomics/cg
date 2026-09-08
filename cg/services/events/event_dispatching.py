@@ -2,13 +2,13 @@ import logging
 from typing import Protocol
 
 from cg.models.cg_config import CGConfig
+from cg.services.events.constants import EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT
 from cg.services.events.event_handlers import (
-    external_sample_transferred_handler,
     external_sample_stored_handler,
+    external_sample_transferred_handler,
     external_sample_uploaded_handler,
     external_samples_ordered_handler,
 )
-from cg.services.transfer_to_cluster_service import EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT
 
 LOG = logging.getLogger(__name__)
 
