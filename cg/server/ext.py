@@ -83,13 +83,13 @@ class AnalysisClient(TrailblazerAPI):
 
 
 nats_config = NatsConfig(
-    ca_cert_path=app_config.listener_ca_cert_path,
-    client_cert_path=app_config.listener_client_cert_path,
-    client_key_path=app_config.listener_client_key_path,
+    ca_cert_path=app_config.nats_ca_cert_path,
+    client_cert_path=app_config.nats_client_cert_path,
+    client_key_path=app_config.nats_client_key_path,
     nats_binary_path=Path(""),
     server=app_config.nats_server,
     stream=app_config.nats_stream,
-    token_path=app_config.listener_token_path,
+    token_path=app_config.nats_token_path,
 )
 
 cors = CORS(resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
