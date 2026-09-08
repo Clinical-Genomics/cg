@@ -7,7 +7,7 @@ from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.models.cg_config import CGConfig, NatsConfig
-from cg.services.events.constants import SAMPLE_INTERNAL_ID_FIELD
+from cg.services.events.constants import EXTERNAL_SAMPLE_STORED_SUBJECT, SAMPLE_INTERNAL_ID_FIELD
 from cg.services.events.event_handlers import external_sample_transferred_handler
 from cg.store.models import Sample
 from cg.store.store import Store
@@ -78,6 +78,6 @@ def test_handle_success(mocker: MockerFixture):
     # THEN an event was published saying the sample was stored
     publish_mock.assert_called_once_with(
         nats_config=nats_config,
-        subject="cg-test.external_sample.storage_completed",
+        subject=f"cg-test.{EXTERNAL_SAMPLE_STORED_SUBJECT}",
         event_payload={SAMPLE_INTERNAL_ID_FIELD: "ACC123"},
     )
