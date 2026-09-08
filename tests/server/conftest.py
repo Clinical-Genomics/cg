@@ -13,7 +13,7 @@ from cg.apps.tb.dto.summary_response import AnalysisSummary, StatusSummary
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import DataDelivery, Workflow
 from cg.server.ext import db as store
-from cg.store.database import create_all_tables, drop_all_tables
+from cg.store.database import create_all_tables, drop_all_tables, get_session, initialize_database
 from cg.store.models import Case, Customer, Order, Sample
 from tests.store_helpers import StoreHelpers
 
@@ -37,7 +37,9 @@ def app() -> Generator[Flask, None, None]:
     from cg.server.auto import app
 
     app.config.update({"TESTING": True})
+    initialize_database("sqlite:///")
     create_all_tables()
+    store.session = get_session()
     yield app
     drop_all_tables()
 

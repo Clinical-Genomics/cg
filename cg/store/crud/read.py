@@ -102,6 +102,7 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
+    ExternalSample,
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
@@ -421,8 +422,8 @@ class ReadHandler(BaseHandler):
 
     def get_sample_by_customer_and_name(
         self, customer_entry_id: list[int], sample_name: str
-    ) -> Sample:
-        """Get samples within a customer."""
+    ) -> Sample | None:
+        """Get a sample within a customer."""
         filter_functions = [
             SampleFilter.BY_CUSTOMER_ENTRY_IDS,
             SampleFilter.BY_SAMPLE_NAME,
@@ -434,6 +435,21 @@ class ReadHandler(BaseHandler):
             customer_entry_ids=customer_entry_id,
             name=sample_name,
         ).first()
+
+    def get_sample_by_customer_and_name_strict(
+        self, customer_entry_id: int, sample_name: str
+    ) -> Sample:
+        samples: Query = (
+            self._get_query(table=Sample)
+            .join(Sample.customer)
+            .filter(Customer.id == customer_entry_id, Sample.name == sample_name)
+        )
+        if sample := samples.first():
+            return sample
+        else:
+            raise SampleNotFoundError(
+                f"Sample {sample_name} not found for customer {customer_entry_id}"
+            )
 
     def get_illumina_metrics_entry_by_device_sample_and_lane(
         self, device_internal_id: str, sample_internal_id: str, lane: int
@@ -2103,6 +2119,16 @@ class ReadHandler(BaseHandler):
         )
 
         return list(self.session.scalars(query).all())
+
+    def get_external_sample(self, customer_id: int, sample_name: str) -> ExternalSample | None:
+        return self.session.scalars(
+            select(ExternalSample).where(
+                and_(
+                    ExternalSample.customer_id == customer_id,
+                    ExternalSample.sample_name == sample_name,
+                )
+            )
+        ).first()
 
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:
