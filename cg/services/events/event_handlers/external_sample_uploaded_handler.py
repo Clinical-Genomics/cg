@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 from cg.models.cg_config import LOG, CGConfig
 from cg.services import transfer_to_cluster_service
+from cg.services.events.constants import CUSTOMER_INTERNAL_ID_FIELD, SAMPLE_NAME_FIELD
 from cg.store.models import (
     SAMPLE_NAME_MAXIMUM_LENGTH,
     SAMPLE_NAME_MINIMUM_LENGTH,
@@ -14,13 +15,13 @@ from cg.store.store import Store
 
 
 class ExternalSampleUploadedEvent(BaseModel):
-    customer: str = Field(alias="statusdb.customer")
+    customer: str = Field(alias=CUSTOMER_INTERNAL_ID_FIELD)
     customer_uploaded_at: datetime
     sample_name: str = Field(
         pattern=SAMPLE_NAME_PATTERN,
         min_length=SAMPLE_NAME_MINIMUM_LENGTH,
         max_length=SAMPLE_NAME_MAXIMUM_LENGTH,
-        alias="statusdb.sample_name",
+        alias=SAMPLE_NAME_FIELD,
     )
 
 
