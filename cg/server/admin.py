@@ -1053,8 +1053,8 @@ class PacbioSmrtCellMetricsView(BaseView):
 
     def delete_model(self, model):
         try:
-            # your custom logic — e.g. soft delete, cascade, logging
-            model.device_run = True
+            # Pacbio SMRT cells are only run once, so cascading to the run_device table is okay.
+            self.session.delete(model.device)
             self.session.commit()
             return True
         except Exception as ex:
