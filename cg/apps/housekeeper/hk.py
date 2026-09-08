@@ -390,7 +390,7 @@ class HousekeeperAPI:
 
     def get_files_from_latest_version(
         self, bundle_name: str, tags: list[str] | None = None
-    ) -> list[File] | None:
+    ) -> list[File]:
         """Return files in the latest version of a bundle.
 
         Raises HousekeeperBundleVersionMissingError:
