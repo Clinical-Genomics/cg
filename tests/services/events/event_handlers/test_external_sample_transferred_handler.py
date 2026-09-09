@@ -40,7 +40,7 @@ def test_handle_success(mocker: MockerFixture):
 
     # GIVEN a publisher for completion events
     publish_mock = mocker.patch.object(
-        external_sample_transferred_handler.event_publisher, "publish"
+        external_sample_transferred_handler.event_publisher, "publish_event"
     )
 
     # GIVEN a valid event payload

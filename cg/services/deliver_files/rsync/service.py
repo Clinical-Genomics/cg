@@ -31,7 +31,7 @@ from cg.services.deliver_files.rsync.sbatch_commands import (
     ERROR_RSYNC_FUNCTION,
     RSYNC_COMMAND,
 )
-from cg.services.events.event_publisher import publish_command
+from cg.services.events.event_publisher import get_publish_command
 from cg.services.events.upload_handler import ANALYSIS_UPLOADED_SUBJECT
 from cg.store.models import Case
 from cg.store.store import Store
@@ -316,7 +316,7 @@ class DeliveryRsyncService:
             "cg.analysis_id": analysis_id,
             "uploaded_at": "$(date +%Y-%m-%dT%H:%M:%SZ)",
         }
-        command += "\n" + publish_command(
+        command += "\n" + get_publish_command(
             nats_config=self.nats_config,
             subject=f"{self.nats_config.stream}.{ANALYSIS_UPLOADED_SUBJECT}",
             data=data,
