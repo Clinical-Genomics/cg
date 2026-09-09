@@ -32,7 +32,7 @@ EVENT_HANDLERS: dict[str, EventHandler] = {
 
 def dispatch(
     config: CGConfig, event_name: str, event_payload: dict, event_handlers: dict = EVENT_HANDLERS
-):
+) -> None:
     """
     Select the appropriate handler for the given event name and call it with the provided payload.
     """
