@@ -69,7 +69,7 @@ def get_well_sample_map(
     well_position, provided the sample is on a plate.
     """
     well_position_to_sample_map = {}
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         for sample_index, sample in case.enumerated_new_samples:
             if is_sample_on_plate(sample):
                 key: tuple[str, str] = (sample.container_name, sample.well_position)
@@ -89,10 +89,10 @@ def get_occupied_well_errors(colliding_samples: list[tuple[int, int]]) -> list[O
 
 
 def get_indices_for_repeated_case_names(order: OrderWithCases) -> list[int]:
-    counter = Counter([case.name for _, case in order.enumerated_new_cases])
+    counter = Counter([case.name for _, case in order.enumerated_cases])
     indices: list[int] = []
 
-    for index, case in order.enumerated_new_cases:
+    for index, case in order.enumerated_cases:
         if counter.get(case.name) > 1:
             indices.append(index)
 
@@ -260,7 +260,7 @@ def is_sample_tube_name_reused(sample: Sample, counter: Counter) -> bool:
 def get_counter_container_names(order: OrderWithCases) -> Counter:
     counter = Counter(
         sample.container_name
-        for case_index, case in order.enumerated_new_cases
+        for case_index, case in order.enumerated_cases
         for sample_index, sample in case.enumerated_new_samples
     )
     return counter
@@ -269,14 +269,9 @@ def get_counter_container_names(order: OrderWithCases) -> Counter:
 def get_existing_sample_names(order: OrderWithCases, status_db: Store) -> set[str]:
     existing_sample_names: set[str] = set()
     for case in order.cases:
-        if case.is_new:
-            for sample_index, sample in case.enumerated_existing_samples:
-                db_sample = status_db.get_sample_by_internal_id(sample.internal_id)
-                existing_sample_names.add(db_sample.name)
-        else:
-            db_case = status_db.get_case_by_internal_id(case.internal_id)
-            for sample in db_case.samples:
-                existing_sample_names.add(sample.name)
+        for sample_index, sample in case.enumerated_existing_samples:
+            db_sample = status_db.get_sample_by_internal_id(sample.internal_id)
+            existing_sample_names.add(db_sample.name)
     return existing_sample_names
 
 
@@ -299,14 +294,6 @@ def is_sample_not_from_collaboration(
     db_sample: DbSample | None = store.get_sample_by_internal_id(sample.internal_id)
     customer: Customer | None = store.get_customer_by_internal_id(customer_id)
     return db_sample and customer and db_sample.customer not in customer.collaborators
-
-
-def get_existing_case_names(order: OrderWithCases, status_db: Store) -> set[str]:
-    existing_case_names: set[str] = set()
-    for _, case in order.enumerated_existing_cases:
-        if db_case := status_db.get_case_by_internal_id(case.internal_id):
-            existing_case_names.add(db_case.name)
-    return existing_case_names
 
 
 def is_sample_compatible_with_order_type(

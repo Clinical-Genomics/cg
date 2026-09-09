@@ -1,7 +1,6 @@
 from cg.apps.lims import LimsAPI
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.services.orders.validation.models.case import Case
-from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.order_types.balsamic.models.case import BalsamicCase
 from cg.services.orders.validation.order_types.balsamic.models.sample import BalsamicSample
@@ -12,9 +11,7 @@ from cg.services.orders.validation.order_types.mip_dna.models.sample import MIPD
 from cg.services.orders.validation.order_types.raredisease.models.case import RarediseaseCase
 from cg.services.orders.validation.order_types.raredisease.models.sample import RarediseaseSample
 from cg.services.orders.validation.order_types.tomte.models.case import TomteCase
-from cg.store.models import Application
-from cg.store.models import Case as DbCase
-from cg.store.models import Customer, Sample
+from cg.store.models import Application, Sample
 from cg.store.store import Store
 
 
@@ -63,12 +60,6 @@ def _is_sample_wgs_normal(
         )
 
 
-def is_case_not_from_collaboration(case: ExistingCase, customer_id: str, store: Store) -> bool:
-    db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
-    customer: Customer | None = store.get_customer_by_internal_id(customer_id)
-    return db_case and customer and db_case.customer not in customer.collaborators
-
-
 def is_sample_in_case(case: Case, sample_name: str, store: Store) -> bool:
     if case.get_new_sample(sample_name):
         return True
@@ -95,21 +86,6 @@ def get_case_prep_categories(case: Case, store: Store) -> set[str]:
     return prep_categories
 
 
-def does_case_exist(case: MIPDNACase | RarediseaseCase | ExistingCase, store: Store):
-    if isinstance(case, ExistingCase):
-        return bool(store.get_case_by_internal_id(case.internal_id))
-    return True
-
-
-def is_single_sample_case(case: MIPDNACase | RarediseaseCase | ExistingCase, store: Store):
-    if isinstance(case, ExistingCase):
-        db_case: DbCase = store.get_case_by_internal_id_strict(case.internal_id)
-        contains_one_sample = bool(len(db_case.samples) == 1)
-    else:
-        contains_one_sample = bool(len(case.samples) == 1)
-    return contains_one_sample
-
-
 def is_sample_related_in_case(
     sample: MIPDNASample | RarediseaseSample | ExistingSample,
     case: MIPDNACase | RarediseaseCase,
@@ -133,14 +109,8 @@ def get_sample_name(sample: MIPDNASample | RarediseaseSample | ExistingSample, s
     return sample_name
 
 
-def get_sample_sources(case: TomteCase | ExistingCase, lims_api: LimsAPI, store: Store) -> set:
-    if isinstance(case, ExistingCase):
-        return _get_existing_case_sources(case=case, lims_api=lims_api, store=store)
-    else:
-        return _get_new_case_sources(case=case, lims_api=lims_api, store=store)
-
-
-def _get_new_case_sources(case: TomteCase, lims_api: LimsAPI, store: Store) -> set:
+def get_sample_sources_from_case(case: TomteCase, lims_api: LimsAPI, store: Store) -> set:
+    """Return unique sources from the samples of the provided case fetched from LIMS."""
     sources = set()
     for sample in case.samples:
         if isinstance(sample, ExistingSample):
@@ -152,16 +122,6 @@ def _get_new_case_sources(case: TomteCase, lims_api: LimsAPI, store: Store) -> s
                 )  # Downsampled samples are not in LIMS so we should get the source from the original sample
         else:
             sources.add(sample.source_comment if sample.source == "other" else sample.source)
-    return sources
-
-
-def _get_existing_case_sources(case: ExistingCase, lims_api: LimsAPI, store: Store) -> set:
-    db_case = store.get_case_by_internal_id(case.internal_id)
-    if not db_case:  # This should result in an error elsewhere
-        return set()
-    sources = set()
-    for sample in db_case.samples:
-        sources.add(lims_api.get_source(sample.from_sample or sample.internal_id))
     return sources
 
 

@@ -1,10 +1,8 @@
 from typing import Callable
 
 from cg.services.orders.validation.rules.case.rules import (
-    validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
-    validate_existing_cases_belong_to_collaboration,
 )
 from cg.services.orders.validation.rules.case_sample.rules import (
     validate_application_compatibility,
@@ -33,10 +31,8 @@ from cg.services.orders.validation.rules.case_sample.rules import (
 )
 
 MIP_RNA_CASE_RULES: list[Callable] = [
-    validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
-    validate_existing_cases_belong_to_collaboration,
 ]
 
 MIP_RNA_CASE_SAMPLE_RULES: list[Callable] = [

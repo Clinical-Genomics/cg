@@ -4,7 +4,6 @@ from cg.clients.freshdesk.constants import Status
 from cg.constants.priority import Priority
 from cg.models.orders.constants import OrderType
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
-from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.models.order_with_samples import OrderWithSamples
@@ -23,7 +22,7 @@ DUE_TIME_BY_PRIORITY: dict[Priority, timedelta] = {
 
 def contains_existing_data(order: OrderWithCases) -> bool:
     """Check if the order contains any existing data"""
-    return any(not case.is_new or case.enumerated_existing_samples for case in order.cases)
+    return any(case.enumerated_existing_samples for case in order.cases)
 
 
 def contains_external_data(order: Order, status_db: Store) -> bool:
@@ -87,15 +86,7 @@ def get_existing_samples(order: Order, status_db: Store) -> list[Sample]:
         existing_samples.extend(
             [
                 sample
-                for (_, case) in order.enumerated_existing_cases
-                for sample in status_db.get_samples_by_case_id(case.internal_id)
-            ]
-        )
-
-        existing_samples.extend(
-            [
-                sample
-                for (_, case) in order.enumerated_new_cases
+                for (_, case) in order.enumerated_cases
                 for (_, existing_sample) in case.enumerated_existing_samples
                 if (sample := status_db.get_sample_by_internal_id(existing_sample.internal_id))
             ]

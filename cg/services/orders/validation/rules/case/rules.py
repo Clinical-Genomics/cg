@@ -1,12 +1,9 @@
 from cg.apps.lims import LimsAPI
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
-    CaseDoesNotExistError,
     CaseNameNotAvailableError,
-    CaseOutsideOfCollaborationError,
     DoubleNormalError,
     DoubleTumourError,
-    ExistingCaseWithoutAffectedSampleError,
     InvalidGenePanelsError,
     MoreThanTwoSamplesInCaseError,
     MultiplePrepCategoriesError,
@@ -28,26 +25,22 @@ from cg.services.orders.validation.order_types.raredisease.models.order import R
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.services.orders.validation.rules.case.utils import (
     contains_duplicates,
-    does_case_exist,
     get_case_prep_categories,
     get_invalid_panels,
     get_sample_name,
-    get_sample_sources,
-    is_case_not_from_collaboration,
+    get_sample_sources_from_case,
     is_double_normal,
     is_double_tumour,
     is_normal_only_wgs,
     is_sample_related_in_case,
-    is_single_sample_case,
 )
 from cg.services.orders.validation.rules.case_sample.utils import get_repeated_case_name_errors
-from cg.store.models import Case as DbCase
 from cg.store.store import Store
 
 
 def validate_gene_panels_unique(order: OrderWithCases, **kwargs) -> list[RepeatedGenePanelsError]:
     errors: list[RepeatedGenePanelsError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if contains_duplicates(case.panels):
             error = RepeatedGenePanelsError(case_index=case_index)
             errors.append(error)
@@ -61,38 +54,9 @@ def validate_case_names_available(
 ) -> list[CaseNameNotAvailableError]:
     errors: list[CaseNameNotAvailableError] = []
     customer = store.get_customer_by_internal_id(order.customer)
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if store.get_case_by_name_and_customer(case_name=case.name, customer=customer):
             error = CaseNameNotAvailableError(case_index=case_index)
-            errors.append(error)
-    return errors
-
-
-def validate_case_internal_ids_exist(
-    order: OrderWithCases,
-    store: Store,
-    **kwargs,
-) -> list[CaseDoesNotExistError]:
-    errors: list[CaseDoesNotExistError] = []
-    for case_index, case in order.enumerated_existing_cases:
-        db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
-        if not db_case:
-            error = CaseDoesNotExistError(case_index=case_index)
-            errors.append(error)
-    return errors
-
-
-def validate_existing_cases_belong_to_collaboration(
-    order: OrderWithCases,
-    store: Store,
-    **kwargs,
-) -> list[CaseOutsideOfCollaborationError]:
-    """Validates that all existing cases within the order belong to a customer
-    within the order's customer's collaboration."""
-    errors: list[CaseOutsideOfCollaborationError] = []
-    for case_index, case in order.enumerated_existing_cases:
-        if is_case_not_from_collaboration(case=case, customer_id=order.customer, store=store):
-            error = CaseOutsideOfCollaborationError(case_index=case_index)
             errors.append(error)
     return errors
 
@@ -110,7 +74,7 @@ def validate_one_sample_per_case(
     """Validates that there is only one sample in each case.
     Only applicable to RNAFusion."""
     errors: list[MultipleSamplesInCaseError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if len(case.samples) > 1:
             error = MultipleSamplesInCaseError(case_index=case_index)
             errors.append(error)
@@ -123,7 +87,7 @@ def validate_at_most_two_samples_per_case(
     """Validates that there is at most two samples in each case.
     Only applicable to Balsamic and Balsamic-UMI."""
     errors: list[MoreThanTwoSamplesInCaseError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if len(case.samples) > 2:
             error = MoreThanTwoSamplesInCaseError(case_index=case_index)
             errors.append(error)
@@ -139,7 +103,7 @@ def validate_number_of_normal_samples(
     Only applicable to Balsamic and Balsamic-UMI.
     """
     errors: list[NumberOfNormalSamplesError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if is_double_normal(case=case, store=store):
             error = DoubleNormalError(case_index=case_index)
             errors.append(error)
@@ -157,23 +121,9 @@ def validate_each_new_case_has_an_affected_sample(
 ) -> list[NewCaseWithoutAffectedSampleError]:
     """Validates that each case in the order contains at least one sample with affected status."""
     errors: list[NewCaseWithoutAffectedSampleError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if all(sample.status != StatusEnum.affected for sample in case.samples):
             error = NewCaseWithoutAffectedSampleError(case_index=case_index)
-            errors.append(error)
-    return errors
-
-
-def validate_existing_cases_have_an_affected_sample(
-    order: MIPDNAOrder | NalloOrder, store: Store, **kwargs
-) -> list[ExistingCaseWithoutAffectedSampleError]:
-    errors: list[ExistingCaseWithoutAffectedSampleError] = []
-    for case_index, case in order.enumerated_existing_cases:
-        db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
-        if not db_case:  # Error should be returned elsewhere
-            continue
-        if all(link.status != StatusEnum.affected for link in db_case.links):
-            error = ExistingCaseWithoutAffectedSampleError(case_index=case_index)
             errors.append(error)
     return errors
 
@@ -182,7 +132,7 @@ def validate_samples_in_case_have_same_prep_category(
     order: OrderWithCases, store: Store, **kwargs
 ) -> list[MultiplePrepCategoriesError]:
     errors: list[MultiplePrepCategoriesError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         prep_categories: set[str] = get_case_prep_categories(case=case, store=store)
         if len(prep_categories) > 1:
             error = MultiplePrepCategoriesError(case_index=case_index)
@@ -194,10 +144,8 @@ def validate_case_contains_related_samples(
     order: MIPDNAOrder | RarediseaseOrder, store: Store, **kwargs
 ) -> list[SamplesNotRelatedError]:
     errors: list[SamplesNotRelatedError] = []
-    for case_index, case in order.enumerated_new_cases:
-        if not does_case_exist(case=case, store=store):  # Error should be raised elsewhere
-            continue
-        if is_single_sample_case(case=case, store=store):  # This should always pass
+    for case_index, case in order.enumerated_cases:
+        if len(case.samples) == 1:
             continue
         case_has_error = False
         isolated_samples: list[str] = []
@@ -219,7 +167,9 @@ def validate_samples_have_same_source(
 ) -> list[SampleSourceMismatchError]:
     errors: list[SampleSourceMismatchError] = []
     for case_index, case in order.enumerated_cases:
-        sample_sources: set = get_sample_sources(case=case, lims_api=lims_api, store=store)
+        sample_sources: set = get_sample_sources_from_case(
+            case=case, lims_api=lims_api, store=store
+        )
         if len(sample_sources) > 1:
             error = SampleSourceMismatchError(
                 case_index=case_index,
@@ -235,7 +185,7 @@ def validate_gene_panels_exist(
     **kwargs,
 ) -> list[InvalidGenePanelsError]:
     errors: list[InvalidGenePanelsError] = []
-    for case_index, case in order.enumerated_new_cases:
+    for case_index, case in order.enumerated_cases:
         if invalid_panels := get_invalid_panels(panels=case.panels, store=store):
             case_error = InvalidGenePanelsError(case_index=case_index, panels=invalid_panels)
             errors.append(case_error)

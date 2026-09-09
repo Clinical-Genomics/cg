@@ -26,16 +26,6 @@ class CaseNameNotAvailableError(CaseError):
     message: str = "Case name already used in a previous order"
 
 
-class CaseDoesNotExistError(CaseError):
-    field: str = "internal_id"
-    message: str = "The case does not exist"
-
-
-class CaseOutsideOfCollaborationError(CaseError):
-    field: str = "internal_id"
-    message: str = "Case does not belong to collaboration"
-
-
 class MultipleSamplesInCaseError(CaseError):
     field: str = "sample_errors"
     message: str = "Multiple samples in the same case not allowed"
@@ -65,13 +55,6 @@ class NormalOnlyWGSError(NumberOfNormalSamplesError):
 class NewCaseWithoutAffectedSampleError(CaseError):
     field: str = "sample_errors"
     message: str = "Each case needs at least one affected sample"
-
-
-class ExistingCaseWithoutAffectedSampleError(CaseError):
-    field: str = "sample_errors"
-    message: str = (
-        "This case contains no affected sample. Please create a new case with at least one affected sample."
-    )
 
 
 class MultiplePrepCategoriesError(CaseError):

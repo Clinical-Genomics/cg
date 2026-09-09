@@ -2,12 +2,9 @@ from typing import Callable
 
 from cg.services.orders.validation.rules.case.rules import (
     validate_case_contains_related_samples,
-    validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
     validate_each_new_case_has_an_affected_sample,
-    validate_existing_cases_belong_to_collaboration,
-    validate_existing_cases_have_an_affected_sample,
     validate_gene_panels_exist,
     validate_gene_panels_unique,
     validate_samples_in_case_have_same_prep_category,
@@ -45,12 +42,9 @@ from cg.services.orders.validation.rules.case_sample.rules import (
 )
 
 RAREDISEASE_CASE_RULES: list[Callable] = [
-    validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
     validate_each_new_case_has_an_affected_sample,
-    validate_existing_cases_have_an_affected_sample,
-    validate_existing_cases_belong_to_collaboration,
     validate_gene_panels_exist,
     validate_gene_panels_unique,
     validate_samples_in_case_have_same_prep_category,
