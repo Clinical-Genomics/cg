@@ -68,11 +68,10 @@ class OrderSubmitter:
         payload: dict = _get_payload_for_external_samples(
             customer_internal_id=customer_internal_id, sample_names=sample_names
         )
-        subject = "external.samples_ordered"
-        LOG.info(f"Publishing event to subject {subject} with payload {payload}")
+        event_name = "external.samples_ordered"
         event_publisher.publish(
             nats_config=self.nats_config,
-            event_name=subject,
+            event_name=event_name,
             event_payload=payload,
         )
 

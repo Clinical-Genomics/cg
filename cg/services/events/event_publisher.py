@@ -44,7 +44,7 @@ async def _publish_async(nats_config, event_name: str, data: dict) -> None:
         js: JetStreamContext = nc.jetstream()
         payload: bytes = json.dumps(data).encode()
         await js.publish(subject=f"{nats_config.stream}.{event_name}", payload=payload)
-        LOG.debug(
+        LOG.info(
             f"Published event to NATS JetStream subject {nats_config.stream}.{event_name} with payload {data}"
         )
     finally:
