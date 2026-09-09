@@ -27,12 +27,12 @@ def publish_command(nats_config, subject: str, data: dict) -> str:
     return command
 
 
-def publish(nats_config, subject: str, event_payload: dict) -> None:
+def publish(nats_config, event_name: str, event_payload: dict) -> None:
     """Publish an event to NATS JetStream from synchronous code."""
-    asyncio.run(_publish_async(nats_config=nats_config, subject=subject, data=event_payload))
+    asyncio.run(_publish_async(nats_config=nats_config, event_name=event_name, data=event_payload))
 
 
-async def _publish_async(nats_config, subject: str, data: dict) -> None:
+async def _publish_async(nats_config, event_name: str, data: dict) -> None:
     LOG.debug("Starting connection to the NATS server")
     nc: Client = await nats.connect(
         servers=nats_config.server,
@@ -43,8 +43,10 @@ async def _publish_async(nats_config, subject: str, data: dict) -> None:
     try:
         js: JetStreamContext = nc.jetstream()
         payload: bytes = json.dumps(data).encode()
-        await js.publish(subject=subject, payload=payload)
-        LOG.debug(f"Published event to NATS JetStream subject {subject} with payload {data}")
+        await js.publish(subject=f"{nats_config.stream}.{event_name}", payload=payload)
+        LOG.info(
+            f"Published event to NATS JetStream subject {nats_config.stream}.{event_name} with payload {data}"
+        )
     finally:
         await nc.drain()
         LOG.debug("Connection to the NATS server closed")

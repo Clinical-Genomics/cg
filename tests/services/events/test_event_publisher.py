@@ -52,7 +52,7 @@ def test_publish_command(nats_config: NatsConfig):
 
 def test_publish(nats_config: NatsConfig, mocker: MockerFixture):
     # GIVEN a NatsConfig, a subject and payload
-    subject = "cg.upload.completed"
+    event_name = "upload.completed"
     event_payload = {"analysis": "analysis_1"}
 
     # GIVEN a mocked nats client and jetstream context
@@ -70,14 +70,16 @@ def test_publish(nats_config: NatsConfig, mocker: MockerFixture):
     mocker.patch.object(event_publisher, "_tls_context", return_value=tls_context)
 
     # WHEN publishing synchronously
-    event_publisher.publish(nats_config=nats_config, subject=subject, event_payload=event_payload)
+    event_publisher.publish(
+        nats_config=nats_config, event_name=event_name, event_payload=event_payload
+    )
 
     # THEN the event is sent via JetStream
     connect_mock.assert_awaited_once_with(
         servers="nats://server", tls=tls_context, token="nats-token"
     )
     jetstream_context.as_mock.publish.assert_awaited_once_with(
-        subject=subject,
+        subject=f"{nats_config.stream}.{event_name}",
         payload=json.dumps(event_payload).encode(),
     )
     nats_client.as_mock.drain.assert_awaited_once()
