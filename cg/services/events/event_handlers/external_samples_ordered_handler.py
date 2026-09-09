@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 from cg.models.cg_config import CGConfig
 from cg.services import transfer_to_cluster_service
+from cg.services.events.constants import CUSTOMER_INTERNAL_ID_FIELD, SAMPLE_NAME_ARRAY_FIELD
 from cg.store.models import Customer, Sample
 from cg.store.store import Store
 
@@ -11,8 +12,8 @@ LOG = logging.getLogger(__name__)
 
 
 class ExternalSamplesOrderedEvent(BaseModel):
-    customer: str = Field(alias="status_db.customer")
-    sample_names: list[str] = Field(alias="status_db.sample_names")
+    customer: str = Field(alias=CUSTOMER_INTERNAL_ID_FIELD)
+    sample_names: list[str] = Field(alias=SAMPLE_NAME_ARRAY_FIELD)
 
 
 def handle(config: CGConfig, event_payload: dict):

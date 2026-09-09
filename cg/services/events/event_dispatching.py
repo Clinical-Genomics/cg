@@ -2,13 +2,18 @@ import logging
 from typing import Protocol
 
 from cg.models.cg_config import CGConfig
+from cg.services.events.constants import (
+    EXTERNAL_SAMPLE_STORED_SUBJECT,
+    EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT,
+    EXTERNAL_SAMPLE_UPLOADED_SUBJECT,
+    EXTERNAL_SAMPLES_ORDERED_SUBJECT,
+)
 from cg.services.events.event_handlers import (
-    external_sample_transferred_handler,
     external_sample_stored_handler,
+    external_sample_transferred_handler,
     external_sample_uploaded_handler,
     external_samples_ordered_handler,
 )
-from cg.services.transfer_to_cluster_service import EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT
 
 LOG = logging.getLogger(__name__)
 
@@ -18,16 +23,16 @@ class EventHandler(Protocol):
 
 
 EVENT_HANDLERS: dict[str, EventHandler] = {
-    "external.customer_uploaded_sample": external_sample_uploaded_handler.handle,
-    "external.sample_stored": external_sample_stored_handler.handle,
-    "external.samples_ordered": external_samples_ordered_handler.handle,
+    EXTERNAL_SAMPLE_UPLOADED_SUBJECT: external_sample_uploaded_handler.handle,
+    EXTERNAL_SAMPLE_STORED_SUBJECT: external_sample_stored_handler.handle,
+    EXTERNAL_SAMPLES_ORDERED_SUBJECT: external_samples_ordered_handler.handle,
     EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT: external_sample_transferred_handler.handle,
 }
 
 
 def dispatch(
     config: CGConfig, event_name: str, event_payload: dict, event_handlers: dict = EVENT_HANDLERS
-):
+) -> None:
     """
     Select the appropriate handler for the given event name and call it with the provided payload.
     """
