@@ -78,6 +78,6 @@ def test_handle_success(mocker: MockerFixture):
     # THEN an event was published saying the sample was stored
     publish_mock.assert_called_once_with(
         nats_config=nats_config,
-        subject=f"cg-test.{EXTERNAL_SAMPLE_STORED_SUBJECT}",
+        event_name=EXTERNAL_SAMPLE_STORED_SUBJECT,
         event_payload={SAMPLE_INTERNAL_ID_FIELD: "ACC123"},
     )
