@@ -73,7 +73,7 @@ class OrderSubmitter:
         LOG.info(f"Publishing event to subject {subject} with payload {payload}")
         event_publisher.publish(
             nats_config=self.nats_config,
-            subject=subject,
+            event_name=subject,
             event_payload=payload,
         )
 

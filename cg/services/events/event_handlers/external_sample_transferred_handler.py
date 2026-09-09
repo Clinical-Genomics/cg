@@ -47,7 +47,7 @@ def handle(config: CGConfig, event_payload: dict) -> None:
     config.status_db.commit_to_store()
     event_publisher.publish(
         nats_config=config.nats,
-        subject=f"{config.nats.stream}.{EXTERNAL_SAMPLE_STORED_SUBJECT}",
+        event_name=EXTERNAL_SAMPLE_STORED_SUBJECT,
         event_payload={"statusdb.sample_internal_id": event.sample_internal_id},
     )
 
