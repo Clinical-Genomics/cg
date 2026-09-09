@@ -27,7 +27,7 @@ def get_publish_command(nats_config, subject: str, data: dict) -> str:
     return command
 
 
-def publish(nats_config, event_name: str, event_payload: dict) -> None:
+def publish_event(nats_config, event_name: str, event_payload: dict) -> None:
     """Publish an event to NATS JetStream from synchronous code."""
     asyncio.run(_publish_async(nats_config=nats_config, event_name=event_name, data=event_payload))
 

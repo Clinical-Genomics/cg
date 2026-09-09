@@ -69,7 +69,7 @@ class OrderSubmitter:
             customer_internal_id=customer_internal_id, sample_names=sample_names
         )
         event_name = "external.samples_ordered"
-        event_publisher.publish(
+        event_publisher.publish_event(
             nats_config=self.nats_config,
             event_name=event_name,
             event_payload=payload,

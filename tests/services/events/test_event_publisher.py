@@ -50,7 +50,7 @@ def test_publish_command(nats_config: NatsConfig):
     assert command == expected
 
 
-def test_publish(nats_config: NatsConfig, mocker: MockerFixture):
+def test_publish_event(nats_config: NatsConfig, mocker: MockerFixture):
     # GIVEN a NatsConfig, a subject and payload
     event_name = "upload.completed"
     event_payload = {"analysis": "analysis_1"}
@@ -70,7 +70,7 @@ def test_publish(nats_config: NatsConfig, mocker: MockerFixture):
     mocker.patch.object(event_publisher, "_tls_context", return_value=tls_context)
 
     # WHEN publishing synchronously
-    event_publisher.publish(
+    event_publisher.publish_event(
         nats_config=nats_config, event_name=event_name, event_payload=event_payload
     )
 
