@@ -67,7 +67,7 @@ def _get_sbatch_command(cg_config: CGConfig, sample: Sample) -> str:
             destination_path=destination_path,
         )
         + "\n"
-        + event_publisher.publish_command(
+        + event_publisher.get_publish_command(
             nats_config=cg_config.nats,
             subject=f"{cg_config.nats.stream}.{EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT}",
             data=event_payload,

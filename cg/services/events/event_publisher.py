@@ -12,7 +12,7 @@ from nats.js import JetStreamContext
 LOG = logging.getLogger(__name__)
 
 
-def publish_command(nats_config, subject: str, data: dict) -> str:
+def get_publish_command(nats_config, subject: str, data: dict) -> str:
     json_str: str = json.dumps(data).replace('"', '\\"')
     command: str = (
         f"{nats_config.nats_binary_path} pub "

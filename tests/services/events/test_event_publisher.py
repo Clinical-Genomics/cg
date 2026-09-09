@@ -32,7 +32,7 @@ def test_publish_command(nats_config: NatsConfig):
     event_payload = {"analysis": "analysis_1", "uploaded_at": "$(date +%Y-%m-%dT%H:%M:%SZ)"}
 
     # WHEN the publish_command function is called with the NatsConfig, subject, and data
-    command = event_publisher.publish_command(
+    command = event_publisher.get_publish_command(
         nats_config=nats_config, subject=subject, data=event_payload
     )
 
