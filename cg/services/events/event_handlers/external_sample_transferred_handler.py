@@ -9,7 +9,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.services.events import event_publisher
-from cg.services.events.constants import EXTERNAL_SAMPLE_STORED_SUBJECT, SAMPLE_INTERNAL_ID_FIELD
+from cg.services.events.constants import EXTERNAL_SAMPLE_STORED_EVENT, SAMPLE_INTERNAL_ID_FIELD
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ def handle(config: CGConfig, event_payload: dict) -> None:
     config.status_db.commit_to_store()
     event_publisher.publish(
         nats_config=config.nats,
-        event_name=EXTERNAL_SAMPLE_STORED_SUBJECT,
+        event_name=EXTERNAL_SAMPLE_STORED_EVENT,
         event_payload={SAMPLE_INTERNAL_ID_FIELD: event.sample_internal_id},
     )
 

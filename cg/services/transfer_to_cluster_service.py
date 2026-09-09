@@ -11,10 +11,7 @@ from cg.services.deliver_files.rsync.sbatch_commands import (
     RSYNC_CONTENTS_COMMAND,
 )
 from cg.services.events import event_publisher
-from cg.services.events.constants import (
-    EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT,
-    SAMPLE_INTERNAL_ID_FIELD,
-)
+from cg.services.events.constants import EXTERNAL_SAMPLE_TRANSFERRED_EVENT, SAMPLE_INTERNAL_ID_FIELD
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -69,7 +66,7 @@ def _get_sbatch_command(cg_config: CGConfig, sample: Sample) -> str:
         + "\n"
         + event_publisher.publish_command(
             nats_config=cg_config.nats,
-            subject=f"{cg_config.nats.stream}.{EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT}",
+            subject=f"{cg_config.nats.stream}.{EXTERNAL_SAMPLE_TRANSFERRED_EVENT}",
             data=event_payload,
         )
     )

@@ -1,8 +1,8 @@
 # Event names
-EXTERNAL_SAMPLES_ORDERED_SUBJECT = "external.samples_ordered"
-EXTERNAL_SAMPLE_STORED_SUBJECT = "external.sample_storage_completed"
-EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT = "external.sample_transfer_completed"
-EXTERNAL_SAMPLE_UPLOADED_SUBJECT = "external.sample_upload_completed"
+EXTERNAL_SAMPLES_ORDERED_EVENT = "external.samples_ordered"
+EXTERNAL_SAMPLE_STORED_EVENT = "external.sample_storage_completed"
+EXTERNAL_SAMPLE_TRANSFERRED_EVENT = "external.sample_transfer_completed"
+EXTERNAL_SAMPLE_UPLOADED_EVENT = "external.sample_upload_completed"
 
 # Payload attributes
 CUSTOMER_INTERNAL_ID_FIELD = "status_db.customer.internal_id"

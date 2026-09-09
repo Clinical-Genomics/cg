@@ -3,10 +3,10 @@ from typing import Protocol
 
 from cg.models.cg_config import CGConfig
 from cg.services.events.constants import (
-    EXTERNAL_SAMPLE_STORED_SUBJECT,
-    EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT,
-    EXTERNAL_SAMPLE_UPLOADED_SUBJECT,
-    EXTERNAL_SAMPLES_ORDERED_SUBJECT,
+    EXTERNAL_SAMPLE_STORED_EVENT,
+    EXTERNAL_SAMPLE_TRANSFERRED_EVENT,
+    EXTERNAL_SAMPLE_UPLOADED_EVENT,
+    EXTERNAL_SAMPLES_ORDERED_EVENT,
 )
 from cg.services.events.event_handlers import (
     external_sample_stored_handler,
@@ -23,10 +23,10 @@ class EventHandler(Protocol):
 
 
 EVENT_HANDLERS: dict[str, EventHandler] = {
-    EXTERNAL_SAMPLE_UPLOADED_SUBJECT: external_sample_uploaded_handler.handle,
-    EXTERNAL_SAMPLE_STORED_SUBJECT: external_sample_stored_handler.handle,
-    EXTERNAL_SAMPLES_ORDERED_SUBJECT: external_samples_ordered_handler.handle,
-    EXTERNAL_SAMPLE_TRANSFERRED_SUBJECT: external_sample_transferred_handler.handle,
+    EXTERNAL_SAMPLE_UPLOADED_EVENT: external_sample_uploaded_handler.handle,
+    EXTERNAL_SAMPLE_STORED_EVENT: external_sample_stored_handler.handle,
+    EXTERNAL_SAMPLES_ORDERED_EVENT: external_samples_ordered_handler.handle,
+    EXTERNAL_SAMPLE_TRANSFERRED_EVENT: external_sample_transferred_handler.handle,
 }
 
 
