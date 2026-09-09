@@ -344,7 +344,9 @@ def test_submit_order_with_external_samples(
         "status_db.sample_names": ["RDSample1", "RDSample2", "RDSample3", "RDSample4"],
     }
     mock_publish_external_order.assert_called_once_with(
-        nats_config=nats_config, subject="external.samples_ordered", event_payload=expected_payload
+        nats_config=nats_config,
+        event_name="external.samples_ordered",
+        event_payload=expected_payload,
     )
 
 
