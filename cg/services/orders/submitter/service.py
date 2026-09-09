@@ -50,16 +50,15 @@ class OrderSubmitter:
         order: Order = self.validation_service.parse_and_validate(
             raw_order=raw_order, order_type=order_type, user_id=user.id
         )
-        ticket_number: int = self.ticket_handler.create_ticket(
-            order=order, user_name=user.name, user_mail=user.email, order_type=order_type
-        )
-        order._generated_ticket_id = ticket_number
-        serialized_order: dict = storing_service.store_order(order)
         if external_samples := order.external_samples(self.status_db):
             self._publish_event_with_external_samples(
                 customer_internal_id=order.customer, external_samples=external_samples
             )
-        return serialized_order
+        ticket_number: int = self.ticket_handler.create_ticket(
+            order=order, user_name=user.name, user_mail=user.email, order_type=order_type
+        )
+        order._generated_ticket_id = ticket_number
+        return storing_service.store_order(order)
 
     def _publish_event_with_external_samples(
         self, customer_internal_id: str, external_samples: list[SampleType]
