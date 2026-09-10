@@ -3,6 +3,7 @@ from unittest.mock import create_autospec
 from pytest_mock import MockerFixture
 
 from cg.models.cg_config import CGConfig
+from cg.services.events.constants import CUSTOMER_INTERNAL_ID_FIELD, SAMPLE_NAME_ARRAY_FIELD
 from cg.services.events.event_handlers import external_samples_ordered_handler
 from cg.services.events.event_handlers.external_samples_ordered_handler import (
     transfer_to_cluster_service,
@@ -14,8 +15,8 @@ from cg.store.store import Store
 def test_handle_trigger_transfer_only_for_stored_sample(mocker: MockerFixture):
     # GIVEN a payload for an order with two external samples
     event_payload = {
-        "status_db.customer": "cust000",
-        "status_db.sample_names": ["sample-name-1", "sample-name-2"],
+        CUSTOMER_INTERNAL_ID_FIELD: "cust000",
+        SAMPLE_NAME_ARRAY_FIELD: ["sample-name-1", "sample-name-2"],
     }
 
     # GIVEN that one of the samples is in the ExternalSample table

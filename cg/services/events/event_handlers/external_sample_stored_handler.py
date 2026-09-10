@@ -7,6 +7,7 @@ from cg.exc import CaseNotFoundError
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
+from cg.services.events.constants import SAMPLE_INTERNAL_ID_FIELD
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -14,7 +15,7 @@ LOG = logging.getLogger(__name__)
 
 
 class ExternalSampleStoredEvent(BaseModel):
-    sample_internal_id: str = Field(alias="status_db.sample_internal_id")
+    sample_internal_id: str = Field(alias=SAMPLE_INTERNAL_ID_FIELD)
 
 
 def handle(config: CGConfig, event_payload: dict) -> None:
