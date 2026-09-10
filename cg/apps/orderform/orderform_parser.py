@@ -10,7 +10,8 @@ from cg.exc import OrderFormError
 from cg.models.orders.constants import OrderType
 from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool
 from cg.models.orders.sample_base import OrderSample
-from cg.store.models import Customer
+from cg.store.models import Customer, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -141,10 +142,13 @@ class OrderformParser(BaseModel):
             synopsis=synopsis,
         )
 
-    def generate_orderform(self) -> Orderform:
+    def generate_orderform(self, status_db: Store) -> Orderform:
         """Generate an orderform"""
         case_objs: list[OrderCase] = []
         if self.project_type in ORDER_TYPES_WITH_CASES:
+            self._fill_out_existing_samples(
+                status_db
+            )  # Only order types with cases support existing samples today.
             cases_map: dict[str, list[OrderSample]] = self.group_cases()
             for case_id in cases_map:
                 case_objs.append(self.expand_case(case_id=case_id, case_samples=cases_map[case_id]))
@@ -158,6 +162,15 @@ class OrderformParser(BaseModel):
             project_type=self.project_type,
             pools=self.get_pools(),
         )
+
+    def _fill_out_existing_samples(self, status_db: Store):
+        for sample in self.samples:
+            if sample_name := sample.existing_sample_name:
+                customer: Customer = status_db.get_customer_by_internal_id_strict(self.customer_id)
+                db_sample: Sample = status_db.get_sample_by_customer_and_name_strict(
+                    customer_entry_id=customer.id, sample_name=sample_name
+                )
+                sample.internal_id = db_sample.internal_id
 
     def __repr__(self):
         return (
