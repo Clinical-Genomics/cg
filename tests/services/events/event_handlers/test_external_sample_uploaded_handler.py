@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from pytest_mock import MockerFixture
 
 from cg.models.cg_config import CGConfig
+from cg.services.events.constants import CUSTOMER_INTERNAL_ID_FIELD, SAMPLE_NAME_FIELD
 from cg.services.events.event_handlers import external_sample_uploaded_handler
 from cg.services.events.event_handlers.external_sample_uploaded_handler import (
     transfer_to_cluster_service,
@@ -29,8 +30,8 @@ def test_handle_triggers_transfer(mocker: MockerFixture):
 
     # GIVEN some payload for an external sample upload event
     event_payload = {
-        "cg.customer": "cust000",
-        "cg.sample_name": "sample-name",
+        CUSTOMER_INTERNAL_ID_FIELD: "cust000",
+        SAMPLE_NAME_FIELD: "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
     }
 
@@ -73,8 +74,8 @@ def test_handle_not_trigger_transfer(mocker: MockerFixture):
 
     # GIVEN some payload for an external sample upload event
     event_payload = {
-        "cg.customer": "cust000",
-        "cg.sample_name": "sample-name",
+        CUSTOMER_INTERNAL_ID_FIELD: "cust000",
+        SAMPLE_NAME_FIELD: "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
     }
 
@@ -104,8 +105,8 @@ def test_handle_invalid_sample_name():
 
     # GIVEN some event payload where the sample name contains illegal letters
     event_payload = {
-        "cg.customer": "cust000",
-        "cg.sample_name": "invalid_sample_name",
+        CUSTOMER_INTERNAL_ID_FIELD: "cust000",
+        SAMPLE_NAME_FIELD: "invalid_sample_name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
     }
 
@@ -121,8 +122,8 @@ def test_handle_invalid_date_format():
 
     # GIVEN some event payload where the uploaded at is malformed
     event_payload = {
-        "cg.customer": "cust000",
-        "cg.sample_name": "sample-name",
+        CUSTOMER_INTERNAL_ID_FIELD: "cust000",
+        SAMPLE_NAME_FIELD: "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14.52",
     }
 

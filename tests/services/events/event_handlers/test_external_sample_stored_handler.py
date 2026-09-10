@@ -9,6 +9,7 @@ from cg.exc import CaseNotFoundError
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
+from cg.services.events.constants import SAMPLE_INTERNAL_ID_FIELD
 from cg.services.events.event_handlers import external_sample_stored_handler
 from cg.store.models import Case, Sample
 from cg.store.store import Store
@@ -17,7 +18,7 @@ from tests.typed_mock import TypedMock, create_typed_mock
 
 def test_handle_starts_case(mocker: MockerFixture):
     # GIVEN a valid event payload with a sample id
-    event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
+    event_payload: dict = {SAMPLE_INTERNAL_ID_FIELD: "ACC123"}
 
     # GIVEN that the sample belongs to a purely external case
     status_db: Store = create_autospec(Store)
@@ -65,7 +66,7 @@ def test_handle_starts_case(mocker: MockerFixture):
 
 def test_handle_fails_with_no_case():
     # GIVEN a valid event payload with a sample id
-    event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
+    event_payload: dict = {SAMPLE_INTERNAL_ID_FIELD: "ACC123"}
 
     # GIVEN that the sample does not have a linked case that should deliver it
     status_db: Store = create_autospec(Store)
@@ -85,7 +86,7 @@ def test_handle_fails_with_no_case():
 
 def test_handle_ignores_case_with_internal_samples(mocker: MockerFixture):
     # GIVEN a valid event payload with a sample id
-    event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
+    event_payload: dict = {SAMPLE_INTERNAL_ID_FIELD: "ACC123"}
 
     # GIVEN that the sample belongs to a case that delivers the sample
     status_db: Store = create_autospec(Store)
@@ -127,7 +128,7 @@ def test_handle_ignores_case_with_internal_samples(mocker: MockerFixture):
 
 def test_handle_ignores_case_with_unstored_samples(mocker: MockerFixture):
     # GIVEN a valid event payload with a sample id
-    event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
+    event_payload: dict = {SAMPLE_INTERNAL_ID_FIELD: "ACC123"}
 
     # GIVEN that the sample belongs to a purely external case
     status_db: Store = create_autospec(Store)
@@ -173,7 +174,7 @@ def test_handle_ignores_case_with_unstored_samples(mocker: MockerFixture):
 
 def test_handle_ignores_case_with_undeliverable_samples(mocker: MockerFixture):
     # GIVEN a valid event payload with a sample id
-    event_payload: dict = {"status_db.sample_internal_id": "ACC123"}
+    event_payload: dict = {SAMPLE_INTERNAL_ID_FIELD: "ACC123"}
 
     # GIVEN that the sample belongs to a case that does not deliver all of its samples
     status_db: Store = create_autospec(Store)

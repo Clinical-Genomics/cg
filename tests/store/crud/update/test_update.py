@@ -9,7 +9,13 @@ from cg.constants.devices import RevioNames
 from cg.constants.lims import LimsStatus
 from cg.constants.sequencing import Sequencers
 from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioSequencingRunDTO
-from cg.store.models import Analysis, IlluminaSampleSequencingMetrics, IlluminaSequencingRun, Sample
+from cg.store.models import (
+    Analysis,
+    ExternalSample,
+    IlluminaSampleSequencingMetrics,
+    IlluminaSequencingRun,
+    Sample,
+)
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -343,3 +349,27 @@ def test_update_sample_lims_status(store: Store, helpers: StoreHelpers, mocker: 
 
     # THEN the commit should not have been called
     commit_spy.assert_not_called()
+
+
+def test_update_external_sample(store: Store, helpers: StoreHelpers):
+    # GIVEN a store containing an external sample without a transferred_at date
+    timestamp_now: datetime = datetime.now()
+    customer = helpers.ensure_customer(store=store, customer_id="cust000")
+    external_sample = ExternalSample(
+        customer_id=customer.id,
+        sample_name="sample-name-1",
+        customer_uploaded_at=timestamp_now,
+    )
+    assert external_sample.transferred_at is None
+    store.add_item_to_store(item=external_sample)
+
+    # WHEN updating transferred_at for the external sample
+    updated_external_sample: ExternalSample = store.update_external_sample(
+        customer_id=customer.id,
+        sample_name=external_sample.sample_name,
+        transferred_at=timestamp_now,
+    )
+
+    # THEN the transferred_at field should have been updated
+    assert updated_external_sample == external_sample
+    assert updated_external_sample.transferred_at == timestamp_now
