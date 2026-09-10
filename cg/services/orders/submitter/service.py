@@ -12,6 +12,7 @@ import logging
 from cg.models.cg_config import NatsConfig
 from cg.models.orders.constants import OrderType
 from cg.services.events import event_publisher
+from cg.services.events.constants import CUSTOMER_INTERNAL_ID_FIELD, SAMPLE_NAME_ARRAY_FIELD
 from cg.services.orders.storing.service import SampleType, StoreOrderService
 from cg.services.orders.storing.service_registry import StoringServiceRegistry
 from cg.services.orders.submitter.ticket_handler import TicketHandler
@@ -77,4 +78,4 @@ class OrderSubmitter:
 
 
 def _get_payload_for_external_samples(customer_internal_id: str, sample_names: list[str]) -> dict:
-    return {"status_db.customer": customer_internal_id, "status_db.sample_names": sample_names}
+    return {CUSTOMER_INTERNAL_ID_FIELD: customer_internal_id, SAMPLE_NAME_ARRAY_FIELD: sample_names}

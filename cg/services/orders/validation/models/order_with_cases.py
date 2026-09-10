@@ -24,6 +24,9 @@ class OrderWithCases(Order[SampleType], Generic[CaseType, SampleType]):
     ]
 
     def external_samples(self, status_db: Store) -> list[SampleType]:
+        """
+        Return external samples. This assumes that the order has already been validated.
+        """
         external_samples: list[SampleType] = []
         for _, _, sample in self.enumerated_new_samples:
             if status_db.get_application_by_tag_strict(sample.application).is_external:
