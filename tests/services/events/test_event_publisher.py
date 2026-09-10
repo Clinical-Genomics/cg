@@ -28,12 +28,12 @@ def nats_config() -> NatsConfig:
 
 def test_publish_command(nats_config: NatsConfig):
     # GIVEN a NatsConfig with publisher authentication details, a subject, and an event payload
-    subject = "cg.upload.completed"
+    event_name = "upload.completed"
     event_payload = {"analysis": "analysis_1", "uploaded_at": "$(date +%Y-%m-%dT%H:%M:%SZ)"}
 
     # WHEN the publish_command function is called with the NatsConfig, subject, and data
     command = event_publisher.get_publish_command(
-        nats_config=nats_config, subject=subject, data=event_payload
+        nats_config=nats_config, event_name=event_name, data=event_payload
     )
 
     # THEN the generated command string matches the expected format
@@ -45,7 +45,7 @@ def test_publish_command(nats_config: NatsConfig):
         "--tlscert client_cert "
         "--tlskey client_key "
         "--token $(cat /token/path) "
-        r'cg.upload.completed "{\"analysis\": \"analysis_1\", \"uploaded_at\": \"$(date +%Y-%m-%dT%H:%M:%SZ)\"}"'
+        r'cg-test.upload.completed "{\"analysis\": \"analysis_1\", \"uploaded_at\": \"$(date +%Y-%m-%dT%H:%M:%SZ)\"}"'
     )
     assert command == expected
 

@@ -318,7 +318,7 @@ class DeliveryRsyncService:
         }
         command += "\n" + get_publish_command(
             nats_config=self.nats_config,
-            subject=f"{self.nats_config.stream}.{ANALYSIS_UPLOADED_SUBJECT}",
+            event_name=ANALYSIS_UPLOADED_SUBJECT,
             data=data,
         )
         return self._generate_and_submit_sbatch(

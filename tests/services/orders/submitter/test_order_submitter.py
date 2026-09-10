@@ -13,6 +13,7 @@ from cg.meta.orders.utils import get_ticket_status, get_ticket_tags
 from cg.models.cg_config import NatsConfig
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum
+from cg.services.events.constants import CUSTOMER_INTERNAL_ID_FIELD, SAMPLE_NAME_ARRAY_FIELD
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.storing.service_registry import StoringServiceRegistry
 from cg.services.orders.submitter.service import OrderSubmitter, event_publisher
@@ -340,8 +341,8 @@ def test_submit_order_with_external_samples(
 
     # THEN an event was published with the expected payload
     expected_payload = {
-        "status_db.customer": "cust000",
-        "status_db.sample_names": ["RDSample1", "RDSample2", "RDSample3", "RDSample4"],
+        CUSTOMER_INTERNAL_ID_FIELD: "cust000",
+        SAMPLE_NAME_ARRAY_FIELD: ["RDSample1", "RDSample2", "RDSample3", "RDSample4"],
     }
     mock_publish_external_order.assert_called_once_with(
         nats_config=nats_config,

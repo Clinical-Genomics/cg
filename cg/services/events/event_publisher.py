@@ -12,7 +12,7 @@ from nats.js import JetStreamContext
 LOG = logging.getLogger(__name__)
 
 
-def get_publish_command(nats_config, subject: str, data: dict) -> str:
+def get_publish_command(nats_config, event_name: str, data: dict) -> str:
     json_str: str = json.dumps(data).replace('"', '\\"')
     command: str = (
         f"{nats_config.nats_binary_path} pub "
@@ -22,7 +22,7 @@ def get_publish_command(nats_config, subject: str, data: dict) -> str:
         f"--tlscert {nats_config.client_cert_path} "
         f"--tlskey {nats_config.client_key_path} "
         f"--token $(cat {nats_config.token_path}) "
-        f'{subject} "{json_str}"'  # double quotes around json to allow bash expansion
+        f'{nats_config.stream}.{event_name} "{json_str}"'  # double quotes around json to allow bash expansion
     )
     return command
 
