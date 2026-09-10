@@ -1051,6 +1051,17 @@ class PacbioSmrtCellMetricsView(BaseView):
         "completed_at",
     ]
 
+    def delete_model(self, model):
+        try:
+            # Pacbio SMRT cells are only run once, so cascading to the run_device table is okay.
+            self.session.delete(model.device)
+            self.session.commit()
+            return True
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                raise
+            return False
+
     @staticmethod
     def view_smrt_cell_link(unused1, unused2, model, unused3):
         """column formatter to open this view"""
