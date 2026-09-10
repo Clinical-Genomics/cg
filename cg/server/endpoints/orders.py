@@ -121,7 +121,7 @@ def create_order_from_form():
             json_data = json.load(input_file.stream, strict=False)
             order_parser = JsonOrderformParser()
             order_parser.parse_orderform(order_data=json_data)
-        parsed_order: Orderform = order_parser.generate_orderform()
+        parsed_order: Orderform = order_parser.generate_orderform(db)
     except (  # user misbehaviour
         AttributeError,
         OrderFormError,

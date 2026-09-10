@@ -63,6 +63,7 @@ class OrderSample(BaseModel):
     data_analysis: Workflow
     data_delivery: DataDelivery
     elution_buffer: str | None = None
+    existing_sample_name: str | None = None
     extraction_method: str | None = None
     family_name: (
         constr(
