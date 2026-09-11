@@ -128,4 +128,6 @@ order_submitter = OrderSubmitter(
     ticket_handler=ticket_handler,
     storing_registry=storing_service_registry,
     validation_service=order_validation_service,
+    status_db=db,
+    nats_config=nats_config,
 )
