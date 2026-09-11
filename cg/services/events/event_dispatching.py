@@ -2,7 +2,15 @@ import logging
 from typing import Protocol
 
 from cg.models.cg_config import CGConfig
+from cg.services.events.constants import (
+    EXTERNAL_SAMPLE_STORED_EVENT,
+    EXTERNAL_SAMPLE_TRANSFERRED_EVENT,
+    EXTERNAL_SAMPLE_UPLOADED_EVENT,
+    EXTERNAL_SAMPLES_ORDERED_EVENT,
+)
 from cg.services.events.event_handlers import (
+    external_sample_stored_handler,
+    external_sample_transferred_handler,
     external_sample_uploaded_handler,
     external_samples_ordered_handler,
 )
@@ -15,20 +23,22 @@ class EventHandler(Protocol):
 
 
 EVENT_HANDLERS: dict[str, EventHandler] = {
-    "external.customer_uploaded_sample": external_sample_uploaded_handler.handle,
-    "external.samples_ordered": external_samples_ordered_handler.handle,
+    EXTERNAL_SAMPLE_UPLOADED_EVENT: external_sample_uploaded_handler.handle,
+    EXTERNAL_SAMPLE_STORED_EVENT: external_sample_stored_handler.handle,
+    EXTERNAL_SAMPLES_ORDERED_EVENT: external_samples_ordered_handler.handle,
+    EXTERNAL_SAMPLE_TRANSFERRED_EVENT: external_sample_transferred_handler.handle,
 }
 
 
 def dispatch(
     config: CGConfig, event_name: str, event_payload: dict, event_handlers: dict = EVENT_HANDLERS
-):
+) -> None:
     """
     Select the appropriate handler for the given event name and call it with the provided payload.
     """
     handler_function: EventHandler | None = event_handlers.get(event_name)
     if handler_function:
-        LOG.debug(f"Dispatching event {event_name} to handler {handler_function.__name__}")
+        LOG.debug(f"Dispatching event {event_name}")
         handler_function(config=config, event_payload=event_payload)
     else:
         LOG.info(f"No handler for event {event_name}")

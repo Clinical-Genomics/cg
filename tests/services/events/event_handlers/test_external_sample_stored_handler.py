@@ -1,0 +1,215 @@
+from unittest.mock import Mock, call, create_autospec
+
+import pytest
+from housekeeper.store.models import Bundle
+from pytest_mock import MockerFixture
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.exc import CaseNotFoundError
+from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.analysis_starter import AnalysisStarter
+from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
+from cg.services.events.constants import SAMPLE_INTERNAL_ID_FIELD
+from cg.services.events.event_handlers import external_sample_stored_handler
+from cg.store.models import Case, Sample
+from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
+
+
+def test_handle_starts_case(mocker: MockerFixture):
+    # GIVEN a valid event payload with a sample id
+    event_payload: dict = {SAMPLE_INTERNAL_ID_FIELD: "ACC123"}
+
+    # GIVEN that the sample belongs to a purely external case
+    status_db: Store = create_autospec(Store)
+    case: Case = create_autospec(Case)
+    stored_sample: Sample = create_autospec(
+        Sample, case_that_delivers=case, internal_id="ACC123", is_external=True
+    )
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=stored_sample)
+
+    # GIVEN that the case has another sample that has been also stored
+    other_sample: Sample = create_autospec(
+        Sample, case_that_delivers=case, internal_id="ACC234", is_external=True
+    )
+    case.samples = [stored_sample, other_sample]  # type: ignore
+
+    # GIVEN a Housekeeper API
+    housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
+    housekeeper_api.as_type.bundle = Mock(return_value=create_autospec(Bundle))
+
+    # GIVEN a CG config
+    cg_config: CGConfig = create_autospec(
+        CGConfig, housekeeper_api=housekeeper_api.as_type, status_db=status_db
+    )
+
+    # GIVEN an analysis starter
+    analysis_starter: TypedMock[AnalysisStarter] = create_typed_mock(AnalysisStarter)
+    mocker.patch.object(
+        AnalysisStarterFactory,
+        "get_analysis_starter_for_case",
+        return_value=analysis_starter.as_type,
+    )
+
+    # WHEN handling the event
+    external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
+
+    # THEN we should have checked that all samples were indeed stored
+    stored_sample_call = call("ACC123")
+    other_sample_call = call("ACC234")
+    assert stored_sample_call in housekeeper_api.as_mock.bundle.call_args_list
+    assert other_sample_call in housekeeper_api.as_mock.bundle.call_args_list
+
+    # THEN the case was started
+    analysis_starter.as_mock.start.assert_called_once_with(case.internal_id)
+
+
+def test_handle_fails_with_no_case():
+    # GIVEN a valid event payload with a sample id
+    event_payload: dict = {SAMPLE_INTERNAL_ID_FIELD: "ACC123"}
+
+    # GIVEN that the sample does not have a linked case that should deliver it
+    status_db: Store = create_autospec(Store)
+    sample: Sample = create_autospec(
+        Sample, case_that_delivers=None, internal_id="ACC123", is_external=True
+    )
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=sample)
+
+    # GIVEN a CG config
+    cg_config: CGConfig = create_autospec(CGConfig, status_db=status_db)
+
+    # WHEN handling the event
+    # THEN the appropriate error is raised
+    with pytest.raises(CaseNotFoundError, match="No case found to deliver sample ACC123"):
+        external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
+
+
+def test_handle_ignores_case_with_internal_samples(mocker: MockerFixture):
+    # GIVEN a valid event payload with a sample id
+    event_payload: dict = {SAMPLE_INTERNAL_ID_FIELD: "ACC123"}
+
+    # GIVEN that the sample belongs to a case that delivers the sample
+    status_db: Store = create_autospec(Store)
+    case: Case = create_autospec(Case)
+    external_sample: Sample = create_autospec(
+        Sample, case_that_delivers=case, internal_id="ACC123", is_external=True
+    )
+
+    # GIVEN that the case has another sample that is not external
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=external_sample)
+    internal_sample: Sample = create_autospec(
+        Sample, case_that_delivers=case, internal_id="ACC234", is_external=False
+    )
+    case.samples = [external_sample, internal_sample]  # type: ignore
+
+    # GIVEN a Housekeeper API
+    housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
+    housekeeper_api.as_type.bundle = Mock(return_value=create_autospec(Bundle))
+
+    # GIVEN a CG config
+    cg_config: CGConfig = create_autospec(
+        CGConfig, housekeeper_api=housekeeper_api.as_type, status_db=status_db
+    )
+
+    # GIVEN an analysis starter
+    analysis_starter: TypedMock[AnalysisStarter] = create_typed_mock(AnalysisStarter)
+    mocker.patch.object(
+        AnalysisStarterFactory,
+        "get_analysis_starter_for_case",
+        return_value=analysis_starter.as_type,
+    )
+
+    # WHEN handling the event
+    external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
+
+    # THEN the analysis was not started
+    analysis_starter.as_mock.start.assert_not_called()
+
+
+def test_handle_ignores_case_with_unstored_samples(mocker: MockerFixture):
+    # GIVEN a valid event payload with a sample id
+    event_payload: dict = {SAMPLE_INTERNAL_ID_FIELD: "ACC123"}
+
+    # GIVEN that the sample belongs to a purely external case
+    status_db: Store = create_autospec(Store)
+    case: Case = create_autospec(Case)
+    stored_sample: Sample = create_autospec(
+        Sample, case_that_delivers=case, internal_id="ACC123", is_external=True
+    )
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=stored_sample)
+
+    # GIVEN that the case has another sample that has not been stored
+    not_stored_sample: Sample = create_autospec(
+        Sample, case_that_delivers=case, internal_id="ACC234", is_external=True
+    )
+    case.samples = [stored_sample, not_stored_sample]  # type: ignore
+
+    # GIVEN a Housekeeper bundle
+    housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
+    housekeeper_api.as_type.bundle = Mock(
+        side_effect=lambda sample_id: (
+            create_autospec(Bundle) if sample_id == stored_sample.internal_id else None
+        )
+    )
+
+    # GIVEN a CG config
+    cg_config: CGConfig = create_autospec(
+        CGConfig, housekeeper_api=housekeeper_api.as_type, status_db=status_db
+    )
+
+    # GIVEN an analysis starter
+    analysis_starter: TypedMock[AnalysisStarter] = create_typed_mock(AnalysisStarter)
+    mocker.patch.object(
+        AnalysisStarterFactory,
+        "get_analysis_starter_for_case",
+        return_value=analysis_starter.as_type,
+    )
+
+    # WHEN handling the event
+    external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
+
+    # THEN the analysis was not started
+    analysis_starter.as_mock.start.assert_not_called()
+
+
+def test_handle_ignores_case_with_undeliverable_samples(mocker: MockerFixture):
+    # GIVEN a valid event payload with a sample id
+    event_payload: dict = {SAMPLE_INTERNAL_ID_FIELD: "ACC123"}
+
+    # GIVEN that the sample belongs to a case that does not deliver all of its samples
+    status_db: Store = create_autospec(Store)
+    case: Case = create_autospec(Case, internal_id="case1")
+    sample_from_case_that_delivers: Sample = create_autospec(
+        Sample, case_that_delivers=case, internal_id="ACC123", is_external=True
+    )
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=sample_from_case_that_delivers)
+    sample_from_another_case: Sample = create_autospec(
+        Sample,
+        case_that_delivers=create_autospec(Case, internal_id="case2"),
+        internal_id="ACC234",
+        is_external=True,
+    )
+    case.samples = [sample_from_case_that_delivers, sample_from_another_case]  # type: ignore
+
+    # GIVEN a Housekeeper API
+    housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
+    housekeeper_api.as_type.bundle = Mock(return_value=create_autospec(Bundle))
+
+    # GIVEN a CG config
+    cg_config: CGConfig = create_autospec(
+        CGConfig, housekeeper_api=housekeeper_api.as_type, status_db=status_db
+    )
+
+    # GIVEN an analysis starter
+    analysis_starter: TypedMock[AnalysisStarter] = create_typed_mock(AnalysisStarter)
+    mocker.patch.object(
+        AnalysisStarterFactory,
+        "get_analysis_starter_for_case",
+        return_value=analysis_starter.as_type,
+    )
+
+    # WHEN handling the event
+    external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
+
+    # THEN the analysis was not started
+    analysis_starter.as_mock.start.assert_not_called()

@@ -34,6 +34,7 @@ from cg.server.endpoints.utils import before_request
 from cg.server.ext import (
     db,
     delivery_message_service,
+    nats_config,
     order_service,
     order_submitter,
     order_validation_service,

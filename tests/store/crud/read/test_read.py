@@ -9,7 +9,12 @@ from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import BedVersionGenomeVersion, CaseActions, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
-from cg.exc import ApplicationTagNotFoundError, BedVersionNotFoundError, CgError
+from cg.exc import (
+    ApplicationTagNotFoundError,
+    BedVersionNotFoundError,
+    CgError,
+    ExternalSampleNotFoundError,
+)
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.models import (
     Analysis,
@@ -1366,3 +1371,35 @@ def test_get_external_sample_no_match(store: Store):
 
     # THEN None should be returned
     assert fetched_external_sample is None
+
+
+def test_get_external_sample_strict_success(store: Store, helpers: StoreHelpers):
+    # GIVEN a store containing a matching external sample for a customer
+    customer = helpers.ensure_customer(store=store, customer_id="cust000")
+    external_sample = ExternalSample(
+        customer_id=customer.id,
+        sample_name="sample-name-1",
+        customer_uploaded_at=datetime.now(),
+    )
+    store.add_item_to_store(item=external_sample)
+
+    # WHEN fetching the external sample strictly by customer and sample name
+    fetched_external_sample: ExternalSample = store.get_external_sample_strict(
+        customer_id=customer.id,
+        sample_name="sample-name-1",
+    )
+
+    # THEN the matching external sample should be returned
+    assert fetched_external_sample == external_sample
+
+
+def test_get_external_sample_strict_external_sample_not_found(store: Store):
+    # GIVEN an empty store
+
+    # WHEN fetching an external sample strictly by customer and sample name
+    # THEN an ExternalSampleNotFoundError should be raised
+    with pytest.raises(ExternalSampleNotFoundError):
+        store.get_external_sample_strict(
+            customer_id=1,
+            sample_name="sample-name-1",
+        )
