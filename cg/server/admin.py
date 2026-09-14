@@ -1060,6 +1060,7 @@ class PacbioSmrtCellMetricsView(BaseView):
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 raise
+            self.session.rollback()
             return False
 
     @staticmethod
