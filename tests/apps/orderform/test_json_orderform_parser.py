@@ -1,8 +1,11 @@
+from unittest.mock import create_autospec
+
 import pytest
 
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.models.orders.constants import OrderType
 from cg.models.orders.orderform_schema import Orderform
+from cg.store.store import Store
 
 
 @pytest.mark.parametrize(
@@ -18,7 +21,7 @@ def test_generate_json_orderform(valid_json_order_type: str, json_order_dict: di
     # WHEN an orderform is parsed and an Orderform object generated
     order_form_parser = JsonOrderformParser()
     order_form_parser.parse_orderform(order_data=json_order)
-    order_form: Orderform = order_form_parser.generate_orderform()
+    order_form: Orderform = order_form_parser.generate_orderform(create_autospec(Store))
 
     # THEN the created Orderform should contain samples, an order type and a delivery_type
     assert order_form.samples

@@ -10,7 +10,8 @@ from cg.exc import OrderFormError
 from cg.models.orders.constants import OrderType
 from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool
 from cg.models.orders.sample_base import OrderSample
-from cg.store.models import Customer
+from cg.store.models import Customer, Sample
+from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
 
@@ -141,10 +142,13 @@ class OrderformParser(BaseModel):
             synopsis=synopsis,
         )
 
-    def generate_orderform(self) -> Orderform:
+    def generate_orderform(self, status_db: Store) -> Orderform:
         """Generate an orderform"""
         case_objs: list[OrderCase] = []
         if self.project_type in ORDER_TYPES_WITH_CASES:
+            self._fill_out_existing_samples(
+                status_db
+            )  # Only order types with cases support existing samples today.
             cases_map: dict[str, list[OrderSample]] = self.group_cases()
             for case_id in cases_map:
                 case_objs.append(self.expand_case(case_id=case_id, case_samples=cases_map[case_id]))
@@ -158,6 +162,36 @@ class OrderformParser(BaseModel):
             project_type=self.project_type,
             pools=self.get_pools(),
         )
+
+    def _fill_out_existing_samples(self, status_db: Store):
+        existing_samples: list[OrderSample] = []
+        for index, sample in enumerate(self.samples):
+            if sample.existing_sample:
+                customer: Customer = status_db.get_customer_by_internal_id_strict(self.customer_id)
+                db_samples_to_add: list[Sample] = (
+                    status_db.get_samples_by_subject_id_customers_and_order_type(
+                        subject_id=sample.subject_id,
+                        customer_ids=[collaborator.id for collaborator in customer.collaborators],
+                        order_type=self.project_type,
+                    )
+                )
+                sample_list: list[OrderSample] = []
+                for db_sample in db_samples_to_add:
+                    new_sample = OrderSample(
+                        application=sample.application,
+                        customer=sample.customer,
+                        data_analysis=sample.data_analysis,
+                        data_delivery=sample.data_delivery,
+                        family_name=sample.family_name,
+                        father=sample.father,
+                        internal_id=db_sample.internal_id,
+                        mother=sample.mother,
+                        name=sample.name,
+                    )
+                    sample_list.append(new_sample)
+                existing_samples.extend(sample_list)
+                self.samples.pop(index)
+        self.samples.extend(existing_samples)
 
     def __repr__(self):
         return (
