@@ -164,13 +164,34 @@ class OrderformParser(BaseModel):
         )
 
     def _fill_out_existing_samples(self, status_db: Store):
-        for sample in self.samples:
-            if sample_name := sample.existing_sample_name:
+        existing_samples: list[OrderSample] = []
+        for index, sample in enumerate(self.samples):
+            if sample.existing_sample:
                 customer: Customer = status_db.get_customer_by_internal_id_strict(self.customer_id)
-                db_sample: Sample = status_db.get_sample_by_customer_and_name_strict(
-                    customer_entry_id=customer.id, sample_name=sample_name
+                db_samples_to_add: list[Sample] = (
+                    status_db.get_samples_by_subject_id_customers_and_order_type(
+                        subject_id=sample.subject_id,
+                        customer_ids=[collaborator.id for collaborator in customer.collaborators],
+                        order_type=self.project_type,
+                    )
                 )
-                sample.internal_id = db_sample.internal_id
+                sample_list: list[OrderSample] = []
+                for db_sample in db_samples_to_add:
+                    new_sample = OrderSample(
+                        application=sample.application,
+                        customer=sample.customer,
+                        data_analysis=sample.data_analysis,
+                        data_delivery=sample.data_delivery,
+                        family_name=sample.family_name,
+                        father=sample.father,
+                        internal_id=db_sample.internal_id,
+                        mother=sample.mother,
+                        name=sample.name,
+                    )
+                    sample_list.append(new_sample)
+                existing_samples.extend(sample_list)
+                self.samples.pop(index)
+        self.samples.extend(existing_samples)
 
     def __repr__(self):
         return (
