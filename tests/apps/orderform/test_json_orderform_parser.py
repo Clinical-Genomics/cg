@@ -1,10 +1,11 @@
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.models.orders.constants import OrderType
 from cg.models.orders.orderform_schema import Orderform
+from cg.store.models import Customer
 from cg.store.store import Store
 
 
@@ -27,3 +28,20 @@ def test_generate_json_orderform(valid_json_order_type: str, json_order_dict: di
     assert order_form.samples
     assert order_form.project_type
     assert order_form.delivery_type
+
+
+def test_generate_json_orderform_with_existing_samples(mip_uploaded_json_order: dict):
+    # GIVEN a JSON order containing existing samples
+    existing_sample_dict = {
+        "existing_sample": True,
+        "family_name": "case-name",
+        "internal_id": "internal_id",
+        "name": "existing-sample-name",
+        "panels": ["OMIM-AUTO"],
+        "subject_id": "existing-subject",
+    }
+    mip_uploaded_json_order["samples"].append(existing_sample_dict)
+
+    # GIVEN that the existing sample's subject_id matches multiple samples
+    status_db: Store = create_autospec(Store)
+    status_db.get_customer_by_internal_id_strict = Mock(return_value=create_autospec(Customer))
