@@ -176,12 +176,13 @@ class OrderformParser(BaseModel):
             )
             sample_list: list[OrderSample] = []
             for db_sample in db_samples_to_add:
-                new_sample = OrderSample(
+                existing_sample = OrderSample(
                     application=sample.application,
                     cohorts=sample.cohorts,
-                    customer=sample.customer,
+                    customer=self.customer_id,
                     data_analysis=sample.data_analysis,
                     data_delivery=sample.data_delivery,
+                    existing_sample=True,
                     family_name=sample.family_name,
                     father=sample.father,
                     internal_id=db_sample.internal_id,
@@ -189,7 +190,7 @@ class OrderformParser(BaseModel):
                     name=sample.name,
                     panels=sample.panels,
                 )
-                sample_list.append(new_sample)
+                sample_list.append(existing_sample)
             existing_samples.extend(sample_list)
 
         new_samples = [sample for sample in self.samples if not sample.existing_sample]

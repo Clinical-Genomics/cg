@@ -94,6 +94,7 @@ class OrderSample(BaseModel):
     organism_other: str | None = None
     original_lab: str | None = None
     original_lab_address: str | None = None
+    panels: list[str] | None = None
     phenotype_groups: list[str] | None = None
     phenotype_terms: list[str] | None = None
     pool: constr(max_length=Pool.name.property.columns[0].type.length) | None = None

@@ -5,6 +5,7 @@ import pytest
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.models.orders.constants import OrderType
 from cg.models.orders.orderform_schema import Orderform
+from cg.models.orders.sample_base import OrderSample
 from cg.store.models import Customer, Sample
 from cg.store.store import Store
 
@@ -30,12 +31,12 @@ def test_generate_json_orderform(valid_json_order_type: str, json_order_dict: di
     assert order_form.delivery_type
 
 
-def test_generate_json_orderform_with_existing_samples(mip_uploaded_json_order: dict):
+def test_generate_json_orderform_with_existing_samples():
     # GIVEN a JSON order containing existing samples
     existing_sample_dict = {
         "application": "WGS123",
         "cohorts": ["cohort"],
-        "data_analysis": "mip-dna",
+        "data_analysis": "raredisease",
         "data_delivery": "scout",
         "existing_sample": True,
         "family_name": "case-name",
@@ -46,7 +47,12 @@ def test_generate_json_orderform_with_existing_samples(mip_uploaded_json_order: 
         "panels": ["OMIM-AUTO"],
         "subject_id": "existing-subject",
     }
-    mip_uploaded_json_order["samples"].append(existing_sample_dict)
+    order = {
+        "comment": "",
+        "customer": "cust000",
+        "name": "test-order",
+        "samples": [existing_sample_dict],
+    }
 
     # GIVEN that the existing sample's subject_id matches multiple samples
     status_db: Store = create_autospec(Store)
@@ -63,7 +69,50 @@ def test_generate_json_orderform_with_existing_samples(mip_uploaded_json_order: 
 
     # WHEN generating the orderform
     order_form_parser = JsonOrderformParser()
-    order_form_parser.parse_orderform(mip_uploaded_json_order)
+    order_form_parser.parse_orderform(order)
     order_form: Orderform = order_form_parser.generate_orderform(status_db)
 
-    assert order_form.samples
+    # THEN three existing samples should be in the response
+    expected_sample_1 = OrderSample(
+        application="WGS123",
+        cohorts=["cohort"],
+        customer="cust000",
+        data_analysis="raredisease",
+        data_delivery="scout",
+        existing_sample=True,
+        family_name="case-name",
+        father="some-father",
+        internal_id="sample1",
+        mother="some-mother",
+        name="existing-sample-name",
+        panels=["OMIM-AUTO"],
+    )
+    expected_sample_2 = OrderSample(
+        application="WGS123",
+        cohorts=["cohort"],
+        customer="cust000",
+        data_analysis="raredisease",
+        data_delivery="scout",
+        existing_sample=True,
+        family_name="case-name",
+        father="some-father",
+        internal_id="sample2",
+        mother="some-mother",
+        name="existing-sample-name",
+        panels=["OMIM-AUTO"],
+    )
+    expected_sample_3 = OrderSample(
+        application="WGS123",
+        cohorts=["cohort"],
+        customer="cust000",
+        data_analysis="raredisease",
+        data_delivery="scout",
+        existing_sample=True,
+        family_name="case-name",
+        father="some-father",
+        internal_id="sample3",
+        mother="some-mother",
+        name="existing-sample-name",
+        panels=["OMIM-AUTO"],
+    )
+    assert order_form.samples == [expected_sample_1, expected_sample_2, expected_sample_3]
