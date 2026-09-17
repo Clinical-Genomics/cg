@@ -50,6 +50,7 @@ class OrderSample(BaseModel):
     age_at_sampling: str | None = None
     application: constr(max_length=Application.tag.property.columns[0].type.length)
     capture_kit: str | None = None
+    cohorts: list[str] | None = None
     collection_date: str | None = None
     comment: constr(max_length=Sample.comment.property.columns[0].type.length) | None = None
     concentration: float | None = None
@@ -63,6 +64,7 @@ class OrderSample(BaseModel):
     data_analysis: Workflow
     data_delivery: DataDelivery
     elution_buffer: str | None = None
+    existing_sample: bool = False
     extraction_method: str | None = None
     family_name: (
         constr(
@@ -92,6 +94,7 @@ class OrderSample(BaseModel):
     organism_other: str | None = None
     original_lab: str | None = None
     original_lab_address: str | None = None
+    panels: list[str] | None = None
     phenotype_groups: list[str] | None = None
     phenotype_terms: list[str] | None = None
     pool: constr(max_length=Pool.name.property.columns[0].type.length) | None = None
