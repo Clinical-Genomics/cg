@@ -1088,6 +1088,7 @@ class PacbioSmrtCellMetricsView(BaseView):
 
 
 class PacbioSampleRunMetricsView(BaseView):
+
     can_export = True
     column_filters = [
         "instrument_run.plate",
