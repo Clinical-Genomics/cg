@@ -50,6 +50,7 @@ class OrderSample(BaseModel):
     age_at_sampling: str | None = None
     application: constr(max_length=Application.tag.property.columns[0].type.length)
     capture_kit: str | None = None
+    cohorts: list[str] | None = None
     collection_date: str | None = None
     comment: constr(max_length=Sample.comment.property.columns[0].type.length) | None = None
     concentration: float | None = None

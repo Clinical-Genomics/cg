@@ -5,7 +5,7 @@ import pytest
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.models.orders.constants import OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.store.models import Customer
+from cg.store.models import Customer, Sample
 from cg.store.store import Store
 
 
@@ -33,9 +33,15 @@ def test_generate_json_orderform(valid_json_order_type: str, json_order_dict: di
 def test_generate_json_orderform_with_existing_samples(mip_uploaded_json_order: dict):
     # GIVEN a JSON order containing existing samples
     existing_sample_dict = {
+        "application": "WGS123",
+        "cohorts": ["cohort"],
+        "data_analysis": "mip-dna",
+        "data_delivery": "scout",
         "existing_sample": True,
         "family_name": "case-name",
+        "father": "some-father",
         "internal_id": "internal_id",
+        "mother": "some-mother",
         "name": "existing-sample-name",
         "panels": ["OMIM-AUTO"],
         "subject_id": "existing-subject",
@@ -44,4 +50,20 @@ def test_generate_json_orderform_with_existing_samples(mip_uploaded_json_order: 
 
     # GIVEN that the existing sample's subject_id matches multiple samples
     status_db: Store = create_autospec(Store)
-    status_db.get_customer_by_internal_id_strict = Mock(return_value=create_autospec(Customer))
+    status_db.get_customer_by_internal_id_strict = Mock(
+        return_value=create_autospec(Customer, id=1)
+    )
+    status_db.get_samples_by_subject_id_customers_and_order_type = Mock(
+        return_value=[
+            create_autospec(Sample, internal_id="sample1"),
+            create_autospec(Sample, internal_id="sample2"),
+            create_autospec(Sample, internal_id="sample3"),
+        ]
+    )
+
+    # WHEN generating the orderform
+    order_form_parser = JsonOrderformParser()
+    order_form_parser.parse_orderform(mip_uploaded_json_order)
+    order_form: Orderform = order_form_parser.generate_orderform(status_db)
+
+    assert order_form.samples

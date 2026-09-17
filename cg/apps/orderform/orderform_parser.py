@@ -165,33 +165,35 @@ class OrderformParser(BaseModel):
 
     def _fill_out_existing_samples(self, status_db: Store):
         existing_samples: list[OrderSample] = []
-        for index, sample in enumerate(self.samples):
-            if sample.existing_sample:
-                customer: Customer = status_db.get_customer_by_internal_id_strict(self.customer_id)
-                db_samples_to_add: list[Sample] = (
-                    status_db.get_samples_by_subject_id_customers_and_order_type(
-                        subject_id=sample.subject_id,
-                        customer_ids=[collaborator.id for collaborator in customer.collaborators],
-                        order_type=self.project_type,
-                    )
+        for sample in [sample for sample in self.samples if sample.existing_sample]:
+            customer: Customer = status_db.get_customer_by_internal_id_strict(self.customer_id)
+            db_samples_to_add: list[Sample] = (
+                status_db.get_samples_by_subject_id_customers_and_order_type(
+                    subject_id=sample.subject_id,
+                    customer_ids=[collaborator.id for collaborator in customer.collaborators],
+                    order_type=self.project_type,
                 )
-                sample_list: list[OrderSample] = []
-                for db_sample in db_samples_to_add:
-                    new_sample = OrderSample(
-                        application=sample.application,
-                        customer=sample.customer,
-                        data_analysis=sample.data_analysis,
-                        data_delivery=sample.data_delivery,
-                        family_name=sample.family_name,
-                        father=sample.father,
-                        internal_id=db_sample.internal_id,
-                        mother=sample.mother,
-                        name=sample.name,
-                    )
-                    sample_list.append(new_sample)
-                existing_samples.extend(sample_list)
-                self.samples.pop(index)
-        self.samples.extend(existing_samples)
+            )
+            sample_list: list[OrderSample] = []
+            for db_sample in db_samples_to_add:
+                new_sample = OrderSample(
+                    application=sample.application,
+                    cohorts=sample.cohorts,
+                    customer=sample.customer,
+                    data_analysis=sample.data_analysis,
+                    data_delivery=sample.data_delivery,
+                    family_name=sample.family_name,
+                    father=sample.father,
+                    internal_id=db_sample.internal_id,
+                    mother=sample.mother,
+                    name=sample.name,
+                    panels=sample.panels,
+                )
+                sample_list.append(new_sample)
+            existing_samples.extend(sample_list)
+
+        new_samples = [sample for sample in self.samples if not sample.existing_sample]
+        self.samples = new_samples + existing_samples
 
     def __repr__(self):
         return (
