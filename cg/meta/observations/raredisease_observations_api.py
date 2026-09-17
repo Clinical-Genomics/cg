@@ -104,6 +104,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
             gq_threshold=RarediseaseLoadParameters.GQ_THRESHOLD.value,
             hard_threshold=RarediseaseLoadParameters.HARD_THRESHOLD.value,
             soft_threshold=RarediseaseLoadParameters.SOFT_THRESHOLD.value,
+            ignore_gq_if_unset=RarediseaseLoadParameters.IGNORE_GQ_IF_UNSET.value,
             loqusdb_options=["--keep-chr-prefix", "--genome-build", "GRCh38"],
         )
         loqusdb_id = str(self.loqusdb_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
@@ -116,7 +117,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
         """Return observations files given a Housekeeper version for RAREDISEASE."""
         input_files: dict[str, File | None] = {
             "snv_vcf_path": self.housekeeper_api.files(
-                version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.SNV_VCF]
+                version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.SNV_VCF_LOQUSDB]
             ).first(),
             "sv_vcf_path": (
                 self.housekeeper_api.files(

@@ -727,10 +727,19 @@ class OrderView(BaseView):
     create_modal = True
     edit_modal = True
     form_ajax_refs = {
+        "analyses": {
+            "fields": ["case_internal_id"],
+            "page_size": 20,
+        },
         "cases": {
             "fields": ["internal_id", "name"],
             "page_size": 20,
-        }
+        },
+        "customer": {
+            "fields": ["internal_id"],
+            "page_size": 20,
+        },
+        "pools": {"fields": ["name"], "page_size": 20},
     }
 
 
@@ -772,6 +781,19 @@ class PoolView(BaseView):
     ]
     column_labels = {"order.ticket_id": "Ticket", "order.name": "Order"}
     column_searchable_list = ["name", "order.name", "order.ticket_id", "customer.internal_id"]
+
+    form_ajax_refs = {
+        "customer": {
+            "fields": ["internal_id"],
+            "page_size": 20,
+        },
+        "invoice": {"fields": ["invoiced_at"], "page_size": 20},
+        "order": {"fields": ["id", "ticket_id"], "page_size": 20},
+        "samples": {
+            "fields": ["name", "internal_id"],
+            "page_size": 20,
+        },
+    }
 
 
 class SampleView(BaseView):
@@ -855,6 +877,15 @@ class SampleView(BaseView):
         "mother_links",
         "sequencing_metrics",
     ]
+    form_ajax_refs = {
+        "application_version": {"fields": ["application_tag"], "page_size": 20},
+        "customer": {
+            "fields": ["internal_id"],
+            "page_size": 20,
+        },
+        "organism": {"fields": ["internal_id", "name"], "page_size": 20},
+        "pool": {"fields": ["name"], "page_size": 20},
+    }
 
     @staticmethod
     def view_sample_link(unused1, unused2, model, unused3):
@@ -994,6 +1025,18 @@ class PacbioSmrtCellMetricsView(BaseView):
         "started_at",
         "completed_at",
     ]
+
+    def delete_model(self, model):
+        try:
+            # Pacbio SMRT cells are only run once, so cascading to the run_device table is okay.
+            self.session.delete(model.device)
+            self.session.commit()
+            return True
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                raise
+            self.session.rollback()
+            return False
 
     @staticmethod
     def view_smrt_cell_link(unused1, unused2, model, unused3):

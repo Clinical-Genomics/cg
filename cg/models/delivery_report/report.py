@@ -49,6 +49,7 @@ class ScoutVariantsFiles(BaseModel):
     """
 
     snv_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
+    snv_vcf_mt: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
     snv_research_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
     sv_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
     sv_research_vcf: Annotated[str, BeforeValidator(get_path_as_string)] = NA_FIELD
