@@ -1,7 +1,9 @@
+import json
 import logging
 from datetime import datetime
 from pathlib import Path
 
+import requests
 from housekeeper.store.models import Bundle, File, Version
 from pydantic import BaseModel, Field
 
@@ -51,7 +53,16 @@ def handle(config: CGConfig, event_payload: dict) -> None:
             event_payload={SAMPLE_INTERNAL_ID_FIELD: event.sample_internal_id},
         )
     except Exception as e:
-        LOG.error(e)
+        # TODO: notify PROD
+        headers = {
+            "Content-Type": "application/json",
+        }
+        response = requests.post(
+            config.slack_webhooks.prod_team, data=json.dumps({"text": str(e)}), headers=headers
+        )
+        if response.status_code != 200:
+            LOG.error(f"Could not notify prod team: {response.status_code} - {response.text}")
+        raise e  # TODO should this be a custom error?
 
 
 def _add_sample_files_to_housekeeper(
