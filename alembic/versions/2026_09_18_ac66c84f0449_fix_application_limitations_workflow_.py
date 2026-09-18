@@ -16,7 +16,7 @@ branch_labels = None
 depends_on = None
 
 
-# Outdated Enum accidentally reinstated by add_nallo_to_limitations_table
+# Outdated Enum accidentally reinstated by add_nallo_to_limitations_table migration
 outdated_workflow_list = (
     "balsamic",
     "balsamic-pon",
