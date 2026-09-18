@@ -42,14 +42,16 @@ def handle(config: CGConfig, event_payload: dict) -> None:
         f"Updated transferred_at for ExternalSample {sample.name} of customer {sample.customer_id} "
         f"to {event.transfer_completed_at}."
     )
-
-    _add_sample_files_to_housekeeper(housekeeper_api=config.housekeeper_api, event=event)
-    config.status_db.commit_to_store()
-    event_publisher.publish_event(
-        nats_config=config.nats,
-        event_name=EXTERNAL_SAMPLE_STORED_EVENT,
-        event_payload={SAMPLE_INTERNAL_ID_FIELD: event.sample_internal_id},
-    )
+    try:
+        _add_sample_files_to_housekeeper(housekeeper_api=config.housekeeper_api, event=event)
+        config.status_db.commit_to_store()
+        event_publisher.publish_event(
+            nats_config=config.nats,
+            event_name=EXTERNAL_SAMPLE_STORED_EVENT,
+            event_payload={SAMPLE_INTERNAL_ID_FIELD: event.sample_internal_id},
+        )
+    except Exception as e:
+        LOG.error(e)
 
 
 def _add_sample_files_to_housekeeper(
