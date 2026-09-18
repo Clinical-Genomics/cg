@@ -1,4 +1,4 @@
-"""fix application limitations workflow enum
+"""Fix application limitations workflow enum
 
 Revision ID: ac66c84f0449
 Revises: 8a0dd32c2550
