@@ -946,6 +946,7 @@ class SampleView(BaseView):
 class CaseSampleView(BaseView):
     """Admin view for Model.caseSample"""
 
+    can_export = True
     column_default_sort = ("created_at", True)
     column_editable_list = ["should_deliver_sample", "status"]
     column_filters = ["should_deliver_sample", "status"]
