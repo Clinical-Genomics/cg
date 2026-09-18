@@ -6,7 +6,7 @@ from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
-from markupsafe import Markup
+from markupsafe import Markup, escape
 from sqlalchemy import inspect
 from wtforms.form import Form
 
@@ -133,23 +133,16 @@ def view_pacbio_sample_sequencing_metrics_link(unused1, unused2, model, unused3)
     )
 
 
-def view_application_text_column(unused1, unused2, model, attribute_name):
-    """Column formatter to widen long text columns."""
+def view_cap_text_column_width(unused1, unused2, model, attribute_name):
+    """Column formatter to cap long text columns to a readable width."""
     del unused1, unused2
     text = getattr(model, attribute_name)
     return (
-        Markup(f"<div style='display: inline-block; min-width: 300px;'>{text}</div>")
+        Markup(
+            "<div style='max-width: 400px; white-space: normal; overflow-wrap: break-word;'>"
+            f"{escape(text)}</div>"
+        )
         if text
-        else ""
-    )
-
-
-def view_order_types(unused1, unused2, model, unused3):
-    del unused1, unused2, unused3
-    order_type_list = "<br>".join(model.order_types)
-    return (
-        Markup(f'<div style="display: inline-block; min-width: 200px;">{order_type_list}</div>')
-        if model.order_type_applications
         else ""
     )
 
@@ -319,14 +312,10 @@ class ApplicationView(BaseView):
     ]
     column_formatters = {
         "tag": view_application_version_link,
-        "order_types": view_order_types,
         "sample_concentration_minimum": view_sample_concentration_minimum,
         "sample_concentration_maximum": view_sample_concentration_maximum,
         "sample_concentration_minimum_cfdna": view_sample_concentration_minimum_cfdna,
         "sample_concentration_maximum_cfdna": view_sample_concentration_maximum_cfdna,
-        "limitations": view_application_text_column,
-        "comment": view_application_text_column,
-        "details": view_application_text_column,
     }
     column_filters = ["prep_category", "is_accredited", "is_archived", "read_type", "is_external"]
     column_searchable_list = ["tag", "prep_category", "description", "details"]
@@ -415,7 +404,10 @@ class ApplicationLimitationsView(BaseView):
         "created_at",
         "updated_at",
     )
-    column_formatters = {"application": ApplicationView.view_application_link}
+    column_formatters = {
+        "application": ApplicationView.view_application_link,
+        "limitations": view_cap_text_column_width,
+    }
     column_filters = ["application.tag", "workflow"]
     column_searchable_list = ["application.tag"]
     column_editable_list = ["comment"]
