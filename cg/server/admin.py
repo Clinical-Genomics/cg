@@ -506,6 +506,21 @@ class CaseView(BaseView):
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["action", "comment"]
+    column_list = [
+        "internal_id",
+        "name",
+        "customer",
+        "tickets",
+        "action",
+        "priority",
+        "ordered_at",
+        "aggregated_sequencing_qc",
+        "data_analysis",
+        "data_delivery",
+        "_panels",
+        "comment",
+        "is_compressible",
+    ]
     column_exclude_list = ["created_at", "_cohorts", "synopsis"]
     column_filters = [
         "customer.internal_id",
