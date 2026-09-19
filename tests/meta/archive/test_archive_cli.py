@@ -4,12 +4,11 @@ import pytest
 from click.testing import CliRunner
 from housekeeper.store.models import Archive, File
 from pytest_mock import MockerFixture
-from requests import HTTPError, Response
+from requests import HTTPError, Response, Session
 
 from cg.cli.archive import archive_spring_files, delete_file, update_job_statuses
 from cg.constants import EXIT_SUCCESS, SequencingFileTag
 from cg.constants.archiving import ArchiveLocations
-from cg.meta.archive.ddn import ddn_data_flow_client
 from cg.meta.archive.ddn.constants import FAILED_JOB_STATUSES, ONGOING_JOB_STATUSES, JobStatus
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import ArchivalResponse, AuthToken, GetJobStatusResponse
@@ -64,7 +63,7 @@ def test_archive_spring_files_success(
         return_value=test_auth_token,
     )
     mocker.patch.object(
-        ddn_data_flow_client,
+        Session,
         "post",
         return_value=ok_miria_response,
     )
@@ -111,7 +110,7 @@ def test_get_archival_job_status(
         return_value=test_auth_token,
     )
     mocker.patch.object(
-        ddn_data_flow_client,
+        Session,
         "post",
         return_value=ok_miria_response,
     )
@@ -171,7 +170,7 @@ def test_get_retrieval_job_status(
         return_value=test_auth_token,
     )
     mocker.patch.object(
-        ddn_data_flow_client,
+        Session,
         "post",
         return_value=ok_miria_response,
     )
@@ -232,7 +231,7 @@ def test_delete_file_raises_http_error(
         return_value=test_auth_token,
     )
     mocker.patch.object(
-        ddn_data_flow_client,
+        Session,
         "post",
         return_value=failed_delete_file_response,
     )
@@ -278,7 +277,7 @@ def test_delete_file_success(
         return_value=test_auth_token,
     )
     mocker.patch.object(
-        ddn_data_flow_client,
+        Session,
         "post",
         return_value=ok_delete_file_response,
     )

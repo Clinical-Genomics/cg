@@ -5,12 +5,11 @@ from urllib.parse import urljoin
 
 import pytest
 from pytest_mock import MockerFixture
-from requests import Response
+from requests import Response, Session
 
 from cg.constants.constants import FileFormat
 from cg.exc import DdnDataflowAuthenticationError
 from cg.io.controller import WriteStream
-from cg.meta.archive.ddn import ddn_data_flow_client
 from cg.meta.archive.ddn.constants import (
     DESTINATION_ATTRIBUTE,
     OSTYPE,
@@ -120,7 +119,7 @@ def test_ddn_dataflow_client_initialization(
 
     # WHEN initializing the DDNDataFlowClient class with the valid DDNConfig object
     mocker.patch.object(
-        ddn_data_flow_client,
+        Session,
         "post",
         return_value=ok_response,
     )
@@ -143,7 +142,7 @@ def test_set_auth_tokens(
 
     # WHEN initializing the DDNDataFlowClient class with the valid DDNConfig object
     mocker.patch.object(
-        ddn_data_flow_client,
+        Session,
         "post",
         return_value=ok_response,
     )
@@ -167,7 +166,7 @@ def test_ddn_dataflow_client_initialization_invalid_credentials(
 
     # WHEN initializing the DDNDataFlowClient class with the invalid credentials
     mocker.patch.object(
-        ddn_data_flow_client,
+        Session,
         "post",
         return_value=unauthorized_response,
     )
@@ -258,7 +257,7 @@ def test__refresh_auth_token(
 
     # WHEN refreshing the auth token
     mocker.patch.object(
-        ddn_data_flow_client,
+        Session,
         "post",
         return_value=ok_response,
     )
@@ -283,7 +282,7 @@ def test_archive_file(
     # GIVEN two paths that should be archived
     # WHEN running the archive method and providing two paths
     mock_request_submitter = mocker.patch.object(
-        ddn_data_flow_client,
+        Session,
         "post",
         return_value=ok_miria_response,
     )
@@ -324,9 +323,7 @@ def test_retrieve_files(
     # GIVEN a file and sample which is archived
 
     # WHEN running retrieve_files and providing a FileAndSample object
-    mock_request_submitter = mocker.patch.object(
-        ddn_data_flow_client, "post", return_value=ok_miria_response
-    )
+    mock_request_submitter = mocker.patch.object(Session, "post", return_value=ok_miria_response)
     job_id: int = ddn_dataflow_client.retrieve_files(files_and_samples=[file_and_sample])
 
     # THEN an integer should be returned
