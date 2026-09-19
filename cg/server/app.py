@@ -1,6 +1,6 @@
 import coloredlogs
 import requests
-from flask import Flask, redirect, session, url_for
+from flask import Flask, redirect, request, session, url_for
 from flask_admin.base import AdminIndexView
 from flask_dance.consumer import oauth_authorized
 from flask_dance.contrib.google import google, make_google_blueprint
@@ -51,6 +51,8 @@ from cg.store.models import (
     Sample,
     User,
 )
+
+DARK_ADMIN_THEME = "cyborg"
 
 
 def create_app():
@@ -140,6 +142,12 @@ def _register_blueprints(app: Flask):
         """Log out the user."""
         session["user_email"] = None
         return redirect(url_for("index"))
+
+    @app.route("/admin/toggle-theme")
+    def toggle_admin_theme():
+        """Toggle the admin interface between the default and the dark theme."""
+        session["admin_theme"] = None if session.get("admin_theme") else DARK_ADMIN_THEME
+        return redirect(request.referrer or url_for("admin.index"))
 
 
 def _register_admin_views():
