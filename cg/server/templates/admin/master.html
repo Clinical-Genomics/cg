@@ -1,7 +1,14 @@
 {% extends admin_base_template %}
 
+{% set admin_theme = session.get('admin_theme') %}
+{% set is_dark = admin_theme is not none %}
+
 {% block head_css %}
     {{ super() }}
+    <link href="{{ admin_static.url(filename='bootstrap/bootstrap4/css/font-awesome.min.css') }}" rel="stylesheet">
+    {% if is_dark %}
+        <link href="{{ admin_static.url(filename='bootstrap/bootstrap2/swatch/' ~ admin_theme ~ '/bootstrap.min.css', v='2.3.2') }}" rel="stylesheet">
+    {% endif %}
     <style>
         /* Fluid width, capped on ultra-wide screens. Content sits flush left/right;
            the navbar's own inset comes from .navbar-inner's padding, not this. */
@@ -25,8 +32,39 @@
             position: sticky;
             top: 0;
             z-index: 2;
-            background-color: #fff;
+            background-color: {{ '#060606' if is_dark else '#fff' }};
             box-shadow: inset 0 -2px 0 #ddd;
         }
+
+        /* Pin the theme button to the navbar's corner: the model menu wraps across
+           rows, so a floated button would push the navbar taller. */
+        .navbar-inner {
+            position: relative;
+        }
+        #theme-toggle {
+            position: absolute;
+            top: 6px;
+            right: 20px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid {{ '#333' if is_dark else '#ccc' }};
+            background-color: {{ '#060606' if is_dark else '#fafafa' }};
+            color: {{ '#f5b301' if is_dark else '#555' }};
+            text-decoration: none;
+        }
+        #theme-toggle:hover {
+            border-color: #888;
+        }
     </style>
+{% endblock %}
+
+{% block access_control %}
+    <a id="theme-toggle" href="{{ url_for('toggle_admin_theme') }}" title="Toggle light/dark mode">
+        <i class="fa {{ 'fa-sun-o' if is_dark else 'fa-moon-o' }}"></i>
+    </a>
 {% endblock %}
