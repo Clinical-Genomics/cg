@@ -1,15 +1,14 @@
-import json
 import logging
 from datetime import datetime
 from pathlib import Path
 
-import requests
 from housekeeper.store.models import Bundle, File, Version
 from pydantic import BaseModel, Field
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
+from cg.services import slack_notification_service
 from cg.services.events import event_publisher
 from cg.services.events.constants import EXTERNAL_SAMPLE_STORED_EVENT, SAMPLE_INTERNAL_ID_FIELD
 from cg.store.models import Sample
@@ -54,14 +53,7 @@ def handle(config: CGConfig, event_payload: dict) -> None:
         )
     except Exception as e:
         # TODO: notify PROD
-        headers = {
-            "Content-Type": "application/json",
-        }
-        response = requests.post(
-            config.slack_webhooks.prod_team, data=json.dumps({"text": str(e)}), headers=headers
-        )
-        if response.status_code != 200:
-            LOG.error(f"Could not notify prod team: {response.status_code} - {response.text}")
+        slack_notification_service.notify(recipient=config.slack_webhooks.prod_team, error=e)
         raise e  # TODO should this be a custom error?
 
 

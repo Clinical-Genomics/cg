@@ -568,7 +568,7 @@ class CGConfig(BaseModel):
     scout_38: CommonAppConfig = None
     scout_api_37_: ScoutAPI = None
     scout_api_38_: ScoutAPI = None
-    slack_webhooks: SlackWebHooks
+    slack_webhooks: SlackWebhooks
     tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
