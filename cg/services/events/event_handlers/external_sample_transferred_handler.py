@@ -58,7 +58,9 @@ def _update_external_sample(config: CGConfig, event: ExternalSampleTransferredEv
 
 
 def _check_for_sequencing_files(event: ExternalSampleTransferredEvent):
-    if not (event.cluster_location.glob("*.bam") or event.cluster_location.glob("*fastq.gz")):
+    if not (
+        any(event.cluster_location.glob("*.bam")) or any(event.cluster_location.glob("*.fastq.gz"))
+    ):
         raise CgError(f"No sequencing files found in directory {event.cluster_location}")
 
 
