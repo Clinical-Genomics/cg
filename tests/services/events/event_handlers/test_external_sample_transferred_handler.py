@@ -117,10 +117,11 @@ def test_handle_failure(mocker: MockerFixture):
 
     # WHEN calling handle
     # THEN a CG error should be raised
-    with pytest.raises(CgError) as e:
+    with pytest.raises(CgError):
         external_sample_transferred_handler.handle(config=config, event_payload=event_payload)
 
     # THEN a Slack notification should have been sent out to prodbioinfo
     slack_notification_service_mock.assert_called_once_with(
-        recipient="http.bingus.gov", error=e.value
+        recipient="http.bingus.gov",
+        message="No sequencing files found in directory /cluster_location",
     )

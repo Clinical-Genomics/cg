@@ -40,7 +40,7 @@ def handle(config: CGConfig, event_payload: dict) -> None:
             event_payload={SAMPLE_INTERNAL_ID_FIELD: event.sample_internal_id},
         )
     except Exception as e:
-        slack_notification_service.notify(recipient=config.slack_webhooks.prod_team, error=e)
+        slack_notification_service.notify(recipient=config.slack_webhooks.prod_team, message=str(e))
         raise e  # TODO should this be a custom error?
 
 

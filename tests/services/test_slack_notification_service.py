@@ -10,14 +10,14 @@ from cg.services.slack_notification_service import requests
 def test_notify_success(mocker: MockerFixture):
     # GIVEN a recipient and an error
     recipient = "http://bingus.gov"
-    error = Exception("This is the problem")
+    message = "This is the problem"
 
     post_mock = mocker.patch.object(
         requests, "post", return_value=create_autospec(Response, status_code=200)
     )
 
     # WHEN calling notify
-    slack_notification_service.notify(recipient=recipient, error=error)
+    slack_notification_service.notify(recipient=recipient, message=message)
 
     # THEN a http post should have been sent
     post_mock.assert_called_once_with(
