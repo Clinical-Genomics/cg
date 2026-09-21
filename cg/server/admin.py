@@ -666,6 +666,7 @@ class AnalysisView(BaseView):
 class IlluminaFlowCellView(BaseView):
     """Admin view for Model.IlluminaSequencingRun"""
 
+    can_export = True
     column_list = (
         "internal_id",
         "model",
@@ -945,6 +946,7 @@ class SampleView(BaseView):
 class CaseSampleView(BaseView):
     """Admin view for Model.caseSample"""
 
+    can_export = True
     column_default_sort = ("created_at", True)
     column_editable_list = ["should_deliver_sample", "status"]
     column_filters = ["should_deliver_sample", "status"]
@@ -989,6 +991,8 @@ class UserView(BaseView):
 
 
 class IlluminaSampleSequencingMetricsView(BaseView):
+
+    can_export = True
     column_list = [
         "flow_cell",
         "sample",
@@ -1010,6 +1014,7 @@ class IlluminaSampleSequencingMetricsView(BaseView):
 class PacbioSmrtCellMetricsView(BaseView):
     """Admin view for Model.PacbioSMRTCell"""
 
+    can_export = True
     column_list = (
         "internal_id",
         "sequencing_run.run_name",
@@ -1084,6 +1089,8 @@ class PacbioSmrtCellMetricsView(BaseView):
 
 
 class PacbioSampleRunMetricsView(BaseView):
+
+    can_export = True
     column_filters = [
         "instrument_run.plate",
         "instrument_run.sequencing_run.run_id",
