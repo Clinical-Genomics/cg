@@ -80,6 +80,10 @@ def test_handle_success(mocker: MockerFixture):
     assert r2_call in function_calls
     assert len(function_calls) == 2
 
+    # THEN the changes were commited so that we can be certain that they are there when the next
+    # event is received
+    status_db.as_mock.commit_to_store.assert_called_once()
+
     # THEN an event was published saying the sample was stored
     publish_mock.assert_called_once_with(
         nats_config=nats_config,

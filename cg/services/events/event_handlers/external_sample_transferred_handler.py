@@ -30,19 +30,8 @@ def handle(config: CGConfig, event_payload: dict) -> None:
     """
     event = ExternalSampleTransferredEvent.model_validate(event_payload)
     try:
-        if not (event.cluster_location.glob("*.bam") or event.cluster_location.glob("*fastq.gz")):
-            raise CgError(f"No sequencing files found in directory {event.cluster_location}")
-
-        sample: Sample = config.status_db.get_sample_by_internal_id_strict(event.sample_internal_id)
-        config.status_db.update_external_sample(
-            sample_name=sample.name,
-            customer_id=sample.customer_id,
-            transferred_at=event.transfer_completed_at,
-        )
-        LOG.info(
-            f"Updated transferred_at for ExternalSample {sample.name} of customer {sample.customer_id} "
-            f"to {event.transfer_completed_at}."
-        )
+        _check_for_sequencing_files(event)
+        _update_external_sample(config=config, event=event)
         _add_sample_files_to_housekeeper(housekeeper_api=config.housekeeper_api, event=event)
         config.status_db.commit_to_store()
         event_publisher.publish_event(
@@ -53,6 +42,24 @@ def handle(config: CGConfig, event_payload: dict) -> None:
     except Exception as e:
         slack_notification_service.notify(recipient=config.slack_webhooks.prod_team, error=e)
         raise e  # TODO should this be a custom error?
+
+
+def _update_external_sample(config: CGConfig, event: ExternalSampleTransferredEvent) -> None:
+    sample: Sample = config.status_db.get_sample_by_internal_id_strict(event.sample_internal_id)
+    config.status_db.update_external_sample(
+        sample_name=sample.name,
+        customer_id=sample.customer_id,
+        transferred_at=event.transfer_completed_at,
+    )
+    LOG.info(
+        f"Updated transferred_at for ExternalSample {sample.name} of customer {sample.customer_id} "
+        f"to {event.transfer_completed_at}."
+    )
+
+
+def _check_for_sequencing_files(event: ExternalSampleTransferredEvent):
+    if not (event.cluster_location.glob("*.bam") or event.cluster_location.glob("*fastq.gz")):
+        raise CgError(f"No sequencing files found in directory {event.cluster_location}")
 
 
 def _add_sample_files_to_housekeeper(
