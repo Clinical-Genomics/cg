@@ -116,7 +116,7 @@ def test_handle_failure(mocker: MockerFixture):
     with pytest.raises(CgError) as e:
         external_sample_transferred_handler.handle(config=config, event_payload=event_payload)
 
-        # THEN a Slack notification should have been sent out to prodbioinfo
-        slack_notification_service_mock.assert_called_once_with(
-            recipient="http.bingus.gov", error=e
-        )
+    # THEN a Slack notification should have been sent out to prodbioinfo
+    slack_notification_service_mock.assert_called_once_with(
+        recipient="http.bingus.gov", error=e.value
+    )
