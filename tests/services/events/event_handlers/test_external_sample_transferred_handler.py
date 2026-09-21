@@ -4,13 +4,16 @@ from unittest.mock import Mock, call, create_autospec
 
 import pytest
 from housekeeper.store.models import Bundle, Version
-from pyfakefs.fake_filesystem import FakeFilesystem
 from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.models.cg_config import CGConfig, NatsConfig
+from cg.exc import CgError
+from cg.models.cg_config import CGConfig, NatsConfig, SlackWebhooks
 from cg.services.events.constants import EXTERNAL_SAMPLE_STORED_EVENT, SAMPLE_INTERNAL_ID_FIELD
 from cg.services.events.event_handlers import external_sample_transferred_handler
+from cg.services.events.event_handlers.external_sample_transferred_handler import (
+    slack_notification_service,
+)
 from cg.store.models import Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
@@ -85,17 +88,18 @@ def test_handle_success(mocker: MockerFixture):
     )
 
 
-def test_handle_failure(fs:FakeFilesystem):
+def test_handle_failure(mocker: MockerFixture):
     # GIVEN a CG config
     config: CGConfig = create_autospec(
         CGConfig,
         status_db=create_autospec(Store),
         housekeeper_api=create_autospec(HousekeeperAPI),
         nats=create_autospec(NatsConfig),
+        slack_webhooks=SlackWebhooks(prod_team="http.bingus.gov"),
     )
 
     # GIVEN that there is no *.bam or *.fastq.qz in the cluster location
-    fs.makedir("/cluster_location")
+    mocker.patch.object(Path, "glob", return_value=[])
 
     # GIVEN a valid event payload
     event_payload = {
@@ -104,9 +108,15 @@ def test_handle_failure(fs:FakeFilesystem):
         "transfer_completed_at": "2026-08-31T14:41:00",
     }
 
+    # GIVEN a Slack notification service
+    slack_notification_service_mock = mocker.patch.object(slack_notification_service, "notify")
+
     # WHEN calling handle
-    external_sample_transferred_handler.handle(config=config, event_payload=event_payload)
+    # THEN a CG error should be raised
+    with pytest.raises(CgError) as e:
+        external_sample_transferred_handler.handle(config=config, event_payload=event_payload)
 
-    # THEN
-    with pytest.raises(CgError):
-
+        # THEN a Slack notification should have been sent out to prodbioinfo
+        slack_notification_service_mock.assert_called_once_with(
+            recipient="http.bingus.gov", error=e
+        )
