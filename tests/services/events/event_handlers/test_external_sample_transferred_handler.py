@@ -2,7 +2,9 @@ from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock, call, create_autospec
 
+import pytest
 from housekeeper.store.models import Bundle, Version
+from pyfakefs.fake_filesystem import FakeFilesystem
 from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -81,3 +83,30 @@ def test_handle_success(mocker: MockerFixture):
         event_name=EXTERNAL_SAMPLE_STORED_EVENT,
         event_payload={SAMPLE_INTERNAL_ID_FIELD: "ACC123"},
     )
+
+
+def test_handle_failure(fs:FakeFilesystem):
+    # GIVEN a CG config
+    config: CGConfig = create_autospec(
+        CGConfig,
+        status_db=create_autospec(Store),
+        housekeeper_api=create_autospec(HousekeeperAPI),
+        nats=create_autospec(NatsConfig),
+    )
+
+    # GIVEN that there is no *.bam or *.fastq.qz in the cluster location
+    fs.makedir("/cluster_location")
+
+    # GIVEN a valid event payload
+    event_payload = {
+        SAMPLE_INTERNAL_ID_FIELD: "ACC123",
+        "cluster_location": "/cluster_location",
+        "transfer_completed_at": "2026-08-31T14:41:00",
+    }
+
+    # WHEN calling handle
+    external_sample_transferred_handler.handle(config=config, event_payload=event_payload)
+
+    # THEN
+    with pytest.raises(CgError):
+

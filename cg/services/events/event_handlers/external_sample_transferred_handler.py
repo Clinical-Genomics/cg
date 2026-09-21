@@ -53,6 +53,7 @@ def handle(config: CGConfig, event_payload: dict) -> None:
         )
     except Exception as e:
         # TODO: notify PROD
+        # TODO: write a test for this.
         slack_notification_service.notify(recipient=config.slack_webhooks.prod_team, error=e)
         raise e  # TODO should this be a custom error?
 
