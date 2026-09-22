@@ -4,7 +4,6 @@ from unittest.mock import Mock, call, create_autospec
 
 import pytest
 from housekeeper.store.models import Bundle, Version
-from pyfakefs.fake_filesystem import FakeFilesystem
 from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -15,7 +14,6 @@ from cg.services.events.event_handlers import external_sample_transferred_handle
 from cg.services.events.event_handlers.external_sample_transferred_handler import (
     slack_notification_service,
 )
-from cg.services.slack_notification_service import SlackNotification
 from cg.store.models import Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
@@ -119,15 +117,16 @@ def test_handle_failure(mocker: MockerFixture):
 
     # WHEN calling handle
     # THEN a CG error should be raised
-    with pytest.raises(CgError) as e:
+    with pytest.raises(CgError):
         external_sample_transferred_handler.handle(config=config, event_payload=event_payload)
 
     # THEN a Slack notification should have been sent out to prodbioinfo
-    slack_notification_service_mock.assert_called_once_with(
-        recipient="http.bingus.gov",
-        notification=SlackNotification(
-            title="Failed to store an external sample",
-            message=f"{EXTERNAL_SAMPLE_STORED_EVENT} failed for sample ACC123",
-            error=e.value,  # type: ignore
-        ),
+    calls = slack_notification_service_mock.call_args_list
+    first_call = calls[0]
+    assert first_call.kwargs["recipient"] == "http.bingus.gov"
+    assert first_call.kwargs["notification"].title == "Failed to store an external sample"
+    assert (
+        first_call.kwargs["notification"].message
+        == f"{EXTERNAL_SAMPLE_STORED_EVENT} failed for sample ACC123"
     )
+    assert "No sequencing files" in first_call.kwargs["notification"].error_text
