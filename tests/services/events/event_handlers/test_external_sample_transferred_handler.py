@@ -21,7 +21,7 @@ from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
-def test_handle_success(mocker: MockerFixture, fs: FakeFilesystem):
+def test_handle_success(mocker: MockerFixture):
     # GIVEN a StatusDB
     status_db: TypedMock[Store] = create_typed_mock(Store)
     sample: Sample = create_autospec(Sample, customer_id=1)
@@ -58,10 +58,9 @@ def test_handle_success(mocker: MockerFixture, fs: FakeFilesystem):
     }
 
     # GIVEN that two files have been transferred for the given sample
-    path_r1 = Path("/path/to/home/file_R1.fastq.gz")
-    path_r2 = Path("/path/to/home/file_R2.fastq.gz")
-    fs.create_file(path_r1)
-    fs.create_file(path_r2)
+    path_r1 = Path("file_R1.fastq.gz")
+    path_r2 = Path("file_R2.fastq.gz")
+    mocker.patch.object(Path, "glob", return_value=[path_r1, path_r2])
 
     # WHEN calling handle
     external_sample_transferred_handler.handle(config=config, event_payload=event_payload)
@@ -95,7 +94,7 @@ def test_handle_success(mocker: MockerFixture, fs: FakeFilesystem):
     )
 
 
-def test_handle_failure(mocker: MockerFixture, fs: FakeFilesystem):
+def test_handle_failure(mocker: MockerFixture):
     # GIVEN a CG config
     config: CGConfig = create_autospec(
         CGConfig,
@@ -106,7 +105,7 @@ def test_handle_failure(mocker: MockerFixture, fs: FakeFilesystem):
     )
 
     # GIVEN that there is no *.bam or *.fastq.gz in the cluster location
-    fs.create_dir("/cluster_location")
+    mocker.patch.object(Path, "glob", return_value=[])
 
     # GIVEN a valid event payload
     event_payload = {
