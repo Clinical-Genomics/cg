@@ -43,7 +43,11 @@ def handle(config: CGConfig, event_payload: dict) -> None:
     except Exception as e:
         slack_notification_service.notify(
             recipient=config.slack_webhooks.prod_team,
-            notification=SlackNotification(title="Title", message="message", error=e),
+            notification=SlackNotification(
+                title="Failed to store an external sample",
+                message=f"{EXTERNAL_SAMPLE_STORED_EVENT} failed for sample {event.sample_internal_id}",
+                error=e,  # type: ignore
+            ),
         )
         raise e  # TODO should this be a custom error?
 

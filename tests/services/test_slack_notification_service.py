@@ -10,7 +10,7 @@ from cg.services.slack_notification_service import SlackNotification, requests
 def test_notify_success(mocker: MockerFixture):
     # GIVEN a Slack notification and a recipient
     notification = SlackNotification(
-        title="Some title", message="A message", error=Exception("An Error")
+        title="Some title", message="A message", error=Exception("An Error")  # type: ignore
     )
     recipient = "http://bingus.gov"
 
