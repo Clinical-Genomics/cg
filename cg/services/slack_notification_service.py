@@ -1,8 +1,9 @@
 import json
 import logging
 from http import HTTPStatus
-from pydantic import BaseModel
+
 import requests
+from pydantic import BaseModel
 
 LOG = logging.getLogger(__name__)
 
@@ -16,14 +17,17 @@ class SlackNotification(BaseModel):
 def _build_slack_notification(notification: SlackNotification) -> dict:
 
     return {
-        "text": "New order received",
         "blocks": [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"*{notification.title}*\n{notification.message}\n{notification.error_text}",
+                    "text": f"*{notification.title}*\n{notification.message}",
                 },
+            },
+            {
+                "type": "section",
+                "text": {"type": "mrkdwn", "text": f"```{notification.error_text}\n```"},
             },
         ],
     }
