@@ -11,6 +11,7 @@ from cg.models.cg_config import CGConfig
 from cg.services import slack_notification_service
 from cg.services.events import event_publisher
 from cg.services.events.constants import EXTERNAL_SAMPLE_STORED_EVENT, SAMPLE_INTERNAL_ID_FIELD
+from cg.services.slack_notification_service import SlackNotification
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -40,7 +41,10 @@ def handle(config: CGConfig, event_payload: dict) -> None:
             event_payload={SAMPLE_INTERNAL_ID_FIELD: event.sample_internal_id},
         )
     except Exception as e:
-        slack_notification_service.notify(recipient=config.slack_webhooks.prod_team, message=str(e))
+        slack_notification_service.notify(
+            recipient=config.slack_webhooks.prod_team,
+            notification=SlackNotification(title="Title", message="message", error=e),
+        )
         raise e  # TODO should this be a custom error?
 
 
