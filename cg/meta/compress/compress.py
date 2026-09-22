@@ -171,7 +171,6 @@ class CompressAPI:
         This function will make sure that everything is ready for decompression from SPRING archive
         to FASTQ files.
 
-            - Housekeeper will be updated to include FASTQ files
             - Housekeeper will still have the SPRING and SPRING metadata file
             - The SPRING metadata file will be updated to include date for decompression
         """

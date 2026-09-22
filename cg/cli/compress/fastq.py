@@ -110,7 +110,7 @@ def fix_spring(context: CGConfig, bundle_name: str | None, dry_run: bool):
 @DRY_RUN
 @click.pass_obj
 def decompress_sample(context: CGConfig, sample_id: str, dry_run: bool):
-    """Decompress SPRING file for sample, and include links to FASTQ files in Housekeeper."""
+    """Decompress SPRING files for a sample."""
 
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     update_compress_api(compress_api=compress_api, dry_run=dry_run)
@@ -128,7 +128,7 @@ def decompress_sample(context: CGConfig, sample_id: str, dry_run: bool):
 @DRY_RUN
 @click.pass_context
 def decompress_case(context: click.Context, case_id, dry_run):
-    """Decompress SPRING file for case, and include links to FASTQ files in Housekeeper."""
+    """Decompress SPRING files for case."""
 
     store: Store = context.obj.status_db
     try:
@@ -149,7 +149,7 @@ def decompress_case(context: click.Context, case_id, dry_run):
 @DRY_RUN
 @click.pass_obj
 def decompress_illumina_run(context: click.Context, flow_cell_id: str, dry_run: bool):
-    """Decompress SPRING files for flow cell, and include links to FASTQ files in Housekeeper."""
+    """Decompress SPRING files for flow cell."""
 
     store: Store = context.obj.status_db
     samples: Iterable[Sample] = store.get_samples_by_illumina_flow_cell(flow_cell_id)
@@ -167,7 +167,7 @@ def decompress_illumina_run(context: click.Context, flow_cell_id: str, dry_run: 
 @DRY_RUN
 @click.pass_context
 def decompress_ticket(context: click.Context, ticket: str, dry_run: bool):
-    """Decompress SPRING file for ticket, and include links to FASTQ files in Housekeeper."""
+    """Decompress SPRING files for ticket."""
     store: Store = context.obj.status_db
     samples: Iterable[Sample] = store.get_samples_from_ticket(ticket=ticket)
     decompressed_individuals = 0
