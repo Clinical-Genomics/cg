@@ -5,9 +5,11 @@ from pydantic import BaseModel, Field
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import CaseNotFoundError
 from cg.models.cg_config import CGConfig
+from cg.services import slack_notification_service
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.events.constants import SAMPLE_INTERNAL_ID_FIELD
+from cg.services.slack_notification_service import SlackNotification
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -39,7 +41,13 @@ def handle(config: CGConfig, event_payload: dict) -> None:
         analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_case(
             case.internal_id
         )
-        analysis_starter.start(case.internal_id)
+        try:
+            analysis_starter.start(case.internal_id)
+        except Exception as e:
+            slack_notification_service.notify(
+                recipient=config.slack_webhooks.prod_team, notification=SlackNotification()
+            )
+            raise e
 
 
 def _are_all_samples_new_external_and_stored(case: Case, housekeeper_api: HousekeeperAPI) -> bool:
