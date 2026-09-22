@@ -49,7 +49,7 @@ def handle(config: CGConfig, event_payload: dict) -> None:
                 error=e,  # type: ignore
             ),
         )
-        raise e  # TODO should this be a custom error?
+        raise e
 
 
 def _update_external_sample(config: CGConfig, event: ExternalSampleTransferredEvent) -> None:

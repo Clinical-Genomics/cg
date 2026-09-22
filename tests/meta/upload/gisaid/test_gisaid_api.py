@@ -48,7 +48,6 @@ def cg_config(housekeeper_api: HousekeeperAPI, status_db: Store) -> CGConfig:
 def mock_completion_file(contents: str, fs) -> File:
     path = "/fake/completion_file.csv"
     fs.create_file(path, contents=contents)
-    fs.makedir()
     return create_autospec(File, full_path=path)
 
 
