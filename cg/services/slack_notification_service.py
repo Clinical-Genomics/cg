@@ -2,7 +2,7 @@ import json
 import logging
 import traceback
 from http import HTTPStatus
-from typing import Annotated
+from typing import Annotated, Any
 
 import requests
 from pydantic import BaseModel, BeforeValidator, Field
@@ -10,7 +10,7 @@ from pydantic import BaseModel, BeforeValidator, Field
 LOG = logging.getLogger(__name__)
 
 
-def _convert_error(exception: Exception | None) -> str | None:
+def _convert_error(exception: Any) -> str | None:
     if isinstance(exception, Exception):
         return "".join(traceback.format_exception(exception))
     else:
