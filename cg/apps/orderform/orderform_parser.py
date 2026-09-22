@@ -1,12 +1,12 @@
 import logging
 from pathlib import Path
-from typing import Hashable, Iterable
+from typing import Hashable, Iterable, Sequence
 
 from pydantic import BaseModel, ConfigDict, constr
 
 from cg.apps.orderform.utils import ORDER_TYPES_WITH_CASES
 from cg.constants import DataDelivery
-from cg.exc import OrderFormError
+from cg.exc import OrderFormError, SubjectIdMissingError
 from cg.models.orders.constants import OrderType
 from cg.models.orders.orderform_schema import OrderCase, Orderform, OrderPool
 from cg.models.orders.sample_base import OrderSample
@@ -166,8 +166,10 @@ class OrderformParser(BaseModel):
     def _fill_out_existing_samples(self, status_db: Store):
         existing_samples: list[OrderSample] = []
         for sample in [sample for sample in self.samples if sample.existing_sample]:
+            if not sample.subject_id:
+                raise SubjectIdMissingError(f"Missing subject_id for sample {sample.name}")
             customer: Customer = status_db.get_customer_by_internal_id_strict(self.customer_id)
-            db_samples_to_add: list[Sample] = (
+            db_samples_to_add: Sequence[Sample] = (
                 status_db.get_samples_by_subject_id_customers_and_order_type(
                     subject_id=sample.subject_id,
                     customer_ids=[collaborator.id for collaborator in customer.collaborators],
