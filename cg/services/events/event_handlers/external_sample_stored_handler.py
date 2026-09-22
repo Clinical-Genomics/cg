@@ -8,7 +8,7 @@ from cg.models.cg_config import CGConfig
 from cg.services import slack_notification_service
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
-from cg.services.events.constants import SAMPLE_INTERNAL_ID_FIELD
+from cg.services.events.constants import EXTERNAL_SAMPLE_STORED_EVENT, SAMPLE_INTERNAL_ID_FIELD
 from cg.services.slack_notification_service import SlackNotification
 from cg.store.models import Case, Sample
 from cg.store.store import Store
@@ -45,7 +45,12 @@ def handle(config: CGConfig, event_payload: dict) -> None:
             analysis_starter.start(case.internal_id)
         except Exception as e:
             slack_notification_service.notify(
-                recipient=config.slack_webhooks.prod_team, notification=SlackNotification()
+                recipient=config.slack_webhooks.prod_team,
+                notification=SlackNotification(
+                    title="Failed to start analysis",
+                    message=f"{EXTERNAL_SAMPLE_STORED_EVENT} failed starting analysis {case.internal_id} triggered by sample {event.sample_internal_id}",
+                    error=e,  # type: ignore
+                ),
             )
             raise e
 
