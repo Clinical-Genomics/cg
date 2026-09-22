@@ -830,7 +830,7 @@ class PoolView(BaseView):
 
 
 class SampleView(BaseView):
-    """Admin view for Model.Sample"""
+    """Admin view for Model.Sample."""
 
     column_list = [
         "internal_id",
