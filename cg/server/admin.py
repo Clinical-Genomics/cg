@@ -506,6 +506,21 @@ class CaseView(BaseView):
 
     column_default_sort = ("created_at", True)
     column_editable_list = ["action", "comment"]
+    column_list = [
+        "internal_id",
+        "name",
+        "customer",
+        "tickets",
+        "action",
+        "priority",
+        "ordered_at",
+        "aggregated_sequencing_qc",
+        "data_analysis",
+        "data_delivery",
+        "_panels",
+        "comment",
+        "is_compressible",
+    ]
     column_exclude_list = ["created_at", "_cohorts", "synopsis"]
     column_filters = [
         "customer.internal_id",
@@ -815,39 +830,38 @@ class PoolView(BaseView):
 
 
 class SampleView(BaseView):
-    """Admin view for Model.Sample"""
+    """Admin view for Model.Sample."""
 
     column_list = [
-        "application_version",
-        "customer",
-        "organism",
-        "invoice",
-        "is_cancelled",
-        "lims_status",
-        "capture_kit",
-        "comment",
-        "control",
-        "created_at",
-        "delivered_at",
-        "downsampled_to",
-        "from_sample",
         "internal_id",
-        "is_tumour",
-        "loqusdb_id",
         "name",
-        "no_invoice",
-        "order",
-        "ordered_at",
-        "original_ticket",
-        "prepared_at",
-        "priority",
-        "reads",
-        "hifi_yield",
-        "last_sequenced_at",
-        "received_at",
-        "reference_genome",
         "sex",
         "subject_id",
+        "customer",
+        "original_ticket",
+        "comment",
+        "is_cancelled",
+        "priority",
+        "application_version",
+        "capture_kit",
+        "is_tumour",
+        "reads",
+        "hifi_yield",
+        "control",
+        "organism",
+        "reference_genome",
+        "invoice",
+        "no_invoice",
+        "order",
+        "lims_status",
+        "from_sample",
+        "downsampled_to",
+        "loqusdb_id",
+        "ordered_at",
+        "received_at",
+        "prepared_at",
+        "last_sequenced_at",
+        "delivered_at",
     ]
     column_default_sort = ("created_at", True)
     column_editable_list = [
