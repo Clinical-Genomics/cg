@@ -14,7 +14,7 @@ def _convert_error(exception: Exception | None) -> str | None:
     if isinstance(exception, Exception):
         return "".join(traceback.format_exception(exception))
     else:
-        return None
+        return exception
 
 
 class SlackNotification(BaseModel):
