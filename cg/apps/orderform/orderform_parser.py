@@ -191,6 +191,7 @@ class OrderformParser(BaseModel):
                     mother=sample.mother,
                     name=sample.name,
                     panels=sample.panels,
+                    status=sample.status,
                 )
                 sample_list.append(existing_sample)
             existing_samples.extend(sample_list)
