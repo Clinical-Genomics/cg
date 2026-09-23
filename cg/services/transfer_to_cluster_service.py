@@ -50,7 +50,7 @@ def _get_sbatch_script_path(sample: Sample, rsync_path: str) -> Path:
 def _get_sbatch_command(cg_config: CGConfig, sample: Sample) -> str:
     source_path = Path(cg_config.external.caesar % sample.customer.internal_id, sample.name)
     LOG.debug(f"Source directory: {source_path}")
-    destination_path = Path(cg_config.external.hasta % sample.customer.internal_id, sample.name)
+    destination_path = Path(cg_config.external.cluster % sample.customer.internal_id, sample.name)
     destination_path.mkdir(parents=True, exist_ok=True)
     LOG.debug(f"Destination directory: {destination_path}")
     event_payload = {
