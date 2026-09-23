@@ -16,6 +16,7 @@ from cg.services.orders.validation.errors.case_errors import (
     RepeatedCaseNameError,
     SamplesNotRelatedError,
     SampleSourceMismatchError,
+    SubjectIdRepeatedError,
 )
 from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
@@ -24,6 +25,10 @@ from cg.services.orders.validation.order_types.mip_dna.constants import MIPDNADe
 from cg.services.orders.validation.order_types.mip_dna.models.case import MIPDNACase
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.order_types.mip_dna.models.sample import MIPDNASample
+from cg.services.orders.validation.order_types.raredisease.constants import RarediseaseDeliveryType
+from cg.services.orders.validation.order_types.raredisease.models.case import RarediseaseCase
+from cg.services.orders.validation.order_types.raredisease.models.order import RarediseaseOrder
+from cg.services.orders.validation.order_types.raredisease.models.sample import RarediseaseSample
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
 from cg.services.orders.validation.order_types.rna_fusion.models.sample import RNAFusionSample
 from cg.services.orders.validation.order_types.tomte.constants import TomteDeliveryType
@@ -42,6 +47,7 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_one_sample_per_case,
     validate_samples_have_same_source,
     validate_samples_in_case_have_same_prep_category,
+    validate_subject_ids_unique,
 )
 from cg.store.models import Application, Case, Sample
 from cg.store.store import Store
@@ -414,3 +420,47 @@ def test_invalid_gene_panels(valid_order: TomteOrder, base_store: Store):
 
     # THEN the error should concern invalid gene panels
     assert isinstance(errors[0], InvalidGenePanelsError)
+
+
+def test_validate_subject_ids_unique():
+    # GIVEN an order containing a case with multiple samples having the same subject_id
+    raredisease_order = RarediseaseOrder(
+        customer="cust000",
+        delivery_type=RarediseaseDeliveryType.FASTQ_ANALYSIS_SCOUT,
+        project_type=OrderType.RAREDISEASE,
+        name="raredisease-order",
+        cases=[
+            RarediseaseCase(
+                name="raredisease-case",
+                panels=["OMIM-AUTO"],
+                samples=[
+                    RarediseaseSample(
+                        application="apptag",
+                        container=ContainerEnum.tube,
+                        name="Sample1",
+                        sex=SexEnum.female,
+                        source="blood",
+                        status="affected",
+                        subject_id="ReusedSubjectId",
+                    ),
+                    RarediseaseSample(
+                        application="apptag",
+                        container=ContainerEnum.tube,
+                        name="Sample2",
+                        sex=SexEnum.female,
+                        source="fibroblast",
+                        status="affected",
+                        subject_id="ReusedSubjectId",
+                    ),
+                ],
+            )
+        ],
+    )
+
+    # WHEN validating that the subject_id is not repeated across a case's samples
+    errors: list[SubjectIdRepeatedError] = validate_subject_ids_unique(
+        order=raredisease_order, store=create_autospec(Store)
+    )
+
+    # THEN an error should be returned
+    assert errors

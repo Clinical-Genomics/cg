@@ -170,3 +170,11 @@ def get_invalid_panels(panels: list[str], store: Store) -> list[str]:
         panel for panel in panels if not store.does_gene_panel_exist(panel)
     ]
     return invalid_panels
+
+
+def get_existing_subject_ids(case, store):
+    pass
+
+
+def get_new_subject_ids(case):
+    pass
