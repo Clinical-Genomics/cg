@@ -10,7 +10,11 @@ from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.services import slack_notification_service
 from cg.services.events import event_publisher
-from cg.services.events.constants import EXTERNAL_SAMPLE_STORED_EVENT, SAMPLE_INTERNAL_ID_FIELD
+from cg.services.events.constants import (
+    EXTERNAL_SAMPLE_STORED_EVENT,
+    EXTERNAL_SAMPLE_TRANSFERRED_EVENT,
+    SAMPLE_INTERNAL_ID_FIELD,
+)
 from cg.services.slack_notification_service import SlackNotification
 from cg.store.models import Sample
 
@@ -45,7 +49,7 @@ def handle(config: CGConfig, event_payload: dict) -> None:
             recipient=config.slack_webhooks.prod_team,
             notification=SlackNotification(
                 title="Failed to store an external sample",
-                message=f"{EXTERNAL_SAMPLE_STORED_EVENT} failed for sample {event.sample_internal_id}",
+                message=f"{EXTERNAL_SAMPLE_TRANSFERRED_EVENT} failed for sample {event.sample_internal_id}",
                 error=e,  # type: ignore
             ),
         )

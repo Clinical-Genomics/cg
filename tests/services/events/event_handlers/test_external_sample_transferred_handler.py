@@ -9,7 +9,11 @@ from pytest_mock import MockerFixture
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig, NatsConfig, SlackWebhooks
-from cg.services.events.constants import EXTERNAL_SAMPLE_STORED_EVENT, SAMPLE_INTERNAL_ID_FIELD
+from cg.services.events.constants import (
+    EXTERNAL_SAMPLE_STORED_EVENT,
+    EXTERNAL_SAMPLE_TRANSFERRED_EVENT,
+    SAMPLE_INTERNAL_ID_FIELD,
+)
 from cg.services.events.event_handlers import external_sample_transferred_handler
 from cg.services.events.event_handlers.external_sample_transferred_handler import (
     slack_notification_service,
@@ -127,6 +131,6 @@ def test_handle_failure(mocker: MockerFixture):
     assert first_call.kwargs["notification"].title == "Failed to store an external sample"
     assert (
         first_call.kwargs["notification"].message
-        == f"{EXTERNAL_SAMPLE_STORED_EVENT} failed for sample ACC123"
+        == f"{EXTERNAL_SAMPLE_TRANSFERRED_EVENT} failed for sample ACC123"
     )
     assert "No sequencing files" in first_call.kwargs["notification"].error_text
