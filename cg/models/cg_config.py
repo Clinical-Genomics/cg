@@ -467,6 +467,10 @@ class IlluminaConfig(BaseModel):
     demultiplexed_runs_dir: str
 
 
+class SlackWebhooks(BaseModel):
+    prod_team: str
+
+
 class RunInstruments(BaseModel):
     pacbio: PacbioConfig
     nanopore: OxfordNanoporeConfig
@@ -564,6 +568,7 @@ class CGConfig(BaseModel):
     scout_38: CommonAppConfig = None
     scout_api_37_: ScoutAPI = None
     scout_api_38_: ScoutAPI = None
+    slack_webhooks: SlackWebhooks
     tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None

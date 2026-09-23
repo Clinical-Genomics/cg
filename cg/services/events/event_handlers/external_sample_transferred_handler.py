@@ -8,8 +8,14 @@ from pydantic import BaseModel, Field
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
+from cg.services import slack_notification_service
 from cg.services.events import event_publisher
-from cg.services.events.constants import EXTERNAL_SAMPLE_STORED_EVENT, SAMPLE_INTERNAL_ID_FIELD
+from cg.services.events.constants import (
+    EXTERNAL_SAMPLE_STORED_EVENT,
+    EXTERNAL_SAMPLE_TRANSFERRED_EVENT,
+    SAMPLE_INTERNAL_ID_FIELD,
+)
+from cg.services.slack_notification_service import SlackNotification
 from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
@@ -28,10 +34,29 @@ def handle(config: CGConfig, event_payload: dict) -> None:
     sample in the ExternalSample table with the datetime of the transfer.
     """
     event = ExternalSampleTransferredEvent.model_validate(event_payload)
+    try:
+        _check_for_sequencing_files(event)
+        _update_external_sample(config=config, event=event)
+        _add_sample_files_to_housekeeper(housekeeper_api=config.housekeeper_api, event=event)
+        config.status_db.commit_to_store()
+        event_publisher.publish_event(
+            nats_config=config.nats,
+            event_name=EXTERNAL_SAMPLE_STORED_EVENT,
+            event_payload={SAMPLE_INTERNAL_ID_FIELD: event.sample_internal_id},
+        )
+    except Exception as e:
+        slack_notification_service.notify(
+            recipient=config.slack_webhooks.prod_team,
+            notification=SlackNotification(
+                title="Failed to store an external sample",
+                message=f"{EXTERNAL_SAMPLE_TRANSFERRED_EVENT} failed for sample {event.sample_internal_id}",
+                error=e,  # type: ignore
+            ),
+        )
+        raise e
 
-    if not (event.cluster_location.glob("*.bam") or event.cluster_location.glob("*fastq.gz")):
-        raise CgError(f"No sequencing files found in directory {event.cluster_location}")
 
+def _update_external_sample(config: CGConfig, event: ExternalSampleTransferredEvent) -> None:
     sample: Sample = config.status_db.get_sample_by_internal_id_strict(event.sample_internal_id)
     config.status_db.update_external_sample(
         sample_name=sample.name,
@@ -43,13 +68,12 @@ def handle(config: CGConfig, event_payload: dict) -> None:
         f"to {event.transfer_completed_at}."
     )
 
-    _add_sample_files_to_housekeeper(housekeeper_api=config.housekeeper_api, event=event)
-    config.status_db.commit_to_store()
-    event_publisher.publish_event(
-        nats_config=config.nats,
-        event_name=EXTERNAL_SAMPLE_STORED_EVENT,
-        event_payload={SAMPLE_INTERNAL_ID_FIELD: event.sample_internal_id},
-    )
+
+def _check_for_sequencing_files(event: ExternalSampleTransferredEvent):
+    if not (
+        any(event.cluster_location.glob("*.bam")) or any(event.cluster_location.glob("*.fastq.gz"))
+    ):
+        raise CgError(f"No sequencing files found in directory {event.cluster_location}")
 
 
 def _add_sample_files_to_housekeeper(

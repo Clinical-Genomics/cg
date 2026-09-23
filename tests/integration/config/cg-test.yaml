@@ -253,6 +253,9 @@ scout_38:
   binary_path: /scout_38/binary
   config_path: /scout_38/config
 
+slack_webhooks: 
+  prod_team: "http://localhost:8888/slack_webhooks/prod_team"
+
 trailblazer:
   database: "sqlite:///file:trailblazer?mode=memory&cache=shared&uri=true"
   root: {test_root_dir}/trailblazer
