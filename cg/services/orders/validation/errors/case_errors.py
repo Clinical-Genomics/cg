@@ -91,4 +91,4 @@ class SampleSourceMismatchError(CaseError):
 
 class SubjectIdRepeatedError(CaseError):
     field: str = "sample_errors"
-    message: str = "Case cannot contain multiple samples with the same subject id."
+    message: str

@@ -172,9 +172,13 @@ def get_invalid_panels(panels: list[str], store: Store) -> list[str]:
     return invalid_panels
 
 
-def get_existing_subject_ids(case, store):
-    pass
-
-
-def get_new_subject_ids(case):
-    pass
+def get_subject_ids(case: RarediseaseCase, store: Store) -> list[str]:
+    subject_ids: list[str] = []
+    for sample in case.samples:
+        if isinstance(sample, ExistingSample):
+            db_sample: Sample | None = store.get_sample_by_internal_id(sample.internal_id)
+            if db_sample and db_sample.subject_id:  # No sample found should raise error elsewhere
+                subject_ids.append(db_sample.subject_id)
+        elif sample.subject_id:
+            subject_ids.append(sample.subject_id)
+    return subject_ids

@@ -422,7 +422,7 @@ def test_invalid_gene_panels(valid_order: TomteOrder, base_store: Store):
     assert isinstance(errors[0], InvalidGenePanelsError)
 
 
-def test_validate_subject_ids_unique():
+def test_validate_subject_ids_unique_new_samples():
     # GIVEN an order containing a case with multiple samples having the same subject_id
     raredisease_order = RarediseaseOrder(
         customer="cust000",
@@ -433,8 +433,8 @@ def test_validate_subject_ids_unique():
             RarediseaseCase(
                 name="raredisease-case",
                 panels=["OMIM-AUTO"],
-                samples=[
-                    RarediseaseSample(
+                samples=[  # type: ignore
+                    RarediseaseSample(  # type: ignore
                         application="apptag",
                         container=ContainerEnum.tube,
                         name="Sample1",
@@ -443,7 +443,7 @@ def test_validate_subject_ids_unique():
                         status="affected",
                         subject_id="ReusedSubjectId",
                     ),
-                    RarediseaseSample(
+                    RarediseaseSample(  # type: ignore
                         application="apptag",
                         container=ContainerEnum.tube,
                         name="Sample2",
@@ -453,13 +453,49 @@ def test_validate_subject_ids_unique():
                         subject_id="ReusedSubjectId",
                     ),
                 ],
-            )
+            ),
         ],
     )
 
     # WHEN validating that the subject_id is not repeated across a case's samples
     errors: list[SubjectIdRepeatedError] = validate_subject_ids_unique(
         order=raredisease_order, store=create_autospec(Store)
+    )
+
+    # THEN an error should be returned
+    assert errors
+
+
+def test_validate_subject_ids_unique_existing_samples():
+    # GIVEN an order containing a case with multiple existing samples having the same subject_id
+    raredisease_order = RarediseaseOrder(
+        customer="cust000",
+        delivery_type=RarediseaseDeliveryType.FASTQ_ANALYSIS_SCOUT,
+        project_type=OrderType.RAREDISEASE,
+        name="raredisease-order",
+        cases=[
+            RarediseaseCase(
+                name="raredisease-case",
+                panels=["OMIM-AUTO"],
+                samples=[  # type: ignore
+                    ExistingSample(  # type: ignore
+                        internal_id="ACC123",
+                    ),
+                    ExistingSample(internal_id="ACC234"),  # type: ignore
+                ],
+            ),
+        ],
+    )
+    status_db = create_autospec(Store)
+    status_db.get_sample_by_internal_id = lambda internal_id: (
+        create_autospec(Sample, internal_id="ACC123", subject_id="Repeated_subject_id")
+        if internal_id == "ACC123"
+        else create_autospec(Sample, internal_id="ACC234", subject_id="Repeated_subject_id")
+    )
+
+    # WHEN validating that the subject_id is not repeated across a case's samples
+    errors: list[SubjectIdRepeatedError] = validate_subject_ids_unique(
+        order=raredisease_order, store=status_db
     )
 
     # THEN an error should be returned

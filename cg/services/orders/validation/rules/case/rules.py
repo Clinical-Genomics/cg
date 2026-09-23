@@ -1,3 +1,5 @@
+from typing import Counter
+
 from cg.apps.lims import LimsAPI
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
@@ -20,7 +22,6 @@ from cg.services.orders.validation.errors.case_errors import (
     SampleSourceMismatchError,
     SubjectIdRepeatedError,
 )
-from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
 from cg.services.orders.validation.order_types.balsamic_umi.models.order import BalsamicUmiOrder
@@ -32,11 +33,10 @@ from cg.services.orders.validation.rules.case.utils import (
     contains_duplicates,
     does_case_exist,
     get_case_prep_categories,
-    get_existing_subject_ids,
     get_invalid_panels,
-    get_new_subject_ids,
     get_sample_name,
     get_sample_sources,
+    get_subject_ids,
     is_case_not_from_collaboration,
     is_double_normal,
     is_double_tumour,
@@ -249,9 +249,17 @@ def validate_gene_panels_exist(
 def validate_subject_ids_unique(
     order: RarediseaseOrder, store: Store, **kwargs
 ) -> list[SubjectIdRepeatedError]:
-    for case_index, case in order.enumerated_cases:
-        subject_ids: set[str] = set()
-        if isinstance(case, ExistingCase):
-            subject_ids.union(get_existing_subject_ids(case, store))
-        else:
-            subject_ids.union(get_new_subject_ids(case))
+    errors: list[SubjectIdRepeatedError] = []
+    for case_index, case in order.enumerated_new_cases:
+        subject_ids: list[str] = get_subject_ids(case=case, store=store)
+        counter_subject_ids = Counter(subject_ids)
+        repeated_subject_ids = [
+            subject_id for subject_id in counter_subject_ids if counter_subject_ids[subject_id] > 1
+        ]
+        if repeated_subject_ids:
+            error = SubjectIdRepeatedError(
+                case_index=case_index,
+                message=f"Case cannot contain multiple samples with the same subject id. Repeated subject_ids: {repeated_subject_ids}",
+            )
+            errors.append(error)
+    return errors
