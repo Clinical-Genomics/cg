@@ -1970,6 +1970,7 @@ def context_config(
         },
         "external": {
             "caesar": "server.name.se:/path/%s/on/caesar",
+            "cluster": "/path/%s/on/cluster",
             "hasta": "/path/on/hasta/%s",
         },
         "fluffy": {
