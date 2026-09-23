@@ -1,4 +1,4 @@
-from unittest.mock import Mock, call, create_autospec
+from unittest.mock import ANY, Mock, call, create_autospec
 
 import pytest
 from housekeeper.store.models import Bundle
@@ -6,11 +6,14 @@ from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import CaseNotFoundError
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, SlackWebhooks
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
-from cg.services.events.constants import SAMPLE_INTERNAL_ID_FIELD
+from cg.services.events.constants import EXTERNAL_SAMPLE_STORED_EVENT, SAMPLE_INTERNAL_ID_FIELD
 from cg.services.events.event_handlers import external_sample_stored_handler
+from cg.services.events.event_handlers.external_sample_stored_handler import (
+    slack_notification_service,
+)
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
@@ -213,3 +216,48 @@ def test_handle_ignores_case_with_undeliverable_samples(mocker: MockerFixture):
 
     # THEN the analysis was not started
     analysis_starter.as_mock.start.assert_not_called()
+
+
+def test_handle_start_raises(mocker: MockerFixture):
+    # GIVEN a payload
+    event_payload = {SAMPLE_INTERNAL_ID_FIELD: "ACC123"}
+
+    analysis_starter = create_autospec(AnalysisStarter)
+
+    analysis_starter.start = Mock(side_effect=Exception("Mighty exception!"))
+
+    mocker.patch.object(
+        AnalysisStarterFactory, "get_analysis_starter_for_case", return_value=analysis_starter
+    )
+
+    status_db: Store = create_autospec(Store)
+    case = create_autospec(Case, internal_id="heftyhen")
+    sample = create_autospec(Sample, case_that_delivers=case)
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=sample)
+    housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        status_db=status_db,
+        housekeeper_api=housekeeper_api,
+        slack_webhooks=SlackWebhooks(prod_team="https://bingus.gov"),
+    )
+
+    notification_mock = mocker.patch.object(slack_notification_service, "notify")
+
+    with pytest.raises(Exception):
+        external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
+
+    notification_mock.assert_called_once_with(
+        recipient=cg_config.slack_webhooks.prod_team, notification=ANY
+    )
+
+    # THEN a Slack notification should have been sent out to prodbioinfo
+    calls = notification_mock.call_args_list
+    first_call = calls[0]
+    assert first_call.kwargs["recipient"] == "https://bingus.gov"
+    assert first_call.kwargs["notification"].title == "Failed to start analysis"
+    assert (
+        first_call.kwargs["notification"].message
+        == f"{EXTERNAL_SAMPLE_STORED_EVENT} failed starting analysis {case.internal_id} triggered by sample ACC123"
+    )
+    assert "Mighty exception!" in first_call.kwargs["notification"].error_text
