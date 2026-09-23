@@ -146,7 +146,7 @@ def test_generate_json_orderform_with_existing_sample_but_missing_subject_id():
 
     # WHEN generating the orderform
     # THEN an error should be raised due to the missing subject_id
+    order_form_parser = JsonOrderformParser()
+    order_form_parser.parse_orderform(order)
     with pytest.raises(SubjectIdMissingError):
-        order_form_parser = JsonOrderformParser()
-        order_form_parser.parse_orderform(order)
         order_form_parser.generate_orderform(status_db)
