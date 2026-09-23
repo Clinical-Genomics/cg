@@ -193,6 +193,7 @@ def validate_samples_in_case_have_same_prep_category(
 def validate_case_contains_related_samples(
     order: MIPDNAOrder | RarediseaseOrder, store: Store, **kwargs
 ) -> list[SamplesNotRelatedError]:
+    # TODO 2
     errors: list[SamplesNotRelatedError] = []
     for case_index, case in order.enumerated_new_cases:
         if not does_case_exist(case=case, store=store):  # Error should be raised elsewhere
@@ -209,6 +210,7 @@ def validate_case_contains_related_samples(
             error = SamplesNotRelatedError(
                 case_index=case_index,
                 message=f"Samples {isolated_samples} are not related to other samples within the case.",
+                # TODO this thrown
             )
             errors.append(error)
     return errors

@@ -54,6 +54,7 @@ RAREDISEASE_CASE_RULES: list[Callable] = [
     validate_gene_panels_exist,
     validate_gene_panels_unique,
     validate_samples_in_case_have_same_prep_category,
+    # TODO 1
     validate_case_contains_related_samples,
 ]
 

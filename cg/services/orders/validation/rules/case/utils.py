@@ -115,6 +115,7 @@ def is_sample_related_in_case(
     case: MIPDNACase | RarediseaseCase,
     store: Store,
 ):
+    # TODO 3
     if not (sample.mother or sample.father):
         sample_name: str = get_sample_name(sample=sample, store=store)
         if not any(
