@@ -70,7 +70,7 @@ def _update_external_sample(config: CGConfig, event: ExternalSampleTransferredEv
     )
 
 
-def _check_for_sequencing_files(event: ExternalSampleTransferredEvent):
+def _check_for_sequencing_files(event: ExternalSampleTransferredEvent) -> None:
     if not (
         any(event.cluster_location.glob("*.bam")) or any(event.cluster_location.glob("*.fastq.gz"))
     ):
