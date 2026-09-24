@@ -7,6 +7,7 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_case_names_not_repeated,
     validate_existing_cases_belong_to_collaboration,
     validate_number_of_normal_samples,
+    validate_samples_in_case_have_same_prep_category,
 )
 from cg.services.orders.validation.rules.case_sample.rules import (
     reset_optional_capture_kits,
@@ -35,6 +36,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_well_position_format,
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
+    warn_if_sex_unknown,
 )
 
 BALSAMIC_CASE_RULES: list[Callable] = [
@@ -44,6 +46,7 @@ BALSAMIC_CASE_RULES: list[Callable] = [
     validate_case_names_not_repeated,
     validate_existing_cases_belong_to_collaboration,
     validate_number_of_normal_samples,
+    validate_samples_in_case_have_same_prep_category,
 ]
 
 BALSAMIC_CASE_SAMPLE_RULES: list[Callable] = [
@@ -73,4 +76,5 @@ BALSAMIC_CASE_SAMPLE_RULES: list[Callable] = [
     validate_well_position_format,
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
+    warn_if_sex_unknown,
 ]

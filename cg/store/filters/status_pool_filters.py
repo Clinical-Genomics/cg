@@ -16,11 +16,6 @@ def filter_pools_by_name_enquiry(pools: Query, name_enquiry: str, **kwargs) -> Q
     return pools.filter(Pool.name.contains(name_enquiry))
 
 
-def filter_pools_by_order_enquiry(pools: Query, order_enquiry: str, **kwargs) -> Query:
-    """Return pools by order enquiry."""
-    return pools.filter(Pool.order.contains(order_enquiry))
-
-
 def filter_pools_by_entry_id(pools: Query, entry_id: int, **kwargs) -> Query:
     """Return pools by entry id."""
     return pools.filter(Pool.id == entry_id)
@@ -120,6 +115,5 @@ class PoolFilter(Enum):
     DO_INVOICE: Callable = filter_pools_do_invoice
     BY_CUSTOMER_IDS: Callable = filter_pools_by_customer_ids
     BY_NAME_ENQUIRY: Callable = filter_pools_by_name_enquiry
-    BY_ORDER_ENQUIRY: Callable = filter_pools_by_order_enquiry
     BY_CUSTOMER: Callable = filter_pools_by_customer
     BY_CUSTOMERS: Callable = filter_pools_by_customers

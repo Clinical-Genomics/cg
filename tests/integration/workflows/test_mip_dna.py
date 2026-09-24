@@ -17,12 +17,14 @@ from cg.services.analysis_starter.submitters.subprocess import submitter
 from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
 from cg.utils import commands
+from tests.integration.trailblazer_utils import (
+    expect_to_add_pending_analysis,
+    expect_to_get_latest_analysis_with_empty_response,
+)
 from tests.integration.utils import (
     IntegrationTestPaths,
     copy_integration_test_file,
     create_integration_test_sample_fastq_files,
-    expect_to_add_pending_analysis_to_trailblazer,
-    expect_to_get_latest_analysis_with_empty_response_from_trailblazer,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -103,13 +105,13 @@ def test_start_available_mip_dna(
     email: str = environ_email()
 
     # GIVEN the Trailblazer API returns no ongoing analysis for the case
-    expect_to_get_latest_analysis_with_empty_response_from_trailblazer(
+    expect_to_get_latest_analysis_with_empty_response(
         trailblazer_server=httpserver, case_id=case.internal_id
     )
 
     # GIVEN a new pending analysis can be added to the Trailblazer API
     analysis_path = Path(mip_dna_path, "cases", case.internal_id, "analysis")
-    expect_to_add_pending_analysis_to_trailblazer(
+    expect_to_add_pending_analysis(
         trailblazer_server=httpserver,
         case=case,
         ticket_id=ticket_id,

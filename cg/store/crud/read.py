@@ -3,35 +3,45 @@
 import datetime as dt
 import logging
 from datetime import datetime
-from typing import Callable, Iterator
+from typing import Callable, Iterator, Literal
 
 import sqlalchemy
+from sqlalchemy import ScalarSelect, Select, and_, or_, select
 from sqlalchemy.orm import Query
 
 from cg.constants import SequencingRunDataAvailability, Workflow
 from cg.constants.constants import (
-    DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD,
+    CASE_ACTIVE_ACTIONS,
+    DNA_WORKFLOWS_WITH_RNA_UPLOAD,
     BedVersionGenomeVersion,
     CustomerId,
-    SampleType,
+    SequencingQCStatus,
 )
 from cg.constants.lims import LimsStatus
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import Priority, SlurmQos, TrailblazerPriority
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
 from cg.exc import (
     AnalysisDoesNotExistError,
     AnalysisNotCompletedError,
+    ApplicationTagNotFoundError,
     BedVersionNotFoundError,
     CaseNotFoundError,
     CgDataError,
     CgError,
+    CustomerNotFoundError,
+    ExternalSampleNotFoundError,
     OrderNotFoundError,
     PacbioSequencingRunNotFoundError,
     SampleNotFoundError,
 )
+from cg.meta.workflow.utils.utils import MAP_FROM_TRAILBLAZER_PRIORITY
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import SexEnum
-from cg.server.dto.samples.requests import CollaboratorSamplesRequest
+from cg.server.dto.samples.requests import (
+    CollaboratorSamplesRequest,
+    SortDirection,
+    UnhandledSamplesSortBy,
+)
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.api.data_classes import RNADNACollection
 from cg.store.base import BaseHandler
@@ -93,6 +103,7 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
+    ExternalSample,
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
@@ -412,8 +423,8 @@ class ReadHandler(BaseHandler):
 
     def get_sample_by_customer_and_name(
         self, customer_entry_id: list[int], sample_name: str
-    ) -> Sample:
-        """Get samples within a customer."""
+    ) -> Sample | None:
+        """Get a sample within a customer."""
         filter_functions = [
             SampleFilter.BY_CUSTOMER_ENTRY_IDS,
             SampleFilter.BY_SAMPLE_NAME,
@@ -425,6 +436,21 @@ class ReadHandler(BaseHandler):
             customer_entry_ids=customer_entry_id,
             name=sample_name,
         ).first()
+
+    def get_sample_by_customer_and_name_strict(
+        self, customer_entry_id: int, sample_name: str
+    ) -> Sample:
+        samples: Query = (
+            self._get_query(table=Sample)
+            .join(Sample.customer)
+            .filter(Customer.id == customer_entry_id, Sample.name == sample_name)
+        )
+        if sample := samples.first():
+            return sample
+        else:
+            raise SampleNotFoundError(
+                f"Sample {sample_name} not found for customer {customer_entry_id}"
+            )
 
     def get_illumina_metrics_entry_by_device_sample_and_lane(
         self, device_internal_id: str, sample_internal_id: str, lane: int
@@ -604,11 +630,12 @@ class ReadHandler(BaseHandler):
 
     def get_pools_by_order_enquiry(self, *, order_enquiry: str = None) -> list[Pool]:
         """Return all the pools with an order fitting the enquiry."""
-        return apply_pool_filter(
-            pools=self._get_query(table=Pool),
-            order_enquiry=order_enquiry,
-            filter_functions=[PoolFilter.BY_ORDER_ENQUIRY],
-        ).all()
+        return (
+            self._get_query(table=Pool)
+            .join(Pool.order)
+            .filter(Order.name.contains(order_enquiry))
+            .all()
+        )
 
     def get_pool_by_entry_id(self, entry_id: int) -> Pool:
         """Return a pool by entry id."""
@@ -667,20 +694,18 @@ class ReadHandler(BaseHandler):
             int: The total number of samples returned before truncation.
         """
         samples: Query = self._get_query(table=Sample)
-        filter_functions: list[SampleFilter] = []
         if customers:
-            if not isinstance(customers, list):
-                customers = list(customers)
-            filter_functions.append(SampleFilter.BY_CUSTOMERS)
+            customer_ids: list[int] = [customer.id for customer in customers]
+            samples = samples.filter(Sample.customer_id.in_(customer_ids))
         if pattern:
-            filter_functions.extend([SampleFilter.BY_INTERNAL_ID_OR_NAME_SEARCH])
-        filter_functions.append(SampleFilter.ORDER_BY_CREATED_AT_DESC)
-        samples: Query = apply_sample_filter(
-            samples=samples,
-            customers=customers,
-            search_pattern=pattern,
-            filter_functions=filter_functions,
-        )
+            samples = samples.filter(
+                or_(
+                    Sample.name.contains(pattern),
+                    Sample.internal_id.contains(pattern),
+                    Sample.order.contains(pattern),
+                )
+            )
+        samples = samples.order_by(Sample.created_at.desc())
         total: int = samples.count()
         return samples.offset(offset).limit(limit).all(), total
 
@@ -733,7 +758,7 @@ class ReadHandler(BaseHandler):
             customer_internal_id=customer_internal_id, subject_id=subject_id
         ).all()
 
-    def get_samples_by_any_id(self, **identifiers: dict) -> Query:
+    def get_samples_by_any_id(self, identifiers: dict) -> Query:
         """Return a sample query filtered by the given names and values of Sample attributes."""
         samples: Query = self._get_query(table=Sample).order_by(Sample.internal_id.desc())
         for identifier_name, identifier_value in identifiers.items():
@@ -751,20 +776,6 @@ class ReadHandler(BaseHandler):
         return apply_sample_filter(
             samples=samples, filter_functions=[SampleFilter.BY_SAMPLE_NAME], name=name
         ).first()
-
-    def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> list[Sample] | None:
-        """Get samples given a tissue type."""
-        samples: Query = apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.SAMPLES_IN_CASE_BY_INTERNAL_ID],
-            case_samples=self._get_join_sample_family_query(),
-            case_internal_id=case_id,
-        )
-        samples: Query = apply_sample_filter(
-            filter_functions=[SampleFilter.WITH_TYPE],
-            samples=samples,
-            tissue_type=sample_type,
-        )
-        return samples.all() if samples else None
 
     def is_case_down_sampled(self, case_id: str) -> bool:
         """Returns True if all samples in a case are down sampled from another sample."""
@@ -861,12 +872,30 @@ class ReadHandler(BaseHandler):
         return bool(self.get_sample_by_internal_id(sample_id))
 
     def get_application_by_tag(self, tag: str) -> Application | None:
-        """Return an application by tag."""
+        """Return an application by tag or None."""
         return apply_application_filter(
             applications=self._get_query(table=Application),
             filter_functions=[ApplicationFilter.BY_TAG],
             tag=tag,
         ).first()
+
+    def get_application_by_tag_strict(self, tag: str) -> Application:
+        """Return an application by tag."""
+        try:
+            return apply_application_filter(
+                applications=self._get_query(table=Application),
+                filter_functions=[ApplicationFilter.BY_TAG],
+                tag=tag,
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise ApplicationTagNotFoundError(
+                f"Application with tag '{tag}' was not found in the database."
+            )
+
+    def get_lims_workflow_id_by_application_tag(self, tag: str) -> int | None:
+        """Return the LIMS workflow ID for an application by tag."""
+        application = self.get_application_by_tag_strict(tag=tag)
+        return application.lims_workflow_id
 
     def get_applications_is_not_archived(self) -> list[Application]:
         """Return applications that are not archived."""
@@ -993,13 +1022,24 @@ class ReadHandler(BaseHandler):
             beds=self._get_query(table=Bed), filter_functions=bed_filter_functions
         )
 
-    def get_customer_by_internal_id(self, customer_internal_id: str) -> Customer:
+    def get_customer_by_internal_id(self, customer_internal_id: str) -> Customer | None:
         """Return customer with customer id."""
         return apply_customer_filter(
             filter_functions=[CustomerFilter.BY_INTERNAL_ID],
             customers=self._get_query(table=Customer),
             customer_internal_id=customer_internal_id,
         ).first()
+
+    def get_customer_by_internal_id_strict(self, internal_id: str) -> Customer:
+        """Return customer with customer id."""
+        if customer := apply_customer_filter(
+            filter_functions=[CustomerFilter.BY_INTERNAL_ID],
+            customers=self._get_query(table=Customer),
+            customer_internal_id=internal_id,
+        ).first():
+            return customer
+        else:
+            raise CustomerNotFoundError(f"Customer with internal id {internal_id}")
 
     def get_collaboration_by_internal_id(self, internal_id: str) -> Collaboration:
         """Fetch a customer group by internal id from the store."""
@@ -1148,19 +1188,6 @@ class ReadHandler(BaseHandler):
         )
         sorted_and_truncated: Query = cases.order_by(Case.ordered_at).limit(limit)
         return sorted_and_truncated.all()
-
-    def get_cases_to_compress(self, date_threshold: datetime) -> list[Case]:
-        """Return all cases that are ready to be compressed by SPRING."""
-        case_filter_functions: list[CaseFilter] = [
-            CaseFilter.HAS_INACTIVE_ANALYSIS,
-            CaseFilter.OLD_BY_CREATION_DATE,
-            CaseFilter.IS_COMPRESSIBLE,
-        ]
-        return apply_case_filter(
-            cases=self._get_query(table=Case),
-            filter_functions=case_filter_functions,
-            creation_date=date_threshold,
-        ).all()
 
     def get_sample_by_entry_id(self, entry_id: int) -> Sample:
         """Return a sample by entry id."""
@@ -1509,6 +1536,18 @@ class ReadHandler(BaseHandler):
         )
         return orders.first()
 
+    def get_order_by_ticket_id_strict(self, ticket_id: int) -> Order:
+        """
+        Returns the entry in Order matching the given ticket id.
+        Raises:
+            OrderNotFoundError: If no order is found with the given ticket id.
+        """
+        orders: Query = self._get_query(table=Order).filter_by(ticket_id=ticket_id)
+        if order := orders.first():
+            return order
+        else:
+            raise OrderNotFoundError(f"Order with ticket ID {ticket_id} not found.")
+
     def get_case_not_received_count(self, order_id: int, cases_to_exclude: list[str]) -> int:
         filters: list[CaseSampleFilter] = [
             CaseSampleFilter.BY_ORDER,
@@ -1585,21 +1624,54 @@ class ReadHandler(BaseHandler):
         return flow_cell
 
     def get_cases_for_sequencing_qc(self) -> list[Case]:
-        """Return all cases that are ready for sequencing QC."""
+        """
+        Return cases that should be evaluated in sequencing QC.
+
+        A case is included only if all of the following are true:
+
+        1. The case sequencing QC status is either:
+           - `SequencingQCStatus.PENDING`
+           - `SequencingQCStatus.FAILED`
+
+        2. The case has at least one linked sample that is not downsampled:
+           - `Sample.downsampled_to is None`
+           NOTE: It is expected that either all or none of the samples of a case are downsampled
+
+        3. For those linked non-downsampled samples, at least one of these is true:
+           - The sample belongs to an external application (`Application.is_external`)
+           - The sample is non-external and has sequencing evidence:
+             - `Sample.last_sequenced_at` is set
+             - `Sample._sample_run_metrics.any()` is true
+
+        The query is built with joins from `Case` to sample and application tables, and
+        returns all matching `Case` objects.
+        """
         query = (
-            self._get_query(table=Case)
-            .join(Case.links)
-            .join(CaseSample.sample)
-            .join(ApplicationVersion)
-            .join(Application)
+            (
+                self._get_query(table=Case)
+                .join(Case.links)
+                .join(CaseSample.sample)
+                .join(ApplicationVersion)
+                .join(Application)
+            )
+            # Select cases with pending or failed sequencing QC
+            .filter(
+                Case.aggregated_sequencing_qc.in_(
+                    [SequencingQCStatus.PENDING, SequencingQCStatus.FAILED]
+                )
+            )
+            # Select samples that are not downsampled
+            .filter(Sample.downsampled_to.is_(None))
+            # Include all samples externally sequenced and non-external samples with sequencing data
+            .filter(
+                or_(
+                    Application.is_external,
+                    and_(Sample.last_sequenced_at.isnot(None), Sample._sample_run_metrics.any()),
+                )
+            )
         )
-        return apply_case_filter(
-            cases=query,
-            filter_functions=[
-                CaseFilter.PENDING_OR_FAILED_SEQUENCING_QC,
-                CaseFilter.HAS_SEQUENCE,
-            ],
-        ).all()
+
+        return query.all()
 
     def is_application_archived(self, application_tag: str) -> bool:
         application: Application | None = self.get_application_by_tag(application_tag)
@@ -1642,6 +1714,35 @@ class ReadHandler(BaseHandler):
             if sample.sex != sex:
                 return True
         return False
+
+    def has_related_dna_sample(self, customer_id: str, is_tumour: bool, subject_id: str) -> bool:
+        """
+        Returns True if the provided subject id matches a unique DNA sample with the same subject id,
+        tumour status and belongs to the same collaboration as the provided customer.
+        Raises:
+            CustomerNotFoundError if the customer_id does not match a customer
+        """
+        customer: Customer = self.get_customer_by_internal_id_strict(customer_id)
+        sample_application_version_query: Query = self._get_join_sample_application_version_query()
+        sample_application_version_query: Query = apply_application_filter(
+            applications=sample_application_version_query,
+            prep_categories=DNA_PREP_CATEGORIES,
+            filter_functions=[ApplicationFilter.BY_PREP_CATEGORIES],
+        )
+
+        samples: Query = apply_sample_filter(
+            samples=sample_application_version_query,
+            subject_id=subject_id,
+            is_tumour=is_tumour,
+            customer_entry_ids=[customer.id for customer in customer.collaborators],
+            filter_functions=[
+                SampleFilter.BY_SUBJECT_ID,
+                SampleFilter.BY_TUMOUR,
+                SampleFilter.BY_CUSTOMER_ENTRY_IDS,
+            ],
+        )
+
+        return samples.count() == 1
 
     def _get_related_samples_query(
         self,
@@ -1697,7 +1798,6 @@ class ReadHandler(BaseHandler):
         Raises:
             CgDataError if no related DNA cases are found
         """
-
         related_dna_cases: list[Case] = []
         collaborators: set[Customer] = rna_case.customer.collaborators
         for rna_sample in rna_case.samples:
@@ -1728,19 +1828,21 @@ class ReadHandler(BaseHandler):
             collaborators=collaborators,
         )
         customer_ids: list[int] = [customer.id for customer in collaborators]
-        return self._get_uploaded_dna_cases(
+        return self._get_dna_cases_eligible_for_rna_upload(
             sample_query=related_dna_samples_query, customer_ids=customer_ids
         )
 
-    def _get_uploaded_dna_cases(self, sample_query: Query, customer_ids: list[int]) -> list[Case]:
+    def _get_dna_cases_eligible_for_rna_upload(
+        self, sample_query: Query, customer_ids: list[int]
+    ) -> list[Case]:
         """Filters the provided sample_query on the customer_ids, DNA workflows supporting
-        Scout uploads and on cases having an uploaded analysis. Returns the matching cases."""
+        Scout RNA uploads and on cases having an uploaded analysis. Returns the matching cases."""
         dna_samples_cases_analysis_query: Query = (
             sample_query.join(Sample.links).join(CaseSample.case).join(Analysis)
         )
         dna_samples_cases_analysis_query: Query = apply_case_filter(
             cases=dna_samples_cases_analysis_query,
-            workflows=DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD,
+            workflows=DNA_WORKFLOWS_WITH_RNA_UPLOAD,
             customer_entry_ids=customer_ids,
             filter_functions=[
                 CaseFilter.BY_WORKFLOWS,
@@ -1783,7 +1885,7 @@ class ReadHandler(BaseHandler):
                 sample=sample, prep_categories=DNA_PREP_CATEGORIES, collaborators=collaborators
             )
             dna_sample_name: str = related_dna_samples.first().name
-            dna_cases: list[Case] = self._get_uploaded_dna_cases(
+            dna_cases: list[Case] = self._get_dna_cases_eligible_for_rna_upload(
                 sample_query=related_dna_samples, customer_ids=collaborator_ids
             )
             dna_case_ids: list[str] = [case.internal_id for case in dna_cases]
@@ -1891,25 +1993,48 @@ class ReadHandler(BaseHandler):
     def get_paginated_unhandled_samples(
         self,
         lims_status: LimsStatus,
-        search: str | None,
         page: int,
         page_size: int,
+        search: str | None = None,
+        sort_by: UnhandledSamplesSortBy | None = None,
+        sort_order: SortDirection | None = None,
+        trailblazer_priority: TrailblazerPriority | None = None,
+        workflow: Workflow | Literal["unknown"] | None = None,
     ) -> tuple[list[Sample], int]:
         unhandled_samples: Query = self._get_unhandled_samples(
-            lims_status=lims_status, search=search
+            lims_status=lims_status,
+            priorities=(
+                MAP_FROM_TRAILBLAZER_PRIORITY[trailblazer_priority]
+                if trailblazer_priority
+                else None
+            ),
+            search=search,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            workflow=workflow,
         )
         return _paginate(query=unhandled_samples, page=page, page_size=page_size)
 
-    def _get_unhandled_samples(self, lims_status: LimsStatus, search: str | None) -> Query:
+    def _get_unhandled_samples(
+        self,
+        lims_status: LimsStatus,
+        priorities: list[Priority] | None = None,
+        search: str | None = None,
+        sort_by: UnhandledSamplesSortBy | None = None,
+        sort_order: SortDirection | None = None,
+        workflow: Workflow | Literal["unknown"] | None = None,
+    ) -> Query:
         """
         Return samples with the given lims_status that:
-        - Are not downsampled
-        - Are not cancelled
-        - Are not delivered
-        - Have been sequenced (last_sequenced_at is not null)
-        - Do not belong to the internal customers
-        - Ordered by last sequenced date, with the oldest first
-        - Optional filtering by search string
+            - Are not downsampled
+            - Are not cancelled
+            - Are not delivered
+            - Have been sequenced (last_sequenced_at is not null)
+            - Do not belong to the internal customers
+            - Ordered by last sequenced date, with the oldest first
+            - Optional filtering by search string
+            - Optional filtering by workflow
+            - Optional filtering by a list of priorities
         """
         query = (
             self._get_query(table=Sample)
@@ -1925,20 +2050,102 @@ class ReadHandler(BaseHandler):
             )
         )
 
+        if sort_by == UnhandledSamplesSortBy.TICKET:
+            desc: bool = sort_order == SortDirection.DESCENDING
+            sort_column = Sample.ticket_id_from_original_order
+            query = query.order_by(sort_column.desc() if desc else sort_column.asc())
+        else:
+            query = query.order_by(Sample.last_sequenced_at.asc())
+
         if search:
-            query = (
-                query.join(CaseSample, CaseSample.sample_id == Sample.id)
-                .join(Case, Case.id == CaseSample.case_id)
-                .filter(
-                    CaseSample.should_deliver_sample.is_(True),
-                    sqlalchemy.or_(
-                        Case.internal_id.ilike(f"%{search}%"),
-                        Sample.internal_id.ilike(f"%{search}%"),
-                    ),
-                )
+            query = query.filter(
+                sqlalchemy.or_(
+                    Sample.delivering_case_internal_id.ilike(f"%{search}%"),
+                    Sample.internal_id.ilike(f"%{search}%"),
+                ),
             )
 
-        return query.order_by(Sample.last_sequenced_at.asc())
+        if workflow:
+            if workflow == "unknown":
+                query = query.filter(Sample.workflow_of_case_that_delivers.is_(None))
+            else:
+                query = query.filter(Sample.workflow_of_case_that_delivers == workflow)
+
+        if priorities:
+            query = query.filter(Sample.priority_of_case_that_delivers.in_(priorities))
+
+        return query
+
+    def get_uploaded_analyses(self, trailblazer_ids: list[int]) -> list[Analysis]:
+        return (
+            self._get_query(table=Analysis)
+            .filter(
+                Analysis.trailblazer_id.in_(trailblazer_ids),
+                Analysis.uploaded_at.is_not(None),
+            )
+            .all()
+        )
+
+    def get_compressible_samples_by_internal_ids(
+        self, internal_ids: list[str], case_created_before_date: datetime
+    ) -> list[Sample]:
+        """
+        Return samples, restricted to the given internal ids, that are compressible:
+            - Excludes samples belonging to any case that:
+                - Is marked as not compressible
+                - Has an active action
+                - Was created on or after case_created_before_date
+            - Ordered by created date, with the oldest first
+        """
+        incompressible_case_samples_subquery: ScalarSelect = (
+            select(CaseSample.sample_id)
+            .join(Case, Case.id == CaseSample.case_id)
+            .where(
+                or_(
+                    Case.is_compressible.is_(False),
+                    Case.action.in_(CASE_ACTIVE_ACTIONS),
+                    Case.created_at >= case_created_before_date,
+                )
+            )
+        ).scalar_subquery()
+
+        query: Select[tuple[Sample]] = (
+            select(Sample)
+            .where(
+                Sample.id.not_in(incompressible_case_samples_subquery),
+                Sample.internal_id.in_(internal_ids),
+            )
+            .distinct()
+            .order_by(Sample.created_at.asc())
+        )
+
+        return list(self.session.scalars(query).all())
+
+    def get_external_sample(self, customer_id: int, sample_name: str) -> ExternalSample | None:
+        return self.session.scalars(
+            select(ExternalSample).where(
+                and_(
+                    ExternalSample.customer_id == customer_id,
+                    ExternalSample.sample_name == sample_name,
+                )
+            )
+        ).first()
+
+    def get_external_sample_strict(self, customer_id: int, sample_name: str) -> ExternalSample:
+        external_samples: Query = self.session.scalars(
+            select(ExternalSample).where(
+                and_(
+                    ExternalSample.customer_id == customer_id,
+                    ExternalSample.sample_name == sample_name,
+                )
+            )
+        )
+        if external_sample := external_samples.first():
+            return external_sample
+        else:
+            raise ExternalSampleNotFoundError(
+                f"Could not find external sample with name {sample_name} for customer {customer_id}"
+            )
 
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:

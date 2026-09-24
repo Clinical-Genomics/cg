@@ -18,4 +18,4 @@ RUN poetry install --only main
 
 USER nonroot
 
-ENTRYPOINT ["poetry", "run", "cg"]
+ENTRYPOINT ["poetry", "run", "listen"]

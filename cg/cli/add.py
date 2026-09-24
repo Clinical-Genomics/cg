@@ -156,7 +156,6 @@ def add_user(context: CGConfig, admin: bool, customer_id: str, email: str, name:
 @click.option(
     "-d", "--down-sampled", type=int, help="How many reads is the sample down sampled to?"
 )
-@click.option("-o", "--order", help="Name of the order the sample belongs to")
 @click.option(
     "-s",
     "--sex",
@@ -193,7 +192,6 @@ def add_sample(
     lims_id: str | None,
     lims_status: LimsStatus,
     name: str,
-    order: str | None,
     original_ticket: str,
     priority: Priority,
     sex: Sex,
@@ -201,11 +199,13 @@ def add_sample(
     """Add a sample for CUSTOMER_ID with a NAME (display)."""
     status_db: Store = context.status_db
 
-    customer: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
+    customer: Customer | None = status_db.get_customer_by_internal_id(
+        customer_internal_id=customer_id
+    )
     if not customer:
         LOG.error(f"Customer: {customer_id} not found")
         raise click.Abort
-    application: Application = status_db.get_application_by_tag(tag=application_tag)
+    application: Application | None = status_db.get_application_by_tag(tag=application_tag)
     if not application:
         LOG.error(f"Application: {application_tag} not found")
         raise click.Abort
@@ -215,7 +215,6 @@ def add_sample(
         internal_id=lims_id,
         lims_status=lims_status,
         name=name,
-        order=order,
         original_ticket=original_ticket,
         priority=priority,
         sex=sex,
@@ -270,13 +269,15 @@ def add_case(
     """Add a case with the given name and associated with the given customer"""
     status_db: Store = context.status_db
 
-    customer: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
+    customer: Customer | None = status_db.get_customer_by_internal_id(
+        customer_internal_id=customer_id
+    )
     if customer is None:
         LOG.error(f"{customer_id}: customer not found")
         raise click.Abort
 
     for panel_abbreviation in panel_abbreviations:
-        panel: Panel = status_db.get_panel_by_abbreviation(abbreviation=panel_abbreviation)
+        panel: Panel | None = status_db.get_panel_by_abbreviation(abbreviation=panel_abbreviation)
 
         if panel is None:
             LOG.error(f"{panel_abbreviation}: panel not found")
@@ -294,17 +295,19 @@ def add_case(
         priority=priority,
         ticket=ticket,
     )
-    order: Order = status_db.get_order_by_ticket_id(int(ticket))
+    order: Order | None = status_db.get_order_by_ticket_id(int(ticket))
     if not order:
         LOG.warning(f"No order found with ticket_id {ticket}")
         click.confirm("No order found for the given ticket, proceed?", default=False, abort=True)
+        order_name: str = click.prompt("What should the new order's name be?")
         order = Order(
             customer_id=customer.id,
+            name=order_name,
             ticket_id=int(ticket),
         )
     new_case.orders.append(order)
 
-    new_case.customer: Customer = customer
+    new_case.customer = customer
     status_db.session.add(new_case)
     status_db.session.commit()
     LOG.info(f"{new_case.internal_id}: new case added")

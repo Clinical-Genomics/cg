@@ -154,49 +154,6 @@ def test_add_sample_lims_id(cli_runner: CliRunner, base_context: CGConfig, helpe
     assert sample_query.first().internal_id == lims_id
 
 
-def test_add_sample_order(
-    cli_runner: CliRunner,
-    base_context: CGConfig,
-    disk_store: Store,
-    helpers: StoreHelpers,
-    application_tag: str,
-):
-    """Test adding a sample using an external sample id."""
-    # GIVEN a database with a customer and an application
-    helpers.ensure_application(store=disk_store, tag=application_tag)
-    helpers.ensure_application_version(store=disk_store, application_tag=application_tag)
-    customer: Customer = helpers.ensure_customer(store=disk_store)
-    name = "sample_name"
-    order = "sample_order"
-    original_ticket = "dummy ticket"
-    # WHEN adding a sample
-    result = cli_runner.invoke(
-        add,
-        [
-            "sample",
-            "--sex",
-            Sex.MALE,
-            "--application-tag",
-            application_tag,
-            "--original-ticket",
-            original_ticket,
-            "--lims-status",
-            "re-prep",
-            "--order",
-            order,
-            customer.internal_id,
-            name,
-        ],
-        obj=base_context,
-    )
-
-    # THEN it should be added
-    assert result.exit_code == EXIT_SUCCESS
-    sample_query = disk_store._get_query(table=Sample)
-    assert sample_query.count() == 1
-    assert sample_query.first().order == order
-
-
 def test_add_sample_when_down_sampled(
     cli_runner,
     base_context: CGConfig,

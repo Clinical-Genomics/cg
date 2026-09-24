@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import rich_click as click
 
 OPTION_PANEL_BED = click.option(
@@ -8,7 +10,7 @@ OPTION_PANEL_BED = click.option(
 )
 OPTION_WORKFLOW_PROFILE = click.option(
     "--workflow-profile",
-    type=click.Path(exists=True),
+    type=click.Path(exists=True, path_type=Path),
     required=False,
     help="Path to directory containing config.yaml.",
 )

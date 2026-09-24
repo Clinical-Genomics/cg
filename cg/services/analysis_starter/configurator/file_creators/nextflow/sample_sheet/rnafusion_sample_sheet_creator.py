@@ -1,6 +1,7 @@
 from collections.abc import Iterator
 
 from cg.constants.constants import Strandedness
+from cg.exc import SampleSheetContentError
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowFastqSampleSheetCreator,
 )
@@ -16,6 +17,8 @@ class RNAFusionSampleSheetCreator(NextflowFastqSampleSheetCreator):
         case: Case = self.store.get_case_by_internal_id(case_id)
         for sample in case.samples:
             content.extend(self._get_sample_sheet_content_per_sample(sample))
+        if content == [HEADERS]:
+            raise SampleSheetContentError(f"Sample sheet for case {case_id} is empty.")
         return content
 
     def _get_sample_sheet_content_per_sample(self, sample: Sample) -> list[list[str]]:

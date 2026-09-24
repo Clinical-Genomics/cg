@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 import pytest
 from sqlalchemy.exc import MultipleResultsFound
@@ -8,7 +9,12 @@ from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import BedVersionGenomeVersion, CaseActions, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
-from cg.exc import BedVersionNotFoundError, CgError
+from cg.exc import (
+    ApplicationTagNotFoundError,
+    BedVersionNotFoundError,
+    CgError,
+    ExternalSampleNotFoundError,
+)
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.models import (
     Analysis,
@@ -21,6 +27,7 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
+    ExternalSample,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
     Invoice,
@@ -115,11 +122,22 @@ def test_get_application_by_tag(microbial_store: Store, tag: str = "MWRNXTR003")
 
     # GIVEN a store with application records
 
-    # WHEN getting the query for the flow cells
+    # WHEN getting an application by tag
     application: Application = microbial_store.get_application_by_tag(tag=tag)
 
-    # THEN return a application with the supplied application tag
+    # THEN return an application with the supplied application tag
     assert application.tag == tag
+
+
+def test_get_application_by_tag_strict_fails(microbial_store: Store, tag: str = "SILLYAPPTAG01"):
+    """Test function to return the application by tag, strict."""
+
+    # GIVEN a store with application records
+
+    # WHEN strictly getting an application by a tag with no application
+    with pytest.raises(ApplicationTagNotFoundError):
+        # THEN the correct error is raised
+        microbial_store.get_application_by_tag_strict(tag=tag)
 
 
 def test_get_applications_is_not_archived(
@@ -1003,19 +1021,23 @@ def test_get_pools_by_name_enquiry(store_with_multiple_pools_for_customer: Store
     assert len(pools) == 1
 
 
-def test_get_pools_by_order_enquiry(
-    store_with_multiple_pools_for_customer: Store, pool_order_1: str
-):
+def test_get_pools_by_order_enquiry(store: Store, helpers: StoreHelpers):
     """Test that pools can be fetched from the store by customer id."""
     # GIVEN a database with two pools
+    customer = helpers.ensure_customer(store=store)
+    order_1 = store.add_order(customer=customer, name="order_1", ticket_id=1)
+    order_2 = store.add_order(customer=customer, name="order_2", ticket_id=2)
+    store.add_multiple_items_to_store([order_1, order_2])
+    store.commit_to_store()
+
+    pool_1 = helpers.ensure_pool(store=store, ticket=1)
+    helpers.ensure_pool(store=store, ticket=2)
 
     # WHEN getting pools by customer id
-    pools: list[Pool] = store_with_multiple_pools_for_customer.get_pools_by_order_enquiry(
-        order_enquiry=pool_order_1
-    )
+    pools: list[Pool] = store.get_pools_by_order_enquiry(order_enquiry="order_1")
 
-    # THEN one pool should be returned
-    assert len(pools) == 1
+    # THEN only pool 1 should be returned
+    assert pools == [pool_1]
 
 
 def test_get_pools_to_render_with(
@@ -1030,19 +1052,17 @@ def test_get_pools_to_render_with(
     assert len(pools) == 2
 
 
-def test_get_pools_to_render_with_customer(
-    store_with_multiple_pools_for_customer: Store,
-):
+def test_get_pools_to_render_with_customer(store: Store, helpers: StoreHelpers):
     """Test that pools can be fetched from the store by customer id."""
-    # GIVEN a database with two pools
+    # GIVEN a database with two pools tied to different customers
+    pool_1: Pool = helpers.ensure_pool(store=store, customer_id="cust_to_fetch", name="pool_1")
+    helpers.ensure_pool(store=store, customer_id="cust_to_not_fetch", name="pool_2")
 
-    # WHEN getting pools by customer id
-    pools: list[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
-        customers=store_with_multiple_pools_for_customer.get_customers()
-    )
+    # WHEN getting pools using the customer id of the first pool
+    pools: list[Pool] = store.get_pools_to_render(customers=[pool_1.customer])
 
-    # THEN two pools should be returned
-    assert len(pools) == 2
+    # THEN only the first pool should be returned
+    assert pools == [pool_1]
 
 
 def test_get_pools_to_render_with_customer_and_name_enquiry(
@@ -1061,20 +1081,28 @@ def test_get_pools_to_render_with_customer_and_name_enquiry(
     assert len(pools) == 1
 
 
-def test_get_pools_to_render_with_customer_and_order_enquiry(
-    store_with_multiple_pools_for_customer: Store,
-    pool_order_1: str,
-):
+def test_get_pools_to_render_with_customer_and_order_enquiry(store: Store, helpers: StoreHelpers):
     """Test that pools can be fetched from the store by customer id."""
-    # GIVEN a database with two pools
-
-    # WHEN fetching pools by customer id and order enquiry
-    pools: list[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
-        customers=store_with_multiple_pools_for_customer.get_customers(), enquiry=pool_order_1
+    # GIVEN a database with two pools belonging to different orders
+    customer_1 = helpers.ensure_customer(
+        store=store, customer_id="customer_id_1", customer_name="customer name 1"
     )
+    customer_2 = helpers.ensure_customer(
+        store=store, customer_id="customer_id_2", customer_name="customer name 2"
+    )
+    order_1 = store.add_order(customer=customer_1, name="order_1", ticket_id=1)
+    order_2 = store.add_order(customer=customer_2, name="order_2", ticket_id=2)
+    store.add_multiple_items_to_store([customer_1, customer_2, order_1, order_2])
+    store.commit_to_store()
 
-    # THEN one pools should be returned
-    assert len(pools) == 1
+    pool_1 = helpers.ensure_pool(store=store, ticket=1)
+    helpers.ensure_pool(store=store, ticket=2)
+
+    # WHEN fetching pools by order enquiry
+    pools: list[Pool] = store.get_pools_to_render(enquiry="order_1")
+
+    # THEN only the first pool should be returned
+    assert pools == [pool_1]
 
 
 def test_get_case_by_name_and_customer_case_found(store_with_multiple_cases_and_samples: Store):
@@ -1305,3 +1333,73 @@ def test_get_orders_mip_dna_and_limit_filter(
 
     # THEN we should get the expected number of orders returned
     assert len(orders) == expected_returned
+
+
+def test_get_external_sample_finds_match(store: Store, helpers: StoreHelpers):
+    # GIVEN a store containing external samples and customers
+    customer_0 = helpers.ensure_customer(store=store, customer_id="cust000")
+    customer_1 = helpers.ensure_customer(store=store, customer_id="cust001")
+    external_sample_1 = ExternalSample(
+        customer_id=customer_0.id, sample_name="sample-name-1", customer_uploaded_at=datetime.now()
+    )
+    external_sample_2 = ExternalSample(
+        customer_id=customer_0.id, sample_name="sample-name-2", customer_uploaded_at=datetime.now()
+    )
+    external_sample_3 = ExternalSample(
+        customer_id=customer_1.id, sample_name="sample-name-1", customer_uploaded_at=datetime.now()
+    )
+    store.add_multiple_items_to_store([external_sample_1, external_sample_2, external_sample_3])
+
+    # WHEN fetching the external sample by customer and sample name
+    fetched_external_sample: ExternalSample | None = store.get_external_sample(
+        customer_id=customer_0.id,
+        sample_name="sample-name-1",
+    )
+
+    # THEN that sample must be returned
+    assert fetched_external_sample == external_sample_1
+
+
+def test_get_external_sample_no_match(store: Store):
+    # GIVEN an empty store
+
+    # WHEN fetching an external sample by customer and sample name
+    fetched_external_sample: ExternalSample | None = store.get_external_sample(
+        customer_id=1,
+        sample_name="sample-name-1",
+    )
+
+    # THEN None should be returned
+    assert fetched_external_sample is None
+
+
+def test_get_external_sample_strict_success(store: Store, helpers: StoreHelpers):
+    # GIVEN a store containing a matching external sample for a customer
+    customer = helpers.ensure_customer(store=store, customer_id="cust000")
+    external_sample = ExternalSample(
+        customer_id=customer.id,
+        sample_name="sample-name-1",
+        customer_uploaded_at=datetime.now(),
+    )
+    store.add_item_to_store(item=external_sample)
+
+    # WHEN fetching the external sample strictly by customer and sample name
+    fetched_external_sample: ExternalSample = store.get_external_sample_strict(
+        customer_id=customer.id,
+        sample_name="sample-name-1",
+    )
+
+    # THEN the matching external sample should be returned
+    assert fetched_external_sample == external_sample
+
+
+def test_get_external_sample_strict_external_sample_not_found(store: Store):
+    # GIVEN an empty store
+
+    # WHEN fetching an external sample strictly by customer and sample name
+    # THEN an ExternalSampleNotFoundError should be raised
+    with pytest.raises(ExternalSampleNotFoundError):
+        store.get_external_sample_strict(
+            customer_id=1,
+            sample_name="sample-name-1",
+        )

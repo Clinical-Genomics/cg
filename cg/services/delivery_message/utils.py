@@ -14,7 +14,6 @@ from cg.services.delivery_message.messages.analysis_message import AnalysisMessa
 from cg.services.delivery_message.messages.bam_message import BamMessage
 from cg.services.delivery_message.messages.delivery_message import DeliveryMessage
 from cg.services.delivery_message.messages.fastq_analysis_message import FastqAnalysisMessage
-from cg.services.delivery_message.messages.order_message import TaxprofilerDeliveryMessage
 from cg.services.delivery_message.messages.raw_data_analysis_message import RawDataAnalysisMessage
 from cg.services.delivery_message.messages.raw_data_analysis_scout_message import (
     RawDataAnalysisScoutMessage,
@@ -28,6 +27,8 @@ from cg.services.delivery_message.messages.rna_delivery_message import (
     RNAScoutStrategy,
     RNAUploadMessageStrategy,
 )
+from cg.services.delivery_message.messages.taxprofiler_message import TaxprofilerDeliveryMessage
+from cg.services.delivery_message.messages.utils import BEST_REGARDS_MESSAGE
 from cg.store.models import Case
 from cg.store.store import Store
 
@@ -56,9 +57,12 @@ RNA_STRATEGY_MAP: dict[DataDelivery, type[RNAUploadMessageStrategy]] = {
 }
 
 
-def get_message(cases: list[Case], store: Store) -> str:
+def get_message(cases: list[Case], store: Store, include_signature: bool = False) -> str:
     message_strategy: DeliveryMessage = get_message_strategy(case=cases[0], store=store)
-    return message_strategy.create_message(cases)
+    message: str = message_strategy.create_message(cases)
+    if include_signature:
+        message = f"{message}\n\n{BEST_REGARDS_MESSAGE}"
+    return message
 
 
 def get_message_strategy(case: Case, store: Store) -> DeliveryMessage:

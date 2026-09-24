@@ -47,6 +47,12 @@ class CaseActions(StrEnum):
         return list(map(lambda action: action.value, cls))
 
 
+CASE_ACTIVE_ACTIONS = [
+    CaseActions.ANALYZE,
+    CaseActions.RUNNING,
+    CaseActions.TOP_UP,
+]
+
 CONTAINER_OPTIONS = ("Tube", "96 well plate", "No container")
 
 
@@ -137,8 +143,9 @@ class Workflow(StrEnum):
     TOMTE = "tomte"
 
 
-DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD: list[Workflow] = [
+DNA_WORKFLOWS_WITH_RNA_UPLOAD: list[Workflow] = [
     Workflow.RAREDISEASE,
+    Workflow.NALLO,
 ]
 
 
@@ -204,9 +211,18 @@ class DataDelivery(StrEnum):
     SCOUT = "scout"
     STATINA = "statina"
 
+    @property
+    def excludes_customer_inbox_delivery(self) -> bool:
+        return self in {
+            DataDelivery.NIPT_VIEWER,
+            DataDelivery.NO_DELIVERY,
+            DataDelivery.SCOUT,
+            DataDelivery.STATINA,
+        }
+
 
 class HastaSlurmPartitions(StrEnum):
-    DRAGEN: str = "dragen"
+    DRAGEN = "dragen"
 
 
 class FileExtensions(StrEnum):

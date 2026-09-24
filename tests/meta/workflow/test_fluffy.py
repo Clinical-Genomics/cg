@@ -1,16 +1,46 @@
+import pytest
 from mock import Mock, create_autospec
 from pytest_mock import MockerFixture
 
 from cg.constants.priority import SlurmQos
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import (
+    CGConfig,
+    FluffyConfig,
+    FluffyUploadConfig,
+    IlluminaConfig,
+    RunInstruments,
+)
 from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
 
-def test_run_fluffy(cg_context: CGConfig, mocker: MockerFixture):
+@pytest.fixture
+def cg_config() -> CGConfig:
+    return create_autospec(
+        CGConfig,
+        fluffy=FluffyConfig(
+            root_dir="/fake/fluffy_root",
+            binary_path="binary_path",
+            config_path="config_path",
+            sftp=FluffyUploadConfig(
+                user="user",
+                password="password",
+                host="host",
+                remote_path="remote_path",
+                port=22,
+            ),
+        ),
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+        ),
+    )
+
+
+def test_run_fluffy(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a FluffyAnalysisAPI
-    analysis_api = FluffyAnalysisAPI(cg_context)
+    analysis_api = FluffyAnalysisAPI(cg_config)
 
     status_db = create_autospec(Store)
     status_db.get_case_by_internal_id = Mock(
@@ -53,9 +83,9 @@ def test_run_fluffy(cg_context: CGConfig, mocker: MockerFixture):
     )
 
 
-def test_run_fluffy_with_batch_ref(cg_context: CGConfig, mocker: MockerFixture):
+def test_run_fluffy_with_batch_ref(cg_config: CGConfig, mocker: MockerFixture):
     # GIVEN a FluffyAnalysisAPI
-    analysis_api = FluffyAnalysisAPI(cg_context)
+    analysis_api = FluffyAnalysisAPI(cg_config)
 
     status_db = create_autospec(Store)
     status_db.get_case_by_internal_id = Mock(

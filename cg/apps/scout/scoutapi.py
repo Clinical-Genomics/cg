@@ -8,7 +8,7 @@ from cg.apps.scout.scout_export import ScoutExportCase, Variant
 from cg.constants.constants import FileFormat
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.scout import ScoutCustomCaseReportTags
-from cg.exc import ScoutUploadError
+from cg.exc import ScoutExportError, ScoutUploadError
 from cg.io.controller import ReadFile, ReadStream
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.services.slurm_upload_service.slurm_upload_service import SlurmUploadService
@@ -65,7 +65,8 @@ class ScoutAPI:
         try:
             self.process.run_command(export_panels_command, dry_run=dry_run)
             if not self.process.stdout:
-                return []
+                LOG.error(self.process.stderr)
+                raise ScoutExportError("Empty export output from scout")
         except CalledProcessError:
             LOG.info("Could not find panels")
             return []

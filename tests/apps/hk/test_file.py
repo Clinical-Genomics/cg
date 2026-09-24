@@ -543,3 +543,39 @@ def test_get_files_from_latest_version_containing_tags_and_excluded_tags(
     filtered_files_names: list[str] = [Path(file.full_path).name for file in filtered_files]
     assert spring_file.name in filtered_files_names
     assert fastq_file.name not in filtered_files_names
+
+
+def test_get_bundle_names_with_fastq_files(
+    populated_housekeeper_api: HousekeeperAPI,
+    sample_id: str,
+    father_sample_id: str,
+    helpers: StoreHelpers,
+    tmp_path: Path,
+):
+    # GIVEN a populated Housekeeper API
+
+    # GIVEN a bundle that has already been compressed
+    compressed_sample = "compressed_sample"
+    spring_path = tmp_path / f"{compressed_sample}.spring"
+    spring_path.touch()
+    helpers.ensure_hk_bundle(
+        store=populated_housekeeper_api,
+        bundle_data={
+            "name": compressed_sample,
+            "created": datetime.now(),
+            "expires": datetime.now(),
+            "files": [
+                {
+                    "path": spring_path.as_posix(),
+                    "archive": False,
+                    "tags": [SequencingFileTag.SPRING, compressed_sample],
+                }
+            ],
+        },
+    )
+
+    # WHEN getting bundle names with fastq files
+    bundle_names: list[str] = populated_housekeeper_api.get_bundle_names_with_fastq_files()
+
+    # THEN only the bundles with fastq should be in the list
+    assert bundle_names == [sample_id, father_sample_id]

@@ -1,6 +1,5 @@
 """Tests for helper functions in Cg Compress CLI."""
 
-import logging
 from pathlib import Path
 from typing import Iterator
 
@@ -8,61 +7,6 @@ from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress import helpers
-from cg.cli.compress.helpers import set_memory_according_to_reads
-from cg.constants.compression import CRUNCHY_MIN_GB_PER_PROCESS, MAX_READS_PER_GB
-
-
-def test_set_memory_according_to_reads_when_no_reads(caplog, sample_id: str):
-    """Test setting memory according to reads when no sample reads."""
-    caplog.set_level(logging.DEBUG)
-
-    # GIVEN a sample id and no reads supplied
-
-    # WHEN setting memory according to reads
-    memory: int = set_memory_according_to_reads(sample_id=sample_id, sample_reads=0)
-
-    # THEN we should log
-    assert f"No reads recorded for sample: {sample_id}" in caplog.text
-
-    # THEN None should be returned
-    assert memory is None
-
-
-def test_set_memory_according_to_reads_when_few_reads(sample_id: str):
-    """Test setting memory according to reads when few reads."""
-    # GIVEN a sample id and reads
-
-    # WHEN setting memory according to reads
-    memory: int = set_memory_according_to_reads(sample_id=sample_id, sample_reads=1)
-
-    # THEN memory should be set to the minimum
-    assert memory == CRUNCHY_MIN_GB_PER_PROCESS
-
-
-def test_set_memory_according_to_reads_when_many_reads(sample_id: str):
-    """Test setting memory according to reads when many reads."""
-    # GIVEN a sample id and reads
-
-    # WHEN setting memory according to reads
-    memory: int = set_memory_according_to_reads(
-        sample_id=sample_id, sample_reads=MAX_READS_PER_GB**10
-    )
-
-    # THEN memory should be limited to what is available on the node
-    assert memory == 180
-
-
-def test_set_memory_according_to_reads(sample_id: str):
-    """Test setting memory according to reads."""
-    # GIVEN a sample id and reads
-
-    # WHEN setting memory according to reads
-    memory: int = set_memory_according_to_reads(
-        sample_id=sample_id, sample_reads=MAX_READS_PER_GB * 100
-    )
-
-    # THEN memory should be adjusted
-    assert memory == 100
 
 
 def test_get_true_dir_no_symlinks(project_dir: Path):

@@ -67,9 +67,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
 
     def get_scout_variants_files(self, case_id: str) -> ScoutVariantsFiles:
         """Return Raredisease files that will be uploaded to Scout."""
-        snv_vcf: str | None = self.get_scout_uploaded_file_from_hk(
-            case_id=case_id, scout_key=ScoutUploadKey.VCF_SNV
-        )
+        snv_vcf, snv_vcf_mt = self._get_clinical_snv_files(case_id)
         sv_vcf: str | None = self.get_scout_uploaded_file_from_hk(
             case_id=case_id, scout_key=ScoutUploadKey.VCF_SV
         )
@@ -82,10 +80,25 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
         )
         return ScoutVariantsFiles(
             snv_vcf=snv_vcf,
+            snv_vcf_mt=snv_vcf_mt,
             sv_vcf=sv_vcf,
             vcf_str=vcf_str,
             smn_tsv=smn_tsv,
         )
+
+    def _get_clinical_snv_files(self, case_id: str) -> tuple[str | None, str | None]:
+        """Returns both the clinical snv and the clinical snv mt files."""
+        snv_files: list[File] = self.housekeeper_api.get_files_from_latest_version(
+            bundle_name=case_id, tags=self.get_hk_scout_file_tags(scout_key=ScoutUploadKey.VCF_SNV)
+        )
+        # We expect there to be at most two such files, one ordinary and one mt file
+        snv_file, snv_mt_file = None, None
+        for file in snv_files:
+            if "mitochondria" in [tag.name for tag in file.tags]:
+                snv_mt_file = file.full_path
+            else:
+                snv_file = file.full_path
+        return snv_file, snv_mt_file
 
     @staticmethod
     def get_sample_metadata_required_fields(case: CaseModel) -> dict:

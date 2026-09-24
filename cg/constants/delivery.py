@@ -32,8 +32,8 @@ BALSAMIC_ANALYSIS_CASE_TAGS: list[set[str]] = [
     {"vcf-sv-clinical-index"},
     {"vcf-snv"},
     {"vcf-snv-index"},
-    {"vcf-snv-research"},
-    {"vcf-snv-research-index"},
+    {"vcf-snv-research-unfiltered"},
+    {"vcf-snv-research-unfiltered-index"},
     {"vcf-snv-clinical"},
     {"vcf-snv-clinical-index"},
     {"vcf2cytosure"},
@@ -197,8 +197,8 @@ OUTBOX_NAME: str = "outbox"
 
 
 class FileDeliveryOption(StrEnum):
-    ANALYSIS: str = "analysis"
-    BAM: str = "bam"
-    FASTQ: str = "fastq"
-    FASTQ_ANALYSIS: str = "fastq-analysis"
-    RAW_DATA_ANALYSIS: str = "raw_data-analysis"
+    ANALYSIS = "analysis"
+    BAM = "bam"
+    FASTQ = "fastq"
+    FASTQ_ANALYSIS = "fastq-analysis"
+    RAW_DATA_ANALYSIS = "raw_data-analysis"

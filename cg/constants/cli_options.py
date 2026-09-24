@@ -35,3 +35,11 @@ LIMIT = click.option(
     type=int,
     help="Maximum number of cases to start",
 )
+
+SIGNATURE = click.option(
+    "--signature",
+    "-s",
+    required=True,
+    type=str,
+    help="Signature (initials) of the user performing the delivery.",
+)

@@ -2,9 +2,14 @@
 
 from datetime import datetime
 from typing import Any
+from unittest.mock import Mock
 
+import pytest
 from housekeeper.store.models import Bundle
+from pytest_mock import MockerFixture
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.exc import BundleAlreadyAddedError
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.small_helpers import SmallHelpers
 
@@ -99,3 +104,40 @@ def test_create_bundle_and_version(
     assert bundle_obj.name == case_id
     assert bundle_obj.versions is not None
     assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 1
+
+
+def test_add_new_bundle_and_version(housekeeper_api: HousekeeperAPI, mocker: MockerFixture):
+    # GIVEN a HousekeeperAPI
+    commit_spy = mocker.spy(housekeeper_api._store.session, "commit")
+
+    # GIVEN a bundle name which is not present in the database
+
+    # WHEN adding a new bundle and a version with that name
+    housekeeper_api.add_new_bundle_and_version(name="bundle_name")
+
+    # THEN a bundle and a version are created
+    bundle: Bundle | None = housekeeper_api.bundle(name="bundle_name")
+    assert bundle
+    assert bundle.name == "bundle_name"
+    assert bundle.versions[0]
+
+    # THEN the changes are not commited
+    commit_spy.assert_not_called()
+
+
+def test_add_new_bundle_and_version_raises_if_bundle_exists(
+    housekeeper_api: HousekeeperAPI, mocker: MockerFixture
+):
+    """Test that adding a new bundle and version fails if bundle already exists."""
+    # GIVEN a HousekeeperAPI
+    add_spy = mocker.spy(housekeeper_api._store.session, "add")
+
+    # GIVEN an existing bundle in the database
+    housekeeper_api.bundle = Mock(return_value=Bundle(name="bundle_name"))
+
+    # WHEN adding a bundle and version with an existing bundle name
+    with pytest.raises(BundleAlreadyAddedError, match="Bundle bundle_name already exists."):
+        housekeeper_api.add_new_bundle_and_version(name="bundle_name")
+
+    # THEN nothing was added to teh database
+    add_spy.assert_not_called()

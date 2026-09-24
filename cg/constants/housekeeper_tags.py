@@ -215,6 +215,9 @@ WORKFLOW_PROTECTED_TAGS = {
         ["gisaid-log"],
         ["gisaid-csv"],
     ],
+    Workflow.NALLO: [
+        [HermesFileTag.LONG_TERM_STORAGE],
+    ],
     Workflow.RAREDISEASE: [
         [HermesFileTag.LONG_TERM_STORAGE],
     ],

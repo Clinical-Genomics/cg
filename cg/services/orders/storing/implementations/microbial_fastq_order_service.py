@@ -24,7 +24,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
 
     def store_order(self, order: MicrobialFastqOrder) -> dict:
         """Store the order in the statusDB and LIMS, return the database samples and LIMS info."""
-        project_data, lims_map = self.lims.process_lims(
+        project_data, lims_samples = self.lims.process_lims(
             samples=order.samples,
             ticket=order._generated_ticket_id,
             order_name=order.name,
@@ -33,7 +33,8 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
             delivery_type=DataDelivery(order.delivery_type),
             skip_reception_control=order.skip_reception_control,
         )
-        self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
+        self._fill_in_sample_ids(samples=order.samples, lims_samples=lims_samples)
+        self._queue_samples_in_workflow(lims_samples)
         new_samples: list[Sample] = self.store_order_data_in_status_db(order=order)
         return {"records": new_samples, "project": project_data}
 
@@ -55,7 +56,6 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
                 )
                 db_sample: Sample = self._create_db_sample(
                     sample=sample,
-                    order_name=order.name,
                     ticket_id=str(db_order.ticket_id),
                     customer=db_order.customer,
                 )
@@ -78,7 +78,7 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=order.customer
         )
-        return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
+        return self.status_db.add_order(customer=customer, name=order.name, ticket_id=ticket_id)
 
     def _create_db_case_for_sample(
         self, sample: MicrobialFastqSample, customer: Customer, order: MicrobialFastqOrder
@@ -99,7 +99,6 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
     def _create_db_sample(
         self,
         sample: MicrobialFastqSample,
-        order_name: str,
         ticket_id: str,
         customer: Customer,
     ) -> Sample:
@@ -113,11 +112,12 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
         return self.status_db.add_sample(
             application_version=application_version,
             comment=sample.comment,
+            control=sample.control,
             customer=customer,
             internal_id=sample._generated_lims_id,
             lims_status=lims_status,
             name=sample.name,
-            order=order_name,
+            no_invoice=application_version.application.is_external,
             ordered=datetime.now(),
             original_ticket=ticket_id,
             priority=sample.priority,

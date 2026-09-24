@@ -60,6 +60,8 @@ def nallo_hk_bundle(
     root = test_run_paths.test_root_dir
     sample_id = nallo_sample.internal_id
 
+    snv_rank_model = Path(root, "rank_model_-v1.0-.ini")
+    sv_rank_model = Path(root, "svrank_model_-v2.13-.ini")
     vcf_snv = Path(root, "vcf_snv_clinical.vcf")
     vcf_snv_research = Path(root, "vcf_snv_research.vcf")
     vcf_sv = Path(root, "vcf_sv_clinical.vcf")
@@ -67,14 +69,28 @@ def nallo_hk_bundle(
     delivery_report = Path(root, "delivery_report.html")
     bam_file = Path(root, f"{sample_id}.bam")
 
-    for path in [vcf_snv, vcf_snv_research, vcf_sv, vcf_sv_research, delivery_report, bam_file]:
+    for path in [
+        bam_file,
+        delivery_report,
+        snv_rank_model,
+        sv_rank_model,
+        vcf_snv,
+        vcf_snv_research,
+        vcf_sv,
+        vcf_sv_research,
+    ]:
         create_empty_file(path)
+
+    snv_rank_model.write_text("[Version]\nversion = 1.0")
+    sv_rank_model.write_text("[Version]\nversion = 2.13")
 
     bundle_data = {
         "name": nallo_case.internal_id,
         "created": datetime.now(),
         "expires": datetime.now(),
         "files": [
+            {"path": snv_rank_model.as_posix(), "tags": ["rank-model-snv"], "archive": False},
+            {"path": sv_rank_model.as_posix(), "tags": ["rank-model-sv"], "archive": False},
             {"path": vcf_snv.as_posix(), "tags": ["vcf-snv-clinical"], "archive": False},
             {"path": vcf_snv_research.as_posix(), "tags": ["vcf-snv-research"], "archive": False},
             {"path": vcf_sv.as_posix(), "tags": ["vcf-sv-clinical"], "archive": False},
@@ -182,18 +198,26 @@ def raredisease_hk_bundle(
 ) -> Version:
     root = test_run_paths.test_root_dir
     delivery_report = Path(root, "raredisease_delivery_report.html")
-    params_file = Path(root, "raredisease_params_file.yaml")
+    snv_rank_model = Path(root, "rank_model_-v1.39-.ini")
+    sv_rank_model = Path(root, "svrank_model_-v1.13-.ini")
     vcf_snv = Path(root, "raredisease_vcf_snv_clinical.vcf")
     vcf_snv_research = Path(root, "raredisease_vcf_snv_research.vcf")
     vcf_sv = Path(root, "raredisease_vcf_sv_clinical.vcf")
     vcf_sv_research = Path(root, "raredisease_vcf_sv_research.vcf")
 
-    for path in [delivery_report, params_file, vcf_snv, vcf_snv_research, vcf_sv, vcf_sv_research]:
+    for path in [
+        delivery_report,
+        snv_rank_model,
+        sv_rank_model,
+        vcf_snv,
+        vcf_snv_research,
+        vcf_sv,
+        vcf_sv_research,
+    ]:
         create_empty_file(path)
 
-    params_file.write_text(
-        "score_config_snv: /rank_model_-v1.39-.ini\nscore_config_sv: /svrank_model_-v1.13-.ini"
-    )
+    snv_rank_model.write_text("[Version]\nversion = 1.39")
+    sv_rank_model.write_text("[Version]\nversion = 1.13")
 
     bundle_data = {
         "name": raredisease_case.internal_id,
@@ -201,7 +225,8 @@ def raredisease_hk_bundle(
         "expires": datetime.now(),
         "files": [
             {"path": delivery_report.as_posix(), "tags": ["delivery-report"], "archive": False},
-            {"path": params_file.as_posix(), "tags": ["nextflow-params"], "archive": False},
+            {"path": snv_rank_model.as_posix(), "tags": ["rank-model-snv"], "archive": False},
+            {"path": sv_rank_model.as_posix(), "tags": ["rank-model-sv"], "archive": False},
             {"path": vcf_snv.as_posix(), "tags": ["vcf-snv-clinical"], "archive": False},
             {"path": vcf_snv_research.as_posix(), "tags": ["vcf-snv-research"], "archive": False},
             {"path": vcf_sv.as_posix(), "tags": ["vcf-sv-clinical"], "archive": False},

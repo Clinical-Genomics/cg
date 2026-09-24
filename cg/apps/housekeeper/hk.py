@@ -14,6 +14,7 @@ from sqlalchemy.orm import Query
 
 from cg.constants import SequencingFileTag
 from cg.exc import (
+    BundleAlreadyAddedError,
     HousekeeperArchiveMissingError,
     HousekeeperBundleVersionMissingError,
     HousekeeperFileMissingError,
@@ -38,7 +39,7 @@ class HousekeeperAPI:
         """Build a new bundle version of files."""
         return self._store.add_bundle(bundle_data)
 
-    def bundle(self, name: str) -> Bundle:
+    def bundle(self, name: str) -> Bundle | None:
         """Fetch a bundle."""
         return self._store.get_bundle_by_name(bundle_name=name)
 
@@ -54,6 +55,17 @@ class HousekeeperAPI:
         new_bundle.versions.append(new_version)
         self.commit()
         LOG.info(f"New bundle created with name {new_bundle.name}")
+        return new_bundle
+
+    def add_new_bundle_and_version(self, name: str) -> Bundle:
+        if self.bundle(name):
+            raise BundleAlreadyAddedError(f"Bundle {name} already exists.")
+        created_at = datetime.now()
+        new_bundle: Bundle = self.new_bundle(name=name, created_at=created_at)
+        new_version: Version = self.new_version(created_at=created_at)
+        new_bundle.versions.append(new_version)
+        self._store.session.add(new_bundle)
+        self._store.session.add(new_version)
         return new_bundle
 
     def new_file(
@@ -163,7 +175,9 @@ class HousekeeperAPI:
         """Wrap method in Housekeeper Store."""
         return self._store.session.rollback()
 
-    def get_files(self, bundle: str, tags: list | None = None, version: int | None = None) -> Query:
+    def get_files(
+        self, bundle: str | None, tags: list | None = None, version: int | None = None
+    ) -> Query:
         """Get all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version.
         """
@@ -241,6 +255,11 @@ class HousekeeperAPI:
         LOG.info(f"Linked file: {file_obj.path} -> {new_path}")
         file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
         return file_obj
+
+    def finalize_file_transactions(self, files: list[File], version: Version) -> None:
+        for file in files:
+            self.include_file(file_obj=file, version_obj=version)
+        self.commit() if files else None
 
     def new_version(self, created_at: datetime, expires_at: datetime = None) -> Version:
         """Create a new bundle version."""
@@ -388,7 +407,7 @@ class HousekeeperAPI:
 
     def get_files_from_latest_version(
         self, bundle_name: str, tags: list[str] | None = None
-    ) -> list[File] | None:
+    ) -> list[File]:
         """Return files in the latest version of a bundle.
 
         Raises HousekeeperBundleVersionMissingError:
@@ -656,3 +675,14 @@ class HousekeeperAPI:
                 files=filtered_files, excluded_tags=excluded_tags
             )
         return filtered_files
+
+    def get_bundle_names_with_fastq_files(self) -> list[str]:
+        """Return the names of all bundles that currently have a fastq-tagged file"""
+        fastq_files: Query = self.get_files(bundle=None, tags=[SequencingFileTag.FASTQ])
+        bundle_names: Query = (
+            fastq_files.join(File.version)
+            .join(Version.bundle)
+            .with_entities(Bundle.name)
+            .distinct()
+        )
+        return [name for (name,) in bundle_names]

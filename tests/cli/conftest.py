@@ -53,7 +53,7 @@ class MockCompressAPI(CompressAPI):
 
     def __init__(self):
         """initialize mock"""
-        super().__init__(hk_api=None, crunchy_api=None, demux_root="")
+        super().__init__(hk_api=None, crunchy_api=None, demux_root="", status_db=None)
         self.ntasks = 12
         self.mem = 50
         self.fastq_compression_success = True
@@ -147,12 +147,14 @@ def real_compress_api(
     illumina_demultiplexed_runs_directory,
     housekeeper_api: HousekeeperAPI,
     real_crunchy_api: CrunchyAPI,
+    store: Store,
 ) -> CompressAPI:
     """Return a compress API context."""
     return CompressAPI(
         crunchy_api=real_crunchy_api,
         hk_api=housekeeper_api,
         demux_root=illumina_demultiplexed_runs_directory.as_posix(),
+        status_db=store,
     )
 
 

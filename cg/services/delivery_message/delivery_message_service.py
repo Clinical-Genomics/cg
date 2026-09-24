@@ -25,7 +25,9 @@ class DeliveryMessageService:
 
     def get_order_message(self, order_id: int) -> DeliveryMessageOrderResponse:
         order: Order = self.store.get_order_by_id(order_id)
-        analyses: list[TrailblazerAnalysis] = self.trailblazer_api.get_analyses_to_deliver(order_id)
+        analyses: list[TrailblazerAnalysis] = (
+            self.trailblazer_api.get_analyses_to_deliver_for_order(order_id)
+        )
         validated_analyses: list[TrailblazerAnalysis] = self._get_validated_analyses(
             analyses=analyses, order=order
         )

@@ -13,6 +13,7 @@ from cg.services.orders.validation.rules.sample.rules import (
     validate_well_position_format,
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
+    warn_if_sex_unknown,
 )
 
 PACBIO_LONG_READ_SAMPLE_RULES: list[Callable] = [
@@ -28,4 +29,5 @@ PACBIO_LONG_READ_SAMPLE_RULES: list[Callable] = [
     validate_wells_contain_at_most_one_sample,
     validate_well_position_format,
     validate_well_positions_required,
+    warn_if_sex_unknown,
 ]

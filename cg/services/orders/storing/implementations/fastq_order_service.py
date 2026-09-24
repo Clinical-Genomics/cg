@@ -1,10 +1,8 @@
 import logging
 from datetime import datetime
 
-from cg.constants import DataDelivery, GenePanelMasterList, Priority, Workflow
-from cg.constants.constants import CustomerId
+from cg.constants import DataDelivery, Workflow
 from cg.constants.lims import LimsStatus
-from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.orders.sample_base import SexEnum, StatusEnum
 from cg.services.orders.constants import ORDER_TYPE_WORKFLOW_MAP
 from cg.services.orders.lims_service.service import OrderLimsService
@@ -26,7 +24,7 @@ class StoreFastqOrderService(StoreOrderService):
 
     def store_order(self, order: FastqOrder) -> dict:
         """Submit a batch of samples for FASTQ delivery."""
-        project_data, lims_map = self.lims.process_lims(
+        project_data, lims_samples = self.lims.process_lims(
             samples=order.samples,
             ticket=order._generated_ticket_id,
             order_name=order.name,
@@ -35,7 +33,8 @@ class StoreFastqOrderService(StoreOrderService):
             delivery_type=DataDelivery(order.delivery_type),
             skip_reception_control=order.skip_reception_control,
         )
-        self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
+        self._fill_in_sample_ids(samples=order.samples, lims_samples=lims_samples)
+        self._queue_samples_in_workflow(lims_samples)
         new_samples: list[Sample] = self.store_order_data_in_status_db(order=order)
         return {"records": new_samples, "project": project_data}
 
@@ -57,7 +56,6 @@ class StoreFastqOrderService(StoreOrderService):
                 )
                 db_sample: Sample = self._create_db_sample(
                     sample=sample,
-                    order_name=order.name,
                     ticket_id=str(db_order.ticket_id),
                     customer=db_order.customer,
                 )
@@ -80,7 +78,7 @@ class StoreFastqOrderService(StoreOrderService):
         customer: Customer = self.status_db.get_customer_by_internal_id(
             customer_internal_id=order.customer
         )
-        return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
+        return self.status_db.add_order(customer=customer, name=order.name, ticket_id=ticket_id)
 
     def _create_db_case_for_sample(
         self,
@@ -102,9 +100,7 @@ class StoreFastqOrderService(StoreOrderService):
         case.customer = customer
         return case
 
-    def _create_db_sample(
-        self, sample: FastqSample, order_name: str, customer: Customer, ticket_id: str
-    ) -> Sample:
+    def _create_db_sample(self, sample: FastqSample, customer: Customer, ticket_id: str) -> Sample:
         """Return a Sample database object."""
         application_version: ApplicationVersion = (
             self.status_db.get_current_application_version_by_tag(tag=sample.application)
@@ -120,7 +116,7 @@ class StoreFastqOrderService(StoreOrderService):
             internal_id=sample._generated_lims_id,
             lims_status=lims_status,
             name=sample.name,
-            order=order_name,
+            no_invoice=application_version.application.is_external,
             ordered=datetime.now(),
             original_ticket=ticket_id,
             priority=sample.priority,

@@ -2,7 +2,9 @@ import pytest
 
 from cg.constants.constants import DataDelivery, Workflow
 from cg.services.delivery_message.delivery_message_service import DeliveryMessageService
-from cg.store.models import Order
+from cg.services.delivery_message.messages.utils import BEST_REGARDS_MESSAGE
+from cg.services.delivery_message.utils import get_message
+from cg.store.models import Case, Order
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -36,6 +38,23 @@ def test_get_delivery_message_for_single_case(
     # THEN the message should be as expected
     expected_message: str = request.getfixturevalue(expected_message_fixture)
     assert message == expected_message
+
+
+def test_get_message_with_signature(
+    delivery_message_service: DeliveryMessageService,
+    mip_case_id: str,
+    analysis_scout_message: str,
+) -> None:
+    """Test that the signature is appended only when explicitly requested."""
+    # GIVEN a store with a case
+    store: Store = delivery_message_service.store
+    cases: list[Case] = store.get_cases_by_internal_ids([mip_case_id])
+
+    # WHEN the delivery message is requested with a signature
+    message: str = get_message(cases=cases, store=store, include_signature=True)
+
+    # THEN the message should end with the signature
+    assert message == f"{analysis_scout_message}\n\n{BEST_REGARDS_MESSAGE}"
 
 
 @pytest.mark.parametrize(

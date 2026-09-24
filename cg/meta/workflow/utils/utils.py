@@ -7,3 +7,10 @@ MAP_TO_TRAILBLAZER_PRIORITY: dict[Priority, TrailblazerPriority] = {
     Priority.priority: TrailblazerPriority.HIGH,
     Priority.express: TrailblazerPriority.EXPRESS,
 }
+
+MAP_FROM_TRAILBLAZER_PRIORITY: dict[TrailblazerPriority, list[Priority]] = {
+    TrailblazerPriority.LOW: [Priority.research],
+    TrailblazerPriority.NORMAL: [Priority.standard, Priority.clinical_trials],
+    TrailblazerPriority.HIGH: [Priority.priority],
+    TrailblazerPriority.EXPRESS: [Priority.express],
+}

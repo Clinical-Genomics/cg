@@ -1,6 +1,7 @@
 """CLI support to create config and/or start BALSAMIC."""
 
 import logging
+from pathlib import Path
 from typing import cast
 
 import rich_click as click
@@ -18,7 +19,9 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
-from cg.services.analysis_starter.configurator.implementations.balsamic import BalsamicConfigurator
+from cg.services.analysis_starter.configurator.implementations.balsamic_configurator import (
+    BalsamicConfigurator,
+)
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.store.store import Store
@@ -155,7 +158,7 @@ def config_case(cg_config: CGConfig, case_id: str, panel_bed: str | None):
 @OPTION_WORKFLOW_PROFILE
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def run(cg_config: CGConfig, case_id: str, workflow_profile: click.Path | None):
+def run(cg_config: CGConfig, case_id: str, workflow_profile: Path | None):
     """
     Run a preconfigured Balsamic case.
 
@@ -177,7 +180,7 @@ def start(
     cg_config: CGConfig,
     case_id: str,
     panel_bed: str | None,
-    workflow_profile: click.Path | None,
+    workflow_profile: Path | None,
 ):
     """
     Starts a Balsamic cases.

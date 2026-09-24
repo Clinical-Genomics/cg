@@ -24,7 +24,7 @@ class StorePacBioOrderService(StoreOrderService):
 
     def store_order(self, order: PacbioOrder) -> dict:
         """Store the order in the statusDB and LIMS, return the database samples and LIMS info."""
-        project_data, lims_map = self.lims.process_lims(
+        project_data, lims_samples = self.lims.process_lims(
             samples=order.samples,
             ticket=order._generated_ticket_id,
             order_name=order.name,
@@ -33,7 +33,8 @@ class StorePacBioOrderService(StoreOrderService):
             delivery_type=DataDelivery(order.delivery_type),
             skip_reception_control=order.skip_reception_control,
         )
-        self._fill_in_sample_ids(samples=order.samples, lims_map=lims_map)
+        self._fill_in_sample_ids(samples=order.samples, lims_samples=lims_samples)
+        self._queue_samples_in_workflow(lims_samples)
         new_samples = self.store_order_data_in_status_db(order=order)
         return {"project": project_data, "records": new_samples}
 
@@ -57,7 +58,6 @@ class StorePacBioOrderService(StoreOrderService):
                 )
                 db_sample: Sample = self._create_db_sample(
                     sample=sample,
-                    order_name=order.name,
                     customer=status_db_order.customer,
                     ticket_id=str(status_db_order.ticket_id),
                 )
@@ -77,10 +77,8 @@ class StorePacBioOrderService(StoreOrderService):
     def _create_db_order(self, order: PacbioOrder) -> Order:
         """Return an Order database object."""
         ticket_id: int = order._generated_ticket_id
-        customer: Customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=order.customer
-        )
-        return self.status_db.add_order(customer=customer, ticket_id=ticket_id)
+        customer: Customer = self.status_db.get_customer_by_internal_id_strict(order.customer)
+        return self.status_db.add_order(customer=customer, name=order.name, ticket_id=ticket_id)
 
     def _create_db_case_for_sample(
         self, sample: PacbioSample, customer: Customer, order: PacbioOrder
@@ -97,9 +95,7 @@ class StorePacBioOrderService(StoreOrderService):
         case.customer = customer
         return case
 
-    def _create_db_sample(
-        self, sample: PacbioSample, order_name: str, customer: Customer, ticket_id: str
-    ) -> Sample:
+    def _create_db_sample(self, sample: PacbioSample, customer: Customer, ticket_id: str) -> Sample:
         """Return a Sample database object."""
         application_version: ApplicationVersion = (
             self.status_db.get_current_application_version_by_tag(tag=sample.application)
@@ -114,7 +110,7 @@ class StorePacBioOrderService(StoreOrderService):
             internal_id=sample._generated_lims_id,
             lims_status=lims_status,
             name=sample.name,
-            order=order_name,
+            no_invoice=application_version.application.is_external,
             ordered=datetime.now(),
             original_ticket=ticket_id,
             priority=sample.priority,

@@ -1,26 +1,26 @@
 """Interactions with the gisaid cli upload_results_to_gisaid"""
 
+import csv
 import logging
 import re
 import tempfile
+from collections.abc import ValuesView
 from pathlib import Path
 
-import pandas as pd
 from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import SARS_COV_REGEX, FileFormat
 from cg.constants.housekeeper_tags import FohmTag
-from cg.exc import HousekeeperFileMissingError
+from cg.exc import CgError, HousekeeperFileMissingError
 from cg.io.controller import ReadFile, WriteFile
+from cg.meta.upload.gisaid.constants import HEADERS
+from cg.meta.upload.gisaid.models import GisaidAccession, GisaidSample
 from cg.models.cg_config import CGConfig
 from cg.store.models import Sample
 from cg.store.store import Store
 from cg.utils import Process
-
-from .constants import HEADERS
-from .models import GisaidAccession, GisaidSample
 
 LOG = logging.getLogger(__name__)
 
@@ -58,12 +58,23 @@ class GisaidAPI:
             raise HousekeeperFileMissingError(message=msg)
         return completion_file
 
-    def get_completion_dataframe(self, completion_file: File) -> pd.DataFrame:
-        """Read completion file in to dataframe, drop duplicates, and return the dataframe"""
-        completion_df = pd.read_csv(completion_file.full_path, index_col=None, header=0)
-        completion_df.drop_duplicates(inplace=True)
-        completion_df = completion_df[completion_df["provnummer"].str.contains(SARS_COV_REGEX)]
-        return completion_df
+    def get_completion_dict(self, completion_file: File):
+        """Read completion file in to dictionary similar to a pandas dataframe and drop duplicates"""
+        with open(Path(completion_file.full_path), "r") as file:
+            csv_reader: csv.DictReader = csv.DictReader(file)
+            if not csv_reader.fieldnames:
+                raise CgError(f"{completion_file.full_path} is malformed.")
+
+            deduplicated_csv: ValuesView = {tuple(row.items()): row for row in csv_reader}.values()
+            completion_dict: dict = {field: {} for field in csv_reader.fieldnames}
+
+            for i, row in enumerate(deduplicated_csv):
+                if not re.match(SARS_COV_REGEX, row["provnummer"]):
+                    continue
+                for key, value in row.items():
+                    completion_dict[key][i] = value
+
+        return completion_dict
 
     def get_gisaid_sample_list(self, case_id: str) -> list[Sample]:
         """Get list of Sample objects eligeble for upload.
@@ -71,8 +82,9 @@ class GisaidAPI:
         The sample will be included in completion file."""
 
         completion_file = self.get_completion_file_from_hk(case_id=case_id)
-        completion_df = self.get_completion_dataframe(completion_file=completion_file)
-        sample_names = list(completion_df["provnummer"].unique())
+        completion_dict = self.get_completion_dict(completion_file=completion_file)
+        # deduplicate by provnummer and preserve order to match legacy pandas unique()
+        sample_names = list(dict.fromkeys(completion_dict["provnummer"].values()))
         return [self.status_db.get_sample_by_name(name=sample_name) for sample_name in sample_names]
 
     def get_gisaid_fasta_path(self, case_id: str) -> Path:
@@ -154,10 +166,9 @@ class GisaidAPI:
 
     def create_gisaid_csv(self, gisaid_samples: list[GisaidSample], case_id: str) -> None:
         """Create csv file for gisaid upload"""
-        samples_df = pd.DataFrame(
-            data=[gisaid_sample.model_dump() for gisaid_sample in gisaid_samples],
-            columns=HEADERS,
-        )
+        sample_dicts: list[dict] = [
+            sample.model_dump(include=set(HEADERS)) for sample in gisaid_samples
+        ]
 
         gisaid_csv_file = self.housekeeper_api.get_file_from_latest_version(
             bundle_name=case_id, tags=["gisaid-csv", case_id]
@@ -167,7 +178,11 @@ class GisaidAPI:
             gisaid_csv_path = gisaid_csv_file.full_path
         else:
             gisaid_csv_path = self.get_gisaid_csv_path(case_id=case_id)
-        samples_df.to_csv(gisaid_csv_path, sep=",", index=False)
+
+        with open(Path(gisaid_csv_path), "w", newline="") as csv_file:
+            writer: csv.DictWriter = csv.DictWriter(csv_file, fieldnames=HEADERS)
+            writer.writeheader()
+            writer.writerows(sample_dicts)
 
         if gisaid_csv_file:
             return
@@ -301,25 +316,39 @@ class GisaidAPI:
         """Update completion file with accession numbers"""
         completion_file = self.get_completion_file_from_hk(case_id=case_id)
         accession_dict = self.get_accession_numbers(case_id=case_id)
-        completion_df = self.get_completion_dataframe(completion_file=completion_file)
-        completion_df["GISAID_accession"] = completion_df["provnummer"].apply(
-            lambda x: accession_dict[x]
-        )
-        completion_df.to_csv(
-            completion_file.full_path,
-            sep=",",
-            index=False,
-        )
+        completion_dict = self.get_completion_dict(completion_file=completion_file)
+
+        for index, completion_provnummer in completion_dict["provnummer"].items():
+            new_value = accession_dict[completion_provnummer]
+            completion_dict["GISAID_accession"][index] = new_value
+
+        fieldnames = list(completion_dict.keys())
+        indices = list(next(iter(completion_dict.values())).keys())
+        rows = [{col: completion_dict[col][i] for col in fieldnames} for i in indices]
+
+        with open(completion_file.full_path, "w", newline="") as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
 
     def upload(self, case_id: str) -> None:
         """Uploading results to gisaid and saving the accession numbers in completion file"""
 
         completion_file = self.get_completion_file_from_hk(case_id=case_id)
-        completion_df = self.get_completion_dataframe(completion_file=completion_file)
-        if len(completion_df["GISAID_accession"].dropna()) == len(completion_df["provnummer"]):
+        completion_dict = self.get_completion_dict(completion_file=completion_file)
+        if self._all_samples_uploaded_dict(completion_dict):
             LOG.info("All samples already uploaded")
             return
 
         self.create_gisaid_files_in_housekeeper(case_id=case_id)
         self.upload_results_to_gisaid(case_id=case_id)
         self.update_completion_file(case_id=case_id)
+
+    def _all_samples_uploaded_dict(self, completion_dict: dict) -> bool:
+        if not completion_dict["provnummer"]:
+            return True
+
+        accession_values = [
+            value for value in completion_dict["GISAID_accession"].values() if value
+        ]
+        return len(accession_values) == len(completion_dict["provnummer"])

@@ -34,6 +34,7 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
+    ExternalSample,
     IlluminaFlowCell,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
@@ -194,8 +195,8 @@ class CreateMixin(ReadHandler):
         downsampled_to: int = None,
         internal_id: str = None,
         last_sequenced_at: datetime = None,
-        order: str = None,
         ordered: datetime = None,
+        pool: Pool | None = None,
         prepared_at: datetime = None,
         priority: Priority = None,
         received: datetime = None,
@@ -216,9 +217,9 @@ class CreateMixin(ReadHandler):
             is_tumour=tumour,
             last_sequenced_at=last_sequenced_at,
             name=name,
-            order=order,
             ordered_at=ordered or datetime.now(),
             original_ticket=original_ticket,
+            pool=pool,
             prepared_at=prepared_at,
             priority=priority,
             received_at=received,
@@ -239,6 +240,7 @@ class CreateMixin(ReadHandler):
         synopsis: str | None = None,
         customer_id: int | None = None,
         comment: str | None = None,
+        is_compressible: bool = True,
     ) -> Case:
         """Build a new Case record."""
 
@@ -255,6 +257,7 @@ class CreateMixin(ReadHandler):
             synopsis=synopsis,
             tickets=ticket,
             customer_id=customer_id,
+            is_compressible=is_compressible,
         )
 
     def relate_sample(
@@ -321,15 +324,15 @@ class CreateMixin(ReadHandler):
         self,
         customer: Customer,
         name: str,
-        order: str,
         ordered: datetime,
         application_version: ApplicationVersion,
-        ticket: str = None,
+        order: Order,
         comment: str = None,
         received_at: datetime = None,
         invoice_id: int = None,
         no_invoice: bool = None,
         delivered_at: datetime = None,
+        samples: list[Sample] | None = None,
     ) -> Pool:
         """Build a new Pool record."""
 
@@ -337,12 +340,12 @@ class CreateMixin(ReadHandler):
             name=name,
             ordered_at=ordered or datetime.now(),
             order=order,
-            ticket=ticket,
             received_at=received_at,
             comment=comment,
             delivered_at=delivered_at,
             invoice_id=invoice_id,
             no_invoice=no_invoice,
+            samples=samples or [],
         )
         new_record.customer = customer
         new_record.application_version = application_version
@@ -395,10 +398,11 @@ class CreateMixin(ReadHandler):
             **kwargs,
         )
 
-    def add_order(self, customer: Customer, ticket_id: int, **kwargs) -> Order:
+    def add_order(self, customer: Customer, name: str, ticket_id: int, **kwargs) -> Order:
         """Build a new Order record."""
         order = Order(
             customer=customer,
+            name=name,
             order_date=datetime.now(),
             ticket_id=ticket_id,
             **kwargs,
@@ -591,3 +595,16 @@ class CreateMixin(ReadHandler):
         )
         self.add_item_to_store(new_sample_sequencing_run)
         return new_sample_sequencing_run
+
+    def add_external_sample(
+        self, customer_id: int, sample_name: str, customer_uploaded_at: datetime
+    ) -> ExternalSample:
+
+        external_sample = ExternalSample(
+            customer_id=customer_id,
+            sample_name=sample_name,
+            customer_uploaded_at=customer_uploaded_at,
+        )
+
+        self.add_item_to_store(external_sample)
+        return external_sample

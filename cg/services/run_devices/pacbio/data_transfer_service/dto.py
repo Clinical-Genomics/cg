@@ -59,7 +59,7 @@ class PacBioSampleSequencingMetricsDTO(BaseModel):
     hifi_yield: int
     hifi_mean_read_length: int
     hifi_median_read_quality: str
-    polymerase_mean_read_length: int
+    polymerase_mean_read_length: int | None
 
 
 class PacBioSequencingRunDTO(BaseModel):

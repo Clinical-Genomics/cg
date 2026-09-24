@@ -21,11 +21,11 @@ class SequencingQCService:
     def run_sequencing_qc(self) -> bool:
         """
         Run QC for samples in pending or failed cases and store the aggregated score on each case.
-        Return True if all checks could run succesfully
+        Return True if all checks could run successfully
         Return False if at least one of the checks raised an exception
         """
         cases: list[Case] = self.store.get_cases_for_sequencing_qc()
-        all_checks_ran_succesfully: bool = True
+        all_checks_ran_successfully: bool = True
 
         for case in cases:
             LOG.debug(f"Performing sequencing QC for case: {case.internal_id}")
@@ -36,9 +36,9 @@ class SequencingQCService:
                 LOG.info(f"Sequencing QC status for case {case.internal_id}: {qc_status}")
             except Exception as e:
                 LOG.error(f"Error found during sequencing QC of case: {case.internal_id}: {e}")
-                all_checks_ran_succesfully = False
+                all_checks_ran_successfully = False
 
-        return all_checks_ran_succesfully
+        return all_checks_ran_successfully
 
     @staticmethod
     def case_pass_sequencing_qc(case: Case) -> bool:

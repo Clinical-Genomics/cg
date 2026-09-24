@@ -336,6 +336,11 @@ def test_is_customer_not_eligible_for_observations_upload(
             RarediseaseAnalysisAPI,
             SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
         ),
+        (
+            Workflow.RAREDISEASE,
+            RarediseaseAnalysisAPI,
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+        ),
     ],
 )
 def test_is_sequencing_method_eligible_for_observations_upload(

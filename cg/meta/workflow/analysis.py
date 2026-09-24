@@ -195,11 +195,6 @@ class AnalysisAPI(MetaAPI):
             raise CgError(f"Different source types found for case: {case_id} ({source_types})")
         return source_types.pop()
 
-    def has_case_only_exome_samples(self, case_id: str) -> bool:
-        """Returns True if the application type for all samples in a case is WHOLE_EXOME_SEQUENCING."""
-        application_type: str = self.get_case_application_type(case_id)
-        return application_type == AnalysisType.WES
-
     def create_housekeeper_bundle(
         self, case_id: str, dry_run: bool = False, force: bool = False
     ) -> tuple[Bundle, Version]:
@@ -241,6 +236,7 @@ class AnalysisAPI(MetaAPI):
             primary=is_primary,
             started_at=analysis_start,
             trailblazer_id=trailblazer_id,
+            order_id=case.latest_order.id,
         )
         new_analysis.case = case
         self.status_db.add_item_to_store(new_analysis)

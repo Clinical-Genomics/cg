@@ -8,6 +8,7 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_each_new_case_has_an_affected_sample,
     validate_existing_cases_belong_to_collaboration,
     validate_existing_cases_have_an_affected_sample,
+    validate_gene_panels_exist,
     validate_gene_panels_unique,
     validate_samples_in_case_have_same_prep_category,
 )
@@ -23,7 +24,6 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_existing_samples_belong_to_collaboration,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
-    validate_gene_panels_exist,
     validate_mothers_are_female,
     validate_mothers_in_same_case_as_children,
     validate_not_all_samples_unknown_in_case,
@@ -41,6 +41,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
     validate_well_position_format,
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
+    warn_if_sex_unknown,
 )
 
 RAREDISEASE_CASE_RULES: list[Callable] = [
@@ -50,6 +51,7 @@ RAREDISEASE_CASE_RULES: list[Callable] = [
     validate_each_new_case_has_an_affected_sample,
     validate_existing_cases_have_an_affected_sample,
     validate_existing_cases_belong_to_collaboration,
+    validate_gene_panels_exist,
     validate_gene_panels_unique,
     validate_samples_in_case_have_same_prep_category,
     validate_case_contains_related_samples,
@@ -67,7 +69,6 @@ RAREDISEASE_CASE_SAMPLE_RULES: list[Callable] = [
     validate_existing_samples_belong_to_collaboration,
     validate_fathers_are_male,
     validate_fathers_in_same_case_as_children,
-    validate_gene_panels_exist,
     validate_mothers_are_female,
     validate_mothers_in_same_case_as_children,
     validate_not_all_samples_unknown_in_case,
@@ -85,4 +86,5 @@ RAREDISEASE_CASE_SAMPLE_RULES: list[Callable] = [
     validate_well_positions_required,
     validate_wells_contain_at_most_one_sample,
     validate_well_position_format,
+    warn_if_sex_unknown,
 ]

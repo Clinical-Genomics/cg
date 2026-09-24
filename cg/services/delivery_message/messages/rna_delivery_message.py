@@ -21,7 +21,7 @@ class RNAUploadMessageStrategy(ABC):
 class RNAAnalysisStrategy(RNAUploadMessageStrategy):
     def get_file_upload_message(self, delivery_path: str) -> str:
         return (
-            f"The analysis files are currently being uploaded to your inbox on Caesar:\n\n"
+            f"The analysis files have been uploaded to your inbox on Caesar:\n\n"
             f"{delivery_path} \n\n"
             f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
         )
@@ -30,7 +30,7 @@ class RNAAnalysisStrategy(RNAUploadMessageStrategy):
 class RNAFastqAnalysisStrategy(RNAUploadMessageStrategy):
     def get_file_upload_message(self, delivery_path: str) -> str:
         return (
-            f"The fastq and analysis files are currently being uploaded to your inbox on Caesar:\n\n"
+            f"The fastq and analysis files have been uploaded to your inbox on Caesar:\n\n"
             f"{delivery_path} \n\n"
             f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
         )
@@ -39,7 +39,7 @@ class RNAFastqAnalysisStrategy(RNAUploadMessageStrategy):
 class RNAFastqStrategy(RNAUploadMessageStrategy):
     def get_file_upload_message(self, delivery_path: str) -> str:
         return (
-            f"The fastq files are currently being uploaded to your inbox on Caesar:\n\n"
+            f"The fastq files have been uploaded to your inbox on Caesar:\n\n"
             f"{delivery_path} \n\n"
             f"{REMINDER_TO_DOWNLOAD_MESSAGE}"
         )

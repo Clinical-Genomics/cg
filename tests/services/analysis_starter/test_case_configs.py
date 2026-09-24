@@ -16,6 +16,7 @@ def test_microsalt_get_start_command():
         config_file="/path/to/microsalt_case/config.json",
         environment="S_microsalt",
         fastq_directory="/path/to/microsalt_case/fastq",
+        pipeline_config_path="/path/to/microsalt/pipeline/config.json",
     )
 
     # WHEN getting the start command
@@ -24,7 +25,7 @@ def test_microsalt_get_start_command():
     # THEN the command is as expected
     expected_command = (
         f"{microsalt_case_config.conda_binary} run --name {microsalt_case_config.environment} "
-        f"{microsalt_case_config.binary} analyse {microsalt_case_config.config_file} "
+        f"{microsalt_case_config.binary} --config {microsalt_case_config.pipeline_config_path} analyse {microsalt_case_config.config_file} "
         f"--input {microsalt_case_config.fastq_directory}"
     )
 
@@ -107,6 +108,7 @@ def test_balsamic_get_start_command_no_flags_set():
         sample_config=Path("/path/to/sample/config"),
         qos=SlurmQos.NORMAL,
         workflow=Workflow.BALSAMIC,
+        workflow_profile=Path("/path/to/balsamic"),
     )
 
     # WHEN getting the start command
@@ -121,7 +123,8 @@ def test_balsamic_get_start_command_no_flags_set():
         "--qos normal "
         "--sample-config /path/to/sample/config "
         "--headjob-partition head_job_partition "
-        "--run-analysis"
+        "--run-analysis "
+        "--workflow-profile /path/to/balsamic"
     )
     assert start_command == expected_command
 

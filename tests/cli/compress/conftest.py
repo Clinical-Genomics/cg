@@ -22,7 +22,7 @@ class MockCompressAPI(CompressAPI):
 
     def __init__(self):
         """initialize mock."""
-        super().__init__(hk_api=None, crunchy_api=None, demux_root="")
+        super().__init__(hk_api=None, crunchy_api=None, demux_root="", status_db=None)
         self.fastq_compression_success: bool = True
         self.spring_decompression_success: bool = True
         self.dry_run: bool = False
@@ -60,11 +60,17 @@ def real_crunchy_api(
 
 @pytest.fixture
 def real_compress_api(
-    demultiplex_runs: Path, housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
+    demultiplex_runs: Path,
+    housekeeper_api: HousekeeperAPI,
+    real_crunchy_api: CrunchyAPI,
+    store: Store,
 ) -> CompressAPI:
     """Return a Compress context."""
     return CompressAPI(
-        crunchy_api=real_crunchy_api, hk_api=housekeeper_api, demux_root=demultiplex_runs.as_posix()
+        crunchy_api=real_crunchy_api,
+        hk_api=housekeeper_api,
+        demux_root=demultiplex_runs.as_posix(),
+        status_db=store,
     )
 
 

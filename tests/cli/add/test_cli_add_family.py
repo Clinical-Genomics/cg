@@ -43,7 +43,7 @@ def test_add_case_required(
             name,
         ],
         obj=base_context,
-        input="y",
+        input="y\nOrderForCase",
     )
 
     # THEN it should be added
@@ -85,7 +85,7 @@ def test_add_case_bad_workflow(
             customer_id,
             name,
         ],
-        input="y",
+        input="y\nOrderForCase",
     )
 
     # THEN it should not be added
@@ -123,7 +123,7 @@ def test_add_case_bad_data_delivery(
             name,
         ],
         obj=base_context,
-        input="y",
+        input="y\nOrderForCase",
     )
 
     # THEN it should not be added
@@ -155,7 +155,7 @@ def test_add_case_bad_customer(cli_runner: CliRunner, base_context: CGConfig, ti
             name,
         ],
         obj=base_context,
-        input="y",
+        input="y\nOrderForCase",
     )
 
     # THEN it should complain about missing customer instead of adding a case
@@ -230,7 +230,7 @@ def test_add_case_priority(
             name,
         ],
         obj=base_context,
-        input="y",
+        input="y\nOrderForCase",
     )
 
     # THEN it should be added

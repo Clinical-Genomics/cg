@@ -47,6 +47,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         self.pipeline_deliverables = Path(config.raredisease.pipeline_deliverables)
         self.platform: str = config.raredisease.platform
         self.profile: str = config.raredisease.profile
+        self.rank_model_threshold = config.raredisease.rank_model_threshold
         self.reference: str = config.raredisease.reference
         self.resources: str = config.raredisease.resources
         self.revision: str = config.raredisease.revision
@@ -125,7 +126,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         return {"metrics": [metric.dict() for metric in metrics]}
 
     def _get_list_of_metric_dicts(self, multiqc_json: MultiqcDataJson):
-        metric_dicts: list[dict[str, Any]] = super()._get_list_of_metric_dicts(multiqc_json)
+        metric_dicts: list[dict[str, Any]] = multiqc_json.report_general_stats_data
         list_copy: list[dict[str, Any]] = copy.deepcopy(metric_dicts)
         list_copy.append(self._get_multiqc_picard_dict(multiqc_json))
 

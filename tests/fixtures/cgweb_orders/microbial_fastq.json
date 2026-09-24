@@ -11,6 +11,7 @@
             "comment": "sample comment",
             "container": "Tube",
             "container_name": "prov1",
+            "control": "positive",
             "data_analysis": "raw-data",
             "data_delivery": "fastq",
             "elution_buffer": "Nuclease-free water",

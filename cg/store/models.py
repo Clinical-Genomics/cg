@@ -11,11 +11,13 @@ from sqlalchemy import (
     Column,
     ForeignKey,
     Numeric,
+    SQLColumnExpression,
     String,
     Table,
 )
 from sqlalchemy import Text as SLQText
-from sqlalchemy import UniqueConstraint, orm, types
+from sqlalchemy import UniqueConstraint, orm, select, types
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
@@ -31,9 +33,10 @@ from cg.constants.constants import (
 )
 from cg.constants.devices import DeviceType, RevioNames
 from cg.constants.lims import LimsStatus
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import PriorityTerms, SlurmQos, TrailblazerPriority
 from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
+from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.models.orders.constants import OrderType
 
 BigInt = Annotated[int, None]
@@ -112,9 +115,9 @@ order_case = Table(
 
 class PriorityMixin:
     @property
-    def priority_human(self) -> str:
+    def priority_human(self) -> PriorityTerms:
         """Humanized priority for sample."""
-        return self.priority.name
+        return PriorityTerms(self.priority.name)
 
     @priority_human.setter
     def priority_human(self, priority: str) -> None:
@@ -181,6 +184,7 @@ class Application(Base):
         "OrderTypeApplication",
         back_populates="application",
     )
+    lims_workflow_id: Mapped[int | None]
 
     @property
     def order_types(self) -> list[OrderType]:
@@ -251,6 +255,19 @@ class ApplicationVersion(Base):
     def __str__(self) -> str:
         return f"{self.application.tag} ({self.version})"
 
+    @hybrid_property
+    def application_tag(self):
+        return self.application.tag
+
+    @application_tag.expression
+    @classmethod
+    def application_tag(cls):
+        return (
+            select(Application.tag)
+            .where(Application.id == cls.application_id)
+            .label("application_tag")
+        )
+
     def to_dict(self, application: bool = True):
         """Represent as dictionary"""
         data = to_dict(model_instance=self)
@@ -304,6 +321,15 @@ class Analysis(Base):
     session_id: Mapped[str | None]
     order_id: Mapped[int | None] = mapped_column(ForeignKey("order.id"))
     order: Mapped["Order"] = orm.relationship(back_populates="analyses")
+
+    @hybrid_property
+    def case_internal_id(self) -> str:
+        return self.case.internal_id
+
+    @case_internal_id.expression
+    @classmethod
+    def case_internal_id(cls):
+        return select(Case.internal_id).where(Case.id == cls.case_id).label("case_internal_id")
 
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
@@ -527,6 +553,10 @@ class Case(Base, PriorityMixin):
         return self.tickets.split(sep=",")[-1] if self.tickets else None
 
     @property
+    def is_to_be_uploaded_to_customer_inbox(self) -> bool:
+        return not DataDelivery(self.data_delivery).excludes_customer_inbox_delivery
+
+    @property
     def original_order(self) -> "Order | None":
         if not self.orders:
             return None
@@ -703,7 +733,10 @@ class Panel(Base):
 
 class Pool(Base):
     __tablename__ = "pool"
-    __table_args__ = (UniqueConstraint("order", "name", name="_order_name_uc"),)
+    __table_args__ = (UniqueConstraint("order_id", "name", name="_order_name_uc"),)
+
+    def __str__(self):
+        return self.name
 
     application_version_id: Mapped[int] = mapped_column(ForeignKey("application_version.id"))
     application_version: Mapped["ApplicationVersion"] = orm.relationship(
@@ -718,15 +751,31 @@ class Pool(Base):
     invoice_id: Mapped[int | None] = mapped_column(ForeignKey("invoice.id"))
     name: Mapped[Str32]
     no_invoice: Mapped[bool | None] = mapped_column(default=False)
-    order: Mapped[Str64]
+    order_id: Mapped[int] = mapped_column(ForeignKey("order.id"))
+    order: Mapped["Order"] = orm.relationship(foreign_keys=[order_id])
     ordered_at: Mapped[datetime]
     received_at: Mapped[datetime | None]
-    ticket: Mapped[Str32 | None]
 
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="pools")
+    samples: Mapped[list["Sample"]] = orm.relationship(back_populates="pool")
+
+    @property
+    def order_name(self):
+        return self.order.name
+
+    @property
+    def ticket(self) -> str | None:
+        return str(self.order.ticket_id) if self.order else None
 
     def to_dict(self):
-        return to_dict(model_instance=self)
+        pool_dict = to_dict(model_instance=self)
+        pool_dict["order"] = self.order_name
+        return pool_dict
+
+
+SAMPLE_NAME_PATTERN = r"^[A-Za-z0-9-]*$"
+SAMPLE_NAME_MINIMUM_LENGTH = 2
+SAMPLE_NAME_MAXIMUM_LENGTH = 128
 
 
 class Sample(Base, PriorityMixin):
@@ -758,7 +807,6 @@ class Sample(Base, PriorityMixin):
     loqusdb_id: Mapped[Str64 | None]
     name: Mapped[Str128]
     no_invoice: Mapped[bool] = mapped_column(default=False)
-    order: Mapped[Str64 | None]
     ordered_at: Mapped[datetime]
     organism_id: Mapped[int | None] = mapped_column(ForeignKey("organism.id"))
     organism: Mapped["Organism | None"] = orm.relationship(foreign_keys=[organism_id])
@@ -766,7 +814,7 @@ class Sample(Base, PriorityMixin):
     _phenotype_groups: Mapped[str | None] = mapped_column(types.Text)
     _phenotype_terms: Mapped[str | None] = mapped_column(types.Text)
     prepared_at: Mapped[datetime | None]
-
+    pool_id: Mapped[int | None] = mapped_column(ForeignKey("pool.id"))
     priority: Mapped[Priority] = mapped_column(default=Priority.standard)
     reads: Mapped[BigInt] = mapped_column(default=0)
     last_sequenced_at: Mapped[datetime | None]
@@ -785,6 +833,7 @@ class Sample(Base, PriorityMixin):
         foreign_keys=[CaseSample.father_id], back_populates="father"
     )
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="samples")
+    pool: Mapped[Pool] = orm.relationship(foreign_keys=[pool_id], back_populates="samples")
 
     _sample_run_metrics: Mapped[list["SampleRunMetrics"]] = orm.relationship(
         back_populates="sample", cascade="all, delete"
@@ -898,21 +947,127 @@ class Sample(Base, PriorityMixin):
         else:
             return None
 
+    @hybrid_property
+    def priority_of_case_that_delivers(
+        self,
+    ) -> Priority | None:  # pyright: ignore [reportRedeclaration]
+        if case := self.case_that_delivers:
+            return case.priority
+        else:
+            return None
+
+    @priority_of_case_that_delivers.expression
+    @classmethod
+    def priority_of_case_that_delivers(cls) -> SQLColumnExpression[Priority]:
+        return (
+            select(Case.priority)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .limit(1)
+            .label("priority_of_case_that_delivers")
+        )
+
     @property
-    def workflow_of_case_that_delivers(self) -> Workflow | None:
+    def trailblazer_priority_of_case_that_delivers(self) -> TrailblazerPriority | None:
+        if case := self.case_that_delivers:
+            return MAP_TO_TRAILBLAZER_PRIORITY[case.priority]
+        else:
+            return None
+
+    @hybrid_property
+    def delivering_case_internal_id(self) -> str | None:  # pyright: ignore [reportRedeclaration]
+        if case := self.case_that_delivers:
+            return case.internal_id
+        return None
+
+    # noinspection PyNestedDecorators
+    @delivering_case_internal_id.expression
+    @classmethod
+    def delivering_case_internal_id(cls) -> SQLColumnExpression[str]:
+        return (
+            select(Case.internal_id)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .limit(1)
+            .label("delivering_case_internal_id")
+        )
+
+    @hybrid_property
+    def workflow_of_case_that_delivers(  # pyright: ignore [reportRedeclaration]
+        self,
+    ) -> Workflow | None:
         """Return the workflow of the original case if the case exists."""
         if case := self.case_that_delivers:
             return case.data_analysis
         else:
             return None
 
-    @property
-    def ticket_id_from_original_order(self) -> int | None:
-        """Return the original ticket id of the delivering case if it is linked to any ticket."""
+    # noinspection PyNestedDecorators
+    @workflow_of_case_that_delivers.expression
+    @classmethod
+    def workflow_of_case_that_delivers(cls) -> SQLColumnExpression[Workflow]:
+        return (
+            select(Case.data_analysis)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .limit(1)
+            .label("workflow_of_case_that_delivers")
+        )
+
+    @hybrid_property
+    def ticket_id_from_original_order(self) -> int | None:  # pyright: ignore [reportRedeclaration]
         if self.case_that_delivers and self.case_that_delivers.original_order:
             return self.case_that_delivers.original_order.ticket_id
-        else:
-            return None
+        return None
+
+    # noinspection PyNestedDecorators
+    @ticket_id_from_original_order.expression
+    @classmethod
+    def ticket_id_from_original_order(cls) -> SQLColumnExpression[int]:
+        return (
+            select(Order.ticket_id)
+            .join(Order.cases)
+            .join(CaseSample, CaseSample.case_id == Case.id)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .order_by(Order.order_date.asc())
+            .limit(1)
+            .label("ticket_id_from_original_order")
+        )
+
+    @hybrid_property
+    def order(self) -> str | None:
+        if case := self.case_that_delivers:
+            if order := case.original_order:
+                return order.name
+        return None
+
+    @order.expression
+    @classmethod
+    def order(cls) -> SQLColumnExpression[int]:
+        return (
+            select(Order.name)
+            .join(Order.cases)
+            .join(Case.links)
+            .where(
+                CaseSample.sample_id == cls.id,
+                CaseSample.should_deliver_sample.is_(True),
+            )
+            .order_by(Order.order_date.asc())
+            .limit(1)
+            .label("order")
+        )
 
     def to_dict(self, links: bool = False) -> dict:
         """Represent as dictionary"""
@@ -923,11 +1078,23 @@ class Sample(Base, PriorityMixin):
         data["application"] = self.application_version.application.to_dict()
         data["hifi_yield"] = self.hifi_yield
         data["uses_reads"] = True
+        data["order"] = self.order
         if self.device_type == DeviceType.PACBIO:
             data["uses_reads"] = False
         if links:
             data["links"] = [link_obj.to_dict(family=True, parents=True) for link_obj in self.links]
         return data
+
+
+class ExternalSample(Base):
+    __tablename__ = "external_sample"
+    id: Mapped[PrimaryKeyInt]
+    customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"))
+    sample_name: Mapped[Str128]
+    customer_uploaded_at: Mapped[datetime]
+    transferred_at: Mapped[datetime | None] = mapped_column(default=None)
+
+    customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
 
 
 class Invoice(Base):
@@ -990,12 +1157,14 @@ class Order(Base):
     cases: Mapped[list[Case]] = orm.relationship(secondary=order_case, back_populates="orders")
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"))
     customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
+    name: Mapped[str]
     order_date: Mapped[datetime] = mapped_column(default=datetime.now)
     ticket_id: Mapped[int] = mapped_column(unique=True, index=True)
     is_open: Mapped[bool] = mapped_column(default=True)
     analyses: Mapped[list[Analysis]] = orm.relationship(
         back_populates="order", order_by="Analysis.created_at"
     )
+    pools: Mapped[list[Pool]] = orm.relationship(back_populates="order", order_by="Pool.ordered_at")
 
     @property
     def workflow(self) -> Workflow:
@@ -1228,7 +1397,7 @@ class PacbioSampleSequencingMetrics(SampleRunMetrics):
     hifi_yield: Mapped[BigInt]
     hifi_mean_read_length: Mapped[BigInt]
     hifi_median_read_quality: Mapped[Str32]
-    polymerase_mean_read_length: Mapped[BigInt]
+    polymerase_mean_read_length: Mapped[BigInt | None]
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.PACBIO}
     instrument_run = orm.relationship(PacbioSMRTCellMetrics, back_populates="sample_metrics")

@@ -14,7 +14,7 @@ class RawDataAnalysisMessage(DeliveryMessage):
         return (
             "Hello,\n\n"
             f"The raw data and analysis files for the following {case_s_} "
-            "are currently being uploaded to your inbox on Caesar:\n\n"
+            "have been uploaded to your inbox on Caesar:\n\n"
             f"{case_names}\n\n"
             "Available under: \n"
             f"{delivery_path} \n\n"

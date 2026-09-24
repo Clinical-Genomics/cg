@@ -17,7 +17,6 @@ def test_set_cases_by_sample_identifiers(
     # GIVEN a database with a case with a sample
     sample_obj = helpers.add_sample(base_store)
     sample_obj.original_ticket = ticket_id
-    sample_obj.order = "An order"
     case = helpers.add_case(base_store)
     helpers.add_relationship(base_store, sample=sample_obj, case=case)
     identifier_value = getattr(sample_obj, identifier_key)

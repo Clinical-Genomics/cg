@@ -1,6 +1,7 @@
 import logging
 import subprocess
 
+from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.services.analysis_starter.configurator.models.microsalt import MicrosaltCaseConfig
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.services.analysis_starter.submitters.submitter import Submitter
@@ -8,7 +9,7 @@ from cg.services.analysis_starter.submitters.subprocess.commands import WORKFLOW
 
 LOG = logging.getLogger(__name__)
 
-SubprocessCaseConfig = MicrosaltCaseConfig | MIPDNACaseConfig
+SubprocessCaseConfig = BalsamicCaseConfig | MicrosaltCaseConfig | MIPDNACaseConfig
 
 
 class SubprocessSubmitter(Submitter):

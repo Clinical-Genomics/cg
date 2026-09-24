@@ -40,7 +40,10 @@ class RarediseaseObservationsAPI(ObservationsAPI):
     @property
     def loqusdb_sequencing_methods(self) -> list[str]:
         """Sequencing methods that are eligible for Loqusdb uploads."""
-        return [SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING]
+        return [
+            SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
+        ]
 
     @staticmethod
     def is_sample_type_eligible_for_observations_upload(case: Case) -> bool:
@@ -68,7 +71,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
         )
         loqusdb_instances: dict[SeqLibraryPrepCategory, LoqusdbInstance] = {
             SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING: LoqusdbInstance.WGS38,
-            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING: LoqusdbInstance.WES,
+            SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING: LoqusdbInstance.WES38,
         }
         self.loqusdb_api = self.get_loqusdb_api(loqusdb_instances[sequencing_method])
 
@@ -101,6 +104,7 @@ class RarediseaseObservationsAPI(ObservationsAPI):
             gq_threshold=RarediseaseLoadParameters.GQ_THRESHOLD.value,
             hard_threshold=RarediseaseLoadParameters.HARD_THRESHOLD.value,
             soft_threshold=RarediseaseLoadParameters.SOFT_THRESHOLD.value,
+            ignore_gq_if_unset=RarediseaseLoadParameters.IGNORE_GQ_IF_UNSET.value,
             loqusdb_options=["--keep-chr-prefix", "--genome-build", "GRCh38"],
         )
         loqusdb_id = str(self.loqusdb_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
@@ -111,9 +115,9 @@ class RarediseaseObservationsAPI(ObservationsAPI):
         self, hk_version: Version, case_id: str
     ) -> RarediseaseObservationsInputFiles:
         """Return observations files given a Housekeeper version for RAREDISEASE."""
-        input_files: dict[str, File] = {
+        input_files: dict[str, File | None] = {
             "snv_vcf_path": self.housekeeper_api.files(
-                version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.SNV_VCF]
+                version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.SNV_VCF_LOQUSDB]
             ).first(),
             "sv_vcf_path": (
                 self.housekeeper_api.files(
