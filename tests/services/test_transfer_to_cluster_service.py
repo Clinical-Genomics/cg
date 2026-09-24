@@ -44,7 +44,7 @@ trap error ERR
 
 rsync -rvL /path/to/rome/cust000/sample-name/ /path/to/hasta/cust000/sample-name --include='*.bam' --include='*.fastq.gz' --exclude='*'
 
-/nats/binary pub --jetstream --server nats://server --tlsca /ca/cert --tlscert /client/cert --tlskey /client/key --token $(cat /token) cg-test.external.sample_transfer_completed "{\\"status_db.sample.internal_id\\": \\"ACC1\\", \\"transfer_completed_at\\": \\"$(date +%Y-%m-%dT%H:%M:%S)\\", \\"cluster_location\\": \\"/path/to/hasta/cust000/sample-name\\"}"
+/nats/binary pub --jetstream --server nats://server --tlsca /ca/cert --tlscert /client/cert --tlskey /client/key --token $(cat /token) cg-test.external.sample_transfer_completed "{\\"status_db.sample.internal_id\\": \\"ACC1\\", \\"transfer_completed_at\\": \\"$(date +%Y-%m-%dT%H:%M:%S)\\", \\"cluster_location\\": \\"/path/to/cluster/cust000/sample-name\\"}"
 
 """
 
@@ -67,7 +67,9 @@ def test_transfer_sample(mocker: MockerFixture, expected_sbatch_content):
             destination_path="/unknown",
             mail_user="mail@scilifelab.se",
         ),
-        external=ExternalConfig(hasta="/path/to/hasta/%s", caesar="/path/to/rome/%s"),
+        external=ExternalConfig(
+            hasta="/path/to/hasta/%s", cluster="/path/to/cluster/%s", caesar="/path/to/rome/%s"
+        ),
         nats=NatsConfig(
             nats_binary_path=Path("/nats/binary"),
             server="nats://server",
