@@ -54,6 +54,7 @@ def handle(config: CGConfig, event_payload: dict) -> None:
             ),
         )
         raise e
+    # TODO: call delete method (inside else?)
 
 
 def _update_external_sample(config: CGConfig, event: ExternalSampleTransferredEvent) -> None:
@@ -102,3 +103,6 @@ def _add_sample_files_to_housekeeper(
         )
         files.append(file)
     housekeeper_api.finalize_file_transactions(files=files, version=version)
+
+
+# TODO: Implement private method to delete folder
