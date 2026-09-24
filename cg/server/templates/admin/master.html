@@ -35,13 +35,13 @@
     <script>
     document.addEventListener('keydown', function (e) {
       /* Gets search field if there is one. */
-      var search = document.querySelector('input[name="search"]');
+      const search = document.querySelector('input[name="search"]');
       if (!search) return;
 
       /* Ensure to not block writing in any field that is not the search field. */
-      var el = document.activeElement;
-      if (el === search || el.tagName === 'INPUT' ||
-          el.tagName === 'TEXTAREA' || el.isContentEditable) return;
+      const el = document.activeElement;
+      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(el.tagName) ||
+        el.isContentEditable) return;
 
       /* Ensure to not block shortcuts and only add single letters to search field. */
       if (e.metaKey || e.ctrlKey || e.altKey) return;
