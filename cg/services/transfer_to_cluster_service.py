@@ -9,6 +9,8 @@ from cg.models.slurm.sbatch import Sbatch
 from cg.services.deliver_files.rsync.sbatch_commands import (
     ERROR_RSYNC_FUNCTION,
     RSYNC_CONTENTS_COMMAND,
+    RSYNC_EXCLUDE_OPTION,
+    RSYNC_INCLUDE_OPTION,
 )
 from cg.services.events import event_publisher
 from cg.services.events.constants import EXTERNAL_SAMPLE_TRANSFERRED_EVENT, SAMPLE_INTERNAL_ID_FIELD
@@ -62,7 +64,10 @@ def _get_sbatch_command(cg_config: CGConfig, sample: Sample) -> str:
         RSYNC_CONTENTS_COMMAND.format(
             source_path=source_path,
             destination_path=destination_path,
-        )
+        ).rstrip("\n")
+        + RSYNC_INCLUDE_OPTION.format(include_pattern="*.bam").strip("\n")
+        + RSYNC_INCLUDE_OPTION.format(include_pattern="*.fastq.gz").strip("\n")
+        + RSYNC_EXCLUDE_OPTION.format(exclude_pattern="*").lstrip("\n")
         + "\n"
         + event_publisher.get_publish_command(
             nats_config=cg_config.nats,
