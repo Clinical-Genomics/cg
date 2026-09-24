@@ -32,4 +32,23 @@
             box-shadow: inset 0 -2px 0 #ddd;
         }
     </style>
+    <script>
+    document.addEventListener('keydown', function (e) {
+      /* Gets search field if there is one. */
+      const search = document.querySelector('input[name="search"]');
+      if (!search) return;
+
+      /* Ensure to not block writing in any field that is not the search field. */
+      const el = document.activeElement;
+      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(el.tagName) ||
+        el.isContentEditable) return;
+
+      /* Ensure to not block shortcuts and only add single letters to search field. */
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key.length !== 1) return;
+
+      /* Glues the typing to search field. */
+      search.focus();
+    });
+    </script>
 {% endblock %}
