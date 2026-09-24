@@ -42,7 +42,7 @@ error() {
 trap error ERR
 
 
-rsync -rvL /path/to/rome/cust000/sample-name/ /path/to/hasta/cust000/sample-name --include='*.bam' --include='*.fastq.gz' --exclude='*'
+rsync -rvL /path/to/rome/cust000/sample-name/ /path/to/cluster/cust000/sample-name --include='*.bam' --include='*.fastq.gz' --exclude='*'
 
 /nats/binary pub --jetstream --server nats://server --tlsca /ca/cert --tlscert /client/cert --tlskey /client/key --token $(cat /token) cg-test.external.sample_transfer_completed "{\\"status_db.sample.internal_id\\": \\"ACC1\\", \\"transfer_completed_at\\": \\"$(date +%Y-%m-%dT%H:%M:%S)\\", \\"cluster_location\\": \\"/path/to/cluster/cust000/sample-name\\"}"
 
