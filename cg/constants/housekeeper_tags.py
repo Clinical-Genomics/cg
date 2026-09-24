@@ -45,6 +45,8 @@ HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]
 
 HK_DELIVERY_REPORT_TAG = "delivery-report"
 
+EXTERNAL_DATA_TAG = "external"
+
 
 class HermesFileTag(StrEnum):
     """Tags for hermes."""
