@@ -239,7 +239,9 @@ def test_handle_start_raises(mocker: MockerFixture):
         CGConfig,
         status_db=status_db,
         housekeeper_api=housekeeper_api,
-        slack_webhooks=SlackWebhooks(prod_team="https://bingus.gov"),
+        slack_webhooks=SlackWebhooks(
+            prod_team="https://bingus.gov", sysdev_team="https://bongus.gov"
+        ),
     )
 
     notification_mock = mocker.patch.object(slack_notification_service, "notify")
