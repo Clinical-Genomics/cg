@@ -1,4 +1,5 @@
 import logging
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -54,6 +55,7 @@ def handle(config: CGConfig, event_payload: dict) -> None:
             ),
         )
         raise e
+    shutil.rmtree(event.cluster_location)
     # TODO: call delete method (inside else?)
 
 
