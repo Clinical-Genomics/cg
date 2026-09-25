@@ -110,7 +110,9 @@ def test_handle_failure(mocker: MockerFixture):
         status_db=create_autospec(Store),
         housekeeper_api=create_autospec(HousekeeperAPI),
         nats=create_autospec(NatsConfig),
-        slack_webhooks=SlackWebhooks(prod_team="http.bingus.gov"),
+        slack_webhooks=SlackWebhooks(
+            prod_team="https://bingus.gov", sysdev_team="https://bongus.gov"
+        ),
     )
 
     # GIVEN that there is no *.bam or *.fastq.gz in the cluster location
@@ -134,7 +136,7 @@ def test_handle_failure(mocker: MockerFixture):
     # THEN a Slack notification should have been sent out to prodbioinfo
     calls = slack_notification_service_mock.call_args_list
     first_call = calls[0]
-    assert first_call.kwargs["recipient"] == "http.bingus.gov"
+    assert first_call.kwargs["recipient"] == "https://bingus.gov"
     assert first_call.kwargs["notification"].title == "Failed to store an external sample"
     assert (
         first_call.kwargs["notification"].message
