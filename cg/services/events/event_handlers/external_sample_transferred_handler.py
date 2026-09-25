@@ -1,4 +1,5 @@
 import logging
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -55,6 +56,8 @@ def handle(config: CGConfig, event_payload: dict) -> None:
             ),
         )
         raise e
+    else:
+        _delete_mirrored_folder(config=config, event=event)
 
 
 def _update_external_sample(config: CGConfig, event: ExternalSampleTransferredEvent) -> None:
@@ -103,3 +106,17 @@ def _add_sample_files_to_housekeeper(
         )
         files.append(file)
     housekeeper_api.finalize_file_transactions(files=files, version=version)
+
+
+def _delete_mirrored_folder(config: CGConfig, event: ExternalSampleTransferredEvent) -> None:
+    try:
+        shutil.rmtree(event.cluster_location)
+    except Exception as e:
+        slack_notification_service.notify(
+            recipient=config.slack_webhooks.sysdev_team,
+            notification=SlackNotification(
+                title=f"Failed to delete {event.cluster_location}",
+                message=f"{EXTERNAL_SAMPLE_TRANSFERRED_EVENT} succeeded for sample {event.sample_internal_id} but failed to delete mirrored directory at {event.cluster_location}",
+                error=e,  # type: ignore
+            ),
+        )

@@ -2231,7 +2231,7 @@ def context_config(
         },
         "arnold": {"api_url": "https://arnold.scilifelab.se/"},
         "janus": {"host": "https://janus.sys.scilifelab.se/"},
-        "slack_webhooks": {"prod_team": "https://bingus.gov"},
+        "slack_webhooks": {"prod_team": "https://bingus.gov", "sysdev_team": "https://bongus.gov"},
     }
 
 

@@ -255,6 +255,7 @@ scout_38:
 
 slack_webhooks: 
   prod_team: "http://localhost:8888/slack_webhooks/prod_team"
+  sysdev_team: "http://localhost:8888/slack_webhooks/sysdev_team"
 
 trailblazer:
   database: "sqlite:///file:trailblazer?mode=memory&cache=shared&uri=true"
