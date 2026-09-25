@@ -1,7 +1,7 @@
 """Tests the find business data part of the Cg store API related to sample model."""
 
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, Sequence
 
 import pytest
 from sqlalchemy.orm import Query
@@ -18,7 +18,15 @@ from cg.server.dto.samples.requests import (
     SortDirection,
     UnhandledSamplesSortBy,
 )
-from cg.store.models import Case, CaseSample, Customer, Invoice, OrderTypeApplication, Sample
+from cg.store.models import (
+    Application,
+    Case,
+    CaseSample,
+    Customer,
+    Invoice,
+    OrderTypeApplication,
+    Sample,
+)
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -1643,3 +1651,100 @@ def test_get_compressible_samples_ensure_right_order(store: Store, helpers: Stor
 
     # THEN the oldest sample is in the beginning of the list
     assert compressible_samples == [old_sample, new_sample]
+
+
+def test_get_samples_by_subject_id_customers_and_order_type(store: Store, helpers: StoreHelpers):
+    # GIVEN a subject_id, a list of customer_ids and an order_type:
+    subject_id = "subject_id"
+    customer_ids: list[int] = [1, 2, 3]
+    order_type = OrderType.RAREDISEASE
+
+    # GIVEN a store containing:
+    # An application tied to the order type
+    application_to_fetch: Application = helpers.ensure_application(store=store, tag="matching_tag")
+    application_to_fetch.order_types = [OrderType.RAREDISEASE]
+
+    application_not_to_fetch: Application = helpers.ensure_application(
+        store=store, tag="not_matching_tag"
+    )
+    application_not_to_fetch.order_types = []
+
+    # A customer that matches our customer_ids
+    customer_to_match = helpers.ensure_customer(store=store, customer_id="matching_customer")
+    customer_to_match.id = 1
+
+    # A customer that does not match our customer_ids
+    customer_not_to_match = helpers.ensure_customer(store=store, customer_id="mismatching_customer")
+    customer_not_to_match.id = 4
+
+    # A sample not matching anything
+    helpers.add_sample(
+        store=store,
+        application_tag="not_matching_tag",
+        customer_id=customer_not_to_match.internal_id,
+        subject_id="mismatching_subject_id",
+    )
+
+    # A sample matching on subject_id but neither customer nor order_type
+    helpers.add_sample(
+        store=store,
+        application_tag="not_matching_tag",
+        customer_id=customer_not_to_match.internal_id,
+        subject_id="subject_id",
+    )
+
+    # A sample matching on customer but neither subject_id nor order_type
+    helpers.add_sample(
+        store=store,
+        application_tag="not_matching_tag",
+        customer_id=customer_to_match.internal_id,
+        subject_id="mismatching_subject_id",
+    )
+
+    # A sample matching on order_type but neither subject_id nor customer
+    helpers.add_sample(
+        store=store,
+        application_tag="matching_tag",
+        customer_id=customer_not_to_match.internal_id,
+        subject_id="mismatching_subject_id",
+    )
+
+    # A sample matching on customer and subject_id but not order_type
+    helpers.add_sample(
+        store=store,
+        application_tag="not_matching_tag",
+        customer_id=customer_to_match.internal_id,
+        subject_id="subject_id",
+    )
+
+    # A sample matching on customer and order type but not subject_id
+    helpers.add_sample(
+        store=store,
+        application_tag="matching_tag",
+        customer_id=customer_to_match.internal_id,
+        subject_id="mismatching_subject_id",
+    )
+
+    # A sample matching on subject_id and order type but not customer
+    helpers.add_sample(
+        store=store,
+        application_tag="matching_tag",
+        customer_id=customer_not_to_match.internal_id,
+        subject_id="subject_id",
+    )
+
+    # A sample matching on subject_id, order type and customer
+    sample_to_fetch: Sample = helpers.add_sample(
+        store=store,
+        application_tag="matching_tag",
+        customer_id=customer_to_match.internal_id,
+        subject_id="subject_id",
+    )
+
+    # WHEN fetching samples by subject id, customers and type
+    matching_samples: Sequence[Sample] = store.get_samples_by_subject_id_customers_and_order_type(
+        subject_id=subject_id, customer_ids=customer_ids, order_type=order_type
+    )
+
+    # THEN only the sample_to_fetch should be returned
+    assert matching_samples == [sample_to_fetch]

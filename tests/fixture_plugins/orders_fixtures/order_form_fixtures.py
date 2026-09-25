@@ -237,7 +237,7 @@ def tomte_orderform(orderforms: Path) -> str:
 
 
 @pytest.fixture(scope="session")
-def mip_uploaded_json_order(orderforms: Path) -> str:
+def mip_uploaded_json_order(orderforms: Path) -> dict:
     """JSON orderform fixture for MIP DNA samples."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=Path(orderforms, "mip_uploaded_json_orderform.json")

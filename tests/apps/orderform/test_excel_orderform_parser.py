@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import create_autospec
 
 import openpyxl
 import pytest
@@ -9,6 +10,7 @@ from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.models.orders.constants import OrderType
 from cg.models.orders.excel_sample import ExcelSample
 from cg.models.orders.orderform_schema import Orderform
+from cg.store.store import Store
 
 
 def get_sample_obj(order_form_parser: ExcelOrderformParser, sample_id: str) -> ExcelSample | None:
@@ -58,7 +60,7 @@ def test_generate_mip_orderform_with_cases(mip_order_parser: ExcelOrderformParse
     # GIVEN a mip orderform parser
 
     # WHEN generating a orderform
-    orderform: Orderform = mip_order_parser.generate_orderform()
+    orderform: Orderform = mip_order_parser.generate_orderform(create_autospec(Store))
 
     # THEN assert that there where cases in the order
     assert len(orderform.cases) > 0
@@ -91,7 +93,7 @@ def test_generate_parsed_rml_orderform(rml_order_parser: ExcelOrderformParser):
     # GIVEN a order form parser that have parsed an excel file
 
     # WHEN generating the order
-    order: Orderform = rml_order_parser.generate_orderform()
+    order: Orderform = rml_order_parser.generate_orderform(create_autospec(Store))
 
     # THEN assert that some samples where parsed and found
     assert order.samples
