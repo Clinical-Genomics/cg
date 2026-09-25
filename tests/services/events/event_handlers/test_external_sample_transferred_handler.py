@@ -1,5 +1,7 @@
 from datetime import datetime
+import os
 from pathlib import Path
+import shutil
 from unittest.mock import Mock, call, create_autospec
 
 import pytest
@@ -64,6 +66,9 @@ def test_handle_success(mocker: MockerFixture):
     path_r2 = Path("file_R2.fastq.gz")
     mocker.patch.object(Path, "glob", return_value=[path_r1, path_r2])
 
+    # GIVEN that deleting the directory goes fine
+    # TODO
+
     # WHEN calling handle
     external_sample_transferred_handler.handle(config=config, event_payload=event_payload)
 
@@ -94,6 +99,9 @@ def test_handle_success(mocker: MockerFixture):
         event_name=EXTERNAL_SAMPLE_STORED_EVENT,
         event_payload={SAMPLE_INTERNAL_ID_FIELD: "ACC123"},
     )
+
+    # THEN the mirrored sample folder was deleted
+    # TODO
 
 
 def test_handle_failure(mocker: MockerFixture):
@@ -134,3 +142,8 @@ def test_handle_failure(mocker: MockerFixture):
         == f"{EXTERNAL_SAMPLE_TRANSFERRED_EVENT} failed for sample ACC123"
     )
     assert "No sequencing files" in first_call.kwargs["notification"].error_text
+
+
+def test_storing_succeeds_deletion_fails():
+    # TODO
+    pass
