@@ -81,8 +81,12 @@ def test_handle_success(mocker: MockerFixture):
     housekeeper_api.as_mock.add_new_bundle_and_version.assert_called_once_with("ACC123")
 
     # THEN all sequencing files were added to the bundle
-    r1_call = call(path=str(path_r1.absolute()), version_obj=version, tags=["ACC123", "fastq"])
-    r2_call = call(path=str(path_r2.absolute()), version_obj=version, tags=["ACC123", "fastq"])
+    r1_call = call(
+        path=str(path_r1.absolute()), version_obj=version, tags=["ACC123", "external", "fastq"]
+    )
+    r2_call = call(
+        path=str(path_r2.absolute()), version_obj=version, tags=["ACC123", "external", "fastq"]
+    )
     function_calls: list = housekeeper_api.as_mock.add_file.call_args_list
     assert r1_call in function_calls
     assert r2_call in function_calls

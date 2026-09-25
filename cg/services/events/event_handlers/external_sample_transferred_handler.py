@@ -7,6 +7,7 @@ from housekeeper.store.models import Bundle, File, Version
 from pydantic import BaseModel, Field
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.housekeeper_tags import EXTERNAL_DATA_TAG, AlignmentFileTag, SequencingFileTag
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.services import slack_notification_service
@@ -72,7 +73,7 @@ def _update_external_sample(config: CGConfig, event: ExternalSampleTransferredEv
     )
 
 
-def _check_for_sequencing_files(event: ExternalSampleTransferredEvent):
+def _check_for_sequencing_files(event: ExternalSampleTransferredEvent) -> None:
     if not (
         any(event.cluster_location.glob("*.bam")) or any(event.cluster_location.glob("*.fastq.gz"))
     ):
@@ -92,11 +93,11 @@ def _add_sample_files_to_housekeeper(
 
     files: list[File] = []
     for file_path in event.cluster_location.glob("*"):
-        tags = [event.sample_internal_id]
+        tags = [event.sample_internal_id, EXTERNAL_DATA_TAG]
         if file_path.as_posix().endswith(".fastq.gz"):
-            tags.append("fastq")
+            tags.append(SequencingFileTag.FASTQ)
         elif file_path.as_posix().endswith(".bam"):
-            tags.append("bam")
+            tags.append(AlignmentFileTag.BAM)
         else:
             LOG.info(f"Omitting storing for non-sequencing file {file_path}.")
             continue
