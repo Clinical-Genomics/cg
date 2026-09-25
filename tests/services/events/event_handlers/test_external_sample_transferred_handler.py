@@ -165,6 +165,9 @@ def test_storing_succeeds_deletion_fails(mocker: MockerFixture):
         status_db=status_db.as_type,
         housekeeper_api=housekeeper_api.as_type,
         nats=nats_config,
+        slack_webhooks=SlackWebhooks(
+            prod_team="https://bingus.gov", sysdev_team="https://bongus.gov"
+        ),
     )
 
     # GIVEN a publisher for completion events
@@ -185,7 +188,7 @@ def test_storing_succeeds_deletion_fails(mocker: MockerFixture):
     mocker.patch.object(Path, "glob", return_value=[path_r1, path_r2])
 
     # GIVEN that deleting the directory goes poorly
-    rmtree_mock = mocker.patch.object(shutil, "rmtree", side_effect=Exception("CATASTROPHE"))
+    mocker.patch.object(shutil, "rmtree", side_effect=Exception("CATASTROPHE"))
 
     notify_mock = mocker.patch.object(slack_notification_service, "notify")
 
@@ -223,7 +226,7 @@ def test_storing_succeeds_deletion_fails(mocker: MockerFixture):
     # THEN a notification should have been sent to the sysdev team about the failure to delete the directory
     calls = notify_mock.call_args_list
     first_call = calls[0]
-    assert first_call.kwargs["recipient"] == "bongus"
+    assert first_call.kwargs["recipient"] == "https://bongus.gov"
     assert (
         first_call.kwargs["notification"].title
         == f"Failed to delete {event_payload['cluster_location']}"
