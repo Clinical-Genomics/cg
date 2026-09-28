@@ -48,7 +48,7 @@ def handle(config: CGConfig, event_payload: dict) -> None:
                 recipient=config.slack_webhooks.prod_team,
                 notification=SlackNotification(
                     title="Failed to start analysis",
-                    message=f"{EXTERNAL_SAMPLE_STORED_EVENT} failed starting analysis {case.internal_id} triggered by sample {event.sample_internal_id}",
+                    message=f"`{EXTERNAL_SAMPLE_STORED_EVENT}` failed starting analysis `{case.internal_id}` triggered by sample `{event.sample_internal_id}`",
                     error=e,  # type: ignore
                 ),
             )

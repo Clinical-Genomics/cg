@@ -258,6 +258,6 @@ def test_handle_start_raises(mocker: MockerFixture):
     assert first_call.kwargs["notification"].title == "Failed to start analysis"
     assert (
         first_call.kwargs["notification"].message
-        == f"{EXTERNAL_SAMPLE_STORED_EVENT} failed starting analysis {case.internal_id} triggered by sample ACC123"
+        == f"`{EXTERNAL_SAMPLE_STORED_EVENT}` failed starting analysis `{case.internal_id}` triggered by sample `ACC123`"
     )
     assert "Mighty exception!" in first_call.kwargs["notification"].error_text

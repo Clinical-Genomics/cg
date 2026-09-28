@@ -135,6 +135,6 @@ def test_handle_failure(mocker: MockerFixture):
     assert first_call.kwargs["notification"].title == "Failed to store an external sample"
     assert (
         first_call.kwargs["notification"].message
-        == f"{EXTERNAL_SAMPLE_TRANSFERRED_EVENT} failed for sample ACC123"
+        == f"`{EXTERNAL_SAMPLE_TRANSFERRED_EVENT}` failed for sample `ACC123`"
     )
     assert "No sequencing files" in first_call.kwargs["notification"].error_text

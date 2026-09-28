@@ -50,7 +50,7 @@ def handle(config: CGConfig, event_payload: dict) -> None:
             recipient=config.slack_webhooks.prod_team,
             notification=SlackNotification(
                 title="Failed to store an external sample",
-                message=f"{EXTERNAL_SAMPLE_TRANSFERRED_EVENT} failed for sample {event.sample_internal_id}",
+                message=f"`{EXTERNAL_SAMPLE_TRANSFERRED_EVENT}` failed for sample `{event.sample_internal_id}`",
                 error=e,  # type: ignore
             ),
         )
