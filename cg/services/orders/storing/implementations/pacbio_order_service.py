@@ -115,5 +115,6 @@ class StorePacBioOrderService(StoreOrderService):
             original_ticket=ticket_id,
             priority=sample.priority,
             sex=sample.sex,
+            skip_compression=application_version.application.is_external,
             tumour=sample.tumour,
         )

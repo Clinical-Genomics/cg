@@ -122,4 +122,5 @@ class StoreMicrobialFastqOrderService(StoreOrderService):
             original_ticket=ticket_id,
             priority=sample.priority,
             sex=SexOptions.UNKNOWN,
+            skip_compression=application_version.application.is_external,
         )

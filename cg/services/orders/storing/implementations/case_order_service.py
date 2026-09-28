@@ -149,6 +149,7 @@ class StoreCaseOrderService(StoreOrderService):
             ordered=ordered,
             original_ticket=ticket,
             priority=case.priority,
+            skip_compression=application_version.application.is_external,
             **sample.model_dump(exclude={"application", "container", "container_name"}),
         )
         db_sample.customer = customer
