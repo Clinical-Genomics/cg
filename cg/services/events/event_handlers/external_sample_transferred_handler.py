@@ -111,6 +111,9 @@ def _add_sample_files_to_housekeeper(
 def _delete_mirrored_folder(config: CGConfig, event: ExternalSampleTransferredEvent) -> None:
     try:
         shutil.rmtree(event.cluster_location)
+        LOG.info(
+            f"Deleted mirrored directory {event.cluster_location} for sample {event.sample_internal_id}."
+        )
     except Exception as e:
         slack_notification_service.notify(
             recipient=config.slack_webhooks.sysdev_team,
