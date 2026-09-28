@@ -434,6 +434,7 @@ class FOHMConfig(BaseModel):
 class ExternalConfig(BaseModel):
     hasta: str
     caesar: str
+    cluster: str
 
 
 class SeqeraPlatformConfig(BaseModel):
