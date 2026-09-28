@@ -7,6 +7,7 @@ from housekeeper.store.models import Bundle, Version
 from pytest_mock import MockerFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import SequencingFileTag
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig, NatsConfig, SlackWebhooks
 from cg.services.events.constants import (
@@ -172,7 +173,7 @@ def test_storing_succeeds_deletion_fails(mocker: MockerFixture):
         housekeeper_api=housekeeper_api.as_type,
         nats=nats_config,
         slack_webhooks=SlackWebhooks(
-            prod_team="https://bingus.gov", sysdev_team="https://bongus.gov"
+            prod_team="https://prod.team", sysdev_team="https://sysdev.team"
         ),
     )
 
@@ -211,8 +212,16 @@ def test_storing_succeeds_deletion_fails(mocker: MockerFixture):
     housekeeper_api.as_mock.add_new_bundle_and_version.assert_called_once_with("ACC123")
 
     # THEN all sequencing files were added to the bundle
-    r1_call = call(path=str(path_r1.absolute()), version_obj=version, tags=["ACC123", "fastq"])
-    r2_call = call(path=str(path_r2.absolute()), version_obj=version, tags=["ACC123", "fastq"])
+    r1_call = call(
+        path=str(path_r1.absolute()),
+        version_obj=version,
+        tags=["ACC123", "external", SequencingFileTag.FASTQ],
+    )
+    r2_call = call(
+        path=str(path_r2.absolute()),
+        version_obj=version,
+        tags=["ACC123", "external", SequencingFileTag.FASTQ],
+    )
     function_calls: list = housekeeper_api.as_mock.add_file.call_args_list
     assert r1_call in function_calls
     assert r2_call in function_calls
@@ -232,7 +241,7 @@ def test_storing_succeeds_deletion_fails(mocker: MockerFixture):
     # THEN a notification should have been sent to the sysdev team about the failure to delete the directory
     calls = notify_mock.call_args_list
     first_call = calls[0]
-    assert first_call.kwargs["recipient"] == "https://bongus.gov"
+    assert first_call.kwargs["recipient"] == "https://sysdev.team"
     assert (
         first_call.kwargs["notification"].title
         == f"Failed to delete {event_payload['cluster_location']}"
