@@ -2090,7 +2090,10 @@ class ReadHandler(BaseHandler):
         self, internal_ids: list[str], case_created_before_date: datetime
     ) -> list[Sample]:
         """
-        Return samples, restricted to the given internal ids, that are compressible:
+        Return samples that are compressible:
+            - Excludes samples that:
+                - Have skip_compression set to true
+                - Do not have an internal id matching the given list
             - Excludes samples belonging to any case that:
                 - Has an active action
                 - Was created on or after case_created_before_date

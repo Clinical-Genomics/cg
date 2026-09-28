@@ -106,9 +106,6 @@ class Pool(Base):
     ordered_at: Mapped[datetime]
 
 
-# TODO use this?
-
-
 def upgrade():
     bind: sa.Connection = op.get_bind()
     session = Session(bind=bind)
