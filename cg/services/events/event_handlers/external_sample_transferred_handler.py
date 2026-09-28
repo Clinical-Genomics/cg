@@ -60,6 +60,13 @@ def handle(config: CGConfig, event_payload: dict) -> None:
         _delete_mirrored_folder(config=config, event=event)
 
 
+def _check_for_sequencing_files(event: ExternalSampleTransferredEvent) -> None:
+    if not (
+        any(event.cluster_location.glob("*.bam")) or any(event.cluster_location.glob("*.fastq.gz"))
+    ):
+        raise CgError(f"No sequencing files found in directory {event.cluster_location}")
+
+
 def _update_external_sample(config: CGConfig, event: ExternalSampleTransferredEvent) -> None:
     sample: Sample = config.status_db.get_sample_by_internal_id_strict(event.sample_internal_id)
     config.status_db.update_external_sample(
@@ -71,13 +78,6 @@ def _update_external_sample(config: CGConfig, event: ExternalSampleTransferredEv
         f"Updated transferred_at for ExternalSample {sample.name} of customer {sample.customer_id} "
         f"to {event.transfer_completed_at}."
     )
-
-
-def _check_for_sequencing_files(event: ExternalSampleTransferredEvent) -> None:
-    if not (
-        any(event.cluster_location.glob("*.bam")) or any(event.cluster_location.glob("*.fastq.gz"))
-    ):
-        raise CgError(f"No sequencing files found in directory {event.cluster_location}")
 
 
 def _add_sample_files_to_housekeeper(

@@ -12,7 +12,7 @@ def test_notify_success(mocker: MockerFixture):
     notification = SlackNotification(
         title="Some title", message="A message", error=Exception("An Error")  # type: ignore
     )
-    recipient = "http://bingus.gov"
+    recipient = "http://prod.team"
 
     post_mock = mocker.patch.object(
         requests, "post", return_value=create_autospec(Response, status_code=200)
@@ -23,7 +23,7 @@ def test_notify_success(mocker: MockerFixture):
 
     # THEN a http post should have been sent
     post_mock.assert_called_once_with(
-        url="http://bingus.gov",
+        url="http://prod.team",
         data='{"blocks": [{"type": "section", "text": {"type": "mrkdwn", "text": "*Some title*\\nA message"}}, {"type": "section", "text": {"type": "mrkdwn", "text": "```Exception: An Error\\n\\n```"}}]}',
         headers={"Content-Type": "application/json"},
     )
