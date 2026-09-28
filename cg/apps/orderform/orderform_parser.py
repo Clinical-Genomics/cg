@@ -165,7 +165,9 @@ class OrderformParser(BaseModel):
 
     def _fill_out_existing_samples(self, status_db: Store):
         existing_samples: list[OrderSample] = []
-        for sample in [sample for sample in self.samples if sample.existing_sample]:
+        for sample in self.samples:
+            if not sample.existing_sample:
+                continue
             if not sample.subject_id:
                 raise SubjectIdMissingError(f"Missing subject_id for sample {sample.name}")
             customer: Customer = status_db.get_customer_by_internal_id_strict(self.customer_id)
