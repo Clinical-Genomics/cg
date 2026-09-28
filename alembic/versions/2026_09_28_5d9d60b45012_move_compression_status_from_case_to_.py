@@ -60,7 +60,7 @@ class Sample(Base):
     __tablename__ = "sample"
     id: Mapped[PrimaryKeyInt]
     links: Mapped[list[CaseSample]] = relationship(back_populates="sample")
-    skip_compression: bool
+    skip_compression: Mapped[bool]
 
 
 def upgrade():
@@ -97,7 +97,7 @@ def downgrade():
         table_name="case", column=sa.Column(name="is_compressible", type_=sa.Boolean, default=True)
     )
 
-    samples = session.query(Sample).where(Sample.skip_compression == True).all()
+    samples = session.query(Sample).where(Sample.skip_compression).all()
     # Loop over all samples with "skip_compression" = True
     # For all cases of these samples, set "is_compressible" to False
 
