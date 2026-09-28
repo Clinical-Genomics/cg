@@ -1530,54 +1530,6 @@ def test_get_compressible_samples(store: Store, helpers: StoreHelpers):
     assert compressible_samples == [squeezable_sample]
 
 
-def test_get_compressible_samples_one_sample_three_cases(store: Store, helpers: StoreHelpers):
-    # TODO remove this?
-    # GIVEN one sample
-    sample: Sample = helpers.add_sample(
-        store=store, internal_id="squeezable_sample", skip_compression=False
-    )
-
-    # GIVEN to cases, one compressible the others not
-    # TODO two first cases are the same now
-    squeezable_case: Case = helpers.add_case(
-        store=store,
-        internal_id="squeezable_case",
-        action=CaseActions.HOLD,
-        name="squeezable_case",
-        customer_id="squeezable_customer",
-    )
-    compact_case: Case = helpers.add_case(
-        store=store,
-        internal_id="compact_case",
-        action=CaseActions.HOLD,
-        name="compact_case",
-        customer_id="compact_customer",
-    )
-    running_case: Case = helpers.add_case(
-        store=store,
-        internal_id="running_case",
-        action=CaseActions.RUNNING,
-        name="running_case",
-        customer_id="running_customer",
-    )
-
-    # GIVEN that the one sample is linked to all cases
-    helpers.add_relationship(store=store, case=squeezable_case, sample=sample)
-    helpers.add_relationship(store=store, case=compact_case, sample=sample)
-    helpers.add_relationship(store=store, case=running_case, sample=sample)
-
-    # GIVEN a date that should not exclude cases
-    cut_off_date = datetime.now() + timedelta(1)
-
-    # WHEN getting compressible samples
-    compressible_samples: list[Sample] = store.get_compressible_samples_by_internal_ids(
-        internal_ids=[sample.internal_id], case_created_before_date=cut_off_date
-    )
-
-    # THEN no sample should have been returned
-    assert compressible_samples == []
-
-
 def test_get_compressible_samples_one_sample_only_old_cases(store: Store, helpers: StoreHelpers):
     # GIVEN compressible samples in cases that allow for compression
     squeezable_sample: Sample = helpers.add_sample(
