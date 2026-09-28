@@ -519,7 +519,6 @@ class CaseView(BaseView):
         "data_delivery",
         "_panels",
         "comment",
-        "is_compressible",
     ]
     column_exclude_list = ["created_at", "_cohorts", "synopsis"]
     column_filters = [
@@ -862,6 +861,7 @@ class SampleView(BaseView):
         "prepared_at",
         "last_sequenced_at",
         "delivered_at",
+        "skip_compression",
     ]
     column_default_sort = ("created_at", True)
     column_editable_list = [
@@ -871,6 +871,7 @@ class SampleView(BaseView):
         "last_sequenced_at",
         "lims_status",
         "sex",
+        "skip_compression",
     ]
     column_filters = [
         "application_version.application",
@@ -879,6 +880,7 @@ class SampleView(BaseView):
         "lims_status",
         "priority",
         "sex",
+        "skip_compression",
     ]
     column_formatters = {
         "application_version": view_application_link_via_application_version,
