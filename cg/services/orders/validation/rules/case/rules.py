@@ -201,11 +201,20 @@ def validate_case_contains_related_samples(
         if is_single_sample_case(case=case, store=store):  # This should always pass
             continue
         case_has_error = False
+
+        # Collect samples which are not parents nor have parents
         isolated_samples: list[str] = []
-        for _, sample in case.enumerated_samples:
+        for sample in case.samples:
             if not is_sample_related_in_case(sample=sample, case=case, store=store):
-                case_has_error = True
                 isolated_samples.append(get_sample_name(sample=sample, store=store))
+
+        if isolated_samples:
+            if set(isolated_samples) == set(case.samples):
+                # If the case consists of ONLY isolated samples, they are siblings
+                pass
+            else:
+                case_has_error = True
+
         if case_has_error:
             error = SamplesNotRelatedError(
                 case_index=case_index,
