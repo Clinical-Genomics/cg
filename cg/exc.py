@@ -413,5 +413,5 @@ class ExternalSampleNotFoundError(CgError):
     """Exception raised when an external sample is not found in StatusDB"""
 
 
-class SubjectIdMissingError(CgError):
-    """Exception raised when the subject_id is missing"""
+class SubjectIdMissingError(OrderFormError):
+    """Exception raised when the subject_id is missing in the order form"""
