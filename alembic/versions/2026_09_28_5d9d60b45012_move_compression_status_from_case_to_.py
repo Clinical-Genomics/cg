@@ -34,7 +34,7 @@ class Base(DeclarativeBase):
 class Case(Base):
     __tablename__ = "case"
     id: Mapped[PrimaryKeyInt]
-    is_compressible: bool
+    is_compressible: Mapped[bool]
     links: Mapped[list["CaseSample"]] = relationship(back_populates="case")
 
     @property
@@ -62,6 +62,11 @@ class Sample(Base):
     links: Mapped[list[CaseSample]] = relationship(back_populates="sample")
     skip_compression: Mapped[bool]
 
+    @property
+    def cases(self) -> list["Case"]:
+        """Return sample cases."""
+        return [link.case for link in self.links]
+
 
 def upgrade():
     bind: sa.Connection = op.get_bind()
@@ -78,15 +83,14 @@ def upgrade():
     )
 
     # Loop through all cases with "is_compressible" = False
-    cases = session.query(Case).all()
+    cases = session.query(Case).where(Case.is_compressible == False).all()
     for case in cases:
-        if case.is_compressible == False:
-            # For all samples such cases, set "skip_compression" to True
-            for sample in case.samples:
-                sample.skip_compression = True
+        # For all samples such cases, set "skip_compression" to True
+        for sample in case.samples:
+            sample.skip_compression = True
 
     # Remove the "is_compressible" column from "case" table
-    op.drop_column("case", "is_compressible")
+    op.drop_column(table_name="case", column_name="is_compressible")
 
 
 def downgrade():
@@ -97,9 +101,12 @@ def downgrade():
         table_name="case", column=sa.Column(name="is_compressible", type_=sa.Boolean, default=True)
     )
 
-    samples = session.query(Sample).where(Sample.skip_compression).all()
     # Loop over all samples with "skip_compression" = True
-    # For all cases of these samples, set "is_compressible" to False
+    samples = session.query(Sample).where(Sample.skip_compression == True).all()
+    for sample in samples:
+        # For all cases of these samples, set "is_compressible" to False
+        for case in sample.cases:
+            case.is_compressible = False
 
     # Drop the "skip_compression" column from "sample" table
-    pass
+    op.drop_column(table_name="sample", column_name="skip_compression")
