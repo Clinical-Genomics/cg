@@ -2092,7 +2092,6 @@ class ReadHandler(BaseHandler):
         """
         Return samples, restricted to the given internal ids, that are compressible:
             - Excludes samples belonging to any case that:
-                - Is marked as not compressible
                 - Has an active action
                 - Was created on or after case_created_before_date
             - Ordered by created date, with the oldest first
