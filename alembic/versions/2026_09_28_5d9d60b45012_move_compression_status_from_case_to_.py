@@ -78,7 +78,7 @@ def upgrade():
             name="skip_compression",
             type_=sa.Boolean,
             nullable=False,
-            default=False,
+            server_default=sa.false(),
         ),
     )
 
@@ -98,7 +98,10 @@ def downgrade():
     session = Session(bind=bind)
     # Add the "is_compressible" column to the "case" table (defaults to True)
     op.add_column(
-        table_name="case", column=sa.Column(name="is_compressible", type_=sa.Boolean, default=True)
+        table_name="case",
+        column=sa.Column(
+            name="is_compressible", type_=sa.Boolean, server_default=sa.true(), nullable=True
+        ),
     )
 
     # Loop over all samples with "skip_compression" = True
