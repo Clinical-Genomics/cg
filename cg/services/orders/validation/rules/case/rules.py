@@ -194,6 +194,7 @@ def validate_case_contains_related_samples(
     order: MIPDNAOrder | RarediseaseOrder, store: Store, **kwargs
 ) -> list[SamplesNotRelatedError]:
     # TODO 2
+    # TODO separate sibling-logic to only apply to RD, should not apply to MIP
     errors: list[SamplesNotRelatedError] = []
     for case_index, case in order.enumerated_new_cases:
         if not does_case_exist(case=case, store=store):  # Error should be raised elsewhere
