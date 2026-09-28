@@ -502,7 +502,7 @@ class StoreHelpers:
         data_delivery: DataDelivery = DataDelivery.SCOUT,
         action: str = None,
         internal_id: str = None,
-        is_compressible: bool = True,
+        is_compressible: bool = True,  # TODO remove
         customer_id: str = "cust000",
         panels: list[str] = [],
         priority: str = PriorityTerms.STANDARD,

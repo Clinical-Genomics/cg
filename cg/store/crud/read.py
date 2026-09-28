@@ -2102,7 +2102,6 @@ class ReadHandler(BaseHandler):
             .join(Case, Case.id == CaseSample.case_id)
             .where(
                 or_(
-                    Case.is_compressible.is_(False),
                     Case.action.in_(CASE_ACTIVE_ACTIONS),
                     Case.created_at >= case_created_before_date,
                 )
@@ -2114,6 +2113,7 @@ class ReadHandler(BaseHandler):
             .where(
                 Sample.id.not_in(incompressible_case_samples_subquery),
                 Sample.internal_id.in_(internal_ids),
+                Sample.skip_compression.is_(False),
             )
             .distinct()
             .order_by(Sample.created_at.asc())
