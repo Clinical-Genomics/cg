@@ -6,7 +6,7 @@ import rich_click as click
 from housekeeper.store.models import File
 
 from cg.apps.crunchy.files import update_metadata_paths
-from cg.cli.compress.helpers import update_compress_api
+from cg.cli.compress.compression_utils import update_compress_api
 from cg.clients.arnold.exceptions import ArnoldClientError, ArnoldServerError
 from cg.clients.janus.exceptions import JanusClientError, JanusServerError
 from cg.constants import SequencingFileTag
