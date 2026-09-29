@@ -174,4 +174,5 @@ class StorePoolOrderService(StoreOrderService):
             pool=pool,
             priority=sample.priority,
             sex=SexEnum.unknown,
+            skip_compression=application_version.application.is_external,
         )

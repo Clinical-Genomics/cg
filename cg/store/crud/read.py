@@ -2105,9 +2105,11 @@ class ReadHandler(BaseHandler):
         self, internal_ids: list[str], case_created_before_date: datetime
     ) -> list[Sample]:
         """
-        Return samples, restricted to the given internal ids, that are compressible:
+        Return samples that are compressible:
+            - Excludes samples that:
+                - Have skip_compression set to true
+                - Do not have an internal id matching the given list
             - Excludes samples belonging to any case that:
-                - Is marked as not compressible
                 - Has an active action
                 - Was created on or after case_created_before_date
             - Ordered by created date, with the oldest first
@@ -2117,7 +2119,6 @@ class ReadHandler(BaseHandler):
             .join(Case, Case.id == CaseSample.case_id)
             .where(
                 or_(
-                    Case.is_compressible.is_(False),
                     Case.action.in_(CASE_ACTIVE_ACTIONS),
                     Case.created_at >= case_created_before_date,
                 )
@@ -2129,6 +2130,7 @@ class ReadHandler(BaseHandler):
             .where(
                 Sample.id.not_in(incompressible_case_samples_subquery),
                 Sample.internal_id.in_(internal_ids),
+                Sample.skip_compression.is_(False),
             )
             .distinct()
             .order_by(Sample.created_at.asc())

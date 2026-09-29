@@ -1483,11 +1483,12 @@ def test_get_paginated_unhandled_samples_priority(store: Store, helpers: StoreHe
 
 def test_get_compressible_samples(store: Store, helpers: StoreHelpers):
     # GIVEN compressible samples in cases that allow for compression
-    squeezable_sample: Sample = helpers.add_sample(store=store, internal_id="squeezable_sample")
+    squeezable_sample: Sample = helpers.add_sample(
+        store=store, internal_id="squeezable_sample", skip_compression=False
+    )
     squeezable_case: Case = helpers.add_case(
         store=store,
         internal_id="squeezable_case",
-        is_compressible=True,
         action=CaseActions.HOLD,
         name="squeezable_case",
         customer_id="squeezable_customer",
@@ -1495,11 +1496,12 @@ def test_get_compressible_samples(store: Store, helpers: StoreHelpers):
     helpers.add_relationship(store=store, case=squeezable_case, sample=squeezable_sample)
 
     # GIVEN a sample in a case that is not compressible
-    compact_sample: Sample = helpers.add_sample(store=store, internal_id="compact_sample")
+    compact_sample: Sample = helpers.add_sample(
+        store=store, internal_id="compact_sample", skip_compression=True
+    )
     compact_case: Case = helpers.add_case(
         store=store,
         internal_id="compact_case",
-        is_compressible=False,
         action=CaseActions.HOLD,
         name="compact_case",
         customer_id="compact_customer",
@@ -1507,11 +1509,12 @@ def test_get_compressible_samples(store: Store, helpers: StoreHelpers):
     helpers.add_relationship(store=store, case=compact_case, sample=compact_sample)
 
     # GIVEN a sample in a running case
-    running_sample: Sample = helpers.add_sample(store=store, internal_id="running_sample")
+    running_sample: Sample = helpers.add_sample(
+        store=store, internal_id="running_sample", skip_compression=False
+    )
     running_case: Case = helpers.add_case(
         store=store,
         internal_id="running_case",
-        is_compressible=True,
         action=CaseActions.RUNNING,
         name="running_case",
         customer_id="running_customer",
@@ -1535,60 +1538,14 @@ def test_get_compressible_samples(store: Store, helpers: StoreHelpers):
     assert compressible_samples == [squeezable_sample]
 
 
-def test_get_compressible_samples_one_sample_three_cases(store: Store, helpers: StoreHelpers):
-    # GIVEN one sample
-    sample: Sample = helpers.add_sample(store=store, internal_id="squeezable_sample")
-
-    # GIVEN to cases, one compressible the others not
-    squeezable_case: Case = helpers.add_case(
-        store=store,
-        internal_id="squeezable_case",
-        is_compressible=True,
-        action=CaseActions.HOLD,
-        name="squeezable_case",
-        customer_id="squeezable_customer",
-    )
-    compact_case: Case = helpers.add_case(
-        store=store,
-        internal_id="compact_case",
-        is_compressible=False,
-        action=CaseActions.HOLD,
-        name="compact_case",
-        customer_id="compact_customer",
-    )
-    running_case: Case = helpers.add_case(
-        store=store,
-        internal_id="running_case",
-        is_compressible=False,
-        action=CaseActions.RUNNING,
-        name="running_case",
-        customer_id="running_customer",
-    )
-
-    # GIVEN that the one sample is linked to all cases
-    helpers.add_relationship(store=store, case=squeezable_case, sample=sample)
-    helpers.add_relationship(store=store, case=compact_case, sample=sample)
-    helpers.add_relationship(store=store, case=running_case, sample=sample)
-
-    # GIVEN a date that should not exclude cases
-    cut_off_date = datetime.now() + timedelta(1)
-
-    # WHEN getting compressible samples
-    compressible_samples: list[Sample] = store.get_compressible_samples_by_internal_ids(
-        internal_ids=[sample.internal_id], case_created_before_date=cut_off_date
-    )
-
-    # THEN no sample should have been returned
-    assert compressible_samples == []
-
-
 def test_get_compressible_samples_one_sample_only_old_cases(store: Store, helpers: StoreHelpers):
     # GIVEN compressible samples in cases that allow for compression
-    squeezable_sample: Sample = helpers.add_sample(store=store, internal_id="squeezable_sample")
+    squeezable_sample: Sample = helpers.add_sample(
+        store=store, internal_id="squeezable_sample", skip_compression=False
+    )
     squeezable_case: Case = helpers.add_case(
         store=store,
         internal_id="squeezable_case",
-        is_compressible=True,
         action=CaseActions.HOLD,
         name="squeezable_case",
         customer_id="squeezable_customer",
@@ -1612,12 +1569,13 @@ def test_get_compressible_samples_one_sample_only_old_cases(store: Store, helper
 
 def test_get_compressible_samples_ensure_right_order(store: Store, helpers: StoreHelpers):
     # GIVEN an old compressible samples in cases that allow for compression
-    old_sample: Sample = helpers.add_sample(store=store, internal_id="old_sample")
+    old_sample: Sample = helpers.add_sample(
+        store=store, internal_id="old_sample", skip_compression=False
+    )
     old_sample.created_at = datetime(year=1920, month=7, day=25)
     old_case: Case = helpers.add_case(
         store=store,
         internal_id="old_case",
-        is_compressible=True,
         action=CaseActions.HOLD,
         name="old_case",
         customer_id="old_customer",
@@ -1625,12 +1583,13 @@ def test_get_compressible_samples_ensure_right_order(store: Store, helpers: Stor
     helpers.add_relationship(store=store, case=old_case, sample=old_sample)
 
     # GIVEN a new compressible samples in cases that allow for compression
-    new_sample: Sample = helpers.add_sample(store=store, internal_id="new_sample")
+    new_sample: Sample = helpers.add_sample(
+        store=store, internal_id="new_sample", skip_compression=False
+    )
     new_sample.created_at = datetime.now()
     new_case: Case = helpers.add_case(
         store=store,
         internal_id="new_case",
-        is_compressible=True,
         action=CaseActions.HOLD,
         name="new_case",
         customer_id="new_customer",

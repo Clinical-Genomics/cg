@@ -508,7 +508,6 @@ class Case(Base, PriorityMixin):
     )
     id: Mapped[PrimaryKeyInt]
     internal_id: Mapped[UniqueStr]
-    is_compressible: Mapped[bool] = mapped_column(default=True)
     name: Mapped[Str128]
     ordered_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     _panels: Mapped[Text | None]
@@ -817,6 +816,7 @@ class Sample(Base, PriorityMixin):
     pool_id: Mapped[int | None] = mapped_column(ForeignKey("pool.id"))
     priority: Mapped[Priority] = mapped_column(default=Priority.standard)
     reads: Mapped[BigInt] = mapped_column(default=0)
+    skip_compression: Mapped[bool] = mapped_column(default=False, nullable=False)
     last_sequenced_at: Mapped[datetime | None]
     received_at: Mapped[datetime | None]
     reference_genome: Mapped[Str255 | None]
