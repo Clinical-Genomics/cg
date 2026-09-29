@@ -75,7 +75,13 @@ def test_receive_event_json_parsing_fails(mocker: MockerFixture):
     # WHEN calling the receive event command with a malformed json
     result = cli_runner.invoke(
         receive_event,
-        args=["something-happened", "--event-payload", "this is a string"],
+        args=[
+            "something-happened",
+            "--event-payload",
+            "this is a string",
+            "--event-metadata",
+            "{}",
+        ],
         obj=cg_config,
     )
 
@@ -98,11 +104,13 @@ def test_receive_event_json_parsing_fails(mocker: MockerFixture):
         [],
         ["--event-payload", ""],
         ["--event-payload", '{"key": "value"}'],
+        ["--event-payload", '{"key": "value"}', "--event-metadata", ""],
     ],
     ids=[
         "no event payload nor metadata arguments",
-        "empty_event_payload_argument",
+        "empty event payload argument",
         "no metadata argument",
+        "empty metadata argument",
     ],
 )
 def test_receive_event_no_payload(mocker: MockerFixture, additional_args: list[str]):
@@ -149,7 +157,7 @@ def test_receive_event_dispatch_raises(mocker: MockerFixture):
     # WHEN calling the receive event command
     result = cli_runner.invoke(
         receive_event,
-        args=["something-happened", "--event-payload", event_payload],
+        args=["something-happened", "--event-payload", event_payload, "--event-metadata", "{}"],
         obj=cg_config,
     )
 

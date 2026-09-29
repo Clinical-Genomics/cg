@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest.mock import Mock, create_autospec
 
 from cg.models.cg_config import CGConfig
@@ -11,7 +12,17 @@ def test_dispatch_existing_handler():
     )
 
     # GIVEN an event payload
-    event_payload = {"key": "value"}
+    event_payload: dict = {"key": "value"}
+
+    # GIVEN event metadata
+    event_metadata: dict = {
+        "sequence": {"consumer": 2, "stream": 1},
+        "num_pending": 0,
+        "num_delivered": 2,
+        "timestamp": "2026-09-29T11:32:12",
+        "stream": "cg-local-dev",
+        "consumer": "cluster-consumer",
+    }
 
     # GIVEN a dict of event handlers
     registered_event_handler = Mock()
@@ -23,10 +34,22 @@ def test_dispatch_existing_handler():
         event_name="existing_event",
         event_payload=event_payload,
         event_handlers=event_handlers,
+        event_metadata=event_metadata,
     )
 
     # THEN the correct handler was called
-    registered_event_handler.assert_called_once_with(config=cg_config, event_payload=event_payload)
+    registered_event_handler.assert_called_once_with(
+        config=cg_config,
+        event_payload=event_payload,
+        event_metadata=EventMetadata(
+            sequence=EventSequence(consumer=2, stream=1),
+            num_pending=0,
+            num_delivered=2,
+            timestamp=datetime.strptime("2026-09-29T11:32:12", "%Y-%m-%dT%H:%M:%S"),
+            stream="cg-local-dev",
+            cunsumer="cluster-consumer",
+        ),
+    )
 
 
 def test_dispatch_no_handler():
