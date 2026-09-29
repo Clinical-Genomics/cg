@@ -35,8 +35,8 @@ from cg.services.orders.validation.order_types.tomte.models.case import TomteCas
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
 from cg.services.orders.validation.rules.case.rules import (
-    validate_case_contains_related_samples,
-    validate_case_contains_related_samples_or_siblings,
+    validate_case_lineal_relations,
+    validate_case_lineal_or_collateral_relations,
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
@@ -245,8 +245,8 @@ def test_case_samples_multiple_prep_categories(
     assert error.case_index == 0
 
 
-def test_order_with_cases_without_relationships():
-    # GIVEN a MIPDNAOrder containing a case with multiple samples, none of which are related
+def test_mip_case_without_lineal_relations_fail():
+    # GIVEN a MIPDNAOrder containing a case with multiple samples, none of which are parent/child
     sample_1 = MIPDNASample(  # type: ignore
         application="WGSPCFC030",
         container=ContainerEnum.tube,
@@ -276,7 +276,7 @@ def test_order_with_cases_without_relationships():
     )
 
     # WHEN validating that all the cases with multiple samples should have specified relationships
-    errors: list[SamplesNotRelatedError] = validate_case_contains_related_samples(
+    errors: list[SamplesNotRelatedError] = validate_case_lineal_relations(
         order=order, store=create_autospec(Store)
     )
 
@@ -317,7 +317,7 @@ def test_rd_case_with_siblings_passes():
     )
 
     # WHEN validating the relatedness of the samples in the case
-    errors: list[SamplesNotRelatedError] = validate_case_contains_related_samples_or_siblings(
+    errors: list[SamplesNotRelatedError] = validate_case_lineal_or_collateral_relations(
         order=order, store=create_autospec(Store)
     )
 
@@ -325,7 +325,7 @@ def test_rd_case_with_siblings_passes():
     assert not errors
 
 
-def test_rd_case_with_siblings_and_unrelated_fails():
+def test_rd_case_with_unrelated_fails():
     # GIVEN a RareDiseaseOrder containing related and unrelated samples
     sister = RarediseaseSample(  # type: ignore
         application="WGSPCFC030",
@@ -377,7 +377,7 @@ def test_rd_case_with_siblings_and_unrelated_fails():
     )
 
     # WHEN validating that all the cases with multiple samples should have specified relationships
-    errors: list[SamplesNotRelatedError] = validate_case_contains_related_samples_or_siblings(
+    errors: list[SamplesNotRelatedError] = validate_case_lineal_or_collateral_relations(
         order=order, store=create_autospec(Store)
     )
 
@@ -385,7 +385,7 @@ def test_rd_case_with_siblings_and_unrelated_fails():
     assert isinstance(errors[0], SamplesNotRelatedError)
 
 
-def test_order_with_cases_with_relationships_passes():
+def test_mip_case_with_lineal_relations_passes():
     # GIVEN a MIPDNAOrder containing a case with multiple samples, one related to the others
     sample_1 = MIPDNASample(  # type: ignore
         application="WGSPCFC030",
@@ -423,9 +423,7 @@ def test_order_with_cases_with_relationships_passes():
     store.get_sample_by_internal_id_strict = Mock(return_value=db_sample)
 
     # WHEN validating that all the samples are related as they should
-    errors: list[SamplesNotRelatedError] = validate_case_contains_related_samples(
-        order=order, store=store
-    )
+    errors: list[SamplesNotRelatedError] = validate_case_lineal_relations(order=order, store=store)
 
     # THEN no error should be returned
     assert not errors
