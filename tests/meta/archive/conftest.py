@@ -17,7 +17,6 @@ from cg.constants.subject import Sex
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.archive.ddn import ddn_data_flow_client
-from cg.meta.archive.ddn.constants import ROOT_TO_TRIM
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import AuthToken, MiriaObject, TransferPayload
 from cg.meta.archive.models import FileAndSample
@@ -193,14 +192,14 @@ def remote_path() -> Path:
 
 @pytest.fixture
 def local_directory() -> Path:
-    """Returns a mock path with /home as its root."""
+    """Returns a mock path with /home as its root."""  # TODO: Fix docstring
     return Path("other", "place")
 
 
 @pytest.fixture
 def trimmed_local_directory(local_directory: Path) -> Path:
     """Returns the trimmed local directory."""
-    return Path(f"/{local_directory.relative_to(ROOT_TO_TRIM)}")
+    return local_directory  # TODO: Remove
 
 
 @pytest.fixture
