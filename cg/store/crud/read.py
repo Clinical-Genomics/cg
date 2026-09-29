@@ -3,7 +3,7 @@
 import datetime as dt
 import logging
 from datetime import datetime
-from typing import Callable, Iterator, Literal
+from typing import Callable, Iterator, Literal, Sequence
 
 import sqlalchemy
 from sqlalchemy import ScalarSelect, Select, and_, or_, select
@@ -451,6 +451,21 @@ class ReadHandler(BaseHandler):
             raise SampleNotFoundError(
                 f"Sample {sample_name} not found for customer {customer_entry_id}"
             )
+
+    def get_samples_by_subject_id_customers_and_order_type(
+        self, subject_id: str, customer_ids: list[int], order_type: OrderType
+    ) -> Sequence[Sample]:
+        query = (
+            select(Sample)
+            .join(Sample.customer)
+            .join(Sample.application_version)
+            .join(ApplicationVersion.application)
+            .join(Application.order_type_applications)
+        )
+        query = query.filter(Sample.subject_id == subject_id)
+        query = query.filter(Customer.id.in_(customer_ids))
+        query = query.filter(OrderTypeApplication.order_type == order_type)
+        return self.session.scalars(query).all()
 
     def get_illumina_metrics_entry_by_device_sample_and_lane(
         self, device_internal_id: str, sample_internal_id: str, lane: int
