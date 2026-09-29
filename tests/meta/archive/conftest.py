@@ -27,18 +27,19 @@ from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.fixture(name="ddn_dataflow_config")
+@pytest.fixture
 def ddn_dataflow_config(
     local_storage_repository: str, remote_storage_repository: str
 ) -> DataFlowConfig:
     """Returns a mock DDN Dataflow config."""
     return DataFlowConfig(
+        archive_repository=remote_storage_repository,
         database_name="test_db",
-        user="test_user",
+        housekeeper_mnt=Path("/path/to/housekeeper-bundles"),
+        local_storage=local_storage_repository,
         password="DummyPassword",
         url=Path("some", "api", "url.com").as_posix(),
-        local_storage=local_storage_repository,
-        archive_repository=remote_storage_repository,
+        user="test_user",
     )
 
 

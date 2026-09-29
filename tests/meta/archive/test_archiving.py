@@ -100,12 +100,13 @@ def test_ddn_dataflow_client_initialization(
 
     # GIVEN a valid DDNConfig object
     valid_config = DataFlowConfig(
+        archive_repository=remote_storage_repository,
         database_name="test_database",
-        user="test_user",
+        housekeeper_mnt=Path("path", "to", "housekeeper-bundles"),
+        local_storage=local_storage_repository,
         password="test_password",
         url="https://test-url.com",
-        archive_repository=remote_storage_repository,
-        local_storage=local_storage_repository,
+        user="test_user",
     )
 
     # GIVEN a mock response with a 200 OK status code and valid JSON content
