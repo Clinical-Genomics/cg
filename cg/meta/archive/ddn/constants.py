@@ -1,7 +1,6 @@
 from enum import StrEnum
 
 OSTYPE: str = "Unix/MacOS"
-ROOT_TO_TRIM: str = "/home"
 
 DESTINATION_ATTRIBUTE: str = "destination"
 SOURCE_ATTRIBUTE: str = "source"

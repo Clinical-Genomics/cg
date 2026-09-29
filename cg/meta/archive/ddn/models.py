@@ -1,9 +1,8 @@
 import logging
-from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-from cg.meta.archive.ddn.constants import OSTYPE, ROOT_TO_TRIM, JobStatus
+from cg.meta.archive.ddn.constants import OSTYPE, JobStatus
 
 LOG = logging.getLogger(__name__)
 
@@ -20,11 +19,7 @@ class MiriaObject(BaseModel):
 
     def trim_path(self, attribute_to_trim: str):
         """Trims the given attribute (source or destination) from its root directory."""
-        setattr(
-            self,
-            attribute_to_trim,
-            f"/{Path(getattr(self, attribute_to_trim)).relative_to(ROOT_TO_TRIM)}",
-        )
+        pass
 
     def add_repositories(self, source_prefix: str, destination_prefix: str):
         """Prepends the given repositories to the source and destination paths."""

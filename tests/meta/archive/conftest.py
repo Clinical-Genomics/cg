@@ -51,7 +51,10 @@ def ok_miria_response(ok_response: Response):
 
 @pytest.fixture
 def archive_request_json(
-    remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
+    ddn_dataflow_config: DataFlowConfig,
+    remote_storage_repository: str,
+    local_storage_repository: str,
+    trimmed_local_path: str,
 ) -> dict:
     return {
         "osType": "Unix/MacOS",
@@ -59,7 +62,10 @@ def archive_request_json(
         "pathInfo": [
             {
                 "destination": f"{remote_storage_repository}ADM1",
-                "source": local_storage_repository + trimmed_local_path,
+                "source": local_storage_repository
+                + ddn_dataflow_config.housekeeper_mnt.as_posix()
+                + "/"
+                + trimmed_local_path,
             }
         ],
         "metadataList": [],
@@ -69,7 +75,10 @@ def archive_request_json(
 
 @pytest.fixture
 def retrieve_request_json(
-    remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
+    ddn_dataflow_config: DataFlowConfig,
+    remote_storage_repository: str,
+    local_storage_repository: str,
+    trimmed_local_path: str,
 ) -> dict[str, Any]:
     """Returns the body for a retrieval http post towards the DDN Miria API."""
     return {
@@ -78,6 +87,8 @@ def retrieve_request_json(
         "pathInfo": [
             {
                 "destination": local_storage_repository
+                + ddn_dataflow_config.housekeeper_mnt.as_posix()
+                + "/"
                 + Path(trimmed_local_path).parent.as_posix(),
                 "source": f"{remote_storage_repository}ADM1",
             }
@@ -154,8 +165,10 @@ def file_and_sample(spring_archive_api: SpringArchiveAPI, sample_id: str):
 
 @pytest.fixture
 def trimmed_local_path(spring_archive_api: SpringArchiveAPI, sample_id: str):
-    file: File = spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first()
-    return file.path[5:]
+    file: File = spring_archive_api.housekeeper_api.get_files(
+        bundle=sample_id
+    ).first()  # TODO: Rename fixture since it is not trimmed anymore
+    return file.path
 
 
 @pytest.fixture
@@ -181,7 +194,7 @@ def remote_path() -> Path:
 @pytest.fixture
 def local_directory() -> Path:
     """Returns a mock path with /home as its root."""
-    return Path(ROOT_TO_TRIM, "other", "place")
+    return Path("other", "place")
 
 
 @pytest.fixture
@@ -304,7 +317,6 @@ def spring_archive_api(
         tag_names=[ArchiveLocations.KAROLINSKA_BUCKET]
     )
     for spring_file in populated_housekeeper_api.files(tags=[SequencingFileTag.SPRING]):
-        spring_file.path = f"/home/{spring_file.path}"
         if spring_file.version.bundle.name == sample_id:
             spring_file.tags.append(
                 populated_housekeeper_api.get_tag(name=ArchiveLocations.KAROLINSKA_BUCKET)
