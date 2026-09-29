@@ -1,4 +1,5 @@
 import logging
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -6,6 +7,7 @@ from housekeeper.store.models import Bundle, File, Version
 from pydantic import BaseModel, Field
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.housekeeper_tags import EXTERNAL_DATA_TAG, AlignmentFileTag, SequencingFileTag
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.services import slack_notification_service
@@ -54,6 +56,15 @@ def handle(config: CGConfig, event_payload: dict) -> None:
             ),
         )
         raise e
+    else:
+        _delete_mirrored_folder(config=config, event=event)
+
+
+def _check_for_sequencing_files(event: ExternalSampleTransferredEvent) -> None:
+    if not (
+        any(event.cluster_location.glob("*.bam")) or any(event.cluster_location.glob("*.fastq.gz"))
+    ):
+        raise CgError(f"No sequencing files found in directory {event.cluster_location}")
 
 
 def _update_external_sample(config: CGConfig, event: ExternalSampleTransferredEvent) -> None:
@@ -69,13 +80,6 @@ def _update_external_sample(config: CGConfig, event: ExternalSampleTransferredEv
     )
 
 
-def _check_for_sequencing_files(event: ExternalSampleTransferredEvent):
-    if not (
-        any(event.cluster_location.glob("*.bam")) or any(event.cluster_location.glob("*.fastq.gz"))
-    ):
-        raise CgError(f"No sequencing files found in directory {event.cluster_location}")
-
-
 def _add_sample_files_to_housekeeper(
     housekeeper_api: HousekeeperAPI, event: ExternalSampleTransferredEvent
 ):
@@ -89,11 +93,11 @@ def _add_sample_files_to_housekeeper(
 
     files: list[File] = []
     for file_path in event.cluster_location.glob("*"):
-        tags = [event.sample_internal_id]
+        tags = [event.sample_internal_id, EXTERNAL_DATA_TAG]
         if file_path.as_posix().endswith(".fastq.gz"):
-            tags.append("fastq")
+            tags.append(SequencingFileTag.FASTQ)
         elif file_path.as_posix().endswith(".bam"):
-            tags.append("bam")
+            tags.append(AlignmentFileTag.BAM)
         else:
             LOG.info(f"Omitting storing for non-sequencing file {file_path}.")
             continue
@@ -102,3 +106,20 @@ def _add_sample_files_to_housekeeper(
         )
         files.append(file)
     housekeeper_api.finalize_file_transactions(files=files, version=version)
+
+
+def _delete_mirrored_folder(config: CGConfig, event: ExternalSampleTransferredEvent) -> None:
+    try:
+        shutil.rmtree(event.cluster_location)
+        LOG.info(
+            f"Deleted mirrored directory {event.cluster_location} for sample {event.sample_internal_id}."
+        )
+    except Exception as e:
+        slack_notification_service.notify(
+            recipient=config.slack_webhooks.sysdev_team,
+            notification=SlackNotification(
+                title=f"Failed to delete {event.cluster_location}",
+                message=f"{EXTERNAL_SAMPLE_TRANSFERRED_EVENT} succeeded for sample {event.sample_internal_id} but failed to delete mirrored directory at {event.cluster_location}",
+                error=e,  # type: ignore
+            ),
+        )

@@ -434,6 +434,7 @@ class FOHMConfig(BaseModel):
 class ExternalConfig(BaseModel):
     hasta: str
     caesar: str
+    cluster: str
 
 
 class SeqeraPlatformConfig(BaseModel):
@@ -469,6 +470,7 @@ class IlluminaConfig(BaseModel):
 
 class SlackWebhooks(BaseModel):
     prod_team: str
+    sysdev_team: str
 
 
 class RunInstruments(BaseModel):

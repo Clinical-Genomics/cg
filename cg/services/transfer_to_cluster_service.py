@@ -9,6 +9,8 @@ from cg.models.slurm.sbatch import Sbatch
 from cg.services.deliver_files.rsync.sbatch_commands import (
     ERROR_RSYNC_FUNCTION,
     RSYNC_CONTENTS_COMMAND,
+    RSYNC_EXCLUDE_OPTION,
+    RSYNC_INCLUDE_OPTION,
 )
 from cg.services.events import event_publisher
 from cg.services.events.constants import EXTERNAL_SAMPLE_TRANSFERRED_EVENT, SAMPLE_INTERNAL_ID_FIELD
@@ -24,7 +26,7 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
         f"Preparing to transfer sample {sample.name} for customer {sample.customer.internal_id}"
     )
     slurm_api = SlurmAPI()
-    sbatch_script: Path = _get_sbatch_script(
+    sbatch_script: Path = _get_sbatch_script_path(
         sample=sample, rsync_path=cg_config.data_delivery.base_path
     )
     sbatch_command: str = _get_sbatch_command(cg_config=cg_config, sample=sample)
@@ -38,7 +40,7 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
     slurm_api.submit_sbatch(sbatch_content=sbatch_content, sbatch_path=sbatch_script)
 
 
-def _get_sbatch_script(sample: Sample, rsync_path: str) -> Path:
+def _get_sbatch_script_path(sample: Sample, rsync_path: str) -> Path:
     timestamp: str = datetime.now().strftime("%y%m%d_%H_%M_%S_%f")
     log_dir = Path(rsync_path, f"{sample.customer.internal_id}_{sample.name}_{timestamp}")
     log_dir.mkdir(parents=True, exist_ok=False)
@@ -50,7 +52,7 @@ def _get_sbatch_script(sample: Sample, rsync_path: str) -> Path:
 def _get_sbatch_command(cg_config: CGConfig, sample: Sample) -> str:
     source_path = Path(cg_config.external.caesar % sample.customer.internal_id, sample.name)
     LOG.debug(f"Source directory: {source_path}")
-    destination_path = Path(cg_config.external.hasta % sample.customer.internal_id, sample.name)
+    destination_path = Path(cg_config.external.cluster % sample.customer.internal_id, sample.name)
     destination_path.mkdir(parents=True, exist_ok=True)
     LOG.debug(f"Destination directory: {destination_path}")
     event_payload = {
@@ -62,7 +64,10 @@ def _get_sbatch_command(cg_config: CGConfig, sample: Sample) -> str:
         RSYNC_CONTENTS_COMMAND.format(
             source_path=source_path,
             destination_path=destination_path,
-        )
+        ).rstrip("\n")
+        + RSYNC_INCLUDE_OPTION.format(include_pattern="*.bam").strip("\n")
+        + RSYNC_INCLUDE_OPTION.format(include_pattern="*.fastq.gz").strip("\n")
+        + RSYNC_EXCLUDE_OPTION.format(exclude_pattern="*").lstrip("\n")
         + "\n"
         + event_publisher.get_publish_command(
             nats_config=cg_config.nats,

@@ -6,7 +6,7 @@ from typing import Iterable
 import rich_click as click
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.compress.helpers import (
+from cg.cli.compress.compression_utils import (
     compress_fastq_to_spring_for_samples,
     correct_spring_paths,
     get_samples_available_for_compression,
