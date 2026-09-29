@@ -24,7 +24,13 @@ def test_receive_event_success(mocker: MockerFixture):
     # WHEN calling the receive event command
     result = cli_runner.invoke(
         receive_event,
-        args=["something-happened", "--event-payload", '{"key": "value"}'],
+        args=[
+            "something-happened",
+            "--event-payload",
+            '{"key": "value"}',
+            "--event-metadata",
+            '{"sequence": {"consumer": 2, "stream": 1}, "num_pending": 0, "num_delivered": 2, "timestamp": "2026-09-29T11:32:12", "stream": "cg-local-dev", "consumer": "cluster-consumer", "domain": null}',
+        ],
         obj=cg_config,
     )
 
@@ -38,6 +44,9 @@ def test_receive_event_success(mocker: MockerFixture):
 
     # THEN the database changes should have been committed
     status_db.as_mock.commit_to_store.assert_called_once_with()
+
+    # THEN
+    # TODO
 
 
 def test_receive_event_json_parsing_fails(mocker: MockerFixture):
