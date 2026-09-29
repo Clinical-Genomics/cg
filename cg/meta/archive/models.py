@@ -15,18 +15,6 @@ class FileAndSample(BaseModel):
     sample: Sample
 
 
-class FileTransferData(BaseModel):
-    """Base class for classes representing files to be archived."""
-
-    @classmethod
-    @abstractmethod
-    def create_from_file_and_sample(
-        cls, file: File, sample: Sample, is_archiving: bool
-    ) -> "FileTransferData":
-        """Instantiates the class from a File and Sample object."""
-        pass
-
-
 class ArchiveHandler(ABC):
     """Base class for classes handling different archiving programs."""
 
@@ -44,13 +32,6 @@ class ArchiveHandler(ABC):
     @abstractmethod
     def retrieve_files(self, files_and_samples: list[FileAndSample]) -> int:
         """Retrieves all files for all samples for the given flowcell."""
-        pass
-
-    @abstractmethod
-    def convert_into_transfer_data(
-        self, files_and_samples: list[FileAndSample], is_archiving: bool = True
-    ) -> list[FileTransferData]:
-        """Converts the provided files_and_samples into a list of objects formatted for the specific archiving flow."""
         pass
 
     @abstractmethod

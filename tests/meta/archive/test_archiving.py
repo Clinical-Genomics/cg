@@ -11,44 +11,11 @@ from cg.constants.constants import FileFormat
 from cg.exc import DdnDataflowAuthenticationError
 from cg.io.controller import WriteStream
 from cg.meta.archive.ddn import ddn_data_flow_client
-from cg.meta.archive.ddn.constants import (
-    DESTINATION_ATTRIBUTE,
-    OSTYPE,
-    ROOT_TO_TRIM,
-    SOURCE_ATTRIBUTE,
-    DataflowEndpoints,
-)
+from cg.meta.archive.ddn.constants import OSTYPE, DataflowEndpoints
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import MiriaObject, TransferPayload
 from cg.meta.archive.models import FileAndSample
 from cg.models.cg_config import DataFlowConfig
-
-
-def test_correct_source_root(miria_file_archive: MiriaObject, trimmed_local_directory: Path):
-    """Tests the method for trimming the source directory."""
-
-    # GIVEN a MiriaObject with a source path and a destination path
-
-    # WHEN trimming the path of the source attribute
-    miria_file_archive.trim_path(attribute_to_trim=SOURCE_ATTRIBUTE)
-
-    # THEN the source path should be the local directory minus the /home part
-    assert miria_file_archive.source == trimmed_local_directory.as_posix()
-
-
-def test_correct_destination_root(
-    local_directory: Path, miria_file_archive: MiriaObject, trimmed_local_directory: Path
-):
-    """Tests the method for trimming the destination directory."""
-
-    # GIVEN a MiriaObject with a source path and a destination path
-    miria_file_archive.destination = local_directory
-
-    # WHEN trimming the path of the destination attribute
-    miria_file_archive.trim_path(attribute_to_trim=DESTINATION_ATTRIBUTE)
-
-    # THEN the destination path should be the local directory minus the /home part
-    assert miria_file_archive.destination == trimmed_local_directory.as_posix()
 
 
 def test_add_repositories(
@@ -100,12 +67,13 @@ def test_ddn_dataflow_client_initialization(
 
     # GIVEN a valid DDNConfig object
     valid_config = DataFlowConfig(
+        archive_repository=remote_storage_repository,
         database_name="test_database",
-        user="test_user",
+        housekeeper_mnt=Path("path", "to", "housekeeper-bundles"),
+        local_storage=local_storage_repository,
         password="test_password",
         url="https://test-url.com",
-        archive_repository=remote_storage_repository,
-        local_storage=local_storage_repository,
+        user="test_user",
     )
 
     # GIVEN a mock response with a 200 OK status code and valid JSON content
@@ -176,36 +144,6 @@ def test_ddn_dataflow_client_initialization_invalid_credentials(
         DDNDataFlowClient(config=ddn_dataflow_config)
 
 
-def test_transfer_payload_correct_source_root(transfer_payload: TransferPayload):
-    """Tests trimming all source paths in the TransferPayload object."""
-    # GIVEN a TransferPayload object with two MiriaObject objects with untrimmed source paths
-    for miria_file in transfer_payload.files_to_transfer:
-        assert miria_file.source.startswith(ROOT_TO_TRIM)
-
-    # WHEN trimming the source directory
-    transfer_payload.trim_paths(attribute_to_trim=SOURCE_ATTRIBUTE)
-
-    # THEN the source directories should no longer contain /home
-    for miria_file in transfer_payload.files_to_transfer:
-        assert not miria_file.source.startswith(ROOT_TO_TRIM)
-
-
-def test_transfer_payload_correct_destination_root(transfer_payload: TransferPayload):
-    """Tests trimming all destination paths in the TransferPayload object."""
-
-    # GIVEN a TransferPayload object with two MiriaObject objects with untrimmed destination paths
-    for miria_file in transfer_payload.files_to_transfer:
-        miria_file.destination = ROOT_TO_TRIM + miria_file.destination
-        assert miria_file.destination.startswith(ROOT_TO_TRIM)
-
-    # WHEN trimming the destination directories
-    transfer_payload.trim_paths(attribute_to_trim=DESTINATION_ATTRIBUTE)
-
-    # THEN the destination directories should no longer contain /home
-    for miria_file in transfer_payload.files_to_transfer:
-        assert not miria_file.destination.startswith(ROOT_TO_TRIM)
-
-
 def test_auth_header_old_token(ddn_dataflow_client: DDNDataFlowClient, old_timestamp: datetime):
     """Tests that the refresh method is called if the auth token is too old."""
 
@@ -271,6 +209,7 @@ def test__refresh_auth_token(
 
 def test_archive_file(
     ddn_dataflow_client: DDNDataFlowClient,
+    ddn_dataflow_config: DataFlowConfig,
     remote_storage_repository: str,
     local_storage_repository: str,
     file_and_sample: FileAndSample,
@@ -299,7 +238,10 @@ def test_archive_file(
         json={
             "pathInfo": [
                 {
-                    "source": local_storage_repository + trimmed_local_path,
+                    "source": local_storage_repository
+                    + ddn_dataflow_config.housekeeper_mnt.as_posix()
+                    + "/"
+                    + trimmed_local_path,
                     "destination": remote_storage_repository + file_and_sample.sample.internal_id,
                 }
             ],
@@ -346,9 +288,8 @@ def test_create_transfer_request_archiving(
     ddn_dataflow_client: DDNDataFlowClient, miria_file_archive: MiriaObject
 ):
     """Tests creating an archiving request."""
-    # GIVEN a TransferData object with an untrimmed source path, and without the source and
+    # GIVEN a TransferData object without the source and
     # destination repositories pre-pended
-    assert miria_file_archive.source.startswith(ROOT_TO_TRIM)
 
     # WHEN creating the archiving request
     transfer_request: TransferPayload = ddn_dataflow_client.create_transfer_request(
@@ -360,7 +301,6 @@ def test_create_transfer_request_archiving(
     # THEN the destination path should start with the archive prefix
     assert transfer_request.files_to_transfer
     for transfer_data_archive in transfer_request.files_to_transfer:
-        assert ROOT_TO_TRIM not in transfer_data_archive.source
         assert transfer_data_archive.source.startswith(ddn_dataflow_client.local_storage)
         assert transfer_data_archive.destination.startswith(ddn_dataflow_client.archive_repository)
 
@@ -369,9 +309,8 @@ def test_create_transfer_request_retrieve(
     ddn_dataflow_client: DDNDataFlowClient, miria_file_retrieve: MiriaObject
 ):
     """Tests creating a retrieve request."""
-    # GIVEN a TransferData object with an untrimmed destination path, and without the source and
+    # GIVEN a TransferData object without the source and
     # destination repositories pre-pended
-    assert miria_file_retrieve.destination.startswith(ROOT_TO_TRIM)
 
     # WHEN creating the retrieve request
     transfer_request: TransferPayload = ddn_dataflow_client.create_transfer_request(
@@ -383,6 +322,5 @@ def test_create_transfer_request_retrieve(
     # THEN the destination path should start with the local_storage prefix
     assert transfer_request.files_to_transfer
     for transfer_data_archive in transfer_request.files_to_transfer:
-        assert ROOT_TO_TRIM not in transfer_data_archive.destination
         assert transfer_data_archive.source.startswith(ddn_dataflow_client.archive_repository)
         assert transfer_data_archive.destination.startswith(ddn_dataflow_client.local_storage)

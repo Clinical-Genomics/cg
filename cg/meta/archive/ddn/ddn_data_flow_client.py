@@ -42,19 +42,20 @@ class DDNDataFlowClient(ArchiveHandler):
     """Class for archiving and retrieving folders via DDN Dataflow."""
 
     def __init__(self, config: DataFlowConfig):
-        self.database_name: str = config.database_name
-        self.user: str = config.user
-        self.password: str = config.password
-        self.url: str = config.url
         self.archive_repository: str = config.archive_repository
-        self.local_storage: str = config.local_storage
         self.auth_token: str
-        self.refresh_token: str
-        self.token_expiration: datetime
+        self.database_name: str = config.database_name
         self.headers: dict[str, str] = {
             "Content-Type": "application/json",
             "accept": "application/json",
         }
+        self.housekeeper_mnt = config.housekeeper_mnt
+        self.local_storage: str = config.local_storage
+        self.password: str = config.password
+        self.refresh_token: str
+        self.token_expiration: datetime
+        self.url: str = config.url
+        self.user: str = config.user
         self._set_auth_tokens()
 
     def _set_auth_tokens(self) -> None:
@@ -166,12 +167,26 @@ class DDNDataFlowClient(ArchiveHandler):
         self, files_and_samples: list[FileAndSample], is_archiving: bool = True
     ) -> list[MiriaObject]:
         """Converts the provided files and samples to the format used for the request."""
-        return [
-            MiriaObject.create_from_file_and_sample(
-                file=file_and_sample.file, sample=file_and_sample.sample, is_archiving=is_archiving
-            )
-            for file_and_sample in files_and_samples
-        ]
+        if is_archiving:
+            return [
+                MiriaObject(
+                    destination=file_and_sample.sample.internal_id,
+                    source=Path(self.housekeeper_mnt, file_and_sample.file.path).as_posix(),
+                )
+                for file_and_sample in files_and_samples
+            ]
+        else:
+            return [
+                MiriaObject(
+                    destination=Path(
+                        self.housekeeper_mnt, file_and_sample.file.path
+                    ).parent.as_posix(),
+                    source=Path(
+                        file_and_sample.sample.internal_id, Path(file_and_sample.file.path).name
+                    ).as_posix(),
+                )
+                for file_and_sample in files_and_samples
+            ]
 
     def is_job_done(self, job_id: int) -> bool:
         """Returns True if the specified job is completed, and false if it is still ongoing.

@@ -12,12 +12,11 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.archiving import ArchiveLocations
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import MissingFilesError, SampleFilesCurrentlyArchivingError
-from cg.meta.archive.archive import ARCHIVE_HANDLERS, FileAndSample, SpringArchiveAPI
+from cg.meta.archive.archive import FileAndSample, SpringArchiveAPI
 from cg.meta.archive.ddn import ddn_data_flow_client
 from cg.meta.archive.ddn.constants import FAILED_JOB_STATUSES, ONGOING_JOB_STATUSES, JobStatus
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import AuthToken, GetJobStatusResponse, MiriaObject
-from cg.meta.archive.models import ArchiveHandler, FileTransferData
 from cg.models.cg_config import DataFlowConfig
 from cg.store.models import Sample
 from cg.store.store import Store
@@ -111,11 +110,10 @@ def test_convert_into_transfer_data(
         return_value=123,
     ):
         # WHEN calling the corresponding archive method
-        data_flow_client: ArchiveHandler = ARCHIVE_HANDLERS[ArchiveLocations.KAROLINSKA_BUCKET](
-            config=ddn_dataflow_config
-        )
+        data_flow_client = DDNDataFlowClient(config=ddn_dataflow_config)
+
     # WHEN using it to instantiate the correct class
-    transferdata: list[FileTransferData] = data_flow_client.convert_into_transfer_data(
+    transferdata: list[MiriaObject] = data_flow_client.convert_into_transfer_data(
         files_and_samples=[file_and_sample],
     )
 
