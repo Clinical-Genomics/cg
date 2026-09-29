@@ -191,10 +191,34 @@ def validate_samples_in_case_have_same_prep_category(
 
 
 def validate_case_contains_related_samples(
-    order: MIPDNAOrder | RarediseaseOrder, store: Store, **kwargs
+    order: MIPDNAOrder, store: Store, **kwargs
 ) -> list[SamplesNotRelatedError]:
-    # TODO 2
-    # TODO separate sibling-logic to only apply to RD, should not apply to MIP
+    # TODO old method
+    errors: list[SamplesNotRelatedError] = []
+    for case_index, case in order.enumerated_new_cases:
+        if not does_case_exist(case=case, store=store):  # Error should be raised elsewhere
+            continue
+        if is_single_sample_case(case=case, store=store):  # This should always pass
+            continue
+        case_has_error = False
+        isolated_samples: list[str] = []
+        for _, sample in case.enumerated_samples:
+            if not is_sample_related_in_case(sample=sample, case=case, store=store):
+                case_has_error = True
+                isolated_samples.append(get_sample_name(sample=sample, store=store))
+        if case_has_error:
+            error = SamplesNotRelatedError(
+                case_index=case_index,
+                message=f"Samples {isolated_samples} are not related to other samples within the case.",
+            )
+            errors.append(error)
+    return errors
+
+
+def validate_case_contains_related_samples_or_siblings(
+    order: RarediseaseOrder, store: Store, **kwargs
+) -> list[SamplesNotRelatedError]:
+    # TODO new method
     errors: list[SamplesNotRelatedError] = []
     for case_index, case in order.enumerated_new_cases:
         if not does_case_exist(case=case, store=store):  # Error should be raised elsewhere
@@ -220,7 +244,6 @@ def validate_case_contains_related_samples(
             error = SamplesNotRelatedError(
                 case_index=case_index,
                 message=f"Samples {isolated_samples} are not related to other samples within the case.",
-                # TODO this thrown
             )
             errors.append(error)
     return errors

@@ -116,7 +116,7 @@ def is_sample_related_in_case(
     store: Store,
 ):
     """Check that a sample either has a parent or is a parent to another sample in the case."""
-    # TODO 3
+    # TODO relevant helper method
     if not (sample.mother or sample.father):
         sample_name: str = get_sample_name(sample=sample, store=store)
         if not any(
