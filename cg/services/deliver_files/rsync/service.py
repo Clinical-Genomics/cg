@@ -314,7 +314,7 @@ class DeliveryRsyncService:
         ).id
         data = {
             "cg.analysis_id": analysis_id,
-            "uploaded_at": "$(date +%Y-%m-%dT%H:%M:%SZ)",
+            "uploaded_at": "$(date +%Y-%m-%dT%H:%M:%S)",
         }
         command += "\n" + get_publish_command(
             nats_config=self.nats_config,

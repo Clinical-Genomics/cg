@@ -221,6 +221,19 @@ class ReadHandler(BaseHandler):
             entry_id=entry_id,
         ).first()
 
+    def get_analysis_by_entry_id_strict(self, entry_id: int) -> Analysis:
+        """Return an analysis or raise an exception if none was found."""
+        # TODO add tests
+        query = apply_analysis_filter(
+            filter_functions=[AnalysisFilter.BY_ENTRY_ID],
+            analyses=self._get_query(table=Analysis),
+            entry_id=entry_id,
+        )
+        if analysis := query.first():
+            return analysis
+        else:
+            raise AnalysisDoesNotExistError(f"Analysis with id {entry_id} not found.")
+
     def get_analysis_by_trailblazer_id(self, trailblazer_id: int) -> Analysis:
         """
         Get analysis by trailblazer id.
