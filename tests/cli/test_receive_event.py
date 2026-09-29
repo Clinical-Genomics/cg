@@ -21,6 +21,9 @@ def test_receive_event_success(mocker: MockerFixture):
     status_db: TypedMock[Store] = create_typed_mock(Store)
     cg_config = create_autospec(CGConfig, status_db=status_db.as_type)
 
+    # GIVEN that the event has metadata
+    metadata = '{"sequence": {"consumer": 2, "stream": 1}, "num_pending": 0, "num_delivered": 2, "timestamp": "2026-09-29T11:32:12", "stream": "cg-local-dev", "consumer": "cluster-consumer"}'
+
     # WHEN calling the receive event command
     result = cli_runner.invoke(
         receive_event,
@@ -29,18 +32,28 @@ def test_receive_event_success(mocker: MockerFixture):
             "--event-payload",
             '{"key": "value"}',
             "--event-metadata",
-            '{"sequence": {"consumer": 2, "stream": 1}, "num_pending": 0, "num_delivered": 2, "timestamp": "2026-09-29T11:32:12", "stream": "cg-local-dev", "consumer": "cluster-consumer", "domain": null}',
+            metadata,
         ],
         obj=cg_config,
     )
 
-    # THEN it calls the dispatch function
-    dispatch_spy.assert_called_once_with(
-        config=cg_config, event_name="something-happened", event_payload={"key": "value"}
-    )
-
     # THEN the result exits successfully
     assert result.exit_code == 0
+
+    # THEN it calls the dispatch function
+    dispatch_spy.assert_called_once_with(
+        config=cg_config,
+        event_name="something-happened",
+        event_payload={"key": "value"},
+        event_metadata={
+            "sequence": {"consumer": 2, "stream": 1},
+            "num_pending": 0,
+            "num_delivered": 2,
+            "timestamp": "2026-09-29T11:32:12",
+            "stream": "cg-local-dev",
+            "consumer": "cluster-consumer",
+        },
+    )
 
     # THEN the database changes should have been committed
     status_db.as_mock.commit_to_store.assert_called_once_with()
@@ -84,8 +97,13 @@ def test_receive_event_json_parsing_fails(mocker: MockerFixture):
     [
         [],
         ["--event-payload", ""],
+        ["--event-payload", '{"key": "value"}'],
     ],
-    ids=["no_event_payload_argument", "empty_event_payload_argument"],
+    ids=[
+        "no event payload nor metadata arguments",
+        "empty_event_payload_argument",
+        "no metadata argument",
+    ],
 )
 def test_receive_event_no_payload(mocker: MockerFixture, additional_args: list[str]):
     # GIVEN the cli runner
@@ -104,11 +122,11 @@ def test_receive_event_no_payload(mocker: MockerFixture, additional_args: list[s
         obj=cg_config,
     )
 
-    # THEN it should not call the dispatch function
-    dispatch_spy.assert_not_called()
-
     # THEN the result exits successfully
     assert result.exit_code == 0
+
+    # THEN it should not call the dispatch function
+    dispatch_spy.assert_not_called()
 
     # THEN the database changes should NOT have been committed
     status_db.as_mock.commit_to_store.assert_not_called()
