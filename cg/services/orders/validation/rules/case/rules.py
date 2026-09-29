@@ -234,7 +234,7 @@ def validate_case_contains_related_samples_or_siblings(
                 isolated_samples.append(get_sample_name(sample=sample, store=store))
 
         if isolated_samples:
-            if set(isolated_samples) == set(case.samples):
+            if len(isolated_samples) == len(case.samples):
                 # If the case consists of ONLY isolated samples, they are siblings
                 pass
             else:
