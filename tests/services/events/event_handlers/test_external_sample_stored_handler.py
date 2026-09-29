@@ -239,7 +239,9 @@ def test_handle_start_raises(mocker: MockerFixture):
         CGConfig,
         status_db=status_db,
         housekeeper_api=housekeeper_api,
-        slack_webhooks=SlackWebhooks(prod_team="https://bingus.gov"),
+        slack_webhooks=SlackWebhooks(
+            prod_team="https://prod.team", sysdev_team="https://sysdev.team"
+        ),
     )
 
     notification_mock = mocker.patch.object(slack_notification_service, "notify")
@@ -254,7 +256,7 @@ def test_handle_start_raises(mocker: MockerFixture):
     # THEN a Slack notification should have been sent out to prodbioinfo
     calls = notification_mock.call_args_list
     first_call = calls[0]
-    assert first_call.kwargs["recipient"] == "https://bingus.gov"
+    assert first_call.kwargs["recipient"] == "https://prod.team"
     assert first_call.kwargs["notification"].title == "Failed to start analysis"
     assert (
         first_call.kwargs["notification"].message
