@@ -32,7 +32,7 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
     Raises:
         CaseNotFoundError: If the sample provided in the payload doesn't belong to any new case.
     """
-    LOG.debug(f"Received event payload {event_payload} with metadata {event_metadata}")
+    LOG.debug(f"Received event payload {event_payload} with metadata {event_metadata.model_dump()}")
     event = ExternalSampleStoredEvent.model_validate(event_payload)
     status_db: Store = config.status_db
     housekeeper_api: HousekeeperAPI = config.housekeeper_api

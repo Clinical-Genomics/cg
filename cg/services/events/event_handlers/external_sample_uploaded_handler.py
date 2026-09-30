@@ -35,7 +35,7 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
     payload. If an order with the external sample has already been placed, trigger the transfer
     of the sample files from the delivery server to the internal cluster.
     """
-    LOG.debug(f"Received event payload {event_payload} with metadata {event_metadata}")
+    LOG.debug(f"Received event payload {event_payload} with metadata {event_metadata.model_dump()}")
     event = ExternalSampleUploadedEvent.model_validate(event_payload)
     status_db: Store = config.status_db
     customer: Customer = status_db.get_customer_by_internal_id_strict(event.customer)
