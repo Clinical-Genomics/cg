@@ -1,9 +1,9 @@
 from datetime import datetime
-from unittest.mock import Mock, create_autospec
+from unittest.mock import create_autospec
 
 from cg.models.cg_config import CGConfig
 from cg.services.events import event_dispatching
-from cg.services.events.event_dispatching import EventMetadata, EventSequence
+from cg.services.events.event_dispatching import EventHandler, EventMetadata, EventSequence
 
 
 def test_dispatch_existing_handler():
@@ -26,7 +26,7 @@ def test_dispatch_existing_handler():
     }
 
     # GIVEN a dict of event handlers
-    registered_event_handler = Mock()
+    registered_event_handler = create_autospec(EventHandler)
     event_handlers: dict = {"existing_event": registered_event_handler}
 
     # WHEN calling dispatch

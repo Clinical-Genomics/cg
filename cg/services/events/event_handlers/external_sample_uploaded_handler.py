@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from cg.models.cg_config import LOG, CGConfig
 from cg.services import transfer_to_cluster_service
 from cg.services.events.constants import CUSTOMER_INTERNAL_ID_FIELD, SAMPLE_NAME_FIELD
+from cg.services.events.event_dispatching import EventMetadata
 from cg.store.models import (
     SAMPLE_NAME_MAXIMUM_LENGTH,
     SAMPLE_NAME_MINIMUM_LENGTH,
@@ -25,7 +26,7 @@ class ExternalSampleUploadedEvent(BaseModel):
     )
 
 
-def handle(config: CGConfig, event_payload: dict) -> None:
+def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata) -> None:
     """
     Add an entry to the ExternalSample table corresponding to the sample name received in the
     payload. If an order with the external sample has already been placed, trigger the transfer
