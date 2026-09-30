@@ -25,7 +25,7 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
     Trigger the transfer of sample files for samples specified in the payload
     if they have an entry in the ExternalSample table.
     """
-    # TODO use or del event_metadata?
+    LOG.debug(f"Received event payload {event_payload} with metadata {event_metadata}")
     event = ExternalSamplesOrderedEvent.model_validate(event_payload)
     status_db: Store = config.status_db
     customer: Customer = status_db.get_customer_by_internal_id_strict(internal_id=event.customer)

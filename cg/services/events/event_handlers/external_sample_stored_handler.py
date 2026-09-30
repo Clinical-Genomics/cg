@@ -12,8 +12,8 @@ from cg.services.events.constants import (
     EXTERNAL_SAMPLE_STORED_EVENT,
     RETRY_NOTIFICATION_THRESHOLD,
     SAMPLE_INTERNAL_ID_FIELD,
+    EventMetadata,
 )
-from cg.services.events.constants import EventMetadata
 from cg.services.slack_notification_service import SlackNotification
 from cg.store.models import Case, Sample
 from cg.store.store import Store
@@ -32,6 +32,7 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
     Raises:
         CaseNotFoundError: If the sample provided in the payload doesn't belong to any new case.
     """
+    LOG.debug(f"Received event payload {event_payload} with metadata {event_metadata}")
     event = ExternalSampleStoredEvent.model_validate(event_payload)
     status_db: Store = config.status_db
     housekeeper_api: HousekeeperAPI = config.housekeeper_api

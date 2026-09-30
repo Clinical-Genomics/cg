@@ -37,6 +37,7 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
     and copy them to the corresponding Housekeeper bundle directory. Also update the entry for the
     sample in the ExternalSample table with the datetime of the transfer.
     """
+    LOG.debug(f"Received event payload {event_payload} with metadata {event_metadata}")
     event = ExternalSampleTransferredEvent.model_validate(event_payload)
     try:
         _check_for_sequencing_files(event)
