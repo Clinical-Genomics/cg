@@ -1,6 +1,5 @@
 import logging
 from typing import Protocol
-from cg.services.events.constants import EventMetadata
 
 from cg.models.cg_config import CGConfig
 from cg.services.events.constants import (
@@ -8,6 +7,7 @@ from cg.services.events.constants import (
     EXTERNAL_SAMPLE_TRANSFERRED_EVENT,
     EXTERNAL_SAMPLE_UPLOADED_EVENT,
     EXTERNAL_SAMPLES_ORDERED_EVENT,
+    EventMetadata,
 )
 from cg.services.events.event_handlers import (
     external_sample_stored_handler,
@@ -17,6 +17,7 @@ from cg.services.events.event_handlers import (
 )
 
 LOG = logging.getLogger(__name__)
+
 
 class EventHandler(Protocol):
     def __call__(
