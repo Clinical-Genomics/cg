@@ -13,7 +13,7 @@ from cg.store.models import (
     ApplicationVersion,
     Collaboration,
     Customer,
-    IlluminaFlowCell,
+    ExternalSample,
     Order,
     Organism,
     PacbioSequencingRun,
@@ -91,8 +91,8 @@ def test_add_microbial_sample(base_store: Store, helpers):
     base_store.session.commit()
 
     # THEN it should be stored in the database
-    assert sample_query.first() == new_sample
-    stored_microbial_sample = sample_query.first()
+    assert sample_query.one() == new_sample
+    stored_microbial_sample = sample_query.one()
     assert stored_microbial_sample.name == name
     assert stored_microbial_sample.internal_id == internal_id
     assert stored_microbial_sample.reference_genome == reference_genome
@@ -128,7 +128,7 @@ def test_add_pool(rml_pool_store: Store):
         .filter(ApplicationVersion.application_id == application.id)
         .first()
     )
-    db_order: Order = rml_pool_store.get_order_by_ticket_id_strict(123456)
+    order: Order = rml_pool_store.get_order_by_ticket_id_strict(123456)
 
     # WHEN adding a new pool
     new_pool = rml_pool_store.add_pool(
@@ -136,7 +136,7 @@ def test_add_pool(rml_pool_store: Store):
         name="pool2",
         ordered=dt.now(),
         application_version=app_version,
-        db_order=db_order,
+        order=order,
     )
 
     rml_pool_store.session.add(new_pool)
@@ -148,7 +148,6 @@ def test_add_pool(rml_pool_store: Store):
 
 def test_add_illumina_flow_cell(
     illumina_flow_cell_dto: IlluminaFlowCellDTO,
-    illumina_flow_cell: IlluminaFlowCell,
     illumina_flow_cell_internal_id: str,
     store: Store,
 ):
@@ -225,3 +224,25 @@ def test_create_pacbio_sequencing_run_already_exists(store: Store):
     # THEN a PacbioSequencingRunAlreadyExistsError should be raised
     with pytest.raises(PacbioSequencingRunAlreadyExistsError):
         store.create_pacbio_sequencing_run(pacbio_sequencing_run_dto)
+
+
+def test_add_external_sample(store: Store):
+    # GIVEN a store with a customer
+    customer: Customer = Customer(id=1)
+    store.add_item_to_store(customer)
+
+    # GIVEN customer_id, sample_name and customer_uploaded_at
+    customer_id, sample_name, customer_uploaded_at = 1, "sample-name", dt.now()
+
+    # WHEN calling add_external_sample
+    external_sample: ExternalSample = store.add_external_sample(
+        customer_id=customer_id, sample_name=sample_name, customer_uploaded_at=customer_uploaded_at
+    )
+
+    # THEN the external sample will have the correct fields
+    assert external_sample.customer_id == customer.id
+    assert external_sample.sample_name == sample_name
+    assert external_sample.customer_uploaded_at == customer_uploaded_at
+
+    # THEN an external sample should have been added to the session
+    assert external_sample in store.session

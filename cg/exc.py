@@ -407,3 +407,11 @@ class FreshdeskUpdateTicketError(FreshdeskError):
 
 class CustomerNotFoundError(CgError):
     """Exception raised when a customer is not found in StatusDB"""
+
+
+class ExternalSampleNotFoundError(CgError):
+    """Exception raised when an external sample is not found in StatusDB"""
+
+
+class SubjectIdMissingError(OrderFormError):
+    """Exception raised when the subject_id is missing in the order form"""

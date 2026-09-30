@@ -7,12 +7,7 @@ from cg.constants.constants import CustomerId
 from cg.constants.invoice import CostCenters
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import RecordType
-from cg.models.invoice.invoice import (
-    InvoiceApplication,
-    InvoiceContact,
-    InvoiceInfo,
-    InvoiceReport,
-)
+from cg.models.invoice.invoice import InvoiceApplication, InvoiceContact, InvoiceInfo, InvoiceReport
 from cg.server.ext import FlaskLims
 from cg.server.ext import lims as genologics_lims
 from cg.store.models import Customer, Invoice, Pool, Sample, User
@@ -164,7 +159,7 @@ class InvoiceAPI:
         return split_price
 
     def get_invoice_entity_record(
-        self, cost_center: str, discount: int, record: Sample or Pool
+        self, cost_center: str, discount: int, record: Sample | Pool
     ) -> InvoiceInfo:
         """Return invoice information for a specific sample or pool."""
         application = self.get_application(record=record, discount=discount)
@@ -221,10 +216,14 @@ class InvoiceAPI:
         return priority
 
     def get_invoice_info(
-        self, record, split_discounted_price: int, cost_center: str, application: InvoiceApplication
+        self,
+        record: Sample | Pool,
+        split_discounted_price: int,
+        cost_center: str,
+        application: InvoiceApplication,
     ) -> InvoiceInfo:
         """Return the invoice_info to be used in the invoice report."""
-        order = record.order
+        order: str | None = record.order if isinstance(record, Sample) else record.order_name
         ticket = self.get_ticket(record)
         lims_id = self.get_lims_id(record)
         priority = self.get_priority(record)

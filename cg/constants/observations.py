@@ -122,6 +122,7 @@ class RarediseaseObservationsAnalysisTag(StrEnum):
     """Rare disease observations files analysis tags."""
 
     SNV_VCF: str = "vcf-snv"
+    SNV_VCF_LOQUSDB = "vcf-snv-loqusdb"
     SV_VCF: str = "vcf-sv"
     FAMILY_PED: str = "pedigree"
 
@@ -133,3 +134,4 @@ class RarediseaseLoadParameters(Enum):
     GQ_THRESHOLD: int = 10
     HARD_THRESHOLD: float = 0.95
     SOFT_THRESHOLD: float = 0.90
+    IGNORE_GQ_IF_UNSET = True

@@ -34,6 +34,7 @@ from cg.server.endpoints.utils import before_request
 from cg.server.ext import (
     db,
     delivery_message_service,
+    nats_config,
     order_service,
     order_validation_service,
     storing_service_registry,
@@ -119,8 +120,8 @@ def create_order_from_form():
         else:
             json_data = json.load(input_file.stream, strict=False)
             order_parser = JsonOrderformParser()
-            order_parser.parse_orderform(order_data=json_data)
-        parsed_order: Orderform = order_parser.generate_orderform()
+            order_parser.parse_orderform(json_data)
+        parsed_order: Orderform = order_parser.generate_orderform(db)
     except (  # user misbehaviour
         AttributeError,
         OrderFormError,
@@ -154,6 +155,8 @@ def submit_order(order_type: OrderType):
         ticket_handler=ticket_handler,
         storing_registry=storing_service_registry,
         validation_service=order_validation_service,
+        status_db=db,
+        nats_config=nats_config,
     )
     error_message: str
     try:

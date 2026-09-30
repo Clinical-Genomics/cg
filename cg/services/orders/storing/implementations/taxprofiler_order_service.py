@@ -107,6 +107,7 @@ class StoreTaxprofilerOrderService(StoreOrderService):
             original_ticket=order._generated_ticket_id,
             priority=sample.priority,
             sex=Sex.UNKNOWN,
+            skip_compression=application_version.application.is_external,
         )
         db_sample.customer = customer
         db_sample.application_version = application_version

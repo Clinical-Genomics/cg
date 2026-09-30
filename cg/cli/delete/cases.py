@@ -12,13 +12,13 @@ CONFIRM = "Continue?"
 LOG = logging.getLogger(__name__)
 
 
-def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Store) -> [Sample]:
+def _get_samples_by_identifiers(identifiers: list[tuple[str, str]], store: Store) -> list[Sample]:
     """Get samples matched by given set of identifiers"""
     identifier_args = dict(identifiers)
-    return store.get_samples_by_any_id(**identifier_args)
+    return store.get_samples_by_any_id(identifier_args).all()
 
 
-def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [Case]:
+def _get_cases(identifiers: list[tuple[str, str]], store: Store) -> set[Case]:
     """Get cases that have samples that match identifiers if given"""
     samples_by_id = _get_samples_by_identifiers(identifiers, store)
     _cases = set()
@@ -44,7 +44,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [Case]:
 def delete_cases(
     context: click.Context,
     dry_run: bool,
-    identifiers: click.Tuple([str, str]),
+    identifiers: list[tuple[str, str]],
 ):
     """Delete many cases of samples at the same time"""
     store = context.obj.status_db

@@ -1970,6 +1970,7 @@ def context_config(
         },
         "external": {
             "caesar": "server.name.se:/path/%s/on/caesar",
+            "cluster": "/path/%s/on/cluster",
             "hasta": "/path/on/hasta/%s",
         },
         "fluffy": {
@@ -2077,6 +2078,7 @@ def context_config(
                 "mail_user": email_address,
             },
             "tower_workflow": "nallo",
+            "variant_catalog": "path/to/variant_catalogue.bed",
         },
         "raredisease": {
             "default_target_bed": "twistexomecomprehensive_10.2_hg38_design.bed",
@@ -2105,6 +2107,7 @@ def context_config(
                 "mail_user": email_address,
             },
             "tower_workflow": "raredisease",
+            "variant_catalog": "path/to/variant_catalogue.json",
             "verifybamid_svd": {
                 "wes": {
                     "bed": Path("path", "to", "sleeping_quarters.bed"),
@@ -2228,6 +2231,7 @@ def context_config(
         },
         "arnold": {"api_url": "https://arnold.scilifelab.se/"},
         "janus": {"host": "https://janus.sys.scilifelab.se/"},
+        "slack_webhooks": {"prod_team": "https://prod.team", "sysdev_team": "https://sysdev.team"},
     }
 
 

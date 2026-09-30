@@ -255,6 +255,19 @@ class ApplicationVersion(Base):
     def __str__(self) -> str:
         return f"{self.application.tag} ({self.version})"
 
+    @hybrid_property
+    def application_tag(self):
+        return self.application.tag
+
+    @application_tag.expression
+    @classmethod
+    def application_tag(cls):
+        return (
+            select(Application.tag)
+            .where(Application.id == cls.application_id)
+            .label("application_tag")
+        )
+
     def to_dict(self, application: bool = True):
         """Represent as dictionary"""
         data = to_dict(model_instance=self)
@@ -308,6 +321,15 @@ class Analysis(Base):
     session_id: Mapped[str | None]
     order_id: Mapped[int | None] = mapped_column(ForeignKey("order.id"))
     order: Mapped["Order"] = orm.relationship(back_populates="analyses")
+
+    @hybrid_property
+    def case_internal_id(self) -> str:
+        return self.case.internal_id
+
+    @case_internal_id.expression
+    @classmethod
+    def case_internal_id(cls):
+        return select(Case.internal_id).where(Case.id == cls.case_id).label("case_internal_id")
 
     def __str__(self):
         return f"{self.case.internal_id} | {self.completed_at.date()}"
@@ -486,7 +508,6 @@ class Case(Base, PriorityMixin):
     )
     id: Mapped[PrimaryKeyInt]
     internal_id: Mapped[UniqueStr]
-    is_compressible: Mapped[bool] = mapped_column(default=True)
     name: Mapped[Str128]
     ordered_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     _panels: Mapped[Text | None]
@@ -713,6 +734,9 @@ class Pool(Base):
     __tablename__ = "pool"
     __table_args__ = (UniqueConstraint("order_id", "name", name="_order_name_uc"),)
 
+    def __str__(self):
+        return self.name
+
     application_version_id: Mapped[int] = mapped_column(ForeignKey("application_version.id"))
     application_version: Mapped["ApplicationVersion"] = orm.relationship(
         foreign_keys=[application_version_id]
@@ -727,7 +751,7 @@ class Pool(Base):
     name: Mapped[Str32]
     no_invoice: Mapped[bool | None] = mapped_column(default=False)
     order_id: Mapped[int] = mapped_column(ForeignKey("order.id"))
-    db_order: Mapped["Order"] = orm.relationship(foreign_keys=[order_id])
+    order: Mapped["Order"] = orm.relationship(foreign_keys=[order_id])
     ordered_at: Mapped[datetime]
     received_at: Mapped[datetime | None]
 
@@ -735,17 +759,22 @@ class Pool(Base):
     samples: Mapped[list["Sample"]] = orm.relationship(back_populates="pool")
 
     @property
-    def order(self):
-        return self.db_order.name
+    def order_name(self):
+        return self.order.name
 
     @property
     def ticket(self) -> str | None:
-        return str(self.db_order.ticket_id) if self.db_order else None
+        return str(self.order.ticket_id) if self.order else None
 
     def to_dict(self):
         pool_dict = to_dict(model_instance=self)
-        pool_dict["order"] = self.order
+        pool_dict["order"] = self.order_name
         return pool_dict
+
+
+SAMPLE_NAME_PATTERN = r"^[A-Za-z0-9-]*$"
+SAMPLE_NAME_MINIMUM_LENGTH = 2
+SAMPLE_NAME_MAXIMUM_LENGTH = 128
 
 
 class Sample(Base, PriorityMixin):
@@ -787,6 +816,7 @@ class Sample(Base, PriorityMixin):
     pool_id: Mapped[int | None] = mapped_column(ForeignKey("pool.id"))
     priority: Mapped[Priority] = mapped_column(default=Priority.standard)
     reads: Mapped[BigInt] = mapped_column(default=0)
+    skip_compression: Mapped[bool] = mapped_column(default=False, nullable=False)
     last_sequenced_at: Mapped[datetime | None]
     received_at: Mapped[datetime | None]
     reference_genome: Mapped[Str255 | None]
@@ -1056,6 +1086,17 @@ class Sample(Base, PriorityMixin):
         return data
 
 
+class ExternalSample(Base):
+    __tablename__ = "external_sample"
+    id: Mapped[PrimaryKeyInt]
+    customer_id: Mapped[int] = mapped_column(ForeignKey("customer.id"))
+    sample_name: Mapped[Str128]
+    customer_uploaded_at: Mapped[datetime]
+    transferred_at: Mapped[datetime | None] = mapped_column(default=None)
+
+    customer: Mapped[Customer] = orm.relationship(foreign_keys=[customer_id])
+
+
 class Invoice(Base):
     __tablename__ = "invoice"
     id: Mapped[PrimaryKeyInt]
@@ -1123,9 +1164,7 @@ class Order(Base):
     analyses: Mapped[list[Analysis]] = orm.relationship(
         back_populates="order", order_by="Analysis.created_at"
     )
-    pools: Mapped[list[Pool]] = orm.relationship(
-        back_populates="db_order", order_by="Pool.ordered_at"
-    )
+    pools: Mapped[list[Pool]] = orm.relationship(back_populates="order", order_by="Pool.ordered_at")
 
     @property
     def workflow(self) -> Workflow:

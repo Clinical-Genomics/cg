@@ -66,7 +66,12 @@ class BalsamicConfigurator(Configurator):
         return Path(self.root_dir, case_id, f"{case_id}.json")
 
     def _ensure_required_config_files_exist(self, config: BalsamicCaseConfig) -> None:
-        if not config.sample_config.exists():
+        if (
+            not config.sample_config.exists()
+            or not Path(config.workflow_profile, "config.yaml").exists()
+        ):
             raise CaseNotConfiguredError(
-                f"Please ensure that the config file {config.sample_config} exists."
+                f"Please ensure that the config file {config.sample_config} exists and that the "
+                f"workflow profile {config.workflow_profile} points to a directory containing a "
+                f"config.yaml file."
             )

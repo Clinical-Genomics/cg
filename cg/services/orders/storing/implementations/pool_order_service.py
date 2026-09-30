@@ -145,7 +145,7 @@ class StorePoolOrderService(StoreOrderService):
             customer=customer,
             name=pool[0],
             ordered=datetime.now(),
-            db_order=db_order,
+            order=db_order,
         )
 
     def _create_db_sample(
@@ -174,4 +174,5 @@ class StorePoolOrderService(StoreOrderService):
             pool=pool,
             priority=sample.priority,
             sex=SexEnum.unknown,
+            skip_compression=application_version.application.is_external,
         )

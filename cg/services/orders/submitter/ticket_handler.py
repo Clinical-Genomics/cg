@@ -31,7 +31,7 @@ class TicketHandler:
 
     def create_ticket(
         self, order: Order, user_name: str, user_mail: str, order_type: OrderType
-    ) -> int | None:
+    ) -> int:
         """Create a ticket and return the ticket number"""
         message: str = self.create_new_ticket_header(
             message=self.create_xml_sample_list(order=order, user_name=user_name),

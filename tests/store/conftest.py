@@ -388,7 +388,7 @@ def rml_pool_store(
         name="Test",
         ordered=dt.datetime.now(),
         application_version=app_version,
-        db_order=test_order,
+        order=test_order,
     )
     store.session.add(new_pool)
     new_case = helpers.add_case(

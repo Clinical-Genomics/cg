@@ -1,12 +1,13 @@
 """Tests the find business data part of the Cg store API related to sample model."""
 
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, Sequence
 
 import pytest
 from sqlalchemy.orm import Query
 
 from cg.constants import SexOptions, Workflow
+from cg.constants.constants import CaseActions
 from cg.constants.lims import LimsStatus
 from cg.constants.priority import PriorityTerms, TrailblazerPriority
 from cg.constants.sequencing import DNA_PREP_CATEGORIES, SeqLibraryPrepCategory
@@ -17,7 +18,15 @@ from cg.server.dto.samples.requests import (
     SortDirection,
     UnhandledSamplesSortBy,
 )
-from cg.store.models import Case, CaseSample, Customer, Invoice, OrderTypeApplication, Sample
+from cg.store.models import (
+    Application,
+    Case,
+    CaseSample,
+    Customer,
+    Invoice,
+    OrderTypeApplication,
+    Sample,
+)
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -209,6 +218,34 @@ def test_get_samples_by_customer_and_name_invalid_customer(
     assert not sample
 
 
+def test_get_samples_by_customer_and_name_strict(store: Store, helpers: StoreHelpers):
+    # GIVEN a database with a sample whose name is unique within a customer
+    customer_0: Customer = helpers.ensure_customer(store, customer_id="cust000")
+    customer_1: Customer = helpers.ensure_customer(store, customer_id="cust001")
+    sample: Sample = helpers.add_sample(store=store, customer=customer_0, name="sample-1")
+    helpers.add_sample(store=store, customer=customer_1, name="sample-1")
+    helpers.add_sample(store=store, customer=customer_0, name="sample-2")
+
+    # WHEN getting sample by customer and name
+    result = store.get_sample_by_customer_and_name_strict(
+        customer_entry_id=sample.customer.id, sample_name=sample.name
+    )
+
+    # THEN the correct sample was returned
+    assert result == sample
+
+
+def test_get_samples_by_customer_and_name_strict_raises_on_no_hits(
+    store: Store, helpers: StoreHelpers
+):
+    # GIVEN an empty store
+
+    # WHEN strictly getting a sample by a customer and name
+    # THEN the sample is not found raising an error
+    with pytest.raises(SampleNotFoundError):
+        store.get_sample_by_customer_and_name_strict(customer_entry_id=1, sample_name="sample-1")
+
+
 def test_get_samples_by_any_id_not_an_attribute_fails(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
     identifiers: dict[str, Any] = {
@@ -226,7 +263,7 @@ def test_get_samples_by_any_id_not_an_attribute_fails(
     # WHEN trying to filter using an attribute not of Sample
     with pytest.raises(AttributeError) as exc_info:
         store_with_a_sample_that_has_many_attributes_and_one_without.get_samples_by_any_id(
-            **identifiers
+            identifiers
         )
 
     # THEN the error message should contain the non-existent-attribute
@@ -256,7 +293,7 @@ def test_get_samples_by_any_id_exclusive_filtering_gives_empty_query(
     }
     filtered_query: Query = (
         store_with_a_sample_that_has_many_attributes_and_one_without.get_samples_by_any_id(
-            **identifiers
+            identifiers
         )
     )
 
@@ -1442,3 +1479,231 @@ def test_get_paginated_unhandled_samples_priority(store: Store, helpers: StoreHe
     # THEN only the newer sample should be returned
     assert unhandled_samples == [sample_normal_prio]
     assert total == 1
+
+
+def test_get_compressible_samples(store: Store, helpers: StoreHelpers):
+    # GIVEN compressible samples in cases that allow for compression
+    squeezable_sample: Sample = helpers.add_sample(
+        store=store, internal_id="squeezable_sample", skip_compression=False
+    )
+    squeezable_case: Case = helpers.add_case(
+        store=store,
+        internal_id="squeezable_case",
+        action=CaseActions.HOLD,
+        name="squeezable_case",
+        customer_id="squeezable_customer",
+    )
+    helpers.add_relationship(store=store, case=squeezable_case, sample=squeezable_sample)
+
+    # GIVEN a sample in a case that is not compressible
+    compact_sample: Sample = helpers.add_sample(
+        store=store, internal_id="compact_sample", skip_compression=True
+    )
+    compact_case: Case = helpers.add_case(
+        store=store,
+        internal_id="compact_case",
+        action=CaseActions.HOLD,
+        name="compact_case",
+        customer_id="compact_customer",
+    )
+    helpers.add_relationship(store=store, case=compact_case, sample=compact_sample)
+
+    # GIVEN a sample in a running case
+    running_sample: Sample = helpers.add_sample(
+        store=store, internal_id="running_sample", skip_compression=False
+    )
+    running_case: Case = helpers.add_case(
+        store=store,
+        internal_id="running_case",
+        action=CaseActions.RUNNING,
+        name="running_case",
+        customer_id="running_customer",
+    )
+    helpers.add_relationship(store=store, case=running_case, sample=running_sample)
+
+    # GIVEN a date that should not exclude cases
+    cut_off_date = datetime.now() + timedelta(1)
+
+    # WHEN getting the samples to be compressed
+    compressible_samples: list[Sample] = store.get_compressible_samples_by_internal_ids(
+        internal_ids=[
+            squeezable_sample.internal_id,
+            compact_sample.internal_id,
+            running_sample.internal_id,
+        ],
+        case_created_before_date=cut_off_date,
+    )
+
+    # THEN only the compressible sample is returned
+    assert compressible_samples == [squeezable_sample]
+
+
+def test_get_compressible_samples_one_sample_only_old_cases(store: Store, helpers: StoreHelpers):
+    # GIVEN compressible samples in cases that allow for compression
+    squeezable_sample: Sample = helpers.add_sample(
+        store=store, internal_id="squeezable_sample", skip_compression=False
+    )
+    squeezable_case: Case = helpers.add_case(
+        store=store,
+        internal_id="squeezable_case",
+        action=CaseActions.HOLD,
+        name="squeezable_case",
+        customer_id="squeezable_customer",
+    )
+    helpers.add_relationship(store=store, case=squeezable_case, sample=squeezable_sample)
+
+    # GIVEN a date that should exclude cases
+    cut_off_date = datetime.now() - timedelta(1)
+
+    # WHEN getting the samples to be compressed
+    compressible_samples: list[Sample] = store.get_compressible_samples_by_internal_ids(
+        internal_ids=[
+            squeezable_sample.internal_id,
+        ],
+        case_created_before_date=cut_off_date,
+    )
+
+    # THEN no samples are returned
+    assert compressible_samples == []
+
+
+def test_get_compressible_samples_ensure_right_order(store: Store, helpers: StoreHelpers):
+    # GIVEN an old compressible samples in cases that allow for compression
+    old_sample: Sample = helpers.add_sample(
+        store=store, internal_id="old_sample", skip_compression=False
+    )
+    old_sample.created_at = datetime(year=1920, month=7, day=25)
+    old_case: Case = helpers.add_case(
+        store=store,
+        internal_id="old_case",
+        action=CaseActions.HOLD,
+        name="old_case",
+        customer_id="old_customer",
+    )
+    helpers.add_relationship(store=store, case=old_case, sample=old_sample)
+
+    # GIVEN a new compressible samples in cases that allow for compression
+    new_sample: Sample = helpers.add_sample(
+        store=store, internal_id="new_sample", skip_compression=False
+    )
+    new_sample.created_at = datetime.now()
+    new_case: Case = helpers.add_case(
+        store=store,
+        internal_id="new_case",
+        action=CaseActions.HOLD,
+        name="new_case",
+        customer_id="new_customer",
+    )
+    helpers.add_relationship(store=store, case=new_case, sample=new_sample)
+
+    # GIVEN a date that should not exclude cases
+    cut_off_date = datetime.now() + timedelta(1)
+
+    # WHEN getting the samples to be compressed
+    compressible_samples: list[Sample] = store.get_compressible_samples_by_internal_ids(
+        internal_ids=[
+            old_sample.internal_id,
+            new_sample.internal_id,
+        ],
+        case_created_before_date=cut_off_date,
+    )
+
+    # THEN the oldest sample is in the beginning of the list
+    assert compressible_samples == [old_sample, new_sample]
+
+
+def test_get_samples_by_subject_id_customers_and_order_type(store: Store, helpers: StoreHelpers):
+    # GIVEN a subject_id, a list of customer_ids and an order_type:
+    subject_id = "subject_id"
+    customer_ids: list[int] = [1, 2, 3]
+    order_type = OrderType.RAREDISEASE
+
+    # GIVEN a store containing:
+    # An application tied to the order type
+    application_to_fetch: Application = helpers.ensure_application(store=store, tag="matching_tag")
+    application_to_fetch.order_types = [OrderType.RAREDISEASE]
+
+    application_not_to_fetch: Application = helpers.ensure_application(
+        store=store, tag="not_matching_tag"
+    )
+    application_not_to_fetch.order_types = []
+
+    # A customer that matches our customer_ids
+    customer_to_match = helpers.ensure_customer(store=store, customer_id="matching_customer")
+    customer_to_match.id = 1
+
+    # A customer that does not match our customer_ids
+    customer_not_to_match = helpers.ensure_customer(store=store, customer_id="mismatching_customer")
+    customer_not_to_match.id = 4
+
+    # A sample not matching anything
+    helpers.add_sample(
+        store=store,
+        application_tag="not_matching_tag",
+        customer_id=customer_not_to_match.internal_id,
+        subject_id="mismatching_subject_id",
+    )
+
+    # A sample matching on subject_id but neither customer nor order_type
+    helpers.add_sample(
+        store=store,
+        application_tag="not_matching_tag",
+        customer_id=customer_not_to_match.internal_id,
+        subject_id="subject_id",
+    )
+
+    # A sample matching on customer but neither subject_id nor order_type
+    helpers.add_sample(
+        store=store,
+        application_tag="not_matching_tag",
+        customer_id=customer_to_match.internal_id,
+        subject_id="mismatching_subject_id",
+    )
+
+    # A sample matching on order_type but neither subject_id nor customer
+    helpers.add_sample(
+        store=store,
+        application_tag="matching_tag",
+        customer_id=customer_not_to_match.internal_id,
+        subject_id="mismatching_subject_id",
+    )
+
+    # A sample matching on customer and subject_id but not order_type
+    helpers.add_sample(
+        store=store,
+        application_tag="not_matching_tag",
+        customer_id=customer_to_match.internal_id,
+        subject_id="subject_id",
+    )
+
+    # A sample matching on customer and order type but not subject_id
+    helpers.add_sample(
+        store=store,
+        application_tag="matching_tag",
+        customer_id=customer_to_match.internal_id,
+        subject_id="mismatching_subject_id",
+    )
+
+    # A sample matching on subject_id and order type but not customer
+    helpers.add_sample(
+        store=store,
+        application_tag="matching_tag",
+        customer_id=customer_not_to_match.internal_id,
+        subject_id="subject_id",
+    )
+
+    # A sample matching on subject_id, order type and customer
+    sample_to_fetch: Sample = helpers.add_sample(
+        store=store,
+        application_tag="matching_tag",
+        customer_id=customer_to_match.internal_id,
+        subject_id="subject_id",
+    )
+
+    # WHEN fetching samples by subject id, customers and type
+    matching_samples: Sequence[Sample] = store.get_samples_by_subject_id_customers_and_order_type(
+        subject_id=subject_id, customer_ids=customer_ids, order_type=order_type
+    )
+
+    # THEN only the sample_to_fetch should be returned
+    assert matching_samples == [sample_to_fetch]

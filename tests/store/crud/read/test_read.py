@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 import pytest
 from sqlalchemy.exc import MultipleResultsFound
@@ -8,7 +9,12 @@ from cg.constants import SequencingRunDataAvailability
 from cg.constants.constants import BedVersionGenomeVersion, CaseActions, Workflow
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PhenotypeStatus
-from cg.exc import ApplicationTagNotFoundError, BedVersionNotFoundError, CgError
+from cg.exc import (
+    ApplicationTagNotFoundError,
+    BedVersionNotFoundError,
+    CgError,
+    ExternalSampleNotFoundError,
+)
 from cg.services.orders.order_service.models import OrderQueryParams
 from cg.store.models import (
     Analysis,
@@ -21,6 +27,7 @@ from cg.store.models import (
     CaseSample,
     Collaboration,
     Customer,
+    ExternalSample,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
     Invoice,
@@ -1326,3 +1333,73 @@ def test_get_orders_mip_dna_and_limit_filter(
 
     # THEN we should get the expected number of orders returned
     assert len(orders) == expected_returned
+
+
+def test_get_external_sample_finds_match(store: Store, helpers: StoreHelpers):
+    # GIVEN a store containing external samples and customers
+    customer_0 = helpers.ensure_customer(store=store, customer_id="cust000")
+    customer_1 = helpers.ensure_customer(store=store, customer_id="cust001")
+    external_sample_1 = ExternalSample(
+        customer_id=customer_0.id, sample_name="sample-name-1", customer_uploaded_at=datetime.now()
+    )
+    external_sample_2 = ExternalSample(
+        customer_id=customer_0.id, sample_name="sample-name-2", customer_uploaded_at=datetime.now()
+    )
+    external_sample_3 = ExternalSample(
+        customer_id=customer_1.id, sample_name="sample-name-1", customer_uploaded_at=datetime.now()
+    )
+    store.add_multiple_items_to_store([external_sample_1, external_sample_2, external_sample_3])
+
+    # WHEN fetching the external sample by customer and sample name
+    fetched_external_sample: ExternalSample | None = store.get_external_sample(
+        customer_id=customer_0.id,
+        sample_name="sample-name-1",
+    )
+
+    # THEN that sample must be returned
+    assert fetched_external_sample == external_sample_1
+
+
+def test_get_external_sample_no_match(store: Store):
+    # GIVEN an empty store
+
+    # WHEN fetching an external sample by customer and sample name
+    fetched_external_sample: ExternalSample | None = store.get_external_sample(
+        customer_id=1,
+        sample_name="sample-name-1",
+    )
+
+    # THEN None should be returned
+    assert fetched_external_sample is None
+
+
+def test_get_external_sample_strict_success(store: Store, helpers: StoreHelpers):
+    # GIVEN a store containing a matching external sample for a customer
+    customer = helpers.ensure_customer(store=store, customer_id="cust000")
+    external_sample = ExternalSample(
+        customer_id=customer.id,
+        sample_name="sample-name-1",
+        customer_uploaded_at=datetime.now(),
+    )
+    store.add_item_to_store(item=external_sample)
+
+    # WHEN fetching the external sample strictly by customer and sample name
+    fetched_external_sample: ExternalSample = store.get_external_sample_strict(
+        customer_id=customer.id,
+        sample_name="sample-name-1",
+    )
+
+    # THEN the matching external sample should be returned
+    assert fetched_external_sample == external_sample
+
+
+def test_get_external_sample_strict_external_sample_not_found(store: Store):
+    # GIVEN an empty store
+
+    # WHEN fetching an external sample strictly by customer and sample name
+    # THEN an ExternalSampleNotFoundError should be raised
+    with pytest.raises(ExternalSampleNotFoundError):
+        store.get_external_sample_strict(
+            customer_id=1,
+            sample_name="sample-name-1",
+        )
