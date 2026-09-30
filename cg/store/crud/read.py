@@ -223,7 +223,6 @@ class ReadHandler(BaseHandler):
 
     def get_analysis_by_entry_id_strict(self, entry_id: int) -> Analysis:
         """Return an analysis or raise an exception if none was found."""
-        # TODO add tests
         query = apply_analysis_filter(
             filter_functions=[AnalysisFilter.BY_ENTRY_ID],
             analyses=self._get_query(table=Analysis),
