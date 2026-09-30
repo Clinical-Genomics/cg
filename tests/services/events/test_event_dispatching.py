@@ -3,6 +3,7 @@ from unittest.mock import Mock, create_autospec
 
 from cg.models.cg_config import CGConfig
 from cg.services.events import event_dispatching
+from cg.services.events.event_dispatching import EventMetadata, EventSequence
 
 
 def test_dispatch_existing_handler():
@@ -47,7 +48,7 @@ def test_dispatch_existing_handler():
             num_delivered=2,
             timestamp=datetime.strptime("2026-09-29T11:32:12", "%Y-%m-%dT%H:%M:%S"),
             stream="cg-local-dev",
-            cunsumer="cluster-consumer",
+            consumer="cluster-consumer",
         ),
     )
 

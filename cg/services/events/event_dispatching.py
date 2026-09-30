@@ -1,5 +1,8 @@
 import logging
+from datetime import datetime
 from typing import Protocol
+
+from pydantic import BaseModel
 
 from cg.models.cg_config import CGConfig
 from cg.services.events.constants import (
@@ -18,8 +21,24 @@ from cg.services.events.event_handlers import (
 LOG = logging.getLogger(__name__)
 
 
+class EventSequence(BaseModel):
+    consumer: int
+    stream: int
+
+
+class EventMetadata(BaseModel):
+    sequence: EventSequence
+    num_pending: int
+    num_delivered: int
+    timestamp: datetime
+    stream: str
+    consumer: str
+
+
 class EventHandler(Protocol):
-    def __call__(self, config: CGConfig, event_payload: dict) -> None: ...
+    def __call__(
+        self, config: CGConfig, event_payload: dict, event_metadata: EventMetadata
+    ) -> None: ...
 
 
 EVENT_HANDLERS: dict[str, EventHandler] = {
@@ -43,6 +62,7 @@ def dispatch(
     handler_function: EventHandler | None = event_handlers.get(event_name)
     if handler_function:
         LOG.debug(f"Dispatching event {event_name}")
-        handler_function(config=config, event_payload=event_payload)
+        parsed_metadata = EventMetadata.model_validate(event_metadata)
+        handler_function(config=config, event_payload=event_payload, event_metadata=parsed_metadata)
     else:
         LOG.info(f"No handler for event {event_name}")
