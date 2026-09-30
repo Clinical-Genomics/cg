@@ -9,7 +9,12 @@ from cg.exc import CaseNotFoundError
 from cg.models.cg_config import CGConfig, SlackWebhooks
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
-from cg.services.events.constants import EXTERNAL_SAMPLE_STORED_EVENT, SAMPLE_INTERNAL_ID_FIELD
+from cg.services.events.constants import (
+    EXTERNAL_SAMPLE_STORED_EVENT,
+    RETRY_NOTIFICATION_THRESHOLD,
+    SAMPLE_INTERNAL_ID_FIELD,
+    EventMetadata,
+)
 from cg.services.events.event_handlers import external_sample_stored_handler
 from cg.services.events.event_handlers.external_sample_stored_handler import (
     slack_notification_service,
@@ -55,7 +60,9 @@ def test_handle_starts_case(mocker: MockerFixture):
     )
 
     # WHEN handling the event
-    external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
+    external_sample_stored_handler.handle(
+        config=cg_config, event_payload=event_payload, event_metadata=create_autospec(EventMetadata)
+    )
 
     # THEN we should have checked that all samples were indeed stored
     stored_sample_call = call("ACC123")
@@ -84,7 +91,11 @@ def test_handle_fails_with_no_case():
     # WHEN handling the event
     # THEN the appropriate error is raised
     with pytest.raises(CaseNotFoundError, match="No case found to deliver sample ACC123"):
-        external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
+        external_sample_stored_handler.handle(
+            config=cg_config,
+            event_payload=event_payload,
+            event_metadata=create_autospec(EventMetadata),
+        )
 
 
 def test_handle_ignores_case_with_internal_samples(mocker: MockerFixture):
@@ -123,7 +134,9 @@ def test_handle_ignores_case_with_internal_samples(mocker: MockerFixture):
     )
 
     # WHEN handling the event
-    external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
+    external_sample_stored_handler.handle(
+        config=cg_config, event_payload=event_payload, event_metadata=create_autospec(EventMetadata)
+    )
 
     # THEN the analysis was not started
     analysis_starter.as_mock.start.assert_not_called()
@@ -169,7 +182,9 @@ def test_handle_ignores_case_with_unstored_samples(mocker: MockerFixture):
     )
 
     # WHEN handling the event
-    external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
+    external_sample_stored_handler.handle(
+        config=cg_config, event_payload=event_payload, event_metadata=create_autospec(EventMetadata)
+    )
 
     # THEN the analysis was not started
     analysis_starter.as_mock.start.assert_not_called()
@@ -212,29 +227,37 @@ def test_handle_ignores_case_with_undeliverable_samples(mocker: MockerFixture):
     )
 
     # WHEN handling the event
-    external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
+    external_sample_stored_handler.handle(
+        config=cg_config, event_payload=event_payload, event_metadata=create_autospec(EventMetadata)
+    )
 
     # THEN the analysis was not started
     analysis_starter.as_mock.start.assert_not_called()
 
 
-def test_handle_start_raises(mocker: MockerFixture):
+def test_handle_start_raises_and_notifies(mocker: MockerFixture):
     # GIVEN a payload
     event_payload = {SAMPLE_INTERNAL_ID_FIELD: "ACC123"}
 
-    analysis_starter = create_autospec(AnalysisStarter)
+    # GIVEN that the slack notification should be sent out
+    event_metadata = create_autospec(EventMetadata, num_delivered=RETRY_NOTIFICATION_THRESHOLD)
 
+    # GIVEN that the starting raises an error
+    analysis_starter = create_autospec(AnalysisStarter)
     analysis_starter.start = Mock(side_effect=Exception("Mighty exception!"))
 
     mocker.patch.object(
         AnalysisStarterFactory, "get_analysis_starter_for_case", return_value=analysis_starter
     )
 
+    # GIVEN a sample that's connected to a case with only external and stored samples
     status_db: Store = create_autospec(Store)
     case = create_autospec(Case, internal_id="heftyhen")
-    sample = create_autospec(Sample, case_that_delivers=case)
+    sample = create_autospec(Sample, case_that_delivers=case, is_external=True)
+    case.samples = [sample]
     status_db.get_sample_by_internal_id_strict = Mock(return_value=sample)
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    housekeeper_api.bundle = Mock(return_value=create_autospec(Bundle))
     cg_config: CGConfig = create_autospec(
         CGConfig,
         status_db=status_db,
@@ -246,14 +269,20 @@ def test_handle_start_raises(mocker: MockerFixture):
 
     notification_mock = mocker.patch.object(slack_notification_service, "notify")
 
+    # WHEN handling the event
+    # THEN the error should be raised
     with pytest.raises(Exception):
-        external_sample_stored_handler.handle(config=cg_config, event_payload=event_payload)
+        external_sample_stored_handler.handle(
+            config=cg_config,
+            event_payload=event_payload,
+            event_metadata=event_metadata,
+        )
 
+    # THEN a Slack notification should have been sent out to prodbioinfo
     notification_mock.assert_called_once_with(
         recipient=cg_config.slack_webhooks.prod_team, notification=ANY
     )
 
-    # THEN a Slack notification should have been sent out to prodbioinfo
     calls = notification_mock.call_args_list
     first_call = calls[0]
     assert first_call.kwargs["recipient"] == "https://prod.team"

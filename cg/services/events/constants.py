@@ -14,9 +14,13 @@ SAMPLE_NAME_ARRAY_FIELD = "status_db.sample.name.array"
 SAMPLE_NAME_FIELD = "status_db.sample.name"
 
 
+RETRY_NOTIFICATION_THRESHOLD = 3
+
+
 class EventSequence(BaseModel):
     consumer: int
     stream: int
+
 
 class EventMetadata(BaseModel):
     # See link for more information

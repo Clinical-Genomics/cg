@@ -58,9 +58,6 @@ def test_receive_event_success(mocker: MockerFixture):
     # THEN the database changes should have been committed
     status_db.as_mock.commit_to_store.assert_called_once_with()
 
-    # THEN
-    # TODO
-
 
 def test_receive_event_json_parsing_fails(mocker: MockerFixture):
     # GIVEN a CliRunner
