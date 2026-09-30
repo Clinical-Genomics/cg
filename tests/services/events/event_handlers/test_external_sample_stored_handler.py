@@ -14,6 +14,7 @@ from cg.services.events.constants import (
     RETRY_NOTIFICATION_THRESHOLD,
     SAMPLE_INTERNAL_ID_FIELD,
     EventMetadata,
+    EventSequence,
 )
 from cg.services.events.event_handlers import external_sample_stored_handler
 from cg.services.events.event_handlers.external_sample_stored_handler import (
@@ -240,7 +241,11 @@ def test_handle_start_raises_and_notifies(mocker: MockerFixture):
     event_payload = {SAMPLE_INTERNAL_ID_FIELD: "ACC123"}
 
     # GIVEN that the slack notification should be sent out
-    event_metadata = create_autospec(EventMetadata, num_delivered=RETRY_NOTIFICATION_THRESHOLD)
+    event_metadata = create_autospec(
+        EventMetadata,
+        num_delivered=RETRY_NOTIFICATION_THRESHOLD,
+        sequence=EventSequence(consumer=1, stream=1),
+    )
 
     # GIVEN that the starting raises an error
     analysis_starter = create_autospec(AnalysisStarter)
@@ -289,7 +294,7 @@ def test_handle_start_raises_and_notifies(mocker: MockerFixture):
     assert first_call.kwargs["notification"].title == "Failed to start analysis"
     assert (
         first_call.kwargs["notification"].message
-        == f"{EXTERNAL_SAMPLE_STORED_EVENT} failed starting analysis {case.internal_id} triggered by sample ACC123"
+        == f"Message 1: {EXTERNAL_SAMPLE_STORED_EVENT} failed starting analysis {case.internal_id} triggered by sample ACC123"
     )
     assert "Mighty exception!" in first_call.kwargs["notification"].error_text
 

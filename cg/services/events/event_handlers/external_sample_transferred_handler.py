@@ -55,13 +55,15 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
                 recipient=config.slack_webhooks.prod_team,
                 notification=SlackNotification(
                     title="Failed to store an external sample",
-                    message=f"{EXTERNAL_SAMPLE_TRANSFERRED_EVENT} failed for sample {event.sample_internal_id}",
+                    message=f"Message {event_metadata.sequence.stream}: {EXTERNAL_SAMPLE_TRANSFERRED_EVENT} failed for sample {event.sample_internal_id}",
                     error=e,  # type: ignore
                 ),
             )
         raise e
     else:
-        _delete_mirrored_folder(config=config, event=event)
+        _delete_mirrored_folder(
+            config=config, event=event, message_nr=event_metadata.sequence.stream
+        )
 
 
 def _check_for_sequencing_files(event: ExternalSampleTransferredEvent) -> None:
@@ -112,7 +114,9 @@ def _add_sample_files_to_housekeeper(
     housekeeper_api.finalize_file_transactions(files=files, version=version)
 
 
-def _delete_mirrored_folder(config: CGConfig, event: ExternalSampleTransferredEvent) -> None:
+def _delete_mirrored_folder(
+    config: CGConfig, event: ExternalSampleTransferredEvent, message_nr: int
+) -> None:
     try:
         shutil.rmtree(event.cluster_location)
         LOG.info(
@@ -123,7 +127,7 @@ def _delete_mirrored_folder(config: CGConfig, event: ExternalSampleTransferredEv
             recipient=config.slack_webhooks.sysdev_team,
             notification=SlackNotification(
                 title=f"Failed to delete {event.cluster_location}",
-                message=f"{EXTERNAL_SAMPLE_TRANSFERRED_EVENT} succeeded for sample {event.sample_internal_id} but failed to delete mirrored directory at {event.cluster_location}",
+                message=f"Message {message_nr}: {EXTERNAL_SAMPLE_TRANSFERRED_EVENT} succeeded for sample {event.sample_internal_id} but failed to delete mirrored directory at {event.cluster_location}",
                 error=e,  # type: ignore
             ),
         )
