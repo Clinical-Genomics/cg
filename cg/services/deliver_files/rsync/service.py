@@ -31,8 +31,8 @@ from cg.services.deliver_files.rsync.sbatch_commands import (
     ERROR_RSYNC_FUNCTION,
     RSYNC_COMMAND,
 )
+from cg.services.events.constants import ANALYSIS_UPLOADED_SUBJECT
 from cg.services.events.event_publisher import get_publish_command
-from cg.services.events.upload_handler import ANALYSIS_UPLOADED_SUBJECT
 from cg.store.models import Case
 from cg.store.store import Store
 
