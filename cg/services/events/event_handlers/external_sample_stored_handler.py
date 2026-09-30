@@ -53,7 +53,7 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
             if event_metadata.num_delivered == RETRY_NOTIFICATION_THRESHOLD:
                 slack_notification_service.notify(
                     recipient=config.slack_webhooks.prod_team,
-                    notification=SlackNotification(
+                    notification=SlackNotification(  # TODO: Add message ID so that prod can find it
                         title="Failed to start analysis",
                         message=f"{EXTERNAL_SAMPLE_STORED_EVENT} failed starting analysis {case.internal_id} triggered by sample {event.sample_internal_id}",
                         error=e,  # type: ignore
