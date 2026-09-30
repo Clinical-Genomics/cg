@@ -121,6 +121,7 @@ class StoreFastqOrderService(StoreOrderService):
             original_ticket=ticket_id,
             priority=sample.priority,
             sex=sample.sex or SexEnum.unknown,
+            skip_compression=application_version.application.is_external,
             subject_id=sample.subject_id,
             tumour=sample.tumour,
         )
