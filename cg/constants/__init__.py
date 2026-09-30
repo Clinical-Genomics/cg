@@ -7,9 +7,7 @@ from cg.constants.constants import CAPTUREKIT_CANCER_OPTIONS as CAPTUREKIT_CANCE
 from cg.constants.constants import CAPTUREKIT_OPTIONS as CAPTUREKIT_OPTIONS
 from cg.constants.constants import CONTAINER_OPTIONS as CONTAINER_OPTIONS
 from cg.constants.constants import DEFAULT_CAPTURE_KIT as DEFAULT_CAPTURE_KIT
-from cg.constants.constants import (
-    DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD as DNA_WORKFLOWS_WITH_SCOUT_38_UPLOAD,
-)
+from cg.constants.constants import DNA_WORKFLOWS_WITH_RNA_UPLOAD as DNA_WORKFLOWS_WITH_RNA_UPLOAD
 from cg.constants.constants import STATUS_OPTIONS as STATUS_OPTIONS
 from cg.constants.constants import DataDelivery as DataDelivery
 from cg.constants.constants import FileExtensions as FileExtensions

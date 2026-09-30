@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Query
 
-from cg.constants import Workflow
 from cg.store.filters.status_order_filters import filter_orders_by_ticket_id
 from cg.store.models import Order
 from cg.store.store import Store
@@ -12,6 +11,7 @@ def test_filter_orders_by_ticket_no_matching_ticket(base_store: Store, non_exist
     order = Order(
         id=1,
         customer_id=1,
+        name="order",
         ticket_id=1,
     )
     base_store.session.add(order)
@@ -31,6 +31,7 @@ def test_filter_orders_by_ticket_id_matching_ticket(base_store: Store, ticket_id
     order = Order(
         id=1,
         customer_id=1,
+        name="order",
         ticket_id=int(ticket_id),
     )
     base_store.session.add(order)

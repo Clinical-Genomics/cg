@@ -112,7 +112,6 @@ def test_store_available(
     mocker.patch.object(
         HermesApi, "convert_deliverables", return_value=CGDeliverables(**hermes_deliverables)
     )
-    mocker.patch.object(BalsamicAnalysisAPI, "config_case", return_value=None)
 
     # GIVEN a mocked Housekeeper API
     balsamic_context.housekeeper_api_ = real_housekeeper_api

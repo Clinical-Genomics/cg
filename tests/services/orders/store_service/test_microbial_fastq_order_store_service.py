@@ -33,7 +33,7 @@ def test_store_samples(
     assert store._get_query(table=Case).count() == 0
 
     # WHEN storing the order
-    new_samples = store_microbial_fastq_order_service.store_order_data_in_status_db(
+    new_samples: list[Sample] = store_microbial_fastq_order_service.store_order_data_in_status_db(
         order=microbial_fastq_order
     )
 
@@ -48,10 +48,21 @@ def test_store_samples(
     assert case_link.case.data_analysis
     assert case_link.case.data_delivery == DataDelivery.FASTQ
 
-    # THEN there should be one relationship per sample which delivers it
     for sample in new_samples:
+        # THEN there should be one relationship per sample which delivers it
         assert len(sample.links) == 1
         assert sample.links[0].should_deliver_sample
+
+        # THEN the samples should have gotten the correct control values set
+        order_sample = [
+            order_sample
+            for order_sample in microbial_fastq_order.samples
+            if order_sample.name == sample.name
+        ][0]
+        if sample.control:
+            assert order_sample.control == sample.control
+        else:
+            assert order_sample.control == ""
 
 
 @pytest.mark.parametrize(
@@ -88,7 +99,7 @@ def test_create_db_sample_with_lims_status_and_invoice(
 
     # WHEN creating a db sample with the application
     store_order_service._create_db_sample(
-        sample=micro_fastq_sample, order_name="order", customer=customer, ticket_id="1234567"
+        sample=micro_fastq_sample, customer=customer, ticket_id="1234567"
     )
 
     # THEN the sample should be created with LimsStatus DONE if the application was external

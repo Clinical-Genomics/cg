@@ -16,6 +16,7 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.compress import CompressAPI
 from cg.models.compression_data import CompressionData, SampleCompressionData
+from cg.store.store import Store
 from tests.cli.compress.conftest import MockCompressAPI
 from tests.store_helpers import StoreHelpers
 
@@ -147,10 +148,14 @@ def compress_api(
     real_crunchy_api: CrunchyAPI,
     housekeeper_api: HousekeeperAPI,
     project_dir: Path,
+    base_store: Store,
 ) -> Generator[CompressAPI, None, None]:
     """Return Compress API."""
     yield CompressAPI(
-        crunchy_api=real_crunchy_api, hk_api=housekeeper_api, demux_root=project_dir.as_posix()
+        crunchy_api=real_crunchy_api,
+        hk_api=housekeeper_api,
+        demux_root=project_dir.as_posix(),
+        status_db=base_store,
     )
 
 

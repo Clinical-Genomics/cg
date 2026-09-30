@@ -2,6 +2,7 @@ from collections.abc import Generator
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from subprocess import CompletedProcess
+from typing import Callable
 from unittest.mock import create_autospec
 
 import pytest
@@ -108,7 +109,7 @@ def mocked_commands_and_outputs() -> dict:
 
 
 @pytest.fixture
-def mock_run_commands(mocked_commands_and_outputs: dict[str, bytes]):
+def mock_run_commands(mocked_commands_and_outputs: dict[str, bytes]) -> Callable:
     def mock_run(*args, **kwargs):
         command = args[0]
         stdout = b""

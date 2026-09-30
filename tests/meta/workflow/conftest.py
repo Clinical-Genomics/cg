@@ -18,6 +18,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.compression_data import CompressionData
 from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Case, Sample
+from cg.store.store import Store
 from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
@@ -35,10 +36,14 @@ def compress_api(
     real_crunchy_api: CrunchyAPI,
     housekeeper_api: HousekeeperAPI,
     project_dir: Path,
+    base_store: Store,
 ) -> Generator[CompressAPI, None, None]:
     """Return Compress API."""
     yield CompressAPI(
-        crunchy_api=real_crunchy_api, hk_api=housekeeper_api, demux_root=project_dir.as_posix()
+        crunchy_api=real_crunchy_api,
+        hk_api=housekeeper_api,
+        demux_root=project_dir.as_posix(),
+        status_db=base_store,
     )
 
 
@@ -324,17 +329,6 @@ def fixture_mip_analysis_api(
     return analysis_api
 
 
-@pytest.fixture
-def taxprofiler_metrics() -> dict[str, float]:
-    """Return Taxprofiler raw analysis metrics dictionary."""
-    return {
-        "filtering_result_passed_filter_reads": 24810472.0,
-        "reads_mapped": 19014950.0,
-        "total_reads": 12400055,
-        "paired_aligned_none": 1409340,
-    }
-
-
 @pytest.fixture(scope="function")
 def nallo_metrics_deliverables(
     nallo_analysis_dir: Path,
@@ -432,7 +426,7 @@ def nallo_metrics_deliverables(
                 "value": 2.0,
             },
             {
-                "condition": {"norm": "gt", "threshold": 20.0},
+                "condition": {"norm": "ge", "threshold": 20.0},
                 "header": None,
                 "id": "ADM1",
                 "input": "multiqc_data.json",

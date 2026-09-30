@@ -1,5 +1,6 @@
 """Tests for functions of DemultiplexAPI."""
 
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -204,3 +205,18 @@ def test_remove_demultiplexing_output_directory(
     assert not demultiplexing_api.demultiplexed_run_dir_path(
         novaseq_6000_post_1_5_kits_flow_cell
     ).exists()
+
+
+def test_get_run_name(tmp_bcl_convert_flow_cell: IlluminaRunDirectoryData):
+    # GIVEN a flow cell dir
+
+    # GIVEN a timestamp
+    timestamp: str = datetime.now().strftime("%Y_%m_%d_%H%M%S")
+
+    # WHEN getting the run name
+    run_name: str = DemultiplexingAPI.get_run_name(
+        sequencing_run=tmp_bcl_convert_flow_cell, timestamp=timestamp
+    )
+
+    # THEN the run_name should look as expected
+    assert run_name == f"{tmp_bcl_convert_flow_cell.id}_demultiplex_{timestamp}"

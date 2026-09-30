@@ -52,6 +52,7 @@ def test_post_processing(
         catch_exceptions=False,
     )
 
+    # THEN the post-processing was successful
     assert result.exit_code == 0
 
     # THEN a PacbioSequencingRun was persisted with the parsed data

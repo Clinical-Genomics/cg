@@ -9,12 +9,14 @@ from tests.store_helpers import StoreHelpers
 def test_get_order_by_ticket_id_strict_success(store: Store, helpers: StoreHelpers):
     # GIVEN a store with two orders with different ticket IDs
     order_1: Order = store.add_order(
-        ticket_id=123,
         customer=helpers.ensure_customer(store),
+        name="order_1",
+        ticket_id=123,
     )
     order_2: Order = store.add_order(
-        ticket_id=456,
         customer=helpers.ensure_customer(store),
+        name="order_2",
+        ticket_id=456,
     )
     store.add_multiple_items_to_store([order_1, order_2])
 

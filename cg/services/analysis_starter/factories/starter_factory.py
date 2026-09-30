@@ -68,6 +68,7 @@ class AnalysisStarterFactory:
                 hk_api=self.housekeeper_api,
                 crunchy_api=self.cg_config.crunchy_api,
                 demux_root=self.cg_config.run_instruments.illumina.demultiplexed_runs_dir,
+                status_db=self.store,
             )
             return FastqFetcher(
                 compress_api=compress_api,

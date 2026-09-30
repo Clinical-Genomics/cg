@@ -11,6 +11,7 @@ from cg.store.crud.read import ReadHandler
 from cg.store.models import (
     Analysis,
     Case,
+    ExternalSample,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
     Order,
@@ -149,3 +150,12 @@ class UpdateMixin(ReadHandler):
         sample: Sample = self.get_sample_by_internal_id_strict(internal_id)
         sample.lims_status = lims_status
         return sample
+
+    def update_external_sample(
+        self, customer_id: int, sample_name: str, transferred_at: datetime
+    ) -> ExternalSample:
+        external_sample: ExternalSample = self.get_external_sample_strict(
+            customer_id=customer_id, sample_name=sample_name
+        )
+        external_sample.transferred_at = transferred_at
+        return external_sample

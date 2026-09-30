@@ -33,6 +33,7 @@ def store(context: CGConfig):
         hk_api=housekeeper_api,
         crunchy_api=crunchy_api,
         demux_root=context.run_instruments.illumina.sequencing_runs_dir,
+        status_db=context.status_db,
     )
     context.meta_apis["compress_api"] = compress_api
 

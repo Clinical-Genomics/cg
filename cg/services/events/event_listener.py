@@ -11,19 +11,25 @@ from nats.aio.client import Client
 from nats.aio.msg import Msg
 from nats.js import JetStreamContext
 
-from cg.models.cg_config import NatsConfig
-
 LOG: Logger = logging.getLogger(__name__)
 
 
 class EventListener:
-    def __init__(self, config: NatsConfig):
-        self.ca_cert_path: Path = config.listener.ca_cert_path
-        self.client_cert: Path = config.listener.client_cert_path
-        self.client_key: Path = config.listener.client_key_path
-        self.server: str = config.server
-        self.stream = config.stream
-        self.token: str = config.listener.token_path.read_text().strip()
+    def __init__(
+        self,
+        nats_server: str,
+        nats_stream: str,
+        listener_ca_cert_path: str,
+        listener_client_cert_path: str,
+        listener_client_key_path: str,
+        listener_token_path: str,
+    ) -> None:
+        self.ca_cert_path = Path(listener_ca_cert_path)
+        self.client_cert = Path(listener_client_cert_path)
+        self.client_key = Path(listener_client_key_path)
+        self.server: str = nats_server
+        self.stream = nats_stream
+        self.token: str = Path(listener_token_path).read_text().strip()
 
         self._handlers: dict[str, Callable] = {}
 

@@ -2,6 +2,7 @@ from cg.constants import Workflow
 from cg.store.models import Case
 
 REMINDER_TO_DOWNLOAD_MESSAGE = "The files will be kept on the server for 30 days before being automatically removed. Please make sure to download them in time."
+BEST_REGARDS_MESSAGE = "Best regards,\nClinical Genomics"
 
 
 def get_caesar_delivery_path(case: Case) -> str:

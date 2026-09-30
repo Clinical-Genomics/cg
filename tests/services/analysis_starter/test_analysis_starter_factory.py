@@ -210,6 +210,7 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
         hk_api=cg_config.housekeeper_api,
         crunchy_api=cg_config.crunchy_api,
         demux_root=cg_config.run_instruments.illumina.demultiplexed_runs_dir,
+        status_db=cg_config.status_db,
     )
 
     # THEN the AnalysisStarter should have a correct Store

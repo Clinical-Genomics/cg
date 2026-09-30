@@ -48,7 +48,13 @@ class SlurmAPI:
     def generate_sbatch_header(sbatch_parameters: Sbatch) -> str:
         header_params: dict[str, Any] = sbatch_parameters.model_dump()
         optional_headers: str = _generate_optional_headers(
-            [sbatch_parameters.exclude, sbatch_parameters.dependency]
+            [
+                sbatch_parameters.exclude,
+                sbatch_parameters.dependency,
+                sbatch_parameters.partition,
+                sbatch_parameters.chdir,
+                sbatch_parameters.cpus_per_task,
+            ]
         )
 
         return SBATCH_HEADER_TEMPLATE.format(**header_params, optional_headers=optional_headers)
@@ -67,7 +73,7 @@ class SlurmAPI:
     @staticmethod
     def write_sbatch_file(sbatch_content: str, sbatch_path: Path, dry_run: bool) -> None:
         if dry_run:
-            LOG.info(f"Write sbatch content to path {sbatch_path}: \n{sbatch_content}")
+            LOG.debug(f"Write sbatch content to path {sbatch_path}: \n{sbatch_content}")
             return
         LOG.debug(f"Write sbatch content {sbatch_content} to {sbatch_path}")
         with open(sbatch_path, mode="w+t") as sbatch_file:

@@ -45,6 +45,8 @@ HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]
 
 HK_DELIVERY_REPORT_TAG = "delivery-report"
 
+EXTERNAL_DATA_TAG = "external"
+
 
 class HermesFileTag(StrEnum):
     """Tags for hermes."""
@@ -214,6 +216,9 @@ WORKFLOW_PROTECTED_TAGS = {
         ["multiqc-json"],
         ["gisaid-log"],
         ["gisaid-csv"],
+    ],
+    Workflow.NALLO: [
+        [HermesFileTag.LONG_TERM_STORAGE],
     ],
     Workflow.RAREDISEASE: [
         [HermesFileTag.LONG_TERM_STORAGE],

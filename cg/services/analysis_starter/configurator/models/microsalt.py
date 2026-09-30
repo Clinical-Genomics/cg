@@ -28,10 +28,13 @@ class MicrosaltCaseConfig(CaseConfig):
     config_file: str
     environment: str
     fastq_directory: str
+    pipeline_config_path: str
     workflow: Workflow = Workflow.MICROSALT
 
     def get_start_command(self) -> str:
         return (
             "{conda_binary} run --name {environment} "
-            "{binary} analyse {config_file} --input {fastq_directory}".format(**self.model_dump())
+            "{binary} --config {pipeline_config_path} analyse {config_file} --input {fastq_directory}".format(
+                **self.model_dump()
+            )
         )

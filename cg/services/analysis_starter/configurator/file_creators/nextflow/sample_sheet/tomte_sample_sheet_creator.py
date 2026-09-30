@@ -1,6 +1,7 @@
 from typing import Iterator
 
 from cg.constants.constants import Strandedness
+from cg.exc import SampleSheetContentError
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowFastqSampleSheetCreator,
 )
@@ -17,6 +18,8 @@ class TomteSampleSheetCreator(NextflowFastqSampleSheetCreator):
             content.extend(
                 self._get_sample_sheet_content_per_sample(case_id=case_id, sample=sample)
             )
+        if content == [HEADERS]:
+            raise SampleSheetContentError(f"Sample sheet for case {case_id} is empty.")
         return content
 
     def _get_sample_sheet_content_per_sample(self, case_id: str, sample: Sample) -> list[list[str]]:

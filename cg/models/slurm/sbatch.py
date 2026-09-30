@@ -19,6 +19,9 @@ class Sbatch(BaseModel):
     number_tasks: int | None = None
     memory: int | None = None
     dependency: str | None = None
+    partition: str | None = None
+    chdir: str | None = None
+    cpus_per_task: str | None = None
 
 
 class SbatchDragen(Sbatch):

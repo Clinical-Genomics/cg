@@ -20,9 +20,7 @@ from cg.store.filters.status_case_filters import (
     filter_cases_with_loqusdb_supported_workflow,
     filter_cases_with_scout_data_delivery,
     filter_cases_with_workflow,
-    filter_inactive_analysis_cases,
     filter_newer_cases_by_order_date,
-    filter_older_cases_by_creation_date,
     filter_report_supported_data_delivery_cases,
     filter_running_cases,
 )
@@ -858,115 +856,6 @@ def test_filter_report_supported_data_delivery_cases(
     assert test_invalid_case not in cases
 
 
-def test_filter_inactive_analysis_cases(base_store: Store, helpers: StoreHelpers):
-    """Test that an inactive case is returned when there is a case that has no action set."""
-
-    # GIVEN a case
-    test_case = helpers.add_case(base_store)
-
-    # GIVEN a cases Query
-    cases: Query = base_store._get_query(table=Case)
-
-    # WHEN getting completed cases
-    cases: Query = filter_inactive_analysis_cases(cases=cases)
-
-    # ASSERT that cases is a query
-    assert isinstance(cases, Query)
-
-    # THEN cases should contain the test case
-    assert cases
-
-    assert cases.all()[0].internal_id == test_case.internal_id
-
-
-def test_filter_inactive_analysis_cases_when_on_hold(base_store: Store, helpers: StoreHelpers):
-    """Test that an inactivated case is returned when there is a case that has action set to hold."""
-
-    # GIVEN a case
-    test_case = helpers.add_case(store=base_store, action=CaseActions.HOLD)
-
-    # GIVEN a cases Query
-    cases: Query = base_store._get_query(table=Case)
-
-    # WHEN getting completed cases
-    cases: Query = filter_inactive_analysis_cases(cases=cases)
-
-    # ASSERT that cases is a query
-    assert isinstance(cases, Query)
-
-    # THEN cases should contain the test case
-    assert cases
-
-    assert cases[0].internal_id == test_case.internal_id
-
-
-def test_filter_inactive_analysis_cases_when_not_completed(
-    base_store: Store, helpers: StoreHelpers
-):
-    """Test that no case is returned when there is a case that, has an action set to running."""
-
-    # GIVEN a case
-    helpers.add_case(store=base_store, action=CaseActions.RUNNING)
-
-    # GIVEN a cases Query
-    cases: Query = base_store._get_query(table=Case)
-
-    # WHEN getting completed cases
-    cases: Query = filter_inactive_analysis_cases(cases=cases)
-
-    # ASSERT that cases is a query
-    assert isinstance(cases, Query)
-
-    # THEN cases should not contain the test case
-    assert not cases.all()
-
-
-def test_get_old_cases(base_store: Store, helpers: StoreHelpers, timestamp_in_2_weeks: datetime):
-    """Test that an old case is returned when a future date is supplied."""
-
-    # GIVEN a case
-    test_case = helpers.add_case(base_store)
-
-    # GIVEN a cases Query
-    cases: Query = base_store._get_query(table=Case)
-
-    # WHEN getting completed cases
-    cases: Query = filter_older_cases_by_creation_date(
-        cases=cases, creation_date=timestamp_in_2_weeks
-    )
-
-    # ASSERT that cases is a query
-    assert isinstance(cases, Query)
-
-    # THEN cases should contain the test case
-    assert cases
-
-    assert cases.all()[0].internal_id == test_case.internal_id
-
-
-def test_get_old_cases_none_when_all_cases_are_too_new(
-    base_store: Store, helpers: StoreHelpers, timestamp_yesterday: datetime
-):
-    """No cases are returned when all cases in the store are too new."""
-
-    # GIVEN a case
-    helpers.add_case(base_store)
-
-    # GIVEN a cases Query
-    cases: Query = base_store._get_query(table=Case)
-
-    # WHEN getting completed cases
-    cases: Query = filter_older_cases_by_creation_date(
-        cases=cases, creation_date=timestamp_yesterday
-    )
-
-    # ASSERT that cases is a query
-    assert isinstance(cases, Query)
-
-    # THEN cases should not contain the test case
-    assert not cases.all()
-
-
 def test_filter_case_by_existing_entry_id(store_with_multiple_cases_and_samples: Store):
     # GIVEN a store containing a case with an entry id
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
@@ -1330,43 +1219,3 @@ def test_filter_newer_cases_by_order_date_some_newer_cases(
     assert filtered_cases.count() > 0
     for case in filtered_cases:
         assert case.ordered_at > intermediate_order_date
-
-
-def test_get_older_cases_by_created_date_no_older_cases(
-    store_with_multiple_cases_and_samples: Store,
-):
-    """Test that no cases are returned when there are no cases with an older creation date."""
-    # GIVEN a store containing cases with different creation dates
-    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
-    oldest_created_date = min(case.created_at for case in cases_query)
-
-    # WHEN filtering cases by a date that is later than the oldest order date
-    filtered_cases: Query = filter_older_cases_by_creation_date(
-        cases=cases_query, creation_date=oldest_created_date
-    )
-
-    # THEN the query should return no cases
-    assert filtered_cases.count() == 0
-
-
-def test_filter_runningfilter_older_cases_by_creation_date_some_newer_cases(
-    store_with_multiple_cases_and_samples: Store,
-):
-    """Test that cases with creation dates older than the given date are returned."""
-    # GIVEN a store containing cases with different creation dates
-    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
-    min_creation_date = min(case.created_at for case in cases_query)
-    max_creation_date = max(case.created_at for case in cases_query)
-
-    # GIVEN an intermediate date between the minimum and maximum creation dates
-    intermediate_creation_date = min_creation_date + (max_creation_date - min_creation_date) / 2
-
-    # WHEN filtering cases by a date that is earlier than some creation dates
-    filtered_cases: Query = filter_older_cases_by_creation_date(
-        cases=cases_query, creation_date=intermediate_creation_date
-    )
-
-    # THEN the query should return the cases with creation dates older than the given date
-    assert filtered_cases.count() > 0
-    for case in filtered_cases:
-        assert case.created_at < intermediate_creation_date

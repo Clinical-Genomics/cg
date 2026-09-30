@@ -67,6 +67,7 @@ def create_app():
 def _load_config(app: Flask):
     app.config.update(app_config.model_dump())
     app.secret_key = app_config.cg_secret_key
+    app.config["FLASK_ADMIN_FLUID_LAYOUT"] = True
 
 
 def _configure_extensions(app: Flask):
