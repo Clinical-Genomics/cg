@@ -183,22 +183,23 @@ class NalloLoadConfig(ScoutLoadConfig):
 
 
 class RarediseaseLoadConfig(ScoutLoadConfig):
+    custom_images: CustomImages | None = None
     madeline: str | None = None
     peddy_check: str | None = None
     peddy_ped: str | None = None
     peddy_sex: str | None = None
+    saltshaker_report: str | None = None
     samples: list[ScoutRarediseaseIndividual] = []
-    custom_images: CustomImages | None = None
     smn_tsv: str | None = None
     vcf_mei: str | None = None
     vcf_mei_research: str | None = None
     vcf_snv: Annotated[str | None, AfterValidator(field_not_none)] = None
-    vcf_snv_research: Annotated[str | None, AfterValidator(field_not_none)] = None
     vcf_snv_mt: str | None = None
+    vcf_snv_research: Annotated[str | None, AfterValidator(field_not_none)] = None
     vcf_snv_research_mt: str | None = None
+    vcf_str: str | None = None
     vcf_sv: Annotated[str | None, AfterValidator(field_not_none)] = None
     vcf_sv_research: Annotated[str | None, AfterValidator(field_not_none)] = None
-    vcf_str: str | None = None
 
 
 class RnafusionLoadConfig(ScoutLoadConfig):
