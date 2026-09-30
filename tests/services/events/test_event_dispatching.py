@@ -59,8 +59,9 @@ def test_dispatch_no_handler():
         CGConfig,
     )
 
-    # GIVEN an event payload
+    # GIVEN an event payload and metadata
     event_payload = {"key": "value"}
+    event_metadata = {}
 
     # GIVEN an event name that doesn't have a handler
     event_name = "no-handler-event"
@@ -68,5 +69,9 @@ def test_dispatch_no_handler():
     # WHEN calling dispatch
     # THEN it doesn't raise
     event_dispatching.dispatch(
-        config=cg_config, event_name=event_name, event_payload=event_payload, event_handlers={}
+        config=cg_config,
+        event_name=event_name,
+        event_payload=event_payload,
+        event_handlers={},
+        event_metadata=event_metadata,
     )
