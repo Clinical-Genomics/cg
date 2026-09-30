@@ -292,3 +292,50 @@ def test_handle_start_raises_and_notifies(mocker: MockerFixture):
         == f"{EXTERNAL_SAMPLE_STORED_EVENT} failed starting analysis {case.internal_id} triggered by sample ACC123"
     )
     assert "Mighty exception!" in first_call.kwargs["notification"].error_text
+
+
+def test_handle_start_raises_silently(mocker: MockerFixture):
+    # GIVEN a payload
+    event_payload = {SAMPLE_INTERNAL_ID_FIELD: "ACC123"}
+
+    # GIVEN that the slack notification should not be sent out
+    event_metadata = create_autospec(EventMetadata, num_delivered=1)
+
+    # GIVEN that the starting raises an error
+    analysis_starter = create_autospec(AnalysisStarter)
+    analysis_starter.start = Mock(side_effect=Exception("Mighty exception!"))
+
+    mocker.patch.object(
+        AnalysisStarterFactory, "get_analysis_starter_for_case", return_value=analysis_starter
+    )
+
+    # GIVEN a sample that's connected to a case with only external and stored samples
+    status_db: Store = create_autospec(Store)
+    case = create_autospec(Case, internal_id="heftyhen")
+    sample = create_autospec(Sample, case_that_delivers=case, is_external=True)
+    case.samples = [sample]
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=sample)
+    housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    housekeeper_api.bundle = Mock(return_value=create_autospec(Bundle))
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        status_db=status_db,
+        housekeeper_api=housekeeper_api,
+        slack_webhooks=SlackWebhooks(
+            prod_team="https://prod.team", sysdev_team="https://sysdev.team"
+        ),
+    )
+
+    notification_mock = mocker.patch.object(slack_notification_service, "notify")
+
+    # WHEN handling the event
+    # THEN the error should be raised
+    with pytest.raises(Exception):
+        external_sample_stored_handler.handle(
+            config=cg_config,
+            event_payload=event_payload,
+            event_metadata=event_metadata,
+        )
+
+    # THEN a Slack notification should not have been sent out to prodbioinfo
+    notification_mock.assert_not_called()

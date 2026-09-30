@@ -3,7 +3,11 @@ from unittest.mock import create_autospec
 from pytest_mock import MockerFixture
 
 from cg.models.cg_config import CGConfig
-from cg.services.events.constants import CUSTOMER_INTERNAL_ID_FIELD, SAMPLE_NAME_ARRAY_FIELD
+from cg.services.events.constants import (
+    CUSTOMER_INTERNAL_ID_FIELD,
+    SAMPLE_NAME_ARRAY_FIELD,
+    EventMetadata,
+)
 from cg.services.events.event_handlers import external_samples_ordered_handler
 from cg.services.events.event_handlers.external_samples_ordered_handler import (
     transfer_to_cluster_service,
@@ -37,7 +41,9 @@ def test_handle_trigger_transfer_only_for_stored_sample(mocker: MockerFixture):
     transfer_sample_mock = mocker.patch.object(transfer_to_cluster_service, "transfer_sample")
 
     # WHEN handling the event
-    external_samples_ordered_handler.handle(config=cg_config, event_payload=event_payload)
+    external_samples_ordered_handler.handle(
+        config=cg_config, event_payload=event_payload, event_metadata=create_autospec(EventMetadata)
+    )
 
     # THEN the transfer for the sample in the ExternalSample table has been triggered once
     transfer_sample_mock.assert_called_once_with(cg_config=cg_config, sample=sample)
