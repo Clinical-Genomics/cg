@@ -1,8 +1,6 @@
 import logging
-from datetime import datetime
 from typing import Protocol
-
-from pydantic import BaseModel
+from cg.services.events.constants import EventMetadata
 
 from cg.models.cg_config import CGConfig
 from cg.services.events.constants import (
@@ -19,21 +17,6 @@ from cg.services.events.event_handlers import (
 )
 
 LOG = logging.getLogger(__name__)
-
-
-class EventSequence(BaseModel):
-    consumer: int
-    stream: int
-
-
-class EventMetadata(BaseModel):
-    sequence: EventSequence
-    num_pending: int
-    num_delivered: int
-    timestamp: datetime
-    stream: str
-    consumer: str
-
 
 class EventHandler(Protocol):
     def __call__(
