@@ -6,15 +6,12 @@ from pydantic import ValidationError
 from pytest_mock import MockerFixture
 
 from cg.models.cg_config import CGConfig
-from cg.services.events.constants import (
-    CUSTOMER_INTERNAL_ID_FIELD,
-    SAMPLE_NAME_FIELD,
-    EventMetadata,
-)
+from cg.services.events.constants import CUSTOMER_INTERNAL_ID_FIELD, SAMPLE_NAME_FIELD
 from cg.services.events.event_handlers import external_sample_uploaded_handler
 from cg.services.events.event_handlers.external_sample_uploaded_handler import (
     transfer_to_cluster_service,
 )
+from cg.services.events.event_metadata import EventMetadata
 from cg.store.models import Customer, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock

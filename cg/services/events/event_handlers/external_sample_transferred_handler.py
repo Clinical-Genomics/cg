@@ -17,8 +17,8 @@ from cg.services.events.constants import (
     EXTERNAL_SAMPLE_TRANSFERRED_EVENT,
     RETRY_NOTIFICATION_THRESHOLD,
     SAMPLE_INTERNAL_ID_FIELD,
-    EventMetadata,
 )
+from cg.services.events.event_metadata import EventMetadata
 from cg.services.slack_notification_service import SlackNotification
 from cg.store.models import Sample
 
@@ -62,7 +62,7 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
         raise e
     else:
         _delete_mirrored_folder(
-            config=config, event=event, message_nr=event_metadata.sequence.stream
+            config=config, event=event, message_id=event_metadata.sequence.stream
         )
 
 
@@ -115,7 +115,7 @@ def _add_sample_files_to_housekeeper(
 
 
 def _delete_mirrored_folder(
-    config: CGConfig, event: ExternalSampleTransferredEvent, message_nr: int
+    config: CGConfig, event: ExternalSampleTransferredEvent, message_id: int
 ) -> None:
     try:
         shutil.rmtree(event.cluster_location)
@@ -127,7 +127,7 @@ def _delete_mirrored_folder(
             recipient=config.slack_webhooks.sysdev_team,
             notification=SlackNotification(
                 title=f"Failed to delete {event.cluster_location}",
-                message=f"Message {message_nr}: {EXTERNAL_SAMPLE_TRANSFERRED_EVENT} succeeded for sample {event.sample_internal_id} but failed to delete mirrored directory at {event.cluster_location}",
+                message=f"Message {message_id}: {EXTERNAL_SAMPLE_TRANSFERRED_EVENT} succeeded for sample {event.sample_internal_id} but failed to delete mirrored directory at {event.cluster_location}",
                 error=e,  # type: ignore
             ),
         )

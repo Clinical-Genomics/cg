@@ -3,15 +3,12 @@ from unittest.mock import create_autospec
 from pytest_mock import MockerFixture
 
 from cg.models.cg_config import CGConfig
-from cg.services.events.constants import (
-    CUSTOMER_INTERNAL_ID_FIELD,
-    SAMPLE_NAME_ARRAY_FIELD,
-    EventMetadata,
-)
+from cg.services.events.constants import CUSTOMER_INTERNAL_ID_FIELD, SAMPLE_NAME_ARRAY_FIELD
 from cg.services.events.event_handlers import external_samples_ordered_handler
 from cg.services.events.event_handlers.external_samples_ordered_handler import (
     transfer_to_cluster_service,
 )
+from cg.services.events.event_metadata import EventMetadata
 from cg.store.models import ExternalSample, Sample
 from cg.store.store import Store
 

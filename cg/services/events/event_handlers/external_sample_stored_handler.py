@@ -12,8 +12,8 @@ from cg.services.events.constants import (
     EXTERNAL_SAMPLE_STORED_EVENT,
     RETRY_NOTIFICATION_THRESHOLD,
     SAMPLE_INTERNAL_ID_FIELD,
-    EventMetadata,
 )
+from cg.services.events.event_metadata import EventMetadata
 from cg.services.slack_notification_service import SlackNotification
 from cg.store.models import Case, Sample
 from cg.store.store import Store

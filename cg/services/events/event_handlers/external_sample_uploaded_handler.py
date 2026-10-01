@@ -4,11 +4,8 @@ from pydantic import BaseModel, Field
 
 from cg.models.cg_config import LOG, CGConfig
 from cg.services import transfer_to_cluster_service
-from cg.services.events.constants import (
-    CUSTOMER_INTERNAL_ID_FIELD,
-    SAMPLE_NAME_FIELD,
-    EventMetadata,
-)
+from cg.services.events.constants import CUSTOMER_INTERNAL_ID_FIELD, SAMPLE_NAME_FIELD
+from cg.services.events.event_metadata import EventMetadata
 from cg.store.models import (
     SAMPLE_NAME_MAXIMUM_LENGTH,
     SAMPLE_NAME_MINIMUM_LENGTH,

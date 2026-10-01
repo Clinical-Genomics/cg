@@ -1,6 +1,3 @@
-from pydantic import BaseModel
-from datetime import datetime
-
 # Event names
 EXTERNAL_SAMPLES_ORDERED_EVENT = "external.samples_ordered"
 EXTERNAL_SAMPLE_STORED_EVENT = "external.sample_storage_completed"
@@ -15,19 +12,3 @@ SAMPLE_NAME_FIELD = "status_db.sample.name"
 
 
 RETRY_NOTIFICATION_THRESHOLD = 3
-
-
-class EventSequence(BaseModel):
-    consumer: int
-    stream: int
-
-
-class EventMetadata(BaseModel):
-    # See link for more information
-    # https://nats-io.github.io/nats.py/modules.html#nats.aio.msg.Msg.Metadata
-    sequence: EventSequence
-    num_pending: int
-    num_delivered: int
-    timestamp: datetime
-    stream: str
-    consumer: str

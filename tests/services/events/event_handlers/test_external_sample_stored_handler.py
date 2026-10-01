@@ -13,13 +13,12 @@ from cg.services.events.constants import (
     EXTERNAL_SAMPLE_STORED_EVENT,
     RETRY_NOTIFICATION_THRESHOLD,
     SAMPLE_INTERNAL_ID_FIELD,
-    EventMetadata,
-    EventSequence,
 )
 from cg.services.events.event_handlers import external_sample_stored_handler
 from cg.services.events.event_handlers.external_sample_stored_handler import (
     slack_notification_service,
 )
+from cg.services.events.event_metadata import EventMetadata, EventSequence
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock

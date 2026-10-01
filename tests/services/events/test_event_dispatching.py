@@ -3,8 +3,8 @@ from unittest.mock import create_autospec
 
 from cg.models.cg_config import CGConfig
 from cg.services.events import event_dispatching
-from cg.services.events.constants import EventMetadata, EventSequence
 from cg.services.events.event_dispatching import EventHandler
+from cg.services.events.event_metadata import EventMetadata, EventSequence
 
 
 def test_dispatch_existing_handler():

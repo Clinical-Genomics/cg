@@ -7,7 +7,6 @@ from cg.services.events.constants import (
     EXTERNAL_SAMPLE_TRANSFERRED_EVENT,
     EXTERNAL_SAMPLE_UPLOADED_EVENT,
     EXTERNAL_SAMPLES_ORDERED_EVENT,
-    EventMetadata,
 )
 from cg.services.events.event_handlers import (
     external_sample_stored_handler,
@@ -15,6 +14,7 @@ from cg.services.events.event_handlers import (
     external_sample_uploaded_handler,
     external_samples_ordered_handler,
 )
+from cg.services.events.event_metadata import EventMetadata
 
 LOG = logging.getLogger(__name__)
 
