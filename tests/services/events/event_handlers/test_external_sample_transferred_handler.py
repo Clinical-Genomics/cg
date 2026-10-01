@@ -13,6 +13,7 @@ from cg.models.cg_config import CGConfig, NatsConfig, SlackWebhooks
 from cg.services.events.constants import (
     EXTERNAL_SAMPLE_STORED_EVENT,
     EXTERNAL_SAMPLE_TRANSFERRED_EVENT,
+    RETRY_NOTIFICATION_THRESHOLD,
     SAMPLE_INTERNAL_ID_FIELD,
 )
 from cg.services.events.event_handlers import external_sample_transferred_handler
@@ -20,6 +21,7 @@ from cg.services.events.event_handlers.external_sample_transferred_handler impor
     shutil,
     slack_notification_service,
 )
+from cg.services.events.event_metadata import EventMetadata, EventSequence
 from cg.store.models import Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
@@ -70,7 +72,11 @@ def test_handle_success(mocker: MockerFixture):
     rmtree_mock = mocker.patch.object(shutil, "rmtree")
 
     # WHEN calling handle
-    external_sample_transferred_handler.handle(config=config, event_payload=event_payload)
+    external_sample_transferred_handler.handle(
+        config=config,
+        event_payload=event_payload,
+        event_metadata=create_autospec(EventMetadata, sequence=EventSequence(consumer=1, stream=1)),
+    )
 
     # THEN the external sample transferred_at was set
     expected_datetime = datetime(year=2026, month=8, day=31, hour=14, minute=41)
@@ -108,7 +114,7 @@ def test_handle_success(mocker: MockerFixture):
     rmtree_mock.assert_called_once_with(Path("/path/to/mirrored/sample"))
 
 
-def test_handle_failure(mocker: MockerFixture):
+def test_handle_failure_and_notifies(mocker: MockerFixture):
     # GIVEN a CG config
     config: CGConfig = create_autospec(
         CGConfig,
@@ -130,13 +136,22 @@ def test_handle_failure(mocker: MockerFixture):
         "transfer_completed_at": "2026-08-31T14:41:00",
     }
 
+    # GIVEN a valid event metadata that triggers a notification
+    metadata = create_autospec(
+        EventMetadata,
+        num_delivered=RETRY_NOTIFICATION_THRESHOLD,
+        sequence=EventSequence(consumer=1, stream=1),
+    )
+
     # GIVEN a Slack notification service
     slack_notification_service_mock = mocker.patch.object(slack_notification_service, "notify")
 
     # WHEN calling handle
     # THEN a CG error should be raised
     with pytest.raises(CgError):
-        external_sample_transferred_handler.handle(config=config, event_payload=event_payload)
+        external_sample_transferred_handler.handle(
+            config=config, event_payload=event_payload, event_metadata=metadata
+        )
 
     # THEN a Slack notification should have been sent out to prodbioinfo
     calls = slack_notification_service_mock.call_args_list
@@ -145,9 +160,48 @@ def test_handle_failure(mocker: MockerFixture):
     assert first_call.kwargs["notification"].title == "Failed to store an external sample"
     assert (
         first_call.kwargs["notification"].message
-        == f"{EXTERNAL_SAMPLE_TRANSFERRED_EVENT} failed for sample ACC123"
+        == f"Message 1: {EXTERNAL_SAMPLE_TRANSFERRED_EVENT} failed for sample ACC123"
     )
     assert "No sequencing files" in first_call.kwargs["notification"].error_text
+
+
+def test_handle_failure_without_notification(mocker: MockerFixture):
+    # GIVEN a CG config
+    config: CGConfig = create_autospec(
+        CGConfig,
+        status_db=create_autospec(Store),
+        housekeeper_api=create_autospec(HousekeeperAPI),
+        nats=create_autospec(NatsConfig),
+        slack_webhooks=SlackWebhooks(
+            prod_team="https://prod.team", sysdev_team="https://sysdev.team"
+        ),
+    )
+
+    # GIVEN that there is no *.bam or *.fastq.gz in the cluster location
+    mocker.patch.object(Path, "glob", return_value=[])
+
+    # GIVEN a valid event payload
+    event_payload = {
+        SAMPLE_INTERNAL_ID_FIELD: "ACC123",
+        "cluster_location": "/cluster_location",
+        "transfer_completed_at": "2026-08-31T14:41:00",
+    }
+
+    # GIVEN a valid event metadata that does not trigger a notification
+    metadata = create_autospec(EventMetadata, num_delivered=1)
+
+    # GIVEN a Slack notification service
+    slack_notification_service_mock = mocker.patch.object(slack_notification_service, "notify")
+
+    # WHEN calling handle
+    # THEN a CG error should be raised
+    with pytest.raises(CgError):
+        external_sample_transferred_handler.handle(
+            config=config, event_payload=event_payload, event_metadata=metadata
+        )
+
+    # THEN a Slack notification should not have been sent out to prodbioinfo
+    slack_notification_service_mock.assert_not_called()
 
 
 def test_storing_succeeds_deletion_fails(mocker: MockerFixture):
@@ -200,7 +254,11 @@ def test_storing_succeeds_deletion_fails(mocker: MockerFixture):
     notify_mock = mocker.patch.object(slack_notification_service, "notify")
 
     # WHEN calling handle
-    external_sample_transferred_handler.handle(config=config, event_payload=event_payload)
+    external_sample_transferred_handler.handle(
+        config=config,
+        event_payload=event_payload,
+        event_metadata=create_autospec(EventMetadata, sequence=EventSequence(consumer=1, stream=1)),
+    )
 
     # THEN the external sample transferred_at was set
     expected_datetime = datetime(year=2026, month=8, day=31, hour=14, minute=41)
@@ -248,6 +306,6 @@ def test_storing_succeeds_deletion_fails(mocker: MockerFixture):
     )
     assert (
         first_call.kwargs["notification"].message
-        == f"{EXTERNAL_SAMPLE_TRANSFERRED_EVENT} succeeded for sample ACC123 but failed to delete mirrored directory at {event_payload['cluster_location']}"
+        == f"Message 1: {EXTERNAL_SAMPLE_TRANSFERRED_EVENT} succeeded for sample ACC123 but failed to delete mirrored directory at {event_payload['cluster_location']}"
     )
     assert "CATASTROPHE" in first_call.kwargs["notification"].error_text

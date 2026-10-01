@@ -15,8 +15,10 @@ from cg.services.events import event_publisher
 from cg.services.events.constants import (
     EXTERNAL_SAMPLE_STORED_EVENT,
     EXTERNAL_SAMPLE_TRANSFERRED_EVENT,
+    RETRY_NOTIFICATION_THRESHOLD,
     SAMPLE_INTERNAL_ID_FIELD,
 )
+from cg.services.events.event_metadata import EventMetadata
 from cg.services.slack_notification_service import SlackNotification
 from cg.store.models import Sample
 
@@ -29,12 +31,13 @@ class ExternalSampleTransferredEvent(BaseModel):
     transfer_completed_at: datetime
 
 
-def handle(config: CGConfig, event_payload: dict) -> None:
+def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata) -> None:
     """
     Add all sequencing files for the sample in the payload to the Housekeeper database
     and copy them to the corresponding Housekeeper bundle directory. Also update the entry for the
     sample in the ExternalSample table with the datetime of the transfer.
     """
+    LOG.debug(f"Received event payload {event_payload} with metadata {event_metadata.model_dump()}")
     event = ExternalSampleTransferredEvent.model_validate(event_payload)
     try:
         _check_for_sequencing_files(event)
@@ -47,17 +50,20 @@ def handle(config: CGConfig, event_payload: dict) -> None:
             event_payload={SAMPLE_INTERNAL_ID_FIELD: event.sample_internal_id},
         )
     except Exception as e:
-        slack_notification_service.notify(
-            recipient=config.slack_webhooks.prod_team,
-            notification=SlackNotification(
-                title="Failed to store an external sample",
-                message=f"{EXTERNAL_SAMPLE_TRANSFERRED_EVENT} failed for sample {event.sample_internal_id}",
-                error=e,  # type: ignore
-            ),
-        )
+        if event_metadata.num_delivered == RETRY_NOTIFICATION_THRESHOLD:
+            slack_notification_service.notify(
+                recipient=config.slack_webhooks.prod_team,
+                notification=SlackNotification(
+                    title="Failed to store an external sample",
+                    message=f"Message {event_metadata.sequence.stream}: {EXTERNAL_SAMPLE_TRANSFERRED_EVENT} failed for sample {event.sample_internal_id}",
+                    error=e,  # type: ignore
+                ),
+            )
         raise e
     else:
-        _delete_mirrored_folder(config=config, event=event)
+        _delete_mirrored_folder(
+            config=config, event=event, message_id=event_metadata.sequence.stream
+        )
 
 
 def _check_for_sequencing_files(event: ExternalSampleTransferredEvent) -> None:
@@ -108,7 +114,9 @@ def _add_sample_files_to_housekeeper(
     housekeeper_api.finalize_file_transactions(files=files, version=version)
 
 
-def _delete_mirrored_folder(config: CGConfig, event: ExternalSampleTransferredEvent) -> None:
+def _delete_mirrored_folder(
+    config: CGConfig, event: ExternalSampleTransferredEvent, message_id: int
+) -> None:
     try:
         shutil.rmtree(event.cluster_location)
         LOG.info(
@@ -119,7 +127,7 @@ def _delete_mirrored_folder(config: CGConfig, event: ExternalSampleTransferredEv
             recipient=config.slack_webhooks.sysdev_team,
             notification=SlackNotification(
                 title=f"Failed to delete {event.cluster_location}",
-                message=f"{EXTERNAL_SAMPLE_TRANSFERRED_EVENT} succeeded for sample {event.sample_internal_id} but failed to delete mirrored directory at {event.cluster_location}",
+                message=f"Message {message_id}: {EXTERNAL_SAMPLE_TRANSFERRED_EVENT} succeeded for sample {event.sample_internal_id} but failed to delete mirrored directory at {event.cluster_location}",
                 error=e,  # type: ignore
             ),
         )
