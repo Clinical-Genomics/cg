@@ -11,5 +11,4 @@ cg.egg-info
 .gitlint.yaml
 .pre-commit-config.yaml
 DEPLOYMENT.md
-CONTRIBUTING.md
 Dockerfile
