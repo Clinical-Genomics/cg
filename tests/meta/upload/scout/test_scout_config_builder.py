@@ -488,7 +488,7 @@ def test_nallo_config_builder(mocker: MockerFixture):
         default_gene_panels=[],
         cohorts=[],
         human_genome_build="38",
-        rank_model_version="1.1",
+        rank_model_version="1.0",
         rank_score_threshold=8,
         rank_model_url=snv_rank_model.full_path,
         sv_rank_model_version="2.0",
