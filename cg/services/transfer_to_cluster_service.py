@@ -7,7 +7,7 @@ from cg.constants.priority import SlurmQos
 from cg.models.cg_config import CGConfig, DataDeliveryConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.services.deliver_files.rsync.sbatch_commands import (
-    ERROR_RSYNC_FUNCTION,
+    ERROR_TRANSFER_TO_CLUSTER_FUNCTION,
     RSYNC_CONTENTS_COMMAND,
     RSYNC_EXCLUDE_OPTION,
     RSYNC_INCLUDE_OPTION,
@@ -15,6 +15,7 @@ from cg.services.deliver_files.rsync.sbatch_commands import (
 from cg.services.events import event_publisher
 from cg.services.events.constants import (
     EXTERNAL_SAMPLE_TRANSFER_COMPLETED_EVENT,
+    EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT,
     SAMPLE_INTERNAL_ID_FIELD,
 )
 from cg.store.models import Sample
@@ -34,6 +35,7 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
     )
     sbatch_command: str = _get_sbatch_command(cg_config=cg_config, sample=sample)
     sbatch_parameters: Sbatch = _get_sbatch_parameters(
+        cg_config=cg_config,
         command=sbatch_command,
         data_delivery_config=cg_config.data_delivery,
         sample=sample,
@@ -82,8 +84,20 @@ def _get_sbatch_command(cg_config: CGConfig, sample: Sample) -> str:
 
 
 def _get_sbatch_parameters(
-    command: str, data_delivery_config: DataDeliveryConfig, sample: Sample, sbatch_path: Path
+    cg_config: CGConfig,
+    command: str,
+    data_delivery_config: DataDeliveryConfig,
+    sample: Sample,
+    sbatch_path: Path,
 ) -> Sbatch:
+    failure_event = event_publisher.get_publish_command(
+        nats_config=cg_config.nats,
+        event_name=EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT,
+        data={
+            SAMPLE_INTERNAL_ID_FIELD: sample.internal_id,
+            "transfer_failed_at": "$(date +%Y-%m-%dT%H:%M:%S)",
+        },
+    )
     sbatch_parameters = Sbatch(
         job_name=f"{sample.customer.internal_id}_{sample.name}_rsync_external_data",
         account=data_delivery_config.account,
@@ -93,7 +107,7 @@ def _get_sbatch_parameters(
         email=data_delivery_config.mail_user,
         hours=24,
         commands=command,
-        error=ERROR_RSYNC_FUNCTION,
+        error=ERROR_TRANSFER_TO_CLUSTER_FUNCTION.format(failure_event=failure_event),
         quality_of_service=SlurmQos.NORMAL,
     )
     return sbatch_parameters
