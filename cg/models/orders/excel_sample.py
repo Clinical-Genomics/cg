@@ -22,7 +22,7 @@ class ExcelSample(OrderSample):
     age_at_sampling: str = Field(None, alias=ExcelSampleAliases.AGE_AT_SAMPLING)
     application: str = Field(..., alias=ExcelSampleAliases.APPLICATION)
     capture_kit: str = Field(None, alias=ExcelSampleAliases.CAPTURE_KIT)
-    cohorts: list[str] = Field(None, alias=ExcelSampleAliases.COHORTS)
+    cohorts: list[str] | None = Field(None, alias=ExcelSampleAliases.COHORTS)
     collection_date: Annotated[str, AfterValidator(convert_to_date)] = Field(
         None, alias=ExcelSampleAliases.COLLECTION_DATE
     )

@@ -273,6 +273,7 @@ def archive_store(
     )
     order = Order(
         customer_id=customer_ddn.id,
+        name="order_name",
         ticket_id=new_samples[0].original_ticket,
     )
     base_store.session.add(order)

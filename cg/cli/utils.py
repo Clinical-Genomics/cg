@@ -10,6 +10,8 @@ from cg.meta.workflow.rnafusion_analysis_api import RnafusionAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.meta.workflow.tomte import TomteAnalysisAPI
 
+LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
+
 
 def echo_lines(lines: list[str]) -> None:
     for line in lines:

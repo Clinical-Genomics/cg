@@ -6,7 +6,7 @@ from pytest_mock import MockerFixture
 
 from cg.constants.scout import ScoutExportFileName
 from cg.models.cg_config import NalloConfig
-from cg.services.analysis_starter.configurator.extensions import nallo
+from cg.services.analysis_starter.configurator.extensions import pipeline_extension as extension
 from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
 from cg.services.analysis_starter.configurator.file_creators.gene_panel import GenePanelFileCreator
 from tests.typed_mock import TypedMock, create_typed_mock
@@ -18,6 +18,7 @@ def nallo_config() -> NalloConfig:
         NalloConfig,
         rank_model_snv="path/to/snv_rank_model.ini",
         rank_model_sv="path/to/sv_rank_model.ini",
+        variant_catalog=Path("path/to/variant_catalog.bed"),
     )
 
 
@@ -37,7 +38,7 @@ def test_configure(nallo_config: NalloConfig, mocker: MockerFixture):
     case_run_directory = Path("case", "run", "directory")
 
     # WHEN configuring a case
-    copy_mock = mocker.patch.object(nallo.shutil, "copy2")
+    copy_mock = mocker.patch.object(extension.shutil, "copy2")
     nallo_extension.configure(case_id="nallo_case", case_run_directory=case_run_directory)
 
     # THEN a gene panel file should have been created
@@ -64,6 +65,8 @@ def test_do_required_files_exist_true(nallo_config: NalloConfig, tmp_path: Path)
     snv_rank_model_file.touch()
     sv_rank_model_file = tmp_path / "sv_rank_model.ini"
     sv_rank_model_file.touch()
+    variant_catalog_file = tmp_path / "variant_catalog.bed"
+    variant_catalog_file.touch()
 
     # GIVEN a Nallo extension
     nallo_extension = NalloExtension(gene_panel_file_creator=Mock(), nallo_config=nallo_config)
@@ -78,14 +81,16 @@ def test_do_required_files_exist_true(nallo_config: NalloConfig, tmp_path: Path)
 @pytest.mark.parametrize(
     "file_existence_array",
     [
-        [False, True, True],
-        [True, False, True],
-        [True, True, False],
+        [False, True, True, True],
+        [True, False, True, True],
+        [True, True, False, True],
+        [True, True, True, False],
     ],
     ids=[
         "missing gene panel scenario",
         "missing snv rank model scenario",
-        "missing sv rank model  scenario",
+        "missing sv rank model scenario",
+        "missing variant catalog scenario",
     ],
 )
 def test_do_required_files_exist_false(
@@ -99,6 +104,7 @@ def test_do_required_files_exist_false(
         Path(case_run_directory, ScoutExportFileName.PANELS): file_existence_array[0],
         Path(case_run_directory, "snv_rank_model.ini"): file_existence_array[1],
         Path(case_run_directory, "sv_rank_model.ini"): file_existence_array[2],
+        Path(case_run_directory, "variant_catalog.bed"): file_existence_array[3],
     }
     for file, should_exist in file_map.items():
         if should_exist:

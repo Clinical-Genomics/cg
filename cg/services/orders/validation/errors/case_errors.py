@@ -87,3 +87,8 @@ class SamplesNotRelatedError(CaseError):
 class SampleSourceMismatchError(CaseError):
     field: str = "sample_errors"
     message: str
+
+
+class SubjectIdRepeatedError(CaseError):
+    field: str = "sample_errors"
+    message: str

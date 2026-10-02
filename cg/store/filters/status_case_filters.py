@@ -179,22 +179,6 @@ def filter_newer_cases_by_order_date(cases: Query, order_date: datetime, **kwarg
     return cases.order_by(Case.ordered_at.asc())
 
 
-def filter_inactive_analysis_cases(cases: Query, **kwargs) -> Query:
-    """Filter cases which are not set or on hold."""
-    return cases.filter(
-        or_(
-            Case.action.is_(None),
-            Case.action == CaseActions.HOLD,
-        )
-    )
-
-
-def filter_older_cases_by_creation_date(cases: Query, creation_date: datetime, **kwargs) -> Query:
-    """Filter older cases compared to date."""
-    cases = cases.filter(Case.created_at < creation_date)
-    return cases.order_by(Case.created_at.asc())
-
-
 def filter_report_supported_data_delivery_cases(cases: Query, **kwargs) -> Query:
     """Filter cases with a valid data delivery for delivery report generation."""
     return cases.filter(Case.data_delivery.in_(REPORT_SUPPORTED_DATA_DELIVERY))
@@ -205,24 +189,9 @@ def filter_running_cases(cases: Query, **kwargs) -> Query:
     return cases.filter(Case.action == CaseActions.RUNNING)
 
 
-def filter_compressible_cases(cases: Query, **kwargs) -> Query:
-    """Filter cases which are running."""
-    return cases.filter(Case.is_compressible)
-
-
 def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
     """Order cases by created at."""
     return cases.order_by(Case.created_at.desc())
-
-
-def filter_cases_pending_or_failed_sequencing_qc(cases: Query, **kwargs) -> Query:
-    """Filter cases with pending or failed sequencing QC."""
-    return cases.filter(
-        or_(
-            Case.aggregated_sequencing_qc == SequencingQCStatus.PENDING,
-            Case.aggregated_sequencing_qc == SequencingQCStatus.FAILED,
-        )
-    )
 
 
 def filter_cases_passing_sequencing_qc(cases: Query, **kwargs) -> Query:
@@ -295,13 +264,10 @@ class CaseFilter(Enum):
     BY_WORKFLOW_SEARCH: Callable = filter_cases_by_workflow_search
     BY_PRIORITY: Callable = filter_cases_by_priority
     FOR_ANALYSIS: Callable = filter_cases_for_analysis
-    HAS_INACTIVE_ANALYSIS: Callable = filter_inactive_analysis_cases
     HAS_SEQUENCE: Callable = filter_cases_has_sequence
     IS_RUNNING: Callable = filter_running_cases
-    IS_COMPRESSIBLE: Callable = filter_compressible_cases
     NEW_BY_ORDER_DATE: Callable = filter_newer_cases_by_order_date
     NOT_ANALYSED: Callable = filter_cases_not_analysed
-    OLD_BY_CREATION_DATE: Callable = filter_older_cases_by_creation_date
     REPORT_SUPPORTED: Callable = filter_report_supported_data_delivery_cases
     WITH_LOQUSDB_SUPPORTED_WORKFLOW: Callable = filter_cases_with_loqusdb_supported_workflow
     WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD: Callable = (
@@ -310,5 +276,4 @@ class CaseFilter(Enum):
     WITH_WORKFLOW: Callable = filter_cases_with_workflow
     WITH_SCOUT_DELIVERY: Callable = filter_cases_with_scout_data_delivery
     ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at
-    PENDING_OR_FAILED_SEQUENCING_QC: Callable = filter_cases_pending_or_failed_sequencing_qc
     PASSING_SEQUENCING_QC: Callable = filter_cases_passing_sequencing_qc

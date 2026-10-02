@@ -4,22 +4,22 @@ from cg.models.cg_config import CGConfig
 from cg.store.store import Store
 
 
-def test_instantiate_correct_configs(base_config_dict: dict):
+def test_instantiate_correct_configs(context_config: dict):
     # GIVEN a dictionary with the basic configs
 
     # WHEN instantiating a CGConfig object
-    config_object = CGConfig(**base_config_dict)
+    config_object = CGConfig(**context_config)
 
     # THEN assert that it was successfully created
     assert isinstance(config_object, CGConfig)
 
 
-def test_fetching_the_status_db(base_config_dict: dict, caplog):
+def test_fetching_the_status_db(context_config: dict, caplog):
     caplog.set_level(logging.DEBUG)
     # GIVEN a dictionary with the basic configs
 
     # WHEN instantiating a CGConfig object
-    config_object = CGConfig(**base_config_dict)
+    config_object = CGConfig(**context_config)
 
     # THEN assert that the status db exists
     assert isinstance(config_object.status_db, Store)
@@ -27,11 +27,11 @@ def test_fetching_the_status_db(base_config_dict: dict, caplog):
     assert "Instantiating status db" in caplog.text
 
 
-def test_api_instantiated_once(base_config_dict: dict, caplog):
+def test_api_instantiated_once(context_config: dict, caplog):
     caplog.set_level(logging.DEBUG)
     # GIVEN a dictionary with the basic configs
     # GIVEN a CGConfig object
-    config_object = CGConfig(**base_config_dict)
+    config_object = CGConfig(**context_config)
 
     # WHEN fetching (instantiating) the status_db
 

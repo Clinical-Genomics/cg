@@ -7,11 +7,9 @@ from housekeeper.store.models import Bundle, Version
 from housekeeper.store.store import Store as HousekeeperStore
 from pytest_httpserver import HTTPServer
 
-from cg.apps.environ import environ_email
-from cg.constants.constants import Workflow
 from cg.constants.housekeeper_tags import AlignmentFileTag, SequencingFileTag
 from cg.constants.tb import AnalysisType
-from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Sample
+from cg.store.models import IlluminaFlowCell, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -165,61 +163,6 @@ def copy_integration_test_file(from_path: Path, to_path: Path):
     to_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(from_path, to_path)
     return True
-
-
-def expect_to_get_latest_analysis_with_empty_response_from_trailblazer(
-    trailblazer_server: HTTPServer, case_id: str
-):
-    trailblazer_server.expect_request(
-        "/trailblazer/get-latest-analysis", data='{"case_id": "' + case_id + '"}'
-    ).respond_with_json(None)
-
-
-def expect_to_add_pending_analysis_to_trailblazer(
-    trailblazer_server: HTTPServer,
-    case: Case,
-    ticket_id: int,
-    out_dir: Path,
-    config_path: Path | None,
-    analysis_type: AnalysisType,
-    workflow: Workflow,
-    tower_workflow_id: str | None = None,
-    workflow_manager: str = "slurm",
-):
-    trailblazer_server.expect_request(
-        "/trailblazer/add-pending-analysis",
-        data=b'{"case_id": "%(case_id)s", "email": "%(email)s", "type": "%(type)s", '
-        b'"config_path": %(config_path)s,'
-        b' "order_id": 1, "out_dir": "%(out_dir)s", '
-        b'"priority": "normal", "workflow": "%(workflow)s", "ticket": "%(ticket_id)s", '
-        b'"workflow_manager": "%(workflow_manager)s", "tower_workflow_id": %(tower_workflow_id)s, "is_hidden": true}'
-        % {
-            b"email": environ_email().encode(),
-            b"type": str(analysis_type).encode(),
-            b"case_id": case.internal_id.encode(),
-            b"ticket_id": str(ticket_id).encode(),
-            b"tower_workflow_id": _quoted_string_or_null(tower_workflow_id),
-            b"out_dir": str(out_dir).encode(),
-            b"config_path": _quoted_string_or_null(config_path),
-            b"workflow": str(workflow).upper().encode(),
-            b"workflow_manager": str(workflow_manager).encode(),
-        },
-        method="POST",
-    ).respond_with_json(
-        {
-            "id": "1",
-            "case_id": "case_id",
-            "logged_at": "",
-            "started_at": "",
-            "completed_at": "",
-            "out_dir": "out/dir",
-            "config_path": "config/path",
-        }
-    )
-
-
-def _quoted_string_or_null(value: str | Path | None) -> bytes:
-    return (f'"{value}"' if value else "null").encode()
 
 
 def expect_lims_sample_request(lims_server: HTTPServer, sample: Sample, bed_name: str):

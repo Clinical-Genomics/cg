@@ -16,7 +16,6 @@ class JsonSample(OrderSample):
     data_analysis: OrderType = Workflow.MIP_DNA
     data_delivery: DataDelivery = DataDelivery.SCOUT
     index: str | None = None
-    panels: list[str] | None = None
     quantity: str | None = None
     synopsis: Annotated[str | None, BeforeValidator(join_list)] = None
     well_position: Annotated[

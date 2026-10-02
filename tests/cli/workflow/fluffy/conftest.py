@@ -9,27 +9,27 @@ from cg.constants import SequencingFileTag, Workflow
 from cg.constants.constants import CaseActions
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, Sample
+from cg.store.models import Case, CaseSample, Customer, Order, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def fluffy_case_id_existing(selected_novaseq_6000_post_1_5_kits_case_ids: list[str]) -> str:
     return selected_novaseq_6000_post_1_5_kits_case_ids[0]
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def fluffy_case_id_non_existing():
     return "nakedmolerat"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def fluffy_sample_lims_id(selected_novaseq_6000_post_1_5_kits_sample_ids):
     return selected_novaseq_6000_post_1_5_kits_sample_ids[0]
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def fluffy_success_output_summary(tmpdir_factory):
     output_dir = tmpdir_factory.mktemp("output")
     file_path = Path(output_dir, "summary.csv")
@@ -37,7 +37,7 @@ def fluffy_success_output_summary(tmpdir_factory):
     return file_path
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def fluffy_success_output_aberrations(tmpdir_factory):
     output_dir = tmpdir_factory.mktemp("output")
     file_path = Path(output_dir, "WCXpredict_aberrations.filt.bed")
@@ -52,15 +52,18 @@ def bcl_convert_samplesheet_path() -> Path:
 
 @pytest.fixture
 def sample() -> Sample:
+    order = Order(customer=Customer(), name="order-name", ticket_id=123)
+    case = Case(internal_id="case_id", orders=[order])
+    case_sample = CaseSample(case=case, should_deliver_sample=True)
     return Sample(
         name="sample_name",
-        order="sample_project",
         control="positive",
         last_sequenced_at=dt.datetime.now(),
+        links=[case_sample],
     )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def fluffy_fastq_file_path(config_root_dir):
     path = Path(config_root_dir)
     path.mkdir(parents=True, exist_ok=True)
@@ -69,7 +72,7 @@ def fluffy_fastq_file_path(config_root_dir):
     return fastq_path
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def deliverables_yaml_path():
     return Path("tests/fixtures/apps/fluffy/deliverables.yaml")
 
@@ -105,7 +108,7 @@ def fluffy_hermes_deliverables_response_data(
     )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def fluffy_fastq_hk_bundle_data(
     fluffy_fastq_file_path: Path,
     fluffy_sample_lims_id: str,
@@ -125,7 +128,7 @@ def fluffy_fastq_hk_bundle_data(
     }
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def fluffy_samplesheet_bundle_data(
     novaseq_6000_post_1_5_kits_correct_sample_sheet_path: Path,
     novaseq_6000_post_1_5_kits_flow_cell_id: str,
@@ -144,7 +147,7 @@ def fluffy_samplesheet_bundle_data(
     }
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def fluffy_store(
     store_with_illumina_sequencing_data: Store,
     fluffy_case_id_existing: str,
@@ -160,7 +163,7 @@ def fluffy_store(
     return store_with_illumina_sequencing_data
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def fluffy_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,

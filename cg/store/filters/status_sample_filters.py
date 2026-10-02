@@ -18,12 +18,6 @@ def filter_samples_by_name(name: str, samples: Query, **kwargs) -> Query:
     return samples.filter(Sample.name == name)
 
 
-def filter_samples_with_type(samples: Query, tissue_type: SampleType, **kwargs) -> Query:
-    """Return samples with sample type."""
-    is_tumour: bool = tissue_type == SampleType.TUMOR
-    return samples.filter(Sample.is_tumour == is_tumour)
-
-
 def filter_samples_with_loqusdb_id(samples: Query, **kwargs) -> Query:
     """Return samples with a loqusdb ID."""
     return samples.filter(Sample.loqusdb_id.isnot(None))
@@ -215,5 +209,4 @@ class SampleFilter(Enum):
     IS_NOT_SEQUENCED: Callable = filter_samples_is_not_sequenced
     WITH_LOQUSDB_ID: Callable = filter_samples_with_loqusdb_id
     WITHOUT_LOQUSDB_ID: Callable = filter_samples_without_loqusdb_id
-    WITH_TYPE: Callable = filter_samples_with_type
     ORDER_BY_CREATED_AT_DESC: Callable = order_samples_by_created_at_desc

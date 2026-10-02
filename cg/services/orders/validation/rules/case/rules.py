@@ -1,3 +1,5 @@
+from typing import Counter
+
 from cg.apps.lims import LimsAPI
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
@@ -18,6 +20,7 @@ from cg.services.orders.validation.errors.case_errors import (
     RepeatedGenePanelsError,
     SamplesNotRelatedError,
     SampleSourceMismatchError,
+    SubjectIdRepeatedError,
 )
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
 from cg.services.orders.validation.order_types.balsamic.models.order import BalsamicOrder
@@ -33,6 +36,7 @@ from cg.services.orders.validation.rules.case.utils import (
     get_invalid_panels,
     get_sample_name,
     get_sample_sources,
+    get_subject_ids,
     is_case_not_from_collaboration,
     is_double_normal,
     is_double_tumour,
@@ -239,4 +243,23 @@ def validate_gene_panels_exist(
         if invalid_panels := get_invalid_panels(panels=case.panels, store=store):
             case_error = InvalidGenePanelsError(case_index=case_index, panels=invalid_panels)
             errors.append(case_error)
+    return errors
+
+
+def validate_subject_ids_unique(
+    order: RarediseaseOrder, store: Store, **kwargs
+) -> list[SubjectIdRepeatedError]:
+    errors: list[SubjectIdRepeatedError] = []
+    for case_index, case in order.enumerated_new_cases:
+        subject_ids: list[str] = get_subject_ids(case=case, store=store)
+        counter_subject_ids = Counter(subject_ids)
+        repeated_subject_ids = [
+            subject_id for subject_id in counter_subject_ids if counter_subject_ids[subject_id] > 1
+        ]
+        if repeated_subject_ids:
+            error = SubjectIdRepeatedError(
+                case_index=case_index,
+                message=f"Case cannot contain multiple samples with the same subject id. Repeated subject_ids: {repeated_subject_ids}",
+            )
+            errors.append(error)
     return errors

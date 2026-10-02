@@ -193,8 +193,9 @@ def test_store_tomte_order(
     assert new_link
 
 
-def test_store_rnafusion_sample_is_set_to_tumour(store: Store, mocker: MockerFixture):
+def test_store_rnafusion_sample_is_set_to_tumour():
     # GIVEN an RNAFusion order with a new sample in it
+    store: Store = create_autospec(Store)
     rna_fusion_sample = RNAFusionSample(
         application="rnafusiontag",
         container=ContainerEnum.tube,
@@ -214,11 +215,8 @@ def test_store_rnafusion_sample_is_set_to_tumour(store: Store, mocker: MockerFix
 
     # GIVEN that persisting to StatusDB and LIMS is successful
     application_version = ApplicationVersion(application=Application())
-    mocker.patch.object(
-        store, "get_current_application_version_by_tag", return_value=application_version
-    )
-    mocker.patch.object(store, "get_lims_workflow_id_by_application_tag")
-    mocker.patch.object(store, "commit_to_store")
+    store.get_current_application_version_by_tag = Mock(return_value=application_version)
+    store.get_customer_by_internal_id_strict = Mock(return_value=create_autospec(Customer))
     lims_service: OrderLimsService = create_autospec(
         OrderLimsService, lims_api=create_autospec(LimsAPI)
     )
@@ -316,7 +314,6 @@ def test_create_db_sample_with_lims_status_and_invoice(
         case=case,
         sample=rna_fusion_sample,
         customer=customer,
-        order_name="any_old_string",
         ordered=datetime.now(),
         ticket="1234567",
     )

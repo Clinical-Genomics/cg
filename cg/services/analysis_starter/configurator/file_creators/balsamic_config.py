@@ -10,13 +10,14 @@ from cg.constants import SexOptions
 from cg.constants.constants import BedVersionGenomeVersion, GenomeVersion
 from cg.constants.process import EXIT_SUCCESS
 from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.exc import MultipleCaptureKitsError
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.models.balsamic import (
     BalsamicConfigInput,
     BalsamicConfigInputPanel,
     BalsamicConfigInputWGS,
 )
-from cg.store.models import BedVersion, Case, Sample
+from cg.store.models import BedVersion, Case
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -208,7 +209,7 @@ class BalsamicConfigFileCreator:
                     return sample.internal_id
 
     @staticmethod
-    def _get_tumor_or_single_sample_id(case) -> str:
+    def _get_tumor_or_single_sample_id(case: Case) -> str:
         """
         Return the internal id of the tumour sample if the case is a paired analysis,
         otherwise return the internal id of the single sample.
@@ -224,10 +225,17 @@ class BalsamicConfigFileCreator:
         return len(case.samples) == 2
 
     def _get_bed_version(self, case: Case, override_panel_bed: str | None) -> BedVersion:
-        first_sample: Sample = case.samples[0]
-        short_name: str = override_panel_bed or self.lims_api.get_capture_kit_strict(
-            first_sample.internal_id
-        )
+        if override_panel_bed:
+            short_name: str = override_panel_bed
+        else:
+            capture_kits: set[str] = {
+                self.lims_api.get_capture_kit_strict(sample.internal_id) for sample in case.samples
+            }
+            if len(capture_kits) > 1:
+                raise MultipleCaptureKitsError(
+                    f"Multiple capture kits found for {case.internal_id}: {capture_kits}"
+                )
+            short_name: str = capture_kits.pop()
         return self.status_db.get_bed_version_by_short_name_and_genome_version_strict(
             short_name=short_name, genome_version=BedVersionGenomeVersion.HG19
         )

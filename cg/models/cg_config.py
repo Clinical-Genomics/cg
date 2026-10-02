@@ -150,19 +150,14 @@ class ChanjoConfig(BaseModel):
     config_path: str
 
 
-class NatsAuthentication(BaseModel):
-    ca_cert_path: Path
-    client_cert_path: Path
-    client_key_path: Path
-    token_path: Path
-
-
 class NatsConfig(BaseModel):
     nats_binary_path: Path
     server: str
     stream: str
-    listener: NatsAuthentication
-    publisher: NatsAuthentication
+    ca_cert_path: Path
+    client_cert_path: Path
+    client_key_path: Path
+    token_path: Path
 
 
 class HermesConfig(CommonAppConfig):
@@ -281,6 +276,7 @@ class NalloConfig(CommonAppConfig):
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    variant_catalog: Path
     workflow_bin_path: str
 
 
@@ -314,6 +310,7 @@ class RarediseaseConfig(CommonAppConfig):
     platform: str
     pre_run_script: str = ""
     profile: str
+    rank_model_threshold: int
     rank_model_snv: str
     rank_model_sv: str
     reference: str
@@ -324,6 +321,7 @@ class RarediseaseConfig(CommonAppConfig):
     root: str
     slurm: SlurmConfig
     tower_workflow: str
+    variant_catalog: Path
     verifybamid_svd: VerifybamidSvdFilesSet
     workflow_bin_path: str
 
@@ -390,6 +388,7 @@ class MicrosaltConfig(BaseModel):
     binary_path: str
     conda_binary: str
     conda_env: str
+    config: str
     queries_path: str
     root: str
 
@@ -435,6 +434,7 @@ class FOHMConfig(BaseModel):
 class ExternalConfig(BaseModel):
     hasta: str
     caesar: str
+    cluster: str
 
 
 class SeqeraPlatformConfig(BaseModel):
@@ -466,6 +466,11 @@ class OxfordNanoporeConfig(BaseModel):
 class IlluminaConfig(BaseModel):
     sequencing_runs_dir: str
     demultiplexed_runs_dir: str
+
+
+class SlackWebhooks(BaseModel):
+    prod_team: str
+    sysdev_team: str
 
 
 class RunInstruments(BaseModel):
@@ -565,6 +570,7 @@ class CGConfig(BaseModel):
     scout_38: CommonAppConfig = None
     scout_api_37_: ScoutAPI = None
     scout_api_38_: ScoutAPI = None
+    slack_webhooks: SlackWebhooks
     tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None

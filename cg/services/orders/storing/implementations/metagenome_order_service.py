@@ -50,7 +50,7 @@ class StoreMetagenomeOrderService(StoreOrderService):
         customer: Customer = self.status_db.get_customer_by_internal_id(order.customer)
         new_samples = []
         db_order: DbOrder = self.status_db.add_order(
-            customer=customer, ticket_id=order._generated_ticket_id
+            customer=customer, name=order.name, ticket_id=order._generated_ticket_id
         )
         with self.status_db.session.no_autoflush:
             for sample in order.samples:
@@ -106,11 +106,11 @@ class StoreMetagenomeOrderService(StoreOrderService):
             lims_status=lims_status,
             name=sample.name,
             no_invoice=application_version.application.is_external,
-            order=order.name,
             ordered=datetime.now(),
             original_ticket=order._generated_ticket_id,
             priority=sample.priority,
             sex=Sex.UNKNOWN,
+            skip_compression=application_version.application.is_external,
         )
         db_sample.customer = customer
         db_sample.application_version = application_version

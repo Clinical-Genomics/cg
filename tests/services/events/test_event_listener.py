@@ -10,7 +10,6 @@ from nats.aio.msg import Msg
 from nats.js import JetStreamContext as JSC
 from pytest_mock import MockerFixture
 
-from cg.models.cg_config import NatsAuthentication, NatsConfig
 from cg.services.events.event_listener import EventListener
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -22,20 +21,13 @@ def mock_path_read_text(mocker: MockerFixture):
 
 @pytest.fixture
 def event_listener() -> EventListener:
-    nats_authentication = NatsAuthentication(
-        ca_cert_path=Path("/ca/cert/path"),
-        client_cert_path=Path("/client/cert/path"),
-        client_key_path=Path("/client/key/path"),
-        token_path=Path("/token/path"),
-    )
     return EventListener(
-        config=NatsConfig(
-            server="nats://server",
-            nats_binary_path=Path("/nats/binary/path"),
-            stream="stream-name",
-            listener=nats_authentication,
-            publisher=nats_authentication,
-        )
+        nats_server="nats://server",
+        nats_stream="stream-name",
+        listener_ca_cert_path="/ca/cert/path",
+        listener_client_cert_path="/client/cert/path",
+        listener_client_key_path="/client/key/path",
+        listener_token_path="/token/path",
     )
 
 

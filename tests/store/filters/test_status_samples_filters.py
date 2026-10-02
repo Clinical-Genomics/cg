@@ -2,7 +2,6 @@ from typing import Any
 
 from sqlalchemy.orm import Query
 
-from cg.constants.constants import SampleType
 from cg.constants.subject import PhenotypeStatus, Sex
 from cg.store.filters.status_sample_filters import (
     filter_samples_by_entry_customer_ids,
@@ -23,7 +22,6 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_is_received,
     filter_samples_is_sequenced,
     filter_samples_with_loqusdb_id,
-    filter_samples_with_type,
     filter_samples_without_invoice_id,
     filter_samples_without_loqusdb_id,
 )
@@ -459,36 +457,6 @@ def test_filter_get_samples_by_entry_id(
 
     # THEN the sample should have the correct id
     assert samples.all()[0].id == entry_id
-
-
-def test_filter_get_samples_with_type(
-    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name=StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
-    tissue_type: SampleType = SampleType.TUMOR,
-):
-    """Test that a sample is returned when there is a sample with the given type."""
-
-    # GIVEN a store with two samples of which one is of the given type
-
-    # WHEN getting a sample by type
-    samples: Query = filter_samples_with_type(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
-            table=Sample
-        ),
-        tissue_type=tissue_type,
-    )
-
-    # ASSERT that samples is a query
-    assert isinstance(samples, Query)
-
-    # THEN samples should contain the test sample
-    assert samples.all()
-
-    # THEN samples should contain one sample
-    assert len(samples.all()) == 1
-
-    # THEN the sample should have is tumour set to true
-    assert samples.all()[0].is_tumour is True
 
 
 def test_filter_get_samples_by_name(

@@ -77,6 +77,7 @@ def test_microsalt_tracker_successful(
         config_file="config/file",
         environment="stage",
         fastq_directory="fastq/dir",
+        pipeline_config_path="pipeline/config.json",
     )
 
     # GIVEN an order, sample and case in StatusDB

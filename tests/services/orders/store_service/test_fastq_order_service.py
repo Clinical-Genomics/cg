@@ -102,7 +102,7 @@ def test_create_db_sample_with_lims_status_and_invoice(
 
     # WHEN creating a db sample with the application
     store_order_service._create_db_sample(
-        sample=fastq_sample, order_name="order", customer=customer, ticket_id="1234567"
+        sample=fastq_sample, customer=customer, ticket_id="1234567"
     )
 
     # THEN the sample should be created with the expected lims status

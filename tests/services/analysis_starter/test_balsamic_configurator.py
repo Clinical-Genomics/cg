@@ -8,7 +8,7 @@ from pytest_mock import MockerFixture
 from cg.apps.lims import LimsAPI
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
-from cg.exc import CaseNotConfiguredError, MultipleCaptureKitsError
+from cg.exc import CaseNotConfiguredError
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.cg_config import BalsamicConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
@@ -20,7 +20,6 @@ from cg.services.analysis_starter.configurator.implementations.balsamic_configur
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
 from cg.store.models import Case, Sample
 from cg.store.store import Store
-from tests.typed_mock import TypedMock, create_typed_mock
 
 PANEL_ONLY_FIELDS = ["soft_filter_normal", "panel_bed", "pon_cnn", "exome"]
 WGS_ONLY_FIELDS = ["genome_interval", "gens_coverage_pon"]
@@ -46,6 +45,10 @@ def test_get_config(
     balsamic_configurator.root_dir = tmp_path
     Path(balsamic_configurator.root_dir, case_id).mkdir()
     Path(balsamic_configurator.root_dir, case_id, f"{case_id}.json").touch()
+
+    # GIVEN that the workflow profile contains a config.yaml
+    Path(balsamic_configurator.workflow_profile).mkdir()
+    Path(balsamic_configurator.workflow_profile, "config.yaml").touch()
 
     # GIVEN that the database returns a case with the provided case_id
     case_to_configure: Case = create_autospec(
@@ -88,6 +91,10 @@ def test_get_config_with_flag(
     balsamic_configurator.root_dir = tmp_path
     Path(balsamic_configurator.root_dir, case_id).mkdir()
     Path(balsamic_configurator.root_dir, case_id, f"{case_id}.json").touch()
+
+    # GIVEN that the workflow profile contains a config.yaml
+    Path(balsamic_configurator.workflow_profile).mkdir()
+    Path(balsamic_configurator.workflow_profile, "config.yaml").touch()
 
     # GIVEN that the database returns a case with the provided case_id
     case_to_configure: Case = create_autospec(
@@ -141,6 +148,34 @@ def test_get_config_missing_config_file(
     # THEN it should raise a CaseNotConfiguredError
     with pytest.raises(CaseNotConfiguredError):
         balsamic_configurator.get_config(case_id=case_id)
+
+
+def test_get_config_faulty_workflow_profile(
+    balsamic_configurator: BalsamicConfigurator, case_id: str, tmp_path: Path
+):
+    """Tests that the get_config method raises an error if the workflow_profile flag does not point
+    to a directory containing a config.yaml file."""
+
+    # GIVEN a Balsamic configurator with an existing config file
+    balsamic_configurator.root_dir = tmp_path
+    Path(balsamic_configurator.root_dir, case_id).mkdir()
+    Path(balsamic_configurator.root_dir, case_id, f"{case_id}.json").touch()
+
+    # GIVEN that the database returns a case with the provided case_id
+    case_to_configure: Case = create_autospec(
+        Case, internal_id=case_id, slurm_priority=SlurmQos.NORMAL
+    )
+    balsamic_configurator.store.get_case_by_internal_id_strict = Mock(
+        return_value=case_to_configure
+    )
+    balsamic_configurator.store.get_case_workflow = Mock(return_value=Workflow.BALSAMIC)
+
+    # WHEN getting the config using a workflow_profile which does not contain a config.yaml
+    # THEN it should raise a CaseNotConfiguredError
+    with pytest.raises(CaseNotConfiguredError):
+        balsamic_configurator.get_config(
+            case_id=case_id, workflow_profile=Path("path/that/leads/nowhere")
+        )
 
 
 @pytest.mark.parametrize("workflow", [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI])
@@ -259,39 +294,3 @@ def test_configure_with_flags(
         workflow=workflow,
         workflow_profile=workflow_profile,
     )
-
-
-def test_configure_mixed_capture_kits(cg_balsamic_config: BalsamicConfig):
-    # GIVEN a fastq handler
-    fastq_handler: BalsamicFastqHandler = create_autospec(BalsamicFastqHandler)
-    fastq_handler.get_fastq_dir = Mock(return_value=Path("some/path"))
-
-    # GIVEN a BalsamicConfigFileCreator
-    config_file_creator: BalsamicConfigFileCreator = create_autospec(BalsamicConfigFileCreator)
-
-    # GIVEN a store containing a case with two samples
-    store: Store = create_autospec(Store)
-    store.get_case_by_internal_id_strict = Mock(
-        return_value=create_autospec(
-            Case,
-            samples=[create_autospec(Sample), create_autospec(Sample)],
-            slurm_priority=SlurmQos.NORMAL,
-        )
-    )
-
-    # GIVEN a LimsAPI which returns two different capture kits for the two samples
-    lims_api: TypedMock[LimsAPI] = create_typed_mock(LimsAPI)
-    lims_api.as_type.capture_kit = Mock(side_effect=["capture_kit_1", "capture_kit_2"])
-
-    # GIVEN a Balsamic configurator
-    balsamic_configurator = BalsamicConfigurator(
-        config=cg_balsamic_config,
-        config_file_creator=config_file_creator,
-        fastq_handler=fastq_handler,
-        lims_api=lims_api.as_type,
-        store=store,
-    )
-    # WHEN calling configure
-    # THEN an error should be raised due to the mixed capture kits
-    with pytest.raises(MultipleCaptureKitsError):
-        balsamic_configurator.configure(case_id="case_id")
