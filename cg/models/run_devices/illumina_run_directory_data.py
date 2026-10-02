@@ -293,13 +293,13 @@ class IlluminaRunDirectoryData:
         A sequencing run is ready if the two files RTAComplete.txt and CopyComplete.txt exist in the
         sequencing run directory.
         """
-        LOG.info("Check if sequencing run is ready for downstream processing")
+        LOG.debug("Check if sequencing run is ready for downstream processing")
         if not self.is_sequencing_done():
-            LOG.warning(f"Sequencing is not completed for sequencing run {self.id}")
+            LOG.debug(f"Sequencing is not completed for sequencing run {self.id}")
             return False
         LOG.debug(f"Sequence is done for sequencing run {self.id}")
         if not self.is_copy_completed():
-            LOG.warning(f"Copy of sequence data is not ready for sequencing run {self.id}")
+            LOG.debug(f"Copy of sequence data is not ready for sequencing run {self.id}")
             return False
         LOG.debug(f"All data has been transferred for sequencing run {self.id}")
         LOG.info(f"Sequencing run {self.id} is ready for downstream processing")

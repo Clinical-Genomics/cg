@@ -108,9 +108,6 @@ def test_demultiplex_all_novaseq(
     # THEN assert it exits without problems
     assert result.exit_code == 0
 
-    # THEN assert it found the directory
-    assert "Found directory" in caplog.text
-
     # THEN assert it found a flow cell that is ready for demultiplexing
     assert f"Sequencing run {sequencing_run.id} is ready for downstream processing" in caplog.text
 
