@@ -16,8 +16,8 @@ from cg.services.events.constants import (
     RETRY_NOTIFICATION_THRESHOLD,
     SAMPLE_INTERNAL_ID_FIELD,
 )
-from cg.services.events.event_handlers import external_sample_transferred_handler
-from cg.services.events.event_handlers.external_sample_transferred_handler import (
+from cg.services.events.event_handlers import external_sample_transfer_completed_handler
+from cg.services.events.event_handlers.external_sample_transfer_completed_handler import (
     shutil,
     slack_notification_service,
 )
@@ -53,7 +53,7 @@ def test_handle_success(mocker: MockerFixture):
 
     # GIVEN a publisher for completion events
     publish_mock = mocker.patch.object(
-        external_sample_transferred_handler.event_publisher, "publish_event"
+        external_sample_transfer_completed_handler.event_publisher, "publish_event"
     )
 
     # GIVEN a valid event payload
@@ -72,7 +72,7 @@ def test_handle_success(mocker: MockerFixture):
     rmtree_mock = mocker.patch.object(shutil, "rmtree")
 
     # WHEN calling handle
-    external_sample_transferred_handler.handle(
+    external_sample_transfer_completed_handler.handle(
         config=config,
         event_payload=event_payload,
         event_metadata=create_autospec(EventMetadata, sequence=EventSequence(consumer=1, stream=1)),
@@ -149,7 +149,7 @@ def test_handle_failure_and_notifies(mocker: MockerFixture):
     # WHEN calling handle
     # THEN a CG error should be raised
     with pytest.raises(CgError):
-        external_sample_transferred_handler.handle(
+        external_sample_transfer_completed_handler.handle(
             config=config, event_payload=event_payload, event_metadata=metadata
         )
 
@@ -196,7 +196,7 @@ def test_handle_failure_without_notification(mocker: MockerFixture):
     # WHEN calling handle
     # THEN a CG error should be raised
     with pytest.raises(CgError):
-        external_sample_transferred_handler.handle(
+        external_sample_transfer_completed_handler.handle(
             config=config, event_payload=event_payload, event_metadata=metadata
         )
 
@@ -233,7 +233,7 @@ def test_storing_succeeds_deletion_fails(mocker: MockerFixture):
 
     # GIVEN a publisher for completion events
     publish_mock = mocker.patch.object(
-        external_sample_transferred_handler.event_publisher, "publish_event"
+        external_sample_transfer_completed_handler.event_publisher, "publish_event"
     )
 
     # GIVEN a valid event payload
@@ -254,7 +254,7 @@ def test_storing_succeeds_deletion_fails(mocker: MockerFixture):
     notify_mock = mocker.patch.object(slack_notification_service, "notify")
 
     # WHEN calling handle
-    external_sample_transferred_handler.handle(
+    external_sample_transfer_completed_handler.handle(
         config=config,
         event_payload=event_payload,
         event_metadata=create_autospec(EventMetadata, sequence=EventSequence(consumer=1, stream=1)),
