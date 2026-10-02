@@ -12,7 +12,7 @@ from cg.exc import CgError
 from cg.models.cg_config import CGConfig, NatsConfig, SlackWebhooks
 from cg.services.events.constants import (
     EXTERNAL_SAMPLE_STORED_EVENT,
-    EXTERNAL_SAMPLE_TRANSFERRED_EVENT,
+    EXTERNAL_SAMPLE_TRANSFER_COMPLETED_EVENT,
     RETRY_NOTIFICATION_THRESHOLD,
     SAMPLE_INTERNAL_ID_FIELD,
 )
@@ -160,7 +160,7 @@ def test_handle_failure_and_notifies(mocker: MockerFixture):
     assert first_call.kwargs["notification"].title == "Failed to store an external sample"
     assert (
         first_call.kwargs["notification"].message
-        == f"Message 1: {EXTERNAL_SAMPLE_TRANSFERRED_EVENT} failed for sample ACC123"
+        == f"Message 1: {EXTERNAL_SAMPLE_TRANSFER_COMPLETED_EVENT} failed for sample ACC123"
     )
     assert "No sequencing files" in first_call.kwargs["notification"].error_text
 
@@ -306,6 +306,6 @@ def test_storing_succeeds_deletion_fails(mocker: MockerFixture):
     )
     assert (
         first_call.kwargs["notification"].message
-        == f"Message 1: {EXTERNAL_SAMPLE_TRANSFERRED_EVENT} succeeded for sample ACC123 but failed to delete mirrored directory at {event_payload['cluster_location']}"
+        == f"Message 1: {EXTERNAL_SAMPLE_TRANSFER_COMPLETED_EVENT} succeeded for sample ACC123 but failed to delete mirrored directory at {event_payload['cluster_location']}"
     )
     assert "CATASTROPHE" in first_call.kwargs["notification"].error_text

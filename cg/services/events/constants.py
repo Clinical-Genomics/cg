@@ -1,7 +1,8 @@
 # Event names
 EXTERNAL_SAMPLES_ORDERED_EVENT = "external.samples_ordered"
 EXTERNAL_SAMPLE_STORED_EVENT = "external.sample_storage_completed"
-EXTERNAL_SAMPLE_TRANSFERRED_EVENT = "external.sample_transfer_completed"
+EXTERNAL_SAMPLE_TRANSFER_COMPLETED_EVENT = "external.sample_transfer_completed"
+EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT = "external.sample_transfer_failed"
 EXTERNAL_SAMPLE_UPLOADED_EVENT = "external.sample_upload_completed"
 
 # Payload attributes
