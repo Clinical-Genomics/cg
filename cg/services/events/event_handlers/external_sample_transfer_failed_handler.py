@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from pydantic import BaseModel, Field
@@ -12,6 +13,7 @@ from cg.services.events.event_metadata import EventMetadata
 from cg.services.slack_notification_service import SlackNotification
 from cg.store.models import Sample
 
+LOG = logging.getLogger(__name__)
 MAX_ATTEMPTS = 5
 
 
@@ -23,6 +25,7 @@ class ExternalSampleTransferFailedEvent(BaseModel):
 
 
 def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata):
+    LOG.debug(f"Received event payload {event_payload} with metadata {event_metadata.model_dump()}")
     event = ExternalSampleTransferFailedEvent.model_validate(event_payload)
     if event.number_of_attempts >= MAX_ATTEMPTS:
         slack_notification_service.notify(

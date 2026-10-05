@@ -35,7 +35,7 @@ log "Running on: $(hostname)"
 
 error() {
     \necho "Rsync failed"
-    /nats/binary pub --jetstream --server nats://server --tlsca /ca/cert --tlscert /client/cert --tlskey /client/key --token $(cat /token) cg-test.external.sample_transfer_failed "{\\"status_db.sample.internal_id\\": \\"ACC1\\", \\"transfer_failed_at\\": \\"$(date +%Y-%m-%dT%H:%M:%S)\\", \\"log_dir\\": \\"/base/path/cust000_sample-name_080910_10_28_00_000000\\", \\"number_of_attempts\\": 0}"
+    /nats/binary pub --jetstream --server nats://server --tlsca /ca/cert --tlscert /client/cert --tlskey /client/key --token $(cat /token) cg-test.external.sample_transfer_failed "{\\"status_db.sample.internal_id\\": \\"ACC1\\", \\"transfer_failed_at\\": \\"$(date +%Y-%m-%dT%H:%M:%S)\\", \\"log_dir\\": \\"/base/path/cust000_sample-name_080910_10_28_00_000000\\", \\"number_of_attempts\\": 1}"
 
     exit 1
 }
