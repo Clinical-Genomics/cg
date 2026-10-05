@@ -156,7 +156,6 @@ class DDNDataFlowClient(ArchiveHandler):
             files_to_transfer=miria_file_data,
             createFolder=is_archiving_request,
         )
-        transfer_request.trim_paths(attribute_to_trim=attribute)
         transfer_request.add_repositories(
             source_prefix=source_prefix, destination_prefix=destination_prefix
         )

@@ -53,7 +53,7 @@ def archive_request_json(
     ddn_dataflow_config: DataFlowConfig,
     remote_storage_repository: str,
     local_storage_repository: str,
-    trimmed_local_path: str,
+    local_path: str,
 ) -> dict:
     return {
         "osType": "Unix/MacOS",
@@ -64,7 +64,7 @@ def archive_request_json(
                 "source": local_storage_repository
                 + ddn_dataflow_config.housekeeper_mnt.as_posix()
                 + "/"
-                + trimmed_local_path,
+                + local_path,
             }
         ],
         "metadataList": [],
@@ -77,7 +77,7 @@ def retrieve_request_json(
     ddn_dataflow_config: DataFlowConfig,
     remote_storage_repository: str,
     local_storage_repository: str,
-    trimmed_local_path: str,
+    local_path: str,
 ) -> dict[str, Any]:
     """Returns the body for a retrieval http post towards the DDN Miria API."""
     return {
@@ -88,7 +88,7 @@ def retrieve_request_json(
                 "destination": local_storage_repository
                 + ddn_dataflow_config.housekeeper_mnt.as_posix()
                 + "/"
-                + Path(trimmed_local_path).parent.as_posix(),
+                + Path(local_path).parent.as_posix(),
                 "source": f"{remote_storage_repository}ADM1",
             }
         ],
@@ -163,10 +163,8 @@ def file_and_sample(spring_archive_api: SpringArchiveAPI, sample_id: str):
 
 
 @pytest.fixture
-def trimmed_local_path(spring_archive_api: SpringArchiveAPI, sample_id: str):
-    file: File = spring_archive_api.housekeeper_api.get_files(
-        bundle=sample_id
-    ).first()  # TODO: Rename fixture since it is not trimmed anymore
+def local_path(spring_archive_api: SpringArchiveAPI, sample_id: str):
+    file: File = spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first()
     return file.path
 
 
@@ -192,14 +190,7 @@ def remote_path() -> Path:
 
 @pytest.fixture
 def local_directory() -> Path:
-    """Returns a mock path with /home as its root."""  # TODO: Fix docstring
     return Path("other", "place")
-
-
-@pytest.fixture
-def trimmed_local_directory(local_directory: Path) -> Path:
-    """Returns the trimmed local directory."""
-    return local_directory  # TODO: Remove
 
 
 @pytest.fixture

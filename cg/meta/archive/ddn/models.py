@@ -17,10 +17,6 @@ class MiriaObject(BaseModel):
     destination: str
     source: str
 
-    def trim_path(self, attribute_to_trim: str):
-        """Trims the given attribute (source or destination) from its root directory."""
-        pass
-
     def add_repositories(self, source_prefix: str, destination_prefix: str):
         """Prepends the given repositories to the source and destination paths."""
         self.source: str = source_prefix + self.source
@@ -35,11 +31,6 @@ class TransferPayload(BaseModel):
     createFolder: bool = True
     settings: list[dict] = []
     metadataList: list[dict] = []
-
-    def trim_paths(self, attribute_to_trim: str):
-        """Trims the source path from its root directory for all objects in the transfer."""
-        for miria_file in self.files_to_transfer:
-            miria_file.trim_path(attribute_to_trim=attribute_to_trim)
 
     def add_repositories(self, source_prefix: str, destination_prefix: str):
         """Prepends the given repositories to the source and destination paths all objects in the

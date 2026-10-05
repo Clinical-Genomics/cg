@@ -213,7 +213,7 @@ def test_archive_file(
     remote_storage_repository: str,
     local_storage_repository: str,
     file_and_sample: FileAndSample,
-    trimmed_local_path: str,
+    local_path: str,
     ok_miria_response,
     mocker: MockerFixture,
 ):
@@ -241,7 +241,7 @@ def test_archive_file(
                     "source": local_storage_repository
                     + ddn_dataflow_config.housekeeper_mnt.as_posix()
                     + "/"
-                    + trimmed_local_path,
+                    + local_path,
                     "destination": remote_storage_repository + file_and_sample.sample.internal_id,
                 }
             ],
