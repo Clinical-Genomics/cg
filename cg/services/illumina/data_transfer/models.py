@@ -22,7 +22,7 @@ class IlluminaFlowCellDTO(BaseModel):
     @field_validator("model")
     def validate_model(cls, model: str) -> str:
         """Validate the model."""
-        if model not in ["10B", "25B", "1.5B", "S1", "S2", "S4", "SP", None]:
+        if model not in ["5B", "10B", "25B", "1.5B", "S1", "S2", "S4", "SP", None]:
             raise ValueError(f"Invalid Flow cell model detected: {model}")
         return model
 
