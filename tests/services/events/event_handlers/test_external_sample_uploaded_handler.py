@@ -6,10 +6,12 @@ from pydantic import ValidationError
 from pytest_mock import MockerFixture
 
 from cg.models.cg_config import CGConfig
+from cg.services.events.constants import CUSTOMER_INTERNAL_ID_FIELD, SAMPLE_NAME_FIELD
 from cg.services.events.event_handlers import external_sample_uploaded_handler
 from cg.services.events.event_handlers.external_sample_uploaded_handler import (
     transfer_to_cluster_service,
 )
+from cg.services.events.event_metadata import EventMetadata
 from cg.store.models import Customer, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
@@ -29,8 +31,8 @@ def test_handle_triggers_transfer(mocker: MockerFixture):
 
     # GIVEN some payload for an external sample upload event
     event_payload = {
-        "cg.customer": "cust000",
-        "cg.sample_name": "sample-name",
+        CUSTOMER_INTERNAL_ID_FIELD: "cust000",
+        SAMPLE_NAME_FIELD: "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
     }
 
@@ -42,7 +44,9 @@ def test_handle_triggers_transfer(mocker: MockerFixture):
     transfer_sample_mock = mocker.patch.object(transfer_to_cluster_service, "transfer_sample")
 
     # WHEN calling handle with a CGConfig and the event payload
-    external_sample_uploaded_handler.handle(config=cg_config, event_payload=event_payload)
+    external_sample_uploaded_handler.handle(
+        config=cg_config, event_payload=event_payload, event_metadata=create_autospec(EventMetadata)
+    )
 
     # THEN the provided external sample should have been added to the database
     status_db.as_mock.add_external_sample.assert_called_once_with(
@@ -73,8 +77,8 @@ def test_handle_not_trigger_transfer(mocker: MockerFixture):
 
     # GIVEN some payload for an external sample upload event
     event_payload = {
-        "cg.customer": "cust000",
-        "cg.sample_name": "sample-name",
+        CUSTOMER_INTERNAL_ID_FIELD: "cust000",
+        SAMPLE_NAME_FIELD: "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
     }
 
@@ -85,7 +89,9 @@ def test_handle_not_trigger_transfer(mocker: MockerFixture):
     transfer_sample_spy = mocker.spy(transfer_to_cluster_service, "transfer_sample")
 
     # WHEN calling handle with a CGConfig and the event payload
-    external_sample_uploaded_handler.handle(config=cg_config, event_payload=event_payload)
+    external_sample_uploaded_handler.handle(
+        config=cg_config, event_payload=event_payload, event_metadata=create_autospec(EventMetadata)
+    )
 
     # THEN the provided external sample should have been added to the database
     status_db.as_mock.add_external_sample.assert_called_once_with(
@@ -104,15 +110,19 @@ def test_handle_invalid_sample_name():
 
     # GIVEN some event payload where the sample name contains illegal letters
     event_payload = {
-        "cg.customer": "cust000",
-        "cg.sample_name": "invalid_sample_name",
+        CUSTOMER_INTERNAL_ID_FIELD: "cust000",
+        SAMPLE_NAME_FIELD: "invalid_sample_name",
         "customer_uploaded_at": "2026-06-02T11:14:52",
     }
 
     # WHEN calling handle with a CGConfig and the event payload
     # THEN a ValidationError should be raised
     with pytest.raises(ValidationError):
-        external_sample_uploaded_handler.handle(config=cg_config, event_payload=event_payload)
+        external_sample_uploaded_handler.handle(
+            config=cg_config,
+            event_payload=event_payload,
+            event_metadata=create_autospec(EventMetadata),
+        )
 
 
 def test_handle_invalid_date_format():
@@ -121,12 +131,16 @@ def test_handle_invalid_date_format():
 
     # GIVEN some event payload where the uploaded at is malformed
     event_payload = {
-        "cg.customer": "cust000",
-        "cg.sample_name": "sample-name",
+        CUSTOMER_INTERNAL_ID_FIELD: "cust000",
+        SAMPLE_NAME_FIELD: "sample-name",
         "customer_uploaded_at": "2026-06-02T11:14.52",
     }
 
     # WHEN calling handle with a CGConfig and the event payload
     # THEN a ValidationError should be raised
     with pytest.raises(ValidationError):
-        external_sample_uploaded_handler.handle(config=cg_config, event_payload=event_payload)
+        external_sample_uploaded_handler.handle(
+            config=cg_config,
+            event_payload=event_payload,
+            event_metadata=create_autospec(EventMetadata),
+        )

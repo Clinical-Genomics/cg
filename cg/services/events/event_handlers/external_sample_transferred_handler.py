@@ -1,0 +1,133 @@
+import logging
+import shutil
+from datetime import datetime
+from pathlib import Path
+
+from housekeeper.store.models import Bundle, File, Version
+from pydantic import BaseModel, Field
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.housekeeper_tags import EXTERNAL_DATA_TAG, AlignmentFileTag, SequencingFileTag
+from cg.exc import CgError
+from cg.models.cg_config import CGConfig
+from cg.services import slack_notification_service
+from cg.services.events import event_publisher
+from cg.services.events.constants import (
+    EXTERNAL_SAMPLE_STORED_EVENT,
+    EXTERNAL_SAMPLE_TRANSFERRED_EVENT,
+    RETRY_NOTIFICATION_THRESHOLD,
+    SAMPLE_INTERNAL_ID_FIELD,
+)
+from cg.services.events.event_metadata import EventMetadata
+from cg.services.slack_notification_service import SlackNotification
+from cg.store.models import Sample
+
+LOG = logging.getLogger(__name__)
+
+
+class ExternalSampleTransferredEvent(BaseModel):
+    sample_internal_id: str = Field(alias=SAMPLE_INTERNAL_ID_FIELD)
+    cluster_location: Path
+    transfer_completed_at: datetime
+
+
+def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata) -> None:
+    """
+    Add all sequencing files for the sample in the payload to the Housekeeper database
+    and copy them to the corresponding Housekeeper bundle directory. Also update the entry for the
+    sample in the ExternalSample table with the datetime of the transfer.
+    """
+    LOG.debug(f"Received event payload {event_payload} with metadata {event_metadata.model_dump()}")
+    event = ExternalSampleTransferredEvent.model_validate(event_payload)
+    try:
+        _check_for_sequencing_files(event)
+        _update_external_sample(config=config, event=event)
+        _add_sample_files_to_housekeeper(housekeeper_api=config.housekeeper_api, event=event)
+        config.status_db.commit_to_store()
+        event_publisher.publish_event(
+            nats_config=config.nats,
+            event_name=EXTERNAL_SAMPLE_STORED_EVENT,
+            event_payload={SAMPLE_INTERNAL_ID_FIELD: event.sample_internal_id},
+        )
+    except Exception as e:
+        if event_metadata.num_delivered == RETRY_NOTIFICATION_THRESHOLD:
+            slack_notification_service.notify(
+                recipient=config.slack_webhooks.prod_team,
+                notification=SlackNotification(
+                    title="Failed to store an external sample",
+                    message=f"Message {event_metadata.sequence.stream}: {EXTERNAL_SAMPLE_TRANSFERRED_EVENT} failed for sample {event.sample_internal_id}",
+                    error=e,  # type: ignore
+                ),
+            )
+        raise e
+    else:
+        _delete_mirrored_folder(
+            config=config, event=event, message_id=event_metadata.sequence.stream
+        )
+
+
+def _check_for_sequencing_files(event: ExternalSampleTransferredEvent) -> None:
+    if not (
+        any(event.cluster_location.glob("*.bam")) or any(event.cluster_location.glob("*.fastq.gz"))
+    ):
+        raise CgError(f"No sequencing files found in directory {event.cluster_location}")
+
+
+def _update_external_sample(config: CGConfig, event: ExternalSampleTransferredEvent) -> None:
+    sample: Sample = config.status_db.get_sample_by_internal_id_strict(event.sample_internal_id)
+    config.status_db.update_external_sample(
+        sample_name=sample.name,
+        customer_id=sample.customer_id,
+        transferred_at=event.transfer_completed_at,
+    )
+    LOG.info(
+        f"Updated transferred_at for ExternalSample {sample.name} of customer {sample.customer_id} "
+        f"to {event.transfer_completed_at}."
+    )
+
+
+def _add_sample_files_to_housekeeper(
+    housekeeper_api: HousekeeperAPI, event: ExternalSampleTransferredEvent
+):
+    """
+    Creates a bundle and version for the given sample and adds the new files to it.
+    Raises:
+        BundleAlreadyAddedError: If a bundle for the sample already exists in Housekeeper.
+    """
+    bundle: Bundle = housekeeper_api.add_new_bundle_and_version(event.sample_internal_id)
+    version: Version = bundle.versions[0]
+
+    files: list[File] = []
+    for file_path in event.cluster_location.glob("*"):
+        tags = [event.sample_internal_id, EXTERNAL_DATA_TAG]
+        if file_path.as_posix().endswith(".fastq.gz"):
+            tags.append(SequencingFileTag.FASTQ)
+        elif file_path.as_posix().endswith(".bam"):
+            tags.append(AlignmentFileTag.BAM)
+        else:
+            LOG.info(f"Omitting storing for non-sequencing file {file_path}.")
+            continue
+        file: File = housekeeper_api.add_file(
+            path=str(file_path.absolute()), version_obj=version, tags=tags
+        )
+        files.append(file)
+    housekeeper_api.finalize_file_transactions(files=files, version=version)
+
+
+def _delete_mirrored_folder(
+    config: CGConfig, event: ExternalSampleTransferredEvent, message_id: int
+) -> None:
+    try:
+        shutil.rmtree(event.cluster_location)
+        LOG.info(
+            f"Deleted mirrored directory {event.cluster_location} for sample {event.sample_internal_id}."
+        )
+    except Exception as e:
+        slack_notification_service.notify(
+            recipient=config.slack_webhooks.sysdev_team,
+            notification=SlackNotification(
+                title=f"Failed to delete {event.cluster_location}",
+                message=f"Message {message_id}: {EXTERNAL_SAMPLE_TRANSFERRED_EVENT} succeeded for sample {event.sample_internal_id} but failed to delete mirrored directory at {event.cluster_location}",
+                error=e,  # type: ignore
+            ),
+        )

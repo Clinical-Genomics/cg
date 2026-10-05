@@ -9,11 +9,11 @@ from pytest_mock import MockFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress import fastq as fastq_module
-from cg.cli.compress.fastq import clean_fastq, fastq_cmd
-from cg.cli.compress.helpers import (
+from cg.cli.compress.compression_utils import (
     compress_fastq_to_spring_for_samples,
     get_samples_available_for_compression,
 )
+from cg.cli.compress.fastq import clean_fastq, fastq_cmd
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case, Sample

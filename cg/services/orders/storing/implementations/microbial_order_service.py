@@ -149,4 +149,5 @@ class StoreMicrobialOrderService(StoreOrderService):
             priority=sample.priority,
             reference_genome=sample.reference_genome,
             sex=Sex.UNKNOWN,
+            skip_compression=application_version.application.is_external,
         )

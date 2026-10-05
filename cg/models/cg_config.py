@@ -444,6 +444,7 @@ class FOHMConfig(BaseModel):
 class ExternalConfig(BaseModel):
     hasta: str
     caesar: str
+    cluster: str
 
 
 class SeqeraPlatformConfig(BaseModel):
@@ -475,6 +476,11 @@ class OxfordNanoporeConfig(BaseModel):
 class IlluminaConfig(BaseModel):
     sequencing_runs_dir: str
     demultiplexed_runs_dir: str
+
+
+class SlackWebhooks(BaseModel):
+    prod_team: str
+    sysdev_team: str
 
 
 class RunInstruments(BaseModel):
@@ -574,6 +580,7 @@ class CGConfig(BaseModel):
     scout_38: CommonAppConfig = None
     scout_api_37_: ScoutAPI = None
     scout_api_38_: ScoutAPI = None
+    slack_webhooks: SlackWebhooks
     tar: CommonAppConfig | None = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None

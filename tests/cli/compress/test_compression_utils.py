@@ -6,7 +6,7 @@ from typing import Iterator
 from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.compress import helpers
+from cg.cli.compress import compression_utils
 
 
 def test_get_true_dir_no_symlinks(project_dir: Path):
@@ -17,7 +17,7 @@ def test_get_true_dir_no_symlinks(project_dir: Path):
     assert a_file.exists()
 
     # WHEN fetching the true dir for the files in fixture dir
-    true_dir = helpers.get_true_dir(a_file.parent)
+    true_dir = compression_utils.get_true_dir(a_file.parent)
 
     # THEN assert that the true_dir is None since there where no symbolic links in the project_dir
     assert true_dir is None
@@ -44,7 +44,7 @@ def test_get_true_dir_when_symlinks(project_dir: Path):
     assert a_link.is_symlink() is True
 
     # WHEN fetching the true dir for the symlinked dir
-    true_dir = helpers.get_true_dir(a_link.parent)
+    true_dir = compression_utils.get_true_dir(a_link.parent)
 
     # THEN assert that the true_dir the same as the parent of the destination of the symlink
     assert true_dir == project_dir
@@ -55,7 +55,7 @@ def test_get_versions_no_bundle(housekeeper_api: HousekeeperAPI):
     # GIVEN a empty housekeeper_api
 
     # WHEN fetching versions
-    versions: Iterator[Version] = helpers.get_versions(housekeeper_api)
+    versions: Iterator[Version] = compression_utils.get_versions(housekeeper_api)
 
     # THEN assert no versions was returned
     assert sum(1 for version in versions) == 0
@@ -67,7 +67,7 @@ def test_get_versions_one_bundle(housekeeper_api: HousekeeperAPI, spring_bundle:
     housekeeper_api.add_bundle(spring_bundle)
 
     # WHEN fetching versions
-    versions = helpers.get_versions(housekeeper_api)
+    versions = compression_utils.get_versions(housekeeper_api)
 
     # THEN assert no versions was returned
     assert sum(1 for version in versions) == 1
@@ -82,13 +82,13 @@ def test_correct_spring_paths(
     # GIVEN a populated housekeeper_api
     housekeeper_api.add_bundle(spring_bundle_symlink_problem)
     # GIVEN that the spring files exists in the wrong location
-    versions: Iterator[Version] = helpers.get_versions(housekeeper_api)
+    versions: Iterator[Version] = compression_utils.get_versions(housekeeper_api)
     version: Version = next(versions)
     for file_path in version.files:
         assert not Path(file_path.full_path).exists()
 
     # WHEN updating the spring paths
-    helpers.correct_spring_paths(housekeeper_api)
+    compression_utils.correct_spring_paths(housekeeper_api)
 
     # THEN assert that the spring paths has been moved
     for file_path in version.files:

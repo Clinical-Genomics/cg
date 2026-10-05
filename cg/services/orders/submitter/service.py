@@ -7,13 +7,21 @@ document with all information about samples in the submission. The input will
 be validated and if passing all checks be accepted as new samples.
 """
 
+import logging
+
+from cg.models.cg_config import NatsConfig
 from cg.models.orders.constants import OrderType
-from cg.services.orders.storing.service import StoreOrderService
+from cg.services.events import event_publisher
+from cg.services.events.constants import CUSTOMER_INTERNAL_ID_FIELD, SAMPLE_NAME_ARRAY_FIELD
+from cg.services.orders.storing.service import SampleType, StoreOrderService
 from cg.services.orders.storing.service_registry import StoringServiceRegistry
 from cg.services.orders.submitter.ticket_handler import TicketHandler
 from cg.services.orders.validation.models.order import Order
 from cg.services.orders.validation.service import OrderValidationService
 from cg.store.models import User
+from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 class OrderSubmitter:
@@ -21,17 +29,21 @@ class OrderSubmitter:
 
     def __init__(
         self,
-        ticket_handler: TicketHandler,
+        status_db: Store,
         storing_registry: StoringServiceRegistry,
+        ticket_handler: TicketHandler,
         validation_service: OrderValidationService,
+        nats_config: NatsConfig,
     ):
         super().__init__()
-        self.ticket_handler = ticket_handler
+        self.status_db = status_db
         self.storing_registry = storing_registry
+        self.ticket_handler = ticket_handler
         self.validation_service = validation_service
+        self.nats_config = nats_config
 
     def submit(self, order_type: OrderType, raw_order: dict, user: User) -> dict:
-        """Submit a batch of samples.
+        """Submit a batch of samples. Publishes event if there are external samples.
 
         Main entry point for the class towards interfaces that implements it.
         """
@@ -39,8 +51,31 @@ class OrderSubmitter:
         order: Order = self.validation_service.parse_and_validate(
             raw_order=raw_order, order_type=order_type, user_id=user.id
         )
+        if external_samples := order.external_samples(self.status_db):
+            self._publish_event_with_external_samples(
+                customer_internal_id=order.customer, external_samples=external_samples
+            )
         ticket_number: int = self.ticket_handler.create_ticket(
             order=order, user_name=user.name, user_mail=user.email, order_type=order_type
         )
         order._generated_ticket_id = ticket_number
         return storing_service.store_order(order)
+
+    def _publish_event_with_external_samples(
+        self, customer_internal_id: str, external_samples: list[SampleType]
+    ) -> None:
+        sample_names: list[str] = [sample.name for sample in external_samples]
+        LOG.info(f"Order contains external samples {sample_names}")
+        payload: dict = _get_payload_for_external_samples(
+            customer_internal_id=customer_internal_id, sample_names=sample_names
+        )
+        event_name = "external.samples_ordered"
+        event_publisher.publish_event(
+            nats_config=self.nats_config,
+            event_name=event_name,
+            event_payload=payload,
+        )
+
+
+def _get_payload_for_external_samples(customer_internal_id: str, sample_names: list[str]) -> dict:
+    return {CUSTOMER_INTERNAL_ID_FIELD: customer_internal_id, SAMPLE_NAME_ARRAY_FIELD: sample_names}
