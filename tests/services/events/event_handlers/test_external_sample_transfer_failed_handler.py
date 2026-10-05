@@ -11,7 +11,7 @@ from cg.services.events.constants import (
 )
 from cg.services.events.event_handlers import external_sample_transfer_failed_handler
 from cg.services.events.event_handlers.external_sample_transfer_failed_handler import (
-    MAX_RETRIES,
+    MAX_ATTEMPTS,
     slack_notification_service,
     transfer_to_cluster_service,
 )
@@ -40,7 +40,7 @@ def test_handle_failure_successfully(mocker: MockerFixture):
         SAMPLE_INTERNAL_ID_FIELD: "ACC123",
         "transfer_failed_at": "2026-10-02T13:32:27",
         "log_dir": "/folder/logs",
-        "number_of_retries": 0,
+        "number_of_attempts": 1,
     }
     metadata = EventMetadata(
         sequence=EventSequence(consumer=1, stream=1),
@@ -62,7 +62,7 @@ def test_handle_failure_successfully(mocker: MockerFixture):
 
     # THEN a new rsync job should have been sent out
     transfer_to_cluster_mock.assert_called_once_with(
-        cg_config=config, sample=sample, number_of_retries=1
+        cg_config=config, sample=sample, number_of_attempts=2
     )
 
     # THEN a Slack notification have been sent out
@@ -72,7 +72,7 @@ def test_handle_failure_successfully(mocker: MockerFixture):
     assert first_call.kwargs["notification"].title == "Failed to RSYNC external sample to cluster"
     assert (
         first_call.kwargs["notification"].message
-        == f"Message 1: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` Attempt 1 of 5 failed for sample `ACC123` at 2026-10-02 13:32:27.\nSee the logs in: /folder/logs"
+        == f"Message 1: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}`\nAttempt 1 of 5 failed for sample `ACC123` at 2026-10-02 13:32:27.\nSee the logs in: `/folder/logs`"
     )
 
 
@@ -96,7 +96,7 @@ def test_handle_failure_limit_reached(mocker: MockerFixture):
         SAMPLE_INTERNAL_ID_FIELD: "ACC123",
         "transfer_failed_at": "2026-10-02T13:32:27",
         "log_dir": "/folder/logs",
-        "number_of_retries": MAX_RETRIES,
+        "number_of_attempts": MAX_ATTEMPTS,
     }
     metadata = EventMetadata(
         sequence=EventSequence(consumer=1, stream=1),
@@ -131,5 +131,5 @@ def test_handle_failure_limit_reached(mocker: MockerFixture):
     )
     assert (
         first_call.kwargs["notification"].message
-        == f"Message 1: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` failed for sample `ACC123` at 2026-10-02 13:32:27.\nSee the logs in: /folder/logs. Will not try further"
+        == f"Message 1: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` failed for sample `ACC123` at 2026-10-02 13:32:27.\nSee the logs in: `/folder/logs`. Will not try further"
     )
