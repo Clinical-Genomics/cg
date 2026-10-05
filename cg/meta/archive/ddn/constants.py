@@ -2,9 +2,6 @@ from enum import StrEnum
 
 OSTYPE: str = "Unix/MacOS"
 
-DESTINATION_ATTRIBUTE: str = "destination"
-SOURCE_ATTRIBUTE: str = "source"
-
 DELETE_FILE_SUCCESSFUL_MESSAGE: str = "Object has been deleted"
 
 

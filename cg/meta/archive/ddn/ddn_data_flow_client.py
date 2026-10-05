@@ -13,9 +13,7 @@ from cg.exc import ArchiveJobFailedError, DdnDataflowAuthenticationError, DdnDat
 from cg.io.api import get, post
 from cg.meta.archive.ddn.constants import (
     DELETE_FILE_SUCCESSFUL_MESSAGE,
-    DESTINATION_ATTRIBUTE,
     FAILED_JOB_STATUSES,
-    SOURCE_ATTRIBUTE,
     DataflowEndpoints,
     JobStatus,
 )
@@ -144,12 +142,11 @@ class DDNDataFlowClient(ArchiveHandler):
         """
         source_prefix: str
         destination_prefix: str
-        attribute: str
 
-        source_prefix, destination_prefix, attribute = (
-            (self.local_storage, self.archive_repository, SOURCE_ATTRIBUTE)
+        source_prefix, destination_prefix = (
+            (self.local_storage, self.archive_repository)
             if is_archiving_request
-            else (self.archive_repository, self.local_storage, DESTINATION_ATTRIBUTE)
+            else (self.archive_repository, self.local_storage)
         )
 
         transfer_request = TransferPayload(
