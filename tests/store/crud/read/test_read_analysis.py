@@ -532,12 +532,34 @@ def test_get_analysis_by_entry_id(
     # GIVEN a database with a number of analyses
 
     # WHEN getting an analysis by entry id
-    analysis: Analysis = store_with_analyses_for_cases_not_uploaded_fluffy.get_analysis_by_entry_id(
-        entry_id=1
+    analysis: Analysis | None = (
+        store_with_analyses_for_cases_not_uploaded_fluffy.get_analysis_by_entry_id(entry_id=1)
     )
 
     # THEN assert that the analysis is returned
-    assert analysis.id == 1
+    assert analysis and analysis.id == 1
+
+
+def test_get_analysis_by_entry_id_strict_returns_analysis(base_store: Store, helpers: StoreHelpers):
+    # GIVEN a store with an analysis
+    analysis = helpers.add_analysis(base_store)
+
+    # WHEN getting the analysis by the entry id using the strict version
+    returned_analysis = base_store.get_analysis_by_entry_id_strict(analysis.id)
+
+    # THEN the existing analysis was returned
+    assert returned_analysis == analysis
+
+
+def test_get_analysis_by_entry_id_strict_with_missing_analysis(
+    base_store: Store, helpers: StoreHelpers
+):
+    # GIVEN a store with no analyses
+
+    # WHEN attempting to get an analysis by the entry id using the strict version
+    # THEN it raises an AnalysisDoesNotExistError
+    with pytest.raises(AnalysisDoesNotExistError):
+        base_store.get_analysis_by_entry_id_strict(789)
 
 
 def test_get_cases_for_analysis_filters_out_analysis_older_than_last_sequenced_sample(
