@@ -11,6 +11,7 @@ from cg.services.events.constants import (
 )
 from cg.services.events.event_handlers import external_sample_transfer_failed_handler
 from cg.services.events.event_handlers.external_sample_transfer_failed_handler import (
+    MAX_RETRIES,
     slack_notification_service,
     transfer_to_cluster_service,
 )
@@ -71,14 +72,64 @@ def test_handle_failure_successfully(mocker: MockerFixture):
     assert first_call.kwargs["notification"].title == "Failed to RSYNC external sample to cluster"
     assert (
         first_call.kwargs["notification"].message
-        == f"Message 1: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` failed for sample `ACC123` at 2026-10-02 13:32:27.\nSee the logs in: /folder/logs"
+        == f"Message 1: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` attempt 1 of 5 failed for sample `ACC123` at 2026-10-02 13:32:27.\nSee the logs in: /folder/logs"
     )
 
 
-def test_handle_failure_limit_reached():
-    # GIVEN
-    # TODO: implement test
-    # WHEN
+def test_handle_failure_limit_reached(mocker: MockerFixture):
+    # GIVEN status db with a sample
+    status_db = create_autospec(Store)
+    sample = create_autospec(Sample, internal_id="ACC123")
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=sample)
 
-    # THEN
-    pass
+    # GIVEN a config with webhooks
+    config = create_autospec(
+        CGConfig,
+        status_db=status_db,
+        slack_webhooks=SlackWebhooks(
+            sysdev_team="https://sys-dev.team", prod_team="https://production-dev.team"
+        ),
+    )
+
+    # GIVEN an event with a payload and metadata
+    event_payload = {
+        SAMPLE_INTERNAL_ID_FIELD: "ACC123",
+        "transfer_failed_at": "2026-10-02T13:32:27",
+        "log_dir": "/folder/logs",
+        "number_of_retries": MAX_RETRIES,
+    }
+    metadata = EventMetadata(
+        sequence=EventSequence(consumer=1, stream=1),
+        num_pending=1,
+        num_delivered=1,
+        timestamp=datetime.now(),
+        stream="cg-test",
+        consumer="cluster-consumer",
+    )
+
+    # GIVEN a transfer service
+    transfer_to_cluster_spy = mocker.spy(transfer_to_cluster_service, "transfer_sample")
+
+    # GIVEN a notification service
+    slack_notification_mock = mocker.patch.object(slack_notification_service, "notify")
+
+    # WHEN calling the external sample transfer failed handler
+    external_sample_transfer_failed_handler.handle(
+        config=config, event_payload=event_payload, event_metadata=metadata
+    )
+
+    # THEN the sample should not be transferred again
+    transfer_to_cluster_spy.assert_not_called()
+
+    # THEN a Slack notification have been sent out
+    calls = slack_notification_mock.call_args_list
+    first_call = calls[0]
+    assert first_call.kwargs["recipient"] == "https://sys-dev.team"
+    assert (
+        first_call.kwargs["notification"].title
+        == "Final attempt to RSYNC external sample to cluster failed"
+    )
+    assert (
+        first_call.kwargs["notification"].message
+        == f"Message 1: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` failed for sample `ACC123` at 2026-10-02 13:32:27.\nSee the logs in: /folder/logs. Will not try further"
+    )
