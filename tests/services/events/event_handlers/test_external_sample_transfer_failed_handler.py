@@ -20,10 +20,12 @@ from cg.store.store import Store
 
 
 def test_handle_failure_successfully(mocker: MockerFixture):
-    # event, metadata
+    # GIVEN status db with a sample
     status_db = create_autospec(Store)
     sample = create_autospec(Sample, internal_id="ACC123")
     status_db.get_sample_by_internal_id_strict = Mock(return_value=sample)
+
+    # GIVEN a config with webhooks
     config = create_autospec(
         CGConfig,
         status_db=status_db,
@@ -32,6 +34,7 @@ def test_handle_failure_successfully(mocker: MockerFixture):
         ),
     )
 
+    # GIVEN an event with a payload and metadata
     event_payload = {
         SAMPLE_INTERNAL_ID_FIELD: "ACC123",
         "transfer_failed_at": "2026-10-02T13:32:27",
@@ -46,11 +49,11 @@ def test_handle_failure_successfully(mocker: MockerFixture):
         consumer="cluster-consumer",
     )
 
+    # GIVEN a transfer_to_cluster_service and a slack_notification_service
     transfer_to_cluster_mock = mocker.patch.object(transfer_to_cluster_service, "transfer_sample")
-
     slack_notification_mock = mocker.patch.object(slack_notification_service, "notify")
 
-    # start another rsync job using transfer to cluster service
+    # WHEN calling the external sample transfer failed handler
     external_sample_transfer_failed_handler.handle(
         config=config, event_payload=event_payload, event_metadata=metadata
     )
