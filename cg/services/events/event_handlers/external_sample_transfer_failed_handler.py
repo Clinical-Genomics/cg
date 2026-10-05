@@ -16,9 +16,11 @@ from cg.store.models import Sample
 class ExternalSampleTransferFailedEvent(BaseModel):
     sample_internal_id: str = Field(alias=SAMPLE_INTERNAL_ID_FIELD)
     transfer_failed_at: datetime
+    log_dir: str
 
 
 def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata):
+    # TODO find a way to not send events indefinitely
     event = ExternalSampleTransferFailedEvent.model_validate(event_payload)
     sample: Sample = config.status_db.get_sample_by_internal_id_strict(
         internal_id=event.sample_internal_id
@@ -27,7 +29,7 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
         recipient=config.slack_webhooks.sysdev_team,
         notification=SlackNotification(
             title="Failed to RSYNC external sample to cluster",
-            message=f"Message {event_metadata.sequence.stream}: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` failed for sample `{event.sample_internal_id}` at {event.transfer_failed_at}",
+            message=f"Message {event_metadata.sequence.stream}: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` failed for sample `{event.sample_internal_id}` at {event.transfer_failed_at}.\nSee the logs in: {event.log_dir}",
         ),
     )
     transfer_to_cluster_service.transfer_sample(cg_config=config, sample=sample)

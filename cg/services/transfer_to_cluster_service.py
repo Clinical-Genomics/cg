@@ -90,12 +90,14 @@ def _get_sbatch_parameters(
     sample: Sample,
     sbatch_path: Path,
 ) -> Sbatch:
+    log_dir: str = sbatch_path.parent.as_posix()
     failure_event = event_publisher.get_publish_command(
         nats_config=cg_config.nats,
         event_name=EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT,
         data={
             SAMPLE_INTERNAL_ID_FIELD: sample.internal_id,
             "transfer_failed_at": "$(date +%Y-%m-%dT%H:%M:%S)",
+            "log_dir": log_dir,
         },
     )
     sbatch_parameters = Sbatch(
@@ -103,7 +105,7 @@ def _get_sbatch_parameters(
         account=data_delivery_config.account,
         number_tasks=1,
         memory=1,
-        log_dir=sbatch_path.parent.as_posix(),
+        log_dir=log_dir,
         email=data_delivery_config.mail_user,
         hours=24,
         commands=command,
