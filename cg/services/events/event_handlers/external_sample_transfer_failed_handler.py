@@ -17,6 +17,7 @@ class ExternalSampleTransferFailedEvent(BaseModel):
     sample_internal_id: str = Field(alias=SAMPLE_INTERNAL_ID_FIELD)
     transfer_failed_at: datetime
     log_dir: str
+    number_of_retries: int
 
 
 def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata):
@@ -32,4 +33,6 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
             message=f"Message {event_metadata.sequence.stream}: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` failed for sample `{event.sample_internal_id}` at {event.transfer_failed_at}.\nSee the logs in: {event.log_dir}",
         ),
     )
-    transfer_to_cluster_service.transfer_sample(cg_config=config, sample=sample)
+    transfer_to_cluster_service.transfer_sample(
+        cg_config=config, sample=sample, number_of_retries=event.number_of_retries + 1
+    )

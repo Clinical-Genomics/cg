@@ -24,7 +24,7 @@ LOG = logging.getLogger(__name__)
 RSYNC_SBATCH_SCRIPT: str = "transfer_sample.sh"
 
 
-def transfer_sample(cg_config: CGConfig, sample: Sample):
+def transfer_sample(cg_config: CGConfig, sample: Sample, number_of_retries: int = 0):
     """Submit an sbatch job that rsyncs one external sample to the destination cluster."""
     LOG.info(
         f"Preparing to transfer sample {sample.name} for customer {sample.customer.internal_id}"
@@ -38,6 +38,7 @@ def transfer_sample(cg_config: CGConfig, sample: Sample):
         cg_config=cg_config,
         command=sbatch_command,
         data_delivery_config=cg_config.data_delivery,
+        number_of_retries=number_of_retries,
         sample=sample,
         sbatch_path=sbatch_script,
     )
@@ -87,6 +88,7 @@ def _get_sbatch_parameters(
     cg_config: CGConfig,
     command: str,
     data_delivery_config: DataDeliveryConfig,
+    number_of_retries: int,
     sample: Sample,
     sbatch_path: Path,
 ) -> Sbatch:
@@ -98,6 +100,7 @@ def _get_sbatch_parameters(
             SAMPLE_INTERNAL_ID_FIELD: sample.internal_id,
             "transfer_failed_at": "$(date +%Y-%m-%dT%H:%M:%S)",
             "log_dir": log_dir,
+            "number_of_retries": number_of_retries,
         },
     )
     sbatch_parameters = Sbatch(

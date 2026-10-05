@@ -39,6 +39,7 @@ def test_handle_failure_successfully(mocker: MockerFixture):
         SAMPLE_INTERNAL_ID_FIELD: "ACC123",
         "transfer_failed_at": "2026-10-02T13:32:27",
         "log_dir": "/folder/logs",
+        "number_of_retries": 0,
     }
     metadata = EventMetadata(
         sequence=EventSequence(consumer=1, stream=1),
@@ -59,7 +60,9 @@ def test_handle_failure_successfully(mocker: MockerFixture):
     )
 
     # THEN a new rsync job should have been sent out
-    transfer_to_cluster_mock.assert_called_once_with(cg_config=config, sample=sample)
+    transfer_to_cluster_mock.assert_called_once_with(
+        cg_config=config, sample=sample, number_of_retries=1
+    )
 
     # THEN a Slack notification have been sent out
     calls = slack_notification_mock.call_args_list
