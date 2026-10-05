@@ -22,7 +22,7 @@ from cg.store.store import Store
 def test_handle_failure_successfully(mocker: MockerFixture):
     # event, metadata
     status_db = create_autospec(Store)
-    sample = create_autospec(Sample)
+    sample = create_autospec(Sample, internal_id="ACC123")
     status_db.get_sample_by_internal_id_strict = Mock(return_value=sample)
     config = create_autospec(
         CGConfig,
