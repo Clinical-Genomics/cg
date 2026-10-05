@@ -16,6 +16,7 @@ from cg.services.events.event_handlers.external_sample_transfer_failed_handler i
     transfer_to_cluster_service,
 )
 from cg.services.events.event_metadata import EventMetadata, EventSequence
+from cg.services.slack_notification_service import SlackNotification
 from cg.store.models import Sample
 from cg.store.store import Store
 
@@ -66,13 +67,17 @@ def test_handle_failure_successfully(mocker: MockerFixture):
     )
 
     # THEN a Slack notification have been sent out
-    calls = slack_notification_mock.call_args_list
-    first_call = calls[0]
-    assert first_call.kwargs["recipient"] == "https://sys-dev.team"
-    assert first_call.kwargs["notification"].title == "Failed to RSYNC external sample to cluster"
-    assert (
-        first_call.kwargs["notification"].message
-        == f"Message 1: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}`\nAttempt 1 of 5 failed for sample `ACC123` at 2026-10-02 13:32:27.\nSee the logs in: `/folder/logs`"
+    expected_notification = SlackNotification(
+        title="Failed to RSYNC external sample to cluster",
+        message=(
+            f"Message 1: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}`\n"
+            "Attempt 1 of 5 failed for sample `ACC123` at 2026-10-02 13:32:27.\n"
+            "See the logs in: `/folder/logs`"
+        ),
+    )
+    slack_notification_mock.assert_called_once_with(
+        recipient="https://sys-dev.team",
+        notification=expected_notification,
     )
 
 
@@ -122,14 +127,14 @@ def test_handle_failure_limit_reached(mocker: MockerFixture):
     transfer_to_cluster_spy.assert_not_called()
 
     # THEN a Slack notification have been sent out
-    calls = slack_notification_mock.call_args_list
-    first_call = calls[0]
-    assert first_call.kwargs["recipient"] == "https://sys-dev.team"
-    assert (
-        first_call.kwargs["notification"].title
-        == "Final attempt to RSYNC external sample to cluster failed"
+    expected_notification = SlackNotification(
+        title="Final attempt to RSYNC external sample to cluster failed",
+        message=(
+            f"Message 1: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` failed for sample `ACC123` "
+            "at 2026-10-02 13:32:27.\nSee the logs in: `/folder/logs`. Will not try further"
+        ),
     )
-    assert (
-        first_call.kwargs["notification"].message
-        == f"Message 1: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` failed for sample `ACC123` at 2026-10-02 13:32:27.\nSee the logs in: `/folder/logs`. Will not try further"
+    slack_notification_mock.assert_called_once_with(
+        recipient="https://sys-dev.team",
+        notification=expected_notification,
     )
