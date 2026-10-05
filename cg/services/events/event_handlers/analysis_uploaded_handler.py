@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 from cg.models.cg_config import CGConfig
 from cg.services.events.constants import ANALYSIS_ID_FIELD
+from cg.services.events.event_metadata import EventMetadata
 
 LOG = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ class AnalysisUploadedEvent(BaseModel):
     uploaded_at: datetime
 
 
-def handle(config: CGConfig, event_payload: dict) -> None:
+def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata) -> None:
     event = AnalysisUploadedEvent.model_validate(event_payload)
 
     if analysis := config.status_db.get_analysis_by_entry_id_strict(event.analysis_id):

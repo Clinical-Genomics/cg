@@ -7,6 +7,7 @@ from sqlalchemy import Case
 from cg.apps.tb.api import TrailblazerAPI
 from cg.models.cg_config import CGConfig
 from cg.services.events.event_handlers import analysis_uploaded_handler
+from cg.services.events.event_metadata import EventMetadata
 from cg.store.models import Analysis
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
@@ -30,7 +31,9 @@ def test_completed_success():
     cg_config = create_autospec(CGConfig, status_db=store.as_type, trailblazer_api=trailblazer_api)
 
     # WHEN a completed event is handled
-    analysis_uploaded_handler.handle(config=cg_config, event_payload=payload)
+    analysis_uploaded_handler.handle(
+        config=cg_config, event_payload=payload, event_metadata=create_autospec(EventMetadata)
+    )
 
     # THEN the analysis uploaded_at should have been updated
     expected_date = datetime(year=2026, month=6, day=2, hour=11, minute=14, second=52)
@@ -56,4 +59,6 @@ def test_completed_missing_analysis():
     # WHEN a completed event is handled
     # THEN the exception is propagated
     with pytest.raises(Exception):
-        analysis_uploaded_handler.handle(config=cg_config, event_payload=payload)
+        analysis_uploaded_handler.handle(
+            config=cg_config, event_payload=payload, event_metadata=create_autospec(EventMetadata)
+        )
