@@ -20,7 +20,7 @@ def test_handle_failure_successfully(mocker: MockerFixture):
     status_db = create_autospec(Store)
     sample = create_autospec(Sample)
     status_db.get_sample_by_internal_id_strict = Mock(return_value=sample)
-    config = create_autospec(CGConfig)
+    config = create_autospec(CGConfig, status_db=status_db)
 
     event_payload = {
         SAMPLE_INTERNAL_ID_FIELD: "ACC123",
