@@ -17,7 +17,6 @@ from cg.constants.subject import Sex
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.archive.ddn import ddn_data_flow_client
-from cg.meta.archive.ddn.constants import ROOT_TO_TRIM
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import AuthToken, MiriaObject, TransferPayload
 from cg.meta.archive.models import FileAndSample
@@ -27,18 +26,19 @@ from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.fixture(name="ddn_dataflow_config")
+@pytest.fixture
 def ddn_dataflow_config(
     local_storage_repository: str, remote_storage_repository: str
 ) -> DataFlowConfig:
     """Returns a mock DDN Dataflow config."""
     return DataFlowConfig(
+        archive_repository=remote_storage_repository,
         database_name="test_db",
-        user="test_user",
+        housekeeper_mnt=Path("/path/to/housekeeper-bundles"),
+        local_storage=local_storage_repository,
         password="DummyPassword",
         url=Path("some", "api", "url.com").as_posix(),
-        local_storage=local_storage_repository,
-        archive_repository=remote_storage_repository,
+        user="test_user",
     )
 
 
@@ -50,7 +50,10 @@ def ok_miria_response(ok_response: Response):
 
 @pytest.fixture
 def archive_request_json(
-    remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
+    ddn_dataflow_config: DataFlowConfig,
+    remote_storage_repository: str,
+    local_storage_repository: str,
+    local_path: str,
 ) -> dict:
     return {
         "osType": "Unix/MacOS",
@@ -58,7 +61,10 @@ def archive_request_json(
         "pathInfo": [
             {
                 "destination": f"{remote_storage_repository}ADM1",
-                "source": local_storage_repository + trimmed_local_path,
+                "source": local_storage_repository
+                + ddn_dataflow_config.housekeeper_mnt.as_posix()
+                + "/"
+                + local_path,
             }
         ],
         "metadataList": [],
@@ -68,7 +74,10 @@ def archive_request_json(
 
 @pytest.fixture
 def retrieve_request_json(
-    remote_storage_repository: str, local_storage_repository: str, trimmed_local_path: str
+    ddn_dataflow_config: DataFlowConfig,
+    remote_storage_repository: str,
+    local_storage_repository: str,
+    local_path: str,
 ) -> dict[str, Any]:
     """Returns the body for a retrieval http post towards the DDN Miria API."""
     return {
@@ -77,7 +86,9 @@ def retrieve_request_json(
         "pathInfo": [
             {
                 "destination": local_storage_repository
-                + Path(trimmed_local_path).parent.as_posix(),
+                + ddn_dataflow_config.housekeeper_mnt.as_posix()
+                + "/"
+                + Path(local_path).parent.as_posix(),
                 "source": f"{remote_storage_repository}ADM1",
             }
         ],
@@ -152,9 +163,9 @@ def file_and_sample(spring_archive_api: SpringArchiveAPI, sample_id: str):
 
 
 @pytest.fixture
-def trimmed_local_path(spring_archive_api: SpringArchiveAPI, sample_id: str):
+def local_path(spring_archive_api: SpringArchiveAPI, sample_id: str):
     file: File = spring_archive_api.housekeeper_api.get_files(bundle=sample_id).first()
-    return file.path[5:]
+    return file.path
 
 
 @pytest.fixture
@@ -179,14 +190,7 @@ def remote_path() -> Path:
 
 @pytest.fixture
 def local_directory() -> Path:
-    """Returns a mock path with /home as its root."""
-    return Path(ROOT_TO_TRIM, "other", "place")
-
-
-@pytest.fixture
-def trimmed_local_directory(local_directory: Path) -> Path:
-    """Returns the trimmed local directory."""
-    return Path(f"/{local_directory.relative_to(ROOT_TO_TRIM)}")
+    return Path("other", "place")
 
 
 @pytest.fixture
@@ -303,7 +307,6 @@ def spring_archive_api(
         tag_names=[ArchiveLocations.KAROLINSKA_BUCKET]
     )
     for spring_file in populated_housekeeper_api.files(tags=[SequencingFileTag.SPRING]):
-        spring_file.path = f"/home/{spring_file.path}"
         if spring_file.version.bundle.name == sample_id:
             spring_file.tags.append(
                 populated_housekeeper_api.get_tag(name=ArchiveLocations.KAROLINSKA_BUCKET)
