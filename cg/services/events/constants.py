@@ -5,7 +5,10 @@ EXTERNAL_SAMPLE_TRANSFER_COMPLETED_EVENT = "external.sample_transfer_completed"
 EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT = "external.sample_transfer_failed"
 EXTERNAL_SAMPLE_UPLOADED_EVENT = "external.sample_upload_completed"
 
+ANALYSIS_UPLOADED_SUBJECT = "analysis.upload_completed"
+
 # Payload attributes
+ANALYSIS_ID_FIELD = "cg.analysis_id"
 CUSTOMER_INTERNAL_ID_FIELD = "status_db.customer.internal_id"
 SAMPLE_INTERNAL_ID_FIELD = "status_db.sample.internal_id"
 SAMPLE_NAME_ARRAY_FIELD = "status_db.sample.name.array"
