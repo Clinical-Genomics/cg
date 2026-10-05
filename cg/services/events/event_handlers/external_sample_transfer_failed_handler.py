@@ -29,7 +29,7 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
             recipient=config.slack_webhooks.sysdev_team,
             notification=SlackNotification(
                 title="Final attempt to RSYNC external sample to cluster failed",
-                message=f"Message {event_metadata.sequence.stream}: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` failed for sample `{event.sample_internal_id}` at {event.transfer_failed_at}.\nSee the logs in: {event.log_dir}. Will not try further",
+                message=f"Message {event_metadata.sequence.stream}: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` failed for sample `{event.sample_internal_id}` at {event.transfer_failed_at}.\nSee the logs in: `{event.log_dir}`. Will not try further",
             ),
         )
     else:
@@ -41,7 +41,7 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
             recipient=config.slack_webhooks.sysdev_team,
             notification=SlackNotification(
                 title="Failed to RSYNC external sample to cluster",
-                message=f"Message {event_metadata.sequence.stream}: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}`\nAttempt {number_of_retries} of {MAX_RETRIES} failed for sample `{event.sample_internal_id}` at {event.transfer_failed_at}.\nSee the logs in: {event.log_dir}",
+                message=f"Message {event_metadata.sequence.stream}: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}`\nAttempt {number_of_retries} of {MAX_RETRIES} failed for sample `{event.sample_internal_id}` at `{event.transfer_failed_at}`.\nSee the logs in: {event.log_dir}",
             ),
         )
         transfer_to_cluster_service.transfer_sample(
