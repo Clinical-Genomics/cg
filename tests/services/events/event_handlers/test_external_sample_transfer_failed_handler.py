@@ -64,5 +64,5 @@ def test_handle_failure_successfully(mocker: MockerFixture):
     assert first_call.kwargs["notification"].title == "Failed to RSYNC external sample to cluster"
     assert (
         first_call.kwargs["notification"].message
-        == f"Message 1: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` failed for sample `ACC123`"
+        == f"Message 1: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` failed for sample `ACC123` at 2026-10-02 13:32:27"
     )
