@@ -28,11 +28,13 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
     LOG.debug(f"Received event payload {event_payload} with metadata {event_metadata.model_dump()}")
     event = ExternalSampleTransferFailedEvent.model_validate(event_payload)
     if event.number_of_attempts >= MAX_ATTEMPTS:
+        log_message = f"Message {event_metadata.sequence.stream}: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` failed for sample `{event.sample_internal_id}` at {event.transfer_failed_at}.\nSee the logs in: `{event.log_dir}`. Will not try further"
+        LOG.info(log_message)
         slack_notification_service.notify(
             recipient=config.slack_webhooks.sysdev_team,
             notification=SlackNotification(
                 title="Final attempt to RSYNC external sample to cluster failed",
-                message=f"Message {event_metadata.sequence.stream}: `{EXTERNAL_SAMPLE_TRANSFER_FAILED_EVENT}` failed for sample `{event.sample_internal_id}` at {event.transfer_failed_at}.\nSee the logs in: `{event.log_dir}`. Will not try further",
+                message=log_message,
             ),
         )
     else:
