@@ -158,32 +158,32 @@ class DemultiplexingAPI:
             - sample sheet needs to exist
             - demultiplexing should not be running
         """
-        LOG.info(f"Check if demultiplexing is possible for {sequencing_run.id}")
+        LOG.debug(f"Check if demultiplexing is possible for {sequencing_run.id}")
         demultiplexing_possible = True
         if not sequencing_run.is_sequencing_run_ready():
             demultiplexing_possible = False
 
         if not sequencing_run.sample_sheet_exists():
-            LOG.warning(
+            LOG.debug(
                 f"Could not find sample sheet in sequencing run directory for {sequencing_run.id}"
             )
             demultiplexing_possible = False
 
         if not self.is_sample_sheet_in_housekeeper(flow_cell_id=sequencing_run.id):
-            LOG.warning(f"Could not find sample sheet in Housekeeper for {sequencing_run.id}")
+            LOG.debug(f"Could not find sample sheet in Housekeeper for {sequencing_run.id}")
             demultiplexing_possible = False
 
         if (
             sequencing_run.has_demultiplexing_started_locally()
             or sequencing_run.has_demultiplexing_started_on_sequencer()
         ):
-            LOG.warning("Demultiplexing has already been started")
+            LOG.debug("Demultiplexing has already been started")
             demultiplexing_possible = False
 
         return demultiplexing_possible
 
     def create_demultiplexing_started_file(self, demultiplexing_started_path: Path) -> None:
-        LOG.info("Creating demultiplexing started file")
+        LOG.debug("Creating demultiplexing started file")
         if self.dry_run:
             return
         demultiplexing_started_path.touch(exist_ok=False)
@@ -195,7 +195,7 @@ class DemultiplexingAPI:
     @staticmethod
     def write_trailblazer_config(content: dict, file_path: Path) -> None:
         """Write the content to a yaml file"""
-        LOG.info(f"Writing yaml content {content} to {file_path}")
+        LOG.debug(f"Writing yaml content {content} to {file_path}")
         WriteFile.write_file_from_content(
             content=content, file_format=FileFormat.YAML, file_path=file_path
         )
