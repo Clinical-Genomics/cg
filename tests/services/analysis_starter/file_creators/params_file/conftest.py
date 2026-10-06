@@ -8,6 +8,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
     rnafusion,
     taxprofiler,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
+    trana_params_file_creator as trana,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.nallo import (
     NalloParamsFileCreator,
 )
@@ -16,6 +19,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.taxprofiler import (
     TaxprofilerParamsFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.trana_params_file_creator import (
+    TranaParamsFileCreator,
 )
 
 
@@ -83,10 +89,16 @@ def expected_taxprofiler_params_file_content(
 
 
 @pytest.fixture
+def expected_trana_params_file_content() -> dict:
+    return {}
+
+
+@pytest.fixture
 def params_file_scenario(
     expected_nallo_params_file_content: dict,
     expected_rnafusion_params_file_content: dict,
     expected_taxprofiler_params_file_content: dict,
+    expected_trana_params_file_content: dict,
 ) -> dict:
     return {
         Workflow.NALLO: (
@@ -104,4 +116,5 @@ def params_file_scenario(
             expected_taxprofiler_params_file_content,
             taxprofiler,
         ),
+        Workflow.TRANA: (TranaParamsFileCreator, expected_trana_params_file_content, trana),
     }
