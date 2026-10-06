@@ -1212,7 +1212,7 @@ class IlluminaFlowCell(RunDevice):
         ForeignKey("run_device.id", ondelete="CASCADE"), primary_key=True
     )
     model: Mapped[str | None] = mapped_column(
-        types.Enum("10B", "25B", "1.5B", "S1", "S2", "S4", "SP")
+        types.Enum("5B", "10B", "25B", "1.5B", "S1", "S2", "S4", "SP")
     )
 
     __mapper_args__ = {"polymorphic_identity": DeviceType.ILLUMINA}
