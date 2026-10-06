@@ -32,6 +32,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
     TomteSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
+    TranaSampleSheetCreator,
+)
 
 
 @pytest.fixture
@@ -144,6 +147,8 @@ def sample_sheet_scenario(
     taxprofiler_sample_sheet_expected_content: list[list[str]],
     tomte_sample_sheet_creator: TomteSampleSheetCreator,
     tomte_sample_sheet_expected_content: list[list[str]],
+    trana_sample_sheet_creator: TranaSampleSheetCreator,
+    trana_sample_sheet_expected_content: list[list[str]],
 ) -> dict:
     return {
         Workflow.RAREDISEASE: (
@@ -159,4 +164,5 @@ def sample_sheet_scenario(
             taxprofiler_sample_sheet_expected_content,
         ),
         Workflow.TOMTE: (tomte_sample_sheet_creator, tomte_sample_sheet_expected_content),
+        Workflow.TRANA: (trana_sample_sheet_creator, trana_sample_sheet_expected_content),
     }
