@@ -1,9 +1,10 @@
+import inspect
 from datetime import datetime
 from unittest.mock import create_autospec
 
 from cg.models.cg_config import CGConfig
 from cg.services.events import event_dispatching
-from cg.services.events.event_dispatching import EventHandler
+from cg.services.events.event_dispatching import EVENT_HANDLERS, EventHandler
 from cg.services.events.event_metadata import EventMetadata, EventSequence
 
 
@@ -76,3 +77,12 @@ def test_dispatch_no_handler():
         event_handlers={},
         event_metadata=event_metadata,
     )
+
+
+def test_dispatch_all_registered_handlers_conform_to_protocol():
+    # GIVEN a dictionary of registered handlers
+    # WHEN looking at their signatures
+    # THEN all the signatures match the EventHandler protocol
+    for event_name, handler in EVENT_HANDLERS.items():
+        handler_parameters = dict(inspect.signature(handler).parameters)
+        assert handler_parameters.keys() == {"config", "event_payload", "event_metadata"}
