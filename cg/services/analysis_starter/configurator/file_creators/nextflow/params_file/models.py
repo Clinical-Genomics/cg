@@ -68,3 +68,7 @@ class TomteParameters(WorkflowParameters):
             return GenomeVersion.GRCh38.value
         elif genome == GenomeVersion.HG19:
             return GenomeVersion.GRCh37.value
+
+
+class TranaParameters(WorkflowParameters):
+    """Model for Trana parameters."""
