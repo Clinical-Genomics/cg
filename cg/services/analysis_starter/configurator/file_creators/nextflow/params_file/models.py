@@ -10,7 +10,6 @@ from cg.utils.utils import replace_non_alphanumeric
 
 
 class WorkflowParameters(BaseModel):
-    input: Path
     outdir: Path
 
 
@@ -18,6 +17,7 @@ class NalloParameters(WorkflowParameters):
     """Model for Nallo parameters."""
 
     filter_variants_hgnc_ids: str
+    input: Path
 
 
 class RarediseaseParameters(WorkflowParameters):
@@ -27,6 +27,7 @@ class RarediseaseParameters(WorkflowParameters):
     analysis_type: str
     gcnvcaller_model: Path | None
     ploidy_model: Path | None
+    input: Path
     readcount_intervals: Path | None
     sample_id_map: Path
     skip_tools: str | None
@@ -41,17 +42,22 @@ class RarediseaseParameters(WorkflowParameters):
 class RNAFusionParameters(WorkflowParameters):
     """RNAFUSION parameters."""
 
+    input: Path
+
 
 class TaxprofilerParameters(WorkflowParameters):
     """Taxprofiler parameters."""
+
+    input: Path
 
 
 class TomteParameters(WorkflowParameters):
     """Model for Tomte parameters."""
 
     gene_panel_clinical_filter: Path
-    tissue: str
     genome: str = GenomeVersion.HG38
+    input: Path
+    tissue: str
 
     @field_validator("tissue", mode="before")
     @classmethod
