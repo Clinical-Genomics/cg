@@ -91,10 +91,12 @@ def expected_taxprofiler_params_file_content(
 @pytest.fixture
 def expected_trana_params_file_content(
     case_run_dir: Path,
+    nextflow_sample_sheet_path: Path,
     nextflow_workflow_params_content: dict,
 ) -> dict:
     """Return a dictionary with parameters for the Trana params file."""
     case_parameters = {
+        "input": nextflow_sample_sheet_path,
         "outdir": case_run_dir,
     }
     return case_parameters | nextflow_workflow_params_content
