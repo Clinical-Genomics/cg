@@ -6,6 +6,8 @@ from cg.constants.constants import GenomeVersion
 from cg.constants.sample_sources import SourceType
 from cg.utils.utils import replace_non_alphanumeric
 
+# TODO start here?
+
 
 class WorkflowParameters(BaseModel):
     input: Path
