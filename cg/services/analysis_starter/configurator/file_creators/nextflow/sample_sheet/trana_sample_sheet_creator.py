@@ -8,7 +8,7 @@ HEADERS: list[str] = ["sample", "fastq_1", "fastq_2", "control"]
 class TranaSampleSheetCreator(NextflowFastqSampleSheetCreator):
 
     def _get_content(self, case_id: str) -> list[list[str]]:
-        pass
+        return []
 
-    def _get_sample_sheet_content_per_sample():
+    def _get_sample_sheet_content_per_sample(self):
         pass
