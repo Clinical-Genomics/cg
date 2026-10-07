@@ -33,6 +33,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
     TomteSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
+    HEADERS as TRANA_HEADERS,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
     TranaSampleSheetCreator,
 )
 
@@ -135,6 +138,14 @@ def tomte_sample_sheet_expected_content(
         Strandedness.REVERSE,
     ]
     return [TOMTE_HEADERS, row]
+
+
+@pytest.fixture
+def trana_sample_sheet_expected_content(
+    fastq_path_1: Path, nextflow_sample_id: str
+) -> list[list[str]]:
+    row: list[str] = [nextflow_sample_id, fastq_path_1.as_posix(), "", "control_sample"]
+    return [TRANA_HEADERS, row]
 
 
 @pytest.fixture
