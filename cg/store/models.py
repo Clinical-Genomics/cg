@@ -8,6 +8,7 @@ from sqlalchemy import (
     DECIMAL,
     VARCHAR,
     BigInteger,
+    CheckConstraint,
     Column,
     ForeignKey,
     Numeric,
@@ -777,6 +778,26 @@ SAMPLE_NAME_MINIMUM_LENGTH = 2
 SAMPLE_NAME_MAXIMUM_LENGTH = 128
 
 
+class SampleControl(Base):
+    __tablename__ = "sample_control"
+    __table_args__ = (
+        CheckConstraint(
+            "sample_id <> sample_control_id",
+            name="sample_control_no_self_reference_ck",
+        ),
+    )
+    sample_id: Mapped[int] = mapped_column(
+        ForeignKey("sample.id", ondelete="CASCADE"), primary_key=True, nullable=False, index=True
+    )
+    sample_control_id: Mapped[int] = mapped_column(
+        ForeignKey("sample.id", ondelete="CASCADE"), nullable=False, primary_key=True, index=True
+    )
+    sample: Mapped["Sample"] = orm.relationship(
+        foreign_keys=[sample_id], back_populates="control_samples"
+    )
+    control: Mapped["Sample"] = orm.relationship(foreign_keys=[sample_control_id])
+
+
 class Sample(Base, PriorityMixin):
     __tablename__ = "sample"
     age_at_sampling: Mapped[float | None]
@@ -831,6 +852,9 @@ class Sample(Base, PriorityMixin):
     )
     father_links: Mapped[list[CaseSample]] = orm.relationship(
         foreign_keys=[CaseSample.father_id], back_populates="father"
+    )
+    control_samples: Mapped[list[SampleControl]] = orm.relationship(
+        foreign_keys=[SampleControl.sample_id], back_populates="sample"
     )
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="samples")
     pool: Mapped[Pool] = orm.relationship(foreign_keys=[pool_id], back_populates="samples")
