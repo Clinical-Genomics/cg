@@ -832,6 +832,9 @@ class Sample(Base, PriorityMixin):
     father_links: Mapped[list[CaseSample]] = orm.relationship(
         foreign_keys=[CaseSample.father_id], back_populates="father"
     )
+    control_samples: Mapped[list["SampleControl"]] = orm.relationship(
+        foreign_keys=[SampleControl.sample_control_id]
+    )
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="samples")
     pool: Mapped[Pool] = orm.relationship(foreign_keys=[pool_id], back_populates="samples")
 
@@ -1084,6 +1087,21 @@ class Sample(Base, PriorityMixin):
         if links:
             data["links"] = [link_obj.to_dict(family=True, parents=True) for link_obj in self.links]
         return data
+
+
+class SampleControl(Base):
+    __tablename__ = "sample_control"
+    __table_args__ = UniqueConstraint("sample_id", "control_id")
+
+    id: Mapped[PrimaryKeyInt]
+    sample_id: Mapped[int] = mapped_column(
+        ForeignKey("sample.id", ondelete="CASCADE", nullable=False)
+    )
+    sample_control_id: Mapped[int] = mapped_column(
+        ForeignKey("sample.id", ondelete="CASCADE", nullable=False)
+    )
+    sample: Mapped[Sample] = orm.relationship(foreign_keys=[sample_id])
+    sample_control: Mapped[Sample] = orm.relationship(foreign_keys=[sample_control_id])
 
 
 class ExternalSample(Base):
