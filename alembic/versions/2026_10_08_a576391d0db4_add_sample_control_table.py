@@ -20,10 +20,21 @@ depends_on = None
 def upgrade():
     op.create_table(
         "sample_control",
-        sa.Column("sample_id", sa.Integer(), nullable=False, index=True),
-        sa.Column("control_sample_id", sa.Integer(), nullable=False, index=True),
+        sa.Column(
+            "sample_id",
+            sa.Integer(),
+            sa.ForeignKey("sample.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        sa.Column(
+            "control_sample_id",
+            sa.Integer(),
+            sa.ForeignKey("sample.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        sa.PrimaryKeyConstraint("sample_id", "control_sample_id"),
     )
 
 
 def downgrade():
-    pass
+    op.drop_table(table_name="sample_control")
