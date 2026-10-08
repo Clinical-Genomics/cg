@@ -777,6 +777,24 @@ SAMPLE_NAME_MINIMUM_LENGTH = 2
 SAMPLE_NAME_MAXIMUM_LENGTH = 128
 
 
+class SampleControl(Base):
+    __tablename__ = "sample_control"
+
+    sample_id: Mapped[int] = mapped_column(
+        ForeignKey("sample.id", ondelete="CASCADE"), primary_key=True, nullable=False
+    )
+    sample_control_id: Mapped[int] = mapped_column(
+        ForeignKey("sample.id", ondelete="CASCADE"),
+        nullable=False,
+        primary_key=True,
+    )
+    # TODO: CheckConstraint for sample_id != sample_control_id
+    sample: Mapped["Sample"] = orm.relationship(foreign_keys=[sample_id])  # TODO: backpopulate
+    control: Mapped["Sample"] = orm.relationship(
+        foreign_keys=[sample_control_id]
+    )  # TODO: backpopulate
+
+
 class Sample(Base, PriorityMixin):
     __tablename__ = "sample"
     age_at_sampling: Mapped[float | None]
@@ -832,8 +850,8 @@ class Sample(Base, PriorityMixin):
     father_links: Mapped[list[CaseSample]] = orm.relationship(
         foreign_keys=[CaseSample.father_id], back_populates="father"
     )
-    control_samples: Mapped[list["SampleControl"]] = orm.relationship(
-        foreign_keys=[SampleControl.sample_control_id]
+    control_samples: Mapped[list[SampleControl]] = orm.relationship(
+        foreign_keys=[SampleControl.sample_id]
     )
     invoice: Mapped["Invoice | None"] = orm.relationship(back_populates="samples")
     pool: Mapped[Pool] = orm.relationship(foreign_keys=[pool_id], back_populates="samples")
@@ -1087,21 +1105,6 @@ class Sample(Base, PriorityMixin):
         if links:
             data["links"] = [link_obj.to_dict(family=True, parents=True) for link_obj in self.links]
         return data
-
-
-class SampleControl(Base):
-    __tablename__ = "sample_control"
-    __table_args__ = UniqueConstraint("sample_id", "control_id")
-
-    id: Mapped[PrimaryKeyInt]
-    sample_id: Mapped[int] = mapped_column(
-        ForeignKey("sample.id", ondelete="CASCADE", nullable=False)
-    )
-    sample_control_id: Mapped[int] = mapped_column(
-        ForeignKey("sample.id", ondelete="CASCADE", nullable=False)
-    )
-    sample: Mapped[Sample] = orm.relationship(foreign_keys=[sample_id])
-    sample_control: Mapped[Sample] = orm.relationship(foreign_keys=[sample_control_id])
 
 
 class ExternalSample(Base):
