@@ -1,5 +1,6 @@
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, create_autospec
+
 import pytest
 from housekeeper.store.models import File
 from pytest_mock import MockerFixture
@@ -25,7 +26,14 @@ from cg.store.store import Store
 
 
 @pytest.mark.parametrize(
-    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE]
+    "workflow",
+    [
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+        Workflow.TRANA,
+    ],
 )
 def test_nextflow_fastq_sample_sheet_creators(
     workflow: Workflow,
@@ -113,7 +121,14 @@ def test_parse_fastq_header_raises_error():
 
 
 @pytest.mark.parametrize(
-    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE]
+    "workflow",
+    [
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+        Workflow.TRANA,
+    ],
 )
 def test_get_content_no_rows_raises(
     workflow: Workflow,
