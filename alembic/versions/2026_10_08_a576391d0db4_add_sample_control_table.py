@@ -24,15 +24,21 @@ def upgrade():
             "sample_id",
             sa.Integer(),
             sa.ForeignKey("sample.id", ondelete="CASCADE"),
-            nullable=False,  # TODO add index
+            nullable=False,
+            index=True,
         ),
         sa.Column(
             "sample_control_id",
             sa.Integer(),
             sa.ForeignKey("sample.id", ondelete="CASCADE"),
-            nullable=False,  # TODO: add index
+            nullable=False,
+            index=True,
         ),
         sa.PrimaryKeyConstraint("sample_id", "sample_control_id"),
+        sa.CheckConstraint(
+            "sample_id <> sample_control_id",
+            name="sample_control_no_self_reference_ck",
+        ),
     )
 
 
