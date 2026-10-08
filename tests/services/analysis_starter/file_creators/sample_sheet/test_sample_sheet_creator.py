@@ -31,8 +31,31 @@ from cg.store.store import Store
 def test_trana_fastq_sample_sheet_creator(
     trana_sample_sheet_creator: TranaSampleSheetCreator,
     trana_sample_sheet_expected_content: list[list[str]],
+    nextflow_case_id: str,
+    nextflow_case_path: Path,
+    mocker: MockerFixture,
 ):
-    pass
+    # GIVEN a store with trana case with a control and a none control sample
+
+    # GIVEN files connected to the samples
+    mocker.patch.object(
+        samplesheet_creator,
+        "read_gzip_first_line",
+        side_effect=[
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/2",
+        ],
+    )
+
+    # GIVEN that the sample sheet is written to a file
+    write_mock: MagicMock = mocker.patch.object(samplesheet_creator, "write_csv")
+
+    # WHEN creating the sample sheet
+    file_path = Path(nextflow_case_path, f"{nextflow_case_id}_samplesheet.csv")
+    trana_sample_sheet_creator.create(case_id=nextflow_case_id, file_path=file_path)
+
+    # THEN the sample sheet should have been written to the correct path with the correct content
+    write_mock.assert_called_with(content=trana_sample_sheet_expected_content, file_path=file_path)
 
 
 @pytest.mark.parametrize(

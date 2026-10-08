@@ -73,7 +73,7 @@ def tomte_sample_sheet_creator(
 
 @pytest.fixture
 def trana_sample_sheet_creator(
-    mock_housekeeper_for_nf_sample_sheet: HousekeeperAPI,
+    mock_housekeeper_for_trana_sample_sheet: HousekeeperAPI,
     nextflow_case_id: str,
     nextflow_sample_id: str,
 ) -> TranaSampleSheetCreator:
@@ -88,5 +88,5 @@ def trana_sample_sheet_creator(
     store.get_case_by_internal_id_strict = Mock(return_value=case)
     return TranaSampleSheetCreator(
         store=store,
-        housekeeper_api=mock_housekeeper_for_nf_sample_sheet,
+        housekeeper_api=mock_housekeeper_for_trana_sample_sheet,
     )
