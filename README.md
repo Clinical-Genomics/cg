@@ -14,10 +14,6 @@ In this context, `cg` provides the interface between these tools to facilitate a
 - HTTP REST for powering the web portal: [clinical.scilifelab.se][portal]
 - CLI for interactions on the command line.
 
-### Contributing
-
-Please check out our [guide for contributing to cg](CONTRIBUTING.md)
-
 ## Installation
 
 Cg written in Python 3.9+ and is available on the [Python Package Index][pypi] (PyPI).
