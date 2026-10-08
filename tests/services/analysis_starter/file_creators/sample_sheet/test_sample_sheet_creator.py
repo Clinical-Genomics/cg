@@ -21,8 +21,18 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo_sample_sheet_creator import (
     NalloSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
+    TranaSampleSheetCreator,
+)
 from cg.store.models import CaseSample, Sample
 from cg.store.store import Store
+
+
+def test_trana_fastq_sample_sheet_creator(
+    trana_sample_sheet_creator: TranaSampleSheetCreator,
+    trana_sample_sheet_expected_content: list[list[str]],
+):
+    pass
 
 
 @pytest.mark.parametrize(
