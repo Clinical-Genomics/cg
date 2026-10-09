@@ -962,7 +962,16 @@ class CaseSampleView(BaseView):
         "case": CaseView.view_case_link,
         "sample": SampleView.view_sample_link,
     }
-    column_searchable_list = ["case.internal_id", "case.name", "sample.internal_id"]
+    column_searchable_list = [
+        "case.internal_id",
+        "case.name",
+        "sample.internal_id",
+        "sample.name",
+        "father.internal_id",
+        "father.name",
+        "mother.internal_id",
+        "mother.name",
+    ]
     create_modal = True
     edit_modal = True
     form_ajax_refs = {
