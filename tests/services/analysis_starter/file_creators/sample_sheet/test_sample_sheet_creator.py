@@ -1,5 +1,6 @@
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, create_autospec
+
 import pytest
 from housekeeper.store.models import File
 from pytest_mock import MockerFixture
@@ -20,12 +21,53 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo_sample_sheet_creator import (
     NalloSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
+    TranaSampleSheetCreator,
+)
 from cg.store.models import CaseSample, Sample
 from cg.store.store import Store
 
 
+def test_trana_fastq_sample_sheet_creator(
+    trana_sample_sheet_creator: TranaSampleSheetCreator,
+    trana_sample_sheet_expected_content: list[list[str]],
+    nextflow_case_id: str,
+    nextflow_case_path: Path,
+    mocker: MockerFixture,
+):
+    # GIVEN a store with a Trana case with a control and a non-control sample
+
+    # GIVEN files connected to the samples
+    mocker.patch.object(
+        samplesheet_creator,
+        "read_gzip_first_line",
+        side_effect=[
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/2",
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/2",
+        ],
+    )
+
+    # GIVEN that the sample sheet is written to a file
+    write_mock: MagicMock = mocker.patch.object(samplesheet_creator, "write_csv")
+
+    # WHEN creating the sample sheet
+    file_path = Path(nextflow_case_path, f"{nextflow_case_id}_samplesheet.csv")
+    trana_sample_sheet_creator.create(case_id=nextflow_case_id, file_path=file_path)
+
+    # THEN the sample sheet should have been written to the correct path with the correct content
+    write_mock.assert_called_with(content=trana_sample_sheet_expected_content, file_path=file_path)
+
+
 @pytest.mark.parametrize(
-    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE]
+    "workflow",
+    [
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+    ],
 )
 def test_nextflow_fastq_sample_sheet_creators(
     workflow: Workflow,
@@ -61,7 +103,6 @@ def test_nextflow_fastq_sample_sheet_creators(
 def test_create_nallo_sample_sheet(
     expected_nallo_sample_sheet_content: list[list[str]], mocker: MockerFixture
 ):
-
     # GIVEN a Nallo case in StatusDB
     case_id = "nallo_case"
     case_sample = create_autospec(
@@ -113,7 +154,14 @@ def test_parse_fastq_header_raises_error():
 
 
 @pytest.mark.parametrize(
-    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE]
+    "workflow",
+    [
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+        Workflow.TRANA,
+    ],
 )
 def test_get_content_no_rows_raises(
     workflow: Workflow,

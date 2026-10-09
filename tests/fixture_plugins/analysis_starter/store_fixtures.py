@@ -83,6 +83,28 @@ def mock_housekeeper_for_nf_sample_sheet(fastq_path_1: Path, fastq_path_2: Path)
 
 
 @pytest.fixture
+def mock_housekeeper_for_trana_sample_sheet(
+    fastq_path_1: Path,
+    fastq_path_2: Path,
+    nextflow_sample_id: str,
+    trana_control_sample_id: str,
+) -> HousekeeperAPI:
+    files_by_bundle: dict[str, list[File]] = {
+        nextflow_sample_id: [
+            create_autospec(File, full_path=fastq_path_1.as_posix()),
+            create_autospec(File, full_path=fastq_path_2.as_posix()),
+        ],
+        trana_control_sample_id: [
+            create_autospec(File, full_path=fastq_path_1.as_posix()),
+            create_autospec(File, full_path=fastq_path_2.as_posix()),
+        ],
+    }
+    housekeeper_mock: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    housekeeper_mock.files.side_effect = lambda bundle, tags: files_by_bundle[bundle]
+    return housekeeper_mock
+
+
+@pytest.fixture
 def mock_store_for_nallo_file_creators() -> Store:
     mock_store: Store = create_autospec(Store)
     mock_store.get_case_workflow = Mock(return_value=Workflow.NALLO)
