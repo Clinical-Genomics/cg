@@ -384,6 +384,26 @@ class TaxprofilerConfig(CommonAppConfig):
     workflow_bin_path: str
 
 
+class TranaConfig(CommonAppConfig):
+    binary_path: str | None = None
+    compute_env: str
+    conda_binary: str | None = None
+    conda_env: str
+    config: str
+    launch_directory: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
+    pre_run_script: str
+    profile: str
+    repository: str
+    resources: str
+    revision: str
+    root: str
+    slurm: SlurmConfig
+    tower_workflow: str
+
+
 class MicrosaltConfig(BaseModel):
     binary_path: str
     conda_binary: str
@@ -590,6 +610,7 @@ class CGConfig(BaseModel):
     statina: StatinaConfig | None = None
     taxprofiler: TaxprofilerConfig | None = None
     tomte: TomteConfig | None = None
+    trana: TranaConfig | None = None
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
