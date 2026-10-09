@@ -487,7 +487,7 @@ class CustomerView(BaseView):
         "lab_contact": view_user_link,
         "primary_contact": view_user_link,
     }
-    column_searchable_list = ["internal_id", "label", "name", "primary_contact"]
+    column_searchable_list = ["internal_id", "label", "name", "primary_contact.name"]
     form_excluded_columns = ["families", "samples", "pools", "orders", "invoices"]
 
 
