@@ -76,10 +76,13 @@ def trana_sample_sheet_creator(
     mock_housekeeper_for_trana_sample_sheet: HousekeeperAPI,
     nextflow_case_id: str,
     nextflow_sample_id: str,
+    trana_control_sample_id: str,
 ) -> TranaSampleSheetCreator:
     store: Store = create_autospec(Store)
     sample: Sample = create_autospec(Sample, internal_id=nextflow_sample_id, control=None, id=1)
-    control_sample: Sample = create_autospec(Sample, control="negative", id=2)
+    control_sample: Sample = create_autospec(
+        Sample, internal_id=trana_control_sample_id, control="negative", id=2
+    )
     sample_control: SampleControl = create_autospec(SampleControl, sample_id=1, sample_control_id=2)
     sample.control_samples = [sample_control]
     case: Case = create_autospec(

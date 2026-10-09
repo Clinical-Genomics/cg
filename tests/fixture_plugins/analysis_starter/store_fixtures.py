@@ -86,8 +86,6 @@ def mock_housekeeper_for_nf_sample_sheet(fastq_path_1: Path, fastq_path_2: Path)
 def mock_housekeeper_for_trana_sample_sheet(
     fastq_path_1: Path,
     fastq_path_2: Path,
-    control_fastq_path_1: Path,
-    control_fastq_path_2: Path,
     nextflow_sample_id: str,
     trana_control_sample_id: str,
 ) -> HousekeeperAPI:
@@ -97,8 +95,8 @@ def mock_housekeeper_for_trana_sample_sheet(
             create_autospec(File, full_path=fastq_path_2.as_posix()),
         ],
         trana_control_sample_id: [
-            create_autospec(File, full_path=control_fastq_path_1.as_posix()),
-            create_autospec(File, full_path=control_fastq_path_2.as_posix()),
+            create_autospec(File, full_path=fastq_path_1.as_posix()),
+            create_autospec(File, full_path=fastq_path_2.as_posix()),
         ],
     }
     housekeeper_mock: HousekeeperAPI = create_autospec(HousekeeperAPI)

@@ -41,10 +41,7 @@ def test_trana_fastq_sample_sheet_creator(
     mocker.patch.object(
         samplesheet_creator,
         "read_gzip_first_line",
-        side_effect=[
-            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
-            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/2",
-        ],
+        return_value="@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
     )
 
     # GIVEN that the sample sheet is written to a file
