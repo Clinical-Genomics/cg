@@ -145,7 +145,8 @@ def trana_sample_sheet_expected_content(
     fastq_path_1: Path, nextflow_sample_id: str
 ) -> list[list[str]]:
     row: list[str] = [nextflow_sample_id, fastq_path_1.as_posix(), "", "control_sample"]
-    return [TRANA_HEADERS, row]
+    control_row: list[str] = ["control_sample", fastq_path_1.as_posix(), "", ""]
+    return [TRANA_HEADERS, row, control_row]
 
 
 @pytest.fixture

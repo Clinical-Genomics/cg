@@ -35,13 +35,18 @@ def test_trana_fastq_sample_sheet_creator(
     nextflow_case_path: Path,
     mocker: MockerFixture,
 ):
-    # GIVEN a store with trana case with a control and a none control sample
+    # GIVEN a store with a Trana case with a control and a non-control sample
 
     # GIVEN files connected to the samples
     mocker.patch.object(
         samplesheet_creator,
         "read_gzip_first_line",
-        return_value="@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
+        side_effect=[
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/2",
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
+            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/2",
+        ],
     )
 
     # GIVEN that the sample sheet is written to a file
@@ -62,7 +67,6 @@ def test_trana_fastq_sample_sheet_creator(
         Workflow.RNAFUSION,
         Workflow.TAXPROFILER,
         Workflow.TOMTE,
-        Workflow.TRANA,
     ],
 )
 def test_nextflow_fastq_sample_sheet_creators(
@@ -99,7 +103,6 @@ def test_nextflow_fastq_sample_sheet_creators(
 def test_create_nallo_sample_sheet(
     expected_nallo_sample_sheet_content: list[list[str]], mocker: MockerFixture
 ):
-
     # GIVEN a Nallo case in StatusDB
     case_id = "nallo_case"
     case_sample = create_autospec(

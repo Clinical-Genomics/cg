@@ -83,7 +83,11 @@ def trana_sample_sheet_creator(
     control_sample: Sample = create_autospec(
         Sample, internal_id=trana_control_sample_id, control="negative", id=2
     )
-    sample_control: SampleControl = create_autospec(SampleControl, sample_id=1, sample_control_id=2)
+    sample.name = nextflow_sample_id
+    control_sample.name = "control_sample"
+    sample_control: SampleControl = create_autospec(
+        SampleControl, sample_id=1, sample_control_id=2, control=control_sample
+    )
     sample.control_samples = [sample_control]
     case: Case = create_autospec(
         Case, internal_id=nextflow_case_id, samples=[sample, control_sample]
