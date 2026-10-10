@@ -3,6 +3,7 @@ from typing import Type
 
 import rich_click as click
 from housekeeper.store.models import Archive, File
+from requests import RequestException
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
@@ -183,6 +184,8 @@ class SpringArchiveAPI:
                 self.housekeeper_api.update_archive_retrieved_at(
                     old_retrieval_job_id=task_id, new_retrieval_job_id=None
                 )
+        except RequestException as error:
+            LOG.error(f"Failed to fetch status for job with id {task_id}: {error}")
 
     def sort_archival_ids_on_archive_location(
         self, archive_entries: list[Archive]

@@ -7,7 +7,7 @@ import pytest
 from click.testing import CliRunner
 from housekeeper.store.models import Bundle, File
 from pytest_mock import MockerFixture
-from requests import Response
+from requests import Response, Session
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
@@ -16,7 +16,6 @@ from cg.constants.constants import DataDelivery, FileFormat, Workflow
 from cg.constants.subject import Sex
 from cg.io.controller import WriteStream
 from cg.meta.archive.archive import SpringArchiveAPI
-from cg.meta.archive.ddn import ddn_data_flow_client
 from cg.meta.archive.ddn.constants import ROOT_TO_TRIM
 from cg.meta.archive.ddn.ddn_data_flow_client import DDNDataFlowClient
 from cg.meta.archive.ddn.models import AuthToken, MiriaObject, TransferPayload
@@ -130,7 +129,7 @@ def ddn_dataflow_client(
         },
     ).encode()
     mocker.patch.object(
-        ddn_data_flow_client,
+        Session,
         "post",
         return_value=mock_ddn_auth_success_response,
     )
