@@ -157,7 +157,12 @@ Please follow these steps to have your contribution considered by the maintainer
    failure is unrelated to your change, please leave a comment on the pull
    request explaining why you believe the failure is unrelated. A maintainer
    will re-run the status check for you.</details>
-4. Update CHANGELOG.md with relevant information
+4. Update CHANGELOG.md with relevant information about your change. If your change is a bug fix, add it to the
+   "Fixed" section. If it's a new feature, add it to the "Added" section. If
+   it's a breaking change, add it to the "Breaking Changes" section. If you're
+   not sure which section to add it to, please ask in the pull request comments. 
+   This is best done by adding your changelog as commit messages to GitHub, 
+   and the automation will take care of the rest.
 
 While the prerequisites above must be satisfied prior to having your pull
 request reviewed, the reviewer(s) may ask you to complete additional design
