@@ -4,7 +4,6 @@ from unittest.mock import MagicMock, Mock, create_autospec
 import pytest
 from housekeeper.store.models import File
 from pytest_mock import MockerFixture
-from sqlalchemy import Case
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
@@ -28,7 +27,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
     TranaSampleSheetCreator,
 )
-from cg.store.models import CaseSample, Sample
+from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
 
@@ -61,9 +60,8 @@ def test_trana_sample_sheet_creator_multiple_negative_controls(mocker: MockerFix
     negative_control_2: Sample = create_autospec(
         Sample, is_negative_control=True, internal_id="control_2"
     )
-    case: Case = create_autospec(
-        Case, internal_id="case_id", samples=[negative_control_1, negative_control_2]
-    )
+    case = create_autospec(Case, internal_id="case_id")
+    case.samples = [negative_control_1, negative_control_2]
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
     # GIVEN a TranaSampleSheetCreator
@@ -86,7 +84,8 @@ def test_trana_sample_sheet_creator_no_negative_controls(mocker: MockerFixture):
     status_db: Store = create_autospec(Store)
     sample_1: Sample = create_autospec(Sample, is_negative_control=False, internal_id="sample_1")
     sample_2: Sample = create_autospec(Sample, is_negative_control=False, internal_id="sample_2")
-    case: Case = create_autospec(Case, internal_id="case_id", samples=[sample_1, sample_2])
+    case = create_autospec(Case, internal_id="case_id")
+    case.samples = [sample_1, sample_2]
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
     # GIVEN a TranaSampleSheetCreator
