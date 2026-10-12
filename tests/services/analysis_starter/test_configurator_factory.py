@@ -93,6 +93,7 @@ def test_get_microsalt_configurator(cg_context: CGConfig):
         (Workflow.RNAFUSION, PipelineExtension),
         (Workflow.TAXPROFILER, PipelineExtension),
         (Workflow.TOMTE, TomteExtension),
+        (Workflow.TRANA, PipelineExtension),
     ],
 )
 def test_nextflow_configurator_factory_success(

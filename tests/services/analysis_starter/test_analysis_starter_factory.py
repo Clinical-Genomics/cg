@@ -20,6 +20,7 @@ from cg.models.cg_config import (
     SeqeraPlatformConfig,
     TaxprofilerConfig,
     TomteConfig,
+    TranaConfig,
 )
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.balsamic_configurator import (
@@ -136,7 +137,14 @@ def test_analysis_starter_factory_mip_dna():
 
 
 @pytest.mark.parametrize(
-    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE]
+    "workflow",
+    [
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+        Workflow.TRANA,
+    ],
 )
 def test_get_analysis_starter_for_workflow_nextflow_fastq(
     nextflow_root: str,
@@ -145,6 +153,7 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
     seqera_platform_config: SeqeraPlatformConfig,
     taxprofiler_config_object: TaxprofilerConfig,
     tomte_config_object: TomteConfig,
+    trana_config_object: TranaConfig,
     workflow: Workflow,
     mocker: MockerFixture,
 ):
@@ -156,6 +165,7 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
      - RNAFUSION
      - Taxprofiler
      - Tomte
+     - Trana
     """
     # GIVEN a CGConfig with valid Seqera platform, data flow and Nextflow pipeline configurations
     cg_config: CGConfig = create_autospec(
@@ -172,6 +182,7 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
         seqera_platform=seqera_platform_config,
         taxprofiler=taxprofiler_config_object,
         tomte=tomte_config_object,
+        trana=trana_config_object,
     )
 
     # GIVEN an AnalysisStarterFactory
