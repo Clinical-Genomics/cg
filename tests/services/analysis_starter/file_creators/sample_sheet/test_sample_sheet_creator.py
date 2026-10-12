@@ -8,7 +8,8 @@ from sqlalchemy import Case
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.exc import SampleSheetContentError, MissingNegativeControlError
+from cg.exc import MultipleNegativeControlsError, SampleSheetContentError
+from cg.models.orders.sample_base import ControlEnum
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
     creator as samplesheet_creator,
 )
@@ -60,13 +61,24 @@ def test_trana_fastq_sample_sheet_creator(
     write_mock.assert_called_with(content=trana_sample_sheet_expected_content, file_path=file_path)
 
 
-def test_trana_sample_sheet_creator_multiple_negative_controls():
-    # GIVEN
-
+def test_trana_sample_sheet_creator_multiple_negative_controls(mocker: MockerFixture):
+    # GIVEN a TranaSampleSheetCreator
+    status_db: Store = create_autospec(Store)
+    negative_control_1: Sample = create_autospec(Sample, control=ControlEnum.negative)
+    negative_control_2: Sample = create_autospec(Sample, control=ControlEnum.negative)
+    case: Case = create_autospec(Case, samples=[negative_control_1, negative_control_2])
+    status_db.get_case_by_internal_id_strict = Mock(return_value=case)
+    trana_sample_sheet_creator = TranaSampleSheetCreator(
+        store=status_db, housekeeper_api=create_autospec(HousekeeperAPI)
+    )
+    write_mock: MagicMock = mocker.patch.object(samplesheet_creator, "write_csv")
     # WHEN creating the sample sheet
     # THEN a MultipleNegativeControlsError is raised
     with pytest.raises(MultipleNegativeControlsError):
-        trana_sample_sheet_creator.create(case_id=nextflow_case_id, file_path=file_path)
+        trana_sample_sheet_creator.create(case_id="case_id", file_path=Path("file/path"))
+
+    # THEN no file was written
+    write_mock.assert_not_called()
 
 
 @pytest.mark.parametrize(

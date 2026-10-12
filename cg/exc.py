@@ -419,3 +419,7 @@ class SubjectIdMissingError(OrderFormError):
 
 class MissingNegativeControlError(CgError):
     """Exception raised when a case is missing a negative control"""
+
+
+class MultipleNegativeControlsError(CgError):
+    """Exception raised when a case has multiple a negative control"""

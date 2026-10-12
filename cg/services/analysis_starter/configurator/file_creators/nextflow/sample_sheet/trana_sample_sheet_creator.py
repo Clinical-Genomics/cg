@@ -1,11 +1,10 @@
-from cg.exc import SampleSheetContentError, MissingNegativeControlError
+from cg.exc import MissingNegativeControlError, SampleSheetContentError
 from cg.models.fastq import FastqFileMeta
 from cg.models.orders.sample_base import ControlEnum
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowFastqSampleSheetCreator,
 )
 from cg.store.models import Case, Sample
-
 
 HEADERS: list[str] = ["sample", "fastq_1", "fastq_2", "control"]
 
@@ -18,7 +17,9 @@ class TranaSampleSheetCreator(NextflowFastqSampleSheetCreator):
         sample_sheet_content: list[list[str]] = [HEADERS]
         sample_control: Sample = self._get_case_negative_control(case)
         for sample in case.samples:
-            sample_sheet_content.extend(self._get_sample_sheet_content_per_sample(sample))
+            sample_sheet_content.extend(
+                self._get_sample_sheet_content_per_sample(sample=sample, control=sample_control)
+            )
         if sample_sheet_content == [HEADERS]:
             raise SampleSheetContentError(f"Sample sheet for case {case_id} is empty.")
         return sample_sheet_content
@@ -56,4 +57,4 @@ class TranaSampleSheetCreator(NextflowFastqSampleSheetCreator):
         for sample in case.samples:
             if sample.control:
                 return sample
-        raise MissingControlError()
+        raise MultipleNegativeControlsError()
