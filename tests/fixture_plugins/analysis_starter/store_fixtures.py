@@ -3,6 +3,7 @@ from unittest.mock import Mock, create_autospec
 
 import pytest
 from housekeeper.store.models import File
+from sqlalchemy.orm import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import DataDelivery, Workflow
@@ -90,14 +91,24 @@ def mock_housekeeper_for_trana_sample_sheet(
     trana_control_sample_id: str,
 ) -> HousekeeperAPI:
     files_by_bundle: dict[str, list[File]] = {
-        nextflow_sample_id: [
-            create_autospec(File, full_path=fastq_path_1.as_posix()),
-            create_autospec(File, full_path=fastq_path_2.as_posix()),
-        ],
-        trana_control_sample_id: [
-            create_autospec(File, full_path=fastq_path_1.as_posix()),
-            create_autospec(File, full_path=fastq_path_2.as_posix()),
-        ],
+        nextflow_sample_id: create_autospec(
+            Query,
+            all=Mock(
+                return_value=[
+                    create_autospec(File, full_path=fastq_path_1.as_posix()),
+                    create_autospec(File, full_path=fastq_path_2.as_posix()),
+                ]
+            ),
+        ),
+        trana_control_sample_id: create_autospec(
+            Query,
+            all=Mock(
+                return_value=[
+                    create_autospec(File, full_path=fastq_path_1.as_posix()),
+                    create_autospec(File, full_path=fastq_path_2.as_posix()),
+                ]
+            ),
+        ),
     }
     housekeeper_mock: HousekeeperAPI = create_autospec(HousekeeperAPI)
     housekeeper_mock.files.side_effect = lambda bundle, tags: files_by_bundle[bundle]

@@ -1,10 +1,10 @@
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import (
     MissingNegativeControlError,
     MultipleNegativeControlsError,
     SampleSheetContentError,
 )
 from cg.models.fastq import FastqFileMeta
-from cg.models.orders.sample_base import ControlEnum
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowFastqSampleSheetCreator,
 )
@@ -32,11 +32,20 @@ class TranaSampleSheetCreator(NextflowFastqSampleSheetCreator):
         self, sample: Sample, control: Sample
     ) -> list[list[str]]:
         content: list[list[str]] = []
-        fastq_files: list[str] = self._get_fastq_files_for_sample(sample)
+        fastq_files: list[str] = self._get_fastq_paths(sample)
         for fastq in fastq_files:
             entry: list[str] = [sample.name, fastq, "", control.name if sample != control else ""]
             content.append(entry)
         return content
+
+    def _get_fastq_paths(self, sample) -> list[str]:
+        fastq_files: list[str] = [
+            file.full_path
+            for file in self.housekeeper_api.files(
+                bundle=sample.internal_id, tags={SequencingFileTag.FASTQ}
+            ).all()
+        ]
+        return fastq_files
 
     def _get_fastq_files_for_sample(self, sample: Sample) -> list[str]:
         # TODO: See if this approach works for unpaired data
