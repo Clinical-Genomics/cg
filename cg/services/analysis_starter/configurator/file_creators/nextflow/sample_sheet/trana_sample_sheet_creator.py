@@ -14,13 +14,16 @@ class TranaSampleSheetCreator(NextflowFastqSampleSheetCreator):
 
         case: Case = self.store.get_case_by_internal_id_strict(internal_id=case_id)
         sample_sheet_content: list[list[str]] = [HEADERS]
+        sample_control: Sample = self._get_case_negative_control(case)
         for sample in case.samples:
             sample_sheet_content.extend(self._get_sample_sheet_content_per_sample(sample))
         if sample_sheet_content == [HEADERS]:
             raise SampleSheetContentError(f"Sample sheet for case {case_id} is empty.")
         return sample_sheet_content
 
-    def _get_sample_sheet_content_per_sample(self, sample: Sample) -> list[list[str]]:
+    def _get_sample_sheet_content_per_sample(
+        self, sample: Sample, control: Sample
+    ) -> list[list[str]]:
         if sample.control:
             control_sample_name: str = ""
         else:
@@ -40,3 +43,12 @@ class TranaSampleSheetCreator(NextflowFastqSampleSheetCreator):
             metadata=sample_metadata, forward_read=True
         )
         return fastq_paths
+
+    def _get_case_negative_control(self, case: Case) -> Sample:
+        if not any(sample.control for sample in case.samples):
+            raise Error
+
+        for sample in case.samples:
+            if sample.control:
+                return sample
+        raise MissingControlError()

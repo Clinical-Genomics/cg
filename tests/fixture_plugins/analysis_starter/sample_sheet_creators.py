@@ -18,7 +18,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
     TranaSampleSheetCreator,
 )
-from cg.store.models import Case, Sample, SampleControl
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
@@ -85,10 +85,6 @@ def trana_sample_sheet_creator(
     )
     sample.name = nextflow_sample_id
     control_sample.name = "control_sample"
-    sample_control: SampleControl = create_autospec(
-        SampleControl, sample_id=1, sample_control_id=2, control=control_sample
-    )
-    sample.control_samples = [sample_control]
     case: Case = create_autospec(
         Case, internal_id=nextflow_case_id, samples=[sample, control_sample]
     )
