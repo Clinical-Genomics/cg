@@ -1,4 +1,5 @@
-from cg.exc import MissingNegativeControlError, SampleSheetContentError
+from cg.exc import MissingNegativeControlError, SampleSheetContentError, \
+    MultipleNegativeControlsError
 from cg.models.fastq import FastqFileMeta
 from cg.models.orders.sample_base import ControlEnum
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
@@ -47,14 +48,16 @@ class TranaSampleSheetCreator(NextflowFastqSampleSheetCreator):
         )
         return fastq_paths
 
-    def _get_case_negative_control(self, case: Case) -> Sample:
-        if not any(sample.control == ControlEnum.negative for sample in case.samples):
+    @staticmethod
+    def _get_case_negative_control(case: Case) -> Sample:
+        negative_controls: list[Sample] = [sample for sample in case.samples if sample.is_negative_control]
+        if len(negative_controls) == 0:
             raise MissingNegativeControlError(
-                f"No negative control found in case {case.internal_id}."
+                f"No negative control found in case {case.internal_id}." # TODO: Add test for this!
             )
-            # TODO: Add test for this!
-
-        for sample in case.samples:
-            if sample.control:
-                return sample
-        raise MultipleNegativeControlsError()
+        elif len(negative_controls) > 1:
+            raise MultipleNegativeControlsError(
+                f"Multiple controls {[control.internal_id for control in negative_controls]} found in case {case.internal_id}"
+            )
+        else:
+            return negative_controls[0]

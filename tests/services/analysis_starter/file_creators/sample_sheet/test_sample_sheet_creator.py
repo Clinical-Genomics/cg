@@ -8,7 +8,8 @@ from sqlalchemy import Case
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.exc import MultipleNegativeControlsError, SampleSheetContentError
+from cg.exc import MultipleNegativeControlsError, SampleSheetContentError, \
+    MissingNegativeControlError
 from cg.models.orders.sample_base import ControlEnum
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
     creator as samplesheet_creator,
@@ -62,19 +63,48 @@ def test_trana_fastq_sample_sheet_creator(
 
 
 def test_trana_sample_sheet_creator_multiple_negative_controls(mocker: MockerFixture):
-    # GIVEN a TranaSampleSheetCreator
+    # GIVEN a StatusDB which returns a case containing two negative controls
     status_db: Store = create_autospec(Store)
-    negative_control_1: Sample = create_autospec(Sample, control=ControlEnum.negative)
-    negative_control_2: Sample = create_autospec(Sample, control=ControlEnum.negative)
-    case: Case = create_autospec(Case, samples=[negative_control_1, negative_control_2])
+    negative_control_1: Sample = create_autospec(Sample, is_negative_control=True, internal_id="control_1")
+    negative_control_2: Sample = create_autospec(Sample, is_negative_control=True, internal_id="control_2")
+    case: Case = create_autospec(Case, internal_id="case_id", samples=[negative_control_1, negative_control_2])
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
+
+    # GIVEN a TranaSampleSheetCreator
     trana_sample_sheet_creator = TranaSampleSheetCreator(
         store=status_db, housekeeper_api=create_autospec(HousekeeperAPI)
     )
     write_mock: MagicMock = mocker.patch.object(samplesheet_creator, "write_csv")
+
     # WHEN creating the sample sheet
     # THEN a MultipleNegativeControlsError is raised
     with pytest.raises(MultipleNegativeControlsError):
+        trana_sample_sheet_creator.create(case_id="case_id", file_path=Path("file/path"))
+
+    # THEN no file was written
+    write_mock.assert_not_called()
+
+
+def test_trana_sample_sheet_creator_no_negative_controls(mocker: MockerFixture):
+    # GIVEN a StatusDB which returns a case containing no negative controls
+    status_db: Store = create_autospec(Store)
+    sample_1: Sample = create_autospec(Sample, is_negative_control=False,
+                                                 internal_id="sample_1")
+    sample_2: Sample = create_autospec(Sample, is_negative_control=False,
+                                                 internal_id="sample_2")
+    case: Case = create_autospec(Case, internal_id="case_id",
+                                 samples=[sample_1, sample_2])
+    status_db.get_case_by_internal_id_strict = Mock(return_value=case)
+
+    # GIVEN a TranaSampleSheetCreator
+    trana_sample_sheet_creator = TranaSampleSheetCreator(
+        store=status_db, housekeeper_api=create_autospec(HousekeeperAPI)
+    )
+    write_mock: MagicMock = mocker.patch.object(samplesheet_creator, "write_csv")
+
+    # WHEN creating the sample sheet
+    # THEN a MissingNegativeControlError is raised
+    with pytest.raises(MissingNegativeControlError):
         trana_sample_sheet_creator.create(case_id="case_id", file_path=Path("file/path"))
 
     # THEN no file was written
