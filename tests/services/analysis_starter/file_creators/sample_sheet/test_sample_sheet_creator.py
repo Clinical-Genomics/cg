@@ -8,9 +8,11 @@ from sqlalchemy import Case
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.exc import MultipleNegativeControlsError, SampleSheetContentError, \
-    MissingNegativeControlError
-from cg.models.orders.sample_base import ControlEnum
+from cg.exc import (
+    MissingNegativeControlError,
+    MultipleNegativeControlsError,
+    SampleSheetContentError,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
     creator as samplesheet_creator,
 )
@@ -39,18 +41,6 @@ def test_trana_fastq_sample_sheet_creator(
 ):
     # GIVEN a store with a Trana case with a control and a non-control sample
 
-    # GIVEN files connected to the samples
-    mocker.patch.object(
-        samplesheet_creator,
-        "read_gzip_first_line",
-        side_effect=[
-            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
-            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/2",
-            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/1",
-            "@ST-E00201:173:HCXXXXX:1:2106:22516:34834/2",
-        ],
-    )
-
     # GIVEN that the sample sheet is written to a file
     write_mock: MagicMock = mocker.patch.object(samplesheet_creator, "write_csv")
 
@@ -65,9 +55,15 @@ def test_trana_fastq_sample_sheet_creator(
 def test_trana_sample_sheet_creator_multiple_negative_controls(mocker: MockerFixture):
     # GIVEN a StatusDB which returns a case containing two negative controls
     status_db: Store = create_autospec(Store)
-    negative_control_1: Sample = create_autospec(Sample, is_negative_control=True, internal_id="control_1")
-    negative_control_2: Sample = create_autospec(Sample, is_negative_control=True, internal_id="control_2")
-    case: Case = create_autospec(Case, internal_id="case_id", samples=[negative_control_1, negative_control_2])
+    negative_control_1: Sample = create_autospec(
+        Sample, is_negative_control=True, internal_id="control_1"
+    )
+    negative_control_2: Sample = create_autospec(
+        Sample, is_negative_control=True, internal_id="control_2"
+    )
+    case: Case = create_autospec(
+        Case, internal_id="case_id", samples=[negative_control_1, negative_control_2]
+    )
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
     # GIVEN a TranaSampleSheetCreator
@@ -88,12 +84,9 @@ def test_trana_sample_sheet_creator_multiple_negative_controls(mocker: MockerFix
 def test_trana_sample_sheet_creator_no_negative_controls(mocker: MockerFixture):
     # GIVEN a StatusDB which returns a case containing no negative controls
     status_db: Store = create_autospec(Store)
-    sample_1: Sample = create_autospec(Sample, is_negative_control=False,
-                                                 internal_id="sample_1")
-    sample_2: Sample = create_autospec(Sample, is_negative_control=False,
-                                                 internal_id="sample_2")
-    case: Case = create_autospec(Case, internal_id="case_id",
-                                 samples=[sample_1, sample_2])
+    sample_1: Sample = create_autospec(Sample, is_negative_control=False, internal_id="sample_1")
+    sample_2: Sample = create_autospec(Sample, is_negative_control=False, internal_id="sample_2")
+    case: Case = create_autospec(Case, internal_id="case_id", samples=[sample_1, sample_2])
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
     # GIVEN a TranaSampleSheetCreator

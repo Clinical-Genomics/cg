@@ -4,7 +4,6 @@ from cg.exc import (
     MultipleNegativeControlsError,
     SampleSheetContentError,
 )
-from cg.models.fastq import FastqFileMeta
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowFastqSampleSheetCreator,
 )
@@ -46,14 +45,6 @@ class TranaSampleSheetCreator(NextflowFastqSampleSheetCreator):
             ).all()
         ]
         return fastq_files
-
-    def _get_fastq_files_for_sample(self, sample: Sample) -> list[str]:
-        # TODO: See if this approach works for unpaired data
-        sample_metadata: list[FastqFileMeta] = self._get_fastq_metadata_for_sample(sample)
-        fastq_paths: list[str] = self._extract_read_files(
-            metadata=sample_metadata, forward_read=True
-        )
-        return fastq_paths
 
     @staticmethod
     def _get_case_negative_control(case: Case) -> Sample:

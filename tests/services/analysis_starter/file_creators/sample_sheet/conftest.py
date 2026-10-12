@@ -142,11 +142,13 @@ def tomte_sample_sheet_expected_content(
 
 @pytest.fixture
 def trana_sample_sheet_expected_content(
-    fastq_path_1: Path, nextflow_sample_id: str
+    fastq_path_1: Path, fastq_path_2: Path, nextflow_sample_id: str
 ) -> list[list[str]]:
-    row: list[str] = [nextflow_sample_id, fastq_path_1.as_posix(), "", "control_sample"]
-    control_row: list[str] = ["control_sample", fastq_path_1.as_posix(), "", ""]
-    return [TRANA_HEADERS, row, control_row]
+    row1: list[str] = [nextflow_sample_id, fastq_path_1.as_posix(), "", "control_sample"]
+    row2: list[str] = [nextflow_sample_id, fastq_path_2.as_posix(), "", "control_sample"]
+    control_row1: list[str] = ["control_sample", fastq_path_1.as_posix(), "", ""]
+    control_row2: list[str] = ["control_sample", fastq_path_2.as_posix(), "", ""]
+    return [TRANA_HEADERS, row1, row2, control_row1, control_row2]
 
 
 @pytest.fixture
