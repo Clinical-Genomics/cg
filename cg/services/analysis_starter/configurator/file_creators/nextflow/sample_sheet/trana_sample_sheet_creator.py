@@ -53,7 +53,7 @@ class TranaSampleSheetCreator(NextflowFastqSampleSheetCreator):
         ]
         if len(negative_controls) == 0:
             raise MissingNegativeControlError(
-                f"No negative control found in case {case.internal_id}."  # TODO: Add test for this!
+                f"No negative control found in case {case.internal_id}."
             )
         elif len(negative_controls) > 1:
             raise MultipleNegativeControlsError(
