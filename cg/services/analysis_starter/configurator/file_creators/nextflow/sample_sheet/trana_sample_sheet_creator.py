@@ -1,5 +1,8 @@
-from cg.exc import MissingNegativeControlError, SampleSheetContentError, \
-    MultipleNegativeControlsError
+from cg.exc import (
+    MissingNegativeControlError,
+    MultipleNegativeControlsError,
+    SampleSheetContentError,
+)
 from cg.models.fastq import FastqFileMeta
 from cg.models.orders.sample_base import ControlEnum
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
@@ -28,15 +31,10 @@ class TranaSampleSheetCreator(NextflowFastqSampleSheetCreator):
     def _get_sample_sheet_content_per_sample(
         self, sample: Sample, control: Sample
     ) -> list[list[str]]:
-        if sample.control:
-            control_sample_name: str = ""
-        else:
-            control_sample_name: str = sample.control_samples[0].control.name
         content: list[list[str]] = []
         fastq_files: list[str] = self._get_fastq_files_for_sample(sample)
-        # TODO: what to do in the scenario of multiple controls
         for fastq in fastq_files:
-            entry: list[str] = [sample.name, fastq, "", control_sample_name]
+            entry: list[str] = [sample.name, fastq, "", control.name if sample != control else ""]
             content.append(entry)
         return content
 
@@ -50,10 +48,12 @@ class TranaSampleSheetCreator(NextflowFastqSampleSheetCreator):
 
     @staticmethod
     def _get_case_negative_control(case: Case) -> Sample:
-        negative_controls: list[Sample] = [sample for sample in case.samples if sample.is_negative_control]
+        negative_controls: list[Sample] = [
+            sample for sample in case.samples if sample.is_negative_control
+        ]
         if len(negative_controls) == 0:
             raise MissingNegativeControlError(
-                f"No negative control found in case {case.internal_id}." # TODO: Add test for this!
+                f"No negative control found in case {case.internal_id}."  # TODO: Add test for this!
             )
         elif len(negative_controls) > 1:
             raise MultipleNegativeControlsError(
