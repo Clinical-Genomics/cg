@@ -8,7 +8,7 @@ from sqlalchemy import Case
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.exc import SampleSheetContentError
+from cg.exc import SampleSheetContentError, MissingNegativeControlError
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
     creator as samplesheet_creator,
 )
@@ -58,6 +58,15 @@ def test_trana_fastq_sample_sheet_creator(
 
     # THEN the sample sheet should have been written to the correct path with the correct content
     write_mock.assert_called_with(content=trana_sample_sheet_expected_content, file_path=file_path)
+
+
+def test_trana_sample_sheet_creator_multiple_negative_controls():
+    # GIVEN
+
+    # WHEN creating the sample sheet
+    # THEN a MultipleNegativeControlsError is raised
+    with pytest.raises(MultipleNegativeControlsError):
+        trana_sample_sheet_creator.create(case_id=nextflow_case_id, file_path=file_path)
 
 
 @pytest.mark.parametrize(

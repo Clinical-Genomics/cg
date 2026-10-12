@@ -1,9 +1,11 @@
-from cg.exc import SampleSheetContentError
+from cg.exc import SampleSheetContentError, MissingNegativeControlError
 from cg.models.fastq import FastqFileMeta
+from cg.models.orders.sample_base import ControlEnum
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.creator import (
     NextflowFastqSampleSheetCreator,
 )
 from cg.store.models import Case, Sample
+
 
 HEADERS: list[str] = ["sample", "fastq_1", "fastq_2", "control"]
 
@@ -45,8 +47,11 @@ class TranaSampleSheetCreator(NextflowFastqSampleSheetCreator):
         return fastq_paths
 
     def _get_case_negative_control(self, case: Case) -> Sample:
-        if not any(sample.control for sample in case.samples):
-            raise Error
+        if not any(sample.control == ControlEnum.negative for sample in case.samples):
+            raise MissingNegativeControlError(
+                f"No negative control found in case {case.internal_id}."
+            )
+            # TODO: Add test for this!
 
         for sample in case.samples:
             if sample.control:
