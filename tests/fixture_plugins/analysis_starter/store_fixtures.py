@@ -90,26 +90,14 @@ def mock_housekeeper_for_trana_sample_sheet(
     nextflow_sample_id: str,
     trana_control_sample_id: str,
 ) -> HousekeeperAPI:
-    files_by_bundle: dict[str, list[File]] = {
-        nextflow_sample_id: create_autospec(
-            Query,
-            all=Mock(
-                return_value=[
-                    create_autospec(File, full_path=fastq_path_1.as_posix()),
-                    create_autospec(File, full_path=fastq_path_2.as_posix()),
-                ]
-            ),
-        ),
-        trana_control_sample_id: create_autospec(
-            Query,
-            all=Mock(
-                return_value=[
-                    create_autospec(File, full_path=fastq_path_1.as_posix()),
-                    create_autospec(File, full_path=fastq_path_2.as_posix()),
-                ]
-            ),
-        ),
-    }
+    files_by_bundle: dict[str, Query] = {}
+    for bundle in [nextflow_sample_id, trana_control_sample_id]:
+        query = create_autospec(Query)
+        query.all.return_value = [
+            create_autospec(File, full_path=fastq_path_1.as_posix()),
+            create_autospec(File, full_path=fastq_path_2.as_posix()),
+        ]
+        files_by_bundle[bundle] = query
     housekeeper_mock: HousekeeperAPI = create_autospec(HousekeeperAPI)
     housekeeper_mock.files.side_effect = lambda bundle, tags: files_by_bundle[bundle]
     return housekeeper_mock

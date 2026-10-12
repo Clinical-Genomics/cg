@@ -87,8 +87,9 @@ def trana_sample_sheet_creator(
     )
     sample.name = nextflow_sample_id
     control_sample.name = "control_sample"
-    case = create_autospec(Case, internal_id=nextflow_case_id)
-    case.samples = [sample, control_sample]
+    case: Case = create_autospec(
+        Case, internal_id=nextflow_case_id, samples=[sample, control_sample]
+    )
     store.get_case_by_internal_id_strict = Mock(return_value=case)
     return TranaSampleSheetCreator(
         store=store,
