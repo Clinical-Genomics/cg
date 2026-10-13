@@ -34,4 +34,4 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
             transfer_to_cluster_service.transfer_sample(cg_config=config, sample=sample)
             LOG.info(f"Transfer of sample {event.customer}/{sample_name} successfully started.")
         else:
-            LOG.info("Waiting for external sample to be uploaded")
+            LOG.info(f"Waiting for upload of external sample: {sample_name}")
