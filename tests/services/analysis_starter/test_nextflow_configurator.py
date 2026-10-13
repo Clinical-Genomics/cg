@@ -17,6 +17,7 @@ from cg.models.cg_config import (
     RnafusionConfig,
     TaxprofilerConfig,
     TomteConfig,
+    TranaConfig,
 )
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
     PipelineExtension,
@@ -43,6 +44,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.tomte_params_file_creator import (
     TomteParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.trana_params_file_creator import (
+    TranaParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo_sample_sheet_creator import (
     NalloSampleSheetCreator,
 )
@@ -58,6 +62,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
     TomteSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
+    TranaSampleSheetCreator,
+)
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.store.models import Analysis
@@ -72,7 +79,7 @@ from cg.store.store import Store
         Workflow.RNAFUSION,
         Workflow.TAXPROFILER,
         Workflow.TOMTE,
-        Workflow.TRANA,  # TODO make test green
+        Workflow.TRANA,
     ],
 )
 def test_get_config(
@@ -163,7 +170,7 @@ def test_get_config_missing_required_files(mocker: MockerFixture):
         Workflow.RNAFUSION,
         Workflow.TAXPROFILER,
         Workflow.TOMTE,
-        Workflow.TRANA,  # TODO make test green
+        Workflow.TRANA,
     ],
 )
 def test_get_case_config_flags(
@@ -270,7 +277,7 @@ def test_get_config_resume_already_completed_analysis(
         Workflow.RNAFUSION,
         Workflow.TAXPROFILER,
         Workflow.TOMTE,
-        Workflow.TRANA,  # TODO make test green
+        Workflow.TRANA,
     ],
 )
 def test_get_case_config_none_flags(
@@ -333,9 +340,14 @@ def test_get_case_config_none_flags(
             TomteConfig,
             TomteSampleSheetCreator,
         ),
-        # TODO add Trana
+        (
+            Workflow.TRANA,
+            TranaParamsFileCreator,
+            TranaConfig,
+            TranaSampleSheetCreator,
+        ),
     ],
-    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte"],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte", "Trana"],
 )
 def test_configure(
     workflow: Workflow,
