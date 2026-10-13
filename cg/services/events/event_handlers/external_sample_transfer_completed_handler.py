@@ -14,7 +14,7 @@ from cg.services import slack_notification_service
 from cg.services.events import event_publisher
 from cg.services.events.constants import (
     EXTERNAL_SAMPLE_STORED_EVENT,
-    EXTERNAL_SAMPLE_TRANSFERRED_EVENT,
+    EXTERNAL_SAMPLE_TRANSFER_COMPLETED_EVENT,
     RETRY_NOTIFICATION_THRESHOLD,
     SAMPLE_INTERNAL_ID_FIELD,
 )
@@ -55,7 +55,7 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
                 recipient=config.slack_webhooks.prod_team,
                 notification=SlackNotification(
                     title="Failed to store an external sample",
-                    message=f"Message {event_metadata.sequence.stream}: {EXTERNAL_SAMPLE_TRANSFERRED_EVENT} failed for sample {event.sample_internal_id}",
+                    message=f"Message {event_metadata.sequence.stream}: {EXTERNAL_SAMPLE_TRANSFER_COMPLETED_EVENT} failed for sample {event.sample_internal_id}",
                     error=e,  # type: ignore
                 ),
             )
@@ -127,7 +127,7 @@ def _delete_mirrored_folder(
             recipient=config.slack_webhooks.sysdev_team,
             notification=SlackNotification(
                 title=f"Failed to delete {event.cluster_location}",
-                message=f"Message {message_id}: {EXTERNAL_SAMPLE_TRANSFERRED_EVENT} succeeded for sample {event.sample_internal_id} but failed to delete mirrored directory at {event.cluster_location}",
+                message=f"Message {message_id}: {EXTERNAL_SAMPLE_TRANSFER_COMPLETED_EVENT} succeeded for sample {event.sample_internal_id} but failed to delete mirrored directory at {event.cluster_location}",
                 error=e,  # type: ignore
             ),
         )
