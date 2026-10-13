@@ -3,19 +3,21 @@ from pathlib import Path
 from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import Workflow
 from cg.exc import AnalysisNotReadyError
-from cg.services.analysis_starter.input_fetcher.input_fetcher import InputFetcher
+from cg.services.analysis_starter.input_fetcher.input_fetcher import InputValidator
 from cg.store.models import Case
 from cg.store.store import Store
 
 
-class BamFetcher(InputFetcher):
+class DataExistsValidator(InputValidator):
     def __init__(self, housekeeper_api: HousekeeperAPI, status_db: Store) -> None:
         self.housekeeper_api = housekeeper_api
         self.status_db = status_db
 
     def ensure_files_are_ready(self, case_id: str) -> None:
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
+        tags = self._get_raw_data_tags_for_workflow(case.data_analysis)
         samples_without_files: list[str] = self._get_samples_without_files(case)
         missing_files: list[str] = self._get_missing_file_paths(case)
         if samples_without_files or missing_files:
@@ -55,3 +57,13 @@ class BamFetcher(InputFetcher):
             missing_files_str = "\n".join(missing_files)
             error_message += f"\nThe following BAM files are missing on disk: \n{missing_files_str}"
         raise AnalysisNotReadyError(error_message)
+
+    def _get_raw_data_tags_for_workflow(self, workflow: Workflow) -> set[str]:
+        """if bam:
+            return {"bam"}
+        elif external fastq:
+            return {"external", "fastq"}
+        elif external bam:
+            return {"external", "bam"}
+        else:"""
+        raise NotImplementedError
