@@ -32,7 +32,9 @@ from cg.services.analysis_starter.configurator.implementations.mip_dna import MI
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories import starter_factory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
-from cg.services.analysis_starter.input_fetcher.implementations.bam_fetcher import BamFetcher
+from cg.services.analysis_starter.input_fetcher.implementations.data_exists_validator import (
+    DataExistsValidator,
+)
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_client import (
     SeqeraPlatformClient,
@@ -253,8 +255,8 @@ def test_get_analysis_starter_for_workflow_nallo(
     # GIVEN an AnalysisStarterFactory
     analysis_starter_factory = AnalysisStarterFactory(cg_config)
 
-    # GIVEN a BamFetcher constructor
-    mock_fetcher_init: MagicMock = mocker.spy(BamFetcher, "__init__")
+    # GIVEN a DataExistsValidator constructor
+    mock_validator_init: MagicMock = mocker.spy(DataExistsValidator, "__init__")
 
     # WHEN fetching the AnalysisStarter
     analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
@@ -264,9 +266,9 @@ def test_get_analysis_starter_for_workflow_nallo(
     # THEN the AnalysisStarter should have a Nextflow configurator
     assert isinstance(analysis_starter.configurator, NextflowConfigurator)
 
-    # THEN the AnalysisStarter should have created a BamFetcher correctly
-    assert isinstance(analysis_starter.input_fetcher, BamFetcher)
-    mock_fetcher_init.assert_called_once_with(
+    # THEN the AnalysisStarter should have created a DataExistsValidator correctly
+    assert isinstance(analysis_starter.input_fetcher, DataExistsValidator)
+    mock_validator_init.assert_called_once_with(
         ANY, housekeeper_api=cg_config.housekeeper_api, status_db=cg_config.status_db
     )
 
