@@ -4,6 +4,7 @@ from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import AnalysisNotReadyError
 from cg.services.analysis_starter.input_fetcher.input_fetcher import InputValidator
 from cg.store.models import Case
@@ -60,8 +61,8 @@ class DataExistsValidator(InputValidator):
 
     def _get_raw_data_tags_for_workflow(self, workflow: Workflow) -> set[str]:
         if workflow == Workflow.NALLO:
-            return {"bam"}
+            return {SequencingFileTag.BAM}
         elif workflow == Workflow.TRANA:
-            return {"fastq"}
+            return {SequencingFileTag.FASTQ}
 
         raise NotImplementedError

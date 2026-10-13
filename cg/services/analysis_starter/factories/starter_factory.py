@@ -10,7 +10,7 @@ from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.constants import IMPLEMENTED_FASTQ_WORKFLOWS
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.input_fetcher.implementations.data_exists_validator import (
-    BamFetcher,
+    DataExistsValidator,
 )
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.input_fetcher.input_fetcher import InputValidator
@@ -79,7 +79,7 @@ class AnalysisStarterFactory:
                 status_db=self.store,
             )
         elif workflow == Workflow.NALLO:
-            return BamFetcher(housekeeper_api=self.housekeeper_api, status_db=self.store)
+            return DataExistsValidator(status_db=self.store, housekeeper_api=self.housekeeper_api)
         raise NotImplementedError(f"No input fetcher for workflow {workflow}")
 
     def _get_submitter(self, workflow: Workflow) -> Submitter:
