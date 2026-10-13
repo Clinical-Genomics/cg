@@ -32,6 +32,12 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
     TomteSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
+    HEADERS as TRANA_HEADERS,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
+    TranaSampleSheetCreator,
+)
 
 
 @pytest.fixture
@@ -135,6 +141,17 @@ def tomte_sample_sheet_expected_content(
 
 
 @pytest.fixture
+def trana_sample_sheet_expected_content(
+    fastq_path_1: Path, fastq_path_2: Path, nextflow_sample_id: str
+) -> list[list[str]]:
+    row1: list[str] = [nextflow_sample_id, fastq_path_1.as_posix(), "", "control_sample"]
+    row2: list[str] = [nextflow_sample_id, fastq_path_2.as_posix(), "", "control_sample"]
+    control_row1: list[str] = ["control_sample", fastq_path_1.as_posix(), "", ""]
+    control_row2: list[str] = ["control_sample", fastq_path_2.as_posix(), "", ""]
+    return [TRANA_HEADERS, row1, row2, control_row1, control_row2]
+
+
+@pytest.fixture
 def sample_sheet_scenario(
     raredisease_sample_sheet_creator: RarediseaseSampleSheetCreator,
     raredisease_sample_sheet_expected_content: list[list[str]],
@@ -144,6 +161,8 @@ def sample_sheet_scenario(
     taxprofiler_sample_sheet_expected_content: list[list[str]],
     tomte_sample_sheet_creator: TomteSampleSheetCreator,
     tomte_sample_sheet_expected_content: list[list[str]],
+    trana_sample_sheet_creator: TranaSampleSheetCreator,
+    trana_sample_sheet_expected_content: list[list[str]],
 ) -> dict:
     return {
         Workflow.RAREDISEASE: (
@@ -159,4 +178,5 @@ def sample_sheet_scenario(
             taxprofiler_sample_sheet_expected_content,
         ),
         Workflow.TOMTE: (tomte_sample_sheet_creator, tomte_sample_sheet_expected_content),
+        Workflow.TRANA: (trana_sample_sheet_creator, trana_sample_sheet_expected_content),
     }

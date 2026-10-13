@@ -1,13 +1,17 @@
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, create_autospec
+
 import pytest
 from housekeeper.store.models import File
 from pytest_mock import MockerFixture
-from sqlalchemy import Case
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
-from cg.exc import SampleSheetContentError
+from cg.exc import (
+    MissingNegativeControlError,
+    MultipleNegativeControlsError,
+    SampleSheetContentError,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import (
     creator as samplesheet_creator,
 )
@@ -20,12 +24,93 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo_sample_sheet_creator import (
     NalloSampleSheetCreator,
 )
-from cg.store.models import CaseSample, Sample
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
+    TranaSampleSheetCreator,
+)
+from cg.store.models import Case, CaseSample, Sample
 from cg.store.store import Store
 
 
+def test_trana_fastq_sample_sheet_creator(
+    trana_sample_sheet_creator: TranaSampleSheetCreator,
+    trana_sample_sheet_expected_content: list[list[str]],
+    nextflow_case_id: str,
+    nextflow_case_path: Path,
+    mocker: MockerFixture,
+):
+    # GIVEN a store with a Trana case with a control and a non-control sample
+
+    # GIVEN that the sample sheet is written to a file
+    write_mock: MagicMock = mocker.patch.object(samplesheet_creator, "write_csv")
+
+    # WHEN creating the sample sheet
+    file_path = Path(nextflow_case_path, f"{nextflow_case_id}_samplesheet.csv")
+    trana_sample_sheet_creator.create(case_id=nextflow_case_id, file_path=file_path)
+
+    # THEN the sample sheet should have been written to the correct path with the correct content
+    write_mock.assert_called_with(content=trana_sample_sheet_expected_content, file_path=file_path)
+
+
+def test_trana_sample_sheet_creator_multiple_negative_controls(mocker: MockerFixture):
+    # GIVEN a StatusDB which returns a case containing two negative controls
+    status_db: Store = create_autospec(Store)
+    negative_control_1: Sample = create_autospec(
+        Sample, is_negative_control=True, internal_id="control_1"
+    )
+    negative_control_2: Sample = create_autospec(
+        Sample, is_negative_control=True, internal_id="control_2"
+    )
+    case: Case = create_autospec(
+        Case, internal_id="case_id", samples=[negative_control_1, negative_control_2]
+    )
+    status_db.get_case_by_internal_id_strict = Mock(return_value=case)
+
+    # GIVEN a TranaSampleSheetCreator
+    trana_sample_sheet_creator = TranaSampleSheetCreator(
+        store=status_db, housekeeper_api=create_autospec(HousekeeperAPI)
+    )
+    write_mock: MagicMock = mocker.patch.object(samplesheet_creator, "write_csv")
+
+    # WHEN creating the sample sheet
+    # THEN a MultipleNegativeControlsError is raised
+    with pytest.raises(MultipleNegativeControlsError):
+        trana_sample_sheet_creator.create(case_id="case_id", file_path=Path("file/path"))
+
+    # THEN no file was written
+    write_mock.assert_not_called()
+
+
+def test_trana_sample_sheet_creator_no_negative_controls(mocker: MockerFixture):
+    # GIVEN a StatusDB which returns a case containing no negative controls
+    status_db: Store = create_autospec(Store)
+    sample_1: Sample = create_autospec(Sample, is_negative_control=False, internal_id="sample_1")
+    sample_2: Sample = create_autospec(Sample, is_negative_control=False, internal_id="sample_2")
+    case: Case = create_autospec(Case, internal_id="case_id", samples=[sample_1, sample_2])
+    status_db.get_case_by_internal_id_strict = Mock(return_value=case)
+
+    # GIVEN a TranaSampleSheetCreator
+    trana_sample_sheet_creator = TranaSampleSheetCreator(
+        store=status_db, housekeeper_api=create_autospec(HousekeeperAPI)
+    )
+    write_mock: MagicMock = mocker.patch.object(samplesheet_creator, "write_csv")
+
+    # WHEN creating the sample sheet
+    # THEN a MissingNegativeControlError is raised
+    with pytest.raises(MissingNegativeControlError):
+        trana_sample_sheet_creator.create(case_id="case_id", file_path=Path("file/path"))
+
+    # THEN no file was written
+    write_mock.assert_not_called()
+
+
 @pytest.mark.parametrize(
-    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE]
+    "workflow",
+    [
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+    ],
 )
 def test_nextflow_fastq_sample_sheet_creators(
     workflow: Workflow,
@@ -61,7 +146,6 @@ def test_nextflow_fastq_sample_sheet_creators(
 def test_create_nallo_sample_sheet(
     expected_nallo_sample_sheet_content: list[list[str]], mocker: MockerFixture
 ):
-
     # GIVEN a Nallo case in StatusDB
     case_id = "nallo_case"
     case_sample = create_autospec(
@@ -113,7 +197,14 @@ def test_parse_fastq_header_raises_error():
 
 
 @pytest.mark.parametrize(
-    "workflow", [Workflow.RAREDISEASE, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TOMTE]
+    "workflow",
+    [
+        Workflow.RAREDISEASE,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TOMTE,
+        Workflow.TRANA,
+    ],
 )
 def test_get_content_no_rows_raises(
     workflow: Workflow,
