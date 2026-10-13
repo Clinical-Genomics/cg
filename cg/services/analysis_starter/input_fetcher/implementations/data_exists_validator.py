@@ -59,6 +59,10 @@ class DataExistsValidator(InputValidator):
         raise AnalysisNotReadyError(error_message)
 
     def _get_raw_data_tags_for_workflow(self, workflow: Workflow) -> set[str]:
+        if workflow == Workflow.NALLO:
+            return {"bam"}
+        elif workflow == Workflow.TRANA:
+            return {"fastq", "external"}
         """if bam:
             return {"bam"}
         elif external fastq:
@@ -66,4 +70,5 @@ class DataExistsValidator(InputValidator):
         elif external bam:
             return {"external", "bam"}
         else:"""
-        raise NotImplementedError
+        return {"bam"}
+        # raise NotImplementedError
