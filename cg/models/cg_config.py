@@ -394,7 +394,7 @@ class TranaConfig(CommonAppConfig):
     params: str
     pipeline_deliverables: str
     platform: str
-    pre_run_script: str = ""
+    pre_run_script: str
     profile: str
     repository: str
     resources: str
