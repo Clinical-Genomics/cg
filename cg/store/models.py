@@ -8,7 +8,6 @@ from sqlalchemy import (
     DECIMAL,
     VARCHAR,
     BigInteger,
-    CheckConstraint,
     Column,
     ForeignKey,
     Numeric,

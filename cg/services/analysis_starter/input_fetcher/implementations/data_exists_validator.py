@@ -6,12 +6,12 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import AnalysisNotReadyError
-from cg.services.analysis_starter.input_fetcher.input_fetcher import InputValidator
+from cg.services.analysis_starter.input_fetcher.input_fetcher import AnalysisInputValidator
 from cg.store.models import Case
 from cg.store.store import Store
 
 
-class DataExistsValidator(InputValidator):
+class DataExistsValidator(AnalysisInputValidator):
     def __init__(self, housekeeper_api: HousekeeperAPI, status_db: Store) -> None:
         self.housekeeper_api = housekeeper_api
         self.status_db = status_db

@@ -13,7 +13,7 @@ from cg.services.analysis_starter.input_fetcher.implementations.data_exists_vali
     DataExistsValidator,
 )
 from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
-from cg.services.analysis_starter.input_fetcher.input_fetcher import InputValidator
+from cg.services.analysis_starter.input_fetcher.input_fetcher import AnalysisInputValidator
 from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_client import (
     SeqeraPlatformClient,
 )
@@ -47,7 +47,7 @@ class AnalysisStarterFactory:
     def get_analysis_starter_for_workflow(self, workflow: Workflow) -> AnalysisStarter:
         LOG.debug(f"Getting a {workflow} analysis starter")
         configurator: Configurator = self.configurator_factory.get_configurator(workflow)
-        input_fetcher: InputValidator = self._get_input_fetcher(workflow)
+        input_fetcher: AnalysisInputValidator = self._get_input_validator(workflow)
         submitter: Submitter = self._get_submitter(workflow)
         tracker: Tracker = self._get_tracker(workflow)
         return AnalysisStarter(
@@ -59,7 +59,7 @@ class AnalysisStarterFactory:
             workflow=workflow,
         )
 
-    def _get_input_fetcher(self, workflow: Workflow) -> InputValidator:
+    def _get_input_validator(self, workflow: Workflow) -> AnalysisInputValidator:
         if workflow in IMPLEMENTED_FASTQ_WORKFLOWS:
             spring_archive_api = SpringArchiveAPI(
                 status_db=self.store,
