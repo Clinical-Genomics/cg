@@ -34,7 +34,7 @@ def ddn_dataflow_config(
     return DataFlowConfig(
         archive_repository=remote_storage_repository,
         database_name="test_db",
-        housekeeper_mnt=Path("/path/to/housekeeper-bundles"),
+        data_mover_housekeeper_mnt=Path("/path/to/housekeeper-bundles"),
         local_storage=local_storage_repository,
         password="DummyPassword",
         url=Path("some", "api", "url.com").as_posix(),
@@ -62,7 +62,7 @@ def archive_request_json(
             {
                 "destination": f"{remote_storage_repository}ADM1",
                 "source": local_storage_repository
-                + ddn_dataflow_config.housekeeper_mnt.as_posix()
+                + ddn_dataflow_config.data_mover_housekeeper_mnt.as_posix()
                 + "/"
                 + local_path,
             }
@@ -86,7 +86,7 @@ def retrieve_request_json(
         "pathInfo": [
             {
                 "destination": local_storage_repository
-                + ddn_dataflow_config.housekeeper_mnt.as_posix()
+                + ddn_dataflow_config.data_mover_housekeeper_mnt.as_posix()
                 + "/"
                 + Path(local_path).parent.as_posix(),
                 "source": f"{remote_storage_repository}ADM1",

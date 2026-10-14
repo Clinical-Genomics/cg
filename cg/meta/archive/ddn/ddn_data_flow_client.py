@@ -47,7 +47,7 @@ class DDNDataFlowClient(ArchiveHandler):
             "Content-Type": "application/json",
             "accept": "application/json",
         }
-        self.housekeeper_mnt = config.housekeeper_mnt
+        self.data_mover_housekeeper_mnt = config.data_mover_housekeeper_mnt
         self.local_storage: str = config.local_storage
         self.password: str = config.password
         self.refresh_token: str
@@ -167,7 +167,9 @@ class DDNDataFlowClient(ArchiveHandler):
             return [
                 MiriaObject(
                     destination=file_and_sample.sample.internal_id,
-                    source=Path(self.housekeeper_mnt, file_and_sample.file.path).as_posix(),
+                    source=Path(
+                        self.data_mover_housekeeper_mnt, file_and_sample.file.path
+                    ).as_posix(),
                 )
                 for file_and_sample in files_and_samples
             ]
@@ -175,7 +177,7 @@ class DDNDataFlowClient(ArchiveHandler):
             return [
                 MiriaObject(
                     destination=Path(
-                        self.housekeeper_mnt, file_and_sample.file.path
+                        self.data_mover_housekeeper_mnt, file_and_sample.file.path
                     ).parent.as_posix(),
                     source=Path(
                         file_and_sample.sample.internal_id, Path(file_and_sample.file.path).name

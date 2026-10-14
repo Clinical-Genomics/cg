@@ -447,7 +447,7 @@ class SeqeraPlatformConfig(BaseModel):
 class DataFlowConfig(BaseModel):
     archive_repository: str
     database_name: str
-    housekeeper_mnt: Path
+    data_mover_housekeeper_mnt: Path
     local_storage: str
     password: str
     url: str

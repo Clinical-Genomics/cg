@@ -69,7 +69,7 @@ def test_ddn_dataflow_client_initialization(
     valid_config = DataFlowConfig(
         archive_repository=remote_storage_repository,
         database_name="test_database",
-        housekeeper_mnt=Path("path", "to", "housekeeper-bundles"),
+        data_mover_housekeeper_mnt=Path("path", "to", "housekeeper-bundles"),
         local_storage=local_storage_repository,
         password="test_password",
         url="https://test-url.com",
@@ -239,7 +239,7 @@ def test_archive_file(
             "pathInfo": [
                 {
                     "source": local_storage_repository
-                    + ddn_dataflow_config.housekeeper_mnt.as_posix()
+                    + ddn_dataflow_config.data_mover_housekeeper_mnt.as_posix()
                     + "/"
                     + local_path,
                     "destination": remote_storage_repository + file_and_sample.sample.internal_id,
